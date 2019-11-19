@@ -33,7 +33,6 @@ jobs:
             ${{ runner.OS }}-node-
 
       - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
         run: make install-ci
 
       - name: Run tests
