@@ -61,7 +61,7 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Create release
-        uses: extenda/actions/conventional-release@master
+        uses: ./conventional-release
         id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
