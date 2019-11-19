@@ -1,0 +1,20 @@
+{
+  "name": "actions",
+  "version": "0.0.1-local",
+  "description": "Extenda Retail GitHub Actions",
+  "private": true,
+  "scripts": {
+    "lint:js": "eslint */src/**.js */test/**.js"
+  },
+  "repository": "github:extenda/actions",
+  "author": {
+    "name": "Extenda Retail",
+    "email": "info@extendaretail.com",
+    "url": "https://extendaretail.com"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/extenda/actions#readme",
+  "devDependencies": {
+    "eslint": "^6.6.0"
+  }
+}

@@ -7,9 +7,10 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      - uses: actions/setup-node@v1
-
-      - run: make lint
+      - name: Lint Javascript
+        run: |
+          npm ci
+          make lint
 
   test:
     runs-on: ubuntu-latest
@@ -17,20 +18,40 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      - uses: actions/setup-node@v1
+      - name: Install Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Cache node modules
+        uses: actions/cache@v1
+        id: cache
+        with:
+          path: ~/.npm
+          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-
 
       - name: Install dependencies
         run: make install-ci
 
       - name: Run tests
-        run: make test
+        run: |
+          echo "::stop-commands::jest-output"
+          make test
+          echo "::jest-output::"
 
       - name: Check compiled dist/* files
         run: |
           make build
-          git add .
-          if [ ! $(git diff-index --quiet HEAD --) ]; then
-            echo "Uncommitted changes to compiled javascripts.\nDid you remember to run 'make build'?"
+          git add "*/dist/**"
+          if [ -n "$(git diff-index --exit-code HEAD --)" ]; then
+            echo ""
+            echo "::error::Found uncommitted changes to compiled javascripts."
+            echo ""
+            git diff-index --stat HEAD --
+            echo ""
+            echo "::error::Did you remember to run 'make build'?"
             exit 1
           fi
 
@@ -42,12 +63,10 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Create release
-        uses: extenda/actions/conventional-release@master
+        uses: ./conventional-release
         id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/setup-node@v1
 
       - name: Update release branch
         run: |
