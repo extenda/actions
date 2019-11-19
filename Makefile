@@ -1,18 +1,18 @@
 packages := $(dir $(wildcard */package.json))
 
 install:
-	@$(foreach dir, . $(packages), npm install --prefix $(dir);)
+	@$(foreach dir, . $(packages), npm install --prefix $(dir) || exit 1;)
 
 install-ci:
-	@$(foreach dir, . $(packages), npm ci --prefix $(dir);)
+	@$(foreach dir, . $(packages), npm ci --prefix $(dir) || exit 1;)
 
 lint:
 	npm run lint:js
 
 test:
-	@$(foreach dir, $(packages), npm test --prefix $(dir);)
+	@$(foreach dir, $(packages), npm test --prefix $(dir) || exit 1;)
 
 build:
-	@$(foreach dir, $(packages), rm -rf $(dir)/dist && npm run build --prefix $(dir);)
+	@$(foreach dir, $(packages), rm -rf $(dir)/dist && npm run build --prefix $(dir) || exit 1;)
 
 .PHONY: install install-ci lint test build
