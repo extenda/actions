@@ -16,7 +16,7 @@ describe('Maven', () => {
   });
 
   test('Build failure', async() => {
-    const status = await mvn.run('-f missing-pom.xml package').catch(err => 1);
+    const status = await mvn.run('-f missing-pom.xml package').catch(() => 1);
       expect(status).toEqual(1);
   });
 });
