@@ -1,5 +1,7 @@
 # actions
 
+![](https://github.com/extenda/actions/workflows/Commit/badge.svg)
+
 This is a monorepo containing GitHub Actions by Extenda Retail. These actions provides reusable logic for
 the fundamental parts of our CI/CD pipelines.
 
@@ -133,12 +135,9 @@ Remember to always run `make build` before committing changes to packages. Faili
 The repository is versioned using a single semantic version. This means that all packages are always released and map 
 to the same version.
 
-To follow GitHub Actions conventions, the following applies
-
-  * Major version tags always point to the latest release for given version, for example `v1` will point to `v1.1.2` 
-    if that has been released
-  * Releases are published from `releases/*` branches where one branch exists for every major version
-  * The `master` branch always contains all changes
+To follow [GitHub Actions version conventions](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
+actions will always be accessible from a `v{MAJOR}` branch that points to the last release for that major version. 
+For example `v1` will point to `v1.1.2` after it has been released.
 
 ### Conventional Commits
 
@@ -152,5 +151,4 @@ The project is versioned with [Conventional Commits](https://www.conventionalcom
 The project is built with a GitHub Actions pipeline. Every successful commit to `master` will
 
   * Be tagged to a semantic release version
-  * Be merged into the matching release branch
-  * Move the `v{MAJOR}` tag to point to the new release
+  * Update the `v{MAJOR}` branch to point to the new release

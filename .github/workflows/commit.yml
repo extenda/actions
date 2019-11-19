@@ -1,0 +1,58 @@
+name: Commit
+on: push
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - uses: actions/setup-node@v1
+
+      - run: make lint
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@master
+
+      - uses: actions/setup-node@v1
+
+      - name: Install dependencies
+        run: make install-ci
+
+      - name: Run tests
+        run: make test
+
+      - name: Check compiled dist/* files
+        run: |
+          make build
+          git add .
+          if [ ! $(git diff-index --quiet HEAD --) ]; then
+            echo "Uncommitted changes to compiled javascripts.\nDid you remember to run 'make build'?"
+            exit 1
+          fi
+
+  release:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Create release
+        uses: extenda/actions/conventional-release@master
+        id: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v1
+
+      - name: Update release branch
+        run: |
+          releaseBranch=$(echo "${{ steps.release.outputs.version }}" | tr "." " " | awk '{print $1}')
+          git checkout -B $releaseBranch ${{ steps.release.outputs.release-tag }}
+          git config --add user.name "GitHub Actions"
+          git config --add user.email devops@extendaretail.com
+          git push origin $releaseBranch --force
