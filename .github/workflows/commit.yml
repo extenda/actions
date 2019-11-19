@@ -7,8 +7,6 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      - uses: actions/setup-node@v1
-
       - name: Lint Javascript
         run: |
           npm ci
@@ -20,15 +18,13 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      - uses: actions/setup-node@v1
-
-      - name: Install dependencies
-        run: make install-ci
-
       - name: Install Java
         uses: actions/setup-java@v1
         with:
           java-version: 11
+
+      - name: Install dependencies
+        run: make install-ci
 
       - name: Run tests
         run: make test
@@ -59,8 +55,6 @@ jobs:
         id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/setup-node@v1
 
       - name: Update release branch
         run: |
