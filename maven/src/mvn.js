@@ -5,7 +5,8 @@ const path = require('path');
 const os = require('os');
 
 const SETTINGS_FILE = path.join(__dirname, 'maven-settings.xml');
-const mavenSettings = path.join(os.homedir(), '.m2', 'maven-settings.xml');
+const mavenHome = path.join(os.homedir(), '.m2');
+const mavenSettings = path.join(mavenHome, 'maven-settings.xml');
 
 const run = async (args) =>
   exec.exec(`mvn -B -V --settings=${mavenSettings} ${args}`);
@@ -17,6 +18,7 @@ const setVersion = async (newVersion) => {
 
 const copySettings = async () => {
   core.debug('Copy maven-settings.xml');
+  await io.mkdirP(mavenHome);
   await io.cp(SETTINGS_FILE, mavenSettings, { force: true });
 };
 
