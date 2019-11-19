@@ -6,8 +6,7 @@
   "scripts": {
     "lint:js": "eslint src",
     "test": "jest",
-    "build": "ncc build src/index.js",
-    "watch": "watch 'npm run build' ./src"
+    "build": ""
   },
   "author": "",
   "license": "MIT",
