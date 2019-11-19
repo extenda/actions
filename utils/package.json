@@ -2,14 +2,13 @@
   "name": "action-utils",
   "version": "0.0.1-local",
   "description": "Utilities for Extenda Retail GitHub Actions",
+  "private": true,
   "main": "src/index.js",
   "scripts": {
     "lint:js": "eslint src",
     "test": "",
     "build": ""
   },
-  "author": "",
-  "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.2.0",
     "@actions/exec": "^1.0.1",
@@ -22,9 +21,5 @@
     "semver": "^6.3.0",
     "simple-git": "^1.126.0",
     "stream-to-string": "^1.2.0"
-  },
-  "devDependencies": {
-    "eslint": "^6.6.0",
-    "jest": "^24.9.0"
   }
 }

@@ -9,7 +9,10 @@ jobs:
 
       - uses: actions/setup-node@v1
 
-      - run: make lint
+      - name: Lint Javascript
+        run: |
+          npm ci
+          make lint
 
   test:
     runs-on: ubuntu-latest
