@@ -38,11 +38,12 @@ jobs:
           make build
           git add "*/dist/**"
           if [ ! $(git diff-index --quiet HEAD --) ]; then
-            echo "Found uncommitted changes to compiled javascripts."
+            echo ""
+            echo "::error::Found uncommitted changes to compiled javascripts."
             echo ""
             git diff-index --stat HEAD
             echo ""
-            echo "Did you remember to run 'make build'?"
+            echo "::error::Did you remember to run 'make build'?"
             exit 1
           fi
 
