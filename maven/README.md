@@ -3,7 +3,7 @@
 This GitHub Action runs Maven preconfigured for Extenda Retail's Nexus Repository Manager.
 
   * Use Maven Central for open-source dependencies 
-  * Use [repo.extendaretail.com]() for everything else
+  * Use [repo.extendaretail.com](https://repo.extendaretail.com) for everything else
   
 It also supports semantic versioning from git tags. It will automatically update POM versions according to 
 [conventional-version](../conventional-version#readme) before building.
@@ -16,8 +16,8 @@ See [action.yml](action.yml).
 
 The following environment variables are required.
 
-  * `NEXUS_USERNAME`: user for [repo.extendaretail.com]()
-  * `NEXUS_PASSWORD`: password for [repo.extendaretail.com]()
+  * `NEXUS_USERNAME`: user for [repo.extendaretail.com](https://repo.extendaretail.com)
+  * `NEXUS_PASSWORD`: password for [repo.extendaretail.com](https://repo.extendaretail.com)
   
 ### Examples
 
