@@ -1,0 +1,26 @@
+{
+  "name": "maven",
+  "version": "0.0.1-local",
+  "description": "Maven with Extenda Retail Settings",
+  "main": "dist/index.js",
+  "scripts": {
+    "lint:js": "eslint src test",
+    "test": "jest",
+    "build": "ncc build src/index.js",
+    "watch": "watch 'npm run build' ./src"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "@actions/exec": "^1.0.1",
+    "@actions/io": "^1.0.1",
+    "git-tag-version": "^1.3.1"
+  },
+  "devDependencies": {
+    "@zeit/ncc": "^0.20.5",
+    "eslint": "^6.6.0",
+    "jest": "^24.9.0",
+    "watch": "^1.0.2"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "conventional-release",
+  "version": "0.0.1-local",
+  "description": "Create a release based on conventional commit conventions and historic releases",
+  "main": "dist/index.js",
+  "scripts": {
+    "lint:js": "eslint src",
+    "test": "jest",
+    "build": "ncc build src/index.js",
+    "watch": "watch 'npm run build' ./src"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "@actions/github": "^1.1.0"
+  },
+  "devDependencies": {
+    "@zeit/ncc": "^0.20.5",
+    "eslint": "^6.6.0",
+    "jest": "^24.9.0",
+    "watch": "^1.0.2"
+  }
+}

@@ -1,0 +1,19 @@
+name: Conventional release
+description: |
+  Create a release based based on conventional commit conventions.
+
+  This action will create a tag and a corresponding release on GitHub.
+  Use the outputs of this step to build your software in the workflow.
+inputs:
+  tag-prefix:
+    description: The release tag prefix
+    required: true
+    default: v
+outputs:
+  release-tag:
+    description: The created release tag
+  version:
+    description: The tagged version
+runs:
+  using: node12
+  main: dist/index.js

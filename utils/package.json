@@ -1,0 +1,31 @@
+{
+  "name": "action-utils",
+  "version": "0.0.1-local",
+  "description": "Utilities for Extenda Retail GitHub Actions",
+  "main": "src/index.js",
+  "scripts": {
+    "lint:js": "eslint src",
+    "test": "jest",
+    "build": "ncc build src/index.js",
+    "watch": "watch 'npm run build' ./src"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "@actions/exec": "^1.0.1",
+    "@actions/io": "^1.0.1",
+    "@zeit/ncc": "^0.20.5",
+    "conventional-changelog-conventionalcommits": "^4.2.3",
+    "conventional-changelog-core": "^4.1.1",
+    "conventional-recommended-bump": "^6.0.5",
+    "git-semver-tags": "^3.0.1",
+    "semver": "^6.3.0",
+    "simple-git": "^1.126.0",
+    "stream-to-string": "^1.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.6.0",
+    "jest": "^24.9.0"
+  }
+}

@@ -1,0 +1,19 @@
+name: Sonar Scanner
+description: Perform a Sonar analysis on a project
+inputs:
+  sonar-host:
+    description: The Sonar server URL.
+    required: true
+  main-branch:
+    description: The Sonar main branch.
+    required: true
+    default: master
+  maven-args:
+    description: Custom maven scan command
+    required: false
+  gradle-args:
+    description: Custom gradle scan command
+    required: false
+runs:
+  using: node12
+  main: dist/index.js
