@@ -10,7 +10,7 @@ It also supports semantic versioning from git tags. It will automatically update
 
 ## Usage
 
-See [action.yml]().
+See [action.yml](action.yml).
 
 ### Secrets
 
