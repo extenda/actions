@@ -70,7 +70,7 @@ jobs:
 
       - name: Update release branch
         run: |
-          releaseBranch=$(echo "${{ steps.release.outputs.version }}" | tr "." " " | awk '{print $1}')
+          releaseBranch=$(echo "${{ steps.release.outputs.release-tag }}" | tr "." " " | awk '{print $1}')
           git checkout -B $releaseBranch ${{ steps.release.outputs.release-tag }}
           git config --add user.name "GitHub Actions"
           git config --add user.email devops@extendaretail.com
