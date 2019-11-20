@@ -6,6 +6,4 @@ const checkEnv = (variables) => {
   });
 };
 
-module.exports = {
-  checkEnv,
-};
+module.exports = checkEnv;

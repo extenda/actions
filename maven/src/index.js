@@ -1,7 +1,8 @@
 const core = require('@actions/core');
 const fs = require('fs');
 const mvn = require('./mvn');
-const { checkEnv, versions } = require('../../utils');
+const { checkEnv } = require('../../utils');
+const versions = require('../../utils/src/versions');
 
 const setVersion = async (version) => core.group(
   `Set version ${version}`,

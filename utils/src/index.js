@@ -1,9 +1,10 @@
-const { checkEnv } = require('./check-env');
-const versions = require('./versions');
+const checkEnv = require('./check-env');
 const loadTool = require('./load-binary');
+
+// Note that src/versions are NOT included here because it adds 2.2MBs to every package that uses the utils module.
+// If versions are to be used, include the file explicitly.
 
 module.exports = {
   checkEnv,
   loadTool,
-  versions,
 };

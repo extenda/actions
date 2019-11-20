@@ -22,6 +22,9 @@ This method throws an error if any of the provided variables are missing.
 A collection of functions to read and manipulate versions according to 
 [conventional commits](https://conventionalcommits.org).
 
+Note that this script is not part of the `utils` main script and must be included from the `src` file. The reason for 
+this is that it adds a lot of footprint to compiled scripts when used.
+
 #### `async getBuildVersion(versionSuffix = '')`
 
 Returns a promise with the version to build. This version number is determined by the last release number and the 
@@ -30,7 +33,7 @@ Returns a promise with the version to build. This version number is determined b
 This method can append an optional suffix to the version, for example `-SNAPSHOT`.
 
 ```javascript
-const { versions } = require('../../utils');
+const versions = require('../../utils/src/versions');
 
 const run = async () => { 
   const snapshotBuild = await getBuildVersion('-SNAPSHOT');
@@ -43,7 +46,7 @@ Returns a promise with a markdown formatted changelog for all conventional chang
 commit.
 
 ```javascript
-const { versions } = require('../../utils');
+const versions = require('../../utils/src/versions');
 
 const run = async () => { 
   const snapshotBuild = await getBuildVersion('-SNAPSHOT');
@@ -56,7 +59,7 @@ const run = async () => {
 Returns a promise with the latest tagged release matching the tag prefix.
 
 ```javascript
-const { versions: { getLatestRelease } } = require('../../.utils');
+const { getLatestRelease } = require('../../.utils/src/versions');
 const run = async () => {
   const latestRelease = await getLatestRelease();
 };
@@ -67,7 +70,7 @@ const run = async () => {
 The tag prefix used for releases.
 
 ```javascript
-const { versions } = require('../../.utils');
+const versions = require('../../utils/src/versions');
 versions.tagPrefix = 'custom-';
 ```
 
@@ -77,7 +80,7 @@ Create a release tag and push it to origin. This function returns a promise with
 formatted `changelog`, the `tagName` and the `version`. 
 
 ```javascript
-const { versions: { tagReleaseVersion} } = require('../../.utils');
+const { tagReleaseVersion } = require('../../.utils/src/versions');
 
 const run = async () => {
   const release = await tagReleaseVersion();
