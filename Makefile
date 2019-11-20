@@ -22,4 +22,4 @@ license-summary:
 	@npm i license-checker --no-save --production
 	@$(foreach dir, $(packages), echo "Licenses for $(dir)" && node_modules/.bin/license-checker --production --direct --summary --excludePrivatePackages --start $(dir);)
 
-.PHONY: install install-ci lint test build $(packages)
+.PHONY: install install-ci lint test build $(packages) license-summary
