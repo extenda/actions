@@ -142,6 +142,14 @@ executes in a Docker container to ensure output is always identical across platf
 
 Remember to always run `make build` before committing changes to packages. Failing to do so will not pass CI/CD checks.
 
+### CI/CD Pipeline
+
+The project is built with a [GitHub Actions pipeline](.github/workflows/commit.yml). Every successful commit to `
+master` will
+
+  * Be tagged to a semantic release version
+  * Update the `v{MAJOR}` branch to point to the new release
+
 ## Versioning
 
 The repository is versioned using a single semantic version. This means that all packages are always released and map 
@@ -157,10 +165,7 @@ The project is versioned with [Conventional Commits](https://www.conventionalcom
 
   * Make sure your commits to `master` always follow conventional commits
   * Always use squash and merge when merging to `master`
-  
-## CI/CD Pipeline
 
-The project is built with a GitHub Actions pipeline. Every successful commit to `master` will
+## License
 
-  * Be tagged to a semantic release version
-  * Update the `v{MAJOR}` branch to point to the new release
+This repository is released under the [MIT license](LICENSE).
