@@ -37,6 +37,8 @@ jobs:
       - name: Determine version
         uses: extenda/actions/conventional-version@v0
         id: semver
+        with:
+          version-suffix: -SNAPSHOT
 
       - name: Build project
         run: |
