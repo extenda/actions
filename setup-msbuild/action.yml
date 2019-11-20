@@ -1,6 +1,5 @@
-name: Setup MSBuild.exe
-description: Uses VSWhere.exe to locate latest MSBuild & put it into the PATH
-author: Warren Buckley
+name: Setup MSBuild
+description: Uses VSWhere to locate latest MSBuild and add it to PATH
 runs:
-  using: 'node12'
-  main: 'dist/main.js'
+  using: node12
+  main: dist/index.js
