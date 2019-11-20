@@ -55,10 +55,49 @@ jobs:
             exit 1
           fi
 
-  release:
+  acceptance-windows:
+    runs-on: windows-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@master
+
+      - uses: ./setup-msbuild
+
+      - name: Assert MSBuild exists on PATH
+        run: where MSBuild.exe
+
+      - name: Run MSBuild
+        if: startsWith(matrix.os, 'windows')
+        run: MSBuild -version
+
+  acceptance-linux:
     runs-on: ubuntu-latest
     needs: test
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Install Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+  # TODO Add support to run without POM file. (Skip auto-version)
+  # TODO Add support for pom-file or no-version
+  #      - name: Run Maven
+  #        uses: ./maven
+  #        with:
+  #          args: --version
+  #        env:
+  #          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+  #          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+  release:
+    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
+    needs:
+      - test
+      - acceptance-windows
+      - acceptance-linux
     steps:
       - uses: actions/checkout@master
 
