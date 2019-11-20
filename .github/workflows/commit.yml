@@ -67,7 +67,6 @@ jobs:
         run: where MSBuild.exe
 
       - name: Run MSBuild
-        if: startsWith(matrix.os, 'windows')
         run: MSBuild -version
 
   acceptance-linux:
