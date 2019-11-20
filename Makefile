@@ -18,4 +18,8 @@ $(packages):
 	@rm -rf $(@)dist
 	@docker run --rm -t -v $(shell pwd):/work -w /work node:12-alpine sh -c "npm run build --prefix $(@)"
 
-.PHONY: install install-ci lint test build $(packages)
+license-summary:
+	@npm i license-checker --no-save --production
+	@$(foreach dir, $(packages), echo "Licenses for $(dir)" && node_modules/.bin/license-checker --production --direct --summary --excludePrivatePackages --start $(dir);)
+
+.PHONY: install install-ci lint test build $(packages) license-summary
