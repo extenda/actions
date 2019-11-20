@@ -54,6 +54,8 @@ const getBuildVersion = async (versionSuffix = '') => {
   return semver.inc(latestRelease, releaseType).concat(versionSuffix);
 };
 
+console.log('Rever this later!');
+
 /**
  * Returns a markdown formatted changelog for all conventional changes from the last release up until this commit.
  * @param version the name of the version built now
