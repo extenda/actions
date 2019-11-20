@@ -3812,14 +3812,15 @@ const path = __webpack_require__(622);
 
 const VSWHERE_VERSION = '2.7.1';
 
-const findVSWhere = async () => tc.find('vswhere', VSWHERE_VERSION);
+const findVSWhere = async () => tc.find('vswhere', VSWHERE_VERSION).then(dir => path.join(dir, 'vswhere.exe'));
 
 const downloadVSWhereIfMissing = async (vswhere) => {
   if (!vswhere) {
     core.info(`Downloading VSWhere ${VSWHERE_VERSION}`);
     const download = await tc.downloadTool(`https://github.com/microsoft/vswhere/releases/download/${VSWHERE_VERSION}/vswhere.exe`);
     core.info(`Downloaded ${download}`);
-    const cachedDir = await tc.cacheFile(path.join(download, 'vswhere.exe'), 'vswhere.exe', 'vswhere', VSWHERE_VERSION);
+    core.info(__webpack_require__(747).readdirSync(download));
+    const cachedDir = await tc.cacheDir(download, 'vswhere', VSWHERE_VERSION);
     core.info(`VSWhere stored in ${cachedDir}`);
     return findVSWhere();
   }
