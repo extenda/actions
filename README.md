@@ -8,6 +8,7 @@ the fundamental parts of our CI/CD pipelines.
 The following actions are available
 
   * [`actions/conventional-release`](conventional-release#readme)
+  * [`actions/conventional-version`](conventional-version#readme)
   * [`actions/maven`](maven#readme)
   * [`actions/setup-msbuild`](setup-msbuild#readme)
   * [`actions/sonar-scanner`](sonar-scanner#readme)

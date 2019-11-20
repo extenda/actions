@@ -43,7 +43,7 @@ jobs:
 
       - name: Check compiled dist/* files
         run: |
-          make build
+          make build -j
           git add "*/dist/**"
           if [ -n "$(git diff-index --exit-code HEAD '*/dist/**')" ]; then
             echo ""
