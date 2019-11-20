@@ -6,7 +6,8 @@ const path = require('path');
 
 const VSWHERE_VERSION = '2.7.1';
 
-const findVSWhere = async () => tc.find('vswhere', VSWHERE_VERSION).then(dir => path.join(dir, 'vswhere.exe'));
+const findVSWhere = async () => Promise.resolve(tc.find('vswhere', VSWHERE_VERSION))
+  .then(dir => dir ? path.join(dir, 'vswhere.exe') : '');
 
 const downloadVSWhereIfMissing = async (vswhere) => {
   if (!vswhere) {

@@ -3812,7 +3812,8 @@ const path = __webpack_require__(622);
 
 const VSWHERE_VERSION = '2.7.1';
 
-const findVSWhere = async () => tc.find('vswhere', VSWHERE_VERSION).then(dir => path.join(dir, 'vswhere.exe'));
+const findVSWhere = async () => Promise.resolve(tc.find('vswhere', VSWHERE_VERSION))
+  .then(dir => dir ? path.join(dir, 'vswhere.exe') : '');
 
 const downloadVSWhereIfMissing = async (vswhere) => {
   if (!vswhere) {
