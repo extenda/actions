@@ -32,3 +32,6 @@ jobs:
         uses: ./maven
         with:
           args: --version
+        env:
+          NEXUS_USERNAME: 'NOT USED'
+          NEXUS_PASSWORD: 'NOT USED'
