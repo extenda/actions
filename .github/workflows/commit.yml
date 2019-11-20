@@ -80,15 +80,13 @@ jobs:
         with:
           java-version: 11
 
-  # TODO Add support to run without POM file. (Skip auto-version)
-  # TODO Add support for pom-file or no-version
-  #      - name: Run Maven
-  #        uses: ./maven
-  #        with:
-  #          args: --version
-  #        env:
-  #          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-  #          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      - name: Run Maven (no POM)
+        uses: ./maven
+        with:
+          args: --version
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
   release:
     runs-on: ubuntu-latest

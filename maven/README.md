@@ -49,7 +49,7 @@ jobs:
           args: test
 ```
 
-#### Usage Without Convential Versioning
+#### Usage Without Conventional Versioning
 
 This example shows how to disable conventional versioning. When disabled, the build version is always read from the POM 
 file the version must be bumped manually.
