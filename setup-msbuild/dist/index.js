@@ -3807,22 +3807,25 @@ function isUnixExecutable(stats) {
 const core = __webpack_require__(470);
 const exec = __webpack_require__(986);
 const tc = __webpack_require__(533);
+const io = __webpack_require__(1);
 const os = __webpack_require__(87);
 const path = __webpack_require__(622);
 
 const VSWHERE_VERSION = '2.7.1';
+const VSWHERE = 'vswhere';
+const VSWHERE_EXE = 'vswhere.exe';
 
-const findVSWhere = async () => Promise.resolve(tc.find('vswhere', VSWHERE_VERSION))
-  .then(dir => dir ? path.join(dir, 'vswhere.exe') : '');
+const findVSWhere = async () => Promise.resolve(tc.find(VSWHERE, VSWHERE_VERSION))
+  .then(dir => dir ? path.join(dir, VSWHERE_EXE) : '');
 
 const downloadVSWhereIfMissing = async (vswhere) => {
   if (!vswhere) {
     core.info(`Downloading VSWhere ${VSWHERE_VERSION}`);
-    const download = await tc.downloadTool(`https://github.com/microsoft/vswhere/releases/download/${VSWHERE_VERSION}/vswhere.exe`);
-    core.info(`Downloaded ${download}`);
-    core.info(__webpack_require__(747).readdirSync(download));
-    const cachedDir = await tc.cacheDir(download, 'vswhere', VSWHERE_VERSION);
-    core.info(`VSWhere stored in ${cachedDir}`);
+    const downloadUuid = await tc.downloadTool(`https://github.com/microsoft/vswhere/releases/download/${VSWHERE_VERSION}/${VSWHERE_EXE}`);
+    const tmpDir = path.dirname(downloadUuid);
+    const tmpFile = path.join(tmpDir, VSWHERE_EXE);
+    await io.cp(downloadUuid, tmpFile);
+    await tc.cacheDir(tmpDir, VSWHERE, VSWHERE_VERSION);
     return findVSWhere();
   }
   return vswhere;
@@ -3851,7 +3854,7 @@ const findMSBuild = async (vswhere) => {
     throw new Error('Failed to find MSBuild.exe');
   }
 
-  return msbuild;
+  return path.dirname(msbuild);
 };
 
 const run = async () => {
@@ -3865,7 +3868,7 @@ const run = async () => {
       .then(findMSBuild)
       .then(msbuild => {
         core.info(`MSBuild directory '${msbuild}' added to PATH.`);
-        return core.addPath(path.dirname(msbuild));
+        return core.addPath(msbuild);
       });
   } catch (error) {
     core.setFailed(error.message);
