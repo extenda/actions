@@ -3,13 +3,13 @@ const tc = require('@actions/tool-cache');
 const io = require('@actions/io');
 const path = require('path');
 
-const find = async ({ tool, version, binary }) => Promise.resolve(tc.find(tool, version))
+const find = async ({ tool, binary, version }) => Promise.resolve(tc.find(tool, version))
   .then(dir => dir ? path.join(dir, binary) : '');
 
 const downloadIfMissing = async (options, cachedTool) => {
   if (!cachedTool) {
-    const { tool, version, binary, downloadUrl } = options;
-    core.info(`Downloading ${tool} ${version}`);
+    const { tool, binary, version, downloadUrl } = options;
+    core.info(`Downloading ${tool} from ${downloadUrl}`);
     const downloadUuid = await tc.downloadTool(downloadUrl);
     const tmpDir = path.dirname(downloadUuid);
     const tmpFile = path.join(tmpDir, binary);

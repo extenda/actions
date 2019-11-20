@@ -5349,13 +5349,13 @@ const tc = __webpack_require__(483);
 const io = __webpack_require__(243);
 const path = __webpack_require__(622);
 
-const find = async ({ tool, version, binary }) => Promise.resolve(tc.find(tool, version))
+const find = async ({ tool, binary, version }) => Promise.resolve(tc.find(tool, version))
   .then(dir => dir ? path.join(dir, binary) : '');
 
 const downloadIfMissing = async (options, cachedTool) => {
   if (!cachedTool) {
-    const { tool, version, binary, downloadUrl } = options;
-    core.info(`Downloading ${tool} ${version}`);
+    const { tool, binary, version, downloadUrl } = options;
+    core.info(`Downloading ${tool} from ${downloadUrl}`);
     const downloadUuid = await tc.downloadTool(downloadUrl);
     const tmpDir = path.dirname(downloadUuid);
     const tmpFile = path.join(tmpDir, binary);
