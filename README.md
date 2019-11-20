@@ -7,9 +7,9 @@ the fundamental parts of our CI/CD pipelines.
 
 The following actions are available
 
-  * [`actions/conventional-release`](conventional-release)
-  * [`actions/maven`](maven)
-  * [`actions/sonar-scanner`](sonar-scanner)
+  * [`actions/conventional-release`](conventional-release#readme)
+  * [`actions/maven`](maven#readme)
+  * [`actions/sonar-scanner`](sonar-scanner#readme)
 
 ## Workflow Examples
 
@@ -105,6 +105,8 @@ The repository is a monorepo consisting of multiple packages. There are some dep
 Javascript actions are compiled into a single javascript files using [`@zeit/ncc`](https://www.npmjs.com/package/@zeit/ncc) 
 to avoid committing `node_modules` into source control. This is required because GitHub Actions does not run `npm install` 
 before running actions.
+
+Development should be done with Node 12.
 
 To make it easier to work with the repository and to recompile the distribution files we use a `Makefile`.
 

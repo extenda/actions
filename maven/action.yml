@@ -5,7 +5,7 @@ inputs:
     description: The Maven command to run
     required: true
   version:
-    description: The project version to build. This is set in the POMs before building.
+    description: The project version to build. This is set in the POMs before building
     required: false
 runs:
   using: node12
