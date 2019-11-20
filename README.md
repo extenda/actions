@@ -9,6 +9,7 @@ The following actions are available
 
   * [`actions/conventional-release`](conventional-release#readme)
   * [`actions/maven`](maven#readme)
+  * [`actions/setup-msbuild`](setup-msbuild#readme)
   * [`actions/sonar-scanner`](sonar-scanner#readme)
 
 ## Workflow Examples
@@ -106,7 +107,14 @@ Javascript actions are compiled into a single javascript files using [`@zeit/ncc
 to avoid committing `node_modules` into source control. This is required because GitHub Actions does not run `npm install` 
 before running actions.
 
-Development should be done with Node 12.
+### Development Environment
+
+Development tools needed are:
+
+  * Latest Node 12 LTS release
+  * Docker
+
+### How to Build
 
 To make it easier to work with the repository and to recompile the distribution files we use a `Makefile`.
 
@@ -128,7 +136,8 @@ Runs `npm test` on all Javascript packages.
 ```bash
 $ make build
 ```
-Runs `npm run build` on all Javascript projects. This recompiles the package into its `dist` directory.
+Runs `npm run build` on all Javascript projects. This recompiles the package into its `dist` directory. This target
+executes in a Docker container to ensure output is always identical across platforms.
 
 Remember to always run `make build` before committing changes to packages. Failing to do so will not pass CI/CD checks.
 
