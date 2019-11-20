@@ -1,0 +1,17 @@
+name: Conventional version
+description: |
+  Determine the project version based on conventional commit conventions.
+inputs:
+  tag-prefix:
+    description: The release tag prefix
+    required: true
+    default: v
+  version-suffix:
+    description: A suffix to append to the project version, for example -SNAPSHOT
+    required: false
+outputs:
+  version:
+    description: The project version
+runs:
+  using: node12
+  main: dist/index.js
