@@ -54,6 +54,11 @@ const getBuildVersion = async (versionSuffix = '') => {
   return semver.inc(latestRelease, releaseType).concat(versionSuffix);
 };
 
+/**
+ * Returns a markdown formatted changelog for all conventional changes from the last release up until this commit.
+ * @param version the name of the version built now
+ * @returns {Promise<string>}
+ */
 const getChangelog = async (version) => {
   const config = await conventionalCommits();
   config.writerOpts.headerPartial = '';
