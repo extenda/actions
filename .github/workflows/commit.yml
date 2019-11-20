@@ -45,11 +45,11 @@ jobs:
         run: |
           make build
           git add "*/dist/**"
-          if [ -n "$(git diff-index --exit-code HEAD --)" ]; then
+          if [ -n "$(git diff-index --exit-code HEAD '*/dist/**')" ]; then
             echo ""
             echo "::error::Found uncommitted changes to compiled javascripts."
             echo ""
-            git diff-index --stat HEAD --
+            git diff-index --stat HEAD '*/dist/**'
             echo ""
             echo "::error::Did you remember to run 'make build'?"
             exit 1

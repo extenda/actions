@@ -3,7 +3,7 @@ description: 'Uses VSWhere.exe to locate latest MSBuild & put it into the PATH'
 author: 'Warren Buckley'
 runs:
   using: 'node12'
-  main: 'lib/main.js'
+  main: 'dist/main.js'
 branding:
   icon: 'download'
   color: 'purple'
