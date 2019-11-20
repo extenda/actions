@@ -1,9 +1,9 @@
+# setup-msbuild
 
-# setup-MSBuild
-
-This action sets up MSBuild.exe as a CLI tool for use in actions by:
-- optionally downloading and caching a version of VSWhere.exe to help find the latest MSBuild on the machine
-- Adds the location of the MSBuild to the PATH
+This action sets up `MSBuild.exe` as a CLI tool for use in actions by:
+  
+  * Optionally downloading and caching a version of `VSWhere.exe` to help find the latest `MSBuild.exe` on the machine
+  * Adds the location of the `MSBuild.exe` to the `PATH`
 
 
 # Usage
@@ -21,7 +21,7 @@ jobs:
     - uses: actions/checkout@master
 
     - name: Setup MSBuild.exe
-      uses: warrenbuckley/Setup-MSBuild@v1
+      uses: extenda/actions/setup-msbuild@v0
 
     - name: MSBuild
       working-directory: src
