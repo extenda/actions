@@ -10,6 +10,12 @@ This action is based on [Warren Buckley's](https://github.com/warrenbuckley)
 
 ## Usage
 
+See [action.yml](action.yml).
+
+### Secrets
+
+No secrets.
+
 ### Basic Usage
 
 ```yaml

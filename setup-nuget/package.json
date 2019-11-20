@@ -1,8 +1,8 @@
 {
-  "name": "setup-msbuild",
+  "name": "setup-nuget",
   "version": "0.0.1-local",
   "private": true,
-  "description": "Prepare MSBuild for use in GitHub Actions",
+  "description": "Prepare NuGet for use in GitHub Actions with Extenda Retail's Nexus Repository Manager",
   "main": "dist/index.js",
   "scripts": {
     "test": "",

@@ -1,0 +1,5 @@
+name: Setup NUGet
+description: Prepare NuGet for use in GitHub Actions with Extenda Retail's Nexus Repository Manager
+runs:
+  using: node12
+  main: dist/index.js

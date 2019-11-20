@@ -69,6 +69,18 @@ jobs:
       - name: Run MSBuild
         run: MSBuild -version
 
+      - uses: ./setup-nuget
+        env:
+          NUGET_USERNAME: ${{ secrets.NUGET_USERNAME }}
+          NUGET_PASSWORD: ${{ secrets.NUGET_PASSWORD }}
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+
+      - name: Assert NuGet exists on PATH
+        run: where nuget.exe
+
+      - name: Run NuGet
+        run: nuget -version
+
   acceptance-linux:
     runs-on: ubuntu-latest
     needs: test
