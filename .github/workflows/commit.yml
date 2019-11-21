@@ -92,7 +92,7 @@ jobs:
         run: where nuget.exe
 
       - name: Run NuGet
-        run: nuget -version
+        run: nuget help
 
   acceptance-linux:
     runs-on: ubuntu-latest
