@@ -11148,10 +11148,13 @@ const downloadIfMissing = async (options, cachedTool) => {
     const { tool, binary, version, downloadUrl } = options;
     core.info(`Downloading ${tool} from ${downloadUrl}`);
     const downloadUuid = await tc.downloadTool(downloadUrl);
+    console.log('DownloadUuid', downloadUuid);
     const tmpDir = path.dirname(downloadUuid);
     const tmpFile = path.join(tmpDir, binary);
     await io.cp(downloadUuid, tmpFile);
-    await tc.cacheDir(tmpDir, tool, version);
+    console.log('dir =>', tmpDir, 'nuget.exe => ', tmpFile);
+    const cached = await tc.cacheDir(tmpDir, tool, version);
+    console.log('cached', cached);
     return find(options);
   }
   return cachedTool;
