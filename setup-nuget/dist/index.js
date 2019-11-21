@@ -4675,52 +4675,56 @@ const core = __webpack_require__(470);
 const exec = __webpack_require__(986);
 const os = __webpack_require__(87);
 const path = __webpack_require__(622);
-const { loadTool } = __webpack_require__(530);
+const { checkEnv, loadTool } = __webpack_require__(530);
 
-const VSWHERE_VERSION = '2.7.1';
-
-const findMSBuild = async (vswhere) => {
-  let msbuild = '';
-  const options = {
-    listeners: {
-      stdout: (data) => {
-        msbuild += data.toString();
-      },
-    },
-  };
-  await exec.exec(vswhere, [
-      '-latest',
-      '-requires',
-      'Microsoft.Component.MSBuild',
-      '-find',
-      'MSBuild\\**\\Bin\\MSBuild.exe',
-    ],
-    options,
-  );
-
-  if (!msbuild) {
-    throw new Error('Failed to find MSBuild.exe');
-  }
-
-  return path.dirname(msbuild);
+const addToPath = (nuget) => {
+  const nugetDir = path.dirname(nuget);
+  core.info(`NuGet directory '${nugetDir}' added to PATH.`);
+  core.addPath(nugetDir);
 };
+
+const setNuGetSource = async (nuget, configFile, { name, source }, { username, password }) => {
+  let args = ['sources', 'update', '-Name', name, '-Source', source];
+  if (username && password) {
+    args.push('-username', username, '-password', password);
+  }
+  args.push('-ConfigFile', configFile);
+  return exec.exec(nuget, args);
+};
+
+const setNuGetApiKey = async (nuget, configFile, { key, source }) => exec.exec(nuget,
+  ['setapikey', key, '-source', source, '-ConfigFile', configFile, '-NonInteractive'],
+);
 
 const run = async () => {
   if (os.platform() !== 'win32') {
-    core.setFailed('MSBuild only works on Windows!');
+    core.setFailed('nuget.exe only works on Windows!');
     return;
   }
   try {
-    await loadTool({
-      tool: 'vswhere',
-      binary: 'vswhere.exe',
-      version: VSWHERE_VERSION,
-      downloadUrl: `https://github.com/microsoft/vswhere/releases/download/${VSWHERE_VERSION}/vswhere.exe`,
-    }).then(findMSBuild)
-      .then((msbuild) => {
-        core.info(`MSBuild directory '${msbuild}' added to PATH.`);
-        return core.addPath(msbuild);
-      });
+    checkEnv(['NUGET_USERNAME', 'NUGET_PASSWORD', 'NUGET_API_KEY']);
+
+    const configFile = core.getInput('config-file', { required: true });
+    const sources = JSON.parse(core.getInput('sources') || '[]');
+
+    const nuget = await loadTool({
+      tool: 'nuget',
+      binary: 'nuget.exe',
+      version: '0.0.1-latest', // Version must be semver and 'latest' is not.
+      downloadUrl: 'https://dist.nuget.org/win-x86-commandline/latest/nuget.exe',
+    });
+
+    addToPath(nuget);
+
+    const nexusAuth = { username: process.env.NUGET_USERNAME, password: process.env.NUGET_PASSWORD };
+
+    for (const { name, source, auth } of sources) {
+      core.info(`Update NuGet source ${name}`);
+      await setNuGetSource(nuget, configFile, { name, source }, auth ? nexusAuth : undefined);
+    }
+
+    const nexusHosted = 'https://repo.extendaretail.com/repository/nuget-hosted/';
+    await setNuGetApiKey(nuget, configFile, { key: process.env.NUGET_API_KEY, source: nexusHosted });
   } catch (error) {
     core.setFailed(error.message);
   }

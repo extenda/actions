@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const { context, GitHub } = require('@actions/github');
-const { checkEnv, versions } = require('../../utils');
+const { checkEnv } = require('../../utils');
+const versions = require('../../utils/src/versions');
 
 const createGitHubRelease = async (release) => {
   const github = new GitHub(process.env.GITHUB_TOKEN);

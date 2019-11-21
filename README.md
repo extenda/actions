@@ -11,6 +11,7 @@ The following actions are available
   * [`actions/conventional-version`](conventional-version#readme)
   * [`actions/maven`](maven#readme)
   * [`actions/setup-msbuild`](setup-msbuild#readme)
+  * [`actions/setup-nuget`](setup-nuget#readme)
   * [`actions/sonar-scanner`](sonar-scanner#readme)
 
 ## Workflow Examples

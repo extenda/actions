@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const { versions } = require('../../utils');
+const versions = require('../../utils/src/versions');
 
 const run = async () => {
   try {
