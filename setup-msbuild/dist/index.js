@@ -5350,7 +5350,10 @@ const io = __webpack_require__(243);
 const path = __webpack_require__(622);
 
 const find = async ({ tool, binary, version }) => Promise.resolve(tc.find(tool, version))
-  .then(dir => dir ? path.join(dir, binary) : '');
+  .then(dir => {
+    console.log('cache hit', dir);
+    return dir ? path.join(dir, binary) : '';
+  });
 
 const downloadIfMissing = async (options, cachedTool) => {
   if (!cachedTool) {
