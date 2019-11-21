@@ -5364,7 +5364,7 @@ const downloadIfMissing = async (options, cachedTool) => {
     const tmpDir = path.dirname(downloadUuid);
     const tmpFile = path.join(tmpDir, binary);
     await io.cp(downloadUuid, tmpFile);
-    console.log('dir =>', tmpDir, 'nuget.exe => ', tmpFile);
+    console.log('dir =>', tmpDir, 'file => ', tmpFile);
     const cached = await tc.cacheDir(tmpDir, tool, version);
     console.log('cached', cached);
     return find(options);

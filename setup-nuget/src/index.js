@@ -33,7 +33,7 @@ const run = async () => {
     const nuget = await loadTool({
       tool: 'nuget',
       binary: 'nuget.exe',
-      version: 'latest',
+      version: '0.0.1-latest', // Version must be semver and 'latest' is not.
       downloadUrl: 'https://dist.nuget.org/win-x86-commandline/latest/nuget.exe',
     });
 
