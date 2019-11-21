@@ -34,12 +34,12 @@ jobs:
             [{ 
               "name": "nuget.org", 
               "source": "https://repo.extendaretail.com/repository/nuget-group/",
-              "auth": true,
+              "auth": true
             },
             { 
               "name": "RS (Nexus)", 
               "source": "https://repo.extendaretail.com/repository/nuget-group/",
-              "auth": true,
+              "auth": true
             }]
         env:
           NUGET_USERNAME: ${{ secrets.NUGET_USERNAME }}

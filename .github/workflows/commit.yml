@@ -71,18 +71,18 @@ jobs:
 
       - uses: ./setup-nuget
         with:
+          config-file: setup-nuget/test/NuGet.Config
           sources: |
             [{
               "name": "nuget.org",
               "source": "https://repo.extendaretail.com/repository/nuget-group/",
-              "auth": true,
+              "auth": true
             },
             {
               "name": "RS (Nexus)",
               "source": "https://repo.extendaretail.com/repository/nuget-group/",
-              "auth": true,
+              "auth": true
             }]
-        working-directory: setup-nuget/test
         env:
           NUGET_USERNAME: ${{ secrets.NUGET_USERNAME }}
           NUGET_PASSWORD: ${{ secrets.NUGET_PASSWORD }}
