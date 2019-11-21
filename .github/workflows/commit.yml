@@ -70,6 +70,19 @@ jobs:
         run: MSBuild -version
 
       - uses: ./setup-nuget
+        with:
+          sources: |
+            [{
+              "name": "nuget.org",
+              "source": "https://repo.extendaretail.com/repository/nuget-group/",
+              "auth": true,
+            },
+            {
+              "name": "RS (Nexus)",
+              "source": "https://repo.extendaretail.com/repository/nuget-group/",
+              "auth": true,
+            }]
+        working-directory: setup-nuget/test
         env:
           NUGET_USERNAME: ${{ secrets.NUGET_USERNAME }}
           NUGET_PASSWORD: ${{ secrets.NUGET_PASSWORD }}
