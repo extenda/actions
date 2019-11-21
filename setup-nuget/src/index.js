@@ -24,11 +24,13 @@ const setNuGetApiKey = async (nuget, { key, source }) => exec.exec(nuget,
 
 const run = async () => {
   if (os.platform() !== 'win32') {
-    core.setFailed('MSBuild only works on Windows!');
+    core.setFailed('nuget.exe only works on Windows!');
     return;
   }
   try {
     checkEnv(['NUGET_USERNAME', 'NUGET_PASSWORD', 'NUGET_API_KEY']);
+
+    const sources = JSON.parse(core.getInput('sources') || '[]');
 
     const nuget = await loadTool({
       tool: 'nuget',
@@ -39,12 +41,12 @@ const run = async () => {
 
     addToPath(nuget);
 
-    const nexusGroup = 'https://repo.extendaretail.com/repository/nuget-group/';
     const nexusAuth = { username: process.env.NUGET_USERNAME, password: process.env.NUGET_PASSWORD };
 
-    // TODO Do not proxy nuget.org
-    await setNuGetSource(nuget, { name: 'nuget.org-proxy', source: nexusGroup }, nexusAuth);
-    await setNuGetSource(nuget, { name: 'RS (Nexus)', source: nexusGroup }, nexusAuth);
+    for (const { name, source, auth } of sources) {
+      core.info(`Update NuGet source ${name}`);
+      await setNuGetSource(nuget, { name, source }, auth ? nexusAuth : undefined);
+    }
 
     const nexusHosted = 'https://repo.extendaretail.com/repository/nuget-hosted/';
     await setNuGetApiKey(nuget, { key: process.env.NUGET_API_KEY, source: nexusHosted });

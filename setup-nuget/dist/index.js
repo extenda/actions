@@ -4697,11 +4697,13 @@ const setNuGetApiKey = async (nuget, { key, source }) => exec.exec(nuget,
 
 const run = async () => {
   if (os.platform() !== 'win32') {
-    core.setFailed('MSBuild only works on Windows!');
+    core.setFailed('nuget.exe only works on Windows!');
     return;
   }
   try {
     checkEnv(['NUGET_USERNAME', 'NUGET_PASSWORD', 'NUGET_API_KEY']);
+
+    const sources = JSON.parse(core.getInput('sources') || '[]');
 
     const nuget = await loadTool({
       tool: 'nuget',
@@ -4712,12 +4714,12 @@ const run = async () => {
 
     addToPath(nuget);
 
-    const nexusGroup = 'https://repo.extendaretail.com/repository/nuget-group/';
     const nexusAuth = { username: process.env.NUGET_USERNAME, password: process.env.NUGET_PASSWORD };
 
-    // TODO Do not proxy nuget.org
-    await setNuGetSource(nuget, { name: 'nuget.org-proxy', source: nexusGroup }, nexusAuth);
-    await setNuGetSource(nuget, { name: 'RS (Nexus)', source: nexusGroup }, nexusAuth);
+    for (const { name, source, auth } of sources) {
+      core.info(`Update NuGet source ${name}`);
+      await setNuGetSource(nuget, { name, source }, auth ? nexusAuth : undefined);
+    }
 
     const nexusHosted = 'https://repo.extendaretail.com/repository/nuget-hosted/';
     await setNuGetApiKey(nuget, { key: process.env.NUGET_API_KEY, source: nexusHosted });
@@ -5350,23 +5352,17 @@ const io = __webpack_require__(243);
 const path = __webpack_require__(622);
 
 const find = async ({ tool, binary, version }) => Promise.resolve(tc.find(tool, version))
-  .then(dir => {
-    console.log('cache hit', dir);
-    return dir ? path.join(dir, binary) : '';
-  });
+  .then(dir => dir ? path.join(dir, binary) : '');
 
 const downloadIfMissing = async (options, cachedTool) => {
   if (!cachedTool) {
     const { tool, binary, version, downloadUrl } = options;
     core.info(`Downloading ${tool} from ${downloadUrl}`);
     const downloadUuid = await tc.downloadTool(downloadUrl);
-    console.log('DownloadUuid', downloadUuid);
     const tmpDir = path.dirname(downloadUuid);
     const tmpFile = path.join(tmpDir, binary);
     await io.cp(downloadUuid, tmpFile);
-    console.log('dir =>', tmpDir, 'file => ', tmpFile);
-    const cached = await tc.cacheDir(tmpDir, tool, version);
-    console.log('cached', cached);
+    await tc.cacheDir(tmpDir, tool, version);
     return find(options);
   }
   return cachedTool;

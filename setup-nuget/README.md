@@ -16,6 +16,8 @@ The following environment variables are required.
 
 ### Basic Usage
 
+This example installs NuGet and updates sources to use defined credentials.
+
 ```yaml
 on: push
 jobs:
@@ -27,6 +29,18 @@ jobs:
 
       - name: Setup NuGet
         uses: extenda/actions/setup-nuget@v0
+        with:
+          sources: |
+            [{ 
+              "name": "nuget.org", 
+              "source": "https://repo.extendaretail.com/repository/nuget-group/",
+              "auth": true,
+            },
+            { 
+              "name": "RS (Nexus)", 
+              "source": "https://repo.extendaretail.com/repository/nuget-group/",
+              "auth": true,
+            }]
         env:
           NUGET_USERNAME: ${{ secrets.NUGET_USERNAME }}
           NUGET_PASSWORD: ${{ secrets.NUGET_PASSWORD }}

@@ -1,5 +1,11 @@
 name: Setup NUGet
 description: Prepare NuGet for use in GitHub Actions with Extenda Retail's Nexus Repository Manager
+inputs:
+  sources:
+    description: |
+      Sources to add to NuGet. The sources are defined as a JSON array of objects
+      { name: <string>, source: <string>, auth: <bool> }
+    required: false
 runs:
   using: node12
   main: dist/index.js
