@@ -121,6 +121,8 @@ jobs:
           checks: |
             lint
             test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   release:
     runs-on: ubuntu-latest

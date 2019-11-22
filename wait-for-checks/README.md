@@ -30,4 +30,6 @@ jobs:
         with:
           checks: |
             test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
