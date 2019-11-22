@@ -31,13 +31,13 @@ jobs:
         uses: extenda/actions/setup-nuget@v0
         with:
           sources: |
-            [{ 
-              "name": "nuget.org", 
+            [{
+              "name": "nuget.org",
               "source": "https://repo.extendaretail.com/repository/nuget-group/",
               "auth": true
             },
-            { 
-              "name": "RS (Nexus)", 
+            {
+              "name": "RS (Nexus)",
               "source": "https://repo.extendaretail.com/repository/nuget-group/",
               "auth": true
             }]
