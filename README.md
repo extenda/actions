@@ -13,6 +13,7 @@ The following actions are available
   * [`actions/setup-msbuild`](setup-msbuild#readme)
   * [`actions/setup-nuget`](setup-nuget#readme)
   * [`actions/sonar-scanner`](sonar-scanner#readme)
+  * [`actions/wait-for-checks`](wait-for-checks#readme)
 
 ## Workflow Examples
 

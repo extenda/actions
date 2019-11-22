@@ -113,6 +113,13 @@ jobs:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
+      - name: Assert that lint and test passed
+        uses: ./wait-for-checks
+        with:
+          checks: |
+            lint
+            test
+
   release:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'

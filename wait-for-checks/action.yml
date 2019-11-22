@@ -1,0 +1,14 @@
+name: Wait for status checks
+description: |
+  Wait for status checks to pass.
+inputs:
+  checks:
+    description: A space-delimited list of checks names to wait for.
+    required: true
+  retry-interval:
+    description: Number of seconds to wait before retry
+    required: true
+    default: 10
+runs:
+  using: node12
+  main: dist/index.js
