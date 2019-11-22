@@ -50,6 +50,8 @@ jobs:
             echo "::error::Found uncommitted changes to compiled javascripts."
             echo ""
             git diff-index --stat HEAD '*/dist/**'
+            git status
+            git diff --cached
             echo ""
             echo "::error::Did you remember to run 'make build'?"
             exit 1
