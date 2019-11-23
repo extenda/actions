@@ -12,7 +12,9 @@ See [action.yml](action.yml).
 
 ### Secrets
 
-No secrets.
+The following environment variables are required.
+ 
+  * `GITHUB_TOKEN`: The GitHub Actions provided access token for the repository
 
 ### Basic Usage
 
