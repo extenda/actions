@@ -734,19 +734,18 @@ module.exports = require("tls");
 const git = __webpack_require__(360)();
 
 const basicAuth = () => {
-  const buffer = new Buffer(`github-actions:${process.env.GITHUB_TOKEN}`);
+  const buffer = Buffer.from(`github-actions:${process.env.GITHUB_TOKEN}`, 'utf8');
   const credentials = buffer.toString('base64');
-  return `basic ${credentials}`
-}
+  return `basic ${credentials}`;
+};
 
 /**
  * Configure the local Git instance to allow push operations against the origin.
  */
-const gitConfig = async () =>
-  git.addConfig('user.email', 'devops@extendaretail.com')
-    .then(() => git.addConfig('user.name', 'GitHub Actions'))
-    .then(() => git.addConfig('http.https://github.com/.extraheader',
-      `AUTHORIZATION: ${basicAuth()}`));
+const gitConfig = async () => git.addConfig('user.email', 'devops@extendaretail.com')
+  .then(() => git.addConfig('user.name', 'GitHub Actions'))
+  .then(() => git.addConfig('http.https://github.com/.extraheader',
+    `AUTHORIZATION: ${basicAuth()}`));
 
 module.exports = gitConfig;
 
@@ -1204,6 +1203,7 @@ const checkEnv = (variables) => {
     if (!process.env[name]) {
       throw new Error(`Missing env var: ${name}`);
     }
+    return true;
   });
 };
 
@@ -3237,7 +3237,7 @@ const { createParams } = __webpack_require__(548);
 const mvn = __webpack_require__(967);
 
 const getCommands = (custom) => {
-  let commands = {};
+  const commands = {};
   if (custom.gradle) {
     commands.gradle = custom.gradle;
   } else if (fs.existsSync('build.gradle')) {
@@ -3263,18 +3263,17 @@ const scan = async (hostUrl, mainBranch, customCommands = {}) => {
   if (commands.gradle) {
     core.info('Scan with Gradle');
     return exec.exec(`./gradlew ${commands.gradle} ${params}`);
-  } else if (commands.maven) {
+  } if (commands.maven) {
     core.info('Scan with Maven');
     return mvn.run(`${commands.maven} ${params}`);
-  } else if (commands.npm) {
+  } if (commands.npm) {
     core.info('Scan with NPM');
     await core.group('Install sonarqube-scanner', async () => {
       await exec.exec('npm install sonarqube-scanner --no-save');
     });
     return exec.exec(`${commands.npm} ${params}`);
-  } else {
-    throw new Error('No supported sonar-scanner detected.');
   }
+  throw new Error('No supported sonar-scanner detected.');
 };
 
 module.exports = {
@@ -8153,8 +8152,8 @@ const checkEnv = __webpack_require__(77);
 const gitConfig = __webpack_require__(20);
 const loadTool = __webpack_require__(951);
 
-// Note that src/versions are NOT included here because it adds 2.2MBs to every package that uses the utils module.
-// If versions are to be used, include the file explicitly.
+// Note that src/versions are NOT included here because it adds 2.2MBs to every package
+// that uses the utils module. If versions are to be used, include the file explicitly.
 
 module.exports = {
   checkEnv,
@@ -8197,17 +8196,19 @@ module.exports = bytesToUuid;
 /***/ }),
 
 /***/ 548:
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const fs = __webpack_require__(747);
 
 const createParams = (hostUrl, mainBranch) => {
   const sonarCloud = hostUrl.startsWith('https://sonarcloud.io');
-  let params = [];
+  const params = [];
   params.push(`-Dsonar.host.url=${hostUrl}`);
   params.push(`-Dsonar.login=${process.env.SONAR_TOKEN}`);
 
   const branch = process.env.GITHUB_REF.replace('refs/heads/', '');
   const repo = process.env.GITHUB_REPOSITORY.split('/');
-  const event = require(process.env.GITHUB_EVENT_PATH);
+  const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
 
   params.push(`-Dsonar.projectName=${repo[1]}`);
 
@@ -8222,7 +8223,7 @@ const createParams = (hostUrl, mainBranch) => {
       params.push(`-Dsonar.pullrequest.branch=${event.pull_request.head.ref}`);
       params.push(`-Dsonar.pullrequest.key=${event.pull_request.number}`);
       params.push('-Dsonar.pullrequest.provider=github');
-      params.push(`-Dsonar.pullrequest.github.repository=${process.env.GITHUB_REPOSITORY}`)
+      params.push(`-Dsonar.pullrequest.github.repository=${process.env.GITHUB_REPOSITORY}`);
     } else {
       // SonarQube 6
       params.push(`-Dsonar.github.oauth=${process.env.GITHUB_TOKEN}`);
@@ -8231,7 +8232,7 @@ const createParams = (hostUrl, mainBranch) => {
       params.push(`-Dsonar.github.pullRequest=${event.pull_request.number}`);
     }
   } else if (sonarCloud && branch !== mainBranch) {
-    params.push(`-Dsonar.branch.name=${branch}`)
+    params.push(`-Dsonar.branch.name=${branch}`);
   }
 
   return params.join(' ');
@@ -10330,15 +10331,14 @@ const auth = {
   password: '',
 };
 
-const projectExists = async (hostUrl, organization, project) => {
-  return axios.get(
-    `${hostUrl}/api/projects/search?organization=${organization}&q=${project}`,
-    { auth })
-    .then((response) => {
-      const { data: { components }} = response;
-      return components && components.length > 0 && components[0].key === project;
-    });
-};
+const projectExists = async (hostUrl, organization, project) => axios.get(
+  `${hostUrl}/api/projects/search?organization=${organization}&q=${project}`,
+  { auth },
+)
+  .then((response) => {
+    const { data: { components } } = response;
+    return components && components.length > 0 && components[0].key === project;
+  });
 
 const createSonarCloudProject = async (hostUrl) => {
   const repo = process.env.GITHUB_REPOSITORY.split('/');
@@ -10356,8 +10356,8 @@ const createSonarCloudProject = async (hostUrl) => {
   }), {
     auth,
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
-    }
+      'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+    },
   }).then(() => {
     core.info(`Created project '${project}' in ${hostUrl}`);
   }).catch(() => {
@@ -10903,12 +10903,10 @@ const run = async () => {
     await createProject(hostUrl);
 
     // Perform the scanning
-    await core.group('Run Sonar analysis', async () =>
-      scan(hostUrl, mainBranch, scanCommands));
+    await core.group('Run Sonar analysis', async () => scan(hostUrl, mainBranch, scanCommands));
 
     // Wait for the quality gate status to update
-    const status = await core.group('Check Quality Gate', async () =>
-      checkQualityGate());
+    const status = await core.group('Check Quality Gate', async () => checkQualityGate());
 
     if (status !== 0) {
       process.exitCode = core.ExitCode.Failure;
@@ -14107,14 +14105,14 @@ const PROP_SERVER_URL = 'serverUrl';
 const axiosConfig = {
   auth: {
     username: process.env.SONAR_TOKEN,
-    password: ''
-  }
+    password: '',
+  },
 };
 
 const findReportFile = () => {
   const paths = ['.scannerwork', path.join('target', 'sonar'), path.join('build', 'sonar')];
-  const reportFile = paths.map(p => path.join(p, REPORT_TASK_FILE))
-    .find(p => fs.existsSync(p));
+  const reportFile = paths.map((p) => path.join(p, REPORT_TASK_FILE))
+    .find((p) => fs.existsSync(p));
   if (!reportFile) {
     throw new Error(`Could not find ${REPORT_TASK_FILE}`);
   }
@@ -14123,7 +14121,7 @@ const findReportFile = () => {
 
 const getTaskReport = async (reportFile) => {
   if (!fs.existsSync(reportFile)) {
-    throw new `File not found ${reportFile}`;
+    throw new `File not found ${reportFile}`();
   }
 
   const reader = readline.createInterface({
@@ -14131,7 +14129,7 @@ const getTaskReport = async (reportFile) => {
     crlfDelay: Infinity,
   });
 
-  let properties = {};
+  const properties = {};
   for await (const line of reader) {
     const index = line.indexOf('=');
     const name = line.substring(0, index);
@@ -14145,7 +14143,7 @@ const getTaskReport = async (reportFile) => {
   return properties;
 };
 
-const getTaskStatus = async taskUrl => axios.get(taskUrl, axiosConfig)
+const getTaskStatus = async (taskUrl) => axios.get(taskUrl, axiosConfig)
   .then((response) => {
     const { data: { task } } = response;
     return {
@@ -14154,18 +14152,19 @@ const getTaskStatus = async taskUrl => axios.get(taskUrl, axiosConfig)
     };
   });
 
-const getQualityGateStatus = async (serverUrl, analysisId) =>
-  axios.get(`${serverUrl}/api/qualitygates/project_status?analysisId=${analysisId}`, axiosConfig)
-    .then(response => response.data.projectStatus.status);
+const getQualityGateStatus = async (serverUrl, analysisId) => axios.get(`${serverUrl}/api/qualitygates/project_status?analysisId=${analysisId}`, axiosConfig)
+  .then((response) => response.data.projectStatus.status);
 
-const timer = (ms) => new Promise(res => setTimeout(res, ms));
+const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 
 const checkQualityGate = async (reportFile = null, sleepMs = 2000) => {
-  const report = await getTaskReport(reportFile ? reportFile : findReportFile());
+  const report = await getTaskReport(reportFile || findReportFile());
   let task = { status: 'UNKNOWN' };
 
+  /* eslint-disable no-await-in-loop */
   while (!['CANCELLED', 'FAILED', 'SUCCESS'].includes(task.status)) {
     if (task.status !== 'UNKNOWN') {
+      // eslint-disable-next-line no-await-in-loop
       await timer(sleepMs);
     }
     task = await getTaskStatus(report[PROP_TASK_URL]);
@@ -14175,7 +14174,7 @@ const checkQualityGate = async (reportFile = null, sleepMs = 2000) => {
   if (task.status === 'CANCELLED') {
     core.info('Sonar job is cancelled -- exit with error');
     return 504;
-  } else if (task.status === 'FAILED') {
+  } if (task.status === 'FAILED') {
     core.error('Sonar job failed -- exit with error');
     return 500;
   }
@@ -14185,9 +14184,9 @@ const checkQualityGate = async (reportFile = null, sleepMs = 2000) => {
   if (qgStatus !== 'OK') {
     core.error('Quality gate is not OK -- exit with error');
     return 1;
-  } else {
-    return 0;
   }
+  return 0;
+  /* eslint-enable no-await-in-loop */
 };
 
 module.exports = {
@@ -14690,11 +14689,13 @@ const io = __webpack_require__(243);
 const path = __webpack_require__(622);
 
 const find = async ({ tool, binary, version }) => Promise.resolve(tc.find(tool, version))
-  .then(dir => dir ? path.join(dir, binary) : '');
+  .then((dir) => (dir ? path.join(dir, binary) : ''));
 
 const downloadIfMissing = async (options, cachedTool) => {
   if (!cachedTool) {
-    const { tool, binary, version, downloadUrl } = options;
+    const {
+      tool, binary, version, downloadUrl,
+    } = options;
     core.info(`Downloading ${tool} from ${downloadUrl}`);
     const downloadUuid = await tc.downloadTool(downloadUrl);
     const tmpDir = path.dirname(downloadUuid);
@@ -14706,9 +14707,13 @@ const downloadIfMissing = async (options, cachedTool) => {
   return cachedTool;
 };
 
-const loadTool = async ({ tool, binary, version, downloadUrl }) => {
-  const options = { tool, binary, version, downloadUrl };
-  return find(options).then(cachedTool => downloadIfMissing(options, cachedTool));
+const loadTool = async ({
+  tool, binary, version, downloadUrl,
+}) => {
+  const options = {
+    tool, binary, version, downloadUrl,
+  };
+  return find(options).then((cachedTool) => downloadIfMissing(options, cachedTool));
 };
 
 module.exports = loadTool;
@@ -15058,8 +15063,7 @@ const SETTINGS_FILE = path.join(__dirname, 'maven-settings.xml');
 const mavenHome = path.join(os.homedir(), '.m2');
 const mavenSettings = path.join(mavenHome, 'maven-settings.xml');
 
-const run = async (args) =>
-  exec.exec(`mvn -B -V --settings=${mavenSettings} ${args}`);
+const run = async (args) => exec.exec(`mvn -B -V --settings=${mavenSettings} ${args}`);
 
 const setVersion = async (newVersion) => {
   core.info(`Build version: ${newVersion}`);

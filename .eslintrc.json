@@ -1,11 +1,12 @@
 {
   "env": {
-    "commonjs": true,
     "es6": true,
     "jest": true,
     "node": true
   },
-  "extends": "eslint:recommended",
+  "extends": [
+    "airbnb-base"
+  ],
   "globals": {
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
@@ -14,5 +15,8 @@
     "ecmaVersion": 2018
   },
   "rules": {
+    "import/prefer-default-export": 0,
+    "import/no-extraneous-dependencies": 0,
+    "no-restricted-syntax": 0
   }
 }

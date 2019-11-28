@@ -700,19 +700,18 @@ module.exports = require("tls");
 const git = __webpack_require__(360)();
 
 const basicAuth = () => {
-  const buffer = new Buffer(`github-actions:${process.env.GITHUB_TOKEN}`);
+  const buffer = Buffer.from(`github-actions:${process.env.GITHUB_TOKEN}`, 'utf8');
   const credentials = buffer.toString('base64');
-  return `basic ${credentials}`
-}
+  return `basic ${credentials}`;
+};
 
 /**
  * Configure the local Git instance to allow push operations against the origin.
  */
-const gitConfig = async () =>
-  git.addConfig('user.email', 'devops@extendaretail.com')
-    .then(() => git.addConfig('user.name', 'GitHub Actions'))
-    .then(() => git.addConfig('http.https://github.com/.extraheader',
-      `AUTHORIZATION: ${basicAuth()}`));
+const gitConfig = async () => git.addConfig('user.email', 'devops@extendaretail.com')
+  .then(() => git.addConfig('user.name', 'GitHub Actions'))
+  .then(() => git.addConfig('http.https://github.com/.extraheader',
+    `AUTHORIZATION: ${basicAuth()}`));
 
 module.exports = gitConfig;
 
@@ -727,6 +726,7 @@ const checkEnv = (variables) => {
     if (!process.env[name]) {
       throw new Error(`Missing env var: ${name}`);
     }
+    return true;
   });
 };
 
@@ -5829,8 +5829,8 @@ const checkEnv = __webpack_require__(77);
 const gitConfig = __webpack_require__(20);
 const loadTool = __webpack_require__(951);
 
-// Note that src/versions are NOT included here because it adds 2.2MBs to every package that uses the utils module.
-// If versions are to be used, include the file explicitly.
+// Note that src/versions are NOT included here because it adds 2.2MBs to every package
+// that uses the utils module. If versions are to be used, include the file explicitly.
 
 module.exports = {
   checkEnv,
@@ -7697,14 +7697,13 @@ const findMSBuild = async (vswhere) => {
     },
   };
   await exec.exec(vswhere, [
-      '-latest',
-      '-requires',
-      'Microsoft.Component.MSBuild',
-      '-find',
-      'MSBuild\\**\\Bin\\MSBuild.exe',
-    ],
-    options,
-  );
+    '-latest',
+    '-requires',
+    'Microsoft.Component.MSBuild',
+    '-find',
+    'MSBuild\\**\\Bin\\MSBuild.exe',
+  ],
+  options);
 
   if (!msbuild) {
     throw new Error('Failed to find MSBuild.exe');
@@ -9295,11 +9294,13 @@ const io = __webpack_require__(243);
 const path = __webpack_require__(622);
 
 const find = async ({ tool, binary, version }) => Promise.resolve(tc.find(tool, version))
-  .then(dir => dir ? path.join(dir, binary) : '');
+  .then((dir) => (dir ? path.join(dir, binary) : ''));
 
 const downloadIfMissing = async (options, cachedTool) => {
   if (!cachedTool) {
-    const { tool, binary, version, downloadUrl } = options;
+    const {
+      tool, binary, version, downloadUrl,
+    } = options;
     core.info(`Downloading ${tool} from ${downloadUrl}`);
     const downloadUuid = await tc.downloadTool(downloadUrl);
     const tmpDir = path.dirname(downloadUuid);
@@ -9311,9 +9312,13 @@ const downloadIfMissing = async (options, cachedTool) => {
   return cachedTool;
 };
 
-const loadTool = async ({ tool, binary, version, downloadUrl }) => {
-  const options = { tool, binary, version, downloadUrl };
-  return find(options).then(cachedTool => downloadIfMissing(options, cachedTool));
+const loadTool = async ({
+  tool, binary, version, downloadUrl,
+}) => {
+  const options = {
+    tool, binary, version, downloadUrl,
+  };
+  return find(options).then((cachedTool) => downloadIfMissing(options, cachedTool));
 };
 
 module.exports = loadTool;

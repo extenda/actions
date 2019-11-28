@@ -8,8 +8,7 @@ const SETTINGS_FILE = path.join(__dirname, 'maven-settings.xml');
 const mavenHome = path.join(os.homedir(), '.m2');
 const mavenSettings = path.join(mavenHome, 'maven-settings.xml');
 
-const run = async (args) =>
-  exec.exec(`mvn -B -V --settings=${mavenSettings} ${args}`);
+const run = async (args) => exec.exec(`mvn -B -V --settings=${mavenSettings} ${args}`);
 
 const setVersion = async (newVersion) => {
   core.info(`Build version: ${newVersion}`);

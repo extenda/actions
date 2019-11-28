@@ -5,7 +5,7 @@ const { createParams } = require('./params');
 const mvn = require('../../maven/src/mvn');
 
 const getCommands = (custom) => {
-  let commands = {};
+  const commands = {};
   if (custom.gradle) {
     commands.gradle = custom.gradle;
   } else if (fs.existsSync('build.gradle')) {
@@ -31,18 +31,17 @@ const scan = async (hostUrl, mainBranch, customCommands = {}) => {
   if (commands.gradle) {
     core.info('Scan with Gradle');
     return exec.exec(`./gradlew ${commands.gradle} ${params}`);
-  } else if (commands.maven) {
+  } if (commands.maven) {
     core.info('Scan with Maven');
     return mvn.run(`${commands.maven} ${params}`);
-  } else if (commands.npm) {
+  } if (commands.npm) {
     core.info('Scan with NPM');
     await core.group('Install sonarqube-scanner', async () => {
       await exec.exec('npm install sonarqube-scanner --no-save');
     });
     return exec.exec(`${commands.npm} ${params}`);
-  } else {
-    throw new Error('No supported sonar-scanner detected.');
   }
+  throw new Error('No supported sonar-scanner detected.');
 };
 
 module.exports = {

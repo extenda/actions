@@ -20,12 +20,10 @@ const run = async () => {
     await createProject(hostUrl);
 
     // Perform the scanning
-    await core.group('Run Sonar analysis', async () =>
-      scan(hostUrl, mainBranch, scanCommands));
+    await core.group('Run Sonar analysis', async () => scan(hostUrl, mainBranch, scanCommands));
 
     // Wait for the quality gate status to update
-    const status = await core.group('Check Quality Gate', async () =>
-      checkQualityGate());
+    const status = await core.group('Check Quality Gate', async () => checkQualityGate());
 
     if (status !== 0) {
       process.exitCode = core.ExitCode.Failure;
