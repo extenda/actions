@@ -4,7 +4,7 @@ This package contains utilities reusable in the actions implemented in this mono
 
 ## Usage
 
-### `checkEnv()`
+### `checkEnv(variables)`
 
 Use this function to check that required environment variables are set prior to executing the action.
 
@@ -16,6 +16,37 @@ const run = async () => {
 }
 ```
 This method throws an error if any of the provided variables are missing.
+
+### `async gitConfig()`
+
+Use this function to configure the Git repository to push changes to GitHub using the GitHub Actions `GITHUB_TOKEN`.
+
+```javascript
+const { gitConfig } = require('../../utils');
+
+const run = async () => {
+  await gitConfig();
+  // From now on, it is possible to push to GitHub.
+};
+```
+
+### `async loadTool ({ tool, binary, version, downloadUrl })`
+
+Use this function to load a tool into `PATH`. If the tool is cached, the cache is loaded, otherwise the tool is 
+downloaded from the provided URL.
+
+```javascript
+const { loadTool } = require('../../utils');
+
+const run = async () => {
+  const nuget = await loadTool({
+    tool: 'nuget',
+    binary: 'nuget.exe',
+    version: '0.0.1-latest', // Version must be semver and 'latest' is not.
+    downloadUrl: 'https://dist.nuget.org/win-x86-commandline/latest/nuget.exe',
+  });
+};
+```
 
 ### `versions`
 
@@ -48,7 +79,7 @@ commit.
 ```javascript
 const versions = require('../../utils/src/versions');
 
-const run = async () => { 
+const run = async () => {
   const snapshotBuild = await getBuildVersion('-SNAPSHOT');
   const changes = await getChangelog(snapshotBuild);
 };

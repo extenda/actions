@@ -41,7 +41,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v1
 
       - uses: actions/cache@v1
         with:
@@ -55,12 +55,12 @@ jobs:
           java-version: 11
 
       - name: Run tests
-        uses: extenda/actions/maven@master
+        uses: extenda/actions/maven@v0
         with:
           args: verify
 
       - name: Scan with SonarCloud
-        uses: extenda/actions/sonar-scanner@master
+        uses: extenda/actions/sonar-scanner@v0
         with:
           sonar-host: https://sonarcloud.io
         env:
@@ -72,10 +72,10 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/master'
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v1
 
       - name: Create release
-        uses: extenda/actions/conventional-release@master
+        uses: extenda/actions/conventional-release@v0
         id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -92,7 +92,7 @@ jobs:
           java-version: 11
 
       - name: Build release
-        uses: extenda/actions/maven@master
+        uses: extenda/actions/maven@v0
         with:
           args: deploy -DskipTests
           version: ${{ steps.release.outputs.version }}
