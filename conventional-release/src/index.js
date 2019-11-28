@@ -16,7 +16,7 @@ const createGitHubRelease = async (release) => {
   });
 
   const { data } = response;
-  core.info(`Created GitHub release ${data.html_url}`)
+  core.info(`Created GitHub release ${data.html_url}`);
 };
 
 const run = async () => {

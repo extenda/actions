@@ -7,15 +7,14 @@ const auth = {
   password: '',
 };
 
-const projectExists = async (hostUrl, organization, project) => {
-  return axios.get(
-    `${hostUrl}/api/projects/search?organization=${organization}&q=${project}`,
-    { auth })
-    .then((response) => {
-      const { data: { components }} = response;
-      return components && components.length > 0 && components[0].key === project;
-    });
-};
+const projectExists = async (hostUrl, organization, project) => axios.get(
+  `${hostUrl}/api/projects/search?organization=${organization}&q=${project}`,
+  { auth },
+)
+  .then((response) => {
+    const { data: { components } } = response;
+    return components && components.length > 0 && components[0].key === project;
+  });
 
 const createSonarCloudProject = async (hostUrl) => {
   const repo = process.env.GITHUB_REPOSITORY.split('/');
@@ -33,8 +32,8 @@ const createSonarCloudProject = async (hostUrl) => {
   }), {
     auth,
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
-    }
+      'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+    },
   }).then(() => {
     core.info(`Created project '${project}' in ${hostUrl}`);
   }).catch(() => {

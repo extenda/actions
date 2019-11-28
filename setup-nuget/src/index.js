@@ -11,7 +11,7 @@ const addToPath = (nuget) => {
 };
 
 const setNuGetSource = async (nuget, configFile, { name, source }, { username, password }) => {
-  let args = ['sources', 'update', '-Name', name, '-Source', source];
+  const args = ['sources', 'update', '-Name', name, '-Source', source];
   if (username && password) {
     args.push('-username', username, '-password', password);
   }
@@ -20,8 +20,7 @@ const setNuGetSource = async (nuget, configFile, { name, source }, { username, p
 };
 
 const setNuGetApiKey = async (nuget, configFile, { key, source }) => exec.exec(nuget,
-  ['setapikey', key, '-source', source, '-ConfigFile', configFile, '-NonInteractive'],
-);
+  ['setapikey', key, '-source', source, '-ConfigFile', configFile, '-NonInteractive']);
 
 const run = async () => {
   if (os.platform() !== 'win32') {
@@ -43,15 +42,22 @@ const run = async () => {
 
     addToPath(nuget);
 
-    const nexusAuth = { username: process.env.NUGET_USERNAME, password: process.env.NUGET_PASSWORD };
+    const nexusAuth = {
+      username: process.env.NUGET_USERNAME,
+      password: process.env.NUGET_PASSWORD,
+    };
 
     for (const { name, source, auth } of sources) {
       core.info(`Update NuGet source ${name}`);
+      // eslint-disable-next-line no-await-in-loop
       await setNuGetSource(nuget, configFile, { name, source }, auth ? nexusAuth : undefined);
     }
 
     const nexusHosted = 'https://repo.extendaretail.com/repository/nuget-hosted/';
-    await setNuGetApiKey(nuget, configFile, { key: process.env.NUGET_API_KEY, source: nexusHosted });
+    await setNuGetApiKey(nuget, configFile, {
+      key: process.env.NUGET_API_KEY,
+      source: nexusHosted,
+    });
   } catch (error) {
     core.setFailed(error.message);
   }

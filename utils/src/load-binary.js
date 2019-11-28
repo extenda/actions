@@ -4,11 +4,13 @@ const io = require('@actions/io');
 const path = require('path');
 
 const find = async ({ tool, binary, version }) => Promise.resolve(tc.find(tool, version))
-  .then(dir => dir ? path.join(dir, binary) : '');
+  .then((dir) => (dir ? path.join(dir, binary) : ''));
 
 const downloadIfMissing = async (options, cachedTool) => {
   if (!cachedTool) {
-    const { tool, binary, version, downloadUrl } = options;
+    const {
+      tool, binary, version, downloadUrl,
+    } = options;
     core.info(`Downloading ${tool} from ${downloadUrl}`);
     const downloadUuid = await tc.downloadTool(downloadUrl);
     const tmpDir = path.dirname(downloadUuid);
@@ -20,9 +22,13 @@ const downloadIfMissing = async (options, cachedTool) => {
   return cachedTool;
 };
 
-const loadTool = async ({ tool, binary, version, downloadUrl }) => {
-  const options = { tool, binary, version, downloadUrl };
-  return find(options).then(cachedTool => downloadIfMissing(options, cachedTool));
+const loadTool = async ({
+  tool, binary, version, downloadUrl,
+}) => {
+  const options = {
+    tool, binary, version, downloadUrl,
+  };
+  return find(options).then((cachedTool) => downloadIfMissing(options, cachedTool));
 };
 
 module.exports = loadTool;

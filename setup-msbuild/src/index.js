@@ -16,14 +16,13 @@ const findMSBuild = async (vswhere) => {
     },
   };
   await exec.exec(vswhere, [
-      '-latest',
-      '-requires',
-      'Microsoft.Component.MSBuild',
-      '-find',
-      'MSBuild\\**\\Bin\\MSBuild.exe',
-    ],
-    options,
-  );
+    '-latest',
+    '-requires',
+    'Microsoft.Component.MSBuild',
+    '-find',
+    'MSBuild\\**\\Bin\\MSBuild.exe',
+  ],
+  options);
 
   if (!msbuild) {
     throw new Error('Failed to find MSBuild.exe');

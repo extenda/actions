@@ -34,12 +34,12 @@ const getLatestRelease = async () => gitSemverTags({ tagPrefix }).then((tags) =>
  * Returns the recommended version bump based on conventional commits since last tag.
  * @returns {Promise<string>}
  */
-const getRecommendedBump = async () =>  {
+const getRecommendedBump = async () => {
   const config = await conventionalCommits();
   return recommendedVersionBump({
     config,
     tagPrefix,
-  }).then(recommendation => recommendation.releaseType);
+  }).then((recommendation) => recommendation.releaseType);
 };
 
 /**
@@ -56,7 +56,8 @@ const getBuildVersion = async (versionSuffix = '') => {
 };
 
 /**
- * Returns a markdown formatted changelog for all conventional changes from the last release up until this commit.
+ * Returns a markdown formatted changelog for all conventional changes from the last release
+ * up until this commit.
  * @param version the name of the version built now
  * @returns {Promise<string>}
  */
@@ -81,22 +82,22 @@ const getChangelog = async (version) => {
       },
     }, {
       issue: 'issues',
-      commit: 'commit'
+      commit: 'commit',
     }, {},
-      {
-        referenceActions: [
-          'close',
-          'closes',
-          'closed',
-          'fix',
-          'fixes',
-          'fixed',
-          'resolve',
-          'resolves',
-          'resolved',
-        ],
-      });
-    return streamToString(stream).then(notes => notes.trim());
+    {
+      referenceActions: [
+        'close',
+        'closes',
+        'closed',
+        'fix',
+        'fixes',
+        'fixed',
+        'resolve',
+        'resolves',
+        'resolved',
+      ],
+    });
+    return streamToString(stream).then((notes) => notes.trim());
   } finally {
     fs.unlinkSync(dummyPackageJson);
   }
@@ -110,10 +111,10 @@ const tagReleaseVersion = async () => {
   const version = await getBuildVersion();
   const changelog = await getChangelog(version);
   const tagName = `${tagPrefix}${version}`;
-  await gitConfig().then(() =>
-    git.addAnnotatedTag(
-      tagName,
-      `Release ${version}`))
+  await gitConfig().then(() => git.addAnnotatedTag(
+    tagName,
+    `Release ${version}`,
+  ))
     .then(() => git.pushTags());
   return {
     changelog,

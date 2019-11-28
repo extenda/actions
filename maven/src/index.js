@@ -6,12 +6,16 @@ const versions = require('../../utils/src/versions');
 
 const setVersion = async (version) => core.group(
   `Set version ${version}`,
-  async () => mvn.setVersion(version));
+  async () => mvn.setVersion(version),
+);
 
-// Determine if a POM exists. If file argument is given, assume it is valid. If none set, look for pom in pwd.
-const pomExists = (args) =>  args.includes('-f ') || args.includes('--file=') || fs.existsSync('pom.xml');
+// Determine if a POM exists. If file argument is given, assume it is valid.
+// If none set, look for pom in pwd.
+const pomExists = (args) => args.includes('-f ')
+  || args.includes('--file=')
+  || fs.existsSync('pom.xml');
 
-const run = async() => {
+const run = async () => {
   const args = core.getInput('args', { required: true });
   const version = core.getInput('version');
   try {

@@ -11,14 +11,14 @@ const PROP_SERVER_URL = 'serverUrl';
 const axiosConfig = {
   auth: {
     username: process.env.SONAR_TOKEN,
-    password: ''
-  }
+    password: '',
+  },
 };
 
 const findReportFile = () => {
   const paths = ['.scannerwork', path.join('target', 'sonar'), path.join('build', 'sonar')];
-  const reportFile = paths.map(p => path.join(p, REPORT_TASK_FILE))
-    .find(p => fs.existsSync(p));
+  const reportFile = paths.map((p) => path.join(p, REPORT_TASK_FILE))
+    .find((p) => fs.existsSync(p));
   if (!reportFile) {
     throw new Error(`Could not find ${REPORT_TASK_FILE}`);
   }
@@ -27,7 +27,7 @@ const findReportFile = () => {
 
 const getTaskReport = async (reportFile) => {
   if (!fs.existsSync(reportFile)) {
-    throw new `File not found ${reportFile}`;
+    throw new `File not found ${reportFile}`();
   }
 
   const reader = readline.createInterface({
@@ -35,7 +35,7 @@ const getTaskReport = async (reportFile) => {
     crlfDelay: Infinity,
   });
 
-  let properties = {};
+  const properties = {};
   for await (const line of reader) {
     const index = line.indexOf('=');
     const name = line.substring(0, index);
@@ -49,7 +49,7 @@ const getTaskReport = async (reportFile) => {
   return properties;
 };
 
-const getTaskStatus = async taskUrl => axios.get(taskUrl, axiosConfig)
+const getTaskStatus = async (taskUrl) => axios.get(taskUrl, axiosConfig)
   .then((response) => {
     const { data: { task } } = response;
     return {
@@ -58,18 +58,19 @@ const getTaskStatus = async taskUrl => axios.get(taskUrl, axiosConfig)
     };
   });
 
-const getQualityGateStatus = async (serverUrl, analysisId) =>
-  axios.get(`${serverUrl}/api/qualitygates/project_status?analysisId=${analysisId}`, axiosConfig)
-    .then(response => response.data.projectStatus.status);
+const getQualityGateStatus = async (serverUrl, analysisId) => axios.get(`${serverUrl}/api/qualitygates/project_status?analysisId=${analysisId}`, axiosConfig)
+  .then((response) => response.data.projectStatus.status);
 
-const timer = (ms) => new Promise(res => setTimeout(res, ms));
+const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 
 const checkQualityGate = async (reportFile = null, sleepMs = 2000) => {
-  const report = await getTaskReport(reportFile ? reportFile : findReportFile());
+  const report = await getTaskReport(reportFile || findReportFile());
   let task = { status: 'UNKNOWN' };
 
+  /* eslint-disable no-await-in-loop */
   while (!['CANCELLED', 'FAILED', 'SUCCESS'].includes(task.status)) {
     if (task.status !== 'UNKNOWN') {
+      // eslint-disable-next-line no-await-in-loop
       await timer(sleepMs);
     }
     task = await getTaskStatus(report[PROP_TASK_URL]);
@@ -79,7 +80,7 @@ const checkQualityGate = async (reportFile = null, sleepMs = 2000) => {
   if (task.status === 'CANCELLED') {
     core.info('Sonar job is cancelled -- exit with error');
     return 504;
-  } else if (task.status === 'FAILED') {
+  } if (task.status === 'FAILED') {
     core.error('Sonar job failed -- exit with error');
     return 500;
   }
@@ -89,9 +90,9 @@ const checkQualityGate = async (reportFile = null, sleepMs = 2000) => {
   if (qgStatus !== 'OK') {
     core.error('Quality gate is not OK -- exit with error');
     return 1;
-  } else {
-    return 0;
   }
+  return 0;
+  /* eslint-enable no-await-in-loop */
 };
 
 module.exports = {

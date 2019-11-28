@@ -3,6 +3,7 @@ const checkEnv = (variables) => {
     if (!process.env[name]) {
       throw new Error(`Missing env var: ${name}`);
     }
+    return true;
   });
 };
 
