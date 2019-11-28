@@ -9,6 +9,7 @@ const recommendedVersionBump = util.promisify(require('conventional-recommended-
 const conventionalChangelog = require('conventional-changelog-core');
 const conventionalCommits = require('conventional-changelog-conventionalcommits');
 const streamToString = require('stream-to-string');
+const gitConfig = require('./git-config');
 
 /**
  * The tag prefix used for releases.
@@ -109,9 +110,8 @@ const tagReleaseVersion = async () => {
   const version = await getBuildVersion();
   const changelog = await getChangelog(version);
   const tagName = `${tagPrefix}${version}`;
-  await git.addConfig('user.email', 'devops@extendaretail.com')
-    .then(() => git.addConfig('user.name', 'GitHub Actions'))
-    .then(() => git.addAnnotatedTag(
+  await gitConfig().then(() =>
+    git.addAnnotatedTag(
       tagName,
       `Release ${version}`))
     .then(() => git.pushTags());
