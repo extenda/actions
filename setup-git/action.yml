@@ -1,0 +1,5 @@
+name: Setup Git
+description: Configure Git CLI with credentials to allow push to GitHub
+runs:
+  using: node12
+  main: dist/index.js
