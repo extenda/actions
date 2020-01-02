@@ -18,5 +18,23 @@
     "eslint": "^6.6.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "@actions/exec": "^1.0.2",
+    "@actions/github": "^2.0.0",
+    "@actions/io": "^1.0.1",
+    "@actions/tool-cache": "^1.1.2",
+    "axios": "^0.19.0",
+    "cmd-executor": "^1.1.1",
+    "conventional-changelog-conventionalcommits": "^4.2.3",
+    "conventional-changelog-core": "^4.1.4",
+    "conventional-recommended-bump": "^6.0.5",
+    "conventional-release": "file:conventional-release",
+    "git-semver-tags": "^3.0.1",
+    "ncc": "^0.3.6",
+    "qs": "^6.9.1",
+    "simple-git-promise": "^1.2.1",
+    "stream-to-string": "^1.2.0"
   }
 }
