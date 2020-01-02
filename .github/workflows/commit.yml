@@ -32,12 +32,6 @@ jobs:
       - name: Lint Javascript
         run: npm run lint:js
 
-      - name: Run tests
-        run: |
-          echo "::stop-commands::jest-output"
-          npm test
-          echo "::jest-output::"
-
       - name: Check compiled dist/* files
         run: |
           npm run build
