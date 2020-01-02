@@ -1,18 +1,10 @@
 # setup-nuget
 
-This GitHub Action prepares NuGet for use with Extenda Retail's Nexus Repository Manager
+This GitHub Action generates RS installer package artifact.
 
 ## Usage
 
 See [action.yml](action.yml).
-
-### Secrets
-
-The following environment variables are required.
-
-  * `NUGET_USERNAME`: user for [repo.extendaretail.com](https://repo.extendaretail.com)
-  * `NUGET_PASSWORD`: password for [repo.extendaretail.com](https://repo.extendaretail.com)
-  * `NUGET_API_KEY`: NuGet API key for [repo.extendaretail.com](https://repo.extendaretail.com)
 
 ### Basic Usage
 
@@ -25,26 +17,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@master
-
-      - name: Setup NuGet
-        uses: extenda/actions/setup-nuget@v0
-        with:
-          sources: |
-            [{
-              "name": "nuget.org",
-              "source": "https://repo.extendaretail.com/repository/nuget-group/",
-              "auth": true
-            },
-            {
-              "name": "RS (Nexus)",
-              "source": "https://repo.extendaretail.com/repository/nuget-group/",
-              "auth": true
-            }]
-        env:
-          NUGET_USERNAME: ${{ secrets.NUGET_USERNAME }}
-          NUGET_PASSWORD: ${{ secrets.NUGET_PASSWORD }}
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      - uses: actions/checkout@master      
 
       - uses: actions/cache@v1
         with:
@@ -54,4 +27,15 @@ jobs:
 
       - name: NuGet Restore
         run: nuget restore MyProject.sln
+      
+      - name: Build
+        run: <build>
+      
+      - name: Create RS installer package
+        uses: extenda/actions/run-rsinstallpackagebuilder@v0
+        with:
+          packageName: <package name>
+          workingDir: <where to work from>
+          outputDir: <where to store the package>
+          sourcePaths: <where are the files you want to package>
 ```
