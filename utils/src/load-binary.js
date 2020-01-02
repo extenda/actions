@@ -3,7 +3,9 @@ const tc = require('@actions/tool-cache');
 const io = require('@actions/io');
 const path = require('path');
 
-const find = async ({ tool, binary, version }) => Promise.resolve(tc.find(tool, version))
+const find = async ({ tool, binary, version }) => Promise.resolve(
+  tc.find(tool, version), /* process.arch), */
+)
   .then((dir) => (dir ? path.join(dir, binary) : ''));
 
 const downloadIfMissing = async (options, cachedTool) => {
