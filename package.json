@@ -32,6 +32,7 @@
     "conventional-recommended-bump": "^6.0.5",
     "conventional-release": "file:conventional-release",
     "git-semver-tags": "^3.0.1",
+    "jest": "^24.9.0",
     "ncc": "^0.3.6",
     "qs": "^6.9.1",
     "simple-git-promise": "^1.2.1",
