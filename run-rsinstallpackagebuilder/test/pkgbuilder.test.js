@@ -17,8 +17,9 @@ describe('RS installer package tests', () => {
     process.env['INPUT_SOURCE-PATHS'] = __dirname;
     process.env['INPUT_TOOL-VERSION'] = 'v1.0.0';
 
-    process.env['NEXUS_USERNAME'] = 'repo-io-deploy'; // TODO: get values from secret
-    process.env['NEXUS_PASSWORD'] = 'C80DTkiDSrmRLYCY';
+    // process.env['NEXUS_USERNAME'] = '';
+    // process.env['NEXUS_PASSWORD'] = '';
+
     await run(); // Should create a package of this file and place it under ../test_output_dir.
     expect(fs.existsSync(path.join(outputDir, 'Test_PkgName.pkg.xml'))).toBe(true);
   });

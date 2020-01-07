@@ -1,4 +1,4 @@
-# setup-nuget
+# run-rsinstallpackagebuilder
 
 This GitHub Action generates RS installer package artifact.
 
@@ -38,4 +38,5 @@ jobs:
           workingDir: <where to work from>
           outputDir: <where to store the package>
           sourcePaths: <where are the files you want to package>
+          toolVersion: <eg. 1.0.0>
 ```
