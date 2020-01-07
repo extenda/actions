@@ -21,6 +21,10 @@ inputs:
     description: Path to source files to include in the installer package.
     required: false
     default: null
+  toolVersion:
+    description: Version string for the version of RS Installer Package builder to use.
+    required: true
+    default: null
 runs:
   using: node12
   main: dist/index.js

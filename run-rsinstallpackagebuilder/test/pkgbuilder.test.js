@@ -1,37 +1,25 @@
+/* eslint-disable dot-notation */
 const os = require('os');
-
-jest.mock('os');
-
-const { getBinaryName /* , getBuilder */ } = require('../src/pkgbuilder');
-
-// const binaryVersion = 'v1.0.0';
-// const appName = 'RS.InstallerPackageBuilder.Core.Console';
+const path = require('path');
+const fs = require('fs');
+const { run } = require('../src/index');
 
 describe('RS installer package tests', () => {
   beforeEach(() => {
     jest.resetModules();
   });
+  test('Run builder on test files', async () => {
+    jest.setTimeout(10000);
+    const outputDir = path.join(__dirname, '..', 'test_output_dir');
+    process.env['INPUT_PACKAGE-NAME'] = 'Test_PkgName';
+    process.env['INPUT_WORKING-DIR'] = os.tmpdir();
+    process.env['INPUT_OUTPUT-DIR'] = outputDir;
+    process.env['INPUT_SOURCE-PATHS'] = __dirname;
+    process.env['INPUT_TOOL-VERSION'] = 'v1.0.0';
 
-  describe('Windows platform', () => {
-    test('Get binary name for win32', async () => {
-      os.platform.mockImplementation(() => 'win32');
-      const binaryName = await getBinaryName();
-      expect(binaryName).toEqual('InstallerPackageBuilder.Core.Console.exe');
-    });
-
-    // TODO: Cannot get this test to validate the response from getbuilder.
-    // test('Get installer package builder for win32', async () => {
-    //   os.platform.mockImplementation(() => 'win32');
-    //   const builder = await getBuilder(appName, binaryVersion);
-    //   expect(builder).toEqual(null);
-    // });
-  });
-
-  describe('Linux platform', () => {
-    test('Get binary name for linux', async () => {
-      os.platform.mockImplementation(() => 'linux');
-      const binaryName = await getBinaryName();
-      expect(binaryName).toEqual('InstallerPackageBuilder.Core.Console');
-    });
+    process.env['NEXUS_USERNAME'] = 'repo-io-deploy'; // TODO: get values from secret
+    process.env['NEXUS_PASSWORD'] = 'C80DTkiDSrmRLYCY';
+    await run(); // Should create a package of this file and place it under ../test_output_dir.
+    expect(fs.existsSync(path.join(outputDir, 'Test_PkgName.pkg.xml'))).toBe(true);
   });
 });

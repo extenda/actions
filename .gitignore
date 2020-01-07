@@ -29,3 +29,4 @@ semver.ps1
 which
 which.cmd
 which.ps1
+/run-rsinstallpackagebuilder/test_output_dir
