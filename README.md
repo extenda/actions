@@ -119,30 +119,39 @@ Development tools needed are:
 
 ### How to Build
 
-To make it easier to work with the repository and to recompile the distribution files we use a `Makefile`.
+Use the NPM scripts in the root `package.json` to install and build the complete project.
 
 ```bash
-$ make install
+$ npm install --no-bin-links
 ```
 Runs `npm install` on all Javascript packages.
 
 ```bash
-$ make lint
+$ npm lint:js
 ```
-Runs `npm run lint:js` on all Javascript packages.
+Runs `eslint` on all Javascript files everywhere.
 
 ```bash
-$ make test
+$ npm test
 ```
-Runs `npm test` on all Javascript packages.
+Runs Jest everywhere.
 
 ```bash
-$ make build
+$ npm run build
 ```
-Runs `npm run build` on all Javascript projects. This recompiles the package into its `dist` directory. This target
-executes in a Docker container to ensure output is always identical across platforms.
+Runs `npm run build` on all Javascript projects. This recompiles the package into its `dist` directory.
+ 
+```bash
+$ npm run build:docker
+```
+Same as `npm run build`, but builds the project in a Docker container to ensure strictly identical output across platforms.
 
-Remember to always run `make build` before committing changes to packages. Failing to do so will not pass CI/CD checks.
+#### Tips
+
+  * Remember to always run `npm run build` before committing changes to packages. 
+    Failing to do so will not pass CI/CD checks.
+  * If developing a package, run `jest` within that package instead of the root to only test your changes.
+  * Do not add dependencies to the root package unless you are making global changes, for example to the build process.
 
 ### CI/CD Pipeline
 

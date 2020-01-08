@@ -12,6 +12,11 @@ jobs:
         with:
           java-version: 11
 
+      - name: Install Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
       - name: Cache node modules
         uses: actions/cache@v1
         id: cache
@@ -22,20 +27,20 @@ jobs:
             ${{ runner.OS }}-node-
 
       - name: Install dependencies
-        run: make install-ci
+        run: npm ci
 
       - name: Lint Javascript
-        run: make lint
+        run: npm run lint:js
 
       - name: Run tests
         run: |
           echo "::stop-commands::jest-output"
-          make test
+          npm test
           echo "::jest-output::"
 
       - name: Check compiled dist/* files
         run: |
-          make build -j
+          npm run build
           git add "*/dist/**"
           if [ -n "$(git diff-index --exit-code HEAD '*/dist/**')" ]; then
             echo ""
@@ -43,7 +48,7 @@ jobs:
             echo ""
             git diff-index --stat HEAD '*/dist/**'
             echo ""
-            echo "::error::Did you remember to run 'make build'?"
+            echo "::error::Did you remember to run 'npm run build'?"
             exit 1
           fi
 
