@@ -1,6 +1,10 @@
 name: Run RS Installer Package builder
 description: Creates installer packages to be used in the RS Installer
 inputs:
+  type:
+    description: single, multiple or singleflat
+    required: true
+    default: null
   packageName:
     description: Name of the installer package to create.
     required: false
@@ -19,6 +23,10 @@ inputs:
     default: null
   sourceFilePaths:
     description: Path to source files to include in the installer package.
+    required: false
+    default: null
+  searchFilter:
+    description: Search filter for enumerating files to include
     required: false
     default: null
   toolVersion:

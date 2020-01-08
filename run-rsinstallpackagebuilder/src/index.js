@@ -1,6 +1,3 @@
-/* eslint-disable max-len */
-/* eslint-disable dot-notation */
-/* eslint-disable no-lonely-if */
 const tc = require('@actions/tool-cache');
 const io = require('@actions/io');
 const fs = require('fs');
@@ -13,8 +10,10 @@ const { getBinaryName } = require('./pkgbuilder');
 const { checkEnv } = require('../../utils');
 
 const packageBuilderCommand = async (
-  builder, packageName, workingDir, outputDir, sourcePaths, sourceFilePaths) => exec.exec(builder,
-  ['--pn', packageName, '--wd', workingDir, '--od', outputDir, '--sp', sourcePaths, '--sfp', sourceFilePaths]);
+  builder, type, packageName, workingDir, outputDir, sourcePaths, sourceFilePaths) => exec.exec(
+  builder, type,
+  ['--pn', packageName, '--wd', workingDir, '--od', outputDir, '--sp', sourcePaths, '--sfp', sourceFilePaths],
+);
 
 function downloadTool(url) {
   let urlObject;
@@ -26,20 +25,18 @@ function downloadTool(url) {
   }
 
   return new Promise(((resolve, reject) => {
-    let tempDirectory = process.env['RUNNER_TEMP'] || '';
-    let cacheRoot = process.env['RUNNER_TOOL_CACHE'] || '';
+    let tempDirectory = process.env.RUNNER_TEMP || '';
+    let cacheRoot = process.env.RUNNER_TOOL_CACHE || '';
 
     if (!tempDirectory || !cacheRoot) {
       let baseLocation;
 
       if (process.platform === 'win32') {
-        baseLocation = process.env['USERPROFILE'] || 'C:\\';
+        baseLocation = process.env.USERPROFILE || 'C:\\';
+      } else if (process.platform === 'darwin') {
+        baseLocation = '/tmp';
       } else {
-        if (process.platform === 'darwin') {
-          baseLocation = '/Users';
-        } else {
-          baseLocation = '/home';
-        }
+        baseLocation = '/home';
       }
 
       if (!tempDirectory) {
@@ -61,8 +58,8 @@ function downloadTool(url) {
       throw new Error(`Destination file path ${destPath} already exists`);
     }
 
-    const username = process.env['NEXUS_USERNAME'];
-    const password = process.env['NEXUS_PASSWORD'];
+    const username = process.env.NEXUS_USERNAME;
+    const password = process.env.NEXUS_PASSWORD;
 
     const auth = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
 
@@ -99,7 +96,8 @@ function downloadTool(url) {
       reject(e.message);
     });
 
-    io.mkdirP(tempDirectory).then(() => { file = fs.createWriteStream(destPath); }).then(() => { req.end(); });
+    io.mkdirP(tempDirectory)
+      .then(() => { file = fs.createWriteStream(destPath); }).then(() => { req.end(); });
   }));
 }
 
@@ -140,13 +138,14 @@ const run = async () => {
   const appName = 'RS.InstallerPackageBuilder.Core.Console';
 
   try {
-    checkEnv(['INPUT_WORKING-DIR', 'INPUT_OUTPUT-DIR', 'INPUT_TOOL-VERSION', 'NEXUS_USERNAME', 'NEXUS_PASSWORD']);
+    checkEnv(['INPUT_TYPE', 'INPUT_WORKING-DIR', 'INPUT_OUTPUT-DIR', 'INPUT_TOOL-VERSION', 'NEXUS_USERNAME', 'NEXUS_PASSWORD']);
 
     const pn = core.getInput('package-name', { required: false });
     const wd = core.getInput('working-dir', { required: true });
     const od = core.getInput('output-dir', { required: true });
     const sp = core.getInput('source-paths', { required: false });
     const sfp = core.getInput('source-filePaths', { required: false });
+    const t = core.getInput('type', { required: false });
     const binaryVersion = core.getInput('tool-version', { required: true });
 
     const binaryName = await getBinaryName();
@@ -158,7 +157,7 @@ const run = async () => {
       downloadUrl: downloadUrlNexus,
     });
 
-    await packageBuilderCommand(builder, pn, wd, od, sp, sfp);
+    await packageBuilderCommand(builder, t, pn, wd, od, sp, sfp);
   } catch (error) {
     core.setFailed(error.message);
   }
