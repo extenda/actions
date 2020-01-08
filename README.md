@@ -127,7 +127,7 @@ $ npm install --no-bin-links
 Runs `npm install` on all Javascript packages.
 
 ```bash
-$ npm lint:js
+$ npm run lint:js
 ```
 Runs `eslint` on all Javascript files everywhere.
 
