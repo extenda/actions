@@ -2,3 +2,4 @@ node_modules/
 !dist/
 .repository/
 .idea
+run-rsinstallpackagebuilder/test_output_dir/

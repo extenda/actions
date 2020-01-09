@@ -11,7 +11,7 @@ const { checkEnv } = require('../../utils');
 
 const packageBuilderCommand = async (
   builder, type, packageName, workingDir, outputDir, sourcePaths, sourceFilePaths) => exec.exec(
-  builder, type,
+  builder,
   [type, '-pn', packageName, '-wd', workingDir, '-od', outputDir, '-sp', sourcePaths, '-sfp', sourceFilePaths],
 );
 
@@ -97,7 +97,13 @@ function downloadTool(url) {
     });
 
     io.mkdirP(tempDirectory)
-      .then(() => { file = fs.createWriteStream(destPath); }).then(() => { req.end(); });
+      .then(() => { file = fs.createWriteStream(destPath); })
+      .then(() => {
+        if (process.platform !== 'win32') {
+          fs.chmodSync(destPath, '755');
+        }
+      })
+      .then(() => { req.end(); });
   }));
 }
 
