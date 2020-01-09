@@ -11,8 +11,7 @@ describe('RS installer package tests', () => {
     jest.setTimeout(10000);
     const outputDir = path.join(__dirname, '..', 'test_output_dir');
     process.env['INPUT_PACKAGE-NAME'] = 'Test_PkgName';
-    // eslint-disable-next-line dot-notation
-    process.env['INPUT_TYPE'] = 'single';
+    process.env['INPUT_BUILDER-TYPE'] = 'single';
     process.env['INPUT_WORKING-DIR'] = os.tmpdir();
     process.env['INPUT_OUTPUT-DIR'] = outputDir;
     process.env['INPUT_SOURCE-PATHS'] = __dirname;

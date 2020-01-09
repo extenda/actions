@@ -10,9 +10,9 @@ const { getBinaryName } = require('./pkgbuilder');
 const { checkEnv } = require('../../utils');
 
 const packageBuilderCommand = async (
-  builder, type, packageName, workingDir, outputDir, sourcePaths, sourceFilePaths) => exec.exec(
+  builder, btype, packageName, workingDir, outputDir, sourcePaths, sourceFilePaths) => exec.exec(
   builder,
-  [type, '-pn', packageName, '-wd', workingDir, '-od', outputDir, '-sp', sourcePaths, '-sfp', sourceFilePaths],
+  [btype, '-pn', packageName, '-wd', workingDir, '-od', outputDir, '-sp', sourcePaths, '-sfp', sourceFilePaths],
 );
 
 function downloadTool(url) {
@@ -144,14 +144,16 @@ const run = async () => {
   const appName = 'RS.InstallerPackageBuilder.Core.Console';
 
   try {
-    checkEnv(['INPUT_TYPE', 'INPUT_WORKING-DIR', 'INPUT_OUTPUT-DIR', 'INPUT_TOOL-VERSION', 'NEXUS_USERNAME', 'NEXUS_PASSWORD']);
+    core.info('Starting to build installer package');
+
+    checkEnv(['INPUT_TOOL-VERSION', 'INPUT_BUILDER-TYPE', 'INPUT_WORKING-DIR', 'INPUT_OUTPUT-DIR', 'NEXUS_USERNAME', 'NEXUS_PASSWORD']);
 
     const pn = core.getInput('package-name', { required: false });
     const wd = core.getInput('working-dir', { required: true });
     const od = core.getInput('output-dir', { required: true });
     const sp = core.getInput('source-paths', { required: false });
     const sfp = core.getInput('source-filePaths', { required: false });
-    const t = core.getInput('type', { required: false });
+    const bt = core.getInput('builder-type', { required: false });
     const binaryVersion = core.getInput('tool-version', { required: true });
 
     const binaryName = await getBinaryName();
@@ -163,7 +165,7 @@ const run = async () => {
       downloadUrl: downloadUrlNexus,
     });
 
-    await packageBuilderCommand(builder, t, pn, wd, od, sp, sfp);
+    await packageBuilderCommand(builder, bt, pn, wd, od, sp, sfp);
   } catch (error) {
     core.setFailed(error.message);
   }
