@@ -8,7 +8,7 @@ describe('RS installer package tests', () => {
     jest.resetModules();
   });
   test('Run builder on test files', async () => {
-    jest.setTimeout(10000);
+    jest.setTimeout(100000);
     const outputDir = path.join(__dirname, '..', 'test_output_dir');
     process.env['INPUT_PACKAGE-NAME'] = 'Test_PkgName';
     process.env['INPUT_BUILDER-TYPE'] = 'single';
