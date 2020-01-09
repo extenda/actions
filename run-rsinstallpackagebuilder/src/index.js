@@ -12,7 +12,7 @@ const { checkEnv } = require('../../utils');
 const packageBuilderCommand = async (
   builder, type, packageName, workingDir, outputDir, sourcePaths, sourceFilePaths) => exec.exec(
   builder, type,
-  ['--pn', packageName, '--wd', workingDir, '--od', outputDir, '--sp', sourcePaths, '--sfp', sourceFilePaths],
+  [type, '-pn', packageName, '-wd', workingDir, '-od', outputDir, '-sp', sourcePaths, '-sfp', sourceFilePaths],
 );
 
 function downloadTool(url) {
