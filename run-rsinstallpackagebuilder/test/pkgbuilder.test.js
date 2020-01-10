@@ -1,27 +1,43 @@
 const os = require('os');
 const path = require('path');
 const fs = require('fs');
-const { run } = require('../src/index');
+const fsExtra = require('fs-extra');
+
+// Used by @actions/tool-cache. Directory must exist before we load module.
+const outputDir = path.join(__dirname, '..', 'test_output_dir');
+process.env.RUNNER_TEMP = outputDir;
+process.env.RUNNER_TOOL_CACHE = outputDir;
+
+if (!fs.existsSync(outputDir)) {
+  fs.mkdirSync(outputDir);
+}
+
+const buildPackage = require('../src/pkgbuilder');
+
+jest.setTimeout(30000);
 
 describe('RS installer package tests', () => {
-  beforeEach(() => {
-    jest.resetModules();
-  });
   test('Run builder on test files', async () => {
-    jest.setTimeout(100000);
-    const outputDir = path.join(__dirname, '..', 'test_output_dir');
-    process.env['INPUT_PACKAGE-NAME'] = 'Test_PkgName';
-    process.env['INPUT_BUILDER-TYPE'] = 'single';
-    process.env['INPUT_WORKING-DIR'] = os.tmpdir();
-    process.env['INPUT_OUTPUT-DIR'] = outputDir;
-    process.env['INPUT_SOURCE-PATHS'] = __dirname;
-    process.env['INPUT_SOURCE-FILEPATHS'] = '';
-    process.env['INPUT_TOOL-VERSION'] = '1.0.0';
+    fsExtra.removeSync(outputDir);
+    fs.mkdirSync(outputDir);
 
-    // process.env['NEXUS_USERNAME'] = '';
-    // process.env['NEXUS_PASSWORD'] = '';
+    if (!process.env.NEXUS_USERNAME) {
+      console.log('Using local user credentials in test');
+      process.env.NEXUS_USERNAME = process.env.GITHUB_USER;
+      process.env.NEXUS_PASSWORD = process.env.GITHUB_TOKEN;
+    }
 
-    await run(); // Should create a package of this file and place it under ../test_output_dir.
+    // Should create a package of this file and place it under ../test_output_dir.
+    await buildPackage({
+      builderType: 'single',
+      binaryVersion: '1.0.0',
+      packageName: 'Test_PkgName',
+      workingDir: os.tmpdir(),
+      outputDir,
+      sourcePaths: __dirname,
+      sourceFilePaths: '',
+    });
+
     expect(fs.existsSync(path.join(outputDir, 'Test_PkgName.pkg.xml'))).toBe(true);
   });
 });
