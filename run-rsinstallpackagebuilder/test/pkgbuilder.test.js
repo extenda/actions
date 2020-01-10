@@ -8,36 +8,51 @@ const outputDir = path.join(__dirname, '..', 'test_output_dir');
 process.env.RUNNER_TEMP = outputDir;
 process.env.RUNNER_TOOL_CACHE = outputDir;
 
-if (!fs.existsSync(outputDir)) {
-  fs.mkdirSync(outputDir);
-}
+// Directory must exist for tool-cache.
+fsExtra.mkdirs(outputDir);
 
-const buildPackage = require('../src/pkgbuilder');
+// We must import pkgbuilder AFTER preparing the environment.
+const { buildPackage, downloadBuildTool } = require('../src/pkgbuilder');
+
+if (!process.env.NEXUS_USERNAME) {
+  console.log('Using local user credentials in test');
+  process.env.NEXUS_USERNAME = process.env.GITHUB_USER;
+  process.env.NEXUS_PASSWORD = process.env.GITHUB_TOKEN;
+}
 
 jest.setTimeout(30000);
 
 describe('RS installer package tests', () => {
-  test('Run builder on test files', async () => {
-    fsExtra.removeSync(outputDir);
-    fs.mkdirSync(outputDir);
-
-    if (!process.env.NEXUS_USERNAME) {
-      console.log('Using local user credentials in test');
-      process.env.NEXUS_USERNAME = process.env.GITHUB_USER;
-      process.env.NEXUS_PASSWORD = process.env.GITHUB_TOKEN;
-    }
-
-    // Should create a package of this file and place it under ../test_output_dir.
-    await buildPackage({
-      builderType: 'single',
-      binaryVersion: '1.0.0',
-      packageName: 'Test_PkgName',
-      workingDir: os.tmpdir(),
-      outputDir,
-      sourcePaths: __dirname,
-      sourceFilePaths: '',
-    });
-
-    expect(fs.existsSync(path.join(outputDir, 'Test_PkgName.pkg.xml'))).toBe(true);
+  beforeAll(() => {
+    fsExtra.mkdirs(outputDir);
   });
+
+  afterAll(() => {
+    fsExtra.removeSync(outputDir);
+  });
+
+  test('It downloads the build tool', async () => {
+    const tool = await downloadBuildTool({
+      binaryVersion: '1.0.0',
+    });
+    expect(fs.existsSync(tool)).toEqual(true);
+  });
+
+  // There's no binary we can test on MacOS
+  if (os.platform() !== 'darwin') {
+    test('It can run the builder', async () => {
+      // Should create a package of this file and place it under ../test_output_dir.
+      await buildPackage({
+        builderType: 'single',
+        binaryVersion: '1.0.0',
+        packageName: 'Test_PkgName',
+        workingDir: os.tmpdir(),
+        outputDir,
+        sourcePaths: __dirname,
+        sourceFilePaths: '',
+      });
+
+      expect(fs.existsSync(path.join(outputDir, 'Test_PkgName.pkg.xml'))).toBe(true);
+    });
+  }
 });

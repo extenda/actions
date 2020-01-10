@@ -15,12 +15,14 @@
     "@actions/io": "^1.0.1",
     "@actions/tool-cache": "^1.1.2",
     "@zeit/ncc": "^0.20.5",
+    "axios": "^0.19.1",
     "conventional-changelog-conventionalcommits": "^4.2.3",
     "conventional-changelog-core": "^4.1.1",
     "conventional-recommended-bump": "^6.0.5",
     "git-semver-tags": "^3.0.1",
     "semver": "^6.3.0",
     "simple-git": "^1.126.0",
-    "stream-to-string": "^1.2.0"
+    "stream-to-string": "^1.2.0",
+    "uuid": "^3.3.3"
   }
 }
