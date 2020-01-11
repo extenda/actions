@@ -8,17 +8,17 @@ const outputDir = path.join(__dirname, '..', 'test_output_dir');
 process.env.RUNNER_TEMP = outputDir;
 process.env.RUNNER_TOOL_CACHE = outputDir;
 
-// Directory must exist for tool-cache.
-fsExtra.mkdirs(outputDir);
-
-// We must import pkgbuilder AFTER preparing the environment.
-const { buildPackage, downloadBuildTool } = require('../src/pkgbuilder');
-
 if (!process.env.NEXUS_USERNAME) {
   console.log('Using local user credentials in test');
   process.env.NEXUS_USERNAME = process.env.GITHUB_USER;
   process.env.NEXUS_PASSWORD = process.env.GITHUB_TOKEN;
 }
+
+// Directory must exist for tool-cache.
+fsExtra.mkdirs(outputDir);
+
+// We must import pkgbuilder AFTER preparing the environment.
+const { buildPackage, downloadBuildTool } = require('../src/pkgbuilder');
 
 jest.setTimeout(30000);
 

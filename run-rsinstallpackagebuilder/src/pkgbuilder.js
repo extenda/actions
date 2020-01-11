@@ -40,6 +40,10 @@ const downloadBuildTool = async (args) => {
     binary: BINARY_NAME,
     version: binaryVersion,
     downloadUrl: url,
+    auth: {
+      username: process.env.NEXUS_USERNAME,
+      password: process.env.NEXUS_PASSWORD,
+    },
   });
 };
 

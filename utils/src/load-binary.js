@@ -11,17 +11,14 @@ const find = async ({ tool, binary, version }) => Promise.resolve(
   tc.find(tool, version), /* process.arch), */
 ).then((dir) => (dir ? path.join(dir, binary) : ''));
 
-const nexusDownload = async (url) => {
+const downloadToolWithAuth = async (url, auth) => {
   const targetFile = path.join(os.tmpdir(), uuid(), uuid());
   fs.mkdirSync(path.dirname(targetFile));
   const stream = fs.createWriteStream(targetFile);
   await axios({
     url,
     method: 'get',
-    auth: {
-      username: process.env.NEXUS_USERNAME,
-      password: process.env.NEXUS_PASSWORD,
-    },
+    auth,
     responseType: 'stream',
   }).then((response) => {
     core.info(`Loading ${response.headers['content-length'] / 1000} KB...`);
@@ -37,20 +34,17 @@ const nexusDownload = async (url) => {
   return targetFile;
 };
 
-const internalDownload = async (url) => {
-  if (url.startsWith('https://repo.extendaretail.com')) {
-    return nexusDownload(url);
-  }
-  return tc.downloadTool(url);
-};
+const internalDownload = async (url, auth) => (
+  auth ? downloadToolWithAuth(url, auth) : tc.downloadTool(url)
+);
 
 const downloadIfMissing = async (options, cachedTool) => {
   if (!cachedTool) {
     const {
-      tool, binary, version, downloadUrl, downloadFn,
+      tool, binary, version, downloadUrl, auth,
     } = options;
     core.info(`Downloading ${tool} from ${downloadUrl}`);
-    const downloadUuid = await downloadFn(downloadUrl);
+    const downloadUuid = await internalDownload(downloadUrl, auth);
     const tmpDir = path.dirname(downloadUuid);
     const tmpFile = path.join(tmpDir, binary);
     await io.cp(downloadUuid, tmpFile);
@@ -61,10 +55,10 @@ const downloadIfMissing = async (options, cachedTool) => {
 };
 
 const loadTool = async ({
-  tool, binary, version, downloadUrl, downloadFn = internalDownload,
+  tool, binary, version, downloadUrl, auth,
 }) => {
   const options = {
-    tool, binary, version, downloadUrl, downloadFn,
+    tool, binary, version, downloadUrl, auth,
   };
   return find(options).then((cachedTool) => downloadIfMissing(options, cachedTool));
 };
