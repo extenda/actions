@@ -23,13 +23,17 @@ const processPackage = async (dir) => {
       stdout: (data) => {
         output += data.toString();
       },
+      stderr: (data) => {
+        output += data.toString();
+      },
     },
-  }).then(() => {
-    // eslint-disable-next-line no-console
-    console.log(output.trim(), '\n');
   }).catch((err) => {
     // eslint-disable-next-line no-console
     console.log(`Failed to process ${dir}`, err);
+    process.exitCode = 1;
+  }).finally(() => {
+    // eslint-disable-next-line no-console
+    console.log(output.trim(), '\n');
   });
 };
 

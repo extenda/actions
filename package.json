@@ -7,7 +7,7 @@
     "build": "node .scripts/packages.js 'npm run build'",
     "build:docker": "docker run --rm -t -v $(pwd):/work -w /work node:12-alpine sh -c 'npm run build'",
     "install": "node .scripts/packages.js install:$npm_config_argv",
-    "test": "jest",
+    "test": "node .scripts/packages.js 'npm test'",
     "lint:js": "eslint .scripts/*.js */src/**.js */test/**.js --no-ignore"
   },
   "repository": "github:extenda/actions",
@@ -20,7 +20,7 @@
   "homepage": "https://github.com/extenda/actions#readme",
   "devDependencies": {
     "@actions/exec": "^1.0.2",
-    "eslint": "^6.6.0",
+    "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
     "jest": "^24.9.0"

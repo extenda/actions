@@ -10,6 +10,7 @@ The following actions are available
   * [`actions/conventional-release`](conventional-release#readme)
   * [`actions/conventional-version`](conventional-version#readme)
   * [`actions/maven`](maven#readme)
+  * [`actions/rs-create-installerpkg`](rs-create-installerpkg#readme)
   * [`actions/setup-git`](setup-git#readme)
   * [`actions/setup-msbuild`](setup-msbuild#readme)
   * [`actions/setup-nuget`](setup-nuget#readme)
