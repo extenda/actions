@@ -1,4 +1,4 @@
-name: Run RS Installer Package builder
+name: Create RS Installer Package
 description: Creates installer packages to be used in the RS Installer
 inputs:
   type:
