@@ -9,6 +9,7 @@ process.env.RUNNER_TEMP = outputDir;
 process.env.RUNNER_TOOL_CACHE = outputDir;
 
 if (!process.env.NEXUS_USERNAME) {
+  // eslint-disable-next-line no-console
   console.log('Using local user credentials in test');
   process.env.NEXUS_USERNAME = process.env.GITHUB_USER;
   process.env.NEXUS_PASSWORD = process.env.GITHUB_TOKEN;
