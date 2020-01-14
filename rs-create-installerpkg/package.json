@@ -1,5 +1,5 @@
 {
-  "name": "run-rsinstallerpackagebuilder",
+  "name": "rs-create-installerpkg",
   "version": "0.0.1-local",
   "private": true,
   "description": "Build RS installer package",
@@ -11,8 +11,7 @@
   },
   "dependencies": {
     "@actions/core": "^1.2.0",
-    "@actions/exec": "^1.0.1",
-    "@actions/tool-cache": "^1.1.2"
+    "@actions/exec": "^1.0.1"
   },
   "devDependencies": {
     "@zeit/ncc": "^0.20.5",
