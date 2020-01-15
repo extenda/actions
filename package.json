@@ -4,10 +4,10 @@
   "description": "Extenda Retail GitHub Actions",
   "private": true,
   "scripts": {
-    "build": "node .scripts/packages.js 'npm run build'",
+    "build": "node .scripts/build-modules.js $npm_config_argv",
     "build:docker": "docker run --rm -t -v $(pwd):/work -w /work node:12-alpine sh -c 'npm run build'",
-    "install": "node .scripts/packages.js install:$npm_config_argv",
-    "test": "node .scripts/packages.js 'npm test'",
+    "install": "node .scripts/install-modules.js $npm_config_argv",
+    "test": "node .scripts/test-modules.js $npm_config_argv",
     "lint:js": "eslint .scripts/*.js */src/**.js */test/**.js --no-ignore"
   },
   "repository": "github:extenda/actions",
@@ -20,6 +20,7 @@
   "homepage": "https://github.com/extenda/actions#readme",
   "devDependencies": {
     "@actions/exec": "^1.0.2",
+    "chalk": "^3.0.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
