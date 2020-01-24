@@ -2,7 +2,7 @@ name: Branch info
 description: This step sets outputs for simple-branch-name, suffix, and is-prerelease based on $GITHUB_REF.
 outputs:
   simple-branch-name:
-    description: Uses ${{ github.ref }} and removes 'refs/heads/' at the beginning
+    description: Uses github.ref and removes 'refs/heads/' at the beginning
   suffix:
     description: Simple suffix that can be used for nugets and other packages that are not stable
   is-prerelease:
