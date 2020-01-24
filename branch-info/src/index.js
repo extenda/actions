@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 
 const { checkEnv } = require('../../utils');
-const { getBranchName, getSuffix, isPreRelease } = require('./branch-helper');
+const { getBranchName, getSuffix, isPreRelease } = require('./branch-info');
 
 const run = async () => {
   checkEnv(['GITHUB_REF']);

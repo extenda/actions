@@ -1,6 +1,6 @@
-const { getBranchName, isPreRelease, getSuffix } = require('../src/branch-helper');
+const { getBranchName, isPreRelease, getSuffix } = require('../src/branch-info');
 
-describe('Branch helper test suite', () => {
+describe('Branch info test suite', () => {
   test('getBranchName() returns branch name or null', () => {
     expect(getBranchName('refs/heads/feature/RS-1234')).toBe('feature/RS-1234');
     expect(getBranchName('refs/heads/feature/RS-1234_test_branch')).toBe('feature/RS-1234_test_branch');

@@ -9639,7 +9639,7 @@ module.exports = require("util");
 const core = __webpack_require__(470);
 
 const { checkEnv } = __webpack_require__(530);
-const { getBranchName, getSuffix, isPreRelease } = __webpack_require__(804);
+const { getBranchName, getSuffix, isPreRelease } = __webpack_require__(833);
 
 const run = async () => {
   checkEnv(['GITHUB_REF']);
@@ -10342,43 +10342,6 @@ module.exports = function dispatchRequest(config) {
 
 /***/ }),
 
-/***/ 804:
-/***/ (function(module) {
-
-const isPreRelease = (branchName) => branchName !== 'master';
-
-const getBranchName = (currentRef) => {
-  if (!currentRef) {
-    return null;
-  }
-
-  const pattern = /refs\/heads\/([A-Za-z0-9/\-_]*)/;
-  const groups = currentRef.match(pattern);
-
-  if (groups == null || groups.length !== 2) {
-    return null;
-  }
-
-  return groups[1];
-};
-
-const getSuffix = (branchName) => {
-  if (!branchName || branchName === 'master') {
-    return '';
-  }
-
-  return branchName.replace(/\//g, '-').replace(/_/g, '-');
-};
-
-module.exports = {
-  getBranchName,
-  isPreRelease,
-  getSuffix,
-};
-
-
-/***/ }),
-
 /***/ 813:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -10848,6 +10811,43 @@ function splitLine (lineStr) {
 
 module.exports = function isCancel(value) {
   return !!(value && value.__CANCEL__);
+};
+
+
+/***/ }),
+
+/***/ 833:
+/***/ (function(module) {
+
+const isPreRelease = (branchName) => branchName !== 'master';
+
+const getBranchName = (currentRef) => {
+  if (!currentRef) {
+    return null;
+  }
+
+  const pattern = /refs\/heads\/([A-Za-z0-9/\-_]*)/;
+  const groups = currentRef.match(pattern);
+
+  if (groups == null || groups.length !== 2) {
+    return null;
+  }
+
+  return groups[1];
+};
+
+const getSuffix = (branchName) => {
+  if (!branchName || branchName === 'master') {
+    return '';
+  }
+
+  return branchName.replace(/\//g, '-').replace(/_/g, '-');
+};
+
+module.exports = {
+  getBranchName,
+  isPreRelease,
+  getSuffix,
 };
 
 

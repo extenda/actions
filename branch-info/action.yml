@@ -1,4 +1,4 @@
-name: Branch helper
+name: Branch info
 description: This step sets outputs for simple-branch-name, suffix, and is-prerelease based on $GITHUB_REF.
 outputs:
   simple-branch-name:
