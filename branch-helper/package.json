@@ -1,0 +1,24 @@
+{
+  "name": "branch-helper",
+  "version": "0.0.1-local",
+  "description": "Helper step to get simple-branch-name, suffix, and is-prerelease.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "ncc build src/index.js",
+    "watch": "watch 'npm run build' ./src"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "@actions/exec": "^1.0.1",
+    "@actions/github": "^2.0.1"
+  },
+  "devDependencies": {
+    "@zeit/ncc": "^0.20.5",
+    "jest": "^24.9.0",
+    "watch": "^1.0.2"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  }
+}
