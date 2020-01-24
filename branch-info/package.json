@@ -1,8 +1,8 @@
 {
-  "name": "branch-helper",
+  "name": "branch-info",
   "version": "0.0.1-local",
   "description": "Helper step to get simple-branch-name, suffix, and is-prerelease.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "jest",
     "build": "ncc build src/index.js",
