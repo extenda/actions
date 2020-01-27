@@ -34,9 +34,11 @@ const run = async () => {
       setNuGetSource(configFile, { name, source }, { username, password });
       core.debug('Set nuget source - SUCCESS');
 
-      core.debug('Set nuget source api-key - PENDING');
-      setNuGetApiKey(configFile, { apikey, source });
-      core.debug('Set nuget source api-key - SUCCESS');
+      if (apikey) {
+        core.debug('Set nuget source api-key - PENDING');
+        setNuGetApiKey(configFile, { apikey, source });
+        core.debug('Set nuget source api-key - SUCCESS');
+      }
     }
   } catch (error) {
     core.debug(error);
