@@ -2,9 +2,9 @@
 
 Configure NuGet.Config file by commenting out already existing sources with the same URL before adding it again with username, password, and API-key
 Linux only supports clear-text passwords so make sure you use secrets to pass in the passwords.
-This step requires that the `nuget` command is available from earlier steps in the GitHub workflow. This can be achieved by using one of the two following methods:
- * Run `sudo apt install nuget`.
- * Define a set using  `NuGet/setup-nuget@v1.0.2`.
+This step requires that the 'nuget' command is available from earlier steps in the GitHub workflow. This can be achieved by using one of the two following methods:
+ * Run 'sudo apt install nuget'.
+ * Define a set using  'NuGet/setup-nuget@v1.0.2'.
 
 ## Usage
 

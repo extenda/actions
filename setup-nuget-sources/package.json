@@ -1,12 +1,12 @@
 {
   "name": "setup-nuget-sources",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1-local",
   "private": true,
+  "description": "Setting nuget sources in NuGet.Config file",
   "main": "dist/index.js",
   "scripts": {
     "test": "jest",
-    "build": "ncc -m build src/index.js",
+    "build": "ncc build src/index.js",
     "watch": "watch 'npm run build' ./src"
   },
   "dependencies": {
