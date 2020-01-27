@@ -1,17 +1,18 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
+const replace = require('replace-in-file');
 
-const setNuGetSource = async (nuget, configFile, { name, source }, { username, password }) => {
-  const args = ['sources', 'update', '-Name', name, '-Source', source];
+const setNuGetSource = async (configFile, { name, source }, { username, password }) => {
+  const args = ['sources', 'add', '-Name', name, '-Source', source];
   if (username && password) {
-    args.push('-username', username, '-password', password);
+    args.push('-username', username, '-password', password, '-StorePasswordInClearText');
   }
   args.push('-ConfigFile', configFile);
-  return exec.exec(nuget, args);
+  return exec.exec('nuget', args);
 };
 
-const setNuGetApiKey = async (nuget, configFile, { key, source }) => exec.exec(
-  nuget,
+const setNuGetApiKey = async (configFile, { key, source }) => exec.exec(
+  'nuget',
   [
     'setapikey', key,
     '-source', source,
@@ -20,18 +21,42 @@ const setNuGetApiKey = async (nuget, configFile, { key, source }) => exec.exec(
   ],
 );
 
-const parseNugetSourceJson = async (sourcesJson) => {
+const parseNugetSourceJson = (sourcesJson) => {
   // TODO: add try catch and log
   const sources = JSON.parse(sourcesJson || '[]');
   return sources;
 };
 
-const commentOutSourceUrl = (url) => {
-  core.info(`Trying to comment out existing url: ${url}`);
+const commentOutSourceUrl = async (nugetFileFullPath, regex) => {
+  core.info(`Trying to comment out existing urls with regex: ${regex}`);
+
+  const options = {
+    files: `${nugetFileFullPath}`,
+    from: regex,
+    to: (match) => `<!--${match}-->`,
+  };
+
+  return replace(options);
 };
 
 const generateRegexPattern = (url) => {
   core.info(`Generating regex for ${url}`);
+
+  try {
+    let escapedUrl = url;
+    if (escapedUrl.substr(-1) !== '/') {
+      escapedUrl += '/';
+    }
+
+    escapedUrl = escapedUrl.replace(/\//g, '\\/');
+
+    const regex = new RegExp(`^\\s*(.*"${escapedUrl}/?"\\s*\\/>)$`, 'gm');
+    core.debug(`Regex created ${regex}`);
+    return regex;
+  } catch (error) {
+    core.error('Error occurred:', error);
+    return null;
+  }
 };
 
 module.exports = {

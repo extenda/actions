@@ -1,5 +1,12 @@
 const core = require('@actions/core');
-const { parseNugetSourceJson, setNuGetApiKey, setNuGetSource } = require('./nuget-sources');
+
+const {
+  parseNugetSourceJson,
+  setNuGetApiKey,
+  setNuGetSource,
+  generateRegexPattern,
+  commentOutSourceUrl,
+} = require('./nuget-sources');
 
 const run = async () => {
   try {
@@ -7,19 +14,18 @@ const run = async () => {
     const sources = parseNugetSourceJson(core.getInput('sources'));
 
     for (const {
-      name, source, username, password, apikey,
+      name, source, username, password, key,
     } of sources) {
-      core.info(`Update NuGet source ${name}`);
-      core.info()
-      // eslint-disable-next-line no-await-in-loop
-      setNuGetSource(nuget, configFile, { name, source }, auth ? nexusAuth : undefined);
-      setNuGetApiKey(nuget, configFile, {
-        key: process.env.NUGET_API_KEY,
-        source: nexusHosted,
-      });
-    }
+      core.info(`Add NuGet source to ${configFile}. Name: ${name}. Path: ${source}. Username: ${username}. Password ${password}. ApiKey: ${key}`);
 
-    const nexusHosted = 'https://repo.extendaretail.com/repository/nuget-hosted/';
+      const pattern = generateRegexPattern(source);
+
+      const commentedResult = commentOutSourceUrl(configFile, pattern);
+      core.debug(`Result of commenting out source if existing: ${commentedResult}`);
+
+      setNuGetSource(configFile, { name, source }, { username, password });
+      setNuGetApiKey(configFile, { key, source });
+    }
   } catch (error) {
     core.setFailed(error.message);
   }
