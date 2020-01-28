@@ -11,10 +11,10 @@ const setNuGetSource = async (configFile, { name, source }, { username, password
   return exec.exec('nuget', args);
 };
 
-const setNuGetApiKey = async (configFile, { key, source }) => exec.exec(
+const setNuGetApiKey = async (configFile, { apikey, source }) => exec.exec(
   'nuget',
   [
-    'setapikey', key,
+    'setapikey', apikey,
     '-source', source,
     '-ConfigFile', configFile,
     '-NonInteractive',

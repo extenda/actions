@@ -12,32 +12,33 @@ const run = async () => {
   try {
     const configFile = core.getInput('config-file', { required: true });
 
-    core.debug('Parsing nuget source JSON - PENDING');
+    core.info('Parsing nuget source JSON - PENDING');
     const sources = parseNugetSourceJson(core.getInput('sources'));
-    core.debug('Parsing nuget source JSON - SUCCESS');
+    core.info('Parsing nuget source JSON - SUCCESS');
+    core.info(`sources JSON: ${JSON.stringify(sources)}`);
 
     for (const {
       name, source, username, password, apikey,
     } of sources) {
       core.info(`Add NuGet source to ${configFile}. Name: ${name}. Path: ${source}. Username: ${username}. Password ${password}. ApiKey: ${apikey}`);
 
-      core.debug('Generating regex pattern - PENDING');
+      core.info('Generating regex pattern - PENDING');
       const pattern = generateRegexPattern(source);
-      core.debug('Generating regex pattern - SUCCESS');
+      core.info('Generating regex pattern - SUCCESS');
 
-      core.debug('Commenting out existing nuget source - PENDING');
+      core.info('Commenting out existing nuget source - PENDING');
       const commentedResult = commentOutSourceUrl(configFile, pattern);
-      core.debug('Commenting out existing nuget source - SUCCESS');
-      core.debug(`Result of commenting out source if existing: ${commentedResult}`);
+      core.info('Commenting out existing nuget source - SUCCESS');
+      core.info(`Result of commenting out source if existing: ${commentedResult}`);
 
-      core.debug('Set nuget source - PENDING');
+      core.info('Set nuget source - PENDING');
       setNuGetSource(configFile, { name, source }, { username, password });
-      core.debug('Set nuget source - SUCCESS');
+      core.info('Set nuget source - SUCCESS');
 
       if (apikey) {
-        core.debug('Set nuget source api-key - PENDING');
+        core.info('Set nuget source api-key - PENDING');
         setNuGetApiKey(configFile, { apikey, source });
-        core.debug('Set nuget source api-key - SUCCESS');
+        core.info('Set nuget source api-key - SUCCESS');
       }
     }
   } catch (error) {
