@@ -4696,10 +4696,10 @@ const setNuGetSource = async (configFile, { name, source }, { username, password
   return exec.exec('nuget', args);
 };
 
-const setNuGetApiKey = async (configFile, { key, source }) => exec.exec(
+const setNuGetApiKey = async (configFile, { apikey, source }) => exec.exec(
   'nuget',
   [
-    'setapikey', key,
+    'setapikey', apikey,
     '-source', source,
     '-ConfigFile', configFile,
     '-NonInteractive',
@@ -4729,9 +4729,9 @@ const generateRegexPattern = (url) => {
 
   try {
     let escapedUrl = url;
-    if (escapedUrl.substr(-1) !== '/') {
-      escapedUrl += '/';
-    }
+    // if (escapedUrl.substr(-1) !== '/') {
+    //   escapedUrl += '/';
+    // }
 
     escapedUrl = escapedUrl.replace(/\//g, '\\/');
 
@@ -6370,22 +6370,38 @@ const {
 const run = async () => {
   try {
     const configFile = core.getInput('config-file', { required: true });
+
+    core.info('Parsing nuget source JSON - PENDING');
     const sources = parseNugetSourceJson(core.getInput('sources'));
+    core.info('Parsing nuget source JSON - SUCCESS');
+    core.info(`sources JSON: ${JSON.stringify(sources)}`);
 
     for (const {
-      name, source, username, password, key,
+      name, source, username, password, apikey,
     } of sources) {
-      core.info(`Add NuGet source to ${configFile}. Name: ${name}. Path: ${source}. Username: ${username}. Password ${password}. ApiKey: ${key}`);
+      core.info(`Add NuGet source to ${configFile}. Name: ${name}. Path: ${source}. Username: ${username}. Password ${password}. ApiKey: ${apikey}`);
 
+      core.info('Generating regex pattern - PENDING');
       const pattern = generateRegexPattern(source);
+      core.info('Generating regex pattern - SUCCESS');
 
+      core.info('Commenting out existing nuget source - PENDING');
       const commentedResult = commentOutSourceUrl(configFile, pattern);
-      core.debug(`Result of commenting out source if existing: ${commentedResult}`);
+      core.info('Commenting out existing nuget source - SUCCESS');
+      core.info(`Result of commenting out source if existing: ${commentedResult}`);
 
+      core.info('Set nuget source - PENDING');
       setNuGetSource(configFile, { name, source }, { username, password });
-      setNuGetApiKey(configFile, { key, source });
+      core.info('Set nuget source - SUCCESS');
+
+      if (apikey) {
+        core.info('Set nuget source api-key - PENDING');
+        setNuGetApiKey(configFile, { apikey, source });
+        core.info('Set nuget source api-key - SUCCESS');
+      }
     }
   } catch (error) {
+    core.debug(error);
     core.setFailed(error.message);
   }
 };
