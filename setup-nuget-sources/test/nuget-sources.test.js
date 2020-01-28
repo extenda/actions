@@ -30,7 +30,8 @@ describe('Setup Nuget Sources tests', () => {
 
   test('Generate regex from url', () => {
     expect(generateRegexPattern('https://repo.extendaretail.com/repository/nuget-group/')).toEqual(/^\s*(.*"https:\/\/repo.extendaretail.com\/repository\/nuget-group\/\/?"\s*\/>)$/gm);
-    expect(generateRegexPattern('https://repo.extendaretail.com/repository/nuget-group')).toEqual(/^\s*(.*"https:\/\/repo.extendaretail.com\/repository\/nuget-group\/\/?"\s*\/>)$/gm);
+    expect(generateRegexPattern('https://repo.extendaretail.com/repository/nuget-group')).toEqual(/^\s*(.*"https:\/\/repo.extendaretail.com\/repository\/nuget-group\/?"\s*\/>)$/gm);
+    expect(generateRegexPattern('https://api.nuget.org/v3/index.json')).toEqual(/^\s*(.*"https:\/\/api.nuget.org\/v3\/index.json\/?"\s*\/>)$/gm);
     expect(generateRegexPattern(null)).toEqual(null);
   });
 

@@ -44,9 +44,9 @@ const generateRegexPattern = (url) => {
 
   try {
     let escapedUrl = url;
-    if (escapedUrl.substr(-1) !== '/') {
-      escapedUrl += '/';
-    }
+    // if (escapedUrl.substr(-1) !== '/') {
+    //   escapedUrl += '/';
+    // }
 
     escapedUrl = escapedUrl.replace(/\//g, '\\/');
 
