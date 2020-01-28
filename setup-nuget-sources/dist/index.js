@@ -4725,13 +4725,18 @@ const commentOutSourceUrl = async (nugetFileFullPath, regex) => {
 };
 
 const generateRegexPattern = (url) => {
-  core.debug(`Generating regex for ${url}`);
-  let escapedUrl = url;
-  escapedUrl = escapedUrl.replace(/\//g, '\\/');
+  try {
+    core.debug(`Generating regex for ${url}`);
+    let escapedUrl = url;
+    escapedUrl = escapedUrl.replace(/\//g, '\\/');
 
-  const regex = new RegExp(`^\\s*(.*"${escapedUrl}/?"\\s*\\/>)$`, 'gm');
-  core.debug(`Regex created ${regex}`);
-  return regex;
+    const regex = new RegExp(`^\\s*(.*"${escapedUrl}/?"\\s*\\/>)$`, 'gm');
+    core.debug(`Regex created ${regex}`);
+    return regex;
+  } catch (error) {
+    core.debug(error.message);
+    return null;
+  }
 };
 
 module.exports = {
@@ -6373,6 +6378,9 @@ const run = async () => {
 
       core.info('Generating regex pattern - PENDING');
       const pattern = generateRegexPattern(source);
+      if (!pattern) {
+        throw new Error(`Could not generate regex pattern for ${source}`);
+      }
       core.info('Generating regex pattern - SUCCESS');
 
       core.info('Commenting out existing nuget source - PENDING');
@@ -6393,7 +6401,6 @@ const run = async () => {
       }
     }
   } catch (error) {
-    core.debug(error);
     core.setFailed(error.message);
   }
 };

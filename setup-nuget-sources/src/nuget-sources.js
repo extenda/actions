@@ -40,13 +40,18 @@ const commentOutSourceUrl = async (nugetFileFullPath, regex) => {
 };
 
 const generateRegexPattern = (url) => {
-  core.debug(`Generating regex for ${url}`);
-  let escapedUrl = url;
-  escapedUrl = escapedUrl.replace(/\//g, '\\/');
+  try {
+    core.debug(`Generating regex for ${url}`);
+    let escapedUrl = url;
+    escapedUrl = escapedUrl.replace(/\//g, '\\/');
 
-  const regex = new RegExp(`^\\s*(.*"${escapedUrl}/?"\\s*\\/>)$`, 'gm');
-  core.debug(`Regex created ${regex}`);
-  return regex;
+    const regex = new RegExp(`^\\s*(.*"${escapedUrl}/?"\\s*\\/>)$`, 'gm');
+    core.debug(`Regex created ${regex}`);
+    return regex;
+  } catch (error) {
+    core.debug(error.message);
+    return null;
+  }
 };
 
 module.exports = {

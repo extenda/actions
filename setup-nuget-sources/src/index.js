@@ -24,6 +24,9 @@ const run = async () => {
 
       core.info('Generating regex pattern - PENDING');
       const pattern = generateRegexPattern(source);
+      if (!pattern) {
+        throw new Error(`Could not generate regex pattern for ${source}`);
+      }
       core.info('Generating regex pattern - SUCCESS');
 
       core.info('Commenting out existing nuget source - PENDING');
@@ -44,7 +47,6 @@ const run = async () => {
       }
     }
   } catch (error) {
-    core.debug(error);
     core.setFailed(error.message);
   }
 };
