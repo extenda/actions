@@ -32,12 +32,14 @@ const run = async () => {
       core.info(`Result of commenting out source if existing: ${commentedResult}`);
 
       core.info('Set nuget source - PENDING');
-      setNuGetSource(configFile, { name, source }, { username, password });
+      // eslint-disable-next-line no-await-in-loop
+      await setNuGetSource(configFile, { name, source }, { username, password });
       core.info('Set nuget source - SUCCESS');
 
       if (apikey) {
         core.info('Set nuget source api-key - PENDING');
-        setNuGetApiKey(configFile, { apikey, source });
+        // eslint-disable-next-line no-await-in-loop
+        await setNuGetApiKey(configFile, { apikey, source });
         core.info('Set nuget source api-key - SUCCESS');
       }
     }

@@ -5,7 +5,8 @@ const replace = require('replace-in-file');
 const setNuGetSource = async (configFile, { name, source }, { username, password }) => {
   const args = ['sources', 'add', '-Name', name, '-Source', source];
   if (username && password) {
-    args.push('-username', username, '-password', password, '-StorePasswordInClearText');
+    core.info('Username and Password is being used when setting source');
+    args.push('-Username', username, '-Password', password, '-StorePasswordInClearText');
   }
   args.push('-ConfigFile', configFile);
   return exec.exec('nuget', args);
