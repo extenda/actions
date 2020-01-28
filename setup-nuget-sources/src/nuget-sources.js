@@ -27,7 +27,7 @@ const parseNugetSourceJson = (sourcesJson) => {
   return sources;
 };
 
-const commentOutSourceUrl = async (nugetFileFullPath, regex) => {
+const commentOutSourceUrl = (nugetFileFullPath, regex) => {
   core.debug(`Trying to comment out existing urls with regex: ${regex}`);
 
   const options = {
