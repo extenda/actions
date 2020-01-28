@@ -23,13 +23,12 @@ const setNuGetApiKey = async (configFile, { apikey, source }) => exec.exec(
 );
 
 const parseNugetSourceJson = (sourcesJson) => {
-  // TODO: add try catch and log
   const sources = JSON.parse(sourcesJson || '[]');
   return sources;
 };
 
 const commentOutSourceUrl = async (nugetFileFullPath, regex) => {
-  core.info(`Trying to comment out existing urls with regex: ${regex}`);
+  core.debug(`Trying to comment out existing urls with regex: ${regex}`);
 
   const options = {
     files: `${nugetFileFullPath}`,
@@ -41,23 +40,13 @@ const commentOutSourceUrl = async (nugetFileFullPath, regex) => {
 };
 
 const generateRegexPattern = (url) => {
-  core.info(`Generating regex for ${url}`);
+  core.debug(`Generating regex for ${url}`);
+  let escapedUrl = url;
+  escapedUrl = escapedUrl.replace(/\//g, '\\/');
 
-  try {
-    let escapedUrl = url;
-    // if (escapedUrl.substr(-1) !== '/') {
-    //   escapedUrl += '/';
-    // }
-
-    escapedUrl = escapedUrl.replace(/\//g, '\\/');
-
-    const regex = new RegExp(`^\\s*(.*"${escapedUrl}/?"\\s*\\/>)$`, 'gm');
-    core.debug(`Regex created ${regex}`);
-    return regex;
-  } catch (error) {
-    core.error('Error occurred:', error);
-    return null;
-  }
+  const regex = new RegExp(`^\\s*(.*"${escapedUrl}/?"\\s*\\/>)$`, 'gm');
+  core.debug(`Regex created ${regex}`);
+  return regex;
 };
 
 module.exports = {

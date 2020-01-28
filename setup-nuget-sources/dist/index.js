@@ -4708,13 +4708,12 @@ const setNuGetApiKey = async (configFile, { apikey, source }) => exec.exec(
 );
 
 const parseNugetSourceJson = (sourcesJson) => {
-  // TODO: add try catch and log
   const sources = JSON.parse(sourcesJson || '[]');
   return sources;
 };
 
 const commentOutSourceUrl = async (nugetFileFullPath, regex) => {
-  core.info(`Trying to comment out existing urls with regex: ${regex}`);
+  core.debug(`Trying to comment out existing urls with regex: ${regex}`);
 
   const options = {
     files: `${nugetFileFullPath}`,
@@ -4726,23 +4725,13 @@ const commentOutSourceUrl = async (nugetFileFullPath, regex) => {
 };
 
 const generateRegexPattern = (url) => {
-  core.info(`Generating regex for ${url}`);
+  core.debug(`Generating regex for ${url}`);
+  let escapedUrl = url;
+  escapedUrl = escapedUrl.replace(/\//g, '\\/');
 
-  try {
-    let escapedUrl = url;
-    // if (escapedUrl.substr(-1) !== '/') {
-    //   escapedUrl += '/';
-    // }
-
-    escapedUrl = escapedUrl.replace(/\//g, '\\/');
-
-    const regex = new RegExp(`^\\s*(.*"${escapedUrl}/?"\\s*\\/>)$`, 'gm');
-    core.debug(`Regex created ${regex}`);
-    return regex;
-  } catch (error) {
-    core.error('Error occurred:', error);
-    return null;
-  }
+  const regex = new RegExp(`^\\s*(.*"${escapedUrl}/?"\\s*\\/>)$`, 'gm');
+  core.debug(`Regex created ${regex}`);
+  return regex;
 };
 
 module.exports = {
@@ -6362,10 +6351,10 @@ const core = __webpack_require__(470);
 
 const {
   parseNugetSourceJson,
-  setNuGetApiKey,
+  // setNuGetApiKey,
   setNuGetSource,
-  generateRegexPattern,
-  commentOutSourceUrl,
+  // generateRegexPattern,
+  // commentOutSourceUrl,
 } = __webpack_require__(576);
 
 const run = async () => {
@@ -6377,32 +6366,50 @@ const run = async () => {
     core.info('Parsing nuget source JSON - SUCCESS');
     core.info(`sources JSON: ${JSON.stringify(sources)}`);
 
-    for (const {
-      name, source, username, password, apikey,
-    } of sources) {
-      core.info(`Add NuGet source to ${configFile}. Name: ${name}. Path: ${source}. Username: ${username}. Password ${password}. ApiKey: ${apikey}`);
+    // for (const {
+    //   name, source, username, password, apikey,
+    // } of sources) {
+    sources.array.forEach(async (element) => {
+      // core.info(`Add NuGet source to ${configFile}. Name: ${element.name}.
+      // Path: ${element.source}.
+      // Username: ${element.username}. Password ${element.password}. ApiKey: ${element.apikey}`);
 
-      core.info('Generating regex pattern - PENDING');
-      const pattern = generateRegexPattern(source);
-      core.info('Generating regex pattern - SUCCESS');
+      const {
+        name,
+        source,
+        username,
+        password,
+        apikey,
+      } = element;
+      core.info(configFile);
+      core.info(name);
+      core.info(source);
+      core.info(username);
+      core.info(password);
+      core.info(apikey);
 
-      core.info('Commenting out existing nuget source - PENDING');
-      const commentedResult = commentOutSourceUrl(configFile, pattern);
-      core.info('Commenting out existing nuget source - SUCCESS');
-      core.info(`Result of commenting out source if existing: ${commentedResult}`);
-
-      core.info('Set nuget source - PENDING');
-      // eslint-disable-next-line no-await-in-loop
       await setNuGetSource(configFile, { name, source }, { username, password });
-      core.info('Set nuget source - SUCCESS');
+      // core.info('Generating regex pattern - PENDING');
+      // const pattern = generateRegexPattern(element.source);
+      // core.info('Generating regex pattern - SUCCESS');
 
-      if (apikey) {
-        core.info('Set nuget source api-key - PENDING');
-        // eslint-disable-next-line no-await-in-loop
-        await setNuGetApiKey(configFile, { apikey, source });
-        core.info('Set nuget source api-key - SUCCESS');
-      }
-    }
+      // core.info('Commenting out existing nuget source - PENDING');
+      // const commentedResult = commentOutSourceUrl(configFile, pattern);
+      // core.info('Commenting out existing nuget source - SUCCESS');
+      // core.info(`Result of commenting out source if existing: ${commentedResult}`);
+
+      // core.info('Set nuget source - PENDING');
+      // // eslint-disable-next-line no-await-in-loop
+      // await setNuGetSource(configFile, { element.name, source }, { username, password });
+      // core.info('Set nuget source - SUCCESS');
+
+      // if (apikey) {
+      //   core.info('Set nuget source api-key - PENDING');
+      //   // eslint-disable-next-line no-await-in-loop
+      //   await setNuGetApiKey(configFile, { element.apikey, source });
+      //   core.info('Set nuget source api-key - SUCCESS');
+      // }
+    });
   } catch (error) {
     core.debug(error);
     core.setFailed(error.message);
