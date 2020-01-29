@@ -6,7 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "lint:js": "eslint src",
-    "test": "",
+    "test": "jest",
     "build": ""
   },
   "dependencies": {
@@ -24,5 +24,13 @@
     "simple-git": "^1.126.0",
     "stream-to-string": "^1.2.0",
     "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "@zeit/ncc": "^0.20.5",
+    "jest": "^24.9.0",
+    "watch": "^1.0.2"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }
