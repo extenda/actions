@@ -48,7 +48,7 @@ describe('Setup Nuget Sources tests', () => {
     expect(generateRegexPattern(null)).toEqual(null);
   });
 
-  test('Comment out existing repo URLs', () => {
+  test('Comment out existing repo URLs', async () => {
     expect.assertions(2);
     return commentOutSourceUrl(`${__dirname}/NuGet-test.config`, /^\s*(.*"https:\/\/repo.extendaretail.com\/repository\/nuget-group\/\/?"\s*\/>)$/gm)
       .then((result) => {

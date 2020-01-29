@@ -6385,8 +6385,7 @@ const run = async () => {
 
       core.info('Commenting out existing nuget source - PENDING');
       const commentedResult = await commentOutSourceUrl(configFile, pattern);
-      core.info('Commenting out existing nuget source - SUCCESS');
-      core.info(`Result of commenting out source if existing: ${commentedResult}`);
+      core.info(`Commenting out existing nuget source result: ${JSON.stringify(commentedResult)}`);
 
       core.info('Set nuget source - PENDING');
       await setNuGetSource(configFile, { name, source }, { username, password });
