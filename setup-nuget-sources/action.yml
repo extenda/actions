@@ -1,0 +1,20 @@
+name: Setup NuGet sources
+description: |
+  Configure NuGet.Config file by commenting out already existing sources with the same URL before adding it again with username, password, and API-key
+  Linux only supports clear-text passwords so make sure you use secrets to pass in the passwords.
+  This step requires that the 'nuget' command is available from earlier steps in the GitHub workflow. This can be achieved by using one of the two following methods:
+  * Run 'sudo apt install nuget'.
+  * Define a set using  'NuGet/setup-nuget@v1.0.2'.
+inputs:
+  config-file:
+    description: The NuGet.Config file to configure.
+    required: true
+    default: NuGet.Config
+  sources:
+    description: |
+      Sources to add to NuGet. The sources are defined as a JSON array of objects
+      { name: <string>, source: <string>, username: <string>, password: <string>, apikey: <string> }
+    required: true
+runs:
+  using: node12
+  main: dist/index.js
