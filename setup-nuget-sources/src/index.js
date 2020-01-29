@@ -16,7 +16,7 @@ const run = async () => {
     const sources = parseNugetSourceJson(core.getInput('sources'));
     core.info('Parsing nuget source JSON - SUCCESS');
     core.info(`sources JSON: ${JSON.stringify(sources)}`);
-
+    /* eslint-disable no-await-in-loop */
     for (const {
       name, source, username, password, apikey,
     } of sources) {
@@ -30,22 +30,21 @@ const run = async () => {
       core.info('Generating regex pattern - SUCCESS');
 
       core.info('Commenting out existing nuget source - PENDING');
-      const commentedResult = commentOutSourceUrl(configFile, pattern);
+      const commentedResult = await commentOutSourceUrl(configFile, pattern);
       core.info('Commenting out existing nuget source - SUCCESS');
       core.info(`Result of commenting out source if existing: ${commentedResult}`);
 
       core.info('Set nuget source - PENDING');
-      // eslint-disable-next-line no-await-in-loop
       await setNuGetSource(configFile, { name, source }, { username, password });
       core.info('Set nuget source - SUCCESS');
 
       if (apikey) {
         core.info('Set nuget source api-key - PENDING');
-        // eslint-disable-next-line no-await-in-loop
         await setNuGetApiKey(configFile, { apikey, source });
         core.info('Set nuget source api-key - SUCCESS');
       }
     }
+    /* eslint-enable no-await-in-loop */
   } catch (error) {
     core.setFailed(error.message);
   }

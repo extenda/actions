@@ -12,22 +12,22 @@ const setNuGetSource = async (configFile, { name, source }, { username, password
   return exec.exec('nuget', args);
 };
 
-const setNuGetApiKey = async (configFile, { apikey, source }) => exec.exec(
-  'nuget',
-  [
+const setNuGetApiKey = async (configFile, { apikey, source }) => {
+  const args = [
     'setapikey', apikey,
     '-source', source,
     '-ConfigFile', configFile,
     '-NonInteractive',
-  ],
-);
+  ];
+  return exec.exec('nuget', args);
+};
 
 const parseNugetSourceJson = (sourcesJson) => {
   const sources = JSON.parse(sourcesJson || '[]');
   return sources;
 };
 
-const commentOutSourceUrl = (nugetFileFullPath, regex) => {
+const commentOutSourceUrl = async (nugetFileFullPath, regex) => {
   core.debug(`Trying to comment out existing urls with regex: ${regex}`);
 
   const options = {

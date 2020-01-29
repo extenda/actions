@@ -6,9 +6,19 @@ const {
   parseNugetSourceJson,
 } = require('../src/nuget-sources');
 
-describe('Setup Nuget Sources tests', () => {
-  afterAll(() => {
-    const nugetXml = `<?xml version="1.0" encoding="utf-8"?>
+const nugetSorce = `[{
+  "name": "nuget.org",
+  "source": "https://api.nuget.org/v3/index.json"
+},
+{
+  "name": "Extenda",
+  "source": "https://repo.extendaretail.com/repository/nuget-group/",
+  "username": "MyUser",
+  "password": "MyPwd",
+  "apikey": "MyKey"
+}]`;
+
+const nugetXml = `<?xml version="1.0" encoding="utf-8"?>
     <configuration>
       <solution>
         <add key="disableSourceControlIntegration" value="true" />
@@ -25,6 +35,9 @@ describe('Setup Nuget Sources tests', () => {
       <packageSourceCredentials />
       <disabledPackageSources />
     </configuration>`;
+
+describe('Setup Nuget Sources tests', () => {
+  beforeAll(() => {
     fs.writeFileSync(`${__dirname}/NuGet-test.config`, nugetXml, { encoding: 'utf8', flag: 'w' });
   });
 
@@ -45,18 +58,6 @@ describe('Setup Nuget Sources tests', () => {
   });
 
   test('Parsing NuGet source JSON', () => {
-    const nugetSorce = `[{
-        "name": "nuget.org",
-        "source": "https://api.nuget.org/v3/index.json"
-      },
-      {
-        "name": "Extenda",
-        "source": "https://repo.extendaretail.com/repository/nuget-group/",
-        "username": "MyUser",
-        "password": "MyPwd",
-        "apikey": "MyKey"
-      }]`;
-
     const result = parseNugetSourceJson(nugetSorce);
 
     expect(result[0].name).toEqual('nuget.org');

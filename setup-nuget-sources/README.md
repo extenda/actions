@@ -40,9 +40,9 @@ jobs:
             {
               "name": "Extenda",
               "source": "https://repo.extendaretail.com/repository/nuget-group/",
-              "username": ${{ secrets.NUGET_USERNAME }},
-              "password": ${{ secrets.NUGET_PASSWORD }},
-              "apikey": ${{ secrets.NUGET_API_KEY }}
+              "username": "${{ secrets.NUGET_USERNAME }}",
+              "password": "${{ secrets.NUGET_PASSWORD }}",
+              "apikey": "${{ secrets.NUGET_API_KEY }}"
             }]
     
       - uses: actions/cache@v1
