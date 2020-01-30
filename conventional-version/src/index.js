@@ -26,7 +26,7 @@ const run = async () => {
     core.info(`branch-name: ${branchName}`);
     core.setOutput('branch-name', branchName);
 
-    const branchNameFriendly = branchinfo.getSuffix(branchName);
+    const branchNameFriendly = branchinfo.getBranchNameFriendly(branchName);
     core.info(`branch-name-friendly: ${branchNameFriendly}`);
     core.setOutput('branch-name-friendly', branchNameFriendly);
 
