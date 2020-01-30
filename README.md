@@ -13,7 +13,7 @@ The following actions are available
   * [`actions/rs-create-installerpkg`](rs-create-installerpkg#readme)
   * [`actions/setup-git`](setup-git#readme)
   * [`actions/setup-msbuild`](setup-msbuild#readme)
-  * [`actions/setup-nuget`](setup-nuget#readme)
+  * [`actions/setup-nuget-sources`](setup-nuget-sources#readme)
   * [`actions/sonar-scanner`](sonar-scanner#readme)
 
 ## Workflow Examples
@@ -31,7 +31,7 @@ This workflow demonstrates how a Maven project can be built using two jobs.
     * Bump the version and create a release
     * Deploy to Nexus without running tests
 
-```
+```yaml
 name: Commit
 on: push
 
