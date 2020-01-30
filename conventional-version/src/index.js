@@ -41,8 +41,8 @@ const run = async () => {
 
     const composedVersion = branchinfo
       .getComposedVersionString(version, branchNameFriendly, buildNumber, shortSha);
-    core.info(`composedVersion: ${composedVersion}`);
-    core.setOutput('composedVersion', composedVersion);
+    core.info(`composed-version-string: ${composedVersion}`);
+    core.setOutput('composed-version-string', composedVersion);
   } catch (err) {
     core.setFailed(err.message);
   }
