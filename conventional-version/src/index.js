@@ -35,7 +35,7 @@ const run = async () => {
     core.setOutput('is-prerelease', isPreRel);
 
     const sha = process.env.GITHUB_SHA;
-    const shortSha = branchinfo.getShortSha(sha);
+    const shortSha = await branchinfo.getShortSha(sha);
     core.info(`short-sha: ${shortSha}`);
     core.setOutput('short-sha', shortSha);
 
