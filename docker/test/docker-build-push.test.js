@@ -5,7 +5,7 @@ const core = require('@actions/core');
 const cp = require('child_process');
 const docker = require('../src/docker');
 const run = require('../src/docker-build-push');
-const maxBufferSize = require('../src/settings');
+// const maxBufferSize = require('../src/settings');
 
 beforeAll(() => {
   docker.push = jest.fn();
