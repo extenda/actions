@@ -9,9 +9,25 @@ inputs:
   version-suffix:
     description: A suffix to append to the project version, for example -SNAPSHOT
     required: false
+  sha-size:
+    description: Wanted size of the commit SHA. Might return a longer SHA to be unambiguous
+    required: false
+  build-number:
+    description: Use output from build step einaregilsson/build-number@v2.
+    required: false
 outputs:
   version:
     description: The project version
+  branch-name:
+    description: Branch name from github.ref where 'refs/heads/' at the beginning is removed.
+  branch-name-friendly:
+    description: Branch name where all '/' and '_' are replaced with '-'
+  is-prerelease:
+    description: Boolean to indicate if the branch is a prerelease or not.
+  short-sha:
+    description: Short commit SHA. Shortest unambiguous SHA1 even if a smaller shaSize is used.
+  composed-version-string:
+    description: Master=<version>, Develop=<version>-<branch-name-friendly>-<build-number>-<short-sha>, Feature=<version>-<branch-name-friendly>-<short-sha>
 runs:
   using: node12
   main: dist/index.js

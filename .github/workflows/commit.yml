@@ -69,31 +69,6 @@ jobs:
       - name: Run MSBuild
         run: MSBuild -version
 
-      - uses: ./setup-nuget
-        with:
-          config-file: setup-nuget/test/NuGet.Config
-          sources: |
-            [{
-              "name": "nuget.org-proxy",
-              "source": "https://repo.extendaretail.com/repository/nuget-group/",
-              "auth": true
-            },
-            {
-              "name": "RS (Nexus)",
-              "source": "https://repo.extendaretail.com/repository/nuget-group/",
-              "auth": true
-            }]
-        env:
-          NUGET_USERNAME: ${{ secrets.NUGET_USERNAME }}
-          NUGET_PASSWORD: ${{ secrets.NUGET_PASSWORD }}
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-
-      - name: Assert NuGet exists on PATH
-        run: where nuget.exe
-
-      - name: Run NuGet
-        run: nuget help
-
   acceptance-linux:
     runs-on: ubuntu-latest
     needs: test
