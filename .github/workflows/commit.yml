@@ -65,7 +65,7 @@ jobs:
 
       - name: Assert MSBuild exists on PATH
         run: where MSBuild.exe
-      
+
       - name: Run MSBuild
         run: MSBuild -version
 
