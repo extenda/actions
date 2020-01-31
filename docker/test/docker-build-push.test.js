@@ -38,9 +38,10 @@ describe('Create & push Docker image', () => {
 
     expect(core.getInput).toHaveBeenCalledTimes(5);
     expect(core.setOutput).toHaveBeenCalledWith('imageFullName', `${registry}/${image}:${tag}`);
-    expect(cp.execSync).toHaveBeenCalledWith(`docker build -f ${dockerfile} -t ${registry}/${image}:${tag} .`, {
-      maxBuffer: maxBufferSize,
-    });
+    expect(cp.execSync).toHaveBeenCalledWith(`docker build -f ${dockerfile} -t ${registry}/${image}:${tag} .`);
+    // {
+    //   maxBuffer: maxBufferSize,
+    // }
   });
 });
 
@@ -63,9 +64,9 @@ describe('Create & push Docker image with build args', () => {
     expect(core.setOutput).toHaveBeenCalledWith('imageFullName', `${registry}/${image}:${tag}`);
     expect(cp.execSync).toHaveBeenCalledWith(
       `docker build -f ${dockerfile} -t ${registry}/${image}:${tag} --build-arg VERSION=1.1.1 --build-arg BUILD_DATE=2020-01-14 .`,
-      {
-        maxBuffer: maxBufferSize,
-      },
+      // {
+      //   maxBuffer: maxBufferSize,
+      // },
     );
   });
 });
