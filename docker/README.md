@@ -46,6 +46,7 @@ steps:
 uses: extenda/actions/docker@v0
 with:
   image: docker-hub-repo/image-name
+  tag: latest
   registry: docker.io
   username: ${{ secrets.DOCKER_USERNAME }}
   password: ${{ secrets.DOCKER_PASSWORD }}
@@ -63,6 +64,7 @@ with:
 uses: extenda/actions/docker@v0
 with:
   image: gcp-project/image-name
+  tag: latest
   registry: gcr.io
   username: _json_key 
   password: ${{ secrets.DOCKER_PASSWORD }} 
@@ -79,6 +81,7 @@ with:
 uses: extenda/actions/docker@v0
 with:
   image: image-name
+  tag: latest
   registry: [aws-account-number].dkr.ecr.[region].amazonaws.com
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
