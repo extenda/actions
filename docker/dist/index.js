@@ -76,7 +76,8 @@ const build = (imageName, buildArgs) => {
   }
 
   core.info(`Building Docker image: ${imageName}`);
-  cp.execSync(createBuildCommand(dockerfile, imageName, buildArgs), { maxBuffer: maxBufferSize });
+  cp.execSync(createBuildCommand(dockerfile, imageName, buildArgs));
+  // , { maxBuffer: maxBufferSize }
 };
 
 const isEcr = (registry) => registry && registry.includes('amazonaws');
@@ -486,7 +487,7 @@ module.exports = require("fs");
 /***/ 814:
 /***/ (function(module) {
 
-const maxBufferSize = 50 * 1024 * 1024;
+const maxBufferSize = 50 * 1024; // * 1024;
 
 module.exports = {
   maxBufferSize,
