@@ -56,7 +56,7 @@ module.exports = require("os");
 const cp = __webpack_require__(129);
 const core = __webpack_require__(470);
 const fs = __webpack_require__(747);
-const maxBufferSize = __webpack_require__(814);
+// const maxBufferSize = require('../src/settings');
 
 const createBuildCommand = (dockerfile, imageName, buildArgs) => {
   let buildCommandPrefix = `docker build -f ${dockerfile} -t ${imageName}`;
@@ -481,18 +481,6 @@ if (require.main === require.cache[eval('__filename')]) {
 /***/ (function(module) {
 
 module.exports = require("fs");
-
-/***/ }),
-
-/***/ 814:
-/***/ (function(module) {
-
-const maxBufferSize = 50 * 1024; // * 1024;
-
-module.exports = {
-  maxBufferSize,
-};
-
 
 /***/ }),
 

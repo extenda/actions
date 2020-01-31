@@ -1,7 +1,7 @@
 const cp = require('child_process');
 const core = require('@actions/core');
 const fs = require('fs');
-const maxBufferSize = require('../src/settings');
+// const maxBufferSize = require('../src/settings');
 
 const createBuildCommand = (dockerfile, imageName, buildArgs) => {
   let buildCommandPrefix = `docker build -f ${dockerfile} -t ${imageName}`;
