@@ -13,7 +13,7 @@ Credit goes to [Sean Smith](https://github.com/mr-smithers-excellent/docker-buil
 steps:
   - uses: actions/checkout@v1.0
 
-  - uses: extenda/docker@v0
+  - uses: extenda/actions/docker@v0
     with:
       image: repo/image
       tag: latest
@@ -43,7 +43,7 @@ steps:
 * Modify sample below and include in your workflow `.github/workflows/*.yml` file 
 
 ```yaml
-uses: extenda/docker@v0
+uses: extenda/actions/docker@v0
 with:
   image: docker-hub-repo/image-name
   registry: docker.io
@@ -60,7 +60,7 @@ with:
 * Ensure you set the username to `_json_key`
 
 ```yaml
-uses: extenda/docker@v0
+uses: extenda/actions/docker@v0
 with:
   image: gcp-project/image-name
   registry: gcr.io
@@ -76,7 +76,7 @@ with:
 * Modify sample below and include in your workflow `.github/workflows/*.yml` file
 
 ```yaml
-uses: extenda/docker@v0
+uses: extenda/actions/docker@v0
 with:
   image: image-name
   registry: [aws-account-number].dkr.ecr.[region].amazonaws.com
