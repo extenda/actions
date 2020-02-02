@@ -11,14 +11,15 @@ beforeAll(() => {
   docker.push = jest.fn();
 });
 
-const mockInputs = (image, registry, tag, buildArgs, dockerfile) => {
+const mockInputs = (image, registry, tag, buildArgs, dockerfile, dockerContext) => {
   core.getInput = jest
     .fn()
     .mockReturnValueOnce(image)
     .mockReturnValueOnce(registry)
     .mockReturnValueOnce(tag)
     .mockReturnValueOnce(buildArgs)
-    .mockReturnValueOnce(dockerfile);
+    .mockReturnValueOnce(dockerfile)
+    .mockReturnValueOnce(dockerContext);
 };
 
 describe('Create & push Docker image', () => {
@@ -28,20 +29,18 @@ describe('Create & push Docker image', () => {
     const tag = 'dev-1234567';
     const buildArgs = '';
     const dockerfile = 'Dockerfile';
+    const dockerContext = 'folder';
 
     docker.login = jest.fn();
-    mockInputs(image, registry, tag, buildArgs, dockerfile);
+    mockInputs(image, registry, tag, buildArgs, dockerfile, dockerContext);
     core.setOutput = jest.fn().mockReturnValueOnce('imageFullName', `${registry}/${image}:${tag}`);
     cp.execSync = jest.fn();
 
     run();
 
-    expect(core.getInput).toHaveBeenCalledTimes(5);
+    expect(core.getInput).toHaveBeenCalledTimes(6);
     expect(core.setOutput).toHaveBeenCalledWith('imageFullName', `${registry}/${image}:${tag}`);
-    expect(cp.execSync).toHaveBeenCalledWith(`docker build -f ${dockerfile} -t ${registry}/${image}:${tag} .`);
-    // {
-    //   maxBuffer: maxBufferSize,
-    // }
+    expect(cp.execSync).toHaveBeenCalledWith(`docker build -f ${dockerfile} -t ${registry}/${image}:${tag} ${dockerContext}`);
   });
 });
 
@@ -52,18 +51,19 @@ describe('Create & push Docker image with build args', () => {
     const tag = 'latest';
     const buildArgs = 'VERSION=1.1.1,BUILD_DATE=2020-01-14';
     const dockerfile = 'Dockerfile.custom';
+    const dockerContext = 'folder';
 
     docker.login = jest.fn();
-    mockInputs(image, registry, tag, buildArgs, dockerfile);
+    mockInputs(image, registry, tag, buildArgs, dockerfile, dockerContext);
     core.setOutput = jest.fn().mockReturnValueOnce('imageFullName', `${registry}/${image}:${tag}`);
     cp.execSync = jest.fn();
 
     run();
 
-    expect(core.getInput).toHaveBeenCalledTimes(5);
+    expect(core.getInput).toHaveBeenCalledTimes(6);
     expect(core.setOutput).toHaveBeenCalledWith('imageFullName', `${registry}/${image}:${tag}`);
     expect(cp.execSync).toHaveBeenCalledWith(
-      `docker build -f ${dockerfile} -t ${registry}/${image}:${tag} --build-arg VERSION=1.1.1 --build-arg BUILD_DATE=2020-01-14 .`,
+      `docker build -f ${dockerfile} -t ${registry}/${image}:${tag} --build-arg VERSION=1.1.1 --build-arg BUILD_DATE=2020-01-14 ${dockerContext}`,
       // {
       //   maxBuffer: maxBufferSize,
       // },

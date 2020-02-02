@@ -8,12 +8,12 @@ describe('Registry URL is sane', () => {
 
   test('Default URL + input registry trimmed', () => {
     const extendaRegistry = '/EXTENDA/rs-postal';
-    expect(urlhelper.getRegistryUrl(extendaRegistry)).toBe(`${urlhelper.defaultBaseUrl}extenda/rs-postal`);
+    expect(urlhelper.getRegistryUrl(extendaRegistry)).toBe(`${urlhelper.defaultRepo}extenda/rs-postal`);
   });
 
   test('Default URL + input registry', () => {
     const extendaRegistry = 'extenda/rs-postal';
-    expect(urlhelper.getRegistryUrl(extendaRegistry)).toBe(`${urlhelper.defaultBaseUrl}extenda/rs-postal`);
+    expect(urlhelper.getRegistryUrl(extendaRegistry)).toBe(`${urlhelper.defaultRepo}extenda/rs-postal`);
   });
 });
 

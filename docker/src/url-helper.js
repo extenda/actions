@@ -1,5 +1,5 @@
 // http://414891016442.dkr.ecr.eu-west-1.amazonaws.com/<registry-name>
-const defaultBaseUrl = 'http://414891016442.dkr.ecr.eu-west-1.amazonaws.com/';
+const defaultRepo = '414891016442.dkr.ecr.eu-west-1.amazonaws.com/';
 
 const getRegistryUrl = (registry) => {
   if (!registry) {
@@ -23,10 +23,10 @@ const getRegistryUrl = (registry) => {
   }
 
   const r = /^\//g;
-  return `${defaultBaseUrl}${reg.replace(r, '')}`;
+  return `${defaultRepo}${reg.replace(r, '')}`;
 };
 
 module.exports = {
   getRegistryUrl,
-  defaultBaseUrl,
+  defaultRepo,
 };

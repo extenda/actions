@@ -38,47 +38,48 @@ describe('core and cp methods', () => {
     });
 
     test('Dockerfile exists', () => {
-      core.getInput.mockReturnValue('Dockerfile');
-      fs.existsSync.mockReturnValueOnce(true);
+      const dockerfile = 'Dockerfile';
+      const dockerContext = 'folder';
       const image = 'gcr.io/some-project/image:v1';
 
+      core.getInput.mockReturnValueOnce(dockerfile);
+      core.getInput.mockReturnValueOnce(dockerContext);
+      fs.existsSync.mockReturnValueOnce(true);
+
       docker.build(image);
-      expect(fs.existsSync).toHaveBeenCalledWith('Dockerfile');
-      expect(cp.execSync).toHaveBeenCalledWith(`docker build -f Dockerfile -t ${image} .`); // , {
-      // maxBuffer: maxBufferSize,
-      // });
+      expect(fs.existsSync).toHaveBeenCalledWith(dockerfile);
+      expect(cp.execSync).toHaveBeenCalledWith(`docker build -f ${dockerfile} -t ${image} ${dockerContext}`);
     });
 
     test('Build with build args', () => {
-      core.getInput.mockReturnValue('Dockerfile');
-      fs.existsSync.mockReturnValueOnce(true);
+      const dockerfile = 'Dockerfile';
+      const dockerContext = 'folder';
       const image = 'docker.io/this-project/that-image:latest';
       const buildArgs = ['VERSION=latest', 'BUILD_DATE=2020-01-14'];
 
+      core.getInput.mockReturnValueOnce(dockerfile);
+      core.getInput.mockReturnValueOnce(dockerContext);
+      fs.existsSync.mockReturnValueOnce(true);
+
       docker.build(image, buildArgs);
-      expect(fs.existsSync).toHaveBeenCalledWith('Dockerfile');
+      expect(fs.existsSync).toHaveBeenCalledWith(dockerfile);
       expect(cp.execSync).toHaveBeenCalledWith(
-        `docker build -f Dockerfile -t ${image} --build-arg VERSION=latest --build-arg BUILD_DATE=2020-01-14 .`,
-      ); // ,
-      // {
-      //   maxBuffer: maxBufferSize,
-      // },
-      // );
+        `docker build -f Dockerfile -t ${image} --build-arg VERSION=latest --build-arg BUILD_DATE=2020-01-14 ${dockerContext}`,
+      );
     });
   });
 
   describe('Registry login', () => {
     test('Docker Hub login', () => {
       const registry = 'docker.io';
-      const username = 'mrsmithers';
+      const username = 'user';
       const password = 'areallysecurepassword';
 
       core.getInput
-        .mockReturnValueOnce(registry)
         .mockReturnValueOnce(username)
         .mockReturnValueOnce(password);
 
-      docker.login();
+      docker.login(registry);
 
       expect(cp.execSync).toHaveBeenCalledWith(`docker login -u ${username} --password-stdin ${registry}`, {
         input: password,
@@ -93,7 +94,7 @@ describe('core and cp methods', () => {
         .mockReturnValueOnce('')
         .mockReturnValueOnce('');
 
-      docker.login();
+      docker.login(registry);
 
       expect(cp.execSync).toHaveBeenCalledWith('$(aws ecr get-login --region us-east-1 --no-include-email)');
     });
@@ -104,7 +105,7 @@ describe('core and cp methods', () => {
         .mockReturnValueOnce('')
         .mockReturnValueOnce('');
 
-      docker.login();
+      docker.login(undefined);
 
       expect(cp.execSync.mock.calls.length).toEqual(0);
     });
