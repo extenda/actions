@@ -66,7 +66,7 @@ const push = (imageName, tags) => {
     return;
   }
 
-  tags.array.forEach((tag) => {
+  tags.forEach((tag) => {
     core.info(`Pushing Docker image ${imageName}:${tag}`);
     cp.execSync(`docker push ${imageName}:${tag}`);
   });
