@@ -28,8 +28,9 @@ const build = (imageName, buildArgs, tags) => {
     core.setFailed(`Dockerfile does not exist in location ${dockerfile}`);
   }
 
-  core.info(`Building Docker image: ${imageName}`);
-  cp.execSync(createBuildCommand(dockerfile, imageName, buildArgs, dockerContext, tags));
+  const buildCmd = createBuildCommand(dockerfile, imageName, buildArgs, dockerContext, tags);
+  core.info(`Building Docker image (${imageName}): ${buildCmd}`);
+  cp.execSync(buildCmd);
 };
 
 const isEcr = (registry) => registry && registry.includes('amazonaws');
