@@ -11,19 +11,34 @@ const processBuildArgsInput = (buildArgsInput) => {
   return buildArgs;
 };
 
+const processTags = (tagsInput) => {
+  let tags = null;
+  if (tagsInput) {
+    tags = tagsInput.split(',');
+  }
+
+  return tags;
+};
+
 const run = () => {
   try {
     const image = core.getInput('image', { required: true });
     const registryInput = core.getInput('registry', { required: false });
-    const tag = core.getInput('tag', { required: true });
+    const tagInput = core.getInput('tag', { required: true });
+    const tags = processTags(tagInput);
+    const shouldPush = core.getInput('push', { required: false });
     const buildArgs = processBuildArgsInput(core.getInput('buildArgs'));
 
     const registry = urlhelper.getRegistryUrl(registryInput);
-    const imageName = `${registry}/${image}:${tag}`;
-
     docker.login(registry);
-    docker.build(imageName, buildArgs);
-    docker.push(imageName);
+
+
+    const imageName = `${registry}/${image}`; // :${tag}
+    docker.build(imageName, buildArgs, tags);
+
+    if (shouldPush === 'true') {
+      docker.push(imageName, tags);
+    }
 
     core.setOutput('imageFullName', imageName);
   } catch (error) {

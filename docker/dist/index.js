@@ -56,10 +56,17 @@ module.exports = require("os");
 const cp = __webpack_require__(129);
 const core = __webpack_require__(470);
 const fs = __webpack_require__(747);
-// const maxBufferSize = require('../src/settings');
 
-const createBuildCommand = (dockerfile, imageName, buildArgs, dockerContext) => {
-  let buildCommandPrefix = `docker build -f ${dockerfile} -t ${imageName}`;
+const createBuildCommand = (dockerfile, imageName, buildArgs, dockerContext, tags) => {
+  let buildCommandPrefix = `docker build -f ${dockerfile}`;
+
+  if (tags) {
+    const tagsSuffix = tags.map((tag) => `-t ${imageName}:${tag}`).join(' ');
+    buildCommandPrefix = `${buildCommandPrefix} ${tagsSuffix}`;
+  } else {
+    buildCommandPrefix = `${buildCommandPrefix} -t ${imageName}`;
+  }
+
   if (buildArgs) {
     const argsSuffix = buildArgs.map((arg) => `--build-arg ${arg}`).join(' ');
     buildCommandPrefix = `${buildCommandPrefix} ${argsSuffix}`;
@@ -68,7 +75,7 @@ const createBuildCommand = (dockerfile, imageName, buildArgs, dockerContext) => 
   return `${buildCommandPrefix} ${dockerContext}`;
 };
 
-const build = (imageName, buildArgs) => {
+const build = (imageName, buildArgs, tags) => {
   const dockerfile = core.getInput('dockerfile');
   const dockerContext = core.getInput('docker-context', { required: false });
 
@@ -77,7 +84,7 @@ const build = (imageName, buildArgs) => {
   }
 
   core.info(`Building Docker image: ${imageName}`);
-  cp.execSync(createBuildCommand(dockerfile, imageName, buildArgs, dockerContext));
+  cp.execSync(createBuildCommand(dockerfile, imageName, buildArgs, dockerContext, tags));
 };
 
 const isEcr = (registry) => registry && registry.includes('amazonaws');
@@ -107,9 +114,17 @@ const login = (registry) => {
   });
 };
 
-const push = (imageName) => {
-  core.info(`Pushing Docker image ${imageName}`);
-  cp.execSync(`docker push ${imageName}`);
+const push = (imageName, tags) => {
+  if (!tags) {
+    core.info(`Pushing Docker image ${imageName} without tags`);
+    cp.execSync(`docker push ${imageName}`);
+    return;
+  }
+
+  tags.array.forEach((tag) => {
+    core.info(`Pushing Docker image ${imageName}:${tag}`);
+    cp.execSync(`docker push ${imageName}:${tag}`);
+  });
 };
 
 module.exports = {
@@ -144,19 +159,34 @@ const processBuildArgsInput = (buildArgsInput) => {
   return buildArgs;
 };
 
+const processTags = (tagsInput) => {
+  let tags = null;
+  if (tagsInput) {
+    tags = tagsInput.split(',');
+  }
+
+  return tags;
+};
+
 const run = () => {
   try {
     const image = core.getInput('image', { required: true });
     const registryInput = core.getInput('registry', { required: false });
-    const tag = core.getInput('tag', { required: true });
+    const tagInput = core.getInput('tag', { required: true });
+    const tags = processTags(tagInput);
+    const shouldPush = core.getInput('push', { required: false });
     const buildArgs = processBuildArgsInput(core.getInput('buildArgs'));
 
     const registry = urlhelper.getRegistryUrl(registryInput);
-    const imageName = `${registry}/${image}:${tag}`;
-
     docker.login(registry);
-    docker.build(imageName, buildArgs);
-    docker.push(imageName);
+
+
+    const imageName = `${registry}/${image}`; // :${tag}
+    docker.build(imageName, buildArgs, tags);
+
+    if (shouldPush === 'true') {
+      docker.push(imageName, tags);
+    }
 
     core.setOutput('imageFullName', imageName);
   } catch (error) {
@@ -492,7 +522,6 @@ module.exports = require("fs");
 /***/ 967:
 /***/ (function(module) {
 
-// http://414891016442.dkr.ecr.eu-west-1.amazonaws.com/<registry-name>
 const defaultRegistry = '414891016442.dkr.ecr.eu-west-1.amazonaws.com';
 
 const getRegistryUrl = (registry) => {

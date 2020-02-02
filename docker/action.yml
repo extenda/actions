@@ -19,6 +19,10 @@ inputs:
     description: 'Context of the docker process. Can be URL or workingDir'
     required: false
     default: '.'
+  push:
+    description: 'True or false to push docker image to registry/repo. Default is true'
+    required: false
+    default: ${{ true }}
   buildArgs:
     description: 'Docker build arguments in format KEY=VALUE,KEY=VALUE'
     required: false

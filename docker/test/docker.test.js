@@ -40,21 +40,37 @@ describe('core and cp methods', () => {
     test('Dockerfile exists', () => {
       const dockerfile = 'Dockerfile';
       const dockerContext = 'folder';
-      const image = 'gcr.io/some-project/image:v1';
+      const tags = ['v1'];
+      const image = 'gcr.io/some-project/image';
 
       core.getInput.mockReturnValueOnce(dockerfile);
       core.getInput.mockReturnValueOnce(dockerContext);
       fs.existsSync.mockReturnValueOnce(true);
 
-      docker.build(image);
+      docker.build(image, null, tags);
       expect(fs.existsSync).toHaveBeenCalledWith(dockerfile);
-      expect(cp.execSync).toHaveBeenCalledWith(`docker build -f ${dockerfile} -t ${image} ${dockerContext}`);
+      expect(cp.execSync).toHaveBeenCalledWith(`docker build -f ${dockerfile} -t ${image}:${tags[0]} ${dockerContext}`);
+    });
+
+    test('Multiple tags', () => {
+      const dockerfile = 'Dockerfile';
+      const dockerContext = 'folder';
+      const tags = ['v2', 'latest'];
+      const image = 'gcr.io/some-project/image';
+
+      core.getInput.mockReturnValueOnce(dockerfile);
+      core.getInput.mockReturnValueOnce(dockerContext);
+      fs.existsSync.mockReturnValueOnce(true);
+
+      docker.build(image, null, tags);
+      expect(fs.existsSync).toHaveBeenCalledWith(dockerfile);
+      expect(cp.execSync).toHaveBeenCalledWith(`docker build -f ${dockerfile} -t ${image}:${tags[0]} -t ${image}:${tags[1]} ${dockerContext}`);
     });
 
     test('Build with build args', () => {
       const dockerfile = 'Dockerfile';
       const dockerContext = 'folder';
-      const image = 'docker.io/this-project/that-image:latest';
+      const image = 'docker.io/this-project/that-image';
       const buildArgs = ['VERSION=latest', 'BUILD_DATE=2020-01-14'];
 
       core.getInput.mockReturnValueOnce(dockerfile);

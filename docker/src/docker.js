@@ -1,10 +1,17 @@
 const cp = require('child_process');
 const core = require('@actions/core');
 const fs = require('fs');
-// const maxBufferSize = require('../src/settings');
 
-const createBuildCommand = (dockerfile, imageName, buildArgs, dockerContext) => {
-  let buildCommandPrefix = `docker build -f ${dockerfile} -t ${imageName}`;
+const createBuildCommand = (dockerfile, imageName, buildArgs, dockerContext, tags) => {
+  let buildCommandPrefix = `docker build -f ${dockerfile}`;
+
+  if (tags) {
+    const tagsSuffix = tags.map((tag) => `-t ${imageName}:${tag}`).join(' ');
+    buildCommandPrefix = `${buildCommandPrefix} ${tagsSuffix}`;
+  } else {
+    buildCommandPrefix = `${buildCommandPrefix} -t ${imageName}`;
+  }
+
   if (buildArgs) {
     const argsSuffix = buildArgs.map((arg) => `--build-arg ${arg}`).join(' ');
     buildCommandPrefix = `${buildCommandPrefix} ${argsSuffix}`;
@@ -13,7 +20,7 @@ const createBuildCommand = (dockerfile, imageName, buildArgs, dockerContext) => 
   return `${buildCommandPrefix} ${dockerContext}`;
 };
 
-const build = (imageName, buildArgs) => {
+const build = (imageName, buildArgs, tags) => {
   const dockerfile = core.getInput('dockerfile');
   const dockerContext = core.getInput('docker-context', { required: false });
 
@@ -22,7 +29,7 @@ const build = (imageName, buildArgs) => {
   }
 
   core.info(`Building Docker image: ${imageName}`);
-  cp.execSync(createBuildCommand(dockerfile, imageName, buildArgs, dockerContext));
+  cp.execSync(createBuildCommand(dockerfile, imageName, buildArgs, dockerContext, tags));
 };
 
 const isEcr = (registry) => registry && registry.includes('amazonaws');
@@ -52,9 +59,17 @@ const login = (registry) => {
   });
 };
 
-const push = (imageName) => {
-  core.info(`Pushing Docker image ${imageName}`);
-  cp.execSync(`docker push ${imageName}`);
+const push = (imageName, tags) => {
+  if (!tags) {
+    core.info(`Pushing Docker image ${imageName} without tags`);
+    cp.execSync(`docker push ${imageName}`);
+    return;
+  }
+
+  tags.array.forEach((tag) => {
+    core.info(`Pushing Docker image ${imageName}:${tag}`);
+    cp.execSync(`docker push ${imageName}:${tag}`);
+  });
 };
 
 module.exports = {
