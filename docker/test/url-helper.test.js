@@ -6,33 +6,7 @@ describe('Registry URL is sane', () => {
     expect(urlhelper.getRegistryUrl(dockerHubRegistry)).toBe(dockerHubRegistry);
   });
 
-  test('Default URL + input registry trimmed', () => {
-    const extendaRegistry = '/EXTENDA/rs-postal';
-    expect(urlhelper.getRegistryUrl(extendaRegistry)).toBe(`${urlhelper.defaultRepo}extenda/rs-postal`);
-  });
-
-  test('Default URL + input registry', () => {
-    const extendaRegistry = 'extenda/rs-postal';
-    expect(urlhelper.getRegistryUrl(extendaRegistry)).toBe(`${urlhelper.defaultRepo}extenda/rs-postal`);
-  });
-});
-
-describe('Registry URL is erronous', () => {
-  test('Input URL is null', () => {
-    expect(() => {
-      expect(urlhelper.getRegistryUrl(null)).toThrow();
-    }).toThrow();
-  });
-
-  test('Input URL is undefined', () => {
-    expect(() => {
-      expect(urlhelper.getRegistryUrl(null)).toThrow();
-    }).toThrow();
-  });
-
-  test('Input URL is empty string', () => {
-    expect(() => {
-      expect(urlhelper.getRegistryUrl(null)).toThrow();
-    }).toThrow();
+  test('Default URL', () => {
+    expect(urlhelper.getRegistryUrl()).toBe(urlhelper.defaultRegistry);
   });
 });

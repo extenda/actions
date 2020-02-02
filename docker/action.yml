@@ -10,7 +10,7 @@ inputs:
     required: true
   registry:
     description: 'Target Docker registry or just the ECR registy name'
-    required: true
+    required: false
   dockerfile:
     description: 'Location of Dockerfile, if not Dockerfile in root directory'
     required: false

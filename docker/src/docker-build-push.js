@@ -14,7 +14,7 @@ const processBuildArgsInput = (buildArgsInput) => {
 const run = () => {
   try {
     const image = core.getInput('image', { required: true });
-    const registryInput = core.getInput('registry', { required: true });
+    const registryInput = core.getInput('registry', { required: false });
     const tag = core.getInput('tag', { required: true });
     const buildArgs = processBuildArgsInput(core.getInput('buildArgs'));
 

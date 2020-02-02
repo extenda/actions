@@ -27,9 +27,9 @@ steps:
 
 | Name           | Description                                                                             | Required |
 |----------------|-----------------------------------------------------------------------------------------|----------|
-| image          | Docker image name                                                                       | Yes      |
+| image          | Docker image name (e.g. extenda/repo-name)                                              | Yes      |
 | tag            | Docker image tag (information should be available in conventional-version step)         | Yes      |
-| registry       | Docker registry host (complete URL or just the registry name in Extenda AWS ECR)        | Yes      |
+| registry       | Docker registry host (complete URL or just leave empty to get Extenda AWS ECR)          | No       |
 | dockerfile     | Location of Dockerfile (defaults to `Dockerfile`)                                       | No       |
 | docker-context | Docker context, is either URL or working directory. Defaults to `.`                     | No       |
 | buildArgs      | Docker build arguments in format `KEY=VALUE,KEY=VALUE`                                  | No       |

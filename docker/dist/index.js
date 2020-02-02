@@ -147,7 +147,7 @@ const processBuildArgsInput = (buildArgsInput) => {
 const run = () => {
   try {
     const image = core.getInput('image', { required: true });
-    const registryInput = core.getInput('registry', { required: true });
+    const registryInput = core.getInput('registry', { required: false });
     const tag = core.getInput('tag', { required: true });
     const buildArgs = processBuildArgsInput(core.getInput('buildArgs'));
 
@@ -493,36 +493,19 @@ module.exports = require("fs");
 /***/ (function(module) {
 
 // http://414891016442.dkr.ecr.eu-west-1.amazonaws.com/<registry-name>
-const defaultRepo = '414891016442.dkr.ecr.eu-west-1.amazonaws.com/';
+const defaultRegistry = '414891016442.dkr.ecr.eu-west-1.amazonaws.com/';
 
 const getRegistryUrl = (registry) => {
   if (!registry) {
-    throw Error('Registry input is null, undefined, or empty');
+    return defaultRegistry;
   }
 
-  const reg = registry.toLowerCase();
-
-  // const p = /^(https?:\/\/)?((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|
-  // ((\d{1,3}\.){3}\d{1,3}))(\\:\d+)?(\/[-a-z\\d%_.~+]*)*(\?[;&a-z\\d%_.~+=-]*)?
-  // (\\#[-a-z\\d_]*)?$/gmi;
-
-  const pattern = new RegExp('^(https?:\\/\\/)?' // protocol
-        + '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' // domain name
-        + '((\\d{1,3}\\.){3}\\d{1,3}))' // OR ip (v4) address
-        + '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' // port and path
-        + '(\\?[;&a-z\\d%_.~+=-]*)?' // query string
-        + '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
-  if (pattern.test(reg)) {
-    return registry;
-  }
-
-  const r = /^\//g;
-  return `${defaultRepo}${reg.replace(r, '')}`;
+  return registry;
 };
 
 module.exports = {
   getRegistryUrl,
-  defaultRepo,
+  defaultRegistry,
 };
 
 
