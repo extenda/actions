@@ -88,6 +88,22 @@ jobs:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
+      - name: GCP Secret Manager
+        uses: ./gcp-secret-manager
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          secrets: |
+            TEST_TOKEN: sonarqube-token
+
+      - name: Assert GCP secrets
+        run: |
+          if [ -n "$TEST_TOKEN" ]; then
+            echo "Secret successfully set to env"
+          else
+            echo "Failed to set secret to env"
+            exit 1
+          fi
+
   release:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
