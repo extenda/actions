@@ -1,5 +1,6 @@
 name: GCP Secret Manager
 description: Access secrets from Google Cloud Secret Manager
+author: Extenda Retail
 inputs:
   service-account-key:
     description: |
@@ -18,3 +19,6 @@ inputs:
 runs:
   using: node12
   main: dist/index.js
+branding:
+  icon: 'unlock'
+  color: 'blue'
