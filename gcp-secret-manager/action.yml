@@ -5,7 +5,7 @@ inputs:
   service-account-key:
     description: |
       The service account key which will be used for authentication.
-      The account key should be a base64 encoded JSON key stored as secret.
+      The account key should be a base64 encoded JSON key stored as a secret.
     required: true
   secrets:
     description: |
