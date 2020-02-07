@@ -15,6 +15,7 @@ const run = async () => {
     const sourceFilePaths = core.getInput('source-filePaths', { required: false });
     const builderType = core.getInput('builder-type', { required: false });
     const binaryVersion = core.getInput('tool-version', { required: true });
+    const packageVersion = core.getInput('package-version', { required: true });
 
     await buildPackage({
       builderType,
@@ -24,6 +25,7 @@ const run = async () => {
       outputDir,
       sourcePaths,
       sourceFilePaths,
+      packageVersion,
     });
   } catch (error) {
     core.setFailed(error.message);
