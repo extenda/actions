@@ -47,6 +47,7 @@ jobs:
           working-dir: .
           output-dir: installpackages
           source-paths: Project\bin\publish\bin
+          package-version: 1.0.0-version-composed-string
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}

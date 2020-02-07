@@ -33,6 +33,9 @@ inputs:
     description: Version string for the version of RS Installer Package builder to use.
     required: true
     default: null
+  package-version:
+      description: Package version suffix apended to the package name before .pkg.zip.
+      required: true
 runs:
   using: node12
   main: dist/index.js

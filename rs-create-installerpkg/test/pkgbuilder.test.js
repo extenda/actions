@@ -5,6 +5,7 @@ const fsExtra = require('fs-extra');
 
 // Used by @actions/tool-cache. Directory must exist before we load module.
 const outputDir = path.join(__dirname, '..', 'test_output_dir');
+const pkgVer = '1.0.1-testversion';
 process.env.RUNNER_TEMP = outputDir;
 process.env.RUNNER_TOOL_CACHE = outputDir;
 
@@ -34,7 +35,7 @@ describe('RS installer package tests', () => {
 
   test('It downloads the build tool', async () => {
     const tool = await downloadBuildTool({
-      binaryVersion: '1.0.0',
+      binaryVersion: '1.1.0',
     });
     expect(fs.existsSync(tool)).toEqual(true);
   });
@@ -45,15 +46,17 @@ describe('RS installer package tests', () => {
       // Should create a package of this file and place it under ../test_output_dir.
       await buildPackage({
         builderType: 'single',
-        binaryVersion: '1.0.0',
+        binaryVersion: '1.1.0',
         packageName: 'Test_PkgName',
         workingDir: os.tmpdir(),
         outputDir,
         sourcePaths: __dirname,
         sourceFilePaths: '',
+        packageVersion: pkgVer,
       });
 
       expect(fs.existsSync(path.join(outputDir, 'Test_PkgName.pkg.xml'))).toBe(true);
+      expect(fs.existsSync(path.join(outputDir, `Test_PkgName_${pkgVer}.pkg.zip`))).toBe(true);
     });
   }
 });

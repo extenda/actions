@@ -14,6 +14,7 @@ const packageBuilderCommand = async (builder, args) => {
     outputDir,
     sourcePaths,
     sourceFilePaths,
+    packageVersion,
   } = args;
 
   return exec.exec(
@@ -25,6 +26,7 @@ const packageBuilderCommand = async (builder, args) => {
       '-od', outputDir,
       '-sp', sourcePaths,
       '-sfp', sourceFilePaths,
+      '-pv', packageVersion,
     ],
   );
 };
