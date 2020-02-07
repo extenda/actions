@@ -7415,7 +7415,7 @@ const packageBuilderCommand = async (builder, args) => {
       '-od', outputDir,
       '-sp', sourcePaths,
       '-sfp', sourceFilePaths,
-      '-pv', packageVersion
+      '-pv', packageVersion,
     ],
   );
 };
