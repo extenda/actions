@@ -1,0 +1,23 @@
+{
+  "name": "gcp-secret-manager",
+  "version": "0.0.1-local",
+  "private": true,
+  "description": "GCP Secret Manager",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "ncc build src/index.js",
+    "watch": "watch 'npm run build' ./src"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "@google-cloud/secret-manager": "^1.2.0",
+    "tmp": "^0.1.0",
+    "yaml": "^1.7.2"
+  },
+  "devDependencies": {
+    "@zeit/ncc": "^0.20.5",
+    "jest": "^25.1.0",
+    "watch": "^1.0.2"
+  }
+}

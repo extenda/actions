@@ -1,0 +1,24 @@
+name: GCP Secret Manager
+description: Access secrets from Google Cloud Secret Manager
+author: Extenda Retail
+inputs:
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+  secrets:
+    description: |
+      A YAML dictionary mapping environment variables to secret names.
+      Example:
+      ```
+      ENV_VARIABLE: secret-name
+      NEXT_VARIABLE: another-secret
+      ```
+    required: true
+runs:
+  using: node12
+  main: dist/index.js
+branding:
+  icon: 'unlock'
+  color: 'blue'
