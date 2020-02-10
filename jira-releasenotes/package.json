@@ -10,7 +10,8 @@
     "watch": "watch 'npm run build' ./src"
   },
   "dependencies": {
-    "@actions/core": "^1.2.0"
+    "@actions/core": "^1.2.0",
+    "jira-client": "^6.14.0"
   },
   "devDependencies": {
     "@zeit/ncc": "^0.20.5",

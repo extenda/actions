@@ -11,6 +11,7 @@ The following actions are available
   * [`actions/conventional-version`](conventional-version#readme)
   * [`actions/docker`](docker#readme)
   * [`actions/gcp-secret-manager`](gcp-secret-manager#readme)
+  * [`actions/jira-releasenotes`](jira-releasenotes#readme)
   * [`actions/maven`](maven#readme)
   * [`actions/rs-create-installerpkg`](rs-create-installerpkg#readme)
   * [`actions/setup-git`](setup-git#readme)

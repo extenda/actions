@@ -18,11 +18,14 @@
     "axios": "^0.19.1",
     "conventional-changelog-conventionalcommits": "^4.2.3",
     "conventional-changelog-core": "^4.1.1",
+    "conventional-commits-parser": "^3.0.8",
     "conventional-recommended-bump": "^6.0.5",
+    "git-raw-commits": "^2.0.3",
     "git-semver-tags": "^3.0.1",
     "semver": "^6.3.0",
     "simple-git": "^1.126.0",
     "stream-to-string": "^1.2.0",
+    "through2": "^3.0.1",
     "uuid": "^3.3.3"
   },
   "devDependencies": {

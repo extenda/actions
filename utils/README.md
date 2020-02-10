@@ -85,6 +85,18 @@ const run = async () => {
 };
 ```
 
+#### `async getConventionalCommits()`
+
+Returns a promise with an array of the conventional commits from the last release up until this commit.
+
+```javascript
+const versions = require('../../utils/src/versions');
+
+const run = async () => {
+  const commits = await getConventionalCommits();
+};
+```
+
 #### `async getLatestRelease()`
 
 Returns a promise with the latest tagged release matching the tag prefix.
