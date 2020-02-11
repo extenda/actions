@@ -5500,7 +5500,7 @@ const options = {
   stopNodes: ['parse-me-as-string'],
 };
 
-let summary = []
+const summary = [];
 
 const prettyPrint = (header, data) => {
   const indentation = 15;
