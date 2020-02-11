@@ -1,0 +1,5 @@
+name: TRX Failure Report
+description: Parse all trx files and print failures to the console
+runs:
+  using: node12
+  main: dist/index.js

@@ -1,0 +1,23 @@
+{
+  "name": "trx-failures-report",
+  "version": "0.0.1-local",
+  "private": true,
+  "description": "Parse trx files and print failures to console.",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "",
+    "build": "ncc build src/index.js",
+    "watch": "watch 'npm run build' ./src"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "fast-xml-parser": "^3.16.0",
+    "fs": "0.0.1-security",
+    "glob": "^7.1.6",
+    "he": "^1.2.0"
+  },
+  "devDependencies": {
+    "@zeit/ncc": "^0.20.5",
+    "watch": "^1.0.2"
+  }
+}
