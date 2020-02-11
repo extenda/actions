@@ -19,5 +19,6 @@ jobs:
       - uses: actions/checkout@v1
 
       - name: Print TRX Failures
+	if: failure()
         uses: extenda/actions/trx-failure-report@v0
 ```
