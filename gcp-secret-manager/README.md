@@ -17,6 +17,14 @@ Once created, the JSON key should be `base64` encoded and added as secret in the
 
 It is recommended that the service account _only_ has permissions to access secrets. Do not allow modifications or 
 access to any other resources in your project.
+
+
+### Available Secrets
+
+Extenda Retail's pipeline secrets are documented on the 
+[GPC Pipeline Secrets Confluence page](https://confluence.extendaretail.com/display/BT/GCP+Pipeline+Secrets).
+
+If you miss a secret, reach out to the platform team.
   
 ### Examples
 
