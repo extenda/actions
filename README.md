@@ -7,6 +7,7 @@ the fundamental parts of our CI/CD pipelines.
 
 The following actions are available
 
+  * [`actions/commitlint`](commitlint#readme)
   * [`actions/conventional-release`](conventional-release#readme)
   * [`actions/conventional-version`](conventional-version#readme)
   * [`actions/docker`](docker#readme)

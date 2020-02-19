@@ -1,0 +1,17 @@
+name: Commitlint
+description: |
+  Run commitlint on a set of commits or an arbitrary text string.
+inputs:
+  commit-from:
+    description: The first commit message to lint
+    required: false
+    default: ${{ github.base_ref }}
+  message:
+    description: A commit message to lint
+    required: false
+runs:
+  using: docker
+  image: Dockerfile
+  args:
+    - '-c ${{ inputs.commit-from }}'
+    - '-m "${{ inputs.message }}"'
