@@ -2,18 +2,20 @@ name: Pull Request
 on: pull_request
 
 jobs:
-  lint_commits:
+  lint-commits:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
 
       - name: Validate commit messages
-        uses: ./commitlint@v0
+        uses: ./commitlint
 
-  lint_title:
+  lint-title:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v1
+
       - name: Validate pull request title
-        uses: extenda/actions/commitlint@v0
+        uses: ./commitlint
         with:
           message: ${{ github.event.pull_request.title }}
