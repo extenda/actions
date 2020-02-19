@@ -3,3 +3,4 @@ node_modules/
 .repository/
 .idea
 rs-create-installerpkg/test/test_output_dir
+setup-nuget-sources/test/NuGet-test.config
