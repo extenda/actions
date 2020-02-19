@@ -10,6 +10,7 @@ message suitable for conventional release notes and JIRA release notes.
 The action can update multiple issues and process multiple commits. If the same JIRA issue is referenced by multiple
 commits, the last commit message will be used.
 
+When using this action, it is recommended to enforce commit conventions using [pre-commit hooks](#pre-commit-configuration).
 
 ## Usage
 
@@ -49,3 +50,30 @@ jobs:
           JIRA_USERNAME: ${{ secrets.JIRA_USERNAME }}
           JIRA_PASSWORD: ${{ secrets.JIRA_PASSWORD }}
 ```
+
+#### Pre-commit configuration
+
+To enforce commit conventions, we recommend using [pre-commit](https://pre-commit.com).
+With commit message hooks, we can ensure that all pushed commits follows our conventions.
+
+To configure pre-commits, start by installing [pre-commit](https://pre-commit.com).
+Next, create a `pre-commit-config.yaml` file in your repository root.
+
+```yaml
+default_stages: [commit]
+exclude: '^.*/dist/.*$'
+repos:
+  - repo: git@github.com:extenda/pre-commit-hooks.git
+    rev: v0.4
+    hooks:
+      - id: commitlint
+        stages: [commit-msg]
+```
+
+Pre-commit must be initiated after a repository has been cloned. To do this, run:
+
+```bash
+$ pre-commit install -t pre-commit -t commit-msg
+```
+
+The hook will now run every time `git commit` is used.
