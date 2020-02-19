@@ -23,11 +23,11 @@ See [action.yml](action.yml).
 The following environment variables are required.
 
   * `SONAR_TOKEN`: an access token with permissions to create projects and perform an analysis
-  
+
 If SonarQube v6 is used to analyze pull requests, the following is _also_ required.
- 
-  * `GITHUB_TOKEN`: The GitHub Actions provided access token for the repository 
-  
+
+  * `GITHUB_TOKEN`: The GitHub Actions provided access token for the repository
+
 ### Examples
 
 #### Basic Usage

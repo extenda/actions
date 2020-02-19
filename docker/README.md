@@ -60,7 +60,7 @@ env:
 ### Docker Hub
 
 * Save your Docker Hub username (`DOCKER_USERNAME`) and password (`DOCKER_PASSWORD`) as secrets in your GitHub repo
-* Modify sample below and include in your workflow `.github/workflows/*.yml` file 
+* Modify sample below and include in your workflow `.github/workflows/*.yml` file
 
 ```yaml
 uses: extenda/actions/docker@v0
@@ -77,7 +77,7 @@ with:
 * Create a service account with the ability to push to GCR (see [configuring access control](https://cloud.google.com/container-registry/docs/access-control))
 * Create and download JSON key for new service account
 * Save content of `.json` file as a secret called `DOCKER_PASSWORD` in your GitHub repo
-* Modify sample below and include in your workflow `.github/workflows/*.yml` file 
+* Modify sample below and include in your workflow `.github/workflows/*.yml` file
 * Ensure you set the username to `_json_key`
 
 ```yaml
@@ -86,8 +86,8 @@ with:
   image: gcp-project/image-name
   tag: latest
   registry: gcr.io
-  username: _json_key 
-  password: ${{ secrets.DOCKER_PASSWORD }} 
+  username: _json_key
+  password: ${{ secrets.DOCKER_PASSWORD }}
 ```
 
 ### AWS Elastic Container Registry (ECR)
