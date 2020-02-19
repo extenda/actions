@@ -2,8 +2,10 @@ name: Commitlint
 description: |
   Run commitlint on a set of commits or an arbitrary text string.
 inputs:
-  commit-from:
-    description: The first commit message to lint
+  commits-from:
+    description: |
+      The commit ref to start linting from.
+      All messages up to HEAD will be linted.
     required: false
     default: ${{ github.base_ref }}
   message:
@@ -11,7 +13,6 @@ inputs:
     required: false
 runs:
   using: docker
-  image: Dockerfile
-  args:
-    - '-c ${{ inputs.commit-from }}'
-    - '-m "${{ inputs.message }}"'
+  image: docker://extenda/commitlint
+  entrypoint: /usr/local/bin/action
+  args: ['-c ${{ inputs.commits-from }}', '-m "${{ inputs.message }}"']
