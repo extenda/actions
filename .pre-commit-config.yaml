@@ -1,3 +1,4 @@
+default_stages: [commit]
 exclude: '^.*/dist/.*$'
 repos:
   -   repo: git://github.com/pre-commit/pre-commit-hooks
@@ -11,9 +12,8 @@ repos:
         -   id: remove-crlf
         -   id: remove-tabs
             args: [ --whitespaces-count=2 ]
-  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
-    rev: v2.2.1
+  - repo: git@github.com:extenda/pre-commit-hooks.git
+    rev: bdbfd4c
     hooks:
       - id: commitlint
         stages: [commit-msg]
-        additional_dependencies: ['@commitlint/config-conventional']
