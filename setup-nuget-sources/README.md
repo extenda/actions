@@ -44,7 +44,7 @@ jobs:
               "password": "${{ secrets.NUGET_PASSWORD }}",
               "apikey": "${{ secrets.NUGET_API_KEY }}"
             }]
-    
+
       - uses: actions/cache@v1
         with:
           path: ~/.nuget/packages

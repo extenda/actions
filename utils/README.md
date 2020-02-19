@@ -32,7 +32,7 @@ const run = async () => {
 
 ### `async loadTool ({ tool, binary, version, downloadUrl })`
 
-Use this function to load a tool into `PATH`. If the tool is cached, the cache is loaded, otherwise the tool is 
+Use this function to load a tool into `PATH`. If the tool is cached, the cache is loaded, otherwise the tool is
 downloaded from the provided URL.
 
 ```javascript
@@ -50,15 +50,15 @@ const run = async () => {
 
 ### `versions`
 
-A collection of functions to read and manipulate versions according to 
+A collection of functions to read and manipulate versions according to
 [conventional commits](https://conventionalcommits.org).
 
-Note that this script is not part of the `utils` main script and must be included from the `src` file. The reason for 
+Note that this script is not part of the `utils` main script and must be included from the `src` file. The reason for
 this is that it adds a lot of footprint to compiled scripts when used.
 
 #### `async getBuildVersion(versionSuffix = '')`
 
-Returns a promise with the version to build. This version number is determined by the last release number and the 
+Returns a promise with the version to build. This version number is determined by the last release number and the
 [conventional commits](https://conventionalcommits.org) after that release.
 
 This method can append an optional suffix to the version, for example `-SNAPSHOT`.
@@ -66,14 +66,14 @@ This method can append an optional suffix to the version, for example `-SNAPSHOT
 ```javascript
 const versions = require('../../utils/src/versions');
 
-const run = async () => { 
+const run = async () => {
   const snapshotBuild = await getBuildVersion('-SNAPSHOT');
 };
 ```
 
 #### `async getChangelog(version)`
 
-Returns a promise with a markdown formatted changelog for all conventional changes from the last release up until this 
+Returns a promise with a markdown formatted changelog for all conventional changes from the last release up until this
 commit.
 
 ```javascript
@@ -82,6 +82,18 @@ const versions = require('../../utils/src/versions');
 const run = async () => {
   const snapshotBuild = await getBuildVersion('-SNAPSHOT');
   const changes = await getChangelog(snapshotBuild);
+};
+```
+
+#### `async getConventionalCommits()`
+
+Returns a promise with an array of the conventional commits from the last release up until this commit.
+
+```javascript
+const versions = require('../../utils/src/versions');
+
+const run = async () => {
+  const commits = await getConventionalCommits();
 };
 ```
 
@@ -105,10 +117,10 @@ const versions = require('../../utils/src/versions');
 versions.tagPrefix = 'custom-';
 ```
 
-#### `async tagReleaseVersion()` 
+#### `async tagReleaseVersion()`
 
-Create a release tag and push it to origin. This function returns a promise with an object containing a markdown 
-formatted `changelog`, the `tagName` and the `version`. 
+Create a release tag and push it to origin. This function returns a promise with an object containing a markdown
+formatted `changelog`, the `tagName` and the `version`.
 
 ```javascript
 const { tagReleaseVersion } = require('../../.utils/src/versions');

@@ -1,4 +1,5 @@
 const checkEnv = require('./check-env');
+const run = require('./run');
 const gitConfig = require('./git-config');
 const loadTool = require('./load-binary');
 
@@ -9,4 +10,5 @@ module.exports = {
   checkEnv,
   gitConfig,
   loadTool,
+  run,
 };

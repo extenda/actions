@@ -1,0 +1,19 @@
+default_stages: [commit]
+exclude: '^.*/dist/.*$'
+repos:
+  -   repo: git://github.com/pre-commit/pre-commit-hooks
+      rev: v1.1.1
+      hooks:
+        -   id: end-of-file-fixer
+        -   id: trailing-whitespace
+  -   repo: git://github.com/Lucas-C/pre-commit-hooks
+      rev: v1.1.4
+      hooks:
+        -   id: remove-crlf
+        -   id: remove-tabs
+            args: [ --whitespaces-count=2 ]
+  - repo: git@github.com:extenda/pre-commit-hooks.git
+    rev: v0.4
+    hooks:
+      - id: commitlint
+        stages: [commit-msg]

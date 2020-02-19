@@ -1218,6 +1218,29 @@ module.exports = require("readline");
 
 /***/ }),
 
+/***/ 71:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const core = __webpack_require__(407);
+
+/**
+ * Run an async action and catch any exception.
+ * @param action the action to run
+ * @returns {Promise<void>}
+ */
+const run = async (action) => {
+  try {
+    await action();
+  } catch (err) {
+    core.setFailed(err.message);
+  }
+};
+
+module.exports = run;
+
+
+/***/ }),
+
 /***/ 72:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -9764,6 +9787,7 @@ module.exports = __webpack_require__(319);
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const checkEnv = __webpack_require__(77);
+const run = __webpack_require__(71);
 const gitConfig = __webpack_require__(20);
 const loadTool = __webpack_require__(951);
 
@@ -9774,6 +9798,7 @@ module.exports = {
   checkEnv,
   gitConfig,
   loadTool,
+  run,
 };
 
 

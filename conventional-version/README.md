@@ -1,20 +1,20 @@
 # conventional-version
 
-This GitHub Action determines the semantical release of a project based on 
-[conventional commits](https://conventionalcommits.org). The action will find the latest release tag and bump the 
+This GitHub Action determines the semantical release of a project based on
+[conventional commits](https://conventionalcommits.org). The action will find the latest release tag and bump the
 version according to conventional commits.
 
 ## Usage
 
 See [action.yml](action.yml).
 
-Use the `outputs` of this action in subsequent build steps, for example to modify the version of project files prior 
+Use the `outputs` of this action in subsequent build steps, for example to modify the version of project files prior
 to building a binary distribution.
 
 ### Secrets
 
-No secrets. 
-  
+No secrets.
+
 ### Examples
 
 #### Basic Usage
@@ -33,7 +33,7 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 11
-      
+
       - name: generate build number
         uses: einaregilsson/build-number@v2
         id: buildnumber
@@ -56,7 +56,7 @@ jobs:
           echo ${{ steps.semver.outputs.is-prerelease }} && \
           echo ${{ steps.semver.outputs.short-sha }} && \
           echo ${{ steps.semver.outputs.composed-version-string }}
-      
+
       - name: Build project
         run: |
           ./gradlew build -Dproject.version=${{ steps.semver.outputs.version }}

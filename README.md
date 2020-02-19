@@ -11,6 +11,7 @@ The following actions are available
   * [`actions/conventional-version`](conventional-version#readme)
   * [`actions/docker`](docker#readme)
   * [`actions/gcp-secret-manager`](gcp-secret-manager#readme)
+  * [`actions/jira-releasenotes`](jira-releasenotes#readme)
   * [`actions/maven`](maven#readme)
   * [`actions/rs-create-installerpkg`](rs-create-installerpkg#readme)
   * [`actions/setup-git`](setup-git#readme)
@@ -100,7 +101,7 @@ jobs:
         with:
           args: deploy -DskipTests
           version: ${{ steps.release.outputs.version }}
-``` 
+```
 
 ## Development
 
@@ -108,9 +109,9 @@ The repository is a monorepo consisting of multiple packages. There are some dep
 
   * All actions depend on common functions from [`utils`](utils)
   * Cross-cutting actions like [`actions/sonar-scanner`](sonar-scanner) depends on other actions
-  
-Javascript actions are compiled into a single javascript files using [`@zeit/ncc`](https://www.npmjs.com/package/@zeit/ncc) 
-to avoid committing `node_modules` into source control. This is required because GitHub Actions does not run `npm install` 
+
+Javascript actions are compiled into a single javascript files using [`@zeit/ncc`](https://www.npmjs.com/package/@zeit/ncc)
+to avoid committing `node_modules` into source control. This is required because GitHub Actions does not run `npm install`
 before running actions.
 
 ### Development Environment
@@ -119,6 +120,7 @@ Development tools needed are:
 
   * Latest Node 12 LTS release
   * Docker
+  * Pre-commit
 
 ### How to Build
 
@@ -143,7 +145,7 @@ Runs Jest everywhere.
 $ npm run build
 ```
 Runs `npm run build` on all Javascript projects. This recompiles the package into its `dist` directory.
- 
+
 ```bash
 $ npm run build:docker
 ```
@@ -151,7 +153,7 @@ Same as `npm run build`, but builds the project in a Docker container to ensure 
 
 #### Tips
 
-  * Remember to always run `npm run build` before committing changes to packages. 
+  * Remember to always run `npm run build` before committing changes to packages.
     Failing to do so will not pass CI/CD checks.
   * If developing a package, run `jest` within that package instead of the root to only test your changes.
   * Do not add dependencies to the root package unless you are making global changes, for example to the build process.
@@ -164,13 +166,22 @@ master` will
   * Be tagged to a semantic release version
   * Update the `v{MAJOR}` branch to point to the new release
 
+### Pre-commit hooks
+
+Developers should use [pre-commit](https://pre-commit.com) on this repository to validate file formatting and commit
+messages on every commit. After pre-commit has been installed on your system, activate on the repository.
+
+```bash
+$ pre-commit install -t pre-commit -t commit-msg
+```
+
 ## Versioning
 
-The repository is versioned using a single semantic version. This means that all packages are always released and map 
+The repository is versioned using a single semantic version. This means that all packages are always released and map
 to the same version.
 
 To follow [GitHub Actions version conventions](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-actions will always be accessible from a `v{MAJOR}` branch that points to the last release for that major version. 
+actions will always be accessible from a `v{MAJOR}` branch that points to the last release for that major version.
 For example `v1` will point to `v1.1.2` after it has been released.
 
 ### Conventional Commits

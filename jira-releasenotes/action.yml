@@ -1,0 +1,22 @@
+name: JIRA release notes
+description: |
+  Populate release notes in JIRA issues based on conventional commit messages.
+inputs:
+  jira-project:
+    description: The JIRA project key
+    required: true
+  jira-protocol:
+    description: The protocol to use when connecting to JIRA
+    required: true
+    default: https
+  jira-host:
+    description: The JIRA host name
+    required: true
+    default: jira.extendaretail.com
+  field-releasenote:
+    description: The human friendly custom JIRA field name to populate with release notes
+    required: true
+    default: Release note
+runs:
+  using: node12
+  main: dist/index.js

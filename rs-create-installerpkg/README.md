@@ -5,7 +5,7 @@ NEXUS_USERNAME and NEXUS_PASSWORD env needs to be set to be able to download the
 
 Three different ways to build installer packages are available.
 
-  * 'single' - Produce a single zipped installer package with the specified package name. 
+  * 'single' - Produce a single zipped installer package with the specified package name.
   * 'multiple' - Produces multiple 'single' zips for all subfolders in 'sourcePaths', where each subfolder result in a subfoldername.pkg.zip file.
   * 'singleflat' - Produce a single zipped installer package where all files found under 'sourcePaths' and 'sourceFilePaths'. All files will be directly under the root directory of the package.
 
@@ -24,7 +24,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@master      
+      - uses: actions/checkout@master  
 
       - uses: actions/cache@v1
         with:
@@ -34,10 +34,10 @@ jobs:
 
       - name: NuGet Restore
         run: nuget restore MyProject.sln
-      
+
       - name: Build
         run: <build>
-      
+
       - name: Create installer package
         uses: extenda/actions/rs-create-installerpkg@v0
         with:
@@ -51,7 +51,7 @@ jobs:
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-        
+
         - name: Publish installer package
           if: github.ref == 'refs/heads/master'
           run: curl -v --user "${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }}" --upload-file installpackages/PackageName.pkg.zip https://repo.extendaretail.com/repository/raw-hosted/PackageName.pkg/<VERSION>/PackageName.pkg.zip

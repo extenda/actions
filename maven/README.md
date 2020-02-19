@@ -2,10 +2,10 @@
 
 This GitHub Action runs Maven preconfigured for Extenda Retail's Nexus Repository Manager.
 
-  * Use Maven Central for open-source dependencies 
+  * Use Maven Central for open-source dependencies
   * Use [repo.extendaretail.com](https://repo.extendaretail.com) for everything else
-  
-It also supports semantic versioning from git tags. It will automatically update POM versions according to 
+
+It also supports semantic versioning from git tags. It will automatically update POM versions according to
 [conventional-version](../conventional-version#readme) before building.
 
 ## Usage
@@ -18,12 +18,12 @@ The following environment variables are required.
 
   * `NEXUS_USERNAME`: user for [repo.extendaretail.com](https://repo.extendaretail.com)
   * `NEXUS_PASSWORD`: password for [repo.extendaretail.com](https://repo.extendaretail.com)
-  
+
 ### Examples
 
 #### Basic Usage
 
-This example runs tests on a Maven project for every `push` event. The build version will be determined by commit history 
+This example runs tests on a Maven project for every `push` event. The build version will be determined by commit history
 and conventional commit messages.
 
 ```
@@ -51,7 +51,7 @@ jobs:
 
 #### Usage Without Conventional Versioning
 
-This example shows how to disable conventional versioning. When disabled, the build version is always read from the POM 
+This example shows how to disable conventional versioning. When disabled, the build version is always read from the POM
 file the version must be bumped manually.
 
 ```
@@ -114,7 +114,7 @@ jobs:
 
 #### Release
 
-Combine with the [conventional-release](../conventional-release#readme) action to build releases on every successful 
+Combine with the [conventional-release](../conventional-release#readme) action to build releases on every successful
 commit to `master`.
 
 ```
