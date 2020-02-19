@@ -120,6 +120,7 @@ Development tools needed are:
 
   * Latest Node 12 LTS release
   * Docker
+  * Pre-commit
 
 ### How to Build
 
@@ -164,6 +165,15 @@ master` will
 
   * Be tagged to a semantic release version
   * Update the `v{MAJOR}` branch to point to the new release
+
+### Pre-commit hooks
+
+Developers should use [pre-commit](https://pre-commit.com) on this repository to validate file formatting and commit
+messages on every commit. After pre-commit has been installed on your system, activate on the repository.
+
+```bash
+$ pre-commit install -t pre-commit -t commit-msg
+```
 
 ## Versioning
 
