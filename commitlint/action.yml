@@ -15,4 +15,4 @@ runs:
   using: docker
   image: docker://extenda/commitlint
   entrypoint: /usr/local/bin/action
-  args: ['-c ${{ inputs.commit-sha }}', '-m ${{ inputs.message }}']
+  args: ['-c', '${{ inputs.commit-sha }}', '-m', '${{ inputs.message }}']
