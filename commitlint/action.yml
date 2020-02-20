@@ -7,7 +7,7 @@ inputs:
       The commit ref to start linting from.
       All messages up to HEAD will be linted.
     required: false
-    default: ${{ github.base_ref }}
+    default: ${{ github.event.pull_request.base.sha }}
   message:
     description: A commit message to lint
     required: false
