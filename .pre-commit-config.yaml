@@ -13,7 +13,7 @@ repos:
         -   id: remove-tabs
             args: [ --whitespaces-count=2 ]
   - repo: git@github.com:extenda/pre-commit-hooks.git
-    rev: 4cba97b
+    rev: v0.4
     hooks:
       - id: commitlint
         stages: [commit-msg]
