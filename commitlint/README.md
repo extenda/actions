@@ -17,32 +17,28 @@ See [action.yml](action.yml).
 
 ## Examples
 
-### Validate Commits in a Pull Request
+### Validate Commits and Pull Request Title
 
 ```yaml
-on: pull_request
+on:
+  pull_request:
+    types:
+      - edit
+      - open
+      - reopen
+      - synchronize
 
 jobs:
-  lint_commits:
+  commitlint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
 
-      - name: Validate commit messages
+      - name: Lint commit messages
         uses: extenda/actions/commitlint@v0
-```
 
-### Validate Pull Request Title
-
-```yaml
-on: pull_request
-
-jobs:
-  lint_pull_request:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Validate pull request title
+      - name: Lint pull request title
         uses: extenda/actions/commitlint@v0
         with:
-          message: ${{ github.event.pull_request.title }}
+          message: ${{ github.event.pull_request.title }}  
 ```

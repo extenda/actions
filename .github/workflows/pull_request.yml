@@ -1,21 +1,22 @@
 name: Pull Request
-on: pull_request
+on:
+  pull_request:
+    types:
+      - edit
+      - open
+      - reopen
+      - synchronize
 
 jobs:
-  lint-commits:
+  commitlint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
 
-      - name: Validate commit messages
+      - name: Lint commit messages
         uses: ./commitlint
 
-  lint-title:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-
-      - name: Validate pull request title
+      - name: Lint pull request title
         uses: ./commitlint
         with:
           message: ${{ github.event.pull_request.title }}
