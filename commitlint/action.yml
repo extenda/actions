@@ -1,0 +1,18 @@
+name: Commitlint
+description: |
+  Run commitlint on a set of commits or an arbitrary text string.
+inputs:
+  commit-sha:
+    description: |
+      The commit SHA to start linting from.
+      All messages up to HEAD will be linted.
+    required: false
+    default: ${{ github.event.pull_request.base.sha }}
+  message:
+    description: A commit message to lint
+    required: false
+runs:
+  using: docker
+  image: docker://extenda/commitlint
+  entrypoint: /usr/local/bin/action
+  args: ['-c', '${{ inputs.commit-sha }}', '-m', '${{ inputs.message }}']
