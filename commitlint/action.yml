@@ -7,7 +7,7 @@ inputs:
       The commit ref to start linting from.
       All messages up to HEAD will be linted.
     required: false
-    default: ${{ github.event.pull_request.base.sha }}
+    default: ${{ github.event.pull_request.base.sh }}
   message:
     description: A commit message to lint
     required: false
@@ -15,4 +15,4 @@ runs:
   using: docker
   image: docker://extenda/commitlint
   entrypoint: /usr/local/bin/action
-  args: ['-c ${{ inputs.commits-from }}', '-m "${{ inputs.message }}"']
+  args: ['-c ${{ inputs.commits-from }}', '-m ${{ inputs.message }}']
