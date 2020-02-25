@@ -1,0 +1,18 @@
+name: Sonar Scanner
+description: Perform a Sonar analysis on a project
+inputs:
+  sonar-host:
+    description: The Sonar server URL
+    required: true
+  project-key:
+    description: The Sonar project key
+    required: true
+  project-name:
+    description: The Sonar project name
+    required: true
+  version:
+    description: The version of the build
+    required: true
+runs:
+  using: node12
+  main: dist/index.js

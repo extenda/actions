@@ -20,6 +20,7 @@ The following actions are available
   * [`actions/setup-nuget-sources`](setup-nuget-sources#readme)
   * [`actions/slack-message`](slack-message#readme)
   * [`actions/sonar-scanner`](sonar-scanner#readme)
+  * [`actions/sonar-scanner-ms`](sonar-scanner-ms#readme)
 
 ## Workflow Examples
 
