@@ -19,14 +19,14 @@ const getBranchType = (branchName) => {
 
 const getBranchName = (currentRef) => {
   if (!currentRef) {
-    return null;
+    throw new Error('Can not return a branchname for null');
   }
 
   const pattern = /refs\/heads\/([A-Za-z0-9/\-_]*)/;
   const groups = currentRef.match(pattern);
 
   if (groups == null || groups.length !== 2) {
-    return null;
+    throw new Error(`Failed to parse branch name from ${currentRef}`);
   }
 
   return groups[1];

@@ -22,7 +22,10 @@ const run = async () => {
     const githubRef = process.env.GITHUB_REF;
     core.info(`GITHUB_REF: ${githubRef}`);
 
-    const branchName = branchinfo.getBranchName(githubRef);
+    const githubHeadRef = process.env.GITHUB_HEAD_REF;
+    core.info(`GITHUB_HEAD_REF: ${githubHeadRef}`);
+
+    const branchName = githubHeadRef || branchinfo.getBranchName(githubRef);
     core.info(`branch-name: ${branchName}`);
     core.setOutput('branch-name', branchName);
 
