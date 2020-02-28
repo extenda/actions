@@ -17,7 +17,9 @@ inputs:
     required: false
 outputs:
   version:
-    description: The project version
+    description: The project version to be built now
+  release-tag:
+    description: The latest tagged release or 0.0.0 if no tagged release exists.
   branch-name:
     description: Branch name from github.ref where 'refs/heads/' at the beginning is removed.
   branch-name-friendly:
