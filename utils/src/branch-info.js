@@ -46,6 +46,19 @@ const getBranchNameFriendly = (branchName) => {
   return branchName.replace(/\//g, '-').replace(/_/g, '-').toLowerCase();
 };
 
+const getPrKey = (githubRef) => {
+  if (githubRef == null) {
+    return null;
+  }
+  const pattern = /refs\/pull\/([0-9]*)\/merge/;
+  const groups = githubRef.match(pattern);
+
+  if (groups == null || groups.length !== 2) {
+    return null;
+  }
+  return groups[1];
+};
+
 const getShortSha = async (sha, shaSize = null) => {
   const args = ['rev-parse'];
 
@@ -93,4 +106,5 @@ module.exports = {
   getShortSha,
   getComposedVersionString,
   getBranchType,
+  getPrKey,
 };

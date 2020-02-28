@@ -5,6 +5,7 @@ const {
   getShortSha,
   getBranchType,
   getComposedVersionString,
+  getPrKey,
 } = require('../src/branch-info');
 
 describe('Branch info test suite', () => {
@@ -52,6 +53,12 @@ describe('Branch info test suite', () => {
     expect(() => {
       getBranchNameFriendly(null);
     }).toThrow();
+  });
+
+  test('getPrKey returns the pull request number from github.ref', () => {
+    expect(getPrKey('refs/pull/123/merge')).toBe('123');
+    expect(getPrKey()).toBe(null);
+    expect(getPrKey('invalid input')).toBe(null);
   });
 
   test('getShortSha() returns a standard short sha from git', async () => {
