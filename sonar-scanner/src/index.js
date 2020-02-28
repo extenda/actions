@@ -14,7 +14,11 @@ const run = async () => {
   };
 
   try {
-    checkEnv(['SONAR_TOKEN', 'GITHUB_TOKEN']);
+    checkEnv(['SONAR_TOKEN']);
+
+    if (!hostUrl.includes('sonarcloud.io')) {
+      checkEnv(['GITHUB_TOKEN']);
+    }
 
     // Auto-create SonarCloud projects
     await createProject(hostUrl);
