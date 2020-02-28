@@ -37,6 +37,10 @@ const run = async () => {
     core.info(`is-prerelease: ${isPreRel}`);
     core.setOutput('is-prerelease', isPreRel);
 
+    const prKey = branchinfo.getPrKey(githubRef);
+    core.info(`pull request key ${prKey}`);
+    core.setOutput('pr-key', prKey);
+
     const sha = process.env.GITHUB_SHA;
     const shortSha = await branchinfo.getShortSha(sha);
     core.info(`short-sha: ${shortSha}`);
