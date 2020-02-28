@@ -17,7 +17,9 @@ inputs:
     required: false
 outputs:
   version:
-    description: The project version
+    description: The project version to be built now
+  release-tag:
+    description: The latest tagged release or 0.0.0 if no tagged release exists.
   branch-name:
     description: Branch name from github.ref where 'refs/heads/' at the beginning is removed.
   branch-name-friendly:
@@ -28,6 +30,8 @@ outputs:
     description: Short commit SHA. Shortest unambiguous SHA1 even if a smaller shaSize is used.
   composed-version-string:
     description: Master=<version>, Develop=<version>-<branch-name-friendly>-<build-number>-<short-sha>, Feature=<version>-<branch-name-friendly>-<short-sha>
+  pr-key:
+    description: The numeric pull request key.
 runs:
   using: node12
   main: dist/index.js
