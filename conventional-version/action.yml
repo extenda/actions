@@ -30,6 +30,8 @@ outputs:
     description: Short commit SHA. Shortest unambiguous SHA1 even if a smaller shaSize is used.
   composed-version-string:
     description: Master=<version>, Develop=<version>-<branch-name-friendly>-<build-number>-<short-sha>, Feature=<version>-<branch-name-friendly>-<short-sha>
+  pr-key:
+    description: The numeric pull request key.
 runs:
   using: node12
   main: dist/index.js
