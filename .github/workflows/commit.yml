@@ -7,6 +7,14 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
+      - name: Notify Slack
+        uses: ./slack-message
+        with:
+          title: 'Slack Message Action :robot:'
+          text: 'This message is sent by GitHub Actions :rocket:'
+          fallback: This message is sent by GitHub Actions
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Install Java
         uses: actions/setup-java@v1
         with:

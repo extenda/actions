@@ -1,0 +1,19 @@
+name: Slack GitHub Bot Message
+description: Send a message to Slack through the GitHub Slack Integration
+inputs:
+  title:
+    description: An optional message title
+    required: false
+  text:
+    description: A markdown formatted message
+    required: true
+  fallback:
+    description: A fallback plain-text message for mobile notifications
+    required: false
+  github-token:
+    description: The GitHub access token used to send the message. The token must have write access to the repository
+    required: true
+    default: ${{ github.token }}
+runs:
+  using: node12
+  main: dist/index.js

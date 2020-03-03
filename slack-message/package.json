@@ -1,0 +1,20 @@
+{
+  "name": "slack-message",
+  "version": "0.0.1-local",
+  "description": "Send a message to Slack through the GitHub Slack Integration",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "",
+    "build": "ncc -m build src/index.js",
+    "watch": "watch 'npm run build' ./src"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "@zeit/ncc": "^0.20.5",
+    "watch": "^1.0.2"
+  }
+}
