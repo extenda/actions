@@ -11,9 +11,21 @@ inputs:
     description: A fallback plain-text message for mobile notifications
     required: false
   github-token:
-    description: The GitHub access token used to send the message. The token must have write access to the repository
-    required: true
-    default: ${{ github.token }}
+    description: |
+      A GitHub personal access token with write access to the repository.
+      If not set, the token will be obtained from GCP Secret Manager.
+    required: false
+  github-token-secret-name:
+    description: |
+      The secret name from which to load the github-token. This is only used
+      when github-token has not be set explicitly.
+    required: false
+    default: github-token
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication with Secret Manager.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: false
 runs:
   using: node12
   main: dist/index.js

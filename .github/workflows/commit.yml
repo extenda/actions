@@ -10,10 +10,13 @@ jobs:
       - name: Notify Slack
         uses: ./slack-message
         with:
-          title: 'Slack Message Action :robot:'
-          text: 'This message is sent by GitHub Actions :rocket:'
+          title: 'Slack Message Action :robot_face:'
+          text: |
+            This message is sent by GitHub Actions :rocket:
+
+            It contains *formatting* and multiple lines.
           fallback: This message is sent by GitHub Actions
-          github-token: ${{ secrets.SLACK_GITHUB_TOKEN }}
+          service-account-key: ${{ secrets.SECRET_AUTH }}
 
       - name: Install Java
         uses: actions/setup-java@v1

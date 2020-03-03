@@ -46,7 +46,18 @@ const loadSecrets = async (serviceAccountKey, secrets = {}) => {
   return Promise.all(results);
 };
 
+const loadSecret = async (serviceAccountKey, name) => {
+  createClient(serviceAccountKey);
+  const projectId = await client.auth.getProjectId();
+  return accessSecretValue(projectId, name)
+    .then((secret) => {
+      core.setSecret(secret);
+      return secret;
+    });
+};
+
 module.exports = {
+  loadSecret,
   loadSecrets,
   parseInputYaml,
 };
