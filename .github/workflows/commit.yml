@@ -13,7 +13,7 @@ jobs:
           title: 'Slack Message Action :robot:'
           text: 'This message is sent by GitHub Actions :rocket:'
           fallback: This message is sent by GitHub Actions
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.SLACK_GITHUB_TOKEN }}
 
       - name: Install Java
         uses: actions/setup-java@v1
