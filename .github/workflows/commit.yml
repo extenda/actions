@@ -7,17 +7,6 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - name: Notify Slack
-        uses: ./slack-message
-        with:
-          title: 'Slack Message Action :robot_face:'
-          text: |
-            This message is sent by GitHub Actions :rocket:
-
-            It contains *formatting* and multiple lines.
-          fallback: This message is sent by GitHub Actions
-          service-account-key: ${{ secrets.SECRET_AUTH }}
-
       - name: Install Java
         uses: actions/setup-java@v1
         with:
