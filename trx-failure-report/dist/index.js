@@ -4203,6 +4203,7 @@ const printSummary = () => {
 const parseFile = (trxFile) => {
   const xmlData = String(fs.readFileSync(trxFile));
   const jsonObj = parser.parse(xmlData, [options]);
+  core.info(JSON.stringify(jsonObj, null, 4));
   const testTypes = Object.keys(jsonObj.TestRun.TestDefinitions);
   for (let typeIndex = 0; typeIndex < testTypes.length; typeIndex += 1) {
     const testType = testTypes[typeIndex];
