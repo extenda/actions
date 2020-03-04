@@ -4,7 +4,7 @@
 
 jest.mock('@google-cloud/secret-manager', () => ({
   // eslint-disable-next-line object-shorthand
-  SecretManagerServiceClient: function () {
+  SecretManagerServiceClient: function SecretManagerServiceClient() {
     return {
       accessSecretVersion: async () => [{ payload: { data: Buffer.from('test-value') } }],
       auth: {
@@ -35,8 +35,8 @@ EXPORT_AS: my-secret
     expect(process.env.TEST_TOKEN).toEqual('test-value');
   });
 
-  test('It can load single secret', async () => {
+  test('It can load a single secret', async () => {
     const secret = await loadSecret('', 'test-token');
     expect(secret).toEqual('test-value');
-  })
+  });
 });
