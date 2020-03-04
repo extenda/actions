@@ -63,6 +63,7 @@ const parseFile = (trxFile) => {
     core.info('='.repeat(title.length));
     for (let i = 0; i < jsonObj.TestRun.Results[ResultEntry].length; i += 1) {
       const resultObj = jsonObj.TestRun.Results[ResultEntry][i];
+      try {
       if (resultObj.Output.ErrorInfo) {
         const testDesc = jsonObj.TestRun.TestDefinitions[testType][i];
         summary.push(`${trxFile} - ${testType} -  ${testDesc.Description}`);
@@ -72,6 +73,10 @@ const parseFile = (trxFile) => {
         prettyPrint('StackTrace', resultObj.Output.ErrorInfo.StackTrace);
         core.info('-'.repeat(title.length));
       }
+      } catch (error) {
+        core.info('failed during parsing');
+        core.info(JSON.stringify(resultObj, null, 4));
+    }
     }
   }
 };
