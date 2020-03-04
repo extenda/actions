@@ -1,10 +1,10 @@
 # slack-message
 
 This GitHub Action can be used to send messages to Slack through the GitHub Slack Integration. Messages
-posted with this action are posted to all Slack channels that are subscribed to this repository.
+posted with this action are delivered to all Slack channels that are subscribed to the repository.
 
 To subscribe Slack channel to a repository, add the `@github` bot and add the subscription
-with  `/github subscribe extenda/actions`.
+with  `/github subscribe <owner>/<repo>`, for example `/github subscribe extenda/actions`
 
 ## Usage
 
@@ -12,7 +12,7 @@ See [action.yml](action.yml).
 
 ### Secrets
 
-If this action is used with `gcp-secret-manager` it requires a GCP service account key with permission to access
+If this action is used with GCP Secret Manager it requires a GCP service account key with permission to access
 secret payloads. Once created, the JSON key should be `base64` encoded and added as secret in the GitHub repository.
 
 It is recommended that the service account _only_ has permissions to access secrets. Do not allow modifications or
@@ -22,7 +22,7 @@ access to any other resources in your project.
 
 #### Usage With Secret Manager
 
-This example will load a `github-token` named secret from the GCP secret manager accessible using
+This example will load a `github-token` named secret from the GCP Secret Manager accessible using
 the provided `service-account-key`. The default secret name can be modified with the
 `github-token-secret-name` input variable.
 
