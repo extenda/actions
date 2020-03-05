@@ -18246,9 +18246,9 @@ const os = __webpack_require__(87);
 
 const SETTINGS_FILE = path.join(__dirname, 'maven-settings.xml');
 const mavenHome = path.join(os.homedir(), '.m2');
-const mavenSettings = path.join(mavenHome, 'maven-settings.xml');
+const mavenSettings = path.join(mavenHome, 'settings.xml');
 
-const run = async (args) => exec.exec(`mvn -B -V --settings=${mavenSettings} ${args}`);
+const run = async (args) => exec.exec(`mvn -B -V ${args}`);
 
 const setVersion = async (newVersion) => {
   core.info(`Build version: ${newVersion}`);
