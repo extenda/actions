@@ -88,6 +88,12 @@ jobs:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
+      - name: Run Maven CLI
+        run: mvn dependency:get -Dartifact=se.extenda.maven:commonpom:2.5.1:pom
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
       - name: GCP Secret Manager
         uses: ./gcp-secret-manager
         with:
