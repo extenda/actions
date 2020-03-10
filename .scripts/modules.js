@@ -37,7 +37,7 @@ const findModules = () => fs.readdirSync(basedir)
   .filter((file) => fs.lstatSync(file).isDirectory())
   .filter((dir) => fs.existsSync(path.join(dir, 'package.json')));
 
-const eachModules = (fn) => findModules().each(fn);
+const eachModules = (fn) => findModules().forEach(fn);
 
 const execModules = async (command) => Promise.all(
   findModules().map((dir) => execModule(dir, command)),
