@@ -2,7 +2,7 @@ const core = require('@actions/core');
 const YAML = require('yaml');
 const fs = require('fs');
 const tmp = require('tmp');
-const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
+const { GoogleAuth } = require('google-auth-library');
 
 tmp.setGracefulCleanup();
 
@@ -15,29 +15,27 @@ const createKeyFile = (serviceAccountKey) => {
   return tmpFile.name;
 };
 
-const createClient = (serviceAccountKey) => {
+const createClient = async (serviceAccountKey) => {
   const keyFilename = createKeyFile(serviceAccountKey);
-  client = new SecretManagerServiceClient({
+  const auth = new GoogleAuth({
     keyFilename,
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
+  client = await auth.getClient();
 };
 
-const accessSecretValue = async (projectId, name) => {
-  const [version] = await client.accessSecretVersion({
-    name: client.secretVersionPath(projectId, name, 'latest'),
-  });
-  return version.payload.data.toString('utf8');
-};
+const accessSecretValue = async (name) => client.request({
+  url: `https://secretmanager.googleapis.com/v1/projects/${client.projectId}/secrets/${name}/versions/latest:access`,
+}).then((res) => res.data.payload.data);
 
 const parseInputYaml = (secretsYaml) => YAML.parse(secretsYaml);
 
 const loadSecrets = async (serviceAccountKey, secrets = {}) => {
-  createClient(serviceAccountKey);
-  const projectId = await client.auth.getProjectId();
+  await createClient(serviceAccountKey);
   const results = [];
   Object.keys(secrets).forEach((env) => {
     const name = secrets[env];
-    results.push(accessSecretValue(projectId, name)
+    results.push(accessSecretValue(name)
       .then((secret) => {
         core.setSecret(secret);
         core.exportVariable(env, secret);
@@ -47,9 +45,8 @@ const loadSecrets = async (serviceAccountKey, secrets = {}) => {
 };
 
 const loadSecret = async (serviceAccountKey, name) => {
-  createClient(serviceAccountKey);
-  const projectId = await client.auth.getProjectId();
-  return accessSecretValue(projectId, name)
+  await createClient(serviceAccountKey);
+  return accessSecretValue(name)
     .then((secret) => {
       core.setSecret(secret);
       return secret;
