@@ -1,0 +1,31 @@
+name: Slack GitHub Bot Message
+description: Send a message to Slack through the GitHub Slack Integration
+inputs:
+  title:
+    description: An optional message title
+    required: false
+  text:
+    description: A markdown formatted message
+    required: true
+  fallback:
+    description: A fallback plain-text message for mobile notifications
+    required: false
+  github-token:
+    description: |
+      A GitHub personal access token with write access to the repository.
+      If not set, the token will be obtained from GCP Secret Manager.
+    required: false
+  github-token-secret-name:
+    description: |
+      The secret name from which to load the github-token. This is only used
+      when github-token has not be set explicitly.
+    required: false
+    default: github-token
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication with Secret Manager.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: false
+runs:
+  using: node12
+  main: dist/index.js

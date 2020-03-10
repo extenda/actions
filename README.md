@@ -18,6 +18,7 @@ The following actions are available
   * [`actions/setup-git`](setup-git#readme)
   * [`actions/setup-msbuild`](setup-msbuild#readme)
   * [`actions/setup-nuget-sources`](setup-nuget-sources#readme)
+  * [`actions/slack-message`](slack-message#readme)
   * [`actions/sonar-scanner`](sonar-scanner#readme)
 
 ## Workflow Examples
