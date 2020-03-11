@@ -11,7 +11,7 @@ jest.mock('google-auth-library', () => ({
         request: async () => Promise.resolve({
           data: {
             payload: {
-              data: 'test-value',
+              data: 'dGVzdC12YWx1ZQ==', // echo -n test-value | base64
             },
           },
         }),
