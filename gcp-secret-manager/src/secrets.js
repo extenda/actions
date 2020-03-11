@@ -26,7 +26,8 @@ const createClient = async (serviceAccountKey) => {
 
 const accessSecretValue = async (name) => client.request({
   url: `https://secretmanager.googleapis.com/v1/projects/${client.projectId}/secrets/${name}/versions/latest:access`,
-}).then((res) => res.data.payload.data);
+}).then((res) => res.data.payload.data)
+  .then((secret) => Buffer.from(secret, 'base64').toString('utf8'));
 
 const parseInputYaml = (secretsYaml) => YAML.parse(secretsYaml);
 
