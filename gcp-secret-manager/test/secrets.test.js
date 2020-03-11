@@ -2,15 +2,20 @@
  * @jest-environment node
  */
 
-jest.mock('@google-cloud/secret-manager', () => ({
+jest.mock('google-auth-library', () => ({
   // eslint-disable-next-line object-shorthand
-  SecretManagerServiceClient: function SecretManagerServiceClient() {
+  GoogleAuth: function GoogleAuth() {
     return {
-      accessSecretVersion: async () => [{ payload: { data: Buffer.from('test-value') } }],
-      auth: {
-        getProjectId: () => 'test-project',
-      },
-      secretVersionPath: (project, secret, version) => `${project}/${secret}/versions/${version}`,
+      getClient: async () => Promise.resolve({
+        projectId: 'test-project',
+        request: async () => Promise.resolve({
+          data: {
+            payload: {
+              data: 'test-value',
+            },
+          },
+        }),
+      }),
     };
   },
 }));
