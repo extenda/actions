@@ -6,10 +6,9 @@ const { scanMsBuild } = require('./scan-msbuild');
 const { checkQualityGate } = require('./check-quality-gate');
 const { postComment } = require('./pr-comment');
 
-const hostUrl = () => core.getInput('sonar-host', { required: true });
-const mainBranch = () => core.getInput('main-branch', { required: true });
-
 run(async () => {
+  const hostUrl = core.getInput('sonar-host', { required: true });
+  const mainBranch = core.getInput('main-branch', { required: true });
   const msbuild = core.getInput('msbuild');
 
   const scanCommands = {
@@ -29,7 +28,7 @@ run(async () => {
     waitForQualityGate = await scanMsBuild(hostUrl, mainBranch);
   } else {
     // Perform the scanning for everything else.
-    await core.group('Run Sonar analysis', async () => scan(hostUrl(), mainBranch(), scanCommands));
+    await core.group('Run Sonar analysis', async () => scan(hostUrl, mainBranch, scanCommands));
     waitForQualityGate = true;
   }
 

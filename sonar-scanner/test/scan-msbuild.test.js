@@ -29,7 +29,7 @@ describe('Scan MSBuild', () => {
   });
 
   test('It begins to scan when marker file is missing', async () => {
-    const output = await scanMsBuild(() => 'https://sonar.extenda.io', () => 'master');
+    const output = await scanMsBuild('https://sonar.extenda.io', 'master');
     expect(output).toEqual(false);
     expect(fs.existsSync(markerFile)).toEqual(true);
     expect(exec.exec.mock.calls.length).toEqual(2);
@@ -41,13 +41,9 @@ describe('Scan MSBuild', () => {
     // Create marker file
     fs.closeSync(fs.openSync(markerFile, 'w'));
 
-    const hostUrl = jest.fn();
-    const mainBranch = jest.fn();
-    const output = await scanMsBuild(hostUrl, mainBranch);
+    const output = await scanMsBuild('https://sonar.extenda.io', 'master');
 
     expect(output).toEqual(true);
-    expect(hostUrl.mock.calls.length).toEqual(0);
-    expect(mainBranch.mock.calls.length).toEqual(0);
     expect(exec.exec.mock.calls.length).toEqual(1);
     expect(exec.exec.mock.calls[0][0]).toContain('dotnet-sonarscanner end');
   });

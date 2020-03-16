@@ -38,7 +38,7 @@ const scanMsBuild = async (hostUrl, mainBranch) => {
   if (!fs.existsSync(markerFile)) {
     // Create marker and begin scan
     fs.closeSync(fs.openSync(markerFile, 'w'));
-    await beginScan(hostUrl(), mainBranch());
+    await beginScan(hostUrl, mainBranch);
     return false;
   }
 

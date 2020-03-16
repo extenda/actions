@@ -84,6 +84,7 @@ jobs:
       - name: Analyze with Sonar
         uses: extenda/actions/sonar-scanner@v0
         with:
+          sonar-host: https://sonar.extenda.io
           msbuild: true
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

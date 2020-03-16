@@ -42072,7 +42072,7 @@ const scanMsBuild = async (hostUrl, mainBranch) => {
   if (!fs.existsSync(markerFile)) {
     // Create marker and begin scan
     fs.closeSync(fs.openSync(markerFile, 'w'));
-    await beginScan(hostUrl(), mainBranch());
+    await beginScan(hostUrl, mainBranch);
     return false;
   }
 
@@ -43806,10 +43806,9 @@ const { scanMsBuild } = __webpack_require__(628);
 const { checkQualityGate } = __webpack_require__(865);
 const { postComment } = __webpack_require__(797);
 
-const hostUrl = () => core.getInput('sonar-host', { required: true });
-const mainBranch = () => core.getInput('main-branch', { required: true });
-
 run(async () => {
+  const hostUrl = core.getInput('sonar-host', { required: true });
+  const mainBranch = core.getInput('main-branch', { required: true });
   const msbuild = core.getInput('msbuild');
 
   const scanCommands = {
@@ -43829,7 +43828,7 @@ run(async () => {
     waitForQualityGate = await scanMsBuild(hostUrl, mainBranch);
   } else {
     // Perform the scanning for everything else.
-    await core.group('Run Sonar analysis', async () => scan(hostUrl(), mainBranch(), scanCommands));
+    await core.group('Run Sonar analysis', async () => scan(hostUrl, mainBranch, scanCommands));
     waitForQualityGate = true;
   }
 
