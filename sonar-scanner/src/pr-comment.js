@@ -1,4 +1,3 @@
-const fs = require('fs');
 const { context, GitHub } = require('@actions/github');
 const core = require('@actions/core');
 
@@ -17,7 +16,7 @@ const formatComment = (data) => {
 };
 
 const postComment = async (qgStatus) => {
-  const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
+  const event = context.payload;
   if (event.pull_request) {
     const { pull_request: { number } } = event;
     const github = new GitHub(process.env.GITHUB_TOKEN);

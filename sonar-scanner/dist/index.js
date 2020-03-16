@@ -51277,7 +51277,6 @@ exports.getUserAgent = getUserAgent;
 /* 797 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const fs = __webpack_require__(747);
 const { context, GitHub } = __webpack_require__(469);
 const core = __webpack_require__(470);
 
@@ -51296,7 +51295,7 @@ const formatComment = (data) => {
 };
 
 const postComment = async (qgStatus) => {
-  const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
+  const event = context.payload;
   if (event.pull_request) {
     const { pull_request: { number } } = event;
     const github = new GitHub(process.env.GITHUB_TOKEN);
