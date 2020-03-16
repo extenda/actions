@@ -13,14 +13,14 @@ const isBranchAnalysis = (mainBranch) => {
   return branch !== mainBranch && !isPullRequest();
 };
 
-const defaultSonarToken = (hostUrl) => (
-  hostUrl.startsWith('https://sonarcloud.io') ? 'sonarcloud-token' : 'sonarqube-token'
+const defaultSonarToken = (isSonarQube) => (
+  isSonarQube ? 'sonarcloud-token' : 'sonarqube-token'
 );
 
-const loadSecrets = async (hostUrl) => {
+const loadSecrets = async (isSonarQube) => {
   const serviceAccountKey = core.getInput('service-account-key');
   const githubTokenName = core.getInput('github-token-secret-name');
-  const sonarTokenName = core.getInput('sonar-token-secret-name') || defaultSonarToken(hostUrl);
+  const sonarTokenName = core.getInput('sonar-token-secret-name') || defaultSonarToken(isSonarQube);
 
   // For backwards compatibility, we access these secrets as env vars.
   if (serviceAccountKey) {
@@ -45,14 +45,14 @@ run(async () => {
     maven: core.getInput('maven-args'),
   };
 
-  const isSonarQube = hostUrl === 'https://sonar.extenda.io';
+  const isSonarQube = hostUrl.startsWith('https://sonar.extenda.io');
 
   if (isSonarQube && isBranchAnalysis(mainBranch)) {
     core.info(`${hostUrl} does not support multi-branch analysis. No analysis is performed.`);
     return;
   }
 
-  await loadSecrets();
+  await loadSecrets(isSonarQube);
 
   // Auto-create SonarCloud projects
   await createProject(hostUrl);
