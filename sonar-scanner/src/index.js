@@ -4,7 +4,13 @@ const { createProject } = require('./create-project');
 const { scan } = require('./scan');
 const { scanMsBuild } = require('./scan-msbuild');
 const { checkQualityGate } = require('./check-quality-gate');
-const { postComment } = require('./pr-comment');
+
+const isPullRequest = () => process.env.GITHUB_EVENT_NAME === 'pull_request';
+
+const isBranchAnalysis = (mainBranch) => {
+  const branch = process.env.GITHUB_REF.replace('refs/heads/', '');
+  return branch !== mainBranch && !isPullRequest();
+};
 
 run(async () => {
   const hostUrl = core.getInput('sonar-host', { required: true });
@@ -15,6 +21,13 @@ run(async () => {
     gradle: core.getInput('gradle-args'),
     maven: core.getInput('maven-args'),
   };
+
+  const isSonarQube = hostUrl === 'https://sonar.extenda.io';
+
+  if (isSonarQube && isBranchAnalysis(mainBranch)) {
+    core.info(`${hostUrl} does not support multi-branch analysis. No analysis is performed.`);
+    return;
+  }
 
   checkEnv(['SONAR_TOKEN', 'GITHUB_TOKEN']);
 
@@ -32,13 +45,16 @@ run(async () => {
     waitForQualityGate = true;
   }
 
+  if (waitForQualityGate && isSonarQube && isPullRequest()) {
+    // No quality gate analysis is performed for PRs on sonar.extenda.io
+    core.info(`Skipping Quality Gate. Not supported for PRs on ${hostUrl}`);
+    waitForQualityGate = false;
+  }
+
   if (waitForQualityGate) {
     // Wait for the quality gate status to update
     const status = await core.group('Check Quality Gate', async () => checkQualityGate());
     if (status.statusCode !== 0) {
-      if (status.serverUrl === 'https://sonar.extenda.io') {
-        await postComment(status);
-      }
       process.exitCode = core.ExitCode.Failure;
     }
   }

@@ -41,7 +41,7 @@ const createParams = (hostUrl, mainBranch, msParams = false, extraParams = {}) =
       props['sonar.pullrequest.github.repository'] = process.env.GITHUB_REPOSITORY;
     } else {
       // SonarQube 6
-      props['sonar.github.oauth'] = process.env.GITHUB_TOKEN;
+      props['sonar.github.oauth'] = process.env.GITHUB_TOKEN; // FIXME This needs to be a user's PAT.
       props['sonar.analysis.mode'] = 'preview';
       props['sonar.github.repository'] = process.env.GITHUB_REPOSITORY;
       props['sonar.github.pullRequest'] = event.pull_request.number;
