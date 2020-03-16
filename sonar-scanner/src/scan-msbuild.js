@@ -14,7 +14,7 @@ const beginScan = async (hostUrl, mainBranch) => {
   });
 
   const extraParams = {
-    '/v:': getBuildVersion('-SNAPSHOT'),
+    '/v:': getBuildVersion(`-${process.env.GITHUB_SHA}`),
     'sonar.coverage.exclusions': '**Test*.cs',
     'sonar.cs.vstest.reportsPaths': '**/*.trx',
     'sonar.cs.opencover.reportsPaths': '**/coverage.opencover.xml',
