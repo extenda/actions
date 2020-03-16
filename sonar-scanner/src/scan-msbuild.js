@@ -6,7 +6,7 @@ const fs = require('fs');
 const { createParams } = require('./params');
 const { getBuildVersion } = require('../../utils/src/versions');
 
-const scanner = path.join(os.home(), '.dotnet', 'tools', 'dotnet-sonarscanner');
+const scanner = path.join(os.homedir(), '.dotnet', 'tools', 'dotnet-sonarscanner');
 
 const beginScan = async (hostUrl, mainBranch) => {
   await core.group('Install dotnet-sonarscanner', async () => {
@@ -33,7 +33,7 @@ const finishScan = async () => {
 };
 
 const scanMsBuild = async (hostUrl, mainBranch) => {
-  const markerFile = path.join(os.home(), '.github_action_sonar.txt');
+  const markerFile = path.join(os.homedir(), '.github_action_sonar.txt');
   if (!fs.existsSync(markerFile)) {
     // Create marker and begin scan
     fs.closeSync(fs.openSync(markerFile, 'w'));
