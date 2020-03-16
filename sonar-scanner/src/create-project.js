@@ -2,14 +2,14 @@ const core = require('@actions/core');
 const axios = require('axios');
 const qs = require('qs');
 
-const auth = {
+const auth = () => ({
   username: process.env.SONAR_TOKEN,
   password: '',
-};
+});
 
 const projectExists = async (hostUrl, organization, project) => axios.get(
   `${hostUrl}/api/projects/search?organization=${organization}&q=${project}`,
-  { auth },
+  { auth: auth() },
 )
   .then((response) => {
     const { data: { components } } = response;
@@ -30,7 +30,7 @@ const createSonarCloudProject = async (hostUrl) => {
     organization: repo[0],
     project,
   }), {
-    auth,
+    auth: auth(),
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
     },

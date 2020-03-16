@@ -14,7 +14,7 @@ const isBranchAnalysis = (mainBranch) => {
 };
 
 const defaultSonarToken = (hostUrl) => (
-  hostUrl === 'https://sonarcloud.io' ? 'sonarcloud-token' : 'sonarqube-token'
+  hostUrl.startsWith('https://sonarcloud.io') ? 'sonarcloud-token' : 'sonarqube-token'
 );
 
 const loadSecrets = async (hostUrl) => {
@@ -25,11 +25,9 @@ const loadSecrets = async (hostUrl) => {
   // For backwards compatibility, we access these secrets as env vars.
   if (serviceAccountKey) {
     if (!process.env.GITHUB_TOKEN) {
-      core.info(`Load secret '${githubTokenName}'`);
       process.env.GITHUB_TOKEN = await loadSecret(serviceAccountKey, githubTokenName);
     }
     if (!process.env.SONAR_TOKEN) {
-      core.info(`Load secret '${sonarTokenName}'`);
       process.env.SONAR_TOKEN = await loadSecret(serviceAccountKey, sonarTokenName);
     }
   }
