@@ -8,12 +8,12 @@ const REPORT_TASK_FILE = 'report-task.txt';
 const PROP_TASK_URL = 'ceTaskUrl';
 const PROP_SERVER_URL = 'serverUrl';
 
-const axiosConfig = {
+const axiosConfig = () => ({
   auth: {
     username: process.env.SONAR_TOKEN,
     password: '',
   },
-};
+});
 
 const findReportFile = () => {
   const paths = [
@@ -44,8 +44,7 @@ const getTaskReport = async (reportFile) => {
   for await (const line of reader) {
     const index = line.indexOf('=');
     const name = line.substring(0, index);
-    const value = line.substring(index + 1);
-    properties[name] = value;
+    properties[name] = line.substring(index + 1);
   }
 
   if (!properties[PROP_TASK_URL]) {
@@ -54,7 +53,7 @@ const getTaskReport = async (reportFile) => {
   return properties;
 };
 
-const getTaskStatus = async (taskUrl) => axios.get(taskUrl, axiosConfig)
+const getTaskStatus = async (taskUrl) => axios.get(taskUrl, axiosConfig())
   .then((response) => {
     const { data: { task } } = response;
     return {
@@ -63,8 +62,10 @@ const getTaskStatus = async (taskUrl) => axios.get(taskUrl, axiosConfig)
     };
   });
 
-const getQualityGateStatus = async (serverUrl, analysisId) => axios.get(`${serverUrl}/api/qualitygates/project_status?analysisId=${analysisId}`, axiosConfig)
-  .then((response) => response.data.projectStatus);
+const getQualityGateStatus = async (serverUrl, analysisId) => axios.get(
+  `${serverUrl}/api/qualitygates/project_status?analysisId=${analysisId}`,
+  axiosConfig(),
+).then((response) => response.data.projectStatus);
 
 const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 
