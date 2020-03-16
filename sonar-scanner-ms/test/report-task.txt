@@ -1,8 +1,0 @@
-organization=extenda
-projectKey=extenda_pos-webclient
-serverUrl=https://sonarcloud.io
-serverVersion=7.8.0.23762
-branch=feature/test-coverage-upgrade
-dashboardUrl=https://sonarcloud.io/dashboard?id=extenda_pos-webclient&branch=feature%2Ftest-coverage-upgrade&resolved=false
-ceTaskId=AW52wi7hhmld4cSPck8p
-ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AW52wi7hhmld4cSPck8p
