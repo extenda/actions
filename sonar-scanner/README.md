@@ -11,6 +11,7 @@ This actions supports the following features:
     * Gradle
     * Maven
     * Node (NPM)
+  * Supports MSBuild Sonar Scanner
   * Wait for Quality Gate results after analysis
   * Fail build if Quality Gate is not passed
 
@@ -51,4 +52,40 @@ jobs:
           sonar-host: https://sonarcloud.io
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### Usage for MSBuild
+
+This example first enables the MSBuild scanner, then runs the tests and finalizes the analysis afterwards.
+The MSBuild Sonar Scanner behaves differently compared to other build systems as it must be initialized prior to the
+regular build cycle.
+
+```
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Begin Sonar Scanner
+        uses: extenda/actions/sonar-scanner@v0
+        with:
+          sonar-host: https://sonar.extenda.io
+          msbuild: true
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Run dotnet build
+
+      - name: Analyze with Sonar
+        uses: extenda/actions/sonar-scanner@v0
+        with:
+          msbuild: true
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```

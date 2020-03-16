@@ -16,7 +16,12 @@ const axiosConfig = {
 };
 
 const findReportFile = () => {
-  const paths = ['.scannerwork', path.join('target', 'sonar'), path.join('build', 'sonar')];
+  const paths = [
+    '.scannerwork', // npm
+    path.join('target', 'sonar'), // maven
+    path.join('build', 'sonar'), // gradle
+    path.join('.sonarqube', 'out', '.sonar'), // dotnet
+  ];
   const reportFile = paths.map((p) => path.join(p, REPORT_TASK_FILE))
     .find((p) => fs.existsSync(p));
   if (!reportFile) {
@@ -59,9 +64,15 @@ const getTaskStatus = async (taskUrl) => axios.get(taskUrl, axiosConfig)
   });
 
 const getQualityGateStatus = async (serverUrl, analysisId) => axios.get(`${serverUrl}/api/qualitygates/project_status?analysisId=${analysisId}`, axiosConfig)
-  .then((response) => response.data.projectStatus.status);
+  .then((response) => response.data.projectStatus);
 
 const timer = (ms) => new Promise((res) => setTimeout(res, ms));
+
+const result = (statusCode, report, qgStatus = null) => ({
+  statusCode,
+  serverUrl: report[PROP_SERVER_URL],
+  qgStatus,
+});
 
 const checkQualityGate = async (reportFile = null, sleepMs = 2000) => {
   const report = await getTaskReport(reportFile || findReportFile());
@@ -79,19 +90,19 @@ const checkQualityGate = async (reportFile = null, sleepMs = 2000) => {
 
   if (task.status === 'CANCELLED') {
     core.info('Sonar job is cancelled -- exit with error');
-    return 504;
+    return result(504, report);
   } if (task.status === 'FAILED') {
     core.error('Sonar job failed -- exit with error');
-    return 500;
+    return result(500, report);
   }
 
   const qgStatus = await getQualityGateStatus(report[PROP_SERVER_URL], task.analysisId);
-  core.info(`Sonar Quality Gate status is ${qgStatus}`);
-  if (qgStatus !== 'OK') {
+  core.info(`Sonar Quality Gate status is ${qgStatus.status}`);
+  if (qgStatus.status !== 'OK') {
     core.error('Quality gate is not OK -- exit with error');
-    return 1;
+    return result(1, report, qgStatus);
   }
-  return 0;
+  return result(0, report, qgStatus);
   /* eslint-enable no-await-in-loop */
 };
 

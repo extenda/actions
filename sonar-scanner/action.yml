@@ -8,11 +8,16 @@ inputs:
     description: The Sonar main branch
     required: true
     default: master
+  gradle-args:
+    description: Custom gradle scan command
+    required: false
   maven-args:
     description: Custom maven scan command
     required: false
-  gradle-args:
-    description: Custom gradle scan command
+  msbuild:
+    description: |
+      Flag to indicate that the MSBuild Sonar Scanner should be used. Set to `true` to use MSBuild.
+      The action will automatically track the state to know if a scan should be started or finalized.
     required: false
 runs:
   using: node12
