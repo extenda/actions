@@ -30,7 +30,7 @@ The following environment variables are required.
 This example will update release notes on https://jira.extendaretail.com when commits are pushed to the `master` branch.
 The release note will be written to a custom field named `Release note`.
 
-```
+```yaml
 on:
   push:
     branches:
@@ -49,6 +49,33 @@ jobs:
         env:
           JIRA_USERNAME: ${{ secrets.JIRA_USERNAME }}
           JIRA_PASSWORD: ${{ secrets.JIRA_PASSWORD }}
+```
+
+#### Usage With Secret Manager
+
+```yaml
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  jira-releasenotes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: actions/extenda/gcp-secret-manager@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          secrets: |
+            JIRA_PASSWORD: jira-password
+            JIRA_USERNAME: jira-username
+
+      - name: Update JIRA release notes
+        uses: actions/extenda/jira-releasenotes@v0
+        with:
+          jira-project: ELY
 ```
 
 #### Pre-commit configuration

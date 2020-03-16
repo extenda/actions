@@ -37,7 +37,7 @@ If any of these environment variables are set, they take precedence over secret 
 
 ### Examples
 
-#### Usage with GCP Secret Manager
+#### Usage with Secret Manager
 
 This example runs tests on a Node project and then performs an analysis on [SonarCloud](https://sonarcloud.io).
 

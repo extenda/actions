@@ -45,5 +45,4 @@ jobs:
         secrets: |
           NEXUS_PASSWORD: nexus-password
           NEXUS_USERNAME: nexus-username
-          SONAR_TOKEN: sonarsource-token
 ```

@@ -25,23 +25,23 @@ steps:
 
 ## Inputs
 
-| Name           | Description                                                                                                          | Required |
-|----------------|----------------------------------------------------------------------------------------------------------------------|----------|
-| image          | Docker image name (e.g. extenda/repo-name)                                                                           | Yes      |
-| tag            | Docker image tag(s), supports a list of tags. (Information should be available in conventional-version step)         | Yes      |
-| registry       | Docker registry host (complete URL or just leave empty to get Extenda AWS ECR)                                       | No       |
-| dockerfile     | Location of Dockerfile (defaults to `Dockerfile`)                                                                    | No       |
-| docker-context | Docker context, is either URL or working directory. Defaults to `.`                                                  | No       |
-| push           | Toggle whether to push image or not. Defaults to true                                                                | No       |
-| buildArgs      | Docker build arguments in format `KEY=VALUE,KEY=VALUE`                                                               | No       |
-| username       | Docker registry username                                                                                             | No       |
-| password       | Docker registry password or token                                                                                    | No       |
+| Name           | Description                                                                                                  | Required |
+|:---------------|:-------------------------------------------------------------------------------------------------------------|:---------|
+| image          | Docker image name (e.g. extenda/repo-name)                                                                   | Yes      |
+| tag            | Docker image tag(s), supports a list of tags. (Information should be available in conventional-version step) | Yes      |
+| registry       | Docker registry host (complete URL or just leave empty to get Extenda AWS ECR)                               | No       |
+| dockerfile     | Location of Dockerfile (defaults to `Dockerfile`)                                                            | No       |
+| docker-context | Docker context, is either URL or working directory. Defaults to `.`                                          | No       |
+| push           | Toggle whether to push image or not. Defaults to true                                                        | No       |
+| buildArgs      | Docker build arguments in format `KEY=VALUE,KEY=VALUE`                                                       | No       |
+| username       | Docker registry username                                                                                     | No       |
+| password       | Docker registry password or token                                                                            | No       |
 
 ## Examples
 
 ### Extenda AWS Elastic Container Registry (ECR)
 
-* Get access keys from Platform team. You can request repos here for instance here:  ['tf-infra'](https://github.com/extenda/tf-infra/blob/master/non-prod/eu-west-1/shared/ecr/ecr.yaml)
+* Get access keys from Platform team. You can request repos here for instance here: ['tf-infra'](https://github.com/extenda/tf-infra/blob/master/non-prod/eu-west-1/shared/ecr/ecr.yaml)
 * Save `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` as secrets in your GitHub repo
 * Modify sample below and include in your workflow `.github/workflows/*.yml` file
 

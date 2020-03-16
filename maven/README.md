@@ -49,6 +49,36 @@ jobs:
           args: test
 ```
 
+### Basic Usage With Secret Manager
+
+This example shows how to load Nexus credentials from GCP Secret Manager.
+
+```
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: extenda/actions/gcp-secret-manager@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          secrets: |
+            NEXUS_PASSWORD: nexus-password
+            NEXUS_USERNAME: nexus-username
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Unit tests
+        uses: extenda/actions/maven@v0
+        with:
+          args: test
+```
+
 #### Usage Without Conventional Versioning
 
 This example shows how to disable conventional versioning. When disabled, the build version is always read from the POM
@@ -57,15 +87,18 @@ file the version must be bumped manually.
 ```
 on: push
 
-env:
-  NEXUS_USERNAME: username
-  NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v1
+
+      - uses: extenda/actions/gcp-secret-manager@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          secrets: |
+            NEXUS_PASSWORD: nexus-password
+            NEXUS_USERNAME: nexus-username
 
       - uses: actions/setup-java@v1
         with:
@@ -85,15 +118,18 @@ This examples uses a [`cache`](https://github.com/actions/cache#readme) for the 
 ```
 on: push
 
-env:
-  NEXUS_USERNAME: username
-  NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v1
+
+      - uses: extenda/actions/gcp-secret-manager@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          secrets: |
+            NEXUS_PASSWORD: nexus-password
+            NEXUS_USERNAME: nexus-username
 
       - uses: actions/setup-java@v1
         with:
@@ -120,10 +156,6 @@ commit to `master`.
 ```
 on: push
 
-env:
-  NEXUS_USERNAME: username
-  NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
 jobs:
   test:
     run-on: ubuntu-latest
@@ -135,7 +167,14 @@ jobs:
     needs: test
     if: github.ref == refs/heads/master
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v1
+
+      - uses: extenda/actions/gcp-secret-manager@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          secrets: |
+            NEXUS_PASSWORD: nexus-password
+            NEXUS_USERNAME: nexus-username
 
       - uses: actions/setup-java@v1
         with:

@@ -1,31 +1,37 @@
-# actions
-
 ![](https://github.com/extenda/actions/workflows/Commit/badge.svg)
+![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/extenda/actions?label=version)
+![GitHub](https://img.shields.io/github/license/extenda/actions)
+
+# actions
 
 This is a monorepo containing GitHub Actions by Extenda Retail. These actions provides reusable logic for
 the fundamental parts of our CI/CD pipelines.
 
 The following actions are available
 
-  * [`actions/commitlint`](commitlint#readme)
-  * [`actions/conventional-release`](conventional-release#readme)
-  * [`actions/conventional-version`](conventional-version#readme)
-  * [`actions/docker`](docker#readme)
-  * [`actions/gcp-secret-manager`](gcp-secret-manager#readme)
-  * [`actions/jira-releasenotes`](jira-releasenotes#readme)
-  * [`actions/maven`](maven#readme)
-  * [`actions/rs-create-installerpkg`](rs-create-installerpkg#readme)
-  * [`actions/setup-git`](setup-git#readme)
-  * [`actions/setup-msbuild`](setup-msbuild#readme)
-  * [`actions/setup-nuget-sources`](setup-nuget-sources#readme)
-  * [`actions/slack-message`](slack-message#readme)
-  * [`actions/sonar-scanner`](sonar-scanner#readme)
+  * [commitlint](commitlint#readme)
+  * [conventional-release](conventional-release#readme)
+  * [conventional-version](conventional-version#readme)
+  * [docker](docker#readme)
+  * [gcp-secret-manager](gcp-secret-manager#readme)
+  * [jira-releasenotes](jira-releasenotes#readme)
+  * [maven](maven#readme)
+  * [rs-create-installerpkg](rs-create-installerpkg#readme)
+  * [setup-git](setup-git#readme)
+  * [setup-msbuild](setup-msbuild#readme)
+  * [setup-nuget-sources](setup-nuget-sources#readme)
+  * [slack-message](slack-message#readme)
+  * [sonar-scanner](sonar-scanner#readme)
 
-## Workflow Examples
+## :rocket: Workflow Examples
 
-The following workflows demonstrates the high-level usage of most actions.
+The following workflows demonstrates the high-level usage of many of our actions.
 
-### Maven Workflow
+  * [Maven](#maven)
+  * [MSBuild](#msbuild)
+  * [Node](#node)
+
+### Maven
 
 This workflow demonstrates how a Maven project can be built using two jobs.
 
@@ -40,15 +46,18 @@ This workflow demonstrates how a Maven project can be built using two jobs.
 name: Commit
 on: push
 
-env:
-  NEXUS_USERNAME: maven-deployment
-  NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+
+      - uses: extenda/actions/gcp-secret-manager@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          secrets: |
+            NEXUS_PASSWORD: nexus-password
+            NEXUS_USERNAME: nexus-username
 
       - uses: actions/cache@v1
         with:
@@ -70,9 +79,7 @@ jobs:
         uses: extenda/actions/sonar-scanner@v0
         with:
           sonar-host: https://sonarcloud.io
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          service-account-key: ${{ secrets.SECRET_AUTH }}
 
   release:
     runs-on: ubuntu-latest
@@ -80,6 +87,13 @@ jobs:
     if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v1
+
+      - uses: extenda/actions/gcp-secret-manager@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          secrets: |
+            NEXUS_PASSWORD: nexus-password
+            NEXUS_USERNAME: nexus-username
 
       - name: Create release
         uses: extenda/actions/conventional-release@v0
@@ -105,12 +119,263 @@ jobs:
           version: ${{ steps.release.outputs.version }}
 ```
 
-## Development
+### MSBuild
+
+This workflow demonstrates how a .NET Core project can be built using two jobs.
+
+  * Every commit triggers the `test` job
+    * Build the project
+    * Run unit tests
+    * Scan with Sonar
+  * Every successful commit on `master` triggers the release job
+    * Bump the version and create a release
+    * Deploy the NuGet package to Nexus
+    * Build a Docker image and push it to Amazon ECR
+
+```yaml
+name: Commit
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: extenda/actions/gcp-secret-manager@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          secrets: |
+            NEXUS_PASSWORD: nexus-password
+            NEXUS_USERNAME: nexus-username
+            NUGET_API_KEY: nuget-api-key
+
+      - uses: extenda/actions/conventional-version@v0
+        id: semver
+        with:
+          version-suffix: -${{ github.sha }}
+
+      - name: Setup .NET Core 2.1
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 2.1.607
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1.0.2
+        with:
+          nuget-version: latest
+
+      - name: Setup NuGet sources
+        uses: extenda/actions/setup-nuget-sources@v0
+        with:
+          config-file: NuGet.Config
+          sources: |
+              [{
+                "name": "nuget.org",
+                "source": "https://api.nuget.org/v3/index.json"
+              },
+              {
+                "name": "Extenda",
+                "source": "https://repo.extendaretail.com/repository/nuget-group/",
+                "username": "${{ env.NEXUS_USERNAME }}",
+                "password": "${{ env.NEXUS_PASSWORD }}",
+                "apikey": "${{ env.NUGET_API_KEY }}"
+              }]
+
+      - name: Begin Sonar Scanner
+        uses: extenda/actions/sonar-scanner@v0
+        with:
+          sonar-host: https://sonar.extenda.io
+          main-branch: develop
+          msbuild: true
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+
+      - name: Build
+        run: |
+          dotnet build --configuration Release \
+            /p:Version=${{ steps.semver.outputs.version }}
+
+      - name: Run tests
+        run: |
+          dotnet test --results-directory "./testresults" -l trx -c Release \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=opencover \
+            --verbosity minimal
+
+      - name: Analyze with Sonar
+        uses: extenda/actions/sonar-scanner@v0
+        with:
+          sonar-host: https://sonar.extenda.io
+          main-branch: develop
+          msbuild: true
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+
+  release:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: extenda/actions/gcp-secret-manager@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          secrets: |
+            NEXUS_PASSWORD: nexus-password
+            NEXUS_USERNAME: nexus-username
+            NUGET_API_KEY: nuget-api-key
+            AWS_ACCESS_KEY_ID: aws-access-key-id
+            AWS_SECRET_ACCESS_KEY: aws-secret-access-key
+
+      - uses: extenda/actions/conventional-version@v0
+        id: semver
+        with:
+          version-suffix: -${{ github.sha }}
+
+      - name: Create a release
+        uses: extenda/actions/conventional-release@v0
+        id: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup .NET Core 2.1
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 2.1.607
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1.0.2
+        with:
+          nuget-version: latest
+
+      - name: Setup NuGet sources
+        uses: extenda/actions/setup-nuget-sources@v0
+        with:
+          config-file: NuGet.Config
+          sources: |
+              [{
+                "name": "nuget.org",
+                "source": "https://api.nuget.org/v3/index.json"
+              },
+              {
+                "name": "Extenda",
+                "source": "https://repo.extendaretail.com/repository/nuget-group/",
+                "username": "${{ env.NEXUS_USERNAME }}",
+                "password": "${{ env.NEXUS_PASSWORD }}",
+                "apikey": "${{ env.NUGET_API_KEY }}"
+              }]
+
+      - name: Build
+        run: dotnet build --configuration Release /p:Version=${{ steps.release.outputs.version }}
+
+      - name: Publish
+        run: |
+          dotnet publish MyExample.csproj \
+            --configuration Release \
+            /p:Version=${{ steps.semver.outputs.version }}
+
+      - name: Docker build and push
+        uses: extenda/actions/docker@v0
+        with:
+          image: extenda/my-example
+          tag: latest,${{ steps.release.outputs.version }}
+```
+
+### Node
+
+This workflow demonstrates how a Node project can be built using two jobs.
+
+  * Every commit triggers the `test` job
+    * Run `eslint`
+    * Run unit tests
+    * Build the project
+    * Scan with Sonar
+  * Every successful commit on `master` triggers the release job
+    * Bump the version and create a release
+    * Build the released version
+    * Build a Docker image and push it to GCR
+
+```yaml
+name: Commit
+on: push
+
+env:
+  GCLOUD_VERSION: '282.0.0'
+  GCP_PROJECT: example-project-a123
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: extenda/actions/gcp-secret-manager@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          secrets: |
+            SONAR_TOKEN: sonarcloud-token
+
+      - name: NPM install
+        run: npm ci
+
+      - name: Lint javascript
+        run: |
+          npm run lint:js -- \
+            --format junit \
+            --output-file test-results/eslint/TEST-eslint.xml
+
+      - name: Unit tests
+        run: npm test -- --ci --coverage
+
+      - name: Build
+        run: npm run build
+
+      - name: SonarCloud Scan
+        uses: extenda/actions/sonar-scanner@v0
+        with:
+          sonar-host: https://sonarcloud.io
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+
+  release:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Create release
+        uses: extenda/actions/conventional-release@v0
+        id: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: NPM install
+        run: npm ci
+
+      - name: Build
+        run: |
+          npm version ${{ steps.release.outputs.version }} --no-git-tag-version
+          npm run build
+
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: ${{ env.GCLOUD_VERSION }}
+          service_account_key: ${{ secrets.GCLOUD_AUTH }}
+
+      - name: Publish Docker image
+        run: |
+          gcloud auth configure-docker
+          IMAGE=gcr.io/$GCP_PROJECT/my-example:v${{ steps.release.outputs.version }}
+          docker build -t $IMAGE .
+          docker push $IMAGE
+```
+
+## :construction: Development
 
 The repository is a monorepo consisting of multiple packages. There are some dependencies between packages. Primarily
 
   * All actions depend on common functions from [`utils`](utils)
-  * Cross-cutting actions like [`actions/sonar-scanner`](sonar-scanner) depends on other actions
+  * Cross-cutting actions like [`sonar-scanner`](sonar-scanner) depends on other actions
 
 Javascript actions are compiled into a single javascript files using [`@zeit/ncc`](https://www.npmjs.com/package/@zeit/ncc)
 to avoid committing `node_modules` into source control. This is required because GitHub Actions does not run `npm install`
@@ -123,6 +388,15 @@ Development tools needed are:
   * Latest Node 12 LTS release
   * Docker
   * Pre-commit
+
+#### Pre-commit hooks
+
+Developers should use [pre-commit](https://pre-commit.com) on this repository to validate file formatting and commit
+messages on every commit. After pre-commit has been installed on your system, activate on the repository.
+
+```bash
+$ pre-commit install -t pre-commit -t commit-msg
+```
 
 ### How to Build
 
@@ -157,25 +431,17 @@ Same as `npm run build`, but builds the project in a Docker container to ensure 
 
   * Remember to always run `npm run build` before committing changes to packages.
     Failing to do so will not pass CI/CD checks.
+  * If you've run `npm run build` and your build still fails, try `npm ci && npm run build`
   * If developing a package, run `jest` within that package instead of the root to only test your changes.
   * Do not add dependencies to the root package unless you are making global changes, for example to the build process.
 
 ### CI/CD Pipeline
 
-The project is built with a [GitHub Actions pipeline](.github/workflows/commit.yml). Every successful commit to `
-master` will
+The project is built with a [GitHub Actions pipeline](.github/workflows/commit.yml).
+Every successful commit to `master` will
 
   * Be tagged to a semantic release version
   * Update the `v{MAJOR}` branch to point to the new release
-
-### Pre-commit hooks
-
-Developers should use [pre-commit](https://pre-commit.com) on this repository to validate file formatting and commit
-messages on every commit. After pre-commit has been installed on your system, activate on the repository.
-
-```bash
-$ pre-commit install -t pre-commit -t commit-msg
-```
 
 ## Versioning
 
