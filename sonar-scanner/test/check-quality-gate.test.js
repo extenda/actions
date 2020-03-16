@@ -12,7 +12,7 @@ describe('Check Quality Gate', () => {
       .mockResolvedValueOnce({ data: { projectStatus: { status: 'OK' } } });
 
     const status = await checkQualityGate(path.join(__dirname, 'report-task.txt'), 0);
-    expect(status).toEqual(0);
+    expect(status).toHaveProperty('statusCode', 0);
   });
 
   test('Wait for not OK', async () => {
@@ -21,7 +21,7 @@ describe('Check Quality Gate', () => {
       .mockResolvedValueOnce({ data: { projectStatus: { status: 'ERROR' } } });
 
     const status = await checkQualityGate(path.join(__dirname, 'report-task.txt'), 0);
-    expect(status).toEqual(1);
+    expect(status).toHaveProperty('statusCode', 1);
   });
 
   test('Wait for CANCELLED', async () => {
@@ -29,7 +29,7 @@ describe('Check Quality Gate', () => {
       .mockResolvedValueOnce({ data: { task: { status: 'CANCELLED', analysisId: '1' } } });
 
     const status = await checkQualityGate(path.join(__dirname, 'report-task.txt'), 0);
-    expect(status).toBeGreaterThan(1);
+    expect(status.statusCode).toBeGreaterThan(1);
   });
 
   test('Wait for FAILED', async () => {
@@ -37,6 +37,6 @@ describe('Check Quality Gate', () => {
       .mockResolvedValueOnce({ data: { task: { status: 'FAILED', analysisId: '1' } } });
 
     const status = await checkQualityGate(path.join(__dirname, 'report-task.txt'), 0);
-    expect(status).toBeGreaterThan(1);
+    expect(status.statusCode).toBeGreaterThan(1);
   });
 });

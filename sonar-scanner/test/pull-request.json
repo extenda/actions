@@ -1,0 +1,11 @@
+{
+  "pull_request": {
+    "number": 1,
+    "base": {
+      "ref": "master"
+    },
+    "head": {
+      "ref": "feature/test"
+    }
+  }
+}
