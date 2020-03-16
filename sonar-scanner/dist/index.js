@@ -42040,7 +42040,9 @@ const fs = __webpack_require__(747);
 const { createParams } = __webpack_require__(548);
 const { getBuildVersion } = __webpack_require__(439);
 
-const scanner = path.join(os.home(), '.dotnet', 'tools', 'dotnet-sonarscanner');
+const markerFile = path.join(os.homedir(), '.github_action_sonar.txt');
+
+const scanner = path.join(os.homedir(), '.dotnet', 'tools', 'dotnet-sonarscanner');
 
 const beginScan = async (hostUrl, mainBranch) => {
   await core.group('Install dotnet-sonarscanner', async () => {
@@ -42067,7 +42069,6 @@ const finishScan = async () => {
 };
 
 const scanMsBuild = async (hostUrl, mainBranch) => {
-  const markerFile = path.join(os.home(), '.github_action_sonar.txt');
   if (!fs.existsSync(markerFile)) {
     // Create marker and begin scan
     fs.closeSync(fs.openSync(markerFile, 'w'));
@@ -42084,6 +42085,7 @@ const scanMsBuild = async (hostUrl, mainBranch) => {
 };
 
 module.exports = {
+  markerFile,
   scanMsBuild,
 };
 

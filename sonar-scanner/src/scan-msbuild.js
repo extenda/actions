@@ -6,6 +6,8 @@ const fs = require('fs');
 const { createParams } = require('./params');
 const { getBuildVersion } = require('../../utils/src/versions');
 
+const markerFile = path.join(os.homedir(), '.github_action_sonar.txt');
+
 const scanner = path.join(os.homedir(), '.dotnet', 'tools', 'dotnet-sonarscanner');
 
 const beginScan = async (hostUrl, mainBranch) => {
@@ -33,7 +35,6 @@ const finishScan = async () => {
 };
 
 const scanMsBuild = async (hostUrl, mainBranch) => {
-  const markerFile = path.join(os.homedir(), '.github_action_sonar.txt');
   if (!fs.existsSync(markerFile)) {
     // Create marker and begin scan
     fs.closeSync(fs.openSync(markerFile, 'w'));
@@ -50,5 +51,6 @@ const scanMsBuild = async (hostUrl, mainBranch) => {
 };
 
 module.exports = {
+  markerFile,
   scanMsBuild,
 };
