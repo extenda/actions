@@ -16,11 +16,16 @@ const createParams = (hostUrl, mainBranch, msParams = false, extraParams = {}) =
     props['sonar.projectName'] = repository;
   }
 
+  if (msParams) {
+    // Note: For other build tools, we assume legacy sonar project key is
+    // provided by Maven/Gradle or sonar props file.
+    props['/k:'] = `${owner}_${repository}`;
+  }
+
   if (sonarCloud) {
     if (msParams) {
       // MSBuild uses other prefixes for this variables.
       props['/o:'] = owner;
-      props['/k:'] = `${owner}_${repository}`;
     } else {
       props['sonar.organization'] = owner;
       props['sonar.projectKey'] = `${owner}_${repository}`;

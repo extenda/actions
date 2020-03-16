@@ -15,8 +15,9 @@ const beginScan = async (hostUrl, mainBranch) => {
     await exec.exec('dotnet tool install -g dotnet-sonarscanner');
   });
 
+  const version = await getBuildVersion(`-${process.env.GITHUB_SHA}`);
   const extraParams = {
-    '/v:': getBuildVersion(`-${process.env.GITHUB_SHA}`),
+    '/v:': version,
     'sonar.coverage.exclusions': '**Test*.cs',
     'sonar.cs.vstest.reportsPaths': '**/*.trx',
     'sonar.cs.opencover.reportsPaths': '**/coverage.opencover.xml',

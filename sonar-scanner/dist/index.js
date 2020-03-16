@@ -36530,11 +36530,16 @@ const createParams = (hostUrl, mainBranch, msParams = false, extraParams = {}) =
     props['sonar.projectName'] = repository;
   }
 
+  if (msParams) {
+    // Note: For other build tools, we assume legacy sonar project key is
+    // provided by Maven/Gradle or sonar props file.
+    props['/k:'] = `${owner}_${repository}`;
+  }
+
   if (sonarCloud) {
     if (msParams) {
       // MSBuild uses other prefixes for this variables.
       props['/o:'] = owner;
-      props['/k:'] = `${owner}_${repository}`;
     } else {
       props['sonar.organization'] = owner;
       props['sonar.projectKey'] = `${owner}_${repository}`;
@@ -42049,8 +42054,9 @@ const beginScan = async (hostUrl, mainBranch) => {
     await exec.exec('dotnet tool install -g dotnet-sonarscanner');
   });
 
+  const version = await getBuildVersion(`-${process.env.GITHUB_SHA}`);
   const extraParams = {
-    '/v:': getBuildVersion(`-${process.env.GITHUB_SHA}`),
+    '/v:': version,
     'sonar.coverage.exclusions': '**Test*.cs',
     'sonar.cs.vstest.reportsPaths': '**/*.trx',
     'sonar.cs.opencover.reportsPaths': '**/coverage.opencover.xml',
