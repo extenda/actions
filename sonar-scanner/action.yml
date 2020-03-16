@@ -19,6 +19,24 @@ inputs:
       Flag to indicate that the MSBuild Sonar Scanner should be used. Set to `true` to use MSBuild.
       The action will automatically track the state to know if a scan should be started or finalized.
     required: false
+  github-token-secret-name:
+    description: |
+      The secret name from which to load the github-token. This is only used
+      when github-token has not be set explicitly.
+    required: false
+    default: github-token
+  sonar-token-secret-name:
+    description: |
+      The secret name from which to load the sonar-token. This is only used
+      when the sonar-token has not been set explicitly. The default value
+      depends on the sonar-host and is 'sonarcloud-token' for sonarcloud and
+      'sonarqube-token' otherwise.
+    required: false
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication with Secret Manager.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: false
 runs:
   using: node12
   main: dist/index.js
