@@ -12,6 +12,10 @@ const createParams = async (hostUrl, mainBranch, msParams = false, extraParams =
   const [owner, repository] = process.env.GITHUB_REPOSITORY.split('/');
   const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
 
+  if (process.env.SONAR_VERBOSE === 'true') {
+    props['sonar.verbose'] = 'true';
+  }
+
   if (msParams) {
     props['/n:'] = repository;
   } else {

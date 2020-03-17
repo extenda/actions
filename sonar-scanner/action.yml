@@ -4,6 +4,12 @@ inputs:
   sonar-host:
     description: The Sonar server URL
     required: true
+  sonar-scanner:
+    description: |
+      The sonar scanner to use. Valid values are 'auto', 'maven', 'gradle', 'node' and 'dotnet'.
+      The default value 'auto' will attempt to perform auto-discovery. Auto-discovery does not work for 'dotnet'.
+    required: true
+    default: auto
   main-branch:
     description: The Sonar main branch
     required: true
@@ -13,11 +19,6 @@ inputs:
     required: false
   maven-args:
     description: Custom maven scan command
-    required: false
-  msbuild:
-    description: |
-      Flag to indicate that the MSBuild Sonar Scanner should be used. Set to `true` to use MSBuild.
-      The action will automatically track the state to know if a scan should be started or finalized.
     required: false
   github-token-secret-name:
     description: |
@@ -37,6 +38,10 @@ inputs:
       The service account key which will be used for authentication with Secret Manager.
       The account key should be a base64 encoded JSON key stored as a secret.
     required: false
+  verbose:
+    description: Enable verbose logging in the sonar scanner.
+    required: false
+    default: 'false'
 runs:
   using: node12
   main: dist/index.js

@@ -15,7 +15,12 @@ const isBranchAnalysis = (mainBranch) => {
 run(async () => {
   const hostUrl = core.getInput('sonar-host', { required: true });
   const mainBranch = core.getInput('main-branch', { required: true });
-  const msbuild = core.getInput('msbuild');
+  const sonarScanner = core.getInput('sonar-scanner', { required: true });
+  const verbose = core.getInput('verbose') === 'true';
+
+  if (verbose) {
+    process.env.SONAR_VERBOSE = 'true';
+  }
 
   const scanCommands = {
     gradle: core.getInput('gradle-args'),
@@ -34,12 +39,12 @@ run(async () => {
 
   let waitForQualityGate = false;
 
-  if (msbuild) {
+  if (sonarScanner === 'dotnet') {
     // MSBuild scanning
     waitForQualityGate = await scanMsBuild(hostUrl, mainBranch);
   } else {
     // Perform the scanning for everything else.
-    await core.group('Run Sonar analysis', async () => scan(hostUrl, mainBranch, scanCommands));
+    await core.group('Run Sonar analysis', async () => scan(hostUrl, mainBranch, sonarScanner, scanCommands));
     waitForQualityGate = true;
   }
 

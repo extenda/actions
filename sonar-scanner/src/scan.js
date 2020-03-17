@@ -4,28 +4,28 @@ const fs = require('fs');
 const { createParams } = require('./params');
 const mvn = require('../../maven/src/mvn');
 
-const getCommands = (custom) => {
+const isAutoDiscovered = (sonarScanner, file) => sonarScanner === 'auto' && fs.existsSync(file);
+
+const getCommands = (sonarScanner, custom) => {
   const commands = {};
-  if (custom.gradle) {
-    commands.gradle = custom.gradle;
-  } else if (fs.existsSync('build.gradle')) {
-    commands.gradle = 'sonarqube';
+
+  if (sonarScanner === 'gradle' || custom.gradle || isAutoDiscovered(sonarScanner, 'build.gradle')) {
+    commands.gradle = custom.gradle || 'sonarqube';
   }
 
-  if (custom.maven) {
-    commands.maven = custom.maven;
-  } else if (fs.existsSync('pom.xml')) {
-    commands.maven = 'org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar';
+  if (sonarScanner === 'maven' || custom.maven || isAutoDiscovered(sonarScanner, 'pom.xml')) {
+    commands.maven = custom.maven || 'org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar';
   }
 
-  if (fs.existsSync('package.json')) {
+  if (sonarScanner === 'node' || isAutoDiscovered(sonarScanner, 'package.json')) {
     commands.npm = 'node_modules/.bin/sonar-scanner';
   }
+
   return commands;
 };
 
-const scan = async (hostUrl, mainBranch, customCommands = {}) => {
-  const commands = getCommands(customCommands);
+const scan = async (hostUrl, mainBranch, sonarScanner = 'auto', customCommands = {}) => {
+  const commands = getCommands(sonarScanner, customCommands);
   const params = await createParams(hostUrl, mainBranch);
 
   if (commands.gradle) {
