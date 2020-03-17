@@ -30,7 +30,8 @@ jobs:
         run: npm ci
 
       - name: Lint Javascript
-        run: npm run lint:js
+        run: |
+          npm run lint:js
 
       - name: Run tests
         run: |
@@ -54,6 +55,18 @@ jobs:
             echo "::error::Did you remember to run 'npm run build'?"
             exit 1
           fi
+
+      - name: Analyze with SonarCloud
+        uses: ./sonar-scanner
+        with:
+          sonar-host: https://sonarcloud.io
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+
+      - name: Analyze with SonarQube
+        uses: ./sonar-scanner
+        with:
+          sonar-host: https://sonar.extenda.io
+          service-account-key: ${{ secrets.SECRET_AUTH }}
 
   acceptance-windows:
     runs-on: windows-latest

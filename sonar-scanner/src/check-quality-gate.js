@@ -3,17 +3,11 @@ const path = require('path');
 const fs = require('fs');
 const readline = require('readline');
 const axios = require('axios');
+const { sonarAuth } = require('./sonar-credentials');
 
 const REPORT_TASK_FILE = 'report-task.txt';
 const PROP_TASK_URL = 'ceTaskUrl';
 const PROP_SERVER_URL = 'serverUrl';
-
-const axiosConfig = () => ({
-  auth: {
-    username: process.env.SONAR_TOKEN,
-    password: '',
-  },
-});
 
 const findReportFile = () => {
   const paths = [
@@ -53,7 +47,7 @@ const getTaskReport = async (reportFile) => {
   return properties;
 };
 
-const getTaskStatus = async (taskUrl) => axios.get(taskUrl, axiosConfig())
+const getTaskStatus = async (taskUrl) => axios.get(taskUrl, { auth: await sonarAuth() })
   .then((response) => {
     const { data: { task } } = response;
     return {
@@ -64,7 +58,7 @@ const getTaskStatus = async (taskUrl) => axios.get(taskUrl, axiosConfig())
 
 const getQualityGateStatus = async (serverUrl, analysisId) => axios.get(
   `${serverUrl}/api/qualitygates/project_status?analysisId=${analysisId}`,
-  axiosConfig(),
+  { auth: await sonarAuth() },
 ).then((response) => response.data.projectStatus);
 
 const timer = (ms) => new Promise((res) => setTimeout(res, ms));

@@ -2,6 +2,7 @@ const path = require('path');
 const axios = require('axios');
 
 jest.mock('axios');
+jest.mock('../src/sonar-credentials');
 
 const { checkQualityGate } = require('../src/check-quality-gate');
 

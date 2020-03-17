@@ -4,6 +4,8 @@ const fs = require('fs');
 
 jest.mock('@actions/exec');
 
+jest.mock('../src/sonar-credentials');
+
 const { scanMsBuild, markerFile } = require('../src/scan-msbuild');
 
 const orgEnv = process.env;

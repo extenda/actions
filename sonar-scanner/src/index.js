@@ -1,10 +1,9 @@
 const core = require('@actions/core');
-const { checkEnv, run } = require('../../utils');
+const { run } = require('../../utils');
 const { createProject } = require('./create-project');
 const { scan } = require('./scan');
 const { scanMsBuild } = require('./scan-msbuild');
 const { checkQualityGate } = require('./check-quality-gate');
-const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
 const isPullRequest = () => process.env.GITHUB_EVENT_NAME === 'pull_request';
 
@@ -13,32 +12,15 @@ const isBranchAnalysis = (mainBranch) => {
   return branch !== mainBranch && !isPullRequest();
 };
 
-const defaultSonarToken = (isSonarQube) => (
-  isSonarQube ? 'sonarcloud-token' : 'sonarqube-token'
-);
-
-const loadSecrets = async (isSonarQube) => {
-  const serviceAccountKey = core.getInput('service-account-key');
-  const githubTokenName = core.getInput('github-token-secret-name');
-  const sonarTokenName = core.getInput('sonar-token-secret-name') || defaultSonarToken(isSonarQube);
-
-  // For backwards compatibility, we access these secrets as env vars.
-  if (serviceAccountKey) {
-    if (!process.env.GITHUB_TOKEN) {
-      process.env.GITHUB_TOKEN = await loadSecret(serviceAccountKey, githubTokenName);
-    }
-    if (!process.env.SONAR_TOKEN) {
-      process.env.SONAR_TOKEN = await loadSecret(serviceAccountKey, sonarTokenName);
-    }
-  }
-
-  checkEnv(['SONAR_TOKEN', 'GITHUB_TOKEN']);
-};
-
 run(async () => {
   const hostUrl = core.getInput('sonar-host', { required: true });
   const mainBranch = core.getInput('main-branch', { required: true });
-  const msbuild = core.getInput('msbuild');
+  const sonarScanner = core.getInput('sonar-scanner', { required: true });
+  const verbose = core.getInput('verbose') === 'true';
+
+  if (verbose) {
+    process.env.SONAR_VERBOSE = 'true';
+  }
 
   const scanCommands = {
     gradle: core.getInput('gradle-args'),
@@ -52,19 +34,17 @@ run(async () => {
     return;
   }
 
-  await loadSecrets(isSonarQube);
-
   // Auto-create SonarCloud projects
   await createProject(hostUrl);
 
   let waitForQualityGate = false;
 
-  if (msbuild) {
+  if (sonarScanner === 'dotnet') {
     // MSBuild scanning
     waitForQualityGate = await scanMsBuild(hostUrl, mainBranch);
   } else {
     // Perform the scanning for everything else.
-    await core.group('Run Sonar analysis', async () => scan(hostUrl, mainBranch, scanCommands));
+    await core.group('Run Sonar analysis', async () => scan(hostUrl, mainBranch, sonarScanner, scanCommands));
     waitForQualityGate = true;
   }
 

@@ -5,3 +5,5 @@ node_modules/
 rs-create-installerpkg/test/test_output_dir
 setup-nuget-sources/test/NuGet-test.config
 coverage/
+sonar-project.properties
+test-results/
