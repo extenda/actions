@@ -58,11 +58,11 @@ describe('Sonar Parameters', () => {
 
     test('MS Params', async () => {
       const result = await createParams('https://sonarcloud.io', 'master', true);
-      expect(result).toContain('/d:sonar.login="sonar"');
-      expect(result).toContain('/d:sonar.host.url="https://sonarcloud.io"');
-      expect(result).toContain('/o:"extenda"');
-      expect(result).toContain('/n:"actions"');
-      expect(result).toContain('/k:"extenda_actions"');
+      expect(result).toContain('/d:sonar.login=sonar');
+      expect(result).toContain('/d:sonar.host.url=https://sonarcloud.io');
+      expect(result).toContain('/o:extenda');
+      expect(result).toContain('/n:actions');
+      expect(result).toContain('/k:extenda_actions');
       expect(result).not.toContain('/d:sonar.pullrequest=');
       expect(result).not.toContain('/d:sonar.branch.name=');
     });

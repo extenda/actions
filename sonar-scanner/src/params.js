@@ -56,7 +56,7 @@ const createParams = async (hostUrl, mainBranch, msParams = false, extraParams =
 
   const params = [];
   Object.keys(props).forEach((name) => {
-    const value = msParams ? `"${props[name]}"` : props[name];
+    const value = props[name];
     if (name.charAt(0) === prefix.charAt(0)) {
       params.push(`${name}${value}`);
     } else {

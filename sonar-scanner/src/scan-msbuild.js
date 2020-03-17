@@ -33,7 +33,7 @@ const beginScan = async (hostUrl, mainBranch) => {
 const finishScan = async (hostUrl) => {
   await core.group('End Sonar analysis', async () => {
     const { sonarToken } = await credentials(hostUrl);
-    await exec.exec(`${scanner} end /d:sonar.login="${sonarToken}"`);
+    await exec.exec(`${scanner} end /d:sonar.login=${sonarToken}`);
   });
 };
 
