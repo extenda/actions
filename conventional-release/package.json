@@ -13,8 +13,6 @@
     "@actions/github": "^1.1.0"
   },
   "devDependencies": {
-    "@zeit/ncc": "^0.20.5",
-    "jest": "^24.9.0",
-    "jest-junit": "^10.0.0"
+    "@zeit/ncc": "^0.20.5"
   }
 }

@@ -1,5 +1,3 @@
-const path = require('path');
-
 module.exports = {
   collectCoverage: true,
   coverageDirectory: 'coverage',
@@ -16,8 +14,8 @@ module.exports = {
     [
       'jest-sonar',
       {
-        outputDirectory: 'test-results/',
-        outputName: 'SONAR-report.xml',
+        outputDirectory: 'test-results',
+        outputName: 'sonar-report.xml',
       },
     ],
   ],

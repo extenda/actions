@@ -1,17 +1,15 @@
 jest.mock('@actions/core');
+jest.mock('child_process');
+jest.mock('fs');
 
 const core = require('@actions/core');
 const cp = require('child_process');
 const fs = require('fs');
+
 const docker = require('../src/docker.js');
 // const maxBufferSize = require('../src/settings');
 
 describe('core and cp methods', () => {
-  core.getInput = jest.fn();
-  core.setFailed = jest.fn();
-  cp.execSync = jest.fn();
-  fs.existsSync = jest.fn();
-
   afterEach(() => {
     core.getInput.mockReset();
     core.setFailed.mockReset();

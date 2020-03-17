@@ -5,16 +5,14 @@
   "description": "Build RS installer package",
   "main": "dist/index.js",
   "scripts": {
-    "test": "jest --config ../jest.config.js",
-    "build": "ncc build src/index.js"
+    "test": "../node_modules/.bin/jest --config ../jest.config.js",
+    "build": "../node_modules/.bin/ncc build src/index.js"
   },
   "dependencies": {
     "@actions/core": "^1.2.0",
     "@actions/exec": "^1.0.1"
   },
   "devDependencies": {
-    "@zeit/ncc": "^0.20.5",
-    "fs-extra": "^8.1.0",
-    "jest": "^24.9.0"
+    "fs-extra": "^8.1.0"
   }
 }

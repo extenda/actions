@@ -6,13 +6,10 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "",
-    "build": "ncc -m build src/index.js"
+    "build": "../node_modules/.bin/ncc -m build src/index.js"
   },
   "dependencies": {
     "@actions/core": "^1.2.0",
     "jira-client": "^6.14.0"
-  },
-  "devDependencies": {
-    "@zeit/ncc": "^0.20.5"
   }
 }

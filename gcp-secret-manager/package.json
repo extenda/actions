@@ -5,18 +5,13 @@
   "description": "GCP Secret Manager",
   "main": "dist/index.js",
   "scripts": {
-    "test": "jest --config ../jest.config.js",
-    "build": "ncc build src/index.js",
-    "watch": "watch 'npm run build' ./src"
+    "test": "../node_modules/.bin/jest --config ../jest.config.js",
+    "build": "../node_modules/.bin/ncc build src/index.js"
   },
   "dependencies": {
     "@actions/core": "^1.2.0",
     "google-auth-library": "^5.10.1",
     "tmp": "^0.1.0",
     "yaml": "^1.7.2"
-  },
-  "devDependencies": {
-    "@zeit/ncc": "^0.20.5",
-    "jest": "^25.1.0"
   }
 }

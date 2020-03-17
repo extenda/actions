@@ -11,7 +11,7 @@ const execModule = async (dir, command) => {
   const module = path.relative(basedir, dir);
   let output = chalk.blue(`> ${command}\n`);
   process.env.FORCE_COLOR = 'true';
-  return exec.exec(command, '', {
+  return await exec.exec(command, '', {
     cwd: dir,
     silent: true,
     listeners: {
