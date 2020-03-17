@@ -3,6 +3,13 @@ const axios = require('axios');
 
 jest.mock('axios');
 
+jest.mock('../src/sonar-credentials', () => ({
+  sonarAuth: async () => ({
+    username: 'sonar',
+    password: '',
+  }),
+}));
+
 const { checkQualityGate } = require('../src/check-quality-gate');
 
 describe('Check Quality Gate', () => {

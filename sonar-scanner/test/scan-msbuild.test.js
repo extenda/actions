@@ -4,6 +4,17 @@ const fs = require('fs');
 
 jest.mock('@actions/exec');
 
+jest.mock('../src/sonar-credentials', () => ({
+  credentials: async () => ({
+    githubToken: 'github',
+    sonarToken: 'sonar',
+  }),
+  sonarAuth: async () => ({
+    username: 'sonar',
+    password: '',
+  }),
+}));
+
 const { scanMsBuild, markerFile } = require('../src/scan-msbuild');
 
 const orgEnv = process.env;

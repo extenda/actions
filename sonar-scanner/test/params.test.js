@@ -5,10 +5,6 @@ jest.mock('../src/sonar-credentials', () => ({
     githubToken: 'github',
     sonarToken: 'sonar',
   }),
-  sonarAuth: {
-    username: 'sonar',
-    password: '',
-  },
 }));
 
 const { createParams } = require('../src/params');
