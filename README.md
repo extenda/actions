@@ -1,4 +1,5 @@
 ![](https://github.com/extenda/actions/workflows/Commit/badge.svg)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=extenda_actions&metric=alert_status&token=40a364ceea3bf93e483e0d5b4644eced24b54d8a)](https://sonarcloud.io/dashboard?id=extenda_actions)
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/extenda/actions?label=version)
 ![GitHub](https://img.shields.io/github/license/extenda/actions)
 
