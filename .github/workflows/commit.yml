@@ -48,10 +48,10 @@ jobs:
           service-account-key: ${{ secrets.SECRET_AUTH }}
 
       - name: Analyze with SonarQube
-          uses: ./sonar-scanner
-          with:
-            sonar-host: https://sonar.extenda.io
-            service-account-key: ${{ secrets.SECRET_AUTH }}
+        uses: ./sonar-scanner
+        with:
+          sonar-host: https://sonar.extenda.io
+          service-account-key: ${{ secrets.SECRET_AUTH }}
 
       - name: Check compiled dist/* files
         run: |
