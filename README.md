@@ -186,8 +186,8 @@ jobs:
         uses: extenda/actions/sonar-scanner@v0
         with:
           sonar-host: https://sonar.extenda.io
+          sonar-scanner: dotnet
           main-branch: develop
-          msbuild: true
           service-account-key: ${{ secrets.SECRET_AUTH }}
 
       - name: Build
@@ -206,8 +206,8 @@ jobs:
         uses: extenda/actions/sonar-scanner@v0
         with:
           sonar-host: https://sonar.extenda.io
+          sonar-scanner: dotnet
           main-branch: develop
-          msbuild: true
           service-account-key: ${{ secrets.SECRET_AUTH }}
 
   release:
