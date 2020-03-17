@@ -7,9 +7,9 @@ const relative = (dir) => {
   return path.relative(baseDir, dir);
 };
 
-const ifExists = (path, fn) => {
-  if (fs.existsSync(path)) {
-    fn(path);
+const ifExists = (file, fn) => {
+  if (fs.existsSync(file)) {
+    fn(file);
   }
 };
 
