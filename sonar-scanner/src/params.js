@@ -1,10 +1,12 @@
 const fs = require('fs');
+const { credentials } = require('./sonar-credentials');
 
-const createParams = (hostUrl, mainBranch, msParams = false, extraParams = {}) => {
+const createParams = async (hostUrl, mainBranch, msParams = false, extraParams = {}) => {
   const sonarCloud = hostUrl.startsWith('https://sonarcloud.io');
+  const { githubToken, sonarToken } = await credentials(hostUrl);
   const props = { ...extraParams };
   props['sonar.host.url'] = hostUrl;
-  props['sonar.login'] = process.env.SONAR_TOKEN;
+  props['sonar.login'] = sonarToken;
 
   const branch = process.env.GITHUB_REF.replace('refs/heads/', '');
   const [owner, repository] = process.env.GITHUB_REPOSITORY.split('/');
@@ -41,7 +43,7 @@ const createParams = (hostUrl, mainBranch, msParams = false, extraParams = {}) =
       props['sonar.pullrequest.github.repository'] = process.env.GITHUB_REPOSITORY;
     } else {
       // SonarQube 6
-      props['sonar.github.oauth'] = process.env.GITHUB_TOKEN;
+      props['sonar.github.oauth'] = githubToken;
       props['sonar.analysis.mode'] = 'preview';
       props['sonar.github.repository'] = process.env.GITHUB_REPOSITORY;
       props['sonar.github.pullRequest'] = event.pull_request.number;

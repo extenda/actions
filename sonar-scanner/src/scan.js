@@ -26,7 +26,7 @@ const getCommands = (custom) => {
 
 const scan = async (hostUrl, mainBranch, customCommands = {}) => {
   const commands = getCommands(customCommands);
-  const params = createParams(hostUrl, mainBranch);
+  const params = await createParams(hostUrl, mainBranch);
 
   if (commands.gradle) {
     core.info('Scan with Gradle');

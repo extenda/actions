@@ -1,38 +1,15 @@
 const core = require('@actions/core');
-const { checkEnv, run } = require('../../utils');
+const { run } = require('../../utils');
 const { createProject } = require('./create-project');
 const { scan } = require('./scan');
 const { scanMsBuild } = require('./scan-msbuild');
 const { checkQualityGate } = require('./check-quality-gate');
-const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
 const isPullRequest = () => process.env.GITHUB_EVENT_NAME === 'pull_request';
 
 const isBranchAnalysis = (mainBranch) => {
   const branch = process.env.GITHUB_REF.replace('refs/heads/', '');
   return branch !== mainBranch && !isPullRequest();
-};
-
-const defaultSonarToken = (isSonarQube) => (
-  isSonarQube ? 'sonarcloud-token' : 'sonarqube-token'
-);
-
-const loadSecrets = async (isSonarQube) => {
-  const serviceAccountKey = core.getInput('service-account-key');
-  const githubTokenName = core.getInput('github-token-secret-name');
-  const sonarTokenName = core.getInput('sonar-token-secret-name') || defaultSonarToken(isSonarQube);
-
-  // For backwards compatibility, we access these secrets as env vars.
-  if (serviceAccountKey) {
-    if (!process.env.GITHUB_TOKEN) {
-      process.env.GITHUB_TOKEN = await loadSecret(serviceAccountKey, githubTokenName);
-    }
-    if (!process.env.SONAR_TOKEN) {
-      process.env.SONAR_TOKEN = await loadSecret(serviceAccountKey, sonarTokenName);
-    }
-  }
-
-  checkEnv(['SONAR_TOKEN', 'GITHUB_TOKEN']);
 };
 
 run(async () => {
@@ -51,8 +28,6 @@ run(async () => {
     core.info(`${hostUrl} does not support multi-branch analysis. No analysis is performed.`);
     return;
   }
-
-  await loadSecrets(isSonarQube);
 
   // Auto-create SonarCloud projects
   await createProject(hostUrl);
