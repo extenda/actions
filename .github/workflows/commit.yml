@@ -34,7 +34,10 @@ jobs:
           npm run lint:js
 
       - name: Run tests
-        run: npm test
+        run: |
+          echo "::stop-commands::jest-output"
+          npm test
+          echo "::jest-output::"
         env:
           NEXUS_USERNAME: ${{secrets.NEXUS_USERNAME}}
           NEXUS_PASSWORD: ${{secrets.NEXUS_PASSWORD}}
