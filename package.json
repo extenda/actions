@@ -26,7 +26,6 @@
     "eslint-plugin-import": "^2.18.2",
     "fs-extra": "^8.1.0",
     "jest": "^24.9.0",
-    "jest-junit": "^10.0.0",
-    "jest-sonar-reporter": "^2.0.0"
+    "jest-sonar": "^0.2.5"
   }
 }

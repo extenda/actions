@@ -14,14 +14,13 @@ module.exports = {
   reporters: [
     'default',
     [
-      'jest-junit',
+      'jest-sonar',
       {
-        outputDirectory: 'test-results/jest',
-        outputName: 'TEST-jest.xml',
+        outputDirectory: 'test-results/',
+        outputName: 'SONAR-report.xml',
       },
     ],
   ],
   rootDir: process.cwd(),
   testEnvironment: 'node',
-  testResultsProcessor: path.join(__dirname, '.scripts', 'sonar-reporter.js'),
 };
