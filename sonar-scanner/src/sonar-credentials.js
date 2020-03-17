@@ -2,8 +2,8 @@ const core = require('@actions/core');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 const { checkEnv } = require('../../utils');
 
-const defaultSonarToken = (isSonarQube) => (
-  isSonarQube ? 'sonarcloud-token' : 'sonarqube-token'
+const defaultSonarToken = (hostUrl) => (
+  hostUrl.startsWith('https://sonarcloud.io') ? 'sonarcloud-token' : 'sonarqube-token'
 );
 
 let credentialsCache;
@@ -23,10 +23,10 @@ const getSecret = async (serviceAccountKey, secretName, envVar) => {
   return secret;
 };
 
-const loadCredentials = async (isSonarQube) => {
+const loadCredentials = async (hostUrl) => {
   const serviceAccountKey = core.getInput('service-account-key');
   const githubTokenName = core.getInput('github-token-secret-name');
-  const sonarTokenName = core.getInput('sonar-token-secret-name') || defaultSonarToken(isSonarQube);
+  const sonarTokenName = core.getInput('sonar-token-secret-name') || defaultSonarToken(hostUrl);
 
   const githubToken = await getSecret(serviceAccountKey, githubTokenName, 'GITHUB_TOKEN');
   const sonarToken = await getSecret(serviceAccountKey, sonarTokenName, 'SONAR_TOKEN');

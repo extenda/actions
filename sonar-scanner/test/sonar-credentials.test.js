@@ -50,6 +50,15 @@ describe('Sonar Credentials', () => {
     expect(secrets.loadSecret.mock.calls[1][1]).toEqual('sonarcloud-token');
   });
 
+  test('It loads sonarqube-token for sonar.extenda.io', async () => {
+    secrets.loadSecret.mockResolvedValueOnce('githubSecret')
+      .mockResolvedValueOnce('sonarSecret');
+    const { sonarToken } = await creds.credentials('https://sonar.extenda.io', false);
+    expect(sonarToken).toEqual('sonarSecret');
+    expect(process.env.SONAR_TOKEN).toEqual('sonarSecret');
+    expect(secrets.loadSecret.mock.calls[1][1]).toEqual('sonarqube-token');
+  });
+
   test('It sets env vars from secrets', async () => {
     secrets.loadSecret.mockResolvedValueOnce('githubSecret')
       .mockResolvedValueOnce('sonarSecret');
