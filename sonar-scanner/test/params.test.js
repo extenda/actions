@@ -1,11 +1,6 @@
 const path = require('path');
 
-jest.mock('../src/sonar-credentials', () => ({
-  credentials: async () => ({
-    githubToken: 'github',
-    sonarToken: 'sonar',
-  }),
-}));
+jest.mock('../src/sonar-credentials');
 
 const { createParams } = require('../src/params');
 

@@ -24,7 +24,7 @@ inputs:
     description: |
       The secret name from which to load the github-token. This is only used
       when github-token has not be set explicitly.
-    required: false
+    required: true
     default: github-token
   sonar-token-secret-name:
     description: |

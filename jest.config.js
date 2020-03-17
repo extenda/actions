@@ -1,4 +1,5 @@
 module.exports = {
+  automock: false,
   collectCoverage: true,
   coverageDirectory: 'coverage',
   coverageReporters: [

@@ -29,6 +29,12 @@ describe('Sonar Credentials', () => {
     expect(secrets.loadSecret.mock.calls).toHaveLength(0);
   });
 
+  test('It fails if env vars and service-account-key is missing', async () => {
+    delete process.env['INPUT_SERVICE-ACCOUNT-KEY'];
+    await expect(creds.credentials('https://sonarcloud.io', false))
+      .rejects.toEqual(new Error('Missing env var: GITHUB_TOKEN'));
+  });
+
   test('It can mix env vars and secrets', async () => {
     process.env.GITHUB_TOKEN = 'github';
     secrets.loadSecret.mockResolvedValueOnce('sonarSecret');
@@ -74,6 +80,22 @@ describe('Sonar Credentials', () => {
     expect(secrets.loadSecret.mock.calls).toHaveLength(2);
 
     await creds.credentials('https://sonarcloud.io');
+    expect(secrets.loadSecret.mock.calls).toHaveLength(2);
+  });
+
+  test('It can return Axios auth config', async () => {
+    secrets.loadSecret.mockResolvedValueOnce('githubSecret')
+      .mockResolvedValueOnce('sonarSecret');
+
+    // We call credentials like this to ensure no cache is used.
+    await creds.credentials('https://sonarcloud.io', false);
+
+    // auth always uses the cache.
+    const auth = await creds.sonarAuth('https://sonarcloud.io');
+    expect(auth).toMatchObject({
+      password: '',
+      username: 'sonarSecret',
+    });
     expect(secrets.loadSecret.mock.calls).toHaveLength(2);
   });
 });

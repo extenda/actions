@@ -31,6 +31,7 @@ sonar.sourceEncoding=UTF-8
 sonar.projectKey=extenda_actions
 sonar.projectName=actions
 sonar.sources=${sources.join(',')}
+sonar.exclusions=**/__mocks__/**
 sonar.tests=${tests.join(',')}
 sonar.javascript.lcov.reportPaths=${lcovReportPaths.join(',')}
 sonar.testExecutionReportPaths=${testReportPaths.join(',')}

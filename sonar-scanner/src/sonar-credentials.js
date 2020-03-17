@@ -25,7 +25,7 @@ const getSecret = async (serviceAccountKey, secretName, envVar) => {
 
 const loadCredentials = async (hostUrl) => {
   const serviceAccountKey = core.getInput('service-account-key');
-  const githubTokenName = core.getInput('github-token-secret-name');
+  const githubTokenName = core.getInput('github-token-secret-name', { required: true });
   const sonarTokenName = core.getInput('sonar-token-secret-name') || defaultSonarToken(hostUrl);
 
   const githubToken = await getSecret(serviceAccountKey, githubTokenName, 'GITHUB_TOKEN');
