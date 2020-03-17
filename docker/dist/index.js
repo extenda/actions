@@ -34,7 +34,7 @@ module.exports =
 /******/ 	// the startup function
 /******/ 	function startup() {
 /******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(676);
+/******/ 		return __webpack_require__(76);
 /******/ 	};
 /******/
 /******/ 	// run startup
@@ -43,97 +43,22 @@ module.exports =
 /************************************************************************/
 /******/ ({
 
+/***/ 76:
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+const run = __webpack_require__(805);
+
+if (require.main === require.cache[eval('__filename')]) {
+  run();
+}
+
+
+/***/ }),
+
 /***/ 87:
 /***/ (function(module) {
 
 module.exports = require("os");
-
-/***/ }),
-
-/***/ 95:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const cp = __webpack_require__(129);
-const core = __webpack_require__(470);
-const fs = __webpack_require__(747);
-
-const createBuildCommand = (dockerfile, imageName, buildArgs, dockerContext, tags) => {
-  let buildCommandPrefix = `docker build -f ${dockerfile}`;
-
-  if (tags) {
-    const tagsSuffix = tags.map((tag) => `-t ${imageName}:${tag}`).join(' ');
-    buildCommandPrefix = `${buildCommandPrefix} ${tagsSuffix}`;
-  } else {
-    buildCommandPrefix = `${buildCommandPrefix} -t ${imageName}`;
-  }
-
-  if (buildArgs) {
-    const argsSuffix = buildArgs.map((arg) => `--build-arg ${arg}`).join(' ');
-    buildCommandPrefix = `${buildCommandPrefix} ${argsSuffix}`;
-  }
-
-  return `${buildCommandPrefix} ${dockerContext}`;
-};
-
-const build = (imageName, buildArgs, tags) => {
-  const dockerfile = core.getInput('dockerfile');
-  const dockerContext = core.getInput('docker-context', { required: false });
-
-  if (!fs.existsSync(dockerfile)) {
-    core.setFailed(`Dockerfile does not exist in location ${dockerfile}`);
-  }
-
-  const buildCmd = createBuildCommand(dockerfile, imageName, buildArgs, dockerContext, tags);
-  core.info(`Building Docker image (${imageName}): ${buildCmd}`);
-  cp.execSync(buildCmd);
-};
-
-const isEcr = (registry) => registry && registry.includes('amazonaws');
-
-const getRegion = (registry) => registry.substring(registry.indexOf('ecr.') + 4, registry.indexOf('.amazonaws'));
-
-const login = (registry) => {
-  if (!registry) {
-    return;
-  }
-
-  core.info('Login started');
-  // If using ECR, use the AWS CLI login command in favor of docker login
-  if (isEcr(registry)) {
-    const region = getRegion(registry);
-    core.info(`Logging into ECR region ${region}...`);
-    cp.execSync(`$(aws ecr get-login --region ${region} --no-include-email)`);
-    return;
-  }
-
-  const username = core.getInput('username');
-  const password = core.getInput('password');
-
-  core.info(`Logging into Docker registry ${registry}...`);
-  cp.execSync(`docker login -u ${username} --password-stdin ${registry}`, {
-    input: password,
-  });
-};
-
-const push = (imageName, tags) => {
-  if (!tags) {
-    core.info(`Pushing Docker image ${imageName} without tags`);
-    cp.execSync(`docker push ${imageName}`);
-    return;
-  }
-
-  tags.forEach((tag) => {
-    core.info(`Pushing Docker image ${imageName}:${tag}`);
-    cp.execSync(`docker push ${imageName}:${tag}`);
-  });
-};
-
-module.exports = {
-  build,
-  login,
-  push,
-};
-
 
 /***/ }),
 
@@ -144,63 +69,28 @@ module.exports = require("child_process");
 
 /***/ }),
 
-/***/ 131:
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ 300:
+/***/ (function(module) {
 
-const core = __webpack_require__(470);
-const docker = __webpack_require__(95);
-const urlhelper = __webpack_require__(967);
+const defaultRegistry = '414891016442.dkr.ecr.eu-west-1.amazonaws.com';
 
-const processBuildArgsInput = (buildArgsInput) => {
-  let buildArgs = null;
-  if (buildArgsInput) {
-    buildArgs = buildArgsInput.split(',');
+const getRegistryUrl = (registry) => {
+  if (!registry) {
+    return defaultRegistry;
   }
 
-  return buildArgs;
+  return registry;
 };
 
-const processTags = (tagsInput) => {
-  let tags = null;
-  if (tagsInput) {
-    tags = tagsInput.split(',');
-  }
-
-  return tags;
+module.exports = {
+  getRegistryUrl,
+  defaultRegistry,
 };
-
-const run = () => {
-  try {
-    const image = core.getInput('image', { required: true });
-    const registryInput = core.getInput('registry', { required: false });
-    const tagInput = core.getInput('tag', { required: true });
-    const tags = processTags(tagInput);
-    const shouldPush = core.getInput('push', { required: false });
-    const buildArgs = processBuildArgsInput(core.getInput('buildArgs'));
-
-    const registry = urlhelper.getRegistryUrl(registryInput);
-    docker.login(registry);
-
-
-    const imageName = `${registry}/${image}`; // :${tag}
-    docker.build(imageName, buildArgs, tags);
-
-    if (shouldPush === 'true') {
-      docker.push(imageName, tags);
-    }
-
-    core.setOutput('imageFullName', imageName);
-  } catch (error) {
-    core.setFailed(error.message);
-  }
-};
-
-module.exports = run;
 
 
 /***/ }),
 
-/***/ 431:
+/***/ 489:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
@@ -285,7 +175,108 @@ function escapeProperty(s) {
 
 /***/ }),
 
-/***/ 470:
+/***/ 622:
+/***/ (function(module) {
+
+module.exports = require("path");
+
+/***/ }),
+
+/***/ 686:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const cp = __webpack_require__(129);
+const core = __webpack_require__(793);
+const fs = __webpack_require__(747);
+
+const createBuildCommand = (dockerfile, imageName, buildArgs, dockerContext, tags) => {
+  let buildCommandPrefix = `docker build -f ${dockerfile}`;
+
+  if (tags) {
+    const tagsSuffix = tags.map((tag) => `-t ${imageName}:${tag}`).join(' ');
+    buildCommandPrefix = `${buildCommandPrefix} ${tagsSuffix}`;
+  } else {
+    buildCommandPrefix = `${buildCommandPrefix} -t ${imageName}`;
+  }
+
+  if (buildArgs) {
+    const argsSuffix = buildArgs.map((arg) => `--build-arg ${arg}`).join(' ');
+    buildCommandPrefix = `${buildCommandPrefix} ${argsSuffix}`;
+  }
+
+  return `${buildCommandPrefix} ${dockerContext}`;
+};
+
+const build = (imageName, buildArgs, tags) => {
+  const dockerfile = core.getInput('dockerfile');
+  const dockerContext = core.getInput('docker-context', { required: false });
+
+  if (!fs.existsSync(dockerfile)) {
+    core.setFailed(`Dockerfile does not exist in location ${dockerfile}`);
+  }
+
+  const buildCmd = createBuildCommand(dockerfile, imageName, buildArgs, dockerContext, tags);
+  core.info(`Building Docker image (${imageName}): ${buildCmd}`);
+  cp.execSync(buildCmd);
+};
+
+const isEcr = (registry) => registry && registry.includes('amazonaws');
+
+const getRegion = (registry) => registry.substring(registry.indexOf('ecr.') + 4, registry.indexOf('.amazonaws'));
+
+const login = (registry) => {
+  if (!registry) {
+    return;
+  }
+
+  core.info('Login started');
+  // If using ECR, use the AWS CLI login command in favor of docker login
+  if (isEcr(registry)) {
+    const region = getRegion(registry);
+    core.info(`Logging into ECR region ${region}...`);
+    cp.execSync(`$(aws ecr get-login --region ${region} --no-include-email)`);
+    return;
+  }
+
+  const username = core.getInput('username');
+  const password = core.getInput('password');
+
+  core.info(`Logging into Docker registry ${registry}...`);
+  cp.execSync(`docker login -u ${username} --password-stdin ${registry}`, {
+    input: password,
+  });
+};
+
+const push = (imageName, tags) => {
+  if (!tags) {
+    core.info(`Pushing Docker image ${imageName} without tags`);
+    cp.execSync(`docker push ${imageName}`);
+    return;
+  }
+
+  tags.forEach((tag) => {
+    core.info(`Pushing Docker image ${imageName}:${tag}`);
+    cp.execSync(`docker push ${imageName}:${tag}`);
+  });
+};
+
+module.exports = {
+  build,
+  login,
+  push,
+};
+
+
+/***/ }),
+
+/***/ 747:
+/***/ (function(module) {
+
+module.exports = require("fs");
+
+/***/ }),
+
+/***/ 793:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
@@ -307,7 +298,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const command_1 = __webpack_require__(431);
+const command_1 = __webpack_require__(489);
 const os = __importStar(__webpack_require__(87));
 const path = __importStar(__webpack_require__(622));
 /**
@@ -494,49 +485,58 @@ exports.getState = getState;
 
 /***/ }),
 
-/***/ 622:
-/***/ (function(module) {
+/***/ 805:
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-module.exports = require("path");
+const core = __webpack_require__(793);
+const docker = __webpack_require__(686);
+const urlhelper = __webpack_require__(300);
 
-/***/ }),
-
-/***/ 676:
-/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
-
-const run = __webpack_require__(131);
-
-if (require.main === require.cache[eval('__filename')]) {
-  run();
-}
-
-
-/***/ }),
-
-/***/ 747:
-/***/ (function(module) {
-
-module.exports = require("fs");
-
-/***/ }),
-
-/***/ 967:
-/***/ (function(module) {
-
-const defaultRegistry = '414891016442.dkr.ecr.eu-west-1.amazonaws.com';
-
-const getRegistryUrl = (registry) => {
-  if (!registry) {
-    return defaultRegistry;
+const processBuildArgsInput = (buildArgsInput) => {
+  let buildArgs = null;
+  if (buildArgsInput) {
+    buildArgs = buildArgsInput.split(',');
   }
 
-  return registry;
+  return buildArgs;
 };
 
-module.exports = {
-  getRegistryUrl,
-  defaultRegistry,
+const processTags = (tagsInput) => {
+  let tags = null;
+  if (tagsInput) {
+    tags = tagsInput.split(',');
+  }
+
+  return tags;
 };
+
+const run = () => {
+  try {
+    const image = core.getInput('image', { required: true });
+    const registryInput = core.getInput('registry', { required: false });
+    const tagInput = core.getInput('tag', { required: true });
+    const tags = processTags(tagInput);
+    const shouldPush = core.getInput('push', { required: false });
+    const buildArgs = processBuildArgsInput(core.getInput('buildArgs'));
+
+    const registry = urlhelper.getRegistryUrl(registryInput);
+    docker.login(registry);
+
+
+    const imageName = `${registry}/${image}`; // :${tag}
+    docker.build(imageName, buildArgs, tags);
+
+    if (shouldPush === 'true') {
+      docker.push(imageName, tags);
+    }
+
+    core.setOutput('imageFullName', imageName);
+  } catch (error) {
+    core.setFailed(error.message);
+  }
+};
+
+module.exports = run;
 
 
 /***/ })
