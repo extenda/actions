@@ -31,9 +31,7 @@ jobs:
 
       - name: Lint Javascript
         run: |
-          npm run lint:js -- \
-            --format junit \
-            --output-file test-results/eslint/TEST-eslint.xml
+          npm run lint:js
 
       - name: Run tests
         run: npm test

@@ -9,13 +9,9 @@ const relative = (dir) => {
 
 const generateSonarProperties = async () => {
   const sources = [];
-  const tests = [
-    'test-results/eslint/TEST-eslint.xml',
-  ];
+  const tests = [];
   const lcovReportPaths = [];
   const testReportPaths = [];
-
-  const baseDir = path.join(__dirname, '..');
 
   await modules.each((dir) => {
     sources.push(relative(path.join(dir, 'src')));
