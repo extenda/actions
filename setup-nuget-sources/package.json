@@ -5,9 +5,8 @@
   "description": "Setting nuget sources in NuGet.Config file",
   "main": "dist/index.js",
   "scripts": {
-    "test": "jest",
-    "build": "ncc build src/index.js",
-    "watch": "watch 'npm run build' ./src"
+    "test": "jest --config ../jest.config.js",
+    "build": "ncc build src/index.js"
   },
   "dependencies": {
     "@actions/core": "^1.2.0",
@@ -16,6 +15,7 @@
   },
   "devDependencies": {
     "@zeit/ncc": "^0.20.5",
-    "watch": "^1.0.2"
+    "jest": "^24.9.0",
+    "jest-junit": "^10.0.0"
   }
 }

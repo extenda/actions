@@ -30,16 +30,28 @@ jobs:
         run: npm ci
 
       - name: Lint Javascript
-        run: npm run lint:js
+        run: |
+          npm run lint:js -- \
+            --format junit \
+            --output-file test-results/eslint/TEST-eslint.xml
 
       - name: Run tests
-        run: |
-          echo "::stop-commands::jest-output"
-          npm test
-          echo "::jest-output::"
+        run: npm test
         env:
           NEXUS_USERNAME: ${{secrets.NEXUS_USERNAME}}
           NEXUS_PASSWORD: ${{secrets.NEXUS_PASSWORD}}
+
+      - name: Analyze with SonarCloud
+        uses: ./sonar-scanner
+        with:
+          sonar-host: https://sonarcloud.io
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+
+      - name: Analyze with SonarQube
+          uses: ./sonar-scanner
+          with:
+            sonar-host: https://sonar.extenda.io
+            service-account-key: ${{ secrets.SECRET_AUTH }}
 
       - name: Check compiled dist/* files
         run: |

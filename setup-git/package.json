@@ -6,14 +6,12 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "",
-    "build": "ncc build src/index.js",
-    "watch": "watch 'npm run build' ./src"
+    "build": "ncc build src/index.js"
   },
   "dependencies": {
     "@actions/core": "^1.2.0"
   },
   "devDependencies": {
-    "@zeit/ncc": "^0.20.5",
-    "watch": "^1.0.2"
+    "@zeit/ncc": "^0.20.5"
   }
 }
