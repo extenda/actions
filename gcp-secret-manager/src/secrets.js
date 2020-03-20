@@ -1,19 +1,9 @@
 const core = require('@actions/core');
 const YAML = require('yaml');
-const fs = require('fs');
-const tmp = require('tmp');
 const { GoogleAuth } = require('google-auth-library');
-
-tmp.setGracefulCleanup();
+const createKeyFile = require('../../utils/src/create-key-file');
 
 let client;
-
-const createKeyFile = (serviceAccountKey) => {
-  const tmpFile = tmp.fileSync({ postfix: '.json' });
-  const jsonKey = Buffer.from(serviceAccountKey, 'base64').toString('utf8');
-  fs.writeFileSync(tmpFile.name, jsonKey);
-  return tmpFile.name;
-};
 
 const createClient = async (serviceAccountKey) => {
   if (!client) {
