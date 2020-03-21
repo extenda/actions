@@ -16,6 +16,8 @@ Once created, the JSON key should be `base64` encoded and added as secret in the
 The cloud run service should be specified in a YAML file that is later used by this action. This allows us to keep
 the service specification DRY while deploying it to different environments.
 
+By default, the action will load `cloud-run.yaml` from the repository base directory.
+
 ### Fully-managed
 
 This example defines a Cloud Run service that runs in managed Cloud Run.
@@ -53,7 +55,7 @@ memory: 256Mi
 allow-unauthenticated: true
 
 runs-on:
-  fully-managed:
+  managed:
     region: europe-west1
 ```
 
