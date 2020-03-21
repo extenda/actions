@@ -3,6 +3,7 @@ jest.mock('../src/run-deploy');
 jest.mock('../src/service-definition');
 
 const core = require('@actions/core');
+const action = require('../src/index');
 const runDeploy = require('../src/run-deploy');
 const serviceDef = require('../src/service-definition');
 
@@ -14,8 +15,7 @@ describe('Cloud Run Action', () => {
       .mockReturnValueOnce('account@gmail.com')
       .mockReturnValueOnce('gcr.io/project/image:tag');
 
-    // eslint-disable-next-line global-require
-    await require('../src/index');
+    await action();
 
     expect(core.getInput).toHaveBeenCalledTimes(4);
     expect(runDeploy).toHaveBeenCalledWith(

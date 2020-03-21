@@ -3,7 +3,7 @@ const { run } = require('../../utils');
 const loadServiceDefinition = require('./service-definition');
 const runDeploy = require('./run-deploy');
 
-run(async () => {
+const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const serviceFile = core.getInput('service-definition', { required: true });
   const runtimeAccountEmail = core.getInput('runtime-account-email', { required: true });
@@ -12,4 +12,10 @@ run(async () => {
   const service = loadServiceDefinition(serviceFile);
 
   await runDeploy(serviceAccountKey, service, runtimeAccountEmail, image);
-});
+};
+
+if (require.main === module) {
+  run(action);
+}
+
+module.exports = action;

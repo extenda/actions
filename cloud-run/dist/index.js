@@ -2910,14 +2910,14 @@ module.exports.default = axios;
 
 /***/ }),
 /* 76 */
-/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 const core = __webpack_require__(793);
 const { run } = __webpack_require__(320);
 const loadServiceDefinition = __webpack_require__(810);
 const runDeploy = __webpack_require__(193);
 
-run(async () => {
+const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const serviceFile = core.getInput('service-definition', { required: true });
   const runtimeAccountEmail = core.getInput('runtime-account-email', { required: true });
@@ -2926,7 +2926,13 @@ run(async () => {
   const service = loadServiceDefinition(serviceFile);
 
   await runDeploy(serviceAccountKey, service, runtimeAccountEmail, image);
-});
+};
+
+if (require.main === require.cache[eval('__filename')]) {
+  run(action);
+}
+
+module.exports = action;
 
 
 /***/ }),
