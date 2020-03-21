@@ -28,7 +28,9 @@ const configureGcloud = async (gcloud, serviceAccountKey) => {
       },
     },
   });
-  core.setOutput('project-id', projectOutput.trim());
+  const projectId = projectOutput.trim();
+  core.setOutput('project-id', projectId);
+  return projectId;
 };
 
 const setupGcloud = async (serviceAccountKey, version = 'latest') => {
@@ -45,7 +47,11 @@ const setupGcloud = async (serviceAccountKey, version = 'latest') => {
     binary,
     version: semver,
     downloadUrl,
-  }).then((gcloud) => configureGcloud(gcloud, serviceAccountKey));
+  }).then((gcloud) => configureGcloud(gcloud, serviceAccountKey))
+    .then((projectId) => {
+      core.exportVariable('GCLOUD_INSTALLED_VERSION', semver);
+      return projectId;
+    });
 };
 
 module.exports = setupGcloud;
