@@ -5256,11 +5256,7 @@ const runDeploy = async (serviceAccountKey, service, runtimeAccountEmail, image)
     args.push('--clear-cloudsql-instances');
   }
 
-  // TODO Add --set-env-vars=KEY=value,KEY2=value2
-  // Labels needed? Probably not?
-  // --revision-suffix should we set that? If tagged, use the tag, otherwise use the short-SHA? v1.0.0 vs sha-ABCDEF
-  // --set-cloudsql-instances
-  // Do we need to support the cmd and args?
+  // TODO Add --revision-suffix from tag or short-sha
 
   if (service.platform.managed) {
     const {

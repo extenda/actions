@@ -1,5 +1,3 @@
-console.log('Works here');
-
 const mockFs = require('mock-fs');
 const loadServiceDefinition = require('../src/service-definition');
 
