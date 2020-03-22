@@ -18,17 +18,50 @@ the service specification DRY while deploying it to different environments.
 
 By default, the action will load `cloud-run.yaml` from the repository base directory.
 
-### Fully-managed
+### Schema
+
+The YAML syntax is formally defined with [JSON Schema](src/cloud-run-schema.js). The following table explains what
+properties are required and not.
+
+| Property             | Description                                                                                                                                                       | Required |
+|:---------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------|
+| `name`               | The service ID or name.                                                                                                                                           | Yes      |
+| `memory`             | Set a memory limit, for example 256Mi, 512Mi or 1Gi.                                                                                                              | Yes      |
+| `concurrency`        | The max concurrent requests per container. Set to `-1` to use the default concurrency for the platform (recommended).                                             | No       |
+| `max-instances`      | The maximum number of container instances to run. Set to `-1` to use the platform default (recommended).                                                          | No       |
+| `environment`        | A map of environment variables. The values can be Secret Manager URLs on the form `sm://*/my-secret` where `*` will be replaced by the project ID at deploy time. | No       |
+| `cloudsql-instances` | A list of [Cloud SQL instance names](https://cloud.google.com/sdk/gcloud/reference/run/deploy#--add-cloudsql-instances) this service can connect to.              | No       |
+
+These properties only apply to Managed Cloud Run:
+
+| Property                                 | Description                                                                 | Required |
+|:-----------------------------------------|:----------------------------------------------------------------------------|:---------|
+| `platform.managed.region`                | The region in which to run the service.                                     | Yes      |
+| `platform.managed.cpu`                   | The CPU limit for the service. Default is 1. Can be set to 2.               | No       |
+| `platform.managed.allow-unauthenticated` | Whether to enable unauthenticated access to the publicly available service. | Yes      |
+
+These properties only apply to Cloud Run on GKE:
+
+| Property                        | Description                                                                                        | Required |
+|:--------------------------------|:---------------------------------------------------------------------------------------------------|:---------|
+| `platform.gke.cluster`          | The name of the cluster to deploy to.                                                              | Yes      |
+| `platform.gke.cluster-location` | The zone in which the cluster is located.                                                          | Yes      |
+| `platform.gke.connectivity`     | Determines if the service can be invoked through internet. Can be set to `external` or `internal`. | Yes      |
+| `platform.gke.cpu`              | The CPU limit for the service in Kubernetes CPU units, for example 500m.                           | No       |
+| `platform.gke.namespace`        | The Kubernetes namespace to use.                                                                   | No       |
+
+### YAML Examples
+
+#### Managed Cloud Run
 
 This example defines a Cloud Run service that runs in managed Cloud Run.
 ```yaml
 name: my-service
 memory: 256Mi
-allow-unauthenticated: true
-
-runs-on:
+platform:
   managed:
     region: europe-west1
+    allow-unauthenticated: true
 ```
 
 ### Cloud Run on GKE
@@ -37,12 +70,11 @@ This example defines a Cloud Run service that runs on Cloud Run on GKE
 ```yaml
 name: my-service
 memory: 256Mi
-allow-unauthenticated: true
-
-runs-on:
+platform:
   gke:
     cluster: tribe-gke-cluster
     cluster-location: europe-west1
+    connectivity: external
 ```
 Replace the `cluster` and `cluster-location` with the name and location of your target GKE cluster.
 
@@ -52,11 +84,11 @@ Given the following `cloud-run.yaml`:
 ```yaml
 name: my-service
 memory: 256Mi
-allow-unauthenticated: true
 
-runs-on:
+platform:
   managed:
     region: europe-west1
+    allow-unauthenticated: true
 ```
 
 #### Basic Usage

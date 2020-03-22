@@ -21,10 +21,11 @@ describe('Run Deploy', () => {
     const service = {
       name: 'my-service',
       memory: '256Mi',
-      allowUnauthenticated: true,
-      runsOn: {
-        platform: 'managed',
-        region: 'eu-west1',
+      platform: {
+        managed: {
+          region: 'eu-west1',
+          'allow-unauthenticated': true,
+        },
       },
     };
     const returnValue = await runDeploy(
@@ -42,9 +43,54 @@ describe('Run Deploy', () => {
       '--service-account=runtime@google.com',
       '--project=test-project',
       '--memory=256Mi',
-      '--allow-unauthenticated',
+      '--concurrency=default',
+      '--max-instances=default',
+      '--clear-env-vars',
+      '--clear-cloudsql-instances',
+      '--cpu=1',
       '--platform=managed',
       '--region=eu-west1',
+      '--allow-unauthenticated',
+    ]);
+  });
+
+  test('It can deploy with environment', async () => {
+    exec.exec.mockResolvedValueOnce(0);
+    setupGcloud.mockResolvedValueOnce('test-project');
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      environment: {
+        KEY1: 'value',
+        KEY2: 'sm://*/my-secret',
+      },
+      platform: {
+        managed: {
+          region: 'eu-west1',
+          'allow-unauthenticated': true,
+        },
+      },
+    };
+    await runDeploy(
+      serviceAccountKey,
+      service,
+      'runtime@google.com',
+      'gcr.io/test-project/my-service:tag',
+    );
+    expect(exec.exec).toHaveBeenCalledWith('gcloud', [
+      'run', 'deploy', 'my-service',
+      '--image=gcr.io/test-project/my-service:tag',
+      '--service-account=runtime@google.com',
+      '--project=test-project',
+      '--memory=256Mi',
+      '--concurrency=default',
+      '--max-instances=default',
+      '--set-env-vars=KEY1="value",KEY2="sm://test-project/my-secret"',
+      '--clear-cloudsql-instances',
+      '--cpu=1',
+      '--platform=managed',
+      '--region=eu-west1',
+      '--allow-unauthenticated',
     ]);
   });
 
@@ -54,10 +100,11 @@ describe('Run Deploy', () => {
     const service = {
       name: 'my-service',
       memory: '256Mi',
-      allowUnauthenticated: false,
-      runsOn: {
-        platform: 'managed',
-        region: 'eu-west1',
+      platform: {
+        managed: {
+          region: 'eu-west1',
+          'allow-unauthenticated': false,
+        },
       },
     };
     const returnValue = await runDeploy(
@@ -68,19 +115,47 @@ describe('Run Deploy', () => {
     );
     expect(returnValue).toEqual(0);
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.not.arrayContaining(['--allow-unauthenticated']));
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--no-allow-unauthenticated']));
   });
 
-  test('It an deploy to Cloud Run on GKE', async () => {
+  test('It can deploy with sql-instances', async () => {
     exec.exec.mockResolvedValueOnce(0);
     setupGcloud.mockResolvedValueOnce('test-project');
     const service = {
       name: 'my-service',
       memory: '256Mi',
-      allowUnauthenticated: true,
-      runsOn: {
-        platform: 'gke',
-        cluster: 'test',
-        clusterLocation: 'eu-west1-b',
+      'cloud-sql-instances': ['MY-INSTANCE'],
+      platform: {
+        managed: {
+          region: 'eu-west1',
+          'allow-unauthenticated': false,
+        },
+      },
+    };
+    const returnValue = await runDeploy(
+      serviceAccountKey,
+      service,
+      'runtime@google.com',
+      'gcr.io/test-project/my-service:tag',
+    );
+    expect(returnValue).toEqual(0);
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.not.arrayContaining(['--set-cloudsql-instances=MY-INSTANCE']));
+  });
+
+  test('It can deploy to Cloud Run on GKE', async () => {
+    exec.exec.mockResolvedValueOnce(0);
+    setupGcloud.mockResolvedValueOnce('test-project');
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      platform: {
+        gke: {
+          cluster: 'test',
+          'cluster-location': 'eu-west1-b',
+          connectivity: 'external',
+          cpu: '400m',
+          namespace: 'my-space',
+        },
       },
     };
     const returnValue = await runDeploy(
@@ -98,10 +173,16 @@ describe('Run Deploy', () => {
       '--service-account=runtime@google.com',
       '--project=test-project',
       '--memory=256Mi',
-      '--allow-unauthenticated',
+      '--concurrency=default',
+      '--max-instances=default',
+      '--clear-env-vars',
+      '--clear-cloudsql-instances',
+      '--cpu=400m',
       '--platform=gke',
       '--cluster=test',
       '--cluster-location=eu-west1-b',
+      '--connectivity=external',
+      '--namespace=my-space',
     ]);
   });
 });

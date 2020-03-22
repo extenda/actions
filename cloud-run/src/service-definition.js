@@ -1,5 +1,8 @@
 const fs = require('fs');
 const yaml = require('yaml');
+const core = require('@actions/core');
+const { validate } = require('jsonschema');
+const jsonSchema = require('./cloud-run-schema');
 
 const loadFile = (serviceFile) => {
   if (!fs.existsSync(serviceFile)) {
@@ -8,68 +11,19 @@ const loadFile = (serviceFile) => {
   return yaml.parse(fs.readFileSync(serviceFile, 'utf8'));
 };
 
-const requireProperty = (spec, name, fqn = '') => {
-  if (spec[name] === undefined || spec[name] === null) {
-    throw new Error(`Missing required property: ${fqn || name}`);
+const validateSchema = (serviceFile, spec) => {
+  const result = validate(spec, jsonSchema);
+  if (!result.valid) {
+    const message = `${serviceFile} is not valid.\n${result.toString()}`;
+    core.error(message);
+    throw new Error(message);
   }
-};
-
-const validate = (spec) => {
-  requireProperty(spec, 'name');
-  requireProperty(spec, 'memory');
-  requireProperty(spec, 'allow-unauthenticated');
-  requireProperty(spec, 'runs-on');
-
-  const { 'runs-on': runsOn } = spec;
-  if ((!runsOn.managed && !runsOn.gke) || (runsOn.managed && runsOn.gke)) {
-    throw new Error('Invalid runs-on block, must contain either managed or gke property');
-  }
-
-  if (runsOn.managed) {
-    const { managed } = runsOn;
-    requireProperty(managed, 'region', 'runs-on.managed.region');
-  }
-
-  if (runsOn.gke) {
-    const { gke } = runsOn;
-    requireProperty(gke, 'cluster', 'runs-on.gke.cluster');
-    requireProperty(gke, 'cluster-location', 'runs-on.gke.cluster-location');
-  }
-};
-
-const convert = (spec) => {
-  const {
-    name,
-    memory,
-    'allow-unauthenticated': allowUnauthenticated,
-    'runs-on': runsOn,
-  } = spec;
-
-  const model = {
-    name,
-    memory,
-    allowUnauthenticated,
-  };
-
-  if (runsOn.managed) {
-    model.runsOn = {
-      platform: 'managed',
-      region: runsOn.managed.region,
-    };
-  } else {
-    model.runsOn = {
-      platform: 'gke',
-      cluster: runsOn.gke.cluster,
-      clusterLocation: runsOn.gke['cluster-location'],
-    };
-  }
-  return model;
 };
 
 const loadServiceDefinition = (serviceFile) => {
   const spec = loadFile(serviceFile);
-  validate(spec);
-  return convert(spec);
+  validateSchema(serviceFile, spec);
+  return spec;
 };
 
 module.exports = loadServiceDefinition;

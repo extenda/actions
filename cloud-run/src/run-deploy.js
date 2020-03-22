@@ -1,6 +1,7 @@
 const exec = require('@actions/exec');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const getRuntimeAccount = require('./runtime-account');
+const createEnvironmentArgs = require('./environment-args');
 
 const glcoudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -13,28 +14,90 @@ const runDeploy = async (serviceAccountKey, service, runtimeAccountEmail, image)
 
   const runtimeAccount = await getRuntimeAccount(runtimeAccountEmail, projectId);
 
-  const args = ['run', 'deploy', service.name,
+  const {
+    name,
+    memory,
+    concurrency = 'default',
+    'max-instances': maxInstances = 'default',
+    environment = undefined,
+    'cloudsql-instances': cloudSqlInstances = undefined,
+  } = service;
+
+  const args = ['run', 'deploy', name,
     `--image=${image}`,
     `--service-account=${runtimeAccount}`,
     `--project=${projectId}`,
-    `--memory=${service.memory}`,
+    `--memory=${memory}`,
+    `--concurrency=${concurrency}`,
+    `--max-instances=${maxInstances}`,
   ];
 
-  if (service.allowUnauthenticated) {
-    args.push('--allow-unauthenticated');
+  if (environment) {
+    args.push(`--set-env-vars=${createEnvironmentArgs(environment, projectId)}`);
+  } else {
+    args.push('--clear-env-vars');
   }
 
-  if (service.runsOn.platform === 'managed') {
-    args.push(
-      '--platform=managed',
-      `--region=${service.runsOn.region}`,
-    );
+  if (cloudSqlInstances) {
+    args.push(`--set-cloudsql-instances=${cloudSqlInstances.join(',')}`);
   } else {
+    args.push('--clear-cloudsql-instances');
+  }
+
+  // TODO Add --set-env-vars=KEY=value,KEY2=value2
+  // Labels needed? Probably not?
+  // --revision-suffix should we set that? If tagged, use the tag, otherwise use the short-SHA? v1.0.0 vs sha-ABCDEF
+  // --set-cloudsql-instances
+  // Do we need to support the cmd and args?
+
+  if (service.platform.managed) {
+    const {
+      platform: {
+        managed: {
+          cpu = 1,
+          region,
+          'allow-unauthenticated': allowUnauthenticated,
+        },
+      },
+    } = service;
+
     args.push(
-      '--platform=gke',
-      `--cluster=${service.runsOn.cluster}`,
-      `--cluster-location=${service.runsOn.clusterLocation}`,
+      `--cpu=${cpu}`,
+      '--platform=managed',
+      `--region=${region}`,
     );
+
+    if (allowUnauthenticated) {
+      args.push('--allow-unauthenticated');
+    } else {
+      args.push('--no-allow-unauthenticated');
+    }
+  }
+
+  if (service.platform.gke) {
+    const {
+      platform: {
+        gke: {
+          cpu = '1',
+          cluster,
+          'cluster-location': clusterLocation,
+          connectivity,
+          namespace = undefined,
+        },
+      },
+    } = service;
+
+    args.push(
+      `--cpu=${cpu}`,
+      '--platform=gke',
+      `--cluster=${cluster}`,
+      `--cluster-location=${clusterLocation}`,
+      `--connectivity=${connectivity}`,
+    );
+
+    if (namespace) {
+      args.push(`--namespace=${namespace}`);
+    }
   }
 
   return exec.exec('gcloud', args);
