@@ -58,6 +58,9 @@ This example defines a Cloud Run service that runs in managed Cloud Run.
 ```yaml
 name: my-service
 memory: 256Mi
+environment:
+  DEBUG_LOG: 'false'
+  SECRET_NAME: sm://*/secret-name
 platform:
   managed:
     region: europe-west1
@@ -84,7 +87,6 @@ Given the following `cloud-run.yaml`:
 ```yaml
 name: my-service
 memory: 256Mi
-
 platform:
   managed:
     region: europe-west1
