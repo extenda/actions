@@ -9,10 +9,17 @@ const runDeploy = require('../src/run-deploy');
 
 const serviceAccountKey = Buffer.from('test', 'utf8').toString('base64');
 
+const orgEnv = process.env;
+
 describe('Run Deploy', () => {
+  beforeEach(() => {
+    process.env = { ...orgEnv };
+    process.env.GITHUB_SHA = '63633c0'; // v.0.18.0
+  });
   afterEach(() => {
     jest.resetAllMocks();
     mockFs.restore();
+    process.env = orgEnv;
   });
 
   test('It can deploy to managed Cloud Run', async () => {
@@ -45,6 +52,7 @@ describe('Run Deploy', () => {
       '--memory=256Mi',
       '--concurrency=default',
       '--max-instances=default',
+      '--revision-suffix=v0.18.0',
       '--clear-env-vars',
       '--clear-cloudsql-instances',
       '--cpu=1',
@@ -57,6 +65,7 @@ describe('Run Deploy', () => {
   test('It can deploy with environment', async () => {
     exec.exec.mockResolvedValueOnce(0);
     setupGcloud.mockResolvedValueOnce('test-project');
+    process.env.GITHUB_SHA = '382aee2'; // Not tagged
     const service = {
       name: 'my-service',
       memory: '256Mi',
@@ -85,6 +94,7 @@ describe('Run Deploy', () => {
       '--memory=256Mi',
       '--concurrency=default',
       '--max-instances=default',
+      '--revision-suffix=382aee2',
       '--set-env-vars=KEY1="value",KEY2="sm://test-project/my-secret"',
       '--clear-cloudsql-instances',
       '--cpu=1',
@@ -175,6 +185,7 @@ describe('Run Deploy', () => {
       '--memory=256Mi',
       '--concurrency=default',
       '--max-instances=default',
+      '--revision-suffix=v0.18.0',
       '--clear-env-vars',
       '--clear-cloudsql-instances',
       '--cpu=400m',

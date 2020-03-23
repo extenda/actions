@@ -2,11 +2,19 @@ const exec = require('@actions/exec');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const getRuntimeAccount = require('./runtime-account');
 const createEnvironmentArgs = require('./environment-args');
+const branchInfo = require('../../utils/src/branch-info');
 
 const glcoudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
   process.env.GCLOUD_INSTALLED_VERSION || 'latest',
 );
+
+const revisionSuffix = async () => {
+  const sha = process.env.GITHUB_SHA;
+  const tagAtSha = await branchInfo.getTagAtCommit(sha);
+  const shortSha = await branchInfo.getShortSha(sha);
+  return tagAtSha || shortSha;
+};
 
 const runDeploy = async (serviceAccountKey, service, runtimeAccountEmail, image) => {
   // Authenticate gcloud with our service-account
@@ -30,6 +38,7 @@ const runDeploy = async (serviceAccountKey, service, runtimeAccountEmail, image)
     `--memory=${memory}`,
     `--concurrency=${concurrency}`,
     `--max-instances=${maxInstances}`,
+    `--revision-suffix=${await revisionSuffix()}`,
   ];
 
   if (environment) {
@@ -43,8 +52,6 @@ const runDeploy = async (serviceAccountKey, service, runtimeAccountEmail, image)
   } else {
     args.push('--clear-cloudsql-instances');
   }
-
-  // TODO Add --revision-suffix from tag or short-sha
 
   if (service.platform.managed) {
     const {
