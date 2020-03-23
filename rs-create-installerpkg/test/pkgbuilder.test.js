@@ -1,62 +1,60 @@
-const os = require('os');
-const path = require('path');
-const fs = require('fs');
-const fsExtra = require('fs-extra');
+const mockFs = require('mock-fs');
 
-// Used by @actions/tool-cache. Directory must exist before we load module.
-const outputDir = path.join(__dirname, '..', 'test_output_dir');
-const pkgVer = '1.0.1-testversion';
-process.env.RUNNER_TEMP = outputDir;
-process.env.RUNNER_TOOL_CACHE = outputDir;
+jest.mock('@actions/exec');
 
-if (!process.env.NEXUS_USERNAME) {
-  // eslint-disable-next-line no-console
-  console.log('Using local user credentials in test');
-  process.env.NEXUS_USERNAME = process.env.GITHUB_USER;
-  process.env.NEXUS_PASSWORD = process.env.GITHUB_TOKEN;
-}
+// Mock out tools download
+jest.mock('../../utils', () => ({
+  loadTool: jest.fn(),
+}));
 
-// Directory must exist for tool-cache.
-fsExtra.mkdirs(outputDir);
+const exec = require('@actions/exec');
+const { loadTool } = require('../../utils');
+const { buildPackage } = require('../src/pkgbuilder');
 
-// We must import pkgbuilder AFTER preparing the environment.
-const { buildPackage, downloadBuildTool } = require('../src/pkgbuilder');
-
-jest.setTimeout(30000);
 
 describe('RS installer package tests', () => {
-  beforeAll(() => {
-    fsExtra.mkdirs(outputDir);
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   afterAll(() => {
-    fsExtra.removeSync(outputDir);
+    mockFs.restore();
   });
 
-  test('It downloads the build tool', async () => {
-    const tool = await downloadBuildTool({
+  test('It can run the builder', async () => {
+    mockFs({
+      workdir: {},
+      output: {},
+    });
+    loadTool.mockResolvedValueOnce('pkgbuilder');
+    exec.exec.mockResolvedValueOnce(0);
+    await buildPackage({
+      builderType: 'single',
       binaryVersion: '1.1.0',
+      packageName: 'Test_PkgName',
+      workingDir: 'workdir',
+      outputDir: 'output',
+      sourcePaths: __dirname,
+      sourceFilePaths: '',
+      packageVersion: '1.0.1-testversion',
     });
-    expect(fs.existsSync(tool)).toEqual(true);
+
+    expect(loadTool).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1]).toEqual([
+      'single',
+      '-pn',
+      'Test_PkgName',
+      '-wd',
+      'workdir',
+      '-od',
+      'output',
+      '-sp',
+      __dirname,
+      '-sfp',
+      '',
+      '-pv',
+      '1.0.1-testversion',
+    ]);
   });
-
-  // There's no binary we can test on MacOS
-  if (os.platform() !== 'darwin') {
-    test('It can run the builder', async () => {
-      // Should create a package of this file and place it under ../test_output_dir.
-      await buildPackage({
-        builderType: 'single',
-        binaryVersion: '1.1.0',
-        packageName: 'Test_PkgName',
-        workingDir: os.tmpdir(),
-        outputDir,
-        sourcePaths: __dirname,
-        sourceFilePaths: '',
-        packageVersion: pkgVer,
-      });
-
-      expect(fs.existsSync(path.join(outputDir, 'Test_PkgName.pkg.xml'))).toBe(true);
-      expect(fs.existsSync(path.join(outputDir, `Test_PkgName_${pkgVer}.pkg.zip`))).toBe(true);
-    });
-  }
 });

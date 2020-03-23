@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const fs = require('fs');
 const mvn = require('./mvn');
-const { checkEnv } = require('../../utils');
+const { run, checkEnv } = require('../../utils');
 const versions = require('../../utils/src/versions');
 
 const setVersion = async (version) => core.group(
@@ -15,30 +15,31 @@ const pomExists = (args) => args.includes('-f ')
   || args.includes('--file=')
   || fs.existsSync('pom.xml');
 
-const run = async () => {
+const action = async () => {
   const args = core.getInput('args', { required: true });
   const version = core.getInput('version');
-  try {
-    checkEnv(['NEXUS_USERNAME', 'NEXUS_PASSWORD']);
 
-    const hasPom = pomExists(args);
+  checkEnv(['NEXUS_USERNAME', 'NEXUS_PASSWORD']);
 
-    if (!process.env.MAVEN_INIT) {
-      await mvn.copySettings();
-      core.exportVariable('MAVEN_INIT', 'true');
-      if (!version && hasPom) {
-        await versions.getBuildVersion('-SNAPSHOT').then(setVersion);
-      }
+  const hasPom = pomExists(args);
+
+  if (!process.env.MAVEN_INIT) {
+    await mvn.copySettings();
+    core.exportVariable('MAVEN_INIT', 'true');
+    if (!version && hasPom) {
+      await versions.getBuildVersion('-SNAPSHOT').then(setVersion);
     }
-
-    if (hasPom && version && version !== 'pom.xml') {
-      await setVersion(version);
-    }
-
-    await mvn.run(args);
-  } catch (err) {
-    core.setFailed(err.message);
   }
+
+  if (hasPom && version && version !== 'pom.xml') {
+    await setVersion(version);
+  }
+
+  await mvn.run(args);
 };
 
-run();
+if (require.main === module) {
+  run(action);
+}
+
+module.exports = action;
