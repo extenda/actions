@@ -2,6 +2,7 @@ const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const fsExtra = require('fs-extra');
+const exec = require('@actions/exec');
 
 // Used by @actions/tool-cache. Directory must exist before we load module.
 const outputDir = path.join(__dirname, '..', 'test_output_dir');
@@ -40,7 +41,6 @@ describe('RS Permission Converter Tests', () => {
   // There's no binary we can test on MacOS
   if (os.platform() !== 'darwin') {
     jest.mock('@actions/exec');
-    const exec = require('@actions/exec');
     test('the permission converter is called correctly for sql', async () => {
       await convertPermissions({
         binaryVersion: '1.0.0',
