@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+const git = require('simple-git/promise')();
 
 const isPreRelease = (branchName) => branchName !== 'master';
 
@@ -47,26 +47,12 @@ const getBranchNameFriendly = (branchName) => {
 };
 
 const getShortSha = async (sha, shaSize = null) => {
-  const args = ['rev-parse'];
-
-  if (shaSize) {
-    args.push(`--short=${shaSize}`);
-  } else {
-    args.push('--short');
-  }
-
-  let execOutput = '';
-  const options = {};
-  options.listeners = {
-    stdout: (data) => {
-      execOutput += data.toString();
-    },
-  };
-
-  args.push(sha);
-  await exec.exec('git', args, options);
-  return execOutput.trimRight();
+  const args = [shaSize ? `--short=${shaSize}` : '--short', sha];
+  return git.revparse(args);
 };
+
+const getTagAtCommit = async (sha) => git.tag(['--points-at', sha])
+  .then((output) => output.trim());
 
 const getComposedVersionString = (version, branchNameFriendly, buildNumber, shortSha) => {
   if (!branchNameFriendly) {
@@ -93,4 +79,5 @@ module.exports = {
   getShortSha,
   getComposedVersionString,
   getBranchType,
+  getTagAtCommit,
 };

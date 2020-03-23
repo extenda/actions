@@ -1,0 +1,19 @@
+{
+  "name": "setup-gcloud",
+  "version": "0.0.1-local",
+  "private": true,
+  "description": "Setup GCloud CLI",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "../node_modules/.bin/jest --config ../jest.config.js",
+    "build": "../node_modules/.bin/ncc build src/index.js"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.3",
+    "@actions/exec": "^1.0.3",
+    "axios": "^0.19.2"
+  },
+  "devDependencies": {
+    "mock-fs": "^4.11.0"
+  }
+}

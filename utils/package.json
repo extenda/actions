@@ -26,6 +26,10 @@
     "simple-git": "^1.126.0",
     "stream-to-string": "^1.2.0",
     "through2": "^3.0.1",
+    "tmp": "^0.1.0",
     "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "mock-fs": "^4.11.0"
   }
 }

@@ -10,6 +10,7 @@ the fundamental parts of our CI/CD pipelines.
 
 The following actions are available
 
+  * [cloud-run](cloud-run#readme)
   * [commitlint](commitlint#readme)
   * [conventional-release](conventional-release#readme)
   * [conventional-version](conventional-version#readme)
@@ -18,6 +19,7 @@ The following actions are available
   * [jira-releasenotes](jira-releasenotes#readme)
   * [maven](maven#readme)
   * [rs-create-installerpkg](rs-create-installerpkg#readme)
+  * [setup-gcloud](setup-gcloud#readme)
   * [setup-git](setup-git#readme)
   * [setup-msbuild](setup-msbuild#readme)
   * [setup-nuget-sources](setup-nuget-sources#readme)
@@ -300,10 +302,6 @@ This workflow demonstrates how a Node project can be built using two jobs.
 name: Commit
 on: push
 
-env:
-  GCLOUD_VERSION: '282.0.0'
-  GCP_PROJECT: example-project-a123
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -358,15 +356,15 @@ jobs:
           npm version ${{ steps.release.outputs.version }} --no-git-tag-version
           npm run build
 
-      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      - uses: extenda/actions/setup-gcloud@v0
+        id: gcloud
         with:
-          version: ${{ env.GCLOUD_VERSION }}
           service_account_key: ${{ secrets.GCLOUD_AUTH }}
 
       - name: Publish Docker image
         run: |
           gcloud auth configure-docker
-          IMAGE=gcr.io/$GCP_PROJECT/my-example:v${{ steps.release.outputs.version }}
+          IMAGE=gcr.io/${{ steps.gcloud.outputs.project-id }}/my-example:v${{ steps.release.outputs.version }}
           docker build -t $IMAGE .
           docker push $IMAGE
 ```

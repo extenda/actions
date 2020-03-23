@@ -5,6 +5,7 @@ const {
   getShortSha,
   getBranchType,
   getComposedVersionString,
+  getTagAtCommit,
 } = require('../src/branch-info');
 
 describe('Branch info test suite', () => {
@@ -63,6 +64,16 @@ describe('Branch info test suite', () => {
 
     const resultSize = await getShortSha(sha, shaSize);
     expect(resultSize).toEqual('921103db82');
+  });
+
+  test('getTagAtCommit() returns a semantic version for tagged commits', async () => {
+    const tag = await getTagAtCommit('63633c0');
+    expect(tag).toEqual('v0.18.0');
+  });
+
+  test('gitTagAtCommit() returns empty string for untagged commits', async () => {
+    const tag = await getTagAtCommit('382aee2');
+    expect(tag).toEqual('');
   });
 
   test('getBranchType() returns master, dev or feature based on branchNameFriendly', () => {
