@@ -40,6 +40,7 @@ describe('RS Permission Converter Tests', () => {
   // There's no binary we can test on MacOS
   if (os.platform() !== 'darwin') {
     jest.mock('@actions/exec');
+    const exec = require('@actions/exec');
     test('the permission converter is called correctly for sql', async () => {
       await convertPermissions({
         binaryVersion: '1.0.0',
