@@ -30,7 +30,10 @@ describe('RS Permission Converter Tests', () => {
 
   afterAll(() => {
     fsExtra.removeSync(outputDir);
-    jest.unmock('@actions/exec');
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   test('It downloads the build tool', async () => {
@@ -61,7 +64,7 @@ describe('RS Permission Converter Tests', () => {
         permFile: 'permFile',
         outputDir: 'outputDir',
       });
-      expect(exec.exec.mock.calls[1][1]).toEqual(['resx', '-w /workDir', '-p permFile', '--output-folder outputDir']);
+      expect(exec.exec.mock.calls[0][1]).toEqual(['resx', '-w /workDir', '-p permFile', '--output-folder outputDir']);
     });
   }
 });
