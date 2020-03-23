@@ -2,7 +2,6 @@ const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const fsExtra = require('fs-extra');
-const exec = require('@actions/exec');
 
 // Used by @actions/tool-cache. Directory must exist before we load module.
 const outputDir = path.join(__dirname, '..', 'test_output_dir');
@@ -40,8 +39,8 @@ describe('RS Permission Converter Tests', () => {
 
   // There's no binary we can test on MacOS
   if (os.platform() !== 'darwin') {
+    jest.mock('@actions/exec');
     test('the permission converter is called correctly for sql', async () => {
-      exec.exec = jest.fn();
       await convertPermissions({
         binaryVersion: '1.0.0',
         type: 'sql',
@@ -53,7 +52,6 @@ describe('RS Permission Converter Tests', () => {
     });
 
     test('the permission converter is called correctly for resx', async () => {
-      exec.exec = jest.fn();
       await convertPermissions({
         binaryVersion: '1.0.0',
         type: 'resx',
@@ -63,5 +61,6 @@ describe('RS Permission Converter Tests', () => {
       });
       expect(exec.exec.mock.calls[0][1]).toEqual(['resx', '-w /workDir', '-p permFile', '--output-folder outputDir']);
     });
+    jest.unmock('@actions/exec');
   }
 });
