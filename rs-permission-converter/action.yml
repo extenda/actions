@@ -1,0 +1,30 @@
+name: RS Permission Converter
+description: Wraps command line tool for converting permissions for RS
+inputs:
+  type:
+    description: sql or resx
+    required: true
+    default: null
+  binaryVersion:
+    description: version of the permission converter tool
+    required: false
+    default: '1.0.0'
+  workDir:
+    description: working directory
+    required: true
+    default: null
+  permFile:
+    description: permissions file
+    required: true
+    default: null
+  outputDir:
+    description: output directory
+    required: false
+    default: null
+  sqlFile:
+    description: sql file
+    required: false
+    default: null
+runs:
+  using: node12
+  main: dist/index.js
