@@ -13,6 +13,6 @@
     "@actions/exec": "^1.0.1"
   },
   "devDependencies": {
-    "fs-extra": "^8.1.0"
+    "mock-fs": "^4.11.0"
   }
 }
