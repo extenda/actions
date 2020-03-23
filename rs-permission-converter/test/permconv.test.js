@@ -22,6 +22,7 @@ const { convertPermissions, downloadPermConvTool } = require('../src/permconv');
 
 jest.setTimeout(30000);
 
+jest.mock('@actions/exec');
 describe('RS Permission Converter Tests', () => {
   beforeAll(() => {
     fsExtra.mkdirs(outputDir);
@@ -29,6 +30,7 @@ describe('RS Permission Converter Tests', () => {
 
   afterAll(() => {
     fsExtra.removeSync(outputDir);
+    jest.unmock('@actions/exec');
   });
 
   test('It downloads the build tool', async () => {
@@ -40,7 +42,6 @@ describe('RS Permission Converter Tests', () => {
 
   // There's no binary we can test on MacOS
   if (os.platform() !== 'darwin') {
-    jest.mock('@actions/exec');
     test('the permission converter is called correctly for sql', async () => {
       await convertPermissions({
         binaryVersion: '1.0.0',
@@ -60,8 +61,7 @@ describe('RS Permission Converter Tests', () => {
         permFile: 'permFile',
         outputDir: 'outputDir',
       });
-      expect(exec.exec.mock.calls[0][1]).toEqual(['resx', '-w /workDir', '-p permFile', '--output-folder outputDir']);
+      expect(exec.exec.mock.calls[1][1]).toEqual(['resx', '-w /workDir', '-p permFile', '--output-folder outputDir']);
     });
-    jest.unmock('@actions/exec');
   }
 });
