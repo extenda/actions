@@ -9,7 +9,6 @@ module.exports = {
   coveragePathIgnorePatterns: [
     '/node_modules/',
   ],
-  displayName: 'test',
   reporters: [
     'default',
     [
