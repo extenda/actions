@@ -2935,7 +2935,7 @@ const setupGcloud = __webpack_require__(378);
 
 run(async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
-  const version = core.getInput('version', { required: true });
+  const version = core.getInput('version') || 'latest';
   await setupGcloud(serviceAccountKey, version);
 });
 
@@ -10388,9 +10388,20 @@ const downloadIfMissing = async (options, cachedTool) => {
     } = options;
     core.info(`Downloading ${tool} from ${downloadUrl}`);
     const downloadUuid = await internalDownload(downloadUrl, auth);
+
     const tmpDir = path.dirname(downloadUuid);
-    const tmpFile = path.join(tmpDir, binary);
-    await io.cp(downloadUuid, tmpFile);
+
+    if (downloadUrl.endsWith('.tar.gz')) {
+      await tc.extractTar(downloadUuid, tmpDir);
+    } else if (downloadUrl.endsWith('.zip')) {
+      await tc.extractZip(downloadUuid, tmpDir);
+    } else if (downloadUrl.endsWith('.7z')) {
+      await tc.extract7z(downloadUuid, tmpDir);
+    } else {
+      // Raw file
+      const tmpFile = path.join(tmpDir, binary);
+      await io.cp(downloadUuid, tmpFile);
+    }
     await tc.cacheDir(tmpDir, tool, version);
     return find(options);
   }
