@@ -10,7 +10,6 @@ inputs:
   service-definition:
     description: |
       The service YAML specification.
-    required: true
     default: cloud-run.yaml
   image:
     description: The Docker image to deploy to Cloud Run.
@@ -20,7 +19,6 @@ inputs:
       The runtime service account used by the Cloud Run service. This can either be specified as a fully-qualified
       email address, for example `my-service@my-gcp-project.iam.googleservices.com` or as the prefix `my-service`.
       When a prefix is used, the action will automatically append the email domain based on the current GCP project.
-    required: true
     default: cloudrun-runtime
 runs:
   using: node12
