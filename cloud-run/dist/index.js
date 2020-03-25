@@ -5221,12 +5221,7 @@ const glcoudAuth = async (serviceAccountKey) => setupGcloud(
   process.env.GCLOUD_INSTALLED_VERSION || 'latest',
 );
 
-const revisionSuffix = async () => {
-  const sha = process.env.GITHUB_SHA;
-  const tagAtSha = await branchInfo.getTagAtCommit(sha);
-  const shortSha = await branchInfo.getShortSha(sha);
-  return tagAtSha || shortSha;
-};
+const revisionSuffix = async () => branchInfo.getShortSha(process.env.GITHUB_SHA);
 
 const runDeploy = async (serviceAccountKey, service, runtimeAccountEmail, image) => {
   // Authenticate gcloud with our service-account
