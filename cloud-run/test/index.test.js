@@ -8,6 +8,10 @@ const runDeploy = require('../src/run-deploy');
 const serviceDef = require('../src/service-definition');
 
 describe('Cloud Run Action', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   test('It can run the action', async () => {
     serviceDef.mockReturnValueOnce({});
     core.getInput.mockReturnValueOnce('service-account')
@@ -22,6 +26,24 @@ describe('Cloud Run Action', () => {
       'service-account',
       {},
       'account@gmail.com',
+      'gcr.io/project/image:tag',
+    );
+  });
+
+  test('It can run without optional args', async () => {
+    serviceDef.mockReturnValueOnce({});
+    core.getInput.mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('gcr.io/project/image:tag');
+
+    await action();
+
+    expect(core.getInput).toHaveBeenCalledTimes(4);
+    expect(runDeploy).toHaveBeenCalledWith(
+      'service-account',
+      {},
+      'cloudrun-runtime',
       'gcr.io/project/image:tag',
     );
   });

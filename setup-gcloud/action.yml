@@ -7,6 +7,9 @@ inputs:
       The service account key which will be used for authentication.
       The account key should be a base64 encoded JSON key stored as a secret.
     required: true
+  version:
+    description: Optional gcloud version to install. Defaults to 'latest'.
+    default: latest
 outputs:
   project-id:
     description: The default project ID associated with the service account.

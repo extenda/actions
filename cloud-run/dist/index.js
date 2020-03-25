@@ -2919,8 +2919,8 @@ const runDeploy = __webpack_require__(193);
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
-  const serviceFile = core.getInput('service-definition', { required: true });
-  const runtimeAccountEmail = core.getInput('runtime-account-email', { required: true });
+  const serviceFile = core.getInput('service-definition') || 'cloud-run.yaml';
+  const runtimeAccountEmail = core.getInput('runtime-account-email') || 'cloudrun-runtime';
   const image = core.getInput('image', { required: true });
 
   const service = loadServiceDefinition(serviceFile);
@@ -6342,6 +6342,8 @@ module.exports = function bind(fn, thisArg) {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const os = __webpack_require__(87);
+const path = __webpack_require__(622);
+const fs = __webpack_require__(747);
 const core = __webpack_require__(804);
 const exec = __webpack_require__(541);
 const { loadTool } = __webpack_require__(320);
@@ -6349,30 +6351,18 @@ const createKeyFile = __webpack_require__(267);
 const getDownloadUrl = __webpack_require__(548);
 const getLatestVersion = __webpack_require__(171);
 
-const configureGcloud = async (gcloud, serviceAccountKey) => {
+const configureGcloud = async (serviceAccountKey) => {
+  const gcloud = os.platform() === 'win32' ? 'gcloud.cmd' : 'gcloud';
+  const jsonKeyFile = createKeyFile(serviceAccountKey);
   await exec.exec(gcloud, [
     '--quiet',
     'auth',
     'activate-service-account',
     '--key-file',
-    createKeyFile(serviceAccountKey),
+    jsonKeyFile,
   ]);
 
-  let projectOutput = '';
-  await exec.exec(gcloud, [
-    'config',
-    'list',
-    '--format',
-    "'value(core.project)'",
-  ], {
-    listeners: {
-      stdout: (data) => {
-        projectOutput += data.toString('utf8');
-      },
-    },
-  });
-  const projectId = projectOutput.trim();
-  core.setOutput('project-id', projectId);
+  const { project_id: projectId = '' } = JSON.parse(fs.readFileSync(jsonKeyFile, 'utf8'));
   return projectId;
 };
 
@@ -6382,19 +6372,21 @@ const setupGcloud = async (serviceAccountKey, version = 'latest') => {
     semver = await getLatestVersion();
     core.info(`Use latest gcloud version: ${semver}`);
   }
-  const binary = os.platform() === 'win32' ? 'gcloud.cmd' : 'gcloud';
   const downloadUrl = getDownloadUrl(semver);
 
   return loadTool({
     tool: 'gcloud',
-    binary,
+    binary: 'google-cloud-sdk',
     version: semver,
     downloadUrl,
-  }).then((gcloud) => configureGcloud(gcloud, serviceAccountKey))
-    .then((projectId) => {
-      core.exportVariable('GCLOUD_INSTALLED_VERSION', semver);
-      return projectId;
-    });
+  }).then((gcloud) => {
+    core.addPath(path.join(gcloud, 'bin'));
+    return configureGcloud(serviceAccountKey);
+  }).then((projectId) => {
+    core.setOutput('project-id', projectId);
+    core.exportVariable('GCLOUD_INSTALLED_VERSION', semver);
+    return projectId;
+  });
 };
 
 module.exports = setupGcloud;
@@ -14845,9 +14837,20 @@ const downloadIfMissing = async (options, cachedTool) => {
     } = options;
     core.info(`Downloading ${tool} from ${downloadUrl}`);
     const downloadUuid = await internalDownload(downloadUrl, auth);
+
     const tmpDir = path.dirname(downloadUuid);
-    const tmpFile = path.join(tmpDir, binary);
-    await io.cp(downloadUuid, tmpFile);
+
+    if (downloadUrl.endsWith('.tar.gz')) {
+      await tc.extractTar(downloadUuid, tmpDir);
+    } else if (downloadUrl.endsWith('.zip')) {
+      await tc.extractZip(downloadUuid, tmpDir);
+    } else if (downloadUrl.endsWith('.7z')) {
+      await tc.extract7z(downloadUuid, tmpDir);
+    } else {
+      // Raw file
+      const tmpFile = path.join(tmpDir, binary);
+      await io.cp(downloadUuid, tmpFile);
+    }
     await tc.cacheDir(tmpDir, tool, version);
     return find(options);
   }
