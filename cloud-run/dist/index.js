@@ -2920,12 +2920,11 @@ const runDeploy = __webpack_require__(193);
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const serviceFile = core.getInput('service-definition') || 'cloud-run.yaml';
-  const runtimeAccountEmail = core.getInput('runtime-account-email') || 'cloudrun-runtime';
   const image = core.getInput('image', { required: true });
 
   const service = loadServiceDefinition(serviceFile);
 
-  await runDeploy(serviceAccountKey, service, runtimeAccountEmail, image);
+  await runDeploy(serviceAccountKey, service, image);
 };
 
 if (require.main === require.cache[eval('__filename')]) {
@@ -5214,38 +5213,102 @@ const exec = __webpack_require__(266);
 const setupGcloud = __webpack_require__(217);
 const getRuntimeAccount = __webpack_require__(838);
 const createEnvironmentArgs = __webpack_require__(471);
-const branchInfo = __webpack_require__(533);
+const getClusterInfo = __webpack_require__(776);
+const createNamespace = __webpack_require__(530);
 
 const glcoudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
   process.env.GCLOUD_INSTALLED_VERSION || 'latest',
 );
 
-const revisionSuffix = async () => branchInfo.getShortSha(process.env.GITHUB_SHA);
+const numericOrDefault = (value) => (value >= 0 ? value : 'default');
 
-const runDeploy = async (serviceAccountKey, service, runtimeAccountEmail, image) => {
-  // Authenticate gcloud with our service-account
-  const projectId = await glcoudAuth(serviceAccountKey);
+const managedArguments = async (args, service, projectId) => {
+  const {
+    platform: {
+      managed: {
+        'allow-unauthenticated': allowUnauthenticated,
+        'cloudsql-instances': cloudSqlInstances = undefined,
+        region,
+        cpu = 1,
+        'runtime-account': runtimeAccountEmail = 'cloudrun-runtime',
+      },
+    },
+  } = service;
 
   const runtimeAccount = await getRuntimeAccount(runtimeAccountEmail, projectId);
+  args.push(`--service-account=${runtimeAccount}`);
+
+  args.push(
+    `--cpu=${cpu}`,
+    '--platform=managed',
+    `--region=${region}`,
+  );
+
+  if (Array.isArray(cloudSqlInstances)) {
+    if (cloudSqlInstances.length === 0) {
+      args.push('--clear-cloudsql-instances');
+    } else {
+      args.push(`--set-cloudsql-instances=${cloudSqlInstances.join(',')}`);
+    }
+  }
+
+  if (allowUnauthenticated) {
+    args.push('--allow-unauthenticated');
+  } else {
+    args.push('--no-allow-unauthenticated');
+  }
+};
+
+const gkeArguments = async (args, service, projectId) => {
+  const {
+    name,
+    'min-instances': minInstances = -1,
+    platform: {
+      gke: {
+        cluster: configuredCluster = undefined,
+        cpu = '1',
+        connectivity,
+        namespace = name,
+      },
+    },
+  } = service;
+
+  const cluster = await getClusterInfo(projectId, configuredCluster);
+
+  args.push(
+    `--cpu=${cpu}`,
+    `--min-instances=${numericOrDefault(minInstances)}`,
+    '--platform=gke',
+    `--cluster=${cluster.uri}`,
+    `--cluster-location=${cluster.clusterLocation}`,
+    `--connectivity=${connectivity}`,
+  );
+
+  if (namespace !== 'default') {
+    await createNamespace(cluster, namespace);
+  }
+  args.push(`--namespace=${namespace}`);
+};
+
+const runDeploy = async (serviceAccountKey, service, image) => {
+  // Authenticate gcloud with our service-account
+  const projectId = await glcoudAuth(serviceAccountKey);
 
   const {
     name,
     memory,
-    concurrency = 'default',
-    'max-instances': maxInstances = 'default',
+    concurrency = -1,
+    'max-instances': maxInstances = -1,
     environment = undefined,
-    'cloudsql-instances': cloudSqlInstances = undefined,
   } = service;
 
   const args = ['run', 'deploy', name,
     `--image=${image}`,
-    `--service-account=${runtimeAccount}`,
     `--project=${projectId}`,
     `--memory=${memory}`,
-    `--concurrency=${concurrency}`,
-    `--max-instances=${maxInstances}`,
-    `--revision-suffix=${await revisionSuffix()}`,
+    `--concurrency=${numericOrDefault(concurrency)}`,
+    `--max-instances=${numericOrDefault(maxInstances)}`,
   ];
 
   if (environment) {
@@ -5254,60 +5317,12 @@ const runDeploy = async (serviceAccountKey, service, runtimeAccountEmail, image)
     args.push('--clear-env-vars');
   }
 
-  if (cloudSqlInstances) {
-    args.push(`--set-cloudsql-instances=${cloudSqlInstances.join(',')}`);
-  } else {
-    args.push('--clear-cloudsql-instances');
-  }
-
   if (service.platform.managed) {
-    const {
-      platform: {
-        managed: {
-          cpu = 1,
-          region,
-          'allow-unauthenticated': allowUnauthenticated,
-        },
-      },
-    } = service;
-
-    args.push(
-      `--cpu=${cpu}`,
-      '--platform=managed',
-      `--region=${region}`,
-    );
-
-    if (allowUnauthenticated) {
-      args.push('--allow-unauthenticated');
-    } else {
-      args.push('--no-allow-unauthenticated');
-    }
+    await managedArguments(args, service, projectId);
   }
 
   if (service.platform.gke) {
-    const {
-      platform: {
-        gke: {
-          cpu = '1',
-          cluster,
-          'cluster-location': clusterLocation,
-          connectivity,
-          namespace = undefined,
-        },
-      },
-    } = service;
-
-    args.push(
-      `--cpu=${cpu}`,
-      '--platform=gke',
-      `--cluster=${cluster}`,
-      `--cluster-location=${clusterLocation}`,
-      `--connectivity=${connectivity}`,
-    );
-
-    if (namespace) {
-      args.push(`--namespace=${namespace}`);
-    }
+    await gkeArguments(args, service, projectId);
   }
 
   return exec.exec('gcloud', args);
@@ -8817,14 +8832,12 @@ module.exports = {
       type: 'integer',
       default: -1,
     },
+    'min-instances': {
+      type: 'integer',
+      default: -1,
+    },
     environment: {
       type: 'object',
-    },
-    'cloudsql-instances': {
-      type: 'array',
-      items: {
-        type: 'string',
-      },
     },
     platform: {
       type: 'object',
@@ -8832,16 +8845,26 @@ module.exports = {
         managed: {
           type: 'object',
           properties: {
-            region: {
-              type: 'string',
+            'allow-unauthenticated': {
+              type: 'boolean',
+            },
+            'cloudsql-instances': {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
             },
             cpu: {
               type: 'integer',
               minimum: 1,
               maximum: 2,
             },
-            'allow-unauthenticated': {
-              type: 'boolean',
+            region: {
+              type: 'string',
+            },
+            'service-account': {
+              type: 'string',
+              default: 'cloudrun-runtime',
             },
           },
           required: [
@@ -8854,9 +8877,6 @@ module.exports = {
           type: 'object',
           properties: {
             cluster: {
-              type: 'string',
-            },
-            'cluster-location': {
               type: 'string',
             },
             connectivity: {
@@ -8874,8 +8894,6 @@ module.exports = {
             },
           },
           required: [
-            'cluster',
-            'cluster-location',
             'connectivity',
           ],
           additionalProperties: false,
@@ -14503,98 +14521,41 @@ function plural(ms, msAbs, n, name) {
 
 
 /***/ }),
-/* 530 */,
-/* 531 */,
-/* 532 */,
-/* 533 */
+/* 530 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const git = __webpack_require__(497)();
+// eslint-disable-next-line no-unused-vars
+const core = __webpack_require__(793);
+// eslint-disable-next-line no-unused-vars
+const exec = __webpack_require__(266);
 
-const isPreRelease = (branchName) => branchName !== 'master';
+// eslint-disable-next-line no-unused-vars
+const createNamespace = async ({ project, cluster, clusterLocation }, namespace) => {
+  // TODO Create namespace if it doesn't exist and label it for OPA and CloudRun.
+  // kubectl create namespace <namespace>
+  // kubectl label namespace <namespace> opa-istio-injection="enabled"
+  // kubectl label namespace <namespace> istio-injection="enabled"
+  // We must also apply configMaps for OPA
 
-const getBranchType = (branchName) => {
-  const devPattern = /(^dev$|^develop$)/gmi;
-  const masterPattern = /^master$/gmi;
-
-  if (devPattern.test(branchName)) {
-    return 'dev';
-  }
-
-  if (masterPattern.test(branchName)) {
-    return 'master';
-  }
-
-  return 'feature';
+  // // Authenticate kubectl
+  // exec.exec('gcloud', [
+  //   'container',
+  //   'clusters',
+  //   'get-credentials',
+  //   cluster,
+  //   `--region=${clusterLocation}`,
+  //   `--project=${project}`,
+  // ]);
+  // List namespace.
 };
 
-const getBranchName = (currentRef) => {
-  if (!currentRef) {
-    throw new Error('Can not return a branchname for null');
-  }
-
-  const pattern = /refs\/heads\/([A-Za-z0-9/\-_]*)/;
-  const groups = currentRef.match(pattern);
-
-  if (groups == null || groups.length !== 2) {
-    throw new Error(`Failed to parse branch name from ${currentRef}`);
-  }
-
-  return groups[1];
-};
-
-const getBranchNameFriendly = (branchName) => {
-  if (!branchName) {
-    throw new Error('You have no branch for some reason');
-  }
-
-  const branchType = getBranchType(branchName);
-
-  if (branchType === 'master' || branchType === 'dev') {
-    return branchName.toLowerCase();
-  }
-
-  return branchName.replace(/\//g, '-').replace(/_/g, '-').toLowerCase();
-};
-
-const getShortSha = async (sha, shaSize = null) => {
-  const args = [shaSize ? `--short=${shaSize}` : '--short', sha];
-  return git.revparse(args);
-};
-
-const getTagAtCommit = async (sha) => git.tag(['--points-at', sha])
-  .then((output) => output.trim());
-
-const getComposedVersionString = (version, branchNameFriendly, buildNumber, shortSha) => {
-  if (!branchNameFriendly) {
-    throw Error('branchNameFriendly is null, undefined, or empty');
-  }
-
-  const branchType = getBranchType(branchNameFriendly);
-
-  if (branchType === 'master') {
-    return `${version}`;
-  }
-
-  if (branchType === 'dev') {
-    return `${version}-dev-${buildNumber}-${shortSha}`;
-  }
-
-  return `${version}-${branchNameFriendly.toLowerCase()}-${shortSha}`;
-};
-
-module.exports = {
-  getBranchName,
-  isPreRelease,
-  getBranchNameFriendly,
-  getShortSha,
-  getComposedVersionString,
-  getBranchType,
-  getTagAtCommit,
-};
+module.exports = createNamespace;
 
 
 /***/ }),
+/* 531 */,
+/* 532 */,
+/* 533 */,
 /* 534 */,
 /* 535 */,
 /* 536 */,
@@ -22081,7 +22042,84 @@ MergeSummary.parse = function (output) {
 
 /***/ }),
 /* 775 */,
-/* 776 */,
+/* 776 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const core = __webpack_require__(793);
+const gcloud = __webpack_require__(942);
+
+const getTribeProject = async (projectId) => {
+  const projectChunks = projectId.split('-');
+  const tribe = projectChunks[0];
+  const env = projectChunks.includes('staging') ? 'staging' : 'prod';
+  const tribeProjectName = `${tribe}-${env}`;
+
+  core.info(`Search for GCP project with name ${tribeProjectName}`);
+  const tribeProject = await gcloud([
+    '--quiet',
+    'projects',
+    'list',
+    `--filter=NAME:${tribeProjectName}`,
+    '--format=value(PROJECT_ID)',
+  ]);
+
+  if (!tribeProject) {
+    throw new Error(`Could not find project ${tribeProjectName}, or missing permissions to list it.`);
+  }
+  return tribeProject;
+};
+
+const getClusterDetails = async (project, cluster) => {
+  const args = [
+    '--quiet',
+    'container',
+    'clusters',
+    'list',
+    `--project=${project}`,
+    '--format=value(NAME,LOCATION)',
+  ];
+  if (cluster) {
+    args.push(`--filter='NAME:${cluster}'`);
+  }
+  const clusterInfo = await gcloud(args);
+  if (!clusterInfo) {
+    throw new Error(`Failed to find a GKE cluster in ${project}.`);
+  }
+  const [clusterName, zone] = clusterInfo.split(/\s+/);
+  return {
+    project,
+    cluster: clusterName,
+    clusterLocation: zone,
+    uri: `projects/${project}/zones/${zone}/clusters/${clusterName}`,
+  };
+};
+
+const getClusterInfo = async (projectId, cluster = '') => {
+  if (cluster && cluster.includes('projects/') && cluster.includes('zones/') && cluster.includes('clusters/')) {
+    // Cluster is already fully qualified
+    const info = cluster.split('/');
+    return {
+      project: info[1],
+      cluster: info[5],
+      clusterLocation: info[3],
+      uri: cluster,
+    };
+  }
+
+  if (cluster) {
+    // A cluster is specified. It should exist in this project.
+    return getClusterDetails(projectId, cluster);
+  }
+
+  // Nothing specified, find the cluster in tribe project.
+  const tribeProject = await getTribeProject(projectId);
+  return getClusterDetails(tribeProject, cluster);
+};
+
+module.exports = getClusterInfo;
+
+
+/***/ }),
 /* 777 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -29943,7 +29981,32 @@ exports.realpath = function realpath(p, cache, cb) {
 /* 939 */,
 /* 940 */,
 /* 941 */,
-/* 942 */,
+/* 942 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const exec = __webpack_require__(266);
+
+/**
+ * Execute a gcloud function and return the standard output.
+ * @param args {string[]}
+ * @returns {Promise<string>}
+ */
+const gcloudOutput = async (args) => {
+  let output = '';
+  await exec.exec('gcloud', args, {
+    listeners: {
+      stdout: (data) => {
+        output = data.toString('utf8');
+      },
+    },
+  });
+  return output.trim();
+};
+
+module.exports = gcloudOutput;
+
+
+/***/ }),
 /* 943 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 

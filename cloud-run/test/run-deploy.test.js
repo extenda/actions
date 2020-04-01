@@ -2,10 +2,12 @@ const mockFs = require('mock-fs');
 
 jest.mock('@actions/exec');
 jest.mock('../../setup-gcloud/src/setup-gcloud');
+jest.mock('../src/cluster-info');
 
 const exec = require('@actions/exec');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const runDeploy = require('../src/run-deploy');
+const getClusterInfo = require('../src/cluster-info');
 
 const serviceAccountKey = Buffer.from('test', 'utf8').toString('base64');
 
@@ -38,7 +40,6 @@ describe('Run Deploy', () => {
     const returnValue = await runDeploy(
       serviceAccountKey,
       service,
-      'runtime@google.com',
       'gcr.io/test-project/my-service:tag',
     );
     expect(returnValue).toEqual(0);
@@ -47,14 +48,12 @@ describe('Run Deploy', () => {
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
       'run', 'deploy', 'my-service',
       '--image=gcr.io/test-project/my-service:tag',
-      '--service-account=runtime@google.com',
       '--project=test-project',
       '--memory=256Mi',
       '--concurrency=default',
       '--max-instances=default',
-      '--revision-suffix=63633c0',
       '--clear-env-vars',
-      '--clear-cloudsql-instances',
+      '--service-account=cloudrun-runtime@test-project.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
       '--region=eu-west1',
@@ -77,26 +76,24 @@ describe('Run Deploy', () => {
         managed: {
           region: 'eu-west1',
           'allow-unauthenticated': true,
+          'cloud-sql-instances': [],
         },
       },
     };
     await runDeploy(
       serviceAccountKey,
       service,
-      'runtime@google.com',
       'gcr.io/test-project/my-service:tag',
     );
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
       'run', 'deploy', 'my-service',
       '--image=gcr.io/test-project/my-service:tag',
-      '--service-account=runtime@google.com',
       '--project=test-project',
       '--memory=256Mi',
       '--concurrency=default',
       '--max-instances=default',
-      '--revision-suffix=382aee2',
       '--set-env-vars=KEY1="value",KEY2="sm://test-project/my-secret"',
-      '--clear-cloudsql-instances',
+      '--service-account=cloudrun-runtime@test-project.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
       '--region=eu-west1',
@@ -120,7 +117,6 @@ describe('Run Deploy', () => {
     const returnValue = await runDeploy(
       serviceAccountKey,
       service,
-      'runtime@google.com',
       'gcr.io/test-project/my-service:tag',
     );
     expect(returnValue).toEqual(0);
@@ -134,34 +130,63 @@ describe('Run Deploy', () => {
     const service = {
       name: 'my-service',
       memory: '256Mi',
-      'cloud-sql-instances': ['MY-INSTANCE'],
       platform: {
         managed: {
           region: 'eu-west1',
           'allow-unauthenticated': false,
+          'cloudsql-instances': ['MY-INSTANCE'],
         },
       },
     };
     const returnValue = await runDeploy(
       serviceAccountKey,
       service,
-      'runtime@google.com',
       'gcr.io/test-project/my-service:tag',
     );
     expect(returnValue).toEqual(0);
-    expect(exec.exec.mock.calls[0][1]).toEqual(expect.not.arrayContaining(['--set-cloudsql-instances=MY-INSTANCE']));
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--set-cloudsql-instances=MY-INSTANCE']));
+  });
+
+
+  test('It can deploy with --clear-sql-instances', async () => {
+    exec.exec.mockResolvedValueOnce(0);
+    setupGcloud.mockResolvedValueOnce('test-project');
+    process.env.GITHUB_SHA = '382aee2'; // Not tagged
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      platform: {
+        managed: {
+          region: 'eu-west1',
+          'allow-unauthenticated': true,
+          'cloudsql-instances': [],
+        },
+      },
+    };
+    await runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-project/my-service:tag',
+    );
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--clear-cloudsql-instances']));
   });
 
   test('It can deploy to Cloud Run on GKE', async () => {
     exec.exec.mockResolvedValueOnce(0);
+    getClusterInfo.mockResolvedValueOnce({
+      project: 'test-project',
+      cluster: 'k8s-cluster',
+      clusterLocation: 'europe-west1',
+      uri: 'projects/test-project/zones/europe-west1/clusters/k8s-cluster',
+    });
     setupGcloud.mockResolvedValueOnce('test-project');
     const service = {
       name: 'my-service',
       memory: '256Mi',
       platform: {
         gke: {
-          cluster: 'test',
-          'cluster-location': 'eu-west1-b',
+          cluster: 'k8s-cluster',
+          'cluster-location': 'europe-west1',
           connectivity: 'external',
           cpu: '400m',
           namespace: 'my-space',
@@ -171,29 +196,123 @@ describe('Run Deploy', () => {
     const returnValue = await runDeploy(
       serviceAccountKey,
       service,
-      'runtime@google.com',
       'gcr.io/test-project/my-service:tag',
     );
     expect(returnValue).toEqual(0);
+    expect(getClusterInfo).toHaveBeenCalled();
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
       'run', 'deploy', 'my-service',
       '--image=gcr.io/test-project/my-service:tag',
-      '--service-account=runtime@google.com',
       '--project=test-project',
       '--memory=256Mi',
       '--concurrency=default',
       '--max-instances=default',
-      '--revision-suffix=63633c0',
       '--clear-env-vars',
-      '--clear-cloudsql-instances',
       '--cpu=400m',
+      '--min-instances=default',
       '--platform=gke',
-      '--cluster=test',
-      '--cluster-location=eu-west1-b',
+      '--cluster=projects/test-project/zones/europe-west1/clusters/k8s-cluster',
+      '--cluster-location=europe-west1',
       '--connectivity=external',
       '--namespace=my-space',
+    ]);
+  });
+
+  test('It can deploy to Cloud Run on GKE and discover cluster', async () => {
+    getClusterInfo.mockResolvedValueOnce({
+      project: 'tribe-staging-1234',
+      cluster: 'k8s-cluster',
+      clusterLocation: 'europe-west1',
+      uri: 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
+    });
+    exec.exec.mockResolvedValueOnce(0);
+    setupGcloud.mockResolvedValueOnce('test-project');
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      platform: {
+        gke: {
+          connectivity: 'external',
+        },
+      },
+    };
+    const returnValue = await runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-project/my-service:tag',
+    );
+    expect(returnValue).toEqual(0);
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(getClusterInfo).toHaveBeenCalledWith('test-project', undefined);
+    expect(setupGcloud).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledWith('gcloud', [
+      'run', 'deploy', 'my-service',
+      '--image=gcr.io/test-project/my-service:tag',
+      '--project=test-project',
+      '--memory=256Mi',
+      '--concurrency=default',
+      '--max-instances=default',
+      '--clear-env-vars',
+      '--cpu=1',
+      '--min-instances=default',
+      '--platform=gke',
+      '--cluster=projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
+      '--cluster-location=europe-west1',
+      '--connectivity=external',
+      '--namespace=my-service',
+    ]);
+  });
+
+  test('It can deploy to Cloud Run on GKE and discover cluster-location', async () => {
+    getClusterInfo.mockResolvedValueOnce({
+      project: 'tribe-staging-12345',
+      cluster: 'k8s-cluster',
+      clusterLocation: 'europe-west1',
+      uri: 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
+    });
+    exec.exec.mockResolvedValueOnce(0);
+    setupGcloud.mockResolvedValueOnce('test-project');
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      concurrency: 50,
+      'min-instances': 1,
+      'max-instances': 100,
+      platform: {
+        gke: {
+          cpu: '400m',
+          cluster: 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
+          connectivity: 'external',
+          namespace: 'default',
+        },
+      },
+    };
+    const returnValue = await runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-project/my-service:tag',
+    );
+    expect(returnValue).toEqual(0);
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(getClusterInfo).toHaveBeenCalledWith('test-project', 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster');
+    expect(setupGcloud).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledWith('gcloud', [
+      'run', 'deploy', 'my-service',
+      '--image=gcr.io/test-project/my-service:tag',
+      '--project=test-project',
+      '--memory=256Mi',
+      '--concurrency=50',
+      '--max-instances=100',
+      '--clear-env-vars',
+      '--cpu=400m',
+      '--min-instances=1',
+      '--platform=gke',
+      '--cluster=projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
+      '--cluster-location=europe-west1',
+      '--connectivity=external',
+      '--namespace=default',
     ]);
   });
 });

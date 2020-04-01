@@ -6,12 +6,11 @@ const runDeploy = require('./run-deploy');
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const serviceFile = core.getInput('service-definition') || 'cloud-run.yaml';
-  const runtimeAccountEmail = core.getInput('runtime-account-email') || 'cloudrun-runtime';
   const image = core.getInput('image', { required: true });
 
   const service = loadServiceDefinition(serviceFile);
 
-  await runDeploy(serviceAccountKey, service, runtimeAccountEmail, image);
+  await runDeploy(serviceAccountKey, service, image);
 };
 
 if (require.main === module) {

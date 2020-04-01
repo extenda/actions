@@ -16,16 +16,14 @@ describe('Cloud Run Action', () => {
     serviceDef.mockReturnValueOnce({});
     core.getInput.mockReturnValueOnce('service-account')
       .mockReturnValueOnce('cloud-run.yaml')
-      .mockReturnValueOnce('account@gmail.com')
       .mockReturnValueOnce('gcr.io/project/image:tag');
 
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(4);
+    expect(core.getInput).toHaveBeenCalledTimes(3);
     expect(runDeploy).toHaveBeenCalledWith(
       'service-account',
       {},
-      'account@gmail.com',
       'gcr.io/project/image:tag',
     );
   });
@@ -34,16 +32,14 @@ describe('Cloud Run Action', () => {
     serviceDef.mockReturnValueOnce({});
     core.getInput.mockReturnValueOnce('service-account')
       .mockReturnValueOnce('')
-      .mockReturnValueOnce('')
       .mockReturnValueOnce('gcr.io/project/image:tag');
 
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(4);
+    expect(core.getInput).toHaveBeenCalledTimes(3);
     expect(runDeploy).toHaveBeenCalledWith(
       'service-account',
       {},
-      'cloudrun-runtime',
       'gcr.io/project/image:tag',
     );
   });
