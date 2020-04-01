@@ -4,7 +4,7 @@ This is a GitHub Action to deploy a service to Cloud Run.
 
 ## Usage
 
-See [action.yaml](action.yaml).
+See [action.yml](action.yml).
 
 ### Secrets
 

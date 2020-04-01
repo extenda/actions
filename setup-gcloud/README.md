@@ -10,7 +10,7 @@ action, but differs in the following ways:
 
 ## Usage
 
-See [action.yaml](action.yaml).
+See [action.yml](action.yml).
 
 ### Secrets
 
