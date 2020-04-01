@@ -22058,8 +22058,8 @@ const getTribeProject = async (projectId) => {
   const tribeProject = await gcloud([
     'projects',
     'list',
-    `--filter='NAME:${tribeProjectName}'`,
-    "--format='value(PROJECT_ID)'",
+    `--filter=NAME:${tribeProjectName}`,
+    '--format=value(PROJECT_ID)',
   ]);
 
   if (!tribeProject) {
@@ -22069,7 +22069,7 @@ const getTribeProject = async (projectId) => {
 };
 
 const getClusterDetails = async (project, cluster) => {
-  const args = ['container', 'clusters', 'list', `--project=${project}`, "--format='value(NAME,LOCATION)'"];
+  const args = ['container', 'clusters', 'list', `--project=${project}`, '--format=value(NAME,LOCATION)'];
   if (cluster) {
     args.push(`--filter='NAME:${cluster}'`);
   }

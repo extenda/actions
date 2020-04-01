@@ -26,8 +26,8 @@ describe('getClusterInfo', () => {
       uri: 'projects/tribe-staging-12345/zones/europe-west1/clusters/k8s-cluster',
     });
     expect(exec.exec).toHaveBeenCalledTimes(2);
-    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['projects', 'list', "--filter='NAME:tribe-staging'", "--format='value(PROJECT_ID)'"]));
-    expect(exec.exec.mock.calls[1][1]).toEqual(expect.arrayContaining(['container', 'clusters', "--format='value(NAME,LOCATION)'"]));
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['projects', 'list', '--filter=NAME:tribe-staging', '--format=value(PROJECT_ID)']));
+    expect(exec.exec.mock.calls[1][1]).toEqual(expect.arrayContaining(['container', 'clusters', '--format=value(NAME,LOCATION)']));
   });
 
 
