@@ -31,8 +31,8 @@ memory: 256Mi
 name: service
 platform:
   managed:
-    region: eu-west1
     allow-unauthenticated: true
+    region: eu-west1
 `,
       });
       expect(() => loadServiceDefinition('cloud-run.yaml'))
@@ -80,7 +80,6 @@ platform:
     allow-unauthenticated: true
   gke:
     cluster: test
-    cluster-location: eu-west1-b
     connectivity: external
 `,
       });
@@ -120,17 +119,17 @@ platform:
       'cloud-run.yaml': `
 name: test-service
 memory: 256Mi
-cloudsql-instances:
-  - Postgres-RANDOM123
 platform:
   managed:
-    region: eu-west1
     allow-unauthenticated: true
+    region: eu-west1
+    cloudsql-instances:
+      - Postgres-RANDOM123
 `,
     });
 
     const service = loadServiceDefinition('cloud-run.yaml');
-    expect(service['cloudsql-instances']).toEqual(['Postgres-RANDOM123']);
+    expect(service.platform.managed['cloudsql-instances']).toEqual(['Postgres-RANDOM123']);
   });
 
   test('It can process a valid managed definition', () => {
@@ -142,13 +141,13 @@ concurrency: 20
 max-instances: 3
 environment:
   FOO: bar
-cloudsql-instances:
-  - Postgres-RANDOM123
 platform:
   managed:
     region: eu-west1
     allow-unauthenticated: true
     cpu: 2
+    cloudsql-instances:
+      - Postgres-RANDOM123
 `,
     });
     const service = loadServiceDefinition('cloud-run.yaml');
@@ -160,13 +159,13 @@ platform:
       environment: {
         FOO: 'bar',
       },
-      'cloudsql-instances': [
-        'Postgres-RANDOM123',
-      ],
       platform: {
         managed: {
           region: 'eu-west1',
           cpu: 2,
+          'cloudsql-instances': [
+            'Postgres-RANDOM123',
+          ],
         },
       },
     });
@@ -179,10 +178,10 @@ name: test-service
 memory: 256Mi
 concurrency: 80
 max-instances: 20
+min-instances: 1
 platform:
   gke:
     cluster: test
-    cluster-location: eu-west1-b
     connectivity: internal
     cpu: 400m
 `,
@@ -193,10 +192,10 @@ platform:
       memory: '256Mi',
       concurrency: 80,
       'max-instances': 20,
+      'min-instances': 1,
       platform: {
         gke: {
           cluster: 'test',
-          'cluster-location': 'eu-west1-b',
           connectivity: 'internal',
           cpu: '400m',
         },

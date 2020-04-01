@@ -15,14 +15,12 @@ module.exports = {
       type: 'integer',
       default: -1,
     },
+    'min-instances': {
+      type: 'integer',
+      default: -1,
+    },
     environment: {
       type: 'object',
-    },
-    'cloudsql-instances': {
-      type: 'array',
-      items: {
-        type: 'string',
-      },
     },
     platform: {
       type: 'object',
@@ -30,16 +28,26 @@ module.exports = {
         managed: {
           type: 'object',
           properties: {
-            region: {
-              type: 'string',
+            'allow-unauthenticated': {
+              type: 'boolean',
+            },
+            'cloudsql-instances': {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
             },
             cpu: {
               type: 'integer',
               minimum: 1,
               maximum: 2,
             },
-            'allow-unauthenticated': {
-              type: 'boolean',
+            region: {
+              type: 'string',
+            },
+            'service-account': {
+              type: 'string',
+              default: 'cloudrun-runtime',
             },
           },
           required: [
@@ -52,9 +60,6 @@ module.exports = {
           type: 'object',
           properties: {
             cluster: {
-              type: 'string',
-            },
-            'cluster-location': {
               type: 'string',
             },
             connectivity: {
@@ -72,8 +77,6 @@ module.exports = {
             },
           },
           required: [
-            'cluster',
-            'cluster-location',
             'connectivity',
           ],
           additionalProperties: false,
