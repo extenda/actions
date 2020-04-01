@@ -22056,6 +22056,7 @@ const getTribeProject = async (projectId) => {
 
   core.info(`Search for GCP project with name ${tribeProjectName}`);
   const tribeProject = await gcloud([
+    '--quiet',
     'projects',
     'list',
     `--filter=NAME:${tribeProjectName}`,
@@ -22069,7 +22070,14 @@ const getTribeProject = async (projectId) => {
 };
 
 const getClusterDetails = async (project, cluster) => {
-  const args = ['container', 'clusters', 'list', `--project=${project}`, '--format=value(NAME,LOCATION)'];
+  const args = [
+    '--quiet',
+    'container',
+    'clusters',
+    'list',
+    `--project=${project}`,
+    '--format=value(NAME,LOCATION)',
+  ];
   if (cluster) {
     args.push(`--filter='NAME:${cluster}'`);
   }
