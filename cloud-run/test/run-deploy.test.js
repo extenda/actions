@@ -92,7 +92,7 @@ describe('Run Deploy', () => {
       '--memory=256Mi',
       '--concurrency=default',
       '--max-instances=default',
-      '--set-env-vars=KEY1="value",KEY2="sm://test-project/my-secret"',
+      '--set-env-vars=KEY1=value,KEY2=sm://test-project/my-secret',
       '--service-account=cloudrun-runtime@test-project.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
