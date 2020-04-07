@@ -4,7 +4,6 @@ const io = require('@actions/io');
 const path = require('path');
 const os = require('os');
 
-const SETTINGS_FILE = path.join(__dirname, 'maven-settings.xml');
 const mavenHome = path.join(os.homedir(), '.m2');
 const mavenSettings = path.join(mavenHome, 'settings.xml');
 
@@ -18,7 +17,16 @@ const setVersion = async (newVersion) => {
 const copySettings = async () => {
   core.debug('Copy maven-settings.xml');
   await io.mkdirP(mavenHome);
-  await io.cp(SETTINGS_FILE, mavenSettings, { force: true });
+
+  const settings = {
+    extenda: path.join(__dirname, 'extenda-maven-settings.xml'),
+    AbalonAb: path.join(__dirname, 'AbalonAb-maven-settings.xml'),
+  };
+
+  const [owner] = (process.env.GITHUB_REPOSITORY || 'extenda').split('/');
+  const settingsFile = settings[owner] || settings.extenda;
+  core.info(`Copy settings file ${settingsFile}`);
+  await io.cp(settingsFile, mavenSettings, { force: true });
 };
 
 module.exports = {
