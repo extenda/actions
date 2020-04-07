@@ -9,6 +9,7 @@ const conventionalCommits = require('conventional-changelog-conventionalcommits'
 const streamToString = require('stream-to-string');
 const through2 = require('through2');
 const mergeConfig = require('conventional-changelog-core/lib/merge-config');
+const { getTagAtCommit } = require('./branch-info');
 
 const tagPrefix = process.env.TAG_PREFIX || 'v';
 
@@ -29,6 +30,10 @@ const withConventionalConfig = async (version, fn) => {
   config.writerOpts.headerPartial = '';
   const recommendedVersion = version || await getRecommendedBump();
 
+  // If current commit is tagged, include two releases.
+  const tag = await getTagAtCommit(process.env.GITHUB_SHA || 'HEAD');
+  const releaseCount = tag.startsWith(tagPrefix) ? 2 : 1;
+
   // Create a dummy package.json
   const dummyPackageJson = path.join(__dirname, 'package.json');
   fs.writeFileSync(dummyPackageJson, JSON.stringify({
@@ -40,6 +45,7 @@ const withConventionalConfig = async (version, fn) => {
     return fn({
       config,
       tagPrefix,
+      releaseCount,
       pkg: {
         path: __dirname,
       },
