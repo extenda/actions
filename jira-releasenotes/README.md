@@ -43,7 +43,7 @@ jobs:
       - uses: actions/checkout@v1
 
       - name: Update JIRA release notes
-        uses: actions/extenda/jira-releasenotes@v0
+        uses: extenda/actions/jira-releasenotes@v0
         with:
           jira-project: ELY
         env:
@@ -65,7 +65,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - name: actions/extenda/gcp-secret-manager@v0
+      - uses: extenda/actions/gcp-secret-manager@v0
         with:
           service-account-key: ${{ secrets.SECRET_AUTH }}
           secrets: |
@@ -73,7 +73,7 @@ jobs:
             JIRA_USERNAME: jira-username
 
       - name: Update JIRA release notes
-        uses: actions/extenda/jira-releasenotes@v0
+        uses: extenda/actions/jira-releasenotes@v0
         with:
           jira-project: ELY
 ```
