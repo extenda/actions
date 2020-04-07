@@ -1,8 +1,6 @@
 const path = require('path');
 let fs = require('fs');
 
-const mavenSettingsXml = fs.readFileSync(path.join(__dirname, '..', 'src', 'maven-settings.xml'), 'utf8');
-
 const mockFs = require('mock-fs');
 
 const os = require('os');
@@ -29,13 +27,15 @@ describe('Maven', () => {
 
   beforeEach(() => {
     process.env = { ...orgEnv };
-    const settingsPath = path.resolve(path.join(__dirname, '../src/maven-settings.xml'));
+    const settingsPath = path.resolve(path.join(__dirname, '../src/extenda-maven-settings.xml'));
+    const abalonPath = path.resolve(path.join(__dirname, '../src/AbalonAb-maven-settings.xml'));
     const fileSystem = {
       test: {
         'pom.xml': '<project />',
       },
     };
-    fileSystem[settingsPath] = mavenSettingsXml;
+    fileSystem[settingsPath] = '<extenda />';
+    fileSystem[abalonPath] = '<abalon />';
     mockFs(fileSystem);
 
     // Make sure core.group executes callbacks.
@@ -51,6 +51,35 @@ describe('Maven', () => {
     await mvn.copySettings();
     const exists = fs.existsSync(path.join(os.homedir(), '.m2', 'settings.xml'));
     expect(exists).toEqual(true);
+    expect(fs.readFileSync(path.join(os.homedir(), '.m2', 'settings.xml'), 'utf8'))
+      .toEqual('<extenda />');
+  });
+
+  test('Copy extenda settings', async () => {
+    process.env.GITHUB_REPOSITORY = 'extenda/test-repo';
+    await mvn.copySettings();
+    const exists = fs.existsSync(path.join(os.homedir(), '.m2', 'settings.xml'));
+    expect(exists).toEqual(true);
+    expect(fs.readFileSync(path.join(os.homedir(), '.m2', 'settings.xml'), 'utf8'))
+      .toEqual('<extenda />');
+  });
+
+  test('Copy default settings', async () => {
+    process.env.GITHUB_REPOSITORY = 'github/test-repo';
+    await mvn.copySettings();
+    const exists = fs.existsSync(path.join(os.homedir(), '.m2', 'settings.xml'));
+    expect(exists).toEqual(true);
+    expect(fs.readFileSync(path.join(os.homedir(), '.m2', 'settings.xml'), 'utf8'))
+      .toEqual('<extenda />');
+  });
+
+  test('Copy Abalon settings', async () => {
+    process.env.GITHUB_REPOSITORY = 'AbalonAb/test-repo';
+    await mvn.copySettings();
+    const exists = fs.existsSync(path.join(os.homedir(), '.m2', 'settings.xml'));
+    expect(exists).toEqual(true);
+    expect(fs.readFileSync(path.join(os.homedir(), '.m2', 'settings.xml'), 'utf8'))
+      .toEqual('<abalon />');
   });
 
   test('Build success', async () => {
