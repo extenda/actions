@@ -23,9 +23,9 @@ See [action.yml](action.yml).
 on:
   pull_request:
     types:
-      - edit
-      - open
-      - reopen
+      - edited
+      - opened
+      - reopened
       - synchronize
 
 jobs:
