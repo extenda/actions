@@ -54,5 +54,5 @@ jobs:
 
         - name: Publish installer package
           if: github.ref == 'refs/heads/master'
-          run: curl -v --user "${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }}" --upload-file installpackages/PackageName.pkg.zip https://repo.extendaretail.com/repository/raw-hosted/PackageName.pkg/<VERSION>/PackageName.pkg.zip
+          run: curl -v --user "${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }}" --upload-file installpackages/PackageName_<VERSION>.pkg.zip https://repo.extendaretail.com/repository/raw-hosted/PackageName.pkg/<VERSION>/PackageName_<VERSION>.pkg.zip
 ```
