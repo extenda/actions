@@ -17,12 +17,12 @@ const packageBuilderCommand = async (builder, args) => {
     packageVersion,
   } = args;
 
-  const builderArgs = [
-    builderType,
-    '-pn', packageName,
-    '-wd', workingDir,
-    '-od', outputDir,
-  ];
+  const builderArgs = [];
+
+  builderArgs.push(builderType);
+  builderArgs.push('-pn', packageName);
+  builderArgs.push('-wd', workingDir);
+  builderArgs.push('-od', outputDir);
 
   if (sourcePaths) {
     builderArgs.push('-sp', sourcePaths);
