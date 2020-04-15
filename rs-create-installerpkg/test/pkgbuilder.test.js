@@ -51,8 +51,6 @@ describe('RS installer package tests', () => {
       'output',
       '-sp',
       __dirname,
-      '-sfp',
-      '',
       '-pv',
       '1.0.1-testversion',
     ]);
