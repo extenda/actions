@@ -27,7 +27,7 @@
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-plugin-import": "^2.20.1",
     "fs-extra": "^8.1.0",
-    "jest": "^25.1.0",
+    "jest": "^25.3.0",
     "jest-sonar": "^0.2.5"
   }
 }
