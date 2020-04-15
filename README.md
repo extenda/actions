@@ -16,6 +16,7 @@ The following actions are available
   * [conventional-version](conventional-version#readme)
   * [docker](docker#readme)
   * [gcp-secret-manager](gcp-secret-manager#readme)
+  * [jira-release](jira-release#readme)
   * [jira-releasenotes](jira-releasenotes#readme)
   * [maven](maven#readme)
   * [rs-create-installerpkg](rs-create-installerpkg#readme)

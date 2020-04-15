@@ -1,0 +1,24 @@
+name: JIRA release
+description: |
+  Create a JIRA release and assign fix version for all included issues.
+inputs:
+  jira-project:
+    description: The JIRA project key
+    required: true
+  jira-component:
+    description: The JIRA component to release
+    required: false
+  jira-protocol:
+    description: The protocol to use when connecting to JIRA
+    required: true
+    default: https
+  jira-host:
+    description: The JIRA host name
+    required: true
+    default: jira.extendaretail.com
+  version:
+    description: The semantic version number to create a release for
+    required: true
+runs:
+  using: node12
+  main: dist/index.js
