@@ -49,10 +49,10 @@ describe('RS installer package tests', () => {
       'workdir',
       '-od',
       'output',
-      '-sp',
-      __dirname,
       '-pv',
       '1.0.1-testversion',
+      '-sp',
+      __dirname,
     ]);
   });
 });
