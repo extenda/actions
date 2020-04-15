@@ -12,13 +12,20 @@ const DEFAULT_VERSION = '0.0.0';
  * Returns the latest tagged release matching the tag prefix.
  * @returns {Promise<string>}
  */
-const getLatestRelease = async () => gitSemverTags({ taxPrefix: changes.tagPrefix })
+const getLatestReleaseTag = async () => gitSemverTags({ tagPrefix: changes.tagPrefix })
   .then((tags) => {
     if (tags.length === 0) {
-      core.info(`No release tags with prefix '${changes.tagPrefix}' exists, use ${DEFAULT_VERSION}`);
+      core.info(`No release tags with prefix '${changes.tagPrefix}' exists, use ${changes.tagPrefix}${DEFAULT_VERSION}`);
     }
-    return tags[0] || DEFAULT_VERSION;
+    return tags[0] || `${changes.tagPrefix}${DEFAULT_VERSION}`;
   });
+
+/**
+ * Returns the latest semantic release matching the tag prefix.
+ * @returns {Promise<string>}
+ */
+const getLatestRelease = async () => getLatestReleaseTag()
+  .then((tag) => tag.replace(changes.tagPrefix, ''));
 
 /**
  * Returns the version to build. This version number is determined by the last release number
@@ -56,7 +63,7 @@ const tagReleaseVersion = async () => {
 module.exports = {
   ...changes,
   getBuildVersion,
-  // getChangelog,
   getLatestRelease,
+  getLatestReleaseTag,
   tagReleaseVersion,
 };
