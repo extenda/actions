@@ -21,7 +21,7 @@ const packageBuilderCommand = async (builder, args) => {
     builderType,
     '-pn', packageName,
     '-wd', workingDir,
-    '-od', outputDir,    
+    '-od', outputDir,
   ];
 
   if (sourcePaths) {
