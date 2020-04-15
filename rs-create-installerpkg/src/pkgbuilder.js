@@ -17,17 +17,25 @@ const packageBuilderCommand = async (builder, args) => {
     packageVersion,
   } = args;
 
+  const builderArgs = [];
+
+  builderArgs.push(builderType);
+  builderArgs.push('-pn', packageName);
+  builderArgs.push('-wd', workingDir);
+  builderArgs.push('-od', outputDir);
+  builderArgs.push('-pv', packageVersion);
+
+  if (sourcePaths) {
+    builderArgs.push('-sp', sourcePaths);
+  }
+
+  if (sourceFilePaths) {
+    builderArgs.push('-sfp', sourceFilePaths);
+  }
+
   return exec.exec(
     builder,
-    [
-      builderType,
-      '-pn', packageName,
-      '-wd', workingDir,
-      '-od', outputDir,
-      '-sp', sourcePaths,
-      '-sfp', sourceFilePaths,
-      '-pv', packageVersion,
-    ],
+    builderArgs,
   );
 };
 
