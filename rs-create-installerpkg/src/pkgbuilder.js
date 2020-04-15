@@ -21,8 +21,7 @@ const packageBuilderCommand = async (builder, args) => {
     builderType,
     '-pn', packageName,
     '-wd', workingDir,
-    '-od', outputDir,
-    '-pv', packageVersion,
+    '-od', outputDir,    
   ];
 
   if (sourcePaths) {
@@ -32,6 +31,8 @@ const packageBuilderCommand = async (builder, args) => {
   if (sourceFilePaths) {
     builderArgs.push('-sfp', sourceFilePaths);
   }
+
+  builderArgs.push('-pv', packageVersion);
 
   return exec.exec(
     builder,
