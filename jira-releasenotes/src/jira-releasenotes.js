@@ -86,4 +86,5 @@ const createReleaseNotes = async ({
 
 module.exports = {
   createReleaseNotes,
+  findJiraChanges,
 };
