@@ -17,19 +17,21 @@ const packageBuilderCommand = async (builder, args) => {
     packageVersion,
   } = args;
 
-  var builderArgs = [
+  let builderArgs = [
     builderType,
     '-pn', packageName,
     '-wd', workingDir,
     '-od', outputDir,
-    '-pv', packageVersion
+    '-pv', packageVersion,
   ];
 
-  if (sourcePaths)
-    builderArgs.push('-sp', sourcePaths);
+  if (sourcePaths) {
+      builderArgs.push('-sp', sourcePaths);
+  }
   
-  if (sourceFilePaths)
+  if (sourceFilePaths) {
     builderArgs.push('-sfp', sourceFilePaths);
+  }
 
   return exec.exec(
     builder,
