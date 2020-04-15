@@ -18,9 +18,12 @@ const run = async () => {
     core.info(`Project version: ${version}`);
     core.setOutput('version', version);
 
-    const taggedRelease = await versions.getLatestRelease();
+    const taggedRelease = await versions.getLatestReleaseTag();
     core.info(`Latest release tag: ${taggedRelease}`);
     core.setOutput('release-tag', taggedRelease);
+
+    const releaseVersion = await versions.getLatestRelease();
+    core.setOutput('release-version', releaseVersion);
 
     /* branch outputs */
     const githubRef = process.env.GITHUB_REF;
