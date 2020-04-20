@@ -360,7 +360,7 @@ jobs:
       - uses: extenda/actions/setup-gcloud@v0
         id: gcloud
         with:
-          service_account_key: ${{ secrets.GCLOUD_AUTH }}
+          service-account-key: ${{ secrets.GCLOUD_AUTH }}
 
       - name: Publish Docker image
         run: |

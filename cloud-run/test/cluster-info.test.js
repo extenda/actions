@@ -26,7 +26,7 @@ describe('getClusterInfo', () => {
       uri: 'projects/tribe-staging-12345/zones/europe-west1/clusters/k8s-cluster',
     });
     expect(exec.exec).toHaveBeenCalledTimes(2);
-    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--quiet', 'projects', 'list', '--filter=NAME:tribe-staging', '--format=value(PROJECT_ID)']));
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--quiet', 'projects', 'list', '--filter=NAME~-staging$ AND PROJECT_ID!=tribe-clan-staging-12345', '--format=value(PROJECT_ID)']));
     expect(exec.exec.mock.calls[1][1]).toEqual(expect.arrayContaining(['--quiet', 'container', 'clusters', '--format=value(NAME,LOCATION)']));
   });
 
@@ -34,7 +34,7 @@ describe('getClusterInfo', () => {
   test('It throws for non-clan project', async () => {
     exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput('', opts));
     await expect(getClusterInfo('tribe-clan-prod-12345')).rejects
-      .toEqual(new Error('Could not find project tribe-prod, or missing permissions to list it.'));
+      .toEqual(new Error('Could not find GKE project with suffix -prod, or missing permissions to list it.'));
   });
 
   test('It throws for missing cluster', async () => {

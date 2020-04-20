@@ -3,22 +3,20 @@ const gcloud = require('./gcloud-output');
 
 const getTribeProject = async (projectId) => {
   const projectChunks = projectId.split('-');
-  const tribe = projectChunks[0];
-  const env = projectChunks.includes('staging') ? 'staging' : 'prod';
-  const tribeProjectName = `${tribe}-${env}`;
-
-  core.info(`Search for GCP project with name ${tribeProjectName}`);
+  const suffix = projectChunks.includes('staging') ? '-staging' : '-prod';
+  core.debug(`Search for GCP project with name suffix ${suffix}`);
   const tribeProject = await gcloud([
     '--quiet',
     'projects',
     'list',
-    `--filter=NAME:${tribeProjectName}`,
+    `--filter=NAME~${suffix}$ AND PROJECT_ID!=${projectId}`,
     '--format=value(PROJECT_ID)',
   ]);
 
   if (!tribeProject) {
-    throw new Error(`Could not find project ${tribeProjectName}, or missing permissions to list it.`);
+    throw new Error(`Could not find GKE project with suffix ${suffix}, or missing permissions to list it.`);
   }
+  core.info(`Found project ${tribeProject}`);
   return tribeProject;
 };
 
