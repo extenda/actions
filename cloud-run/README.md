@@ -131,7 +131,8 @@ jobs:
 
       - uses: extenda/actions/setup-gcloud@v0
         id: gcloud
-        service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
+        with:
+          service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
 
       - uses: extenda/actions/cloud-run@v0
         with:
@@ -165,7 +166,8 @@ jobs:
 
       - uses: extenda/actions/setup-gcloud@v0
         id: gcloud
-        service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
+        with:
+          service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
 
       - uses: extenda/actions/cloud-run@v0
         with:
