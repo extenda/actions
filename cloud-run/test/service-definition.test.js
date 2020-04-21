@@ -184,6 +184,7 @@ platform:
     cluster: test
     connectivity: internal
     cpu: 400m
+    opa-enabled: true
 `,
     });
     const service = loadServiceDefinition('cloud-run.yaml');
@@ -198,6 +199,7 @@ platform:
           cluster: 'test',
           connectivity: 'internal',
           cpu: '400m',
+          'opa-enabled': true,
         },
       },
     });

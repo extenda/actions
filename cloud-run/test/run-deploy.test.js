@@ -3,6 +3,7 @@ const mockFs = require('mock-fs');
 jest.mock('@actions/exec');
 jest.mock('../../setup-gcloud/src/setup-gcloud');
 jest.mock('../src/cluster-info');
+jest.mock('../src/create-namespace');
 
 const exec = require('@actions/exec');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');

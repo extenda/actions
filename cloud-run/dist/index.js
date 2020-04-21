@@ -5270,6 +5270,7 @@ const gkeArguments = async (args, service, projectId) => {
         cpu = '1',
         connectivity,
         namespace = name,
+        'opa-enabled': opaEnabled = true,
       },
     },
   } = service;
@@ -5286,7 +5287,7 @@ const gkeArguments = async (args, service, projectId) => {
   );
 
   if (namespace !== 'default') {
-    await createNamespace(cluster, namespace);
+    await createNamespace(opaEnabled, cluster, namespace);
   }
   args.push(`--namespace=${namespace}`);
 };
@@ -8891,6 +8892,9 @@ module.exports = {
             },
             namespace: {
               type: 'string',
+            },
+            'opa-enabled': {
+              type: 'boolean',
             },
           },
           required: [
@@ -14524,29 +14528,59 @@ function plural(ms, msAbs, n, name) {
 /* 530 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-// eslint-disable-next-line no-unused-vars
 const core = __webpack_require__(793);
-// eslint-disable-next-line no-unused-vars
 const exec = __webpack_require__(266);
 
-// eslint-disable-next-line no-unused-vars
-const createNamespace = async ({ project, cluster, clusterLocation }, namespace) => {
-  // TODO Create namespace if it doesn't exist and label it for OPA and CloudRun.
-  // kubectl create namespace <namespace>
-  // kubectl label namespace <namespace> opa-istio-injection="enabled"
-  // kubectl label namespace <namespace> istio-injection="enabled"
-  // We must also apply configMaps for OPA
+const getNamespace = async (namespace) => {
+  let output = '';
+  await exec.exec('kubectl', [
+    'get',
+    'namespace',
+    namespace,
+  ], {
+    listeners: {
+      stdout: (data) => {
+        output = data.toString('utf8');
+      },
+    },
+  });
+  return output.trim();
+};
 
-  // // Authenticate kubectl
-  // exec.exec('gcloud', [
-  //   'container',
-  //   'clusters',
-  //   'get-credentials',
-  //   cluster,
-  //   `--region=${clusterLocation}`,
-  //   `--project=${project}`,
-  // ]);
-  // List namespace.
+const setLabel = async (namespace, label, value) => exec.exec('kubectl', [
+  'label',
+  'namespace',
+  namespace,
+  `${label}=${value}`,
+  '--overwrite=true',
+]);
+
+const createNamespace = async (opaEnabled, { project, cluster, clusterLocation }, namespace) => {
+  const opaInjection = opaEnabled ? 'enabled' : 'disabled';
+
+  // Authenticate kubectl
+  await exec.exec('gcloud', [
+    'container',
+    'clusters',
+    'get-credentials',
+    cluster,
+    `--region=${clusterLocation}`,
+    `--project=${project}`,
+  ]);
+
+  const response = await getNamespace(namespace);
+  if (response.includes('(NotFound)')) {
+    core.info(`creating namespace ${namespace}`);
+
+    // TODO: create kubernetes service account and map to(annotate) Google
+    // service account for workload identity
+
+    await exec.exec('kubectl', ['create', 'namespace', namespace]);
+  }
+  await setLabel(namespace, 'opa-istio-injection', opaInjection);
+  await setLabel(namespace, 'istio-injection', opaInjection);
+
+  // TODO: update OPA config map
 };
 
 module.exports = createNamespace;
