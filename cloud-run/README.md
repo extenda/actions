@@ -58,6 +58,7 @@ These properties only apply to Cloud Run on GKE:
 | `platform.gke.connectivity`     | Determines if the service can be invoked through internet. Can be set to `external` or `internal`.       | Yes      |                                  |
 | `platform.gke.cpu`              | The CPU limit for the service in Kubernetes CPU units, for example 500m.                                 | No       | `1`                              |
 | `platform.gke.namespace`        | The Kubernetes namespace to use.                                                                         | No       | The service `name`               |
+| `platform.gke.opa-enabled`      | Flag to enable opa and istio injection on service.                                                       | No       | `true`                           |
 
 ### YAML Examples
 

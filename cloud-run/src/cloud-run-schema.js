@@ -75,6 +75,9 @@ module.exports = {
             namespace: {
               type: 'string',
             },
+            'opa-enabled': {
+              type: 'boolean',
+            },
           },
           required: [
             'connectivity',
