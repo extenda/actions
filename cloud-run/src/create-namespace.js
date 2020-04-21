@@ -1,6 +1,4 @@
-// eslint-disable-next-line no-unused-vars
 const core = require('@actions/core');
-// eslint-disable-next-line no-unused-vars
 const exec = require('@actions/exec');
 
 const getNamespace = async (namespace) => {
@@ -27,7 +25,6 @@ const setLabel = async (namespace, label, value) => exec.exec('kubectl', [
   '--overwrite=true',
 ]);
 
-// eslint-disable-next-line no-unused-vars
 const createNamespace = async (opaEnabled, { project, cluster, clusterLocation }, namespace) => {
   const opaInjection = opaEnabled ? 'enabled' : 'disabled';
 
@@ -48,7 +45,7 @@ const createNamespace = async (opaEnabled, { project, cluster, clusterLocation }
     // TODO: create kubernetes service account and map to(annotate) Google
     // service account for workload identity
 
-    await exec.exec(`kubectl create namespace ${namespace}`);
+    await exec.exec('kubectl', ['create', 'namespace', namespace]);
   }
   await setLabel(namespace, 'opa-istio-injection', opaInjection);
   await setLabel(namespace, 'istio-injection', opaInjection);
