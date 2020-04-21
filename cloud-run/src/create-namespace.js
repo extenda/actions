@@ -8,12 +8,11 @@ const getNamespace = async (namespace) => {
       'namespace',
       namespace,
     ]);
-  } catch (err){
-    if(err.message.toString().includes(`(NotFound)`)) {
+  } catch (err) {
+    if (err.message.toString().includes('(NotFound)')) {
       return false;
-    } else {
-      throw "Couldn't get namespace information!"
     }
+    throw new Error("Couldn't get namespace information!");
   }
   return true;
 };
