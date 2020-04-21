@@ -2,19 +2,20 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 
 const getNamespace = async (namespace) => {
-  let output = '';
-  await exec.exec('kubectl', [
-    'get',
-    'namespace',
-    namespace,
-  ], {
-    listeners: {
-      stdout: (data) => {
-        output = data.toString('utf8');
-      },
-    },
-  });
-  return output.trim();
+  try {
+    await exec.exec('kubectl', [
+      'get',
+      'namespace',
+      namespace,
+    ]);
+  } catch (err){
+    if(err.message.toString().includes(`(NotFound)`)) {
+      return false;
+    } else {
+      throw "Couldn't get namespace information!"
+    }
+  }
+  return true;
 };
 
 const setLabel = async (namespace, label, value) => exec.exec('kubectl', [
@@ -38,14 +39,12 @@ const createNamespace = async (opaEnabled, { project, cluster, clusterLocation }
     `--project=${project}`,
   ]);
 
-  const response = await getNamespace(namespace);
-  if (response.includes('(NotFound)')) {
+  if (!await getNamespace(namespace)) {
     core.info(`creating namespace ${namespace}`);
+    await exec.exec('kubectl', ['create', 'namespace', namespace]);
 
     // TODO: create kubernetes service account and map to(annotate) Google
     // service account for workload identity
-
-    await exec.exec('kubectl', ['create', 'namespace', namespace]);
   }
   await setLabel(namespace, 'opa-istio-injection', opaInjection);
   await setLabel(namespace, 'istio-injection', opaInjection);
