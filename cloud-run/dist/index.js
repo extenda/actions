@@ -14532,19 +14532,19 @@ const core = __webpack_require__(793);
 const exec = __webpack_require__(266);
 
 const getNamespace = async (namespace) => {
-  let output = '';
-  await exec.exec('kubectl', [
-    'get',
-    'namespace',
-    namespace,
-  ], {
-    listeners: {
-      stdout: (data) => {
-        output = data.toString('utf8');
-      },
-    },
-  });
-  return output.trim();
+  try {
+    await exec.exec('kubectl', [
+      'get',
+      'namespace',
+      namespace,
+    ]);
+  } catch (err) {
+    if (err.message.includes('(NotFound)')) {
+      return false;
+    }
+    throw new Error(`Couldn't get namespace information! reason: ${err.message}`);
+  }
+  return true;
 };
 
 const setLabel = async (namespace, label, value) => exec.exec('kubectl', [
@@ -14568,14 +14568,12 @@ const createNamespace = async (opaEnabled, { project, cluster, clusterLocation }
     `--project=${project}`,
   ]);
 
-  const response = await getNamespace(namespace);
-  if (response.includes('(NotFound)')) {
+  if (!await getNamespace(namespace)) {
     core.info(`creating namespace ${namespace}`);
+    await exec.exec('kubectl', ['create', 'namespace', namespace]);
 
     // TODO: create kubernetes service account and map to(annotate) Google
     // service account for workload identity
-
-    await exec.exec('kubectl', ['create', 'namespace', namespace]);
   }
   await setLabel(namespace, 'opa-istio-injection', opaInjection);
   await setLabel(namespace, 'istio-injection', opaInjection);

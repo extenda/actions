@@ -9,11 +9,6 @@ const clusterInfo = {
   project: 'test-12345',
 };
 
-const mockOutput = (data, opts) => {
-  opts.listeners.stdout(Buffer.from(`${data}\n`, 'utf8'));
-  return Promise.resolve(0);
-};
-
 describe('Create namespace', () => {
   afterEach(() => {
     jest.resetAllMocks();
@@ -21,7 +16,7 @@ describe('Create namespace', () => {
 
   test('It creates namespace if non exists', async () => {
     exec.exec.mockResolvedValueOnce(0)
-      .mockImplementationOnce((bin, args, opts) => mockOutput('Error from server (NotFound): namespaces "testns" not found', opts))
+      .mockRejectedValueOnce(new Error('(NotFound)'))
       .mockResolvedValue(0);
     await createNamespace(true, clusterInfo, 'testns');
 
@@ -31,9 +26,7 @@ describe('Create namespace', () => {
   });
 
   test('It reuses namespace if exists', async () => {
-    exec.exec.mockResolvedValueOnce(0)
-      .mockImplementationOnce((bin, args, opts) => mockOutput('testns', opts))
-      .mockResolvedValue(0);
+    exec.exec.mockResolvedValue(0);
 
     await createNamespace(true, clusterInfo, 'testns');
     expect(exec.exec).toHaveBeenCalledTimes(4);
@@ -41,9 +34,7 @@ describe('Create namespace', () => {
   });
 
   test('It enables Istio injection', async () => {
-    exec.exec.mockResolvedValueOnce(0)
-      .mockImplementationOnce((bin, args, opts) => mockOutput('testns', opts))
-      .mockResolvedValue(0);
+    exec.exec.mockResolvedValue(0);
     await createNamespace(true, clusterInfo, 'testns');
     expect(exec.exec).toHaveBeenCalledWith(
       'kubectl',
@@ -56,9 +47,7 @@ describe('Create namespace', () => {
   });
 
   test('It disables Istio injection', async () => {
-    exec.exec.mockResolvedValueOnce(0)
-      .mockImplementationOnce((bin, args, opts) => mockOutput('testns', opts))
-      .mockResolvedValue(0);
+    exec.exec.mockResolvedValue(0);
     await createNamespace(false, clusterInfo, 'testns');
     expect(exec.exec).toHaveBeenCalledWith(
       'kubectl',
