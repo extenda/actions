@@ -9,11 +9,6 @@ const clusterInfo = {
   project: 'test-12345',
 };
 
-const mockOutput = (data, opts) => {
-  opts.listeners.stdout(Buffer.from(`${data}\n`, 'utf8'));
-  return Promise.resolve(0);
-};
-
 describe('Create namespace', () => {
   afterEach(() => {
     jest.resetAllMocks();
@@ -21,7 +16,7 @@ describe('Create namespace', () => {
 
   test('It creates namespace if non exists', async () => {
     exec.exec.mockResolvedValueOnce(0)
-      .mockRejectedValueOnce(new Error ('(NotFound)'))
+      .mockRejectedValueOnce(new Error('(NotFound)'))
       .mockResolvedValue(0);
     await createNamespace(true, clusterInfo, 'testns');
 
