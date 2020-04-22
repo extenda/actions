@@ -46,7 +46,7 @@ const execModules = async (command) => Promise.all(
 /* eslint-enable no-console */
 
 module.exports = {
-  npmArgument: process.argv.length >= 3 ? JSON.parse(process.argv[2]).original.join(' ') : null,
+  npmArgument: JSON.parse(process.env.npm_config_argv || { original: '' }).original.join(' '),
   modules: {
     each: eachModules,
     exec: execModules,
