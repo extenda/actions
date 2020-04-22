@@ -11,7 +11,7 @@ const clusterInfo = {
 
 const mockOutput = (data, opts) => {
   opts.listeners.stderr(Buffer.from(`${data}\n`, 'utf8'));
-  return Promise.reject(new Error("exit code 1"));
+  return Promise.reject(new Error('exit code 1'));
 };
 
 describe('Create namespace', () => {
