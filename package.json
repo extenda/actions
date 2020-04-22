@@ -11,7 +11,9 @@
     "install": "node .scripts/install-modules.js",
     "test": "jest --silent",
     "posttest": "node .scripts/create-sonar-properties.js",
-    "lint:js": "eslint '.scripts/*.js' '*/src/*.js' '*/test/*.js'"
+    "lint:js": "run-script-os",
+    "lint:js:win32": "docker run --rm -t -v %cd%:/work -w /work node:12-alpine sh -c 'npm run lint:js'",
+    "lint:js:default": "eslint .scripts/*.js */src/*.js */test/*.js --no-ignore"
   },
   "repository": "github:extenda/actions",
   "author": {
