@@ -2,17 +2,24 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 
 const getNamespace = async (namespace) => {
+  let output = '';
   try {
     await exec.exec('kubectl', [
       'get',
       'namespace',
       namespace,
-    ]);
+    ], {
+      listeners: {
+        stderr: (data) => {
+          output += data.toString('utf8');
+        },
+      },
+    });
   } catch (err) {
-    if (err.message.includes('(NotFound)')) {
+    if (output.includes('(NotFound)')) {
       return false;
     }
-    throw new Error(`Couldn't get namespace information! reason: ${err.message}`);
+    throw new Error(`Couldn't get namespace information! reason: ${err.message || 'unknown'}`);
   }
   return true;
 };
@@ -25,7 +32,7 @@ const setLabel = async (namespace, label, value) => exec.exec('kubectl', [
   '--overwrite=true',
 ]);
 
-const createNamespace = async (opaEnabled, { project, cluster, clusterLocation }, namespace) => {
+const createNamespace = async (opaEnabled, {project, cluster, clusterLocation}, namespace) => {
   const opaInjection = opaEnabled ? 'enabled' : 'disabled';
 
   // Authenticate kubectl
