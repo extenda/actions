@@ -4,12 +4,16 @@
   "description": "Extenda Retail GitHub Actions",
   "private": true,
   "scripts": {
-    "build": "node .scripts/build-modules.js $npm_config_argv",
-    "build:docker": "docker run --rm -t -v $(pwd):/work -w /work node:12-alpine sh -c 'npm run build'",
-    "install": "node .scripts/install-modules.js $npm_config_argv",
+    "build": "node .scripts/build-modules.js",
+    "build:docker": "run-script-os",
+    "build:docker:win32": "docker run --rm -t -v %cd%:/work -w /work node:12-alpine sh -c 'npm run build'",
+    "build:docker:default": "docker run --rm -t -v $(pwd):/work -w /work node:12-alpine sh -c 'npm run build'",
+    "install": "node .scripts/install-modules.js",
     "test": "jest --silent",
     "posttest": "node .scripts/create-sonar-properties.js",
-    "lint:js": "eslint .scripts/*.js */src/**.js */test/**.js --no-ignore"
+    "lint:js": "run-script-os",
+    "lint:js:win32": "docker run --rm -t -v %cd%:/work -w /work node:12-alpine sh -c 'npm run lint:js'",
+    "lint:js:default": "eslint .scripts/*.js */src/*.js */test/*.js --no-ignore"
   },
   "repository": "github:extenda/actions",
   "author": {
@@ -28,6 +32,7 @@
     "eslint-plugin-import": "^2.20.1",
     "fs-extra": "^8.1.0",
     "jest": "^25.3.0",
-    "jest-sonar": "^0.2.5"
+    "jest-sonar": "^0.2.5",
+    "run-script-os": "^1.1.1"
   }
 }

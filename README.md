@@ -421,6 +421,7 @@ Runs Jest everywhere.
 $ npm run build
 ```
 Runs `npm run build` on all Javascript projects. This recompiles the package into its `dist` directory.
+On Windows, always use `npm run build:docker` or configure your NPM to use bash as shell.
 
 ```bash
 $ npm run build:docker
