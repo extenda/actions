@@ -9,10 +9,10 @@ const getNamespace = async (namespace) => {
       namespace,
     ]);
   } catch (err) {
-    if (err.message.toString().includes('(NotFound)')) {
+    if (err.message.includes('(NotFound)')) {
       return false;
     }
-    throw new Error("Couldn't get namespace information!");
+    throw new Error(`Couldn't get namespace information! reason: ${err.message}`);
   }
   return true;
 };
