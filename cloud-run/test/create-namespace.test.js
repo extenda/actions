@@ -9,6 +9,11 @@ const clusterInfo = {
   project: 'test-12345',
 };
 
+const mockOutput = (data, opts) => {
+  opts.listeners.stderr(Buffer.from(`${data}\n`, 'utf8'));
+  return Promise.reject(new Error('exit code 1'));
+};
+
 describe('Create namespace', () => {
   afterEach(() => {
     jest.resetAllMocks();
@@ -16,13 +21,22 @@ describe('Create namespace', () => {
 
   test('It creates namespace if non exists', async () => {
     exec.exec.mockResolvedValueOnce(0)
-      .mockRejectedValueOnce(new Error('(NotFound)'))
+      .mockImplementationOnce((bin, args, opts) => mockOutput('Error from server (NotFound): namespaces "testns" not found', opts))
       .mockResolvedValue(0);
     await createNamespace(true, clusterInfo, 'testns');
 
     expect(exec.exec).toHaveBeenCalledTimes(5);
     expect(exec.exec.mock.calls[1][1]).toEqual(['get', 'namespace', 'testns']);
     expect(exec.exec).toHaveBeenNthCalledWith(3, 'kubectl', ['create', 'namespace', 'testns']);
+  });
+
+  test('It fails on unknown error', async () => {
+    exec.exec.mockResolvedValueOnce(0)
+      .mockImplementationOnce((bin, args, opts) => mockOutput('Error from server (connection refused): could not establish connection', opts))
+      .mockResolvedValue(0);
+    await expect(createNamespace(true, clusterInfo, 'testns')).rejects.toEqual(new Error('Could not get namespace information! reason: exit code 1'));
+    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(exec.exec.mock.calls[1][1]).toEqual(['get', 'namespace', 'testns']);
   });
 
   test('It reuses namespace if exists', async () => {

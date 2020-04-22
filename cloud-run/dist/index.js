@@ -14532,17 +14532,24 @@ const core = __webpack_require__(793);
 const exec = __webpack_require__(266);
 
 const getNamespace = async (namespace) => {
+  let output = '';
   try {
     await exec.exec('kubectl', [
       'get',
       'namespace',
       namespace,
-    ]);
+    ], {
+      listeners: {
+        stderr: (data) => {
+          output += data.toString('utf8');
+        },
+      },
+    });
   } catch (err) {
-    if (err.message.includes('(NotFound)')) {
+    if (output.includes('(NotFound)')) {
       return false;
     }
-    throw new Error(`Couldn't get namespace information! reason: ${err.message}`);
+    throw new Error(`Could not get namespace information! reason: ${err.message || 'unknown'}`);
   }
   return true;
 };
