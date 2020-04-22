@@ -11,7 +11,7 @@
     "install": "node .scripts/install-modules.js",
     "test": "jest --silent",
     "posttest": "node .scripts/create-sonar-properties.js",
-    "lint:js": "eslint .scripts/*.js */src/**.js */test/**.js --no-ignore"
+    "lint:js": "eslint '.scripts/*.js' '*/src/*.js' '*/test/*.js'"
   },
   "repository": "github:extenda/actions",
   "author": {
