@@ -19,7 +19,7 @@ const getNamespace = async (namespace) => {
     if (output.includes('(NotFound)')) {
       return false;
     }
-    throw new Error(`Couldn't get namespace information! reason: ${err.message || 'unknown'}`);
+    throw new Error(`Could not get namespace information! reason: ${err.message || 'unknown'}`);
   }
   return true;
 };
@@ -32,7 +32,7 @@ const setLabel = async (namespace, label, value) => exec.exec('kubectl', [
   '--overwrite=true',
 ]);
 
-const createNamespace = async (opaEnabled, {project, cluster, clusterLocation}, namespace) => {
+const createNamespace = async (opaEnabled, { project, cluster, clusterLocation }, namespace) => {
   const opaInjection = opaEnabled ? 'enabled' : 'disabled';
 
   // Authenticate kubectl

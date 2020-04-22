@@ -11,7 +11,7 @@ const clusterInfo = {
 
 const mockOutput = (data, opts) => {
   opts.listeners.stderr(Buffer.from(`${data}\n`, 'utf8'));
-  return Promise.reject(1);
+  return Promise.reject(new Error("exit code 1"));
 };
 
 describe('Create namespace', () => {
@@ -34,7 +34,7 @@ describe('Create namespace', () => {
     exec.exec.mockResolvedValueOnce(0)
       .mockImplementationOnce((bin, args, opts) => mockOutput('Error from server (connection refused): could not establish connection', opts))
       .mockResolvedValue(0);
-    await expect(createNamespace(true, clusterInfo, 'testns')).rejects.toEqual(new Error(`Couldn't get namespace information! reason: unknown`))
+    await expect(createNamespace(true, clusterInfo, 'testns')).rejects.toEqual(new Error('Could not get namespace information! reason: exit code 1'));
     expect(exec.exec).toHaveBeenCalledTimes(2);
     expect(exec.exec.mock.calls[1][1]).toEqual(['get', 'namespace', 'testns']);
   });
