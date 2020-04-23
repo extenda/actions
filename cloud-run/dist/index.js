@@ -14562,7 +14562,10 @@ const setLabel = async (namespace, label, value) => exec.exec('kubectl', [
   '--overwrite=true',
 ]);
 
-const createNamespace = async (clan_id, opaEnabled, { project, cluster, clusterLocation }, namespace) => {
+const createNamespace = async (clanId,
+  opaEnabled,
+  { project, cluster, clusterLocation },
+  namespace) => {
   const opaInjection = opaEnabled ? 'enabled' : 'disabled';
 
   // Authenticate kubectl
@@ -14584,7 +14587,7 @@ const createNamespace = async (clan_id, opaEnabled, { project, cluster, clusterL
       'serviceaccount',
       `--namespace ${namespace}`,
       'default',
-      `iam.gke.io/gcp-service-account=${namespace}@${clan_id}.iam.gserviceaccount.com`,
+      `iam.gke.io/gcp-service-account=${namespace}@${clanId}.iam.gserviceaccount.com`,
     ]);
   }
   await setLabel(namespace, 'opa-istio-injection', opaInjection);
