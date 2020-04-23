@@ -1,5 +1,5 @@
-const fs = require('fs');
 const { credentials } = require('./sonar-credentials');
+const { getPullRequestInfo } = require('./pull-request-info');
 
 const createParams = async (hostUrl, mainBranch, msParams = false, extraParams = {}) => {
   const sonarCloud = hostUrl.startsWith('https://sonarcloud.io');
@@ -9,23 +9,24 @@ const createParams = async (hostUrl, mainBranch, msParams = false, extraParams =
   props['sonar.login'] = sonarToken;
 
   const branch = process.env.GITHUB_REF.replace('refs/heads/', '');
-  const [owner, repository] = process.env.GITHUB_REPOSITORY.split('/');
-  const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
+
+  const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+  const pullRequest = await getPullRequestInfo(githubToken);
 
   if (process.env.SONAR_VERBOSE === 'true') {
     props['sonar.verbose'] = 'true';
   }
 
   if (msParams) {
-    props['/n:'] = repository;
+    props['/n:'] = repo;
   } else {
-    props['sonar.projectName'] = repository;
+    props['sonar.projectName'] = repo;
   }
 
   if (msParams) {
     // Note: For other build tools, we assume legacy sonar project key is
     // provided by Maven/Gradle or sonar props file.
-    props['/k:'] = `${owner}_${repository}`;
+    props['/k:'] = `${owner}_${repo}`;
   }
 
   if (sonarCloud) {
@@ -34,15 +35,15 @@ const createParams = async (hostUrl, mainBranch, msParams = false, extraParams =
       props['/o:'] = owner;
     } else {
       props['sonar.organization'] = owner;
-      props['sonar.projectKey'] = `${owner}_${repository}`;
+      props['sonar.projectKey'] = `${owner}_${repo}`;
     }
   }
 
-  if (event.pull_request) {
+  if (pullRequest) {
     if (sonarCloud) {
-      props['sonar.pullrequest.base'] = event.pull_request.base.ref;
-      props['sonar.pullrequest.branch'] = event.pull_request.head.ref;
-      props['sonar.pullrequest.key'] = event.pull_request.number;
+      props['sonar.pullrequest.base'] = pullRequest.base.ref;
+      props['sonar.pullrequest.branch'] = pullRequest.head.ref;
+      props['sonar.pullrequest.key'] = pullRequest.number;
       props['sonar.pullrequest.provider'] = 'github';
       props['sonar.pullrequest.github.repository'] = process.env.GITHUB_REPOSITORY;
     } else {
@@ -50,7 +51,7 @@ const createParams = async (hostUrl, mainBranch, msParams = false, extraParams =
       props['sonar.github.oauth'] = githubToken;
       props['sonar.analysis.mode'] = 'preview';
       props['sonar.github.repository'] = process.env.GITHUB_REPOSITORY;
-      props['sonar.github.pullRequest'] = event.pull_request.number;
+      props['sonar.github.pullRequest'] = pullRequest.number;
     }
   } else if (sonarCloud && branch !== mainBranch) {
     props['sonar.branch.name'] = branch;

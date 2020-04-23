@@ -1,8 +1,10 @@
 const path = require('path');
 
 jest.mock('../src/sonar-credentials');
+jest.mock('../src/pull-request-info');
 
 const { createParams } = require('../src/params');
+const { getPullRequestInfo } = require('../src/pull-request-info');
 
 const orgEnv = process.env;
 
@@ -78,6 +80,11 @@ describe('Sonar Parameters', () => {
     beforeEach(() => {
       process.env.GITHUB_REF = 'feature/test';
       process.env.GITHUB_EVENT_PATH = path.join(__dirname, 'pull-request.json');
+      getPullRequestInfo.mockResolvedValueOnce({
+        number: 1,
+        base: { ref: 'master' },
+        head: { ref: 'feature/test' },
+      });
     });
 
     test('SonarCloud', async () => {
