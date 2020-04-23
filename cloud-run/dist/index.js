@@ -5287,7 +5287,7 @@ const gkeArguments = async (args, service, projectId) => {
   );
 
   if (namespace !== 'default') {
-    await createNamespace(opaEnabled, cluster, namespace);
+    await createNamespace(projectId, opaEnabled, cluster, namespace);
   }
   args.push(`--namespace=${namespace}`);
 };
@@ -14562,7 +14562,7 @@ const setLabel = async (namespace, label, value) => exec.exec('kubectl', [
   '--overwrite=true',
 ]);
 
-const createNamespace = async (opaEnabled, { project, cluster, clusterLocation }, namespace) => {
+const createNamespace = async (clan_id, opaEnabled, { project, cluster, clusterLocation }, namespace) => {
   const opaInjection = opaEnabled ? 'enabled' : 'disabled';
 
   // Authenticate kubectl
@@ -14579,8 +14579,13 @@ const createNamespace = async (opaEnabled, { project, cluster, clusterLocation }
     core.info(`creating namespace ${namespace}`);
     await exec.exec('kubectl', ['create', 'namespace', namespace]);
 
-    // TODO: create kubernetes service account and map to(annotate) Google
-    // service account for workload identity
+    await exec.exec('kubectl', [
+      'annotate',
+      'serviceaccount',
+      `--namespace ${namespace}`,
+      'default',
+      `iam.gke.io/gcp-service-account=${namespace}@${clan_id}.iam.gserviceaccount.com`,
+    ]);
   }
   await setLabel(namespace, 'opa-istio-injection', opaInjection);
   await setLabel(namespace, 'istio-injection', opaInjection);

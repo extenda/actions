@@ -76,7 +76,7 @@ const gkeArguments = async (args, service, projectId) => {
   );
 
   if (namespace !== 'default') {
-    await createNamespace(opaEnabled, cluster, namespace);
+    await createNamespace(projectId, opaEnabled, cluster, namespace);
   }
   args.push(`--namespace=${namespace}`);
 };
