@@ -32,7 +32,10 @@ const setLabel = async (namespace, label, value) => exec.exec('kubectl', [
   '--overwrite=true',
 ]);
 
-const createNamespace = async (opaEnabled, { project, cluster, clusterLocation }, namespace) => {
+const createNamespace = async (clanId,
+  opaEnabled,
+  { project, cluster, clusterLocation },
+  namespace) => {
   const opaInjection = opaEnabled ? 'enabled' : 'disabled';
 
   // Authenticate kubectl
@@ -49,8 +52,13 @@ const createNamespace = async (opaEnabled, { project, cluster, clusterLocation }
     core.info(`creating namespace ${namespace}`);
     await exec.exec('kubectl', ['create', 'namespace', namespace]);
 
-    // TODO: create kubernetes service account and map to(annotate) Google
-    // service account for workload identity
+    await exec.exec('kubectl', [
+      'annotate',
+      'serviceaccount',
+      `--namespace ${namespace}`,
+      'default',
+      `iam.gke.io/gcp-service-account=${namespace}@${clanId}.iam.gserviceaccount.com`,
+    ]);
   }
   await setLabel(namespace, 'opa-istio-injection', opaInjection);
   await setLabel(namespace, 'istio-injection', opaInjection);
