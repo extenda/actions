@@ -15,11 +15,12 @@ const getPullRequestInfo = async (githubToken) => {
     repo,
     state: 'open',
     head: `${owner}:${context.ref.replace('refs/heads/', '')}`,
-  }).then((response) => response.find((pr) => pr.head.sha === context.sha))
-    .catch((err) => {
-      core.warning(`Failed to find pull requests. Reason: ${err.message}`);
-      return undefined;
-    });
+  }).then((response) => response.data.find(
+    (pr) => pr.head.sha === context.sha,
+  )).catch((err) => {
+    core.warning(`Failed to find pull requests. Reason: ${err.message}`);
+    return undefined;
+  });
 };
 
 module.exports = {

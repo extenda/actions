@@ -57,11 +57,13 @@ describe('Pull Request Info', () => {
       sha: '123456',
       ref: 'refs/heads/feature/test',
     });
-    mockPulls.mockResolvedValueOnce([{
-      base: { ref: 'base-ref' },
-      head: { ref: 'head-ref', sha: '123456' },
-      number: '2',
-    }]);
+    mockPulls.mockResolvedValueOnce({
+      data: [{
+        base: { ref: 'base-ref' },
+        head: { ref: 'head-ref', sha: '123456' },
+        number: '2',
+      }],
+    });
     const info = await pullInfo.getPullRequestInfo('TOKEN');
     expect(info).toMatchObject({
       base: { ref: 'base-ref' },
@@ -89,7 +91,9 @@ describe('Pull Request Info', () => {
       sha: '123456',
       ref: 'refs/heads/feature/test',
     });
-    mockPulls.mockResolvedValueOnce([]);
+    mockPulls.mockResolvedValueOnce({
+      data: [],
+    });
     const info = await pullInfo.getPullRequestInfo('TOKEN');
     expect(info).toBeFalsy();
     expect(mockPulls).toHaveBeenCalled();
