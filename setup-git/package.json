@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "",
-    "build": "../node_modules/.bin/ncc build src/index.js"
+    "build": "node ../node_modules/.bin/ncc build src/index.js"
   },
   "dependencies": {
     "@actions/core": "^1.2.0"

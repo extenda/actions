@@ -56,11 +56,11 @@
 *.ps1      text eol=crlf
 
 # Serialisation
-*.json     text
+*.json     text eol=lf
 *.toml     text
 *.xml      text
-*.yaml     text
-*.yml      text
+*.yaml     text eol=lf
+*.yml      text eol=lf
 
 # Archives
 *.7z       binary
@@ -106,9 +106,9 @@
 *.html            text diff=html
 *.inc             text
 *.ini             text
-*.js              text
-*.json            text
-*.jsx             text
+*.js              text eol=lf
+*.json            text eol=lf
+*.jsx             text eol=lf
 *.less            text
 *.ls              text
 *.map             text -diff
@@ -137,7 +137,7 @@ Dockerfile        text
 # Documentation
 *.ipynb           text
 *.markdown        text
-*.md              text
+*.md              text eol=lf
 *.mdwn            text
 *.mdown           text
 *.mkd             text
