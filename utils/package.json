@@ -5,8 +5,7 @@
   "private": true,
   "main": "src/index.js",
   "scripts": {
-    "lint:js": "eslint src",
-    "test": "../node_modules/.bin/jest --config ../jest.config.js",
+    "test": "node ../node_modules/.bin/jest --config ../jest.config.js",
     "build": ""
   },
   "dependencies": {

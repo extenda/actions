@@ -6,13 +6,10 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "",
-    "build": "ncc -m build src/index.js"
+    "build": "node ../node_modules/.bin/ncc build src/index.js"
   },
   "dependencies": {
     "@actions/core": "^1.2.0",
     "@actions/github": "^1.1.0"
-  },
-  "devDependencies": {
-    "@zeit/ncc": "^0.20.5"
   }
 }

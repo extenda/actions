@@ -5,8 +5,8 @@
   "description": "Deploy to Cloud Run",
   "main": "dist/index.js",
   "scripts": {
-    "test": "../node_modules/.bin/jest --config ../jest.config.js",
-    "build": "../node_modules/.bin/ncc build src/index.js"
+    "test": "node ../node_modules/.bin/jest --config ../jest.config.js",
+    "build": "node ../node_modules/.bin/ncc build src/index.js"
   },
   "dependencies": {
     "@actions/core": "^1.2.3",
