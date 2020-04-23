@@ -33,9 +33,9 @@ const setLabel = async (namespace, label, value) => exec.exec('kubectl', [
 ]);
 
 const createNamespace = async (clanId,
-                               opaEnabled,
-                               { project, cluster, clusterLocation },
-                               namespace) => {
+  opaEnabled,
+  { project, cluster, clusterLocation },
+  namespace) => {
   const opaInjection = opaEnabled ? 'enabled' : 'disabled';
 
   // Authenticate kubectl
