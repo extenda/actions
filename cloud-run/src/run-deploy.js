@@ -90,7 +90,7 @@ const runDeploy = async (serviceAccountKey, service, image) => {
     memory,
     concurrency = -1,
     'max-instances': maxInstances = -1,
-    environment = undefined,
+    environment = [],
   } = service;
 
   const args = ['run', 'deploy', name,
@@ -99,13 +99,9 @@ const runDeploy = async (serviceAccountKey, service, image) => {
     `--memory=${memory}`,
     `--concurrency=${numericOrDefault(concurrency)}`,
     `--max-instances=${numericOrDefault(maxInstances)}`,
+    `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
   ];
 
-  if (environment) {
-    args.push(`--set-env-vars=${createEnvironmentArgs(environment, projectId)}`);
-  } else {
-    args.push('--clear-env-vars');
-  }
 
   if (service.platform.managed) {
     await managedArguments(args, service, projectId);
