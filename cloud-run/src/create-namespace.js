@@ -55,7 +55,7 @@ const createNamespace = async (clanId,
     await exec.exec('kubectl', [
       'annotate',
       'serviceaccount',
-      `--namespace ${namespace}`,
+      `--namespace=${namespace}`,
       'default',
       `iam.gke.io/gcp-service-account=${namespace}@${clanId}.iam.gserviceaccount.com`,
     ]);

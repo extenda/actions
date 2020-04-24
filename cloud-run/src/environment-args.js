@@ -5,6 +5,7 @@ const createEnvironmentArgs = (environment, projectId) => {
       .replace('sm://*/', `sm://${projectId}/`);
     args.push(`${name}=${value}`);
   });
+  args.push(`SERVICE_PROJECT_ID=${projectId}`);
   return args.join(',');
 };
 
