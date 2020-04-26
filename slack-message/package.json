@@ -4,10 +4,6 @@
   "description": "Send a message to Slack through the GitHub Slack Integration",
   "private": true,
   "main": "dist/index.js",
-  "scripts": {
-    "test": "",
-    "build": "node ../node_modules/.bin/ncc -m build src/index.js"
-  },
   "dependencies": {
     "@actions/core": "^1.2.0",
     "node-fetch": "^2.6.0"

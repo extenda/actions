@@ -4,10 +4,6 @@
   "private": true,
   "description": "Deploy to Cloud Run",
   "main": "dist/index.js",
-  "scripts": {
-    "test": "node ../node_modules/jest/bin/jest.js --config ../jest.config.js",
-    "build": "node ../node_modules/@zeit/ncc/dist/ncc/cli.js build src/index.js"
-  },
   "dependencies": {
     "@actions/core": "^1.2.3",
     "@actions/exec": "^1.0.3",
