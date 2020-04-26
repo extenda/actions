@@ -4,10 +4,6 @@
   "description": "Utilities for Extenda Retail GitHub Actions",
   "private": true,
   "main": "src/index.js",
-  "scripts": {
-    "test": "node ../node_modules/.bin/jest --config ../jest.config.js",
-    "build": ""
-  },
   "dependencies": {
     "@actions/core": "^1.2.0",
     "@actions/exec": "^1.0.1",

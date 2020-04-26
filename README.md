@@ -429,16 +429,15 @@ Same as `npm run build`, but builds the project in a Docker container to ensure 
 
 #### Tips
 
-  * Remember to always run `npm run build` before committing changes to packages.
-    Failing to do so will not pass CI/CD checks.
+  * Remember to always run `npm run build` before committing changes to packages. Failing to do so will not pass CI/CD checks
   * If you've run `npm run build` and your build still fails, try `npm ci && npm run build`
-  * If developing a package, run `jest` within that package instead of the root to only test your changes.
-  * Do not add dependencies to the root package unless you are making global changes, for example to the build process.
+  * While developing, run `npm test -- -o` to only run tests on changed files
+  * Do not add dependencies to the root package unless you are making global changes, for example to the build process
 
 ### CI/CD Pipeline
 
-The project is built with a [GitHub Actions pipeline](.github/workflows/commit.yml).
-Every successful commit to `master` will
+A [GitHub Actions pipeline](.github/workflows/commit.yml) will run tests on every commit.
+Every successful commit to `master` will automatically:
 
   * Be tagged to a semantic release version
   * Update the `v{MAJOR}` branch to point to the new release

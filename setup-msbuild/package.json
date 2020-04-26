@@ -4,10 +4,6 @@
   "private": true,
   "description": "Prepare MSBuild for use in GitHub Actions",
   "main": "dist/index.js",
-  "scripts": {
-    "test": "",
-    "build": "node ../node_modules/.bin/ncc build src/index.js"
-  },
   "dependencies": {
     "@actions/core": "^1.2.0",
     "@actions/exec": "^1.0.1"

@@ -4,10 +4,6 @@
   "private": true,
   "description": "Build RS installer package",
   "main": "dist/index.js",
-  "scripts": {
-    "test": "node ../node_modules/.bin/jest --config ../jest.config.js",
-    "build": "node ../node_modules/.bin/ncc build src/index.js"
-  },
   "dependencies": {
     "@actions/core": "^1.2.0",
     "@actions/exec": "^1.0.1"

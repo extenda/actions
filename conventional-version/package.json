@@ -4,10 +4,6 @@
   "description": "Determine the project version based on conventional commit conventions",
   "private": true,
   "main": "dist/index.js",
-  "scripts": {
-    "test": "",
-    "build": "node ../node_modules/.bin/ncc -m build src/index.js"
-  },
   "dependencies": {
     "@actions/core": "^1.2.0"
   }
