@@ -1,19 +1,14 @@
 jest.mock('@actions/exec');
 
 const exec = require('@actions/exec');
-
 const getClusterInfo = require('../src/cluster-info');
-
-const mockOutput = (data, opts) => {
-  opts.listeners.stdout(Buffer.from(`${data}\n`, 'utf8'));
-  return Promise.resolve(0);
-};
-
-afterEach(() => {
-  jest.clearAllMocks();
-});
+const { mockOutput } = require('./utils');
 
 describe('getClusterInfo', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('It can find cluster and zone from tribe', async () => {
     exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput('tribe-staging-12345', opts))
       .mockImplementationOnce((bin, args, opts) => mockOutput('k8s-cluster    europe-west1', opts));

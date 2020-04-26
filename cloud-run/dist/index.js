@@ -2916,15 +2916,18 @@ const core = __webpack_require__(793);
 const { run } = __webpack_require__(320);
 const loadServiceDefinition = __webpack_require__(810);
 const runDeploy = __webpack_require__(193);
+const configureDomains = __webpack_require__(278);
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const serviceFile = core.getInput('service-definition') || 'cloud-run.yaml';
   const image = core.getInput('image', { required: true });
+  const domainBindingsEnv = core.getInput('domain-mappings-env') || '';
+  const dnsProjectLabel = core.getInput('dns-project-label') || 'dns';
 
   const service = loadServiceDefinition(serviceFile);
-
-  await runDeploy(serviceAccountKey, service, image);
+  await runDeploy(serviceAccountKey, service, image)
+    .then(({ cluster }) => configureDomains(service, cluster, domainBindingsEnv, dnsProjectLabel));
 };
 
 if (require.main === require.cache[eval('__filename')]) {
@@ -3576,7 +3579,72 @@ module.exports = {
 /***/ }),
 /* 131 */,
 /* 132 */,
-/* 133 */,
+/* 133 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const core = __webpack_require__(793);
+const exec = __webpack_require__(266);
+const gcloud = __webpack_require__(942);
+
+let dnsProjectId;
+
+const findDnsProject = async (dnsProjectLabel) => gcloud([
+  'projects',
+  'list',
+  `--filter=labels:${dnsProjectLabel}`,
+  '--format=value(PROJECT_ID)',
+]);
+
+const dnsTransaction = async (domain, args) => {
+  const zone = domain.split('.').slice(-2).join('-');
+  return exec.exec('gcloud', [
+    'dns',
+    `--project=${dnsProjectId}`,
+    'record-sets',
+    'transaction',
+    ...args,
+    `--zone=${zone}`,
+  ]);
+};
+
+const addDnsRecord = async (dnsProjectLabel, domain, ipAddress) => {
+  core.info(`Create DNS record for: ${domain} ${ipAddress}`);
+
+  if (dnsProjectLabel === 'none') {
+    core.info("DNS update disabled with label 'none'.");
+    return null;
+  }
+
+  if (!dnsProjectId) {
+    dnsProjectId = await findDnsProject(dnsProjectLabel);
+    if (!dnsProjectId) {
+      core.error(`Could not find a project labeled '${dnsProjectLabel}'. DNS not updated.`);
+      return null;
+    }
+  }
+
+  return dnsTransaction(domain, ['start'])
+    .then(() => dnsTransaction(domain, [
+      'add',
+      ipAddress,
+      `--name=${domain}`,
+      '--ttl=300',
+      '--type=A',
+    ]))
+    .then((() => dnsTransaction(domain, ['execute'])));
+};
+
+const clearCache = () => {
+  dnsProjectId = undefined;
+};
+
+module.exports = {
+  addDnsRecord,
+  clearCache,
+};
+
+
+/***/ }),
 /* 134 */,
 /* 135 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -5290,6 +5358,8 @@ const gkeArguments = async (args, service, projectId) => {
     await createNamespace(projectId, opaEnabled, cluster, namespace);
   }
   args.push(`--namespace=${namespace}`);
+
+  return cluster;
 };
 
 const runDeploy = async (serviceAccountKey, service, image) => {
@@ -5314,15 +5384,22 @@ const runDeploy = async (serviceAccountKey, service, image) => {
   ];
 
 
+  let cluster;
   if (service.platform.managed) {
     await managedArguments(args, service, projectId);
   }
 
   if (service.platform.gke) {
-    await gkeArguments(args, service, projectId);
+    cluster = await gkeArguments(args, service, projectId);
   }
 
-  return exec.exec('gcloud', args);
+  const gcloudExitCode = await exec.exec('gcloud', args);
+
+  return {
+    gcloudExitCode,
+    projectId,
+    cluster,
+  };
 };
 
 module.exports = runDeploy;
@@ -7897,7 +7974,118 @@ module.exports = function transformData(data, headers, fns) {
 /* 275 */,
 /* 276 */,
 /* 277 */,
-/* 278 */,
+/* 278 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const core = __webpack_require__(793);
+const gcloud = __webpack_require__(942);
+const authenticateKubeCtl = __webpack_require__(731);
+const { setOpaInjectionLabels } = __webpack_require__(667);
+const { addDnsRecord } = __webpack_require__(133);
+
+const listDomains = async ({ cluster, clusterLocation, projectId }) => gcloud([
+  'run',
+  'domain-mappings',
+  'list',
+  '--platform=gke',
+  `--project=${projectId}`,
+  `--cluster=${cluster}`,
+  `--cluster-location=${clusterLocation}`,
+  '--format=value(DOMAIN,SERVICE)',
+]).then((result) => result.split('\n'))
+  .then((list) => list.reduce((prev, value) => {
+    const [domain, service] = value.split(/\s+/);
+    const update = { ...prev };
+    update[domain] = service;
+    return update;
+  }, {}));
+
+const getNewDomains = async (domains, name, cluster) => {
+  const mappings = await listDomains(cluster);
+  return domains.filter((domain) => {
+    const existing = mappings[domain];
+    if (existing && existing !== name) {
+      throw Error(`Conflict: Domain ${domain} already mapped to service ${existing}`);
+    }
+    return !existing;
+  });
+};
+
+const createDomainMapping = async (
+  { cluster, clusterLocation, projectId },
+  domain,
+  service,
+  namespace,
+) => {
+  core.info(`Create '${domain}' domain-mapping.`);
+  return gcloud([
+    'run',
+    'domain-mappings',
+    'create',
+    `--service=${service}`,
+    `--domain=${domain}`,
+    `--namespace=${namespace}`,
+    '--platform=gke',
+    `--project=${projectId}`,
+    `--cluster=${cluster}`,
+    `--cluster-location=${clusterLocation}`,
+    '--format=value(CONTENTS)',
+  ]);
+};
+
+const determineEnv = (projectId) => (projectId.includes('staging') ? 'staging' : 'prod');
+
+const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectId) => {
+  if (!cluster) {
+    core.info('Domain binding is not yet supported for managed cloud run.');
+    return [];
+  }
+
+  const env = domainMappingEnv || determineEnv(cluster.projectId);
+  const {
+    name,
+    platform: {
+      gke: {
+        connectivity,
+        'domain-mappings': domainMappings = [],
+        'opa-enabled': opaEnabled = true,
+        namespace = name,
+      },
+    },
+  } = service;
+
+  const domains = domainMappings[env] || [];
+
+  if (connectivity === 'external' && domains.length > 0) {
+    const newDomains = await getNewDomains(domains, name, cluster);
+
+    if (opaEnabled) {
+      await authenticateKubeCtl(cluster);
+      await setOpaInjectionLabels(namespace, false);
+    }
+
+    const promises = [];
+    newDomains.forEach((domain) => {
+      promises.push(createDomainMapping(cluster, domain, name, namespace)
+        .then((ipAddress) => addDnsRecord(dnsProjectId, domain, ipAddress)));
+    });
+
+    await Promise.all(promises).finally(() => {
+      if (opaEnabled) {
+        return setOpaInjectionLabels(namespace, true);
+      }
+      return null;
+    });
+
+    return newDomains;
+  }
+  return [];
+};
+
+module.exports = configureDomains;
+
+
+/***/ }),
 /* 279 */,
 /* 280 */,
 /* 281 */,
@@ -8885,6 +9073,24 @@ module.exports = {
             },
             cpu: {
               type: 'string',
+            },
+            'domain-mappings': {
+              type: 'object',
+              properties: {
+                prod: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                  },
+                },
+                staging: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                  },
+                },
+              },
+              additionalProperties: false,
             },
             namespace: {
               type: 'string',
@@ -14527,6 +14733,8 @@ function plural(ms, msAbs, n, name) {
 
 const core = __webpack_require__(793);
 const exec = __webpack_require__(266);
+const authenticateKubeCtl = __webpack_require__(731);
+const { setOpaInjectionLabels } = __webpack_require__(667);
 
 const getNamespace = async (namespace) => {
   let output = '';
@@ -14551,29 +14759,12 @@ const getNamespace = async (namespace) => {
   return true;
 };
 
-const setLabel = async (namespace, label, value) => exec.exec('kubectl', [
-  'label',
-  'namespace',
-  namespace,
-  `${label}=${value}`,
-  '--overwrite=true',
-]);
-
 const createNamespace = async (clanId,
   opaEnabled,
   { project, cluster, clusterLocation },
   namespace) => {
-  const opaInjection = opaEnabled ? 'enabled' : 'disabled';
-
   // Authenticate kubectl
-  await exec.exec('gcloud', [
-    'container',
-    'clusters',
-    'get-credentials',
-    cluster,
-    `--region=${clusterLocation}`,
-    `--project=${project}`,
-  ]);
+  await authenticateKubeCtl({ cluster, clusterLocation, project });
 
   if (!await getNamespace(namespace)) {
     core.info(`creating namespace ${namespace}`);
@@ -14587,8 +14778,8 @@ const createNamespace = async (clanId,
       `iam.gke.io/gcp-service-account=${namespace}@${clanId}.iam.gserviceaccount.com`,
     ]);
   }
-  await setLabel(namespace, 'opa-istio-injection', opaInjection);
-  await setLabel(namespace, 'istio-injection', opaInjection);
+
+  await setOpaInjectionLabels(namespace, opaEnabled);
 
   // TODO: update OPA config map
 };
@@ -19261,7 +19452,32 @@ function escapeProperty(s) {
 /* 664 */,
 /* 665 */,
 /* 666 */,
-/* 667 */,
+/* 667 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const exec = __webpack_require__(266);
+
+const setLabel = async (namespace, label, value) => exec.exec('kubectl', [
+  'label',
+  'namespace',
+  namespace,
+  `${label}=${value}`,
+  '--overwrite=true',
+]);
+
+const setOpaInjectionLabels = async (namespace, opaEnabled) => {
+  const opaInjection = opaEnabled ? 'enabled' : 'disabled';
+  await setLabel(namespace, 'opa-istio-injection', opaInjection);
+  await setLabel(namespace, 'istio-injection', opaInjection);
+};
+
+module.exports = {
+  setLabel,
+  setOpaInjectionLabels,
+};
+
+
+/***/ }),
 /* 668 */,
 /* 669 */
 /***/ (function(module) {
@@ -20776,7 +20992,24 @@ module.exports = {
 /* 728 */,
 /* 729 */,
 /* 730 */,
-/* 731 */,
+/* 731 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const exec = __webpack_require__(266);
+
+const authenticateKubeCtl = async ({ cluster, clusterLocation, project }) => exec.exec('gcloud', [
+  'container',
+  'clusters',
+  'get-credentials',
+  cluster,
+  `--region=${clusterLocation}`,
+  `--project=${project}`,
+]);
+
+module.exports = authenticateKubeCtl;
+
+
+/***/ }),
 /* 732 */,
 /* 733 */,
 /* 734 */,
