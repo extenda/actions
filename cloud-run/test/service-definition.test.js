@@ -184,6 +184,11 @@ platform:
     cluster: test
     connectivity: internal
     cpu: 400m
+    domain-mappings:
+      staging:
+        - test-service.domain.dev
+      prod:
+        - test-service.domain.com
     opa-enabled: true
 `,
     });
@@ -200,6 +205,10 @@ platform:
           connectivity: 'internal',
           cpu: '400m',
           'opa-enabled': true,
+          'domain-mappings': {
+            staging: ['test-service.domain.dev'],
+            prod: ['test-service.domain.com'],
+          },
         },
       },
     });
