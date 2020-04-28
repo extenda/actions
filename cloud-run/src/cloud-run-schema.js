@@ -72,6 +72,24 @@ module.exports = {
             cpu: {
               type: 'string',
             },
+            'domain-mappings': {
+              type: 'object',
+              properties: {
+                prod: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                  },
+                },
+                staging: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                  },
+                },
+              },
+              additionalProperties: false,
+            },
             namespace: {
               type: 'string',
             },

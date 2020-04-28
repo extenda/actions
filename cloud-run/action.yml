@@ -10,10 +10,22 @@ inputs:
   service-definition:
     description: |
       The service YAML specification.
+    required: false
     default: cloud-run.yaml
   image:
     description: The Docker image to deploy to Cloud Run.
     required: true
+  domain-mappings-env:
+    description: |
+      The environment in which to perform domain mappings. This should be either `prod` or `staging`. If not set,
+      this value will be determined based on the GCP project suffix.
+    required: false
+  dns-project-label:
+    description: |
+      A label to identify the GCP project that contains Cloud DNS settings.
+      If set to 'none', DNS records will not be updated.
+    required: false
+    default: dns
 runs:
   using: node12
   main: dist/index.js

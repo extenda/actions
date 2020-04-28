@@ -79,6 +79,8 @@ const gkeArguments = async (args, service, projectId) => {
     await createNamespace(projectId, opaEnabled, cluster, namespace);
   }
   args.push(`--namespace=${namespace}`);
+
+  return cluster;
 };
 
 const runDeploy = async (serviceAccountKey, service, image) => {
@@ -103,15 +105,22 @@ const runDeploy = async (serviceAccountKey, service, image) => {
   ];
 
 
+  let cluster;
   if (service.platform.managed) {
     await managedArguments(args, service, projectId);
   }
 
   if (service.platform.gke) {
-    await gkeArguments(args, service, projectId);
+    cluster = await gkeArguments(args, service, projectId);
   }
 
-  return exec.exec('gcloud', args);
+  const gcloudExitCode = await exec.exec('gcloud', args);
+
+  return {
+    gcloudExitCode,
+    projectId,
+    cluster,
+  };
 };
 
 module.exports = runDeploy;

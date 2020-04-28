@@ -1,5 +1,7 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
+const authenticateKubeCtl = require('./kubectl-auth');
+const { setOpaInjectionLabels } = require('./set-namespace-label');
 
 const getNamespace = async (namespace) => {
   let output = '';
@@ -24,29 +26,12 @@ const getNamespace = async (namespace) => {
   return true;
 };
 
-const setLabel = async (namespace, label, value) => exec.exec('kubectl', [
-  'label',
-  'namespace',
-  namespace,
-  `${label}=${value}`,
-  '--overwrite=true',
-]);
-
 const createNamespace = async (clanId,
   opaEnabled,
   { project, cluster, clusterLocation },
   namespace) => {
-  const opaInjection = opaEnabled ? 'enabled' : 'disabled';
-
   // Authenticate kubectl
-  await exec.exec('gcloud', [
-    'container',
-    'clusters',
-    'get-credentials',
-    cluster,
-    `--region=${clusterLocation}`,
-    `--project=${project}`,
-  ]);
+  await authenticateKubeCtl({ cluster, clusterLocation, project });
 
   if (!await getNamespace(namespace)) {
     core.info(`creating namespace ${namespace}`);
@@ -60,8 +45,8 @@ const createNamespace = async (clanId,
       `iam.gke.io/gcp-service-account=${namespace}@${clanId}.iam.gserviceaccount.com`,
     ]);
   }
-  await setLabel(namespace, 'opa-istio-injection', opaInjection);
-  await setLabel(namespace, 'istio-injection', opaInjection);
+
+  await setOpaInjectionLabels(namespace, opaEnabled);
 
   // TODO: update OPA config map
 };

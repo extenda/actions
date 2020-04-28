@@ -2,6 +2,14 @@
 
 This is a GitHub Action to deploy a service to Cloud Run.
 
+When deploying to Cloud Run on GKE, the action will also conditionally deploy or configure the following
+
+  * Service Kubernetes namespace
+  * Workload identity and service account
+  * Istio and OPA injection
+  * Config maps
+  * Domain bindings for external services
+
 ## Usage
 
 See [action.yml](action.yml).
@@ -10,6 +18,15 @@ See [action.yml](action.yml).
 
 This action requires a GCP service account key with permission to deploy the cloud run services.
 Once created, the JSON key should be `base64` encoded and added as secret in the GitHub repository.
+
+### DNS mappings
+
+For fully automated DNS mappings on GKE, the following conditions must be met.
+
+  * Cloud DNS must be enabled and manage DNS record-sets for your domain(s)
+  * The service account in use must be permitted to update DNS record sets
+  * Label your DNS project with the `dns` label for auto-discovery or use the `dns-project-label` input if another label is used.
+  * The DNS zones must follow this naming convention: For domain `mydomain.com` the zone is `mydomain-com`
 
 ## Cloud Run YAML
 
@@ -31,9 +48,7 @@ properties are required and not.
 | `max-instances` | The maximum number of container instances to run. Set to `-1` to use the platform default (recommended).                                                          | No       | `-1`          |
 | `environment`*  | A map of environment variables. The values can be Secret Manager URLs on the form `sm://*/my-secret` where `*` will be replaced by the project ID at deploy time. | No       | -             |
 
-<small>
-  <top>*</top> Once set, this value can only be unset by passing <code>[]</code> (empty array) as value.
-</small><br><br>
+<top>\*</top> Once set, this value can only be unset by passing `[]` (empty array) as value.
 
 These properties only apply to Managed Cloud Run:
 
@@ -45,20 +60,20 @@ These properties only apply to Managed Cloud Run:
 | `platform.managed.cpu`                            | The CPU limit for the service. Default is 1. Can be set to 2.                                                                                                    | No       | 1                  |
 | `platform.managed.service-account`                | The runtime service account used by the Cloud Run service. Either a fully-qualified email or a prefix where the default project email is appended automatically. | No       | `cloudrun-runtime` |
 
-<small>
-  <top>*</top> Once set, this value can only be unset by passing <code>[]</code> (empty array) as value.
-</small><br><br>
+<top>\*</top> Once set, this value can only be unset by passing `[]` (empty array) as value.
 
 These properties only apply to Cloud Run on GKE:
 
-| Property                        | Description                                                                                              | Required | Default Value                    |
-|:--------------------------------|:---------------------------------------------------------------------------------------------------------|:---------|:---------------------------------|
-| `min-instances`                 | The minimum number of container instances to run. Set to `-1` to use the platform default (recommended). | No       | `-1`                             |
-| `platform.gke.cluster`          | The name of the cluster to deploy to.                                                                    | No       | The `k8s-cluster` in Tribe GKE.  |
-| `platform.gke.connectivity`     | Determines if the service can be invoked through internet. Can be set to `external` or `internal`.       | Yes      |                                  |
-| `platform.gke.cpu`              | The CPU limit for the service in Kubernetes CPU units, for example 500m.                                 | No       | `1`                              |
-| `platform.gke.namespace`        | The Kubernetes namespace to use.                                                                         | No       | The service `name`               |
-| `platform.gke.opa-enabled`      | Flag to enable opa and istio injection on service.                                                       | No       | `true`                           |
+| Property                               | Description                                                                                                | Required | Default Value                   |
+|:---------------------------------------|:-----------------------------------------------------------------------------------------------------------|:---------|:--------------------------------|
+| `min-instances`                        | The minimum number of container instances to run. Set to `-1` to use the platform default (recommended).   | No       | `-1`                            |
+| `platform.gke.cluster`                 | The name of the cluster to deploy to.                                                                      | No       | The `k8s-cluster` in Tribe GKE. |
+| `platform.gke.connectivity`            | Determines if the service can be invoked through internet. Can be set to `external` or `internal`.         | Yes      |                                 |
+| `platform.gke.cpu`                     | The CPU limit for the service in Kubernetes CPU units, for example 500m.                                   | No       | `1`                             |
+| `platform.gke.domain-mappings.prod`    | List of fully qualified domains to map in the `prod` environment. Only applies to `external` services.     | No       |                                 |
+| `platform.gke.domain-mappings.staging` | List of fully qualified domains to map in the `staging` environment. Only applies to `external` services.  | No       |                                 |
+| `platform.gke.namespace`               | The Kubernetes namespace to use.                                                                           | No       | The service `name`              |
+| `platform.gke.opa-enabled`             | Flag to enable OPA and Istio injection on service.                                                         | No       | `true`                          |
 
 ### YAML Examples
 
@@ -79,13 +94,29 @@ platform:
 
 ### Cloud Run on auto-discovered GKE
 
-This example defines a Cloud Run service that runs on Cloud Run on GKE
+This example defines a Cloud Run service that runs on Cloud Run on GKE.
 ```yaml
 name: my-service
 memory: 256Mi
 platform:
   gke:
     connectivity: external
+```
+
+### Cloud Run on GKE with domain-mappings
+
+This example defines a Cloud Run service that is bound to a public domain.
+```yaml
+name: my-service
+memory: 256Mi
+platform:
+  gke:
+    connectivity: external
+    domains-mappings:
+      prod:
+        - my-service.retailsvc.com
+      staging:
+        - my-service.retailsvc.dev
 ```
 
 ### Cloud run on manually specified GKE
@@ -130,15 +161,10 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - uses: extenda/actions/setup-gcloud@v0
-        id: gcloud
-        with:
-          service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
-
       - uses: extenda/actions/cloud-run@v0
         with:
           service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
-          image: gcr.io/${{ steps.gcloud.outputs.project-id }}/my-service:$GITHUB_SHA
+          image: eu.gcr.io/extenda/my-service:$GITHUB_SHA
 ```
 
 #### Custom runtime account
@@ -165,14 +191,9 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - uses: extenda/actions/setup-gcloud@v0
-        id: gcloud
-        with:
-          service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
-
       - uses: extenda/actions/cloud-run@v0
         with:
           service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
           service-definition: cloud-run.yaml
-          image: gcr.io/${{ steps.gcloud.outputs.project-id }}/my-service:$GITHUB_SHA
+          image: eu.gcr.io/extenda/my-service:$GITHUB_SHA
 ```

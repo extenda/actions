@@ -43,7 +43,7 @@ describe('Run Deploy', () => {
       service,
       'gcr.io/test-project/my-service:tag',
     );
-    expect(returnValue).toEqual(0);
+    expect(returnValue.gcloudExitCode).toEqual(0);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
@@ -120,7 +120,7 @@ describe('Run Deploy', () => {
       service,
       'gcr.io/test-project/my-service:tag',
     );
-    expect(returnValue).toEqual(0);
+    expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.not.arrayContaining(['--allow-unauthenticated']));
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--no-allow-unauthenticated']));
   });
@@ -144,7 +144,7 @@ describe('Run Deploy', () => {
       service,
       'gcr.io/test-project/my-service:tag',
     );
-    expect(returnValue).toEqual(0);
+    expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--set-cloudsql-instances=MY-INSTANCE']));
   });
 
@@ -199,7 +199,7 @@ describe('Run Deploy', () => {
       service,
       'gcr.io/test-project/my-service:tag',
     );
-    expect(returnValue).toEqual(0);
+    expect(returnValue.gcloudExitCode).toEqual(0);
     expect(getClusterInfo).toHaveBeenCalled();
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledTimes(1);
@@ -244,7 +244,7 @@ describe('Run Deploy', () => {
       service,
       'gcr.io/test-project/my-service:tag',
     );
-    expect(returnValue).toEqual(0);
+    expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(getClusterInfo).toHaveBeenCalledWith('test-project', undefined);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
@@ -295,7 +295,7 @@ describe('Run Deploy', () => {
       service,
       'gcr.io/test-project/my-service:tag',
     );
-    expect(returnValue).toEqual(0);
+    expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(getClusterInfo).toHaveBeenCalledWith('test-project', 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster');
     expect(setupGcloud).toHaveBeenCalledTimes(1);
