@@ -4,15 +4,25 @@ const { createProject } = require('./create-project');
 const { scan } = require('./scan');
 const { scanMsBuild } = require('./scan-msbuild');
 const { checkQualityGate } = require('./check-quality-gate');
+const { credentials } = require('./sonar-credentials');
+const { getPullRequestInfo } = require('./pull-request-info');
 
-const isPullRequest = () => process.env.GITHUB_EVENT_NAME === 'pull_request';
-
-const isBranchAnalysis = (mainBranch) => {
-  const branch = process.env.GITHUB_REF.replace('refs/heads/', '');
-  return branch !== mainBranch && !isPullRequest();
+const isPullRequest = async (hostUrl) => {
+  const { githubToken } = await credentials(hostUrl);
+  const pullRequest = await getPullRequestInfo(githubToken);
+  return !!pullRequest;
 };
 
-run(async () => {
+const isBranchAnalysis = async (mainBranch, hostUrl) => {
+  const branch = process.env.GITHUB_REF.replace('refs/heads/', '');
+  if (branch !== mainBranch) {
+    // Return false if this isn't a pull request.
+    return isPullRequest(hostUrl).then((pullRequest) => !pullRequest);
+  }
+  return false;
+};
+
+const action = async () => {
   const hostUrl = core.getInput('sonar-host', { required: true });
   const mainBranch = core.getInput('main-branch', { required: true });
   const sonarScanner = core.getInput('sonar-scanner', { required: true });
@@ -28,8 +38,8 @@ run(async () => {
   };
 
   const isSonarQube = hostUrl.startsWith('https://sonar.extenda.io');
-
-  if (isSonarQube && isBranchAnalysis(mainBranch)) {
+  const branchAnalysis = await isBranchAnalysis(mainBranch, hostUrl);
+  if (isSonarQube && branchAnalysis) {
     core.info(`${hostUrl} does not support multi-branch analysis. No analysis is performed.`);
     return;
   }
@@ -61,4 +71,10 @@ run(async () => {
       process.exitCode = core.ExitCode.Failure;
     }
   }
-});
+};
+
+if (require.main === module) {
+  run(action);
+}
+
+module.exports = action;

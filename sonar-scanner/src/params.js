@@ -46,7 +46,7 @@ const createParams = async (hostUrl, mainBranch, msParams = false, extraParams =
       props['sonar.pullrequest.key'] = pullRequest.number;
       props['sonar.pullrequest.provider'] = 'github';
       props['sonar.pullrequest.github.repository'] = process.env.GITHUB_REPOSITORY;
-    } else {
+    } else if (hostUrl === 'https://sonar.extenda.io') {
       // SonarQube 6
       props['sonar.github.oauth'] = githubToken;
       props['sonar.analysis.mode'] = 'preview';

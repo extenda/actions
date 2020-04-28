@@ -2,12 +2,9 @@ const core = require('@actions/core');
 const { GitHub } = require('@actions/github');
 let { context } = require('@actions/github');
 
-const getPullRequestInfo = async (githubToken) => {
-  if (context.eventName === 'pull_request') {
-    const { pull_request: pullRequest } = context.payload;
-    return pullRequest;
-  }
+let pullRequestCache;
 
+const fetchPullRequestInfo = async (githubToken) => {
   const octokit = new GitHub(githubToken);
   const { owner, repo } = context.repo;
   return octokit.pulls.list({
@@ -23,9 +20,25 @@ const getPullRequestInfo = async (githubToken) => {
   });
 };
 
+const getPullRequestInfo = async (githubToken) => {
+  if (pullRequestCache) {
+    return pullRequestCache;
+  }
+
+  if (context.eventName === 'pull_request') {
+    const { pull_request: pullRequest } = context.payload;
+    pullRequestCache = pullRequest;
+  } else {
+    pullRequestCache = await fetchPullRequestInfo(githubToken);
+  }
+  return pullRequestCache;
+};
+
 module.exports = {
   setContext: (ctx) => {
+    // Used to mock the context in tests.
     context = ctx;
+    pullRequestCache = undefined;
   },
   getPullRequestInfo,
 };
