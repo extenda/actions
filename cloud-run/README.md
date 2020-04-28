@@ -69,7 +69,7 @@ These properties only apply to Cloud Run on GKE:
 | `min-instances`                        | The minimum number of container instances to run. Set to `-1` to use the platform default (recommended).   | No       | `-1`                            |
 | `platform.gke.cluster`                 | The name of the cluster to deploy to.                                                                      | No       | The `k8s-cluster` in Tribe GKE. |
 | `platform.gke.connectivity`            | Determines if the service can be invoked through internet. Can be set to `external` or `internal`.         | Yes      |                                 |
-| `platform.gke.cpu`                     | The CPU limit for the service in Kubernetes CPU units, for example 500m.                                   | No       | `1`                             |
+| `platform.gke.cpu`                     | The CPU limit for the service in Kubernetes CPU units, for example 300m.                                   | Yes      |                                 |
 | `platform.gke.domain-mappings.prod`    | List of fully qualified domains to map in the `prod` environment. Only applies to `external` services.     | No       |                                 |
 | `platform.gke.domain-mappings.staging` | List of fully qualified domains to map in the `staging` environment. Only applies to `external` services.  | No       |                                 |
 | `platform.gke.namespace`               | The Kubernetes namespace to use.                                                                           | No       | The service `name`              |
@@ -101,6 +101,7 @@ memory: 256Mi
 platform:
   gke:
     connectivity: external
+    cpu: 300m
 ```
 
 ### Cloud Run on GKE with domain-mappings
@@ -112,6 +113,7 @@ memory: 256Mi
 platform:
   gke:
     connectivity: external
+    cpu: 300m
     domains-mappings:
       prod:
         - my-service.retailsvc.com
@@ -128,6 +130,7 @@ memory: 256Mi
 platform:
   gke:
     connectivity: external
+    cpu: 300m
     cluster: k8s-cluster
     namespace: default
 ```

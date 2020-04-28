@@ -99,6 +99,7 @@ module.exports = {
           },
           required: [
             'connectivity',
+            'cpu',
           ],
           additionalProperties: false,
         },

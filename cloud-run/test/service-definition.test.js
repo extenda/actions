@@ -81,6 +81,7 @@ platform:
   gke:
     cluster: test
     connectivity: external
+    cpu: 300m
 `,
       });
       expect(() => loadServiceDefinition('cloud-run.yaml'))
