@@ -102,7 +102,7 @@ describe('Sonar Parameters', () => {
       expect(result).toContain('-Dsonar.pullrequest.github.repository=extenda/actions');
     });
 
-    test('SonarQube', async () => {
+    test('sonar.extenda.io', async () => {
       const result = await createParams('https://sonar.extenda.io', 'master');
       expect(result).toContain('-Dsonar.login=sonar');
       expect(result).toContain('-Dsonar.host.url=https://sonar.extenda.io');
@@ -112,5 +112,19 @@ describe('Sonar Parameters', () => {
       expect(result).toContain('-Dsonar.github.repository=extenda/actions');
       expect(result).toContain('-Dsonar.github.pullRequest=1');
     });
+
+    test('Any SonarQube', async () => {
+      const result = await createParams('https://sonarqube.io', 'master');
+      expect(result).toContain('-Dsonar.login=sonar');
+      expect(result).toContain('-Dsonar.host.url=https://sonarqube.io');
+      expect(result).toContain('-Dsonar.projectName=actions');
+      expect(result).not.toContain('-Dsonar.analysis.mode=preview');
+    });
+  });
+
+  test('It sets verbose flag', async () => {
+    process.env.SONAR_VERBOSE = 'true';
+    const result = await createParams('https://sonar.extenda.io', 'master');
+    expect(result).toContain('-Dsonar.verbose=true');
   });
 });
