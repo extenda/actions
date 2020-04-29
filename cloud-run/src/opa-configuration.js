@@ -73,7 +73,7 @@ const setupOpaConfigAndApply = async (namespace, regoPackage) => {
   ]);
 };
 
-const loadRego = (regoFile) => fs.readFileSync(regoFile).replace(/\r\n/g, '\n');
+const loadRego = (regoFile) => fs.readFileSync(regoFile, 'utf8').replace(/\r\n/g, '\n');
 
 const setOpaConfigurations = async (namespace, regoFile) => {
   const rego = loadRego(regoFile);

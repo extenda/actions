@@ -2928,7 +2928,7 @@ const action = async () => {
   const verbose = (core.getInput('verbose') || 'false');
 
   const service = loadServiceDefinition(serviceFile);
-  await runDeploy(serviceAccountKey, service, image, verbose === 'true')
+  await runDeploy(serviceAccountKey, service, image, regoFile, verbose === 'true')
     .then(({ cluster }) => configureDomains(service, cluster, domainBindingsEnv, dnsProjectLabel));
 };
 
@@ -5364,7 +5364,7 @@ const gkeArguments = async (args, service, projectId, regoFile) => {
   return cluster;
 };
 
-const runDeploy = async (serviceAccountKey, service, image, verbose = false) => {
+const runDeploy = async (serviceAccountKey, service, image, regoFile, verbose = false) => {
   // Authenticate gcloud with our service-account
   const projectId = await glcoudAuth(serviceAccountKey);
 
@@ -14789,8 +14789,8 @@ const createNamespace = async (clanId,
 
   await setOpaInjectionLabels(namespace, !regoFile ? false : opaEnabled);
 
-  if(opaEnabled && regoFile) {
-    core.info('setting up OPA configurations and rego policy!')
+  if (opaEnabled && regoFile) {
+    core.info('setting up OPA configurations and rego policy!');
     await setOpaConfigurations(namespace, regoFile);
   }
 };
@@ -21318,40 +21318,37 @@ exports.default = ParseContext;
 /* 758 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const core = __webpack_require__(793);
 const exec = __webpack_require__(266);
 const fs = __webpack_require__(747);
 const yaml = __webpack_require__(498);
 
-const getPackagePath = async(regoFile) => {
-  // get package line and retrieve the path
-  return '' + (`${regoFile}`).split('\n', 1)[0].replace('package', '').trim();
-};
+// get package line and retrieve the path
+const getPackagePath = async (regoFile) => regoFile.split('\n', 1)[0].replace('package', '').trim();
 
-const setupRegoAndApply = async (namespace, regoFile) => {
-  let rego = (`${regoFile}`).replace(/\r\n/g, "\n");
-  let policyConfig = {
+const setupRegoAndApply = async (namespace, rego) => {
+  const policyConfig = {
     apiVersion: 'v1',
     kind: 'ConfigMap',
     metadata: {
       name: 'opa-policy',
-      namespace: namespace
+      namespace,
     },
     data: {
-      'policy.rego': rego
-    }
+      'policy.rego': rego,
+    },
   };
-  let yamlStr = yaml.stringify(policyConfig);
+  const yamlStr = yaml.stringify(policyConfig);
   fs.writeFileSync('policy.yaml', yamlStr, 'utf8');
-  await exec.exec('kubectl', [
+
+  return exec.exec('kubectl', [
     'apply',
     '-f',
     'policy.yaml',
-  ])
+  ]);
 };
 
 const setupOpaConfigAndApply = async (namespace, regoPackage) => {
-  let configYaml = yaml.stringify({
+  const configYaml = yaml.stringify({
     bundles: {
       global_policy: {
         service: 'global_bundle',
@@ -21376,29 +21373,33 @@ const setupOpaConfigAndApply = async (namespace, regoPackage) => {
       },
     },
   });
-  let opaConfig = {
+  const opaConfig = {
     apiVersion: 'v1',
     kind: 'ConfigMap',
     metadata: {
       name: 'opa-istio-config',
-      namespace: namespace
+      namespace,
     },
     data: {
-      'config.yaml': configYaml
-    }
+      'config.yaml': configYaml,
+    },
   };
-  let yamlStr = yaml.stringify(opaConfig);
+  const yamlStr = yaml.stringify(opaConfig);
   fs.writeFileSync('config.yaml', yamlStr, 'utf8');
   await exec.exec('kubectl', [
     'apply',
     '-f',
     'config.yaml',
-  ])
+  ]);
 };
 
+const loadRego = (regoFile) => fs.readFileSync(regoFile, 'utf8').replace(/\r\n/g, '\n');
+
 const setOpaConfigurations = async (namespace, regoFile) => {
-  await setupOpaConfigAndApply(namespace, await getPackagePath(regoFile));
-  await setupRegoAndApply(namespace, regoFile);
+  const rego = loadRego(regoFile);
+  const regoPackage = await getPackagePath(rego);
+  await setupOpaConfigAndApply(namespace, regoPackage);
+  await setupRegoAndApply(namespace, rego);
 };
 
 module.exports = {
