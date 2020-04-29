@@ -50,8 +50,8 @@ const createNamespace = async (clanId,
 
   await setOpaInjectionLabels(namespace, !regoFile ? false : opaEnabled);
 
-  if(opaEnabled && regoFile) {
-    core.info('setting up OPA configurations and rego policy!')
+  if (opaEnabled && regoFile) {
+    core.info('setting up OPA configurations and rego policy!');
     await setOpaConfigurations(namespace, regoFile);
   }
 };

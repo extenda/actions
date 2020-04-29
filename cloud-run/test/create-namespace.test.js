@@ -15,7 +15,7 @@ const mockOutput = (data, opts) => {
   return Promise.reject(new Error('exit code 1'));
 };
 
-const mockRegoFile = 'package istio.authz\n' + 'default allow = true';
+const mockRegoFile = 'package istio.authz\ndefault allow = true';
 
 describe('Create namespace', () => {
   beforeEach(() => {
