@@ -5279,7 +5279,6 @@ function _evaluateVersions(versions, versionSpec) {
 /* 193 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const core = __webpack_require__(793);
 const exec = __webpack_require__(266);
 const setupGcloud = __webpack_require__(217);
 const getRuntimeAccount = __webpack_require__(838);

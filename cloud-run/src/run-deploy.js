@@ -1,4 +1,3 @@
-const core = require('@actions/core');
 const exec = require('@actions/exec');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const getRuntimeAccount = require('./runtime-account');
