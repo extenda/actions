@@ -4,12 +4,12 @@ const authenticateKubeCtl = require('./kubectl-auth');
 const { setOpaInjectionLabels } = require('./set-namespace-label');
 const { addDnsRecord } = require('./dns-record');
 
-const listDomains = async ({ cluster, clusterLocation, projectId }) => gcloud([
+const listDomains = async ({ cluster, clusterLocation, project }) => gcloud([
   'run',
   'domain-mappings',
   'list',
   '--platform=gke',
-  `--project=${projectId}`,
+  `--project=${project}`,
   `--cluster=${cluster}`,
   `--cluster-location=${clusterLocation}`,
   '--format=value(DOMAIN,SERVICE)',
@@ -33,7 +33,7 @@ const getNewDomains = async (domains, name, cluster) => {
 };
 
 const createDomainMapping = async (
-  { cluster, clusterLocation, projectId },
+  { cluster, clusterLocation, project },
   domain,
   service,
   namespace,
@@ -47,22 +47,22 @@ const createDomainMapping = async (
     `--domain=${domain}`,
     `--namespace=${namespace}`,
     '--platform=gke',
-    `--project=${projectId}`,
+    `--project=${project}`,
     `--cluster=${cluster}`,
     `--cluster-location=${clusterLocation}`,
     '--format=value(CONTENTS)',
   ]);
 };
 
-const determineEnv = (projectId) => (projectId.includes('staging') ? 'staging' : 'prod');
+const determineEnv = (project) => (project.includes('staging') ? 'staging' : 'prod');
 
-const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectId) => {
+const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectLabel) => {
   if (!cluster) {
     core.info('Domain binding is not yet supported for managed cloud run.');
     return [];
   }
 
-  const env = domainMappingEnv || determineEnv(cluster.projectId);
+  const env = domainMappingEnv || determineEnv(cluster.project);
   const {
     name,
     platform: {
@@ -88,7 +88,7 @@ const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectId
     const promises = [];
     newDomains.forEach((domain) => {
       promises.push(createDomainMapping(cluster, domain, name, namespace)
-        .then((ipAddress) => addDnsRecord(dnsProjectId, domain, ipAddress)));
+        .then((ipAddress) => addDnsRecord(dnsProjectLabel, domain, ipAddress)));
     });
 
     await Promise.all(promises).finally(() => {

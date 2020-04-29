@@ -2925,9 +2925,10 @@ const action = async () => {
   const image = core.getInput('image', { required: true });
   const domainBindingsEnv = core.getInput('domain-mappings-env') || '';
   const dnsProjectLabel = core.getInput('dns-project-label') || 'dns';
+  const verbose = (core.getInput('verbose') || 'false');
 
   const service = loadServiceDefinition(serviceFile);
-  await runDeploy(serviceAccountKey, service, image, regoFile)
+  await runDeploy(serviceAccountKey, service, image, verbose === 'true')
     .then(({ cluster }) => configureDomains(service, cluster, domainBindingsEnv, dnsProjectLabel));
 };
 
@@ -5363,7 +5364,7 @@ const gkeArguments = async (args, service, projectId, regoFile) => {
   return cluster;
 };
 
-const runDeploy = async (serviceAccountKey, service, image, regoFile) => {
+const runDeploy = async (serviceAccountKey, service, image, verbose = false) => {
   // Authenticate gcloud with our service-account
   const projectId = await glcoudAuth(serviceAccountKey);
 
@@ -5383,6 +5384,10 @@ const runDeploy = async (serviceAccountKey, service, image, regoFile) => {
     `--max-instances=${numericOrDefault(maxInstances)}`,
     `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
   ];
+
+  if (verbose) {
+    args.push('--verbosity=debug');
+  }
 
 
   let cluster;
@@ -7984,12 +7989,12 @@ const authenticateKubeCtl = __webpack_require__(731);
 const { setOpaInjectionLabels } = __webpack_require__(667);
 const { addDnsRecord } = __webpack_require__(133);
 
-const listDomains = async ({ cluster, clusterLocation, projectId }) => gcloud([
+const listDomains = async ({ cluster, clusterLocation, project }) => gcloud([
   'run',
   'domain-mappings',
   'list',
   '--platform=gke',
-  `--project=${projectId}`,
+  `--project=${project}`,
   `--cluster=${cluster}`,
   `--cluster-location=${clusterLocation}`,
   '--format=value(DOMAIN,SERVICE)',
@@ -8013,7 +8018,7 @@ const getNewDomains = async (domains, name, cluster) => {
 };
 
 const createDomainMapping = async (
-  { cluster, clusterLocation, projectId },
+  { cluster, clusterLocation, project },
   domain,
   service,
   namespace,
@@ -8027,22 +8032,22 @@ const createDomainMapping = async (
     `--domain=${domain}`,
     `--namespace=${namespace}`,
     '--platform=gke',
-    `--project=${projectId}`,
+    `--project=${project}`,
     `--cluster=${cluster}`,
     `--cluster-location=${clusterLocation}`,
     '--format=value(CONTENTS)',
   ]);
 };
 
-const determineEnv = (projectId) => (projectId.includes('staging') ? 'staging' : 'prod');
+const determineEnv = (project) => (project.includes('staging') ? 'staging' : 'prod');
 
-const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectId) => {
+const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectLabel) => {
   if (!cluster) {
     core.info('Domain binding is not yet supported for managed cloud run.');
     return [];
   }
 
-  const env = domainMappingEnv || determineEnv(cluster.projectId);
+  const env = domainMappingEnv || determineEnv(cluster.project);
   const {
     name,
     platform: {
@@ -8068,7 +8073,7 @@ const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectId
     const promises = [];
     newDomains.forEach((domain) => {
       promises.push(createDomainMapping(cluster, domain, name, namespace)
-        .then((ipAddress) => addDnsRecord(dnsProjectId, domain, ipAddress)));
+        .then((ipAddress) => addDnsRecord(dnsProjectLabel, domain, ipAddress)));
     });
 
     await Promise.all(promises).finally(() => {

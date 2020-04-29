@@ -7,7 +7,7 @@ const { addDnsRecord } = require('../src/dns-record');
 const { mockOutput } = require('./utils');
 
 const mockCluster = {
-  projectId: 'test-project-staging-1234',
+  project: 'test-project-staging-1234',
   cluster: 'k8s-cluster',
   clusterLocation: 'europe-west1',
 };
