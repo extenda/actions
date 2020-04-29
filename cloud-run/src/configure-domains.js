@@ -4,7 +4,7 @@ const authenticateKubeCtl = require('./kubectl-auth');
 const { setOpaInjectionLabels } = require('./set-namespace-label');
 const { addDnsRecord } = require('./dns-record');
 
-const listDomains = async ({ cluster, clusterLocation, project }) => gcloud([
+const listDomains = async ({ cluster, clusterLocation, project }, namespace) => gcloud([
   'run',
   'domain-mappings',
   'list',
@@ -12,6 +12,7 @@ const listDomains = async ({ cluster, clusterLocation, project }) => gcloud([
   `--project=${project}`,
   `--cluster=${cluster}`,
   `--cluster-location=${clusterLocation}`,
+  `--namespace=${namespace}`,
   '--format=value(DOMAIN,SERVICE)',
 ]).then((result) => result.split('\n'))
   .then((list) => list.reduce((prev, value) => {
@@ -21,8 +22,8 @@ const listDomains = async ({ cluster, clusterLocation, project }) => gcloud([
     return update;
   }, {}));
 
-const getNewDomains = async (domains, name, cluster) => {
-  const mappings = await listDomains(cluster);
+const getNewDomains = async (domains, name, cluster, namespace) => {
+  const mappings = await listDomains(cluster, namespace);
   return domains.filter((domain) => {
     const existing = mappings[domain];
     if (existing && existing !== name) {
@@ -78,7 +79,7 @@ const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectLa
   const domains = domainMappings[env] || [];
 
   if (connectivity === 'external' && domains.length > 0) {
-    const newDomains = await getNewDomains(domains, name, cluster);
+    const newDomains = await getNewDomains(domains, name, cluster, namespace);
 
     if (opaEnabled) {
       await authenticateKubeCtl(cluster);
