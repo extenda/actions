@@ -17,17 +17,21 @@ describe('Cloud Run Action', () => {
     serviceDef.mockReturnValueOnce({});
     core.getInput.mockReturnValueOnce('service-account')
       .mockReturnValueOnce('cloud-run.yaml')
+      .mockReturnValueOnce('package istio.authz\n' +
+        'default allow = true')
       .mockReturnValueOnce('gcr.io/project/image:tag')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('dns');
     runDeploy.mockResolvedValueOnce({});
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(5);
+    expect(core.getInput).toHaveBeenCalledTimes(6);
     expect(runDeploy).toHaveBeenCalledWith(
       'service-account',
       {},
       'gcr.io/project/image:tag',
+      'package istio.authz\n' +
+      'default allow = true',
     );
   });
 
@@ -35,6 +39,8 @@ describe('Cloud Run Action', () => {
     serviceDef.mockReturnValueOnce({});
     core.getInput.mockReturnValueOnce('service-account')
       .mockReturnValueOnce('')
+      .mockReturnValueOnce('package istio.authz\n' +
+        'default allow = true')
       .mockReturnValueOnce('gcr.io/project/image:tag')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('dns');
@@ -42,11 +48,13 @@ describe('Cloud Run Action', () => {
 
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(5);
+    expect(core.getInput).toHaveBeenCalledTimes(6);
     expect(runDeploy).toHaveBeenCalledWith(
       'service-account',
       {},
       'gcr.io/project/image:tag',
+      'package istio.authz\n' +
+      'default allow = true',
     );
   });
 });

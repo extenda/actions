@@ -26,6 +26,10 @@ inputs:
       If set to 'none', DNS records will not be updated.
     required: false
     default: dns
+  rego-policy:
+    description: An authorization policy for your service in use by OPA.
+    required: false
+    default: policy.rego
 runs:
   using: node12
   main: dist/index.js
