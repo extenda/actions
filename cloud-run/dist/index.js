@@ -2924,9 +2924,10 @@ const action = async () => {
   const image = core.getInput('image', { required: true });
   const domainBindingsEnv = core.getInput('domain-mappings-env') || '';
   const dnsProjectLabel = core.getInput('dns-project-label') || 'dns';
+  const verbose = (core.getInput('verbose') || 'false');
 
   const service = loadServiceDefinition(serviceFile);
-  await runDeploy(serviceAccountKey, service, image)
+  await runDeploy(serviceAccountKey, service, image, verbose === 'true')
     .then(({ cluster }) => configureDomains(service, cluster, domainBindingsEnv, dnsProjectLabel));
 };
 
@@ -5362,7 +5363,7 @@ const gkeArguments = async (args, service, projectId) => {
   return cluster;
 };
 
-const runDeploy = async (serviceAccountKey, service, image) => {
+const runDeploy = async (serviceAccountKey, service, image, verbose = false) => {
   // Authenticate gcloud with our service-account
   const projectId = await glcoudAuth(serviceAccountKey);
 
@@ -5382,6 +5383,10 @@ const runDeploy = async (serviceAccountKey, service, image) => {
     `--max-instances=${numericOrDefault(maxInstances)}`,
     `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
   ];
+
+  if (verbose) {
+    args.push('--verbosity=debug');
+  }
 
 
   let cluster;

@@ -62,6 +62,29 @@ describe('Run Deploy', () => {
     ]);
   });
 
+  test('It can deploy with verbose logging', async () => {
+    exec.exec.mockResolvedValueOnce(0);
+    setupGcloud.mockResolvedValueOnce('test-project');
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      platform: {
+        managed: {
+          region: 'eu-west1',
+          'allow-unauthenticated': false,
+        },
+      },
+    };
+    const returnValue = await runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-project/my-service:tag',
+      true,
+    );
+    expect(returnValue.gcloudExitCode).toEqual(0);
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--verbosity=debug']));
+  });
+
   test('It can deploy with environment', async () => {
     exec.exec.mockResolvedValueOnce(0);
     setupGcloud.mockResolvedValueOnce('test-project');

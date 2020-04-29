@@ -26,6 +26,11 @@ inputs:
       If set to 'none', DNS records will not be updated.
     required: false
     default: dns
+  verbose:
+    description: |
+      Flag to enable verbose debug logging on gcloud.
+    required: false
+    default: 'false'
 runs:
   using: node12
   main: dist/index.js
