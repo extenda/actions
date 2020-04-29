@@ -31,6 +31,7 @@ describe('Run Deploy', () => {
     const service = {
       name: 'my-service',
       memory: '256Mi',
+      cpu: 1,
       platform: {
         managed: {
           region: 'eu-west1',
@@ -68,6 +69,7 @@ describe('Run Deploy', () => {
     const service = {
       name: 'my-service',
       memory: '256Mi',
+      cpu: 1,
       platform: {
         managed: {
           region: 'eu-west1',
@@ -93,6 +95,7 @@ describe('Run Deploy', () => {
     const service = {
       name: 'my-service',
       memory: '256Mi',
+      cpu: 1,
       environment: {
         KEY1: 'value',
         KEY2: 'sm://*/my-secret',
@@ -132,6 +135,7 @@ describe('Run Deploy', () => {
     const service = {
       name: 'my-service',
       memory: '256Mi',
+      cpu: 1,
       platform: {
         managed: {
           region: 'eu-west1',
@@ -155,6 +159,7 @@ describe('Run Deploy', () => {
     const service = {
       name: 'my-service',
       memory: '256Mi',
+      cpu: 1,
       platform: {
         managed: {
           region: 'eu-west1',
@@ -180,6 +185,7 @@ describe('Run Deploy', () => {
     const service = {
       name: 'my-service',
       memory: '256Mi',
+      cpu: 1,
       platform: {
         managed: {
           region: 'eu-west1',
@@ -208,12 +214,12 @@ describe('Run Deploy', () => {
     const service = {
       name: 'my-service',
       memory: '256Mi',
+      cpu: '400m',
       platform: {
         gke: {
           cluster: 'k8s-cluster',
           'cluster-location': 'europe-west1',
           connectivity: 'external',
-          cpu: '400m',
           namespace: 'my-space',
         },
       },
@@ -257,6 +263,7 @@ describe('Run Deploy', () => {
     const service = {
       name: 'my-service',
       memory: '256Mi',
+      cpu: '200m',
       platform: {
         gke: {
           connectivity: 'external',
@@ -280,7 +287,7 @@ describe('Run Deploy', () => {
       '--concurrency=default',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-project',
-      '--cpu=1',
+      '--cpu=200m',
       '--min-instances=default',
       '--platform=gke',
       '--cluster=projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
@@ -302,12 +309,12 @@ describe('Run Deploy', () => {
     const service = {
       name: 'my-service',
       memory: '256Mi',
+      cpu: '400m',
       concurrency: 50,
       'min-instances': 1,
       'max-instances': 100,
       platform: {
         gke: {
-          cpu: '400m',
           cluster: 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
           connectivity: 'external',
           namespace: 'default',
@@ -339,5 +346,52 @@ describe('Run Deploy', () => {
       '--connectivity=external',
       '--namespace=default',
     ]);
+  });
+
+  test('It throws for invalid managed cpu units', async () => {
+    exec.exec.mockResolvedValueOnce(0);
+    setupGcloud.mockResolvedValueOnce('test-project');
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      cpu: '200m',
+      platform: {
+        managed: {
+          region: 'eu-west1',
+          'allow-unauthenticated': true,
+        },
+      },
+    };
+    await expect(runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-project/my-service:tag',
+    )).rejects.toEqual(
+      new Error('Managed Cloud Run must be configured with CPU count [1,2]. Use of millicpu is not supported.'),
+    );
+  });
+
+  test('It throws for invalid gke millcpu', async () => {
+    exec.exec.mockResolvedValueOnce(0);
+    setupGcloud.mockResolvedValueOnce('test-project');
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      cpu: 2,
+      platform: {
+        gke: {
+          cluster: 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
+          connectivity: 'external',
+          namespace: 'default',
+        },
+      },
+    };
+    await expect(runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-project/my-service:tag',
+    )).rejects.toEqual(
+      new Error('Cloud Run GKE must be configured with millicpu. Use of CPU count is not supported.'),
+    );
   });
 });

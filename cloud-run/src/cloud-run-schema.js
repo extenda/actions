@@ -1,19 +1,38 @@
 module.exports = {
   type: 'object',
   properties: {
-    name: {
-      type: 'string',
-    },
-    memory: {
-      type: 'string',
-    },
     concurrency: {
       type: 'integer',
       default: -1,
     },
+    cpu: {
+      oneOf: [
+        {
+          type: 'string',
+          title: 'millicpu',
+          description: 'Kubernetes CPU request in millicpu',
+          pattern: '^[0-9]{1,4}m$',
+        },
+        {
+          type: 'integer',
+          title: 'CPU cores',
+          description: 'CPU cores for managed cloud run',
+          minimum: 1,
+          maximum: 2,
+        },
+      ],
+      default: '200m',
+    },
+    name: {
+      type: 'string',
+    },
     'max-instances': {
       type: 'integer',
       default: -1,
+    },
+    memory: {
+      type: 'string',
+      pattern: '^[0-9]+(M|G)i',
     },
     'min-instances': {
       type: 'integer',
@@ -36,11 +55,6 @@ module.exports = {
               items: {
                 type: 'string',
               },
-            },
-            cpu: {
-              type: 'integer',
-              minimum: 1,
-              maximum: 2,
             },
             region: {
               type: 'string',
@@ -69,9 +83,6 @@ module.exports = {
                 'internal',
               ],
             },
-            cpu: {
-              type: 'string',
-            },
             'domain-mappings': {
               type: 'object',
               properties: {
@@ -99,19 +110,25 @@ module.exports = {
           },
           required: [
             'connectivity',
-            'cpu',
           ],
           additionalProperties: false,
         },
       },
       oneOf: [
-        { required: ['managed'] },
-        { required: ['gke'] },
+        {
+          title: 'managed',
+          required: ['managed'],
+        },
+        {
+          title: 'gke',
+          required: ['gke'],
+        },
       ],
       additionalProperties: false,
     },
   },
   required: [
+    'cpu',
     'name',
     'memory',
     'platform',

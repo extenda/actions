@@ -17,6 +17,7 @@ describe('Service Definition', () => {
       mockFs({
         'cloud-run.yaml': `
 memory: 256Mi
+cpu: 1
 `,
       });
       expect(() => loadServiceDefinition('cloud-run.yaml'))
@@ -29,6 +30,7 @@ memory: 256Mi
       mockFs({
         'cloud-run.yaml': `
 name: service
+cpu: 1
 platform:
   managed:
     allow-unauthenticated: true
@@ -40,11 +42,28 @@ platform:
 0: instance requires property "memory"`);
     });
 
+    test('It throws for invalid memory', () => {
+      mockFs({
+        'cloud-run.yaml': `
+name: service
+memory: 256m
+cpu: 1
+platform:
+  managed:
+    allow-unauthenticated: true
+    region: eu-west1
+`,
+      });
+      expect(() => loadServiceDefinition('cloud-run.yaml'))
+        .toThrow(`cloud-run.yaml is not valid.
+0: instance.memory does not match pattern "^[0-9]+(M|G)i"`);
+    });
+
     test('It throws for missing allow-unauthenticated', () => {
       mockFs({
         'cloud-run.yaml': `
 name: service
-memory: 256Mi
+memory: 1Gi
 platform:
   managed:
     region: eu-west1
@@ -61,6 +80,7 @@ platform:
         'cloud-run.yaml': `
 name: test-service
 memory: 256Mi
+cpu: 100m
 `,
       });
       expect(() => loadServiceDefinition('cloud-run.yaml'))
@@ -69,7 +89,7 @@ memory: 256Mi
 `);
     });
 
-    test('It throws for both platform', () => {
+    test('It throws for missing cpu', () => {
       mockFs({
         'cloud-run.yaml': `
 name: test-service
@@ -78,15 +98,66 @@ platform:
   managed:
     region: eu-west1
     allow-unauthenticated: true
-  gke:
-    cluster: test
-    connectivity: external
-    cpu: 300m
 `,
       });
       expect(() => loadServiceDefinition('cloud-run.yaml'))
         .toThrow(`cloud-run.yaml is not valid.
-0: instance.platform is not exactly one from [subschema 0],[subschema 1]`);
+0: instance requires property "cpu"
+`);
+    });
+
+    test('It throws for both platform', () => {
+      mockFs({
+        'cloud-run.yaml': `
+name: test-service
+memory: 64Mi
+cpu: 300m
+platform:
+  managed:
+    region: eu-west1
+    allow-unauthenticated: true
+  gke:
+    cluster: test
+    connectivity: external
+`,
+      });
+      expect(() => loadServiceDefinition('cloud-run.yaml'))
+        .toThrow(`cloud-run.yaml is not valid.
+0: instance.platform is not exactly one from "managed","gke"`);
+    });
+
+    test('It throws for invalid core count', () => {
+      mockFs({
+        'cloud-run.yaml': `
+name: test-service
+memory: 256Mi
+cpu: 3
+platform:
+  managed:
+    region: eu-west1
+    allow-unauthenticated: true
+`,
+      });
+      expect(() => loadServiceDefinition('cloud-run.yaml'))
+        .toThrow(`cloud-run.yaml is not valid.
+0: instance.cpu is not exactly one from "millicpu","CPU cores"`);
+    });
+
+    test('It throws for invalid millicpu', () => {
+      mockFs({
+        'cloud-run.yaml': `
+name: test-service
+memory: 256Mi
+cpu: 10000m
+platform:
+  managed:
+    region: eu-west1
+    allow-unauthenticated: true
+`,
+      });
+      expect(() => loadServiceDefinition('cloud-run.yaml'))
+        .toThrow(`cloud-run.yaml is not valid.
+0: instance.cpu is not exactly one from "millicpu","CPU cores"`);
     });
   });
 
@@ -96,6 +167,7 @@ platform:
       'cloud-run.yaml': `
 name: service
 memory: 256Mi
+cpu: 1
 
 environment:
   NAME: value
@@ -120,6 +192,7 @@ platform:
       'cloud-run.yaml': `
 name: test-service
 memory: 256Mi
+cpu: 1
 platform:
   managed:
     allow-unauthenticated: true
@@ -139,6 +212,7 @@ platform:
 name: test-service
 memory: 256Mi
 concurrency: 20
+cpu: 2
 max-instances: 3
 environment:
   FOO: bar
@@ -146,7 +220,6 @@ platform:
   managed:
     region: eu-west1
     allow-unauthenticated: true
-    cpu: 2
     cloudsql-instances:
       - Postgres-RANDOM123
 `,
@@ -156,6 +229,7 @@ platform:
       name: 'test-service',
       memory: '256Mi',
       concurrency: 20,
+      cpu: 2,
       'max-instances': 3,
       environment: {
         FOO: 'bar',
@@ -163,7 +237,6 @@ platform:
       platform: {
         managed: {
           region: 'eu-west1',
-          cpu: 2,
           'cloudsql-instances': [
             'Postgres-RANDOM123',
           ],
@@ -177,6 +250,7 @@ platform:
       'cloud-run.yaml': `
 name: test-service
 memory: 256Mi
+cpu: 400m
 concurrency: 80
 max-instances: 20
 min-instances: 1
@@ -184,7 +258,6 @@ platform:
   gke:
     cluster: test
     connectivity: internal
-    cpu: 400m
     domain-mappings:
       staging:
         - test-service.domain.dev
@@ -197,6 +270,7 @@ platform:
     expect(service).toMatchObject({
       name: 'test-service',
       memory: '256Mi',
+      cpu: '400m',
       concurrency: 80,
       'max-instances': 20,
       'min-instances': 1,
@@ -204,7 +278,6 @@ platform:
         gke: {
           cluster: 'test',
           connectivity: 'internal',
-          cpu: '400m',
           'opa-enabled': true,
           'domain-mappings': {
             staging: ['test-service.domain.dev'],

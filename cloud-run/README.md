@@ -40,40 +40,39 @@ By default, the action will load `cloud-run.yaml` from the repository base direc
 The YAML syntax is formally defined with [JSON Schema](src/cloud-run-schema.js). The following table explains what
 properties are required and not.
 
-| Property        | Description                                                                                                                                                       | Required | Default Value |
-|:----------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------|:--------------|
-| `name`          | The service name.                                                                                                                                                 | Yes      |               |
-| `memory`        | Set a memory limit, for example `256Mi`, `512Mi` or `1Gi`.                                                                                                        | Yes      |               |
-| `concurrency`   | The max concurrent requests per container. Set to `-1` to use the default concurrency for the platform (recommended).                                             | No       | `-1`          |
-| `max-instances` | The maximum number of container instances to run. Set to `-1` to use the platform default (recommended).                                                          | No       | `-1`          |
-| `environment`*  | A map of environment variables. The values can be Secret Manager URLs on the form `sm://*/my-secret` where `*` will be replaced by the project ID at deploy time. | No       | -             |
+| Property                   | Description                                                                                                                                                       | Required | Default Value |
+|:---------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------|:--------------|
+| `name`                     | The service name.                                                                                                                                                 | Yes      |               |
+| `memory`                   | Set a memory limit, for example `256Mi`, `512Mi` or `1Gi`.                                                                                                        | Yes      |               |
+| `concurrency`              | The max concurrent requests per container. Set to `-1` to use the default concurrency for the platform (recommended).                                             | No       | `-1`          |
+| `cpu`                      | The CPU limit for the service. For managed Cloud Run, use core count `1` or `2`. For Cloud Run on GKE, use millicpu (e.g., `200m`).                               | Yes      |               |
+| `max-instances`            | The maximum number of container instances to run. Set to `-1` to use the platform default (recommended).                                                          | No       | `-1`          |
+| `environment`<top>\*</top> | A map of environment variables. The values can be Secret Manager URLs on the form `sm://*/my-secret` where `*` will be replaced by the project ID at deploy time. | No       | -             |
 
 <top>\*</top> Once set, this value can only be unset by passing `[]` (empty array) as value.
 
 These properties only apply to Managed Cloud Run:
 
-| Property                                          | Description                                                                                                                                                      | Required | Default Value      |
-|:--------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------|:-------------------|
-| `platform.managed.allow-unauthenticated`          | Whether to enable unauthenticated access to the publicly available service.                                                                                      | Yes      |                    |
-| `platform.managed.region`                         | The region in which to run the service.                                                                                                                          | Yes      |                    |
-| `platform.managed.cloudsql-instances`<top>*</top> | A list of [Cloud SQL instance names](https://cloud.google.com/sdk/gcloud/reference/run/deploy#--add-cloudsql-instances) this service can connect to.             | No       | -                  |
-| `platform.managed.cpu`                            | The CPU limit for the service. Default is 1. Can be set to 2.                                                                                                    | No       | 1                  |
-| `platform.managed.service-account`                | The runtime service account used by the Cloud Run service. Either a fully-qualified email or a prefix where the default project email is appended automatically. | No       | `cloudrun-runtime` |
+| Property                                           | Description                                                                                                                                                      | Required | Default Value      |
+|:---------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------|:-------------------|
+| `platform.managed.allow-unauthenticated`           | Whether to enable unauthenticated access to the publicly available service.                                                                                      | Yes      |                    |
+| `platform.managed.region`                          | The region in which to run the service.                                                                                                                          | Yes      |                    |
+| `platform.managed.cloudsql-instances`<top>\*</top> | A list of [Cloud SQL instance names](https://cloud.google.com/sdk/gcloud/reference/run/deploy#--add-cloudsql-instances) this service can connect to.             | No       | -                  |
+| `platform.managed.service-account`                 | The runtime service account used by the Cloud Run service. Either a fully-qualified email or a prefix where the default project email is appended automatically. | No       | `cloudrun-runtime` |
 
 <top>\*</top> Once set, this value can only be unset by passing `[]` (empty array) as value.
 
 These properties only apply to Cloud Run on GKE:
 
-| Property                               | Description                                                                                                | Required | Default Value                   |
-|:---------------------------------------|:-----------------------------------------------------------------------------------------------------------|:---------|:--------------------------------|
-| `min-instances`                        | The minimum number of container instances to run. Set to `-1` to use the platform default (recommended).   | No       | `-1`                            |
-| `platform.gke.cluster`                 | The name of the cluster to deploy to.                                                                      | No       | The `k8s-cluster` in Tribe GKE. |
-| `platform.gke.connectivity`            | Determines if the service can be invoked through internet. Can be set to `external` or `internal`.         | Yes      |                                 |
-| `platform.gke.cpu`                     | The CPU limit for the service in Kubernetes CPU units, for example 300m.                                   | Yes      |                                 |
-| `platform.gke.domain-mappings.prod`    | List of fully qualified domains to map in the `prod` environment. Only applies to `external` services.     | No       |                                 |
-| `platform.gke.domain-mappings.staging` | List of fully qualified domains to map in the `staging` environment. Only applies to `external` services.  | No       |                                 |
-| `platform.gke.namespace`               | The Kubernetes namespace to use.                                                                           | No       | The service `name`              |
-| `platform.gke.opa-enabled`             | Flag to enable OPA and Istio injection on service.                                                         | No       | `true`                          |
+| Property                               | Description                                                                                               | Required | Default Value                   |
+|:---------------------------------------|:----------------------------------------------------------------------------------------------------------|:---------|:--------------------------------|
+| `min-instances`                        | The minimum number of container instances to run. Set to `-1` to use the platform default (recommended).  | No       | `-1`                            |
+| `platform.gke.cluster`                 | The name of the cluster to deploy to.                                                                     | No       | The `k8s-cluster` in Tribe GKE. |
+| `platform.gke.connectivity`            | Determines if the service can be invoked through internet. Can be set to `external` or `internal`.        | Yes      |                                 |
+| `platform.gke.domain-mappings.prod`    | List of fully qualified domains to map in the `prod` environment. Only applies to `external` services.    | No       |                                 |
+| `platform.gke.domain-mappings.staging` | List of fully qualified domains to map in the `staging` environment. Only applies to `external` services. | No       |                                 |
+| `platform.gke.namespace`               | The Kubernetes namespace to use.                                                                          | No       | The service `name`              |
+| `platform.gke.opa-enabled`             | Flag to enable OPA and Istio injection on service.                                                        | No       | `true`                          |
 
 ### YAML Examples
 
@@ -83,6 +82,7 @@ This example defines a Cloud Run service that runs in managed Cloud Run.
 ```yaml
 name: my-service
 memory: 256Mi
+cpu: 1
 environment:
   DEBUG_LOG: 'false'
   SECRET_NAME: sm://*/secret-name
@@ -98,10 +98,10 @@ This example defines a Cloud Run service that runs on Cloud Run on GKE.
 ```yaml
 name: my-service
 memory: 256Mi
+cpu: 200m
 platform:
   gke:
     connectivity: external
-    cpu: 300m
 ```
 
 ### Cloud Run on GKE with domain-mappings
@@ -110,10 +110,10 @@ This example defines a Cloud Run service that is bound to a public domain.
 ```yaml
 name: my-service
 memory: 256Mi
+cpu: 300m
 platform:
   gke:
     connectivity: external
-    cpu: 300m
     domains-mappings:
       prod:
         - my-service.retailsvc.com
@@ -127,10 +127,10 @@ This example defines a Cloud Run service that runs on Cloud Run on GKE.
 ```yaml
 name: my-service
 memory: 256Mi
+cpu: 200m
 platform:
   gke:
     connectivity: external
-    cpu: 300m
     cluster: k8s-cluster
     namespace: default
 ```
@@ -146,6 +146,7 @@ Given the following `cloud-run.yaml`:
 ```yaml
 name: my-service
 memory: 256Mi
+cpu: 1
 platform:
   managed:
     allow-unauthenticated: true
@@ -176,6 +177,7 @@ Given the following `cloud-run.yaml`:
 ```yaml
 name: my-service
 memory: 256Mi
+cpu: 1
 platform:
   managed:
     allow-unauthenticated: true

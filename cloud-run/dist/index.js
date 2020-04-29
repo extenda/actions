@@ -5279,6 +5279,7 @@ function _evaluateVersions(versions, versionSpec) {
 /* 193 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
+const core = __webpack_require__(793);
 const exec = __webpack_require__(266);
 const setupGcloud = __webpack_require__(217);
 const getRuntimeAccount = __webpack_require__(838);
@@ -5295,16 +5296,20 @@ const numericOrDefault = (value) => (value >= 0 ? value : 'default');
 
 const managedArguments = async (args, service, projectId) => {
   const {
+    cpu,
     platform: {
       managed: {
         'allow-unauthenticated': allowUnauthenticated,
         'cloudsql-instances': cloudSqlInstances = undefined,
         region,
-        cpu = 1,
         'runtime-account': runtimeAccountEmail = 'cloudrun-runtime',
       },
     },
   } = service;
+
+  if (typeof cpu === 'string' && cpu.endsWith('m')) {
+    throw new Error('Managed Cloud Run must be configured with CPU count [1,2]. Use of millicpu is not supported.');
+  }
 
   const runtimeAccount = await getRuntimeAccount(runtimeAccountEmail, projectId);
   args.push(`--service-account=${runtimeAccount}`);
@@ -5333,17 +5338,21 @@ const managedArguments = async (args, service, projectId) => {
 const gkeArguments = async (args, service, projectId, regoFile) => {
   const {
     name,
+    cpu,
     'min-instances': minInstances = -1,
     platform: {
       gke: {
         cluster: configuredCluster = undefined,
-        cpu = '1',
         connectivity,
         namespace = name,
         'opa-enabled': opaEnabled = true,
       },
     },
   } = service;
+
+  if (typeof cpu === 'number') {
+    throw new Error('Cloud Run GKE must be configured with millicpu. Use of CPU count is not supported.');
+  }
 
   const cluster = await getClusterInfo(projectId, configuredCluster);
 
@@ -9010,19 +9019,38 @@ function getPrettyContext({
 module.exports = {
   type: 'object',
   properties: {
-    name: {
-      type: 'string',
-    },
-    memory: {
-      type: 'string',
-    },
     concurrency: {
       type: 'integer',
       default: -1,
     },
+    cpu: {
+      oneOf: [
+        {
+          type: 'string',
+          title: 'millicpu',
+          description: 'Kubernetes CPU request in millicpu',
+          pattern: '^[0-9]{1,4}m$',
+        },
+        {
+          type: 'integer',
+          title: 'CPU cores',
+          description: 'CPU cores for managed cloud run',
+          minimum: 1,
+          maximum: 2,
+        },
+      ],
+      default: '200m',
+    },
+    name: {
+      type: 'string',
+    },
     'max-instances': {
       type: 'integer',
       default: -1,
+    },
+    memory: {
+      type: 'string',
+      pattern: '^[0-9]+(M|G)i',
     },
     'min-instances': {
       type: 'integer',
@@ -9045,11 +9073,6 @@ module.exports = {
               items: {
                 type: 'string',
               },
-            },
-            cpu: {
-              type: 'integer',
-              minimum: 1,
-              maximum: 2,
             },
             region: {
               type: 'string',
@@ -9078,9 +9101,6 @@ module.exports = {
                 'internal',
               ],
             },
-            cpu: {
-              type: 'string',
-            },
             'domain-mappings': {
               type: 'object',
               properties: {
@@ -9108,19 +9128,25 @@ module.exports = {
           },
           required: [
             'connectivity',
-            'cpu',
           ],
           additionalProperties: false,
         },
       },
       oneOf: [
-        { required: ['managed'] },
-        { required: ['gke'] },
+        {
+          title: 'managed',
+          required: ['managed'],
+        },
+        {
+          title: 'gke',
+          required: ['gke'],
+        },
       ],
       additionalProperties: false,
     },
   },
   required: [
+    'cpu',
     'name',
     'memory',
     'platform',
