@@ -79,6 +79,7 @@ describe('Run Deploy', () => {
       serviceAccountKey,
       service,
       'gcr.io/test-project/my-service:tag',
+      'policy.rego',
       true,
     );
     expect(returnValue.gcloudExitCode).toEqual(0);

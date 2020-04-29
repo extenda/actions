@@ -49,7 +49,7 @@ const managedArguments = async (args, service, projectId) => {
   }
 };
 
-const gkeArguments = async (args, service, projectId) => {
+const gkeArguments = async (args, service, projectId, regoFile) => {
   const {
     name,
     'min-instances': minInstances = -1,
@@ -76,14 +76,14 @@ const gkeArguments = async (args, service, projectId) => {
   );
 
   if (namespace !== 'default') {
-    await createNamespace(projectId, opaEnabled, cluster, namespace);
+    await createNamespace(projectId, opaEnabled, cluster, namespace, regoFile);
   }
   args.push(`--namespace=${namespace}`);
 
   return cluster;
 };
 
-const runDeploy = async (serviceAccountKey, service, image, verbose = false) => {
+const runDeploy = async (serviceAccountKey, service, image, regoFile, verbose = false) => {
   // Authenticate gcloud with our service-account
   const projectId = await glcoudAuth(serviceAccountKey);
 
@@ -115,7 +115,7 @@ const runDeploy = async (serviceAccountKey, service, image, verbose = false) => 
   }
 
   if (service.platform.gke) {
-    cluster = await gkeArguments(args, service, projectId);
+    cluster = await gkeArguments(args, service, projectId, regoFile);
   }
 
   const gcloudExitCode = await exec.exec('gcloud', args);

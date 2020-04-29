@@ -2921,13 +2921,14 @@ const configureDomains = __webpack_require__(278);
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const serviceFile = core.getInput('service-definition') || 'cloud-run.yaml';
+  const regoFile = core.getInput('rego-policy') || 'policy.rego';
   const image = core.getInput('image', { required: true });
   const domainBindingsEnv = core.getInput('domain-mappings-env') || '';
   const dnsProjectLabel = core.getInput('dns-project-label') || 'dns';
   const verbose = (core.getInput('verbose') || 'false');
 
   const service = loadServiceDefinition(serviceFile);
-  await runDeploy(serviceAccountKey, service, image, verbose === 'true')
+  await runDeploy(serviceAccountKey, service, image, regoFile, verbose === 'true')
     .then(({ cluster }) => configureDomains(service, cluster, domainBindingsEnv, dnsProjectLabel));
 };
 
@@ -5329,7 +5330,7 @@ const managedArguments = async (args, service, projectId) => {
   }
 };
 
-const gkeArguments = async (args, service, projectId) => {
+const gkeArguments = async (args, service, projectId, regoFile) => {
   const {
     name,
     'min-instances': minInstances = -1,
@@ -5356,14 +5357,14 @@ const gkeArguments = async (args, service, projectId) => {
   );
 
   if (namespace !== 'default') {
-    await createNamespace(projectId, opaEnabled, cluster, namespace);
+    await createNamespace(projectId, opaEnabled, cluster, namespace, regoFile);
   }
   args.push(`--namespace=${namespace}`);
 
   return cluster;
 };
 
-const runDeploy = async (serviceAccountKey, service, image, verbose = false) => {
+const runDeploy = async (serviceAccountKey, service, image, regoFile, verbose = false) => {
   // Authenticate gcloud with our service-account
   const projectId = await glcoudAuth(serviceAccountKey);
 
@@ -5395,7 +5396,7 @@ const runDeploy = async (serviceAccountKey, service, image, verbose = false) => 
   }
 
   if (service.platform.gke) {
-    cluster = await gkeArguments(args, service, projectId);
+    cluster = await gkeArguments(args, service, projectId, regoFile);
   }
 
   const gcloudExitCode = await exec.exec('gcloud', args);
@@ -14739,6 +14740,7 @@ function plural(ms, msAbs, n, name) {
 const core = __webpack_require__(793);
 const exec = __webpack_require__(266);
 const authenticateKubeCtl = __webpack_require__(731);
+const { setOpaConfigurations } = __webpack_require__(758);
 const { setOpaInjectionLabels } = __webpack_require__(667);
 
 const getNamespace = async (namespace) => {
@@ -14767,7 +14769,8 @@ const getNamespace = async (namespace) => {
 const createNamespace = async (clanId,
   opaEnabled,
   { project, cluster, clusterLocation },
-  namespace) => {
+  namespace,
+  regoFile) => {
   // Authenticate kubectl
   await authenticateKubeCtl({ cluster, clusterLocation, project });
 
@@ -14784,9 +14787,12 @@ const createNamespace = async (clanId,
     ]);
   }
 
-  await setOpaInjectionLabels(namespace, opaEnabled);
+  await setOpaInjectionLabels(namespace, !regoFile ? false : opaEnabled);
 
-  // TODO: update OPA config map
+  if (opaEnabled && regoFile) {
+    core.info('setting up OPA configurations and rego policy!');
+    await setOpaConfigurations(namespace, regoFile);
+  }
 };
 
 module.exports = createNamespace;
@@ -21309,7 +21315,99 @@ exports.default = ParseContext;
 /* 755 */,
 /* 756 */,
 /* 757 */,
-/* 758 */,
+/* 758 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const exec = __webpack_require__(266);
+const fs = __webpack_require__(747);
+const yaml = __webpack_require__(498);
+
+// get package line and retrieve the path
+const getPackagePath = async (regoFile) => regoFile.split('\n', 1)[0].replace('package', '').trim();
+
+const setupRegoAndApply = async (namespace, rego) => {
+  const policyConfig = {
+    apiVersion: 'v1',
+    kind: 'ConfigMap',
+    metadata: {
+      name: 'opa-policy',
+      namespace,
+    },
+    data: {
+      'policy.rego': rego,
+    },
+  };
+  const yamlStr = yaml.stringify(policyConfig);
+  fs.writeFileSync('policy.yaml', yamlStr, 'utf8');
+
+  return exec.exec('kubectl', [
+    'apply',
+    '-f',
+    'policy.yaml',
+  ]);
+};
+
+const setupOpaConfigAndApply = async (namespace, regoPackage) => {
+  const configYaml = yaml.stringify({
+    bundles: {
+      global_policy: {
+        service: 'global_bundle',
+        resource: `${namespace}.tar.gz`,
+        polling: {
+          min_delay_seconds: 10,
+          max_delay_seconds: 20,
+        },
+      },
+    },
+    services: {
+      name: 'global_bundle',
+      url: 'http://bundle-server.opa-bundle.svc.cluster.local',
+    },
+    decision_logs: {
+      console: 'true',
+    },
+    plugins: {
+      envoy_ext_authz_grpc: {
+        addr: ':9191',
+        path: `${regoPackage}.allow`.replace('.', '/'),
+      },
+    },
+  });
+  const opaConfig = {
+    apiVersion: 'v1',
+    kind: 'ConfigMap',
+    metadata: {
+      name: 'opa-istio-config',
+      namespace,
+    },
+    data: {
+      'config.yaml': configYaml,
+    },
+  };
+  const yamlStr = yaml.stringify(opaConfig);
+  fs.writeFileSync('config.yaml', yamlStr, 'utf8');
+  await exec.exec('kubectl', [
+    'apply',
+    '-f',
+    'config.yaml',
+  ]);
+};
+
+const loadRego = (regoFile) => fs.readFileSync(regoFile, 'utf8').replace(/\r\n/g, '\n');
+
+const setOpaConfigurations = async (namespace, regoFile) => {
+  const rego = loadRego(regoFile);
+  const regoPackage = await getPackagePath(rego);
+  await setupOpaConfigAndApply(namespace, regoPackage);
+  await setupRegoAndApply(namespace, rego);
+};
+
+module.exports = {
+  setOpaConfigurations,
+};
+
+
+/***/ }),
 /* 759 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
