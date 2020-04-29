@@ -34,7 +34,8 @@ jobs:
 
       - uses: extenda/actions/setup-gcloud@v0
         id: gcloud
-        service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
+        with:
+          service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
 
       - name: Build and push Docker image
         run: |
