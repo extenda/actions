@@ -83,7 +83,7 @@ const gkeArguments = async (args, service, projectId) => {
   return cluster;
 };
 
-const runDeploy = async (serviceAccountKey, service, image) => {
+const runDeploy = async (serviceAccountKey, service, image, verbose = false) => {
   // Authenticate gcloud with our service-account
   const projectId = await glcoudAuth(serviceAccountKey);
 
@@ -103,6 +103,10 @@ const runDeploy = async (serviceAccountKey, service, image) => {
     `--max-instances=${numericOrDefault(maxInstances)}`,
     `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
   ];
+
+  if (verbose) {
+    args.push('--verbosity=debug');
+  }
 
 
   let cluster;

@@ -19,15 +19,17 @@ describe('Cloud Run Action', () => {
       .mockReturnValueOnce('cloud-run.yaml')
       .mockReturnValueOnce('gcr.io/project/image:tag')
       .mockReturnValueOnce('')
-      .mockReturnValueOnce('dns');
+      .mockReturnValueOnce('dns')
+      .mockReturnValueOnce('false');
     runDeploy.mockResolvedValueOnce({});
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(5);
+    expect(core.getInput).toHaveBeenCalledTimes(6);
     expect(runDeploy).toHaveBeenCalledWith(
       'service-account',
       {},
       'gcr.io/project/image:tag',
+      false,
     );
   });
 
@@ -37,16 +39,39 @@ describe('Cloud Run Action', () => {
       .mockReturnValueOnce('')
       .mockReturnValueOnce('gcr.io/project/image:tag')
       .mockReturnValueOnce('')
-      .mockReturnValueOnce('dns');
+      .mockReturnValueOnce('dns')
+      .mockReturnValueOnce('false');
     runDeploy.mockResolvedValueOnce({});
 
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(5);
+    expect(core.getInput).toHaveBeenCalledTimes(6);
     expect(runDeploy).toHaveBeenCalledWith(
       'service-account',
       {},
       'gcr.io/project/image:tag',
+      false,
+    );
+  });
+
+  test('It can run with verbose flag set', async () => {
+    serviceDef.mockReturnValueOnce({});
+    core.getInput.mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('gcr.io/project/image:tag')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('dns')
+      .mockReturnValueOnce('true');
+    runDeploy.mockResolvedValueOnce({});
+
+    await action();
+
+    expect(core.getInput).toHaveBeenCalledTimes(6);
+    expect(runDeploy).toHaveBeenCalledWith(
+      'service-account',
+      {},
+      'gcr.io/project/image:tag',
+      true,
     );
   });
 });
