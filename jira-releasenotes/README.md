@@ -84,7 +84,7 @@ To enforce commit conventions, we recommend using [pre-commit](https://pre-commi
 With commit message hooks, we can ensure that all pushed commits follows our conventions.
 
 To configure pre-commits, start by installing [pre-commit](https://pre-commit.com).
-Next, create a `pre-commit-config.yaml` file in your repository root.
+Next, create a `.pre-commit-config.yaml` file in your repository root.
 
 ```yaml
 default_stages: [commit]
