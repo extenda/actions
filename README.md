@@ -24,6 +24,7 @@ The following actions are available
   * [setup-git](setup-git#readme)
   * [setup-msbuild](setup-msbuild#readme)
   * [setup-nuget-sources](setup-nuget-sources#readme)
+  * [setup-terraform](setup-terraform#readme)
   * [slack-message](slack-message#readme)
   * [sonar-scanner](sonar-scanner#readme)
 
