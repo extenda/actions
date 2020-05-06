@@ -1,0 +1,22 @@
+name: Terraform plan comment
+description: Post a Terraform plan output as a pull request comment.
+inputs:
+  plan-file:
+    description: |
+      The plan output filename. The action will include all plans matching this name below the working directory.
+    required: false
+    default: plan.out
+  github-token:
+    description: A GitHub token with write access to the repository.
+    required: false
+    default: ${{ github.token }}
+  working-directory:
+    description: The working directory. Defaults to the current working directory.
+    required: false
+  job-id:
+    description: The job ID in the GitHub Action workflow
+    required: false
+    default: ${{ job.id }}
+runs:
+  using: node12
+  main: dist/index.js

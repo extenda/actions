@@ -5,7 +5,7 @@ const fs = require('fs');
 jest.mock('@actions/exec');
 
 jest.mock('../src/sonar-credentials');
-jest.mock('../src/pull-request-info');
+jest.mock('../../utils/src/pull-request-info');
 
 const { scanMsBuild, markerFile } = require('../src/scan-msbuild');
 
