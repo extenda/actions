@@ -22,7 +22,7 @@ const getBranchName = (currentRef) => {
     throw new Error('Can not return a branchname for null');
   }
 
-  const pattern = /refs\/heads\/([A-Za-z0-9/\-_]*)/;
+  const pattern = /refs\/heads\/([A-Za-z0-9/\-_.]*)/;
   const groups = currentRef.match(pattern);
 
   if (groups == null || groups.length !== 2) {
@@ -44,6 +44,21 @@ const getBranchNameFriendly = (branchName) => {
   }
 
   return branchName.replace(/\//g, '-').replace(/_/g, '-').toLowerCase();
+};
+
+const getBranchNameShort = (currentRef) => {
+  if (!currentRef) {
+    throw new Error('Can not return a branchname for null');
+  }
+
+  const pattern = /.*\/(.*)/;
+  const groups = currentRef.match(pattern);
+
+  if (groups == null || groups.length !== 2) {
+    throw new Error(`Failed to parse branch name from ${currentRef}`);
+  }
+
+  return groups[1];
 };
 
 const getShortSha = async (sha, shaSize = null) => {
