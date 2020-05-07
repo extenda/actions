@@ -7,7 +7,7 @@ const mockComment = jest.fn();
 jest.mock('@actions/github', () => ({
   GitHub: function GitHub() {
     return {
-      pulls: {
+      issues: {
         createComment: mockComment,
       },
     };

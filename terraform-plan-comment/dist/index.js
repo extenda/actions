@@ -4248,12 +4248,13 @@ const action = async () => {
     .then((outputs) => outputs.map(outputToMarkdown))
     .then((outputs) => createComment(outputs, jobId));
 
+  // Use issue comment instead?
   const client = new GitHub(githubToken);
   const { owner, repo } = context.repo;
-  await client.pulls.createComment({
+  await client.issues.createComment({
     owner,
     repo,
-    pull_number: pullRequest.number,
+    issue_number: pullRequest.number,
     body: comment,
   });
 
