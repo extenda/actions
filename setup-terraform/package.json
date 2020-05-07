@@ -1,0 +1,14 @@
+{
+  "name": "setup-terraform",
+  "version": "0.0.1-local",
+  "description": "Download Terraform and Terragrunt",
+  "private": true,
+  "main": "dist/index.js",
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "semver": "^7.3.2"
+  },
+  "devDependencies": {
+    "mock-fs": "^4.11.0"
+  }
+}

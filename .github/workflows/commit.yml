@@ -77,6 +77,15 @@ jobs:
       - name: Run MSBuild
         run: MSBuild -version
 
+      - name: Setup Terraform
+        uses: ./setup-terraform
+        with:
+          terraform-version: 0.12.24
+          terragrunt-version: 0.23.3
+
+      - name: Test Terragrunt
+        run: terragrunt -version
+
   acceptance-linux:
     runs-on: ubuntu-latest
     needs: test
@@ -132,6 +141,17 @@ jobs:
             echo "Failed to set project-id"
             exit 1
           fi
+
+      - name: Setup Terraform
+        uses: ./setup-terraform
+        with:
+          terraform-version: 0.12.24
+          terragrunt-version: 0.23.3
+
+      - name: Test Terraform
+        run: |
+          terraform -version
+          terragrunt -version
 
   release:
     runs-on: ubuntu-latest
