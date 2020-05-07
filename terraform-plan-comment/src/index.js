@@ -61,7 +61,7 @@ const action = async () => {
     .then((outputs) => createComment(outputs, jobId));
 
   const client = new GitHub(githubToken);
-  const { owner, repo } = context.repo();
+  const { owner, repo } = context.repo;
   await client.pulls.createComment({
     owner,
     repo,
