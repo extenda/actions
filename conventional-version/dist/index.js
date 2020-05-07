@@ -157,7 +157,8 @@ function prependListener(emitter, event, fn) {
 
 function ReadableState(options, stream, isDuplex) {
   Duplex = Duplex || __webpack_require__(206);
-  options = options || {}; // Duplex streams are both readable and writable, but share
+  options = options || {}; 
+  // Duplex streams are both readable and writable, but share
   // the same options object.
   // However, some cases require setting options to different
   // values for the readable and the writable sides of the duplex stream.
