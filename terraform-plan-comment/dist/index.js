@@ -4199,24 +4199,24 @@ const outputToMarkdown = ({ module, output }) => [
   '```',
 ].join('\n');
 
-const createComment = (changes, jobId) => {
+const createComment = (changes, workingDirectory) => {
   const comment = [];
 
 
   if (changes.length === 0) {
     comment.push(
-      ':white_check_mark: **No changes**',
+      '**:white_check_mark: No changes**',
       '',
       'Terraform plan reported no changes.',
     );
   } else {
     comment.push(
-      ':volcano: **Terraform plan changes**',
+      '**:earth_americas: Terraform plan changes**',
       '',
       'The output only includes modules with changes.',
       '',
       '<details>',
-      '<summary>Show Output</summary>',
+      `<summary>Show output from ${changes.length} ${changes.length > 1 ? 'modules' : 'module'}</summary>`,
       '',
       ...changes,
       '',
@@ -4226,7 +4226,8 @@ const createComment = (changes, jobId) => {
 
   comment.push(
     '',
-    `*Workflow: \`${process.env.GITHUB_WORKFLOW}.${jobId}\`*`,
+    `*Workflow: \`${process.env.GITHUB_WORKFLOW}\`*`,
+    `*Working directory: \`${workingDirectory}\`*`,
   );
 
   return comment.join('\n');
@@ -4236,7 +4237,6 @@ const action = async () => {
   const planFile = core.getInput('plan-file') || 'plan.out';
   const workingDirectory = core.getInput('working-directory') || process.cwd();
   const githubToken = core.getInput('github-token') || process.env.GITHUB_TOKEN;
-  const jobId = core.getInput('job-id') || 'unknown';
 
   const pullRequest = await getPullRequestInfo(githubToken);
   if (!pullRequest) {
@@ -4246,9 +4246,8 @@ const action = async () => {
 
   const comment = await generateOutputs(workingDirectory, planFile)
     .then((outputs) => outputs.map(outputToMarkdown))
-    .then((outputs) => createComment(outputs, jobId));
+    .then((outputs) => createComment(outputs, workingDirectory));
 
-  // Use issue comment instead?
   const client = new GitHub(githubToken);
   const { owner, repo } = context.repo;
   await client.issues.createComment({

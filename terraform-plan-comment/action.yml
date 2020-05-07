@@ -13,10 +13,6 @@ inputs:
   working-directory:
     description: The working directory. Defaults to the current working directory.
     required: false
-  job-id:
-    description: The job ID in the GitHub Action workflow
-    required: false
-    default: ${{ job.id }}
 runs:
   using: node12
   main: dist/index.js

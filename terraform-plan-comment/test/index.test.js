@@ -55,12 +55,12 @@ describe('Terraform plan comment', () => {
     ]);
 
     const comment = await action();
-    expect(comment).toEqual(`:volcano: **Terraform plan changes**
+    expect(comment).toEqual(`**:earth_americas: Terraform plan changes**
 
 The output only includes modules with changes.
 
 <details>
-<summary>Show Output</summary>
+<summary>Show output from 4 modules</summary>
 
 :arrow_forward: **folder/moduleA**
 \`\`\`hcl
@@ -81,7 +81,8 @@ Plan nested output
 
 </details>
 
-*Workflow: \`Terraform.unknown\`*`);
+*Workflow: \`Terraform\`*
+*Working directory: \`${process.cwd()}\`*`);
     expect(mockComment).toHaveBeenCalled();
   });
 
@@ -91,12 +92,12 @@ Plan nested output
     ]);
 
     const comment = await action();
-    expect(comment).toEqual(`:volcano: **Terraform plan changes**
+    expect(comment).toEqual(`**:earth_americas: Terraform plan changes**
 
 The output only includes modules with changes.
 
 <details>
-<summary>Show Output</summary>
+<summary>Show output from 1 module</summary>
 
 :arrow_forward: **work**
 \`\`\`hcl
@@ -105,14 +106,15 @@ Plan output
 
 </details>
 
-*Workflow: \`Terraform.unknown\`*`);
+*Workflow: \`Terraform\`*
+*Working directory: \`${process.cwd()}\`*`);
     expect(mockComment).toHaveBeenCalled();
   });
 
   test('It can generate comment for no changes', async () => {
     generateOutputs.mockResolvedValueOnce([]);
     const comment = await action();
-    expect(comment).toEqual(':white_check_mark: **No changes**\n\nTerraform plan reported no changes.\n\n*Workflow: `Terraform.unknown`*');
+    expect(comment).toEqual(`**:white_check_mark: No changes**\n\nTerraform plan reported no changes.\n\n*Workflow: \`Terraform\`*\n*Working directory: \`${process.cwd()}\`*`);
     expect(mockComment).toHaveBeenCalled();
   });
 
