@@ -91,6 +91,7 @@ module.exports = {
   getBranchName,
   isPreRelease,
   getBranchNameFriendly,
+  getBranchNameShort,
   getShortSha,
   getComposedVersionString,
   getBranchType,
