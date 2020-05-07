@@ -31,20 +31,20 @@ const run = async () => {
 
     const githubHeadRef = process.env.GITHUB_HEAD_REF;
     core.info(`GITHUB_HEAD_REF: ${githubHeadRef}`);
-    
-	const branchName = githubHeadRef || branchinfo.getBranchName(githubRef);
+
+    const branchName = githubHeadRef || branchinfo.getBranchName(githubRef);
     core.info(`branch-name: ${branchName}`);
     core.setOutput('branch-name', branchName);
-    
-	const branchNameFriendly = branchinfo.getBranchNameFriendly(branchName);
+
+    const branchNameFriendly = branchinfo.getBranchNameFriendly(branchName);
     core.info(`branch-name-friendly: ${branchNameFriendly}`);
     core.setOutput('branch-name-friendly', branchNameFriendly);
-    
-	const branchNameShort = branchinfo.getBranchNameShort(branchName);
+
+    const branchNameShort = branchinfo.getBranchNameShort(branchName);
     core.info(`branch-name-short: ${branchNameShort}`);
     core.setOutput('branch-name-short', branchNameShort);
-    
-	const isPreRel = branchinfo.isPreRelease(branchName);
+
+    const isPreRel = branchinfo.isPreRelease(branchName);
     core.info(`is-prerelease: ${isPreRel}`);
     core.setOutput('is-prerelease', isPreRel);
 
