@@ -27,6 +27,7 @@ The following actions are available
   * [setup-terraform](setup-terraform#readme)
   * [slack-message](slack-message#readme)
   * [sonar-scanner](sonar-scanner#readme)
+  * [terraform-plan-comment](terraform-plan-comment#readme)
 
 ## :rocket: Workflow Examples
 

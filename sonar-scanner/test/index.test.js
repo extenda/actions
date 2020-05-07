@@ -2,20 +2,20 @@ jest.mock('../src/create-project');
 jest.mock('../src/scan');
 jest.mock('../src/scan-msbuild');
 jest.mock('../src/check-quality-gate');
-jest.mock('../src/pull-request-info');
 jest.mock('../src/sonar-credentials', () => ({
   credentials: () => ({
     githubToken: 'GITHUB_TOKEN',
     sonarToken: 'SONAR_TOKEN',
   }),
 }));
+jest.mock('../../utils/src/pull-request-info');
 
 const core = require('@actions/core');
 const { createProject } = require('../src/create-project');
 const { scan } = require('../src/scan');
 const { scanMsBuild } = require('../src/scan-msbuild');
 const { checkQualityGate } = require('../src/check-quality-gate');
-const { getPullRequestInfo } = require('../src/pull-request-info');
+const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
 const action = require('../src/index');
 
 const orgEnv = process.env;

@@ -5,7 +5,7 @@ const { scan } = require('./scan');
 const { scanMsBuild } = require('./scan-msbuild');
 const { checkQualityGate } = require('./check-quality-gate');
 const { credentials } = require('./sonar-credentials');
-const { getPullRequestInfo } = require('./pull-request-info');
+const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
 
 const isPullRequest = async (hostUrl) => {
   const { githubToken } = await credentials(hostUrl);
