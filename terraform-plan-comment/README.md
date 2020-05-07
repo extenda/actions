@@ -38,14 +38,14 @@ jobs:
           service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
           export-default-credentials: true
 
-      - uses: extenda/actions/setup-terragrunt@v0
+      - uses: extenda/actions/setup-terraform@v0
 
       - name: Terragrunt plan
         run: terragrunt plan-all -lock=false -compact-warnings -out=plan.out
         working-directory: infra/staging
 
       - name: Add pull request comment
-        uses: extenda/actions/terraform-pull-request@v0
+        uses: extenda/actions/terraform-plan-comment@v0
         with:
           working-directory: infra/staging
  ```
