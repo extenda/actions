@@ -40,6 +40,10 @@ const run = async () => {
     core.info(`branch-name-friendly: ${branchNameFriendly}`);
     core.setOutput('branch-name-friendly', branchNameFriendly);
 
+    const branchNameShort = branchinfo.getBranchNameShort(branchName);
+    core.info(`branch-name-short: ${branchNameShort}`);
+    core.setOutput('branch-name-short', branchNameShort);
+
     const isPreRel = branchinfo.isPreRelease(branchName);
     core.info(`is-prerelease: ${isPreRel}`);
     core.setOutput('is-prerelease', isPreRel);
