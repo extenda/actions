@@ -56,22 +56,22 @@ describe('Branch info test suite', () => {
   });
 
   test('getBranchNameShort() returns last branch name or null', () => {
-    expect(getBranchName('refs/heads/feature/RS-1234')).toBe('RS-1234');
-    expect(getBranchName('refs/heads/feature/RS-1234_test_branch')).toBe('RS-1234_test_branch');
+    expect(getBranchNameShort('refs/heads/feature/RS-1234')).toBe('RS-1234');
+    expect(getBranchNameShort('refs/heads/feature/RS-1234_test_branch')).toBe('RS-1234_test_branch');
     expect(() => {
-      getBranchName('wrong string');
+      getBranchNameShort('wrong string');
     }).toThrow();
     expect(() => {
-      getBranchName(null);
+      getBranchNameShort(null);
     }).toThrow();
     expect(() => {
-      getBranchName(undefined);
+      getBranchNameShort(undefined);
     }).toThrow();
     expect(() => {
-      getBranchName();
+      getBranchNameShort();
     }).toThrow();
     expect(() => {
-      getBranchName('');
+      getBranchNameShort('');
     }).toThrow();
   });
 
