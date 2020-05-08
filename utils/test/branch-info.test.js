@@ -55,6 +55,26 @@ describe('Branch info test suite', () => {
     }).toThrow();
   });
 
+  test('getBranchNameShort() returns last branch name or null', () => {
+    expect(getBranchName('refs/heads/feature/RS-1234')).toBe('RS-1234');
+    expect(getBranchName('refs/heads/feature/RS-1234_test_branch')).toBe('RS-1234_test_branch');
+    expect(() => {
+      getBranchName('wrong string');
+    }).toThrow();
+    expect(() => {
+      getBranchName(null);
+    }).toThrow();
+    expect(() => {
+      getBranchName(undefined);
+    }).toThrow();
+    expect(() => {
+      getBranchName();
+    }).toThrow();
+    expect(() => {
+      getBranchName('');
+    }).toThrow();
+  });
+
   test('getShortSha() returns a standard short sha from git', async () => {
     const sha = '921103db8259eb9de72f42db8b939895f5651489';
     const shaSize = 10;
