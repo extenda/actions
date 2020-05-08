@@ -2,6 +2,7 @@ const {
   getBranchName,
   isPreRelease,
   getBranchNameFriendly,
+  getBranchNameShort,
   getShortSha,
   getBranchType,
   getComposedVersionString,
