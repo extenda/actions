@@ -1,0 +1,16 @@
+{
+  "name": "terragrunt-plan-comment",
+  "version": "0.0.1-local",
+  "description": "Post a Terragrunt plan as a pull request comment",
+  "private": true,
+  "main": "dist/index.js",
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "@actions/exec": "^1.0.4",
+    "@actions/github": "^2.1.1",
+    "fast-glob": "^3.2.2"
+  },
+  "devDependencies": {
+    "mock-fs": "^4.12.0"
+  }
+}

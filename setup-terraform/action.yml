@@ -1,0 +1,23 @@
+name: Setup Terraform
+description: Download Terraform and Terragrunt
+inputs:
+  terraform-version:
+    description: |
+      The Terraform version to install or a path to a `tfenv`
+      `.terraform-version` file that contains the version number.
+    required: false
+    default: .terraform-version
+  terragrunt-version:
+    description: |
+      The Terragrunt version to install or a path to a `tgenv`
+      `.terragrunt-version` file that contains the version number.
+    required: false
+    default: .terragrunt-version
+  skip-terragrunt:
+    description: |
+      Flag to skip download of Terragrunt
+    required: false
+    default: 'false'
+runs:
+  using: node12
+  main: dist/index.js
