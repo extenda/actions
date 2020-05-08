@@ -2,6 +2,7 @@ const {
   getBranchName,
   isPreRelease,
   getBranchNameFriendly,
+  getBranchNameShort,
   getShortSha,
   getBranchType,
   getComposedVersionString,
@@ -52,6 +53,26 @@ describe('Branch info test suite', () => {
 
     expect(() => {
       getBranchNameFriendly(null);
+    }).toThrow();
+  });
+
+  test('getBranchNameShort() returns last branch name or null', () => {
+    expect(getBranchNameShort('refs/heads/feature/RS-1234')).toBe('RS-1234');
+    expect(getBranchNameShort('refs/heads/feature/RS-1234_test_branch')).toBe('RS-1234_test_branch');
+    expect(() => {
+      getBranchNameShort('wrong string');
+    }).toThrow();
+    expect(() => {
+      getBranchNameShort(null);
+    }).toThrow();
+    expect(() => {
+      getBranchNameShort(undefined);
+    }).toThrow();
+    expect(() => {
+      getBranchNameShort();
+    }).toThrow();
+    expect(() => {
+      getBranchNameShort('');
     }).toThrow();
   });
 
