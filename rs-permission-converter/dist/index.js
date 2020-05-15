@@ -2231,7 +2231,7 @@ module.exports.default = axios;
 /***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
 const core = __webpack_require__(793);
-const { permissionConverter } = __webpack_require__(920);
+const { convertPermissions } = __webpack_require__(920);
 const { checkEnv } = __webpack_require__(320);
 
 const run = async () => {
@@ -2245,7 +2245,7 @@ const run = async () => {
     const sqlFile = core.getInput('sql-file', { required: false });
     const outputDir = core.getInput('output-dir', { required: false });
 
-    await permissionConverter({
+    await convertPermissions({
       type,
       binaryVersion,
       workDir,
