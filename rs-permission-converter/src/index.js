@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const { permissionConverter } = require('./permconv');
+const { convertPermissions } = require('./permconv');
 const { checkEnv } = require('../../utils');
 
 const run = async () => {
@@ -13,7 +13,7 @@ const run = async () => {
     const sqlFile = core.getInput('sql-file', { required: false });
     const outputDir = core.getInput('output-dir', { required: false });
 
-    await permissionConverter({
+    await convertPermissions({
       type,
       binaryVersion,
       workDir,
