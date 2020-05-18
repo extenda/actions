@@ -45,16 +45,22 @@ describe('Configure KubeCtl', () => {
 
   test('It fails if cloud-run.yaml is missing', async () => {
     mockFs({});
-    expect(configureKubeCtl('sa', '', '')).rejects
+    await expect(configureKubeCtl('sa', '', '')).rejects
       .toEqual(new Error('Service specification file not found: cloud-run.yaml'));
   });
 
-  test('It fails for missing cluster definition', async () => {
+  test('It will find cluster if definition is missing', async () => {
     mockFs({
       'cloud-run.yaml': noClusterYaml,
     });
-    expect(configureKubeCtl('sa', '', '')).rejects
-      .toEqual(new Error("'cluster' must be defined as input or in cloud-run.yaml"));
+    const clusterInfo = await configureKubeCtl('sa', '', '');
+    expect(clusterInfo).toEqual({
+      cluster: 'k8s-cluster',
+      clusterLocation: 'europe-west1',
+      project: 'gke-project',
+      url: 'projects/gke-project/zones/europe-west1/clusters/k8s-cluster',
+      namespace: 'my-test',
+    });
   });
 
   test('It will use cluster from cloud-run.yaml', async () => {

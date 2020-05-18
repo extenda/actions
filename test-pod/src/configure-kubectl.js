@@ -16,18 +16,15 @@ const resolveClusterAndNamespace = (clusterInput, namespaceInput) => {
     name,
     platform: {
       gke: {
-        cluster = clusterInput,
-        namespace = namespaceInput,
+        cluster = clusterInput || undefined,
+        namespace = namespaceInput || name,
       } = {},
     } = {},
   } = service;
 
-  if (!cluster) {
-    throw new Error("'cluster' must be defined as input or in cloud-run.yaml");
-  }
   return {
     cluster,
-    namespace: namespace || name,
+    namespace,
   };
 };
 
