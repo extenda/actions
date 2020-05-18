@@ -58,7 +58,7 @@ const runPod = async ({ namespace }, image, configMap) => {
 
   if (configMap) {
     const json = JSON.stringify(createOverride(name, namespace, image, configMap));
-    args.push(`--override=${json}`);
+    args.push(`--overrides=${json}`);
   }
 
   return exec.exec('kubectl', args);

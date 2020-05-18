@@ -66,7 +66,7 @@ describe('Pod run', () => {
       },
     };
     expect(exec.exec.mock.calls[0][1]).toEqual(
-      expect.arrayContaining([`--override=${JSON.stringify(override)}`]),
+      expect.arrayContaining([`--overrides=${JSON.stringify(override)}`]),
     );
   });
 
@@ -102,7 +102,7 @@ describe('Pod run', () => {
       },
     };
     expect(exec.exec.mock.calls[0][1]).toEqual(
-      expect.arrayContaining([`--override=${JSON.stringify(override)}`]),
+      expect.arrayContaining([`--overrides=${JSON.stringify(override)}`]),
     );
   });
 });
