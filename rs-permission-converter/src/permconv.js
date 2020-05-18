@@ -8,14 +8,24 @@ const BINARY_NAME = os.platform() !== 'win32'
   : 'PermissionConverter.exe';
 
 const permissionConvCommand = async (converter, args) => {
+  const {
+      type,
+      binaryVersion,
+      workDir,
+      permFile,
+      sqlFile,
+      outputDir,
+  } = args;
+
   const params = [];
-  params.push(args.type);
-  params.push(`-w ${args.workDir}`);
-  params.push(`-p ${args.permFile}`);
-  if (args.type === 'sql') {
-    params.push(`-s ${args.sqlFile}`);
-  } else if (args.type === 'resx') {
-    params.push(`--output-folder ${args.outputDir}`);
+  params.push(type);
+  params.push('-w', workDir);
+  params.push('-p', permFile);
+  params.push('-w', workDir);
+  if (type === 'sql') {
+    params.push('-s', sqlFile);
+  } else if (type === 'resx') {
+    params.push('-o', outputDir);
   }
   core.info('Running permission converter');
   return exec.exec(converter, params);
