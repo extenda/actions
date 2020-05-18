@@ -5,7 +5,7 @@ const createEnvironmentArgs = require('./environment-args');
 const getClusterInfo = require('./cluster-info');
 const createNamespace = require('./create-namespace');
 
-const glcoudAuth = async (serviceAccountKey) => setupGcloud(
+const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
   process.env.GCLOUD_INSTALLED_VERSION || 'latest',
 );
@@ -93,7 +93,7 @@ const gkeArguments = async (args, service, projectId, regoFile) => {
 
 const runDeploy = async (serviceAccountKey, service, image, regoFile, verbose = false) => {
   // Authenticate gcloud with our service-account
-  const projectId = await glcoudAuth(serviceAccountKey);
+  const projectId = await gcloudAuth(serviceAccountKey);
 
   const {
     name,

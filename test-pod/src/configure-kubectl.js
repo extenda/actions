@@ -1,0 +1,57 @@
+const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
+const getClusterInfo = require('../../cloud-run/src/cluster-info');
+const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
+const loadServiceDefinition = require('../../cloud-run/src/service-definition');
+
+const resolveClusterAndNamespace = (clusterInput, namespaceInput) => {
+  if (clusterInput && namespaceInput) {
+    return {
+      cluster: clusterInput,
+      namespace: namespaceInput,
+    };
+  }
+
+  const service = loadServiceDefinition('cloud-run.yaml');
+  const {
+    name,
+    platform: {
+      gke: {
+        cluster = clusterInput,
+        namespace = namespaceInput,
+      } = {},
+    } = {},
+  } = service;
+
+  if (!cluster) {
+    throw new Error("'cluster' must be defined as input or in cloud-run.yaml");
+  }
+  return {
+    cluster,
+    namespace: namespace || name,
+  };
+};
+
+const configureKubeCtl = async (serviceAccountKey, clusterInput, namespaceInput) => {
+  // Authenticate GCloud
+  const projectId = await setupGcloud(
+    serviceAccountKey,
+    process.env.GCLOUD_INSTALLED_VERSION || 'latest',
+  );
+
+  // Resolve cluster and namespace.
+  const { cluster, namespace } = resolveClusterAndNamespace(clusterInput, namespaceInput);
+
+  // Find cluster information
+  const clusterInfo = await getClusterInfo(projectId, cluster);
+
+  // Authenticate kubectl
+  await authenticateKubeCtl(clusterInfo);
+
+  return {
+    ...clusterInfo,
+    namespace,
+  };
+};
+
+
+module.exports = configureKubeCtl;
