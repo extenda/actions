@@ -20,6 +20,7 @@ The following actions are available
   * [jira-releasenotes](jira-releasenotes#readme)
   * [maven](maven#readme)
   * [rs-create-installerpkg](rs-create-installerpkg#readme)
+  * [rs-permission-converter](rs-permission-converter#readme)
   * [setup-gcloud](setup-gcloud#readme)
   * [setup-git](setup-git#readme)
   * [setup-msbuild](setup-msbuild#readme)
@@ -28,6 +29,7 @@ The following actions are available
   * [slack-message](slack-message#readme)
   * [sonar-scanner](sonar-scanner#readme)
   * [terraform-plan-comment](terraform-plan-comment#readme)
+  * [test-pod](test-pod#readme)
 
 ## :rocket: Workflow Examples
 

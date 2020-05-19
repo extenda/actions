@@ -1,0 +1,38 @@
+name: Test Pod
+description: Run acceptance tests in a Kubernetes Pod
+inputs:
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+  image:
+    description: |
+      The Docker image to run tests in.
+    required: true
+  entrypoint:
+    description: |
+      Optional bash script entrypoint to run in the test container. This should be a
+      bash script in your repository. It will be mounted via a Configmap and used as
+      the entry point in the test container.
+    required: false
+  working-directory:
+    description: |
+      The working directory to mount in the test container. When set, the directory contents
+      will be mounted as a volume in the test container and used as the working directory.
+    required: false
+  cluster:
+    description: |
+      The fully qualified cluster on the form
+      `projects/<project-id>/zones/<cluster-location>/clusters/<cluster-name>`
+      If not supplied, the action will try to find the cluster from `cloud-run.yaml`.
+    required: false
+  namespace:
+    description: |
+      The namespace to run the pod in. If a `cloud-run.yaml` file exists in the repository root
+      the namespace will be deduced from the service specification. Otherwise, the `default`
+      namespace will be used.
+    required: false
+runs:
+  using: node12
+  main: dist/index.js
