@@ -20,7 +20,7 @@ describe('Pod run', () => {
   });
 
   test('It will run test without config map', async () => {
-    await podRun({ namespace: 'test' }, 'myimage', null);
+    await podRun({ name: '', namespace: 'test' }, 'myimage', null);
     expect(exec.exec).toHaveBeenCalledWith('kubectl', [
       'run',
       'actions-15b1e98-test',
@@ -34,7 +34,7 @@ describe('Pod run', () => {
   });
 
   test('It will run test with complete config map', async () => {
-    await podRun({ namespace: 'test' }, 'myimage', {
+    await podRun({ name: 'test', namespace: 'test' }, 'myimage', {
       name: 'testmap',
       workingDirectory: true,
       entrypoint: true,
@@ -55,6 +55,10 @@ describe('Pod run', () => {
             name: 'workspace',
             readOnly: false,
           }],
+          env: [{
+            name: 'SERVICE_URL',
+            value: 'http://test.test',
+          }],
           command: ['/bin/sh', 'entrypoint.sh'],
         }],
         volumes: [{
@@ -66,12 +70,15 @@ describe('Pod run', () => {
       },
     };
     expect(exec.exec.mock.calls[0][1]).toEqual(
-      expect.arrayContaining([`--overrides=${JSON.stringify(override)}`]),
+      expect.arrayContaining([
+        '--env=SERVICE_URL=http://test.test',
+        `--overrides=${JSON.stringify(override)}`,
+      ]),
     );
   });
 
   test('It will run test without entrypoint in map', async () => {
-    await podRun({ namespace: 'test' }, 'myimage', {
+    await podRun({ name: '', namespace: 'test' }, 'myimage', {
       name: 'testmap',
       workingDirectory: true,
       entrypoint: false,

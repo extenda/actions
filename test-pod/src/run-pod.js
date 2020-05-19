@@ -7,9 +7,9 @@ const podName = async () => {
   return `${repo}-${sha}-test`;
 };
 
-const createOverride = (name, namespace, image, configMap) => {
+const createOverride = (pod, namespace, image, configMap, serviceUrl) => {
   const container = {
-    name,
+    name: pod,
     image,
     workingDir: '/work',
     volumeMounts: [{
@@ -18,6 +18,13 @@ const createOverride = (name, namespace, image, configMap) => {
       readOnly: false,
     }],
   };
+
+  if (serviceUrl) {
+    container.env = [{
+      name: 'SERVICE_URL',
+      value: serviceUrl,
+    }];
+  }
 
   if (configMap.entrypoint) {
     container.command = ['/bin/sh', 'entrypoint.sh'];
@@ -42,12 +49,12 @@ const createOverride = (name, namespace, image, configMap) => {
   };
 };
 
-const runPod = async ({ namespace }, image, configMap) => {
-  const name = await podName();
+const runPod = async ({ name, namespace }, image, configMap) => {
+  const pod = await podName();
 
   const args = [
     'run',
-    name,
+    pod,
     '--rm',
     '--attach',
     '--restart=Never',
@@ -56,8 +63,14 @@ const runPod = async ({ namespace }, image, configMap) => {
     namespace,
   ];
 
+  const serviceUrl = name ? `http://${name}.${namespace}` : null;
+
+  if (serviceUrl) {
+    args.push(`--env=SERVICE_URL=${serviceUrl}`);
+  }
+
   if (configMap) {
-    const json = JSON.stringify(createOverride(name, namespace, image, configMap));
+    const json = JSON.stringify(createOverride(pod, namespace, image, configMap, serviceUrl));
     args.push(`--overrides=${json}`);
   }
 

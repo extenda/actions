@@ -9,6 +9,7 @@ The action supports the following features:
   * Supports any Docker image
   * Mount a volume as working directory in Pod
   * Specify a custom entrypoint for the container
+  * Expose the internal service URL as a `SERVICE_URL` environment variable when `cloud-run.yaml` is used
 
 ## Usage
 
@@ -48,6 +49,8 @@ jobs:
 ### Test internal service without `cloud-run.yaml`
 
 This example demonstrates how to run a test without depending on a `cloud-run.yaml` in your repository.
+
+Note that when `cloud-run.yaml` isn't used, the Pod will not have a `SERVICE_URL` environment variable set.
 
 ```yaml
 on: push

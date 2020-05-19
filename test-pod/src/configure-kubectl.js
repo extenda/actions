@@ -7,6 +7,7 @@ const resolveClusterAndNamespace = (clusterInput, namespaceInput) => {
   if (clusterInput && namespaceInput) {
     return {
       cluster: clusterInput,
+      name: '',
       namespace: namespaceInput,
     };
   }
@@ -24,6 +25,7 @@ const resolveClusterAndNamespace = (clusterInput, namespaceInput) => {
 
   return {
     cluster,
+    name,
     namespace,
   };
 };
@@ -36,7 +38,7 @@ const configureKubeCtl = async (serviceAccountKey, clusterInput, namespaceInput)
   );
 
   // Resolve cluster and namespace.
-  const { cluster, namespace } = resolveClusterAndNamespace(clusterInput, namespaceInput);
+  const { cluster, name, namespace } = resolveClusterAndNamespace(clusterInput, namespaceInput);
 
   // Find cluster information
   const clusterInfo = await getClusterInfo(projectId, cluster);
@@ -46,6 +48,7 @@ const configureKubeCtl = async (serviceAccountKey, clusterInput, namespaceInput)
 
   return {
     ...clusterInfo,
+    name,
     namespace,
   };
 };

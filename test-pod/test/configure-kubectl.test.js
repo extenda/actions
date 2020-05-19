@@ -60,6 +60,7 @@ describe('Configure KubeCtl', () => {
       project: 'gke-project',
       url: 'projects/gke-project/zones/europe-west1/clusters/k8s-cluster',
       namespace: 'my-test',
+      name: 'my-test',
     });
   });
 
@@ -75,6 +76,7 @@ describe('Configure KubeCtl', () => {
       project: 'gke-project',
       url: 'projects/gke-project/zones/europe-west1/clusters/k8s-cluster',
       namespace: 'my-test',
+      name: 'my-test',
     });
 
     expect(getClusterInfo).toHaveBeenCalledWith(
@@ -90,7 +92,11 @@ describe('Configure KubeCtl', () => {
   });
 
   test('It will use input cluster and namespace', async () => {
-    await configureKubeCtl('sa', 'input-cluster', 'ns');
+    const clusterInfo = await configureKubeCtl('sa', 'input-cluster', 'ns');
+    expect(clusterInfo).toMatchObject({
+      namespace: 'ns',
+      name: '',
+    });
     expect(getClusterInfo).toHaveBeenCalledWith(
       'service-project',
       'input-cluster',
