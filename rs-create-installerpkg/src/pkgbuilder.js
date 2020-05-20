@@ -4,6 +4,7 @@ const core = require('@actions/core');
 const fs = require('fs');
 const request = require('request');
 const { loadTool } = require('../../utils');
+const path = require('path')
 
 const BINARY_NAME = os.platform() !== 'win32'
   ? 'InstallerPackageBuilder.Core.Console'
@@ -64,13 +65,14 @@ const publishPackage = async (args) => {
   const {
     packageName,
     packageVersion,
+    outputDir,
     publishUrl,
     branch,
   } = args;
 
   const packageUrl = `${packageName}.pkg/${branch}/${packageName}.pkg.${packageVersion}.zip`;
   const fullpublishUrl = `${publishUrl}${packageUrl}`;
-  const filePath = `installpackages/${packageName}_${packageVersion}.pkg.zip`;
+  const filePath = `${outputDir}${path.sep}${packageName}_${packageVersion}.pkg.zip`;
   const data = await fs.createReadStream(filePath);
 
   // const headerProperties = {
@@ -88,11 +90,11 @@ const publishPackage = async (args) => {
     },
     encoding: null,
     body: data,
-  },
-  (error, response) => {
+  }, (error, response) => {
     if (error) {
       core.info(`Post installer package returned status ${response.statusCode} ${error}`);
-    } else {
+    }
+    else {
       core.info(`Post installer package returned status ${response.statusCode}`);
     }
   });
