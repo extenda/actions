@@ -1,7 +1,7 @@
 const os = require('os');
 const exec = require('@actions/exec');
 const core = require('@actions/core');
-const fs = require('fs');
+// const fs = require('fs');
 const request = require('request');
 const path = require('path');
 const { loadTool } = require('../../utils');
