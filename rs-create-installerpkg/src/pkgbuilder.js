@@ -73,7 +73,7 @@ const publishPackage = async (args) => {
   const packageUrl = `${packageName}.pkg/${branch}/${packageName}.pkg.${packageVersion}.zip`;
   const fullpublishUrl = `${publishUrl}${packageUrl}`;
   const filePath = `${outputDir}${path.sep}${packageName}_${packageVersion}.pkg.zip`;
-  let data = fs.createReadStream(filePath);
+  const data = fs.createReadStream(filePath);
 
   // const headerProperties = {
   //   Authorization: `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:
