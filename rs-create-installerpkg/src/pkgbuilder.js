@@ -1,7 +1,7 @@
 const os = require('os');
 const exec = require('@actions/exec');
 const core = require('@actions/core');
-// const fs = require('fs');
+const fs = require('fs');
 const request = require('request');
 const path = require('path');
 const { loadTool } = require('../../utils');
@@ -73,9 +73,8 @@ const publishPackage = async (args) => {
   const packageUrl = `${packageName}.pkg/${branch}/${packageName}.pkg.${packageVersion}.zip`;
   const fullpublishUrl = `${publishUrl}${packageUrl}`;
   const filePath = `${outputDir}${path.sep}${packageName}_${packageVersion}.pkg.zip`;
-  const data = Buffer.from('content custom');
+  const data = fs.readFileSync(filePath, 'binary');  
   // fs.createReadStream(filePath);
-
   // const headerProperties = {
   //   Authorization: `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:
   // ${process.env.NEXUS_PASSWORD}`).toString('base64')}`,
