@@ -16,6 +16,8 @@ const run = async () => {
     const builderType = core.getInput('builder-type', { required: false });
     const binaryVersion = core.getInput('tool-version', { required: true });
     const packageVersion = core.getInput('package-version', { required: true });
+    const publishUrl = core.getInput('publish-root-dr', { required: true });
+    const branch = core.getInput('branch-name-short', { required: true });
 
     await buildPackage({
       builderType,
@@ -26,6 +28,8 @@ const run = async () => {
       sourcePaths,
       sourceFilePaths,
       packageVersion,
+      publishUrl,
+      branch,
     });
   } catch (error) {
     core.setFailed(error.message);

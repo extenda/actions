@@ -1,5 +1,8 @@
 const os = require('os');
 const exec = require('@actions/exec');
+const core = require('@actions/core');
+const fetch = require('node-fetch');
+const { createReadStream } = require('fs');
 const { loadTool } = require('../../utils');
 
 const BINARY_NAME = os.platform() !== 'win32'
@@ -57,12 +60,35 @@ const downloadBuildTool = async (args) => {
   });
 };
 
+const publishPackage = async (args) => {
+  const {
+    packageName,
+    packageVersion,
+    publishUrl,
+    branch,
+  } = args;
+
+  const packageUrl = `${packageName}.pkg/${branch}/${packageName}.pkg.${packageVersion}.zip`;
+  const fullpublishUrl = `${publishUrl}${packageUrl}`;
+  const filePath = `installpackages/${packageName}${packageVersion}.pkg.zip`;
+  const stream = createReadStream(filePath);
+
+  const headerProperties = {
+    Authorization: `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:${process.env.NEXUS_PASSWORD}`).toString('base64')}`,
+  };
+  fetch(fullpublishUrl, { method: 'POST', body: stream, headers: headerProperties })
+    .then((res) => core.info(`Post installer package returned status${res.status}`));
+};
+
 const buildPackage = async (args) => {
   const buildTool = await downloadBuildTool(args);
-  return packageBuilderCommand(buildTool, args);
+  await packageBuilderCommand(buildTool, args);
+  const publishResult = await publishPackage(args);
+  return publishResult;
 };
 
 module.exports = {
   buildPackage,
   downloadBuildTool,
+  publishPackage,
 };

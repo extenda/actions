@@ -26,6 +26,7 @@ describe('RS installer package tests', () => {
       workdir: {},
       output: {},
     });
+
     loadTool.mockResolvedValueOnce('pkgbuilder');
     exec.exec.mockResolvedValueOnce(0);
     await buildPackage({
@@ -37,6 +38,8 @@ describe('RS installer package tests', () => {
       sourcePaths: __dirname,
       sourceFilePaths: '',
       packageVersion: '1.0.1-testversion',
+      publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
+      branch: 'develop',
     });
 
     expect(loadTool).toHaveBeenCalledTimes(1);
