@@ -25,7 +25,7 @@ describe('RS installer package tests', () => {
     mockFs({
       workdir: {},
       output: {},
-      'installpackages/Test_PkgName_1.0.1-testversion.pkg.zip': 'file content here',
+      'output/Test_PkgName_1.0.1-testversion.pkg.zip': Buffer.from('test content'),
     });
 
     loadTool.mockResolvedValueOnce('pkgbuilder');
