@@ -3,8 +3,8 @@ const exec = require('@actions/exec');
 const core = require('@actions/core');
 const fs = require('fs');
 const request = require('request');
-const { loadTool } = require('../../utils');
 const path = require('path')
+const { loadTool } = require('../../utils');
 
 const BINARY_NAME = os.platform() !== 'win32'
   ? 'InstallerPackageBuilder.Core.Console'
