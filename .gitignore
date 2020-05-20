@@ -2,6 +2,8 @@ node_modules/
 !dist/
 .repository/
 .idea
+.vs/
+.vscode/
 rs-create-installerpkg/test/test_output_dir
 setup-nuget-sources/test/NuGet-test.config
 coverage/
