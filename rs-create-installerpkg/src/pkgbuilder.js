@@ -70,7 +70,7 @@ const publishPackage = async (args) => {
 
   const packageUrl = `${packageName}.pkg/${branch}/${packageName}.pkg.${packageVersion}.zip`;
   const fullpublishUrl = `${publishUrl}${packageUrl}`;
-  const filePath = `installpackages/${packageName}${packageVersion}.pkg.zip`;
+  const filePath = `installpackages/${packageName}_${packageVersion}.pkg.zip`;
   const data = await fs.createReadStream(filePath);
 
   // const headerProperties = {
