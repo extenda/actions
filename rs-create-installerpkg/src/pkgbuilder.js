@@ -3,7 +3,7 @@ const exec = require('@actions/exec');
 const core = require('@actions/core');
 const fs = require('fs');
 const request = require('request');
-const path = require('path')
+const path = require('path');
 const { loadTool } = require('../../utils');
 
 const BINARY_NAME = os.platform() !== 'win32'
@@ -93,8 +93,7 @@ const publishPackage = async (args) => {
   }, (error, response) => {
     if (error) {
       core.info(`Post installer package returned status ${response.statusCode} ${error}`);
-    }
-    else {
+    } else {
       core.info(`Post installer package returned status ${response.statusCode}`);
     }
   });
