@@ -1,8 +1,8 @@
 const os = require('os');
 const exec = require('@actions/exec');
 const core = require('@actions/core');
-const fetch = require('node-fetch');
-const { createReadStream } = require('fs');
+const fs = require('fs');
+const request = require('request');
 const { loadTool } = require('../../utils');
 
 const BINARY_NAME = os.platform() !== 'win32'
@@ -71,13 +71,31 @@ const publishPackage = async (args) => {
   const packageUrl = `${packageName}.pkg/${branch}/${packageName}.pkg.${packageVersion}.zip`;
   const fullpublishUrl = `${publishUrl}${packageUrl}`;
   const filePath = `installpackages/${packageName}${packageVersion}.pkg.zip`;
-  const stream = createReadStream(filePath);
+  const data = await fs.createReadStream(filePath);
 
-  const headerProperties = {
-    Authorization: `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:${process.env.NEXUS_PASSWORD}`).toString('base64')}`,
-  };
-  fetch(fullpublishUrl, { method: 'POST', body: stream, headers: headerProperties })
-    .then((res) => core.info(`Post installer package returned status${res.status}`));
+  // const headerProperties = {
+  //   Authorization: `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:
+  // ${process.env.NEXUS_PASSWORD}`).toString('base64')}`,
+  // };
+  request({
+    url: fullpublishUrl,
+    method: 'POST',
+    headers: {
+      'cache-control': 'no-cache',
+      'content-disposition': `attachment; filename=${filePath}`,
+      'content-type': 'image/jpg',
+      authorization: `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:${process.env.NEXUS_PASSWORD}`).toString('base64')}`,
+    },
+    encoding: null,
+    body: data,
+  },
+  (error, response) => {
+    if (error) {
+      core.info(`Post installer package returned status ${response.statusCode} ${error}`);
+    } else {
+      core.info(`Post installer package returned status ${response.statusCode}`);
+    }
+  });
 };
 
 const buildPackage = async (args) => {
