@@ -81,11 +81,11 @@ const publishPackage = async (args) => {
   // };
   request({
     url: fullpublishUrl,
-    method: 'POST',
+    method: 'PUT',
     headers: {
-      'cache-control': 'no-cache',
-      'content-disposition': `attachment; filename=${filePath}`,
-      'content-type': 'image/jpg',
+      // 'cache-control': 'no-cache',
+      // 'content-disposition': `attachment; filename=${filePath}`,
+      // 'content-type': 'image/jpg',
       authorization: `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:${process.env.NEXUS_PASSWORD}`).toString('base64')}`,
     },
     encoding: null,
