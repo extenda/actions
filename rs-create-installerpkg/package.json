@@ -10,8 +10,5 @@
   },
   "devDependencies": {
     "mock-fs": "^4.11.0"
-  },
-  "resolutions": {
-    "write-file-atomic": "2.4.1"
   }
 }
