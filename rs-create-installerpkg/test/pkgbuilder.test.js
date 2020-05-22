@@ -8,9 +8,11 @@ jest.mock('../../utils', () => ({
 }));
 
 const exec = require('@actions/exec');
+// const path = require('path');
+// const { request } = require('request');
 const { loadTool } = require('../../utils');
 const { buildPackage } = require('../src/pkgbuilder');
-
+const { publishPackage } = require('../src/pkgbuilder');
 
 describe('RS installer package tests', () => {
   afterEach(() => {
@@ -58,5 +60,30 @@ describe('RS installer package tests', () => {
       '-sp',
       __dirname,
     ]);
+  });
+
+  test('publishPackage() publish package to nexus', async () => {
+    mockFs({
+      workdir: {},
+      output: {},
+      'output/Test_PkgName_1.0.1-testversion.pkg.zip': Buffer.from('test content'),
+    });
+    // request.mockResolvedValueOnce(0);
+    await publishPackage({
+      packageName: 'RS_TestPackage',
+      packageVersion: '1.0.0',
+      outputDir: 'output',
+      publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
+      branch: 'develop',
+    });
+    expect(() => {
+      publishPackage({
+        packageName: 'RS_TestPackage',
+        packageVersion: '1.0.0',
+        outputDir: 'output',
+        publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
+        branch: 'develop',
+      });
+    }).toThrow();
   });
 });
