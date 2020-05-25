@@ -7796,7 +7796,7 @@ const action = async () => {
     event_type: eventType,
     client_payload: clientPayload,
   }).then(() => {
-    core.info(`Dispatched ${eventType} to ${target}.`);
+    core.info(`Dispatched ${eventType} to ${repository}.`);
   });
 };
 
