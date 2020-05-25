@@ -34,6 +34,7 @@ describe('repository-dispatch', () => {
 
   beforeEach(() => {
     loadGitHubToken.mockResolvedValueOnce('github-token');
+    mockDispatch.mockResolvedValueOnce(null);
   });
 
   test('It can dispatch an event', async () => {

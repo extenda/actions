@@ -7790,11 +7790,13 @@ const action = async () => {
   const [owner, repo] = target.split('/');
 
   const octokit = new GitHub(token);
-  await octokit.repos.createDispatchEvent({
+  return octokit.repos.createDispatchEvent({
     owner,
     repo,
     event_type: eventType,
     client_payload: clientPayload,
+  }).then(() => {
+    core.info(`Dispatched ${eventType} to ${target}.`);
   });
 };
 

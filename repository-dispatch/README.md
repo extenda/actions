@@ -27,8 +27,8 @@ the provided `service-account-key`. The default secret name can be modified with
 
 ```yaml
 on:
-  - push
   - pull_request
+  - issue_comment
 
 jobs:
   dispatch:
