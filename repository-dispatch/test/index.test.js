@@ -25,7 +25,7 @@ jest.mock('@actions/github', () => ({
 
 const core = require('@actions/core');
 const action = require('../src/index');
-const { loadGitHubToken } = require('../../utils');
+const { loadGitHubToken } = require('../../utils');
 
 describe('repository-dispatch', () => {
   afterEach(() => {
@@ -34,7 +34,6 @@ describe('repository-dispatch', () => {
 
   beforeEach(() => {
     loadGitHubToken.mockResolvedValueOnce('github-token');
-    //loadSecret.mockResolvedValueOnce('github-token');
   });
 
   test('It can dispatch an event', async () => {
