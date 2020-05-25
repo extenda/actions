@@ -37,6 +37,6 @@ jobs:
       - uses: extenda/actions/repository-dispatch@v0
         with:
           service-account-key: ${{ secrets.SECRET_AUTH }}
-          target-repository: extenda/tf-infra-gcp
+          repository: extenda/tf-infra-gcp
           event-type: clan-infra
 ```

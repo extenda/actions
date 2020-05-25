@@ -18,7 +18,7 @@ inputs:
       The service account key which will be used for authentication with Secret Manager.
       The account key should be a base64 encoded JSON key stored as a secret.
     required: false
-  target-repository:
+  repository:
     description: The repository to forward the event to.
     required: true
   event-type:
