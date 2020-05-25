@@ -29,6 +29,7 @@ The following actions are available
   * [setup-terraform](setup-terraform#readme)
   * [slack-message](slack-message#readme)
   * [sonar-scanner](sonar-scanner#readme)
+  * [status-check](status-check#readme)
   * [terraform-plan-comment](terraform-plan-comment#readme)
   * [test-pod](test-pod#readme)
 

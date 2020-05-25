@@ -1,4 +1,3 @@
-jest.mock('@actions/github');
 jest.mock('@actions/core');
 jest.mock('../../utils');
 
