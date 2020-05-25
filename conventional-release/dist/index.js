@@ -21266,7 +21266,7 @@ Duplex.prototype._destroy = function (err, cb) {
 
 
 var scan = __webpack_require__(953)
-var parse = __webpack_require__(783)
+var parse = __webpack_require__(557)
 
 module.exports = function (source) {
   return parse(scan(source))
@@ -21661,6 +21661,7 @@ const checkEnv = __webpack_require__(202);
 const run = __webpack_require__(303);
 const gitConfig = __webpack_require__(551);
 const loadTool = __webpack_require__(549);
+const loadGitHubToken = __webpack_require__(783);
 
 // Note that src/versions are NOT included here because it adds 2.2MBs to every package
 // that uses the utils module. If versions are to be used, include the file explicitly.
@@ -21669,6 +21670,7 @@ module.exports = {
   checkEnv,
   gitConfig,
   loadTool,
+  loadGitHubToken,
   run,
 };
 
@@ -49278,7 +49280,151 @@ Duplex.prototype._destroy = function (err, cb) {
 };
 
 /***/ }),
-/* 557 */,
+/* 557 */
+/***/ (function(module) {
+
+"use strict";
+
+
+// The ABNF grammar in the spec is totally ambiguous.
+//
+// This parser follows the operator precedence defined in the
+// `Order of Precedence and Parentheses` section.
+
+module.exports = function (tokens) {
+  var index = 0
+
+  function hasMore () {
+    return index < tokens.length
+  }
+
+  function token () {
+    return hasMore() ? tokens[index] : null
+  }
+
+  function next () {
+    if (!hasMore()) {
+      throw new Error()
+    }
+    index++
+  }
+
+  function parseOperator (operator) {
+    var t = token()
+    if (t && t.type === 'OPERATOR' && operator === t.string) {
+      next()
+      return t.string
+    }
+  }
+
+  function parseWith () {
+    if (parseOperator('WITH')) {
+      var t = token()
+      if (t && t.type === 'EXCEPTION') {
+        next()
+        return t.string
+      }
+      throw new Error('Expected exception after `WITH`')
+    }
+  }
+
+  function parseLicenseRef () {
+    // TODO: Actually, everything is concatenated into one string
+    // for backward-compatibility but it could be better to return
+    // a nice structure.
+    var begin = index
+    var string = ''
+    var t = token()
+    if (t.type === 'DOCUMENTREF') {
+      next()
+      string += 'DocumentRef-' + t.string + ':'
+      if (!parseOperator(':')) {
+        throw new Error('Expected `:` after `DocumentRef-...`')
+      }
+    }
+    t = token()
+    if (t.type === 'LICENSEREF') {
+      next()
+      string += 'LicenseRef-' + t.string
+      return {license: string}
+    }
+    index = begin
+  }
+
+  function parseLicense () {
+    var t = token()
+    if (t && t.type === 'LICENSE') {
+      next()
+      var node = {license: t.string}
+      if (parseOperator('+')) {
+        node.plus = true
+      }
+      var exception = parseWith()
+      if (exception) {
+        node.exception = exception
+      }
+      return node
+    }
+  }
+
+  function parseParenthesizedExpression () {
+    var left = parseOperator('(')
+    if (!left) {
+      return
+    }
+
+    var expr = parseExpression()
+
+    if (!parseOperator(')')) {
+      throw new Error('Expected `)`')
+    }
+
+    return expr
+  }
+
+  function parseAtom () {
+    return (
+      parseParenthesizedExpression() ||
+      parseLicenseRef() ||
+      parseLicense()
+    )
+  }
+
+  function makeBinaryOpParser (operator, nextParser) {
+    return function parseBinaryOp () {
+      var left = nextParser()
+      if (!left) {
+        return
+      }
+
+      if (!parseOperator(operator)) {
+        return left
+      }
+
+      var right = parseBinaryOp()
+      if (!right) {
+        throw new Error('Expected expression')
+      }
+      return {
+        left: left,
+        conjunction: operator.toLowerCase(),
+        right: right
+      }
+    }
+  }
+
+  var parseAnd = makeBinaryOpParser('AND', parseAtom)
+  var parseExpression = makeBinaryOpParser('OR', parseAnd)
+
+  var node = parseExpression()
+  if (!node || hasMore()) {
+    throw new Error('Syntax error')
+  }
+  return node
+}
+
+
+/***/ }),
 /* 558 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -61596,147 +61742,34 @@ exports.endpoint = endpoint;
 /* 781 */,
 /* 782 */,
 /* 783 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+const core = __webpack_require__(369);
 
-
-// The ABNF grammar in the spec is totally ambiguous.
-//
-// This parser follows the operator precedence defined in the
-// `Order of Precedence and Parentheses` section.
-
-module.exports = function (tokens) {
-  var index = 0
-
-  function hasMore () {
-    return index < tokens.length
+/**
+ * Load a GitHub token from either a provided `github-token` input or
+ * from a `github-token-secret-name` and `service-account-key`.
+ * @param loadSecret a function to load secrets from a GCP secret manager
+ * @returns {Promise<*>} the resolved token
+ */
+const loadGitHubToken = async (loadSecret) => {
+  const token = core.getInput('github-token');
+  const secretName = core.getInput('github-token-secret-name');
+  const serviceAccountKey = core.getInput('service-account-key');
+  if (!token && !serviceAccountKey) {
+    throw new Error('Missing input. Either provide github-token or service-account-key');
   }
-
-  function token () {
-    return hasMore() ? tokens[index] : null
+  if (serviceAccountKey && !secretName) {
+    throw new Error('Missing input. The secret-name must be set with service-account-key');
   }
-
-  function next () {
-    if (!hasMore()) {
-      throw new Error()
-    }
-    index++
+  if (!token && serviceAccountKey && secretName) {
+    core.info('Load github-token from Secret Manager');
+    return loadSecret(serviceAccountKey, secretName);
   }
+  return token;
+};
 
-  function parseOperator (operator) {
-    var t = token()
-    if (t && t.type === 'OPERATOR' && operator === t.string) {
-      next()
-      return t.string
-    }
-  }
-
-  function parseWith () {
-    if (parseOperator('WITH')) {
-      var t = token()
-      if (t && t.type === 'EXCEPTION') {
-        next()
-        return t.string
-      }
-      throw new Error('Expected exception after `WITH`')
-    }
-  }
-
-  function parseLicenseRef () {
-    // TODO: Actually, everything is concatenated into one string
-    // for backward-compatibility but it could be better to return
-    // a nice structure.
-    var begin = index
-    var string = ''
-    var t = token()
-    if (t.type === 'DOCUMENTREF') {
-      next()
-      string += 'DocumentRef-' + t.string + ':'
-      if (!parseOperator(':')) {
-        throw new Error('Expected `:` after `DocumentRef-...`')
-      }
-    }
-    t = token()
-    if (t.type === 'LICENSEREF') {
-      next()
-      string += 'LicenseRef-' + t.string
-      return {license: string}
-    }
-    index = begin
-  }
-
-  function parseLicense () {
-    var t = token()
-    if (t && t.type === 'LICENSE') {
-      next()
-      var node = {license: t.string}
-      if (parseOperator('+')) {
-        node.plus = true
-      }
-      var exception = parseWith()
-      if (exception) {
-        node.exception = exception
-      }
-      return node
-    }
-  }
-
-  function parseParenthesizedExpression () {
-    var left = parseOperator('(')
-    if (!left) {
-      return
-    }
-
-    var expr = parseExpression()
-
-    if (!parseOperator(')')) {
-      throw new Error('Expected `)`')
-    }
-
-    return expr
-  }
-
-  function parseAtom () {
-    return (
-      parseParenthesizedExpression() ||
-      parseLicenseRef() ||
-      parseLicense()
-    )
-  }
-
-  function makeBinaryOpParser (operator, nextParser) {
-    return function parseBinaryOp () {
-      var left = nextParser()
-      if (!left) {
-        return
-      }
-
-      if (!parseOperator(operator)) {
-        return left
-      }
-
-      var right = parseBinaryOp()
-      if (!right) {
-        throw new Error('Expected expression')
-      }
-      return {
-        left: left,
-        conjunction: operator.toLowerCase(),
-        right: right
-      }
-    }
-  }
-
-  var parseAnd = makeBinaryOpParser('AND', parseAtom)
-  var parseExpression = makeBinaryOpParser('OR', parseAnd)
-
-  var node = parseExpression()
-  if (!node || hasMore()) {
-    throw new Error('Syntax error')
-  }
-  return node
-}
+module.exports = loadGitHubToken;
 
 
 /***/ }),

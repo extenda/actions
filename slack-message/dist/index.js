@@ -5512,7 +5512,7 @@ module.exports.default = axios;
 
 const core = __webpack_require__(793);
 const fetch = __webpack_require__(114);
-const { run } = __webpack_require__(320);
+const { run, loadGitHubToken } = __webpack_require__(320);
 const { loadSecret } = __webpack_require__(37);
 
 const createMessage = (title, text, fallback) => {
@@ -5530,21 +5530,7 @@ run(async () => {
   const title = core.getInput('title');
   const text = core.getInput('text', { required: true });
   const fallback = core.getInput('fallback');
-  let token = core.getInput('github-token');
-  const secretName = core.getInput('github-token-secret-name');
-  const serviceAccountKey = core.getInput('service-account-key');
-
-  if (!token && !serviceAccountKey) {
-    throw new Error('Missing input. Either provide github-token or service-account-key');
-  }
-  if (serviceAccountKey && !secretName) {
-    throw new Error('Missing input. The secret-name must be set with service-account-key');
-  }
-
-  if (!token && serviceAccountKey && secretName) {
-    core.info('Load github-token from Secret Manager');
-    token = await loadSecret(serviceAccountKey, secretName);
-  }
+  const token = await loadGitHubToken(loadSecret);
 
   const response = await fetch(`https://slack.github.com/repos/${process.env.GITHUB_REPOSITORY}`, {
     method: 'post',
@@ -25070,6 +25056,7 @@ const checkEnv = __webpack_require__(202);
 const run = __webpack_require__(303);
 const gitConfig = __webpack_require__(551);
 const loadTool = __webpack_require__(564);
+const loadGitHubToken = __webpack_require__(783);
 
 // Note that src/versions are NOT included here because it adds 2.2MBs to every package
 // that uses the utils module. If versions are to be used, include the file explicitly.
@@ -25078,6 +25065,7 @@ module.exports = {
   checkEnv,
   gitConfig,
   loadTool,
+  loadGitHubToken,
   run,
 };
 
@@ -51316,7 +51304,38 @@ module.exports = DataStream;
 
 
 /***/ }),
-/* 783 */,
+/* 783 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const core = __webpack_require__(369);
+
+/**
+ * Load a GitHub token from either a provided `github-token` input or
+ * from a `github-token-secret-name` and `service-account-key`.
+ * @param loadSecret a function to load secrets from a GCP secret manager
+ * @returns {Promise<*>} the resolved token
+ */
+const loadGitHubToken = async (loadSecret) => {
+  const token = core.getInput('github-token');
+  const secretName = core.getInput('github-token-secret-name');
+  const serviceAccountKey = core.getInput('service-account-key');
+  if (!token && !serviceAccountKey) {
+    throw new Error('Missing input. Either provide github-token or service-account-key');
+  }
+  if (serviceAccountKey && !secretName) {
+    throw new Error('Missing input. The secret-name must be set with service-account-key');
+  }
+  if (!token && serviceAccountKey && secretName) {
+    core.info('Load github-token from Secret Manager');
+    return loadSecret(serviceAccountKey, secretName);
+  }
+  return token;
+};
+
+module.exports = loadGitHubToken;
+
+
+/***/ }),
 /* 784 */,
 /* 785 */
 /***/ (function(__unusedmodule, exports) {
