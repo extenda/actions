@@ -24,6 +24,9 @@ inputs:
   working-directory:
     description: The working directory. Defaults to the current working directory.
     required: false
+  footer:
+    description: Custom footer message to add after plan outputs. Can contain Markdown.
+    required: false
 runs:
   using: node12
   main: dist/index.js

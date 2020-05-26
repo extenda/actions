@@ -4192,40 +4192,61 @@ const { run } = __webpack_require__(320);
 const { getPullRequestInfo } = __webpack_require__(914);
 const generateOutputs = __webpack_require__(184);
 
-const outputToMarkdown = ({ module, output }) => [
-  `:arrow_forward: **${module}**`,
-  '```hcl',
-  output,
-  '```',
-].join('\n');
+const moduleEmoji = (summary) => {
+  if (!summary.includes('0 to destroy')) {
+    return ':closed_book:';
+  }
+  if (!summary.includes('0 to change')) {
+    return ':orange_book:';
+  }
+  return ':green_book:';
+};
 
-const createComment = (changes, workingDirectory) => {
+const outputToMarkdown = ({ module, output }) => {
+  const summary = output.trim().split('\n').pop();
+  const emoji = moduleEmoji(summary);
+  return [
+    `#### ${emoji} \`${module}\``,
+    '',
+    '<details>',
+    `<summary>${summary}</summary>`,
+    '',
+    '```hcl',
+    output,
+    '```',
+    '',
+    '</details>',
+    '',
+  ].join('\n');
+};
+
+const createComment = (changes, workingDirectory, footer) => {
   const comment = [];
-
-
   if (changes.length === 0) {
     comment.push(
-      '**:white_check_mark: No changes**',
+      '### :white_check_mark: Terraform plan with no changes',
       '',
       'Terraform plan reported no changes.',
+      '',
     );
   } else {
     comment.push(
-      '**:earth_americas: Terraform plan changes**',
+      '### :mag: Terraform plan changes',
       '',
       'The output only includes modules with changes.',
       '',
-      '<details>',
-      `<summary>Show output from ${changes.length} ${changes.length > 1 ? 'modules' : 'module'}</summary>`,
-      '',
       ...changes,
+    );
+  }
+
+  if (footer) {
+    comment.push(
+      footer,
       '',
-      '</details>',
     );
   }
 
   comment.push(
-    '',
     `*Workflow: \`${process.env.GITHUB_WORKFLOW}\`*`,
     `*Working directory: \`${workingDirectory}\`*`,
   );
@@ -4239,6 +4260,7 @@ const action = async () => {
   const githubToken = core.getInput('github-token') || process.env.GITHUB_TOKEN;
   const repository = core.getInput('repository') || process.env.GITHUB_REPOSITORY;
   const pullRequestNumber = core.getInput('pull-request-number');
+  const footer = core.getInput('footer');
 
   if (repository !== process.env.GITHUB_REPOSITORY && !pullRequestNumber) {
     throw new Error('pull-request-number must be provided for remote repository.');
@@ -4259,7 +4281,7 @@ const action = async () => {
 
   const comment = await generateOutputs(workingDirectory, planFile)
     .then((outputs) => outputs.map(outputToMarkdown))
-    .then((outputs) => createComment(outputs, workingDirectory));
+    .then((outputs) => createComment(outputs, workingDirectory, footer));
 
   const client = new GitHub(githubToken);
   const [owner, repo] = repository.split('/');

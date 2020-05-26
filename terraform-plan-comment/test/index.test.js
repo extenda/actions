@@ -49,35 +49,61 @@ describe('Terraform plan comment', () => {
 
   test('It can generate comment for multiple plans', async () => {
     generateOutputs.mockResolvedValueOnce([
-      { module: 'folder/moduleA', output: 'Plan A output', status: 0 },
-      { module: 'folder/moduleB', output: 'Plan B output', status: 0 },
-      { module: 'folder/nested/moduleC', output: 'Plan C output', status: 0 },
-      { module: 'folder/nested', output: 'Plan nested output', status: 0 },
+      { module: 'folder/moduleA', output: 'Plan A output\n0 to add 1 to change 0 to destroy', status: 0 },
+      { module: 'folder/moduleB', output: 'Plan B output\n1 to add 0 to change 0 to destroy', status: 0 },
+      { module: 'folder/nested/moduleC', output: 'Plan C output\n1 to add 1 to change 1 to destroy', status: 0 },
+      { module: 'folder/nested', output: 'Plan nested output\n1 to add 0 to change 0 to destroy', status: 0 },
     ]);
 
     const comment = await action();
-    expect(comment).toEqual(`**:earth_americas: Terraform plan changes**
+    expect(comment).toEqual(`### :mag: Terraform plan changes
 
 The output only includes modules with changes.
 
-<details>
-<summary>Show output from 4 modules</summary>
+#### :orange_book: \`folder/moduleA\`
 
-:arrow_forward: **folder/moduleA**
+<details>
+<summary>0 to add 1 to change 0 to destroy</summary>
+
 \`\`\`hcl
 Plan A output
+0 to add 1 to change 0 to destroy
 \`\`\`
-:arrow_forward: **folder/moduleB**
+
+</details>
+
+#### :green_book: \`folder/moduleB\`
+
+<details>
+<summary>1 to add 0 to change 0 to destroy</summary>
+
 \`\`\`hcl
 Plan B output
+1 to add 0 to change 0 to destroy
 \`\`\`
-:arrow_forward: **folder/nested/moduleC**
+
+</details>
+
+#### :closed_book: \`folder/nested/moduleC\`
+
+<details>
+<summary>1 to add 1 to change 1 to destroy</summary>
+
 \`\`\`hcl
 Plan C output
+1 to add 1 to change 1 to destroy
 \`\`\`
-:arrow_forward: **folder/nested**
+
+</details>
+
+#### :green_book: \`folder/nested\`
+
+<details>
+<summary>1 to add 0 to change 0 to destroy</summary>
+
 \`\`\`hcl
 Plan nested output
+1 to add 0 to change 0 to destroy
 \`\`\`
 
 </details>
@@ -89,20 +115,24 @@ Plan nested output
 
   test('It can generate comment for single plan', async () => {
     generateOutputs.mockResolvedValueOnce([
-      { module: 'work', output: 'Plan output', status: 0 },
+      { module: 'work', output: 'Plan output\nPlan: 1 to add 0 to change 0 to destroy\n\n', status: 0 },
     ]);
 
     const comment = await action();
-    expect(comment).toEqual(`**:earth_americas: Terraform plan changes**
+    expect(comment).toEqual(`### :mag: Terraform plan changes
 
 The output only includes modules with changes.
 
-<details>
-<summary>Show output from 1 module</summary>
+#### :green_book: \`work\`
 
-:arrow_forward: **work**
+<details>
+<summary>Plan: 1 to add 0 to change 0 to destroy</summary>
+
 \`\`\`hcl
 Plan output
+Plan: 1 to add 0 to change 0 to destroy
+
+
 \`\`\`
 
 </details>
@@ -115,7 +145,7 @@ Plan output
   test('It can generate comment for no changes', async () => {
     generateOutputs.mockResolvedValueOnce([]);
     const comment = await action();
-    expect(comment).toEqual(`**:white_check_mark: No changes**\n\nTerraform plan reported no changes.\n\n*Workflow: \`Terraform\`*\n*Working directory: \`${process.cwd()}\`*`);
+    expect(comment).toEqual(`### :white_check_mark: Terraform plan with no changes\n\nTerraform plan reported no changes.\n\n*Workflow: \`Terraform\`*\n*Working directory: \`${process.cwd()}\`*`);
     expect(mockComment).toHaveBeenCalled();
   });
 
@@ -154,5 +184,27 @@ Plan output
       .mockReturnValueOnce('');
     generateOutputs.mockResolvedValueOnce([]);
     await expect(action()).rejects.toEqual(new Error('pull-request-number must be provided for remote repository.'));
+  });
+
+  test('It can generate a custom footer', async () => {
+    core.getInput
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('Custom footer with\nnew line and *markdown*');
+    generateOutputs.mockResolvedValueOnce([]);
+    const comment = await action();
+    expect(comment).toEqual(`### :white_check_mark: Terraform plan with no changes
+
+Terraform plan reported no changes.
+
+Custom footer with
+new line and *markdown*
+
+*Workflow: \`Terraform\`*
+*Working directory: \`${process.cwd()}\`*`);
+    expect(mockComment).toHaveBeenCalled();
   });
 });
