@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const { GitHub, context } = require('@actions/github');
+const { GitHub } = require('@actions/github');
 const { run } = require('../../utils');
 const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
 const generateOutputs = require('./generate-outputs');

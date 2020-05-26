@@ -4187,7 +4187,7 @@ module.exports.default = axios;
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const core = __webpack_require__(793);
-const { GitHub, context } = __webpack_require__(396);
+const { GitHub } = __webpack_require__(396);
 const { run } = __webpack_require__(320);
 const { getPullRequestInfo } = __webpack_require__(914);
 const generateOutputs = __webpack_require__(184);
