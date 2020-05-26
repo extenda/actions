@@ -1,7 +1,7 @@
 {
-  "name": "repository-dispatch",
+  "name": "status-check",
   "version": "0.0.1-local",
-  "description": "Forward the original GitHub Action event using repository dispatch",
+  "description": "Create and update status checks on GitHub commits",
   "private": true,
   "main": "dist/index.js",
   "dependencies": {
