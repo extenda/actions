@@ -10,6 +10,17 @@ inputs:
     description: A GitHub token with write access to the repository.
     required: false
     default: ${{ github.token }}
+  repository:
+    description: |
+      The repository to post to. When set to another repository than the one running the workflow,
+      also set the `pull-request-number`.
+    required: false
+    default: ${{ github.repository }}
+  pull-request-number:
+    description: |
+      The pull request number to post to. If not specified, this will be determined
+      from the github context.
+    required: false
   working-directory:
     description: The working directory. Defaults to the current working directory.
     required: false

@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const { GitHub, context } = require('@actions/github');
+const { GitHub } = require('@actions/github');
 const { run } = require('../../utils');
 const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
 const generateOutputs = require('./generate-outputs');
@@ -49,11 +49,24 @@ const action = async () => {
   const planFile = core.getInput('plan-file') || 'plan.out';
   const workingDirectory = core.getInput('working-directory') || process.cwd();
   const githubToken = core.getInput('github-token') || process.env.GITHUB_TOKEN;
+  const repository = core.getInput('repository') || process.env.GITHUB_REPOSITORY;
+  const pullRequestNumber = core.getInput('pull-request-number');
 
-  const pullRequest = await getPullRequestInfo(githubToken);
-  if (!pullRequest) {
-    core.warning('Skipping execution - No open pull-request found.');
-    return null;
+  if (repository !== process.env.GITHUB_REPOSITORY && !pullRequestNumber) {
+    throw new Error('pull-request-number must be provided for remote repository.');
+  }
+
+  let pullRequest;
+  if (pullRequestNumber) {
+    pullRequest = {
+      number: pullRequestNumber,
+    };
+  } else {
+    pullRequest = await getPullRequestInfo(githubToken);
+    if (!pullRequest) {
+      core.warning('Skipping execution - No open pull-request found.');
+      return null;
+    }
   }
 
   const comment = await generateOutputs(workingDirectory, planFile)
@@ -61,7 +74,7 @@ const action = async () => {
     .then((outputs) => createComment(outputs, workingDirectory));
 
   const client = new GitHub(githubToken);
-  const { owner, repo } = context.repo;
+  const [owner, repo] = repository.split('/');
   await client.issues.createComment({
     owner,
     repo,
