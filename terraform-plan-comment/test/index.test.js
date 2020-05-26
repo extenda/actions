@@ -43,6 +43,7 @@ describe('Terraform plan comment', () => {
     process.env = {
       ...orgEnv,
       GITHUB_WORKFLOW: 'Terraform',
+      GITHUB_REPOSITORY: 'extenda/actions',
     };
   });
 
@@ -125,5 +126,33 @@ Plan output
     expect(core.warning).toHaveBeenCalledWith('Skipping execution - No open pull-request found.');
     expect(generateOutputs).not.toHaveBeenCalled();
     expect(comment).toBeNull();
+  });
+
+  test('It can generate comment for custom repo and pull number', async () => {
+    core.getInput.mockReset();
+    core.getInput.mockReturnValueOnce('plan.out')
+      .mockReturnValueOnce('infra')
+      .mockReturnValueOnce('github-token')
+      .mockReturnValueOnce('extenda/test-repo')
+      .mockReturnValueOnce('3');
+    generateOutputs.mockResolvedValueOnce([]);
+    const comment = await action();
+    expect(generateOutputs).toHaveBeenCalled();
+    expect(comment).toBeTruthy();
+    expect(mockComment.mock.calls[0][0]).toMatchObject({
+      owner: 'extenda',
+      repo: 'test-repo',
+    });
+  });
+
+  test('It throws if remote repository and no pull number is provided', async () => {
+    core.getInput.mockReset();
+    core.getInput.mockReturnValueOnce('plan.out')
+      .mockReturnValueOnce('infra')
+      .mockReturnValueOnce('github-token')
+      .mockReturnValueOnce('extenda/test-repo')
+      .mockReturnValueOnce('');
+    generateOutputs.mockResolvedValueOnce([]);
+    await expect(action()).rejects.toEqual(new Error('pull-request-number must be provided for remote repository.'));
   });
 });
