@@ -7782,12 +7782,12 @@ const createPayload = (payloadString) => {
 };
 
 const action = async () => {
-  const target = core.getInput('target-repository', { required: true });
+  const repository = core.getInput('repository', { required: true });
   const eventType = core.getInput('event-type', { required: true });
   const payloadString = core.getInput('client-payload') || '';
   const token = await loadGitHubToken(loadSecret);
   const clientPayload = createPayload(payloadString);
-  const [owner, repo] = target.split('/');
+  const [owner, repo] = repository.split('/');
 
   const octokit = new GitHub(token);
   return octokit.repos.createDispatchEvent({
@@ -7796,7 +7796,7 @@ const action = async () => {
     event_type: eventType,
     client_payload: clientPayload,
   }).then(() => {
-    core.info(`Dispatched ${eventType} to ${target}.`);
+    core.info(`Dispatched ${eventType} to ${repository}.`);
   });
 };
 
