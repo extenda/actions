@@ -193,7 +193,7 @@ Plan: 1 to add 0 to change 0 to destroy
       .mockReturnValueOnce('')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('')
-      .mockReturnValueOnce('Custom footer with\nremoved new line and *markdown*\n\nNext section. Preserved.');
+      .mockReturnValueOnce('Custom footer with\nremoved\nnew line and *markdown*\n\nNext section. Preserved.');
     generateOutputs.mockResolvedValueOnce([]);
     const comment = await action();
     expect(comment).toEqual(`### :white_check_mark: Terraform plan with no changes
