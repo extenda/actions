@@ -1,38 +1,35 @@
+require('jest-fetch-mock')
+  .enableMocks();
 const mockFs = require('mock-fs');
+const exec = require('@actions/exec');
+const core = require('@actions/core');
+const os = require('os');
+
+const { loadTool } = require('../../utils');
+const { getBinaryName } = require('../src/pkgbuilder');
+const { buildPackage } = require('../src/pkgbuilder');
+const { publishPackage } = require('../src/pkgbuilder');
+const { packageBuilderCommand } = require('../src/pkgbuilder');
 
 jest.mock('@actions/exec');
-
-// Mock out tools download
 jest.mock('../../utils', () => ({
   loadTool: jest.fn(),
 }));
 
-const exec = require('@actions/exec');
-// const path = require('path');
-// const { request } = require('request');
-const { loadTool } = require('../../utils');
-const { buildPackage } = require('../src/pkgbuilder');
-const { publishPackage } = require('../src/pkgbuilder');
+
 
 describe('RS installer package tests', () => {
   afterEach(() => {
     jest.resetAllMocks();
-  });
-
-  afterAll(() => {
     mockFs.restore();
+    fetch.resetMocks();
   });
 
-  test('It can run the builder', async () => {
+  test('packageBuilderCommand() executed with correct args', async () => {
     mockFs({
-      workdir: {},
-      output: {},
-      'output/Test_PkgName_1.0.1-testversion.pkg.zip': Buffer.from('test content'),
-    });
-
-    loadTool.mockResolvedValueOnce('pkgbuilder');
-    exec.exec.mockResolvedValueOnce(0);
-    await buildPackage({
+      'output': {},
+    }, {});
+    let args = {
       builderType: 'single',
       binaryVersion: '1.1.0',
       packageName: 'Test_PkgName',
@@ -43,32 +40,119 @@ describe('RS installer package tests', () => {
       packageVersion: '1.0.1-testversion',
       publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
       branch: 'develop',
-    });
+    };
+    await packageBuilderCommand(loadTool, args);
 
-    expect(loadTool).toHaveBeenCalledTimes(1);
-    expect(exec.exec).toHaveBeenCalledTimes(1);
-    expect(exec.exec.mock.calls[0][1]).toEqual([
-      'single',
-      '-pn',
-      'Test_PkgName',
-      '-wd',
-      'workdir',
-      '-od',
-      'output',
-      '-pv',
-      '1.0.1-testversion',
-      '-sp',
-      __dirname,
-    ]);
+    expect(exec.exec)
+      .toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1])
+      .toEqual([
+        'single',
+        '-pn',
+        'Test_PkgName',
+        '-wd',
+        'workdir',
+        '-od',
+        'output',
+        '-pv',
+        '1.0.1-testversion',
+        '-sp',
+        __dirname,
+      ]);
+
   });
 
-  test('publishPackage() publish package to nexus', async () => {
+  test('packageBuilderCommand() sets specified sourcePaths', async () => {
     mockFs({
-      workdir: {},
-      output: {},
-      'output/Test_PkgName_1.0.1-testversion.pkg.zip': Buffer.from('test content'),
-    });
-    // request.mockResolvedValueOnce(0);
+      'output': {},
+    }, {});
+    let args = {
+      builderType: 'single',
+      binaryVersion: '1.1.0',
+      packageName: 'Test_PkgName',
+      workingDir: 'workdir',
+      outputDir: 'output',
+      sourcePaths: 'testSourcePaths',
+      sourceFilePaths: '',
+      packageVersion: '1.0.1-testversion',
+      publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
+      branch: 'develop',
+    };
+
+    await packageBuilderCommand(loadTool, args);
+
+    expect(exec.exec)
+      .toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1])
+      .toEqual([
+        'single',
+        '-pn',
+        'Test_PkgName',
+        '-wd',
+        'workdir',
+        '-od',
+        'output',
+        '-pv',
+        '1.0.1-testversion',
+        '-sp',
+        'testSourcePaths',
+      ]);
+  });
+
+  test('packageBuilderCommand() sets specified sourceFilePaths', async () => {
+    mockFs({
+      'output': {},
+    }, {});
+    let args = {
+      builderType: 'single',
+      binaryVersion: '1.1.0',
+      packageName: 'Test_PkgName',
+      workingDir: 'workdir',
+      outputDir: 'output',
+      sourcePaths: __dirname,
+      sourceFilePaths: 'testSourceFilePaths',
+      packageVersion: '1.0.1-testversion',
+      publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
+      branch: 'develop',
+    };
+
+    await packageBuilderCommand(loadTool, args);
+
+    expect(exec.exec)
+      .toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1])
+      .toEqual([
+        'single',
+        '-pn',
+        'Test_PkgName',
+        '-wd',
+        'workdir',
+        '-od',
+        'output',
+        '-pv',
+        '1.0.1-testversion',
+        '-sp',
+        __dirname,
+        '-sfp',
+        'testSourceFilePaths'
+      ]);
+  });
+
+  test('publishPackage() reports success when received OK response', async () => {
+    core.error = jest.fn();
+    core.info = jest.fn();
+
+    mockFs({
+      'output': {
+        'RS_TestPackage_1.0.0.pkg.zip': Buffer.from('test content'),
+      },
+    }, {});
+
+    fetch.mockResponse(JSON.stringify({
+      status: '200',
+      statusText: 'Test'
+    }));
+
     await publishPackage({
       packageName: 'RS_TestPackage',
       packageVersion: '1.0.0',
@@ -76,14 +160,105 @@ describe('RS installer package tests', () => {
       publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
       branch: 'develop',
     });
-    expect(() => {
-      publishPackage({
-        packageName: 'RS_TestPackage',
-        packageVersion: '1.0.0',
-        outputDir: 'output',
-        publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
-        branch: 'develop',
-      });
-    }).toThrow();
+
+    expect(fetch)
+      .toHaveBeenCalledTimes(1);
+    expect(core.info)
+      .toBeCalledTimes(1);
+    expect(core.info)
+      .toBeCalledWith('Package published successfully, server responded with 200 Test');
+    expect(core.error)
+      .not
+      .toBeCalled();
+
   });
+
+  test('publishPackage() reports error when response failed', async () => {
+    core.error = jest.fn();
+    core.info = jest.fn();
+
+    mockFs({
+      'output': {
+        'RS_TestPackage_1.0.0.pkg.zip': Buffer.from('test content'),
+      },
+    }, {});
+
+    fetch.mockReject({
+      status: '503',
+      statusText: 'Test'
+    });
+
+    await publishPackage({
+      packageName: 'RS_TestPackage',
+      packageVersion: '1.0.0',
+      outputDir: 'output',
+      publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
+      branch: 'develop',
+    });
+    expect(fetch)
+      .toHaveBeenCalledTimes(1);
+    expect(core.error)
+      .toBeCalledTimes(1);
+    expect(core.error)
+      .toBeCalledWith('Failed to publish package, server responded with 503 Test');
+    expect(core.info)
+      .not
+      .toBeCalled();
+  });
+
+  test('getBinaryName() returns correct binary name', () => {
+    os.platform = jest.fn();
+
+    os.platform.mockReturnValue('win32');
+    expect(getBinaryName()).toBe('InstallerPackageBuilder.Core.Console');
+
+    os.platform.mockReturnValue('win33test');
+    expect(getBinaryName()).toBe('InstallerPackageBuilder.Core.Console.exe');
+
+    expect(os.platform).toBeCalledTimes(2);
+  })
+
+  test('It can run the builder', async () => {
+    mockFs({
+      workdir: {},
+      output: {},
+      'output/Test_PkgName_1.0.1-testversion.pkg.zip': Buffer.from('test content'),
+    });
+
+    loadTool.mockResolvedValueOnce('pkgbuilder');
+    await buildPackage({
+      builderType: 'single',
+      binaryVersion: '1.1.1',
+      packageName: 'Test_PkgName',
+      workingDir: 'workdir',
+      outputDir: 'output',
+      sourcePaths: __dirname,
+      sourceFilePaths: '',
+      packageVersion: '1.0.1-testversion',
+      publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
+      branch: 'develop',
+    });
+
+    expect(loadTool)
+      .toHaveBeenCalledTimes(1);
+    expect(exec.exec)
+      .toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1])
+      .toEqual([
+        'single',
+        '-pn',
+        'Test_PkgName',
+        '-wd',
+        'workdir',
+        '-od',
+        'output',
+        '-pv',
+        '1.0.1-testversion',
+        '-sp',
+        __dirname,
+      ]);
+  });
+
+
 });
+

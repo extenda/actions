@@ -2,13 +2,11 @@ const os = require('os');
 const exec = require('@actions/exec');
 const core = require('@actions/core');
 const fs = require('fs');
-const request = require('request');
+const fetch = require('node-fetch');
 const path = require('path');
 const { loadTool } = require('../../utils');
 
-const BINARY_NAME = os.platform() !== 'win32'
-  ? 'InstallerPackageBuilder.Core.Console'
-  : 'InstallerPackageBuilder.Core.Console.exe';
+const getBinaryName = () => os.platform() === 'win32' ? 'InstallerPackageBuilder.Core.Console' : 'InstallerPackageBuilder.Core.Console.exe';
 
 const packageBuilderCommand = async (builder, args) => {
   const {
@@ -47,11 +45,11 @@ const downloadBuildTool = async (args) => {
   const appName = 'RS.InstallerPackageBuilder.Core.Console';
   const { binaryVersion } = args;
 
-  const url = `https://repo.extendaretail.com/repository/raw-hosted/${appName}/${binaryVersion}/${BINARY_NAME}`;
+  const url = `https://repo.extendaretail.com/repository/raw-hosted/${appName}/${binaryVersion}/${getBinaryName()}`;
 
   return loadTool({
     tool: 'InstallerPackageBuilder.Core.Console',
-    binary: BINARY_NAME,
+    binary: getBinaryName(),
     version: binaryVersion,
     downloadUrl: url,
     auth: {
@@ -74,40 +72,39 @@ const publishPackage = async (args) => {
   const fullpublishUrl = `${publishUrl}${packageUrl}`;
   const filePath = `${outputDir}${path.sep}${packageName}_${packageVersion}.pkg.zip`;
   const data = fs.readFileSync(filePath, 'binary');
-  // fs.createReadStream(filePath);
-  // const headerProperties = {
-  //   Authorization: `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:
-  // ${process.env.NEXUS_PASSWORD}`).toString('base64')}`,
-  // };
-  request({
-    url: fullpublishUrl,
-    method: 'PUT',
-    headers: {
-      // 'cache-control': 'no-cache',
-      // 'content-disposition': `attachment; filename=${filePath}`,
-      // 'content-type': 'image/jpg',
-      authorization: `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:${process.env.NEXUS_PASSWORD}`).toString('base64')}`,
-    },
-    encoding: null,
+
+  return await fetch(fullpublishUrl, {
+    method: 'POST',
     body: data,
-  }, (error, response) => {
-    if (error) {
-      core.info(`Post installer package returned status ${response.statusCode} ${error}`);
-    } else {
-      core.info(`Post installer package returned status ${response.statusCode}`);
+    headers: {
+      'Authorization': `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:${process.env.NEXUS_PASSWORD}`)
+        .toString('base64')}`,
     }
-  });
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw response;
+      }
+      return response;
+    })
+    .then(json => {
+      core.info(`Package published successfully, server responded with ${json.status} ${json.statusText}`);
+    })
+    .catch(err => {
+      core.error(`Failed to publish package, server responded with ${err.status} ${err.statusText}`);
+    });
 };
 
 const buildPackage = async (args) => {
   const buildTool = await downloadBuildTool(args);
   await packageBuilderCommand(buildTool, args);
-  const publishResult = await publishPackage(args);
-  return publishResult;
+  await publishPackage(args);
 };
 
 module.exports = {
   buildPackage,
   downloadBuildTool,
   publishPackage,
+  packageBuilderCommand,
+  getBinaryName
 };
