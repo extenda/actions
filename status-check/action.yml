@@ -1,0 +1,44 @@
+name: Status check
+description: Create and update status checks on GitHub commits
+inputs:
+  github-token:
+    description: |
+      The GitHub access token to use to call the checks API.
+      The token must have write access on the target repository.
+      If not set, the token will be obtained from GCP Secret Manager.
+    required: false
+  github-token-secret-name:
+    description: |
+      The secret name from which to load the github-token. This is only used
+      when github-token has not be set explicitly.
+    required: false
+    default: github-token
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication with Secret Manager.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: false
+  repository:
+    description: The repository to set a status on.
+    required: false
+    default: ${{ github.repository }}
+  sha:
+    description: The commit SHA to update.
+    required: false
+    default: ${{ github.sha }}
+  context:
+    description: A context for the status check.
+    required: true
+  state:
+    description: The state. Can be one of 'pending', 'success' or 'failure'.
+    required: true
+  description:
+    description: A short description of the status check.
+    required: true
+  target-url:
+    description: A URL pointing to the detailed check build outputs.
+    required: false
+    default: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+runs:
+  using: node12
+  main: dist/index.js

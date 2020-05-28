@@ -19,6 +19,7 @@ The following actions are available
   * [jira-release](jira-release#readme)
   * [jira-releasenotes](jira-releasenotes#readme)
   * [maven](maven#readme)
+  * [repository-dispatch](repository-dispatch#readme)
   * [rs-create-installerpkg](rs-create-installerpkg#readme)
   * [rs-permission-converter](rs-permission-converter#readme)
   * [setup-gcloud](setup-gcloud#readme)
@@ -28,6 +29,7 @@ The following actions are available
   * [setup-terraform](setup-terraform#readme)
   * [slack-message](slack-message#readme)
   * [sonar-scanner](sonar-scanner#readme)
+  * [status-check](status-check#readme)
   * [terraform-plan-comment](terraform-plan-comment#readme)
   * [test-pod](test-pod#readme)
 

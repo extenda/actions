@@ -15,8 +15,8 @@ describe('Setup Terraform', () => {
   });
 
   beforeEach(() => {
-    loadTool.mockResolvedValueOnce('/downloads/terragrunt_x64/terragrunt')
-      .mockResolvedValueOnce('/downloads/terraform_x64/terraform');
+    loadTool.mockResolvedValueOnce('/downloads/terraform_x64/terraform')
+      .mockResolvedValueOnce('/downloads/terragrunt_x64/terragrunt');
   });
 
   test('It can download tool versions from dot version files', async () => {
@@ -70,7 +70,9 @@ describe('Setup Terraform', () => {
   });
 
   test('It fails on invalid semver', async () => {
-    mockFs({});
+    mockFs({
+      '/downloads/terraform_x64/terraform': '',
+    });
     core.getInput.mockReturnValueOnce('20.0.0')
       .mockReturnValueOnce('false')
       .mockReturnValueOnce('invalid value');
@@ -95,7 +97,9 @@ describe('Setup Terraform', () => {
   });
 
   test('It can skip terragrunt', async () => {
-    mockFs({});
+    mockFs({
+      '/downloads/terraform_x64/terraform': '',
+    });
     core.getInput.mockReturnValueOnce('20.0.0')
       .mockReturnValueOnce('true');
 

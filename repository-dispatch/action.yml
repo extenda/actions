@@ -1,0 +1,33 @@
+name: Repository dispatch
+description: Forward the original GitHub Action event using repository dispatch
+inputs:
+  github-token:
+    description: |
+      The GitHub access token to use to trigger the repository dispatch event.
+      The token must have write access on the target repository.
+      If not set, the token will be obtained from GCP Secret Manager.
+    required: false
+  github-token-secret-name:
+    description: |
+      The secret name from which to load the github-token. This is only used
+      when github-token has not be set explicitly.
+    required: false
+    default: github-token
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication with Secret Manager.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: false
+  repository:
+    description: The repository to forward the event to.
+    required: true
+  event-type:
+    description: The event type to dispatch.
+    required: true
+  client-payload:
+    description: |
+      JSON client payload. By default, the original GitHub event is forwarded under the `github` object key.
+    required: false
+runs:
+  using: node12
+  main: dist/index.js

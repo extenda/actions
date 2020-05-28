@@ -2363,7 +2363,10 @@ const action = async () => {
     version: terraformVersion,
     downloadUrl: `https://releases.hashicorp.com/terraform/${terraformVersion}/terraform_${terraformVersion}_${platform()}_amd64.zip`,
   }).then((terraform) => {
-    core.addPath(terraform);
+    if (platform() !== 'windows') {
+      fs.chmodSync(terraform, '777');
+    }
+    core.addPath(path.dirname(terraform));
   });
 
   const skipTerragrunt = core.getInput('skip-terragrunt') || 'false';
@@ -4856,6 +4859,7 @@ const checkEnv = __webpack_require__(202);
 const run = __webpack_require__(303);
 const gitConfig = __webpack_require__(551);
 const loadTool = __webpack_require__(564);
+const loadGitHubToken = __webpack_require__(783);
 
 // Note that src/versions are NOT included here because it adds 2.2MBs to every package
 // that uses the utils module. If versions are to be used, include the file explicitly.
@@ -4864,6 +4868,7 @@ module.exports = {
   checkEnv,
   gitConfig,
   loadTool,
+  loadGitHubToken,
   run,
 };
 
@@ -10196,6 +10201,39 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 };
 
 module.exports = InterceptorManager;
+
+
+/***/ }),
+
+/***/ 783:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const core = __webpack_require__(369);
+
+/**
+ * Load a GitHub token from either a provided `github-token` input or
+ * from a `github-token-secret-name` and `service-account-key`.
+ * @param loadSecret a function to load secrets from a GCP secret manager
+ * @returns {Promise<*>} the resolved token
+ */
+const loadGitHubToken = async (loadSecret) => {
+  const token = core.getInput('github-token');
+  const secretName = core.getInput('github-token-secret-name');
+  const serviceAccountKey = core.getInput('service-account-key');
+  if (!token && !serviceAccountKey) {
+    throw new Error('Missing input. Either provide github-token or service-account-key');
+  }
+  if (serviceAccountKey && !secretName) {
+    throw new Error('Missing input. The secret-name must be set with service-account-key');
+  }
+  if (!token && serviceAccountKey && secretName) {
+    core.info('Load github-token from Secret Manager');
+    return loadSecret(serviceAccountKey, secretName);
+  }
+  return token;
+};
+
+module.exports = loadGitHubToken;
 
 
 /***/ }),

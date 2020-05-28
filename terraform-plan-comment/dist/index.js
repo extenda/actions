@@ -4187,45 +4187,67 @@ module.exports.default = axios;
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const core = __webpack_require__(793);
-const { GitHub, context } = __webpack_require__(396);
+const { GitHub } = __webpack_require__(396);
 const { run } = __webpack_require__(320);
 const { getPullRequestInfo } = __webpack_require__(914);
 const generateOutputs = __webpack_require__(184);
 
-const outputToMarkdown = ({ module, output }) => [
-  `:arrow_forward: **${module}**`,
-  '```hcl',
-  output,
-  '```',
-].join('\n');
+const moduleEmoji = (summary) => {
+  if (!summary.includes('0 to destroy')) {
+    return ':closed_book:';
+  }
+  if (!summary.includes('0 to change')) {
+    return ':orange_book:';
+  }
+  return ':green_book:';
+};
 
-const createComment = (changes, workingDirectory) => {
+const outputToMarkdown = ({ module, output }) => {
+  const summary = output.trim().split('\n').pop();
+  const emoji = moduleEmoji(summary);
+  return [
+    `#### ${emoji} \`${module}\``,
+    '',
+    '<details>',
+    `<summary>${summary}</summary>`,
+    '',
+    '```hcl',
+    output,
+    '```',
+    '',
+    '</details>',
+    '',
+  ].join('\n');
+};
+
+const createComment = (changes, workingDirectory, footer) => {
   const comment = [];
-
-
   if (changes.length === 0) {
     comment.push(
-      '**:white_check_mark: No changes**',
+      '### :white_check_mark: Terraform plan with no changes',
       '',
       'Terraform plan reported no changes.',
+      '',
     );
   } else {
     comment.push(
-      '**:earth_americas: Terraform plan changes**',
+      '### :mag: Terraform plan changes',
       '',
       'The output only includes modules with changes.',
       '',
-      '<details>',
-      `<summary>Show output from ${changes.length} ${changes.length > 1 ? 'modules' : 'module'}</summary>`,
-      '',
       ...changes,
+    );
+  }
+
+  if (footer) {
+    comment.push(
+      // Remove line breaks, but preserve paragraphs.
+      footer.split('\n\n').map((p) => p.replace(/\n/g, ' ')).join('\n\n'),
       '',
-      '</details>',
     );
   }
 
   comment.push(
-    '',
     `*Workflow: \`${process.env.GITHUB_WORKFLOW}\`*`,
     `*Working directory: \`${workingDirectory}\`*`,
   );
@@ -4237,19 +4259,33 @@ const action = async () => {
   const planFile = core.getInput('plan-file') || 'plan.out';
   const workingDirectory = core.getInput('working-directory') || process.cwd();
   const githubToken = core.getInput('github-token') || process.env.GITHUB_TOKEN;
+  const repository = core.getInput('repository') || process.env.GITHUB_REPOSITORY;
+  const pullRequestNumber = core.getInput('pull-request-number');
+  const footer = core.getInput('footer');
 
-  const pullRequest = await getPullRequestInfo(githubToken);
-  if (!pullRequest) {
-    core.warning('Skipping execution - No open pull-request found.');
-    return null;
+  if (repository !== process.env.GITHUB_REPOSITORY && !pullRequestNumber) {
+    throw new Error('pull-request-number must be provided for remote repository.');
+  }
+
+  let pullRequest;
+  if (pullRequestNumber) {
+    pullRequest = {
+      number: pullRequestNumber,
+    };
+  } else {
+    pullRequest = await getPullRequestInfo(githubToken);
+    if (!pullRequest) {
+      core.warning('Skipping execution - No open pull-request found.');
+      return null;
+    }
   }
 
   const comment = await generateOutputs(workingDirectory, planFile)
     .then((outputs) => outputs.map(outputToMarkdown))
-    .then((outputs) => createComment(outputs, workingDirectory));
+    .then((outputs) => createComment(outputs, workingDirectory, footer));
 
   const client = new GitHub(githubToken);
-  const { owner, repo } = context.repo;
+  const [owner, repo] = repository.split('/');
   await client.issues.createComment({
     owner,
     repo,
@@ -10891,7 +10927,8 @@ const terraformShow = async (plan) => {
 };
 
 const filterUnchanged = (outputs) => outputs.filter(
-  ({ output }) => !output.includes('0 to add, 0 to change, 0 to destroy.'),
+  ({ output }) => !output.includes('0 to add, 0 to change, 0 to destroy.')
+    && !output.includes('No changes. Infrastructure is up-to-date.'),
 );
 
 const sortModulePaths = (outputs) => outputs.sort((a, b) => a.module.localeCompare(b.module));
@@ -10902,7 +10939,7 @@ const moduleName = (plan, workingDirectory) => {
   if (index > 0) {
     return paths.slice(0, index).join(path.sep);
   }
-  return path.dirname(plan);
+  return path.basename(path.dirname(plan));
 };
 
 const generateOutputs = async (workingDirectory, planFile) => {
@@ -17301,6 +17338,7 @@ const checkEnv = __webpack_require__(202);
 const run = __webpack_require__(303);
 const gitConfig = __webpack_require__(551);
 const loadTool = __webpack_require__(549);
+const loadGitHubToken = __webpack_require__(783);
 
 // Note that src/versions are NOT included here because it adds 2.2MBs to every package
 // that uses the utils module. If versions are to be used, include the file explicitly.
@@ -17309,6 +17347,7 @@ module.exports = {
   checkEnv,
   gitConfig,
   loadTool,
+  loadGitHubToken,
   run,
 };
 
@@ -34060,7 +34099,38 @@ module.exports.shellSync = (cmd, opts) => handleShell(module.exports.sync, cmd, 
 /* 780 */,
 /* 781 */,
 /* 782 */,
-/* 783 */,
+/* 783 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const core = __webpack_require__(369);
+
+/**
+ * Load a GitHub token from either a provided `github-token` input or
+ * from a `github-token-secret-name` and `service-account-key`.
+ * @param loadSecret a function to load secrets from a GCP secret manager
+ * @returns {Promise<*>} the resolved token
+ */
+const loadGitHubToken = async (loadSecret) => {
+  const token = core.getInput('github-token');
+  const secretName = core.getInput('github-token-secret-name');
+  const serviceAccountKey = core.getInput('service-account-key');
+  if (!token && !serviceAccountKey) {
+    throw new Error('Missing input. Either provide github-token or service-account-key');
+  }
+  if (serviceAccountKey && !secretName) {
+    throw new Error('Missing input. The secret-name must be set with service-account-key');
+  }
+  if (!token && serviceAccountKey && secretName) {
+    core.info('Load github-token from Secret Manager');
+    return loadSecret(serviceAccountKey, secretName);
+  }
+  return token;
+};
+
+module.exports = loadGitHubToken;
+
+
+/***/ }),
 /* 784 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 

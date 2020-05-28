@@ -1,0 +1,11 @@
+{
+  "name": "status-check",
+  "version": "0.0.1-local",
+  "description": "Create and update status checks on GitHub commits",
+  "private": true,
+  "main": "dist/index.js",
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "@actions/github": "^2.2.0"
+  }
+}
