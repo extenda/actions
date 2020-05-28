@@ -2363,7 +2363,10 @@ const action = async () => {
     version: terraformVersion,
     downloadUrl: `https://releases.hashicorp.com/terraform/${terraformVersion}/terraform_${terraformVersion}_${platform()}_amd64.zip`,
   }).then((terraform) => {
-    core.addPath(terraform);
+    if (platform() !== 'windows') {
+      fs.chmodSync(terraform, '777');
+    }
+    core.addPath(path.dirname(terraform));
   });
 
   const skipTerragrunt = core.getInput('skip-terragrunt') || 'false';
