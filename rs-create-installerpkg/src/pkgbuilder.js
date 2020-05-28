@@ -85,7 +85,7 @@ const publishPackage = async (args) => {
       if (!response.ok) {
         throw response;
       }
-      return response;
+      return response.json();
     })
     .then((json) => {
       core.info(`Package published successfully, server responded with ${json.status} ${json.statusText}`);
