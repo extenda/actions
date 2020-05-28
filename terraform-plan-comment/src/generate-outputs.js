@@ -41,7 +41,7 @@ const moduleName = (plan, workingDirectory) => {
   if (index > 0) {
     return paths.slice(0, index).join(path.sep);
   }
-  return path.dirname(plan);
+  return path.basename(path.dirname(plan));
 };
 
 const generateOutputs = async (workingDirectory, planFile) => {
