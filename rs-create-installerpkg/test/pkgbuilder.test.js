@@ -1,5 +1,6 @@
 require('jest-fetch-mock')
   .enableMocks();
+
 const mockFs = require('mock-fs');
 const exec = require('@actions/exec');
 const core = require('@actions/core');
@@ -20,14 +21,15 @@ describe('RS installer package tests', () => {
   afterEach(() => {
     jest.resetAllMocks();
     mockFs.restore();
+    // eslint-disable-next-line no-undef
     fetch.resetMocks();
   });
 
   test('packageBuilderCommand() executed with correct args', async () => {
     mockFs({
-      'output': {},
+      output: {},
     }, {});
-    let args = {
+    const args = {
       builderType: 'single',
       binaryVersion: '1.1.0',
       packageName: 'Test_PkgName',
@@ -57,14 +59,13 @@ describe('RS installer package tests', () => {
         '-sp',
         __dirname,
       ]);
-
   });
 
   test('packageBuilderCommand() sets specified sourcePaths', async () => {
     mockFs({
-      'output': {},
+      output: {},
     }, {});
-    let args = {
+    const args = {
       builderType: 'single',
       binaryVersion: '1.1.0',
       packageName: 'Test_PkgName',
@@ -99,9 +100,9 @@ describe('RS installer package tests', () => {
 
   test('packageBuilderCommand() sets specified sourceFilePaths', async () => {
     mockFs({
-      'output': {},
+      output: {},
     }, {});
-    let args = {
+    const args = {
       builderType: 'single',
       binaryVersion: '1.1.0',
       packageName: 'Test_PkgName',
@@ -132,7 +133,7 @@ describe('RS installer package tests', () => {
         '-sp',
         __dirname,
         '-sfp',
-        'testSourceFilePaths'
+        'testSourceFilePaths',
       ]);
   });
 
@@ -141,14 +142,14 @@ describe('RS installer package tests', () => {
     core.info = jest.fn();
 
     mockFs({
-      'output': {
+      output: {
         'RS_TestPackage_1.0.0.pkg.zip': Buffer.from('test content'),
       },
     }, {});
-
+    // eslint-disable-next-line no-undef
     fetch.mockResponse(JSON.stringify({
       status: '200',
-      statusText: 'Test'
+      statusText: 'Test',
     }));
 
     await publishPackage({
@@ -158,7 +159,7 @@ describe('RS installer package tests', () => {
       publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
       branch: 'develop',
     });
-
+    // eslint-disable-next-line no-undef
     expect(fetch)
       .toHaveBeenCalledTimes(1);
     expect(core.info)
@@ -168,7 +169,6 @@ describe('RS installer package tests', () => {
     expect(core.error)
       .not
       .toBeCalled();
-
   });
 
   test('publishPackage() reports error when response failed', async () => {
@@ -176,14 +176,14 @@ describe('RS installer package tests', () => {
     core.info = jest.fn();
 
     mockFs({
-      'output': {
+      output: {
         'RS_TestPackage_1.0.0.pkg.zip': Buffer.from('test content'),
       },
     }, {});
-
+    // eslint-disable-next-line no-undef
     fetch.mockReject({
       status: '503',
-      statusText: 'Test'
+      statusText: 'Test',
     });
 
     await publishPackage({
@@ -193,6 +193,7 @@ describe('RS installer package tests', () => {
       publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
       branch: 'develop',
     });
+    // eslint-disable-next-line no-undef
     expect(fetch)
       .toHaveBeenCalledTimes(1);
     expect(core.error)
@@ -214,7 +215,7 @@ describe('RS installer package tests', () => {
     expect(getBinaryName()).toBe('InstallerPackageBuilder.Core.Console.exe');
 
     expect(os.platform).toBeCalledTimes(2);
-  })
+  });
 
   test('It can run the builder', async () => {
     mockFs({
@@ -257,4 +258,3 @@ describe('RS installer package tests', () => {
       ]);
   });
 });
-
