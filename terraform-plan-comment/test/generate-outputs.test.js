@@ -77,7 +77,11 @@ describe('Generate Terraform plan output', () => {
     exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput(
       'Module A unchanged. 0 to add, 0 to change, 0 to destroy.\n',
       opts,
-    )).mockImplementationOnce((bin, args, opts) => mockOutput('Module B changes', opts));
+    )).mockImplementationOnce((bin, args, opts) => mockOutput('Module B changes', opts))
+      .mockImplementationOnce((bin, args, opts) => mockOutput(
+        'Module C. No changes. Infrastructure is up-to-date.',
+        opts,
+      ));
     const outputs = await generateOutputs('/work', 'plan.out');
     expect(exec.exec).toHaveBeenCalledTimes(2);
     expect(outputs).toHaveLength(1);
