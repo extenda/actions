@@ -13,9 +13,11 @@ const { publishPackage } = require('../src/pkgbuilder');
 const { packageBuilderCommand } = require('../src/pkgbuilder');
 
 jest.mock('@actions/exec');
+jest.mock('@actions/core');
 jest.mock('../../utils', () => ({
   loadTool: jest.fn(),
 }));
+
 
 describe('RS installer package tests', () => {
   afterEach(() => {
@@ -172,9 +174,6 @@ describe('RS installer package tests', () => {
   });
 
   test('publishPackage() reports error when response failed', async () => {
-    core.error = jest.fn();
-    core.info = jest.fn();
-
     mockFs({
       output: {
         'RS_TestPackage_1.0.0.pkg.zip': Buffer.from('test content'),
@@ -206,15 +205,18 @@ describe('RS installer package tests', () => {
   });
 
   test('getBinaryName() returns correct binary name', () => {
-    os.platform = jest.fn();
-
+    jest.spyOn(os, 'platform');
     os.platform.mockReturnValue('win32');
-    expect(getBinaryName()).toBe('InstallerPackageBuilder.Core.Console');
+    expect(getBinaryName())
+      .toBe('InstallerPackageBuilder.Core.Console');
 
     os.platform.mockReturnValue('win33test');
-    expect(getBinaryName()).toBe('InstallerPackageBuilder.Core.Console.exe');
+    expect(getBinaryName())
+      .toBe('InstallerPackageBuilder.Core.Console.exe');
 
-    expect(os.platform).toBeCalledTimes(2);
+    expect(os.platform)
+      .toBeCalledTimes(2);
+    jest.unmock('os');
   });
 
   test('It can run the builder', async () => {
