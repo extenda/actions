@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 const path = require('path');
 const { loadTool } = require('../../utils');
 
-const getBinaryName = () => os.platform() === 'win32' ? 'InstallerPackageBuilder.Core.Console' : 'InstallerPackageBuilder.Core.Console.exe';
+const getBinaryName = () => (os.platform() === 'win32' ? 'InstallerPackageBuilder.Core.Console' : 'InstallerPackageBuilder.Core.Console.exe');
 
 const packageBuilderCommand = async (builder, args) => {
   const {
@@ -73,24 +73,24 @@ const publishPackage = async (args) => {
   const filePath = `${outputDir}${path.sep}${packageName}_${packageVersion}.pkg.zip`;
   const data = fs.readFileSync(filePath, 'binary');
 
-  return await fetch(fullpublishUrl, {
+  return fetch(fullpublishUrl, {
     method: 'POST',
     body: data,
     headers: {
-      'Authorization': `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:${process.env.NEXUS_PASSWORD}`)
+      Authorization: `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:${process.env.NEXUS_PASSWORD}`)
         .toString('base64')}`,
-    }
+    },
   })
-    .then(response => {
+    .then((response) => {
       if (!response.ok) {
         throw response;
       }
       return response;
     })
-    .then(json => {
+    .then((json) => {
       core.info(`Package published successfully, server responded with ${json.status} ${json.statusText}`);
     })
-    .catch(err => {
+    .catch((err) => {
       core.error(`Failed to publish package, server responded with ${err.status} ${err.statusText}`);
     });
 };
@@ -106,5 +106,5 @@ module.exports = {
   downloadBuildTool,
   publishPackage,
   packageBuilderCommand,
-  getBinaryName
+  getBinaryName,
 };
