@@ -10927,7 +10927,8 @@ const terraformShow = async (plan) => {
 };
 
 const filterUnchanged = (outputs) => outputs.filter(
-  ({ output }) => !output.includes('0 to add, 0 to change, 0 to destroy.'),
+  ({ output }) => !output.includes('0 to add, 0 to change, 0 to destroy.')
+    && !output.includes('No changes. Infrastructure is up-to-date.'),
 );
 
 const sortModulePaths = (outputs) => outputs.sort((a, b) => a.module.localeCompare(b.module));
@@ -10938,7 +10939,7 @@ const moduleName = (plan, workingDirectory) => {
   if (index > 0) {
     return paths.slice(0, index).join(path.sep);
   }
-  return path.dirname(plan);
+  return path.basename(path.dirname(plan));
 };
 
 const generateOutputs = async (workingDirectory, planFile) => {

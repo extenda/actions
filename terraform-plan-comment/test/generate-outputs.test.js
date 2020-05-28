@@ -61,13 +61,13 @@ describe('Generate Terraform plan output', () => {
 
   test('It can process a single plan file', async () => {
     mockFs({
-      '/work/plan.out': 'single-plan',
+      '/path/to/work/plan.out': 'single-plan',
     });
     exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput('Changed terraform plan.', opts));
-    const outputs = await generateOutputs('/work', 'plan.out');
+    const outputs = await generateOutputs('/path/to/work', 'plan.out');
     expect(outputs).toHaveLength(1);
     expect(outputs).toEqual([
-      { module: '/work', output: 'Changed terraform plan.', status: 0 },
+      { module: 'work', output: 'Changed terraform plan.', status: 0 },
     ]);
     expect(exec.exec).toHaveBeenCalledTimes(1);
   });
@@ -77,7 +77,11 @@ describe('Generate Terraform plan output', () => {
     exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput(
       'Module A unchanged. 0 to add, 0 to change, 0 to destroy.\n',
       opts,
-    )).mockImplementationOnce((bin, args, opts) => mockOutput('Module B changes', opts));
+    )).mockImplementationOnce((bin, args, opts) => mockOutput('Module B changes', opts))
+      .mockImplementationOnce((bin, args, opts) => mockOutput(
+        'Module C. No changes. Infrastructure is up-to-date.',
+        opts,
+      ));
     const outputs = await generateOutputs('/work', 'plan.out');
     expect(exec.exec).toHaveBeenCalledTimes(2);
     expect(outputs).toHaveLength(1);
@@ -94,7 +98,7 @@ describe('Generate Terraform plan output', () => {
     const outputs = await generateOutputs('/work', 'plan.out');
     expect(outputs).toHaveLength(1);
     expect(outputs).toEqual([
-      { module: '/work', output: 'Terraform output\nError', status: 1 },
+      { module: 'work', output: 'Terraform output\nError', status: 1 },
     ]);
     expect(exec.exec).toHaveBeenCalledTimes(1);
   });
