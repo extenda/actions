@@ -22,7 +22,7 @@ describe('Setup Terraform', () => {
 
   test('It can download tool versions from dot version files', async () => {
     jest.spyOn(os, 'platform');
-    os.platform.mockResolvedValue('linux');
+    os.platform.mockReturnValue('linux');
 
 
     mockFs({
