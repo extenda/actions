@@ -9,7 +9,7 @@ const os = require('os');
 const { loadTool } = require('../../utils');
 const { getBinaryName } = require('../src/pkgbuilder');
 const { buildPackage } = require('../src/pkgbuilder');
-const { publishPackage } = require('../src/pkgbuilder');
+const { publishPackageCommand } = require('../src/pkgbuilder');
 const { packageBuilderCommand } = require('../src/pkgbuilder');
 
 jest.mock('@actions/exec');
@@ -139,7 +139,7 @@ describe('RS installer package tests', () => {
       ]);
   });
 
-  test('publishPackage() reports success when received OK response', async () => {
+  test('publishPackageCommand() reports success when received OK response', async () => {
     mockFs({
       output: {
         'RS_TestPackage_1.0.0.pkg.zip': Buffer.from('test content'),
@@ -151,7 +151,7 @@ describe('RS installer package tests', () => {
       statusText: 'Test',
     }));
 
-    await publishPackage({
+    await publishPackageCommand({
       packageName: 'RS_TestPackage',
       packageVersion: '1.0.0',
       outputDir: 'output',
@@ -170,7 +170,7 @@ describe('RS installer package tests', () => {
       .toBeCalled();
   });
 
-  test('publishPackage() reports error when response failed', async () => {
+  test('publishPackageCommand() reports error when response failed', async () => {
     mockFs({
       output: {
         'RS_TestPackage_1.0.0.pkg.zip': Buffer.from('test content'),
@@ -182,7 +182,7 @@ describe('RS installer package tests', () => {
       statusText: 'Test',
     });
 
-    await publishPackage({
+    await publishPackageCommand({
       packageName: 'RS_TestPackage',
       packageVersion: '1.0.0',
       outputDir: 'output',
