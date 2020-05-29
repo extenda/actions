@@ -210,11 +210,11 @@ describe('RS installer package tests', () => {
     jest.spyOn(os, 'platform');
     os.platform.mockReturnValue('win32');
     expect(getBinaryName())
-      .toBe('InstallerPackageBuilder.Core.Console');
+      .toBe('InstallerPackageBuilder.Core.Console.exe');
 
     os.platform.mockReturnValue('win33test');
     expect(getBinaryName())
-      .toBe('InstallerPackageBuilder.Core.Console.exe');
+      .toBe('InstallerPackageBuilder.Core.Console');
 
     expect(os.platform)
       .toBeCalledTimes(2);
