@@ -140,9 +140,6 @@ describe('RS installer package tests', () => {
   });
 
   test('publishPackage() reports success when received OK response', async () => {
-    core.error = jest.fn();
-    core.info = jest.fn();
-
     mockFs({
       output: {
         'RS_TestPackage_1.0.0.pkg.zip': Buffer.from('test content'),
