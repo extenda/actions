@@ -18,6 +18,13 @@ const run = async () => {
     const packageVersion = core.getInput('package-version', { required: true });
     const publishUrl = core.getInput('publish-root-dr', { required: true });
     const branch = core.getInput('branch-name-short', { required: true });
+    const publishPackageInput = core.getInput('publish-package', { required: false });
+    let publishPackage;
+    if (publishPackageInput === undefined || publishPackageInput === null) {
+      publishPackage = false;
+    } else {
+      publishPackage = publishPackageInput;
+    }
 
     await buildPackage({
       builderType,
@@ -30,6 +37,7 @@ const run = async () => {
       packageVersion,
       publishUrl,
       branch,
+      publishPackage,
     });
   } catch (error) {
     core.setFailed(error.message);

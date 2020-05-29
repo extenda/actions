@@ -59,7 +59,7 @@ const downloadBuildTool = async (args) => {
   });
 };
 
-const publishPackage = async (args) => {
+const publishPackageCommand = async (args) => {
   const {
     packageName,
     packageVersion,
@@ -96,15 +96,21 @@ const publishPackage = async (args) => {
 };
 
 const buildPackage = async (args) => {
+  const {
+    publishPackage,
+  } = args;
+
   const buildTool = await downloadBuildTool(args);
   await packageBuilderCommand(buildTool, args);
-  await publishPackage(args);
+  if (publishPackage) {
+    await publishPackageCommand(args);
+  }
 };
 
 module.exports = {
   buildPackage,
   downloadBuildTool,
-  publishPackage,
+  publishPackageCommand,
   packageBuilderCommand,
   getBinaryName,
 };
