@@ -10131,7 +10131,7 @@ const permissionConvCommand = async (converter, args) => {
   if (args.type === 'sql') {
     params.push(`-s ${args.sqlFile}`);
   } else if (args.type === 'resx') {
-    params.push(`--output-folder ${args.outputDir}`);
+    params.push(`-o ${args.outputDir}`);
   }
   core.info('Running permission converter');
   return exec.exec(converter, params);
