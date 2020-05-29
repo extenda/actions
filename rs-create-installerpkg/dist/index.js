@@ -5979,7 +5979,7 @@ const fetch = __webpack_require__(114);
 const path = __webpack_require__(622);
 const { loadTool } = __webpack_require__(320);
 
-const getBinaryName = () => (os.platform() === 'win32' ? 'InstallerPackageBuilder.Core.Console' : 'InstallerPackageBuilder.Core.Console.exe');
+const getBinaryName = () => (os.platform() === 'win32' ? 'InstallerPackageBuilder.Core.Console.exe' : 'InstallerPackageBuilder.Core.Console');
 
 const packageBuilderCommand = async (builder, args) => {
   const {
