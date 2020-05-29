@@ -2250,6 +2250,13 @@ const run = async () => {
     const packageVersion = core.getInput('package-version', { required: true });
     const publishUrl = core.getInput('publish-root-dr', { required: true });
     const branch = core.getInput('branch-name-short', { required: true });
+    const publishPackageInput = core.getInput('publish-package', { required: false });
+    let publishPackage;
+    if (publishPackageInput === undefined || publishPackageInput === null) {
+      publishPackage = false;
+    } else {
+      publishPackage = publishPackageInput;
+    }
 
     await buildPackage({
       builderType,
@@ -2262,6 +2269,7 @@ const run = async () => {
       packageVersion,
       publishUrl,
       branch,
+      publishPackage,
     });
   } catch (error) {
     core.setFailed(error.message);
@@ -6024,7 +6032,7 @@ const downloadBuildTool = async (args) => {
   });
 };
 
-const publishPackage = async (args) => {
+const publishPackageCommand = async (args) => {
   const {
     packageName,
     packageVersion,
@@ -6061,15 +6069,21 @@ const publishPackage = async (args) => {
 };
 
 const buildPackage = async (args) => {
+  const {
+    publishPackage,
+  } = args;
+
   const buildTool = await downloadBuildTool(args);
   await packageBuilderCommand(buildTool, args);
-  await publishPackage(args);
+  if (publishPackage) {
+    await publishPackageCommand(args);
+  }
 };
 
 module.exports = {
   buildPackage,
   downloadBuildTool,
-  publishPackage,
+  publishPackageCommand,
   packageBuilderCommand,
   getBinaryName,
 };
