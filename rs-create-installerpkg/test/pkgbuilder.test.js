@@ -42,6 +42,7 @@ describe('RS installer package tests', () => {
       packageVersion: '1.0.1-testversion',
       publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
       branch: 'develop',
+      publishPackage: true,
     };
     await packageBuilderCommand(loadTool, args);
 
@@ -78,6 +79,7 @@ describe('RS installer package tests', () => {
       packageVersion: '1.0.1-testversion',
       publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
       branch: 'develop',
+      publishPackage: true,
     };
 
     await packageBuilderCommand(loadTool, args);
@@ -115,6 +117,7 @@ describe('RS installer package tests', () => {
       packageVersion: '1.0.1-testversion',
       publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
       branch: 'develop',
+      publishPackage: true,
     };
 
     await packageBuilderCommand(loadTool, args);
@@ -157,6 +160,7 @@ describe('RS installer package tests', () => {
       outputDir: 'output',
       publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
       branch: 'develop',
+      publishPackage: true,
     });
     // eslint-disable-next-line no-undef
     expect(fetch)
@@ -188,6 +192,7 @@ describe('RS installer package tests', () => {
       outputDir: 'output',
       publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
       branch: 'develop',
+      publishPackage: true,
     });
     // eslint-disable-next-line no-undef
     expect(fetch)
@@ -235,6 +240,7 @@ describe('RS installer package tests', () => {
       packageVersion: '1.0.1-testversion',
       publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
       branch: 'develop',
+      publishPackage: true,
     });
 
     expect(loadTool)
