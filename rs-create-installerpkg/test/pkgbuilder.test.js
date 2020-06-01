@@ -304,5 +304,4 @@ describe('RS installer package tests', () => {
         __dirname,
       ]);
   });
-
 });
