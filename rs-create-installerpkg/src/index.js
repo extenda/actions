@@ -1,24 +1,24 @@
 const core = require('@actions/core');
 const { buildPackage } = require('./pkgbuilder');
-const { checkEnv } = require('../../utils');
+const { checkEnv, run } = require('../../utils');
 
-const run = async () => {
+const action = async () => {
   try {
     core.info('Starting to build installer package');
 
     checkEnv(['NEXUS_USERNAME', 'NEXUS_PASSWORD']);
 
-    const packageName = core.getInput('package-name', { required: false });
-    const workingDir = core.getInput('working-dir', { required: true });
-    const outputDir = core.getInput('output-dir', { required: true });
-    const sourcePaths = core.getInput('source-paths', { required: false });
-    const sourceFilePaths = core.getInput('source-filePaths', { required: false });
-    const builderType = core.getInput('builder-type', { required: false });
     const binaryVersion = core.getInput('tool-version', { required: true });
-    const packageVersion = core.getInput('package-version', { required: true });
-    const publishUrl = core.getInput('publish-root-dr', { required: true });
     const branch = core.getInput('branch-name-short', { required: true });
+    const builderType = core.getInput('builder-type', { required: false });
+    const outputDir = core.getInput('output-dir', { required: true });
+    const packageName = core.getInput('package-name', { required: false });
+    const packageVersion = core.getInput('package-version', { required: true });
     const publishPackageInput = core.getInput('publish-package', { required: false });
+    const publishUrl = core.getInput('publish-root-dr', { required: true });
+    const sourceFilePaths = core.getInput('source-filePaths', { required: false });
+    const sourcePaths = core.getInput('source-paths', { required: false });
+    const workingDir = core.getInput('working-dir', { required: true });
     let publishPackage;
     if (publishPackageInput === undefined || publishPackageInput === null) {
       publishPackage = false;
@@ -27,21 +27,25 @@ const run = async () => {
     }
 
     await buildPackage({
-      builderType,
       binaryVersion,
-      packageName,
-      workingDir,
-      outputDir,
-      sourcePaths,
-      sourceFilePaths,
-      packageVersion,
-      publishUrl,
       branch,
+      builderType,
+      outputDir,
+      packageName,
+      packageVersion,
       publishPackage,
+      publishUrl,
+      sourceFilePaths,
+      sourcePaths,
+      workingDir,
     });
   } catch (error) {
     core.setFailed(error.message);
   }
 };
 
-run();
+if (require.main === module) {
+  run(action);
+}
+
+module.exports = action;
