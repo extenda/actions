@@ -262,4 +262,47 @@ describe('RS installer package tests', () => {
         __dirname,
       ]);
   });
+
+  test('It can run the builder without publish', async () => {
+    mockFs({
+      workdir: {},
+      output: {},
+      'output/Test_PkgName_1.0.1-testversion.pkg.zip': Buffer.from('test content'),
+    });
+
+    loadTool.mockResolvedValueOnce('pkgbuilder');
+    await buildPackage({
+      builderType: 'single',
+      binaryVersion: '1.1.1',
+      packageName: 'Test_PkgName',
+      workingDir: 'workdir',
+      outputDir: 'output',
+      sourcePaths: __dirname,
+      sourceFilePaths: '',
+      packageVersion: '1.0.1-testversion',
+      publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
+      branch: 'develop',
+      publishPackage: false,
+    });
+
+    expect(loadTool)
+      .toHaveBeenCalledTimes(1);
+    expect(exec.exec)
+      .toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1])
+      .toEqual([
+        'single',
+        '-pn',
+        'Test_PkgName',
+        '-wd',
+        'workdir',
+        '-od',
+        'output',
+        '-pv',
+        '1.0.1-testversion',
+        '-sp',
+        __dirname,
+      ]);
+  });
+
 });
