@@ -33,17 +33,17 @@ describe('create packaage Action', () => {
 
   test('It will use passed inputs', async () => {
     core.getInput
-    .mockReturnValueOnce('1.1.0')
-    .mockReturnValueOnce('develop')
-    .mockReturnValueOnce('single')
-    .mockReturnValueOnce('output')
-    .mockReturnValueOnce('Test_PkgName')
-    .mockReturnValueOnce('1.0.1-testversion')
-    .mockReturnValueOnce(true)
-    .mockReturnValueOnce('https://repo.extendaretail.com/repository/raw-hosted/RS/')
-    .mockReturnValueOnce('')
-    .mockReturnValueOnce(__dirname)
-    .mockReturnValueOnce('workdir');
+      .mockReturnValueOnce('1.1.0')
+      .mockReturnValueOnce('develop')
+      .mockReturnValueOnce('single')
+      .mockReturnValueOnce('output')
+      .mockReturnValueOnce('Test_PkgName')
+      .mockReturnValueOnce('1.0.1-testversion')
+      .mockReturnValueOnce(true)
+      .mockReturnValueOnce('https://repo.extendaretail.com/repository/raw-hosted/RS/')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce(__dirname)
+      .mockReturnValueOnce('workdir');
 
     await action();
     expect(buildPackage).toHaveBeenCalledWith({
