@@ -6051,7 +6051,7 @@ const publishPackageCommand = async (args) => {
   const data = fs.readFileSync(filePath, 'binary');
 
   return fetch(fullpublishUrl, {
-    method: 'POST',
+    method: 'PUT',
     body: data,
     headers: {
       Authorization: `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:${process.env.NEXUS_PASSWORD}`)
