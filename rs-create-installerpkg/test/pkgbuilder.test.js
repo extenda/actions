@@ -167,8 +167,6 @@ describe('RS installer package tests', () => {
       .toHaveBeenCalledTimes(1);
     expect(core.info)
       .toBeCalledTimes(3);
-    // expect(fetch)
-    //   .toBeCalledWith('Package published successfully, server responded with 200 Test');
     expect(core.error)
       .not
       .toBeCalled();
@@ -201,9 +199,6 @@ describe('RS installer package tests', () => {
       .toBeCalledTimes(1);
     expect(core.error)
       .toBeCalledWith('Failed to publish package, server responded with 503 Test');
-    // expect(core.info)
-    //   .not
-    //   .toBeCalled();
   });
 
   test('getBinaryName() returns correct binary name', () => {
