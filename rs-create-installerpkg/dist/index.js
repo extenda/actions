@@ -6070,7 +6070,7 @@ const publishPackageCommand = async (args) => {
       core.info(`Package published successfully, server responded with ${json.status} ${json.statusText}`);
     })
     .catch((err) => {
-      core.error(`Failed to publish package, server responded with ${json.status} ${json.statusText}`);
+      core.error(`Failed to publish package, server responded with ${err.status} ${err.statusText}`);
       core.info(`Failed to publish package, server responded with ${err}`);
     });
 };
