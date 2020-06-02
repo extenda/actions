@@ -47,6 +47,6 @@ describe('RS Permission Converter Tests', () => {
       outputDir: 'outputDir',
     });
     expect(loadTool).toHaveBeenCalledTimes(1);
-    expect(exec.exec.mock.calls[0][1]).toEqual(['resx', '-w /workDir', '-p permFile', '--output-folder outputDir']);
+    expect(exec.exec.mock.calls[0][1]).toEqual(['resx', '-w /workDir', '-p permFile', '-o outputDir']);
   });
 });
