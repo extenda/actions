@@ -166,7 +166,7 @@ describe('RS installer package tests', () => {
     expect(fetch)
       .toHaveBeenCalledTimes(1);
     expect(core.info)
-      .toBeCalledTimes(1);
+      .toBeCalledTimes(3);
     expect(core.info)
       .toBeCalledWith('Package published successfully, server responded with 200 Test');
     expect(core.error)
@@ -198,7 +198,7 @@ describe('RS installer package tests', () => {
     expect(fetch)
       .toHaveBeenCalledTimes(1);
     expect(core.error)
-      .toBeCalledTimes(3);
+      .toBeCalledTimes(1);
     expect(core.error)
       .toBeCalledWith('Failed to publish package, server responded with 503 Test');
     // expect(core.info)
