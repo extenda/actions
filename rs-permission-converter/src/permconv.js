@@ -10,7 +10,6 @@ const BINARY_NAME = os.platform() !== 'win32'
 const permissionConvCommand = async (converter, args) => {
   const {
     type,
-    binaryVersion,
     workDir,
     permFile,
     sqlFile,
