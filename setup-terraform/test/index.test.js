@@ -5,6 +5,7 @@ jest.mock('../../utils');
 jest.mock('@actions/core');
 
 const core = require('@actions/core');
+const os = require('os');
 const { action, platform } = require('../src/index');
 const { loadTool } = require('../../utils');
 
@@ -20,6 +21,10 @@ describe('Setup Terraform', () => {
   });
 
   test('It can download tool versions from dot version files', async () => {
+    jest.spyOn(os, 'platform');
+    os.platform.mockReturnValue('linux');
+
+
     mockFs({
       '.terraform-version': '1.2.0',
       '.terragrunt-version': '1.0.0',
