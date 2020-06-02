@@ -151,7 +151,7 @@ describe('RS installer package tests', () => {
     // eslint-disable-next-line no-undef
     fetch.mockResponse(JSON.stringify({
       status: '200',
-      statusText: 'Test',
+      statusText: 'OK',
     }));
 
     await publishPackageCommand({
@@ -167,8 +167,8 @@ describe('RS installer package tests', () => {
       .toHaveBeenCalledTimes(1);
     expect(core.info)
       .toBeCalledTimes(3);
-    expect(core.info)
-      .toBeCalledWith('Package published successfully, server responded with 200 Test');
+    // expect(fetch)
+    //   .toBeCalledWith('Package published successfully, server responded with 200 Test');
     expect(core.error)
       .not
       .toBeCalled();
