@@ -33,13 +33,13 @@ describe('create packaage Action', () => {
 
   test('It will use passed inputs', async () => {
     core.getInput
+      .mockReturnValueOnce(true)
       .mockReturnValueOnce('1.1.0')
       .mockReturnValueOnce('develop')
       .mockReturnValueOnce('single')
       .mockReturnValueOnce('output')
       .mockReturnValueOnce('Test_PkgName')
       .mockReturnValueOnce('1.0.1-testversion')
-      .mockReturnValueOnce(true)
       .mockReturnValueOnce('https://repo.extendaretail.com/repository/raw-hosted/RS/')
       .mockReturnValueOnce('')
       .mockReturnValueOnce(__dirname)
@@ -54,6 +54,36 @@ describe('create packaage Action', () => {
       packageName: 'Test_PkgName',
       packageVersion: '1.0.1-testversion',
       publishPackage: true,
+      publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
+      sourceFilePaths: '',
+      sourcePaths: __dirname,
+      workingDir: 'workdir',
+    });
+  });
+
+  test('Without publish package defined', async () => {
+    core.getInput
+      .mockReturnValueOnce(undefined)
+      .mockReturnValueOnce('1.1.0')
+      .mockReturnValueOnce('develop')
+      .mockReturnValueOnce('single')
+      .mockReturnValueOnce('output')
+      .mockReturnValueOnce('Test_PkgName')
+      .mockReturnValueOnce('1.0.1-testversion')
+      .mockReturnValueOnce('https://repo.extendaretail.com/repository/raw-hosted/RS/')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce(__dirname)
+      .mockReturnValueOnce('workdir');
+
+    await action();
+    expect(buildPackage).toHaveBeenCalledWith({
+      binaryVersion: '1.1.0',
+      branch: 'develop',
+      builderType: 'single',
+      outputDir: 'output',
+      packageName: 'Test_PkgName',
+      packageVersion: '1.0.1-testversion',
+      publishPackage: false,
       publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
       sourceFilePaths: '',
       sourcePaths: __dirname,

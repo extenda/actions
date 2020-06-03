@@ -10,10 +10,10 @@ const action = async () => {
 
     const publishPackageInput = core.getInput('publish-package', { required: false });
     let publishPackage;
-    if (publishPackageInput === undefined || publishPackageInput === null) {
+    if (!publishPackageInput) {
       publishPackage = false;
     } else {
-      publishPackage = (publishPackageInput.toLowerCase() === 'true');
+      publishPackage = publishPackageInput;
     }
 
     const binaryVersion = core.getInput('tool-version', { required: true });
