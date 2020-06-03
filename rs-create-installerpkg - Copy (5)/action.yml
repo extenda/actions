@@ -1,0 +1,41 @@
+name: Create RS Installer Package
+description: Creates installer packages to be used in the RS Installer
+inputs:
+  builder-type:
+    description: single, multiple or singleflat
+    required: true
+    default: null
+  package-name:
+    description: Name of the installer package to create.
+    required: false
+    default: null
+  working-dir:
+    description: Working directory is used as base path for SourcePaths and SourceFilePaths.
+    required: true
+    default: null
+  output-dir:
+    description: Directory to store the installer package.
+    required: true
+    default: null
+  source-paths:
+    description: Path to source directories to include in the installer package.
+    required: false
+    default: null
+  source-filePaths:
+    description: Path to source files to include in the installer package.
+    required: false
+    default: null
+  search-filter:
+    description: Search filter for enumerating files to include
+    required: false
+    default: null
+  tool-version:
+    description: Version string for the version of RS Installer Package builder to use.
+    required: true
+    default: null
+  package-version:
+      description: Package version suffix apended to the package name before .pkg.zip.
+      required: true
+runs:
+  using: node12
+  main: dist/index.js
