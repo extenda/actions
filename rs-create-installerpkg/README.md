@@ -47,12 +47,11 @@ jobs:
           working-dir: .
           output-dir: installpackages
           source-paths: Project\bin\publish\bin
-          package-version: 1.0.0-version-composed-string
+          package-version: ${{ steps.semver.outputs.version }}
+          publish-package: true
+          publish-root-url: https://repo.extendaretail.com/repository/raw-hosted/RS/
+          branch-name-short: ${{ steps.semver.outputs.branch-name-short }}
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
-        - name: Publish installer package
-          if: github.ref == 'refs/heads/master'
-          run: curl -v --user "${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }}" --upload-file installpackages/PackageName_<VERSION>.pkg.zip https://repo.extendaretail.com/repository/raw-hosted/PackageName.pkg/<VERSION>/PackageName_<VERSION>.pkg.zip
 ```

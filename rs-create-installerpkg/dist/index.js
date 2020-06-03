@@ -2254,7 +2254,7 @@ const action = async () => {
     const outputDir = core.getInput('output-dir', { required: true });
     const packageName = core.getInput('package-name', { required: false });
     const packageVersion = core.getInput('package-version', { required: true });
-    const publishUrl = core.getInput('publish-root-dr', { required: publishPackage });
+    const publishUrl = core.getInput('publish-root-url', { required: publishPackage });
     const sourceFilePaths = core.getInput('source-filePaths', { required: false });
     const sourcePaths = core.getInput('source-paths', { required: false });
     const workingDir = core.getInput('working-dir', { required: true });

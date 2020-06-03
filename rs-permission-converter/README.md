@@ -1,13 +1,6 @@
-# rs-create-installerpkg
+# rs-permission-converter
 
-This GitHub Action generates a zipped RS installer package artifact. Installer packages will have the file extension pkg.zip
-NEXUS_USERNAME and NEXUS_PASSWORD env needs to be set to be able to download the binary from Nexus.
-
-Three different ways to build installer packages are available.
-
-  * 'single' - Produce a single zipped installer package with the specified package name.
-  * 'multiple' - Produces multiple 'single' zips for all subfolders in 'sourcePaths', where each subfolder result in a subfoldername.pkg.zip file.
-  * 'singleflat' - Produce a single zipped installer package where all files found under 'sourcePaths' and 'sourceFilePaths'. All files will be directly under the root directory of the package.
+This GitHub Action converts a permission.xml file into sql file or into resx files. It is the xml file that is the master when adding new access rights and translations.
 
 ## Usage
 
@@ -15,7 +8,7 @@ See [action.yml](action.yml).
 
 ### Basic Usage
 
-This example installs NuGet and updates sources to use defined credentials.
+This example generates sql file and resx files
 
 ```yaml
 on: push
@@ -26,33 +19,21 @@ jobs:
     steps:
       - uses: actions/checkout@master  
 
-      - uses: actions/cache@v1
+      - name: Create sql file from permission xml
+        uses: extenda/actions/rs-permission-converter@v0
         with:
-          path: ~/.nuget/packages
-          key: nuget-cache
-          restore-keys: nuget-cache
+          type: sql
+          tool-version: 1.0.1
+          work-directory: .
+          permission-file: RS.Security.Resources\Permissions.xml
+          sql-file: RS.Security.Resources\DatabaseScripts\R__Permissions.sql
 
-      - name: NuGet Restore
-        run: nuget restore MyProject.sln
-
-      - name: Build
-        run: <build>
-
-      - name: Create installer package
-        uses: extenda/actions/rs-create-installerpkg@v0
+      - name: Create resx file from permission xml
+        uses: extenda/actions/rs-permission-converter@v0
         with:
-          builder-type: single
-          tool-version: 1.0.0
-          package-name: PackageName
-          working-dir: .
-          output-dir: installpackages
-          source-paths: Project\bin\publish\bin
-          package-version: 1.0.0-version-composed-string
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
-        - name: Publish installer package
-          if: github.ref == 'refs/heads/master'
-          run: curl -v --user "${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }}" --upload-file installpackages/PackageName.pkg.zip https://repo.extendaretail.com/repository/raw-hosted/PackageName.pkg/<VERSION>/PackageName.pkg.zip
+          type: resx
+          tool-version: 1.0.1
+          work-directory: .
+          permission-file: RS.Security.Resources\Permissions.xml
+          output-dir: RS.Security.Resources\Resources
 ```
