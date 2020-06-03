@@ -8,23 +8,24 @@ const action = async () => {
 
     checkEnv(['NEXUS_USERNAME', 'NEXUS_PASSWORD']);
 
-    const binaryVersion = core.getInput('tool-version', { required: true });
-    const branch = core.getInput('branch-name-short', { required: true });
-    const builderType = core.getInput('builder-type', { required: false });
-    const outputDir = core.getInput('output-dir', { required: true });
-    const packageName = core.getInput('package-name', { required: false });
-    const packageVersion = core.getInput('package-version', { required: true });
     const publishPackageInput = core.getInput('publish-package', { required: false });
-    const publishUrl = core.getInput('publish-root-dr', { required: true });
-    const sourceFilePaths = core.getInput('source-filePaths', { required: false });
-    const sourcePaths = core.getInput('source-paths', { required: false });
-    const workingDir = core.getInput('working-dir', { required: true });
     let publishPackage;
     if (publishPackageInput === undefined || publishPackageInput === null) {
       publishPackage = false;
     } else {
-      publishPackage = publishPackageInput;
+      publishPackage = (publishPackageInput.toLowerCase() === 'true');
     }
+
+    const binaryVersion = core.getInput('tool-version', { required: true });
+    const branch = core.getInput('branch-name-short', { required: publishPackage });
+    const builderType = core.getInput('builder-type', { required: false });
+    const outputDir = core.getInput('output-dir', { required: true });
+    const packageName = core.getInput('package-name', { required: false });
+    const packageVersion = core.getInput('package-version', { required: true });
+    const publishUrl = core.getInput('publish-root-dr', { required: publishPackage });
+    const sourceFilePaths = core.getInput('source-filePaths', { required: false });
+    const sourcePaths = core.getInput('source-paths', { required: false });
+    const workingDir = core.getInput('working-dir', { required: true });
 
     await buildPackage({
       binaryVersion,
