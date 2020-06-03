@@ -2,27 +2,27 @@ name: RS Permission Converter
 description: Wraps command line tool for converting permissions for RS
 inputs:
   type:
-    description: sql or resx
+    description: sql or resx. This specifies if it is sql file or resource file to be generated.
     required: true
     default: null
-  binaryVersion:
-    description: version of the permission converter tool
+  tool-version:
+    description: Version of the permission converter tool
     required: false
     default: '1.0.0'
-  workDir:
+  work-directory:
     description: working directory
     required: true
     default: null
-  permFile:
-    description: permissions file
+  permission-file:
+    description: The path to the permsission xml file
     required: true
     default: null
-  outputDir:
-    description: output directory
+  output-dir:
+    description: The relative path where the resx files are generated.
     required: false
     default: null
-  sqlFile:
-    description: sql file
+  sql-file:
+    description: The relative path and file name to the output sql file
     required: false
     default: null
 runs:
