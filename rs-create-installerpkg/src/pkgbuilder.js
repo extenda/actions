@@ -1,9 +1,9 @@
 const os = require('os');
 const exec = require('@actions/exec');
 const core = require('@actions/core');
-const fs = require('fs');
+const {fs, readdirSync, statSync} = require('fs');
 const fetch = require('node-fetch');
-const path = require('path');
+const { path, join } = require('path');
 const { loadTool } = require('../../utils');
 
 const getBinaryName = () => (os.platform() === 'win32' ? 'InstallerPackageBuilder.Core.Console.exe' : 'InstallerPackageBuilder.Core.Console');
@@ -103,12 +103,31 @@ const publishPackageCommand = async (args) => {
 const buildPackage = async (args) => {
   const {
     publishPackage,
+    packageVersion,
+    outputDir,
+    publishUrl,
+    branch,
+    sourcePaths,
   } = args;
 
   const buildTool = await downloadBuildTool(args);
   await packageBuilderCommand(buildTool, args);
   if (publishPackage) {
-    await publishPackageCommand(args);
+
+    const fullPath = join(__dirname, sourcePaths);
+    core.info(`Sourcepath fullname: ${fullPath}`);
+    const dirs = readdirSync(fullPath).filter((f) => statSync(join(fullPath, f)).isDirectory());
+    dirs.forEach((dir) => {
+      core.info(`DirectoryName: ${dir}`);
+      publishPackageCommand({
+        dir,
+        packageVersion,
+        outputDir,
+        publishUrl,
+        branch,
+      });
+    });
+    return true;
   }
 };
 

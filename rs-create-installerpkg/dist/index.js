@@ -5979,9 +5979,9 @@ module.exports = function createError(message, config, code, request, response) 
 const os = __webpack_require__(87);
 const exec = __webpack_require__(73);
 const core = __webpack_require__(793);
-const fs = __webpack_require__(747);
+const {fs, readdirSync, statSync} = __webpack_require__(747);
 const fetch = __webpack_require__(114);
-const path = __webpack_require__(622);
+const { path, join } = __webpack_require__(622);
 const { loadTool } = __webpack_require__(320);
 
 const getBinaryName = () => (os.platform() === 'win32' ? 'InstallerPackageBuilder.Core.Console.exe' : 'InstallerPackageBuilder.Core.Console');
@@ -6081,12 +6081,31 @@ const publishPackageCommand = async (args) => {
 const buildPackage = async (args) => {
   const {
     publishPackage,
+    packageVersion,
+    outputDir,
+    publishUrl,
+    branch,
+    sourcePaths,
   } = args;
 
   const buildTool = await downloadBuildTool(args);
   await packageBuilderCommand(buildTool, args);
   if (publishPackage) {
-    await publishPackageCommand(args);
+
+    const fullPath = join(__dirname, sourcePaths);
+    core.info(`Sourcepath fullname: ${fullPath}`);
+    const dirs = readdirSync(fullPath).filter((f) => statSync(join(fullPath, f)).isDirectory());
+    dirs.forEach((dir) => {
+      core.info(`DirectoryName: ${dir}`);
+      publishPackageCommand({
+        dir,
+        packageVersion,
+        outputDir,
+        publishUrl,
+        branch,
+      });
+    });
+    return true;
   }
 };
 
