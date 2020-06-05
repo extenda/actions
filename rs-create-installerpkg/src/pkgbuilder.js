@@ -22,9 +22,11 @@ const packageBuilderCommand = async (builder, args) => {
   const builderArgs = [];
 
   builderArgs.push(builderType);
-  if(packageName) {
+
+  if (packageName) {
     builderArgs.push('-pn', packageName);
   }
+  
   builderArgs.push('-wd', workingDir);
   builderArgs.push('-od', outputDir);
   builderArgs.push('-pv', packageVersion);
