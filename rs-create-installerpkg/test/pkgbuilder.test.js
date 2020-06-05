@@ -230,7 +230,7 @@ describe('RS installer package tests', () => {
       packageName: 'Test_PkgName',
       workingDir: 'workdir',
       outputDir: 'output',
-      sourcePaths: __dirname,
+      sourcePaths: 'output',
       sourceFilePaths: '',
       packageVersion: '1.0.1-testversion',
       publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
@@ -254,7 +254,7 @@ describe('RS installer package tests', () => {
         '-pv',
         '1.0.1-testversion',
         '-sp',
-        __dirname,
+        'output',
       ]);
   });
 
