@@ -113,10 +113,10 @@ const buildPackage = async (args) => {
   const buildTool = await downloadBuildTool(args);
   await packageBuilderCommand(buildTool, args);
   if (publishPackage) {
-
     const fullPath = sourcePaths; // path.join(__dirname, sourcePaths);
     core.info(`Sourcepath fullname: ${fullPath}`);
-    const dirs = fs.readdirSync(fullPath).filter((f) => fs.statSync(path.join(fullPath, f)).isDirectory());
+    const dirs = fs.readdirSync(fullPath)
+      .filter((f) => fs.statSync(path.join(fullPath, f)).isDirectory());
     dirs.forEach((dir) => {
       core.info(`DirectoryName: ${dir}`);
       publishPackageCommand({
@@ -127,8 +127,8 @@ const buildPackage = async (args) => {
         branch,
       });
     });
-    return true;
   }
+  return true;
 };
 
 module.exports = {
