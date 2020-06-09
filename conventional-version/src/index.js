@@ -59,8 +59,6 @@ const run = async () => {
     const releaseVersion = await versions.getLatestRelease();
     core.setOutput('release-version', releaseVersion);
 
-
-
     const composedVersion = branchinfo
       .getComposedVersionString(version, branchNameFriendly, buildNumber, shortSha);
     core.info(`composed-version-string: ${composedVersion}`);
