@@ -6047,15 +6047,15 @@ module.exports.default = axios;
 
 /***/ }),
 /* 76 */
-/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 const core = __webpack_require__(793);
 
-const { checkEnv } = __webpack_require__(320);
+const { checkEnv, run } = __webpack_require__(320);
 const versions = __webpack_require__(606);
 const branchinfo = __webpack_require__(544);
 
-const run = async () => {
+const action = async () => {
   try {
     checkEnv(['GITHUB_REF', 'GITHUB_SHA']);
 
@@ -6119,7 +6119,11 @@ const run = async () => {
   }
 };
 
-run();
+if (require.main === require.cache[eval('__filename')]) {
+  run(action);
+}
+
+module.exports = action;
 
 
 /***/ }),
@@ -43103,6 +43107,24 @@ const getBranchNameShort = (currentRef) => {
   return groups[1];
 };
 
+const getBranchNameSemver = (currentRef) => {
+  if (!currentRef) {
+    throw new Error('Can not return a branchname for null');
+  }
+
+  const pattern = /[0-9a-zA-Z]+(?: [0-9a-zA-Z]+)*?/gm;
+  const groups = currentRef.match(pattern);
+
+  if (groups == null || groups === undefined || groups.length < 1) {
+    throw new Error(`Failed to parse branch name from ${currentRef}`);
+  }
+  let branchName = '';
+  groups.forEach((group) => {
+    branchName = branchName.concat(group);
+  });
+  return branchName;
+};
+
 const getShortSha = async (sha, shaSize = null) => {
   const args = [shaSize ? `--short=${shaSize}` : '--short', sha];
   return git.revparse(args);
@@ -43134,6 +43156,7 @@ module.exports = {
   isPreRelease,
   getBranchNameFriendly,
   getBranchNameShort,
+  getBranchNameSemver,
   getShortSha,
   getComposedVersionString,
   getBranchType,

@@ -1,10 +1,10 @@
 const core = require('@actions/core');
 
-const { checkEnv } = require('../../utils');
+const { checkEnv, run } = require('../../utils');
 const versions = require('../../utils/src/versions');
 const branchinfo = require('../../utils/src/branch-info');
 
-const run = async () => {
+const action = async () => {
   try {
     checkEnv(['GITHUB_REF', 'GITHUB_SHA']);
 
@@ -68,4 +68,8 @@ const run = async () => {
   }
 };
 
-run();
+if (require.main === module) {
+  run(action);
+}
+
+module.exports = action;
