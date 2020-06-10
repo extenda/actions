@@ -6097,6 +6097,10 @@ const action = async () => {
 
     versions.tagPrefix = tagPrefix;
     const version = await versions.getBuildVersion(versionSuffix);
+    const semver = await versions.getBuildVersion(`-${branchNameSemver}.${buildNumber}+${shortSha}`);
+
+    core.info(`Semver 2.0 version: ${semver}`);
+    core.setOutput('semver', semver);
 
     let semver = '';
     if (isPreRel) {
