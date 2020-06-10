@@ -77,7 +77,7 @@ describe('Branch info test suite', () => {
     }).toThrow();
   });
 
-  test('getBranchNameSemver() returns last branch name or null', () => {
+  test('getBranchNameSemver() returns branch name with a-z and 0-9 only', () => {
     expect(getBranchNameSemver('refs/heads/feature/RS-1234')).toBe('refsheadsfeatureRS1234');
     expect(() => {
       getBranchNameSemver('#¤#__:');
@@ -95,7 +95,6 @@ describe('Branch info test suite', () => {
       getBranchNameSemver('');
     }).toThrow();
   });
-
 
   test('getShortSha() returns a standard short sha from git', async () => {
     const sha = '921103db8259eb9de72f42db8b939895f5651489';
