@@ -56,11 +56,11 @@ describe('Generate Terraform plan output', () => {
       { module: 'moduleA', output: 'Module A changes', status: 0 },
       { module: 'moduleB', output: 'Module B changes', status: 0 },
     ]);
-    expect(exec.exec.mock.calls[0][1]).toEqual(['show', '-no-color', '/work/moduleA/plan.out']);
+    expect(exec.exec.mock.calls[0][1]).toEqual(['show', '-no-color', '../../../plan.out']);
     expect(exec.exec.mock.calls[0][2]).toMatchObject({
       cwd: '/work/moduleA/.terragrunt-cache/UUID1/UUID2',
     });
-    expect(exec.exec.mock.calls[1][1]).toEqual(['show', '-no-color', '/work/moduleB/.terragrunt-cache/UUID1/UUID2/plan.out']);
+    expect(exec.exec.mock.calls[1][1]).toEqual(['show', '-no-color', 'plan.out']);
     expect(exec.exec.mock.calls[1][2]).toMatchObject({
       cwd: '/work/moduleB/.terragrunt-cache/UUID1/UUID2',
     });

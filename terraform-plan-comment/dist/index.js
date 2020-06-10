@@ -10915,7 +10915,7 @@ const terraformShow = async (plan) => {
     [cwd] = terragruntCache;
   }
 
-  const status = await exec.exec('terraform', ['show', '-no-color', plan], {
+  const status = await exec.exec('terraform', ['show', '-no-color', path.relative(cwd, plan)], {
     cwd,
     silent: true,
     listeners: {
