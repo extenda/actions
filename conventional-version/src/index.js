@@ -42,7 +42,7 @@ const action = async () => {
 
     const tagPrefix = core.getInput('tag-prefix', { required: true });
     const buildNumber = core.getInput('build-number');
-    let versionSuffix = core.getInput('version-suffix');
+    const versionSuffix = core.getInput('version-suffix');
 
     versions.tagPrefix = tagPrefix;
     const version = await versions.getBuildVersion(versionSuffix);
