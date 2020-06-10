@@ -6102,6 +6102,9 @@ const action = async () => {
     core.info(`Semver 2.0 version: ${semver}`);
     core.setOutput('semver', semver);
 
+    core.info(`Project version: ${version}`);
+    core.setOutput('version', version);
+
     const taggedRelease = await versions.getLatestReleaseTag();
     core.info(`Latest release tag: ${taggedRelease}`);
     core.setOutput('release-tag', taggedRelease);
