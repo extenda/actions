@@ -46,12 +46,11 @@ const action = async () => {
 
     versions.tagPrefix = tagPrefix;
     const version = await versions.getBuildVersion(versionSuffix);
-    
+
     let semver = '';
-    if  (isPreRel) {
+    if (isPreRel) {
       semver = await versions.getBuildVersion(`-${branchNameSemver}.${buildNumber}+${shortSha}`);
-    }
-    else {
+    } else {
       semver = version;
     }
 
