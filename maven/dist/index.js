@@ -43669,7 +43669,7 @@ const getBranchNameSemver = (currentRef) => {
   const pattern = /[0-9a-zA-Z]+(?: [0-9a-zA-Z]+)*?/gm;
   const groups = currentRef.match(pattern);
 
-  if (groups == null || groups === undefined || groups.length < 1) {
+  if (groups == null || groups.length < 1) {
     throw new Error(`Failed to parse branch name from ${currentRef}`);
   }
   let branchName = '';
