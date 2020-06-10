@@ -3,6 +3,7 @@ const {
   isPreRelease,
   getBranchNameFriendly,
   getBranchNameShort,
+  getBranchNameSemver,
   getShortSha,
   getBranchType,
   getComposedVersionString,
@@ -73,6 +74,25 @@ describe('Branch info test suite', () => {
     }).toThrow();
     expect(() => {
       getBranchNameShort('');
+    }).toThrow();
+  });
+
+  test('getBranchNameSemver() returns branch name with a-z and 0-9 only', () => {
+    expect(getBranchNameSemver('refs/heads/feature/RS-1234')).toBe('refsheadsfeatureRS1234');
+    expect(() => {
+      getBranchNameSemver('#¤#__:');
+    }).toThrow();
+    expect(() => {
+      getBranchNameSemver(null);
+    }).toThrow();
+    expect(() => {
+      getBranchNameSemver(undefined);
+    }).toThrow();
+    expect(() => {
+      getBranchNameSemver();
+    }).toThrow();
+    expect(() => {
+      getBranchNameSemver('');
     }).toThrow();
   });
 
