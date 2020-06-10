@@ -6094,14 +6094,13 @@ const action = async () => {
     const tagPrefix = core.getInput('tag-prefix', { required: true });
     const buildNumber = core.getInput('build-number');
     let versionSuffix = core.getInput('version-suffix');
-    if ((versionSuffix === null || versionSuffix === '') && isPreRel) {
-      versionSuffix = `-${branchNameSemver}.${buildNumber}+${shortSha}`;
-    }
+
     versions.tagPrefix = tagPrefix;
     const version = await versions.getBuildVersion(versionSuffix);
+    const semver = await versions.getBuildVersion(`-${branchNameSemver}.${buildNumber}+${shortSha}`);
 
-    core.info(`Project version: ${version}`);
-    core.setOutput('version', version);
+    core.info(`Semver 2.0 version: ${semver}`);
+    core.setOutput('semver', semver);
 
     const taggedRelease = await versions.getLatestReleaseTag();
     core.info(`Latest release tag: ${taggedRelease}`);
