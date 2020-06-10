@@ -48926,6 +48926,24 @@ const getBranchNameShort = (currentRef) => {
   return groups[1];
 };
 
+const getBranchNameSemver = (currentRef) => {
+  if (!currentRef) {
+    throw new Error('Can not return a branchname for null');
+  }
+
+  const pattern = /[0-9a-zA-Z]+(?: [0-9a-zA-Z]+)*?/gm;
+  const groups = currentRef.match(pattern);
+
+  if (groups == null || groups === undefined || groups.length < 1) {
+    throw new Error(`Failed to parse branch name from ${currentRef}`);
+  }
+  let branchName = '';
+  groups.forEach((group) => {
+    branchName = branchName.concat(group);
+  });
+  return branchName;
+};
+
 const getShortSha = async (sha, shaSize = null) => {
   const args = [shaSize ? `--short=${shaSize}` : '--short', sha];
   return git.revparse(args);
@@ -48957,6 +48975,7 @@ module.exports = {
   isPreRelease,
   getBranchNameFriendly,
   getBranchNameShort,
+  getBranchNameSemver,
   getShortSha,
   getComposedVersionString,
   getBranchType,
