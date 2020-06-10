@@ -6047,34 +6047,17 @@ module.exports.default = axios;
 
 /***/ }),
 /* 76 */
-/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 const core = __webpack_require__(793);
 
-const { checkEnv } = __webpack_require__(320);
+const { checkEnv, run } = __webpack_require__(320);
 const versions = __webpack_require__(606);
 const branchinfo = __webpack_require__(544);
 
-const run = async () => {
+const action = async () => {
   try {
     checkEnv(['GITHUB_REF', 'GITHUB_SHA']);
-
-    const tagPrefix = core.getInput('tag-prefix', { required: true });
-    const versionSuffix = core.getInput('version-suffix');
-    const buildNumber = core.getInput('build-number');
-
-    versions.tagPrefix = tagPrefix;
-    const version = await versions.getBuildVersion(versionSuffix);
-
-    core.info(`Project version: ${version}`);
-    core.setOutput('version', version);
-
-    const taggedRelease = await versions.getLatestReleaseTag();
-    core.info(`Latest release tag: ${taggedRelease}`);
-    core.setOutput('release-tag', taggedRelease);
-
-    const releaseVersion = await versions.getLatestRelease();
-    core.setOutput('release-version', releaseVersion);
 
     /* branch outputs */
     const githubRef = process.env.GITHUB_REF;
@@ -6095,6 +6078,10 @@ const run = async () => {
     core.info(`branch-name-short: ${branchNameShort}`);
     core.setOutput('branch-name-short', branchNameShort);
 
+    const branchNameSemver = branchinfo.getBranchNameSemver(githubRef);
+    core.info(`branch-name-semver: ${branchNameSemver}`);
+    core.setOutput('branch-name-semver', branchNameSemver);
+
     const isPreRel = branchinfo.isPreRelease(branchName);
     core.info(`is-prerelease: ${isPreRel}`);
     core.setOutput('is-prerelease', isPreRel);
@@ -6103,6 +6090,25 @@ const run = async () => {
     const shortSha = await branchinfo.getShortSha(sha);
     core.info(`short-sha: ${shortSha}`);
     core.setOutput('short-sha', shortSha);
+
+    const tagPrefix = core.getInput('tag-prefix', { required: true });
+    const buildNumber = core.getInput('build-number');
+    let versionSuffix = core.getInput('version-suffix');
+    if ((versionSuffix === null || versionSuffix === '') && isPreRel) {
+      versionSuffix = `-${branchNameSemver}.${buildNumber}+${shortSha}`;
+    }
+    versions.tagPrefix = tagPrefix;
+    const version = await versions.getBuildVersion(versionSuffix);
+
+    core.info(`Project version: ${version}`);
+    core.setOutput('version', version);
+
+    const taggedRelease = await versions.getLatestReleaseTag();
+    core.info(`Latest release tag: ${taggedRelease}`);
+    core.setOutput('release-tag', taggedRelease);
+
+    const releaseVersion = await versions.getLatestRelease();
+    core.setOutput('release-version', releaseVersion);
 
     const composedVersion = branchinfo
       .getComposedVersionString(version, branchNameFriendly, buildNumber, shortSha);
@@ -6113,7 +6119,11 @@ const run = async () => {
   }
 };
 
-run();
+if (require.main === require.cache[eval('__filename')]) {
+  run(action);
+}
+
+module.exports = action;
 
 
 /***/ }),
@@ -43097,6 +43107,24 @@ const getBranchNameShort = (currentRef) => {
   return groups[1];
 };
 
+const getBranchNameSemver = (currentRef) => {
+  if (!currentRef) {
+    throw new Error('Can not return a branchname for null');
+  }
+
+  const pattern = /[0-9a-zA-Z]+(?: [0-9a-zA-Z]+)*?/gm;
+  const groups = currentRef.match(pattern);
+
+  if (groups == null || groups.length < 1) {
+    throw new Error(`Failed to parse branch name from ${currentRef}`);
+  }
+  let branchName = '';
+  groups.forEach((group) => {
+    branchName = branchName.concat(group);
+  });
+  return branchName;
+};
+
 const getShortSha = async (sha, shaSize = null) => {
   const args = [shaSize ? `--short=${shaSize}` : '--short', sha];
   return git.revparse(args);
@@ -43128,6 +43156,7 @@ module.exports = {
   isPreRelease,
   getBranchNameFriendly,
   getBranchNameShort,
+  getBranchNameSemver,
   getShortSha,
   getComposedVersionString,
   getBranchType,
