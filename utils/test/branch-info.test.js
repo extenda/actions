@@ -3,6 +3,7 @@ const {
   isPreRelease,
   getBranchNameFriendly,
   getBranchNameShort,
+  getBranchNameSemver,
   getShortSha,
   getBranchType,
   getComposedVersionString,
@@ -75,6 +76,26 @@ describe('Branch info test suite', () => {
       getBranchNameShort('');
     }).toThrow();
   });
+
+  test('getBranchNameSemver() returns last branch name or null', () => {
+    expect(getBranchNameSemver('refs/heads/feature/RS-1234')).toBe('refsheadsfeatureRS1234');
+    expect(() => {
+      getBranchNameSemver('#¤#__:');
+    }).toThrow();
+    expect(() => {
+      getBranchNameSemver(null);
+    }).toThrow();
+    expect(() => {
+      getBranchNameSemver(undefined);
+    }).toThrow();
+    expect(() => {
+      getBranchNameSemver();
+    }).toThrow();
+    expect(() => {
+      getBranchNameSemver('');
+    }).toThrow();
+  });
+
 
   test('getShortSha() returns a standard short sha from git', async () => {
     const sha = '921103db8259eb9de72f42db8b939895f5651489';
