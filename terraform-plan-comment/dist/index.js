@@ -10904,8 +10904,19 @@ const fg = __webpack_require__(180);
 const terraformShow = async (plan) => {
   let stdout = '';
   let stderr = '';
-  const status = await exec.exec('terraform', ['show', '-no-color', path.basename(plan)], {
-    cwd: path.dirname(plan),
+
+  let cwd = path.dirname(plan);
+
+  const terragruntCache = fg.sync(
+    `${path.dirname(plan)}/**/.terragrunt-cache/*/*`,
+    { dot: true, onlyDirectories: true },
+  );
+  if (terragruntCache.length > 0) {
+    [cwd] = terragruntCache;
+  }
+
+  const status = await exec.exec('terraform', ['show', '-no-color', plan], {
+    cwd,
     silent: true,
     listeners: {
       stdout: (data) => {
@@ -10934,7 +10945,18 @@ const filterUnchanged = (outputs) => outputs.filter(
 const sortModulePaths = (outputs) => outputs.sort((a, b) => a.module.localeCompare(b.module));
 
 const moduleName = (plan, workingDirectory) => {
-  const paths = path.relative(workingDirectory, plan).split(path.sep);
+  let planDir = plan;
+
+  const terragruntCache = fg.sync(
+    `${path.dirname(plan)}/**/.terragrunt-cache`,
+    { dot: true, onlyDirectories: true },
+  );
+
+  if (terragruntCache.length > 0) {
+    [planDir] = terragruntCache;
+  }
+
+  const paths = path.relative(workingDirectory, planDir).split(path.sep);
   const index = paths.findIndex((e) => e === '.terragrunt-cache');
   if (index > 0) {
     return paths.slice(0, index).join(path.sep);
