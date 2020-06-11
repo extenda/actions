@@ -23,7 +23,7 @@ const packageBuilderCommand = async (builder, args) => {
 
   builderArgs.push(builderType);
 
-  if (packageName) {
+  if (packageName && builderType !== 'multiple') {
     builderArgs.push('-pn', packageName);
   }
 
