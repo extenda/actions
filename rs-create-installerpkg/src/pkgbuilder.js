@@ -23,7 +23,7 @@ const packageBuilderCommand = async (builder, args) => {
 
   builderArgs.push(builderType);
 
-  if (packageName) {
+  if (packageName && builderType !== 'multiple') {
     builderArgs.push('-pn', packageName);
   }
 
@@ -86,14 +86,13 @@ const publishPackageCommand = async (args) => {
       Authorization: `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:${process.env.NEXUS_PASSWORD}`)
         .toString('base64')}`,
     },
+  }).then((response) => {
+    if (!response.ok) {
+      throw response;
+    }
+    core.info(`Package published successfully, server responded with ${response.status} ${response.statusText}`);
+    return response;
   })
-    .then((response) => {
-      if (!response.ok) {
-        throw response;
-      }
-      core.info(`Package published successfully, server responded with ${response.status} ${response.statusText}`);
-      return response;
-    })
     .catch((err) => {
       core.error(`Failed to publish package, server responded with ${err.status} ${err.statusText}`);
       core.info(`Failed to publish package, server responded with ${err}`);
@@ -103,13 +102,32 @@ const publishPackageCommand = async (args) => {
 const buildPackage = async (args) => {
   const {
     publishPackage,
+    packageVersion,
+    outputDir,
+    publishUrl,
+    branch,
+    sourcePaths,
   } = args;
 
   const buildTool = await downloadBuildTool(args);
   await packageBuilderCommand(buildTool, args);
   if (publishPackage) {
-    await publishPackageCommand(args);
+    const fullPath = sourcePaths; // path.join(__dirname, sourcePaths);
+    core.info(`Sourcepath fullname: ${fullPath}`);
+    const dirs = fs.readdirSync(fullPath)
+      .filter((f) => fs.statSync(path.join(fullPath, f)).isDirectory());
+    dirs.forEach((dir) => {
+      core.info(`DirectoryName: ${dir}`);
+      publishPackageCommand({
+        packageName: dir,
+        packageVersion,
+        outputDir,
+        publishUrl,
+        branch,
+      });
+    });
   }
+  return true;
 };
 
 module.exports = {

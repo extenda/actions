@@ -102,6 +102,76 @@ describe('RS installer package tests', () => {
       ]);
   });
 
+  test('packageBuilderCommand() does not set sourcePaths if none specified', async () => {
+    mockFs({
+      output: {},
+    }, {});
+    const args = {
+      builderType: 'single',
+      binaryVersion: '1.1.0',
+      packageName: 'Test_PkgName',
+      workingDir: 'workdir',
+      outputDir: 'output',
+      sourcePaths: '',
+      sourceFilePaths: '',
+      packageVersion: '1.0.1-testversion',
+      publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
+      branch: 'develop',
+      publishPackage: true,
+    };
+
+    await packageBuilderCommand(loadTool, args);
+
+    expect(exec.exec)
+      .toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1])
+      .toEqual([
+        'single',
+        '-pn',
+        'Test_PkgName',
+        '-wd',
+        'workdir',
+        '-od',
+        'output',
+        '-pv',
+        '1.0.1-testversion',
+      ]);
+  });
+
+  test('packageBuilderCommand() does not set packageName if none specified', async () => {
+    mockFs({
+      output: {},
+    }, {});
+    const args = {
+      builderType: 'single',
+      binaryVersion: '1.1.0',
+      packageName: '',
+      workingDir: 'workdir',
+      outputDir: 'output',
+      sourcePaths: '',
+      sourceFilePaths: '',
+      packageVersion: '1.0.1-testversion',
+      publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
+      branch: 'develop',
+      publishPackage: true,
+    };
+
+    await packageBuilderCommand(loadTool, args);
+
+    expect(exec.exec)
+      .toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1])
+      .toEqual([
+        'single',
+        '-wd',
+        'workdir',
+        '-od',
+        'output',
+        '-pv',
+        '1.0.1-testversion',
+      ]);
+  });
+
   test('packageBuilderCommand() sets specified sourceFilePaths', async () => {
     mockFs({
       output: {},
@@ -230,7 +300,7 @@ describe('RS installer package tests', () => {
       packageName: 'Test_PkgName',
       workingDir: 'workdir',
       outputDir: 'output',
-      sourcePaths: __dirname,
+      sourcePaths: 'output',
       sourceFilePaths: '',
       packageVersion: '1.0.1-testversion',
       publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
@@ -254,7 +324,7 @@ describe('RS installer package tests', () => {
         '-pv',
         '1.0.1-testversion',
         '-sp',
-        __dirname,
+        'output',
       ]);
   });
 
@@ -298,5 +368,65 @@ describe('RS installer package tests', () => {
         '-sp',
         __dirname,
       ]);
+  });
+
+  test('buildPackage outputs sourcePaths', async () => {
+    mockFs({
+      workdir: {},
+      sourcePathsTest: {},
+      'output/Test_PkgName_1.0.1-testversion.pkg.zip': Buffer.from('test content'),
+    });
+
+    loadTool.mockResolvedValueOnce('pkgbuilder');
+    await buildPackage({
+      builderType: 'single',
+      binaryVersion: '1.1.1',
+      packageName: 'Test_PkgName',
+      workingDir: 'workdir',
+      outputDir: 'output',
+      sourcePaths: 'sourcePathsTest',
+      sourceFilePaths: '',
+      packageVersion: '1.0.1-testversion',
+      publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
+      branch: 'develop',
+      publishPackage: true,
+    });
+
+    expect(core.info).toBeCalledWith('Sourcepath fullname: sourcePathsTest');
+  });
+
+  test('buildPackage outputs directories', async () => {
+    mockFs({
+      workdir: {},
+      output: {
+        'test1_1.0.1-testversion.pkg.zip': Buffer.from('test content'),
+      },
+      sourcePathsTest: {
+        test1: {
+        },
+      },
+
+    });
+
+    loadTool.mockResolvedValueOnce('pkgbuilder');
+    await buildPackage({
+      builderType: 'single',
+      binaryVersion: '1.1.1',
+      packageName: 'Test_PkgName',
+      workingDir: 'workdir',
+      outputDir: 'output',
+      sourcePaths: 'sourcePathsTest',
+      sourceFilePaths: '',
+      packageVersion: '1.0.1-testversion',
+      publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
+      branch: 'develop',
+      publishPackage: true,
+    });
+
+    expect(core.info).toBeCalledWith('DirectoryName: test1');
+    expect(core.info.mock.calls[0][0]).toBe('Sourcepath fullname: sourcePathsTest');
+    expect(core.info.mock.calls[1][0]).toBe('DirectoryName: test1');
+    expect(core.info.mock.calls[2][0]).toBe('PublishUrl: https://repo.extendaretail.com/repository/raw-hosted/RS/test1.pkg/develop/test1.pkg.1.0.1-testversion.zip');
+    expect(core.info.mock.calls[4][0]).toBe('Package published successfully, server responded with 200 OK');
   });
 });
