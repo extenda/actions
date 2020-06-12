@@ -393,14 +393,13 @@ describe('RS installer package tests', () => {
     });
 
     expect(core.info).toBeCalledWith('Sourcepath fullname: sourcePathsTest');
-
   });
 
   test('buildPackage outputs directories', async () => {
     mockFs({
       workdir: {},
       output: {
-        'test1_1.0.1-testversion.pkg.zip': Buffer.from('test content')
+        'test1_1.0.1-testversion.pkg.zip': Buffer.from('test content'),
       },
       sourcePathsTest: {
         test1: {
@@ -430,5 +429,4 @@ describe('RS installer package tests', () => {
     expect(core.info.mock.calls[2][0]).toBe('PublishUrl: https://repo.extendaretail.com/repository/raw-hosted/RS/test1.pkg/develop/test1.pkg.1.0.1-testversion.zip');
     expect(core.info.mock.calls[4][0]).toBe('Package published successfully, server responded with 200 OK');
   });
-
 });

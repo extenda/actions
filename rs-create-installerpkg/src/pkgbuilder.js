@@ -86,14 +86,13 @@ const publishPackageCommand = async (args) => {
       Authorization: `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:${process.env.NEXUS_PASSWORD}`)
         .toString('base64')}`,
     },
+  }).then((response) => {
+    if (!response.ok) {
+      throw response;
+    }
+    core.info(`Package published successfully, server responded with ${response.status} ${response.statusText}`);
+    return response;
   })
-    .then((response) => {
-      if (!response.ok) {
-        throw response;
-      }
-      core.info(`Package published successfully, server responded with ${response.status} ${response.statusText}`);
-      return response;
-    })
     .catch((err) => {
       core.error(`Failed to publish package, server responded with ${err.status} ${err.statusText}`);
       core.info(`Failed to publish package, server responded with ${err}`);
@@ -120,7 +119,7 @@ const buildPackage = async (args) => {
     dirs.forEach((dir) => {
       core.info(`DirectoryName: ${dir}`);
       publishPackageCommand({
-        dir,
+        packageName: dir,
         packageVersion,
         outputDir,
         publishUrl,
