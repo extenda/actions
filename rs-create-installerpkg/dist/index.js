@@ -6053,17 +6053,20 @@ const publishPackageCommand = async (args) => {
   const packageUrl = `${packageName}.pkg/${branch}/${packageName}.pkg.${packageVersion}.zip`;
   const fullpublishUrl = `${publishUrl}${packageUrl}`;
   const filePath = `${outputDir}${path.sep}${packageName}_${packageVersion}.pkg.zip`;
-  const data = fs.readFileSync(filePath, 'binary');
+  const stats = fs.statSync(filePath);
+  const fileSizeInBytes = stats.size;
+  let readStream = fs.createReadStream(filePath);
 
   core.info(`PublishUrl: ${fullpublishUrl}`);
   core.info(`user: ${process.env.NEXUS_USERNAME}, pass ${process.env.NEXUS_PASSWORD}`);
   return fetch(fullpublishUrl, {
     method: 'PUT',
-    body: data,
+    body: readStream,
     headers: {
       Authorization: `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:${process.env.NEXUS_PASSWORD}`)
         .toString('base64')}`,
-    },
+      "Content-length": fileSizeInBytes
+      },
   }).then((response) => {
     if (!response.ok) {
       throw response;
