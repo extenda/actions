@@ -36,7 +36,7 @@ const setDefaultConcurrency = (cpu) => {
   } else if (defaultConcurrency < minConcurrency) {
     defaultConcurrency = minConcurrency;
   }
-  return defaultConcurrency;
+  return Math.ceil(defaultConcurrency);
 };
 
 const managedArguments = async (args, service, projectId) => {

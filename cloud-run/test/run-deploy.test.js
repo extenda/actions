@@ -394,4 +394,50 @@ describe('Run Deploy', () => {
       new Error('Cloud Run GKE must be configured with millicpu. Use of CPU count is not supported.'),
     );
   });
+
+  test('It can deploy to Cloud Run on GKE with odd CPU', async () => {
+    getClusterInfo.mockResolvedValueOnce({
+      project: 'tribe-staging-1234',
+      cluster: 'k8s-cluster',
+      clusterLocation: 'europe-west1',
+      uri: 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
+    });
+    exec.exec.mockResolvedValueOnce(0);
+    setupGcloud.mockResolvedValueOnce('test-project');
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      cpu: '233m',
+      platform: {
+        gke: {
+          connectivity: 'external',
+        },
+      },
+    };
+    const returnValue = await runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-project/my-service:tag',
+    );
+    expect(returnValue.gcloudExitCode).toEqual(0);
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(getClusterInfo).toHaveBeenCalledWith('test-project', undefined);
+    expect(setupGcloud).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledWith('gcloud', [
+      'run', 'deploy', 'my-service',
+      '--image=gcr.io/test-project/my-service:tag',
+      '--project=test-project',
+      '--memory=256Mi',
+      '--concurrency=19',
+      '--max-instances=default',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-project',
+      '--cpu=233m',
+      '--min-instances=default',
+      '--platform=gke',
+      '--cluster=projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
+      '--cluster-location=europe-west1',
+      '--connectivity=external',
+      '--namespace=my-service',
+    ]);
+  });
 });
