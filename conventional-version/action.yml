@@ -33,8 +33,8 @@ outputs:
   composed-version-string:
     description: |
       Master=<version>,
-      Develop=<version>-<branch-name-friendly>-<build-number>-<short-sha>,
-      Feature=<version>-<branch-name-friendly>-<short-sha>
+      Develop=<version>-dev-<build-number>-<short-sha>,
+      Feature=<version>-<branch-name-friendly>-<build-number>-<short-sha>
 runs:
   using: node12
   main: dist/index.js

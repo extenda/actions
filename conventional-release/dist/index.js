@@ -48967,7 +48967,7 @@ const getComposedVersionString = (version, branchNameFriendly, buildNumber, shor
     return `${version}-dev-${buildNumber}-${shortSha}`;
   }
 
-  return `${version}-${branchNameFriendly.toLowerCase()}-${shortSha}`;
+  return `${version}-${branchNameFriendly.toLowerCase()}-${buildNumber}-${shortSha}`;
 };
 
 module.exports = {

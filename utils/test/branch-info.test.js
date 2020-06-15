@@ -139,8 +139,8 @@ describe('Branch info test suite', () => {
     expect(getComposedVersionString(version, 'Dev', buildNumber, shortSha)).toBe('1.1.0-dev-6-921103d');
     expect(getComposedVersionString(version, 'develop', buildNumber, shortSha)).toBe('1.1.0-dev-6-921103d');
     expect(getComposedVersionString(version, 'Develop', buildNumber, shortSha)).toBe('1.1.0-dev-6-921103d');
-    expect(getComposedVersionString(version, 'feature-other-stuff', buildNumber, shortSha)).toBe('1.1.0-feature-other-stuff-921103d');
-    expect(getComposedVersionString(version, 'Feature-OTHER-Stuff', buildNumber, shortSha)).toBe('1.1.0-feature-other-stuff-921103d');
+    expect(getComposedVersionString(version, 'feature-other-stuff', buildNumber, shortSha)).toBe('1.1.0-feature-other-stuff-6-921103d');
+    expect(getComposedVersionString(version, 'Feature-OTHER-Stuff', buildNumber, shortSha)).toBe('1.1.0-feature-other-stuff-6-921103d');
 
     expect(() => {
       getComposedVersionString(version, null, buildNumber, shortSha);
