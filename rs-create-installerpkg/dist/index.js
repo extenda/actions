@@ -6055,13 +6055,13 @@ const publishPackageCommand = async (args) => {
   const filePath = `${outputDir}${path.sep}${packageName}_${packageVersion}.pkg.zip`;
   const stats = fs.statSync(filePath);
   const fileSizeInBytes = stats.size;
-  const readStream = fs.createReadStream(filePath);
+  const data = fs.readFileSync(filePath);
 
   core.info(`PublishUrl: ${fullpublishUrl}`);
   core.info(`user: ${process.env.NEXUS_USERNAME}, pass ${process.env.NEXUS_PASSWORD}`);
   return fetch(fullpublishUrl, {
     method: 'PUT',
-    body: readStream,
+    body: data,
     headers: {
       Authorization: `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:${process.env.NEXUS_PASSWORD}`)
         .toString('base64')}`,
