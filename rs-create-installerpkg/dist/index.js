@@ -6080,7 +6080,6 @@ const publishPackageCommand = async (args) => {
 const buildPackage = async (args) => {
   const {
     builderType,
-    packageName,
     publishPackage,
     packageVersion,
     outputDir,
@@ -6092,7 +6091,7 @@ const buildPackage = async (args) => {
   const buildTool = await downloadBuildTool(args);
   await packageBuilderCommand(buildTool, args);
   if (publishPackage) {
-    if (builderType == 'multiple') {
+    if (builderType === 'multiple') {
       const fullPath = sourcePaths; // path.join(__dirname, sourcePaths);
       core.info(`Sourcepath fullname: ${fullPath}`);
       const dirs = fs.readdirSync(fullPath)
