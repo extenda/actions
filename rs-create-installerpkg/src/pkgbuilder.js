@@ -101,6 +101,8 @@ const publishPackageCommand = async (args) => {
 
 const buildPackage = async (args) => {
   const {
+    builderType,
+    packageName,
     publishPackage,
     packageVersion,
     outputDir,
@@ -112,20 +114,24 @@ const buildPackage = async (args) => {
   const buildTool = await downloadBuildTool(args);
   await packageBuilderCommand(buildTool, args);
   if (publishPackage) {
-    const fullPath = sourcePaths; // path.join(__dirname, sourcePaths);
-    core.info(`Sourcepath fullname: ${fullPath}`);
-    const dirs = fs.readdirSync(fullPath)
-      .filter((f) => fs.statSync(path.join(fullPath, f)).isDirectory());
-    dirs.forEach((dir) => {
-      core.info(`DirectoryName: ${dir}`);
-      publishPackageCommand({
-        packageName: dir,
-        packageVersion,
-        outputDir,
-        publishUrl,
-        branch,
+    if (builderType == 'multiple') {
+      const fullPath = sourcePaths; // path.join(__dirname, sourcePaths);
+      core.info(`Sourcepath fullname: ${fullPath}`);
+      const dirs = fs.readdirSync(fullPath)
+        .filter((f) => fs.statSync(path.join(fullPath, f)).isDirectory());
+      dirs.forEach((dir) => {
+        core.info(`DirectoryName: ${dir}`);
+        publishPackageCommand({
+          packageName: dir,
+          packageVersion,
+          outputDir,
+          publishUrl,
+          branch,
+        });
       });
-    });
+    } else {
+      publishPackageCommand(args);
+    }
   }
   return true;
 };

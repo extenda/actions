@@ -392,10 +392,14 @@ describe('RS installer package tests', () => {
       publishPackage: true,
     });
 
-    expect(core.info).toBeCalledWith('Sourcepath fullname: sourcePathsTest');
+    expect(core.info).toHaveBeenCalledTimes(3);
+    expect(core.info.mock.calls[0][0]).toBe('PublishUrl: https://repo.extendaretail.com/repository/raw-hosted/RS/Test_PkgName.pkg/develop/Test_PkgName.pkg.1.0.1-testversion.zip');
+    expect(core.info.mock.calls[1][0]).toBe('user: undefined, pass undefined');
+    expect(core.info.mock.calls[2][0]).toBe('Package published successfully, server responded with 200 OK');
+
   });
 
-  test('buildPackage outputs directories', async () => {
+  test('buildPackage outputs directories multiple', async () => {
     mockFs({
       workdir: {},
       output: {
@@ -406,11 +410,11 @@ describe('RS installer package tests', () => {
         },
       },
 
-    });
+      });
 
     loadTool.mockResolvedValueOnce('pkgbuilder');
     await buildPackage({
-      builderType: 'single',
+      builderType: 'multiple',
       binaryVersion: '1.1.1',
       packageName: 'Test_PkgName',
       workingDir: 'workdir',
