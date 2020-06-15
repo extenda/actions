@@ -6065,8 +6065,8 @@ const publishPackageCommand = async (args) => {
     headers: {
       Authorization: `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:${process.env.NEXUS_PASSWORD}`)
         .toString('base64')}`,
-        'Content-length': fileSizeInBytes,
-      },
+      'Content-length': fileSizeInBytes,
+    },
   }).then((response) => {
     if (!response.ok) {
       throw response;
