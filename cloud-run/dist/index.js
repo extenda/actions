@@ -5374,6 +5374,33 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
 
 const numericOrDefault = (value) => (value >= 0 ? value : 'default');
 
+const isManagedCloudRun = (cpu) => {
+  if (typeof cpu === 'string' && cpu.endsWith('m')) {
+    return false;
+  }
+  return true;
+};
+
+const setDefaultConcurrency = (cpu) => {
+  const cloudDefaultConcurrency = 80;
+  const cloudDefaultCPU = 1000;
+  const maxConcurrency = 100;
+  const minConcurrency = 10;
+  let miliCPU = 0;
+  if (isManagedCloudRun(cpu)) {
+    miliCPU = cpu * 1000;
+  } else {
+    miliCPU = cpu.replace(/\D/g, '');
+  }
+  let defaultConcurrency = cloudDefaultConcurrency * (miliCPU / cloudDefaultCPU);
+  if (defaultConcurrency > maxConcurrency) {
+    defaultConcurrency = maxConcurrency;
+  } else if (defaultConcurrency < minConcurrency) {
+    defaultConcurrency = minConcurrency;
+  }
+  return Math.ceil(defaultConcurrency);
+};
+
 const managedArguments = async (args, service, projectId) => {
   const {
     cpu,
@@ -5387,7 +5414,7 @@ const managedArguments = async (args, service, projectId) => {
     },
   } = service;
 
-  if (typeof cpu === 'string' && cpu.endsWith('m')) {
+  if (!isManagedCloudRun(cpu)) {
     throw new Error('Managed Cloud Run must be configured with CPU count [1,2]. Use of millicpu is not supported.');
   }
 
@@ -5430,7 +5457,7 @@ const gkeArguments = async (args, service, projectId, regoFile) => {
     },
   } = service;
 
-  if (typeof cpu === 'number') {
+  if (isManagedCloudRun(cpu)) {
     throw new Error('Cloud Run GKE must be configured with millicpu. Use of CPU count is not supported.');
   }
 
@@ -5460,7 +5487,7 @@ const runDeploy = async (serviceAccountKey, service, image, regoFile, verbose = 
   const {
     name,
     memory,
-    concurrency = -1,
+    concurrency = setDefaultConcurrency(service.cpu),
     'max-instances': maxInstances = -1,
     environment = [],
   } = service;
@@ -5469,7 +5496,7 @@ const runDeploy = async (serviceAccountKey, service, image, regoFile, verbose = 
     `--image=${image}`,
     `--project=${projectId}`,
     `--memory=${memory}`,
-    `--concurrency=${numericOrDefault(concurrency)}`,
+    `--concurrency=${concurrency}`,
     `--max-instances=${numericOrDefault(maxInstances)}`,
     `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
   ];
