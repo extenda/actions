@@ -6012,18 +6012,18 @@ const packageBuilderCommand = async (builder, args) => {
   const pattern = /^[^\r\n]*$/mg;
   if (sourcePaths) {
     const groups = sourcePaths.match(pattern);
-    if (groups != null) {    
-      groups.forEach(function (item) {
-        builderArgs.push('-sp', item);
+    if (groups != null) {
+      groups.forEach((group) => {
+        builderArgs.push('-sp', group);
       });
     }
   }
 
   if (sourceFilePaths) {
     const groups = sourceFilePaths.match(pattern);
-    if (groups != null) {    
-      groups.forEach(function (item) {
-        builderArgs.push('-sfp', item);
+    if (groups != null) {
+      groups.forEach((group) => {
+        builderArgs.push('-sfp', group);
       });
     }
   }
