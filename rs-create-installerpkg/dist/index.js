@@ -2242,10 +2242,10 @@ const action = async () => {
 
     const publishPackageInput = core.getInput('publish-package', { required: false });
     let publishPackage;
-    if (!publishPackageInput) {
-      publishPackage = false;
+    if (publishPackageInput === 'true') {
+      publishPackage = true;
     } else {
-      publishPackage = publishPackageInput;
+      publishPackage = false;
     }
 
     const binaryVersion = core.getInput('tool-version', { required: true });
