@@ -31,12 +31,23 @@ const packageBuilderCommand = async (builder, args) => {
   builderArgs.push('-od', outputDir);
   builderArgs.push('-pv', packageVersion);
 
+  const pattern = /^[^\r\n]*$/mg;
   if (sourcePaths) {
-    builderArgs.push('-sp', sourcePaths);
+    const groups = sourcePaths.match(pattern);
+    if (groups != null) {    
+      groups.forEach(function (item) {
+        builderArgs.push('-sp', item);
+      });
+    }
   }
 
   if (sourceFilePaths) {
-    builderArgs.push('-sfp', sourceFilePaths);
+    const groups = sourceFilePaths.match(pattern);
+    if (groups != null) {    
+      groups.forEach(function (item) {
+        builderArgs.push('-sfp', item);
+      });
+    }
   }
 
   return exec.exec(
