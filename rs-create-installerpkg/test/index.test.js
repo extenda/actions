@@ -33,7 +33,7 @@ describe('create packaage Action', () => {
 
   test('It will use passed inputs', async () => {
     core.getInput
-      .mockReturnValueOnce(true)
+      .mockReturnValueOnce('true')
       .mockReturnValueOnce('1.1.0')
       .mockReturnValueOnce('develop')
       .mockReturnValueOnce('single')
