@@ -8597,7 +8597,7 @@ const run = async () => {
 
     checkEnv(['GITHUB_TOKEN']);
 
-    versions.tagPrefix = tagPrefix;
+    versions.setTagPrefix(tagPrefix);
     const release = await versions.tagReleaseVersion();
 
     await createGitHubRelease(release);
@@ -50803,8 +50803,13 @@ const tagReleaseVersion = async () => {
   };
 };
 
+const setTagPrefix = (prefix) => {
+  changes.tagPrefix = prefix;
+};
+
 module.exports = {
   ...changes,
+  setTagPrefix,
   getBuildVersion,
   getLatestRelease,
   getLatestReleaseTag,
