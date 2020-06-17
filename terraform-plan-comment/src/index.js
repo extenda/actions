@@ -74,6 +74,7 @@ const action = async () => {
   const repository = core.getInput('repository') || process.env.GITHUB_REPOSITORY;
   const pullRequestNumber = core.getInput('pull-request-number');
   const footer = core.getInput('footer');
+  const ignoredResourcesRegexp = core.getInput('ignored-resources-regexp');
 
   if (repository !== process.env.GITHUB_REPOSITORY && !pullRequestNumber) {
     throw new Error('pull-request-number must be provided for remote repository.');
@@ -92,7 +93,7 @@ const action = async () => {
     }
   }
 
-  const comment = await generateOutputs(workingDirectory, planFile)
+  const comment = await generateOutputs(workingDirectory, planFile, ignoredResourcesRegexp)
     .then((outputs) => outputs.map(outputToMarkdown))
     .then((outputs) => createComment(outputs, workingDirectory, footer));
 
