@@ -108,13 +108,13 @@ const run = async () => {
 };
 ```
 
-#### `tagPrefix`
+#### `setTagPrefix(prefix)`
 
 The tag prefix used for releases.
 
 ```javascript
 const versions = require('../../utils/src/versions');
-versions.tagPrefix = 'custom-';
+versions.setTagPrefix('custom-');
 ```
 
 #### `async tagReleaseVersion()`

@@ -6095,7 +6095,7 @@ const action = async () => {
     const buildNumber = core.getInput('build-number');
     const versionSuffix = core.getInput('version-suffix');
 
-    versions.tagPrefix = tagPrefix;
+    versions.setTagPrefix(tagPrefix);
     const version = await versions.getBuildVersion(versionSuffix);
 
     let semver = '';
@@ -46397,8 +46397,13 @@ const tagReleaseVersion = async () => {
   };
 };
 
+const setTagPrefix = (prefix) => {
+  changes.tagPrefix = prefix;
+};
+
 module.exports = {
   ...changes,
+  setTagPrefix,
   getBuildVersion,
   getLatestRelease,
   getLatestReleaseTag,

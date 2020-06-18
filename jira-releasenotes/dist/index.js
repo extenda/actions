@@ -68892,8 +68892,13 @@ const tagReleaseVersion = async () => {
   };
 };
 
+const setTagPrefix = (prefix) => {
+  changes.tagPrefix = prefix;
+};
+
 module.exports = {
   ...changes,
+  setTagPrefix,
   getBuildVersion,
   getLatestRelease,
   getLatestReleaseTag,
