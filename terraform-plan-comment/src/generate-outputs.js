@@ -44,6 +44,11 @@ const filterUnchanged = (outputs) => outputs.filter(
     && !output.includes('No changes. Infrastructure is up-to-date.'),
 );
 
+const filterIgnored = (outputs, ignoredRegexp) => outputs.filter(
+  ({ output }) => !(ignoredRegexp && new RegExp(`# ${ignoredRegexp} `).test(output)
+    && new RegExp(' (0|1) to add, (0|1) to change, (0|1) to destroy').test(output)),
+);
+
 const sortModulePaths = (outputs) => outputs.sort((a, b) => a.module.localeCompare(b.module));
 
 const moduleName = (plan, workingDirectory) => {
@@ -66,7 +71,7 @@ const moduleName = (plan, workingDirectory) => {
   return path.basename(path.dirname(plan));
 };
 
-const generateOutputs = async (workingDirectory, planFile) => {
+const generateOutputs = async (workingDirectory, planFile, ignoredResourcesRegexp) => {
   const source = `${workingDirectory}/**/${planFile}`;
   const plans = fg.sync(source, { dot: true });
   core.info(`Found ${plans.length} plan(s) for glob ${source}`);
@@ -80,6 +85,7 @@ const generateOutputs = async (workingDirectory, planFile) => {
 
   return Promise.all(promises)
     .then(filterUnchanged)
+    .then((output) => filterIgnored(output, ignoredResourcesRegexp))
     .then(sortModulePaths)
     .then((changed) => {
       core.info(`Found ${changed.length} plan(s) with changes`);
