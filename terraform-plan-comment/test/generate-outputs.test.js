@@ -97,6 +97,25 @@ describe('Generate Terraform plan output', () => {
     ]);
   });
 
+  test('It will filter changing ignored objects', async () => {
+    mockFs(terragruntFs);
+    exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput(
+      '# module.module_a.resource.resource_a must be replaced\n'
+      + 'Module A Plan: 1 to add, 0 to change, 1 to destroy.\n',
+      opts,
+    )).mockImplementationOnce((bin, args, opts) => mockOutput(
+      '# module.module_b.resource.ignored_resource_b must be replaced\n'
+      + 'Module B Plan: 1 to add, 0 to change, 1 to destroy.\n',
+      opts,
+    ));
+    const outputs = await generateOutputs('/work', 'plan.out', 'module.module_b.resource.ignored_resource_b');
+    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(outputs).toHaveLength(1);
+    expect(outputs).toEqual([
+      { module: 'moduleA', output: '# module.module_a.resource.resource_a must be replaced\nModule A Plan: 1 to add, 0 to change, 1 to destroy.', status: 0 },
+    ]);
+  });
+
   test('It will swallow and report terraform error', async () => {
     mockFs({
       '/work/plan.out': 'bad-plan',

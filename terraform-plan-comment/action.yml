@@ -27,6 +27,9 @@ inputs:
   footer:
     description: Custom footer message to add after plan outputs. Can contain Markdown.
     required: false
+  ignored-resources-regexp:
+    description: Pattern of resource names for ignore in pull request comment if only those resources are planned to change.
+    required: false
 runs:
   using: node12
   main: dist/index.js
