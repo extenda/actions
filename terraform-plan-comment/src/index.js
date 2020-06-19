@@ -74,6 +74,7 @@ const action = async () => {
   const repository = core.getInput('repository') || process.env.GITHUB_REPOSITORY;
   const pullRequestNumber = core.getInput('pull-request-number');
   const footer = core.getInput('footer');
+  const maxThreads = core.getInput('max-terraform-processes');
   const ignoredResourcesRegexp = core.getInput('ignored-resources-regexp');
 
   if (repository !== process.env.GITHUB_REPOSITORY && !pullRequestNumber) {
@@ -93,8 +94,9 @@ const action = async () => {
     }
   }
 
-  const comment = await generateOutputs(workingDirectory, planFile, ignoredResourcesRegexp)
-    .then((outputs) => outputs.map(outputToMarkdown))
+  const comment = await generateOutputs(
+    workingDirectory, planFile, maxThreads, ignoredResourcesRegexp,
+  ).then((outputs) => outputs.map(outputToMarkdown))
     .then((outputs) => createComment(outputs, workingDirectory, footer));
 
   const client = new GitHub(githubToken);

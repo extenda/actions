@@ -2,6 +2,7 @@ const exec = require('@actions/exec');
 const core = require('@actions/core');
 const path = require('path');
 const fg = require('fast-glob');
+const pLimit = require('p-limit');
 
 const terraformShow = async (plan) => {
   let stdout = '';
@@ -71,16 +72,17 @@ const moduleName = (plan, workingDirectory) => {
   return path.basename(path.dirname(plan));
 };
 
-const generateOutputs = async (workingDirectory, planFile, ignoredResourcesRegexp) => {
+const generateOutputs = async (workingDirectory, planFile, maxThreads, ignoredResourcesRegexp) => {
   const source = `${workingDirectory}/**/${planFile}`;
   const plans = fg.sync(source, { dot: true });
   core.info(`Found ${plans.length} plan(s) for glob ${source}`);
   const promises = [];
+  const limit = pLimit(parseInt(maxThreads, 10) || 1);
   plans.forEach((plan) => {
-    promises.push(terraformShow(plan).then((output) => ({
+    promises.push(limit(() => terraformShow(plan).then((output) => ({
       module: moduleName(plan, workingDirectory),
       ...output,
-    })));
+    }))));
   });
 
   return Promise.all(promises)

@@ -27,6 +27,10 @@ inputs:
   footer:
     description: Custom footer message to add after plan outputs. Can contain Markdown.
     required: false
+  max-terraform-processes:
+    description: Maximum number of terraform processes running at the same time
+    required: false
+    default: 10
   ignored-resources-regexp:
     description: Pattern of resource names for ignore in pull request comment if only those resources are planned to change.
     required: false
