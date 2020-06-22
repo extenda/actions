@@ -580,7 +580,22 @@ exports.createDirentFromStats = createDirentFromStats;
 
 
 /***/ }),
-/* 22 */,
+/* 22 */
+/***/ (function(module) {
+
+"use strict";
+
+
+const pTry = (fn, ...arguments_) => new Promise(resolve => {
+	resolve(fn(...arguments_));
+});
+
+module.exports = pTry;
+// TODO: remove this in the next major version
+module.exports.default = pTry;
+
+
+/***/ }),
 /* 23 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -4262,6 +4277,7 @@ const action = async () => {
   const repository = core.getInput('repository') || process.env.GITHUB_REPOSITORY;
   const pullRequestNumber = core.getInput('pull-request-number');
   const footer = core.getInput('footer');
+  const maxThreads = core.getInput('max-terraform-processes');
   const ignoredResourcesRegexp = core.getInput('ignored-resources-regexp');
 
   if (repository !== process.env.GITHUB_REPOSITORY && !pullRequestNumber) {
@@ -4281,8 +4297,9 @@ const action = async () => {
     }
   }
 
-  const comment = await generateOutputs(workingDirectory, planFile, ignoredResourcesRegexp)
-    .then((outputs) => outputs.map(outputToMarkdown))
+  const comment = await generateOutputs(
+    workingDirectory, planFile, maxThreads, ignoredResourcesRegexp,
+  ).then((outputs) => outputs.map(outputToMarkdown))
     .then((outputs) => createComment(outputs, workingDirectory, footer));
 
   const client = new GitHub(githubToken);
@@ -10901,6 +10918,7 @@ const exec = __webpack_require__(73);
 const core = __webpack_require__(793);
 const path = __webpack_require__(622);
 const fg = __webpack_require__(180);
+const pLimit = __webpack_require__(351);
 
 const terraformShow = async (plan) => {
   let stdout = '';
@@ -10970,16 +10988,17 @@ const moduleName = (plan, workingDirectory) => {
   return path.basename(path.dirname(plan));
 };
 
-const generateOutputs = async (workingDirectory, planFile, ignoredResourcesRegexp) => {
+const generateOutputs = async (workingDirectory, planFile, maxThreads, ignoredResourcesRegexp) => {
   const source = `${workingDirectory}/**/${planFile}`;
   const plans = fg.sync(source, { dot: true });
   core.info(`Found ${plans.length} plan(s) for glob ${source}`);
   const promises = [];
+  const limit = pLimit(parseInt(maxThreads, 10) || 1);
   plans.forEach((plan) => {
-    promises.push(terraformShow(plan).then((output) => ({
+    promises.push(limit(() => terraformShow(plan).then((output) => ({
       module: moduleName(plan, workingDirectory),
       ...output,
-    })));
+    }))));
   });
 
   return Promise.all(promises)
@@ -18211,7 +18230,82 @@ function getPageLinks (link) {
 /***/ }),
 /* 349 */,
 /* 350 */,
-/* 351 */,
+/* 351 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const pTry = __webpack_require__(22);
+
+const pLimit = concurrency => {
+	if (!((Number.isInteger(concurrency) || concurrency === Infinity) && concurrency > 0)) {
+		return Promise.reject(new TypeError('Expected `concurrency` to be a number from 1 and up'));
+	}
+
+	const queue = [];
+	let activeCount = 0;
+
+	const next = () => {
+		activeCount--;
+
+		if (queue.length > 0) {
+			queue.shift()();
+		}
+	};
+
+	const run = async (fn, resolve, ...args) => {
+		activeCount++;
+
+		// TODO: Get rid of `pTry`. It's not needed anymore.
+		const result = pTry(fn, ...args);
+
+		resolve(result);
+
+		try {
+			await result;
+		} catch {}
+
+		next();
+	};
+
+	const enqueue = (fn, resolve, ...args) => {
+		queue.push(run.bind(null, fn, resolve, ...args));
+
+		(async () => {
+			// This function needs to wait until the next microtask before comparing
+			// `activeCount` to `concurrency`, because `activeCount` is updated asynchronously
+			// when the run function is dequeued and called. The comparison in the if-statement
+			// needs to happen asynchronously as well to get an up-to-date value for `activeCount`.
+			await Promise.resolve();
+
+			if (activeCount < concurrency && queue.length > 0) {
+				queue.shift()();
+			}
+		})();
+	};
+
+	const generator = (fn, ...args) => new Promise(resolve => enqueue(fn, resolve, ...args));
+	Object.defineProperties(generator, {
+		activeCount: {
+			get: () => activeCount
+		},
+		pendingCount: {
+			get: () => queue.length
+		},
+		clearQueue: {
+			value: () => {
+				queue.length = 0;
+			}
+		}
+	});
+
+	return generator;
+};
+
+module.exports = pLimit;
+
+
+/***/ }),
 /* 352 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 

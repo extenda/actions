@@ -8,7 +8,8 @@
     "@actions/core": "^1.2.0",
     "@actions/exec": "^1.0.4",
     "@actions/github": "^2.1.1",
-    "fast-glob": "^3.2.2"
+    "fast-glob": "^3.2.2",
+    "p-limit": "^3.0.1"
   },
   "devDependencies": {
     "mock-fs": "^4.12.0"

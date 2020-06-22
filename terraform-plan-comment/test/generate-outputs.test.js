@@ -108,7 +108,7 @@ describe('Generate Terraform plan output', () => {
       + 'Module B Plan: 1 to add, 0 to change, 1 to destroy.\n',
       opts,
     ));
-    const outputs = await generateOutputs('/work', 'plan.out', 'module.module_b.resource.ignored_resource_b');
+    const outputs = await generateOutputs('/work', 'plan.out', 1, 'module.module_b.resource.ignored_resource_b');
     expect(exec.exec).toHaveBeenCalledTimes(2);
     expect(outputs).toHaveLength(1);
     expect(outputs).toEqual([
