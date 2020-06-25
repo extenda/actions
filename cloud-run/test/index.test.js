@@ -17,7 +17,6 @@ describe('Cloud Run Action', () => {
     serviceDef.mockReturnValueOnce({});
     core.getInput.mockReturnValueOnce('service-account')
       .mockReturnValueOnce('cloud-run.yaml')
-      .mockReturnValueOnce('package istio.authz\ndefault allow = true')
       .mockReturnValueOnce('gcr.io/project/image:tag')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('dns')
@@ -25,12 +24,11 @@ describe('Cloud Run Action', () => {
     runDeploy.mockResolvedValueOnce({});
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(7);
+    expect(core.getInput).toHaveBeenCalledTimes(6);
     expect(runDeploy).toHaveBeenCalledWith(
       'service-account',
       {},
       'gcr.io/project/image:tag',
-      'package istio.authz\ndefault allow = true',
       false,
     );
   });
@@ -39,7 +37,6 @@ describe('Cloud Run Action', () => {
     serviceDef.mockReturnValueOnce({});
     core.getInput.mockReturnValueOnce('service-account')
       .mockReturnValueOnce('')
-      .mockReturnValueOnce('package istio.authz\ndefault allow = true')
       .mockReturnValueOnce('gcr.io/project/image:tag')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('dns')
@@ -48,12 +45,11 @@ describe('Cloud Run Action', () => {
 
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(7);
+    expect(core.getInput).toHaveBeenCalledTimes(6);
     expect(runDeploy).toHaveBeenCalledWith(
       'service-account',
       {},
       'gcr.io/project/image:tag',
-      'package istio.authz\ndefault allow = true',
       false,
     );
   });
@@ -62,7 +58,6 @@ describe('Cloud Run Action', () => {
     serviceDef.mockReturnValueOnce({});
     core.getInput.mockReturnValueOnce('service-account')
       .mockReturnValueOnce('')
-      .mockReturnValueOnce('package istio.authz\ndefault allow = true')
       .mockReturnValueOnce('gcr.io/project/image:tag')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('dns')
@@ -71,12 +66,11 @@ describe('Cloud Run Action', () => {
 
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(7);
+    expect(core.getInput).toHaveBeenCalledTimes(6);
     expect(runDeploy).toHaveBeenCalledWith(
       'service-account',
       {},
       'gcr.io/project/image:tag',
-      'package istio.authz\ndefault allow = true',
       true,
     );
   });

@@ -36,9 +36,9 @@ describe('Create namespace', () => {
     exec.exec.mockResolvedValueOnce(0)
       .mockImplementationOnce((bin, args, opts) => mockOutput('Error from server (NotFound): namespaces "testns" not found', opts))
       .mockResolvedValue(0);
-    await createNamespace('clan_project', true, clusterInfo, 'testns', 'policy.rego');
+    await createNamespace('clan_project', true, clusterInfo, 'testns');
 
-    expect(exec.exec).toHaveBeenCalledTimes(8);
+    expect(exec.exec).toHaveBeenCalledTimes(6);
     expect(exec.exec.mock.calls[1][1]).toEqual(['get', 'namespace', 'testns']);
     expect(exec.exec).toHaveBeenNthCalledWith(3, 'kubectl', ['create', 'namespace', 'testns']);
   });
@@ -47,7 +47,7 @@ describe('Create namespace', () => {
     exec.exec.mockResolvedValueOnce(0)
       .mockImplementationOnce((bin, args, opts) => mockOutput('Error from server (connection refused): could not establish connection', opts))
       .mockResolvedValue(0);
-    await expect(createNamespace('clan_project', true, clusterInfo, 'testns', 'policy.rego')).rejects.toEqual(new Error('Could not get namespace information! reason: exit code 1'));
+    await expect(createNamespace('clan_project', true, clusterInfo, 'testns')).rejects.toEqual(new Error('Could not get namespace information! reason: exit code 1'));
     expect(exec.exec).toHaveBeenCalledTimes(2);
     expect(exec.exec.mock.calls[1][1]).toEqual(['get', 'namespace', 'testns']);
   });
@@ -55,14 +55,14 @@ describe('Create namespace', () => {
   test('It reuses namespace if exists', async () => {
     exec.exec.mockResolvedValue(0);
 
-    await createNamespace('clan_project', true, clusterInfo, 'testns', 'policy.rego');
-    expect(exec.exec).toHaveBeenCalledTimes(6);
+    await createNamespace('clan_project', true, clusterInfo, 'testns');
+    expect(exec.exec).toHaveBeenCalledTimes(4);
     expect(exec.exec).not.toHaveBeenCalledWith('kubectl', ['create', 'namespace', 'testns']);
   });
 
   test('It enables Istio injection', async () => {
     exec.exec.mockResolvedValue(0);
-    await createNamespace('clan_project', true, clusterInfo, 'testns', 'policy.rego');
+    await createNamespace('clan_project', true, clusterInfo, 'testns');
     expect(exec.exec).toHaveBeenCalledWith(
       'kubectl',
       ['label', 'namespace', 'testns', 'opa-istio-injection=enabled', '--overwrite=true'],
@@ -75,20 +75,7 @@ describe('Create namespace', () => {
 
   test('It disables Istio injection', async () => {
     exec.exec.mockResolvedValue(0);
-    await createNamespace('clan_project', false, clusterInfo, 'testns', 'policy.rego');
-    expect(exec.exec).toHaveBeenCalledWith(
-      'kubectl',
-      ['label', 'namespace', 'testns', 'opa-istio-injection=disabled', '--overwrite=true'],
-    );
-    expect(exec.exec).toHaveBeenCalledWith(
-      'kubectl',
-      ['label', 'namespace', 'testns', 'istio-injection=disabled', '--overwrite=true'],
-    );
-  });
-
-  test('It disables opa injection without regoFile', async () => {
-    exec.exec.mockResolvedValue(0);
-    await createNamespace('clan_project', true, clusterInfo, 'testns', '');
+    await createNamespace('clan_project', false, clusterInfo, 'testns');
     expect(exec.exec).toHaveBeenCalledWith(
       'kubectl',
       ['label', 'namespace', 'testns', 'opa-istio-injection=disabled', '--overwrite=true'],
