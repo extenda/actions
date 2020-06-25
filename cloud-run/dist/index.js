@@ -14944,7 +14944,6 @@ function plural(ms, msAbs, n, name) {
 const core = __webpack_require__(793);
 const exec = __webpack_require__(266);
 const authenticateKubeCtl = __webpack_require__(731);
-const { setOpaConfigurations } = __webpack_require__(758);
 const { setOpaInjectionLabels } = __webpack_require__(667);
 
 const getNamespace = async (namespace) => {
@@ -21513,12 +21512,7 @@ exports.default = ParseContext;
 /* 755 */,
 /* 756 */,
 /* 757 */,
-/* 758 */
-/***/ (function() {
-
-
-
-/***/ }),
+/* 758 */,
 /* 759 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 

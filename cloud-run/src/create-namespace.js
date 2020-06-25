@@ -1,7 +1,6 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
 const authenticateKubeCtl = require('./kubectl-auth');
-const { setOpaConfigurations } = require('./opa-configuration');
 const { setOpaInjectionLabels } = require('./set-namespace-label');
 
 const getNamespace = async (namespace) => {
