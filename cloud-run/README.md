@@ -44,8 +44,8 @@ properties are required and not.
 |:---------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------|:--------------|
 | `name`                     | The service name.                                                                                                                                                 | Yes      |               |
 | `memory`                   | Set a memory limit, for example `256Mi`, `512Mi` or `1Gi`.                                                                                                        | Yes      |               |
-| `concurrency`              | The max concurrent requests per container. Will scale with cpu if left blank (`250m` sets 20 in concurrency).                                        | No       | `10-100`          |
 | `cpu`                      | The CPU limit for the service. For managed Cloud Run, use core count `1` or `2`. For Cloud Run on GKE, use millicpu (e.g., `200m`).                               | Yes      |               |
+| `concurrency`              | The max concurrent requests per container. Will scale with cpu if left blank (`250m` sets 20 in concurrency).                                        | No       | `10-100`          |
 | `max-instances`            | The maximum number of container instances to run. Set to `-1` to use the platform default (recommended).                                                          | No       | `-1`          |
 | `environment`<top>\*</top> | A map of environment variables. The values can be Secret Manager URLs on the form `sm://*/my-secret` where `*` will be replaced by the project ID at deploy time. | No       | -             |
 
