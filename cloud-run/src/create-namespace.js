@@ -1,7 +1,6 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
 const authenticateKubeCtl = require('./kubectl-auth');
-const { setOpaConfigurations } = require('./opa-configuration');
 const { setOpaInjectionLabels } = require('./set-namespace-label');
 
 const getNamespace = async (namespace) => {
@@ -30,8 +29,7 @@ const getNamespace = async (namespace) => {
 const createNamespace = async (clanId,
   opaEnabled,
   { project, cluster, clusterLocation },
-  namespace,
-  regoFile) => {
+  namespace) => {
   // Authenticate kubectl
   await authenticateKubeCtl({ cluster, clusterLocation, project });
 
@@ -48,12 +46,7 @@ const createNamespace = async (clanId,
     ]);
   }
 
-  await setOpaInjectionLabels(namespace, !regoFile ? false : opaEnabled);
-
-  if (opaEnabled && regoFile) {
-    core.info('setting up OPA configurations and rego policy!');
-    await setOpaConfigurations(namespace, regoFile);
-  }
+  await setOpaInjectionLabels(namespace, opaEnabled);
 };
 
 module.exports = createNamespace;

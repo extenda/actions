@@ -80,7 +80,7 @@ const managedArguments = async (args, service, projectId) => {
   }
 };
 
-const gkeArguments = async (args, service, projectId, regoFile) => {
+const gkeArguments = async (args, service, projectId) => {
   const {
     name,
     cpu,
@@ -111,14 +111,14 @@ const gkeArguments = async (args, service, projectId, regoFile) => {
   );
 
   if (namespace !== 'default') {
-    await createNamespace(projectId, opaEnabled, cluster, namespace, regoFile);
+    await createNamespace(projectId, opaEnabled, cluster, namespace);
   }
   args.push(`--namespace=${namespace}`);
 
   return cluster;
 };
 
-const runDeploy = async (serviceAccountKey, service, image, regoFile, verbose = false) => {
+const runDeploy = async (serviceAccountKey, service, image, verbose = false) => {
   // Authenticate gcloud with our service-account
   const projectId = await gcloudAuth(serviceAccountKey);
 
@@ -150,7 +150,7 @@ const runDeploy = async (serviceAccountKey, service, image, regoFile, verbose = 
   }
 
   if (service.platform.gke) {
-    cluster = await gkeArguments(args, service, projectId, regoFile);
+    cluster = await gkeArguments(args, service, projectId);
   }
 
   const gcloudExitCode = await exec.exec('gcloud', args);
