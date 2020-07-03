@@ -11,8 +11,12 @@ inputs:
   message:
     description: A commit message to lint
     required: false
+  relaxed:
+    description: Flag to indicate if commit validation is relaxed or not.
+    required: false
+    default: 'false'
 runs:
   using: docker
   image: docker://extenda/commitlint
   entrypoint: /usr/local/bin/action
-  args: ['-c', '${{ inputs.commit-sha }}', '-m', '${{ inputs.message }}']
+  args: ['-c', '${{ inputs.commit-sha }}', '-m', '${{ inputs.message }}', '-x', '${{ inputs.relaxed }}']
