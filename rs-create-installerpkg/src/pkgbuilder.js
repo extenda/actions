@@ -17,6 +17,7 @@ const packageBuilderCommand = async (builder, args) => {
     sourcePaths,
     sourceFilePaths,
     packageVersion,
+    searchFilters,
   } = args;
 
   const builderArgs = [];
@@ -48,6 +49,10 @@ const packageBuilderCommand = async (builder, args) => {
         builderArgs.push('-sfp', group);
       });
     }
+  }
+
+  if (searchFilters) {
+    builderArgs.push('-sf', searchFilters);
   }
 
   return exec.exec(
