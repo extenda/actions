@@ -31,6 +31,10 @@ inputs:
     description: Path to source directories to include in the installer package.
     required: false
     default: null
+  search-filter:
+    description: The search filter that applies for all source-paths. This can be multiple criteria, eg. *.dll;*.exe.
+    required: false
+    default: *
   tool-version:
     description: Version string for the version of RS Installer Package builder to use.
     required: true

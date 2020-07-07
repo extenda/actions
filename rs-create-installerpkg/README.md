@@ -47,6 +47,8 @@ jobs:
           working-dir: .
           output-dir: installpackages
           source-paths: Project\bin\publish\bin
+          source-filepaths: Project\SingleFile.txt
+          search-filter: *.dll;*.exe
           package-version: ${{ steps.semver.outputs.version }}
           publish-package: true
           publish-root-url: https://repo.extendaretail.com/repository/raw-hosted/RS/
