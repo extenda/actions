@@ -2258,7 +2258,7 @@ const action = async () => {
     const sourceFilePaths = core.getInput('source-filePaths', { required: false });
     const sourcePaths = core.getInput('source-paths', { required: false });
     const workingDir = core.getInput('working-dir', { required: true });
-    const searchFilter = core.getInput('search-filter', { required: true });
+    const searchFilter = core.getInput('search-filter', { required: false });
 
     await buildPackage({
       binaryVersion,
