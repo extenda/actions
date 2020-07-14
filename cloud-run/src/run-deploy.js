@@ -119,7 +119,8 @@ const gkeArguments = async (args, service, projectId) => {
   return cluster;
 };
 
-const runDeploy = async (serviceAccountKey, service, image, verbose = false) => {
+const runDeploy = async (
+  serviceAccountKey, service, image, disableHttp2 = false, verbose = false) => {
   // Authenticate gcloud with our service-account
   const projectId = await gcloudAuth(serviceAccountKey);
 
@@ -145,6 +146,10 @@ const runDeploy = async (serviceAccountKey, service, image, verbose = false) => 
     `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
     `--labels=service_project_id=${projectId},service_project=${project},service_env=${env}`,
   ];
+
+  if (!disableHttp2) {
+    args.push('--use-http2');
+  }
 
   if (verbose) {
     args.push('--verbosity=debug');
