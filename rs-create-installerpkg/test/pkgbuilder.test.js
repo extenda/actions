@@ -102,6 +102,47 @@ describe('RS installer package tests', () => {
       ]);
   });
 
+  test('packageBuilderCommand() sets specified searchFilter', async () => {
+    mockFs({
+      output: {},
+    }, {});
+    const args = {
+      builderType: 'single',
+      binaryVersion: '1.1.0',
+      packageName: 'Test_PkgName',
+      workingDir: 'workdir',
+      outputDir: 'output',
+      sourcePaths: 'testSourcePaths',
+      searchFilter: 'testFilter',
+      sourceFilePaths: '',
+      packageVersion: '1.0.1-testversion',
+      publishUrl: 'https://repo.extendaretail.com/repository/raw-hosted/RS/',
+      branch: 'develop',
+      publishPackage: true,
+    };
+
+    await packageBuilderCommand(loadTool, args);
+
+    expect(exec.exec)
+      .toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1])
+      .toEqual([
+        'single',
+        '-pn',
+        'Test_PkgName',
+        '-wd',
+        'workdir',
+        '-od',
+        'output',
+        '-pv',
+        '1.0.1-testversion',
+        '-sp',
+        'testSourcePaths',
+        '-sf',
+        'testFilter',
+      ]);
+  });
+
   test('packageBuilderCommand() does not set sourcePaths if none specified', async () => {
     mockFs({
       output: {},
