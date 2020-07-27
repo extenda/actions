@@ -22565,17 +22565,21 @@ const getTribeProject = async (projectId) => {
   const projectChunks = projectId.split('-');
   const suffix = projectChunks.includes('staging') ? '-staging' : '-prod';
   core.debug(`Search for GCP project with name suffix ${suffix}`);
-  const tribeProject = await gcloud([
+  const output = await gcloud([
     '--quiet',
     'projects',
     'list',
     `--filter=NAME~${suffix}$ AND PROJECT_ID!=${projectId}`,
     '--format=value(PROJECT_ID)',
   ]);
-
-  if (!tribeProject) {
+  const projects = output.split('\n').filter((s) => s && !s.startsWith('hiidentity-'));
+  if (projects.length === 0) {
     throw new Error(`Could not find GKE project with suffix ${suffix}, or missing permissions to list it.`);
   }
+  if (projects.length > 1) {
+    throw new Error(`There is more than one project with suffix ${suffix}, can't determine which one is tribe project`);
+  }
+  const tribeProject = projects[0];
   core.info(`Found project ${tribeProject}`);
   return tribeProject;
 };
