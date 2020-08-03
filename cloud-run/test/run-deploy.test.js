@@ -55,7 +55,47 @@ describe('Run Deploy', () => {
       '--concurrency=80',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-project',
+      '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
       '--service-account=cloudrun-runtime@test-project.iam.gserviceaccount.com',
+      '--cpu=1',
+      '--platform=managed',
+      '--region=eu-west1',
+      '--allow-unauthenticated',
+    ]);
+  });
+
+  test('It parse projectId and set labels', async () => {
+    exec.exec.mockResolvedValueOnce(0);
+    setupGcloud.mockResolvedValueOnce('test-project-staging-ab12');
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      cpu: 1,
+      platform: {
+        managed: {
+          region: 'eu-west1',
+          'allow-unauthenticated': true,
+        },
+      },
+    };
+    const returnValue = await runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-project-staging-ab12/my-service:tag',
+    );
+    expect(returnValue.gcloudExitCode).toEqual(0);
+    expect(setupGcloud).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledWith('gcloud', [
+      'run', 'deploy', 'my-service',
+      '--image=gcr.io/test-project-staging-ab12/my-service:tag',
+      '--project=test-project-staging-ab12',
+      '--memory=256Mi',
+      '--concurrency=80',
+      '--max-instances=default',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-project-staging-ab12',
+      '--labels=service_project_id=test-project-staging-ab12,service_project=test-project,service_env=staging',
+      '--service-account=cloudrun-runtime@test-project-staging-ab12.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
       '--region=eu-west1',
@@ -121,6 +161,7 @@ describe('Run Deploy', () => {
       '--concurrency=80',
       '--max-instances=default',
       '--set-env-vars=KEY1=value,KEY2=sm://test-project/my-secret,SERVICE_PROJECT_ID=test-project',
+      '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
       '--service-account=cloudrun-runtime@test-project.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
@@ -241,6 +282,7 @@ describe('Run Deploy', () => {
       '--concurrency=32',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-project',
+      '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
       '--cpu=400m',
       '--min-instances=default',
       '--platform=gke',
@@ -287,6 +329,7 @@ describe('Run Deploy', () => {
       '--concurrency=10',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-project',
+      '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
       '--cpu=100m',
       '--min-instances=default',
       '--platform=gke',
@@ -338,6 +381,7 @@ describe('Run Deploy', () => {
       '--concurrency=50',
       '--max-instances=100',
       '--set-env-vars=SERVICE_PROJECT_ID=test-project',
+      '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
       '--cpu=400m',
       '--min-instances=1',
       '--platform=gke',
@@ -431,6 +475,7 @@ describe('Run Deploy', () => {
       '--concurrency=19',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-project',
+      '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
       '--cpu=233m',
       '--min-instances=default',
       '--platform=gke',

@@ -3164,7 +3164,23 @@ module.exports = InterceptorManager;
 /* 97 */,
 /* 98 */,
 /* 99 */,
-/* 100 */,
+/* 100 */
+/***/ (function(module) {
+
+
+const projectInfo = (projectId) => {
+  const parsed = projectId.split(/^(.+)-(prod|staging)(-.*)?$/).filter(Boolean);
+  return {
+    project: parsed[0],
+    env: parsed[1],
+    suffix: parsed[2],
+  };
+};
+
+module.exports = projectInfo;
+
+
+/***/ }),
 /* 101 */,
 /* 102 */,
 /* 103 */,
@@ -5365,6 +5381,7 @@ const getRuntimeAccount = __webpack_require__(838);
 const createEnvironmentArgs = __webpack_require__(471);
 const getClusterInfo = __webpack_require__(776);
 const createNamespace = __webpack_require__(530);
+const projectInfo = __webpack_require__(100);
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -5484,6 +5501,11 @@ const runDeploy = async (serviceAccountKey, service, image, verbose = false) => 
   const projectId = await gcloudAuth(serviceAccountKey);
 
   const {
+    project,
+    env,
+  } = projectInfo(projectId);
+
+  const {
     name,
     memory,
     concurrency = setDefaultConcurrency(service.cpu),
@@ -5498,6 +5520,7 @@ const runDeploy = async (serviceAccountKey, service, image, verbose = false) => 
     `--concurrency=${concurrency}`,
     `--max-instances=${numericOrDefault(maxInstances)}`,
     `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
+    `--labels=service_project_id=${projectId},service_project=${project},service_env=${env}`,
   ];
 
   if (verbose) {
