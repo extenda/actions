@@ -10,10 +10,11 @@ const action = async () => {
   const image = core.getInput('image', { required: true });
   const domainBindingsEnv = core.getInput('domain-mappings-env') || '';
   const dnsProjectLabel = core.getInput('dns-project-label') || 'dns';
+  const disableHttp2 = (core.getInput('disable-http2') || 'false');
   const verbose = (core.getInput('verbose') || 'false');
 
   const service = loadServiceDefinition(serviceFile);
-  await runDeploy(serviceAccountKey, service, image, verbose === 'true')
+  await runDeploy(serviceAccountKey, service, image, disableHttp2 === 'true', verbose === 'true')
     .then(({ cluster }) => configureDomains(service, cluster, domainBindingsEnv, dnsProjectLabel));
 };
 
