@@ -119,8 +119,7 @@ const gkeArguments = async (args, service, projectId) => {
   return cluster;
 };
 
-const runDeploy = async (
-  serviceAccountKey, service, image, enableHttp2 = false, verbose = false) => {
+const runDeploy = async (serviceAccountKey, service, image, verbose = false) => {
   // Authenticate gcloud with our service-account
   const projectId = await gcloudAuth(serviceAccountKey);
 
@@ -135,6 +134,7 @@ const runDeploy = async (
     concurrency = setDefaultConcurrency(service.cpu),
     'max-instances': maxInstances = -1,
     environment = [],
+    'enable-http2': enableHttp2 = false,
   } = service;
 
   const args = ['run', 'deploy', name,

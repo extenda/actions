@@ -12636,6 +12636,10 @@ module.exports = {
       ],
       default: '200m',
     },
+    'enable-http2': {
+      type: 'boolean',
+      default: false,
+    },
     name: {
       type: 'string',
     },

@@ -118,13 +118,12 @@ describe('Run Deploy', () => {
           'allow-unauthenticated': false,
         },
       },
+      'enable-http2': true,
     };
     const returnValue = await runDeploy(
       serviceAccountKey,
       service,
       'gcr.io/test-project/my-service:tag',
-      true,
-      false,
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--use-http2']));
@@ -148,7 +147,7 @@ describe('Run Deploy', () => {
       serviceAccountKey,
       service,
       'gcr.io/test-project/my-service:tag',
-      false,
+      'policy.rego',
       true,
     );
     expect(returnValue.gcloudExitCode).toEqual(0);

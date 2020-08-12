@@ -2924,11 +2924,10 @@ const action = async () => {
   const image = core.getInput('image', { required: true });
   const domainBindingsEnv = core.getInput('domain-mappings-env') || '';
   const dnsProjectLabel = core.getInput('dns-project-label') || 'dns';
-  const enableHttp2 = (core.getInput('enable-http2') || 'false');
   const verbose = (core.getInput('verbose') || 'false');
 
   const service = loadServiceDefinition(serviceFile);
-  await runDeploy(serviceAccountKey, service, image, enableHttp2 === 'true', verbose === 'true')
+  await runDeploy(serviceAccountKey, service, image, verbose === 'true')
     .then(({ cluster }) => configureDomains(service, cluster, domainBindingsEnv, dnsProjectLabel));
 };
 
@@ -5497,8 +5496,7 @@ const gkeArguments = async (args, service, projectId) => {
   return cluster;
 };
 
-const runDeploy = async (
-  serviceAccountKey, service, image, enableHttp2 = false, verbose = false) => {
+const runDeploy = async (serviceAccountKey, service, image, verbose = false) => {
   // Authenticate gcloud with our service-account
   const projectId = await gcloudAuth(serviceAccountKey);
 
@@ -5513,6 +5511,7 @@ const runDeploy = async (
     concurrency = setDefaultConcurrency(service.cpu),
     'max-instances': maxInstances = -1,
     environment = [],
+    'enable-http2': enableHttp2 = false,
   } = service;
 
   const args = ['run', 'deploy', name,
@@ -9228,6 +9227,10 @@ module.exports = {
         },
       ],
       default: '200m',
+    },
+    'enable-http2': {
+      type: 'boolean',
+      default: false,
     },
     name: {
       type: 'string',
