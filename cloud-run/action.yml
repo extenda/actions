@@ -26,16 +26,11 @@ inputs:
       If set to 'none', DNS records will not be updated.
     required: false
     default: dns
-  enable-http2:
-    description: |
-      Flag to enable HTTP/2. Application must support h2c to work correctly with HTTP/2
-    required: false
-    default: 'false'
   disable-http2:
     description: |
-      Flag for disabling HTTP/2. Deprecated, use enable-http2 flag instead
+      Flag to disable HTTP/2 for legacy applications
     required: false
-    default: 'true'
+    default: 'false'
   verbose:
     description: |
       Flag to enable verbose debug logging on gcloud.

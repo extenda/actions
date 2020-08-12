@@ -56,7 +56,7 @@ describe('Run Deploy', () => {
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-project',
       '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
-      '--no-use-http2',
+      '--use-http2',
       '--service-account=cloudrun-runtime@test-project.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
@@ -96,7 +96,7 @@ describe('Run Deploy', () => {
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-project-staging-ab12',
       '--labels=service_project_id=test-project-staging-ab12,service_project=test-project,service_env=staging',
-      '--no-use-http2',
+      '--use-http2',
       '--service-account=cloudrun-runtime@test-project-staging-ab12.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
@@ -105,7 +105,7 @@ describe('Run Deploy', () => {
     ]);
   });
 
-  test('It can deploy with enabled http/2', async () => {
+  test('It can deploy with disabled http/2', async () => {
     exec.exec.mockResolvedValueOnce(0);
     setupGcloud.mockResolvedValueOnce('test-project');
     const service = {
@@ -127,7 +127,7 @@ describe('Run Deploy', () => {
       false,
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
-    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--use-http2']));
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--no-use-http2']));
   });
 
   test('It can deploy with verbose logging', async () => {
@@ -189,7 +189,7 @@ describe('Run Deploy', () => {
       '--max-instances=default',
       '--set-env-vars=KEY1=value,KEY2=sm://test-project/my-secret,SERVICE_PROJECT_ID=test-project',
       '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
-      '--no-use-http2',
+      '--use-http2',
       '--service-account=cloudrun-runtime@test-project.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
@@ -311,7 +311,7 @@ describe('Run Deploy', () => {
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-project',
       '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
-      '--no-use-http2',
+      '--use-http2',
       '--cpu=400m',
       '--min-instances=default',
       '--platform=gke',
@@ -359,7 +359,7 @@ describe('Run Deploy', () => {
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-project',
       '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
-      '--no-use-http2',
+      '--use-http2',
       '--cpu=100m',
       '--min-instances=default',
       '--platform=gke',
@@ -412,7 +412,7 @@ describe('Run Deploy', () => {
       '--max-instances=100',
       '--set-env-vars=SERVICE_PROJECT_ID=test-project',
       '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
-      '--no-use-http2',
+      '--use-http2',
       '--cpu=400m',
       '--min-instances=1',
       '--platform=gke',
@@ -507,7 +507,7 @@ describe('Run Deploy', () => {
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-project',
       '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
-      '--no-use-http2',
+      '--use-http2',
       '--cpu=233m',
       '--min-instances=default',
       '--platform=gke',

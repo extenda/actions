@@ -56,7 +56,7 @@ describe('Cloud Run Action', () => {
     );
   });
 
-  test('It can run with enable-http2 flag set', async () => {
+  test('It can run with disable-http2 flag set', async () => {
     serviceDef.mockReturnValueOnce({});
     core.getInput.mockReturnValueOnce('service-account')
       .mockReturnValueOnce('')

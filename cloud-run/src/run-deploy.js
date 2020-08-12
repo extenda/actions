@@ -120,7 +120,7 @@ const gkeArguments = async (args, service, projectId) => {
 };
 
 const runDeploy = async (
-  serviceAccountKey, service, image, enableHttp2 = false, verbose = false) => {
+  serviceAccountKey, service, image, disableHttp2 = false, verbose = false) => {
   // Authenticate gcloud with our service-account
   const projectId = await gcloudAuth(serviceAccountKey);
 
@@ -147,10 +147,10 @@ const runDeploy = async (
     `--labels=service_project_id=${projectId},service_project=${project},service_env=${env}`,
   ];
 
-  if (enableHttp2) {
-    args.push('--use-http2');
-  } else {
+  if (disableHttp2) {
     args.push('--no-use-http2');
+  } else {
+    args.push('--use-http2');
   }
 
   if (verbose) {
