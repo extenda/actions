@@ -147,9 +147,7 @@ const runDeploy = async (
     `--labels=service_project_id=${projectId},service_project=${project},service_env=${env}`,
   ];
 
-  if (disableHttp2) {
-    args.push('--no-use-http2');
-  } else {
+  if (!disableHttp2) {
     args.push('--use-http2');
   }
 
