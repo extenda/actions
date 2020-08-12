@@ -26,11 +26,6 @@ inputs:
       If set to 'none', DNS records will not be updated.
     required: false
     default: dns
-  disable-http2:
-    description: |
-      Flag to disable HTTP/2 for legacy applications
-    required: false
-    default: 'false'
   verbose:
     description: |
       Flag to enable verbose debug logging on gcloud.
