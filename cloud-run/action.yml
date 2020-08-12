@@ -26,6 +26,11 @@ inputs:
       If set to 'none', DNS records will not be updated.
     required: false
     default: dns
+  disable-http2:
+    description: |
+      Flag for disabling HTTP/2. Deprecated, use key in cloud-run.yaml instead
+    required: false
+    default: 'true'
   verbose:
     description: |
       Flag to enable verbose debug logging on gcloud.

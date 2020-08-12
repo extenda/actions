@@ -48,6 +48,7 @@ properties are required and not.
 | `concurrency`              | The max concurrent requests per container. Will scale with cpu if left blank (`250m` sets 20 in concurrency).                                        | No       | `10-100`          |
 | `max-instances`            | The maximum number of container instances to run. Set to `-1` to use the platform default (recommended).                                                          | No       | `-1`          |
 | `environment`<top>\*</top> | A map of environment variables. The values can be Secret Manager URLs on the form `sm://*/my-secret` where `*` will be replaced by the project ID at deploy time. | No       | -             |
+| `enable-http2`             | Flag to enable HTTP/2. Application must support h2c to work correctly with HTTP/2                                                                                 | No       | `false`       |
 
 <top>\*</top> Once set, this value can only be unset by passing `[]` (empty array) as value.
 

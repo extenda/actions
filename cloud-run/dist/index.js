@@ -5511,6 +5511,7 @@ const runDeploy = async (serviceAccountKey, service, image, verbose = false) => 
     concurrency = setDefaultConcurrency(service.cpu),
     'max-instances': maxInstances = -1,
     environment = [],
+    'enable-http2': enableHttp2 = false,
   } = service;
 
   const args = ['run', 'deploy', name,
@@ -5522,6 +5523,12 @@ const runDeploy = async (serviceAccountKey, service, image, verbose = false) => 
     `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
     `--labels=service_project_id=${projectId},service_project=${project},service_env=${env}`,
   ];
+
+  if (enableHttp2) {
+    args.push('--use-http2');
+  } else {
+    args.push('--no-use-http2');
+  }
 
   if (verbose) {
     args.push('--verbosity=debug');
@@ -9220,6 +9227,10 @@ module.exports = {
         },
       ],
       default: '200m',
+    },
+    'enable-http2': {
+      type: 'boolean',
+      default: false,
     },
     name: {
       type: 'string',
