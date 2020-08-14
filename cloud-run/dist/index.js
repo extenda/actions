@@ -3164,7 +3164,23 @@ module.exports = InterceptorManager;
 /* 97 */,
 /* 98 */,
 /* 99 */,
-/* 100 */,
+/* 100 */
+/***/ (function(module) {
+
+
+const projectInfo = (projectId) => {
+  const parsed = projectId.split(/^(.+)-(prod|staging)(-.*)?$/).filter(Boolean);
+  return {
+    project: parsed[0],
+    env: parsed[1],
+    suffix: parsed[2],
+  };
+};
+
+module.exports = projectInfo;
+
+
+/***/ }),
 /* 101 */,
 /* 102 */,
 /* 103 */,
@@ -5365,6 +5381,7 @@ const getRuntimeAccount = __webpack_require__(838);
 const createEnvironmentArgs = __webpack_require__(471);
 const getClusterInfo = __webpack_require__(776);
 const createNamespace = __webpack_require__(530);
+const projectInfo = __webpack_require__(100);
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -5484,11 +5501,17 @@ const runDeploy = async (serviceAccountKey, service, image, verbose = false) => 
   const projectId = await gcloudAuth(serviceAccountKey);
 
   const {
+    project,
+    env,
+  } = projectInfo(projectId);
+
+  const {
     name,
     memory,
     concurrency = setDefaultConcurrency(service.cpu),
     'max-instances': maxInstances = -1,
     environment = [],
+    'enable-http2': enableHttp2 = false,
   } = service;
 
   const args = ['run', 'deploy', name,
@@ -5498,7 +5521,14 @@ const runDeploy = async (serviceAccountKey, service, image, verbose = false) => 
     `--concurrency=${concurrency}`,
     `--max-instances=${numericOrDefault(maxInstances)}`,
     `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
+    `--labels=service_project_id=${projectId},service_project=${project},service_env=${env}`,
   ];
+
+  if (enableHttp2) {
+    args.push('--use-http2');
+  } else {
+    args.push('--no-use-http2');
+  }
 
   if (verbose) {
     args.push('--verbosity=debug');
@@ -9197,6 +9227,10 @@ module.exports = {
         },
       ],
       default: '200m',
+    },
+    'enable-http2': {
+      type: 'boolean',
+      default: false,
     },
     name: {
       type: 'string',
@@ -22565,17 +22599,21 @@ const getTribeProject = async (projectId) => {
   const projectChunks = projectId.split('-');
   const suffix = projectChunks.includes('staging') ? '-staging' : '-prod';
   core.debug(`Search for GCP project with name suffix ${suffix}`);
-  const tribeProject = await gcloud([
+  const output = await gcloud([
     '--quiet',
     'projects',
     'list',
     `--filter=NAME~${suffix}$ AND PROJECT_ID!=${projectId}`,
     '--format=value(PROJECT_ID)',
   ]);
-
-  if (!tribeProject) {
+  const projects = output.split('\n').filter((s) => s && !s.startsWith('hiidentity-'));
+  if (projects.length === 0) {
     throw new Error(`Could not find GKE project with suffix ${suffix}, or missing permissions to list it.`);
   }
+  if (projects.length > 1) {
+    throw new Error(`There is more than one project with suffix ${suffix}, can't determine which one is tribe project`);
+  }
+  const tribeProject = projects[0];
   core.info(`Found project ${tribeProject}`);
   return tribeProject;
 };

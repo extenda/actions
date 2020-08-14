@@ -4,6 +4,7 @@ const getRuntimeAccount = require('./runtime-account');
 const createEnvironmentArgs = require('./environment-args');
 const getClusterInfo = require('./cluster-info');
 const createNamespace = require('./create-namespace');
+const projectInfo = require('./project-info');
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -123,11 +124,17 @@ const runDeploy = async (serviceAccountKey, service, image, verbose = false) => 
   const projectId = await gcloudAuth(serviceAccountKey);
 
   const {
+    project,
+    env,
+  } = projectInfo(projectId);
+
+  const {
     name,
     memory,
     concurrency = setDefaultConcurrency(service.cpu),
     'max-instances': maxInstances = -1,
     environment = [],
+    'enable-http2': enableHttp2 = false,
   } = service;
 
   const args = ['run', 'deploy', name,
@@ -137,7 +144,14 @@ const runDeploy = async (serviceAccountKey, service, image, verbose = false) => 
     `--concurrency=${concurrency}`,
     `--max-instances=${numericOrDefault(maxInstances)}`,
     `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
+    `--labels=service_project_id=${projectId},service_project=${project},service_env=${env}`,
   ];
+
+  if (enableHttp2) {
+    args.push('--use-http2');
+  } else {
+    args.push('--no-use-http2');
+  }
 
   if (verbose) {
     args.push('--verbosity=debug');

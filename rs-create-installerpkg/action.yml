@@ -20,6 +20,10 @@ inputs:
   package-version:
       description: Package version suffix apended to the package name before .pkg.zip.
       required: true
+  publish-package:
+    description: If set to true - publish the installer package.
+    required: false
+    default: false
   publish-root-url:
       description: The root url to where to publish the installer package. The url must end with backslash.
       required: false
