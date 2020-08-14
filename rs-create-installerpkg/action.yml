@@ -36,9 +36,9 @@ inputs:
     required: false
     default: null
   search-filter:
-    description: Search pattern to filter files under source-path.
+    description: The search filter that applies for all source-paths. This can be multiple criteria, eg. *.dll;*.exe.
     required: false
-    default: null
+    default: *
   tool-version:
     description: Version string for the version of RS Installer Package builder to use.
     required: true
