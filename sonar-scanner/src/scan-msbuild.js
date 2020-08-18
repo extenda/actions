@@ -14,7 +14,7 @@ const scanner = path.join(os.homedir(), '.dotnet', 'tools', 'dotnet-sonarscanner
 // Any 11+ openJDK will work for us.
 const findJava11 = async () => {
   try {
-    return fs.readdirSync('/usr/lib/jvm')
+    return fs.readdirSync(process.env.JDK_BASEDIR || '/usr/lib/jvm')
       .find((f) => f.startsWith('adoptopenjdk-1'));
   } catch (err) {
     core.error('/usr/lib/jvm not found');

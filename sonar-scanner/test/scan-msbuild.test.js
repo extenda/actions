@@ -1,6 +1,7 @@
 const exec = require('@actions/exec');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
 jest.mock('@actions/exec');
 
@@ -12,22 +13,20 @@ const { scanMsBuild, markerFile } = require('../src/scan-msbuild');
 const orgEnv = process.env;
 
 describe('Scan MSBuild', () => {
-  beforeAll(() => {
+  beforeEach(() => {
     process.env = { ...orgEnv };
+    delete process.env.JAVA_HOME;
     process.env.GITHUB_REF = 'master';
     process.env.GITHUB_REPOSITORY = 'extenda/actions';
     process.env.SONAR_TOKEN = 'x';
     process.env.GITHUB_EVENT_PATH = path.join(__dirname, 'push-event.json');
   });
 
-  afterAll(() => {
-    process.env = orgEnv;
-  });
-
   afterEach(() => {
     if (fs.existsSync(markerFile)) {
       fs.unlinkSync(markerFile);
     }
+    process.env = orgEnv;
     jest.resetAllMocks();
   });
 
@@ -52,4 +51,35 @@ describe('Scan MSBuild', () => {
     expect(exec.exec.mock.calls[0][0]).toContain('dotnet-sonarscanner');
     expect(exec.exec.mock.calls[0][1]).toContain('end');
   });
+
+  test('It will skip JAVA_HOME on Windows', async () => {
+    // Create marker file
+    fs.closeSync(fs.openSync(markerFile, 'w'));
+
+    const platformSpy = jest.spyOn(os, 'platform').mockReturnValue('win32');
+    await scanMsBuild('https://sonar.extenda.io', 'master');
+    expect(Object.keys(exec.exec.mock.calls[0][2].env)).not.toContain('JAVA_HOME');
+    platformSpy.mockRestore();
+  });
+
+  test('It can handle missing JDK', async () => {
+    // Create marker fil
+    fs.closeSync(fs.openSync(markerFile, 'w'));
+    process.env.JDK_BASEDIR = '/tmp/missing';
+
+    const platformSpy = jest.spyOn(os, 'platform').mockReturnValue('linux');
+    await scanMsBuild('https://sonar.extenda.io', 'master');
+    expect(Object.keys(exec.exec.mock.calls[0][2].env)).not.toContain('JAVA_HOME');
+    platformSpy.mockRestore();
+  });
+
+  if (fs.existsSync('/usr/lib/jvm')) {
+    test('It can set JAVA_HOME', async () => {
+      fs.closeSync(fs.openSync(markerFile, 'w'));
+      const platformSpy = jest.spyOn(os, 'platform').mockReturnValue('linux');
+      await scanMsBuild('https://sonar.extenda.io', 'master');
+      expect(Object.keys(exec.exec.mock.calls[0][2].env)).toContain('JAVA_HOME');
+      platformSpy.mockRestore();
+    });
+  }
 });
