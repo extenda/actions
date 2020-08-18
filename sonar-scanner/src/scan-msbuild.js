@@ -14,8 +14,9 @@ const scanner = path.join(os.homedir(), '.dotnet', 'tools', 'dotnet-sonarscanner
 // Any 11+ openJDK will work for us.
 const findJava11 = async () => {
   try {
-    return fs.readdirSync(process.env.JDK_BASEDIR || '/usr/lib/jvm')
-      .find((f) => f.startsWith('adoptopenjdk-1'));
+    const jdks = fs.readdirSync(process.env.JDK_BASEDIR || '/usr/lib/jvm');
+    core.info(`Available JDKs: ${jdks.join(', ')}`);
+    return jdks.find((f) => f.startsWith('adoptopenjdk-1'));
   } catch (err) {
     core.error('/usr/lib/jvm not found');
     return null;
@@ -27,8 +28,12 @@ const scanWithJavaHome = async (args) => {
   if (os.platform() !== 'win32') {
     const javaHome = await findJava11();
     if (javaHome) {
+      core.info(`Set JAVA_HOME=${javaHome}`);
       env.JAVA_HOME = javaHome;
     }
+  }
+  if (typeof args === 'string') {
+    return exec.exec(`${scanner} ${args}`, [], { env });
   }
   return exec.exec(scanner, args, { env });
 };
@@ -48,7 +53,7 @@ const beginScan = async (hostUrl, mainBranch) => {
   const params = await createParams(hostUrl, mainBranch, true, extraParams);
 
   await core.group('Begin Sonar analysis', async () => {
-    await scanWithJavaHome(['begin', ...params]);
+    await scanWithJavaHome(`begin ${params}`);
   });
 };
 
