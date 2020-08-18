@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "dependencies": {
     "@actions/core": "^1.2.3",
-    "@actions/exec": "^1.0.3",
+    "@actions/exec": "^1.0.4",
     "jsonschema": "^1.2.5",
     "yaml": "^1.8.2"
   },
