@@ -79,6 +79,9 @@ describe('Scan MSBuild', () => {
       const platformSpy = jest.spyOn(os, 'platform').mockReturnValue('linux');
       await scanMsBuild('https://sonar.extenda.io', 'master');
       expect(Object.keys(exec.exec.mock.calls[0][2].env)).toContain('JAVA_HOME');
+      expect(exec.exec.mock.calls[0][2].env).toMatchObject({
+        JAVA_HOME: '/usr/lib/jvm/adoptopenjdk-11-hotspot-amd64',
+      });
       platformSpy.mockRestore();
     });
   }
