@@ -37,7 +37,8 @@ describe('Scan MSBuild', () => {
     expect(fs.existsSync(markerFile)).toEqual(true);
     expect(exec.exec.mock.calls.length).toEqual(2);
     expect(exec.exec.mock.calls[0][0]).toEqual('dotnet tool install -g dotnet-sonarscanner');
-    expect(exec.exec.mock.calls[1][0]).toContain('dotnet-sonarscanner begin');
+    expect(exec.exec.mock.calls[1][0]).toContain('dotnet-sonarscanner');
+    expect(exec.exec.mock.calls[1][1]).toContain('begin');
   });
 
   test('It ends scan when marker file exists', async () => {
@@ -48,6 +49,7 @@ describe('Scan MSBuild', () => {
 
     expect(output).toEqual(true);
     expect(exec.exec.mock.calls.length).toEqual(1);
-    expect(exec.exec.mock.calls[0][0]).toContain('dotnet-sonarscanner end');
+    expect(exec.exec.mock.calls[0][0]).toContain('dotnet-sonarscanner');
+    expect(exec.exec.mock.calls[0][1]).toContain('end');
   });
 });
