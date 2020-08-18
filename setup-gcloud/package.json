@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "dependencies": {
     "@actions/core": "^1.2.3",
-    "@actions/exec": "^1.0.3",
+    "@actions/exec": "^1.0.4",
     "@actions/io": "^1.0.2",
     "axios": "^0.19.2",
     "uuid": "^8.0.0"

@@ -11,6 +11,28 @@ const markerFile = path.join(os.homedir(), '.github_action_sonar.txt');
 
 const scanner = path.join(os.homedir(), '.dotnet', 'tools', 'dotnet-sonarscanner');
 
+// Any 11+ openJDK will work for us.
+const findJava11 = async () => {
+  try {
+    return fs.readdirSync(process.env.JDK_BASEDIR || '/usr/lib/jvm')
+      .find((f) => f.startsWith('adoptopenjdk-1'));
+  } catch (err) {
+    core.error('/usr/lib/jvm not found');
+    return null;
+  }
+};
+
+const scanWithJavaHome = async (args) => {
+  const env = { ...process.env };
+  if (os.platform() !== 'win32') {
+    const javaHome = await findJava11();
+    if (javaHome) {
+      env.JAVA_HOME = javaHome;
+    }
+  }
+  return exec.exec(scanner, args, { env });
+};
+
 const beginScan = async (hostUrl, mainBranch) => {
   await core.group('Install dotnet-sonarscanner', async () => {
     await exec.exec('dotnet tool install -g dotnet-sonarscanner');
@@ -26,14 +48,14 @@ const beginScan = async (hostUrl, mainBranch) => {
   const params = await createParams(hostUrl, mainBranch, true, extraParams);
 
   await core.group('Begin Sonar analysis', async () => {
-    await exec.exec(`${scanner} begin ${params}`);
+    await scanWithJavaHome(['begin', ...params]);
   });
 };
 
 const finishScan = async (hostUrl) => {
   await core.group('End Sonar analysis', async () => {
     const { sonarToken } = await credentials(hostUrl);
-    await exec.exec(`${scanner} end /d:sonar.login=${sonarToken}`);
+    await scanWithJavaHome(['end', `/d:sonar.login=${sonarToken}`]);
   });
 };
 
