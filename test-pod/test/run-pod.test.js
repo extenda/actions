@@ -44,6 +44,9 @@ describe('Pod run', () => {
       apiVersion: 'v1',
       metadata: {
         namespace: 'test',
+        labels: {
+          'opa-injection': 'false',
+        },
         annotations: {
           'sidecar.istio.io/inject': 'false',
         },
@@ -91,6 +94,9 @@ describe('Pod run', () => {
       apiVersion: 'v1',
       metadata: {
         namespace: 'test',
+        labels: {
+          'opa-injection': 'false',
+        },
         annotations: {
           'sidecar.istio.io/inject': 'false',
         },
