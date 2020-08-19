@@ -35,7 +35,7 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl) => {
     metadata: {
       namespace,
       labels: {
-        'opa-injection': 'false'
+        'opa-injection': 'false',
       },
       annotations: {
         'sidecar.istio.io/inject': 'false',
