@@ -14938,6 +14938,9 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl) => {
     apiVersion: 'v1',
     metadata: {
       namespace,
+      annotations: {
+        'sidecar.istio.io/inject': 'false',
+      },
     },
     spec: {
       containers: [

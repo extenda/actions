@@ -44,6 +44,9 @@ describe('Pod run', () => {
       apiVersion: 'v1',
       metadata: {
         namespace: 'test',
+        annotations: {
+          'sidecar.istio.io/inject': 'false',
+        },
       },
       spec: {
         containers: [{
@@ -88,6 +91,9 @@ describe('Pod run', () => {
       apiVersion: 'v1',
       metadata: {
         namespace: 'test',
+        annotations: {
+          'sidecar.istio.io/inject': 'false',
+        },
       },
       spec: {
         containers: [{
