@@ -63,7 +63,7 @@ const createJiraRelease = async ({
 
   const project = await client.getProject(projectKey);
 
-  if (component && !project.components.find(list => list.name === component)) {
+  if (component && !project.components.find((list) => list.name === component)) {
     throw new Error(`'${component}' is not a valid JIRA component in project '${projectKey}'`);
   }
 

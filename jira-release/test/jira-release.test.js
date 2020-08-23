@@ -49,14 +49,18 @@ describe('JIRA release', () => {
     mockGetProject.mockResolvedValueOnce({
       id: 12073,
       key: 'TEST',
-      components: [ { self: 'https://jiratest.extendaretail.com/rest/api/2/component/17744',
-       id: '17744',
-       name: 'Test',
-       isAssigneeTypeValid: false },
-     { self: 'https://jiratest.extendaretail.com/rest/api/2/component/15845',
-       id: '15845',
-       name: 'Test 2',
-       isAssigneeTypeValid: false } ],
+      components: [{
+        self: 'https://jiratest.extendaretail.com/rest/api/2/component/17744',
+        id: '17744',
+        name: 'Test',
+        isAssigneeTypeValid: false,
+      },
+      {
+        self: 'https://jiratest.extendaretail.com/rest/api/2/component/15845',
+        id: '15845',
+        name: 'Test 2',
+        isAssigneeTypeValid: false,
+      }],
     });
     mockUpdateIssue.mockResolvedValue({});
   });
