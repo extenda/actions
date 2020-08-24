@@ -5463,6 +5463,7 @@ const gkeArguments = async (args, service, projectId) => {
     name,
     cpu,
     'min-instances': minInstances = -1,
+    'enable-http2': enableHttp2 = false,
     platform: {
       gke: {
         cluster: configuredCluster = undefined,
@@ -5488,6 +5489,12 @@ const gkeArguments = async (args, service, projectId) => {
     `--connectivity=${connectivity}`,
   );
 
+  if (enableHttp2) {
+    args.push('--use-http2');
+  } else {
+    args.push('--no-use-http2');
+  }
+
   if (namespace !== 'default') {
     await createNamespace(projectId, opaEnabled, cluster, namespace);
   }
@@ -5511,7 +5518,6 @@ const runDeploy = async (serviceAccountKey, service, image, verbose = false) => 
     concurrency = setDefaultConcurrency(service.cpu),
     'max-instances': maxInstances = -1,
     environment = [],
-    'enable-http2': enableHttp2 = false,
   } = service;
 
   const args = ['run', 'deploy', name,
@@ -5523,12 +5529,6 @@ const runDeploy = async (serviceAccountKey, service, image, verbose = false) => 
     `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
     `--labels=service_project_id=${projectId},service_project=${project},service_env=${env}`,
   ];
-
-  if (enableHttp2) {
-    args.push('--use-http2');
-  } else {
-    args.push('--no-use-http2');
-  }
 
   if (verbose) {
     args.push('--verbosity=debug');
