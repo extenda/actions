@@ -1,0 +1,17 @@
+name: IAM permissions
+description: Publish permissions to Hii Retail IAM
+author: Extenda Retail
+inputs:
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+  iam-definition:
+    description: |
+      The IAM YAML specification.
+    required: false
+    default: iam.yaml
+runs:
+  using: node12
+  main: dist/index.js

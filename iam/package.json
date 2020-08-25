@@ -1,0 +1,16 @@
+{
+  "name": "iam",
+  "version": "0.0.1-local",
+  "private": true,
+  "description": "Publish permissions to Hii Retail IAM",
+  "main": "dist/index.js",
+  "dependencies": {
+    "@actions/core": "^1.2.3",
+    "@actions/exec": "^1.0.4",
+    "jsonschema": "^1.2.5",
+    "yaml": "^1.8.2"
+  },
+  "devDependencies": {
+    "mock-fs": "^4.11.0"
+  }
+}
