@@ -30,6 +30,7 @@ The following actions are available
   * [slack-message](slack-message#readme)
   * [sonar-scanner](sonar-scanner#readme)
   * [status-check](status-check#readme)
+  * [styra-das-deploy](styra-das-deploy#readme)
   * [terraform-plan-comment](terraform-plan-comment#readme)
   * [test-pod](test-pod#readme)
 
