@@ -20,10 +20,10 @@ const validateSchema = (serviceFile, spec) => {
   }
 };
 
-const loadServiceDefinition = (serviceFile) => {
+const loadIamDefinition = (serviceFile) => {
   const spec = loadFile(serviceFile);
   validateSchema(serviceFile, spec);
   return spec;
 };
 
-module.exports = loadServiceDefinition;
+module.exports = loadIamDefinition;
