@@ -1,0 +1,24 @@
+name: Styra DAS test
+description: |
+  Execute unit tests for Rego rules inside Styra DAS.
+  The following files are expected to exist in your project:
+  - policies/policy/com.styra.envoy.ingress/test/test/test.rego
+  - policies/policy/com.styra.envoy.ingress/rules/rules/ingress.rego
+inputs:
+  system-id:
+    description: Styra DAS System ID to test against
+    required: true
+runs:
+  using: docker
+  image: docker://styra/cli:0.5.0
+  env:
+    STYRA_ORGANIZATION_ID: extendaretail.styra.com
+    STYRA_TOKEN: ${{ env.STYRA_TOKEN }}
+  args:
+    - validate
+    - tests
+    - ${{ inputs.system-id }}
+    - '-p'
+    - policy/com.styra.envoy.ingress/test/test/test.rego=policies/policy/com.styra.envoy.ingress/test/test/test.rego
+    - '-p'
+    - policy/com.styra.envoy.ingress/rules/rules/ingress.rego=policies/policy/com.styra.envoy.ingress/rules/rules/ingress.rego
