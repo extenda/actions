@@ -1,4 +1,4 @@
-# policy-push
+# styra-das-deploy
 
 This is a GitHub Action to publish the DAS staging policy to DAS production system
 
