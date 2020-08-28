@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const { run } = require('../../utils');
+const { run } = require('../../utils/src');
 const pushPolicy = require('./push-policy');
 
 const action = async () => {

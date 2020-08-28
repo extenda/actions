@@ -16130,10 +16130,8 @@ const pushPolicyProd = (styraToken, systemId, ingressRego) => new Promise((resol
   });
 });
 
-const pushPolicy = async (styraToken, stagingSystemId, prodSystemId) => {
-  fetchPolicy(styraToken, stagingSystemId)
-    .then((ingressRego) => pushPolicyProd(styraToken, prodSystemId, ingressRego));
-};
+const pushPolicy = async (token, systemId, prodSystemId) => fetchPolicy(token, systemId)
+  .then((ingressRego) => pushPolicyProd(token, prodSystemId, ingressRego));
 
 module.exports = pushPolicy;
 

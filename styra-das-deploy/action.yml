@@ -1,4 +1,4 @@
-name: policy push
+name: styra-das-deploy
 description: publish staging policy into production DAS system
 author: Extenda Retail
 inputs:

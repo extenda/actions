@@ -1,5 +1,5 @@
 {
-  "name": "policy-push",
+  "name": "styra-das-deploy",
   "version": "0.0.1-local",
   "private": true,
   "description": "publish staging policy into production DAS system",
