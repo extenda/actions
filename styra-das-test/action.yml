@@ -5,6 +5,9 @@ description: |
   - policies/policy/com.styra.envoy.ingress/test/test/test.rego
   - policies/policy/com.styra.envoy.ingress/rules/rules/ingress.rego
 inputs:
+  styra-das-token:
+    description: The token used to make api calls to Styra DAS
+    required: true
   system-id:
     description: Styra DAS System ID to test against
     required: true
@@ -13,6 +16,7 @@ runs:
   image: docker://styra/cli:0.5.0
   env:
     STYRA_ORGANIZATION_ID: extendaretail.styra.com
+    STYRA_TOKEN: ${{ inputs.styra-das-token }}
   args: # FIXME exit with <> 0 if tests fail
     - validate
     - tests
