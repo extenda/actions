@@ -13,7 +13,6 @@ runs:
   image: docker://styra/cli:0.5.0
   env:
     STYRA_ORGANIZATION_ID: extendaretail.styra.com
-    STYRA_TOKEN: ${{ secrets.styra-das-token }}
   args: # FIXME exit with <> 0 if tests fail
     - validate
     - tests
