@@ -26,8 +26,9 @@ jobs:
           secrets: |
             STYRA_TOKEN: styra-das-token
 
-      - name: Run OPA/Rego unit tests
+      - name: OPA/Rego unit tests
         uses: extenda/actions/styra-das-test@v0
         with:
+          styra-das-token: ${{ secrets.styra-das-token }}
           system-id: 'Your Styra DAS System ID (e.g., iam-staging)'
 ```
