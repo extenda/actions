@@ -13,7 +13,7 @@ inputs:
     required: true
 runs:
   using: docker
-  image: docker://styra/cli:0.5.0
+  image: Dockerfile
   env:
     STYRA_ORGANIZATION_ID: extendaretail.styra.com
     STYRA_TOKEN: ${{ inputs.styra-das-token }}
