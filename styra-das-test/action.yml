@@ -17,7 +17,7 @@ runs:
   env:
     STYRA_ORGANIZATION_ID: extendaretail.styra.com
     STYRA_TOKEN: ${{ inputs.styra-das-token }}
-  args: # FIXME exit with <> 0 if tests fail
+  args:
     - validate
     - tests
     - ${{ inputs.system-id }}
