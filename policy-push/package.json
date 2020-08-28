@@ -1,0 +1,17 @@
+{
+  "name": "policy-push",
+  "version": "0.0.1-local",
+  "private": true,
+  "description": "publish staging policy into production DAS system",
+  "main": "dist/index.js",
+  "dependencies": {
+    "@actions/core": "^1.2.3",
+    "@actions/exec": "^1.0.4",
+    "jsonschema": "^1.2.5",
+    "request": "^2.88.2",
+    "yaml": "^1.8.2"
+  },
+  "devDependencies": {
+    "mock-fs": "^4.11.0"
+  }
+}
