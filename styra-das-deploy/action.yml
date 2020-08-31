@@ -1,0 +1,24 @@
+name: styra-das-deploy
+description: publish staging policy into production DAS system
+author: Extenda Retail
+inputs:
+  styra-das-token:
+    description: |
+      the token used to make api calls to Styra
+    required: true
+  staging-system-id:
+    description: |
+      the DAS staging system id for this service
+    required: true
+  prod-system-id:
+    description: |
+      the DAS production system id for this service
+    required: true
+  styra-workspace:
+    description: |
+      the DAS workspace/tenant used to connect to
+    default: extendaretail
+    required: false
+runs:
+  using: node12
+  main: dist/index.js
