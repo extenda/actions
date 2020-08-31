@@ -11,14 +11,16 @@ describe('run push policy', () => {
   });
 
   test('It can run the action', async () => {
-    core.getInput.mockReturnValueOnce('token')
+    core.getInput.mockReturnValueOnce('extenda')
+      .mockReturnValueOnce('token')
       .mockReturnValueOnce('staging-id')
       .mockReturnValueOnce('prod-id');
     pushPolicy.mockResolvedValueOnce({});
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(3);
+    expect(core.getInput).toHaveBeenCalledTimes(4);
     expect(pushPolicy).toHaveBeenCalledWith(
+      'extenda',
       'token',
       'staging-id',
       'prod-id',

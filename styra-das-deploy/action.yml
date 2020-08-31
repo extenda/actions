@@ -14,6 +14,11 @@ inputs:
     description: |
       the DAS production system id for this service
     required: true
+  styra-workspace:
+    description: |
+      the DAS workspace/tenant used to connect to
+    default: extendaretail
+    required: false
 runs:
   using: node12
   main: dist/index.js

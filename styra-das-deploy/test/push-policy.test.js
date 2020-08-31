@@ -19,7 +19,7 @@ describe('fetch and push policy', () => {
     };
     request.mockImplementation((conf, cb) => cb(null, { statusCode: 200 },
       JSON.stringify(mockReturn)));
-    await pushPolicy('token', 'staging-id', 'prod-id');
+    await pushPolicy('extenda', 'token', 'staging-id', 'prod-id');
 
     expect(request).toHaveBeenCalledTimes(2);
   });
@@ -27,7 +27,7 @@ describe('fetch and push policy', () => {
   test('it can\'t fetch the policy', async () => {
     request.mockImplementation((conf, cb) => cb(null, { statusCode: 400 }, ''));
 
-    await expect(pushPolicy('token', 'staging-id', 'prod-id')).rejects.toEqual(new Error('Couldn\'t fetch policy for system with id: staging-id'));
+    await expect(pushPolicy('extenda', 'token', 'staging-id', 'prod-id')).rejects.toEqual(new Error('Couldn\'t fetch policy for system with id: staging-id'));
     expect(request).toHaveBeenCalledTimes(1);
   });
 
@@ -43,7 +43,7 @@ describe('fetch and push policy', () => {
       JSON.stringify(mockReturn)));
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 400 }, ''));
 
-    await expect(pushPolicy('token', 'staging-id', 'prod-id')).rejects.toEqual(new Error('Couldn\'t update policy for production system'));
+    await expect(pushPolicy('extenda', 'token', 'staging-id', 'prod-id')).rejects.toEqual(new Error('Couldn\'t update policy for production system'));
     expect(request).toHaveBeenCalledTimes(2);
   });
 });
