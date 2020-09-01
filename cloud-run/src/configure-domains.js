@@ -1,4 +1,5 @@
 const core = require('@actions/core');
+const exec = require('@actions/exec');
 const gcloud = require('./gcloud-output');
 const authenticateKubeCtl = require('./kubectl-auth');
 const { setOpaInjectionLabels } = require('./set-namespace-label');
@@ -55,6 +56,21 @@ const createDomainMapping = async (
   ]);
 };
 
+const enableHttpRedirectOnDomain = async (
+  domain,
+  namespace,
+) => {
+  core.info(`Enable http redirect for '${domain}'`);
+  return exec.exec('kubectl', [
+    'annotate',
+    'domainmappings',
+    domain,
+    'domains.cloudrun.com/httpsRedirect=Enabled',
+    '--namespace',
+    namespace,
+  ]);
+};
+
 const determineEnv = (project) => (project.includes('staging') ? 'staging' : 'prod');
 
 const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectLabel) => {
@@ -81,14 +97,16 @@ const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectLa
   if (connectivity === 'external' && domains.length > 0) {
     const newDomains = await getNewDomains(domains, name, cluster, namespace);
 
+    await authenticateKubeCtl(cluster);
+
     if (opaEnabled) {
-      await authenticateKubeCtl(cluster);
       await setOpaInjectionLabels(namespace, false);
     }
 
     const promises = [];
     newDomains.forEach((domain) => {
       promises.push(createDomainMapping(cluster, domain, name, namespace)
+        .then(() => enableHttpRedirectOnDomain(domain, namespace))
         .then((ipAddress) => addDnsRecord(dnsProjectLabel, domain, ipAddress)));
     });
 
