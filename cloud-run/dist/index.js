@@ -5375,6 +5375,7 @@ function _evaluateVersions(versions, versionSpec) {
 /* 193 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
+const core = __webpack_require__(793);
 const exec = __webpack_require__(266);
 const setupGcloud = __webpack_require__(217);
 const getRuntimeAccount = __webpack_require__(838);
@@ -5382,6 +5383,7 @@ const createEnvironmentArgs = __webpack_require__(471);
 const getClusterInfo = __webpack_require__(776);
 const createNamespace = __webpack_require__(530);
 const projectInfo = __webpack_require__(100);
+const waitForRevision = __webpack_require__(675);
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -5503,7 +5505,36 @@ const gkeArguments = async (args, service, projectId) => {
   return cluster;
 };
 
-const runDeploy = async (serviceAccountKey, service, image, verbose = false) => {
+const execWithOutput = async (args) => {
+  let stdout = '';
+  let stderr = '';
+  const status = await exec.exec('gcloud', args, {
+    listeners: {
+      stdout: (data) => {
+        stdout += data.toString('utf8');
+      },
+      stderr: (data) => {
+        stderr += data.toString('utf8');
+      },
+    },
+  }).catch((err) => {
+    core.error(`gcloud execution failed: ${err.message}`);
+    stdout += stderr;
+  });
+
+  return {
+    status,
+    output: stdout ? stdout.trim() : '',
+  };
+};
+
+const runDeploy = async (
+  serviceAccountKey,
+  service,
+  image,
+  verbose = false,
+  retryInterval = 5000,
+) => {
   // Authenticate gcloud with our service-account
   const projectId = await gcloudAuth(serviceAccountKey);
 
@@ -5544,7 +5575,9 @@ const runDeploy = async (serviceAccountKey, service, image, verbose = false) => 
     cluster = await gkeArguments(args, service, projectId);
   }
 
-  const gcloudExitCode = await exec.exec('gcloud', args);
+  const gcloudExitCode = await execWithOutput(args)
+    .then((response) => waitForRevision(response, args, retryInterval));
+
 
   return {
     gcloudExitCode,
@@ -20546,7 +20579,130 @@ function copyFile(srcFile, destFile, force) {
 /* 672 */,
 /* 673 */,
 /* 674 */,
-/* 675 */,
+/* 675 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const core = __webpack_require__(793);
+const exec = __webpack_require__(266);
+
+const FIVE_MINUTES = 300000;
+
+const findRevision = (output) => {
+  const matches = output.match(/ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: 0\/\d+ nodes/);
+  if (matches && matches.length >= 2) {
+    return matches[1];
+  }
+  throw new Error('Deploy failed for other reasons than node scaling out');
+};
+
+const parseConditions = (conditions) => {
+  // Default status flags.
+  const revisionStatus = {
+    active: { status: false },
+    ready: { status: false },
+    containerHealthy: { status: false },
+    resourcesAvailable: { status: false },
+  };
+
+  conditions.forEach((condition) => {
+    const type = condition.type.charAt(0).toLowerCase() + condition.type.slice(1);
+    const status = condition.status === 'True';
+    revisionStatus[type] = {
+      status,
+      lastTransitionTime: condition.lastTransitionTime,
+    };
+  });
+
+  return revisionStatus;
+};
+
+const getRevisionStatus = async (revision, args) => {
+  const findArg = (match) => args.find((a) => a.startsWith(match));
+  let stdout = '';
+  await exec.exec('gcloud', [
+    'run', 'revisions', 'describe', revision,
+    findArg('--project='),
+    findArg('--cluster='),
+    findArg('--cluster-location='),
+    findArg('--namespace='),
+    '--format=json',
+  ], {
+    listeners: {
+      stdout: (data) => {
+        stdout += data.toString('utf8');
+      },
+    },
+  });
+
+  try {
+    const { status: { conditions } } = JSON.parse(stdout.trim());
+    core.debug(JSON.stringify(conditions, null, 2));
+    return parseConditions(conditions);
+  } catch (err) {
+    throw new Error(`Invalid JSON: Failed to load status for revision "${revision}". Reason: ${err.message}`);
+  }
+};
+
+const timer = (ms) => new Promise((res) => setTimeout(res, ms));
+
+const isRevisionCompleted = (revisionStatus) => {
+  const {
+    active,
+    ready,
+    containerHealthy,
+    resourcesAvailable,
+  } = revisionStatus;
+
+  return active.status
+    && ready.status
+    && containerHealthy.status
+    && resourcesAvailable.status;
+};
+
+const printStatus = (revisionStatus) => {
+  const completed = isRevisionCompleted(revisionStatus);
+  const values = Object.keys(revisionStatus)
+    .map((k) => `${k}=${revisionStatus[k].status}`).join(', ');
+  return `${completed} (${values})`;
+};
+
+const waitForRevision = async (
+  { status, output },
+  args,
+  sleepMs = 10000,
+  timeoutMs = FIVE_MINUTES,
+) => {
+  if (status === 0) {
+    return status;
+  }
+
+  if (!args.includes('--platform=gke')) {
+    throw new Error('Wait is not supported for managed cloud run');
+  }
+
+  const revision = findRevision(output);
+
+  let revisionStatus = {};
+
+  /* eslint-disable no-await-in-loop */
+  const t0 = Date.now();
+  do {
+    if (Date.now() - t0 > timeoutMs) {
+      throw new Error(`Timed out after while for revision "${revision}".`);
+    }
+    await timer(sleepMs);
+    revisionStatus = await getRevisionStatus(revision, args);
+    core.info(`Deploy status is: ${printStatus(revisionStatus)}`);
+  } while (!isRevisionCompleted(revisionStatus));
+  /* eslint-enable no-await-in-loop */
+
+  return 0;
+};
+
+module.exports = waitForRevision;
+
+
+/***/ }),
 /* 676 */,
 /* 677 */,
 /* 678 */,
