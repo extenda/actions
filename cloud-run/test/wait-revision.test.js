@@ -150,4 +150,46 @@ describe('Wait for revision', () => {
     )).rejects.toEqual(new Error('Timed out after while for revision "xxxxxxx-00013-loc".'));
     expect(exec.exec.mock.calls.length).toBeGreaterThan(1);
   });
+
+  test('It fails fast if ExitCode is set as reason', async () => {
+    const revisionStatus = {
+      status: {
+        conditions: [
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            severity: 'Info',
+            status: 'False',
+            type: 'Active',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'ContainerHealthy',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'False',
+            message: 'Container failed with: failed to access secret...',
+            reason: 'ExitCode60',
+            type: 'Ready',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'ResourcesAvailable',
+          },
+        ],
+      },
+    };
+    exec.exec.mockImplementation((cmd, args, opts) => {
+      opts.listeners.stdout(Buffer.from(JSON.stringify(revisionStatus), 'utf8'));
+      return Promise.resolve(0);
+    });
+    await expect(waitForRevision(
+      { status: 1, output: GCLOUD_ERROR_MSG },
+      GCLOUD_ARGS,
+      10,
+    )).rejects.toEqual(new Error('Revision failed "ready" condition with reason: ExitCode60'));
+    expect(exec.exec).toHaveBeenCalled();
+  });
 });

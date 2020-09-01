@@ -26,6 +26,7 @@ const parseConditions = (conditions) => {
     revisionStatus[type] = {
       status,
       lastTransitionTime: condition.lastTransitionTime,
+      reason: condition.reason || null,
     };
   });
 
@@ -62,17 +63,20 @@ const getRevisionStatus = async (revision, args) => {
 const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 
 const isRevisionCompleted = (revisionStatus) => {
-  const {
-    active,
-    ready,
-    containerHealthy,
-    resourcesAvailable,
-  } = revisionStatus;
+  const keys = ['active', 'ready', 'containerHealthy', 'resourcesAvailable'];
+  const success = keys.map((key) => revisionStatus[key].status)
+    .reduce((prev, status) => prev && status, true);
 
-  return active.status
-    && ready.status
-    && containerHealthy.status
-    && resourcesAvailable.status;
+  if (!success) {
+    // Check if we should fail fast
+    keys.map((key) => ({ key, reason: revisionStatus[key].reason }))
+      .forEach(({ key, reason }) => {
+        if (typeof reason === 'string' && reason.startsWith('ExitCode')) {
+          throw new Error(`Revision failed "${key}" condition with reason: ${reason}`);
+        }
+      });
+  }
+  return success;
 };
 
 const printStatus = (revisionStatus) => {
