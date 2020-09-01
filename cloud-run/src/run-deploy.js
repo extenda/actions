@@ -1,3 +1,4 @@
+const core = require('@actions/core');
 const exec = require('@actions/exec');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const getRuntimeAccount = require('./runtime-account');
@@ -5,6 +6,7 @@ const createEnvironmentArgs = require('./environment-args');
 const getClusterInfo = require('./cluster-info');
 const createNamespace = require('./create-namespace');
 const projectInfo = require('./project-info');
+const waitForRevision = require('./wait-revision');
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -126,7 +128,36 @@ const gkeArguments = async (args, service, projectId) => {
   return cluster;
 };
 
-const runDeploy = async (serviceAccountKey, service, image, verbose = false) => {
+const execWithOutput = async (args) => {
+  let stdout = '';
+  let stderr = '';
+  const status = await exec.exec('gcloud', args, {
+    listeners: {
+      stdout: (data) => {
+        stdout += data.toString('utf8');
+      },
+      stderr: (data) => {
+        stderr += data.toString('utf8');
+      },
+    },
+  }).catch((err) => {
+    core.error(`gcloud execution failed: ${err.message}`);
+    stdout += stderr;
+  });
+
+  return {
+    status,
+    output: stdout ? stdout.trim() : '',
+  };
+};
+
+const runDeploy = async (
+  serviceAccountKey,
+  service,
+  image,
+  verbose = false,
+  retryInterval = 5000,
+) => {
   // Authenticate gcloud with our service-account
   const projectId = await gcloudAuth(serviceAccountKey);
 
@@ -167,7 +198,9 @@ const runDeploy = async (serviceAccountKey, service, image, verbose = false) => 
     cluster = await gkeArguments(args, service, projectId);
   }
 
-  const gcloudExitCode = await exec.exec('gcloud', args);
+  const gcloudExitCode = await execWithOutput(args)
+    .then((response) => waitForRevision(response, args, retryInterval));
+
 
   return {
     gcloudExitCode,
