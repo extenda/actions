@@ -39,6 +39,7 @@ const getRevisionStatus = async (revision, args) => {
   await exec.exec('gcloud', [
     'run', 'revisions', 'describe', revision,
     findArg('--project='),
+    findArg('--platform='),
     findArg('--cluster='),
     findArg('--cluster-location='),
     findArg('--namespace='),
@@ -99,6 +100,7 @@ const waitForRevision = async (
 
     const revision = findRevision(output);
 
+    core.info(`Waiting for revision "${revision}" to become active...`);
     let revisionStatus = {};
 
     /* eslint-disable no-await-in-loop */
