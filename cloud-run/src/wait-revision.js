@@ -92,30 +92,27 @@ const waitForRevision = async (
   sleepMs = 10000,
   timeoutMs = FIVE_MINUTES,
 ) => {
-  if (status === 0) {
-    return status;
-  }
-
-  if (!args.includes('--platform=gke')) {
-    throw new Error('Wait is not supported for managed cloud run');
-  }
-
-  const revision = findRevision(output);
-
-  let revisionStatus = {};
-
-  /* eslint-disable no-await-in-loop */
-  const t0 = Date.now();
-  do {
-    if (Date.now() - t0 > timeoutMs) {
-      throw new Error(`Timed out after while for revision "${revision}".`);
+  if (status !== 0) {
+    if (!args.includes('--platform=gke')) {
+      throw new Error('Wait is not supported for managed cloud run');
     }
-    await timer(sleepMs);
-    revisionStatus = await getRevisionStatus(revision, args);
-    core.info(`Deploy status is: ${printStatus(revisionStatus)}`);
-  } while (!isRevisionCompleted(revisionStatus));
-  /* eslint-enable no-await-in-loop */
 
+    const revision = findRevision(output);
+
+    let revisionStatus = {};
+
+    /* eslint-disable no-await-in-loop */
+    const t0 = Date.now();
+    do {
+      if (Date.now() - t0 > timeoutMs) {
+        throw new Error(`Timed out after while for revision "${revision}".`);
+      }
+      await timer(sleepMs);
+      revisionStatus = await getRevisionStatus(revision, args);
+      core.info(`Deploy status is: ${printStatus(revisionStatus)}`);
+    } while (!isRevisionCompleted(revisionStatus));
+    /* eslint-enable no-await-in-loop */
+  }
   return 0;
 };
 
