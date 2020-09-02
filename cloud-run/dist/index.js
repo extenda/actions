@@ -20629,6 +20629,7 @@ const getRevisionStatus = async (revision, args) => {
     findArg('--namespace='),
     '--format=json',
   ], {
+    silent: true,
     listeners: {
       stdout: (data) => {
         stdout += data.toString('utf8');
