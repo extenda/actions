@@ -189,7 +189,7 @@ describe('Wait for revision', () => {
       { status: 1, output: GCLOUD_ERROR_MSG },
       GCLOUD_ARGS,
       10,
-    )).rejects.toEqual(new Error('Revision failed "ready" condition with reason: ExitCode60'));
+    )).rejects.toEqual(new Error('Revision failed "ready" condition with reason: ExitCode60\nContainer failed with: failed to access secret...'));
     expect(exec.exec).toHaveBeenCalled();
   });
 });
