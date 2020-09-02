@@ -27,6 +27,7 @@ const parseConditions = (conditions) => {
       status,
       lastTransitionTime: condition.lastTransitionTime,
       reason: condition.reason || null,
+      message: condition.message || null,
     };
   });
 
@@ -71,12 +72,14 @@ const isRevisionCompleted = (revisionStatus) => {
 
   if (!success) {
     // Check if we should fail fast
-    keys.map((key) => ({ key, reason: revisionStatus[key].reason }))
-      .forEach(({ key, reason }) => {
-        if (typeof reason === 'string' && reason.startsWith('ExitCode')) {
-          throw new Error(`Revision failed "${key}" condition with reason: ${reason}`);
-        }
-      });
+    keys.map((key) => {
+      const { reason = null, message = '' } = revisionStatus[key];
+      return { key, reason, message };
+    }).forEach(({ key, reason, message }) => {
+      if (typeof reason === 'string' && reason.startsWith('ExitCode')) {
+        throw new Error(`Revision failed "${key}" condition with reason: ${reason}\n${message || ''}`);
+      }
+    });
   }
   return success;
 };
