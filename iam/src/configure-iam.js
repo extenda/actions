@@ -1,4 +1,6 @@
-const exec = require('@actions/exec');
+const request = require('request');
+const { setupPermissions, handlePermissions } = require('./permissions');
+const setupRoles = require('./roles');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const projectInfo = require('../../cloud-run/src/project-info');
 
@@ -7,72 +9,40 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   process.env.GCLOUD_INSTALLED_VERSION || 'latest',
 );
 
-const checkSystem = (systemName, env, styra_token) => {
-  return new Promise((resolve, reject) => {
-    request.get(`https://extendaretail.styra.com/v1/systems?compact=true&name=${systemName}-${env}`, {
-      'auth': {
-        'bearer': styra_token
-      }
+const checkSystem = async (
+  systemName, env, styraToken, styraTenant,
+) => new Promise((resolve, reject) => {
+  const url = `https://${styraTenant}.styra.com/v1/systems?compact=true&name=${systemName}-${env}`;
+  request({
+    uri: url,
+    method: 'GET',
+    headers: {
+      'Content-type': 'application/json',
+      Authorization: `bearer ${styraToken}`,
     },
-      (error, res, body) => {
-        if (!error) {
-          jsonBody = JSON.parse(body);
-          jsonBody.result.forEach((result) => {
-            if (result.name === `${systemName}-${env}`) {
-              resolve(true);
-            }
-          });
-          reject(`No system found with name: ${systemName}-${env}`)
+  }, (error, res, body) => {
+    if (!error) {
+      const jsonBody = JSON.parse(body);
+      jsonBody.result.forEach((result) => {
+        if (result.name === `${systemName}-${env}`) {
+          resolve(true);
         }
       });
-  })
-}
-
-const listExistingPermissions = (systemName, env) => {
-  if (env === 'staging') {
-    url = 'https://iam-api.retailsvc.dev/api/v1/permissions';
-  } else {
-    url = 'https://iam-api.retailsvc.com/api/v1/permissions';
-  }
-
-  return new Promise((resolve, reject) => {
-    request.get(url, {
-      'auth': {
-        'bearer': ''
-      }
-    },
-      (error, res, body) => {
-        if (!error) {
-          jsonBody = JSON.parse(body);
-          resolve(body);
-        }
-      });
-  })
-}
-
-const setupPermissions = (permissions, system_id) => {
-  full_permission = new Set();
-  for (var permission in permissions) {
-    for (var key in permissions[permission]) {
-      var permission_id = `${system_id}.${permission}.${key}`;
-      var permission_desc = permissions[permission][key];
-      full_permission.add({ permission_id, permission_desc })
+      reject(new Error(`No system found with name: ${systemName}-${env}`));
     }
-  }
-  return full_permission;
-};
+  });
+});
 
-const handlePermissions = (permissions) => {
-
-}
-
-const configureIAM = async (serviceAccountKey, iam, styra_token) => {
+const configureIAM = async (
+  serviceAccountKey, iam, styraToken, styraTenant, iamToken, baseIamUrl,
+) => {
   const projectId = await gcloudAuth(serviceAccountKey);
 
   const {
-    project,
     env,
   } = projectInfo(projectId);
+
+  const iamUrl = baseIamUrl + ((env === 'staging') ? '.dev' : '.com');
 
   const {
     system,
@@ -80,14 +50,12 @@ const configureIAM = async (serviceAccountKey, iam, styra_token) => {
     roles,
   } = iam;
 
-  await checkSystem(system.id, env, styra_token).catch((error) => {
-    console.error(error)
-    process.exit(1);
-  });
+  await checkSystem(system.id, env, styraToken, styraTenant);
 
-  full_permissions = await setupPermissions(permissions, system.id);
-  handlePermissions(full_permissions);
+  await setupPermissions(permissions, system.id)
+    .then((fullPermissions) => handlePermissions(fullPermissions, iamToken, iamUrl));
 
-}
+  await setupRoles(roles, system.id, iamToken, iamUrl);
+};
 
 module.exports = configureIAM;
