@@ -8351,8 +8351,8 @@ const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectLa
     const promises = [];
     newDomains.forEach((domain) => {
       promises.push(createDomainMapping(cluster, domain, name, namespace)
-        .then(() => enableHttpRedirectOnDomain(domain, namespace))
-        .then((ipAddress) => addDnsRecord(dnsProjectLabel, domain, ipAddress)));
+        .then((ipAddress) => addDnsRecord(dnsProjectLabel, domain, ipAddress))
+        .then(() => enableHttpRedirectOnDomain(domain, namespace)));
     });
 
     await Promise.all(promises).finally(() => {
