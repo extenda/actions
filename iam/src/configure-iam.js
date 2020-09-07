@@ -1,6 +1,6 @@
 const request = require('request');
 const { setupPermissions, handlePermissions } = require('./permissions');
-const setupRoles = require('./roles');
+const { setupRoles } = require('./roles');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const projectInfo = require('../../cloud-run/src/project-info');
 

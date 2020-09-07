@@ -19,8 +19,10 @@ const action = async () => {
   const iamApiTenantId = core.getInput('iam-tenant', { required: true });
 
   const iam = loadIamDefinition(iamFile);
-  const iamToken = await fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenantId);
-  await configureIAM(serviceAccountKey, iam, styraToken, styraTenant, iamUrl, iamToken);
+  await fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenantId)
+    .then((iamToken) => configureIAM(
+      serviceAccountKey, iam, styraToken, styraTenant, iamUrl, iamToken,
+    ));
 };
 
 if (require.main === module) {

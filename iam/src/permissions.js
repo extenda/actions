@@ -73,17 +73,13 @@ const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
 
 const setupPermissions = async (permissions, systemId) => {
   const fullPermissions = new Map();
-  for (const permission in permissions) {
-    if (Object.prototype.hasOwnProperty.call(permission, permissions)) {
-      for (const verb in permissions[permission]) {
-        if (Object.prototype.hasOwnProperty.call(verb, permissions[permission])) {
-          const id = `${systemId}.${permission}.${verb}`;
-          const description = permissions[permission][verb];
-          fullPermissions.set(id, description);
-        }
-      }
-    }
-  }
+  Object.keys(permissions).forEach((permission) => {
+    Object.entries(permissions[permission]).forEach(([verb, desc]) => {
+      const id = `${systemId}.${permission}.${verb}`;
+      const description = desc;
+      fullPermissions.set(id, description);
+    });
+  });
   return fullPermissions;
 };
 

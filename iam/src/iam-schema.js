@@ -6,9 +6,11 @@ module.exports = {
       properties: {
         id: {
           type: 'string',
+          required: true,
         },
-        desc: {
+        name: {
           type: 'string',
+          required: true,
         },
       },
     },

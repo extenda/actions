@@ -4256,8 +4256,10 @@ const action = async () => {
   const iamApiTenantId = core.getInput('iam-tenant', { required: true });
 
   const iam = loadIamDefinition(iamFile);
-  const iamToken = await fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenantId);
-  await configureIAM(serviceAccountKey, iam, styraToken, styraTenant, iamUrl, iamToken);
+  await fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenantId)
+    .then((iamToken) => configureIAM(
+      serviceAccountKey, iam, styraToken, styraTenant, iamUrl, iamToken,
+    ));
 };
 
 if (require.main === require.cache[eval('__filename')]) {
@@ -5095,13 +5097,13 @@ const getRole = async (
   });
 });
 
-function arraysEqual(a, b) {
-  if (a === b) return true;
-  if (a == null || b == null) return false;
-  if (a.length !== b.length) return false;
+function arraysEqual(rolePermissions, newPermissions) {
+  if (rolePermissions === newPermissions) return true;
+  if (rolePermissions == null || newPermissions == null) return false;
+  if (rolePermissions.length !== newPermissions.length) return false;
 
-  for (let i = 0; i < a.length; i += 1) {
-    if (a[i] !== b[i]) return false;
+  for (let i = 0; i < rolePermissions.length; i += 1) {
+    if (rolePermissions[i] !== newPermissions[i]) return false;
   }
   return true;
 }
@@ -5129,7 +5131,9 @@ const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
   });
 };
 
-module.exports = setupRoles;
+module.exports = {
+  setupRoles, getRole, createRole, updateRole, arraysEqual,
+};
 
 
 /***/ }),
@@ -21188,7 +21192,7 @@ const jsonSchema = __webpack_require__(388);
 
 const loadFile = (iamFile) => {
   if (!fs.existsSync(iamFile)) {
-    throw Error(`Service specification file not found: ${iamFile}`);
+    throw Error(`iam specification file not found: ${iamFile}`);
   }
   return yaml.parse(fs.readFileSync(iamFile, 'utf8'));
 };
@@ -23478,9 +23482,11 @@ module.exports = {
       properties: {
         id: {
           type: 'string',
+          required: true,
         },
-        desc: {
+        name: {
           type: 'string',
+          required: true,
         },
       },
     },
@@ -40628,7 +40634,7 @@ module.exports = require("path");
 
 const request = __webpack_require__(653);
 const { setupPermissions, handlePermissions } = __webpack_require__(744);
-const setupRoles = __webpack_require__(94);
+const { setupRoles } = __webpack_require__(94);
 const setupGcloud = __webpack_require__(217);
 const projectInfo = __webpack_require__(47);
 
@@ -48522,17 +48528,13 @@ const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
 
 const setupPermissions = async (permissions, systemId) => {
   const fullPermissions = new Map();
-  for (const permission in permissions) {
-    if (Object.prototype.hasOwnProperty.call(permission, permissions)) {
-      for (const verb in permissions[permission]) {
-        if (Object.prototype.hasOwnProperty.call(verb, permissions[permission])) {
-          const id = `${systemId}.${permission}.${verb}`;
-          const description = permissions[permission][verb];
-          fullPermissions.set(id, description);
-        }
-      }
-    }
-  }
+  Object.keys(permissions).forEach((permission) => {
+    Object.entries(permissions[permission]).forEach(([verb, desc]) => {
+      const id = `${systemId}.${permission}.${verb}`;
+      const description = desc;
+      fullPermissions.set(id, description);
+    });
+  });
   return fullPermissions;
 };
 

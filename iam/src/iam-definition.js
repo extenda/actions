@@ -6,7 +6,7 @@ const jsonSchema = require('./iam-schema');
 
 const loadFile = (iamFile) => {
   if (!fs.existsSync(iamFile)) {
-    throw Error(`Service specification file not found: ${iamFile}`);
+    throw Error(`iam specification file not found: ${iamFile}`);
   }
   return yaml.parse(fs.readFileSync(iamFile, 'utf8'));
 };
