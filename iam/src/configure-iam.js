@@ -1,13 +1,6 @@
 const request = require('request');
 const { setupPermissions, handlePermissions } = require('./permissions');
 const { setupRoles } = require('./roles');
-const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
-const projectInfo = require('../../cloud-run/src/project-info');
-
-const gcloudAuth = async (serviceAccountKey) => setupGcloud(
-  serviceAccountKey,
-  process.env.GCLOUD_INSTALLED_VERSION || 'latest',
-);
 
 const checkSystem = async (
   systemName, env, styraToken, styraTenant,
@@ -34,14 +27,8 @@ const checkSystem = async (
 });
 
 const configureIAM = async (
-  serviceAccountKey, iam, styraToken, styraTenant, iamToken, iamUrl,
+  iam, styraToken, styraTenant, iamToken, iamUrl, env,
 ) => {
-  const projectId = await gcloudAuth(serviceAccountKey);
-
-  const {
-    env,
-  } = projectInfo(projectId);
-
   const {
     system,
     permissions,

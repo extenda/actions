@@ -7,26 +7,6 @@ inputs:
       The service account key which will be used for authentication.
       The account key should be a base64 encoded JSON key stored as a secret.
     required: true
-  styra-token:
-    description: |
-      The token used to authenticate towards Styra-das
-    required: true
-  iam-email:
-    description: |
-      The email used to fetch iam-api token
-    required: true
-  iam-password:
-    description: |
-      The password used to fetch iam-api token
-    required: true
-  iam-key:
-    description: |
-      The API Key used to connect to identity platform
-    required: true
-  iam-tenant:
-    description: |
-      The tenant on the identity platform to authenticate against
-    required: true
   iam-definition:
     description: |
       The IAM YAML specification.

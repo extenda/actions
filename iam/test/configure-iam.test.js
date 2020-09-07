@@ -53,7 +53,7 @@ describe('Configure iam', () => {
       JSON.stringify(checkSystem)));
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
-    await configureIam('service-account', iam, 'styra-token', 'extendaretail', 'iam-token', 'https://apiurl.test.dev');
+    await configureIam(iam, 'styra-token', 'extendaretail', 'iam-token', 'https://apiurl.test.dev', 'staging');
 
     expect(request).toHaveBeenCalledTimes(1);
     expect(setupPermissions).toHaveBeenCalledWith(
@@ -94,7 +94,7 @@ describe('Configure iam', () => {
       JSON.stringify(checkSystem)));
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
-    await expect(configureIam('service-account', iam, 'styra-token', 'extendaretail', 'iam-token', 'https://apiurl.test.dev'))
+    await expect(configureIam(iam, 'styra-token', 'extendaretail', 'iam-token', 'https://apiurl.test.dev', 'staging'))
       .rejects.toEqual(new Error('No system found with name: test-test-staging'));
 
     expect(request).toHaveBeenCalledTimes(1);
