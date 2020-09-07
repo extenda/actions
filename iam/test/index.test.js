@@ -26,7 +26,7 @@ describe('run action', () => {
       iamApiEmail: 'iam-email',
       iamApiPassword: 'iam-pass',
       iamApiKey: 'iam-key',
-      iamApiTenantId: 'iam-tenant',
+      iamApiTenant: 'iam-tenant',
     };
 
     setupGcloud.mockResolvedValueOnce('test-staging-332');

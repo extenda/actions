@@ -7183,14 +7183,14 @@ const action = async () => {
     iamApiEmail,
     iamApiPassword,
     iamApiKey,
-    iamApiTenantId,
+    iamApiTenant,
   } = await loadCredentials(serviceAccountKey, env);
 
   const iamUrl = core.getInput('iam-api-url')
   || `https://iam-api.retailsvc.${(env === 'staging') ? 'dev' : 'com'}`;
 
   const iam = loadIamDefinition(iamFile);
-  await fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenantId)
+  await fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenant)
     .then((iamToken) => configureIAM(
       iam, styraToken, styraTenant, iamUrl, iamToken, env,
     ));
