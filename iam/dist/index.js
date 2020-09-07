@@ -4247,7 +4247,7 @@ const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const iamFile = core.getInput('iam-definition') || 'iam.yaml';
   const styraTenant = core.getInput('styra-workspace') || 'extendaretail';
-  const iamUrl = core.getInput('iam-api-url') || 'https://iam-api.retailsvc';
+  const iamUrl = core.getInput('iam-api-url') || 'https://iam-api.retailsvc.dev';
 
   const styraToken = core.getInput('styra-token', { required: true });
   const iamApiEmail = core.getInput('iam-email', { required: true });
@@ -40668,15 +40668,13 @@ const checkSystem = async (
 });
 
 const configureIAM = async (
-  serviceAccountKey, iam, styraToken, styraTenant, iamToken, baseIamUrl,
+  serviceAccountKey, iam, styraToken, styraTenant, iamToken, iamUrl,
 ) => {
   const projectId = await gcloudAuth(serviceAccountKey);
 
   const {
     env,
   } = projectInfo(projectId);
-
-  const iamUrl = baseIamUrl + ((env === 'staging') ? '.dev' : '.com');
 
   const {
     system,

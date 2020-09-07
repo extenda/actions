@@ -10,7 +10,7 @@ const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const iamFile = core.getInput('iam-definition') || 'iam.yaml';
   const styraTenant = core.getInput('styra-workspace') || 'extendaretail';
-  const iamUrl = core.getInput('iam-api-url') || 'https://iam-api.retailsvc';
+  const iamUrl = core.getInput('iam-api-url') || 'https://iam-api.retailsvc.dev';
 
   const styraToken = core.getInput('styra-token', { required: true });
   const iamApiEmail = core.getInput('iam-email', { required: true });

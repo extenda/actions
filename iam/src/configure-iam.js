@@ -34,15 +34,13 @@ const checkSystem = async (
 });
 
 const configureIAM = async (
-  serviceAccountKey, iam, styraToken, styraTenant, iamToken, baseIamUrl,
+  serviceAccountKey, iam, styraToken, styraTenant, iamToken, iamUrl,
 ) => {
   const projectId = await gcloudAuth(serviceAccountKey);
 
   const {
     env,
   } = projectInfo(projectId);
-
-  const iamUrl = baseIamUrl + ((env === 'staging') ? '.dev' : '.com');
 
   const {
     system,

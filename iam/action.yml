@@ -39,9 +39,9 @@ inputs:
     default: extendaretail
   iam-api-url:
     description: |
-      The iam-api service url (.com or .dev will be added depending on env)
+      The iam-api service url
     required: false
-    default: https://iam-api.retailsvc
+    default: https://iam-api.retailsvc.dev
 runs:
   using: node12
   main: dist/index.js
