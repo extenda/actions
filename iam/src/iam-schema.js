@@ -8,7 +8,7 @@ module.exports = {
           type: 'string',
           required: true,
         },
-        name: {
+        description: {
           type: 'string',
           required: true,
         },

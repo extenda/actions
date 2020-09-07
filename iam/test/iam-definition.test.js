@@ -29,7 +29,7 @@ permissions:
       mockFs({
         'iam.yaml': `
 system:
-  name: test
+  description: test
 permissions:
   res:
     verb: descr
