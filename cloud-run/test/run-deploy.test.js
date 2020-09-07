@@ -61,7 +61,7 @@ describe('Run Deploy', () => {
       '--platform=managed',
       '--region=eu-west1',
       '--allow-unauthenticated',
-    ]);
+    ], expect.anything());
   });
 
   test('It parse projectId and set labels', async () => {
@@ -100,7 +100,7 @@ describe('Run Deploy', () => {
       '--platform=managed',
       '--region=eu-west1',
       '--allow-unauthenticated',
-    ]);
+    ], expect.anything());
   });
 
   test('It can deploy with enabled http/2', async () => {
@@ -199,7 +199,7 @@ describe('Run Deploy', () => {
       '--platform=managed',
       '--region=eu-west1',
       '--allow-unauthenticated',
-    ]);
+    ], expect.anything());
   });
 
   test('It can deploy authenticated', async () => {
@@ -323,7 +323,7 @@ describe('Run Deploy', () => {
       '--connectivity=external',
       '--no-use-http2',
       '--namespace=my-space',
-    ]);
+    ], expect.anything());
   });
 
   test('It can deploy to Cloud Run on GKE and discover cluster', async () => {
@@ -371,7 +371,7 @@ describe('Run Deploy', () => {
       '--connectivity=external',
       '--no-use-http2',
       '--namespace=my-service',
-    ]);
+    ], expect.anything());
   });
 
   test('It can deploy to Cloud Run on GKE and discover cluster-location', async () => {
@@ -424,7 +424,7 @@ describe('Run Deploy', () => {
       '--connectivity=external',
       '--no-use-http2',
       '--namespace=default',
-    ]);
+    ], expect.anything());
   });
 
   test('It throws for invalid managed cpu units', async () => {
@@ -519,6 +519,84 @@ describe('Run Deploy', () => {
       '--connectivity=external',
       '--no-use-http2',
       '--namespace=my-service',
-    ]);
+    ], expect.anything());
+  });
+
+  test('It will wait for revision if deploy fails due to scaling out cluster', async () => {
+    const gcloudOutput = `
+Deploying container to Cloud Run for Anthos service [xxxxxxx] in namespace [default] of cluster [k8s-cluster]
+Deploying...
+Creating Revision.................failed
+Deployment failed
+ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3 nodes are available: 3 Insufficient cpu..
+`;
+
+    getClusterInfo.mockResolvedValueOnce({
+      project: 'tribe-staging-1234',
+      cluster: 'k8s-cluster',
+      clusterLocation: 'europe-west1',
+      uri: 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
+    });
+
+    const revisionStatus = {
+      status: {
+        conditions: [
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            severity: 'Info',
+            status: 'False',
+            type: 'Active',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'ContainerHealthy',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'Ready',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'ResourcesAvailable',
+          },
+        ],
+      },
+    };
+
+    exec.exec.mockImplementationOnce((cmd, args, opts) => {
+      opts.listeners.stderr(Buffer.from(gcloudOutput, 'utf8'));
+      return Promise.reject(new Error('Mock error'));
+    }).mockImplementationOnce((cmd, args, opts) => {
+      opts.listeners.stdout(Buffer.from(JSON.stringify(revisionStatus), 'utf8'));
+      return Promise.resolve(0);
+    }).mockImplementationOnce((cmd, args, opts) => {
+      revisionStatus.status.conditions[0].status = 'True';
+      opts.listeners.stdout(Buffer.from(JSON.stringify(revisionStatus), 'utf8'));
+      return Promise.resolve(0);
+    });
+
+    setupGcloud.mockResolvedValueOnce('test-project');
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      cpu: '233m',
+      platform: {
+        gke: {
+          connectivity: 'external',
+        },
+      },
+    };
+    const returnValue = await runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-project/my-service:tag',
+      false,
+      10,
+    );
+
+    expect(returnValue.gcloudExitCode).toEqual(0);
   });
 });
