@@ -98,13 +98,16 @@ const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
       rolePermissions[i] = `${systemId}.${rolePermissions[i]}`;
     }
 
+    core.info(`fetching data for ${roleId}`);
     const roleResult = await getRole(iamToken, iamUrl, roleId);
     if (roleResult === true) {
+      core.info(`creating ${roleId}`);
       await createRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
         .then((message) => core.info(message));
     } else if (
       !arraysEqual(roleResult.permissions, rolePermissions)
-        || roleResult.name !== roleName) {
+      || roleResult.name !== roleName) {
+      core.info(`updating ${roleId}`);
       await updateRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
         .then((message) => core.info(message));
     }
