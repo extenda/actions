@@ -61,9 +61,11 @@ const getPermission = async (
 
 const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
   fullPermissions.forEach(async (desc, id) => {
+    core.info(`handling permission for ${id}`);
     getPermission(iamToken, id, desc, iamUrl)
       .then((status) => {
         if (status !== 'NONE') {
+          core.info(`permission ${id} require update`);
           updateAddPermission(iamToken, id, desc, status, iamUrl)
             .then((message) => core.info(message));
         }
