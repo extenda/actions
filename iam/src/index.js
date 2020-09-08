@@ -14,10 +14,11 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
+  const serviceAccountKeyCluster = core.getInput('service-account-key-cluster', { required: true });
   const iamFile = core.getInput('iam-definition') || 'iam.yaml';
   const styraTenant = core.getInput('styra-workspace') || 'extendaretail';
 
-  const projectId = await gcloudAuth(serviceAccountKey);
+  const projectId = await gcloudAuth(serviceAccountKeyCluster);
 
   const {
     env,

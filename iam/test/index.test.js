@@ -32,6 +32,7 @@ describe('run action', () => {
     setupGcloud.mockResolvedValueOnce('test-staging-332');
     loadCredentials.mockResolvedValueOnce(credentials);
     core.getInput.mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('service-account-cluster')
       .mockReturnValueOnce('iam.yaml')
       .mockReturnValueOnce('extendaretail')
       .mockReturnValueOnce('https://iam-api.retailsvc.dev');
@@ -39,7 +40,7 @@ describe('run action', () => {
     fetchToken.mockResolvedValueOnce('iam-token');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(4);
+    expect(core.getInput).toHaveBeenCalledTimes(5);
     expect(fetchToken).toHaveBeenCalledWith(
       'iam-key',
       'iam-email',
