@@ -15,7 +15,7 @@ Once created, the JSON key should be `base64` encoded and added as secret in the
 
 ```yaml
 jobs:
-  test:
+  staging:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1

@@ -53,7 +53,7 @@ describe('Configure iam', () => {
       JSON.stringify(checkSystem)));
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
-    await configureIam(iam, 'styra-token', 'extendaretail', 'iam-token', 'https://apiurl.test.dev', 'staging');
+    await configureIam(iam, 'styra-token', 'extendaretail', 'https://apiurl.test.dev', 'iam-token', 'staging');
 
     expect(request).toHaveBeenCalledTimes(1);
     expect(setupPermissions).toHaveBeenCalledWith(
