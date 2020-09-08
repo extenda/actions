@@ -20,14 +20,11 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - uses: extenda/actions/gcp-secret-manager@v0
-        with:
-          service-account-key: ${{ secrets.SECRET_AUTH }} # Required
-
       - name: IAM permissions
         uses: extenda/actions/iam@v0
         with:
-          service-account-key: ${{ secrets.SECRET_AUTH }} # Used to fetch required credentials
+          service-account-key: ${{ secrets.SECRET_AUTH }} # Used to fetch required credentials from secrets (required)
+          service-account-key-cluster: ${{ secrets.GCLOUD_AUTH_STAGING }} # Used to configure and create DAS-system on the correct cluster/environment (required)
           iam-definition: iam.yaml # default iam.yaml
           styra-tenant: extendaretail # default extendaretail
           iam-api-url: https://iam-api.retailsvc.dev # default https://iam-api.retailsvc. (dev for staging, com for prod)
