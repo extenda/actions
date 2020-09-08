@@ -70050,7 +70050,7 @@ const checkSystem = async (
 });
 
 const configureIAM = async (
-  iam, styraToken, styraTenant, iamToken, iamUrl, env,
+  iam, styraToken, styraTenant, iamUrl, iamToken, env,
 ) => {
   const {
     system,
