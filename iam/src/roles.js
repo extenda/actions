@@ -91,7 +91,7 @@ function arraysEqual(rolePermissions, newPermissions) {
 const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
   roles.forEach(async (role) => {
     const roleId = `${systemId}.${role.name}`;
-    const roleName = role.desc;
+    const roleName = role.description;
     const rolePermissions = role.permissions;
 
     for (let i = 0; i < rolePermissions.length; i += 1) {
