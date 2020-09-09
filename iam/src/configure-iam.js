@@ -38,9 +38,8 @@ const configureIAM = async (
   await checkSystem(system.id, env, styraToken, styraTenant);
 
   await setupPermissions(permissions, system.id)
-    .then((fullPermissions) => handlePermissions(fullPermissions, iamToken, iamUrl));
-
-  await setupRoles(roles, system.id, iamToken, iamUrl);
+    .then((fullPermissions) => handlePermissions(fullPermissions, iamToken, iamUrl))
+    .then(() => setupRoles(roles, system.id, iamToken, iamUrl));
 };
 
 module.exports = configureIAM;

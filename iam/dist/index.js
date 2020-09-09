@@ -70061,9 +70061,8 @@ const configureIAM = async (
   await checkSystem(system.id, env, styraToken, styraTenant);
 
   await setupPermissions(permissions, system.id)
-    .then((fullPermissions) => handlePermissions(fullPermissions, iamToken, iamUrl));
-
-  await setupRoles(roles, system.id, iamToken, iamUrl);
+    .then((fullPermissions) => handlePermissions(fullPermissions, iamToken, iamUrl))
+    .then(() => setupRoles(roles, system.id, iamToken, iamUrl));
 };
 
 module.exports = configureIAM;
@@ -83621,17 +83620,19 @@ const getPermission = async (
 });
 
 const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
+  const promises = [];
   fullPermissions.forEach(async (desc, id) => {
     core.info(`handling permission for ${id}`);
-    getPermission(iamToken, id, desc, iamUrl)
+    promises.push(getPermission(iamToken, id, desc, iamUrl)
       .then((status) => {
         if (status !== 'NONE') {
           core.info(`permission ${id} require update`);
-          updateAddPermission(iamToken, id, desc, status, iamUrl)
-            .then((message) => core.info(message));
+          return updateAddPermission(iamToken, id, desc, status, iamUrl);
         }
-      });
+        return null;
+      }));
   });
+  return Promise.all(promises);
 };
 
 const setupPermissions = async (permissions, systemId) => {
