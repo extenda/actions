@@ -50,7 +50,7 @@ properties are required and not.
 | `permissions`                      | An object containing the permissions for this service.                             | Yes      |               |
 | `roles`              | An list of roles that should exist for this service                                        | No       |         |
 | `roles.name`            | The role name                                                          | No       |          |
-| `roles.desc` | The description of the role, (max 20 characters)       | No             |
+| `roles.description` | The description of the role, (max 20 characters)       | No             |
 | `roles.permissions`             | An list of permissions this role should contain                                                                                 | No       |       |
 
 ### YAML Examples
@@ -72,7 +72,7 @@ permissions:
     special: Super user access
 roles:
   - name: admin
-    desc: IAM admin
+    description: IAM admin
     permissions:
       - 'tenants.create'
       - 'tenants.get'
@@ -80,7 +80,7 @@ roles:
       - 'tenants.delete'
       - 'tenants.special'
   - name: readonly
-    desc: IAM readonly
+    description: IAM readonly
     permissions:
       - 'tenants.get'
 

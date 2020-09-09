@@ -24,7 +24,7 @@ module.exports = {
           name: {
             type: 'string',
           },
-          desc: {
+          description: {
             type: 'string',
             maxLength: 20,
           },
