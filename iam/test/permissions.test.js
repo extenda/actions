@@ -24,9 +24,7 @@ describe('Setup permissions and handle', () => {
     await expect(setupPermissions(permissions, 'test'))
       .resolves.toEqual(result);
 
-    await handlePermissions(result, 'iam-token', 'api-url');
-
-    expect(request).toHaveBeenCalledTimes(2);
+    expect(request).toHaveBeenCalledTimes(0);
   });
 
   test('it can get permissions that exists', async () => {
@@ -57,7 +55,7 @@ describe('Setup permissions and handle', () => {
 
     await handlePermissions(result, 'iam-token', 'api-url');
 
-    expect(request).toHaveBeenCalledTimes(1);
+    expect(request).toHaveBeenCalledTimes(2);
   });
 
   test('it can update permissions', async () => {
@@ -77,7 +75,7 @@ describe('Setup permissions and handle', () => {
 
     await handlePermissions(result, 'iam-token', 'api-url');
 
-    expect(request).toHaveBeenCalledTimes(1);
+    expect(request).toHaveBeenCalledTimes(2);
   });
 
   test('it fails update permissions', async () => {
@@ -95,8 +93,8 @@ describe('Setup permissions and handle', () => {
     result.set('test.resource.get', 'Get resource');
 
 
-    await handlePermissions(result, 'iam-token', 'api-url');
+    await expect(handlePermissions(result, 'iam-token', 'api-url')).rejects.toEqual(new Error('Couldn\'t add/update permission'));
 
-    expect(request).toHaveBeenCalledTimes(1);
+    expect(request).toHaveBeenCalledTimes(2);
   });
 });
