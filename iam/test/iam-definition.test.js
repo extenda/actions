@@ -16,20 +16,21 @@ describe('IAM Definition', () => {
     test('It throws for missing system', () => {
       mockFs({
         'iam.yaml': `
+permission-prefix: test
+systems:
+  - namespace: test-space
+    repository: test-repo
 permissions:
 `,
       });
       expect(() => loadIamDefinition('iam.yaml'))
         .toThrow(`iam.yaml is not valid.
-0: instance.permissions is not of a type(s) object
-1: instance requires property "system"`);
+0: instance.permissions is not of a type(s) object`);
     });
 
-    test('It throws for missing system.id', () => {
+    test('It throws for missing systems and permission-prefix', () => {
       mockFs({
         'iam.yaml': `
-system:
-  description: test
 permissions:
   res:
     verb: descr
@@ -37,7 +38,8 @@ permissions:
       });
       expect(() => loadIamDefinition('iam.yaml'))
         .toThrow(`iam.yaml is not valid.
-0: instance.system.id is required
+0: instance requires property "permission-prefix"
+1: instance requires property "systems"
 `);
     });
   });

@@ -32,28 +32,28 @@ describe('run action', () => {
     setupGcloud.mockResolvedValueOnce('test-staging-332');
     loadCredentials.mockResolvedValueOnce(credentials);
     core.getInput.mockReturnValueOnce('service-account')
-      .mockReturnValueOnce('service-account-cluster')
+      .mockReturnValueOnce('service-account-staging')
+      .mockReturnValueOnce('service-account-prod')
       .mockReturnValueOnce('iam.yaml')
-      .mockReturnValueOnce('extendaretail')
-      .mockReturnValueOnce('https://iam-api.retailsvc.dev');
+      .mockReturnValueOnce('https://extendaretail.styra.com');
     loadIamDefinition.mockReturnValueOnce({});
     fetchToken.mockResolvedValueOnce('iam-token');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(5);
+    expect(core.getInput).toHaveBeenCalledTimes(6);
     expect(fetchToken).toHaveBeenCalledWith(
       'iam-key',
       'iam-email',
       'iam-pass',
       'iam-tenant',
     );
-    expect(configureIam).toHaveBeenCalledWith(
+    expect(configureIam).toHaveBeenNthCalledWith(1,
       {},
       'styra-token',
-      'extendaretail',
+      'https://extendaretail.styra.com',
       'https://iam-api.retailsvc.dev',
       'iam-token',
       'staging',
-    );
+      'test-staging-332');
   });
 });

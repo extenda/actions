@@ -18,10 +18,10 @@ describe('iam Credentials', () => {
   });
 
   test('It uses existing env vars', async () => {
-    process.env.API_EMAIL = 'email';
-    process.env.API_PASSWORD = 'password';
-    process.env.API_KEY = 'key';
-    process.env.API_TENANT = 'tenant';
+    process.env.API_EMAIL_prod = 'email';
+    process.env.API_PASSWORD_prod = 'password';
+    process.env.API_KEY_prod = 'key';
+    process.env.API_TENANT_prod = 'tenant';
     process.env.STYRA_TOKEN = 'styra-token';
     const {
       styraToken,
