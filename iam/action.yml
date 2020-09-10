@@ -22,7 +22,7 @@ inputs:
     default: iam.yaml
   styra-url:
     description: |
-      The styra workspace tenant
+      The styra url
     required: false
     default: https://extendaretail.styra.com
 runs:
