@@ -15,7 +15,7 @@ Once created, the JSON key should be `base64` encoded and added as secret in the
 
 ```yaml
 jobs:
-  staging:
+  prod:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -24,10 +24,10 @@ jobs:
         uses: extenda/actions/iam@v0
         with:
           service-account-key: ${{ secrets.SECRET_AUTH }} # Used to fetch required credentials from secrets (required)
-          service-account-key-cluster: ${{ secrets.GCLOUD_AUTH_STAGING }} # Used to configure and create DAS-system on the correct cluster/environment (required)
+          service-account-key-staging: ${{ secrets.GCLOUD_AUTH_STAGING }} # Used to configure and create DAS-system on the correct cluster/environment (required)
+          service-account-key-prod: ${{ secrets.GCLOUD_AUTH_PROD }} # Used to configure and create DAS-system on the correct cluster/environment (required)
           iam-definition: iam.yaml # default iam.yaml
-          styra-tenant: extendaretail # default extendaretail
-          iam-api-url: https://iam-api.retailsvc.dev # default https://iam-api.retailsvc. (dev for staging, com for prod)
+          styra-url: https://extendaretail.styra.com # default extendaretail
 
 ```
 

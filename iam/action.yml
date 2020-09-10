@@ -7,25 +7,24 @@ inputs:
       The service account key which will be used for authentication
       to the secrets manager.
     required: true
-  service-account-key-cluster:
+  service-account-key-staging:
     description: |
-      The service account key used to authenticate to your cluster project
+      The service account key used to authenticate to your stagin project
+    required: true
+  service-account-key-prod:
+    description: |
+      The service account key used to authenticate to your prod project
     required: true
   iam-definition:
     description: |
       The IAM YAML specification.
     required: false
     default: iam.yaml
-  styra-tenant:
+  styra-url:
     description: |
       The styra workspace tenant
     required: false
-    default: extendaretail
-  iam-api-url:
-    description: |
-      The iam-api service url
-    required: false
-    default: https://iam-api.retailsvc.dev
+    default: https://extendaretail.styra.com
 runs:
   using: node12
   main: dist/index.js

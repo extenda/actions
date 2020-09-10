@@ -1,11 +1,15 @@
+const core = require('@actions/core');
 const request = require('request');
 const { setupPermissions, handlePermissions } = require('./permissions');
 const { setupRoles } = require('./roles');
+const setupSystem = require('./create-system');
+const getClusterInfo = require('../../cloud-run/src/cluster-info');
+const authenticateKubectl = require('../../cloud-run/src/kubectl-auth');
 
 const checkSystem = async (
-  systemName, env, styraToken, styraTenant,
-) => new Promise((resolve, reject) => {
-  const url = `https://${styraTenant}.styra.com/v1/systems?compact=true&name=${systemName}-${env}`;
+  systemName, styraToken, styraUrl,
+) => new Promise((resolve) => {
+  const url = `${styraUrl}/v1/systems?compact=true&name=${systemName}`;
   request({
     uri: url,
     method: 'GET',
@@ -17,29 +21,49 @@ const checkSystem = async (
     if (!error) {
       const jsonBody = JSON.parse(body);
       jsonBody.result.forEach((result) => {
-        if (result.name === `${systemName}-${env}`) {
-          resolve(true);
+        if (result.name === `${systemName}`) {
+          resolve(false);
         }
       });
-      reject(new Error(`No system found with name: ${systemName}-${env}`));
+      resolve(true);
     }
   });
 });
 
 const configureIAM = async (
-  iam, styraToken, styraTenant, iamUrl, iamToken, env,
+  iam, styraToken, styraUrl, iamUrl, iamToken, env, projectId,
 ) => {
   const {
-    system,
+    'permission-prefix': permissionPrefix,
+    systems,
     permissions,
     roles,
   } = iam;
 
-  await checkSystem(system.id, env, styraToken, styraTenant);
 
-  await setupPermissions(permissions, system.id)
+  const promises = [];
+  const cluster = await getClusterInfo(projectId, undefined);
+  await authenticateKubectl(cluster);
+
+  Object.keys(systems).forEach(async (key) => {
+    const { namespace } = systems[key];
+    const { repository } = systems[key];
+    const systemName = `${permissionPrefix}.${namespace}-${env}`;
+    promises.push(checkSystem(systemName, styraToken, styraUrl)
+      .then((createSystem) => {
+        if (createSystem) {
+          core.info(`creating system ${systemName}`);
+          return setupSystem(namespace, systemName, env, repository, styraToken, styraUrl);
+        }
+        return null;
+      }));
+  });
+
+  promises.push(setupPermissions(permissions, permissionPrefix)
     .then((fullPermissions) => handlePermissions(fullPermissions, iamToken, iamUrl))
-    .then(() => setupRoles(roles, system.id, iamToken, iamUrl));
+    .then(() => setupRoles(roles, permissionPrefix, iamToken, iamUrl)));
+
+  return Promise.all(promises);
 };
 
 module.exports = configureIAM;
