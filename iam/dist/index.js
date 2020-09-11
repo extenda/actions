@@ -314,7 +314,24 @@ module.exports = function generate_uniqueItems(it, $keyword, $ruleType) {
 
 
 /***/ }),
-/* 3 */,
+/* 3 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const common = __webpack_require__(994);
+class Reader {
+    constructor(_root, _settings) {
+        this._root = _root;
+        this._settings = _settings;
+        this._root = common.replacePathSegmentSeparator(_root, _settings.pathSegmentSeparator);
+    }
+}
+exports.default = Reader;
+
+
+/***/ }),
 /* 4 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -346,7 +363,7 @@ module.exports = function generate_uniqueItems(it, $keyword, $ruleType) {
  *
  * body: the binary-encoded body.
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(294);
 
 // shortcut for pem API
@@ -977,168 +994,46 @@ exports.default = _default;
 /***/ }),
 /* 9 */,
 /* 10 */
-/***/ (function(__unusedmodule, exports) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-
-exports.byteLength = byteLength
-exports.toByteArray = toByteArray
-exports.fromByteArray = fromByteArray
-
-var lookup = []
-var revLookup = []
-var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array
-
-var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-for (var i = 0, len = code.length; i < len; ++i) {
-  lookup[i] = code[i]
-  revLookup[code.charCodeAt(i)] = i
+Object.defineProperty(exports, "__esModule", { value: true });
+const stream_1 = __webpack_require__(413);
+const async_1 = __webpack_require__(668);
+class StreamProvider {
+    constructor(_root, _settings) {
+        this._root = _root;
+        this._settings = _settings;
+        this._reader = new async_1.default(this._root, this._settings);
+        this._stream = new stream_1.Readable({
+            objectMode: true,
+            read: () => { },
+            destroy: this._reader.destroy.bind(this._reader)
+        });
+    }
+    read() {
+        this._reader.onError((error) => {
+            this._stream.emit('error', error);
+        });
+        this._reader.onEntry((entry) => {
+            this._stream.push(entry);
+        });
+        this._reader.onEnd(() => {
+            this._stream.push(null);
+        });
+        this._reader.read();
+        return this._stream;
+    }
 }
-
-// Support decoding URL-safe base64 strings, as Node.js does.
-// See: https://en.wikipedia.org/wiki/Base64#URL_applications
-revLookup['-'.charCodeAt(0)] = 62
-revLookup['_'.charCodeAt(0)] = 63
-
-function getLens (b64) {
-  var len = b64.length
-
-  if (len % 4 > 0) {
-    throw new Error('Invalid string. Length must be a multiple of 4')
-  }
-
-  // Trim off extra bytes after placeholder bytes are found
-  // See: https://github.com/beatgammit/base64-js/issues/42
-  var validLen = b64.indexOf('=')
-  if (validLen === -1) validLen = len
-
-  var placeHoldersLen = validLen === len
-    ? 0
-    : 4 - (validLen % 4)
-
-  return [validLen, placeHoldersLen]
-}
-
-// base64 is 4/3 + up to two characters of the original data
-function byteLength (b64) {
-  var lens = getLens(b64)
-  var validLen = lens[0]
-  var placeHoldersLen = lens[1]
-  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
-}
-
-function _byteLength (b64, validLen, placeHoldersLen) {
-  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
-}
-
-function toByteArray (b64) {
-  var tmp
-  var lens = getLens(b64)
-  var validLen = lens[0]
-  var placeHoldersLen = lens[1]
-
-  var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen))
-
-  var curByte = 0
-
-  // if there are placeholders, only get up to the last complete 4 chars
-  var len = placeHoldersLen > 0
-    ? validLen - 4
-    : validLen
-
-  var i
-  for (i = 0; i < len; i += 4) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 18) |
-      (revLookup[b64.charCodeAt(i + 1)] << 12) |
-      (revLookup[b64.charCodeAt(i + 2)] << 6) |
-      revLookup[b64.charCodeAt(i + 3)]
-    arr[curByte++] = (tmp >> 16) & 0xFF
-    arr[curByte++] = (tmp >> 8) & 0xFF
-    arr[curByte++] = tmp & 0xFF
-  }
-
-  if (placeHoldersLen === 2) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 2) |
-      (revLookup[b64.charCodeAt(i + 1)] >> 4)
-    arr[curByte++] = tmp & 0xFF
-  }
-
-  if (placeHoldersLen === 1) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 10) |
-      (revLookup[b64.charCodeAt(i + 1)] << 4) |
-      (revLookup[b64.charCodeAt(i + 2)] >> 2)
-    arr[curByte++] = (tmp >> 8) & 0xFF
-    arr[curByte++] = tmp & 0xFF
-  }
-
-  return arr
-}
-
-function tripletToBase64 (num) {
-  return lookup[num >> 18 & 0x3F] +
-    lookup[num >> 12 & 0x3F] +
-    lookup[num >> 6 & 0x3F] +
-    lookup[num & 0x3F]
-}
-
-function encodeChunk (uint8, start, end) {
-  var tmp
-  var output = []
-  for (var i = start; i < end; i += 3) {
-    tmp =
-      ((uint8[i] << 16) & 0xFF0000) +
-      ((uint8[i + 1] << 8) & 0xFF00) +
-      (uint8[i + 2] & 0xFF)
-    output.push(tripletToBase64(tmp))
-  }
-  return output.join('')
-}
-
-function fromByteArray (uint8) {
-  var tmp
-  var len = uint8.length
-  var extraBytes = len % 3 // if we have 1 byte left, pad 2 bytes
-  var parts = []
-  var maxChunkLength = 16383 // must be multiple of 3
-
-  // go through the array every three bytes, we'll deal with trailing stuff later
-  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
-    parts.push(encodeChunk(
-      uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)
-    ))
-  }
-
-  // pad the end with zeros, but make sure to not forget the extra bytes
-  if (extraBytes === 1) {
-    tmp = uint8[len - 1]
-    parts.push(
-      lookup[tmp >> 2] +
-      lookup[(tmp << 4) & 0x3F] +
-      '=='
-    )
-  } else if (extraBytes === 2) {
-    tmp = (uint8[len - 2] << 8) + uint8[len - 1]
-    parts.push(
-      lookup[tmp >> 10] +
-      lookup[(tmp >> 4) & 0x3F] +
-      lookup[(tmp << 2) & 0x3F] +
-      '='
-    )
-  }
-
-  return parts.join('')
-}
+exports.default = StreamProvider;
 
 
 /***/ }),
 /* 11 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-var crypto = __webpack_require__(417)
+var crypto = __webpack_require__(373)
 
 function sha (key, body, algorithm) {
   return crypto.createHmac(algorithm, key).update(body).digest('base64')
@@ -1292,7 +1187,7 @@ exports.generateBase = generateBase
 
 
 
-var FileStatusSummary = __webpack_require__(112);
+var FileStatusSummary = __webpack_require__(807);
 
 module.exports = StatusSummary;
 
@@ -1473,7 +1368,52 @@ function splitLine (lineStr) {
 
 
 /***/ }),
-/* 13 */,
+/* 13 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+// Copyright 2015 Joyent, Inc.
+
+var Key = __webpack_require__(463);
+var Fingerprint = __webpack_require__(926);
+var Signature = __webpack_require__(885);
+var PrivateKey = __webpack_require__(877);
+var Certificate = __webpack_require__(89);
+var Identity = __webpack_require__(359);
+var errs = __webpack_require__(172);
+
+module.exports = {
+	/* top-level classes */
+	Key: Key,
+	parseKey: Key.parse,
+	Fingerprint: Fingerprint,
+	parseFingerprint: Fingerprint.parse,
+	Signature: Signature,
+	parseSignature: Signature.parse,
+	PrivateKey: PrivateKey,
+	parsePrivateKey: PrivateKey.parse,
+	generatePrivateKey: PrivateKey.generate,
+	Certificate: Certificate,
+	parseCertificate: Certificate.parse,
+	createSelfSignedCertificate: Certificate.createSelfSigned,
+	createCertificate: Certificate.create,
+	Identity: Identity,
+	identityFromDN: Identity.parseDN,
+	identityForHost: Identity.forHost,
+	identityForUser: Identity.forUser,
+	identityForEmail: Identity.forEmail,
+	identityFromArray: Identity.fromArray,
+
+	/* errors */
+	FingerprintFormatError: errs.FingerprintFormatError,
+	InvalidAlgorithmError: errs.InvalidAlgorithmError,
+	KeyParseError: errs.KeyParseError,
+	SignatureParseError: errs.SignatureParseError,
+	KeyEncryptedError: errs.KeyEncryptedError,
+	CertificateParseError: errs.CertificateParseError
+};
+
+
+/***/ }),
 /* 14 */
 /***/ (function(module) {
 
@@ -2163,295 +2103,27 @@ function childrenIgnored (self, path) {
 
 /***/ }),
 /* 21 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports) {
 
-// Copyright 2017 Joyent, Inc.
+"use strict";
 
-module.exports = {
-	read: read,
-	write: write
-};
-
-var assert = __webpack_require__(552);
-var Buffer = __webpack_require__(299).Buffer;
-var Key = __webpack_require__(463);
-var PrivateKey = __webpack_require__(877);
-var utils = __webpack_require__(241);
-var SSHBuffer = __webpack_require__(53);
-var Dhe = __webpack_require__(581);
-
-var supportedAlgos = {
-	'rsa-sha1' : 5,
-	'rsa-sha256' : 8,
-	'rsa-sha512' : 10,
-	'ecdsa-p256-sha256' : 13,
-	'ecdsa-p384-sha384' : 14
-	/*
-	 * ed25519 is hypothetically supported with id 15
-	 * but the common tools available don't appear to be
-	 * capable of generating/using ed25519 keys
-	 */
-};
-
-var supportedAlgosById = {};
-Object.keys(supportedAlgos).forEach(function (k) {
-	supportedAlgosById[supportedAlgos[k]] = k.toUpperCase();
-});
-
-function read(buf, options) {
-	if (typeof (buf) !== 'string') {
-		assert.buffer(buf, 'buf');
-		buf = buf.toString('ascii');
-	}
-	var lines = buf.split('\n');
-	if (lines[0].match(/^Private-key-format\: v1/)) {
-		var algElems = lines[1].split(' ');
-		var algoNum = parseInt(algElems[1], 10);
-		var algoName = algElems[2];
-		if (!supportedAlgosById[algoNum])
-			throw (new Error('Unsupported algorithm: ' + algoName));
-		return (readDNSSECPrivateKey(algoNum, lines.slice(2)));
-	}
-
-	// skip any comment-lines
-	var line = 0;
-	/* JSSTYLED */
-	while (lines[line].match(/^\;/))
-		line++;
-	// we should now have *one single* line left with our KEY on it.
-	if ((lines[line].match(/\. IN KEY /) ||
-	    lines[line].match(/\. IN DNSKEY /)) && lines[line+1].length === 0) {
-		return (readRFC3110(lines[line]));
-	}
-	throw (new Error('Cannot parse dnssec key'));
+Object.defineProperty(exports, "__esModule", { value: true });
+class DirentFromStats {
+    constructor(name, stats) {
+        this.name = name;
+        this.isBlockDevice = stats.isBlockDevice.bind(stats);
+        this.isCharacterDevice = stats.isCharacterDevice.bind(stats);
+        this.isDirectory = stats.isDirectory.bind(stats);
+        this.isFIFO = stats.isFIFO.bind(stats);
+        this.isFile = stats.isFile.bind(stats);
+        this.isSocket = stats.isSocket.bind(stats);
+        this.isSymbolicLink = stats.isSymbolicLink.bind(stats);
+    }
 }
-
-function readRFC3110(keyString) {
-	var elems = keyString.split(' ');
-	//unused var flags = parseInt(elems[3], 10);
-	//unused var protocol = parseInt(elems[4], 10);
-	var algorithm = parseInt(elems[5], 10);
-	if (!supportedAlgosById[algorithm])
-		throw (new Error('Unsupported algorithm: ' + algorithm));
-	var base64key = elems.slice(6, elems.length).join();
-	var keyBuffer = Buffer.from(base64key, 'base64');
-	if (supportedAlgosById[algorithm].match(/^RSA-/)) {
-		// join the rest of the body into a single base64-blob
-		var publicExponentLen = keyBuffer.readUInt8(0);
-		if (publicExponentLen != 3 && publicExponentLen != 1)
-			throw (new Error('Cannot parse dnssec key: ' +
-			    'unsupported exponent length'));
-
-		var publicExponent = keyBuffer.slice(1, publicExponentLen+1);
-		publicExponent = utils.mpNormalize(publicExponent);
-		var modulus = keyBuffer.slice(1+publicExponentLen);
-		modulus = utils.mpNormalize(modulus);
-		// now, make the key
-		var rsaKey = {
-			type: 'rsa',
-			parts: []
-		};
-		rsaKey.parts.push({ name: 'e', data: publicExponent});
-		rsaKey.parts.push({ name: 'n', data: modulus});
-		return (new Key(rsaKey));
-	}
-	if (supportedAlgosById[algorithm] === 'ECDSA-P384-SHA384' ||
-	    supportedAlgosById[algorithm] === 'ECDSA-P256-SHA256') {
-		var curve = 'nistp384';
-		var size = 384;
-		if (supportedAlgosById[algorithm].match(/^ECDSA-P256-SHA256/)) {
-			curve = 'nistp256';
-			size = 256;
-		}
-
-		var ecdsaKey = {
-			type: 'ecdsa',
-			curve: curve,
-			size: size,
-			parts: [
-				{name: 'curve', data: Buffer.from(curve) },
-				{name: 'Q', data: utils.ecNormalize(keyBuffer) }
-			]
-		};
-		return (new Key(ecdsaKey));
-	}
-	throw (new Error('Unsupported algorithm: ' +
-	    supportedAlgosById[algorithm]));
+function createDirentFromStats(name, stats) {
+    return new DirentFromStats(name, stats);
 }
-
-function elementToBuf(e) {
-	return (Buffer.from(e.split(' ')[1], 'base64'));
-}
-
-function readDNSSECRSAPrivateKey(elements) {
-	var rsaParams = {};
-	elements.forEach(function (element) {
-		if (element.split(' ')[0] === 'Modulus:')
-			rsaParams['n'] = elementToBuf(element);
-		else if (element.split(' ')[0] === 'PublicExponent:')
-			rsaParams['e'] = elementToBuf(element);
-		else if (element.split(' ')[0] === 'PrivateExponent:')
-			rsaParams['d'] = elementToBuf(element);
-		else if (element.split(' ')[0] === 'Prime1:')
-			rsaParams['p'] = elementToBuf(element);
-		else if (element.split(' ')[0] === 'Prime2:')
-			rsaParams['q'] = elementToBuf(element);
-		else if (element.split(' ')[0] === 'Exponent1:')
-			rsaParams['dmodp'] = elementToBuf(element);
-		else if (element.split(' ')[0] === 'Exponent2:')
-			rsaParams['dmodq'] = elementToBuf(element);
-		else if (element.split(' ')[0] === 'Coefficient:')
-			rsaParams['iqmp'] = elementToBuf(element);
-	});
-	// now, make the key
-	var key = {
-		type: 'rsa',
-		parts: [
-			{ name: 'e', data: utils.mpNormalize(rsaParams['e'])},
-			{ name: 'n', data: utils.mpNormalize(rsaParams['n'])},
-			{ name: 'd', data: utils.mpNormalize(rsaParams['d'])},
-			{ name: 'p', data: utils.mpNormalize(rsaParams['p'])},
-			{ name: 'q', data: utils.mpNormalize(rsaParams['q'])},
-			{ name: 'dmodp',
-			    data: utils.mpNormalize(rsaParams['dmodp'])},
-			{ name: 'dmodq',
-			    data: utils.mpNormalize(rsaParams['dmodq'])},
-			{ name: 'iqmp',
-			    data: utils.mpNormalize(rsaParams['iqmp'])}
-		]
-	};
-	return (new PrivateKey(key));
-}
-
-function readDNSSECPrivateKey(alg, elements) {
-	if (supportedAlgosById[alg].match(/^RSA-/)) {
-		return (readDNSSECRSAPrivateKey(elements));
-	}
-	if (supportedAlgosById[alg] === 'ECDSA-P384-SHA384' ||
-	    supportedAlgosById[alg] === 'ECDSA-P256-SHA256') {
-		var d = Buffer.from(elements[0].split(' ')[1], 'base64');
-		var curve = 'nistp384';
-		var size = 384;
-		if (supportedAlgosById[alg] === 'ECDSA-P256-SHA256') {
-			curve = 'nistp256';
-			size = 256;
-		}
-		// DNSSEC generates the public-key on the fly (go calculate it)
-		var publicKey = utils.publicFromPrivateECDSA(curve, d);
-		var Q = publicKey.part['Q'].data;
-		var ecdsaKey = {
-			type: 'ecdsa',
-			curve: curve,
-			size: size,
-			parts: [
-				{name: 'curve', data: Buffer.from(curve) },
-				{name: 'd', data: d },
-				{name: 'Q', data: Q }
-			]
-		};
-		return (new PrivateKey(ecdsaKey));
-	}
-	throw (new Error('Unsupported algorithm: ' + supportedAlgosById[alg]));
-}
-
-function dnssecTimestamp(date) {
-	var year = date.getFullYear() + ''; //stringify
-	var month = (date.getMonth() + 1);
-	var timestampStr = year + month + date.getUTCDate();
-	timestampStr += '' + date.getUTCHours() + date.getUTCMinutes();
-	timestampStr += date.getUTCSeconds();
-	return (timestampStr);
-}
-
-function rsaAlgFromOptions(opts) {
-	if (!opts || !opts.hashAlgo || opts.hashAlgo === 'sha1')
-		return ('5 (RSASHA1)');
-	else if (opts.hashAlgo === 'sha256')
-		return ('8 (RSASHA256)');
-	else if (opts.hashAlgo === 'sha512')
-		return ('10 (RSASHA512)');
-	else
-		throw (new Error('Unknown or unsupported hash: ' +
-		    opts.hashAlgo));
-}
-
-function writeRSA(key, options) {
-	// if we're missing parts, add them.
-	if (!key.part.dmodp || !key.part.dmodq) {
-		utils.addRSAMissing(key);
-	}
-
-	var out = '';
-	out += 'Private-key-format: v1.3\n';
-	out += 'Algorithm: ' + rsaAlgFromOptions(options) + '\n';
-	var n = utils.mpDenormalize(key.part['n'].data);
-	out += 'Modulus: ' + n.toString('base64') + '\n';
-	var e = utils.mpDenormalize(key.part['e'].data);
-	out += 'PublicExponent: ' + e.toString('base64') + '\n';
-	var d = utils.mpDenormalize(key.part['d'].data);
-	out += 'PrivateExponent: ' + d.toString('base64') + '\n';
-	var p = utils.mpDenormalize(key.part['p'].data);
-	out += 'Prime1: ' + p.toString('base64') + '\n';
-	var q = utils.mpDenormalize(key.part['q'].data);
-	out += 'Prime2: ' + q.toString('base64') + '\n';
-	var dmodp = utils.mpDenormalize(key.part['dmodp'].data);
-	out += 'Exponent1: ' + dmodp.toString('base64') + '\n';
-	var dmodq = utils.mpDenormalize(key.part['dmodq'].data);
-	out += 'Exponent2: ' + dmodq.toString('base64') + '\n';
-	var iqmp = utils.mpDenormalize(key.part['iqmp'].data);
-	out += 'Coefficient: ' + iqmp.toString('base64') + '\n';
-	// Assume that we're valid as-of now
-	var timestamp = new Date();
-	out += 'Created: ' + dnssecTimestamp(timestamp) + '\n';
-	out += 'Publish: ' + dnssecTimestamp(timestamp) + '\n';
-	out += 'Activate: ' + dnssecTimestamp(timestamp) + '\n';
-	return (Buffer.from(out, 'ascii'));
-}
-
-function writeECDSA(key, options) {
-	var out = '';
-	out += 'Private-key-format: v1.3\n';
-
-	if (key.curve === 'nistp256') {
-		out += 'Algorithm: 13 (ECDSAP256SHA256)\n';
-	} else if (key.curve === 'nistp384') {
-		out += 'Algorithm: 14 (ECDSAP384SHA384)\n';
-	} else {
-		throw (new Error('Unsupported curve'));
-	}
-	var base64Key = key.part['d'].data.toString('base64');
-	out += 'PrivateKey: ' + base64Key + '\n';
-
-	// Assume that we're valid as-of now
-	var timestamp = new Date();
-	out += 'Created: ' + dnssecTimestamp(timestamp) + '\n';
-	out += 'Publish: ' + dnssecTimestamp(timestamp) + '\n';
-	out += 'Activate: ' + dnssecTimestamp(timestamp) + '\n';
-
-	return (Buffer.from(out, 'ascii'));
-}
-
-function write(key, options) {
-	if (PrivateKey.isPrivateKey(key)) {
-		if (key.type === 'rsa') {
-			return (writeRSA(key, options));
-		} else if (key.type === 'ecdsa') {
-			return (writeECDSA(key, options));
-		} else {
-			throw (new Error('Unsupported algorithm: ' + key.type));
-		}
-	} else if (Key.isKey(key)) {
-		/*
-		 * RFC3110 requires a keyname, and a keytype, which we
-		 * don't really have a mechanism for specifying such
-		 * additional metadata.
-		 */
-		throw (new Error('Format "dnssec" only supports ' +
-		    'writing private keys'));
-	} else {
-		throw (new Error('key is not a Key or PrivateKey'));
-	}
-}
+exports.createDirentFromStats = createDirentFromStats;
 
 
 /***/ }),
@@ -2661,735 +2333,1012 @@ function isUnixExecutable(stats) {
 /* 25 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-/**
- * Support for concurrent task management and synchronization in web
- * applications.
- *
- * @author Dave Longley
- * @author David I. Lehn <dlehn@digitalbazaar.com>
- *
- * Copyright (c) 2009-2013 Digital Bazaar, Inc.
- */
-var forge = __webpack_require__(998);
-__webpack_require__(367);
-__webpack_require__(931);
-__webpack_require__(294);
+// Copyright 2017 Joyent, Inc.
 
-// logging category
-var cat = 'forge.task';
-
-// verbose level
-// 0: off, 1: a little, 2: a whole lot
-// Verbose debug logging is surrounded by a level check to avoid the
-// performance issues with even calling the logging code regardless if it
-// is actually logged.  For performance reasons this should not be set to 2
-// for production use.
-// ex: if(sVL >= 2) forge.log.verbose(....)
-var sVL = 0;
-
-// track tasks for debugging
-var sTasks = {};
-var sNextTaskId = 0;
-// debug access
-forge.debug.set(cat, 'tasks', sTasks);
-
-// a map of task type to task queue
-var sTaskQueues = {};
-// debug access
-forge.debug.set(cat, 'queues', sTaskQueues);
-
-// name for unnamed tasks
-var sNoTaskName = '?';
-
-// maximum number of doNext() recursions before a context swap occurs
-// FIXME: might need to tweak this based on the browser
-var sMaxRecursions = 30;
-
-// time slice for doing tasks before a context swap occurs
-// FIXME: might need to tweak this based on the browser
-var sTimeSlice = 20;
-
-/**
- * Task states.
- *
- * READY: ready to start processing
- * RUNNING: task or a subtask is running
- * BLOCKED: task is waiting to acquire N permits to continue
- * SLEEPING: task is sleeping for a period of time
- * DONE: task is done
- * ERROR: task has an error
- */
-var READY = 'ready';
-var RUNNING = 'running';
-var BLOCKED = 'blocked';
-var SLEEPING = 'sleeping';
-var DONE = 'done';
-var ERROR = 'error';
-
-/**
- * Task actions.  Used to control state transitions.
- *
- * STOP: stop processing
- * START: start processing tasks
- * BLOCK: block task from continuing until 1 or more permits are released
- * UNBLOCK: release one or more permits
- * SLEEP: sleep for a period of time
- * WAKEUP: wakeup early from SLEEPING state
- * CANCEL: cancel further tasks
- * FAIL: a failure occured
- */
-var STOP = 'stop';
-var START = 'start';
-var BLOCK = 'block';
-var UNBLOCK = 'unblock';
-var SLEEP = 'sleep';
-var WAKEUP = 'wakeup';
-var CANCEL = 'cancel';
-var FAIL = 'fail';
-
-/**
- * State transition table.
- *
- * nextState = sStateTable[currentState][action]
- */
-var sStateTable = {};
-
-sStateTable[READY] = {};
-sStateTable[READY][STOP] = READY;
-sStateTable[READY][START] = RUNNING;
-sStateTable[READY][CANCEL] = DONE;
-sStateTable[READY][FAIL] = ERROR;
-
-sStateTable[RUNNING] = {};
-sStateTable[RUNNING][STOP] = READY;
-sStateTable[RUNNING][START] = RUNNING;
-sStateTable[RUNNING][BLOCK] = BLOCKED;
-sStateTable[RUNNING][UNBLOCK] = RUNNING;
-sStateTable[RUNNING][SLEEP] = SLEEPING;
-sStateTable[RUNNING][WAKEUP] = RUNNING;
-sStateTable[RUNNING][CANCEL] = DONE;
-sStateTable[RUNNING][FAIL] = ERROR;
-
-sStateTable[BLOCKED] = {};
-sStateTable[BLOCKED][STOP] = BLOCKED;
-sStateTable[BLOCKED][START] = BLOCKED;
-sStateTable[BLOCKED][BLOCK] = BLOCKED;
-sStateTable[BLOCKED][UNBLOCK] = BLOCKED;
-sStateTable[BLOCKED][SLEEP] = BLOCKED;
-sStateTable[BLOCKED][WAKEUP] = BLOCKED;
-sStateTable[BLOCKED][CANCEL] = DONE;
-sStateTable[BLOCKED][FAIL] = ERROR;
-
-sStateTable[SLEEPING] = {};
-sStateTable[SLEEPING][STOP] = SLEEPING;
-sStateTable[SLEEPING][START] = SLEEPING;
-sStateTable[SLEEPING][BLOCK] = SLEEPING;
-sStateTable[SLEEPING][UNBLOCK] = SLEEPING;
-sStateTable[SLEEPING][SLEEP] = SLEEPING;
-sStateTable[SLEEPING][WAKEUP] = SLEEPING;
-sStateTable[SLEEPING][CANCEL] = DONE;
-sStateTable[SLEEPING][FAIL] = ERROR;
-
-sStateTable[DONE] = {};
-sStateTable[DONE][STOP] = DONE;
-sStateTable[DONE][START] = DONE;
-sStateTable[DONE][BLOCK] = DONE;
-sStateTable[DONE][UNBLOCK] = DONE;
-sStateTable[DONE][SLEEP] = DONE;
-sStateTable[DONE][WAKEUP] = DONE;
-sStateTable[DONE][CANCEL] = DONE;
-sStateTable[DONE][FAIL] = ERROR;
-
-sStateTable[ERROR] = {};
-sStateTable[ERROR][STOP] = ERROR;
-sStateTable[ERROR][START] = ERROR;
-sStateTable[ERROR][BLOCK] = ERROR;
-sStateTable[ERROR][UNBLOCK] = ERROR;
-sStateTable[ERROR][SLEEP] = ERROR;
-sStateTable[ERROR][WAKEUP] = ERROR;
-sStateTable[ERROR][CANCEL] = ERROR;
-sStateTable[ERROR][FAIL] = ERROR;
-
-/**
- * Creates a new task.
- *
- * @param options options for this task
- *   run: the run function for the task (required)
- *   name: the run function for the task (optional)
- *   parent: parent of this task (optional)
- *
- * @return the empty task.
- */
-var Task = function(options) {
-  // task id
-  this.id = -1;
-
-  // task name
-  this.name = options.name || sNoTaskName;
-
-  // task has no parent
-  this.parent = options.parent || null;
-
-  // save run function
-  this.run = options.run;
-
-  // create a queue of subtasks to run
-  this.subtasks = [];
-
-  // error flag
-  this.error = false;
-
-  // state of the task
-  this.state = READY;
-
-  // number of times the task has been blocked (also the number
-  // of permits needed to be released to continue running)
-  this.blocks = 0;
-
-  // timeout id when sleeping
-  this.timeoutId = null;
-
-  // no swap time yet
-  this.swapTime = null;
-
-  // no user data
-  this.userData = null;
-
-  // initialize task
-  // FIXME: deal with overflow
-  this.id = sNextTaskId++;
-  sTasks[this.id] = this;
-  if(sVL >= 1) {
-    forge.log.verbose(cat, '[%s][%s] init', this.id, this.name, this);
-  }
+module.exports = {
+	DiffieHellman: DiffieHellman,
+	generateECDSA: generateECDSA,
+	generateED25519: generateED25519
 };
 
-/**
- * Logs debug information on this task and the system state.
- */
-Task.prototype.debug = function(msg) {
-  msg = msg || '';
-  forge.log.debug(cat, msg,
-    '[%s][%s] task:', this.id, this.name, this,
-    'subtasks:', this.subtasks.length,
-    'queue:', sTaskQueues);
+var assert = __webpack_require__(552);
+var crypto = __webpack_require__(373);
+var Buffer = __webpack_require__(299).Buffer;
+var algs = __webpack_require__(151);
+var utils = __webpack_require__(241);
+var nacl = __webpack_require__(701);
+
+var Key = __webpack_require__(463);
+var PrivateKey = __webpack_require__(877);
+
+var CRYPTO_HAVE_ECDH = (crypto.createECDH !== undefined);
+
+var ecdh = __webpack_require__(880);
+var ec = __webpack_require__(44);
+var jsbn = __webpack_require__(113).BigInteger;
+
+function DiffieHellman(key) {
+	utils.assertCompatible(key, Key, [1, 4], 'key');
+	this._isPriv = PrivateKey.isPrivateKey(key, [1, 3]);
+	this._algo = key.type;
+	this._curve = key.curve;
+	this._key = key;
+	if (key.type === 'dsa') {
+		if (!CRYPTO_HAVE_ECDH) {
+			throw (new Error('Due to bugs in the node 0.10 ' +
+			    'crypto API, node 0.12.x or later is required ' +
+			    'to use DH'));
+		}
+		this._dh = crypto.createDiffieHellman(
+		    key.part.p.data, undefined,
+		    key.part.g.data, undefined);
+		this._p = key.part.p;
+		this._g = key.part.g;
+		if (this._isPriv)
+			this._dh.setPrivateKey(key.part.x.data);
+		this._dh.setPublicKey(key.part.y.data);
+
+	} else if (key.type === 'ecdsa') {
+		if (!CRYPTO_HAVE_ECDH) {
+			this._ecParams = new X9ECParameters(this._curve);
+
+			if (this._isPriv) {
+				this._priv = new ECPrivate(
+				    this._ecParams, key.part.d.data);
+			}
+			return;
+		}
+
+		var curve = {
+			'nistp256': 'prime256v1',
+			'nistp384': 'secp384r1',
+			'nistp521': 'secp521r1'
+		}[key.curve];
+		this._dh = crypto.createECDH(curve);
+		if (typeof (this._dh) !== 'object' ||
+		    typeof (this._dh.setPrivateKey) !== 'function') {
+			CRYPTO_HAVE_ECDH = false;
+			DiffieHellman.call(this, key);
+			return;
+		}
+		if (this._isPriv)
+			this._dh.setPrivateKey(key.part.d.data);
+		this._dh.setPublicKey(key.part.Q.data);
+
+	} else if (key.type === 'curve25519') {
+		if (this._isPriv) {
+			utils.assertCompatible(key, PrivateKey, [1, 5], 'key');
+			this._priv = key.part.k.data;
+		}
+
+	} else {
+		throw (new Error('DH not supported for ' + key.type + ' keys'));
+	}
+}
+
+DiffieHellman.prototype.getPublicKey = function () {
+	if (this._isPriv)
+		return (this._key.toPublic());
+	return (this._key);
 };
 
-/**
- * Adds a subtask to run after task.doNext() or task.fail() is called.
- *
- * @param name human readable name for this task (optional).
- * @param subrun a function to run that takes the current task as
- *          its first parameter.
- *
- * @return the current task (useful for chaining next() calls).
- */
-Task.prototype.next = function(name, subrun) {
-  // juggle parameters if it looks like no name is given
-  if(typeof(name) === 'function') {
-    subrun = name;
+DiffieHellman.prototype.getPrivateKey = function () {
+	if (this._isPriv)
+		return (this._key);
+	else
+		return (undefined);
+};
+DiffieHellman.prototype.getKey = DiffieHellman.prototype.getPrivateKey;
 
-    // inherit parent's name
-    name = this.name;
-  }
-  // create subtask, set parent to this task, propagate callbacks
-  var subtask = new Task({
-    run: subrun,
-    name: name,
-    parent: this
-  });
-  // start subtasks running
-  subtask.state = RUNNING;
-  subtask.type = this.type;
-  subtask.successCallback = this.successCallback || null;
-  subtask.failureCallback = this.failureCallback || null;
+DiffieHellman.prototype._keyCheck = function (pk, isPub) {
+	assert.object(pk, 'key');
+	if (!isPub)
+		utils.assertCompatible(pk, PrivateKey, [1, 3], 'key');
+	utils.assertCompatible(pk, Key, [1, 4], 'key');
 
-  // queue a new subtask
-  this.subtasks.push(subtask);
+	if (pk.type !== this._algo) {
+		throw (new Error('A ' + pk.type + ' key cannot be used in ' +
+		    this._algo + ' Diffie-Hellman'));
+	}
 
-  return this;
+	if (pk.curve !== this._curve) {
+		throw (new Error('A key from the ' + pk.curve + ' curve ' +
+		    'cannot be used with a ' + this._curve +
+		    ' Diffie-Hellman'));
+	}
+
+	if (pk.type === 'dsa') {
+		assert.deepEqual(pk.part.p, this._p,
+		    'DSA key prime does not match');
+		assert.deepEqual(pk.part.g, this._g,
+		    'DSA key generator does not match');
+	}
 };
 
-/**
- * Adds subtasks to run in parallel after task.doNext() or task.fail()
- * is called.
- *
- * @param name human readable name for this task (optional).
- * @param subrun functions to run that take the current task as
- *          their first parameter.
- *
- * @return the current task (useful for chaining next() calls).
- */
-Task.prototype.parallel = function(name, subrun) {
-  // juggle parameters if it looks like no name is given
-  if(forge.util.isArray(name)) {
-    subrun = name;
+DiffieHellman.prototype.setKey = function (pk) {
+	this._keyCheck(pk);
 
-    // inherit parent's name
-    name = this.name;
-  }
-  // Wrap parallel tasks in a regular task so they are started at the
-  // proper time.
-  return this.next(name, function(task) {
-    // block waiting for subtasks
-    var ptask = task;
-    ptask.block(subrun.length);
+	if (pk.type === 'dsa') {
+		this._dh.setPrivateKey(pk.part.x.data);
+		this._dh.setPublicKey(pk.part.y.data);
 
-    // we pass the iterator from the loop below as a parameter
-    // to a function because it is otherwise included in the
-    // closure and changes as the loop changes -- causing i
-    // to always be set to its highest value
-    var startParallelTask = function(pname, pi) {
-      forge.task.start({
-        type: pname,
-        run: function(task) {
-           subrun[pi](task);
-        },
-        success: function(task) {
-           ptask.unblock();
-        },
-        failure: function(task) {
-           ptask.unblock();
-        }
-      });
-    };
+	} else if (pk.type === 'ecdsa') {
+		if (CRYPTO_HAVE_ECDH) {
+			this._dh.setPrivateKey(pk.part.d.data);
+			this._dh.setPublicKey(pk.part.Q.data);
+		} else {
+			this._priv = new ECPrivate(
+			    this._ecParams, pk.part.d.data);
+		}
 
-    for(var i = 0; i < subrun.length; i++) {
-      // Type must be unique so task starts in parallel:
-      //    name + private string + task id + sub-task index
-      // start tasks in parallel and unblock when the finish
-      var pname = name + '__parallel-' + task.id + '-' + i;
-      var pi = i;
-      startParallelTask(pname, pi);
-    }
-  });
+	} else if (pk.type === 'curve25519') {
+		var k = pk.part.k;
+		if (!pk.part.k)
+			k = pk.part.r;
+		this._priv = k.data;
+		if (this._priv[0] === 0x00)
+			this._priv = this._priv.slice(1);
+		this._priv = this._priv.slice(0, 32);
+	}
+	this._key = pk;
+	this._isPriv = true;
+};
+DiffieHellman.prototype.setPrivateKey = DiffieHellman.prototype.setKey;
+
+DiffieHellman.prototype.computeSecret = function (otherpk) {
+	this._keyCheck(otherpk, true);
+	if (!this._isPriv)
+		throw (new Error('DH exchange has not been initialized with ' +
+		    'a private key yet'));
+
+	var pub;
+	if (this._algo === 'dsa') {
+		return (this._dh.computeSecret(
+		    otherpk.part.y.data));
+
+	} else if (this._algo === 'ecdsa') {
+		if (CRYPTO_HAVE_ECDH) {
+			return (this._dh.computeSecret(
+			    otherpk.part.Q.data));
+		} else {
+			pub = new ECPublic(
+			    this._ecParams, otherpk.part.Q.data);
+			return (this._priv.deriveSharedSecret(pub));
+		}
+
+	} else if (this._algo === 'curve25519') {
+		pub = otherpk.part.A.data;
+		while (pub[0] === 0x00 && pub.length > 32)
+			pub = pub.slice(1);
+		var priv = this._priv;
+		assert.strictEqual(pub.length, 32);
+		assert.strictEqual(priv.length, 32);
+
+		var secret = nacl.box.before(new Uint8Array(pub),
+		    new Uint8Array(priv));
+
+		return (Buffer.from(secret));
+	}
+
+	throw (new Error('Invalid algorithm: ' + this._algo));
 };
 
-/**
- * Stops a running task.
- */
-Task.prototype.stop = function() {
-  this.state = sStateTable[this.state][STOP];
+DiffieHellman.prototype.generateKey = function () {
+	var parts = [];
+	var priv, pub;
+	if (this._algo === 'dsa') {
+		this._dh.generateKeys();
+
+		parts.push({name: 'p', data: this._p.data});
+		parts.push({name: 'q', data: this._key.part.q.data});
+		parts.push({name: 'g', data: this._g.data});
+		parts.push({name: 'y', data: this._dh.getPublicKey()});
+		parts.push({name: 'x', data: this._dh.getPrivateKey()});
+		this._key = new PrivateKey({
+			type: 'dsa',
+			parts: parts
+		});
+		this._isPriv = true;
+		return (this._key);
+
+	} else if (this._algo === 'ecdsa') {
+		if (CRYPTO_HAVE_ECDH) {
+			this._dh.generateKeys();
+
+			parts.push({name: 'curve',
+			    data: Buffer.from(this._curve)});
+			parts.push({name: 'Q', data: this._dh.getPublicKey()});
+			parts.push({name: 'd', data: this._dh.getPrivateKey()});
+			this._key = new PrivateKey({
+				type: 'ecdsa',
+				curve: this._curve,
+				parts: parts
+			});
+			this._isPriv = true;
+			return (this._key);
+
+		} else {
+			var n = this._ecParams.getN();
+			var r = new jsbn(crypto.randomBytes(n.bitLength()));
+			var n1 = n.subtract(jsbn.ONE);
+			priv = r.mod(n1).add(jsbn.ONE);
+			pub = this._ecParams.getG().multiply(priv);
+
+			priv = Buffer.from(priv.toByteArray());
+			pub = Buffer.from(this._ecParams.getCurve().
+			    encodePointHex(pub), 'hex');
+
+			this._priv = new ECPrivate(this._ecParams, priv);
+
+			parts.push({name: 'curve',
+			    data: Buffer.from(this._curve)});
+			parts.push({name: 'Q', data: pub});
+			parts.push({name: 'd', data: priv});
+
+			this._key = new PrivateKey({
+				type: 'ecdsa',
+				curve: this._curve,
+				parts: parts
+			});
+			this._isPriv = true;
+			return (this._key);
+		}
+
+	} else if (this._algo === 'curve25519') {
+		var pair = nacl.box.keyPair();
+		priv = Buffer.from(pair.secretKey);
+		pub = Buffer.from(pair.publicKey);
+		priv = Buffer.concat([priv, pub]);
+		assert.strictEqual(priv.length, 64);
+		assert.strictEqual(pub.length, 32);
+
+		parts.push({name: 'A', data: pub});
+		parts.push({name: 'k', data: priv});
+		this._key = new PrivateKey({
+			type: 'curve25519',
+			parts: parts
+		});
+		this._isPriv = true;
+		return (this._key);
+	}
+
+	throw (new Error('Invalid algorithm: ' + this._algo));
+};
+DiffieHellman.prototype.generateKeys = DiffieHellman.prototype.generateKey;
+
+/* These are helpers for using ecc-jsbn (for node 0.10 compatibility). */
+
+function X9ECParameters(name) {
+	var params = algs.curves[name];
+	assert.object(params);
+
+	var p = new jsbn(params.p);
+	var a = new jsbn(params.a);
+	var b = new jsbn(params.b);
+	var n = new jsbn(params.n);
+	var h = jsbn.ONE;
+	var curve = new ec.ECCurveFp(p, a, b);
+	var G = curve.decodePointHex(params.G.toString('hex'));
+
+	this.curve = curve;
+	this.g = G;
+	this.n = n;
+	this.h = h;
+}
+X9ECParameters.prototype.getCurve = function () { return (this.curve); };
+X9ECParameters.prototype.getG = function () { return (this.g); };
+X9ECParameters.prototype.getN = function () { return (this.n); };
+X9ECParameters.prototype.getH = function () { return (this.h); };
+
+function ECPublic(params, buffer) {
+	this._params = params;
+	if (buffer[0] === 0x00)
+		buffer = buffer.slice(1);
+	this._pub = params.getCurve().decodePointHex(buffer.toString('hex'));
+}
+
+function ECPrivate(params, buffer) {
+	this._params = params;
+	this._priv = new jsbn(utils.mpNormalize(buffer));
+}
+ECPrivate.prototype.deriveSharedSecret = function (pubKey) {
+	assert.ok(pubKey instanceof ECPublic);
+	var S = pubKey._pub.multiply(this._priv);
+	return (Buffer.from(S.getX().toBigInteger().toByteArray()));
 };
 
-/**
- * Starts running a task.
- */
-Task.prototype.start = function() {
-  this.error = false;
-  this.state = sStateTable[this.state][START];
+function generateED25519() {
+	var pair = nacl.sign.keyPair();
+	var priv = Buffer.from(pair.secretKey);
+	var pub = Buffer.from(pair.publicKey);
+	assert.strictEqual(priv.length, 64);
+	assert.strictEqual(pub.length, 32);
 
-  // try to restart
-  if(this.state === RUNNING) {
-    this.start = new Date();
-    this.run(this);
-    runNext(this, 0);
-  }
-};
+	var parts = [];
+	parts.push({name: 'A', data: pub});
+	parts.push({name: 'k', data: priv.slice(0, 32)});
+	var key = new PrivateKey({
+		type: 'ed25519',
+		parts: parts
+	});
+	return (key);
+}
 
-/**
- * Blocks a task until it one or more permits have been released. The
- * task will not resume until the requested number of permits have
- * been released with call(s) to unblock().
- *
- * @param n number of permits to wait for(default: 1).
- */
-Task.prototype.block = function(n) {
-  n = typeof(n) === 'undefined' ? 1 : n;
-  this.blocks += n;
-  if(this.blocks > 0) {
-    this.state = sStateTable[this.state][BLOCK];
-  }
-};
+/* Generates a new ECDSA private key on a given curve. */
+function generateECDSA(curve) {
+	var parts = [];
+	var key;
 
-/**
- * Releases a permit to unblock a task. If a task was blocked by
- * requesting N permits via block(), then it will only continue
- * running once enough permits have been released via unblock() calls.
- *
- * If multiple processes need to synchronize with a single task then
- * use a condition variable (see forge.task.createCondition). It is
- * an error to unblock a task more times than it has been blocked.
- *
- * @param n number of permits to release (default: 1).
- *
- * @return the current block count (task is unblocked when count is 0)
- */
-Task.prototype.unblock = function(n) {
-  n = typeof(n) === 'undefined' ? 1 : n;
-  this.blocks -= n;
-  if(this.blocks === 0 && this.state !== DONE) {
-    this.state = RUNNING;
-    runNext(this, 0);
-  }
-  return this.blocks;
-};
+	if (CRYPTO_HAVE_ECDH) {
+		/*
+		 * Node crypto doesn't expose key generation directly, but the
+		 * ECDH instances can generate keys. It turns out this just
+		 * calls into the OpenSSL generic key generator, and we can
+		 * read its output happily without doing an actual DH. So we
+		 * use that here.
+		 */
+		var osCurve = {
+			'nistp256': 'prime256v1',
+			'nistp384': 'secp384r1',
+			'nistp521': 'secp521r1'
+		}[curve];
 
-/**
- * Sleep for a period of time before resuming tasks.
- *
- * @param n number of milliseconds to sleep (default: 0).
- */
-Task.prototype.sleep = function(n) {
-  n = typeof(n) === 'undefined' ? 0 : n;
-  this.state = sStateTable[this.state][SLEEP];
-  var self = this;
-  this.timeoutId = setTimeout(function() {
-    self.timeoutId = null;
-    self.state = RUNNING;
-    runNext(self, 0);
-  }, n);
-};
+		var dh = crypto.createECDH(osCurve);
+		dh.generateKeys();
 
-/**
- * Waits on a condition variable until notified. The next task will
- * not be scheduled until notification. A condition variable can be
- * created with forge.task.createCondition().
- *
- * Once cond.notify() is called, the task will continue.
- *
- * @param cond the condition variable to wait on.
- */
-Task.prototype.wait = function(cond) {
-  cond.wait(this);
-};
+		parts.push({name: 'curve',
+		    data: Buffer.from(curve)});
+		parts.push({name: 'Q', data: dh.getPublicKey()});
+		parts.push({name: 'd', data: dh.getPrivateKey()});
 
-/**
- * If sleeping, wakeup and continue running tasks.
- */
-Task.prototype.wakeup = function() {
-  if(this.state === SLEEPING) {
-    cancelTimeout(this.timeoutId);
-    this.timeoutId = null;
-    this.state = RUNNING;
-    runNext(this, 0);
-  }
-};
+		key = new PrivateKey({
+			type: 'ecdsa',
+			curve: curve,
+			parts: parts
+		});
+		return (key);
+	} else {
 
-/**
- * Cancel all remaining subtasks of this task.
- */
-Task.prototype.cancel = function() {
-  this.state = sStateTable[this.state][CANCEL];
-  // remove permits needed
-  this.permitsNeeded = 0;
-  // cancel timeouts
-  if(this.timeoutId !== null) {
-    cancelTimeout(this.timeoutId);
-    this.timeoutId = null;
-  }
-  // remove subtasks
-  this.subtasks = [];
-};
+		var ecParams = new X9ECParameters(curve);
 
-/**
- * Finishes this task with failure and sets error flag. The entire
- * task will be aborted unless the next task that should execute
- * is passed as a parameter. This allows levels of subtasks to be
- * skipped. For instance, to abort only this tasks's subtasks, then
- * call fail(task.parent). To abort this task's subtasks and its
- * parent's subtasks, call fail(task.parent.parent). To abort
- * all tasks and simply call the task callback, call fail() or
- * fail(null).
- *
- * The task callback (success or failure) will always, eventually, be
- * called.
- *
- * @param next the task to continue at, or null to abort entirely.
- */
-Task.prototype.fail = function(next) {
-  // set error flag
-  this.error = true;
+		/* This algorithm taken from FIPS PUB 186-4 (section B.4.1) */
+		var n = ecParams.getN();
+		/*
+		 * The crypto.randomBytes() function can only give us whole
+		 * bytes, so taking a nod from X9.62, we round up.
+		 */
+		var cByteLen = Math.ceil((n.bitLength() + 64) / 8);
+		var c = new jsbn(crypto.randomBytes(cByteLen));
 
-  // finish task
-  finish(this, true);
+		var n1 = n.subtract(jsbn.ONE);
+		var priv = c.mod(n1).add(jsbn.ONE);
+		var pub = ecParams.getG().multiply(priv);
 
-  if(next) {
-    // propagate task info
-    next.error = this.error;
-    next.swapTime = this.swapTime;
-    next.userData = this.userData;
+		priv = Buffer.from(priv.toByteArray());
+		pub = Buffer.from(ecParams.getCurve().
+		    encodePointHex(pub), 'hex');
 
-    // do next task as specified
-    runNext(next, 0);
-  } else {
-    if(this.parent !== null) {
-      // finish root task (ensures it is removed from task queue)
-      var parent = this.parent;
-      while(parent.parent !== null) {
-        // propagate task info
-        parent.error = this.error;
-        parent.swapTime = this.swapTime;
-        parent.userData = this.userData;
-        parent = parent.parent;
-      }
-      finish(parent, true);
-    }
+		parts.push({name: 'curve', data: Buffer.from(curve)});
+		parts.push({name: 'Q', data: pub});
+		parts.push({name: 'd', data: priv});
 
-    // call failure callback if one exists
-    if(this.failureCallback) {
-      this.failureCallback(this);
-    }
-  }
-};
-
-/**
- * Asynchronously start a task.
- *
- * @param task the task to start.
- */
-var start = function(task) {
-  task.error = false;
-  task.state = sStateTable[task.state][START];
-  setTimeout(function() {
-    if(task.state === RUNNING) {
-      task.swapTime = +new Date();
-      task.run(task);
-      runNext(task, 0);
-    }
-  }, 0);
-};
-
-/**
- * Run the next subtask or finish this task.
- *
- * @param task the task to process.
- * @param recurse the recursion count.
- */
-var runNext = function(task, recurse) {
-  // get time since last context swap (ms), if enough time has passed set
-  // swap to true to indicate that doNext was performed asynchronously
-  // also, if recurse is too high do asynchronously
-  var swap =
-    (recurse > sMaxRecursions) ||
-    (+new Date() - task.swapTime) > sTimeSlice;
-
-  var doNext = function(recurse) {
-    recurse++;
-    if(task.state === RUNNING) {
-      if(swap) {
-        // update swap time
-        task.swapTime = +new Date();
-      }
-
-      if(task.subtasks.length > 0) {
-        // run next subtask
-        var subtask = task.subtasks.shift();
-        subtask.error = task.error;
-        subtask.swapTime = task.swapTime;
-        subtask.userData = task.userData;
-        subtask.run(subtask);
-        if(!subtask.error) {
-           runNext(subtask, recurse);
-        }
-      } else {
-        finish(task);
-
-        if(!task.error) {
-          // chain back up and run parent
-          if(task.parent !== null) {
-            // propagate task info
-            task.parent.error = task.error;
-            task.parent.swapTime = task.swapTime;
-            task.parent.userData = task.userData;
-
-            // no subtasks left, call run next subtask on parent
-            runNext(task.parent, recurse);
-          }
-        }
-      }
-    }
-  };
-
-  if(swap) {
-    // we're swapping, so run asynchronously
-    setTimeout(doNext, 0);
-  } else {
-    // not swapping, so run synchronously
-    doNext(recurse);
-  }
-};
-
-/**
- * Finishes a task and looks for the next task in the queue to start.
- *
- * @param task the task to finish.
- * @param suppressCallbacks true to suppress callbacks.
- */
-var finish = function(task, suppressCallbacks) {
-  // subtask is now done
-  task.state = DONE;
-
-  delete sTasks[task.id];
-  if(sVL >= 1) {
-    forge.log.verbose(cat, '[%s][%s] finish',
-      task.id, task.name, task);
-  }
-
-  // only do queue processing for root tasks
-  if(task.parent === null) {
-    // report error if queue is missing
-    if(!(task.type in sTaskQueues)) {
-      forge.log.error(cat,
-        '[%s][%s] task queue missing [%s]',
-        task.id, task.name, task.type);
-    } else if(sTaskQueues[task.type].length === 0) {
-      // report error if queue is empty
-      forge.log.error(cat,
-        '[%s][%s] task queue empty [%s]',
-        task.id, task.name, task.type);
-    } else if(sTaskQueues[task.type][0] !== task) {
-      // report error if this task isn't the first in the queue
-      forge.log.error(cat,
-        '[%s][%s] task not first in queue [%s]',
-        task.id, task.name, task.type);
-    } else {
-      // remove ourselves from the queue
-      sTaskQueues[task.type].shift();
-      // clean up queue if it is empty
-      if(sTaskQueues[task.type].length === 0) {
-        if(sVL >= 1) {
-          forge.log.verbose(cat, '[%s][%s] delete queue [%s]',
-            task.id, task.name, task.type);
-        }
-        /* Note: Only a task can delete a queue of its own type. This
-         is used as a way to synchronize tasks. If a queue for a certain
-         task type exists, then a task of that type is running.
-         */
-        delete sTaskQueues[task.type];
-      } else {
-        // dequeue the next task and start it
-        if(sVL >= 1) {
-          forge.log.verbose(cat,
-            '[%s][%s] queue start next [%s] remain:%s',
-            task.id, task.name, task.type,
-            sTaskQueues[task.type].length);
-        }
-        sTaskQueues[task.type][0].start();
-      }
-    }
-
-    if(!suppressCallbacks) {
-      // call final callback if one exists
-      if(task.error && task.failureCallback) {
-        task.failureCallback(task);
-      } else if(!task.error && task.successCallback) {
-        task.successCallback(task);
-      }
-    }
-  }
-};
-
-/* Tasks API */
-module.exports = forge.task = forge.task || {};
-
-/**
- * Starts a new task that will run the passed function asynchronously.
- *
- * In order to finish the task, either task.doNext() or task.fail()
- * *must* be called.
- *
- * The task must have a type (a string identifier) that can be used to
- * synchronize it with other tasks of the same type. That type can also
- * be used to cancel tasks that haven't started yet.
- *
- * To start a task, the following object must be provided as a parameter
- * (each function takes a task object as its first parameter):
- *
- * {
- *   type: the type of task.
- *   run: the function to run to execute the task.
- *   success: a callback to call when the task succeeds (optional).
- *   failure: a callback to call when the task fails (optional).
- * }
- *
- * @param options the object as described above.
- */
-forge.task.start = function(options) {
-  // create a new task
-  var task = new Task({
-    run: options.run,
-    name: options.name || sNoTaskName
-  });
-  task.type = options.type;
-  task.successCallback = options.success || null;
-  task.failureCallback = options.failure || null;
-
-  // append the task onto the appropriate queue
-  if(!(task.type in sTaskQueues)) {
-    if(sVL >= 1) {
-      forge.log.verbose(cat, '[%s][%s] create queue [%s]',
-        task.id, task.name, task.type);
-    }
-    // create the queue with the new task
-    sTaskQueues[task.type] = [task];
-    start(task);
-  } else {
-    // push the task onto the queue, it will be run after a task
-    // with the same type completes
-    sTaskQueues[options.type].push(task);
-  }
-};
-
-/**
- * Cancels all tasks of the given type that haven't started yet.
- *
- * @param type the type of task to cancel.
- */
-forge.task.cancel = function(type) {
-  // find the task queue
-  if(type in sTaskQueues) {
-    // empty all but the current task from the queue
-    sTaskQueues[type] = [sTaskQueues[type][0]];
-  }
-};
-
-/**
- * Creates a condition variable to synchronize tasks. To make a task wait
- * on the condition variable, call task.wait(condition). To notify all
- * tasks that are waiting, call condition.notify().
- *
- * @return the condition variable.
- */
-forge.task.createCondition = function() {
-  var cond = {
-    // all tasks that are blocked
-    tasks: {}
-  };
-
-  /**
-   * Causes the given task to block until notify is called. If the task
-   * is already waiting on this condition then this is a no-op.
-   *
-   * @param task the task to cause to wait.
-   */
-  cond.wait = function(task) {
-    // only block once
-    if(!(task.id in cond.tasks)) {
-       task.block();
-       cond.tasks[task.id] = task;
-    }
-  };
-
-  /**
-   * Notifies all waiting tasks to wake up.
-   */
-  cond.notify = function() {
-    // since unblock() will run the next task from here, make sure to
-    // clear the condition's blocked task list before unblocking
-    var tmp = cond.tasks;
-    cond.tasks = {};
-    for(var id in tmp) {
-      tmp[id].unblock();
-    }
-  };
-
-  return cond;
-};
+		key = new PrivateKey({
+			type: 'ecdsa',
+			curve: curve,
+			parts: parts
+		});
+		return (key);
+	}
+}
 
 
 /***/ }),
-/* 26 */,
+/* 26 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const os = __importStar(__webpack_require__(87));
+const events = __importStar(__webpack_require__(614));
+const child = __importStar(__webpack_require__(129));
+const path = __importStar(__webpack_require__(622));
+const io = __importStar(__webpack_require__(553));
+const ioUtil = __importStar(__webpack_require__(325));
+/* eslint-disable @typescript-eslint/unbound-method */
+const IS_WINDOWS = process.platform === 'win32';
+/*
+ * Class for running command line tools. Handles quoting and arg parsing in a platform agnostic way.
+ */
+class ToolRunner extends events.EventEmitter {
+    constructor(toolPath, args, options) {
+        super();
+        if (!toolPath) {
+            throw new Error("Parameter 'toolPath' cannot be null or empty.");
+        }
+        this.toolPath = toolPath;
+        this.args = args || [];
+        this.options = options || {};
+    }
+    _debug(message) {
+        if (this.options.listeners && this.options.listeners.debug) {
+            this.options.listeners.debug(message);
+        }
+    }
+    _getCommandString(options, noPrefix) {
+        const toolPath = this._getSpawnFileName();
+        const args = this._getSpawnArgs(options);
+        let cmd = noPrefix ? '' : '[command]'; // omit prefix when piped to a second tool
+        if (IS_WINDOWS) {
+            // Windows + cmd file
+            if (this._isCmdFile()) {
+                cmd += toolPath;
+                for (const a of args) {
+                    cmd += ` ${a}`;
+                }
+            }
+            // Windows + verbatim
+            else if (options.windowsVerbatimArguments) {
+                cmd += `"${toolPath}"`;
+                for (const a of args) {
+                    cmd += ` ${a}`;
+                }
+            }
+            // Windows (regular)
+            else {
+                cmd += this._windowsQuoteCmdArg(toolPath);
+                for (const a of args) {
+                    cmd += ` ${this._windowsQuoteCmdArg(a)}`;
+                }
+            }
+        }
+        else {
+            // OSX/Linux - this can likely be improved with some form of quoting.
+            // creating processes on Unix is fundamentally different than Windows.
+            // on Unix, execvp() takes an arg array.
+            cmd += toolPath;
+            for (const a of args) {
+                cmd += ` ${a}`;
+            }
+        }
+        return cmd;
+    }
+    _processLineBuffer(data, strBuffer, onLine) {
+        try {
+            let s = strBuffer + data.toString();
+            let n = s.indexOf(os.EOL);
+            while (n > -1) {
+                const line = s.substring(0, n);
+                onLine(line);
+                // the rest of the string ...
+                s = s.substring(n + os.EOL.length);
+                n = s.indexOf(os.EOL);
+            }
+            strBuffer = s;
+        }
+        catch (err) {
+            // streaming lines to console is best effort.  Don't fail a build.
+            this._debug(`error processing line. Failed with error ${err}`);
+        }
+    }
+    _getSpawnFileName() {
+        if (IS_WINDOWS) {
+            if (this._isCmdFile()) {
+                return process.env['COMSPEC'] || 'cmd.exe';
+            }
+        }
+        return this.toolPath;
+    }
+    _getSpawnArgs(options) {
+        if (IS_WINDOWS) {
+            if (this._isCmdFile()) {
+                let argline = `/D /S /C "${this._windowsQuoteCmdArg(this.toolPath)}`;
+                for (const a of this.args) {
+                    argline += ' ';
+                    argline += options.windowsVerbatimArguments
+                        ? a
+                        : this._windowsQuoteCmdArg(a);
+                }
+                argline += '"';
+                return [argline];
+            }
+        }
+        return this.args;
+    }
+    _endsWith(str, end) {
+        return str.endsWith(end);
+    }
+    _isCmdFile() {
+        const upperToolPath = this.toolPath.toUpperCase();
+        return (this._endsWith(upperToolPath, '.CMD') ||
+            this._endsWith(upperToolPath, '.BAT'));
+    }
+    _windowsQuoteCmdArg(arg) {
+        // for .exe, apply the normal quoting rules that libuv applies
+        if (!this._isCmdFile()) {
+            return this._uvQuoteCmdArg(arg);
+        }
+        // otherwise apply quoting rules specific to the cmd.exe command line parser.
+        // the libuv rules are generic and are not designed specifically for cmd.exe
+        // command line parser.
+        //
+        // for a detailed description of the cmd.exe command line parser, refer to
+        // http://stackoverflow.com/questions/4094699/how-does-the-windows-command-interpreter-cmd-exe-parse-scripts/7970912#7970912
+        // need quotes for empty arg
+        if (!arg) {
+            return '""';
+        }
+        // determine whether the arg needs to be quoted
+        const cmdSpecialChars = [
+            ' ',
+            '\t',
+            '&',
+            '(',
+            ')',
+            '[',
+            ']',
+            '{',
+            '}',
+            '^',
+            '=',
+            ';',
+            '!',
+            "'",
+            '+',
+            ',',
+            '`',
+            '~',
+            '|',
+            '<',
+            '>',
+            '"'
+        ];
+        let needsQuotes = false;
+        for (const char of arg) {
+            if (cmdSpecialChars.some(x => x === char)) {
+                needsQuotes = true;
+                break;
+            }
+        }
+        // short-circuit if quotes not needed
+        if (!needsQuotes) {
+            return arg;
+        }
+        // the following quoting rules are very similar to the rules that by libuv applies.
+        //
+        // 1) wrap the string in quotes
+        //
+        // 2) double-up quotes - i.e. " => ""
+        //
+        //    this is different from the libuv quoting rules. libuv replaces " with \", which unfortunately
+        //    doesn't work well with a cmd.exe command line.
+        //
+        //    note, replacing " with "" also works well if the arg is passed to a downstream .NET console app.
+        //    for example, the command line:
+        //          foo.exe "myarg:""my val"""
+        //    is parsed by a .NET console app into an arg array:
+        //          [ "myarg:\"my val\"" ]
+        //    which is the same end result when applying libuv quoting rules. although the actual
+        //    command line from libuv quoting rules would look like:
+        //          foo.exe "myarg:\"my val\""
+        //
+        // 3) double-up slashes that precede a quote,
+        //    e.g.  hello \world    => "hello \world"
+        //          hello\"world    => "hello\\""world"
+        //          hello\\"world   => "hello\\\\""world"
+        //          hello world\    => "hello world\\"
+        //
+        //    technically this is not required for a cmd.exe command line, or the batch argument parser.
+        //    the reasons for including this as a .cmd quoting rule are:
+        //
+        //    a) this is optimized for the scenario where the argument is passed from the .cmd file to an
+        //       external program. many programs (e.g. .NET console apps) rely on the slash-doubling rule.
+        //
+        //    b) it's what we've been doing previously (by deferring to node default behavior) and we
+        //       haven't heard any complaints about that aspect.
+        //
+        // note, a weakness of the quoting rules chosen here, is that % is not escaped. in fact, % cannot be
+        // escaped when used on the command line directly - even though within a .cmd file % can be escaped
+        // by using %%.
+        //
+        // the saving grace is, on the command line, %var% is left as-is if var is not defined. this contrasts
+        // the line parsing rules within a .cmd file, where if var is not defined it is replaced with nothing.
+        //
+        // one option that was explored was replacing % with ^% - i.e. %var% => ^%var^%. this hack would
+        // often work, since it is unlikely that var^ would exist, and the ^ character is removed when the
+        // variable is used. the problem, however, is that ^ is not removed when %* is used to pass the args
+        // to an external program.
+        //
+        // an unexplored potential solution for the % escaping problem, is to create a wrapper .cmd file.
+        // % can be escaped within a .cmd file.
+        let reverse = '"';
+        let quoteHit = true;
+        for (let i = arg.length; i > 0; i--) {
+            // walk the string in reverse
+            reverse += arg[i - 1];
+            if (quoteHit && arg[i - 1] === '\\') {
+                reverse += '\\'; // double the slash
+            }
+            else if (arg[i - 1] === '"') {
+                quoteHit = true;
+                reverse += '"'; // double the quote
+            }
+            else {
+                quoteHit = false;
+            }
+        }
+        reverse += '"';
+        return reverse
+            .split('')
+            .reverse()
+            .join('');
+    }
+    _uvQuoteCmdArg(arg) {
+        // Tool runner wraps child_process.spawn() and needs to apply the same quoting as
+        // Node in certain cases where the undocumented spawn option windowsVerbatimArguments
+        // is used.
+        //
+        // Since this function is a port of quote_cmd_arg from Node 4.x (technically, lib UV,
+        // see https://github.com/nodejs/node/blob/v4.x/deps/uv/src/win/process.c for details),
+        // pasting copyright notice from Node within this function:
+        //
+        //      Copyright Joyent, Inc. and other Node contributors. All rights reserved.
+        //
+        //      Permission is hereby granted, free of charge, to any person obtaining a copy
+        //      of this software and associated documentation files (the "Software"), to
+        //      deal in the Software without restriction, including without limitation the
+        //      rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+        //      sell copies of the Software, and to permit persons to whom the Software is
+        //      furnished to do so, subject to the following conditions:
+        //
+        //      The above copyright notice and this permission notice shall be included in
+        //      all copies or substantial portions of the Software.
+        //
+        //      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        //      IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        //      FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        //      AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        //      LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+        //      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+        //      IN THE SOFTWARE.
+        if (!arg) {
+            // Need double quotation for empty argument
+            return '""';
+        }
+        if (!arg.includes(' ') && !arg.includes('\t') && !arg.includes('"')) {
+            // No quotation needed
+            return arg;
+        }
+        if (!arg.includes('"') && !arg.includes('\\')) {
+            // No embedded double quotes or backslashes, so I can just wrap
+            // quote marks around the whole thing.
+            return `"${arg}"`;
+        }
+        // Expected input/output:
+        //   input : hello"world
+        //   output: "hello\"world"
+        //   input : hello""world
+        //   output: "hello\"\"world"
+        //   input : hello\world
+        //   output: hello\world
+        //   input : hello\\world
+        //   output: hello\\world
+        //   input : hello\"world
+        //   output: "hello\\\"world"
+        //   input : hello\\"world
+        //   output: "hello\\\\\"world"
+        //   input : hello world\
+        //   output: "hello world\\" - note the comment in libuv actually reads "hello world\"
+        //                             but it appears the comment is wrong, it should be "hello world\\"
+        let reverse = '"';
+        let quoteHit = true;
+        for (let i = arg.length; i > 0; i--) {
+            // walk the string in reverse
+            reverse += arg[i - 1];
+            if (quoteHit && arg[i - 1] === '\\') {
+                reverse += '\\';
+            }
+            else if (arg[i - 1] === '"') {
+                quoteHit = true;
+                reverse += '\\';
+            }
+            else {
+                quoteHit = false;
+            }
+        }
+        reverse += '"';
+        return reverse
+            .split('')
+            .reverse()
+            .join('');
+    }
+    _cloneExecOptions(options) {
+        options = options || {};
+        const result = {
+            cwd: options.cwd || process.cwd(),
+            env: options.env || process.env,
+            silent: options.silent || false,
+            windowsVerbatimArguments: options.windowsVerbatimArguments || false,
+            failOnStdErr: options.failOnStdErr || false,
+            ignoreReturnCode: options.ignoreReturnCode || false,
+            delay: options.delay || 10000
+        };
+        result.outStream = options.outStream || process.stdout;
+        result.errStream = options.errStream || process.stderr;
+        return result;
+    }
+    _getSpawnOptions(options, toolPath) {
+        options = options || {};
+        const result = {};
+        result.cwd = options.cwd;
+        result.env = options.env;
+        result['windowsVerbatimArguments'] =
+            options.windowsVerbatimArguments || this._isCmdFile();
+        if (options.windowsVerbatimArguments) {
+            result.argv0 = `"${toolPath}"`;
+        }
+        return result;
+    }
+    /**
+     * Exec a tool.
+     * Output will be streamed to the live console.
+     * Returns promise with return code
+     *
+     * @param     tool     path to tool to exec
+     * @param     options  optional exec options.  See ExecOptions
+     * @returns   number
+     */
+    exec() {
+        return __awaiter(this, void 0, void 0, function* () {
+            // root the tool path if it is unrooted and contains relative pathing
+            if (!ioUtil.isRooted(this.toolPath) &&
+                (this.toolPath.includes('/') ||
+                    (IS_WINDOWS && this.toolPath.includes('\\')))) {
+                // prefer options.cwd if it is specified, however options.cwd may also need to be rooted
+                this.toolPath = path.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
+            }
+            // if the tool is only a file name, then resolve it from the PATH
+            // otherwise verify it exists (add extension on Windows if necessary)
+            this.toolPath = yield io.which(this.toolPath, true);
+            return new Promise((resolve, reject) => {
+                this._debug(`exec tool: ${this.toolPath}`);
+                this._debug('arguments:');
+                for (const arg of this.args) {
+                    this._debug(`   ${arg}`);
+                }
+                const optionsNonNull = this._cloneExecOptions(this.options);
+                if (!optionsNonNull.silent && optionsNonNull.outStream) {
+                    optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os.EOL);
+                }
+                const state = new ExecState(optionsNonNull, this.toolPath);
+                state.on('debug', (message) => {
+                    this._debug(message);
+                });
+                const fileName = this._getSpawnFileName();
+                const cp = child.spawn(fileName, this._getSpawnArgs(optionsNonNull), this._getSpawnOptions(this.options, fileName));
+                const stdbuffer = '';
+                if (cp.stdout) {
+                    cp.stdout.on('data', (data) => {
+                        if (this.options.listeners && this.options.listeners.stdout) {
+                            this.options.listeners.stdout(data);
+                        }
+                        if (!optionsNonNull.silent && optionsNonNull.outStream) {
+                            optionsNonNull.outStream.write(data);
+                        }
+                        this._processLineBuffer(data, stdbuffer, (line) => {
+                            if (this.options.listeners && this.options.listeners.stdline) {
+                                this.options.listeners.stdline(line);
+                            }
+                        });
+                    });
+                }
+                const errbuffer = '';
+                if (cp.stderr) {
+                    cp.stderr.on('data', (data) => {
+                        state.processStderr = true;
+                        if (this.options.listeners && this.options.listeners.stderr) {
+                            this.options.listeners.stderr(data);
+                        }
+                        if (!optionsNonNull.silent &&
+                            optionsNonNull.errStream &&
+                            optionsNonNull.outStream) {
+                            const s = optionsNonNull.failOnStdErr
+                                ? optionsNonNull.errStream
+                                : optionsNonNull.outStream;
+                            s.write(data);
+                        }
+                        this._processLineBuffer(data, errbuffer, (line) => {
+                            if (this.options.listeners && this.options.listeners.errline) {
+                                this.options.listeners.errline(line);
+                            }
+                        });
+                    });
+                }
+                cp.on('error', (err) => {
+                    state.processError = err.message;
+                    state.processExited = true;
+                    state.processClosed = true;
+                    state.CheckComplete();
+                });
+                cp.on('exit', (code) => {
+                    state.processExitCode = code;
+                    state.processExited = true;
+                    this._debug(`Exit code ${code} received from tool '${this.toolPath}'`);
+                    state.CheckComplete();
+                });
+                cp.on('close', (code) => {
+                    state.processExitCode = code;
+                    state.processExited = true;
+                    state.processClosed = true;
+                    this._debug(`STDIO streams have closed for tool '${this.toolPath}'`);
+                    state.CheckComplete();
+                });
+                state.on('done', (error, exitCode) => {
+                    if (stdbuffer.length > 0) {
+                        this.emit('stdline', stdbuffer);
+                    }
+                    if (errbuffer.length > 0) {
+                        this.emit('errline', errbuffer);
+                    }
+                    cp.removeAllListeners();
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(exitCode);
+                    }
+                });
+                if (this.options.input) {
+                    if (!cp.stdin) {
+                        throw new Error('child process missing stdin');
+                    }
+                    cp.stdin.end(this.options.input);
+                }
+            });
+        });
+    }
+}
+exports.ToolRunner = ToolRunner;
+/**
+ * Convert an arg string to an array of args. Handles escaping
+ *
+ * @param    argString   string of arguments
+ * @returns  string[]    array of arguments
+ */
+function argStringToArray(argString) {
+    const args = [];
+    let inQuotes = false;
+    let escaped = false;
+    let arg = '';
+    function append(c) {
+        // we only escape double quotes.
+        if (escaped && c !== '"') {
+            arg += '\\';
+        }
+        arg += c;
+        escaped = false;
+    }
+    for (let i = 0; i < argString.length; i++) {
+        const c = argString.charAt(i);
+        if (c === '"') {
+            if (!escaped) {
+                inQuotes = !inQuotes;
+            }
+            else {
+                append(c);
+            }
+            continue;
+        }
+        if (c === '\\' && escaped) {
+            append(c);
+            continue;
+        }
+        if (c === '\\' && inQuotes) {
+            escaped = true;
+            continue;
+        }
+        if (c === ' ' && !inQuotes) {
+            if (arg.length > 0) {
+                args.push(arg);
+                arg = '';
+            }
+            continue;
+        }
+        append(c);
+    }
+    if (arg.length > 0) {
+        args.push(arg.trim());
+    }
+    return args;
+}
+exports.argStringToArray = argStringToArray;
+class ExecState extends events.EventEmitter {
+    constructor(options, toolPath) {
+        super();
+        this.processClosed = false; // tracks whether the process has exited and stdio is closed
+        this.processError = '';
+        this.processExitCode = 0;
+        this.processExited = false; // tracks whether the process has exited
+        this.processStderr = false; // tracks whether stderr was written to
+        this.delay = 10000; // 10 seconds
+        this.done = false;
+        this.timeout = null;
+        if (!toolPath) {
+            throw new Error('toolPath must not be empty');
+        }
+        this.options = options;
+        this.toolPath = toolPath;
+        if (options.delay) {
+            this.delay = options.delay;
+        }
+    }
+    CheckComplete() {
+        if (this.done) {
+            return;
+        }
+        if (this.processClosed) {
+            this._setResult();
+        }
+        else if (this.processExited) {
+            this.timeout = setTimeout(ExecState.HandleTimeout, this.delay, this);
+        }
+    }
+    _debug(message) {
+        this.emit('debug', message);
+    }
+    _setResult() {
+        // determine whether there is an error
+        let error;
+        if (this.processExited) {
+            if (this.processError) {
+                error = new Error(`There was an error when attempting to execute the process '${this.toolPath}'. This may indicate the process failed to start. Error: ${this.processError}`);
+            }
+            else if (this.processExitCode !== 0 && !this.options.ignoreReturnCode) {
+                error = new Error(`The process '${this.toolPath}' failed with exit code ${this.processExitCode}`);
+            }
+            else if (this.processStderr && this.options.failOnStdErr) {
+                error = new Error(`The process '${this.toolPath}' failed because one or more lines were written to the STDERR stream`);
+            }
+        }
+        // clear the timeout
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+        }
+        this.done = true;
+        this.emit('done', error, this.processExitCode);
+    }
+    static HandleTimeout(state) {
+        if (state.done) {
+            return;
+        }
+        if (!state.processClosed && state.processExited) {
+            const message = `The STDIO streams did not close within ${state.delay /
+                1000} seconds of the exit event from process '${state.toolPath}'. This may indicate a child process inherited the STDIO streams and has not yet exited.`;
+            state._debug(message);
+        }
+        state._setResult();
+    }
+}
+//# sourceMappingURL=toolrunner.js.map
+
+/***/ }),
 /* 27 */
 /***/ (function(module) {
 
@@ -3559,65 +3508,153 @@ exports.default = _default;
 
 /***/ }),
 /* 29 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
-/*!
- * Copyright (c) 2015, Salesforce.com, Inc.
- * All rights reserved.
+
+/*
+ * merge2
+ * https://github.com/teambition/merge2
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * 3. Neither the name of Salesforce.com nor the names of its contributors may
- * be used to endorse or promote products derived from this software without
- * specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2014-2020 Teambition
+ * Licensed under the MIT license.
  */
+const Stream = __webpack_require__(413)
+const PassThrough = Stream.PassThrough
+const slice = Array.prototype.slice
 
-var pubsuffix = __webpack_require__(719);
+module.exports = merge2
 
-// Gives the permutation of all possible domainMatch()es of a given domain. The
-// array is in shortest-to-longest order.  Handy for indexing.
-function permuteDomain (domain) {
-  var pubSuf = pubsuffix.getPublicSuffix(domain);
-  if (!pubSuf) {
-    return null;
-  }
-  if (pubSuf == domain) {
-    return [domain];
+function merge2 () {
+  const streamsQueue = []
+  const args = slice.call(arguments)
+  let merging = false
+  let options = args[args.length - 1]
+
+  if (options && !Array.isArray(options) && options.pipe == null) {
+    args.pop()
+  } else {
+    options = {}
   }
 
-  var prefix = domain.slice(0, -(pubSuf.length + 1)); // ".example.com"
-  var parts = prefix.split('.').reverse();
-  var cur = pubSuf;
-  var permutations = [cur];
-  while (parts.length) {
-    cur = parts.shift() + '.' + cur;
-    permutations.push(cur);
+  const doEnd = options.end !== false
+  const doPipeError = options.pipeError === true
+  if (options.objectMode == null) {
+    options.objectMode = true
   }
-  return permutations;
+  if (options.highWaterMark == null) {
+    options.highWaterMark = 64 * 1024
+  }
+  const mergedStream = PassThrough(options)
+
+  function addStream () {
+    for (let i = 0, len = arguments.length; i < len; i++) {
+      streamsQueue.push(pauseStreams(arguments[i], options))
+    }
+    mergeStream()
+    return this
+  }
+
+  function mergeStream () {
+    if (merging) {
+      return
+    }
+    merging = true
+
+    let streams = streamsQueue.shift()
+    if (!streams) {
+      process.nextTick(endStream)
+      return
+    }
+    if (!Array.isArray(streams)) {
+      streams = [streams]
+    }
+
+    let pipesCount = streams.length + 1
+
+    function next () {
+      if (--pipesCount > 0) {
+        return
+      }
+      merging = false
+      mergeStream()
+    }
+
+    function pipe (stream) {
+      function onend () {
+        stream.removeListener('merge2UnpipeEnd', onend)
+        stream.removeListener('end', onend)
+        if (doPipeError) {
+          stream.removeListener('error', onerror)
+        }
+        next()
+      }
+      function onerror (err) {
+        mergedStream.emit('error', err)
+      }
+      // skip ended stream
+      if (stream._readableState.endEmitted) {
+        return next()
+      }
+
+      stream.on('merge2UnpipeEnd', onend)
+      stream.on('end', onend)
+
+      if (doPipeError) {
+        stream.on('error', onerror)
+      }
+
+      stream.pipe(mergedStream, { end: false })
+      // compatible for old stream
+      stream.resume()
+    }
+
+    for (let i = 0; i < streams.length; i++) {
+      pipe(streams[i])
+    }
+
+    next()
+  }
+
+  function endStream () {
+    merging = false
+    // emit 'queueDrain' when all streams merged.
+    mergedStream.emit('queueDrain')
+    if (doEnd) {
+      mergedStream.end()
+    }
+  }
+
+  mergedStream.setMaxListeners(0)
+  mergedStream.add = addStream
+  mergedStream.on('unpipe', function (stream) {
+    stream.emit('merge2UnpipeEnd')
+  })
+
+  if (args.length) {
+    addStream.apply(null, args)
+  }
+  return mergedStream
 }
 
-exports.permuteDomain = permuteDomain;
+// check and pause streams for pipe.
+function pauseStreams (streams, options) {
+  if (!Array.isArray(streams)) {
+    // Backwards-compat with old-style streams
+    if (!streams._readableState && streams.pipe) {
+      streams = streams.pipe(PassThrough(options))
+    }
+    if (!streams._readableState || !streams.pause || !streams.pipe) {
+      throw new Error('Only readable stream can be merged.')
+    }
+    streams.pause()
+  } else {
+    for (let i = 0, len = streams.length; i < len; i++) {
+      streams[i] = pauseStreams(streams[i], options)
+    }
+  }
+  return streams
+}
 
 
 /***/ }),
@@ -3702,8 +3739,567 @@ module.exports = function mergeConfig(config1, config2) {
 
 
 /***/ }),
-/* 32 */,
+/* 32 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+/*!
+ * fill-range <https://github.com/jonschlinkert/fill-range>
+ *
+ * Copyright (c) 2014-present, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+
+
+const util = __webpack_require__(669);
+const toRegexRange = __webpack_require__(451);
+
+const isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
+
+const transform = toNumber => {
+  return value => toNumber === true ? Number(value) : String(value);
+};
+
+const isValidValue = value => {
+  return typeof value === 'number' || (typeof value === 'string' && value !== '');
+};
+
+const isNumber = num => Number.isInteger(+num);
+
+const zeros = input => {
+  let value = `${input}`;
+  let index = -1;
+  if (value[0] === '-') value = value.slice(1);
+  if (value === '0') return false;
+  while (value[++index] === '0');
+  return index > 0;
+};
+
+const stringify = (start, end, options) => {
+  if (typeof start === 'string' || typeof end === 'string') {
+    return true;
+  }
+  return options.stringify === true;
+};
+
+const pad = (input, maxLength, toNumber) => {
+  if (maxLength > 0) {
+    let dash = input[0] === '-' ? '-' : '';
+    if (dash) input = input.slice(1);
+    input = (dash + input.padStart(dash ? maxLength - 1 : maxLength, '0'));
+  }
+  if (toNumber === false) {
+    return String(input);
+  }
+  return input;
+};
+
+const toMaxLen = (input, maxLength) => {
+  let negative = input[0] === '-' ? '-' : '';
+  if (negative) {
+    input = input.slice(1);
+    maxLength--;
+  }
+  while (input.length < maxLength) input = '0' + input;
+  return negative ? ('-' + input) : input;
+};
+
+const toSequence = (parts, options) => {
+  parts.negatives.sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
+  parts.positives.sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
+
+  let prefix = options.capture ? '' : '?:';
+  let positives = '';
+  let negatives = '';
+  let result;
+
+  if (parts.positives.length) {
+    positives = parts.positives.join('|');
+  }
+
+  if (parts.negatives.length) {
+    negatives = `-(${prefix}${parts.negatives.join('|')})`;
+  }
+
+  if (positives && negatives) {
+    result = `${positives}|${negatives}`;
+  } else {
+    result = positives || negatives;
+  }
+
+  if (options.wrap) {
+    return `(${prefix}${result})`;
+  }
+
+  return result;
+};
+
+const toRange = (a, b, isNumbers, options) => {
+  if (isNumbers) {
+    return toRegexRange(a, b, { wrap: false, ...options });
+  }
+
+  let start = String.fromCharCode(a);
+  if (a === b) return start;
+
+  let stop = String.fromCharCode(b);
+  return `[${start}-${stop}]`;
+};
+
+const toRegex = (start, end, options) => {
+  if (Array.isArray(start)) {
+    let wrap = options.wrap === true;
+    let prefix = options.capture ? '' : '?:';
+    return wrap ? `(${prefix}${start.join('|')})` : start.join('|');
+  }
+  return toRegexRange(start, end, options);
+};
+
+const rangeError = (...args) => {
+  return new RangeError('Invalid range arguments: ' + util.inspect(...args));
+};
+
+const invalidRange = (start, end, options) => {
+  if (options.strictRanges === true) throw rangeError([start, end]);
+  return [];
+};
+
+const invalidStep = (step, options) => {
+  if (options.strictRanges === true) {
+    throw new TypeError(`Expected step "${step}" to be a number`);
+  }
+  return [];
+};
+
+const fillNumbers = (start, end, step = 1, options = {}) => {
+  let a = Number(start);
+  let b = Number(end);
+
+  if (!Number.isInteger(a) || !Number.isInteger(b)) {
+    if (options.strictRanges === true) throw rangeError([start, end]);
+    return [];
+  }
+
+  // fix negative zero
+  if (a === 0) a = 0;
+  if (b === 0) b = 0;
+
+  let descending = a > b;
+  let startString = String(start);
+  let endString = String(end);
+  let stepString = String(step);
+  step = Math.max(Math.abs(step), 1);
+
+  let padded = zeros(startString) || zeros(endString) || zeros(stepString);
+  let maxLen = padded ? Math.max(startString.length, endString.length, stepString.length) : 0;
+  let toNumber = padded === false && stringify(start, end, options) === false;
+  let format = options.transform || transform(toNumber);
+
+  if (options.toRegex && step === 1) {
+    return toRange(toMaxLen(start, maxLen), toMaxLen(end, maxLen), true, options);
+  }
+
+  let parts = { negatives: [], positives: [] };
+  let push = num => parts[num < 0 ? 'negatives' : 'positives'].push(Math.abs(num));
+  let range = [];
+  let index = 0;
+
+  while (descending ? a >= b : a <= b) {
+    if (options.toRegex === true && step > 1) {
+      push(a);
+    } else {
+      range.push(pad(format(a, index), maxLen, toNumber));
+    }
+    a = descending ? a - step : a + step;
+    index++;
+  }
+
+  if (options.toRegex === true) {
+    return step > 1
+      ? toSequence(parts, options)
+      : toRegex(range, null, { wrap: false, ...options });
+  }
+
+  return range;
+};
+
+const fillLetters = (start, end, step = 1, options = {}) => {
+  if ((!isNumber(start) && start.length > 1) || (!isNumber(end) && end.length > 1)) {
+    return invalidRange(start, end, options);
+  }
+
+
+  let format = options.transform || (val => String.fromCharCode(val));
+  let a = `${start}`.charCodeAt(0);
+  let b = `${end}`.charCodeAt(0);
+
+  let descending = a > b;
+  let min = Math.min(a, b);
+  let max = Math.max(a, b);
+
+  if (options.toRegex && step === 1) {
+    return toRange(min, max, false, options);
+  }
+
+  let range = [];
+  let index = 0;
+
+  while (descending ? a >= b : a <= b) {
+    range.push(format(a, index));
+    a = descending ? a - step : a + step;
+    index++;
+  }
+
+  if (options.toRegex === true) {
+    return toRegex(range, null, { wrap: false, options });
+  }
+
+  return range;
+};
+
+const fill = (start, end, step, options = {}) => {
+  if (end == null && isValidValue(start)) {
+    return [start];
+  }
+
+  if (!isValidValue(start) || !isValidValue(end)) {
+    return invalidRange(start, end, options);
+  }
+
+  if (typeof step === 'function') {
+    return fill(start, end, 1, { transform: step });
+  }
+
+  if (isObject(step)) {
+    return fill(start, end, 0, step);
+  }
+
+  let opts = { ...options };
+  if (opts.capture === true) opts.wrap = true;
+  step = step || opts.step || 1;
+
+  if (!isNumber(step)) {
+    if (step != null && !isObject(step)) return invalidStep(step, opts);
+    return fill(start, end, 1, step);
+  }
+
+  if (isNumber(start) && isNumber(end)) {
+    return fillNumbers(start, end, step, opts);
+  }
+
+  return fillLetters(start, end, Math.max(Math.abs(step), 1), opts);
+};
+
+module.exports = fill;
+
+
+/***/ }),
 /* 33 */
+/***/ (function(module) {
+
+"use strict";
+/*!
+ * is-number <https://github.com/jonschlinkert/is-number>
+ *
+ * Copyright (c) 2014-present, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+
+
+module.exports = function(num) {
+  if (typeof num === 'number') {
+    return num - num === 0;
+  }
+  if (typeof num === 'string' && num.trim() !== '') {
+    return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
+  }
+  return false;
+};
+
+
+/***/ }),
+/* 34 */,
+/* 35 */,
+/* 36 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _Scalar = _interopRequireDefault(__webpack_require__(122));
+
+var _stringify = __webpack_require__(713);
+
+var _failsafe = _interopRequireDefault(__webpack_require__(8));
+
+var _options = __webpack_require__(228);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = _failsafe.default.concat([{
+  identify: value => value == null,
+  createNode: (schema, value, ctx) => ctx.wrapScalars ? new _Scalar.default(null) : null,
+  default: true,
+  tag: 'tag:yaml.org,2002:null',
+  test: /^(?:~|[Nn]ull|NULL)?$/,
+  resolve: () => null,
+  options: _options.nullOptions,
+  stringify: () => _options.nullOptions.nullStr
+}, {
+  identify: value => typeof value === 'boolean',
+  default: true,
+  tag: 'tag:yaml.org,2002:bool',
+  test: /^(?:[Tt]rue|TRUE|[Ff]alse|FALSE)$/,
+  resolve: str => str[0] === 't' || str[0] === 'T',
+  options: _options.boolOptions,
+  stringify: ({
+    value
+  }) => value ? _options.boolOptions.trueStr : _options.boolOptions.falseStr
+}, {
+  identify: value => typeof value === 'number',
+  default: true,
+  tag: 'tag:yaml.org,2002:int',
+  format: 'OCT',
+  test: /^0o([0-7]+)$/,
+  resolve: (str, oct) => parseInt(oct, 8),
+  stringify: ({
+    value
+  }) => '0o' + value.toString(8)
+}, {
+  identify: value => typeof value === 'number',
+  default: true,
+  tag: 'tag:yaml.org,2002:int',
+  test: /^[-+]?[0-9]+$/,
+  resolve: str => parseInt(str, 10),
+  stringify: _stringify.stringifyNumber
+}, {
+  identify: value => typeof value === 'number',
+  default: true,
+  tag: 'tag:yaml.org,2002:int',
+  format: 'HEX',
+  test: /^0x([0-9a-fA-F]+)$/,
+  resolve: (str, hex) => parseInt(hex, 16),
+  stringify: ({
+    value
+  }) => '0x' + value.toString(16)
+}, {
+  identify: value => typeof value === 'number',
+  default: true,
+  tag: 'tag:yaml.org,2002:float',
+  test: /^(?:[-+]?\.inf|(\.nan))$/i,
+  resolve: (str, nan) => nan ? NaN : str[0] === '-' ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
+  stringify: _stringify.stringifyNumber
+}, {
+  identify: value => typeof value === 'number',
+  default: true,
+  tag: 'tag:yaml.org,2002:float',
+  format: 'EXP',
+  test: /^[-+]?(?:0|[1-9][0-9]*)(\.[0-9]*)?[eE][-+]?[0-9]+$/,
+  resolve: str => parseFloat(str),
+  stringify: ({
+    value
+  }) => Number(value).toExponential()
+}, {
+  identify: value => typeof value === 'number',
+  default: true,
+  tag: 'tag:yaml.org,2002:float',
+  test: /^[-+]?(?:0|[1-9][0-9]*)\.([0-9]*)$/,
+
+  resolve(str, frac) {
+    const node = new _Scalar.default(parseFloat(str));
+    if (frac && frac[frac.length - 1] === '0') node.minFractionDigits = frac.length;
+    return node;
+  },
+
+  stringify: _stringify.stringifyNumber
+}]);
+
+exports.default = _default;
+
+/***/ }),
+/* 37 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.checkFlowCollectionEnd = checkFlowCollectionEnd;
+exports.checkKeyLength = checkKeyLength;
+exports.resolveComments = resolveComments;
+
+var _errors = __webpack_require__(297);
+
+var _constants = __webpack_require__(720);
+
+function checkFlowCollectionEnd(errors, cst) {
+  let char, name;
+
+  switch (cst.type) {
+    case _constants.Type.FLOW_MAP:
+      char = '}';
+      name = 'flow map';
+      break;
+
+    case _constants.Type.FLOW_SEQ:
+      char = ']';
+      name = 'flow sequence';
+      break;
+
+    default:
+      errors.push(new _errors.YAMLSemanticError(cst, 'Not a flow collection!?'));
+      return;
+  }
+
+  let lastItem;
+
+  for (let i = cst.items.length - 1; i >= 0; --i) {
+    const item = cst.items[i];
+
+    if (!item || item.type !== _constants.Type.COMMENT) {
+      lastItem = item;
+      break;
+    }
+  }
+
+  if (lastItem && lastItem.char !== char) {
+    const msg = `Expected ${name} to end with ${char}`;
+    let err;
+
+    if (typeof lastItem.offset === 'number') {
+      err = new _errors.YAMLSemanticError(cst, msg);
+      err.offset = lastItem.offset + 1;
+    } else {
+      err = new _errors.YAMLSemanticError(lastItem, msg);
+      if (lastItem.range && lastItem.range.end) err.offset = lastItem.range.end - lastItem.range.start;
+    }
+
+    errors.push(err);
+  }
+}
+
+function checkKeyLength(errors, node, itemIdx, key, keyStart) {
+  if (!key || typeof keyStart !== 'number') return;
+  const item = node.items[itemIdx];
+  let keyEnd = item && item.range && item.range.start;
+
+  if (!keyEnd) {
+    for (let i = itemIdx - 1; i >= 0; --i) {
+      const it = node.items[i];
+
+      if (it && it.range) {
+        keyEnd = it.range.end + 2 * (itemIdx - i);
+        break;
+      }
+    }
+  }
+
+  if (keyEnd > keyStart + 1024) {
+    const k = String(key).substr(0, 8) + '...' + String(key).substr(-8);
+    errors.push(new _errors.YAMLSemanticError(node, `The "${k}" key is too long`));
+  }
+}
+
+function resolveComments(collection, comments) {
+  for (const {
+    afterKey,
+    before,
+    comment
+  } of comments) {
+    let item = collection.items[before];
+
+    if (!item) {
+      if (comment !== undefined) {
+        if (collection.comment) collection.comment += '\n' + comment;else collection.comment = comment;
+      }
+    } else {
+      if (afterKey && item.value) item = item.value;
+
+      if (comment === undefined) {
+        if (afterKey || !item.commentBefore) item.spaceBefore = true;
+      } else {
+        if (item.commentBefore) item.commentBefore += '\n' + comment;else item.commentBefore = comment;
+      }
+    }
+  }
+}
+
+/***/ }),
+/* 38 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(128);
+
+/***/ }),
+/* 39 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const core = __webpack_require__(134);
+const YAML = __webpack_require__(676);
+const { GoogleAuth } = __webpack_require__(287);
+const createKeyFile = __webpack_require__(267);
+
+let client;
+
+const createClient = async (serviceAccountKey) => {
+  if (!client) {
+    const keyFilename = createKeyFile(serviceAccountKey);
+    const auth = new GoogleAuth({
+      keyFilename,
+      scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+    });
+    client = await auth.getClient();
+  }
+};
+
+const accessSecretValue = async (name) => client.request({
+  url: `https://secretmanager.googleapis.com/v1/projects/${client.projectId}/secrets/${name}/versions/latest:access`,
+}).then((res) => res.data.payload.data)
+  .then((secret) => Buffer.from(secret, 'base64').toString('utf8'));
+
+const parseInputYaml = (secretsYaml) => YAML.parse(secretsYaml);
+
+const loadSecrets = async (serviceAccountKey, secrets = {}) => {
+  await createClient(serviceAccountKey);
+  const results = [];
+  Object.keys(secrets).forEach((env) => {
+    const name = secrets[env];
+    results.push(accessSecretValue(name)
+      .then((secret) => {
+        core.setSecret(secret);
+        core.exportVariable(env, secret);
+      }));
+  });
+  return Promise.all(results);
+};
+
+const loadSecret = async (serviceAccountKey, name) => {
+  await createClient(serviceAccountKey);
+  return accessSecretValue(name)
+    .then((secret) => {
+      core.setSecret(secret);
+      return secret;
+    });
+};
+
+module.exports = {
+  loadSecret,
+  loadSecrets,
+  parseInputYaml,
+};
+
+
+/***/ }),
+/* 40 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
@@ -3711,7 +4307,7 @@ module.exports = function mergeConfig(config1, config2) {
 
 
 
-var Punycode = __webpack_require__(213);
+var Punycode = __webpack_require__(815);
 
 
 var internals = {};
@@ -3979,345 +4575,6 @@ exports.isValid = function (domain) {
 
 
 /***/ }),
-/* 34 */,
-/* 35 */,
-/* 36 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _Scalar = _interopRequireDefault(__webpack_require__(122));
-
-var _stringify = __webpack_require__(713);
-
-var _failsafe = _interopRequireDefault(__webpack_require__(8));
-
-var _options = __webpack_require__(228);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var _default = _failsafe.default.concat([{
-  identify: value => value == null,
-  createNode: (schema, value, ctx) => ctx.wrapScalars ? new _Scalar.default(null) : null,
-  default: true,
-  tag: 'tag:yaml.org,2002:null',
-  test: /^(?:~|[Nn]ull|NULL)?$/,
-  resolve: () => null,
-  options: _options.nullOptions,
-  stringify: () => _options.nullOptions.nullStr
-}, {
-  identify: value => typeof value === 'boolean',
-  default: true,
-  tag: 'tag:yaml.org,2002:bool',
-  test: /^(?:[Tt]rue|TRUE|[Ff]alse|FALSE)$/,
-  resolve: str => str[0] === 't' || str[0] === 'T',
-  options: _options.boolOptions,
-  stringify: ({
-    value
-  }) => value ? _options.boolOptions.trueStr : _options.boolOptions.falseStr
-}, {
-  identify: value => typeof value === 'number',
-  default: true,
-  tag: 'tag:yaml.org,2002:int',
-  format: 'OCT',
-  test: /^0o([0-7]+)$/,
-  resolve: (str, oct) => parseInt(oct, 8),
-  stringify: ({
-    value
-  }) => '0o' + value.toString(8)
-}, {
-  identify: value => typeof value === 'number',
-  default: true,
-  tag: 'tag:yaml.org,2002:int',
-  test: /^[-+]?[0-9]+$/,
-  resolve: str => parseInt(str, 10),
-  stringify: _stringify.stringifyNumber
-}, {
-  identify: value => typeof value === 'number',
-  default: true,
-  tag: 'tag:yaml.org,2002:int',
-  format: 'HEX',
-  test: /^0x([0-9a-fA-F]+)$/,
-  resolve: (str, hex) => parseInt(hex, 16),
-  stringify: ({
-    value
-  }) => '0x' + value.toString(16)
-}, {
-  identify: value => typeof value === 'number',
-  default: true,
-  tag: 'tag:yaml.org,2002:float',
-  test: /^(?:[-+]?\.inf|(\.nan))$/i,
-  resolve: (str, nan) => nan ? NaN : str[0] === '-' ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
-  stringify: _stringify.stringifyNumber
-}, {
-  identify: value => typeof value === 'number',
-  default: true,
-  tag: 'tag:yaml.org,2002:float',
-  format: 'EXP',
-  test: /^[-+]?(?:0|[1-9][0-9]*)(\.[0-9]*)?[eE][-+]?[0-9]+$/,
-  resolve: str => parseFloat(str),
-  stringify: ({
-    value
-  }) => Number(value).toExponential()
-}, {
-  identify: value => typeof value === 'number',
-  default: true,
-  tag: 'tag:yaml.org,2002:float',
-  test: /^[-+]?(?:0|[1-9][0-9]*)\.([0-9]*)$/,
-
-  resolve(str, frac) {
-    const node = new _Scalar.default(parseFloat(str));
-    if (frac && frac[frac.length - 1] === '0') node.minFractionDigits = frac.length;
-    return node;
-  },
-
-  stringify: _stringify.stringifyNumber
-}]);
-
-exports.default = _default;
-
-/***/ }),
-/* 37 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.checkFlowCollectionEnd = checkFlowCollectionEnd;
-exports.checkKeyLength = checkKeyLength;
-exports.resolveComments = resolveComments;
-
-var _errors = __webpack_require__(297);
-
-var _constants = __webpack_require__(720);
-
-function checkFlowCollectionEnd(errors, cst) {
-  let char, name;
-
-  switch (cst.type) {
-    case _constants.Type.FLOW_MAP:
-      char = '}';
-      name = 'flow map';
-      break;
-
-    case _constants.Type.FLOW_SEQ:
-      char = ']';
-      name = 'flow sequence';
-      break;
-
-    default:
-      errors.push(new _errors.YAMLSemanticError(cst, 'Not a flow collection!?'));
-      return;
-  }
-
-  let lastItem;
-
-  for (let i = cst.items.length - 1; i >= 0; --i) {
-    const item = cst.items[i];
-
-    if (!item || item.type !== _constants.Type.COMMENT) {
-      lastItem = item;
-      break;
-    }
-  }
-
-  if (lastItem && lastItem.char !== char) {
-    const msg = `Expected ${name} to end with ${char}`;
-    let err;
-
-    if (typeof lastItem.offset === 'number') {
-      err = new _errors.YAMLSemanticError(cst, msg);
-      err.offset = lastItem.offset + 1;
-    } else {
-      err = new _errors.YAMLSemanticError(lastItem, msg);
-      if (lastItem.range && lastItem.range.end) err.offset = lastItem.range.end - lastItem.range.start;
-    }
-
-    errors.push(err);
-  }
-}
-
-function checkKeyLength(errors, node, itemIdx, key, keyStart) {
-  if (!key || typeof keyStart !== 'number') return;
-  const item = node.items[itemIdx];
-  let keyEnd = item && item.range && item.range.start;
-
-  if (!keyEnd) {
-    for (let i = itemIdx - 1; i >= 0; --i) {
-      const it = node.items[i];
-
-      if (it && it.range) {
-        keyEnd = it.range.end + 2 * (itemIdx - i);
-        break;
-      }
-    }
-  }
-
-  if (keyEnd > keyStart + 1024) {
-    const k = String(key).substr(0, 8) + '...' + String(key).substr(-8);
-    errors.push(new _errors.YAMLSemanticError(node, `The "${k}" key is too long`));
-  }
-}
-
-function resolveComments(collection, comments) {
-  for (const {
-    afterKey,
-    before,
-    comment
-  } of comments) {
-    let item = collection.items[before];
-
-    if (!item) {
-      if (comment !== undefined) {
-        if (collection.comment) collection.comment += '\n' + comment;else collection.comment = comment;
-      }
-    } else {
-      if (afterKey && item.value) item = item.value;
-
-      if (comment === undefined) {
-        if (afterKey || !item.commentBefore) item.spaceBefore = true;
-      } else {
-        if (item.commentBefore) item.commentBefore += '\n' + comment;else item.commentBefore = comment;
-      }
-    }
-  }
-}
-
-/***/ }),
-/* 38 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-module.exports = __webpack_require__(128);
-
-/***/ }),
-/* 39 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const core = __webpack_require__(120);
-const YAML = __webpack_require__(676);
-const { GoogleAuth } = __webpack_require__(287);
-const createKeyFile = __webpack_require__(267);
-
-let client;
-
-const createClient = async (serviceAccountKey) => {
-  if (!client) {
-    const keyFilename = createKeyFile(serviceAccountKey);
-    const auth = new GoogleAuth({
-      keyFilename,
-      scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-    });
-    client = await auth.getClient();
-  }
-};
-
-const accessSecretValue = async (name) => client.request({
-  url: `https://secretmanager.googleapis.com/v1/projects/${client.projectId}/secrets/${name}/versions/latest:access`,
-}).then((res) => res.data.payload.data)
-  .then((secret) => Buffer.from(secret, 'base64').toString('utf8'));
-
-const parseInputYaml = (secretsYaml) => YAML.parse(secretsYaml);
-
-const loadSecrets = async (serviceAccountKey, secrets = {}) => {
-  await createClient(serviceAccountKey);
-  const results = [];
-  Object.keys(secrets).forEach((env) => {
-    const name = secrets[env];
-    results.push(accessSecretValue(name)
-      .then((secret) => {
-        core.setSecret(secret);
-        core.exportVariable(env, secret);
-      }));
-  });
-  return Promise.all(results);
-};
-
-const loadSecret = async (serviceAccountKey, name) => {
-  await createClient(serviceAccountKey);
-  return accessSecretValue(name)
-    .then((secret) => {
-      core.setSecret(secret);
-      return secret;
-    });
-};
-
-module.exports = {
-  loadSecret,
-  loadSecrets,
-  parseInputYaml,
-};
-
-
-/***/ }),
-/* 40 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-var Type = __webpack_require__(741);
-
-var _toString = Object.prototype.toString;
-
-function resolveYamlPairs(data) {
-  if (data === null) return true;
-
-  var index, length, pair, keys, result,
-      object = data;
-
-  result = new Array(object.length);
-
-  for (index = 0, length = object.length; index < length; index += 1) {
-    pair = object[index];
-
-    if (_toString.call(pair) !== '[object Object]') return false;
-
-    keys = Object.keys(pair);
-
-    if (keys.length !== 1) return false;
-
-    result[index] = [ keys[0], pair[keys[0]] ];
-  }
-
-  return true;
-}
-
-function constructYamlPairs(data) {
-  if (data === null) return [];
-
-  var index, length, pair, keys, result,
-      object = data;
-
-  result = new Array(object.length);
-
-  for (index = 0, length = object.length; index < length; index += 1) {
-    pair = object[index];
-
-    keys = Object.keys(pair);
-
-    result[index] = [ keys[0], pair[keys[0]] ];
-  }
-
-  return result;
-}
-
-module.exports = new Type('tag:yaml.org,2002:pairs', {
-  kind: 'sequence',
-  resolve: resolveYamlPairs,
-  construct: constructYamlPairs
-});
-
-
-/***/ }),
 /* 41 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -4409,7 +4666,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const extend_1 = __importDefault(__webpack_require__(27));
 const node_fetch_1 = __importDefault(__webpack_require__(579));
 const querystring_1 = __importDefault(__webpack_require__(393));
-const is_stream_1 = __importDefault(__webpack_require__(64));
+const is_stream_1 = __importDefault(__webpack_require__(376));
 const url_1 = __importDefault(__webpack_require__(835));
 const common_1 = __webpack_require__(732);
 const retry_1 = __webpack_require__(996);
@@ -4435,7 +4692,7 @@ function loadProxy() {
         process.env.HTTP_PROXY ||
         process.env.http_proxy;
     if (proxy) {
-        HttpsProxyAgent = __webpack_require__(446);
+        HttpsProxyAgent = __webpack_require__(531);
     }
     return proxy;
 }
@@ -4605,9 +4862,72 @@ exports.Gaxios = Gaxios;
 
 /***/ }),
 /* 43 */
-/***/ (function(module) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-module.exports = {"$id":"content.json#","$schema":"http://json-schema.org/draft-06/schema#","type":"object","required":["size","mimeType"],"properties":{"size":{"type":"integer"},"compression":{"type":"integer"},"mimeType":{"type":"string"},"text":{"type":"string"},"encoding":{"type":"string"},"comment":{"type":"string"}}};
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const utils = __webpack_require__(817);
+const partial_1 = __webpack_require__(512);
+class DeepFilter {
+    constructor(_settings, _micromatchOptions) {
+        this._settings = _settings;
+        this._micromatchOptions = _micromatchOptions;
+    }
+    getFilter(basePath, positive, negative) {
+        const matcher = this._getMatcher(positive);
+        const negativeRe = this._getNegativePatternsRe(negative);
+        return (entry) => this._filter(basePath, entry, matcher, negativeRe);
+    }
+    _getMatcher(patterns) {
+        return new partial_1.default(patterns, this._settings, this._micromatchOptions);
+    }
+    _getNegativePatternsRe(patterns) {
+        const affectDepthOfReadingPatterns = patterns.filter(utils.pattern.isAffectDepthOfReadingPattern);
+        return utils.pattern.convertPatternsToRe(affectDepthOfReadingPatterns, this._micromatchOptions);
+    }
+    _filter(basePath, entry, matcher, negativeRe) {
+        if (this._isSkippedByDeep(basePath, entry.path)) {
+            return false;
+        }
+        if (this._isSkippedSymbolicLink(entry)) {
+            return false;
+        }
+        const filepath = utils.path.removeLeadingDotSegment(entry.path);
+        if (this._isSkippedByPositivePatterns(filepath, matcher)) {
+            return false;
+        }
+        return this._isSkippedByNegativePatterns(filepath, negativeRe);
+    }
+    _isSkippedByDeep(basePath, entryPath) {
+        /**
+         * Avoid unnecessary depth calculations when it doesn't matter.
+         */
+        if (this._settings.deep === Infinity) {
+            return false;
+        }
+        return this._getEntryLevel(basePath, entryPath) >= this._settings.deep;
+    }
+    _getEntryLevel(basePath, entryPath) {
+        const entryPathDepth = entryPath.split('/').length;
+        if (basePath === '') {
+            return entryPathDepth;
+        }
+        const basePathDepth = basePath.split('/').length;
+        return entryPathDepth - basePathDepth;
+    }
+    _isSkippedSymbolicLink(entry) {
+        return !this._settings.followSymbolicLinks && entry.dirent.isSymbolicLink();
+    }
+    _isSkippedByPositivePatterns(entryPath, matcher) {
+        return !this._settings.baseNameMatch && !matcher.match(entryPath);
+    }
+    _isSkippedByNegativePatterns(entryPath, patternsRe) {
+        return !utils.pattern.matchAny(entryPath, patternsRe);
+    }
+}
+exports.default = DeepFilter;
+
 
 /***/ }),
 /* 44 */
@@ -5177,14 +5497,32 @@ module.exports = exports
 
 
 /***/ }),
-/* 45 */,
+/* 45 */
+/***/ (function(module) {
+
+/**
+ * Node.js module for Forge.
+ *
+ * @author Dave Longley
+ *
+ * Copyright 2011-2016 Digital Bazaar, Inc.
+ */
+module.exports = {
+  // default options
+  options: {
+    usePureJavaScript: false
+  }
+};
+
+
+/***/ }),
 /* 46 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 
-var Cancel = __webpack_require__(302);
+var Cancel = __webpack_require__(186);
 
 /**
  * A `CancelToken` is an object that can be used to request cancellation of an operation.
@@ -5547,8 +5885,8 @@ SSHBuffer.prototype.write = function (buf) {
 
    'use strict';
 
-   var debug = __webpack_require__(370)('simple-git');
-   var deferred = __webpack_require__(109);
+   var debug = __webpack_require__(962)('simple-git');
+   var deferred = __webpack_require__(356);
    var exists = __webpack_require__(639);
    var NOOP = function () {};
    var responses = __webpack_require__(889);
@@ -7434,7 +7772,7 @@ module.exports = {
 };
 
 var assert = __webpack_require__(552);
-var asn1 = __webpack_require__(784);
+var asn1 = __webpack_require__(440);
 var Buffer = __webpack_require__(299).Buffer;
 var algs = __webpack_require__(151);
 var utils = __webpack_require__(241);
@@ -8021,38 +8359,20 @@ module.exports = function buildURL(url, params, paramsSerializer) {
 /***/ }),
 /* 63 */,
 /* 64 */
-/***/ (function(module) {
+/***/ (function(__unusedmodule, exports) {
 
 "use strict";
 
-
-const isStream = stream =>
-	stream !== null &&
-	typeof stream === 'object' &&
-	typeof stream.pipe === 'function';
-
-isStream.writable = stream =>
-	isStream(stream) &&
-	stream.writable !== false &&
-	typeof stream._write === 'function' &&
-	typeof stream._writableState === 'object';
-
-isStream.readable = stream =>
-	isStream(stream) &&
-	stream.readable !== false &&
-	typeof stream._read === 'function' &&
-	typeof stream._readableState === 'object';
-
-isStream.duplex = stream =>
-	isStream.writable(stream) &&
-	isStream.readable(stream);
-
-isStream.transform = stream =>
-	isStream.duplex(stream) &&
-	typeof stream._transform === 'function' &&
-	typeof stream._transformState === 'object';
-
-module.exports = isStream;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.isEmpty = exports.isString = void 0;
+function isString(input) {
+    return typeof input === 'string';
+}
+exports.isString = isString;
+function isEmpty(input) {
+    return input === '';
+}
+exports.isEmpty = isEmpty;
 
 
 /***/ }),
@@ -8082,7 +8402,7 @@ __webpack_require__(244);
 
 
 var utils = __webpack_require__(617);
-var formats = __webpack_require__(649);
+var formats = __webpack_require__(379);
 
 var arrayPrefixGenerators = {
     brackets: function brackets(prefix) { // eslint-disable-line func-name-matching
@@ -8292,7 +8612,56 @@ module.exports = function (object, opts) {
 
 
 /***/ }),
-/* 67 */,
+/* 67 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const tr = __importStar(__webpack_require__(26));
+/**
+ * Exec a command.
+ * Output will be streamed to the live console.
+ * Returns promise with return code
+ *
+ * @param     commandLine        command to execute (can include additional args). Must be correctly escaped.
+ * @param     args               optional arguments for tool. Escaping is handled by the lib.
+ * @param     options            optional exec options.  See ExecOptions
+ * @returns   Promise<number>    exit code
+ */
+function exec(commandLine, args, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const commandArgs = tr.argStringToArray(commandLine);
+        if (commandArgs.length === 0) {
+            throw new Error(`Parameter 'commandLine' cannot be null or empty.`);
+        }
+        // Path to tool to execute should be first arg
+        const toolPath = commandArgs[0];
+        args = commandArgs.slice(1).concat(args || []);
+        const runner = new tr.ToolRunner(toolPath, args, options);
+        return runner.exec();
+    });
+}
+exports.exec = exec;
+//# sourceMappingURL=exec.js.map
+
+/***/ }),
 /* 68 */
 /***/ (function(module) {
 
@@ -8588,7 +8957,7 @@ exports.default = _default;
 if (typeof process === 'undefined' || process.type === 'renderer') {
   module.exports = __webpack_require__(987);
 } else {
-  module.exports = __webpack_require__(435);
+  module.exports = __webpack_require__(288);
 }
 
 
@@ -8599,43 +8968,37 @@ if (typeof process === 'undefined' || process.type === 'renderer') {
 
 "use strict";
 
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _constants = __webpack_require__(720);
-
-var _Node = _interopRequireDefault(__webpack_require__(898));
-
-var _Range = _interopRequireDefault(__webpack_require__(853));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-class Comment extends _Node.default {
-  constructor() {
-    super(_constants.Type.COMMENT);
-  }
-  /**
-   * Parses a comment line from the source
-   *
-   * @param {ParseContext} context
-   * @param {number} start - Index of first character
-   * @returns {number} - Index of the character after this scalar
-   */
-
-
-  parse(context, start) {
-    this.context = context;
-    const offset = this.parseComment(start);
-    this.range = new _Range.default(start, offset);
-    return offset;
-  }
-
+Object.defineProperty(exports, "__esModule", { value: true });
+const stream_1 = __webpack_require__(413);
+const stream_2 = __webpack_require__(919);
+const provider_1 = __webpack_require__(446);
+class ProviderStream extends provider_1.default {
+    constructor() {
+        super(...arguments);
+        this._reader = new stream_2.default(this._settings);
+    }
+    read(task) {
+        const root = this._getRootDirectory(task);
+        const options = this._getReaderOptions(task);
+        const source = this.api(root, task, options);
+        const destination = new stream_1.Readable({ objectMode: true, read: () => { } });
+        source
+            .once('error', (error) => destination.emit('error', error))
+            .on('data', (entry) => destination.emit('data', options.transform(entry)))
+            .once('end', () => destination.emit('end'));
+        destination
+            .once('close', () => source.destroy());
+        return destination;
+    }
+    api(root, task, options) {
+        if (task.dynamic) {
+            return this._reader.dynamic(root, options);
+        }
+        return this._reader.static(task.patterns, options);
+    }
 }
+exports.default = ProviderStream;
 
-exports.default = Comment;
 
 /***/ }),
 /* 74 */,
@@ -8683,7 +9046,7 @@ axios.create = function create(instanceConfig) {
 
 // Expose Cancel & CancelToken
 axios.Cancel = __webpack_require__(871);
-axios.CancelToken = __webpack_require__(629);
+axios.CancelToken = __webpack_require__(495);
 axios.isCancel = __webpack_require__(888);
 
 // Expose all/spread
@@ -8703,11 +9066,12 @@ module.exports.default = axios;
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const core = __webpack_require__(793);
+const fg = __webpack_require__(180);
 const { run } = __webpack_require__(320);
 const loadIamDefinition = __webpack_require__(337);
 const configureIAM = __webpack_require__(623);
 const loadCredentials = __webpack_require__(884);
-const fetchIamToken = __webpack_require__(636);
+const fetchIamToken = __webpack_require__(199);
 const setupGcloud = __webpack_require__(217);
 const projectInfo = __webpack_require__(47);
 
@@ -8716,26 +9080,30 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   process.env.GCLOUD_INSTALLED_VERSION || 'latest',
 );
 
-const setupEnvironment = async (SA, SACluster, iam, styraUrl) => {
-  const projectId = await gcloudAuth(SACluster);
-  const {
-    env,
-  } = projectInfo(projectId);
-  const iamUrl = core.getInput('iam-api-url')
-    || `https://iam-api.retailsvc.${(env === 'staging') ? 'dev' : 'com'}`;
+const setupEnvironment = async (serviceAccountKey, gcloudAuthKey, iam, styraUrl, iamUrl) => {
+  const projectId = await gcloudAuth(gcloudAuthKey);
+  const { env: projectEnv } = projectInfo(projectId);
+
+  let credentialsEnv = projectEnv;
+  if (projectEnv === 'staging') {
+    // Even for staging, we always target prod iam-api unless explicitly told not to.
+    credentialsEnv = iamUrl.endsWith('retailsvc.dev') ? 'staging' : 'prod';
+    core.warning(`IAM definitions has been explicitly configured to publish to ${iamUrl} which is the STAGING environment.`);
+  }
+
   const {
     styraToken,
     iamApiEmail,
     iamApiPassword,
     iamApiKey,
     iamApiTenant,
-  } = await loadCredentials(SA, env);
+  } = await loadCredentials(serviceAccountKey, credentialsEnv);
 
   const promises = [];
 
   promises.push(fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenant)
     .then((iamToken) => configureIAM(
-      iam, styraToken, styraUrl, iamUrl, iamToken, env, projectId,
+      iam, styraToken, styraUrl, iamUrl, iamToken, projectEnv, projectId,
     )));
 
   return Promise.all(promises);
@@ -8746,12 +9114,20 @@ const action = async () => {
   const serviceAccountKeyStaging = core.getInput('service-account-key-staging', { required: true });
   const serviceAccountKeyProd = core.getInput('service-account-key-prod', { required: true });
 
-  const iamFile = core.getInput('iam-definition') || 'iam.yaml';
+  const iamFileGlob = core.getInput('iam-definition') || 'iam/*.yaml';
+  const iamUrl = core.getInput('iam-api-url') || 'https://iam-api.retailsvc.com';
   const styraUrl = core.getInput('styra-url') || 'https://extendaretail.styra.com';
-  const iam = loadIamDefinition(iamFile);
 
-  await setupEnvironment(serviceAccountKey, serviceAccountKeyStaging, iam, styraUrl)
-    .then(setupEnvironment(serviceAccountKey, serviceAccountKeyProd, iam, styraUrl));
+  const iamFiles = fg.sync(iamFileGlob, { onlyFiles: true });
+
+  for (const iamFile of iamFiles) {
+    const iam = loadIamDefinition(iamFile);
+    // We MUST process these files one by one as we depend on external tools
+    // eslint-disable-next-line no-await-in-loop
+    await setupEnvironment(serviceAccountKey, serviceAccountKeyStaging, iam, styraUrl, iamUrl);
+    // eslint-disable-next-line no-await-in-loop
+    await setupEnvironment(serviceAccountKey, serviceAccountKeyProd, iam, styraUrl, iamUrl);
+  }
 };
 
 if (require.main === require.cache[eval('__filename')]) {
@@ -8772,7 +9148,7 @@ module.exports = action;
  *
  * Copyright (c) 2014 Digital Bazaar, Inc.
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(294);
 __webpack_require__(924);
 __webpack_require__(845);
@@ -9076,7 +9452,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _crypto = _interopRequireDefault(__webpack_require__(417));
+var _crypto = _interopRequireDefault(__webpack_require__(373));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -9097,1263 +9473,39 @@ exports.default = _default;
 /* 79 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-/**
- * Javascript implementation of PKCS#7 v1.5.
- *
- * @author Stefan Siegl
- * @author Dave Longley
- *
- * Copyright (c) 2012 Stefan Siegl <stesie@brokenpipe.de>
- * Copyright (c) 2012-2015 Digital Bazaar, Inc.
- *
- * Currently this implementation only supports ContentType of EnvelopedData,
- * EncryptedData, or SignedData at the root level. The top level elements may
- * contain only a ContentInfo of ContentType Data, i.e. plain data. Further
- * nesting is not (yet) supported.
- *
- * The Forge validators for PKCS #7's ASN.1 structures are available from
- * a separate file pkcs7asn1.js, since those are referenced from other
- * PKCS standards like PKCS #12.
- */
-var forge = __webpack_require__(998);
-__webpack_require__(138);
-__webpack_require__(535);
-__webpack_require__(390);
-__webpack_require__(930);
-__webpack_require__(4);
-__webpack_require__(618);
-__webpack_require__(845);
-__webpack_require__(294);
-__webpack_require__(918);
+"use strict";
 
-// shortcut for ASN.1 API
-var asn1 = forge.asn1;
 
-// shortcut for PKCS#7 API
-var p7 = module.exports = forge.pkcs7 = forge.pkcs7 || {};
+const utils = __webpack_require__(304);
 
-/**
- * Converts a PKCS#7 message from PEM format.
- *
- * @param pem the PEM-formatted PKCS#7 message.
- *
- * @return the PKCS#7 message.
- */
-p7.messageFromPem = function(pem) {
-  var msg = forge.pem.decode(pem)[0];
+module.exports = (ast, options = {}) => {
+  let stringify = (node, parent = {}) => {
+    let invalidBlock = options.escapeInvalid && utils.isInvalidBrace(parent);
+    let invalidNode = node.invalid === true && options.escapeInvalid === true;
+    let output = '';
 
-  if(msg.type !== 'PKCS7') {
-    var error = new Error('Could not convert PKCS#7 message from PEM; PEM ' +
-      'header type is not "PKCS#7".');
-    error.headerType = msg.type;
-    throw error;
-  }
-  if(msg.procType && msg.procType.type === 'ENCRYPTED') {
-    throw new Error('Could not convert PKCS#7 message from PEM; PEM is encrypted.');
-  }
-
-  // convert DER to ASN.1 object
-  var obj = asn1.fromDer(msg.body);
-
-  return p7.messageFromAsn1(obj);
-};
-
-/**
- * Converts a PKCS#7 message to PEM format.
- *
- * @param msg The PKCS#7 message object
- * @param maxline The maximum characters per line, defaults to 64.
- *
- * @return The PEM-formatted PKCS#7 message.
- */
-p7.messageToPem = function(msg, maxline) {
-  // convert to ASN.1, then DER, then PEM-encode
-  var pemObj = {
-    type: 'PKCS7',
-    body: asn1.toDer(msg.toAsn1()).getBytes()
-  };
-  return forge.pem.encode(pemObj, {maxline: maxline});
-};
-
-/**
- * Converts a PKCS#7 message from an ASN.1 object.
- *
- * @param obj the ASN.1 representation of a ContentInfo.
- *
- * @return the PKCS#7 message.
- */
-p7.messageFromAsn1 = function(obj) {
-  // validate root level ContentInfo and capture data
-  var capture = {};
-  var errors = [];
-  if(!asn1.validate(obj, p7.asn1.contentInfoValidator, capture, errors)) {
-    var error = new Error('Cannot read PKCS#7 message. ' +
-      'ASN.1 object is not an PKCS#7 ContentInfo.');
-    error.errors = errors;
-    throw error;
-  }
-
-  var contentType = asn1.derToOid(capture.contentType);
-  var msg;
-
-  switch(contentType) {
-    case forge.pki.oids.envelopedData:
-      msg = p7.createEnvelopedData();
-      break;
-
-    case forge.pki.oids.encryptedData:
-      msg = p7.createEncryptedData();
-      break;
-
-    case forge.pki.oids.signedData:
-      msg = p7.createSignedData();
-      break;
-
-    default:
-      throw new Error('Cannot read PKCS#7 message. ContentType with OID ' +
-        contentType + ' is not (yet) supported.');
-  }
-
-  msg.fromAsn1(capture.content.value[0]);
-  return msg;
-};
-
-p7.createSignedData = function() {
-  var msg = null;
-  msg = {
-    type: forge.pki.oids.signedData,
-    version: 1,
-    certificates: [],
-    crls: [],
-    // TODO: add json-formatted signer stuff here?
-    signers: [],
-    // populated during sign()
-    digestAlgorithmIdentifiers: [],
-    contentInfo: null,
-    signerInfos: [],
-
-    fromAsn1: function(obj) {
-      // validate SignedData content block and capture data.
-      _fromAsn1(msg, obj, p7.asn1.signedDataValidator);
-      msg.certificates = [];
-      msg.crls = [];
-      msg.digestAlgorithmIdentifiers = [];
-      msg.contentInfo = null;
-      msg.signerInfos = [];
-
-      if(msg.rawCapture.certificates) {
-        var certs = msg.rawCapture.certificates.value;
-        for(var i = 0; i < certs.length; ++i) {
-          msg.certificates.push(forge.pki.certificateFromAsn1(certs[i]));
-        }
+    if (node.value) {
+      if ((invalidBlock || invalidNode) && utils.isOpenOrClose(node)) {
+        return '\\' + node.value;
       }
-
-      // TODO: parse crls
-    },
-
-    toAsn1: function() {
-      // degenerate case with no content
-      if(!msg.contentInfo) {
-        msg.sign();
-      }
-
-      var certs = [];
-      for(var i = 0; i < msg.certificates.length; ++i) {
-        certs.push(forge.pki.certificateToAsn1(msg.certificates[i]));
-      }
-
-      var crls = [];
-      // TODO: implement CRLs
-
-      // [0] SignedData
-      var signedData = asn1.create(asn1.Class.CONTEXT_SPECIFIC, 0, true, [
-        asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
-          // Version
-          asn1.create(asn1.Class.UNIVERSAL, asn1.Type.INTEGER, false,
-            asn1.integerToDer(msg.version).getBytes()),
-          // DigestAlgorithmIdentifiers
-          asn1.create(
-            asn1.Class.UNIVERSAL, asn1.Type.SET, true,
-            msg.digestAlgorithmIdentifiers),
-          // ContentInfo
-          msg.contentInfo
-        ])
-      ]);
-      if(certs.length > 0) {
-        // [0] IMPLICIT ExtendedCertificatesAndCertificates OPTIONAL
-        signedData.value[0].value.push(
-          asn1.create(asn1.Class.CONTEXT_SPECIFIC, 0, true, certs));
-      }
-      if(crls.length > 0) {
-        // [1] IMPLICIT CertificateRevocationLists OPTIONAL
-        signedData.value[0].value.push(
-          asn1.create(asn1.Class.CONTEXT_SPECIFIC, 1, true, crls));
-      }
-      // SignerInfos
-      signedData.value[0].value.push(
-        asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SET, true,
-          msg.signerInfos));
-
-      // ContentInfo
-      return asn1.create(
-        asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
-          // ContentType
-          asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
-            asn1.oidToDer(msg.type).getBytes()),
-          // [0] SignedData
-          signedData
-        ]);
-    },
-
-    /**
-     * Add (another) entity to list of signers.
-     *
-     * Note: If authenticatedAttributes are provided, then, per RFC 2315,
-     * they must include at least two attributes: content type and
-     * message digest. The message digest attribute value will be
-     * auto-calculated during signing and will be ignored if provided.
-     *
-     * Here's an example of providing these two attributes:
-     *
-     * forge.pkcs7.createSignedData();
-     * p7.addSigner({
-     *   issuer: cert.issuer.attributes,
-     *   serialNumber: cert.serialNumber,
-     *   key: privateKey,
-     *   digestAlgorithm: forge.pki.oids.sha1,
-     *   authenticatedAttributes: [{
-     *     type: forge.pki.oids.contentType,
-     *     value: forge.pki.oids.data
-     *   }, {
-     *     type: forge.pki.oids.messageDigest
-     *   }]
-     * });
-     *
-     * TODO: Support [subjectKeyIdentifier] as signer's ID.
-     *
-     * @param signer the signer information:
-     *          key the signer's private key.
-     *          [certificate] a certificate containing the public key
-     *            associated with the signer's private key; use this option as
-     *            an alternative to specifying signer.issuer and
-     *            signer.serialNumber.
-     *          [issuer] the issuer attributes (eg: cert.issuer.attributes).
-     *          [serialNumber] the signer's certificate's serial number in
-     *           hexadecimal (eg: cert.serialNumber).
-     *          [digestAlgorithm] the message digest OID, as a string, to use
-     *            (eg: forge.pki.oids.sha1).
-     *          [authenticatedAttributes] an optional array of attributes
-     *            to also sign along with the content.
-     */
-    addSigner: function(signer) {
-      var issuer = signer.issuer;
-      var serialNumber = signer.serialNumber;
-      if(signer.certificate) {
-        var cert = signer.certificate;
-        if(typeof cert === 'string') {
-          cert = forge.pki.certificateFromPem(cert);
-        }
-        issuer = cert.issuer.attributes;
-        serialNumber = cert.serialNumber;
-      }
-      var key = signer.key;
-      if(!key) {
-        throw new Error(
-          'Could not add PKCS#7 signer; no private key specified.');
-      }
-      if(typeof key === 'string') {
-        key = forge.pki.privateKeyFromPem(key);
-      }
-
-      // ensure OID known for digest algorithm
-      var digestAlgorithm = signer.digestAlgorithm || forge.pki.oids.sha1;
-      switch(digestAlgorithm) {
-      case forge.pki.oids.sha1:
-      case forge.pki.oids.sha256:
-      case forge.pki.oids.sha384:
-      case forge.pki.oids.sha512:
-      case forge.pki.oids.md5:
-        break;
-      default:
-        throw new Error(
-          'Could not add PKCS#7 signer; unknown message digest algorithm: ' +
-          digestAlgorithm);
-      }
-
-      // if authenticatedAttributes is present, then the attributes
-      // must contain at least PKCS #9 content-type and message-digest
-      var authenticatedAttributes = signer.authenticatedAttributes || [];
-      if(authenticatedAttributes.length > 0) {
-        var contentType = false;
-        var messageDigest = false;
-        for(var i = 0; i < authenticatedAttributes.length; ++i) {
-          var attr = authenticatedAttributes[i];
-          if(!contentType && attr.type === forge.pki.oids.contentType) {
-            contentType = true;
-            if(messageDigest) {
-              break;
-            }
-            continue;
-          }
-          if(!messageDigest && attr.type === forge.pki.oids.messageDigest) {
-            messageDigest = true;
-            if(contentType) {
-              break;
-            }
-            continue;
-          }
-        }
-
-        if(!contentType || !messageDigest) {
-          throw new Error('Invalid signer.authenticatedAttributes. If ' +
-            'signer.authenticatedAttributes is specified, then it must ' +
-            'contain at least two attributes, PKCS #9 content-type and ' +
-            'PKCS #9 message-digest.');
-        }
-      }
-
-      msg.signers.push({
-        key: key,
-        version: 1,
-        issuer: issuer,
-        serialNumber: serialNumber,
-        digestAlgorithm: digestAlgorithm,
-        signatureAlgorithm: forge.pki.oids.rsaEncryption,
-        signature: null,
-        authenticatedAttributes: authenticatedAttributes,
-        unauthenticatedAttributes: []
-      });
-    },
-
-    /**
-     * Signs the content.
-     * @param options Options to apply when signing:
-     *    [detached] boolean. If signing should be done in detached mode. Defaults to false.
-     */
-    sign: function(options) {
-      options = options || {};
-      // auto-generate content info
-      if(typeof msg.content !== 'object' || msg.contentInfo === null) {
-        // use Data ContentInfo
-        msg.contentInfo = asn1.create(
-          asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
-            // ContentType
-            asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
-              asn1.oidToDer(forge.pki.oids.data).getBytes())
-          ]);
-
-        // add actual content, if present
-        if('content' in msg) {
-          var content;
-          if(msg.content instanceof forge.util.ByteBuffer) {
-            content = msg.content.bytes();
-          } else if(typeof msg.content === 'string') {
-            content = forge.util.encodeUtf8(msg.content);
-          }
-
-          if (options.detached) {
-            msg.detachedContent = asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false, content);
-          } else {
-            msg.contentInfo.value.push(
-              // [0] EXPLICIT content
-              asn1.create(asn1.Class.CONTEXT_SPECIFIC, 0, true, [
-                asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false,
-                  content)
-              ]));
-          }
-        }
-      }
-
-      // no signers, return early (degenerate case for certificate container)
-      if(msg.signers.length === 0) {
-        return;
-      }
-
-      // generate digest algorithm identifiers
-      var mds = addDigestAlgorithmIds();
-
-      // generate signerInfos
-      addSignerInfos(mds);
-    },
-
-    verify: function() {
-      throw new Error('PKCS#7 signature verification not yet implemented.');
-    },
-
-    /**
-     * Add a certificate.
-     *
-     * @param cert the certificate to add.
-     */
-    addCertificate: function(cert) {
-      // convert from PEM
-      if(typeof cert === 'string') {
-        cert = forge.pki.certificateFromPem(cert);
-      }
-      msg.certificates.push(cert);
-    },
-
-    /**
-     * Add a certificate revokation list.
-     *
-     * @param crl the certificate revokation list to add.
-     */
-    addCertificateRevokationList: function(crl) {
-      throw new Error('PKCS#7 CRL support not yet implemented.');
-    }
-  };
-  return msg;
-
-  function addDigestAlgorithmIds() {
-    var mds = {};
-
-    for(var i = 0; i < msg.signers.length; ++i) {
-      var signer = msg.signers[i];
-      var oid = signer.digestAlgorithm;
-      if(!(oid in mds)) {
-        // content digest
-        mds[oid] = forge.md[forge.pki.oids[oid]].create();
-      }
-      if(signer.authenticatedAttributes.length === 0) {
-        // no custom attributes to digest; use content message digest
-        signer.md = mds[oid];
-      } else {
-        // custom attributes to be digested; use own message digest
-        // TODO: optimize to just copy message digest state if that
-        // feature is ever supported with message digests
-        signer.md = forge.md[forge.pki.oids[oid]].create();
-      }
+      return node.value;
     }
 
-    // add unique digest algorithm identifiers
-    msg.digestAlgorithmIdentifiers = [];
-    for(var oid in mds) {
-      msg.digestAlgorithmIdentifiers.push(
-        // AlgorithmIdentifier
-        asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
-          // algorithm
-          asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
-            asn1.oidToDer(oid).getBytes()),
-          // parameters (null)
-          asn1.create(asn1.Class.UNIVERSAL, asn1.Type.NULL, false, '')
-        ]));
+    if (node.value) {
+      return node.value;
     }
 
-    return mds;
-  }
-
-  function addSignerInfos(mds) {
-    var content;
-
-    if (msg.detachedContent) {
-      // Signature has been made in detached mode.
-      content = msg.detachedContent;
-    } else {
-      // Note: ContentInfo is a SEQUENCE with 2 values, second value is
-      // the content field and is optional for a ContentInfo but required here
-      // since signers are present
-      // get ContentInfo content
-      content = msg.contentInfo.value[1];
-      // skip [0] EXPLICIT content wrapper
-      content = content.value[0];
-    }
-
-    if(!content) {
-      throw new Error(
-        'Could not sign PKCS#7 message; there is no content to sign.');
-    }
-
-    // get ContentInfo content type
-    var contentType = asn1.derToOid(msg.contentInfo.value[0].value);
-
-    // serialize content
-    var bytes = asn1.toDer(content);
-
-    // skip identifier and length per RFC 2315 9.3
-    // skip identifier (1 byte)
-    bytes.getByte();
-    // read and discard length bytes
-    asn1.getBerValueLength(bytes);
-    bytes = bytes.getBytes();
-
-    // digest content DER value bytes
-    for(var oid in mds) {
-      mds[oid].start().update(bytes);
-    }
-
-    // sign content
-    var signingTime = new Date();
-    for(var i = 0; i < msg.signers.length; ++i) {
-      var signer = msg.signers[i];
-
-      if(signer.authenticatedAttributes.length === 0) {
-        // if ContentInfo content type is not "Data", then
-        // authenticatedAttributes must be present per RFC 2315
-        if(contentType !== forge.pki.oids.data) {
-          throw new Error(
-            'Invalid signer; authenticatedAttributes must be present ' +
-            'when the ContentInfo content type is not PKCS#7 Data.');
-        }
-      } else {
-        // process authenticated attributes
-        // [0] IMPLICIT
-        signer.authenticatedAttributesAsn1 = asn1.create(
-          asn1.Class.CONTEXT_SPECIFIC, 0, true, []);
-
-        // per RFC 2315, attributes are to be digested using a SET container
-        // not the above [0] IMPLICIT container
-        var attrsAsn1 = asn1.create(
-          asn1.Class.UNIVERSAL, asn1.Type.SET, true, []);
-
-        for(var ai = 0; ai < signer.authenticatedAttributes.length; ++ai) {
-          var attr = signer.authenticatedAttributes[ai];
-          if(attr.type === forge.pki.oids.messageDigest) {
-            // use content message digest as value
-            attr.value = mds[signer.digestAlgorithm].digest();
-          } else if(attr.type === forge.pki.oids.signingTime) {
-            // auto-populate signing time if not already set
-            if(!attr.value) {
-              attr.value = signingTime;
-            }
-          }
-
-          // convert to ASN.1 and push onto Attributes SET (for signing) and
-          // onto authenticatedAttributesAsn1 to complete SignedData ASN.1
-          // TODO: optimize away duplication
-          attrsAsn1.value.push(_attributeToAsn1(attr));
-          signer.authenticatedAttributesAsn1.value.push(_attributeToAsn1(attr));
-        }
-
-        // DER-serialize and digest SET OF attributes only
-        bytes = asn1.toDer(attrsAsn1).getBytes();
-        signer.md.start().update(bytes);
-      }
-
-      // sign digest
-      signer.signature = signer.key.sign(signer.md, 'RSASSA-PKCS1-V1_5');
-    }
-
-    // add signer info
-    msg.signerInfos = _signersToAsn1(msg.signers);
-  }
-};
-
-/**
- * Creates an empty PKCS#7 message of type EncryptedData.
- *
- * @return the message.
- */
-p7.createEncryptedData = function() {
-  var msg = null;
-  msg = {
-    type: forge.pki.oids.encryptedData,
-    version: 0,
-    encryptedContent: {
-      algorithm: forge.pki.oids['aes256-CBC']
-    },
-
-    /**
-     * Reads an EncryptedData content block (in ASN.1 format)
-     *
-     * @param obj The ASN.1 representation of the EncryptedData content block
-     */
-    fromAsn1: function(obj) {
-      // Validate EncryptedData content block and capture data.
-      _fromAsn1(msg, obj, p7.asn1.encryptedDataValidator);
-    },
-
-    /**
-     * Decrypt encrypted content
-     *
-     * @param key The (symmetric) key as a byte buffer
-     */
-    decrypt: function(key) {
-      if(key !== undefined) {
-        msg.encryptedContent.key = key;
-      }
-      _decryptContent(msg);
-    }
-  };
-  return msg;
-};
-
-/**
- * Creates an empty PKCS#7 message of type EnvelopedData.
- *
- * @return the message.
- */
-p7.createEnvelopedData = function() {
-  var msg = null;
-  msg = {
-    type: forge.pki.oids.envelopedData,
-    version: 0,
-    recipients: [],
-    encryptedContent: {
-      algorithm: forge.pki.oids['aes256-CBC']
-    },
-
-    /**
-     * Reads an EnvelopedData content block (in ASN.1 format)
-     *
-     * @param obj the ASN.1 representation of the EnvelopedData content block.
-     */
-    fromAsn1: function(obj) {
-      // validate EnvelopedData content block and capture data
-      var capture = _fromAsn1(msg, obj, p7.asn1.envelopedDataValidator);
-      msg.recipients = _recipientsFromAsn1(capture.recipientInfos.value);
-    },
-
-    toAsn1: function() {
-      // ContentInfo
-      return asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
-        // ContentType
-        asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
-          asn1.oidToDer(msg.type).getBytes()),
-        // [0] EnvelopedData
-        asn1.create(asn1.Class.CONTEXT_SPECIFIC, 0, true, [
-          asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
-            // Version
-            asn1.create(asn1.Class.UNIVERSAL, asn1.Type.INTEGER, false,
-              asn1.integerToDer(msg.version).getBytes()),
-            // RecipientInfos
-            asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SET, true,
-              _recipientsToAsn1(msg.recipients)),
-            // EncryptedContentInfo
-            asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true,
-              _encryptedContentToAsn1(msg.encryptedContent))
-          ])
-        ])
-      ]);
-    },
-
-    /**
-     * Find recipient by X.509 certificate's issuer.
-     *
-     * @param cert the certificate with the issuer to look for.
-     *
-     * @return the recipient object.
-     */
-    findRecipient: function(cert) {
-      var sAttr = cert.issuer.attributes;
-
-      for(var i = 0; i < msg.recipients.length; ++i) {
-        var r = msg.recipients[i];
-        var rAttr = r.issuer;
-
-        if(r.serialNumber !== cert.serialNumber) {
-          continue;
-        }
-
-        if(rAttr.length !== sAttr.length) {
-          continue;
-        }
-
-        var match = true;
-        for(var j = 0; j < sAttr.length; ++j) {
-          if(rAttr[j].type !== sAttr[j].type ||
-            rAttr[j].value !== sAttr[j].value) {
-            match = false;
-            break;
-          }
-        }
-
-        if(match) {
-          return r;
-        }
-      }
-
-      return null;
-    },
-
-    /**
-     * Decrypt enveloped content
-     *
-     * @param recipient The recipient object related to the private key
-     * @param privKey The (RSA) private key object
-     */
-    decrypt: function(recipient, privKey) {
-      if(msg.encryptedContent.key === undefined && recipient !== undefined &&
-        privKey !== undefined) {
-        switch(recipient.encryptedContent.algorithm) {
-          case forge.pki.oids.rsaEncryption:
-          case forge.pki.oids.desCBC:
-            var key = privKey.decrypt(recipient.encryptedContent.content);
-            msg.encryptedContent.key = forge.util.createBuffer(key);
-            break;
-
-          default:
-            throw new Error('Unsupported asymmetric cipher, ' +
-              'OID ' + recipient.encryptedContent.algorithm);
-        }
-      }
-
-      _decryptContent(msg);
-    },
-
-    /**
-     * Add (another) entity to list of recipients.
-     *
-     * @param cert The certificate of the entity to add.
-     */
-    addRecipient: function(cert) {
-      msg.recipients.push({
-        version: 0,
-        issuer: cert.issuer.attributes,
-        serialNumber: cert.serialNumber,
-        encryptedContent: {
-          // We simply assume rsaEncryption here, since forge.pki only
-          // supports RSA so far.  If the PKI module supports other
-          // ciphers one day, we need to modify this one as well.
-          algorithm: forge.pki.oids.rsaEncryption,
-          key: cert.publicKey
-        }
-      });
-    },
-
-    /**
-     * Encrypt enveloped content.
-     *
-     * This function supports two optional arguments, cipher and key, which
-     * can be used to influence symmetric encryption.  Unless cipher is
-     * provided, the cipher specified in encryptedContent.algorithm is used
-     * (defaults to AES-256-CBC).  If no key is provided, encryptedContent.key
-     * is (re-)used.  If that one's not set, a random key will be generated
-     * automatically.
-     *
-     * @param [key] The key to be used for symmetric encryption.
-     * @param [cipher] The OID of the symmetric cipher to use.
-     */
-    encrypt: function(key, cipher) {
-      // Part 1: Symmetric encryption
-      if(msg.encryptedContent.content === undefined) {
-        cipher = cipher || msg.encryptedContent.algorithm;
-        key = key || msg.encryptedContent.key;
-
-        var keyLen, ivLen, ciphFn;
-        switch(cipher) {
-          case forge.pki.oids['aes128-CBC']:
-            keyLen = 16;
-            ivLen = 16;
-            ciphFn = forge.aes.createEncryptionCipher;
-            break;
-
-          case forge.pki.oids['aes192-CBC']:
-            keyLen = 24;
-            ivLen = 16;
-            ciphFn = forge.aes.createEncryptionCipher;
-            break;
-
-          case forge.pki.oids['aes256-CBC']:
-            keyLen = 32;
-            ivLen = 16;
-            ciphFn = forge.aes.createEncryptionCipher;
-            break;
-
-          case forge.pki.oids['des-EDE3-CBC']:
-            keyLen = 24;
-            ivLen = 8;
-            ciphFn = forge.des.createEncryptionCipher;
-            break;
-
-          default:
-            throw new Error('Unsupported symmetric cipher, OID ' + cipher);
-        }
-
-        if(key === undefined) {
-          key = forge.util.createBuffer(forge.random.getBytes(keyLen));
-        } else if(key.length() != keyLen) {
-          throw new Error('Symmetric key has wrong length; ' +
-            'got ' + key.length() + ' bytes, expected ' + keyLen + '.');
-        }
-
-        // Keep a copy of the key & IV in the object, so the caller can
-        // use it for whatever reason.
-        msg.encryptedContent.algorithm = cipher;
-        msg.encryptedContent.key = key;
-        msg.encryptedContent.parameter = forge.util.createBuffer(
-          forge.random.getBytes(ivLen));
-
-        var ciph = ciphFn(key);
-        ciph.start(msg.encryptedContent.parameter.copy());
-        ciph.update(msg.content);
-
-        // The finish function does PKCS#7 padding by default, therefore
-        // no action required by us.
-        if(!ciph.finish()) {
-          throw new Error('Symmetric encryption failed.');
-        }
-
-        msg.encryptedContent.content = ciph.output;
-      }
-
-      // Part 2: asymmetric encryption for each recipient
-      for(var i = 0; i < msg.recipients.length; ++i) {
-        var recipient = msg.recipients[i];
-
-        // Nothing to do, encryption already done.
-        if(recipient.encryptedContent.content !== undefined) {
-          continue;
-        }
-
-        switch(recipient.encryptedContent.algorithm) {
-          case forge.pki.oids.rsaEncryption:
-            recipient.encryptedContent.content =
-              recipient.encryptedContent.key.encrypt(
-                msg.encryptedContent.key.data);
-            break;
-
-          default:
-            throw new Error('Unsupported asymmetric cipher, OID ' +
-              recipient.encryptedContent.algorithm);
-        }
+    if (node.nodes) {
+      for (let child of node.nodes) {
+        output += stringify(child);
       }
     }
-  };
-  return msg;
-};
-
-/**
- * Converts a single recipient from an ASN.1 object.
- *
- * @param obj the ASN.1 RecipientInfo.
- *
- * @return the recipient object.
- */
-function _recipientFromAsn1(obj) {
-  // validate EnvelopedData content block and capture data
-  var capture = {};
-  var errors = [];
-  if(!asn1.validate(obj, p7.asn1.recipientInfoValidator, capture, errors)) {
-    var error = new Error('Cannot read PKCS#7 RecipientInfo. ' +
-      'ASN.1 object is not an PKCS#7 RecipientInfo.');
-    error.errors = errors;
-    throw error;
-  }
-
-  return {
-    version: capture.version.charCodeAt(0),
-    issuer: forge.pki.RDNAttributesAsArray(capture.issuer),
-    serialNumber: forge.util.createBuffer(capture.serial).toHex(),
-    encryptedContent: {
-      algorithm: asn1.derToOid(capture.encAlgorithm),
-      parameter: capture.encParameter.value,
-      content: capture.encKey
-    }
-  };
-}
-
-/**
- * Converts a single recipient object to an ASN.1 object.
- *
- * @param obj the recipient object.
- *
- * @return the ASN.1 RecipientInfo.
- */
-function _recipientToAsn1(obj) {
-  return asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
-    // Version
-    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.INTEGER, false,
-      asn1.integerToDer(obj.version).getBytes()),
-    // IssuerAndSerialNumber
-    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
-      // Name
-      forge.pki.distinguishedNameToAsn1({attributes: obj.issuer}),
-      // Serial
-      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.INTEGER, false,
-        forge.util.hexToBytes(obj.serialNumber))
-    ]),
-    // KeyEncryptionAlgorithmIdentifier
-    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
-      // Algorithm
-      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
-        asn1.oidToDer(obj.encryptedContent.algorithm).getBytes()),
-      // Parameter, force NULL, only RSA supported for now.
-      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.NULL, false, '')
-    ]),
-    // EncryptedKey
-    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false,
-      obj.encryptedContent.content)
-  ]);
-}
-
-/**
- * Map a set of RecipientInfo ASN.1 objects to recipient objects.
- *
- * @param infos an array of ASN.1 representations RecipientInfo (i.e. SET OF).
- *
- * @return an array of recipient objects.
- */
-function _recipientsFromAsn1(infos) {
-  var ret = [];
-  for(var i = 0; i < infos.length; ++i) {
-    ret.push(_recipientFromAsn1(infos[i]));
-  }
-  return ret;
-}
-
-/**
- * Map an array of recipient objects to ASN.1 RecipientInfo objects.
- *
- * @param recipients an array of recipientInfo objects.
- *
- * @return an array of ASN.1 RecipientInfos.
- */
-function _recipientsToAsn1(recipients) {
-  var ret = [];
-  for(var i = 0; i < recipients.length; ++i) {
-    ret.push(_recipientToAsn1(recipients[i]));
-  }
-  return ret;
-}
-
-/**
- * Converts a single signer from an ASN.1 object.
- *
- * @param obj the ASN.1 representation of a SignerInfo.
- *
- * @return the signer object.
- */
-function _signerFromAsn1(obj) {
-  // validate EnvelopedData content block and capture data
-  var capture = {};
-  var errors = [];
-  if(!asn1.validate(obj, p7.asn1.signerInfoValidator, capture, errors)) {
-    var error = new Error('Cannot read PKCS#7 SignerInfo. ' +
-      'ASN.1 object is not an PKCS#7 SignerInfo.');
-    error.errors = errors;
-    throw error;
-  }
-
-  var rval = {
-    version: capture.version.charCodeAt(0),
-    issuer: forge.pki.RDNAttributesAsArray(capture.issuer),
-    serialNumber: forge.util.createBuffer(capture.serial).toHex(),
-    digestAlgorithm: asn1.derToOid(capture.digestAlgorithm),
-    signatureAlgorithm: asn1.derToOid(capture.signatureAlgorithm),
-    signature: capture.signature,
-    authenticatedAttributes: [],
-    unauthenticatedAttributes: []
+    return output;
   };
 
-  // TODO: convert attributes
-  var authenticatedAttributes = capture.authenticatedAttributes || [];
-  var unauthenticatedAttributes = capture.unauthenticatedAttributes || [];
+  return stringify(ast);
+};
 
-  return rval;
-}
-
-/**
- * Converts a single signerInfo object to an ASN.1 object.
- *
- * @param obj the signerInfo object.
- *
- * @return the ASN.1 representation of a SignerInfo.
- */
-function _signerToAsn1(obj) {
-  // SignerInfo
-  var rval = asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
-    // version
-    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.INTEGER, false,
-      asn1.integerToDer(obj.version).getBytes()),
-    // issuerAndSerialNumber
-    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
-      // name
-      forge.pki.distinguishedNameToAsn1({attributes: obj.issuer}),
-      // serial
-      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.INTEGER, false,
-        forge.util.hexToBytes(obj.serialNumber))
-    ]),
-    // digestAlgorithm
-    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
-      // algorithm
-      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
-        asn1.oidToDer(obj.digestAlgorithm).getBytes()),
-      // parameters (null)
-      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.NULL, false, '')
-    ])
-  ]);
-
-  // authenticatedAttributes (OPTIONAL)
-  if(obj.authenticatedAttributesAsn1) {
-    // add ASN.1 previously generated during signing
-    rval.value.push(obj.authenticatedAttributesAsn1);
-  }
-
-  // digestEncryptionAlgorithm
-  rval.value.push(asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
-    // algorithm
-    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
-      asn1.oidToDer(obj.signatureAlgorithm).getBytes()),
-    // parameters (null)
-    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.NULL, false, '')
-  ]));
-
-  // encryptedDigest
-  rval.value.push(asn1.create(
-    asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false, obj.signature));
-
-  // unauthenticatedAttributes (OPTIONAL)
-  if(obj.unauthenticatedAttributes.length > 0) {
-    // [1] IMPLICIT
-    var attrsAsn1 = asn1.create(asn1.Class.CONTEXT_SPECIFIC, 1, true, []);
-    for(var i = 0; i < obj.unauthenticatedAttributes.length; ++i) {
-      var attr = obj.unauthenticatedAttributes[i];
-      attrsAsn1.values.push(_attributeToAsn1(attr));
-    }
-    rval.value.push(attrsAsn1);
-  }
-
-  return rval;
-}
-
-/**
- * Map a set of SignerInfo ASN.1 objects to an array of signer objects.
- *
- * @param signerInfoAsn1s an array of ASN.1 SignerInfos (i.e. SET OF).
- *
- * @return an array of signers objects.
- */
-function _signersFromAsn1(signerInfoAsn1s) {
-  var ret = [];
-  for(var i = 0; i < signerInfoAsn1s.length; ++i) {
-    ret.push(_signerFromAsn1(signerInfoAsn1s[i]));
-  }
-  return ret;
-}
-
-/**
- * Map an array of signer objects to ASN.1 objects.
- *
- * @param signers an array of signer objects.
- *
- * @return an array of ASN.1 SignerInfos.
- */
-function _signersToAsn1(signers) {
-  var ret = [];
-  for(var i = 0; i < signers.length; ++i) {
-    ret.push(_signerToAsn1(signers[i]));
-  }
-  return ret;
-}
-
-/**
- * Convert an attribute object to an ASN.1 Attribute.
- *
- * @param attr the attribute object.
- *
- * @return the ASN.1 Attribute.
- */
-function _attributeToAsn1(attr) {
-  var value;
-
-  // TODO: generalize to support more attributes
-  if(attr.type === forge.pki.oids.contentType) {
-    value = asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
-      asn1.oidToDer(attr.value).getBytes());
-  } else if(attr.type === forge.pki.oids.messageDigest) {
-    value = asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false,
-      attr.value.bytes());
-  } else if(attr.type === forge.pki.oids.signingTime) {
-    /* Note per RFC 2985: Dates between 1 January 1950 and 31 December 2049
-      (inclusive) MUST be encoded as UTCTime. Any dates with year values
-      before 1950 or after 2049 MUST be encoded as GeneralizedTime. [Further,]
-      UTCTime values MUST be expressed in Greenwich Mean Time (Zulu) and MUST
-      include seconds (i.e., times are YYMMDDHHMMSSZ), even where the
-      number of seconds is zero.  Midnight (GMT) must be represented as
-      "YYMMDD000000Z". */
-    // TODO: make these module-level constants
-    var jan_1_1950 = new Date('1950-01-01T00:00:00Z');
-    var jan_1_2050 = new Date('2050-01-01T00:00:00Z');
-    var date = attr.value;
-    if(typeof date === 'string') {
-      // try to parse date
-      var timestamp = Date.parse(date);
-      if(!isNaN(timestamp)) {
-        date = new Date(timestamp);
-      } else if(date.length === 13) {
-        // YYMMDDHHMMSSZ (13 chars for UTCTime)
-        date = asn1.utcTimeToDate(date);
-      } else {
-        // assume generalized time
-        date = asn1.generalizedTimeToDate(date);
-      }
-    }
-
-    if(date >= jan_1_1950 && date < jan_1_2050) {
-      value = asn1.create(
-        asn1.Class.UNIVERSAL, asn1.Type.UTCTIME, false,
-        asn1.dateToUtcTime(date));
-    } else {
-      value = asn1.create(
-        asn1.Class.UNIVERSAL, asn1.Type.GENERALIZEDTIME, false,
-        asn1.dateToGeneralizedTime(date));
-    }
-  }
-
-  // TODO: expose as common API call
-  // create a RelativeDistinguishedName set
-  // each value in the set is an AttributeTypeAndValue first
-  // containing the type (an OID) and second the value
-  return asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
-    // AttributeType
-    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
-      asn1.oidToDer(attr.type).getBytes()),
-    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SET, true, [
-      // AttributeValue
-      value
-    ])
-  ]);
-}
-
-/**
- * Map messages encrypted content to ASN.1 objects.
- *
- * @param ec The encryptedContent object of the message.
- *
- * @return ASN.1 representation of the encryptedContent object (SEQUENCE).
- */
-function _encryptedContentToAsn1(ec) {
-  return [
-    // ContentType, always Data for the moment
-    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
-      asn1.oidToDer(forge.pki.oids.data).getBytes()),
-    // ContentEncryptionAlgorithmIdentifier
-    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
-      // Algorithm
-      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
-        asn1.oidToDer(ec.algorithm).getBytes()),
-      // Parameters (IV)
-      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false,
-        ec.parameter.getBytes())
-    ]),
-    // [0] EncryptedContent
-    asn1.create(asn1.Class.CONTEXT_SPECIFIC, 0, true, [
-      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false,
-        ec.content.getBytes())
-    ])
-  ];
-}
-
-/**
- * Reads the "common part" of an PKCS#7 content block (in ASN.1 format)
- *
- * This function reads the "common part" of the PKCS#7 content blocks
- * EncryptedData and EnvelopedData, i.e. version number and symmetrically
- * encrypted content block.
- *
- * The result of the ASN.1 validate and capture process is returned
- * to allow the caller to extract further data, e.g. the list of recipients
- * in case of a EnvelopedData object.
- *
- * @param msg the PKCS#7 object to read the data to.
- * @param obj the ASN.1 representation of the content block.
- * @param validator the ASN.1 structure validator object to use.
- *
- * @return the value map captured by validator object.
- */
-function _fromAsn1(msg, obj, validator) {
-  var capture = {};
-  var errors = [];
-  if(!asn1.validate(obj, validator, capture, errors)) {
-    var error = new Error('Cannot read PKCS#7 message. ' +
-      'ASN.1 object is not a supported PKCS#7 message.');
-    error.errors = error;
-    throw error;
-  }
-
-  // Check contentType, so far we only support (raw) Data.
-  var contentType = asn1.derToOid(capture.contentType);
-  if(contentType !== forge.pki.oids.data) {
-    throw new Error('Unsupported PKCS#7 message. ' +
-      'Only wrapped ContentType Data supported.');
-  }
-
-  if(capture.encryptedContent) {
-    var content = '';
-    if(forge.util.isArray(capture.encryptedContent)) {
-      for(var i = 0; i < capture.encryptedContent.length; ++i) {
-        if(capture.encryptedContent[i].type !== asn1.Type.OCTETSTRING) {
-          throw new Error('Malformed PKCS#7 message, expecting encrypted ' +
-            'content constructed of only OCTET STRING objects.');
-        }
-        content += capture.encryptedContent[i].value;
-      }
-    } else {
-      content = capture.encryptedContent;
-    }
-    msg.encryptedContent = {
-      algorithm: asn1.derToOid(capture.encAlgorithm),
-      parameter: forge.util.createBuffer(capture.encParameter.value),
-      content: forge.util.createBuffer(content)
-    };
-  }
-
-  if(capture.content) {
-    var content = '';
-    if(forge.util.isArray(capture.content)) {
-      for(var i = 0; i < capture.content.length; ++i) {
-        if(capture.content[i].type !== asn1.Type.OCTETSTRING) {
-          throw new Error('Malformed PKCS#7 message, expecting ' +
-            'content constructed of only OCTET STRING objects.');
-        }
-        content += capture.content[i].value;
-      }
-    } else {
-      content = capture.content;
-    }
-    msg.content = forge.util.createBuffer(content);
-  }
-
-  msg.version = capture.version.charCodeAt(0);
-  msg.rawCapture = capture;
-
-  return capture;
-}
-
-/**
- * Decrypt the symmetrically encrypted content block of the PKCS#7 message.
- *
- * Decryption is skipped in case the PKCS#7 message object already has a
- * (decrypted) content attribute.  The algorithm, key and cipher parameters
- * (probably the iv) are taken from the encryptedContent attribute of the
- * message object.
- *
- * @param The PKCS#7 message object.
- */
-function _decryptContent(msg) {
-  if(msg.encryptedContent.key === undefined) {
-    throw new Error('Symmetric key not available.');
-  }
-
-  if(msg.content === undefined) {
-    var ciph;
-
-    switch(msg.encryptedContent.algorithm) {
-      case forge.pki.oids['aes128-CBC']:
-      case forge.pki.oids['aes192-CBC']:
-      case forge.pki.oids['aes256-CBC']:
-        ciph = forge.aes.createDecryptionCipher(msg.encryptedContent.key);
-        break;
-
-      case forge.pki.oids['desCBC']:
-      case forge.pki.oids['des-EDE3-CBC']:
-        ciph = forge.des.createDecryptionCipher(msg.encryptedContent.key);
-        break;
-
-      default:
-        throw new Error('Unsupported symmetric cipher, OID ' +
-          msg.encryptedContent.algorithm);
-    }
-    ciph.start(msg.encryptedContent.parameter);
-    ciph.update(msg.encryptedContent.content);
-
-    if(!ciph.finish()) {
-      throw new Error('Symmetric decryption failed.');
-    }
-
-    msg.content = ciph.output;
-  }
-}
 
 
 /***/ }),
@@ -10370,7 +9522,7 @@ function _decryptContent(msg) {
  *
  * https://github.com/dchest/tweetnacl-js
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(924);
 __webpack_require__(845);
 __webpack_require__(244);
@@ -11448,7 +10600,7 @@ exports.default = void 0;
 
 var _v = _interopRequireDefault(__webpack_require__(765));
 
-var _sha = _interopRequireDefault(__webpack_require__(908));
+var _sha = _interopRequireDefault(__webpack_require__(648));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -11462,83 +10614,39 @@ exports.default = _default;
 
 "use strict";
 
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const os = __importStar(__webpack_require__(87));
+exports.removeLeadingDotSegment = exports.escape = exports.makeAbsolute = exports.unixify = void 0;
+const path = __webpack_require__(622);
+const LEADING_DOT_SEGMENT_CHARACTERS_COUNT = 2; // ./ or .\\
+const UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()*?[\]{|}]|^!|[!+@](?=\())/g;
 /**
- * Commands
- *
- * Command Format:
- *   ::name key=value,key=value::message
- *
- * Examples:
- *   ::warning::This is the message
- *   ::set-env name=MY_VAR::some value
+ * Designed to work only with simple paths: `dir\\file`.
  */
-function issueCommand(command, properties, message) {
-    const cmd = new Command(command, properties, message);
-    process.stdout.write(cmd.toString() + os.EOL);
+function unixify(filepath) {
+    return filepath.replace(/\\/g, '/');
 }
-exports.issueCommand = issueCommand;
-function issue(name, message = '') {
-    issueCommand(name, {}, message);
+exports.unixify = unixify;
+function makeAbsolute(cwd, filepath) {
+    return path.resolve(cwd, filepath);
 }
-exports.issue = issue;
-const CMD_STRING = '::';
-class Command {
-    constructor(command, properties, message) {
-        if (!command) {
-            command = 'missing.command';
+exports.makeAbsolute = makeAbsolute;
+function escape(pattern) {
+    return pattern.replace(UNESCAPED_GLOB_SYMBOLS_RE, '\\$2');
+}
+exports.escape = escape;
+function removeLeadingDotSegment(entry) {
+    // We do not use `startsWith` because this is 10x slower than current implementation for some cases.
+    // eslint-disable-next-line @typescript-eslint/prefer-string-starts-ends-with
+    if (entry.charAt(0) === '.') {
+        const secondCharactery = entry.charAt(1);
+        if (secondCharactery === '/' || secondCharactery === '\\') {
+            return entry.slice(LEADING_DOT_SEGMENT_CHARACTERS_COUNT);
         }
-        this.command = command;
-        this.properties = properties;
-        this.message = message;
     }
-    toString() {
-        let cmdStr = CMD_STRING + this.command;
-        if (this.properties && Object.keys(this.properties).length > 0) {
-            cmdStr += ' ';
-            let first = true;
-            for (const key in this.properties) {
-                if (this.properties.hasOwnProperty(key)) {
-                    const val = this.properties[key];
-                    if (val) {
-                        if (first) {
-                            first = false;
-                        }
-                        else {
-                            cmdStr += ',';
-                        }
-                        cmdStr += `${key}=${escapeProperty(val)}`;
-                    }
-                }
-            }
-        }
-        cmdStr += `${CMD_STRING}${escapeData(this.message)}`;
-        return cmdStr;
-    }
+    return entry;
 }
-function escapeData(s) {
-    return (s || '')
-        .replace(/%/g, '%25')
-        .replace(/\r/g, '%0D')
-        .replace(/\n/g, '%0A');
-}
-function escapeProperty(s) {
-    return (s || '')
-        .replace(/%/g, '%25')
-        .replace(/\r/g, '%0D')
-        .replace(/\n/g, '%0A')
-        .replace(/:/g, '%3A')
-        .replace(/,/g, '%2C');
-}
-//# sourceMappingURL=command.js.map
+exports.removeLeadingDotSegment = removeLeadingDotSegment;
+
 
 /***/ }),
 /* 83 */,
@@ -12081,53 +11189,10 @@ module.exports = require("os");
 
 "use strict";
 
-/**
- * Copyright 2018 Google LLC
- *
- * Distributed under MIT license.
- * See file LICENSE for detail or copy at https://opensource.org/licenses/MIT
- */
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs = __webpack_require__(747);
-const forge = __webpack_require__(606);
-const util_1 = __webpack_require__(669);
-const readFile = util_1.promisify(fs.readFile);
-function getPem(filename, callback) {
-    if (callback) {
-        getPemAsync(filename)
-            .then(pem => callback(null, pem))
-            .catch(err => callback(err, null));
-    }
-    else {
-        return getPemAsync(filename);
-    }
-}
-exports.getPem = getPem;
-function getPemAsync(filename) {
-    return readFile(filename, { encoding: 'base64' }).then(keyp12 => {
-        return convertToPem(keyp12);
-    });
-}
-/**
- * Converts a P12 in base64 encoding to a pem.
- * @param p12base64 String containing base64 encoded p12.
- * @returns a string containing the pem.
- */
-function convertToPem(p12base64) {
-    const p12Der = forge.util.decode64(p12base64);
-    const p12Asn1 = forge.asn1.fromDer(p12Der);
-    const p12 = forge.pkcs12.pkcs12FromAsn1(p12Asn1, 'notasecret');
-    const bags = p12.getBags({ friendlyName: 'privatekey' });
-    if (bags.friendlyName) {
-        const privateKey = bags.friendlyName[0].key;
-        const pem = forge.pki.privateKeyToPem(privateKey);
-        return pem.replace(/\r\n/g, '\n');
-    }
-    else {
-        throw new Error('Unable to get friendly name.');
-    }
-}
-//# sourceMappingURL=index.js.map
+const fs = __webpack_require__(21);
+exports.fs = fs;
+
 
 /***/ }),
 /* 89 */
@@ -12140,7 +11205,7 @@ module.exports = Certificate;
 var assert = __webpack_require__(552);
 var Buffer = __webpack_require__(299).Buffer;
 var algs = __webpack_require__(151);
-var crypto = __webpack_require__(417);
+var crypto = __webpack_require__(373);
 var Fingerprint = __webpack_require__(926);
 var Signature = __webpack_require__(885);
 var errs = __webpack_require__(172);
@@ -12153,7 +11218,7 @@ var Identity = __webpack_require__(359);
 var formats = {};
 formats['openssh'] = __webpack_require__(585);
 formats['x509'] = __webpack_require__(904);
-formats['pem'] = __webpack_require__(238);
+formats['pem'] = __webpack_require__(542);
 
 var CertificateParseError = errs.CertificateParseError;
 var InvalidAlgorithmError = errs.InvalidAlgorithmError;
@@ -12805,47 +11870,33 @@ module.exports = {
 /***/ }),
 /* 95 */,
 /* 96 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
-// Copyright 2015 Joyent, Inc.
 
-var Key = __webpack_require__(463);
-var Fingerprint = __webpack_require__(926);
-var Signature = __webpack_require__(885);
-var PrivateKey = __webpack_require__(877);
-var Certificate = __webpack_require__(89);
-var Identity = __webpack_require__(359);
-var errs = __webpack_require__(172);
+module.exports = BranchDeletion;
 
-module.exports = {
-	/* top-level classes */
-	Key: Key,
-	parseKey: Key.parse,
-	Fingerprint: Fingerprint,
-	parseFingerprint: Fingerprint.parse,
-	Signature: Signature,
-	parseSignature: Signature.parse,
-	PrivateKey: PrivateKey,
-	parsePrivateKey: PrivateKey.parse,
-	generatePrivateKey: PrivateKey.generate,
-	Certificate: Certificate,
-	parseCertificate: Certificate.parse,
-	createSelfSignedCertificate: Certificate.createSelfSigned,
-	createCertificate: Certificate.create,
-	Identity: Identity,
-	identityFromDN: Identity.parseDN,
-	identityForHost: Identity.forHost,
-	identityForUser: Identity.forUser,
-	identityForEmail: Identity.forEmail,
-	identityFromArray: Identity.fromArray,
+function BranchDeletion (branch, hash) {
+   this.branch = branch;
+   this.hash = hash;
+   this.success = hash !== null;
+}
 
-	/* errors */
-	FingerprintFormatError: errs.FingerprintFormatError,
-	InvalidAlgorithmError: errs.InvalidAlgorithmError,
-	KeyParseError: errs.KeyParseError,
-	SignatureParseError: errs.SignatureParseError,
-	KeyEncryptedError: errs.KeyEncryptedError,
-	CertificateParseError: errs.CertificateParseError
+BranchDeletion.deleteSuccessRegex = /(\S+)\s+\(\S+\s([^\)]+)\)/;
+BranchDeletion.deleteErrorRegex = /^error[^']+'([^']+)'/;
+
+BranchDeletion.parse = function (data, asArray) {
+   var result;
+   var branchDeletions = data.trim().split('\n').map(function (line) {
+         if (result = BranchDeletion.deleteSuccessRegex.exec(line)) {
+            return new BranchDeletion(result[1], result[2]);
+         }
+         else if (result = BranchDeletion.deleteErrorRegex.exec(line)) {
+            return new BranchDeletion(result[1], null);
+         }
+      })
+      .filter(Boolean);
+
+   return asArray ? branchDeletions : branchDeletions.pop();
 };
 
 
@@ -12869,7 +11920,90 @@ module.exports = function bind(fn, thisArg) {
 
 
 /***/ }),
-/* 99 */,
+/* 99 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const os = __importStar(__webpack_require__(87));
+/**
+ * Commands
+ *
+ * Command Format:
+ *   ::name key=value,key=value::message
+ *
+ * Examples:
+ *   ::warning::This is the message
+ *   ::set-env name=MY_VAR::some value
+ */
+function issueCommand(command, properties, message) {
+    const cmd = new Command(command, properties, message);
+    process.stdout.write(cmd.toString() + os.EOL);
+}
+exports.issueCommand = issueCommand;
+function issue(name, message = '') {
+    issueCommand(name, {}, message);
+}
+exports.issue = issue;
+const CMD_STRING = '::';
+class Command {
+    constructor(command, properties, message) {
+        if (!command) {
+            command = 'missing.command';
+        }
+        this.command = command;
+        this.properties = properties;
+        this.message = message;
+    }
+    toString() {
+        let cmdStr = CMD_STRING + this.command;
+        if (this.properties && Object.keys(this.properties).length > 0) {
+            cmdStr += ' ';
+            let first = true;
+            for (const key in this.properties) {
+                if (this.properties.hasOwnProperty(key)) {
+                    const val = this.properties[key];
+                    if (val) {
+                        if (first) {
+                            first = false;
+                        }
+                        else {
+                            cmdStr += ',';
+                        }
+                        cmdStr += `${key}=${escapeProperty(val)}`;
+                    }
+                }
+            }
+        }
+        cmdStr += `${CMD_STRING}${escapeData(this.message)}`;
+        return cmdStr;
+    }
+}
+function escapeData(s) {
+    return (s || '')
+        .replace(/%/g, '%25')
+        .replace(/\r/g, '%0D')
+        .replace(/\n/g, '%0A');
+}
+function escapeProperty(s) {
+    return (s || '')
+        .replace(/%/g, '%25')
+        .replace(/\r/g, '%0D')
+        .replace(/\n/g, '%0A')
+        .replace(/:/g, '%3A')
+        .replace(/,/g, '%2C');
+}
+//# sourceMappingURL=command.js.map
+
+/***/ }),
 /* 100 */,
 /* 101 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -13073,7 +12207,269 @@ module.exports = function generate_if(it, $keyword, $ruleType) {
 
 
 /***/ }),
-/* 104 */,
+/* 104 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * Module dependencies.
+ */
+
+const tty = __webpack_require__(867);
+const util = __webpack_require__(669);
+
+/**
+ * This is the Node.js implementation of `debug()`.
+ */
+
+exports.init = init;
+exports.log = log;
+exports.formatArgs = formatArgs;
+exports.save = save;
+exports.load = load;
+exports.useColors = useColors;
+
+/**
+ * Colors.
+ */
+
+exports.colors = [6, 2, 3, 4, 5, 1];
+
+try {
+	// Optional dependency (as in, doesn't need to be installed, NOT like optionalDependencies in package.json)
+	// eslint-disable-next-line import/no-extraneous-dependencies
+	const supportsColor = __webpack_require__(130);
+
+	if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
+		exports.colors = [
+			20,
+			21,
+			26,
+			27,
+			32,
+			33,
+			38,
+			39,
+			40,
+			41,
+			42,
+			43,
+			44,
+			45,
+			56,
+			57,
+			62,
+			63,
+			68,
+			69,
+			74,
+			75,
+			76,
+			77,
+			78,
+			79,
+			80,
+			81,
+			92,
+			93,
+			98,
+			99,
+			112,
+			113,
+			128,
+			129,
+			134,
+			135,
+			148,
+			149,
+			160,
+			161,
+			162,
+			163,
+			164,
+			165,
+			166,
+			167,
+			168,
+			169,
+			170,
+			171,
+			172,
+			173,
+			178,
+			179,
+			184,
+			185,
+			196,
+			197,
+			198,
+			199,
+			200,
+			201,
+			202,
+			203,
+			204,
+			205,
+			206,
+			207,
+			208,
+			209,
+			214,
+			215,
+			220,
+			221
+		];
+	}
+} catch (error) {
+	// Swallow - we only care if `supports-color` is available; it doesn't have to be.
+}
+
+/**
+ * Build up the default `inspectOpts` object from the environment variables.
+ *
+ *   $ DEBUG_COLORS=no DEBUG_DEPTH=10 DEBUG_SHOW_HIDDEN=enabled node script.js
+ */
+
+exports.inspectOpts = Object.keys(process.env).filter(key => {
+	return /^debug_/i.test(key);
+}).reduce((obj, key) => {
+	// Camel-case
+	const prop = key
+		.substring(6)
+		.toLowerCase()
+		.replace(/_([a-z])/g, (_, k) => {
+			return k.toUpperCase();
+		});
+
+	// Coerce string value into JS value
+	let val = process.env[key];
+	if (/^(yes|on|true|enabled)$/i.test(val)) {
+		val = true;
+	} else if (/^(no|off|false|disabled)$/i.test(val)) {
+		val = false;
+	} else if (val === 'null') {
+		val = null;
+	} else {
+		val = Number(val);
+	}
+
+	obj[prop] = val;
+	return obj;
+}, {});
+
+/**
+ * Is stdout a TTY? Colored output is enabled when `true`.
+ */
+
+function useColors() {
+	return 'colors' in exports.inspectOpts ?
+		Boolean(exports.inspectOpts.colors) :
+		tty.isatty(process.stderr.fd);
+}
+
+/**
+ * Adds ANSI color escape codes if enabled.
+ *
+ * @api public
+ */
+
+function formatArgs(args) {
+	const {namespace: name, useColors} = this;
+
+	if (useColors) {
+		const c = this.color;
+		const colorCode = '\u001B[3' + (c < 8 ? c : '8;5;' + c);
+		const prefix = `  ${colorCode};1m${name} \u001B[0m`;
+
+		args[0] = prefix + args[0].split('\n').join('\n' + prefix);
+		args.push(colorCode + 'm+' + module.exports.humanize(this.diff) + '\u001B[0m');
+	} else {
+		args[0] = getDate() + name + ' ' + args[0];
+	}
+}
+
+function getDate() {
+	if (exports.inspectOpts.hideDate) {
+		return '';
+	}
+	return new Date().toISOString() + ' ';
+}
+
+/**
+ * Invokes `util.format()` with the specified arguments and writes to stderr.
+ */
+
+function log(...args) {
+	return process.stderr.write(util.format(...args) + '\n');
+}
+
+/**
+ * Save `namespaces`.
+ *
+ * @param {String} namespaces
+ * @api private
+ */
+function save(namespaces) {
+	if (namespaces) {
+		process.env.DEBUG = namespaces;
+	} else {
+		// If you set a process.env field to null or undefined, it gets cast to the
+		// string 'null' or 'undefined'. Just delete instead.
+		delete process.env.DEBUG;
+	}
+}
+
+/**
+ * Load `namespaces`.
+ *
+ * @return {String} returns the previously persisted debug modes
+ * @api private
+ */
+
+function load() {
+	return process.env.DEBUG;
+}
+
+/**
+ * Init logic for `debug` instances.
+ *
+ * Create a new `inspectOpts` object in case `useColors` is set
+ * differently for a particular `debug` instance.
+ */
+
+function init(debug) {
+	debug.inspectOpts = {};
+
+	const keys = Object.keys(exports.inspectOpts);
+	for (let i = 0; i < keys.length; i++) {
+		debug.inspectOpts[keys[i]] = exports.inspectOpts[keys[i]];
+	}
+}
+
+module.exports = __webpack_require__(507)(exports);
+
+const {formatters} = module.exports;
+
+/**
+ * Map %o to `util.inspect()`, all on a single line.
+ */
+
+formatters.o = function (v) {
+	this.inspectOpts.colors = this.useColors;
+	return util.inspect(v, this.inspectOpts)
+		.replace(/\s*\n\s*/g, ' ');
+};
+
+/**
+ * Map %O to `util.inspect()`, allowing multiple lines if needed.
+ */
+
+formatters.O = function (v) {
+	this.inspectOpts.colors = this.useColors;
+	return util.inspect(v, this.inspectOpts);
+};
+
+
+/***/ }),
 /* 105 */
 /***/ (function(module) {
 
@@ -13084,18 +12480,392 @@ module.exports = {"$id":"beforeRequest.json#","$schema":"http://json-schema.org/
 /* 107 */,
 /* 108 */,
 /* 109 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
 
 
-module.exports = function deferred () {
-   var d = {};
-   d.promise = new Promise(function (resolve, reject) {
-      d.resolve = resolve;
-      d.reject = reject
-   });
+const utils = __webpack_require__(839);
+const {
+  CHAR_ASTERISK,             /* * */
+  CHAR_AT,                   /* @ */
+  CHAR_BACKWARD_SLASH,       /* \ */
+  CHAR_COMMA,                /* , */
+  CHAR_DOT,                  /* . */
+  CHAR_EXCLAMATION_MARK,     /* ! */
+  CHAR_FORWARD_SLASH,        /* / */
+  CHAR_LEFT_CURLY_BRACE,     /* { */
+  CHAR_LEFT_PARENTHESES,     /* ( */
+  CHAR_LEFT_SQUARE_BRACKET,  /* [ */
+  CHAR_PLUS,                 /* + */
+  CHAR_QUESTION_MARK,        /* ? */
+  CHAR_RIGHT_CURLY_BRACE,    /* } */
+  CHAR_RIGHT_PARENTHESES,    /* ) */
+  CHAR_RIGHT_SQUARE_BRACKET  /* ] */
+} = __webpack_require__(387);
 
-   return d;
+const isPathSeparator = code => {
+  return code === CHAR_FORWARD_SLASH || code === CHAR_BACKWARD_SLASH;
 };
+
+const depth = token => {
+  if (token.isPrefix !== true) {
+    token.depth = token.isGlobstar ? Infinity : 1;
+  }
+};
+
+/**
+ * Quickly scans a glob pattern and returns an object with a handful of
+ * useful properties, like `isGlob`, `path` (the leading non-glob, if it exists),
+ * `glob` (the actual pattern), and `negated` (true if the path starts with `!`).
+ *
+ * ```js
+ * const pm = require('picomatch');
+ * console.log(pm.scan('foo/bar/*.js'));
+ * { isGlob: true, input: 'foo/bar/*.js', base: 'foo/bar', glob: '*.js' }
+ * ```
+ * @param {String} `str`
+ * @param {Object} `options`
+ * @return {Object} Returns an object with tokens and regex source string.
+ * @api public
+ */
+
+const scan = (input, options) => {
+  const opts = options || {};
+
+  const length = input.length - 1;
+  const scanToEnd = opts.parts === true || opts.scanToEnd === true;
+  const slashes = [];
+  const tokens = [];
+  const parts = [];
+
+  let str = input;
+  let index = -1;
+  let start = 0;
+  let lastIndex = 0;
+  let isBrace = false;
+  let isBracket = false;
+  let isGlob = false;
+  let isExtglob = false;
+  let isGlobstar = false;
+  let braceEscaped = false;
+  let backslashes = false;
+  let negated = false;
+  let finished = false;
+  let braces = 0;
+  let prev;
+  let code;
+  let token = { value: '', depth: 0, isGlob: false };
+
+  const eos = () => index >= length;
+  const peek = () => str.charCodeAt(index + 1);
+  const advance = () => {
+    prev = code;
+    return str.charCodeAt(++index);
+  };
+
+  while (index < length) {
+    code = advance();
+    let next;
+
+    if (code === CHAR_BACKWARD_SLASH) {
+      backslashes = token.backslashes = true;
+      code = advance();
+
+      if (code === CHAR_LEFT_CURLY_BRACE) {
+        braceEscaped = true;
+      }
+      continue;
+    }
+
+    if (braceEscaped === true || code === CHAR_LEFT_CURLY_BRACE) {
+      braces++;
+
+      while (eos() !== true && (code = advance())) {
+        if (code === CHAR_BACKWARD_SLASH) {
+          backslashes = token.backslashes = true;
+          advance();
+          continue;
+        }
+
+        if (code === CHAR_LEFT_CURLY_BRACE) {
+          braces++;
+          continue;
+        }
+
+        if (braceEscaped !== true && code === CHAR_DOT && (code = advance()) === CHAR_DOT) {
+          isBrace = token.isBrace = true;
+          isGlob = token.isGlob = true;
+          finished = true;
+
+          if (scanToEnd === true) {
+            continue;
+          }
+
+          break;
+        }
+
+        if (braceEscaped !== true && code === CHAR_COMMA) {
+          isBrace = token.isBrace = true;
+          isGlob = token.isGlob = true;
+          finished = true;
+
+          if (scanToEnd === true) {
+            continue;
+          }
+
+          break;
+        }
+
+        if (code === CHAR_RIGHT_CURLY_BRACE) {
+          braces--;
+
+          if (braces === 0) {
+            braceEscaped = false;
+            isBrace = token.isBrace = true;
+            finished = true;
+            break;
+          }
+        }
+      }
+
+      if (scanToEnd === true) {
+        continue;
+      }
+
+      break;
+    }
+
+    if (code === CHAR_FORWARD_SLASH) {
+      slashes.push(index);
+      tokens.push(token);
+      token = { value: '', depth: 0, isGlob: false };
+
+      if (finished === true) continue;
+      if (prev === CHAR_DOT && index === (start + 1)) {
+        start += 2;
+        continue;
+      }
+
+      lastIndex = index + 1;
+      continue;
+    }
+
+    if (opts.noext !== true) {
+      const isExtglobChar = code === CHAR_PLUS
+        || code === CHAR_AT
+        || code === CHAR_ASTERISK
+        || code === CHAR_QUESTION_MARK
+        || code === CHAR_EXCLAMATION_MARK;
+
+      if (isExtglobChar === true && peek() === CHAR_LEFT_PARENTHESES) {
+        isGlob = token.isGlob = true;
+        isExtglob = token.isExtglob = true;
+        finished = true;
+
+        if (scanToEnd === true) {
+          while (eos() !== true && (code = advance())) {
+            if (code === CHAR_BACKWARD_SLASH) {
+              backslashes = token.backslashes = true;
+              code = advance();
+              continue;
+            }
+
+            if (code === CHAR_RIGHT_PARENTHESES) {
+              isGlob = token.isGlob = true;
+              finished = true;
+              break;
+            }
+          }
+          continue;
+        }
+        break;
+      }
+    }
+
+    if (code === CHAR_ASTERISK) {
+      if (prev === CHAR_ASTERISK) isGlobstar = token.isGlobstar = true;
+      isGlob = token.isGlob = true;
+      finished = true;
+
+      if (scanToEnd === true) {
+        continue;
+      }
+      break;
+    }
+
+    if (code === CHAR_QUESTION_MARK) {
+      isGlob = token.isGlob = true;
+      finished = true;
+
+      if (scanToEnd === true) {
+        continue;
+      }
+      break;
+    }
+
+    if (code === CHAR_LEFT_SQUARE_BRACKET) {
+      while (eos() !== true && (next = advance())) {
+        if (next === CHAR_BACKWARD_SLASH) {
+          backslashes = token.backslashes = true;
+          advance();
+          continue;
+        }
+
+        if (next === CHAR_RIGHT_SQUARE_BRACKET) {
+          isBracket = token.isBracket = true;
+          isGlob = token.isGlob = true;
+          finished = true;
+
+          if (scanToEnd === true) {
+            continue;
+          }
+          break;
+        }
+      }
+    }
+
+    if (opts.nonegate !== true && code === CHAR_EXCLAMATION_MARK && index === start) {
+      negated = token.negated = true;
+      start++;
+      continue;
+    }
+
+    if (opts.noparen !== true && code === CHAR_LEFT_PARENTHESES) {
+      isGlob = token.isGlob = true;
+
+      if (scanToEnd === true) {
+        while (eos() !== true && (code = advance())) {
+          if (code === CHAR_LEFT_PARENTHESES) {
+            backslashes = token.backslashes = true;
+            code = advance();
+            continue;
+          }
+
+          if (code === CHAR_RIGHT_PARENTHESES) {
+            finished = true;
+            break;
+          }
+        }
+        continue;
+      }
+      break;
+    }
+
+    if (isGlob === true) {
+      finished = true;
+
+      if (scanToEnd === true) {
+        continue;
+      }
+
+      break;
+    }
+  }
+
+  if (opts.noext === true) {
+    isExtglob = false;
+    isGlob = false;
+  }
+
+  let base = str;
+  let prefix = '';
+  let glob = '';
+
+  if (start > 0) {
+    prefix = str.slice(0, start);
+    str = str.slice(start);
+    lastIndex -= start;
+  }
+
+  if (base && isGlob === true && lastIndex > 0) {
+    base = str.slice(0, lastIndex);
+    glob = str.slice(lastIndex);
+  } else if (isGlob === true) {
+    base = '';
+    glob = str;
+  } else {
+    base = str;
+  }
+
+  if (base && base !== '' && base !== '/' && base !== str) {
+    if (isPathSeparator(base.charCodeAt(base.length - 1))) {
+      base = base.slice(0, -1);
+    }
+  }
+
+  if (opts.unescape === true) {
+    if (glob) glob = utils.removeBackslashes(glob);
+
+    if (base && backslashes === true) {
+      base = utils.removeBackslashes(base);
+    }
+  }
+
+  const state = {
+    prefix,
+    input,
+    start,
+    base,
+    glob,
+    isBrace,
+    isBracket,
+    isGlob,
+    isExtglob,
+    isGlobstar,
+    negated
+  };
+
+  if (opts.tokens === true) {
+    state.maxDepth = 0;
+    if (!isPathSeparator(code)) {
+      tokens.push(token);
+    }
+    state.tokens = tokens;
+  }
+
+  if (opts.parts === true || opts.tokens === true) {
+    let prevIndex;
+
+    for (let idx = 0; idx < slashes.length; idx++) {
+      const n = prevIndex ? prevIndex + 1 : start;
+      const i = slashes[idx];
+      const value = input.slice(n, i);
+      if (opts.tokens) {
+        if (idx === 0 && start !== 0) {
+          tokens[idx].isPrefix = true;
+          tokens[idx].value = prefix;
+        } else {
+          tokens[idx].value = value;
+        }
+        depth(tokens[idx]);
+        state.maxDepth += tokens[idx].depth;
+      }
+      if (idx !== 0 || value !== '') {
+        parts.push(value);
+      }
+      prevIndex = i;
+    }
+
+    if (prevIndex && prevIndex + 1 < input.length) {
+      const value = input.slice(prevIndex + 1);
+      parts.push(value);
+
+      if (opts.tokens) {
+        tokens[tokens.length - 1].value = value;
+        depth(tokens[tokens.length - 1]);
+        state.maxDepth += tokens[tokens.length - 1].depth;
+      }
+    }
+
+    state.slashes = slashes;
+    state.parts = parts;
+  }
+
+  return state;
+};
+
+module.exports = scan;
 
 
 /***/ }),
@@ -13208,31 +12978,1087 @@ function warnOptionDeprecation(name, alternative) {
 
 /***/ }),
 /* 112 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 
-function FileStatusSummary (path, index, working_dir) {
-   this.path = path;
-   this.index = index;
-   this.working_dir = working_dir;
+const constants = __webpack_require__(387);
+const utils = __webpack_require__(839);
 
-   if ('R' === index + working_dir) {
-      var detail = FileStatusSummary.fromPathRegex.exec(path) || [null, path, path];
-      this.from = detail[1];
-      this.path = detail[2];
-   }
-}
+/**
+ * Constants
+ */
 
-FileStatusSummary.fromPathRegex = /^(.+) -> (.+)$/;
+const {
+  MAX_LENGTH,
+  POSIX_REGEX_SOURCE,
+  REGEX_NON_SPECIAL_CHARS,
+  REGEX_SPECIAL_CHARS_BACKREF,
+  REPLACEMENTS
+} = constants;
 
-FileStatusSummary.prototype = {
-   path: '',
-   from: ''
+/**
+ * Helpers
+ */
+
+const expandRange = (args, options) => {
+  if (typeof options.expandRange === 'function') {
+    return options.expandRange(...args, options);
+  }
+
+  args.sort();
+  const value = `[${args.join('-')}]`;
+
+  try {
+    /* eslint-disable-next-line no-new */
+    new RegExp(value);
+  } catch (ex) {
+    return args.map(v => utils.escapeRegex(v)).join('..');
+  }
+
+  return value;
 };
 
-module.exports = FileStatusSummary;
+/**
+ * Create the message for a syntax error
+ */
+
+const syntaxError = (type, char) => {
+  return `Missing ${type}: "${char}" - use "\\\\${char}" to match literal characters`;
+};
+
+/**
+ * Parse the given input string.
+ * @param {String} input
+ * @param {Object} options
+ * @return {Object}
+ */
+
+const parse = (input, options) => {
+  if (typeof input !== 'string') {
+    throw new TypeError('Expected a string');
+  }
+
+  input = REPLACEMENTS[input] || input;
+
+  const opts = { ...options };
+  const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+
+  let len = input.length;
+  if (len > max) {
+    throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
+  }
+
+  const bos = { type: 'bos', value: '', output: opts.prepend || '' };
+  const tokens = [bos];
+
+  const capture = opts.capture ? '' : '?:';
+  const win32 = utils.isWindows(options);
+
+  // create constants based on platform, for windows or posix
+  const PLATFORM_CHARS = constants.globChars(win32);
+  const EXTGLOB_CHARS = constants.extglobChars(PLATFORM_CHARS);
+
+  const {
+    DOT_LITERAL,
+    PLUS_LITERAL,
+    SLASH_LITERAL,
+    ONE_CHAR,
+    DOTS_SLASH,
+    NO_DOT,
+    NO_DOT_SLASH,
+    NO_DOTS_SLASH,
+    QMARK,
+    QMARK_NO_DOT,
+    STAR,
+    START_ANCHOR
+  } = PLATFORM_CHARS;
+
+  const globstar = (opts) => {
+    return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
+  };
+
+  const nodot = opts.dot ? '' : NO_DOT;
+  const qmarkNoDot = opts.dot ? QMARK : QMARK_NO_DOT;
+  let star = opts.bash === true ? globstar(opts) : STAR;
+
+  if (opts.capture) {
+    star = `(${star})`;
+  }
+
+  // minimatch options support
+  if (typeof opts.noext === 'boolean') {
+    opts.noextglob = opts.noext;
+  }
+
+  const state = {
+    input,
+    index: -1,
+    start: 0,
+    dot: opts.dot === true,
+    consumed: '',
+    output: '',
+    prefix: '',
+    backtrack: false,
+    negated: false,
+    brackets: 0,
+    braces: 0,
+    parens: 0,
+    quotes: 0,
+    globstar: false,
+    tokens
+  };
+
+  input = utils.removePrefix(input, state);
+  len = input.length;
+
+  const extglobs = [];
+  const braces = [];
+  const stack = [];
+  let prev = bos;
+  let value;
+
+  /**
+   * Tokenizing helpers
+   */
+
+  const eos = () => state.index === len - 1;
+  const peek = state.peek = (n = 1) => input[state.index + n];
+  const advance = state.advance = () => input[++state.index];
+  const remaining = () => input.slice(state.index + 1);
+  const consume = (value = '', num = 0) => {
+    state.consumed += value;
+    state.index += num;
+  };
+  const append = token => {
+    state.output += token.output != null ? token.output : token.value;
+    consume(token.value);
+  };
+
+  const negate = () => {
+    let count = 1;
+
+    while (peek() === '!' && (peek(2) !== '(' || peek(3) === '?')) {
+      advance();
+      state.start++;
+      count++;
+    }
+
+    if (count % 2 === 0) {
+      return false;
+    }
+
+    state.negated = true;
+    state.start++;
+    return true;
+  };
+
+  const increment = type => {
+    state[type]++;
+    stack.push(type);
+  };
+
+  const decrement = type => {
+    state[type]--;
+    stack.pop();
+  };
+
+  /**
+   * Push tokens onto the tokens array. This helper speeds up
+   * tokenizing by 1) helping us avoid backtracking as much as possible,
+   * and 2) helping us avoid creating extra tokens when consecutive
+   * characters are plain text. This improves performance and simplifies
+   * lookbehinds.
+   */
+
+  const push = tok => {
+    if (prev.type === 'globstar') {
+      const isBrace = state.braces > 0 && (tok.type === 'comma' || tok.type === 'brace');
+      const isExtglob = tok.extglob === true || (extglobs.length && (tok.type === 'pipe' || tok.type === 'paren'));
+
+      if (tok.type !== 'slash' && tok.type !== 'paren' && !isBrace && !isExtglob) {
+        state.output = state.output.slice(0, -prev.output.length);
+        prev.type = 'star';
+        prev.value = '*';
+        prev.output = star;
+        state.output += prev.output;
+      }
+    }
+
+    if (extglobs.length && tok.type !== 'paren' && !EXTGLOB_CHARS[tok.value]) {
+      extglobs[extglobs.length - 1].inner += tok.value;
+    }
+
+    if (tok.value || tok.output) append(tok);
+    if (prev && prev.type === 'text' && tok.type === 'text') {
+      prev.value += tok.value;
+      prev.output = (prev.output || '') + tok.value;
+      return;
+    }
+
+    tok.prev = prev;
+    tokens.push(tok);
+    prev = tok;
+  };
+
+  const extglobOpen = (type, value) => {
+    const token = { ...EXTGLOB_CHARS[value], conditions: 1, inner: '' };
+
+    token.prev = prev;
+    token.parens = state.parens;
+    token.output = state.output;
+    const output = (opts.capture ? '(' : '') + token.open;
+
+    increment('parens');
+    push({ type, value, output: state.output ? '' : ONE_CHAR });
+    push({ type: 'paren', extglob: true, value: advance(), output });
+    extglobs.push(token);
+  };
+
+  const extglobClose = token => {
+    let output = token.close + (opts.capture ? ')' : '');
+
+    if (token.type === 'negate') {
+      let extglobStar = star;
+
+      if (token.inner && token.inner.length > 1 && token.inner.includes('/')) {
+        extglobStar = globstar(opts);
+      }
+
+      if (extglobStar !== star || eos() || /^\)+$/.test(remaining())) {
+        output = token.close = `)$))${extglobStar}`;
+      }
+
+      if (token.prev.type === 'bos' && eos()) {
+        state.negatedExtglob = true;
+      }
+    }
+
+    push({ type: 'paren', extglob: true, value, output });
+    decrement('parens');
+  };
+
+  /**
+   * Fast paths
+   */
+
+  if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input)) {
+    let backslashes = false;
+
+    let output = input.replace(REGEX_SPECIAL_CHARS_BACKREF, (m, esc, chars, first, rest, index) => {
+      if (first === '\\') {
+        backslashes = true;
+        return m;
+      }
+
+      if (first === '?') {
+        if (esc) {
+          return esc + first + (rest ? QMARK.repeat(rest.length) : '');
+        }
+        if (index === 0) {
+          return qmarkNoDot + (rest ? QMARK.repeat(rest.length) : '');
+        }
+        return QMARK.repeat(chars.length);
+      }
+
+      if (first === '.') {
+        return DOT_LITERAL.repeat(chars.length);
+      }
+
+      if (first === '*') {
+        if (esc) {
+          return esc + first + (rest ? star : '');
+        }
+        return star;
+      }
+      return esc ? m : `\\${m}`;
+    });
+
+    if (backslashes === true) {
+      if (opts.unescape === true) {
+        output = output.replace(/\\/g, '');
+      } else {
+        output = output.replace(/\\+/g, m => {
+          return m.length % 2 === 0 ? '\\\\' : (m ? '\\' : '');
+        });
+      }
+    }
+
+    if (output === input && opts.contains === true) {
+      state.output = input;
+      return state;
+    }
+
+    state.output = utils.wrapOutput(output, state, options);
+    return state;
+  }
+
+  /**
+   * Tokenize input until we reach end-of-string
+   */
+
+  while (!eos()) {
+    value = advance();
+
+    if (value === '\u0000') {
+      continue;
+    }
+
+    /**
+     * Escaped characters
+     */
+
+    if (value === '\\') {
+      const next = peek();
+
+      if (next === '/' && opts.bash !== true) {
+        continue;
+      }
+
+      if (next === '.' || next === ';') {
+        continue;
+      }
+
+      if (!next) {
+        value += '\\';
+        push({ type: 'text', value });
+        continue;
+      }
+
+      // collapse slashes to reduce potential for exploits
+      const match = /^\\+/.exec(remaining());
+      let slashes = 0;
+
+      if (match && match[0].length > 2) {
+        slashes = match[0].length;
+        state.index += slashes;
+        if (slashes % 2 !== 0) {
+          value += '\\';
+        }
+      }
+
+      if (opts.unescape === true) {
+        value = advance() || '';
+      } else {
+        value += advance() || '';
+      }
+
+      if (state.brackets === 0) {
+        push({ type: 'text', value });
+        continue;
+      }
+    }
+
+    /**
+     * If we're inside a regex character class, continue
+     * until we reach the closing bracket.
+     */
+
+    if (state.brackets > 0 && (value !== ']' || prev.value === '[' || prev.value === '[^')) {
+      if (opts.posix !== false && value === ':') {
+        const inner = prev.value.slice(1);
+        if (inner.includes('[')) {
+          prev.posix = true;
+
+          if (inner.includes(':')) {
+            const idx = prev.value.lastIndexOf('[');
+            const pre = prev.value.slice(0, idx);
+            const rest = prev.value.slice(idx + 2);
+            const posix = POSIX_REGEX_SOURCE[rest];
+            if (posix) {
+              prev.value = pre + posix;
+              state.backtrack = true;
+              advance();
+
+              if (!bos.output && tokens.indexOf(prev) === 1) {
+                bos.output = ONE_CHAR;
+              }
+              continue;
+            }
+          }
+        }
+      }
+
+      if ((value === '[' && peek() !== ':') || (value === '-' && peek() === ']')) {
+        value = `\\${value}`;
+      }
+
+      if (value === ']' && (prev.value === '[' || prev.value === '[^')) {
+        value = `\\${value}`;
+      }
+
+      if (opts.posix === true && value === '!' && prev.value === '[') {
+        value = '^';
+      }
+
+      prev.value += value;
+      append({ value });
+      continue;
+    }
+
+    /**
+     * If we're inside a quoted string, continue
+     * until we reach the closing double quote.
+     */
+
+    if (state.quotes === 1 && value !== '"') {
+      value = utils.escapeRegex(value);
+      prev.value += value;
+      append({ value });
+      continue;
+    }
+
+    /**
+     * Double quotes
+     */
+
+    if (value === '"') {
+      state.quotes = state.quotes === 1 ? 0 : 1;
+      if (opts.keepQuotes === true) {
+        push({ type: 'text', value });
+      }
+      continue;
+    }
+
+    /**
+     * Parentheses
+     */
+
+    if (value === '(') {
+      increment('parens');
+      push({ type: 'paren', value });
+      continue;
+    }
+
+    if (value === ')') {
+      if (state.parens === 0 && opts.strictBrackets === true) {
+        throw new SyntaxError(syntaxError('opening', '('));
+      }
+
+      const extglob = extglobs[extglobs.length - 1];
+      if (extglob && state.parens === extglob.parens + 1) {
+        extglobClose(extglobs.pop());
+        continue;
+      }
+
+      push({ type: 'paren', value, output: state.parens ? ')' : '\\)' });
+      decrement('parens');
+      continue;
+    }
+
+    /**
+     * Square brackets
+     */
+
+    if (value === '[') {
+      if (opts.nobracket === true || !remaining().includes(']')) {
+        if (opts.nobracket !== true && opts.strictBrackets === true) {
+          throw new SyntaxError(syntaxError('closing', ']'));
+        }
+
+        value = `\\${value}`;
+      } else {
+        increment('brackets');
+      }
+
+      push({ type: 'bracket', value });
+      continue;
+    }
+
+    if (value === ']') {
+      if (opts.nobracket === true || (prev && prev.type === 'bracket' && prev.value.length === 1)) {
+        push({ type: 'text', value, output: `\\${value}` });
+        continue;
+      }
+
+      if (state.brackets === 0) {
+        if (opts.strictBrackets === true) {
+          throw new SyntaxError(syntaxError('opening', '['));
+        }
+
+        push({ type: 'text', value, output: `\\${value}` });
+        continue;
+      }
+
+      decrement('brackets');
+
+      const prevValue = prev.value.slice(1);
+      if (prev.posix !== true && prevValue[0] === '^' && !prevValue.includes('/')) {
+        value = `/${value}`;
+      }
+
+      prev.value += value;
+      append({ value });
+
+      // when literal brackets are explicitly disabled
+      // assume we should match with a regex character class
+      if (opts.literalBrackets === false || utils.hasRegexChars(prevValue)) {
+        continue;
+      }
+
+      const escaped = utils.escapeRegex(prev.value);
+      state.output = state.output.slice(0, -prev.value.length);
+
+      // when literal brackets are explicitly enabled
+      // assume we should escape the brackets to match literal characters
+      if (opts.literalBrackets === true) {
+        state.output += escaped;
+        prev.value = escaped;
+        continue;
+      }
+
+      // when the user specifies nothing, try to match both
+      prev.value = `(${capture}${escaped}|${prev.value})`;
+      state.output += prev.value;
+      continue;
+    }
+
+    /**
+     * Braces
+     */
+
+    if (value === '{' && opts.nobrace !== true) {
+      increment('braces');
+
+      const open = {
+        type: 'brace',
+        value,
+        output: '(',
+        outputIndex: state.output.length,
+        tokensIndex: state.tokens.length
+      };
+
+      braces.push(open);
+      push(open);
+      continue;
+    }
+
+    if (value === '}') {
+      const brace = braces[braces.length - 1];
+
+      if (opts.nobrace === true || !brace) {
+        push({ type: 'text', value, output: value });
+        continue;
+      }
+
+      let output = ')';
+
+      if (brace.dots === true) {
+        const arr = tokens.slice();
+        const range = [];
+
+        for (let i = arr.length - 1; i >= 0; i--) {
+          tokens.pop();
+          if (arr[i].type === 'brace') {
+            break;
+          }
+          if (arr[i].type !== 'dots') {
+            range.unshift(arr[i].value);
+          }
+        }
+
+        output = expandRange(range, opts);
+        state.backtrack = true;
+      }
+
+      if (brace.comma !== true && brace.dots !== true) {
+        const out = state.output.slice(0, brace.outputIndex);
+        const toks = state.tokens.slice(brace.tokensIndex);
+        brace.value = brace.output = '\\{';
+        value = output = '\\}';
+        state.output = out;
+        for (const t of toks) {
+          state.output += (t.output || t.value);
+        }
+      }
+
+      push({ type: 'brace', value, output });
+      decrement('braces');
+      braces.pop();
+      continue;
+    }
+
+    /**
+     * Pipes
+     */
+
+    if (value === '|') {
+      if (extglobs.length > 0) {
+        extglobs[extglobs.length - 1].conditions++;
+      }
+      push({ type: 'text', value });
+      continue;
+    }
+
+    /**
+     * Commas
+     */
+
+    if (value === ',') {
+      let output = value;
+
+      const brace = braces[braces.length - 1];
+      if (brace && stack[stack.length - 1] === 'braces') {
+        brace.comma = true;
+        output = '|';
+      }
+
+      push({ type: 'comma', value, output });
+      continue;
+    }
+
+    /**
+     * Slashes
+     */
+
+    if (value === '/') {
+      // if the beginning of the glob is "./", advance the start
+      // to the current index, and don't add the "./" characters
+      // to the state. This greatly simplifies lookbehinds when
+      // checking for BOS characters like "!" and "." (not "./")
+      if (prev.type === 'dot' && state.index === state.start + 1) {
+        state.start = state.index + 1;
+        state.consumed = '';
+        state.output = '';
+        tokens.pop();
+        prev = bos; // reset "prev" to the first token
+        continue;
+      }
+
+      push({ type: 'slash', value, output: SLASH_LITERAL });
+      continue;
+    }
+
+    /**
+     * Dots
+     */
+
+    if (value === '.') {
+      if (state.braces > 0 && prev.type === 'dot') {
+        if (prev.value === '.') prev.output = DOT_LITERAL;
+        const brace = braces[braces.length - 1];
+        prev.type = 'dots';
+        prev.output += value;
+        prev.value += value;
+        brace.dots = true;
+        continue;
+      }
+
+      if ((state.braces + state.parens) === 0 && prev.type !== 'bos' && prev.type !== 'slash') {
+        push({ type: 'text', value, output: DOT_LITERAL });
+        continue;
+      }
+
+      push({ type: 'dot', value, output: DOT_LITERAL });
+      continue;
+    }
+
+    /**
+     * Question marks
+     */
+
+    if (value === '?') {
+      const isGroup = prev && prev.value === '(';
+      if (!isGroup && opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
+        extglobOpen('qmark', value);
+        continue;
+      }
+
+      if (prev && prev.type === 'paren') {
+        const next = peek();
+        let output = value;
+
+        if (next === '<' && !utils.supportsLookbehinds()) {
+          throw new Error('Node.js v10 or higher is required for regex lookbehinds');
+        }
+
+        if ((prev.value === '(' && !/[!=<:]/.test(next)) || (next === '<' && !/<([!=]|\w+>)/.test(remaining()))) {
+          output = `\\${value}`;
+        }
+
+        push({ type: 'text', value, output });
+        continue;
+      }
+
+      if (opts.dot !== true && (prev.type === 'slash' || prev.type === 'bos')) {
+        push({ type: 'qmark', value, output: QMARK_NO_DOT });
+        continue;
+      }
+
+      push({ type: 'qmark', value, output: QMARK });
+      continue;
+    }
+
+    /**
+     * Exclamation
+     */
+
+    if (value === '!') {
+      if (opts.noextglob !== true && peek() === '(') {
+        if (peek(2) !== '?' || !/[!=<:]/.test(peek(3))) {
+          extglobOpen('negate', value);
+          continue;
+        }
+      }
+
+      if (opts.nonegate !== true && state.index === 0) {
+        negate();
+        continue;
+      }
+    }
+
+    /**
+     * Plus
+     */
+
+    if (value === '+') {
+      if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
+        extglobOpen('plus', value);
+        continue;
+      }
+
+      if ((prev && prev.value === '(') || opts.regex === false) {
+        push({ type: 'plus', value, output: PLUS_LITERAL });
+        continue;
+      }
+
+      if ((prev && (prev.type === 'bracket' || prev.type === 'paren' || prev.type === 'brace')) || state.parens > 0) {
+        push({ type: 'plus', value });
+        continue;
+      }
+
+      push({ type: 'plus', value: PLUS_LITERAL });
+      continue;
+    }
+
+    /**
+     * Plain text
+     */
+
+    if (value === '@') {
+      if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
+        push({ type: 'at', extglob: true, value, output: '' });
+        continue;
+      }
+
+      push({ type: 'text', value });
+      continue;
+    }
+
+    /**
+     * Plain text
+     */
+
+    if (value !== '*') {
+      if (value === '$' || value === '^') {
+        value = `\\${value}`;
+      }
+
+      const match = REGEX_NON_SPECIAL_CHARS.exec(remaining());
+      if (match) {
+        value += match[0];
+        state.index += match[0].length;
+      }
+
+      push({ type: 'text', value });
+      continue;
+    }
+
+    /**
+     * Stars
+     */
+
+    if (prev && (prev.type === 'globstar' || prev.star === true)) {
+      prev.type = 'star';
+      prev.star = true;
+      prev.value += value;
+      prev.output = star;
+      state.backtrack = true;
+      state.globstar = true;
+      consume(value);
+      continue;
+    }
+
+    let rest = remaining();
+    if (opts.noextglob !== true && /^\([^?]/.test(rest)) {
+      extglobOpen('star', value);
+      continue;
+    }
+
+    if (prev.type === 'star') {
+      if (opts.noglobstar === true) {
+        consume(value);
+        continue;
+      }
+
+      const prior = prev.prev;
+      const before = prior.prev;
+      const isStart = prior.type === 'slash' || prior.type === 'bos';
+      const afterStar = before && (before.type === 'star' || before.type === 'globstar');
+
+      if (opts.bash === true && (!isStart || (rest[0] && rest[0] !== '/'))) {
+        push({ type: 'star', value, output: '' });
+        continue;
+      }
+
+      const isBrace = state.braces > 0 && (prior.type === 'comma' || prior.type === 'brace');
+      const isExtglob = extglobs.length && (prior.type === 'pipe' || prior.type === 'paren');
+      if (!isStart && prior.type !== 'paren' && !isBrace && !isExtglob) {
+        push({ type: 'star', value, output: '' });
+        continue;
+      }
+
+      // strip consecutive `/**/`
+      while (rest.slice(0, 3) === '/**') {
+        const after = input[state.index + 4];
+        if (after && after !== '/') {
+          break;
+        }
+        rest = rest.slice(3);
+        consume('/**', 3);
+      }
+
+      if (prior.type === 'bos' && eos()) {
+        prev.type = 'globstar';
+        prev.value += value;
+        prev.output = globstar(opts);
+        state.output = prev.output;
+        state.globstar = true;
+        consume(value);
+        continue;
+      }
+
+      if (prior.type === 'slash' && prior.prev.type !== 'bos' && !afterStar && eos()) {
+        state.output = state.output.slice(0, -(prior.output + prev.output).length);
+        prior.output = `(?:${prior.output}`;
+
+        prev.type = 'globstar';
+        prev.output = globstar(opts) + (opts.strictSlashes ? ')' : '|$)');
+        prev.value += value;
+        state.globstar = true;
+        state.output += prior.output + prev.output;
+        consume(value);
+        continue;
+      }
+
+      if (prior.type === 'slash' && prior.prev.type !== 'bos' && rest[0] === '/') {
+        const end = rest[1] !== void 0 ? '|$' : '';
+
+        state.output = state.output.slice(0, -(prior.output + prev.output).length);
+        prior.output = `(?:${prior.output}`;
+
+        prev.type = 'globstar';
+        prev.output = `${globstar(opts)}${SLASH_LITERAL}|${SLASH_LITERAL}${end})`;
+        prev.value += value;
+
+        state.output += prior.output + prev.output;
+        state.globstar = true;
+
+        consume(value + advance());
+
+        push({ type: 'slash', value: '/', output: '' });
+        continue;
+      }
+
+      if (prior.type === 'bos' && rest[0] === '/') {
+        prev.type = 'globstar';
+        prev.value += value;
+        prev.output = `(?:^|${SLASH_LITERAL}|${globstar(opts)}${SLASH_LITERAL})`;
+        state.output = prev.output;
+        state.globstar = true;
+        consume(value + advance());
+        push({ type: 'slash', value: '/', output: '' });
+        continue;
+      }
+
+      // remove single star from output
+      state.output = state.output.slice(0, -prev.output.length);
+
+      // reset previous token to globstar
+      prev.type = 'globstar';
+      prev.output = globstar(opts);
+      prev.value += value;
+
+      // reset output with globstar
+      state.output += prev.output;
+      state.globstar = true;
+      consume(value);
+      continue;
+    }
+
+    const token = { type: 'star', value, output: star };
+
+    if (opts.bash === true) {
+      token.output = '.*?';
+      if (prev.type === 'bos' || prev.type === 'slash') {
+        token.output = nodot + token.output;
+      }
+      push(token);
+      continue;
+    }
+
+    if (prev && (prev.type === 'bracket' || prev.type === 'paren') && opts.regex === true) {
+      token.output = value;
+      push(token);
+      continue;
+    }
+
+    if (state.index === state.start || prev.type === 'slash' || prev.type === 'dot') {
+      if (prev.type === 'dot') {
+        state.output += NO_DOT_SLASH;
+        prev.output += NO_DOT_SLASH;
+
+      } else if (opts.dot === true) {
+        state.output += NO_DOTS_SLASH;
+        prev.output += NO_DOTS_SLASH;
+
+      } else {
+        state.output += nodot;
+        prev.output += nodot;
+      }
+
+      if (peek() !== '*') {
+        state.output += ONE_CHAR;
+        prev.output += ONE_CHAR;
+      }
+    }
+
+    push(token);
+  }
+
+  while (state.brackets > 0) {
+    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ']'));
+    state.output = utils.escapeLast(state.output, '[');
+    decrement('brackets');
+  }
+
+  while (state.parens > 0) {
+    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ')'));
+    state.output = utils.escapeLast(state.output, '(');
+    decrement('parens');
+  }
+
+  while (state.braces > 0) {
+    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', '}'));
+    state.output = utils.escapeLast(state.output, '{');
+    decrement('braces');
+  }
+
+  if (opts.strictSlashes !== true && (prev.type === 'star' || prev.type === 'bracket')) {
+    push({ type: 'maybe_slash', value: '', output: `${SLASH_LITERAL}?` });
+  }
+
+  // rebuild the output if we had to backtrack at any point
+  if (state.backtrack === true) {
+    state.output = '';
+
+    for (const token of state.tokens) {
+      state.output += token.output != null ? token.output : token.value;
+
+      if (token.suffix) {
+        state.output += token.suffix;
+      }
+    }
+  }
+
+  return state;
+};
+
+/**
+ * Fast paths for creating regular expressions for common glob patterns.
+ * This can significantly speed up processing and has very little downside
+ * impact when none of the fast paths match.
+ */
+
+parse.fastpaths = (input, options) => {
+  const opts = { ...options };
+  const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+  const len = input.length;
+  if (len > max) {
+    throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
+  }
+
+  input = REPLACEMENTS[input] || input;
+  const win32 = utils.isWindows(options);
+
+  // create constants based on platform, for windows or posix
+  const {
+    DOT_LITERAL,
+    SLASH_LITERAL,
+    ONE_CHAR,
+    DOTS_SLASH,
+    NO_DOT,
+    NO_DOTS,
+    NO_DOTS_SLASH,
+    STAR,
+    START_ANCHOR
+  } = constants.globChars(win32);
+
+  const nodot = opts.dot ? NO_DOTS : NO_DOT;
+  const slashDot = opts.dot ? NO_DOTS_SLASH : NO_DOT;
+  const capture = opts.capture ? '' : '?:';
+  const state = { negated: false, prefix: '' };
+  let star = opts.bash === true ? '.*?' : STAR;
+
+  if (opts.capture) {
+    star = `(${star})`;
+  }
+
+  const globstar = (opts) => {
+    if (opts.noglobstar === true) return star;
+    return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
+  };
+
+  const create = str => {
+    switch (str) {
+      case '*':
+        return `${nodot}${ONE_CHAR}${star}`;
+
+      case '.*':
+        return `${DOT_LITERAL}${ONE_CHAR}${star}`;
+
+      case '*.*':
+        return `${nodot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
+
+      case '*/*':
+        return `${nodot}${star}${SLASH_LITERAL}${ONE_CHAR}${slashDot}${star}`;
+
+      case '**':
+        return nodot + globstar(opts);
+
+      case '**/*':
+        return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${ONE_CHAR}${star}`;
+
+      case '**/*.*':
+        return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
+
+      case '**/.*':
+        return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${DOT_LITERAL}${ONE_CHAR}${star}`;
+
+      default: {
+        const match = /^(.*?)\.(\w+)$/.exec(str);
+        if (!match) return;
+
+        const source = create(match[1]);
+        if (!source) return;
+
+        return source + DOT_LITERAL + match[2];
+      }
+    }
+  };
+
+  const output = utils.removePrefix(input, state);
+  let source = create(output);
+
+  if (source && opts.strictSlashes !== true) {
+    source += `${SLASH_LITERAL}?`;
+  }
+
+  return source;
+};
+
+module.exports = parse;
 
 
 /***/ }),
@@ -15055,211 +15881,94 @@ MoveSummary.parse = function (text) {
 
 /***/ }),
 /* 120 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module) {
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const command_1 = __webpack_require__(82);
-const os = __importStar(__webpack_require__(87));
-const path = __importStar(__webpack_require__(622));
-/**
- * The code to exit an action
- */
-var ExitCode;
-(function (ExitCode) {
-    /**
-     * A code indicating that the action was successful
-     */
-    ExitCode[ExitCode["Success"] = 0] = "Success";
-    /**
-     * A code indicating that the action was a failure
-     */
-    ExitCode[ExitCode["Failure"] = 1] = "Failure";
-})(ExitCode = exports.ExitCode || (exports.ExitCode = {}));
-//-----------------------------------------------------------------------
-// Variables
-//-----------------------------------------------------------------------
-/**
- * Sets env variable for this action and future actions in the job
- * @param name the name of the variable to set
- * @param val the value of the variable
- */
-function exportVariable(name, val) {
-    process.env[name] = val;
-    command_1.issueCommand('set-env', { name }, val);
-}
-exports.exportVariable = exportVariable;
-/**
- * Registers a secret which will get masked from logs
- * @param secret value of the secret
- */
-function setSecret(secret) {
-    command_1.issueCommand('add-mask', {}, secret);
-}
-exports.setSecret = setSecret;
-/**
- * Prepends inputPath to the PATH (for this action and future actions)
- * @param inputPath
- */
-function addPath(inputPath) {
-    command_1.issueCommand('add-path', {}, inputPath);
-    process.env['PATH'] = `${inputPath}${path.delimiter}${process.env['PATH']}`;
-}
-exports.addPath = addPath;
-/**
- * Gets the value of an input.  The value is also trimmed.
- *
- * @param     name     name of the input to get
- * @param     options  optional. See InputOptions.
- * @returns   string
- */
-function getInput(name, options) {
-    const val = process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`] || '';
-    if (options && options.required && !val) {
-        throw new Error(`Input required and not supplied: ${name}`);
+module.exports = function generate_not(it, $keyword, $ruleType) {
+  var out = ' ';
+  var $lvl = it.level;
+  var $dataLvl = it.dataLevel;
+  var $schema = it.schema[$keyword];
+  var $schemaPath = it.schemaPath + it.util.getProperty($keyword);
+  var $errSchemaPath = it.errSchemaPath + '/' + $keyword;
+  var $breakOnError = !it.opts.allErrors;
+  var $data = 'data' + ($dataLvl || '');
+  var $errs = 'errs__' + $lvl;
+  var $it = it.util.copy(it);
+  $it.level++;
+  var $nextValid = 'valid' + $it.level;
+  if ((it.opts.strictKeywords ? typeof $schema == 'object' && Object.keys($schema).length > 0 : it.util.schemaHasRules($schema, it.RULES.all))) {
+    $it.schema = $schema;
+    $it.schemaPath = $schemaPath;
+    $it.errSchemaPath = $errSchemaPath;
+    out += ' var ' + ($errs) + ' = errors;  ';
+    var $wasComposite = it.compositeRule;
+    it.compositeRule = $it.compositeRule = true;
+    $it.createErrors = false;
+    var $allErrorsOption;
+    if ($it.opts.allErrors) {
+      $allErrorsOption = $it.opts.allErrors;
+      $it.opts.allErrors = false;
     }
-    return val.trim();
+    out += ' ' + (it.validate($it)) + ' ';
+    $it.createErrors = true;
+    if ($allErrorsOption) $it.opts.allErrors = $allErrorsOption;
+    it.compositeRule = $it.compositeRule = $wasComposite;
+    out += ' if (' + ($nextValid) + ') {   ';
+    var $$outStack = $$outStack || [];
+    $$outStack.push(out);
+    out = ''; /* istanbul ignore else */
+    if (it.createErrors !== false) {
+      out += ' { keyword: \'' + ('not') + '\' , dataPath: (dataPath || \'\') + ' + (it.errorPath) + ' , schemaPath: ' + (it.util.toQuotedString($errSchemaPath)) + ' , params: {} ';
+      if (it.opts.messages !== false) {
+        out += ' , message: \'should NOT be valid\' ';
+      }
+      if (it.opts.verbose) {
+        out += ' , schema: validate.schema' + ($schemaPath) + ' , parentSchema: validate.schema' + (it.schemaPath) + ' , data: ' + ($data) + ' ';
+      }
+      out += ' } ';
+    } else {
+      out += ' {} ';
+    }
+    var __err = out;
+    out = $$outStack.pop();
+    if (!it.compositeRule && $breakOnError) {
+      /* istanbul ignore if */
+      if (it.async) {
+        out += ' throw new ValidationError([' + (__err) + ']); ';
+      } else {
+        out += ' validate.errors = [' + (__err) + ']; return false; ';
+      }
+    } else {
+      out += ' var err = ' + (__err) + ';  if (vErrors === null) vErrors = [err]; else vErrors.push(err); errors++; ';
+    }
+    out += ' } else {  errors = ' + ($errs) + '; if (vErrors !== null) { if (' + ($errs) + ') vErrors.length = ' + ($errs) + '; else vErrors = null; } ';
+    if (it.opts.allErrors) {
+      out += ' } ';
+    }
+  } else {
+    out += '  var err =   '; /* istanbul ignore else */
+    if (it.createErrors !== false) {
+      out += ' { keyword: \'' + ('not') + '\' , dataPath: (dataPath || \'\') + ' + (it.errorPath) + ' , schemaPath: ' + (it.util.toQuotedString($errSchemaPath)) + ' , params: {} ';
+      if (it.opts.messages !== false) {
+        out += ' , message: \'should NOT be valid\' ';
+      }
+      if (it.opts.verbose) {
+        out += ' , schema: validate.schema' + ($schemaPath) + ' , parentSchema: validate.schema' + (it.schemaPath) + ' , data: ' + ($data) + ' ';
+      }
+      out += ' } ';
+    } else {
+      out += ' {} ';
+    }
+    out += ';  if (vErrors === null) vErrors = [err]; else vErrors.push(err); errors++; ';
+    if ($breakOnError) {
+      out += ' if (false) { ';
+    }
+  }
+  return out;
 }
-exports.getInput = getInput;
-/**
- * Sets the value of an output.
- *
- * @param     name     name of the output to set
- * @param     value    value to store
- */
-function setOutput(name, value) {
-    command_1.issueCommand('set-output', { name }, value);
-}
-exports.setOutput = setOutput;
-//-----------------------------------------------------------------------
-// Results
-//-----------------------------------------------------------------------
-/**
- * Sets the action status to failed.
- * When the action exits it will be with an exit code of 1
- * @param message add error issue message
- */
-function setFailed(message) {
-    process.exitCode = ExitCode.Failure;
-    error(message);
-}
-exports.setFailed = setFailed;
-//-----------------------------------------------------------------------
-// Logging Commands
-//-----------------------------------------------------------------------
-/**
- * Writes debug message to user log
- * @param message debug message
- */
-function debug(message) {
-    command_1.issueCommand('debug', {}, message);
-}
-exports.debug = debug;
-/**
- * Adds an error issue
- * @param message error issue message
- */
-function error(message) {
-    command_1.issue('error', message);
-}
-exports.error = error;
-/**
- * Adds an warning issue
- * @param message warning issue message
- */
-function warning(message) {
-    command_1.issue('warning', message);
-}
-exports.warning = warning;
-/**
- * Writes info to log with console.log.
- * @param message info message
- */
-function info(message) {
-    process.stdout.write(message + os.EOL);
-}
-exports.info = info;
-/**
- * Begin an output group.
- *
- * Output until the next `groupEnd` will be foldable in this group
- *
- * @param name The name of the output group
- */
-function startGroup(name) {
-    command_1.issue('group', name);
-}
-exports.startGroup = startGroup;
-/**
- * End an output group.
- */
-function endGroup() {
-    command_1.issue('endgroup');
-}
-exports.endGroup = endGroup;
-/**
- * Wrap an asynchronous function call in a group.
- *
- * Returns the same type as the function itself.
- *
- * @param name The name of the group
- * @param fn The function to wrap in the group
- */
-function group(name, fn) {
-    return __awaiter(this, void 0, void 0, function* () {
-        startGroup(name);
-        let result;
-        try {
-            result = yield fn();
-        }
-        finally {
-            endGroup();
-        }
-        return result;
-    });
-}
-exports.group = group;
-//-----------------------------------------------------------------------
-// Wrapper action state
-//-----------------------------------------------------------------------
-/**
- * Saves state for current action, the state can only be retrieved by this action's post job execution.
- *
- * @param     name     name of the state to store
- * @param     value    value to store
- */
-function saveState(name, value) {
-    command_1.issueCommand('save-state', { name }, value);
-}
-exports.saveState = saveState;
-/**
- * Gets the value of an state set by this action's main execution.
- *
- * @param     name     name of the state to get
- * @returns   string
- */
-function getState(name) {
-    return process.env[`STATE_${name}`] || '';
-}
-exports.getState = getState;
-//# sourceMappingURL=core.js.map
+
 
 /***/ }),
 /* 121 */
@@ -15350,7 +16059,7 @@ exports.default = void 0;
 
 var _toJSON = _interopRequireDefault(__webpack_require__(788));
 
-var _Node = _interopRequireDefault(__webpack_require__(965));
+var _Node = _interopRequireDefault(__webpack_require__(831));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -15472,7 +16181,7 @@ function escapeProperty(s) {
  * Copyright (c) 2009-2015 Digital Bazaar, Inc.
  *
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(138);
 __webpack_require__(538);
 
@@ -15792,7 +16501,7 @@ axios.create = function create(instanceConfig) {
 };
 
 // Expose Cancel & CancelToken
-axios.Cancel = __webpack_require__(302);
+axios.Cancel = __webpack_require__(186);
 axios.CancelToken = __webpack_require__(46);
 axios.isCancel = __webpack_require__(597);
 
@@ -16082,190 +16791,211 @@ module.exports = {"application/1d-interleaved-parityfec":{"source":"iana"},"appl
 
 /***/ }),
 /* 134 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-
-var utils = __webpack_require__(759);
-var settle = __webpack_require__(730);
-var buildURL = __webpack_require__(62);
-var buildFullPath = __webpack_require__(743);
-var parseHeaders = __webpack_require__(313);
-var isURLSameOrigin = __webpack_require__(121);
-var createError = __webpack_require__(932);
-
-module.exports = function xhrAdapter(config) {
-  return new Promise(function dispatchXhrRequest(resolve, reject) {
-    var requestData = config.data;
-    var requestHeaders = config.headers;
-
-    if (utils.isFormData(requestData)) {
-      delete requestHeaders['Content-Type']; // Let the browser set it
-    }
-
-    var request = new XMLHttpRequest();
-
-    // HTTP basic authentication
-    if (config.auth) {
-      var username = config.auth.username || '';
-      var password = config.auth.password || '';
-      requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
-    }
-
-    var fullPath = buildFullPath(config.baseURL, config.url);
-    request.open(config.method.toUpperCase(), buildURL(fullPath, config.params, config.paramsSerializer), true);
-
-    // Set the request timeout in MS
-    request.timeout = config.timeout;
-
-    // Listen for ready state
-    request.onreadystatechange = function handleLoad() {
-      if (!request || request.readyState !== 4) {
-        return;
-      }
-
-      // The request errored out and we didn't get a response, this will be
-      // handled by onerror instead
-      // With one exception: request that using file: protocol, most browsers
-      // will return status as 0 even though it's a successful request
-      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
-        return;
-      }
-
-      // Prepare the response
-      var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
-      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
-      var response = {
-        data: responseData,
-        status: request.status,
-        statusText: request.statusText,
-        headers: responseHeaders,
-        config: config,
-        request: request
-      };
-
-      settle(resolve, reject, response);
-
-      // Clean up request
-      request = null;
-    };
-
-    // Handle browser request cancellation (as opposed to a manual cancellation)
-    request.onabort = function handleAbort() {
-      if (!request) {
-        return;
-      }
-
-      reject(createError('Request aborted', config, 'ECONNABORTED', request));
-
-      // Clean up request
-      request = null;
-    };
-
-    // Handle low level network errors
-    request.onerror = function handleError() {
-      // Real errors are hidden from us by the browser
-      // onerror should only fire if it's a network error
-      reject(createError('Network Error', config, null, request));
-
-      // Clean up request
-      request = null;
-    };
-
-    // Handle timeout
-    request.ontimeout = function handleTimeout() {
-      var timeoutErrorMessage = 'timeout of ' + config.timeout + 'ms exceeded';
-      if (config.timeoutErrorMessage) {
-        timeoutErrorMessage = config.timeoutErrorMessage;
-      }
-      reject(createError(timeoutErrorMessage, config, 'ECONNABORTED',
-        request));
-
-      // Clean up request
-      request = null;
-    };
-
-    // Add xsrf header
-    // This is only done if running in a standard browser environment.
-    // Specifically not if we're in a web worker, or react-native.
-    if (utils.isStandardBrowserEnv()) {
-      var cookies = __webpack_require__(116);
-
-      // Add xsrf header
-      var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
-        cookies.read(config.xsrfCookieName) :
-        undefined;
-
-      if (xsrfValue) {
-        requestHeaders[config.xsrfHeaderName] = xsrfValue;
-      }
-    }
-
-    // Add headers to the request
-    if ('setRequestHeader' in request) {
-      utils.forEach(requestHeaders, function setRequestHeader(val, key) {
-        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
-          // Remove Content-Type if data is undefined
-          delete requestHeaders[key];
-        } else {
-          // Otherwise add header to the request
-          request.setRequestHeader(key, val);
-        }
-      });
-    }
-
-    // Add withCredentials to request if needed
-    if (!utils.isUndefined(config.withCredentials)) {
-      request.withCredentials = !!config.withCredentials;
-    }
-
-    // Add responseType to request if needed
-    if (config.responseType) {
-      try {
-        request.responseType = config.responseType;
-      } catch (e) {
-        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
-        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
-        if (config.responseType !== 'json') {
-          throw e;
-        }
-      }
-    }
-
-    // Handle progress if needed
-    if (typeof config.onDownloadProgress === 'function') {
-      request.addEventListener('progress', config.onDownloadProgress);
-    }
-
-    // Not all browsers support upload events
-    if (typeof config.onUploadProgress === 'function' && request.upload) {
-      request.upload.addEventListener('progress', config.onUploadProgress);
-    }
-
-    if (config.cancelToken) {
-      // Handle cancellation
-      config.cancelToken.promise.then(function onCanceled(cancel) {
-        if (!request) {
-          return;
-        }
-
-        request.abort();
-        reject(cancel);
-        // Clean up request
-        request = null;
-      });
-    }
-
-    if (requestData === undefined) {
-      requestData = null;
-    }
-
-    // Send the request
-    request.send(requestData);
-  });
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
 };
-
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const command_1 = __webpack_require__(99);
+const os = __importStar(__webpack_require__(87));
+const path = __importStar(__webpack_require__(622));
+/**
+ * The code to exit an action
+ */
+var ExitCode;
+(function (ExitCode) {
+    /**
+     * A code indicating that the action was successful
+     */
+    ExitCode[ExitCode["Success"] = 0] = "Success";
+    /**
+     * A code indicating that the action was a failure
+     */
+    ExitCode[ExitCode["Failure"] = 1] = "Failure";
+})(ExitCode = exports.ExitCode || (exports.ExitCode = {}));
+//-----------------------------------------------------------------------
+// Variables
+//-----------------------------------------------------------------------
+/**
+ * Sets env variable for this action and future actions in the job
+ * @param name the name of the variable to set
+ * @param val the value of the variable
+ */
+function exportVariable(name, val) {
+    process.env[name] = val;
+    command_1.issueCommand('set-env', { name }, val);
+}
+exports.exportVariable = exportVariable;
+/**
+ * Registers a secret which will get masked from logs
+ * @param secret value of the secret
+ */
+function setSecret(secret) {
+    command_1.issueCommand('add-mask', {}, secret);
+}
+exports.setSecret = setSecret;
+/**
+ * Prepends inputPath to the PATH (for this action and future actions)
+ * @param inputPath
+ */
+function addPath(inputPath) {
+    command_1.issueCommand('add-path', {}, inputPath);
+    process.env['PATH'] = `${inputPath}${path.delimiter}${process.env['PATH']}`;
+}
+exports.addPath = addPath;
+/**
+ * Gets the value of an input.  The value is also trimmed.
+ *
+ * @param     name     name of the input to get
+ * @param     options  optional. See InputOptions.
+ * @returns   string
+ */
+function getInput(name, options) {
+    const val = process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`] || '';
+    if (options && options.required && !val) {
+        throw new Error(`Input required and not supplied: ${name}`);
+    }
+    return val.trim();
+}
+exports.getInput = getInput;
+/**
+ * Sets the value of an output.
+ *
+ * @param     name     name of the output to set
+ * @param     value    value to store
+ */
+function setOutput(name, value) {
+    command_1.issueCommand('set-output', { name }, value);
+}
+exports.setOutput = setOutput;
+//-----------------------------------------------------------------------
+// Results
+//-----------------------------------------------------------------------
+/**
+ * Sets the action status to failed.
+ * When the action exits it will be with an exit code of 1
+ * @param message add error issue message
+ */
+function setFailed(message) {
+    process.exitCode = ExitCode.Failure;
+    error(message);
+}
+exports.setFailed = setFailed;
+//-----------------------------------------------------------------------
+// Logging Commands
+//-----------------------------------------------------------------------
+/**
+ * Writes debug message to user log
+ * @param message debug message
+ */
+function debug(message) {
+    command_1.issueCommand('debug', {}, message);
+}
+exports.debug = debug;
+/**
+ * Adds an error issue
+ * @param message error issue message
+ */
+function error(message) {
+    command_1.issue('error', message);
+}
+exports.error = error;
+/**
+ * Adds an warning issue
+ * @param message warning issue message
+ */
+function warning(message) {
+    command_1.issue('warning', message);
+}
+exports.warning = warning;
+/**
+ * Writes info to log with console.log.
+ * @param message info message
+ */
+function info(message) {
+    process.stdout.write(message + os.EOL);
+}
+exports.info = info;
+/**
+ * Begin an output group.
+ *
+ * Output until the next `groupEnd` will be foldable in this group
+ *
+ * @param name The name of the output group
+ */
+function startGroup(name) {
+    command_1.issue('group', name);
+}
+exports.startGroup = startGroup;
+/**
+ * End an output group.
+ */
+function endGroup() {
+    command_1.issue('endgroup');
+}
+exports.endGroup = endGroup;
+/**
+ * Wrap an asynchronous function call in a group.
+ *
+ * Returns the same type as the function itself.
+ *
+ * @param name The name of the group
+ * @param fn The function to wrap in the group
+ */
+function group(name, fn) {
+    return __awaiter(this, void 0, void 0, function* () {
+        startGroup(name);
+        let result;
+        try {
+            result = yield fn();
+        }
+        finally {
+            endGroup();
+        }
+        return result;
+    });
+}
+exports.group = group;
+//-----------------------------------------------------------------------
+// Wrapper action state
+//-----------------------------------------------------------------------
+/**
+ * Saves state for current action, the state can only be retrieved by this action's post job execution.
+ *
+ * @param     name     name of the state to store
+ * @param     value    value to store
+ */
+function saveState(name, value) {
+    command_1.issueCommand('save-state', { name }, value);
+}
+exports.saveState = saveState;
+/**
+ * Gets the value of an state set by this action's main execution.
+ *
+ * @param     name     name of the state to get
+ * @returns   string
+ */
+function getState(name) {
+    return process.env[`STATE_${name}`] || '';
+}
+exports.getState = getState;
+//# sourceMappingURL=core.js.map
 
 /***/ }),
 /* 135 */
@@ -16474,9 +17204,9 @@ exports.request = request;
  *
  * Copyright (c) 2010-2014 Digital Bazaar, Inc.
  */
-var forge = __webpack_require__(998);
-__webpack_require__(171);
-__webpack_require__(951);
+var forge = __webpack_require__(45);
+__webpack_require__(985);
+__webpack_require__(476);
 __webpack_require__(294);
 
 /* AES API */
@@ -17557,7 +18287,7 @@ function _createCipher(options) {
 // Unique ID creation requires a high quality random # generator.  In node.js
 // this is pretty straight-forward - we use the crypto API.
 
-var crypto = __webpack_require__(417);
+var crypto = __webpack_require__(373);
 
 module.exports = function nodeRNG() {
   return crypto.randomBytes(16);
@@ -17571,7 +18301,7 @@ module.exports = function nodeRNG() {
 // Copyright 2012 Joyent, Inc.  All rights reserved.
 
 var assert = __webpack_require__(552);
-var sshpk = __webpack_require__(96);
+var sshpk = __webpack_require__(13);
 var util = __webpack_require__(669);
 
 var HASH_ALGOS = {
@@ -17698,7 +18428,28 @@ module.exports = (flag, argv = process.argv) => {
 
 
 /***/ }),
-/* 142 */,
+/* 142 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _v = _interopRequireDefault(__webpack_require__(765));
+
+var _md = _interopRequireDefault(__webpack_require__(78));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const v3 = (0, _v.default)('v3', 0x30, _md.default);
+var _default = v3;
+exports.default = _default;
+
+/***/ }),
 /* 143 */,
 /* 144 */,
 /* 145 */
@@ -21578,7 +22329,7 @@ var _Pair = _interopRequireDefault(__webpack_require__(308));
 
 var _parseUtils = __webpack_require__(37);
 
-var _Alias = _interopRequireDefault(__webpack_require__(697));
+var _Alias = _interopRequireDefault(__webpack_require__(358));
 
 var _Collection = _interopRequireDefault(__webpack_require__(235));
 
@@ -22093,7 +22844,45 @@ function DoublyLinkedNode(key, val) {
 
 
 /***/ }),
-/* 167 */,
+/* 167 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const async_1 = __webpack_require__(686);
+const stream_1 = __webpack_require__(10);
+const sync_1 = __webpack_require__(246);
+const settings_1 = __webpack_require__(435);
+exports.Settings = settings_1.default;
+function walk(directory, optionsOrSettingsOrCallback, callback) {
+    if (typeof optionsOrSettingsOrCallback === 'function') {
+        return new async_1.default(directory, getSettings()).read(optionsOrSettingsOrCallback);
+    }
+    new async_1.default(directory, getSettings(optionsOrSettingsOrCallback)).read(callback);
+}
+exports.walk = walk;
+function walkSync(directory, optionsOrSettings) {
+    const settings = getSettings(optionsOrSettings);
+    const provider = new sync_1.default(directory, settings);
+    return provider.read();
+}
+exports.walkSync = walkSync;
+function walkStream(directory, optionsOrSettings) {
+    const settings = getSettings(optionsOrSettings);
+    const provider = new stream_1.default(directory, settings);
+    return provider.read();
+}
+exports.walkStream = walkStream;
+function getSettings(settingsOrOptions = {}) {
+    if (settingsOrOptions instanceof settings_1.default) {
+        return settingsOrOptions;
+    }
+    return new settings_1.default(settingsOrOptions);
+}
+
+
+/***/ }),
 /* 168 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -22105,7 +22894,7 @@ module.exports = {
   beforeRequest: __webpack_require__(105),
   browser: __webpack_require__(427),
   cache: __webpack_require__(984),
-  content: __webpack_require__(43),
+  content: __webpack_require__(290),
   cookie: __webpack_require__(193),
   creator: __webpack_require__(450),
   entry: __webpack_require__(473),
@@ -22113,7 +22902,7 @@ module.exports = {
   header: __webpack_require__(448),
   log: __webpack_require__(68),
   page: __webpack_require__(584),
-  pageTimings: __webpack_require__(490),
+  pageTimings: __webpack_require__(539),
   postData: __webpack_require__(132),
   query: __webpack_require__(511),
   request: __webpack_require__(762),
@@ -22160,7 +22949,7 @@ if (typeof Object.create === 'function') {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 /*global module, process*/
-var Buffer = __webpack_require__(880).Buffer;
+var Buffer = __webpack_require__(705).Buffer;
 var Stream = __webpack_require__(413);
 var util = __webpack_require__(669);
 
@@ -22218,238 +23007,141 @@ module.exports = DataStream;
 
 /***/ }),
 /* 171 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-/**
- * Cipher base API.
- *
- * @author Dave Longley
- *
- * Copyright (c) 2010-2014 Digital Bazaar, Inc.
- */
-var forge = __webpack_require__(998);
-__webpack_require__(294);
+"use strict";
 
-module.exports = forge.cipher = forge.cipher || {};
-
-// registered algorithms
-forge.cipher.algorithms = forge.cipher.algorithms || {};
-
-/**
- * Creates a cipher object that can be used to encrypt data using the given
- * algorithm and key. The algorithm may be provided as a string value for a
- * previously registered algorithm or it may be given as a cipher algorithm
- * API object.
- *
- * @param algorithm the algorithm to use, either a string or an algorithm API
- *          object.
- * @param key the key to use, as a binary-encoded string of bytes or a
- *          byte buffer.
- *
- * @return the cipher.
- */
-forge.cipher.createCipher = function(algorithm, key) {
-  var api = algorithm;
-  if(typeof api === 'string') {
-    api = forge.cipher.getAlgorithm(api);
-    if(api) {
-      api = api();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.matchAny = exports.convertPatternsToRe = exports.makeRe = exports.getPatternParts = exports.expandBraceExpansion = exports.expandPatternsWithBraceExpansion = exports.isAffectDepthOfReadingPattern = exports.endsWithSlashGlobStar = exports.hasGlobStar = exports.getBaseDirectory = exports.getPositivePatterns = exports.getNegativePatterns = exports.isPositivePattern = exports.isNegativePattern = exports.convertToNegativePattern = exports.convertToPositivePattern = exports.isDynamicPattern = exports.isStaticPattern = void 0;
+const path = __webpack_require__(622);
+const globParent = __webpack_require__(221);
+const micromatch = __webpack_require__(621);
+const picomatch = __webpack_require__(784);
+const GLOBSTAR = '**';
+const ESCAPE_SYMBOL = '\\';
+const COMMON_GLOB_SYMBOLS_RE = /[*?]|^!/;
+const REGEX_CHARACTER_CLASS_SYMBOLS_RE = /\[.*]/;
+const REGEX_GROUP_SYMBOLS_RE = /(?:^|[^!*+?@])\(.*\|.*\)/;
+const GLOB_EXTENSION_SYMBOLS_RE = /[!*+?@]\(.*\)/;
+const BRACE_EXPANSIONS_SYMBOLS_RE = /{.*(?:,|\.\.).*}/;
+function isStaticPattern(pattern, options = {}) {
+    return !isDynamicPattern(pattern, options);
+}
+exports.isStaticPattern = isStaticPattern;
+function isDynamicPattern(pattern, options = {}) {
+    /**
+     * A special case with an empty string is necessary for matching patterns that start with a forward slash.
+     * An empty string cannot be a dynamic pattern.
+     * For example, the pattern `/lib/*` will be spread into parts: '', 'lib', '*'.
+     */
+    if (pattern === '') {
+        return false;
     }
-  }
-  if(!api) {
-    throw new Error('Unsupported algorithm: ' + algorithm);
-  }
-
-  // assume block cipher
-  return new forge.cipher.BlockCipher({
-    algorithm: api,
-    key: key,
-    decrypt: false
-  });
-};
-
-/**
- * Creates a decipher object that can be used to decrypt data using the given
- * algorithm and key. The algorithm may be provided as a string value for a
- * previously registered algorithm or it may be given as a cipher algorithm
- * API object.
- *
- * @param algorithm the algorithm to use, either a string or an algorithm API
- *          object.
- * @param key the key to use, as a binary-encoded string of bytes or a
- *          byte buffer.
- *
- * @return the cipher.
- */
-forge.cipher.createDecipher = function(algorithm, key) {
-  var api = algorithm;
-  if(typeof api === 'string') {
-    api = forge.cipher.getAlgorithm(api);
-    if(api) {
-      api = api();
+    /**
+     * When the `caseSensitiveMatch` option is disabled, all patterns must be marked as dynamic, because we cannot check
+     * filepath directly (without read directory).
+     */
+    if (options.caseSensitiveMatch === false || pattern.includes(ESCAPE_SYMBOL)) {
+        return true;
     }
-  }
-  if(!api) {
-    throw new Error('Unsupported algorithm: ' + algorithm);
-  }
-
-  // assume block cipher
-  return new forge.cipher.BlockCipher({
-    algorithm: api,
-    key: key,
-    decrypt: true
-  });
-};
-
-/**
- * Registers an algorithm by name. If the name was already registered, the
- * algorithm API object will be overwritten.
- *
- * @param name the name of the algorithm.
- * @param algorithm the algorithm API object.
- */
-forge.cipher.registerAlgorithm = function(name, algorithm) {
-  name = name.toUpperCase();
-  forge.cipher.algorithms[name] = algorithm;
-};
-
-/**
- * Gets a registered algorithm by name.
- *
- * @param name the name of the algorithm.
- *
- * @return the algorithm, if found, null if not.
- */
-forge.cipher.getAlgorithm = function(name) {
-  name = name.toUpperCase();
-  if(name in forge.cipher.algorithms) {
-    return forge.cipher.algorithms[name];
-  }
-  return null;
-};
-
-var BlockCipher = forge.cipher.BlockCipher = function(options) {
-  this.algorithm = options.algorithm;
-  this.mode = this.algorithm.mode;
-  this.blockSize = this.mode.blockSize;
-  this._finish = false;
-  this._input = null;
-  this.output = null;
-  this._op = options.decrypt ? this.mode.decrypt : this.mode.encrypt;
-  this._decrypt = options.decrypt;
-  this.algorithm.initialize(options);
-};
-
-/**
- * Starts or restarts the encryption or decryption process, whichever
- * was previously configured.
- *
- * For non-GCM mode, the IV may be a binary-encoded string of bytes, an array
- * of bytes, a byte buffer, or an array of 32-bit integers. If the IV is in
- * bytes, then it must be Nb (16) bytes in length. If the IV is given in as
- * 32-bit integers, then it must be 4 integers long.
- *
- * Note: an IV is not required or used in ECB mode.
- *
- * For GCM-mode, the IV must be given as a binary-encoded string of bytes or
- * a byte buffer. The number of bytes should be 12 (96 bits) as recommended
- * by NIST SP-800-38D but another length may be given.
- *
- * @param options the options to use:
- *          iv the initialization vector to use as a binary-encoded string of
- *            bytes, null to reuse the last ciphered block from a previous
- *            update() (this "residue" method is for legacy support only).
- *          additionalData additional authentication data as a binary-encoded
- *            string of bytes, for 'GCM' mode, (default: none).
- *          tagLength desired length of authentication tag, in bits, for
- *            'GCM' mode (0-128, default: 128).
- *          tag the authentication tag to check if decrypting, as a
- *             binary-encoded string of bytes.
- *          output the output the buffer to write to, null to create one.
- */
-BlockCipher.prototype.start = function(options) {
-  options = options || {};
-  var opts = {};
-  for(var key in options) {
-    opts[key] = options[key];
-  }
-  opts.decrypt = this._decrypt;
-  this._finish = false;
-  this._input = forge.util.createBuffer();
-  this.output = options.output || forge.util.createBuffer();
-  this.mode.start(opts);
-};
-
-/**
- * Updates the next block according to the cipher mode.
- *
- * @param input the buffer to read from.
- */
-BlockCipher.prototype.update = function(input) {
-  if(input) {
-    // input given, so empty it into the input buffer
-    this._input.putBuffer(input);
-  }
-
-  // do cipher operation until it needs more input and not finished
-  while(!this._op.call(this.mode, this._input, this.output, this._finish) &&
-    !this._finish) {}
-
-  // free consumed memory from input buffer
-  this._input.compact();
-};
-
-/**
- * Finishes encrypting or decrypting.
- *
- * @param pad a padding function to use in CBC mode, null for default,
- *          signature(blockSize, buffer, decrypt).
- *
- * @return true if successful, false on error.
- */
-BlockCipher.prototype.finish = function(pad) {
-  // backwards-compatibility w/deprecated padding API
-  // Note: will overwrite padding functions even after another start() call
-  if(pad && (this.mode.name === 'ECB' || this.mode.name === 'CBC')) {
-    this.mode.pad = function(input) {
-      return pad(this.blockSize, input, false);
-    };
-    this.mode.unpad = function(output) {
-      return pad(this.blockSize, output, true);
-    };
-  }
-
-  // build options for padding and afterFinish functions
-  var options = {};
-  options.decrypt = this._decrypt;
-
-  // get # of bytes that won't fill a block
-  options.overflow = this._input.length() % this.blockSize;
-
-  if(!this._decrypt && this.mode.pad) {
-    if(!this.mode.pad(this._input, options)) {
-      return false;
+    if (COMMON_GLOB_SYMBOLS_RE.test(pattern) || REGEX_CHARACTER_CLASS_SYMBOLS_RE.test(pattern) || REGEX_GROUP_SYMBOLS_RE.test(pattern)) {
+        return true;
     }
-  }
-
-  // do final update
-  this._finish = true;
-  this.update();
-
-  if(this._decrypt && this.mode.unpad) {
-    if(!this.mode.unpad(this.output, options)) {
-      return false;
+    if (options.extglob !== false && GLOB_EXTENSION_SYMBOLS_RE.test(pattern)) {
+        return true;
     }
-  }
-
-  if(this.mode.afterFinish) {
-    if(!this.mode.afterFinish(this.output, options)) {
-      return false;
+    if (options.braceExpansion !== false && BRACE_EXPANSIONS_SYMBOLS_RE.test(pattern)) {
+        return true;
     }
-  }
-
-  return true;
-};
+    return false;
+}
+exports.isDynamicPattern = isDynamicPattern;
+function convertToPositivePattern(pattern) {
+    return isNegativePattern(pattern) ? pattern.slice(1) : pattern;
+}
+exports.convertToPositivePattern = convertToPositivePattern;
+function convertToNegativePattern(pattern) {
+    return '!' + pattern;
+}
+exports.convertToNegativePattern = convertToNegativePattern;
+function isNegativePattern(pattern) {
+    return pattern.startsWith('!') && pattern[1] !== '(';
+}
+exports.isNegativePattern = isNegativePattern;
+function isPositivePattern(pattern) {
+    return !isNegativePattern(pattern);
+}
+exports.isPositivePattern = isPositivePattern;
+function getNegativePatterns(patterns) {
+    return patterns.filter(isNegativePattern);
+}
+exports.getNegativePatterns = getNegativePatterns;
+function getPositivePatterns(patterns) {
+    return patterns.filter(isPositivePattern);
+}
+exports.getPositivePatterns = getPositivePatterns;
+function getBaseDirectory(pattern) {
+    return globParent(pattern, { flipBackslashes: false });
+}
+exports.getBaseDirectory = getBaseDirectory;
+function hasGlobStar(pattern) {
+    return pattern.includes(GLOBSTAR);
+}
+exports.hasGlobStar = hasGlobStar;
+function endsWithSlashGlobStar(pattern) {
+    return pattern.endsWith('/' + GLOBSTAR);
+}
+exports.endsWithSlashGlobStar = endsWithSlashGlobStar;
+function isAffectDepthOfReadingPattern(pattern) {
+    const basename = path.basename(pattern);
+    return endsWithSlashGlobStar(pattern) || isStaticPattern(basename);
+}
+exports.isAffectDepthOfReadingPattern = isAffectDepthOfReadingPattern;
+function expandPatternsWithBraceExpansion(patterns) {
+    return patterns.reduce((collection, pattern) => {
+        return collection.concat(expandBraceExpansion(pattern));
+    }, []);
+}
+exports.expandPatternsWithBraceExpansion = expandPatternsWithBraceExpansion;
+function expandBraceExpansion(pattern) {
+    return micromatch.braces(pattern, {
+        expand: true,
+        nodupes: true
+    });
+}
+exports.expandBraceExpansion = expandBraceExpansion;
+function getPatternParts(pattern, options) {
+    let { parts } = picomatch.scan(pattern, Object.assign(Object.assign({}, options), { parts: true }));
+    /**
+     * The scan method returns an empty array in some cases.
+     * See micromatch/picomatch#58 for more details.
+     */
+    if (parts.length === 0) {
+        parts = [pattern];
+    }
+    /**
+     * The scan method does not return an empty part for the pattern with a forward slash.
+     * This is another part of micromatch/picomatch#58.
+     */
+    if (parts[0].startsWith('/')) {
+        parts[0] = parts[0].slice(1);
+        parts.unshift('');
+    }
+    return parts;
+}
+exports.getPatternParts = getPatternParts;
+function makeRe(pattern, options) {
+    return micromatch.makeRe(pattern, options);
+}
+exports.makeRe = makeRe;
+function convertPatternsToRe(patterns, options) {
+    return patterns.map((pattern) => makeRe(pattern, options));
+}
+exports.convertPatternsToRe = convertPatternsToRe;
+function matchAny(entry, patternsRe) {
+    return patternsRe.some((patternRe) => patternRe.test(entry));
+}
+exports.matchAny = matchAny;
 
 
 /***/ }),
@@ -22545,51 +23237,187 @@ module.exports = {
 /***/ }),
 /* 173 */,
 /* 174 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports) {
 
-var wrappy = __webpack_require__(559)
-module.exports = wrappy(once)
-module.exports.strict = wrappy(onceStrict)
+"use strict";
 
-once.proto = once(function () {
-  Object.defineProperty(Function.prototype, 'once', {
-    value: function () {
-      return once(this)
-    },
-    configurable: true
-  })
 
-  Object.defineProperty(Function.prototype, 'onceStrict', {
-    value: function () {
-      return onceStrict(this)
-    },
-    configurable: true
-  })
-})
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getLinePos = getLinePos;
+exports.getLine = getLine;
+exports.getPrettyContext = getPrettyContext;
 
-function once (fn) {
-  var f = function () {
-    if (f.called) return f.value
-    f.called = true
-    return f.value = fn.apply(this, arguments)
+function findLineStarts(src) {
+  const ls = [0];
+  let offset = src.indexOf('\n');
+
+  while (offset !== -1) {
+    offset += 1;
+    ls.push(offset);
+    offset = src.indexOf('\n', offset);
   }
-  f.called = false
-  return f
+
+  return ls;
 }
 
-function onceStrict (fn) {
-  var f = function () {
-    if (f.called)
-      throw new Error(f.onceError)
-    f.called = true
-    return f.value = fn.apply(this, arguments)
-  }
-  var name = fn.name || 'Function wrapped with `once`'
-  f.onceError = name + " shouldn't be called more than once"
-  f.called = false
-  return f
-}
+function getSrcInfo(cst) {
+  let lineStarts, src;
 
+  if (typeof cst === 'string') {
+    lineStarts = findLineStarts(cst);
+    src = cst;
+  } else {
+    if (Array.isArray(cst)) cst = cst[0];
+
+    if (cst && cst.context) {
+      if (!cst.lineStarts) cst.lineStarts = findLineStarts(cst.context.src);
+      lineStarts = cst.lineStarts;
+      src = cst.context.src;
+    }
+  }
+
+  return {
+    lineStarts,
+    src
+  };
+}
+/**
+ * @typedef {Object} LinePos - One-indexed position in the source
+ * @property {number} line
+ * @property {number} col
+ */
+
+/**
+ * Determine the line/col position matching a character offset.
+ *
+ * Accepts a source string or a CST document as the second parameter. With
+ * the latter, starting indices for lines are cached in the document as
+ * `lineStarts: number[]`.
+ *
+ * Returns a one-indexed `{ line, col }` location if found, or
+ * `undefined` otherwise.
+ *
+ * @param {number} offset
+ * @param {string|Document|Document[]} cst
+ * @returns {?LinePos}
+ */
+
+
+function getLinePos(offset, cst) {
+  if (typeof offset !== 'number' || offset < 0) return null;
+  const {
+    lineStarts,
+    src
+  } = getSrcInfo(cst);
+  if (!lineStarts || !src || offset > src.length) return null;
+
+  for (let i = 0; i < lineStarts.length; ++i) {
+    const start = lineStarts[i];
+
+    if (offset < start) {
+      return {
+        line: i,
+        col: offset - lineStarts[i - 1] + 1
+      };
+    }
+
+    if (offset === start) return {
+      line: i + 1,
+      col: 1
+    };
+  }
+
+  const line = lineStarts.length;
+  return {
+    line,
+    col: offset - lineStarts[line - 1] + 1
+  };
+}
+/**
+ * Get a specified line from the source.
+ *
+ * Accepts a source string or a CST document as the second parameter. With
+ * the latter, starting indices for lines are cached in the document as
+ * `lineStarts: number[]`.
+ *
+ * Returns the line as a string if found, or `null` otherwise.
+ *
+ * @param {number} line One-indexed line number
+ * @param {string|Document|Document[]} cst
+ * @returns {?string}
+ */
+
+
+function getLine(line, cst) {
+  const {
+    lineStarts,
+    src
+  } = getSrcInfo(cst);
+  if (!lineStarts || !(line >= 1) || line > lineStarts.length) return null;
+  const start = lineStarts[line - 1];
+  let end = lineStarts[line]; // undefined for last line; that's ok for slice()
+
+  while (end && end > start && src[end - 1] === '\n') --end;
+
+  return src.slice(start, end);
+}
+/**
+ * Pretty-print the starting line from the source indicated by the range `pos`
+ *
+ * Trims output to `maxWidth` chars while keeping the starting column visible,
+ * using `…` at either end to indicate dropped characters.
+ *
+ * Returns a two-line string (or `null`) with `\n` as separator; the second line
+ * will hold appropriately indented `^` marks indicating the column range.
+ *
+ * @param {Object} pos
+ * @param {LinePos} pos.start
+ * @param {LinePos} [pos.end]
+ * @param {string|Document|Document[]*} cst
+ * @param {number} [maxWidth=80]
+ * @returns {?string}
+ */
+
+
+function getPrettyContext({
+  start,
+  end
+}, cst, maxWidth = 80) {
+  let src = getLine(start.line, cst);
+  if (!src) return null;
+  let {
+    col
+  } = start;
+
+  if (src.length > maxWidth) {
+    if (col <= maxWidth - 10) {
+      src = src.substr(0, maxWidth - 1) + '…';
+    } else {
+      const halfWidth = Math.round(maxWidth / 2);
+      if (src.length > col + halfWidth) src = src.substr(0, col + halfWidth - 1) + '…';
+      col -= src.length - maxWidth;
+      src = '…' + src.substr(1 - maxWidth);
+    }
+  }
+
+  let errLen = 1;
+  let errEnd = '';
+
+  if (end) {
+    if (end.line === start.line && col + (end.col - start.col) <= maxWidth + 1) {
+      errLen = end.col - start.col;
+    } else {
+      errLen = Math.min(src.length + 1, maxWidth) - col;
+      errEnd = '…';
+    }
+  }
+
+  const offset = col > 1 ? ' '.repeat(col - 1) : '';
+  const err = '^'.repeat(errLen);
+  return `${src}\n${offset}${err}${errEnd}`;
+}
 
 /***/ }),
 /* 175 */
@@ -22676,7 +23504,7 @@ module.exports = new Schema({
  *
  * @author https://github.com/shellac
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(138);
 __webpack_require__(709);
 __webpack_require__(445);
@@ -23016,7 +23844,80 @@ function resolveComments(collection, comments) {
 }
 
 /***/ }),
-/* 180 */,
+/* 180 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const taskManager = __webpack_require__(403);
+const async_1 = __webpack_require__(618);
+const stream_1 = __webpack_require__(73);
+const sync_1 = __webpack_require__(594);
+const settings_1 = __webpack_require__(738);
+const utils = __webpack_require__(817);
+async function FastGlob(source, options) {
+    assertPatternsInput(source);
+    const works = getWorks(source, async_1.default, options);
+    const result = await Promise.all(works);
+    return utils.array.flatten(result);
+}
+// https://github.com/typescript-eslint/typescript-eslint/issues/60
+// eslint-disable-next-line no-redeclare
+(function (FastGlob) {
+    function sync(source, options) {
+        assertPatternsInput(source);
+        const works = getWorks(source, sync_1.default, options);
+        return utils.array.flatten(works);
+    }
+    FastGlob.sync = sync;
+    function stream(source, options) {
+        assertPatternsInput(source);
+        const works = getWorks(source, stream_1.default, options);
+        /**
+         * The stream returned by the provider cannot work with an asynchronous iterator.
+         * To support asynchronous iterators, regardless of the number of tasks, we always multiplex streams.
+         * This affects performance (+25%). I don't see best solution right now.
+         */
+        return utils.stream.merge(works);
+    }
+    FastGlob.stream = stream;
+    function generateTasks(source, options) {
+        assertPatternsInput(source);
+        const patterns = [].concat(source);
+        const settings = new settings_1.default(options);
+        return taskManager.generate(patterns, settings);
+    }
+    FastGlob.generateTasks = generateTasks;
+    function isDynamicPattern(source, options) {
+        assertPatternsInput(source);
+        const settings = new settings_1.default(options);
+        return utils.pattern.isDynamicPattern(source, settings);
+    }
+    FastGlob.isDynamicPattern = isDynamicPattern;
+    function escapePath(source) {
+        assertPatternsInput(source);
+        return utils.path.escape(source);
+    }
+    FastGlob.escapePath = escapePath;
+})(FastGlob || (FastGlob = {}));
+function getWorks(source, _Provider, options) {
+    const patterns = [].concat(source);
+    const settings = new settings_1.default(options);
+    const tasks = taskManager.generate(patterns, settings);
+    const provider = new _Provider(settings);
+    return tasks.map(provider.read, provider);
+}
+function assertPatternsInput(input) {
+    const source = [].concat(input);
+    const isValidSource = source.every((item) => utils.string.isString(item) && !utils.string.isEmpty(item));
+    if (!isValidSource) {
+        throw new TypeError('Patterns must be a string (non empty) or an array of strings');
+    }
+}
+module.exports = FastGlob;
+
+
+/***/ }),
 /* 181 */,
 /* 182 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -23255,119 +24156,42 @@ exports.default = Anchors;
 /***/ }),
 /* 184 */,
 /* 185 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
+var Mime = __webpack_require__(56);
+module.exports = new Mime(__webpack_require__(680), __webpack_require__(591));
 
-var _rng = _interopRequireDefault(__webpack_require__(475));
-
-var _bytesToUuid = _interopRequireDefault(__webpack_require__(262));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// **`v1()` - Generate time-based UUID**
-//
-// Inspired by https://github.com/LiosK/UUID.js
-// and http://docs.python.org/library/uuid.html
-var _nodeId;
-
-var _clockseq; // Previous uuid creation time
-
-
-var _lastMSecs = 0;
-var _lastNSecs = 0; // See https://github.com/uuidjs/uuid for API details
-
-function v1(options, buf, offset) {
-  var i = buf && offset || 0;
-  var b = buf || [];
-  options = options || {};
-  var node = options.node || _nodeId;
-  var clockseq = options.clockseq !== undefined ? options.clockseq : _clockseq; // node and clockseq need to be initialized to random values if they're not
-  // specified.  We do this lazily to minimize issues related to insufficient
-  // system entropy.  See #189
-
-  if (node == null || clockseq == null) {
-    var seedBytes = options.random || (options.rng || _rng.default)();
-
-    if (node == null) {
-      // Per 4.5, create and 48-bit node id, (47 random bits + multicast bit = 1)
-      node = _nodeId = [seedBytes[0] | 0x01, seedBytes[1], seedBytes[2], seedBytes[3], seedBytes[4], seedBytes[5]];
-    }
-
-    if (clockseq == null) {
-      // Per 4.2.2, randomize (14 bit) clockseq
-      clockseq = _clockseq = (seedBytes[6] << 8 | seedBytes[7]) & 0x3fff;
-    }
-  } // UUID timestamps are 100 nano-second units since the Gregorian epoch,
-  // (1582-10-15 00:00).  JSNumbers aren't precise enough for this, so
-  // time is handled internally as 'msecs' (integer milliseconds) and 'nsecs'
-  // (100-nanoseconds offset from msecs) since unix epoch, 1970-01-01 00:00.
-
-
-  var msecs = options.msecs !== undefined ? options.msecs : new Date().getTime(); // Per 4.2.1.2, use count of uuid's generated during the current clock
-  // cycle to simulate higher resolution clock
-
-  var nsecs = options.nsecs !== undefined ? options.nsecs : _lastNSecs + 1; // Time since last uuid creation (in msecs)
-
-  var dt = msecs - _lastMSecs + (nsecs - _lastNSecs) / 10000; // Per 4.2.1.2, Bump clockseq on clock regression
-
-  if (dt < 0 && options.clockseq === undefined) {
-    clockseq = clockseq + 1 & 0x3fff;
-  } // Reset nsecs if clock regresses (new clockseq) or we've moved onto a new
-  // time interval
-
-
-  if ((dt < 0 || msecs > _lastMSecs) && options.nsecs === undefined) {
-    nsecs = 0;
-  } // Per 4.2.1.2 Throw error if too many uuids are requested
-
-
-  if (nsecs >= 10000) {
-    throw new Error("uuid.v1(): Can't create more than 10M uuids/sec");
-  }
-
-  _lastMSecs = msecs;
-  _lastNSecs = nsecs;
-  _clockseq = clockseq; // Per 4.1.4 - Convert from unix epoch to Gregorian epoch
-
-  msecs += 12219292800000; // `time_low`
-
-  var tl = ((msecs & 0xfffffff) * 10000 + nsecs) % 0x100000000;
-  b[i++] = tl >>> 24 & 0xff;
-  b[i++] = tl >>> 16 & 0xff;
-  b[i++] = tl >>> 8 & 0xff;
-  b[i++] = tl & 0xff; // `time_mid`
-
-  var tmh = msecs / 0x100000000 * 10000 & 0xfffffff;
-  b[i++] = tmh >>> 8 & 0xff;
-  b[i++] = tmh & 0xff; // `time_high_and_version`
-
-  b[i++] = tmh >>> 24 & 0xf | 0x10; // include version
-
-  b[i++] = tmh >>> 16 & 0xff; // `clock_seq_hi_and_reserved` (Per 4.2.2 - include variant)
-
-  b[i++] = clockseq >>> 8 | 0x80; // `clock_seq_low`
-
-  b[i++] = clockseq & 0xff; // `node`
-
-  for (var n = 0; n < 6; ++n) {
-    b[i + n] = node[n];
-  }
-
-  return buf ? buf : (0, _bytesToUuid.default)(b);
-}
-
-var _default = v1;
-exports.default = _default;
 
 /***/ }),
-/* 186 */,
+/* 186 */
+/***/ (function(module) {
+
+"use strict";
+
+
+/**
+ * A `Cancel` is an object that is thrown when an operation is canceled.
+ *
+ * @class
+ * @param {string=} message The message.
+ */
+function Cancel(message) {
+  this.message = message;
+}
+
+Cancel.prototype.toString = function toString() {
+  return 'Cancel' + (this.message ? ': ' + this.message : '');
+};
+
+Cancel.prototype.__CANCEL__ = true;
+
+module.exports = Cancel;
+
+
+/***/ }),
 /* 187 */,
 /* 188 */,
 /* 189 */,
@@ -23493,7 +24317,7 @@ const io = __webpack_require__(806);
 const fs = __webpack_require__(747);
 const os = __webpack_require__(87);
 const path = __webpack_require__(622);
-const httpm = __webpack_require__(670);
+const httpm = __webpack_require__(965);
 const semver = __webpack_require__(935);
 const uuidV4 = __webpack_require__(620);
 const exec_1 = __webpack_require__(925);
@@ -24788,299 +25612,38 @@ exports.default = BlockValue;
 
 /***/ }),
 /* 199 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+const request = __webpack_require__(841);
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const childProcess = __webpack_require__(129);
-const path = __webpack_require__(622);
-const util_1 = __webpack_require__(669);
-const ioUtil = __webpack_require__(325);
-const exec = util_1.promisify(childProcess.exec);
-/**
- * Copies a file or folder.
- * Based off of shelljs - https://github.com/shelljs/shelljs/blob/9237f66c52e5daa40458f94f9565e18e8132f5a6/src/cp.js
- *
- * @param     source    source path
- * @param     dest      destination path
- * @param     options   optional. See CopyOptions.
- */
-function cp(source, dest, options = {}) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const { force, recursive } = readCopyOptions(options);
-        const destStat = (yield ioUtil.exists(dest)) ? yield ioUtil.stat(dest) : null;
-        // Dest is an existing file, but not forcing
-        if (destStat && destStat.isFile() && !force) {
-            return;
-        }
-        // If dest is an existing directory, should copy inside.
-        const newDest = destStat && destStat.isDirectory()
-            ? path.join(dest, path.basename(source))
-            : dest;
-        if (!(yield ioUtil.exists(source))) {
-            throw new Error(`no such file or directory: ${source}`);
-        }
-        const sourceStat = yield ioUtil.stat(source);
-        if (sourceStat.isDirectory()) {
-            if (!recursive) {
-                throw new Error(`Failed to copy. ${source} is a directory, but tried to copy without recursive flag.`);
-            }
-            else {
-                yield cpDirRecursive(source, newDest, 0, force);
-            }
-        }
-        else {
-            if (path.relative(source, newDest) === '') {
-                // a file cannot be copied to itself
-                throw new Error(`'${newDest}' and '${source}' are the same file`);
-            }
-            yield copyFile(source, newDest, force);
-        }
-    });
-}
-exports.cp = cp;
-/**
- * Moves a path.
- *
- * @param     source    source path
- * @param     dest      destination path
- * @param     options   optional. See MoveOptions.
- */
-function mv(source, dest, options = {}) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (yield ioUtil.exists(dest)) {
-            let destExists = true;
-            if (yield ioUtil.isDirectory(dest)) {
-                // If dest is directory copy src into dest
-                dest = path.join(dest, path.basename(source));
-                destExists = yield ioUtil.exists(dest);
-            }
-            if (destExists) {
-                if (options.force == null || options.force) {
-                    yield rmRF(dest);
-                }
-                else {
-                    throw new Error('Destination already exists');
-                }
-            }
-        }
-        yield mkdirP(path.dirname(dest));
-        yield ioUtil.rename(source, dest);
-    });
-}
-exports.mv = mv;
-/**
- * Remove a path recursively with force
- *
- * @param inputPath path to remove
- */
-function rmRF(inputPath) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (ioUtil.IS_WINDOWS) {
-            // Node doesn't provide a delete operation, only an unlink function. This means that if the file is being used by another
-            // program (e.g. antivirus), it won't be deleted. To address this, we shell out the work to rd/del.
-            try {
-                if (yield ioUtil.isDirectory(inputPath, true)) {
-                    yield exec(`rd /s /q "${inputPath}"`);
-                }
-                else {
-                    yield exec(`del /f /a "${inputPath}"`);
-                }
-            }
-            catch (err) {
-                // if you try to delete a file that doesn't exist, desired result is achieved
-                // other errors are valid
-                if (err.code !== 'ENOENT')
-                    throw err;
-            }
-            // Shelling out fails to remove a symlink folder with missing source, this unlink catches that
-            try {
-                yield ioUtil.unlink(inputPath);
-            }
-            catch (err) {
-                // if you try to delete a file that doesn't exist, desired result is achieved
-                // other errors are valid
-                if (err.code !== 'ENOENT')
-                    throw err;
-            }
-        }
-        else {
-            let isDir = false;
-            try {
-                isDir = yield ioUtil.isDirectory(inputPath);
-            }
-            catch (err) {
-                // if you try to delete a file that doesn't exist, desired result is achieved
-                // other errors are valid
-                if (err.code !== 'ENOENT')
-                    throw err;
-                return;
-            }
-            if (isDir) {
-                yield exec(`rm -rf "${inputPath}"`);
-            }
-            else {
-                yield ioUtil.unlink(inputPath);
-            }
-        }
-    });
-}
-exports.rmRF = rmRF;
-/**
- * Make a directory.  Creates the full path with folders in between
- * Will throw if it fails
- *
- * @param   fsPath        path to create
- * @returns Promise<void>
- */
-function mkdirP(fsPath) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield ioUtil.mkdirP(fsPath);
-    });
-}
-exports.mkdirP = mkdirP;
-/**
- * Returns path of a tool had the tool actually been invoked.  Resolves via paths.
- * If you check and the tool does not exist, it will throw.
- *
- * @param     tool              name of the tool
- * @param     check             whether to check if tool exists
- * @returns   Promise<string>   path to tool
- */
-function which(tool, check) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!tool) {
-            throw new Error("parameter 'tool' is required");
-        }
-        // recursive when check=true
-        if (check) {
-            const result = yield which(tool, false);
-            if (!result) {
-                if (ioUtil.IS_WINDOWS) {
-                    throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also verify the file has a valid extension for an executable file.`);
-                }
-                else {
-                    throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also check the file mode to verify the file is executable.`);
-                }
-            }
-        }
-        try {
-            // build the list of extensions to try
-            const extensions = [];
-            if (ioUtil.IS_WINDOWS && process.env.PATHEXT) {
-                for (const extension of process.env.PATHEXT.split(path.delimiter)) {
-                    if (extension) {
-                        extensions.push(extension);
-                    }
-                }
-            }
-            // if it's rooted, return it if exists. otherwise return empty.
-            if (ioUtil.isRooted(tool)) {
-                const filePath = yield ioUtil.tryGetExecutablePath(tool, extensions);
-                if (filePath) {
-                    return filePath;
-                }
-                return '';
-            }
-            // if any path separators, return empty
-            if (tool.includes('/') || (ioUtil.IS_WINDOWS && tool.includes('\\'))) {
-                return '';
-            }
-            // build the list of directories
-            //
-            // Note, technically "where" checks the current directory on Windows. From a toolkit perspective,
-            // it feels like we should not do this. Checking the current directory seems like more of a use
-            // case of a shell, and the which() function exposed by the toolkit should strive for consistency
-            // across platforms.
-            const directories = [];
-            if (process.env.PATH) {
-                for (const p of process.env.PATH.split(path.delimiter)) {
-                    if (p) {
-                        directories.push(p);
-                    }
-                }
-            }
-            // return the first match
-            for (const directory of directories) {
-                const filePath = yield ioUtil.tryGetExecutablePath(directory + path.sep + tool, extensions);
-                if (filePath) {
-                    return filePath;
-                }
-            }
-            return '';
-        }
-        catch (err) {
-            throw new Error(`which failed with message ${err.message}`);
-        }
-    });
-}
-exports.which = which;
-function readCopyOptions(options) {
-    const force = options.force == null ? true : options.force;
-    const recursive = Boolean(options.recursive);
-    return { force, recursive };
-}
-function cpDirRecursive(sourceDir, destDir, currentDepth, force) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // Ensure there is not a run away recursive copy
-        if (currentDepth >= 255)
-            return;
-        currentDepth++;
-        yield mkdirP(destDir);
-        const files = yield ioUtil.readdir(sourceDir);
-        for (const fileName of files) {
-            const srcFile = `${sourceDir}/${fileName}`;
-            const destFile = `${destDir}/${fileName}`;
-            const srcFileStat = yield ioUtil.lstat(srcFile);
-            if (srcFileStat.isDirectory()) {
-                // Recurse
-                yield cpDirRecursive(srcFile, destFile, currentDepth, force);
-            }
-            else {
-                yield copyFile(srcFile, destFile, force);
-            }
-        }
-        // Change the mode for the newly created directory
-        yield ioUtil.chmod(destDir, (yield ioUtil.stat(sourceDir)).mode);
-    });
-}
-// Buffered file copy
-function copyFile(srcFile, destFile, force) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if ((yield ioUtil.lstat(srcFile)).isSymbolicLink()) {
-            // unlink/re-link it
-            try {
-                yield ioUtil.lstat(destFile);
-                yield ioUtil.unlink(destFile);
-            }
-            catch (e) {
-                // Try to override file permission
-                if (e.code === 'EPERM') {
-                    yield ioUtil.chmod(destFile, '0666');
-                    yield ioUtil.unlink(destFile);
-                }
-                // other errors = it doesn't exist, no work to do
-            }
-            // Copy over symlink
-            const symlinkFull = yield ioUtil.readlink(srcFile);
-            yield ioUtil.symlink(symlinkFull, destFile, ioUtil.IS_WINDOWS ? 'junction' : null);
-        }
-        else if (!(yield ioUtil.exists(destFile)) || force) {
-            yield ioUtil.copyFile(srcFile, destFile);
-        }
-    });
-}
-//# sourceMappingURL=io.js.map
+const fetchIamToken = async (
+  apiKey, apiEmail, apiPassword, apiTenantId,
+) => new Promise((resolve, reject) => {
+  const loginBody = {
+    email: apiEmail,
+    password: apiPassword,
+    tenantId: apiTenantId,
+    returnSecureToken: true,
+  };
+  const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
+  request({
+    uri: url,
+    method: 'POST',
+    headers: {
+      'Content-type': 'application/json',
+    },
+    body: loginBody,
+    json: true,
+  }, (error, res, body) => {
+    if (!error && res.statusCode === 200) {
+      resolve(body.idToken);
+    }
+    reject(new Error(body));
+  });
+});
+
+module.exports = fetchIamToken;
+
 
 /***/ }),
 /* 200 */
@@ -25094,7 +25657,7 @@ function copyFile(srcFile, destFile, force) {
 if (typeof process === 'undefined' || process.type === 'renderer' || process.browser === true || process.__nwjs) {
 	module.exports = __webpack_require__(582);
 } else {
-	module.exports = __webpack_require__(621);
+	module.exports = __webpack_require__(104);
 }
 
 
@@ -25125,7 +25688,7 @@ module.exports = checkEnv;
 var URI = __webpack_require__(630)
   , equal = __webpack_require__(690)
   , util = __webpack_require__(254)
-  , SchemaObject = __webpack_require__(344)
+  , SchemaObject = __webpack_require__(840)
   , traverse = __webpack_require__(718);
 
 module.exports = resolve;
@@ -25744,48 +26307,31 @@ module.exports = function httpAdapter(config) {
 
 /***/ }),
 /* 208 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports) {
 
 "use strict";
 
-
-
-var loader = __webpack_require__(361);
-var dumper = __webpack_require__(580);
-
-
-function deprecated(name) {
-  return function () {
-    throw new Error('Function ' + name + ' is deprecated and cannot be used.');
-  };
+Object.defineProperty(exports, "__esModule", { value: true });
+function read(path, settings) {
+    const lstat = settings.fs.lstatSync(path);
+    if (!lstat.isSymbolicLink() || !settings.followSymbolicLink) {
+        return lstat;
+    }
+    try {
+        const stat = settings.fs.statSync(path);
+        if (settings.markSymbolicLink) {
+            stat.isSymbolicLink = () => true;
+        }
+        return stat;
+    }
+    catch (error) {
+        if (!settings.throwErrorOnBrokenSymbolicLink) {
+            return lstat;
+        }
+        throw error;
+    }
 }
-
-
-module.exports.Type                = __webpack_require__(741);
-module.exports.Schema              = __webpack_require__(449);
-module.exports.FAILSAFE_SCHEMA     = __webpack_require__(118);
-module.exports.JSON_SCHEMA         = __webpack_require__(971);
-module.exports.CORE_SCHEMA         = __webpack_require__(176);
-module.exports.DEFAULT_SAFE_SCHEMA = __webpack_require__(301);
-module.exports.DEFAULT_FULL_SCHEMA = __webpack_require__(227);
-module.exports.load                = loader.load;
-module.exports.loadAll             = loader.loadAll;
-module.exports.safeLoad            = loader.safeLoad;
-module.exports.safeLoadAll         = loader.safeLoadAll;
-module.exports.dump                = dumper.dump;
-module.exports.safeDump            = dumper.safeDump;
-module.exports.YAMLException       = __webpack_require__(430);
-
-// Deprecated schema names from JS-YAML 2.0.x
-module.exports.MINIMAL_SCHEMA = __webpack_require__(118);
-module.exports.SAFE_SCHEMA    = __webpack_require__(301);
-module.exports.DEFAULT_SCHEMA = __webpack_require__(227);
-
-// Deprecated functions from JS-YAML 1.x.x
-module.exports.scan           = deprecated('scan');
-module.exports.parse          = deprecated('parse');
-module.exports.compose        = deprecated('compose');
-module.exports.addConstructor = deprecated('addConstructor');
+exports.read = read;
 
 
 /***/ }),
@@ -25801,7 +26347,7 @@ var https = __webpack_require__(211);
 var parseUrl = __webpack_require__(835).parse;
 var fs = __webpack_require__(747);
 var mime = __webpack_require__(717);
-var asynckit = __webpack_require__(946);
+var asynckit = __webpack_require__(490);
 var populate = __webpack_require__(478);
 
 // Public API
@@ -26260,41 +26806,526 @@ module.exports = require("https");
 
 /***/ }),
 /* 212 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
 
 
-module.exports = BranchDeletion;
+const path = __webpack_require__(622);
+const scan = __webpack_require__(109);
+const parse = __webpack_require__(112);
+const utils = __webpack_require__(839);
+const constants = __webpack_require__(387);
+const isObject = val => val && typeof val === 'object' && !Array.isArray(val);
 
-function BranchDeletion (branch, hash) {
-   this.branch = branch;
-   this.hash = hash;
-   this.success = hash !== null;
-}
+/**
+ * Creates a matcher function from one or more glob patterns. The
+ * returned function takes a string to match as its first argument,
+ * and returns true if the string is a match. The returned matcher
+ * function also takes a boolean as the second argument that, when true,
+ * returns an object with additional information.
+ *
+ * ```js
+ * const picomatch = require('picomatch');
+ * // picomatch(glob[, options]);
+ *
+ * const isMatch = picomatch('*.!(*a)');
+ * console.log(isMatch('a.a')); //=> false
+ * console.log(isMatch('a.b')); //=> true
+ * ```
+ * @name picomatch
+ * @param {String|Array} `globs` One or more glob patterns.
+ * @param {Object=} `options`
+ * @return {Function=} Returns a matcher function.
+ * @api public
+ */
 
-BranchDeletion.deleteSuccessRegex = /(\S+)\s+\(\S+\s([^\)]+)\)/;
-BranchDeletion.deleteErrorRegex = /^error[^']+'([^']+)'/;
+const picomatch = (glob, options, returnState = false) => {
+  if (Array.isArray(glob)) {
+    const fns = glob.map(input => picomatch(input, options, returnState));
+    const arrayMatcher = str => {
+      for (const isMatch of fns) {
+        const state = isMatch(str);
+        if (state) return state;
+      }
+      return false;
+    };
+    return arrayMatcher;
+  }
 
-BranchDeletion.parse = function (data, asArray) {
-   var result;
-   var branchDeletions = data.trim().split('\n').map(function (line) {
-         if (result = BranchDeletion.deleteSuccessRegex.exec(line)) {
-            return new BranchDeletion(result[1], result[2]);
-         }
-         else if (result = BranchDeletion.deleteErrorRegex.exec(line)) {
-            return new BranchDeletion(result[1], null);
-         }
-      })
-      .filter(Boolean);
+  const isState = isObject(glob) && glob.tokens && glob.input;
 
-   return asArray ? branchDeletions : branchDeletions.pop();
+  if (glob === '' || (typeof glob !== 'string' && !isState)) {
+    throw new TypeError('Expected pattern to be a non-empty string');
+  }
+
+  const opts = options || {};
+  const posix = utils.isWindows(options);
+  const regex = isState
+    ? picomatch.compileRe(glob, options)
+    : picomatch.makeRe(glob, options, false, true);
+
+  const state = regex.state;
+  delete regex.state;
+
+  let isIgnored = () => false;
+  if (opts.ignore) {
+    const ignoreOpts = { ...options, ignore: null, onMatch: null, onResult: null };
+    isIgnored = picomatch(opts.ignore, ignoreOpts, returnState);
+  }
+
+  const matcher = (input, returnObject = false) => {
+    const { isMatch, match, output } = picomatch.test(input, regex, options, { glob, posix });
+    const result = { glob, state, regex, posix, input, output, match, isMatch };
+
+    if (typeof opts.onResult === 'function') {
+      opts.onResult(result);
+    }
+
+    if (isMatch === false) {
+      result.isMatch = false;
+      return returnObject ? result : false;
+    }
+
+    if (isIgnored(input)) {
+      if (typeof opts.onIgnore === 'function') {
+        opts.onIgnore(result);
+      }
+      result.isMatch = false;
+      return returnObject ? result : false;
+    }
+
+    if (typeof opts.onMatch === 'function') {
+      opts.onMatch(result);
+    }
+    return returnObject ? result : true;
+  };
+
+  if (returnState) {
+    matcher.state = state;
+  }
+
+  return matcher;
 };
+
+/**
+ * Test `input` with the given `regex`. This is used by the main
+ * `picomatch()` function to test the input string.
+ *
+ * ```js
+ * const picomatch = require('picomatch');
+ * // picomatch.test(input, regex[, options]);
+ *
+ * console.log(picomatch.test('foo/bar', /^(?:([^/]*?)\/([^/]*?))$/));
+ * // { isMatch: true, match: [ 'foo/', 'foo', 'bar' ], output: 'foo/bar' }
+ * ```
+ * @param {String} `input` String to test.
+ * @param {RegExp} `regex`
+ * @return {Object} Returns an object with matching info.
+ * @api public
+ */
+
+picomatch.test = (input, regex, options, { glob, posix } = {}) => {
+  if (typeof input !== 'string') {
+    throw new TypeError('Expected input to be a string');
+  }
+
+  if (input === '') {
+    return { isMatch: false, output: '' };
+  }
+
+  const opts = options || {};
+  const format = opts.format || (posix ? utils.toPosixSlashes : null);
+  let match = input === glob;
+  let output = (match && format) ? format(input) : input;
+
+  if (match === false) {
+    output = format ? format(input) : input;
+    match = output === glob;
+  }
+
+  if (match === false || opts.capture === true) {
+    if (opts.matchBase === true || opts.basename === true) {
+      match = picomatch.matchBase(input, regex, options, posix);
+    } else {
+      match = regex.exec(output);
+    }
+  }
+
+  return { isMatch: Boolean(match), match, output };
+};
+
+/**
+ * Match the basename of a filepath.
+ *
+ * ```js
+ * const picomatch = require('picomatch');
+ * // picomatch.matchBase(input, glob[, options]);
+ * console.log(picomatch.matchBase('foo/bar.js', '*.js'); // true
+ * ```
+ * @param {String} `input` String to test.
+ * @param {RegExp|String} `glob` Glob pattern or regex created by [.makeRe](#makeRe).
+ * @return {Boolean}
+ * @api public
+ */
+
+picomatch.matchBase = (input, glob, options, posix = utils.isWindows(options)) => {
+  const regex = glob instanceof RegExp ? glob : picomatch.makeRe(glob, options);
+  return regex.test(path.basename(input));
+};
+
+/**
+ * Returns true if **any** of the given glob `patterns` match the specified `string`.
+ *
+ * ```js
+ * const picomatch = require('picomatch');
+ * // picomatch.isMatch(string, patterns[, options]);
+ *
+ * console.log(picomatch.isMatch('a.a', ['b.*', '*.a'])); //=> true
+ * console.log(picomatch.isMatch('a.a', 'b.*')); //=> false
+ * ```
+ * @param {String|Array} str The string to test.
+ * @param {String|Array} patterns One or more glob patterns to use for matching.
+ * @param {Object} [options] See available [options](#options).
+ * @return {Boolean} Returns true if any patterns match `str`
+ * @api public
+ */
+
+picomatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
+
+/**
+ * Parse a glob pattern to create the source string for a regular
+ * expression.
+ *
+ * ```js
+ * const picomatch = require('picomatch');
+ * const result = picomatch.parse(pattern[, options]);
+ * ```
+ * @param {String} `pattern`
+ * @param {Object} `options`
+ * @return {Object} Returns an object with useful properties and output to be used as a regex source string.
+ * @api public
+ */
+
+picomatch.parse = (pattern, options) => {
+  if (Array.isArray(pattern)) return pattern.map(p => picomatch.parse(p, options));
+  return parse(pattern, { ...options, fastpaths: false });
+};
+
+/**
+ * Scan a glob pattern to separate the pattern into segments.
+ *
+ * ```js
+ * const picomatch = require('picomatch');
+ * // picomatch.scan(input[, options]);
+ *
+ * const result = picomatch.scan('!./foo/*.js');
+ * console.log(result);
+ * { prefix: '!./',
+ *   input: '!./foo/*.js',
+ *   start: 3,
+ *   base: 'foo',
+ *   glob: '*.js',
+ *   isBrace: false,
+ *   isBracket: false,
+ *   isGlob: true,
+ *   isExtglob: false,
+ *   isGlobstar: false,
+ *   negated: true }
+ * ```
+ * @param {String} `input` Glob pattern to scan.
+ * @param {Object} `options`
+ * @return {Object} Returns an object with
+ * @api public
+ */
+
+picomatch.scan = (input, options) => scan(input, options);
+
+/**
+ * Create a regular expression from a parsed glob pattern.
+ *
+ * ```js
+ * const picomatch = require('picomatch');
+ * const state = picomatch.parse('*.js');
+ * // picomatch.compileRe(state[, options]);
+ *
+ * console.log(picomatch.compileRe(state));
+ * //=> /^(?:(?!\.)(?=.)[^/]*?\.js)$/
+ * ```
+ * @param {String} `state` The object returned from the `.parse` method.
+ * @param {Object} `options`
+ * @return {RegExp} Returns a regex created from the given pattern.
+ * @api public
+ */
+
+picomatch.compileRe = (parsed, options, returnOutput = false, returnState = false) => {
+  if (returnOutput === true) {
+    return parsed.output;
+  }
+
+  const opts = options || {};
+  const prepend = opts.contains ? '' : '^';
+  const append = opts.contains ? '' : '$';
+
+  let source = `${prepend}(?:${parsed.output})${append}`;
+  if (parsed && parsed.negated === true) {
+    source = `^(?!${source}).*$`;
+  }
+
+  const regex = picomatch.toRegex(source, options);
+  if (returnState === true) {
+    regex.state = parsed;
+  }
+
+  return regex;
+};
+
+picomatch.makeRe = (input, options, returnOutput = false, returnState = false) => {
+  if (!input || typeof input !== 'string') {
+    throw new TypeError('Expected a non-empty string');
+  }
+
+  const opts = options || {};
+  let parsed = { negated: false, fastpaths: true };
+  let prefix = '';
+  let output;
+
+  if (input.startsWith('./')) {
+    input = input.slice(2);
+    prefix = parsed.prefix = './';
+  }
+
+  if (opts.fastpaths !== false && (input[0] === '.' || input[0] === '*')) {
+    output = parse.fastpaths(input, options);
+  }
+
+  if (output === undefined) {
+    parsed = parse(input, options);
+    parsed.prefix = prefix + (parsed.prefix || '');
+  } else {
+    parsed.output = output;
+  }
+
+  return picomatch.compileRe(parsed, options, returnOutput, returnState);
+};
+
+/**
+ * Create a regular expression from the given regex source string.
+ *
+ * ```js
+ * const picomatch = require('picomatch');
+ * // picomatch.toRegex(source[, options]);
+ *
+ * const { output } = picomatch.parse('*.js');
+ * console.log(picomatch.toRegex(output));
+ * //=> /^(?:(?!\.)(?=.)[^/]*?\.js)$/
+ * ```
+ * @param {String} `source` Regular expression source string.
+ * @param {Object} `options`
+ * @return {RegExp}
+ * @api public
+ */
+
+picomatch.toRegex = (source, options) => {
+  try {
+    const opts = options || {};
+    return new RegExp(source, opts.flags || (opts.nocase ? 'i' : ''));
+  } catch (err) {
+    if (options && options.debug === true) throw err;
+    return /$^/;
+  }
+};
+
+/**
+ * Picomatch constants.
+ * @return {Object}
+ */
+
+picomatch.constants = constants;
+
+/**
+ * Expose "picomatch"
+ */
+
+module.exports = picomatch;
 
 
 /***/ }),
 /* 213 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-module.exports = require("punycode");
+"use strict";
+
+
+const stringify = __webpack_require__(79);
+const compile = __webpack_require__(878);
+const expand = __webpack_require__(673);
+const parse = __webpack_require__(401);
+
+/**
+ * Expand the given pattern or create a regex-compatible string.
+ *
+ * ```js
+ * const braces = require('braces');
+ * console.log(braces('{a,b,c}', { compile: true })); //=> ['(a|b|c)']
+ * console.log(braces('{a,b,c}')); //=> ['a', 'b', 'c']
+ * ```
+ * @param {String} `str`
+ * @param {Object} `options`
+ * @return {String}
+ * @api public
+ */
+
+const braces = (input, options = {}) => {
+  let output = [];
+
+  if (Array.isArray(input)) {
+    for (let pattern of input) {
+      let result = braces.create(pattern, options);
+      if (Array.isArray(result)) {
+        output.push(...result);
+      } else {
+        output.push(result);
+      }
+    }
+  } else {
+    output = [].concat(braces.create(input, options));
+  }
+
+  if (options && options.expand === true && options.nodupes === true) {
+    output = [...new Set(output)];
+  }
+  return output;
+};
+
+/**
+ * Parse the given `str` with the given `options`.
+ *
+ * ```js
+ * // braces.parse(pattern, [, options]);
+ * const ast = braces.parse('a/{b,c}/d');
+ * console.log(ast);
+ * ```
+ * @param {String} pattern Brace pattern to parse
+ * @param {Object} options
+ * @return {Object} Returns an AST
+ * @api public
+ */
+
+braces.parse = (input, options = {}) => parse(input, options);
+
+/**
+ * Creates a braces string from an AST, or an AST node.
+ *
+ * ```js
+ * const braces = require('braces');
+ * let ast = braces.parse('foo/{a,b}/bar');
+ * console.log(stringify(ast.nodes[2])); //=> '{a,b}'
+ * ```
+ * @param {String} `input` Brace pattern or AST.
+ * @param {Object} `options`
+ * @return {Array} Returns an array of expanded values.
+ * @api public
+ */
+
+braces.stringify = (input, options = {}) => {
+  if (typeof input === 'string') {
+    return stringify(braces.parse(input, options), options);
+  }
+  return stringify(input, options);
+};
+
+/**
+ * Compiles a brace pattern into a regex-compatible, optimized string.
+ * This method is called by the main [braces](#braces) function by default.
+ *
+ * ```js
+ * const braces = require('braces');
+ * console.log(braces.compile('a/{b,c}/d'));
+ * //=> ['a/(b|c)/d']
+ * ```
+ * @param {String} `input` Brace pattern or AST.
+ * @param {Object} `options`
+ * @return {Array} Returns an array of expanded values.
+ * @api public
+ */
+
+braces.compile = (input, options = {}) => {
+  if (typeof input === 'string') {
+    input = braces.parse(input, options);
+  }
+  return compile(input, options);
+};
+
+/**
+ * Expands a brace pattern into an array. This method is called by the
+ * main [braces](#braces) function when `options.expand` is true. Before
+ * using this method it's recommended that you read the [performance notes](#performance))
+ * and advantages of using [.compile](#compile) instead.
+ *
+ * ```js
+ * const braces = require('braces');
+ * console.log(braces.expand('a/{b,c}/d'));
+ * //=> ['a/b/d', 'a/c/d'];
+ * ```
+ * @param {String} `pattern` Brace pattern
+ * @param {Object} `options`
+ * @return {Array} Returns an array of expanded values.
+ * @api public
+ */
+
+braces.expand = (input, options = {}) => {
+  if (typeof input === 'string') {
+    input = braces.parse(input, options);
+  }
+
+  let result = expand(input, options);
+
+  // filter out empty strings if specified
+  if (options.noempty === true) {
+    result = result.filter(Boolean);
+  }
+
+  // filter out duplicates if specified
+  if (options.nodupes === true) {
+    result = [...new Set(result)];
+  }
+
+  return result;
+};
+
+/**
+ * Processes a brace pattern and returns either an expanded array
+ * (if `options.expand` is true), a highly optimized regex-compatible string.
+ * This method is called by the main [braces](#braces) function.
+ *
+ * ```js
+ * const braces = require('braces');
+ * console.log(braces.create('user-{200..300}/project-{a,b,c}-{1..10}'))
+ * //=> 'user-(20[0-9]|2[1-9][0-9]|300)/project-(a|b|c)-([1-9]|10)'
+ * ```
+ * @param {String} `pattern` Brace pattern
+ * @param {Object} `options`
+ * @return {Array} Returns an array of expanded values.
+ * @api public
+ */
+
+braces.create = (input, options = {}) => {
+  if (input === '' || input.length < 3) {
+    return [input];
+  }
+
+ return options.expand !== true
+    ? braces.compile(input, options)
+    : braces.expand(input, options);
+};
+
+/**
+ * Expose "braces"
+ */
+
+module.exports = braces;
+
 
 /***/ }),
 /* 214 */
@@ -26652,8 +27683,8 @@ const os = __webpack_require__(87);
 const path = __webpack_require__(622);
 const fs = __webpack_require__(747);
 const core = __webpack_require__(804);
-const exec = __webpack_require__(376);
-const io = __webpack_require__(199);
+const exec = __webpack_require__(67);
+const io = __webpack_require__(553);
 const { v4: uuidv4 } = __webpack_require__(455);
 const { loadTool } = __webpack_require__(320);
 const createKeyFile = __webpack_require__(267);
@@ -26752,7 +27783,54 @@ function defer(fn)
 
 
 /***/ }),
-/* 221 */,
+/* 221 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+var isGlob = __webpack_require__(370);
+var pathPosixDirname = __webpack_require__(622).posix.dirname;
+var isWin32 = __webpack_require__(87).platform() === 'win32';
+
+var slash = '/';
+var backslash = /\\/g;
+var enclosure = /[\{\[].*[\/]*.*[\}\]]$/;
+var globby = /(^|[^\\])([\{\[]|\([^\)]+$)/;
+var escaped = /\\([\!\*\?\|\[\]\(\)\{\}])/g;
+
+/**
+ * @param {string} str
+ * @param {Object} opts
+ * @param {boolean} [opts.flipBackslashes=true]
+ */
+module.exports = function globParent(str, opts) {
+  var options = Object.assign({ flipBackslashes: true }, opts);
+
+  // flip windows path separators
+  if (options.flipBackslashes && isWin32 && str.indexOf(slash) < 0) {
+    str = str.replace(backslash, slash);
+  }
+
+  // special case for strings ending in enclosure containing path separator
+  if (enclosure.test(str)) {
+    str += slash;
+  }
+
+  // preserves full path in case of trailing path separator
+  str += 'a';
+
+  // remove path parts that are globby
+  do {
+    str = pathPosixDirname(str);
+  } while (isGlob(str) || globby.test(str));
+
+  // remove escape chars and return result
+  return str.replace(escaped, '$1');
+};
+
+
+/***/ }),
 /* 222 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -26764,7 +27842,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _Alias = _interopRequireDefault(__webpack_require__(697));
+var _Alias = _interopRequireDefault(__webpack_require__(358));
 
 var _Map = _interopRequireDefault(__webpack_require__(378));
 
@@ -27095,11 +28173,11 @@ SafeBuffer.allocUnsafeSlow = function (size) {
  *   ... -- For future extensions
  * }
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(535);
 __webpack_require__(709);
 __webpack_require__(930);
-__webpack_require__(618);
+__webpack_require__(636);
 __webpack_require__(395);
 __webpack_require__(845);
 __webpack_require__(821);
@@ -28155,7 +29233,7 @@ exports.strOptions = strOptions;
 
 var wrappy = __webpack_require__(559)
 var reqs = Object.create(null)
-var once = __webpack_require__(174)
+var once = __webpack_require__(917)
 
 module.exports = wrappy(inflight)
 
@@ -28211,7 +29289,30 @@ function slice (args) {
 
 /***/ }),
 /* 230 */,
-/* 231 */,
+/* 231 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.merge = void 0;
+const merge2 = __webpack_require__(29);
+function merge(streams) {
+    const mergedStream = merge2(streams);
+    streams.forEach((stream) => {
+        stream.once('error', (error) => mergedStream.emit('error', error));
+    });
+    mergedStream.once('close', () => propagateCloseEventToSources(streams));
+    mergedStream.once('end', () => propagateCloseEventToSources(streams));
+    return mergedStream;
+}
+exports.merge = merge;
+function propagateCloseEventToSources(streams) {
+    streams.forEach((stream) => stream.emit('close'));
+}
+
+
+/***/ }),
 /* 232 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -28507,7 +29608,7 @@ exports.default = void 0;
 
 var _constants = __webpack_require__(460);
 
-var _sourceUtils = __webpack_require__(673);
+var _sourceUtils = __webpack_require__(174);
 
 var _Range = _interopRequireDefault(__webpack_require__(415));
 
@@ -29122,98 +30223,48 @@ exports.IdTokenClient = IdTokenClient;
 //# sourceMappingURL=idtokenclient.js.map
 
 /***/ }),
-/* 237 */,
-/* 238 */
+/* 237 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-// Copyright 2016 Joyent, Inc.
+"use strict";
 
-var x509 = __webpack_require__(904);
 
-module.exports = {
-	read: read,
-	verify: x509.verify,
-	sign: x509.sign,
-	write: write
+var enhanceError = __webpack_require__(728);
+
+/**
+ * Create an Error with the specified message, config, error code, request and response.
+ *
+ * @param {string} message The error message.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The created error.
+ */
+module.exports = function createError(message, config, code, request, response) {
+  var error = new Error(message);
+  return enhanceError(error, config, code, request, response);
 };
 
-var assert = __webpack_require__(552);
-var asn1 = __webpack_require__(784);
-var Buffer = __webpack_require__(299).Buffer;
-var algs = __webpack_require__(151);
-var utils = __webpack_require__(241);
-var Key = __webpack_require__(463);
-var PrivateKey = __webpack_require__(877);
-var pem = __webpack_require__(298);
-var Identity = __webpack_require__(359);
-var Signature = __webpack_require__(885);
-var Certificate = __webpack_require__(89);
 
-function read(buf, options) {
-	if (typeof (buf) !== 'string') {
-		assert.buffer(buf, 'buf');
-		buf = buf.toString('ascii');
-	}
+/***/ }),
+/* 238 */
+/***/ (function(__unusedmodule, exports) {
 
-	var lines = buf.trim().split(/[\r\n]+/g);
+"use strict";
 
-	var m;
-	var si = -1;
-	while (!m && si < lines.length) {
-		m = lines[++si].match(/*JSSTYLED*/
-		    /[-]+[ ]*BEGIN CERTIFICATE[ ]*[-]+/);
-	}
-	assert.ok(m, 'invalid PEM header');
-
-	var m2;
-	var ei = lines.length;
-	while (!m2 && ei > 0) {
-		m2 = lines[--ei].match(/*JSSTYLED*/
-		    /[-]+[ ]*END CERTIFICATE[ ]*[-]+/);
-	}
-	assert.ok(m2, 'invalid PEM footer');
-
-	lines = lines.slice(si, ei + 1);
-
-	var headers = {};
-	while (true) {
-		lines = lines.slice(1);
-		m = lines[0].match(/*JSSTYLED*/
-		    /^([A-Za-z0-9-]+): (.+)$/);
-		if (!m)
-			break;
-		headers[m[1].toLowerCase()] = m[2];
-	}
-
-	/* Chop off the first and last lines */
-	lines = lines.slice(0, -1).join('');
-	buf = Buffer.from(lines, 'base64');
-
-	return (x509.read(buf, options));
-}
-
-function write(cert, options) {
-	var dbuf = x509.write(cert, options);
-
-	var header = 'CERTIFICATE';
-	var tmp = dbuf.toString('base64');
-	var len = tmp.length + (tmp.length / 64) +
-	    18 + 16 + header.length*2 + 10;
-	var buf = Buffer.alloc(len);
-	var o = 0;
-	o += buf.write('-----BEGIN ' + header + '-----\n', o);
-	for (var i = 0; i < tmp.length; ) {
-		var limit = i + 64;
-		if (limit > tmp.length)
-			limit = tmp.length;
-		o += buf.write(tmp.slice(i, limit), o);
-		buf[o++] = 10;
-		i = limit;
-	}
-	o += buf.write('-----END ' + header + '-----\n', o);
-
-	return (buf.slice(0, o));
-}
+Object.defineProperty(exports, "__esModule", { value: true });
+const NODE_PROCESS_VERSION_PARTS = process.versions.node.split('.');
+const MAJOR_VERSION = parseInt(NODE_PROCESS_VERSION_PARTS[0], 10);
+const MINOR_VERSION = parseInt(NODE_PROCESS_VERSION_PARTS[1], 10);
+const SUPPORTED_MAJOR_VERSION = 10;
+const SUPPORTED_MINOR_VERSION = 10;
+const IS_MATCHED_BY_MAJOR = MAJOR_VERSION > SUPPORTED_MAJOR_VERSION;
+const IS_MATCHED_BY_MAJOR_AND_MINOR = MAJOR_VERSION === SUPPORTED_MAJOR_VERSION && MINOR_VERSION >= SUPPORTED_MINOR_VERSION;
+/**
+ * IS `true` for Node.js 10.10 and greater.
+ */
+exports.IS_SUPPORT_READDIR_WITH_FILE_TYPES = IS_MATCHED_BY_MAJOR || IS_MATCHED_BY_MAJOR_AND_MINOR;
 
 
 /***/ }),
@@ -29254,9 +30305,9 @@ var assert = __webpack_require__(552);
 var Buffer = __webpack_require__(299).Buffer;
 var PrivateKey = __webpack_require__(877);
 var Key = __webpack_require__(463);
-var crypto = __webpack_require__(417);
+var crypto = __webpack_require__(373);
 var algs = __webpack_require__(151);
-var asn1 = __webpack_require__(784);
+var asn1 = __webpack_require__(440);
 
 var ec = __webpack_require__(44);
 var jsbn = __webpack_require__(113).BigInteger;
@@ -29716,7 +30767,7 @@ module.exports = function (data, opts) {
  *
  * Copyright (c) 2014-2015 Digital Bazaar, Inc.
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(891);
 __webpack_require__(294);
 
@@ -30284,7 +31335,27 @@ module.exports = function toString(obj) {
 
 
 /***/ }),
-/* 246 */,
+/* 246 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const sync_1 = __webpack_require__(998);
+class SyncProvider {
+    constructor(_root, _settings) {
+        this._root = _root;
+        this._settings = _settings;
+        this._reader = new sync_1.default(this._root, this._settings);
+    }
+    read() {
+        return this._reader.read();
+    }
+}
+exports.default = SyncProvider;
+
+
+/***/ }),
 /* 247 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -30381,7 +31452,7 @@ function descending(a, b)
  * Copyright (c) 2014 Lautaro Cozzani <lautaro.cozzani@scytl.com>
  * Copyright (c) 2014 Digital Bazaar, Inc.
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(294);
 __webpack_require__(845);
 __webpack_require__(924);
@@ -30813,7 +31884,7 @@ function unescapeJsonPointer(str) {
 Object.defineProperty(exports, "__esModule", { value: true });
 // This file implements crypto functions we need using in-browser
 // SubtleCrypto interface `window.crypto.subtle`.
-const base64js = __webpack_require__(10);
+const base64js = __webpack_require__(735);
 // Not all browsers support `TextEncoder`. The following `require` will
 // provide a fast UTF8-only replacement for those browsers that don't support
 // text encoding natively.
@@ -32900,7 +33971,29 @@ exports.Auth = Auth
 /* 277 */,
 /* 278 */,
 /* 279 */,
-/* 280 */,
+/* 280 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs = __webpack_require__(758);
+class Settings {
+    constructor(_options = {}) {
+        this._options = _options;
+        this.followSymbolicLink = this._getValue(this._options.followSymbolicLink, true);
+        this.fs = fs.createFileSystemAdapter(this._options.fs);
+        this.markSymbolicLink = this._getValue(this._options.markSymbolicLink, false);
+        this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
+    }
+    _getValue(option, value) {
+        return option === undefined ? value : option;
+    }
+}
+exports.default = Settings;
+
+
+/***/ }),
 /* 281 */,
 /* 282 */,
 /* 283 */
@@ -33093,9 +34186,9 @@ module.exports = {
   maxProperties: __webpack_require__(652),
   minProperties: __webpack_require__(652),
   multipleOf: __webpack_require__(216),
-  not: __webpack_require__(495),
+  not: __webpack_require__(120),
   oneOf: __webpack_require__(563),
-  pattern: __webpack_require__(542),
+  pattern: __webpack_require__(829),
   properties: __webpack_require__(505),
   propertyNames: __webpack_require__(572),
   required: __webpack_require__(850),
@@ -33152,31 +34245,302 @@ exports.auth = auth;
 //# sourceMappingURL=index.js.map
 
 /***/ }),
-/* 288 */,
-/* 289 */
-/***/ (function(__unusedmodule, exports) {
+/* 288 */
+/***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
+/**
+ * Module dependencies.
+ */
 
+var tty = __webpack_require__(867);
+var util = __webpack_require__(669);
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.addCommentBefore = addCommentBefore;
-exports.default = addComment;
+/**
+ * This is the Node.js implementation of `debug()`.
+ *
+ * Expose `debug()` as the module.
+ */
 
-function addCommentBefore(str, indent, comment) {
-  if (!comment) return str;
-  const cc = comment.replace(/[\s\S]^/gm, `$&${indent}#`);
-  return `#${cc}\n${indent}${str}`;
+exports = module.exports = __webpack_require__(656);
+exports.init = init;
+exports.log = log;
+exports.formatArgs = formatArgs;
+exports.save = save;
+exports.load = load;
+exports.useColors = useColors;
+
+/**
+ * Colors.
+ */
+
+exports.colors = [ 6, 2, 3, 4, 5, 1 ];
+
+try {
+  var supportsColor = __webpack_require__(130);
+  if (supportsColor && supportsColor.level >= 2) {
+    exports.colors = [
+      20, 21, 26, 27, 32, 33, 38, 39, 40, 41, 42, 43, 44, 45, 56, 57, 62, 63, 68,
+      69, 74, 75, 76, 77, 78, 79, 80, 81, 92, 93, 98, 99, 112, 113, 128, 129, 134,
+      135, 148, 149, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171,
+      172, 173, 178, 179, 184, 185, 196, 197, 198, 199, 200, 201, 202, 203, 204,
+      205, 206, 207, 208, 209, 214, 215, 220, 221
+    ];
+  }
+} catch (err) {
+  // swallow - we only care if `supports-color` is available; it doesn't have to be.
 }
 
-function addComment(str, indent, comment) {
-  return !comment ? str : comment.indexOf('\n') === -1 ? `${str} #${comment}` : `${str}\n` + comment.replace(/^/gm, `${indent || ''}#`);
+/**
+ * Build up the default `inspectOpts` object from the environment variables.
+ *
+ *   $ DEBUG_COLORS=no DEBUG_DEPTH=10 DEBUG_SHOW_HIDDEN=enabled node script.js
+ */
+
+exports.inspectOpts = Object.keys(process.env).filter(function (key) {
+  return /^debug_/i.test(key);
+}).reduce(function (obj, key) {
+  // camel-case
+  var prop = key
+    .substring(6)
+    .toLowerCase()
+    .replace(/_([a-z])/g, function (_, k) { return k.toUpperCase() });
+
+  // coerce string value into JS value
+  var val = process.env[key];
+  if (/^(yes|on|true|enabled)$/i.test(val)) val = true;
+  else if (/^(no|off|false|disabled)$/i.test(val)) val = false;
+  else if (val === 'null') val = null;
+  else val = Number(val);
+
+  obj[prop] = val;
+  return obj;
+}, {});
+
+/**
+ * Is stdout a TTY? Colored output is enabled when `true`.
+ */
+
+function useColors() {
+  return 'colors' in exports.inspectOpts
+    ? Boolean(exports.inspectOpts.colors)
+    : tty.isatty(process.stderr.fd);
 }
+
+/**
+ * Map %o to `util.inspect()`, all on a single line.
+ */
+
+exports.formatters.o = function(v) {
+  this.inspectOpts.colors = this.useColors;
+  return util.inspect(v, this.inspectOpts)
+    .split('\n').map(function(str) {
+      return str.trim()
+    }).join(' ');
+};
+
+/**
+ * Map %o to `util.inspect()`, allowing multiple lines if needed.
+ */
+
+exports.formatters.O = function(v) {
+  this.inspectOpts.colors = this.useColors;
+  return util.inspect(v, this.inspectOpts);
+};
+
+/**
+ * Adds ANSI color escape codes if enabled.
+ *
+ * @api public
+ */
+
+function formatArgs(args) {
+  var name = this.namespace;
+  var useColors = this.useColors;
+
+  if (useColors) {
+    var c = this.color;
+    var colorCode = '\u001b[3' + (c < 8 ? c : '8;5;' + c);
+    var prefix = '  ' + colorCode + ';1m' + name + ' ' + '\u001b[0m';
+
+    args[0] = prefix + args[0].split('\n').join('\n' + prefix);
+    args.push(colorCode + 'm+' + exports.humanize(this.diff) + '\u001b[0m');
+  } else {
+    args[0] = getDate() + name + ' ' + args[0];
+  }
+}
+
+function getDate() {
+  if (exports.inspectOpts.hideDate) {
+    return '';
+  } else {
+    return new Date().toISOString() + ' ';
+  }
+}
+
+/**
+ * Invokes `util.format()` with the specified arguments and writes to stderr.
+ */
+
+function log() {
+  return process.stderr.write(util.format.apply(util, arguments) + '\n');
+}
+
+/**
+ * Save `namespaces`.
+ *
+ * @param {String} namespaces
+ * @api private
+ */
+
+function save(namespaces) {
+  if (null == namespaces) {
+    // If you set a process.env field to null or undefined, it gets cast to the
+    // string 'null' or 'undefined'. Just delete instead.
+    delete process.env.DEBUG;
+  } else {
+    process.env.DEBUG = namespaces;
+  }
+}
+
+/**
+ * Load `namespaces`.
+ *
+ * @return {String} returns the previously persisted debug modes
+ * @api private
+ */
+
+function load() {
+  return process.env.DEBUG;
+}
+
+/**
+ * Init logic for `debug` instances.
+ *
+ * Create a new `inspectOpts` object in case `useColors` is set
+ * differently for a particular `debug` instance.
+ */
+
+function init (debug) {
+  debug.inspectOpts = {};
+
+  var keys = Object.keys(exports.inspectOpts);
+  for (var i = 0; i < keys.length; i++) {
+    debug.inspectOpts[keys[i]] = exports.inspectOpts[keys[i]];
+  }
+}
+
+/**
+ * Enable namespaces listed in `process.env.DEBUG` initially.
+ */
+
+exports.enable(load());
+
 
 /***/ }),
-/* 290 */,
+/* 289 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+// Copyright 2015 Joyent, Inc.
+
+module.exports = {
+	Verifier: Verifier,
+	Signer: Signer
+};
+
+var nacl = __webpack_require__(701);
+var stream = __webpack_require__(413);
+var util = __webpack_require__(669);
+var assert = __webpack_require__(552);
+var Buffer = __webpack_require__(299).Buffer;
+var Signature = __webpack_require__(885);
+
+function Verifier(key, hashAlgo) {
+	if (hashAlgo.toLowerCase() !== 'sha512')
+		throw (new Error('ED25519 only supports the use of ' +
+		    'SHA-512 hashes'));
+
+	this.key = key;
+	this.chunks = [];
+
+	stream.Writable.call(this, {});
+}
+util.inherits(Verifier, stream.Writable);
+
+Verifier.prototype._write = function (chunk, enc, cb) {
+	this.chunks.push(chunk);
+	cb();
+};
+
+Verifier.prototype.update = function (chunk) {
+	if (typeof (chunk) === 'string')
+		chunk = Buffer.from(chunk, 'binary');
+	this.chunks.push(chunk);
+};
+
+Verifier.prototype.verify = function (signature, fmt) {
+	var sig;
+	if (Signature.isSignature(signature, [2, 0])) {
+		if (signature.type !== 'ed25519')
+			return (false);
+		sig = signature.toBuffer('raw');
+
+	} else if (typeof (signature) === 'string') {
+		sig = Buffer.from(signature, 'base64');
+
+	} else if (Signature.isSignature(signature, [1, 0])) {
+		throw (new Error('signature was created by too old ' +
+		    'a version of sshpk and cannot be verified'));
+	}
+
+	assert.buffer(sig);
+	return (nacl.sign.detached.verify(
+	    new Uint8Array(Buffer.concat(this.chunks)),
+	    new Uint8Array(sig),
+	    new Uint8Array(this.key.part.A.data)));
+};
+
+function Signer(key, hashAlgo) {
+	if (hashAlgo.toLowerCase() !== 'sha512')
+		throw (new Error('ED25519 only supports the use of ' +
+		    'SHA-512 hashes'));
+
+	this.key = key;
+	this.chunks = [];
+
+	stream.Writable.call(this, {});
+}
+util.inherits(Signer, stream.Writable);
+
+Signer.prototype._write = function (chunk, enc, cb) {
+	this.chunks.push(chunk);
+	cb();
+};
+
+Signer.prototype.update = function (chunk) {
+	if (typeof (chunk) === 'string')
+		chunk = Buffer.from(chunk, 'binary');
+	this.chunks.push(chunk);
+};
+
+Signer.prototype.sign = function () {
+	var sig = nacl.sign.detached(
+	    new Uint8Array(Buffer.concat(this.chunks)),
+	    new Uint8Array(Buffer.concat([
+		this.key.part.k.data, this.key.part.A.data])));
+	var sigBuf = Buffer.from(sig);
+	var sigObj = Signature.parse(sigBuf, 'ed25519', 'raw');
+	sigObj.hashAlgorithm = 'sha512';
+	return (sigObj);
+};
+
+
+/***/ }),
+/* 290 */
+/***/ (function(module) {
+
+module.exports = {"$id":"content.json#","$schema":"http://json-schema.org/draft-06/schema#","type":"object","required":["size","mimeType"],"properties":{"size":{"type":"integer"},"compression":{"type":"integer"},"mimeType":{"type":"string"},"text":{"type":"string"},"encoding":{"type":"string"},"comment":{"type":"string"}}};
+
+/***/ }),
 /* 291 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -33501,8 +34865,8 @@ module.exports = require("buffer");
  *
  * Copyright (c) 2010-2018 Digital Bazaar, Inc.
  */
-var forge = __webpack_require__(998);
-var baseN = __webpack_require__(387);
+var forge = __webpack_require__(45);
+var baseN = __webpack_require__(593);
 
 /* Utilities API */
 var util = module.exports = forge.util = forge.util || {};
@@ -36649,8 +38013,8 @@ module.exports = {
 };
 
 var assert = __webpack_require__(552);
-var asn1 = __webpack_require__(784);
-var crypto = __webpack_require__(417);
+var asn1 = __webpack_require__(440);
+var crypto = __webpack_require__(373);
 var Buffer = __webpack_require__(299).Buffer;
 var algs = __webpack_require__(151);
 var utils = __webpack_require__(241);
@@ -37650,7 +39014,7 @@ module.exports = new Schema({
   explicit: [
     __webpack_require__(798),
     __webpack_require__(6),
-    __webpack_require__(40),
+    __webpack_require__(916),
     __webpack_require__(890)
   ]
 });
@@ -37658,28 +39022,99 @@ module.exports = new Schema({
 
 /***/ }),
 /* 302 */
-/***/ (function(module) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-
-/**
- * A `Cancel` is an object that is thrown when an operation is canceled.
- *
- * @class
- * @param {string=} message The message.
- */
-function Cancel(message) {
-  this.message = message;
+Object.defineProperty(exports, "__esModule", { value: true });
+const fsStat = __webpack_require__(519);
+const rpl = __webpack_require__(595);
+const constants_1 = __webpack_require__(238);
+const utils = __webpack_require__(88);
+function read(directory, settings, callback) {
+    if (!settings.stats && constants_1.IS_SUPPORT_READDIR_WITH_FILE_TYPES) {
+        return readdirWithFileTypes(directory, settings, callback);
+    }
+    return readdir(directory, settings, callback);
 }
-
-Cancel.prototype.toString = function toString() {
-  return 'Cancel' + (this.message ? ': ' + this.message : '');
-};
-
-Cancel.prototype.__CANCEL__ = true;
-
-module.exports = Cancel;
+exports.read = read;
+function readdirWithFileTypes(directory, settings, callback) {
+    settings.fs.readdir(directory, { withFileTypes: true }, (readdirError, dirents) => {
+        if (readdirError !== null) {
+            return callFailureCallback(callback, readdirError);
+        }
+        const entries = dirents.map((dirent) => ({
+            dirent,
+            name: dirent.name,
+            path: `${directory}${settings.pathSegmentSeparator}${dirent.name}`
+        }));
+        if (!settings.followSymbolicLinks) {
+            return callSuccessCallback(callback, entries);
+        }
+        const tasks = entries.map((entry) => makeRplTaskEntry(entry, settings));
+        rpl(tasks, (rplError, rplEntries) => {
+            if (rplError !== null) {
+                return callFailureCallback(callback, rplError);
+            }
+            callSuccessCallback(callback, rplEntries);
+        });
+    });
+}
+exports.readdirWithFileTypes = readdirWithFileTypes;
+function makeRplTaskEntry(entry, settings) {
+    return (done) => {
+        if (!entry.dirent.isSymbolicLink()) {
+            return done(null, entry);
+        }
+        settings.fs.stat(entry.path, (statError, stats) => {
+            if (statError !== null) {
+                if (settings.throwErrorOnBrokenSymbolicLink) {
+                    return done(statError);
+                }
+                return done(null, entry);
+            }
+            entry.dirent = utils.fs.createDirentFromStats(entry.name, stats);
+            return done(null, entry);
+        });
+    };
+}
+function readdir(directory, settings, callback) {
+    settings.fs.readdir(directory, (readdirError, names) => {
+        if (readdirError !== null) {
+            return callFailureCallback(callback, readdirError);
+        }
+        const filepaths = names.map((name) => `${directory}${settings.pathSegmentSeparator}${name}`);
+        const tasks = filepaths.map((filepath) => {
+            return (done) => fsStat.stat(filepath, settings.fsStatSettings, done);
+        });
+        rpl(tasks, (rplError, results) => {
+            if (rplError !== null) {
+                return callFailureCallback(callback, rplError);
+            }
+            const entries = [];
+            names.forEach((name, index) => {
+                const stats = results[index];
+                const entry = {
+                    name,
+                    path: filepaths[index],
+                    dirent: utils.fs.createDirentFromStats(name, stats)
+                };
+                if (settings.stats) {
+                    entry.stats = stats;
+                }
+                entries.push(entry);
+            });
+            callSuccessCallback(callback, entries);
+        });
+    });
+}
+exports.readdir = readdir;
+function callFailureCallback(callback, error) {
+    callback(error);
+}
+function callSuccessCallback(callback, result) {
+    callback(null, result);
+}
 
 
 /***/ }),
@@ -37705,7 +39140,125 @@ module.exports = run;
 
 
 /***/ }),
-/* 304 */,
+/* 304 */
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+
+exports.isInteger = num => {
+  if (typeof num === 'number') {
+    return Number.isInteger(num);
+  }
+  if (typeof num === 'string' && num.trim() !== '') {
+    return Number.isInteger(Number(num));
+  }
+  return false;
+};
+
+/**
+ * Find a node of the given type
+ */
+
+exports.find = (node, type) => node.nodes.find(node => node.type === type);
+
+/**
+ * Find a node of the given type
+ */
+
+exports.exceedsLimit = (min, max, step = 1, limit) => {
+  if (limit === false) return false;
+  if (!exports.isInteger(min) || !exports.isInteger(max)) return false;
+  return ((Number(max) - Number(min)) / Number(step)) >= limit;
+};
+
+/**
+ * Escape the given node with '\\' before node.value
+ */
+
+exports.escapeNode = (block, n = 0, type) => {
+  let node = block.nodes[n];
+  if (!node) return;
+
+  if ((type && node.type === type) || node.type === 'open' || node.type === 'close') {
+    if (node.escaped !== true) {
+      node.value = '\\' + node.value;
+      node.escaped = true;
+    }
+  }
+};
+
+/**
+ * Returns true if the given brace node should be enclosed in literal braces
+ */
+
+exports.encloseBrace = node => {
+  if (node.type !== 'brace') return false;
+  if ((node.commas >> 0 + node.ranges >> 0) === 0) {
+    node.invalid = true;
+    return true;
+  }
+  return false;
+};
+
+/**
+ * Returns true if a brace node is invalid.
+ */
+
+exports.isInvalidBrace = block => {
+  if (block.type !== 'brace') return false;
+  if (block.invalid === true || block.dollar) return true;
+  if ((block.commas >> 0 + block.ranges >> 0) === 0) {
+    block.invalid = true;
+    return true;
+  }
+  if (block.open !== true || block.close !== true) {
+    block.invalid = true;
+    return true;
+  }
+  return false;
+};
+
+/**
+ * Returns true if a node is an open or close node
+ */
+
+exports.isOpenOrClose = node => {
+  if (node.type === 'open' || node.type === 'close') {
+    return true;
+  }
+  return node.open === true || node.close === true;
+};
+
+/**
+ * Reduce an array of text nodes.
+ */
+
+exports.reduce = nodes => nodes.reduce((acc, node) => {
+  if (node.type === 'text') acc.push(node.value);
+  if (node.type === 'range') node.type = 'text';
+  return acc;
+}, []);
+
+/**
+ * Flatten an array
+ */
+
+exports.flatten = (...args) => {
+  const result = [];
+  const flat = arr => {
+    for (let i = 0; i < arr.length; i++) {
+      let ele = arr[i];
+      Array.isArray(ele) ? flat(ele, result) : ele !== void 0 && result.push(ele);
+    }
+    return result;
+  };
+  flat(args);
+  return result;
+};
+
+
+/***/ }),
 /* 305 */
 /***/ (function(module) {
 
@@ -38304,8 +39857,8 @@ function rmkidsSync (p, options) {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 var bufferEqual = __webpack_require__(470);
-var Buffer = __webpack_require__(880).Buffer;
-var crypto = __webpack_require__(417);
+var Buffer = __webpack_require__(705).Buffer;
+var crypto = __webpack_require__(373);
 var formatEcdsa = __webpack_require__(952);
 var util = __webpack_require__(669);
 
@@ -38766,7 +40319,31 @@ module.exports = {
 
 
 /***/ }),
-/* 321 */,
+/* 321 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs = __webpack_require__(747);
+exports.FILE_SYSTEM_ADAPTER = {
+    lstat: fs.lstat,
+    stat: fs.stat,
+    lstatSync: fs.lstatSync,
+    statSync: fs.statSync,
+    readdir: fs.readdir,
+    readdirSync: fs.readdirSync
+};
+function createFileSystemAdapter(fsMethods) {
+    if (fsMethods === undefined) {
+        return exports.FILE_SYSTEM_ADAPTER;
+    }
+    return Object.assign(Object.assign({}, exports.FILE_SYSTEM_ADAPTER), fsMethods);
+}
+exports.createFileSystemAdapter = createFileSystemAdapter;
+
+
+/***/ }),
 /* 322 */
 /***/ (function(__unusedmodule, exports) {
 
@@ -39214,7 +40791,7 @@ function warnOptionDeprecation(name, alternative) {
  * Information on the RC2 cipher is available from RFC #2268,
  * http://www.ietf.org/rfc/rfc2268.txt
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(294);
 
 var piTable = [
@@ -39636,8 +41213,8 @@ var PrivateKey = __webpack_require__(877);
 var pem = __webpack_require__(298);
 var ssh = __webpack_require__(979);
 var rfc4253 = __webpack_require__(233);
-var dnssec = __webpack_require__(21);
-var putty = __webpack_require__(919);
+var dnssec = __webpack_require__(946);
+var putty = __webpack_require__(809);
 
 var DNSSEC_PRIVKEY_HEADER_PREFIX = 'Private-key-format: v1';
 
@@ -40334,21 +41911,78 @@ module.exports = function transformData(data, headers, fns) {
 /* 344 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
 
+var Git = __webpack_require__(54);
 
-var util = __webpack_require__(254);
+module.exports = function (baseDir) {
 
-module.exports = SchemaObject;
+   var dependencies = __webpack_require__(727);
 
-function SchemaObject(obj) {
-  util.copy(obj, this);
-}
+   if (baseDir && !dependencies.exists(baseDir, dependencies.exists.FOLDER)) {
+       throw new Error("Cannot use simple-git on a directory that does not exist.");
+    }
+
+    return new Git(baseDir || process.cwd(), dependencies.childProcess(), dependencies.buffer());
+};
+
 
 
 /***/ }),
 /* 345 */,
-/* 346 */,
+/* 346 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+/**
+ * Copyright 2018 Google LLC
+ *
+ * Distributed under MIT license.
+ * See file LICENSE for detail or copy at https://opensource.org/licenses/MIT
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs = __webpack_require__(747);
+const forge = __webpack_require__(606);
+const util_1 = __webpack_require__(669);
+const readFile = util_1.promisify(fs.readFile);
+function getPem(filename, callback) {
+    if (callback) {
+        getPemAsync(filename)
+            .then(pem => callback(null, pem))
+            .catch(err => callback(err, null));
+    }
+    else {
+        return getPemAsync(filename);
+    }
+}
+exports.getPem = getPem;
+function getPemAsync(filename) {
+    return readFile(filename, { encoding: 'base64' }).then(keyp12 => {
+        return convertToPem(keyp12);
+    });
+}
+/**
+ * Converts a P12 in base64 encoding to a pem.
+ * @param p12base64 String containing base64 encoded p12.
+ * @returns a string containing the pem.
+ */
+function convertToPem(p12base64) {
+    const p12Der = forge.util.decode64(p12base64);
+    const p12Asn1 = forge.asn1.fromDer(p12Der);
+    const p12 = forge.pkcs12.pkcs12FromAsn1(p12Asn1, 'notasecret');
+    const bags = p12.getBags({ friendlyName: 'privatekey' });
+    if (bags.friendlyName) {
+        const privateKey = bags.friendlyName[0].key;
+        const pem = forge.pki.privateKeyToPem(privateKey);
+        return pem.replace(/\r\n/g, '\n');
+    }
+    else {
+        throw new Error('Unable to get friendly name.');
+    }
+}
+//# sourceMappingURL=index.js.map
+
+/***/ }),
 /* 347 */,
 /* 348 */,
 /* 349 */,
@@ -40660,155 +42294,29 @@ exports.default = _default;
 
 /***/ }),
 /* 352 */
-/***/ (function(__unusedmodule, exports) {
+/***/ (function(module) {
 
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = foldFlowLines;
-exports.FOLD_QUOTED = exports.FOLD_BLOCK = exports.FOLD_FLOW = void 0;
-const FOLD_FLOW = 'flow';
-exports.FOLD_FLOW = FOLD_FLOW;
-const FOLD_BLOCK = 'block';
-exports.FOLD_BLOCK = FOLD_BLOCK;
-const FOLD_QUOTED = 'quoted'; // presumes i+1 is at the start of a line
-// returns index of last newline in more-indented block
-
-exports.FOLD_QUOTED = FOLD_QUOTED;
-
-const consumeMoreIndentedLines = (text, i) => {
-  let ch = text[i + 1];
-
-  while (ch === ' ' || ch === '\t') {
-    do {
-      ch = text[i += 1];
-    } while (ch && ch !== '\n');
-
-    ch = text[i + 1];
-  }
-
-  return i;
-};
-/**
- * Tries to keep input at up to `lineWidth` characters, splitting only on spaces
- * not followed by newlines or spaces unless `mode` is `'quoted'`. Lines are
- * terminated with `\n` and started with `indent`.
+/*!
+ * is-extglob <https://github.com/jonschlinkert/is-extglob>
  *
- * @param {string} text
- * @param {string} indent
- * @param {string} [mode='flow'] `'block'` prevents more-indented lines
- *   from being folded; `'quoted'` allows for `\` escapes, including escaped
- *   newlines
- * @param {Object} options
- * @param {number} [options.indentAtStart] Accounts for leading contents on
- *   the first line, defaulting to `indent.length`
- * @param {number} [options.lineWidth=80]
- * @param {number} [options.minContentWidth=20] Allow highly indented lines to
- *   stretch the line width
- * @param {function} options.onFold Called once if the text is folded
- * @param {function} options.onFold Called once if any line of text exceeds
- *   lineWidth characters
+ * Copyright (c) 2014-2016, Jon Schlinkert.
+ * Licensed under the MIT License.
  */
 
-
-function foldFlowLines(text, indent, mode, {
-  indentAtStart,
-  lineWidth = 80,
-  minContentWidth = 20,
-  onFold,
-  onOverflow
-}) {
-  if (!lineWidth || lineWidth < 0) return text;
-  const endStep = Math.max(1 + minContentWidth, 1 + lineWidth - indent.length);
-  if (text.length <= endStep) return text;
-  const folds = [];
-  const escapedFolds = {};
-  let end = lineWidth - (typeof indentAtStart === 'number' ? indentAtStart : indent.length);
-  let split = undefined;
-  let prev = undefined;
-  let overflow = false;
-  let i = -1;
-
-  if (mode === FOLD_BLOCK) {
-    i = consumeMoreIndentedLines(text, i);
-    if (i !== -1) end = i + endStep;
+module.exports = function isExtglob(str) {
+  if (typeof str !== 'string' || str === '') {
+    return false;
   }
 
-  for (let ch; ch = text[i += 1];) {
-    if (mode === FOLD_QUOTED && ch === '\\') {
-      switch (text[i + 1]) {
-        case 'x':
-          i += 3;
-          break;
-
-        case 'u':
-          i += 5;
-          break;
-
-        case 'U':
-          i += 9;
-          break;
-
-        default:
-          i += 1;
-      }
-    }
-
-    if (ch === '\n') {
-      if (mode === FOLD_BLOCK) i = consumeMoreIndentedLines(text, i);
-      end = i + endStep;
-      split = undefined;
-    } else {
-      if (ch === ' ' && prev && prev !== ' ' && prev !== '\n' && prev !== '\t') {
-        // space surrounded by non-space can be replaced with newline + indent
-        const next = text[i + 1];
-        if (next && next !== ' ' && next !== '\n' && next !== '\t') split = i;
-      }
-
-      if (i >= end) {
-        if (split) {
-          folds.push(split);
-          end = split + endStep;
-          split = undefined;
-        } else if (mode === FOLD_QUOTED) {
-          // white-space collected at end may stretch past lineWidth
-          while (prev === ' ' || prev === '\t') {
-            prev = ch;
-            ch = text[i += 1];
-            overflow = true;
-          } // i - 2 accounts for not-dropped last char + newline-escaping \
-
-
-          folds.push(i - 2);
-          escapedFolds[i - 2] = true;
-          end = i - 2 + endStep;
-          split = undefined;
-        } else {
-          overflow = true;
-        }
-      }
-    }
-
-    prev = ch;
+  var match;
+  while ((match = /(\\).|([@?!+*]\(.*\))/g.exec(str))) {
+    if (match[2]) return true;
+    str = str.slice(match.index + match[0].length);
   }
 
-  if (overflow && onOverflow) onOverflow();
-  if (folds.length === 0) return text;
-  if (onFold) onFold();
-  let res = text.slice(0, folds[0]);
+  return false;
+};
 
-  for (let i = 0; i < folds.length; ++i) {
-    const fold = folds[i];
-    const end = folds[i + 1] || text.length;
-    if (mode === FOLD_QUOTED && escapedFolds[fold]) res += `${text[fold]}\\`;
-    res += `\n${indent}${text.slice(fold + 1, end)}`;
-  }
-
-  return res;
-}
 
 /***/ }),
 /* 353 */
@@ -40817,8 +42325,8 @@ function foldFlowLines(text, indent, mode, {
 "use strict";
 
 
-var jsonSafeStringify = __webpack_require__(519)
-var crypto = __webpack_require__(417)
+var jsonSafeStringify = __webpack_require__(908)
+var crypto = __webpack_require__(373)
 var Buffer = __webpack_require__(225).Buffer
 
 var defer = typeof setImmediate === 'undefined'
@@ -40964,87 +42472,17 @@ module.exports = {
 
 /***/ }),
 /* 356 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
+/***/ (function(module) {
 
 
-var utils = __webpack_require__(759);
-var transformData = __webpack_require__(941);
-var isCancel = __webpack_require__(597);
-var defaults = __webpack_require__(689);
+module.exports = function deferred () {
+   var d = {};
+   d.promise = new Promise(function (resolve, reject) {
+      d.resolve = resolve;
+      d.reject = reject
+   });
 
-/**
- * Throws a `Cancel` if cancellation has been requested.
- */
-function throwIfCancellationRequested(config) {
-  if (config.cancelToken) {
-    config.cancelToken.throwIfRequested();
-  }
-}
-
-/**
- * Dispatch a request to the server using the configured adapter.
- *
- * @param {object} config The config that is to be used for the request
- * @returns {Promise} The Promise to be fulfilled
- */
-module.exports = function dispatchRequest(config) {
-  throwIfCancellationRequested(config);
-
-  // Ensure headers exist
-  config.headers = config.headers || {};
-
-  // Transform request data
-  config.data = transformData(
-    config.data,
-    config.headers,
-    config.transformRequest
-  );
-
-  // Flatten headers
-  config.headers = utils.merge(
-    config.headers.common || {},
-    config.headers[config.method] || {},
-    config.headers
-  );
-
-  utils.forEach(
-    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
-    function cleanHeaderConfig(method) {
-      delete config.headers[method];
-    }
-  );
-
-  var adapter = config.adapter || defaults.adapter;
-
-  return adapter(config).then(function onAdapterResolution(response) {
-    throwIfCancellationRequested(config);
-
-    // Transform response data
-    response.data = transformData(
-      response.data,
-      response.headers,
-      config.transformResponse
-    );
-
-    return response;
-  }, function onAdapterRejection(reason) {
-    if (!isCancel(reason)) {
-      throwIfCancellationRequested(config);
-
-      // Transform response data
-      if (reason && reason.response) {
-        reason.response.data = transformData(
-          reason.response.data,
-          reason.response.headers,
-          config.transformResponse
-        );
-      }
-    }
-
-    return Promise.reject(reason);
-  });
+   return d;
 };
 
 
@@ -41055,7 +42493,122 @@ module.exports = function dispatchRequest(config) {
 module.exports = require("assert");
 
 /***/ }),
-/* 358 */,
+/* 358 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _constants = __webpack_require__(720);
+
+var _errors = __webpack_require__(297);
+
+var _toJSON = _interopRequireDefault(__webpack_require__(372));
+
+var _Collection = _interopRequireDefault(__webpack_require__(235));
+
+var _Node = _interopRequireDefault(__webpack_require__(590));
+
+var _Pair = _interopRequireDefault(__webpack_require__(308));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+const getAliasCount = (node, anchors) => {
+  if (node instanceof Alias) {
+    const anchor = anchors.find(a => a.node === node.source);
+    return anchor.count * anchor.aliasCount;
+  } else if (node instanceof _Collection.default) {
+    let count = 0;
+
+    for (const item of node.items) {
+      const c = getAliasCount(item, anchors);
+      if (c > count) count = c;
+    }
+
+    return count;
+  } else if (node instanceof _Pair.default) {
+    const kc = getAliasCount(node.key, anchors);
+    const vc = getAliasCount(node.value, anchors);
+    return Math.max(kc, vc);
+  }
+
+  return 1;
+};
+
+class Alias extends _Node.default {
+  static stringify({
+    range,
+    source
+  }, {
+    anchors,
+    doc,
+    implicitKey,
+    inStringifyKey
+  }) {
+    let anchor = Object.keys(anchors).find(a => anchors[a] === source);
+    if (!anchor && inStringifyKey) anchor = doc.anchors.getName(source) || doc.anchors.newName();
+    if (anchor) return `*${anchor}${implicitKey ? ' ' : ''}`;
+    const msg = doc.anchors.getName(source) ? 'Alias node must be after source node' : 'Source node not found for alias node';
+    throw new Error(`${msg} [${range}]`);
+  }
+
+  constructor(source) {
+    super();
+    this.source = source;
+    this.type = _constants.Type.ALIAS;
+  }
+
+  set tag(t) {
+    throw new Error('Alias nodes cannot have tags');
+  }
+
+  toJSON(arg, ctx) {
+    if (!ctx) return (0, _toJSON.default)(this.source, arg, ctx);
+    const {
+      anchors,
+      maxAliasCount
+    } = ctx;
+    const anchor = anchors.find(a => a.node === this.source);
+    /* istanbul ignore if */
+
+    if (!anchor || anchor.res === undefined) {
+      const msg = 'This should not happen: Alias anchor was not resolved?';
+      if (this.cstNode) throw new _errors.YAMLReferenceError(this.cstNode, msg);else throw new ReferenceError(msg);
+    }
+
+    if (maxAliasCount >= 0) {
+      anchor.count += 1;
+      if (anchor.aliasCount === 0) anchor.aliasCount = getAliasCount(this.source, anchors);
+
+      if (anchor.count * anchor.aliasCount > maxAliasCount) {
+        const msg = 'Excessive alias count indicates a resource exhaustion attack';
+        if (this.cstNode) throw new _errors.YAMLReferenceError(this.cstNode, msg);else throw new ReferenceError(msg);
+      }
+    }
+
+    return anchor.res;
+  } // Only called when stringifying an alias mapping key while constructing
+  // Object output.
+
+
+  toString(ctx) {
+    return Alias.stringify(this, ctx);
+  }
+
+}
+
+exports.default = Alias;
+
+_defineProperty(Alias, "default", true);
+
+/***/ }),
 /* 359 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -41065,13 +42618,13 @@ module.exports = Identity;
 
 var assert = __webpack_require__(552);
 var algs = __webpack_require__(151);
-var crypto = __webpack_require__(417);
+var crypto = __webpack_require__(373);
 var Fingerprint = __webpack_require__(926);
 var Signature = __webpack_require__(885);
 var errs = __webpack_require__(172);
 var util = __webpack_require__(669);
 var utils = __webpack_require__(241);
-var asn1 = __webpack_require__(784);
+var asn1 = __webpack_require__(440);
 var Buffer = __webpack_require__(299).Buffer;
 
 /*JSSTYLED*/
@@ -43286,7 +44839,7 @@ function resolveFlowSeqItems(doc, cst) {
  * Module dependencies.
  */
 
-var crypto = __webpack_require__(417)
+var crypto = __webpack_require__(373)
   , parse = __webpack_require__(835).parse
   ;
 
@@ -43490,7 +45043,7 @@ module.exports.canonicalizeResource = canonicalizeResource
  *
  * Copyright 2008-2013 Digital Bazaar, Inc.
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 
 /* DEBUG API */
 module.exports = forge.debug = forge.debug || {};
@@ -43564,7 +45117,65 @@ forge.debug.clear = function(cat, name) {
 
 
 /***/ }),
-/* 368 */,
+/* 368 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const fsStat = __webpack_require__(519);
+const constants_1 = __webpack_require__(238);
+const utils = __webpack_require__(88);
+function read(directory, settings) {
+    if (!settings.stats && constants_1.IS_SUPPORT_READDIR_WITH_FILE_TYPES) {
+        return readdirWithFileTypes(directory, settings);
+    }
+    return readdir(directory, settings);
+}
+exports.read = read;
+function readdirWithFileTypes(directory, settings) {
+    const dirents = settings.fs.readdirSync(directory, { withFileTypes: true });
+    return dirents.map((dirent) => {
+        const entry = {
+            dirent,
+            name: dirent.name,
+            path: `${directory}${settings.pathSegmentSeparator}${dirent.name}`
+        };
+        if (entry.dirent.isSymbolicLink() && settings.followSymbolicLinks) {
+            try {
+                const stats = settings.fs.statSync(entry.path);
+                entry.dirent = utils.fs.createDirentFromStats(entry.name, stats);
+            }
+            catch (error) {
+                if (settings.throwErrorOnBrokenSymbolicLink) {
+                    throw error;
+                }
+            }
+        }
+        return entry;
+    });
+}
+exports.readdirWithFileTypes = readdirWithFileTypes;
+function readdir(directory, settings) {
+    const names = settings.fs.readdirSync(directory);
+    return names.map((name) => {
+        const entryPath = `${directory}${settings.pathSegmentSeparator}${name}`;
+        const stats = fsStat.statSync(entryPath, settings.fsStatSettings);
+        const entry = {
+            name,
+            path: entryPath,
+            dirent: utils.fs.createDirentFromStats(name, stats)
+        };
+        if (settings.stats) {
+            entry.stats = stats;
+        }
+        return entry;
+    });
+}
+exports.readdir = readdir;
+
+
+/***/ }),
 /* 369 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -43769,20 +45380,203 @@ exports.getState = getState;
 /* 370 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-/**
- * Detect Electron renderer / nwjs process, which is node, but we should
- * treat as a browser.
+/*!
+ * is-glob <https://github.com/jonschlinkert/is-glob>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
  */
 
-if (typeof process === 'undefined' || process.type === 'renderer' || process.browser === true || process.__nwjs) {
-	module.exports = __webpack_require__(770);
-} else {
-	module.exports = __webpack_require__(513);
-}
+var isExtglob = __webpack_require__(352);
+var chars = { '{': '}', '(': ')', '[': ']'};
+var strictRegex = /\\(.)|(^!|\*|[\].+)]\?|\[[^\\\]]+\]|\{[^\\}]+\}|\(\?[:!=][^\\)]+\)|\([^|]+\|[^\\)]+\))/;
+var relaxedRegex = /\\(.)|(^!|[*?{}()[\]]|\(\?)/;
+
+module.exports = function isGlob(str, options) {
+  if (typeof str !== 'string' || str === '') {
+    return false;
+  }
+
+  if (isExtglob(str)) {
+    return true;
+  }
+
+  var regex = strictRegex;
+  var match;
+
+  // optionally relax regex
+  if (options && options.strict === false) {
+    regex = relaxedRegex;
+  }
+
+  while ((match = regex.exec(str))) {
+    if (match[2]) return true;
+    var idx = match.index + match[0].length;
+
+    // if an open bracket/brace/paren is escaped,
+    // set the index to the next closing character
+    var open = match[1];
+    var close = open ? chars[open] : null;
+    if (open && close) {
+      var n = str.indexOf(close, idx);
+      if (n !== -1) {
+        idx = n + 1;
+      }
+    }
+
+    str = str.slice(idx);
+  }
+  return false;
+};
 
 
 /***/ }),
-/* 371 */,
+/* 371 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _constants = __webpack_require__(460);
+
+var _errors = __webpack_require__(541);
+
+var _BlankLine = _interopRequireDefault(__webpack_require__(862));
+
+var _Node = _interopRequireDefault(__webpack_require__(234));
+
+var _Range = _interopRequireDefault(__webpack_require__(415));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class CollectionItem extends _Node.default {
+  constructor(type, props) {
+    super(type, props);
+    this.node = null;
+  }
+
+  get includesTrailingLines() {
+    return !!this.node && this.node.includesTrailingLines;
+  }
+  /**
+   * @param {ParseContext} context
+   * @param {number} start - Index of first character
+   * @returns {number} - Index of the character after this
+   */
+
+
+  parse(context, start) {
+    this.context = context;
+    const {
+      parseNode,
+      src
+    } = context;
+    let {
+      atLineStart,
+      lineStart
+    } = context;
+    if (!atLineStart && this.type === _constants.Type.SEQ_ITEM) this.error = new _errors.YAMLSemanticError(this, 'Sequence items must not have preceding content on the same line');
+    const indent = atLineStart ? start - lineStart : context.indent;
+
+    let offset = _Node.default.endOfWhiteSpace(src, start + 1);
+
+    let ch = src[offset];
+    const inlineComment = ch === '#';
+    const comments = [];
+    let blankLine = null;
+
+    while (ch === '\n' || ch === '#') {
+      if (ch === '#') {
+        const end = _Node.default.endOfLine(src, offset + 1);
+
+        comments.push(new _Range.default(offset, end));
+        offset = end;
+      } else {
+        atLineStart = true;
+        lineStart = offset + 1;
+
+        const wsEnd = _Node.default.endOfWhiteSpace(src, lineStart);
+
+        if (src[wsEnd] === '\n' && comments.length === 0) {
+          blankLine = new _BlankLine.default();
+          lineStart = blankLine.parse({
+            src
+          }, lineStart);
+        }
+
+        offset = _Node.default.endOfIndent(src, lineStart);
+      }
+
+      ch = src[offset];
+    }
+
+    if (_Node.default.nextNodeIsIndented(ch, offset - (lineStart + indent), this.type !== _constants.Type.SEQ_ITEM)) {
+      this.node = parseNode({
+        atLineStart,
+        inCollection: false,
+        indent,
+        lineStart,
+        parent: this
+      }, offset);
+    } else if (ch && lineStart > start + 1) {
+      offset = lineStart - 1;
+    }
+
+    if (this.node) {
+      if (blankLine) {
+        // Only blank lines preceding non-empty nodes are captured. Note that
+        // this means that collection item range start indices do not always
+        // increase monotonically. -- eemeli/yaml#126
+        const items = context.parent.items || context.parent.contents;
+        if (items) items.push(blankLine);
+      }
+
+      if (comments.length) Array.prototype.push.apply(this.props, comments);
+      offset = this.node.range.end;
+    } else {
+      if (inlineComment) {
+        const c = comments[0];
+        this.props.push(c);
+        offset = c.end;
+      } else {
+        offset = _Node.default.endOfLine(src, start + 1);
+      }
+    }
+
+    const end = this.node ? this.node.valueRange.end : offset;
+    this.valueRange = new _Range.default(start, end);
+    return offset;
+  }
+
+  setOrigRanges(cr, offset) {
+    offset = super.setOrigRanges(cr, offset);
+    return this.node ? this.node.setOrigRanges(cr, offset) : offset;
+  }
+
+  toString() {
+    const {
+      context: {
+        src
+      },
+      node,
+      range,
+      value
+    } = this;
+    if (value != null) return value;
+    const str = node ? src.slice(range.start, node.range.start) + String(node) : src.slice(range.start, range.end);
+    return _Node.default.addStringTerminator(src, range.end, str);
+  }
+
+}
+
+exports.default = CollectionItem;
+
+/***/ }),
 /* 372 */
 /***/ (function(__unusedmodule, exports) {
 
@@ -43813,9 +45607,9 @@ function toJSON(value, arg, ctx) {
 
 /***/ }),
 /* 373 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
-module.exports = __webpack_require__(75);
+module.exports = require("crypto");
 
 /***/ }),
 /* 374 */
@@ -43962,53 +45756,39 @@ module.exports = (
 
 /***/ }),
 /* 376 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module) {
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const tr = __importStar(__webpack_require__(868));
-/**
- * Exec a command.
- * Output will be streamed to the live console.
- * Returns promise with return code
- *
- * @param     commandLine        command to execute (can include additional args). Must be correctly escaped.
- * @param     args               optional arguments for tool. Escaping is handled by the lib.
- * @param     options            optional exec options.  See ExecOptions
- * @returns   Promise<number>    exit code
- */
-function exec(commandLine, args, options) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const commandArgs = tr.argStringToArray(commandLine);
-        if (commandArgs.length === 0) {
-            throw new Error(`Parameter 'commandLine' cannot be null or empty.`);
-        }
-        // Path to tool to execute should be first arg
-        const toolPath = commandArgs[0];
-        args = commandArgs.slice(1).concat(args || []);
-        const runner = new tr.ToolRunner(toolPath, args, options);
-        return runner.exec();
-    });
-}
-exports.exec = exec;
-//# sourceMappingURL=exec.js.map
+
+const isStream = stream =>
+	stream !== null &&
+	typeof stream === 'object' &&
+	typeof stream.pipe === 'function';
+
+isStream.writable = stream =>
+	isStream(stream) &&
+	stream.writable !== false &&
+	typeof stream._write === 'function' &&
+	typeof stream._writableState === 'object';
+
+isStream.readable = stream =>
+	isStream(stream) &&
+	stream.readable !== false &&
+	typeof stream._read === 'function' &&
+	typeof stream._readableState === 'object';
+
+isStream.duplex = stream =>
+	isStream.writable(stream) &&
+	isStream.readable(stream);
+
+isStream.transform = stream =>
+	isStream.duplex(stream) &&
+	typeof stream._transform === 'function' &&
+	typeof stream._transformState === 'object';
+
+module.exports = isStream;
+
 
 /***/ }),
 /* 377 */,
@@ -44121,7 +45901,31 @@ class YAMLMap extends _Collection.default {
 exports.default = YAMLMap;
 
 /***/ }),
-/* 379 */,
+/* 379 */
+/***/ (function(module) {
+
+"use strict";
+
+
+var replace = String.prototype.replace;
+var percentTwenties = /%20/g;
+
+module.exports = {
+    'default': 'RFC3986',
+    formatters: {
+        RFC1738: function (value) {
+            return replace.call(value, percentTwenties, '+');
+        },
+        RFC3986: function (value) {
+            return value;
+        }
+    },
+    RFC1738: 'RFC1738',
+    RFC3986: 'RFC3986'
+};
+
+
+/***/ }),
 /* 380 */
 /***/ (function(module) {
 
@@ -44387,194 +46191,188 @@ TagList.parse = function (data, customSort) {
 
 /***/ }),
 /* 387 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+const path = __webpack_require__(622);
+const WIN_SLASH = '\\\\/';
+const WIN_NO_SLASH = `[^${WIN_SLASH}]`;
 
 /**
- * Base-N/Base-X encoding/decoding functions.
- *
- * Original implementation from base-x:
- * https://github.com/cryptocoinjs/base-x
- *
- * Which is MIT licensed:
- *
- * The MIT License (MIT)
- *
- * Copyright base-x contributors (c) 2016
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
+ * Posix glob regex
  */
-var api = {};
-module.exports = api;
 
-// baseN alphabet indexes
-var _reverseAlphabets = {};
+const DOT_LITERAL = '\\.';
+const PLUS_LITERAL = '\\+';
+const QMARK_LITERAL = '\\?';
+const SLASH_LITERAL = '\\/';
+const ONE_CHAR = '(?=.)';
+const QMARK = '[^/]';
+const END_ANCHOR = `(?:${SLASH_LITERAL}|$)`;
+const START_ANCHOR = `(?:^|${SLASH_LITERAL})`;
+const DOTS_SLASH = `${DOT_LITERAL}{1,2}${END_ANCHOR}`;
+const NO_DOT = `(?!${DOT_LITERAL})`;
+const NO_DOTS = `(?!${START_ANCHOR}${DOTS_SLASH})`;
+const NO_DOT_SLASH = `(?!${DOT_LITERAL}{0,1}${END_ANCHOR})`;
+const NO_DOTS_SLASH = `(?!${DOTS_SLASH})`;
+const QMARK_NO_DOT = `[^.${SLASH_LITERAL}]`;
+const STAR = `${QMARK}*?`;
 
-/**
- * BaseN-encodes a Uint8Array using the given alphabet.
- *
- * @param input the Uint8Array to encode.
- * @param maxline the maximum number of encoded characters per line to use,
- *          defaults to none.
- *
- * @return the baseN-encoded output string.
- */
-api.encode = function(input, alphabet, maxline) {
-  if(typeof alphabet !== 'string') {
-    throw new TypeError('"alphabet" must be a string.');
-  }
-  if(maxline !== undefined && typeof maxline !== 'number') {
-    throw new TypeError('"maxline" must be a number.');
-  }
-
-  var output = '';
-
-  if(!(input instanceof Uint8Array)) {
-    // assume forge byte buffer
-    output = _encodeWithByteBuffer(input, alphabet);
-  } else {
-    var i = 0;
-    var base = alphabet.length;
-    var first = alphabet.charAt(0);
-    var digits = [0];
-    for(i = 0; i < input.length; ++i) {
-      for(var j = 0, carry = input[i]; j < digits.length; ++j) {
-        carry += digits[j] << 8;
-        digits[j] = carry % base;
-        carry = (carry / base) | 0;
-      }
-
-      while(carry > 0) {
-        digits.push(carry % base);
-        carry = (carry / base) | 0;
-      }
-    }
-
-    // deal with leading zeros
-    for(i = 0; input[i] === 0 && i < input.length - 1; ++i) {
-      output += first;
-    }
-    // convert digits to a string
-    for(i = digits.length - 1; i >= 0; --i) {
-      output += alphabet[digits[i]];
-    }
-  }
-
-  if(maxline) {
-    var regex = new RegExp('.{1,' + maxline + '}', 'g');
-    output = output.match(regex).join('\r\n');
-  }
-
-  return output;
+const POSIX_CHARS = {
+  DOT_LITERAL,
+  PLUS_LITERAL,
+  QMARK_LITERAL,
+  SLASH_LITERAL,
+  ONE_CHAR,
+  QMARK,
+  END_ANCHOR,
+  DOTS_SLASH,
+  NO_DOT,
+  NO_DOTS,
+  NO_DOT_SLASH,
+  NO_DOTS_SLASH,
+  QMARK_NO_DOT,
+  STAR,
+  START_ANCHOR
 };
 
 /**
- * Decodes a baseN-encoded (using the given alphabet) string to a
- * Uint8Array.
- *
- * @param input the baseN-encoded input string.
- *
- * @return the Uint8Array.
+ * Windows glob regex
  */
-api.decode = function(input, alphabet) {
-  if(typeof input !== 'string') {
-    throw new TypeError('"input" must be a string.');
-  }
-  if(typeof alphabet !== 'string') {
-    throw new TypeError('"alphabet" must be a string.');
-  }
 
-  var table = _reverseAlphabets[alphabet];
-  if(!table) {
-    // compute reverse alphabet
-    table = _reverseAlphabets[alphabet] = [];
-    for(var i = 0; i < alphabet.length; ++i) {
-      table[alphabet.charCodeAt(i)] = i;
-    }
-  }
+const WINDOWS_CHARS = {
+  ...POSIX_CHARS,
 
-  // remove whitespace characters
-  input = input.replace(/\s/g, '');
-
-  var base = alphabet.length;
-  var first = alphabet.charAt(0);
-  var bytes = [0];
-  for(var i = 0; i < input.length; i++) {
-    var value = table[input.charCodeAt(i)];
-    if(value === undefined) {
-      return;
-    }
-
-    for(var j = 0, carry = value; j < bytes.length; ++j) {
-      carry += bytes[j] * base;
-      bytes[j] = carry & 0xff;
-      carry >>= 8;
-    }
-
-    while(carry > 0) {
-      bytes.push(carry & 0xff);
-      carry >>= 8;
-    }
-  }
-
-  // deal with leading zeros
-  for(var k = 0; input[k] === first && k < input.length - 1; ++k) {
-    bytes.push(0);
-  }
-
-  if(typeof Buffer !== 'undefined') {
-    return Buffer.from(bytes.reverse());
-  }
-
-  return new Uint8Array(bytes.reverse());
+  SLASH_LITERAL: `[${WIN_SLASH}]`,
+  QMARK: WIN_NO_SLASH,
+  STAR: `${WIN_NO_SLASH}*?`,
+  DOTS_SLASH: `${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$)`,
+  NO_DOT: `(?!${DOT_LITERAL})`,
+  NO_DOTS: `(?!(?:^|[${WIN_SLASH}])${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
+  NO_DOT_SLASH: `(?!${DOT_LITERAL}{0,1}(?:[${WIN_SLASH}]|$))`,
+  NO_DOTS_SLASH: `(?!${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
+  QMARK_NO_DOT: `[^.${WIN_SLASH}]`,
+  START_ANCHOR: `(?:^|[${WIN_SLASH}])`,
+  END_ANCHOR: `(?:[${WIN_SLASH}]|$)`
 };
 
-function _encodeWithByteBuffer(input, alphabet) {
-  var i = 0;
-  var base = alphabet.length;
-  var first = alphabet.charAt(0);
-  var digits = [0];
-  for(i = 0; i < input.length(); ++i) {
-    for(var j = 0, carry = input.at(i); j < digits.length; ++j) {
-      carry += digits[j] << 8;
-      digits[j] = carry % base;
-      carry = (carry / base) | 0;
-    }
+/**
+ * POSIX Bracket Regex
+ */
 
-    while(carry > 0) {
-      digits.push(carry % base);
-      carry = (carry / base) | 0;
-    }
+const POSIX_REGEX_SOURCE = {
+  alnum: 'a-zA-Z0-9',
+  alpha: 'a-zA-Z',
+  ascii: '\\x00-\\x7F',
+  blank: ' \\t',
+  cntrl: '\\x00-\\x1F\\x7F',
+  digit: '0-9',
+  graph: '\\x21-\\x7E',
+  lower: 'a-z',
+  print: '\\x20-\\x7E ',
+  punct: '\\-!"#$%&\'()\\*+,./:;<=>?@[\\]^_`{|}~',
+  space: ' \\t\\r\\n\\v\\f',
+  upper: 'A-Z',
+  word: 'A-Za-z0-9_',
+  xdigit: 'A-Fa-f0-9'
+};
+
+module.exports = {
+  MAX_LENGTH: 1024 * 64,
+  POSIX_REGEX_SOURCE,
+
+  // regular expressions
+  REGEX_BACKSLASH: /\\(?![*+?^${}(|)[\]])/g,
+  REGEX_NON_SPECIAL_CHARS: /^[^@![\].,$*+?^{}()|\\/]+/,
+  REGEX_SPECIAL_CHARS: /[-*+?.^${}(|)[\]]/,
+  REGEX_SPECIAL_CHARS_BACKREF: /(\\?)((\W)(\3*))/g,
+  REGEX_SPECIAL_CHARS_GLOBAL: /([-*+?.^${}(|)[\]])/g,
+  REGEX_REMOVE_BACKSLASH: /(?:\[.*?[^\\]\]|\\(?=.))/g,
+
+  // Replace globs with equivalent patterns to reduce parsing time.
+  REPLACEMENTS: {
+    '***': '*',
+    '**/**': '**',
+    '**/**/**': '**'
+  },
+
+  // Digits
+  CHAR_0: 48, /* 0 */
+  CHAR_9: 57, /* 9 */
+
+  // Alphabet chars.
+  CHAR_UPPERCASE_A: 65, /* A */
+  CHAR_LOWERCASE_A: 97, /* a */
+  CHAR_UPPERCASE_Z: 90, /* Z */
+  CHAR_LOWERCASE_Z: 122, /* z */
+
+  CHAR_LEFT_PARENTHESES: 40, /* ( */
+  CHAR_RIGHT_PARENTHESES: 41, /* ) */
+
+  CHAR_ASTERISK: 42, /* * */
+
+  // Non-alphabetic chars.
+  CHAR_AMPERSAND: 38, /* & */
+  CHAR_AT: 64, /* @ */
+  CHAR_BACKWARD_SLASH: 92, /* \ */
+  CHAR_CARRIAGE_RETURN: 13, /* \r */
+  CHAR_CIRCUMFLEX_ACCENT: 94, /* ^ */
+  CHAR_COLON: 58, /* : */
+  CHAR_COMMA: 44, /* , */
+  CHAR_DOT: 46, /* . */
+  CHAR_DOUBLE_QUOTE: 34, /* " */
+  CHAR_EQUAL: 61, /* = */
+  CHAR_EXCLAMATION_MARK: 33, /* ! */
+  CHAR_FORM_FEED: 12, /* \f */
+  CHAR_FORWARD_SLASH: 47, /* / */
+  CHAR_GRAVE_ACCENT: 96, /* ` */
+  CHAR_HASH: 35, /* # */
+  CHAR_HYPHEN_MINUS: 45, /* - */
+  CHAR_LEFT_ANGLE_BRACKET: 60, /* < */
+  CHAR_LEFT_CURLY_BRACE: 123, /* { */
+  CHAR_LEFT_SQUARE_BRACKET: 91, /* [ */
+  CHAR_LINE_FEED: 10, /* \n */
+  CHAR_NO_BREAK_SPACE: 160, /* \u00A0 */
+  CHAR_PERCENT: 37, /* % */
+  CHAR_PLUS: 43, /* + */
+  CHAR_QUESTION_MARK: 63, /* ? */
+  CHAR_RIGHT_ANGLE_BRACKET: 62, /* > */
+  CHAR_RIGHT_CURLY_BRACE: 125, /* } */
+  CHAR_RIGHT_SQUARE_BRACKET: 93, /* ] */
+  CHAR_SEMICOLON: 59, /* ; */
+  CHAR_SINGLE_QUOTE: 39, /* ' */
+  CHAR_SPACE: 32, /*   */
+  CHAR_TAB: 9, /* \t */
+  CHAR_UNDERSCORE: 95, /* _ */
+  CHAR_VERTICAL_LINE: 124, /* | */
+  CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279, /* \uFEFF */
+
+  SEP: path.sep,
+
+  /**
+   * Create EXTGLOB_CHARS
+   */
+
+  extglobChars(chars) {
+    return {
+      '!': { type: 'negate', open: '(?:(?!(?:', close: `))${chars.STAR})` },
+      '?': { type: 'qmark', open: '(?:', close: ')?' },
+      '+': { type: 'plus', open: '(?:', close: ')+' },
+      '*': { type: 'star', open: '(?:', close: ')*' },
+      '@': { type: 'at', open: '(?:', close: ')' }
+    };
+  },
+
+  /**
+   * Create GLOB_CHARS
+   */
+
+  globChars(win32) {
+    return win32 === true ? WINDOWS_CHARS : POSIX_CHARS;
   }
-
-  var output = '';
-
-  // deal with leading zeros
-  for(i = 0; input.at(i) === 0 && i < input.length() - 1; ++i) {
-    output += first;
-  }
-  // convert digits to a string
-  for(i = digits.length - 1; i >= 0; --i) {
-    output += alphabet[digits[i]];
-  }
-
-  return output;
-}
+};
 
 
 /***/ }),
@@ -44597,9 +46395,20 @@ module.exports = {
           type: 'string',
         },
       },
+      required: [
+        'namespace',
+        'repository',
+      ],
+      additionalProperties: false,
     },
     permissions: {
       type: 'object',
+      additionalProperties: {
+        type: 'object',
+        additionalProperties: {
+          type: 'string',
+        },
+      },
     },
     roles: {
       type: 'array',
@@ -44617,6 +46426,12 @@ module.exports = {
           },
         },
       },
+      required: [
+        'name',
+        'desc',
+        'permissions',
+      ],
+      additionalProperties: false,
     },
   },
   required: [
@@ -44664,9 +46479,9 @@ module.exports = {
  * Copyright (c) 2012 Stefan Siegl <stesie@brokenpipe.de>
  * Copyright (c) 2012-2014 Digital Bazaar, Inc.
  */
-var forge = __webpack_require__(998);
-__webpack_require__(171);
-__webpack_require__(951);
+var forge = __webpack_require__(45);
+__webpack_require__(985);
+__webpack_require__(476);
 __webpack_require__(294);
 
 /* DES API */
@@ -45772,7 +47587,7 @@ exports.default = QuoteSingle;
  *
  * EncryptedData ::= OCTET STRING
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(138);
 __webpack_require__(535);
 __webpack_require__(390);
@@ -46898,7 +48713,46 @@ exports.Querystring = Querystring
 
 
 /***/ }),
-/* 398 */,
+/* 398 */
+/***/ (function(module) {
+
+"use strict";
+
+
+function reusify (Constructor) {
+  var head = new Constructor()
+  var tail = head
+
+  function get () {
+    var current = head
+
+    if (current.next) {
+      head = current.next
+    } else {
+      head = new Constructor()
+      tail = head
+    }
+
+    current.next = null
+
+    return current
+  }
+
+  function release (obj) {
+    tail.next = obj
+    tail = obj
+  }
+
+  return {
+    get: get,
+    release: release
+  }
+}
+
+module.exports = reusify
+
+
+/***/ }),
 /* 399 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -47231,287 +49085,449 @@ module.exports.wrap = wrap;
 /* 401 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-var iterate    = __webpack_require__(755)
-  , initState  = __webpack_require__(59)
-  , terminator = __webpack_require__(782)
-  ;
+"use strict";
 
-// Public API
-module.exports = parallel;
+
+const stringify = __webpack_require__(79);
 
 /**
- * Runs iterator over provided array elements in parallel
- *
- * @param   {array|object} list - array or object (named list) to iterate over
- * @param   {function} iterator - iterator to run
- * @param   {function} callback - invoked when all elements processed
- * @returns {function} - jobs terminator
+ * Constants
  */
-function parallel(list, iterator, callback)
-{
-  var state = initState(list);
 
-  while (state.index < (state['keyedList'] || list).length)
-  {
-    iterate(list, iterator, state, function(error, result)
-    {
-      if (error)
-      {
-        callback(error, result);
-        return;
-      }
+const {
+  MAX_LENGTH,
+  CHAR_BACKSLASH, /* \ */
+  CHAR_BACKTICK, /* ` */
+  CHAR_COMMA, /* , */
+  CHAR_DOT, /* . */
+  CHAR_LEFT_PARENTHESES, /* ( */
+  CHAR_RIGHT_PARENTHESES, /* ) */
+  CHAR_LEFT_CURLY_BRACE, /* { */
+  CHAR_RIGHT_CURLY_BRACE, /* } */
+  CHAR_LEFT_SQUARE_BRACKET, /* [ */
+  CHAR_RIGHT_SQUARE_BRACKET, /* ] */
+  CHAR_DOUBLE_QUOTE, /* " */
+  CHAR_SINGLE_QUOTE, /* ' */
+  CHAR_NO_BREAK_SPACE,
+  CHAR_ZERO_WIDTH_NOBREAK_SPACE
+} = __webpack_require__(896);
 
-      // looks like it's the last one
-      if (Object.keys(state.jobs).length === 0)
-      {
-        callback(null, state.results);
-        return;
-      }
-    });
+/**
+ * parse
+ */
 
-    state.index++;
+const parse = (input, options = {}) => {
+  if (typeof input !== 'string') {
+    throw new TypeError('Expected a string');
   }
 
-  return terminator.bind(state, callback);
-}
+  let opts = options || {};
+  let max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+  if (input.length > max) {
+    throw new SyntaxError(`Input length (${input.length}), exceeds max characters (${max})`);
+  }
+
+  let ast = { type: 'root', input, nodes: [] };
+  let stack = [ast];
+  let block = ast;
+  let prev = ast;
+  let brackets = 0;
+  let length = input.length;
+  let index = 0;
+  let depth = 0;
+  let value;
+  let memo = {};
+
+  /**
+   * Helpers
+   */
+
+  const advance = () => input[index++];
+  const push = node => {
+    if (node.type === 'text' && prev.type === 'dot') {
+      prev.type = 'text';
+    }
+
+    if (prev && prev.type === 'text' && node.type === 'text') {
+      prev.value += node.value;
+      return;
+    }
+
+    block.nodes.push(node);
+    node.parent = block;
+    node.prev = prev;
+    prev = node;
+    return node;
+  };
+
+  push({ type: 'bos' });
+
+  while (index < length) {
+    block = stack[stack.length - 1];
+    value = advance();
+
+    /**
+     * Invalid chars
+     */
+
+    if (value === CHAR_ZERO_WIDTH_NOBREAK_SPACE || value === CHAR_NO_BREAK_SPACE) {
+      continue;
+    }
+
+    /**
+     * Escaped chars
+     */
+
+    if (value === CHAR_BACKSLASH) {
+      push({ type: 'text', value: (options.keepEscaping ? value : '') + advance() });
+      continue;
+    }
+
+    /**
+     * Right square bracket (literal): ']'
+     */
+
+    if (value === CHAR_RIGHT_SQUARE_BRACKET) {
+      push({ type: 'text', value: '\\' + value });
+      continue;
+    }
+
+    /**
+     * Left square bracket: '['
+     */
+
+    if (value === CHAR_LEFT_SQUARE_BRACKET) {
+      brackets++;
+
+      let closed = true;
+      let next;
+
+      while (index < length && (next = advance())) {
+        value += next;
+
+        if (next === CHAR_LEFT_SQUARE_BRACKET) {
+          brackets++;
+          continue;
+        }
+
+        if (next === CHAR_BACKSLASH) {
+          value += advance();
+          continue;
+        }
+
+        if (next === CHAR_RIGHT_SQUARE_BRACKET) {
+          brackets--;
+
+          if (brackets === 0) {
+            break;
+          }
+        }
+      }
+
+      push({ type: 'text', value });
+      continue;
+    }
+
+    /**
+     * Parentheses
+     */
+
+    if (value === CHAR_LEFT_PARENTHESES) {
+      block = push({ type: 'paren', nodes: [] });
+      stack.push(block);
+      push({ type: 'text', value });
+      continue;
+    }
+
+    if (value === CHAR_RIGHT_PARENTHESES) {
+      if (block.type !== 'paren') {
+        push({ type: 'text', value });
+        continue;
+      }
+      block = stack.pop();
+      push({ type: 'text', value });
+      block = stack[stack.length - 1];
+      continue;
+    }
+
+    /**
+     * Quotes: '|"|`
+     */
+
+    if (value === CHAR_DOUBLE_QUOTE || value === CHAR_SINGLE_QUOTE || value === CHAR_BACKTICK) {
+      let open = value;
+      let next;
+
+      if (options.keepQuotes !== true) {
+        value = '';
+      }
+
+      while (index < length && (next = advance())) {
+        if (next === CHAR_BACKSLASH) {
+          value += next + advance();
+          continue;
+        }
+
+        if (next === open) {
+          if (options.keepQuotes === true) value += next;
+          break;
+        }
+
+        value += next;
+      }
+
+      push({ type: 'text', value });
+      continue;
+    }
+
+    /**
+     * Left curly brace: '{'
+     */
+
+    if (value === CHAR_LEFT_CURLY_BRACE) {
+      depth++;
+
+      let dollar = prev.value && prev.value.slice(-1) === '$' || block.dollar === true;
+      let brace = {
+        type: 'brace',
+        open: true,
+        close: false,
+        dollar,
+        depth,
+        commas: 0,
+        ranges: 0,
+        nodes: []
+      };
+
+      block = push(brace);
+      stack.push(block);
+      push({ type: 'open', value });
+      continue;
+    }
+
+    /**
+     * Right curly brace: '}'
+     */
+
+    if (value === CHAR_RIGHT_CURLY_BRACE) {
+      if (block.type !== 'brace') {
+        push({ type: 'text', value });
+        continue;
+      }
+
+      let type = 'close';
+      block = stack.pop();
+      block.close = true;
+
+      push({ type, value });
+      depth--;
+
+      block = stack[stack.length - 1];
+      continue;
+    }
+
+    /**
+     * Comma: ','
+     */
+
+    if (value === CHAR_COMMA && depth > 0) {
+      if (block.ranges > 0) {
+        block.ranges = 0;
+        let open = block.nodes.shift();
+        block.nodes = [open, { type: 'text', value: stringify(block) }];
+      }
+
+      push({ type: 'comma', value });
+      block.commas++;
+      continue;
+    }
+
+    /**
+     * Dot: '.'
+     */
+
+    if (value === CHAR_DOT && depth > 0 && block.commas === 0) {
+      let siblings = block.nodes;
+
+      if (depth === 0 || siblings.length === 0) {
+        push({ type: 'text', value });
+        continue;
+      }
+
+      if (prev.type === 'dot') {
+        block.range = [];
+        prev.value += value;
+        prev.type = 'range';
+
+        if (block.nodes.length !== 3 && block.nodes.length !== 5) {
+          block.invalid = true;
+          block.ranges = 0;
+          prev.type = 'text';
+          continue;
+        }
+
+        block.ranges++;
+        block.args = [];
+        continue;
+      }
+
+      if (prev.type === 'range') {
+        siblings.pop();
+
+        let before = siblings[siblings.length - 1];
+        before.value += prev.value + value;
+        prev = before;
+        block.ranges--;
+        continue;
+      }
+
+      push({ type: 'dot', value });
+      continue;
+    }
+
+    /**
+     * Text
+     */
+
+    push({ type: 'text', value });
+  }
+
+  // Mark imbalanced braces and brackets as invalid
+  do {
+    block = stack.pop();
+
+    if (block.type !== 'root') {
+      block.nodes.forEach(node => {
+        if (!node.nodes) {
+          if (node.type === 'open') node.isOpen = true;
+          if (node.type === 'close') node.isClose = true;
+          if (!node.nodes) node.type = 'text';
+          node.invalid = true;
+        }
+      });
+
+      // get the location of the block on parent.nodes (block's siblings)
+      let parent = stack[stack.length - 1];
+      let index = parent.nodes.indexOf(block);
+      // replace the (invalid) block with it's nodes
+      parent.nodes.splice(index, 1, ...block.nodes);
+    }
+  } while (stack.length > 0);
+
+  push({ type: 'eos' });
+  return ast;
+};
+
+module.exports = parse;
 
 
 /***/ }),
 /* 402 */,
 /* 403 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
+"use strict";
 
-/**
- * This is the common logic for both the Node.js and web browser
- * implementations of `debug()`.
- *
- * Expose `debug()` as the module.
- */
-
-exports = module.exports = createDebug.debug = createDebug['default'] = createDebug;
-exports.coerce = coerce;
-exports.disable = disable;
-exports.enable = enable;
-exports.enabled = enabled;
-exports.humanize = __webpack_require__(624);
-
-/**
- * Active `debug` instances.
- */
-exports.instances = [];
-
-/**
- * The currently active debug mode names, and names to skip.
- */
-
-exports.names = [];
-exports.skips = [];
-
-/**
- * Map of special "%n" handling functions, for the debug "format" argument.
- *
- * Valid key names are a single, lower or upper-case letter, i.e. "n" and "N".
- */
-
-exports.formatters = {};
-
-/**
- * Select a color.
- * @param {String} namespace
- * @return {Number}
- * @api private
- */
-
-function selectColor(namespace) {
-  var hash = 0, i;
-
-  for (i in namespace) {
-    hash  = ((hash << 5) - hash) + namespace.charCodeAt(i);
-    hash |= 0; // Convert to 32bit integer
-  }
-
-  return exports.colors[Math.abs(hash) % exports.colors.length];
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.convertPatternGroupToTask = exports.convertPatternGroupsToTasks = exports.groupPatternsByBaseDirectory = exports.getNegativePatternsAsPositive = exports.getPositivePatterns = exports.convertPatternsToTasks = exports.generate = void 0;
+const utils = __webpack_require__(817);
+function generate(patterns, settings) {
+    const positivePatterns = getPositivePatterns(patterns);
+    const negativePatterns = getNegativePatternsAsPositive(patterns, settings.ignore);
+    const staticPatterns = positivePatterns.filter((pattern) => utils.pattern.isStaticPattern(pattern, settings));
+    const dynamicPatterns = positivePatterns.filter((pattern) => utils.pattern.isDynamicPattern(pattern, settings));
+    const staticTasks = convertPatternsToTasks(staticPatterns, negativePatterns, /* dynamic */ false);
+    const dynamicTasks = convertPatternsToTasks(dynamicPatterns, negativePatterns, /* dynamic */ true);
+    return staticTasks.concat(dynamicTasks);
 }
-
-/**
- * Create a debugger with the given `namespace`.
- *
- * @param {String} namespace
- * @return {Function}
- * @api public
- */
-
-function createDebug(namespace) {
-
-  var prevTime;
-
-  function debug() {
-    // disabled?
-    if (!debug.enabled) return;
-
-    var self = debug;
-
-    // set `diff` timestamp
-    var curr = +new Date();
-    var ms = curr - (prevTime || curr);
-    self.diff = ms;
-    self.prev = prevTime;
-    self.curr = curr;
-    prevTime = curr;
-
-    // turn the `arguments` into a proper Array
-    var args = new Array(arguments.length);
-    for (var i = 0; i < args.length; i++) {
-      args[i] = arguments[i];
+exports.generate = generate;
+function convertPatternsToTasks(positive, negative, dynamic) {
+    const positivePatternsGroup = groupPatternsByBaseDirectory(positive);
+    // When we have a global group – there is no reason to divide the patterns into independent tasks.
+    // In this case, the global task covers the rest.
+    if ('.' in positivePatternsGroup) {
+        const task = convertPatternGroupToTask('.', positive, negative, dynamic);
+        return [task];
     }
-
-    args[0] = exports.coerce(args[0]);
-
-    if ('string' !== typeof args[0]) {
-      // anything else let's inspect with %O
-      args.unshift('%O');
-    }
-
-    // apply any `formatters` transformations
-    var index = 0;
-    args[0] = args[0].replace(/%([a-zA-Z%])/g, function(match, format) {
-      // if we encounter an escaped % then don't increase the array index
-      if (match === '%%') return match;
-      index++;
-      var formatter = exports.formatters[format];
-      if ('function' === typeof formatter) {
-        var val = args[index];
-        match = formatter.call(self, val);
-
-        // now we need to remove `args[index]` since it's inlined in the `format`
-        args.splice(index, 1);
-        index--;
-      }
-      return match;
+    return convertPatternGroupsToTasks(positivePatternsGroup, negative, dynamic);
+}
+exports.convertPatternsToTasks = convertPatternsToTasks;
+function getPositivePatterns(patterns) {
+    return utils.pattern.getPositivePatterns(patterns);
+}
+exports.getPositivePatterns = getPositivePatterns;
+function getNegativePatternsAsPositive(patterns, ignore) {
+    const negative = utils.pattern.getNegativePatterns(patterns).concat(ignore);
+    const positive = negative.map(utils.pattern.convertToPositivePattern);
+    return positive;
+}
+exports.getNegativePatternsAsPositive = getNegativePatternsAsPositive;
+function groupPatternsByBaseDirectory(patterns) {
+    const group = {};
+    return patterns.reduce((collection, pattern) => {
+        const base = utils.pattern.getBaseDirectory(pattern);
+        if (base in collection) {
+            collection[base].push(pattern);
+        }
+        else {
+            collection[base] = [pattern];
+        }
+        return collection;
+    }, group);
+}
+exports.groupPatternsByBaseDirectory = groupPatternsByBaseDirectory;
+function convertPatternGroupsToTasks(positive, negative, dynamic) {
+    return Object.keys(positive).map((base) => {
+        return convertPatternGroupToTask(base, positive[base], negative, dynamic);
     });
-
-    // apply env-specific formatting (colors, etc.)
-    exports.formatArgs.call(self, args);
-
-    var logFn = debug.log || exports.log || console.log.bind(console);
-    logFn.apply(self, args);
-  }
-
-  debug.namespace = namespace;
-  debug.enabled = exports.enabled(namespace);
-  debug.useColors = exports.useColors();
-  debug.color = selectColor(namespace);
-  debug.destroy = destroy;
-
-  // env-specific initialization logic for debug instances
-  if ('function' === typeof exports.init) {
-    exports.init(debug);
-  }
-
-  exports.instances.push(debug);
-
-  return debug;
 }
-
-function destroy () {
-  var index = exports.instances.indexOf(this);
-  if (index !== -1) {
-    exports.instances.splice(index, 1);
-    return true;
-  } else {
-    return false;
-  }
+exports.convertPatternGroupsToTasks = convertPatternGroupsToTasks;
+function convertPatternGroupToTask(base, positive, negative, dynamic) {
+    return {
+        dynamic,
+        positive,
+        negative,
+        base,
+        patterns: [].concat(positive, negative.map(utils.pattern.convertToNegativePattern))
+    };
 }
-
-/**
- * Enables a debug mode by namespaces. This can include modes
- * separated by a colon and wildcards.
- *
- * @param {String} namespaces
- * @api public
- */
-
-function enable(namespaces) {
-  exports.save(namespaces);
-
-  exports.names = [];
-  exports.skips = [];
-
-  var i;
-  var split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
-  var len = split.length;
-
-  for (i = 0; i < len; i++) {
-    if (!split[i]) continue; // ignore empty strings
-    namespaces = split[i].replace(/\*/g, '.*?');
-    if (namespaces[0] === '-') {
-      exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
-    } else {
-      exports.names.push(new RegExp('^' + namespaces + '$'));
-    }
-  }
-
-  for (i = 0; i < exports.instances.length; i++) {
-    var instance = exports.instances[i];
-    instance.enabled = exports.enabled(instance.namespace);
-  }
-}
-
-/**
- * Disable debug output.
- *
- * @api public
- */
-
-function disable() {
-  exports.enable('');
-}
-
-/**
- * Returns true if the given mode name is enabled, false otherwise.
- *
- * @param {String} name
- * @return {Boolean}
- * @api public
- */
-
-function enabled(name) {
-  if (name[name.length - 1] === '*') {
-    return true;
-  }
-  var i, len;
-  for (i = 0, len = exports.skips.length; i < len; i++) {
-    if (exports.skips[i].test(name)) {
-      return false;
-    }
-  }
-  for (i = 0, len = exports.names.length; i < len; i++) {
-    if (exports.names[i].test(name)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * Coerce `val`.
- *
- * @param {Mixed} val
- * @return {Mixed}
- * @api private
- */
-
-function coerce(val) {
-  if (val instanceof Error) return val.stack || val.message;
-  return val;
-}
+exports.convertPatternGroupToTask = convertPatternGroupToTask;
 
 
 /***/ }),
 /* 404 */,
 /* 405 */,
-/* 406 */,
+/* 406 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const path = __webpack_require__(622);
+const fsStat = __webpack_require__(519);
+const fs = __webpack_require__(321);
+class Settings {
+    constructor(_options = {}) {
+        this._options = _options;
+        this.followSymbolicLinks = this._getValue(this._options.followSymbolicLinks, false);
+        this.fs = fs.createFileSystemAdapter(this._options.fs);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path.sep);
+        this.stats = this._getValue(this._options.stats, false);
+        this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
+        this.fsStatSettings = new fsStat.Settings({
+            followSymbolicLink: this.followSymbolicLinks,
+            fs: this.fs,
+            throwErrorOnBrokenSymbolicLink: this.throwErrorOnBrokenSymbolicLink
+        });
+    }
+    _getValue(option, value) {
+        return option === undefined ? value : option;
+    }
+}
+exports.default = Settings;
+
+
+/***/ }),
 /* 407 */,
 /* 408 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -48350,432 +50366,171 @@ exports.default = Range;
 /* 416 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-/**
- * A javascript implementation of a cryptographically-secure
- * Pseudo Random Number Generator (PRNG). The Fortuna algorithm is followed
- * here though the use of SHA-256 is not enforced; when generating an
- * a PRNG context, the hashing algorithm and block cipher used for
- * the generator are specified via a plugin.
- *
- * @author Dave Longley
- *
- * Copyright (c) 2010-2014 Digital Bazaar, Inc.
- */
-var forge = __webpack_require__(998);
-__webpack_require__(294);
+var Stream = __webpack_require__(413).Stream;
+var util = __webpack_require__(669);
 
-var _crypto = null;
-if(forge.util.isNodejs && !forge.options.usePureJavaScript &&
-  !process.versions['node-webkit']) {
-  _crypto = __webpack_require__(417);
+module.exports = DelayedStream;
+function DelayedStream() {
+  this.source = null;
+  this.dataSize = 0;
+  this.maxDataSize = 1024 * 1024;
+  this.pauseStream = true;
+
+  this._maxDataSizeExceeded = false;
+  this._released = false;
+  this._bufferedEvents = [];
 }
+util.inherits(DelayedStream, Stream);
 
-/* PRNG API */
-var prng = module.exports = forge.prng = forge.prng || {};
+DelayedStream.create = function(source, options) {
+  var delayedStream = new this();
 
-/**
- * Creates a new PRNG context.
- *
- * A PRNG plugin must be passed in that will provide:
- *
- * 1. A function that initializes the key and seed of a PRNG context. It
- *   will be given a 16 byte key and a 16 byte seed. Any key expansion
- *   or transformation of the seed from a byte string into an array of
- *   integers (or similar) should be performed.
- * 2. The cryptographic function used by the generator. It takes a key and
- *   a seed.
- * 3. A seed increment function. It takes the seed and returns seed + 1.
- * 4. An api to create a message digest.
- *
- * For an example, see random.js.
- *
- * @param plugin the PRNG plugin to use.
- */
-prng.create = function(plugin) {
-  var ctx = {
-    plugin: plugin,
-    key: null,
-    seed: null,
-    time: null,
-    // number of reseeds so far
-    reseeds: 0,
-    // amount of data generated so far
-    generated: 0,
-    // no initial key bytes
-    keyBytes: ''
-  };
-
-  // create 32 entropy pools (each is a message digest)
-  var md = plugin.md;
-  var pools = new Array(32);
-  for(var i = 0; i < 32; ++i) {
-    pools[i] = md.create();
-  }
-  ctx.pools = pools;
-
-  // entropy pools are written to cyclically, starting at index 0
-  ctx.pool = 0;
-
-  /**
-   * Generates random bytes. The bytes may be generated synchronously or
-   * asynchronously. Web workers must use the asynchronous interface or
-   * else the behavior is undefined.
-   *
-   * @param count the number of random bytes to generate.
-   * @param [callback(err, bytes)] called once the operation completes.
-   *
-   * @return count random bytes as a string.
-   */
-  ctx.generate = function(count, callback) {
-    // do synchronously
-    if(!callback) {
-      return ctx.generateSync(count);
-    }
-
-    // simple generator using counter-based CBC
-    var cipher = ctx.plugin.cipher;
-    var increment = ctx.plugin.increment;
-    var formatKey = ctx.plugin.formatKey;
-    var formatSeed = ctx.plugin.formatSeed;
-    var b = forge.util.createBuffer();
-
-    // paranoid deviation from Fortuna:
-    // reset key for every request to protect previously
-    // generated random bytes should the key be discovered;
-    // there is no 100ms based reseeding because of this
-    // forced reseed for every `generate` call
-    ctx.key = null;
-
-    generate();
-
-    function generate(err) {
-      if(err) {
-        return callback(err);
-      }
-
-      // sufficient bytes generated
-      if(b.length() >= count) {
-        return callback(null, b.getBytes(count));
-      }
-
-      // if amount of data generated is greater than 1 MiB, trigger reseed
-      if(ctx.generated > 0xfffff) {
-        ctx.key = null;
-      }
-
-      if(ctx.key === null) {
-        // prevent stack overflow
-        return forge.util.nextTick(function() {
-          _reseed(generate);
-        });
-      }
-
-      // generate the random bytes
-      var bytes = cipher(ctx.key, ctx.seed);
-      ctx.generated += bytes.length;
-      b.putBytes(bytes);
-
-      // generate bytes for a new key and seed
-      ctx.key = formatKey(cipher(ctx.key, increment(ctx.seed)));
-      ctx.seed = formatSeed(cipher(ctx.key, ctx.seed));
-
-      forge.util.setImmediate(generate);
-    }
-  };
-
-  /**
-   * Generates random bytes synchronously.
-   *
-   * @param count the number of random bytes to generate.
-   *
-   * @return count random bytes as a string.
-   */
-  ctx.generateSync = function(count) {
-    // simple generator using counter-based CBC
-    var cipher = ctx.plugin.cipher;
-    var increment = ctx.plugin.increment;
-    var formatKey = ctx.plugin.formatKey;
-    var formatSeed = ctx.plugin.formatSeed;
-
-    // paranoid deviation from Fortuna:
-    // reset key for every request to protect previously
-    // generated random bytes should the key be discovered;
-    // there is no 100ms based reseeding because of this
-    // forced reseed for every `generateSync` call
-    ctx.key = null;
-
-    var b = forge.util.createBuffer();
-    while(b.length() < count) {
-      // if amount of data generated is greater than 1 MiB, trigger reseed
-      if(ctx.generated > 0xfffff) {
-        ctx.key = null;
-      }
-
-      if(ctx.key === null) {
-        _reseedSync();
-      }
-
-      // generate the random bytes
-      var bytes = cipher(ctx.key, ctx.seed);
-      ctx.generated += bytes.length;
-      b.putBytes(bytes);
-
-      // generate bytes for a new key and seed
-      ctx.key = formatKey(cipher(ctx.key, increment(ctx.seed)));
-      ctx.seed = formatSeed(cipher(ctx.key, ctx.seed));
-    }
-
-    return b.getBytes(count);
-  };
-
-  /**
-   * Private function that asynchronously reseeds a generator.
-   *
-   * @param callback(err) called once the operation completes.
-   */
-  function _reseed(callback) {
-    if(ctx.pools[0].messageLength >= 32) {
-      _seed();
-      return callback();
-    }
-    // not enough seed data...
-    var needed = (32 - ctx.pools[0].messageLength) << 5;
-    ctx.seedFile(needed, function(err, bytes) {
-      if(err) {
-        return callback(err);
-      }
-      ctx.collect(bytes);
-      _seed();
-      callback();
-    });
+  options = options || {};
+  for (var option in options) {
+    delayedStream[option] = options[option];
   }
 
-  /**
-   * Private function that synchronously reseeds a generator.
-   */
-  function _reseedSync() {
-    if(ctx.pools[0].messageLength >= 32) {
-      return _seed();
-    }
-    // not enough seed data...
-    var needed = (32 - ctx.pools[0].messageLength) << 5;
-    ctx.collect(ctx.seedFileSync(needed));
-    _seed();
-  }
+  delayedStream.source = source;
 
-  /**
-   * Private function that seeds a generator once enough bytes are available.
-   */
-  function _seed() {
-    // update reseed count
-    ctx.reseeds = (ctx.reseeds === 0xffffffff) ? 0 : ctx.reseeds + 1;
-
-    // goal is to update `key` via:
-    // key = hash(key + s)
-    //   where 's' is all collected entropy from selected pools, then...
-
-    // create a plugin-based message digest
-    var md = ctx.plugin.md.create();
-
-    // consume current key bytes
-    md.update(ctx.keyBytes);
-
-    // digest the entropy of pools whose index k meet the
-    // condition 'n mod 2^k == 0' where n is the number of reseeds
-    var _2powK = 1;
-    for(var k = 0; k < 32; ++k) {
-      if(ctx.reseeds % _2powK === 0) {
-        md.update(ctx.pools[k].digest().getBytes());
-        ctx.pools[k].start();
-      }
-      _2powK = _2powK << 1;
-    }
-
-    // get digest for key bytes
-    ctx.keyBytes = md.digest().getBytes();
-
-    // paranoid deviation from Fortuna:
-    // update `seed` via `seed = hash(key)`
-    // instead of initializing to zero once and only
-    // ever incrementing it
-    md.start();
-    md.update(ctx.keyBytes);
-    var seedBytes = md.digest().getBytes();
-
-    // update state
-    ctx.key = ctx.plugin.formatKey(ctx.keyBytes);
-    ctx.seed = ctx.plugin.formatSeed(seedBytes);
-    ctx.generated = 0;
-  }
-
-  /**
-   * The built-in default seedFile. This seedFile is used when entropy
-   * is needed immediately.
-   *
-   * @param needed the number of bytes that are needed.
-   *
-   * @return the random bytes.
-   */
-  function defaultSeedFile(needed) {
-    // use window.crypto.getRandomValues strong source of entropy if available
-    var getRandomValues = null;
-    var globalScope = forge.util.globalScope;
-    var _crypto = globalScope.crypto || globalScope.msCrypto;
-    if(_crypto && _crypto.getRandomValues) {
-      getRandomValues = function(arr) {
-        return _crypto.getRandomValues(arr);
-      };
-    }
-
-    var b = forge.util.createBuffer();
-    if(getRandomValues) {
-      while(b.length() < needed) {
-        // max byte length is 65536 before QuotaExceededError is thrown
-        // http://www.w3.org/TR/WebCryptoAPI/#RandomSource-method-getRandomValues
-        var count = Math.max(1, Math.min(needed - b.length(), 65536) / 4);
-        var entropy = new Uint32Array(Math.floor(count));
-        try {
-          getRandomValues(entropy);
-          for(var i = 0; i < entropy.length; ++i) {
-            b.putInt32(entropy[i]);
-          }
-        } catch(e) {
-          /* only ignore QuotaExceededError */
-          if(!(typeof QuotaExceededError !== 'undefined' &&
-            e instanceof QuotaExceededError)) {
-            throw e;
-          }
-        }
-      }
-    }
-
-    // be sad and add some weak random data
-    if(b.length() < needed) {
-      /* Draws from Park-Miller "minimal standard" 31 bit PRNG,
-      implemented with David G. Carta's optimization: with 32 bit math
-      and without division (Public Domain). */
-      var hi, lo, next;
-      var seed = Math.floor(Math.random() * 0x010000);
-      while(b.length() < needed) {
-        lo = 16807 * (seed & 0xFFFF);
-        hi = 16807 * (seed >> 16);
-        lo += (hi & 0x7FFF) << 16;
-        lo += hi >> 15;
-        lo = (lo & 0x7FFFFFFF) + (lo >> 31);
-        seed = lo & 0xFFFFFFFF;
-
-        // consume lower 3 bytes of seed
-        for(var i = 0; i < 3; ++i) {
-          // throw in more pseudo random
-          next = seed >>> (i << 3);
-          next ^= Math.floor(Math.random() * 0x0100);
-          b.putByte(String.fromCharCode(next & 0xFF));
-        }
-      }
-    }
-
-    return b.getBytes(needed);
-  }
-  // initialize seed file APIs
-  if(_crypto) {
-    // use nodejs async API
-    ctx.seedFile = function(needed, callback) {
-      _crypto.randomBytes(needed, function(err, bytes) {
-        if(err) {
-          return callback(err);
-        }
-        callback(null, bytes.toString());
-      });
-    };
-    // use nodejs sync API
-    ctx.seedFileSync = function(needed) {
-      return _crypto.randomBytes(needed).toString();
-    };
-  } else {
-    ctx.seedFile = function(needed, callback) {
-      try {
-        callback(null, defaultSeedFile(needed));
-      } catch(e) {
-        callback(e);
-      }
-    };
-    ctx.seedFileSync = defaultSeedFile;
-  }
-
-  /**
-   * Adds entropy to a prng ctx's accumulator.
-   *
-   * @param bytes the bytes of entropy as a string.
-   */
-  ctx.collect = function(bytes) {
-    // iterate over pools distributing entropy cyclically
-    var count = bytes.length;
-    for(var i = 0; i < count; ++i) {
-      ctx.pools[ctx.pool].update(bytes.substr(i, 1));
-      ctx.pool = (ctx.pool === 31) ? 0 : ctx.pool + 1;
-    }
+  var realEmit = source.emit;
+  source.emit = function() {
+    delayedStream._handleEmit(arguments);
+    return realEmit.apply(source, arguments);
   };
 
-  /**
-   * Collects an integer of n bits.
-   *
-   * @param i the integer entropy.
-   * @param n the number of bits in the integer.
-   */
-  ctx.collectInt = function(i, n) {
-    var bytes = '';
-    for(var x = 0; x < n; x += 8) {
-      bytes += String.fromCharCode((i >> x) & 0xFF);
-    }
-    ctx.collect(bytes);
-  };
+  source.on('error', function() {});
+  if (delayedStream.pauseStream) {
+    source.pause();
+  }
 
-  /**
-   * Registers a Web Worker to receive immediate entropy from the main thread.
-   * This method is required until Web Workers can access the native crypto
-   * API. This method should be called twice for each created worker, once in
-   * the main thread, and once in the worker itself.
-   *
-   * @param worker the worker to register.
-   */
-  ctx.registerWorker = function(worker) {
-    // worker receives random bytes
-    if(worker === self) {
-      ctx.seedFile = function(needed, callback) {
-        function listener(e) {
-          var data = e.data;
-          if(data.forge && data.forge.prng) {
-            self.removeEventListener('message', listener);
-            callback(data.forge.prng.err, data.forge.prng.bytes);
-          }
-        }
-        self.addEventListener('message', listener);
-        self.postMessage({forge: {prng: {needed: needed}}});
-      };
-    } else {
-      // main thread sends random bytes upon request
-      var listener = function(e) {
-        var data = e.data;
-        if(data.forge && data.forge.prng) {
-          ctx.seedFile(data.forge.prng.needed, function(err, bytes) {
-            worker.postMessage({forge: {prng: {err: err, bytes: bytes}}});
-          });
-        }
-      };
-      // TODO: do we need to remove the event listener when the worker dies?
-      worker.addEventListener('message', listener);
-    }
-  };
+  return delayedStream;
+};
 
-  return ctx;
+Object.defineProperty(DelayedStream.prototype, 'readable', {
+  configurable: true,
+  enumerable: true,
+  get: function() {
+    return this.source.readable;
+  }
+});
+
+DelayedStream.prototype.setEncoding = function() {
+  return this.source.setEncoding.apply(this.source, arguments);
+};
+
+DelayedStream.prototype.resume = function() {
+  if (!this._released) {
+    this.release();
+  }
+
+  this.source.resume();
+};
+
+DelayedStream.prototype.pause = function() {
+  this.source.pause();
+};
+
+DelayedStream.prototype.release = function() {
+  this._released = true;
+
+  this._bufferedEvents.forEach(function(args) {
+    this.emit.apply(this, args);
+  }.bind(this));
+  this._bufferedEvents = [];
+};
+
+DelayedStream.prototype.pipe = function() {
+  var r = Stream.prototype.pipe.apply(this, arguments);
+  this.resume();
+  return r;
+};
+
+DelayedStream.prototype._handleEmit = function(args) {
+  if (this._released) {
+    this.emit.apply(this, args);
+    return;
+  }
+
+  if (args[0] === 'data') {
+    this.dataSize += args[1].length;
+    this._checkIfMaxDataSizeExceeded();
+  }
+
+  this._bufferedEvents.push(args);
+};
+
+DelayedStream.prototype._checkIfMaxDataSizeExceeded = function() {
+  if (this._maxDataSizeExceeded) {
+    return;
+  }
+
+  if (this.dataSize <= this.maxDataSize) {
+    return;
+  }
+
+  this._maxDataSizeExceeded = true;
+  var message =
+    'DelayedStream#maxDataSize of ' + this.maxDataSize + ' bytes exceeded.'
+  this.emit('error', new Error(message));
 };
 
 
 /***/ }),
 /* 417 */
-/***/ (function(module) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-module.exports = require("crypto");
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const utils = __webpack_require__(817);
+class Matcher {
+    constructor(_patterns, _settings, _micromatchOptions) {
+        this._patterns = _patterns;
+        this._settings = _settings;
+        this._micromatchOptions = _micromatchOptions;
+        this._storage = [];
+        this._fillStorage();
+    }
+    _fillStorage() {
+        /**
+         * The original pattern may include `{,*,**,a/*}`, which will lead to problems with matching (unresolved level).
+         * So, before expand patterns with brace expansion into separated patterns.
+         */
+        const patterns = utils.pattern.expandPatternsWithBraceExpansion(this._patterns);
+        for (const pattern of patterns) {
+            const segments = this._getPatternSegments(pattern);
+            const sections = this._splitSegmentsIntoSections(segments);
+            this._storage.push({
+                complete: sections.length <= 1,
+                pattern,
+                segments,
+                sections
+            });
+        }
+    }
+    _getPatternSegments(pattern) {
+        const parts = utils.pattern.getPatternParts(pattern, this._micromatchOptions);
+        return parts.map((part) => {
+            const dynamic = utils.pattern.isDynamicPattern(part, this._settings);
+            if (!dynamic) {
+                return {
+                    dynamic: false,
+                    pattern: part
+                };
+            }
+            return {
+                dynamic: true,
+                pattern: part,
+                patternRe: utils.pattern.makeRe(part, this._micromatchOptions)
+            };
+        });
+    }
+    _splitSegmentsIntoSections(segments) {
+        return utils.array.splitWhen(segments, (segment) => segment.dynamic && utils.pattern.hasGlobStar(segment.pattern));
+    }
+}
+exports.default = Matcher;
+
 
 /***/ }),
 /* 418 */
@@ -49852,216 +51607,76 @@ module.exports = function generate__limitItems(it, $keyword, $ruleType) {
 
 /***/ }),
 /* 435 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-/**
- * Module dependencies.
- */
+"use strict";
 
-var tty = __webpack_require__(867);
-var util = __webpack_require__(669);
-
-/**
- * This is the Node.js implementation of `debug()`.
- *
- * Expose `debug()` as the module.
- */
-
-exports = module.exports = __webpack_require__(403);
-exports.init = init;
-exports.log = log;
-exports.formatArgs = formatArgs;
-exports.save = save;
-exports.load = load;
-exports.useColors = useColors;
-
-/**
- * Colors.
- */
-
-exports.colors = [ 6, 2, 3, 4, 5, 1 ];
-
-try {
-  var supportsColor = __webpack_require__(130);
-  if (supportsColor && supportsColor.level >= 2) {
-    exports.colors = [
-      20, 21, 26, 27, 32, 33, 38, 39, 40, 41, 42, 43, 44, 45, 56, 57, 62, 63, 68,
-      69, 74, 75, 76, 77, 78, 79, 80, 81, 92, 93, 98, 99, 112, 113, 128, 129, 134,
-      135, 148, 149, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171,
-      172, 173, 178, 179, 184, 185, 196, 197, 198, 199, 200, 201, 202, 203, 204,
-      205, 206, 207, 208, 209, 214, 215, 220, 221
-    ];
-  }
-} catch (err) {
-  // swallow - we only care if `supports-color` is available; it doesn't have to be.
+Object.defineProperty(exports, "__esModule", { value: true });
+const path = __webpack_require__(622);
+const fsScandir = __webpack_require__(633);
+class Settings {
+    constructor(_options = {}) {
+        this._options = _options;
+        this.basePath = this._getValue(this._options.basePath, undefined);
+        this.concurrency = this._getValue(this._options.concurrency, Infinity);
+        this.deepFilter = this._getValue(this._options.deepFilter, null);
+        this.entryFilter = this._getValue(this._options.entryFilter, null);
+        this.errorFilter = this._getValue(this._options.errorFilter, null);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path.sep);
+        this.fsScandirSettings = new fsScandir.Settings({
+            followSymbolicLinks: this._options.followSymbolicLinks,
+            fs: this._options.fs,
+            pathSegmentSeparator: this._options.pathSegmentSeparator,
+            stats: this._options.stats,
+            throwErrorOnBrokenSymbolicLink: this._options.throwErrorOnBrokenSymbolicLink
+        });
+    }
+    _getValue(option, value) {
+        return option === undefined ? value : option;
+    }
 }
-
-/**
- * Build up the default `inspectOpts` object from the environment variables.
- *
- *   $ DEBUG_COLORS=no DEBUG_DEPTH=10 DEBUG_SHOW_HIDDEN=enabled node script.js
- */
-
-exports.inspectOpts = Object.keys(process.env).filter(function (key) {
-  return /^debug_/i.test(key);
-}).reduce(function (obj, key) {
-  // camel-case
-  var prop = key
-    .substring(6)
-    .toLowerCase()
-    .replace(/_([a-z])/g, function (_, k) { return k.toUpperCase() });
-
-  // coerce string value into JS value
-  var val = process.env[key];
-  if (/^(yes|on|true|enabled)$/i.test(val)) val = true;
-  else if (/^(no|off|false|disabled)$/i.test(val)) val = false;
-  else if (val === 'null') val = null;
-  else val = Number(val);
-
-  obj[prop] = val;
-  return obj;
-}, {});
-
-/**
- * Is stdout a TTY? Colored output is enabled when `true`.
- */
-
-function useColors() {
-  return 'colors' in exports.inspectOpts
-    ? Boolean(exports.inspectOpts.colors)
-    : tty.isatty(process.stderr.fd);
-}
-
-/**
- * Map %o to `util.inspect()`, all on a single line.
- */
-
-exports.formatters.o = function(v) {
-  this.inspectOpts.colors = this.useColors;
-  return util.inspect(v, this.inspectOpts)
-    .split('\n').map(function(str) {
-      return str.trim()
-    }).join(' ');
-};
-
-/**
- * Map %o to `util.inspect()`, allowing multiple lines if needed.
- */
-
-exports.formatters.O = function(v) {
-  this.inspectOpts.colors = this.useColors;
-  return util.inspect(v, this.inspectOpts);
-};
-
-/**
- * Adds ANSI color escape codes if enabled.
- *
- * @api public
- */
-
-function formatArgs(args) {
-  var name = this.namespace;
-  var useColors = this.useColors;
-
-  if (useColors) {
-    var c = this.color;
-    var colorCode = '\u001b[3' + (c < 8 ? c : '8;5;' + c);
-    var prefix = '  ' + colorCode + ';1m' + name + ' ' + '\u001b[0m';
-
-    args[0] = prefix + args[0].split('\n').join('\n' + prefix);
-    args.push(colorCode + 'm+' + exports.humanize(this.diff) + '\u001b[0m');
-  } else {
-    args[0] = getDate() + name + ' ' + args[0];
-  }
-}
-
-function getDate() {
-  if (exports.inspectOpts.hideDate) {
-    return '';
-  } else {
-    return new Date().toISOString() + ' ';
-  }
-}
-
-/**
- * Invokes `util.format()` with the specified arguments and writes to stderr.
- */
-
-function log() {
-  return process.stderr.write(util.format.apply(util, arguments) + '\n');
-}
-
-/**
- * Save `namespaces`.
- *
- * @param {String} namespaces
- * @api private
- */
-
-function save(namespaces) {
-  if (null == namespaces) {
-    // If you set a process.env field to null or undefined, it gets cast to the
-    // string 'null' or 'undefined'. Just delete instead.
-    delete process.env.DEBUG;
-  } else {
-    process.env.DEBUG = namespaces;
-  }
-}
-
-/**
- * Load `namespaces`.
- *
- * @return {String} returns the previously persisted debug modes
- * @api private
- */
-
-function load() {
-  return process.env.DEBUG;
-}
-
-/**
- * Init logic for `debug` instances.
- *
- * Create a new `inspectOpts` object in case `useColors` is set
- * differently for a particular `debug` instance.
- */
-
-function init (debug) {
-  debug.inspectOpts = {};
-
-  var keys = Object.keys(exports.inspectOpts);
-  for (var i = 0; i < keys.length; i++) {
-    debug.inspectOpts[keys[i]] = exports.inspectOpts[keys[i]];
-  }
-}
-
-/**
- * Enable namespaces listed in `process.env.DEBUG` initially.
- */
-
-exports.enable(load());
+exports.default = Settings;
 
 
 /***/ }),
 /* 436 */,
 /* 437 */
-/***/ (function(module) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-
-/**
- * Creates a new URL by combining the specified URLs
- *
- * @param {string} baseURL The base URL
- * @param {string} relativeURL The relative URL
- * @returns {string} The combined URL
- */
-module.exports = function combineURLs(baseURL, relativeURL) {
-  return relativeURL
-    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
-    : baseURL;
-};
+Object.defineProperty(exports, "__esModule", { value: true });
+const path = __webpack_require__(622);
+const fsStat = __webpack_require__(519);
+const utils = __webpack_require__(817);
+class Reader {
+    constructor(_settings) {
+        this._settings = _settings;
+        this._fsStatSettings = new fsStat.Settings({
+            followSymbolicLink: this._settings.followSymbolicLinks,
+            fs: this._settings.fs,
+            throwErrorOnBrokenSymbolicLink: this._settings.followSymbolicLinks
+        });
+    }
+    _getFullEntryPath(filepath) {
+        return path.resolve(this._settings.cwd, filepath);
+    }
+    _makeEntry(stats, pattern) {
+        const entry = {
+            name: pattern,
+            path: pattern,
+            dirent: utils.fs.createDirentFromStats(pattern, stats)
+        };
+        if (this._settings.stats) {
+            entry.stats = stats;
+        }
+        return entry;
+    }
+    _isFatalError(error) {
+        return !utils.errno.isEnoentCodeError(error) && !this._settings.suppressErrors;
+    }
+}
+exports.default = Reader;
 
 
 /***/ }),
@@ -50286,11 +51901,81 @@ exports.requestTimeout = requestTimeout;
 
 /***/ }),
 /* 439 */,
-/* 440 */,
+/* 440 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+// Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
+
+// If you have no idea what ASN.1 or BER is, see this:
+// ftp://ftp.rsa.com/pub/pkcs/ascii/layman.asc
+
+var Ber = __webpack_require__(899);
+
+
+
+// --- Exported API
+
+module.exports = {
+
+  Ber: Ber,
+
+  BerReader: Ber.Reader,
+
+  BerWriter: Ber.Writer
+
+};
+
+
+/***/ }),
 /* 441 */,
 /* 442 */,
 /* 443 */,
-/* 444 */,
+/* 444 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+
+var loader = __webpack_require__(361);
+var dumper = __webpack_require__(580);
+
+
+function deprecated(name) {
+  return function () {
+    throw new Error('Function ' + name + ' is deprecated and cannot be used.');
+  };
+}
+
+
+module.exports.Type                = __webpack_require__(741);
+module.exports.Schema              = __webpack_require__(449);
+module.exports.FAILSAFE_SCHEMA     = __webpack_require__(118);
+module.exports.JSON_SCHEMA         = __webpack_require__(971);
+module.exports.CORE_SCHEMA         = __webpack_require__(176);
+module.exports.DEFAULT_SAFE_SCHEMA = __webpack_require__(301);
+module.exports.DEFAULT_FULL_SCHEMA = __webpack_require__(227);
+module.exports.load                = loader.load;
+module.exports.loadAll             = loader.loadAll;
+module.exports.safeLoad            = loader.safeLoad;
+module.exports.safeLoadAll         = loader.safeLoadAll;
+module.exports.dump                = dumper.dump;
+module.exports.safeDump            = dumper.safeDump;
+module.exports.YAMLException       = __webpack_require__(430);
+
+// Deprecated schema names from JS-YAML 2.0.x
+module.exports.MINIMAL_SCHEMA = __webpack_require__(118);
+module.exports.SAFE_SCHEMA    = __webpack_require__(301);
+module.exports.DEFAULT_SCHEMA = __webpack_require__(227);
+
+// Deprecated functions from JS-YAML 1.x.x
+module.exports.scan           = deprecated('scan');
+module.exports.parse          = deprecated('parse');
+module.exports.compose        = deprecated('compose');
+module.exports.addConstructor = deprecated('addConstructor');
+
+
+/***/ }),
 /* 445 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -50301,7 +51986,7 @@ exports.requestTimeout = requestTimeout;
  *
  * Copyright (c) 2010-2014 Digital Bazaar, Inc.
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(891);
 __webpack_require__(294);
 
@@ -50587,23 +52272,58 @@ function _update(s, w, bytes) {
 
 /***/ }),
 /* 446 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-const agent_1 = __importDefault(__webpack_require__(695));
-function createHttpsProxyAgent(opts) {
-    return new agent_1.default(opts);
+Object.defineProperty(exports, "__esModule", { value: true });
+const path = __webpack_require__(622);
+const deep_1 = __webpack_require__(43);
+const entry_1 = __webpack_require__(650);
+const error_1 = __webpack_require__(514);
+const entry_2 = __webpack_require__(526);
+class Provider {
+    constructor(_settings) {
+        this._settings = _settings;
+        this.errorFilter = new error_1.default(this._settings);
+        this.entryFilter = new entry_1.default(this._settings, this._getMicromatchOptions());
+        this.deepFilter = new deep_1.default(this._settings, this._getMicromatchOptions());
+        this.entryTransformer = new entry_2.default(this._settings);
+    }
+    _getRootDirectory(task) {
+        return path.resolve(this._settings.cwd, task.base);
+    }
+    _getReaderOptions(task) {
+        const basePath = task.base === '.' ? '' : task.base;
+        return {
+            basePath,
+            pathSegmentSeparator: '/',
+            concurrency: this._settings.concurrency,
+            deepFilter: this.deepFilter.getFilter(basePath, task.positive, task.negative),
+            entryFilter: this.entryFilter.getFilter(task.positive, task.negative),
+            errorFilter: this.errorFilter.getFilter(),
+            followSymbolicLinks: this._settings.followSymbolicLinks,
+            fs: this._settings.fs,
+            stats: this._settings.stats,
+            throwErrorOnBrokenSymbolicLink: this._settings.throwErrorOnBrokenSymbolicLink,
+            transform: this.entryTransformer.getTransformer()
+        };
+    }
+    _getMicromatchOptions() {
+        return {
+            dot: this._settings.dot,
+            matchBase: this._settings.baseNameMatch,
+            nobrace: !this._settings.braceExpansion,
+            nocase: !this._settings.caseSensitiveMatch,
+            noext: !this._settings.extglob,
+            noglobstar: !this._settings.globstar,
+            posix: true,
+            strictSlashes: false
+        };
+    }
 }
-(function (createHttpsProxyAgent) {
-    createHttpsProxyAgent.HttpsProxyAgent = agent_1.default;
-    createHttpsProxyAgent.prototype = agent_1.default.prototype;
-})(createHttpsProxyAgent || (createHttpsProxyAgent = {}));
-module.exports = createHttpsProxyAgent;
-//# sourceMappingURL=index.js.map
+exports.default = Provider;
+
 
 /***/ }),
 /* 447 */,
@@ -50737,113 +52457,295 @@ module.exports = {"$id":"creator.json#","$schema":"http://json-schema.org/draft-
 /* 451 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-var Stream = __webpack_require__(413).Stream;
-var util = __webpack_require__(669);
+"use strict";
+/*!
+ * to-regex-range <https://github.com/micromatch/to-regex-range>
+ *
+ * Copyright (c) 2015-present, Jon Schlinkert.
+ * Released under the MIT License.
+ */
 
-module.exports = DelayedStream;
-function DelayedStream() {
-  this.source = null;
-  this.dataSize = 0;
-  this.maxDataSize = 1024 * 1024;
-  this.pauseStream = true;
 
-  this._maxDataSizeExceeded = false;
-  this._released = false;
-  this._bufferedEvents = [];
+
+const isNumber = __webpack_require__(33);
+
+const toRegexRange = (min, max, options) => {
+  if (isNumber(min) === false) {
+    throw new TypeError('toRegexRange: expected the first argument to be a number');
+  }
+
+  if (max === void 0 || min === max) {
+    return String(min);
+  }
+
+  if (isNumber(max) === false) {
+    throw new TypeError('toRegexRange: expected the second argument to be a number.');
+  }
+
+  let opts = { relaxZeros: true, ...options };
+  if (typeof opts.strictZeros === 'boolean') {
+    opts.relaxZeros = opts.strictZeros === false;
+  }
+
+  let relax = String(opts.relaxZeros);
+  let shorthand = String(opts.shorthand);
+  let capture = String(opts.capture);
+  let wrap = String(opts.wrap);
+  let cacheKey = min + ':' + max + '=' + relax + shorthand + capture + wrap;
+
+  if (toRegexRange.cache.hasOwnProperty(cacheKey)) {
+    return toRegexRange.cache[cacheKey].result;
+  }
+
+  let a = Math.min(min, max);
+  let b = Math.max(min, max);
+
+  if (Math.abs(a - b) === 1) {
+    let result = min + '|' + max;
+    if (opts.capture) {
+      return `(${result})`;
+    }
+    if (opts.wrap === false) {
+      return result;
+    }
+    return `(?:${result})`;
+  }
+
+  let isPadded = hasPadding(min) || hasPadding(max);
+  let state = { min, max, a, b };
+  let positives = [];
+  let negatives = [];
+
+  if (isPadded) {
+    state.isPadded = isPadded;
+    state.maxLen = String(state.max).length;
+  }
+
+  if (a < 0) {
+    let newMin = b < 0 ? Math.abs(b) : 1;
+    negatives = splitToPatterns(newMin, Math.abs(a), state, opts);
+    a = state.a = 0;
+  }
+
+  if (b >= 0) {
+    positives = splitToPatterns(a, b, state, opts);
+  }
+
+  state.negatives = negatives;
+  state.positives = positives;
+  state.result = collatePatterns(negatives, positives, opts);
+
+  if (opts.capture === true) {
+    state.result = `(${state.result})`;
+  } else if (opts.wrap !== false && (positives.length + negatives.length) > 1) {
+    state.result = `(?:${state.result})`;
+  }
+
+  toRegexRange.cache[cacheKey] = state;
+  return state.result;
+};
+
+function collatePatterns(neg, pos, options) {
+  let onlyNegative = filterPatterns(neg, pos, '-', false, options) || [];
+  let onlyPositive = filterPatterns(pos, neg, '', false, options) || [];
+  let intersected = filterPatterns(neg, pos, '-?', true, options) || [];
+  let subpatterns = onlyNegative.concat(intersected).concat(onlyPositive);
+  return subpatterns.join('|');
 }
-util.inherits(DelayedStream, Stream);
 
-DelayedStream.create = function(source, options) {
-  var delayedStream = new this();
+function splitToRanges(min, max) {
+  let nines = 1;
+  let zeros = 1;
 
-  options = options || {};
-  for (var option in options) {
-    delayedStream[option] = options[option];
+  let stop = countNines(min, nines);
+  let stops = new Set([max]);
+
+  while (min <= stop && stop <= max) {
+    stops.add(stop);
+    nines += 1;
+    stop = countNines(min, nines);
   }
 
-  delayedStream.source = source;
+  stop = countZeros(max + 1, zeros) - 1;
 
-  var realEmit = source.emit;
-  source.emit = function() {
-    delayedStream._handleEmit(arguments);
-    return realEmit.apply(source, arguments);
-  };
-
-  source.on('error', function() {});
-  if (delayedStream.pauseStream) {
-    source.pause();
+  while (min < stop && stop <= max) {
+    stops.add(stop);
+    zeros += 1;
+    stop = countZeros(max + 1, zeros) - 1;
   }
 
-  return delayedStream;
-};
+  stops = [...stops];
+  stops.sort(compare);
+  return stops;
+}
 
-Object.defineProperty(DelayedStream.prototype, 'readable', {
-  configurable: true,
-  enumerable: true,
-  get: function() {
-    return this.source.readable;
-  }
-});
+/**
+ * Convert a range to a regex pattern
+ * @param {Number} `start`
+ * @param {Number} `stop`
+ * @return {String}
+ */
 
-DelayedStream.prototype.setEncoding = function() {
-  return this.source.setEncoding.apply(this.source, arguments);
-};
-
-DelayedStream.prototype.resume = function() {
-  if (!this._released) {
-    this.release();
+function rangeToPattern(start, stop, options) {
+  if (start === stop) {
+    return { pattern: start, count: [], digits: 0 };
   }
 
-  this.source.resume();
-};
+  let zipped = zip(start, stop);
+  let digits = zipped.length;
+  let pattern = '';
+  let count = 0;
 
-DelayedStream.prototype.pause = function() {
-  this.source.pause();
-};
+  for (let i = 0; i < digits; i++) {
+    let [startDigit, stopDigit] = zipped[i];
 
-DelayedStream.prototype.release = function() {
-  this._released = true;
+    if (startDigit === stopDigit) {
+      pattern += startDigit;
 
-  this._bufferedEvents.forEach(function(args) {
-    this.emit.apply(this, args);
-  }.bind(this));
-  this._bufferedEvents = [];
-};
+    } else if (startDigit !== '0' || stopDigit !== '9') {
+      pattern += toCharacterClass(startDigit, stopDigit, options);
 
-DelayedStream.prototype.pipe = function() {
-  var r = Stream.prototype.pipe.apply(this, arguments);
-  this.resume();
-  return r;
-};
-
-DelayedStream.prototype._handleEmit = function(args) {
-  if (this._released) {
-    this.emit.apply(this, args);
-    return;
+    } else {
+      count++;
+    }
   }
 
-  if (args[0] === 'data') {
-    this.dataSize += args[1].length;
-    this._checkIfMaxDataSizeExceeded();
+  if (count) {
+    pattern += options.shorthand === true ? '\\d' : '[0-9]';
   }
 
-  this._bufferedEvents.push(args);
-};
+  return { pattern, count: [count], digits };
+}
 
-DelayedStream.prototype._checkIfMaxDataSizeExceeded = function() {
-  if (this._maxDataSizeExceeded) {
-    return;
+function splitToPatterns(min, max, tok, options) {
+  let ranges = splitToRanges(min, max);
+  let tokens = [];
+  let start = min;
+  let prev;
+
+  for (let i = 0; i < ranges.length; i++) {
+    let max = ranges[i];
+    let obj = rangeToPattern(String(start), String(max), options);
+    let zeros = '';
+
+    if (!tok.isPadded && prev && prev.pattern === obj.pattern) {
+      if (prev.count.length > 1) {
+        prev.count.pop();
+      }
+
+      prev.count.push(obj.count[0]);
+      prev.string = prev.pattern + toQuantifier(prev.count);
+      start = max + 1;
+      continue;
+    }
+
+    if (tok.isPadded) {
+      zeros = padZeros(max, tok, options);
+    }
+
+    obj.string = zeros + obj.pattern + toQuantifier(obj.count);
+    tokens.push(obj);
+    start = max + 1;
+    prev = obj;
   }
 
-  if (this.dataSize <= this.maxDataSize) {
-    return;
+  return tokens;
+}
+
+function filterPatterns(arr, comparison, prefix, intersection, options) {
+  let result = [];
+
+  for (let ele of arr) {
+    let { string } = ele;
+
+    // only push if _both_ are negative...
+    if (!intersection && !contains(comparison, 'string', string)) {
+      result.push(prefix + string);
+    }
+
+    // or _both_ are positive
+    if (intersection && contains(comparison, 'string', string)) {
+      result.push(prefix + string);
+    }
+  }
+  return result;
+}
+
+/**
+ * Zip strings
+ */
+
+function zip(a, b) {
+  let arr = [];
+  for (let i = 0; i < a.length; i++) arr.push([a[i], b[i]]);
+  return arr;
+}
+
+function compare(a, b) {
+  return a > b ? 1 : b > a ? -1 : 0;
+}
+
+function contains(arr, key, val) {
+  return arr.some(ele => ele[key] === val);
+}
+
+function countNines(min, len) {
+  return Number(String(min).slice(0, -len) + '9'.repeat(len));
+}
+
+function countZeros(integer, zeros) {
+  return integer - (integer % Math.pow(10, zeros));
+}
+
+function toQuantifier(digits) {
+  let [start = 0, stop = ''] = digits;
+  if (stop || start > 1) {
+    return `{${start + (stop ? ',' + stop : '')}}`;
+  }
+  return '';
+}
+
+function toCharacterClass(a, b, options) {
+  return `[${a}${(b - a === 1) ? '' : '-'}${b}]`;
+}
+
+function hasPadding(str) {
+  return /^-?(0+)\d/.test(str);
+}
+
+function padZeros(value, tok, options) {
+  if (!tok.isPadded) {
+    return value;
   }
 
-  this._maxDataSizeExceeded = true;
-  var message =
-    'DelayedStream#maxDataSize of ' + this.maxDataSize + ' bytes exceeded.'
-  this.emit('error', new Error(message));
-};
+  let diff = Math.abs(tok.maxLen - String(value).length);
+  let relax = options.relaxZeros !== false;
+
+  switch (diff) {
+    case 0:
+      return '';
+    case 1:
+      return relax ? '0?' : '0';
+    case 2:
+      return relax ? '0{0,2}' : '00';
+    default: {
+      return relax ? `0{0,${diff}}` : `0{${diff}}`;
+    }
+  }
+}
+
+/**
+ * Cache
+ */
+
+toRegexRange.cache = {};
+toRegexRange.clearCache = () => (toRegexRange.cache = {});
+
+/**
+ * Expose `toRegexRange`
+ */
+
+module.exports = toRegexRange;
 
 
 /***/ }),
@@ -51087,11 +52989,11 @@ Object.defineProperty(exports, "v5", {
   }
 });
 
-var _v = _interopRequireDefault(__webpack_require__(185));
+var _v = _interopRequireDefault(__webpack_require__(665));
 
-var _v2 = _interopRequireDefault(__webpack_require__(539));
+var _v2 = _interopRequireDefault(__webpack_require__(142));
 
-var _v3 = _interopRequireDefault(__webpack_require__(809));
+var _v3 = _interopRequireDefault(__webpack_require__(830));
 
 var _v4 = _interopRequireDefault(__webpack_require__(81));
 
@@ -51153,17 +53055,17 @@ module.exports = Key;
 
 var assert = __webpack_require__(552);
 var algs = __webpack_require__(151);
-var crypto = __webpack_require__(417);
+var crypto = __webpack_require__(373);
 var Fingerprint = __webpack_require__(926);
 var Signature = __webpack_require__(885);
-var DiffieHellman = __webpack_require__(581).DiffieHellman;
+var DiffieHellman = __webpack_require__(25).DiffieHellman;
 var errs = __webpack_require__(172);
 var utils = __webpack_require__(241);
 var PrivateKey = __webpack_require__(877);
 var edCompat;
 
 try {
-	edCompat = __webpack_require__(797);
+	edCompat = __webpack_require__(289);
 } catch (e) {
 	/* Just continue through, and bail out if we try to use it. */
 }
@@ -51180,8 +53082,8 @@ formats['rfc4253'] = __webpack_require__(233);
 formats['ssh'] = __webpack_require__(979);
 formats['ssh-private'] = __webpack_require__(537);
 formats['openssh'] = formats['ssh-private'];
-formats['dnssec'] = __webpack_require__(21);
-formats['putty'] = __webpack_require__(919);
+formats['dnssec'] = __webpack_require__(946);
+formats['putty'] = __webpack_require__(809);
 formats['ppk'] = formats['putty'];
 
 function Key(opts) {
@@ -52154,7 +54056,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = rng;
 
-var _crypto = _interopRequireDefault(__webpack_require__(417));
+var _crypto = _interopRequireDefault(__webpack_require__(373));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -52163,8 +54065,1040 @@ function rng() {
 }
 
 /***/ }),
-/* 476 */,
-/* 477 */,
+/* 476 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+/**
+ * Supported cipher modes.
+ *
+ * @author Dave Longley
+ *
+ * Copyright (c) 2010-2014 Digital Bazaar, Inc.
+ */
+var forge = __webpack_require__(45);
+__webpack_require__(294);
+
+forge.cipher = forge.cipher || {};
+
+// supported cipher modes
+var modes = module.exports = forge.cipher.modes = forge.cipher.modes || {};
+
+/** Electronic codebook (ECB) (Don't use this; it's not secure) **/
+
+modes.ecb = function(options) {
+  options = options || {};
+  this.name = 'ECB';
+  this.cipher = options.cipher;
+  this.blockSize = options.blockSize || 16;
+  this._ints = this.blockSize / 4;
+  this._inBlock = new Array(this._ints);
+  this._outBlock = new Array(this._ints);
+};
+
+modes.ecb.prototype.start = function(options) {};
+
+modes.ecb.prototype.encrypt = function(input, output, finish) {
+  // not enough input to encrypt
+  if(input.length() < this.blockSize && !(finish && input.length() > 0)) {
+    return true;
+  }
+
+  // get next block
+  for(var i = 0; i < this._ints; ++i) {
+    this._inBlock[i] = input.getInt32();
+  }
+
+  // encrypt block
+  this.cipher.encrypt(this._inBlock, this._outBlock);
+
+  // write output
+  for(var i = 0; i < this._ints; ++i) {
+    output.putInt32(this._outBlock[i]);
+  }
+};
+
+modes.ecb.prototype.decrypt = function(input, output, finish) {
+  // not enough input to decrypt
+  if(input.length() < this.blockSize && !(finish && input.length() > 0)) {
+    return true;
+  }
+
+  // get next block
+  for(var i = 0; i < this._ints; ++i) {
+    this._inBlock[i] = input.getInt32();
+  }
+
+  // decrypt block
+  this.cipher.decrypt(this._inBlock, this._outBlock);
+
+  // write output
+  for(var i = 0; i < this._ints; ++i) {
+    output.putInt32(this._outBlock[i]);
+  }
+};
+
+modes.ecb.prototype.pad = function(input, options) {
+  // add PKCS#7 padding to block (each pad byte is the
+  // value of the number of pad bytes)
+  var padding = (input.length() === this.blockSize ?
+    this.blockSize : (this.blockSize - input.length()));
+  input.fillWithByte(padding, padding);
+  return true;
+};
+
+modes.ecb.prototype.unpad = function(output, options) {
+  // check for error: input data not a multiple of blockSize
+  if(options.overflow > 0) {
+    return false;
+  }
+
+  // ensure padding byte count is valid
+  var len = output.length();
+  var count = output.at(len - 1);
+  if(count > (this.blockSize << 2)) {
+    return false;
+  }
+
+  // trim off padding bytes
+  output.truncate(count);
+  return true;
+};
+
+/** Cipher-block Chaining (CBC) **/
+
+modes.cbc = function(options) {
+  options = options || {};
+  this.name = 'CBC';
+  this.cipher = options.cipher;
+  this.blockSize = options.blockSize || 16;
+  this._ints = this.blockSize / 4;
+  this._inBlock = new Array(this._ints);
+  this._outBlock = new Array(this._ints);
+};
+
+modes.cbc.prototype.start = function(options) {
+  // Note: legacy support for using IV residue (has security flaws)
+  // if IV is null, reuse block from previous processing
+  if(options.iv === null) {
+    // must have a previous block
+    if(!this._prev) {
+      throw new Error('Invalid IV parameter.');
+    }
+    this._iv = this._prev.slice(0);
+  } else if(!('iv' in options)) {
+    throw new Error('Invalid IV parameter.');
+  } else {
+    // save IV as "previous" block
+    this._iv = transformIV(options.iv, this.blockSize);
+    this._prev = this._iv.slice(0);
+  }
+};
+
+modes.cbc.prototype.encrypt = function(input, output, finish) {
+  // not enough input to encrypt
+  if(input.length() < this.blockSize && !(finish && input.length() > 0)) {
+    return true;
+  }
+
+  // get next block
+  // CBC XOR's IV (or previous block) with plaintext
+  for(var i = 0; i < this._ints; ++i) {
+    this._inBlock[i] = this._prev[i] ^ input.getInt32();
+  }
+
+  // encrypt block
+  this.cipher.encrypt(this._inBlock, this._outBlock);
+
+  // write output, save previous block
+  for(var i = 0; i < this._ints; ++i) {
+    output.putInt32(this._outBlock[i]);
+  }
+  this._prev = this._outBlock;
+};
+
+modes.cbc.prototype.decrypt = function(input, output, finish) {
+  // not enough input to decrypt
+  if(input.length() < this.blockSize && !(finish && input.length() > 0)) {
+    return true;
+  }
+
+  // get next block
+  for(var i = 0; i < this._ints; ++i) {
+    this._inBlock[i] = input.getInt32();
+  }
+
+  // decrypt block
+  this.cipher.decrypt(this._inBlock, this._outBlock);
+
+  // write output, save previous ciphered block
+  // CBC XOR's IV (or previous block) with ciphertext
+  for(var i = 0; i < this._ints; ++i) {
+    output.putInt32(this._prev[i] ^ this._outBlock[i]);
+  }
+  this._prev = this._inBlock.slice(0);
+};
+
+modes.cbc.prototype.pad = function(input, options) {
+  // add PKCS#7 padding to block (each pad byte is the
+  // value of the number of pad bytes)
+  var padding = (input.length() === this.blockSize ?
+    this.blockSize : (this.blockSize - input.length()));
+  input.fillWithByte(padding, padding);
+  return true;
+};
+
+modes.cbc.prototype.unpad = function(output, options) {
+  // check for error: input data not a multiple of blockSize
+  if(options.overflow > 0) {
+    return false;
+  }
+
+  // ensure padding byte count is valid
+  var len = output.length();
+  var count = output.at(len - 1);
+  if(count > (this.blockSize << 2)) {
+    return false;
+  }
+
+  // trim off padding bytes
+  output.truncate(count);
+  return true;
+};
+
+/** Cipher feedback (CFB) **/
+
+modes.cfb = function(options) {
+  options = options || {};
+  this.name = 'CFB';
+  this.cipher = options.cipher;
+  this.blockSize = options.blockSize || 16;
+  this._ints = this.blockSize / 4;
+  this._inBlock = null;
+  this._outBlock = new Array(this._ints);
+  this._partialBlock = new Array(this._ints);
+  this._partialOutput = forge.util.createBuffer();
+  this._partialBytes = 0;
+};
+
+modes.cfb.prototype.start = function(options) {
+  if(!('iv' in options)) {
+    throw new Error('Invalid IV parameter.');
+  }
+  // use IV as first input
+  this._iv = transformIV(options.iv, this.blockSize);
+  this._inBlock = this._iv.slice(0);
+  this._partialBytes = 0;
+};
+
+modes.cfb.prototype.encrypt = function(input, output, finish) {
+  // not enough input to encrypt
+  var inputLength = input.length();
+  if(inputLength === 0) {
+    return true;
+  }
+
+  // encrypt block
+  this.cipher.encrypt(this._inBlock, this._outBlock);
+
+  // handle full block
+  if(this._partialBytes === 0 && inputLength >= this.blockSize) {
+    // XOR input with output, write input as output
+    for(var i = 0; i < this._ints; ++i) {
+      this._inBlock[i] = input.getInt32() ^ this._outBlock[i];
+      output.putInt32(this._inBlock[i]);
+    }
+    return;
+  }
+
+  // handle partial block
+  var partialBytes = (this.blockSize - inputLength) % this.blockSize;
+  if(partialBytes > 0) {
+    partialBytes = this.blockSize - partialBytes;
+  }
+
+  // XOR input with output, write input as partial output
+  this._partialOutput.clear();
+  for(var i = 0; i < this._ints; ++i) {
+    this._partialBlock[i] = input.getInt32() ^ this._outBlock[i];
+    this._partialOutput.putInt32(this._partialBlock[i]);
+  }
+
+  if(partialBytes > 0) {
+    // block still incomplete, restore input buffer
+    input.read -= this.blockSize;
+  } else {
+    // block complete, update input block
+    for(var i = 0; i < this._ints; ++i) {
+      this._inBlock[i] = this._partialBlock[i];
+    }
+  }
+
+  // skip any previous partial bytes
+  if(this._partialBytes > 0) {
+    this._partialOutput.getBytes(this._partialBytes);
+  }
+
+  if(partialBytes > 0 && !finish) {
+    output.putBytes(this._partialOutput.getBytes(
+      partialBytes - this._partialBytes));
+    this._partialBytes = partialBytes;
+    return true;
+  }
+
+  output.putBytes(this._partialOutput.getBytes(
+    inputLength - this._partialBytes));
+  this._partialBytes = 0;
+};
+
+modes.cfb.prototype.decrypt = function(input, output, finish) {
+  // not enough input to decrypt
+  var inputLength = input.length();
+  if(inputLength === 0) {
+    return true;
+  }
+
+  // encrypt block (CFB always uses encryption mode)
+  this.cipher.encrypt(this._inBlock, this._outBlock);
+
+  // handle full block
+  if(this._partialBytes === 0 && inputLength >= this.blockSize) {
+    // XOR input with output, write input as output
+    for(var i = 0; i < this._ints; ++i) {
+      this._inBlock[i] = input.getInt32();
+      output.putInt32(this._inBlock[i] ^ this._outBlock[i]);
+    }
+    return;
+  }
+
+  // handle partial block
+  var partialBytes = (this.blockSize - inputLength) % this.blockSize;
+  if(partialBytes > 0) {
+    partialBytes = this.blockSize - partialBytes;
+  }
+
+  // XOR input with output, write input as partial output
+  this._partialOutput.clear();
+  for(var i = 0; i < this._ints; ++i) {
+    this._partialBlock[i] = input.getInt32();
+    this._partialOutput.putInt32(this._partialBlock[i] ^ this._outBlock[i]);
+  }
+
+  if(partialBytes > 0) {
+    // block still incomplete, restore input buffer
+    input.read -= this.blockSize;
+  } else {
+    // block complete, update input block
+    for(var i = 0; i < this._ints; ++i) {
+      this._inBlock[i] = this._partialBlock[i];
+    }
+  }
+
+  // skip any previous partial bytes
+  if(this._partialBytes > 0) {
+    this._partialOutput.getBytes(this._partialBytes);
+  }
+
+  if(partialBytes > 0 && !finish) {
+    output.putBytes(this._partialOutput.getBytes(
+      partialBytes - this._partialBytes));
+    this._partialBytes = partialBytes;
+    return true;
+  }
+
+  output.putBytes(this._partialOutput.getBytes(
+    inputLength - this._partialBytes));
+  this._partialBytes = 0;
+};
+
+/** Output feedback (OFB) **/
+
+modes.ofb = function(options) {
+  options = options || {};
+  this.name = 'OFB';
+  this.cipher = options.cipher;
+  this.blockSize = options.blockSize || 16;
+  this._ints = this.blockSize / 4;
+  this._inBlock = null;
+  this._outBlock = new Array(this._ints);
+  this._partialOutput = forge.util.createBuffer();
+  this._partialBytes = 0;
+};
+
+modes.ofb.prototype.start = function(options) {
+  if(!('iv' in options)) {
+    throw new Error('Invalid IV parameter.');
+  }
+  // use IV as first input
+  this._iv = transformIV(options.iv, this.blockSize);
+  this._inBlock = this._iv.slice(0);
+  this._partialBytes = 0;
+};
+
+modes.ofb.prototype.encrypt = function(input, output, finish) {
+  // not enough input to encrypt
+  var inputLength = input.length();
+  if(input.length() === 0) {
+    return true;
+  }
+
+  // encrypt block (OFB always uses encryption mode)
+  this.cipher.encrypt(this._inBlock, this._outBlock);
+
+  // handle full block
+  if(this._partialBytes === 0 && inputLength >= this.blockSize) {
+    // XOR input with output and update next input
+    for(var i = 0; i < this._ints; ++i) {
+      output.putInt32(input.getInt32() ^ this._outBlock[i]);
+      this._inBlock[i] = this._outBlock[i];
+    }
+    return;
+  }
+
+  // handle partial block
+  var partialBytes = (this.blockSize - inputLength) % this.blockSize;
+  if(partialBytes > 0) {
+    partialBytes = this.blockSize - partialBytes;
+  }
+
+  // XOR input with output
+  this._partialOutput.clear();
+  for(var i = 0; i < this._ints; ++i) {
+    this._partialOutput.putInt32(input.getInt32() ^ this._outBlock[i]);
+  }
+
+  if(partialBytes > 0) {
+    // block still incomplete, restore input buffer
+    input.read -= this.blockSize;
+  } else {
+    // block complete, update input block
+    for(var i = 0; i < this._ints; ++i) {
+      this._inBlock[i] = this._outBlock[i];
+    }
+  }
+
+  // skip any previous partial bytes
+  if(this._partialBytes > 0) {
+    this._partialOutput.getBytes(this._partialBytes);
+  }
+
+  if(partialBytes > 0 && !finish) {
+    output.putBytes(this._partialOutput.getBytes(
+      partialBytes - this._partialBytes));
+    this._partialBytes = partialBytes;
+    return true;
+  }
+
+  output.putBytes(this._partialOutput.getBytes(
+    inputLength - this._partialBytes));
+  this._partialBytes = 0;
+};
+
+modes.ofb.prototype.decrypt = modes.ofb.prototype.encrypt;
+
+/** Counter (CTR) **/
+
+modes.ctr = function(options) {
+  options = options || {};
+  this.name = 'CTR';
+  this.cipher = options.cipher;
+  this.blockSize = options.blockSize || 16;
+  this._ints = this.blockSize / 4;
+  this._inBlock = null;
+  this._outBlock = new Array(this._ints);
+  this._partialOutput = forge.util.createBuffer();
+  this._partialBytes = 0;
+};
+
+modes.ctr.prototype.start = function(options) {
+  if(!('iv' in options)) {
+    throw new Error('Invalid IV parameter.');
+  }
+  // use IV as first input
+  this._iv = transformIV(options.iv, this.blockSize);
+  this._inBlock = this._iv.slice(0);
+  this._partialBytes = 0;
+};
+
+modes.ctr.prototype.encrypt = function(input, output, finish) {
+  // not enough input to encrypt
+  var inputLength = input.length();
+  if(inputLength === 0) {
+    return true;
+  }
+
+  // encrypt block (CTR always uses encryption mode)
+  this.cipher.encrypt(this._inBlock, this._outBlock);
+
+  // handle full block
+  if(this._partialBytes === 0 && inputLength >= this.blockSize) {
+    // XOR input with output
+    for(var i = 0; i < this._ints; ++i) {
+      output.putInt32(input.getInt32() ^ this._outBlock[i]);
+    }
+  } else {
+    // handle partial block
+    var partialBytes = (this.blockSize - inputLength) % this.blockSize;
+    if(partialBytes > 0) {
+      partialBytes = this.blockSize - partialBytes;
+    }
+
+    // XOR input with output
+    this._partialOutput.clear();
+    for(var i = 0; i < this._ints; ++i) {
+      this._partialOutput.putInt32(input.getInt32() ^ this._outBlock[i]);
+    }
+
+    if(partialBytes > 0) {
+      // block still incomplete, restore input buffer
+      input.read -= this.blockSize;
+    }
+
+    // skip any previous partial bytes
+    if(this._partialBytes > 0) {
+      this._partialOutput.getBytes(this._partialBytes);
+    }
+
+    if(partialBytes > 0 && !finish) {
+      output.putBytes(this._partialOutput.getBytes(
+        partialBytes - this._partialBytes));
+      this._partialBytes = partialBytes;
+      return true;
+    }
+
+    output.putBytes(this._partialOutput.getBytes(
+      inputLength - this._partialBytes));
+    this._partialBytes = 0;
+  }
+
+  // block complete, increment counter (input block)
+  inc32(this._inBlock);
+};
+
+modes.ctr.prototype.decrypt = modes.ctr.prototype.encrypt;
+
+/** Galois/Counter Mode (GCM) **/
+
+modes.gcm = function(options) {
+  options = options || {};
+  this.name = 'GCM';
+  this.cipher = options.cipher;
+  this.blockSize = options.blockSize || 16;
+  this._ints = this.blockSize / 4;
+  this._inBlock = new Array(this._ints);
+  this._outBlock = new Array(this._ints);
+  this._partialOutput = forge.util.createBuffer();
+  this._partialBytes = 0;
+
+  // R is actually this value concatenated with 120 more zero bits, but
+  // we only XOR against R so the other zeros have no effect -- we just
+  // apply this value to the first integer in a block
+  this._R = 0xE1000000;
+};
+
+modes.gcm.prototype.start = function(options) {
+  if(!('iv' in options)) {
+    throw new Error('Invalid IV parameter.');
+  }
+  // ensure IV is a byte buffer
+  var iv = forge.util.createBuffer(options.iv);
+
+  // no ciphered data processed yet
+  this._cipherLength = 0;
+
+  // default additional data is none
+  var additionalData;
+  if('additionalData' in options) {
+    additionalData = forge.util.createBuffer(options.additionalData);
+  } else {
+    additionalData = forge.util.createBuffer();
+  }
+
+  // default tag length is 128 bits
+  if('tagLength' in options) {
+    this._tagLength = options.tagLength;
+  } else {
+    this._tagLength = 128;
+  }
+
+  // if tag is given, ensure tag matches tag length
+  this._tag = null;
+  if(options.decrypt) {
+    // save tag to check later
+    this._tag = forge.util.createBuffer(options.tag).getBytes();
+    if(this._tag.length !== (this._tagLength / 8)) {
+      throw new Error('Authentication tag does not match tag length.');
+    }
+  }
+
+  // create tmp storage for hash calculation
+  this._hashBlock = new Array(this._ints);
+
+  // no tag generated yet
+  this.tag = null;
+
+  // generate hash subkey
+  // (apply block cipher to "zero" block)
+  this._hashSubkey = new Array(this._ints);
+  this.cipher.encrypt([0, 0, 0, 0], this._hashSubkey);
+
+  // generate table M
+  // use 4-bit tables (32 component decomposition of a 16 byte value)
+  // 8-bit tables take more space and are known to have security
+  // vulnerabilities (in native implementations)
+  this.componentBits = 4;
+  this._m = this.generateHashTable(this._hashSubkey, this.componentBits);
+
+  // Note: support IV length different from 96 bits? (only supporting
+  // 96 bits is recommended by NIST SP-800-38D)
+  // generate J_0
+  var ivLength = iv.length();
+  if(ivLength === 12) {
+    // 96-bit IV
+    this._j0 = [iv.getInt32(), iv.getInt32(), iv.getInt32(), 1];
+  } else {
+    // IV is NOT 96-bits
+    this._j0 = [0, 0, 0, 0];
+    while(iv.length() > 0) {
+      this._j0 = this.ghash(
+        this._hashSubkey, this._j0,
+        [iv.getInt32(), iv.getInt32(), iv.getInt32(), iv.getInt32()]);
+    }
+    this._j0 = this.ghash(
+      this._hashSubkey, this._j0, [0, 0].concat(from64To32(ivLength * 8)));
+  }
+
+  // generate ICB (initial counter block)
+  this._inBlock = this._j0.slice(0);
+  inc32(this._inBlock);
+  this._partialBytes = 0;
+
+  // consume authentication data
+  additionalData = forge.util.createBuffer(additionalData);
+  // save additional data length as a BE 64-bit number
+  this._aDataLength = from64To32(additionalData.length() * 8);
+  // pad additional data to 128 bit (16 byte) block size
+  var overflow = additionalData.length() % this.blockSize;
+  if(overflow) {
+    additionalData.fillWithByte(0, this.blockSize - overflow);
+  }
+  this._s = [0, 0, 0, 0];
+  while(additionalData.length() > 0) {
+    this._s = this.ghash(this._hashSubkey, this._s, [
+      additionalData.getInt32(),
+      additionalData.getInt32(),
+      additionalData.getInt32(),
+      additionalData.getInt32()
+    ]);
+  }
+};
+
+modes.gcm.prototype.encrypt = function(input, output, finish) {
+  // not enough input to encrypt
+  var inputLength = input.length();
+  if(inputLength === 0) {
+    return true;
+  }
+
+  // encrypt block
+  this.cipher.encrypt(this._inBlock, this._outBlock);
+
+  // handle full block
+  if(this._partialBytes === 0 && inputLength >= this.blockSize) {
+    // XOR input with output
+    for(var i = 0; i < this._ints; ++i) {
+      output.putInt32(this._outBlock[i] ^= input.getInt32());
+    }
+    this._cipherLength += this.blockSize;
+  } else {
+    // handle partial block
+    var partialBytes = (this.blockSize - inputLength) % this.blockSize;
+    if(partialBytes > 0) {
+      partialBytes = this.blockSize - partialBytes;
+    }
+
+    // XOR input with output
+    this._partialOutput.clear();
+    for(var i = 0; i < this._ints; ++i) {
+      this._partialOutput.putInt32(input.getInt32() ^ this._outBlock[i]);
+    }
+
+    if(partialBytes <= 0 || finish) {
+      // handle overflow prior to hashing
+      if(finish) {
+        // get block overflow
+        var overflow = inputLength % this.blockSize;
+        this._cipherLength += overflow;
+        // truncate for hash function
+        this._partialOutput.truncate(this.blockSize - overflow);
+      } else {
+        this._cipherLength += this.blockSize;
+      }
+
+      // get output block for hashing
+      for(var i = 0; i < this._ints; ++i) {
+        this._outBlock[i] = this._partialOutput.getInt32();
+      }
+      this._partialOutput.read -= this.blockSize;
+    }
+
+    // skip any previous partial bytes
+    if(this._partialBytes > 0) {
+      this._partialOutput.getBytes(this._partialBytes);
+    }
+
+    if(partialBytes > 0 && !finish) {
+      // block still incomplete, restore input buffer, get partial output,
+      // and return early
+      input.read -= this.blockSize;
+      output.putBytes(this._partialOutput.getBytes(
+        partialBytes - this._partialBytes));
+      this._partialBytes = partialBytes;
+      return true;
+    }
+
+    output.putBytes(this._partialOutput.getBytes(
+      inputLength - this._partialBytes));
+    this._partialBytes = 0;
+  }
+
+  // update hash block S
+  this._s = this.ghash(this._hashSubkey, this._s, this._outBlock);
+
+  // increment counter (input block)
+  inc32(this._inBlock);
+};
+
+modes.gcm.prototype.decrypt = function(input, output, finish) {
+  // not enough input to decrypt
+  var inputLength = input.length();
+  if(inputLength < this.blockSize && !(finish && inputLength > 0)) {
+    return true;
+  }
+
+  // encrypt block (GCM always uses encryption mode)
+  this.cipher.encrypt(this._inBlock, this._outBlock);
+
+  // increment counter (input block)
+  inc32(this._inBlock);
+
+  // update hash block S
+  this._hashBlock[0] = input.getInt32();
+  this._hashBlock[1] = input.getInt32();
+  this._hashBlock[2] = input.getInt32();
+  this._hashBlock[3] = input.getInt32();
+  this._s = this.ghash(this._hashSubkey, this._s, this._hashBlock);
+
+  // XOR hash input with output
+  for(var i = 0; i < this._ints; ++i) {
+    output.putInt32(this._outBlock[i] ^ this._hashBlock[i]);
+  }
+
+  // increment cipher data length
+  if(inputLength < this.blockSize) {
+    this._cipherLength += inputLength % this.blockSize;
+  } else {
+    this._cipherLength += this.blockSize;
+  }
+};
+
+modes.gcm.prototype.afterFinish = function(output, options) {
+  var rval = true;
+
+  // handle overflow
+  if(options.decrypt && options.overflow) {
+    output.truncate(this.blockSize - options.overflow);
+  }
+
+  // handle authentication tag
+  this.tag = forge.util.createBuffer();
+
+  // concatenate additional data length with cipher length
+  var lengths = this._aDataLength.concat(from64To32(this._cipherLength * 8));
+
+  // include lengths in hash
+  this._s = this.ghash(this._hashSubkey, this._s, lengths);
+
+  // do GCTR(J_0, S)
+  var tag = [];
+  this.cipher.encrypt(this._j0, tag);
+  for(var i = 0; i < this._ints; ++i) {
+    this.tag.putInt32(this._s[i] ^ tag[i]);
+  }
+
+  // trim tag to length
+  this.tag.truncate(this.tag.length() % (this._tagLength / 8));
+
+  // check authentication tag
+  if(options.decrypt && this.tag.bytes() !== this._tag) {
+    rval = false;
+  }
+
+  return rval;
+};
+
+/**
+ * See NIST SP-800-38D 6.3 (Algorithm 1). This function performs Galois
+ * field multiplication. The field, GF(2^128), is defined by the polynomial:
+ *
+ * x^128 + x^7 + x^2 + x + 1
+ *
+ * Which is represented in little-endian binary form as: 11100001 (0xe1). When
+ * the value of a coefficient is 1, a bit is set. The value R, is the
+ * concatenation of this value and 120 zero bits, yielding a 128-bit value
+ * which matches the block size.
+ *
+ * This function will multiply two elements (vectors of bytes), X and Y, in
+ * the field GF(2^128). The result is initialized to zero. For each bit of
+ * X (out of 128), x_i, if x_i is set, then the result is multiplied (XOR'd)
+ * by the current value of Y. For each bit, the value of Y will be raised by
+ * a power of x (multiplied by the polynomial x). This can be achieved by
+ * shifting Y once to the right. If the current value of Y, prior to being
+ * multiplied by x, has 0 as its LSB, then it is a 127th degree polynomial.
+ * Otherwise, we must divide by R after shifting to find the remainder.
+ *
+ * @param x the first block to multiply by the second.
+ * @param y the second block to multiply by the first.
+ *
+ * @return the block result of the multiplication.
+ */
+modes.gcm.prototype.multiply = function(x, y) {
+  var z_i = [0, 0, 0, 0];
+  var v_i = y.slice(0);
+
+  // calculate Z_128 (block has 128 bits)
+  for(var i = 0; i < 128; ++i) {
+    // if x_i is 0, Z_{i+1} = Z_i (unchanged)
+    // else Z_{i+1} = Z_i ^ V_i
+    // get x_i by finding 32-bit int position, then left shift 1 by remainder
+    var x_i = x[(i / 32) | 0] & (1 << (31 - i % 32));
+    if(x_i) {
+      z_i[0] ^= v_i[0];
+      z_i[1] ^= v_i[1];
+      z_i[2] ^= v_i[2];
+      z_i[3] ^= v_i[3];
+    }
+
+    // if LSB(V_i) is 1, V_i = V_i >> 1
+    // else V_i = (V_i >> 1) ^ R
+    this.pow(v_i, v_i);
+  }
+
+  return z_i;
+};
+
+modes.gcm.prototype.pow = function(x, out) {
+  // if LSB(x) is 1, x = x >>> 1
+  // else x = (x >>> 1) ^ R
+  var lsb = x[3] & 1;
+
+  // always do x >>> 1:
+  // starting with the rightmost integer, shift each integer to the right
+  // one bit, pulling in the bit from the integer to the left as its top
+  // most bit (do this for the last 3 integers)
+  for(var i = 3; i > 0; --i) {
+    out[i] = (x[i] >>> 1) | ((x[i - 1] & 1) << 31);
+  }
+  // shift the first integer normally
+  out[0] = x[0] >>> 1;
+
+  // if lsb was not set, then polynomial had a degree of 127 and doesn't
+  // need to divided; otherwise, XOR with R to find the remainder; we only
+  // need to XOR the first integer since R technically ends w/120 zero bits
+  if(lsb) {
+    out[0] ^= this._R;
+  }
+};
+
+modes.gcm.prototype.tableMultiply = function(x) {
+  // assumes 4-bit tables are used
+  var z = [0, 0, 0, 0];
+  for(var i = 0; i < 32; ++i) {
+    var idx = (i / 8) | 0;
+    var x_i = (x[idx] >>> ((7 - (i % 8)) * 4)) & 0xF;
+    var ah = this._m[i][x_i];
+    z[0] ^= ah[0];
+    z[1] ^= ah[1];
+    z[2] ^= ah[2];
+    z[3] ^= ah[3];
+  }
+  return z;
+};
+
+/**
+ * A continuing version of the GHASH algorithm that operates on a single
+ * block. The hash block, last hash value (Ym) and the new block to hash
+ * are given.
+ *
+ * @param h the hash block.
+ * @param y the previous value for Ym, use [0, 0, 0, 0] for a new hash.
+ * @param x the block to hash.
+ *
+ * @return the hashed value (Ym).
+ */
+modes.gcm.prototype.ghash = function(h, y, x) {
+  y[0] ^= x[0];
+  y[1] ^= x[1];
+  y[2] ^= x[2];
+  y[3] ^= x[3];
+  return this.tableMultiply(y);
+  //return this.multiply(y, h);
+};
+
+/**
+ * Precomputes a table for multiplying against the hash subkey. This
+ * mechanism provides a substantial speed increase over multiplication
+ * performed without a table. The table-based multiplication this table is
+ * for solves X * H by multiplying each component of X by H and then
+ * composing the results together using XOR.
+ *
+ * This function can be used to generate tables with different bit sizes
+ * for the components, however, this implementation assumes there are
+ * 32 components of X (which is a 16 byte vector), therefore each component
+ * takes 4-bits (so the table is constructed with bits=4).
+ *
+ * @param h the hash subkey.
+ * @param bits the bit size for a component.
+ */
+modes.gcm.prototype.generateHashTable = function(h, bits) {
+  // TODO: There are further optimizations that would use only the
+  // first table M_0 (or some variant) along with a remainder table;
+  // this can be explored in the future
+  var multiplier = 8 / bits;
+  var perInt = 4 * multiplier;
+  var size = 16 * multiplier;
+  var m = new Array(size);
+  for(var i = 0; i < size; ++i) {
+    var tmp = [0, 0, 0, 0];
+    var idx = (i / perInt) | 0;
+    var shft = ((perInt - 1 - (i % perInt)) * bits);
+    tmp[idx] = (1 << (bits - 1)) << shft;
+    m[i] = this.generateSubHashTable(this.multiply(tmp, h), bits);
+  }
+  return m;
+};
+
+/**
+ * Generates a table for multiplying against the hash subkey for one
+ * particular component (out of all possible component values).
+ *
+ * @param mid the pre-multiplied value for the middle key of the table.
+ * @param bits the bit size for a component.
+ */
+modes.gcm.prototype.generateSubHashTable = function(mid, bits) {
+  // compute the table quickly by minimizing the number of
+  // POW operations -- they only need to be performed for powers of 2,
+  // all other entries can be composed from those powers using XOR
+  var size = 1 << bits;
+  var half = size >>> 1;
+  var m = new Array(size);
+  m[half] = mid.slice(0);
+  var i = half >>> 1;
+  while(i > 0) {
+    // raise m0[2 * i] and store in m0[i]
+    this.pow(m[2 * i], m[i] = []);
+    i >>= 1;
+  }
+  i = 2;
+  while(i < half) {
+    for(var j = 1; j < i; ++j) {
+      var m_i = m[i];
+      var m_j = m[j];
+      m[i + j] = [
+        m_i[0] ^ m_j[0],
+        m_i[1] ^ m_j[1],
+        m_i[2] ^ m_j[2],
+        m_i[3] ^ m_j[3]
+      ];
+    }
+    i *= 2;
+  }
+  m[0] = [0, 0, 0, 0];
+  /* Note: We could avoid storing these by doing composition during multiply
+  calculate top half using composition by speed is preferred. */
+  for(i = half + 1; i < size; ++i) {
+    var c = m[i ^ half];
+    m[i] = [mid[0] ^ c[0], mid[1] ^ c[1], mid[2] ^ c[2], mid[3] ^ c[3]];
+  }
+  return m;
+};
+
+/** Utility functions */
+
+function transformIV(iv, blockSize) {
+  if(typeof iv === 'string') {
+    // convert iv string into byte buffer
+    iv = forge.util.createBuffer(iv);
+  }
+
+  if(forge.util.isArray(iv) && iv.length > 4) {
+    // convert iv byte array into byte buffer
+    var tmp = iv;
+    iv = forge.util.createBuffer();
+    for(var i = 0; i < tmp.length; ++i) {
+      iv.putByte(tmp[i]);
+    }
+  }
+
+  if(iv.length() < blockSize) {
+    throw new Error(
+      'Invalid IV length; got ' + iv.length() +
+      ' bytes and expected ' + blockSize + ' bytes.');
+  }
+
+  if(!forge.util.isArray(iv)) {
+    // convert iv byte buffer into 32-bit integer array
+    var ints = [];
+    var blocks = blockSize / 4;
+    for(var i = 0; i < blocks; ++i) {
+      ints.push(iv.getInt32());
+    }
+    iv = ints;
+  }
+
+  return iv;
+}
+
+function inc32(block) {
+  // increment last 32 bits of block only
+  block[block.length - 1] = (block[block.length - 1] + 1) & 0xFFFFFFFF;
+}
+
+function from64To32(num) {
+  // convert 64-bit number to two BE Int32s
+  return [(num / 0x100000000) | 0, num & 0xFFFFFFFF];
+}
+
+
+/***/ }),
+/* 477 */
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.splitWhen = exports.flatten = void 0;
+function flatten(items) {
+    return items.reduce((collection, item) => [].concat(collection, item), []);
+}
+exports.flatten = flatten;
+function splitWhen(items, predicate) {
+    const result = [[]];
+    let groupIndex = 0;
+    for (const item of items) {
+        if (predicate(item)) {
+            groupIndex++;
+            result[groupIndex] = [];
+        }
+        else {
+            result[groupIndex].push(item);
+        }
+    }
+    return result;
+}
+exports.splitWhen = splitWhen;
+
+
+/***/ }),
 /* 478 */
 /***/ (function(module) {
 
@@ -52194,7 +55128,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _addComment = _interopRequireDefault(__webpack_require__(289));
+var _addComment = _interopRequireDefault(__webpack_require__(823));
 
 var _Anchors = _interopRequireDefault(__webpack_require__(183));
 
@@ -52210,7 +55144,7 @@ var _Alias = _interopRequireDefault(__webpack_require__(834));
 
 var _Collection = _interopRequireWildcard(__webpack_require__(672));
 
-var _Node = _interopRequireDefault(__webpack_require__(965));
+var _Node = _interopRequireDefault(__webpack_require__(831));
 
 var _Scalar = _interopRequireDefault(__webpack_require__(122));
 
@@ -53052,7 +55986,27 @@ function parse(src) {
 }
 
 /***/ }),
-/* 484 */,
+/* 484 */
+/***/ (function(module) {
+
+"use strict";
+
+
+/**
+ * Creates a new URL by combining the specified URLs
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} relativeURL The relative URL
+ * @returns {string} The combined URL
+ */
+module.exports = function combineURLs(baseURL, relativeURL) {
+  return relativeURL
+    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
+};
+
+
+/***/ }),
 /* 485 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -53080,7 +56034,7 @@ var _Alias = _interopRequireDefault(__webpack_require__(834));
 
 var _Collection = _interopRequireDefault(__webpack_require__(672));
 
-var _Node = _interopRequireDefault(__webpack_require__(965));
+var _Node = _interopRequireDefault(__webpack_require__(831));
 
 var _Pair = _interopRequireDefault(__webpack_require__(532));
 
@@ -53924,9 +56878,15 @@ function escapeProperty(s) {
 
 /***/ }),
 /* 490 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-module.exports = {"$id":"pageTimings.json#","$schema":"http://json-schema.org/draft-06/schema#","type":"object","properties":{"onContentLoad":{"type":"number","min":-1},"onLoad":{"type":"number","min":-1},"comment":{"type":"string"}}};
+module.exports =
+{
+  parallel      : __webpack_require__(567),
+  serial        : __webpack_require__(726),
+  serialOrdered : __webpack_require__(247)
+};
+
 
 /***/ }),
 /* 491 */,
@@ -53939,7 +56899,7 @@ module.exports = {"$id":"pageTimings.json#","$schema":"http://json-schema.org/dr
 var utils = __webpack_require__(759);
 var buildURL = __webpack_require__(62);
 var InterceptorManager = __webpack_require__(993);
-var dispatchRequest = __webpack_require__(356);
+var dispatchRequest = __webpack_require__(932);
 var mergeConfig = __webpack_require__(833);
 
 /**
@@ -54111,93 +57071,66 @@ ListLogSummary.parse = function (text, splitter, fields) {
 /***/ }),
 /* 494 */,
 /* 495 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-module.exports = function generate_not(it, $keyword, $ruleType) {
-  var out = ' ';
-  var $lvl = it.level;
-  var $dataLvl = it.dataLevel;
-  var $schema = it.schema[$keyword];
-  var $schemaPath = it.schemaPath + it.util.getProperty($keyword);
-  var $errSchemaPath = it.errSchemaPath + '/' + $keyword;
-  var $breakOnError = !it.opts.allErrors;
-  var $data = 'data' + ($dataLvl || '');
-  var $errs = 'errs__' + $lvl;
-  var $it = it.util.copy(it);
-  $it.level++;
-  var $nextValid = 'valid' + $it.level;
-  if ((it.opts.strictKeywords ? typeof $schema == 'object' && Object.keys($schema).length > 0 : it.util.schemaHasRules($schema, it.RULES.all))) {
-    $it.schema = $schema;
-    $it.schemaPath = $schemaPath;
-    $it.errSchemaPath = $errSchemaPath;
-    out += ' var ' + ($errs) + ' = errors;  ';
-    var $wasComposite = it.compositeRule;
-    it.compositeRule = $it.compositeRule = true;
-    $it.createErrors = false;
-    var $allErrorsOption;
-    if ($it.opts.allErrors) {
-      $allErrorsOption = $it.opts.allErrors;
-      $it.opts.allErrors = false;
-    }
-    out += ' ' + (it.validate($it)) + ' ';
-    $it.createErrors = true;
-    if ($allErrorsOption) $it.opts.allErrors = $allErrorsOption;
-    it.compositeRule = $it.compositeRule = $wasComposite;
-    out += ' if (' + ($nextValid) + ') {   ';
-    var $$outStack = $$outStack || [];
-    $$outStack.push(out);
-    out = ''; /* istanbul ignore else */
-    if (it.createErrors !== false) {
-      out += ' { keyword: \'' + ('not') + '\' , dataPath: (dataPath || \'\') + ' + (it.errorPath) + ' , schemaPath: ' + (it.util.toQuotedString($errSchemaPath)) + ' , params: {} ';
-      if (it.opts.messages !== false) {
-        out += ' , message: \'should NOT be valid\' ';
-      }
-      if (it.opts.verbose) {
-        out += ' , schema: validate.schema' + ($schemaPath) + ' , parentSchema: validate.schema' + (it.schemaPath) + ' , data: ' + ($data) + ' ';
-      }
-      out += ' } ';
-    } else {
-      out += ' {} ';
-    }
-    var __err = out;
-    out = $$outStack.pop();
-    if (!it.compositeRule && $breakOnError) {
-      /* istanbul ignore if */
-      if (it.async) {
-        out += ' throw new ValidationError([' + (__err) + ']); ';
-      } else {
-        out += ' validate.errors = [' + (__err) + ']; return false; ';
-      }
-    } else {
-      out += ' var err = ' + (__err) + ';  if (vErrors === null) vErrors = [err]; else vErrors.push(err); errors++; ';
-    }
-    out += ' } else {  errors = ' + ($errs) + '; if (vErrors !== null) { if (' + ($errs) + ') vErrors.length = ' + ($errs) + '; else vErrors = null; } ';
-    if (it.opts.allErrors) {
-      out += ' } ';
-    }
-  } else {
-    out += '  var err =   '; /* istanbul ignore else */
-    if (it.createErrors !== false) {
-      out += ' { keyword: \'' + ('not') + '\' , dataPath: (dataPath || \'\') + ' + (it.errorPath) + ' , schemaPath: ' + (it.util.toQuotedString($errSchemaPath)) + ' , params: {} ';
-      if (it.opts.messages !== false) {
-        out += ' , message: \'should NOT be valid\' ';
-      }
-      if (it.opts.verbose) {
-        out += ' , schema: validate.schema' + ($schemaPath) + ' , parentSchema: validate.schema' + (it.schemaPath) + ' , data: ' + ($data) + ' ';
-      }
-      out += ' } ';
-    } else {
-      out += ' {} ';
-    }
-    out += ';  if (vErrors === null) vErrors = [err]; else vErrors.push(err); errors++; ';
-    if ($breakOnError) {
-      out += ' if (false) { ';
-    }
+
+var Cancel = __webpack_require__(871);
+
+/**
+ * A `CancelToken` is an object that can be used to request cancellation of an operation.
+ *
+ * @class
+ * @param {Function} executor The executor function.
+ */
+function CancelToken(executor) {
+  if (typeof executor !== 'function') {
+    throw new TypeError('executor must be a function.');
   }
-  return out;
+
+  var resolvePromise;
+  this.promise = new Promise(function promiseExecutor(resolve) {
+    resolvePromise = resolve;
+  });
+
+  var token = this;
+  executor(function cancel(message) {
+    if (token.reason) {
+      // Cancellation has already been requested
+      return;
+    }
+
+    token.reason = new Cancel(message);
+    resolvePromise(token.reason);
+  });
 }
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+  if (this.reason) {
+    throw this.reason;
+  }
+};
+
+/**
+ * Returns an object that contains a new `CancelToken` and a function that, when called,
+ * cancels the `CancelToken`.
+ */
+CancelToken.source = function source() {
+  var cancel;
+  var token = new CancelToken(function executor(c) {
+    cancel = c;
+  });
+  return {
+    token: token,
+    cancel: cancel
+  };
+};
+
+module.exports = CancelToken;
 
 
 /***/ }),
@@ -54219,7 +57152,7 @@ function isAsyncCall (fn) {
 module.exports = function (baseDir) {
 
    var Git = __webpack_require__(54);
-   var gitFactory = __webpack_require__(962);
+   var gitFactory = __webpack_require__(344);
    var git;
 
 
@@ -54295,7 +57228,7 @@ module.exports = function (baseDir) {
 /* 498 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-module.exports = __webpack_require__(650).default
+module.exports = __webpack_require__(581).default
 
 
 /***/ }),
@@ -55794,64 +58727,45 @@ module.exports = {"$id":"query.json#","$schema":"http://json-schema.org/draft-06
 /* 512 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-var crypto = __webpack_require__(417);
-var BigInteger = __webpack_require__(113).BigInteger;
-var ECPointFp = __webpack_require__(44).ECPointFp;
-var Buffer = __webpack_require__(299).Buffer;
-exports.ECCurves = __webpack_require__(881);
+"use strict";
 
-// zero prepad
-function unstupid(hex,len)
-{
-	return (hex.length >= len) ? hex : unstupid("0"+hex,len);
-}
-
-exports.ECKey = function(curve, key, isPublic)
-{
-  var priv;
-	var c = curve();
-	var n = c.getN();
-  var bytes = Math.floor(n.bitLength()/8);
-
-  if(key)
-  {
-    if(isPublic)
-    {
-      var curve = c.getCurve();
-//      var x = key.slice(1,bytes+1); // skip the 04 for uncompressed format
-//      var y = key.slice(bytes+1);
-//      this.P = new ECPointFp(curve,
-//        curve.fromBigInteger(new BigInteger(x.toString("hex"), 16)),
-//        curve.fromBigInteger(new BigInteger(y.toString("hex"), 16)));      
-      this.P = curve.decodePointHex(key.toString("hex"));
-    }else{
-      if(key.length != bytes) return false;
-      priv = new BigInteger(key.toString("hex"), 16);      
+Object.defineProperty(exports, "__esModule", { value: true });
+const matcher_1 = __webpack_require__(417);
+class PartialMatcher extends matcher_1.default {
+    match(filepath) {
+        const parts = filepath.split('/');
+        const levels = parts.length;
+        const patterns = this._storage.filter((info) => !info.complete || info.segments.length > levels);
+        for (const pattern of patterns) {
+            const section = pattern.sections[0];
+            /**
+             * In this case, the pattern has a globstar and we must read all directories unconditionally,
+             * but only if the level has reached the end of the first group.
+             *
+             * fixtures/{a,b}/**
+             *  ^ true/false  ^ always true
+            */
+            if (!pattern.complete && levels > section.length) {
+                return true;
+            }
+            const match = parts.every((part, index) => {
+                const segment = pattern.segments[index];
+                if (segment.dynamic && segment.patternRe.test(part)) {
+                    return true;
+                }
+                if (!segment.dynamic && segment.pattern === part) {
+                    return true;
+                }
+                return false;
+            });
+            if (match) {
+                return true;
+            }
+        }
+        return false;
     }
-  }else{
-    var n1 = n.subtract(BigInteger.ONE);
-    var r = new BigInteger(crypto.randomBytes(n.bitLength()));
-    priv = r.mod(n1).add(BigInteger.ONE);
-    this.P = c.getG().multiply(priv);
-  }
-  if(this.P)
-  {
-//  var pubhex = unstupid(this.P.getX().toBigInteger().toString(16),bytes*2)+unstupid(this.P.getY().toBigInteger().toString(16),bytes*2);
-//  this.PublicKey = Buffer.from("04"+pubhex,"hex");
-    this.PublicKey = Buffer.from(c.getCurve().encodeCompressedPointHex(this.P),"hex");
-  }
-  if(priv)
-  {
-    this.PrivateKey = Buffer.from(unstupid(priv.toString(16),bytes*2),"hex");
-    this.deriveSharedSecret = function(key)
-    {
-      if(!key || !key.P) return false;
-      var S = key.P.multiply(priv);
-      return Buffer.from(unstupid(S.getX().toBigInteger().toString(16),bytes*2),"hex");
-   }     
-  }
 }
-
+exports.default = PartialMatcher;
 
 
 /***/ }),
@@ -56118,7 +59032,28 @@ formatters.O = function (v) {
 
 
 /***/ }),
-/* 514 */,
+/* 514 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const utils = __webpack_require__(817);
+class ErrorFilter {
+    constructor(_settings) {
+        this._settings = _settings;
+    }
+    getFilter() {
+        return (error) => this._isNonFatalError(error);
+    }
+    _isNonFatalError(error) {
+        return utils.errno.isEnoentCodeError(error) || this._settings.suppressErrors;
+    }
+}
+exports.default = ErrorFilter;
+
+
+/***/ }),
 /* 515 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -56744,34 +59679,32 @@ class ExecState extends events.EventEmitter {
 
 /***/ }),
 /* 519 */
-/***/ (function(module, exports) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-exports = module.exports = stringify
-exports.getSerialize = serializer
+"use strict";
 
-function stringify(obj, replacer, spaces, cycleReplacer) {
-  return JSON.stringify(obj, serializer(replacer, cycleReplacer), spaces)
-}
-
-function serializer(replacer, cycleReplacer) {
-  var stack = [], keys = []
-
-  if (cycleReplacer == null) cycleReplacer = function(key, value) {
-    if (stack[0] === value) return "[Circular ~]"
-    return "[Circular ~." + keys.slice(0, stack.indexOf(value)).join(".") + "]"
-  }
-
-  return function(key, value) {
-    if (stack.length > 0) {
-      var thisPos = stack.indexOf(this)
-      ~thisPos ? stack.splice(thisPos + 1) : stack.push(this)
-      ~thisPos ? keys.splice(thisPos, Infinity, key) : keys.push(key)
-      if (~stack.indexOf(value)) value = cycleReplacer.call(this, key, value)
+Object.defineProperty(exports, "__esModule", { value: true });
+const async = __webpack_require__(670);
+const sync = __webpack_require__(208);
+const settings_1 = __webpack_require__(280);
+exports.Settings = settings_1.default;
+function stat(path, optionsOrSettingsOrCallback, callback) {
+    if (typeof optionsOrSettingsOrCallback === 'function') {
+        return async.read(path, getSettings(), optionsOrSettingsOrCallback);
     }
-    else stack.push(value)
-
-    return replacer == null ? value : replacer.call(this, key, value)
-  }
+    async.read(path, getSettings(optionsOrSettingsOrCallback), callback);
+}
+exports.stat = stat;
+function statSync(path, optionsOrSettings) {
+    const settings = getSettings(optionsOrSettings);
+    return sync.read(path, settings);
+}
+exports.statSync = statSync;
+function getSettings(settingsOrOptions = {}) {
+    if (settingsOrOptions instanceof settings_1.default) {
+        return settingsOrOptions;
+    }
+    return new settings_1.default(settingsOrOptions);
 }
 
 
@@ -56783,7 +59716,7 @@ function serializer(replacer, cycleReplacer) {
 
 var util = __webpack_require__(669);
 var Stream = __webpack_require__(413).Stream;
-var DelayedStream = __webpack_require__(451);
+var DelayedStream = __webpack_require__(416);
 
 module.exports = CombinedStream;
 function CombinedStream() {
@@ -57570,7 +60503,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __webpack_require__(747);
 const gaxios_1 = __webpack_require__(137);
 const jws = __webpack_require__(540);
-const mime = __webpack_require__(815);
+const mime = __webpack_require__(185);
 const util_1 = __webpack_require__(669);
 const readFile = fs.readFile
     ? util_1.promisify(fs.readFile)
@@ -57668,7 +60601,7 @@ class GoogleToken {
                 // bit time to overall module loading, and is likely not frequently
                 // used.  In a future release, p12 support will be entirely removed.
                 if (!getPem) {
-                    getPem = (await Promise.resolve().then(() => __webpack_require__(88))).getPem;
+                    getPem = (await Promise.resolve().then(() => __webpack_require__(346))).getPem;
                 }
                 const privateKey = await getPem(keyFile);
                 return { privateKey };
@@ -57834,145 +60767,32 @@ module.exports = function spread(callback) {
 
 "use strict";
 
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _constants = __webpack_require__(460);
-
-var _errors = __webpack_require__(541);
-
-var _BlankLine = _interopRequireDefault(__webpack_require__(862));
-
-var _Node = _interopRequireDefault(__webpack_require__(234));
-
-var _Range = _interopRequireDefault(__webpack_require__(415));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-class CollectionItem extends _Node.default {
-  constructor(type, props) {
-    super(type, props);
-    this.node = null;
-  }
-
-  get includesTrailingLines() {
-    return !!this.node && this.node.includesTrailingLines;
-  }
-  /**
-   * @param {ParseContext} context
-   * @param {number} start - Index of first character
-   * @returns {number} - Index of the character after this
-   */
-
-
-  parse(context, start) {
-    this.context = context;
-    const {
-      parseNode,
-      src
-    } = context;
-    let {
-      atLineStart,
-      lineStart
-    } = context;
-    if (!atLineStart && this.type === _constants.Type.SEQ_ITEM) this.error = new _errors.YAMLSemanticError(this, 'Sequence items must not have preceding content on the same line');
-    const indent = atLineStart ? start - lineStart : context.indent;
-
-    let offset = _Node.default.endOfWhiteSpace(src, start + 1);
-
-    let ch = src[offset];
-    const inlineComment = ch === '#';
-    const comments = [];
-    let blankLine = null;
-
-    while (ch === '\n' || ch === '#') {
-      if (ch === '#') {
-        const end = _Node.default.endOfLine(src, offset + 1);
-
-        comments.push(new _Range.default(offset, end));
-        offset = end;
-      } else {
-        atLineStart = true;
-        lineStart = offset + 1;
-
-        const wsEnd = _Node.default.endOfWhiteSpace(src, lineStart);
-
-        if (src[wsEnd] === '\n' && comments.length === 0) {
-          blankLine = new _BlankLine.default();
-          lineStart = blankLine.parse({
-            src
-          }, lineStart);
+Object.defineProperty(exports, "__esModule", { value: true });
+const utils = __webpack_require__(817);
+class EntryTransformer {
+    constructor(_settings) {
+        this._settings = _settings;
+    }
+    getTransformer() {
+        return (entry) => this._transform(entry);
+    }
+    _transform(entry) {
+        let filepath = entry.path;
+        if (this._settings.absolute) {
+            filepath = utils.path.makeAbsolute(this._settings.cwd, filepath);
+            filepath = utils.path.unixify(filepath);
         }
-
-        offset = _Node.default.endOfIndent(src, lineStart);
-      }
-
-      ch = src[offset];
+        if (this._settings.markDirectories && entry.dirent.isDirectory()) {
+            filepath += '/';
+        }
+        if (!this._settings.objectMode) {
+            return filepath;
+        }
+        return Object.assign(Object.assign({}, entry), { path: filepath });
     }
-
-    if (_Node.default.nextNodeIsIndented(ch, offset - (lineStart + indent), this.type !== _constants.Type.SEQ_ITEM)) {
-      this.node = parseNode({
-        atLineStart,
-        inCollection: false,
-        indent,
-        lineStart,
-        parent: this
-      }, offset);
-    } else if (ch && lineStart > start + 1) {
-      offset = lineStart - 1;
-    }
-
-    if (this.node) {
-      if (blankLine) {
-        // Only blank lines preceding non-empty nodes are captured. Note that
-        // this means that collection item range start indices do not always
-        // increase monotonically. -- eemeli/yaml#126
-        const items = context.parent.items || context.parent.contents;
-        if (items) items.push(blankLine);
-      }
-
-      if (comments.length) Array.prototype.push.apply(this.props, comments);
-      offset = this.node.range.end;
-    } else {
-      if (inlineComment) {
-        const c = comments[0];
-        this.props.push(c);
-        offset = c.end;
-      } else {
-        offset = _Node.default.endOfLine(src, start + 1);
-      }
-    }
-
-    const end = this.node ? this.node.valueRange.end : offset;
-    this.valueRange = new _Range.default(start, end);
-    return offset;
-  }
-
-  setOrigRanges(cr, offset) {
-    offset = super.setOrigRanges(cr, offset);
-    return this.node ? this.node.setOrigRanges(cr, offset) : offset;
-  }
-
-  toString() {
-    const {
-      context: {
-        src
-      },
-      node,
-      range,
-      value
-    } = this;
-    if (value != null) return value;
-    const str = node ? src.slice(range.start, node.range.start) + String(node) : src.slice(range.start, range.end);
-    return _Node.default.addStringTerminator(src, range.end, str);
-  }
-
 }
+exports.default = EntryTransformer;
 
-exports.default = CollectionItem;
 
 /***/ }),
 /* 527 */
@@ -58151,7 +60971,26 @@ function plural(ms, msAbs, n, name) {
 
 /***/ }),
 /* 530 */,
-/* 531 */,
+/* 531 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+const agent_1 = __importDefault(__webpack_require__(695));
+function createHttpsProxyAgent(opts) {
+    return new agent_1.default(opts);
+}
+(function (createHttpsProxyAgent) {
+    createHttpsProxyAgent.HttpsProxyAgent = agent_1.default;
+    createHttpsProxyAgent.prototype = agent_1.default.prototype;
+})(createHttpsProxyAgent || (createHttpsProxyAgent = {}));
+module.exports = createHttpsProxyAgent;
+//# sourceMappingURL=index.js.map
+
+/***/ }),
 /* 532 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -58163,7 +61002,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _addComment = _interopRequireDefault(__webpack_require__(289));
+var _addComment = _interopRequireDefault(__webpack_require__(823));
 
 var _constants = __webpack_require__(460);
 
@@ -58171,7 +61010,7 @@ var _toJSON = _interopRequireDefault(__webpack_require__(788));
 
 var _Collection = _interopRequireDefault(__webpack_require__(672));
 
-var _Node = _interopRequireDefault(__webpack_require__(965));
+var _Node = _interopRequireDefault(__webpack_require__(831));
 
 var _Scalar = _interopRequireDefault(__webpack_require__(122));
 
@@ -58463,7 +61302,7 @@ module.exports = {"$schema":"http://json-schema.org/draft-07/schema#","$id":"htt
  * The full OID (including ASN.1 tag and length of 6 bytes) is:
  * 0x06062A864886F70D
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(294);
 __webpack_require__(930);
 
@@ -59745,10 +62584,10 @@ asn1.prettyPrint = function(obj, level, indentation) {
 // Copyright 2012 Joyent, Inc.  All rights reserved.
 
 var assert = __webpack_require__(552);
-var crypto = __webpack_require__(417);
+var crypto = __webpack_require__(373);
 var http = __webpack_require__(605);
 var util = __webpack_require__(669);
-var sshpk = __webpack_require__(96);
+var sshpk = __webpack_require__(13);
 var jsprim = __webpack_require__(546);
 var utils = __webpack_require__(140);
 
@@ -60158,11 +62997,11 @@ module.exports = {
 };
 
 var assert = __webpack_require__(552);
-var asn1 = __webpack_require__(784);
+var asn1 = __webpack_require__(440);
 var Buffer = __webpack_require__(299).Buffer;
 var algs = __webpack_require__(151);
 var utils = __webpack_require__(241);
-var crypto = __webpack_require__(417);
+var crypto = __webpack_require__(373);
 
 var Key = __webpack_require__(463);
 var PrivateKey = __webpack_require__(877);
@@ -60649,7 +63488,7 @@ function write(key, options) {
  * due to the large block size of existing MACs and the small size of the
  * timing signal.
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(535);
 __webpack_require__(709);
 __webpack_require__(445);
@@ -64703,25 +67542,9 @@ forge.tls.createConnection = tls.createConnection;
 
 /***/ }),
 /* 539 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module) {
 
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _v = _interopRequireDefault(__webpack_require__(765));
-
-var _md = _interopRequireDefault(__webpack_require__(78));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const v3 = (0, _v.default)('v3', 0x30, _md.default);
-var _default = v3;
-exports.default = _default;
+module.exports = {"$id":"pageTimings.json#","$schema":"http://json-schema.org/draft-06/schema#","type":"object","properties":{"onContentLoad":{"type":"number","min":-1},"onLoad":{"type":"number","min":-1},"comment":{"type":"string"}}};
 
 /***/ }),
 /* 540 */
@@ -64729,7 +67552,7 @@ exports.default = _default;
 
 /*global exports*/
 var SignStream = __webpack_require__(825);
-var VerifyStream = __webpack_require__(817);
+var VerifyStream = __webpack_require__(838);
 
 var ALGORITHMS = [
   'HS256', 'HS384', 'HS512',
@@ -64765,7 +67588,7 @@ exports.YAMLWarning = exports.YAMLSyntaxError = exports.YAMLSemanticError = expo
 
 var _Node = _interopRequireDefault(__webpack_require__(234));
 
-var _sourceUtils = __webpack_require__(673);
+var _sourceUtils = __webpack_require__(174);
 
 var _Range = _interopRequireDefault(__webpack_require__(415));
 
@@ -64861,83 +67684,95 @@ exports.YAMLWarning = YAMLWarning;
 
 /***/ }),
 /* 542 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+// Copyright 2016 Joyent, Inc.
 
-module.exports = function generate_pattern(it, $keyword, $ruleType) {
-  var out = ' ';
-  var $lvl = it.level;
-  var $dataLvl = it.dataLevel;
-  var $schema = it.schema[$keyword];
-  var $schemaPath = it.schemaPath + it.util.getProperty($keyword);
-  var $errSchemaPath = it.errSchemaPath + '/' + $keyword;
-  var $breakOnError = !it.opts.allErrors;
-  var $data = 'data' + ($dataLvl || '');
-  var $isData = it.opts.$data && $schema && $schema.$data,
-    $schemaValue;
-  if ($isData) {
-    out += ' var schema' + ($lvl) + ' = ' + (it.util.getData($schema.$data, $dataLvl, it.dataPathArr)) + '; ';
-    $schemaValue = 'schema' + $lvl;
-  } else {
-    $schemaValue = $schema;
-  }
-  var $regexp = $isData ? '(new RegExp(' + $schemaValue + '))' : it.usePattern($schema);
-  out += 'if ( ';
-  if ($isData) {
-    out += ' (' + ($schemaValue) + ' !== undefined && typeof ' + ($schemaValue) + ' != \'string\') || ';
-  }
-  out += ' !' + ($regexp) + '.test(' + ($data) + ') ) {   ';
-  var $$outStack = $$outStack || [];
-  $$outStack.push(out);
-  out = ''; /* istanbul ignore else */
-  if (it.createErrors !== false) {
-    out += ' { keyword: \'' + ('pattern') + '\' , dataPath: (dataPath || \'\') + ' + (it.errorPath) + ' , schemaPath: ' + (it.util.toQuotedString($errSchemaPath)) + ' , params: { pattern:  ';
-    if ($isData) {
-      out += '' + ($schemaValue);
-    } else {
-      out += '' + (it.util.toQuotedString($schema));
-    }
-    out += '  } ';
-    if (it.opts.messages !== false) {
-      out += ' , message: \'should match pattern "';
-      if ($isData) {
-        out += '\' + ' + ($schemaValue) + ' + \'';
-      } else {
-        out += '' + (it.util.escapeQuotes($schema));
-      }
-      out += '"\' ';
-    }
-    if (it.opts.verbose) {
-      out += ' , schema:  ';
-      if ($isData) {
-        out += 'validate.schema' + ($schemaPath);
-      } else {
-        out += '' + (it.util.toQuotedString($schema));
-      }
-      out += '         , parentSchema: validate.schema' + (it.schemaPath) + ' , data: ' + ($data) + ' ';
-    }
-    out += ' } ';
-  } else {
-    out += ' {} ';
-  }
-  var __err = out;
-  out = $$outStack.pop();
-  if (!it.compositeRule && $breakOnError) {
-    /* istanbul ignore if */
-    if (it.async) {
-      out += ' throw new ValidationError([' + (__err) + ']); ';
-    } else {
-      out += ' validate.errors = [' + (__err) + ']; return false; ';
-    }
-  } else {
-    out += ' var err = ' + (__err) + ';  if (vErrors === null) vErrors = [err]; else vErrors.push(err); errors++; ';
-  }
-  out += '} ';
-  if ($breakOnError) {
-    out += ' else { ';
-  }
-  return out;
+var x509 = __webpack_require__(904);
+
+module.exports = {
+	read: read,
+	verify: x509.verify,
+	sign: x509.sign,
+	write: write
+};
+
+var assert = __webpack_require__(552);
+var asn1 = __webpack_require__(440);
+var Buffer = __webpack_require__(299).Buffer;
+var algs = __webpack_require__(151);
+var utils = __webpack_require__(241);
+var Key = __webpack_require__(463);
+var PrivateKey = __webpack_require__(877);
+var pem = __webpack_require__(298);
+var Identity = __webpack_require__(359);
+var Signature = __webpack_require__(885);
+var Certificate = __webpack_require__(89);
+
+function read(buf, options) {
+	if (typeof (buf) !== 'string') {
+		assert.buffer(buf, 'buf');
+		buf = buf.toString('ascii');
+	}
+
+	var lines = buf.trim().split(/[\r\n]+/g);
+
+	var m;
+	var si = -1;
+	while (!m && si < lines.length) {
+		m = lines[++si].match(/*JSSTYLED*/
+		    /[-]+[ ]*BEGIN CERTIFICATE[ ]*[-]+/);
+	}
+	assert.ok(m, 'invalid PEM header');
+
+	var m2;
+	var ei = lines.length;
+	while (!m2 && ei > 0) {
+		m2 = lines[--ei].match(/*JSSTYLED*/
+		    /[-]+[ ]*END CERTIFICATE[ ]*[-]+/);
+	}
+	assert.ok(m2, 'invalid PEM footer');
+
+	lines = lines.slice(si, ei + 1);
+
+	var headers = {};
+	while (true) {
+		lines = lines.slice(1);
+		m = lines[0].match(/*JSSTYLED*/
+		    /^([A-Za-z0-9-]+): (.+)$/);
+		if (!m)
+			break;
+		headers[m[1].toLowerCase()] = m[2];
+	}
+
+	/* Chop off the first and last lines */
+	lines = lines.slice(0, -1).join('');
+	buf = Buffer.from(lines, 'base64');
+
+	return (x509.read(buf, options));
+}
+
+function write(cert, options) {
+	var dbuf = x509.write(cert, options);
+
+	var header = 'CERTIFICATE';
+	var tmp = dbuf.toString('base64');
+	var len = tmp.length + (tmp.length / 64) +
+	    18 + 16 + header.length*2 + 10;
+	var buf = Buffer.alloc(len);
+	var o = 0;
+	o += buf.write('-----BEGIN ' + header + '-----\n', o);
+	for (var i = 0; i < tmp.length; ) {
+		var limit = i + 64;
+		if (limit > tmp.length)
+			limit = tmp.length;
+		o += buf.write(tmp.slice(i, limit), o);
+		buf[o++] = 10;
+		i = limit;
+	}
+	o += buf.write('-----END ' + header + '-----\n', o);
+
+	return (buf.slice(0, o));
 }
 
 
@@ -66080,7 +68915,302 @@ module.exports = _setExports(process.env.NODE_NDEBUG);
 
 
 /***/ }),
-/* 553 */,
+/* 553 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const childProcess = __webpack_require__(129);
+const path = __webpack_require__(622);
+const util_1 = __webpack_require__(669);
+const ioUtil = __webpack_require__(325);
+const exec = util_1.promisify(childProcess.exec);
+/**
+ * Copies a file or folder.
+ * Based off of shelljs - https://github.com/shelljs/shelljs/blob/9237f66c52e5daa40458f94f9565e18e8132f5a6/src/cp.js
+ *
+ * @param     source    source path
+ * @param     dest      destination path
+ * @param     options   optional. See CopyOptions.
+ */
+function cp(source, dest, options = {}) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { force, recursive } = readCopyOptions(options);
+        const destStat = (yield ioUtil.exists(dest)) ? yield ioUtil.stat(dest) : null;
+        // Dest is an existing file, but not forcing
+        if (destStat && destStat.isFile() && !force) {
+            return;
+        }
+        // If dest is an existing directory, should copy inside.
+        const newDest = destStat && destStat.isDirectory()
+            ? path.join(dest, path.basename(source))
+            : dest;
+        if (!(yield ioUtil.exists(source))) {
+            throw new Error(`no such file or directory: ${source}`);
+        }
+        const sourceStat = yield ioUtil.stat(source);
+        if (sourceStat.isDirectory()) {
+            if (!recursive) {
+                throw new Error(`Failed to copy. ${source} is a directory, but tried to copy without recursive flag.`);
+            }
+            else {
+                yield cpDirRecursive(source, newDest, 0, force);
+            }
+        }
+        else {
+            if (path.relative(source, newDest) === '') {
+                // a file cannot be copied to itself
+                throw new Error(`'${newDest}' and '${source}' are the same file`);
+            }
+            yield copyFile(source, newDest, force);
+        }
+    });
+}
+exports.cp = cp;
+/**
+ * Moves a path.
+ *
+ * @param     source    source path
+ * @param     dest      destination path
+ * @param     options   optional. See MoveOptions.
+ */
+function mv(source, dest, options = {}) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (yield ioUtil.exists(dest)) {
+            let destExists = true;
+            if (yield ioUtil.isDirectory(dest)) {
+                // If dest is directory copy src into dest
+                dest = path.join(dest, path.basename(source));
+                destExists = yield ioUtil.exists(dest);
+            }
+            if (destExists) {
+                if (options.force == null || options.force) {
+                    yield rmRF(dest);
+                }
+                else {
+                    throw new Error('Destination already exists');
+                }
+            }
+        }
+        yield mkdirP(path.dirname(dest));
+        yield ioUtil.rename(source, dest);
+    });
+}
+exports.mv = mv;
+/**
+ * Remove a path recursively with force
+ *
+ * @param inputPath path to remove
+ */
+function rmRF(inputPath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (ioUtil.IS_WINDOWS) {
+            // Node doesn't provide a delete operation, only an unlink function. This means that if the file is being used by another
+            // program (e.g. antivirus), it won't be deleted. To address this, we shell out the work to rd/del.
+            try {
+                if (yield ioUtil.isDirectory(inputPath, true)) {
+                    yield exec(`rd /s /q "${inputPath}"`);
+                }
+                else {
+                    yield exec(`del /f /a "${inputPath}"`);
+                }
+            }
+            catch (err) {
+                // if you try to delete a file that doesn't exist, desired result is achieved
+                // other errors are valid
+                if (err.code !== 'ENOENT')
+                    throw err;
+            }
+            // Shelling out fails to remove a symlink folder with missing source, this unlink catches that
+            try {
+                yield ioUtil.unlink(inputPath);
+            }
+            catch (err) {
+                // if you try to delete a file that doesn't exist, desired result is achieved
+                // other errors are valid
+                if (err.code !== 'ENOENT')
+                    throw err;
+            }
+        }
+        else {
+            let isDir = false;
+            try {
+                isDir = yield ioUtil.isDirectory(inputPath);
+            }
+            catch (err) {
+                // if you try to delete a file that doesn't exist, desired result is achieved
+                // other errors are valid
+                if (err.code !== 'ENOENT')
+                    throw err;
+                return;
+            }
+            if (isDir) {
+                yield exec(`rm -rf "${inputPath}"`);
+            }
+            else {
+                yield ioUtil.unlink(inputPath);
+            }
+        }
+    });
+}
+exports.rmRF = rmRF;
+/**
+ * Make a directory.  Creates the full path with folders in between
+ * Will throw if it fails
+ *
+ * @param   fsPath        path to create
+ * @returns Promise<void>
+ */
+function mkdirP(fsPath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield ioUtil.mkdirP(fsPath);
+    });
+}
+exports.mkdirP = mkdirP;
+/**
+ * Returns path of a tool had the tool actually been invoked.  Resolves via paths.
+ * If you check and the tool does not exist, it will throw.
+ *
+ * @param     tool              name of the tool
+ * @param     check             whether to check if tool exists
+ * @returns   Promise<string>   path to tool
+ */
+function which(tool, check) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!tool) {
+            throw new Error("parameter 'tool' is required");
+        }
+        // recursive when check=true
+        if (check) {
+            const result = yield which(tool, false);
+            if (!result) {
+                if (ioUtil.IS_WINDOWS) {
+                    throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also verify the file has a valid extension for an executable file.`);
+                }
+                else {
+                    throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also check the file mode to verify the file is executable.`);
+                }
+            }
+        }
+        try {
+            // build the list of extensions to try
+            const extensions = [];
+            if (ioUtil.IS_WINDOWS && process.env.PATHEXT) {
+                for (const extension of process.env.PATHEXT.split(path.delimiter)) {
+                    if (extension) {
+                        extensions.push(extension);
+                    }
+                }
+            }
+            // if it's rooted, return it if exists. otherwise return empty.
+            if (ioUtil.isRooted(tool)) {
+                const filePath = yield ioUtil.tryGetExecutablePath(tool, extensions);
+                if (filePath) {
+                    return filePath;
+                }
+                return '';
+            }
+            // if any path separators, return empty
+            if (tool.includes('/') || (ioUtil.IS_WINDOWS && tool.includes('\\'))) {
+                return '';
+            }
+            // build the list of directories
+            //
+            // Note, technically "where" checks the current directory on Windows. From a toolkit perspective,
+            // it feels like we should not do this. Checking the current directory seems like more of a use
+            // case of a shell, and the which() function exposed by the toolkit should strive for consistency
+            // across platforms.
+            const directories = [];
+            if (process.env.PATH) {
+                for (const p of process.env.PATH.split(path.delimiter)) {
+                    if (p) {
+                        directories.push(p);
+                    }
+                }
+            }
+            // return the first match
+            for (const directory of directories) {
+                const filePath = yield ioUtil.tryGetExecutablePath(directory + path.sep + tool, extensions);
+                if (filePath) {
+                    return filePath;
+                }
+            }
+            return '';
+        }
+        catch (err) {
+            throw new Error(`which failed with message ${err.message}`);
+        }
+    });
+}
+exports.which = which;
+function readCopyOptions(options) {
+    const force = options.force == null ? true : options.force;
+    const recursive = Boolean(options.recursive);
+    return { force, recursive };
+}
+function cpDirRecursive(sourceDir, destDir, currentDepth, force) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Ensure there is not a run away recursive copy
+        if (currentDepth >= 255)
+            return;
+        currentDepth++;
+        yield mkdirP(destDir);
+        const files = yield ioUtil.readdir(sourceDir);
+        for (const fileName of files) {
+            const srcFile = `${sourceDir}/${fileName}`;
+            const destFile = `${destDir}/${fileName}`;
+            const srcFileStat = yield ioUtil.lstat(srcFile);
+            if (srcFileStat.isDirectory()) {
+                // Recurse
+                yield cpDirRecursive(srcFile, destFile, currentDepth, force);
+            }
+            else {
+                yield copyFile(srcFile, destFile, force);
+            }
+        }
+        // Change the mode for the newly created directory
+        yield ioUtil.chmod(destDir, (yield ioUtil.stat(sourceDir)).mode);
+    });
+}
+// Buffered file copy
+function copyFile(srcFile, destFile, force) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if ((yield ioUtil.lstat(srcFile)).isSymbolicLink()) {
+            // unlink/re-link it
+            try {
+                yield ioUtil.lstat(destFile);
+                yield ioUtil.unlink(destFile);
+            }
+            catch (e) {
+                // Try to override file permission
+                if (e.code === 'EPERM') {
+                    yield ioUtil.chmod(destFile, '0666');
+                    yield ioUtil.unlink(destFile);
+                }
+                // other errors = it doesn't exist, no work to do
+            }
+            // Copy over symlink
+            const symlinkFull = yield ioUtil.readlink(srcFile);
+            yield ioUtil.symlink(symlinkFull, destFile, ioUtil.IS_WINDOWS ? 'junction' : null);
+        }
+        else if (!(yield ioUtil.exists(destFile)) || force) {
+            yield ioUtil.copyFile(srcFile, destFile);
+        }
+    });
+}
+//# sourceMappingURL=io.js.map
+
+/***/ }),
 /* 554 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -66180,7 +69310,69 @@ const timestamp = {
 exports.timestamp = timestamp;
 
 /***/ }),
-/* 555 */,
+/* 555 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+/*!
+ * Copyright (c) 2015, Salesforce.com, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of Salesforce.com nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+var pubsuffix = __webpack_require__(719);
+
+// Gives the permutation of all possible domainMatch()es of a given domain. The
+// array is in shortest-to-longest order.  Handy for indexing.
+function permuteDomain (domain) {
+  var pubSuf = pubsuffix.getPublicSuffix(domain);
+  if (!pubSuf) {
+    return null;
+  }
+  if (pubSuf == domain) {
+    return [domain];
+  }
+
+  var prefix = domain.slice(0, -(pubSuf.length + 1)); // ".example.com"
+  var parts = prefix.split('.').reverse();
+  var cur = pubSuf;
+  var permutations = [cur];
+  while (parts.length) {
+    cur = parts.shift() + '.' + cur;
+    permutations.push(cur);
+  }
+  return permutations;
+}
+
+exports.permuteDomain = permuteDomain;
+
+
+/***/ }),
 /* 556 */,
 /* 557 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -66199,7 +69391,7 @@ module.exports = {
 };
 
 var assert = __webpack_require__(552);
-var asn1 = __webpack_require__(784);
+var asn1 = __webpack_require__(440);
 var Buffer = __webpack_require__(299).Buffer;
 var algs = __webpack_require__(151);
 var utils = __webpack_require__(241);
@@ -67073,7 +70265,7 @@ const core = __webpack_require__(369);
 const tc = __webpack_require__(191);
 const io = __webpack_require__(806);
 const path = __webpack_require__(622);
-const axios = __webpack_require__(373);
+const axios = __webpack_require__(977);
 const uuid = __webpack_require__(620);
 const fs = __webpack_require__(747);
 const os = __webpack_require__(87);
@@ -67222,11 +70414,90 @@ function unmonkeypatch () {
 
 /***/ }),
 /* 566 */,
-/* 567 */,
+/* 567 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var iterate    = __webpack_require__(755)
+  , initState  = __webpack_require__(59)
+  , terminator = __webpack_require__(782)
+  ;
+
+// Public API
+module.exports = parallel;
+
+/**
+ * Runs iterator over provided array elements in parallel
+ *
+ * @param   {array|object} list - array or object (named list) to iterate over
+ * @param   {function} iterator - iterator to run
+ * @param   {function} callback - invoked when all elements processed
+ * @returns {function} - jobs terminator
+ */
+function parallel(list, iterator, callback)
+{
+  var state = initState(list);
+
+  while (state.index < (state['keyedList'] || list).length)
+  {
+    iterate(list, iterator, state, function(error, result)
+    {
+      if (error)
+      {
+        callback(error, result);
+        return;
+      }
+
+      // looks like it's the last one
+      if (Object.keys(state.jobs).length === 0)
+      {
+        callback(null, state.results);
+        return;
+      }
+    });
+
+    state.index++;
+  }
+
+  return terminator.bind(state, callback);
+}
+
+
+/***/ }),
 /* 568 */,
 /* 569 */,
 /* 570 */,
-/* 571 */,
+/* 571 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+var createError = __webpack_require__(237);
+
+/**
+ * Resolve or reject a Promise based on response status.
+ *
+ * @param {Function} resolve A function that resolves the promise.
+ * @param {Function} reject A function that rejects the promise.
+ * @param {object} response The response.
+ */
+module.exports = function settle(resolve, reject, response) {
+  var validateStatus = response.config.validateStatus;
+  if (!validateStatus || validateStatus(response.status)) {
+    resolve(response);
+  } else {
+    reject(createError(
+      'Request failed with status code ' + response.status,
+      response.config,
+      null,
+      response.request,
+      response
+    ));
+  }
+};
+
+
+/***/ }),
 /* 572 */
 /***/ (function(module) {
 
@@ -67339,7 +70610,7 @@ var _listTagNames = _interopRequireDefault(__webpack_require__(469));
 
 var _schema = _interopRequireDefault(__webpack_require__(704));
 
-var _Alias = _interopRequireDefault(__webpack_require__(697));
+var _Alias = _interopRequireDefault(__webpack_require__(358));
 
 var _Collection = _interopRequireWildcard(__webpack_require__(235));
 
@@ -70750,406 +74021,110 @@ module.exports.safeDump = safeDump;
 
 /***/ }),
 /* 581 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-// Copyright 2017 Joyent, Inc.
+"use strict";
 
-module.exports = {
-	DiffieHellman: DiffieHellman,
-	generateECDSA: generateECDSA,
-	generateED25519: generateED25519
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _parse = _interopRequireDefault(__webpack_require__(483));
+
+var _Document = _interopRequireDefault(__webpack_require__(574));
+
+var _errors = __webpack_require__(297);
+
+var _schema = _interopRequireDefault(__webpack_require__(704));
+
+var _warnings = __webpack_require__(111);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const defaultOptions = {
+  anchorPrefix: 'a',
+  customTags: null,
+  keepCstNodes: false,
+  keepNodeTypes: true,
+  keepBlobsInJSON: true,
+  mapAsMap: false,
+  maxAliasCount: 100,
+  prettyErrors: false,
+  // TODO Set true in v2
+  simpleKeys: false,
+  version: '1.2'
 };
 
-var assert = __webpack_require__(552);
-var crypto = __webpack_require__(417);
-var Buffer = __webpack_require__(299).Buffer;
-var algs = __webpack_require__(151);
-var utils = __webpack_require__(241);
-var nacl = __webpack_require__(701);
+function createNode(value, wrapScalars = true, tag) {
+  if (tag === undefined && typeof wrapScalars === 'string') {
+    tag = wrapScalars;
+    wrapScalars = true;
+  }
 
-var Key = __webpack_require__(463);
-var PrivateKey = __webpack_require__(877);
-
-var CRYPTO_HAVE_ECDH = (crypto.createECDH !== undefined);
-
-var ecdh = __webpack_require__(512);
-var ec = __webpack_require__(44);
-var jsbn = __webpack_require__(113).BigInteger;
-
-function DiffieHellman(key) {
-	utils.assertCompatible(key, Key, [1, 4], 'key');
-	this._isPriv = PrivateKey.isPrivateKey(key, [1, 3]);
-	this._algo = key.type;
-	this._curve = key.curve;
-	this._key = key;
-	if (key.type === 'dsa') {
-		if (!CRYPTO_HAVE_ECDH) {
-			throw (new Error('Due to bugs in the node 0.10 ' +
-			    'crypto API, node 0.12.x or later is required ' +
-			    'to use DH'));
-		}
-		this._dh = crypto.createDiffieHellman(
-		    key.part.p.data, undefined,
-		    key.part.g.data, undefined);
-		this._p = key.part.p;
-		this._g = key.part.g;
-		if (this._isPriv)
-			this._dh.setPrivateKey(key.part.x.data);
-		this._dh.setPublicKey(key.part.y.data);
-
-	} else if (key.type === 'ecdsa') {
-		if (!CRYPTO_HAVE_ECDH) {
-			this._ecParams = new X9ECParameters(this._curve);
-
-			if (this._isPriv) {
-				this._priv = new ECPrivate(
-				    this._ecParams, key.part.d.data);
-			}
-			return;
-		}
-
-		var curve = {
-			'nistp256': 'prime256v1',
-			'nistp384': 'secp384r1',
-			'nistp521': 'secp521r1'
-		}[key.curve];
-		this._dh = crypto.createECDH(curve);
-		if (typeof (this._dh) !== 'object' ||
-		    typeof (this._dh.setPrivateKey) !== 'function') {
-			CRYPTO_HAVE_ECDH = false;
-			DiffieHellman.call(this, key);
-			return;
-		}
-		if (this._isPriv)
-			this._dh.setPrivateKey(key.part.d.data);
-		this._dh.setPublicKey(key.part.Q.data);
-
-	} else if (key.type === 'curve25519') {
-		if (this._isPriv) {
-			utils.assertCompatible(key, PrivateKey, [1, 5], 'key');
-			this._priv = key.part.k.data;
-		}
-
-	} else {
-		throw (new Error('DH not supported for ' + key.type + ' keys'));
-	}
+  const options = Object.assign({}, _Document.default.defaults[defaultOptions.version], defaultOptions);
+  const schema = new _schema.default(options);
+  return schema.createNode(value, wrapScalars, tag);
 }
 
-DiffieHellman.prototype.getPublicKey = function () {
-	if (this._isPriv)
-		return (this._key.toPublic());
-	return (this._key);
-};
+class Document extends _Document.default {
+  constructor(options) {
+    super(Object.assign({}, defaultOptions, options));
+  }
 
-DiffieHellman.prototype.getPrivateKey = function () {
-	if (this._isPriv)
-		return (this._key);
-	else
-		return (undefined);
-};
-DiffieHellman.prototype.getKey = DiffieHellman.prototype.getPrivateKey;
-
-DiffieHellman.prototype._keyCheck = function (pk, isPub) {
-	assert.object(pk, 'key');
-	if (!isPub)
-		utils.assertCompatible(pk, PrivateKey, [1, 3], 'key');
-	utils.assertCompatible(pk, Key, [1, 4], 'key');
-
-	if (pk.type !== this._algo) {
-		throw (new Error('A ' + pk.type + ' key cannot be used in ' +
-		    this._algo + ' Diffie-Hellman'));
-	}
-
-	if (pk.curve !== this._curve) {
-		throw (new Error('A key from the ' + pk.curve + ' curve ' +
-		    'cannot be used with a ' + this._curve +
-		    ' Diffie-Hellman'));
-	}
-
-	if (pk.type === 'dsa') {
-		assert.deepEqual(pk.part.p, this._p,
-		    'DSA key prime does not match');
-		assert.deepEqual(pk.part.g, this._g,
-		    'DSA key generator does not match');
-	}
-};
-
-DiffieHellman.prototype.setKey = function (pk) {
-	this._keyCheck(pk);
-
-	if (pk.type === 'dsa') {
-		this._dh.setPrivateKey(pk.part.x.data);
-		this._dh.setPublicKey(pk.part.y.data);
-
-	} else if (pk.type === 'ecdsa') {
-		if (CRYPTO_HAVE_ECDH) {
-			this._dh.setPrivateKey(pk.part.d.data);
-			this._dh.setPublicKey(pk.part.Q.data);
-		} else {
-			this._priv = new ECPrivate(
-			    this._ecParams, pk.part.d.data);
-		}
-
-	} else if (pk.type === 'curve25519') {
-		var k = pk.part.k;
-		if (!pk.part.k)
-			k = pk.part.r;
-		this._priv = k.data;
-		if (this._priv[0] === 0x00)
-			this._priv = this._priv.slice(1);
-		this._priv = this._priv.slice(0, 32);
-	}
-	this._key = pk;
-	this._isPriv = true;
-};
-DiffieHellman.prototype.setPrivateKey = DiffieHellman.prototype.setKey;
-
-DiffieHellman.prototype.computeSecret = function (otherpk) {
-	this._keyCheck(otherpk, true);
-	if (!this._isPriv)
-		throw (new Error('DH exchange has not been initialized with ' +
-		    'a private key yet'));
-
-	var pub;
-	if (this._algo === 'dsa') {
-		return (this._dh.computeSecret(
-		    otherpk.part.y.data));
-
-	} else if (this._algo === 'ecdsa') {
-		if (CRYPTO_HAVE_ECDH) {
-			return (this._dh.computeSecret(
-			    otherpk.part.Q.data));
-		} else {
-			pub = new ECPublic(
-			    this._ecParams, otherpk.part.Q.data);
-			return (this._priv.deriveSharedSecret(pub));
-		}
-
-	} else if (this._algo === 'curve25519') {
-		pub = otherpk.part.A.data;
-		while (pub[0] === 0x00 && pub.length > 32)
-			pub = pub.slice(1);
-		var priv = this._priv;
-		assert.strictEqual(pub.length, 32);
-		assert.strictEqual(priv.length, 32);
-
-		var secret = nacl.box.before(new Uint8Array(pub),
-		    new Uint8Array(priv));
-
-		return (Buffer.from(secret));
-	}
-
-	throw (new Error('Invalid algorithm: ' + this._algo));
-};
-
-DiffieHellman.prototype.generateKey = function () {
-	var parts = [];
-	var priv, pub;
-	if (this._algo === 'dsa') {
-		this._dh.generateKeys();
-
-		parts.push({name: 'p', data: this._p.data});
-		parts.push({name: 'q', data: this._key.part.q.data});
-		parts.push({name: 'g', data: this._g.data});
-		parts.push({name: 'y', data: this._dh.getPublicKey()});
-		parts.push({name: 'x', data: this._dh.getPrivateKey()});
-		this._key = new PrivateKey({
-			type: 'dsa',
-			parts: parts
-		});
-		this._isPriv = true;
-		return (this._key);
-
-	} else if (this._algo === 'ecdsa') {
-		if (CRYPTO_HAVE_ECDH) {
-			this._dh.generateKeys();
-
-			parts.push({name: 'curve',
-			    data: Buffer.from(this._curve)});
-			parts.push({name: 'Q', data: this._dh.getPublicKey()});
-			parts.push({name: 'd', data: this._dh.getPrivateKey()});
-			this._key = new PrivateKey({
-				type: 'ecdsa',
-				curve: this._curve,
-				parts: parts
-			});
-			this._isPriv = true;
-			return (this._key);
-
-		} else {
-			var n = this._ecParams.getN();
-			var r = new jsbn(crypto.randomBytes(n.bitLength()));
-			var n1 = n.subtract(jsbn.ONE);
-			priv = r.mod(n1).add(jsbn.ONE);
-			pub = this._ecParams.getG().multiply(priv);
-
-			priv = Buffer.from(priv.toByteArray());
-			pub = Buffer.from(this._ecParams.getCurve().
-			    encodePointHex(pub), 'hex');
-
-			this._priv = new ECPrivate(this._ecParams, priv);
-
-			parts.push({name: 'curve',
-			    data: Buffer.from(this._curve)});
-			parts.push({name: 'Q', data: pub});
-			parts.push({name: 'd', data: priv});
-
-			this._key = new PrivateKey({
-				type: 'ecdsa',
-				curve: this._curve,
-				parts: parts
-			});
-			this._isPriv = true;
-			return (this._key);
-		}
-
-	} else if (this._algo === 'curve25519') {
-		var pair = nacl.box.keyPair();
-		priv = Buffer.from(pair.secretKey);
-		pub = Buffer.from(pair.publicKey);
-		priv = Buffer.concat([priv, pub]);
-		assert.strictEqual(priv.length, 64);
-		assert.strictEqual(pub.length, 32);
-
-		parts.push({name: 'A', data: pub});
-		parts.push({name: 'k', data: priv});
-		this._key = new PrivateKey({
-			type: 'curve25519',
-			parts: parts
-		});
-		this._isPriv = true;
-		return (this._key);
-	}
-
-	throw (new Error('Invalid algorithm: ' + this._algo));
-};
-DiffieHellman.prototype.generateKeys = DiffieHellman.prototype.generateKey;
-
-/* These are helpers for using ecc-jsbn (for node 0.10 compatibility). */
-
-function X9ECParameters(name) {
-	var params = algs.curves[name];
-	assert.object(params);
-
-	var p = new jsbn(params.p);
-	var a = new jsbn(params.a);
-	var b = new jsbn(params.b);
-	var n = new jsbn(params.n);
-	var h = jsbn.ONE;
-	var curve = new ec.ECCurveFp(p, a, b);
-	var G = curve.decodePointHex(params.G.toString('hex'));
-
-	this.curve = curve;
-	this.g = G;
-	this.n = n;
-	this.h = h;
-}
-X9ECParameters.prototype.getCurve = function () { return (this.curve); };
-X9ECParameters.prototype.getG = function () { return (this.g); };
-X9ECParameters.prototype.getN = function () { return (this.n); };
-X9ECParameters.prototype.getH = function () { return (this.h); };
-
-function ECPublic(params, buffer) {
-	this._params = params;
-	if (buffer[0] === 0x00)
-		buffer = buffer.slice(1);
-	this._pub = params.getCurve().decodePointHex(buffer.toString('hex'));
 }
 
-function ECPrivate(params, buffer) {
-	this._params = params;
-	this._priv = new jsbn(utils.mpNormalize(buffer));
+function parseAllDocuments(src, options) {
+  const stream = [];
+  let prev;
+
+  for (const cstDoc of (0, _parse.default)(src)) {
+    const doc = new Document(options);
+    doc.parse(cstDoc, prev);
+    stream.push(doc);
+    prev = doc;
+  }
+
+  return stream;
 }
-ECPrivate.prototype.deriveSharedSecret = function (pubKey) {
-	assert.ok(pubKey instanceof ECPublic);
-	var S = pubKey._pub.multiply(this._priv);
-	return (Buffer.from(S.getX().toBigInteger().toByteArray()));
+
+function parseDocument(src, options) {
+  const cst = (0, _parse.default)(src);
+  const doc = new Document(options).parse(cst[0]);
+
+  if (cst.length > 1) {
+    const errMsg = 'Source contains multiple documents; please use YAML.parseAllDocuments()';
+    doc.errors.unshift(new _errors.YAMLSemanticError(cst[1], errMsg));
+  }
+
+  return doc;
+}
+
+function parse(src, options) {
+  const doc = parseDocument(src, options);
+  doc.warnings.forEach(warning => (0, _warnings.warn)(warning));
+  if (doc.errors.length > 0) throw doc.errors[0];
+  return doc.toJSON();
+}
+
+function stringify(value, options) {
+  const doc = new Document(options);
+  doc.contents = value;
+  return String(doc);
+}
+
+var _default = {
+  createNode,
+  defaultOptions,
+  Document,
+  parse,
+  parseAllDocuments,
+  parseCST: _parse.default,
+  parseDocument,
+  stringify
 };
-
-function generateED25519() {
-	var pair = nacl.sign.keyPair();
-	var priv = Buffer.from(pair.secretKey);
-	var pub = Buffer.from(pair.publicKey);
-	assert.strictEqual(priv.length, 64);
-	assert.strictEqual(pub.length, 32);
-
-	var parts = [];
-	parts.push({name: 'A', data: pub});
-	parts.push({name: 'k', data: priv.slice(0, 32)});
-	var key = new PrivateKey({
-		type: 'ed25519',
-		parts: parts
-	});
-	return (key);
-}
-
-/* Generates a new ECDSA private key on a given curve. */
-function generateECDSA(curve) {
-	var parts = [];
-	var key;
-
-	if (CRYPTO_HAVE_ECDH) {
-		/*
-		 * Node crypto doesn't expose key generation directly, but the
-		 * ECDH instances can generate keys. It turns out this just
-		 * calls into the OpenSSL generic key generator, and we can
-		 * read its output happily without doing an actual DH. So we
-		 * use that here.
-		 */
-		var osCurve = {
-			'nistp256': 'prime256v1',
-			'nistp384': 'secp384r1',
-			'nistp521': 'secp521r1'
-		}[curve];
-
-		var dh = crypto.createECDH(osCurve);
-		dh.generateKeys();
-
-		parts.push({name: 'curve',
-		    data: Buffer.from(curve)});
-		parts.push({name: 'Q', data: dh.getPublicKey()});
-		parts.push({name: 'd', data: dh.getPrivateKey()});
-
-		key = new PrivateKey({
-			type: 'ecdsa',
-			curve: curve,
-			parts: parts
-		});
-		return (key);
-	} else {
-
-		var ecParams = new X9ECParameters(curve);
-
-		/* This algorithm taken from FIPS PUB 186-4 (section B.4.1) */
-		var n = ecParams.getN();
-		/*
-		 * The crypto.randomBytes() function can only give us whole
-		 * bytes, so taking a nod from X9.62, we round up.
-		 */
-		var cByteLen = Math.ceil((n.bitLength() + 64) / 8);
-		var c = new jsbn(crypto.randomBytes(cByteLen));
-
-		var n1 = n.subtract(jsbn.ONE);
-		var priv = c.mod(n1).add(jsbn.ONE);
-		var pub = ecParams.getG().multiply(priv);
-
-		priv = Buffer.from(priv.toByteArray());
-		pub = Buffer.from(ecParams.getCurve().
-		    encodePointHex(pub), 'hex');
-
-		parts.push({name: 'curve', data: Buffer.from(curve)});
-		parts.push({name: 'Q', data: pub});
-		parts.push({name: 'd', data: priv});
-
-		key = new PrivateKey({
-			type: 'ecdsa',
-			curve: curve,
-			parts: parts
-		});
-		return (key);
-	}
-}
-
+exports.default = _default;
 
 /***/ }),
 /* 582 */
@@ -71448,7 +74423,7 @@ module.exports = {
 
 var assert = __webpack_require__(552);
 var SSHBuffer = __webpack_require__(53);
-var crypto = __webpack_require__(417);
+var crypto = __webpack_require__(373);
 var Buffer = __webpack_require__(299).Buffer;
 var algs = __webpack_require__(151);
 var Key = __webpack_require__(463);
@@ -71878,7 +74853,7 @@ exports.default = YAMLSeq;
 
 
 var isAbsoluteURL = __webpack_require__(849);
-var combineURLs = __webpack_require__(437);
+var combineURLs = __webpack_require__(797);
 
 /**
  * Creates a new URL by combining the baseURL with the requestedURL,
@@ -71939,7 +74914,7 @@ var _errors = __webpack_require__(297);
 
 var _BlankLine = _interopRequireDefault(__webpack_require__(487));
 
-var _Comment = _interopRequireDefault(__webpack_require__(73));
+var _Comment = _interopRequireDefault(__webpack_require__(697));
 
 var _Node = _interopRequireDefault(__webpack_require__(898));
 
@@ -72146,9 +75121,282 @@ class FlowCollection extends _Node.default {
 exports.default = FlowCollection;
 
 /***/ }),
-/* 593 */,
-/* 594 */,
-/* 595 */,
+/* 593 */
+/***/ (function(module) {
+
+/**
+ * Base-N/Base-X encoding/decoding functions.
+ *
+ * Original implementation from base-x:
+ * https://github.com/cryptocoinjs/base-x
+ *
+ * Which is MIT licensed:
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright base-x contributors (c) 2016
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+var api = {};
+module.exports = api;
+
+// baseN alphabet indexes
+var _reverseAlphabets = {};
+
+/**
+ * BaseN-encodes a Uint8Array using the given alphabet.
+ *
+ * @param input the Uint8Array to encode.
+ * @param maxline the maximum number of encoded characters per line to use,
+ *          defaults to none.
+ *
+ * @return the baseN-encoded output string.
+ */
+api.encode = function(input, alphabet, maxline) {
+  if(typeof alphabet !== 'string') {
+    throw new TypeError('"alphabet" must be a string.');
+  }
+  if(maxline !== undefined && typeof maxline !== 'number') {
+    throw new TypeError('"maxline" must be a number.');
+  }
+
+  var output = '';
+
+  if(!(input instanceof Uint8Array)) {
+    // assume forge byte buffer
+    output = _encodeWithByteBuffer(input, alphabet);
+  } else {
+    var i = 0;
+    var base = alphabet.length;
+    var first = alphabet.charAt(0);
+    var digits = [0];
+    for(i = 0; i < input.length; ++i) {
+      for(var j = 0, carry = input[i]; j < digits.length; ++j) {
+        carry += digits[j] << 8;
+        digits[j] = carry % base;
+        carry = (carry / base) | 0;
+      }
+
+      while(carry > 0) {
+        digits.push(carry % base);
+        carry = (carry / base) | 0;
+      }
+    }
+
+    // deal with leading zeros
+    for(i = 0; input[i] === 0 && i < input.length - 1; ++i) {
+      output += first;
+    }
+    // convert digits to a string
+    for(i = digits.length - 1; i >= 0; --i) {
+      output += alphabet[digits[i]];
+    }
+  }
+
+  if(maxline) {
+    var regex = new RegExp('.{1,' + maxline + '}', 'g');
+    output = output.match(regex).join('\r\n');
+  }
+
+  return output;
+};
+
+/**
+ * Decodes a baseN-encoded (using the given alphabet) string to a
+ * Uint8Array.
+ *
+ * @param input the baseN-encoded input string.
+ *
+ * @return the Uint8Array.
+ */
+api.decode = function(input, alphabet) {
+  if(typeof input !== 'string') {
+    throw new TypeError('"input" must be a string.');
+  }
+  if(typeof alphabet !== 'string') {
+    throw new TypeError('"alphabet" must be a string.');
+  }
+
+  var table = _reverseAlphabets[alphabet];
+  if(!table) {
+    // compute reverse alphabet
+    table = _reverseAlphabets[alphabet] = [];
+    for(var i = 0; i < alphabet.length; ++i) {
+      table[alphabet.charCodeAt(i)] = i;
+    }
+  }
+
+  // remove whitespace characters
+  input = input.replace(/\s/g, '');
+
+  var base = alphabet.length;
+  var first = alphabet.charAt(0);
+  var bytes = [0];
+  for(var i = 0; i < input.length; i++) {
+    var value = table[input.charCodeAt(i)];
+    if(value === undefined) {
+      return;
+    }
+
+    for(var j = 0, carry = value; j < bytes.length; ++j) {
+      carry += bytes[j] * base;
+      bytes[j] = carry & 0xff;
+      carry >>= 8;
+    }
+
+    while(carry > 0) {
+      bytes.push(carry & 0xff);
+      carry >>= 8;
+    }
+  }
+
+  // deal with leading zeros
+  for(var k = 0; input[k] === first && k < input.length - 1; ++k) {
+    bytes.push(0);
+  }
+
+  if(typeof Buffer !== 'undefined') {
+    return Buffer.from(bytes.reverse());
+  }
+
+  return new Uint8Array(bytes.reverse());
+};
+
+function _encodeWithByteBuffer(input, alphabet) {
+  var i = 0;
+  var base = alphabet.length;
+  var first = alphabet.charAt(0);
+  var digits = [0];
+  for(i = 0; i < input.length(); ++i) {
+    for(var j = 0, carry = input.at(i); j < digits.length; ++j) {
+      carry += digits[j] << 8;
+      digits[j] = carry % base;
+      carry = (carry / base) | 0;
+    }
+
+    while(carry > 0) {
+      digits.push(carry % base);
+      carry = (carry / base) | 0;
+    }
+  }
+
+  var output = '';
+
+  // deal with leading zeros
+  for(i = 0; input.at(i) === 0 && i < input.length() - 1; ++i) {
+    output += first;
+  }
+  // convert digits to a string
+  for(i = digits.length - 1; i >= 0; --i) {
+    output += alphabet[digits[i]];
+  }
+
+  return output;
+}
+
+
+/***/ }),
+/* 594 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const sync_1 = __webpack_require__(992);
+const provider_1 = __webpack_require__(446);
+class ProviderSync extends provider_1.default {
+    constructor() {
+        super(...arguments);
+        this._reader = new sync_1.default(this._settings);
+    }
+    read(task) {
+        const root = this._getRootDirectory(task);
+        const options = this._getReaderOptions(task);
+        const entries = this.api(root, task, options);
+        return entries.map(options.transform);
+    }
+    api(root, task, options) {
+        if (task.dynamic) {
+            return this._reader.dynamic(root, options);
+        }
+        return this._reader.static(task.patterns, options);
+    }
+}
+exports.default = ProviderSync;
+
+
+/***/ }),
+/* 595 */
+/***/ (function(module) {
+
+module.exports = runParallel
+
+function runParallel (tasks, cb) {
+  var results, pending, keys
+  var isSync = true
+
+  if (Array.isArray(tasks)) {
+    results = []
+    pending = tasks.length
+  } else {
+    keys = Object.keys(tasks)
+    results = {}
+    pending = keys.length
+  }
+
+  function done (err) {
+    function end () {
+      if (cb) cb(err, results)
+      cb = null
+    }
+    if (isSync) process.nextTick(end)
+    else end()
+  }
+
+  function each (i, err, result) {
+    results[i] = result
+    if (--pending === 0 || err) {
+      done(err)
+    }
+  }
+
+  if (!pending) {
+    // empty
+    done(null)
+  } else if (keys) {
+    // object
+    keys.forEach(function (key) {
+      tasks[key](function (err, result) { each(key, err, result) })
+    })
+  } else {
+    // array
+    tasks.forEach(function (task, i) {
+      task(function (err, result) { each(i, err, result) })
+    })
+  }
+
+  isSync = false
+}
+
+
+/***/ }),
 /* 596 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -72811,11 +76059,11 @@ module.exports = require("http");
  *
  * Copyright 2011-2016 Digital Bazaar, Inc.
  */
-module.exports = __webpack_require__(998);
+module.exports = __webpack_require__(45);
 __webpack_require__(138);
 __webpack_require__(127);
 __webpack_require__(535);
-__webpack_require__(171);
+__webpack_require__(985);
 __webpack_require__(367);
 __webpack_require__(390);
 __webpack_require__(80);
@@ -72823,20 +76071,20 @@ __webpack_require__(709);
 __webpack_require__(251);
 __webpack_require__(931);
 __webpack_require__(65);
-__webpack_require__(992);
+__webpack_require__(730);
 __webpack_require__(983);
 __webpack_require__(4);
 __webpack_require__(737);
 __webpack_require__(226);
-__webpack_require__(79);
+__webpack_require__(677);
 __webpack_require__(787);
 __webpack_require__(77);
-__webpack_require__(416);
+__webpack_require__(683);
 __webpack_require__(811);
 __webpack_require__(845);
 __webpack_require__(329);
 __webpack_require__(177);
-__webpack_require__(25);
+__webpack_require__(989);
 __webpack_require__(538);
 __webpack_require__(294);
 
@@ -72894,7 +76142,7 @@ exports.default = Alias;
 
 
 var utils = __webpack_require__(759);
-var settle = __webpack_require__(730);
+var settle = __webpack_require__(571);
 var buildFullPath = __webpack_require__(743);
 var buildURL = __webpack_require__(62);
 var http = __webpack_require__(605);
@@ -72904,7 +76152,7 @@ var httpsFollow = __webpack_require__(486).https;
 var url = __webpack_require__(835);
 var zlib = __webpack_require__(761);
 var pkg = __webpack_require__(933);
-var createError = __webpack_require__(932);
+var createError = __webpack_require__(237);
 var enhanceError = __webpack_require__(728);
 
 var isHttps = /https:?/;
@@ -73461,7 +76709,7 @@ module.exports = require("events");
 var aws4 = exports,
     url = __webpack_require__(835),
     querystring = __webpack_require__(393),
-    crypto = __webpack_require__(417),
+    crypto = __webpack_require__(373),
     lru = __webpack_require__(166),
     credentialsCache = lru(1000)
 
@@ -74039,417 +77287,37 @@ module.exports = {
 
 /***/ }),
 /* 618 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-/**
- * Javascript implementation of ASN.1 validators for PKCS#7 v1.5.
- *
- * @author Dave Longley
- * @author Stefan Siegl
- *
- * Copyright (c) 2012-2015 Digital Bazaar, Inc.
- * Copyright (c) 2012 Stefan Siegl <stesie@brokenpipe.de>
- *
- * The ASN.1 representation of PKCS#7 is as follows
- * (see RFC #2315 for details, http://www.ietf.org/rfc/rfc2315.txt):
- *
- * A PKCS#7 message consists of a ContentInfo on root level, which may
- * contain any number of further ContentInfo nested into it.
- *
- * ContentInfo ::= SEQUENCE {
- *   contentType                ContentType,
- *   content               [0]  EXPLICIT ANY DEFINED BY contentType OPTIONAL
- * }
- *
- * ContentType ::= OBJECT IDENTIFIER
- *
- * EnvelopedData ::= SEQUENCE {
- *   version                    Version,
- *   recipientInfos             RecipientInfos,
- *   encryptedContentInfo       EncryptedContentInfo
- * }
- *
- * EncryptedData ::= SEQUENCE {
- *   version                    Version,
- *   encryptedContentInfo       EncryptedContentInfo
- * }
- *
- * id-signedData OBJECT IDENTIFIER ::= { iso(1) member-body(2)
- *   us(840) rsadsi(113549) pkcs(1) pkcs7(7) 2 }
- *
- * SignedData ::= SEQUENCE {
- *   version           INTEGER,
- *   digestAlgorithms  DigestAlgorithmIdentifiers,
- *   contentInfo       ContentInfo,
- *   certificates      [0] IMPLICIT Certificates OPTIONAL,
- *   crls              [1] IMPLICIT CertificateRevocationLists OPTIONAL,
- *   signerInfos       SignerInfos
- * }
- *
- * SignerInfos ::= SET OF SignerInfo
- *
- * SignerInfo ::= SEQUENCE {
- *   version                    Version,
- *   issuerAndSerialNumber      IssuerAndSerialNumber,
- *   digestAlgorithm            DigestAlgorithmIdentifier,
- *   authenticatedAttributes    [0] IMPLICIT Attributes OPTIONAL,
- *   digestEncryptionAlgorithm  DigestEncryptionAlgorithmIdentifier,
- *   encryptedDigest            EncryptedDigest,
- *   unauthenticatedAttributes  [1] IMPLICIT Attributes OPTIONAL
- * }
- *
- * EncryptedDigest ::= OCTET STRING
- *
- * Attributes ::= SET OF Attribute
- *
- * Attribute ::= SEQUENCE {
- *   attrType    OBJECT IDENTIFIER,
- *   attrValues  SET OF AttributeValue
- * }
- *
- * AttributeValue ::= ANY
- *
- * Version ::= INTEGER
- *
- * RecipientInfos ::= SET OF RecipientInfo
- *
- * EncryptedContentInfo ::= SEQUENCE {
- *   contentType                 ContentType,
- *   contentEncryptionAlgorithm  ContentEncryptionAlgorithmIdentifier,
- *   encryptedContent       [0]  IMPLICIT EncryptedContent OPTIONAL
- * }
- *
- * ContentEncryptionAlgorithmIdentifier ::= AlgorithmIdentifier
- *
- * The AlgorithmIdentifier contains an Object Identifier (OID) and parameters
- * for the algorithm, if any. In the case of AES and DES3, there is only one,
- * the IV.
- *
- * AlgorithmIdentifer ::= SEQUENCE {
- *    algorithm OBJECT IDENTIFIER,
- *    parameters ANY DEFINED BY algorithm OPTIONAL
- * }
- *
- * EncryptedContent ::= OCTET STRING
- *
- * RecipientInfo ::= SEQUENCE {
- *   version                     Version,
- *   issuerAndSerialNumber       IssuerAndSerialNumber,
- *   keyEncryptionAlgorithm      KeyEncryptionAlgorithmIdentifier,
- *   encryptedKey                EncryptedKey
- * }
- *
- * IssuerAndSerialNumber ::= SEQUENCE {
- *   issuer                      Name,
- *   serialNumber                CertificateSerialNumber
- * }
- *
- * CertificateSerialNumber ::= INTEGER
- *
- * KeyEncryptionAlgorithmIdentifier ::= AlgorithmIdentifier
- *
- * EncryptedKey ::= OCTET STRING
- */
-var forge = __webpack_require__(998);
-__webpack_require__(535);
-__webpack_require__(294);
+"use strict";
 
-// shortcut for ASN.1 API
-var asn1 = forge.asn1;
-
-// shortcut for PKCS#7 API
-var p7v = module.exports = forge.pkcs7asn1 = forge.pkcs7asn1 || {};
-forge.pkcs7 = forge.pkcs7 || {};
-forge.pkcs7.asn1 = p7v;
-
-var contentInfoValidator = {
-  name: 'ContentInfo',
-  tagClass: asn1.Class.UNIVERSAL,
-  type: asn1.Type.SEQUENCE,
-  constructed: true,
-  value: [{
-    name: 'ContentInfo.ContentType',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.OID,
-    constructed: false,
-    capture: 'contentType'
-  }, {
-    name: 'ContentInfo.content',
-    tagClass: asn1.Class.CONTEXT_SPECIFIC,
-    type: 0,
-    constructed: true,
-    optional: true,
-    captureAsn1: 'content'
-  }]
-};
-p7v.contentInfoValidator = contentInfoValidator;
-
-var encryptedContentInfoValidator = {
-  name: 'EncryptedContentInfo',
-  tagClass: asn1.Class.UNIVERSAL,
-  type: asn1.Type.SEQUENCE,
-  constructed: true,
-  value: [{
-    name: 'EncryptedContentInfo.contentType',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.OID,
-    constructed: false,
-    capture: 'contentType'
-  }, {
-    name: 'EncryptedContentInfo.contentEncryptionAlgorithm',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.SEQUENCE,
-    constructed: true,
-    value: [{
-      name: 'EncryptedContentInfo.contentEncryptionAlgorithm.algorithm',
-      tagClass: asn1.Class.UNIVERSAL,
-      type: asn1.Type.OID,
-      constructed: false,
-      capture: 'encAlgorithm'
-    }, {
-      name: 'EncryptedContentInfo.contentEncryptionAlgorithm.parameter',
-      tagClass: asn1.Class.UNIVERSAL,
-      captureAsn1: 'encParameter'
-    }]
-  }, {
-    name: 'EncryptedContentInfo.encryptedContent',
-    tagClass: asn1.Class.CONTEXT_SPECIFIC,
-    type: 0,
-    /* The PKCS#7 structure output by OpenSSL somewhat differs from what
-     * other implementations do generate.
-     *
-     * OpenSSL generates a structure like this:
-     * SEQUENCE {
-     *    ...
-     *    [0]
-     *       26 DA 67 D2 17 9C 45 3C B1 2A A8 59 2F 29 33 38
-     *       C3 C3 DF 86 71 74 7A 19 9F 40 D0 29 BE 85 90 45
-     *       ...
-     * }
-     *
-     * Whereas other implementations (and this PKCS#7 module) generate:
-     * SEQUENCE {
-     *    ...
-     *    [0] {
-     *       OCTET STRING
-     *          26 DA 67 D2 17 9C 45 3C B1 2A A8 59 2F 29 33 38
-     *          C3 C3 DF 86 71 74 7A 19 9F 40 D0 29 BE 85 90 45
-     *          ...
-     *    }
-     * }
-     *
-     * In order to support both, we just capture the context specific
-     * field here.  The OCTET STRING bit is removed below.
-     */
-    capture: 'encryptedContent',
-    captureAsn1: 'encryptedContentAsn1'
-  }]
-};
-
-p7v.envelopedDataValidator = {
-  name: 'EnvelopedData',
-  tagClass: asn1.Class.UNIVERSAL,
-  type: asn1.Type.SEQUENCE,
-  constructed: true,
-  value: [{
-    name: 'EnvelopedData.Version',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.INTEGER,
-    constructed: false,
-    capture: 'version'
-  }, {
-    name: 'EnvelopedData.RecipientInfos',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.SET,
-    constructed: true,
-    captureAsn1: 'recipientInfos'
-  }].concat(encryptedContentInfoValidator)
-};
-
-p7v.encryptedDataValidator = {
-  name: 'EncryptedData',
-  tagClass: asn1.Class.UNIVERSAL,
-  type: asn1.Type.SEQUENCE,
-  constructed: true,
-  value: [{
-    name: 'EncryptedData.Version',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.INTEGER,
-    constructed: false,
-    capture: 'version'
-  }].concat(encryptedContentInfoValidator)
-};
-
-var signerValidator = {
-  name: 'SignerInfo',
-  tagClass: asn1.Class.UNIVERSAL,
-  type: asn1.Type.SEQUENCE,
-  constructed: true,
-  value: [{
-    name: 'SignerInfo.version',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.INTEGER,
-    constructed: false
-  }, {
-    name: 'SignerInfo.issuerAndSerialNumber',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.SEQUENCE,
-    constructed: true,
-    value: [{
-      name: 'SignerInfo.issuerAndSerialNumber.issuer',
-      tagClass: asn1.Class.UNIVERSAL,
-      type: asn1.Type.SEQUENCE,
-      constructed: true,
-      captureAsn1: 'issuer'
-    }, {
-      name: 'SignerInfo.issuerAndSerialNumber.serialNumber',
-      tagClass: asn1.Class.UNIVERSAL,
-      type: asn1.Type.INTEGER,
-      constructed: false,
-      capture: 'serial'
-    }]
-  }, {
-    name: 'SignerInfo.digestAlgorithm',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.SEQUENCE,
-    constructed: true,
-    value: [{
-      name: 'SignerInfo.digestAlgorithm.algorithm',
-      tagClass: asn1.Class.UNIVERSAL,
-      type: asn1.Type.OID,
-      constructed: false,
-      capture: 'digestAlgorithm'
-    }, {
-      name: 'SignerInfo.digestAlgorithm.parameter',
-      tagClass: asn1.Class.UNIVERSAL,
-      constructed: false,
-      captureAsn1: 'digestParameter',
-      optional: true
-    }]
-  }, {
-    name: 'SignerInfo.authenticatedAttributes',
-    tagClass: asn1.Class.CONTEXT_SPECIFIC,
-    type: 0,
-    constructed: true,
-    optional: true,
-    capture: 'authenticatedAttributes'
-  }, {
-    name: 'SignerInfo.digestEncryptionAlgorithm',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.SEQUENCE,
-    constructed: true,
-    capture: 'signatureAlgorithm'
-  }, {
-    name: 'SignerInfo.encryptedDigest',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.OCTETSTRING,
-    constructed: false,
-    capture: 'signature'
-  }, {
-    name: 'SignerInfo.unauthenticatedAttributes',
-    tagClass: asn1.Class.CONTEXT_SPECIFIC,
-    type: 1,
-    constructed: true,
-    optional: true,
-    capture: 'unauthenticatedAttributes'
-  }]
-};
-
-p7v.signedDataValidator = {
-  name: 'SignedData',
-  tagClass: asn1.Class.UNIVERSAL,
-  type: asn1.Type.SEQUENCE,
-  constructed: true,
-  value: [{
-    name: 'SignedData.Version',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.INTEGER,
-    constructed: false,
-    capture: 'version'
-  }, {
-    name: 'SignedData.DigestAlgorithms',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.SET,
-    constructed: true,
-    captureAsn1: 'digestAlgorithms'
-  },
-  contentInfoValidator,
-  {
-    name: 'SignedData.Certificates',
-    tagClass: asn1.Class.CONTEXT_SPECIFIC,
-    type: 0,
-    optional: true,
-    captureAsn1: 'certificates'
-  }, {
-    name: 'SignedData.CertificateRevocationLists',
-    tagClass: asn1.Class.CONTEXT_SPECIFIC,
-    type: 1,
-    optional: true,
-    captureAsn1: 'crls'
-  }, {
-    name: 'SignedData.SignerInfos',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.SET,
-    capture: 'signerInfos',
-    optional: true,
-    value: [signerValidator]
-  }]
-};
-
-p7v.recipientInfoValidator = {
-  name: 'RecipientInfo',
-  tagClass: asn1.Class.UNIVERSAL,
-  type: asn1.Type.SEQUENCE,
-  constructed: true,
-  value: [{
-    name: 'RecipientInfo.version',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.INTEGER,
-    constructed: false,
-    capture: 'version'
-  }, {
-    name: 'RecipientInfo.issuerAndSerial',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.SEQUENCE,
-    constructed: true,
-    value: [{
-      name: 'RecipientInfo.issuerAndSerial.issuer',
-      tagClass: asn1.Class.UNIVERSAL,
-      type: asn1.Type.SEQUENCE,
-      constructed: true,
-      captureAsn1: 'issuer'
-    }, {
-      name: 'RecipientInfo.issuerAndSerial.serialNumber',
-      tagClass: asn1.Class.UNIVERSAL,
-      type: asn1.Type.INTEGER,
-      constructed: false,
-      capture: 'serial'
-    }]
-  }, {
-    name: 'RecipientInfo.keyEncryptionAlgorithm',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.SEQUENCE,
-    constructed: true,
-    value: [{
-      name: 'RecipientInfo.keyEncryptionAlgorithm.algorithm',
-      tagClass: asn1.Class.UNIVERSAL,
-      type: asn1.Type.OID,
-      constructed: false,
-      capture: 'encAlgorithm'
-    }, {
-      name: 'RecipientInfo.keyEncryptionAlgorithm.parameter',
-      tagClass: asn1.Class.UNIVERSAL,
-      constructed: false,
-      captureAsn1: 'encParameter'
-    }]
-  }, {
-    name: 'RecipientInfo.encryptedKey',
-    tagClass: asn1.Class.UNIVERSAL,
-    type: asn1.Type.OCTETSTRING,
-    constructed: false,
-    capture: 'encKey'
-  }]
-};
+Object.defineProperty(exports, "__esModule", { value: true });
+const stream_1 = __webpack_require__(919);
+const provider_1 = __webpack_require__(446);
+class ProviderAsync extends provider_1.default {
+    constructor() {
+        super(...arguments);
+        this._reader = new stream_1.default(this._settings);
+    }
+    read(task) {
+        const root = this._getRootDirectory(task);
+        const options = this._getReaderOptions(task);
+        const entries = [];
+        return new Promise((resolve, reject) => {
+            const stream = this.api(root, task, options);
+            stream.once('error', reject);
+            stream.on('data', (entry) => entries.push(options.transform(entry)));
+            stream.once('end', () => resolve(entries));
+        });
+    }
+    api(root, task, options) {
+        if (task.dynamic) {
+            return this._reader.dynamic(root, options);
+        }
+        return this._reader.static(task.patterns, options);
+    }
+}
+exports.default = ProviderAsync;
 
 
 /***/ }),
@@ -74572,265 +77440,476 @@ module.exports = v4;
 
 /***/ }),
 /* 621 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-/**
- * Module dependencies.
- */
+"use strict";
 
-const tty = __webpack_require__(867);
+
 const util = __webpack_require__(669);
+const braces = __webpack_require__(213);
+const picomatch = __webpack_require__(784);
+const utils = __webpack_require__(839);
+const isEmptyString = val => typeof val === 'string' && (val === '' || val === './');
 
 /**
- * This is the Node.js implementation of `debug()`.
- */
-
-exports.init = init;
-exports.log = log;
-exports.formatArgs = formatArgs;
-exports.save = save;
-exports.load = load;
-exports.useColors = useColors;
-
-/**
- * Colors.
- */
-
-exports.colors = [6, 2, 3, 4, 5, 1];
-
-try {
-	// Optional dependency (as in, doesn't need to be installed, NOT like optionalDependencies in package.json)
-	// eslint-disable-next-line import/no-extraneous-dependencies
-	const supportsColor = __webpack_require__(130);
-
-	if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
-		exports.colors = [
-			20,
-			21,
-			26,
-			27,
-			32,
-			33,
-			38,
-			39,
-			40,
-			41,
-			42,
-			43,
-			44,
-			45,
-			56,
-			57,
-			62,
-			63,
-			68,
-			69,
-			74,
-			75,
-			76,
-			77,
-			78,
-			79,
-			80,
-			81,
-			92,
-			93,
-			98,
-			99,
-			112,
-			113,
-			128,
-			129,
-			134,
-			135,
-			148,
-			149,
-			160,
-			161,
-			162,
-			163,
-			164,
-			165,
-			166,
-			167,
-			168,
-			169,
-			170,
-			171,
-			172,
-			173,
-			178,
-			179,
-			184,
-			185,
-			196,
-			197,
-			198,
-			199,
-			200,
-			201,
-			202,
-			203,
-			204,
-			205,
-			206,
-			207,
-			208,
-			209,
-			214,
-			215,
-			220,
-			221
-		];
-	}
-} catch (error) {
-	// Swallow - we only care if `supports-color` is available; it doesn't have to be.
-}
-
-/**
- * Build up the default `inspectOpts` object from the environment variables.
+ * Returns an array of strings that match one or more glob patterns.
  *
- *   $ DEBUG_COLORS=no DEBUG_DEPTH=10 DEBUG_SHOW_HIDDEN=enabled node script.js
- */
-
-exports.inspectOpts = Object.keys(process.env).filter(key => {
-	return /^debug_/i.test(key);
-}).reduce((obj, key) => {
-	// Camel-case
-	const prop = key
-		.substring(6)
-		.toLowerCase()
-		.replace(/_([a-z])/g, (_, k) => {
-			return k.toUpperCase();
-		});
-
-	// Coerce string value into JS value
-	let val = process.env[key];
-	if (/^(yes|on|true|enabled)$/i.test(val)) {
-		val = true;
-	} else if (/^(no|off|false|disabled)$/i.test(val)) {
-		val = false;
-	} else if (val === 'null') {
-		val = null;
-	} else {
-		val = Number(val);
-	}
-
-	obj[prop] = val;
-	return obj;
-}, {});
-
-/**
- * Is stdout a TTY? Colored output is enabled when `true`.
- */
-
-function useColors() {
-	return 'colors' in exports.inspectOpts ?
-		Boolean(exports.inspectOpts.colors) :
-		tty.isatty(process.stderr.fd);
-}
-
-/**
- * Adds ANSI color escape codes if enabled.
+ * ```js
+ * const mm = require('micromatch');
+ * // mm(list, patterns[, options]);
  *
+ * console.log(mm(['a.js', 'a.txt'], ['*.js']));
+ * //=> [ 'a.js' ]
+ * ```
+ * @param {String|Array<string>} list List of strings to match.
+ * @param {String|Array<string>} patterns One or more glob patterns to use for matching.
+ * @param {Object} options See available [options](#options)
+ * @return {Array} Returns an array of matches
+ * @summary false
  * @api public
  */
 
-function formatArgs(args) {
-	const {namespace: name, useColors} = this;
+const micromatch = (list, patterns, options) => {
+  patterns = [].concat(patterns);
+  list = [].concat(list);
 
-	if (useColors) {
-		const c = this.color;
-		const colorCode = '\u001B[3' + (c < 8 ? c : '8;5;' + c);
-		const prefix = `  ${colorCode};1m${name} \u001B[0m`;
+  let omit = new Set();
+  let keep = new Set();
+  let items = new Set();
+  let negatives = 0;
 
-		args[0] = prefix + args[0].split('\n').join('\n' + prefix);
-		args.push(colorCode + 'm+' + module.exports.humanize(this.diff) + '\u001B[0m');
-	} else {
-		args[0] = getDate() + name + ' ' + args[0];
-	}
-}
+  let onResult = state => {
+    items.add(state.output);
+    if (options && options.onResult) {
+      options.onResult(state);
+    }
+  };
 
-function getDate() {
-	if (exports.inspectOpts.hideDate) {
-		return '';
-	}
-	return new Date().toISOString() + ' ';
-}
+  for (let i = 0; i < patterns.length; i++) {
+    let isMatch = picomatch(String(patterns[i]), { ...options, onResult }, true);
+    let negated = isMatch.state.negated || isMatch.state.negatedExtglob;
+    if (negated) negatives++;
 
-/**
- * Invokes `util.format()` with the specified arguments and writes to stderr.
- */
+    for (let item of list) {
+      let matched = isMatch(item, true);
 
-function log(...args) {
-	return process.stderr.write(util.format(...args) + '\n');
-}
+      let match = negated ? !matched.isMatch : matched.isMatch;
+      if (!match) continue;
 
-/**
- * Save `namespaces`.
- *
- * @param {String} namespaces
- * @api private
- */
-function save(namespaces) {
-	if (namespaces) {
-		process.env.DEBUG = namespaces;
-	} else {
-		// If you set a process.env field to null or undefined, it gets cast to the
-		// string 'null' or 'undefined'. Just delete instead.
-		delete process.env.DEBUG;
-	}
-}
+      if (negated) {
+        omit.add(matched.output);
+      } else {
+        omit.delete(matched.output);
+        keep.add(matched.output);
+      }
+    }
+  }
 
-/**
- * Load `namespaces`.
- *
- * @return {String} returns the previously persisted debug modes
- * @api private
- */
+  let result = negatives === patterns.length ? [...items] : [...keep];
+  let matches = result.filter(item => !omit.has(item));
 
-function load() {
-	return process.env.DEBUG;
-}
+  if (options && matches.length === 0) {
+    if (options.failglob === true) {
+      throw new Error(`No matches found for "${patterns.join(', ')}"`);
+    }
 
-/**
- * Init logic for `debug` instances.
- *
- * Create a new `inspectOpts` object in case `useColors` is set
- * differently for a particular `debug` instance.
- */
+    if (options.nonull === true || options.nullglob === true) {
+      return options.unescape ? patterns.map(p => p.replace(/\\/g, '')) : patterns;
+    }
+  }
 
-function init(debug) {
-	debug.inspectOpts = {};
-
-	const keys = Object.keys(exports.inspectOpts);
-	for (let i = 0; i < keys.length; i++) {
-		debug.inspectOpts[keys[i]] = exports.inspectOpts[keys[i]];
-	}
-}
-
-module.exports = __webpack_require__(507)(exports);
-
-const {formatters} = module.exports;
-
-/**
- * Map %o to `util.inspect()`, all on a single line.
- */
-
-formatters.o = function (v) {
-	this.inspectOpts.colors = this.useColors;
-	return util.inspect(v, this.inspectOpts)
-		.replace(/\s*\n\s*/g, ' ');
+  return matches;
 };
 
 /**
- * Map %O to `util.inspect()`, allowing multiple lines if needed.
+ * Backwards compatibility
  */
 
-formatters.O = function (v) {
-	this.inspectOpts.colors = this.useColors;
-	return util.inspect(v, this.inspectOpts);
+micromatch.match = micromatch;
+
+/**
+ * Returns a matcher function from the given glob `pattern` and `options`.
+ * The returned function takes a string to match as its only argument and returns
+ * true if the string is a match.
+ *
+ * ```js
+ * const mm = require('micromatch');
+ * // mm.matcher(pattern[, options]);
+ *
+ * const isMatch = mm.matcher('*.!(*a)');
+ * console.log(isMatch('a.a')); //=> false
+ * console.log(isMatch('a.b')); //=> true
+ * ```
+ * @param {String} `pattern` Glob pattern
+ * @param {Object} `options`
+ * @return {Function} Returns a matcher function.
+ * @api public
+ */
+
+micromatch.matcher = (pattern, options) => picomatch(pattern, options);
+
+/**
+ * Returns true if **any** of the given glob `patterns` match the specified `string`.
+ *
+ * ```js
+ * const mm = require('micromatch');
+ * // mm.isMatch(string, patterns[, options]);
+ *
+ * console.log(mm.isMatch('a.a', ['b.*', '*.a'])); //=> true
+ * console.log(mm.isMatch('a.a', 'b.*')); //=> false
+ * ```
+ * @param {String} str The string to test.
+ * @param {String|Array} patterns One or more glob patterns to use for matching.
+ * @param {Object} [options] See available [options](#options).
+ * @return {Boolean} Returns true if any patterns match `str`
+ * @api public
+ */
+
+micromatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
+
+/**
+ * Backwards compatibility
+ */
+
+micromatch.any = micromatch.isMatch;
+
+/**
+ * Returns a list of strings that _**do not match any**_ of the given `patterns`.
+ *
+ * ```js
+ * const mm = require('micromatch');
+ * // mm.not(list, patterns[, options]);
+ *
+ * console.log(mm.not(['a.a', 'b.b', 'c.c'], '*.a'));
+ * //=> ['b.b', 'c.c']
+ * ```
+ * @param {Array} `list` Array of strings to match.
+ * @param {String|Array} `patterns` One or more glob pattern to use for matching.
+ * @param {Object} `options` See available [options](#options) for changing how matches are performed
+ * @return {Array} Returns an array of strings that **do not match** the given patterns.
+ * @api public
+ */
+
+micromatch.not = (list, patterns, options = {}) => {
+  patterns = [].concat(patterns).map(String);
+  let result = new Set();
+  let items = [];
+
+  let onResult = state => {
+    if (options.onResult) options.onResult(state);
+    items.push(state.output);
+  };
+
+  let matches = micromatch(list, patterns, { ...options, onResult });
+
+  for (let item of items) {
+    if (!matches.includes(item)) {
+      result.add(item);
+    }
+  }
+  return [...result];
 };
+
+/**
+ * Returns true if the given `string` contains the given pattern. Similar
+ * to [.isMatch](#isMatch) but the pattern can match any part of the string.
+ *
+ * ```js
+ * var mm = require('micromatch');
+ * // mm.contains(string, pattern[, options]);
+ *
+ * console.log(mm.contains('aa/bb/cc', '*b'));
+ * //=> true
+ * console.log(mm.contains('aa/bb/cc', '*d'));
+ * //=> false
+ * ```
+ * @param {String} `str` The string to match.
+ * @param {String|Array} `patterns` Glob pattern to use for matching.
+ * @param {Object} `options` See available [options](#options) for changing how matches are performed
+ * @return {Boolean} Returns true if the patter matches any part of `str`.
+ * @api public
+ */
+
+micromatch.contains = (str, pattern, options) => {
+  if (typeof str !== 'string') {
+    throw new TypeError(`Expected a string: "${util.inspect(str)}"`);
+  }
+
+  if (Array.isArray(pattern)) {
+    return pattern.some(p => micromatch.contains(str, p, options));
+  }
+
+  if (typeof pattern === 'string') {
+    if (isEmptyString(str) || isEmptyString(pattern)) {
+      return false;
+    }
+
+    if (str.includes(pattern) || (str.startsWith('./') && str.slice(2).includes(pattern))) {
+      return true;
+    }
+  }
+
+  return micromatch.isMatch(str, pattern, { ...options, contains: true });
+};
+
+/**
+ * Filter the keys of the given object with the given `glob` pattern
+ * and `options`. Does not attempt to match nested keys. If you need this feature,
+ * use [glob-object][] instead.
+ *
+ * ```js
+ * const mm = require('micromatch');
+ * // mm.matchKeys(object, patterns[, options]);
+ *
+ * const obj = { aa: 'a', ab: 'b', ac: 'c' };
+ * console.log(mm.matchKeys(obj, '*b'));
+ * //=> { ab: 'b' }
+ * ```
+ * @param {Object} `object` The object with keys to filter.
+ * @param {String|Array} `patterns` One or more glob patterns to use for matching.
+ * @param {Object} `options` See available [options](#options) for changing how matches are performed
+ * @return {Object} Returns an object with only keys that match the given patterns.
+ * @api public
+ */
+
+micromatch.matchKeys = (obj, patterns, options) => {
+  if (!utils.isObject(obj)) {
+    throw new TypeError('Expected the first argument to be an object');
+  }
+  let keys = micromatch(Object.keys(obj), patterns, options);
+  let res = {};
+  for (let key of keys) res[key] = obj[key];
+  return res;
+};
+
+/**
+ * Returns true if some of the strings in the given `list` match any of the given glob `patterns`.
+ *
+ * ```js
+ * const mm = require('micromatch');
+ * // mm.some(list, patterns[, options]);
+ *
+ * console.log(mm.some(['foo.js', 'bar.js'], ['*.js', '!foo.js']));
+ * // true
+ * console.log(mm.some(['foo.js'], ['*.js', '!foo.js']));
+ * // false
+ * ```
+ * @param {String|Array} `list` The string or array of strings to test. Returns as soon as the first match is found.
+ * @param {String|Array} `patterns` One or more glob patterns to use for matching.
+ * @param {Object} `options` See available [options](#options) for changing how matches are performed
+ * @return {Boolean} Returns true if any patterns match `str`
+ * @api public
+ */
+
+micromatch.some = (list, patterns, options) => {
+  let items = [].concat(list);
+
+  for (let pattern of [].concat(patterns)) {
+    let isMatch = picomatch(String(pattern), options);
+    if (items.some(item => isMatch(item))) {
+      return true;
+    }
+  }
+  return false;
+};
+
+/**
+ * Returns true if every string in the given `list` matches
+ * any of the given glob `patterns`.
+ *
+ * ```js
+ * const mm = require('micromatch');
+ * // mm.every(list, patterns[, options]);
+ *
+ * console.log(mm.every('foo.js', ['foo.js']));
+ * // true
+ * console.log(mm.every(['foo.js', 'bar.js'], ['*.js']));
+ * // true
+ * console.log(mm.every(['foo.js', 'bar.js'], ['*.js', '!foo.js']));
+ * // false
+ * console.log(mm.every(['foo.js'], ['*.js', '!foo.js']));
+ * // false
+ * ```
+ * @param {String|Array} `list` The string or array of strings to test.
+ * @param {String|Array} `patterns` One or more glob patterns to use for matching.
+ * @param {Object} `options` See available [options](#options) for changing how matches are performed
+ * @return {Boolean} Returns true if any patterns match `str`
+ * @api public
+ */
+
+micromatch.every = (list, patterns, options) => {
+  let items = [].concat(list);
+
+  for (let pattern of [].concat(patterns)) {
+    let isMatch = picomatch(String(pattern), options);
+    if (!items.every(item => isMatch(item))) {
+      return false;
+    }
+  }
+  return true;
+};
+
+/**
+ * Returns true if **all** of the given `patterns` match
+ * the specified string.
+ *
+ * ```js
+ * const mm = require('micromatch');
+ * // mm.all(string, patterns[, options]);
+ *
+ * console.log(mm.all('foo.js', ['foo.js']));
+ * // true
+ *
+ * console.log(mm.all('foo.js', ['*.js', '!foo.js']));
+ * // false
+ *
+ * console.log(mm.all('foo.js', ['*.js', 'foo.js']));
+ * // true
+ *
+ * console.log(mm.all('foo.js', ['*.js', 'f*', '*o*', '*o.js']));
+ * // true
+ * ```
+ * @param {String|Array} `str` The string to test.
+ * @param {String|Array} `patterns` One or more glob patterns to use for matching.
+ * @param {Object} `options` See available [options](#options) for changing how matches are performed
+ * @return {Boolean} Returns true if any patterns match `str`
+ * @api public
+ */
+
+micromatch.all = (str, patterns, options) => {
+  if (typeof str !== 'string') {
+    throw new TypeError(`Expected a string: "${util.inspect(str)}"`);
+  }
+
+  return [].concat(patterns).every(p => picomatch(p, options)(str));
+};
+
+/**
+ * Returns an array of matches captured by `pattern` in `string, or `null` if the pattern did not match.
+ *
+ * ```js
+ * const mm = require('micromatch');
+ * // mm.capture(pattern, string[, options]);
+ *
+ * console.log(mm.capture('test/*.js', 'test/foo.js'));
+ * //=> ['foo']
+ * console.log(mm.capture('test/*.js', 'foo/bar.css'));
+ * //=> null
+ * ```
+ * @param {String} `glob` Glob pattern to use for matching.
+ * @param {String} `input` String to match
+ * @param {Object} `options` See available [options](#options) for changing how matches are performed
+ * @return {Boolean} Returns an array of captures if the input matches the glob pattern, otherwise `null`.
+ * @api public
+ */
+
+micromatch.capture = (glob, input, options) => {
+  let posix = utils.isWindows(options);
+  let regex = picomatch.makeRe(String(glob), { ...options, capture: true });
+  let match = regex.exec(posix ? utils.toPosixSlashes(input) : input);
+
+  if (match) {
+    return match.slice(1).map(v => v === void 0 ? '' : v);
+  }
+};
+
+/**
+ * Create a regular expression from the given glob `pattern`.
+ *
+ * ```js
+ * const mm = require('micromatch');
+ * // mm.makeRe(pattern[, options]);
+ *
+ * console.log(mm.makeRe('*.js'));
+ * //=> /^(?:(\.[\\\/])?(?!\.)(?=.)[^\/]*?\.js)$/
+ * ```
+ * @param {String} `pattern` A glob pattern to convert to regex.
+ * @param {Object} `options`
+ * @return {RegExp} Returns a regex created from the given pattern.
+ * @api public
+ */
+
+micromatch.makeRe = (...args) => picomatch.makeRe(...args);
+
+/**
+ * Scan a glob pattern to separate the pattern into segments. Used
+ * by the [split](#split) method.
+ *
+ * ```js
+ * const mm = require('micromatch');
+ * const state = mm.scan(pattern[, options]);
+ * ```
+ * @param {String} `pattern`
+ * @param {Object} `options`
+ * @return {Object} Returns an object with
+ * @api public
+ */
+
+micromatch.scan = (...args) => picomatch.scan(...args);
+
+/**
+ * Parse a glob pattern to create the source string for a regular
+ * expression.
+ *
+ * ```js
+ * const mm = require('micromatch');
+ * const state = mm(pattern[, options]);
+ * ```
+ * @param {String} `glob`
+ * @param {Object} `options`
+ * @return {Object} Returns an object with useful properties and output to be used as regex source string.
+ * @api public
+ */
+
+micromatch.parse = (patterns, options) => {
+  let res = [];
+  for (let pattern of [].concat(patterns || [])) {
+    for (let str of braces(String(pattern), options)) {
+      res.push(picomatch.parse(str, options));
+    }
+  }
+  return res;
+};
+
+/**
+ * Process the given brace `pattern`.
+ *
+ * ```js
+ * const { braces } = require('micromatch');
+ * console.log(braces('foo/{a,b,c}/bar'));
+ * //=> [ 'foo/(a|b|c)/bar' ]
+ *
+ * console.log(braces('foo/{a,b,c}/bar', { expand: true }));
+ * //=> [ 'foo/a/bar', 'foo/b/bar', 'foo/c/bar' ]
+ * ```
+ * @param {String} `pattern` String with brace pattern to process.
+ * @param {Object} `options` Any [options](#options) to change how expansion is performed. See the [braces][] library for all available options.
+ * @return {Array}
+ * @api public
+ */
+
+micromatch.braces = (pattern, options) => {
+  if (typeof pattern !== 'string') throw new TypeError('Expected a string');
+  if ((options && options.nobrace === true) || !/\{.*\}/.test(pattern)) {
+    return [pattern];
+  }
+  return braces(pattern, options);
+};
+
+/**
+ * Expand braces
+ */
+
+micromatch.braceExpand = (pattern, options) => {
+  if (typeof pattern !== 'string') throw new TypeError('Expected a string');
+  return micromatch.braces(pattern, { ...options, expand: true });
+};
+
+/**
+ * Expose micromatch
+ */
+
+module.exports = micromatch;
 
 
 /***/ }),
@@ -75421,66 +78500,28 @@ function isUnixExecutable(stats) {
 /***/ }),
 /* 628 */,
 /* 629 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports) {
 
 "use strict";
 
-
-var Cancel = __webpack_require__(871);
-
-/**
- * A `CancelToken` is an object that can be used to request cancellation of an operation.
- *
- * @class
- * @param {Function} executor The executor function.
- */
-function CancelToken(executor) {
-  if (typeof executor !== 'function') {
-    throw new TypeError('executor must be a function.');
-  }
-
-  var resolvePromise;
-  this.promise = new Promise(function promiseExecutor(resolve) {
-    resolvePromise = resolve;
-  });
-
-  var token = this;
-  executor(function cancel(message) {
-    if (token.reason) {
-      // Cancellation has already been requested
-      return;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createDirentFromStats = void 0;
+class DirentFromStats {
+    constructor(name, stats) {
+        this.name = name;
+        this.isBlockDevice = stats.isBlockDevice.bind(stats);
+        this.isCharacterDevice = stats.isCharacterDevice.bind(stats);
+        this.isDirectory = stats.isDirectory.bind(stats);
+        this.isFIFO = stats.isFIFO.bind(stats);
+        this.isFile = stats.isFile.bind(stats);
+        this.isSocket = stats.isSocket.bind(stats);
+        this.isSymbolicLink = stats.isSymbolicLink.bind(stats);
     }
-
-    token.reason = new Cancel(message);
-    resolvePromise(token.reason);
-  });
 }
-
-/**
- * Throws a `Cancel` if cancellation has been requested.
- */
-CancelToken.prototype.throwIfRequested = function throwIfRequested() {
-  if (this.reason) {
-    throw this.reason;
-  }
-};
-
-/**
- * Returns an object that contains a new `CancelToken` and a function that, when called,
- * cancels the `CancelToken`.
- */
-CancelToken.source = function source() {
-  var cancel;
-  var token = new CancelToken(function executor(c) {
-    cancel = c;
-  });
-  return {
-    token: token,
-    cancel: cancel
-  };
-};
-
-module.exports = CancelToken;
+function createDirentFromStats(name, stats) {
+    return new DirentFromStats(name, stats);
+}
+exports.createDirentFromStats = createDirentFromStats;
 
 
 /***/ }),
@@ -77070,67 +80111,30 @@ exports.Compute = Compute;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
+const async = __webpack_require__(302);
+const sync = __webpack_require__(368);
+const settings_1 = __webpack_require__(406);
+exports.Settings = settings_1.default;
+function scandir(path, optionsOrSettingsOrCallback, callback) {
+    if (typeof optionsOrSettingsOrCallback === 'function') {
+        return async.read(path, getSettings(), optionsOrSettingsOrCallback);
+    }
+    async.read(path, getSettings(optionsOrSettingsOrCallback), callback);
+}
+exports.scandir = scandir;
+function scandirSync(path, optionsOrSettings) {
+    const settings = getSettings(optionsOrSettings);
+    return sync.read(path, settings);
+}
+exports.scandirSync = scandirSync;
+function getSettings(settingsOrOptions = {}) {
+    if (settingsOrOptions instanceof settings_1.default) {
+        return settingsOrOptions;
+    }
+    return new settings_1.default(settingsOrOptions);
+}
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.tags = exports.schemas = void 0;
-
-var _core = _interopRequireWildcard(__webpack_require__(314));
-
-var _failsafe = _interopRequireDefault(__webpack_require__(685));
-
-var _json = _interopRequireDefault(__webpack_require__(135));
-
-var _yaml = _interopRequireDefault(__webpack_require__(351));
-
-var _map = _interopRequireDefault(__webpack_require__(943));
-
-var _seq = _interopRequireDefault(__webpack_require__(997));
-
-var _binary = _interopRequireDefault(__webpack_require__(146));
-
-var _omap = _interopRequireDefault(__webpack_require__(922));
-
-var _pairs = _interopRequireDefault(__webpack_require__(923));
-
-var _set = _interopRequireDefault(__webpack_require__(433));
-
-var _timestamp = __webpack_require__(646);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-const schemas = {
-  core: _core.default,
-  failsafe: _failsafe.default,
-  json: _json.default,
-  yaml11: _yaml.default
-};
-exports.schemas = schemas;
-const tags = {
-  binary: _binary.default,
-  bool: _core.boolObj,
-  float: _core.floatObj,
-  floatExp: _core.expObj,
-  floatNaN: _core.nanObj,
-  floatTime: _timestamp.floatTime,
-  int: _core.intObj,
-  intHex: _core.hexObj,
-  intOct: _core.octObj,
-  intTime: _timestamp.intTime,
-  map: _map.default,
-  null: _core.nullObj,
-  omap: _omap.default,
-  pairs: _pairs.default,
-  seq: _seq.default,
-  set: _set.default,
-  timestamp: _timestamp.timestamp
-};
-exports.tags = tags;
 
 /***/ }),
 /* 634 */
@@ -77238,35 +80242,415 @@ module.exports = Axios;
 /* 636 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const request = __webpack_require__(841);
+/**
+ * Javascript implementation of ASN.1 validators for PKCS#7 v1.5.
+ *
+ * @author Dave Longley
+ * @author Stefan Siegl
+ *
+ * Copyright (c) 2012-2015 Digital Bazaar, Inc.
+ * Copyright (c) 2012 Stefan Siegl <stesie@brokenpipe.de>
+ *
+ * The ASN.1 representation of PKCS#7 is as follows
+ * (see RFC #2315 for details, http://www.ietf.org/rfc/rfc2315.txt):
+ *
+ * A PKCS#7 message consists of a ContentInfo on root level, which may
+ * contain any number of further ContentInfo nested into it.
+ *
+ * ContentInfo ::= SEQUENCE {
+ *   contentType                ContentType,
+ *   content               [0]  EXPLICIT ANY DEFINED BY contentType OPTIONAL
+ * }
+ *
+ * ContentType ::= OBJECT IDENTIFIER
+ *
+ * EnvelopedData ::= SEQUENCE {
+ *   version                    Version,
+ *   recipientInfos             RecipientInfos,
+ *   encryptedContentInfo       EncryptedContentInfo
+ * }
+ *
+ * EncryptedData ::= SEQUENCE {
+ *   version                    Version,
+ *   encryptedContentInfo       EncryptedContentInfo
+ * }
+ *
+ * id-signedData OBJECT IDENTIFIER ::= { iso(1) member-body(2)
+ *   us(840) rsadsi(113549) pkcs(1) pkcs7(7) 2 }
+ *
+ * SignedData ::= SEQUENCE {
+ *   version           INTEGER,
+ *   digestAlgorithms  DigestAlgorithmIdentifiers,
+ *   contentInfo       ContentInfo,
+ *   certificates      [0] IMPLICIT Certificates OPTIONAL,
+ *   crls              [1] IMPLICIT CertificateRevocationLists OPTIONAL,
+ *   signerInfos       SignerInfos
+ * }
+ *
+ * SignerInfos ::= SET OF SignerInfo
+ *
+ * SignerInfo ::= SEQUENCE {
+ *   version                    Version,
+ *   issuerAndSerialNumber      IssuerAndSerialNumber,
+ *   digestAlgorithm            DigestAlgorithmIdentifier,
+ *   authenticatedAttributes    [0] IMPLICIT Attributes OPTIONAL,
+ *   digestEncryptionAlgorithm  DigestEncryptionAlgorithmIdentifier,
+ *   encryptedDigest            EncryptedDigest,
+ *   unauthenticatedAttributes  [1] IMPLICIT Attributes OPTIONAL
+ * }
+ *
+ * EncryptedDigest ::= OCTET STRING
+ *
+ * Attributes ::= SET OF Attribute
+ *
+ * Attribute ::= SEQUENCE {
+ *   attrType    OBJECT IDENTIFIER,
+ *   attrValues  SET OF AttributeValue
+ * }
+ *
+ * AttributeValue ::= ANY
+ *
+ * Version ::= INTEGER
+ *
+ * RecipientInfos ::= SET OF RecipientInfo
+ *
+ * EncryptedContentInfo ::= SEQUENCE {
+ *   contentType                 ContentType,
+ *   contentEncryptionAlgorithm  ContentEncryptionAlgorithmIdentifier,
+ *   encryptedContent       [0]  IMPLICIT EncryptedContent OPTIONAL
+ * }
+ *
+ * ContentEncryptionAlgorithmIdentifier ::= AlgorithmIdentifier
+ *
+ * The AlgorithmIdentifier contains an Object Identifier (OID) and parameters
+ * for the algorithm, if any. In the case of AES and DES3, there is only one,
+ * the IV.
+ *
+ * AlgorithmIdentifer ::= SEQUENCE {
+ *    algorithm OBJECT IDENTIFIER,
+ *    parameters ANY DEFINED BY algorithm OPTIONAL
+ * }
+ *
+ * EncryptedContent ::= OCTET STRING
+ *
+ * RecipientInfo ::= SEQUENCE {
+ *   version                     Version,
+ *   issuerAndSerialNumber       IssuerAndSerialNumber,
+ *   keyEncryptionAlgorithm      KeyEncryptionAlgorithmIdentifier,
+ *   encryptedKey                EncryptedKey
+ * }
+ *
+ * IssuerAndSerialNumber ::= SEQUENCE {
+ *   issuer                      Name,
+ *   serialNumber                CertificateSerialNumber
+ * }
+ *
+ * CertificateSerialNumber ::= INTEGER
+ *
+ * KeyEncryptionAlgorithmIdentifier ::= AlgorithmIdentifier
+ *
+ * EncryptedKey ::= OCTET STRING
+ */
+var forge = __webpack_require__(45);
+__webpack_require__(535);
+__webpack_require__(294);
 
-const fetchIamToken = async (
-  apiKey, apiEmail, apiPassword, apiTenantId,
-) => new Promise((resolve, reject) => {
-  const loginBody = {
-    email: apiEmail,
-    password: apiPassword,
-    tenantId: apiTenantId,
-    returnSecureToken: true,
-  };
-  const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
-  request({
-    uri: url,
-    method: 'POST',
-    headers: {
-      'Content-type': 'application/json',
-    },
-    body: loginBody,
-    json: true,
-  }, (error, res, body) => {
-    if (!error && res.statusCode === 200) {
-      resolve(body.idToken);
-    }
-    reject(new Error(body));
-  });
-});
+// shortcut for ASN.1 API
+var asn1 = forge.asn1;
 
-module.exports = fetchIamToken;
+// shortcut for PKCS#7 API
+var p7v = module.exports = forge.pkcs7asn1 = forge.pkcs7asn1 || {};
+forge.pkcs7 = forge.pkcs7 || {};
+forge.pkcs7.asn1 = p7v;
+
+var contentInfoValidator = {
+  name: 'ContentInfo',
+  tagClass: asn1.Class.UNIVERSAL,
+  type: asn1.Type.SEQUENCE,
+  constructed: true,
+  value: [{
+    name: 'ContentInfo.ContentType',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.OID,
+    constructed: false,
+    capture: 'contentType'
+  }, {
+    name: 'ContentInfo.content',
+    tagClass: asn1.Class.CONTEXT_SPECIFIC,
+    type: 0,
+    constructed: true,
+    optional: true,
+    captureAsn1: 'content'
+  }]
+};
+p7v.contentInfoValidator = contentInfoValidator;
+
+var encryptedContentInfoValidator = {
+  name: 'EncryptedContentInfo',
+  tagClass: asn1.Class.UNIVERSAL,
+  type: asn1.Type.SEQUENCE,
+  constructed: true,
+  value: [{
+    name: 'EncryptedContentInfo.contentType',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.OID,
+    constructed: false,
+    capture: 'contentType'
+  }, {
+    name: 'EncryptedContentInfo.contentEncryptionAlgorithm',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.SEQUENCE,
+    constructed: true,
+    value: [{
+      name: 'EncryptedContentInfo.contentEncryptionAlgorithm.algorithm',
+      tagClass: asn1.Class.UNIVERSAL,
+      type: asn1.Type.OID,
+      constructed: false,
+      capture: 'encAlgorithm'
+    }, {
+      name: 'EncryptedContentInfo.contentEncryptionAlgorithm.parameter',
+      tagClass: asn1.Class.UNIVERSAL,
+      captureAsn1: 'encParameter'
+    }]
+  }, {
+    name: 'EncryptedContentInfo.encryptedContent',
+    tagClass: asn1.Class.CONTEXT_SPECIFIC,
+    type: 0,
+    /* The PKCS#7 structure output by OpenSSL somewhat differs from what
+     * other implementations do generate.
+     *
+     * OpenSSL generates a structure like this:
+     * SEQUENCE {
+     *    ...
+     *    [0]
+     *       26 DA 67 D2 17 9C 45 3C B1 2A A8 59 2F 29 33 38
+     *       C3 C3 DF 86 71 74 7A 19 9F 40 D0 29 BE 85 90 45
+     *       ...
+     * }
+     *
+     * Whereas other implementations (and this PKCS#7 module) generate:
+     * SEQUENCE {
+     *    ...
+     *    [0] {
+     *       OCTET STRING
+     *          26 DA 67 D2 17 9C 45 3C B1 2A A8 59 2F 29 33 38
+     *          C3 C3 DF 86 71 74 7A 19 9F 40 D0 29 BE 85 90 45
+     *          ...
+     *    }
+     * }
+     *
+     * In order to support both, we just capture the context specific
+     * field here.  The OCTET STRING bit is removed below.
+     */
+    capture: 'encryptedContent',
+    captureAsn1: 'encryptedContentAsn1'
+  }]
+};
+
+p7v.envelopedDataValidator = {
+  name: 'EnvelopedData',
+  tagClass: asn1.Class.UNIVERSAL,
+  type: asn1.Type.SEQUENCE,
+  constructed: true,
+  value: [{
+    name: 'EnvelopedData.Version',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.INTEGER,
+    constructed: false,
+    capture: 'version'
+  }, {
+    name: 'EnvelopedData.RecipientInfos',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.SET,
+    constructed: true,
+    captureAsn1: 'recipientInfos'
+  }].concat(encryptedContentInfoValidator)
+};
+
+p7v.encryptedDataValidator = {
+  name: 'EncryptedData',
+  tagClass: asn1.Class.UNIVERSAL,
+  type: asn1.Type.SEQUENCE,
+  constructed: true,
+  value: [{
+    name: 'EncryptedData.Version',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.INTEGER,
+    constructed: false,
+    capture: 'version'
+  }].concat(encryptedContentInfoValidator)
+};
+
+var signerValidator = {
+  name: 'SignerInfo',
+  tagClass: asn1.Class.UNIVERSAL,
+  type: asn1.Type.SEQUENCE,
+  constructed: true,
+  value: [{
+    name: 'SignerInfo.version',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.INTEGER,
+    constructed: false
+  }, {
+    name: 'SignerInfo.issuerAndSerialNumber',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.SEQUENCE,
+    constructed: true,
+    value: [{
+      name: 'SignerInfo.issuerAndSerialNumber.issuer',
+      tagClass: asn1.Class.UNIVERSAL,
+      type: asn1.Type.SEQUENCE,
+      constructed: true,
+      captureAsn1: 'issuer'
+    }, {
+      name: 'SignerInfo.issuerAndSerialNumber.serialNumber',
+      tagClass: asn1.Class.UNIVERSAL,
+      type: asn1.Type.INTEGER,
+      constructed: false,
+      capture: 'serial'
+    }]
+  }, {
+    name: 'SignerInfo.digestAlgorithm',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.SEQUENCE,
+    constructed: true,
+    value: [{
+      name: 'SignerInfo.digestAlgorithm.algorithm',
+      tagClass: asn1.Class.UNIVERSAL,
+      type: asn1.Type.OID,
+      constructed: false,
+      capture: 'digestAlgorithm'
+    }, {
+      name: 'SignerInfo.digestAlgorithm.parameter',
+      tagClass: asn1.Class.UNIVERSAL,
+      constructed: false,
+      captureAsn1: 'digestParameter',
+      optional: true
+    }]
+  }, {
+    name: 'SignerInfo.authenticatedAttributes',
+    tagClass: asn1.Class.CONTEXT_SPECIFIC,
+    type: 0,
+    constructed: true,
+    optional: true,
+    capture: 'authenticatedAttributes'
+  }, {
+    name: 'SignerInfo.digestEncryptionAlgorithm',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.SEQUENCE,
+    constructed: true,
+    capture: 'signatureAlgorithm'
+  }, {
+    name: 'SignerInfo.encryptedDigest',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.OCTETSTRING,
+    constructed: false,
+    capture: 'signature'
+  }, {
+    name: 'SignerInfo.unauthenticatedAttributes',
+    tagClass: asn1.Class.CONTEXT_SPECIFIC,
+    type: 1,
+    constructed: true,
+    optional: true,
+    capture: 'unauthenticatedAttributes'
+  }]
+};
+
+p7v.signedDataValidator = {
+  name: 'SignedData',
+  tagClass: asn1.Class.UNIVERSAL,
+  type: asn1.Type.SEQUENCE,
+  constructed: true,
+  value: [{
+    name: 'SignedData.Version',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.INTEGER,
+    constructed: false,
+    capture: 'version'
+  }, {
+    name: 'SignedData.DigestAlgorithms',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.SET,
+    constructed: true,
+    captureAsn1: 'digestAlgorithms'
+  },
+  contentInfoValidator,
+  {
+    name: 'SignedData.Certificates',
+    tagClass: asn1.Class.CONTEXT_SPECIFIC,
+    type: 0,
+    optional: true,
+    captureAsn1: 'certificates'
+  }, {
+    name: 'SignedData.CertificateRevocationLists',
+    tagClass: asn1.Class.CONTEXT_SPECIFIC,
+    type: 1,
+    optional: true,
+    captureAsn1: 'crls'
+  }, {
+    name: 'SignedData.SignerInfos',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.SET,
+    capture: 'signerInfos',
+    optional: true,
+    value: [signerValidator]
+  }]
+};
+
+p7v.recipientInfoValidator = {
+  name: 'RecipientInfo',
+  tagClass: asn1.Class.UNIVERSAL,
+  type: asn1.Type.SEQUENCE,
+  constructed: true,
+  value: [{
+    name: 'RecipientInfo.version',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.INTEGER,
+    constructed: false,
+    capture: 'version'
+  }, {
+    name: 'RecipientInfo.issuerAndSerial',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.SEQUENCE,
+    constructed: true,
+    value: [{
+      name: 'RecipientInfo.issuerAndSerial.issuer',
+      tagClass: asn1.Class.UNIVERSAL,
+      type: asn1.Type.SEQUENCE,
+      constructed: true,
+      captureAsn1: 'issuer'
+    }, {
+      name: 'RecipientInfo.issuerAndSerial.serialNumber',
+      tagClass: asn1.Class.UNIVERSAL,
+      type: asn1.Type.INTEGER,
+      constructed: false,
+      capture: 'serial'
+    }]
+  }, {
+    name: 'RecipientInfo.keyEncryptionAlgorithm',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.SEQUENCE,
+    constructed: true,
+    value: [{
+      name: 'RecipientInfo.keyEncryptionAlgorithm.algorithm',
+      tagClass: asn1.Class.UNIVERSAL,
+      type: asn1.Type.OID,
+      constructed: false,
+      capture: 'encAlgorithm'
+    }, {
+      name: 'RecipientInfo.keyEncryptionAlgorithm.parameter',
+      tagClass: asn1.Class.UNIVERSAL,
+      constructed: false,
+      captureAsn1: 'encParameter'
+    }]
+  }, {
+    name: 'RecipientInfo.encryptedKey',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.OCTETSTRING,
+    constructed: false,
+    capture: 'encKey'
+  }]
+};
 
 
 /***/ }),
@@ -77472,7 +80856,7 @@ function validateKeyword(definition, throwError) {
 // Unique ID creation requires a high quality random # generator.  In node.js
 // this is pretty straight-forward - we use the crypto API.
 
-var crypto = __webpack_require__(417);
+var crypto = __webpack_require__(373);
 
 module.exports = function nodeRNG() {
   return crypto.randomBytes(16);
@@ -77582,33 +80966,7 @@ exports.timestamp = timestamp;
 
 /***/ }),
 /* 647 */,
-/* 648 */,
-/* 649 */
-/***/ (function(module) {
-
-"use strict";
-
-
-var replace = String.prototype.replace;
-var percentTwenties = /%20/g;
-
-module.exports = {
-    'default': 'RFC3986',
-    formatters: {
-        RFC1738: function (value) {
-            return replace.call(value, percentTwenties, '+');
-        },
-        RFC3986: function (value) {
-            return value;
-        }
-    },
-    RFC1738: 'RFC1738',
-    RFC3986: 'RFC3986'
-};
-
-
-/***/ }),
-/* 650 */
+/* 648 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
@@ -77619,100 +80977,179 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _parse = _interopRequireDefault(__webpack_require__(483));
-
-var _Document = _interopRequireDefault(__webpack_require__(574));
-
-var _errors = __webpack_require__(297);
-
-var _schema = _interopRequireDefault(__webpack_require__(704));
-
-var _warnings = __webpack_require__(111);
+var _crypto = _interopRequireDefault(__webpack_require__(373));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const defaultOptions = {
-  anchorPrefix: 'a',
-  customTags: null,
-  keepCstNodes: false,
-  keepNodeTypes: true,
-  keepBlobsInJSON: true,
-  mapAsMap: false,
-  maxAliasCount: 100,
-  prettyErrors: false,
-  // TODO Set true in v2
-  simpleKeys: false,
-  version: '1.2'
-};
-
-function createNode(value, wrapScalars = true, tag) {
-  if (tag === undefined && typeof wrapScalars === 'string') {
-    tag = wrapScalars;
-    wrapScalars = true;
+function sha1(bytes) {
+  if (Array.isArray(bytes)) {
+    bytes = Buffer.from(bytes);
+  } else if (typeof bytes === 'string') {
+    bytes = Buffer.from(bytes, 'utf8');
   }
 
-  const options = Object.assign({}, _Document.default.defaults[defaultOptions.version], defaultOptions);
-  const schema = new _schema.default(options);
-  return schema.createNode(value, wrapScalars, tag);
+  return _crypto.default.createHash('sha1').update(bytes).digest();
 }
 
-class Document extends _Document.default {
-  constructor(options) {
-    super(Object.assign({}, defaultOptions, options));
-  }
-
-}
-
-function parseAllDocuments(src, options) {
-  const stream = [];
-  let prev;
-
-  for (const cstDoc of (0, _parse.default)(src)) {
-    const doc = new Document(options);
-    doc.parse(cstDoc, prev);
-    stream.push(doc);
-    prev = doc;
-  }
-
-  return stream;
-}
-
-function parseDocument(src, options) {
-  const cst = (0, _parse.default)(src);
-  const doc = new Document(options).parse(cst[0]);
-
-  if (cst.length > 1) {
-    const errMsg = 'Source contains multiple documents; please use YAML.parseAllDocuments()';
-    doc.errors.unshift(new _errors.YAMLSemanticError(cst[1], errMsg));
-  }
-
-  return doc;
-}
-
-function parse(src, options) {
-  const doc = parseDocument(src, options);
-  doc.warnings.forEach(warning => (0, _warnings.warn)(warning));
-  if (doc.errors.length > 0) throw doc.errors[0];
-  return doc.toJSON();
-}
-
-function stringify(value, options) {
-  const doc = new Document(options);
-  doc.contents = value;
-  return String(doc);
-}
-
-var _default = {
-  createNode,
-  defaultOptions,
-  Document,
-  parse,
-  parseAllDocuments,
-  parseCST: _parse.default,
-  parseDocument,
-  stringify
-};
+var _default = sha1;
 exports.default = _default;
+
+/***/ }),
+/* 649 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+// Copyright 2015 Joyent, Inc.
+
+var assert = __webpack_require__(552);
+var crypto = __webpack_require__(373);
+var sshpk = __webpack_require__(13);
+var utils = __webpack_require__(140);
+
+var HASH_ALGOS = utils.HASH_ALGOS;
+var PK_ALGOS = utils.PK_ALGOS;
+var InvalidAlgorithmError = utils.InvalidAlgorithmError;
+var HttpSignatureError = utils.HttpSignatureError;
+var validateAlgorithm = utils.validateAlgorithm;
+
+///--- Exported API
+
+module.exports = {
+  /**
+   * Verify RSA/DSA signature against public key.  You are expected to pass in
+   * an object that was returned from `parse()`.
+   *
+   * @param {Object} parsedSignature the object you got from `parse`.
+   * @param {String} pubkey RSA/DSA private key PEM.
+   * @return {Boolean} true if valid, false otherwise.
+   * @throws {TypeError} if you pass in bad arguments.
+   * @throws {InvalidAlgorithmError}
+   */
+  verifySignature: function verifySignature(parsedSignature, pubkey) {
+    assert.object(parsedSignature, 'parsedSignature');
+    if (typeof (pubkey) === 'string' || Buffer.isBuffer(pubkey))
+      pubkey = sshpk.parseKey(pubkey);
+    assert.ok(sshpk.Key.isKey(pubkey, [1, 1]), 'pubkey must be a sshpk.Key');
+
+    var alg = validateAlgorithm(parsedSignature.algorithm);
+    if (alg[0] === 'hmac' || alg[0] !== pubkey.type)
+      return (false);
+
+    var v = pubkey.createVerify(alg[1]);
+    v.update(parsedSignature.signingString);
+    return (v.verify(parsedSignature.params.signature, 'base64'));
+  },
+
+  /**
+   * Verify HMAC against shared secret.  You are expected to pass in an object
+   * that was returned from `parse()`.
+   *
+   * @param {Object} parsedSignature the object you got from `parse`.
+   * @param {String} secret HMAC shared secret.
+   * @return {Boolean} true if valid, false otherwise.
+   * @throws {TypeError} if you pass in bad arguments.
+   * @throws {InvalidAlgorithmError}
+   */
+  verifyHMAC: function verifyHMAC(parsedSignature, secret) {
+    assert.object(parsedSignature, 'parsedHMAC');
+    assert.string(secret, 'secret');
+
+    var alg = validateAlgorithm(parsedSignature.algorithm);
+    if (alg[0] !== 'hmac')
+      return (false);
+
+    var hashAlg = alg[1].toUpperCase();
+
+    var hmac = crypto.createHmac(hashAlg, secret);
+    hmac.update(parsedSignature.signingString);
+
+    /*
+     * Now double-hash to avoid leaking timing information - there's
+     * no easy constant-time compare in JS, so we use this approach
+     * instead. See for more info:
+     * https://www.isecpartners.com/blog/2011/february/double-hmac-
+     * verification.aspx
+     */
+    var h1 = crypto.createHmac(hashAlg, secret);
+    h1.update(hmac.digest());
+    h1 = h1.digest();
+    var h2 = crypto.createHmac(hashAlg, secret);
+    h2.update(new Buffer(parsedSignature.params.signature, 'base64'));
+    h2 = h2.digest();
+
+    /* Node 0.8 returns strings from .digest(). */
+    if (typeof (h1) === 'string')
+      return (h1 === h2);
+    /* And node 0.10 lacks the .equals() method on Buffers. */
+    if (Buffer.isBuffer(h1) && !h1.equals)
+      return (h1.toString('binary') === h2.toString('binary'));
+
+    return (h1.equals(h2));
+  }
+};
+
+
+/***/ }),
+/* 650 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const utils = __webpack_require__(817);
+class EntryFilter {
+    constructor(_settings, _micromatchOptions) {
+        this._settings = _settings;
+        this._micromatchOptions = _micromatchOptions;
+        this.index = new Map();
+    }
+    getFilter(positive, negative) {
+        const positiveRe = utils.pattern.convertPatternsToRe(positive, this._micromatchOptions);
+        const negativeRe = utils.pattern.convertPatternsToRe(negative, this._micromatchOptions);
+        return (entry) => this._filter(entry, positiveRe, negativeRe);
+    }
+    _filter(entry, positiveRe, negativeRe) {
+        if (this._settings.unique && this._isDuplicateEntry(entry)) {
+            return false;
+        }
+        if (this._onlyFileFilter(entry) || this._onlyDirectoryFilter(entry)) {
+            return false;
+        }
+        if (this._isSkippedByAbsoluteNegativePatterns(entry.path, negativeRe)) {
+            return false;
+        }
+        const filepath = this._settings.baseNameMatch ? entry.name : entry.path;
+        const isMatched = this._isMatchToPatterns(filepath, positiveRe) && !this._isMatchToPatterns(entry.path, negativeRe);
+        if (this._settings.unique && isMatched) {
+            this._createIndexRecord(entry);
+        }
+        return isMatched;
+    }
+    _isDuplicateEntry(entry) {
+        return this.index.has(entry.path);
+    }
+    _createIndexRecord(entry) {
+        this.index.set(entry.path, undefined);
+    }
+    _onlyFileFilter(entry) {
+        return this._settings.onlyFiles && !entry.dirent.isFile();
+    }
+    _onlyDirectoryFilter(entry) {
+        return this._settings.onlyDirectories && !entry.dirent.isDirectory();
+    }
+    _isSkippedByAbsoluteNegativePatterns(entryPath, patternsRe) {
+        if (!this._settings.absolute) {
+            return false;
+        }
+        const fullpath = utils.path.makeAbsolute(this._settings.cwd, entryPath);
+        return utils.pattern.matchAny(fullpath, patternsRe);
+    }
+    _isMatchToPatterns(entryPath, patternsRe) {
+        const filepath = utils.path.removeLeadingDotSegment(entryPath);
+        return utils.pattern.matchAny(filepath, patternsRe);
+    }
+}
+exports.default = EntryFilter;
+
 
 /***/ }),
 /* 651 */
@@ -77932,12 +81369,12 @@ var util = __webpack_require__(669);
 var pubsuffix = __webpack_require__(719);
 var Store = __webpack_require__(136).Store;
 var MemoryCookieStore = __webpack_require__(915).MemoryCookieStore;
-var pathMatch = __webpack_require__(994).pathMatch;
+var pathMatch = __webpack_require__(951).pathMatch;
 var VERSION = __webpack_require__(910);
 
 var punycode;
 try {
-  punycode = __webpack_require__(213);
+  punycode = __webpack_require__(815);
 } catch(e) {
   console.warn("tough-cookie: can't load punycode; won't use punycode for domain normalization");
 }
@@ -79374,7 +82811,7 @@ exports.defaultPath = defaultPath;
 exports.pathMatch = pathMatch;
 exports.getPublicSuffix = pubsuffix.getPublicSuffix;
 exports.cookieCompare = cookieCompare;
-exports.permuteDomain = __webpack_require__(29).permuteDomain;
+exports.permuteDomain = __webpack_require__(555).permuteDomain;
 exports.permutePath = permutePath;
 exports.canonicalDomain = canonicalDomain;
 
@@ -79837,7 +83274,237 @@ WError.prototype.cause = function we_cause(c)
 
 
 /***/ }),
-/* 656 */,
+/* 656 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+/**
+ * This is the common logic for both the Node.js and web browser
+ * implementations of `debug()`.
+ *
+ * Expose `debug()` as the module.
+ */
+
+exports = module.exports = createDebug.debug = createDebug['default'] = createDebug;
+exports.coerce = coerce;
+exports.disable = disable;
+exports.enable = enable;
+exports.enabled = enabled;
+exports.humanize = __webpack_require__(624);
+
+/**
+ * Active `debug` instances.
+ */
+exports.instances = [];
+
+/**
+ * The currently active debug mode names, and names to skip.
+ */
+
+exports.names = [];
+exports.skips = [];
+
+/**
+ * Map of special "%n" handling functions, for the debug "format" argument.
+ *
+ * Valid key names are a single, lower or upper-case letter, i.e. "n" and "N".
+ */
+
+exports.formatters = {};
+
+/**
+ * Select a color.
+ * @param {String} namespace
+ * @return {Number}
+ * @api private
+ */
+
+function selectColor(namespace) {
+  var hash = 0, i;
+
+  for (i in namespace) {
+    hash  = ((hash << 5) - hash) + namespace.charCodeAt(i);
+    hash |= 0; // Convert to 32bit integer
+  }
+
+  return exports.colors[Math.abs(hash) % exports.colors.length];
+}
+
+/**
+ * Create a debugger with the given `namespace`.
+ *
+ * @param {String} namespace
+ * @return {Function}
+ * @api public
+ */
+
+function createDebug(namespace) {
+
+  var prevTime;
+
+  function debug() {
+    // disabled?
+    if (!debug.enabled) return;
+
+    var self = debug;
+
+    // set `diff` timestamp
+    var curr = +new Date();
+    var ms = curr - (prevTime || curr);
+    self.diff = ms;
+    self.prev = prevTime;
+    self.curr = curr;
+    prevTime = curr;
+
+    // turn the `arguments` into a proper Array
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
+
+    args[0] = exports.coerce(args[0]);
+
+    if ('string' !== typeof args[0]) {
+      // anything else let's inspect with %O
+      args.unshift('%O');
+    }
+
+    // apply any `formatters` transformations
+    var index = 0;
+    args[0] = args[0].replace(/%([a-zA-Z%])/g, function(match, format) {
+      // if we encounter an escaped % then don't increase the array index
+      if (match === '%%') return match;
+      index++;
+      var formatter = exports.formatters[format];
+      if ('function' === typeof formatter) {
+        var val = args[index];
+        match = formatter.call(self, val);
+
+        // now we need to remove `args[index]` since it's inlined in the `format`
+        args.splice(index, 1);
+        index--;
+      }
+      return match;
+    });
+
+    // apply env-specific formatting (colors, etc.)
+    exports.formatArgs.call(self, args);
+
+    var logFn = debug.log || exports.log || console.log.bind(console);
+    logFn.apply(self, args);
+  }
+
+  debug.namespace = namespace;
+  debug.enabled = exports.enabled(namespace);
+  debug.useColors = exports.useColors();
+  debug.color = selectColor(namespace);
+  debug.destroy = destroy;
+
+  // env-specific initialization logic for debug instances
+  if ('function' === typeof exports.init) {
+    exports.init(debug);
+  }
+
+  exports.instances.push(debug);
+
+  return debug;
+}
+
+function destroy () {
+  var index = exports.instances.indexOf(this);
+  if (index !== -1) {
+    exports.instances.splice(index, 1);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/**
+ * Enables a debug mode by namespaces. This can include modes
+ * separated by a colon and wildcards.
+ *
+ * @param {String} namespaces
+ * @api public
+ */
+
+function enable(namespaces) {
+  exports.save(namespaces);
+
+  exports.names = [];
+  exports.skips = [];
+
+  var i;
+  var split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
+  var len = split.length;
+
+  for (i = 0; i < len; i++) {
+    if (!split[i]) continue; // ignore empty strings
+    namespaces = split[i].replace(/\*/g, '.*?');
+    if (namespaces[0] === '-') {
+      exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
+    } else {
+      exports.names.push(new RegExp('^' + namespaces + '$'));
+    }
+  }
+
+  for (i = 0; i < exports.instances.length; i++) {
+    var instance = exports.instances[i];
+    instance.enabled = exports.enabled(instance.namespace);
+  }
+}
+
+/**
+ * Disable debug output.
+ *
+ * @api public
+ */
+
+function disable() {
+  exports.enable('');
+}
+
+/**
+ * Returns true if the given mode name is enabled, false otherwise.
+ *
+ * @param {String} name
+ * @return {Boolean}
+ * @api public
+ */
+
+function enabled(name) {
+  if (name[name.length - 1] === '*') {
+    return true;
+  }
+  var i, len;
+  for (i = 0, len = exports.skips.length; i < len; i++) {
+    if (exports.skips[i].test(name)) {
+      return false;
+    }
+  }
+  for (i = 0, len = exports.names.length; i < len; i++) {
+    if (exports.names[i].test(name)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Coerce `val`.
+ *
+ * @param {Mixed} val
+ * @return {Mixed}
+ * @api private
+ */
+
+function coerce(val) {
+  if (val instanceof Error) return val.stack || val.message;
+  return val;
+}
+
+
+/***/ }),
 /* 657 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -81649,7 +85316,119 @@ function dumpException(ex)
 
 /***/ }),
 /* 664 */,
-/* 665 */,
+/* 665 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _rng = _interopRequireDefault(__webpack_require__(475));
+
+var _bytesToUuid = _interopRequireDefault(__webpack_require__(262));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// **`v1()` - Generate time-based UUID**
+//
+// Inspired by https://github.com/LiosK/UUID.js
+// and http://docs.python.org/library/uuid.html
+var _nodeId;
+
+var _clockseq; // Previous uuid creation time
+
+
+var _lastMSecs = 0;
+var _lastNSecs = 0; // See https://github.com/uuidjs/uuid for API details
+
+function v1(options, buf, offset) {
+  var i = buf && offset || 0;
+  var b = buf || [];
+  options = options || {};
+  var node = options.node || _nodeId;
+  var clockseq = options.clockseq !== undefined ? options.clockseq : _clockseq; // node and clockseq need to be initialized to random values if they're not
+  // specified.  We do this lazily to minimize issues related to insufficient
+  // system entropy.  See #189
+
+  if (node == null || clockseq == null) {
+    var seedBytes = options.random || (options.rng || _rng.default)();
+
+    if (node == null) {
+      // Per 4.5, create and 48-bit node id, (47 random bits + multicast bit = 1)
+      node = _nodeId = [seedBytes[0] | 0x01, seedBytes[1], seedBytes[2], seedBytes[3], seedBytes[4], seedBytes[5]];
+    }
+
+    if (clockseq == null) {
+      // Per 4.2.2, randomize (14 bit) clockseq
+      clockseq = _clockseq = (seedBytes[6] << 8 | seedBytes[7]) & 0x3fff;
+    }
+  } // UUID timestamps are 100 nano-second units since the Gregorian epoch,
+  // (1582-10-15 00:00).  JSNumbers aren't precise enough for this, so
+  // time is handled internally as 'msecs' (integer milliseconds) and 'nsecs'
+  // (100-nanoseconds offset from msecs) since unix epoch, 1970-01-01 00:00.
+
+
+  var msecs = options.msecs !== undefined ? options.msecs : new Date().getTime(); // Per 4.2.1.2, use count of uuid's generated during the current clock
+  // cycle to simulate higher resolution clock
+
+  var nsecs = options.nsecs !== undefined ? options.nsecs : _lastNSecs + 1; // Time since last uuid creation (in msecs)
+
+  var dt = msecs - _lastMSecs + (nsecs - _lastNSecs) / 10000; // Per 4.2.1.2, Bump clockseq on clock regression
+
+  if (dt < 0 && options.clockseq === undefined) {
+    clockseq = clockseq + 1 & 0x3fff;
+  } // Reset nsecs if clock regresses (new clockseq) or we've moved onto a new
+  // time interval
+
+
+  if ((dt < 0 || msecs > _lastMSecs) && options.nsecs === undefined) {
+    nsecs = 0;
+  } // Per 4.2.1.2 Throw error if too many uuids are requested
+
+
+  if (nsecs >= 10000) {
+    throw new Error("uuid.v1(): Can't create more than 10M uuids/sec");
+  }
+
+  _lastMSecs = msecs;
+  _lastNSecs = nsecs;
+  _clockseq = clockseq; // Per 4.1.4 - Convert from unix epoch to Gregorian epoch
+
+  msecs += 12219292800000; // `time_low`
+
+  var tl = ((msecs & 0xfffffff) * 10000 + nsecs) % 0x100000000;
+  b[i++] = tl >>> 24 & 0xff;
+  b[i++] = tl >>> 16 & 0xff;
+  b[i++] = tl >>> 8 & 0xff;
+  b[i++] = tl & 0xff; // `time_mid`
+
+  var tmh = msecs / 0x100000000 * 10000 & 0xfffffff;
+  b[i++] = tmh >>> 8 & 0xff;
+  b[i++] = tmh & 0xff; // `time_high_and_version`
+
+  b[i++] = tmh >>> 24 & 0xf | 0x10; // include version
+
+  b[i++] = tmh >>> 16 & 0xff; // `clock_seq_hi_and_reserved` (Per 4.2.2 - include variant)
+
+  b[i++] = clockseq >>> 8 | 0x80; // `clock_seq_low`
+
+  b[i++] = clockseq & 0xff; // `node`
+
+  for (var n = 0; n < 6; ++n) {
+    b[i + n] = node[n];
+  }
+
+  return buf ? buf : (0, _bytesToUuid.default)(b);
+}
+
+var _default = v1;
+exports.default = _default;
+
+/***/ }),
 /* 666 */,
 /* 667 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -81670,7 +85449,7 @@ function dumpException(ex)
 // See the License for the specific language governing permissions and
 // limitations under the License.
 Object.defineProperty(exports, "__esModule", { value: true });
-const crypto = __webpack_require__(417);
+const crypto = __webpack_require__(373);
 class NodeCrypto {
     async sha256DigestBase64(str) {
         return crypto
@@ -81704,7 +85483,106 @@ exports.NodeCrypto = NodeCrypto;
 //# sourceMappingURL=crypto.js.map
 
 /***/ }),
-/* 668 */,
+/* 668 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const events_1 = __webpack_require__(614);
+const fsScandir = __webpack_require__(633);
+const fastq = __webpack_require__(900);
+const common = __webpack_require__(994);
+const reader_1 = __webpack_require__(3);
+class AsyncReader extends reader_1.default {
+    constructor(_root, _settings) {
+        super(_root, _settings);
+        this._settings = _settings;
+        this._scandir = fsScandir.scandir;
+        this._emitter = new events_1.EventEmitter();
+        this._queue = fastq(this._worker.bind(this), this._settings.concurrency);
+        this._isFatalError = false;
+        this._isDestroyed = false;
+        this._queue.drain = () => {
+            if (!this._isFatalError) {
+                this._emitter.emit('end');
+            }
+        };
+    }
+    read() {
+        this._isFatalError = false;
+        this._isDestroyed = false;
+        setImmediate(() => {
+            this._pushToQueue(this._root, this._settings.basePath);
+        });
+        return this._emitter;
+    }
+    destroy() {
+        if (this._isDestroyed) {
+            throw new Error('The reader is already destroyed');
+        }
+        this._isDestroyed = true;
+        this._queue.killAndDrain();
+    }
+    onEntry(callback) {
+        this._emitter.on('entry', callback);
+    }
+    onError(callback) {
+        this._emitter.once('error', callback);
+    }
+    onEnd(callback) {
+        this._emitter.once('end', callback);
+    }
+    _pushToQueue(directory, base) {
+        const queueItem = { directory, base };
+        this._queue.push(queueItem, (error) => {
+            if (error !== null) {
+                this._handleError(error);
+            }
+        });
+    }
+    _worker(item, done) {
+        this._scandir(item.directory, this._settings.fsScandirSettings, (error, entries) => {
+            if (error !== null) {
+                return done(error, undefined);
+            }
+            for (const entry of entries) {
+                this._handleEntry(entry, item.base);
+            }
+            done(null, undefined);
+        });
+    }
+    _handleError(error) {
+        if (!common.isFatalError(this._settings, error)) {
+            return;
+        }
+        this._isFatalError = true;
+        this._isDestroyed = true;
+        this._emitter.emit('error', error);
+    }
+    _handleEntry(entry, base) {
+        if (this._isDestroyed || this._isFatalError) {
+            return;
+        }
+        const fullpath = entry.path;
+        if (base !== undefined) {
+            entry.path = common.joinPathSegments(base, entry.name, this._settings.pathSegmentSeparator);
+        }
+        if (common.isAppliedFilter(this._settings.entryFilter, entry)) {
+            this._emitEntry(entry);
+        }
+        if (entry.dirent.isDirectory() && common.isAppliedFilter(this._settings.deepFilter, entry)) {
+            this._pushToQueue(fullpath, entry.path);
+        }
+    }
+    _emitEntry(entry) {
+        this._emitter.emit('entry', entry);
+    }
+}
+exports.default = AsyncReader;
+
+
+/***/ }),
 /* 669 */
 /***/ (function(module) {
 
@@ -81712,464 +85590,40 @@ module.exports = require("util");
 
 /***/ }),
 /* 670 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports) {
 
 "use strict";
 
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const url = __webpack_require__(835);
-const http = __webpack_require__(605);
-const https = __webpack_require__(211);
-let fs;
-let tunnel;
-var HttpCodes;
-(function (HttpCodes) {
-    HttpCodes[HttpCodes["OK"] = 200] = "OK";
-    HttpCodes[HttpCodes["MultipleChoices"] = 300] = "MultipleChoices";
-    HttpCodes[HttpCodes["MovedPermanently"] = 301] = "MovedPermanently";
-    HttpCodes[HttpCodes["ResourceMoved"] = 302] = "ResourceMoved";
-    HttpCodes[HttpCodes["SeeOther"] = 303] = "SeeOther";
-    HttpCodes[HttpCodes["NotModified"] = 304] = "NotModified";
-    HttpCodes[HttpCodes["UseProxy"] = 305] = "UseProxy";
-    HttpCodes[HttpCodes["SwitchProxy"] = 306] = "SwitchProxy";
-    HttpCodes[HttpCodes["TemporaryRedirect"] = 307] = "TemporaryRedirect";
-    HttpCodes[HttpCodes["PermanentRedirect"] = 308] = "PermanentRedirect";
-    HttpCodes[HttpCodes["BadRequest"] = 400] = "BadRequest";
-    HttpCodes[HttpCodes["Unauthorized"] = 401] = "Unauthorized";
-    HttpCodes[HttpCodes["PaymentRequired"] = 402] = "PaymentRequired";
-    HttpCodes[HttpCodes["Forbidden"] = 403] = "Forbidden";
-    HttpCodes[HttpCodes["NotFound"] = 404] = "NotFound";
-    HttpCodes[HttpCodes["MethodNotAllowed"] = 405] = "MethodNotAllowed";
-    HttpCodes[HttpCodes["NotAcceptable"] = 406] = "NotAcceptable";
-    HttpCodes[HttpCodes["ProxyAuthenticationRequired"] = 407] = "ProxyAuthenticationRequired";
-    HttpCodes[HttpCodes["RequestTimeout"] = 408] = "RequestTimeout";
-    HttpCodes[HttpCodes["Conflict"] = 409] = "Conflict";
-    HttpCodes[HttpCodes["Gone"] = 410] = "Gone";
-    HttpCodes[HttpCodes["InternalServerError"] = 500] = "InternalServerError";
-    HttpCodes[HttpCodes["NotImplemented"] = 501] = "NotImplemented";
-    HttpCodes[HttpCodes["BadGateway"] = 502] = "BadGateway";
-    HttpCodes[HttpCodes["ServiceUnavailable"] = 503] = "ServiceUnavailable";
-    HttpCodes[HttpCodes["GatewayTimeout"] = 504] = "GatewayTimeout";
-})(HttpCodes = exports.HttpCodes || (exports.HttpCodes = {}));
-const HttpRedirectCodes = [HttpCodes.MovedPermanently, HttpCodes.ResourceMoved, HttpCodes.SeeOther, HttpCodes.TemporaryRedirect, HttpCodes.PermanentRedirect];
-const HttpResponseRetryCodes = [HttpCodes.BadGateway, HttpCodes.ServiceUnavailable, HttpCodes.GatewayTimeout];
-const RetryableHttpVerbs = ['OPTIONS', 'GET', 'DELETE', 'HEAD'];
-const ExponentialBackoffCeiling = 10;
-const ExponentialBackoffTimeSlice = 5;
-class HttpClientResponse {
-    constructor(message) {
-        this.message = message;
-    }
-    readBody() {
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            let output = '';
-            this.message.on('data', (chunk) => {
-                output += chunk;
-            });
-            this.message.on('end', () => {
-                resolve(output);
-            });
-        }));
-    }
+function read(path, settings, callback) {
+    settings.fs.lstat(path, (lstatError, lstat) => {
+        if (lstatError !== null) {
+            return callFailureCallback(callback, lstatError);
+        }
+        if (!lstat.isSymbolicLink() || !settings.followSymbolicLink) {
+            return callSuccessCallback(callback, lstat);
+        }
+        settings.fs.stat(path, (statError, stat) => {
+            if (statError !== null) {
+                if (settings.throwErrorOnBrokenSymbolicLink) {
+                    return callFailureCallback(callback, statError);
+                }
+                return callSuccessCallback(callback, lstat);
+            }
+            if (settings.markSymbolicLink) {
+                stat.isSymbolicLink = () => true;
+            }
+            callSuccessCallback(callback, stat);
+        });
+    });
 }
-exports.HttpClientResponse = HttpClientResponse;
-function isHttps(requestUrl) {
-    let parsedUrl = url.parse(requestUrl);
-    return parsedUrl.protocol === 'https:';
+exports.read = read;
+function callFailureCallback(callback, error) {
+    callback(error);
 }
-exports.isHttps = isHttps;
-var EnvironmentVariables;
-(function (EnvironmentVariables) {
-    EnvironmentVariables["HTTP_PROXY"] = "HTTP_PROXY";
-    EnvironmentVariables["HTTPS_PROXY"] = "HTTPS_PROXY";
-})(EnvironmentVariables || (EnvironmentVariables = {}));
-class HttpClient {
-    constructor(userAgent, handlers, requestOptions) {
-        this._ignoreSslError = false;
-        this._allowRedirects = true;
-        this._maxRedirects = 50;
-        this._allowRetries = false;
-        this._maxRetries = 1;
-        this._keepAlive = false;
-        this._disposed = false;
-        this.userAgent = userAgent;
-        this.handlers = handlers || [];
-        this.requestOptions = requestOptions;
-        if (requestOptions) {
-            if (requestOptions.ignoreSslError != null) {
-                this._ignoreSslError = requestOptions.ignoreSslError;
-            }
-            this._socketTimeout = requestOptions.socketTimeout;
-            this._httpProxy = requestOptions.proxy;
-            if (requestOptions.proxy && requestOptions.proxy.proxyBypassHosts) {
-                this._httpProxyBypassHosts = [];
-                requestOptions.proxy.proxyBypassHosts.forEach(bypass => {
-                    this._httpProxyBypassHosts.push(new RegExp(bypass, 'i'));
-                });
-            }
-            this._certConfig = requestOptions.cert;
-            if (this._certConfig) {
-                // If using cert, need fs
-                fs = __webpack_require__(747);
-                // cache the cert content into memory, so we don't have to read it from disk every time 
-                if (this._certConfig.caFile && fs.existsSync(this._certConfig.caFile)) {
-                    this._ca = fs.readFileSync(this._certConfig.caFile, 'utf8');
-                }
-                if (this._certConfig.certFile && fs.existsSync(this._certConfig.certFile)) {
-                    this._cert = fs.readFileSync(this._certConfig.certFile, 'utf8');
-                }
-                if (this._certConfig.keyFile && fs.existsSync(this._certConfig.keyFile)) {
-                    this._key = fs.readFileSync(this._certConfig.keyFile, 'utf8');
-                }
-            }
-            if (requestOptions.allowRedirects != null) {
-                this._allowRedirects = requestOptions.allowRedirects;
-            }
-            if (requestOptions.maxRedirects != null) {
-                this._maxRedirects = Math.max(requestOptions.maxRedirects, 0);
-            }
-            if (requestOptions.keepAlive != null) {
-                this._keepAlive = requestOptions.keepAlive;
-            }
-            if (requestOptions.allowRetries != null) {
-                this._allowRetries = requestOptions.allowRetries;
-            }
-            if (requestOptions.maxRetries != null) {
-                this._maxRetries = requestOptions.maxRetries;
-            }
-        }
-    }
-    options(requestUrl, additionalHeaders) {
-        return this.request('OPTIONS', requestUrl, null, additionalHeaders || {});
-    }
-    get(requestUrl, additionalHeaders) {
-        return this.request('GET', requestUrl, null, additionalHeaders || {});
-    }
-    del(requestUrl, additionalHeaders) {
-        return this.request('DELETE', requestUrl, null, additionalHeaders || {});
-    }
-    post(requestUrl, data, additionalHeaders) {
-        return this.request('POST', requestUrl, data, additionalHeaders || {});
-    }
-    patch(requestUrl, data, additionalHeaders) {
-        return this.request('PATCH', requestUrl, data, additionalHeaders || {});
-    }
-    put(requestUrl, data, additionalHeaders) {
-        return this.request('PUT', requestUrl, data, additionalHeaders || {});
-    }
-    head(requestUrl, additionalHeaders) {
-        return this.request('HEAD', requestUrl, null, additionalHeaders || {});
-    }
-    sendStream(verb, requestUrl, stream, additionalHeaders) {
-        return this.request(verb, requestUrl, stream, additionalHeaders);
-    }
-    /**
-     * Makes a raw http request.
-     * All other methods such as get, post, patch, and request ultimately call this.
-     * Prefer get, del, post and patch
-     */
-    request(verb, requestUrl, data, headers) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (this._disposed) {
-                throw new Error("Client has already been disposed.");
-            }
-            let info = this._prepareRequest(verb, requestUrl, headers);
-            // Only perform retries on reads since writes may not be idempotent.
-            let maxTries = (this._allowRetries && RetryableHttpVerbs.indexOf(verb) != -1) ? this._maxRetries + 1 : 1;
-            let numTries = 0;
-            let response;
-            while (numTries < maxTries) {
-                response = yield this.requestRaw(info, data);
-                // Check if it's an authentication challenge
-                if (response && response.message && response.message.statusCode === HttpCodes.Unauthorized) {
-                    let authenticationHandler;
-                    for (let i = 0; i < this.handlers.length; i++) {
-                        if (this.handlers[i].canHandleAuthentication(response)) {
-                            authenticationHandler = this.handlers[i];
-                            break;
-                        }
-                    }
-                    if (authenticationHandler) {
-                        return authenticationHandler.handleAuthentication(this, info, data);
-                    }
-                    else {
-                        // We have received an unauthorized response but have no handlers to handle it.
-                        // Let the response return to the caller.
-                        return response;
-                    }
-                }
-                let redirectsRemaining = this._maxRedirects;
-                while (HttpRedirectCodes.indexOf(response.message.statusCode) != -1
-                    && this._allowRedirects
-                    && redirectsRemaining > 0) {
-                    const redirectUrl = response.message.headers["location"];
-                    if (!redirectUrl) {
-                        // if there's no location to redirect to, we won't
-                        break;
-                    }
-                    // we need to finish reading the response before reassigning response
-                    // which will leak the open socket.
-                    yield response.readBody();
-                    // let's make the request with the new redirectUrl
-                    info = this._prepareRequest(verb, redirectUrl, headers);
-                    response = yield this.requestRaw(info, data);
-                    redirectsRemaining--;
-                }
-                if (HttpResponseRetryCodes.indexOf(response.message.statusCode) == -1) {
-                    // If not a retry code, return immediately instead of retrying
-                    return response;
-                }
-                numTries += 1;
-                if (numTries < maxTries) {
-                    yield response.readBody();
-                    yield this._performExponentialBackoff(numTries);
-                }
-            }
-            return response;
-        });
-    }
-    /**
-     * Needs to be called if keepAlive is set to true in request options.
-     */
-    dispose() {
-        if (this._agent) {
-            this._agent.destroy();
-        }
-        this._disposed = true;
-    }
-    /**
-     * Raw request.
-     * @param info
-     * @param data
-     */
-    requestRaw(info, data) {
-        return new Promise((resolve, reject) => {
-            let callbackForResult = function (err, res) {
-                if (err) {
-                    reject(err);
-                }
-                resolve(res);
-            };
-            this.requestRawWithCallback(info, data, callbackForResult);
-        });
-    }
-    /**
-     * Raw request with callback.
-     * @param info
-     * @param data
-     * @param onResult
-     */
-    requestRawWithCallback(info, data, onResult) {
-        let socket;
-        let isDataString = typeof (data) === 'string';
-        if (typeof (data) === 'string') {
-            info.options.headers["Content-Length"] = Buffer.byteLength(data, 'utf8');
-        }
-        let callbackCalled = false;
-        let handleResult = (err, res) => {
-            if (!callbackCalled) {
-                callbackCalled = true;
-                onResult(err, res);
-            }
-        };
-        let req = info.httpModule.request(info.options, (msg) => {
-            let res = new HttpClientResponse(msg);
-            handleResult(null, res);
-        });
-        req.on('socket', (sock) => {
-            socket = sock;
-        });
-        // If we ever get disconnected, we want the socket to timeout eventually
-        req.setTimeout(this._socketTimeout || 3 * 60000, () => {
-            if (socket) {
-                socket.end();
-            }
-            handleResult(new Error('Request timeout: ' + info.options.path), null);
-        });
-        req.on('error', function (err) {
-            // err has statusCode property
-            // res should have headers
-            handleResult(err, null);
-        });
-        if (data && typeof (data) === 'string') {
-            req.write(data, 'utf8');
-        }
-        if (data && typeof (data) !== 'string') {
-            data.on('close', function () {
-                req.end();
-            });
-            data.pipe(req);
-        }
-        else {
-            req.end();
-        }
-    }
-    _prepareRequest(method, requestUrl, headers) {
-        const info = {};
-        info.parsedUrl = url.parse(requestUrl);
-        const usingSsl = info.parsedUrl.protocol === 'https:';
-        info.httpModule = usingSsl ? https : http;
-        const defaultPort = usingSsl ? 443 : 80;
-        info.options = {};
-        info.options.host = info.parsedUrl.hostname;
-        info.options.port = info.parsedUrl.port ? parseInt(info.parsedUrl.port) : defaultPort;
-        info.options.path = (info.parsedUrl.pathname || '') + (info.parsedUrl.search || '');
-        info.options.method = method;
-        info.options.headers = this._mergeHeaders(headers);
-        info.options.headers["user-agent"] = this.userAgent;
-        info.options.agent = this._getAgent(requestUrl);
-        // gives handlers an opportunity to participate
-        if (this.handlers && !this._isPresigned(requestUrl)) {
-            this.handlers.forEach((handler) => {
-                handler.prepareRequest(info.options);
-            });
-        }
-        return info;
-    }
-    _isPresigned(requestUrl) {
-        if (this.requestOptions && this.requestOptions.presignedUrlPatterns) {
-            const patterns = this.requestOptions.presignedUrlPatterns;
-            for (let i = 0; i < patterns.length; i++) {
-                if (requestUrl.match(patterns[i])) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    _mergeHeaders(headers) {
-        const lowercaseKeys = obj => Object.keys(obj).reduce((c, k) => (c[k.toLowerCase()] = obj[k], c), {});
-        if (this.requestOptions && this.requestOptions.headers) {
-            return Object.assign({}, lowercaseKeys(this.requestOptions.headers), lowercaseKeys(headers));
-        }
-        return lowercaseKeys(headers || {});
-    }
-    _getAgent(requestUrl) {
-        let agent;
-        let proxy = this._getProxy(requestUrl);
-        let useProxy = proxy.proxyUrl && proxy.proxyUrl.hostname && !this._isBypassProxy(requestUrl);
-        if (this._keepAlive && useProxy) {
-            agent = this._proxyAgent;
-        }
-        if (this._keepAlive && !useProxy) {
-            agent = this._agent;
-        }
-        // if agent is already assigned use that agent.
-        if (!!agent) {
-            return agent;
-        }
-        let parsedUrl = url.parse(requestUrl);
-        const usingSsl = parsedUrl.protocol === 'https:';
-        let maxSockets = 100;
-        if (!!this.requestOptions) {
-            maxSockets = this.requestOptions.maxSockets || http.globalAgent.maxSockets;
-        }
-        if (useProxy) {
-            // If using proxy, need tunnel
-            if (!tunnel) {
-                tunnel = __webpack_require__(510);
-            }
-            const agentOptions = {
-                maxSockets: maxSockets,
-                keepAlive: this._keepAlive,
-                proxy: {
-                    proxyAuth: proxy.proxyAuth,
-                    host: proxy.proxyUrl.hostname,
-                    port: proxy.proxyUrl.port
-                },
-            };
-            let tunnelAgent;
-            const overHttps = proxy.proxyUrl.protocol === 'https:';
-            if (usingSsl) {
-                tunnelAgent = overHttps ? tunnel.httpsOverHttps : tunnel.httpsOverHttp;
-            }
-            else {
-                tunnelAgent = overHttps ? tunnel.httpOverHttps : tunnel.httpOverHttp;
-            }
-            agent = tunnelAgent(agentOptions);
-            this._proxyAgent = agent;
-        }
-        // if reusing agent across request and tunneling agent isn't assigned create a new agent
-        if (this._keepAlive && !agent) {
-            const options = { keepAlive: this._keepAlive, maxSockets: maxSockets };
-            agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
-            this._agent = agent;
-        }
-        // if not using private agent and tunnel agent isn't setup then use global agent
-        if (!agent) {
-            agent = usingSsl ? https.globalAgent : http.globalAgent;
-        }
-        if (usingSsl && this._ignoreSslError) {
-            // we don't want to set NODE_TLS_REJECT_UNAUTHORIZED=0 since that will affect request for entire process
-            // http.RequestOptions doesn't expose a way to modify RequestOptions.agent.options
-            // we have to cast it to any and change it directly
-            agent.options = Object.assign(agent.options || {}, { rejectUnauthorized: false });
-        }
-        if (usingSsl && this._certConfig) {
-            agent.options = Object.assign(agent.options || {}, { ca: this._ca, cert: this._cert, key: this._key, passphrase: this._certConfig.passphrase });
-        }
-        return agent;
-    }
-    _getProxy(requestUrl) {
-        const parsedUrl = url.parse(requestUrl);
-        let usingSsl = parsedUrl.protocol === 'https:';
-        let proxyConfig = this._httpProxy;
-        // fallback to http_proxy and https_proxy env
-        let https_proxy = process.env[EnvironmentVariables.HTTPS_PROXY];
-        let http_proxy = process.env[EnvironmentVariables.HTTP_PROXY];
-        if (!proxyConfig) {
-            if (https_proxy && usingSsl) {
-                proxyConfig = {
-                    proxyUrl: https_proxy
-                };
-            }
-            else if (http_proxy) {
-                proxyConfig = {
-                    proxyUrl: http_proxy
-                };
-            }
-        }
-        let proxyUrl;
-        let proxyAuth;
-        if (proxyConfig) {
-            if (proxyConfig.proxyUrl.length > 0) {
-                proxyUrl = url.parse(proxyConfig.proxyUrl);
-            }
-            if (proxyConfig.proxyUsername || proxyConfig.proxyPassword) {
-                proxyAuth = proxyConfig.proxyUsername + ":" + proxyConfig.proxyPassword;
-            }
-        }
-        return { proxyUrl: proxyUrl, proxyAuth: proxyAuth };
-    }
-    _isBypassProxy(requestUrl) {
-        if (!this._httpProxyBypassHosts) {
-            return false;
-        }
-        let bypass = false;
-        this._httpProxyBypassHosts.forEach(bypassHost => {
-            if (bypassHost.test(requestUrl)) {
-                bypass = true;
-            }
-        });
-        return bypass;
-    }
-    _performExponentialBackoff(retryNumber) {
-        retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
-        const ms = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
-        return new Promise(resolve => setTimeout(() => resolve(), ms));
-    }
+function callSuccessCallback(callback, result) {
+    callback(null, result);
 }
-exports.HttpClient = HttpClient;
 
 
 /***/ }),
@@ -82366,9 +85820,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = exports.isEmptyPath = void 0;
 
-var _addComment = _interopRequireDefault(__webpack_require__(289));
+var _addComment = _interopRequireDefault(__webpack_require__(823));
 
-var _Node = _interopRequireDefault(__webpack_require__(965));
+var _Node = _interopRequireDefault(__webpack_require__(831));
 
 var _Pair = _interopRequireDefault(__webpack_require__(532));
 
@@ -82533,187 +85987,123 @@ _defineProperty(Collection, "maxFlowStringSingleLineLength", 60);
 
 /***/ }),
 /* 673 */
-/***/ (function(__unusedmodule, exports) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.getLinePos = getLinePos;
-exports.getLine = getLine;
-exports.getPrettyContext = getPrettyContext;
+const fill = __webpack_require__(32);
+const stringify = __webpack_require__(79);
+const utils = __webpack_require__(304);
 
-function findLineStarts(src) {
-  const ls = [0];
-  let offset = src.indexOf('\n');
+const append = (queue = '', stash = '', enclose = false) => {
+  let result = [];
 
-  while (offset !== -1) {
-    offset += 1;
-    ls.push(offset);
-    offset = src.indexOf('\n', offset);
+  queue = [].concat(queue);
+  stash = [].concat(stash);
+
+  if (!stash.length) return queue;
+  if (!queue.length) {
+    return enclose ? utils.flatten(stash).map(ele => `{${ele}}`) : stash;
   }
 
-  return ls;
-}
-
-function getSrcInfo(cst) {
-  let lineStarts, src;
-
-  if (typeof cst === 'string') {
-    lineStarts = findLineStarts(cst);
-    src = cst;
-  } else {
-    if (Array.isArray(cst)) cst = cst[0];
-
-    if (cst && cst.context) {
-      if (!cst.lineStarts) cst.lineStarts = findLineStarts(cst.context.src);
-      lineStarts = cst.lineStarts;
-      src = cst.context.src;
-    }
-  }
-
-  return {
-    lineStarts,
-    src
-  };
-}
-/**
- * @typedef {Object} LinePos - One-indexed position in the source
- * @property {number} line
- * @property {number} col
- */
-
-/**
- * Determine the line/col position matching a character offset.
- *
- * Accepts a source string or a CST document as the second parameter. With
- * the latter, starting indices for lines are cached in the document as
- * `lineStarts: number[]`.
- *
- * Returns a one-indexed `{ line, col }` location if found, or
- * `undefined` otherwise.
- *
- * @param {number} offset
- * @param {string|Document|Document[]} cst
- * @returns {?LinePos}
- */
-
-
-function getLinePos(offset, cst) {
-  if (typeof offset !== 'number' || offset < 0) return null;
-  const {
-    lineStarts,
-    src
-  } = getSrcInfo(cst);
-  if (!lineStarts || !src || offset > src.length) return null;
-
-  for (let i = 0; i < lineStarts.length; ++i) {
-    const start = lineStarts[i];
-
-    if (offset < start) {
-      return {
-        line: i,
-        col: offset - lineStarts[i - 1] + 1
-      };
-    }
-
-    if (offset === start) return {
-      line: i + 1,
-      col: 1
-    };
-  }
-
-  const line = lineStarts.length;
-  return {
-    line,
-    col: offset - lineStarts[line - 1] + 1
-  };
-}
-/**
- * Get a specified line from the source.
- *
- * Accepts a source string or a CST document as the second parameter. With
- * the latter, starting indices for lines are cached in the document as
- * `lineStarts: number[]`.
- *
- * Returns the line as a string if found, or `null` otherwise.
- *
- * @param {number} line One-indexed line number
- * @param {string|Document|Document[]} cst
- * @returns {?string}
- */
-
-
-function getLine(line, cst) {
-  const {
-    lineStarts,
-    src
-  } = getSrcInfo(cst);
-  if (!lineStarts || !(line >= 1) || line > lineStarts.length) return null;
-  const start = lineStarts[line - 1];
-  let end = lineStarts[line]; // undefined for last line; that's ok for slice()
-
-  while (end && end > start && src[end - 1] === '\n') --end;
-
-  return src.slice(start, end);
-}
-/**
- * Pretty-print the starting line from the source indicated by the range `pos`
- *
- * Trims output to `maxWidth` chars while keeping the starting column visible,
- * using `…` at either end to indicate dropped characters.
- *
- * Returns a two-line string (or `null`) with `\n` as separator; the second line
- * will hold appropriately indented `^` marks indicating the column range.
- *
- * @param {Object} pos
- * @param {LinePos} pos.start
- * @param {LinePos} [pos.end]
- * @param {string|Document|Document[]*} cst
- * @param {number} [maxWidth=80]
- * @returns {?string}
- */
-
-
-function getPrettyContext({
-  start,
-  end
-}, cst, maxWidth = 80) {
-  let src = getLine(start.line, cst);
-  if (!src) return null;
-  let {
-    col
-  } = start;
-
-  if (src.length > maxWidth) {
-    if (col <= maxWidth - 10) {
-      src = src.substr(0, maxWidth - 1) + '…';
+  for (let item of queue) {
+    if (Array.isArray(item)) {
+      for (let value of item) {
+        result.push(append(value, stash, enclose));
+      }
     } else {
-      const halfWidth = Math.round(maxWidth / 2);
-      if (src.length > col + halfWidth) src = src.substr(0, col + halfWidth - 1) + '…';
-      col -= src.length - maxWidth;
-      src = '…' + src.substr(1 - maxWidth);
+      for (let ele of stash) {
+        if (enclose === true && typeof ele === 'string') ele = `{${ele}}`;
+        result.push(Array.isArray(ele) ? append(item, ele, enclose) : (item + ele));
+      }
     }
   }
+  return utils.flatten(result);
+};
 
-  let errLen = 1;
-  let errEnd = '';
+const expand = (ast, options = {}) => {
+  let rangeLimit = options.rangeLimit === void 0 ? 1000 : options.rangeLimit;
 
-  if (end) {
-    if (end.line === start.line && col + (end.col - start.col) <= maxWidth + 1) {
-      errLen = end.col - start.col;
-    } else {
-      errLen = Math.min(src.length + 1, maxWidth) - col;
-      errEnd = '…';
+  let walk = (node, parent = {}) => {
+    node.queue = [];
+
+    let p = parent;
+    let q = parent.queue;
+
+    while (p.type !== 'brace' && p.type !== 'root' && p.parent) {
+      p = p.parent;
+      q = p.queue;
     }
-  }
 
-  const offset = col > 1 ? ' '.repeat(col - 1) : '';
-  const err = '^'.repeat(errLen);
-  return `${src}\n${offset}${err}${errEnd}`;
-}
+    if (node.invalid || node.dollar) {
+      q.push(append(q.pop(), stringify(node, options)));
+      return;
+    }
+
+    if (node.type === 'brace' && node.invalid !== true && node.nodes.length === 2) {
+      q.push(append(q.pop(), ['{}']));
+      return;
+    }
+
+    if (node.nodes && node.ranges > 0) {
+      let args = utils.reduce(node.nodes);
+
+      if (utils.exceedsLimit(...args, options.step, rangeLimit)) {
+        throw new RangeError('expanded array length exceeds range limit. Use options.rangeLimit to increase or disable the limit.');
+      }
+
+      let range = fill(...args, options);
+      if (range.length === 0) {
+        range = stringify(node, options);
+      }
+
+      q.push(append(q.pop(), range));
+      node.nodes = [];
+      return;
+    }
+
+    let enclose = utils.encloseBrace(node);
+    let queue = node.queue;
+    let block = node;
+
+    while (block.type !== 'brace' && block.type !== 'root' && block.parent) {
+      block = block.parent;
+      queue = block.queue;
+    }
+
+    for (let i = 0; i < node.nodes.length; i++) {
+      let child = node.nodes[i];
+
+      if (child.type === 'comma' && node.type === 'brace') {
+        if (i === 1) queue.push('');
+        queue.push('');
+        continue;
+      }
+
+      if (child.type === 'close') {
+        q.push(append(q.pop(), queue, enclose));
+        continue;
+      }
+
+      if (child.value && child.type !== 'open') {
+        queue.push(append(queue.pop(), child.value));
+        continue;
+      }
+
+      if (child.nodes) {
+        walk(child, node);
+      }
+    }
+
+    return queue;
+  };
+
+  return utils.flatten(walk(ast));
+};
+
+module.exports = expand;
+
 
 /***/ }),
 /* 674 */,
@@ -82725,7 +86115,1269 @@ module.exports = __webpack_require__(859).default
 
 
 /***/ }),
-/* 677 */,
+/* 677 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+/**
+ * Javascript implementation of PKCS#7 v1.5.
+ *
+ * @author Stefan Siegl
+ * @author Dave Longley
+ *
+ * Copyright (c) 2012 Stefan Siegl <stesie@brokenpipe.de>
+ * Copyright (c) 2012-2015 Digital Bazaar, Inc.
+ *
+ * Currently this implementation only supports ContentType of EnvelopedData,
+ * EncryptedData, or SignedData at the root level. The top level elements may
+ * contain only a ContentInfo of ContentType Data, i.e. plain data. Further
+ * nesting is not (yet) supported.
+ *
+ * The Forge validators for PKCS #7's ASN.1 structures are available from
+ * a separate file pkcs7asn1.js, since those are referenced from other
+ * PKCS standards like PKCS #12.
+ */
+var forge = __webpack_require__(45);
+__webpack_require__(138);
+__webpack_require__(535);
+__webpack_require__(390);
+__webpack_require__(930);
+__webpack_require__(4);
+__webpack_require__(636);
+__webpack_require__(845);
+__webpack_require__(294);
+__webpack_require__(918);
+
+// shortcut for ASN.1 API
+var asn1 = forge.asn1;
+
+// shortcut for PKCS#7 API
+var p7 = module.exports = forge.pkcs7 = forge.pkcs7 || {};
+
+/**
+ * Converts a PKCS#7 message from PEM format.
+ *
+ * @param pem the PEM-formatted PKCS#7 message.
+ *
+ * @return the PKCS#7 message.
+ */
+p7.messageFromPem = function(pem) {
+  var msg = forge.pem.decode(pem)[0];
+
+  if(msg.type !== 'PKCS7') {
+    var error = new Error('Could not convert PKCS#7 message from PEM; PEM ' +
+      'header type is not "PKCS#7".');
+    error.headerType = msg.type;
+    throw error;
+  }
+  if(msg.procType && msg.procType.type === 'ENCRYPTED') {
+    throw new Error('Could not convert PKCS#7 message from PEM; PEM is encrypted.');
+  }
+
+  // convert DER to ASN.1 object
+  var obj = asn1.fromDer(msg.body);
+
+  return p7.messageFromAsn1(obj);
+};
+
+/**
+ * Converts a PKCS#7 message to PEM format.
+ *
+ * @param msg The PKCS#7 message object
+ * @param maxline The maximum characters per line, defaults to 64.
+ *
+ * @return The PEM-formatted PKCS#7 message.
+ */
+p7.messageToPem = function(msg, maxline) {
+  // convert to ASN.1, then DER, then PEM-encode
+  var pemObj = {
+    type: 'PKCS7',
+    body: asn1.toDer(msg.toAsn1()).getBytes()
+  };
+  return forge.pem.encode(pemObj, {maxline: maxline});
+};
+
+/**
+ * Converts a PKCS#7 message from an ASN.1 object.
+ *
+ * @param obj the ASN.1 representation of a ContentInfo.
+ *
+ * @return the PKCS#7 message.
+ */
+p7.messageFromAsn1 = function(obj) {
+  // validate root level ContentInfo and capture data
+  var capture = {};
+  var errors = [];
+  if(!asn1.validate(obj, p7.asn1.contentInfoValidator, capture, errors)) {
+    var error = new Error('Cannot read PKCS#7 message. ' +
+      'ASN.1 object is not an PKCS#7 ContentInfo.');
+    error.errors = errors;
+    throw error;
+  }
+
+  var contentType = asn1.derToOid(capture.contentType);
+  var msg;
+
+  switch(contentType) {
+    case forge.pki.oids.envelopedData:
+      msg = p7.createEnvelopedData();
+      break;
+
+    case forge.pki.oids.encryptedData:
+      msg = p7.createEncryptedData();
+      break;
+
+    case forge.pki.oids.signedData:
+      msg = p7.createSignedData();
+      break;
+
+    default:
+      throw new Error('Cannot read PKCS#7 message. ContentType with OID ' +
+        contentType + ' is not (yet) supported.');
+  }
+
+  msg.fromAsn1(capture.content.value[0]);
+  return msg;
+};
+
+p7.createSignedData = function() {
+  var msg = null;
+  msg = {
+    type: forge.pki.oids.signedData,
+    version: 1,
+    certificates: [],
+    crls: [],
+    // TODO: add json-formatted signer stuff here?
+    signers: [],
+    // populated during sign()
+    digestAlgorithmIdentifiers: [],
+    contentInfo: null,
+    signerInfos: [],
+
+    fromAsn1: function(obj) {
+      // validate SignedData content block and capture data.
+      _fromAsn1(msg, obj, p7.asn1.signedDataValidator);
+      msg.certificates = [];
+      msg.crls = [];
+      msg.digestAlgorithmIdentifiers = [];
+      msg.contentInfo = null;
+      msg.signerInfos = [];
+
+      if(msg.rawCapture.certificates) {
+        var certs = msg.rawCapture.certificates.value;
+        for(var i = 0; i < certs.length; ++i) {
+          msg.certificates.push(forge.pki.certificateFromAsn1(certs[i]));
+        }
+      }
+
+      // TODO: parse crls
+    },
+
+    toAsn1: function() {
+      // degenerate case with no content
+      if(!msg.contentInfo) {
+        msg.sign();
+      }
+
+      var certs = [];
+      for(var i = 0; i < msg.certificates.length; ++i) {
+        certs.push(forge.pki.certificateToAsn1(msg.certificates[i]));
+      }
+
+      var crls = [];
+      // TODO: implement CRLs
+
+      // [0] SignedData
+      var signedData = asn1.create(asn1.Class.CONTEXT_SPECIFIC, 0, true, [
+        asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+          // Version
+          asn1.create(asn1.Class.UNIVERSAL, asn1.Type.INTEGER, false,
+            asn1.integerToDer(msg.version).getBytes()),
+          // DigestAlgorithmIdentifiers
+          asn1.create(
+            asn1.Class.UNIVERSAL, asn1.Type.SET, true,
+            msg.digestAlgorithmIdentifiers),
+          // ContentInfo
+          msg.contentInfo
+        ])
+      ]);
+      if(certs.length > 0) {
+        // [0] IMPLICIT ExtendedCertificatesAndCertificates OPTIONAL
+        signedData.value[0].value.push(
+          asn1.create(asn1.Class.CONTEXT_SPECIFIC, 0, true, certs));
+      }
+      if(crls.length > 0) {
+        // [1] IMPLICIT CertificateRevocationLists OPTIONAL
+        signedData.value[0].value.push(
+          asn1.create(asn1.Class.CONTEXT_SPECIFIC, 1, true, crls));
+      }
+      // SignerInfos
+      signedData.value[0].value.push(
+        asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SET, true,
+          msg.signerInfos));
+
+      // ContentInfo
+      return asn1.create(
+        asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+          // ContentType
+          asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
+            asn1.oidToDer(msg.type).getBytes()),
+          // [0] SignedData
+          signedData
+        ]);
+    },
+
+    /**
+     * Add (another) entity to list of signers.
+     *
+     * Note: If authenticatedAttributes are provided, then, per RFC 2315,
+     * they must include at least two attributes: content type and
+     * message digest. The message digest attribute value will be
+     * auto-calculated during signing and will be ignored if provided.
+     *
+     * Here's an example of providing these two attributes:
+     *
+     * forge.pkcs7.createSignedData();
+     * p7.addSigner({
+     *   issuer: cert.issuer.attributes,
+     *   serialNumber: cert.serialNumber,
+     *   key: privateKey,
+     *   digestAlgorithm: forge.pki.oids.sha1,
+     *   authenticatedAttributes: [{
+     *     type: forge.pki.oids.contentType,
+     *     value: forge.pki.oids.data
+     *   }, {
+     *     type: forge.pki.oids.messageDigest
+     *   }]
+     * });
+     *
+     * TODO: Support [subjectKeyIdentifier] as signer's ID.
+     *
+     * @param signer the signer information:
+     *          key the signer's private key.
+     *          [certificate] a certificate containing the public key
+     *            associated with the signer's private key; use this option as
+     *            an alternative to specifying signer.issuer and
+     *            signer.serialNumber.
+     *          [issuer] the issuer attributes (eg: cert.issuer.attributes).
+     *          [serialNumber] the signer's certificate's serial number in
+     *           hexadecimal (eg: cert.serialNumber).
+     *          [digestAlgorithm] the message digest OID, as a string, to use
+     *            (eg: forge.pki.oids.sha1).
+     *          [authenticatedAttributes] an optional array of attributes
+     *            to also sign along with the content.
+     */
+    addSigner: function(signer) {
+      var issuer = signer.issuer;
+      var serialNumber = signer.serialNumber;
+      if(signer.certificate) {
+        var cert = signer.certificate;
+        if(typeof cert === 'string') {
+          cert = forge.pki.certificateFromPem(cert);
+        }
+        issuer = cert.issuer.attributes;
+        serialNumber = cert.serialNumber;
+      }
+      var key = signer.key;
+      if(!key) {
+        throw new Error(
+          'Could not add PKCS#7 signer; no private key specified.');
+      }
+      if(typeof key === 'string') {
+        key = forge.pki.privateKeyFromPem(key);
+      }
+
+      // ensure OID known for digest algorithm
+      var digestAlgorithm = signer.digestAlgorithm || forge.pki.oids.sha1;
+      switch(digestAlgorithm) {
+      case forge.pki.oids.sha1:
+      case forge.pki.oids.sha256:
+      case forge.pki.oids.sha384:
+      case forge.pki.oids.sha512:
+      case forge.pki.oids.md5:
+        break;
+      default:
+        throw new Error(
+          'Could not add PKCS#7 signer; unknown message digest algorithm: ' +
+          digestAlgorithm);
+      }
+
+      // if authenticatedAttributes is present, then the attributes
+      // must contain at least PKCS #9 content-type and message-digest
+      var authenticatedAttributes = signer.authenticatedAttributes || [];
+      if(authenticatedAttributes.length > 0) {
+        var contentType = false;
+        var messageDigest = false;
+        for(var i = 0; i < authenticatedAttributes.length; ++i) {
+          var attr = authenticatedAttributes[i];
+          if(!contentType && attr.type === forge.pki.oids.contentType) {
+            contentType = true;
+            if(messageDigest) {
+              break;
+            }
+            continue;
+          }
+          if(!messageDigest && attr.type === forge.pki.oids.messageDigest) {
+            messageDigest = true;
+            if(contentType) {
+              break;
+            }
+            continue;
+          }
+        }
+
+        if(!contentType || !messageDigest) {
+          throw new Error('Invalid signer.authenticatedAttributes. If ' +
+            'signer.authenticatedAttributes is specified, then it must ' +
+            'contain at least two attributes, PKCS #9 content-type and ' +
+            'PKCS #9 message-digest.');
+        }
+      }
+
+      msg.signers.push({
+        key: key,
+        version: 1,
+        issuer: issuer,
+        serialNumber: serialNumber,
+        digestAlgorithm: digestAlgorithm,
+        signatureAlgorithm: forge.pki.oids.rsaEncryption,
+        signature: null,
+        authenticatedAttributes: authenticatedAttributes,
+        unauthenticatedAttributes: []
+      });
+    },
+
+    /**
+     * Signs the content.
+     * @param options Options to apply when signing:
+     *    [detached] boolean. If signing should be done in detached mode. Defaults to false.
+     */
+    sign: function(options) {
+      options = options || {};
+      // auto-generate content info
+      if(typeof msg.content !== 'object' || msg.contentInfo === null) {
+        // use Data ContentInfo
+        msg.contentInfo = asn1.create(
+          asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+            // ContentType
+            asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
+              asn1.oidToDer(forge.pki.oids.data).getBytes())
+          ]);
+
+        // add actual content, if present
+        if('content' in msg) {
+          var content;
+          if(msg.content instanceof forge.util.ByteBuffer) {
+            content = msg.content.bytes();
+          } else if(typeof msg.content === 'string') {
+            content = forge.util.encodeUtf8(msg.content);
+          }
+
+          if (options.detached) {
+            msg.detachedContent = asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false, content);
+          } else {
+            msg.contentInfo.value.push(
+              // [0] EXPLICIT content
+              asn1.create(asn1.Class.CONTEXT_SPECIFIC, 0, true, [
+                asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false,
+                  content)
+              ]));
+          }
+        }
+      }
+
+      // no signers, return early (degenerate case for certificate container)
+      if(msg.signers.length === 0) {
+        return;
+      }
+
+      // generate digest algorithm identifiers
+      var mds = addDigestAlgorithmIds();
+
+      // generate signerInfos
+      addSignerInfos(mds);
+    },
+
+    verify: function() {
+      throw new Error('PKCS#7 signature verification not yet implemented.');
+    },
+
+    /**
+     * Add a certificate.
+     *
+     * @param cert the certificate to add.
+     */
+    addCertificate: function(cert) {
+      // convert from PEM
+      if(typeof cert === 'string') {
+        cert = forge.pki.certificateFromPem(cert);
+      }
+      msg.certificates.push(cert);
+    },
+
+    /**
+     * Add a certificate revokation list.
+     *
+     * @param crl the certificate revokation list to add.
+     */
+    addCertificateRevokationList: function(crl) {
+      throw new Error('PKCS#7 CRL support not yet implemented.');
+    }
+  };
+  return msg;
+
+  function addDigestAlgorithmIds() {
+    var mds = {};
+
+    for(var i = 0; i < msg.signers.length; ++i) {
+      var signer = msg.signers[i];
+      var oid = signer.digestAlgorithm;
+      if(!(oid in mds)) {
+        // content digest
+        mds[oid] = forge.md[forge.pki.oids[oid]].create();
+      }
+      if(signer.authenticatedAttributes.length === 0) {
+        // no custom attributes to digest; use content message digest
+        signer.md = mds[oid];
+      } else {
+        // custom attributes to be digested; use own message digest
+        // TODO: optimize to just copy message digest state if that
+        // feature is ever supported with message digests
+        signer.md = forge.md[forge.pki.oids[oid]].create();
+      }
+    }
+
+    // add unique digest algorithm identifiers
+    msg.digestAlgorithmIdentifiers = [];
+    for(var oid in mds) {
+      msg.digestAlgorithmIdentifiers.push(
+        // AlgorithmIdentifier
+        asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+          // algorithm
+          asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
+            asn1.oidToDer(oid).getBytes()),
+          // parameters (null)
+          asn1.create(asn1.Class.UNIVERSAL, asn1.Type.NULL, false, '')
+        ]));
+    }
+
+    return mds;
+  }
+
+  function addSignerInfos(mds) {
+    var content;
+
+    if (msg.detachedContent) {
+      // Signature has been made in detached mode.
+      content = msg.detachedContent;
+    } else {
+      // Note: ContentInfo is a SEQUENCE with 2 values, second value is
+      // the content field and is optional for a ContentInfo but required here
+      // since signers are present
+      // get ContentInfo content
+      content = msg.contentInfo.value[1];
+      // skip [0] EXPLICIT content wrapper
+      content = content.value[0];
+    }
+
+    if(!content) {
+      throw new Error(
+        'Could not sign PKCS#7 message; there is no content to sign.');
+    }
+
+    // get ContentInfo content type
+    var contentType = asn1.derToOid(msg.contentInfo.value[0].value);
+
+    // serialize content
+    var bytes = asn1.toDer(content);
+
+    // skip identifier and length per RFC 2315 9.3
+    // skip identifier (1 byte)
+    bytes.getByte();
+    // read and discard length bytes
+    asn1.getBerValueLength(bytes);
+    bytes = bytes.getBytes();
+
+    // digest content DER value bytes
+    for(var oid in mds) {
+      mds[oid].start().update(bytes);
+    }
+
+    // sign content
+    var signingTime = new Date();
+    for(var i = 0; i < msg.signers.length; ++i) {
+      var signer = msg.signers[i];
+
+      if(signer.authenticatedAttributes.length === 0) {
+        // if ContentInfo content type is not "Data", then
+        // authenticatedAttributes must be present per RFC 2315
+        if(contentType !== forge.pki.oids.data) {
+          throw new Error(
+            'Invalid signer; authenticatedAttributes must be present ' +
+            'when the ContentInfo content type is not PKCS#7 Data.');
+        }
+      } else {
+        // process authenticated attributes
+        // [0] IMPLICIT
+        signer.authenticatedAttributesAsn1 = asn1.create(
+          asn1.Class.CONTEXT_SPECIFIC, 0, true, []);
+
+        // per RFC 2315, attributes are to be digested using a SET container
+        // not the above [0] IMPLICIT container
+        var attrsAsn1 = asn1.create(
+          asn1.Class.UNIVERSAL, asn1.Type.SET, true, []);
+
+        for(var ai = 0; ai < signer.authenticatedAttributes.length; ++ai) {
+          var attr = signer.authenticatedAttributes[ai];
+          if(attr.type === forge.pki.oids.messageDigest) {
+            // use content message digest as value
+            attr.value = mds[signer.digestAlgorithm].digest();
+          } else if(attr.type === forge.pki.oids.signingTime) {
+            // auto-populate signing time if not already set
+            if(!attr.value) {
+              attr.value = signingTime;
+            }
+          }
+
+          // convert to ASN.1 and push onto Attributes SET (for signing) and
+          // onto authenticatedAttributesAsn1 to complete SignedData ASN.1
+          // TODO: optimize away duplication
+          attrsAsn1.value.push(_attributeToAsn1(attr));
+          signer.authenticatedAttributesAsn1.value.push(_attributeToAsn1(attr));
+        }
+
+        // DER-serialize and digest SET OF attributes only
+        bytes = asn1.toDer(attrsAsn1).getBytes();
+        signer.md.start().update(bytes);
+      }
+
+      // sign digest
+      signer.signature = signer.key.sign(signer.md, 'RSASSA-PKCS1-V1_5');
+    }
+
+    // add signer info
+    msg.signerInfos = _signersToAsn1(msg.signers);
+  }
+};
+
+/**
+ * Creates an empty PKCS#7 message of type EncryptedData.
+ *
+ * @return the message.
+ */
+p7.createEncryptedData = function() {
+  var msg = null;
+  msg = {
+    type: forge.pki.oids.encryptedData,
+    version: 0,
+    encryptedContent: {
+      algorithm: forge.pki.oids['aes256-CBC']
+    },
+
+    /**
+     * Reads an EncryptedData content block (in ASN.1 format)
+     *
+     * @param obj The ASN.1 representation of the EncryptedData content block
+     */
+    fromAsn1: function(obj) {
+      // Validate EncryptedData content block and capture data.
+      _fromAsn1(msg, obj, p7.asn1.encryptedDataValidator);
+    },
+
+    /**
+     * Decrypt encrypted content
+     *
+     * @param key The (symmetric) key as a byte buffer
+     */
+    decrypt: function(key) {
+      if(key !== undefined) {
+        msg.encryptedContent.key = key;
+      }
+      _decryptContent(msg);
+    }
+  };
+  return msg;
+};
+
+/**
+ * Creates an empty PKCS#7 message of type EnvelopedData.
+ *
+ * @return the message.
+ */
+p7.createEnvelopedData = function() {
+  var msg = null;
+  msg = {
+    type: forge.pki.oids.envelopedData,
+    version: 0,
+    recipients: [],
+    encryptedContent: {
+      algorithm: forge.pki.oids['aes256-CBC']
+    },
+
+    /**
+     * Reads an EnvelopedData content block (in ASN.1 format)
+     *
+     * @param obj the ASN.1 representation of the EnvelopedData content block.
+     */
+    fromAsn1: function(obj) {
+      // validate EnvelopedData content block and capture data
+      var capture = _fromAsn1(msg, obj, p7.asn1.envelopedDataValidator);
+      msg.recipients = _recipientsFromAsn1(capture.recipientInfos.value);
+    },
+
+    toAsn1: function() {
+      // ContentInfo
+      return asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+        // ContentType
+        asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
+          asn1.oidToDer(msg.type).getBytes()),
+        // [0] EnvelopedData
+        asn1.create(asn1.Class.CONTEXT_SPECIFIC, 0, true, [
+          asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+            // Version
+            asn1.create(asn1.Class.UNIVERSAL, asn1.Type.INTEGER, false,
+              asn1.integerToDer(msg.version).getBytes()),
+            // RecipientInfos
+            asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SET, true,
+              _recipientsToAsn1(msg.recipients)),
+            // EncryptedContentInfo
+            asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true,
+              _encryptedContentToAsn1(msg.encryptedContent))
+          ])
+        ])
+      ]);
+    },
+
+    /**
+     * Find recipient by X.509 certificate's issuer.
+     *
+     * @param cert the certificate with the issuer to look for.
+     *
+     * @return the recipient object.
+     */
+    findRecipient: function(cert) {
+      var sAttr = cert.issuer.attributes;
+
+      for(var i = 0; i < msg.recipients.length; ++i) {
+        var r = msg.recipients[i];
+        var rAttr = r.issuer;
+
+        if(r.serialNumber !== cert.serialNumber) {
+          continue;
+        }
+
+        if(rAttr.length !== sAttr.length) {
+          continue;
+        }
+
+        var match = true;
+        for(var j = 0; j < sAttr.length; ++j) {
+          if(rAttr[j].type !== sAttr[j].type ||
+            rAttr[j].value !== sAttr[j].value) {
+            match = false;
+            break;
+          }
+        }
+
+        if(match) {
+          return r;
+        }
+      }
+
+      return null;
+    },
+
+    /**
+     * Decrypt enveloped content
+     *
+     * @param recipient The recipient object related to the private key
+     * @param privKey The (RSA) private key object
+     */
+    decrypt: function(recipient, privKey) {
+      if(msg.encryptedContent.key === undefined && recipient !== undefined &&
+        privKey !== undefined) {
+        switch(recipient.encryptedContent.algorithm) {
+          case forge.pki.oids.rsaEncryption:
+          case forge.pki.oids.desCBC:
+            var key = privKey.decrypt(recipient.encryptedContent.content);
+            msg.encryptedContent.key = forge.util.createBuffer(key);
+            break;
+
+          default:
+            throw new Error('Unsupported asymmetric cipher, ' +
+              'OID ' + recipient.encryptedContent.algorithm);
+        }
+      }
+
+      _decryptContent(msg);
+    },
+
+    /**
+     * Add (another) entity to list of recipients.
+     *
+     * @param cert The certificate of the entity to add.
+     */
+    addRecipient: function(cert) {
+      msg.recipients.push({
+        version: 0,
+        issuer: cert.issuer.attributes,
+        serialNumber: cert.serialNumber,
+        encryptedContent: {
+          // We simply assume rsaEncryption here, since forge.pki only
+          // supports RSA so far.  If the PKI module supports other
+          // ciphers one day, we need to modify this one as well.
+          algorithm: forge.pki.oids.rsaEncryption,
+          key: cert.publicKey
+        }
+      });
+    },
+
+    /**
+     * Encrypt enveloped content.
+     *
+     * This function supports two optional arguments, cipher and key, which
+     * can be used to influence symmetric encryption.  Unless cipher is
+     * provided, the cipher specified in encryptedContent.algorithm is used
+     * (defaults to AES-256-CBC).  If no key is provided, encryptedContent.key
+     * is (re-)used.  If that one's not set, a random key will be generated
+     * automatically.
+     *
+     * @param [key] The key to be used for symmetric encryption.
+     * @param [cipher] The OID of the symmetric cipher to use.
+     */
+    encrypt: function(key, cipher) {
+      // Part 1: Symmetric encryption
+      if(msg.encryptedContent.content === undefined) {
+        cipher = cipher || msg.encryptedContent.algorithm;
+        key = key || msg.encryptedContent.key;
+
+        var keyLen, ivLen, ciphFn;
+        switch(cipher) {
+          case forge.pki.oids['aes128-CBC']:
+            keyLen = 16;
+            ivLen = 16;
+            ciphFn = forge.aes.createEncryptionCipher;
+            break;
+
+          case forge.pki.oids['aes192-CBC']:
+            keyLen = 24;
+            ivLen = 16;
+            ciphFn = forge.aes.createEncryptionCipher;
+            break;
+
+          case forge.pki.oids['aes256-CBC']:
+            keyLen = 32;
+            ivLen = 16;
+            ciphFn = forge.aes.createEncryptionCipher;
+            break;
+
+          case forge.pki.oids['des-EDE3-CBC']:
+            keyLen = 24;
+            ivLen = 8;
+            ciphFn = forge.des.createEncryptionCipher;
+            break;
+
+          default:
+            throw new Error('Unsupported symmetric cipher, OID ' + cipher);
+        }
+
+        if(key === undefined) {
+          key = forge.util.createBuffer(forge.random.getBytes(keyLen));
+        } else if(key.length() != keyLen) {
+          throw new Error('Symmetric key has wrong length; ' +
+            'got ' + key.length() + ' bytes, expected ' + keyLen + '.');
+        }
+
+        // Keep a copy of the key & IV in the object, so the caller can
+        // use it for whatever reason.
+        msg.encryptedContent.algorithm = cipher;
+        msg.encryptedContent.key = key;
+        msg.encryptedContent.parameter = forge.util.createBuffer(
+          forge.random.getBytes(ivLen));
+
+        var ciph = ciphFn(key);
+        ciph.start(msg.encryptedContent.parameter.copy());
+        ciph.update(msg.content);
+
+        // The finish function does PKCS#7 padding by default, therefore
+        // no action required by us.
+        if(!ciph.finish()) {
+          throw new Error('Symmetric encryption failed.');
+        }
+
+        msg.encryptedContent.content = ciph.output;
+      }
+
+      // Part 2: asymmetric encryption for each recipient
+      for(var i = 0; i < msg.recipients.length; ++i) {
+        var recipient = msg.recipients[i];
+
+        // Nothing to do, encryption already done.
+        if(recipient.encryptedContent.content !== undefined) {
+          continue;
+        }
+
+        switch(recipient.encryptedContent.algorithm) {
+          case forge.pki.oids.rsaEncryption:
+            recipient.encryptedContent.content =
+              recipient.encryptedContent.key.encrypt(
+                msg.encryptedContent.key.data);
+            break;
+
+          default:
+            throw new Error('Unsupported asymmetric cipher, OID ' +
+              recipient.encryptedContent.algorithm);
+        }
+      }
+    }
+  };
+  return msg;
+};
+
+/**
+ * Converts a single recipient from an ASN.1 object.
+ *
+ * @param obj the ASN.1 RecipientInfo.
+ *
+ * @return the recipient object.
+ */
+function _recipientFromAsn1(obj) {
+  // validate EnvelopedData content block and capture data
+  var capture = {};
+  var errors = [];
+  if(!asn1.validate(obj, p7.asn1.recipientInfoValidator, capture, errors)) {
+    var error = new Error('Cannot read PKCS#7 RecipientInfo. ' +
+      'ASN.1 object is not an PKCS#7 RecipientInfo.');
+    error.errors = errors;
+    throw error;
+  }
+
+  return {
+    version: capture.version.charCodeAt(0),
+    issuer: forge.pki.RDNAttributesAsArray(capture.issuer),
+    serialNumber: forge.util.createBuffer(capture.serial).toHex(),
+    encryptedContent: {
+      algorithm: asn1.derToOid(capture.encAlgorithm),
+      parameter: capture.encParameter.value,
+      content: capture.encKey
+    }
+  };
+}
+
+/**
+ * Converts a single recipient object to an ASN.1 object.
+ *
+ * @param obj the recipient object.
+ *
+ * @return the ASN.1 RecipientInfo.
+ */
+function _recipientToAsn1(obj) {
+  return asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+    // Version
+    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.INTEGER, false,
+      asn1.integerToDer(obj.version).getBytes()),
+    // IssuerAndSerialNumber
+    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+      // Name
+      forge.pki.distinguishedNameToAsn1({attributes: obj.issuer}),
+      // Serial
+      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.INTEGER, false,
+        forge.util.hexToBytes(obj.serialNumber))
+    ]),
+    // KeyEncryptionAlgorithmIdentifier
+    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+      // Algorithm
+      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
+        asn1.oidToDer(obj.encryptedContent.algorithm).getBytes()),
+      // Parameter, force NULL, only RSA supported for now.
+      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.NULL, false, '')
+    ]),
+    // EncryptedKey
+    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false,
+      obj.encryptedContent.content)
+  ]);
+}
+
+/**
+ * Map a set of RecipientInfo ASN.1 objects to recipient objects.
+ *
+ * @param infos an array of ASN.1 representations RecipientInfo (i.e. SET OF).
+ *
+ * @return an array of recipient objects.
+ */
+function _recipientsFromAsn1(infos) {
+  var ret = [];
+  for(var i = 0; i < infos.length; ++i) {
+    ret.push(_recipientFromAsn1(infos[i]));
+  }
+  return ret;
+}
+
+/**
+ * Map an array of recipient objects to ASN.1 RecipientInfo objects.
+ *
+ * @param recipients an array of recipientInfo objects.
+ *
+ * @return an array of ASN.1 RecipientInfos.
+ */
+function _recipientsToAsn1(recipients) {
+  var ret = [];
+  for(var i = 0; i < recipients.length; ++i) {
+    ret.push(_recipientToAsn1(recipients[i]));
+  }
+  return ret;
+}
+
+/**
+ * Converts a single signer from an ASN.1 object.
+ *
+ * @param obj the ASN.1 representation of a SignerInfo.
+ *
+ * @return the signer object.
+ */
+function _signerFromAsn1(obj) {
+  // validate EnvelopedData content block and capture data
+  var capture = {};
+  var errors = [];
+  if(!asn1.validate(obj, p7.asn1.signerInfoValidator, capture, errors)) {
+    var error = new Error('Cannot read PKCS#7 SignerInfo. ' +
+      'ASN.1 object is not an PKCS#7 SignerInfo.');
+    error.errors = errors;
+    throw error;
+  }
+
+  var rval = {
+    version: capture.version.charCodeAt(0),
+    issuer: forge.pki.RDNAttributesAsArray(capture.issuer),
+    serialNumber: forge.util.createBuffer(capture.serial).toHex(),
+    digestAlgorithm: asn1.derToOid(capture.digestAlgorithm),
+    signatureAlgorithm: asn1.derToOid(capture.signatureAlgorithm),
+    signature: capture.signature,
+    authenticatedAttributes: [],
+    unauthenticatedAttributes: []
+  };
+
+  // TODO: convert attributes
+  var authenticatedAttributes = capture.authenticatedAttributes || [];
+  var unauthenticatedAttributes = capture.unauthenticatedAttributes || [];
+
+  return rval;
+}
+
+/**
+ * Converts a single signerInfo object to an ASN.1 object.
+ *
+ * @param obj the signerInfo object.
+ *
+ * @return the ASN.1 representation of a SignerInfo.
+ */
+function _signerToAsn1(obj) {
+  // SignerInfo
+  var rval = asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+    // version
+    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.INTEGER, false,
+      asn1.integerToDer(obj.version).getBytes()),
+    // issuerAndSerialNumber
+    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+      // name
+      forge.pki.distinguishedNameToAsn1({attributes: obj.issuer}),
+      // serial
+      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.INTEGER, false,
+        forge.util.hexToBytes(obj.serialNumber))
+    ]),
+    // digestAlgorithm
+    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+      // algorithm
+      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
+        asn1.oidToDer(obj.digestAlgorithm).getBytes()),
+      // parameters (null)
+      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.NULL, false, '')
+    ])
+  ]);
+
+  // authenticatedAttributes (OPTIONAL)
+  if(obj.authenticatedAttributesAsn1) {
+    // add ASN.1 previously generated during signing
+    rval.value.push(obj.authenticatedAttributesAsn1);
+  }
+
+  // digestEncryptionAlgorithm
+  rval.value.push(asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+    // algorithm
+    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
+      asn1.oidToDer(obj.signatureAlgorithm).getBytes()),
+    // parameters (null)
+    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.NULL, false, '')
+  ]));
+
+  // encryptedDigest
+  rval.value.push(asn1.create(
+    asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false, obj.signature));
+
+  // unauthenticatedAttributes (OPTIONAL)
+  if(obj.unauthenticatedAttributes.length > 0) {
+    // [1] IMPLICIT
+    var attrsAsn1 = asn1.create(asn1.Class.CONTEXT_SPECIFIC, 1, true, []);
+    for(var i = 0; i < obj.unauthenticatedAttributes.length; ++i) {
+      var attr = obj.unauthenticatedAttributes[i];
+      attrsAsn1.values.push(_attributeToAsn1(attr));
+    }
+    rval.value.push(attrsAsn1);
+  }
+
+  return rval;
+}
+
+/**
+ * Map a set of SignerInfo ASN.1 objects to an array of signer objects.
+ *
+ * @param signerInfoAsn1s an array of ASN.1 SignerInfos (i.e. SET OF).
+ *
+ * @return an array of signers objects.
+ */
+function _signersFromAsn1(signerInfoAsn1s) {
+  var ret = [];
+  for(var i = 0; i < signerInfoAsn1s.length; ++i) {
+    ret.push(_signerFromAsn1(signerInfoAsn1s[i]));
+  }
+  return ret;
+}
+
+/**
+ * Map an array of signer objects to ASN.1 objects.
+ *
+ * @param signers an array of signer objects.
+ *
+ * @return an array of ASN.1 SignerInfos.
+ */
+function _signersToAsn1(signers) {
+  var ret = [];
+  for(var i = 0; i < signers.length; ++i) {
+    ret.push(_signerToAsn1(signers[i]));
+  }
+  return ret;
+}
+
+/**
+ * Convert an attribute object to an ASN.1 Attribute.
+ *
+ * @param attr the attribute object.
+ *
+ * @return the ASN.1 Attribute.
+ */
+function _attributeToAsn1(attr) {
+  var value;
+
+  // TODO: generalize to support more attributes
+  if(attr.type === forge.pki.oids.contentType) {
+    value = asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
+      asn1.oidToDer(attr.value).getBytes());
+  } else if(attr.type === forge.pki.oids.messageDigest) {
+    value = asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false,
+      attr.value.bytes());
+  } else if(attr.type === forge.pki.oids.signingTime) {
+    /* Note per RFC 2985: Dates between 1 January 1950 and 31 December 2049
+      (inclusive) MUST be encoded as UTCTime. Any dates with year values
+      before 1950 or after 2049 MUST be encoded as GeneralizedTime. [Further,]
+      UTCTime values MUST be expressed in Greenwich Mean Time (Zulu) and MUST
+      include seconds (i.e., times are YYMMDDHHMMSSZ), even where the
+      number of seconds is zero.  Midnight (GMT) must be represented as
+      "YYMMDD000000Z". */
+    // TODO: make these module-level constants
+    var jan_1_1950 = new Date('1950-01-01T00:00:00Z');
+    var jan_1_2050 = new Date('2050-01-01T00:00:00Z');
+    var date = attr.value;
+    if(typeof date === 'string') {
+      // try to parse date
+      var timestamp = Date.parse(date);
+      if(!isNaN(timestamp)) {
+        date = new Date(timestamp);
+      } else if(date.length === 13) {
+        // YYMMDDHHMMSSZ (13 chars for UTCTime)
+        date = asn1.utcTimeToDate(date);
+      } else {
+        // assume generalized time
+        date = asn1.generalizedTimeToDate(date);
+      }
+    }
+
+    if(date >= jan_1_1950 && date < jan_1_2050) {
+      value = asn1.create(
+        asn1.Class.UNIVERSAL, asn1.Type.UTCTIME, false,
+        asn1.dateToUtcTime(date));
+    } else {
+      value = asn1.create(
+        asn1.Class.UNIVERSAL, asn1.Type.GENERALIZEDTIME, false,
+        asn1.dateToGeneralizedTime(date));
+    }
+  }
+
+  // TODO: expose as common API call
+  // create a RelativeDistinguishedName set
+  // each value in the set is an AttributeTypeAndValue first
+  // containing the type (an OID) and second the value
+  return asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+    // AttributeType
+    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
+      asn1.oidToDer(attr.type).getBytes()),
+    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SET, true, [
+      // AttributeValue
+      value
+    ])
+  ]);
+}
+
+/**
+ * Map messages encrypted content to ASN.1 objects.
+ *
+ * @param ec The encryptedContent object of the message.
+ *
+ * @return ASN.1 representation of the encryptedContent object (SEQUENCE).
+ */
+function _encryptedContentToAsn1(ec) {
+  return [
+    // ContentType, always Data for the moment
+    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
+      asn1.oidToDer(forge.pki.oids.data).getBytes()),
+    // ContentEncryptionAlgorithmIdentifier
+    asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+      // Algorithm
+      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false,
+        asn1.oidToDer(ec.algorithm).getBytes()),
+      // Parameters (IV)
+      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false,
+        ec.parameter.getBytes())
+    ]),
+    // [0] EncryptedContent
+    asn1.create(asn1.Class.CONTEXT_SPECIFIC, 0, true, [
+      asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false,
+        ec.content.getBytes())
+    ])
+  ];
+}
+
+/**
+ * Reads the "common part" of an PKCS#7 content block (in ASN.1 format)
+ *
+ * This function reads the "common part" of the PKCS#7 content blocks
+ * EncryptedData and EnvelopedData, i.e. version number and symmetrically
+ * encrypted content block.
+ *
+ * The result of the ASN.1 validate and capture process is returned
+ * to allow the caller to extract further data, e.g. the list of recipients
+ * in case of a EnvelopedData object.
+ *
+ * @param msg the PKCS#7 object to read the data to.
+ * @param obj the ASN.1 representation of the content block.
+ * @param validator the ASN.1 structure validator object to use.
+ *
+ * @return the value map captured by validator object.
+ */
+function _fromAsn1(msg, obj, validator) {
+  var capture = {};
+  var errors = [];
+  if(!asn1.validate(obj, validator, capture, errors)) {
+    var error = new Error('Cannot read PKCS#7 message. ' +
+      'ASN.1 object is not a supported PKCS#7 message.');
+    error.errors = error;
+    throw error;
+  }
+
+  // Check contentType, so far we only support (raw) Data.
+  var contentType = asn1.derToOid(capture.contentType);
+  if(contentType !== forge.pki.oids.data) {
+    throw new Error('Unsupported PKCS#7 message. ' +
+      'Only wrapped ContentType Data supported.');
+  }
+
+  if(capture.encryptedContent) {
+    var content = '';
+    if(forge.util.isArray(capture.encryptedContent)) {
+      for(var i = 0; i < capture.encryptedContent.length; ++i) {
+        if(capture.encryptedContent[i].type !== asn1.Type.OCTETSTRING) {
+          throw new Error('Malformed PKCS#7 message, expecting encrypted ' +
+            'content constructed of only OCTET STRING objects.');
+        }
+        content += capture.encryptedContent[i].value;
+      }
+    } else {
+      content = capture.encryptedContent;
+    }
+    msg.encryptedContent = {
+      algorithm: asn1.derToOid(capture.encAlgorithm),
+      parameter: forge.util.createBuffer(capture.encParameter.value),
+      content: forge.util.createBuffer(content)
+    };
+  }
+
+  if(capture.content) {
+    var content = '';
+    if(forge.util.isArray(capture.content)) {
+      for(var i = 0; i < capture.content.length; ++i) {
+        if(capture.content[i].type !== asn1.Type.OCTETSTRING) {
+          throw new Error('Malformed PKCS#7 message, expecting ' +
+            'content constructed of only OCTET STRING objects.');
+        }
+        content += capture.content[i].value;
+      }
+    } else {
+      content = capture.content;
+    }
+    msg.content = forge.util.createBuffer(content);
+  }
+
+  msg.version = capture.version.charCodeAt(0);
+  msg.rawCapture = capture;
+
+  return capture;
+}
+
+/**
+ * Decrypt the symmetrically encrypted content block of the PKCS#7 message.
+ *
+ * Decryption is skipped in case the PKCS#7 message object already has a
+ * (decrypted) content attribute.  The algorithm, key and cipher parameters
+ * (probably the iv) are taken from the encryptedContent attribute of the
+ * message object.
+ *
+ * @param The PKCS#7 message object.
+ */
+function _decryptContent(msg) {
+  if(msg.encryptedContent.key === undefined) {
+    throw new Error('Symmetric key not available.');
+  }
+
+  if(msg.content === undefined) {
+    var ciph;
+
+    switch(msg.encryptedContent.algorithm) {
+      case forge.pki.oids['aes128-CBC']:
+      case forge.pki.oids['aes192-CBC']:
+      case forge.pki.oids['aes256-CBC']:
+        ciph = forge.aes.createDecryptionCipher(msg.encryptedContent.key);
+        break;
+
+      case forge.pki.oids['desCBC']:
+      case forge.pki.oids['des-EDE3-CBC']:
+        ciph = forge.des.createDecryptionCipher(msg.encryptedContent.key);
+        break;
+
+      default:
+        throw new Error('Unsupported symmetric cipher, OID ' +
+          msg.encryptedContent.algorithm);
+    }
+    ciph.start(msg.encryptedContent.parameter);
+    ciph.update(msg.encryptedContent.content);
+
+    if(!ciph.finish()) {
+      throw new Error('Symmetric decryption failed.');
+    }
+
+    msg.content = ciph.output;
+  }
+}
+
+
+/***/ }),
 /* 678 */,
 /* 679 */,
 /* 680 */
@@ -82752,7 +87404,7 @@ var _BlankLine = _interopRequireDefault(__webpack_require__(487));
 
 var _CollectionItem = _interopRequireDefault(__webpack_require__(420));
 
-var _Comment = _interopRequireDefault(__webpack_require__(73));
+var _Comment = _interopRequireDefault(__webpack_require__(697));
 
 var _Node = _interopRequireDefault(__webpack_require__(898));
 
@@ -83012,7 +87664,431 @@ exports.default = Collection;
 
 /***/ }),
 /* 682 */,
-/* 683 */,
+/* 683 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+/**
+ * A javascript implementation of a cryptographically-secure
+ * Pseudo Random Number Generator (PRNG). The Fortuna algorithm is followed
+ * here though the use of SHA-256 is not enforced; when generating an
+ * a PRNG context, the hashing algorithm and block cipher used for
+ * the generator are specified via a plugin.
+ *
+ * @author Dave Longley
+ *
+ * Copyright (c) 2010-2014 Digital Bazaar, Inc.
+ */
+var forge = __webpack_require__(45);
+__webpack_require__(294);
+
+var _crypto = null;
+if(forge.util.isNodejs && !forge.options.usePureJavaScript &&
+  !process.versions['node-webkit']) {
+  _crypto = __webpack_require__(373);
+}
+
+/* PRNG API */
+var prng = module.exports = forge.prng = forge.prng || {};
+
+/**
+ * Creates a new PRNG context.
+ *
+ * A PRNG plugin must be passed in that will provide:
+ *
+ * 1. A function that initializes the key and seed of a PRNG context. It
+ *   will be given a 16 byte key and a 16 byte seed. Any key expansion
+ *   or transformation of the seed from a byte string into an array of
+ *   integers (or similar) should be performed.
+ * 2. The cryptographic function used by the generator. It takes a key and
+ *   a seed.
+ * 3. A seed increment function. It takes the seed and returns seed + 1.
+ * 4. An api to create a message digest.
+ *
+ * For an example, see random.js.
+ *
+ * @param plugin the PRNG plugin to use.
+ */
+prng.create = function(plugin) {
+  var ctx = {
+    plugin: plugin,
+    key: null,
+    seed: null,
+    time: null,
+    // number of reseeds so far
+    reseeds: 0,
+    // amount of data generated so far
+    generated: 0,
+    // no initial key bytes
+    keyBytes: ''
+  };
+
+  // create 32 entropy pools (each is a message digest)
+  var md = plugin.md;
+  var pools = new Array(32);
+  for(var i = 0; i < 32; ++i) {
+    pools[i] = md.create();
+  }
+  ctx.pools = pools;
+
+  // entropy pools are written to cyclically, starting at index 0
+  ctx.pool = 0;
+
+  /**
+   * Generates random bytes. The bytes may be generated synchronously or
+   * asynchronously. Web workers must use the asynchronous interface or
+   * else the behavior is undefined.
+   *
+   * @param count the number of random bytes to generate.
+   * @param [callback(err, bytes)] called once the operation completes.
+   *
+   * @return count random bytes as a string.
+   */
+  ctx.generate = function(count, callback) {
+    // do synchronously
+    if(!callback) {
+      return ctx.generateSync(count);
+    }
+
+    // simple generator using counter-based CBC
+    var cipher = ctx.plugin.cipher;
+    var increment = ctx.plugin.increment;
+    var formatKey = ctx.plugin.formatKey;
+    var formatSeed = ctx.plugin.formatSeed;
+    var b = forge.util.createBuffer();
+
+    // paranoid deviation from Fortuna:
+    // reset key for every request to protect previously
+    // generated random bytes should the key be discovered;
+    // there is no 100ms based reseeding because of this
+    // forced reseed for every `generate` call
+    ctx.key = null;
+
+    generate();
+
+    function generate(err) {
+      if(err) {
+        return callback(err);
+      }
+
+      // sufficient bytes generated
+      if(b.length() >= count) {
+        return callback(null, b.getBytes(count));
+      }
+
+      // if amount of data generated is greater than 1 MiB, trigger reseed
+      if(ctx.generated > 0xfffff) {
+        ctx.key = null;
+      }
+
+      if(ctx.key === null) {
+        // prevent stack overflow
+        return forge.util.nextTick(function() {
+          _reseed(generate);
+        });
+      }
+
+      // generate the random bytes
+      var bytes = cipher(ctx.key, ctx.seed);
+      ctx.generated += bytes.length;
+      b.putBytes(bytes);
+
+      // generate bytes for a new key and seed
+      ctx.key = formatKey(cipher(ctx.key, increment(ctx.seed)));
+      ctx.seed = formatSeed(cipher(ctx.key, ctx.seed));
+
+      forge.util.setImmediate(generate);
+    }
+  };
+
+  /**
+   * Generates random bytes synchronously.
+   *
+   * @param count the number of random bytes to generate.
+   *
+   * @return count random bytes as a string.
+   */
+  ctx.generateSync = function(count) {
+    // simple generator using counter-based CBC
+    var cipher = ctx.plugin.cipher;
+    var increment = ctx.plugin.increment;
+    var formatKey = ctx.plugin.formatKey;
+    var formatSeed = ctx.plugin.formatSeed;
+
+    // paranoid deviation from Fortuna:
+    // reset key for every request to protect previously
+    // generated random bytes should the key be discovered;
+    // there is no 100ms based reseeding because of this
+    // forced reseed for every `generateSync` call
+    ctx.key = null;
+
+    var b = forge.util.createBuffer();
+    while(b.length() < count) {
+      // if amount of data generated is greater than 1 MiB, trigger reseed
+      if(ctx.generated > 0xfffff) {
+        ctx.key = null;
+      }
+
+      if(ctx.key === null) {
+        _reseedSync();
+      }
+
+      // generate the random bytes
+      var bytes = cipher(ctx.key, ctx.seed);
+      ctx.generated += bytes.length;
+      b.putBytes(bytes);
+
+      // generate bytes for a new key and seed
+      ctx.key = formatKey(cipher(ctx.key, increment(ctx.seed)));
+      ctx.seed = formatSeed(cipher(ctx.key, ctx.seed));
+    }
+
+    return b.getBytes(count);
+  };
+
+  /**
+   * Private function that asynchronously reseeds a generator.
+   *
+   * @param callback(err) called once the operation completes.
+   */
+  function _reseed(callback) {
+    if(ctx.pools[0].messageLength >= 32) {
+      _seed();
+      return callback();
+    }
+    // not enough seed data...
+    var needed = (32 - ctx.pools[0].messageLength) << 5;
+    ctx.seedFile(needed, function(err, bytes) {
+      if(err) {
+        return callback(err);
+      }
+      ctx.collect(bytes);
+      _seed();
+      callback();
+    });
+  }
+
+  /**
+   * Private function that synchronously reseeds a generator.
+   */
+  function _reseedSync() {
+    if(ctx.pools[0].messageLength >= 32) {
+      return _seed();
+    }
+    // not enough seed data...
+    var needed = (32 - ctx.pools[0].messageLength) << 5;
+    ctx.collect(ctx.seedFileSync(needed));
+    _seed();
+  }
+
+  /**
+   * Private function that seeds a generator once enough bytes are available.
+   */
+  function _seed() {
+    // update reseed count
+    ctx.reseeds = (ctx.reseeds === 0xffffffff) ? 0 : ctx.reseeds + 1;
+
+    // goal is to update `key` via:
+    // key = hash(key + s)
+    //   where 's' is all collected entropy from selected pools, then...
+
+    // create a plugin-based message digest
+    var md = ctx.plugin.md.create();
+
+    // consume current key bytes
+    md.update(ctx.keyBytes);
+
+    // digest the entropy of pools whose index k meet the
+    // condition 'n mod 2^k == 0' where n is the number of reseeds
+    var _2powK = 1;
+    for(var k = 0; k < 32; ++k) {
+      if(ctx.reseeds % _2powK === 0) {
+        md.update(ctx.pools[k].digest().getBytes());
+        ctx.pools[k].start();
+      }
+      _2powK = _2powK << 1;
+    }
+
+    // get digest for key bytes
+    ctx.keyBytes = md.digest().getBytes();
+
+    // paranoid deviation from Fortuna:
+    // update `seed` via `seed = hash(key)`
+    // instead of initializing to zero once and only
+    // ever incrementing it
+    md.start();
+    md.update(ctx.keyBytes);
+    var seedBytes = md.digest().getBytes();
+
+    // update state
+    ctx.key = ctx.plugin.formatKey(ctx.keyBytes);
+    ctx.seed = ctx.plugin.formatSeed(seedBytes);
+    ctx.generated = 0;
+  }
+
+  /**
+   * The built-in default seedFile. This seedFile is used when entropy
+   * is needed immediately.
+   *
+   * @param needed the number of bytes that are needed.
+   *
+   * @return the random bytes.
+   */
+  function defaultSeedFile(needed) {
+    // use window.crypto.getRandomValues strong source of entropy if available
+    var getRandomValues = null;
+    var globalScope = forge.util.globalScope;
+    var _crypto = globalScope.crypto || globalScope.msCrypto;
+    if(_crypto && _crypto.getRandomValues) {
+      getRandomValues = function(arr) {
+        return _crypto.getRandomValues(arr);
+      };
+    }
+
+    var b = forge.util.createBuffer();
+    if(getRandomValues) {
+      while(b.length() < needed) {
+        // max byte length is 65536 before QuotaExceededError is thrown
+        // http://www.w3.org/TR/WebCryptoAPI/#RandomSource-method-getRandomValues
+        var count = Math.max(1, Math.min(needed - b.length(), 65536) / 4);
+        var entropy = new Uint32Array(Math.floor(count));
+        try {
+          getRandomValues(entropy);
+          for(var i = 0; i < entropy.length; ++i) {
+            b.putInt32(entropy[i]);
+          }
+        } catch(e) {
+          /* only ignore QuotaExceededError */
+          if(!(typeof QuotaExceededError !== 'undefined' &&
+            e instanceof QuotaExceededError)) {
+            throw e;
+          }
+        }
+      }
+    }
+
+    // be sad and add some weak random data
+    if(b.length() < needed) {
+      /* Draws from Park-Miller "minimal standard" 31 bit PRNG,
+      implemented with David G. Carta's optimization: with 32 bit math
+      and without division (Public Domain). */
+      var hi, lo, next;
+      var seed = Math.floor(Math.random() * 0x010000);
+      while(b.length() < needed) {
+        lo = 16807 * (seed & 0xFFFF);
+        hi = 16807 * (seed >> 16);
+        lo += (hi & 0x7FFF) << 16;
+        lo += hi >> 15;
+        lo = (lo & 0x7FFFFFFF) + (lo >> 31);
+        seed = lo & 0xFFFFFFFF;
+
+        // consume lower 3 bytes of seed
+        for(var i = 0; i < 3; ++i) {
+          // throw in more pseudo random
+          next = seed >>> (i << 3);
+          next ^= Math.floor(Math.random() * 0x0100);
+          b.putByte(String.fromCharCode(next & 0xFF));
+        }
+      }
+    }
+
+    return b.getBytes(needed);
+  }
+  // initialize seed file APIs
+  if(_crypto) {
+    // use nodejs async API
+    ctx.seedFile = function(needed, callback) {
+      _crypto.randomBytes(needed, function(err, bytes) {
+        if(err) {
+          return callback(err);
+        }
+        callback(null, bytes.toString());
+      });
+    };
+    // use nodejs sync API
+    ctx.seedFileSync = function(needed) {
+      return _crypto.randomBytes(needed).toString();
+    };
+  } else {
+    ctx.seedFile = function(needed, callback) {
+      try {
+        callback(null, defaultSeedFile(needed));
+      } catch(e) {
+        callback(e);
+      }
+    };
+    ctx.seedFileSync = defaultSeedFile;
+  }
+
+  /**
+   * Adds entropy to a prng ctx's accumulator.
+   *
+   * @param bytes the bytes of entropy as a string.
+   */
+  ctx.collect = function(bytes) {
+    // iterate over pools distributing entropy cyclically
+    var count = bytes.length;
+    for(var i = 0; i < count; ++i) {
+      ctx.pools[ctx.pool].update(bytes.substr(i, 1));
+      ctx.pool = (ctx.pool === 31) ? 0 : ctx.pool + 1;
+    }
+  };
+
+  /**
+   * Collects an integer of n bits.
+   *
+   * @param i the integer entropy.
+   * @param n the number of bits in the integer.
+   */
+  ctx.collectInt = function(i, n) {
+    var bytes = '';
+    for(var x = 0; x < n; x += 8) {
+      bytes += String.fromCharCode((i >> x) & 0xFF);
+    }
+    ctx.collect(bytes);
+  };
+
+  /**
+   * Registers a Web Worker to receive immediate entropy from the main thread.
+   * This method is required until Web Workers can access the native crypto
+   * API. This method should be called twice for each created worker, once in
+   * the main thread, and once in the worker itself.
+   *
+   * @param worker the worker to register.
+   */
+  ctx.registerWorker = function(worker) {
+    // worker receives random bytes
+    if(worker === self) {
+      ctx.seedFile = function(needed, callback) {
+        function listener(e) {
+          var data = e.data;
+          if(data.forge && data.forge.prng) {
+            self.removeEventListener('message', listener);
+            callback(data.forge.prng.err, data.forge.prng.bytes);
+          }
+        }
+        self.addEventListener('message', listener);
+        self.postMessage({forge: {prng: {needed: needed}}});
+      };
+    } else {
+      // main thread sends random bytes upon request
+      var listener = function(e) {
+        var data = e.data;
+        if(data.forge && data.forge.prng) {
+          ctx.seedFile(data.forge.prng.needed, function(err, bytes) {
+            worker.postMessage({forge: {prng: {err: err, bytes: bytes}}});
+          });
+        }
+      };
+      // TODO: do we need to remove the event listener when the worker dies?
+      worker.addEventListener('message', listener);
+    }
+  };
+
+  return ctx;
+};
+
+
+/***/ }),
 /* 684 */,
 /* 685 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -83037,7 +88113,43 @@ var _default = [_map.default, _seq.default, _string.default];
 exports.default = _default;
 
 /***/ }),
-/* 686 */,
+/* 686 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const async_1 = __webpack_require__(668);
+class AsyncProvider {
+    constructor(_root, _settings) {
+        this._root = _root;
+        this._settings = _settings;
+        this._reader = new async_1.default(this._root, this._settings);
+        this._storage = new Set();
+    }
+    read(callback) {
+        this._reader.onError((error) => {
+            callFailureCallback(callback, error);
+        });
+        this._reader.onEntry((entry) => {
+            this._storage.add(entry);
+        });
+        this._reader.onEnd(() => {
+            callSuccessCallback(callback, [...this._storage]);
+        });
+        this._reader.read();
+    }
+}
+exports.default = AsyncProvider;
+function callFailureCallback(callback, error) {
+    callback(error);
+}
+function callSuccessCallback(callback, entries) {
+    callback(null, entries);
+}
+
+
+/***/ }),
 /* 687 */,
 /* 688 */,
 /* 689 */
@@ -83063,7 +88175,7 @@ function getDefaultAdapter() {
   var adapter;
   if (typeof XMLHttpRequest !== 'undefined') {
     // For browsers use XHR adapter
-    adapter = __webpack_require__(134);
+    adapter = __webpack_require__(966);
   } else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') {
     // For node use HTTP adapter
     adapter = __webpack_require__(609);
@@ -83851,107 +88963,35 @@ exports.default = void 0;
 
 var _constants = __webpack_require__(720);
 
-var _errors = __webpack_require__(297);
+var _Node = _interopRequireDefault(__webpack_require__(898));
 
-var _toJSON = _interopRequireDefault(__webpack_require__(372));
-
-var _Collection = _interopRequireDefault(__webpack_require__(235));
-
-var _Node = _interopRequireDefault(__webpack_require__(590));
-
-var _Pair = _interopRequireDefault(__webpack_require__(308));
+var _Range = _interopRequireDefault(__webpack_require__(853));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-const getAliasCount = (node, anchors) => {
-  if (node instanceof Alias) {
-    const anchor = anchors.find(a => a.node === node.source);
-    return anchor.count * anchor.aliasCount;
-  } else if (node instanceof _Collection.default) {
-    let count = 0;
-
-    for (const item of node.items) {
-      const c = getAliasCount(item, anchors);
-      if (c > count) count = c;
-    }
-
-    return count;
-  } else if (node instanceof _Pair.default) {
-    const kc = getAliasCount(node.key, anchors);
-    const vc = getAliasCount(node.value, anchors);
-    return Math.max(kc, vc);
+class Comment extends _Node.default {
+  constructor() {
+    super(_constants.Type.COMMENT);
   }
-
-  return 1;
-};
-
-class Alias extends _Node.default {
-  static stringify({
-    range,
-    source
-  }, {
-    anchors,
-    doc,
-    implicitKey,
-    inStringifyKey
-  }) {
-    let anchor = Object.keys(anchors).find(a => anchors[a] === source);
-    if (!anchor && inStringifyKey) anchor = doc.anchors.getName(source) || doc.anchors.newName();
-    if (anchor) return `*${anchor}${implicitKey ? ' ' : ''}`;
-    const msg = doc.anchors.getName(source) ? 'Alias node must be after source node' : 'Source node not found for alias node';
-    throw new Error(`${msg} [${range}]`);
-  }
-
-  constructor(source) {
-    super();
-    this.source = source;
-    this.type = _constants.Type.ALIAS;
-  }
-
-  set tag(t) {
-    throw new Error('Alias nodes cannot have tags');
-  }
-
-  toJSON(arg, ctx) {
-    if (!ctx) return (0, _toJSON.default)(this.source, arg, ctx);
-    const {
-      anchors,
-      maxAliasCount
-    } = ctx;
-    const anchor = anchors.find(a => a.node === this.source);
-    /* istanbul ignore if */
-
-    if (!anchor || anchor.res === undefined) {
-      const msg = 'This should not happen: Alias anchor was not resolved?';
-      if (this.cstNode) throw new _errors.YAMLReferenceError(this.cstNode, msg);else throw new ReferenceError(msg);
-    }
-
-    if (maxAliasCount >= 0) {
-      anchor.count += 1;
-      if (anchor.aliasCount === 0) anchor.aliasCount = getAliasCount(this.source, anchors);
-
-      if (anchor.count * anchor.aliasCount > maxAliasCount) {
-        const msg = 'Excessive alias count indicates a resource exhaustion attack';
-        if (this.cstNode) throw new _errors.YAMLReferenceError(this.cstNode, msg);else throw new ReferenceError(msg);
-      }
-    }
-
-    return anchor.res;
-  } // Only called when stringifying an alias mapping key while constructing
-  // Object output.
+  /**
+   * Parses a comment line from the source
+   *
+   * @param {ParseContext} context
+   * @param {number} start - Index of first character
+   * @returns {number} - Index of the character after this scalar
+   */
 
 
-  toString(ctx) {
-    return Alias.stringify(this, ctx);
+  parse(context, start) {
+    this.context = context;
+    const offset = this.parseComment(start);
+    this.range = new _Range.default(start, offset);
+    return offset;
   }
 
 }
 
-exports.default = Alias;
-
-_defineProperty(Alias, "default", true);
+exports.default = Comment;
 
 /***/ }),
 /* 698 */,
@@ -86676,7 +91716,7 @@ nacl.setPRNG = function(fn) {
     });
   } else if (true) {
     // Node.js.
-    crypto = __webpack_require__(417);
+    crypto = __webpack_require__(373);
     if (crypto && crypto.randomBytes) {
       nacl.setPRNG(function(x, n) {
         var i, v = crypto.randomBytes(n);
@@ -86712,11 +91752,11 @@ var _errors = __webpack_require__(297);
 
 var _stringify = __webpack_require__(827);
 
-var _tags = __webpack_require__(633);
+var _tags = __webpack_require__(776);
 
 var _string = __webpack_require__(175);
 
-var _Alias = _interopRequireDefault(__webpack_require__(697));
+var _Alias = _interopRequireDefault(__webpack_require__(358));
 
 var _Collection = _interopRequireDefault(__webpack_require__(235));
 
@@ -87014,7 +92054,74 @@ _defineProperty(Schema, "defaultTags", {
 });
 
 /***/ }),
-/* 705 */,
+/* 705 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* eslint-disable node/no-deprecated-api */
+var buffer = __webpack_require__(293)
+var Buffer = buffer.Buffer
+
+// alternative to using Object.keys for old browsers
+function copyProps (src, dst) {
+  for (var key in src) {
+    dst[key] = src[key]
+  }
+}
+if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
+  module.exports = buffer
+} else {
+  // Copy properties from require('buffer')
+  copyProps(buffer, exports)
+  exports.Buffer = SafeBuffer
+}
+
+function SafeBuffer (arg, encodingOrOffset, length) {
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+// Copy static methods from Buffer
+copyProps(Buffer, SafeBuffer)
+
+SafeBuffer.from = function (arg, encodingOrOffset, length) {
+  if (typeof arg === 'number') {
+    throw new TypeError('Argument must not be a number')
+  }
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+SafeBuffer.alloc = function (size, fill, encoding) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  var buf = Buffer(size)
+  if (fill !== undefined) {
+    if (typeof encoding === 'string') {
+      buf.fill(fill, encoding)
+    } else {
+      buf.fill(fill)
+    }
+  } else {
+    buf.fill(0)
+  }
+  return buf
+}
+
+SafeBuffer.allocUnsafe = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return Buffer(size)
+}
+
+SafeBuffer.allocUnsafeSlow = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return buffer.SlowBuffer(size)
+}
+
+
+/***/ }),
 /* 706 */,
 /* 707 */
 /***/ (function(module) {
@@ -87042,7 +92149,7 @@ var qs = __webpack_require__(949)
 var caseless = __webpack_require__(500)
 var uuid = __webpack_require__(610)
 var oauth = __webpack_require__(11)
-var crypto = __webpack_require__(417)
+var crypto = __webpack_require__(373)
 var Buffer = __webpack_require__(225).Buffer
 
 function OAuth (request) {
@@ -87198,7 +92305,7 @@ exports.OAuth = OAuth
  *
  * Copyright (c) 2010-2012 Digital Bazaar, Inc. All rights reserved.
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(891);
 __webpack_require__(294);
 
@@ -87451,7 +92558,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.stringifyNumber = stringifyNumber;
 exports.stringifyString = stringifyString;
 
-var _addComment = __webpack_require__(289);
+var _addComment = __webpack_require__(823);
 
 var _constants = __webpack_require__(460);
 
@@ -88375,7 +93482,7 @@ function escapeJsonPtr(str) {
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-var psl = __webpack_require__(33);
+var psl = __webpack_require__(40);
 
 function getPublicSuffix(domain) {
   return psl.get(domain);
@@ -88573,31 +93680,62 @@ module.exports = function enhanceError(error, config, code, request, response) {
 /* 730 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+/**
+ * Javascript implementation of mask generation function MGF1.
+ *
+ * @author Stefan Siegl
+ * @author Dave Longley
+ *
+ * Copyright (c) 2012 Stefan Siegl <stesie@brokenpipe.de>
+ * Copyright (c) 2014 Digital Bazaar, Inc.
+ */
+var forge = __webpack_require__(45);
+__webpack_require__(294);
 
-
-var createError = __webpack_require__(932);
+forge.mgf = forge.mgf || {};
+var mgf1 = module.exports = forge.mgf.mgf1 = forge.mgf1 = forge.mgf1 || {};
 
 /**
- * Resolve or reject a Promise based on response status.
+ * Creates a MGF1 mask generation function object.
  *
- * @param {Function} resolve A function that resolves the promise.
- * @param {Function} reject A function that rejects the promise.
- * @param {object} response The response.
+ * @param md the message digest API to use (eg: forge.md.sha1.create()).
+ *
+ * @return a mask generation function object.
  */
-module.exports = function settle(resolve, reject, response) {
-  var validateStatus = response.config.validateStatus;
-  if (!validateStatus || validateStatus(response.status)) {
-    resolve(response);
-  } else {
-    reject(createError(
-      'Request failed with status code ' + response.status,
-      response.config,
-      null,
-      response.request,
-      response
-    ));
-  }
+mgf1.create = function(md) {
+  var mgf = {
+    /**
+     * Generate mask of specified length.
+     *
+     * @param {String} seed The seed for mask generation.
+     * @param maskLen Number of bytes to generate.
+     * @return {String} The generated mask.
+     */
+    generate: function(seed, maskLen) {
+      /* 2. Let T be the empty octet string. */
+      var t = new forge.util.ByteBuffer();
+
+      /* 3. For counter from 0 to ceil(maskLen / hLen), do the following: */
+      var len = Math.ceil(maskLen / md.digestLength);
+      for(var i = 0; i < len; i++) {
+        /* a. Convert counter to an octet string C of length 4 octets */
+        var c = new forge.util.ByteBuffer();
+        c.putInt32(i);
+
+        /* b. Concatenate the hash of the seed mgfSeed and C to the octet
+         * string T: */
+        md.start();
+        md.update(seed + c.getBytes());
+        t.putBuffer(md.digest());
+      }
+
+      /* Output the leading maskLen octets of T as the octet string mask. */
+      t.truncate(t.length() - maskLen);
+      return t.getBytes();
+    }
+  };
+
+  return mgf;
 };
 
 
@@ -88731,7 +93869,165 @@ exports.GaxiosError = GaxiosError;
 /***/ }),
 /* 733 */,
 /* 734 */,
-/* 735 */,
+/* 735 */
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+
+exports.byteLength = byteLength
+exports.toByteArray = toByteArray
+exports.fromByteArray = fromByteArray
+
+var lookup = []
+var revLookup = []
+var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array
+
+var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+for (var i = 0, len = code.length; i < len; ++i) {
+  lookup[i] = code[i]
+  revLookup[code.charCodeAt(i)] = i
+}
+
+// Support decoding URL-safe base64 strings, as Node.js does.
+// See: https://en.wikipedia.org/wiki/Base64#URL_applications
+revLookup['-'.charCodeAt(0)] = 62
+revLookup['_'.charCodeAt(0)] = 63
+
+function getLens (b64) {
+  var len = b64.length
+
+  if (len % 4 > 0) {
+    throw new Error('Invalid string. Length must be a multiple of 4')
+  }
+
+  // Trim off extra bytes after placeholder bytes are found
+  // See: https://github.com/beatgammit/base64-js/issues/42
+  var validLen = b64.indexOf('=')
+  if (validLen === -1) validLen = len
+
+  var placeHoldersLen = validLen === len
+    ? 0
+    : 4 - (validLen % 4)
+
+  return [validLen, placeHoldersLen]
+}
+
+// base64 is 4/3 + up to two characters of the original data
+function byteLength (b64) {
+  var lens = getLens(b64)
+  var validLen = lens[0]
+  var placeHoldersLen = lens[1]
+  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
+}
+
+function _byteLength (b64, validLen, placeHoldersLen) {
+  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
+}
+
+function toByteArray (b64) {
+  var tmp
+  var lens = getLens(b64)
+  var validLen = lens[0]
+  var placeHoldersLen = lens[1]
+
+  var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen))
+
+  var curByte = 0
+
+  // if there are placeholders, only get up to the last complete 4 chars
+  var len = placeHoldersLen > 0
+    ? validLen - 4
+    : validLen
+
+  var i
+  for (i = 0; i < len; i += 4) {
+    tmp =
+      (revLookup[b64.charCodeAt(i)] << 18) |
+      (revLookup[b64.charCodeAt(i + 1)] << 12) |
+      (revLookup[b64.charCodeAt(i + 2)] << 6) |
+      revLookup[b64.charCodeAt(i + 3)]
+    arr[curByte++] = (tmp >> 16) & 0xFF
+    arr[curByte++] = (tmp >> 8) & 0xFF
+    arr[curByte++] = tmp & 0xFF
+  }
+
+  if (placeHoldersLen === 2) {
+    tmp =
+      (revLookup[b64.charCodeAt(i)] << 2) |
+      (revLookup[b64.charCodeAt(i + 1)] >> 4)
+    arr[curByte++] = tmp & 0xFF
+  }
+
+  if (placeHoldersLen === 1) {
+    tmp =
+      (revLookup[b64.charCodeAt(i)] << 10) |
+      (revLookup[b64.charCodeAt(i + 1)] << 4) |
+      (revLookup[b64.charCodeAt(i + 2)] >> 2)
+    arr[curByte++] = (tmp >> 8) & 0xFF
+    arr[curByte++] = tmp & 0xFF
+  }
+
+  return arr
+}
+
+function tripletToBase64 (num) {
+  return lookup[num >> 18 & 0x3F] +
+    lookup[num >> 12 & 0x3F] +
+    lookup[num >> 6 & 0x3F] +
+    lookup[num & 0x3F]
+}
+
+function encodeChunk (uint8, start, end) {
+  var tmp
+  var output = []
+  for (var i = start; i < end; i += 3) {
+    tmp =
+      ((uint8[i] << 16) & 0xFF0000) +
+      ((uint8[i + 1] << 8) & 0xFF00) +
+      (uint8[i + 2] & 0xFF)
+    output.push(tripletToBase64(tmp))
+  }
+  return output.join('')
+}
+
+function fromByteArray (uint8) {
+  var tmp
+  var len = uint8.length
+  var extraBytes = len % 3 // if we have 1 byte left, pad 2 bytes
+  var parts = []
+  var maxChunkLength = 16383 // must be multiple of 3
+
+  // go through the array every three bytes, we'll deal with trailing stuff later
+  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
+    parts.push(encodeChunk(
+      uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)
+    ))
+  }
+
+  // pad the end with zeros, but make sure to not forget the extra bytes
+  if (extraBytes === 1) {
+    tmp = uint8[len - 1]
+    parts.push(
+      lookup[tmp >> 2] +
+      lookup[(tmp << 4) & 0x3F] +
+      '=='
+    )
+  } else if (extraBytes === 2) {
+    tmp = (uint8[len - 2] << 8) + uint8[len - 1]
+    parts.push(
+      lookup[tmp >> 10] +
+      lookup[(tmp >> 4) & 0x3F] +
+      lookup[(tmp << 2) & 0x3F] +
+      '='
+    )
+  }
+
+  return parts.join('')
+}
+
+
+/***/ }),
 /* 736 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -88966,7 +94262,7 @@ function resolveFlowSeqItems(doc, cst) {
  *
  * Copyright (c) 2013-2014 Digital Bazaar, Inc.
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(294);
 __webpack_require__(845);
 __webpack_require__(826);
@@ -89200,7 +94496,66 @@ function rsa_mgf1(seed, maskLength, hash) {
 
 
 /***/ }),
-/* 738 */,
+/* 738 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DEFAULT_FILE_SYSTEM_ADAPTER = void 0;
+const fs = __webpack_require__(747);
+const os = __webpack_require__(87);
+const CPU_COUNT = os.cpus().length;
+exports.DEFAULT_FILE_SYSTEM_ADAPTER = {
+    lstat: fs.lstat,
+    lstatSync: fs.lstatSync,
+    stat: fs.stat,
+    statSync: fs.statSync,
+    readdir: fs.readdir,
+    readdirSync: fs.readdirSync
+};
+class Settings {
+    constructor(_options = {}) {
+        this._options = _options;
+        this.absolute = this._getValue(this._options.absolute, false);
+        this.baseNameMatch = this._getValue(this._options.baseNameMatch, false);
+        this.braceExpansion = this._getValue(this._options.braceExpansion, true);
+        this.caseSensitiveMatch = this._getValue(this._options.caseSensitiveMatch, true);
+        this.concurrency = this._getValue(this._options.concurrency, CPU_COUNT);
+        this.cwd = this._getValue(this._options.cwd, process.cwd());
+        this.deep = this._getValue(this._options.deep, Infinity);
+        this.dot = this._getValue(this._options.dot, false);
+        this.extglob = this._getValue(this._options.extglob, true);
+        this.followSymbolicLinks = this._getValue(this._options.followSymbolicLinks, true);
+        this.fs = this._getFileSystemMethods(this._options.fs);
+        this.globstar = this._getValue(this._options.globstar, true);
+        this.ignore = this._getValue(this._options.ignore, []);
+        this.markDirectories = this._getValue(this._options.markDirectories, false);
+        this.objectMode = this._getValue(this._options.objectMode, false);
+        this.onlyDirectories = this._getValue(this._options.onlyDirectories, false);
+        this.onlyFiles = this._getValue(this._options.onlyFiles, true);
+        this.stats = this._getValue(this._options.stats, false);
+        this.suppressErrors = this._getValue(this._options.suppressErrors, false);
+        this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, false);
+        this.unique = this._getValue(this._options.unique, true);
+        if (this.onlyDirectories) {
+            this.onlyFiles = false;
+        }
+        if (this.stats) {
+            this.objectMode = true;
+        }
+    }
+    _getValue(option, value) {
+        return option === undefined ? value : option;
+    }
+    _getFileSystemMethods(methods = {}) {
+        return Object.assign(Object.assign({}, exports.DEFAULT_FILE_SYSTEM_ADAPTER), methods);
+    }
+}
+exports.default = Settings;
+
+
+/***/ }),
 /* 739 */,
 /* 740 */,
 /* 741 */
@@ -89279,7 +94634,7 @@ module.exports = Type;
 
 
 var isAbsoluteURL = __webpack_require__(722);
-var combineURLs = __webpack_require__(916);
+var combineURLs = __webpack_require__(484);
 
 /**
  * Creates a new URL by combining the baseURL with the requestedURL,
@@ -89305,7 +94660,7 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
 "use strict";
 
 
-var crypto = __webpack_require__(417)
+var crypto = __webpack_require__(373)
 
 function randomString (size) {
   var bits = (size + 1) * 6
@@ -89579,7 +94934,7 @@ const applyConfiguration = async (opaConfig, systemName) => {
       'apply',
       '-f',
       systemName,
-    ]).then(() => fs.unlink(systemName, (err) => { if (err) core.info(err); }));
+    ]).then(() => fs.unlinkSync(systemName, (err) => { if (err) core.info(err); }));
   }));
   return Promise.all(promises);
 };
@@ -90809,7 +96164,29 @@ function runJob(iterator, key, item, callback)
 /***/ }),
 /* 756 */,
 /* 757 */,
-/* 758 */,
+/* 758 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs = __webpack_require__(747);
+exports.FILE_SYSTEM_ADAPTER = {
+    lstat: fs.lstat,
+    stat: fs.stat,
+    lstatSync: fs.lstatSync,
+    statSync: fs.statSync
+};
+function createFileSystemAdapter(fsMethods) {
+    if (fsMethods === undefined) {
+        return exports.FILE_SYSTEM_ADAPTER;
+    }
+    return Object.assign(Object.assign({}, exports.FILE_SYSTEM_ADAPTER), fsMethods);
+}
+exports.createFileSystemAdapter = createFileSystemAdapter;
+
+
+/***/ }),
 /* 759 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -91177,7 +96554,7 @@ var _constants = __webpack_require__(460);
 
 var _BlankLine = _interopRequireDefault(__webpack_require__(862));
 
-var _CollectionItem = _interopRequireDefault(__webpack_require__(526));
+var _CollectionItem = _interopRequireDefault(__webpack_require__(371));
 
 var _Comment = _interopRequireDefault(__webpack_require__(273));
 
@@ -91960,7 +97337,7 @@ var _BlankLine = _interopRequireDefault(__webpack_require__(487));
 
 var _Collection = __webpack_require__(681);
 
-var _Comment = _interopRequireDefault(__webpack_require__(73));
+var _Comment = _interopRequireDefault(__webpack_require__(697));
 
 var _Directive = _interopRequireDefault(__webpack_require__(153));
 
@@ -92700,7 +98077,7 @@ formatters.j = function (v) {
  *
  * Copyright (c) 2010-2015 Digital Bazaar, Inc.
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(891);
 __webpack_require__(294);
 
@@ -93262,36 +98639,71 @@ module.exports = new Type('tag:yaml.org,2002:map', {
 
 /***/ }),
 /* 776 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-// Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
-
-var errors = __webpack_require__(355);
-var types = __webpack_require__(102);
-
-var Reader = __webpack_require__(502);
-var Writer = __webpack_require__(408);
+"use strict";
 
 
-// --- Exports
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.tags = exports.schemas = void 0;
 
-module.exports = {
+var _core = _interopRequireWildcard(__webpack_require__(314));
 
-  Reader: Reader,
+var _failsafe = _interopRequireDefault(__webpack_require__(685));
 
-  Writer: Writer
+var _json = _interopRequireDefault(__webpack_require__(135));
 
+var _yaml = _interopRequireDefault(__webpack_require__(351));
+
+var _map = _interopRequireDefault(__webpack_require__(943));
+
+var _seq = _interopRequireDefault(__webpack_require__(997));
+
+var _binary = _interopRequireDefault(__webpack_require__(146));
+
+var _omap = _interopRequireDefault(__webpack_require__(922));
+
+var _pairs = _interopRequireDefault(__webpack_require__(923));
+
+var _set = _interopRequireDefault(__webpack_require__(433));
+
+var _timestamp = __webpack_require__(646);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+const schemas = {
+  core: _core.default,
+  failsafe: _failsafe.default,
+  json: _json.default,
+  yaml11: _yaml.default
 };
-
-for (var t in types) {
-  if (types.hasOwnProperty(t))
-    module.exports[t] = types[t];
-}
-for (var e in errors) {
-  if (errors.hasOwnProperty(e))
-    module.exports[e] = errors[e];
-}
-
+exports.schemas = schemas;
+const tags = {
+  binary: _binary.default,
+  bool: _core.boolObj,
+  float: _core.floatObj,
+  floatExp: _core.expObj,
+  floatNaN: _core.nanObj,
+  floatTime: _timestamp.floatTime,
+  int: _core.intObj,
+  intHex: _core.hexObj,
+  intOct: _core.octObj,
+  intTime: _timestamp.intTime,
+  map: _map.default,
+  null: _core.nullObj,
+  omap: _omap.default,
+  pairs: _pairs.default,
+  seq: _seq.default,
+  set: _set.default,
+  timestamp: _timestamp.timestamp
+};
+exports.tags = tags;
 
 /***/ }),
 /* 777 */
@@ -93419,7 +98831,7 @@ function errorSubclass(Subclass) {
 
 
 
-var yaml = __webpack_require__(208);
+var yaml = __webpack_require__(444);
 
 
 module.exports = yaml;
@@ -93496,26 +98908,10 @@ module.exports = loadGitHubToken;
 /* 784 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-// Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
-
-// If you have no idea what ASN.1 or BER is, see this:
-// ftp://ftp.rsa.com/pub/pkcs/ascii/layman.asc
-
-var Ber = __webpack_require__(776);
+"use strict";
 
 
-
-// --- Exported API
-
-module.exports = {
-
-  Ber: Ber,
-
-  BerReader: Ber.Reader,
-
-  BerWriter: Ber.Writer
-
-};
+module.exports = __webpack_require__(212);
 
 
 /***/ }),
@@ -93723,7 +99119,7 @@ exports.validate = validate;
  *
  * Copyright (c) 2010-2013 Digital Bazaar, Inc.
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(535);
 __webpack_require__(930);
 __webpack_require__(395);
@@ -94030,7 +99426,7 @@ var _BlockValue = _interopRequireDefault(__webpack_require__(198));
 
 var _Collection = _interopRequireDefault(__webpack_require__(760));
 
-var _CollectionItem = _interopRequireDefault(__webpack_require__(526));
+var _CollectionItem = _interopRequireDefault(__webpack_require__(371));
 
 var _FlowCollection = _interopRequireDefault(__webpack_require__(464));
 
@@ -94535,99 +99931,22 @@ module.exports = bytesToUuid;
 /* 795 */,
 /* 796 */,
 /* 797 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
-// Copyright 2015 Joyent, Inc.
+"use strict";
 
-module.exports = {
-	Verifier: Verifier,
-	Signer: Signer
-};
 
-var nacl = __webpack_require__(701);
-var stream = __webpack_require__(413);
-var util = __webpack_require__(669);
-var assert = __webpack_require__(552);
-var Buffer = __webpack_require__(299).Buffer;
-var Signature = __webpack_require__(885);
-
-function Verifier(key, hashAlgo) {
-	if (hashAlgo.toLowerCase() !== 'sha512')
-		throw (new Error('ED25519 only supports the use of ' +
-		    'SHA-512 hashes'));
-
-	this.key = key;
-	this.chunks = [];
-
-	stream.Writable.call(this, {});
-}
-util.inherits(Verifier, stream.Writable);
-
-Verifier.prototype._write = function (chunk, enc, cb) {
-	this.chunks.push(chunk);
-	cb();
-};
-
-Verifier.prototype.update = function (chunk) {
-	if (typeof (chunk) === 'string')
-		chunk = Buffer.from(chunk, 'binary');
-	this.chunks.push(chunk);
-};
-
-Verifier.prototype.verify = function (signature, fmt) {
-	var sig;
-	if (Signature.isSignature(signature, [2, 0])) {
-		if (signature.type !== 'ed25519')
-			return (false);
-		sig = signature.toBuffer('raw');
-
-	} else if (typeof (signature) === 'string') {
-		sig = Buffer.from(signature, 'base64');
-
-	} else if (Signature.isSignature(signature, [1, 0])) {
-		throw (new Error('signature was created by too old ' +
-		    'a version of sshpk and cannot be verified'));
-	}
-
-	assert.buffer(sig);
-	return (nacl.sign.detached.verify(
-	    new Uint8Array(Buffer.concat(this.chunks)),
-	    new Uint8Array(sig),
-	    new Uint8Array(this.key.part.A.data)));
-};
-
-function Signer(key, hashAlgo) {
-	if (hashAlgo.toLowerCase() !== 'sha512')
-		throw (new Error('ED25519 only supports the use of ' +
-		    'SHA-512 hashes'));
-
-	this.key = key;
-	this.chunks = [];
-
-	stream.Writable.call(this, {});
-}
-util.inherits(Signer, stream.Writable);
-
-Signer.prototype._write = function (chunk, enc, cb) {
-	this.chunks.push(chunk);
-	cb();
-};
-
-Signer.prototype.update = function (chunk) {
-	if (typeof (chunk) === 'string')
-		chunk = Buffer.from(chunk, 'binary');
-	this.chunks.push(chunk);
-};
-
-Signer.prototype.sign = function () {
-	var sig = nacl.sign.detached(
-	    new Uint8Array(Buffer.concat(this.chunks)),
-	    new Uint8Array(Buffer.concat([
-		this.key.part.k.data, this.key.part.A.data])));
-	var sigBuf = Buffer.from(sig);
-	var sigObj = Signature.parse(sigBuf, 'ed25519', 'raw');
-	sigObj.hashAlgorithm = 'sha512';
-	return (sigObj);
+/**
+ * Creates a new URL by combining the specified URLs
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} relativeURL The relative URL
+ * @returns {string} The combined URL
+ */
+module.exports = function combineURLs(baseURL, relativeURL) {
+  return relativeURL
+    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
 };
 
 
@@ -95589,7 +100908,35 @@ function copyFile(srcFile, destFile, force) {
 //# sourceMappingURL=io.js.map
 
 /***/ }),
-/* 807 */,
+/* 807 */
+/***/ (function(module) {
+
+"use strict";
+
+
+function FileStatusSummary (path, index, working_dir) {
+   this.path = path;
+   this.index = index;
+   this.working_dir = working_dir;
+
+   if ('R' === index + working_dir) {
+      var detail = FileStatusSummary.fromPathRegex.exec(path) || [null, path, path];
+      this.from = detail[1];
+      this.path = detail[2];
+   }
+}
+
+FileStatusSummary.fromPathRegex = /^(.+) -> (.+)$/;
+
+FileStatusSummary.prototype = {
+   path: '',
+   from: ''
+};
+
+module.exports = FileStatusSummary;
+
+
+/***/ }),
 /* 808 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -95607,7 +100954,7 @@ function copyFile(srcFile, destFile, force) {
 const fs = __webpack_require__(747);
 const os = __webpack_require__(87);
 const path = __webpack_require__(622);
-const crypto = __webpack_require__(417);
+const crypto = __webpack_require__(373);
 const _c = fs.constants && os.constants ?
   { fs: fs.constants, os: os.constants } :
   process.binding('constants');
@@ -96359,49 +101706,108 @@ module.exports.setGracefulCleanup = setGracefulCleanup;
 
 /***/ }),
 /* 809 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+// Copyright 2018 Joyent, Inc.
 
+module.exports = {
+	read: read,
+	write: write
+};
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
+var assert = __webpack_require__(552);
+var Buffer = __webpack_require__(299).Buffer;
+var rfc4253 = __webpack_require__(233);
+var Key = __webpack_require__(463);
 
-var _rng = _interopRequireDefault(__webpack_require__(475));
+var errors = __webpack_require__(172);
 
-var _bytesToUuid = _interopRequireDefault(__webpack_require__(262));
+function read(buf, options) {
+	var lines = buf.toString('ascii').split(/[\r\n]+/);
+	var found = false;
+	var parts;
+	var si = 0;
+	while (si < lines.length) {
+		parts = splitHeader(lines[si++]);
+		if (parts &&
+		    parts[0].toLowerCase() === 'putty-user-key-file-2') {
+			found = true;
+			break;
+		}
+	}
+	if (!found) {
+		throw (new Error('No PuTTY format first line found'));
+	}
+	var alg = parts[1];
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	parts = splitHeader(lines[si++]);
+	assert.equal(parts[0].toLowerCase(), 'encryption');
 
-function v4(options, buf, offset) {
-  var i = buf && offset || 0;
+	parts = splitHeader(lines[si++]);
+	assert.equal(parts[0].toLowerCase(), 'comment');
+	var comment = parts[1];
 
-  if (typeof options == 'string') {
-    buf = options === 'binary' ? new Array(16) : null;
-    options = null;
-  }
+	parts = splitHeader(lines[si++]);
+	assert.equal(parts[0].toLowerCase(), 'public-lines');
+	var publicLines = parseInt(parts[1], 10);
+	if (!isFinite(publicLines) || publicLines < 0 ||
+	    publicLines > lines.length) {
+		throw (new Error('Invalid public-lines count'));
+	}
 
-  options = options || {};
-
-  var rnds = options.random || (options.rng || _rng.default)(); // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
-
-
-  rnds[6] = rnds[6] & 0x0f | 0x40;
-  rnds[8] = rnds[8] & 0x3f | 0x80; // Copy bytes to buffer, if provided
-
-  if (buf) {
-    for (var ii = 0; ii < 16; ++ii) {
-      buf[i + ii] = rnds[ii];
-    }
-  }
-
-  return buf || (0, _bytesToUuid.default)(rnds);
+	var publicBuf = Buffer.from(
+	    lines.slice(si, si + publicLines).join(''), 'base64');
+	var keyType = rfc4253.algToKeyType(alg);
+	var key = rfc4253.read(publicBuf);
+	if (key.type !== keyType) {
+		throw (new Error('Outer key algorithm mismatch'));
+	}
+	key.comment = comment;
+	return (key);
 }
 
-var _default = v4;
-exports.default = _default;
+function splitHeader(line) {
+	var idx = line.indexOf(':');
+	if (idx === -1)
+		return (null);
+	var header = line.slice(0, idx);
+	++idx;
+	while (line[idx] === ' ')
+		++idx;
+	var rest = line.slice(idx);
+	return ([header, rest]);
+}
+
+function write(key, options) {
+	assert.object(key);
+	if (!Key.isKey(key))
+		throw (new Error('Must be a public key'));
+
+	var alg = rfc4253.keyTypeToAlg(key);
+	var buf = rfc4253.write(key);
+	var comment = key.comment || '';
+
+	var b64 = buf.toString('base64');
+	var lines = wrap(b64, 64);
+
+	lines.unshift('Public-Lines: ' + lines.length);
+	lines.unshift('Comment: ' + comment);
+	lines.unshift('Encryption: none');
+	lines.unshift('PuTTY-User-Key-File-2: ' + alg);
+
+	return (Buffer.from(lines.join('\n') + '\n'));
+}
+
+function wrap(txt, len) {
+	var lines = [];
+	var pos = 0;
+	while (pos < txt.length) {
+		lines.push(txt.slice(pos, pos + 64));
+		pos += 64;
+	}
+	return (lines);
+}
+
 
 /***/ }),
 /* 810 */,
@@ -96415,7 +101821,7 @@ exports.default = _default;
  *
  * Copyright (c) 2012 Stefan Siegl <stesie@brokenpipe.de>
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(845);
 __webpack_require__(294);
 
@@ -96695,140 +102101,33 @@ function async(callback)
 /***/ }),
 /* 814 */,
 /* 815 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
-"use strict";
-
-
-var Mime = __webpack_require__(56);
-module.exports = new Mime(__webpack_require__(680), __webpack_require__(591));
-
+module.exports = require("punycode");
 
 /***/ }),
 /* 816 */,
 /* 817 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-/*global module*/
-var Buffer = __webpack_require__(880).Buffer;
-var DataStream = __webpack_require__(170);
-var jwa = __webpack_require__(310);
-var Stream = __webpack_require__(413);
-var toString = __webpack_require__(245);
-var util = __webpack_require__(669);
-var JWS_REGEX = /^[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)?$/;
+"use strict";
 
-function isObject(thing) {
-  return Object.prototype.toString.call(thing) === '[object Object]';
-}
-
-function safeJsonParse(thing) {
-  if (isObject(thing))
-    return thing;
-  try { return JSON.parse(thing); }
-  catch (e) { return undefined; }
-}
-
-function headerFromJWS(jwsSig) {
-  var encodedHeader = jwsSig.split('.', 1)[0];
-  return safeJsonParse(Buffer.from(encodedHeader, 'base64').toString('binary'));
-}
-
-function securedInputFromJWS(jwsSig) {
-  return jwsSig.split('.', 2).join('.');
-}
-
-function signatureFromJWS(jwsSig) {
-  return jwsSig.split('.')[2];
-}
-
-function payloadFromJWS(jwsSig, encoding) {
-  encoding = encoding || 'utf8';
-  var payload = jwsSig.split('.')[1];
-  return Buffer.from(payload, 'base64').toString(encoding);
-}
-
-function isValidJws(string) {
-  return JWS_REGEX.test(string) && !!headerFromJWS(string);
-}
-
-function jwsVerify(jwsSig, algorithm, secretOrKey) {
-  if (!algorithm) {
-    var err = new Error("Missing algorithm parameter for jws.verify");
-    err.code = "MISSING_ALGORITHM";
-    throw err;
-  }
-  jwsSig = toString(jwsSig);
-  var signature = signatureFromJWS(jwsSig);
-  var securedInput = securedInputFromJWS(jwsSig);
-  var algo = jwa(algorithm);
-  return algo.verify(securedInput, signature, secretOrKey);
-}
-
-function jwsDecode(jwsSig, opts) {
-  opts = opts || {};
-  jwsSig = toString(jwsSig);
-
-  if (!isValidJws(jwsSig))
-    return null;
-
-  var header = headerFromJWS(jwsSig);
-
-  if (!header)
-    return null;
-
-  var payload = payloadFromJWS(jwsSig);
-  if (header.typ === 'JWT' || opts.json)
-    payload = JSON.parse(payload, opts.encoding);
-
-  return {
-    header: header,
-    payload: payload,
-    signature: signatureFromJWS(jwsSig)
-  };
-}
-
-function VerifyStream(opts) {
-  opts = opts || {};
-  var secretOrKey = opts.secret||opts.publicKey||opts.key;
-  var secretStream = new DataStream(secretOrKey);
-  this.readable = true;
-  this.algorithm = opts.algorithm;
-  this.encoding = opts.encoding;
-  this.secret = this.publicKey = this.key = secretStream;
-  this.signature = new DataStream(opts.signature);
-  this.secret.once('close', function () {
-    if (!this.signature.writable && this.readable)
-      this.verify();
-  }.bind(this));
-
-  this.signature.once('close', function () {
-    if (!this.secret.writable && this.readable)
-      this.verify();
-  }.bind(this));
-}
-util.inherits(VerifyStream, Stream);
-VerifyStream.prototype.verify = function verify() {
-  try {
-    var valid = jwsVerify(this.signature.buffer, this.algorithm, this.key.buffer);
-    var obj = jwsDecode(this.signature.buffer, this.encoding);
-    this.emit('done', valid, obj);
-    this.emit('data', valid);
-    this.emit('end');
-    this.readable = false;
-    return valid;
-  } catch (e) {
-    this.readable = false;
-    this.emit('error', e);
-    this.emit('close');
-  }
-};
-
-VerifyStream.decode = jwsDecode;
-VerifyStream.isValid = isValidJws;
-VerifyStream.verify = jwsVerify;
-
-module.exports = VerifyStream;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.string = exports.stream = exports.pattern = exports.path = exports.fs = exports.errno = exports.array = void 0;
+const array = __webpack_require__(477);
+exports.array = array;
+const errno = __webpack_require__(846);
+exports.errno = errno;
+const fs = __webpack_require__(629);
+exports.fs = fs;
+const path = __webpack_require__(82);
+exports.path = path;
+const pattern = __webpack_require__(171);
+exports.pattern = pattern;
+const stream = __webpack_require__(231);
+exports.stream = stream;
+const string = __webpack_require__(64);
+exports.string = string;
 
 
 /***/ }),
@@ -96951,7 +102250,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
  *
  * The OID for the RSA key algorithm is: 1.2.840.113549.1.1.1
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(535);
 __webpack_require__(924);
 __webpack_require__(930);
@@ -96964,7 +102263,7 @@ if(typeof BigInteger === 'undefined') {
   var BigInteger = forge.jsbn.BigInteger;
 }
 
-var _crypto = forge.util.isNodejs ? __webpack_require__(417) : null;
+var _crypto = forge.util.isNodejs ? __webpack_require__(373) : null;
 
 // shortcut for asn.1 API
 var asn1 = forge.asn1;
@@ -98750,7 +104049,29 @@ function _base64ToBigInt(b64) {
 
 /***/ }),
 /* 822 */,
-/* 823 */,
+/* 823 */
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.addCommentBefore = addCommentBefore;
+exports.default = addComment;
+
+function addCommentBefore(str, indent, comment) {
+  if (!comment) return str;
+  const cc = comment.replace(/[\s\S]^/gm, `$&${indent}#`);
+  return `#${cc}\n${indent}${str}`;
+}
+
+function addComment(str, indent, comment) {
+  return !comment ? str : comment.indexOf('\n') === -1 ? `${str} #${comment}` : `${str}\n` + comment.replace(/^/gm, `${indent || ''}#`);
+}
+
+/***/ }),
 /* 824 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -99106,7 +104427,7 @@ module.exports = {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 /*global module*/
-var Buffer = __webpack_require__(880).Buffer;
+var Buffer = __webpack_require__(705).Buffer;
 var DataStream = __webpack_require__(170);
 var jwa = __webpack_require__(310);
 var Stream = __webpack_require__(413);
@@ -99196,7 +104517,7 @@ module.exports = SignStream;
  *
  * Copyright (c) 2010-2015 Digital Bazaar, Inc.
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(891);
 __webpack_require__(294);
 
@@ -99527,7 +104848,7 @@ var _addComment = __webpack_require__(147);
 
 var _constants = __webpack_require__(720);
 
-var _foldFlowLines = _interopRequireWildcard(__webpack_require__(352));
+var _foldFlowLines = _interopRequireWildcard(__webpack_require__(868));
 
 var _options = __webpack_require__(544);
 
@@ -99876,9 +105197,150 @@ function stringifyString(item, ctx, onComment, onChompKeep) {
 
 /***/ }),
 /* 828 */,
-/* 829 */,
-/* 830 */,
-/* 831 */,
+/* 829 */
+/***/ (function(module) {
+
+"use strict";
+
+module.exports = function generate_pattern(it, $keyword, $ruleType) {
+  var out = ' ';
+  var $lvl = it.level;
+  var $dataLvl = it.dataLevel;
+  var $schema = it.schema[$keyword];
+  var $schemaPath = it.schemaPath + it.util.getProperty($keyword);
+  var $errSchemaPath = it.errSchemaPath + '/' + $keyword;
+  var $breakOnError = !it.opts.allErrors;
+  var $data = 'data' + ($dataLvl || '');
+  var $isData = it.opts.$data && $schema && $schema.$data,
+    $schemaValue;
+  if ($isData) {
+    out += ' var schema' + ($lvl) + ' = ' + (it.util.getData($schema.$data, $dataLvl, it.dataPathArr)) + '; ';
+    $schemaValue = 'schema' + $lvl;
+  } else {
+    $schemaValue = $schema;
+  }
+  var $regexp = $isData ? '(new RegExp(' + $schemaValue + '))' : it.usePattern($schema);
+  out += 'if ( ';
+  if ($isData) {
+    out += ' (' + ($schemaValue) + ' !== undefined && typeof ' + ($schemaValue) + ' != \'string\') || ';
+  }
+  out += ' !' + ($regexp) + '.test(' + ($data) + ') ) {   ';
+  var $$outStack = $$outStack || [];
+  $$outStack.push(out);
+  out = ''; /* istanbul ignore else */
+  if (it.createErrors !== false) {
+    out += ' { keyword: \'' + ('pattern') + '\' , dataPath: (dataPath || \'\') + ' + (it.errorPath) + ' , schemaPath: ' + (it.util.toQuotedString($errSchemaPath)) + ' , params: { pattern:  ';
+    if ($isData) {
+      out += '' + ($schemaValue);
+    } else {
+      out += '' + (it.util.toQuotedString($schema));
+    }
+    out += '  } ';
+    if (it.opts.messages !== false) {
+      out += ' , message: \'should match pattern "';
+      if ($isData) {
+        out += '\' + ' + ($schemaValue) + ' + \'';
+      } else {
+        out += '' + (it.util.escapeQuotes($schema));
+      }
+      out += '"\' ';
+    }
+    if (it.opts.verbose) {
+      out += ' , schema:  ';
+      if ($isData) {
+        out += 'validate.schema' + ($schemaPath);
+      } else {
+        out += '' + (it.util.toQuotedString($schema));
+      }
+      out += '         , parentSchema: validate.schema' + (it.schemaPath) + ' , data: ' + ($data) + ' ';
+    }
+    out += ' } ';
+  } else {
+    out += ' {} ';
+  }
+  var __err = out;
+  out = $$outStack.pop();
+  if (!it.compositeRule && $breakOnError) {
+    /* istanbul ignore if */
+    if (it.async) {
+      out += ' throw new ValidationError([' + (__err) + ']); ';
+    } else {
+      out += ' validate.errors = [' + (__err) + ']; return false; ';
+    }
+  } else {
+    out += ' var err = ' + (__err) + ';  if (vErrors === null) vErrors = [err]; else vErrors.push(err); errors++; ';
+  }
+  out += '} ';
+  if ($breakOnError) {
+    out += ' else { ';
+  }
+  return out;
+}
+
+
+/***/ }),
+/* 830 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _rng = _interopRequireDefault(__webpack_require__(475));
+
+var _bytesToUuid = _interopRequireDefault(__webpack_require__(262));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function v4(options, buf, offset) {
+  var i = buf && offset || 0;
+
+  if (typeof options == 'string') {
+    buf = options === 'binary' ? new Array(16) : null;
+    options = null;
+  }
+
+  options = options || {};
+
+  var rnds = options.random || (options.rng || _rng.default)(); // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+
+
+  rnds[6] = rnds[6] & 0x0f | 0x40;
+  rnds[8] = rnds[8] & 0x3f | 0x80; // Copy bytes to buffer, if provided
+
+  if (buf) {
+    for (var ii = 0; ii < 16; ++ii) {
+      buf[i + ii] = rnds[ii];
+    }
+  }
+
+  return buf || (0, _bytesToUuid.default)(rnds);
+}
+
+var _default = v4;
+exports.default = _default;
+
+/***/ }),
+/* 831 */
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+class Node {}
+
+exports.default = Node;
+
+/***/ }),
 /* 832 */,
 /* 833 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -99979,7 +105441,7 @@ var _toJSON = _interopRequireDefault(__webpack_require__(788));
 
 var _Collection = _interopRequireDefault(__webpack_require__(672));
 
-var _Node = _interopRequireDefault(__webpack_require__(965));
+var _Node = _interopRequireDefault(__webpack_require__(831));
 
 var _Pair = _interopRequireDefault(__webpack_require__(532));
 
@@ -100285,9 +105747,219 @@ module.exports = new Type('tag:yaml.org,2002:int', {
 
 
 /***/ }),
-/* 838 */,
-/* 839 */,
-/* 840 */,
+/* 838 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+/*global module*/
+var Buffer = __webpack_require__(705).Buffer;
+var DataStream = __webpack_require__(170);
+var jwa = __webpack_require__(310);
+var Stream = __webpack_require__(413);
+var toString = __webpack_require__(245);
+var util = __webpack_require__(669);
+var JWS_REGEX = /^[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)?$/;
+
+function isObject(thing) {
+  return Object.prototype.toString.call(thing) === '[object Object]';
+}
+
+function safeJsonParse(thing) {
+  if (isObject(thing))
+    return thing;
+  try { return JSON.parse(thing); }
+  catch (e) { return undefined; }
+}
+
+function headerFromJWS(jwsSig) {
+  var encodedHeader = jwsSig.split('.', 1)[0];
+  return safeJsonParse(Buffer.from(encodedHeader, 'base64').toString('binary'));
+}
+
+function securedInputFromJWS(jwsSig) {
+  return jwsSig.split('.', 2).join('.');
+}
+
+function signatureFromJWS(jwsSig) {
+  return jwsSig.split('.')[2];
+}
+
+function payloadFromJWS(jwsSig, encoding) {
+  encoding = encoding || 'utf8';
+  var payload = jwsSig.split('.')[1];
+  return Buffer.from(payload, 'base64').toString(encoding);
+}
+
+function isValidJws(string) {
+  return JWS_REGEX.test(string) && !!headerFromJWS(string);
+}
+
+function jwsVerify(jwsSig, algorithm, secretOrKey) {
+  if (!algorithm) {
+    var err = new Error("Missing algorithm parameter for jws.verify");
+    err.code = "MISSING_ALGORITHM";
+    throw err;
+  }
+  jwsSig = toString(jwsSig);
+  var signature = signatureFromJWS(jwsSig);
+  var securedInput = securedInputFromJWS(jwsSig);
+  var algo = jwa(algorithm);
+  return algo.verify(securedInput, signature, secretOrKey);
+}
+
+function jwsDecode(jwsSig, opts) {
+  opts = opts || {};
+  jwsSig = toString(jwsSig);
+
+  if (!isValidJws(jwsSig))
+    return null;
+
+  var header = headerFromJWS(jwsSig);
+
+  if (!header)
+    return null;
+
+  var payload = payloadFromJWS(jwsSig);
+  if (header.typ === 'JWT' || opts.json)
+    payload = JSON.parse(payload, opts.encoding);
+
+  return {
+    header: header,
+    payload: payload,
+    signature: signatureFromJWS(jwsSig)
+  };
+}
+
+function VerifyStream(opts) {
+  opts = opts || {};
+  var secretOrKey = opts.secret||opts.publicKey||opts.key;
+  var secretStream = new DataStream(secretOrKey);
+  this.readable = true;
+  this.algorithm = opts.algorithm;
+  this.encoding = opts.encoding;
+  this.secret = this.publicKey = this.key = secretStream;
+  this.signature = new DataStream(opts.signature);
+  this.secret.once('close', function () {
+    if (!this.signature.writable && this.readable)
+      this.verify();
+  }.bind(this));
+
+  this.signature.once('close', function () {
+    if (!this.secret.writable && this.readable)
+      this.verify();
+  }.bind(this));
+}
+util.inherits(VerifyStream, Stream);
+VerifyStream.prototype.verify = function verify() {
+  try {
+    var valid = jwsVerify(this.signature.buffer, this.algorithm, this.key.buffer);
+    var obj = jwsDecode(this.signature.buffer, this.encoding);
+    this.emit('done', valid, obj);
+    this.emit('data', valid);
+    this.emit('end');
+    this.readable = false;
+    return valid;
+  } catch (e) {
+    this.readable = false;
+    this.emit('error', e);
+    this.emit('close');
+  }
+};
+
+VerifyStream.decode = jwsDecode;
+VerifyStream.isValid = isValidJws;
+VerifyStream.verify = jwsVerify;
+
+module.exports = VerifyStream;
+
+
+/***/ }),
+/* 839 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+const path = __webpack_require__(622);
+const win32 = process.platform === 'win32';
+const {
+  REGEX_BACKSLASH,
+  REGEX_REMOVE_BACKSLASH,
+  REGEX_SPECIAL_CHARS,
+  REGEX_SPECIAL_CHARS_GLOBAL
+} = __webpack_require__(387);
+
+exports.isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
+exports.hasRegexChars = str => REGEX_SPECIAL_CHARS.test(str);
+exports.isRegexChar = str => str.length === 1 && exports.hasRegexChars(str);
+exports.escapeRegex = str => str.replace(REGEX_SPECIAL_CHARS_GLOBAL, '\\$1');
+exports.toPosixSlashes = str => str.replace(REGEX_BACKSLASH, '/');
+
+exports.removeBackslashes = str => {
+  return str.replace(REGEX_REMOVE_BACKSLASH, match => {
+    return match === '\\' ? '' : match;
+  });
+};
+
+exports.supportsLookbehinds = () => {
+  const segs = process.version.slice(1).split('.').map(Number);
+  if (segs.length === 3 && segs[0] >= 9 || (segs[0] === 8 && segs[1] >= 10)) {
+    return true;
+  }
+  return false;
+};
+
+exports.isWindows = options => {
+  if (options && typeof options.windows === 'boolean') {
+    return options.windows;
+  }
+  return win32 === true || path.sep === '\\';
+};
+
+exports.escapeLast = (input, char, lastIdx) => {
+  const idx = input.lastIndexOf(char, lastIdx);
+  if (idx === -1) return input;
+  if (input[idx - 1] === '\\') return exports.escapeLast(input, char, idx - 1);
+  return `${input.slice(0, idx)}\\${input.slice(idx)}`;
+};
+
+exports.removePrefix = (input, state = {}) => {
+  let output = input;
+  if (output.startsWith('./')) {
+    output = output.slice(2);
+    state.prefix = './';
+  }
+  return output;
+};
+
+exports.wrapOutput = (input, state = {}, options = {}) => {
+  const prepend = options.contains ? '' : '^';
+  const append = options.contains ? '' : '$';
+
+  let output = `${prepend}(?:${input})${append}`;
+  if (state.negated === true) {
+    output = `(?:^(?!${output}).*$)`;
+  }
+  return output;
+};
+
+
+/***/ }),
+/* 840 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+var util = __webpack_require__(254);
+
+module.exports = SchemaObject;
+
+function SchemaObject(obj) {
+  util.copy(obj, this);
+}
+
+
+/***/ }),
 /* 841 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -100519,10 +106191,10 @@ module.exports = function enhanceError(error, config, code, request, response) {
  *
  * Copyright (c) 2009-2014 Digital Bazaar, Inc.
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(138);
 __webpack_require__(772);
-__webpack_require__(416);
+__webpack_require__(683);
 __webpack_require__(294);
 
 (function() {
@@ -100699,96 +106371,16 @@ module.exports = forge.random;
 
 /***/ }),
 /* 846 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports) {
 
-// Copyright 2015 Joyent, Inc.
+"use strict";
 
-var assert = __webpack_require__(552);
-var crypto = __webpack_require__(417);
-var sshpk = __webpack_require__(96);
-var utils = __webpack_require__(140);
-
-var HASH_ALGOS = utils.HASH_ALGOS;
-var PK_ALGOS = utils.PK_ALGOS;
-var InvalidAlgorithmError = utils.InvalidAlgorithmError;
-var HttpSignatureError = utils.HttpSignatureError;
-var validateAlgorithm = utils.validateAlgorithm;
-
-///--- Exported API
-
-module.exports = {
-  /**
-   * Verify RSA/DSA signature against public key.  You are expected to pass in
-   * an object that was returned from `parse()`.
-   *
-   * @param {Object} parsedSignature the object you got from `parse`.
-   * @param {String} pubkey RSA/DSA private key PEM.
-   * @return {Boolean} true if valid, false otherwise.
-   * @throws {TypeError} if you pass in bad arguments.
-   * @throws {InvalidAlgorithmError}
-   */
-  verifySignature: function verifySignature(parsedSignature, pubkey) {
-    assert.object(parsedSignature, 'parsedSignature');
-    if (typeof (pubkey) === 'string' || Buffer.isBuffer(pubkey))
-      pubkey = sshpk.parseKey(pubkey);
-    assert.ok(sshpk.Key.isKey(pubkey, [1, 1]), 'pubkey must be a sshpk.Key');
-
-    var alg = validateAlgorithm(parsedSignature.algorithm);
-    if (alg[0] === 'hmac' || alg[0] !== pubkey.type)
-      return (false);
-
-    var v = pubkey.createVerify(alg[1]);
-    v.update(parsedSignature.signingString);
-    return (v.verify(parsedSignature.params.signature, 'base64'));
-  },
-
-  /**
-   * Verify HMAC against shared secret.  You are expected to pass in an object
-   * that was returned from `parse()`.
-   *
-   * @param {Object} parsedSignature the object you got from `parse`.
-   * @param {String} secret HMAC shared secret.
-   * @return {Boolean} true if valid, false otherwise.
-   * @throws {TypeError} if you pass in bad arguments.
-   * @throws {InvalidAlgorithmError}
-   */
-  verifyHMAC: function verifyHMAC(parsedSignature, secret) {
-    assert.object(parsedSignature, 'parsedHMAC');
-    assert.string(secret, 'secret');
-
-    var alg = validateAlgorithm(parsedSignature.algorithm);
-    if (alg[0] !== 'hmac')
-      return (false);
-
-    var hashAlg = alg[1].toUpperCase();
-
-    var hmac = crypto.createHmac(hashAlg, secret);
-    hmac.update(parsedSignature.signingString);
-
-    /*
-     * Now double-hash to avoid leaking timing information - there's
-     * no easy constant-time compare in JS, so we use this approach
-     * instead. See for more info:
-     * https://www.isecpartners.com/blog/2011/february/double-hmac-
-     * verification.aspx
-     */
-    var h1 = crypto.createHmac(hashAlg, secret);
-    h1.update(hmac.digest());
-    h1 = h1.digest();
-    var h2 = crypto.createHmac(hashAlg, secret);
-    h2.update(new Buffer(parsedSignature.params.signature, 'base64'));
-    h2 = h2.digest();
-
-    /* Node 0.8 returns strings from .digest(). */
-    if (typeof (h1) === 'string')
-      return (h1 === h2);
-    /* And node 0.10 lacks the .equals() method on Buffers. */
-    if (Buffer.isBuffer(h1) && !h1.equals)
-      return (h1.toString('binary') === h2.toString('binary'));
-
-    return (h1.equals(h2));
-  }
-};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.isEnoentCodeError = void 0;
+function isEnoentCodeError(error) {
+    return error.code === 'ENOENT';
+}
+exports.isEnoentCodeError = isEnoentCodeError;
 
 
 /***/ }),
@@ -101552,7 +107144,7 @@ exports.default = Range;
 
 var parser = __webpack_require__(85);
 var signer = __webpack_require__(536);
-var verify = __webpack_require__(846);
+var verify = __webpack_require__(649);
 var utils = __webpack_require__(140);
 
 
@@ -102604,609 +108196,155 @@ module.exports = require("tty");
 
 /***/ }),
 /* 868 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports) {
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = foldFlowLines;
+exports.FOLD_QUOTED = exports.FOLD_BLOCK = exports.FOLD_FLOW = void 0;
+const FOLD_FLOW = 'flow';
+exports.FOLD_FLOW = FOLD_FLOW;
+const FOLD_BLOCK = 'block';
+exports.FOLD_BLOCK = FOLD_BLOCK;
+const FOLD_QUOTED = 'quoted'; // presumes i+1 is at the start of a line
+// returns index of last newline in more-indented block
+
+exports.FOLD_QUOTED = FOLD_QUOTED;
+
+const consumeMoreIndentedLines = (text, i) => {
+  let ch = text[i + 1];
+
+  while (ch === ' ' || ch === '\t') {
+    do {
+      ch = text[i += 1];
+    } while (ch && ch !== '\n');
+
+    ch = text[i + 1];
+  }
+
+  return i;
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const os = __importStar(__webpack_require__(87));
-const events = __importStar(__webpack_require__(614));
-const child = __importStar(__webpack_require__(129));
-const path = __importStar(__webpack_require__(622));
-const io = __importStar(__webpack_require__(199));
-const ioUtil = __importStar(__webpack_require__(325));
-/* eslint-disable @typescript-eslint/unbound-method */
-const IS_WINDOWS = process.platform === 'win32';
-/*
- * Class for running command line tools. Handles quoting and arg parsing in a platform agnostic way.
- */
-class ToolRunner extends events.EventEmitter {
-    constructor(toolPath, args, options) {
-        super();
-        if (!toolPath) {
-            throw new Error("Parameter 'toolPath' cannot be null or empty.");
-        }
-        this.toolPath = toolPath;
-        this.args = args || [];
-        this.options = options || {};
-    }
-    _debug(message) {
-        if (this.options.listeners && this.options.listeners.debug) {
-            this.options.listeners.debug(message);
-        }
-    }
-    _getCommandString(options, noPrefix) {
-        const toolPath = this._getSpawnFileName();
-        const args = this._getSpawnArgs(options);
-        let cmd = noPrefix ? '' : '[command]'; // omit prefix when piped to a second tool
-        if (IS_WINDOWS) {
-            // Windows + cmd file
-            if (this._isCmdFile()) {
-                cmd += toolPath;
-                for (const a of args) {
-                    cmd += ` ${a}`;
-                }
-            }
-            // Windows + verbatim
-            else if (options.windowsVerbatimArguments) {
-                cmd += `"${toolPath}"`;
-                for (const a of args) {
-                    cmd += ` ${a}`;
-                }
-            }
-            // Windows (regular)
-            else {
-                cmd += this._windowsQuoteCmdArg(toolPath);
-                for (const a of args) {
-                    cmd += ` ${this._windowsQuoteCmdArg(a)}`;
-                }
-            }
-        }
-        else {
-            // OSX/Linux - this can likely be improved with some form of quoting.
-            // creating processes on Unix is fundamentally different than Windows.
-            // on Unix, execvp() takes an arg array.
-            cmd += toolPath;
-            for (const a of args) {
-                cmd += ` ${a}`;
-            }
-        }
-        return cmd;
-    }
-    _processLineBuffer(data, strBuffer, onLine) {
-        try {
-            let s = strBuffer + data.toString();
-            let n = s.indexOf(os.EOL);
-            while (n > -1) {
-                const line = s.substring(0, n);
-                onLine(line);
-                // the rest of the string ...
-                s = s.substring(n + os.EOL.length);
-                n = s.indexOf(os.EOL);
-            }
-            strBuffer = s;
-        }
-        catch (err) {
-            // streaming lines to console is best effort.  Don't fail a build.
-            this._debug(`error processing line. Failed with error ${err}`);
-        }
-    }
-    _getSpawnFileName() {
-        if (IS_WINDOWS) {
-            if (this._isCmdFile()) {
-                return process.env['COMSPEC'] || 'cmd.exe';
-            }
-        }
-        return this.toolPath;
-    }
-    _getSpawnArgs(options) {
-        if (IS_WINDOWS) {
-            if (this._isCmdFile()) {
-                let argline = `/D /S /C "${this._windowsQuoteCmdArg(this.toolPath)}`;
-                for (const a of this.args) {
-                    argline += ' ';
-                    argline += options.windowsVerbatimArguments
-                        ? a
-                        : this._windowsQuoteCmdArg(a);
-                }
-                argline += '"';
-                return [argline];
-            }
-        }
-        return this.args;
-    }
-    _endsWith(str, end) {
-        return str.endsWith(end);
-    }
-    _isCmdFile() {
-        const upperToolPath = this.toolPath.toUpperCase();
-        return (this._endsWith(upperToolPath, '.CMD') ||
-            this._endsWith(upperToolPath, '.BAT'));
-    }
-    _windowsQuoteCmdArg(arg) {
-        // for .exe, apply the normal quoting rules that libuv applies
-        if (!this._isCmdFile()) {
-            return this._uvQuoteCmdArg(arg);
-        }
-        // otherwise apply quoting rules specific to the cmd.exe command line parser.
-        // the libuv rules are generic and are not designed specifically for cmd.exe
-        // command line parser.
-        //
-        // for a detailed description of the cmd.exe command line parser, refer to
-        // http://stackoverflow.com/questions/4094699/how-does-the-windows-command-interpreter-cmd-exe-parse-scripts/7970912#7970912
-        // need quotes for empty arg
-        if (!arg) {
-            return '""';
-        }
-        // determine whether the arg needs to be quoted
-        const cmdSpecialChars = [
-            ' ',
-            '\t',
-            '&',
-            '(',
-            ')',
-            '[',
-            ']',
-            '{',
-            '}',
-            '^',
-            '=',
-            ';',
-            '!',
-            "'",
-            '+',
-            ',',
-            '`',
-            '~',
-            '|',
-            '<',
-            '>',
-            '"'
-        ];
-        let needsQuotes = false;
-        for (const char of arg) {
-            if (cmdSpecialChars.some(x => x === char)) {
-                needsQuotes = true;
-                break;
-            }
-        }
-        // short-circuit if quotes not needed
-        if (!needsQuotes) {
-            return arg;
-        }
-        // the following quoting rules are very similar to the rules that by libuv applies.
-        //
-        // 1) wrap the string in quotes
-        //
-        // 2) double-up quotes - i.e. " => ""
-        //
-        //    this is different from the libuv quoting rules. libuv replaces " with \", which unfortunately
-        //    doesn't work well with a cmd.exe command line.
-        //
-        //    note, replacing " with "" also works well if the arg is passed to a downstream .NET console app.
-        //    for example, the command line:
-        //          foo.exe "myarg:""my val"""
-        //    is parsed by a .NET console app into an arg array:
-        //          [ "myarg:\"my val\"" ]
-        //    which is the same end result when applying libuv quoting rules. although the actual
-        //    command line from libuv quoting rules would look like:
-        //          foo.exe "myarg:\"my val\""
-        //
-        // 3) double-up slashes that precede a quote,
-        //    e.g.  hello \world    => "hello \world"
-        //          hello\"world    => "hello\\""world"
-        //          hello\\"world   => "hello\\\\""world"
-        //          hello world\    => "hello world\\"
-        //
-        //    technically this is not required for a cmd.exe command line, or the batch argument parser.
-        //    the reasons for including this as a .cmd quoting rule are:
-        //
-        //    a) this is optimized for the scenario where the argument is passed from the .cmd file to an
-        //       external program. many programs (e.g. .NET console apps) rely on the slash-doubling rule.
-        //
-        //    b) it's what we've been doing previously (by deferring to node default behavior) and we
-        //       haven't heard any complaints about that aspect.
-        //
-        // note, a weakness of the quoting rules chosen here, is that % is not escaped. in fact, % cannot be
-        // escaped when used on the command line directly - even though within a .cmd file % can be escaped
-        // by using %%.
-        //
-        // the saving grace is, on the command line, %var% is left as-is if var is not defined. this contrasts
-        // the line parsing rules within a .cmd file, where if var is not defined it is replaced with nothing.
-        //
-        // one option that was explored was replacing % with ^% - i.e. %var% => ^%var^%. this hack would
-        // often work, since it is unlikely that var^ would exist, and the ^ character is removed when the
-        // variable is used. the problem, however, is that ^ is not removed when %* is used to pass the args
-        // to an external program.
-        //
-        // an unexplored potential solution for the % escaping problem, is to create a wrapper .cmd file.
-        // % can be escaped within a .cmd file.
-        let reverse = '"';
-        let quoteHit = true;
-        for (let i = arg.length; i > 0; i--) {
-            // walk the string in reverse
-            reverse += arg[i - 1];
-            if (quoteHit && arg[i - 1] === '\\') {
-                reverse += '\\'; // double the slash
-            }
-            else if (arg[i - 1] === '"') {
-                quoteHit = true;
-                reverse += '"'; // double the quote
-            }
-            else {
-                quoteHit = false;
-            }
-        }
-        reverse += '"';
-        return reverse
-            .split('')
-            .reverse()
-            .join('');
-    }
-    _uvQuoteCmdArg(arg) {
-        // Tool runner wraps child_process.spawn() and needs to apply the same quoting as
-        // Node in certain cases where the undocumented spawn option windowsVerbatimArguments
-        // is used.
-        //
-        // Since this function is a port of quote_cmd_arg from Node 4.x (technically, lib UV,
-        // see https://github.com/nodejs/node/blob/v4.x/deps/uv/src/win/process.c for details),
-        // pasting copyright notice from Node within this function:
-        //
-        //      Copyright Joyent, Inc. and other Node contributors. All rights reserved.
-        //
-        //      Permission is hereby granted, free of charge, to any person obtaining a copy
-        //      of this software and associated documentation files (the "Software"), to
-        //      deal in the Software without restriction, including without limitation the
-        //      rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-        //      sell copies of the Software, and to permit persons to whom the Software is
-        //      furnished to do so, subject to the following conditions:
-        //
-        //      The above copyright notice and this permission notice shall be included in
-        //      all copies or substantial portions of the Software.
-        //
-        //      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-        //      IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-        //      FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-        //      AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-        //      LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-        //      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-        //      IN THE SOFTWARE.
-        if (!arg) {
-            // Need double quotation for empty argument
-            return '""';
-        }
-        if (!arg.includes(' ') && !arg.includes('\t') && !arg.includes('"')) {
-            // No quotation needed
-            return arg;
-        }
-        if (!arg.includes('"') && !arg.includes('\\')) {
-            // No embedded double quotes or backslashes, so I can just wrap
-            // quote marks around the whole thing.
-            return `"${arg}"`;
-        }
-        // Expected input/output:
-        //   input : hello"world
-        //   output: "hello\"world"
-        //   input : hello""world
-        //   output: "hello\"\"world"
-        //   input : hello\world
-        //   output: hello\world
-        //   input : hello\\world
-        //   output: hello\\world
-        //   input : hello\"world
-        //   output: "hello\\\"world"
-        //   input : hello\\"world
-        //   output: "hello\\\\\"world"
-        //   input : hello world\
-        //   output: "hello world\\" - note the comment in libuv actually reads "hello world\"
-        //                             but it appears the comment is wrong, it should be "hello world\\"
-        let reverse = '"';
-        let quoteHit = true;
-        for (let i = arg.length; i > 0; i--) {
-            // walk the string in reverse
-            reverse += arg[i - 1];
-            if (quoteHit && arg[i - 1] === '\\') {
-                reverse += '\\';
-            }
-            else if (arg[i - 1] === '"') {
-                quoteHit = true;
-                reverse += '\\';
-            }
-            else {
-                quoteHit = false;
-            }
-        }
-        reverse += '"';
-        return reverse
-            .split('')
-            .reverse()
-            .join('');
-    }
-    _cloneExecOptions(options) {
-        options = options || {};
-        const result = {
-            cwd: options.cwd || process.cwd(),
-            env: options.env || process.env,
-            silent: options.silent || false,
-            windowsVerbatimArguments: options.windowsVerbatimArguments || false,
-            failOnStdErr: options.failOnStdErr || false,
-            ignoreReturnCode: options.ignoreReturnCode || false,
-            delay: options.delay || 10000
-        };
-        result.outStream = options.outStream || process.stdout;
-        result.errStream = options.errStream || process.stderr;
-        return result;
-    }
-    _getSpawnOptions(options, toolPath) {
-        options = options || {};
-        const result = {};
-        result.cwd = options.cwd;
-        result.env = options.env;
-        result['windowsVerbatimArguments'] =
-            options.windowsVerbatimArguments || this._isCmdFile();
-        if (options.windowsVerbatimArguments) {
-            result.argv0 = `"${toolPath}"`;
-        }
-        return result;
-    }
-    /**
-     * Exec a tool.
-     * Output will be streamed to the live console.
-     * Returns promise with return code
-     *
-     * @param     tool     path to tool to exec
-     * @param     options  optional exec options.  See ExecOptions
-     * @returns   number
-     */
-    exec() {
-        return __awaiter(this, void 0, void 0, function* () {
-            // root the tool path if it is unrooted and contains relative pathing
-            if (!ioUtil.isRooted(this.toolPath) &&
-                (this.toolPath.includes('/') ||
-                    (IS_WINDOWS && this.toolPath.includes('\\')))) {
-                // prefer options.cwd if it is specified, however options.cwd may also need to be rooted
-                this.toolPath = path.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
-            }
-            // if the tool is only a file name, then resolve it from the PATH
-            // otherwise verify it exists (add extension on Windows if necessary)
-            this.toolPath = yield io.which(this.toolPath, true);
-            return new Promise((resolve, reject) => {
-                this._debug(`exec tool: ${this.toolPath}`);
-                this._debug('arguments:');
-                for (const arg of this.args) {
-                    this._debug(`   ${arg}`);
-                }
-                const optionsNonNull = this._cloneExecOptions(this.options);
-                if (!optionsNonNull.silent && optionsNonNull.outStream) {
-                    optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os.EOL);
-                }
-                const state = new ExecState(optionsNonNull, this.toolPath);
-                state.on('debug', (message) => {
-                    this._debug(message);
-                });
-                const fileName = this._getSpawnFileName();
-                const cp = child.spawn(fileName, this._getSpawnArgs(optionsNonNull), this._getSpawnOptions(this.options, fileName));
-                const stdbuffer = '';
-                if (cp.stdout) {
-                    cp.stdout.on('data', (data) => {
-                        if (this.options.listeners && this.options.listeners.stdout) {
-                            this.options.listeners.stdout(data);
-                        }
-                        if (!optionsNonNull.silent && optionsNonNull.outStream) {
-                            optionsNonNull.outStream.write(data);
-                        }
-                        this._processLineBuffer(data, stdbuffer, (line) => {
-                            if (this.options.listeners && this.options.listeners.stdline) {
-                                this.options.listeners.stdline(line);
-                            }
-                        });
-                    });
-                }
-                const errbuffer = '';
-                if (cp.stderr) {
-                    cp.stderr.on('data', (data) => {
-                        state.processStderr = true;
-                        if (this.options.listeners && this.options.listeners.stderr) {
-                            this.options.listeners.stderr(data);
-                        }
-                        if (!optionsNonNull.silent &&
-                            optionsNonNull.errStream &&
-                            optionsNonNull.outStream) {
-                            const s = optionsNonNull.failOnStdErr
-                                ? optionsNonNull.errStream
-                                : optionsNonNull.outStream;
-                            s.write(data);
-                        }
-                        this._processLineBuffer(data, errbuffer, (line) => {
-                            if (this.options.listeners && this.options.listeners.errline) {
-                                this.options.listeners.errline(line);
-                            }
-                        });
-                    });
-                }
-                cp.on('error', (err) => {
-                    state.processError = err.message;
-                    state.processExited = true;
-                    state.processClosed = true;
-                    state.CheckComplete();
-                });
-                cp.on('exit', (code) => {
-                    state.processExitCode = code;
-                    state.processExited = true;
-                    this._debug(`Exit code ${code} received from tool '${this.toolPath}'`);
-                    state.CheckComplete();
-                });
-                cp.on('close', (code) => {
-                    state.processExitCode = code;
-                    state.processExited = true;
-                    state.processClosed = true;
-                    this._debug(`STDIO streams have closed for tool '${this.toolPath}'`);
-                    state.CheckComplete();
-                });
-                state.on('done', (error, exitCode) => {
-                    if (stdbuffer.length > 0) {
-                        this.emit('stdline', stdbuffer);
-                    }
-                    if (errbuffer.length > 0) {
-                        this.emit('errline', errbuffer);
-                    }
-                    cp.removeAllListeners();
-                    if (error) {
-                        reject(error);
-                    }
-                    else {
-                        resolve(exitCode);
-                    }
-                });
-                if (this.options.input) {
-                    if (!cp.stdin) {
-                        throw new Error('child process missing stdin');
-                    }
-                    cp.stdin.end(this.options.input);
-                }
-            });
-        });
-    }
-}
-exports.ToolRunner = ToolRunner;
 /**
- * Convert an arg string to an array of args. Handles escaping
+ * Tries to keep input at up to `lineWidth` characters, splitting only on spaces
+ * not followed by newlines or spaces unless `mode` is `'quoted'`. Lines are
+ * terminated with `\n` and started with `indent`.
  *
- * @param    argString   string of arguments
- * @returns  string[]    array of arguments
+ * @param {string} text
+ * @param {string} indent
+ * @param {string} [mode='flow'] `'block'` prevents more-indented lines
+ *   from being folded; `'quoted'` allows for `\` escapes, including escaped
+ *   newlines
+ * @param {Object} options
+ * @param {number} [options.indentAtStart] Accounts for leading contents on
+ *   the first line, defaulting to `indent.length`
+ * @param {number} [options.lineWidth=80]
+ * @param {number} [options.minContentWidth=20] Allow highly indented lines to
+ *   stretch the line width
+ * @param {function} options.onFold Called once if the text is folded
+ * @param {function} options.onFold Called once if any line of text exceeds
+ *   lineWidth characters
  */
-function argStringToArray(argString) {
-    const args = [];
-    let inQuotes = false;
-    let escaped = false;
-    let arg = '';
-    function append(c) {
-        // we only escape double quotes.
-        if (escaped && c !== '"') {
-            arg += '\\';
-        }
-        arg += c;
-        escaped = false;
+
+
+function foldFlowLines(text, indent, mode, {
+  indentAtStart,
+  lineWidth = 80,
+  minContentWidth = 20,
+  onFold,
+  onOverflow
+}) {
+  if (!lineWidth || lineWidth < 0) return text;
+  const endStep = Math.max(1 + minContentWidth, 1 + lineWidth - indent.length);
+  if (text.length <= endStep) return text;
+  const folds = [];
+  const escapedFolds = {};
+  let end = lineWidth - (typeof indentAtStart === 'number' ? indentAtStart : indent.length);
+  let split = undefined;
+  let prev = undefined;
+  let overflow = false;
+  let i = -1;
+
+  if (mode === FOLD_BLOCK) {
+    i = consumeMoreIndentedLines(text, i);
+    if (i !== -1) end = i + endStep;
+  }
+
+  for (let ch; ch = text[i += 1];) {
+    if (mode === FOLD_QUOTED && ch === '\\') {
+      switch (text[i + 1]) {
+        case 'x':
+          i += 3;
+          break;
+
+        case 'u':
+          i += 5;
+          break;
+
+        case 'U':
+          i += 9;
+          break;
+
+        default:
+          i += 1;
+      }
     }
-    for (let i = 0; i < argString.length; i++) {
-        const c = argString.charAt(i);
-        if (c === '"') {
-            if (!escaped) {
-                inQuotes = !inQuotes;
-            }
-            else {
-                append(c);
-            }
-            continue;
+
+    if (ch === '\n') {
+      if (mode === FOLD_BLOCK) i = consumeMoreIndentedLines(text, i);
+      end = i + endStep;
+      split = undefined;
+    } else {
+      if (ch === ' ' && prev && prev !== ' ' && prev !== '\n' && prev !== '\t') {
+        // space surrounded by non-space can be replaced with newline + indent
+        const next = text[i + 1];
+        if (next && next !== ' ' && next !== '\n' && next !== '\t') split = i;
+      }
+
+      if (i >= end) {
+        if (split) {
+          folds.push(split);
+          end = split + endStep;
+          split = undefined;
+        } else if (mode === FOLD_QUOTED) {
+          // white-space collected at end may stretch past lineWidth
+          while (prev === ' ' || prev === '\t') {
+            prev = ch;
+            ch = text[i += 1];
+            overflow = true;
+          } // i - 2 accounts for not-dropped last char + newline-escaping \
+
+
+          folds.push(i - 2);
+          escapedFolds[i - 2] = true;
+          end = i - 2 + endStep;
+          split = undefined;
+        } else {
+          overflow = true;
         }
-        if (c === '\\' && escaped) {
-            append(c);
-            continue;
-        }
-        if (c === '\\' && inQuotes) {
-            escaped = true;
-            continue;
-        }
-        if (c === ' ' && !inQuotes) {
-            if (arg.length > 0) {
-                args.push(arg);
-                arg = '';
-            }
-            continue;
-        }
-        append(c);
+      }
     }
-    if (arg.length > 0) {
-        args.push(arg.trim());
-    }
-    return args;
+
+    prev = ch;
+  }
+
+  if (overflow && onOverflow) onOverflow();
+  if (folds.length === 0) return text;
+  if (onFold) onFold();
+  let res = text.slice(0, folds[0]);
+
+  for (let i = 0; i < folds.length; ++i) {
+    const fold = folds[i];
+    const end = folds[i + 1] || text.length;
+    if (mode === FOLD_QUOTED && escapedFolds[fold]) res += `${text[fold]}\\`;
+    res += `\n${indent}${text.slice(fold + 1, end)}`;
+  }
+
+  return res;
 }
-exports.argStringToArray = argStringToArray;
-class ExecState extends events.EventEmitter {
-    constructor(options, toolPath) {
-        super();
-        this.processClosed = false; // tracks whether the process has exited and stdio is closed
-        this.processError = '';
-        this.processExitCode = 0;
-        this.processExited = false; // tracks whether the process has exited
-        this.processStderr = false; // tracks whether stderr was written to
-        this.delay = 10000; // 10 seconds
-        this.done = false;
-        this.timeout = null;
-        if (!toolPath) {
-            throw new Error('toolPath must not be empty');
-        }
-        this.options = options;
-        this.toolPath = toolPath;
-        if (options.delay) {
-            this.delay = options.delay;
-        }
-    }
-    CheckComplete() {
-        if (this.done) {
-            return;
-        }
-        if (this.processClosed) {
-            this._setResult();
-        }
-        else if (this.processExited) {
-            this.timeout = setTimeout(ExecState.HandleTimeout, this.delay, this);
-        }
-    }
-    _debug(message) {
-        this.emit('debug', message);
-    }
-    _setResult() {
-        // determine whether there is an error
-        let error;
-        if (this.processExited) {
-            if (this.processError) {
-                error = new Error(`There was an error when attempting to execute the process '${this.toolPath}'. This may indicate the process failed to start. Error: ${this.processError}`);
-            }
-            else if (this.processExitCode !== 0 && !this.options.ignoreReturnCode) {
-                error = new Error(`The process '${this.toolPath}' failed with exit code ${this.processExitCode}`);
-            }
-            else if (this.processStderr && this.options.failOnStdErr) {
-                error = new Error(`The process '${this.toolPath}' failed because one or more lines were written to the STDERR stream`);
-            }
-        }
-        // clear the timeout
-        if (this.timeout) {
-            clearTimeout(this.timeout);
-            this.timeout = null;
-        }
-        this.done = true;
-        this.emit('done', error, this.processExitCode);
-    }
-    static HandleTimeout(state) {
-        if (state.done) {
-            return;
-        }
-        if (!state.processClosed && state.processExited) {
-            const message = `The STDIO streams did not close within ${state.delay /
-                1000} seconds of the exit event from process '${state.toolPath}'. This may indicate a child process inherited the STDIO streams and has not yet exited.`;
-            state._debug(message);
-        }
-        state._setResult();
-    }
-}
-//# sourceMappingURL=toolrunner.js.map
 
 /***/ }),
 /* 869 */
@@ -103343,16 +108481,16 @@ module.exports = PrivateKey;
 var assert = __webpack_require__(552);
 var Buffer = __webpack_require__(299).Buffer;
 var algs = __webpack_require__(151);
-var crypto = __webpack_require__(417);
+var crypto = __webpack_require__(373);
 var Fingerprint = __webpack_require__(926);
 var Signature = __webpack_require__(885);
 var errs = __webpack_require__(172);
 var util = __webpack_require__(669);
 var utils = __webpack_require__(241);
-var dhe = __webpack_require__(581);
+var dhe = __webpack_require__(25);
 var generateECDSA = dhe.generateECDSA;
 var generateED25519 = dhe.generateED25519;
-var edCompat = __webpack_require__(797);
+var edCompat = __webpack_require__(289);
 var nacl = __webpack_require__(701);
 
 var Key = __webpack_require__(463);
@@ -103370,7 +108508,7 @@ formats['rfc4253'] = __webpack_require__(233);
 formats['ssh-private'] = __webpack_require__(537);
 formats['openssh'] = formats['ssh-private'];
 formats['ssh'] = formats['ssh-private'];
-formats['dnssec'] = __webpack_require__(21);
+formats['dnssec'] = __webpack_require__(946);
 
 function PrivateKey(opts) {
 	assert.object(opts, 'options');
@@ -103585,73 +108723,132 @@ PrivateKey._oldVersionDetect = function (obj) {
 
 
 /***/ }),
-/* 878 */,
+/* 878 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+const fill = __webpack_require__(32);
+const utils = __webpack_require__(304);
+
+const compile = (ast, options = {}) => {
+  let walk = (node, parent = {}) => {
+    let invalidBlock = utils.isInvalidBrace(parent);
+    let invalidNode = node.invalid === true && options.escapeInvalid === true;
+    let invalid = invalidBlock === true || invalidNode === true;
+    let prefix = options.escapeInvalid === true ? '\\' : '';
+    let output = '';
+
+    if (node.isOpen === true) {
+      return prefix + node.value;
+    }
+    if (node.isClose === true) {
+      return prefix + node.value;
+    }
+
+    if (node.type === 'open') {
+      return invalid ? (prefix + node.value) : '(';
+    }
+
+    if (node.type === 'close') {
+      return invalid ? (prefix + node.value) : ')';
+    }
+
+    if (node.type === 'comma') {
+      return node.prev.type === 'comma' ? '' : (invalid ? node.value : '|');
+    }
+
+    if (node.value) {
+      return node.value;
+    }
+
+    if (node.nodes && node.ranges > 0) {
+      let args = utils.reduce(node.nodes);
+      let range = fill(...args, { ...options, wrap: false, toRegex: true });
+
+      if (range.length !== 0) {
+        return args.length > 1 && range.length > 1 ? `(${range})` : range;
+      }
+    }
+
+    if (node.nodes) {
+      for (let child of node.nodes) {
+        output += walk(child, node);
+      }
+    }
+    return output;
+  };
+
+  return walk(ast);
+};
+
+module.exports = compile;
+
+
+/***/ }),
 /* 879 */,
 /* 880 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-/* eslint-disable node/no-deprecated-api */
-var buffer = __webpack_require__(293)
-var Buffer = buffer.Buffer
+var crypto = __webpack_require__(373);
+var BigInteger = __webpack_require__(113).BigInteger;
+var ECPointFp = __webpack_require__(44).ECPointFp;
+var Buffer = __webpack_require__(299).Buffer;
+exports.ECCurves = __webpack_require__(881);
 
-// alternative to using Object.keys for old browsers
-function copyProps (src, dst) {
-  for (var key in src) {
-    dst[key] = src[key]
-  }
-}
-if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
-  module.exports = buffer
-} else {
-  // Copy properties from require('buffer')
-  copyProps(buffer, exports)
-  exports.Buffer = SafeBuffer
+// zero prepad
+function unstupid(hex,len)
+{
+	return (hex.length >= len) ? hex : unstupid("0"+hex,len);
 }
 
-function SafeBuffer (arg, encodingOrOffset, length) {
-  return Buffer(arg, encodingOrOffset, length)
-}
+exports.ECKey = function(curve, key, isPublic)
+{
+  var priv;
+	var c = curve();
+	var n = c.getN();
+  var bytes = Math.floor(n.bitLength()/8);
 
-// Copy static methods from Buffer
-copyProps(Buffer, SafeBuffer)
-
-SafeBuffer.from = function (arg, encodingOrOffset, length) {
-  if (typeof arg === 'number') {
-    throw new TypeError('Argument must not be a number')
-  }
-  return Buffer(arg, encodingOrOffset, length)
-}
-
-SafeBuffer.alloc = function (size, fill, encoding) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  var buf = Buffer(size)
-  if (fill !== undefined) {
-    if (typeof encoding === 'string') {
-      buf.fill(fill, encoding)
-    } else {
-      buf.fill(fill)
+  if(key)
+  {
+    if(isPublic)
+    {
+      var curve = c.getCurve();
+//      var x = key.slice(1,bytes+1); // skip the 04 for uncompressed format
+//      var y = key.slice(bytes+1);
+//      this.P = new ECPointFp(curve,
+//        curve.fromBigInteger(new BigInteger(x.toString("hex"), 16)),
+//        curve.fromBigInteger(new BigInteger(y.toString("hex"), 16)));      
+      this.P = curve.decodePointHex(key.toString("hex"));
+    }else{
+      if(key.length != bytes) return false;
+      priv = new BigInteger(key.toString("hex"), 16);      
     }
-  } else {
-    buf.fill(0)
+  }else{
+    var n1 = n.subtract(BigInteger.ONE);
+    var r = new BigInteger(crypto.randomBytes(n.bitLength()));
+    priv = r.mod(n1).add(BigInteger.ONE);
+    this.P = c.getG().multiply(priv);
   }
-  return buf
+  if(this.P)
+  {
+//  var pubhex = unstupid(this.P.getX().toBigInteger().toString(16),bytes*2)+unstupid(this.P.getY().toBigInteger().toString(16),bytes*2);
+//  this.PublicKey = Buffer.from("04"+pubhex,"hex");
+    this.PublicKey = Buffer.from(c.getCurve().encodeCompressedPointHex(this.P),"hex");
+  }
+  if(priv)
+  {
+    this.PrivateKey = Buffer.from(unstupid(priv.toString(16),bytes*2),"hex");
+    this.deriveSharedSecret = function(key)
+    {
+      if(!key || !key.P) return false;
+      var S = key.P.multiply(priv);
+      return Buffer.from(unstupid(S.getX().toBigInteger().toString(16),bytes*2),"hex");
+   }     
+  }
 }
 
-SafeBuffer.allocUnsafe = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return Buffer(size)
-}
-
-SafeBuffer.allocUnsafeSlow = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return buffer.SlowBuffer(size)
-}
 
 
 /***/ }),
@@ -103890,10 +109087,10 @@ module.exports = Signature;
 var assert = __webpack_require__(552);
 var Buffer = __webpack_require__(299).Buffer;
 var algs = __webpack_require__(151);
-var crypto = __webpack_require__(417);
+var crypto = __webpack_require__(373);
 var errs = __webpack_require__(172);
 var utils = __webpack_require__(241);
-var asn1 = __webpack_require__(784);
+var asn1 = __webpack_require__(440);
 var SSHBuffer = __webpack_require__(53);
 
 var InvalidAlgorithmError = errs.InvalidAlgorithmError;
@@ -104265,7 +109462,7 @@ var util = __webpack_require__(669)
 var childrenIgnored = common.childrenIgnored
 var isIgnored = common.isIgnored
 
-var once = __webpack_require__(174)
+var once = __webpack_require__(917)
 
 function glob (pattern, options, cb) {
   if (typeof options === 'function') cb = options, options = {}
@@ -105014,12 +110211,12 @@ module.exports = function isCancel(value) {
 
 
 module.exports = {
-   BranchDeleteSummary: __webpack_require__(212),
+   BranchDeleteSummary: __webpack_require__(96),
    BranchSummary: __webpack_require__(162),
    CommitSummary: __webpack_require__(419),
    DiffSummary: __webpack_require__(789),
    FetchSummary: __webpack_require__(396),
-   FileStatusSummary: __webpack_require__(112),
+   FileStatusSummary: __webpack_require__(807),
    ListLogSummary: __webpack_require__(493),
    MergeSummary: __webpack_require__(774),
    MoveSummary: __webpack_require__(119),
@@ -105076,7 +110273,7 @@ module.exports = new Type('tag:yaml.org,2002:set', {
  *
  * Copyright 2011-2017 Digital Bazaar, Inc.
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 
 module.exports = forge.md = forge.md || {};
 forge.md.algorithms = forge.md.algorithms || {};
@@ -105394,7 +110591,70 @@ exports.JWTAccess = JWTAccess;
 
 /***/ }),
 /* 895 */,
-/* 896 */,
+/* 896 */
+/***/ (function(module) {
+
+"use strict";
+
+
+module.exports = {
+  MAX_LENGTH: 1024 * 64,
+
+  // Digits
+  CHAR_0: '0', /* 0 */
+  CHAR_9: '9', /* 9 */
+
+  // Alphabet chars.
+  CHAR_UPPERCASE_A: 'A', /* A */
+  CHAR_LOWERCASE_A: 'a', /* a */
+  CHAR_UPPERCASE_Z: 'Z', /* Z */
+  CHAR_LOWERCASE_Z: 'z', /* z */
+
+  CHAR_LEFT_PARENTHESES: '(', /* ( */
+  CHAR_RIGHT_PARENTHESES: ')', /* ) */
+
+  CHAR_ASTERISK: '*', /* * */
+
+  // Non-alphabetic chars.
+  CHAR_AMPERSAND: '&', /* & */
+  CHAR_AT: '@', /* @ */
+  CHAR_BACKSLASH: '\\', /* \ */
+  CHAR_BACKTICK: '`', /* ` */
+  CHAR_CARRIAGE_RETURN: '\r', /* \r */
+  CHAR_CIRCUMFLEX_ACCENT: '^', /* ^ */
+  CHAR_COLON: ':', /* : */
+  CHAR_COMMA: ',', /* , */
+  CHAR_DOLLAR: '$', /* . */
+  CHAR_DOT: '.', /* . */
+  CHAR_DOUBLE_QUOTE: '"', /* " */
+  CHAR_EQUAL: '=', /* = */
+  CHAR_EXCLAMATION_MARK: '!', /* ! */
+  CHAR_FORM_FEED: '\f', /* \f */
+  CHAR_FORWARD_SLASH: '/', /* / */
+  CHAR_HASH: '#', /* # */
+  CHAR_HYPHEN_MINUS: '-', /* - */
+  CHAR_LEFT_ANGLE_BRACKET: '<', /* < */
+  CHAR_LEFT_CURLY_BRACE: '{', /* { */
+  CHAR_LEFT_SQUARE_BRACKET: '[', /* [ */
+  CHAR_LINE_FEED: '\n', /* \n */
+  CHAR_NO_BREAK_SPACE: '\u00A0', /* \u00A0 */
+  CHAR_PERCENT: '%', /* % */
+  CHAR_PLUS: '+', /* + */
+  CHAR_QUESTION_MARK: '?', /* ? */
+  CHAR_RIGHT_ANGLE_BRACKET: '>', /* > */
+  CHAR_RIGHT_CURLY_BRACE: '}', /* } */
+  CHAR_RIGHT_SQUARE_BRACKET: ']', /* ] */
+  CHAR_SEMICOLON: ';', /* ; */
+  CHAR_SINGLE_QUOTE: '\'', /* ' */
+  CHAR_SPACE: ' ', /*   */
+  CHAR_TAB: '\t', /* \t */
+  CHAR_UNDERSCORE: '_', /* _ */
+  CHAR_VERTICAL_LINE: '|', /* | */
+  CHAR_ZERO_WIDTH_NOBREAK_SPACE: '\uFEFF' /* \uFEFF */
+};
+
+
+/***/ }),
 /* 897 */,
 /* 898 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -105767,8 +111027,232 @@ class Node {
 exports.default = Node;
 
 /***/ }),
-/* 899 */,
-/* 900 */,
+/* 899 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+// Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
+
+var errors = __webpack_require__(355);
+var types = __webpack_require__(102);
+
+var Reader = __webpack_require__(502);
+var Writer = __webpack_require__(408);
+
+
+// --- Exports
+
+module.exports = {
+
+  Reader: Reader,
+
+  Writer: Writer
+
+};
+
+for (var t in types) {
+  if (types.hasOwnProperty(t))
+    module.exports[t] = types[t];
+}
+for (var e in errors) {
+  if (errors.hasOwnProperty(e))
+    module.exports[e] = errors[e];
+}
+
+
+/***/ }),
+/* 900 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+var reusify = __webpack_require__(398)
+
+function fastqueue (context, worker, concurrency) {
+  if (typeof context === 'function') {
+    concurrency = worker
+    worker = context
+    context = null
+  }
+
+  var cache = reusify(Task)
+  var queueHead = null
+  var queueTail = null
+  var _running = 0
+
+  var self = {
+    push: push,
+    drain: noop,
+    saturated: noop,
+    pause: pause,
+    paused: false,
+    concurrency: concurrency,
+    running: running,
+    resume: resume,
+    idle: idle,
+    length: length,
+    getQueue: getQueue,
+    unshift: unshift,
+    empty: noop,
+    kill: kill,
+    killAndDrain: killAndDrain
+  }
+
+  return self
+
+  function running () {
+    return _running
+  }
+
+  function pause () {
+    self.paused = true
+  }
+
+  function length () {
+    var current = queueHead
+    var counter = 0
+
+    while (current) {
+      current = current.next
+      counter++
+    }
+
+    return counter
+  }
+
+  function getQueue () {
+    var current = queueHead
+    var tasks = []
+
+    while (current) {
+      tasks.push(current.value)
+      current = current.next
+    }
+
+    return tasks
+  }
+
+  function resume () {
+    if (!self.paused) return
+    self.paused = false
+    for (var i = 0; i < self.concurrency; i++) {
+      _running++
+      release()
+    }
+  }
+
+  function idle () {
+    return _running === 0 && self.length() === 0
+  }
+
+  function push (value, done) {
+    var current = cache.get()
+
+    current.context = context
+    current.release = release
+    current.value = value
+    current.callback = done || noop
+
+    if (_running === self.concurrency || self.paused) {
+      if (queueTail) {
+        queueTail.next = current
+        queueTail = current
+      } else {
+        queueHead = current
+        queueTail = current
+        self.saturated()
+      }
+    } else {
+      _running++
+      worker.call(context, current.value, current.worked)
+    }
+  }
+
+  function unshift (value, done) {
+    var current = cache.get()
+
+    current.context = context
+    current.release = release
+    current.value = value
+    current.callback = done || noop
+
+    if (_running === self.concurrency || self.paused) {
+      if (queueHead) {
+        current.next = queueHead
+        queueHead = current
+      } else {
+        queueHead = current
+        queueTail = current
+        self.saturated()
+      }
+    } else {
+      _running++
+      worker.call(context, current.value, current.worked)
+    }
+  }
+
+  function release (holder) {
+    if (holder) {
+      cache.release(holder)
+    }
+    var next = queueHead
+    if (next) {
+      if (!self.paused) {
+        if (queueTail === queueHead) {
+          queueTail = null
+        }
+        queueHead = next.next
+        next.next = null
+        worker.call(context, next.value, next.worked)
+        if (queueTail === null) {
+          self.empty()
+        }
+      } else {
+        _running--
+      }
+    } else if (--_running === 0) {
+      self.drain()
+    }
+  }
+
+  function kill () {
+    queueHead = null
+    queueTail = null
+    self.drain = noop
+  }
+
+  function killAndDrain () {
+    queueHead = null
+    queueTail = null
+    self.drain()
+    self.drain = noop
+  }
+}
+
+function noop () {}
+
+function Task () {
+  this.value = null
+  this.callback = noop
+  this.next = null
+  this.release = noop
+  this.context = null
+
+  var self = this
+
+  this.worked = function worked (err, result) {
+    var callback = self.callback
+    self.value = null
+    self.callback = noop
+    callback.call(self.context, err, result)
+    self.release(self)
+  }
+}
+
+module.exports = fastqueue
+
+
+/***/ }),
 /* 901 */
 /***/ (function(module) {
 
@@ -105942,7 +111426,7 @@ module.exports = {
 };
 
 var assert = __webpack_require__(552);
-var asn1 = __webpack_require__(784);
+var asn1 = __webpack_require__(440);
 var Buffer = __webpack_require__(299).Buffer;
 var algs = __webpack_require__(151);
 var utils = __webpack_require__(241);
@@ -108255,7 +113739,7 @@ module.exports = Request
 var compileSchema = __webpack_require__(856)
   , resolve = __webpack_require__(203)
   , Cache = __webpack_require__(818)
-  , SchemaObject = __webpack_require__(344)
+  , SchemaObject = __webpack_require__(840)
   , stableStringify = __webpack_require__(243)
   , formats = __webpack_require__(848)
   , rules = __webpack_require__(625)
@@ -108761,32 +114245,36 @@ function noop() {}
 /***/ }),
 /* 907 */,
 /* 908 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
+exports = module.exports = stringify
+exports.getSerialize = serializer
 
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _crypto = _interopRequireDefault(__webpack_require__(417));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function sha1(bytes) {
-  if (Array.isArray(bytes)) {
-    bytes = Buffer.from(bytes);
-  } else if (typeof bytes === 'string') {
-    bytes = Buffer.from(bytes, 'utf8');
-  }
-
-  return _crypto.default.createHash('sha1').update(bytes).digest();
+function stringify(obj, replacer, spaces, cycleReplacer) {
+  return JSON.stringify(obj, serializer(replacer, cycleReplacer), spaces)
 }
 
-var _default = sha1;
-exports.default = _default;
+function serializer(replacer, cycleReplacer) {
+  var stack = [], keys = []
+
+  if (cycleReplacer == null) cycleReplacer = function(key, value) {
+    if (stack[0] === value) return "[Circular ~]"
+    return "[Circular ~." + keys.slice(0, stack.indexOf(value)).join(".") + "]"
+  }
+
+  return function(key, value) {
+    if (stack.length > 0) {
+      var thisPos = stack.indexOf(this)
+      ~thisPos ? stack.splice(thisPos + 1) : stack.push(this)
+      ~thisPos ? keys.splice(thisPos, Infinity, key) : keys.push(key)
+      if (~stack.indexOf(value)) value = cycleReplacer.call(this, key, value)
+    }
+    else stack.push(value)
+
+    return replacer == null ? value : replacer.call(this, key, value)
+  }
+}
+
 
 /***/ }),
 /* 909 */,
@@ -108808,8 +114296,8 @@ module.exports = '2.5.0'
  *
  * Copyright 2012 Stefan Siegl <stesie@brokenpipe.de>
  */
-var forge = __webpack_require__(998);
-__webpack_require__(992);
+var forge = __webpack_require__(45);
+__webpack_require__(730);
 
 module.exports = forge.mgf = forge.mgf || {};
 forge.mgf.mgf1 = forge.mgf1;
@@ -109060,8 +114548,8 @@ module.exports = new Type('tag:yaml.org,2002:str', {
  */
 
 var Store = __webpack_require__(136).Store;
-var permuteDomain = __webpack_require__(29).permuteDomain;
-var pathMatch = __webpack_require__(994).pathMatch;
+var permuteDomain = __webpack_require__(555).permuteDomain;
+var pathMatch = __webpack_require__(951).pathMatch;
 var util = __webpack_require__(669);
 
 function MemoryCookieStore() {
@@ -109213,27 +114701,113 @@ MemoryCookieStore.prototype.getAllCookies = function(cb) {
 
 /***/ }),
 /* 916 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 
-/**
- * Creates a new URL by combining the specified URLs
- *
- * @param {string} baseURL The base URL
- * @param {string} relativeURL The relative URL
- * @returns {string} The combined URL
- */
-module.exports = function combineURLs(baseURL, relativeURL) {
-  return relativeURL
-    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
-    : baseURL;
-};
+var Type = __webpack_require__(741);
+
+var _toString = Object.prototype.toString;
+
+function resolveYamlPairs(data) {
+  if (data === null) return true;
+
+  var index, length, pair, keys, result,
+      object = data;
+
+  result = new Array(object.length);
+
+  for (index = 0, length = object.length; index < length; index += 1) {
+    pair = object[index];
+
+    if (_toString.call(pair) !== '[object Object]') return false;
+
+    keys = Object.keys(pair);
+
+    if (keys.length !== 1) return false;
+
+    result[index] = [ keys[0], pair[keys[0]] ];
+  }
+
+  return true;
+}
+
+function constructYamlPairs(data) {
+  if (data === null) return [];
+
+  var index, length, pair, keys, result,
+      object = data;
+
+  result = new Array(object.length);
+
+  for (index = 0, length = object.length; index < length; index += 1) {
+    pair = object[index];
+
+    keys = Object.keys(pair);
+
+    result[index] = [ keys[0], pair[keys[0]] ];
+  }
+
+  return result;
+}
+
+module.exports = new Type('tag:yaml.org,2002:pairs', {
+  kind: 'sequence',
+  resolve: resolveYamlPairs,
+  construct: constructYamlPairs
+});
 
 
 /***/ }),
-/* 917 */,
+/* 917 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var wrappy = __webpack_require__(559)
+module.exports = wrappy(once)
+module.exports.strict = wrappy(onceStrict)
+
+once.proto = once(function () {
+  Object.defineProperty(Function.prototype, 'once', {
+    value: function () {
+      return once(this)
+    },
+    configurable: true
+  })
+
+  Object.defineProperty(Function.prototype, 'onceStrict', {
+    value: function () {
+      return onceStrict(this)
+    },
+    configurable: true
+  })
+})
+
+function once (fn) {
+  var f = function () {
+    if (f.called) return f.value
+    f.called = true
+    return f.value = fn.apply(this, arguments)
+  }
+  f.called = false
+  return f
+}
+
+function onceStrict (fn) {
+  var f = function () {
+    if (f.called)
+      throw new Error(f.onceError)
+    f.called = true
+    return f.value = fn.apply(this, arguments)
+  }
+  var name = fn.name || 'Function wrapped with `once`'
+  f.onceError = name + " shouldn't be called more than once"
+  f.called = false
+  return f
+}
+
+
+/***/ }),
 /* 918 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -109346,7 +114920,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
  *   signature          BIT STRING
  * }
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(138);
 __webpack_require__(535);
 __webpack_require__(390);
@@ -112574,107 +118148,64 @@ pki.verifyCertificateChain = function(caStore, chain, options) {
 
 /***/ }),
 /* 919 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-// Copyright 2018 Joyent, Inc.
+"use strict";
 
-module.exports = {
-	read: read,
-	write: write
-};
-
-var assert = __webpack_require__(552);
-var Buffer = __webpack_require__(299).Buffer;
-var rfc4253 = __webpack_require__(233);
-var Key = __webpack_require__(463);
-
-var errors = __webpack_require__(172);
-
-function read(buf, options) {
-	var lines = buf.toString('ascii').split(/[\r\n]+/);
-	var found = false;
-	var parts;
-	var si = 0;
-	while (si < lines.length) {
-		parts = splitHeader(lines[si++]);
-		if (parts &&
-		    parts[0].toLowerCase() === 'putty-user-key-file-2') {
-			found = true;
-			break;
-		}
-	}
-	if (!found) {
-		throw (new Error('No PuTTY format first line found'));
-	}
-	var alg = parts[1];
-
-	parts = splitHeader(lines[si++]);
-	assert.equal(parts[0].toLowerCase(), 'encryption');
-
-	parts = splitHeader(lines[si++]);
-	assert.equal(parts[0].toLowerCase(), 'comment');
-	var comment = parts[1];
-
-	parts = splitHeader(lines[si++]);
-	assert.equal(parts[0].toLowerCase(), 'public-lines');
-	var publicLines = parseInt(parts[1], 10);
-	if (!isFinite(publicLines) || publicLines < 0 ||
-	    publicLines > lines.length) {
-		throw (new Error('Invalid public-lines count'));
-	}
-
-	var publicBuf = Buffer.from(
-	    lines.slice(si, si + publicLines).join(''), 'base64');
-	var keyType = rfc4253.algToKeyType(alg);
-	var key = rfc4253.read(publicBuf);
-	if (key.type !== keyType) {
-		throw (new Error('Outer key algorithm mismatch'));
-	}
-	key.comment = comment;
-	return (key);
+Object.defineProperty(exports, "__esModule", { value: true });
+const stream_1 = __webpack_require__(413);
+const fsStat = __webpack_require__(519);
+const fsWalk = __webpack_require__(167);
+const reader_1 = __webpack_require__(437);
+class ReaderStream extends reader_1.default {
+    constructor() {
+        super(...arguments);
+        this._walkStream = fsWalk.walkStream;
+        this._stat = fsStat.stat;
+    }
+    dynamic(root, options) {
+        return this._walkStream(root, options);
+    }
+    static(patterns, options) {
+        const filepaths = patterns.map(this._getFullEntryPath, this);
+        const stream = new stream_1.PassThrough({ objectMode: true });
+        stream._write = (index, _enc, done) => {
+            return this._getEntry(filepaths[index], patterns[index], options)
+                .then((entry) => {
+                if (entry !== null && options.entryFilter(entry)) {
+                    stream.push(entry);
+                }
+                if (index === filepaths.length - 1) {
+                    stream.end();
+                }
+                done();
+            })
+                .catch(done);
+        };
+        for (let i = 0; i < filepaths.length; i++) {
+            stream.write(i);
+        }
+        return stream;
+    }
+    _getEntry(filepath, pattern, options) {
+        return this._getStat(filepath)
+            .then((stats) => this._makeEntry(stats, pattern))
+            .catch((error) => {
+            if (options.errorFilter(error)) {
+                return null;
+            }
+            throw error;
+        });
+    }
+    _getStat(filepath) {
+        return new Promise((resolve, reject) => {
+            this._stat(filepath, this._fsStatSettings, (error, stats) => {
+                return error === null ? resolve(stats) : reject(error);
+            });
+        });
+    }
 }
-
-function splitHeader(line) {
-	var idx = line.indexOf(':');
-	if (idx === -1)
-		return (null);
-	var header = line.slice(0, idx);
-	++idx;
-	while (line[idx] === ' ')
-		++idx;
-	var rest = line.slice(idx);
-	return ([header, rest]);
-}
-
-function write(key, options) {
-	assert.object(key);
-	if (!Key.isKey(key))
-		throw (new Error('Must be a public key'));
-
-	var alg = rfc4253.keyTypeToAlg(key);
-	var buf = rfc4253.write(key);
-	var comment = key.comment || '';
-
-	var b64 = buf.toString('base64');
-	var lines = wrap(b64, 64);
-
-	lines.unshift('Public-Lines: ' + lines.length);
-	lines.unshift('Comment: ' + comment);
-	lines.unshift('Encryption: none');
-	lines.unshift('PuTTY-User-Key-File-2: ' + alg);
-
-	return (Buffer.from(lines.join('\n') + '\n'));
-}
-
-function wrap(txt, len) {
-	var lines = [];
-	var pos = 0;
-	while (pos < txt.length) {
-		lines.push(txt.slice(pos, pos + 64));
-		pos += 64;
-	}
-	return (lines);
-}
+exports.default = ReaderStream;
 
 
 /***/ }),
@@ -113007,7 +118538,7 @@ Address all questions regarding this license to:
   Tom Wu
   tjw@cs.Stanford.EDU
 */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 
 module.exports = forge.jsbn = forge.jsbn || {};
 
@@ -114286,7 +119817,7 @@ module.exports = Fingerprint;
 var assert = __webpack_require__(552);
 var Buffer = __webpack_require__(299).Buffer;
 var algs = __webpack_require__(151);
-var crypto = __webpack_require__(417);
+var crypto = __webpack_require__(373);
 var errs = __webpack_require__(172);
 var Key = __webpack_require__(463);
 var PrivateKey = __webpack_require__(877);
@@ -114574,7 +120105,7 @@ module.exports = function parseHeaders(headers) {
  *
  * Copyright (c) 2010-2013 Digital Bazaar, Inc.
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 
 forge.pki = forge.pki || {};
 var oids = module.exports = forge.pki.oids = forge.oids = forge.oids || {};
@@ -114750,7 +120281,7 @@ _IN('1.3.6.1.5.5.7.3.8', 'timeStamping');
  *
  * Copyright (c) 2008-2013 Digital Bazaar, Inc.
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(294);
 
 /* LOG API */
@@ -115069,21 +120600,82 @@ forge.log.consoleLogger = sConsoleLogger;
 "use strict";
 
 
-var enhanceError = __webpack_require__(728);
+var utils = __webpack_require__(759);
+var transformData = __webpack_require__(941);
+var isCancel = __webpack_require__(597);
+var defaults = __webpack_require__(689);
 
 /**
- * Create an Error with the specified message, config, error code, request and response.
- *
- * @param {string} message The error message.
- * @param {Object} config The config.
- * @param {string} [code] The error code (for example, 'ECONNABORTED').
- * @param {Object} [request] The request.
- * @param {Object} [response] The response.
- * @returns {Error} The created error.
+ * Throws a `Cancel` if cancellation has been requested.
  */
-module.exports = function createError(message, config, code, request, response) {
-  var error = new Error(message);
-  return enhanceError(error, config, code, request, response);
+function throwIfCancellationRequested(config) {
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested();
+  }
+}
+
+/**
+ * Dispatch a request to the server using the configured adapter.
+ *
+ * @param {object} config The config that is to be used for the request
+ * @returns {Promise} The Promise to be fulfilled
+ */
+module.exports = function dispatchRequest(config) {
+  throwIfCancellationRequested(config);
+
+  // Ensure headers exist
+  config.headers = config.headers || {};
+
+  // Transform request data
+  config.data = transformData(
+    config.data,
+    config.headers,
+    config.transformRequest
+  );
+
+  // Flatten headers
+  config.headers = utils.merge(
+    config.headers.common || {},
+    config.headers[config.method] || {},
+    config.headers
+  );
+
+  utils.forEach(
+    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+    function cleanHeaderConfig(method) {
+      delete config.headers[method];
+    }
+  );
+
+  var adapter = config.adapter || defaults.adapter;
+
+  return adapter(config).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config);
+
+    // Transform response data
+    response.data = transformData(
+      response.data,
+      response.headers,
+      config.transformResponse
+    );
+
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config);
+
+      // Transform response data
+      if (reason && reason.response) {
+        reason.response.data = transformData(
+          reason.response.data,
+          reason.response.headers,
+          config.transformResponse
+        );
+      }
+    }
+
+    return Promise.reject(reason);
+  });
 };
 
 
@@ -117014,7 +122606,7 @@ exports.realpath = function realpath(p, cache, cb) {
  * Copyright (c) 2019 Digital Bazaar, Inc.
  */
 
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(535);
 var asn1 = forge.asn1;
 
@@ -117906,12 +123498,293 @@ class ExecState extends events.EventEmitter {
 /* 946 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-module.exports =
-{
-  parallel      : __webpack_require__(401),
-  serial        : __webpack_require__(726),
-  serialOrdered : __webpack_require__(247)
+// Copyright 2017 Joyent, Inc.
+
+module.exports = {
+	read: read,
+	write: write
 };
+
+var assert = __webpack_require__(552);
+var Buffer = __webpack_require__(299).Buffer;
+var Key = __webpack_require__(463);
+var PrivateKey = __webpack_require__(877);
+var utils = __webpack_require__(241);
+var SSHBuffer = __webpack_require__(53);
+var Dhe = __webpack_require__(25);
+
+var supportedAlgos = {
+	'rsa-sha1' : 5,
+	'rsa-sha256' : 8,
+	'rsa-sha512' : 10,
+	'ecdsa-p256-sha256' : 13,
+	'ecdsa-p384-sha384' : 14
+	/*
+	 * ed25519 is hypothetically supported with id 15
+	 * but the common tools available don't appear to be
+	 * capable of generating/using ed25519 keys
+	 */
+};
+
+var supportedAlgosById = {};
+Object.keys(supportedAlgos).forEach(function (k) {
+	supportedAlgosById[supportedAlgos[k]] = k.toUpperCase();
+});
+
+function read(buf, options) {
+	if (typeof (buf) !== 'string') {
+		assert.buffer(buf, 'buf');
+		buf = buf.toString('ascii');
+	}
+	var lines = buf.split('\n');
+	if (lines[0].match(/^Private-key-format\: v1/)) {
+		var algElems = lines[1].split(' ');
+		var algoNum = parseInt(algElems[1], 10);
+		var algoName = algElems[2];
+		if (!supportedAlgosById[algoNum])
+			throw (new Error('Unsupported algorithm: ' + algoName));
+		return (readDNSSECPrivateKey(algoNum, lines.slice(2)));
+	}
+
+	// skip any comment-lines
+	var line = 0;
+	/* JSSTYLED */
+	while (lines[line].match(/^\;/))
+		line++;
+	// we should now have *one single* line left with our KEY on it.
+	if ((lines[line].match(/\. IN KEY /) ||
+	    lines[line].match(/\. IN DNSKEY /)) && lines[line+1].length === 0) {
+		return (readRFC3110(lines[line]));
+	}
+	throw (new Error('Cannot parse dnssec key'));
+}
+
+function readRFC3110(keyString) {
+	var elems = keyString.split(' ');
+	//unused var flags = parseInt(elems[3], 10);
+	//unused var protocol = parseInt(elems[4], 10);
+	var algorithm = parseInt(elems[5], 10);
+	if (!supportedAlgosById[algorithm])
+		throw (new Error('Unsupported algorithm: ' + algorithm));
+	var base64key = elems.slice(6, elems.length).join();
+	var keyBuffer = Buffer.from(base64key, 'base64');
+	if (supportedAlgosById[algorithm].match(/^RSA-/)) {
+		// join the rest of the body into a single base64-blob
+		var publicExponentLen = keyBuffer.readUInt8(0);
+		if (publicExponentLen != 3 && publicExponentLen != 1)
+			throw (new Error('Cannot parse dnssec key: ' +
+			    'unsupported exponent length'));
+
+		var publicExponent = keyBuffer.slice(1, publicExponentLen+1);
+		publicExponent = utils.mpNormalize(publicExponent);
+		var modulus = keyBuffer.slice(1+publicExponentLen);
+		modulus = utils.mpNormalize(modulus);
+		// now, make the key
+		var rsaKey = {
+			type: 'rsa',
+			parts: []
+		};
+		rsaKey.parts.push({ name: 'e', data: publicExponent});
+		rsaKey.parts.push({ name: 'n', data: modulus});
+		return (new Key(rsaKey));
+	}
+	if (supportedAlgosById[algorithm] === 'ECDSA-P384-SHA384' ||
+	    supportedAlgosById[algorithm] === 'ECDSA-P256-SHA256') {
+		var curve = 'nistp384';
+		var size = 384;
+		if (supportedAlgosById[algorithm].match(/^ECDSA-P256-SHA256/)) {
+			curve = 'nistp256';
+			size = 256;
+		}
+
+		var ecdsaKey = {
+			type: 'ecdsa',
+			curve: curve,
+			size: size,
+			parts: [
+				{name: 'curve', data: Buffer.from(curve) },
+				{name: 'Q', data: utils.ecNormalize(keyBuffer) }
+			]
+		};
+		return (new Key(ecdsaKey));
+	}
+	throw (new Error('Unsupported algorithm: ' +
+	    supportedAlgosById[algorithm]));
+}
+
+function elementToBuf(e) {
+	return (Buffer.from(e.split(' ')[1], 'base64'));
+}
+
+function readDNSSECRSAPrivateKey(elements) {
+	var rsaParams = {};
+	elements.forEach(function (element) {
+		if (element.split(' ')[0] === 'Modulus:')
+			rsaParams['n'] = elementToBuf(element);
+		else if (element.split(' ')[0] === 'PublicExponent:')
+			rsaParams['e'] = elementToBuf(element);
+		else if (element.split(' ')[0] === 'PrivateExponent:')
+			rsaParams['d'] = elementToBuf(element);
+		else if (element.split(' ')[0] === 'Prime1:')
+			rsaParams['p'] = elementToBuf(element);
+		else if (element.split(' ')[0] === 'Prime2:')
+			rsaParams['q'] = elementToBuf(element);
+		else if (element.split(' ')[0] === 'Exponent1:')
+			rsaParams['dmodp'] = elementToBuf(element);
+		else if (element.split(' ')[0] === 'Exponent2:')
+			rsaParams['dmodq'] = elementToBuf(element);
+		else if (element.split(' ')[0] === 'Coefficient:')
+			rsaParams['iqmp'] = elementToBuf(element);
+	});
+	// now, make the key
+	var key = {
+		type: 'rsa',
+		parts: [
+			{ name: 'e', data: utils.mpNormalize(rsaParams['e'])},
+			{ name: 'n', data: utils.mpNormalize(rsaParams['n'])},
+			{ name: 'd', data: utils.mpNormalize(rsaParams['d'])},
+			{ name: 'p', data: utils.mpNormalize(rsaParams['p'])},
+			{ name: 'q', data: utils.mpNormalize(rsaParams['q'])},
+			{ name: 'dmodp',
+			    data: utils.mpNormalize(rsaParams['dmodp'])},
+			{ name: 'dmodq',
+			    data: utils.mpNormalize(rsaParams['dmodq'])},
+			{ name: 'iqmp',
+			    data: utils.mpNormalize(rsaParams['iqmp'])}
+		]
+	};
+	return (new PrivateKey(key));
+}
+
+function readDNSSECPrivateKey(alg, elements) {
+	if (supportedAlgosById[alg].match(/^RSA-/)) {
+		return (readDNSSECRSAPrivateKey(elements));
+	}
+	if (supportedAlgosById[alg] === 'ECDSA-P384-SHA384' ||
+	    supportedAlgosById[alg] === 'ECDSA-P256-SHA256') {
+		var d = Buffer.from(elements[0].split(' ')[1], 'base64');
+		var curve = 'nistp384';
+		var size = 384;
+		if (supportedAlgosById[alg] === 'ECDSA-P256-SHA256') {
+			curve = 'nistp256';
+			size = 256;
+		}
+		// DNSSEC generates the public-key on the fly (go calculate it)
+		var publicKey = utils.publicFromPrivateECDSA(curve, d);
+		var Q = publicKey.part['Q'].data;
+		var ecdsaKey = {
+			type: 'ecdsa',
+			curve: curve,
+			size: size,
+			parts: [
+				{name: 'curve', data: Buffer.from(curve) },
+				{name: 'd', data: d },
+				{name: 'Q', data: Q }
+			]
+		};
+		return (new PrivateKey(ecdsaKey));
+	}
+	throw (new Error('Unsupported algorithm: ' + supportedAlgosById[alg]));
+}
+
+function dnssecTimestamp(date) {
+	var year = date.getFullYear() + ''; //stringify
+	var month = (date.getMonth() + 1);
+	var timestampStr = year + month + date.getUTCDate();
+	timestampStr += '' + date.getUTCHours() + date.getUTCMinutes();
+	timestampStr += date.getUTCSeconds();
+	return (timestampStr);
+}
+
+function rsaAlgFromOptions(opts) {
+	if (!opts || !opts.hashAlgo || opts.hashAlgo === 'sha1')
+		return ('5 (RSASHA1)');
+	else if (opts.hashAlgo === 'sha256')
+		return ('8 (RSASHA256)');
+	else if (opts.hashAlgo === 'sha512')
+		return ('10 (RSASHA512)');
+	else
+		throw (new Error('Unknown or unsupported hash: ' +
+		    opts.hashAlgo));
+}
+
+function writeRSA(key, options) {
+	// if we're missing parts, add them.
+	if (!key.part.dmodp || !key.part.dmodq) {
+		utils.addRSAMissing(key);
+	}
+
+	var out = '';
+	out += 'Private-key-format: v1.3\n';
+	out += 'Algorithm: ' + rsaAlgFromOptions(options) + '\n';
+	var n = utils.mpDenormalize(key.part['n'].data);
+	out += 'Modulus: ' + n.toString('base64') + '\n';
+	var e = utils.mpDenormalize(key.part['e'].data);
+	out += 'PublicExponent: ' + e.toString('base64') + '\n';
+	var d = utils.mpDenormalize(key.part['d'].data);
+	out += 'PrivateExponent: ' + d.toString('base64') + '\n';
+	var p = utils.mpDenormalize(key.part['p'].data);
+	out += 'Prime1: ' + p.toString('base64') + '\n';
+	var q = utils.mpDenormalize(key.part['q'].data);
+	out += 'Prime2: ' + q.toString('base64') + '\n';
+	var dmodp = utils.mpDenormalize(key.part['dmodp'].data);
+	out += 'Exponent1: ' + dmodp.toString('base64') + '\n';
+	var dmodq = utils.mpDenormalize(key.part['dmodq'].data);
+	out += 'Exponent2: ' + dmodq.toString('base64') + '\n';
+	var iqmp = utils.mpDenormalize(key.part['iqmp'].data);
+	out += 'Coefficient: ' + iqmp.toString('base64') + '\n';
+	// Assume that we're valid as-of now
+	var timestamp = new Date();
+	out += 'Created: ' + dnssecTimestamp(timestamp) + '\n';
+	out += 'Publish: ' + dnssecTimestamp(timestamp) + '\n';
+	out += 'Activate: ' + dnssecTimestamp(timestamp) + '\n';
+	return (Buffer.from(out, 'ascii'));
+}
+
+function writeECDSA(key, options) {
+	var out = '';
+	out += 'Private-key-format: v1.3\n';
+
+	if (key.curve === 'nistp256') {
+		out += 'Algorithm: 13 (ECDSAP256SHA256)\n';
+	} else if (key.curve === 'nistp384') {
+		out += 'Algorithm: 14 (ECDSAP384SHA384)\n';
+	} else {
+		throw (new Error('Unsupported curve'));
+	}
+	var base64Key = key.part['d'].data.toString('base64');
+	out += 'PrivateKey: ' + base64Key + '\n';
+
+	// Assume that we're valid as-of now
+	var timestamp = new Date();
+	out += 'Created: ' + dnssecTimestamp(timestamp) + '\n';
+	out += 'Publish: ' + dnssecTimestamp(timestamp) + '\n';
+	out += 'Activate: ' + dnssecTimestamp(timestamp) + '\n';
+
+	return (Buffer.from(out, 'ascii'));
+}
+
+function write(key, options) {
+	if (PrivateKey.isPrivateKey(key)) {
+		if (key.type === 'rsa') {
+			return (writeRSA(key, options));
+		} else if (key.type === 'ecdsa') {
+			return (writeECDSA(key, options));
+		} else {
+			throw (new Error('Unsupported algorithm: ' + key.type));
+		}
+	} else if (Key.isKey(key)) {
+		/*
+		 * RFC3110 requires a keyname, and a keytype, which we
+		 * don't really have a mechanism for specifying such
+		 * additional metadata.
+		 */
+		throw (new Error('Format "dnssec" only supports ' +
+		    'writing private keys'));
+	} else {
+		throw (new Error('key is not a Key or PrivateKey'));
+	}
+}
 
 
 /***/ }),
@@ -117925,7 +123798,7 @@ module.exports =
 
 var stringify = __webpack_require__(66);
 var parse = __webpack_require__(57);
-var formats = __webpack_require__(649);
+var formats = __webpack_require__(379);
 
 module.exports = {
     formats: formats,
@@ -117937,1007 +123810,70 @@ module.exports = {
 /***/ }),
 /* 950 */,
 /* 951 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports) {
 
-/**
- * Supported cipher modes.
+"use strict";
+/*!
+ * Copyright (c) 2015, Salesforce.com, Inc.
+ * All rights reserved.
  *
- * @author Dave Longley
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * Copyright (c) 2010-2014 Digital Bazaar, Inc.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of Salesforce.com nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
-var forge = __webpack_require__(998);
-__webpack_require__(294);
 
-forge.cipher = forge.cipher || {};
-
-// supported cipher modes
-var modes = module.exports = forge.cipher.modes = forge.cipher.modes || {};
-
-/** Electronic codebook (ECB) (Don't use this; it's not secure) **/
-
-modes.ecb = function(options) {
-  options = options || {};
-  this.name = 'ECB';
-  this.cipher = options.cipher;
-  this.blockSize = options.blockSize || 16;
-  this._ints = this.blockSize / 4;
-  this._inBlock = new Array(this._ints);
-  this._outBlock = new Array(this._ints);
-};
-
-modes.ecb.prototype.start = function(options) {};
-
-modes.ecb.prototype.encrypt = function(input, output, finish) {
-  // not enough input to encrypt
-  if(input.length() < this.blockSize && !(finish && input.length() > 0)) {
+/*
+ * "A request-path path-matches a given cookie-path if at least one of the
+ * following conditions holds:"
+ */
+function pathMatch (reqPath, cookiePath) {
+  // "o  The cookie-path and the request-path are identical."
+  if (cookiePath === reqPath) {
     return true;
   }
 
-  // get next block
-  for(var i = 0; i < this._ints; ++i) {
-    this._inBlock[i] = input.getInt32();
-  }
-
-  // encrypt block
-  this.cipher.encrypt(this._inBlock, this._outBlock);
-
-  // write output
-  for(var i = 0; i < this._ints; ++i) {
-    output.putInt32(this._outBlock[i]);
-  }
-};
-
-modes.ecb.prototype.decrypt = function(input, output, finish) {
-  // not enough input to decrypt
-  if(input.length() < this.blockSize && !(finish && input.length() > 0)) {
-    return true;
-  }
-
-  // get next block
-  for(var i = 0; i < this._ints; ++i) {
-    this._inBlock[i] = input.getInt32();
-  }
-
-  // decrypt block
-  this.cipher.decrypt(this._inBlock, this._outBlock);
-
-  // write output
-  for(var i = 0; i < this._ints; ++i) {
-    output.putInt32(this._outBlock[i]);
-  }
-};
-
-modes.ecb.prototype.pad = function(input, options) {
-  // add PKCS#7 padding to block (each pad byte is the
-  // value of the number of pad bytes)
-  var padding = (input.length() === this.blockSize ?
-    this.blockSize : (this.blockSize - input.length()));
-  input.fillWithByte(padding, padding);
-  return true;
-};
-
-modes.ecb.prototype.unpad = function(output, options) {
-  // check for error: input data not a multiple of blockSize
-  if(options.overflow > 0) {
-    return false;
-  }
-
-  // ensure padding byte count is valid
-  var len = output.length();
-  var count = output.at(len - 1);
-  if(count > (this.blockSize << 2)) {
-    return false;
-  }
-
-  // trim off padding bytes
-  output.truncate(count);
-  return true;
-};
-
-/** Cipher-block Chaining (CBC) **/
-
-modes.cbc = function(options) {
-  options = options || {};
-  this.name = 'CBC';
-  this.cipher = options.cipher;
-  this.blockSize = options.blockSize || 16;
-  this._ints = this.blockSize / 4;
-  this._inBlock = new Array(this._ints);
-  this._outBlock = new Array(this._ints);
-};
-
-modes.cbc.prototype.start = function(options) {
-  // Note: legacy support for using IV residue (has security flaws)
-  // if IV is null, reuse block from previous processing
-  if(options.iv === null) {
-    // must have a previous block
-    if(!this._prev) {
-      throw new Error('Invalid IV parameter.');
-    }
-    this._iv = this._prev.slice(0);
-  } else if(!('iv' in options)) {
-    throw new Error('Invalid IV parameter.');
-  } else {
-    // save IV as "previous" block
-    this._iv = transformIV(options.iv, this.blockSize);
-    this._prev = this._iv.slice(0);
-  }
-};
-
-modes.cbc.prototype.encrypt = function(input, output, finish) {
-  // not enough input to encrypt
-  if(input.length() < this.blockSize && !(finish && input.length() > 0)) {
-    return true;
-  }
-
-  // get next block
-  // CBC XOR's IV (or previous block) with plaintext
-  for(var i = 0; i < this._ints; ++i) {
-    this._inBlock[i] = this._prev[i] ^ input.getInt32();
-  }
-
-  // encrypt block
-  this.cipher.encrypt(this._inBlock, this._outBlock);
-
-  // write output, save previous block
-  for(var i = 0; i < this._ints; ++i) {
-    output.putInt32(this._outBlock[i]);
-  }
-  this._prev = this._outBlock;
-};
-
-modes.cbc.prototype.decrypt = function(input, output, finish) {
-  // not enough input to decrypt
-  if(input.length() < this.blockSize && !(finish && input.length() > 0)) {
-    return true;
-  }
-
-  // get next block
-  for(var i = 0; i < this._ints; ++i) {
-    this._inBlock[i] = input.getInt32();
-  }
-
-  // decrypt block
-  this.cipher.decrypt(this._inBlock, this._outBlock);
-
-  // write output, save previous ciphered block
-  // CBC XOR's IV (or previous block) with ciphertext
-  for(var i = 0; i < this._ints; ++i) {
-    output.putInt32(this._prev[i] ^ this._outBlock[i]);
-  }
-  this._prev = this._inBlock.slice(0);
-};
-
-modes.cbc.prototype.pad = function(input, options) {
-  // add PKCS#7 padding to block (each pad byte is the
-  // value of the number of pad bytes)
-  var padding = (input.length() === this.blockSize ?
-    this.blockSize : (this.blockSize - input.length()));
-  input.fillWithByte(padding, padding);
-  return true;
-};
-
-modes.cbc.prototype.unpad = function(output, options) {
-  // check for error: input data not a multiple of blockSize
-  if(options.overflow > 0) {
-    return false;
-  }
-
-  // ensure padding byte count is valid
-  var len = output.length();
-  var count = output.at(len - 1);
-  if(count > (this.blockSize << 2)) {
-    return false;
-  }
-
-  // trim off padding bytes
-  output.truncate(count);
-  return true;
-};
-
-/** Cipher feedback (CFB) **/
-
-modes.cfb = function(options) {
-  options = options || {};
-  this.name = 'CFB';
-  this.cipher = options.cipher;
-  this.blockSize = options.blockSize || 16;
-  this._ints = this.blockSize / 4;
-  this._inBlock = null;
-  this._outBlock = new Array(this._ints);
-  this._partialBlock = new Array(this._ints);
-  this._partialOutput = forge.util.createBuffer();
-  this._partialBytes = 0;
-};
-
-modes.cfb.prototype.start = function(options) {
-  if(!('iv' in options)) {
-    throw new Error('Invalid IV parameter.');
-  }
-  // use IV as first input
-  this._iv = transformIV(options.iv, this.blockSize);
-  this._inBlock = this._iv.slice(0);
-  this._partialBytes = 0;
-};
-
-modes.cfb.prototype.encrypt = function(input, output, finish) {
-  // not enough input to encrypt
-  var inputLength = input.length();
-  if(inputLength === 0) {
-    return true;
-  }
-
-  // encrypt block
-  this.cipher.encrypt(this._inBlock, this._outBlock);
-
-  // handle full block
-  if(this._partialBytes === 0 && inputLength >= this.blockSize) {
-    // XOR input with output, write input as output
-    for(var i = 0; i < this._ints; ++i) {
-      this._inBlock[i] = input.getInt32() ^ this._outBlock[i];
-      output.putInt32(this._inBlock[i]);
-    }
-    return;
-  }
-
-  // handle partial block
-  var partialBytes = (this.blockSize - inputLength) % this.blockSize;
-  if(partialBytes > 0) {
-    partialBytes = this.blockSize - partialBytes;
-  }
-
-  // XOR input with output, write input as partial output
-  this._partialOutput.clear();
-  for(var i = 0; i < this._ints; ++i) {
-    this._partialBlock[i] = input.getInt32() ^ this._outBlock[i];
-    this._partialOutput.putInt32(this._partialBlock[i]);
-  }
-
-  if(partialBytes > 0) {
-    // block still incomplete, restore input buffer
-    input.read -= this.blockSize;
-  } else {
-    // block complete, update input block
-    for(var i = 0; i < this._ints; ++i) {
-      this._inBlock[i] = this._partialBlock[i];
-    }
-  }
-
-  // skip any previous partial bytes
-  if(this._partialBytes > 0) {
-    this._partialOutput.getBytes(this._partialBytes);
-  }
-
-  if(partialBytes > 0 && !finish) {
-    output.putBytes(this._partialOutput.getBytes(
-      partialBytes - this._partialBytes));
-    this._partialBytes = partialBytes;
-    return true;
-  }
-
-  output.putBytes(this._partialOutput.getBytes(
-    inputLength - this._partialBytes));
-  this._partialBytes = 0;
-};
-
-modes.cfb.prototype.decrypt = function(input, output, finish) {
-  // not enough input to decrypt
-  var inputLength = input.length();
-  if(inputLength === 0) {
-    return true;
-  }
-
-  // encrypt block (CFB always uses encryption mode)
-  this.cipher.encrypt(this._inBlock, this._outBlock);
-
-  // handle full block
-  if(this._partialBytes === 0 && inputLength >= this.blockSize) {
-    // XOR input with output, write input as output
-    for(var i = 0; i < this._ints; ++i) {
-      this._inBlock[i] = input.getInt32();
-      output.putInt32(this._inBlock[i] ^ this._outBlock[i]);
-    }
-    return;
-  }
-
-  // handle partial block
-  var partialBytes = (this.blockSize - inputLength) % this.blockSize;
-  if(partialBytes > 0) {
-    partialBytes = this.blockSize - partialBytes;
-  }
-
-  // XOR input with output, write input as partial output
-  this._partialOutput.clear();
-  for(var i = 0; i < this._ints; ++i) {
-    this._partialBlock[i] = input.getInt32();
-    this._partialOutput.putInt32(this._partialBlock[i] ^ this._outBlock[i]);
-  }
-
-  if(partialBytes > 0) {
-    // block still incomplete, restore input buffer
-    input.read -= this.blockSize;
-  } else {
-    // block complete, update input block
-    for(var i = 0; i < this._ints; ++i) {
-      this._inBlock[i] = this._partialBlock[i];
-    }
-  }
-
-  // skip any previous partial bytes
-  if(this._partialBytes > 0) {
-    this._partialOutput.getBytes(this._partialBytes);
-  }
-
-  if(partialBytes > 0 && !finish) {
-    output.putBytes(this._partialOutput.getBytes(
-      partialBytes - this._partialBytes));
-    this._partialBytes = partialBytes;
-    return true;
-  }
-
-  output.putBytes(this._partialOutput.getBytes(
-    inputLength - this._partialBytes));
-  this._partialBytes = 0;
-};
-
-/** Output feedback (OFB) **/
-
-modes.ofb = function(options) {
-  options = options || {};
-  this.name = 'OFB';
-  this.cipher = options.cipher;
-  this.blockSize = options.blockSize || 16;
-  this._ints = this.blockSize / 4;
-  this._inBlock = null;
-  this._outBlock = new Array(this._ints);
-  this._partialOutput = forge.util.createBuffer();
-  this._partialBytes = 0;
-};
-
-modes.ofb.prototype.start = function(options) {
-  if(!('iv' in options)) {
-    throw new Error('Invalid IV parameter.');
-  }
-  // use IV as first input
-  this._iv = transformIV(options.iv, this.blockSize);
-  this._inBlock = this._iv.slice(0);
-  this._partialBytes = 0;
-};
-
-modes.ofb.prototype.encrypt = function(input, output, finish) {
-  // not enough input to encrypt
-  var inputLength = input.length();
-  if(input.length() === 0) {
-    return true;
-  }
-
-  // encrypt block (OFB always uses encryption mode)
-  this.cipher.encrypt(this._inBlock, this._outBlock);
-
-  // handle full block
-  if(this._partialBytes === 0 && inputLength >= this.blockSize) {
-    // XOR input with output and update next input
-    for(var i = 0; i < this._ints; ++i) {
-      output.putInt32(input.getInt32() ^ this._outBlock[i]);
-      this._inBlock[i] = this._outBlock[i];
-    }
-    return;
-  }
-
-  // handle partial block
-  var partialBytes = (this.blockSize - inputLength) % this.blockSize;
-  if(partialBytes > 0) {
-    partialBytes = this.blockSize - partialBytes;
-  }
-
-  // XOR input with output
-  this._partialOutput.clear();
-  for(var i = 0; i < this._ints; ++i) {
-    this._partialOutput.putInt32(input.getInt32() ^ this._outBlock[i]);
-  }
-
-  if(partialBytes > 0) {
-    // block still incomplete, restore input buffer
-    input.read -= this.blockSize;
-  } else {
-    // block complete, update input block
-    for(var i = 0; i < this._ints; ++i) {
-      this._inBlock[i] = this._outBlock[i];
-    }
-  }
-
-  // skip any previous partial bytes
-  if(this._partialBytes > 0) {
-    this._partialOutput.getBytes(this._partialBytes);
-  }
-
-  if(partialBytes > 0 && !finish) {
-    output.putBytes(this._partialOutput.getBytes(
-      partialBytes - this._partialBytes));
-    this._partialBytes = partialBytes;
-    return true;
-  }
-
-  output.putBytes(this._partialOutput.getBytes(
-    inputLength - this._partialBytes));
-  this._partialBytes = 0;
-};
-
-modes.ofb.prototype.decrypt = modes.ofb.prototype.encrypt;
-
-/** Counter (CTR) **/
-
-modes.ctr = function(options) {
-  options = options || {};
-  this.name = 'CTR';
-  this.cipher = options.cipher;
-  this.blockSize = options.blockSize || 16;
-  this._ints = this.blockSize / 4;
-  this._inBlock = null;
-  this._outBlock = new Array(this._ints);
-  this._partialOutput = forge.util.createBuffer();
-  this._partialBytes = 0;
-};
-
-modes.ctr.prototype.start = function(options) {
-  if(!('iv' in options)) {
-    throw new Error('Invalid IV parameter.');
-  }
-  // use IV as first input
-  this._iv = transformIV(options.iv, this.blockSize);
-  this._inBlock = this._iv.slice(0);
-  this._partialBytes = 0;
-};
-
-modes.ctr.prototype.encrypt = function(input, output, finish) {
-  // not enough input to encrypt
-  var inputLength = input.length();
-  if(inputLength === 0) {
-    return true;
-  }
-
-  // encrypt block (CTR always uses encryption mode)
-  this.cipher.encrypt(this._inBlock, this._outBlock);
-
-  // handle full block
-  if(this._partialBytes === 0 && inputLength >= this.blockSize) {
-    // XOR input with output
-    for(var i = 0; i < this._ints; ++i) {
-      output.putInt32(input.getInt32() ^ this._outBlock[i]);
-    }
-  } else {
-    // handle partial block
-    var partialBytes = (this.blockSize - inputLength) % this.blockSize;
-    if(partialBytes > 0) {
-      partialBytes = this.blockSize - partialBytes;
-    }
-
-    // XOR input with output
-    this._partialOutput.clear();
-    for(var i = 0; i < this._ints; ++i) {
-      this._partialOutput.putInt32(input.getInt32() ^ this._outBlock[i]);
-    }
-
-    if(partialBytes > 0) {
-      // block still incomplete, restore input buffer
-      input.read -= this.blockSize;
-    }
-
-    // skip any previous partial bytes
-    if(this._partialBytes > 0) {
-      this._partialOutput.getBytes(this._partialBytes);
-    }
-
-    if(partialBytes > 0 && !finish) {
-      output.putBytes(this._partialOutput.getBytes(
-        partialBytes - this._partialBytes));
-      this._partialBytes = partialBytes;
+  var idx = reqPath.indexOf(cookiePath);
+  if (idx === 0) {
+    // "o  The cookie-path is a prefix of the request-path, and the last
+    // character of the cookie-path is %x2F ("/")."
+    if (cookiePath.substr(-1) === "/") {
       return true;
     }
 
-    output.putBytes(this._partialOutput.getBytes(
-      inputLength - this._partialBytes));
-    this._partialBytes = 0;
-  }
-
-  // block complete, increment counter (input block)
-  inc32(this._inBlock);
-};
-
-modes.ctr.prototype.decrypt = modes.ctr.prototype.encrypt;
-
-/** Galois/Counter Mode (GCM) **/
-
-modes.gcm = function(options) {
-  options = options || {};
-  this.name = 'GCM';
-  this.cipher = options.cipher;
-  this.blockSize = options.blockSize || 16;
-  this._ints = this.blockSize / 4;
-  this._inBlock = new Array(this._ints);
-  this._outBlock = new Array(this._ints);
-  this._partialOutput = forge.util.createBuffer();
-  this._partialBytes = 0;
-
-  // R is actually this value concatenated with 120 more zero bits, but
-  // we only XOR against R so the other zeros have no effect -- we just
-  // apply this value to the first integer in a block
-  this._R = 0xE1000000;
-};
-
-modes.gcm.prototype.start = function(options) {
-  if(!('iv' in options)) {
-    throw new Error('Invalid IV parameter.');
-  }
-  // ensure IV is a byte buffer
-  var iv = forge.util.createBuffer(options.iv);
-
-  // no ciphered data processed yet
-  this._cipherLength = 0;
-
-  // default additional data is none
-  var additionalData;
-  if('additionalData' in options) {
-    additionalData = forge.util.createBuffer(options.additionalData);
-  } else {
-    additionalData = forge.util.createBuffer();
-  }
-
-  // default tag length is 128 bits
-  if('tagLength' in options) {
-    this._tagLength = options.tagLength;
-  } else {
-    this._tagLength = 128;
-  }
-
-  // if tag is given, ensure tag matches tag length
-  this._tag = null;
-  if(options.decrypt) {
-    // save tag to check later
-    this._tag = forge.util.createBuffer(options.tag).getBytes();
-    if(this._tag.length !== (this._tagLength / 8)) {
-      throw new Error('Authentication tag does not match tag length.');
-    }
-  }
-
-  // create tmp storage for hash calculation
-  this._hashBlock = new Array(this._ints);
-
-  // no tag generated yet
-  this.tag = null;
-
-  // generate hash subkey
-  // (apply block cipher to "zero" block)
-  this._hashSubkey = new Array(this._ints);
-  this.cipher.encrypt([0, 0, 0, 0], this._hashSubkey);
-
-  // generate table M
-  // use 4-bit tables (32 component decomposition of a 16 byte value)
-  // 8-bit tables take more space and are known to have security
-  // vulnerabilities (in native implementations)
-  this.componentBits = 4;
-  this._m = this.generateHashTable(this._hashSubkey, this.componentBits);
-
-  // Note: support IV length different from 96 bits? (only supporting
-  // 96 bits is recommended by NIST SP-800-38D)
-  // generate J_0
-  var ivLength = iv.length();
-  if(ivLength === 12) {
-    // 96-bit IV
-    this._j0 = [iv.getInt32(), iv.getInt32(), iv.getInt32(), 1];
-  } else {
-    // IV is NOT 96-bits
-    this._j0 = [0, 0, 0, 0];
-    while(iv.length() > 0) {
-      this._j0 = this.ghash(
-        this._hashSubkey, this._j0,
-        [iv.getInt32(), iv.getInt32(), iv.getInt32(), iv.getInt32()]);
-    }
-    this._j0 = this.ghash(
-      this._hashSubkey, this._j0, [0, 0].concat(from64To32(ivLength * 8)));
-  }
-
-  // generate ICB (initial counter block)
-  this._inBlock = this._j0.slice(0);
-  inc32(this._inBlock);
-  this._partialBytes = 0;
-
-  // consume authentication data
-  additionalData = forge.util.createBuffer(additionalData);
-  // save additional data length as a BE 64-bit number
-  this._aDataLength = from64To32(additionalData.length() * 8);
-  // pad additional data to 128 bit (16 byte) block size
-  var overflow = additionalData.length() % this.blockSize;
-  if(overflow) {
-    additionalData.fillWithByte(0, this.blockSize - overflow);
-  }
-  this._s = [0, 0, 0, 0];
-  while(additionalData.length() > 0) {
-    this._s = this.ghash(this._hashSubkey, this._s, [
-      additionalData.getInt32(),
-      additionalData.getInt32(),
-      additionalData.getInt32(),
-      additionalData.getInt32()
-    ]);
-  }
-};
-
-modes.gcm.prototype.encrypt = function(input, output, finish) {
-  // not enough input to encrypt
-  var inputLength = input.length();
-  if(inputLength === 0) {
-    return true;
-  }
-
-  // encrypt block
-  this.cipher.encrypt(this._inBlock, this._outBlock);
-
-  // handle full block
-  if(this._partialBytes === 0 && inputLength >= this.blockSize) {
-    // XOR input with output
-    for(var i = 0; i < this._ints; ++i) {
-      output.putInt32(this._outBlock[i] ^= input.getInt32());
-    }
-    this._cipherLength += this.blockSize;
-  } else {
-    // handle partial block
-    var partialBytes = (this.blockSize - inputLength) % this.blockSize;
-    if(partialBytes > 0) {
-      partialBytes = this.blockSize - partialBytes;
-    }
-
-    // XOR input with output
-    this._partialOutput.clear();
-    for(var i = 0; i < this._ints; ++i) {
-      this._partialOutput.putInt32(input.getInt32() ^ this._outBlock[i]);
-    }
-
-    if(partialBytes <= 0 || finish) {
-      // handle overflow prior to hashing
-      if(finish) {
-        // get block overflow
-        var overflow = inputLength % this.blockSize;
-        this._cipherLength += overflow;
-        // truncate for hash function
-        this._partialOutput.truncate(this.blockSize - overflow);
-      } else {
-        this._cipherLength += this.blockSize;
-      }
-
-      // get output block for hashing
-      for(var i = 0; i < this._ints; ++i) {
-        this._outBlock[i] = this._partialOutput.getInt32();
-      }
-      this._partialOutput.read -= this.blockSize;
-    }
-
-    // skip any previous partial bytes
-    if(this._partialBytes > 0) {
-      this._partialOutput.getBytes(this._partialBytes);
-    }
-
-    if(partialBytes > 0 && !finish) {
-      // block still incomplete, restore input buffer, get partial output,
-      // and return early
-      input.read -= this.blockSize;
-      output.putBytes(this._partialOutput.getBytes(
-        partialBytes - this._partialBytes));
-      this._partialBytes = partialBytes;
+    // " o  The cookie-path is a prefix of the request-path, and the first
+    // character of the request-path that is not included in the cookie- path
+    // is a %x2F ("/") character."
+    if (reqPath.substr(cookiePath.length, 1) === "/") {
       return true;
     }
-
-    output.putBytes(this._partialOutput.getBytes(
-      inputLength - this._partialBytes));
-    this._partialBytes = 0;
   }
 
-  // update hash block S
-  this._s = this.ghash(this._hashSubkey, this._s, this._outBlock);
-
-  // increment counter (input block)
-  inc32(this._inBlock);
-};
-
-modes.gcm.prototype.decrypt = function(input, output, finish) {
-  // not enough input to decrypt
-  var inputLength = input.length();
-  if(inputLength < this.blockSize && !(finish && inputLength > 0)) {
-    return true;
-  }
-
-  // encrypt block (GCM always uses encryption mode)
-  this.cipher.encrypt(this._inBlock, this._outBlock);
-
-  // increment counter (input block)
-  inc32(this._inBlock);
-
-  // update hash block S
-  this._hashBlock[0] = input.getInt32();
-  this._hashBlock[1] = input.getInt32();
-  this._hashBlock[2] = input.getInt32();
-  this._hashBlock[3] = input.getInt32();
-  this._s = this.ghash(this._hashSubkey, this._s, this._hashBlock);
-
-  // XOR hash input with output
-  for(var i = 0; i < this._ints; ++i) {
-    output.putInt32(this._outBlock[i] ^ this._hashBlock[i]);
-  }
-
-  // increment cipher data length
-  if(inputLength < this.blockSize) {
-    this._cipherLength += inputLength % this.blockSize;
-  } else {
-    this._cipherLength += this.blockSize;
-  }
-};
-
-modes.gcm.prototype.afterFinish = function(output, options) {
-  var rval = true;
-
-  // handle overflow
-  if(options.decrypt && options.overflow) {
-    output.truncate(this.blockSize - options.overflow);
-  }
-
-  // handle authentication tag
-  this.tag = forge.util.createBuffer();
-
-  // concatenate additional data length with cipher length
-  var lengths = this._aDataLength.concat(from64To32(this._cipherLength * 8));
-
-  // include lengths in hash
-  this._s = this.ghash(this._hashSubkey, this._s, lengths);
-
-  // do GCTR(J_0, S)
-  var tag = [];
-  this.cipher.encrypt(this._j0, tag);
-  for(var i = 0; i < this._ints; ++i) {
-    this.tag.putInt32(this._s[i] ^ tag[i]);
-  }
-
-  // trim tag to length
-  this.tag.truncate(this.tag.length() % (this._tagLength / 8));
-
-  // check authentication tag
-  if(options.decrypt && this.tag.bytes() !== this._tag) {
-    rval = false;
-  }
-
-  return rval;
-};
-
-/**
- * See NIST SP-800-38D 6.3 (Algorithm 1). This function performs Galois
- * field multiplication. The field, GF(2^128), is defined by the polynomial:
- *
- * x^128 + x^7 + x^2 + x + 1
- *
- * Which is represented in little-endian binary form as: 11100001 (0xe1). When
- * the value of a coefficient is 1, a bit is set. The value R, is the
- * concatenation of this value and 120 zero bits, yielding a 128-bit value
- * which matches the block size.
- *
- * This function will multiply two elements (vectors of bytes), X and Y, in
- * the field GF(2^128). The result is initialized to zero. For each bit of
- * X (out of 128), x_i, if x_i is set, then the result is multiplied (XOR'd)
- * by the current value of Y. For each bit, the value of Y will be raised by
- * a power of x (multiplied by the polynomial x). This can be achieved by
- * shifting Y once to the right. If the current value of Y, prior to being
- * multiplied by x, has 0 as its LSB, then it is a 127th degree polynomial.
- * Otherwise, we must divide by R after shifting to find the remainder.
- *
- * @param x the first block to multiply by the second.
- * @param y the second block to multiply by the first.
- *
- * @return the block result of the multiplication.
- */
-modes.gcm.prototype.multiply = function(x, y) {
-  var z_i = [0, 0, 0, 0];
-  var v_i = y.slice(0);
-
-  // calculate Z_128 (block has 128 bits)
-  for(var i = 0; i < 128; ++i) {
-    // if x_i is 0, Z_{i+1} = Z_i (unchanged)
-    // else Z_{i+1} = Z_i ^ V_i
-    // get x_i by finding 32-bit int position, then left shift 1 by remainder
-    var x_i = x[(i / 32) | 0] & (1 << (31 - i % 32));
-    if(x_i) {
-      z_i[0] ^= v_i[0];
-      z_i[1] ^= v_i[1];
-      z_i[2] ^= v_i[2];
-      z_i[3] ^= v_i[3];
-    }
-
-    // if LSB(V_i) is 1, V_i = V_i >> 1
-    // else V_i = (V_i >> 1) ^ R
-    this.pow(v_i, v_i);
-  }
-
-  return z_i;
-};
-
-modes.gcm.prototype.pow = function(x, out) {
-  // if LSB(x) is 1, x = x >>> 1
-  // else x = (x >>> 1) ^ R
-  var lsb = x[3] & 1;
-
-  // always do x >>> 1:
-  // starting with the rightmost integer, shift each integer to the right
-  // one bit, pulling in the bit from the integer to the left as its top
-  // most bit (do this for the last 3 integers)
-  for(var i = 3; i > 0; --i) {
-    out[i] = (x[i] >>> 1) | ((x[i - 1] & 1) << 31);
-  }
-  // shift the first integer normally
-  out[0] = x[0] >>> 1;
-
-  // if lsb was not set, then polynomial had a degree of 127 and doesn't
-  // need to divided; otherwise, XOR with R to find the remainder; we only
-  // need to XOR the first integer since R technically ends w/120 zero bits
-  if(lsb) {
-    out[0] ^= this._R;
-  }
-};
-
-modes.gcm.prototype.tableMultiply = function(x) {
-  // assumes 4-bit tables are used
-  var z = [0, 0, 0, 0];
-  for(var i = 0; i < 32; ++i) {
-    var idx = (i / 8) | 0;
-    var x_i = (x[idx] >>> ((7 - (i % 8)) * 4)) & 0xF;
-    var ah = this._m[i][x_i];
-    z[0] ^= ah[0];
-    z[1] ^= ah[1];
-    z[2] ^= ah[2];
-    z[3] ^= ah[3];
-  }
-  return z;
-};
-
-/**
- * A continuing version of the GHASH algorithm that operates on a single
- * block. The hash block, last hash value (Ym) and the new block to hash
- * are given.
- *
- * @param h the hash block.
- * @param y the previous value for Ym, use [0, 0, 0, 0] for a new hash.
- * @param x the block to hash.
- *
- * @return the hashed value (Ym).
- */
-modes.gcm.prototype.ghash = function(h, y, x) {
-  y[0] ^= x[0];
-  y[1] ^= x[1];
-  y[2] ^= x[2];
-  y[3] ^= x[3];
-  return this.tableMultiply(y);
-  //return this.multiply(y, h);
-};
-
-/**
- * Precomputes a table for multiplying against the hash subkey. This
- * mechanism provides a substantial speed increase over multiplication
- * performed without a table. The table-based multiplication this table is
- * for solves X * H by multiplying each component of X by H and then
- * composing the results together using XOR.
- *
- * This function can be used to generate tables with different bit sizes
- * for the components, however, this implementation assumes there are
- * 32 components of X (which is a 16 byte vector), therefore each component
- * takes 4-bits (so the table is constructed with bits=4).
- *
- * @param h the hash subkey.
- * @param bits the bit size for a component.
- */
-modes.gcm.prototype.generateHashTable = function(h, bits) {
-  // TODO: There are further optimizations that would use only the
-  // first table M_0 (or some variant) along with a remainder table;
-  // this can be explored in the future
-  var multiplier = 8 / bits;
-  var perInt = 4 * multiplier;
-  var size = 16 * multiplier;
-  var m = new Array(size);
-  for(var i = 0; i < size; ++i) {
-    var tmp = [0, 0, 0, 0];
-    var idx = (i / perInt) | 0;
-    var shft = ((perInt - 1 - (i % perInt)) * bits);
-    tmp[idx] = (1 << (bits - 1)) << shft;
-    m[i] = this.generateSubHashTable(this.multiply(tmp, h), bits);
-  }
-  return m;
-};
-
-/**
- * Generates a table for multiplying against the hash subkey for one
- * particular component (out of all possible component values).
- *
- * @param mid the pre-multiplied value for the middle key of the table.
- * @param bits the bit size for a component.
- */
-modes.gcm.prototype.generateSubHashTable = function(mid, bits) {
-  // compute the table quickly by minimizing the number of
-  // POW operations -- they only need to be performed for powers of 2,
-  // all other entries can be composed from those powers using XOR
-  var size = 1 << bits;
-  var half = size >>> 1;
-  var m = new Array(size);
-  m[half] = mid.slice(0);
-  var i = half >>> 1;
-  while(i > 0) {
-    // raise m0[2 * i] and store in m0[i]
-    this.pow(m[2 * i], m[i] = []);
-    i >>= 1;
-  }
-  i = 2;
-  while(i < half) {
-    for(var j = 1; j < i; ++j) {
-      var m_i = m[i];
-      var m_j = m[j];
-      m[i + j] = [
-        m_i[0] ^ m_j[0],
-        m_i[1] ^ m_j[1],
-        m_i[2] ^ m_j[2],
-        m_i[3] ^ m_j[3]
-      ];
-    }
-    i *= 2;
-  }
-  m[0] = [0, 0, 0, 0];
-  /* Note: We could avoid storing these by doing composition during multiply
-  calculate top half using composition by speed is preferred. */
-  for(i = half + 1; i < size; ++i) {
-    var c = m[i ^ half];
-    m[i] = [mid[0] ^ c[0], mid[1] ^ c[1], mid[2] ^ c[2], mid[3] ^ c[3]];
-  }
-  return m;
-};
-
-/** Utility functions */
-
-function transformIV(iv, blockSize) {
-  if(typeof iv === 'string') {
-    // convert iv string into byte buffer
-    iv = forge.util.createBuffer(iv);
-  }
-
-  if(forge.util.isArray(iv) && iv.length > 4) {
-    // convert iv byte array into byte buffer
-    var tmp = iv;
-    iv = forge.util.createBuffer();
-    for(var i = 0; i < tmp.length; ++i) {
-      iv.putByte(tmp[i]);
-    }
-  }
-
-  if(iv.length() < blockSize) {
-    throw new Error(
-      'Invalid IV length; got ' + iv.length() +
-      ' bytes and expected ' + blockSize + ' bytes.');
-  }
-
-  if(!forge.util.isArray(iv)) {
-    // convert iv byte buffer into 32-bit integer array
-    var ints = [];
-    var blocks = blockSize / 4;
-    for(var i = 0; i < blocks; ++i) {
-      ints.push(iv.getInt32());
-    }
-    iv = ints;
-  }
-
-  return iv;
+  return false;
 }
 
-function inc32(block) {
-  // increment last 32 bits of block only
-  block[block.length - 1] = (block[block.length - 1] + 1) & 0xFFFFFFFF;
-}
-
-function from64To32(num) {
-  // convert 64-bit number to two BE Int32s
-  return [(num / 0x100000000) | 0, num & 0xFFFFFFFF];
-}
+exports.pathMatch = pathMatch;
 
 
 /***/ }),
@@ -118947,7 +123883,7 @@ function from64To32(num) {
 "use strict";
 
 
-var Buffer = __webpack_require__(880).Buffer;
+var Buffer = __webpack_require__(705).Buffer;
 
 var getParamBytesForAlg = __webpack_require__(501);
 
@@ -119315,20 +124251,16 @@ module.exports = function generate_ref(it, $keyword, $ruleType) {
 /* 962 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
+/**
+ * Detect Electron renderer / nwjs process, which is node, but we should
+ * treat as a browser.
+ */
 
-var Git = __webpack_require__(54);
-
-module.exports = function (baseDir) {
-
-   var dependencies = __webpack_require__(727);
-
-   if (baseDir && !dependencies.exists(baseDir, dependencies.exists.FOLDER)) {
-       throw new Error("Cannot use simple-git on a directory that does not exist.");
-    }
-
-    return new Git(baseDir || process.cwd(), dependencies.childProcess(), dependencies.buffer());
-};
-
+if (typeof process === 'undefined' || process.type === 'renderer' || process.browser === true || process.__nwjs) {
+	module.exports = __webpack_require__(770);
+} else {
+	module.exports = __webpack_require__(513);
+}
 
 
 /***/ }),
@@ -119340,22 +124272,654 @@ module.exports = {"$id":"timings.json#","$schema":"http://json-schema.org/draft-
 
 /***/ }),
 /* 965 */
-/***/ (function(__unusedmodule, exports) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const url = __webpack_require__(835);
+const http = __webpack_require__(605);
+const https = __webpack_require__(211);
+let fs;
+let tunnel;
+var HttpCodes;
+(function (HttpCodes) {
+    HttpCodes[HttpCodes["OK"] = 200] = "OK";
+    HttpCodes[HttpCodes["MultipleChoices"] = 300] = "MultipleChoices";
+    HttpCodes[HttpCodes["MovedPermanently"] = 301] = "MovedPermanently";
+    HttpCodes[HttpCodes["ResourceMoved"] = 302] = "ResourceMoved";
+    HttpCodes[HttpCodes["SeeOther"] = 303] = "SeeOther";
+    HttpCodes[HttpCodes["NotModified"] = 304] = "NotModified";
+    HttpCodes[HttpCodes["UseProxy"] = 305] = "UseProxy";
+    HttpCodes[HttpCodes["SwitchProxy"] = 306] = "SwitchProxy";
+    HttpCodes[HttpCodes["TemporaryRedirect"] = 307] = "TemporaryRedirect";
+    HttpCodes[HttpCodes["PermanentRedirect"] = 308] = "PermanentRedirect";
+    HttpCodes[HttpCodes["BadRequest"] = 400] = "BadRequest";
+    HttpCodes[HttpCodes["Unauthorized"] = 401] = "Unauthorized";
+    HttpCodes[HttpCodes["PaymentRequired"] = 402] = "PaymentRequired";
+    HttpCodes[HttpCodes["Forbidden"] = 403] = "Forbidden";
+    HttpCodes[HttpCodes["NotFound"] = 404] = "NotFound";
+    HttpCodes[HttpCodes["MethodNotAllowed"] = 405] = "MethodNotAllowed";
+    HttpCodes[HttpCodes["NotAcceptable"] = 406] = "NotAcceptable";
+    HttpCodes[HttpCodes["ProxyAuthenticationRequired"] = 407] = "ProxyAuthenticationRequired";
+    HttpCodes[HttpCodes["RequestTimeout"] = 408] = "RequestTimeout";
+    HttpCodes[HttpCodes["Conflict"] = 409] = "Conflict";
+    HttpCodes[HttpCodes["Gone"] = 410] = "Gone";
+    HttpCodes[HttpCodes["InternalServerError"] = 500] = "InternalServerError";
+    HttpCodes[HttpCodes["NotImplemented"] = 501] = "NotImplemented";
+    HttpCodes[HttpCodes["BadGateway"] = 502] = "BadGateway";
+    HttpCodes[HttpCodes["ServiceUnavailable"] = 503] = "ServiceUnavailable";
+    HttpCodes[HttpCodes["GatewayTimeout"] = 504] = "GatewayTimeout";
+})(HttpCodes = exports.HttpCodes || (exports.HttpCodes = {}));
+const HttpRedirectCodes = [HttpCodes.MovedPermanently, HttpCodes.ResourceMoved, HttpCodes.SeeOther, HttpCodes.TemporaryRedirect, HttpCodes.PermanentRedirect];
+const HttpResponseRetryCodes = [HttpCodes.BadGateway, HttpCodes.ServiceUnavailable, HttpCodes.GatewayTimeout];
+const RetryableHttpVerbs = ['OPTIONS', 'GET', 'DELETE', 'HEAD'];
+const ExponentialBackoffCeiling = 10;
+const ExponentialBackoffTimeSlice = 5;
+class HttpClientResponse {
+    constructor(message) {
+        this.message = message;
+    }
+    readBody() {
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            let output = '';
+            this.message.on('data', (chunk) => {
+                output += chunk;
+            });
+            this.message.on('end', () => {
+                resolve(output);
+            });
+        }));
+    }
+}
+exports.HttpClientResponse = HttpClientResponse;
+function isHttps(requestUrl) {
+    let parsedUrl = url.parse(requestUrl);
+    return parsedUrl.protocol === 'https:';
+}
+exports.isHttps = isHttps;
+var EnvironmentVariables;
+(function (EnvironmentVariables) {
+    EnvironmentVariables["HTTP_PROXY"] = "HTTP_PROXY";
+    EnvironmentVariables["HTTPS_PROXY"] = "HTTPS_PROXY";
+})(EnvironmentVariables || (EnvironmentVariables = {}));
+class HttpClient {
+    constructor(userAgent, handlers, requestOptions) {
+        this._ignoreSslError = false;
+        this._allowRedirects = true;
+        this._maxRedirects = 50;
+        this._allowRetries = false;
+        this._maxRetries = 1;
+        this._keepAlive = false;
+        this._disposed = false;
+        this.userAgent = userAgent;
+        this.handlers = handlers || [];
+        this.requestOptions = requestOptions;
+        if (requestOptions) {
+            if (requestOptions.ignoreSslError != null) {
+                this._ignoreSslError = requestOptions.ignoreSslError;
+            }
+            this._socketTimeout = requestOptions.socketTimeout;
+            this._httpProxy = requestOptions.proxy;
+            if (requestOptions.proxy && requestOptions.proxy.proxyBypassHosts) {
+                this._httpProxyBypassHosts = [];
+                requestOptions.proxy.proxyBypassHosts.forEach(bypass => {
+                    this._httpProxyBypassHosts.push(new RegExp(bypass, 'i'));
+                });
+            }
+            this._certConfig = requestOptions.cert;
+            if (this._certConfig) {
+                // If using cert, need fs
+                fs = __webpack_require__(747);
+                // cache the cert content into memory, so we don't have to read it from disk every time 
+                if (this._certConfig.caFile && fs.existsSync(this._certConfig.caFile)) {
+                    this._ca = fs.readFileSync(this._certConfig.caFile, 'utf8');
+                }
+                if (this._certConfig.certFile && fs.existsSync(this._certConfig.certFile)) {
+                    this._cert = fs.readFileSync(this._certConfig.certFile, 'utf8');
+                }
+                if (this._certConfig.keyFile && fs.existsSync(this._certConfig.keyFile)) {
+                    this._key = fs.readFileSync(this._certConfig.keyFile, 'utf8');
+                }
+            }
+            if (requestOptions.allowRedirects != null) {
+                this._allowRedirects = requestOptions.allowRedirects;
+            }
+            if (requestOptions.maxRedirects != null) {
+                this._maxRedirects = Math.max(requestOptions.maxRedirects, 0);
+            }
+            if (requestOptions.keepAlive != null) {
+                this._keepAlive = requestOptions.keepAlive;
+            }
+            if (requestOptions.allowRetries != null) {
+                this._allowRetries = requestOptions.allowRetries;
+            }
+            if (requestOptions.maxRetries != null) {
+                this._maxRetries = requestOptions.maxRetries;
+            }
+        }
+    }
+    options(requestUrl, additionalHeaders) {
+        return this.request('OPTIONS', requestUrl, null, additionalHeaders || {});
+    }
+    get(requestUrl, additionalHeaders) {
+        return this.request('GET', requestUrl, null, additionalHeaders || {});
+    }
+    del(requestUrl, additionalHeaders) {
+        return this.request('DELETE', requestUrl, null, additionalHeaders || {});
+    }
+    post(requestUrl, data, additionalHeaders) {
+        return this.request('POST', requestUrl, data, additionalHeaders || {});
+    }
+    patch(requestUrl, data, additionalHeaders) {
+        return this.request('PATCH', requestUrl, data, additionalHeaders || {});
+    }
+    put(requestUrl, data, additionalHeaders) {
+        return this.request('PUT', requestUrl, data, additionalHeaders || {});
+    }
+    head(requestUrl, additionalHeaders) {
+        return this.request('HEAD', requestUrl, null, additionalHeaders || {});
+    }
+    sendStream(verb, requestUrl, stream, additionalHeaders) {
+        return this.request(verb, requestUrl, stream, additionalHeaders);
+    }
+    /**
+     * Makes a raw http request.
+     * All other methods such as get, post, patch, and request ultimately call this.
+     * Prefer get, del, post and patch
+     */
+    request(verb, requestUrl, data, headers) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this._disposed) {
+                throw new Error("Client has already been disposed.");
+            }
+            let info = this._prepareRequest(verb, requestUrl, headers);
+            // Only perform retries on reads since writes may not be idempotent.
+            let maxTries = (this._allowRetries && RetryableHttpVerbs.indexOf(verb) != -1) ? this._maxRetries + 1 : 1;
+            let numTries = 0;
+            let response;
+            while (numTries < maxTries) {
+                response = yield this.requestRaw(info, data);
+                // Check if it's an authentication challenge
+                if (response && response.message && response.message.statusCode === HttpCodes.Unauthorized) {
+                    let authenticationHandler;
+                    for (let i = 0; i < this.handlers.length; i++) {
+                        if (this.handlers[i].canHandleAuthentication(response)) {
+                            authenticationHandler = this.handlers[i];
+                            break;
+                        }
+                    }
+                    if (authenticationHandler) {
+                        return authenticationHandler.handleAuthentication(this, info, data);
+                    }
+                    else {
+                        // We have received an unauthorized response but have no handlers to handle it.
+                        // Let the response return to the caller.
+                        return response;
+                    }
+                }
+                let redirectsRemaining = this._maxRedirects;
+                while (HttpRedirectCodes.indexOf(response.message.statusCode) != -1
+                    && this._allowRedirects
+                    && redirectsRemaining > 0) {
+                    const redirectUrl = response.message.headers["location"];
+                    if (!redirectUrl) {
+                        // if there's no location to redirect to, we won't
+                        break;
+                    }
+                    // we need to finish reading the response before reassigning response
+                    // which will leak the open socket.
+                    yield response.readBody();
+                    // let's make the request with the new redirectUrl
+                    info = this._prepareRequest(verb, redirectUrl, headers);
+                    response = yield this.requestRaw(info, data);
+                    redirectsRemaining--;
+                }
+                if (HttpResponseRetryCodes.indexOf(response.message.statusCode) == -1) {
+                    // If not a retry code, return immediately instead of retrying
+                    return response;
+                }
+                numTries += 1;
+                if (numTries < maxTries) {
+                    yield response.readBody();
+                    yield this._performExponentialBackoff(numTries);
+                }
+            }
+            return response;
+        });
+    }
+    /**
+     * Needs to be called if keepAlive is set to true in request options.
+     */
+    dispose() {
+        if (this._agent) {
+            this._agent.destroy();
+        }
+        this._disposed = true;
+    }
+    /**
+     * Raw request.
+     * @param info
+     * @param data
+     */
+    requestRaw(info, data) {
+        return new Promise((resolve, reject) => {
+            let callbackForResult = function (err, res) {
+                if (err) {
+                    reject(err);
+                }
+                resolve(res);
+            };
+            this.requestRawWithCallback(info, data, callbackForResult);
+        });
+    }
+    /**
+     * Raw request with callback.
+     * @param info
+     * @param data
+     * @param onResult
+     */
+    requestRawWithCallback(info, data, onResult) {
+        let socket;
+        let isDataString = typeof (data) === 'string';
+        if (typeof (data) === 'string') {
+            info.options.headers["Content-Length"] = Buffer.byteLength(data, 'utf8');
+        }
+        let callbackCalled = false;
+        let handleResult = (err, res) => {
+            if (!callbackCalled) {
+                callbackCalled = true;
+                onResult(err, res);
+            }
+        };
+        let req = info.httpModule.request(info.options, (msg) => {
+            let res = new HttpClientResponse(msg);
+            handleResult(null, res);
+        });
+        req.on('socket', (sock) => {
+            socket = sock;
+        });
+        // If we ever get disconnected, we want the socket to timeout eventually
+        req.setTimeout(this._socketTimeout || 3 * 60000, () => {
+            if (socket) {
+                socket.end();
+            }
+            handleResult(new Error('Request timeout: ' + info.options.path), null);
+        });
+        req.on('error', function (err) {
+            // err has statusCode property
+            // res should have headers
+            handleResult(err, null);
+        });
+        if (data && typeof (data) === 'string') {
+            req.write(data, 'utf8');
+        }
+        if (data && typeof (data) !== 'string') {
+            data.on('close', function () {
+                req.end();
+            });
+            data.pipe(req);
+        }
+        else {
+            req.end();
+        }
+    }
+    _prepareRequest(method, requestUrl, headers) {
+        const info = {};
+        info.parsedUrl = url.parse(requestUrl);
+        const usingSsl = info.parsedUrl.protocol === 'https:';
+        info.httpModule = usingSsl ? https : http;
+        const defaultPort = usingSsl ? 443 : 80;
+        info.options = {};
+        info.options.host = info.parsedUrl.hostname;
+        info.options.port = info.parsedUrl.port ? parseInt(info.parsedUrl.port) : defaultPort;
+        info.options.path = (info.parsedUrl.pathname || '') + (info.parsedUrl.search || '');
+        info.options.method = method;
+        info.options.headers = this._mergeHeaders(headers);
+        info.options.headers["user-agent"] = this.userAgent;
+        info.options.agent = this._getAgent(requestUrl);
+        // gives handlers an opportunity to participate
+        if (this.handlers && !this._isPresigned(requestUrl)) {
+            this.handlers.forEach((handler) => {
+                handler.prepareRequest(info.options);
+            });
+        }
+        return info;
+    }
+    _isPresigned(requestUrl) {
+        if (this.requestOptions && this.requestOptions.presignedUrlPatterns) {
+            const patterns = this.requestOptions.presignedUrlPatterns;
+            for (let i = 0; i < patterns.length; i++) {
+                if (requestUrl.match(patterns[i])) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    _mergeHeaders(headers) {
+        const lowercaseKeys = obj => Object.keys(obj).reduce((c, k) => (c[k.toLowerCase()] = obj[k], c), {});
+        if (this.requestOptions && this.requestOptions.headers) {
+            return Object.assign({}, lowercaseKeys(this.requestOptions.headers), lowercaseKeys(headers));
+        }
+        return lowercaseKeys(headers || {});
+    }
+    _getAgent(requestUrl) {
+        let agent;
+        let proxy = this._getProxy(requestUrl);
+        let useProxy = proxy.proxyUrl && proxy.proxyUrl.hostname && !this._isBypassProxy(requestUrl);
+        if (this._keepAlive && useProxy) {
+            agent = this._proxyAgent;
+        }
+        if (this._keepAlive && !useProxy) {
+            agent = this._agent;
+        }
+        // if agent is already assigned use that agent.
+        if (!!agent) {
+            return agent;
+        }
+        let parsedUrl = url.parse(requestUrl);
+        const usingSsl = parsedUrl.protocol === 'https:';
+        let maxSockets = 100;
+        if (!!this.requestOptions) {
+            maxSockets = this.requestOptions.maxSockets || http.globalAgent.maxSockets;
+        }
+        if (useProxy) {
+            // If using proxy, need tunnel
+            if (!tunnel) {
+                tunnel = __webpack_require__(510);
+            }
+            const agentOptions = {
+                maxSockets: maxSockets,
+                keepAlive: this._keepAlive,
+                proxy: {
+                    proxyAuth: proxy.proxyAuth,
+                    host: proxy.proxyUrl.hostname,
+                    port: proxy.proxyUrl.port
+                },
+            };
+            let tunnelAgent;
+            const overHttps = proxy.proxyUrl.protocol === 'https:';
+            if (usingSsl) {
+                tunnelAgent = overHttps ? tunnel.httpsOverHttps : tunnel.httpsOverHttp;
+            }
+            else {
+                tunnelAgent = overHttps ? tunnel.httpOverHttps : tunnel.httpOverHttp;
+            }
+            agent = tunnelAgent(agentOptions);
+            this._proxyAgent = agent;
+        }
+        // if reusing agent across request and tunneling agent isn't assigned create a new agent
+        if (this._keepAlive && !agent) {
+            const options = { keepAlive: this._keepAlive, maxSockets: maxSockets };
+            agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
+            this._agent = agent;
+        }
+        // if not using private agent and tunnel agent isn't setup then use global agent
+        if (!agent) {
+            agent = usingSsl ? https.globalAgent : http.globalAgent;
+        }
+        if (usingSsl && this._ignoreSslError) {
+            // we don't want to set NODE_TLS_REJECT_UNAUTHORIZED=0 since that will affect request for entire process
+            // http.RequestOptions doesn't expose a way to modify RequestOptions.agent.options
+            // we have to cast it to any and change it directly
+            agent.options = Object.assign(agent.options || {}, { rejectUnauthorized: false });
+        }
+        if (usingSsl && this._certConfig) {
+            agent.options = Object.assign(agent.options || {}, { ca: this._ca, cert: this._cert, key: this._key, passphrase: this._certConfig.passphrase });
+        }
+        return agent;
+    }
+    _getProxy(requestUrl) {
+        const parsedUrl = url.parse(requestUrl);
+        let usingSsl = parsedUrl.protocol === 'https:';
+        let proxyConfig = this._httpProxy;
+        // fallback to http_proxy and https_proxy env
+        let https_proxy = process.env[EnvironmentVariables.HTTPS_PROXY];
+        let http_proxy = process.env[EnvironmentVariables.HTTP_PROXY];
+        if (!proxyConfig) {
+            if (https_proxy && usingSsl) {
+                proxyConfig = {
+                    proxyUrl: https_proxy
+                };
+            }
+            else if (http_proxy) {
+                proxyConfig = {
+                    proxyUrl: http_proxy
+                };
+            }
+        }
+        let proxyUrl;
+        let proxyAuth;
+        if (proxyConfig) {
+            if (proxyConfig.proxyUrl.length > 0) {
+                proxyUrl = url.parse(proxyConfig.proxyUrl);
+            }
+            if (proxyConfig.proxyUsername || proxyConfig.proxyPassword) {
+                proxyAuth = proxyConfig.proxyUsername + ":" + proxyConfig.proxyPassword;
+            }
+        }
+        return { proxyUrl: proxyUrl, proxyAuth: proxyAuth };
+    }
+    _isBypassProxy(requestUrl) {
+        if (!this._httpProxyBypassHosts) {
+            return false;
+        }
+        let bypass = false;
+        this._httpProxyBypassHosts.forEach(bypassHost => {
+            if (bypassHost.test(requestUrl)) {
+                bypass = true;
+            }
+        });
+        return bypass;
+    }
+    _performExponentialBackoff(retryNumber) {
+        retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
+        const ms = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
+        return new Promise(resolve => setTimeout(() => resolve(), ms));
+    }
+}
+exports.HttpClient = HttpClient;
+
+
+/***/ }),
+/* 966 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
+var utils = __webpack_require__(759);
+var settle = __webpack_require__(571);
+var buildURL = __webpack_require__(62);
+var buildFullPath = __webpack_require__(743);
+var parseHeaders = __webpack_require__(313);
+var isURLSameOrigin = __webpack_require__(121);
+var createError = __webpack_require__(237);
 
-class Node {}
+module.exports = function xhrAdapter(config) {
+  return new Promise(function dispatchXhrRequest(resolve, reject) {
+    var requestData = config.data;
+    var requestHeaders = config.headers;
 
-exports.default = Node;
+    if (utils.isFormData(requestData)) {
+      delete requestHeaders['Content-Type']; // Let the browser set it
+    }
+
+    var request = new XMLHttpRequest();
+
+    // HTTP basic authentication
+    if (config.auth) {
+      var username = config.auth.username || '';
+      var password = config.auth.password || '';
+      requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
+    }
+
+    var fullPath = buildFullPath(config.baseURL, config.url);
+    request.open(config.method.toUpperCase(), buildURL(fullPath, config.params, config.paramsSerializer), true);
+
+    // Set the request timeout in MS
+    request.timeout = config.timeout;
+
+    // Listen for ready state
+    request.onreadystatechange = function handleLoad() {
+      if (!request || request.readyState !== 4) {
+        return;
+      }
+
+      // The request errored out and we didn't get a response, this will be
+      // handled by onerror instead
+      // With one exception: request that using file: protocol, most browsers
+      // will return status as 0 even though it's a successful request
+      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+        return;
+      }
+
+      // Prepare the response
+      var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
+      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
+      var response = {
+        data: responseData,
+        status: request.status,
+        statusText: request.statusText,
+        headers: responseHeaders,
+        config: config,
+        request: request
+      };
+
+      settle(resolve, reject, response);
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle browser request cancellation (as opposed to a manual cancellation)
+    request.onabort = function handleAbort() {
+      if (!request) {
+        return;
+      }
+
+      reject(createError('Request aborted', config, 'ECONNABORTED', request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle low level network errors
+    request.onerror = function handleError() {
+      // Real errors are hidden from us by the browser
+      // onerror should only fire if it's a network error
+      reject(createError('Network Error', config, null, request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle timeout
+    request.ontimeout = function handleTimeout() {
+      var timeoutErrorMessage = 'timeout of ' + config.timeout + 'ms exceeded';
+      if (config.timeoutErrorMessage) {
+        timeoutErrorMessage = config.timeoutErrorMessage;
+      }
+      reject(createError(timeoutErrorMessage, config, 'ECONNABORTED',
+        request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Add xsrf header
+    // This is only done if running in a standard browser environment.
+    // Specifically not if we're in a web worker, or react-native.
+    if (utils.isStandardBrowserEnv()) {
+      var cookies = __webpack_require__(116);
+
+      // Add xsrf header
+      var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
+        cookies.read(config.xsrfCookieName) :
+        undefined;
+
+      if (xsrfValue) {
+        requestHeaders[config.xsrfHeaderName] = xsrfValue;
+      }
+    }
+
+    // Add headers to the request
+    if ('setRequestHeader' in request) {
+      utils.forEach(requestHeaders, function setRequestHeader(val, key) {
+        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
+          // Remove Content-Type if data is undefined
+          delete requestHeaders[key];
+        } else {
+          // Otherwise add header to the request
+          request.setRequestHeader(key, val);
+        }
+      });
+    }
+
+    // Add withCredentials to request if needed
+    if (!utils.isUndefined(config.withCredentials)) {
+      request.withCredentials = !!config.withCredentials;
+    }
+
+    // Add responseType to request if needed
+    if (config.responseType) {
+      try {
+        request.responseType = config.responseType;
+      } catch (e) {
+        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
+        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
+        if (config.responseType !== 'json') {
+          throw e;
+        }
+      }
+    }
+
+    // Handle progress if needed
+    if (typeof config.onDownloadProgress === 'function') {
+      request.addEventListener('progress', config.onDownloadProgress);
+    }
+
+    // Not all browsers support upload events
+    if (typeof config.onUploadProgress === 'function' && request.upload) {
+      request.upload.addEventListener('progress', config.onUploadProgress);
+    }
+
+    if (config.cancelToken) {
+      // Handle cancellation
+      config.cancelToken.promise.then(function onCanceled(cancel) {
+        if (!request) {
+          return;
+        }
+
+        request.abort();
+        reject(cancel);
+        // Clean up request
+        request = null;
+      });
+    }
+
+    if (requestData === undefined) {
+      requestData = null;
+    }
+
+    // Send the request
+    request.send(requestData);
+  });
+};
+
 
 /***/ }),
-/* 966 */,
 /* 967 */,
 /* 968 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -119932,7 +125496,12 @@ class YAMLSeq extends _Collection.default {
 exports.default = YAMLSeq;
 
 /***/ }),
-/* 977 */,
+/* 977 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(75);
+
+/***/ }),
 /* 978 */,
 /* 979 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -120070,7 +125639,7 @@ function write(key, options) {
  *
  * Copyright (c) 2010-2013 Digital Bazaar, Inc.
  */
-var forge = __webpack_require__(998);
+var forge = __webpack_require__(45);
 __webpack_require__(709);
 __webpack_require__(891);
 __webpack_require__(294);
@@ -120079,7 +125648,7 @@ var pkcs5 = forge.pkcs5 = forge.pkcs5 || {};
 
 var crypto;
 if(forge.util.isNodejs && !forge.options.usePureJavaScript) {
-  crypto = __webpack_require__(417);
+  crypto = __webpack_require__(373);
 }
 
 /**
@@ -120281,7 +125850,242 @@ module.exports = forge.pbkdf2 = pkcs5.pbkdf2 = function(
 module.exports = {"$id":"cache.json#","$schema":"http://json-schema.org/draft-06/schema#","properties":{"beforeRequest":{"oneOf":[{"type":"null"},{"$ref":"beforeRequest.json#"}]},"afterRequest":{"oneOf":[{"type":"null"},{"$ref":"afterRequest.json#"}]},"comment":{"type":"string"}}};
 
 /***/ }),
-/* 985 */,
+/* 985 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+/**
+ * Cipher base API.
+ *
+ * @author Dave Longley
+ *
+ * Copyright (c) 2010-2014 Digital Bazaar, Inc.
+ */
+var forge = __webpack_require__(45);
+__webpack_require__(294);
+
+module.exports = forge.cipher = forge.cipher || {};
+
+// registered algorithms
+forge.cipher.algorithms = forge.cipher.algorithms || {};
+
+/**
+ * Creates a cipher object that can be used to encrypt data using the given
+ * algorithm and key. The algorithm may be provided as a string value for a
+ * previously registered algorithm or it may be given as a cipher algorithm
+ * API object.
+ *
+ * @param algorithm the algorithm to use, either a string or an algorithm API
+ *          object.
+ * @param key the key to use, as a binary-encoded string of bytes or a
+ *          byte buffer.
+ *
+ * @return the cipher.
+ */
+forge.cipher.createCipher = function(algorithm, key) {
+  var api = algorithm;
+  if(typeof api === 'string') {
+    api = forge.cipher.getAlgorithm(api);
+    if(api) {
+      api = api();
+    }
+  }
+  if(!api) {
+    throw new Error('Unsupported algorithm: ' + algorithm);
+  }
+
+  // assume block cipher
+  return new forge.cipher.BlockCipher({
+    algorithm: api,
+    key: key,
+    decrypt: false
+  });
+};
+
+/**
+ * Creates a decipher object that can be used to decrypt data using the given
+ * algorithm and key. The algorithm may be provided as a string value for a
+ * previously registered algorithm or it may be given as a cipher algorithm
+ * API object.
+ *
+ * @param algorithm the algorithm to use, either a string or an algorithm API
+ *          object.
+ * @param key the key to use, as a binary-encoded string of bytes or a
+ *          byte buffer.
+ *
+ * @return the cipher.
+ */
+forge.cipher.createDecipher = function(algorithm, key) {
+  var api = algorithm;
+  if(typeof api === 'string') {
+    api = forge.cipher.getAlgorithm(api);
+    if(api) {
+      api = api();
+    }
+  }
+  if(!api) {
+    throw new Error('Unsupported algorithm: ' + algorithm);
+  }
+
+  // assume block cipher
+  return new forge.cipher.BlockCipher({
+    algorithm: api,
+    key: key,
+    decrypt: true
+  });
+};
+
+/**
+ * Registers an algorithm by name. If the name was already registered, the
+ * algorithm API object will be overwritten.
+ *
+ * @param name the name of the algorithm.
+ * @param algorithm the algorithm API object.
+ */
+forge.cipher.registerAlgorithm = function(name, algorithm) {
+  name = name.toUpperCase();
+  forge.cipher.algorithms[name] = algorithm;
+};
+
+/**
+ * Gets a registered algorithm by name.
+ *
+ * @param name the name of the algorithm.
+ *
+ * @return the algorithm, if found, null if not.
+ */
+forge.cipher.getAlgorithm = function(name) {
+  name = name.toUpperCase();
+  if(name in forge.cipher.algorithms) {
+    return forge.cipher.algorithms[name];
+  }
+  return null;
+};
+
+var BlockCipher = forge.cipher.BlockCipher = function(options) {
+  this.algorithm = options.algorithm;
+  this.mode = this.algorithm.mode;
+  this.blockSize = this.mode.blockSize;
+  this._finish = false;
+  this._input = null;
+  this.output = null;
+  this._op = options.decrypt ? this.mode.decrypt : this.mode.encrypt;
+  this._decrypt = options.decrypt;
+  this.algorithm.initialize(options);
+};
+
+/**
+ * Starts or restarts the encryption or decryption process, whichever
+ * was previously configured.
+ *
+ * For non-GCM mode, the IV may be a binary-encoded string of bytes, an array
+ * of bytes, a byte buffer, or an array of 32-bit integers. If the IV is in
+ * bytes, then it must be Nb (16) bytes in length. If the IV is given in as
+ * 32-bit integers, then it must be 4 integers long.
+ *
+ * Note: an IV is not required or used in ECB mode.
+ *
+ * For GCM-mode, the IV must be given as a binary-encoded string of bytes or
+ * a byte buffer. The number of bytes should be 12 (96 bits) as recommended
+ * by NIST SP-800-38D but another length may be given.
+ *
+ * @param options the options to use:
+ *          iv the initialization vector to use as a binary-encoded string of
+ *            bytes, null to reuse the last ciphered block from a previous
+ *            update() (this "residue" method is for legacy support only).
+ *          additionalData additional authentication data as a binary-encoded
+ *            string of bytes, for 'GCM' mode, (default: none).
+ *          tagLength desired length of authentication tag, in bits, for
+ *            'GCM' mode (0-128, default: 128).
+ *          tag the authentication tag to check if decrypting, as a
+ *             binary-encoded string of bytes.
+ *          output the output the buffer to write to, null to create one.
+ */
+BlockCipher.prototype.start = function(options) {
+  options = options || {};
+  var opts = {};
+  for(var key in options) {
+    opts[key] = options[key];
+  }
+  opts.decrypt = this._decrypt;
+  this._finish = false;
+  this._input = forge.util.createBuffer();
+  this.output = options.output || forge.util.createBuffer();
+  this.mode.start(opts);
+};
+
+/**
+ * Updates the next block according to the cipher mode.
+ *
+ * @param input the buffer to read from.
+ */
+BlockCipher.prototype.update = function(input) {
+  if(input) {
+    // input given, so empty it into the input buffer
+    this._input.putBuffer(input);
+  }
+
+  // do cipher operation until it needs more input and not finished
+  while(!this._op.call(this.mode, this._input, this.output, this._finish) &&
+    !this._finish) {}
+
+  // free consumed memory from input buffer
+  this._input.compact();
+};
+
+/**
+ * Finishes encrypting or decrypting.
+ *
+ * @param pad a padding function to use in CBC mode, null for default,
+ *          signature(blockSize, buffer, decrypt).
+ *
+ * @return true if successful, false on error.
+ */
+BlockCipher.prototype.finish = function(pad) {
+  // backwards-compatibility w/deprecated padding API
+  // Note: will overwrite padding functions even after another start() call
+  if(pad && (this.mode.name === 'ECB' || this.mode.name === 'CBC')) {
+    this.mode.pad = function(input) {
+      return pad(this.blockSize, input, false);
+    };
+    this.mode.unpad = function(output) {
+      return pad(this.blockSize, output, true);
+    };
+  }
+
+  // build options for padding and afterFinish functions
+  var options = {};
+  options.decrypt = this._decrypt;
+
+  // get # of bytes that won't fill a block
+  options.overflow = this._input.length() % this.blockSize;
+
+  if(!this._decrypt && this.mode.pad) {
+    if(!this.mode.pad(this._input, options)) {
+      return false;
+    }
+  }
+
+  // do final update
+  this._finish = true;
+  this.update();
+
+  if(this._decrypt && this.mode.unpad) {
+    if(!this.mode.unpad(this.output, options)) {
+      return false;
+    }
+  }
+
+  if(this.mode.afterFinish) {
+    if(!this.mode.afterFinish(this.output, options)) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+
+/***/ }),
 /* 986 */,
 /* 987 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -120292,7 +126096,7 @@ module.exports = {"$id":"cache.json#","$schema":"http://json-schema.org/draft-06
  * Expose `debug()` as the module.
  */
 
-exports = module.exports = __webpack_require__(403);
+exports = module.exports = __webpack_require__(656);
 exports.log = log;
 exports.formatArgs = formatArgs;
 exports.save = save;
@@ -120485,7 +126289,737 @@ function localstorage() {
 
 /***/ }),
 /* 988 */,
-/* 989 */,
+/* 989 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+/**
+ * Support for concurrent task management and synchronization in web
+ * applications.
+ *
+ * @author Dave Longley
+ * @author David I. Lehn <dlehn@digitalbazaar.com>
+ *
+ * Copyright (c) 2009-2013 Digital Bazaar, Inc.
+ */
+var forge = __webpack_require__(45);
+__webpack_require__(367);
+__webpack_require__(931);
+__webpack_require__(294);
+
+// logging category
+var cat = 'forge.task';
+
+// verbose level
+// 0: off, 1: a little, 2: a whole lot
+// Verbose debug logging is surrounded by a level check to avoid the
+// performance issues with even calling the logging code regardless if it
+// is actually logged.  For performance reasons this should not be set to 2
+// for production use.
+// ex: if(sVL >= 2) forge.log.verbose(....)
+var sVL = 0;
+
+// track tasks for debugging
+var sTasks = {};
+var sNextTaskId = 0;
+// debug access
+forge.debug.set(cat, 'tasks', sTasks);
+
+// a map of task type to task queue
+var sTaskQueues = {};
+// debug access
+forge.debug.set(cat, 'queues', sTaskQueues);
+
+// name for unnamed tasks
+var sNoTaskName = '?';
+
+// maximum number of doNext() recursions before a context swap occurs
+// FIXME: might need to tweak this based on the browser
+var sMaxRecursions = 30;
+
+// time slice for doing tasks before a context swap occurs
+// FIXME: might need to tweak this based on the browser
+var sTimeSlice = 20;
+
+/**
+ * Task states.
+ *
+ * READY: ready to start processing
+ * RUNNING: task or a subtask is running
+ * BLOCKED: task is waiting to acquire N permits to continue
+ * SLEEPING: task is sleeping for a period of time
+ * DONE: task is done
+ * ERROR: task has an error
+ */
+var READY = 'ready';
+var RUNNING = 'running';
+var BLOCKED = 'blocked';
+var SLEEPING = 'sleeping';
+var DONE = 'done';
+var ERROR = 'error';
+
+/**
+ * Task actions.  Used to control state transitions.
+ *
+ * STOP: stop processing
+ * START: start processing tasks
+ * BLOCK: block task from continuing until 1 or more permits are released
+ * UNBLOCK: release one or more permits
+ * SLEEP: sleep for a period of time
+ * WAKEUP: wakeup early from SLEEPING state
+ * CANCEL: cancel further tasks
+ * FAIL: a failure occured
+ */
+var STOP = 'stop';
+var START = 'start';
+var BLOCK = 'block';
+var UNBLOCK = 'unblock';
+var SLEEP = 'sleep';
+var WAKEUP = 'wakeup';
+var CANCEL = 'cancel';
+var FAIL = 'fail';
+
+/**
+ * State transition table.
+ *
+ * nextState = sStateTable[currentState][action]
+ */
+var sStateTable = {};
+
+sStateTable[READY] = {};
+sStateTable[READY][STOP] = READY;
+sStateTable[READY][START] = RUNNING;
+sStateTable[READY][CANCEL] = DONE;
+sStateTable[READY][FAIL] = ERROR;
+
+sStateTable[RUNNING] = {};
+sStateTable[RUNNING][STOP] = READY;
+sStateTable[RUNNING][START] = RUNNING;
+sStateTable[RUNNING][BLOCK] = BLOCKED;
+sStateTable[RUNNING][UNBLOCK] = RUNNING;
+sStateTable[RUNNING][SLEEP] = SLEEPING;
+sStateTable[RUNNING][WAKEUP] = RUNNING;
+sStateTable[RUNNING][CANCEL] = DONE;
+sStateTable[RUNNING][FAIL] = ERROR;
+
+sStateTable[BLOCKED] = {};
+sStateTable[BLOCKED][STOP] = BLOCKED;
+sStateTable[BLOCKED][START] = BLOCKED;
+sStateTable[BLOCKED][BLOCK] = BLOCKED;
+sStateTable[BLOCKED][UNBLOCK] = BLOCKED;
+sStateTable[BLOCKED][SLEEP] = BLOCKED;
+sStateTable[BLOCKED][WAKEUP] = BLOCKED;
+sStateTable[BLOCKED][CANCEL] = DONE;
+sStateTable[BLOCKED][FAIL] = ERROR;
+
+sStateTable[SLEEPING] = {};
+sStateTable[SLEEPING][STOP] = SLEEPING;
+sStateTable[SLEEPING][START] = SLEEPING;
+sStateTable[SLEEPING][BLOCK] = SLEEPING;
+sStateTable[SLEEPING][UNBLOCK] = SLEEPING;
+sStateTable[SLEEPING][SLEEP] = SLEEPING;
+sStateTable[SLEEPING][WAKEUP] = SLEEPING;
+sStateTable[SLEEPING][CANCEL] = DONE;
+sStateTable[SLEEPING][FAIL] = ERROR;
+
+sStateTable[DONE] = {};
+sStateTable[DONE][STOP] = DONE;
+sStateTable[DONE][START] = DONE;
+sStateTable[DONE][BLOCK] = DONE;
+sStateTable[DONE][UNBLOCK] = DONE;
+sStateTable[DONE][SLEEP] = DONE;
+sStateTable[DONE][WAKEUP] = DONE;
+sStateTable[DONE][CANCEL] = DONE;
+sStateTable[DONE][FAIL] = ERROR;
+
+sStateTable[ERROR] = {};
+sStateTable[ERROR][STOP] = ERROR;
+sStateTable[ERROR][START] = ERROR;
+sStateTable[ERROR][BLOCK] = ERROR;
+sStateTable[ERROR][UNBLOCK] = ERROR;
+sStateTable[ERROR][SLEEP] = ERROR;
+sStateTable[ERROR][WAKEUP] = ERROR;
+sStateTable[ERROR][CANCEL] = ERROR;
+sStateTable[ERROR][FAIL] = ERROR;
+
+/**
+ * Creates a new task.
+ *
+ * @param options options for this task
+ *   run: the run function for the task (required)
+ *   name: the run function for the task (optional)
+ *   parent: parent of this task (optional)
+ *
+ * @return the empty task.
+ */
+var Task = function(options) {
+  // task id
+  this.id = -1;
+
+  // task name
+  this.name = options.name || sNoTaskName;
+
+  // task has no parent
+  this.parent = options.parent || null;
+
+  // save run function
+  this.run = options.run;
+
+  // create a queue of subtasks to run
+  this.subtasks = [];
+
+  // error flag
+  this.error = false;
+
+  // state of the task
+  this.state = READY;
+
+  // number of times the task has been blocked (also the number
+  // of permits needed to be released to continue running)
+  this.blocks = 0;
+
+  // timeout id when sleeping
+  this.timeoutId = null;
+
+  // no swap time yet
+  this.swapTime = null;
+
+  // no user data
+  this.userData = null;
+
+  // initialize task
+  // FIXME: deal with overflow
+  this.id = sNextTaskId++;
+  sTasks[this.id] = this;
+  if(sVL >= 1) {
+    forge.log.verbose(cat, '[%s][%s] init', this.id, this.name, this);
+  }
+};
+
+/**
+ * Logs debug information on this task and the system state.
+ */
+Task.prototype.debug = function(msg) {
+  msg = msg || '';
+  forge.log.debug(cat, msg,
+    '[%s][%s] task:', this.id, this.name, this,
+    'subtasks:', this.subtasks.length,
+    'queue:', sTaskQueues);
+};
+
+/**
+ * Adds a subtask to run after task.doNext() or task.fail() is called.
+ *
+ * @param name human readable name for this task (optional).
+ * @param subrun a function to run that takes the current task as
+ *          its first parameter.
+ *
+ * @return the current task (useful for chaining next() calls).
+ */
+Task.prototype.next = function(name, subrun) {
+  // juggle parameters if it looks like no name is given
+  if(typeof(name) === 'function') {
+    subrun = name;
+
+    // inherit parent's name
+    name = this.name;
+  }
+  // create subtask, set parent to this task, propagate callbacks
+  var subtask = new Task({
+    run: subrun,
+    name: name,
+    parent: this
+  });
+  // start subtasks running
+  subtask.state = RUNNING;
+  subtask.type = this.type;
+  subtask.successCallback = this.successCallback || null;
+  subtask.failureCallback = this.failureCallback || null;
+
+  // queue a new subtask
+  this.subtasks.push(subtask);
+
+  return this;
+};
+
+/**
+ * Adds subtasks to run in parallel after task.doNext() or task.fail()
+ * is called.
+ *
+ * @param name human readable name for this task (optional).
+ * @param subrun functions to run that take the current task as
+ *          their first parameter.
+ *
+ * @return the current task (useful for chaining next() calls).
+ */
+Task.prototype.parallel = function(name, subrun) {
+  // juggle parameters if it looks like no name is given
+  if(forge.util.isArray(name)) {
+    subrun = name;
+
+    // inherit parent's name
+    name = this.name;
+  }
+  // Wrap parallel tasks in a regular task so they are started at the
+  // proper time.
+  return this.next(name, function(task) {
+    // block waiting for subtasks
+    var ptask = task;
+    ptask.block(subrun.length);
+
+    // we pass the iterator from the loop below as a parameter
+    // to a function because it is otherwise included in the
+    // closure and changes as the loop changes -- causing i
+    // to always be set to its highest value
+    var startParallelTask = function(pname, pi) {
+      forge.task.start({
+        type: pname,
+        run: function(task) {
+           subrun[pi](task);
+        },
+        success: function(task) {
+           ptask.unblock();
+        },
+        failure: function(task) {
+           ptask.unblock();
+        }
+      });
+    };
+
+    for(var i = 0; i < subrun.length; i++) {
+      // Type must be unique so task starts in parallel:
+      //    name + private string + task id + sub-task index
+      // start tasks in parallel and unblock when the finish
+      var pname = name + '__parallel-' + task.id + '-' + i;
+      var pi = i;
+      startParallelTask(pname, pi);
+    }
+  });
+};
+
+/**
+ * Stops a running task.
+ */
+Task.prototype.stop = function() {
+  this.state = sStateTable[this.state][STOP];
+};
+
+/**
+ * Starts running a task.
+ */
+Task.prototype.start = function() {
+  this.error = false;
+  this.state = sStateTable[this.state][START];
+
+  // try to restart
+  if(this.state === RUNNING) {
+    this.start = new Date();
+    this.run(this);
+    runNext(this, 0);
+  }
+};
+
+/**
+ * Blocks a task until it one or more permits have been released. The
+ * task will not resume until the requested number of permits have
+ * been released with call(s) to unblock().
+ *
+ * @param n number of permits to wait for(default: 1).
+ */
+Task.prototype.block = function(n) {
+  n = typeof(n) === 'undefined' ? 1 : n;
+  this.blocks += n;
+  if(this.blocks > 0) {
+    this.state = sStateTable[this.state][BLOCK];
+  }
+};
+
+/**
+ * Releases a permit to unblock a task. If a task was blocked by
+ * requesting N permits via block(), then it will only continue
+ * running once enough permits have been released via unblock() calls.
+ *
+ * If multiple processes need to synchronize with a single task then
+ * use a condition variable (see forge.task.createCondition). It is
+ * an error to unblock a task more times than it has been blocked.
+ *
+ * @param n number of permits to release (default: 1).
+ *
+ * @return the current block count (task is unblocked when count is 0)
+ */
+Task.prototype.unblock = function(n) {
+  n = typeof(n) === 'undefined' ? 1 : n;
+  this.blocks -= n;
+  if(this.blocks === 0 && this.state !== DONE) {
+    this.state = RUNNING;
+    runNext(this, 0);
+  }
+  return this.blocks;
+};
+
+/**
+ * Sleep for a period of time before resuming tasks.
+ *
+ * @param n number of milliseconds to sleep (default: 0).
+ */
+Task.prototype.sleep = function(n) {
+  n = typeof(n) === 'undefined' ? 0 : n;
+  this.state = sStateTable[this.state][SLEEP];
+  var self = this;
+  this.timeoutId = setTimeout(function() {
+    self.timeoutId = null;
+    self.state = RUNNING;
+    runNext(self, 0);
+  }, n);
+};
+
+/**
+ * Waits on a condition variable until notified. The next task will
+ * not be scheduled until notification. A condition variable can be
+ * created with forge.task.createCondition().
+ *
+ * Once cond.notify() is called, the task will continue.
+ *
+ * @param cond the condition variable to wait on.
+ */
+Task.prototype.wait = function(cond) {
+  cond.wait(this);
+};
+
+/**
+ * If sleeping, wakeup and continue running tasks.
+ */
+Task.prototype.wakeup = function() {
+  if(this.state === SLEEPING) {
+    cancelTimeout(this.timeoutId);
+    this.timeoutId = null;
+    this.state = RUNNING;
+    runNext(this, 0);
+  }
+};
+
+/**
+ * Cancel all remaining subtasks of this task.
+ */
+Task.prototype.cancel = function() {
+  this.state = sStateTable[this.state][CANCEL];
+  // remove permits needed
+  this.permitsNeeded = 0;
+  // cancel timeouts
+  if(this.timeoutId !== null) {
+    cancelTimeout(this.timeoutId);
+    this.timeoutId = null;
+  }
+  // remove subtasks
+  this.subtasks = [];
+};
+
+/**
+ * Finishes this task with failure and sets error flag. The entire
+ * task will be aborted unless the next task that should execute
+ * is passed as a parameter. This allows levels of subtasks to be
+ * skipped. For instance, to abort only this tasks's subtasks, then
+ * call fail(task.parent). To abort this task's subtasks and its
+ * parent's subtasks, call fail(task.parent.parent). To abort
+ * all tasks and simply call the task callback, call fail() or
+ * fail(null).
+ *
+ * The task callback (success or failure) will always, eventually, be
+ * called.
+ *
+ * @param next the task to continue at, or null to abort entirely.
+ */
+Task.prototype.fail = function(next) {
+  // set error flag
+  this.error = true;
+
+  // finish task
+  finish(this, true);
+
+  if(next) {
+    // propagate task info
+    next.error = this.error;
+    next.swapTime = this.swapTime;
+    next.userData = this.userData;
+
+    // do next task as specified
+    runNext(next, 0);
+  } else {
+    if(this.parent !== null) {
+      // finish root task (ensures it is removed from task queue)
+      var parent = this.parent;
+      while(parent.parent !== null) {
+        // propagate task info
+        parent.error = this.error;
+        parent.swapTime = this.swapTime;
+        parent.userData = this.userData;
+        parent = parent.parent;
+      }
+      finish(parent, true);
+    }
+
+    // call failure callback if one exists
+    if(this.failureCallback) {
+      this.failureCallback(this);
+    }
+  }
+};
+
+/**
+ * Asynchronously start a task.
+ *
+ * @param task the task to start.
+ */
+var start = function(task) {
+  task.error = false;
+  task.state = sStateTable[task.state][START];
+  setTimeout(function() {
+    if(task.state === RUNNING) {
+      task.swapTime = +new Date();
+      task.run(task);
+      runNext(task, 0);
+    }
+  }, 0);
+};
+
+/**
+ * Run the next subtask or finish this task.
+ *
+ * @param task the task to process.
+ * @param recurse the recursion count.
+ */
+var runNext = function(task, recurse) {
+  // get time since last context swap (ms), if enough time has passed set
+  // swap to true to indicate that doNext was performed asynchronously
+  // also, if recurse is too high do asynchronously
+  var swap =
+    (recurse > sMaxRecursions) ||
+    (+new Date() - task.swapTime) > sTimeSlice;
+
+  var doNext = function(recurse) {
+    recurse++;
+    if(task.state === RUNNING) {
+      if(swap) {
+        // update swap time
+        task.swapTime = +new Date();
+      }
+
+      if(task.subtasks.length > 0) {
+        // run next subtask
+        var subtask = task.subtasks.shift();
+        subtask.error = task.error;
+        subtask.swapTime = task.swapTime;
+        subtask.userData = task.userData;
+        subtask.run(subtask);
+        if(!subtask.error) {
+           runNext(subtask, recurse);
+        }
+      } else {
+        finish(task);
+
+        if(!task.error) {
+          // chain back up and run parent
+          if(task.parent !== null) {
+            // propagate task info
+            task.parent.error = task.error;
+            task.parent.swapTime = task.swapTime;
+            task.parent.userData = task.userData;
+
+            // no subtasks left, call run next subtask on parent
+            runNext(task.parent, recurse);
+          }
+        }
+      }
+    }
+  };
+
+  if(swap) {
+    // we're swapping, so run asynchronously
+    setTimeout(doNext, 0);
+  } else {
+    // not swapping, so run synchronously
+    doNext(recurse);
+  }
+};
+
+/**
+ * Finishes a task and looks for the next task in the queue to start.
+ *
+ * @param task the task to finish.
+ * @param suppressCallbacks true to suppress callbacks.
+ */
+var finish = function(task, suppressCallbacks) {
+  // subtask is now done
+  task.state = DONE;
+
+  delete sTasks[task.id];
+  if(sVL >= 1) {
+    forge.log.verbose(cat, '[%s][%s] finish',
+      task.id, task.name, task);
+  }
+
+  // only do queue processing for root tasks
+  if(task.parent === null) {
+    // report error if queue is missing
+    if(!(task.type in sTaskQueues)) {
+      forge.log.error(cat,
+        '[%s][%s] task queue missing [%s]',
+        task.id, task.name, task.type);
+    } else if(sTaskQueues[task.type].length === 0) {
+      // report error if queue is empty
+      forge.log.error(cat,
+        '[%s][%s] task queue empty [%s]',
+        task.id, task.name, task.type);
+    } else if(sTaskQueues[task.type][0] !== task) {
+      // report error if this task isn't the first in the queue
+      forge.log.error(cat,
+        '[%s][%s] task not first in queue [%s]',
+        task.id, task.name, task.type);
+    } else {
+      // remove ourselves from the queue
+      sTaskQueues[task.type].shift();
+      // clean up queue if it is empty
+      if(sTaskQueues[task.type].length === 0) {
+        if(sVL >= 1) {
+          forge.log.verbose(cat, '[%s][%s] delete queue [%s]',
+            task.id, task.name, task.type);
+        }
+        /* Note: Only a task can delete a queue of its own type. This
+         is used as a way to synchronize tasks. If a queue for a certain
+         task type exists, then a task of that type is running.
+         */
+        delete sTaskQueues[task.type];
+      } else {
+        // dequeue the next task and start it
+        if(sVL >= 1) {
+          forge.log.verbose(cat,
+            '[%s][%s] queue start next [%s] remain:%s',
+            task.id, task.name, task.type,
+            sTaskQueues[task.type].length);
+        }
+        sTaskQueues[task.type][0].start();
+      }
+    }
+
+    if(!suppressCallbacks) {
+      // call final callback if one exists
+      if(task.error && task.failureCallback) {
+        task.failureCallback(task);
+      } else if(!task.error && task.successCallback) {
+        task.successCallback(task);
+      }
+    }
+  }
+};
+
+/* Tasks API */
+module.exports = forge.task = forge.task || {};
+
+/**
+ * Starts a new task that will run the passed function asynchronously.
+ *
+ * In order to finish the task, either task.doNext() or task.fail()
+ * *must* be called.
+ *
+ * The task must have a type (a string identifier) that can be used to
+ * synchronize it with other tasks of the same type. That type can also
+ * be used to cancel tasks that haven't started yet.
+ *
+ * To start a task, the following object must be provided as a parameter
+ * (each function takes a task object as its first parameter):
+ *
+ * {
+ *   type: the type of task.
+ *   run: the function to run to execute the task.
+ *   success: a callback to call when the task succeeds (optional).
+ *   failure: a callback to call when the task fails (optional).
+ * }
+ *
+ * @param options the object as described above.
+ */
+forge.task.start = function(options) {
+  // create a new task
+  var task = new Task({
+    run: options.run,
+    name: options.name || sNoTaskName
+  });
+  task.type = options.type;
+  task.successCallback = options.success || null;
+  task.failureCallback = options.failure || null;
+
+  // append the task onto the appropriate queue
+  if(!(task.type in sTaskQueues)) {
+    if(sVL >= 1) {
+      forge.log.verbose(cat, '[%s][%s] create queue [%s]',
+        task.id, task.name, task.type);
+    }
+    // create the queue with the new task
+    sTaskQueues[task.type] = [task];
+    start(task);
+  } else {
+    // push the task onto the queue, it will be run after a task
+    // with the same type completes
+    sTaskQueues[options.type].push(task);
+  }
+};
+
+/**
+ * Cancels all tasks of the given type that haven't started yet.
+ *
+ * @param type the type of task to cancel.
+ */
+forge.task.cancel = function(type) {
+  // find the task queue
+  if(type in sTaskQueues) {
+    // empty all but the current task from the queue
+    sTaskQueues[type] = [sTaskQueues[type][0]];
+  }
+};
+
+/**
+ * Creates a condition variable to synchronize tasks. To make a task wait
+ * on the condition variable, call task.wait(condition). To notify all
+ * tasks that are waiting, call condition.notify().
+ *
+ * @return the condition variable.
+ */
+forge.task.createCondition = function() {
+  var cond = {
+    // all tasks that are blocked
+    tasks: {}
+  };
+
+  /**
+   * Causes the given task to block until notify is called. If the task
+   * is already waiting on this condition then this is a no-op.
+   *
+   * @param task the task to cause to wait.
+   */
+  cond.wait = function(task) {
+    // only block once
+    if(!(task.id in cond.tasks)) {
+       task.block();
+       cond.tasks[task.id] = task;
+    }
+  };
+
+  /**
+   * Notifies all waiting tasks to wake up.
+   */
+  cond.notify = function() {
+    // since unblock() will run the next task from here, make sure to
+    // clear the condition's blocked task list before unblocking
+    var tmp = cond.tasks;
+    cond.tasks = {};
+    for(var id in tmp) {
+      tmp[id].unblock();
+    }
+  };
+
+  return cond;
+};
+
+
+/***/ }),
 /* 990 */,
 /* 991 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -120533,65 +127067,52 @@ exports.jar = function (store) {
 
 /***/ }),
 /* 992 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-/**
- * Javascript implementation of mask generation function MGF1.
- *
- * @author Stefan Siegl
- * @author Dave Longley
- *
- * Copyright (c) 2012 Stefan Siegl <stesie@brokenpipe.de>
- * Copyright (c) 2014 Digital Bazaar, Inc.
- */
-var forge = __webpack_require__(998);
-__webpack_require__(294);
+"use strict";
 
-forge.mgf = forge.mgf || {};
-var mgf1 = module.exports = forge.mgf.mgf1 = forge.mgf1 = forge.mgf1 || {};
-
-/**
- * Creates a MGF1 mask generation function object.
- *
- * @param md the message digest API to use (eg: forge.md.sha1.create()).
- *
- * @return a mask generation function object.
- */
-mgf1.create = function(md) {
-  var mgf = {
-    /**
-     * Generate mask of specified length.
-     *
-     * @param {String} seed The seed for mask generation.
-     * @param maskLen Number of bytes to generate.
-     * @return {String} The generated mask.
-     */
-    generate: function(seed, maskLen) {
-      /* 2. Let T be the empty octet string. */
-      var t = new forge.util.ByteBuffer();
-
-      /* 3. For counter from 0 to ceil(maskLen / hLen), do the following: */
-      var len = Math.ceil(maskLen / md.digestLength);
-      for(var i = 0; i < len; i++) {
-        /* a. Convert counter to an octet string C of length 4 octets */
-        var c = new forge.util.ByteBuffer();
-        c.putInt32(i);
-
-        /* b. Concatenate the hash of the seed mgfSeed and C to the octet
-         * string T: */
-        md.start();
-        md.update(seed + c.getBytes());
-        t.putBuffer(md.digest());
-      }
-
-      /* Output the leading maskLen octets of T as the octet string mask. */
-      t.truncate(t.length() - maskLen);
-      return t.getBytes();
+Object.defineProperty(exports, "__esModule", { value: true });
+const fsStat = __webpack_require__(519);
+const fsWalk = __webpack_require__(167);
+const reader_1 = __webpack_require__(437);
+class ReaderSync extends reader_1.default {
+    constructor() {
+        super(...arguments);
+        this._walkSync = fsWalk.walkSync;
+        this._statSync = fsStat.statSync;
     }
-  };
-
-  return mgf;
-};
+    dynamic(root, options) {
+        return this._walkSync(root, options);
+    }
+    static(patterns, options) {
+        const entries = [];
+        for (const pattern of patterns) {
+            const filepath = this._getFullEntryPath(pattern);
+            const entry = this._getEntry(filepath, pattern, options);
+            if (entry === null || !options.entryFilter(entry)) {
+                continue;
+            }
+            entries.push(entry);
+        }
+        return entries;
+    }
+    _getEntry(filepath, pattern, options) {
+        try {
+            const stats = this._getStat(filepath);
+            return this._makeEntry(stats, pattern);
+        }
+        catch (error) {
+            if (options.errorFilter(error)) {
+                return null;
+            }
+            throw error;
+        }
+    }
+    _getStat(filepath) {
+        return this._statSync(filepath, this._fsStatSettings);
+    }
+}
+exports.default = ReaderSync;
 
 
 /***/ }),
@@ -120658,67 +127179,30 @@ module.exports = InterceptorManager;
 /***/ (function(__unusedmodule, exports) {
 
 "use strict";
-/*!
- * Copyright (c) 2015, Salesforce.com, Inc.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * 3. Neither the name of Salesforce.com nor the names of its contributors may
- * be used to endorse or promote products derived from this software without
- * specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
 
-/*
- * "A request-path path-matches a given cookie-path if at least one of the
- * following conditions holds:"
- */
-function pathMatch (reqPath, cookiePath) {
-  // "o  The cookie-path and the request-path are identical."
-  if (cookiePath === reqPath) {
-    return true;
-  }
-
-  var idx = reqPath.indexOf(cookiePath);
-  if (idx === 0) {
-    // "o  The cookie-path is a prefix of the request-path, and the last
-    // character of the cookie-path is %x2F ("/")."
-    if (cookiePath.substr(-1) === "/") {
-      return true;
+Object.defineProperty(exports, "__esModule", { value: true });
+function isFatalError(settings, error) {
+    if (settings.errorFilter === null) {
+        return true;
     }
-
-    // " o  The cookie-path is a prefix of the request-path, and the first
-    // character of the request-path that is not included in the cookie- path
-    // is a %x2F ("/") character."
-    if (reqPath.substr(cookiePath.length, 1) === "/") {
-      return true;
-    }
-  }
-
-  return false;
+    return !settings.errorFilter(error);
 }
-
-exports.pathMatch = pathMatch;
+exports.isFatalError = isFatalError;
+function isAppliedFilter(filter, value) {
+    return filter === null || filter(value);
+}
+exports.isAppliedFilter = isAppliedFilter;
+function replacePathSegmentSeparator(filepath, separator) {
+    return filepath.split(/[\\/]/).join(separator);
+}
+exports.replacePathSegmentSeparator = replacePathSegmentSeparator;
+function joinPathSegments(a, b, separator) {
+    if (a === '') {
+        return b;
+    }
+    return a + separator + b;
+}
+exports.joinPathSegments = joinPathSegments;
 
 
 /***/ }),
@@ -120957,21 +127441,68 @@ exports.default = _default;
 
 /***/ }),
 /* 998 */
-/***/ (function(module) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-/**
- * Node.js module for Forge.
- *
- * @author Dave Longley
- *
- * Copyright 2011-2016 Digital Bazaar, Inc.
- */
-module.exports = {
-  // default options
-  options: {
-    usePureJavaScript: false
-  }
-};
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const fsScandir = __webpack_require__(633);
+const common = __webpack_require__(994);
+const reader_1 = __webpack_require__(3);
+class SyncReader extends reader_1.default {
+    constructor() {
+        super(...arguments);
+        this._scandir = fsScandir.scandirSync;
+        this._storage = new Set();
+        this._queue = new Set();
+    }
+    read() {
+        this._pushToQueue(this._root, this._settings.basePath);
+        this._handleQueue();
+        return [...this._storage];
+    }
+    _pushToQueue(directory, base) {
+        this._queue.add({ directory, base });
+    }
+    _handleQueue() {
+        for (const item of this._queue.values()) {
+            this._handleDirectory(item.directory, item.base);
+        }
+    }
+    _handleDirectory(directory, base) {
+        try {
+            const entries = this._scandir(directory, this._settings.fsScandirSettings);
+            for (const entry of entries) {
+                this._handleEntry(entry, base);
+            }
+        }
+        catch (error) {
+            this._handleError(error);
+        }
+    }
+    _handleError(error) {
+        if (!common.isFatalError(this._settings, error)) {
+            return;
+        }
+        throw error;
+    }
+    _handleEntry(entry, base) {
+        const fullpath = entry.path;
+        if (base !== undefined) {
+            entry.path = common.joinPathSegments(base, entry.name, this._settings.pathSegmentSeparator);
+        }
+        if (common.isAppliedFilter(this._settings.entryFilter, entry)) {
+            this._pushToStorage(entry);
+        }
+        if (entry.dirent.isDirectory() && common.isAppliedFilter(this._settings.deepFilter, entry)) {
+            this._pushToQueue(fullpath, entry.path);
+        }
+    }
+    _pushToStorage(entry) {
+        this._storage.add(entry);
+    }
+}
+exports.default = SyncReader;
 
 
 /***/ }),

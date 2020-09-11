@@ -14,6 +14,7 @@ describe('create system in styra-das', () => {
   });
 
   test('it can create system for staging', async () => {
+    mock({});
     exec.exec.mockResolvedValueOnce(0);
     const createSystemResult = {
       result: {
@@ -39,6 +40,7 @@ describe('create system in styra-das', () => {
   });
 
   test('it can create system for prod', async () => {
+    mock({});
     exec.exec.mockResolvedValueOnce(0);
     const createSystemResult = {
       result: {
