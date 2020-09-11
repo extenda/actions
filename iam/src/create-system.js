@@ -1,22 +1,15 @@
 const exec = require('@actions/exec');
-const core = require('@actions/core');
 const request = require('request');
 const fs = require('fs');
 const yaml = require('js-yaml');
 
 const applyConfiguration = async (opaConfig, systemName) => {
-  const promises = [];
-  promises.push(opaConfig.then(async (config) => {
-    fs.writeFile(systemName, yaml.safeDump(config), (err) => {
-      if (err) core.info(err);
-    });
-    return exec.exec('kubectl', [
-      'apply',
-      '-f',
-      systemName,
-    ]).then(() => fs.unlinkSync(systemName, (err) => { if (err) core.info(err); }));
-  }));
-  return Promise.all(promises);
+  fs.writeFileSync(systemName, yaml.safeDump(opaConfig));
+  return exec.exec('kubectl', [
+    'apply',
+    '-f',
+    systemName,
+  ]).then(() => fs.unlinkSync(systemName));
 };
 
 const setLabels = async (
@@ -110,7 +103,7 @@ const setDefaultDataset = async (
   resolve(true);
 });
 
-const getOpaConfig = async (systemId, tokenContent, namespace, styraUrl) => {
+const getOpaConfig = (systemId, tokenContent, namespace, styraUrl) => {
   const token = tokenContent.split(/['']/)[1].substr(22);
   const opaConfig = {
     kind: 'ConfigMap',
