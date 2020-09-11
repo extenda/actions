@@ -94919,24 +94919,17 @@ module.exports = require("fs");
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const exec = __webpack_require__(266);
-const core = __webpack_require__(793);
 const request = __webpack_require__(841);
 const fs = __webpack_require__(747);
 const yaml = __webpack_require__(781);
 
 const applyConfiguration = async (opaConfig, systemName) => {
-  const promises = [];
-  promises.push(opaConfig.then(async (config) => {
-    fs.writeFile(systemName, yaml.safeDump(config), (err) => {
-      if (err) core.info(err);
-    });
-    return exec.exec('kubectl', [
-      'apply',
-      '-f',
-      systemName,
-    ]).then(() => fs.unlinkSync(systemName, (err) => { if (err) core.info(err); }));
-  }));
-  return Promise.all(promises);
+  fs.writeFileSync(systemName, yaml.safeDump(opaConfig));
+  return exec.exec('kubectl', [
+    'apply',
+    '-f',
+    systemName,
+  ]).then(() => fs.unlinkSync(systemName));
 };
 
 const setLabels = async (
@@ -95030,7 +95023,7 @@ const setDefaultDataset = async (
   resolve(true);
 });
 
-const getOpaConfig = async (systemId, tokenContent, namespace, styraUrl) => {
+const getOpaConfig = (systemId, tokenContent, namespace, styraUrl) => {
   const token = tokenContent.split(/['']/)[1].substr(22);
   const opaConfig = {
     kind: 'ConfigMap',
