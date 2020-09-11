@@ -1,4 +1,5 @@
 const exec = require('@actions/exec');
+const core = require('@actions/core');
 const request = require('request');
 const fs = require('fs');
 const yaml = require('js-yaml');
@@ -11,6 +12,61 @@ const applyConfiguration = async (opaConfig, systemName) => {
     systemName,
   ]).then(() => fs.unlinkSync(systemName));
 };
+
+const sendInvites = async (
+  token, styraUrl, user,
+) => new Promise((resolve, reject) => {
+  core.info(user);
+  const userBody = {
+    user_id: user,
+    roles: ['viewer'],
+  };
+  const url = `${styraUrl}/v1/invitations`;
+  request({
+    uri: url,
+    method: 'POST',
+    headers: {
+      'Content-type': 'application/json',
+      Authorization: `bearer ${token}`,
+    },
+    body: userBody,
+    json: true,
+  }, (error, res) => {
+    if (error) {
+      reject(new Error(error));
+    } else {
+      resolve(res.statusCode === 200);
+    }
+  });
+});
+
+const setOwners = async (
+  systemId, token, styraUrl, systemOwners,
+) => new Promise((resolve, reject) => {
+  const ownerBody = {
+    description: '',
+    id: 'owners',
+    role_name: 'owner',
+    subjects: systemOwners,
+  };
+  const url = `${styraUrl}/v1/authz/rolebindings/systems/${systemId}/owners`;
+  request({
+    uri: url,
+    method: 'PUT',
+    headers: {
+      'Content-type': 'application/json',
+      Authorization: `bearer ${token}`,
+    },
+    body: ownerBody,
+    json: true,
+  }, (error, res) => {
+    if (error) {
+      reject(new Error(error));
+    } else {
+      resolve(res.statusCode === 400);
+    }
+  });
+});
 
 const setLabels = async (
   systemId, env, token, styraUrl,
@@ -36,9 +92,10 @@ const setLabels = async (
   }, (error) => {
     if (error) {
       reject(new Error(error));
+    } else {
+      resolve(true);
     }
   });
-  resolve(true);
 });
 
 const setDefaultPolicy = async (
@@ -65,9 +122,10 @@ const setDefaultPolicy = async (
   }, (error) => {
     if (error) {
       reject(new Error(error));
+    } else {
+      resolve(true);
     }
   });
-  resolve(true);
 });
 
 const setDefaultDataset = async (
@@ -98,9 +156,10 @@ const setDefaultDataset = async (
   }, (error) => {
     if (error) {
       reject(new Error(error));
+    } else {
+      resolve(true);
     }
   });
-  resolve(true);
 });
 
 const getOpaConfig = (systemId, tokenContent, namespace, styraUrl) => {
@@ -173,12 +232,13 @@ const createSystem = async (
       const opaInstall = body.result.install.envoy['example-app'];
       const opaConfig = getOpaConfig(body.result.id, opaInstall, namespace, styraUrl);
       resolve({ systemId: body.result.id, opaConfig });
+    } else {
+      reject(new Error(body));
     }
-    reject(new Error(body));
   });
 });
 
-const setupSystem = async (service, systemName, env, repo, token, styraUrl) => {
+const setupSystem = async (service, systemName, env, repo, token, styraUrl, systemOwners) => {
   const promises = [];
   const { systemId, opaConfig } = await createSystem(
     service, systemName, repo, token, styraUrl, env,
@@ -186,7 +246,21 @@ const setupSystem = async (service, systemName, env, repo, token, styraUrl) => {
   promises.push(setLabels(systemId, env, token, styraUrl));
   promises.push(setDefaultPolicy(systemId, token, styraUrl));
   promises.push(setDefaultDataset(systemId, token, styraUrl));
-  // setOwners())
+  promises.push(setOwners(systemId, token, styraUrl, systemOwners)
+    .then((invites) => {
+      if (invites) {
+        const invitePromises = [];
+        systemOwners.forEach((user) => invitePromises.push(sendInvites(token, styraUrl, user)));
+        return Promise.all(invitePromises).then(() => true);
+      }
+      return false;
+    })
+    .then((retry) => {
+      if (retry) {
+        return setOwners(systemId, token, styraUrl, systemOwners);
+      }
+      return null;
+    }));
   promises.push(applyConfiguration(opaConfig, systemName));
 
   return Promise.all(promises);

@@ -5,6 +5,10 @@ jest.mock('../src/iam-auth');
 jest.mock('../src/load-credentials');
 jest.mock('../../setup-gcloud/src/setup-gcloud');
 jest.mock('fast-glob');
+jest.mock('@actions/github');
+jest.mock('../../cloud-run/src/cluster-info');
+jest.mock('../src/system-owners');
+jest.mock('../../gcp-secret-manager/src/secrets');
 
 const core = require('@actions/core');
 const fg = require('fast-glob');
@@ -14,6 +18,9 @@ const fetchIamToken = require('../src/iam-auth');
 const loadIamDefinition = require('../src/iam-definition');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const loadCredentials = require('../src/load-credentials');
+const getClusterInfo = require('../../cloud-run/src/cluster-info');
+const getSystemOwners = require('../src/system-owners');
+const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
 const credentials = {
   styraToken: 'styra-token',
@@ -29,8 +36,16 @@ describe('run action', () => {
   });
 
   test('It can run the action', async () => {
-    setupGcloud.mockResolvedValue('test-staging-332');
+    loadSecret.mockResolvedValue('token');
+    getSystemOwners.mockResolvedValueOnce(['test@mail.com']);
+    setupGcloud.mockResolvedValue('test-prod-332');
     loadCredentials.mockResolvedValue(credentials);
+
+    const clusterInfoResponse = {
+      project: 'tribe-prod-1242',
+    };
+
+    getClusterInfo.mockReturnValue(clusterInfoResponse);
     core.getInput.mockReturnValueOnce('service-account')
       .mockReturnValueOnce('service-account-staging')
       .mockReturnValueOnce('service-account-prod')
@@ -55,11 +70,20 @@ describe('run action', () => {
       'https://extendaretail.styra.com',
       'https://iam-api.retailsvc.com',
       'iam-token',
-      'staging',
-      'test-staging-332');
+      'prod',
+      'test-prod-332',
+      ['test@mail.com']);
   });
 
   test('It can run for multiple files', async () => {
+    loadSecret.mockResolvedValue('token');
+    getSystemOwners.mockResolvedValueOnce(['test@mail.com']);
+    const clusterInfoResponse = {
+      project: 'tribe-prod-1242',
+    };
+
+    getClusterInfo.mockReturnValue(clusterInfoResponse);
+
     setupGcloud.mockResolvedValue('test-prod-332');
     loadCredentials.mockResolvedValue(credentials);
     core.getInput.mockReturnValueOnce('service-account')

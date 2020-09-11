@@ -57,7 +57,7 @@ describe('Configure iam', () => {
       JSON.stringify(checkSystem)));
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
-    await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'project-staging-321');
+    await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'project-staging-321', []);
 
     expect(request).toHaveBeenCalledTimes(1);
     expect(setupPermissions).toHaveBeenCalledWith(
@@ -100,9 +100,9 @@ describe('Configure iam', () => {
       JSON.stringify(checkSystem)));
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
-    await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123');
+    await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', []);
     expect(setupSystem).toHaveBeenCalledWith(
-      'test-service', 'test.test-service-staging', 'staging', 'test-repo', 'styra-token', 'https://extendaretail.styra.com',
+      'test-service', 'test.test-service-staging', 'staging', 'test-repo', 'styra-token', 'https://extendaretail.styra.com', [],
     );
     expect(request).toHaveBeenCalledTimes(1);
   });
