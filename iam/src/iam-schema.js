@@ -14,9 +14,20 @@ module.exports = {
           type: 'string',
         },
       },
+      required: [
+        'namespace',
+        'repository',
+      ],
+      additionalProperties: false,
     },
     permissions: {
       type: 'object',
+      additionalProperties: {
+        type: 'object',
+        additionalProperties: {
+          type: 'string',
+        },
+      },
     },
     roles: {
       type: 'array',
@@ -34,6 +45,12 @@ module.exports = {
           },
         },
       },
+      required: [
+        'name',
+        'desc',
+        'permissions',
+      ],
+      additionalProperties: false,
     },
   },
   required: [

@@ -19,7 +19,12 @@ inputs:
     description: |
       The IAM YAML specification.
     required: false
-    default: iam.yaml
+    default: iam/*.yaml
+  iam-api-url:
+    description: |
+      The Hii Retail IAM API URL.
+    required: false
+    default: https://iam-api.retailsvc.com
   styra-url:
     description: |
       The styra url

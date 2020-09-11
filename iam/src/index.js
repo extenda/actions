@@ -1,4 +1,5 @@
 const core = require('@actions/core');
+const fg = require('fast-glob');
 const { run } = require('../../utils');
 const loadIamDefinition = require('./iam-definition');
 const configureIAM = require('./configure-iam');
@@ -12,26 +13,30 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   process.env.GCLOUD_INSTALLED_VERSION || 'latest',
 );
 
-const setupEnvironment = async (SA, SACluster, iam, styraUrl) => {
-  const projectId = await gcloudAuth(SACluster);
-  const {
-    env,
-  } = projectInfo(projectId);
-  const iamUrl = core.getInput('iam-api-url')
-    || `https://iam-api.retailsvc.${(env === 'staging') ? 'dev' : 'com'}`;
+const setupEnvironment = async (serviceAccountKey, gcloudAuthKey, iam, styraUrl, iamUrl) => {
+  const projectId = await gcloudAuth(gcloudAuthKey);
+  const { env: projectEnv } = projectInfo(projectId);
+
+  let credentialsEnv = projectEnv;
+  if (projectEnv === 'staging') {
+    // Even for staging, we always target prod iam-api unless explicitly told not to.
+    credentialsEnv = iamUrl.endsWith('retailsvc.dev') ? 'staging' : 'prod';
+    core.warning(`IAM definitions has been explicitly configured to publish to ${iamUrl} which is the STAGING environment.`);
+  }
+
   const {
     styraToken,
     iamApiEmail,
     iamApiPassword,
     iamApiKey,
     iamApiTenant,
-  } = await loadCredentials(SA, env);
+  } = await loadCredentials(serviceAccountKey, credentialsEnv);
 
   const promises = [];
 
   promises.push(fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenant)
     .then((iamToken) => configureIAM(
-      iam, styraToken, styraUrl, iamUrl, iamToken, env, projectId,
+      iam, styraToken, styraUrl, iamUrl, iamToken, projectEnv, projectId,
     )));
 
   return Promise.all(promises);
@@ -42,12 +47,20 @@ const action = async () => {
   const serviceAccountKeyStaging = core.getInput('service-account-key-staging', { required: true });
   const serviceAccountKeyProd = core.getInput('service-account-key-prod', { required: true });
 
-  const iamFile = core.getInput('iam-definition') || 'iam.yaml';
+  const iamFileGlob = core.getInput('iam-definition') || 'iam/*.yaml';
+  const iamUrl = core.getInput('iam-api-url') || 'https://iam-api.retailsvc.com';
   const styraUrl = core.getInput('styra-url') || 'https://extendaretail.styra.com';
-  const iam = loadIamDefinition(iamFile);
 
-  await setupEnvironment(serviceAccountKey, serviceAccountKeyStaging, iam, styraUrl)
-    .then(setupEnvironment(serviceAccountKey, serviceAccountKeyProd, iam, styraUrl));
+  const iamFiles = fg.sync(iamFileGlob, { onlyFiles: true });
+
+  for (const iamFile of iamFiles) {
+    const iam = loadIamDefinition(iamFile);
+    // We MUST process these files one by one as we depend on external tools
+    // eslint-disable-next-line no-await-in-loop
+    await setupEnvironment(serviceAccountKey, serviceAccountKeyStaging, iam, styraUrl, iamUrl);
+    // eslint-disable-next-line no-await-in-loop
+    await setupEnvironment(serviceAccountKey, serviceAccountKeyProd, iam, styraUrl, iamUrl);
+  }
 };
 
 if (require.main === module) {
