@@ -7,6 +7,9 @@ const request = require('request');
 const exec = require('@actions/exec');
 const setupSystem = require('../src/create-system');
 
+
+const systemOwners = ['test@mail.com'];
+
 describe('create system in styra-das', () => {
   afterEach(() => {
     jest.resetAllMocks();
@@ -28,9 +31,16 @@ describe('create system in styra-das', () => {
     };
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 201 },
       createSystemResult));
-    await setupSystem('test-service', 'test.test-service-staging', 'staging', 'test-repo', 'styra-token', 'https://test.styra.com');
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
+      createSystemResult));
+    request.mockImplementationOnce((conf, cb) => cb(null));
+    request.mockImplementationOnce((conf, cb) => cb(null));
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 }));
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 400 }));
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 }));
+    await setupSystem('test-service', 'test.test-service-staging', 'staging', 'test-repo', 'styra-token', 'https://test.styra.com', systemOwners);
 
-    expect(request).toHaveBeenCalledTimes(4);
+    expect(request).toHaveBeenCalledTimes(5);
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('kubectl', [
       'apply',
@@ -41,7 +51,6 @@ describe('create system in styra-das', () => {
 
   test('it can create system for prod', async () => {
     mock({});
-    exec.exec.mockResolvedValueOnce(0);
     const createSystemResult = {
       result: {
         id: '3q54hw45hwrt',
@@ -54,9 +63,15 @@ describe('create system in styra-das', () => {
     };
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 201 },
       createSystemResult));
-    await setupSystem('test-service', 'test.test-service-prod', 'prod', 'test-repo', 'styra-token', 'https://test.styra.com');
-
-    expect(request).toHaveBeenCalledTimes(4);
+    request.mockImplementationOnce((conf, cb) => cb(null));
+    request.mockImplementationOnce((conf, cb) => cb(null));
+    request.mockImplementationOnce((conf, cb) => cb(null));
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 400 }));
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 400 }));
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 }));
+    exec.exec.mockResolvedValueOnce(0);
+    await setupSystem('test-service', 'test.test-service-prod', 'prod', 'test-repo', 'styra-token', 'https://test.styra.com', systemOwners);
+    expect(request).toHaveBeenCalledTimes(7);
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('kubectl', [
       'apply',

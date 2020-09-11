@@ -31,7 +31,7 @@ const checkSystem = async (
 });
 
 const configureIAM = async (
-  iam, styraToken, styraUrl, iamUrl, iamToken, env, projectId,
+  iam, styraToken, styraUrl, iamUrl, iamToken, env, projectId, systemOwners,
 ) => {
   const {
     'permission-prefix': permissionPrefix,
@@ -53,7 +53,9 @@ const configureIAM = async (
       .then((createSystem) => {
         if (createSystem) {
           core.info(`creating system ${systemName}`);
-          return setupSystem(namespace, systemName, env, repository, styraToken, styraUrl);
+          return setupSystem(
+            namespace, systemName, env, repository, styraToken, styraUrl, systemOwners,
+          );
         }
         return null;
       }));
