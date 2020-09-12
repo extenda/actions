@@ -25,7 +25,7 @@ inputs:
     description: |
       The iam-api service url
     required: false
-    default: https://iam-api.retailsvc.dev
+    default: https://iam-api.retailsvc.com
 runs:
   using: node12
   main: dist/index.js

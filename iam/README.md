@@ -27,7 +27,7 @@ jobs:
           service-account-key-cluster: ${{ secrets.GCLOUD_AUTH_STAGING }} # Used to configure and create DAS-system on the correct cluster/environment (required)
           iam-definition: iam.yaml # default iam.yaml
           styra-tenant: extendaretail # default extendaretail
-          iam-api-url: https://iam-api.retailsvc.dev # default https://iam-api.retailsvc. (dev for staging, com for prod)
+          iam-api-url: https://iam-api.retailsvc.com # default https://iam-api.retailsvc.com (dev for staging, com for prod)
 
 ```
 
