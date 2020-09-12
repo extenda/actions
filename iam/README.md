@@ -26,9 +26,8 @@ jobs:
           service-account-key: ${{ secrets.SECRET_AUTH }} # Used to fetch required credentials from secrets (required)
           service-account-key-staging: ${{ secrets.GCLOUD_AUTH_STAGING }} # Used to configure and create DAS-system on the correct cluster/environment (required)
           service-account-key-prod: ${{ secrets.GCLOUD_AUTH_PROD }} # Used to configure and create DAS-system on the correct cluster/environment (required)
-          iam-definition: iam/ # default will match iam/*.yaml
+          iam-definition: iam/*.yaml # default will match iam/*.yaml
           styra-url: https://extendaretail.styra.com # default extendaretail
-
 ```
 
 ## IAM YAML

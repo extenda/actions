@@ -54,6 +54,7 @@ const action = async () => {
   const iamFileGlob = core.getInput('iam-definition') || 'iam/*.yaml';
   const iamUrl = core.getInput('iam-api-url') || 'https://iam-api.retailsvc.com';
   const styraUrl = core.getInput('styra-url') || 'https://extendaretail.styra.com';
+  const dryRun = core.getInput('dry-run') === 'true';
 
   const iamFiles = fg.sync(iamFileGlob, { onlyFiles: true });
 
@@ -62,15 +63,17 @@ const action = async () => {
 
   for (const iamFile of iamFiles) {
     const iam = loadIamDefinition(iamFile);
-    // We MUST process these files one by one as we depend on external tools
-    // eslint-disable-next-line no-await-in-loop
-    await setupEnvironment(
-      serviceAccountKey, serviceAccountKeyStaging, iam, styraUrl, iamUrl, systemOwners,
-    );
-    // eslint-disable-next-line no-await-in-loop
-    await setupEnvironment(
-      serviceAccountKey, serviceAccountKeyProd, iam, styraUrl, iamUrl, systemOwners,
-    );
+    if (!dryRun) {
+      // We MUST process these files one by one as we depend on external tools
+      // eslint-disable-next-line no-await-in-loop
+      await setupEnvironment(
+        serviceAccountKey, serviceAccountKeyStaging, iam, styraUrl, iamUrl, systemOwners,
+      );
+      // eslint-disable-next-line no-await-in-loop
+      await setupEnvironment(
+        serviceAccountKey, serviceAccountKeyProd, iam, styraUrl, iamUrl, systemOwners,
+      );
+    }
   }
 };
 

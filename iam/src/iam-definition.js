@@ -12,6 +12,7 @@ const loadFile = (iamFile) => {
 };
 
 const validateSchema = (iamFile, spec) => {
+  core.info(`Validate ${iamFile}`);
   const result = validate(spec, jsonSchema);
   if (!result.valid) {
     const message = `${iamFile} is not valid.\n${result.toString()}`;
