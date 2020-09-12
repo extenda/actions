@@ -11848,7 +11848,7 @@ const createRole = async (
     if (!error && res.statusCode === 201) {
       resolve(`role '${roleId}' added`);
     } else {
-      reject(new Error('Couldn\'t add role'));
+      reject(new Error(`Couldn't add role '${roleId}'. Reason: ${error.message}`));
     }
   });
 });
@@ -11875,7 +11875,7 @@ const updateRole = async (
     if (!error && res.statusCode === 200) {
       resolve(`role '${roleId}' updated`);
     } else {
-      reject(new Error('Couldn\'t update role'));
+      reject(new Error(`Couldn't update role '${roleId}'. Reason: ${error.message}`));
     }
   });
 });
@@ -11923,12 +11923,12 @@ const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
     core.info(`fetching data for ${roleId}`);
     promises.push(getRole(iamToken, iamUrl, roleId).then((roleResult) => {
       if (roleResult === true) {
-        core.info(`creating ${roleId}`);
+        core.info(`creating role '${roleId}'`);
         return createRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
           .then((message) => core.info(message));
       }
       if (!arraysEqual(roleResult.permissions, rolePermissions) || roleResult.name !== roleName) {
-        core.info(`updating ${roleId}`);
+        core.info(`updating role '${roleId}'`);
         return updateRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
           .then((message) => core.info(message));
       }
@@ -81778,11 +81778,13 @@ const configureIAM = async (
         })));
   });
 
-  promises.push(setupPermissions(permissions, permissionPrefix)
-    .then((fullPermissions) => handlePermissions(fullPermissions, iamToken, iamUrl))
-    .then(() => setupRoles(roles, permissionPrefix, iamToken, iamUrl)));
+  // Wait for K8s and DAS system.
+  await Promise.all(promises);
 
-  return Promise.all(promises);
+  // Next, update IAM system
+  return setupPermissions(permissions, permissionPrefix)
+    .then((fullPermissions) => handlePermissions(fullPermissions, iamToken, iamUrl))
+    .then(() => setupRoles(roles, permissionPrefix, iamToken, iamUrl));
 };
 
 module.exports = configureIAM;
@@ -97578,7 +97580,7 @@ const updateAddPermission = async (
     if (!error && (res.statusCode === 201 || res.statusCode === 200)) {
       resolve(`permission '${permissionId}' updated/added`);
     } else {
-      reject(new Error('Couldn\'t add/update permission'));
+      reject(new Error(`Couldn't add/update permission '${permissionId}'. Reason: ${error.message}`));
     }
   });
 });
@@ -97612,11 +97614,11 @@ const getPermission = async (
 const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
   const promises = [];
   fullPermissions.forEach((desc, id) => {
-    core.info(`handling permission for ${id}`);
+    core.info(`handling permission for '${id}'`);
     promises.push(getPermission(iamToken, id, desc, iamUrl)
       .then((status) => {
         if (status !== 'NONE') {
-          core.info(`permission ${id} require update`);
+          core.info(`permission '${id}' require update`);
           return updateAddPermission(iamToken, id, desc, status, iamUrl);
         }
         return null;

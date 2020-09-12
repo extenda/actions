@@ -64,11 +64,13 @@ const configureIAM = async (
         })));
   });
 
-  promises.push(setupPermissions(permissions, permissionPrefix)
-    .then((fullPermissions) => handlePermissions(fullPermissions, iamToken, iamUrl))
-    .then(() => setupRoles(roles, permissionPrefix, iamToken, iamUrl)));
+  // Wait for K8s and DAS system.
+  await Promise.all(promises);
 
-  return Promise.all(promises);
+  // Next, update IAM system
+  return setupPermissions(permissions, permissionPrefix)
+    .then((fullPermissions) => handlePermissions(fullPermissions, iamToken, iamUrl))
+    .then(() => setupRoles(roles, permissionPrefix, iamToken, iamUrl));
 };
 
 module.exports = configureIAM;

@@ -28,7 +28,7 @@ const updateAddPermission = async (
     if (!error && (res.statusCode === 201 || res.statusCode === 200)) {
       resolve(`permission '${permissionId}' updated/added`);
     } else {
-      reject(new Error('Couldn\'t add/update permission'));
+      reject(new Error(`Couldn't add/update permission '${permissionId}'. Reason: ${error.message}`));
     }
   });
 });
@@ -62,11 +62,11 @@ const getPermission = async (
 const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
   const promises = [];
   fullPermissions.forEach((desc, id) => {
-    core.info(`handling permission for ${id}`);
+    core.info(`handling permission for '${id}'`);
     promises.push(getPermission(iamToken, id, desc, iamUrl)
       .then((status) => {
         if (status !== 'NONE') {
-          core.info(`permission ${id} require update`);
+          core.info(`permission '${id}' require update`);
           return updateAddPermission(iamToken, id, desc, status, iamUrl);
         }
         return null;

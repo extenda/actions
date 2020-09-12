@@ -23,7 +23,7 @@ const createRole = async (
     if (!error && res.statusCode === 201) {
       resolve(`role '${roleId}' added`);
     } else {
-      reject(new Error('Couldn\'t add role'));
+      reject(new Error(`Couldn't add role '${roleId}'. Reason: ${error.message}`));
     }
   });
 });
@@ -50,7 +50,7 @@ const updateRole = async (
     if (!error && res.statusCode === 200) {
       resolve(`role '${roleId}' updated`);
     } else {
-      reject(new Error('Couldn\'t update role'));
+      reject(new Error(`Couldn't update role '${roleId}'. Reason: ${error.message}`));
     }
   });
 });
@@ -98,12 +98,12 @@ const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
     core.info(`fetching data for ${roleId}`);
     promises.push(getRole(iamToken, iamUrl, roleId).then((roleResult) => {
       if (roleResult === true) {
-        core.info(`creating ${roleId}`);
+        core.info(`creating role '${roleId}'`);
         return createRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
           .then((message) => core.info(message));
       }
       if (!arraysEqual(roleResult.permissions, rolePermissions) || roleResult.name !== roleName) {
-        core.info(`updating ${roleId}`);
+        core.info(`updating role '${roleId}'`);
         return updateRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
           .then((message) => core.info(message));
       }
