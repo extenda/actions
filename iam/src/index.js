@@ -25,8 +25,11 @@ const setupEnvironment = async (
   let credentialsEnv = projectEnv;
   if (projectEnv === 'staging') {
     // Even for staging, we always target prod iam-api unless explicitly told not to.
-    credentialsEnv = iamUrl.endsWith('retailsvc.dev') ? 'staging' : 'prod';
-    core.warning(`IAM definitions has been explicitly configured to publish to ${iamUrl} which is the STAGING environment.`);
+    const explicitStaging = iamUrl.endsWith('retailsvc.dev');
+    credentialsEnv = explicitStaging ? 'staging' : 'prod';
+    if (explicitStaging) {
+      core.warning(`IAM definitions has been explicitly configured to publish to ${iamUrl} which is the STAGING environment.`);
+    }
   }
 
   const {
