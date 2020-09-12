@@ -57,7 +57,7 @@ describe('run action', () => {
     fetchIamToken.mockResolvedValue('iam-token');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(6);
+    expect(core.getInput).toHaveBeenCalledTimes(7);
     expect(fetchIamToken).toHaveBeenCalledWith(
       'iam-key',
       'iam-email',
@@ -98,5 +98,24 @@ describe('run action', () => {
     await action();
 
     expect(loadIamDefinition).toHaveBeenCalledTimes(2);
+  });
+
+  test('Dry-run stops after loading schema', async () => {
+    setupGcloud.mockResolvedValue('test-prod-332');
+    loadCredentials.mockResolvedValue(credentials);
+    core.getInput.mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('service-account-staging')
+      .mockReturnValueOnce('service-account-prod')
+      .mockReturnValueOnce('iam/*.yaml')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('https://extendaretail.styra.com')
+      .mockReturnValueOnce('true');
+    loadIamDefinition.mockReturnValue({});
+    fg.sync.mockReturnValueOnce(['iam/iam.yaml', 'iam/two.yaml']);
+    await action();
+
+    expect(loadIamDefinition).toHaveBeenCalledTimes(2);
+    expect(fetchIamToken).not.toHaveBeenCalled();
+    expect(configureIam).not.toHaveBeenCalled();
   });
 });
