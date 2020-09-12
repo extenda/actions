@@ -984,7 +984,7 @@ var _map = _interopRequireDefault(__webpack_require__(953));
 
 var _seq = _interopRequireDefault(__webpack_require__(651));
 
-var _string = _interopRequireDefault(__webpack_require__(598));
+var _string = _interopRequireDefault(__webpack_require__(436));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -9141,7 +9141,6 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   process.env.GCLOUD_INSTALLED_VERSION || 'latest',
 );
 
-
 const setupEnvironment = async (
   serviceAccountKey, gcloudAuthKey, iam, styraUrl, iamUrl, systemOwners,
 ) => {
@@ -9166,14 +9165,10 @@ const setupEnvironment = async (
     iamApiTenant,
   } = await loadCredentials(serviceAccountKey, credentialsEnv);
 
-  const promises = [];
-
-  promises.push(fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenant)
+  return fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenant)
     .then((iamToken) => configureIAM(
       iam, styraToken, styraUrl, iamUrl, iamToken, projectEnv, projectId, systemOwners,
-    )));
-
-  return Promise.all(promises);
+    ));
 };
 
 const action = async () => {
@@ -9191,18 +9186,24 @@ const action = async () => {
   const systemOwners = await getSystemOwners(githubToken, serviceAccountKeyStaging);
 
   for (const iamFile of iamFiles) {
+    core.startGroup(`Process ${iamFile}`);
     const iam = loadIamDefinition(iamFile);
     if (!dryRun) {
       // We MUST process these files one by one as we depend on external tools
+
+      core.info('Update staging');
       // eslint-disable-next-line no-await-in-loop
       await setupEnvironment(
         serviceAccountKey, serviceAccountKeyStaging, iam, styraUrl, iamUrl, systemOwners,
       );
+
+      core.info('Update prod');
       // eslint-disable-next-line no-await-in-loop
       await setupEnvironment(
         serviceAccountKey, serviceAccountKeyProd, iam, styraUrl, iamUrl, systemOwners,
       );
     }
+    core.endGroup();
   }
 };
 
@@ -11913,29 +11914,28 @@ function arraysEqual(rolePermissions, newPermissions) {
 }
 
 const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
-  roles.forEach(async (role) => {
+  const promises = [];
+  roles.forEach((role) => {
     const roleId = `${systemId}.${role.name}`;
-    const roleName = role.description;
-    const rolePermissions = role.permissions;
-
-    for (let i = 0; i < rolePermissions.length; i += 1) {
-      rolePermissions[i] = `${systemId}.${rolePermissions[i]}`;
-    }
+    const roleName = role.desc;
+    const rolePermissions = role.permissions.map((p) => `${systemId}.${p}`);
 
     core.info(`fetching data for ${roleId}`);
-    const roleResult = await getRole(iamToken, iamUrl, roleId);
-    if (roleResult === true) {
-      core.info(`creating ${roleId}`);
-      await createRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
-        .then((message) => core.info(message));
-    } else if (
-      !arraysEqual(roleResult.permissions, rolePermissions)
-      || roleResult.name !== roleName) {
-      core.info(`updating ${roleId}`);
-      await updateRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
-        .then((message) => core.info(message));
-    }
+    promises.push(getRole(iamToken, iamUrl, roleId).then((roleResult) => {
+      if (roleResult === true) {
+        core.info(`creating ${roleId}`);
+        return createRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
+          .then((message) => core.info(message));
+      }
+      if (!arraysEqual(roleResult.permissions, rolePermissions) || roleResult.name !== roleName) {
+        core.info(`updating ${roleId}`);
+        return updateRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
+          .then((message) => core.info(message));
+      }
+      return null;
+    }));
   });
+  return Promise.all(promises);
 };
 
 module.exports = {
@@ -25237,7 +25237,7 @@ module.exports = new Schema({
  */
 var forge = __webpack_require__(45);
 __webpack_require__(138);
-__webpack_require__(709);
+__webpack_require__(588);
 __webpack_require__(445);
 __webpack_require__(826);
 __webpack_require__(294);
@@ -29906,7 +29906,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
  */
 var forge = __webpack_require__(45);
 __webpack_require__(535);
-__webpack_require__(709);
+__webpack_require__(588);
 __webpack_require__(930);
 __webpack_require__(636);
 __webpack_require__(395);
@@ -34253,7 +34253,7 @@ var _seq = _interopRequireDefault(__webpack_require__(651));
 
 var _Scalar = _interopRequireDefault(__webpack_require__(122));
 
-var _string = __webpack_require__(598);
+var _string = __webpack_require__(436);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -54861,7 +54861,52 @@ exports.default = Settings;
 
 
 /***/ }),
-/* 436 */,
+/* 436 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = exports.resolveString = void 0;
+
+var _stringify = __webpack_require__(713);
+
+var _options = __webpack_require__(228);
+
+const resolveString = (doc, node) => {
+  // on error, will return { str: string, errors: Error[] }
+  const res = node.strValue;
+  if (!res) return '';
+  if (typeof res === 'string') return res;
+  res.errors.forEach(error => {
+    if (!error.source) error.source = node;
+    doc.errors.push(error);
+  });
+  return res.str;
+};
+
+exports.resolveString = resolveString;
+var _default = {
+  identify: value => typeof value === 'string',
+  default: true,
+  tag: 'tag:yaml.org,2002:str',
+  resolve: resolveString,
+
+  stringify(item, ctx, onComment, onChompKeep) {
+    ctx = Object.assign({
+      actualString: true
+    }, ctx);
+    return (0, _stringify.stringifyString)(item, ctx, onComment, onChompKeep);
+  },
+
+  options: _options.strOptions
+};
+exports.default = _default;
+
+/***/ }),
 /* 437 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -59393,7 +59438,7 @@ var _stringify = __webpack_require__(713);
 
 var _tags = __webpack_require__(115);
 
-var _string = __webpack_require__(598);
+var _string = __webpack_require__(436);
 
 var _Alias = _interopRequireDefault(__webpack_require__(834));
 
@@ -67070,7 +67115,7 @@ function write(key, options) {
  */
 var forge = __webpack_require__(45);
 __webpack_require__(535);
-__webpack_require__(709);
+__webpack_require__(588);
 __webpack_require__(445);
 __webpack_require__(4);
 __webpack_require__(787);
@@ -78453,7 +78498,158 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
 
 
 /***/ }),
-/* 588 */,
+/* 588 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+/**
+ * Hash-based Message Authentication Code implementation. Requires a message
+ * digest object that can be obtained, for example, from forge.md.sha1 or
+ * forge.md.md5.
+ *
+ * @author Dave Longley
+ *
+ * Copyright (c) 2010-2012 Digital Bazaar, Inc. All rights reserved.
+ */
+var forge = __webpack_require__(45);
+__webpack_require__(891);
+__webpack_require__(294);
+
+/* HMAC API */
+var hmac = module.exports = forge.hmac = forge.hmac || {};
+
+/**
+ * Creates an HMAC object that uses the given message digest object.
+ *
+ * @return an HMAC object.
+ */
+hmac.create = function() {
+  // the hmac key to use
+  var _key = null;
+
+  // the message digest to use
+  var _md = null;
+
+  // the inner padding
+  var _ipadding = null;
+
+  // the outer padding
+  var _opadding = null;
+
+  // hmac context
+  var ctx = {};
+
+  /**
+   * Starts or restarts the HMAC with the given key and message digest.
+   *
+   * @param md the message digest to use, null to reuse the previous one,
+   *           a string to use builtin 'sha1', 'md5', 'sha256'.
+   * @param key the key to use as a string, array of bytes, byte buffer,
+   *           or null to reuse the previous key.
+   */
+  ctx.start = function(md, key) {
+    if(md !== null) {
+      if(typeof md === 'string') {
+        // create builtin message digest
+        md = md.toLowerCase();
+        if(md in forge.md.algorithms) {
+          _md = forge.md.algorithms[md].create();
+        } else {
+          throw new Error('Unknown hash algorithm "' + md + '"');
+        }
+      } else {
+        // store message digest
+        _md = md;
+      }
+    }
+
+    if(key === null) {
+      // reuse previous key
+      key = _key;
+    } else {
+      if(typeof key === 'string') {
+        // convert string into byte buffer
+        key = forge.util.createBuffer(key);
+      } else if(forge.util.isArray(key)) {
+        // convert byte array into byte buffer
+        var tmp = key;
+        key = forge.util.createBuffer();
+        for(var i = 0; i < tmp.length; ++i) {
+          key.putByte(tmp[i]);
+        }
+      }
+
+      // if key is longer than blocksize, hash it
+      var keylen = key.length();
+      if(keylen > _md.blockLength) {
+        _md.start();
+        _md.update(key.bytes());
+        key = _md.digest();
+      }
+
+      // mix key into inner and outer padding
+      // ipadding = [0x36 * blocksize] ^ key
+      // opadding = [0x5C * blocksize] ^ key
+      _ipadding = forge.util.createBuffer();
+      _opadding = forge.util.createBuffer();
+      keylen = key.length();
+      for(var i = 0; i < keylen; ++i) {
+        var tmp = key.at(i);
+        _ipadding.putByte(0x36 ^ tmp);
+        _opadding.putByte(0x5C ^ tmp);
+      }
+
+      // if key is shorter than blocksize, add additional padding
+      if(keylen < _md.blockLength) {
+        var tmp = _md.blockLength - keylen;
+        for(var i = 0; i < tmp; ++i) {
+          _ipadding.putByte(0x36);
+          _opadding.putByte(0x5C);
+        }
+      }
+      _key = key;
+      _ipadding = _ipadding.bytes();
+      _opadding = _opadding.bytes();
+    }
+
+    // digest is done like so: hash(opadding | hash(ipadding | message))
+
+    // prepare to do inner hash
+    // hash(ipadding | message)
+    _md.start();
+    _md.update(_ipadding);
+  };
+
+  /**
+   * Updates the HMAC with the given message bytes.
+   *
+   * @param bytes the bytes to update with.
+   */
+  ctx.update = function(bytes) {
+    _md.update(bytes);
+  };
+
+  /**
+   * Produces the Message Authentication Code (MAC).
+   *
+   * @return a byte buffer containing the digest value.
+   */
+  ctx.getMac = function() {
+    // digest is done like so: hash(opadding | hash(ipadding | message))
+    // here we do the outer hashing
+    var inner = _md.digest().bytes();
+    _md.start();
+    _md.update(_opadding);
+    _md.update(inner);
+    return _md.digest();
+  };
+  // alias for getMac
+  ctx.digest = ctx.getMac;
+
+  return ctx;
+};
+
+
+/***/ }),
 /* 589 */,
 /* 590 */
 /***/ (function(__unusedmodule, exports) {
@@ -79008,49 +79204,63 @@ module.exports = function isCancel(value) {
 
 /***/ }),
 /* 598 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+const core = __webpack_require__(763);
+const exec = __webpack_require__(101);
+const authenticateKubeCtl = __webpack_require__(283);
+const { setOpaInjectionLabels } = __webpack_require__(709);
 
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = exports.resolveString = void 0;
-
-var _stringify = __webpack_require__(713);
-
-var _options = __webpack_require__(228);
-
-const resolveString = (doc, node) => {
-  // on error, will return { str: string, errors: Error[] }
-  const res = node.strValue;
-  if (!res) return '';
-  if (typeof res === 'string') return res;
-  res.errors.forEach(error => {
-    if (!error.source) error.source = node;
-    doc.errors.push(error);
-  });
-  return res.str;
+const getNamespace = async (namespace) => {
+  let output = '';
+  try {
+    await exec.exec('kubectl', [
+      'get',
+      'namespace',
+      namespace,
+    ], {
+      listeners: {
+        stderr: (data) => {
+          output += data.toString('utf8');
+        },
+      },
+    });
+  } catch (err) {
+    if (output.includes('(NotFound)')) {
+      return false;
+    }
+    throw new Error(`Could not get namespace information! reason: ${err.message || 'unknown'}`);
+  }
+  return true;
 };
 
-exports.resolveString = resolveString;
-var _default = {
-  identify: value => typeof value === 'string',
-  default: true,
-  tag: 'tag:yaml.org,2002:str',
-  resolve: resolveString,
+const createNamespace = async (clanId,
+  opaEnabled,
+  { project, cluster, clusterLocation },
+  namespace) => {
+  // Authenticate kubectl
+  await authenticateKubeCtl({ cluster, clusterLocation, project });
 
-  stringify(item, ctx, onComment, onChompKeep) {
-    ctx = Object.assign({
-      actualString: true
-    }, ctx);
-    return (0, _stringify.stringifyString)(item, ctx, onComment, onChompKeep);
-  },
+  if (!await getNamespace(namespace)) {
+    core.info(`creating namespace ${namespace}`);
+    await exec.exec('kubectl', ['create', 'namespace', namespace]);
 
-  options: _options.strOptions
+    await exec.exec('kubectl', [
+      'annotate',
+      'serviceaccount',
+      `--namespace=${namespace}`,
+      'default',
+      `iam.gke.io/gcp-service-account=${namespace}@${clanId}.iam.gserviceaccount.com`,
+    ]);
+  }
+
+  if (opaEnabled !== 'skip') {
+    await setOpaInjectionLabels(namespace, opaEnabled);
+  }
 };
-exports.default = _default;
+
+module.exports = createNamespace;
+
 
 /***/ }),
 /* 599 */
@@ -79647,7 +79857,7 @@ __webpack_require__(985);
 __webpack_require__(367);
 __webpack_require__(390);
 __webpack_require__(80);
-__webpack_require__(709);
+__webpack_require__(588);
 __webpack_require__(251);
 __webpack_require__(931);
 __webpack_require__(65);
@@ -81508,7 +81718,7 @@ const { setupPermissions, handlePermissions } = __webpack_require__(731);
 const { setupRoles } = __webpack_require__(94);
 const setupSystem = __webpack_require__(748);
 const getClusterInfo = __webpack_require__(488);
-const authenticateKubectl = __webpack_require__(283);
+const createNamespace = __webpack_require__(598);
 
 const checkSystem = async (
   systemName, styraToken, styraUrl,
@@ -81546,23 +81756,26 @@ const configureIAM = async (
 
 
   const promises = [];
-  const cluster = await getClusterInfo(projectId, undefined);
-  await authenticateKubectl(cluster);
+  const cluster = await getClusterInfo(projectId);
 
-  Object.keys(systems).forEach(async (key) => {
-    const { namespace } = systems[key];
-    const { repository } = systems[key];
+  systems.forEach(({ namespace, repository }) => {
     const systemName = `${permissionPrefix}.${namespace}-${env}`;
-    promises.push(checkSystem(systemName, styraToken, styraUrl)
-      .then((createSystem) => {
-        if (createSystem) {
-          core.info(`creating system ${systemName}`);
-          return setupSystem(
-            namespace, systemName, env, repository, styraToken, styraUrl, systemOwners,
-          );
-        }
-        return null;
-      }));
+
+    // 1. Authenticate Kubectl and create namespace (if not exists)
+    // 2. Check if DAS system exists
+    // 3. Create DAS system (if not exists)
+    promises.push(createNamespace(projectId, 'skip', cluster, namespace)
+      .then(() => checkSystem(systemName, styraToken, styraUrl)
+        .then((createSystem) => {
+          if (createSystem) {
+            core.info(`creating system '${systemName}' in ${styraUrl}`);
+            return setupSystem(
+              namespace, systemName, env, repository, styraToken, styraUrl, systemOwners,
+            );
+          }
+          core.info(`system '${systemName}' already exists in ${styraUrl}`);
+          return null;
+        })));
   });
 
   promises.push(setupPermissions(permissions, permissionPrefix)
@@ -95900,151 +96113,25 @@ exports.OAuth = OAuth
 /* 709 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-/**
- * Hash-based Message Authentication Code implementation. Requires a message
- * digest object that can be obtained, for example, from forge.md.sha1 or
- * forge.md.md5.
- *
- * @author Dave Longley
- *
- * Copyright (c) 2010-2012 Digital Bazaar, Inc. All rights reserved.
- */
-var forge = __webpack_require__(45);
-__webpack_require__(891);
-__webpack_require__(294);
+const exec = __webpack_require__(101);
 
-/* HMAC API */
-var hmac = module.exports = forge.hmac = forge.hmac || {};
+const setLabel = async (namespace, label, value) => exec.exec('kubectl', [
+  'label',
+  'namespace',
+  namespace,
+  `${label}=${value}`,
+  '--overwrite=true',
+]);
 
-/**
- * Creates an HMAC object that uses the given message digest object.
- *
- * @return an HMAC object.
- */
-hmac.create = function() {
-  // the hmac key to use
-  var _key = null;
+const setOpaInjectionLabels = async (namespace, opaEnabled) => {
+  const opaInjection = opaEnabled ? 'enabled' : 'disabled';
+  await setLabel(namespace, 'opa-istio-injection', opaInjection);
+  await setLabel(namespace, 'istio-injection', opaInjection);
+};
 
-  // the message digest to use
-  var _md = null;
-
-  // the inner padding
-  var _ipadding = null;
-
-  // the outer padding
-  var _opadding = null;
-
-  // hmac context
-  var ctx = {};
-
-  /**
-   * Starts or restarts the HMAC with the given key and message digest.
-   *
-   * @param md the message digest to use, null to reuse the previous one,
-   *           a string to use builtin 'sha1', 'md5', 'sha256'.
-   * @param key the key to use as a string, array of bytes, byte buffer,
-   *           or null to reuse the previous key.
-   */
-  ctx.start = function(md, key) {
-    if(md !== null) {
-      if(typeof md === 'string') {
-        // create builtin message digest
-        md = md.toLowerCase();
-        if(md in forge.md.algorithms) {
-          _md = forge.md.algorithms[md].create();
-        } else {
-          throw new Error('Unknown hash algorithm "' + md + '"');
-        }
-      } else {
-        // store message digest
-        _md = md;
-      }
-    }
-
-    if(key === null) {
-      // reuse previous key
-      key = _key;
-    } else {
-      if(typeof key === 'string') {
-        // convert string into byte buffer
-        key = forge.util.createBuffer(key);
-      } else if(forge.util.isArray(key)) {
-        // convert byte array into byte buffer
-        var tmp = key;
-        key = forge.util.createBuffer();
-        for(var i = 0; i < tmp.length; ++i) {
-          key.putByte(tmp[i]);
-        }
-      }
-
-      // if key is longer than blocksize, hash it
-      var keylen = key.length();
-      if(keylen > _md.blockLength) {
-        _md.start();
-        _md.update(key.bytes());
-        key = _md.digest();
-      }
-
-      // mix key into inner and outer padding
-      // ipadding = [0x36 * blocksize] ^ key
-      // opadding = [0x5C * blocksize] ^ key
-      _ipadding = forge.util.createBuffer();
-      _opadding = forge.util.createBuffer();
-      keylen = key.length();
-      for(var i = 0; i < keylen; ++i) {
-        var tmp = key.at(i);
-        _ipadding.putByte(0x36 ^ tmp);
-        _opadding.putByte(0x5C ^ tmp);
-      }
-
-      // if key is shorter than blocksize, add additional padding
-      if(keylen < _md.blockLength) {
-        var tmp = _md.blockLength - keylen;
-        for(var i = 0; i < tmp; ++i) {
-          _ipadding.putByte(0x36);
-          _opadding.putByte(0x5C);
-        }
-      }
-      _key = key;
-      _ipadding = _ipadding.bytes();
-      _opadding = _opadding.bytes();
-    }
-
-    // digest is done like so: hash(opadding | hash(ipadding | message))
-
-    // prepare to do inner hash
-    // hash(ipadding | message)
-    _md.start();
-    _md.update(_ipadding);
-  };
-
-  /**
-   * Updates the HMAC with the given message bytes.
-   *
-   * @param bytes the bytes to update with.
-   */
-  ctx.update = function(bytes) {
-    _md.update(bytes);
-  };
-
-  /**
-   * Produces the Message Authentication Code (MAC).
-   *
-   * @return a byte buffer containing the digest value.
-   */
-  ctx.getMac = function() {
-    // digest is done like so: hash(opadding | hash(ipadding | message))
-    // here we do the outer hashing
-    var inner = _md.digest().bytes();
-    _md.start();
-    _md.update(_opadding);
-    _md.update(inner);
-    return _md.digest();
-  };
-  // alias for getMac
-  ctx.digest = ctx.getMac;
-
-  return ctx;
+module.exports = {
+  setLabel,
+  setOpaInjectionLabels,
 };
 
 
@@ -97524,7 +97611,7 @@ const getPermission = async (
 
 const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
   const promises = [];
-  fullPermissions.forEach(async (desc, id) => {
+  fullPermissions.forEach((desc, id) => {
     core.info(`handling permission for ${id}`);
     promises.push(getPermission(iamToken, id, desc, iamUrl)
       .then((status) => {
@@ -97543,8 +97630,7 @@ const setupPermissions = async (permissions, systemId) => {
   Object.keys(permissions).forEach((permission) => {
     Object.entries(permissions[permission]).forEach(([verb, desc]) => {
       const id = `${systemId}.${permission}.${verb}`;
-      const description = desc;
-      fullPermissions.set(id, description);
+      fullPermissions.set(id, desc);
     });
   });
   return fullPermissions;
@@ -98640,7 +98726,7 @@ const exec = __webpack_require__(266);
 const core = __webpack_require__(793);
 const request = __webpack_require__(841);
 const fs = __webpack_require__(747);
-const yaml = __webpack_require__(781);
+const yaml = __webpack_require__(781); // FIXME what YAML lib is used?
 
 const applyConfiguration = async (opaConfig, systemName) => {
   fs.writeFileSync(systemName, yaml.safeDump(opaConfig));
@@ -101408,7 +101494,7 @@ var _errors = __webpack_require__(541);
 
 var _stringify = __webpack_require__(713);
 
-var _string = __webpack_require__(598);
+var _string = __webpack_require__(436);
 
 var _options = __webpack_require__(228);
 
@@ -129946,7 +130032,7 @@ function write(key, options) {
  * Copyright (c) 2010-2013 Digital Bazaar, Inc.
  */
 var forge = __webpack_require__(45);
-__webpack_require__(709);
+__webpack_require__(588);
 __webpack_require__(891);
 __webpack_require__(294);
 

@@ -89,29 +89,28 @@ function arraysEqual(rolePermissions, newPermissions) {
 }
 
 const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
-  roles.forEach(async (role) => {
+  const promises = [];
+  roles.forEach((role) => {
     const roleId = `${systemId}.${role.name}`;
-    const roleName = role.description;
-    const rolePermissions = role.permissions;
-
-    for (let i = 0; i < rolePermissions.length; i += 1) {
-      rolePermissions[i] = `${systemId}.${rolePermissions[i]}`;
-    }
+    const roleName = role.desc;
+    const rolePermissions = role.permissions.map((p) => `${systemId}.${p}`);
 
     core.info(`fetching data for ${roleId}`);
-    const roleResult = await getRole(iamToken, iamUrl, roleId);
-    if (roleResult === true) {
-      core.info(`creating ${roleId}`);
-      await createRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
-        .then((message) => core.info(message));
-    } else if (
-      !arraysEqual(roleResult.permissions, rolePermissions)
-      || roleResult.name !== roleName) {
-      core.info(`updating ${roleId}`);
-      await updateRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
-        .then((message) => core.info(message));
-    }
+    promises.push(getRole(iamToken, iamUrl, roleId).then((roleResult) => {
+      if (roleResult === true) {
+        core.info(`creating ${roleId}`);
+        return createRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
+          .then((message) => core.info(message));
+      }
+      if (!arraysEqual(roleResult.permissions, rolePermissions) || roleResult.name !== roleName) {
+        core.info(`updating ${roleId}`);
+        return updateRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
+          .then((message) => core.info(message));
+      }
+      return null;
+    }));
   });
+  return Promise.all(promises);
 };
 
 module.exports = {

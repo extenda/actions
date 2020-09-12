@@ -23,7 +23,45 @@ describe('Setup roles and handle', () => {
   ];
 
   test('it can setup roles for creation', async () => {
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 404 }, {}));
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 404 }, {}))
+      .mockImplementationOnce((conf, cb) => cb(null, { statusCode: 201 }, {}));
+
+    await setupRoles(roles, 'sys-id', 'iam-token', 'iam-url');
+
+    expect(request).toHaveBeenCalledTimes(2);
+  });
+
+  test('It can setup roles for update', async () => {
+    const getRoleResponse = {
+      id: 'sys-id.admin',
+      name: 'sys-id admin',
+      permissions: [
+        'resource.get',
+        'resource.create',
+        'resource.delete',
+      ],
+    };
+    request.mockImplementationOnce((conf, cb) => cb(
+      null, { statusCode: 200 }, JSON.stringify(getRoleResponse),
+    )).mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 }, {}));
+
+    await setupRoles(roles, 'sys-id', 'iam-token', 'iam-url');
+
+    expect(request).toHaveBeenCalledTimes(2);
+  });
+
+  test('It can setup roles which are in-sync (no update)', async () => {
+    const getRoleResponse = {
+      id: 'sys-id.admin',
+      name: 'sys-id admin',
+      permissions: [
+        'sys-id.resource.get',
+        'sys-id.resource.create',
+      ],
+    };
+    request.mockImplementationOnce((conf, cb) => cb(
+      null, { statusCode: 200 }, JSON.stringify(getRoleResponse),
+    )).mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 }, {}));
 
     await setupRoles(roles, 'sys-id', 'iam-token', 'iam-url');
 

@@ -4,7 +4,7 @@ const { setupPermissions, handlePermissions } = require('./permissions');
 const { setupRoles } = require('./roles');
 const setupSystem = require('./create-system');
 const getClusterInfo = require('../../cloud-run/src/cluster-info');
-const authenticateKubectl = require('../../cloud-run/src/kubectl-auth');
+const createNamespace = require('../../cloud-run/src/create-namespace');
 
 const checkSystem = async (
   systemName, styraToken, styraUrl,
@@ -42,23 +42,26 @@ const configureIAM = async (
 
 
   const promises = [];
-  const cluster = await getClusterInfo(projectId, undefined);
-  await authenticateKubectl(cluster);
+  const cluster = await getClusterInfo(projectId);
 
-  Object.keys(systems).forEach(async (key) => {
-    const { namespace } = systems[key];
-    const { repository } = systems[key];
+  systems.forEach(({ namespace, repository }) => {
     const systemName = `${permissionPrefix}.${namespace}-${env}`;
-    promises.push(checkSystem(systemName, styraToken, styraUrl)
-      .then((createSystem) => {
-        if (createSystem) {
-          core.info(`creating system ${systemName}`);
-          return setupSystem(
-            namespace, systemName, env, repository, styraToken, styraUrl, systemOwners,
-          );
-        }
-        return null;
-      }));
+
+    // 1. Authenticate Kubectl and create namespace (if not exists)
+    // 2. Check if DAS system exists
+    // 3. Create DAS system (if not exists)
+    promises.push(createNamespace(projectId, 'skip', cluster, namespace)
+      .then(() => checkSystem(systemName, styraToken, styraUrl)
+        .then((createSystem) => {
+          if (createSystem) {
+            core.info(`creating system '${systemName}' in ${styraUrl}`);
+            return setupSystem(
+              namespace, systemName, env, repository, styraToken, styraUrl, systemOwners,
+            );
+          }
+          core.info(`system '${systemName}' already exists in ${styraUrl}`);
+          return null;
+        })));
   });
 
   promises.push(setupPermissions(permissions, permissionPrefix)

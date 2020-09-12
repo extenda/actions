@@ -2,7 +2,7 @@ const exec = require('@actions/exec');
 const core = require('@actions/core');
 const request = require('request');
 const fs = require('fs');
-const yaml = require('js-yaml');
+const yaml = require('js-yaml'); // FIXME what YAML lib is used?
 
 const applyConfiguration = async (opaConfig, systemName) => {
   fs.writeFileSync(systemName, yaml.safeDump(opaConfig));

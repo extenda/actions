@@ -15,7 +15,6 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   process.env.GCLOUD_INSTALLED_VERSION || 'latest',
 );
 
-
 const setupEnvironment = async (
   serviceAccountKey, gcloudAuthKey, iam, styraUrl, iamUrl, systemOwners,
 ) => {
@@ -40,14 +39,10 @@ const setupEnvironment = async (
     iamApiTenant,
   } = await loadCredentials(serviceAccountKey, credentialsEnv);
 
-  const promises = [];
-
-  promises.push(fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenant)
+  return fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenant)
     .then((iamToken) => configureIAM(
       iam, styraToken, styraUrl, iamUrl, iamToken, projectEnv, projectId, systemOwners,
-    )));
-
-  return Promise.all(promises);
+    ));
 };
 
 const action = async () => {
@@ -65,18 +60,24 @@ const action = async () => {
   const systemOwners = await getSystemOwners(githubToken, serviceAccountKeyStaging);
 
   for (const iamFile of iamFiles) {
+    core.startGroup(`Process ${iamFile}`);
     const iam = loadIamDefinition(iamFile);
     if (!dryRun) {
       // We MUST process these files one by one as we depend on external tools
+
+      core.info('Update staging');
       // eslint-disable-next-line no-await-in-loop
       await setupEnvironment(
         serviceAccountKey, serviceAccountKeyStaging, iam, styraUrl, iamUrl, systemOwners,
       );
+
+      core.info('Update prod');
       // eslint-disable-next-line no-await-in-loop
       await setupEnvironment(
         serviceAccountKey, serviceAccountKeyProd, iam, styraUrl, iamUrl, systemOwners,
       );
     }
+    core.endGroup();
   }
 };
 

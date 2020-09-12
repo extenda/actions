@@ -61,7 +61,7 @@ const getPermission = async (
 
 const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
   const promises = [];
-  fullPermissions.forEach(async (desc, id) => {
+  fullPermissions.forEach((desc, id) => {
     core.info(`handling permission for ${id}`);
     promises.push(getPermission(iamToken, id, desc, iamUrl)
       .then((status) => {
@@ -80,8 +80,7 @@ const setupPermissions = async (permissions, systemId) => {
   Object.keys(permissions).forEach((permission) => {
     Object.entries(permissions[permission]).forEach(([verb, desc]) => {
       const id = `${systemId}.${permission}.${verb}`;
-      const description = desc;
-      fullPermissions.set(id, description);
+      fullPermissions.set(id, desc);
     });
   });
   return fullPermissions;

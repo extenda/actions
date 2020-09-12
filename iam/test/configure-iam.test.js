@@ -6,10 +6,11 @@ jest.mock('../../setup-gcloud/src/setup-gcloud');
 jest.mock('../../cloud-run/src/project-info');
 jest.mock('../src/create-system');
 jest.mock('../../cloud-run/src/cluster-info');
-jest.mock('../../cloud-run/src/kubectl-auth');
+jest.mock('../../cloud-run/src/create-namespace');
 
 const request = require('request');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
+const createNamespace = require('../../cloud-run/src/create-namespace');
 const configureIam = require('../src/configure-iam');
 const projectInfo = require('../../cloud-run/src/project-info');
 const { setupPermissions, handlePermissions } = require('../src/permissions');
@@ -17,6 +18,9 @@ const { setupRoles } = require('../src/roles');
 const setupSystem = require('../src/create-system');
 
 describe('Configure iam', () => {
+  beforeEach(() => {
+    createNamespace.mockResolvedValueOnce(null);
+  });
   afterEach(() => {
     jest.resetAllMocks();
   });
