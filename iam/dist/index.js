@@ -9151,8 +9151,11 @@ const setupEnvironment = async (
   let credentialsEnv = projectEnv;
   if (projectEnv === 'staging') {
     // Even for staging, we always target prod iam-api unless explicitly told not to.
-    credentialsEnv = iamUrl.endsWith('retailsvc.dev') ? 'staging' : 'prod';
-    core.warning(`IAM definitions has been explicitly configured to publish to ${iamUrl} which is the STAGING environment.`);
+    const explicitStaging = iamUrl.endsWith('retailsvc.dev');
+    credentialsEnv = explicitStaging ? 'staging' : 'prod';
+    if (explicitStaging) {
+      core.warning(`IAM definitions has been explicitly configured to publish to ${iamUrl} which is the STAGING environment.`);
+    }
   }
 
   const {
@@ -49498,19 +49501,22 @@ module.exports = {
     },
     systems: {
       type: 'array',
-      properties: {
-        namespace: {
-          type: 'string',
+      items: {
+        type: 'object',
+        properties: {
+          namespace: {
+            type: 'string',
+          },
+          repository: {
+            type: 'string',
+          },
         },
-        repository: {
-          type: 'string',
-        },
+        required: [
+          'namespace',
+          'repository',
+        ],
+        additionalProperties: false,
       },
-      required: [
-        'namespace',
-        'repository',
-      ],
-      additionalProperties: false,
     },
     permissions: {
       type: 'object',
@@ -49518,31 +49524,36 @@ module.exports = {
         type: 'object',
         additionalProperties: {
           type: 'string',
+          maxLength: 20,
         },
       },
     },
     roles: {
       type: 'array',
-      properties: {
-        name: {
-          type: 'string',
-        },
-        desc: {
-          type: 'string',
-        },
-        permissions: {
-          type: 'array',
-          items: {
+      items: {
+        type: 'object',
+        properties: {
+          name: {
             type: 'string',
           },
+          desc: {
+            type: 'string',
+            maxLength: 20,
+          },
+          permissions: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
         },
+        required: [
+          'name',
+          'desc',
+          'permissions',
+        ],
+        additionalProperties: false,
       },
-      required: [
-        'name',
-        'desc',
-        'permissions',
-      ],
-      additionalProperties: false,
     },
   },
   required: [

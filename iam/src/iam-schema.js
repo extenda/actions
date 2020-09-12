@@ -6,19 +6,22 @@ module.exports = {
     },
     systems: {
       type: 'array',
-      properties: {
-        namespace: {
-          type: 'string',
+      items: {
+        type: 'object',
+        properties: {
+          namespace: {
+            type: 'string',
+          },
+          repository: {
+            type: 'string',
+          },
         },
-        repository: {
-          type: 'string',
-        },
+        required: [
+          'namespace',
+          'repository',
+        ],
+        additionalProperties: false,
       },
-      required: [
-        'namespace',
-        'repository',
-      ],
-      additionalProperties: false,
     },
     permissions: {
       type: 'object',
@@ -26,31 +29,36 @@ module.exports = {
         type: 'object',
         additionalProperties: {
           type: 'string',
+          maxLength: 20,
         },
       },
     },
     roles: {
       type: 'array',
-      properties: {
-        name: {
-          type: 'string',
-        },
-        desc: {
-          type: 'string',
-        },
-        permissions: {
-          type: 'array',
-          items: {
+      items: {
+        type: 'object',
+        properties: {
+          name: {
             type: 'string',
           },
+          desc: {
+            type: 'string',
+            maxLength: 20,
+          },
+          permissions: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
         },
+        required: [
+          'name',
+          'desc',
+          'permissions',
+        ],
+        additionalProperties: false,
       },
-      required: [
-        'name',
-        'desc',
-        'permissions',
-      ],
-      additionalProperties: false,
     },
   },
   required: [
