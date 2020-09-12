@@ -74,11 +74,19 @@ const checkQualityGate = async (reportFile = null, sleepMs = 2000) => {
   let task = { status: 'UNKNOWN' };
 
   /* eslint-disable no-await-in-loop */
+  const t0 = Date.now();
+  const THREE_MINUTES = 3 * 60 * 1000;
   while (!['CANCELLED', 'FAILED', 'SUCCESS'].includes(task.status)) {
     if (task.status !== 'UNKNOWN') {
       // eslint-disable-next-line no-await-in-loop
       await timer(sleepMs);
     }
+
+    if (Date.now() - t0 > THREE_MINUTES) {
+      task.status = 'TIMEOUT';
+      break;
+    }
+
     task = await getTaskStatus(report[PROP_TASK_URL]);
     core.info(`Status of Sonar task is ${task.status}`);
   }
@@ -86,9 +94,14 @@ const checkQualityGate = async (reportFile = null, sleepMs = 2000) => {
   if (task.status === 'CANCELLED') {
     core.info('Sonar job is cancelled -- exit with error');
     return result(504, report);
-  } if (task.status === 'FAILED') {
+  }
+  if (task.status === 'FAILED') {
     core.error('Sonar job failed -- exit with error');
     return result(500, report);
+  }
+  if (task.status === 'TIMEOUT') {
+    core.warning('Sonar job failed to complete within 3 minutes -- assume success');
+    return result(0, report);
   }
 
   const qgStatus = await getQualityGateStatus(report[PROP_SERVER_URL], task.analysisId);
