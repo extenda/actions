@@ -95,7 +95,9 @@ const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
       return null;
     }));
   });
-  return Promise.all(promises);
+
+  // We wait here to ensure we resolve all role promises before returning
+  await Promise.all(promises);
 };
 
 module.exports = {

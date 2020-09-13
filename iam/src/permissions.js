@@ -63,7 +63,9 @@ const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
         return null;
       }));
   });
-  return Promise.all(promises);
+
+  // We wait here to make sure we resolve all promises that updates permissions.
+  await Promise.all(promises);
 };
 
 const setupPermissions = async (permissions, systemId) => {
