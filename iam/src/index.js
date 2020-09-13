@@ -21,14 +21,11 @@ const setupEnvironment = async (
   const projectId = await gcloudAuth(gcloudAuthKey);
   const { env: projectEnv } = projectInfo(projectId);
 
-  let credentialsEnv = projectEnv;
-  if (projectEnv === 'staging') {
-    // Even for staging, we always target prod iam-api unless explicitly told not to.
-    const explicitStaging = iamUrl.endsWith('retailsvc.dev');
-    credentialsEnv = explicitStaging ? 'staging' : 'prod';
-    if (explicitStaging) {
-      core.warning(`IAM definitions has been explicitly configured to publish to ${iamUrl} which is the STAGING environment.`);
-    }
+  // By default we always target prod iam-api unless explicitly told not to.
+  let credentialsEnv = 'prod';
+  if (projectEnv === 'staging' && iamUrl.endsWith('retailsvc.dev')) {
+    credentialsEnv = 'staging';
+    core.warning(`IAM definitions has been explicitly configured to publish to ${iamUrl} which is the STAGING environment.`);
   }
 
   const {
