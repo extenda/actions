@@ -1,62 +1,53 @@
 const core = require('@actions/core');
-const request = require('request');
+const axios = require('axios');
 
 const updateAddPermission = async (
   iamToken, permissionId, permissionDesc, method, iamUrl,
-) => new Promise((resolve, reject) => {
+) => {
   let url = `${iamUrl}/api/v1/permissions`;
-  let permissionBody = {
-    id: permissionId,
+  const data = {
     description: permissionDesc,
   };
-  if (method === 'PUT') {
-    permissionBody = {
-      description: permissionDesc,
-    };
+  if (method !== 'PUT') {
+    data.id = permissionId;
     url += `/${permissionId}`;
   }
-  request({
-    uri: url,
+  return axios({
+    url,
     method,
     headers: {
-      'Content-type': 'application/json',
-      Authorization: `bearer ${iamToken}`,
+      authorization: `Bearer ${iamToken}`,
+      'content-type': 'application/json',
     },
-    body: permissionBody,
-    json: true,
-  }, (error, res) => {
-    if (!error && (res.statusCode === 201 || res.statusCode === 200)) {
-      resolve(`permission '${permissionId}' updated/added`);
+    data,
+  }).then((response) => {
+    if (response.status === 200) {
+      core.info(`permission '${permissionId}' created.`);
     } else {
-      reject(new Error(`Couldn't add/update permission '${permissionId}'. Reason: ${error.message}`));
+      core.info(`permission '${permissionId}' updated.`);
     }
+  }).catch((err) => {
+    throw new Error(`Failed to create/update permission ${permissionId}. Reason: ${err.message}.`);
   });
-});
+};
 
 const getPermission = async (
   iamToken, permissionId, permissionDesc, iamUrl,
-) => new Promise((resolve, reject) => {
-  const url = `${iamUrl}/api/v1/permissions/${permissionId}`;
-  request({
-    uri: url,
-    method: 'GET',
-    headers: {
-      'Content-type': 'application/json',
-      Authorization: `bearer ${iamToken}`,
-    },
-  }, (error, res, body) => {
-    if (!error && res.statusCode === 200) {
-      const existingPermission = JSON.parse(body);
-      if (existingPermission.description === permissionDesc) {
-        resolve('NONE');
-      }
-      resolve('PUT');
-    } else if (res.statusCode === 404) {
-      resolve('POST');
-    } else {
-      reject(new Error('Couldn\'t fetch permissions from iam-service'));
-    }
-  });
+) => axios({
+  url: `${iamUrl}/api/v1/permissions/${permissionId}`,
+  method: 'GET',
+  headers: {
+    'content-type': 'application/json',
+    authorization: `Bearer ${iamToken}`,
+  },
+}).then((response) => {
+  const { description = null } = response.data;
+  return description === permissionDesc ? 'NONE' : 'PUT';
+}).catch((err) => {
+  if (err.response.status === 404) {
+    return 'POST';
+  }
+  throw new Error(`Could not fetch permissions from iam-service. Reason: ${err.message}`);
 });
 
 const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {

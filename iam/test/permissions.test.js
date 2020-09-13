@@ -1,6 +1,8 @@
 jest.mock('@actions/core');
 jest.mock('request');
+jest.mock('axios');
 
+const axios = require('axios');
 const request = require('request');
 const { setupPermissions, handlePermissions } = require('../src/permissions');
 
@@ -23,8 +25,6 @@ describe('Setup permissions and handle', () => {
 
     await expect(setupPermissions(permissions, 'test'))
       .resolves.toEqual(result);
-
-    expect(request).toHaveBeenCalledTimes(0);
   });
 
   test('it can get permissions that exists', async () => {
@@ -32,30 +32,27 @@ describe('Setup permissions and handle', () => {
       id: 'test.resource.get',
       description: 'Get resource',
     };
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
-      JSON.stringify(getSystemResult)));
 
+    axios.mockResolvedValueOnce({ status: 200, data: getSystemResult });
 
     const result = new Map();
     result.set('test.resource.get', 'Get resource');
 
-
     await handlePermissions(result, 'iam-token', 'api-url');
 
-    expect(request).toHaveBeenCalledTimes(1);
+    expect(axios).toHaveBeenCalledTimes(1);
   });
 
-  test('it can create permissions if it doeasn\'t exist', async () => {
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 404 }, {}));
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 201 }, {}));
+  test('it can create permissions if it doesn\'t exist', async () => {
+    axios.mockRejectedValueOnce({ response: { status: 404 } })
+      .mockResolvedValueOnce({ status: 201 });
 
     const result = new Map();
     result.set('test.resource.get', 'Get resource');
 
-
     await handlePermissions(result, 'iam-token', 'api-url');
 
-    expect(request).toHaveBeenCalledTimes(2);
+    expect(axios).toHaveBeenCalledTimes(2);
   });
 
   test('it can update permissions', async () => {
@@ -64,18 +61,14 @@ describe('Setup permissions and handle', () => {
       description: 'Get res',
     };
 
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
-      JSON.stringify(getSystemResult)));
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
-      JSON.stringify(getSystemResult)));
+    axios.mockResolvedValue({ status: 200, data: getSystemResult });
 
     const result = new Map();
     result.set('test.resource.get', 'Get resource');
 
-
     await handlePermissions(result, 'iam-token', 'api-url');
 
-    expect(request).toHaveBeenCalledTimes(2);
+    expect(axios).toHaveBeenCalledTimes(2);
   });
 
   test('it fails update permissions', async () => {
@@ -86,15 +79,15 @@ describe('Setup permissions and handle', () => {
 
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
       JSON.stringify(getSystemResult)));
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 404 },
-      JSON.stringify(getSystemResult)));
+    axios.mockResolvedValueOnce({ status: 200, data: getSystemResult })
+      .mockRejectedValueOnce({ message: 'Not found', response: { status: 404, data: getSystemResult } });
 
     const result = new Map();
     result.set('test.resource.get', 'Get resource');
 
+    await expect(handlePermissions(result, 'iam-token', 'api-url')).rejects
+      .toEqual(new Error('Failed to create/update permission test.resource.get. Reason: Not found.'));
 
-    await expect(handlePermissions(result, 'iam-token', 'api-url')).rejects.toEqual(new Error('Couldn\'t add/update permission'));
-
-    expect(request).toHaveBeenCalledTimes(2);
+    expect(axios).toHaveBeenCalledTimes(2);
   });
 });

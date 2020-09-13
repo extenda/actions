@@ -1,81 +1,66 @@
 const core = require('@actions/core');
-const request = require('request');
+const axios = require('axios');
 
 const createRole = async (
   iamToken, roleId, roleName, rolePermissions, iamUrl,
-) => new Promise((resolve, reject) => {
-  const url = `${iamUrl}/api/v1/roles`;
-  const roleBody = {
+) => axios({
+  url: `${iamUrl}/api/v1/roles`,
+  method: 'POST',
+  headers: {
+    'content-type': 'application/json',
+    authorization: `Bearer ${iamToken}`,
+  },
+  data: {
     id: roleId,
     name: roleName,
     permissions: rolePermissions,
-  };
-  request({
-    uri: url,
-    method: 'POST',
-    headers: {
-      'Content-type': 'application/json',
-      Authorization: `bearer ${iamToken}`,
-    },
-    body: roleBody,
-    json: true,
-  }, (error, res) => {
-    if (!error && res.statusCode === 201) {
-      resolve(`role '${roleId}' added`);
-    } else {
-      reject(new Error(`Couldn't add role '${roleId}'. Reason: ${error.message}`));
-    }
-  });
+  },
+}).then(() => {
+  const message = `role '${roleId}' added`;
+  core.info(message);
+  return message;
+}).catch((err) => {
+  throw new Error(`Couldn't add role '${roleId}'. Reason: ${err.message}`);
 });
 
 
 const updateRole = async (
   iamToken, roleId, roleName, rolePermissions, iamUrl,
-) => new Promise((resolve, reject) => {
-  const url = `${iamUrl}/api/v1/roles/${roleId}`;
-  const roleBody = {
+) => axios({
+  url: `${iamUrl}/api/v1/roles/${roleId}`,
+  method: 'PUT',
+  headers: {
+    'content-type': 'application/json',
+    authorization: `Bearer ${iamToken}`,
+  },
+  data: {
     name: roleName,
     permissions: rolePermissions,
-  };
-  request({
-    uri: url,
-    method: 'PUT',
-    headers: {
-      'Content-type': 'application/json',
-      Authorization: `bearer ${iamToken}`,
-    },
-    body: roleBody,
-    json: true,
-  }, (error, res) => {
-    if (!error && res.statusCode === 200) {
-      resolve(`role '${roleId}' updated`);
-    } else {
-      reject(new Error(`Couldn't update role '${roleId}'. Reason: ${error.message}`));
-    }
-  });
+  },
+}).then(() => {
+  const message = `role '${roleId}' updated`;
+  core.info(message);
+  return message;
+}).catch((err) => {
+  throw new Error(`Couldn't update role '${roleId}'. Reason: ${err.message}`);
 });
 
 const getRole = async (
   iamToken, iamUrl, roleId,
-) => new Promise((resolve, reject) => {
-  const url = `${iamUrl}/api/v1/roles/${roleId}`;
-  request({
-    uri: url,
-    method: 'GET',
-    headers: {
-      'Content-type': 'application/json',
-      Authorization: `bearer ${iamToken}`,
-    },
-  }, (error, res, body) => {
-    if (!error && res.statusCode === 200) {
-      resolve(JSON.parse(body));
-    } else if (res.statusCode === 404) {
-      resolve(true);
-    } else {
-      reject(new Error('Couldn\'t fetch role from iam-service'));
+) => axios({
+  url: `${iamUrl}/api/v1/roles/${roleId}`,
+  method: 'GET',
+  headers: {
+    'content-type': 'application/json',
+    authorization: `Bearer ${iamToken}`,
+  },
+}).then((response) => response.data)
+  .catch((err) => {
+    if (err.response.status === 404) {
+      return true;
     }
+    throw new Error(`Could not fetch role from iam-service. Reason: ${err.message}`);
   });
-});
 
 function arraysEqual(rolePermissions, newPermissions) {
   if (rolePermissions === newPermissions) return true;
