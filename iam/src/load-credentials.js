@@ -23,6 +23,8 @@ const loadCredentials = async (serviceAccountKey, env) => {
   const iamApiKeyName = `iam-api-key-${env}`;
   const iamApiTenantName = `iam-api-tenantId-${env}`;
 
+  core.info(`Load credentials for ${env}`);
+
   const styraToken = await getSecret(serviceAccountKey, 'styra-das-token', 'STYRA_TOKEN');
   const iamApiEmail = await getSecret(serviceAccountKey, iamApiEmailName, `API_EMAIL_${env}`);
   const iamApiPassword = await getSecret(serviceAccountKey, iamApiPasswordName, `API_PASSWORD_${env}`);
