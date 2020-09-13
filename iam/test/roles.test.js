@@ -120,10 +120,10 @@ describe('Setup roles and handle', () => {
   });
 
   test('it fails to get a role', async () => {
-    axios.mockRejectedValueOnce({ message: 'Error', response: { status: 500 } });
+    axios.mockRejectedValueOnce({ message: 'Error', response: { status: 500, data: { error: 'Message' } } });
 
     await expect(getRole('iam-token', 'iam-url', 'sys-id.admin'))
-      .rejects.toEqual(new Error('Could not fetch role from iam-service. Reason: Error'));
+      .rejects.toEqual(new Error('Could not fetch role from iam-service. Reason: Error Message'));
 
     expect(axios).toHaveBeenCalledTimes(1);
   });
@@ -139,11 +139,11 @@ describe('Setup roles and handle', () => {
   });
 
   test('it failes to create a new role', async () => {
-    axios.mockRejectedValueOnce({ message: 'Error', response: { status: 500 } });
+    axios.mockRejectedValueOnce({ message: 'Error', response: { status: 500, data: { error: 'Message' } } });
 
     await expect(createRole('iam-token', 'sys-id.admin', 'sys-id admin',
       ['sys-id.resources.get', 'sys-id.resources-create'], 'iam-url'))
-      .rejects.toEqual(new Error('Couldn\'t add role \'sys-id.admin\'. Reason: Error'));
+      .rejects.toEqual(new Error('Couldn\'t add role \'sys-id.admin\'. Reason: Error Message'));
 
     expect(axios).toHaveBeenCalledTimes(1);
   });
@@ -159,11 +159,11 @@ describe('Setup roles and handle', () => {
   });
 
   test('it failes to update a role', async () => {
-    axios.mockRejectedValueOnce({ message: 'Error', response: { status: 500 } });
+    axios.mockRejectedValueOnce({ message: 'Error', response: { status: 500, data: { error: 'Message' } } });
 
     await expect(updateRole('iam-token', 'sys-id.admin', 'sys-id admin',
       ['sys-id.resources.get', 'sys-id.resources-create'], 'iam-url'))
-      .rejects.toEqual(new Error('Couldn\'t update role \'sys-id.admin\'. Reason: Error. undefined'));
+      .rejects.toEqual(new Error('Couldn\'t update role \'sys-id.admin\'. Reason: Error Message'));
 
     expect(axios).toHaveBeenCalledTimes(1);
   });

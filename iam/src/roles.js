@@ -20,7 +20,7 @@ const createRole = async (
   core.info(message);
   return message;
 }).catch((err) => {
-  throw new Error(`Couldn't add role '${roleId}'. Reason: ${err.message}`);
+  throw new Error(`Couldn't add role '${roleId}'. Reason: ${err.message} ${err.response.data.error || ''}`);
 });
 
 
@@ -42,7 +42,7 @@ const updateRole = async (
   core.info(message);
   return message;
 }).catch((err) => {
-  throw new Error(`Couldn't update role '${roleId}'. Reason: ${err.message}. ${err.response.data.error || ''}`);
+  throw new Error(`Couldn't update role '${roleId}'. Reason: ${err.message} ${err.response.data.error || ''}`);
 });
 
 const getRole = async (
@@ -59,7 +59,7 @@ const getRole = async (
     if (err.response.status === 404) {
       return true;
     }
-    throw new Error(`Could not fetch role from iam-service. Reason: ${err.message}`);
+    throw new Error(`Could not fetch role from iam-service. Reason: ${err.message} ${err.response.data.error || ''}`);
   });
 
 function arraysEqual(rolePermissions, newPermissions) {

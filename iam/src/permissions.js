@@ -27,7 +27,7 @@ const updateAddPermission = async (
       core.info(`permission '${permissionId}' updated.`);
     }
   }).catch((err) => {
-    throw new Error(`Failed to create/update permission ${permissionId}. Reason: ${err.message}. ${err.response.data.error || ''}`);
+    throw new Error(`Failed to create/update permission ${permissionId}. Reason: ${err.message} ${err.response.data.error || ''}`);
   });
 };
 
@@ -37,7 +37,6 @@ const getPermission = async (
   url: `${iamUrl}/api/v1/permissions/${permissionId}`,
   method: 'GET',
   headers: {
-    'content-type': 'application/json',
     authorization: `Bearer ${iamToken}`,
   },
 }).then((response) => {
@@ -47,7 +46,7 @@ const getPermission = async (
   if (err.response.status === 404) {
     return 'POST';
   }
-  throw new Error(`Could not fetch permissions from iam-service. Reason: ${err.message}`);
+  throw new Error(`Could not fetch permissions from iam-service. Reason: ${err.message} ${err.response.data.error || ''}`);
 });
 
 const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
