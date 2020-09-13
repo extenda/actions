@@ -92,12 +92,14 @@ const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
         return updateRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
           .then((message) => core.info(message));
       }
+      core.info(`role '${roleId} exists`);
       return null;
     }));
   });
 
   // We wait here to ensure we resolve all role promises before returning
   await Promise.all(promises);
+  core.info('All roles processed');
 };
 
 module.exports = {

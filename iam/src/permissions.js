@@ -60,12 +60,14 @@ const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
           core.info(`permission '${id}' require update`);
           return updateAddPermission(iamToken, id, desc, status, iamUrl);
         }
+        core.info(`permission '${id}' exists`);
         return null;
       }));
   });
 
   // We wait here to make sure we resolve all promises that updates permissions.
   await Promise.all(promises);
+  core.info('All permissions processed.');
 };
 
 const setupPermissions = async (permissions, systemId) => {
