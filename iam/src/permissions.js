@@ -10,6 +10,7 @@ const updateAddPermission = async (
   };
   if (method !== 'PUT') {
     data.id = permissionId;
+  } else {
     url += `/${permissionId}`;
   }
   return axios({
@@ -56,7 +57,7 @@ const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
     promises.push(getPermission(iamToken, id, desc, iamUrl)
       .then((status) => {
         if (status !== 'NONE') {
-          core.info(`permission '${id}' require update`);
+          core.info(`permission '${id}' require update (${status})`);
           return updateAddPermission(iamToken, id, desc, status, iamUrl);
         }
         core.info(`permission '${id}' exists`);
