@@ -42,7 +42,7 @@ const updateRole = async (
   core.info(message);
   return message;
 }).catch((err) => {
-  throw new Error(`Couldn't update role '${roleId}'. Reason: ${err.message}`);
+  throw new Error(`Couldn't update role '${roleId}'. Reason: ${err.message}. ${err.response.data.error || ''}`);
 });
 
 const getRole = async (

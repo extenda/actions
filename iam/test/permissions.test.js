@@ -1,9 +1,7 @@
 jest.mock('@actions/core');
-jest.mock('request');
 jest.mock('axios');
 
 const axios = require('axios');
-const request = require('request');
 const { setupPermissions, handlePermissions } = require('../src/permissions');
 
 describe('Setup permissions and handle', () => {
@@ -77,8 +75,6 @@ describe('Setup permissions and handle', () => {
       description: 'Get res',
     };
 
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
-      JSON.stringify(getSystemResult)));
     axios.mockResolvedValueOnce({ status: 200, data: getSystemResult })
       .mockRejectedValueOnce({ message: 'Not found', response: { status: 404, data: getSystemResult } });
 
@@ -86,7 +82,7 @@ describe('Setup permissions and handle', () => {
     result.set('test.resource.get', 'Get resource');
 
     await expect(handlePermissions(result, 'iam-token', 'api-url')).rejects
-      .toEqual(new Error('Failed to create/update permission test.resource.get. Reason: Not found.'));
+      .toEqual(new Error('Failed to create/update permission test.resource.get. Reason: Not found. '));
 
     expect(axios).toHaveBeenCalledTimes(2);
   });

@@ -163,7 +163,7 @@ describe('Setup roles and handle', () => {
 
     await expect(updateRole('iam-token', 'sys-id.admin', 'sys-id admin',
       ['sys-id.resources.get', 'sys-id.resources-create'], 'iam-url'))
-      .rejects.toEqual(new Error('Couldn\'t update role \'sys-id.admin\'. Reason: Error'));
+      .rejects.toEqual(new Error('Couldn\'t update role \'sys-id.admin\'. Reason: Error. undefined'));
 
     expect(axios).toHaveBeenCalledTimes(1);
   });

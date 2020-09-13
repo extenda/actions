@@ -27,7 +27,7 @@ const updateAddPermission = async (
       core.info(`permission '${permissionId}' updated.`);
     }
   }).catch((err) => {
-    throw new Error(`Failed to create/update permission ${permissionId}. Reason: ${err.message}.`);
+    throw new Error(`Failed to create/update permission ${permissionId}. Reason: ${err.message}. ${err.response.data.error || ''}`);
   });
 };
 
