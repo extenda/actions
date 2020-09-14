@@ -10,7 +10,7 @@ See [action.yml](action.yml).
 
 ```yaml
 jobs:
-  test:
+  prod:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -27,5 +27,5 @@ jobs:
           styra-das-token: ${{ env.STYRA_TOKEN }}
           staging-system-id: 'Your Styra DAS staging System ID (e.g., iam-staging)'
           prod-system-id: 'Your Styra DAS prod System ID (e.g., iam-prod)'
-          styra-workspace: extendaretail # optional - will default to extendaretail
+          styra-url: https://extendaretail.svc.com # optional - will default to https://extendaretail.svc.com
 ```

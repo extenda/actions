@@ -14,10 +14,10 @@ inputs:
     description: |
       the DAS production system id for this service
     required: true
-  styra-workspace:
+  styra-url:
     description: |
-      the DAS workspace/tenant used to connect to
-    default: extendaretail
+      the DAS url
+    default: https://extendaretail.svc.com
     required: false
 runs:
   using: node12
