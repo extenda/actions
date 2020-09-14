@@ -178,12 +178,12 @@ const getOpaConfig = (systemId, tokenContent, namespace, styraUrl) => {
     credentials:
       bearer:
         token: "${token}"
-    labels:
-      system-id: "${systemId}"
-      system-type: "envoy"
-    discovery:
-      name: discovery
-      prefix: "/systems/${systemId}"\n`,
+labels:
+  system-id: "${systemId}"
+  system-type: "envoy"
+discovery:
+  name: discovery
+  prefix: "/systems/${systemId}"\n`,
     },
   };
   return opaConfig;
