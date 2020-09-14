@@ -17,7 +17,7 @@ inputs:
   styra-url:
     description: |
       the DAS url
-    default: https://extendaretail.svc.com
+    default: https://extendaretail.svc.styra.com
     required: false
 runs:
   using: node12
