@@ -1,8 +1,8 @@
 const request = require('request');
 
-const fetchPolicy = (dasTenant, styraToken, systemId) => new Promise((resolve, reject) => {
+const fetchPolicy = (styraUrl, styraToken, systemId) => new Promise((resolve, reject) => {
   request({
-    uri: `https://${dasTenant}.styra.com/v1/policies/systems/${systemId}/policy/com.styra.envoy.ingress/rules/rules`,
+    uri: `${styraUrl}/v1/policies/systems/${systemId}/policy/com.styra.envoy.ingress/rules/rules`,
     method: 'GET',
     headers: {
       'Content-type': 'application/json',
@@ -20,7 +20,7 @@ const fetchPolicy = (dasTenant, styraToken, systemId) => new Promise((resolve, r
 });
 
 const pushPolicyProd = (
-  dasTenant, styraToken, systemId, ingressRego,
+  styraUrl, styraToken, systemId, ingressRego,
 ) => new Promise((resolve, reject) => {
   const policyBody = {
     modules: {
@@ -31,7 +31,7 @@ const pushPolicyProd = (
     },
   };
   request({
-    uri: `https://${dasTenant}.styra.com/v1/policies/systems/${systemId}/policy/com.styra.envoy.ingress/rules/rules`,
+    uri: `${styraUrl}/v1/policies/systems/${systemId}/policy/com.styra.envoy.ingress/rules/rules`,
     method: 'PUT',
     headers: {
       'Content-type': 'application/json',
@@ -48,8 +48,8 @@ const pushPolicyProd = (
   });
 });
 
-const pushPolicy = async (dasTenant, token, systemId, prodSystemId) => fetchPolicy(
-  dasTenant, token, systemId,
-).then((ingressRego) => pushPolicyProd(dasTenant, token, prodSystemId, ingressRego));
+const pushPolicy = async (styraUrl, token, systemId, prodSystemId) => fetchPolicy(
+  styraUrl, token, systemId,
+).then((ingressRego) => pushPolicyProd(styraUrl, token, prodSystemId, ingressRego));
 
 module.exports = pushPolicy;

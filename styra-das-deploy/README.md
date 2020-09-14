@@ -25,7 +25,7 @@ jobs:
         uses: extenda/actions/styra-das-deploy@v0
         with:
           styra-das-token: ${{ env.STYRA_TOKEN }}
-          staging-system-id: 'Your Styra DAS staging System ID (e.g., iam-staging)'
-          prod-system-id: 'Your Styra DAS prod System ID (e.g., iam-prod)'
-          styra-workspace: extendaretail # optional - will default to extendaretail
+          permission-prefix: iam
+          namespace: service-namespace
+          styra-url: https://extendaretail.styra.com # optional - will default to extendaretail
 ```
