@@ -1,7 +1,7 @@
 jest.mock('@actions/core');
-jest.mock('request');
+jest.mock('axios');
 
-const request = require('request');
+const axios = require('axios');
 const {
   setupRoles, getRole, createRole, updateRole, arraysEqual,
 } = require('../src/roles');
@@ -13,7 +13,7 @@ describe('Setup roles and handle', () => {
 
   const roles = [
     {
-      name: 'admin',
+      id: 'admin',
       desc: 'sys-id admin',
       permissions: [
         'resource.get',
@@ -23,11 +23,47 @@ describe('Setup roles and handle', () => {
   ];
 
   test('it can setup roles for creation', async () => {
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 404 }, {}));
+    axios.mockRejectedValueOnce({ response: { status: 404 } })
+      .mockResolvedValueOnce({ status: 201 });
 
     await setupRoles(roles, 'sys-id', 'iam-token', 'iam-url');
 
-    expect(request).toHaveBeenCalledTimes(1);
+    expect(axios).toHaveBeenCalledTimes(2);
+  });
+
+  test('It can setup roles for update', async () => {
+    const getRoleResponse = {
+      id: 'sys-id.admin',
+      name: 'sys-id admin',
+      permissions: [
+        'resource.get',
+        'resource.create',
+        'resource.delete',
+      ],
+    };
+
+    axios.mockResolvedValueOnce({ status: 200, data: getRoleResponse })
+      .mockResolvedValueOnce({ status: 200 });
+
+    await setupRoles(roles, 'sys-id', 'iam-token', 'iam-url');
+
+    expect(axios).toHaveBeenCalledTimes(2);
+  });
+
+  test('It can setup roles which are in-sync (no update)', async () => {
+    const getRoleResponse = {
+      id: 'sys-id.admin',
+      name: 'sys-id admin',
+      permissions: [
+        'sys-id.resource.get',
+        'sys-id.resource.create',
+      ],
+    };
+    axios.mockResolvedValueOnce({ status: 200, data: getRoleResponse });
+
+    await setupRoles(roles, 'sys-id', 'iam-token', 'iam-url');
+
+    expect(axios).toHaveBeenCalledTimes(1);
   });
 
   test('it can compare roles with roles for updating', async () => {
@@ -66,76 +102,69 @@ describe('Setup roles and handle', () => {
       ],
     };
 
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
-      JSON.stringify(getRoleResponse)));
+    axios.mockResolvedValueOnce({ status: 200, data: getRoleResponse });
 
     await expect(getRole('iam-token', 'iam-url', 'sys-id.admin'))
       .resolves.toEqual(getRoleResponse);
 
-    expect(request).toHaveBeenCalledTimes(1);
+    expect(axios).toHaveBeenCalledTimes(1);
   });
 
   test('it gets a role that doesn\'t exist', async () => {
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 404 },
-      {}));
+    axios.mockRejectedValueOnce({ response: { status: 404 } });
 
     await expect(getRole('iam-token', 'iam-url', 'sys-id.admin'))
       .resolves.toEqual(true);
 
-    expect(request).toHaveBeenCalledTimes(1);
+    expect(axios).toHaveBeenCalledTimes(1);
   });
 
   test('it fails to get a role', async () => {
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 500 },
-      {}));
+    axios.mockRejectedValueOnce({ message: 'Error', response: { status: 500, data: { error: 'Message' } } });
 
     await expect(getRole('iam-token', 'iam-url', 'sys-id.admin'))
-      .rejects.toEqual(new Error('Couldn\'t fetch role from iam-service'));
+      .rejects.toEqual(new Error('Could not fetch role from iam-service. Reason: Error Message'));
 
-    expect(request).toHaveBeenCalledTimes(1);
+    expect(axios).toHaveBeenCalledTimes(1);
   });
 
   test('it creates a new role', async () => {
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 201 },
-      {}));
+    axios.mockResolvedValueOnce({ status: 200 });
 
     await expect(createRole('iam-token', 'sys-id.admin', 'sys-id admin',
       ['sys-id.resources.get', 'sys-id.resources-create'], 'iam-url'))
       .resolves.toEqual('role \'sys-id.admin\' added');
 
-    expect(request).toHaveBeenCalledTimes(1);
+    expect(axios).toHaveBeenCalledTimes(1);
   });
 
   test('it failes to create a new role', async () => {
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 500 },
-      {}));
+    axios.mockRejectedValueOnce({ message: 'Error', response: { status: 500, data: { error: 'Message' } } });
 
     await expect(createRole('iam-token', 'sys-id.admin', 'sys-id admin',
       ['sys-id.resources.get', 'sys-id.resources-create'], 'iam-url'))
-      .rejects.toEqual(new Error('Couldn\'t add role'));
+      .rejects.toEqual(new Error('Couldn\'t add role \'sys-id.admin\'. Reason: Error Message'));
 
-    expect(request).toHaveBeenCalledTimes(1);
+    expect(axios).toHaveBeenCalledTimes(1);
   });
 
   test('it updates a role', async () => {
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
-      {}));
+    axios.mockResolvedValueOnce({ status: 200 });
 
     await expect(updateRole('iam-token', 'sys-id.admin', 'sys-id admin',
       ['sys-id.resources.get', 'sys-id.resources-create'], 'iam-url'))
       .resolves.toEqual('role \'sys-id.admin\' updated');
 
-    expect(request).toHaveBeenCalledTimes(1);
+    expect(axios).toHaveBeenCalledTimes(1);
   });
 
   test('it failes to update a role', async () => {
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 500 },
-      {}));
+    axios.mockRejectedValueOnce({ message: 'Error', response: { status: 500, data: { error: 'Message' } } });
 
     await expect(updateRole('iam-token', 'sys-id.admin', 'sys-id admin',
       ['sys-id.resources.get', 'sys-id.resources-create'], 'iam-url'))
-      .rejects.toEqual(new Error('Couldn\'t update role'));
+      .rejects.toEqual(new Error('Couldn\'t update role \'sys-id.admin\'. Reason: Error Message'));
 
-    expect(request).toHaveBeenCalledTimes(1);
+    expect(axios).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,32 +1,57 @@
 module.exports = {
   type: 'object',
   properties: {
-    system: {
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string',
-          required: true,
-        },
-        description: {
-          type: 'string',
-          required: true,
-        },
-      },
+    name: {
+      type: 'string',
     },
-    permissions: {
-      type: 'object',
+    'permission-prefix': {
+      type: 'string',
+      maxLength: 3,
     },
-    roles: {
+    services: {
       type: 'array',
       items: {
+        type: 'object',
         properties: {
           name: {
             type: 'string',
           },
-          description: {
+          repository: {
+            type: 'string',
+          },
+        },
+        required: [
+          'name',
+          'repository',
+        ],
+        additionalProperties: false,
+      },
+    },
+    permissions: {
+      type: 'object',
+      additionalProperties: {
+        type: 'array',
+        maxLength: 16,
+        additionalProperties: {
+          type: 'string',
+          maxLength: 16,
+        },
+      },
+    },
+    roles: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+          desc: {
             type: 'string',
             maxLength: 20,
+          },
+          name: {
+            type: 'string',
           },
           permissions: {
             type: 'array',
@@ -35,11 +60,19 @@ module.exports = {
             },
           },
         },
+        required: [
+          'id',
+          'name',
+          'desc',
+          'permissions',
+        ],
+        additionalProperties: false,
       },
     },
   },
   required: [
-    'system',
+    'permission-prefix',
+    'services',
     'permissions',
   ],
   additionalProperties: false,

@@ -15,7 +15,7 @@ runs:
   using: docker
   image: Dockerfile
   env:
-    STYRA_ORGANIZATION_ID: extendaretail.styra.com
+    STYRA_ORGANIZATION_ID: extendaretail.svc.styra.com
     STYRA_TOKEN: ${{ inputs.styra-das-token }}
   args:
     - validate

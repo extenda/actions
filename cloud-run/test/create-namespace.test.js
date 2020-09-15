@@ -85,4 +85,13 @@ describe('Create namespace', () => {
       ['label', 'namespace', 'testns', 'istio-injection=disabled', '--overwrite=true'],
     );
   });
+
+  test('It skips label injection', async () => {
+    exec.exec.mockResolvedValue(0);
+    await createNamespace('clan_project', 'skip', clusterInfo, 'testns');
+    expect(exec.exec).not.toHaveBeenCalledWith(
+      'kubectl',
+      ['label', 'namespace', 'testns', expect.stringContaining('opa-istio-injection'), '--overwrite=true'],
+    );
+  });
 });

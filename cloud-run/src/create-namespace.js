@@ -46,7 +46,9 @@ const createNamespace = async (clanId,
     ]);
   }
 
-  await setOpaInjectionLabels(namespace, opaEnabled);
+  if (opaEnabled !== 'skip') {
+    await setOpaInjectionLabels(namespace, opaEnabled);
+  }
 };
 
 module.exports = createNamespace;

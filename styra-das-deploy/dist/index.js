@@ -5106,7 +5106,7 @@ const pushPolicy = __webpack_require__(376);
 const fetchSystemId = __webpack_require__(81);
 
 const action = async () => {
-  const styraUrl = core.getInput('styra-url') || 'https://extendaretail.styra.com';
+  const styraUrl = core.getInput('styra-url') || 'https://extendaretail.svc.styra.com';
   const styraToken = core.getInput('styra-das-token', { required: true });
   const permissionPrefix = core.getInput('permission-prefix', { required: true });
   const namespace = core.getInput('namepsace', { required: true });

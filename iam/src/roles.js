@@ -1,81 +1,66 @@
 const core = require('@actions/core');
-const request = require('request');
+const axios = require('axios');
 
 const createRole = async (
   iamToken, roleId, roleName, rolePermissions, iamUrl,
-) => new Promise((resolve, reject) => {
-  const url = `${iamUrl}/api/v1/roles`;
-  const roleBody = {
+) => axios({
+  url: `${iamUrl}/api/v1/roles`,
+  method: 'POST',
+  headers: {
+    'content-type': 'application/json',
+    authorization: `Bearer ${iamToken}`,
+  },
+  data: {
     id: roleId,
     name: roleName,
     permissions: rolePermissions,
-  };
-  request({
-    uri: url,
-    method: 'POST',
-    headers: {
-      'Content-type': 'application/json',
-      Authorization: `bearer ${iamToken}`,
-    },
-    body: roleBody,
-    json: true,
-  }, (error, res) => {
-    if (!error && res.statusCode === 201) {
-      resolve(`role '${roleId}' added`);
-    } else {
-      reject(new Error('Couldn\'t add role'));
-    }
-  });
+  },
+}).then(() => {
+  const message = `role '${roleId}' added`;
+  core.info(message);
+  return message;
+}).catch((err) => {
+  throw new Error(`Couldn't add role '${roleId}'. Reason: ${err.message} ${err.response.data.error || ''}`);
 });
 
 
 const updateRole = async (
   iamToken, roleId, roleName, rolePermissions, iamUrl,
-) => new Promise((resolve, reject) => {
-  const url = `${iamUrl}/api/v1/roles/${roleId}`;
-  const roleBody = {
+) => axios({
+  url: `${iamUrl}/api/v1/roles/${roleId}`,
+  method: 'PUT',
+  headers: {
+    'content-type': 'application/json',
+    authorization: `Bearer ${iamToken}`,
+  },
+  data: {
     name: roleName,
     permissions: rolePermissions,
-  };
-  request({
-    uri: url,
-    method: 'PUT',
-    headers: {
-      'Content-type': 'application/json',
-      Authorization: `bearer ${iamToken}`,
-    },
-    body: roleBody,
-    json: true,
-  }, (error, res) => {
-    if (!error && res.statusCode === 200) {
-      resolve(`role '${roleId}' updated`);
-    } else {
-      reject(new Error('Couldn\'t update role'));
-    }
-  });
+  },
+}).then(() => {
+  const message = `role '${roleId}' updated`;
+  core.info(message);
+  return message;
+}).catch((err) => {
+  throw new Error(`Couldn't update role '${roleId}'. Reason: ${err.message} ${err.response.data.error || ''}`);
 });
 
 const getRole = async (
   iamToken, iamUrl, roleId,
-) => new Promise((resolve, reject) => {
-  const url = `${iamUrl}/api/v1/roles/${roleId}`;
-  request({
-    uri: url,
-    method: 'GET',
-    headers: {
-      'Content-type': 'application/json',
-      Authorization: `bearer ${iamToken}`,
-    },
-  }, (error, res, body) => {
-    if (!error && res.statusCode === 200) {
-      resolve(JSON.parse(body));
-    } else if (res.statusCode === 404) {
-      resolve(true);
-    } else {
-      reject(new Error('Couldn\'t fetch role from iam-service'));
+) => axios({
+  url: `${iamUrl}/api/v1/roles/${roleId}`,
+  method: 'GET',
+  headers: {
+    'content-type': 'application/json',
+    authorization: `Bearer ${iamToken}`,
+  },
+}).then((response) => response.data)
+  .catch((err) => {
+    if (err.response.status === 404) {
+      return true;
     }
+    throw new Error(`Could not fetch role from iam-service. Reason: ${err.message} ${err.response.data.error || ''}`);
   });
-});
 
 function arraysEqual(rolePermissions, newPermissions) {
   if (rolePermissions === newPermissions) return true;
@@ -89,29 +74,32 @@ function arraysEqual(rolePermissions, newPermissions) {
 }
 
 const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
-  roles.forEach(async (role) => {
-    const roleId = `${systemId}.${role.name}`;
-    const roleName = role.description;
-    const rolePermissions = role.permissions;
-
-    for (let i = 0; i < rolePermissions.length; i += 1) {
-      rolePermissions[i] = `${systemId}.${rolePermissions[i]}`;
-    }
+  const promises = [];
+  roles.forEach((role) => {
+    const roleId = `${systemId}.${role.id}`;
+    const roleDesc = role.desc;
+    const rolePermissions = role.permissions.map((p) => `${systemId}.${p}`);
 
     core.info(`fetching data for ${roleId}`);
-    const roleResult = await getRole(iamToken, iamUrl, roleId);
-    if (roleResult === true) {
-      core.info(`creating ${roleId}`);
-      await createRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
-        .then((message) => core.info(message));
-    } else if (
-      !arraysEqual(roleResult.permissions, rolePermissions)
-      || roleResult.name !== roleName) {
-      core.info(`updating ${roleId}`);
-      await updateRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
-        .then((message) => core.info(message));
-    }
+    promises.push(getRole(iamToken, iamUrl, roleId).then((roleResult) => {
+      if (roleResult === true) {
+        core.info(`creating role '${roleId}'`);
+        return createRole(iamToken, roleId, roleDesc, rolePermissions, iamUrl)
+          .then((message) => core.info(message));
+      }
+      if (!arraysEqual(roleResult.permissions, rolePermissions) || roleResult.name !== roleDesc) {
+        core.info(`updating role '${roleId}'`);
+        return updateRole(iamToken, roleId, roleDesc, rolePermissions, iamUrl)
+          .then((message) => core.info(message));
+      }
+      core.info(`role '${roleId} exists`);
+      return null;
+    }));
   });
+
+  // We wait here to ensure we resolve all role promises before returning
+  await Promise.all(promises);
+  core.info('All roles processed');
 };
 
 module.exports = {

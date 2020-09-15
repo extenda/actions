@@ -4,8 +4,11 @@ jest.mock('../../gcp-secret-manager/src/secrets');
 
 const loadCredentials = require('../src/load-credentials');
 
+const orgEnv = process.env;
+
 describe('iam Credentials', () => {
   beforeEach(() => {
+    process.env = { ...orgEnv };
     delete process.env.API_EMAIL;
     delete process.env.API_PASSWORD;
     delete process.env.API_KEY;
@@ -15,13 +18,14 @@ describe('iam Credentials', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
+    process.env = orgEnv;
   });
 
   test('It uses existing env vars', async () => {
-    process.env.API_EMAIL = 'email';
-    process.env.API_PASSWORD = 'password';
-    process.env.API_KEY = 'key';
-    process.env.API_TENANT = 'tenant';
+    process.env.API_EMAIL_prod = 'email';
+    process.env.API_PASSWORD_prod = 'password';
+    process.env.API_KEY_prod = 'key';
+    process.env.API_TENANT_prod = 'tenant';
     process.env.STYRA_TOKEN = 'styra-token';
     const {
       styraToken,

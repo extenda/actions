@@ -13,31 +13,102 @@ describe('IAM Definition', () => {
   });
 
   describe('Schema validation', () => {
-    test('It throws for missing system', () => {
+    test('It throws for missing services', () => {
       mockFs({
         'iam.yaml': `
+permission-prefix: tst
+name: test
 permissions:
+  test:
+    - verb
 `,
       });
       expect(() => loadIamDefinition('iam.yaml'))
         .toThrow(`iam.yaml is not valid.
-0: instance.permissions is not of a type(s) object
-1: instance requires property "system"`);
+0: instance requires property "services"
+`);
     });
 
-    test('It throws for missing system.id', () => {
+    test('It throws for missing systems and permission-prefix', () => {
       mockFs({
         'iam.yaml': `
-system:
-  description: test
 permissions:
   res:
-    verb: descr
+    - verb
 `,
       });
       expect(() => loadIamDefinition('iam.yaml'))
         .toThrow(`iam.yaml is not valid.
-0: instance.system.id is required
+0: instance requires property "permission-prefix"
+1: instance requires property "services"
+`);
+    });
+
+    test('It throws for incorrect property name', () => {
+      mockFs({
+        'iam.yaml': `
+permission-prefix: tst
+services:
+  - name: test
+    repository: actions
+permissions: {}
+roles:
+  - id: admin
+    name: test name
+    description: Should be desc
+    permissions: []
+`,
+      });
+      expect(() => loadIamDefinition('iam.yaml'))
+        .toThrow(`iam.yaml is not valid.
+0: instance.roles[0] requires property "desc"
+1: instance.roles[0] additionalProperty "description" exists in instance when not allowed
+`);
+    });
+
+    test('It throws for too long desc', () => {
+      mockFs({
+        'iam.yaml': `
+permission-prefix: tst
+services:
+  - name: test
+    repository: actions
+permissions: 
+  test:
+    - test
+roles:
+  - id: admin
+    name: admin name
+    desc: A description longer than 20 characters
+    permissions: []
+`,
+      });
+      expect(() => loadIamDefinition('iam.yaml'))
+        .toThrow(`iam.yaml is not valid.
+0: instance.roles[0].desc does not meet maximum length of 20
+`);
+    });
+
+    test('It throws for too long permission description', () => {
+      mockFs({
+        'iam.yaml': `
+permission-prefix: tst
+services:
+  - name: test
+    repository: actions
+permissions:
+  test:
+    - create
+roles:
+  - id: admin
+    name: admin bla
+    desc: Description that is to long
+    permissions: []
+`,
+      });
+      expect(() => loadIamDefinition('iam.yaml'))
+        .toThrow(`iam.yaml is not valid.
+0: instance.roles[0].desc does not meet maximum length of 20
 `);
     });
   });
