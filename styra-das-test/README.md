@@ -1,11 +1,14 @@
 # styra-das-test
 
-Execute unit tests for Rego rules inside Styra DAS.
+An opinionated action to execute unit tests for Rego rules inside Styra DAS.
 
 The following files are expected to exist in your project:
 
 - `policies/policy/com.styra.envoy.ingress/test/test/test.rego`
 - `policies/policy/com.styra.envoy.ingress/rules/rules/ingress.rego`
+
+The DAS system name is expected to follow the Extenda Retail naming convention:
+`<permission-prefix>.<service-name>-staging`.
 
 ## Usage
 
@@ -15,10 +18,10 @@ See [action.yml](action.yml).
 
 ```yaml
 jobs:
-  test:
+  test-opa:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
 
       - uses: extenda/actions/gcp-secret-manager@v0
         with:
@@ -30,5 +33,6 @@ jobs:
         uses: extenda/actions/styra-das-test@v0
         with:
           styra-das-token: ${{ env.STYRA_TOKEN }}
-          system-id: 'Your Styra DAS System ID (e.g., iam-staging)'
+          permission-prefix: tst
+          service-name: my-service
 ```

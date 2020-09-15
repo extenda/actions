@@ -10,9 +10,9 @@ inputs:
     description: |
       The permission-prefix setup for the service in you clan-common-repo
     required: true
-  namespace:
+  service-name:
     description: |
-      The namespace of the sesrvice (service name)
+      The name of the service
     required: true
   styra-url:
     description: |

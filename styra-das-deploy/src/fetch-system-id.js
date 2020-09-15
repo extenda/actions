@@ -9,7 +9,6 @@ const fetchSystemId = async (
     method: 'GET',
     headers: {
       authorization: `Bearer ${styraToken}`,
-      'content-type': 'application/json',
     },
   }).then((response) => response.data.result[0].id)
     .catch((err) => {
