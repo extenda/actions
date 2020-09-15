@@ -4,7 +4,7 @@ const pushPolicy = require('./push-policy');
 const fetchSystemId = require('./fetch-system-id');
 
 const action = async () => {
-  const styraUrl = core.getInput('styra-url') || 'https://extendaretail.styra.com';
+  const styraUrl = core.getInput('styra-url') || 'https://extendaretail.svc.styra.com';
   const styraToken = core.getInput('styra-das-token', { required: true });
   const permissionPrefix = core.getInput('permission-prefix', { required: true });
   const namespace = core.getInput('namepsace', { required: true });

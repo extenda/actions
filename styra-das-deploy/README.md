@@ -27,5 +27,5 @@ jobs:
           styra-das-token: ${{ env.STYRA_TOKEN }}
           permission-prefix: iam
           namespace: service-namespace
-          styra-url: https://extendaretail.styra.com # optional - will default to extendaretail
+          styra-url: https://extendaretail.svc.styra.com # optional - will default to extendaretail
 ```
