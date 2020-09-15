@@ -35,7 +35,7 @@ const configureIAM = async (
 ) => {
   const {
     'permission-prefix': permissionPrefix,
-    systems,
+    services,
     permissions,
     roles,
   } = iam;
@@ -44,7 +44,7 @@ const configureIAM = async (
   const promises = [];
   const cluster = await getClusterInfo(projectId);
 
-  systems.forEach(({ namespace, repository }) => {
+  services.forEach(({ name: namespace, repository }) => {
     const systemName = `${permissionPrefix}.${namespace}-${env}`;
 
     // 1. Authenticate Kubectl and create namespace (if not exists)
