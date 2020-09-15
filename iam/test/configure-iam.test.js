@@ -28,8 +28,8 @@ describe('Configure iam', () => {
   test('it can check system exists', async () => {
     const iam = {
       'permission-prefix': 'test',
-      systems: [{
-        namespace: 'test-service',
+      services: [{
+        name: 'test-service',
         repository: 'test-repo',
       }],
       permissions: {
@@ -83,8 +83,8 @@ describe('Configure iam', () => {
     projectInfo.mockReturnValueOnce({ env: 'staging' });
     const iam = {
       'permission-prefix': 'test',
-      systems: [{
-        namespace: 'test-service',
+      services: [{
+        name: 'test-service',
         repository: 'test-repo',
       }],
     };
