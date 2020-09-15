@@ -4,20 +4,20 @@ author: Extenda Retail
 inputs:
   styra-das-token:
     description: |
-      the token used to make api calls to Styra
+      The token used to make api calls to Styra
     required: true
-  staging-system-id:
+  permission-prefix:
     description: |
-      the DAS staging system id for this service
+      The permission-prefix setup for the service in you clan-common-repo
     required: true
-  prod-system-id:
+  namespace:
     description: |
-      the DAS production system id for this service
+      The namespace of the sesrvice (service name)
     required: true
-  styra-workspace:
+  styra-url:
     description: |
-      the DAS workspace/tenant used to connect to
-    default: extendaretail
+      The styra DAS url
+    default: https://extendaretail.styra.com
     required: false
 runs:
   using: node12

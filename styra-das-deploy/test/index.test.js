@@ -1,9 +1,11 @@
 jest.mock('@actions/core');
 jest.mock('../src/push-policy');
+jest.mock('../src/fetch-system-id');
 
 const core = require('@actions/core');
 const action = require('../src/index');
 const pushPolicy = require('../src/push-policy');
+const fetchSystemId = require('../src/fetch-system-id');
 
 describe('run push policy', () => {
   afterEach(() => {
@@ -11,10 +13,12 @@ describe('run push policy', () => {
   });
 
   test('It can run the action', async () => {
+    fetchSystemId.mockResolvedValueOnce('systemId-staging');
+    fetchSystemId.mockResolvedValueOnce('systemId-prod');
     core.getInput.mockReturnValueOnce('extenda')
       .mockReturnValueOnce('token')
-      .mockReturnValueOnce('staging-id')
-      .mockReturnValueOnce('prod-id');
+      .mockReturnValueOnce('test')
+      .mockReturnValueOnce('service-namespace');
     pushPolicy.mockResolvedValueOnce({});
     await action();
 
@@ -22,8 +26,8 @@ describe('run push policy', () => {
     expect(pushPolicy).toHaveBeenCalledWith(
       'extenda',
       'token',
-      'staging-id',
-      'prod-id',
+      'systemId-staging',
+      'systemId-prod',
     );
   });
 });
