@@ -29,7 +29,7 @@ inputs:
     description: |
       The styra url
     required: false
-    default: https://extendaretail.styra.com
+    default: https://extendaretail.svc.styra.com
   dry-run:
     description: |
       If 'true' stop after validating the YAML schema. No remote systems will be updated.

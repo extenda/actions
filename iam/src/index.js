@@ -48,7 +48,7 @@ const action = async () => {
   const serviceAccountKeyProd = core.getInput('service-account-key-prod', { required: true });
   const iamFileGlob = core.getInput('iam-definition') || 'iam/*.yaml';
   const iamUrl = core.getInput('iam-api-url') || 'https://iam-api.retailsvc.com';
-  const styraUrl = core.getInput('styra-url') || 'https://extendaretail.styra.com';
+  const styraUrl = core.getInput('styra-url') || 'https://extendaretail.svc.styra.com';
   const dryRun = core.getInput('dry-run') === 'true';
 
   const iamFiles = fg.sync(iamFileGlob, { onlyFiles: true });
