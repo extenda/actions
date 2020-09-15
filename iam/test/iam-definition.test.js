@@ -13,19 +13,20 @@ describe('IAM Definition', () => {
   });
 
   describe('Schema validation', () => {
-    test('It throws for missing system', () => {
+    test('It throws for missing services', () => {
       mockFs({
         'iam.yaml': `
-permission-prefix: test
-systems:
-  - namespace: test-space
-    repository: test-repo
+permission-prefix: tst
+name: test
 permissions:
+  test:
+    - verb
 `,
       });
       expect(() => loadIamDefinition('iam.yaml'))
         .toThrow(`iam.yaml is not valid.
-0: instance.permissions is not of a type(s) object`);
+0: instance requires property "services"
+`);
     });
 
     test('It throws for missing systems and permission-prefix', () => {
@@ -33,26 +34,27 @@ permissions:
         'iam.yaml': `
 permissions:
   res:
-    verb: descr
+    - verb
 `,
       });
       expect(() => loadIamDefinition('iam.yaml'))
         .toThrow(`iam.yaml is not valid.
 0: instance requires property "permission-prefix"
-1: instance requires property "systems"
+1: instance requires property "services"
 `);
     });
 
     test('It throws for incorrect property name', () => {
       mockFs({
         'iam.yaml': `
-permission-prefix: test
-systems:
-  - namespace: test
+permission-prefix: tst
+services:
+  - name: test
     repository: actions
 permissions: {}
 roles:
-  - name: admin
+  - id: admin
+    name: test name
     description: Should be desc
     permissions: []
 `,
@@ -67,13 +69,16 @@ roles:
     test('It throws for too long desc', () => {
       mockFs({
         'iam.yaml': `
-permission-prefix: test
-systems:
-  - namespace: test
+permission-prefix: tst
+services:
+  - name: test
     repository: actions
-permissions: {}
+permissions: 
+  test:
+    - test
 roles:
-  - name: admin
+  - id: admin
+    name: admin name
     desc: A description longer than 20 characters
     permissions: []
 `,
@@ -87,22 +92,23 @@ roles:
     test('It throws for too long permission description', () => {
       mockFs({
         'iam.yaml': `
-permission-prefix: test
-systems:
-  - namespace: test
+permission-prefix: tst
+services:
+  - name: test
     repository: actions
 permissions:
   test:
-    create: A description longer than 20 characters
+    - create
 roles:
-  - name: admin
-    desc: Description
+  - id: admin
+    name: admin bla
+    desc: Description that is to long
     permissions: []
 `,
       });
       expect(() => loadIamDefinition('iam.yaml'))
         .toThrow(`iam.yaml is not valid.
-0: instance.permissions.test.create does not meet maximum length of 20
+0: instance.roles[0].desc does not meet maximum length of 20
 `);
     });
   });

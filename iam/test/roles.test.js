@@ -13,7 +13,7 @@ describe('Setup roles and handle', () => {
 
   const roles = [
     {
-      name: 'admin',
+      id: 'admin',
       desc: 'sys-id admin',
       permissions: [
         'resource.get',

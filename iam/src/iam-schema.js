@@ -1,15 +1,19 @@
 module.exports = {
   type: 'object',
   properties: {
-    'permission-prefix': {
+    name: {
       type: 'string',
     },
-    systems: {
+    'permission-prefix': {
+      type: 'string',
+      maxLength: 3,
+    },
+    services: {
       type: 'array',
       items: {
         type: 'object',
         properties: {
-          namespace: {
+          name: {
             type: 'string',
           },
           repository: {
@@ -17,7 +21,7 @@ module.exports = {
           },
         },
         required: [
-          'namespace',
+          'name',
           'repository',
         ],
         additionalProperties: false,
@@ -26,10 +30,11 @@ module.exports = {
     permissions: {
       type: 'object',
       additionalProperties: {
-        type: 'object',
+        type: 'array',
+        maxLength: 16,
         additionalProperties: {
           type: 'string',
-          maxLength: 20,
+          maxLength: 16,
         },
       },
     },
@@ -38,12 +43,15 @@ module.exports = {
       items: {
         type: 'object',
         properties: {
-          name: {
+          id: {
             type: 'string',
           },
           desc: {
             type: 'string',
             maxLength: 20,
+          },
+          name: {
+            type: 'string',
           },
           permissions: {
             type: 'array',
@@ -53,6 +61,7 @@ module.exports = {
           },
         },
         required: [
+          'id',
           'name',
           'desc',
           'permissions',
@@ -63,7 +72,7 @@ module.exports = {
   },
   required: [
     'permission-prefix',
-    'systems',
+    'services',
     'permissions',
   ],
   additionalProperties: false,

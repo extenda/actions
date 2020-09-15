@@ -73,9 +73,10 @@ const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
 const setupPermissions = async (permissions, systemId) => {
   const fullPermissions = new Map();
   Object.keys(permissions).forEach((permission) => {
-    Object.entries(permissions[permission]).forEach(([verb, desc]) => {
+    Object.values(permissions[permission]).forEach((verb) => {
       const id = `${systemId}.${permission}.${verb}`;
-      fullPermissions.set(id, desc);
+      const description = '';
+      fullPermissions.set(id, description);
     });
   });
   return fullPermissions;

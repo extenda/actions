@@ -11,15 +11,15 @@ describe('Setup permissions and handle', () => {
 
   test('it can create a map with permissions from the iam', async () => {
     const permissions = {
-      resource: {
-        get: 'Get resource',
-        create: 'Create resource',
-      },
+      resource: [
+        'get',
+        'create',
+      ],
     };
 
     const result = new Map();
-    result.set('test.resource.get', 'Get resource');
-    result.set('test.resource.create', 'Create resource');
+    result.set('test.resource.get', '');
+    result.set('test.resource.create', '');
 
     await expect(setupPermissions(permissions, 'test'))
       .resolves.toEqual(result);
