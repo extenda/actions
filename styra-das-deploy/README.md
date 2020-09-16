@@ -1,6 +1,13 @@
 # styra-das-deploy
 
-This is a GitHub Action to publish the DAS staging policy to DAS production system
+This is an opinionated GitHub Action to publish a DAS staging policy to its matching DAS production system.
+
+The action makes the following assumptions:
+
+  * DAS systems follow a naming convention adhering to `<permission-prefix>.<service-name>-<env>`
+  * All systems have a `staging` and `prod` environment
+  * Staging systems allow interactive editing with GitOps integration in Styra DAS
+  * Prod systems are read-only in Styra DAS
 
 ## Usage
 
@@ -10,10 +17,11 @@ See [action.yml](action.yml).
 
 ```yaml
 jobs:
-  test:
+  prod:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
 
       - uses: extenda/actions/gcp-secret-manager@v0
         with:
@@ -25,7 +33,6 @@ jobs:
         uses: extenda/actions/styra-das-deploy@v0
         with:
           styra-das-token: ${{ env.STYRA_TOKEN }}
-          permission-prefix: iam
-          namespace: service-namespace
-          styra-url: https://extendaretail.svc.styra.com # optional - will default to extendaretail
+          permission-prefix: tst
+          service-name: my-service
 ```

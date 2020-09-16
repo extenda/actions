@@ -5109,10 +5109,10 @@ const action = async () => {
   const styraUrl = core.getInput('styra-url') || 'https://extendaretail.svc.styra.com';
   const styraToken = core.getInput('styra-das-token', { required: true });
   const permissionPrefix = core.getInput('permission-prefix', { required: true });
-  const namespace = core.getInput('namepsace', { required: true });
+  const serviceName = core.getInput('service-name', { required: true });
 
-  const styraStagingId = await fetchSystemId(styraUrl, styraToken, `${permissionPrefix}.${namespace}-staging`);
-  const styraProdId = await fetchSystemId(styraUrl, styraToken, `${permissionPrefix}.${namespace}-prod`);
+  const styraStagingId = await fetchSystemId(styraUrl, styraToken, `${permissionPrefix}.${serviceName}-staging`);
+  const styraProdId = await fetchSystemId(styraUrl, styraToken, `${permissionPrefix}.${serviceName}-prod`);
   await pushPolicy(
     styraUrl,
     styraToken,
@@ -5424,7 +5424,6 @@ const fetchSystemId = async (
     method: 'GET',
     headers: {
       authorization: `Bearer ${styraToken}`,
-      'content-type': 'application/json',
     },
   }).then((response) => response.data.result[0].id)
     .catch((err) => {
@@ -8629,7 +8628,7 @@ module.exports = {
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 var Ajv = __webpack_require__(906)
-var HARError = __webpack_require__(432)
+var HARError = __webpack_require__(781)
 var schemas = __webpack_require__(168)
 
 var ajv
@@ -16259,7 +16258,16 @@ module.exports = function generate_multipleOf(it, $keyword, $ruleType) {
 /* 340 */
 /***/ (function(module) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-07/schema#","$id":"https://raw.githubusercontent.com/ajv-validator/ajv/master/lib/refs/data.json#","description":"Meta-schema for $data reference (JSON Schema extension proposal)","type":"object","required":["$data"],"properties":{"$data":{"type":"string","anyOf":[{"format":"relative-json-pointer"},{"format":"json-pointer"}]}},"additionalProperties":false};
+"use strict";
+
+module.exports = (flag, argv) => {
+	argv = argv || process.argv;
+	const prefix = flag.startsWith('-') ? '' : (flag.length === 1 ? '-' : '--');
+	const pos = argv.indexOf(prefix + flag);
+	const terminatorPos = argv.indexOf('--');
+	return pos !== -1 && (terminatorPos === -1 ? true : pos < terminatorPos);
+};
+
 
 /***/ }),
 /* 341 */
@@ -17037,218 +17045,138 @@ module.exports = {"$id":"response.json#","$schema":"http://json-schema.org/draft
 /* 366 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
+"use strict";
 
-/*!
- *  Copyright 2010 LearnBoost <dev@learnboost.com>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+const os = __webpack_require__(87);
+const hasFlag = __webpack_require__(340);
 
-/**
- * Module dependencies.
- */
+const env = process.env;
 
-var crypto = __webpack_require__(417)
-  , parse = __webpack_require__(835).parse
-  ;
-
-/**
- * Valid keys.
- */
-
-var keys = 
-  [ 'acl'
-  , 'location'
-  , 'logging'
-  , 'notification'
-  , 'partNumber'
-  , 'policy'
-  , 'requestPayment'
-  , 'torrent'
-  , 'uploadId'
-  , 'uploads'
-  , 'versionId'
-  , 'versioning'
-  , 'versions'
-  , 'website'
-  ]
-
-/**
- * Return an "Authorization" header value with the given `options`
- * in the form of "AWS <key>:<signature>"
- *
- * @param {Object} options
- * @return {String}
- * @api private
- */
-
-function authorization (options) {
-  return 'AWS ' + options.key + ':' + sign(options)
+let forceColor;
+if (hasFlag('no-color') ||
+	hasFlag('no-colors') ||
+	hasFlag('color=false')) {
+	forceColor = false;
+} else if (hasFlag('color') ||
+	hasFlag('colors') ||
+	hasFlag('color=true') ||
+	hasFlag('color=always')) {
+	forceColor = true;
+}
+if ('FORCE_COLOR' in env) {
+	forceColor = env.FORCE_COLOR.length === 0 || parseInt(env.FORCE_COLOR, 10) !== 0;
 }
 
-module.exports = authorization
-module.exports.authorization = authorization
+function translateLevel(level) {
+	if (level === 0) {
+		return false;
+	}
 
-/**
- * Simple HMAC-SHA1 Wrapper
- *
- * @param {Object} options
- * @return {String}
- * @api private
- */ 
-
-function hmacSha1 (options) {
-  return crypto.createHmac('sha1', options.secret).update(options.message).digest('base64')
+	return {
+		level,
+		hasBasic: true,
+		has256: level >= 2,
+		has16m: level >= 3
+	};
 }
 
-module.exports.hmacSha1 = hmacSha1
+function supportsColor(stream) {
+	if (forceColor === false) {
+		return 0;
+	}
 
-/**
- * Create a base64 sha1 HMAC for `options`. 
- * 
- * @param {Object} options
- * @return {String}
- * @api private
- */
+	if (hasFlag('color=16m') ||
+		hasFlag('color=full') ||
+		hasFlag('color=truecolor')) {
+		return 3;
+	}
 
-function sign (options) {
-  options.message = stringToSign(options)
-  return hmacSha1(options)
+	if (hasFlag('color=256')) {
+		return 2;
+	}
+
+	if (stream && !stream.isTTY && forceColor !== true) {
+		return 0;
+	}
+
+	const min = forceColor ? 1 : 0;
+
+	if (process.platform === 'win32') {
+		// Node.js 7.5.0 is the first version of Node.js to include a patch to
+		// libuv that enables 256 color output on Windows. Anything earlier and it
+		// won't work. However, here we target Node.js 8 at minimum as it is an LTS
+		// release, and Node.js 7 is not. Windows 10 build 10586 is the first Windows
+		// release that supports 256 colors. Windows 10 build 14931 is the first release
+		// that supports 16m/TrueColor.
+		const osRelease = os.release().split('.');
+		if (
+			Number(process.versions.node.split('.')[0]) >= 8 &&
+			Number(osRelease[0]) >= 10 &&
+			Number(osRelease[2]) >= 10586
+		) {
+			return Number(osRelease[2]) >= 14931 ? 3 : 2;
+		}
+
+		return 1;
+	}
+
+	if ('CI' in env) {
+		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
+			return 1;
+		}
+
+		return min;
+	}
+
+	if ('TEAMCITY_VERSION' in env) {
+		return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
+	}
+
+	if (env.COLORTERM === 'truecolor') {
+		return 3;
+	}
+
+	if ('TERM_PROGRAM' in env) {
+		const version = parseInt((env.TERM_PROGRAM_VERSION || '').split('.')[0], 10);
+
+		switch (env.TERM_PROGRAM) {
+			case 'iTerm.app':
+				return version >= 3 ? 3 : 2;
+			case 'Apple_Terminal':
+				return 2;
+			// No default
+		}
+	}
+
+	if (/-256(color)?$/i.test(env.TERM)) {
+		return 2;
+	}
+
+	if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
+		return 1;
+	}
+
+	if ('COLORTERM' in env) {
+		return 1;
+	}
+
+	if (env.TERM === 'dumb') {
+		return min;
+	}
+
+	return min;
 }
-module.exports.sign = sign
 
-/**
- * Create a base64 sha1 HMAC for `options`. 
- *
- * Specifically to be used with S3 presigned URLs
- * 
- * @param {Object} options
- * @return {String}
- * @api private
- */
-
-function signQuery (options) {
-  options.message = queryStringToSign(options)
-  return hmacSha1(options)
+function getSupportLevel(stream) {
+	const level = supportsColor(stream);
+	return translateLevel(level);
 }
-module.exports.signQuery= signQuery
 
-/**
- * Return a string for sign() with the given `options`.
- *
- * Spec:
- * 
- *    <verb>\n
- *    <md5>\n
- *    <content-type>\n
- *    <date>\n
- *    [headers\n]
- *    <resource>
- *
- * @param {Object} options
- * @return {String}
- * @api private
- */
-
-function stringToSign (options) {
-  var headers = options.amazonHeaders || ''
-  if (headers) headers += '\n'
-  var r = 
-    [ options.verb
-    , options.md5
-    , options.contentType
-    , options.date ? options.date.toUTCString() : ''
-    , headers + options.resource
-    ]
-  return r.join('\n')
-}
-module.exports.stringToSign = stringToSign
-
-/**
- * Return a string for sign() with the given `options`, but is meant exclusively
- * for S3 presigned URLs
- *
- * Spec:
- * 
- *    <date>\n
- *    <resource>
- *
- * @param {Object} options
- * @return {String}
- * @api private
- */
-
-function queryStringToSign (options){
-  return 'GET\n\n\n' + options.date + '\n' + options.resource
-}
-module.exports.queryStringToSign = queryStringToSign
-
-/**
- * Perform the following:
- *
- *  - ignore non-amazon headers
- *  - lowercase fields
- *  - sort lexicographically
- *  - trim whitespace between ":"
- *  - join with newline
- *
- * @param {Object} headers
- * @return {String}
- * @api private
- */
-
-function canonicalizeHeaders (headers) {
-  var buf = []
-    , fields = Object.keys(headers)
-    ;
-  for (var i = 0, len = fields.length; i < len; ++i) {
-    var field = fields[i]
-      , val = headers[field]
-      , field = field.toLowerCase()
-      ;
-    if (0 !== field.indexOf('x-amz')) continue
-    buf.push(field + ':' + val)
-  }
-  return buf.sort().join('\n')
-}
-module.exports.canonicalizeHeaders = canonicalizeHeaders
-
-/**
- * Perform the following:
- *
- *  - ignore non sub-resources
- *  - sort lexicographically
- *
- * @param {String} resource
- * @return {String}
- * @api private
- */
-
-function canonicalizeResource (resource) {
-  var url = parse(resource, true)
-    , path = url.pathname
-    , buf = []
-    ;
-
-  Object.keys(url.query).forEach(function(key){
-    if (!~keys.indexOf(key)) return
-    var val = '' == url.query[key] ? '' : '=' + encodeURIComponent(url.query[key])
-    buf.push(key + val)
-  })
-
-  return path + (buf.length ? '?' + buf.sort().join('&') : '')
-}
-module.exports.canonicalizeResource = canonicalizeResource
+module.exports = {
+	supportsColor: getSupportLevel,
+	stdout: getSupportLevel(process.stdout),
+	stderr: getSupportLevel(process.stderr)
+};
 
 
 /***/ }),
@@ -19756,24 +19684,7 @@ module.exports = {
 /* 432 */
 /***/ (function(module) {
 
-function HARError (errors) {
-  var message = 'validation failed'
-
-  this.name = 'HARError'
-  this.message = message
-  this.errors = errors
-
-  if (typeof Error.captureStackTrace === 'function') {
-    Error.captureStackTrace(this, this.constructor)
-  } else {
-    this.stack = (new Error(message)).stack
-  }
-}
-
-HARError.prototype = Error.prototype
-
-module.exports = HARError
-
+module.exports = {"$schema":"http://json-schema.org/draft-07/schema#","$id":"https://raw.githubusercontent.com/ajv-validator/ajv/master/lib/refs/data.json#","description":"Meta-schema for $data reference (JSON Schema extension proposal)","type":"object","required":["$data"],"properties":{"$data":{"type":"string","anyOf":[{"format":"relative-json-pointer"},{"format":"json-pointer"}]}},"additionalProperties":false};
 
 /***/ }),
 /* 433 */,
@@ -19895,7 +19806,7 @@ exports.useColors = useColors;
 exports.colors = [ 6, 2, 3, 4, 5, 1 ];
 
 try {
-  var supportsColor = __webpack_require__(130);
+  var supportsColor = __webpack_require__(366);
   if (supportsColor && supportsColor.level >= 2) {
     exports.colors = [
       20, 21, 26, 27, 32, 33, 38, 39, 40, 41, 42, 43, 44, 45, 56, 57, 62, 63, 68,
@@ -22639,7 +22550,7 @@ exports.colors = [6, 2, 3, 4, 5, 1];
 try {
 	// Optional dependency (as in, doesn't need to be installed, NOT like optionalDependencies in package.json)
 	// eslint-disable-next-line import/no-extraneous-dependencies
-	const supportsColor = __webpack_require__(130);
+	const supportsColor = __webpack_require__(366);
 
 	if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
 		exports.colors = [
@@ -38559,7 +38470,29 @@ function errorSubclass(Subclass) {
 
 /***/ }),
 /* 780 */,
-/* 781 */,
+/* 781 */
+/***/ (function(module) {
+
+function HARError (errors) {
+  var message = 'validation failed'
+
+  this.name = 'HARError'
+  this.message = message
+  this.errors = errors
+
+  if (typeof Error.captureStackTrace === 'function') {
+    Error.captureStackTrace(this, this.constructor)
+  } else {
+    this.stack = (new Error(message)).stack
+  }
+}
+
+HARError.prototype = Error.prototype
+
+module.exports = HARError
+
+
+/***/ }),
 /* 782 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -42605,7 +42538,224 @@ function createConnectionSSL (port, host, options) {
 
 
 /***/ }),
-/* 893 */,
+/* 893 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+
+/*!
+ *  Copyright 2010 LearnBoost <dev@learnboost.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Module dependencies.
+ */
+
+var crypto = __webpack_require__(417)
+  , parse = __webpack_require__(835).parse
+  ;
+
+/**
+ * Valid keys.
+ */
+
+var keys = 
+  [ 'acl'
+  , 'location'
+  , 'logging'
+  , 'notification'
+  , 'partNumber'
+  , 'policy'
+  , 'requestPayment'
+  , 'torrent'
+  , 'uploadId'
+  , 'uploads'
+  , 'versionId'
+  , 'versioning'
+  , 'versions'
+  , 'website'
+  ]
+
+/**
+ * Return an "Authorization" header value with the given `options`
+ * in the form of "AWS <key>:<signature>"
+ *
+ * @param {Object} options
+ * @return {String}
+ * @api private
+ */
+
+function authorization (options) {
+  return 'AWS ' + options.key + ':' + sign(options)
+}
+
+module.exports = authorization
+module.exports.authorization = authorization
+
+/**
+ * Simple HMAC-SHA1 Wrapper
+ *
+ * @param {Object} options
+ * @return {String}
+ * @api private
+ */ 
+
+function hmacSha1 (options) {
+  return crypto.createHmac('sha1', options.secret).update(options.message).digest('base64')
+}
+
+module.exports.hmacSha1 = hmacSha1
+
+/**
+ * Create a base64 sha1 HMAC for `options`. 
+ * 
+ * @param {Object} options
+ * @return {String}
+ * @api private
+ */
+
+function sign (options) {
+  options.message = stringToSign(options)
+  return hmacSha1(options)
+}
+module.exports.sign = sign
+
+/**
+ * Create a base64 sha1 HMAC for `options`. 
+ *
+ * Specifically to be used with S3 presigned URLs
+ * 
+ * @param {Object} options
+ * @return {String}
+ * @api private
+ */
+
+function signQuery (options) {
+  options.message = queryStringToSign(options)
+  return hmacSha1(options)
+}
+module.exports.signQuery= signQuery
+
+/**
+ * Return a string for sign() with the given `options`.
+ *
+ * Spec:
+ * 
+ *    <verb>\n
+ *    <md5>\n
+ *    <content-type>\n
+ *    <date>\n
+ *    [headers\n]
+ *    <resource>
+ *
+ * @param {Object} options
+ * @return {String}
+ * @api private
+ */
+
+function stringToSign (options) {
+  var headers = options.amazonHeaders || ''
+  if (headers) headers += '\n'
+  var r = 
+    [ options.verb
+    , options.md5
+    , options.contentType
+    , options.date ? options.date.toUTCString() : ''
+    , headers + options.resource
+    ]
+  return r.join('\n')
+}
+module.exports.stringToSign = stringToSign
+
+/**
+ * Return a string for sign() with the given `options`, but is meant exclusively
+ * for S3 presigned URLs
+ *
+ * Spec:
+ * 
+ *    <date>\n
+ *    <resource>
+ *
+ * @param {Object} options
+ * @return {String}
+ * @api private
+ */
+
+function queryStringToSign (options){
+  return 'GET\n\n\n' + options.date + '\n' + options.resource
+}
+module.exports.queryStringToSign = queryStringToSign
+
+/**
+ * Perform the following:
+ *
+ *  - ignore non-amazon headers
+ *  - lowercase fields
+ *  - sort lexicographically
+ *  - trim whitespace between ":"
+ *  - join with newline
+ *
+ * @param {Object} headers
+ * @return {String}
+ * @api private
+ */
+
+function canonicalizeHeaders (headers) {
+  var buf = []
+    , fields = Object.keys(headers)
+    ;
+  for (var i = 0, len = fields.length; i < len; ++i) {
+    var field = fields[i]
+      , val = headers[field]
+      , field = field.toLowerCase()
+      ;
+    if (0 !== field.indexOf('x-amz')) continue
+    buf.push(field + ':' + val)
+  }
+  return buf.sort().join('\n')
+}
+module.exports.canonicalizeHeaders = canonicalizeHeaders
+
+/**
+ * Perform the following:
+ *
+ *  - ignore non sub-resources
+ *  - sort lexicographically
+ *
+ * @param {String} resource
+ * @return {String}
+ * @api private
+ */
+
+function canonicalizeResource (resource) {
+  var url = parse(resource, true)
+    , path = url.pathname
+    , buf = []
+    ;
+
+  Object.keys(url.query).forEach(function(key){
+    if (!~keys.indexOf(key)) return
+    var val = '' == url.query[key] ? '' : '=' + encodeURIComponent(url.query[key])
+    buf.push(key + val)
+  })
+
+  return path + (buf.length ? '?' + buf.sort().join('&') : '')
+}
+module.exports.canonicalizeResource = canonicalizeResource
+
+
+/***/ }),
 /* 894 */,
 /* 895 */,
 /* 896 */,
@@ -43386,7 +43536,7 @@ var url = __webpack_require__(835)
 var util = __webpack_require__(669)
 var stream = __webpack_require__(413)
 var zlib = __webpack_require__(761)
-var aws2 = __webpack_require__(366)
+var aws2 = __webpack_require__(893)
 var aws4 = __webpack_require__(616)
 var httpSignature = __webpack_require__(854)
 var mime = __webpack_require__(717)
@@ -45381,7 +45531,7 @@ function addFormat(name, format) {
 function addDefaultMetaSchema(self) {
   var $dataSchema;
   if (self._opts.$data) {
-    $dataSchema = __webpack_require__(340);
+    $dataSchema = __webpack_require__(432);
     self.addMetaSchema($dataSchema, $dataSchema.$id, true);
   }
   if (self._opts.meta === false) return;
