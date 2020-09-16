@@ -2,26 +2,30 @@ name: Styra DAS test
 description: |
   Execute unit tests for Rego rules inside Styra DAS.
   The following files are expected to exist in your project:
-  - policies/policy/com.styra.envoy.ingress/test/test/test.rego
-  - policies/policy/com.styra.envoy.ingress/rules/rules/ingress.rego
+    - policies/policy/com.styra.envoy.ingress/test/test/test.rego
+    - policies/policy/com.styra.envoy.ingress/rules/rules/ingress.rego
 inputs:
   styra-das-token:
     description: The token used to make api calls to Styra DAS
     required: true
-  system-id:
-    description: Styra DAS System ID to test against
+  permission-prefix:
+    description: |
+      The permission-prefix setup for the service in you clan-common-repo
     required: true
+  service-name:
+    description: |
+      The name of the service
+    required: true
+  styra-url:
+    description: |
+      The styra DAS url
+    default: https://extendaretail.svc.styra.com
+    required: false
 runs:
   using: docker
   image: Dockerfile
   env:
     STYRA_ORGANIZATION_ID: extendaretail.svc.styra.com
     STYRA_TOKEN: ${{ inputs.styra-das-token }}
-  args:
-    - validate
-    - tests
-    - ${{ inputs.system-id }}
-    - '-p'
-    - policy/com.styra.envoy.ingress/test/test/test.rego=policies/policy/com.styra.envoy.ingress/test/test/test.rego
-    - '-p'
-    - policy/com.styra.envoy.ingress/rules/rules/ingress.rego=policies/policy/com.styra.envoy.ingress/rules/rules/ingress.rego
+    STYRA_SYSTEM_NAME: ${{ inputs.permission-prefix }}.${{ inputs.service-name }}-staging
+  args: []
