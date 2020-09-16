@@ -3,7 +3,7 @@ const tc = require('@actions/tool-cache');
 const io = require('@actions/io');
 const path = require('path');
 const axios = require('axios');
-const uuid = require('uuid/v4');
+const { v4: uuid } = require('uuid');
 const fs = require('fs');
 const os = require('os');
 

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
+
 const recommendedVersionBump = util.promisify(require('conventional-recommended-bump'));
 const gitRawCommits = require('git-raw-commits');
 const conventionalCommitsParser = require('conventional-commits-parser');
