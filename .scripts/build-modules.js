@@ -6,5 +6,5 @@ const { modules } = require('./modules');
   modules.each((dir) => {
     fs.removeSync(path.join(dir, 'dist'));
   });
-  await modules.exec('node ../node_modules/@zeit/ncc/dist/ncc/cli.js build src/index.js');
+  await modules.exec('node ../node_modules/@vercel/ncc/dist/ncc/cli.js build src/index.js');
 })();
