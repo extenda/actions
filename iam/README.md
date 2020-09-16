@@ -61,7 +61,7 @@ properties are required and not.
 
 #### Create permissions and roles
 
-This example defines a YAML file that creates roles and permissions for the DAS system `iam`
+This example defines a YAML file that creates roles and permissions for the DAS system `bhq`
 ```yaml
 name: Braveheart Quotes
 permission-prefix: bhq
