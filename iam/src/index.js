@@ -23,9 +23,12 @@ const setupEnvironment = async (
 
   // By default we always target prod iam-api unless explicitly told not to.
   let credentialsEnv = 'prod';
+  let url = iamUrl;
   if (projectEnv === 'staging' && iamUrl.endsWith('retailsvc.dev')) {
     credentialsEnv = 'staging';
     core.warning(`IAM definitions has been explicitly configured to publish to ${iamUrl} which is the STAGING environment.`);
+  } else if (projectEnv === 'prod' && iamUrl.endsWith('retailsvc.dev')) {
+    url = iamUrl.replace('dev', 'com');
   }
 
   const {
@@ -38,7 +41,7 @@ const setupEnvironment = async (
 
   return fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenant)
     .then((iamToken) => configureIAM(
-      iam, styraToken, styraUrl, iamUrl, iamToken, projectEnv, projectId, systemOwners,
+      iam, styraToken, styraUrl, url, iamToken, projectEnv, projectId, systemOwners,
     ));
 };
 
