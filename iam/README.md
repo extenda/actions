@@ -45,8 +45,10 @@ properties are required and not.
 
 | Property                   | Description                                                                                                                                                       | Required | Default Value |
 |:---------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------|:--------------|
-| `system.id`                     | The permission prefix and DAS system name                                                                                                                                                 | Yes      |               |
-| `system.description`                   | The description of the service                                                                                                      | Yes      |               |
+| `name`                     | The permission prefix and DAS system name                                    
+| `permission-prefix`                     | The permission prefix and DAS system name                                    
+| `services.name`                     | The permission prefix and DAS system name                                                                                                                                                 | Yes      |               |
+| `services.repository`                   | The description of the service                                                                                                      | Yes      |               |
 | `permissions`                      | An object containing the permissions for this service.                             | Yes      |               |
 | `roles`              | An list of roles that should exist for this service                                        | No       |         |
 | `roles.name`            | The role name                                                          | No       |          |
@@ -59,31 +61,41 @@ properties are required and not.
 
 This example defines a YAML file that creates roles and permissions for the DAS system `iam`
 ```yaml
-permission-prefix: iam
-systems:
-  - namespace: iam-api
-    repository: hiiretail-iam-api
-  - namespace: iam-ui
-    repository: hiiretail-iam-ui
+name: Braveheart Quotes
+permission-prefix: bhq
+services:
+  - name: braveheart-quotes
+    repository: braveheart-quotes-service
+  - name: braveheart-quotes-webclient-be
+    repository: braveheart-quotes-webclient-backend
 permissions:
-  tenants:
-    create: Create tenants
-    get: Get tenants
-    update: Update Tenants
-    delete: Delete Tenants
-    special: Super user access
+  favorite:
+    - toggle
+    - list
+  quote:
+    - create
+    - delete
+    - get
+    - list
+    - update
 roles:
-  - name: admin
-    desc: IAM admin
+  - id: admin
+    name: Braveheart Quotes Admin
+    desc: Create, modify and delete movie quotes.
     permissions:
-      - tenants.create
-      - tenants.get
-      - tenants.update
-      - tenants.delete
-      - tenants.special
-  - name: readonly
-    desc: IAM readonly
+      - quote.create
+      - quote.delete
+      - quote.get
+      - quote.list
+      - quote.update
+  - id: user
+    name: Braveheart Quotes User
+    desc: Read and like movie quotes.
     permissions:
-      - tenants.get
+      - favorite.toggle
+      - favorite.list
+      - quote.get
+      - quote.list
+
 
 ```
