@@ -31,7 +31,6 @@ module.exports = {
       type: 'object',
       additionalProperties: {
         type: 'array',
-        maxLength: 16,
         additionalProperties: {
           type: 'string',
           maxLength: 16,
