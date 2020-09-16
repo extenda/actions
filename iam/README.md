@@ -45,14 +45,16 @@ properties are required and not.
 
 | Property                   | Description                                                                                                                                                       | Required | Default Value |
 |:---------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------|:--------------|
-| `name`                     | The permission prefix and DAS system name                                    
-| `permission-prefix`                     | The permission prefix and DAS system name                                    
-| `services.name`                     | The permission prefix and DAS system name                                                                                                                                                 | Yes      |               |
+| `name`                     | The name of the service system | Yes                                   
+| `permission-prefix`                     | The permission prefix, this will be prefixed to every permission and roles id.            | Yes                         
+| `services`                     | A list of services that need a DAS system                                     
+| `services.name`                     | The service name of the system to be created                                                                                                                                                 | Yes      |               |
 | `services.repository`                   | The description of the service                                                                                                      | Yes      |               |
-| `permissions`                      | An object containing the permissions for this service.                             | Yes      |               |
+| `permissions`                      | An object containing the permissions for this service.                             | No      |               |
 | `roles`              | An list of roles that should exist for this service                                        | No       |         |
+| `roles.id`            | The role id                                                          | No       |          |
 | `roles.name`            | The role name                                                          | No       |          |
-| `roles.description` | The description of the role, (max 20 characters)       | No             |
+| `roles.desc` | The description of the role, (max 20 characters)       | No             |
 | `roles.permissions`             | An list of permissions this role should contain                                                                                 | No       |       |
 
 ### YAML Examples
