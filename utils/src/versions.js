@@ -6,25 +6,11 @@ const changes = require('./conventionalchanges');
 
 const DEFAULT_VERSION = '0.0.0';
 
-let hasFetchedTags = false;
-
-const fetchOnce = async () => {
-  if (!hasFetchedTags) {
-    core.info('Fetch tags');
-    return git.fetch(['--tags']).then(() => {
-      hasFetchedTags = true;
-      return true;
-    });
-  }
-  return true;
-};
-
 /**
  * Returns the latest tagged release matching the tag prefix.
  * @returns {Promise<string>}
  */
-const getLatestReleaseTag = async () => fetchOnce()
-  .then(() => git.tags(['--sort=-version:refname', '--merged', 'HEAD', `${changes.tagPrefix}*`]))
+const getLatestReleaseTag = async () => git.tags(['--sort=-version:refname', '--merged', 'HEAD', `${changes.tagPrefix}*`])
   .then((tags) => {
     if (tags.all.length === 0) {
       core.info(`No release tags with prefix '${changes.tagPrefix}' exists, use ${changes.tagPrefix}${DEFAULT_VERSION}`);
