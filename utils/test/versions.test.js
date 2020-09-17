@@ -14,4 +14,10 @@ describe('Versions', () => {
     const tag = await versions.getLatestReleaseTag();
     expect(tag).toEqual('test-0.0.0');
   });
+
+  test('it returns a build version', async () => {
+    versions.setTagPrefix('v');
+    const buildVersion = await versions.getBuildVersion();
+    expect(semver.gte(buildVersion, '0.62.0'));
+  });
 });
