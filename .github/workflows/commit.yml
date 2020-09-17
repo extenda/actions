@@ -67,7 +67,9 @@ jobs:
     runs-on: windows-latest
     needs: test
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - uses: ./setup-msbuild
 
@@ -86,6 +88,15 @@ jobs:
       - name: Test Terragrunt
         run: terragrunt -version
 
+      - name: Conventional version
+        uses: ./conventional-version
+        id: version
+
+      - name: Print version
+        run: |
+          echo VERSION=${{ steps.version.outputs.version }}
+          echo RELEASE_TAG=${{ steps.version.outputs.release-tag }}
+
   acceptance-linux:
     runs-on: ubuntu-latest
     needs: test
@@ -103,13 +114,13 @@ jobs:
           args: --version
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
       - name: Run Maven CLI
         run: mvn dependency:get -Dartifact=se.extenda.maven:commonpom:2.5.1:pom
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
       - name: GCP Secret Manager
         uses: ./gcp-secret-manager
@@ -157,6 +168,15 @@ jobs:
             exit 1
           fi
           terragrunt -version
+
+      - name: Conventional version
+        uses: ./conventional-version
+        id: version
+
+      - name: Print version
+        run: |
+          echo VERSION=${{ steps.version.outputs.version }}
+          echo RELEASE_TAG=${{ steps.version.outputs.release-tag }}
 
   release:
     runs-on: ubuntu-latest
