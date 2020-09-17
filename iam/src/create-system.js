@@ -162,8 +162,30 @@ const setDefaultDataset = async (
   });
 });
 
-const getOpaConfig = (systemId, tokenContent, namespace, styraUrl) => {
-  const token = tokenContent.split(/['']/)[1].substr(22);
+const getTokenFromOpaConfig = async (
+  url, token,
+) => new Promise((resolve, reject) => {
+  request({
+    uri: url,
+    method: 'GET',
+    headers: {
+      'Content-type': 'application/json',
+      Authorization: `bearer ${token}`,
+    },
+    json: true,
+  }, (error, res, body) => {
+    if (error) {
+      reject(new Error(error));
+    } else {
+      const configYaml = yaml.safeLoadAll(body)[0].data['conf.yaml'];
+      resolve(yaml.safeLoad(configYaml).services[0].credentials.bearer);
+    }
+  });
+});
+
+const buildOpaConfig = async (systemId, styraToken, namespace, styraUrl) => {
+  const getConfigUrl = `${styraUrl}/v1/systems/${systemId}/assets/example-app`;
+  const token = await getTokenFromOpaConfig(getConfigUrl, styraToken);
   const opaConfig = {
     kind: 'ConfigMap',
     apiVersion: 'v1',
@@ -229,9 +251,7 @@ const createSystem = async (
     json: true,
   }, (error, res, body) => {
     if (!error) {
-      const opaInstall = body.result.install.envoy['example-app'];
-      const opaConfig = getOpaConfig(body.result.id, opaInstall, namespace, styraUrl);
-      resolve({ systemId: body.result.id, opaConfig });
+      resolve(body.result.id);
     } else {
       reject(new Error(body));
     }
@@ -240,9 +260,8 @@ const createSystem = async (
 
 const setupSystem = async (service, systemName, env, repo, token, styraUrl, systemOwners) => {
   const promises = [];
-  const { systemId, opaConfig } = await createSystem(
-    service, systemName, repo, token, styraUrl, env,
-  );
+  const systemId = await createSystem(service, systemName, repo, token, styraUrl, env);
+  const opaConfig = await buildOpaConfig(systemId, token, service, styraUrl);
   promises.push(setLabels(systemId, env, token, styraUrl));
   promises.push(setDefaultPolicy(systemId, token, styraUrl));
   promises.push(setDefaultDataset(systemId, token, styraUrl));
