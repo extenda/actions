@@ -35,7 +35,7 @@ const getBuildVersion = async (versionSuffix = '') => {
   const latestRelease = await getLatestRelease();
   const releaseType = await changes.getRecommendedBump();
   core.info(`Conventional commits '${releaseType}' bump from ${latestRelease}`);
-  return semver.inc(latestRelease, releaseType).concat(versionSuffix);
+  return semver.inc(semver.coerce(latestRelease), releaseType).concat(versionSuffix);
 };
 
 /**
