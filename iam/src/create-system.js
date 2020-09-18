@@ -178,7 +178,7 @@ const getTokenFromOpaConfig = async (
       reject(new Error(error));
     } else {
       const configYaml = yaml.safeLoadAll(body)[0].data['conf.yaml'];
-      resolve(yaml.safeLoad(configYaml).services[0].credentials.bearer);
+      resolve(yaml.safeLoad(configYaml).services[0].credentials.bearer.token);
     }
   });
 });
