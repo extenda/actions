@@ -94,7 +94,6 @@ const gkeArguments = async (args, service, projectId) => {
         cluster: configuredCluster = undefined,
         connectivity,
         namespace = name,
-        'opa-enabled': opaEnabled = true,
       },
     },
   } = service;
@@ -121,6 +120,7 @@ const gkeArguments = async (args, service, projectId) => {
   }
 
   if (namespace !== 'default') {
+    const opaEnabled = 'skip';
     await createNamespace(projectId, opaEnabled, cluster, namespace);
   }
   args.push(`--namespace=${namespace}`);

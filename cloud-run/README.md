@@ -73,7 +73,7 @@ These properties only apply to Cloud Run on GKE:
 | `platform.gke.domain-mappings.prod`    | List of fully qualified domains to map in the `prod` environment. Only applies to `external` services.    | No       |                                 |
 | `platform.gke.domain-mappings.staging` | List of fully qualified domains to map in the `staging` environment. Only applies to `external` services. | No       |                                 |
 | `platform.gke.namespace`               | The Kubernetes namespace to use.                                                                          | No       | The service `name`              |
-| `platform.gke.opa-enabled`             | Flag to enable OPA and Istio injection on service.                                                        | No       | `true`                          |
+|
 
 ### YAML Examples
 
