@@ -50,7 +50,7 @@ const configureIAM = async (
     // 1. Authenticate Kubectl and create namespace (if not exists)
     // 2. Check if DAS system exists
     // 3. Create DAS system (if not exists)
-    promises.push(createNamespace(projectId, 'skip', cluster, namespace)
+    promises.push(createNamespace(projectId, true, cluster, namespace)
       .then(() => checkSystem(systemName, styraToken, styraUrl)
         .then((createSystem) => {
           if (createSystem) {
