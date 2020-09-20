@@ -47,7 +47,7 @@ const getPermission = async (
   if (err.response.status === 404) {
     return 'POST';
   }
-  throw new Error(`Could not fetch permissions from iam-service. Reason: ${err.message} ${err.response.data.error || ''}`);
+  throw new Error(`Could not fetch permission ${iamUrl}/api/v1/permissions/${permissionId}. Reason: ${err.message} ${err.response.data.error || ''}`);
 });
 
 const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
