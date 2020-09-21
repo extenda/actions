@@ -2,7 +2,7 @@
 set -e
 
 # Lookup the System ID from system name.
-SYSTEM_ID=$(/usr/local/bin/styra-cli get systems | grep "$STYRA_SYSTEM_NAME" | awk '{print $1}')
+SYSTEM_ID=$(/usr/local/bin/styra-cli get systems | grep "${STYRA_SYSTEM_NAME}-staging" | awk '{print $1}')
 
 if [ -z "$SYSTEM_ID" ]; then
   echo "Not found. No system matching name '${STYRA_SYSTEM_NAME}'"
