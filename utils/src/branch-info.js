@@ -76,7 +76,7 @@ const getBranchNameSemver = (currentRef) => {
   groups.forEach((group) => {
     branchName = branchName.concat(group);
   });
-  branchName = branchName.replace('refsheads','');
+  branchName = branchName.replace('refsheads', '');
   return branchName;
 };
 
