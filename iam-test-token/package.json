@@ -1,0 +1,12 @@
+{
+  "name": "iam-test-token",
+  "version": "0.0.1-local",
+  "private": true,
+  "description": "Obtain a valid ID token from the Hii Retail IAM",
+  "main": "dist/index.js",
+  "dependencies": {
+    "@actions/core": "^1.2.3",
+    "@actions/exec": "^1.0.4",
+    "axios": "^0.20.0"
+  }
+}

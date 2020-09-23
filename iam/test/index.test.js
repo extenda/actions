@@ -1,7 +1,7 @@
 jest.mock('@actions/core');
 jest.mock('../src/configure-iam');
 jest.mock('../src/iam-definition');
-jest.mock('../src/iam-auth');
+jest.mock('../../iam-test-token/src/iam-auth');
 jest.mock('../src/load-credentials');
 jest.mock('../../setup-gcloud/src/setup-gcloud');
 jest.mock('fast-glob');
@@ -14,7 +14,7 @@ const core = require('@actions/core');
 const fg = require('fast-glob');
 const action = require('../src/index');
 const configureIam = require('../src/configure-iam');
-const fetchIamToken = require('../src/iam-auth');
+const fetchIamToken = require('../../iam-test-token/src/iam-auth');
 const loadIamDefinition = require('../src/iam-definition');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const loadCredentials = require('../src/load-credentials');

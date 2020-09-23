@@ -17,6 +17,7 @@ The following actions are available
   * [docker](docker#readme)
   * [gcp-secret-manager](gcp-secret-manager#readme)
   * [iam](iam#readme)
+  * [iam-test-token](iam-test-token#readme)
   * [jira-release](jira-release#readme)
   * [jira-releasenotes](jira-releasenotes#readme)
   * [maven](maven#readme)
