@@ -1,31 +1,16 @@
-const request = require('request');
+const axios = require('axios');
 
-// TODO Use Axios instead!
-
-const fetchIamToken = async (
-  apiKey, apiEmail, apiPassword, apiTenantId,
-) => new Promise((resolve, reject) => {
-  const loginBody = {
+const fetchIamToken = async (apiKey, apiEmail, apiPassword, apiTenantId) => axios.post(
+  `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
+  {
     email: apiEmail,
     password: apiPassword,
     tenantId: apiTenantId,
     returnSecureToken: true,
-  };
-  const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
-  request({
-    uri: url,
-    method: 'POST',
-    headers: {
-      'Content-type': 'application/json',
-    },
-    body: loginBody,
-    json: true,
-  }, (error, res, body) => {
-    if (!error && res.statusCode === 200) {
-      resolve(body.idToken);
-    }
-    reject(new Error(body));
+  },
+).then((response) => response.data.idToken)
+  .catch((err) => {
+    throw new Error(`Authentication failed. HTTP status: ${err.response.status}. Reason: ${err.response.data || 'N/A'}`);
   });
-});
 
 module.exports = fetchIamToken;

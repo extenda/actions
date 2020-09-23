@@ -1,7 +1,7 @@
 jest.mock('@actions/core');
-jest.mock('request');
+jest.mock('axios');
 
-const request = require('request');
+const axios = require('axios');
 const fetchIamToken = require('../src/iam-auth');
 
 describe('fetch iam-api token', () => {
@@ -10,15 +10,17 @@ describe('fetch iam-api token', () => {
   });
 
   test('it can fetch api token', async () => {
-    const response = {
-      idToken: 'token',
-    };
+    axios.post.mockResolvedValueOnce({ data: { idToken: 'test-token' } });
 
-    request.mockImplementation((conf, cb) => cb(null, { statusCode: 200 },
-      response));
+    const token = await fetchIamToken('key', 'email', 'password', 'tenantId');
+    expect(token).toEqual('test-token');
+    expect(axios.post).toHaveBeenCalledTimes(1);
+  });
 
+  test('It throws exception on login failure', async () => {
+    axios.post.mockRejectedValueOnce({ response: { status: 403, data: 'A message' } });
     await expect(fetchIamToken('key', 'email', 'password', 'tenantId'))
-      .resolves.toEqual('token');
-    expect(request).toHaveBeenCalledTimes(1);
+      .rejects.toEqual(new Error('Authentication failed. HTTP status: 403. Reason: A message'));
+    expect(axios.post).toHaveBeenCalledTimes(1);
   });
 });
