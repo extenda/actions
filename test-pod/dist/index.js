@@ -17904,13 +17904,16 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl) => {
   const container = {
     name: pod,
     image,
-    workingDir: '/work',
-    volumeMounts: [{
+  };
+
+  if (configMap) {
+    container.workingDir = '/work';
+    container.volumeMounts = [{
       mountPath: '/work',
       name: 'workspace',
       readOnly: false,
-    }],
-  };
+    }];
+  }
 
   if (serviceUrl) {
     container.env = [{
@@ -17919,11 +17922,11 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl) => {
     }];
   }
 
-  if (configMap.entrypoint) {
+  if (configMap && configMap.entrypoint) {
     container.command = ['/bin/sh', 'entrypoint.sh'];
   }
 
-  return {
+  const override = {
     apiVersion: 'v1',
     metadata: {
       namespace,
@@ -17938,14 +17941,19 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl) => {
       containers: [
         container,
       ],
-      volumes: [{
-        name: 'workspace',
-        configMap: {
-          name: configMap.name,
-        },
-      }],
     },
   };
+
+  if (configMap) {
+    override.spec.volumes = [{
+      name: 'workspace',
+      configMap: {
+        name: configMap.name,
+      },
+    }];
+  }
+
+  return override;
 };
 
 const runPod = async ({ name, namespace }, image, configMap) => {
@@ -17968,10 +17976,8 @@ const runPod = async ({ name, namespace }, image, configMap) => {
     args.push(`--env=SERVICE_URL=${serviceUrl}`);
   }
 
-  if (configMap) {
-    const json = JSON.stringify(createOverride(pod, namespace, image, configMap, serviceUrl));
-    args.push(`--overrides=${json}`);
-  }
+  const json = JSON.stringify(createOverride(pod, namespace, image, configMap, serviceUrl));
+  args.push(`--overrides=${json}`);
 
   return exec.exec('kubectl', args);
 };

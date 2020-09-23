@@ -21,6 +21,24 @@ describe('Pod run', () => {
 
   test('It will run test without config map', async () => {
     await podRun({ name: '', namespace: 'test' }, 'myimage', null);
+    const override = {
+      apiVersion: 'v1',
+      metadata: {
+        namespace: 'test',
+        labels: {
+          'opa-injection': 'false',
+        },
+        annotations: {
+          'sidecar.istio.io/inject': 'false',
+        },
+      },
+      spec: {
+        containers: [{
+          name: 'actions-15b1e98-test',
+          image: 'myimage',
+        }],
+      },
+    };
     expect(exec.exec).toHaveBeenCalledWith('kubectl', [
       'run',
       'actions-15b1e98-test',
@@ -30,6 +48,7 @@ describe('Pod run', () => {
       '--image=myimage',
       '-n',
       'test',
+      `--overrides=${JSON.stringify(override)}`,
     ]);
   });
 
