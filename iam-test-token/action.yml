@@ -1,0 +1,15 @@
+name: IAM test token
+description: Obtain a valid ID token from the Hii Retail IAM
+author: Extenda Retail
+inputs:
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication
+      to the secrets manager.
+    required: true
+outputs:
+  iam-token:
+    description: The test user's ID token.
+runs:
+  using: node12
+  main: dist/index.js
