@@ -78,7 +78,7 @@ describe('Branch info test suite', () => {
   });
 
   test('getBranchNameSemver() returns branch name with a-z and 0-9 only', () => {
-    expect(getBranchNameSemver('refs/heads/feature/RS-1234')).toBe('refsheadsfeatureRS1234');
+    expect(getBranchNameSemver('refs/heads/feature/RS-1234')).toBe('featureRS1234');
     expect(() => {
       getBranchNameSemver('#¤#__:');
     }).toThrow();
