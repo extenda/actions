@@ -6,6 +6,7 @@ reachable directly from GitHub Actions.
 The action supports the following features:
 
   * Test against cluster internal services
+  * Test Pod runs in the service's namespace, with the same workload identity (service account)
   * Supports any Docker image
   * Mount a volume as working directory in Pod
   * Specify a custom entrypoint for the container
