@@ -4,10 +4,10 @@ const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 const getIamToken = require('./iam-auth');
 
 const loadCredentials = async (serviceAccountKey) => {
-  const email = await loadSecret(serviceAccountKey, 'iam-api-email-prod');
-  const password = await loadSecret(serviceAccountKey, 'iam-api-password-prod');
+  const email = await loadSecret(serviceAccountKey, 'iam-testrunner-email');
+  const password = await loadSecret(serviceAccountKey, 'iam-testrunner-password-prod');
   const apiKey = await loadSecret(serviceAccountKey, 'iam-api-key-prod');
-  const tenant = await loadSecret(serviceAccountKey, 'iam-api-tenantId-prod');
+  const tenant = await loadSecret(serviceAccountKey, 'iam-testrunner-tenant-prod');
 
   return [
     apiKey,

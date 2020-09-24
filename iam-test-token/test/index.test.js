@@ -16,9 +16,9 @@ describe('iam-test-token', () => {
     expect(loadSecret).toHaveBeenCalledTimes(4);
     expect(getIamToken).toHaveBeenCalledWith(
       'iam-api-key-prod',
-      'iam-api-email-prod',
-      'iam-api-password-prod',
-      'iam-api-tenantId-prod',
+      'iam-testrunner-email',
+      'iam-testrunner-password-prod',
+      'iam-testrunner-tenant-prod',
     );
     expect(core.setOutput).toHaveBeenCalledWith('iam-token', 'secret-token');
     expect(core.setSecret).toHaveBeenCalledWith('secret-token');
