@@ -143,4 +143,48 @@ describe('Pod run', () => {
       expect.arrayContaining([`--overrides=${JSON.stringify(override)}`]),
     );
   });
+
+  test('It will include TESTPOD_ env vars', async () => {
+    process.env.TESTPOD_API_KEY = 'my-secret';
+    process.env.TESTPOD_VERBOSE = 'true';
+    const override = {
+      apiVersion: 'v1',
+      metadata: {
+        namespace: 'test',
+        labels: {
+          'opa-injection': 'false',
+        },
+        annotations: {
+          'sidecar.istio.io/inject': 'false',
+        },
+      },
+      spec: {
+        containers: [{
+          name: 'actions-15b1e98-test',
+          image: 'myimage',
+          env: [
+            {
+              name: 'TESTPOD_API_KEY',
+              value: 'my-secret',
+            },
+            {
+              name: 'TESTPOD_VERBOSE',
+              value: 'true',
+            },
+          ],
+        }],
+      },
+    };
+    await podRun({ name: '', namespace: 'test' }, 'myimage');
+    expect(exec.exec.mock.calls[0][1]).toEqual(
+      expect.arrayContaining([
+        '--env=TESTPOD_API_KEY=my-secret',
+        '--env=TESTPOD_VERBOSE=true',
+        `--overrides=${JSON.stringify(override)}`,
+      ]),
+    );
+    expect(exec.exec.mock.calls[0][1]).not.toEqual(
+      expect.arrayContaining(['--env=GITHUB_REPOSITORY=extenda/actions']),
+    );
+  });
 });

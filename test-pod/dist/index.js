@@ -17900,6 +17900,8 @@ const podName = async () => {
   return `${repo}-${sha}-test`;
 };
 
+const podEnv = () => Object.keys(process.env).filter((env) => env.startsWith('TESTPOD_'));
+
 const createOverride = (pod, namespace, image, configMap, serviceUrl) => {
   const container = {
     name: pod,
@@ -17921,6 +17923,16 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl) => {
       value: serviceUrl,
     }];
   }
+
+  podEnv().forEach((env) => {
+    if (!container.env) {
+      container.env = [];
+    }
+    container.env.push({
+      name: env,
+      value: process.env[env],
+    });
+  });
 
   if (configMap && configMap.entrypoint) {
     container.command = ['/bin/sh', 'entrypoint.sh'];
@@ -17975,6 +17987,10 @@ const runPod = async ({ name, namespace }, image, configMap) => {
   if (serviceUrl) {
     args.push(`--env=SERVICE_URL=${serviceUrl}`);
   }
+
+  podEnv().forEach((env) => {
+    args.push(`--env=${env}=${process.env[env]}`);
+  });
 
   const json = JSON.stringify(createOverride(pod, namespace, image, configMap, serviceUrl));
   args.push(`--overrides=${json}`);
