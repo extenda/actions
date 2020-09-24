@@ -33028,6 +33028,7 @@ const exec = __webpack_require__(2176);
 const core = __webpack_require__(6341);
 const path = __webpack_require__(5622);
 const fg = __webpack_require__(2411);
+const fs = __webpack_require__(5747);
 const pLimit = __webpack_require__(5574);
 
 const terraformShow = async (plan) => {
@@ -33107,6 +33108,7 @@ const generateOutputs = async (workingDirectory, planFile, maxThreads, ignoredRe
   plans.forEach((plan) => {
     promises.push(limit(() => terraformShow(plan).then((output) => ({
       module: moduleName(plan, workingDirectory),
+      plan,
       ...output,
     }))));
   });
@@ -33116,6 +33118,12 @@ const generateOutputs = async (workingDirectory, planFile, maxThreads, ignoredRe
     .then((output) => filterIgnored(output, ignoredResourcesRegexp))
     .then(sortModulePaths)
     .then((changed) => {
+      changed.forEach(({ plan }) => {
+        const planwWithChanges = `${plan}.changes`;
+        fs.copyFile(plan, planwWithChanges, () => {
+          core.info(`Save plan with changes to ${planwWithChanges}`);
+        });
+      });
       core.info(`Found ${changed.length} plan(s) with changes`);
       return changed;
     });

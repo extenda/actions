@@ -2,6 +2,7 @@ const exec = require('@actions/exec');
 const core = require('@actions/core');
 const path = require('path');
 const fg = require('fast-glob');
+const fs = require('fs');
 const pLimit = require('p-limit');
 
 const terraformShow = async (plan) => {
@@ -81,6 +82,7 @@ const generateOutputs = async (workingDirectory, planFile, maxThreads, ignoredRe
   plans.forEach((plan) => {
     promises.push(limit(() => terraformShow(plan).then((output) => ({
       module: moduleName(plan, workingDirectory),
+      plan,
       ...output,
     }))));
   });
@@ -90,6 +92,12 @@ const generateOutputs = async (workingDirectory, planFile, maxThreads, ignoredRe
     .then((output) => filterIgnored(output, ignoredResourcesRegexp))
     .then(sortModulePaths)
     .then((changed) => {
+      changed.forEach(({ plan }) => {
+        const planwWithChanges = `${plan}.changes`;
+        fs.copyFile(plan, planwWithChanges, () => {
+          core.info(`Save plan with changes to ${planwWithChanges}`);
+        });
+      });
       core.info(`Found ${changed.length} plan(s) with changes`);
       return changed;
     });
