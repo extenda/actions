@@ -178,6 +178,15 @@ jobs:
           echo VERSION=${{ steps.version.outputs.version }}
           echo RELEASE_TAG=${{ steps.version.outputs.release-tag }}
 
+      - name: Get test token
+        uses: ./iam-test-token
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+
+      - name: Test IAM token
+        run: |
+          curl -sSi "https://iam-api.retailsvc.com/api/v1/permissions/iam.tenant.create" -H "Authorization: Bearer $IAM_TOKEN"
+
   release:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
