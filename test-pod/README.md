@@ -10,6 +10,7 @@ The action supports the following features:
   * Mount a volume as working directory in Pod
   * Specify a custom entrypoint for the container
   * Expose the internal service URL as a `SERVICE_URL` environment variable when `cloud-run.yaml` is used
+  * Expose any `TESTPOD_*` environment variables to the Pod at runtime
 
 ## Usage
 
@@ -28,6 +29,10 @@ This example will run Newman tests against an internal Cloud Run service. The se
 with the [`cloud-run`](../cloud-run#readme) action. The `cluster` and `namespace` inputs are derived from the `cloud-run.yaml`
 which is assumed to exist in the repository root.
 
+The example also demostrates how to pass additional environment variables to your pod runtime using environment
+variables with `TESTPOD_` prefixes. In the example, the `TESTPOD_API_KEY` will be available to tests
+as a system environment variable.
+
 ````yaml
 on: push
 
@@ -44,6 +49,8 @@ jobs:
           image: postman/newman:alpine
           working-directory: test/newman
           entrypoint: test/newman/run-test.sh
+        env:
+          TESTPOD_API_KEY: ${{ secrets.API_KEY }}
 ````
 
 ### Test internal service without `cloud-run.yaml`
@@ -72,10 +79,41 @@ jobs:
           namespace: example
 ```
 
-
 ### Test with custom Docker image
 
 This example demonstrates how to build a custom Docker image to run the tests in.
+You want to use a custom docker image when using a compiled language for the test suite, for example Java or Dotnet.
+
+Below, we use the following `Dockerfile` as an example. It will:
+
+  * Copy the working directory contents
+  * Use a `serviceUrl` and `apiKey` as build time arguments which we access as environment variables at runtime
+  * Run Newman tests from files in the image
+
+```dockerfile
+FROM postman/newman:alpine
+WORKDIR /work
+ARG serviceUrl
+ENV SERVICE_URL $serviceUrl
+COPY . .
+ENTRYPOINT ["./run.sh"]
+```
+
+And our `run.sh` would look something like this:
+
+```shell script
+#!/bin/sh
+if [ -z "$SERVICE_URL" ]; then
+  SERVICE_URL="http://localhost:8080"
+fi
+
+exec newman run piglatin-service.postman_collection.json \
+  --environment piglatin-staging.postman_environment.json \
+  --env-var serverUrl=$SERVICE_URL \
+  --color off
+```
+
+Below is the sample workflow that builds and runs the custom `Dockerfile`.
 
 ```yaml
 on: push
@@ -94,7 +132,10 @@ jobs:
         run: |
           gcloud --quiet auth configure-docker
           IMAGE=eu.gcr.io/extenda/example-test:${{ github.sha }}
-          docker build --build-arg SERVICE_URL=http://example.example -t $IMAGE .
+          docker build \
+            --build-arg serviceUrl=http://example.example \
+            --build-arg apiKey="${{ secrets.API_KEY }}" \
+            -t $IMAGE .
           docker push $IMAGE
         working-directory: test/newman
 
