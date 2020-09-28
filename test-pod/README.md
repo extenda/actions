@@ -8,7 +8,7 @@ The action supports the following features:
   * Test against cluster internal services
   * Test Pod runs in the service's namespace, with the same workload identity (service account)
   * Supports any Docker image
-  * Mount a volume as working directory in Pod
+  * Mount a volume as working directory in Pod - *NOTE: The mount is not recursive, only direct children of the directory will be included*
   * Specify a custom entrypoint for the container
   * Expose the internal service URL as a `SERVICE_URL` environment variable when `cloud-run.yaml` is used
   * Expose any `TESTPOD_*` environment variables to the Pod at runtime
@@ -135,7 +135,6 @@ jobs:
           IMAGE=eu.gcr.io/extenda/example-test:${{ github.sha }}
           docker build \
             --build-arg serviceUrl=http://example.example \
-            --build-arg apiKey="${{ secrets.API_KEY }}" \
             -t $IMAGE .
           docker push $IMAGE
         working-directory: test/newman
@@ -145,4 +144,6 @@ jobs:
         with:
           service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
           image: eu.gcr.io/extenda/example-test:${{ github.sha }}
+        env:
+          TESTPOD_API_KEY: ${{ secrets.API_KEY }}          
 ```
