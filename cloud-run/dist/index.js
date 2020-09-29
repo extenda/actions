@@ -10611,6 +10611,71 @@ module.exports = __webpack_require__(3333).default
 
 /***/ }),
 
+/***/ 2695:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const exec = __webpack_require__(2176);
+const core = __webpack_require__(6341);
+
+const getRevisions = async (namespace, project, cluster, location) => {
+  let output = '';
+  await exec.exec('gcloud', [
+    'run',
+    'revisions',
+    'list',
+    `--namespace=${namespace}`,
+    `--project=${project}`,
+    `--cluster=${cluster}`,
+    `--cluster-location=${location}`,
+    '--platform=gke',
+    '--sort-by=DEPLOYED',
+    '--filter=false',
+    '--format=value(REVISION)',
+  ], {
+    silent: true,
+    listeners: {
+      stdout: (data) => {
+        output += data.toString('utf8');
+      },
+    },
+  });
+  return output.split(/[\r\n]+/);
+};
+const deleteRevision = async (namespace, project, cluster, location, revisionName) => exec.exec('gcloud', [
+  'run',
+  'revisions',
+  'delete',
+  `${revisionName}`,
+  '-q',
+  `--namespace=${namespace}`,
+  `--project=${project}`,
+  `--cluster=${cluster}`,
+  `--cluster-location=${location}`,
+  '--platform=gke',
+  '--no-user-output-enabled',
+], { silent: true });
+
+const cleanRevisions = async (namespace, project, cluster, location, maxRevisions) => {
+  const promises = [];
+  await getRevisions(namespace, project, cluster, location).then((revisions) => {
+    const length = revisions.length - maxRevisions;
+    if (length > 0) {
+      for (let i = 0; i < length; i += 1) {
+        core.info(`deleting revision '${revisions[i]}'`);
+        promises.push(deleteRevision(namespace, project, cluster, location, revisions[i]));
+      }
+    }
+  });
+  return Promise.all(promises);
+};
+
+module.exports = cleanRevisions;
+
+// run('braveheart-quotes', 'film-staging-c19b', 'k8s-cluster', 'europe-west1', 5)
+
+
+/***/ }),
+
 /***/ 7783:
 /***/ ((module) => {
 
@@ -10649,6 +10714,10 @@ module.exports = {
     'max-instances': {
       type: 'integer',
       default: -1,
+    },
+    'max-revisions': {
+      type: 'integer',
+      default: 4,
     },
     memory: {
       type: 'string',
@@ -11226,6 +11295,7 @@ const getClusterInfo = __webpack_require__(8602);
 const createNamespace = __webpack_require__(4721);
 const projectInfo = __webpack_require__(645);
 const waitForRevision = __webpack_require__(6545);
+const cleanRevisions = __webpack_require__(2695);
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -11390,6 +11460,7 @@ const runDeploy = async (
     memory,
     concurrency = setDefaultConcurrency(service.cpu),
     'max-instances': maxInstances = -1,
+    'max-revisions': maxRevisions = 4,
     environment = [],
   } = service;
 
@@ -11420,6 +11491,9 @@ const runDeploy = async (
   const gcloudExitCode = await execWithOutput(args)
     .then((response) => waitForRevision(response, args, retryInterval));
 
+  if (service.platform.gke) {
+    await cleanRevisions(name, projectId, cluster.uri, cluster.clusterLocation, maxRevisions);
+  }
 
   return {
     gcloudExitCode,

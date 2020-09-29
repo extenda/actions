@@ -305,7 +305,7 @@ describe('Run Deploy', () => {
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(getClusterInfo).toHaveBeenCalled();
     expect(setupGcloud).toHaveBeenCalledTimes(1);
-    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledTimes(2);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
       'run', 'deploy', 'my-service',
       '--image=gcr.io/test-project/my-service:tag',
@@ -351,7 +351,7 @@ describe('Run Deploy', () => {
       'gcr.io/test-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
-    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledTimes(2);
     expect(getClusterInfo).toHaveBeenCalledWith('test-project', undefined);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
@@ -404,7 +404,7 @@ describe('Run Deploy', () => {
       'gcr.io/test-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
-    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledTimes(2);
     expect(getClusterInfo).toHaveBeenCalledWith('test-project', 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster');
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
@@ -499,7 +499,7 @@ describe('Run Deploy', () => {
       'gcr.io/test-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
-    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledTimes(2);
     expect(getClusterInfo).toHaveBeenCalledWith('test-project', undefined);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
