@@ -10671,8 +10671,6 @@ const cleanRevisions = async (namespace, project, cluster, location, maxRevision
 
 module.exports = cleanRevisions;
 
-// run('braveheart-quotes', 'film-staging-c19b', 'k8s-cluster', 'europe-west1', 5)
-
 
 /***/ }),
 
