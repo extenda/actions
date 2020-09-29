@@ -11489,7 +11489,7 @@ const runDeploy = async (
   const gcloudExitCode = await execWithOutput(args)
     .then((response) => waitForRevision(response, args, retryInterval));
 
-  if (service.platform.gke) {
+  if (service.platform.gke && cluster) {
     await cleanRevisions(name, projectId, cluster.uri, cluster.clusterLocation, maxRevisions);
   }
 
