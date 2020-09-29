@@ -7,6 +7,7 @@ const getClusterInfo = require('./cluster-info');
 const createNamespace = require('./create-namespace');
 const projectInfo = require('./project-info');
 const waitForRevision = require('./wait-revision');
+const cleanRevisions = require('./clean-revisions');
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -171,6 +172,7 @@ const runDeploy = async (
     memory,
     concurrency = setDefaultConcurrency(service.cpu),
     'max-instances': maxInstances = -1,
+    'max-revisions': maxRevisions = 4,
     environment = [],
   } = service;
 
@@ -201,6 +203,9 @@ const runDeploy = async (
   const gcloudExitCode = await execWithOutput(args)
     .then((response) => waitForRevision(response, args, retryInterval));
 
+  if (service.platform.gke && cluster) {
+    await cleanRevisions(name, projectId, cluster.uri, cluster.clusterLocation, maxRevisions);
+  }
 
   return {
     gcloudExitCode,

@@ -10650,6 +10650,10 @@ module.exports = {
       type: 'integer',
       default: -1,
     },
+    'max-revisions': {
+      type: 'integer',
+      default: 4,
+    },
     memory: {
       type: 'string',
       pattern: '^[0-9]+(M|G)i',

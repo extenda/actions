@@ -47,6 +47,7 @@ properties are required and not.
 | `cpu`                      | The CPU limit for the service. For managed Cloud Run, use core count `1` or `2`. For Cloud Run on GKE, use millicpu (e.g., `200m`).                               | Yes      |               |
 | `concurrency`              | The max concurrent requests per container. Will scale with cpu if left blank (`250m` sets 20 in concurrency).                                        | No       | `10-100`          |
 | `max-instances`            | The maximum number of container instances to run. Set to `-1` to use the platform default (recommended).                                                          | No       | `-1`          |
+| `max-revisions`            | The maximum number of cloudrun revisions to save. Set to `4` to use the platform default (recommended).                                                          | No       | `4`          |
 | `environment`<top>\*</top> | A map of environment variables. The values can be Secret Manager URLs on the form `sm://*/my-secret` where `*` will be replaced by the project ID at deploy time. | No       | -             |
 | `enable-http2`             | Flag to enable HTTP/2. Application must support h2c to work correctly with HTTP/2                                                                                 | No       | `false`       |
 
