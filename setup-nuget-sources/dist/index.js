@@ -2,7 +2,7 @@ module.exports =
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 416:
+/***/ 6416:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -15,7 +15,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const os = __importStar(__webpack_require__(87));
+const os = __importStar(__webpack_require__(2087));
+const utils_1 = __webpack_require__(3057);
 /**
  * Commands
  *
@@ -70,13 +71,13 @@ class Command {
     }
 }
 function escapeData(s) {
-    return (s || '')
+    return utils_1.toCommandValue(s)
         .replace(/%/g, '%25')
         .replace(/\r/g, '%0D')
         .replace(/\n/g, '%0A');
 }
 function escapeProperty(s) {
-    return (s || '')
+    return utils_1.toCommandValue(s)
         .replace(/%/g, '%25')
         .replace(/\r/g, '%0D')
         .replace(/\n/g, '%0A')
@@ -87,7 +88,7 @@ function escapeProperty(s) {
 
 /***/ }),
 
-/***/ 341:
+/***/ 6341:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -109,9 +110,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const command_1 = __webpack_require__(416);
-const os = __importStar(__webpack_require__(87));
-const path = __importStar(__webpack_require__(622));
+const command_1 = __webpack_require__(6416);
+const file_command_1 = __webpack_require__(2786);
+const utils_1 = __webpack_require__(3057);
+const os = __importStar(__webpack_require__(2087));
+const path = __importStar(__webpack_require__(5622));
 /**
  * The code to exit an action
  */
@@ -132,11 +135,21 @@ var ExitCode;
 /**
  * Sets env variable for this action and future actions in the job
  * @param name the name of the variable to set
- * @param val the value of the variable
+ * @param val the value of the variable. Non-string values will be converted to a string via JSON.stringify
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function exportVariable(name, val) {
-    process.env[name] = val;
-    command_1.issueCommand('set-env', { name }, val);
+    const convertedVal = utils_1.toCommandValue(val);
+    process.env[name] = convertedVal;
+    const filePath = process.env['GITHUB_ENV'] || '';
+    if (filePath) {
+        const delimiter = '_GitHubActionsFileCommandDelimeter_';
+        const commandValue = `${name}<<${delimiter}${os.EOL}${convertedVal}${os.EOL}${delimiter}`;
+        file_command_1.issueCommand('ENV', commandValue);
+    }
+    else {
+        command_1.issueCommand('set-env', { name }, convertedVal);
+    }
 }
 exports.exportVariable = exportVariable;
 /**
@@ -152,7 +165,13 @@ exports.setSecret = setSecret;
  * @param inputPath
  */
 function addPath(inputPath) {
-    command_1.issueCommand('add-path', {}, inputPath);
+    const filePath = process.env['GITHUB_PATH'] || '';
+    if (filePath) {
+        file_command_1.issueCommand('PATH', inputPath);
+    }
+    else {
+        command_1.issueCommand('add-path', {}, inputPath);
+    }
     process.env['PATH'] = `${inputPath}${path.delimiter}${process.env['PATH']}`;
 }
 exports.addPath = addPath;
@@ -175,12 +194,22 @@ exports.getInput = getInput;
  * Sets the value of an output.
  *
  * @param     name     name of the output to set
- * @param     value    value to store
+ * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function setOutput(name, value) {
     command_1.issueCommand('set-output', { name }, value);
 }
 exports.setOutput = setOutput;
+/**
+ * Enables or disables the echoing of commands into stdout for the rest of the step.
+ * Echoing is disabled by default if ACTIONS_STEP_DEBUG is not set.
+ *
+ */
+function setCommandEcho(enabled) {
+    command_1.issue('echo', enabled ? 'on' : 'off');
+}
+exports.setCommandEcho = setCommandEcho;
 //-----------------------------------------------------------------------
 // Results
 //-----------------------------------------------------------------------
@@ -198,6 +227,13 @@ exports.setFailed = setFailed;
 // Logging Commands
 //-----------------------------------------------------------------------
 /**
+ * Gets whether Actions Step Debug is on or not
+ */
+function isDebug() {
+    return process.env['RUNNER_DEBUG'] === '1';
+}
+exports.isDebug = isDebug;
+/**
  * Writes debug message to user log
  * @param message debug message
  */
@@ -207,18 +243,18 @@ function debug(message) {
 exports.debug = debug;
 /**
  * Adds an error issue
- * @param message error issue message
+ * @param message error issue message. Errors will be converted to string via toString()
  */
 function error(message) {
-    command_1.issue('error', message);
+    command_1.issue('error', message instanceof Error ? message.toString() : message);
 }
 exports.error = error;
 /**
  * Adds an warning issue
- * @param message warning issue message
+ * @param message warning issue message. Errors will be converted to string via toString()
  */
 function warning(message) {
-    command_1.issue('warning', message);
+    command_1.issue('warning', message instanceof Error ? message.toString() : message);
 }
 exports.warning = warning;
 /**
@@ -276,8 +312,9 @@ exports.group = group;
  * Saves state for current action, the state can only be retrieved by this action's post job execution.
  *
  * @param     name     name of the state to store
- * @param     value    value to store
+ * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function saveState(name, value) {
     command_1.issueCommand('save-state', { name }, value);
 }
@@ -296,7 +333,69 @@ exports.getState = getState;
 
 /***/ }),
 
-/***/ 176:
+/***/ 2786:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+// For internal use, subject to change.
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+// We use any as a valid input type
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const fs = __importStar(__webpack_require__(5747));
+const os = __importStar(__webpack_require__(2087));
+const utils_1 = __webpack_require__(3057);
+function issueCommand(command, message) {
+    const filePath = process.env[`GITHUB_${command}`];
+    if (!filePath) {
+        throw new Error(`Unable to find environment variable for file command ${command}`);
+    }
+    if (!fs.existsSync(filePath)) {
+        throw new Error(`Missing file at path: ${filePath}`);
+    }
+    fs.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os.EOL}`, {
+        encoding: 'utf8'
+    });
+}
+exports.issueCommand = issueCommand;
+//# sourceMappingURL=file-command.js.map
+
+/***/ }),
+
+/***/ 3057:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+// We use any as a valid input type
+/* eslint-disable @typescript-eslint/no-explicit-any */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+/**
+ * Sanitizes an input into a string so it can be passed into issueCommand safely
+ * @param input input to sanitize into a string
+ */
+function toCommandValue(input) {
+    if (input === null || input === undefined) {
+        return '';
+    }
+    else if (typeof input === 'string' || input instanceof String) {
+        return input;
+    }
+    return JSON.stringify(input);
+}
+exports.toCommandValue = toCommandValue;
+//# sourceMappingURL=utils.js.map
+
+/***/ }),
+
+/***/ 2176:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -318,7 +417,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tr = __importStar(__webpack_require__(299));
+const tr = __importStar(__webpack_require__(4299));
 /**
  * Exec a command.
  * Output will be streamed to the live console.
@@ -347,7 +446,7 @@ exports.exec = exec;
 
 /***/ }),
 
-/***/ 299:
+/***/ 4299:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -369,12 +468,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const os = __importStar(__webpack_require__(87));
-const events = __importStar(__webpack_require__(614));
-const child = __importStar(__webpack_require__(129));
-const path = __importStar(__webpack_require__(622));
-const io = __importStar(__webpack_require__(960));
-const ioUtil = __importStar(__webpack_require__(348));
+const os = __importStar(__webpack_require__(2087));
+const events = __importStar(__webpack_require__(8614));
+const child = __importStar(__webpack_require__(3129));
+const path = __importStar(__webpack_require__(5622));
+const io = __importStar(__webpack_require__(7960));
+const ioUtil = __importStar(__webpack_require__(4348));
 /* eslint-disable @typescript-eslint/unbound-method */
 const IS_WINDOWS = process.platform === 'win32';
 /*
@@ -954,7 +1053,7 @@ class ExecState extends events.EventEmitter {
 
 /***/ }),
 
-/***/ 348:
+/***/ 4348:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -970,9 +1069,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const assert_1 = __webpack_require__(357);
-const fs = __webpack_require__(747);
-const path = __webpack_require__(622);
+const assert_1 = __webpack_require__(2357);
+const fs = __webpack_require__(5747);
+const path = __webpack_require__(5622);
 _a = fs.promises, exports.chmod = _a.chmod, exports.copyFile = _a.copyFile, exports.lstat = _a.lstat, exports.mkdir = _a.mkdir, exports.readdir = _a.readdir, exports.readlink = _a.readlink, exports.rename = _a.rename, exports.rmdir = _a.rmdir, exports.stat = _a.stat, exports.symlink = _a.symlink, exports.unlink = _a.unlink;
 exports.IS_WINDOWS = process.platform === 'win32';
 function exists(fsPath) {
@@ -1156,7 +1255,7 @@ function isUnixExecutable(stats) {
 
 /***/ }),
 
-/***/ 960:
+/***/ 7960:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1171,10 +1270,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const childProcess = __webpack_require__(129);
-const path = __webpack_require__(622);
-const util_1 = __webpack_require__(669);
-const ioUtil = __webpack_require__(348);
+const childProcess = __webpack_require__(3129);
+const path = __webpack_require__(5622);
+const util_1 = __webpack_require__(1669);
+const ioUtil = __webpack_require__(4348);
 const exec = util_1.promisify(childProcess.exec);
 /**
  * Copies a file or folder.
@@ -1453,7 +1552,7 @@ function copyFile(srcFile, destFile, force) {
 
 /***/ }),
 
-/***/ 771:
+/***/ 7771:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -1500,7 +1599,7 @@ const setLazyProperty = (object, property, get) => {
 let colorConvert;
 const makeDynamicStyles = (wrap, targetSpace, identity, isBackground) => {
 	if (colorConvert === undefined) {
-		colorConvert = __webpack_require__(19);
+		colorConvert = __webpack_require__(3019);
 	}
 
 	const offset = isBackground ? 10 : 0;
@@ -1692,10 +1791,10 @@ function range(a, b, str) {
 
 /***/ }),
 
-/***/ 117:
+/***/ 1117:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var concatMap = __webpack_require__(593);
+var concatMap = __webpack_require__(6593);
 var balanced = __webpack_require__(996);
 
 module.exports = expandTop;
@@ -1900,13 +1999,13 @@ function expand(str, isTop) {
 
 /***/ }),
 
-/***/ 860:
+/***/ 3860:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
 
-const ansiStyles = __webpack_require__(771);
-const {stdout: stdoutColor, stderr: stderrColor} = __webpack_require__(195);
+const ansiStyles = __webpack_require__(7771);
+const {stdout: stdoutColor, stderr: stderrColor} = __webpack_require__(5195);
 const {
 	stringReplaceAll,
 	stringEncaseCRLFWithFirstIndex
@@ -2111,7 +2210,7 @@ const chalkTag = (chalk, ...strings) => {
 	}
 
 	if (template === undefined) {
-		template = __webpack_require__(297);
+		template = __webpack_require__(7297);
 	}
 
 	return template(chalk, parts.join(''));
@@ -2141,7 +2240,7 @@ module.exports = chalk;
 
 /***/ }),
 
-/***/ 297:
+/***/ 7297:
 /***/ ((module) => {
 
 "use strict";
@@ -2330,12 +2429,12 @@ module.exports = {
 
 /***/ }),
 
-/***/ 569:
+/***/ 5569:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /* MIT license */
 /* eslint-disable no-mixed-operators */
-const cssKeywords = __webpack_require__(553);
+const cssKeywords = __webpack_require__(3553);
 
 // NOTE: conversions should only return primitive values (i.e. arrays, or
 //       values that give correct `typeof` results).
@@ -3176,11 +3275,11 @@ convert.rgb.gray = function (rgb) {
 
 /***/ }),
 
-/***/ 19:
+/***/ 3019:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const conversions = __webpack_require__(569);
-const route = __webpack_require__(898);
+const conversions = __webpack_require__(5569);
+const route = __webpack_require__(4898);
 
 const convert = {};
 
@@ -3264,10 +3363,10 @@ module.exports = convert;
 
 /***/ }),
 
-/***/ 898:
+/***/ 4898:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const conversions = __webpack_require__(569);
+const conversions = __webpack_require__(5569);
 
 /*
 	This function routes a model to all other models.
@@ -3368,7 +3467,7 @@ module.exports = function (fromModel) {
 
 /***/ }),
 
-/***/ 553:
+/***/ 3553:
 /***/ ((module) => {
 
 "use strict";
@@ -3528,7 +3627,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 593:
+/***/ 6593:
 /***/ ((module) => {
 
 module.exports = function (xs, fn) {
@@ -3548,7 +3647,7 @@ var isArray = Array.isArray || function (xs) {
 
 /***/ }),
 
-/***/ 11:
+/***/ 6011:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = realpath
@@ -3558,13 +3657,13 @@ realpath.realpathSync = realpathSync
 realpath.monkeypatch = monkeypatch
 realpath.unmonkeypatch = unmonkeypatch
 
-var fs = __webpack_require__(747)
+var fs = __webpack_require__(5747)
 var origRealpath = fs.realpath
 var origRealpathSync = fs.realpathSync
 
 var version = process.version
 var ok = /^v[0-5]\./.test(version)
-var old = __webpack_require__(302)
+var old = __webpack_require__(2302)
 
 function newError (er) {
   return er && er.syscall === 'realpath' && (
@@ -3621,7 +3720,7 @@ function unmonkeypatch () {
 
 /***/ }),
 
-/***/ 302:
+/***/ 2302:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 // Copyright Joyent, Inc. and other Node contributors.
@@ -3645,9 +3744,9 @@ function unmonkeypatch () {
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var pathModule = __webpack_require__(622);
+var pathModule = __webpack_require__(5622);
 var isWindows = process.platform === 'win32';
-var fs = __webpack_require__(747);
+var fs = __webpack_require__(5747);
 
 // JavaScript implementation of realpath, ported from node pre-v6
 
@@ -3931,7 +4030,7 @@ exports.realpath = function realpath(p, cache, cb) {
 
 /***/ }),
 
-/***/ 505:
+/***/ 6505:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 exports.alphasort = alphasort
@@ -3948,9 +4047,9 @@ function ownProp (obj, field) {
   return Object.prototype.hasOwnProperty.call(obj, field)
 }
 
-var path = __webpack_require__(622)
-var minimatch = __webpack_require__(754)
-var isAbsolute = __webpack_require__(817)
+var path = __webpack_require__(5622)
+var minimatch = __webpack_require__(9754)
+var isAbsolute = __webpack_require__(6817)
 var Minimatch = minimatch.Minimatch
 
 function alphasorti (a, b) {
@@ -4178,7 +4277,7 @@ function childrenIgnored (self, path) {
 
 /***/ }),
 
-/***/ 804:
+/***/ 8804:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // Approach:
@@ -4223,27 +4322,27 @@ function childrenIgnored (self, path) {
 
 module.exports = glob
 
-var fs = __webpack_require__(747)
-var rp = __webpack_require__(11)
-var minimatch = __webpack_require__(754)
+var fs = __webpack_require__(5747)
+var rp = __webpack_require__(6011)
+var minimatch = __webpack_require__(9754)
 var Minimatch = minimatch.Minimatch
-var inherits = __webpack_require__(599)
-var EE = __webpack_require__(614).EventEmitter
-var path = __webpack_require__(622)
-var assert = __webpack_require__(357)
-var isAbsolute = __webpack_require__(817)
-var globSync = __webpack_require__(806)
-var common = __webpack_require__(505)
+var inherits = __webpack_require__(5599)
+var EE = __webpack_require__(8614).EventEmitter
+var path = __webpack_require__(5622)
+var assert = __webpack_require__(2357)
+var isAbsolute = __webpack_require__(6817)
+var globSync = __webpack_require__(7806)
+var common = __webpack_require__(6505)
 var alphasort = common.alphasort
 var alphasorti = common.alphasorti
 var setopts = common.setopts
 var ownProp = common.ownProp
-var inflight = __webpack_require__(565)
-var util = __webpack_require__(669)
+var inflight = __webpack_require__(9565)
+var util = __webpack_require__(1669)
 var childrenIgnored = common.childrenIgnored
 var isIgnored = common.isIgnored
 
-var once = __webpack_require__(469)
+var once = __webpack_require__(8469)
 
 function glob (pattern, options, cb) {
   if (typeof options === 'function') cb = options, options = {}
@@ -4975,22 +5074,22 @@ Glob.prototype._stat2 = function (f, abs, er, stat, cb) {
 
 /***/ }),
 
-/***/ 806:
+/***/ 7806:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = globSync
 globSync.GlobSync = GlobSync
 
-var fs = __webpack_require__(747)
-var rp = __webpack_require__(11)
-var minimatch = __webpack_require__(754)
+var fs = __webpack_require__(5747)
+var rp = __webpack_require__(6011)
+var minimatch = __webpack_require__(9754)
 var Minimatch = minimatch.Minimatch
-var Glob = __webpack_require__(804).Glob
-var util = __webpack_require__(669)
-var path = __webpack_require__(622)
-var assert = __webpack_require__(357)
-var isAbsolute = __webpack_require__(817)
-var common = __webpack_require__(505)
+var Glob = __webpack_require__(8804).Glob
+var util = __webpack_require__(1669)
+var path = __webpack_require__(5622)
+var assert = __webpack_require__(2357)
+var isAbsolute = __webpack_require__(6817)
+var common = __webpack_require__(6505)
 var alphasort = common.alphasort
 var alphasorti = common.alphasorti
 var setopts = common.setopts
@@ -5484,12 +5583,12 @@ module.exports = (flag, argv = process.argv) => {
 
 /***/ }),
 
-/***/ 565:
+/***/ 9565:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var wrappy = __webpack_require__(481)
+var wrappy = __webpack_require__(7481)
 var reqs = Object.create(null)
-var once = __webpack_require__(469)
+var once = __webpack_require__(8469)
 
 module.exports = wrappy(inflight)
 
@@ -5545,23 +5644,23 @@ function slice (args) {
 
 /***/ }),
 
-/***/ 599:
+/***/ 5599:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 try {
-  var util = __webpack_require__(669);
+  var util = __webpack_require__(1669);
   /* istanbul ignore next */
   if (typeof util.inherits !== 'function') throw '';
   module.exports = util.inherits;
 } catch (e) {
   /* istanbul ignore next */
-  module.exports = __webpack_require__(252);
+  module.exports = __webpack_require__(7252);
 }
 
 
 /***/ }),
 
-/***/ 252:
+/***/ 7252:
 /***/ ((module) => {
 
 if (typeof Object.create === 'function') {
@@ -5595,7 +5694,7 @@ if (typeof Object.create === 'function') {
 
 /***/ }),
 
-/***/ 754:
+/***/ 9754:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = minimatch
@@ -5603,11 +5702,11 @@ minimatch.Minimatch = Minimatch
 
 var path = { sep: '/' }
 try {
-  path = __webpack_require__(622)
+  path = __webpack_require__(5622)
 } catch (er) {}
 
 var GLOBSTAR = minimatch.GLOBSTAR = Minimatch.GLOBSTAR = {}
-var expand = __webpack_require__(117)
+var expand = __webpack_require__(1117)
 
 var plTypes = {
   '!': { open: '(?:(?!(?:', close: '))[^/]*?)'},
@@ -6525,10 +6624,10 @@ function regExpEscape (s) {
 
 /***/ }),
 
-/***/ 469:
+/***/ 8469:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var wrappy = __webpack_require__(481)
+var wrappy = __webpack_require__(7481)
 module.exports = wrappy(once)
 module.exports.strict = wrappy(onceStrict)
 
@@ -6574,7 +6673,7 @@ function onceStrict (fn) {
 
 /***/ }),
 
-/***/ 817:
+/***/ 6817:
 /***/ ((module) => {
 
 "use strict";
@@ -6602,15 +6701,15 @@ module.exports.win32 = win32;
 
 /***/ }),
 
-/***/ 779:
+/***/ 8779:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-module.exports = __webpack_require__(140);
+module.exports = __webpack_require__(2140);
 
 
 /***/ }),
 
-/***/ 914:
+/***/ 4914:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -6619,7 +6718,7 @@ module.exports = __webpack_require__(140);
 /**
  * Dependencies
  */
-const globAsync = __webpack_require__(604);
+const globAsync = __webpack_require__(9604);
 
 /**
  * Get paths asynchrously
@@ -6644,7 +6743,7 @@ module.exports = function getPathsAsync(patterns, config) {
 
 /***/ }),
 
-/***/ 503:
+/***/ 3503:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -6653,7 +6752,7 @@ module.exports = function getPathsAsync(patterns, config) {
 /**
  * Dependencies
  */
-const glob = __webpack_require__(804);
+const glob = __webpack_require__(8804);
 
 /**
  * Get paths (sync)
@@ -6694,7 +6793,7 @@ module.exports = function getPathsSync(patterns, config) {
 
 /***/ }),
 
-/***/ 604:
+/***/ 9604:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -6703,7 +6802,7 @@ module.exports = function getPathsSync(patterns, config) {
 /**
  * Dependencies
  */
-const glob = __webpack_require__(804);
+const glob = __webpack_require__(8804);
 
 /**
  * Async wrapper for glob
@@ -6819,7 +6918,7 @@ module.exports = function makeReplacements(contents, from, to, file, count) {
 
 /***/ }),
 
-/***/ 508:
+/***/ 2508:
 /***/ ((module) => {
 
 "use strict";
@@ -6894,7 +6993,7 @@ module.exports = function parseConfig(config) {
 
 /***/ }),
 
-/***/ 377:
+/***/ 3377:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -6903,7 +7002,7 @@ module.exports = function parseConfig(config) {
 /**
  * Dependencies
  */
-const fs = __webpack_require__(747);
+const fs = __webpack_require__(5747);
 const makeReplacements = __webpack_require__(721);
 
 /**
@@ -6947,7 +7046,7 @@ module.exports = function replaceAsync(file, from, to, config) {
 
 /***/ }),
 
-/***/ 873:
+/***/ 4873:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -6956,7 +7055,7 @@ module.exports = function replaceAsync(file, from, to, config) {
 /**
  * Dependencies
  */
-const fs = __webpack_require__(747);
+const fs = __webpack_require__(5747);
 const makeReplacements = __webpack_require__(721);
 
 /**
@@ -6985,7 +7084,7 @@ module.exports = function replaceSync(file, from, to, config) {
 
 /***/ }),
 
-/***/ 140:
+/***/ 2140:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -6994,12 +7093,12 @@ module.exports = function replaceSync(file, from, to, config) {
 /**
  * Dependencies
  */
-const chalk = __webpack_require__(860);
-const parseConfig = __webpack_require__(508);
-const getPathsSync = __webpack_require__(503);
-const getPathsAsync = __webpack_require__(914);
-const replaceSync = __webpack_require__(873);
-const replaceAsync = __webpack_require__(377);
+const chalk = __webpack_require__(3860);
+const parseConfig = __webpack_require__(2508);
+const getPathsSync = __webpack_require__(3503);
+const getPathsAsync = __webpack_require__(4914);
+const replaceSync = __webpack_require__(4873);
+const replaceAsync = __webpack_require__(3377);
 
 /**
  * Replace in file helper
@@ -7081,13 +7180,13 @@ module.exports = replaceInFile;
 
 /***/ }),
 
-/***/ 195:
+/***/ 5195:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
 
-const os = __webpack_require__(87);
-const tty = __webpack_require__(867);
+const os = __webpack_require__(2087);
+const tty = __webpack_require__(3867);
 const hasFlag = __webpack_require__(406);
 
 const {env} = process;
@@ -7228,7 +7327,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 481:
+/***/ 7481:
 /***/ ((module) => {
 
 // Returns a wrapper function that returns a wrapped callback
@@ -7268,10 +7367,10 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 571:
+/***/ 8571:
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
-const core = __webpack_require__(341);
+const core = __webpack_require__(6341);
 
 const {
   parseNugetSourceJson,
@@ -7279,7 +7378,7 @@ const {
   setNuGetSource,
   generateRegexPattern,
   commentOutSourceUrl,
-} = __webpack_require__(312);
+} = __webpack_require__(3312);
 
 const run = async () => {
   try {
@@ -7327,12 +7426,12 @@ run();
 
 /***/ }),
 
-/***/ 312:
+/***/ 3312:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const core = __webpack_require__(341);
-const exec = __webpack_require__(176);
-const replace = __webpack_require__(779);
+const core = __webpack_require__(6341);
+const exec = __webpack_require__(2176);
+const replace = __webpack_require__(8779);
 
 const setNuGetSource = async (configFile, { name, source }, { username, password }) => {
   const args = ['sources', 'add', '-Name', name, '-Source', source];
@@ -7397,7 +7496,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 357:
+/***/ 2357:
 /***/ ((module) => {
 
 "use strict";
@@ -7405,7 +7504,7 @@ module.exports = require("assert");
 
 /***/ }),
 
-/***/ 129:
+/***/ 3129:
 /***/ ((module) => {
 
 "use strict";
@@ -7413,7 +7512,7 @@ module.exports = require("child_process");
 
 /***/ }),
 
-/***/ 614:
+/***/ 8614:
 /***/ ((module) => {
 
 "use strict";
@@ -7421,7 +7520,7 @@ module.exports = require("events");
 
 /***/ }),
 
-/***/ 747:
+/***/ 5747:
 /***/ ((module) => {
 
 "use strict";
@@ -7429,7 +7528,7 @@ module.exports = require("fs");
 
 /***/ }),
 
-/***/ 87:
+/***/ 2087:
 /***/ ((module) => {
 
 "use strict";
@@ -7437,7 +7536,7 @@ module.exports = require("os");
 
 /***/ }),
 
-/***/ 622:
+/***/ 5622:
 /***/ ((module) => {
 
 "use strict";
@@ -7445,7 +7544,7 @@ module.exports = require("path");
 
 /***/ }),
 
-/***/ 867:
+/***/ 3867:
 /***/ ((module) => {
 
 "use strict";
@@ -7453,7 +7552,7 @@ module.exports = require("tty");
 
 /***/ }),
 
-/***/ 669:
+/***/ 1669:
 /***/ ((module) => {
 
 "use strict";
@@ -7511,6 +7610,6 @@ module.exports = require("util");
 /******/ 	// module exports must be returned from runtime so entry inlining is disabled
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(571);
+/******/ 	return __webpack_require__(8571);
 /******/ })()
 ;
