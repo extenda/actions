@@ -58,7 +58,7 @@ describe('Generate Terraform plan output', () => {
         module: 'moduleA', output: 'Module A changes', status: 0, plan: '/work/moduleA/plan.out',
       },
       {
-        module: 'moduleB', output: 'Module B changes', status: 0, plan: '/work/moduleB/plan.out',
+        module: 'moduleB', output: 'Module B changes', status: 0, plan: '/work/moduleB/.terragrunt-cache/UUID1/UUID2/plan.out',
       },
     ]);
     expect(exec.exec.mock.calls[0][1]).toEqual(['show', '-no-color', '../../../plan.out']);
@@ -71,7 +71,7 @@ describe('Generate Terraform plan output', () => {
     });
     // expect(fs.exists('/work/moduleA/plan.out.changes'));
     expect(fs.existsSync('/work/moduleA/plan.out.changes')).toEqual(true);
-    expect(fs.existsSync('/work/moduleB/plan.out.changes')).toEqual(true);
+    expect(fs.existsSync('/work/moduleB/.terragrunt-cache/UUID1/UUID2/plan.out.changes')).toEqual(true);
   });
 
   test('It can process a single plan file', async () => {
@@ -104,11 +104,11 @@ describe('Generate Terraform plan output', () => {
     expect(outputs).toHaveLength(1);
     expect(outputs).toEqual([
       {
-        module: 'moduleB', output: 'Module B changes', status: 0, plan: '/work/moduleB/plan.out',
+        module: 'moduleB', output: 'Module B changes', status: 0, plan: '/work/moduleB/.terragrunt-cache/UUID1/UUID2/plan.out',
       },
     ]);
     expect(fs.existsSync('/work/moduleA/plan.out.changes')).toEqual(false);
-    expect(fs.existsSync('/work/moduleB/plan.out.changes')).toEqual(true);
+    expect(fs.existsSync('/work/moduleB/.terragrunt-cache/UUID1/UUID2/plan.out.changes')).toEqual(true);
   });
 
   test('It will filter changing ignored objects', async () => {
