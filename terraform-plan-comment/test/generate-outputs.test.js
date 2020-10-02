@@ -14,7 +14,6 @@ const terragruntFs = {
       },
     },
     moduleB: {
-      'plan.out': 'moduleB',
       '.terragrunt-cache': {
         UUID1: {
           UUID2: {
@@ -66,7 +65,7 @@ describe('Generate Terraform plan output', () => {
     expect(exec.exec.mock.calls[0][2]).toMatchObject({
       cwd: '/work/moduleA/.terragrunt-cache/UUID1/UUID2',
     });
-    expect(exec.exec.mock.calls[1][1]).toEqual(['show', '-no-color', '../../../plan.out']);
+    expect(exec.exec.mock.calls[1][1]).toEqual(['show', '-no-color', 'plan.out']);
     expect(exec.exec.mock.calls[1][2]).toMatchObject({
       cwd: '/work/moduleB/.terragrunt-cache/UUID1/UUID2',
     });
