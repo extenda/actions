@@ -3,21 +3,29 @@ module.exports =
 /******/ 	var __webpack_modules__ = ({
 
 /***/ 6416:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
 
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const os = __webpack_require__(2087);
+const os = __importStar(__webpack_require__(2087));
+const utils_1 = __webpack_require__(3057);
 /**
  * Commands
  *
  * Command Format:
- *   ##[name key=value;key=value]message
+ *   ::name key=value,key=value::message
  *
  * Examples:
- *   ##[warning]This is the user warning message
- *   ##[set-secret name=mypassword]definitelyNotAPassword!
+ *   ::warning::This is the message
+ *   ::set-env name=MY_VAR::some value
  */
 function issueCommand(command, properties, message) {
     const cmd = new Command(command, properties, message);
@@ -42,34 +50,39 @@ class Command {
         let cmdStr = CMD_STRING + this.command;
         if (this.properties && Object.keys(this.properties).length > 0) {
             cmdStr += ' ';
+            let first = true;
             for (const key in this.properties) {
                 if (this.properties.hasOwnProperty(key)) {
                     const val = this.properties[key];
                     if (val) {
-                        // safely append the val - avoid blowing up when attempting to
-                        // call .replace() if message is not a string for some reason
-                        cmdStr += `${key}=${escape(`${val || ''}`)},`;
+                        if (first) {
+                            first = false;
+                        }
+                        else {
+                            cmdStr += ',';
+                        }
+                        cmdStr += `${key}=${escapeProperty(val)}`;
                     }
                 }
             }
         }
-        cmdStr += CMD_STRING;
-        // safely append the message - avoid blowing up when attempting to
-        // call .replace() if message is not a string for some reason
-        const message = `${this.message || ''}`;
-        cmdStr += escapeData(message);
+        cmdStr += `${CMD_STRING}${escapeData(this.message)}`;
         return cmdStr;
     }
 }
 function escapeData(s) {
-    return s.replace(/\r/g, '%0D').replace(/\n/g, '%0A');
+    return utils_1.toCommandValue(s)
+        .replace(/%/g, '%25')
+        .replace(/\r/g, '%0D')
+        .replace(/\n/g, '%0A');
 }
-function escape(s) {
-    return s
+function escapeProperty(s) {
+    return utils_1.toCommandValue(s)
+        .replace(/%/g, '%25')
         .replace(/\r/g, '%0D')
         .replace(/\n/g, '%0A')
-        .replace(/]/g, '%5D')
-        .replace(/;/g, '%3B');
+        .replace(/:/g, '%3A')
+        .replace(/,/g, '%2C');
 }
 //# sourceMappingURL=command.js.map
 
@@ -89,10 +102,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const command_1 = __webpack_require__(6416);
-const os = __webpack_require__(2087);
-const path = __webpack_require__(5622);
+const file_command_1 = __webpack_require__(2786);
+const utils_1 = __webpack_require__(3057);
+const os = __importStar(__webpack_require__(2087));
+const path = __importStar(__webpack_require__(5622));
 /**
  * The code to exit an action
  */
@@ -113,11 +135,21 @@ var ExitCode;
 /**
  * Sets env variable for this action and future actions in the job
  * @param name the name of the variable to set
- * @param val the value of the variable
+ * @param val the value of the variable. Non-string values will be converted to a string via JSON.stringify
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function exportVariable(name, val) {
-    process.env[name] = val;
-    command_1.issueCommand('set-env', { name }, val);
+    const convertedVal = utils_1.toCommandValue(val);
+    process.env[name] = convertedVal;
+    const filePath = process.env['GITHUB_ENV'] || '';
+    if (filePath) {
+        const delimiter = '_GitHubActionsFileCommandDelimeter_';
+        const commandValue = `${name}<<${delimiter}${os.EOL}${convertedVal}${os.EOL}${delimiter}`;
+        file_command_1.issueCommand('ENV', commandValue);
+    }
+    else {
+        command_1.issueCommand('set-env', { name }, convertedVal);
+    }
 }
 exports.exportVariable = exportVariable;
 /**
@@ -133,7 +165,13 @@ exports.setSecret = setSecret;
  * @param inputPath
  */
 function addPath(inputPath) {
-    command_1.issueCommand('add-path', {}, inputPath);
+    const filePath = process.env['GITHUB_PATH'] || '';
+    if (filePath) {
+        file_command_1.issueCommand('PATH', inputPath);
+    }
+    else {
+        command_1.issueCommand('add-path', {}, inputPath);
+    }
     process.env['PATH'] = `${inputPath}${path.delimiter}${process.env['PATH']}`;
 }
 exports.addPath = addPath;
@@ -156,12 +194,22 @@ exports.getInput = getInput;
  * Sets the value of an output.
  *
  * @param     name     name of the output to set
- * @param     value    value to store
+ * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function setOutput(name, value) {
     command_1.issueCommand('set-output', { name }, value);
 }
 exports.setOutput = setOutput;
+/**
+ * Enables or disables the echoing of commands into stdout for the rest of the step.
+ * Echoing is disabled by default if ACTIONS_STEP_DEBUG is not set.
+ *
+ */
+function setCommandEcho(enabled) {
+    command_1.issue('echo', enabled ? 'on' : 'off');
+}
+exports.setCommandEcho = setCommandEcho;
 //-----------------------------------------------------------------------
 // Results
 //-----------------------------------------------------------------------
@@ -179,6 +227,13 @@ exports.setFailed = setFailed;
 // Logging Commands
 //-----------------------------------------------------------------------
 /**
+ * Gets whether Actions Step Debug is on or not
+ */
+function isDebug() {
+    return process.env['RUNNER_DEBUG'] === '1';
+}
+exports.isDebug = isDebug;
+/**
  * Writes debug message to user log
  * @param message debug message
  */
@@ -188,18 +243,18 @@ function debug(message) {
 exports.debug = debug;
 /**
  * Adds an error issue
- * @param message error issue message
+ * @param message error issue message. Errors will be converted to string via toString()
  */
 function error(message) {
-    command_1.issue('error', message);
+    command_1.issue('error', message instanceof Error ? message.toString() : message);
 }
 exports.error = error;
 /**
  * Adds an warning issue
- * @param message warning issue message
+ * @param message warning issue message. Errors will be converted to string via toString()
  */
 function warning(message) {
-    command_1.issue('warning', message);
+    command_1.issue('warning', message instanceof Error ? message.toString() : message);
 }
 exports.warning = warning;
 /**
@@ -257,8 +312,9 @@ exports.group = group;
  * Saves state for current action, the state can only be retrieved by this action's post job execution.
  *
  * @param     name     name of the state to store
- * @param     value    value to store
+ * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function saveState(name, value) {
     command_1.issueCommand('save-state', { name }, value);
 }
@@ -274,6 +330,68 @@ function getState(name) {
 }
 exports.getState = getState;
 //# sourceMappingURL=core.js.map
+
+/***/ }),
+
+/***/ 2786:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+// For internal use, subject to change.
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+// We use any as a valid input type
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const fs = __importStar(__webpack_require__(5747));
+const os = __importStar(__webpack_require__(2087));
+const utils_1 = __webpack_require__(3057);
+function issueCommand(command, message) {
+    const filePath = process.env[`GITHUB_${command}`];
+    if (!filePath) {
+        throw new Error(`Unable to find environment variable for file command ${command}`);
+    }
+    if (!fs.existsSync(filePath)) {
+        throw new Error(`Missing file at path: ${filePath}`);
+    }
+    fs.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os.EOL}`, {
+        encoding: 'utf8'
+    });
+}
+exports.issueCommand = issueCommand;
+//# sourceMappingURL=file-command.js.map
+
+/***/ }),
+
+/***/ 3057:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+// We use any as a valid input type
+/* eslint-disable @typescript-eslint/no-explicit-any */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+/**
+ * Sanitizes an input into a string so it can be passed into issueCommand safely
+ * @param input input to sanitize into a string
+ */
+function toCommandValue(input) {
+    if (input === null || input === undefined) {
+        return '';
+    }
+    else if (typeof input === 'string' || input instanceof String) {
+        return input;
+    }
+    return JSON.stringify(input);
+}
+exports.toCommandValue = toCommandValue;
+//# sourceMappingURL=utils.js.map
 
 /***/ }),
 
@@ -1530,21 +1648,29 @@ module.exports = {
 /***/ }),
 
 /***/ 6332:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
 
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const os = __webpack_require__(2087);
+const os = __importStar(__webpack_require__(2087));
+const utils_1 = __webpack_require__(2894);
 /**
  * Commands
  *
  * Command Format:
- *   ##[name key=value;key=value]message
+ *   ::name key=value,key=value::message
  *
  * Examples:
- *   ##[warning]This is the user warning message
- *   ##[set-secret name=mypassword]definitelyNotAPassword!
+ *   ::warning::This is the message
+ *   ::set-env name=MY_VAR::some value
  */
 function issueCommand(command, properties, message) {
     const cmd = new Command(command, properties, message);
@@ -1569,34 +1695,39 @@ class Command {
         let cmdStr = CMD_STRING + this.command;
         if (this.properties && Object.keys(this.properties).length > 0) {
             cmdStr += ' ';
+            let first = true;
             for (const key in this.properties) {
                 if (this.properties.hasOwnProperty(key)) {
                     const val = this.properties[key];
                     if (val) {
-                        // safely append the val - avoid blowing up when attempting to
-                        // call .replace() if message is not a string for some reason
-                        cmdStr += `${key}=${escape(`${val || ''}`)},`;
+                        if (first) {
+                            first = false;
+                        }
+                        else {
+                            cmdStr += ',';
+                        }
+                        cmdStr += `${key}=${escapeProperty(val)}`;
                     }
                 }
             }
         }
-        cmdStr += CMD_STRING;
-        // safely append the message - avoid blowing up when attempting to
-        // call .replace() if message is not a string for some reason
-        const message = `${this.message || ''}`;
-        cmdStr += escapeData(message);
+        cmdStr += `${CMD_STRING}${escapeData(this.message)}`;
         return cmdStr;
     }
 }
 function escapeData(s) {
-    return s.replace(/\r/g, '%0D').replace(/\n/g, '%0A');
+    return utils_1.toCommandValue(s)
+        .replace(/%/g, '%25')
+        .replace(/\r/g, '%0D')
+        .replace(/\n/g, '%0A');
 }
-function escape(s) {
-    return s
+function escapeProperty(s) {
+    return utils_1.toCommandValue(s)
+        .replace(/%/g, '%25')
         .replace(/\r/g, '%0D')
         .replace(/\n/g, '%0A')
-        .replace(/]/g, '%5D')
-        .replace(/;/g, '%3B');
+        .replace(/:/g, '%3A')
+        .replace(/,/g, '%2C');
 }
 //# sourceMappingURL=command.js.map
 
@@ -1616,10 +1747,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const command_1 = __webpack_require__(6332);
-const os = __webpack_require__(2087);
-const path = __webpack_require__(5622);
+const file_command_1 = __webpack_require__(3664);
+const utils_1 = __webpack_require__(2894);
+const os = __importStar(__webpack_require__(2087));
+const path = __importStar(__webpack_require__(5622));
 /**
  * The code to exit an action
  */
@@ -1640,11 +1780,21 @@ var ExitCode;
 /**
  * Sets env variable for this action and future actions in the job
  * @param name the name of the variable to set
- * @param val the value of the variable
+ * @param val the value of the variable. Non-string values will be converted to a string via JSON.stringify
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function exportVariable(name, val) {
-    process.env[name] = val;
-    command_1.issueCommand('set-env', { name }, val);
+    const convertedVal = utils_1.toCommandValue(val);
+    process.env[name] = convertedVal;
+    const filePath = process.env['GITHUB_ENV'] || '';
+    if (filePath) {
+        const delimiter = '_GitHubActionsFileCommandDelimeter_';
+        const commandValue = `${name}<<${delimiter}${os.EOL}${convertedVal}${os.EOL}${delimiter}`;
+        file_command_1.issueCommand('ENV', commandValue);
+    }
+    else {
+        command_1.issueCommand('set-env', { name }, convertedVal);
+    }
 }
 exports.exportVariable = exportVariable;
 /**
@@ -1660,7 +1810,13 @@ exports.setSecret = setSecret;
  * @param inputPath
  */
 function addPath(inputPath) {
-    command_1.issueCommand('add-path', {}, inputPath);
+    const filePath = process.env['GITHUB_PATH'] || '';
+    if (filePath) {
+        file_command_1.issueCommand('PATH', inputPath);
+    }
+    else {
+        command_1.issueCommand('add-path', {}, inputPath);
+    }
     process.env['PATH'] = `${inputPath}${path.delimiter}${process.env['PATH']}`;
 }
 exports.addPath = addPath;
@@ -1683,12 +1839,22 @@ exports.getInput = getInput;
  * Sets the value of an output.
  *
  * @param     name     name of the output to set
- * @param     value    value to store
+ * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function setOutput(name, value) {
     command_1.issueCommand('set-output', { name }, value);
 }
 exports.setOutput = setOutput;
+/**
+ * Enables or disables the echoing of commands into stdout for the rest of the step.
+ * Echoing is disabled by default if ACTIONS_STEP_DEBUG is not set.
+ *
+ */
+function setCommandEcho(enabled) {
+    command_1.issue('echo', enabled ? 'on' : 'off');
+}
+exports.setCommandEcho = setCommandEcho;
 //-----------------------------------------------------------------------
 // Results
 //-----------------------------------------------------------------------
@@ -1706,6 +1872,13 @@ exports.setFailed = setFailed;
 // Logging Commands
 //-----------------------------------------------------------------------
 /**
+ * Gets whether Actions Step Debug is on or not
+ */
+function isDebug() {
+    return process.env['RUNNER_DEBUG'] === '1';
+}
+exports.isDebug = isDebug;
+/**
  * Writes debug message to user log
  * @param message debug message
  */
@@ -1715,18 +1888,18 @@ function debug(message) {
 exports.debug = debug;
 /**
  * Adds an error issue
- * @param message error issue message
+ * @param message error issue message. Errors will be converted to string via toString()
  */
 function error(message) {
-    command_1.issue('error', message);
+    command_1.issue('error', message instanceof Error ? message.toString() : message);
 }
 exports.error = error;
 /**
  * Adds an warning issue
- * @param message warning issue message
+ * @param message warning issue message. Errors will be converted to string via toString()
  */
 function warning(message) {
-    command_1.issue('warning', message);
+    command_1.issue('warning', message instanceof Error ? message.toString() : message);
 }
 exports.warning = warning;
 /**
@@ -1784,8 +1957,9 @@ exports.group = group;
  * Saves state for current action, the state can only be retrieved by this action's post job execution.
  *
  * @param     name     name of the state to store
- * @param     value    value to store
+ * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function saveState(name, value) {
     command_1.issueCommand('save-state', { name }, value);
 }
@@ -1801,6 +1975,68 @@ function getState(name) {
 }
 exports.getState = getState;
 //# sourceMappingURL=core.js.map
+
+/***/ }),
+
+/***/ 3664:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+// For internal use, subject to change.
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+// We use any as a valid input type
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const fs = __importStar(__webpack_require__(5747));
+const os = __importStar(__webpack_require__(2087));
+const utils_1 = __webpack_require__(2894);
+function issueCommand(command, message) {
+    const filePath = process.env[`GITHUB_${command}`];
+    if (!filePath) {
+        throw new Error(`Unable to find environment variable for file command ${command}`);
+    }
+    if (!fs.existsSync(filePath)) {
+        throw new Error(`Missing file at path: ${filePath}`);
+    }
+    fs.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os.EOL}`, {
+        encoding: 'utf8'
+    });
+}
+exports.issueCommand = issueCommand;
+//# sourceMappingURL=file-command.js.map
+
+/***/ }),
+
+/***/ 2894:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+// We use any as a valid input type
+/* eslint-disable @typescript-eslint/no-explicit-any */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+/**
+ * Sanitizes an input into a string so it can be passed into issueCommand safely
+ * @param input input to sanitize into a string
+ */
+function toCommandValue(input) {
+    if (input === null || input === undefined) {
+        return '';
+    }
+    else if (typeof input === 'string' || input instanceof String) {
+        return input;
+    }
+    return JSON.stringify(input);
+}
+exports.toCommandValue = toCommandValue;
+//# sourceMappingURL=utils.js.map
 
 /***/ }),
 

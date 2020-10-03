@@ -5,6 +5,6 @@
   "description": "Docker build, tag, and push with default registry URL",
   "main": "dist/index.js",
   "dependencies": {
-    "@actions/core": "^1.2.0"
+    "@actions/core": "^1.2.6"
   }
 }
