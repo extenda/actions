@@ -33122,10 +33122,11 @@ const terraformShow = async (plan) => {
       },
     },
   }).catch((err) => {
-    core.error(`${err.message}\nTerraform output:\n${stdout}\n${stderr}`);
+    core.error(`Plan file: ${plan}\n${err.message}\nTerraform output:\n${stdout}\n${stderr}\n----------------`);
     stdout += stderr;
     return 1;
   });
+  core.info(`Plan file: ${plan}\nTerraform output:\n${stdout}\n----------------`);
   return {
     status,
     output: stdout.trim(),
