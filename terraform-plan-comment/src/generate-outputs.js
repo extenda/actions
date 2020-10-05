@@ -75,7 +75,7 @@ const moduleName = (plan, workingDirectory) => {
 
 const generateOutputs = async (workingDirectory, planFile, maxThreads, ignoredResourcesRegexp) => {
   const source = `${workingDirectory}/**/${planFile}`;
-  const plans = fg.sync(source, { dot: true });
+  const plans = fg.sync(source, { dot: true, ignore: [`**/.terragrunt-cache/**/${planFile}`] });
   core.info(`Found ${plans.length} plan(s) for glob ${source}`);
   const promises = [];
   const limit = pLimit(parseInt(maxThreads, 10) || 1);
