@@ -51,7 +51,7 @@ const managedArguments = async (args, service, projectId) => {
         'allow-unauthenticated': allowUnauthenticated,
         'cloudsql-instances': cloudSqlInstances = undefined,
         region,
-        'runtime-account': runtimeAccountEmail = 'cloudrun-runtime',
+        'service-account': runtimeAccountEmail = 'cloudrun-runtime',
       },
     },
   } = service;
