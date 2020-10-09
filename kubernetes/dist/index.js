@@ -19079,6 +19079,40 @@ module.exports = __webpack_require__(3333).YAML
 
 /***/ }),
 
+/***/ 4601:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const exec = __webpack_require__(2176);
+
+const applyKubectl = async (deployment, dryRun) => {
+  const applyArgs = [
+    'apply',
+    '-k',
+    './kustomize',
+  ];
+  if (dryRun) {
+    applyArgs.push('--dry-run=client');
+  }
+
+  await exec.exec('kubectl', applyArgs);
+
+  if (!dryRun) {
+    await exec.exec('kubectl', [
+      'rollout',
+      'status',
+      'deployment',
+      deployment,
+      '--namespace',
+      deployment,
+    ]);
+  }
+};
+
+module.exports = applyKubectl;
+
+
+/***/ }),
+
 /***/ 1773:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -19174,9 +19208,10 @@ const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const serviceFile = core.getInput('service-definition') || 'kubernetes.yaml';
   const image = core.getInput('image', { required: true });
+  const dryRun = core.getInput('dry-run') === 'true';
 
   const service = loadServiceDefinition(serviceFile, kubernetesSchema);
-  await runDeploy(serviceAccountKey, service, image);
+  await runDeploy(serviceAccountKey, service, image, dryRun);
 };
 
 if (require.main === require.cache[eval('__filename')]) {
@@ -19229,7 +19264,6 @@ module.exports = {
 /***/ 6250:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const core = __webpack_require__(6341);
 const exec = __webpack_require__(2176);
 const { loadTool } = __webpack_require__(1898);
 
@@ -19304,7 +19338,6 @@ module.exports = patchDeploymentYaml;
 /***/ 3383:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const exec = __webpack_require__(2176);
 const path = __webpack_require__(5622);
 const fs = __webpack_require__(5747);
 const clusterInfo = __webpack_require__(7955);
@@ -19315,6 +19348,7 @@ const patchDeploymentYaml = __webpack_require__(9309);
 const patchConfigMapYaml = __webpack_require__(1556);
 const parseEnvironmentArgs = __webpack_require__(6762);
 const createBaseKustomize = __webpack_require__(1773);
+const applyKubectl = __webpack_require__(4601);
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -19333,23 +19367,6 @@ const patchDeployment = (service) => {
   let deploymentYaml = fs.readFileSync(deploymentYamlPath, 'utf8');
   deploymentYaml = patchDeploymentYaml(service, deploymentYaml);
   fs.writeFileSync(deploymentYamlPath, deploymentYaml);
-};
-
-const applyWithKubectl = async (deployment) => {
-  await exec.exec('kubectl', [
-    'apply',
-    '-k',
-    './kustomize',
-  ]);
-
-  await exec.exec('kubectl', [
-    'rollout',
-    'status',
-    'deployment',
-    deployment,
-    '--namespace',
-    deployment,
-  ]);
 };
 
 const kustomizeNamespace = async (namespace) => {
@@ -19399,6 +19416,7 @@ const runDeploy = async (
   serviceAccountKey,
   service,
   image,
+  dryRun,
 ) => {
   createBaseKustomize();
 
@@ -19420,7 +19438,7 @@ const runDeploy = async (
   await kustomizeNameSuffix(service.name);
   await kustomizeBuild();
 
-  await applyWithKubectl(namespace);
+  await applyKubectl(namespace, dryRun);
 };
 
 module.exports = runDeploy;

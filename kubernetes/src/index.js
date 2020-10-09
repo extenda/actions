@@ -8,9 +8,10 @@ const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const serviceFile = core.getInput('service-definition') || 'kubernetes.yaml';
   const image = core.getInput('image', { required: true });
+  const dryRun = core.getInput('dry-run') === 'true';
 
   const service = loadServiceDefinition(serviceFile, kubernetesSchema);
-  await runDeploy(serviceAccountKey, service, image);
+  await runDeploy(serviceAccountKey, service, image, dryRun);
 };
 
 if (require.main === module) {

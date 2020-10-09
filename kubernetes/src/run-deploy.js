@@ -1,4 +1,3 @@
-const exec = require('@actions/exec');
 const path = require('path');
 const fs = require('fs');
 const clusterInfo = require('../../cloud-run/src/cluster-info');
@@ -9,6 +8,7 @@ const patchDeploymentYaml = require('./patch-deployment-yaml');
 const patchConfigMapYaml = require('./patch-configmap-yaml');
 const parseEnvironmentArgs = require('./environment-args');
 const createBaseKustomize = require('./create-base-kustomize');
+const applyKubectl = require('./apply-kubectl');
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -27,23 +27,6 @@ const patchDeployment = (service) => {
   let deploymentYaml = fs.readFileSync(deploymentYamlPath, 'utf8');
   deploymentYaml = patchDeploymentYaml(service, deploymentYaml);
   fs.writeFileSync(deploymentYamlPath, deploymentYaml);
-};
-
-const applyWithKubectl = async (deployment) => {
-  await exec.exec('kubectl', [
-    'apply',
-    '-k',
-    './kustomize',
-  ]);
-
-  await exec.exec('kubectl', [
-    'rollout',
-    'status',
-    'deployment',
-    deployment,
-    '--namespace',
-    deployment,
-  ]);
 };
 
 const kustomizeNamespace = async (namespace) => {
@@ -93,6 +76,7 @@ const runDeploy = async (
   serviceAccountKey,
   service,
   image,
+  dryRun,
 ) => {
   createBaseKustomize();
 
@@ -114,7 +98,7 @@ const runDeploy = async (
   await kustomizeNameSuffix(service.name);
   await kustomizeBuild();
 
-  await applyWithKubectl(namespace);
+  await applyKubectl(namespace, dryRun);
 };
 
 module.exports = runDeploy;

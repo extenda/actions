@@ -16,15 +16,17 @@ describe('Kubernetes Action', () => {
     serviceDefinition.mockReturnValueOnce({});
     core.getInput.mockReturnValueOnce('service-account')
       .mockReturnValueOnce(serviceDefinition)
-      .mockReturnValueOnce('image:tag');
+      .mockReturnValueOnce('image:tag')
+      .mockReturnValueOnce('true');
     runDeploy.mockResolvedValueOnce({});
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(3);
+    expect(core.getInput).toHaveBeenCalledTimes(4);
     expect(runDeploy).toHaveBeenCalledWith(
       'service-account',
       {},
       'image:tag',
+      true,
     );
   });
 });

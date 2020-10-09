@@ -15,6 +15,11 @@ inputs:
   image:
     description: The Docker image to deploy to Kubernetes.
     required: true
+  dry-run:
+    description: |
+      Instructs not to perform actual kubernetes deployment. Set to 'true' to only simulate deploying the final Kubernetes manifest.
+    required: false
+    default: 'false'
 runs:
   using: node12
   main: dist/index.js
