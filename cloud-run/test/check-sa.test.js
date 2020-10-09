@@ -1,0 +1,31 @@
+const exec = require('@actions/exec');
+const checkServiceAccount = require('../src/check-sa');
+
+jest.mock('@actions/exec');
+
+const revisionsListString = [`service-name1@test-staging-t3st.iam.gserviceaccount.com
+service-name@test-staging-t3st.iam.gserviceaccount.com
+service-name2@test-staging-t3st.iam.gserviceaccount.com`];
+
+describe('clean revisions', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  test('check service account exists', async () => {
+    exec.exec.mockImplementationOnce((
+      cmd, args, opts,
+    ) => opts.listeners.stdout(revisionsListString));
+    checkServiceAccount('service-name', 'test-staging-t3st');
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+  });
+
+  test('check service account not exists', async () => {
+    exec.exec.mockImplementationOnce((
+      cmd, args, opts,
+    ) => opts.listeners.stdout(revisionsListString));
+    await expect(checkServiceAccount('service-name3', 'test-staging-t3st')).rejects
+      .toEqual(new Error('This service has no service account. Please refer to "https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md#services" for help'));
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+  });
+});
