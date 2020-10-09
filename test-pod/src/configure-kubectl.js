@@ -2,6 +2,7 @@ const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const getClusterInfo = require('../../cloud-run/src/cluster-info');
 const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
 const loadServiceDefinition = require('../../cloud-run/src/service-definition');
+const cloudRunSchema = require('../../cloud-run/src/cloud-run-schema');
 
 const resolveClusterAndNamespace = (clusterInput, namespaceInput) => {
   if (clusterInput && namespaceInput) {
@@ -12,7 +13,7 @@ const resolveClusterAndNamespace = (clusterInput, namespaceInput) => {
     };
   }
 
-  const service = loadServiceDefinition('cloud-run.yaml');
+  const service = loadServiceDefinition('cloud-run.yaml', cloudRunSchema);
   const {
     name,
     platform: {
