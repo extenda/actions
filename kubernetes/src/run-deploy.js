@@ -1,4 +1,3 @@
-const io = require('@actions/io');
 const exec = require('@actions/exec');
 const path = require('path');
 const fs = require('fs');
@@ -9,6 +8,7 @@ const execKustomize = require('./kustomize');
 const patchDeploymentYaml = require('./patch-deployment-yaml');
 const patchConfigMapYaml = require('./patch-configmap-yaml');
 const parseEnvironmentArgs = require('./environment-args');
+const createBaseKustomize = require('./create-base-kustomize');
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -16,14 +16,14 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
 );
 
 const patchConfigMap = (environmentArgs) => {
-  const configMapYamlPath = path.join(process.env.GITHUB_WORKSPACE, 'kustomize', 'configmap.yml');
+  const configMapYamlPath = path.join('kustomize', 'configmap.yml');
   let configMapYaml = fs.readFileSync(configMapYamlPath, 'utf8');
   configMapYaml = patchConfigMapYaml(environmentArgs, configMapYaml);
   fs.writeFileSync(configMapYamlPath, configMapYaml);
 };
 
 const patchDeployment = (service) => {
-  const deploymentYamlPath = path.join(process.env.GITHUB_WORKSPACE, 'kustomize', 'deployment.yml');
+  const deploymentYamlPath = path.join('kustomize', 'deployment.yml');
   let deploymentYaml = fs.readFileSync(deploymentYamlPath, 'utf8');
   deploymentYaml = patchDeploymentYaml(service, deploymentYaml);
   fs.writeFileSync(deploymentYamlPath, deploymentYaml);
@@ -94,8 +94,7 @@ const runDeploy = async (
   service,
   image,
 ) => {
-  // put kubernetes configuration in repository
-  await io.cp(path.join(__dirname, 'kustomize'), process.env.GITHUB_WORKSPACE, { recursive: true });
+  createBaseKustomize();
 
   const projectId = await gcloudAuth(serviceAccountKey);
   const {

@@ -1,6 +1,5 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
-const path = require('path');
 const { loadTool } = require('../../utils');
 
 const KUSTOMIZE_VERSION = '3.8.4';
@@ -16,7 +15,7 @@ const execKustomize = async (args) => {
   let stdout = '';
   let stderr = '';
   const status = await exec.exec(kustomize, args, {
-    cwd: path.join(process.env.GITHUB_WORKSPACE, 'kustomize'),
+    cwd: 'kustomize',
     listeners: {
       stdout: (data) => {
         stdout += data.toString('utf8');

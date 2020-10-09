@@ -1,5 +1,4 @@
 const exec = require('@actions/exec');
-const path = require('path');
 const { loadTool } = require('../../utils');
 const kustomize = require('../src/kustomize');
 
@@ -17,18 +16,6 @@ describe('Run Kustomize', () => {
     jest.resetAllMocks();
   });
 
-  test('It runs Kustomize on repository path', async () => {
-    exec.exec.mockResolvedValueOnce(0);
-    const tool = 'kustomize';
-    loadTool.mockResolvedValueOnce(tool);
-
-    const args = ['edit', 'set'];
-    await kustomize(args);
-
-    expect(exec.exec).toHaveBeenCalledWith(tool, args, expect.objectContaining({ cwd: path.join('extenda/test-repo', 'kustomize') }));
-    expect(exec.exec).toHaveBeenCalledTimes(1);
-  });
-
   test('It can run Kustomize with args', async () => {
     exec.exec.mockResolvedValueOnce(0);
     const tool = 'kustomize';
@@ -37,7 +24,7 @@ describe('Run Kustomize', () => {
     const args = ['edit', 'set'];
     const result = await kustomize(args);
 
-    expect(exec.exec).toHaveBeenCalledWith(tool, args, expect.anything());
+    expect(exec.exec).toHaveBeenCalledWith(tool, args, expect.objectContaining({ cwd: 'kustomize' }));
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(result).toMatchObject({ status: 0, output: '' });
   });

@@ -18991,6 +18991,76 @@ module.exports = __webpack_require__(3333).YAML
 
 /***/ }),
 
+/***/ 1773:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const fs = __webpack_require__(5747);
+const path = __webpack_require__(5622);
+
+const createBaseKustomize = () => {
+  const yamls = {
+    namespace: `
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: hiiretail`,
+    deployment: `
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hiiretail
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hiiretail
+  template:
+    metadata:
+      labels:
+        app: hiiretail
+    spec:
+      containers:
+        - name: hiiretail
+          image: eu.gcr.io/extenda/IMAGE:TAG
+          envFrom:
+            - configMapRef:
+                  name: hiiretail
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+`,
+    configmap: `
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hiiretail
+`,
+    kustomization: `
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yml
+  - deployment.yml
+  - configmap.yml
+`,
+  };
+
+  fs.mkdirSync('kustomize');
+  Object.keys(yamls).forEach((name) => {
+    fs.writeFileSync(path.join('kustomize', `/${name}.yml`), yamls[name]);
+  });
+};
+
+
+module.exports = createBaseKustomize;
+
+
+/***/ }),
+
 /***/ 6762:
 /***/ ((module) => {
 
@@ -19079,7 +19149,6 @@ module.exports = {
 
 const core = __webpack_require__(6341);
 const exec = __webpack_require__(2176);
-const path = __webpack_require__(5622);
 const { loadTool } = __webpack_require__(1898);
 
 const KUSTOMIZE_VERSION = '3.8.4';
@@ -19095,7 +19164,7 @@ const execKustomize = async (args) => {
   let stdout = '';
   let stderr = '';
   const status = await exec.exec(kustomize, args, {
-    cwd: path.join(process.env.GITHUB_WORKSPACE, 'kustomize'),
+    cwd: 'kustomize',
     listeners: {
       stdout: (data) => {
         stdout += data.toString('utf8');
@@ -19163,7 +19232,6 @@ module.exports = patchDeploymentYaml;
 /***/ 3383:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const io = __webpack_require__(7960);
 const exec = __webpack_require__(2176);
 const path = __webpack_require__(5622);
 const fs = __webpack_require__(5747);
@@ -19174,6 +19242,7 @@ const execKustomize = __webpack_require__(6250);
 const patchDeploymentYaml = __webpack_require__(9309);
 const patchConfigMapYaml = __webpack_require__(1556);
 const parseEnvironmentArgs = __webpack_require__(6762);
+const createBaseKustomize = __webpack_require__(1773);
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -19181,14 +19250,14 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
 );
 
 const patchConfigMap = (environmentArgs) => {
-  const configMapYamlPath = path.join(process.env.GITHUB_WORKSPACE, 'kustomize', 'configmap.yml');
+  const configMapYamlPath = path.join('kustomize', 'configmap.yml');
   let configMapYaml = fs.readFileSync(configMapYamlPath, 'utf8');
   configMapYaml = patchConfigMapYaml(environmentArgs, configMapYaml);
   fs.writeFileSync(configMapYamlPath, configMapYaml);
 };
 
 const patchDeployment = (service) => {
-  const deploymentYamlPath = path.join(process.env.GITHUB_WORKSPACE, 'kustomize', 'deployment.yml');
+  const deploymentYamlPath = path.join('kustomize', 'deployment.yml');
   let deploymentYaml = fs.readFileSync(deploymentYamlPath, 'utf8');
   deploymentYaml = patchDeploymentYaml(service, deploymentYaml);
   fs.writeFileSync(deploymentYamlPath, deploymentYaml);
@@ -19259,8 +19328,7 @@ const runDeploy = async (
   service,
   image,
 ) => {
-  // put kubernetes configuration in repository
-  await io.cp(__webpack_require__.ab + "kustomize", process.env.GITHUB_WORKSPACE, { recursive: true });
+  createBaseKustomize();
 
   const projectId = await gcloudAuth(serviceAccountKey);
   const {

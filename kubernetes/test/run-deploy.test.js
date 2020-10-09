@@ -1,9 +1,3 @@
-let fs = require('fs');
-
-const mockFs = require('mock-fs');
-
-fs = require('fs');
-
 jest.mock('@actions/exec');
 jest.mock('../../setup-gcloud/src/setup-gcloud');
 jest.mock('../../cloud-run/src/cluster-info');
@@ -16,6 +10,7 @@ jest.mock('../../utils', () => ({
 }));
 
 const exec = require('@actions/exec');
+const mockFs = require('mock-fs');
 const clusterInfo = require('../../cloud-run/src/cluster-info');
 const runDeploy = require('../src/run-deploy');
 const kustomize = require('../src/kustomize');
@@ -33,33 +28,12 @@ describe('Run Deploy', () => {
   });
 
   beforeEach(() => {
-    const fileSystem = {
-      'src/kustomize': {
-        'deployment.yml': 'kind: Deployment',
-        'namespace.yml': 'kind: Namespace',
-        'configmap.yml': 'kind: ConfigMap',
-      },
-      'extenda/test-repo': {},
-    };
-    mockFs(fileSystem);
+    mockFs({});
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
     mockFs.restore();
-  });
-
-  test('It copies kustomize yaml files to repository', async () => {
-    clusterInfo.mockResolvedValueOnce({});
-    exec.exec.mockResolvedValue(0);
-    await runDeploy(
-      'service-account',
-      {},
-      'gcr.io/test-project/my-service:tag',
-    );
-    expect(fs.existsSync(`${process.env.GITHUB_WORKSPACE}/kustomize/deployment.yml`)).toEqual(true);
-    expect(fs.existsSync(`${process.env.GITHUB_WORKSPACE}/kustomize/configmap.yml`)).toEqual(true);
-    expect(fs.existsSync(`${process.env.GITHUB_WORKSPACE}/kustomize/namespace.yml`)).toEqual(true);
+    jest.resetAllMocks();
   });
 
   test('It calls kustomize on yaml files and build', async () => {
