@@ -3,11 +3,6 @@ const path = require('path');
 
 const createBaseKustomize = () => {
   const yamls = {
-    namespace: `
-kind: Namespace
-apiVersion: v1
-metadata:
-  name: hiiretail`,
     deployment: `
 apiVersion: apps/v1
 kind: Deployment
@@ -47,7 +42,6 @@ metadata:
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - namespace.yml
   - deployment.yml
   - configmap.yml
 `,

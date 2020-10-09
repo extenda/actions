@@ -22,10 +22,9 @@ describe('Run Kustomize', () => {
     loadTool.mockResolvedValueOnce(tool);
 
     const args = ['edit', 'set'];
-    const result = await kustomize(args);
+    await kustomize(args);
 
     expect(exec.exec).toHaveBeenCalledWith(tool, args, expect.objectContaining({ cwd: 'kustomize' }));
     expect(exec.exec).toHaveBeenCalledTimes(1);
-    expect(result).toMatchObject({ status: 0, output: '' });
   });
 });

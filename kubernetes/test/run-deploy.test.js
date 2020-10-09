@@ -3,6 +3,7 @@ jest.mock('../../setup-gcloud/src/setup-gcloud');
 jest.mock('../../cloud-run/src/cluster-info');
 jest.mock('../../cloud-run/src/project-info');
 jest.mock('../../cloud-run/src/kubectl-auth');
+jest.mock('../../cloud-run/src/create-namespace');
 jest.mock('../src/kustomize');
 jest.mock('../src/patch-deployment-yaml', () => jest.fn((_service, yaml) => yaml));
 jest.mock('../../utils', () => ({
@@ -12,8 +13,10 @@ jest.mock('../../utils', () => ({
 const exec = require('@actions/exec');
 const mockFs = require('mock-fs');
 const clusterInfo = require('../../cloud-run/src/cluster-info');
+const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const runDeploy = require('../src/run-deploy');
 const kustomize = require('../src/kustomize');
+const createNamespace = require('../../cloud-run/src/create-namespace');
 
 const orgEnv = process.env;
 
@@ -34,6 +37,30 @@ describe('Run Deploy', () => {
   afterEach(() => {
     mockFs.restore();
     jest.resetAllMocks();
+  });
+
+  test('It calls create namespace', async () => {
+    clusterInfo.mockResolvedValueOnce({
+      project: 'project',
+      cluster: 'cluster',
+      clusterLocation: 'cluster-location',
+    });
+    setupGcloud.mockResolvedValueOnce('project-id');
+    exec.exec.mockResolvedValue(0);
+    const image = 'gcr.io/test-project/my-service:tag';
+    const name = 'deployment-name';
+    await runDeploy(
+      'service-account',
+      { name },
+      image,
+    );
+
+    expect(createNamespace).toHaveBeenCalledWith(
+      'project-id',
+      'skip',
+      { cluster: 'cluster', clusterLocation: 'cluster-location', project: 'project' },
+      'hiiretail-deployment-name',
+    );
   });
 
   test('It calls kustomize on yaml files and build', async () => {

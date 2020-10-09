@@ -17,7 +17,6 @@ describe('Creates base kustomize yaml files', () => {
   test('It creates correct yml files', () => {
     createBaseKustomize();
 
-    expect(fs.existsSync('kustomize/namespace.yml')).toEqual(true);
     expect(fs.existsSync('kustomize/deployment.yml')).toEqual(true);
     expect(fs.existsSync('kustomize/configmap.yml')).toEqual(true);
     expect(fs.existsSync('kustomize/kustomization.yml')).toEqual(true);

@@ -2,8 +2,8 @@ const exec = require('@actions/exec');
 const path = require('path');
 const fs = require('fs');
 const clusterInfo = require('../../cloud-run/src/cluster-info');
+const createNamespace = require('../../cloud-run/src/create-namespace');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
-const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
 const execKustomize = require('./kustomize');
 const patchDeploymentYaml = require('./patch-deployment-yaml');
 const patchConfigMapYaml = require('./patch-configmap-yaml');
@@ -97,30 +97,24 @@ const runDeploy = async (
   createBaseKustomize();
 
   const projectId = await gcloudAuth(serviceAccountKey);
-  const {
-    cluster,
-    clusterLocation,
-    project,
-  } = await clusterInfo(projectId);
+  const cluster = await clusterInfo(projectId);
 
   const args = parseEnvironmentArgs(service.environment, projectId);
   patchConfigMap(args);
   patchDeployment(service);
 
-  const deployment = `hiiretail-${service.name}`;
-  await kustomizeNamespace(deployment);
+  const namespace = `hiiretail-${service.name}`;
+
+  const opaEnabled = 'skip';
+  await createNamespace(projectId, opaEnabled, cluster, namespace);
+
+  await kustomizeNamespace(namespace);
   await kustomizeImage(image);
   await kustomizeLabels(service.name);
   await kustomizeNameSuffix(service.name);
   await kustomizeBuild();
 
-  await authenticateKubeCtl({
-    cluster,
-    clusterLocation,
-    project,
-  });
-
-  await applyWithKubectl(deployment);
+  await applyWithKubectl(namespace);
 };
 
 module.exports = runDeploy;

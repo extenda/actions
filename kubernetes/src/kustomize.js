@@ -13,26 +13,16 @@ const execKustomize = async (args) => {
     downloadUrl: KUSTOMIZE_URI,
   });
   let stdout = '';
-  let stderr = '';
-  const status = await exec.exec(kustomize, args, {
+  await exec.exec(kustomize, args, {
     cwd: 'kustomize',
     listeners: {
       stdout: (data) => {
         stdout += data.toString('utf8');
       },
-      stderr: (data) => {
-        stderr += data.toString('utf8');
-      },
     },
-  }).catch((err) => {
-    core.error(`kustomize execution failed: ${err.message}`);
-    stdout += stderr;
   });
 
-  return {
-    status,
-    output: stdout ? stdout.trim() : '',
-  };
+  return stdout.trim();
 };
 
 module.exports = execKustomize;

@@ -10784,6 +10784,67 @@ module.exports = getClusterInfo;
 
 /***/ }),
 
+/***/ 8494:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const core = __webpack_require__(7199);
+const exec = __webpack_require__(8972);
+const authenticateKubeCtl = __webpack_require__(693);
+const { setOpaInjectionLabels } = __webpack_require__(5892);
+
+const getNamespace = async (namespace) => {
+  let output = '';
+  try {
+    await exec.exec('kubectl', [
+      'get',
+      'namespace',
+      namespace,
+    ], {
+      listeners: {
+        stderr: (data) => {
+          output += data.toString('utf8');
+        },
+      },
+    });
+  } catch (err) {
+    if (output.includes('(NotFound)')) {
+      return false;
+    }
+    throw new Error(`Could not get namespace information! reason: ${err.message || 'unknown'}`);
+  }
+  return true;
+};
+
+const createNamespace = async (projectId,
+  opaEnabled,
+  { project, cluster, clusterLocation },
+  namespace) => {
+  // Authenticate kubectl
+  await authenticateKubeCtl({ cluster, clusterLocation, project });
+
+  if (!await getNamespace(namespace)) {
+    core.info(`creating namespace ${namespace}`);
+    await exec.exec('kubectl', ['create', 'namespace', namespace]);
+
+    await exec.exec('kubectl', [
+      'annotate',
+      'serviceaccount',
+      `--namespace=${namespace}`,
+      'default',
+      `iam.gke.io/gcp-service-account=${namespace}@${projectId}.iam.gserviceaccount.com`,
+    ]);
+  }
+
+  if (opaEnabled !== 'skip') {
+    await setOpaInjectionLabels(namespace, opaEnabled);
+  }
+};
+
+module.exports = createNamespace;
+
+
+/***/ }),
+
 /***/ 8295:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -10861,6 +10922,33 @@ const loadServiceDefinition = (serviceFile, schema) => {
 };
 
 module.exports = loadServiceDefinition;
+
+
+/***/ }),
+
+/***/ 5892:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const exec = __webpack_require__(8972);
+
+const setLabel = async (namespace, label, value) => exec.exec('kubectl', [
+  'label',
+  'namespace',
+  namespace,
+  `${label}=${value}`,
+  '--overwrite=true',
+]);
+
+const setOpaInjectionLabels = async (namespace, opaEnabled) => {
+  const opaInjection = opaEnabled ? 'enabled' : 'disabled';
+  await setLabel(namespace, 'opa-istio-injection', opaInjection);
+  await setLabel(namespace, 'istio-injection', opaInjection);
+};
+
+module.exports = {
+  setLabel,
+  setOpaInjectionLabels,
+};
 
 
 /***/ }),
@@ -18999,11 +19087,6 @@ const path = __webpack_require__(5622);
 
 const createBaseKustomize = () => {
   const yamls = {
-    namespace: `
-kind: Namespace
-apiVersion: v1
-metadata:
-  name: hiiretail`,
     deployment: `
 apiVersion: apps/v1
 kind: Deployment
@@ -19043,7 +19126,6 @@ metadata:
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - namespace.yml
   - deployment.yml
   - configmap.yml
 `,
@@ -19162,26 +19244,16 @@ const execKustomize = async (args) => {
     downloadUrl: KUSTOMIZE_URI,
   });
   let stdout = '';
-  let stderr = '';
-  const status = await exec.exec(kustomize, args, {
+  await exec.exec(kustomize, args, {
     cwd: 'kustomize',
     listeners: {
       stdout: (data) => {
         stdout += data.toString('utf8');
       },
-      stderr: (data) => {
-        stderr += data.toString('utf8');
-      },
     },
-  }).catch((err) => {
-    core.error(`kustomize execution failed: ${err.message}`);
-    stdout += stderr;
   });
 
-  return {
-    status,
-    output: stdout ? stdout.trim() : '',
-  };
+  return stdout.trim();
 };
 
 module.exports = execKustomize;
@@ -19236,8 +19308,8 @@ const exec = __webpack_require__(2176);
 const path = __webpack_require__(5622);
 const fs = __webpack_require__(5747);
 const clusterInfo = __webpack_require__(7955);
+const createNamespace = __webpack_require__(8494);
 const setupGcloud = __webpack_require__(7095);
-const authenticateKubeCtl = __webpack_require__(693);
 const execKustomize = __webpack_require__(6250);
 const patchDeploymentYaml = __webpack_require__(9309);
 const patchConfigMapYaml = __webpack_require__(1556);
@@ -19331,30 +19403,24 @@ const runDeploy = async (
   createBaseKustomize();
 
   const projectId = await gcloudAuth(serviceAccountKey);
-  const {
-    cluster,
-    clusterLocation,
-    project,
-  } = await clusterInfo(projectId);
+  const cluster = await clusterInfo(projectId);
 
   const args = parseEnvironmentArgs(service.environment, projectId);
   patchConfigMap(args);
   patchDeployment(service);
 
-  const deployment = `hiiretail-${service.name}`;
-  await kustomizeNamespace(deployment);
+  const namespace = `hiiretail-${service.name}`;
+
+  const opaEnabled = 'skip';
+  await createNamespace(projectId, opaEnabled, cluster, namespace);
+
+  await kustomizeNamespace(namespace);
   await kustomizeImage(image);
   await kustomizeLabels(service.name);
   await kustomizeNameSuffix(service.name);
   await kustomizeBuild();
 
-  await authenticateKubeCtl({
-    cluster,
-    clusterLocation,
-    project,
-  });
-
-  await applyWithKubectl(deployment);
+  await applyWithKubectl(namespace);
 };
 
 module.exports = runDeploy;
