@@ -7,12 +7,12 @@ const revisionsListString = [`service-name1@test-staging-t3st.iam.gserviceaccoun
 service-name@test-staging-t3st.iam.gserviceaccount.com
 service-name2@test-staging-t3st.iam.gserviceaccount.com`];
 
-describe('clean revisions', () => {
+describe('check service account', () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  test('check service account exists', async () => {
+  test('it checks service account exists', async () => {
     exec.exec.mockImplementationOnce((
       cmd, args, opts,
     ) => opts.listeners.stdout(revisionsListString));
@@ -20,7 +20,7 @@ describe('clean revisions', () => {
     expect(exec.exec).toHaveBeenCalledTimes(1);
   });
 
-  test('check service account not exists', async () => {
+  test('it checks service account doesn\'t exist', async () => {
     exec.exec.mockImplementationOnce((
       cmd, args, opts,
     ) => opts.listeners.stdout(revisionsListString));

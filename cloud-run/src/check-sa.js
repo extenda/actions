@@ -20,16 +20,9 @@ const getServiceAccounts = async (project) => {
 };
 
 const checkServiceAccount = async (serviceName, projectID) => {
-  let found = false;
-
   const emails = await getServiceAccounts(projectID);
-  for await (const email of emails) {
-    if (email === `${serviceName}@${projectID}.iam.gserviceaccount.com`) {
-      found = true;
-    }
-  }
-
-  if (!found) {
+  const match = emails.find((email) => email === `${serviceName}@${projectID}.iam.gserviceaccount.com`);
+  if (!match) {
     throw new Error('This service has no service account. Please refer to "https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md#services" for help');
   }
 };
