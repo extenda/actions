@@ -8,6 +8,7 @@ const createNamespace = require('./create-namespace');
 const projectInfo = require('./project-info');
 const waitForRevision = require('./wait-revision');
 const cleanRevisions = require('./clean-revisions');
+const checkServiceAccount = require('./check-sa');
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -175,6 +176,8 @@ const runDeploy = async (
     'max-revisions': maxRevisions = 4,
     environment = [],
   } = service;
+
+  await checkServiceAccount(name, projectId);
 
   const args = ['run', 'deploy', name,
     `--image=${image}`,

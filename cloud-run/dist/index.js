@@ -10703,6 +10703,43 @@ module.exports = __webpack_require__(3333).default
 
 /***/ }),
 
+/***/ 498:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const exec = __webpack_require__(2176);
+
+const getServiceAccounts = async (project) => {
+  let output = '';
+  await exec.exec('gcloud', [
+    'iam',
+    'service-accounts',
+    'list',
+    `--project=${project}`,
+    '--format=value(EMAIL)',
+  ], {
+    silent: true,
+    listeners: {
+      stdout: (data) => {
+        output += data.toString('utf8');
+      },
+    },
+  });
+  return output.split(/[\r\n]+/);
+};
+
+const checkServiceAccount = async (serviceName, projectID) => {
+  const emails = await getServiceAccounts(projectID);
+  const match = emails.find((email) => email === `${serviceName}@${projectID}.iam.gserviceaccount.com`);
+  if (!match) {
+    throw new Error('This service has no service account. Please refer to "https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md#services" for help');
+  }
+};
+
+module.exports = checkServiceAccount;
+
+
+/***/ }),
+
 /***/ 2695:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -11386,6 +11423,7 @@ const createNamespace = __webpack_require__(4721);
 const projectInfo = __webpack_require__(645);
 const waitForRevision = __webpack_require__(6545);
 const cleanRevisions = __webpack_require__(2695);
+const checkServiceAccount = __webpack_require__(498);
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -11553,6 +11591,8 @@ const runDeploy = async (
     'max-revisions': maxRevisions = 4,
     environment = [],
   } = service;
+
+  await checkServiceAccount(name, projectId);
 
   const args = ['run', 'deploy', name,
     `--image=${image}`,
