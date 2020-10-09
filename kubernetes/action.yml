@@ -1,0 +1,20 @@
+name: Kubernetes
+description: Deploy to Kubernetes
+author: Extenda Retail
+inputs:
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+  service-definition:
+    description: |
+      The service YAML specification.
+    required: false
+    default: kubernetes.yaml
+  image:
+    description: The Docker image to deploy to Kubernetes.
+    required: true
+runs:
+  using: node12
+  main: dist/index.js
