@@ -5,7 +5,6 @@ jest.mock('../../cloud-run/src/project-info');
 jest.mock('../../cloud-run/src/kubectl-auth');
 jest.mock('../../cloud-run/src/create-namespace');
 jest.mock('../src/kustomize');
-jest.mock('../src/patch-deployment-yaml', () => jest.fn((_service, yaml) => yaml));
 jest.mock('../../utils', () => ({
   loadTool: jest.fn(),
 }));

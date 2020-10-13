@@ -4,7 +4,7 @@ const clusterInfo = require('../../cloud-run/src/cluster-info');
 const createNamespace = require('../../cloud-run/src/create-namespace');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const execKustomize = require('./kustomize');
-const patchDeploymentYaml = require('./patch-deployment-yaml');
+const patchStatefulSetYaml = require('./patch-statefulset-yaml');
 const patchConfigMapYaml = require('./patch-configmap-yaml');
 const parseEnvironmentArgs = require('./environment-args');
 const createBaseKustomize = require('./create-base-kustomize');
@@ -22,11 +22,11 @@ const patchConfigMap = (environmentArgs) => {
   fs.writeFileSync(configMapYamlPath, configMapYaml);
 };
 
-const patchDeployment = (service) => {
-  const deploymentYamlPath = path.join('kustomize', 'deployment.yml');
-  let deploymentYaml = fs.readFileSync(deploymentYamlPath, 'utf8');
-  deploymentYaml = patchDeploymentYaml(service, deploymentYaml);
-  fs.writeFileSync(deploymentYamlPath, deploymentYaml);
+const patchStatefulSet = (service) => {
+  const statefulSetYamlPath = path.join('kustomize', 'statefulSet.yml');
+  let statefulSetYaml = fs.readFileSync(statefulSetYamlPath, 'utf8');
+  statefulSetYaml = patchStatefulSetYaml(service, statefulSetYaml);
+  fs.writeFileSync(statefulSetYamlPath, statefulSetYaml);
 };
 
 const kustomizeNamespace = async (namespace) => {
@@ -78,27 +78,26 @@ const runDeploy = async (
   image,
   dryRun,
 ) => {
-  createBaseKustomize();
+  const deploymentName = `hiiretail-${service.name}`;
+  createBaseKustomize(deploymentName);
 
   const projectId = await gcloudAuth(serviceAccountKey);
   const cluster = await clusterInfo(projectId);
 
   const args = parseEnvironmentArgs(service.environment, projectId);
   patchConfigMap(args);
-  patchDeployment(service);
-
-  const namespace = `hiiretail-${service.name}`;
+  patchStatefulSet(service);
 
   const opaEnabled = 'skip';
-  await createNamespace(projectId, opaEnabled, cluster, namespace);
+  await createNamespace(projectId, opaEnabled, cluster, deploymentName);
 
-  await kustomizeNamespace(namespace);
+  await kustomizeNamespace(deploymentName);
   await kustomizeImage(image);
   await kustomizeLabels(service.name);
   await kustomizeNameSuffix(service.name);
   await kustomizeBuild();
 
-  await applyKubectl(namespace, dryRun);
+  await applyKubectl(deploymentName, dryRun);
 };
 
 module.exports = runDeploy;

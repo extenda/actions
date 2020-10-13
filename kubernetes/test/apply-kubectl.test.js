@@ -31,14 +31,12 @@ describe('Kubectl applies manifest', () => {
       [
         'rollout',
         'status',
-        'deployment',
-        deployment,
-        '--namespace',
-        deployment,
+        '-k',
+        './kustomize',
+        `--namespace=${deployment}`,
       ],
     );
   });
-
 
   test('It will not apply manifest and skip rollout status when running with dry-run', async () => {
     const dryRun = true;

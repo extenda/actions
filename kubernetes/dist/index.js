@@ -19100,10 +19100,9 @@ const applyKubectl = async (deployment, dryRun) => {
     await exec.exec('kubectl', [
       'rollout',
       'status',
-      'deployment',
-      deployment,
-      '--namespace',
-      deployment,
+      '-k',
+      './kustomize',
+      `--namespace=${deployment}`,
     ]);
   }
 };
@@ -19119,8 +19118,62 @@ module.exports = applyKubectl;
 const fs = __webpack_require__(5747);
 const path = __webpack_require__(5622);
 
-const createBaseKustomize = () => {
+const createBaseKustomize = (deploymentName) => {
   const yamls = {
+    service: `
+apiVersion: v1
+kind: Service
+metadata:
+  name: hiiretail
+  labels:
+    app: hiiretail
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app: hiiretail
+`,
+    statefulSet: `
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hiiretail
+spec:
+  serviceName: hiiretail
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hiiretail
+  template:
+    metadata:
+      labels:
+        app: hiiretail
+    spec:
+      containers:
+        - name: ${deploymentName}
+          image: eu.gcr.io/extenda/IMAGE:TAG
+          envFrom:
+            - configMapRef:
+                name: hiiretail
+          volumeMounts:
+            - name: ${deploymentName}
+              mountPath: /data/storage
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+  volumeClaimTemplates:
+  - metadata:
+      name: ${deploymentName}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+`,
     deployment: `
 apiVersion: apps/v1
 kind: Deployment
@@ -19141,7 +19194,7 @@ spec:
           image: eu.gcr.io/extenda/IMAGE:TAG
           envFrom:
             - configMapRef:
-                  name: hiiretail
+                name: hiiretail
           resources:
             requests:
               cpu: 100m
@@ -19160,8 +19213,9 @@ metadata:
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - deployment.yml
+  - service.yml
   - configmap.yml
+  - statefulSet.yml
 `,
   };
 
@@ -19248,6 +19302,11 @@ module.exports = {
       type: 'integer',
       default: 1,
     },
+    storage: {
+      type: 'string',
+      pattern: '^[0-9]+(M|G)i',
+      default: '1Gi',
+    },
     environment: {
       type: 'object',
     },
@@ -19313,24 +19372,32 @@ module.exports = patchConfigMapYaml;
 
 /***/ }),
 
-/***/ 9309:
+/***/ 8768:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const yaml = __webpack_require__(5024);
 
-const patchDeploymentYaml = (service, deploymentYaml) => {
-  const deployment = yaml.parse(deploymentYaml);
+const patchStatefulSetYaml = (service, containerYaml) => {
+  const statefulSet = yaml.parse(containerYaml);
 
-  deployment.spec.replicas = service.replicas;
-  deployment.spec.template.spec.containers[0].resources.requests.cpu = service.cpu;
-  deployment.spec.template.spec.containers[0].resources.limits.cpu = service.cpu;
-  deployment.spec.template.spec.containers[0].resources.requests.memory = service.memory;
-  deployment.spec.template.spec.containers[0].resources.limits.memory = service.memory;
+  const {
+    replicas = 1,
+    cpu = '100m',
+    memory = '256Mi',
+    storage = '1Gi',
+  } = service;
 
-  return yaml.stringify(deployment);
+  statefulSet.spec.replicas = replicas;
+  statefulSet.spec.template.spec.containers[0].resources.requests.cpu = cpu;
+  statefulSet.spec.template.spec.containers[0].resources.limits.cpu = cpu;
+  statefulSet.spec.template.spec.containers[0].resources.requests.memory = memory;
+  statefulSet.spec.template.spec.containers[0].resources.limits.memory = memory;
+  statefulSet.spec.volumeClaimTemplates[0].spec.resources.requests.storage = storage;
+
+  return yaml.stringify(statefulSet);
 };
 
-module.exports = patchDeploymentYaml;
+module.exports = patchStatefulSetYaml;
 
 
 /***/ }),
@@ -19344,7 +19411,7 @@ const clusterInfo = __webpack_require__(7955);
 const createNamespace = __webpack_require__(8494);
 const setupGcloud = __webpack_require__(7095);
 const execKustomize = __webpack_require__(6250);
-const patchDeploymentYaml = __webpack_require__(9309);
+const patchStatefulSetYaml = __webpack_require__(8768);
 const patchConfigMapYaml = __webpack_require__(1556);
 const parseEnvironmentArgs = __webpack_require__(6762);
 const createBaseKustomize = __webpack_require__(1773);
@@ -19362,11 +19429,11 @@ const patchConfigMap = (environmentArgs) => {
   fs.writeFileSync(configMapYamlPath, configMapYaml);
 };
 
-const patchDeployment = (service) => {
-  const deploymentYamlPath = path.join('kustomize', 'deployment.yml');
-  let deploymentYaml = fs.readFileSync(deploymentYamlPath, 'utf8');
-  deploymentYaml = patchDeploymentYaml(service, deploymentYaml);
-  fs.writeFileSync(deploymentYamlPath, deploymentYaml);
+const patchStatefulSet = (service) => {
+  const statefulSetYamlPath = path.join('kustomize', 'statefulSet.yml');
+  let statefulSetYaml = fs.readFileSync(statefulSetYamlPath, 'utf8');
+  statefulSetYaml = patchStatefulSetYaml(service, statefulSetYaml);
+  fs.writeFileSync(statefulSetYamlPath, statefulSetYaml);
 };
 
 const kustomizeNamespace = async (namespace) => {
@@ -19418,27 +19485,26 @@ const runDeploy = async (
   image,
   dryRun,
 ) => {
-  createBaseKustomize();
+  const deploymentName = `hiiretail-${service.name}`;
+  createBaseKustomize(deploymentName);
 
   const projectId = await gcloudAuth(serviceAccountKey);
   const cluster = await clusterInfo(projectId);
 
   const args = parseEnvironmentArgs(service.environment, projectId);
   patchConfigMap(args);
-  patchDeployment(service);
-
-  const namespace = `hiiretail-${service.name}`;
+  patchStatefulSet(service);
 
   const opaEnabled = 'skip';
-  await createNamespace(projectId, opaEnabled, cluster, namespace);
+  await createNamespace(projectId, opaEnabled, cluster, deploymentName);
 
-  await kustomizeNamespace(namespace);
+  await kustomizeNamespace(deploymentName);
   await kustomizeImage(image);
   await kustomizeLabels(service.name);
   await kustomizeNameSuffix(service.name);
   await kustomizeBuild();
 
-  await applyKubectl(namespace, dryRun);
+  await applyKubectl(deploymentName, dryRun);
 };
 
 module.exports = runDeploy;

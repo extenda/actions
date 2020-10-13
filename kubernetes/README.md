@@ -29,6 +29,7 @@ properties are required and not.
 | `memory`                   | Set a memory limit, for example `256Mi`, `512Mi` or `1Gi`.                                                                                                        | No       | `256Mi`       |
 | `cpu`                      | The CPU limit for the service, for example `200m`.                                                                                                                | No       | `100m`        |
 | `replicas`                 | The number of pod instances to run.                                                                                                                               | No       | `1`           |
+| `storage`                  | The size of the volume attached to pod.                                                                                                                           | No       | `1Gi`           |
 | `environment`<top>\*</top> | A map of environment variables. The values can be Secret Manager URLs on the form `sm://*/my-secret` where `*` will be replaced by the project ID at deploy time. | No       | -             |
 
 <top>\*</top> Once set, this value can only be unset by passing `[]` (empty array) as value.
@@ -40,6 +41,7 @@ This example defines a service.
 name: my-kubernetes-service
 memory: 256Mi
 cpu: 300m
+storage: 1Gi
 environment:
   DEBUG_LOG: 'false'
   SECRET_NAME: sm://*/secret-name

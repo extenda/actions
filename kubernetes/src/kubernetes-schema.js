@@ -20,6 +20,11 @@ module.exports = {
       type: 'integer',
       default: 1,
     },
+    storage: {
+      type: 'string',
+      pattern: '^[0-9]+(M|G)i',
+      default: '1Gi',
+    },
     environment: {
       type: 'object',
     },

@@ -16,10 +16,9 @@ const applyKubectl = async (deployment, dryRun) => {
     await exec.exec('kubectl', [
       'rollout',
       'status',
-      'deployment',
-      deployment,
-      '--namespace',
-      deployment,
+      '-k',
+      './kustomize',
+      `--namespace=${deployment}`,
     ]);
   }
 };
