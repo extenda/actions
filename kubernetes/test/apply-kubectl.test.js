@@ -31,8 +31,8 @@ describe('Kubectl applies manifest', () => {
       [
         'rollout',
         'status',
-        '-k',
-        './kustomize',
+        'statefulset',
+        deployment,
         `--namespace=${deployment}`,
       ],
     );

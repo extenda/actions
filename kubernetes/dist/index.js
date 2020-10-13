@@ -19100,8 +19100,8 @@ const applyKubectl = async (deployment, dryRun) => {
     await exec.exec('kubectl', [
       'rollout',
       'status',
-      '-k',
-      './kustomize',
+      'statefulset',
+      deployment,
       `--namespace=${deployment}`,
     ]);
   }
