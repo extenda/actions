@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
 const { getShortSha } = require('../../utils/src/branch-info');
-const { extractOutput, outputCommand, LogFilter } = require('./extract-output');
+const { extractOutput, LogFilter } = require('./extract-output');
 
 const podName = async () => {
   const repo = process.env.GITHUB_REPOSITORY.split('/')[1];

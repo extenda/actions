@@ -21582,7 +21582,7 @@ module.exports = action;
 const core = __webpack_require__(6341);
 const exec = __webpack_require__(2176);
 const { getShortSha } = __webpack_require__(8258);
-const { extractOutput, outputCommand, LogFilter } = __webpack_require__(8207);
+const { extractOutput, LogFilter } = __webpack_require__(8207);
 
 const podName = async () => {
   const repo = process.env.GITHUB_REPOSITORY.split('/')[1];
