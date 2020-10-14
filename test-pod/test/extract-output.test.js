@@ -77,7 +77,6 @@ describe('Extract output', () => {
   if (process.platform !== 'win32') {
     test('It can create a tar archive', async () => {
       const output = await execTarCommand();
-      expect(output.split('\n')).toHaveLength(3);
       expect(output).toContain('test-pod-output BEGIN');
       expect(output).toContain('test-pod-output END');
     });
