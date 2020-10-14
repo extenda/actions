@@ -21,11 +21,14 @@ const setupEnvironment = async (
   const projectId = await gcloudAuth(gcloudAuthKey);
   const { env: projectEnv } = projectInfo(projectId);
 
+  // Skip IAM handling if staging (not iam-api)
+  let skipIAM = (projectEnv === 'staging');
   // By default we always target prod iam-api unless explicitly told not to.
   let credentialsEnv = 'prod';
   let url = iamUrl;
   if (projectEnv === 'staging' && iamUrl.endsWith('retailsvc.dev')) {
     credentialsEnv = 'staging';
+    skipIAM = false;
     core.warning(`IAM definitions has been explicitly configured to publish to ${iamUrl} which is the STAGING environment.`);
   } else if (projectEnv === 'prod' && iamUrl.endsWith('retailsvc.dev')) {
     url = iamUrl.replace('dev', 'com');
@@ -38,11 +41,13 @@ const setupEnvironment = async (
     iamApiKey,
     iamApiTenant,
   } = await loadCredentials(serviceAccountKey, credentialsEnv);
-
-  return fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenant)
-    .then((iamToken) => configureIAM(
-      iam, styraToken, styraUrl, url, iamToken, projectEnv, projectId, systemOwners,
-    ));
+  let iamToken = '';
+  if (!skipIAM) {
+    iamToken = await fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenant);
+  }
+  return configureIAM(
+    iam, styraToken, styraUrl, url, iamToken, projectEnv, projectId, systemOwners, skipIAM,
+  );
 };
 
 const action = async () => {

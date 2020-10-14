@@ -5,7 +5,7 @@ jest.mock('@actions/exec');
 jest.mock('request');
 const request = require('request');
 const exec = require('@actions/exec');
-const setupSystem = require('../src/create-system');
+const { setupSystem } = require('../src/create-system');
 
 
 const systemOwners = ['test@mail.com'];
