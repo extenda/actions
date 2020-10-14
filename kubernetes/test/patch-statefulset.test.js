@@ -16,26 +16,26 @@ describe('Patches statefulSet.yml', () => {
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: hiiretail
+  name: statefulset
 spec:
-  serviceName: hiiretail
+  serviceName: statefulset
   replicas: 1
   selector:
     matchLabels:
-      app: hiiretail
+      app: statefulset
   template:
     metadata:
       labels:
-        app: hiiretail
+        app: statefulset
     spec:
       containers:
-        - name: hiiretail
+        - name: statefulset
           image: eu.gcr.io/extenda/IMAGE:TAG
           envFrom:
             - configMapRef:
-                name: hiiretail
+                name: statefulset
           volumeMounts:
-            - name: hiiretail
+            - name: statefulset
               mountPath: /data/state
           resources:
             requests:
@@ -46,7 +46,7 @@ spec:
               memory: 256Mi
   volumeClaimTemplates:
   - metadata:
-      name: hiiretail
+      name: statefulset
     spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:

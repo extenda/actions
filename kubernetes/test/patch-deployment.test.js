@@ -13,7 +13,7 @@ spec:
   template:
     spec:
       containers:
-        - name: hiiretail
+        - name: container
           resources:
             requests:
               cpu: 100m
@@ -41,7 +41,7 @@ spec:
   template:
     spec:
       containers:
-        - name: hiiretail
+        - name: container
           resources:
             requests:
               cpu: 100m

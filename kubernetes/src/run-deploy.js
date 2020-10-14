@@ -50,16 +50,6 @@ const kustomizeLabels = async (name) => {
   ]);
 };
 
-const kustomizeNameSuffix = async (name) => {
-  await execKustomize([
-    'edit',
-    'set',
-    'namesuffix',
-    '--',
-    `-${name}`,
-  ]);
-};
-
 const kustomizeBuild = async () => {
   await execKustomize([
     'build',
@@ -81,8 +71,7 @@ const runDeploy = async (
   image,
   dryRun,
 ) => {
-  const deploymentName = `hiiretail-${service.name}`;
-  createBaseKustomize(deploymentName);
+  createBaseKustomize(service.name);
 
   const projectId = await gcloudAuth(serviceAccountKey);
   const cluster = await clusterInfo(projectId);
@@ -102,15 +91,14 @@ const runDeploy = async (
   }
 
   const opaEnabled = 'skip';
-  await createNamespace(projectId, opaEnabled, cluster, deploymentName);
+  await createNamespace(projectId, opaEnabled, cluster, service.name);
 
-  await kustomizeNamespace(deploymentName);
+  await kustomizeNamespace(service.name);
   await kustomizeImage(image);
   await kustomizeLabels(service.name);
-  await kustomizeNameSuffix(service.name);
   await kustomizeBuild();
 
-  await applyKubectl(deploymentName, deploymentType, dryRun);
+  await applyKubectl(service.name, deploymentType, dryRun);
 };
 
 module.exports = runDeploy;
