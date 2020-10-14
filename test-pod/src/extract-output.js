@@ -28,7 +28,7 @@ const extractOutput = async (rawOutput) => {
 const outputCommand = (outputPatterns) => [
   '/bin/sh',
   '-c',
-  `echo ${OUT_BEGIN_MARKER}; tar -czf - ${outputPatterns.join(' ')} | base64; echo ${OUT_END_MARKER}`,
+  `echo Archiving output...; echo ${OUT_BEGIN_MARKER}; tar -czf - ${outputPatterns.join(' ')} | base64; echo ${OUT_END_MARKER}`,
 ];
 
 const LogFilter = function LogFilter() {

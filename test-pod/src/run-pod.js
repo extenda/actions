@@ -119,6 +119,7 @@ const runPod = async ({ name, namespace }, image, configMap, outputPatterns = []
 
   let output = '';
   const filter = new LogFilter();
+  core.info(`kubectl ${args.join(' ')}`);
   return exec.exec('kubectl', args, {
     silent: true,
     listeners: {

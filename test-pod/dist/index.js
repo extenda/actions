@@ -21518,7 +21518,7 @@ const extractOutput = async (rawOutput) => {
 const outputCommand = (outputPatterns) => [
   '/bin/sh',
   '-c',
-  `echo ${OUT_BEGIN_MARKER}; tar -czf - ${outputPatterns.join(' ')} | base64; echo ${OUT_END_MARKER}`,
+  `echo Archiving output...; echo ${OUT_BEGIN_MARKER}; tar -czf - ${outputPatterns.join(' ')} | base64; echo ${OUT_END_MARKER}`,
 ];
 
 const LogFilter = function LogFilter() {
@@ -21706,6 +21706,7 @@ const runPod = async ({ name, namespace }, image, configMap, outputPatterns = []
 
   let output = '';
   const filter = new LogFilter();
+  core.info(`kubectl ${args.join(' ')}`);
   return exec.exec('kubectl', args, {
     silent: true,
     listeners: {

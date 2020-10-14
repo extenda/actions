@@ -46,7 +46,7 @@ describe('Extract output', () => {
     expect(command).toEqual([
       '/bin/sh',
       '-c',
-      'echo test-pod-output BEGIN; tar -czf - coverage *.txt | base64; echo test-pod-output END',
+      'echo Archiving output...; echo test-pod-output BEGIN; tar -czf - coverage *.txt | base64; echo test-pod-output END',
     ]);
   });
 
