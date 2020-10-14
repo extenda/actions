@@ -1,5 +1,6 @@
 const mockFs = require('mock-fs');
 const loadServiceDefinition = require('../src/service-definition');
+const cloudRunSchema = require('../src/cloud-run-schema');
 
 describe('Service Definition', () => {
   afterEach(() => {
@@ -8,7 +9,7 @@ describe('Service Definition', () => {
 
   test('It throws for file not found', () => {
     mockFs({});
-    expect(() => loadServiceDefinition('cloud-run.yaml'))
+    expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
       .toThrow('Service specification file not found: cloud-run.yaml');
   });
 
@@ -20,7 +21,7 @@ memory: 256Mi
 cpu: 1
 `,
       });
-      expect(() => loadServiceDefinition('cloud-run.yaml'))
+      expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
         .toThrow(`cloud-run.yaml is not valid.
 0: instance requires property "name"
 1: instance requires property "platform"`);
@@ -37,7 +38,7 @@ platform:
     region: eu-west1
 `,
       });
-      expect(() => loadServiceDefinition('cloud-run.yaml'))
+      expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
         .toThrow(`cloud-run.yaml is not valid.
 0: instance requires property "memory"`);
     });
@@ -54,7 +55,7 @@ platform:
     region: eu-west1
 `,
       });
-      expect(() => loadServiceDefinition('cloud-run.yaml'))
+      expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
         .toThrow(`cloud-run.yaml is not valid.
 0: instance.memory does not match pattern "^[0-9]+(M|G)i"`);
     });
@@ -69,7 +70,7 @@ platform:
     region: eu-west1
 `,
       });
-      expect(() => loadServiceDefinition('cloud-run.yaml'))
+      expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
         .toThrow(`cloud-run.yaml is not valid.
 0: instance.platform.managed requires property "allow-unauthenticated"
 `);
@@ -83,7 +84,7 @@ memory: 256Mi
 cpu: 100m
 `,
       });
-      expect(() => loadServiceDefinition('cloud-run.yaml'))
+      expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
         .toThrow(`cloud-run.yaml is not valid.
 0: instance requires property "platform"
 `);
@@ -100,7 +101,7 @@ platform:
     allow-unauthenticated: true
 `,
       });
-      expect(() => loadServiceDefinition('cloud-run.yaml'))
+      expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
         .toThrow(`cloud-run.yaml is not valid.
 0: instance requires property "cpu"
 `);
@@ -121,7 +122,7 @@ platform:
     connectivity: external
 `,
       });
-      expect(() => loadServiceDefinition('cloud-run.yaml'))
+      expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
         .toThrow(`cloud-run.yaml is not valid.
 0: instance.platform is not exactly one from "managed","gke"`);
     });
@@ -138,7 +139,7 @@ platform:
     allow-unauthenticated: true
 `,
       });
-      expect(() => loadServiceDefinition('cloud-run.yaml'))
+      expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
         .toThrow(`cloud-run.yaml is not valid.
 0: instance.cpu is not exactly one from "millicpu","CPU cores"`);
     });
@@ -155,7 +156,7 @@ platform:
     allow-unauthenticated: true
 `,
       });
-      expect(() => loadServiceDefinition('cloud-run.yaml'))
+      expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
         .toThrow(`cloud-run.yaml is not valid.
 0: instance.cpu is not exactly one from "millicpu","CPU cores"`);
     });
@@ -180,7 +181,7 @@ platform:
 `,
     });
 
-    const service = loadServiceDefinition('cloud-run.yaml');
+    const service = loadServiceDefinition('cloud-run.yaml', cloudRunSchema);
     expect(service.environment).toMatchObject({
       NAME: 'value',
       SECRET: 'sm://*/secret-name',
@@ -202,7 +203,7 @@ platform:
 `,
     });
 
-    const service = loadServiceDefinition('cloud-run.yaml');
+    const service = loadServiceDefinition('cloud-run.yaml', cloudRunSchema);
     expect(service.platform.managed['cloudsql-instances']).toEqual(['Postgres-RANDOM123']);
   });
 
@@ -224,7 +225,7 @@ platform:
       - Postgres-RANDOM123
 `,
     });
-    const service = loadServiceDefinition('cloud-run.yaml');
+    const service = loadServiceDefinition('cloud-run.yaml', cloudRunSchema);
     expect(service).toMatchObject({
       name: 'test-service',
       memory: '256Mi',
@@ -266,7 +267,7 @@ platform:
     opa-enabled: true
 `,
     });
-    const service = loadServiceDefinition('cloud-run.yaml');
+    const service = loadServiceDefinition('cloud-run.yaml', cloudRunSchema);
     expect(service).toMatchObject({
       name: 'test-service',
       memory: '256Mi',

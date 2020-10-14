@@ -2,7 +2,6 @@ const fs = require('fs');
 const yaml = require('yaml');
 const core = require('@actions/core');
 const { validate } = require('jsonschema');
-const jsonSchema = require('./cloud-run-schema');
 
 const loadFile = (serviceFile) => {
   if (!fs.existsSync(serviceFile)) {
@@ -11,8 +10,8 @@ const loadFile = (serviceFile) => {
   return yaml.parse(fs.readFileSync(serviceFile, 'utf8'));
 };
 
-const validateSchema = (serviceFile, spec) => {
-  const result = validate(spec, jsonSchema);
+const validateSchema = (serviceFile, spec, schema) => {
+  const result = validate(spec, schema);
   if (!result.valid) {
     const message = `${serviceFile} is not valid.\n${result.toString()}`;
     core.error(message);
@@ -20,9 +19,9 @@ const validateSchema = (serviceFile, spec) => {
   }
 };
 
-const loadServiceDefinition = (serviceFile) => {
+const loadServiceDefinition = (serviceFile, schema) => {
   const spec = loadFile(serviceFile);
-  validateSchema(serviceFile, spec);
+  validateSchema(serviceFile, spec, schema);
   return spec;
 };
 

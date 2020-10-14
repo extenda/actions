@@ -26,7 +26,7 @@ const getNamespace = async (namespace) => {
   return true;
 };
 
-const createNamespace = async (clanId,
+const createNamespace = async (projectId,
   opaEnabled,
   { project, cluster, clusterLocation },
   namespace) => {
@@ -42,7 +42,7 @@ const createNamespace = async (clanId,
       'serviceaccount',
       `--namespace=${namespace}`,
       'default',
-      `iam.gke.io/gcp-service-account=${namespace}@${clanId}.iam.gserviceaccount.com`,
+      `iam.gke.io/gcp-service-account=${namespace}@${projectId}.iam.gserviceaccount.com`,
     ]);
   }
 
