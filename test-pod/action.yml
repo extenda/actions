@@ -37,7 +37,7 @@ inputs:
     description: |
       A comma separated list of directories or file patterns to output to the GitHub runner's file system.
       If provided, the test-pod will use a `preStop` hook to create a tar archive that is base64 encoded
-      and printed to stdout. Ater the test-pod exists, the action will extract the contents to
+      and printed to stdout. Ater the test-pod exits, the action will extract the contents to
       `${HOME}/.test-pod-outputs`.
     required: false
     default: ''
