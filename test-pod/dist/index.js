@@ -10989,7 +10989,6 @@ const fs = __webpack_require__(5747);
 const yaml = __webpack_require__(6242);
 const core = __webpack_require__(7199);
 const { validate } = __webpack_require__(2145);
-const jsonSchema = __webpack_require__(5895);
 
 const loadFile = (serviceFile) => {
   if (!fs.existsSync(serviceFile)) {
@@ -10998,8 +10997,8 @@ const loadFile = (serviceFile) => {
   return yaml.parse(fs.readFileSync(serviceFile, 'utf8'));
 };
 
-const validateSchema = (serviceFile, spec) => {
-  const result = validate(spec, jsonSchema);
+const validateSchema = (serviceFile, spec, schema) => {
+  const result = validate(spec, schema);
   if (!result.valid) {
     const message = `${serviceFile} is not valid.\n${result.toString()}`;
     core.error(message);
@@ -11007,9 +11006,9 @@ const validateSchema = (serviceFile, spec) => {
   }
 };
 
-const loadServiceDefinition = (serviceFile) => {
+const loadServiceDefinition = (serviceFile, schema) => {
   const spec = loadFile(serviceFile);
-  validateSchema(serviceFile, spec);
+  validateSchema(serviceFile, spec, schema);
   return spec;
 };
 
@@ -18050,6 +18049,7 @@ const setupGcloud = __webpack_require__(7095);
 const getClusterInfo = __webpack_require__(7955);
 const authenticateKubeCtl = __webpack_require__(693);
 const loadServiceDefinition = __webpack_require__(7933);
+const cloudRunSchema = __webpack_require__(5895);
 
 const resolveClusterAndNamespace = (clusterInput, namespaceInput) => {
   if (clusterInput && namespaceInput) {
@@ -18060,7 +18060,7 @@ const resolveClusterAndNamespace = (clusterInput, namespaceInput) => {
     };
   }
 
-  const service = loadServiceDefinition('cloud-run.yaml');
+  const service = loadServiceDefinition('cloud-run.yaml', cloudRunSchema);
   const {
     name,
     platform: {

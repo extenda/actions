@@ -11199,7 +11199,7 @@ const getNamespace = async (namespace) => {
   return true;
 };
 
-const createNamespace = async (clanId,
+const createNamespace = async (projectId,
   opaEnabled,
   { project, cluster, clusterLocation },
   namespace) => {
@@ -11215,7 +11215,7 @@ const createNamespace = async (clanId,
       'serviceaccount',
       `--namespace=${namespace}`,
       'default',
-      `iam.gke.io/gcp-service-account=${namespace}@${clanId}.iam.gserviceaccount.com`,
+      `iam.gke.io/gcp-service-account=${namespace}@${projectId}.iam.gserviceaccount.com`,
     ]);
   }
 
@@ -11350,6 +11350,7 @@ const { run } = __webpack_require__(1898);
 const loadServiceDefinition = __webpack_require__(6219);
 const runDeploy = __webpack_require__(3383);
 const configureDomains = __webpack_require__(4455);
+const jsonSchema = __webpack_require__(7783);
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
@@ -11359,7 +11360,7 @@ const action = async () => {
   const dnsProjectLabel = core.getInput('dns-project-label') || 'dns';
   const verbose = (core.getInput('verbose') || 'false');
 
-  const service = loadServiceDefinition(serviceFile);
+  const service = loadServiceDefinition(serviceFile, jsonSchema);
   await runDeploy(serviceAccountKey, service, image, verbose === 'true')
     .then(({ cluster }) => configureDomains(service, cluster, domainBindingsEnv, dnsProjectLabel));
 };
@@ -11659,7 +11660,6 @@ const fs = __webpack_require__(5747);
 const yaml = __webpack_require__(5024);
 const core = __webpack_require__(6341);
 const { validate } = __webpack_require__(2039);
-const jsonSchema = __webpack_require__(7783);
 
 const loadFile = (serviceFile) => {
   if (!fs.existsSync(serviceFile)) {
@@ -11668,8 +11668,8 @@ const loadFile = (serviceFile) => {
   return yaml.parse(fs.readFileSync(serviceFile, 'utf8'));
 };
 
-const validateSchema = (serviceFile, spec) => {
-  const result = validate(spec, jsonSchema);
+const validateSchema = (serviceFile, spec, schema) => {
+  const result = validate(spec, schema);
   if (!result.valid) {
     const message = `${serviceFile} is not valid.\n${result.toString()}`;
     core.error(message);
@@ -11677,9 +11677,9 @@ const validateSchema = (serviceFile, spec) => {
   }
 };
 
-const loadServiceDefinition = (serviceFile) => {
+const loadServiceDefinition = (serviceFile, schema) => {
   const spec = loadFile(serviceFile);
-  validateSchema(serviceFile, spec);
+  validateSchema(serviceFile, spec, schema);
   return spec;
 };
 
