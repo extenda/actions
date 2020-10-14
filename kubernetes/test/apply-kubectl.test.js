@@ -15,8 +15,10 @@ describe('Kubectl applies manifest', () => {
   });
 
   test('It will apply manifest and call rollout status', async () => {
+    const dryRun = false;
     const deployment = 'deployment';
-    await applyKubectl(deployment);
+    const deploymentType = 'deployment-type';
+    await applyKubectl(deployment, deploymentType, dryRun);
 
     expect(exec.exec).toHaveBeenCalledWith(
       'kubectl',
@@ -31,7 +33,7 @@ describe('Kubectl applies manifest', () => {
       [
         'rollout',
         'status',
-        'statefulset',
+        deploymentType,
         deployment,
         `--namespace=${deployment}`,
       ],
@@ -41,7 +43,8 @@ describe('Kubectl applies manifest', () => {
   test('It will not apply manifest and skip rollout status when running with dry-run', async () => {
     const dryRun = true;
     const deployment = 'deployment';
-    await applyKubectl(deployment, dryRun);
+    const deploymentType = 'deployment-type';
+    await applyKubectl(deployment, deploymentType, dryRun);
 
     expect(exec.exec).toHaveBeenCalledWith(
       'kubectl',

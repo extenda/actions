@@ -5,6 +5,7 @@ const createNamespace = require('../../cloud-run/src/create-namespace');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const execKustomize = require('./kustomize');
 const patchStatefulSetYaml = require('./patch-statefulset-yaml');
+const patchDeploymentYaml = require('./patch-deployment-yaml');
 const patchConfigMapYaml = require('./patch-configmap-yaml');
 const parseEnvironmentArgs = require('./environment-args');
 const createBaseKustomize = require('./create-base-kustomize');
@@ -15,18 +16,11 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   process.env.GCLOUD_INSTALLED_VERSION || 'latest',
 );
 
-const patchConfigMap = (environmentArgs) => {
-  const configMapYamlPath = path.join('kustomize', 'configmap.yml');
-  let configMapYaml = fs.readFileSync(configMapYamlPath, 'utf8');
-  configMapYaml = patchConfigMapYaml(environmentArgs, configMapYaml);
-  fs.writeFileSync(configMapYamlPath, configMapYaml);
-};
-
-const patchStatefulSet = (service) => {
-  const statefulSetYamlPath = path.join('kustomize', 'statefulSet.yml');
-  let statefulSetYaml = fs.readFileSync(statefulSetYamlPath, 'utf8');
-  statefulSetYaml = patchStatefulSetYaml(service, statefulSetYaml);
-  fs.writeFileSync(statefulSetYamlPath, statefulSetYaml);
+const patchManifest = (manifest, patcher) => {
+  const yamlPath = path.join('kustomize', manifest);
+  let deploymentYaml = fs.readFileSync(yamlPath, 'utf8');
+  deploymentYaml = patcher(deploymentYaml);
+  fs.writeFileSync(yamlPath, deploymentYaml);
 };
 
 const kustomizeNamespace = async (namespace) => {
@@ -72,6 +66,15 @@ const kustomizeBuild = async () => {
   ]);
 };
 
+const kustomizeResource = async (resource) => {
+  await execKustomize([
+    'edit',
+    'add',
+    'resource',
+    resource,
+  ]);
+};
+
 const runDeploy = async (
   serviceAccountKey,
   service,
@@ -84,9 +87,19 @@ const runDeploy = async (
   const projectId = await gcloudAuth(serviceAccountKey);
   const cluster = await clusterInfo(projectId);
 
-  const args = parseEnvironmentArgs(service.environment, projectId);
-  patchConfigMap(args);
-  patchStatefulSet(service);
+  patchManifest('configmap.yml', (yml) => {
+    const args = parseEnvironmentArgs(service.environment, projectId);
+    return patchConfigMapYaml(args, yml);
+  });
+
+  const deploymentType = service.storage ? 'statefulset' : 'deployment';
+  if (deploymentType === 'statefulset') {
+    patchManifest('statefulSet.yml', (yml) => patchStatefulSetYaml(service, yml));
+    await kustomizeResource('statefulSet.yml');
+  } else {
+    patchManifest('deployment.yml', (yml) => patchDeploymentYaml(service, yml));
+    await kustomizeResource('deployment.yml');
+  }
 
   const opaEnabled = 'skip';
   await createNamespace(projectId, opaEnabled, cluster, deploymentName);
@@ -97,7 +110,7 @@ const runDeploy = async (
   await kustomizeNameSuffix(service.name);
   await kustomizeBuild();
 
-  await applyKubectl(deploymentName, dryRun);
+  await applyKubectl(deploymentName, deploymentType, dryRun);
 };
 
 module.exports = runDeploy;

@@ -98,7 +98,6 @@ kind: Kustomization
 resources:
   - service.yml
   - configmap.yml
-  - statefulSet.yml
 `,
   };
 

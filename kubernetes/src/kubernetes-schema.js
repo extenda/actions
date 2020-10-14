@@ -21,9 +21,20 @@ module.exports = {
       default: 1,
     },
     storage: {
-      type: 'string',
-      pattern: '^[0-9]+(M|G)i',
-      default: '1Gi',
+      type: 'object',
+      properties: {
+        volume: {
+          type: 'string',
+          pattern: '^[0-9]+(M|G)i',
+          default: '1Gi',
+        },
+        mountPath: {
+          type: 'string',
+          pattern: '^\\/[\\d\\w\\-_\\/]+$',
+          default: '/data/storage',
+        },
+      },
+      additionalProperties: false,
     },
     environment: {
       type: 'object',

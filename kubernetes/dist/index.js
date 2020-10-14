@@ -19084,7 +19084,7 @@ module.exports = __webpack_require__(3333).YAML
 
 const exec = __webpack_require__(2176);
 
-const applyKubectl = async (deployment, dryRun) => {
+const applyKubectl = async (deployment, deploymentType, dryRun = false) => {
   const applyArgs = [
     'apply',
     '-k',
@@ -19100,7 +19100,7 @@ const applyKubectl = async (deployment, dryRun) => {
     await exec.exec('kubectl', [
       'rollout',
       'status',
-      'statefulset',
+      deploymentType,
       deployment,
       `--namespace=${deployment}`,
     ]);
@@ -19215,7 +19215,6 @@ kind: Kustomization
 resources:
   - service.yml
   - configmap.yml
-  - statefulSet.yml
 `,
   };
 
@@ -19303,9 +19302,20 @@ module.exports = {
       default: 1,
     },
     storage: {
-      type: 'string',
-      pattern: '^[0-9]+(M|G)i',
-      default: '1Gi',
+      type: 'object',
+      properties: {
+        volume: {
+          type: 'string',
+          pattern: '^[0-9]+(M|G)i',
+          default: '1Gi',
+        },
+        mountPath: {
+          type: 'string',
+          pattern: '^\\/[\\d\\w\\-_\\/]+$',
+          default: '/data/storage',
+        },
+      },
+      additionalProperties: false,
     },
     environment: {
       type: 'object',
@@ -19372,6 +19382,28 @@ module.exports = patchConfigMapYaml;
 
 /***/ }),
 
+/***/ 9309:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const yaml = __webpack_require__(5024);
+
+const patchDeploymentYaml = (service, deploymentYaml) => {
+  const deployment = yaml.parse(deploymentYaml);
+
+  deployment.spec.replicas = service.replicas;
+  deployment.spec.template.spec.containers[0].resources.requests.cpu = service.cpu;
+  deployment.spec.template.spec.containers[0].resources.limits.cpu = service.cpu;
+  deployment.spec.template.spec.containers[0].resources.requests.memory = service.memory;
+  deployment.spec.template.spec.containers[0].resources.limits.memory = service.memory;
+
+  return yaml.stringify(deployment);
+};
+
+module.exports = patchDeploymentYaml;
+
+
+/***/ }),
+
 /***/ 8768:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -19384,7 +19416,10 @@ const patchStatefulSetYaml = (service, containerYaml) => {
     replicas = 1,
     cpu = '100m',
     memory = '256Mi',
-    storage = '1Gi',
+    storage: {
+      volume = '1Gi',
+      mountPath = '/data/storage',
+    },
   } = service;
 
   statefulSet.spec.replicas = replicas;
@@ -19392,7 +19427,8 @@ const patchStatefulSetYaml = (service, containerYaml) => {
   statefulSet.spec.template.spec.containers[0].resources.limits.cpu = cpu;
   statefulSet.spec.template.spec.containers[0].resources.requests.memory = memory;
   statefulSet.spec.template.spec.containers[0].resources.limits.memory = memory;
-  statefulSet.spec.volumeClaimTemplates[0].spec.resources.requests.storage = storage;
+  statefulSet.spec.template.spec.containers[0].volumeMounts[0].mountPath = mountPath;
+  statefulSet.spec.volumeClaimTemplates[0].spec.resources.requests.storage = volume;
 
   return yaml.stringify(statefulSet);
 };
@@ -19412,6 +19448,7 @@ const createNamespace = __webpack_require__(8494);
 const setupGcloud = __webpack_require__(7095);
 const execKustomize = __webpack_require__(6250);
 const patchStatefulSetYaml = __webpack_require__(8768);
+const patchDeploymentYaml = __webpack_require__(9309);
 const patchConfigMapYaml = __webpack_require__(1556);
 const parseEnvironmentArgs = __webpack_require__(6762);
 const createBaseKustomize = __webpack_require__(1773);
@@ -19422,18 +19459,11 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   process.env.GCLOUD_INSTALLED_VERSION || 'latest',
 );
 
-const patchConfigMap = (environmentArgs) => {
-  const configMapYamlPath = path.join('kustomize', 'configmap.yml');
-  let configMapYaml = fs.readFileSync(configMapYamlPath, 'utf8');
-  configMapYaml = patchConfigMapYaml(environmentArgs, configMapYaml);
-  fs.writeFileSync(configMapYamlPath, configMapYaml);
-};
-
-const patchStatefulSet = (service) => {
-  const statefulSetYamlPath = path.join('kustomize', 'statefulSet.yml');
-  let statefulSetYaml = fs.readFileSync(statefulSetYamlPath, 'utf8');
-  statefulSetYaml = patchStatefulSetYaml(service, statefulSetYaml);
-  fs.writeFileSync(statefulSetYamlPath, statefulSetYaml);
+const patchManifest = (manifest, patcher) => {
+  const yamlPath = path.join('kustomize', manifest);
+  let deploymentYaml = fs.readFileSync(yamlPath, 'utf8');
+  deploymentYaml = patcher(deploymentYaml);
+  fs.writeFileSync(yamlPath, deploymentYaml);
 };
 
 const kustomizeNamespace = async (namespace) => {
@@ -19479,6 +19509,15 @@ const kustomizeBuild = async () => {
   ]);
 };
 
+const kustomizeResource = async (resource) => {
+  await execKustomize([
+    'edit',
+    'add',
+    'resource',
+    resource,
+  ]);
+};
+
 const runDeploy = async (
   serviceAccountKey,
   service,
@@ -19491,9 +19530,19 @@ const runDeploy = async (
   const projectId = await gcloudAuth(serviceAccountKey);
   const cluster = await clusterInfo(projectId);
 
-  const args = parseEnvironmentArgs(service.environment, projectId);
-  patchConfigMap(args);
-  patchStatefulSet(service);
+  patchManifest('configmap.yml', (yml) => {
+    const args = parseEnvironmentArgs(service.environment, projectId);
+    return patchConfigMapYaml(args, yml);
+  });
+
+  const deploymentType = service.storage ? 'statefulset' : 'deployment';
+  if (deploymentType === 'statefulset') {
+    patchManifest('statefulSet.yml', (yml) => patchStatefulSetYaml(service, yml));
+    await kustomizeResource('statefulSet.yml');
+  } else {
+    patchManifest('deployment.yml', (yml) => patchDeploymentYaml(service, yml));
+    await kustomizeResource('deployment.yml');
+  }
 
   const opaEnabled = 'skip';
   await createNamespace(projectId, opaEnabled, cluster, deploymentName);
@@ -19504,7 +19553,7 @@ const runDeploy = async (
   await kustomizeNameSuffix(service.name);
   await kustomizeBuild();
 
-  await applyKubectl(deploymentName, dryRun);
+  await applyKubectl(deploymentName, deploymentType, dryRun);
 };
 
 module.exports = runDeploy;

@@ -6,7 +6,10 @@ describe('Patches statefulSet.yml', () => {
     cpu: '400m',
     memory: '1024Mi',
     replicas: 3,
-    storage: '1Gi',
+    storage: {
+      volume: '1Gi',
+      mountPath: '/data/new_path',
+    },
   };
 
   const statefulSetYaml = `
@@ -57,10 +60,23 @@ spec:
     }));
   });
 
-  test('It patches storage size', () => {
+  test('It patches storage', () => {
     const output = yaml.parse(patchStatefulSetYaml(service, statefulSetYaml));
     expect(output).toMatchObject(expect.objectContaining({
       spec: expect.objectContaining({
+        template: expect.objectContaining({
+          spec: expect.objectContaining({
+            containers: expect.arrayContaining([
+              expect.objectContaining({
+                volumeMounts: expect.arrayContaining([
+                  expect.objectContaining({
+                    mountPath: '/data/new_path',
+                  }),
+                ]),
+              }),
+            ]),
+          }),
+        }),
         volumeClaimTemplates: expect.arrayContaining([
           expect.objectContaining({
             spec: expect.objectContaining({

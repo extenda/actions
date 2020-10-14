@@ -4,7 +4,10 @@ jest.mock('../../cloud-run/src/cluster-info');
 jest.mock('../../cloud-run/src/project-info');
 jest.mock('../../cloud-run/src/kubectl-auth');
 jest.mock('../../cloud-run/src/create-namespace');
+jest.mock('../src/patch-deployment-yaml');
+jest.mock('../src/patch-statefulset-yaml');
 jest.mock('../src/kustomize');
+jest.mock('../src/apply-kubectl');
 jest.mock('../../utils', () => ({
   loadTool: jest.fn(),
 }));
@@ -13,9 +16,12 @@ const exec = require('@actions/exec');
 const mockFs = require('mock-fs');
 const clusterInfo = require('../../cloud-run/src/cluster-info');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
+const patchDeployment = require('../src/patch-deployment-yaml');
+const patchStatefulSet = require('../src/patch-statefulset-yaml');
 const runDeploy = require('../src/run-deploy');
 const kustomize = require('../src/kustomize');
 const createNamespace = require('../../cloud-run/src/create-namespace');
+const applyKubectl = require('../src/apply-kubectl');
 
 const orgEnv = process.env;
 
@@ -62,6 +68,61 @@ describe('Run Deploy', () => {
     );
   });
 
+  test('It will deploy StatefulSet when storage is defined', async () => {
+    clusterInfo.mockResolvedValueOnce({});
+    exec.exec.mockResolvedValue(0);
+
+    const dryRun = undefined;
+    const service = {
+      name: 'deployment-name',
+      storage: {
+        volume: '5Mi',
+        mountPath: '/data/storage',
+      },
+    };
+    const image = 'gcr.io/test-project/my-service:tag';
+    await runDeploy(
+      'service-account',
+      service,
+      image,
+    );
+
+    expect(patchStatefulSet).toHaveBeenCalledWith(service, expect.anything());
+    expect(kustomize).toHaveBeenCalledWith([
+      'edit',
+      'add',
+      'resource',
+      'statefulSet.yml',
+    ]);
+    expect(applyKubectl).toHaveBeenCalledWith(expect.anything(), 'statefulset', dryRun);
+  });
+
+  test('It will deploy Deployment when storage is not required', async () => {
+    clusterInfo.mockResolvedValueOnce({});
+    exec.exec.mockResolvedValue(0);
+
+    const dryRun = undefined;
+    const service = {
+      name: 'deployment-name',
+      storage: undefined,
+    };
+    const image = 'gcr.io/test-project/my-service:tag';
+    await runDeploy(
+      'service-account',
+      service,
+      image,
+    );
+
+    expect(patchDeployment).toHaveBeenCalledWith(service, expect.anything());
+    expect(kustomize).toHaveBeenCalledWith([
+      'edit',
+      'add',
+      'resource',
+      'deployment.yml',
+    ]);
+    expect(applyKubectl).toHaveBeenCalledWith(expect.anything(), 'deployment', dryRun);
+  });
+
   test('It calls kustomize on yaml files and build', async () => {
     clusterInfo.mockResolvedValueOnce({});
     exec.exec.mockResolvedValue(0);
@@ -72,25 +133,25 @@ describe('Run Deploy', () => {
       { name },
       image,
     );
-    expect(kustomize).toHaveBeenNthCalledWith(1, [
+    expect(kustomize).toHaveBeenNthCalledWith(2, [
       'edit',
       'set',
       'namespace',
       `hiiretail-${name}`,
     ]);
-    expect(kustomize).toHaveBeenNthCalledWith(2, [
+    expect(kustomize).toHaveBeenNthCalledWith(3, [
       'edit',
       'set',
       'image',
       `eu.gcr.io/extenda/IMAGE:TAG=${image}`,
     ]);
-    expect(kustomize).toHaveBeenNthCalledWith(3, [
+    expect(kustomize).toHaveBeenNthCalledWith(4, [
       'edit',
       'add',
       'label',
       `app:${name}`,
     ]);
-    expect(kustomize).toHaveBeenNthCalledWith(4, [
+    expect(kustomize).toHaveBeenNthCalledWith(5, [
       'edit',
       'set',
       'namesuffix',

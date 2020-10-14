@@ -1,6 +1,6 @@
 const exec = require('@actions/exec');
 
-const applyKubectl = async (deployment, dryRun) => {
+const applyKubectl = async (deployment, deploymentType, dryRun = false) => {
   const applyArgs = [
     'apply',
     '-k',
@@ -16,7 +16,7 @@ const applyKubectl = async (deployment, dryRun) => {
     await exec.exec('kubectl', [
       'rollout',
       'status',
-      'statefulset',
+      deploymentType,
       deployment,
       `--namespace=${deployment}`,
     ]);
