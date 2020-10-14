@@ -10,7 +10,7 @@ const gcloudOutput = async (args) => {
   await exec.exec('gcloud', args, {
     listeners: {
       stdout: (data) => {
-        output = data.toString('utf8');
+        output += data.toString('utf8');
       },
     },
   });

@@ -1,5 +1,7 @@
+const core = require('@actions/core');
 const exec = require('@actions/exec');
 const { getShortSha } = require('../../utils/src/branch-info');
+const { extractOutput, outputCommand, LogFilter } = require('./extract-output');
 
 const podName = async () => {
   const repo = process.env.GITHUB_REPOSITORY.split('/')[1];
@@ -9,7 +11,7 @@ const podName = async () => {
 
 const podEnv = () => Object.keys(process.env).filter((env) => env.startsWith('TESTPOD_'));
 
-const createOverride = (pod, namespace, image, configMap, serviceUrl) => {
+const createOverride = (pod, namespace, image, configMap, serviceUrl, outputPatterns) => {
   const container = {
     name: pod,
     image,
@@ -45,6 +47,17 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl) => {
     container.command = ['/bin/sh', 'entrypoint.sh'];
   }
 
+  // Capture output
+  if (outputPatterns.length > 0) {
+    container.lifecycle = {
+      preStop: {
+        exec: {
+          command: outputCommand(outputPatterns),
+        },
+      },
+    };
+  }
+
   const override = {
     apiVersion: 'v1',
     metadata: {
@@ -75,7 +88,7 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl) => {
   return override;
 };
 
-const runPod = async ({ name, namespace }, image, configMap) => {
+const runPod = async ({ name, namespace }, image, configMap, outputPatterns = []) => {
   const pod = await podName();
 
   const args = [
@@ -99,10 +112,35 @@ const runPod = async ({ name, namespace }, image, configMap) => {
     args.push(`--env=${env}=${process.env[env]}`);
   });
 
-  const json = JSON.stringify(createOverride(pod, namespace, image, configMap, serviceUrl));
+  const json = JSON.stringify(
+    createOverride(pod, namespace, image, configMap, serviceUrl, outputPatterns),
+  );
   args.push(`--overrides=${json}`);
 
-  return exec.exec('kubectl', args);
+  let output = '';
+  const filter = new LogFilter();
+  return exec.exec('kubectl', args, {
+    silent: true,
+    listeners: {
+      stdout: {
+        stdout: (data) => {
+          filter.log(data, process.stdout);
+          output += data.toString('utf8');
+        },
+        stderr: (data) => {
+          process.stderr.write(data);
+        },
+      },
+    },
+  }).then((result) => {
+    if (outputPatterns.length > 0) {
+      return extractOutput(output).then((dest) => {
+        core.info(`Output saved to: ${dest}`);
+        return result;
+      });
+    }
+    return result;
+  });
 };
 
 module.exports = runPod;

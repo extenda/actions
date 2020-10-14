@@ -8,10 +8,13 @@ The action supports the following features:
   * Test against cluster internal services
   * Test Pod runs in the service's namespace, with the same workload identity (service account)
   * Supports any Docker image
-  * Mount a volume as working directory in Pod - *NOTE: The mount is not recursive, only direct children of the directory will be included*
-  * Specify a custom entrypoint for the container
+  * Mount a volume as working directory in Pod
+    > :warning: The mount is not recursive, only direct children of the directory will be included
+  * Specify a custom shell script to run as entrypoint for the container
   * Expose the internal service URL as a `SERVICE_URL` environment variable when `cloud-run.yaml` is used
   * Expose any `TESTPOD_*` environment variables to the Pod at runtime
+  * Save output such as test reports and coverage files in a `test-pod-output` folder in the working directory
+    > :warning: Files are transferred in a tarball over `stdout` so be careful to not transfer too large files.
 
 ## Usage
 
@@ -30,7 +33,7 @@ This example will run Newman tests against an internal Cloud Run service. The se
 with the [`cloud-run`](../cloud-run#readme) action. The `cluster` and `namespace` inputs are derived from the `cloud-run.yaml`
 which is assumed to exist in the repository root.
 
-The example also demostrates how to pass additional environment variables to your pod runtime using environment
+The example also demonstrates how to pass additional environment variables to your pod runtime using environment
 variables with `TESTPOD_` prefixes. In the example, the `TESTPOD_API_KEY` will be available to tests
 as a system environment variable.
 
@@ -145,5 +148,5 @@ jobs:
           service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
           image: eu.gcr.io/extenda/example-test:${{ github.sha }}
         env:
-          TESTPOD_API_KEY: ${{ secrets.API_KEY }}          
+          TESTPOD_API_KEY: ${{ secrets.API_KEY }}  
 ```

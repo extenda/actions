@@ -1,7 +1,9 @@
 jest.mock('@actions/exec');
+jest.mock('../src/extract-output');
 
 const exec = require('@actions/exec');
 const podRun = require('../src/run-pod');
+const extract = require('../src/extract-output');
 
 const orgEnv = process.env;
 
@@ -49,7 +51,7 @@ describe('Pod run', () => {
       '-n',
       'test',
       `--overrides=${JSON.stringify(override)}`,
-    ]);
+    ], expect.objectContaining({ silent: true }));
   });
 
   test('It will run test with complete config map', async () => {
@@ -186,5 +188,49 @@ describe('Pod run', () => {
     expect(exec.exec.mock.calls[0][1]).not.toEqual(
       expect.arrayContaining(['--env=GITHUB_REPOSITORY=extenda/actions']),
     );
+  });
+
+  test('It will save output', async () => {
+    const override = {
+      apiVersion: 'v1',
+      metadata: {
+        namespace: 'test',
+        labels: {
+          'opa-injection': 'false',
+        },
+        annotations: {
+          'sidecar.istio.io/inject': 'false',
+        },
+      },
+      spec: {
+        containers: [{
+          name: 'actions-15b1e98-test',
+          image: 'myimage',
+          lifecycle: {
+            preStop: {
+              exec: {
+                command: [
+                  '/bin/sh',
+                  '-c',
+                  'echo test-pod-output BEGIN; tar -czf - package.json | base64; echo test-pod-output END',
+                ],
+              },
+            },
+          },
+        }],
+      },
+    };
+
+    extract.outputCommand.mockImplementationOnce(jest.requireActual('../src/extract-output').outputCommand);
+    extract.extractOutput.mockResolvedValueOnce('test-pod-output');
+
+    await podRun({ name: '', namespace: 'test' }, 'myimage', null, ['package.json']);
+    expect(exec.exec.mock.calls[0][1]).toEqual(
+      expect.arrayContaining([
+        `--overrides=${JSON.stringify(override)}`,
+      ]),
+    );
+    expect(extract.extractOutput).toHaveBeenCalled();
+    expect(extract.outputCommand).toHaveBeenCalledWith(['package.json']);
   });
 });
