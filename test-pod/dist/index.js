@@ -21709,14 +21709,12 @@ const runPod = async ({ name, namespace }, image, configMap, outputPatterns = []
   return exec.exec('kubectl', args, {
     silent: true,
     listeners: {
-      stdout: {
-        stdout: (data) => {
-          filter.log(data, process.stdout);
-          output += data.toString('utf8');
-        },
-        stderr: (data) => {
-          process.stderr.write(data);
-        },
+      stdout: (data) => {
+        filter.log(data, process.stdout);
+        output += data.toString('utf8');
+      },
+      stderr: (data) => {
+        process.stderr.write(data);
       },
     },
   }).then((result) => {
