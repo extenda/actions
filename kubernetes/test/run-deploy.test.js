@@ -64,7 +64,7 @@ describe('Run Deploy', () => {
       'project-id',
       'skip',
       { cluster: 'cluster', clusterLocation: 'cluster-location', project: 'project' },
-      'hiiretail-deployment-name',
+      'deployment-name',
     );
   });
 
@@ -137,7 +137,7 @@ describe('Run Deploy', () => {
       'edit',
       'set',
       'namespace',
-      `hiiretail-${name}`,
+      name,
     ]);
     expect(kustomize).toHaveBeenNthCalledWith(3, [
       'edit',
@@ -150,13 +150,6 @@ describe('Run Deploy', () => {
       'add',
       'label',
       `app:${name}`,
-    ]);
-    expect(kustomize).toHaveBeenNthCalledWith(5, [
-      'edit',
-      'set',
-      'namesuffix',
-      '--',
-      `-${name}`,
     ]);
     expect(kustomize).toHaveBeenLastCalledWith([
       'build',
