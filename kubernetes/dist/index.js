@@ -19124,37 +19124,37 @@ const createBaseKustomize = (deploymentName) => {
 apiVersion: v1
 kind: Service
 metadata:
-  name: hiiretail
+  name: ${deploymentName}
   labels:
-    app: hiiretail
+    app: ${deploymentName}
 spec:
   type: ClusterIP
   clusterIP: None
   selector:
-    app: hiiretail
+    app: ${deploymentName}
 `,
     statefulSet: `
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: hiiretail
+  name: ${deploymentName}
 spec:
-  serviceName: hiiretail
+  serviceName: ${deploymentName}
   replicas: 1
   selector:
     matchLabels:
-      app: hiiretail
+      app: ${deploymentName}
   template:
     metadata:
       labels:
-        app: hiiretail
+        app: ${deploymentName}
     spec:
       containers:
         - name: ${deploymentName}
           image: eu.gcr.io/extenda/IMAGE:TAG
           envFrom:
             - configMapRef:
-                name: hiiretail
+                name: ${deploymentName}
           volumeMounts:
             - name: ${deploymentName}
               mountPath: /data/storage
@@ -19178,23 +19178,23 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hiiretail
+  name: ${deploymentName}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: hiiretail
+      app: ${deploymentName}
   template:
     metadata:
       labels:
-        app: hiiretail
+        app: ${deploymentName}
     spec:
       containers:
-        - name: hiiretail
+        - name: ${deploymentName}
           image: eu.gcr.io/extenda/IMAGE:TAG
           envFrom:
             - configMapRef:
-                name: hiiretail
+                name: ${deploymentName}
           resources:
             requests:
               cpu: 100m
@@ -19207,7 +19207,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: hiiretail
+  name: ${deploymentName}
 `,
     kustomization: `
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -19223,7 +19223,6 @@ resources:
     fs.writeFileSync(path.join('kustomize', `/${name}.yml`), yamls[name]);
   });
 };
-
 
 module.exports = createBaseKustomize;
 
@@ -19493,16 +19492,6 @@ const kustomizeLabels = async (name) => {
   ]);
 };
 
-const kustomizeNameSuffix = async (name) => {
-  await execKustomize([
-    'edit',
-    'set',
-    'namesuffix',
-    '--',
-    `-${name}`,
-  ]);
-};
-
 const kustomizeBuild = async () => {
   await execKustomize([
     'build',
@@ -19524,8 +19513,7 @@ const runDeploy = async (
   image,
   dryRun,
 ) => {
-  const deploymentName = `hiiretail-${service.name}`;
-  createBaseKustomize(deploymentName);
+  createBaseKustomize(service.name);
 
   const projectId = await gcloudAuth(serviceAccountKey);
   const cluster = await clusterInfo(projectId);
@@ -19545,15 +19533,14 @@ const runDeploy = async (
   }
 
   const opaEnabled = 'skip';
-  await createNamespace(projectId, opaEnabled, cluster, deploymentName);
+  await createNamespace(projectId, opaEnabled, cluster, service.name);
 
-  await kustomizeNamespace(deploymentName);
+  await kustomizeNamespace(service.name);
   await kustomizeImage(image);
   await kustomizeLabels(service.name);
-  await kustomizeNameSuffix(service.name);
   await kustomizeBuild();
 
-  await applyKubectl(deploymentName, deploymentType, dryRun);
+  await applyKubectl(service.name, deploymentType, dryRun);
 };
 
 module.exports = runDeploy;

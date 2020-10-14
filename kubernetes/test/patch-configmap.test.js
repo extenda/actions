@@ -10,14 +10,14 @@ describe('Patches ConfigMap.yml', () => {
     const configMap = `
 kind: ConfigMap
 metadata:
-  name: hiiretail
+  name: configmap
 `;
 
     const output = yaml.parse(patchConfigMapYaml(environmentArgs, configMap));
     expect(output).toMatchObject({
       kind: 'ConfigMap',
       metadata: {
-        name: 'hiiretail',
+        name: 'configmap',
       },
       data: {
         key1: 'value1',

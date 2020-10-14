@@ -36,7 +36,7 @@ properties are required and not.
 <top>\*</top> Once set, this value can only be unset by passing `[]` (empty array) as value.
 
 > **Note**: If `storage` property is not provided, action assumes that the deployment is stateless and will deploy using `Deployment` manifest.
-> If `storage` property is provided, deployment will be done using `StategfulSet` manifest.
+> If `storage` property is provided, deployment will be done using `StatefulSet` manifest.
 
 ### YAML Examples
 

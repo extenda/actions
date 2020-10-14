@@ -7,37 +7,37 @@ const createBaseKustomize = (deploymentName) => {
 apiVersion: v1
 kind: Service
 metadata:
-  name: hiiretail
+  name: ${deploymentName}
   labels:
-    app: hiiretail
+    app: ${deploymentName}
 spec:
   type: ClusterIP
   clusterIP: None
   selector:
-    app: hiiretail
+    app: ${deploymentName}
 `,
     statefulSet: `
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: hiiretail
+  name: ${deploymentName}
 spec:
-  serviceName: hiiretail
+  serviceName: ${deploymentName}
   replicas: 1
   selector:
     matchLabels:
-      app: hiiretail
+      app: ${deploymentName}
   template:
     metadata:
       labels:
-        app: hiiretail
+        app: ${deploymentName}
     spec:
       containers:
         - name: ${deploymentName}
           image: eu.gcr.io/extenda/IMAGE:TAG
           envFrom:
             - configMapRef:
-                name: hiiretail
+                name: ${deploymentName}
           volumeMounts:
             - name: ${deploymentName}
               mountPath: /data/storage
@@ -61,23 +61,23 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hiiretail
+  name: ${deploymentName}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: hiiretail
+      app: ${deploymentName}
   template:
     metadata:
       labels:
-        app: hiiretail
+        app: ${deploymentName}
     spec:
       containers:
-        - name: hiiretail
+        - name: ${deploymentName}
           image: eu.gcr.io/extenda/IMAGE:TAG
           envFrom:
             - configMapRef:
-                name: hiiretail
+                name: ${deploymentName}
           resources:
             requests:
               cpu: 100m
@@ -90,7 +90,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: hiiretail
+  name: ${deploymentName}
 `,
     kustomization: `
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -106,6 +106,5 @@ resources:
     fs.writeFileSync(path.join('kustomize', `/${name}.yml`), yamls[name]);
   });
 };
-
 
 module.exports = createBaseKustomize;
