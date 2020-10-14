@@ -21504,22 +21504,20 @@ const getBinaryData = (rawOutput) => {
     const data = rawOutput.substring(start + OUT_BEGIN_MARKER.length + 1, end);
     return Buffer.from(data, 'base64');
   }
-  throw new Error(`No ${OUT_BEGIN_MARKER} or ${OUT_END_MARKER} in output`);
+  return null;
 };
 
 const extractOutput = async (rawOutput) => {
   const data = getBinaryData(rawOutput);
+  if (!data) {
+    core.debug('No test-pod-output');
+    return null;
+  }
   core.info(`Unpack test-pod output. Buffer size: ${Buffer.byteLength(data, 'binary')} bytes`);
   const tarFile = path.join(os.tmpdir(), `test-pod-output-${Date.now()}.tar`);
   fs.writeFileSync(tarFile, data, 'binary');
   return extractTar(tarFile, 'test-pod-output');
 };
-
-const outputCommand = (outputPatterns) => [
-  '/bin/sh',
-  '-c',
-  `echo Archiving output...; echo ${OUT_BEGIN_MARKER}; tar -czf - ${outputPatterns.join(' ')} | base64; echo ${OUT_END_MARKER}`,
-];
 
 const LogFilter = function LogFilter() {
   this.logEnabled = true;
@@ -21538,7 +21536,6 @@ LogFilter.prototype.log = function log(data, stream) {
 
 module.exports = {
   extractOutput,
-  outputCommand,
   LogFilter,
 };
 
@@ -21561,15 +21558,12 @@ const action = async () => {
   const cluster = core.getInput('cluster');
   const entrypoint = core.getInput('entrypoint');
   const workingDirectory = core.getInput('working-directory');
-  const outputPatternsInput = core.getInput('output-patterns');
-
-  const outputPatterns = outputPatternsInput ? outputPatternsInput.split(/\s*,\s*/) : [];
 
   const clusterInfo = await configureKubeCtl(serviceAccountKey, cluster, namespace);
 
   const configMap = await createConfigMap(clusterInfo, workingDirectory, entrypoint);
 
-  return runPod(clusterInfo, image, configMap, outputPatterns)
+  return runPod(clusterInfo, image, configMap)
     .finally(() => (configMap ? deleteConfigMap(clusterInfo) : null));
 };
 
@@ -21598,7 +21592,7 @@ const podName = async () => {
 
 const podEnv = () => Object.keys(process.env).filter((env) => env.startsWith('TESTPOD_'));
 
-const createOverride = (pod, namespace, image, configMap, serviceUrl, outputPatterns) => {
+const createOverride = (pod, namespace, image, configMap, serviceUrl) => {
   const container = {
     name: pod,
     image,
@@ -21634,17 +21628,6 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl, outputPatt
     container.command = ['/bin/sh', 'entrypoint.sh'];
   }
 
-  // Capture output
-  if (outputPatterns.length > 0) {
-    container.lifecycle = {
-      preStop: {
-        exec: {
-          command: outputCommand(outputPatterns),
-        },
-      },
-    };
-  }
-
   const override = {
     apiVersion: 'v1',
     metadata: {
@@ -21675,7 +21658,7 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl, outputPatt
   return override;
 };
 
-const runPod = async ({ name, namespace }, image, configMap, outputPatterns = []) => {
+const runPod = async ({ name, namespace }, image, configMap) => {
   const pod = await podName();
 
   const args = [
@@ -21700,7 +21683,7 @@ const runPod = async ({ name, namespace }, image, configMap, outputPatterns = []
   });
 
   const json = JSON.stringify(
-    createOverride(pod, namespace, image, configMap, serviceUrl, outputPatterns),
+    createOverride(pod, namespace, image, configMap, serviceUrl),
   );
   args.push(`--overrides=${json}`);
 
@@ -21718,15 +21701,12 @@ const runPod = async ({ name, namespace }, image, configMap, outputPatterns = []
         process.stderr.write(data);
       },
     },
-  }).then((result) => {
-    if (outputPatterns.length > 0) {
-      return extractOutput(output).then((dest) => {
-        core.info(`Output saved to: ${dest}`);
-        return result;
-      });
+  }).then((result) => extractOutput(output).then((dest) => {
+    if (dest) {
+      core.info(`Output saved to: ${dest}`);
     }
     return result;
-  });
+  }));
 };
 
 module.exports = runPod;

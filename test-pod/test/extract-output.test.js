@@ -2,7 +2,13 @@ const fs = require('fs');
 const { resolve } = require('path');
 const exec = require('@actions/exec');
 const rmdir = require('rmdir');
-const { outputCommand, extractOutput, LogFilter } = require('../src/extract-output');
+const { extractOutput, LogFilter } = require('../src/extract-output');
+
+const outputCommand = (patterns) => [
+  '/bin/sh',
+  '-c',
+  `echo test-pod-output BEGIN; tar -czf - ${patterns.join(' ')} | base64; echo test-pod-output END`,
+];
 
 const execTarCommand = async () => {
   const tarCommand = outputCommand(['src', '*.json']);
@@ -41,15 +47,6 @@ describe('Extract output', () => {
     rmdir(resolve('test-pod-output'));
   });
 
-  test('It generates an output command', () => {
-    const command = outputCommand(['coverage', '*.txt']);
-    expect(command).toEqual([
-      '/bin/sh',
-      '-c',
-      'echo Archiving output...; echo test-pod-output BEGIN; tar -czf - coverage *.txt | base64; echo test-pod-output END',
-    ]);
-  });
-
   test('It filters output with LogFilter', () => {
     const filter = new LogFilter();
     const write = jest.fn();
@@ -72,6 +69,21 @@ describe('Extract output', () => {
     expect(write).toHaveBeenCalledWith(Buffer.from('done', 'utf8'));
 
     expect(write).toHaveBeenCalledTimes(2);
+  });
+
+  test('It can handle no output', async () => {
+    const output = await extractOutput('Log statement');
+    expect(output).toBeNull();
+  });
+
+  test('It will discard output with missing END', async () => {
+    const output = await extractOutput('test-pod-output BEGIN\nBinary data\nMore data');
+    expect(output).toBeNull();
+  });
+
+  test('It will discard output with END before BEGIN', async () => {
+    const output = await extractOutput('test-pod-output END\nBinary data\ntest-pod-output BEGIN');
+    expect(output).toBeNull();
   });
 
   if (process.platform !== 'win32') {

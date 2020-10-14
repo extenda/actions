@@ -15,6 +15,7 @@ describe('Pod run', () => {
       GITHUB_SHA: '15b1e9856fc56aaf79ddece96c0d931bf67227f0',
     };
     exec.exec.mockResolvedValue(0);
+    extract.extractOutput.mockResolvedValueOnce(null);
   });
   afterEach(() => {
     process.env = orgEnv;
@@ -206,31 +207,19 @@ describe('Pod run', () => {
         containers: [{
           name: 'actions-15b1e98-test',
           image: 'myimage',
-          lifecycle: {
-            preStop: {
-              exec: {
-                command: [
-                  '/bin/sh',
-                  '-c',
-                  'echo test-pod-output BEGIN; tar -czf - package.json | base64; echo test-pod-output END',
-                ],
-              },
-            },
-          },
         }],
       },
     };
 
-    extract.outputCommand.mockImplementationOnce(jest.requireActual('../src/extract-output').outputCommand);
+    extract.extractOutput.mockReset();
     extract.extractOutput.mockResolvedValueOnce('test-pod-output');
 
-    await podRun({ name: '', namespace: 'test' }, 'myimage', null, ['package.json']);
+    await podRun({ name: '', namespace: 'test' }, 'myimage', null);
     expect(exec.exec.mock.calls[0][1]).toEqual(
       expect.arrayContaining([
         `--overrides=${JSON.stringify(override)}`,
       ]),
     );
     expect(extract.extractOutput).toHaveBeenCalled();
-    expect(extract.outputCommand).toHaveBeenCalledWith(['package.json']);
   });
 });

@@ -11,15 +11,12 @@ const action = async () => {
   const cluster = core.getInput('cluster');
   const entrypoint = core.getInput('entrypoint');
   const workingDirectory = core.getInput('working-directory');
-  const outputPatternsInput = core.getInput('output-patterns');
-
-  const outputPatterns = outputPatternsInput ? outputPatternsInput.split(/\s*,\s*/) : [];
 
   const clusterInfo = await configureKubeCtl(serviceAccountKey, cluster, namespace);
 
   const configMap = await createConfigMap(clusterInfo, workingDirectory, entrypoint);
 
-  return runPod(clusterInfo, image, configMap, outputPatterns)
+  return runPod(clusterInfo, image, configMap)
     .finally(() => (configMap ? deleteConfigMap(clusterInfo) : null));
 };
 

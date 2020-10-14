@@ -31,7 +31,7 @@ describe('test-pod Action', () => {
     await action();
     expect(configureKubeCtl).toHaveBeenCalledWith('sa', 'cluster', 'namespace');
     expect(createConfigMap).toHaveBeenCalledWith({ namespace: 'namespace' }, 'dir', 'entrypoint');
-    expect(runPod).toHaveBeenCalledWith({ namespace: 'namespace' }, 'myimage', { name: 'configmap' }, []);
+    expect(runPod).toHaveBeenCalledWith({ namespace: 'namespace' }, 'myimage', { name: 'configmap' });
     expect(deleteConfigMap).toHaveBeenCalledWith({ namespace: 'namespace' });
   });
 

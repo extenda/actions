@@ -14,22 +14,20 @@ const getBinaryData = (rawOutput) => {
     const data = rawOutput.substring(start + OUT_BEGIN_MARKER.length + 1, end);
     return Buffer.from(data, 'base64');
   }
-  throw new Error(`No ${OUT_BEGIN_MARKER} or ${OUT_END_MARKER} in output`);
+  return null;
 };
 
 const extractOutput = async (rawOutput) => {
   const data = getBinaryData(rawOutput);
+  if (!data) {
+    core.debug('No test-pod-output');
+    return null;
+  }
   core.info(`Unpack test-pod output. Buffer size: ${Buffer.byteLength(data, 'binary')} bytes`);
   const tarFile = path.join(os.tmpdir(), `test-pod-output-${Date.now()}.tar`);
   fs.writeFileSync(tarFile, data, 'binary');
   return extractTar(tarFile, 'test-pod-output');
 };
-
-const outputCommand = (outputPatterns) => [
-  '/bin/sh',
-  '-c',
-  `echo Archiving output...; echo ${OUT_BEGIN_MARKER}; tar -czf - ${outputPatterns.join(' ')} | base64; echo ${OUT_END_MARKER}`,
-];
 
 const LogFilter = function LogFilter() {
   this.logEnabled = true;
@@ -48,6 +46,5 @@ LogFilter.prototype.log = function log(data, stream) {
 
 module.exports = {
   extractOutput,
-  outputCommand,
   LogFilter,
 };

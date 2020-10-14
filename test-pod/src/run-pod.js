@@ -11,7 +11,7 @@ const podName = async () => {
 
 const podEnv = () => Object.keys(process.env).filter((env) => env.startsWith('TESTPOD_'));
 
-const createOverride = (pod, namespace, image, configMap, serviceUrl, outputPatterns) => {
+const createOverride = (pod, namespace, image, configMap, serviceUrl) => {
   const container = {
     name: pod,
     image,
@@ -47,17 +47,6 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl, outputPatt
     container.command = ['/bin/sh', 'entrypoint.sh'];
   }
 
-  // Capture output
-  if (outputPatterns.length > 0) {
-    container.lifecycle = {
-      preStop: {
-        exec: {
-          command: outputCommand(outputPatterns),
-        },
-      },
-    };
-  }
-
   const override = {
     apiVersion: 'v1',
     metadata: {
@@ -88,7 +77,7 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl, outputPatt
   return override;
 };
 
-const runPod = async ({ name, namespace }, image, configMap, outputPatterns = []) => {
+const runPod = async ({ name, namespace }, image, configMap) => {
   const pod = await podName();
 
   const args = [
@@ -113,7 +102,7 @@ const runPod = async ({ name, namespace }, image, configMap, outputPatterns = []
   });
 
   const json = JSON.stringify(
-    createOverride(pod, namespace, image, configMap, serviceUrl, outputPatterns),
+    createOverride(pod, namespace, image, configMap, serviceUrl),
   );
   args.push(`--overrides=${json}`);
 
@@ -131,15 +120,12 @@ const runPod = async ({ name, namespace }, image, configMap, outputPatterns = []
         process.stderr.write(data);
       },
     },
-  }).then((result) => {
-    if (outputPatterns.length > 0) {
-      return extractOutput(output).then((dest) => {
-        core.info(`Output saved to: ${dest}`);
-        return result;
-      });
+  }).then((result) => extractOutput(output).then((dest) => {
+    if (dest) {
+      core.info(`Output saved to: ${dest}`);
     }
     return result;
-  });
+  }));
 };
 
 module.exports = runPod;
