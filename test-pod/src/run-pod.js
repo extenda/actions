@@ -1,5 +1,7 @@
+const core = require('@actions/core');
 const exec = require('@actions/exec');
 const { getShortSha } = require('../../utils/src/branch-info');
+const { extractOutput, LogFilter } = require('./extract-output');
 
 const podName = async () => {
   const repo = process.env.GITHUB_REPOSITORY.split('/')[1];
@@ -99,10 +101,31 @@ const runPod = async ({ name, namespace }, image, configMap) => {
     args.push(`--env=${env}=${process.env[env]}`);
   });
 
-  const json = JSON.stringify(createOverride(pod, namespace, image, configMap, serviceUrl));
+  const json = JSON.stringify(
+    createOverride(pod, namespace, image, configMap, serviceUrl),
+  );
   args.push(`--overrides=${json}`);
 
-  return exec.exec('kubectl', args);
+  let output = '';
+  const filter = new LogFilter();
+  core.info(`kubectl ${args.join(' ')}`);
+  return exec.exec('kubectl', args, {
+    silent: true,
+    listeners: {
+      stdout: (data) => {
+        filter.log(data, process.stdout);
+        output += data.toString('utf8');
+      },
+      stderr: (data) => {
+        process.stderr.write(data);
+      },
+    },
+  }).then((result) => extractOutput(output).then((dest) => {
+    if (dest) {
+      core.info(`Output saved to: ${dest}`);
+    }
+    return result;
+  }));
 };
 
 module.exports = runPod;
