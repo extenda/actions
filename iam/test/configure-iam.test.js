@@ -15,7 +15,7 @@ const configureIam = require('../src/configure-iam');
 const projectInfo = require('../../cloud-run/src/project-info');
 const { setupPermissions, handlePermissions } = require('../src/permissions');
 const { setupRoles } = require('../src/roles');
-const setupSystem = require('../src/create-system');
+const { setupSystem } = require('../src/create-system');
 
 describe('Configure iam', () => {
   beforeEach(() => {
@@ -61,7 +61,7 @@ describe('Configure iam', () => {
       JSON.stringify(checkSystem)));
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
-    await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'project-staging-321', []);
+    await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'project-staging-321', [], false);
 
     expect(request).toHaveBeenCalledTimes(1);
     expect(setupPermissions).toHaveBeenCalledWith(
@@ -104,7 +104,75 @@ describe('Configure iam', () => {
       JSON.stringify(checkSystem)));
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
-    await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', []);
+    await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], false);
+    expect(setupSystem).toHaveBeenCalledWith(
+      'test-service', 'test.test-service-staging', 'staging', 'test-repo', 'styra-token', 'https://extendaretail.styra.com', [],
+    );
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+
+  test('it skips roles and permissions', async () => {
+    setupGcloud.mockResolvedValueOnce('test-project');
+    projectInfo.mockReturnValueOnce({ env: 'staging' });
+    const iam = {
+      'permission-prefix': 'test',
+      services: [{
+        name: 'test-service',
+        repository: 'test-repo',
+      }],
+    };
+
+    const checkSystem = {
+      result: [
+        {
+          name: 'test-wrong-staging',
+        },
+      ],
+    };
+    const fullPermissions = {
+      'test.test.get': 'test desc',
+      'test.test.create': 'test1 desc',
+    };
+    request.mockImplementation((conf, cb) => cb(null, { statusCode: 404 },
+      JSON.stringify(checkSystem)));
+    setupPermissions.mockResolvedValueOnce(fullPermissions);
+
+    await expect(configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], true))
+      .resolves.toEqual(null);
+    expect(setupSystem).toHaveBeenCalledWith(
+      'test-service', 'test.test-service-staging', 'staging', 'test-repo', 'styra-token', 'https://extendaretail.styra.com', [],
+    );
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+
+  test('it handles owners if system exists', async () => {
+    setupGcloud.mockResolvedValueOnce('test-project');
+    projectInfo.mockReturnValueOnce({ env: 'staging' });
+    const iam = {
+      'permission-prefix': 'test',
+      services: [{
+        name: 'test-service',
+        repository: 'test-repo',
+      }],
+    };
+
+    const checkSystem = {
+      result: [
+        {
+          name: 'test-wrong-staging',
+        },
+      ],
+    };
+    const fullPermissions = {
+      'test.test.get': 'test desc',
+      'test.test.create': 'test1 desc',
+    };
+    request.mockImplementation((conf, cb) => cb(null, { statusCode: 404 },
+      JSON.stringify(checkSystem)));
+    setupPermissions.mockResolvedValueOnce(fullPermissions);
+
+    await expect(configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], true))
+      .resolves.toEqual(null);
     expect(setupSystem).toHaveBeenCalledWith(
       'test-service', 'test.test-service-staging', 'staging', 'test-repo', 'styra-token', 'https://extendaretail.styra.com', [],
     );

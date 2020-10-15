@@ -2,9 +2,10 @@ const core = require('@actions/core');
 const request = require('request');
 const { setupPermissions, handlePermissions } = require('./permissions');
 const { setupRoles } = require('./roles');
-const setupSystem = require('./create-system');
+const { setupSystem } = require('./create-system');
 const getClusterInfo = require('../../cloud-run/src/cluster-info');
 const createNamespace = require('../../cloud-run/src/create-namespace');
+const checkOwners = require('./handle-owners');
 
 const checkSystem = async (
   systemName, styraToken, styraUrl,
@@ -22,16 +23,16 @@ const checkSystem = async (
       const jsonBody = JSON.parse(body);
       jsonBody.result.forEach((result) => {
         if (result.name === `${systemName}`) {
-          resolve(false);
+          resolve(result.id);
         }
       });
-      resolve(true);
+      resolve('');
     }
   });
 });
 
 const configureIAM = async (
-  iam, styraToken, styraUrl, iamUrl, iamToken, env, projectId, systemOwners,
+  iam, styraToken, styraUrl, iamUrl, iamToken, env, projectId, systemOwners, skipIAM,
 ) => {
   const {
     'permission-prefix': permissionPrefix,
@@ -52,15 +53,15 @@ const configureIAM = async (
     // 3. Create DAS system (if not exists)
     promises.push(createNamespace(projectId, true, cluster, namespace)
       .then(() => checkSystem(systemName, styraToken, styraUrl)
-        .then((createSystem) => {
-          if (createSystem) {
+        .then((systemId) => {
+          if (systemId === '') {
             core.info(`creating system '${systemName}' in ${styraUrl}`);
             return setupSystem(
               namespace, systemName, env, repository, styraToken, styraUrl, systemOwners,
             );
           }
           core.info(`system '${systemName}' already exists in ${styraUrl}`);
-          return null;
+          return checkOwners(systemId, styraToken, styraUrl, systemOwners);
         })));
   });
 
@@ -68,9 +69,12 @@ const configureIAM = async (
   await Promise.all(promises);
 
   // Next, update IAM system
-  return setupPermissions(permissions, permissionPrefix)
-    .then((fullPermissions) => handlePermissions(fullPermissions, iamToken, iamUrl))
-    .then(() => setupRoles(roles, permissionPrefix, iamToken, iamUrl));
+  if (!skipIAM) {
+    return setupPermissions(permissions, permissionPrefix)
+      .then((fullPermissions) => handlePermissions(fullPermissions, iamToken, iamUrl))
+      .then(() => setupRoles(roles, permissionPrefix, iamToken, iamUrl));
+  }
+  return null;
 };
 
 module.exports = configureIAM;

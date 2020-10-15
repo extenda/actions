@@ -68,6 +68,24 @@ const setOwners = async (
   });
 });
 
+const updateOwners = async (
+  systemId, token, styraUrl, systemOwners,
+) => setOwners(systemId, token, styraUrl, systemOwners)
+  .then((invites) => {
+    if (invites) {
+      const invitePromises = [];
+      systemOwners.forEach((user) => invitePromises.push(sendInvites(token, styraUrl, user)));
+      return Promise.all(invitePromises).then(() => true);
+    }
+    return false;
+  })
+  .then((retry) => {
+    if (retry) {
+      return setOwners(systemId, token, styraUrl, systemOwners);
+    }
+    return null;
+  });
+
 const setLabels = async (
   systemId, env, token, styraUrl,
 ) => new Promise((resolve, reject) => {
@@ -265,24 +283,10 @@ const setupSystem = async (service, systemName, env, repo, token, styraUrl, syst
   promises.push(setLabels(systemId, env, token, styraUrl));
   promises.push(setDefaultPolicy(systemId, token, styraUrl));
   promises.push(setDefaultDataset(systemId, token, styraUrl));
-  promises.push(setOwners(systemId, token, styraUrl, systemOwners)
-    .then((invites) => {
-      if (invites) {
-        const invitePromises = [];
-        systemOwners.forEach((user) => invitePromises.push(sendInvites(token, styraUrl, user)));
-        return Promise.all(invitePromises).then(() => true);
-      }
-      return false;
-    })
-    .then((retry) => {
-      if (retry) {
-        return setOwners(systemId, token, styraUrl, systemOwners);
-      }
-      return null;
-    }));
+  promises.push(updateOwners(systemId, token, styraUrl, systemOwners));
   promises.push(applyConfiguration(opaConfig, systemName));
 
   return Promise.all(promises);
 };
 
-module.exports = setupSystem;
+module.exports = { setupSystem, updateOwners };

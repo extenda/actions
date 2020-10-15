@@ -38,14 +38,15 @@ describe('run action', () => {
   test('It can run the action', async () => {
     loadSecret.mockResolvedValue('token');
     getSystemOwners.mockResolvedValueOnce(['test@mail.com']);
-    setupGcloud.mockResolvedValue('test-prod-332');
+    setupGcloud.mockResolvedValueOnce('test-staging-332');
+    setupGcloud.mockResolvedValueOnce('test-prod-332');
     loadCredentials.mockResolvedValue(credentials);
 
     const clusterInfoResponse = {
       project: 'tribe-prod-1242',
     };
 
-    getClusterInfo.mockReturnValue(clusterInfoResponse);
+    getClusterInfo.mockReturnValueOnce(clusterInfoResponse);
     core.getInput.mockReturnValueOnce('service-account')
       .mockReturnValueOnce('service-account-staging')
       .mockReturnValueOnce('service-account-prod')
@@ -54,7 +55,7 @@ describe('run action', () => {
       .mockReturnValueOnce('https://extendaretail.styra.com');
     loadIamDefinition.mockReturnValueOnce({});
     fg.sync.mockReturnValueOnce(['iam.yaml']);
-    fetchIamToken.mockResolvedValue('iam-token');
+    fetchIamToken.mockResolvedValueOnce('iam-token');
     await action();
 
     expect(core.getInput).toHaveBeenCalledTimes(7);
@@ -69,10 +70,74 @@ describe('run action', () => {
       'styra-token',
       'https://extendaretail.styra.com',
       'https://iam-api.retailsvc.com',
+      '',
+      'staging',
+      'test-staging-332',
+      ['test@mail.com'],
+      true);
+    expect(configureIam).toHaveBeenNthCalledWith(2,
+      {},
+      'styra-token',
+      'https://extendaretail.styra.com',
+      'https://iam-api.retailsvc.com',
       'iam-token',
       'prod',
       'test-prod-332',
-      ['test@mail.com']);
+      ['test@mail.com'],
+      false);
+  });
+
+  test('It can run the action for IAM api correctly', async () => {
+    loadSecret.mockResolvedValue('token');
+    getSystemOwners.mockResolvedValueOnce(['test@mail.com']);
+    setupGcloud.mockResolvedValueOnce('test-staging-332');
+    setupGcloud.mockResolvedValueOnce('test-prod-332');
+    loadCredentials.mockResolvedValue(credentials);
+
+    const clusterInfoResponse = {
+      project: 'tribe-prod-1242',
+    };
+
+    getClusterInfo.mockReturnValueOnce(clusterInfoResponse);
+    core.getInput.mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('service-account-staging')
+      .mockReturnValueOnce('service-account-prod')
+      .mockReturnValueOnce('iam.yaml')
+      .mockReturnValueOnce('https://iam-api.retailsvc.dev')
+      .mockReturnValueOnce('https://extendaretail.styra.com');
+    loadIamDefinition.mockReturnValueOnce({});
+    fg.sync.mockReturnValueOnce(['iam.yaml']);
+    fetchIamToken.mockResolvedValueOnce('iam-token');
+    fetchIamToken.mockResolvedValueOnce('iam-token');
+    await action();
+
+    expect(core.getInput).toHaveBeenCalledTimes(7);
+    expect(fetchIamToken).toHaveBeenCalledWith(
+      'iam-key',
+      'iam-email',
+      'iam-pass',
+      'iam-tenant',
+    );
+    expect(configureIam).toHaveBeenNthCalledWith(1,
+      {},
+      'styra-token',
+      'https://extendaretail.styra.com',
+      'https://iam-api.retailsvc.dev',
+      'iam-token',
+      'staging',
+      'test-staging-332',
+      ['test@mail.com'],
+      false);
+    expect(configureIam).toHaveBeenNthCalledWith(2,
+      {},
+      'styra-token',
+      'https://extendaretail.styra.com',
+      'https://iam-api.retailsvc.com',
+      'iam-token',
+      'prod',
+      'test-prod-332',
+      ['test@mail.com'],
+      false);
   });
 
   test('It can run for multiple files', async () => {
