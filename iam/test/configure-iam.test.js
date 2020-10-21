@@ -178,6 +178,8 @@ describe('Configure iam', () => {
     };
     request.mockImplementation((conf, cb) => cb(null, { statusCode: 200 },
       JSON.stringify(checkSystem)));
+    checkOwners.mockResolvedValueOnce(null);
+    checkRepository.mockResolvedValueOnce(null);
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
     await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], true);
