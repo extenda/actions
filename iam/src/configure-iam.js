@@ -6,11 +6,12 @@ const { setupSystem } = require('./create-system');
 const getClusterInfo = require('../../cloud-run/src/cluster-info');
 const createNamespace = require('../../cloud-run/src/create-namespace');
 const checkOwners = require('./handle-owners');
+const checkRepository = require('./handle-repository');
 
 const checkSystem = async (
   systemName, styraToken, styraUrl,
 ) => new Promise((resolve) => {
-  const url = `${styraUrl}/v1/systems?compact=true&name=${systemName}`;
+  const url = `${styraUrl}/v1/systems?compact=false&name=${systemName}`;
   request({
     uri: url,
     method: 'GET',
@@ -23,10 +24,10 @@ const checkSystem = async (
       const jsonBody = JSON.parse(body);
       jsonBody.result.forEach((result) => {
         if (result.name === `${systemName}`) {
-          resolve(result.id);
+          resolve(result);
         }
       });
-      resolve('');
+      resolve({ id: '' });
     }
   });
 });
@@ -53,15 +54,16 @@ const configureIAM = async (
     // 3. Create DAS system (if not exists)
     promises.push(createNamespace(projectId, true, cluster, namespace)
       .then(() => checkSystem(systemName, styraToken, styraUrl)
-        .then((systemId) => {
-          if (systemId === '') {
+        .then((system) => {
+          if (system.id === '') {
             core.info(`creating system '${systemName}' in ${styraUrl}`);
             return setupSystem(
               namespace, systemName, env, repository, styraToken, styraUrl, systemOwners,
             );
           }
           core.info(`system '${systemName}' already exists in ${styraUrl}`);
-          return checkOwners(systemId, styraToken, styraUrl, systemOwners);
+          return checkOwners(system.id, styraToken, styraUrl, systemOwners)
+            .then(() => checkRepository(system, styraToken, styraUrl, repository));
         })));
   });
 
