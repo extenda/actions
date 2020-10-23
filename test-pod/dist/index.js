@@ -21667,6 +21667,8 @@ const runPod = async ({ name, namespace }, image, configMap) => {
     '--rm',
     '--attach',
     '--restart=Never',
+    '--pod-running-timeout=15m',
+    '--wait=true',
     `--image=${image}`,
     '-n',
     namespace,
