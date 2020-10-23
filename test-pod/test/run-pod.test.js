@@ -48,6 +48,8 @@ describe('Pod run', () => {
       '--rm',
       '--attach',
       '--restart=Never',
+      '--pod-running-timeout=15m',
+      '--wait=true',
       '--image=myimage',
       '-n',
       'test',
