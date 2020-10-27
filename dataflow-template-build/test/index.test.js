@@ -29,5 +29,5 @@ describe('Dataflow Build Action', () => {
     await action();
 
     expect(core.getInput).toHaveBeenCalledTimes(5);
-    });
+  });
 });
