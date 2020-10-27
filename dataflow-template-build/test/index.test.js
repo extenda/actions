@@ -14,10 +14,20 @@ describe('Dataflow Build Action', () => {
     core.getInput.mockReturnValueOnce('service-account')
       .mockReturnValueOnce('gs://test/dataflow/template.json')
       .mockReturnValueOnce('gcr.io/project/image:tag')
-      .mockReturnValueOnce('')
+      .mockReturnValueOnce('metadata.json')
       .mockReturnValueOnce('JAVA');
     await action();
 
     expect(core.getInput).toHaveBeenCalledTimes(5);
   });
+
+  test('It can run the action without optional metadata tag', async () => {
+    core.getInput.mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('gs://test/dataflow/template.json')
+      .mockReturnValueOnce('gcr.io/project/image:tag')
+      .mockReturnValueOnce('JAVA');
+    await action();
+
+    expect(core.getInput).toHaveBeenCalledTimes(5);
+    });
 });
