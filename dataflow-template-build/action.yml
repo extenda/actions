@@ -7,7 +7,7 @@ inputs:
     required: true
   metadata-path:
     description: The metadata file path.
-    required: true
+    required: false
   service-account-key:
     description:
       The service account key which will be used for authentication.

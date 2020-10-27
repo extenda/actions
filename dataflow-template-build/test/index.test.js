@@ -14,7 +14,7 @@ describe('Dataflow Build Action', () => {
     core.getInput.mockReturnValueOnce('service-account')
       .mockReturnValueOnce('gs://test/dataflow/template.json')
       .mockReturnValueOnce('gcr.io/project/image:tag')
-      .mockReturnValueOnce('metadata.json')
+      .mockReturnValueOnce('')
       .mockReturnValueOnce('JAVA');
     await action();
 

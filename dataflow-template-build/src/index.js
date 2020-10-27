@@ -6,7 +6,7 @@ const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const image = core.getInput('image', { required: true });
-  const metadataPath = core.getInput('metadata-path', { required: true });
+  const metadataPath = core.getInput('metadata-path') || '';
   const sdkLanguage = core.getInput('sdk-language') || 'JAVA';
   const templatePath = core.getInput('template-path', { required: true });
 

@@ -3,17 +3,9 @@
   "version": "0.0.1-local",
   "private": true,
   "description": "Build a dataflow flex template",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "dependencies": {
     "@actions/core": "^1.2.6",
     "@actions/exec": "^1.0.4"
-  },
-  "scripts": {
-    "test": "jest",
-    "lint:js": "eslint ."
-  },
-  "devDependencies": {
-    "eslint": "^7.12.0",
-    "jest": "^21.2.1"
   }
 }
