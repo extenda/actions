@@ -1558,19 +1558,38 @@ function copyFile(srcFile, destFile, force) {
 const exec = __webpack_require__(2176);
 
 const deployJob = async (
-  newJobName, parameters, dataflowServiceAccount, bucket, region, projectId,
-) => exec.exec('gcloud', [
-  'dataflow',
-  'flex-template',
-  'run',
   newJobName,
-  `--template-file-gcs-location=${bucket}/template.json`,
-  `--parameters=${parameters}`,
-  `--service-account-email=${dataflowServiceAccount}`,
-  `--staging-location=${bucket}}/temp`,
-  `--region=${region}`,
-  `--project=${projectId}`,
-]);
+  parameters,
+  dataflowServiceAccount,
+  templatePath,
+  region,
+  projectId,
+  mode,
+  stagingLocation,
+) => {
+  const args = [
+    'dataflow',
+    mode,
+    'run',
+    newJobName,
+  ];
+  if (mode === 'flex-template') {
+    args.push(`--template-file-gcs-location=${templatePath}`);
+  } else {
+    args.push(`--gcs-location=${templatePath}`);
+  }
+  if (parameters !== '') {
+    args.push(`--parameters=${parameters}`);
+  }
+  if (stagingLocation) {
+    args.push(`--staging-location=${stagingLocation}`);
+  }
+  args.push(`--service-account-email=${dataflowServiceAccount}`);
+  args.push(`--region=${region}`);
+  args.push(`--project=${projectId}`);
+
+  return exec.exec('gcloud', args);
+};
 
 module.exports = deployJob;
 
@@ -1632,17 +1651,27 @@ const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const jobName = core.getInput('job-name', { required: true });
   const jobVersion = core.getInput('job-version', { required: true });
-  const githubRun = core.getInput('github-run', { required: true });
-  const parameters = core.getInput('parameters') || '';
   const dataflowServiceAccount = core.getInput('dataflow-service-account', { required: true });
-  const bucketCore = core.getInput('bucket', { required: true });
+  const templatePath = core.getInput('template-path', { required: true });
+  const jobType = core.getInput('job-type') || 'job';
+  const parameters = core.getInput('parameters') || '';
+  const stagingLocation = core.getInput('staging-location') || '';
   const region = core.getInput('region') || 'europe-west1';
 
-  const newJobName = `${jobName}-${githubRun}`;
-  const bucket = `gs://${bucketCore}/dataflow/templates/${jobName}/${jobVersion}/`;
+  const newJobName = `${jobName}-${jobVersion}`;
+
   const projectId = await setupGcloud(serviceAccountKey, process.env.GCLOUD_INSTALLED_VERSION || 'latest');
 
-  await deployJob(newJobName, parameters, dataflowServiceAccount, bucket, region, projectId)
+  await deployJob(
+    newJobName,
+    parameters,
+    dataflowServiceAccount,
+    templatePath,
+    region,
+    projectId,
+    jobType,
+    stagingLocation,
+  )
     .then(() => drainJob(jobName, newJobName, region, projectId));
 };
 

@@ -19,22 +19,25 @@ describe('Cloud Run Action', () => {
     deployJob.mockResolvedValueOnce(0);
     core.getInput.mockReturnValueOnce('service-account')
       .mockReturnValueOnce('job-name')
-      .mockReturnValueOnce('0.0.1')
       .mockReturnValueOnce('10')
-      .mockReturnValueOnce('test=job')
       .mockReturnValueOnce('dataflow-sa')
-      .mockReturnValueOnce('bucket-name')
+      .mockReturnValueOnce('gs://test-template/10/template.json')
+      .mockReturnValueOnce('flex-template')
+      .mockReturnValueOnce('test=job,test2=job2')
+      .mockReturnValueOnce('gs://clan-dataflow/job-name/10/staging')
       .mockReturnValueOnce('europe-west4');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(8);
+    expect(core.getInput).toHaveBeenCalledTimes(9);
     expect(deployJob).toHaveBeenCalledWith(
       'job-name-10',
-      'test=job',
+      'test=job,test2=job2',
       'dataflow-sa',
-      'gs://bucket-name/dataflow/templates/job-name/0.0.1/',
+      'gs://test-template/10/template.json',
       'europe-west4',
       'test-project-342',
+      'flex-template',
+      'gs://clan-dataflow/job-name/10/staging',
     );
     expect(drainJob).toHaveBeenCalledWith(
       'job-name',
@@ -49,21 +52,22 @@ describe('Cloud Run Action', () => {
     deployJob.mockResolvedValueOnce(0);
     core.getInput.mockReturnValueOnce('service-account')
       .mockReturnValueOnce('job-name')
-      .mockReturnValueOnce('0.0.1')
       .mockReturnValueOnce('10')
-      .mockReturnValueOnce('test=job')
       .mockReturnValueOnce('dataflow-sa')
-      .mockReturnValueOnce('bucket-name');
+      .mockReturnValueOnce('gs://test-template/10/template.json')
+      .mockReturnValueOnce('flex-template');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(8);
+    expect(core.getInput).toHaveBeenCalledTimes(9);
     expect(deployJob).toHaveBeenCalledWith(
       'job-name-10',
-      'test=job',
+      '',
       'dataflow-sa',
-      'gs://bucket-name/dataflow/templates/job-name/0.0.1/',
+      'gs://test-template/10/template.json',
       'europe-west1',
       'test-project-342',
+      'flex-template',
+      '',
     );
     expect(drainJob).toHaveBeenCalledWith(
       'job-name',

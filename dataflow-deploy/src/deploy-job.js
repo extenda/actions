@@ -1,18 +1,37 @@
 const exec = require('@actions/exec');
 
 const deployJob = async (
-  newJobName, parameters, dataflowServiceAccount, bucket, region, projectId,
-) => exec.exec('gcloud', [
-  'dataflow',
-  'flex-template',
-  'run',
   newJobName,
-  `--template-file-gcs-location=${bucket}/template.json`,
-  `--parameters=${parameters}`,
-  `--service-account-email=${dataflowServiceAccount}`,
-  `--staging-location=${bucket}}/temp`,
-  `--region=${region}`,
-  `--project=${projectId}`,
-]);
+  parameters,
+  dataflowServiceAccount,
+  templatePath,
+  region,
+  projectId,
+  mode,
+  stagingLocation,
+) => {
+  const args = [
+    'dataflow',
+    mode,
+    'run',
+    newJobName,
+  ];
+  if (mode === 'flex-template') {
+    args.push(`--template-file-gcs-location=${templatePath}`);
+  } else {
+    args.push(`--gcs-location=${templatePath}`);
+  }
+  if (parameters !== '') {
+    args.push(`--parameters=${parameters}`);
+  }
+  if (stagingLocation) {
+    args.push(`--staging-location=${stagingLocation}`);
+  }
+  args.push(`--service-account-email=${dataflowServiceAccount}`);
+  args.push(`--region=${region}`);
+  args.push(`--project=${projectId}`);
+
+  return exec.exec('gcloud', args);
+};
 
 module.exports = deployJob;
