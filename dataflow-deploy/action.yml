@@ -1,0 +1,41 @@
+name: Cloud Run
+description: Deploy to Cloud Run
+author: Extenda Retail
+inputs:
+  bucket:
+    description: |
+      The bucket for this job deployment.
+    required: true
+  dataflow-service-account:
+    description: |
+      Dataflow worker service-account.
+    required: true
+  job-name:
+    description: |
+      The job name created in previous steps.
+    required: true
+  job-version:
+    description: |
+      The job version used to seperate jobs.
+    required: true
+  parameters:
+    description: |
+      Parameters to pass to job.
+    required: false
+  region:
+    description: |
+      Dataflow job region.
+    default: europe-west1
+    required: false
+  release-version:
+    description: |
+      The release version used to store templates in bucket.
+    required: true
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+runs:
+  using: node12
+  main: dist/index.js
