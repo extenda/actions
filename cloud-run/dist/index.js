@@ -11593,7 +11593,9 @@ const runDeploy = async (
     environment = [],
   } = service;
 
-  await checkServiceAccount(name, projectId);
+  if (!isManagedCloudRun(service.cpu)) {
+    await checkServiceAccount(name, projectId);
+  }
 
   const args = ['run', 'deploy', name,
     `--image=${image}`,
