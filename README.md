@@ -14,6 +14,7 @@ The following actions are available
   * [commitlint](commitlint#readme)
   * [conventional-release](conventional-release#readme)
   * [conventional-version](conventional-version#readme)
+  * [dataflow-template-build](dataflow-template-build#readme)
   * [docker](docker#readme)
   * [gcp-secret-manager](gcp-secret-manager#readme)
   * [iam](iam#readme)
