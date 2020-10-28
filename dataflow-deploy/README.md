@@ -35,9 +35,9 @@ jobs:
           dataflow-service-account: ${{ env.DATAFLOW_SERVICE_ACCOUNT }}
           job-type: job
           job-name: send-to-bigquery
-          job-version: ${{ github.run_number }} # Used for job name seperation (will be appended to job name)
+          job-version: ${{ steps.semver.outputs.short-sha }} # Used for job name seperation (will be appended to job name)
           template-path: gs://dataflow-templates-europe-west1/latest/Cloud_PubSub_to_Cloud_PubSub
-          staging-location: gs://clan-templates/send-to-bigquery/${{ github.run_number }}/
+          staging-location: gs://clan-templates/send-to-bigquery/${{ steps.semver.outputs.short-sha }}/
           region: europe-west1
 ```
 
@@ -69,9 +69,9 @@ jobs:
           dataflow-service-account: ${{ env.DATAFLOW_SERVICE_ACCOUNT }}
           job-type: flex-template
           job-name: hive-to-bigquery
-          job-version: ${{ github.run_number }} # Used for job name seperation (will be appended to job name)
+          job-version: ${{ steps.semver.outputs.short-sha }} # Used for job name seperation (will be appended to job name)
           template-path: gs://dataflow-templates-europe-west1/latest/flex/Hive_to_BigQuery
-          staging-location: gs://clan-templates/Hive_to_BigQuery/${{ github.run_number }}/
+          staging-location: gs://clan-templates/Hive_to_BigQuery/${{ steps.semver.outputs.short-sha }}/
           parameters: inputSubscription=hive-subscription,outputSubscription=bigquery-topic
           region: europe-west1
 ```
@@ -90,12 +90,21 @@ jobs:
         with:
           build-number: ${{ github.run_number }}
 
+      - name: Authenticate docker
+        run: |
+          gcloud --quiet auth configure-docker
+
+      - name: Docker build and push
+        run: |
+          docker build . -f Dockerfile -t eu.gcr.io/extenda/project-id/work-work:${{ github.sha }}
+          docker push eu.gcr.io/extenda/project-id/work-work:${{ github.sha }}
+
       - uses: actions/checkout@v1
       - name: Dataflow template build
         uses: extenda/actions/dataflow-template-build@v0
         with:
           template-path: gs://clan-dataflow/templates/work-work/${{ steps.semver.outputs.version }}/template.json
-          image: my-image # Path to the image in the GCR with the tag `eu.gcr.io/extenda/project-id/image:${{ steps.semver.outputs.version }}'
+          image: eu.gcr.io/extenda/project-id/work-work:${{ github.sha }} # Path to the image in the GCR with the tag
           sdk-language: JAVA # Can be JAVA or PYTHON
           metadata-path: metadata.json
           service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }} # Used to authenticate with gcloud
@@ -119,10 +128,6 @@ jobs:
         with:
           build-number: ${{ github.run_number }}
 
-      - name: Short sha
-        id: short_sha
-        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-
       - name: Dataflow deploy
         uses: extenda/actions/dataflow-deploy@v0
         with:
@@ -130,9 +135,9 @@ jobs:
           dataflow-service-account: ${{ env.DATAFLOW_SERVICE_ACCOUNT }}
           job-type: flex-template
           job-name: work-work
-          job-version: ${{ steps.short_sha.outputs.sha_short }} # Used for job name seperation (will be appended to job name)
+          job-version: ${{ steps.semver.outputs.short-sha }} # Used for job name seperation (will be appended to job name)
           template-path: gs://clan-dataflow/templates/work-work/${{ steps.semver.outputs.version }}/template.json
-          staging-location: gs://clan-templates/work-work/${{ steps.short_sha.outputs.sha_short }}/
+          staging-location: gs://clan-templates/work-work/staging/${{ steps.semver.outputs.short-sha }}/
           parameters: inputSubscription=work-subscription
           region: europe-west1
 ```
