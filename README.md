@@ -15,6 +15,7 @@ The following actions are available
   * [conventional-release](conventional-release#readme)
   * [conventional-version](conventional-version#readme)
   * [docker](docker#readme)
+  * [dataflow-deploy](dataflow-deploy#readme)
   * [gcp-secret-manager](gcp-secret-manager#readme)
   * [iam](iam#readme)
   * [iam-test-token](iam-test-token#readme)

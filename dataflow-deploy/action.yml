@@ -1,5 +1,5 @@
-name: Cloud Run
-description: Deploy to Cloud Run
+name: dataflow-deploy
+description: Deploy dataflow job
 author: Extenda Retail
 inputs:
   service-account-key:

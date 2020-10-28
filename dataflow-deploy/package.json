@@ -1,8 +1,8 @@
 {
-  "name": "cloud-run",
+  "name": "dataflow-deploy",
   "version": "0.0.1-local",
   "private": true,
-  "description": "Deploy to Cloud Run",
+  "description": "Deploy dataflow jow",
   "main": "dist/index.js",
   "dependencies": {
     "@actions/core": "^1.2.6",
