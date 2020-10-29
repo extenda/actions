@@ -1,0 +1,46 @@
+name: dataflow-deploy
+description: Deploy dataflow job
+author: Extenda Retail
+inputs:
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+  dataflow-service-account:
+    description: |
+      Dataflow worker service-account.
+    required: true
+  job-type:
+    description: |
+      The job type (can be flex-template or job)
+    default: job
+    required: false
+  job-name:
+    description: |
+      The name of this job deployment.
+    required: true
+  job-version:
+    description: |
+      The job version (will be appended to the job-name)
+    required: true
+  template-path:
+    description: |
+      Bucket path for dataflow template.
+    required: true
+  staging-location:
+    description: |
+      Bucket path for job staging files.
+    required: false
+  parameters:
+    description: |
+      Parameters to pass to job.
+    required: false
+  region:
+    description: |
+      Dataflow job region.
+    default: europe-west1
+    required: false
+runs:
+  using: node12
+  main: dist/index.js
