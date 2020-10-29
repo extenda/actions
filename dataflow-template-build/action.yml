@@ -1,0 +1,26 @@
+name: Build Dataflow flex template
+description: Build a dataflow flex template
+author: Extenda Retail
+inputs:
+  image:
+    description: The path to the docker image which will contain the dataflow job.
+    required: true
+  metadata-path:
+    description: The metadata file path.
+    required: false
+  service-account-key:
+    description:
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+  sdk-language:
+    description: |
+      SDK language of the flex template job. Must be one of: JAVA, PYTHON.
+    required: false
+    default: JAVA
+  template-path:
+    description: The bucket location of the flex template file.
+    required: true
+runs:
+  using: node12
+  main: dist/index.js
