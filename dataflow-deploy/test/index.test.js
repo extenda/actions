@@ -25,10 +25,12 @@ describe('Cloud Run Action', () => {
       .mockReturnValueOnce('flex-template')
       .mockReturnValueOnce('test=job,test2=job2')
       .mockReturnValueOnce('gs://clan-dataflow/job-name/10/staging')
-      .mockReturnValueOnce('europe-west4');
+      .mockReturnValueOnce('europe-west4')
+      .mockReturnValueOnce('tribe-network')
+      .mockReturnValueOnce('clan-resources');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(9);
+    expect(core.getInput).toHaveBeenCalledTimes(11);
     expect(deployJob).toHaveBeenCalledWith(
       'job-name-10',
       'test=job,test2=job2',
@@ -38,6 +40,8 @@ describe('Cloud Run Action', () => {
       'test-project-342',
       'flex-template',
       'gs://clan-dataflow/job-name/10/staging',
+      'tribe-network',
+      'clan-resources',
     );
     expect(drainJob).toHaveBeenCalledWith(
       'job-name',
@@ -55,10 +59,15 @@ describe('Cloud Run Action', () => {
       .mockReturnValueOnce('10')
       .mockReturnValueOnce('dataflow-sa')
       .mockReturnValueOnce('gs://test-template/10/template.json')
-      .mockReturnValueOnce('flex-template');
+      .mockReturnValueOnce('flex-template')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('europe-west1')
+      .mockReturnValueOnce('clan-resources')
+      .mockReturnValueOnce('tribe-network');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(9);
+    expect(core.getInput).toHaveBeenCalledTimes(11);
     expect(deployJob).toHaveBeenCalledWith(
       'job-name-10',
       '',
@@ -68,6 +77,8 @@ describe('Cloud Run Action', () => {
       'test-project-342',
       'flex-template',
       '',
+      'clan-resources',
+      'tribe-network',
     );
     expect(drainJob).toHaveBeenCalledWith(
       'job-name',

@@ -9,6 +9,8 @@ const deployJob = async (
   projectId,
   mode,
   stagingLocation,
+  network,
+  subnetwork,
 ) => {
   const args = [
     'dataflow',
@@ -30,6 +32,8 @@ const deployJob = async (
   args.push(`--service-account-email=${dataflowServiceAccount}`);
   args.push(`--region=${region}`);
   args.push(`--project=${projectId}`);
+  args.push(`--network=${network}`);
+  args.push(`--subnetwork=${subnetwork}`);
 
   return exec.exec('gcloud', args);
 };

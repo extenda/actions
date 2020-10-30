@@ -14,6 +14,8 @@ const action = async () => {
   const parameters = core.getInput('parameters') || '';
   const stagingLocation = core.getInput('staging-location') || '';
   const region = core.getInput('region') || 'europe-west1';
+  const network = core.getInput('network', { required: true });
+  const subnetwork = core.getInput('subnetwork', { required: true });
 
   const newJobName = `${jobName}-${jobVersion}`;
 
@@ -28,6 +30,8 @@ const action = async () => {
     projectId,
     jobType,
     stagingLocation,
+    network,
+    subnetwork,
   )
     .then(() => drainJob(jobName, newJobName, region, projectId));
 };
