@@ -1566,6 +1566,8 @@ const deployJob = async (
   projectId,
   mode,
   stagingLocation,
+  network,
+  subnetwork,
 ) => {
   const args = [
     'dataflow',
@@ -1587,6 +1589,8 @@ const deployJob = async (
   args.push(`--service-account-email=${dataflowServiceAccount}`);
   args.push(`--region=${region}`);
   args.push(`--project=${projectId}`);
+  args.push(`--network=${network}`);
+  args.push(`--subnetwork=${subnetwork}`);
 
   return exec.exec('gcloud', args);
 };
@@ -1657,6 +1661,8 @@ const action = async () => {
   const parameters = core.getInput('parameters') || '';
   const stagingLocation = core.getInput('staging-location') || '';
   const region = core.getInput('region') || 'europe-west1';
+  const network = core.getInput('network', { required: true });
+  const subnetwork = core.getInput('subnetwork', { required: true });
 
   const newJobName = `${jobName}-${jobVersion}`;
 
@@ -1671,6 +1677,8 @@ const action = async () => {
     projectId,
     jobType,
     stagingLocation,
+    network,
+    subnetwork,
   )
     .then(() => drainJob(jobName, newJobName, region, projectId));
 };
