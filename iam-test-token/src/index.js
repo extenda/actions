@@ -3,11 +3,12 @@ const { run } = require('../../utils');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 const getIamToken = require('./iam-auth');
 
-const loadCredentials = async (serviceAccountKey) => {
-  const email = await loadSecret(serviceAccountKey, 'iam-testrunner-email');
-  const password = await loadSecret(serviceAccountKey, 'iam-testrunner-password-prod');
-  const apiKey = await loadSecret(serviceAccountKey, 'iam-api-key-prod');
-  const tenant = await loadSecret(serviceAccountKey, 'iam-testrunner-tenant-prod');
+const loadCredentials = async (serviceAccountKey, emailInput, passwordSecret, apiKey, tenant) => {
+  let email = emailInput;
+  if (!emailInput.includes('@')) {
+    email = await loadSecret(serviceAccountKey, emailInput);
+  }
+  const password = await loadSecret(serviceAccountKey, passwordSecret);
 
   return [
     apiKey,
@@ -19,7 +20,12 @@ const loadCredentials = async (serviceAccountKey) => {
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
-  const token = await loadCredentials(serviceAccountKey)
+  const email = core.getInput('user-email') || 'iam-test-token-email';
+  const password = core.getInput('user-password') || 'iam-test-token-password';
+  const apiKey = core.getInput('api-key') || 'AIzaSyBn2akUn5Iq9wLfVwPUsHiTtSP7EV2k-FU';
+  const tenantId = core.getInput('tenant-id') || 'extenda-mdcg6';
+
+  const token = await loadCredentials(serviceAccountKey, email, password, apiKey, tenantId)
     .then((credentials) => getIamToken(...credentials));
   core.setSecret(token);
   core.exportVariable('IAM_TOKEN', token);

@@ -25,7 +25,11 @@ jobs:
       - name: IAM token
         uses: extenda/actions/iam-test-token@v0
         with:
-          service-account-key: ${{ secrets.SECRET_AUTH }}
+          service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
+          user-email: iam-test-token-email (default) (also accepts full email)
+          user-password: iam-test-token-password (default)
+          api-key: AIzaSyBn2akUn5Iq9wLfVwPUsHiTtSP7EV2k-FU (default)
+          tenant-id: extenda-mdcg6 (default)
 
       - name: Acceptance test
         run: |

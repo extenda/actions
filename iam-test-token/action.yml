@@ -7,6 +7,26 @@ inputs:
       The service account key which will be used for authentication
       to the secrets manager.
     required: true
+  user-email:
+    description: |
+      Test user email (can be secret or full email).
+    default: iam-test-token-email
+    required: false
+  user-password:
+    description: |
+      Test user password secret name.
+    default: iam-test-token-password
+    required: false
+  api-key:
+    description: |
+      Api key for firestore.
+    default: AIzaSyBn2akUn5Iq9wLfVwPUsHiTtSP7EV2k-FU
+    required: false
+  tenant-id:
+    description: |
+      Tenant id for tests to run against.
+    default: extenda-mdcg6
+    required: false
 outputs:
   iam-token:
     description: The test user's ID token.
