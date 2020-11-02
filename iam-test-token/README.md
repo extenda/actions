@@ -15,7 +15,12 @@ Once created, the JSON key should be `base64` encoded and added as secret in the
 
 ### Examples
 
-This will use the default testrunner account
+This will use the defaults values as inputs.
+
+Requirements:
+  * iam-test-token-email secret must exist in clan secretmanager
+  * iam-test-token-password secret must exist in clan secretmanager
+  * This user should exist in testrunner tenant
 ```yaml
 jobs:
   acceptance:
@@ -26,7 +31,7 @@ jobs:
       - name: IAM token
         uses: extenda/actions/iam-test-token@v0
         with:
-          service-account-key: ${{ secrets.SECRET_AUTH }}
+          service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
 
       - name: Acceptance test
         run: |
