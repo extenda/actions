@@ -14,7 +14,7 @@ jest.mock('../../utils', () => ({
 
 const exec = require('@actions/exec');
 const mockFs = require('mock-fs');
-const clusterInfo = require('../../cloud-run/src/cluster-info');
+const { clusterInfo } = require('../../cloud-run/src/cluster-info');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const patchDeployment = require('../src/patch-deployment-yaml');
 const patchStatefulSet = require('../src/patch-statefulset-yaml');

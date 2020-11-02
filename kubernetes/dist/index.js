@@ -19445,7 +19445,7 @@ module.exports = patchStatefulSetYaml;
 
 const path = __webpack_require__(5622);
 const fs = __webpack_require__(5747);
-const clusterInfo = __webpack_require__(7955);
+const { clusterInfo } = __webpack_require__(7955);
 const createNamespace = __webpack_require__(8494);
 const setupGcloud = __webpack_require__(7095);
 const execKustomize = __webpack_require__(6250);

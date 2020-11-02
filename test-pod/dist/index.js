@@ -21427,7 +21427,7 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const setupGcloud = __webpack_require__(7095);
-const getClusterInfo = __webpack_require__(7955);
+const { getClusterInfo } = __webpack_require__(7955);
 const authenticateKubeCtl = __webpack_require__(693);
 const loadServiceDefinition = __webpack_require__(7933);
 const cloudRunSchema = __webpack_require__(5895);

@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const clusterInfo = require('../../cloud-run/src/cluster-info');
+const { clusterInfo } = require('../../cloud-run/src/cluster-info');
 const createNamespace = require('../../cloud-run/src/create-namespace');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const execKustomize = require('./kustomize');
