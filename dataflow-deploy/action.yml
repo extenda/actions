@@ -41,6 +41,11 @@ inputs:
       Dataflow job region.
     default: europe-west1
     required: false
+  network:
+    description: |
+      Compute Engine network for launching dataflow.
+    default: tribe-network
+    required: false
 runs:
   using: node12
   main: dist/index.js
