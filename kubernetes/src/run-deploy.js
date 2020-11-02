@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const { clusterInfo } = require('../../cloud-run/src/cluster-info');
+const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 const createNamespace = require('../../cloud-run/src/create-namespace');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const execKustomize = require('./kustomize');
@@ -74,7 +74,7 @@ const runDeploy = async (
   createBaseKustomize(service.name);
 
   const projectId = await gcloudAuth(serviceAccountKey);
-  const cluster = await clusterInfo(projectId);
+  const cluster = await getClusterInfo(projectId);
 
   patchManifest('configmap.yml', (yml) => {
     const args = parseEnvironmentArgs(service.environment, projectId);

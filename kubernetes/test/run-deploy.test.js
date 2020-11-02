@@ -14,7 +14,7 @@ jest.mock('../../utils', () => ({
 
 const exec = require('@actions/exec');
 const mockFs = require('mock-fs');
-const { clusterInfo } = require('../../cloud-run/src/cluster-info');
+const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const patchDeployment = require('../src/patch-deployment-yaml');
 const patchStatefulSet = require('../src/patch-statefulset-yaml');
@@ -45,7 +45,7 @@ describe('Run Deploy', () => {
   });
 
   test('It calls create namespace', async () => {
-    clusterInfo.mockResolvedValueOnce({
+    getClusterInfo.mockResolvedValueOnce({
       project: 'project',
       cluster: 'cluster',
       clusterLocation: 'cluster-location',
@@ -69,7 +69,7 @@ describe('Run Deploy', () => {
   });
 
   test('It will deploy StatefulSet when storage is defined', async () => {
-    clusterInfo.mockResolvedValueOnce({});
+    getClusterInfo.mockResolvedValueOnce({});
     exec.exec.mockResolvedValue(0);
 
     const dryRun = undefined;
@@ -98,7 +98,7 @@ describe('Run Deploy', () => {
   });
 
   test('It will deploy Deployment when storage is not required', async () => {
-    clusterInfo.mockResolvedValueOnce({});
+    getClusterInfo.mockResolvedValueOnce({});
     exec.exec.mockResolvedValue(0);
 
     const dryRun = undefined;
@@ -124,7 +124,7 @@ describe('Run Deploy', () => {
   });
 
   test('It calls kustomize on yaml files and build', async () => {
-    clusterInfo.mockResolvedValueOnce({});
+    getClusterInfo.mockResolvedValueOnce({});
     exec.exec.mockResolvedValue(0);
     const image = 'gcr.io/test-project/my-service:tag';
     const name = 'deployment-name';
