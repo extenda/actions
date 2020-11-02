@@ -49,8 +49,8 @@ jobs:
         uses: extenda/actions/iam-test-token@v0
         with:
           service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
-          user-email: iam-test-token-email (default) ( also accepts full email )
-          user-password: iam-test-token-password (default) ( must reference a secret in your secret manager )
+          user-email: iam-test-token-email (default secret name, also accepts full email)
+          user-password: iam-test-token-password (default secret name)
           api-key: AIzaSyBn2akUn5Iq9wLfVwPUsHiTtSP7EV2k-FU (default)
           tenant-id: testrunner-2mfuk (default)
 
