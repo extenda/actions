@@ -1,7 +1,7 @@
 jest.mock('@actions/exec');
 
 const exec = require('@actions/exec');
-const getClusterInfo = require('../src/cluster-info');
+const { getClusterInfo } = require('../src/cluster-info');
 const { mockOutput } = require('./utils');
 
 describe('getClusterInfo', () => {

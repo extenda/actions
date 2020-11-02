@@ -9,7 +9,7 @@ jest.mock('../src/check-sa');
 const exec = require('@actions/exec');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const runDeploy = require('../src/run-deploy');
-const getClusterInfo = require('../src/cluster-info');
+const { getClusterInfo } = require('../src/cluster-info');
 
 const serviceAccountKey = Buffer.from('test', 'utf8').toString('base64');
 

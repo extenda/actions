@@ -39,6 +39,7 @@ jobs:
           template-path: gs://dataflow-templates-europe-west1/latest/Cloud_PubSub_to_Cloud_PubSub
           staging-location: gs://clan-templates/send-to-bigquery/${{ steps.semver.outputs.short-sha }}/
           region: europe-west1
+          network: tribe-network
 ```
 
 If you want to use a more customized template you will need to use flex-template job-type
@@ -74,6 +75,7 @@ jobs:
           staging-location: gs://clan-templates/Hive_to_BigQuery/${{ steps.semver.outputs.short-sha }}/
           parameters: inputSubscription=hive-subscription,outputSubscription=bigquery-topic
           region: europe-west1
+          network: tribe-network
 ```
 Use the action together with dataflow build action for customized image and template
 
@@ -140,4 +142,5 @@ jobs:
           staging-location: gs://clan-templates/work-work/staging/${{ steps.semver.outputs.short-sha }}/
           parameters: inputSubscription=work-subscription
           region: europe-west1
+          network: tribe-network
 ```

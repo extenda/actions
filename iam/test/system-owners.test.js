@@ -5,7 +5,7 @@ jest.mock('../../cloud-run/src/cluster-info');
 jest.mock('../../setup-gcloud/src/setup-gcloud');
 
 const projectInfo = require('../../cloud-run/src/project-info');
-const getClusterInfo = require('../../cloud-run/src/cluster-info');
+const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 const getSystemOwners = require('../src/system-owners');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 
