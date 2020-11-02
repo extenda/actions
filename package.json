@@ -34,6 +34,5 @@
     "jest": "^25.3.0",
     "jest-sonar": "^0.2.5",
     "run-script-os": "^1.1.1"
-  },
-  "dependencies": {}
+  }
 }
