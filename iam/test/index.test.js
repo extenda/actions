@@ -18,7 +18,7 @@ const fetchIamToken = require('../../iam-test-token/src/iam-auth');
 const loadIamDefinition = require('../src/iam-definition');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const loadCredentials = require('../src/load-credentials');
-const getClusterInfo = require('../../cloud-run/src/cluster-info');
+const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 const getSystemOwners = require('../src/system-owners');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 

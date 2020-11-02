@@ -17,6 +17,8 @@ describe('deploy dataflow job', () => {
       'test-staging-323',
       'flex-template',
       'gs://dataflow-bucket/dataflow/templates/job-name/0.0.1/staging',
+      'tribe-network',
+      'clan-resources',
     );
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
@@ -30,6 +32,8 @@ describe('deploy dataflow job', () => {
       '--service-account-email=dataflow-sa',
       '--region=europe-west1',
       '--project=test-staging-323',
+      '--network=tribe-network',
+      '--subnetwork=clan-resources',
     ]);
   });
 
@@ -43,6 +47,8 @@ describe('deploy dataflow job', () => {
       'test-staging-323',
       'flex-template',
       'gs://dataflow-bucket/dataflow/templates/job-name/0.0.1/staging',
+      'tribe-network',
+      'clan-resources',
     );
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
@@ -55,6 +61,8 @@ describe('deploy dataflow job', () => {
       '--service-account-email=dataflow-sa',
       '--region=europe-west1',
       '--project=test-staging-323',
+      '--network=tribe-network',
+      '--subnetwork=clan-resources',
     ]);
   });
 
@@ -67,6 +75,9 @@ describe('deploy dataflow job', () => {
       'europe-west1',
       'test-staging-323',
       'job',
+      'gs://dataflow-bucket/dataflow/templates/job-name/0.0.1/staging',
+      'tribe-network',
+      'clan-resources',
     );
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
@@ -75,9 +86,12 @@ describe('deploy dataflow job', () => {
       'run',
       'job-name-10',
       '--gcs-location=gs://dataflow-templates-europe-west1/latest/Word_Count',
+      '--staging-location=gs://dataflow-bucket/dataflow/templates/job-name/0.0.1/staging',
       '--service-account-email=dataflow-sa',
       '--region=europe-west1',
       '--project=test-staging-323',
+      '--network=tribe-network',
+      '--subnetwork=clan-resources',
     ]);
   });
 });

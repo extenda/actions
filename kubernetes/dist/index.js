@@ -10779,7 +10779,10 @@ const getClusterInfo = async (projectId, cluster = '') => {
   return getClusterDetails(tribeProject, cluster);
 };
 
-module.exports = getClusterInfo;
+module.exports = {
+  getClusterInfo,
+  getTribeProject,
+};
 
 
 /***/ }),
@@ -19442,7 +19445,7 @@ module.exports = patchStatefulSetYaml;
 
 const path = __webpack_require__(5622);
 const fs = __webpack_require__(5747);
-const clusterInfo = __webpack_require__(7955);
+const { getClusterInfo } = __webpack_require__(7955);
 const createNamespace = __webpack_require__(8494);
 const setupGcloud = __webpack_require__(7095);
 const execKustomize = __webpack_require__(6250);
@@ -19516,7 +19519,7 @@ const runDeploy = async (
   createBaseKustomize(service.name);
 
   const projectId = await gcloudAuth(serviceAccountKey);
-  const cluster = await clusterInfo(projectId);
+  const cluster = await getClusterInfo(projectId);
 
   patchManifest('configmap.yml', (yml) => {
     const args = parseEnvironmentArgs(service.environment, projectId);
