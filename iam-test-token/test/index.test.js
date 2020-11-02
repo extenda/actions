@@ -44,7 +44,7 @@ describe('iam-test-token', () => {
       'AIzaSyBn2akUn5Iq9wLfVwPUsHiTtSP7EV2k-FU',
       'iam-test-token-email',
       'iam-test-token-password',
-      'extenda-mdcg6',
+      'testrunner-2mfuk',
     );
     expect(core.setOutput).toHaveBeenCalledWith('iam-token', 'secret-token');
     expect(core.setSecret).toHaveBeenCalledWith('secret-token');
@@ -64,7 +64,7 @@ describe('iam-test-token', () => {
       'AIzaSyBn2akUn5Iq9wLfVwPUsHiTtSP7EV2k-FU',
       'email@test.com',
       'password-secret',
-      'extenda-mdcg6',
+      'testrunner-2mfuk',
     );
     expect(core.setOutput).toHaveBeenCalledWith('iam-token', 'secret-token');
     expect(core.setSecret).toHaveBeenCalledWith('secret-token');

@@ -25,7 +25,7 @@ inputs:
   tenant-id:
     description: |
       Tenant id for tests to run against.
-    default: extenda-mdcg6
+    default: testrunner-2mfuk
     required: false
 outputs:
   iam-token:

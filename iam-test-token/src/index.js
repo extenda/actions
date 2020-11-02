@@ -23,7 +23,7 @@ const action = async () => {
   const email = core.getInput('user-email') || 'iam-test-token-email';
   const password = core.getInput('user-password') || 'iam-test-token-password';
   const apiKey = core.getInput('api-key') || 'AIzaSyBn2akUn5Iq9wLfVwPUsHiTtSP7EV2k-FU';
-  const tenantId = core.getInput('tenant-id') || 'extenda-mdcg6';
+  const tenantId = core.getInput('tenant-id') || 'testrunner-2mfuk';
 
   const token = await loadCredentials(serviceAccountKey, email, password, apiKey, tenantId)
     .then((credentials) => getIamToken(...credentials));
