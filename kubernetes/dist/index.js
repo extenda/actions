@@ -10779,7 +10779,10 @@ const getClusterInfo = async (projectId, cluster = '') => {
   return getClusterDetails(tribeProject, cluster);
 };
 
-module.exports = getClusterInfo;
+module.exports = {
+  getClusterInfo,
+  getTribeProject,
+};
 
 
 /***/ }),

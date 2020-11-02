@@ -44,11 +44,8 @@ inputs:
   network:
     description: |
       Compute Engine network for launching dataflow.
-    required: true
-  subnetwork:
-    description: |
-      Compute Engine subnetwork for launching dataflow. (In case of Shared VPC the full path needs to be specified).
-    required: true
+    default: tribe-network
+    required: false
 runs:
   using: node12
   main: dist/index.js

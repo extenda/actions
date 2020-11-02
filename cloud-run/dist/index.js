@@ -11031,7 +11031,10 @@ const getClusterInfo = async (projectId, cluster = '') => {
   return getClusterDetails(tribeProject, cluster);
 };
 
-module.exports = getClusterInfo;
+module.exports = {
+  getClusterInfo,
+  getTribeProject,
+};
 
 
 /***/ }),
@@ -11419,7 +11422,7 @@ const exec = __webpack_require__(2176);
 const setupGcloud = __webpack_require__(7095);
 const getRuntimeAccount = __webpack_require__(344);
 const createEnvironmentArgs = __webpack_require__(6762);
-const getClusterInfo = __webpack_require__(8602);
+const { getClusterInfo } = __webpack_require__(8602);
 const createNamespace = __webpack_require__(4721);
 const projectInfo = __webpack_require__(645);
 const waitForRevision = __webpack_require__(6545);
