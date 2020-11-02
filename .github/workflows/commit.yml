@@ -182,9 +182,7 @@ jobs:
         uses: ./iam-test-token
         with:
           service-account-key: ${{ secrets.SECRET_AUTH }}
-          user-email: iam-testrunner-email
-          user-password: iam-testrunner-password-prod
-          
+
       - name: Test IAM token
         run: |
           curl -sSi "https://iam-api.retailsvc.com/api/v1/permissions/iam.tenant.create" -H "Authorization: Bearer $IAM_TOKEN"

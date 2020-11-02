@@ -19,7 +19,7 @@ inputs:
     required: false
   api-key:
     description: |
-      Api key for firestore.
+      Api key for identity platform.
     default: AIzaSyBn2akUn5Iq9wLfVwPUsHiTtSP7EV2k-FU
     required: false
   tenant-id:

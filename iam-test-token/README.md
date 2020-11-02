@@ -15,6 +15,29 @@ Once created, the JSON key should be `base64` encoded and added as secret in the
 
 ### Examples
 
+This will use the default testrunner account
+```yaml
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: IAM token
+        uses: extenda/actions/iam-test-token@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+
+      - name: Acceptance test
+        run: |
+          newman run e2e.postman_collection.json \
+            --environment e2e.postman_environment.json \
+            --env-var iamToken=$IAM_TOKEN \
+            --color off
+```
+
+If you need a custom test user, you will need to supply your own inputs
+This will also use the secrets from your clan secret-manager
 ```yaml
 jobs:
   acceptance:
