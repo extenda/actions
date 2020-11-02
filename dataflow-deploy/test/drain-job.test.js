@@ -17,6 +17,6 @@ describe('drain dataflow job', () => {
       'europe-west1',
       'test-staging-323',
     );
-    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(exec.exec).toHaveBeenCalledTimes(1);
   });
 });

@@ -27,7 +27,7 @@ const drainJob = async (
   'dataflow',
   'jobs',
   'drain',
-  getJob(region, jobName, newJobName, projectId),
+  await getJob(region, jobName, newJobName, projectId),
   `--region=${region}`,
   `--project=${projectId}`,
 ]);
