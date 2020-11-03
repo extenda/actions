@@ -1,14 +1,14 @@
 const exec = require('@actions/exec');
 
-const getJob = async (region, jobName, newJobName, projectId) => {
+const getJobs = async (region, jobName, newJobId, projectId) => {
   let output = '';
   await exec.exec('gcloud', [
     'dataflow',
     'jobs',
     'list',
+    `--filter=NAME:${jobName}* AND NOT ID:${newJobId} AND STATE=Running`,
+    '--format=value(JOB_ID)',
     `--region=${region}`,
-    `--filter='NAME:${jobName}* AND NOT NAME:${newJobName} AND STATE=Running'`,
-    'format=\'value(JOB_ID)\'',
     `--project=${projectId}`,
   ], {
     silent: true,
@@ -18,18 +18,28 @@ const getJob = async (region, jobName, newJobName, projectId) => {
       },
     },
   });
-  return output;
+  return output.trim().split(/[\r\n]+/);
 };
 
 const drainJob = async (
-  jobName, newJobName, region, projectId,
-) => exec.exec('gcloud', [
-  'dataflow',
-  'jobs',
-  'drain',
-  await getJob(region, jobName, newJobName, projectId),
-  `--region=${region}`,
-  `--project=${projectId}`,
-]);
+  newJobId, jobName, region, projectId,
+) => {
+  const jobs = await getJobs(region, jobName, newJobId, projectId);
+  if (jobs[0] === '') {
+    return true;
+  }
+  const drainJobs = [];
+  jobs.forEach((jobId) => {
+    drainJobs.push(exec.exec('gcloud', [
+      'dataflow',
+      'jobs',
+      'drain',
+      jobId,
+      `--region=${region}`,
+      `--project=${projectId}`,
+    ]));
+  });
+  return Promise.all(drainJobs);
+};
 
 module.exports = drainJob;
