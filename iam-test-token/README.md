@@ -15,6 +15,12 @@ Once created, the JSON key should be `base64` encoded and added as secret in the
 
 ### Examples
 
+This will use the defaults values as inputs.
+
+Requirements:
+  * iam-test-token-email secret must exist in clan secretmanager
+  * iam-test-token-password secret must exist in clan secretmanager
+  * This user should exist in testrunner tenant
 ```yaml
 jobs:
   acceptance:
@@ -25,7 +31,33 @@ jobs:
       - name: IAM token
         uses: extenda/actions/iam-test-token@v0
         with:
-          service-account-key: ${{ secrets.SECRET_AUTH }}
+          service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
+
+      - name: Acceptance test
+        run: |
+          newman run e2e.postman_collection.json \
+            --environment e2e.postman_environment.json \
+            --env-var iamToken=$IAM_TOKEN \
+            --color off
+```
+
+If you need a custom test user, you will need to supply your own inputs
+This will also use the secrets from your clan secret-manager
+```yaml
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: IAM token
+        uses: extenda/actions/iam-test-token@v0
+        with:
+          service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
+          user-email: iam-test-token-email (default secret name, also accepts full email)
+          user-password: iam-test-token-password (default secret name)
+          api-key: AIzaSyBn2akUn5Iq9wLfVwPUsHiTtSP7EV2k-FU (default)
+          tenant-id: testrunner-2mfuk (default)
 
       - name: Acceptance test
         run: |
