@@ -3263,6 +3263,9 @@ const deployJob = async (
     },
   });
 
+  if (mode === 'flex-template') {
+    return jobId.trim().split(/[\r\n]+/)[3].substr(6);
+  }
   return jobId.trim().split(/[\r\n]+/)[2].substr(4);
 };
 
