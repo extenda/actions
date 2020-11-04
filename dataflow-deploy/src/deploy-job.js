@@ -35,7 +35,19 @@ const deployJob = async (
   args.push(`--network=${network}`);
   args.push(`--subnetwork=${subnetwork}`);
 
-  return exec.exec('gcloud', args);
+  let jobId = '';
+  await exec.exec('gcloud',
+    args,
+    {
+      silent: true,
+      listeners: {
+        stdout: (data) => {
+          jobId += data.toString('utf8');
+        },
+      },
+    });
+
+  return jobId.trim().split(/[\r\n]+/)[2].substr(4);
 };
 
 module.exports = deployJob;

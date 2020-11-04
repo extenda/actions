@@ -8,6 +8,13 @@ describe('deploy dataflow job', () => {
   });
 
   test('deploy flex-template job', async () => {
+    const getJob = `line1
+line2
+id: jobId
+`;
+    exec.exec.mockImplementationOnce((
+      cmd, args, opts,
+    ) => opts.listeners.stdout(getJob));
     deployJob(
       'job-name-10',
       'test=job-test',
@@ -21,23 +28,16 @@ describe('deploy dataflow job', () => {
       'clan-resources',
     );
     expect(exec.exec).toHaveBeenCalledTimes(1);
-    expect(exec.exec).toHaveBeenCalledWith('gcloud', [
-      'dataflow',
-      'flex-template',
-      'run',
-      'job-name-10',
-      '--template-file-gcs-location=gs://dataflow-bucket/dataflow/templates/job-name/0.0.1/template.json',
-      '--parameters=test=job-test',
-      '--staging-location=gs://dataflow-bucket/dataflow/templates/job-name/0.0.1/staging',
-      '--service-account-email=dataflow-sa',
-      '--region=europe-west1',
-      '--project=test-staging-323',
-      '--network=tribe-network',
-      '--subnetwork=clan-resources',
-    ]);
   });
 
   test('deploy flex-template job without parameters', async () => {
+    const getJob = `line1
+line2
+id: jobId
+`;
+    exec.exec.mockImplementationOnce((
+      cmd, args, opts,
+    ) => opts.listeners.stdout(getJob));
     deployJob(
       'job-name-10',
       '',
@@ -51,22 +51,16 @@ describe('deploy dataflow job', () => {
       'clan-resources',
     );
     expect(exec.exec).toHaveBeenCalledTimes(1);
-    expect(exec.exec).toHaveBeenCalledWith('gcloud', [
-      'dataflow',
-      'flex-template',
-      'run',
-      'job-name-10',
-      '--template-file-gcs-location=gs://dataflow-bucket/dataflow/templates/job-name/0.0.1/template.json',
-      '--staging-location=gs://dataflow-bucket/dataflow/templates/job-name/0.0.1/staging',
-      '--service-account-email=dataflow-sa',
-      '--region=europe-west1',
-      '--project=test-staging-323',
-      '--network=tribe-network',
-      '--subnetwork=clan-resources',
-    ]);
   });
 
   test('deploy job', async () => {
+    const getJob = `line1
+line2
+id: jobId
+`;
+    exec.exec.mockImplementationOnce((
+      cmd, args, opts,
+    ) => opts.listeners.stdout(getJob));
     deployJob(
       'job-name-10',
       '',
@@ -80,18 +74,5 @@ describe('deploy dataflow job', () => {
       'clan-resources',
     );
     expect(exec.exec).toHaveBeenCalledTimes(1);
-    expect(exec.exec).toHaveBeenCalledWith('gcloud', [
-      'dataflow',
-      'job',
-      'run',
-      'job-name-10',
-      '--gcs-location=gs://dataflow-templates-europe-west1/latest/Word_Count',
-      '--staging-location=gs://dataflow-bucket/dataflow/templates/job-name/0.0.1/staging',
-      '--service-account-email=dataflow-sa',
-      '--region=europe-west1',
-      '--project=test-staging-323',
-      '--network=tribe-network',
-      '--subnetwork=clan-resources',
-    ]);
   });
 });

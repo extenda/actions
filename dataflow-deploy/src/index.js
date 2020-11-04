@@ -35,7 +35,7 @@ const action = async () => {
     network,
     subnetwork,
   )
-    .then(() => drainJob(jobName, newJobName, region, projectId));
+    .then((jobId) => drainJob(jobId, jobName, region, projectId));
 };
 
 if (require.main === module) {

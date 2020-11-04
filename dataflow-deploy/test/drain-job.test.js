@@ -7,16 +7,29 @@ describe('drain dataflow job', () => {
     jest.resetAllMocks();
   });
 
-  test('drain job', async () => {
+  test('it drains job', async () => {
     exec.exec.mockImplementationOnce((
       cmd, args, opts,
-    ) => opts.listeners.stdout('job-name-9'));
+    ) => opts.listeners.stdout('jobId-122'));
     drainJob(
-      'job-name',
+      'jobId-123',
       'job-name-10',
       'europe-west1',
       'test-staging-323',
     );
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+  });
+
+  test('it finds no old job', async () => {
+    exec.exec.mockImplementationOnce((
+      cmd, args, opts,
+    ) => opts.listeners.stdout(''));
+    expect(drainJob(
+      'jobId-123',
+      'job-name-10',
+      'europe-west1',
+      'test-staging-323',
+    )).resolves.toEqual(true);
     expect(exec.exec).toHaveBeenCalledTimes(1);
   });
 });

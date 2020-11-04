@@ -11,7 +11,7 @@ const drainJob = require('../src/drain-job');
 const deployJob = require('../src/deploy-job');
 const { getTribeProject } = require('../../cloud-run/src/cluster-info');
 
-describe('Cloud Run Action', () => {
+describe('deploy dataflow Action', () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
@@ -19,7 +19,7 @@ describe('Cloud Run Action', () => {
   test('It can run the action', async () => {
     setupGcloud.mockReturnValueOnce('test-project-342');
     getTribeProject.mockReturnValueOnce('test-project-123');
-    deployJob.mockResolvedValueOnce(0);
+    deployJob.mockResolvedValueOnce('jobId');
     core.getInput.mockReturnValueOnce('service-account')
       .mockReturnValueOnce('job-name')
       .mockReturnValueOnce('10')
@@ -47,8 +47,8 @@ describe('Cloud Run Action', () => {
       'https://www.googleapis.com/compute/v1/projects/test-project-123/regions/europe-west4/subnetworks/clan-resources',
     );
     expect(drainJob).toHaveBeenCalledWith(
+      'jobId',
       'job-name',
-      'job-name-10',
       'europe-west4',
       'test-project-342',
     );
@@ -56,8 +56,9 @@ describe('Cloud Run Action', () => {
 
   test('It can run the action without optional parameters', async () => {
     setupGcloud.mockReturnValueOnce('test-project-342');
+    deployJob.mockResolvedValueOnce('jobId');
     getTribeProject.mockReturnValueOnce('test-project-123');
-    deployJob.mockResolvedValueOnce(0);
+    deployJob.mockResolvedValueOnce('jobId');
     core.getInput.mockReturnValueOnce('service-account')
       .mockReturnValueOnce('job-name')
       .mockReturnValueOnce('10')
@@ -84,8 +85,8 @@ describe('Cloud Run Action', () => {
       'https://www.googleapis.com/compute/v1/projects/test-project-123/regions/europe-west1/subnetworks/clan-resources',
     );
     expect(drainJob).toHaveBeenCalledWith(
+      'jobId',
       'job-name',
-      'job-name-10',
       'europe-west1',
       'test-project-342',
     );
