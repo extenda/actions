@@ -3254,16 +3254,14 @@ const deployJob = async (
   args.push(`--subnetwork=${subnetwork}`);
 
   let jobId = '';
-  await exec.exec('gcloud',
-    args,
-    {
-      silent: true,
-      listeners: {
-        stdout: (data) => {
-          jobId += data.toString('utf8');
-        },
+  await exec.exec('gcloud', args, {
+    silent: false,
+    listeners: {
+      stdout: (data) => {
+        jobId += data.toString('utf8');
       },
-    });
+    },
+  });
 
   return jobId.trim().split(/[\r\n]+/)[2].substr(4);
 };
@@ -3289,7 +3287,7 @@ const getJobs = async (region, jobName, newJobId, projectId) => {
     `--region=${region}`,
     `--project=${projectId}`,
   ], {
-    silent: true,
+    silent: false,
     listeners: {
       stdout: (data) => {
         output += data.toString('utf8');
