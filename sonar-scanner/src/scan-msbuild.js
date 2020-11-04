@@ -42,7 +42,7 @@ const scanWithJavaHome = async (args) => {
 
 const beginScan = async (hostUrl, mainBranch) => {
   await core.group('Install dotnet-sonarscanner', async () => {
-    await exec.exec('dotnet tool install -g dotnet-sonarscanner');
+    await exec.exec('dotnet tool install -g dotnet-sonarscanner --version 4.10.0');
   });
 
   const version = await getBuildVersion(`-${process.env.GITHUB_SHA}`);
