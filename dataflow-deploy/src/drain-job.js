@@ -11,7 +11,7 @@ const getJobs = async (region, jobName, newJobId, projectId) => {
     `--region=${region}`,
     `--project=${projectId}`,
   ], {
-    silent: true,
+    silent: false,
     listeners: {
       stdout: (data) => {
         output += data.toString('utf8');
