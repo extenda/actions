@@ -21,6 +21,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: extenda/actions/gcp-secret-manager@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          secrets: |
+            NEXUS_PASSWORD: nexus-password
+            NEXUS_USERNAME: nexus-username
+            NUGET_API_KEY: nuget-api-key
+            
       - uses: actions/checkout@v1
 
       - name: Setup NuGet
@@ -40,9 +48,9 @@ jobs:
             {
               "name": "Extenda",
               "source": "https://repo.extendaretail.com/repository/nuget-group/",
-              "username": "${{ secrets.NUGET_USERNAME }}",
-              "password": "${{ secrets.NUGET_PASSWORD }}",
-              "apikey": "${{ secrets.NUGET_API_KEY }}"
+              "username": "${{ env.NUGET_USERNAME }}",
+              "password": "${{ env.NUGET_PASSWORD }}",
+              "apikey": "${{ env.NUGET_API_KEY }}"
             }]
 
       - uses: actions/cache@v1
