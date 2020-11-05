@@ -7,6 +7,7 @@ const { getClusterInfo } = require('./cluster-info');
 const createNamespace = require('./create-namespace');
 const projectInfo = require('./project-info');
 const waitForRevision = require('./wait-revision');
+const authenticateKubeCtl = require('./kubectl-auth');
 const cleanRevisions = require('./clean-revisions');
 const checkServiceAccount = require('./check-sa');
 
@@ -123,7 +124,8 @@ const gkeArguments = async (args, service, projectId) => {
 
   if (namespace !== 'default') {
     const opaEnabled = 'skip';
-    await createNamespace(projectId, opaEnabled, cluster, namespace);
+    await authenticateKubeCtl(cluster);
+    await createNamespace(projectId, opaEnabled, namespace);
   }
   args.push(`--namespace=${namespace}`);
 

@@ -4,11 +4,6 @@ const mockFs = require('mock-fs');
 const exec = require('@actions/exec');
 const createNamespace = require('../src/create-namespace');
 
-const clusterInfo = {
-  cluster: 'k8-cluster',
-  clusterLocation: 'europe-west1',
-  project: 'test-12345',
-};
 
 const mockOutput = (data, opts) => {
   opts.listeners.stderr(Buffer.from(`${data}\n`, 'utf8'));
@@ -33,36 +28,34 @@ describe('Create namespace', () => {
   });
 
   test('It creates namespace if non exists', async () => {
-    exec.exec.mockResolvedValueOnce(0)
-      .mockImplementationOnce((bin, args, opts) => mockOutput('Error from server (NotFound): namespaces "testns" not found', opts))
+    exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput('Error from server (NotFound): namespaces "testns" not found', opts))
       .mockResolvedValue(0);
-    await createNamespace('clan_project', true, clusterInfo, 'testns');
+    await createNamespace('clan_project', true, 'testns');
 
-    expect(exec.exec).toHaveBeenCalledTimes(6);
-    expect(exec.exec.mock.calls[1][1]).toEqual(['get', 'namespace', 'testns']);
-    expect(exec.exec).toHaveBeenNthCalledWith(3, 'kubectl', ['create', 'namespace', 'testns']);
+    expect(exec.exec).toHaveBeenCalledTimes(5);
+    expect(exec.exec.mock.calls[0][1]).toEqual(['get', 'namespace', 'testns']);
+    expect(exec.exec).toHaveBeenNthCalledWith(2, 'kubectl', ['create', 'namespace', 'testns']);
   });
 
   test('It fails on unknown error', async () => {
-    exec.exec.mockResolvedValueOnce(0)
-      .mockImplementationOnce((bin, args, opts) => mockOutput('Error from server (connection refused): could not establish connection', opts))
+    exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput('Error from server (connection refused): could not establish connection', opts))
       .mockResolvedValue(0);
-    await expect(createNamespace('clan_project', true, clusterInfo, 'testns')).rejects.toEqual(new Error('Could not get namespace information! reason: exit code 1'));
-    expect(exec.exec).toHaveBeenCalledTimes(2);
-    expect(exec.exec.mock.calls[1][1]).toEqual(['get', 'namespace', 'testns']);
+    await expect(createNamespace('clan_project', true, 'testns')).rejects.toEqual(new Error('Could not get namespace information! reason: exit code 1'));
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1]).toEqual(['get', 'namespace', 'testns']);
   });
 
   test('It reuses namespace if exists', async () => {
     exec.exec.mockResolvedValue(0);
 
-    await createNamespace('clan_project', true, clusterInfo, 'testns');
-    expect(exec.exec).toHaveBeenCalledTimes(4);
+    await createNamespace('clan_project', true, 'testns');
+    expect(exec.exec).toHaveBeenCalledTimes(3);
     expect(exec.exec).not.toHaveBeenCalledWith('kubectl', ['create', 'namespace', 'testns']);
   });
 
   test('It enables Istio injection', async () => {
     exec.exec.mockResolvedValue(0);
-    await createNamespace('clan_project', true, clusterInfo, 'testns');
+    await createNamespace('clan_project', true, 'testns');
     expect(exec.exec).toHaveBeenCalledWith(
       'kubectl',
       ['label', 'namespace', 'testns', 'opa-istio-injection=enabled', '--overwrite=true'],
@@ -75,7 +68,7 @@ describe('Create namespace', () => {
 
   test('It disables Istio injection', async () => {
     exec.exec.mockResolvedValue(0);
-    await createNamespace('clan_project', false, clusterInfo, 'testns');
+    await createNamespace('clan_project', false, 'testns');
     expect(exec.exec).toHaveBeenCalledWith(
       'kubectl',
       ['label', 'namespace', 'testns', 'opa-istio-injection=disabled', '--overwrite=true'],
@@ -88,7 +81,7 @@ describe('Create namespace', () => {
 
   test('It skips label injection', async () => {
     exec.exec.mockResolvedValue(0);
-    await createNamespace('clan_project', 'skip', clusterInfo, 'testns');
+    await createNamespace('clan_project', 'skip', 'testns');
     expect(exec.exec).not.toHaveBeenCalledWith(
       'kubectl',
       ['label', 'namespace', 'testns', expect.stringContaining('opa-istio-injection'), '--overwrite=true'],

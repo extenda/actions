@@ -9,6 +9,7 @@ jest.mock('../../cloud-run/src/cluster-info');
 jest.mock('../../cloud-run/src/create-namespace');
 jest.mock('../src/handle-repository');
 jest.mock('../src/handle-owners');
+jest.mock('../../cloud-run/src/kubectl-auth');
 
 const request = require('request');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
