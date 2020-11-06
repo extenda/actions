@@ -10870,6 +10870,25 @@ module.exports = gcloudOutput;
 
 /***/ }),
 
+/***/ 693:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const exec = __webpack_require__(8972);
+
+const authenticateKubeCtl = async ({ cluster, clusterLocation, project }) => exec.exec('gcloud', [
+  'container',
+  'clusters',
+  'get-credentials',
+  cluster,
+  `--region=${clusterLocation}`,
+  `--project=${project}`,
+]);
+
+module.exports = authenticateKubeCtl;
+
+
+/***/ }),
+
 /***/ 7933:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -19431,6 +19450,7 @@ const patchConfigMapYaml = __webpack_require__(1556);
 const parseEnvironmentArgs = __webpack_require__(6762);
 const createBaseKustomize = __webpack_require__(1773);
 const applyKubectl = __webpack_require__(4601);
+const authenticateKubeCtl = __webpack_require__(693);
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -19512,7 +19532,8 @@ const runDeploy = async (
   }
 
   const opaEnabled = 'skip';
-  await createNamespace(projectId, opaEnabled, cluster, service.name);
+  await authenticateKubeCtl(cluster);
+  await createNamespace(projectId, opaEnabled, service.name);
 
   await kustomizeNamespace(service.name);
   await kustomizeImage(image);
