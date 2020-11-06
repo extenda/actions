@@ -1,6 +1,5 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
-const authenticateKubeCtl = require('./kubectl-auth');
 const { setOpaInjectionLabels } = require('./set-namespace-label');
 
 const getNamespace = async (namespace) => {
@@ -28,11 +27,7 @@ const getNamespace = async (namespace) => {
 
 const createNamespace = async (projectId,
   opaEnabled,
-  { project, cluster, clusterLocation },
   namespace) => {
-  // Authenticate kubectl
-  await authenticateKubeCtl({ cluster, clusterLocation, project });
-
   if (!await getNamespace(namespace)) {
     core.info(`creating namespace ${namespace}`);
     await exec.exec('kubectl', ['create', 'namespace', namespace]);

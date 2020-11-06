@@ -11176,7 +11176,6 @@ module.exports = configureDomains;
 
 const core = __webpack_require__(6341);
 const exec = __webpack_require__(2176);
-const authenticateKubeCtl = __webpack_require__(6104);
 const { setOpaInjectionLabels } = __webpack_require__(7186);
 
 const getNamespace = async (namespace) => {
@@ -11204,11 +11203,7 @@ const getNamespace = async (namespace) => {
 
 const createNamespace = async (projectId,
   opaEnabled,
-  { project, cluster, clusterLocation },
   namespace) => {
-  // Authenticate kubectl
-  await authenticateKubeCtl({ cluster, clusterLocation, project });
-
   if (!await getNamespace(namespace)) {
     core.info(`creating namespace ${namespace}`);
     await exec.exec('kubectl', ['create', 'namespace', namespace]);
@@ -11426,6 +11421,7 @@ const { getClusterInfo } = __webpack_require__(8602);
 const createNamespace = __webpack_require__(4721);
 const projectInfo = __webpack_require__(645);
 const waitForRevision = __webpack_require__(6545);
+const authenticateKubeCtl = __webpack_require__(6104);
 const cleanRevisions = __webpack_require__(2695);
 const checkServiceAccount = __webpack_require__(498);
 
@@ -11542,7 +11538,8 @@ const gkeArguments = async (args, service, projectId) => {
 
   if (namespace !== 'default') {
     const opaEnabled = 'skip';
-    await createNamespace(projectId, opaEnabled, cluster, namespace);
+    await authenticateKubeCtl(cluster);
+    await createNamespace(projectId, opaEnabled, namespace);
   }
   args.push(`--namespace=${namespace}`);
 

@@ -7,6 +7,7 @@ const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 const createNamespace = require('../../cloud-run/src/create-namespace');
 const checkOwners = require('./handle-owners');
 const checkRepository = require('./handle-repository');
+const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
 
 const checkSystem = async (
   systemName, styraToken, styraUrl,
@@ -45,26 +46,32 @@ const configureIAM = async (
 
   const promises = [];
   const cluster = await getClusterInfo(projectId);
+  // Connect to cluster
+  await authenticateKubeCtl(cluster);
 
   services.forEach(({ name: namespace, repository }) => {
     const systemName = `${permissionPrefix}.${namespace}-${env}`;
 
-    // 1. Authenticate Kubectl and create namespace (if not exists)
-    // 2. Check if DAS system exists
-    // 3. Create DAS system (if not exists)
-    promises.push(createNamespace(projectId, true, cluster, namespace)
-      .then(() => checkSystem(systemName, styraToken, styraUrl)
-        .then((system) => {
-          if (system.id === '') {
-            core.info(`creating system '${systemName}' in ${styraUrl}`);
-            return setupSystem(
+    // 1. Check if DAS system exists
+    // If system doesn't exist
+    //    2. Create namespace
+    //    3. Create DAS system
+    // If system exists
+    //    2. Update owners
+    //    3. Update repository reference
+    promises.push(checkSystem(systemName, styraToken, styraUrl)
+      .then((system) => {
+        if (system.id === '') {
+          core.info(`creating system '${systemName}' in ${styraUrl}`);
+          return createNamespace(projectId, true, namespace)
+            .then(() => setupSystem(
               namespace, systemName, env, repository, styraToken, styraUrl, systemOwners,
-            );
-          }
-          core.info(`system '${systemName}' already exists in ${styraUrl}`);
-          return checkOwners(system.id, styraToken, styraUrl, systemOwners)
-            .then(() => checkRepository(system, styraToken, styraUrl, repository));
-        })));
+            ));
+        }
+        core.info(`system '${systemName}' already exists in ${styraUrl}`);
+        return checkOwners(system.id, styraToken, styraUrl, systemOwners)
+          .then(() => checkRepository(system, styraToken, styraUrl, repository));
+      }));
   });
 
   // Wait for K8s and DAS system.

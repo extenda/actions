@@ -10792,7 +10792,6 @@ module.exports = {
 
 const core = __webpack_require__(7199);
 const exec = __webpack_require__(8972);
-const authenticateKubeCtl = __webpack_require__(693);
 const { setOpaInjectionLabels } = __webpack_require__(5892);
 
 const getNamespace = async (namespace) => {
@@ -10820,11 +10819,7 @@ const getNamespace = async (namespace) => {
 
 const createNamespace = async (projectId,
   opaEnabled,
-  { project, cluster, clusterLocation },
   namespace) => {
-  // Authenticate kubectl
-  await authenticateKubeCtl({ cluster, clusterLocation, project });
-
   if (!await getNamespace(namespace)) {
     core.info(`creating namespace ${namespace}`);
     await exec.exec('kubectl', ['create', 'namespace', namespace]);
@@ -10871,25 +10866,6 @@ const gcloudOutput = async (args) => {
 };
 
 module.exports = gcloudOutput;
-
-
-/***/ }),
-
-/***/ 693:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-const exec = __webpack_require__(8972);
-
-const authenticateKubeCtl = async ({ cluster, clusterLocation, project }) => exec.exec('gcloud', [
-  'container',
-  'clusters',
-  'get-credentials',
-  cluster,
-  `--region=${clusterLocation}`,
-  `--project=${project}`,
-]);
-
-module.exports = authenticateKubeCtl;
 
 
 /***/ }),

@@ -50,7 +50,7 @@ describe('create system in styra-das', () => {
         },
       },
     };
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 201 },
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
       createSystemResult));
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
       opaConfig));
@@ -84,7 +84,7 @@ describe('create system in styra-das', () => {
         },
       },
     };
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 201 },
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
       createSystemResult));
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
       opaConfig));
@@ -103,5 +103,22 @@ describe('create system in styra-das', () => {
       '-f',
       'test.test-service-prod',
     ]);
+  });
+
+  test('It returns if create system fails', async () => {
+    mock({});
+    const createSystemResult = {
+      code: 'Invalid repository',
+      message: 'Error message',
+    };
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 400 },
+      createSystemResult));
+    exec.exec.mockResolvedValueOnce(0);
+    await expect(
+      setupSystem('test-service', 'test.test-service-prod', 'prod', 'test-repo', 'styra-token', 'https://test.styra.com', systemOwners),
+    )
+      .resolves.toEqual(null);
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledTimes(0);
   });
 });
