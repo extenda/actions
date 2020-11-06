@@ -10,6 +10,7 @@ const patchConfigMapYaml = require('./patch-configmap-yaml');
 const parseEnvironmentArgs = require('./environment-args');
 const createBaseKustomize = require('./create-base-kustomize');
 const applyKubectl = require('./apply-kubectl');
+const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -91,7 +92,8 @@ const runDeploy = async (
   }
 
   const opaEnabled = 'skip';
-  await createNamespace(projectId, opaEnabled, cluster, service.name);
+  await authenticateKubeCtl(cluster);
+  await createNamespace(projectId, opaEnabled, service.name);
 
   await kustomizeNamespace(service.name);
   await kustomizeImage(image);
