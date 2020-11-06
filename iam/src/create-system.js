@@ -269,7 +269,7 @@ const createSystem = async (
     json: true,
   }, (error, res, body) => {
     if (!error) {
-      resolve(body.result.id);
+      resolve(body);
     } else {
       reject(new Error(body));
     }
@@ -278,12 +278,17 @@ const createSystem = async (
 
 const setupSystem = async (service, systemName, env, repo, token, styraUrl, systemOwners) => {
   const promises = [];
-  const systemId = await createSystem(service, systemName, repo, token, styraUrl, env);
-  const opaConfig = await buildOpaConfig(systemId, token, service, styraUrl);
-  promises.push(setLabels(systemId, env, token, styraUrl));
-  promises.push(setDefaultPolicy(systemId, token, styraUrl));
-  promises.push(setDefaultDataset(systemId, token, styraUrl));
-  promises.push(updateOwners(systemId, token, styraUrl, systemOwners));
+  const systemResult = await createSystem(service, systemName, repo, token, styraUrl, env);
+  if (systemResult.code) {
+    core.error(`System creation failed for ${service}. Reason: ${systemResult.code}`);
+    core.error(systemResult.message);
+    return null;
+  }
+  const opaConfig = await buildOpaConfig(systemResult.result.id, token, service, styraUrl);
+  promises.push(setLabels(systemResult.result.id, env, token, styraUrl));
+  promises.push(setDefaultPolicy(systemResult.result.id, token, styraUrl));
+  promises.push(setDefaultDataset(systemResult.result.id, token, styraUrl));
+  promises.push(updateOwners(systemResult.result.id, token, styraUrl, systemOwners));
   promises.push(applyConfiguration(opaConfig, systemName));
 
   return Promise.all(promises);
