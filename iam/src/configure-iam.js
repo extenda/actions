@@ -46,14 +46,19 @@ const configureIAM = async (
 
   const promises = [];
   const cluster = await getClusterInfo(projectId);
+  // Connect to cluster
   await authenticateKubeCtl(cluster);
 
   services.forEach(({ name: namespace, repository }) => {
     const systemName = `${permissionPrefix}.${namespace}-${env}`;
 
-    // 1. Authenticate Kubectl and create namespace (if not exists)
-    // 2. Check if DAS system exists
-    // 3. Create DAS system (if not exists)
+    // 1. Check if DAS system exists
+    // If system doesn't exist
+    //    2. Create namespace
+    //    3. Create DAS system
+    // If system exists
+    //    2. Update owners
+    //    3. Update repository reference
     promises.push(checkSystem(systemName, styraToken, styraUrl)
       .then((system) => {
         if (system.id === '') {
