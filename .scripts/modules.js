@@ -46,7 +46,7 @@ const execModules = async (command) => Promise.all(
 /* eslint-enable no-console */
 
 module.exports = {
-  npmArgument: JSON.parse(process.env.npm_config_argv || { original: '' }).original.join(' '),
+  npmArgument: JSON.parse(process.env.npm_config_argv || '{"original": []}').original.join(' '),
   modules: {
     each: eachModules,
     exec: execModules,
