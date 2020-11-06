@@ -182,6 +182,8 @@ jobs:
         uses: ./iam-test-token
         with:
           service-account-key: ${{ secrets.SECRET_AUTH }}
+          user-email: iam-test-token-acceptance-email
+          user-password: iam-test-token-acceptance-password
 
       - name: Test IAM token
         run: |
