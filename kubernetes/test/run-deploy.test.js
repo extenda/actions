@@ -63,7 +63,6 @@ describe('Run Deploy', () => {
     expect(createNamespace).toHaveBeenCalledWith(
       'project-id',
       'skip',
-      { cluster: 'cluster', clusterLocation: 'cluster-location', project: 'project' },
       'deployment-name',
     );
   });
