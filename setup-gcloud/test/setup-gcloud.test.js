@@ -43,6 +43,7 @@ describe('Setup Gcloud', () => {
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['auth', 'activate-service-account']));
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
+    expect(core.exportVariable).toHaveBeenCalledWith('CLOUDSDK_CORE_PROJECT', 'test-project');
   });
 
   test('It can configure gcloud 280.0.0', async () => {
@@ -52,6 +53,7 @@ describe('Setup Gcloud', () => {
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['auth', 'activate-service-account']));
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
+    expect(core.exportVariable).toHaveBeenCalledWith('CLOUDSDK_CORE_PROJECT', 'test-project');
     expect(core.exportVariable).toHaveBeenCalledWith('GCLOUD_INSTALLED_VERSION', '280.0.0');
   });
 

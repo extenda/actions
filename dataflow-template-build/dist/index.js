@@ -7000,6 +7000,7 @@ const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredenti
     core.addPath(path.join(gcloud, 'bin'));
     return configureGcloud(serviceAccountKey, exportCredentials);
   }).then((projectId) => {
+    core.exportVariable('CLOUDSDK_CORE_PROJECT', projectId);
     core.setOutput('project-id', projectId);
     core.exportVariable('GCLOUD_INSTALLED_VERSION', semver);
     return projectId;
