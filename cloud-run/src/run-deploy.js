@@ -208,7 +208,7 @@ const runDeploy = async (
   }
 
   const gcloudExitCode = await execWithOutput(args)
-    .then((response) => waitForRevision(response, args, retryInterval));
+    .then((response) => waitForRevision(response, args, service.name, cluster, retryInterval));
 
   if (service.platform.gke && cluster) {
     await cleanRevisions(name, projectId, cluster.uri, cluster.clusterLocation, maxRevisions);

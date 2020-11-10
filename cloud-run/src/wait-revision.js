@@ -1,14 +1,32 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
+const getLatestRevision = require('./get-revision');
 
 const FIVE_MINUTES = 300000;
 
-const findRevision = (output) => {
-  const matches = output.match(/ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: 0\/\d+ nodes/);
-  if (matches && matches.length >= 2) {
-    return matches[1];
+const findRevision = (output, namespace, cluster) => {
+  const failureMatches = [
+    /ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: 0\/\d+ nodes/,
+    /ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: Unable to fetch image "([^"]+)": failed to resolve image to digest: Get "([^"]+)": context deadline exceeded./,
+    /ERROR: \(gcloud\.run\.deploy\) Ingress reconciliation failed/,
+  ];
+  let match;
+  failureMatches.forEach((failureMatch) => {
+    const matches = output.match(failureMatch);
+    if (matches) {
+      if (matches.length >= 2) {
+        [, match] = matches;
+      } else {
+        match = getLatestRevision(namespace, cluster);
+      }
+    }
+  });
+
+  if (match) {
+    return match;
   }
-  throw new Error('Deploy failed for other reasons than node scaling out');
+
+  throw new Error('Deploy failed for unknown reasons');
 };
 
 const parseConditions = (conditions) => {
@@ -94,6 +112,8 @@ const printStatus = (revisionStatus) => {
 const waitForRevision = async (
   { status, output },
   args,
+  namespace,
+  cluster,
   sleepMs = 10000,
   timeoutMs = FIVE_MINUTES,
 ) => {
@@ -102,7 +122,7 @@ const waitForRevision = async (
       throw new Error('Wait is not supported for managed cloud run');
     }
 
-    const revision = findRevision(output);
+    const revision = findRevision(output, namespace, cluster);
 
     core.info(`Waiting for revision "${revision}" to become active...`);
     let revisionStatus = {};

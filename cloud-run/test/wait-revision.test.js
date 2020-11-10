@@ -1,15 +1,33 @@
+jest.mock('../src/get-revision');
 const exec = require('@actions/exec');
 const core = require('@actions/core');
 const waitForRevision = require('../src/wait-revision');
+const getLatestRevision = require('../src/get-revision');
 
 jest.mock('@actions/exec');
 
-const GCLOUD_ERROR_MSG = `
+const GCLOUD_ERROR_MSG_NODE_SCALING = `
 Deploying container to Cloud Run for Anthos service [xxxxxxx] in namespace [default] of cluster [k8s-cluster]
 Deploying...
 Creating Revision.................failed
 Deployment failed
 ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3 nodes are available: 3 Insufficient cpu..
+`;
+
+const GCLOUD_ERROR_MSG_RECONCILIATION = `
+Deploying container to Cloud Run for Anthos service [xxxxxxx] in namespace [default] of cluster [k8s-cluster]
+Deploying...
+Creating Revision.................failed
+Deployment failed
+ERROR: (gcloud.run.deploy) Ingress reconciliation failed
+`;
+
+const GCLOUD_ERROR_MSG_IMAGE_FETCH = `
+Deploying container to Cloud Run for Anthos service [xxxxxxx] in namespace [default] of cluster [k8s-cluster]
+Deploying...
+Creating Revision.................failed
+Deployment failed
+ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00083-hox" failed with message: Unable to fetch image "eu.gcr.io/extenda/xxxxxxx:1.45.0": failed to resolve image to digest: Get "https://eu.gcr.io/v2/extenda/xxxxxxx/manifests/1.45.0": context deadline exceeded.
 `;
 
 const GCLOUD_ARGS = [
@@ -19,6 +37,12 @@ const GCLOUD_ARGS = [
   '--cluster-location=europe-west1',
   '--namespace=test',
 ];
+
+const clusterInput = {
+  project: 'project-id',
+  cluster: 'k8s-cluster',
+  clusterLocation: 'europe-west1',
+};
 
 let debugSpy;
 
@@ -65,8 +89,10 @@ describe('Wait for revision', () => {
       return Promise.resolve(0);
     });
     const response = await waitForRevision(
-      { status: 1, output: GCLOUD_ERROR_MSG },
+      { status: 1, output: GCLOUD_ERROR_MSG_NODE_SCALING },
       GCLOUD_ARGS,
+      'service-name',
+      clusterInput,
       10,
     );
     expect(response).toEqual(0);
@@ -74,14 +100,19 @@ describe('Wait for revision', () => {
   });
 
   test('It returns immediately for successful deploy', async () => {
-    const response = await waitForRevision({ status: 0, output: '' }, GCLOUD_ARGS);
+    const response = await waitForRevision(
+      { status: 0, output: '' },
+      GCLOUD_ARGS,
+      'service-name',
+      clusterInput,
+    );
     expect(response).toEqual(0);
     expect(exec.exec).not.toHaveBeenCalled();
   });
 
   test('It does not wait for managed cloud run', async () => {
     await expect(waitForRevision(
-      { status: 1, output: GCLOUD_ERROR_MSG },
+      { status: 1, output: GCLOUD_ERROR_MSG_NODE_SCALING },
       ['--platform=managed'],
       10,
     )).rejects.toEqual(new Error('Wait is not supported for managed cloud run'));
@@ -92,8 +123,10 @@ describe('Wait for revision', () => {
     await expect(waitForRevision(
       { status: 1, output: 'ERROR: Unexpected error for revision: "abc-123"' },
       GCLOUD_ARGS,
+      'service-name',
+      clusterInput,
       10,
-    )).rejects.toEqual(new Error('Deploy failed for other reasons than node scaling out'));
+    )).rejects.toEqual(new Error('Deploy failed for unknown reasons'));
     expect(exec.exec).not.toHaveBeenCalled();
   });
 
@@ -103,8 +136,10 @@ describe('Wait for revision', () => {
       return Promise.resolve(0);
     });
     await expect(waitForRevision(
-      { status: 1, output: GCLOUD_ERROR_MSG },
+      { status: 1, output: GCLOUD_ERROR_MSG_NODE_SCALING },
       GCLOUD_ARGS,
+      'service-name',
+      clusterInput,
       10,
     )).rejects.toEqual(new Error('Invalid JSON: Failed to load status for revision "xxxxxxx-00013-loc". Reason: Unexpected token E in JSON at position 0'));
     expect(exec.exec).toHaveBeenCalled();
@@ -143,8 +178,10 @@ describe('Wait for revision', () => {
       return Promise.resolve(0);
     });
     await expect(waitForRevision(
-      { status: 1, output: GCLOUD_ERROR_MSG },
+      { status: 1, output: GCLOUD_ERROR_MSG_NODE_SCALING },
       GCLOUD_ARGS,
+      'service-name',
+      clusterInput,
       10,
       100,
     )).rejects.toEqual(new Error('Timed out after while for revision "xxxxxxx-00013-loc".'));
@@ -186,10 +223,100 @@ describe('Wait for revision', () => {
       return Promise.resolve(0);
     });
     await expect(waitForRevision(
-      { status: 1, output: GCLOUD_ERROR_MSG },
+      { status: 1, output: GCLOUD_ERROR_MSG_NODE_SCALING },
       GCLOUD_ARGS,
+      'service-name',
+      clusterInput,
       10,
     )).rejects.toEqual(new Error('Revision failed "ready" condition with reason: ExitCode60\nContainer failed with: failed to access secret...'));
+    expect(exec.exec).toHaveBeenCalled();
+  });
+
+  test('It waits on image fetch', async () => {
+    const revisionStatus = {
+      status: {
+        conditions: [
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            severity: 'Info',
+            status: 'True',
+            type: 'Active',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'ContainerHealthy',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'Ready',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'ResourcesAvailable',
+          },
+        ],
+      },
+    };
+    exec.exec.mockImplementationOnce((cmd, args, opts) => {
+      opts.listeners.stdout(Buffer.from(JSON.stringify(revisionStatus), 'utf8'));
+      return Promise.resolve(0);
+    });
+    const response = await waitForRevision(
+      { status: 1, output: GCLOUD_ERROR_MSG_IMAGE_FETCH },
+      GCLOUD_ARGS,
+      'service-name',
+      clusterInput,
+      10,
+    );
+    expect(response).toEqual(0);
+    expect(exec.exec).toHaveBeenCalled();
+  });
+
+  test('It waits on ingress reconcilliation', async () => {
+    const revisionStatus = {
+      status: {
+        conditions: [
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            severity: 'Info',
+            status: 'True',
+            type: 'Active',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'ContainerHealthy',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'Ready',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'ResourcesAvailable',
+          },
+        ],
+      },
+    };
+    getLatestRevision.mockResolvedValueOnce('service-revision');
+    exec.exec.mockImplementationOnce((cmd, args, opts) => {
+      opts.listeners.stdout(Buffer.from(JSON.stringify(revisionStatus), 'utf8'));
+      return Promise.resolve(0);
+    });
+    const response = await waitForRevision(
+      { status: 1, output: GCLOUD_ERROR_MSG_RECONCILIATION },
+      GCLOUD_ARGS,
+      'service-name',
+      clusterInput,
+      10,
+      100,
+    );
+    expect(response).toEqual(0);
     expect(exec.exec).toHaveBeenCalled();
   });
 });

@@ -11340,6 +11340,40 @@ module.exports = gcloudOutput;
 
 /***/ }),
 
+/***/ 638:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const exec = __webpack_require__(2176);
+
+const getLatestRevision = async (namespace, { cluster, clusterLocation, project }) => {
+  let output = '';
+  await exec.exec('gcloud', [
+    'run',
+    'revisions',
+    'list',
+    `--namespace=${namespace}`,
+    `--project=${project}`,
+    `--cluster=${cluster}`,
+    `--cluster-location=${clusterLocation}`,
+    '--platform=gke',
+    '--format=value(REVISION)',
+  ], {
+    silent: true,
+    listeners: {
+      stdout: (data) => {
+        output += data.toString('utf8');
+      },
+    },
+  });
+  const list = output.trim().split(/[\r\n]+/);
+  return list[list.length - 1];
+};
+
+module.exports = getLatestRevision;
+
+
+/***/ }),
+
 /***/ 8571:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -11622,7 +11656,7 @@ const runDeploy = async (
   }
 
   const gcloudExitCode = await execWithOutput(args)
-    .then((response) => waitForRevision(response, args, retryInterval));
+    .then((response) => waitForRevision(response, args, service.name, cluster, retryInterval));
 
   if (service.platform.gke && cluster) {
     await cleanRevisions(name, projectId, cluster.uri, cluster.clusterLocation, maxRevisions);
@@ -11722,15 +11756,33 @@ module.exports = {
 
 const core = __webpack_require__(6341);
 const exec = __webpack_require__(2176);
+const getLatestRevision = __webpack_require__(638);
 
 const FIVE_MINUTES = 300000;
 
-const findRevision = (output) => {
-  const matches = output.match(/ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: 0\/\d+ nodes/);
-  if (matches && matches.length >= 2) {
-    return matches[1];
+const findRevision = (output, namespace, cluster) => {
+  const failureMatches = [
+    /ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: 0\/\d+ nodes/,
+    /ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: Unable to fetch image "([^"]+)": failed to resolve image to digest: Get "([^"]+)": context deadline exceeded./,
+    /ERROR: \(gcloud\.run\.deploy\) Ingress reconciliation failed/,
+  ];
+  let match;
+  failureMatches.forEach((failureMatch) => {
+    const matches = output.match(failureMatch);
+    if (matches) {
+      if (matches.length >= 2) {
+        [, match] = matches;
+      } else {
+        match = getLatestRevision(namespace, cluster);
+      }
+    }
+  });
+
+  if (match) {
+    return match;
   }
-  throw new Error('Deploy failed for other reasons than node scaling out');
+
+  throw new Error('Deploy failed for unknown reasons');
 };
 
 const parseConditions = (conditions) => {
@@ -11816,6 +11868,8 @@ const printStatus = (revisionStatus) => {
 const waitForRevision = async (
   { status, output },
   args,
+  namespace,
+  cluster,
   sleepMs = 10000,
   timeoutMs = FIVE_MINUTES,
 ) => {
@@ -11824,7 +11878,7 @@ const waitForRevision = async (
       throw new Error('Wait is not supported for managed cloud run');
     }
 
-    const revision = findRevision(output);
+    const revision = findRevision(output, namespace, cluster);
 
     core.info(`Waiting for revision "${revision}" to become active...`);
     let revisionStatus = {};
