@@ -91,6 +91,8 @@ describe('Wait for revision', () => {
     const response = await waitForRevision(
       { status: 1, output: GCLOUD_ERROR_MSG_NODE_SCALING },
       GCLOUD_ARGS,
+      'service-name',
+      clusterInput,
       10,
     );
     expect(response).toEqual(0);
@@ -98,7 +100,12 @@ describe('Wait for revision', () => {
   });
 
   test('It returns immediately for successful deploy', async () => {
-    const response = await waitForRevision({ status: 0, output: '' }, GCLOUD_ARGS);
+    const response = await waitForRevision(
+      { status: 0, output: '' },
+      GCLOUD_ARGS,
+      'service-name',
+      clusterInput,
+    );
     expect(response).toEqual(0);
     expect(exec.exec).not.toHaveBeenCalled();
   });
@@ -116,6 +123,8 @@ describe('Wait for revision', () => {
     await expect(waitForRevision(
       { status: 1, output: 'ERROR: Unexpected error for revision: "abc-123"' },
       GCLOUD_ARGS,
+      'service-name',
+      clusterInput,
       10,
     )).rejects.toEqual(new Error('Deploy failed for unknown reasons'));
     expect(exec.exec).not.toHaveBeenCalled();
@@ -129,6 +138,8 @@ describe('Wait for revision', () => {
     await expect(waitForRevision(
       { status: 1, output: GCLOUD_ERROR_MSG_NODE_SCALING },
       GCLOUD_ARGS,
+      'service-name',
+      clusterInput,
       10,
     )).rejects.toEqual(new Error('Invalid JSON: Failed to load status for revision "xxxxxxx-00013-loc". Reason: Unexpected token E in JSON at position 0'));
     expect(exec.exec).toHaveBeenCalled();
@@ -169,6 +180,8 @@ describe('Wait for revision', () => {
     await expect(waitForRevision(
       { status: 1, output: GCLOUD_ERROR_MSG_NODE_SCALING },
       GCLOUD_ARGS,
+      'service-name',
+      clusterInput,
       10,
       100,
     )).rejects.toEqual(new Error('Timed out after while for revision "xxxxxxx-00013-loc".'));
@@ -212,6 +225,8 @@ describe('Wait for revision', () => {
     await expect(waitForRevision(
       { status: 1, output: GCLOUD_ERROR_MSG_NODE_SCALING },
       GCLOUD_ARGS,
+      'service-name',
+      clusterInput,
       10,
     )).rejects.toEqual(new Error('Revision failed "ready" condition with reason: ExitCode60\nContainer failed with: failed to access secret...'));
     expect(exec.exec).toHaveBeenCalled();
@@ -252,6 +267,8 @@ describe('Wait for revision', () => {
     const response = await waitForRevision(
       { status: 1, output: GCLOUD_ERROR_MSG_IMAGE_FETCH },
       GCLOUD_ARGS,
+      'service-name',
+      clusterInput,
       10,
     );
     expect(response).toEqual(0);
@@ -294,10 +311,10 @@ describe('Wait for revision', () => {
     const response = await waitForRevision(
       { status: 1, output: GCLOUD_ERROR_MSG_RECONCILIATION },
       GCLOUD_ARGS,
-      10,
-      100,
       'service-name',
       clusterInput,
+      10,
+      100,
     );
     expect(response).toEqual(0);
     expect(exec.exec).toHaveBeenCalled();

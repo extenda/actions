@@ -112,10 +112,10 @@ const printStatus = (revisionStatus) => {
 const waitForRevision = async (
   { status, output },
   args,
-  sleepMs = 10000,
-  timeoutMs = FIVE_MINUTES,
   namespace,
   cluster,
+  sleepMs = 10000,
+  timeoutMs = FIVE_MINUTES,
 ) => {
   if (status !== 0) {
     if (!args.includes('--platform=gke')) {

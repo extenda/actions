@@ -11656,7 +11656,7 @@ const runDeploy = async (
   }
 
   const gcloudExitCode = await execWithOutput(args)
-    .then((response) => waitForRevision(response, args, retryInterval, service.name, cluster));
+    .then((response) => waitForRevision(response, args, service.name, cluster, retryInterval));
 
   if (service.platform.gke && cluster) {
     await cleanRevisions(name, projectId, cluster.uri, cluster.clusterLocation, maxRevisions);
@@ -11868,10 +11868,10 @@ const printStatus = (revisionStatus) => {
 const waitForRevision = async (
   { status, output },
   args,
-  sleepMs = 10000,
-  timeoutMs = FIVE_MINUTES,
   namespace,
   cluster,
+  sleepMs = 10000,
+  timeoutMs = FIVE_MINUTES,
 ) => {
   if (status !== 0) {
     if (!args.includes('--platform=gke')) {
