@@ -6,6 +6,7 @@ jest.mock('../src/cluster-info');
 jest.mock('../src/create-namespace');
 jest.mock('../src/check-sa');
 jest.mock('../src/kubectl-auth');
+jest.mock('../src/get-revision');
 
 const exec = require('@actions/exec');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
