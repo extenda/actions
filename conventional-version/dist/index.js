@@ -451,7 +451,7 @@ const action = async () => {
     if (isPreRel) {
       semver = await versions.getBuildVersion(`-${branchNameSemver}.${buildNumber}+${shortSha}`);
     } else {
-      semver = version;
+      semver = await versions.getBuildVersion();
     }
 
     core.info(`Semver 2.0 version: ${semver}`);
