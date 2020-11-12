@@ -4,7 +4,7 @@ const getLatestRevision = require('./get-revision');
 
 const FIVE_MINUTES = 300000;
 
-const findRevision = (output, namespace, cluster) => {
+const findRevision = async (output, namespace, cluster) => {
   const failureMatches = [
     /ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: 0\/\d+ nodes/,
     /ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: Unable to fetch image "([^"]+)": failed to resolve image to digest: Get "([^"]+)": context deadline exceeded./,
@@ -122,7 +122,7 @@ const waitForRevision = async (
       throw new Error('Wait is not supported for managed cloud run');
     }
 
-    const revision = findRevision(output, namespace, cluster);
+    const revision = await findRevision(output, namespace, cluster);
 
     core.info(`Waiting for revision "${revision}" to become active...`);
     let revisionStatus = {};
