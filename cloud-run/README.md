@@ -116,7 +116,7 @@ cpu: 300m
 platform:
   gke:
     connectivity: external
-    domains-mappings:
+    domain-mappings:
       prod:
         - my-service.retailsvc.com
       staging:
