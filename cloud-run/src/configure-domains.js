@@ -2,7 +2,6 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 const gcloud = require('./gcloud-output');
 const authenticateKubeCtl = require('./kubectl-auth');
-const { setOpaInjectionLabels } = require('./set-namespace-label');
 const { addDnsRecord } = require('./dns-record');
 
 const listDomains = async ({ cluster, clusterLocation, project }, namespace) => gcloud([
@@ -86,7 +85,6 @@ const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectLa
       gke: {
         connectivity,
         'domain-mappings': domainMappings = [],
-        'opa-enabled': opaEnabled = true,
         namespace = name,
       },
     },
@@ -99,10 +97,6 @@ const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectLa
 
     await authenticateKubeCtl(cluster);
 
-    if (opaEnabled) {
-      await setOpaInjectionLabels(namespace, false);
-    }
-
     const promises = [];
     newDomains.forEach((domain) => {
       promises.push(createDomainMapping(cluster, domain, name, namespace)
@@ -110,12 +104,7 @@ const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectLa
         .then(() => enableHttpRedirectOnDomain(domain, namespace)));
     });
 
-    await Promise.all(promises).finally(() => {
-      if (opaEnabled) {
-        return setOpaInjectionLabels(namespace, true);
-      }
-      return null;
-    });
+    await Promise.all(promises);
 
     return newDomains;
   }
