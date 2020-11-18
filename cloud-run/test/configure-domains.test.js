@@ -45,7 +45,7 @@ existing.retailsvc.dev  test-service
     }, mockCluster, '', 'dns-project');
 
     expect(newDomains).toEqual(['test-service.retailsvc.dev']);
-    expect(exec.exec.mock.calls[4][1]).toEqual([
+    expect(exec.exec.mock.calls[2][1]).toEqual([
       'run',
       'domain-mappings',
       'create',
