@@ -38,5 +38,27 @@ cpu: 100m
         storage: expect.anything(),
       }));
     });
+
+    test('It loads ports', () => {
+      mockFs({
+        'kubernetes.yaml': `
+name: kubernetes
+cpu: 100m
+ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+`,
+      });
+      const serviceDef = loadServiceDefinition('kubernetes.yaml', kubernetesSchema);
+      expect(serviceDef).toMatchObject({
+        ports: [
+          {
+            protocol: 'TCP',
+            port: 80,
+            targetPort: 8080,
+          }],
+      });
+    });
   });
 });

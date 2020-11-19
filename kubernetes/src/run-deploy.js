@@ -6,6 +6,7 @@ const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const execKustomize = require('./kustomize');
 const patchStatefulSetYaml = require('./patch-statefulset-yaml');
 const patchDeploymentYaml = require('./patch-deployment-yaml');
+const patchServiceYaml = require('./patch-service-yaml');
 const patchConfigMapYaml = require('./patch-configmap-yaml');
 const parseEnvironmentArgs = require('./environment-args');
 const createBaseKustomize = require('./create-base-kustomize');
@@ -76,6 +77,10 @@ const runDeploy = async (
 
   const projectId = await gcloudAuth(serviceAccountKey);
   const cluster = await getClusterInfo(projectId);
+
+  patchManifest('service.yml', (yml) => {
+    patchServiceYaml(service, yml);
+  });
 
   patchManifest('configmap.yml', (yml) => {
     const args = parseEnvironmentArgs(service.environment, projectId);

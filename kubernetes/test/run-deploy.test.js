@@ -5,6 +5,7 @@ jest.mock('../../cloud-run/src/project-info');
 jest.mock('../../cloud-run/src/kubectl-auth');
 jest.mock('../../cloud-run/src/create-namespace');
 jest.mock('../src/patch-deployment-yaml');
+jest.mock('../src/patch-service-yaml');
 jest.mock('../src/patch-statefulset-yaml');
 jest.mock('../src/kustomize');
 jest.mock('../src/apply-kubectl');
@@ -17,6 +18,7 @@ const mockFs = require('mock-fs');
 const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const patchDeployment = require('../src/patch-deployment-yaml');
+const patchService = require('../src/patch-service-yaml');
 const patchStatefulSet = require('../src/patch-statefulset-yaml');
 const runDeploy = require('../src/run-deploy');
 const kustomize = require('../src/kustomize');
@@ -65,6 +67,29 @@ describe('Run Deploy', () => {
       'skip',
       'deployment-name',
     );
+  });
+
+  test('It calls patchService', async () => {
+    getClusterInfo.mockResolvedValueOnce({});
+    exec.exec.mockResolvedValue(0);
+
+    const service = {
+      name: 'service-name',
+      ports: [
+        {
+          protocol: 'TCP',
+          port: 80,
+          targetPort: 8080,
+        }],
+    };
+    const image = 'gcr.io/test-project/my-service:tag';
+    await runDeploy(
+      'service-account',
+      service,
+      image,
+    );
+
+    expect(patchService).toHaveBeenCalledWith(service, expect.anything());
   });
 
   test('It will deploy StatefulSet when storage is defined', async () => {
