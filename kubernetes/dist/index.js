@@ -19127,12 +19127,9 @@ metadata:
     app: ${deploymentName}
 spec:
   type: ClusterIP
+  clusterIP: None
   selector:
     app: ${deploymentName}
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8080
 `,
     statefulSet: `
 apiVersion: apps/v1
@@ -19301,6 +19298,24 @@ module.exports = {
       type: 'integer',
       default: 1,
     },
+    ports: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          protocol: {
+            type: 'string',
+          },
+          port: {
+            type: 'integer',
+          },
+          targetPort: {
+            type: 'integer',
+          },
+        },
+        additionalProperties: false,
+      },
+    },
     storage: {
       type: 'object',
       properties: {
@@ -19404,6 +19419,28 @@ module.exports = patchDeploymentYaml;
 
 /***/ }),
 
+/***/ 1270:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const yaml = __webpack_require__(5024);
+
+const patchServiceYaml = (service, serviceYaml) => {
+  const patchedService = yaml.parse(serviceYaml);
+
+  if (service.ports && service.ports.length) {
+    patchedService.spec.ports = service.ports;
+    // remove clusterIp:NONE from template
+    delete patchedService.spec.clusterIP;
+  }
+
+  return yaml.stringify(patchedService);
+};
+
+module.exports = patchServiceYaml;
+
+
+/***/ }),
+
 /***/ 8768:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -19449,6 +19486,7 @@ const setupGcloud = __webpack_require__(7095);
 const execKustomize = __webpack_require__(6250);
 const patchStatefulSetYaml = __webpack_require__(8768);
 const patchDeploymentYaml = __webpack_require__(9309);
+const patchServiceYaml = __webpack_require__(1270);
 const patchConfigMapYaml = __webpack_require__(1556);
 const parseEnvironmentArgs = __webpack_require__(6762);
 const createBaseKustomize = __webpack_require__(1773);
@@ -19519,6 +19557,10 @@ const runDeploy = async (
 
   const projectId = await gcloudAuth(serviceAccountKey);
   const cluster = await getClusterInfo(projectId);
+
+  patchManifest('service.yml', (yml) => {
+    patchServiceYaml(service, yml);
+  });
 
   patchManifest('configmap.yml', (yml) => {
     const args = parseEnvironmentArgs(service.environment, projectId);

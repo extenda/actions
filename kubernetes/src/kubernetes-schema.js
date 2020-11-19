@@ -20,6 +20,24 @@ module.exports = {
       type: 'integer',
       default: 1,
     },
+    ports: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          protocol: {
+            type: 'string',
+          },
+          port: {
+            type: 'integer',
+          },
+          targetPort: {
+            type: 'integer',
+          },
+        },
+        additionalProperties: false,
+      },
+    },
     storage: {
       type: 'object',
       properties: {
