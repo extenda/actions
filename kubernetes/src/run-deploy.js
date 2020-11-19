@@ -78,9 +78,7 @@ const runDeploy = async (
   const projectId = await gcloudAuth(serviceAccountKey);
   const cluster = await getClusterInfo(projectId);
 
-  patchManifest('service.yml', (yml) => {
-    patchServiceYaml(service, yml);
-  });
+  patchManifest('service.yml', (yml) => patchServiceYaml(service, yml));
 
   patchManifest('configmap.yml', (yml) => {
     const args = parseEnvironmentArgs(service.environment, projectId);
