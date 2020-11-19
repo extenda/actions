@@ -19127,9 +19127,12 @@ metadata:
     app: ${deploymentName}
 spec:
   type: ClusterIP
-  clusterIP: None
   selector:
     app: ${deploymentName}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
 `,
     statefulSet: `
 apiVersion: apps/v1
