@@ -3356,7 +3356,7 @@ const action = async () => {
   const region = core.getInput('region') || 'europe-west1';
   const network = core.getInput('network') || 'tribe-network';
   const maxWorkers = core.getInput('max-workers') || '';
-  const numWorkers= core.getInput('num-workers') || '';
+  const numWorkers = core.getInput('num-workers') || '';
 
   const newJobName = `${jobName}-${jobVersion}`;
 
