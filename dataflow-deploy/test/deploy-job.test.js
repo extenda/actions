@@ -26,6 +26,8 @@ id: jobId
       'gs://dataflow-bucket/dataflow/templates/job-name/0.0.1/staging',
       'tribe-network',
       'clan-resources',
+      '4',
+      '1',
     );
     expect(exec.exec).toHaveBeenCalledTimes(1);
   });
@@ -49,6 +51,8 @@ id: jobId
       'gs://dataflow-bucket/dataflow/templates/job-name/0.0.1/staging',
       'tribe-network',
       'clan-resources',
+      '',
+      '',
     );
     expect(exec.exec).toHaveBeenCalledTimes(1);
   });
@@ -72,6 +76,8 @@ id: jobId
       'gs://dataflow-bucket/dataflow/templates/job-name/0.0.1/staging',
       'tribe-network',
       'clan-resources',
+      '',
+      '',
     );
     expect(exec.exec).toHaveBeenCalledTimes(1);
   });

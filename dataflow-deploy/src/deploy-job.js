@@ -11,6 +11,8 @@ const deployJob = async (
   stagingLocation,
   network,
   subnetwork,
+  maxWorkers,
+  numWorkers,
 ) => {
   const args = [
     'dataflow',
@@ -28,6 +30,12 @@ const deployJob = async (
   }
   if (stagingLocation) {
     args.push(`--staging-location=${stagingLocation}`);
+  }
+  if (maxWorkers) {
+    args.push(`--max-workers=${maxWorkers}`);
+  }
+  if (numWorkers) {
+    args.push(`--num-workers=${numWorkers}`);
   }
   args.push(`--service-account-email=${dataflowServiceAccount}`);
   args.push(`--region=${region}`);
