@@ -49,10 +49,10 @@ describe('Terraform plan comment', () => {
 
   test('It can generate comment for multiple plans', async () => {
     generateOutputs.mockResolvedValueOnce([
-      { module: 'folder/moduleA', output: 'Plan A output\n0 to add 1 to change 0 to destroy', status: 0 },
-      { module: 'folder/moduleB', output: 'Plan B output\n1 to add 0 to change 0 to destroy', status: 0 },
-      { module: 'folder/nested/moduleC', output: 'Plan C output\n1 to add 1 to change 1 to destroy', status: 0 },
-      { module: 'folder/nested', output: 'Plan nested output\n1 to add 0 to change 0 to destroy', status: 0 },
+      { module: 'folder/moduleA', output: 'Plan A output\n0 to add, 1 to change, 0 to destroy', status: 0 },
+      { module: 'folder/moduleB', output: 'Plan B output\n1 to add, 0 to change, 0 to destroy', status: 0 },
+      { module: 'folder/nested/moduleC', output: 'Plan C output\n1 to add, 1 to change, 1 to destroy', status: 0 },
+      { module: 'folder/nested', output: 'Plan nested output\n1 to add, 0 to change, 0 to destroy', status: 0 },
     ]);
 
     const comment = await action();
@@ -63,11 +63,11 @@ The output only includes modules with changes.
 #### :orange_book: \`folder/moduleA\`
 
 <details>
-<summary>0 to add 1 to change 0 to destroy</summary>
+<summary>0 to add, 1 to change, 0 to destroy</summary>
 
 \`\`\`hcl
 Plan A output
-0 to add 1 to change 0 to destroy
+0 to add, 1 to change, 0 to destroy
 \`\`\`
 
 </details>
@@ -75,11 +75,11 @@ Plan A output
 #### :green_book: \`folder/moduleB\`
 
 <details>
-<summary>1 to add 0 to change 0 to destroy</summary>
+<summary>1 to add, 0 to change, 0 to destroy</summary>
 
 \`\`\`hcl
 Plan B output
-1 to add 0 to change 0 to destroy
+1 to add, 0 to change, 0 to destroy
 \`\`\`
 
 </details>
@@ -87,11 +87,11 @@ Plan B output
 #### :closed_book: \`folder/nested/moduleC\`
 
 <details>
-<summary>1 to add 1 to change 1 to destroy</summary>
+<summary>1 to add, 1 to change, 1 to destroy</summary>
 
 \`\`\`hcl
 Plan C output
-1 to add 1 to change 1 to destroy
+1 to add, 1 to change, 1 to destroy
 \`\`\`
 
 </details>
@@ -99,11 +99,11 @@ Plan C output
 #### :green_book: \`folder/nested\`
 
 <details>
-<summary>1 to add 0 to change 0 to destroy</summary>
+<summary>1 to add, 0 to change, 0 to destroy</summary>
 
 \`\`\`hcl
 Plan nested output
-1 to add 0 to change 0 to destroy
+1 to add, 0 to change, 0 to destroy
 \`\`\`
 
 </details>
@@ -115,7 +115,7 @@ Plan nested output
 
   test('It can generate comment for single plan', async () => {
     generateOutputs.mockResolvedValueOnce([
-      { module: 'work', output: 'Plan output\nPlan: 1 to add 0 to change 0 to destroy\n\n', status: 0 },
+      { module: 'work', output: 'Plan output\nPlan: 1 to add, 0 to change, 0 to destroy\n\n', status: 0 },
     ]);
 
     const comment = await action();
@@ -126,11 +126,11 @@ The output only includes modules with changes.
 #### :green_book: \`work\`
 
 <details>
-<summary>Plan: 1 to add 0 to change 0 to destroy</summary>
+<summary>Plan: 1 to add, 0 to change, 0 to destroy</summary>
 
 \`\`\`hcl
 Plan output
-Plan: 1 to add 0 to change 0 to destroy
+Plan: 1 to add, 0 to change, 0 to destroy
 
 
 \`\`\`
