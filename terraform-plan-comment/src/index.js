@@ -5,10 +5,10 @@ const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
 const generateOutputs = require('./generate-outputs');
 
 const moduleEmoji = (summary) => {
-  if (!summary.includes('0 to destroy')) {
+  if (!summary.includes(', 0 to destroy')) {
     return ':closed_book:';
   }
-  if (!summary.includes('0 to change')) {
+  if (!summary.includes(', 0 to change')) {
     return ':orange_book:';
   }
   return ':green_book:';

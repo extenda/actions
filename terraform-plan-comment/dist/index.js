@@ -33210,10 +33210,10 @@ const { getPullRequestInfo } = __webpack_require__(2672);
 const generateOutputs = __webpack_require__(3385);
 
 const moduleEmoji = (summary) => {
-  if (!summary.includes('0 to destroy')) {
+  if (!summary.includes(', 0 to destroy')) {
     return ':closed_book:';
   }
-  if (!summary.includes('0 to change')) {
+  if (!summary.includes(', 0 to change')) {
     return ':orange_book:';
   }
   return ':green_book:';
