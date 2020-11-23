@@ -30,10 +30,12 @@ describe('deploy dataflow Action', () => {
       .mockReturnValueOnce('gs://clan-dataflow/job-name/10/staging')
       .mockReturnValueOnce('europe-west4')
       .mockReturnValueOnce('tribe-network')
+      .mockReturnValueOnce('1')
+      .mockReturnValueOnce('4')
       .mockReturnValueOnce('https://www.googleapis.com/compute/v1/projects/test-project-123/regions/europe-west4/subnetworks/clan-resources');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(10);
+    expect(core.getInput).toHaveBeenCalledTimes(12);
     expect(deployJob).toHaveBeenCalledWith(
       'job-name-10',
       'test=job,test2=job2',
@@ -45,6 +47,8 @@ describe('deploy dataflow Action', () => {
       'gs://clan-dataflow/job-name/10/staging',
       'tribe-network',
       'https://www.googleapis.com/compute/v1/projects/test-project-123/regions/europe-west4/subnetworks/clan-resources',
+      '1',
+      '4',
     );
     expect(drainJob).toHaveBeenCalledWith(
       'jobId',
@@ -68,10 +72,12 @@ describe('deploy dataflow Action', () => {
       .mockReturnValueOnce('')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('europe-west1')
-      .mockReturnValueOnce('tribe-network');
+      .mockReturnValueOnce('tribe-network')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(10);
+    expect(core.getInput).toHaveBeenCalledTimes(12);
     expect(deployJob).toHaveBeenCalledWith(
       'job-name-10',
       '',
@@ -83,6 +89,8 @@ describe('deploy dataflow Action', () => {
       '',
       'tribe-network',
       'https://www.googleapis.com/compute/v1/projects/test-project-123/regions/europe-west1/subnetworks/clan-resources',
+      '',
+      '',
     );
     expect(drainJob).toHaveBeenCalledWith(
       'jobId',

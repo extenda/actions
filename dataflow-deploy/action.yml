@@ -46,6 +46,14 @@ inputs:
       Compute Engine network for launching dataflow.
     default: tribe-network
     required: false
+  num-workers:
+    description: |
+      The initial number of workers to use.
+    required: false
+  max-workers:
+    description: |
+      The maximum number of workers to run.
+    required: false
 runs:
   using: node12
   main: dist/index.js
