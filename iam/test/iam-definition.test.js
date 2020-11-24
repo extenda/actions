@@ -131,7 +131,7 @@ roles:
       });
       expect(() => loadIamDefinition('iam.yaml'))
         .toThrow(`iam.yaml is not valid.
-0: instance.permissions does not match pattern \"^[a-z][-a-z]{1,15}$\"
+0: instance.permissions does not match pattern "^[a-z][-a-z]{1,15}$"
 `);
     });
 

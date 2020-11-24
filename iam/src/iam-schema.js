@@ -44,7 +44,7 @@ module.exports = {
         minLength: 1,
         maxLength: 16,
         pattern: '^[a-z][-a-z]{1,15}$',
-      }
+      },
     },
     roles: {
       type: 'array',
