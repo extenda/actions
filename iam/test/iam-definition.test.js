@@ -62,7 +62,7 @@ roles:
       expect(() => loadIamDefinition('iam.yaml'))
         .toThrow(`iam.yaml is not valid.
 0: instance.roles[0] requires property "desc"
-1: instance.roles[0] additionalProperty "description" exists in instance when not allowed
+1: instance.roles[0] is not allowed to have the additional property "description"
 `);
     });
 
@@ -79,17 +79,63 @@ permissions:
 roles:
   - id: admin
     name: admin name
-    desc: A description longer than 20 characters
+    desc: A description description description description description description description description description description description description description description description longer than 200 characters
     permissions: []
 `,
       });
       expect(() => loadIamDefinition('iam.yaml'))
         .toThrow(`iam.yaml is not valid.
-0: instance.roles[0].desc does not meet maximum length of 20
+0: instance.roles[0].desc does not meet maximum length of 200
 `);
     });
 
-    test('It throws for too long permission description', () => {
+    test('It throws for invalid permission-prefix', () => {
+      mockFs({
+        'iam.yaml': `
+permission-prefix: in1
+services:
+  - name: test
+    repository: actions
+permissions:
+  test:
+    - test
+roles:
+  - id: admin
+    name: admin name
+    desc: A description
+    permissions: []
+`,
+      });
+      expect(() => loadIamDefinition('iam.yaml'))
+        .toThrow(`iam.yaml is not valid.
+0: instance.permission-prefix does not match pattern "^[a-z][-a-z]{2}$"
+`);
+    });
+
+    test('It throws for invalid permission resource', () => {
+      mockFs({
+        'iam.yaml': `
+permission-prefix: tst
+services:
+  - name: test
+    repository: actions
+permissions:
+  test1:
+    - test
+roles:
+  - id: admin
+    name: admin name
+    desc: A description
+    permissions: []
+`,
+      });
+      expect(() => loadIamDefinition('iam.yaml'))
+        .toThrow(`iam.yaml is not valid.
+0: instance.permissions does not match pattern "^[a-z][-a-z]{1,15}$"
+`);
+    });
+
+    test('It throws for invalid permission verb', () => {
       mockFs({
         'iam.yaml': `
 permission-prefix: tst
@@ -98,17 +144,17 @@ services:
     repository: actions
 permissions:
   test:
-    - create
+    - test1
 roles:
   - id: admin
-    name: admin bla
-    desc: Description that is to long
+    name: admin name
+    desc: A description
     permissions: []
 `,
       });
       expect(() => loadIamDefinition('iam.yaml'))
         .toThrow(`iam.yaml is not valid.
-0: instance.roles[0].desc does not meet maximum length of 20
+0: instance.permissions.test[0] does not match pattern "^[a-z][-a-z]{1,15}$"
 `);
     });
 

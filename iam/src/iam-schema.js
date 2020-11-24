@@ -6,7 +6,9 @@ module.exports = {
     },
     'permission-prefix': {
       type: 'string',
+      minLength: 3,
       maxLength: 3,
+      pattern: '^[a-z][-a-z]{2}$',
     },
     services: {
       type: 'array',
@@ -31,10 +33,17 @@ module.exports = {
       type: 'object',
       additionalProperties: {
         type: 'array',
-        additionalProperties: {
+        items: {
           type: 'string',
+          minLength: 1,
           maxLength: 16,
+          pattern: '^[a-z][-a-z]{1,15}$',
         },
+      },
+      propertyNames: {
+        minLength: 1,
+        maxLength: 16,
+        pattern: '^[a-z][-a-z]{1,15}$',
       },
     },
     roles: {
@@ -44,10 +53,13 @@ module.exports = {
         properties: {
           id: {
             type: 'string',
+            minLength: 1,
+            maxLength: 20,
+            pattern: '^[a-z][-a-z]{1,19}$',
           },
           desc: {
             type: 'string',
-            maxLength: 20,
+            maxLength: 200,
           },
           name: {
             type: 'string',
@@ -56,6 +68,7 @@ module.exports = {
             type: 'array',
             items: {
               type: 'string',
+              pattern: '^[a-z][-a-z]{1,15}\\.[a-z][-a-z]{1,15}$',
             },
           },
         },

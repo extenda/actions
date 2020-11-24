@@ -10,7 +10,7 @@
     "@actions/github": "^4.0.0",
     "axios": "^0.20.0",
     "fast-glob": "^3.2.4",
-    "jsonschema": "^1.2.5",
+    "jsonschema": "^1.4.0",
     "request": "^2.88.2",
     "yaml": "^1.8.2"
   },
