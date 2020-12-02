@@ -23,14 +23,12 @@ const { setupRoles } = require('../src/roles');
 const { setupSystem } = require('../src/create-system');
 
 describe('Configure iam', () => {
-  beforeEach(() => {
-    createNamespace.mockResolvedValueOnce(null);
-  });
   afterEach(() => {
     jest.resetAllMocks();
   });
 
   test('it can check system exists', async () => {
+    createNamespace.mockResolvedValueOnce(null);
     const iam = {
       'permission-prefix': 'test',
       services: [{
@@ -84,6 +82,8 @@ describe('Configure iam', () => {
   });
 
   test('it can create system if it doesn\'t exist', async () => {
+    createNamespace.mockResolvedValueOnce(null);
+
     setupGcloud.mockResolvedValueOnce('test-project');
     projectInfo.mockReturnValueOnce({ env: 'staging' });
     const iam = {
@@ -117,6 +117,8 @@ describe('Configure iam', () => {
   });
 
   test('it skips roles and permissions', async () => {
+    createNamespace.mockResolvedValueOnce(null);
+
     setupGcloud.mockResolvedValueOnce('test-project');
     projectInfo.mockReturnValueOnce({ env: 'staging' });
     const iam = {
@@ -151,6 +153,8 @@ describe('Configure iam', () => {
   });
 
   test('it handles owners and repository if system exists', async () => {
+    createNamespace.mockResolvedValueOnce(null);
+
     setupGcloud.mockResolvedValueOnce('test-project');
     projectInfo.mockReturnValueOnce({ env: 'staging' });
     const iam = {
@@ -191,6 +195,40 @@ describe('Configure iam', () => {
     expect(checkRepository).toHaveBeenCalledWith(
       resultBody, 'styra-token', 'https://extendaretail.styra.com', 'test-repo',
     );
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+
+  test('it wont create system if namespace doesn\'t exist', async () => {
+    createNamespace.mockRejectedValueOnce(new Error(`Namespace not found, please make sure your service is setup correctly!
+Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md#services for more information`));
+
+    setupGcloud.mockResolvedValueOnce('test-project');
+    projectInfo.mockReturnValueOnce({ env: 'staging' });
+    const iam = {
+      'permission-prefix': 'test',
+      services: [{
+        name: 'test-service',
+        repository: 'test-repo',
+      }],
+    };
+
+    const checkSystem = {
+      result: [
+        {
+          name: 'test-wrong-staging',
+        },
+      ],
+    };
+    const fullPermissions = {
+      'test.test.get': 'test desc',
+      'test.test.create': 'test1 desc',
+    };
+    request.mockImplementation((conf, cb) => cb(null, { statusCode: 404 },
+      JSON.stringify(checkSystem)));
+    setupPermissions.mockResolvedValueOnce(fullPermissions);
+
+    await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], false);
+    expect(setupSystem).toHaveBeenCalledTimes(0);
     expect(request).toHaveBeenCalledTimes(1);
   });
 });

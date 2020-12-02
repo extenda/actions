@@ -1,4 +1,3 @@
-const core = require('@actions/core');
 const exec = require('@actions/exec');
 const { setOpaInjectionLabels } = require('./set-namespace-label');
 
@@ -29,16 +28,8 @@ const createNamespace = async (projectId,
   opaEnabled,
   namespace) => {
   if (!await getNamespace(namespace)) {
-    core.info(`creating namespace ${namespace}`);
-    await exec.exec('kubectl', ['create', 'namespace', namespace]);
-
-    await exec.exec('kubectl', [
-      'annotate',
-      'serviceaccount',
-      `--namespace=${namespace}`,
-      'default',
-      `iam.gke.io/gcp-service-account=${namespace}@${projectId}.iam.gserviceaccount.com`,
-    ]);
+    throw new Error(`Namespace not found, please make sure your service is setup correctly!
+Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md#services for more information`);
   }
 
   if (opaEnabled !== 'skip') {
