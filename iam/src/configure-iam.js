@@ -66,7 +66,7 @@ const configureIAM = async (
           return createNamespace(projectId, true, namespace)
             .then(() => setupSystem(
               namespace, systemName, env, repository, styraToken, styraUrl, systemOwners,
-            ));
+            )).catch((err) => core.error(err));
         }
         core.info(`system '${systemName}' already exists in ${styraUrl}`);
         return checkOwners(system.id, styraToken, styraUrl, systemOwners)

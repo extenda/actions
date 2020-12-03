@@ -10790,7 +10790,6 @@ module.exports = {
 /***/ 8494:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const core = __webpack_require__(7199);
 const exec = __webpack_require__(8972);
 const { setOpaInjectionLabels } = __webpack_require__(5892);
 
@@ -10821,16 +10820,8 @@ const createNamespace = async (projectId,
   opaEnabled,
   namespace) => {
   if (!await getNamespace(namespace)) {
-    core.info(`creating namespace ${namespace}`);
-    await exec.exec('kubectl', ['create', 'namespace', namespace]);
-
-    await exec.exec('kubectl', [
-      'annotate',
-      'serviceaccount',
-      `--namespace=${namespace}`,
-      'default',
-      `iam.gke.io/gcp-service-account=${namespace}@${projectId}.iam.gserviceaccount.com`,
-    ]);
+    throw new Error(`Namespace not found, please make sure your service is setup correctly!
+Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md#services for more information`);
   }
 
   if (opaEnabled !== 'skip') {
