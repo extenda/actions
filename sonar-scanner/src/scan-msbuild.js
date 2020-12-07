@@ -40,7 +40,7 @@ const scanWithJavaHome = async (args) => {
   return exec.exec(scanner, args, { env });
 };
 
-const beginScan = async (hostUrl, mainBranch) => {
+const beginScan = async (hostUrl, mainBranch, customArgs = '') => {
   await core.group('Install dotnet-sonarscanner', async () => {
     await exec.exec('dotnet tool install -g dotnet-sonarscanner --version 4.10.0');
   });
@@ -55,7 +55,7 @@ const beginScan = async (hostUrl, mainBranch) => {
   const params = await createParams(hostUrl, mainBranch, true, extraParams);
 
   await core.group('Begin Sonar analysis', async () => {
-    await scanWithJavaHome(`begin ${params}`);
+    await scanWithJavaHome(`begin ${params} ${customArgs}`);
   });
 };
 
@@ -66,11 +66,11 @@ const finishScan = async (hostUrl) => {
   });
 };
 
-const scanMsBuild = async (hostUrl, mainBranch) => {
+const scanMsBuild = async (hostUrl, mainBranch, customArgs = '') => {
   if (!fs.existsSync(markerFile)) {
     // Create marker and begin scan
     fs.closeSync(fs.openSync(markerFile, 'w'));
-    await beginScan(hostUrl, mainBranch);
+    await beginScan(hostUrl, mainBranch, customArgs);
     return false;
   }
 
