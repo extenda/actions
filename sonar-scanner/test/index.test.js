@@ -107,11 +107,12 @@ describe('Sonar-Scanner Action', () => {
 
   test('It will use scanMsBuild for dotnet', async () => {
     mockInputs('https://sonarcloud.io', 'dotnet');
+    getInput.mockReturnValueOnce('');
     mockPullRequest(true);
     checkQualityGate.mockResolvedValueOnce(0);
     scanMsBuild.mockResolvedValueOnce(true);
     await action();
-    expect(scanMsBuild).toHaveBeenCalledWith('https://sonarcloud.io', 'master');
+    expect(scanMsBuild).toHaveBeenCalledWith('https://sonarcloud.io', 'master', '');
     expect(checkQualityGate).toHaveBeenCalled();
   });
 

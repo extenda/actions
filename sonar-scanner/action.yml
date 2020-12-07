@@ -20,6 +20,9 @@ inputs:
   maven-args:
     description: Custom maven scan command
     required: false
+  dotnet-args:
+    description: Custom Sonar arguments that will be appended to the dotnet scanner command
+    required: false
   github-token-secret-name:
     description: |
       The secret name from which to load the github-token. This is only used
