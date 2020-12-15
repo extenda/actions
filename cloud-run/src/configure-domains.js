@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
+const pLimit = require('p-limit');
 const gcloud = require('./gcloud-output');
 const authenticateKubeCtl = require('./kubectl-auth');
 const { addDnsRecord } = require('./dns-record');
@@ -98,10 +99,11 @@ const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectLa
     await authenticateKubeCtl(cluster);
 
     const promises = [];
+    const limit = pLimit(1);
     newDomains.forEach((domain) => {
-      promises.push(createDomainMapping(cluster, domain, name, namespace)
+      promises.push(limit(() => createDomainMapping(cluster, domain, name, namespace)
         .then((ipAddress) => addDnsRecord(dnsProjectLabel, domain, ipAddress))
-        .then(() => enableHttpRedirectOnDomain(domain, namespace)));
+        .then(() => enableHttpRedirectOnDomain(domain, namespace))));
     });
 
     await Promise.all(promises);

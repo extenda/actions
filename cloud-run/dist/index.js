@@ -11044,6 +11044,7 @@ module.exports = {
 
 const core = __webpack_require__(6341);
 const exec = __webpack_require__(2176);
+const pLimit = __webpack_require__(9053);
 const gcloud = __webpack_require__(3476);
 const authenticateKubeCtl = __webpack_require__(6104);
 const { addDnsRecord } = __webpack_require__(5017);
@@ -11142,10 +11143,11 @@ const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectLa
     await authenticateKubeCtl(cluster);
 
     const promises = [];
+    const limit = pLimit(1);
     newDomains.forEach((domain) => {
-      promises.push(createDomainMapping(cluster, domain, name, namespace)
+      promises.push(limit(() => createDomainMapping(cluster, domain, name, namespace)
         .then((ipAddress) => addDnsRecord(dnsProjectLabel, domain, ipAddress))
-        .then(() => enableHttpRedirectOnDomain(domain, namespace)));
+        .then(() => enableHttpRedirectOnDomain(domain, namespace))));
     });
 
     await Promise.all(promises);
@@ -11879,6 +11881,68 @@ const waitForRevision = async (
 };
 
 module.exports = waitForRevision;
+
+
+/***/ }),
+
+/***/ 9053:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+const pTry = __webpack_require__(8069);
+
+module.exports = concurrency => {
+	if (concurrency < 1) {
+		throw new TypeError('Expected `concurrency` to be a number from 1 and up');
+	}
+
+	const queue = [];
+	let activeCount = 0;
+
+	const next = () => {
+		activeCount--;
+
+		if (queue.length > 0) {
+			queue.shift()();
+		}
+	};
+
+	return fn => new Promise((resolve, reject) => {
+		const run = () => {
+			activeCount++;
+
+			pTry(fn).then(
+				val => {
+					resolve(val);
+					next();
+				},
+				err => {
+					reject(err);
+					next();
+				}
+			);
+		};
+
+		if (activeCount < concurrency) {
+			run();
+		} else {
+			queue.push(run);
+		}
+	});
+};
+
+
+/***/ }),
+
+/***/ 8069:
+/***/ ((module) => {
+
+"use strict";
+
+module.exports = cb => new Promise(resolve => {
+	resolve(cb());
+});
 
 
 /***/ }),
