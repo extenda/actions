@@ -22,6 +22,14 @@ Deployment failed
 ERROR: (gcloud.run.deploy) Ingress reconciliation failed
 `;
 
+const GCLOUD_ERROR_MSG_READY_REVISIONS = `
+Deploying container to Cloud Run for Anthos service [xxxxxxx] in namespace [default] of cluster [k8s-cluster]
+Deploying...
+Creating Revision.................failed
+Deployment failed
+ERROR: (gcloud.run.deploy) Configuration "test-service" does not have any ready Revision.
+`;
+
 const GCLOUD_ERROR_MSG_IMAGE_FETCH = `
 Deploying container to Cloud Run for Anthos service [xxxxxxx] in namespace [default] of cluster [k8s-cluster]
 Deploying...
@@ -312,6 +320,51 @@ describe('Wait for revision', () => {
       { status: 1, output: GCLOUD_ERROR_MSG_RECONCILIATION },
       GCLOUD_ARGS,
       'service-name',
+      clusterInput,
+      10,
+      100,
+    );
+    expect(response).toEqual(0);
+    expect(exec.exec).toHaveBeenCalled();
+  });
+
+  test('It waits on ready revisions', async () => {
+    const revisionStatus = {
+      status: {
+        conditions: [
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            severity: 'Info',
+            status: 'True',
+            type: 'Active',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'ContainerHealthy',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'Ready',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'ResourcesAvailable',
+          },
+        ],
+      },
+    };
+    getLatestRevision.mockResolvedValueOnce('service-revision');
+    exec.exec.mockImplementationOnce((cmd, args, opts) => {
+      opts.listeners.stdout(Buffer.from(JSON.stringify(revisionStatus), 'utf8'));
+      return Promise.resolve(0);
+    });
+    const response = await waitForRevision(
+      { status: 1, output: GCLOUD_ERROR_MSG_READY_REVISIONS },
+      GCLOUD_ARGS,
+      'test-service',
       clusterInput,
       10,
       100,
