@@ -3,16 +3,22 @@ const yaml = require('yaml');
 const patchDeploymentYaml = (service, deploymentYaml) => {
   const deployment = yaml.parse(deploymentYaml);
 
-  deployment.spec.replicas = service.replicas;
+  const {
+    requests,
+    limits,
+    replicas = 1,
+  } = service;
 
-  if (service.requests) {
-    deployment.spec.template.spec.containers[0].resources.requests.cpu = service.requests.cpu;
-    deployment.spec.template.spec.containers[0].resources.requests.memory = service.requests.memory;
+  deployment.spec.replicas = replicas;
+
+  if (requests) {
+    deployment.spec.template.spec.containers[0].resources.requests.cpu = requests.cpu;
+    deployment.spec.template.spec.containers[0].resources.requests.memory = requests.memory;
   }
 
-  if (service.limits) {
-    deployment.spec.template.spec.containers[0].resources.limits.cpu = service.limits.cpu;
-    deployment.spec.template.spec.containers[0].resources.limits.memory = service.limits.memory;
+  if (limits) {
+    deployment.spec.template.spec.containers[0].resources.limits.cpu = limits.cpu;
+    deployment.spec.template.spec.containers[0].resources.limits.memory = limits.memory;
   }
 
   return yaml.stringify(deployment);
