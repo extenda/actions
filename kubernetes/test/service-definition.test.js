@@ -30,7 +30,6 @@ storage:
       mockFs({
         'kubernetes.yaml': `
 name: kubernetes
-cpu: 100m
 `,
       });
       const serviceDef = loadServiceDefinition('kubernetes.yaml', kubernetesSchema);
@@ -39,11 +38,35 @@ cpu: 100m
       }));
     });
 
+    test('It loads cpu and memory definitions', () => {
+      mockFs({
+        'kubernetes.yaml': `
+name: kubernetes
+requests:
+  memory: 128Mi
+  cpu: 100m
+limits:
+  memory: 256Mi
+  cpu: 300m
+`,
+      });
+      const serviceDef = loadServiceDefinition('kubernetes.yaml', kubernetesSchema);
+      expect(serviceDef).toMatchObject({
+        requests: {
+          cpu: '100m',
+          memory: '128Mi',
+        },
+        limits: {
+          cpu: '300m',
+          memory: '256Mi',
+        },
+      });
+    });
+
     test('It loads ports', () => {
       mockFs({
         'kubernetes.yaml': `
 name: kubernetes
-cpu: 100m
 ports:
   - protocol: TCP
     port: 80

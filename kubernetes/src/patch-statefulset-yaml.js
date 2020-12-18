@@ -5,8 +5,6 @@ const patchStatefulSetYaml = (service, containerYaml) => {
 
   const {
     replicas = 1,
-    cpu = '100m',
-    memory = '256Mi',
     storage: {
       volume = '1Gi',
       mountPath = '/data/storage',
@@ -14,12 +12,18 @@ const patchStatefulSetYaml = (service, containerYaml) => {
   } = service;
 
   statefulSet.spec.replicas = replicas;
-  statefulSet.spec.template.spec.containers[0].resources.requests.cpu = cpu;
-  statefulSet.spec.template.spec.containers[0].resources.limits.cpu = cpu;
-  statefulSet.spec.template.spec.containers[0].resources.requests.memory = memory;
-  statefulSet.spec.template.spec.containers[0].resources.limits.memory = memory;
   statefulSet.spec.template.spec.containers[0].volumeMounts[0].mountPath = mountPath;
   statefulSet.spec.volumeClaimTemplates[0].spec.resources.requests.storage = volume;
+
+  if (service.requests) {
+    statefulSet.spec.template.spec.containers[0].resources.requests.cpu = service.requests.cpu;
+    statefulSet.spec.template.spec.containers[0].resources.requests.memory = service.requests.memory;
+  }
+
+  if (service.limits) {
+    statefulSet.spec.template.spec.containers[0].resources.limits.cpu = service.limits.cpu;
+    statefulSet.spec.template.spec.containers[0].resources.limits.memory = service.limits.memory;
+  }
 
   return yaml.stringify(statefulSet);
 };

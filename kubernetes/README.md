@@ -26,9 +26,12 @@ properties are required and not.
 | Property                   | Description                                                                                                                                                       | Required |  Default Value  |
 |:---------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------|:----------------|
 | `name`                     | The service name.                                                                                                                                                 | Yes      |                 |
-| `memory`                   | Set a memory limit, for example `256Mi`, `512Mi` or `1Gi`.                                                                                                        | No       | `256Mi`         |
-| `cpu`                      | The CPU limit for the service, for example `200m`.                                                                                                                | No       | `100m`          |
+| `requests.memory`          | Set a memory requested, for example `256Mi`, `512Mi` or `1Gi`.                                                                                                    | No       | `256Mi`         |
+| `requests.cpu`             | The CPU requested for the service, for example `200m`.                                                                                                            | No       | `100m`          |
+| `limits.memory`            | Set a memory limit, for example `256Mi`, `512Mi` or `1Gi`.                                                                                                        | No       | `256Mi`         |
+| `limits.cpu`               | The CPU limit for the service, for example `200m`.                                                                                                                | No       | `100m`          |
 | `replicas`                 | The number of pod instances to run.                                                                                                                               | No       | `1`             |
+| `ports`                    | The array of port mappings. If no ports specified, the service is created with ClusterIP:None                                                                     | No       |                 |
 | `storage.volume`           | The size of the volume attached to pod.                                                                                                                           | No       | `1Gi`           |
 | `storage.mountPath`        | The path volume will be mounted under.                                                                                                                            | No       | `/data/storage` |
 | `environment`<top>\*</top> | A map of environment variables. The values can be Secret Manager URLs on the form `sm://*/my-secret` where `*` will be replaced by the project ID at deploy time. | No       | -               |
@@ -43,12 +46,31 @@ properties are required and not.
 This example defines a service.
 ```yaml
 name: my-kubernetes-service
-memory: 256Mi
-cpu: 300m
+requests:
+  memory: 256Mi
+  cpu: 100m
+limits:
+  memory: 512Mi
+  cpu: 300m
 storage:
   volume: 1Gi
   mountPath: /data/storage
 environment:
   DEBUG_LOG: 'false'
   SECRET_NAME: sm://*/secret-name
+```
+
+This example defines a service with port 80 opened for communications inside same cluster
+```yaml
+name: my-kubernetes-service
+requests:
+  memory: 256Mi
+  cpu: 100m
+limits:
+  memory: 512Mi
+  cpu: 300m
+ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
 ```
