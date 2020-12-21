@@ -1,9 +1,6 @@
 module.exports = {
   type: 'object',
-  properties: {
-    name: {
-      type: 'string',
-    },
+  definitions: {
     memory: {
       type: 'string',
       pattern: '^[0-9]+(M|G)i',
@@ -15,6 +12,27 @@ module.exports = {
       description: 'Kubernetes CPU request in millicpu',
       pattern: '^[0-9]{1,4}m$',
       default: '100m',
+    },
+  },
+  properties: {
+    name: {
+      type: 'string',
+    },
+    requests: {
+      type: 'object',
+      properties: {
+        memory: { $ref: '#/definitions/memory' },
+        cpu: { $ref: '#/definitions/cpu' },
+      },
+      additionalProperties: false,
+    },
+    limits: {
+      type: 'object',
+      properties: {
+        memory: { $ref: '#/definitions/memory' },
+        cpu: { $ref: '#/definitions/cpu' },
+      },
+      additionalProperties: false,
     },
     replicas: {
       type: 'integer',

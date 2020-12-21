@@ -19269,10 +19269,7 @@ module.exports = action;
 
 module.exports = {
   type: 'object',
-  properties: {
-    name: {
-      type: 'string',
-    },
+  definitions: {
     memory: {
       type: 'string',
       pattern: '^[0-9]+(M|G)i',
@@ -19284,6 +19281,27 @@ module.exports = {
       description: 'Kubernetes CPU request in millicpu',
       pattern: '^[0-9]{1,4}m$',
       default: '100m',
+    },
+  },
+  properties: {
+    name: {
+      type: 'string',
+    },
+    requests: {
+      type: 'object',
+      properties: {
+        memory: { $ref: '#/definitions/memory' },
+        cpu: { $ref: '#/definitions/cpu' },
+      },
+      additionalProperties: false,
+    },
+    limits: {
+      type: 'object',
+      properties: {
+        memory: { $ref: '#/definitions/memory' },
+        cpu: { $ref: '#/definitions/cpu' },
+      },
+      additionalProperties: false,
     },
     replicas: {
       type: 'integer',
@@ -19396,11 +19414,23 @@ const yaml = __webpack_require__(5024);
 const patchDeploymentYaml = (service, deploymentYaml) => {
   const deployment = yaml.parse(deploymentYaml);
 
-  deployment.spec.replicas = service.replicas;
-  deployment.spec.template.spec.containers[0].resources.requests.cpu = service.cpu;
-  deployment.spec.template.spec.containers[0].resources.limits.cpu = service.cpu;
-  deployment.spec.template.spec.containers[0].resources.requests.memory = service.memory;
-  deployment.spec.template.spec.containers[0].resources.limits.memory = service.memory;
+  const {
+    requests,
+    limits,
+    replicas = 1,
+  } = service;
+
+  deployment.spec.replicas = replicas;
+
+  if (requests) {
+    deployment.spec.template.spec.containers[0].resources.requests.cpu = requests.cpu;
+    deployment.spec.template.spec.containers[0].resources.requests.memory = requests.memory;
+  }
+
+  if (limits) {
+    deployment.spec.template.spec.containers[0].resources.limits.cpu = limits.cpu;
+    deployment.spec.template.spec.containers[0].resources.limits.memory = limits.memory;
+  }
 
   return yaml.stringify(deployment);
 };
@@ -19441,9 +19471,9 @@ const patchStatefulSetYaml = (service, containerYaml) => {
   const statefulSet = yaml.parse(containerYaml);
 
   const {
+    requests,
+    limits,
     replicas = 1,
-    cpu = '100m',
-    memory = '256Mi',
     storage: {
       volume = '1Gi',
       mountPath = '/data/storage',
@@ -19451,12 +19481,18 @@ const patchStatefulSetYaml = (service, containerYaml) => {
   } = service;
 
   statefulSet.spec.replicas = replicas;
-  statefulSet.spec.template.spec.containers[0].resources.requests.cpu = cpu;
-  statefulSet.spec.template.spec.containers[0].resources.limits.cpu = cpu;
-  statefulSet.spec.template.spec.containers[0].resources.requests.memory = memory;
-  statefulSet.spec.template.spec.containers[0].resources.limits.memory = memory;
   statefulSet.spec.template.spec.containers[0].volumeMounts[0].mountPath = mountPath;
   statefulSet.spec.volumeClaimTemplates[0].spec.resources.requests.storage = volume;
+
+  if (requests) {
+    statefulSet.spec.template.spec.containers[0].resources.requests.cpu = requests.cpu;
+    statefulSet.spec.template.spec.containers[0].resources.requests.memory = requests.memory;
+  }
+
+  if (limits) {
+    statefulSet.spec.template.spec.containers[0].resources.limits.cpu = limits.cpu;
+    statefulSet.spec.template.spec.containers[0].resources.limits.memory = limits.memory;
+  }
 
   return yaml.stringify(statefulSet);
 };
