@@ -69,9 +69,8 @@ describe('Generate Terraform plan output', () => {
     expect(exec.exec.mock.calls[1][2]).toMatchObject({
       cwd: '/work/moduleB/.terragrunt-cache/UUID1/UUID2',
     });
-    // expect(fs.exists('/work/moduleA/plan.out.changes'));
     expect(fs.existsSync('/work/moduleA/plan.out.changes')).toEqual(true);
-    expect(fs.existsSync('/work/moduleB/.terragrunt-cache/UUID1/UUID2/plan.out.changes')).toEqual(true);
+    expect(fs.existsSync('/work/moduleB/plan.out.changes')).toEqual(true);
   });
 
   test('It can process a single plan file', async () => {
@@ -108,7 +107,7 @@ describe('Generate Terraform plan output', () => {
       },
     ]);
     expect(fs.existsSync('/work/moduleA/plan.out.changes')).toEqual(false);
-    expect(fs.existsSync('/work/moduleB/.terragrunt-cache/UUID1/UUID2/plan.out.changes')).toEqual(true);
+    expect(fs.existsSync('/work/moduleB/plan.out.changes')).toEqual(true);
   });
 
   test('It will filter changing ignored objects', async () => {
