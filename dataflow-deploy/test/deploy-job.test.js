@@ -28,8 +28,9 @@ id: jobId
       'clan-resources',
       '4',
       '1',
+      'cc=640',
     );
-    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledTimes(2);
   });
 
   test('deploy flex-template job without parameters', async () => {
@@ -53,8 +54,9 @@ id: jobId
       'clan-resources',
       '',
       '',
+      'cc=640',
     );
-    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledTimes(2);
   });
 
   test('deploy job', async () => {
@@ -78,7 +80,8 @@ id: jobId
       'clan-resources',
       '',
       '',
+      'cc=640',
     );
-    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledTimes(2);
   });
 });
