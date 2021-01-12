@@ -43,19 +43,20 @@ will be processed independent of others.
 The YAML syntax is formally defined with [JSON Schema](src/iam-schema.js). The following table explains what
 properties are required and not.
 
-| Property                   | Description                                                                                                                                                       | Required | Default Value |
-|:---------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------|:--------------|
-| `name`                     | The name of the service system | Yes                                   
-| `permission-prefix`                     | The permission prefix, this will be prefixed to every permission and roles id.            | Yes                         
-| `services`                     | A list of services that need a DAS system                                     
-| `services.name`                     | The service name of the system to be created                                                                                                                                                 | Yes      |               |
-| `services.repository`                   | The description of the service                                                                                                      | Yes      |               |
-| `permissions`                      | An object containing the permissions for this service.                             | No      |               |
-| `roles`              | An list of roles that should exist for this service                                        | No       |         |
-| `roles.id`            | The role id                                                          | No       |          |
-| `roles.name`            | The role name                                                          | No       |          |
-| `roles.desc` | The description of the role, (max 20 characters)       | No             |
-| `roles.permissions`             | An list of permissions this role should contain                                                                                 | No       |       |
+| Property                   | Description                                                                                      | Required |
+|:---------------------------|:-------------------------------------------------------------------------------------------------|:---------|
+| `name`                     | The name of the service system                                                                   | No      |
+| `permission-prefix`        | The permission prefix, this will be prefixed to every permission and roles id. ([a-z][-a-z]{2})  | Yes      |
+| `services`                 | A list of services that need a DAS system                                                        | Yes      |
+| `services.name`            | The service name of the system to be created                                                     | Yes      |
+| `services.repository`      | The description of the service                                                                   | Yes      |
+| `permissions`              | An object containing the permissions for this service. (keys [a-z][-a-z]{1,15})                  | Yes      |
+| `prmissions.<resource>`    | Array containing the verbs for the `<resource>`. (items [a-z][-a-z]{1,15})                       | Yes      |
+| `roles`                    | An list of roles that should exist for this service                                              | No       |
+| `roles.id`                 | The role id ([a-z][-a-z]{1,19})                                                                  | Yes      |
+| `roles.name`               | The role name                                                                                    | Yes      |
+| `roles.desc`               | The description of the role, (max 200 characters)                                                | Yes      |
+| `roles.permissions`        | An list of permissions this role should contain (items ^[a-z][-a-z]{1,15}\.[a-z][-a-z]{1,15}$)   |  Yes      |
 
 ### YAML Examples
 

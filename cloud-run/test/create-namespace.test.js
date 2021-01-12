@@ -27,14 +27,14 @@ describe('Create namespace', () => {
     mockFs.restore();
   });
 
-  test('It creates namespace if non exists', async () => {
+  test('It throws error if namespace does not exist', async () => {
     exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput('Error from server (NotFound): namespaces "testns" not found', opts))
       .mockResolvedValue(0);
-    await createNamespace('clan_project', true, 'testns');
+    await expect(createNamespace('clan_project', true, 'testns')).rejects.toEqual(new Error(`Namespace not found, please make sure your service is setup correctly!
+Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md#services for more information`));
 
-    expect(exec.exec).toHaveBeenCalledTimes(5);
+    expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec.mock.calls[0][1]).toEqual(['get', 'namespace', 'testns']);
-    expect(exec.exec).toHaveBeenNthCalledWith(2, 'kubectl', ['create', 'namespace', 'testns']);
   });
 
   test('It fails on unknown error', async () => {

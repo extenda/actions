@@ -11044,6 +11044,7 @@ module.exports = {
 
 const core = __webpack_require__(6341);
 const exec = __webpack_require__(2176);
+const pLimit = __webpack_require__(9053);
 const gcloud = __webpack_require__(3476);
 const authenticateKubeCtl = __webpack_require__(6104);
 const { addDnsRecord } = __webpack_require__(5017);
@@ -11142,10 +11143,11 @@ const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectLa
     await authenticateKubeCtl(cluster);
 
     const promises = [];
+    const limit = pLimit(1);
     newDomains.forEach((domain) => {
-      promises.push(createDomainMapping(cluster, domain, name, namespace)
+      promises.push(limit(() => createDomainMapping(cluster, domain, name, namespace)
         .then((ipAddress) => addDnsRecord(dnsProjectLabel, domain, ipAddress))
-        .then(() => enableHttpRedirectOnDomain(domain, namespace)));
+        .then(() => enableHttpRedirectOnDomain(domain, namespace))));
     });
 
     await Promise.all(promises);
@@ -11163,7 +11165,6 @@ module.exports = configureDomains;
 /***/ 4721:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const core = __webpack_require__(6341);
 const exec = __webpack_require__(2176);
 const { setOpaInjectionLabels } = __webpack_require__(7186);
 
@@ -11194,16 +11195,8 @@ const createNamespace = async (projectId,
   opaEnabled,
   namespace) => {
   if (!await getNamespace(namespace)) {
-    core.info(`creating namespace ${namespace}`);
-    await exec.exec('kubectl', ['create', 'namespace', namespace]);
-
-    await exec.exec('kubectl', [
-      'annotate',
-      'serviceaccount',
-      `--namespace=${namespace}`,
-      'default',
-      `iam.gke.io/gcp-service-account=${namespace}@${projectId}.iam.gserviceaccount.com`,
-    ]);
+    throw new Error(`Namespace not found, please make sure your service is setup correctly!
+Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md#services for more information`);
   }
 
   if (opaEnabled !== 'skip') {
@@ -11754,6 +11747,7 @@ const findRevision = async (output, namespace, cluster) => {
     /ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: 0\/\d+ nodes/,
     /ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: Unable to fetch image "([^"]+)": failed to resolve image to digest: Get "([^"]+)": context deadline exceeded./,
     /ERROR: \(gcloud\.run\.deploy\) Ingress reconciliation failed/,
+    new RegExp(`ERROR: \\(gcloud\\.run\\.deploy\\) Configuration "${namespace}" does not have any ready Revision.`),
   ];
   let match;
   failureMatches.forEach((failureMatch) => {
@@ -11888,6 +11882,68 @@ const waitForRevision = async (
 };
 
 module.exports = waitForRevision;
+
+
+/***/ }),
+
+/***/ 9053:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+const pTry = __webpack_require__(8069);
+
+module.exports = concurrency => {
+	if (concurrency < 1) {
+		throw new TypeError('Expected `concurrency` to be a number from 1 and up');
+	}
+
+	const queue = [];
+	let activeCount = 0;
+
+	const next = () => {
+		activeCount--;
+
+		if (queue.length > 0) {
+			queue.shift()();
+		}
+	};
+
+	return fn => new Promise((resolve, reject) => {
+		const run = () => {
+			activeCount++;
+
+			pTry(fn).then(
+				val => {
+					resolve(val);
+					next();
+				},
+				err => {
+					reject(err);
+					next();
+				}
+			);
+		};
+
+		if (activeCount < concurrency) {
+			run();
+		} else {
+			queue.push(run);
+		}
+	});
+};
+
+
+/***/ }),
+
+/***/ 8069:
+/***/ ((module) => {
+
+"use strict";
+
+module.exports = cb => new Promise(resolve => {
+	resolve(cb());
+});
 
 
 /***/ }),

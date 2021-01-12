@@ -3,8 +3,14 @@ const patchStatefulSetYaml = require('../src/patch-statefulset-yaml');
 
 describe('Patches statefulSet.yml', () => {
   const service = {
-    cpu: '400m',
-    memory: '1024Mi',
+    requests: {
+      cpu: '200m',
+      memory: '512Mi',
+    },
+    limits: {
+      cpu: '400m',
+      memory: '1024Mi',
+    },
     replicas: 3,
     storage: {
       volume: '1Gi',
@@ -92,6 +98,38 @@ spec:
     }));
   });
 
+  test('It leaves default cpu and memory count', () => {
+    const serviceObj = {
+      storage: {
+        volume: '1Gi',
+        mountPath: '/data/new_path',
+      },
+    };
+    const output = yaml.parse(patchStatefulSetYaml(serviceObj, statefulSetYaml));
+    expect(output).toMatchObject(expect.objectContaining({
+      spec: expect.objectContaining({
+        template: expect.objectContaining({
+          spec: expect.objectContaining({
+            containers: expect.arrayContaining([
+              expect.objectContaining({
+                resources: expect.objectContaining({
+                  requests: expect.objectContaining({
+                    cpu: '100m',
+                    memory: '256Mi',
+                  }),
+                  limits: expect.objectContaining({
+                    cpu: '100m',
+                    memory: '256Mi',
+                  }),
+                }),
+              }),
+            ]),
+          }),
+        }),
+      }),
+    }));
+  });
+
   test('It patches cpu and memory count', () => {
     const output = yaml.parse(patchStatefulSetYaml(service, statefulSetYaml));
     expect(output).toMatchObject(expect.objectContaining({
@@ -102,8 +140,8 @@ spec:
               expect.objectContaining({
                 resources: expect.objectContaining({
                   requests: expect.objectContaining({
-                    cpu: '400m',
-                    memory: '1024Mi',
+                    cpu: '200m',
+                    memory: '512Mi',
                   }),
                   limits: expect.objectContaining({
                     cpu: '400m',
