@@ -1,4 +1,5 @@
 const exec = require('@actions/exec');
+const projectLabels = require('./project-labels');
 
 const deployJob = async (
   newJobName,
@@ -42,6 +43,7 @@ const deployJob = async (
   args.push(`--project=${projectId}`);
   args.push(`--network=${network}`);
   args.push(`--subnetwork=${subnetwork}`);
+  args.push(`--additional-user-labels=cc=${projectLabels(projectId)}`);
 
   let jobId = '';
   await exec.exec('gcloud', args, {
