@@ -11287,7 +11287,7 @@ const createEnvironmentArgs = (environment, projectId) => {
     args.push(`${name}=${value}`);
   });
   args.push(`SERVICE_PROJECT_ID=${projectId}`);
-  args.push(`SERVICE_ENVIRONMENT=${projectId.split('-')[1]}`);
+  args.push(`SERVICE_ENVIRONMENT=${projectId.includes('-staging-') ? 'staging' : 'prod'}`);
   return args.join(',');
 };
 
