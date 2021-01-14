@@ -35,7 +35,7 @@ describe('Scan MSBuild', () => {
     expect(output).toEqual(false);
     expect(fs.existsSync(markerFile)).toEqual(true);
     expect(exec.exec.mock.calls.length).toEqual(2);
-    expect(exec.exec.mock.calls[0][0]).toEqual('dotnet tool install -g dotnet-sonarscanner --version 4.10.0');
+    expect(exec.exec.mock.calls[0][0]).toEqual('dotnet tool install -g dotnet-sonarscanner --version 5.0.4');
     expect(exec.exec.mock.calls[1][0]).toContain('dotnet-sonarscanner');
     expect(exec.exec.mock.calls[1][0]).toContain('begin');
   });
