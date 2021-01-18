@@ -33145,6 +33145,28 @@ const filterIgnored = (outputs, ignoredRegexp) => outputs.filter(
 
 const sortModulePaths = (outputs) => outputs.sort((a, b) => a.module.localeCompare(b.module));
 
+
+const modulePath = (plan) => {
+  let planDir = plan;
+
+  const terragruntCache = fg.sync(
+    `${path.dirname(plan)}/**/.terragrunt-cache`,
+    { dot: true, onlyDirectories: true },
+  );
+
+  if (terragruntCache.length > 0) {
+    [planDir] = terragruntCache;
+  }
+
+  const paths = planDir.split(path.sep);
+  const index = paths.findIndex((e) => e === '.terragrunt-cache');
+  if (index > 0) {
+    return paths.slice(0, index).join(path.sep);
+  }
+  return path.dirname(plan);
+};
+
+
 const moduleName = (plan, workingDirectory) => {
   let planDir = plan;
 
@@ -33185,7 +33207,7 @@ const generateOutputs = async (workingDirectory, planFile, maxThreads, ignoredRe
     .then(sortModulePaths)
     .then((changed) => {
       changed.forEach(({ plan }) => {
-        const planwWithChanges = `${plan}.changes`;
+        const planwWithChanges = path.join(modulePath(plan), `${planFile}.changes`);
         fs.copyFile(plan, planwWithChanges, () => {
           core.info(`Save plan with changes to ${planwWithChanges}`);
         });
