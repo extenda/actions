@@ -30,7 +30,7 @@ describe('Run Deploy', () => {
 
   test('It can deploy to managed Cloud Run', async () => {
     exec.exec.mockResolvedValueOnce(0);
-    setupGcloud.mockResolvedValueOnce('test-project');
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
     const service = {
       name: 'my-service',
       memory: '256Mi',
@@ -45,21 +45,21 @@ describe('Run Deploy', () => {
     const returnValue = await runDeploy(
       serviceAccountKey,
       service,
-      'gcr.io/test-project/my-service:tag',
+      'gcr.io/test-staging-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
       'run', 'deploy', 'my-service',
-      '--image=gcr.io/test-project/my-service:tag',
-      '--project=test-project',
+      '--image=gcr.io/test-staging-project/my-service:tag',
+      '--project=test-staging-project',
       '--memory=256Mi',
       '--concurrency=80',
       '--max-instances=default',
-      '--set-env-vars=SERVICE_PROJECT_ID=test-project',
-      '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
-      '--service-account=cloudrun-runtime@test-project.iam.gserviceaccount.com',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
+      '--service-account=cloudrun-runtime@test-staging-project.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
       '--region=eu-west1',
@@ -69,7 +69,7 @@ describe('Run Deploy', () => {
 
   test('It parse projectId and set labels', async () => {
     exec.exec.mockResolvedValueOnce(0);
-    setupGcloud.mockResolvedValueOnce('test-project-staging-ab12');
+    setupGcloud.mockResolvedValueOnce('test-staging-project-staging-ab12');
     const service = {
       name: 'my-service',
       memory: '256Mi',
@@ -84,21 +84,21 @@ describe('Run Deploy', () => {
     const returnValue = await runDeploy(
       serviceAccountKey,
       service,
-      'gcr.io/test-project-staging-ab12/my-service:tag',
+      'gcr.io/test-staging-project-staging-ab12/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
       'run', 'deploy', 'my-service',
-      '--image=gcr.io/test-project-staging-ab12/my-service:tag',
-      '--project=test-project-staging-ab12',
+      '--image=gcr.io/test-staging-project-staging-ab12/my-service:tag',
+      '--project=test-staging-project-staging-ab12',
       '--memory=256Mi',
       '--concurrency=80',
       '--max-instances=default',
-      '--set-env-vars=SERVICE_PROJECT_ID=test-project-staging-ab12',
-      '--labels=service_project_id=test-project-staging-ab12,service_project=test-project,service_env=staging',
-      '--service-account=cloudrun-runtime@test-project-staging-ab12.iam.gserviceaccount.com',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project-staging-ab12,SERVICE_ENVIRONMENT=staging',
+      '--labels=service_project_id=test-staging-project-staging-ab12,service_project=test-staging-project,service_env=staging',
+      '--service-account=cloudrun-runtime@test-staging-project-staging-ab12.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
       '--region=eu-west1',
@@ -109,12 +109,12 @@ describe('Run Deploy', () => {
   test('It can deploy with enabled http/2', async () => {
     exec.exec.mockResolvedValueOnce(0);
     getClusterInfo.mockResolvedValueOnce({
-      project: 'test-project',
+      project: 'test-staging-project',
       cluster: 'k8s-cluster',
       clusterLocation: 'europe-west1',
-      uri: 'projects/test-project/zones/europe-west1/clusters/k8s-cluster',
+      uri: 'projects/test-staging-project/zones/europe-west1/clusters/k8s-cluster',
     });
-    setupGcloud.mockResolvedValueOnce('test-project');
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
     const service = {
       name: 'my-service',
       memory: '256Mi',
@@ -132,7 +132,7 @@ describe('Run Deploy', () => {
     const returnValue = await runDeploy(
       serviceAccountKey,
       service,
-      'gcr.io/test-project/my-service:tag',
+      'gcr.io/test-staging-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--use-http2']));
@@ -140,7 +140,7 @@ describe('Run Deploy', () => {
 
   test('It can deploy with verbose logging', async () => {
     exec.exec.mockResolvedValueOnce(0);
-    setupGcloud.mockResolvedValueOnce('test-project');
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
     const service = {
       name: 'my-service',
       memory: '256Mi',
@@ -155,7 +155,7 @@ describe('Run Deploy', () => {
     const returnValue = await runDeploy(
       serviceAccountKey,
       service,
-      'gcr.io/test-project/my-service:tag',
+      'gcr.io/test-staging-project/my-service:tag',
       'policy.rego',
       true,
     );
@@ -165,7 +165,7 @@ describe('Run Deploy', () => {
 
   test('It can deploy with environment', async () => {
     exec.exec.mockResolvedValueOnce(0);
-    setupGcloud.mockResolvedValueOnce('test-project');
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
     process.env.GITHUB_SHA = '382aee2'; // Not tagged
     const service = {
       name: 'my-service',
@@ -186,18 +186,18 @@ describe('Run Deploy', () => {
     await runDeploy(
       serviceAccountKey,
       service,
-      'gcr.io/test-project/my-service:tag',
+      'gcr.io/test-staging-project/my-service:tag',
     );
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
       'run', 'deploy', 'my-service',
-      '--image=gcr.io/test-project/my-service:tag',
-      '--project=test-project',
+      '--image=gcr.io/test-staging-project/my-service:tag',
+      '--project=test-staging-project',
       '--memory=256Mi',
       '--concurrency=80',
       '--max-instances=default',
-      '--set-env-vars=KEY1=value,KEY2=sm://test-project/my-secret,SERVICE_PROJECT_ID=test-project',
-      '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
-      '--service-account=cloudrun-runtime@test-project.iam.gserviceaccount.com',
+      '--set-env-vars=KEY1=value,KEY2=sm://test-staging-project/my-secret,SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
+      '--service-account=cloudrun-runtime@test-staging-project.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
       '--region=eu-west1',
@@ -207,7 +207,7 @@ describe('Run Deploy', () => {
 
   test('It can deploy authenticated', async () => {
     exec.exec.mockResolvedValueOnce(0);
-    setupGcloud.mockResolvedValueOnce('test-project');
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
     const service = {
       name: 'my-service',
       memory: '256Mi',
@@ -222,7 +222,7 @@ describe('Run Deploy', () => {
     const returnValue = await runDeploy(
       serviceAccountKey,
       service,
-      'gcr.io/test-project/my-service:tag',
+      'gcr.io/test-staging-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.not.arrayContaining(['--allow-unauthenticated']));
@@ -231,7 +231,7 @@ describe('Run Deploy', () => {
 
   test('It can deploy with sql-instances', async () => {
     exec.exec.mockResolvedValueOnce(0);
-    setupGcloud.mockResolvedValueOnce('test-project');
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
     const service = {
       name: 'my-service',
       memory: '256Mi',
@@ -247,7 +247,7 @@ describe('Run Deploy', () => {
     const returnValue = await runDeploy(
       serviceAccountKey,
       service,
-      'gcr.io/test-project/my-service:tag',
+      'gcr.io/test-staging-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--set-cloudsql-instances=MY-INSTANCE']));
@@ -256,7 +256,7 @@ describe('Run Deploy', () => {
 
   test('It can deploy with --clear-sql-instances', async () => {
     exec.exec.mockResolvedValueOnce(0);
-    setupGcloud.mockResolvedValueOnce('test-project');
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
     process.env.GITHUB_SHA = '382aee2'; // Not tagged
     const service = {
       name: 'my-service',
@@ -273,7 +273,7 @@ describe('Run Deploy', () => {
     await runDeploy(
       serviceAccountKey,
       service,
-      'gcr.io/test-project/my-service:tag',
+      'gcr.io/test-staging-project/my-service:tag',
     );
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--clear-cloudsql-instances']));
   });
@@ -281,12 +281,12 @@ describe('Run Deploy', () => {
   test('It can deploy to Cloud Run on GKE', async () => {
     exec.exec.mockResolvedValueOnce(0);
     getClusterInfo.mockResolvedValueOnce({
-      project: 'test-project',
+      project: 'test-staging-project',
       cluster: 'k8s-cluster',
       clusterLocation: 'europe-west1',
-      uri: 'projects/test-project/zones/europe-west1/clusters/k8s-cluster',
+      uri: 'projects/test-staging-project/zones/europe-west1/clusters/k8s-cluster',
     });
-    setupGcloud.mockResolvedValueOnce('test-project');
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
     const service = {
       name: 'my-service',
       memory: '256Mi',
@@ -303,7 +303,7 @@ describe('Run Deploy', () => {
     const returnValue = await runDeploy(
       serviceAccountKey,
       service,
-      'gcr.io/test-project/my-service:tag',
+      'gcr.io/test-staging-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(getClusterInfo).toHaveBeenCalled();
@@ -311,17 +311,17 @@ describe('Run Deploy', () => {
     expect(exec.exec).toHaveBeenCalledTimes(2);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
       'run', 'deploy', 'my-service',
-      '--image=gcr.io/test-project/my-service:tag',
-      '--project=test-project',
+      '--image=gcr.io/test-staging-project/my-service:tag',
+      '--project=test-staging-project',
       '--memory=256Mi',
       '--concurrency=32',
       '--max-instances=default',
-      '--set-env-vars=SERVICE_PROJECT_ID=test-project',
-      '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
       '--cpu=400m',
       '--min-instances=default',
       '--platform=gke',
-      '--cluster=projects/test-project/zones/europe-west1/clusters/k8s-cluster',
+      '--cluster=projects/test-staging-project/zones/europe-west1/clusters/k8s-cluster',
       '--cluster-location=europe-west1',
       '--connectivity=external',
       '--no-use-http2',
@@ -337,7 +337,7 @@ describe('Run Deploy', () => {
       uri: 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
     });
     exec.exec.mockResolvedValueOnce(0);
-    setupGcloud.mockResolvedValueOnce('test-project');
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
     const service = {
       name: 'my-service',
       memory: '256Mi',
@@ -351,21 +351,21 @@ describe('Run Deploy', () => {
     const returnValue = await runDeploy(
       serviceAccountKey,
       service,
-      'gcr.io/test-project/my-service:tag',
+      'gcr.io/test-staging-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec).toHaveBeenCalledTimes(2);
-    expect(getClusterInfo).toHaveBeenCalledWith('test-project', undefined);
+    expect(getClusterInfo).toHaveBeenCalledWith('test-staging-project', undefined);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
       'run', 'deploy', 'my-service',
-      '--image=gcr.io/test-project/my-service:tag',
-      '--project=test-project',
+      '--image=gcr.io/test-staging-project/my-service:tag',
+      '--project=test-staging-project',
       '--memory=256Mi',
       '--concurrency=10',
       '--max-instances=default',
-      '--set-env-vars=SERVICE_PROJECT_ID=test-project',
-      '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
       '--cpu=100m',
       '--min-instances=default',
       '--platform=gke',
@@ -385,7 +385,7 @@ describe('Run Deploy', () => {
       uri: 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
     });
     exec.exec.mockResolvedValueOnce(0);
-    setupGcloud.mockResolvedValueOnce('test-project');
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
     const service = {
       name: 'my-service',
       memory: '256Mi',
@@ -404,21 +404,21 @@ describe('Run Deploy', () => {
     const returnValue = await runDeploy(
       serviceAccountKey,
       service,
-      'gcr.io/test-project/my-service:tag',
+      'gcr.io/test-staging-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec).toHaveBeenCalledTimes(2);
-    expect(getClusterInfo).toHaveBeenCalledWith('test-project', 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster');
+    expect(getClusterInfo).toHaveBeenCalledWith('test-staging-project', 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster');
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
       'run', 'deploy', 'my-service',
-      '--image=gcr.io/test-project/my-service:tag',
-      '--project=test-project',
+      '--image=gcr.io/test-staging-project/my-service:tag',
+      '--project=test-staging-project',
       '--memory=256Mi',
       '--concurrency=50',
       '--max-instances=100',
-      '--set-env-vars=SERVICE_PROJECT_ID=test-project',
-      '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
       '--cpu=400m',
       '--min-instances=1',
       '--platform=gke',
@@ -432,7 +432,7 @@ describe('Run Deploy', () => {
 
   test('It throws for invalid managed cpu units', async () => {
     exec.exec.mockResolvedValueOnce(0);
-    setupGcloud.mockResolvedValueOnce('test-project');
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
     const service = {
       name: 'my-service',
       memory: '256Mi',
@@ -447,7 +447,7 @@ describe('Run Deploy', () => {
     await expect(runDeploy(
       serviceAccountKey,
       service,
-      'gcr.io/test-project/my-service:tag',
+      'gcr.io/test-staging-project/my-service:tag',
     )).rejects.toEqual(
       new Error('Managed Cloud Run must be configured with CPU count [1,2]. Use of millicpu is not supported.'),
     );
@@ -455,7 +455,7 @@ describe('Run Deploy', () => {
 
   test('It throws for invalid gke millcpu', async () => {
     exec.exec.mockResolvedValueOnce(0);
-    setupGcloud.mockResolvedValueOnce('test-project');
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
     const service = {
       name: 'my-service',
       memory: '256Mi',
@@ -471,7 +471,7 @@ describe('Run Deploy', () => {
     await expect(runDeploy(
       serviceAccountKey,
       service,
-      'gcr.io/test-project/my-service:tag',
+      'gcr.io/test-staging-project/my-service:tag',
     )).rejects.toEqual(
       new Error('Cloud Run GKE must be configured with millicpu. Use of CPU count is not supported.'),
     );
@@ -485,7 +485,7 @@ describe('Run Deploy', () => {
       uri: 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
     });
     exec.exec.mockResolvedValueOnce(0);
-    setupGcloud.mockResolvedValueOnce('test-project');
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
     const service = {
       name: 'my-service',
       memory: '256Mi',
@@ -499,21 +499,21 @@ describe('Run Deploy', () => {
     const returnValue = await runDeploy(
       serviceAccountKey,
       service,
-      'gcr.io/test-project/my-service:tag',
+      'gcr.io/test-staging-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec).toHaveBeenCalledTimes(2);
-    expect(getClusterInfo).toHaveBeenCalledWith('test-project', undefined);
+    expect(getClusterInfo).toHaveBeenCalledWith('test-staging-project', undefined);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
       'run', 'deploy', 'my-service',
-      '--image=gcr.io/test-project/my-service:tag',
-      '--project=test-project',
+      '--image=gcr.io/test-staging-project/my-service:tag',
+      '--project=test-staging-project',
       '--memory=256Mi',
       '--concurrency=19',
       '--max-instances=default',
-      '--set-env-vars=SERVICE_PROJECT_ID=test-project',
-      '--labels=service_project_id=test-project,service_project=test-project,service_env=undefined',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
       '--cpu=233m',
       '--min-instances=default',
       '--platform=gke',
@@ -581,7 +581,7 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       return Promise.resolve(0);
     });
 
-    setupGcloud.mockResolvedValueOnce('test-project');
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
     const service = {
       name: 'my-service',
       memory: '256Mi',
@@ -595,7 +595,7 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
     const returnValue = await runDeploy(
       serviceAccountKey,
       service,
-      'gcr.io/test-project/my-service:tag',
+      'gcr.io/test-staging-project/my-service:tag',
       false,
       10,
     );

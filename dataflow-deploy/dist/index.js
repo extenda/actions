@@ -3217,6 +3217,7 @@ function copyFile(srcFile, destFile, force) {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const exec = __webpack_require__(2176);
+const projectLabels = __webpack_require__(7499);
 
 const deployJob = async (
   newJobName,
@@ -3260,6 +3261,7 @@ const deployJob = async (
   args.push(`--project=${projectId}`);
   args.push(`--network=${network}`);
   args.push(`--subnetwork=${subnetwork}`);
+  args.push(`--additional-user-labels=cc=${projectLabels(projectId)}`);
 
   let jobId = '';
   await exec.exec('gcloud', args, {
@@ -3386,6 +3388,37 @@ if (require.main === require.cache[eval('__filename')]) {
 }
 
 module.exports = action;
+
+
+/***/ }),
+
+/***/ 7499:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const exec = __webpack_require__(2176);
+
+const projectLabels = async (projectId) => {
+  let output = '';
+  await exec.exec('gcloud', [
+    'projects',
+    'describe',
+    projectId,
+    '--flatten=labels',
+    '|',
+    'grep',
+    'cc',
+  ], {
+    silent: true,
+    listeners: {
+      stdout: (data) => {
+        output += data.toString('utf8');
+      },
+    },
+  });
+  return output.substring(5, 8);
+};
+
+module.exports = projectLabels;
 
 
 /***/ }),
