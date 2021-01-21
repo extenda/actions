@@ -187,7 +187,7 @@ describe('Run Deploy', () => {
     exec.exec.mockResolvedValue(0);
     const image = 'gcr.io/test-project/my-service:tag';
     const service = {
-      name : 'deployment-name',
+      name: 'deployment-name',
       storage: {
         volume: '5Mi',
         mountPath: '/data/storage',
@@ -195,8 +195,8 @@ describe('Run Deploy', () => {
       replicas: 1,
       autoscale: {
         minReplicas: 1,
-        maxReplicas: 6
-      }
+        maxReplicas: 6,
+      },
     };
     const dryRun = true;
 
@@ -204,7 +204,7 @@ describe('Run Deploy', () => {
       'service-account',
       service,
       image,
-      dryRun
+      dryRun,
     );
 
     expect(applyAutoscale).toHaveBeenCalledWith(service.name, 'statefulset', service.autoscale, service.replicas, dryRun);
@@ -215,19 +215,18 @@ describe('Run Deploy', () => {
     exec.exec.mockResolvedValue(0);
     const image = 'gcr.io/test-project/my-service:tag';
     const service = {
-      name : 'deployment-name',
-      replicas: 1
+      name: 'deployment-name',
+      replicas: 1,
     };
     const dryRun = undefined;
-    
+
     await runDeploy(
       'service-account',
       service,
       image,
-      dryRun
+      dryRun,
     );
-    
+
     expect(applyAutoscale).toHaveBeenCalledWith(service.name, 'deployment', undefined, service.replicas, dryRun);
   });
-
 });

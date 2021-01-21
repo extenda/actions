@@ -19110,7 +19110,7 @@ const fs = __webpack_require__(5747);
 const removeAutoscale = async (deploymentName, deploymentType, permanentReplicas, dryRunArg) => {
   let errOutput = '';
   try {
-    await exec.exec('kubectl', ['get', 'hpa', deploymentName], 
+    await exec.exec('kubectl', ['get', 'hpa', deploymentName],
       {
         listeners: {
           stderr: (data) => {
@@ -19128,17 +19128,15 @@ const removeAutoscale = async (deploymentName, deploymentType, permanentReplicas
 
   await exec.exec('kubectl', ['delete', 'hpa', deploymentName, ...dryRunArg]);
   await exec.exec('kubectl', ['scale', deploymentType, deploymentName, `--replicas=${permanentReplicas}`, ...dryRunArg]);
-}
-  
+;}
 
 
 const applyAutoscale = async (deploymentName, deploymentType, autoscale, permanentReplicas, dryRun) => {
-
-  const dryRunArg = dryRun ? ['--dry-run=client'] : []
+  const dryRunArg = dryRun ? ['--dry-run=client'] : [];
 
   if (autoscale == null) {
-    await removeAutoscale(deploymentName, deploymentType, permanentReplicas, dryRunArg)
-    return
+    await removeAutoscale(deploymentName, deploymentType, permanentReplicas, dryRunArg);
+    return;
   }
 
   const hpaYaml = `
@@ -19165,11 +19163,9 @@ spec:
   fs.writeFileSync('hpa.yml', hpaYaml);
 
   await exec.exec('kubectl', ['apply', '-f', 'hpa.yml', ...dryRunArg]);
-}
+};
 
 module.exports = applyAutoscale;
-
-
 
 /***/ }),
 
@@ -19419,14 +19415,14 @@ module.exports = {
     autoscale: {
       type: 'object',
       properties: {
-        minReplicas: { 
-          type: 'integer'
+        minReplicas: {
+          type: 'integer',
         },
-        maxReplicas: { 
-          type: 'integer'
+        maxReplicas: {
+          type: 'integer',
         },
         cpuPercent: {
-          type: 'integer'
+          type: 'integer',
         },
       },
       additionalProperties: false,
@@ -19700,7 +19696,7 @@ const runDeploy = async (
 
   await applyKubectl(service.name, deploymentType, dryRun);
 
-  await applyAutoscale(service.name, deploymentType, service.autoscale, service.replicas, dryRun)
+  await applyAutoscale(service.name, deploymentType, service.autoscale, service.replicas, dryRun);
 };
 
 module.exports = runDeploy;

@@ -106,7 +106,7 @@ const runDeploy = async (
 
   await applyKubectl(service.name, deploymentType, dryRun);
 
-  await applyAutoscale(service.name, deploymentType, service.autoscale, service.replicas, dryRun)
+  await applyAutoscale(service.name, deploymentType, service.autoscale, service.replicas, dryRun);
 };
 
 module.exports = runDeploy;

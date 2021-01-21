@@ -78,14 +78,14 @@ module.exports = {
     autoscale: {
       type: 'object',
       properties: {
-        minReplicas: { 
-          type: 'integer'
+        minReplicas: {
+          type: 'integer',
         },
-        maxReplicas: { 
-          type: 'integer'
+        maxReplicas: {
+          type: 'integer',
         },
         cpuPercent: {
-          type: 'integer'
+          type: 'integer',
         },
       },
       additionalProperties: false,
