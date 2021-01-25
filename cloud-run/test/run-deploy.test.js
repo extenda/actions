@@ -342,6 +342,7 @@ describe('Run Deploy', () => {
       name: 'my-service',
       memory: '256Mi',
       cpu: '100m',
+      'min-instances': 2,
       platform: {
         gke: {
           connectivity: 'external',
@@ -367,7 +368,7 @@ describe('Run Deploy', () => {
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
       '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
       '--cpu=100m',
-      '--min-instances=default',
+      '--min-instances=2',
       '--platform=gke',
       '--cluster=projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
       '--cluster-location=europe-west1',
@@ -391,7 +392,7 @@ describe('Run Deploy', () => {
       memory: '256Mi',
       cpu: '400m',
       concurrency: 50,
-      'min-instances': 1,
+      'min-instances': 10,
       'max-instances': 100,
       platform: {
         gke: {
@@ -420,7 +421,7 @@ describe('Run Deploy', () => {
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
       '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
       '--cpu=400m',
-      '--min-instances=1',
+      '--min-instances=5',
       '--platform=gke',
       '--cluster=projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
       '--cluster-location=europe-west1',
