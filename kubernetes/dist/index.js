@@ -19110,7 +19110,7 @@ const fs = __webpack_require__(5747);
 const removeAutoscale = async (deploymentName, deploymentType, permanentReplicas, dryRunArg) => {
   let errOutput = '';
   try {
-    await exec.exec('kubectl', ['get', 'hpa', deploymentName],
+    await exec.exec('kubectl', ['get', 'hpa', deploymentName, `--namespace=${deploymentName}`],
       {
         listeners: {
           stderr: (data) => {
@@ -19125,8 +19125,8 @@ const removeAutoscale = async (deploymentName, deploymentType, permanentReplicas
     throw err;
   }
 
-  await exec.exec('kubectl', ['delete', 'hpa', deploymentName, ...dryRunArg]);
-  await exec.exec('kubectl', ['scale', deploymentType, deploymentName, `--replicas=${permanentReplicas}`, ...dryRunArg]);
+  await exec.exec('kubectl', ['delete', 'hpa', deploymentName, `--namespace=${deploymentName}`, ...dryRunArg]);
+  await exec.exec('kubectl', ['scale', deploymentType, deploymentName, `--namespace=${deploymentName}`, `--replicas=${permanentReplicas}`, ...dryRunArg]);
 };
 
 
@@ -19144,6 +19144,7 @@ apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
   name: ${deploymentName}
+  namespace: ${deploymentName}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
