@@ -20,9 +20,7 @@ describe('Kubectl applies autoscaler', () => {
     const deploymentType = 'deployment-type';
     const permanentReplicas = 2;
 
-    exec.exec.mockImplementationOnce((cmd, args, opts) => {
-      return Promise.resolve(0);
-    });
+    exec.exec.mockImplementationOnce((cmd, args, opts) => Promise.resolve(0));
 
     await applyAutoscale(deployment, deploymentType, undefined, permanentReplicas, dryRun);
 

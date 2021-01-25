@@ -12,8 +12,7 @@ const removeAutoscale = async (deploymentName, deploymentType, permanentReplicas
           },
         },
       });
-  }
-  catch (err) {
+  } catch (err) {
     if (errOutput.includes('(NotFound)')) {
       return;
     }
@@ -22,10 +21,11 @@ const removeAutoscale = async (deploymentName, deploymentType, permanentReplicas
 
   await exec.exec('kubectl', ['delete', 'hpa', deploymentName, ...dryRunArg]);
   await exec.exec('kubectl', ['scale', deploymentType, deploymentName, `--replicas=${permanentReplicas}`, ...dryRunArg]);
-;}
+}
 
 
-const applyAutoscale = async (deploymentName, deploymentType, autoscale, permanentReplicas, dryRun) => {
+const applyAutoscale = async (deploymentName, deploymentType, autoscale, permanentReplicas, 
+  dryRun) => {
   const dryRunArg = dryRun ? ['--dry-run=client'] : [];
 
   if (autoscale == null) {
