@@ -12,7 +12,7 @@ const action = async () => {
   const domainBindingsEnv = core.getInput('domain-mappings-env') || '';
   const dnsProjectLabel = core.getInput('dns-project-label') || 'dns';
   const verbose = (core.getInput('verbose') || 'false');
-  const pipelineServiceAccountKey = core.getInput('pipeline-secrets-service-account-key' || '');
+  const pipelineServiceAccountKey = core.getInput('pipeline-secrets-service-account-key') || '';
 
   const service = loadServiceDefinition(serviceFile, jsonSchema);
   await runDeploy(serviceAccountKey, service, image, verbose === 'true')
