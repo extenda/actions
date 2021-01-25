@@ -9,6 +9,7 @@ jest.mock('../src/patch-service-yaml');
 jest.mock('../src/patch-statefulset-yaml');
 jest.mock('../src/kustomize');
 jest.mock('../src/apply-kubectl');
+jest.mock('../src/autoscale');
 jest.mock('../../utils', () => ({
   loadTool: jest.fn(),
 }));
@@ -24,6 +25,7 @@ const runDeploy = require('../src/run-deploy');
 const kustomize = require('../src/kustomize');
 const createNamespace = require('../../cloud-run/src/create-namespace');
 const applyKubectl = require('../src/apply-kubectl');
+const applyAutoscale = require('../src/autoscale');
 
 const orgEnv = process.env;
 
@@ -178,5 +180,53 @@ describe('Run Deploy', () => {
     expect(kustomize).toHaveBeenLastCalledWith([
       'build',
     ]);
+  });
+
+  test('It calls applyAutoscale with storage (stateful set), autoscale parameters and dryRun', async () => {
+    getClusterInfo.mockResolvedValueOnce({});
+    exec.exec.mockResolvedValue(0);
+    const image = 'gcr.io/test-project/my-service:tag';
+    const service = {
+      name: 'deployment-name',
+      storage: {
+        volume: '5Mi',
+        mountPath: '/data/storage',
+      },
+      replicas: 1,
+      autoscale: {
+        minReplicas: 1,
+        maxReplicas: 6,
+      },
+    };
+    const dryRun = true;
+
+    await runDeploy(
+      'service-account',
+      service,
+      image,
+      dryRun,
+    );
+
+    expect(applyAutoscale).toHaveBeenCalledWith(service.name, 'statefulset', service.autoscale, service.replicas, dryRun);
+  });
+
+  test('It calls applyAutoscale without storage, autoscale parameters and dryRun', async () => {
+    getClusterInfo.mockResolvedValueOnce({});
+    exec.exec.mockResolvedValue(0);
+    const image = 'gcr.io/test-project/my-service:tag';
+    const service = {
+      name: 'deployment-name',
+      replicas: 1,
+    };
+    const dryRun = undefined;
+
+    await runDeploy(
+      'service-account',
+      service,
+      image,
+      dryRun,
+    );
+
+    expect(applyAutoscale).toHaveBeenCalledWith(service.name, 'deployment', undefined, service.replicas, dryRun);
   });
 });

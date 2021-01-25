@@ -19101,6 +19101,75 @@ module.exports = applyKubectl;
 
 /***/ }),
 
+/***/ 6858:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const exec = __webpack_require__(2176);
+const fs = __webpack_require__(5747);
+
+const removeAutoscale = async (deploymentName, deploymentType, permanentReplicas, dryRunArg) => {
+  let errOutput = '';
+  try {
+    await exec.exec('kubectl', ['get', 'hpa', deploymentName],
+      {
+        listeners: {
+          stderr: (data) => {
+            errOutput += data.toString('utf8');
+          },
+        },
+      });
+  } catch (err) {
+    if (errOutput.includes('(NotFound)')) {
+      return;
+    }
+    throw err;
+  }
+
+  await exec.exec('kubectl', ['delete', 'hpa', deploymentName, ...dryRunArg]);
+  await exec.exec('kubectl', ['scale', deploymentType, deploymentName, `--replicas=${permanentReplicas}`, ...dryRunArg]);
+};
+
+
+const applyAutoscale = async (deploymentName, deploymentType, autoscale, permanentReplicas,
+  dryRun) => {
+  const dryRunArg = dryRun ? ['--dry-run=client'] : [];
+
+  if (autoscale == null) {
+    await removeAutoscale(deploymentName, deploymentType, permanentReplicas, dryRunArg);
+    return;
+  }
+
+  const hpaYaml = `
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ${deploymentName}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: ${deploymentType}
+    name: ${deploymentName}
+  minReplicas: ${autoscale.minReplicas}
+  maxReplicas: ${autoscale.maxReplicas}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: ${autoscale.cpuPercent}
+`;
+
+  fs.writeFileSync('hpa.yml', hpaYaml);
+
+  await exec.exec('kubectl', ['apply', '-f', 'hpa.yml', ...dryRunArg]);
+};
+
+module.exports = applyAutoscale;
+
+
+/***/ }),
+
 /***/ 1773:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -19344,6 +19413,21 @@ module.exports = {
     environment: {
       type: 'object',
     },
+    autoscale: {
+      type: 'object',
+      properties: {
+        minReplicas: {
+          type: 'integer',
+        },
+        maxReplicas: {
+          type: 'integer',
+        },
+        cpuPercent: {
+          type: 'integer',
+        },
+      },
+      additionalProperties: false,
+    },
   },
   required: [
     'name',
@@ -19519,6 +19603,7 @@ const parseEnvironmentArgs = __webpack_require__(6762);
 const createBaseKustomize = __webpack_require__(1773);
 const applyKubectl = __webpack_require__(4601);
 const authenticateKubeCtl = __webpack_require__(693);
+const applyAutoscale = __webpack_require__(6858);
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -19611,6 +19696,8 @@ const runDeploy = async (
   await kustomizeBuild();
 
   await applyKubectl(service.name, deploymentType, dryRun);
+
+  await applyAutoscale(service.name, deploymentType, service.autoscale, service.replicas, dryRun);
 };
 
 module.exports = runDeploy;

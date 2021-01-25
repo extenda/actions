@@ -75,6 +75,21 @@ module.exports = {
     environment: {
       type: 'object',
     },
+    autoscale: {
+      type: 'object',
+      properties: {
+        minReplicas: {
+          type: 'integer',
+        },
+        maxReplicas: {
+          type: 'integer',
+        },
+        cpuPercent: {
+          type: 'integer',
+        },
+      },
+      additionalProperties: false,
+    },
   },
   required: [
     'name',

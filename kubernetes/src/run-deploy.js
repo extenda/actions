@@ -12,6 +12,7 @@ const parseEnvironmentArgs = require('./environment-args');
 const createBaseKustomize = require('./create-base-kustomize');
 const applyKubectl = require('./apply-kubectl');
 const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
+const applyAutoscale = require('./autoscale');
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -104,6 +105,8 @@ const runDeploy = async (
   await kustomizeBuild();
 
   await applyKubectl(service.name, deploymentType, dryRun);
+
+  await applyAutoscale(service.name, deploymentType, service.autoscale, service.replicas, dryRun);
 };
 
 module.exports = runDeploy;
