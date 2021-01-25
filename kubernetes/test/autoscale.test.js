@@ -24,9 +24,9 @@ describe('Kubectl applies autoscaler', () => {
 
     await applyAutoscale(deployment, deploymentType, undefined, permanentReplicas, dryRun);
 
-    expect(exec.exec).toHaveBeenNthCalledWith(1, 'kubectl', ['get', 'hpa', deployment], expect.anything());
-    expect(exec.exec).toHaveBeenNthCalledWith(2, 'kubectl', ['delete', 'hpa', deployment]);
-    expect(exec.exec).toHaveBeenNthCalledWith(3, 'kubectl', ['scale', deploymentType, deployment, `--replicas=${permanentReplicas}`]);
+    expect(exec.exec).toHaveBeenNthCalledWith(1, 'kubectl', ['get', 'hpa', deployment, `--namespace=${deployment}`], expect.anything());
+    expect(exec.exec).toHaveBeenNthCalledWith(2, 'kubectl', ['delete', 'hpa', deployment, `--namespace=${deployment}`]);
+    expect(exec.exec).toHaveBeenNthCalledWith(3, 'kubectl', ['scale', deploymentType, deployment, `--namespace=${deployment}`, `--replicas=${permanentReplicas}`]);
     expect(exec.exec).toHaveBeenCalledTimes(3);
   });
 
@@ -43,7 +43,7 @@ describe('Kubectl applies autoscaler', () => {
 
     await applyAutoscale(deployment, deploymentType, undefined, permanentReplicas, dryRun);
 
-    expect(exec.exec).toHaveBeenNthCalledWith(1, 'kubectl', ['get', 'hpa', deployment], expect.anything());
+    expect(exec.exec).toHaveBeenNthCalledWith(1, 'kubectl', ['get', 'hpa', deployment, `--namespace=${deployment}`], expect.anything());
     expect(exec.exec).toHaveBeenCalledTimes(1);
   });
 
