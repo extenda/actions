@@ -11453,7 +11453,8 @@ const maxMinInstances = (value) => {
   if (value > 5) {
     core.warning('Minimum instances value cannot be greater than 5 -- set to 5');
     return 5;
-  } if (value < 0) {
+  }
+  if (value < 0) {
     return 'default';
   }
   return value;
