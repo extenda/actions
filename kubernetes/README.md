@@ -34,6 +34,9 @@ properties are required and not.
 | `ports`                    | The array of port mappings. If no ports specified, the service is created with ClusterIP:None                                                                     | No       |                 |
 | `storage.volume`           | The size of the volume attached to pod.                                                                                                                           | No       | `1Gi`           |
 | `storage.mountPath`        | The path volume will be mounted under.                                                                                                                            | No       | `/data/storage` |
+| `autoscale.minReplicas`    | The min replicas count for horizontal pos autoscaling
+| `autoscale.maxReplicas`    | The max replicas count for horizontal pos autoscaling
+| `autoscale.cpuPercent`     | The cpu utilization percentage for horizontal pos autoscaling 
 | `environment`<top>\*</top> | A map of environment variables. The values can be Secret Manager URLs on the form `sm://*/my-secret` where `*` will be replaced by the project ID at deploy time. | No       | -               |
 
 <top>\*</top> Once set, this value can only be unset by passing `[]` (empty array) as value.
