@@ -44,7 +44,8 @@ module.exports = {
     },
     'min-instances': {
       type: 'integer',
-      pattern: '^(-1|[0-5])$',
+      minimum: -1,
+      maximum: 5,
       default: -1,
     },
     environment: {
