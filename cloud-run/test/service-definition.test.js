@@ -60,6 +60,24 @@ platform:
 0: instance.memory does not match pattern "^[0-9]+(M|G)i"`);
     });
 
+    test('It throws for invalid min-instances', () => {
+      mockFs({
+        'cloud-run.yaml': `
+name: service
+memory: 1Gi
+min-instances: 7
+cpu: 1
+platform:
+  managed:
+    allow-unauthenticated: true
+    region: eu-west1
+`,
+      });
+      expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
+        .toThrow(`cloud-run.yaml is not valid.
+0: instance.min-instances must have a maximum value of 5`);
+    });
+
     test('It throws for missing allow-unauthenticated', () => {
       mockFs({
         'cloud-run.yaml': `
