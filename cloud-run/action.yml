@@ -7,7 +7,7 @@ inputs:
       The service account key which will be used for authentication.
       The account key should be a base64 encoded JSON key stored as a secret.
     required: true
-  pipeline-secrets-service-account-key:
+  secret-manager-service-account-key:
     description: |
       The service account key used to access pipeline secrets required for certain features in the deploy process.
     required: false
