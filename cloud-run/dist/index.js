@@ -10852,6 +10852,7 @@ module.exports = {
     },
     'min-instances': {
       type: 'integer',
+      pattern: '^(-1|[0-5])$',
       default: -1,
     },
     environment: {
@@ -11449,17 +11450,6 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
 
 const numericOrDefault = (value) => (value >= 0 ? value : 'default');
 
-const maxMinInstances = (value) => {
-  if (value > 5) {
-    core.warning('Minimum instances value cannot be greater than 5 -- set to 5');
-    return 5;
-  }
-  if (value < 0) {
-    return 'default';
-  }
-  return value;
-};
-
 const isManagedCloudRun = (cpu) => {
   if (typeof cpu === 'string' && cpu.endsWith('m')) {
     return false;
@@ -11551,7 +11541,7 @@ const gkeArguments = async (args, service, projectId) => {
 
   args.push(
     `--cpu=${cpu}`,
-    `--min-instances=${maxMinInstances(minInstances)}`,
+    `--min-instances=${numericOrDefault(minInstances)}`,
     '--platform=gke',
     `--cluster=${cluster.uri}`,
     `--cluster-location=${cluster.clusterLocation}`,
