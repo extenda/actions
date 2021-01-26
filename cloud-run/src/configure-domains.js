@@ -4,6 +4,7 @@ const pLimit = require('p-limit');
 const gcloud = require('./gcloud-output');
 const authenticateKubeCtl = require('./kubectl-auth');
 const { addDnsRecord } = require('./dns-record');
+const certificateExpiration = require('./alert-certificate-expiration');
 
 const listDomains = async ({ cluster, clusterLocation, project }, namespace) => gcloud([
   'run',
@@ -73,7 +74,13 @@ const enableHttpRedirectOnDomain = async (
 
 const determineEnv = (project) => (project.includes('staging') ? 'staging' : 'prod');
 
-const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectLabel) => {
+const configureDomains = async (
+  service,
+  cluster,
+  domainMappingEnv,
+  dnsProjectLabel,
+  pipelineSA,
+) => {
   if (!cluster) {
     core.info('Domain binding is not yet supported for managed cloud run.');
     return [];
@@ -105,8 +112,11 @@ const configureDomains = async (service, cluster, domainMappingEnv, dnsProjectLa
         .then((ipAddress) => addDnsRecord(dnsProjectLabel, domain, ipAddress))
         .then(() => enableHttpRedirectOnDomain(domain, namespace))));
     });
-
     await Promise.all(promises);
+
+    if (pipelineSA) {
+      await certificateExpiration(pipelineSA, cluster.project);
+    }
 
     return newDomains;
   }

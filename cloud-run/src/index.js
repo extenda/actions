@@ -12,10 +12,17 @@ const action = async () => {
   const domainBindingsEnv = core.getInput('domain-mappings-env') || '';
   const dnsProjectLabel = core.getInput('dns-project-label') || 'dns';
   const verbose = (core.getInput('verbose') || 'false');
+  const secretManagerServiceAccountKey = core.getInput('secret-manager-service-account-key') || '';
 
   const service = loadServiceDefinition(serviceFile, jsonSchema);
   await runDeploy(serviceAccountKey, service, image, verbose === 'true')
-    .then(({ cluster }) => configureDomains(service, cluster, domainBindingsEnv, dnsProjectLabel));
+    .then(({ cluster }) => configureDomains(
+      service,
+      cluster,
+      domainBindingsEnv,
+      dnsProjectLabel,
+      secretManagerServiceAccountKey,
+    ));
 };
 
 if (require.main === module) {
