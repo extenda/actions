@@ -38,6 +38,7 @@ apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
   name: ${deploymentName}
+  namespace: ${deploymentName}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
