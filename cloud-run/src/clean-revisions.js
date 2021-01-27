@@ -12,7 +12,6 @@ const getRevisions = async (namespace, project, cluster, location) => {
     `--cluster=${cluster}`,
     `--cluster-location=${location}`,
     '--platform=gke',
-    '--sort-by=DEPLOYED',
     '--filter=false',
     '--format=value(REVISION)',
   ], {
