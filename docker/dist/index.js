@@ -503,7 +503,7 @@ const login = (registry) => {
   if (isEcr(registry)) {
     const region = getRegion(registry);
     core.info(`Logging into ECR region ${region}...`);
-    cp.execSync(`$(aws ecr get-login --region ${region} --no-include-email)`);
+    cp.execSync(`$(aws ecr get-login-password --region ${region} --no-include-email)`);
     return;
   }
 
