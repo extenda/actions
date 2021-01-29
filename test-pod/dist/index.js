@@ -39177,11 +39177,8 @@ const getBranchNameShort = (currentRef) => {
   const pattern = /.*\/(.*)/;
   const groups = currentRef.match(pattern);
 
-  if (currentRef === 'master' || currentRef === 'develop') {
-    return currentRef;
-  }
   if (groups == null || groups.length !== 2) {
-    throw new Error(`Failed to parse branch name from ${currentRef}`);
+    return currentRef
   }
 
   return groups[1];
@@ -39195,12 +39192,10 @@ const getBranchNameSemver = (currentRef) => {
   const pattern = /[0-9a-zA-Z]+(?: [0-9a-zA-Z]+)*?/gm;
   const groups = currentRef.match(pattern);
 
-  if (currentRef === 'master' || currentRef === 'develop') {
+  if (groups == null || groups.length < 1) {
     return currentRef;
   }
-  if (groups == null || groups.length < 1) {
-    throw new Error(`Failed to parse branch name ${currentRef}`);
-  }
+  
   let branchName = '';
   groups.forEach((group) => {
     branchName = branchName.concat(group);

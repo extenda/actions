@@ -63,9 +63,6 @@ describe('Branch info test suite', () => {
     expect(getBranchNameShort('master')).toBe('master');
     expect(getBranchNameShort('develop')).toBe('develop');
     expect(() => {
-      getBranchNameShort('wrong string');
-    }).toThrow();
-    expect(() => {
       getBranchNameShort(null);
     }).toThrow();
     expect(() => {
@@ -83,9 +80,6 @@ describe('Branch info test suite', () => {
     expect(getBranchNameSemver('refs/heads/feature/RS-1234')).toBe('featureRS1234');
     expect(getBranchNameSemver('master')).toBe('master');
     expect(getBranchNameSemver('develop')).toBe('develop');
-    expect(() => {
-      getBranchNameSemver('#¤#__:');
-    }).toThrow();
     expect(() => {
       getBranchNameSemver(null);
     }).toThrow();
