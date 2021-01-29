@@ -39178,7 +39178,7 @@ const getBranchNameShort = (currentRef) => {
   const groups = currentRef.match(pattern);
 
   if (groups == null || groups.length !== 2) {
-    return currentRef
+    return currentRef;
   }
 
   return groups[1];
@@ -39195,7 +39195,6 @@ const getBranchNameSemver = (currentRef) => {
   if (groups == null || groups.length < 1) {
     return currentRef;
   }
-  
   let branchName = '';
   groups.forEach((group) => {
     branchName = branchName.concat(group);
