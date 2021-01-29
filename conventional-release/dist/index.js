@@ -79074,7 +79074,7 @@ const getBranchNameShort = (currentRef) => {
     return currentRef;
   }
   if (groups == null || groups.length !== 2) {
-    throw new Error(`Failed to parse branch name from ${currentRef}`);
+    return currentRef;
   }
 
   return groups[1];
@@ -79092,7 +79092,7 @@ const getBranchNameSemver = (currentRef) => {
     return currentRef;
   }
   if (groups == null || groups.length < 1) {
-    throw new Error(`Failed to parse branch name ${currentRef}`);
+    return currentRef;
   }
   let branchName = '';
   groups.forEach((group) => {
