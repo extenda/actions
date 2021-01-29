@@ -62,6 +62,7 @@ describe('Branch info test suite', () => {
     expect(getBranchNameShort('refs/heads/feature/RS-1234_test_branch')).toBe('RS-1234_test_branch');
     expect(getBranchNameShort('master')).toBe('master');
     expect(getBranchNameShort('develop')).toBe('develop');
+    expect(getBranchNameShort('RS-50991_AddScope')).toBe('RS-50991_AddScope');
     expect(() => {
       getBranchNameShort(null);
     }).toThrow();
@@ -80,6 +81,7 @@ describe('Branch info test suite', () => {
     expect(getBranchNameSemver('refs/heads/feature/RS-1234')).toBe('featureRS1234');
     expect(getBranchNameSemver('master')).toBe('master');
     expect(getBranchNameSemver('develop')).toBe('develop');
+    expect(getBranchNameSemver('RS-50991_AddScope')).toBe('RS50991AddScope');
     expect(() => {
       getBranchNameSemver(null);
     }).toThrow();
