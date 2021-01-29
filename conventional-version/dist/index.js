@@ -423,11 +423,11 @@ const action = async () => {
     core.info(`branch-name-friendly: ${branchNameFriendly}`);
     core.setOutput('branch-name-friendly', branchNameFriendly);
 
-    const branchNameShort = branchinfo.getBranchNameShort(githubRef);
+    const branchNameShort = branchinfo.getBranchNameShort(branchName);
     core.info(`branch-name-short: ${branchNameShort}`);
     core.setOutput('branch-name-short', branchNameShort);
 
-    const branchNameSemver = branchinfo.getBranchNameSemver(githubRef);
+    const branchNameSemver = branchinfo.getBranchNameSemver(branchName);
     core.info(`branch-name-semver: ${branchNameSemver}`);
     core.setOutput('branch-name-semver', branchNameSemver);
 
