@@ -69433,6 +69433,9 @@ const getBranchNameShort = (currentRef) => {
   const pattern = /.*\/(.*)/;
   const groups = currentRef.match(pattern);
 
+  if (currentRef === 'master' || currentRef === 'develop') {
+    return currentRef;
+  }
   if (groups == null || groups.length !== 2) {
     return currentRef;
   }
@@ -69448,6 +69451,9 @@ const getBranchNameSemver = (currentRef) => {
   const pattern = /[0-9a-zA-Z]+(?: [0-9a-zA-Z]+)*?/gm;
   const groups = currentRef.match(pattern);
 
+  if (currentRef === 'master' || currentRef === 'develop') {
+    return currentRef;
+  }
   if (groups == null || groups.length < 1) {
     return currentRef;
   }
