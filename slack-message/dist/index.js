@@ -52484,8 +52484,25 @@ exports.FetchError = FetchError;
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
 const core = __webpack_require__(6341);
+const sendMessage = __webpack_require__(4534);
+const { run } = __webpack_require__(1898);
+
+run(async () => {
+  const title = core.getInput('title');
+  const text = core.getInput('text', { required: true });
+  const fallback = core.getInput('fallback');
+  sendMessage(title, text, fallback);
+});
+
+
+/***/ }),
+
+/***/ 4534:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const core = __webpack_require__(6341);
 const fetch = __webpack_require__(344);
-const { run, loadGitHubToken } = __webpack_require__(1898);
+const { loadGitHubToken } = __webpack_require__(1898);
 const { loadSecret } = __webpack_require__(8652);
 
 const createMessage = (title, text, fallback) => {
@@ -52499,10 +52516,7 @@ const createMessage = (title, text, fallback) => {
   return [message];
 };
 
-run(async () => {
-  const title = core.getInput('title');
-  const text = core.getInput('text', { required: true });
-  const fallback = core.getInput('fallback');
+const sendMessage = async (title, text, fallback) => {
   const token = await loadGitHubToken(loadSecret);
 
   const response = await fetch(`https://slack.github.com/repos/${process.env.GITHUB_REPOSITORY}`, {
@@ -52516,7 +52530,9 @@ run(async () => {
 
   const body = await response.json();
   core.info(`API status: ${response.status}, body: ${JSON.stringify(body)}`);
-});
+};
+
+module.exports = sendMessage;
 
 
 /***/ }),
