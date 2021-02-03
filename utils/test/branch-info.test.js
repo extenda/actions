@@ -60,9 +60,9 @@ describe('Branch info test suite', () => {
   test('getBranchNameShort() returns last branch name or null', () => {
     expect(getBranchNameShort('refs/heads/feature/RS-1234')).toBe('RS-1234');
     expect(getBranchNameShort('refs/heads/feature/RS-1234_test_branch')).toBe('RS-1234_test_branch');
-    expect(() => {
-      getBranchNameShort('wrong string');
-    }).toThrow();
+    expect(getBranchNameShort('master')).toBe('master');
+    expect(getBranchNameShort('develop')).toBe('develop');
+    expect(getBranchNameShort('RS-50991_AddScope')).toBe('RS-50991_AddScope');
     expect(() => {
       getBranchNameShort(null);
     }).toThrow();
@@ -79,9 +79,9 @@ describe('Branch info test suite', () => {
 
   test('getBranchNameSemver() returns branch name with a-z and 0-9 only', () => {
     expect(getBranchNameSemver('refs/heads/feature/RS-1234')).toBe('featureRS1234');
-    expect(() => {
-      getBranchNameSemver('#¤#__:');
-    }).toThrow();
+    expect(getBranchNameSemver('master')).toBe('master');
+    expect(getBranchNameSemver('develop')).toBe('develop');
+    expect(getBranchNameSemver('RS-50991_AddScope')).toBe('RS50991AddScope');
     expect(() => {
       getBranchNameSemver(null);
     }).toThrow();

@@ -423,11 +423,11 @@ const action = async () => {
     core.info(`branch-name-friendly: ${branchNameFriendly}`);
     core.setOutput('branch-name-friendly', branchNameFriendly);
 
-    const branchNameShort = branchinfo.getBranchNameShort(githubRef);
+    const branchNameShort = branchinfo.getBranchNameShort(branchName);
     core.info(`branch-name-short: ${branchNameShort}`);
     core.setOutput('branch-name-short', branchNameShort);
 
-    const branchNameSemver = branchinfo.getBranchNameSemver(githubRef);
+    const branchNameSemver = branchinfo.getBranchNameSemver(branchName);
     core.info(`branch-name-semver: ${branchNameSemver}`);
     core.setOutput('branch-name-semver', branchNameSemver);
 
@@ -68271,8 +68271,11 @@ const getBranchNameShort = (currentRef) => {
   const pattern = /.*\/(.*)/;
   const groups = currentRef.match(pattern);
 
+  if (currentRef === 'master' || currentRef === 'develop') {
+    return currentRef;
+  }
   if (groups == null || groups.length !== 2) {
-    throw new Error(`Failed to parse branch name from ${currentRef}`);
+    return currentRef;
   }
 
   return groups[1];
@@ -68280,14 +68283,17 @@ const getBranchNameShort = (currentRef) => {
 
 const getBranchNameSemver = (currentRef) => {
   if (!currentRef) {
-    throw new Error('Can not return a branchname for null');
+    throw new Error(`Failed to parse branch name from ${currentRef}`);
   }
 
   const pattern = /[0-9a-zA-Z]+(?: [0-9a-zA-Z]+)*?/gm;
   const groups = currentRef.match(pattern);
 
+  if (currentRef === 'master' || currentRef === 'develop') {
+    return currentRef;
+  }
   if (groups == null || groups.length < 1) {
-    throw new Error(`Failed to parse branch name from ${currentRef}`);
+    return currentRef;
   }
   let branchName = '';
   groups.forEach((group) => {

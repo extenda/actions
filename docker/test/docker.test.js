@@ -108,9 +108,12 @@ describe('core and cp methods', () => {
         .mockReturnValueOnce('')
         .mockReturnValueOnce('');
 
+      cp.execSync.mockReturnValueOnce('JWT');
+
       docker.login(registry);
 
-      expect(cp.execSync).toHaveBeenCalledWith('$(aws ecr get-login --region us-east-1 --no-include-email)');
+      expect(cp.execSync).toHaveBeenCalledWith('aws ecr get-login-password --region us-east-1');
+      expect(cp.execSync).toHaveBeenCalledWith(`docker login -u AWS --password-stdin ${registry}`, { input: 'JWT' });
     });
 
     test("returns undefined if empty login and doesn't execute command", () => {

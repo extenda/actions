@@ -499,16 +499,19 @@ const login = (registry) => {
   }
 
   core.info('Login started');
-  // If using ECR, use the AWS CLI login command in favor of docker login
+
+  let username;
+  let password;
+
+  // If using ECR, use the AWS CLI to obtain a JWT to use with docker-login
   if (isEcr(registry)) {
     const region = getRegion(registry);
-    core.info(`Logging into ECR region ${region}...`);
-    cp.execSync(`$(aws ecr get-login --region ${region} --no-include-email)`);
-    return;
+    username = 'AWS';
+    password = cp.execSync(`aws ecr get-login-password --region ${region}`);
+  } else {
+    username = core.getInput('username');
+    password = core.getInput('password');
   }
-
-  const username = core.getInput('username');
-  const password = core.getInput('password');
 
   core.info(`Logging into Docker registry ${registry}...`);
   cp.execSync(`docker login -u ${username} --password-stdin ${registry}`, {
