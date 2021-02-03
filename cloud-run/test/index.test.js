@@ -1,4 +1,5 @@
 jest.mock('@actions/core');
+jest.mock('../src/vulnerability-scanning');
 jest.mock('../src/run-deploy');
 jest.mock('../src/service-definition');
 jest.mock('../src/configure-domains');
