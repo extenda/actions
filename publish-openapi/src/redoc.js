@@ -27,7 +27,9 @@ const installRedoc = async () => exec.exec('sudo', [
   'install',
   'redoc-cli',
   '-global',
-]);
+], {
+  silent: true,
+});
 
 const buildApiDocs = async (openApiYaml, apiName) => exec.exec('redoc-cli', [
   'bundle',
@@ -38,20 +40,26 @@ const buildApiDocs = async (openApiYaml, apiName) => exec.exec('redoc-cli', [
   '--options.hideSingleRequestSampleTab',
   '--options.onlyRequiredInSamples',
   '--cdn',
-]);
+], {
+  silent: true,
+});
 
 const uploadApiDocs = async (bucket, apiName) => exec.exec('gsutil', [
   'cp',
   '-r',
   `${apiName}`,
   bucket,
-]);
+], {
+  silent: true,
+});
 
 const uploadIndex = async (file, bucket) => exec.exec('gsutil', [
   'cp',
   file,
   bucket,
-]);
+], {
+  silent: true,
+});
 
 const fetchDocList = async (bucket) => {
   let output = '';
@@ -89,7 +97,9 @@ const setMetadata = async (bucket) => exec.exec('gsutil', [
   '-h',
   'Cache-Control:no-store, max-age=0',
   `${bucket}index.html`,
-]);
+], {
+  silent: true,
+});
 
 const deployDocumentation = async (yaml, apiName, version, bucket) => {
   // version not yet implemented
