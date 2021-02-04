@@ -1,0 +1,14 @@
+{
+  "name": "publish-openapi",
+  "version": "0.0.1-local",
+  "private": true,
+  "description": "publish open api documentation",
+  "main": "dist/index.js",
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/exec": "^1.0.4"
+  },
+  "devDependencies": {
+    "mock-fs": "^4.11.0"
+  }
+}
