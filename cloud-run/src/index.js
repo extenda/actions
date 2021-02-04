@@ -4,7 +4,6 @@ const loadServiceDefinition = require('./service-definition');
 const runDeploy = require('./run-deploy');
 const configureDomains = require('./configure-domains');
 const jsonSchema = require('./cloud-run-schema');
-const runScan = require('./vulnerability-scanning');
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
@@ -15,7 +14,6 @@ const action = async () => {
   const verbose = (core.getInput('verbose') || 'false');
   const secretManagerServiceAccountKey = core.getInput('secret-manager-service-account-key') || '';
 
-  await runScan(image);
   const service = loadServiceDefinition(serviceFile, jsonSchema);
   await runDeploy(serviceAccountKey, service, image, verbose === 'true')
     .then(({ cluster }) => configureDomains(

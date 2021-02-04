@@ -1,5 +1,6 @@
 const mockFs = require('mock-fs');
 
+jest.mock('../src/vulnerability-scanning');
 jest.mock('@actions/exec');
 jest.mock('../../setup-gcloud/src/setup-gcloud');
 jest.mock('../src/cluster-info');
