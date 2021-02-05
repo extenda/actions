@@ -9,7 +9,9 @@ const installRedoc = async () => exec.exec('sudo', [
   'install',
   'redoc-cli',
   '-global',
-]);
+], {
+  silent: true,
+});
 
 const buildApiDocs = async (openApiYaml, apiName, systemName, version) => exec.exec('redoc-cli', [
   'bundle',
@@ -20,7 +22,9 @@ const buildApiDocs = async (openApiYaml, apiName, systemName, version) => exec.e
   '--options.hideSingleRequestSampleTab',
   '--options.onlyRequiredInSamples',
   '--cdn',
-]);
+], {
+  silent: true,
+});
 
 const uploadApiDocs = async (bucket, systemName) => exec.exec('gsutil', [
   'cp',
@@ -93,7 +97,9 @@ const setMetadata = async (folder) => exec.exec('gsutil', [
   '-h',
   'Cache-Control:no-store, max-age=0',
   `${folder}index.html`,
-]);
+], {
+  silent: true,
+});
 
 const buildAndUploadIndex = async (folder, preFolder, title, bucket) => {
   await fetchDirList(folder)
