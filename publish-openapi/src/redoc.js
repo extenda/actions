@@ -4,7 +4,8 @@ const fs = require('fs');
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const installRedoc = async () => exec.exec('npm', [
+const installRedoc = async () => exec.exec('sudo', [
+  'npm',
   'install',
   'redoc-cli',
   '-global',

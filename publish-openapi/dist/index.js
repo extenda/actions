@@ -1587,7 +1587,8 @@ const fs = __webpack_require__(5747);
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const installRedoc = async () => exec.exec('npm', [
+const installRedoc = async () => exec.exec('sudo', [
+  'npm',
   'install',
   'redoc-cli',
   '-global',
