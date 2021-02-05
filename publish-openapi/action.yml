@@ -10,6 +10,9 @@ inputs:
   release-tag:
     description: Your api version documentation
     required: true
+  system-name:
+    description: The system your api belongs to
+    required: true
   bucket:
     description: The bucket to upload the generated files to
     required: false
