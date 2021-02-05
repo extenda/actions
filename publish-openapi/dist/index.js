@@ -1696,9 +1696,9 @@ const deployDocumentation = async (yaml, apiName, version, bucket, systemName) =
   const versionTitle = 'Versions';
 
   const promises = [];
-  await installRedoc()
-    .then(buildApiDocs(yaml, apiName, systemName, version)
-      .then(uploadApiDocs(bucket, systemName)));
+  await installRedoc();
+  await buildApiDocs(yaml, apiName, systemName, version);
+  await uploadApiDocs(bucket, systemName);
 
   promises.push(buildAndUploadIndex(systemsFolder, bucket, systemsTitle, bucket));
   promises.push(buildAndUploadIndex(systemNameFolder, systemNameFolder, apiTitle, bucket));
