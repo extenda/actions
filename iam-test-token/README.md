@@ -28,10 +28,17 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - uses: extenda/actions/gcp-secret-manager@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          secrets: |
+            API_KEY: api-key-hiidentity-staff
+
       - name: IAM token
         uses: extenda/actions/iam-test-token@v0
         with:
           service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
+          api-key: ${{ env.API_KEY }}
 
       - name: Acceptance test
         run: |
@@ -50,13 +57,19 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+     - uses: extenda/actions/gcp-secret-manager@v0
+      with:
+        service-account-key: ${{ secrets.SECRET_AUTH }}
+        secrets: |
+          API_KEY: api-key-hiidentity-staff
+
       - name: IAM token
         uses: extenda/actions/iam-test-token@v0
         with:
           service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
           user-email: iam-test-token-email (default secret name, also accepts full email)
           user-password: iam-test-token-password (default secret name)
-          api-key: AIzaSyBn2akUn5Iq9wLfVwPUsHiTtSP7EV2k-FU (default)
+          api-key: ${{ env.API_KEY }}
           tenant-id: testrunner-2mfuk (default)
 
       - name: Acceptance test

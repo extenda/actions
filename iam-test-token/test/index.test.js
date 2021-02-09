@@ -34,14 +34,17 @@ describe('iam-test-token', () => {
   });
 
   test('It will use default input', async () => {
-    core.getInput.mockReturnValueOnce('serviceAccountKey');
+    core.getInput.mockReturnValueOnce('serviceAccountKey')
+      .mockReturnValueOnce('iam-test-token-email')
+      .mockReturnValueOnce('iam-test-token-password')
+      .mockReturnValueOnce('api-key-test');
 
     getIamToken.mockResolvedValueOnce('secret-token');
     loadSecret.mockImplementation((serviceAccountKey, name) => Promise.resolve(name));
     await action();
     expect(loadSecret).toHaveBeenCalledTimes(2);
     expect(getIamToken).toHaveBeenCalledWith(
-      'AIzaSyBn2akUn5Iq9wLfVwPUsHiTtSP7EV2k-FU',
+      'api-key-test',
       'iam-test-token-email',
       'iam-test-token-password',
       'testrunner-2mfuk',
@@ -54,6 +57,7 @@ describe('iam-test-token', () => {
   test('It will use email as input', async () => {
     core.getInput.mockReturnValueOnce('serviceAccountKey')
       .mockReturnValueOnce('email@test.com')
+      .mockReturnValueOnce('api-key-test')
       .mockReturnValueOnce('password-secret');
 
     getIamToken.mockResolvedValueOnce('secret-token');
@@ -61,9 +65,9 @@ describe('iam-test-token', () => {
     await action();
     expect(loadSecret).toHaveBeenCalledTimes(1);
     expect(getIamToken).toHaveBeenCalledWith(
-      'AIzaSyBn2akUn5Iq9wLfVwPUsHiTtSP7EV2k-FU',
-      'email@test.com',
       'password-secret',
+      'email@test.com',
+      'api-key-test',
       'testrunner-2mfuk',
     );
     expect(core.setOutput).toHaveBeenCalledWith('iam-token', 'secret-token');
