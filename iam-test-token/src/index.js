@@ -22,7 +22,7 @@ const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const email = core.getInput('user-email') || 'iam-test-token-email';
   const password = core.getInput('user-password') || 'iam-test-token-password';
-  const apiKey = core.getInput('api-key') || 'AIzaSyBn2akUn5Iq9wLfVwPUsHiTtSP7EV2k-FU';
+  const apiKey = core.getInput('api-key', { required: true });
   const tenantId = core.getInput('tenant-id') || 'testrunner-2mfuk';
 
   const token = await loadCredentials(serviceAccountKey, email, password, apiKey, tenantId)
