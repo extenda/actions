@@ -1,5 +1,6 @@
 jest.mock('@actions/exec');
 jest.mock('../src/dns-record');
+jest.mock('../src/alert-certificate-expiration');
 
 const exec = require('@actions/exec');
 const configureDomains = require('../src/configure-domains');

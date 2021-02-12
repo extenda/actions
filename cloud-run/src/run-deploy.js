@@ -166,7 +166,7 @@ const runDeploy = async (
   // Authenticate gcloud with our service-account
   const projectId = await gcloudAuth(serviceAccountKey);
 
-  await runScan(image);
+  await runScan(serviceAccountKey, image);
 
   const {
     project,
