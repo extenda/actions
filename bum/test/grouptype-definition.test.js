@@ -30,7 +30,7 @@ describe('Grouptype Definition', () => {
   grouptypes:
   - id: price
     name: price name
-    desc: Should be desc`,
+    description: Should be description`,
       });
       expect(() => loadGroupTypeDefinition('grouptypes.yaml'))
         .toThrow(`grouptypes.yaml is not valid.
@@ -46,7 +46,7 @@ repository: bum-repo
 grouptypes:
   - id: admin
     name: test name
-    desc: Should be desc
+    description: Should be description
     custom: My own property`,
       });
       expect(() => loadGroupTypeDefinition('grouptypes.yaml'))
@@ -55,7 +55,7 @@ grouptypes:
 `);
     });
 
-    test('It throws for too long desc', () => {
+    test('It throws for too long description', () => {
       mockFs({
         'grouptypes.yaml': `
 name: test
@@ -63,12 +63,12 @@ repository: bum-repo
 grouptypes:
   - id: price
     name: price name
-    desc: A description description description description description description description description description description description description description description description longer than 200 characters
+    description: A description description description description description description description description description description description description description description description longer than 200 characters
 `,
       });
       expect(() => loadGroupTypeDefinition('grouptypes.yaml'))
         .toThrow(`grouptypes.yaml is not valid.
-0: instance.grouptypes[0].desc does not meet maximum length of 200
+0: instance.grouptypes[0].description does not meet maximum length of 200
 `);
     });
 
@@ -80,7 +80,7 @@ repository: bum-repo,
 grouptypes:
   - id: price
     name: price name name name name name name name name name name name name name name name name name name name name name name name name name name name name longer then 50
-    desc: A description
+    description: A description
 `,
       });
       expect(() => loadGroupTypeDefinition('grouptypes.yaml'))
@@ -99,10 +99,10 @@ repository: bum-repo
 grouptypes:
   - id: price
     name: price name
-    desc: Should be desc
+    description: Should be description
   - id: legal
     name: legal name
-    desc: Should be desc
+    description: Should be description
 `,
       });
       expect(() => loadGroupTypeDefinition('grouptypes.yaml'))
@@ -120,7 +120,7 @@ repository: actions
 grouptypes:
   - id: price
     name: price group
-    desc: the price group
+    description: the price group
 `,
       });
       expect(() => loadGroupTypeDefinition('grouptypes.yaml'))

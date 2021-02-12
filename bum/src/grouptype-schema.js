@@ -22,7 +22,7 @@ module.exports = {
             type: 'string',
             maxLength: 50,
           },
-          desc: {
+          description: {
             type: 'string',
             maxLength: 200,
           },
@@ -30,7 +30,7 @@ module.exports = {
         required: [
           'id',
           'name',
-          'desc',
+          'description',
         ],
         additionalProperties: false,
       },

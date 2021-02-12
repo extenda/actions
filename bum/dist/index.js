@@ -19062,7 +19062,7 @@ module.exports = {
             type: 'string',
             maxLength: 50,
           },
-          desc: {
+          description: {
             type: 'string',
             maxLength: 200,
           },
@@ -19070,7 +19070,7 @@ module.exports = {
         required: [
           'id',
           'name',
-          'desc',
+          'description',
         ],
         additionalProperties: false,
       },
@@ -19119,13 +19119,14 @@ const createGroupType = async (
 const updateGroupType = async (
   iamToken, groupTypeId, groupTypeName, groupTypeDescription, bumUrl,
 ) => axios({
-  url: `${bumUrl}/api/v1/grouptypes/${groupTypeId}`,
-  method: 'PUT',
+  url: `${bumUrl}/api/v1/grouptypes`,
+  method: 'POST',
   headers: {
     'content-type': 'application/json',
     authorization: `Bearer ${iamToken}`,
   },
   data: {
+    id: groupTypeId,
     name: groupTypeName,
     description: groupTypeDescription,
   },
@@ -19161,13 +19162,13 @@ const setupGroupTypes = async (groupTypes, owner, iamToken, bumUrl) => {
     promises.push(getGroupType(iamToken, bumUrl, groupType.id).then((groupTypeResult) => {
       if (groupTypeResult === true) {
         core.info(`creating grouptype '${groupType.id}'`);
-        return createGroupType(iamToken, groupType.id, groupType.name, groupType.desc, bumUrl)
+        return createGroupType(iamToken, groupType.id, groupType.name, groupType.description, bumUrl)
           .then((message) => core.info(message));
       }
-      if (groupTypeResult.name !== groupType.name
-        || groupTypeResult.description !== groupType.desc) {
+      if (groupTypeResult === undefined || groupTypeResult.name !== groupType.name
+        || groupTypeResult.description !== groupType.description) {
         core.info(`updating groupType '${groupType.id}'`);
-        return updateGroupType(iamToken, groupType.id, groupType.name, groupType.desc, bumUrl)
+        return updateGroupType(iamToken, groupType.id, groupType.name, groupType.description, bumUrl)
           .then((message) => core.info(message));
       }
       core.info(`groupType '${groupType.id} exists`);
@@ -19244,7 +19245,7 @@ const action = async () => {
   const serviceAccountKeyStaging = core.getInput('service-account-key-staging', { required: true });
   const serviceAccountKeyProd = core.getInput('service-account-key-prod', { required: true });
   const groupTypeFileGlob = core.getInput('group-type-definition') || 'grouptypes/*.yaml';
-  const bumUrl = core.getInput('styra-url') || 'https://business-unit-api.retailsvc.com';
+  const bumUrl = core.getInput('bum-url') || 'https://business-unit-api.retailsvc.com';
   const dryRun = core.getInput('dry-run') === 'true';
 
   const groupTypeFiles = fg.sync(groupTypeFileGlob, { onlyFiles: true });

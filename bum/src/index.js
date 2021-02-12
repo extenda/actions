@@ -52,7 +52,7 @@ const action = async () => {
   const serviceAccountKeyStaging = core.getInput('service-account-key-staging', { required: true });
   const serviceAccountKeyProd = core.getInput('service-account-key-prod', { required: true });
   const groupTypeFileGlob = core.getInput('group-type-definition') || 'grouptypes/*.yaml';
-  const bumUrl = core.getInput('styra-url') || 'https://business-unit-api.retailsvc.com';
+  const bumUrl = core.getInput('bum-url') || 'https://business-unit-api.retailsvc.com';
   const dryRun = core.getInput('dry-run') === 'true';
 
   const groupTypeFiles = fg.sync(groupTypeFileGlob, { onlyFiles: true });

@@ -48,7 +48,7 @@ properties are required and not.
 | `grouptypes`               | An list of group types that should exist for this service                                              | No       |
 | `grouptypes.id`            | The role id ([a-z][-a-z]{1,19})                                                                  | Yes      |
 | `grouptypes.name`          | The role name                                                                                    | Yes      |
-| `grouptypes.desc`          | The description of the role, (max 200 characters)                                                | Yes      |
+| `grouptypes.description`          | The description of the role, (max 200 characters)                                                | Yes      |
 
 ### YAML Examples
 
@@ -61,10 +61,10 @@ repository: braveheart-quotes-service
 grouptypes:
   - id: legal
     name: Legal type
-    desc: Top node for legal three
+    description: Top node for legal three
   - id: region
     name: Region type
-    desc: Top node for region three
+    description: Top node for region three
 
 
 ```

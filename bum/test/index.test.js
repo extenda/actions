@@ -49,13 +49,13 @@ describe('run action', () => {
       .mockReturnValueOnce('service-account-prod')
       .mockReturnValueOnce('iam.yaml')
       .mockReturnValueOnce('')
-      .mockReturnValueOnce('https://extendaretail.styra.com');
+      .mockReturnValueOnce('https://business-unit-api.retailsvc.com');
     loadIamDefinition.mockReturnValueOnce({});
     fg.sync.mockReturnValueOnce(['iam.yaml']);
     fetchIamToken.mockResolvedValueOnce('iam-token');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(7);
+    expect(core.getInput).toHaveBeenCalledTimes(6);
     expect(fetchIamToken).toHaveBeenCalledWith(
       'iam-key',
       'iam-email',
@@ -64,23 +64,15 @@ describe('run action', () => {
     );
     expect(configureIam).toHaveBeenNthCalledWith(1,
       {},
-      'styra-token',
-      'https://extendaretail.styra.com',
-      'https://iam-api.retailsvc.com',
+      'https://business-unit-api.retailsvc.com',
       '',
-      'staging',
       'test-staging-332',
-      ['test@mail.com'],
       true);
     expect(configureIam).toHaveBeenNthCalledWith(2,
       {},
-      'styra-token',
-      'https://extendaretail.styra.com',
-      'https://iam-api.retailsvc.com',
+      'https://business-unit-api.retailsvc.com',
       'iam-token',
-      'prod',
       'test-prod-332',
-      ['test@mail.com'],
       false);
   });
 
@@ -100,14 +92,14 @@ describe('run action', () => {
       .mockReturnValueOnce('service-account-prod')
       .mockReturnValueOnce('iam.yaml')
       .mockReturnValueOnce('https://iam-api.retailsvc.dev')
-      .mockReturnValueOnce('https://extendaretail.styra.com');
+      .mockReturnValueOnce('https://business-unit-api.retailsvc.com');
     loadIamDefinition.mockReturnValueOnce({});
     fg.sync.mockReturnValueOnce(['iam.yaml']);
     fetchIamToken.mockResolvedValueOnce('iam-token');
     fetchIamToken.mockResolvedValueOnce('iam-token');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(7);
+    expect(core.getInput).toHaveBeenCalledTimes(6);
     expect(fetchIamToken).toHaveBeenCalledWith(
       'iam-key',
       'iam-email',
@@ -116,23 +108,15 @@ describe('run action', () => {
     );
     expect(configureIam).toHaveBeenNthCalledWith(1,
       {},
-      'styra-token',
-      'https://extendaretail.styra.com',
       'https://iam-api.retailsvc.dev',
       'iam-token',
-      'staging',
       'test-staging-332',
-      ['test@mail.com'],
       false);
     expect(configureIam).toHaveBeenNthCalledWith(2,
       {},
-      'styra-token',
-      'https://extendaretail.styra.com',
       'https://iam-api.retailsvc.com',
       'iam-token',
-      'prod',
       'test-prod-332',
-      ['test@mail.com'],
       false);
   });
 
@@ -151,7 +135,7 @@ describe('run action', () => {
       .mockReturnValueOnce('service-account-prod')
       .mockReturnValueOnce('iam/*.yaml')
       .mockReturnValueOnce('')
-      .mockReturnValueOnce('https://extendaretail.styra.com');
+      .mockReturnValueOnce('https://business-unit-api.retailsvc.com');
     loadIamDefinition.mockReturnValue({});
     fg.sync.mockReturnValueOnce(['iam/iam.yaml', 'iam/two.yaml']);
     fetchIamToken.mockResolvedValue('iam-token');
@@ -163,15 +147,14 @@ describe('run action', () => {
   test('Dry-run stops after loading schema', async () => {
     setupGcloud.mockResolvedValue('test-prod-332');
     loadCredentials.mockResolvedValue(credentials);
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput.mockReturnValueOnce('service-account-key')
       .mockReturnValueOnce('service-account-staging')
       .mockReturnValueOnce('service-account-prod')
-      .mockReturnValueOnce('iam/*.yaml')
-      .mockReturnValueOnce('')
-      .mockReturnValueOnce('https://extendaretail.styra.com')
+      .mockReturnValueOnce('bum/*.yaml')
+      .mockReturnValueOnce('https://business-unit-api.retailsvc.com')
       .mockReturnValueOnce('true');
     loadIamDefinition.mockReturnValue({});
-    fg.sync.mockReturnValueOnce(['iam/iam.yaml', 'iam/two.yaml']);
+    fg.sync.mockReturnValueOnce(['bum/grouptypes.yaml', 'bum/grouptypes2.yaml']);
     await action();
 
     expect(loadIamDefinition).toHaveBeenCalledTimes(2);
