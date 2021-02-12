@@ -1604,6 +1604,7 @@ const buildApiDocs = async (openApiYaml, apiName, systemName, version) => exec.e
   '--options.nativeScrollbars',
   '--options.hideSingleRequestSampleTab',
   '--options.onlyRequiredInSamples',
+  '--options.sortPropsAlphabetically',
   '--cdn',
 ], {
   silent: true,
