@@ -54469,7 +54469,7 @@ const postSlackMessageToChannel = async (
 const notifySlack = async (serviceAccount, message, channelName) => {
   let channel = channelName;
   const slackToken = await loadSecret(serviceAccount, 'slack-notify-token');
-  if (!channelName || channel === '') {
+  if (!channel || channel === '') {
     channel = await loadSecret(serviceAccount, 'clan-slack-channel');
   }
   await postSlackMessageToChannel(slackToken, message, channel);
