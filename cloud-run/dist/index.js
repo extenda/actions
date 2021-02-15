@@ -11669,7 +11669,9 @@ const runDeploy = async (
   // Authenticate gcloud with our service-account
   const projectId = await gcloudAuth(serviceAccountKey);
 
-  await runScan(serviceAccountKey, image);
+  if (process.platform !== 'win32') {
+    await runScan(serviceAccountKey, image);
+  }
 
   const {
     project,

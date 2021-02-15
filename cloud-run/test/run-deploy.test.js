@@ -13,6 +13,7 @@ const exec = require('@actions/exec');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const runDeploy = require('../src/run-deploy');
 const { getClusterInfo } = require('../src/cluster-info');
+const scan = require('../src/vulnerability-scanning');
 
 const serviceAccountKey = Buffer.from('test', 'utf8').toString('base64');
 
@@ -600,7 +601,89 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       false,
       10,
     );
+    expect(scan).toHaveBeenCalledTimes(1);
+    expect(returnValue.gcloudExitCode).toEqual(0);
+  });
 
+  test('It will not run scan on windows', async () => {
+    Object.defineProperty(process, 'platform', {
+      value: 'win32',
+    });
+    const gcloudOutput = `
+Deploying container to Cloud Run for Anthos service [xxxxxxx] in namespace [default] of cluster [k8s-cluster]
+Deploying...
+Creating Revision.................failed
+Deployment failed
+ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3 nodes are available: 3 Insufficient cpu..
+`;
+
+    getClusterInfo.mockResolvedValueOnce({
+      project: 'tribe-staging-1234',
+      cluster: 'k8s-cluster',
+      clusterLocation: 'europe-west1',
+      uri: 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
+    });
+
+    const revisionStatus = {
+      status: {
+        conditions: [
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            severity: 'Info',
+            status: 'False',
+            type: 'Active',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'ContainerHealthy',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'Ready',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'ResourcesAvailable',
+          },
+        ],
+      },
+    };
+
+    exec.exec.mockImplementationOnce((cmd, args, opts) => {
+      opts.listeners.stderr(Buffer.from(gcloudOutput, 'utf8'));
+      return Promise.reject(new Error('Mock error'));
+    }).mockImplementationOnce((cmd, args, opts) => {
+      opts.listeners.stdout(Buffer.from(JSON.stringify(revisionStatus), 'utf8'));
+      return Promise.resolve(0);
+    }).mockImplementationOnce((cmd, args, opts) => {
+      revisionStatus.status.conditions[0].status = 'True';
+      opts.listeners.stdout(Buffer.from(JSON.stringify(revisionStatus), 'utf8'));
+      return Promise.resolve(0);
+    });
+
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      cpu: '233m',
+      platform: {
+        gke: {
+          connectivity: 'external',
+        },
+      },
+    };
+    const returnValue = await runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-staging-project/my-service:tag',
+      false,
+      10,
+    );
+
+    expect(scan).toHaveBeenCalledTimes(0);
     expect(returnValue.gcloudExitCode).toEqual(0);
   });
 });

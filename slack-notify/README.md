@@ -7,12 +7,17 @@ If the channel you are posting a message on is private make sure to invite the S
 
 See [action.yml](action.yml).
 
-### Examples
+### Comparing slack-message action
 
-#### Without channel input
+The main difference in this action lies in being able to publish to any public slack channel that you set as input, for private channels it is required to add this app to the channel(slackNotifications app). Whereas the github slack-message would need to subscribe to each and every repository that might require a notification alert.
+
+#### Examples
+
+##### Without channel input
 
 This example will load a `slack-token` named slack-notify-token from the GCP Secret Manager accessible using
-the provided `service-account-key`.
+the provided `service-account-key`. 
+If no channel is set this action will automatically look for the clan_slack_channelsecret stored in your clan secret manager and referese your clan monitoring channel.
 
 ```yaml
 on: push
