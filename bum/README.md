@@ -1,4 +1,4 @@
-# iam
+# Business unit group types
 
 This is a GitHub Action to publish group types to Hii Retail Business Unit.
 
@@ -45,16 +45,16 @@ properties are required and not.
 |:---------------------------|:-------------------------------------------------------------------------------------------------|:---------|
 | `name`                     | The name of the service system                                                                   | Yes      |
 | `repository`               | The repository for the service                                                                   | Yes      |
-| `grouptypes`               | An list of group types that should exist for this service                                              | No       |
+| `grouptypes`               | An list of group types that should exist for this service                                        | No       |
 | `grouptypes.id`            | The role id ([a-z][-a-z]{1,19})                                                                  | Yes      |
 | `grouptypes.name`          | The role name                                                                                    | Yes      |
-| `grouptypes.description`          | The description of the role, (max 200 characters)                                                | Yes      |
+| `grouptypes.description`   | The description of the role, (max 200 characters)                                                | Yes      |
 
 ### YAML Examples
 
-#### Create permissions and roles
+#### Create group types
 
-This example defines a YAML file that creates roles and permissions for the DAS system `bhq`
+This example defines a YAML file that creates group types
 ```yaml
 name: Braveheart Quotes
 repository: braveheart-quotes-service

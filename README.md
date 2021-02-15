@@ -10,6 +10,7 @@ the fundamental parts of our CI/CD pipelines.
 
 The following actions are available
 
+  * [Business unit group types](bum#readme)
   * [cloud-run](cloud-run#readme)
   * [commitlint](commitlint#readme)
   * [conventional-release](conventional-release#readme)
