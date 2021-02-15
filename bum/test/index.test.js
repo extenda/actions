@@ -16,7 +16,7 @@ const configureGroupTypes = require('../src/configure-grouptypes');
 const fetchIamToken = require('../../iam-test-token/src/iam-auth');
 const loadGroupTypeDefinition = require('../src/grouptype-definition');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
-const loadCredentials = require('../../utils');
+const { loadCredentials } = require('../../utils');
 const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 

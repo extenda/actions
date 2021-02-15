@@ -3,7 +3,7 @@ const yaml = require('yaml');
 const core = require('@actions/core');
 const { validate } = require('jsonschema');
 const jsonSchema = require('./iam-schema');
-const sortAndCompare = require('../../utils');
+const { sortAndCompare } = require('../../utils');
 
 const loadFile = (iamFile) => {
   if (!fs.existsSync(iamFile)) {
