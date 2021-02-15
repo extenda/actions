@@ -54419,18 +54419,24 @@ module.exports.wrap = wrap;
 /***/ }),
 
 /***/ 8571:
-/***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const core = __webpack_require__(6341);
 const { run } = __webpack_require__(1898);
 const notifySlack = __webpack_require__(9221);
 
-run(async () => {
+const action = async () => {
   const serviceAccount = core.getInput('service-account-key', { required: true });
   const text = core.getInput('text', { required: true });
   const channel = core.getInput('channel') || '';
   await notifySlack(serviceAccount, text, channel);
-});
+};
+
+if (require.main === require.cache[eval('__filename')]) {
+  run(action);
+}
+
+module.exports = action;
 
 
 /***/ }),
@@ -54457,7 +54463,7 @@ const postSlackMessageToChannel = async (
     text: message,
   },
 }).catch((err) => {
-  core.err(`Unable to send notification on slack! reason:\n${err}`);
+  core.error(`Unable to send notification on slack! reason:\n${err}`);
 });
 
 const notifySlack = async (serviceAccount, message, channelName) => {

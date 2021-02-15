@@ -71776,7 +71776,7 @@ const postSlackMessageToChannel = async (
     text: message,
   },
 }).catch((err) => {
-  core.err(`Unable to send notification on slack! reason:\n${err}`);
+  core.error(`Unable to send notification on slack! reason:\n${err}`);
 });
 
 const notifySlack = async (serviceAccount, message, channelName) => {
