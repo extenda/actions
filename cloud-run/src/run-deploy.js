@@ -10,6 +10,7 @@ const waitForRevision = require('./wait-revision');
 const authenticateKubeCtl = require('./kubectl-auth');
 const cleanRevisions = require('./clean-revisions');
 const checkServiceAccount = require('./check-sa');
+const runScan = require('./vulnerability-scanning');
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -164,6 +165,10 @@ const runDeploy = async (
 ) => {
   // Authenticate gcloud with our service-account
   const projectId = await gcloudAuth(serviceAccountKey);
+
+  if (process.platform !== 'win32') {
+    await runScan(serviceAccountKey, image);
+  }
 
   const {
     project,

@@ -79,7 +79,7 @@ const configureDomains = async (
   cluster,
   domainMappingEnv,
   dnsProjectLabel,
-  pipelineSA,
+  serviceAccount,
 ) => {
   if (!cluster) {
     core.info('Domain binding is not yet supported for managed cloud run.');
@@ -114,9 +114,7 @@ const configureDomains = async (
     });
     await Promise.all(promises);
 
-    if (pipelineSA) {
-      await certificateExpiration(pipelineSA, cluster.project);
-    }
+    await certificateExpiration(serviceAccount, cluster.project);
 
     return newDomains;
   }

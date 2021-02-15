@@ -6,9 +6,14 @@ posted with this action are delivered to all Slack channels that are subscribed 
 To subscribe Slack channel to a repository, add the `@github` bot and add the subscription
 with  `/github subscribe <owner>/<repo>`, for example `/github subscribe extenda/actions`
 
+## Comparing [slack-notify](../slack-notify/README.md) action
+
+The main difference in this action lies in first subscribing to a repository in order for the notification sent from that repo to reach this the slack channel. Whereas the slack-notify action requires you to specify what channel to notify on. Be aware that if the channel is private the app needs to be manually added to the channel.
+
 ## Usage
 
 See [action.yml](action.yml).
+
 
 ### Secrets
 
