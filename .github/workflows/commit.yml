@@ -178,12 +178,20 @@ jobs:
           echo VERSION=${{ steps.version.outputs.version }}
           echo RELEASE_TAG=${{ steps.version.outputs.release-tag }}
 
+      - name: Get API key secret
+        uses: ./gcp-secret-manager
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          secrets: |
+            API_KEY: api-key-hiidentity-staff
+
       - name: Get test token
         uses: ./iam-test-token
         with:
           service-account-key: ${{ secrets.SECRET_AUTH }}
           user-email: iam-test-token-acceptance-email
           user-password: iam-test-token-acceptance-password
+          api-key: ${{ env.API_KEY }}
 
       - name: Test IAM token
         run: |
