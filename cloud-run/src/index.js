@@ -12,7 +12,6 @@ const action = async () => {
   const domainBindingsEnv = core.getInput('domain-mappings-env') || '';
   const dnsProjectLabel = core.getInput('dns-project-label') || 'dns';
   const verbose = (core.getInput('verbose') || 'false');
-  const secretManagerServiceAccountKey = core.getInput('secret-manager-service-account-key') || '';
 
   const service = loadServiceDefinition(serviceFile, jsonSchema);
   await runDeploy(serviceAccountKey, service, image, verbose === 'true')
@@ -21,7 +20,7 @@ const action = async () => {
       cluster,
       domainBindingsEnv,
       dnsProjectLabel,
-      secretManagerServiceAccountKey,
+      serviceAccountKey,
     ));
 };
 

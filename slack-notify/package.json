@@ -1,0 +1,11 @@
+{
+  "name": "slack-notify",
+  "version": "0.0.1-local",
+  "description": "Send a message to Slack through the slack notification app",
+  "private": true,
+  "main": "dist/index.js",
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "axios": "^0.21.1"
+  }
+}
