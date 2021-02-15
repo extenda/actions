@@ -3,13 +3,14 @@
 This GitHub Action can be used to send messages to Slack through the SlackNotifications app added to our extenda workspace.
 If the channel you are posting a message on is private make sure to invite the SlackNotifications app before using this action.
 
+## Comparing [slack-message](../slack-message/README.md) action
+
+The main difference in this action lies in being able to publish to any public slack channel that you set as input, for private channels it is required to add this app to the channel(slackNotifications app). Whereas the github slack-message would need to subscribe to each and every repository that might require a notification alert.
+
 ## Usage
 
 See [action.yml](action.yml).
 
-### Comparing slack-message action
-
-The main difference in this action lies in being able to publish to any public slack channel that you set as input, for private channels it is required to add this app to the channel(slackNotifications app). Whereas the github slack-message would need to subscribe to each and every repository that might require a notification alert.
 
 #### Examples
 
