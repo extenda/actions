@@ -19162,13 +19162,15 @@ const setupGroupTypes = async (groupTypes, owner, iamToken, bumUrl) => {
     promises.push(getGroupType(iamToken, bumUrl, groupType.id).then((groupTypeResult) => {
       if (groupTypeResult === true) {
         core.info(`creating grouptype '${groupType.id}'`);
-        return createGroupType(iamToken, groupType.id, groupType.name, groupType.description, bumUrl)
+        return createGroupType(iamToken, groupType.id, groupType.name,
+          groupType.description, bumUrl)
           .then((message) => core.info(message));
       }
       if (groupTypeResult === undefined || groupTypeResult.name !== groupType.name
         || groupTypeResult.description !== groupType.description) {
         core.info(`updating groupType '${groupType.id}'`);
-        return updateGroupType(iamToken, groupType.id, groupType.name, groupType.description, bumUrl)
+        return updateGroupType(iamToken, groupType.id, groupType.name,
+          groupType.description, bumUrl)
           .then((message) => core.info(message));
       }
       core.info(`groupType '${groupType.id} exists`);
