@@ -18987,22 +18987,13 @@ const yaml = __webpack_require__(75024);
 const core = __webpack_require__(6341);
 const { validate } = __webpack_require__(32039);
 const jsonSchema = __webpack_require__(5272);
+const { sortAndCompare } = __webpack_require__(1898);
 
 const loadFile = (groupTypeFile) => {
   if (!fs.existsSync(groupTypeFile)) {
     throw Error(`grouptype specification file not found: ${groupTypeFile}`);
   }
   return yaml.parse(fs.readFileSync(groupTypeFile, 'utf8'));
-};
-
-const sortAndCompare = (array, docPath, result) => {
-  const sorted = array.slice(0).sort((a, b) => a.localeCompare(b, 'en-US'));
-  for (let i = 0; i < array.length; i += 1) {
-    if (array[i] !== sorted[i]) {
-      const err = result.addError('is not sorted alphabetically');
-      err.property = `instance.${docPath}[${i}]`;
-    }
-  }
 };
 
 const validateAlphaSort = (spec, result) => {
@@ -19198,7 +19189,7 @@ const fg = __webpack_require__(12411);
 const { run } = __webpack_require__(1898);
 const loadGroupTypeDefinition = __webpack_require__(72826);
 const configureGroupTypes = __webpack_require__(910);
-const loadCredentials = __webpack_require__(32558);
+const { loadCredentials } = __webpack_require__(1898);
 const fetchIamToken = __webpack_require__(68);
 const setupGcloud = __webpack_require__(97095);
 const projectInfo = __webpack_require__(80809);
@@ -19279,54 +19270,6 @@ if (require.main === require.cache[eval('__filename')]) {
 }
 
 module.exports = action;
-
-
-/***/ }),
-
-/***/ 32558:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-const core = __webpack_require__(6341);
-const { loadSecret } = __webpack_require__(48652);
-const { checkEnv } = __webpack_require__(1898);
-
-const getSecret = async (serviceAccountKey, secretName, envVar) => {
-  let secret;
-  if (process.env[envVar]) {
-    core.debug(`Using explicit ${envVar} env var`);
-    secret = process.env[envVar];
-  } else if (serviceAccountKey) {
-    core.debug(`Load '${secretName}' from secret manager`);
-    secret = await loadSecret(serviceAccountKey, secretName);
-    process.env[envVar] = secret;
-  } else {
-    checkEnv([envVar]);
-  }
-  return secret;
-};
-
-const loadCredentials = async (serviceAccountKey, env) => {
-  const iamApiEmailName = `iam-api-email-${env}`;
-  const iamApiPasswordName = `iam-api-password-${env}`;
-  const iamApiKeyName = `iam-api-key-${env}`;
-  const iamApiTenantName = `iam-api-tenantId-${env}`;
-
-  core.info(`Load credentials for ${env}`);
-
-  const iamApiEmail = await getSecret(serviceAccountKey, iamApiEmailName, `API_EMAIL_${env}`);
-  const iamApiPassword = await getSecret(serviceAccountKey, iamApiPasswordName, `API_PASSWORD_${env}`);
-  const iamApiKey = await getSecret(serviceAccountKey, iamApiKeyName, `API_KEY_${env}`);
-  const iamApiTenant = await getSecret(serviceAccountKey, iamApiTenantName, `API_TENANT_${env}`);
-
-  return {
-    iamApiEmail,
-    iamApiPassword,
-    iamApiKey,
-    iamApiTenant,
-  };
-};
-
-module.exports = loadCredentials;
 
 
 /***/ }),
@@ -97732,6 +97675,8 @@ const run = __webpack_require__(96252);
 const gitConfig = __webpack_require__(14722);
 const loadTool = __webpack_require__(7828);
 const loadGitHubToken = __webpack_require__(92282);
+const loadCredentials = __webpack_require__(3318);
+const sortAndCompare = __webpack_require__(58006);
 
 // Note that src/versions are NOT included here because it adds 2.2MBs to every package
 // that uses the utils module. If versions are to be used, include the file explicitly.
@@ -97742,6 +97687,8 @@ module.exports = {
   loadTool,
   loadGitHubToken,
   run,
+  sortAndCompare,
+  loadCredentials,
 };
 
 
@@ -97831,6 +97778,56 @@ module.exports = loadTool;
 
 /***/ }),
 
+/***/ 3318:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const core = __webpack_require__(34006);
+const { checkEnv } = __webpack_require__(19045);
+const { loadSecret } = __webpack_require__(48652);
+
+const getSecret = async (serviceAccountKey, secretName, envVar) => {
+  let secret;
+  if (process.env[envVar]) {
+    core.debug(`Using explicit ${envVar} env var`);
+    secret = process.env[envVar];
+  } else if (serviceAccountKey) {
+    core.debug(`Load '${secretName}' from secret manager`);
+    secret = await loadSecret(serviceAccountKey, secretName);
+    process.env[envVar] = secret;
+  } else {
+    checkEnv([envVar]);
+  }
+  return secret;
+};
+
+const loadCredentials = async (serviceAccountKey, env) => {
+  const iamApiEmailName = `iam-api-email-${env}`;
+  const iamApiPasswordName = `iam-api-password-${env}`;
+  const iamApiKeyName = `iam-api-key-${env}`;
+  const iamApiTenantName = `iam-api-tenantId-${env}`;
+
+  core.info(`Load credentials for ${env}`);
+
+  const styraToken = await getSecret(serviceAccountKey, 'styra-das-token', 'STYRA_TOKEN');
+  const iamApiEmail = await getSecret(serviceAccountKey, iamApiEmailName, `API_EMAIL_${env}`);
+  const iamApiPassword = await getSecret(serviceAccountKey, iamApiPasswordName, `API_PASSWORD_${env}`);
+  const iamApiKey = await getSecret(serviceAccountKey, iamApiKeyName, `API_KEY_${env}`);
+  const iamApiTenant = await getSecret(serviceAccountKey, iamApiTenantName, `API_TENANT_${env}`);
+
+  return {
+    styraToken,
+    iamApiEmail,
+    iamApiPassword,
+    iamApiKey,
+    iamApiTenant,
+  };
+};
+
+module.exports = loadCredentials;
+
+
+/***/ }),
+
 /***/ 92282:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -97883,6 +97880,26 @@ const run = async (action) => {
 };
 
 module.exports = run;
+
+
+/***/ }),
+
+/***/ 58006:
+/***/ ((module) => {
+
+
+const sortAndCompare = async (array, docPath, result) => {
+  const sorted = array.slice(0).sort((a, b) => a.localeCompare(b, 'en-US'));
+  for (let i = 0; i < array.length; i += 1) {
+    if (array[i] !== sorted[i]) {
+      const err = result.addError('is not sorted alphabetically');
+      err.property = `instance.${docPath}[${i}]`;
+    }
+  }
+};
+
+
+module.exports = sortAndCompare;
 
 
 /***/ }),

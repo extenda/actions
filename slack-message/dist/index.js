@@ -69986,6 +69986,8 @@ const run = __webpack_require__(6252);
 const gitConfig = __webpack_require__(4722);
 const loadTool = __webpack_require__(7828);
 const loadGitHubToken = __webpack_require__(2282);
+const loadCredentials = __webpack_require__(3318);
+const sortAndCompare = __webpack_require__(8006);
 
 // Note that src/versions are NOT included here because it adds 2.2MBs to every package
 // that uses the utils module. If versions are to be used, include the file explicitly.
@@ -69996,6 +69998,8 @@ module.exports = {
   loadTool,
   loadGitHubToken,
   run,
+  sortAndCompare,
+  loadCredentials,
 };
 
 
@@ -70085,6 +70089,56 @@ module.exports = loadTool;
 
 /***/ }),
 
+/***/ 3318:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const core = __webpack_require__(4006);
+const { checkEnv } = __webpack_require__(9045);
+const { loadSecret } = __webpack_require__(8652);
+
+const getSecret = async (serviceAccountKey, secretName, envVar) => {
+  let secret;
+  if (process.env[envVar]) {
+    core.debug(`Using explicit ${envVar} env var`);
+    secret = process.env[envVar];
+  } else if (serviceAccountKey) {
+    core.debug(`Load '${secretName}' from secret manager`);
+    secret = await loadSecret(serviceAccountKey, secretName);
+    process.env[envVar] = secret;
+  } else {
+    checkEnv([envVar]);
+  }
+  return secret;
+};
+
+const loadCredentials = async (serviceAccountKey, env) => {
+  const iamApiEmailName = `iam-api-email-${env}`;
+  const iamApiPasswordName = `iam-api-password-${env}`;
+  const iamApiKeyName = `iam-api-key-${env}`;
+  const iamApiTenantName = `iam-api-tenantId-${env}`;
+
+  core.info(`Load credentials for ${env}`);
+
+  const styraToken = await getSecret(serviceAccountKey, 'styra-das-token', 'STYRA_TOKEN');
+  const iamApiEmail = await getSecret(serviceAccountKey, iamApiEmailName, `API_EMAIL_${env}`);
+  const iamApiPassword = await getSecret(serviceAccountKey, iamApiPasswordName, `API_PASSWORD_${env}`);
+  const iamApiKey = await getSecret(serviceAccountKey, iamApiKeyName, `API_KEY_${env}`);
+  const iamApiTenant = await getSecret(serviceAccountKey, iamApiTenantName, `API_TENANT_${env}`);
+
+  return {
+    styraToken,
+    iamApiEmail,
+    iamApiPassword,
+    iamApiKey,
+    iamApiTenant,
+  };
+};
+
+module.exports = loadCredentials;
+
+
+/***/ }),
+
 /***/ 2282:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -70137,6 +70191,26 @@ const run = async (action) => {
 };
 
 module.exports = run;
+
+
+/***/ }),
+
+/***/ 8006:
+/***/ ((module) => {
+
+
+const sortAndCompare = async (array, docPath, result) => {
+  const sorted = array.slice(0).sort((a, b) => a.localeCompare(b, 'en-US'));
+  for (let i = 0; i < array.length; i += 1) {
+    if (array[i] !== sorted[i]) {
+      const err = result.addError('is not sorted alphabetically');
+      err.property = `instance.${docPath}[${i}]`;
+    }
+  }
+};
+
+
+module.exports = sortAndCompare;
 
 
 /***/ }),

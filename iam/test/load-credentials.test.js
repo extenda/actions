@@ -2,7 +2,7 @@ const secrets = require('../../gcp-secret-manager/src/secrets');
 
 jest.mock('../../gcp-secret-manager/src/secrets');
 
-const loadCredentials = require('../src/load-credentials');
+const { loadCredentials } = require('../../utils');
 
 const orgEnv = process.env;
 
