@@ -1,5 +1,5 @@
-name: IAM permissions
-description: Publish permissions to Hii Retail IAM
+name: Business unit group type
+description: Publish group types to business unit manager service
 author: Extenda Retail
 inputs:
   service-account-key:
@@ -15,21 +15,16 @@ inputs:
     description: |
       The service account key used to authenticate to your prod project
     required: true
-  iam-definition:
+  bum-definition:
     description: |
-      The IAM YAML specification.
-    required: false
-    default: iam/*.yaml
-  iam-api-url:
+      The business unit group type YAML specification.
+    required: true
+    default: bum/*.yaml
+  bum-api-url:
     description: |
-      The Hii Retail IAM API URL.
-    required: false
-    default: https://iam-api.retailsvc.com
-  styra-url:
-    description: |
-      The styra url
-    required: false
-    default: https://extendaretail.svc.styra.com
+      The Hii Retail Business Unit Manager API URL.
+    required: true
+    default: https://business-unit-api.retailsvc.com
   dry-run:
     description: |
       If 'true' stop after validating the YAML schema. No remote systems will be updated.
