@@ -1,6 +1,6 @@
 const core = require('@actions/core');
+const { checkEnv } = require('./check-env');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
-const { checkEnv } = require('../../utils');
 
 const getSecret = async (serviceAccountKey, secretName, envVar) => {
   let secret;
@@ -25,12 +25,14 @@ const loadCredentials = async (serviceAccountKey, env) => {
 
   core.info(`Load credentials for ${env}`);
 
+  const styraToken = await getSecret(serviceAccountKey, 'styra-das-token', 'STYRA_TOKEN');
   const iamApiEmail = await getSecret(serviceAccountKey, iamApiEmailName, `API_EMAIL_${env}`);
   const iamApiPassword = await getSecret(serviceAccountKey, iamApiPasswordName, `API_PASSWORD_${env}`);
   const iamApiKey = await getSecret(serviceAccountKey, iamApiKeyName, `API_KEY_${env}`);
   const iamApiTenant = await getSecret(serviceAccountKey, iamApiTenantName, `API_TENANT_${env}`);
 
   return {
+    styraToken,
     iamApiEmail,
     iamApiPassword,
     iamApiKey,

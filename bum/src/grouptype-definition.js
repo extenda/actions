@@ -3,22 +3,13 @@ const yaml = require('yaml');
 const core = require('@actions/core');
 const { validate } = require('jsonschema');
 const jsonSchema = require('./grouptype-schema');
+const { sortAndCompare } = require('../../utils');
 
 const loadFile = (groupTypeFile) => {
   if (!fs.existsSync(groupTypeFile)) {
     throw Error(`grouptype specification file not found: ${groupTypeFile}`);
   }
   return yaml.parse(fs.readFileSync(groupTypeFile, 'utf8'));
-};
-
-const sortAndCompare = (array, docPath, result) => {
-  const sorted = array.slice(0).sort((a, b) => a.localeCompare(b, 'en-US'));
-  for (let i = 0; i < array.length; i += 1) {
-    if (array[i] !== sorted[i]) {
-      const err = result.addError('is not sorted alphabetically');
-      err.property = `instance.${docPath}[${i}]`;
-    }
-  }
 };
 
 const validateAlphaSort = (spec, result) => {

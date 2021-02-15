@@ -2,7 +2,7 @@ jest.mock('@actions/core');
 jest.mock('../src/configure-grouptypes');
 jest.mock('../src/grouptype-definition');
 jest.mock('../../iam-test-token/src/iam-auth');
-jest.mock('../src/load-credentials');
+jest.mock('../../utils');
 jest.mock('../../setup-gcloud/src/setup-gcloud');
 jest.mock('fast-glob');
 jest.mock('@actions/github');
@@ -12,11 +12,11 @@ jest.mock('../../gcp-secret-manager/src/secrets');
 const core = require('@actions/core');
 const fg = require('fast-glob');
 const action = require('../src/index');
-const configureIam = require('../src/configure-grouptypes');
+const configureGroupTypes = require('../src/configure-grouptypes');
 const fetchIamToken = require('../../iam-test-token/src/iam-auth');
-const loadIamDefinition = require('../src/grouptype-definition');
+const loadGroupTypeDefinition = require('../src/grouptype-definition');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
-const loadCredentials = require('../src/load-credentials');
+const loadCredentials = require('../../utils');
 const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
@@ -50,7 +50,7 @@ describe('run action', () => {
       .mockReturnValueOnce('iam.yaml')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('https://business-unit-api.retailsvc.com');
-    loadIamDefinition.mockReturnValueOnce({});
+    loadGroupTypeDefinition.mockReturnValueOnce({});
     fg.sync.mockReturnValueOnce(['iam.yaml']);
     fetchIamToken.mockResolvedValueOnce('iam-token');
     await action();
@@ -62,13 +62,13 @@ describe('run action', () => {
       'iam-pass',
       'iam-tenant',
     );
-    expect(configureIam).toHaveBeenNthCalledWith(1,
+    expect(configureGroupTypes).toHaveBeenNthCalledWith(1,
       {},
       'https://business-unit-api.retailsvc.com',
       '',
       'test-staging-332',
       true);
-    expect(configureIam).toHaveBeenNthCalledWith(2,
+    expect(configureGroupTypes).toHaveBeenNthCalledWith(2,
       {},
       'https://business-unit-api.retailsvc.com',
       'iam-token',
@@ -93,7 +93,7 @@ describe('run action', () => {
       .mockReturnValueOnce('iam.yaml')
       .mockReturnValueOnce('https://iam-api.retailsvc.dev')
       .mockReturnValueOnce('https://business-unit-api.retailsvc.com');
-    loadIamDefinition.mockReturnValueOnce({});
+    loadGroupTypeDefinition.mockReturnValueOnce({});
     fg.sync.mockReturnValueOnce(['iam.yaml']);
     fetchIamToken.mockResolvedValueOnce('iam-token');
     fetchIamToken.mockResolvedValueOnce('iam-token');
@@ -106,13 +106,13 @@ describe('run action', () => {
       'iam-pass',
       'iam-tenant',
     );
-    expect(configureIam).toHaveBeenNthCalledWith(1,
+    expect(configureGroupTypes).toHaveBeenNthCalledWith(1,
       {},
       'https://iam-api.retailsvc.dev',
       'iam-token',
       'test-staging-332',
       false);
-    expect(configureIam).toHaveBeenNthCalledWith(2,
+    expect(configureGroupTypes).toHaveBeenNthCalledWith(2,
       {},
       'https://iam-api.retailsvc.com',
       'iam-token',
@@ -136,12 +136,12 @@ describe('run action', () => {
       .mockReturnValueOnce('iam/*.yaml')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('https://business-unit-api.retailsvc.com');
-    loadIamDefinition.mockReturnValue({});
+    loadGroupTypeDefinition.mockReturnValue({});
     fg.sync.mockReturnValueOnce(['iam/iam.yaml', 'iam/two.yaml']);
     fetchIamToken.mockResolvedValue('iam-token');
     await action();
 
-    expect(loadIamDefinition).toHaveBeenCalledTimes(2);
+    expect(loadGroupTypeDefinition).toHaveBeenCalledTimes(2);
   });
 
   test('Dry-run stops after loading schema', async () => {
@@ -153,12 +153,12 @@ describe('run action', () => {
       .mockReturnValueOnce('bum/*.yaml')
       .mockReturnValueOnce('https://business-unit-api.retailsvc.com')
       .mockReturnValueOnce('true');
-    loadIamDefinition.mockReturnValue({});
+    loadGroupTypeDefinition.mockReturnValue({});
     fg.sync.mockReturnValueOnce(['bum/grouptypes.yaml', 'bum/grouptypes2.yaml']);
     await action();
 
-    expect(loadIamDefinition).toHaveBeenCalledTimes(2);
+    expect(loadGroupTypeDefinition).toHaveBeenCalledTimes(2);
     expect(fetchIamToken).not.toHaveBeenCalled();
-    expect(configureIam).not.toHaveBeenCalled();
+    expect(configureGroupTypes).not.toHaveBeenCalled();
   });
 });
