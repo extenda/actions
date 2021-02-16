@@ -38,12 +38,13 @@ const deployJob = async (
   if (numWorkers) {
     args.push(`--num-workers=${numWorkers}`);
   }
+  const userLabels = await projectLabels(projectId);
   args.push(`--service-account-email=${dataflowServiceAccount}`);
   args.push(`--region=${region}`);
   args.push(`--project=${projectId}`);
   args.push(`--network=${network}`);
   args.push(`--subnetwork=${subnetwork}`);
-  args.push(`--additional-user-labels=cc=${projectLabels(projectId)}`);
+  args.push(`--additional-user-labels=cc=${userLabels}`);
 
   let jobId = '';
   await exec.exec('gcloud', args, {
