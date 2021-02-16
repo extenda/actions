@@ -11835,11 +11835,10 @@ const installTrivy = async () => {
 // 2. run trivvy scan on image
 const scanImage = async (image) => {
   let output = '';
-  await exec.exec('sudo', [
-    'trivy',
-    image,
-    '>',
+  await exec.exec('trivy', [
+    '-o',
     'scanReport.scn',
+    image,
   ], {
     silent: true,
     listeners: {
