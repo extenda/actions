@@ -22,9 +22,9 @@ const postSlackMessageToChannel = async (
 
 const notifySlack = async (serviceAccount, message, channelName) => {
   let channel = channelName;
-  const slackToken = await loadSecret(serviceAccount, 'slack-notify-token');
+  const slackToken = await loadSecret(serviceAccount, 'slack_notify_token');
   if (!channel) {
-    channel = await loadSecret(serviceAccount, 'clan-slack-channel');
+    channel = await loadSecret(serviceAccount, 'clan_slack_channel');
   }
   await postSlackMessageToChannel(slackToken, message, channel);
 };
