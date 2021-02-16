@@ -2,6 +2,8 @@
 jest.mock('axios');
 jest.mock('@actions/core');
 jest.mock('../../gcp-secret-manager/src/secrets');
+jest.mock('fs');
+jest.mock('form-data');
 
 const axios = require('axios');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
@@ -29,6 +31,13 @@ describe('send Message to slack', () => {
   test('Error on request', async () => {
     axios.mockRejectedValueOnce({ status: 500 });
     await notifySlack('service-account', 'text', 'channel-name', '');
+    expect(axios).toHaveBeenCalledTimes(1);
+    expect(loadSecret).toHaveBeenCalledTimes(1);
+  });
+
+  test('Error on request', async () => {
+    axios.mockRejectedValueOnce({ status: 500 });
+    await notifySlack('service-account', 'text', 'channel-name', 'file');
     expect(axios).toHaveBeenCalledTimes(1);
     expect(loadSecret).toHaveBeenCalledTimes(1);
   });

@@ -11880,7 +11880,9 @@ Critical: ${report.CRITICAL}
 `;
   core.info(text);
   await notifySlack(serviceAccount, text, '', 'scanReport.scn');
-  //if (report.CRITICAL > 0 || report.HIGH > 0 || report.TOTAL > 10) await notifySlack(serviceAccount, text, '', 'scanReport.scn');
+  // if (report.CRITICAL > 0 || report.HIGH > 0 || report.TOTAL > 10) {
+  //  await notifySlack(serviceAccount, text, '', 'scanReport.scn');
+  // }
 };
 
 const runScan = async (serviceAccount, image) => installTrivy()
@@ -73275,11 +73277,12 @@ function populateMaps (extensions, types) {
 const core = __webpack_require__(17377);
 const axios = __webpack_require__(72536);
 const FormData = __webpack_require__(98946);
+const fs = __webpack_require__(35747);
 const { loadSecret } = __webpack_require__(48652);
 
 const buildFormData = async (channel, message, file) => {
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('file', fs.createReadStream(file));
   formData.append('channels', channel);
   formData.append('initial_comment', message);
   return formData;
@@ -73311,19 +73314,19 @@ const postMessageToSlackChannel = async (
   core.error(`Unable to send notification on slack! reason:\n${err}`);
 });
 
-const postFileToSlackChannel = async (
-  slackData, message, file,
-) => axios({
-  url: 'https://slack.com/api/files.upload',
-  method: 'POST',
-  headers: {
-    'content-type': 'application/x-www-form-urlencoded',
-    authorization: `Bearer ${slackData.token}`,
-  },
-  data: await buildFormData(slackData.channel, message, file),
-}).catch((err) => {
-  core.error(`Unable to send notification on slack! reason:\n${err}`);
-});
+const postFileToSlackChannel = async (slackData, message, file) => {
+  const formData = await buildFormData(slackData.channel, message, file);
+  const headers = { Authorization: `Bearer ${slackData.token}`, ...formData.getHeaders() };
+  axios({
+    url: 'https://slack.com/api/files.upload',
+    method: 'POST',
+    data: formData,
+    headers,
+  })
+    .catch((err) => {
+      core.error(`Unable to send notification on slack! reason:\n${err}`);
+    });
+};
 
 const notifySlackMessage = async (
   serviceAccount, message, channelName,
