@@ -38,17 +38,17 @@ will be processed independent of others.
 
 ### Schema
 
-The YAML syntax is formally defined with [JSON Schema](src/iam-schema.js). The following table explains what
+The YAML syntax is formally defined with [JSON Schema](src/grouptype-schema.js). The following table explains what
 properties are required and not.
 
 | Property                   | Description                                                                                      | Required |
 |:---------------------------|:-------------------------------------------------------------------------------------------------|:---------|
-| `name`                     | The name of the service system                                                                   | Yes      |
+| `name`                     | The name of the service                                                                          | Yes      |
 | `repository`               | The repository for the service                                                                   | Yes      |
-| `grouptypes`               | An list of group types that should exist for this service                                        | No       |
-| `grouptypes.id`            | The role id ([a-z][-a-z]{1,19})                                                                  | Yes      |
-| `grouptypes.name`          | The role name                                                                                    | Yes      |
-| `grouptypes.description`   | The description of the role, (max 200 characters)                                                | Yes      |
+| `grouptypes`               | An list of group types that should exist for this service                                        | Yes      |
+| `grouptypes.id`            | The group type id ([a-z][-a-z]{1,19})                                                            | Yes      |
+| `grouptypes.name`          | The group type name                                                                              | Yes      |
+| `grouptypes.description`   | The description of the group type, (max 200 characters)                                          | Yes      |
 
 ### YAML Examples
 
