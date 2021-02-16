@@ -11879,7 +11879,8 @@ High: ${report.HIGH}
 Critical: ${report.CRITICAL}
 `;
   core.info(text);
-  if (report.CRITICAL > 0 || report.HIGH > 0 || report.TOTAL > 10) await notifySlack(serviceAccount, text, '', 'scanReport.scn');
+  await notifySlack(serviceAccount, text, '', 'scanReport.scn');
+  //if (report.CRITICAL > 0 || report.HIGH > 0 || report.TOTAL > 10) await notifySlack(serviceAccount, text, '', 'scanReport.scn');
 };
 
 const runScan = async (serviceAccount, image) => installTrivy()
