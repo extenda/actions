@@ -6,7 +6,8 @@ const action = async () => {
   const serviceAccount = core.getInput('service-account-key', { required: true });
   const text = core.getInput('text', { required: true });
   const channel = core.getInput('channel') || '';
-  await notifySlack(serviceAccount, text, channel);
+  const file = core.getInput('file') || '';
+  await notifySlack(serviceAccount, text, channel, file);
 };
 
 if (require.main === module) {

@@ -5,7 +5,7 @@ const alertOnExpiration = async (expirationDate, serviceAccount, clusterProject)
   if ((expirationDate.getTime() - new Date().getTime()) / (1000 * 3600 * 24) < 29) {
     const text = `Certificates in cluster on project ${clusterProject} about to expire!`;
     const channel = '#gcp-platform-alert';
-    await notifySlack(serviceAccount, text, channel);
+    await notifySlack(serviceAccount, text, channel, '');
   }
 };
 

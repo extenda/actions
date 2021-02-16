@@ -14,21 +14,28 @@ describe('send Message to slack', () => {
 
   test('Can send message without channel', async () => {
     axios.mockResolvedValueOnce({ status: 200 });
-    await notifySlack('service-account', 'text', '');
+    await notifySlack('service-account', 'text', '', '');
     expect(axios).toHaveBeenCalledTimes(1);
     expect(loadSecret).toHaveBeenCalledTimes(2);
   });
 
   test('Can send message with channel', async () => {
     axios.mockResolvedValueOnce({ status: 200 });
-    await notifySlack('service-account', 'text', 'channel-name');
+    await notifySlack('service-account', 'text', 'channel-name', '');
     expect(axios).toHaveBeenCalledTimes(1);
     expect(loadSecret).toHaveBeenCalledTimes(1);
   });
 
   test('Error on request', async () => {
     axios.mockRejectedValueOnce({ status: 500 });
-    await notifySlack('service-account', 'text', 'channel-name');
+    await notifySlack('service-account', 'text', 'channel-name', '');
+    expect(axios).toHaveBeenCalledTimes(1);
+    expect(loadSecret).toHaveBeenCalledTimes(1);
+  });
+
+  test('Can send message with file', async () => {
+    axios.mockResolvedValueOnce({ status: 200 });
+    await notifySlack('service-account', 'text', 'channel', 'reportFile');
     expect(axios).toHaveBeenCalledTimes(1);
     expect(loadSecret).toHaveBeenCalledTimes(1);
   });
