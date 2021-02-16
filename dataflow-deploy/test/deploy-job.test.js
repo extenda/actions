@@ -2,20 +2,31 @@ jest.mock('@actions/exec');
 const exec = require('@actions/exec');
 const deployJob = require('../src/deploy-job');
 
+const mockExecListeners = (output) => (cmd, args, opts) => {
+  opts.listeners.stdout(Buffer.from(output, 'utf8'));
+  return Promise.resolve(0);
+};
+
 describe('deploy dataflow job', () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
 
   test('deploy flex-template job', async () => {
-    const getJob = `line1
-line2
-id: jobId
+    const getJob = `job:
+  createTime: '2021-02-10T16:39:01.838758Z'
+  currentStateTime: '1970-01-01T00:00:00Z'
+  id: 2021-02-10_08_39_00-161366295837612
+  location: europe-west1
+  name: stock-transation-processing-97c642e
+  projectId: logistics-staging-e392
+  startTime: '2021-02-10T16:39:01.838758Z'
 `;
-    exec.exec.mockImplementationOnce((
-      cmd, args, opts,
-    ) => opts.listeners.stdout(getJob));
-    deployJob(
+    exec.exec
+      .mockImplementationOnce(mockExecListeners("cc: '640'"))
+      .mockImplementationOnce(mockExecListeners(getJob));
+
+    await deployJob(
       'job-name-10',
       'test=job-test',
       'dataflow-sa',
@@ -34,14 +45,20 @@ id: jobId
   });
 
   test('deploy flex-template job without parameters', async () => {
-    const getJob = `line1
-line2
-id: jobId
+    const getJob = `job:
+  createTime: '2021-02-10T16:39:01.838758Z'
+  currentStateTime: '1970-01-01T00:00:00Z'
+  id: 2021-02-10_08_39_00-161366295837612
+  location: europe-west1
+  name: stock-transation-processing-97c642e
+  projectId: logistics-staging-e392
+  startTime: '2021-02-10T16:39:01.838758Z'
 `;
-    exec.exec.mockImplementationOnce((
-      cmd, args, opts,
-    ) => opts.listeners.stdout(getJob));
-    deployJob(
+    exec.exec
+      .mockImplementationOnce(mockExecListeners("cc: '640'"))
+      .mockImplementationOnce(mockExecListeners(getJob));
+
+    await deployJob(
       'job-name-10',
       '',
       'dataflow-sa',
@@ -60,14 +77,20 @@ id: jobId
   });
 
   test('deploy job', async () => {
-    const getJob = `line1
-line2
-id: jobId
+    const getJob = `job:
+  createTime: '2021-02-10T16:39:01.838758Z'
+  currentStateTime: '1970-01-01T00:00:00Z'
+  id: 2021-02-10_08_39_00-161366295837612
+  location: europe-west1
+  name: stock-transation-processing-97c642e
+  projectId: logistics-staging-e392
+  startTime: '2021-02-10T16:39:01.838758Z'
 `;
-    exec.exec.mockImplementationOnce((
-      cmd, args, opts,
-    ) => opts.listeners.stdout(getJob));
-    deployJob(
+    exec.exec
+      .mockImplementationOnce(mockExecListeners("cc: '640'"))
+      .mockImplementationOnce(mockExecListeners(getJob));
+
+    await deployJob(
       'job-name-10',
       '',
       'dataflow-sa',
