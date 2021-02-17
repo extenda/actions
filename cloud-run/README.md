@@ -10,9 +10,35 @@ When deploying to Cloud Run on GKE, the action will also conditionally deploy or
   * Config maps
   * Domain bindings for external services
 
+## Vulnerability scanning
+
+This action will automatically scan your image for vulnerabilities. If a vulnerability is found rated with HIGH or CRITICAL severity you will be notified on your clan slack channel. Important to note is that if your clan slack channel is private you will have to invite the slackNotification app/bot to recieve these reports. If you don't know what your clan slack channel is it's specified in your clan infra common repository under your common.hcl file.
+
+To work locally with the scan tool or for more information visit [trivy-github](https://github.com/aquasecurity/trivy#table-of-contents)
+
+### Securing your image
+
+When a vulnerability is found on your service, this usually means that you are using a base image with many packages installed that can be exploited by malicious users/bots. A good solution is to make sure you are using a secure version of the image or alternatively an alpine/distroless version which usually contain few or no known vulnerabilities.
+
+### Ignore vulnerabilities
+
+In some cases we have to use certain images for a service that may requires a package/support installed. In these cases we have the .trivyignore that should be placed in the root of your repository.
+````
+#.trivyignore
+# Accept the risk
+CVE-2018-14618
+
+# No impact in our settings
+CVE-2019-1543
+````
+
+This will be usefull when you are forced to use an image with a known vulnerability.
+
 ## Usage
 
 See [action.yml](action.yml).
+
+
 
 ### Secrets
 
