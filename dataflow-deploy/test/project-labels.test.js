@@ -10,7 +10,10 @@ describe('Get projects labels', () => {
   test('Labels added', async () => {
     exec.exec.mockImplementationOnce((
       cmd, args, opts,
-    ) => opts.listeners.stdout('cc: \'640\''));
+    ) => {
+      opts.listeners.stdout('cc: \'640\'');
+      return Promise.resolve(0);
+    });
 
     await expect(projectLabels('test-staging-323')).resolves
       .toEqual('640');
