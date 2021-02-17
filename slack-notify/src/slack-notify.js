@@ -1,32 +1,74 @@
 
 const core = require('@actions/core');
 const axios = require('axios');
+const FormData = require('form-data');
+const fs = require('fs');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
-const postSlackMessageToChannel = async (
-  token, message, channelName,
+const buildFormData = async (channel, message, file) => {
+  const formData = new FormData();
+  formData.append('file', fs.createReadStream(file));
+  formData.append('channels', channel);
+  formData.append('initial_comment', message);
+  return formData;
+};
+
+const initSlack = async (serviceAccount, channelName) => {
+  let channel = channelName;
+  const slackToken = await loadSecret(serviceAccount, 'slack_notify_token');
+  if (!channel) {
+    channel = await loadSecret(serviceAccount, 'clan_slack_channel');
+  }
+  return { token: slackToken, channel };
+};
+
+const postMessageToSlackChannel = async (
+  slackData, message,
 ) => axios({
   url: 'https://slack.com/api/chat.postMessage',
   method: 'POST',
   headers: {
     'content-type': 'application/json',
-    authorization: `Bearer ${token}`,
+    authorization: `Bearer ${slackData.token}`,
   },
   data: {
-    channel: channelName,
+    channel: slackData.channel,
     text: message,
   },
 }).catch((err) => {
   core.error(`Unable to send notification on slack! reason:\n${err}`);
 });
 
-const notifySlack = async (serviceAccount, message, channelName) => {
-  let channel = channelName;
-  const slackToken = await loadSecret(serviceAccount, 'slack_notify_token');
-  if (!channel) {
-    channel = await loadSecret(serviceAccount, 'clan_slack_channel');
+const postFileToSlackChannel = async (slackData, message, file) => {
+  const formData = await buildFormData(slackData.channel, message, file);
+  const headers = { Authorization: `Bearer ${slackData.token}`, ...formData.getHeaders() };
+  axios({
+    url: 'https://slack.com/api/files.upload',
+    method: 'POST',
+    data: formData,
+    headers,
+  })
+    .catch((err) => {
+      core.error(`Unable to send notification on slack! reason:\n${err}`);
+    });
+};
+
+const notifySlackMessage = async (
+  serviceAccount, message, channelName,
+) => initSlack(serviceAccount, channelName)
+  .then((slackData) => postMessageToSlackChannel(slackData, message));
+
+const notifySlackWithFile = async (
+  serviceAccount, message, channelName, file,
+) => initSlack(serviceAccount, channelName)
+  .then((slackData) => postFileToSlackChannel(slackData, message, file));
+
+const notifySlack = async (serviceAccount, message, channelName, file) => {
+  if (file) {
+    await notifySlackWithFile(serviceAccount, message, channelName, file);
+  } else {
+    await notifySlackMessage(serviceAccount, message, channelName);
   }
-  await postSlackMessageToChannel(slackToken, message, channel);
 };
 
 module.exports = notifySlack;

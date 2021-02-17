@@ -13,6 +13,10 @@ inputs:
     description: |
       The channel name to notify on. ( default is your clan alert channel )
     required: false
+  file:
+    description: |
+      The path to a file you want to send in the notification.
+    required: false
 runs:
   using: node12
   main: dist/index.js

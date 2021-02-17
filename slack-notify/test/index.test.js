@@ -20,6 +20,22 @@ describe('slack notification', () => {
       'service-account',
       'text',
       'channel-name',
+      '',
+    );
+  });
+
+  test('Can run the action with file', async () => {
+    core.getInput.mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('text')
+      .mockReturnValueOnce('channel-name')
+      .mockReturnValueOnce('file');
+    await action();
+    expect(notifySlack).toHaveBeenCalledTimes(1);
+    expect(notifySlack).toHaveBeenCalledWith(
+      'service-account',
+      'text',
+      'channel-name',
+      'file',
     );
   });
 });
