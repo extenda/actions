@@ -11841,11 +11841,6 @@ const scanImage = async (image) => {
   ], {
     silent: false,
   });
-  await exec.exec('export', [
-    'TRIVY_TIMEOUT_SEC=120s',
-  ], {
-    silent: false,
-  });
   await exec.exec('trivy', [
     '-o',
     'scanReport.scan',
