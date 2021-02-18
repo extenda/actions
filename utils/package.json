@@ -10,7 +10,7 @@
     "@actions/github": "^2.1.1",
     "@actions/io": "^1.0.1",
     "@actions/tool-cache": "^1.1.2",
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "conventional-changelog-conventionalcommits": "^4.4.0",
     "conventional-changelog-core": "4.1.1",
     "conventional-commits-parser": "^3.1.0",

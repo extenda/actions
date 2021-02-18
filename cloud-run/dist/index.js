@@ -11897,7 +11897,7 @@ High: ${report.HIGH}
 Critical: ${report.CRITICAL}
 `;
   core.info(text);
-  if (report.CRITICAL > 0 || report.HIGH > 0 ) {
+  if (report.CRITICAL > 0 || report.HIGH > 0) {
     await notifySlack(serviceAccount, text, '', 'scanReport.scan');
   }
 };
