@@ -7675,6 +7675,31 @@ var enhanceError = __webpack_require__(2858);
 
 var isHttps = /https:?/;
 
+/**
+ *
+ * @param {http.ClientRequestArgs} options
+ * @param {AxiosProxyConfig} proxy
+ * @param {string} location
+ */
+function setProxy(options, proxy, location) {
+  options.hostname = proxy.host;
+  options.host = proxy.host;
+  options.port = proxy.port;
+  options.path = location;
+
+  // Basic proxy authorization
+  if (proxy.auth) {
+    var base64 = Buffer.from(proxy.auth.username + ':' + proxy.auth.password, 'utf8').toString('base64');
+    options.headers['Proxy-Authorization'] = 'Basic ' + base64;
+  }
+
+  // If a proxy is used, any redirects must also pass through the proxy
+  options.beforeRedirect = function beforeRedirect(redirection) {
+    redirection.headers.host = redirection.host;
+    setProxy(redirection, proxy, redirection.href);
+  };
+}
+
 /*eslint consistent-return:0*/
 module.exports = function httpAdapter(config) {
   return new Promise(function dispatchHttpRequest(resolvePromise, rejectPromise) {
@@ -7785,11 +7810,11 @@ module.exports = function httpAdapter(config) {
           });
         }
 
-
         if (shouldProxy) {
           proxy = {
             host: parsedProxyUrl.hostname,
-            port: parsedProxyUrl.port
+            port: parsedProxyUrl.port,
+            protocol: parsedProxyUrl.protocol
           };
 
           if (parsedProxyUrl.auth) {
@@ -7804,17 +7829,8 @@ module.exports = function httpAdapter(config) {
     }
 
     if (proxy) {
-      options.hostname = proxy.host;
-      options.host = proxy.host;
       options.headers.host = parsed.hostname + (parsed.port ? ':' + parsed.port : '');
-      options.port = proxy.port;
-      options.path = protocol + '//' + parsed.hostname + (parsed.port ? ':' + parsed.port : '') + options.path;
-
-      // Basic proxy authorization
-      if (proxy.auth) {
-        var base64 = Buffer.from(proxy.auth.username + ':' + proxy.auth.password, 'utf8').toString('base64');
-        options.headers['Proxy-Authorization'] = 'Basic ' + base64;
-      }
+      setProxy(options, proxy, protocol + '//' + parsed.hostname + (parsed.port ? ':' + parsed.port : '') + options.path);
     }
 
     var transport;
@@ -7972,19 +7988,12 @@ module.exports = function xhrAdapter(config) {
       delete requestHeaders['Content-Type']; // Let the browser set it
     }
 
-    if (
-      (utils.isBlob(requestData) || utils.isFile(requestData)) &&
-      requestData.type
-    ) {
-      delete requestHeaders['Content-Type']; // Let the browser set it
-    }
-
     var request = new XMLHttpRequest();
 
     // HTTP basic authentication
     if (config.auth) {
       var username = config.auth.username || '';
-      var password = unescape(encodeURIComponent(config.auth.password)) || '';
+      var password = config.auth.password ? unescape(encodeURIComponent(config.auth.password)) : '';
       requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
     }
 
@@ -8195,6 +8204,9 @@ axios.all = function all(promises) {
 };
 axios.spread = __webpack_require__(1878);
 
+// Expose isAxiosError
+axios.isAxiosError = __webpack_require__(5590);
+
 module.exports = axios;
 
 // Allow use of default import syntax in TypeScript
@@ -8389,7 +8401,8 @@ utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData
   Axios.prototype[method] = function(url, config) {
     return this.request(mergeConfig(config || {}, {
       method: method,
-      url: url
+      url: url,
+      data: (config || {}).data
     }));
   };
 });
@@ -10800,14 +10813,19 @@ formatters.O = function (v) {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var debug;
-try {
-  /* eslint global-require: off */
-  debug = __webpack_require__(9311)("follow-redirects");
-}
-catch (error) {
-  debug = function () { /* */ };
-}
-module.exports = debug;
+
+module.exports = function () {
+  if (!debug) {
+    try {
+      /* eslint global-require: off */
+      debug = __webpack_require__(9311)("follow-redirects");
+    }
+    catch (error) {
+      debug = function () { /* */ };
+    }
+  }
+  debug.apply(null, arguments);
+};
 
 
 /***/ }),
@@ -11217,7 +11235,7 @@ function wrap(protocols) {
     var wrappedProtocol = exports[scheme] = Object.create(nativeProtocol);
 
     // Executes a request, following redirects
-    wrappedProtocol.request = function (input, options, callback) {
+    function request(input, options, callback) {
       // Parse parameters
       if (typeof input === "string") {
         var urlStr = input;
@@ -11252,14 +11270,20 @@ function wrap(protocols) {
       assert.equal(options.protocol, protocol, "protocol mismatch");
       debug("options", options);
       return new RedirectableRequest(options, callback);
-    };
+    }
 
     // Executes a GET request, following redirects
-    wrappedProtocol.get = function (input, options, callback) {
-      var request = wrappedProtocol.request(input, options, callback);
-      request.end();
-      return request;
-    };
+    function get(input, options, callback) {
+      var wrappedRequest = wrappedProtocol.request(input, options, callback);
+      wrappedRequest.end();
+      return wrappedRequest;
+    }
+
+    // Expose the properties on the wrapped protocol
+    Object.defineProperties(wrappedProtocol, {
+      request: { value: request, configurable: true, enumerable: true, writable: true },
+      get: { value: get, configurable: true, enumerable: true, writable: true },
+    });
   });
   return exports;
 }
@@ -23045,6 +23069,14 @@ module.exports = run;
 
 /***/ }),
 
+/***/ 5590:
+/***/ ((module) => {
+
+module.exports = eval("require")("./helpers/isAxiosError");
+
+
+/***/ }),
+
 /***/ 696:
 /***/ ((module) => {
 
@@ -23057,7 +23089,7 @@ module.exports = JSON.parse("{\"name\":\"axios\",\"version\":\"0.19.2\",\"descri
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse("{\"name\":\"axios\",\"version\":\"0.20.0\",\"description\":\"Promise based HTTP client for the browser and node.js\",\"main\":\"index.js\",\"scripts\":{\"test\":\"grunt test && bundlesize\",\"start\":\"node ./sandbox/server.js\",\"build\":\"NODE_ENV=production grunt build\",\"preversion\":\"npm test\",\"version\":\"npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json\",\"postversion\":\"git push && git push --tags\",\"examples\":\"node ./examples/server.js\",\"coveralls\":\"cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js\",\"fix\":\"eslint --fix lib/**/*.js\"},\"repository\":{\"type\":\"git\",\"url\":\"https://github.com/axios/axios.git\"},\"keywords\":[\"xhr\",\"http\",\"ajax\",\"promise\",\"node\"],\"author\":\"Matt Zabriskie\",\"license\":\"MIT\",\"bugs\":{\"url\":\"https://github.com/axios/axios/issues\"},\"homepage\":\"https://github.com/axios/axios\",\"devDependencies\":{\"bundlesize\":\"^0.17.0\",\"coveralls\":\"^3.0.0\",\"es6-promise\":\"^4.2.4\",\"grunt\":\"^1.0.2\",\"grunt-banner\":\"^0.6.0\",\"grunt-cli\":\"^1.2.0\",\"grunt-contrib-clean\":\"^1.1.0\",\"grunt-contrib-watch\":\"^1.0.0\",\"grunt-eslint\":\"^20.1.0\",\"grunt-karma\":\"^2.0.0\",\"grunt-mocha-test\":\"^0.13.3\",\"grunt-ts\":\"^6.0.0-beta.19\",\"grunt-webpack\":\"^1.0.18\",\"istanbul-instrumenter-loader\":\"^1.0.0\",\"jasmine-core\":\"^2.4.1\",\"karma\":\"^1.3.0\",\"karma-chrome-launcher\":\"^2.2.0\",\"karma-coverage\":\"^1.1.1\",\"karma-firefox-launcher\":\"^1.1.0\",\"karma-jasmine\":\"^1.1.1\",\"karma-jasmine-ajax\":\"^0.1.13\",\"karma-opera-launcher\":\"^1.0.0\",\"karma-safari-launcher\":\"^1.0.0\",\"karma-sauce-launcher\":\"^1.2.0\",\"karma-sinon\":\"^1.0.5\",\"karma-sourcemap-loader\":\"^0.3.7\",\"karma-webpack\":\"^1.7.0\",\"load-grunt-tasks\":\"^3.5.2\",\"minimist\":\"^1.2.0\",\"mocha\":\"^5.2.0\",\"sinon\":\"^4.5.0\",\"typescript\":\"^2.8.1\",\"url-search-params\":\"^0.10.0\",\"webpack\":\"^1.13.1\",\"webpack-dev-server\":\"^1.14.1\"},\"browser\":{\"./lib/adapters/http.js\":\"./lib/adapters/xhr.js\"},\"jsdelivr\":\"dist/axios.min.js\",\"unpkg\":\"dist/axios.min.js\",\"typings\":\"./index.d.ts\",\"dependencies\":{\"follow-redirects\":\"^1.10.0\"},\"bundlesize\":[{\"path\":\"./dist/axios.min.js\",\"threshold\":\"5kB\"}],\"_resolved\":\"https://registry.npmjs.org/axios/-/axios-0.20.0.tgz\",\"_integrity\":\"sha512-ANA4rr2BDcmmAQLOKft2fufrtuvlqR+cXNNinUmvfeSNCOF98PZL+7M/v1zIdGo7OLjEA9J2gXJL+j4zGsl0bA==\",\"_from\":\"axios@0.20.0\"}");
+module.exports = JSON.parse("{\"name\":\"axios\",\"version\":\"0.21.1\",\"description\":\"Promise based HTTP client for the browser and node.js\",\"main\":\"index.js\",\"scripts\":{\"test\":\"grunt test && bundlesize\",\"start\":\"node ./sandbox/server.js\",\"build\":\"NODE_ENV=production grunt build\",\"preversion\":\"npm test\",\"version\":\"npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json\",\"postversion\":\"git push && git push --tags\",\"examples\":\"node ./examples/server.js\",\"coveralls\":\"cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js\",\"fix\":\"eslint --fix lib/**/*.js\"},\"repository\":{\"type\":\"git\",\"url\":\"https://github.com/axios/axios.git\"},\"keywords\":[\"xhr\",\"http\",\"ajax\",\"promise\",\"node\"],\"author\":\"Matt Zabriskie\",\"license\":\"MIT\",\"bugs\":{\"url\":\"https://github.com/axios/axios/issues\"},\"homepage\":\"https://github.com/axios/axios\",\"devDependencies\":{\"bundlesize\":\"^0.17.0\",\"coveralls\":\"^3.0.0\",\"es6-promise\":\"^4.2.4\",\"grunt\":\"^1.0.2\",\"grunt-banner\":\"^0.6.0\",\"grunt-cli\":\"^1.2.0\",\"grunt-contrib-clean\":\"^1.1.0\",\"grunt-contrib-watch\":\"^1.0.0\",\"grunt-eslint\":\"^20.1.0\",\"grunt-karma\":\"^2.0.0\",\"grunt-mocha-test\":\"^0.13.3\",\"grunt-ts\":\"^6.0.0-beta.19\",\"grunt-webpack\":\"^1.0.18\",\"istanbul-instrumenter-loader\":\"^1.0.0\",\"jasmine-core\":\"^2.4.1\",\"karma\":\"^1.3.0\",\"karma-chrome-launcher\":\"^2.2.0\",\"karma-coverage\":\"^1.1.1\",\"karma-firefox-launcher\":\"^1.1.0\",\"karma-jasmine\":\"^1.1.1\",\"karma-jasmine-ajax\":\"^0.1.13\",\"karma-opera-launcher\":\"^1.0.0\",\"karma-safari-launcher\":\"^1.0.0\",\"karma-sauce-launcher\":\"^1.2.0\",\"karma-sinon\":\"^1.0.5\",\"karma-sourcemap-loader\":\"^0.3.7\",\"karma-webpack\":\"^1.7.0\",\"load-grunt-tasks\":\"^3.5.2\",\"minimist\":\"^1.2.0\",\"mocha\":\"^5.2.0\",\"sinon\":\"^4.5.0\",\"typescript\":\"^2.8.1\",\"url-search-params\":\"^0.10.0\",\"webpack\":\"^1.13.1\",\"webpack-dev-server\":\"^1.14.1\"},\"browser\":{\"./lib/adapters/http.js\":\"./lib/adapters/xhr.js\"},\"jsdelivr\":\"dist/axios.min.js\",\"unpkg\":\"dist/axios.min.js\",\"typings\":\"./index.d.ts\",\"dependencies\":{\"follow-redirects\":\"^1.10.0\"},\"bundlesize\":[{\"path\":\"./dist/axios.min.js\",\"threshold\":\"5kB\"}],\"_resolved\":\"https://registry.npmjs.org/axios/-/axios-0.21.1.tgz\",\"_integrity\":\"sha512-dKQiRHxGD9PPRIUNIWvZhPTPpl1rf/OxTYKsqKUDjBwYylTvV7SjSHJb9ratfyzM6wCdLCOYLzs73qpg5c4iGA==\",\"_from\":\"axios@0.21.1\"}");
 
 /***/ }),
 

@@ -11834,6 +11834,7 @@ const installTrivy = async () => {
 };
 // 2. run trivvy scan on image
 const scanImage = async (image) => {
+  let rerunScan = false;
   let output = '';
   await exec.exec('trivy', [
     '-o',
@@ -11846,7 +11847,24 @@ const scanImage = async (image) => {
         output += data.toString('utf8');
       },
     },
+  }).catch(() => {
+    rerunScan = true;
   });
+  // temporary fix, rerun scan on error
+  if (rerunScan) {
+    await exec.exec('trivy', [
+      '-o',
+      'scanReport.scan',
+      image,
+    ], {
+      silent: true,
+      listeners: {
+        stdout: (data) => {
+          output += data.toString('utf8');
+        },
+      },
+    });
+  }
   return output.split(/[\r\n]+/);
 };
 
@@ -11879,7 +11897,7 @@ High: ${report.HIGH}
 Critical: ${report.CRITICAL}
 `;
   core.info(text);
-  if (report.CRITICAL > 0 || report.HIGH > 0 || report.TOTAL > 10) {
+  if (report.CRITICAL > 0 || report.HIGH > 0) {
     await notifySlack(serviceAccount, text, '', 'scanReport.scan');
   }
 };
