@@ -11818,11 +11818,11 @@ const exec = __webpack_require__(22176);
 const core = __webpack_require__(6341);
 const notifySlack = __webpack_require__(81478);
 
-const runImageScan = async (image, ignoreUnfixed) => {
+const runImageScan = async (image, ignoreUnfixed, firstRun) => {
   let output = '';
   await exec.exec(
     'trivy',
-    ignoreUnfixed === true ? ['--ignore-unfixed', '-o', 'scanReport.scan', image] : [image],
+    ignoreUnfixed === true ? ['--ignore-unfixed', '-o', 'scanReport.scan', image] : [firstRun === true ? '--timeout=1s' : '--timeout=120s', image],
     {
       silent: true,
       listeners: {
@@ -11869,17 +11869,18 @@ const installTrivy = async () => {
 
 const scanImage = async (image, ignoreUnfixed) => {
   let rerunScan = false;
-  let output = await runImageScan(image, ignoreUnfixed)
+  let output = await runImageScan(image, ignoreUnfixed, !ignoreUnfixed)
     .catch(() => {
       rerunScan = true;
     });
   // temporary fix, rerun scan on error
   if (rerunScan) {
-    output = await runImageScan(image, ignoreUnfixed);
+    output = await runImageScan(image, ignoreUnfixed, false);
   }
   const scanResult = output.split(/[\r\n]+/);
   const report = await buildReport(scanResult, image);
   if (!ignoreUnfixed) {
+    core.info(report);
     core.startGroup('full vulnerability scan report');
     core.info(output);
     core.endGroup();
