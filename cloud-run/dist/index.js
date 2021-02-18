@@ -11823,34 +11823,21 @@ const installTrivy = async () => {
   await exec.exec('wget', [
     'https://github.com/aquasecurity/trivy/releases/download/v0.15.0/trivy_0.15.0_Linux-64bit.deb',
   ], {
-    silent: false,
+    silent: true,
   });
   await exec.exec('sudo dpkg', [
     '-i',
     'trivy_0.15.0_Linux-64bit.deb',
   ], {
-    silent: false,
+    silent: true,
   });
 };
 // 2. run trivvy scan on image
 const scanImage = async (image) => {
   let output = '';
   await exec.exec('trivy', [
-    'image',
-    '--clear-cache',
-  ], {
-    silent: false,
-  });
-  await exec.exec('trivy', [
-    'image',
-    '--reset',
-  ], {
-    silent: false,
-  });
-  await exec.exec('trivy', [
     '-o',
     'scanReport.scan',
-    '--debug',
     image,
   ], {
     silent: false,
@@ -11859,6 +11846,20 @@ const scanImage = async (image) => {
         output += data.toString('utf8');
       },
     },
+  }).catch(() => {
+    // temporary fix, rerun scan on error
+    exec.exec('trivy', [
+      '-o',
+      'scanReport.scan',
+      image,
+    ], {
+      silent: false,
+      listeners: {
+        stdout: (data) => {
+          output += data.toString('utf8');
+        },
+      },
+    });
   });
   return output.split(/[\r\n]+/);
 };
