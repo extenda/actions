@@ -11842,6 +11842,12 @@ const scanImage = async (image) => {
     silent: false,
   });
   await exec.exec('trivy', [
+    'image',
+    '--reset',
+  ], {
+    silent: false,
+  });
+  await exec.exec('trivy', [
     '-o',
     'scanReport.scan',
     '--debug',
