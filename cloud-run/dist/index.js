@@ -11820,19 +11820,18 @@ const notifySlack = __webpack_require__(81478);
 
 const runImageScan = async (image, ignoreUnfixed) => {
   let output = '';
-  await exec.exec('trivy', [
-    '-o',
-    'scanReport.scan',
-    ignoreUnfixed === true ? '--ignore-unfixed' : '',
-    image,
-  ], {
-    silent: true,
-    listeners: {
-      stdout: (data) => {
-        output += data.toString('utf8');
+  await exec.exec(
+    'trivy',
+    ignoreUnfixed === true ? ['--ignore-unfixed', '-o', 'scanReport.scan', image] : [image],
+    {
+      silent: false,
+      listeners: {
+        stdout: (data) => {
+          output += data.toString('utf8');
+        },
       },
     },
-  });
+  );
   return output;
 };
 
