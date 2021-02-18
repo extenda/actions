@@ -11823,13 +11823,13 @@ const installTrivy = async () => {
   await exec.exec('wget', [
     'https://github.com/aquasecurity/trivy/releases/download/v0.15.0/trivy_0.15.0_Linux-64bit.deb',
   ], {
-    silent: true,
+    silent: false,
   });
   await exec.exec('sudo dpkg', [
     '-i',
     'trivy_0.15.0_Linux-64bit.deb',
   ], {
-    silent: true,
+    silent: false,
   });
 };
 // 2. run trivvy scan on image
@@ -11840,7 +11840,7 @@ const scanImage = async (image) => {
     'scanReport.scan',
     image,
   ], {
-    silent: true,
+    silent: false,
     listeners: {
       stdout: (data) => {
         output += data.toString('utf8');
