@@ -11822,9 +11822,9 @@ const runImageScan = async (image, ignoreUnfixed) => {
   let output = '';
   await exec.exec(
     'trivy',
-    ignoreUnfixed === true ? ['--ignore-unfixed', '-o', 'scanReport.scan', image] : [image],
+    ignoreUnfixed === true ? ['--ignore-unfixed', '-o', 'scanReport.scan', image] : ['-o', 'fullScan', image],
     {
-      silent: false,
+      silent: true,
       listeners: {
         stdout: (data) => {
           output += data.toString('utf8');
@@ -11844,14 +11844,13 @@ const buildReport = async (scanResults, image) => {
     }
   }
 
-  const report = `Total vulnerabilities found on ${image}: ${results[1]}
+  return `Total vulnerabilities found on ${image}: ${results[1]}
   Unknown: ${results[2]}
   Low: ${results[3]}
   Medium: ${results[4]}
   High: ${results[5]}
   Critical: ${results[6]}
   `;
-  return report;
 };
 
 const installTrivy = async () => {
@@ -11881,7 +11880,9 @@ const scanImage = async (image, ignoreUnfixed) => {
   const scanResult = output.split(/[\r\n]+/);
   const report = await buildReport(scanResult, image);
   if (!ignoreUnfixed) {
-    core.info(report);
+    core.startGroup('Full report');
+    core.info(output);
+    core.endGroup();
   }
   return report;
 };
