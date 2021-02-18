@@ -11822,7 +11822,7 @@ const runImageScan = async (image, ignoreUnfixed) => {
   let output = '';
   await exec.exec(
     'trivy',
-    ignoreUnfixed === true ? ['--ignore-unfixed', '-o', 'scanReport.scan', image] : ['-o', 'fullScan', image],
+    ignoreUnfixed === true ? ['--ignore-unfixed', '-o', 'scanReport.scan', image] : [image],
     {
       silent: true,
       listeners: {
@@ -11880,7 +11880,7 @@ const scanImage = async (image, ignoreUnfixed) => {
   const scanResult = output.split(/[\r\n]+/);
   const report = await buildReport(scanResult, image);
   if (!ignoreUnfixed) {
-    core.startGroup('Full report');
+    core.startGroup('full vulnerability scan report');
     core.info(output);
     core.endGroup();
   }
