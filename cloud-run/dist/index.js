@@ -11818,7 +11818,41 @@ const exec = __webpack_require__(22176);
 const core = __webpack_require__(6341);
 const notifySlack = __webpack_require__(81478);
 
-// 1. download trivvy and install bin
+const runImageScan = async (image, ignoreUnfixed) => {
+  let output = '';
+  await exec.exec(
+    'trivy',
+    ignoreUnfixed === true ? ['--ignore-unfixed', '-o', 'scanReport.scan', image] : [image],
+    {
+      silent: true,
+      listeners: {
+        stdout: (data) => {
+          output += data.toString('utf8');
+        },
+      },
+    },
+  );
+  return output;
+};
+
+const buildReport = async (scanResults, image) => {
+  let results = [];
+  for (let i = 0; i < scanResults.length; i += 1) {
+    const line = scanResults[i];
+    if (line.startsWith('Total:')) {
+      results = line.match(/Total: ([0-9]+) \(UNKNOWN: ([0-9]+), LOW: ([0-9]+), MEDIUM: ([0-9]+), HIGH: ([0-9]+), CRITICAL: ([0-9]+)\)/);
+    }
+  }
+
+  return `Total vulnerabilities found on ${image}: ${results[1]}
+  Unknown: ${results[2]}
+  Low: ${results[3]}
+  Medium: ${results[4]}
+  High: ${results[5]}
+  Critical: ${results[6]}
+  `;
+};
+
 const installTrivy = async () => {
   await exec.exec('wget', [
     'https://github.com/aquasecurity/trivy/releases/download/v0.15.0/trivy_0.15.0_Linux-64bit.deb',
@@ -11832,80 +11866,38 @@ const installTrivy = async () => {
     silent: true,
   });
 };
-// 2. run trivvy scan on image
-const scanImage = async (image) => {
+
+const scanImage = async (image, ignoreUnfixed) => {
   let rerunScan = false;
-  let output = '';
-  await exec.exec('trivy', [
-    '-o',
-    'scanReport.scan',
-    image,
-  ], {
-    silent: true,
-    listeners: {
-      stdout: (data) => {
-        output += data.toString('utf8');
-      },
-    },
-  }).catch(() => {
-    rerunScan = true;
-  });
+  let output = await runImageScan(image, ignoreUnfixed)
+    .catch(() => {
+      rerunScan = true;
+    });
   // temporary fix, rerun scan on error
   if (rerunScan) {
-    await exec.exec('trivy', [
-      '-o',
-      'scanReport.scan',
-      image,
-    ], {
-      silent: true,
-      listeners: {
-        stdout: (data) => {
-          output += data.toString('utf8');
-        },
-      },
-    });
+    output = await runImageScan(image, ignoreUnfixed);
   }
-  return output.split(/[\r\n]+/);
+  const scanResult = output.split(/[\r\n]+/);
+  const report = await buildReport(scanResult, image);
+  if (!ignoreUnfixed) {
+    core.info(report);
+    core.startGroup('full vulnerability scan report');
+    core.info(output);
+    core.endGroup();
+  }
+  return report;
 };
 
-// 3. parse issues
-const buildReport = async (scanResults) => {
-  let results = [];
-  for (let i = 0; i < scanResults.length; i += 1) {
-    const line = scanResults[i];
-    if (line.startsWith('Total:')) {
-      results = line.match(/Total: ([0-9]+) \(UNKNOWN: ([0-9]+), LOW: ([0-9]+), MEDIUM: ([0-9]+), HIGH: ([0-9]+), CRITICAL: ([0-9]+)\)/);
-    }
-  }
-  return {
-    TOTAL: results[1],
-    UNKNOWN: results[2],
-    LOW: results[3],
-    MEDIUM: results[4],
-    HIGH: results[5],
-    CRITICAL: results[6],
-  };
-};
-
-// 4. notify with slack message
-const sendSlackAlert = async (serviceAccount, report, image) => {
-  const text = `Total vulnerabilities found on ${image}: ${report.TOTAL}
-Unknown: ${report.UNKNOWN}
-Low: ${report.LOW}
-Medium: ${report.MEDIUM}
-High: ${report.HIGH}
-Critical: ${report.CRITICAL}
-`;
-  core.info(text);
+const sendSlackAlert = async (serviceAccount, report) => {
   if (report.CRITICAL > 0 || report.HIGH > 0) {
-    await notifySlack(serviceAccount, text, '', 'scanReport.scan');
+    await notifySlack(serviceAccount, report, '', 'scanReport.scan');
   }
 };
 
 const runScan = async (serviceAccount, image) => installTrivy()
-  .then(() => scanImage(image)
-    .then((scanResults) => buildReport(scanResults)
-      .then((report) => sendSlackAlert(serviceAccount, report, image))));
+  .then(() => scanImage(image, false)
+    .then(() => scanImage(image, true)
+      .then((report) => sendSlackAlert(serviceAccount, report))));
 
 module.exports = runScan;
 
