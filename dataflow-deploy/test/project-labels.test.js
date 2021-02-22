@@ -11,7 +11,7 @@ describe('Get projects labels', () => {
     exec.exec.mockImplementationOnce((
       cmd, args, opts,
     ) => {
-      opts.listeners.stdout('cc: \'640\'');
+      opts.listeners.stdout('--- cc: \'640\'');
       return Promise.resolve(0);
     });
 
