@@ -11,7 +11,7 @@ const projectLabels = async (projectId) => {
     'grep',
     'cc',
   ], {
-    silent: true,
+    silent: false,
     listeners: {
       stdout: (data) => {
         output += data.toString('utf8');
