@@ -3405,9 +3405,6 @@ const projectLabels = async (projectId) => {
     'describe',
     projectId,
     '--flatten=labels',
-    '|',
-    'grep',
-    'cc',
   ], {
     silent: false,
     listeners: {
@@ -3416,7 +3413,7 @@ const projectLabels = async (projectId) => {
       },
     },
   });
-  return output.substring(5, 8);
+  return output.substring(9, 12);
 };
 
 module.exports = projectLabels;
