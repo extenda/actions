@@ -11824,7 +11824,7 @@ const runImageScan = async (image, ignoreUnfixed) => {
     'trivy',
     ignoreUnfixed === true ? ['--ignore-unfixed', '-o', 'scanReport.scan', image] : [image],
     {
-      silent: true,
+      silent: false,
       listeners: {
         stdout: (data) => {
           output += data.toString('utf8');
@@ -11875,7 +11875,10 @@ const scanImage = async (image, ignoreUnfixed) => {
     });
   // temporary fix, rerun scan on error
   if (rerunScan) {
-    output = await runImageScan(image, ignoreUnfixed);
+    output = await runImageScan(image, ignoreUnfixed)
+      .catch((err) => {
+        core.info(err);
+      });
   }
   const scanResult = output.split(/[\r\n]+/);
   const report = await buildReport(scanResult, image);
