@@ -11880,7 +11880,9 @@ const scanImage = async (image, ignoreUnfixed) => {
     });
   // temporary fix, rerun scan on error
   if (rerunScan) {
-    output = await runImageScan(image, ignoreUnfixed);
+    output = await runImageScan(image, ignoreUnfixed).catch((err) => {
+      throw new Error(err);
+    });
   }
   const scanResult = output.split(/[\r\n]+/);
   const report = await buildReport(scanResult, image);
