@@ -11887,7 +11887,7 @@ const scanImage = async (image, ignoreUnfixed) => {
   const scanResult = output.split(/[\r\n]+/);
   const report = await buildReport(scanResult, image);
   if (!ignoreUnfixed) {
-    core.info(report);
+    core.info(report.MESSAGE);
     core.startGroup('full vulnerability scan report');
     core.info(output);
     core.endGroup();
