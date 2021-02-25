@@ -11824,7 +11824,7 @@ const runImageScan = async (image, ignoreUnfixed) => {
     'trivy',
     ignoreUnfixed === true ? ['--timeout=300s', '--ignore-unfixed', '-o', 'scanReport.scan', image] : ['--timeout=300s', image],
     {
-      silent: false,
+      silent: true,
       listeners: {
         stdout: (data) => {
           output += data.toString('utf8');
