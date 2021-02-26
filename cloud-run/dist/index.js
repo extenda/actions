@@ -11822,7 +11822,7 @@ const runImageScan = async (image, ignoreUnfixed) => {
   let output = '';
   await exec.exec(
     'trivy',
-    ignoreUnfixed === true ? ['--timeout=300s', '--ignore-unfixed', '-o', 'scanReport.scan', image] : ['--timeout=300s', image],
+    ignoreUnfixed === true ? ['--timeout=300s', '--ignore-unfixed', '--light', '-o', 'scanReport.scan', image] : ['--timeout=300s', '--light', image],
     {
       silent: true,
       listeners: {
