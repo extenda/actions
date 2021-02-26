@@ -11837,24 +11837,30 @@ const runImageScan = async (image, ignoreUnfixed) => {
 
 const buildReport = async (scanResults, image) => {
   let results = [];
+  const totResults = [0, 0, 0, 0, 0, 0];
   for (let i = 0; i < scanResults.length; i += 1) {
     const line = scanResults[i];
     if (line.startsWith('Total:')) {
       results = line.match(/Total: ([0-9]+) \(UNKNOWN: ([0-9]+), LOW: ([0-9]+), MEDIUM: ([0-9]+), HIGH: ([0-9]+), CRITICAL: ([0-9]+)\)/);
+      totResults[0] += parseInt(results[1], 10);
+      totResults[1] += parseInt(results[2], 10);
+      totResults[2] += parseInt(results[3], 10);
+      totResults[3] += parseInt(results[4], 10);
+      totResults[4] += parseInt(results[5], 10);
+      totResults[5] += parseInt(results[6], 10);
     }
   }
 
-
   return {
-    MESSAGE: `Total vulnerabilities found on ${image}: ${results[1]}
-  Unknown: ${results[2]}
-  Low: ${results[3]}
-  Medium: ${results[4]}
-  High: ${results[5]}
-  Critical: ${results[6]}
+    MESSAGE: `Total vulnerabilities found on ${image}: ${totResults[0]}
+  Unknown: ${totResults[1]}
+  Low: ${totResults[2]}
+  Medium: ${totResults[3]}
+  High: ${totResults[4]}
+  Critical: ${totResults[5]}
   `,
-    HIGH: results[5],
-    CRITICAL: results[6],
+    HIGH: totResults[4],
+    CRITICAL: totResults[5],
   };
 };
 
