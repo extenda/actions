@@ -33,6 +33,7 @@ The following actions are available
   * [setup-nuget-sources](setup-nuget-sources#readme)
   * [setup-terraform](setup-terraform#readme)
   * [slack-message](slack-message#readme)
+  * [slack-notify](slack-notify#readme)
   * [sonar-scanner](sonar-scanner#readme)
   * [status-check](status-check#readme)
   * [styra-das-deploy](styra-das-deploy#readme)

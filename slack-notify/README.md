@@ -12,9 +12,9 @@ The main difference in this action lies in being able to publish to any public s
 See [action.yml](action.yml).
 
 
-#### Examples
+### Examples
 
-##### Without channel input
+#### Without channel input
 
 This example will load a `slack-token` named slack-notify-token from the GCP Secret Manager accessible using
 the provided `service-account-key`. 
@@ -59,4 +59,27 @@ jobs:
             It contains *formatting* and multiple lines.
           service-account-key: ${{ secrets.SECRET_AUTH_STAGING }}
           channel: engineering-iam-monitor
+```
+
+#### With file attached
+
+```yaml
+on: push
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Notify Slack
+        uses: extenda/actions/slack-notify@v0
+        with:
+          text: |
+            This message is sent by GitHub Actions :rocket:
+
+            It contains *formatting* and multiple lines.
+          service-account-key: ${{ secrets.SECRET_AUTH_STAGING }}
+          channel: engineering-iam-monitor
+          file: reports/report.log
 ```

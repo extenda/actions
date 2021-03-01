@@ -20,6 +20,8 @@ To work locally with the scan tool or for more information visit [trivy-github](
 
 When a vulnerability is found on your service, this usually means that you are using a base image with many packages installed that can be exploited by malicious users/bots. A good solution is to make sure you are using a secure version of the image or alternatively an alpine/distroless version which usually contain few or no known vulnerabilities.
 
+In cases where there are no new versions of your image you may be able to update the affected packages directly in your dockerfile depending on what package manager you are using. Images that don't include a package manager might need to leverage the multistage build to secure the image in one step of the build process and finalize image in another.
+
 ### Ignore vulnerabilities
 
 In some cases we have to use certain images for a service that may requires a package/support installed. In these cases we have the .trivyignore that should be placed in the root of your repository.
