@@ -12,9 +12,9 @@ describe('env-vars', () => {
       NAMESPACE: 'txengine-testrunner-se',
       CONTAINER_IMAGE: 'eu.gcr.io/extenda/test:v1.0.0',
       TENANT_NAME: 'testrunner',
-      POSTGRES_IP: 'sm://test-project/postgresql_private_address',
-      POSTGRES_USER: 'default',
-      POSTGRES_PASSWORD: 'sm://test-project/postgresql_master_password',
+      POSTGRES_IP: 'sm://test-project/testrunner_postgresql_private_address',
+      POSTGRES_USER: 'postgres',
+      POSTGRES_PASSWORD: 'sm://test-project/testrunner_postgresql_master_password',
     });
   });
 
