@@ -12,6 +12,8 @@ const createVariables = (projectId, image, tenantName, countryCode) => {
     POSTGRES_IP: `sm://${projectId}/${tenantLowerCase}_postgresql_private_address`,
     POSTGRES_USER: 'postgres',
     POSTGRES_PASSWORD: `sm://${projectId}/${tenantLowerCase}_postgresql_master_password`,
+    SERVICE_PROJECT_ID: projectId,
+    SERVICE_ENVIRONMENT: projectId.includes('-staging-') ? 'staging' : 'prod',
   };
 };
 

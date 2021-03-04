@@ -24,6 +24,17 @@ inputs:
     description: |
       The 2-letter ISO 3166 country code for which this Transaction Engine is deployed.
     required: false
+  environment:
+    description: |
+      Additional YAML dictionary of environment variables to set on the user container. For secret manager values,
+      it is possible to use `*` instead of the project ID. The wildcard will be replaced with the correct project ID.
+      Example:
+      ```
+      VARIABLE_1: value1
+      VARIABLE_2: value2
+      VARIABLE_3: sm://*/my-secret
+      ```
+    requried: false
 runs:
   using: node12
   main: dist/index.js

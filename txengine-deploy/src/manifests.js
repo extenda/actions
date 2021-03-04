@@ -1,6 +1,7 @@
 const github = require('@actions/github');
 const fs = require('fs');
 const path = require('path');
+const yaml = require('yaml');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
 const loadManifests = async (secretServiceAccountKey) => {
@@ -16,19 +17,42 @@ const loadManifests = async (secretServiceAccountKey) => {
     .then((contents) => contents.join('\n'));
 };
 
-const replaceVariables = (manifest, vars) => {
+const replaceVariables = (manifest, defaultEnvironment, additionalEnvironment) => {
   let result = manifest;
-  Object.keys(vars).forEach((name) => {
-    result = result.replace(new RegExp(`\\$${name}`, 'g'), vars[name]);
+  Object.entries(defaultEnvironment).forEach(([key, value]) => {
+    result = result.replace(
+      new RegExp(`\\$${key}`, 'g'),
+      value,
+    );
   });
-  return result;
+
+  const environment = { ...defaultEnvironment, ...additionalEnvironment };
+  delete environment.NAMESPACE;
+  delete environment.CONTAINER_IMAGE;
+
+  result = yaml.parseAllDocuments(result).map((doc) => {
+    const data = doc.toJSON();
+    if (data.kind === 'statefulset') {
+      const container = data.spec.template.spec.containers[0];
+      if (!container.env) {
+        container.env = [];
+      }
+      container.env = [
+        ...container.env,
+        ...Object.entries(environment).map(([name, value]) => ({ name, value }))];
+    }
+    return yaml.stringify(data);
+  }).join('---\n');
+
+  return `---\n${result}`;
 };
 
 const createManifests = async (
   secretServiceAccountKey,
-  vars,
+  defaultEnvironment,
+  additionalEnvironment = {},
 ) => loadManifests(secretServiceAccountKey)
-  .then((manifest) => replaceVariables(manifest, vars))
+  .then((manifest) => replaceVariables(manifest, defaultEnvironment, additionalEnvironment))
   .then((manifest) => {
     const outputDir = path.join('.k8s', 'generated');
     const outputFile = path.join(outputDir, '00-manifest.yaml');
@@ -37,7 +61,7 @@ const createManifests = async (
     return {
       file: outputFile,
       content: manifest,
-      namespace: vars.NAMESPACE,
+      namespace: defaultEnvironment.NAMESPACE,
     };
   });
 

@@ -18,9 +18,13 @@ It also requires a GCP service account key with permission to access secrets fro
 
 ### Deploy tenant specific service
 
-In this example, a deploy job is used to deploy a Transaction Engine to production.
-It depends on a release job that we assumes have built, tagged and pushed a docker
+In this example, a job is used to deploy a Transaction Engine to production.
+It depends on a release job that we assume have built, tagged and pushed a docker
 image that we can access via an output variable.
+
+The `environment` input is optional. When used, it should be a YAML map of additional key-value pairs to set as
+environment on the user container. For secret manager values, it is possible to use `*` instead of the project ID.
+The wildcard will be replaced with the correct project ID.
 
 ```yaml
 jobs:
@@ -40,4 +44,7 @@ jobs:
           image: ${{ needs.release.outputs.container-image }}
           tenant-name: acme
           country-code: SE
+          environment: |
+            CENTRALOFFICE_HOST: 127.0.0.1
+            MY_SECRET: sm://*/my-secret
 ```
