@@ -22,6 +22,7 @@ const createVariables = require('../src/env-vars');
 describe('manifests', () => {
   afterEach(() => {
     mockFs.restore();
+    jest.resetAllMocks();
   });
 
   beforeEach(() => {
@@ -145,6 +146,58 @@ spec:
           env:
             - name: SERVICE_DNS
               value: test.dns
+`,
+          'utf8',
+        ).toString('base64'),
+      }],
+    });
+    const { content } = await createManifests('secret-account', { NAMESPACE: 'test' }, {
+      EXTRA_VARIABLE: 'extra-value',
+      VARIABLE2: 'value2',
+    });
+
+    expect(yaml.parse(content)).toMatchObject({
+      spec: {
+        template: {
+          spec: {
+            containers: [{
+              env: [{
+                name: 'SERVICE_DNS',
+                value: 'test.dns',
+              },
+              {
+                name: 'EXTRA_VARIABLE',
+                value: 'extra-value',
+              },
+              {
+                name: 'VARIABLE2',
+                value: 'value2',
+              }],
+            }],
+          },
+        },
+      },
+    });
+  });
+
+  test('It does not create duplicate variables', async () => {
+    mockContent.mockResolvedValueOnce({
+      data: [{
+        name: '00-file0.yaml',
+        content: Buffer.from(
+          `---
+kind: statefulset
+spec:
+  template:
+    spec:
+      containers:
+        - name: test-service
+          image: test-image
+          env:
+            - name: SERVICE_DNS
+              value: test.dns
+            - name: EXTRA_VARIABLE
+              value: default-value
 `,
           'utf8',
         ).toString('base64'),

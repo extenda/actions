@@ -70903,7 +70903,7 @@ module.exports = __webpack_require__(3333).YAML
 
 const kubectl = __webpack_require__(3954);
 
-const deploy = async ({ file, namespace }) => {
+const deploy = async ({ file, namespace, tenantName }, timeoutSeconds = 180) => {
   // Apply
   await kubectl.exec(['apply', '-f', file]);
 
@@ -70912,8 +70912,8 @@ const deploy = async ({ file, namespace }) => {
     'rollout',
     'status',
     'statefulset',
-    'transaction-engine-service',
-    '--timeout=180s',
+    `${tenantName}-txengine-service`,
+    `--timeout=${timeoutSeconds}s`,
     `--namespace=${namespace}`,
   ]);
 };
@@ -70974,6 +70974,7 @@ const action = async () => {
   const image = core.getInput('image', { required: true });
   const tenantName = core.getInput('tenant-name', { required: true });
   const countryCode = core.getInput('country-code') || '';
+  const timeoutSeconds = core.getInput('timeout-seconds');
 
   const { projectId } = await kubectl.configure(deployServiceAccountKey);
 
@@ -70981,7 +70982,7 @@ const action = async () => {
   const defaultEnvironment = createVariables(projectId, image, tenantName, countryCode);
 
   await createManifests(secretServiceAccountKey, defaultEnvironment, additionalEnvironment)
-    .then(deploy);
+    .then((manifest) => deploy(manifest, timeoutSeconds));
 };
 
 if (require.main === require.cache[eval('__filename')]) {
@@ -71070,6 +71071,9 @@ const replaceVariables = (manifest, defaultEnvironment, additionalEnvironment) =
       const container = data.spec.template.spec.containers[0];
       if (!container.env) {
         container.env = [];
+      } else {
+        // Remove duplicates that will be overwritten
+        container.env = container.env.filter(({ name }) => !environment.hasOwnProperty(name));
       }
       container.env = [
         ...container.env,
@@ -71096,6 +71100,7 @@ const createManifests = async (
       file: outputFile,
       content: manifest,
       namespace: defaultEnvironment.NAMESPACE,
+      tenantName: defaultEnvironment.TENANT_NAME,
     };
   });
 

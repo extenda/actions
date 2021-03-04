@@ -35,7 +35,7 @@ describe('txengine-deploy', () => {
 
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(6);
+    expect(core.getInput).toHaveBeenCalledTimes(7);
     expect(kubectl.configure).toHaveBeenCalledWith('deploy-account');
     expect(createManifests).toHaveBeenCalledTimes(1);
     expect(deploy).toHaveBeenCalledTimes(1);
@@ -47,6 +47,7 @@ describe('txengine-deploy', () => {
       .mockReturnValueOnce('image')
       .mockReturnValueOnce('tenant')
       .mockReturnValueOnce('SE')
+      .mockReturnValueOnce('300')
       .mockReturnValueOnce('KEY: value\nSECRET: sm://*/my-secret\n');
 
     createEnvironment.mockReturnValueOnce({ NAMESPACE: 'test' });
@@ -60,7 +61,7 @@ describe('txengine-deploy', () => {
 
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(6);
+    expect(core.getInput).toHaveBeenCalledTimes(7);
     expect(kubectl.configure).toHaveBeenCalledWith('deploy-account');
     expect(createManifests).toHaveBeenCalledWith(
       'secret-account',

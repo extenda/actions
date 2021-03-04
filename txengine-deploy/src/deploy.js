@@ -1,6 +1,6 @@
 const kubectl = require('./kubectl');
 
-const deploy = async ({ file, namespace }) => {
+const deploy = async ({ file, namespace, tenantName }, timeoutSeconds = 180) => {
   // Apply
   await kubectl.exec(['apply', '-f', file]);
 
@@ -9,8 +9,8 @@ const deploy = async ({ file, namespace }) => {
     'rollout',
     'status',
     'statefulset',
-    'transaction-engine-service',
-    '--timeout=180s',
+    `${tenantName}-txengine-service`,
+    `--timeout=${timeoutSeconds}s`,
     `--namespace=${namespace}`,
   ]);
 };

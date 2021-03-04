@@ -34,7 +34,12 @@ inputs:
       VARIABLE_2: value2
       VARIABLE_3: sm://*/my-secret
       ```
-    requried: false
+    required: false
+  deploy-timeout:
+    description: |
+      The rollout timeout in seconds.
+    default: '180'
+    required: false
 runs:
   using: node12
   main: dist/index.js

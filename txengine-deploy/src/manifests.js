@@ -36,6 +36,9 @@ const replaceVariables = (manifest, defaultEnvironment, additionalEnvironment) =
       const container = data.spec.template.spec.containers[0];
       if (!container.env) {
         container.env = [];
+      } else {
+        // Remove duplicates that will be overwritten
+        container.env = container.env.filter(({ name }) => !environment.hasOwnProperty(name));
       }
       container.env = [
         ...container.env,
@@ -62,6 +65,7 @@ const createManifests = async (
       file: outputFile,
       content: manifest,
       namespace: defaultEnvironment.NAMESPACE,
+      tenantName: defaultEnvironment.TENANT_NAME,
     };
   });
 

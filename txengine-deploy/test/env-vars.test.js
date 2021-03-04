@@ -1,6 +1,10 @@
 const createVariables = require('../src/env-vars');
 
 describe('env-vars', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   test('It creates variables', () => {
     const variables = createVariables(
       'test-staging-project',
