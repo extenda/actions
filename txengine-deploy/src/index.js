@@ -1,17 +1,9 @@
 const core = require('@actions/core');
-const yaml = require('yaml');
 const { run } = require('../../utils');
 const kubectl = require('./kubectl');
 const deploy = require('./deploy');
-const createVariables = require('./env-vars');
+const prepareEnvConfig = require('./env-config');
 const createManifests = require('./manifests');
-
-const parseEnvironment = (environment, projectId) => {
-  if (!environment) {
-    return {};
-  }
-  return yaml.parse(environment.replace(/sm:\/\/\*\//g, `sm://${projectId}/`));
-};
 
 const action = async () => {
   const deployServiceAccountKey = core.getInput('deploy-service-account-key', { required: true });
@@ -20,13 +12,20 @@ const action = async () => {
   const tenantName = core.getInput('tenant-name', { required: true });
   const countryCode = core.getInput('country-code') || '';
   const timeoutSeconds = core.getInput('timeout-seconds');
+  const inputEnvironment = core.getInput('environment');
 
   const { projectId } = await kubectl.configure(deployServiceAccountKey);
 
-  const additionalEnvironment = parseEnvironment(core.getInput('environment'), projectId);
-  const defaultEnvironment = createVariables(projectId, image, tenantName, countryCode);
+  const envConfig = await prepareEnvConfig(
+    deployServiceAccountKey,
+    projectId,
+    image,
+    tenantName,
+    countryCode,
+    inputEnvironment,
+  );
 
-  await createManifests(secretServiceAccountKey, defaultEnvironment, additionalEnvironment)
+  await createManifests(secretServiceAccountKey, envConfig)
     .then((manifest) => deploy(manifest, timeoutSeconds));
 };
 

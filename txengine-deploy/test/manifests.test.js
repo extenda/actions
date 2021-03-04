@@ -17,7 +17,6 @@ jest.mock('@actions/github', () => ({
 }));
 
 const createManifests = require('../src/manifests');
-const createVariables = require('../src/env-vars');
 
 describe('manifests', () => {
   afterEach(() => {
@@ -50,7 +49,11 @@ describe('manifests', () => {
         ).toString('base64'),
       }],
     });
-    const vars = createVariables('project', 'image', 'tenant', 'SE');
+    const vars = {
+      replaceTokens: { NAMESPACE: 'txengine-tenant-se' },
+      configMap: {},
+      secrets: {},
+    };
     const result = await createManifests('secret-account', vars);
     expect(result.file).toEqual('.k8s/generated/00-manifest.yaml');
     expect(result.content).toEqual('---\nname: file0\n---\nname: file1\n---\nname: file2\n');
@@ -59,7 +62,7 @@ describe('manifests', () => {
     expect(fs.readFileSync(result.file, 'utf8')).toEqual(result.content);
   });
 
-  test('It can replace variables in manifest', async () => {
+  test('It can replace token variables in manifest', async () => {
     mockContent.mockResolvedValueOnce({
       data: [{
         name: '02-file2.yaml',
@@ -79,7 +82,14 @@ describe('manifests', () => {
         ).toString('base64'),
       }],
     });
-    const vars = createVariables('project', 'image', 'tenant', 'SE');
+    const vars = {
+      replaceTokens: {
+        NAMESPACE: 'txengine-tenant-se',
+        CONTAINER_IMAGE: 'image',
+      },
+      configMap: {},
+      secrets: {},
+    };
     const { content } = await createManifests('secret-account', vars);
     expect(content).not.toContain('$NAMESPACE');
     expect(content).not.toContain('$CONTAINER_IMAGE');
@@ -87,147 +97,103 @@ describe('manifests', () => {
     expect(content).toContain('image: image');
   });
 
-  test('It can add additional env vars when none exists', async () => {
+  test('It can populate a config map', async () => {
     mockContent.mockResolvedValueOnce({
       data: [{
         name: '00-file0.yaml',
         content: Buffer.from(
           `---
-kind: statefulset
-spec:
-  template:
-    spec:
-      containers:
-        - name: test-service
-          image: test-image
+kind: ConfigMap
+metadata:
+  name: test-txengine-env
+data:
+  DATABASE_VENDOR: postgres
 `,
           'utf8',
         ).toString('base64'),
       }],
     });
-    const { content } = await createManifests('secret-account', { NAMESPACE: 'test' }, {
-      EXTRA_VARIABLE: 'extra-value',
-      VARIABLE2: 'value2',
-    });
+    const vars = {
+      replaceTokens: {},
+      configMap: {
+        EXTRA_VARIABLE: 'extra-value',
+        VARIABLE2: 'value2',
+      },
+      secrets: {},
+    };
+    const { content } = await createManifests('secret-account', vars);
 
     expect(yaml.parse(content)).toMatchObject({
-      spec: {
-        template: {
-          spec: {
-            containers: [{
-              env: [{
-                name: 'EXTRA_VARIABLE',
-                value: 'extra-value',
-              },
-              {
-                name: 'VARIABLE2',
-                value: 'value2',
-              }],
-            }],
-          },
-        },
+      kind: 'ConfigMap',
+      data: {
+        DATABASE_VENDOR: 'postgres',
+        EXTRA_VARIABLE: 'extra-value',
+        VARIABLE2: 'value2',
       },
     });
   });
 
-  test('It can append additional env vars', async () => {
+  test('It can populate secrets', async () => {
     mockContent.mockResolvedValueOnce({
       data: [{
         name: '00-file0.yaml',
         content: Buffer.from(
           `---
-kind: statefulset
-spec:
-  template:
-    spec:
-      containers:
-        - name: test-service
-          image: test-image
-          env:
-            - name: SERVICE_DNS
-              value: test.dns
+kind: Secret
+metadata:
+  name: test-txengine-secrets
+data: {}
 `,
           'utf8',
         ).toString('base64'),
       }],
     });
-    const { content } = await createManifests('secret-account', { NAMESPACE: 'test' }, {
-      EXTRA_VARIABLE: 'extra-value',
-      VARIABLE2: 'value2',
-    });
+    const vars = {
+      replaceTokens: {},
+      configMap: {},
+      secrets: {
+        SECRET: 'my-value',
+      },
+    };
+    const { content } = await createManifests('secret-account', vars);
 
     expect(yaml.parse(content)).toMatchObject({
-      spec: {
-        template: {
-          spec: {
-            containers: [{
-              env: [{
-                name: 'SERVICE_DNS',
-                value: 'test.dns',
-              },
-              {
-                name: 'EXTRA_VARIABLE',
-                value: 'extra-value',
-              },
-              {
-                name: 'VARIABLE2',
-                value: 'value2',
-              }],
-            }],
-          },
-        },
+      kind: 'Secret',
+      data: {
+        SECRET: 'my-value',
       },
     });
   });
 
-  test('It does not create duplicate variables', async () => {
+  test('It is possible to override default values', async () => {
     mockContent.mockResolvedValueOnce({
       data: [{
         name: '00-file0.yaml',
         content: Buffer.from(
           `---
-kind: statefulset
-spec:
-  template:
-    spec:
-      containers:
-        - name: test-service
-          image: test-image
-          env:
-            - name: SERVICE_DNS
-              value: test.dns
-            - name: EXTRA_VARIABLE
-              value: default-value
+kind: ConfigMap
+metadata:
+  name: test-txengine-env
+data:
+  DATABASE_VENDOR: postgres
 `,
           'utf8',
         ).toString('base64'),
       }],
     });
-    const { content } = await createManifests('secret-account', { NAMESPACE: 'test' }, {
-      EXTRA_VARIABLE: 'extra-value',
-      VARIABLE2: 'value2',
-    });
+    const vars = {
+      replaceTokens: {},
+      configMap: {
+        DATABASE_VENDOR: 'hsqldb',
+      },
+      secrets: {},
+    };
+    const { content } = await createManifests('secret-account', vars);
 
     expect(yaml.parse(content)).toMatchObject({
-      spec: {
-        template: {
-          spec: {
-            containers: [{
-              env: [{
-                name: 'SERVICE_DNS',
-                value: 'test.dns',
-              },
-              {
-                name: 'EXTRA_VARIABLE',
-                value: 'extra-value',
-              },
-              {
-                name: 'VARIABLE2',
-                value: 'value2',
-              }],
-            }],
-          },
-        },
+      kind: 'ConfigMap',
+      data: {
+        DATABASE_VENDOR: 'hsqldb',
       },
     });
   });

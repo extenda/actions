@@ -70923,10 +70923,13 @@ module.exports = deploy;
 
 /***/ }),
 
-/***/ 201:
-/***/ ((module) => {
+/***/ 4961:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const createVariables = (projectId, image, tenantName, countryCode) => {
+const yaml = __webpack_require__(5024);
+const { loadSecret } = __webpack_require__(8652);
+
+const createReplaceTokens = (projectId, image, tenantName, countryCode) => {
   const tenantLowerCase = tenantName.toLowerCase();
   const namespace = ['txengine', tenantLowerCase];
   if (countryCode) {
@@ -70937,29 +70940,8 @@ const createVariables = (projectId, image, tenantName, countryCode) => {
     NAMESPACE: namespace.join('-'),
     TENANT_NAME: tenantLowerCase,
     CONTAINER_IMAGE: image,
-    POSTGRES_IP: `sm://${projectId}/${tenantLowerCase}_postgresql_private_address`,
-    POSTGRES_USER: 'postgres',
-    POSTGRES_PASSWORD: `sm://${projectId}/${tenantLowerCase}_postgresql_master_password`,
-    SERVICE_PROJECT_ID: projectId,
-    SERVICE_ENVIRONMENT: projectId.includes('-staging-') ? 'staging' : 'prod',
   };
 };
-
-module.exports = createVariables;
-
-
-/***/ }),
-
-/***/ 8571:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-const core = __webpack_require__(6341);
-const yaml = __webpack_require__(5024);
-const { run } = __webpack_require__(1898);
-const kubectl = __webpack_require__(3954);
-const deploy = __webpack_require__(6029);
-const createVariables = __webpack_require__(201);
-const createManifests = __webpack_require__(6469);
 
 const parseEnvironment = (environment, projectId) => {
   if (!environment) {
@@ -70968,6 +70950,80 @@ const parseEnvironment = (environment, projectId) => {
   return yaml.parse(environment.replace(/sm:\/\/\*\//g, `sm://${projectId}/`));
 };
 
+const defaultEnvironment = (projectId, tenantName) => ({
+  DATABASE_HOST: `sm://${projectId}/${tenantName}_postgresql_private_address`,
+  DATABASE_USER: 'postgres',
+  DATABASE_PASSWORD: `sm://${projectId}/${tenantName}_postgresql_master_password`,
+  SERVICE_PROJECT_ID: projectId,
+  SERVICE_ENVIRONMENT: projectId.includes('-staging-') ? 'staging' : 'prod',
+});
+
+const loadAllSecrets = async (serviceAccountKey, secrets) => {
+  const results = [];
+  const resolvedSecrets = {};
+  Object.entries(secrets).forEach(([name, value]) => {
+    results.push(loadSecret(serviceAccountKey, value)
+      .then((secret) => {
+        resolvedSecrets[name] = secret;
+      }).catch((err) => {
+        throw new Error(`Failed to access secret '${value}'. Reason: ${err.message}`)
+      }));
+  });
+  await Promise.all(results);
+  return resolvedSecrets;
+};
+
+const prepareEnvConfig = async (
+  deployServiceAccountKey,
+  projectId,
+  image,
+  tenantName,
+  countryCode,
+  environmentString = ''
+) => {
+  const replaceTokens = createReplaceTokens(projectId, image, tenantName, countryCode);
+  const environment = {
+    ...defaultEnvironment(projectId, tenantName.toLowerCase()),
+    ...parseEnvironment(environmentString, projectId),
+  };
+
+  const configMap = {};
+  const secretsAsNames = {};
+  Object.entries(environment).forEach(([name, value]) => {
+    if (value.startsWith('sm://')) {
+      if (!value.includes(projectId)) {
+        throw new Error(`Secrets can only be loaded from target project: ${projectId}`);
+      }
+      secretsAsNames[name] = value.split('/').pop();
+    } else {
+      configMap[name] = value;
+    }
+  });
+
+  const secrets = await loadAllSecrets(deployServiceAccountKey, secretsAsNames);
+
+  return {
+    replaceTokens,
+    configMap,
+    secrets,
+  };
+};
+
+module.exports = prepareEnvConfig;
+
+
+/***/ }),
+
+/***/ 8571:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const core = __webpack_require__(6341);
+const { run } = __webpack_require__(1898);
+const kubectl = __webpack_require__(3954);
+const deploy = __webpack_require__(6029);
+const prepareEnvConfig = __webpack_require__(4961);
+const createManifests = __webpack_require__(6469);
+
 const action = async () => {
   const deployServiceAccountKey = core.getInput('deploy-service-account-key', { required: true });
   const secretServiceAccountKey = core.getInput('secret-service-account-key', { required: true });
@@ -70975,13 +71031,20 @@ const action = async () => {
   const tenantName = core.getInput('tenant-name', { required: true });
   const countryCode = core.getInput('country-code') || '';
   const timeoutSeconds = core.getInput('timeout-seconds');
+  const inputEnvironment = core.getInput('environment');
 
   const { projectId } = await kubectl.configure(deployServiceAccountKey);
 
-  const additionalEnvironment = parseEnvironment(core.getInput('environment'), projectId);
-  const defaultEnvironment = createVariables(projectId, image, tenantName, countryCode);
+  const envConfig = await prepareEnvConfig(
+    deployServiceAccountKey,
+    projectId,
+    image,
+    tenantName,
+    countryCode,
+    inputEnvironment,
+  );
 
-  await createManifests(secretServiceAccountKey, defaultEnvironment, additionalEnvironment)
+  await createManifests(secretServiceAccountKey, envConfig)
     .then((manifest) => deploy(manifest, timeoutSeconds));
 };
 
@@ -71052,45 +71115,43 @@ const loadManifests = async (secretServiceAccountKey) => {
     .then((contents) => contents.join('\n'));
 };
 
-const replaceVariables = (manifest, defaultEnvironment, additionalEnvironment) => {
-  let result = manifest;
-  Object.entries(defaultEnvironment).forEach(([key, value]) => {
-    result = result.replace(
-      new RegExp(`\\$${key}`, 'g'),
+const replaceTokenVariables = (manifest, replaceTokens) => {
+  let content = manifest;
+  Object.entries(replaceTokens).forEach(([name, value]) => {
+    content = content.replace(
+      new RegExp(`\\$${name}`, 'g'),
       value,
     );
   });
+  return content;
+};
 
-  const environment = { ...defaultEnvironment, ...additionalEnvironment };
-  delete environment.NAMESPACE;
-  delete environment.CONTAINER_IMAGE;
+const isDataMap = (doc, kind, suffix) => doc.kind === kind && doc.metadata.name.endsWith(suffix);
 
-  result = yaml.parseAllDocuments(result).map((doc) => {
-    const data = doc.toJSON();
-    if (data.kind === 'statefulset') {
-      const container = data.spec.template.spec.containers[0];
-      if (!container.env) {
-        container.env = [];
-      } else {
-        // Remove duplicates that will be overwritten
-        container.env = container.env.filter(({ name }) => !environment.hasOwnProperty(name));
-      }
-      container.env = [
-        ...container.env,
-        ...Object.entries(environment).map(([name, value]) => ({ name, value }))];
-    }
-    return yaml.stringify(data);
-  }).join('---\n');
-
-  return `---\n${result}`;
+const populateDataMap = (doc, dataMap) => {
+  doc.data = {
+    ...doc.data,
+    ...dataMap,
+  };
+  return yaml.stringify(doc);
 };
 
 const createManifests = async (
   secretServiceAccountKey,
-  defaultEnvironment,
-  additionalEnvironment = {},
+  { replaceTokens, configMap, secrets },
 ) => loadManifests(secretServiceAccountKey)
-  .then((manifest) => replaceVariables(manifest, defaultEnvironment, additionalEnvironment))
+  .then((manifest) => replaceTokenVariables(manifest, replaceTokens))
+  .then((manifest) => yaml.parseAllDocuments(manifest).map((doc) => doc.toJSON()))
+  .then((docs) => docs.map((doc) => {
+    if (isDataMap(doc, 'ConfigMap', '-txengine-env')) {
+      return populateDataMap(doc, configMap);
+    }
+    if (isDataMap(doc, 'Secret', '-txengine-secrets')) {
+      return populateDataMap(doc, secrets);
+    }
+    return yaml.stringify(doc);
+    }).join('---\n'))
+  .then((manifest) => `---\n${manifest}`)
   .then((manifest) => {
     const outputDir = path.join('.k8s', 'generated');
     const outputFile = path.join(outputDir, '00-manifest.yaml');
@@ -71099,8 +71160,8 @@ const createManifests = async (
     return {
       file: outputFile,
       content: manifest,
-      namespace: defaultEnvironment.NAMESPACE,
-      tenantName: defaultEnvironment.TENANT_NAME,
+      namespace: replaceTokens.NAMESPACE,
+      tenantName: replaceTokens.TENANT_NAME,
     };
   });
 

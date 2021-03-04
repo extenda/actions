@@ -19,5 +19,5 @@ describe('deploy', () => {
     await deploy({ file: 'manifest.yaml', namespace: 'namespace', tenantName: 'tenant' }, 300);
     expect(kubectl.exec).toHaveBeenNthCalledWith(2,
       expect.arrayContaining(['rollout', '--timeout=300s']));
-  })
+  });
 });

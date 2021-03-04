@@ -17,45 +17,44 @@ const loadManifests = async (secretServiceAccountKey) => {
     .then((contents) => contents.join('\n'));
 };
 
-const replaceVariables = (manifest, defaultEnvironment, additionalEnvironment) => {
-  let result = manifest;
-  Object.entries(defaultEnvironment).forEach(([key, value]) => {
-    result = result.replace(
-      new RegExp(`\\$${key}`, 'g'),
+const replaceTokenVariables = (manifest, replaceTokens) => {
+  let content = manifest;
+  Object.entries(replaceTokens).forEach(([name, value]) => {
+    content = content.replace(
+      new RegExp(`\\$${name}`, 'g'),
       value,
     );
   });
+  return content;
+};
 
-  const environment = { ...defaultEnvironment, ...additionalEnvironment };
-  delete environment.NAMESPACE;
-  delete environment.CONTAINER_IMAGE;
+const isDataMap = (doc, kind, suffix) => doc.kind === kind && doc.metadata.name.endsWith(suffix);
 
-  result = yaml.parseAllDocuments(result).map((doc) => {
-    const data = doc.toJSON();
-    if (data.kind === 'statefulset') {
-      const container = data.spec.template.spec.containers[0];
-      if (!container.env) {
-        container.env = [];
-      } else {
-        // Remove duplicates that will be overwritten
-        container.env = container.env.filter(({ name }) => !environment.hasOwnProperty(name));
-      }
-      container.env = [
-        ...container.env,
-        ...Object.entries(environment).map(([name, value]) => ({ name, value }))];
-    }
-    return yaml.stringify(data);
-  }).join('---\n');
-
-  return `---\n${result}`;
+const populateDataMap = (doc, dataMap) => {
+  const update = doc;
+  update.data = {
+    ...doc.data,
+    ...dataMap,
+  };
+  return yaml.stringify(update);
 };
 
 const createManifests = async (
   secretServiceAccountKey,
-  defaultEnvironment,
-  additionalEnvironment = {},
+  { replaceTokens, configMap, secrets },
 ) => loadManifests(secretServiceAccountKey)
-  .then((manifest) => replaceVariables(manifest, defaultEnvironment, additionalEnvironment))
+  .then((manifest) => replaceTokenVariables(manifest, replaceTokens))
+  .then((manifest) => yaml.parseAllDocuments(manifest).map((doc) => doc.toJSON()))
+  .then((docs) => docs.map((doc) => {
+    if (isDataMap(doc, 'ConfigMap', '-txengine-env')) {
+      return populateDataMap(doc, configMap);
+    }
+    if (isDataMap(doc, 'Secret', '-txengine-secrets')) {
+      return populateDataMap(doc, secrets);
+    }
+    return yaml.stringify(doc);
+  }).join('---\n'))
+  .then((manifest) => `---\n${manifest}`)
   .then((manifest) => {
     const outputDir = path.join('.k8s', 'generated');
     const outputFile = path.join(outputDir, '00-manifest.yaml');
@@ -64,8 +63,8 @@ const createManifests = async (
     return {
       file: outputFile,
       content: manifest,
-      namespace: defaultEnvironment.NAMESPACE,
-      tenantName: defaultEnvironment.TENANT_NAME,
+      namespace: replaceTokens.NAMESPACE,
+      tenantName: replaceTokens.TENANT_NAME,
     };
   });
 
