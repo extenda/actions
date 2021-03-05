@@ -30,10 +30,10 @@ const replaceTokenVariables = (manifest, replaceTokens) => {
 
 const isDataMap = (doc, kind, suffix) => doc.kind === kind && doc.metadata.name.endsWith(suffix);
 
-const populateDataMap = (doc, dataMap) => {
+const populateDataMap = (doc, propName, dataMap) => {
   const update = doc;
-  update.data = {
-    ...doc.data,
+  update[propName] = {
+    ...doc[propName],
     ...dataMap,
   };
   return yaml.stringify(update);
@@ -47,10 +47,10 @@ const createManifests = async (
   .then((manifest) => yaml.parseAllDocuments(manifest).map((doc) => doc.toJSON()))
   .then((docs) => docs.map((doc) => {
     if (isDataMap(doc, 'ConfigMap', '-txengine-env')) {
-      return populateDataMap(doc, configMap);
+      return populateDataMap(doc, 'data', configMap);
     }
     if (isDataMap(doc, 'Secret', '-txengine-secrets')) {
-      return populateDataMap(doc, secrets);
+      return populateDataMap(doc, 'stringData', secrets);
     }
     return yaml.stringify(doc);
   }).join('---\n'))

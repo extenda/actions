@@ -142,7 +142,7 @@ data:
 kind: Secret
 metadata:
   name: test-txengine-secrets
-data: {}
+stringData: {}
 `,
           'utf8',
         ).toString('base64'),
@@ -159,7 +159,7 @@ data: {}
 
     expect(yaml.parse(content)).toMatchObject({
       kind: 'Secret',
-      data: {
+      stringData: {
         SECRET: 'my-value',
       },
     });

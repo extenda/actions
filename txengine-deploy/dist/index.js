@@ -70966,7 +70966,7 @@ const loadAllSecrets = async (serviceAccountKey, secrets) => {
       .then((secret) => {
         resolvedSecrets[name] = secret;
       }).catch((err) => {
-        throw new Error(`Failed to access secret '${value}'. Reason: ${err.message}`)
+        throw new Error(`Failed to access secret '${value}'. Reason: ${err.message}`);
       }));
   });
   await Promise.all(results);
@@ -70979,7 +70979,7 @@ const prepareEnvConfig = async (
   image,
   tenantName,
   countryCode,
-  environmentString = ''
+  environmentString = '',
 ) => {
   const replaceTokens = createReplaceTokens(projectId, image, tenantName, countryCode);
   const environment = {
@@ -71128,12 +71128,13 @@ const replaceTokenVariables = (manifest, replaceTokens) => {
 
 const isDataMap = (doc, kind, suffix) => doc.kind === kind && doc.metadata.name.endsWith(suffix);
 
-const populateDataMap = (doc, dataMap) => {
-  doc.data = {
-    ...doc.data,
+const populateDataMap = (doc, propName, dataMap) => {
+  const update = doc;
+  update[propName] = {
+    ...doc[propName],
     ...dataMap,
   };
-  return yaml.stringify(doc);
+  return yaml.stringify(update);
 };
 
 const createManifests = async (
@@ -71144,13 +71145,13 @@ const createManifests = async (
   .then((manifest) => yaml.parseAllDocuments(manifest).map((doc) => doc.toJSON()))
   .then((docs) => docs.map((doc) => {
     if (isDataMap(doc, 'ConfigMap', '-txengine-env')) {
-      return populateDataMap(doc, configMap);
+      return populateDataMap(doc, 'data', configMap);
     }
     if (isDataMap(doc, 'Secret', '-txengine-secrets')) {
-      return populateDataMap(doc, secrets);
+      return populateDataMap(doc, 'stringData', secrets);
     }
     return yaml.stringify(doc);
-    }).join('---\n'))
+  }).join('---\n'))
   .then((manifest) => `---\n${manifest}`)
   .then((manifest) => {
     const outputDir = path.join('.k8s', 'generated');
