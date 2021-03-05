@@ -40,6 +40,7 @@ The following actions are available
   * [styra-das-test](styra-das-test#readme)
   * [terraform-plan-comment](terraform-plan-comment#readme)
   * [test-pod](test-pod#readme)
+  * [txengine-deploy](txengine-deploy#readme)
 
 ## :rocket: Workflow Examples
 

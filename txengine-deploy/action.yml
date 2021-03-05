@@ -1,0 +1,45 @@
+name: Deploy Transaction Engine
+description: Deploy a tenant-specific Transaction Engine.
+inputs:
+  deploy-service-account-key:
+    description: |
+      The service account key which will be used for deployment.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+  secret-service-account-key:
+    description: |
+      The service account key which will be used for accessing secrets.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+  image:
+    description: |
+      The Docker image to deploy.
+    required: true
+  tenant-name:
+    description: |
+      The human readable tenant name in Hii Retail. This should match the `tenant` in `https://<tenant>.hiiretail.com`,
+      which is used to access Hii Retail services.
+    required: true
+  country-code:
+    description: |
+      The 2-letter ISO 3166 country code for which this Transaction Engine is deployed.
+    required: false
+  environment:
+    description: |
+      Additional YAML dictionary of environment variables to set on the user container. For secret manager values,
+      it is possible to use `*` instead of the project ID. The wildcard will be replaced with the correct project ID.
+      Example:
+      ```
+      VARIABLE_1: value1
+      VARIABLE_2: value2
+      VARIABLE_3: sm://*/my-secret
+      ```
+    required: false
+  deploy-timeout:
+    description: |
+      The rollout timeout in seconds.
+    default: '180'
+    required: false
+runs:
+  using: node12
+  main: dist/index.js
