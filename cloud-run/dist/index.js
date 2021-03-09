@@ -62285,14 +62285,12 @@ const createKeyFile = __webpack_require__(62597);
 let client;
 
 const createClient = async (serviceAccountKey) => {
-  if (!client) {
-    const keyFilename = createKeyFile(serviceAccountKey);
-    const auth = new GoogleAuth({
-      keyFilename,
-      scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-    });
-    client = await auth.getClient();
-  }
+  const keyFilename = createKeyFile(serviceAccountKey);
+  const auth = new GoogleAuth({
+    keyFilename,
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  });
+  client = await auth.getClient();
 };
 
 const accessSecretValue = async (name) => client.request({
