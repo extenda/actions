@@ -6,6 +6,7 @@ const createKeyFile = require('../../utils/src/create-key-file');
 let client;
 
 const createClient = async (serviceAccountKey) => {
+  core.info(`create client for: ${serviceAccountKey}`);
   if (!client) {
     const keyFilename = createKeyFile(serviceAccountKey);
     const auth = new GoogleAuth({
@@ -13,6 +14,7 @@ const createClient = async (serviceAccountKey) => {
       scopes: ['https://www.googleapis.com/auth/cloud-platform'],
     });
     client = await auth.getClient();
+    core.info(`client created for ${serviceAccountKey}`);
   }
 };
 
