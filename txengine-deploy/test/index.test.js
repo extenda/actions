@@ -1,4 +1,5 @@
 jest.mock('@actions/core');
+jest.mock('@actions/exec');
 jest.mock('../src/deploy');
 jest.mock('../src/kubectl');
 jest.mock('../src/manifests');
