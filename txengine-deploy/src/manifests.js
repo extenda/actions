@@ -6,7 +6,9 @@ const core = require('@actions/core');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
 const logAndReturn = async (returnValue, log) => {
-  core.info(log);
+  core.startGroup(log);
+  core.info(returnValue);
+  core.endGroup();
   return returnValue;
 };
 
@@ -70,6 +72,7 @@ const createManifests = async (
   }).join('---\n'))
   .then((returnValue) => logAndReturn(returnValue, 'map documents'))
   .then((manifest) => `---\n${manifest}`)
+  .then((returnValue) => logAndReturn(returnValue, 'add --- to document'))
   .then((manifest) => {
     const outputDir = path.join('.k8s', 'generated');
     const outputFile = path.join(outputDir, '00-manifest.yaml');
@@ -81,6 +84,7 @@ const createManifests = async (
       namespace: replaceTokens.NAMESPACE,
       tenantName: replaceTokens.TENANT_NAME,
     };
-  });
+  })
+  .then((returnValue) => logAndReturn(returnValue, 'generate documents'));
 
 module.exports = createManifests;

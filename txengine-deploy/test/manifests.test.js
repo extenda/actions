@@ -1,3 +1,5 @@
+jest.mock('@actions/core');
+
 const mockFs = require('mock-fs');
 const fs = require('fs');
 const yaml = require('yaml');
