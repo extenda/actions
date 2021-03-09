@@ -71023,6 +71023,7 @@ const kubectl = __webpack_require__(3954);
 const deploy = __webpack_require__(6029);
 const prepareEnvConfig = __webpack_require__(4961);
 const createManifests = __webpack_require__(6469);
+const setupGcloud = __webpack_require__(7095);
 
 const action = async () => {
   const deployServiceAccountKey = core.getInput('deploy-service-account-key', { required: true });
@@ -71044,6 +71045,7 @@ const action = async () => {
     inputEnvironment,
   );
 
+  await setupGcloud(secretServiceAccountKey);
   await createManifests(secretServiceAccountKey, envConfig)
     .then((manifest) => deploy(manifest, timeoutSeconds));
 };

@@ -4,6 +4,7 @@ const kubectl = require('./kubectl');
 const deploy = require('./deploy');
 const prepareEnvConfig = require('./env-config');
 const createManifests = require('./manifests');
+const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 
 const action = async () => {
   const deployServiceAccountKey = core.getInput('deploy-service-account-key', { required: true });
@@ -25,6 +26,7 @@ const action = async () => {
     inputEnvironment,
   );
 
+  await setupGcloud(secretServiceAccountKey);
   await createManifests(secretServiceAccountKey, envConfig)
     .then((manifest) => deploy(manifest, timeoutSeconds));
 };
