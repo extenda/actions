@@ -71033,7 +71033,7 @@ const action = async () => {
   const timeoutSeconds = core.getInput('timeout-seconds');
   const inputEnvironment = core.getInput('environment');
 
-  const { projectId } = await kubectl.configure(deployServiceAccountKey);
+  const projectId = await kubectl.configure(deployServiceAccountKey);
 
   const envConfig = await prepareEnvConfig(
     deployServiceAccountKey,
@@ -71078,9 +71078,7 @@ const configure = async (serviceAccountKey) => {
   // Authenticate kubectl
   await authenticateKubeCtl(clusterInfo);
 
-  return {
-    ...clusterInfo,
-  };
+  return projectId;
 };
 
 const kubectl = async (args) => exec.exec('kubectl', args);

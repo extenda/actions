@@ -16,9 +16,7 @@ const configure = async (serviceAccountKey) => {
   // Authenticate kubectl
   await authenticateKubeCtl(clusterInfo);
 
-  return {
-    ...clusterInfo,
-  };
+  return projectId;
 };
 
 const kubectl = async (args) => exec.exec('kubectl', args);

@@ -14,7 +14,7 @@ const action = async () => {
   const timeoutSeconds = core.getInput('timeout-seconds');
   const inputEnvironment = core.getInput('environment');
 
-  const { projectId } = await kubectl.configure(deployServiceAccountKey);
+  const projectId = await kubectl.configure(deployServiceAccountKey);
 
   const envConfig = await prepareEnvConfig(
     deployServiceAccountKey,
