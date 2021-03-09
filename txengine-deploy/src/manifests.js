@@ -2,18 +2,30 @@ const github = require('@actions/github');
 const fs = require('fs');
 const path = require('path');
 const yaml = require('yaml');
+const core = require('@actions/core');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
+
+const logAndReturn = async (returnValue, log) => {
+  core.info(log);
+  return returnValue;
+};
 
 const loadManifests = async (secretServiceAccountKey) => {
   const token = await loadSecret(secretServiceAccountKey, 'github-token');
   const octokit = github.getOctokit(token);
+  core.info('token fetched!');
   return octokit.repos.getContent({
     owner: 'extenda',
     repo: 'hiiretail-transaction-engine',
     path: '.k8s',
-  }).then((response) => response.data)
+  })
+    .then((returnValue) => logAndReturn(returnValue, 'get content response'))
+    .then((response) => response.data)
+    .then((returnValue) => logAndReturn(returnValue, 'get response data'))
     .then((files) => files.sort((a, b) => a.name.localeCompare(b.name)))
+    .then((returnValue) => logAndReturn(returnValue, 'sort files done'))
     .then((files) => files.map((e) => Buffer.from(e.content, 'base64').toString('utf8')))
+    .then((returnValue) => logAndReturn(returnValue, 'map files done'))
     .then((contents) => contents.join('\n'));
 };
 
@@ -44,7 +56,9 @@ const createManifests = async (
   { replaceTokens, configMap, secrets },
 ) => loadManifests(secretServiceAccountKey)
   .then((manifest) => replaceTokenVariables(manifest, replaceTokens))
+  .then((returnValue) => logAndReturn(returnValue, 'replace token vars'))
   .then((manifest) => yaml.parseAllDocuments(manifest).map((doc) => doc.toJSON()))
+  .then((returnValue) => logAndReturn(returnValue, 'parse documents'))
   .then((docs) => docs.map((doc) => {
     if (isDataMap(doc, 'ConfigMap', '-txengine-env')) {
       return populateDataMap(doc, 'data', configMap);
@@ -54,6 +68,7 @@ const createManifests = async (
     }
     return yaml.stringify(doc);
   }).join('---\n'))
+  .then((returnValue) => logAndReturn(returnValue, 'map documents'))
   .then((manifest) => `---\n${manifest}`)
   .then((manifest) => {
     const outputDir = path.join('.k8s', 'generated');
