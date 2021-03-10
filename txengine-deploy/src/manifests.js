@@ -3,32 +3,42 @@ const fs = require('fs');
 const path = require('path');
 const yaml = require('yaml');
 const core = require('@actions/core');
+const axios = require('axios');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
-const logAndReturn = async (returnValue, log) => {
-  core.startGroup(log);
-  core.info(JSON.stringify(returnValue));
-  core.endGroup();
-  return returnValue;
+const getContent = async (url) => axios({
+  url,
+  method: 'GET',
+  headers: {
+    'content-type': 'application/text',
+  },
+}).then((response) => response.data).catch((err) => {
+  throw new Error(`Couldn't fetch file contents: ${err}`);
+});
+
+
+const fetchFileContent = async (files) => {
+  let content = '';
+  /* eslint-disable no-await-in-loop */
+  for (let i = 0; i < files.length; i += 1) {
+    core.info(`test${i}`);
+    content += await getContent(files[i].download_url);
+  }
+  /* eslint-enable no-await-in-loop */
+  return content;
 };
 
 const loadManifests = async (secretServiceAccountKey) => {
+  core.info(secretServiceAccountKey);
   const token = await loadSecret(secretServiceAccountKey, 'github-token');
   const octokit = github.getOctokit(token);
-  core.info('token fetched!');
   return octokit.repos.getContent({
     owner: 'extenda',
     repo: 'hiiretail-transaction-engine',
     path: '.k8s',
-  })
-    .then((returnValue) => logAndReturn(returnValue, 'get content response'))
-    .then((response) => response.data)
-    .then((returnValue) => logAndReturn(returnValue, 'get response data'))
+  }).then((response) => response.data)
     .then((files) => files.sort((a, b) => a.name.localeCompare(b.name)))
-    .then((returnValue) => logAndReturn(returnValue, 'sort files done'))
-    .then((files) => files.map((e) => Buffer.from(e.content, 'base64').toString('utf8')))
-    .then((returnValue) => logAndReturn(returnValue, 'map files done'))
-    .then((contents) => contents.join('\n'));
+    .then((files) => fetchFileContent(files));
 };
 
 const replaceTokenVariables = (manifest, replaceTokens) => {
@@ -58,9 +68,7 @@ const createManifests = async (
   { replaceTokens, configMap, secrets },
 ) => loadManifests(secretServiceAccountKey)
   .then((manifest) => replaceTokenVariables(manifest, replaceTokens))
-  .then((returnValue) => logAndReturn(returnValue, 'replace token vars'))
   .then((manifest) => yaml.parseAllDocuments(manifest).map((doc) => doc.toJSON()))
-  .then((returnValue) => logAndReturn(returnValue, 'parse documents'))
   .then((docs) => docs.map((doc) => {
     if (isDataMap(doc, 'ConfigMap', '-txengine-env')) {
       return populateDataMap(doc, 'data', configMap);
@@ -70,9 +78,7 @@ const createManifests = async (
     }
     return yaml.stringify(doc);
   }).join('---\n'))
-  .then((returnValue) => logAndReturn(returnValue, 'map documents'))
   .then((manifest) => `---\n${manifest}`)
-  .then((returnValue) => logAndReturn(returnValue, 'add --- to document'))
   .then((manifest) => {
     const outputDir = path.join('.k8s', 'generated');
     const outputFile = path.join(outputDir, '00-manifest.yaml');
@@ -84,7 +90,6 @@ const createManifests = async (
       namespace: replaceTokens.NAMESPACE,
       tenantName: replaceTokens.TENANT_NAME,
     };
-  })
-  .then((returnValue) => logAndReturn(returnValue, 'generate documents'));
+  });
 
 module.exports = createManifests;

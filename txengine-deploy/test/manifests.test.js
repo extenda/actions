@@ -1,8 +1,10 @@
 jest.mock('@actions/core');
+jest.mock('axios');
 
 const mockFs = require('mock-fs');
 const fs = require('fs');
 const yaml = require('yaml');
+const axios = require('axios');
 
 const mockLoadSecret = jest.fn();
 jest.mock('../../gcp-secret-manager/src/secrets', () => ({
@@ -32,6 +34,13 @@ describe('manifests', () => {
   });
 
   test('It can collect files into one', async () => {
+    const mockYaml1 = '---\nname: file0\n';
+    const mockYaml2 = '---\nname: file1\n';
+    const mockYaml3 = '---\nname: file2\n';
+
+    axios.mockResolvedValueOnce({ data: mockYaml1, status: 200 });
+    axios.mockResolvedValueOnce({ data: mockYaml2, status: 200 });
+    axios.mockResolvedValueOnce({ data: mockYaml3, status: 200 });
     mockContent.mockResolvedValueOnce({
       data: [{
         name: '02-file2.yaml',
@@ -51,12 +60,14 @@ describe('manifests', () => {
         ).toString('base64'),
       }],
     });
+
     const vars = {
       replaceTokens: { NAMESPACE: 'txengine-tenant-se' },
       configMap: {},
       secrets: {},
     };
     const result = await createManifests('secret-account', vars);
+    expect(axios).toHaveBeenCalledTimes(3);
     expect(result.file).toEqual('.k8s/generated/00-manifest.yaml');
     expect(result.content).toEqual('---\nname: file0\n---\nname: file1\n---\nname: file2\n');
     expect(result.namespace).toEqual('txengine-tenant-se');
@@ -65,6 +76,13 @@ describe('manifests', () => {
   });
 
   test('It can replace token variables in manifest', async () => {
+    const mockYaml1 = '---\nname: file0\nnamespace: $NAMESPACE\nimage: $CONTAINER_IMAGE\n';
+    const mockYaml2 = '---\nname: file1\nnamespace: $NAMESPACE';
+    const mockYaml3 = '---\nname: file2\n';
+
+    axios.mockResolvedValueOnce({ data: mockYaml1, status: 200 });
+    axios.mockResolvedValueOnce({ data: mockYaml2, status: 200 });
+    axios.mockResolvedValueOnce({ data: mockYaml3, status: 200 });
     mockContent.mockResolvedValueOnce({
       data: [{
         name: '02-file2.yaml',
@@ -100,19 +118,19 @@ describe('manifests', () => {
   });
 
   test('It can populate a config map', async () => {
+    const mockYaml = `---
+    kind: ConfigMap
+    metadata:
+      name: test-txengine-env
+    data:
+      DATABASE_VENDOR: postgres
+    `;
+    axios.mockResolvedValueOnce({ data: mockYaml, status: 200 });
     mockContent.mockResolvedValueOnce({
       data: [{
         name: '00-file0.yaml',
-        content: Buffer.from(
-          `---
-kind: ConfigMap
-metadata:
-  name: test-txengine-env
-data:
-  DATABASE_VENDOR: postgres
-`,
-          'utf8',
-        ).toString('base64'),
+        content: Buffer.from(mockYaml,
+          'utf8').toString('base64'),
       }],
     });
     const vars = {
@@ -136,18 +154,18 @@ data:
   });
 
   test('It can populate secrets', async () => {
+    const mockYaml = `---
+    kind: Secret
+    metadata:
+      name: test-txengine-secrets
+    stringData: {}
+    `;
+    axios.mockResolvedValueOnce({ data: mockYaml, status: 200 });
     mockContent.mockResolvedValueOnce({
       data: [{
         name: '00-file0.yaml',
-        content: Buffer.from(
-          `---
-kind: Secret
-metadata:
-  name: test-txengine-secrets
-stringData: {}
-`,
-          'utf8',
-        ).toString('base64'),
+        content: Buffer.from(mockYaml,
+          'utf8').toString('base64'),
       }],
     });
     const vars = {
@@ -168,17 +186,19 @@ stringData: {}
   });
 
   test('It is possible to override default values', async () => {
+    const mockYaml = `---
+    kind: ConfigMap
+    metadata:
+      name: test-txengine-env
+    data:
+      DATABASE_VENDOR: postgres
+    `;
+    axios.mockResolvedValueOnce({ data: mockYaml, status: 200 });
     mockContent.mockResolvedValueOnce({
       data: [{
         name: '00-file0.yaml',
         content: Buffer.from(
-          `---
-kind: ConfigMap
-metadata:
-  name: test-txengine-env
-data:
-  DATABASE_VENDOR: postgres
-`,
+          mockYaml,
           'utf8',
         ).toString('base64'),
       }],
