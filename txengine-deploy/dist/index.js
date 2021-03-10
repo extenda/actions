@@ -71107,7 +71107,7 @@ const { loadSecret } = __webpack_require__(8652);
 
 const logAndReturn = async (returnValue, log) => {
   core.startGroup(log);
-  core.info(returnValue);
+  core.info(JSON.stringify(returnValue));
   core.endGroup();
   return returnValue;
 };

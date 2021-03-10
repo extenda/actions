@@ -7,7 +7,7 @@ const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
 const logAndReturn = async (returnValue, log) => {
   core.startGroup(log);
-  core.info(returnValue);
+  core.info(JSON.stringify(returnValue));
   core.endGroup();
   return returnValue;
 };
