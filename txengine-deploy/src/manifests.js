@@ -16,7 +16,6 @@ const getContent = async (url) => axios({
   throw new Error(`Couldn't fetch file contents: ${err}`);
 });
 
-
 const fetchFileContent = async (files) => {
   let content = '';
   /* eslint-disable no-await-in-loop */
@@ -35,7 +34,7 @@ const loadManifests = async (secretServiceAccountKey) => {
   return octokit.repos.getContent({
     owner: 'extenda',
     repo: 'hiiretail-transaction-engine',
-    path: '.k8s',
+    path: '.k8s/txengine',
   }).then((response) => response.data)
     .then((files) => files.sort((a, b) => a.name.localeCompare(b.name)))
     .then((files) => fetchFileContent(files));

@@ -74510,7 +74510,7 @@ module.exports = __webpack_require__(3333).YAML
 
 const kubectl = __webpack_require__(3954);
 
-const deploy = async ({ file, namespace, tenantName }, timeoutSeconds = 180) => {
+const deploy = async ({ file, namespace, tenantName }, timeoutSeconds) => {
   // Apply
   await kubectl.exec(['apply', '-f', file]);
 
@@ -74638,7 +74638,7 @@ const action = async () => {
   const image = core.getInput('image', { required: true });
   const tenantName = core.getInput('tenant-name', { required: true });
   const countryCode = core.getInput('country-code') || '';
-  const timeoutSeconds = core.getInput('timeout-seconds');
+  const timeoutSeconds = core.getInput('timeout-seconds') || 180;
   const inputEnvironment = core.getInput('environment');
 
   const projectId = await kubectl.configure(deployServiceAccountKey);
@@ -74720,7 +74720,6 @@ const getContent = async (url) => axios({
   throw new Error(`Couldn't fetch file contents: ${err}`);
 });
 
-
 const fetchFileContent = async (files) => {
   let content = '';
   /* eslint-disable no-await-in-loop */
@@ -74739,7 +74738,7 @@ const loadManifests = async (secretServiceAccountKey) => {
   return octokit.repos.getContent({
     owner: 'extenda',
     repo: 'hiiretail-transaction-engine',
-    path: '.k8s',
+    path: '.k8s/txengine',
   }).then((response) => response.data)
     .then((files) => files.sort((a, b) => a.name.localeCompare(b.name)))
     .then((files) => fetchFileContent(files));
