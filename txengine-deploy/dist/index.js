@@ -74625,13 +74625,11 @@ module.exports = prepareEnvConfig;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const core = __webpack_require__(6341);
-const exec = __webpack_require__(2176);
 const { run } = __webpack_require__(1898);
 const kubectl = __webpack_require__(3954);
 const deploy = __webpack_require__(6029);
 const prepareEnvConfig = __webpack_require__(4961);
 const createManifests = __webpack_require__(6469);
-const setupGcloud = __webpack_require__(7095);
 
 const action = async () => {
   const deployServiceAccountKey = core.getInput('deploy-service-account-key', { required: true });
@@ -74653,10 +74651,6 @@ const action = async () => {
     inputEnvironment,
   );
 
-  await exec.exec('gcloud', ['config', 'list']);
-  await setupGcloud(secretServiceAccountKey);
-  await exec.exec('gcloud', ['config', 'list']);
-  await exec.exec('gcloud', ['config', 'set', 'project', 'pipeline-secrets-1136']);
   await createManifests(secretServiceAccountKey, envConfig)
     .then((manifest) => deploy(manifest, timeoutSeconds));
 };
