@@ -2,7 +2,28 @@ const github = require('@actions/github');
 const fs = require('fs');
 const path = require('path');
 const yaml = require('yaml');
+const axios = require('axios');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
+
+const getContent = async (url) => axios({
+  url,
+  method: 'GET',
+  headers: {
+    'content-type': 'application/text',
+  },
+}).then((response) => response.data).catch((err) => {
+  throw new Error(`Couldn't fetch file contents: ${err}`);
+});
+
+const fetchFileContent = async (files) => {
+  let content = '';
+  /* eslint-disable no-await-in-loop */
+  for (let i = 0; i < files.length; i += 1) {
+    content += await getContent(files[i].download_url);
+  }
+  /* eslint-enable no-await-in-loop */
+  return content;
+};
 
 const loadManifests = async (secretServiceAccountKey) => {
   const token = await loadSecret(secretServiceAccountKey, 'github-token');
@@ -10,11 +31,10 @@ const loadManifests = async (secretServiceAccountKey) => {
   return octokit.repos.getContent({
     owner: 'extenda',
     repo: 'hiiretail-transaction-engine',
-    path: '.k8s',
+    path: '.k8s/txengine',
   }).then((response) => response.data)
     .then((files) => files.sort((a, b) => a.name.localeCompare(b.name)))
-    .then((files) => files.map((e) => Buffer.from(e.content, 'base64').toString('utf8')))
-    .then((contents) => contents.join('\n'));
+    .then((files) => fetchFileContent(files));
 };
 
 const replaceTokenVariables = (manifest, replaceTokens) => {

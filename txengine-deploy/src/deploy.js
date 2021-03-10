@@ -1,6 +1,6 @@
 const kubectl = require('./kubectl');
 
-const deploy = async ({ file, namespace, tenantName }, timeoutSeconds = 180) => {
+const deploy = async ({ file, namespace, tenantName }, timeoutSeconds) => {
   // Apply
   await kubectl.exec(['apply', '-f', file]);
 

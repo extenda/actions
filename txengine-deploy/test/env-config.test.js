@@ -25,7 +25,7 @@ describe('env-config', () => {
     );
 
     expect(replaceTokens).toEqual({
-      NAMESPACE: 'txengine-testrunner-se',
+      NAMESPACE: 'testrunner-se-txengine',
       CONTAINER_IMAGE: 'eu.gcr.io/extenda/test:v1.0.0',
       TENANT_NAME: 'testrunner',
     });
@@ -54,7 +54,7 @@ describe('env-config', () => {
     );
 
     expect(replaceTokens).toMatchObject({
-      NAMESPACE: 'txengine-testrunner',
+      NAMESPACE: 'testrunner-txengine',
     });
   });
 
@@ -85,7 +85,7 @@ describe('env-config', () => {
     );
 
     expect(replaceTokens).toEqual({
-      NAMESPACE: 'txengine-testrunner-se',
+      NAMESPACE: 'testrunner-se-txengine',
       CONTAINER_IMAGE: 'eu.gcr.io/extenda/test:v1.0.0',
       TENANT_NAME: 'testrunner',
     });

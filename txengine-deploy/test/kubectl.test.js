@@ -21,7 +21,7 @@ describe('kubectl', () => {
     setupGcloud.mockResolvedValueOnce('test-project');
     mockClusterInfo.mockResolvedValueOnce({ projectId: 'test-project' });
     authenticateKubeCtl.mockResolvedValueOnce({ projectId: 'test-project' });
-    const { projectId } = await kubectl.configure('service-key');
+    const projectId = await kubectl.configure('service-key');
     expect(projectId).toEqual('test-project');
     expect(setupGcloud).toHaveBeenCalled();
   });
