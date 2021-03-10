@@ -3,10 +3,11 @@ const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
 const createReplaceTokens = (projectId, image, tenantName, countryCode) => {
   const tenantLowerCase = tenantName.toLowerCase();
-  const namespace = ['txengine', tenantLowerCase];
+  const namespace = [tenantLowerCase];
   if (countryCode) {
     namespace.push(countryCode.toLowerCase());
   }
+  namespace.push('txengine');
 
   return {
     NAMESPACE: namespace.join('-'),

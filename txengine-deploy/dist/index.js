@@ -74538,10 +74538,11 @@ const { loadSecret } = __webpack_require__(8652);
 
 const createReplaceTokens = (projectId, image, tenantName, countryCode) => {
   const tenantLowerCase = tenantName.toLowerCase();
-  const namespace = ['txengine', tenantLowerCase];
+  const namespace = [tenantLowerCase];
   if (countryCode) {
     namespace.push(countryCode.toLowerCase());
   }
+  namespace.push('txengine');
 
   return {
     NAMESPACE: namespace.join('-'),
