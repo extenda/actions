@@ -74706,7 +74706,6 @@ const github = __webpack_require__(8809);
 const fs = __webpack_require__(5747);
 const path = __webpack_require__(5622);
 const yaml = __webpack_require__(5024);
-const core = __webpack_require__(6341);
 const axios = __webpack_require__(9090);
 const { loadSecret } = __webpack_require__(8652);
 
@@ -74724,7 +74723,6 @@ const fetchFileContent = async (files) => {
   let content = '';
   /* eslint-disable no-await-in-loop */
   for (let i = 0; i < files.length; i += 1) {
-    core.info(`test${i}`);
     content += await getContent(files[i].download_url);
   }
   /* eslint-enable no-await-in-loop */
@@ -74732,7 +74730,6 @@ const fetchFileContent = async (files) => {
 };
 
 const loadManifests = async (secretServiceAccountKey) => {
-  core.info(secretServiceAccountKey);
   const token = await loadSecret(secretServiceAccountKey, 'github-token');
   const octokit = github.getOctokit(token);
   return octokit.repos.getContent({
