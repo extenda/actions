@@ -23,7 +23,7 @@ describe('Pod run', () => {
   });
 
   test('It will run test without config map', async () => {
-    await podRun({ name: '', namespace: 'test' }, 'myimage', null);
+    await podRun({ name: '', namespace: 'test' }, 'myimage', null, false);
     const override = {
       apiVersion: 'v1',
       metadata: {
@@ -62,7 +62,7 @@ describe('Pod run', () => {
       name: 'testmap',
       workingDirectory: true,
       entrypoint: true,
-    });
+    }, false);
 
     const override = {
       apiVersion: 'v1',
@@ -112,7 +112,7 @@ describe('Pod run', () => {
       name: 'testmap',
       workingDirectory: true,
       entrypoint: false,
-    });
+    }, false);
 
     const override = {
       apiVersion: 'v1',
@@ -180,11 +180,55 @@ describe('Pod run', () => {
         }],
       },
     };
-    await podRun({ name: '', namespace: 'test' }, 'myimage');
+    await podRun({ name: '', namespace: 'test' }, 'myimage', null, false);
     expect(exec.exec.mock.calls[0][1]).toEqual(
       expect.arrayContaining([
         '--env=TESTPOD_API_KEY=my-secret',
         '--env=TESTPOD_VERBOSE=true',
+        `--overrides=${JSON.stringify(override)}`,
+      ]),
+    );
+    expect(exec.exec.mock.calls[0][1]).not.toEqual(
+      expect.arrayContaining(['--env=GITHUB_REPOSITORY=extenda/actions']),
+    );
+  });
+
+  test('It will trim TESTPOD_ prefixes from env vars', async () => {
+    process.env.TESTPOD_API_KEY = 'my-secret';
+    process.env.TESTPOD_VERBOSE = 'true';
+    const override = {
+      apiVersion: 'v1',
+      metadata: {
+        namespace: 'test',
+        labels: {
+          'opa-injection': 'false',
+        },
+        annotations: {
+          'sidecar.istio.io/inject': 'false',
+        },
+      },
+      spec: {
+        containers: [{
+          name: 'actions-15b1e98-test',
+          image: 'myimage',
+          env: [
+            {
+              name: 'API_KEY',
+              value: 'my-secret',
+            },
+            {
+              name: 'VERBOSE',
+              value: 'true',
+            },
+          ],
+        }],
+      },
+    };
+    await podRun({ name: '', namespace: 'test' }, 'myimage', null, true);
+    expect(exec.exec.mock.calls[0][1]).toEqual(
+      expect.arrayContaining([
+        '--env=API_KEY=my-secret',
+        '--env=VERBOSE=true',
         `--overrides=${JSON.stringify(override)}`,
       ]),
     );
@@ -216,7 +260,7 @@ describe('Pod run', () => {
     extract.extractOutput.mockReset();
     extract.extractOutput.mockResolvedValueOnce('test-pod-output');
 
-    await podRun({ name: '', namespace: 'test' }, 'myimage', null);
+    await podRun({ name: '', namespace: 'test' }, 'myimage', null, false);
     expect(exec.exec.mock.calls[0][1]).toEqual(
       expect.arrayContaining([
         `--overrides=${JSON.stringify(override)}`,

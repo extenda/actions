@@ -11,12 +11,13 @@ const action = async () => {
   const cluster = core.getInput('cluster');
   const entrypoint = core.getInput('entrypoint');
   const workingDirectory = core.getInput('working-directory');
+  const trimPrefix = core.getInput('trim-prefix') === 'true';
 
   const clusterInfo = await configureKubeCtl(serviceAccountKey, cluster, namespace);
 
   const configMap = await createConfigMap(clusterInfo, workingDirectory, entrypoint);
 
-  return runPod(clusterInfo, image, configMap)
+  return runPod(clusterInfo, image, configMap, trimPrefix)
     .finally(() => (configMap ? deleteConfigMap(clusterInfo) : null));
 };
 
