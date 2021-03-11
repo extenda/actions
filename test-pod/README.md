@@ -57,6 +57,30 @@ jobs:
           TESTPOD_API_KEY: ${{ secrets.API_KEY }}
 ````
 
+To trim the `TESTPOD_` prefixes from environment variables set `trim-prefix: true` flag.
+In the example below, the `TESTPOD_API_KEY` will be available to tests as a system environment variable named `API_KEY`.
+
+````yaml
+on: push
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Acceptance tests
+        uses: extenda/actions/test-pod@v0
+        with:
+          service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
+          image: postman/newman:alpine
+          working-directory: test/newman
+          entrypoint: test/newman/run-test.sh
+          trim-prefix: true
+        env:
+          TESTPOD_API_KEY: ${{ secrets.API_KEY }}
+````
+
 ### Test internal service without `cloud-run.yaml`
 
 This example demonstrates how to run a test without depending on a `cloud-run.yaml` in your repository.

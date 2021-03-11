@@ -21564,12 +21564,13 @@ const action = async () => {
   const cluster = core.getInput('cluster');
   const entrypoint = core.getInput('entrypoint');
   const workingDirectory = core.getInput('working-directory');
+  const trimPrefix = core.getInput('trim-prefix') === 'true';
 
   const clusterInfo = await configureKubeCtl(serviceAccountKey, cluster, namespace);
 
   const configMap = await createConfigMap(clusterInfo, workingDirectory, entrypoint);
 
-  return runPod(clusterInfo, image, configMap)
+  return runPod(clusterInfo, image, configMap, trimPrefix)
     .finally(() => (configMap ? deleteConfigMap(clusterInfo) : null));
 };
 
@@ -21596,9 +21597,15 @@ const podName = async () => {
   return `${repo}-${sha}-test`;
 };
 
-const podEnv = () => Object.keys(process.env).filter((env) => env.startsWith('TESTPOD_'));
+const TEST_POD_ENV_PREFIX = 'TESTPOD_';
+const PREFIX_LEN = TEST_POD_ENV_PREFIX.length;
 
-const createOverride = (pod, namespace, image, configMap, serviceUrl) => {
+const podEnv = (trimPrefix) => Object
+  .entries(process.env)
+  .filter(([envName]) => envName.startsWith(TEST_POD_ENV_PREFIX))
+  .map(([envName, envValue]) => [trimPrefix ? envName.slice(PREFIX_LEN) : envName, envValue]);
+
+const createOverride = (pod, namespace, image, configMap, serviceUrl, trimPrefix) => {
   const container = {
     name: pod,
     image,
@@ -21620,13 +21627,13 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl) => {
     }];
   }
 
-  podEnv().forEach((env) => {
+  podEnv(trimPrefix).forEach(([envName, envValue]) => {
     if (!container.env) {
       container.env = [];
     }
     container.env.push({
-      name: env,
-      value: process.env[env],
+      name: envName,
+      value: envValue,
     });
   });
 
@@ -21664,7 +21671,7 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl) => {
   return override;
 };
 
-const runPod = async ({ name, namespace }, image, configMap) => {
+const runPod = async ({ name, namespace }, image, configMap, trimPrefix) => {
   const pod = await podName();
 
   const args = [
@@ -21686,12 +21693,12 @@ const runPod = async ({ name, namespace }, image, configMap) => {
     args.push(`--env=SERVICE_URL=${serviceUrl}`);
   }
 
-  podEnv().forEach((env) => {
-    args.push(`--env=${env}=${process.env[env]}`);
+  podEnv(trimPrefix).forEach(([envName, envValue]) => {
+    args.push(`--env=${envName}=${envValue}`);
   });
 
   const json = JSON.stringify(
-    createOverride(pod, namespace, image, configMap, serviceUrl),
+    createOverride(pod, namespace, image, configMap, serviceUrl, trimPrefix),
   );
   args.push(`--overrides=${json}`);
 

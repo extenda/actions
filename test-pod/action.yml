@@ -33,6 +33,11 @@ inputs:
       the namespace will be deduced from the service specification. Otherwise, the `default`
       namespace will be used.
     required: false
+  trim-prefix:
+    description: |
+      If set to true trims 'TEST_POD_' prefixes from env vars.
+      Example: TEST_POD_API_KEY is exposed to test pod as API_KEY.
+    required: false
 runs:
   using: node12
   main: dist/index.js
