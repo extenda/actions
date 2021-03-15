@@ -33,6 +33,7 @@ module.exports = {
                   type: 'array',
                   items: {
                     type: 'string',
+                    // eslint-disable-next-line no-useless-escape
                     pattern: '^[A-Za-z0-9_\-]+@[A-Za-z0-9_\-]+\.iam\.gserviceaccount\.com$',
                   },
                 },
