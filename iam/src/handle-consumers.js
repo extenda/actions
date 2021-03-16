@@ -35,13 +35,12 @@ const updateConsumers = async (systemID, styraToken, styraUrl, consumers) => {
 const handleConsumers = async (
   systemID, styraToken, styraUrl, consumers, systemName,
 ) => {
-  if (!consumers) {
-    return;
-  }
   const allowedConsumers = [];
-  for (let i = 0; i < consumers.length; i += 1) {
-    for (const sa of consumers[i]['service-accounts']) {
-      allowedConsumers.push(sa);
+  if (consumers) {
+    for (let i = 0; i < consumers.length; i += 1) {
+      for (const sa of consumers[i]['service-accounts']) {
+        allowedConsumers.push(sa);
+      }
     }
   }
   await upsertDatasource(systemID, styraToken, styraUrl);

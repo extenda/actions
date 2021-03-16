@@ -46,9 +46,23 @@ describe('Setup consumers and update datasource', () => {
     expect(axios).toHaveBeenCalledTimes(2);
   });
 
-  test('it doesn\'t run if no allowed consumers', async () => {
+  test('it runs even if no allowed consumers', async () => {
+    axios.mockResolvedValue({ status: 200 });
     await handleConsumers('systemID', 'token', 'styraUrl', undefined);
-    expect(axios).toHaveBeenCalledTimes(0);
+
+    const setData = {
+      url: 'styraUrl/v1/data/systems/systemID/consumers',
+      method: 'PUT',
+      headers: {
+        authorization: 'Bearer token',
+        'content-type': 'application/json',
+      },
+      data: {
+        consumers: [],
+      },
+    };
+    expect(axios).toHaveBeenNthCalledWith(2, setData);
+    expect(axios).toHaveBeenCalledTimes(2);
   });
 
   test('it throws error on failing to setup datasource', async () => {
