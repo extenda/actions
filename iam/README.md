@@ -158,7 +158,7 @@ roles:
 
 The consumers will be available in your das system by importing data.consumers. This dataset will contain an array named consumers with service-accounts.
 
-examle policy
+example policy
 
 ```
 import data.consumers.consumers
