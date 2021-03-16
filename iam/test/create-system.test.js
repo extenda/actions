@@ -3,6 +3,8 @@ const mock = require('mock-fs');
 jest.mock('@actions/core');
 jest.mock('@actions/exec');
 jest.mock('request');
+jest.mock('../src/handle-consumers');
+
 const request = require('request');
 const exec = require('@actions/exec');
 const { setupSystem } = require('../src/create-system');
