@@ -58,7 +58,7 @@ describe('run action', () => {
     fetchIamToken.mockResolvedValueOnce('iam-token');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(7);
+    expect(core.getInput).toHaveBeenCalledTimes(8);
     expect(fetchIamToken).toHaveBeenCalledWith(
       'iam-key',
       'iam-email',
@@ -111,7 +111,7 @@ describe('run action', () => {
     fetchIamToken.mockResolvedValueOnce('iam-token');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(7);
+    expect(core.getInput).toHaveBeenCalledTimes(8);
     expect(fetchIamToken).toHaveBeenCalledWith(
       'iam-key',
       'iam-email',
