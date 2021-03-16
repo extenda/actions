@@ -1,4 +1,5 @@
 const axios = require('axios');
+const core = require('@actions/core');
 
 const sendHttp = async (
   url, token, body,
@@ -32,7 +33,7 @@ const updateConsumers = async (systemID, styraToken, styraUrl, consumers) => {
 };
 
 const handleConsumers = async (
-  systemID, styraToken, styraUrl, consumers,
+  systemID, styraToken, styraUrl, consumers, systemName,
 ) => {
   if (!consumers) {
     return;
@@ -45,6 +46,7 @@ const handleConsumers = async (
   }
   await upsertDatasource(systemID, styraToken, styraUrl);
   await updateConsumers(systemID, styraToken, styraUrl, allowedConsumers);
+  core.info(`consumers handled for ${systemName}`);
 };
 
 module.exports = handleConsumers;

@@ -300,7 +300,7 @@ const setupSystem = async (
   promises.push(setDefaultDataset(systemResult.result.id, token, styraUrl));
   promises.push(updateOwners(systemResult.result.id, token, styraUrl, systemOwners));
   promises.push(applyConfiguration(opaConfig, systemName));
-  promises.push(handleConsumers(systemResult.result.id, token, styraUrl, consumers));
+  promises.push(handleConsumers(systemResult.result.id, token, styraUrl, consumers, systemName));
 
   return Promise.all(promises);
 };
