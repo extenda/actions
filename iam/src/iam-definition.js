@@ -30,6 +30,16 @@ const validateAlphaSort = (spec, result) => {
 
   sortAndCompare(services.map((service) => service.name), 'services', result);
 
+  services.forEach((service, serviceIndex) => {
+    const allowedConsumers = service['allowed-consumers'];
+    if (allowedConsumers) {
+      allowedConsumers.forEach((consumerGroup, index) => {
+        const serviceAccounts = consumerGroup['service-accounts'];
+        sortAndCompare(serviceAccounts, `services[${serviceIndex}]['allowed-consumers'][${index}]['service-accounts']`, result);
+      });
+    }
+  });
+
   sortAndCompare(Object.keys(permissions), 'permissions', result);
   Object.keys(permissions).forEach((noun) => {
     sortAndCompare(permissions[noun], `permissions.${noun}`, result);
