@@ -35,7 +35,7 @@ describe('Setup consumers and update datasource', () => {
         'content-type': 'application/json',
       },
       data: {
-        consumers: ['sa1', 'sa2', 'sa1tes1', 'sa2test2'],
+        services: ['sa1', 'sa2', 'sa1tes1', 'sa2test2'],
       },
     };
 
@@ -58,7 +58,7 @@ describe('Setup consumers and update datasource', () => {
         'content-type': 'application/json',
       },
       data: {
-        consumers: [],
+        services: [],
       },
     };
     expect(axios).toHaveBeenNthCalledWith(2, setData);

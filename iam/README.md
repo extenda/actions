@@ -43,23 +43,23 @@ will be processed independent of others.
 The YAML syntax is formally defined with [JSON Schema](src/iam-schema.js). The following table explains what
 properties are required and not.
 
-| Property                    | Description                                                                                      | Required |
-|:----------------------------|:-------------------------------------------------------------------------------------------------|:---------|
-| `name`                      | The name of the service system                                                                   | No      |
-| `permission-prefix`         | The permission prefix, this will be prefixed to every permission and roles id. ([a-z][-a-z]{2})  | Yes      |
-| `services`                  | A list of services that need a DAS system                                                        | Yes      |
-| `services.name`             | The service name of the system to be created                                                     | Yes      |
-| `services.repository`       | The description of the service                                                                   | Yes      |
-| `services.allowed-consumers`| A list of clans and services allowed to consume this service                                     | No       |
-| `services.clan`             | Your clan name subscribing to this service                                                       | Yes      |
-| `services.service-accounts` | A list of service accounts allowed to consume this service. (Full service account name required) | Yes      |
-| `permissions`               | An object containing the permissions for this service. (keys [a-z][-a-z]{1,15})                  | Yes      |
-| `prmissions.<resource>`     | Array containing the verbs for the `<resource>`. (items [a-z][-a-z]{1,15})                       | Yes      |
-| `roles`                     | An list of roles that should exist for this service                                              | No       |
-| `roles.id`                  | The role id ([a-z][-a-z]{1,19})                                                                  | Yes      |
-| `roles.name`                | The role name                                                                                    | Yes      |
-| `roles.desc`                | The description of the role, (max 200 characters)                                                | Yes      |
-| `roles.permissions`         | An list of permissions this role should contain (items ^[a-z][-a-z]{1,15}\.[a-z][-a-z]{1,15}$)   |  Yes      |
+| Property                                      | Description                                                                                      | Required |
+|:----------------------------------------------|:-------------------------------------------------------------------------------------------------|:---------|
+| `name`                                        | The name of the service system                                                                   | No       |
+| `permission-prefix`                           | The permission prefix, this will be prefixed to every permission and roles id. ([a-z][-a-z]{2})  | Yes      |
+| `services`                                    | A list of services that need a DAS system                                                        | Yes      |
+| `services.name`                               | The service name of the system to be created                                                     | Yes      |
+| `services.repository`                         | The description of the service                                                                   | Yes      |
+| `services.allowed-consumers`                  | A list of clans and services allowed to consume this service                                     | No       |
+| `services.allowed-consumers.clan`             | Your clan name subscribing to this service                                                       | Yes      |
+| `services.allowed-consumers.service-accounts` | A list of service accounts allowed to consume this service. (Full service account name required) | Yes      |
+| `permissions`                                 | An object containing the permissions for this service. (keys [a-z][-a-z]{1,15})                  | Yes      |
+| `permissions.<resource>`                      | Array containing the verbs for the `<resource>`. (items [a-z][-a-z]{1,15})                       | Yes      |
+| `roles`                                       | An list of roles that should exist for this service                                              | No       |
+| `roles.id`                                    | The role id ([a-z][-a-z]{1,19})                                                                  | Yes      |
+| `roles.name`                                  | The role name                                                                                    | Yes      |
+| `roles.desc`                                  | The description of the role, (max 200 characters)                                                | Yes      |
+| `roles.permissions`                           | An list of permissions this role should contain (items ^[a-z][-a-z]{1,15}\.[a-z][-a-z]{1,15}$)   | Yes      |
 
 ### YAML Examples
 
@@ -118,18 +118,18 @@ services:
     allowed-consumers:
     - clan: iam
       service-accounts:
-        - 'iam-api@iam-staging-c2a9.iam.gserviceaccount.com'
+        - iam-api@iam-staging-c2a9.iam.gserviceaccount.com
     - clan: quotes
       service-accounts:
-        - 'braveheart-quotes-webclient-be@quotes-staging-ccdf.iam.gserviceaccount.com'
+        - braveheart-quotes-webclient-be@quotes-staging-ccdf.iam.gserviceaccount.com
   - name: braveheart-quotes-webclient-be
     repository: braveheart-quotes-webclient-backend
     allowed-consumers:
     - clan: iam
       service-accounts:
-        - 'iam-api@iam-staging-c2a9.iam.gserviceaccount.com'
-        - 'iam-das-sync-worker@iam-staging-c2a9.iam.gserviceaccount.com'
-        - 'iam-oauth-client-managment@iam-staging-c2a9.iam.gserviceaccount.com'
+        - iam-api@iam-staging-c2a9.iam.gserviceaccount.com
+        - iam-das-sync-worker@iam-staging-c2a9.iam.gserviceaccount.com
+        - iam-oauth-client-managment@iam-staging-c2a9.iam.gserviceaccount.com
 permissions:
   quote:
     - create
@@ -142,30 +142,30 @@ roles:
     name: Braveheart quotes administrator
     desc: full access
     permissions:
-      - 'quote.create'
-      - 'quote.delete'
-      - 'quote.get'
-      - 'quote.list'
-      - 'quote.update'
+      - quote.create
+      - quote.delete
+      - quote.get
+      - quote.list
+      - quote.update
   - id: viewer
     name: Braveheart quotes viwer
     desc: view access
     permissions:
-      - 'quote.get'
-      - 'quote.list'
+      - quote.get
+      - quote.list
 
 ```
 
-The consumers will be available in your das system by importing data.consumers. This dataset will contain an array named consumers with service-accounts.
+The consumers will be available in your das system by importing data.consumers. This dataset will contain an array named services with service-accounts.
 
 example policy
 
 ```
-import data.consumers.consumers
+import data.consumers.services
 
 allow = true {
   http_request.method == "GET"
   parsed_path == ["quotes"]
-  googletoken.check_service_account("quotes.list", consumers)
+  googletoken.check_service_account("quotes.list", services)
 }
 ```

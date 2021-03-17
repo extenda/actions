@@ -24,10 +24,10 @@ const upsertDatasource = async (systemID, styraToken, styraUrl) => {
   return sendHttp(url, styraToken, body);
 };
 
-const updateConsumers = async (systemID, styraToken, styraUrl, consumers) => {
+const updateConsumers = async (systemID, styraToken, styraUrl, services) => {
   const url = `${styraUrl}/v1/data/systems/${systemID}/consumers`;
   const body = {
-    consumers,
+    services,
   };
   return sendHttp(url, styraToken, body);
 };
