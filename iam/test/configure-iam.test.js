@@ -9,6 +9,7 @@ jest.mock('../../cloud-run/src/cluster-info');
 jest.mock('../../cloud-run/src/create-namespace');
 jest.mock('../src/handle-repository');
 jest.mock('../src/handle-owners');
+jest.mock('../src/handle-consumers');
 jest.mock('../../cloud-run/src/kubectl-auth');
 
 const request = require('request');
@@ -21,6 +22,8 @@ const projectInfo = require('../../cloud-run/src/project-info');
 const { setupPermissions, handlePermissions } = require('../src/permissions');
 const { setupRoles } = require('../src/roles');
 const { setupSystem } = require('../src/create-system');
+
+const allowedConsumers = [{ clan: 'test', 'service-accounts': ['sa1', 'sa2'] }];
 
 describe('Configure iam', () => {
   afterEach(() => {
@@ -91,6 +94,7 @@ describe('Configure iam', () => {
       services: [{
         name: 'test-service',
         repository: 'test-repo',
+        'allowed-consumers': allowedConsumers,
       }],
     };
 
@@ -111,7 +115,7 @@ describe('Configure iam', () => {
 
     await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], false);
     expect(setupSystem).toHaveBeenCalledWith(
-      'test-service', 'test.test-service-staging', 'staging', 'test-repo', 'styra-token', 'https://extendaretail.styra.com', [],
+      'test-service', 'test.test-service-staging', 'staging', 'test-repo', 'styra-token', 'https://extendaretail.styra.com', [], allowedConsumers,
     );
     expect(request).toHaveBeenCalledTimes(1);
   });
@@ -126,6 +130,7 @@ describe('Configure iam', () => {
       services: [{
         name: 'test-service',
         repository: 'test-repo',
+        'allowed-consumers': allowedConsumers,
       }],
     };
 
@@ -147,7 +152,7 @@ describe('Configure iam', () => {
     await expect(configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], true))
       .resolves.toEqual(null);
     expect(setupSystem).toHaveBeenCalledWith(
-      'test-service', 'test.test-service-staging', 'staging', 'test-repo', 'styra-token', 'https://extendaretail.styra.com', [],
+      'test-service', 'test.test-service-staging', 'staging', 'test-repo', 'styra-token', 'https://extendaretail.styra.com', [], allowedConsumers,
     );
     expect(request).toHaveBeenCalledTimes(1);
   });

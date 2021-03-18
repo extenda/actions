@@ -58,6 +58,7 @@ const action = async () => {
   const iamUrl = core.getInput('iam-api-url') || 'https://iam-api.retailsvc.com';
   const styraUrl = core.getInput('styra-url') || 'https://extendaretail.svc.styra.com';
   const dryRun = core.getInput('dry-run') === 'true';
+  const skipProd = core.getInput('skip-prod') === 'true';
 
   const iamFiles = fg.sync(iamFileGlob, { onlyFiles: true });
 
@@ -76,11 +77,13 @@ const action = async () => {
         serviceAccountKey, serviceAccountKeyStaging, iam, styraUrl, iamUrl, systemOwners,
       );
 
-      core.info('Update prod');
-      // eslint-disable-next-line no-await-in-loop
-      await setupEnvironment(
-        serviceAccountKey, serviceAccountKeyProd, iam, styraUrl, iamUrl, systemOwners,
-      );
+      if (!skipProd) {
+        core.info('Update prod');
+        // eslint-disable-next-line no-await-in-loop
+        await setupEnvironment(
+          serviceAccountKey, serviceAccountKeyProd, iam, styraUrl, iamUrl, systemOwners,
+        );
+      }
     }
     core.endGroup();
   }
