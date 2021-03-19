@@ -15,25 +15,48 @@ const sendHttp = async (
   throw new Error(`Request to ${url} failed. Reason: ${err.message}`);
 });
 
-const upsertDatasource = async (systemID, styraToken, styraUrl) => {
+
+const sendHttpWithRetries = async (url, token, body, attempts, backoffSeconds) => {
+  /* eslint-disable no-await-in-loop */
+  for (let i = 0; i < attempts; i += 1) {
+    let error;
+    await sendHttp(url, token, body).catch((err) => {
+      error = err;
+    });
+    if (error) {
+      if (i === attempts - 1) {
+        throw new Error(error.message);
+      }
+      await new Promise((r) => setTimeout(r, (backoffSeconds * 1000)));
+    } else {
+      break;
+    }
+  }
+  /* eslint-enable no-await-in-loop */
+  return null;
+};
+
+const upsertDatasource = async (systemID, styraToken, styraUrl, retries, backoffSeconds) => {
   const url = `${styraUrl}/v1/datasources/systems/${systemID}/consumers`;
   const body = {
     category: 'rest',
     type: 'push',
   };
-  return sendHttp(url, styraToken, body);
+  return sendHttpWithRetries(url, styraToken, body, retries, backoffSeconds);
 };
 
-const updateConsumers = async (systemID, styraToken, styraUrl, services) => {
+const updateConsumers = async (
+  systemID, styraToken, styraUrl, services, retries, backoffSeconds,
+) => {
   const url = `${styraUrl}/v1/data/systems/${systemID}/consumers`;
   const body = {
     services,
   };
-  return sendHttp(url, styraToken, body);
+  return sendHttpWithRetries(url, styraToken, body, retries, backoffSeconds);
 };
 
 const handleConsumers = async (
-  systemID, styraToken, styraUrl, consumers, systemName,
+  systemID, styraToken, styraUrl, consumers, systemName, retries = 3, backoffSeconds = 1,
 ) => {
   const allowedConsumers = [];
   if (consumers) {
@@ -43,8 +66,8 @@ const handleConsumers = async (
       }
     }
   }
-  await upsertDatasource(systemID, styraToken, styraUrl);
-  await updateConsumers(systemID, styraToken, styraUrl, allowedConsumers);
+  await upsertDatasource(systemID, styraToken, styraUrl, retries, backoffSeconds);
+  await updateConsumers(systemID, styraToken, styraUrl, allowedConsumers, retries, backoffSeconds);
   core.info(`consumers handled for ${systemName}`);
 };
 
