@@ -23,6 +23,8 @@ const parseEnvironment = (environment, projectId) => {
   return yaml.parse(environment.replace(/sm:\/\/\*\//g, `sm://${projectId}/`));
 };
 
+const getConditionalCountryCodeString = (countryCode) => (typeof (countryCode) !== 'undefined' ? `${countryCode}_` : '');
+
 const defaultEnvironment = (projectId, tenantName, countryCode) => ({
   DATABASE_HOST: `sm://${projectId}/${tenantName}_${getConditionalCountryCodeString(countryCode)}postgresql_private_address`,
   DATABASE_USER: 'postgres',
@@ -30,8 +32,6 @@ const defaultEnvironment = (projectId, tenantName, countryCode) => ({
   SERVICE_PROJECT_ID: projectId,
   SERVICE_ENVIRONMENT: projectId.includes('-staging-') ? 'staging' : 'prod',
 });
-
-const getConditionalCountryCodeString = (countryCode) => (typeof(countryCode) != "undefined") ? countryCode+"_" : "";
 
 const loadAllSecrets = async (serviceAccountKey, secrets) => {
   const results = [];
