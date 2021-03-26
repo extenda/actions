@@ -3,6 +3,7 @@ const core = require('@actions/core');
 const request = require('request');
 const fs = require('fs');
 const yaml = require('js-yaml'); // FIXME what YAML lib is used?
+const handleConsumers = require('./handle-consumers');
 
 const applyConfiguration = async (opaConfig, systemName) => {
   fs.writeFileSync(systemName, yaml.safeDump(opaConfig));
@@ -276,7 +277,16 @@ const createSystem = async (
   });
 });
 
-const setupSystem = async (service, systemName, env, repo, token, styraUrl, systemOwners) => {
+const setupSystem = async (
+  service,
+  systemName,
+  env,
+  repo,
+  token,
+  styraUrl,
+  systemOwners,
+  consumers,
+) => {
   const promises = [];
   const systemResult = await createSystem(service, systemName, repo, token, styraUrl, env);
   if (systemResult.code) {
@@ -290,6 +300,7 @@ const setupSystem = async (service, systemName, env, repo, token, styraUrl, syst
   promises.push(setDefaultDataset(systemResult.result.id, token, styraUrl));
   promises.push(updateOwners(systemResult.result.id, token, styraUrl, systemOwners));
   promises.push(applyConfiguration(opaConfig, systemName));
+  promises.push(handleConsumers(systemResult.result.id, token, styraUrl, consumers, systemName));
 
   return Promise.all(promises);
 };

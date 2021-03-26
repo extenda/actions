@@ -21,6 +21,29 @@ module.exports = {
           repository: {
             type: 'string',
           },
+          'allowed-consumers': {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                clan: {
+                  type: 'string',
+                },
+                'service-accounts': {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    // eslint-disable-next-line no-useless-escape
+                    pattern: '^[A-Za-z0-9_\-]+@[A-Za-z0-9_\-]+\.iam\.gserviceaccount\.com$',
+                  },
+                },
+              },
+              required: [
+                'clan',
+                'service-accounts',
+              ],
+            },
+          },
         },
         required: [
           'name',

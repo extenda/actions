@@ -8,6 +8,7 @@ const createNamespace = require('../../cloud-run/src/create-namespace');
 const checkOwners = require('./handle-owners');
 const checkRepository = require('./handle-repository');
 const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
+const handleConsumers = require('./handle-consumers');
 
 const checkSystem = async (
   systemName, styraToken, styraUrl,
@@ -49,7 +50,7 @@ const configureIAM = async (
   // Connect to cluster
   await authenticateKubeCtl(cluster);
 
-  services.forEach(({ name: namespace, repository }) => {
+  services.forEach(({ name: namespace, repository, 'allowed-consumers': consumers }) => {
     const systemName = `${permissionPrefix}.${namespace}-${env}`;
 
     // 1. Check if DAS system exists
@@ -65,12 +66,13 @@ const configureIAM = async (
           core.info(`creating system '${systemName}' in ${styraUrl}`);
           return createNamespace(projectId, true, namespace)
             .then(() => setupSystem(
-              namespace, systemName, env, repository, styraToken, styraUrl, systemOwners,
+              namespace, systemName, env, repository, styraToken, styraUrl, systemOwners, consumers,
             )).catch((err) => core.error(err));
         }
         core.info(`system '${systemName}' already exists in ${styraUrl}`);
         return checkOwners(system.id, styraToken, styraUrl, systemOwners)
-          .then(() => checkRepository(system, styraToken, styraUrl, repository));
+          .then(() => checkRepository(system, styraToken, styraUrl, repository)
+            .then(() => handleConsumers(system.id, styraToken, styraUrl, consumers, systemName)));
       }));
   });
 

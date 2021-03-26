@@ -372,5 +372,121 @@ roles:
 2: instance.roles[0].permissions[1] is not sorted alphabetically
 `);
     });
+
+    test('It can fail on consumer alphabetical order', () => {
+      mockFs({
+        'iam.yaml': `
+permission-prefix: tst
+services:
+- name: test
+  repository: actions
+  allowed-consumers:
+    - clan: clan
+      service-accounts:
+        - iam-api@iam-staging-c2a9.iam.gserviceaccount.com
+        - braveheart-quotes-webclient-be@quotes-staging-ccdf.iam.gserviceaccount.com
+permissions:
+  alpha:
+    - alpha
+    - beta
+  beta:
+    - alpha
+    - beta
+roles:
+- id: admin
+  name: Test Admin
+  desc: The test admin role
+  permissions:
+    - beta.alpha
+    - alpha.alpha
+`,
+      });
+      expect(() => loadIamDefinition('iam.yaml'))
+        .toThrow(`iam.yaml is not valid.
+0: instance.services[0]['allowed-consumers'][0]['service-accounts'][0] is not sorted alphabetically
+1: instance.services[0]['allowed-consumers'][0]['service-accounts'][1] is not sorted alphabetically
+2: instance.roles[0].permissions[0] is not sorted alphabetically
+3: instance.roles[0].permissions[1] is not sorted alphabetically`);
+    });
+
+    test('It can fail on consumer alphabetical order with more allowed consumer clans', () => {
+      mockFs({
+        'iam.yaml': `
+permission-prefix: tst
+services:
+- name: test
+  repository: actions
+  allowed-consumers:
+    - clan: clan
+      service-accounts:
+        - braveheart-quotes-webclient-be@quotes-staging-ccdf.iam.gserviceaccount.com
+        - iam-api@iam-staging-c2a9.iam.gserviceaccount.com
+    - clan: clan
+      service-accounts:
+        - iam-api@iam-staging-c2a9.iam.gserviceaccount.com
+        - braveheart-quotes-webclient-be@quotes-staging-ccdf.iam.gserviceaccount.com
+permissions:
+  alpha:
+    - alpha
+    - beta
+  beta:
+    - alpha
+    - beta
+roles:
+- id: admin
+  name: Test Admin
+  desc: The test admin role
+  permissions:
+    - alpha.alpha
+    - beta.alpha
+`,
+      });
+      expect(() => loadIamDefinition('iam.yaml'))
+        .toThrow(`iam.yaml is not valid.
+0: instance.services[0]['allowed-consumers'][1]['service-accounts'][0] is not sorted alphabetically
+1: instance.services[0]['allowed-consumers'][1]['service-accounts'][1] is not sorted alphabetically`);
+    });
+    test('It can fail on consumer alphabetical order across several services', () => {
+      mockFs({
+        'iam.yaml': `
+permission-prefix: tst
+services:
+- name: test
+  repository: actions
+  allowed-consumers:
+    - clan: clan
+      service-accounts:
+        - iam-api@iam-staging-c2a9.iam.gserviceaccount.com
+        - braveheart-quotes-webclient-be@quotes-staging-ccdf.iam.gserviceaccount.com
+- name: test1
+  repository: actions1
+  allowed-consumers:
+    - clan: clan1
+      service-accounts:
+        - iam-api@iam-staging-c2a9.iam.gserviceaccount.com
+        - braveheart-quotes-webclient-be@quotes-staging-ccdf.iam.gserviceaccount.com
+permissions:
+  alpha:
+    - alpha
+    - beta
+  beta:
+    - alpha
+    - beta
+roles:
+- id: admin
+  name: Test Admin
+  desc: The test admin role
+  permissions:
+    - alpha.alpha
+    - beta.alpha
+`,
+      });
+      expect(() => loadIamDefinition('iam.yaml'))
+        .toThrow(`iam.yaml is not valid.
+0: instance.services[0]['allowed-consumers'][0]['service-accounts'][0] is not sorted alphabetically
+1: instance.services[0]['allowed-consumers'][0]['service-accounts'][1] is not sorted alphabetically
+2: instance.services[1]['allowed-consumers'][0]['service-accounts'][0] is not sorted alphabetically
+3: instance.services[1]['allowed-consumers'][0]['service-accounts'][1] is not sorted alphabetically`);
+    });
   });
 });

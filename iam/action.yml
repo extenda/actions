@@ -35,6 +35,11 @@ inputs:
       If 'true' stop after validating the YAML schema. No remote systems will be updated.
     required: false
     default: 'false'
+  skip-prod:
+    description: |
+      If your service are only in staging set this to true to avoid errors setting up prod environment.
+    required: false
+    default: 'false'
 runs:
   using: node12
   main: dist/index.js
