@@ -24,12 +24,14 @@ const parseEnvironment = (environment, projectId) => {
 };
 
 const defaultEnvironment = (projectId, tenantName, countryCode) => ({
-  DATABASE_HOST: `sm://${projectId}/${tenantName}_${countryCode}_postgresql_private_address`,
+  DATABASE_HOST: `sm://${projectId}/${tenantName}_${getConditionalCountryCodeString(countryCode)}postgresql_private_address`,
   DATABASE_USER: 'postgres',
-  DATABASE_PASSWORD: `sm://${projectId}/${tenantName}_${countryCode}_postgresql_master_password`,
+  DATABASE_PASSWORD: `sm://${projectId}/${tenantName}_${getConditionalCountryCodeString(countryCode)}postgresql_master_password`,
   SERVICE_PROJECT_ID: projectId,
   SERVICE_ENVIRONMENT: projectId.includes('-staging-') ? 'staging' : 'prod',
 });
+
+const getConditionalCountryCodeString = (countryCode) => (typeof(countryCode) != "undefined") ? countryCode+"_" : "";
 
 const loadAllSecrets = async (serviceAccountKey, secrets) => {
   const results = [];

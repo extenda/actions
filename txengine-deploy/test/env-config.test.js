@@ -56,6 +56,8 @@ describe('env-config', () => {
     expect(replaceTokens).toMatchObject({
       NAMESPACE: 'testrunner-txengine',
     });
+    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_postgresql_private_address');
+    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_postgresql_master_password');
   });
 
   test('It can detect staging environment', async () => {
