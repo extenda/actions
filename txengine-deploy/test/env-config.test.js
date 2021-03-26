@@ -41,8 +41,8 @@ describe('env-config', () => {
       DATABASE_PASSWORD: 'my-password',
     });
 
-    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_postgresql_private_address');
-    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_postgresql_master_password');
+    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_private_address');
+    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_master_password');
   });
 
   test('It can handle optional country code', async () => {
@@ -104,8 +104,8 @@ describe('env-config', () => {
       MY_SECRET2: 'my-second-secret',
     });
 
-    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_postgresql_private_address');
-    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_postgresql_master_password');
+    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_private_address');
+    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_master_password');
     expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'secret1');
     expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'secret2');
   });
