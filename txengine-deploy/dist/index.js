@@ -74558,10 +74558,12 @@ const parseEnvironment = (environment, projectId) => {
   return yaml.parse(environment.replace(/sm:\/\/\*\//g, `sm://${projectId}/`));
 };
 
-const defaultEnvironment = (projectId, tenantName) => ({
-  DATABASE_HOST: `sm://${projectId}/${tenantName}_postgresql_private_address`,
+const getConditionalCountryCodeString = (countryCode) => (typeof (countryCode) !== 'undefined' ? `${countryCode}_` : '');
+
+const defaultEnvironment = (projectId, tenantName, countryCode) => ({
+  DATABASE_HOST: `sm://${projectId}/${tenantName}_${getConditionalCountryCodeString(countryCode)}postgresql_private_address`,
   DATABASE_USER: 'postgres',
-  DATABASE_PASSWORD: `sm://${projectId}/${tenantName}_postgresql_master_password`,
+  DATABASE_PASSWORD: `sm://${projectId}/${tenantName}_${getConditionalCountryCodeString(countryCode)}postgresql_master_password`,
   SERVICE_PROJECT_ID: projectId,
   SERVICE_ENVIRONMENT: projectId.includes('-staging-') ? 'staging' : 'prod',
 });
@@ -74591,7 +74593,7 @@ const prepareEnvConfig = async (
 ) => {
   const replaceTokens = createReplaceTokens(projectId, image, tenantName, countryCode);
   const environment = {
-    ...defaultEnvironment(projectId, tenantName.toLowerCase()),
+    ...defaultEnvironment(projectId, tenantName.toLowerCase(), countryCode),
     ...parseEnvironment(environmentString, projectId),
   };
 
@@ -91443,7 +91445,7 @@ class HttpClient {
             if (this._certConfig) {
                 // If using cert, need fs
                 fs = __webpack_require__(5747);
-                // cache the cert content into memory, so we don't have to read it from disk every time
+                // cache the cert content into memory, so we don't have to read it from disk every time 
                 if (this._certConfig.caFile && fs.existsSync(this._certConfig.caFile)) {
                     this._ca = fs.readFileSync(this._certConfig.caFile, 'utf8');
                 }
@@ -92597,7 +92599,7 @@ module.exports = require("zlib");
 /************************************************************************/
 /******/ 	// The module cache
 /******/ 	var __webpack_module_cache__ = {};
-/******/
+/******/ 	
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
 /******/ 		// Check if module is in cache
@@ -92610,7 +92612,7 @@ module.exports = require("zlib");
 /******/ 			// no module.loaded needed
 /******/ 			exports: {}
 /******/ 		};
-/******/
+/******/ 	
 /******/ 		// Execute the module function
 /******/ 		var threw = true;
 /******/ 		try {
@@ -92619,11 +92621,11 @@ module.exports = require("zlib");
 /******/ 		} finally {
 /******/ 			if(threw) delete __webpack_module_cache__[moduleId];
 /******/ 		}
-/******/
+/******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/
+/******/ 	
 /************************************************************************/
 /******/ 	/* webpack/runtime/compat get default export */
 /******/ 	(() => {
@@ -92636,7 +92638,7 @@ module.exports = require("zlib");
 /******/ 			return getter;
 /******/ 		};
 /******/ 	})();
-/******/
+/******/ 	
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
 /******/ 		// define getter functions for harmony exports
@@ -92648,12 +92650,12 @@ module.exports = require("zlib");
 /******/ 			}
 /******/ 		};
 /******/ 	})();
-/******/
+/******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__webpack_require__.o = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop)
 /******/ 	})();
-/******/
+/******/ 	
 /******/ 	/* webpack/runtime/make namespace object */
 /******/ 	(() => {
 /******/ 		// define __esModule on exports
@@ -92664,9 +92666,9 @@ module.exports = require("zlib");
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
 /******/ 	})();
-/******/
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
-/******/
+/******/ 	
 /******/ 	__webpack_require__.ab = __dirname + "/";/************************************************************************/
 /******/ 	// module exports must be returned from runtime so entry inlining is disabled
 /******/ 	// startup
