@@ -60,6 +60,22 @@ describe('env-config', () => {
     expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_postgresql_master_password');
   });
 
+  test('It can handle empty country code', async () => {
+    const { replaceTokens } = await prepareEnvConfig(
+      'deploy-secret-key',
+      'test-staging-project',
+      'eu.gcr.io/extenda/test:v1.0.0',
+      'testrunner',
+      '',
+    );
+
+    expect(replaceTokens).toMatchObject({
+      NAMESPACE: 'testrunner-txengine',
+    });
+    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_postgresql_private_address');
+    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_postgresql_master_password');
+  });
+
   test('It can detect staging environment', async () => {
     const { configMap } = await prepareEnvConfig(
       'deploy-secret-key',

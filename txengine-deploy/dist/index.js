@@ -74539,7 +74539,7 @@ const { loadSecret } = __webpack_require__(8652);
 const createReplaceTokens = (projectId, image, tenantName, countryCode) => {
   const tenantLowerCase = tenantName.toLowerCase();
   const namespace = [tenantLowerCase];
-  if (countryCode) {
+  if (countryCode && countryCode.trim().length > 0) {
     namespace.push(countryCode.toLowerCase());
   }
   namespace.push('txengine');
@@ -74558,7 +74558,7 @@ const parseEnvironment = (environment, projectId) => {
   return yaml.parse(environment.replace(/sm:\/\/\*\//g, `sm://${projectId}/`));
 };
 
-const getConditionalCountryCodeString = (countryCode) => (typeof (countryCode) !== 'undefined' ? `${countryCode}_` : '');
+const getConditionalCountryCodeString = (countryCode) => (countryCode && countryCode.trim().length > 0 ? `${countryCode}_` : '');
 
 const defaultEnvironment = (projectId, tenantName, countryCode) => ({
   DATABASE_HOST: `sm://${projectId}/${tenantName}_${getConditionalCountryCodeString(countryCode)}postgresql_private_address`,
