@@ -74539,7 +74539,7 @@ const { loadSecret } = __webpack_require__(8652);
 const createReplaceTokens = (projectId, image, tenantName, countryCode) => {
   const tenantLowerCase = tenantName.toLowerCase();
   const namespace = [tenantLowerCase];
-  if (countryCode) {
+  if (countryCode && countryCode.trim().length > 0) {
     namespace.push(countryCode.toLowerCase());
   }
   namespace.push('txengine');
@@ -74558,10 +74558,12 @@ const parseEnvironment = (environment, projectId) => {
   return yaml.parse(environment.replace(/sm:\/\/\*\//g, `sm://${projectId}/`));
 };
 
-const defaultEnvironment = (projectId, tenantName) => ({
-  DATABASE_HOST: `sm://${projectId}/${tenantName}_postgresql_private_address`,
+const getConditionalCountryCodeString = (countryCode) => (countryCode && countryCode.trim().length > 0 ? `${countryCode}_` : '');
+
+const defaultEnvironment = (projectId, tenantName, countryCode) => ({
+  DATABASE_HOST: `sm://${projectId}/${tenantName}_${getConditionalCountryCodeString(countryCode)}postgresql_private_address`,
   DATABASE_USER: 'postgres',
-  DATABASE_PASSWORD: `sm://${projectId}/${tenantName}_postgresql_master_password`,
+  DATABASE_PASSWORD: `sm://${projectId}/${tenantName}_${getConditionalCountryCodeString(countryCode)}postgresql_master_password`,
   SERVICE_PROJECT_ID: projectId,
   SERVICE_ENVIRONMENT: projectId.includes('-staging-') ? 'staging' : 'prod',
 });
@@ -74591,7 +74593,7 @@ const prepareEnvConfig = async (
 ) => {
   const replaceTokens = createReplaceTokens(projectId, image, tenantName, countryCode);
   const environment = {
-    ...defaultEnvironment(projectId, tenantName.toLowerCase()),
+    ...defaultEnvironment(projectId, tenantName.toLowerCase(), countryCode),
     ...parseEnvironment(environmentString, projectId),
   };
 
