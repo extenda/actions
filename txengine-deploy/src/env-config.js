@@ -2,10 +2,11 @@ const yaml = require('yaml');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
 const createReplaceTokens = (projectId, image, tenantName, countryCode) => {
-  const tenantLowerCase = tenantName.toLowerCase();
+  let tenantLowerCase = tenantName.toLowerCase();
   const namespace = [tenantLowerCase];
   if (countryCode && countryCode.trim().length > 0) {
     namespace.push(countryCode.toLowerCase());
+    tenantLowerCase += `-${countryCode.toLowerCase()}`;
   }
   namespace.push('txengine');
 
