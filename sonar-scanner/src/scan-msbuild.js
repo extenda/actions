@@ -20,7 +20,7 @@ const customArgsToParams = (customArgsAsString) => {
 
     if (param.length === 2) {
       // remove msbuild prefix from the key
-      param[0] = param[0].replace(/\/d:/,'');
+      param[0] = param[0].replace(/\/d:/, '');
 
       customArgsKeyValueArray.push(param);
     }
@@ -70,8 +70,8 @@ const beginScan = async (hostUrl, mainBranch, customArgs = '') => {
     'sonar.coverage.exclusions': '**Test*.cs',
     'sonar.cs.vstest.reportsPaths': '**/*.trx',
     'sonar.cs.opencover.reportsPaths': '**/coverage.opencover.xml',
-  };  
-  const extraParams = {...defaultParams, ...customArgsToParams(customArgs)};
+  };
+  const extraParams = { ...defaultParams, ...customArgsToParams(customArgs) };
 
   const params = await createParams(hostUrl, mainBranch, true, extraParams);
 
