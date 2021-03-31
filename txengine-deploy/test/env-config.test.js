@@ -27,7 +27,7 @@ describe('env-config', () => {
     expect(replaceTokens).toEqual({
       NAMESPACE: 'testrunner-se-txengine',
       CONTAINER_IMAGE: 'eu.gcr.io/extenda/test:v1.0.0',
-      TENANT_NAME: 'testrunner',
+      TENANT_NAME: 'testrunner-se',
     });
 
     expect(configMap).toEqual({
@@ -105,7 +105,7 @@ describe('env-config', () => {
     expect(replaceTokens).toEqual({
       NAMESPACE: 'testrunner-se-txengine',
       CONTAINER_IMAGE: 'eu.gcr.io/extenda/test:v1.0.0',
-      TENANT_NAME: 'testrunner',
+      TENANT_NAME: 'testrunner-se',
     });
 
     expect(configMap).toEqual({
