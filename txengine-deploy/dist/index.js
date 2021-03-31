@@ -74537,10 +74537,11 @@ const yaml = __webpack_require__(5024);
 const { loadSecret } = __webpack_require__(8652);
 
 const createReplaceTokens = (projectId, image, tenantName, countryCode) => {
-  const tenantLowerCase = tenantName.toLowerCase();
+  let tenantLowerCase = tenantName.toLowerCase();
   const namespace = [tenantLowerCase];
   if (countryCode && countryCode.trim().length > 0) {
     namespace.push(countryCode.toLowerCase());
+    tenantLowerCase += `-${countryCode.toLowerCase()}`;
   }
   namespace.push('txengine');
 
@@ -74640,7 +74641,7 @@ const action = async () => {
   const image = core.getInput('image', { required: true });
   const tenantName = core.getInput('tenant-name', { required: true });
   const countryCode = core.getInput('country-code') || '';
-  const timeoutSeconds = core.getInput('timeout-seconds') || 180;
+  const timeoutSeconds = core.getInput('deploy-timeout') || 180;
   const inputEnvironment = core.getInput('environment');
 
   const projectId = await kubectl.configure(deployServiceAccountKey);
