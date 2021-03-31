@@ -4,16 +4,16 @@ const { addDnsRecord } = require("../../cloud-run/src/dns-record");
 
 let debugMode;
 
-const zone = async (env) => {
+const DNSZone = async (env) => {
   if (env === 'staging') {
     return 'retailsvc-dev';
   }
   return 'retailsvc-com';
 }
 
-const gcloudOutput = async (args) => {
+const gcloudOutput = async (args, bin = 'gcloud') => {
   let output = '';
-  await exec.exec('gcloud', args, {
+  await exec.exec(bin, args, {
     silent: !debugMode,
     listeners: {
       stdout: (data) => {
@@ -29,7 +29,7 @@ const createIP = async (projectID) => await gcloudOutput([
   'compute',
   'addresses',
   'create',
-  'txengine-https',
+  'txengine-https-ip',
   `--project=${projectID}`,
   '--global',
   '--ip-version=IPV4'
@@ -39,7 +39,7 @@ const obtainIP = async (projectID) => await gcloudOutput([
   'compute',
   'addresses',
   'describe',
-  'txengine-https',
+  'txengine-https-ip',
   `--project=${projectID}`,
   '--global',
   '--format=get(address)'
@@ -52,7 +52,7 @@ const checkDNS = async (env, fullDNS) => {
       'dns',
       'record-sets',
       'list',
-      `--zone=${await zone(env)}`,
+      `--zone=${await DNSZone(env)}`,
       '--project=extenda',
       `--filter=${fullDNS}`,
       '--format=json']));
@@ -103,17 +103,118 @@ const setupHealthCheck = async (projectID) => await gcloudOutput([
   `--project=${projectID}`
 ]).catch(() => core.info('Health check already exists!'));
 
-// Create certificate containing old domains and new
+// Check if NEG exists
+const checkNEG = async (tenantName, projectID, zone) => await gcloudOutput([
+  'compute',
+  'network-endpoint-groups',
+  'describe',
+  `${tenantName}-txengine`,
+  `--project=${projectID}`,
+  `--zone=${zone}`
+]);
 
+// Add NEG backend to backend-service
+const addBackend = async (tenantName, projectID, zone) => await gcloudOutput([
+  'compute',
+  'backend-services',
+  'add-backend',
+  `${tenantName}-txengine`,
+  `--network-endpoint-group=${tenantName}-txengine`,
+  `--network-endpoint-group-zone=${zone}`,
+  `--project=${projectID}`,
+  '--global',
+  '--balancing-mode=rate',
+  '--max-rate-per-endpoint=1'
+]).catch(() => core.info('Backend already added to service!'));
+
+// Create backend-service 
+const setupBackendService = async (tenantName, projectID) => await gcloudOutput([
+  'compute',
+  'backend-services',
+  'create',
+  `${tenantName}-txengine`,
+  '--protocol=HTTP',
+  '--port-name=http',
+  '--connection-draining-timeout=300s',
+  '--health-checks=txengine-health',
+  '--global',
+  '--enable-logging',
+  '--logging-sample-rate=1',
+  `--project=${projectID}`
+]).catch(() => core.info('Backend service already exists!'));
+
+// Create 404 bucket
+const create404Bucket = async (tenantName, projectID) => await gcloudOutput([
+  'mb',
+  '-c',
+  'standard',
+  `-l`,
+  'europe-west1',
+  '-p',
+  projectID,
+  '-b',
+  'on',
+  'gs://txengine-404'
+], 'gsutil')
+  .then(() => gcloudOutput([
+    'compute',
+    'backend-buckets',
+    'create',
+    'txengine-404',
+    '--gcs-bucket-name=txengine-404',
+    `--project=${projectID}`
+  ]))
+  .catch(() => core.info('bucket already exists'));
+
+// Create forwarding rule
+const createLoadbalancer = async (projectID) => await gcloudOutput([
+  'compute',
+  'url-maps',
+  'create',
+  'txengine-lb',
+  `--project=${projectID}`,
+  '--default-backend-bucket=txengine-404'
+]).catch(() => core.info('Loadbalancer already exist'));
+
+// Create certificate containing old domains and new
+const createCertificate = async (fullDNS, projectID) => await gcloudOutput([
+  'compute',
+  'ssl-certificates',
+  'create',
+  'cert-test',
+  `--domains=${fullDNS}`,
+  `--project=${projectID}`,
+  '--global'
+]).catch(() => core.info('Certificate already exists!'));
 // Add certficate to frontend, if more than 2 remove oldest
 
-// Create backend from neg
-
 // Add route to lb for new backend
+const createHttpsProxy = async (projectID) => await gcloudOutput([
+  'compute',
+  'target-https-proxies',
+  'create',
+  'https-lb-proxy',
+  '--url-map=txengine-lb',
+  '--ssl-certificates=cert-test',
+  `--project=${projectID}`
+]).catch(() => core.info('Https proxy already exists!'));;
+
+const createForwardingRule = async (projectID) => await gcloudOutput([
+  'compute',
+  'forwarding-rules',
+  'create',
+  'txengine-https',
+  '--address=txengine-https-ip',
+  '--target-https-proxy=https-lb-proxy',
+  '--global',
+  `--project=${projectID}`,
+  '--ports=443'
+]).catch(() => core.info('Forwarding rule already exist'));
 
 // Caller method
-const configureDomains = async (env, tenantName, debug = false) => {
+const configureDomains = async (env, tenant, countryCode, debug = false, zone = 'europe-west1-d') => {
   debugMode = debug;
+  tenantName = `${tenant}${countryCode && tenant ? `-${countryCode}` : ''}`;
   const fullDNS = `${tenantName !== '' ? `${tenantName}.` : ''}txengine.retailsvc.${env === 'staging' ? 'dev' : 'com'}`;
   const clusterProject = env === 'staging' ? 'experience-staging-b807' : 'experience-prod-852a';
 
@@ -125,7 +226,23 @@ const configureDomains = async (env, tenantName, debug = false) => {
   await createDNS(env, fullDNS, loadBalancerIP);
   core.info('Creating healthcheck');
   await setupHealthCheck(clusterProject);
-  
+  core.info('Creating backend service');
+  await setupBackendService(tenantName, clusterProject);
+  core.info('Creating 404-bucket');
+  await create404Bucket(tenantName, clusterProject);
+  core.info('Creating loadbalancer');
+  await createLoadbalancer(clusterProject);
+  core.info('Creating SSL-certificate');
+  await createCertificate(fullDNS, clusterProject);
+  core.info('Creating https proxy');
+  await createHttpsProxy(clusterProject);
+  core.info('Creating forwarding rule');
+  await createForwardingRule(clusterProject);
+  core.info('Adding backend NEG to backend service');
+  await checkNEG(tenantName, clusterProject, zone)
+    .then(() => addBackend(tenantName, clusterProject, zone))
+    .catch(() => { throw new Error('The NEG was not found! make sure the deployment is correct') });
+
 }
 
-configureDomains('staging', '')
+configureDomains('staging', 'test', 'se', false)
