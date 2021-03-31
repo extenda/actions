@@ -85,4 +85,22 @@ describe('Scan MSBuild', () => {
       platformSpy.mockRestore();
     });
   }
+
+  test('It uses default params', async () => {
+    await scanMsBuild('https://sonar.extenda.io', 'master');
+
+    console.log(exec.exec.mock.calls[0]);
+    expect(exec.exec.mock.calls[1][0]).toContain('/d:sonar.coverage.exclusions=**Test*.cs');    
+    expect(exec.exec.mock.calls[1][0]).toContain('/d:sonar.cs.vstest.reportsPaths=**/*.trx');
+  });
+
+  test('It overrides default params with or without prefix', async () => {
+    const customArgs = '/d:sonar.coverage.exclusions=**custom\\file.cs sonar.cs.vstest.reportsPaths=**/custom.trx';
+
+    await scanMsBuild('https://sonar.extenda.io', 'master', customArgs);
+
+    console.log(exec.exec.mock.calls[0]);
+    expect(exec.exec.mock.calls[1][0]).toContain('/d:sonar.coverage.exclusions=**custom\\file.cs');
+    expect(exec.exec.mock.calls[1][0]).toContain('/d:sonar.cs.vstest.reportsPaths=**/custom.trx');
+  });
 });

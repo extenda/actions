@@ -11,6 +11,25 @@ const markerFile = path.join(os.homedir(), '.github_action_sonar.txt');
 
 const scanner = path.join(os.homedir(), '.dotnet', 'tools', 'dotnet-sonarscanner');
 
+const customArgsToParams = (customArgsAsString) => {
+  const customArgsArray = customArgsAsString.split(' ');
+
+  const customArgsKeyValueArray = [];
+  customArgsArray.forEach(arg => {
+    const param = arg.split('=');
+
+    if(param.length == 2) {
+      // remove msbuild prefix from the key
+      param[0] = param[0].replace(/\/d:/,"");
+
+      customArgsKeyValueArray.push(param);
+    }
+  });
+
+  const customArgsAsObject = Object.fromEntries(customArgsKeyValueArray);
+  return customArgsAsObject;
+};
+
 // Any 11+ openJDK will work for us.
 const findJava11 = async () => {
   try {
@@ -46,16 +65,18 @@ const beginScan = async (hostUrl, mainBranch, customArgs = '') => {
   });
 
   const version = await getBuildVersion(`-${process.env.GITHUB_SHA}`);
-  const extraParams = {
+  const defaultParams = {
     '/v:': version,
     'sonar.coverage.exclusions': '**Test*.cs',
     'sonar.cs.vstest.reportsPaths': '**/*.trx',
     'sonar.cs.opencover.reportsPaths': '**/coverage.opencover.xml',
-  };
+  };  
+  const extraParams = {...defaultParams, ...customArgsToParams(customArgs)};
+
   const params = await createParams(hostUrl, mainBranch, true, extraParams);
 
   await core.group('Begin Sonar analysis', async () => {
-    await scanWithJavaHome(`begin ${params} ${customArgs}`);
+    await scanWithJavaHome(`begin ${params}`);
   });
 };
 
