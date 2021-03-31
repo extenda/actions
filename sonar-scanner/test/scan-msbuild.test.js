@@ -90,7 +90,7 @@ describe('Scan MSBuild', () => {
     await scanMsBuild('https://sonar.extenda.io', 'master');
 
     console.log(exec.exec.mock.calls[0]);
-    expect(exec.exec.mock.calls[1][0]).toContain('/d:sonar.coverage.exclusions=**Test*.cs');    
+    expect(exec.exec.mock.calls[1][0]).toContain('/d:sonar.coverage.exclusions=**Test*.cs');
     expect(exec.exec.mock.calls[1][0]).toContain('/d:sonar.cs.vstest.reportsPaths=**/*.trx');
   });
 
@@ -99,7 +99,6 @@ describe('Scan MSBuild', () => {
 
     await scanMsBuild('https://sonar.extenda.io', 'master', customArgs);
 
-    console.log(exec.exec.mock.calls[0]);
     expect(exec.exec.mock.calls[1][0]).toContain('/d:sonar.coverage.exclusions=**custom\\file.cs');
     expect(exec.exec.mock.calls[1][0]).toContain('/d:sonar.cs.vstest.reportsPaths=**/custom.trx');
   });

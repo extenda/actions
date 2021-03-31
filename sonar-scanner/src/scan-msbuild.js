@@ -15,12 +15,12 @@ const customArgsToParams = (customArgsAsString) => {
   const customArgsArray = customArgsAsString.split(' ');
 
   const customArgsKeyValueArray = [];
-  customArgsArray.forEach(arg => {
+  customArgsArray.forEach((arg) => {
     const param = arg.split('=');
 
-    if(param.length == 2) {
+    if (param.length === 2) {
       // remove msbuild prefix from the key
-      param[0] = param[0].replace(/\/d:/,"");
+      param[0] = param[0].replace(/\/d:/,'');
 
       customArgsKeyValueArray.push(param);
     }
