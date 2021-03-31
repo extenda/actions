@@ -74640,7 +74640,7 @@ const action = async () => {
   const image = core.getInput('image', { required: true });
   const tenantName = core.getInput('tenant-name', { required: true });
   const countryCode = core.getInput('country-code') || '';
-  const timeoutSeconds = core.getInput('timeout-seconds') || 180;
+  const timeoutSeconds = core.getInput('deploy-timeout') || 180;
   const inputEnvironment = core.getInput('environment');
 
   const projectId = await kubectl.configure(deployServiceAccountKey);
