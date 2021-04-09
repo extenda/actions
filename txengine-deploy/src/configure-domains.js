@@ -1,15 +1,20 @@
-const exec = require("@actions/exec");
-const core = require("@actions/core");
-const { addDnsRecord } = require("../../cloud-run/src/dns-record");
+const exec = require('@actions/exec');
+const core = require('@actions/core');
+const { addDnsRecord } = require('../../cloud-run/src/dns-record');
+const handleCertificates = require('./handle-certificate');
 
 let debugMode;
+const staticIPName = 'txengine-https-ip';
+const loadBalancerName = 'txengine-lb';
+const healthcheckName = 'txengine-health';
+const backendBucketName = 'txengine-404';
 
 const DNSZone = async (env) => {
   if (env === 'staging') {
     return 'retailsvc-dev';
   }
   return 'retailsvc-com';
-}
+};
 
 const gcloudOutput = async (args, bin = 'gcloud') => {
   let output = '';
@@ -25,29 +30,30 @@ const gcloudOutput = async (args, bin = 'gcloud') => {
 };
 
 // Create/fetch static IP named txengine-https
-const createIP = async (projectID) => await gcloudOutput([
+const createIP = async (projectID) => gcloudOutput([
   'compute',
   'addresses',
   'create',
-  'txengine-https-ip',
+  staticIPName,
   `--project=${projectID}`,
   '--global',
-  '--ip-version=IPV4'
-]).then(() => obtainIP(projectID));
+  '--ip-version=IPV4',
+]);
 
-const obtainIP = async (projectID) => await gcloudOutput([
+const obtainIP = async (projectID) => gcloudOutput([
   'compute',
   'addresses',
   'describe',
-  'txengine-https-ip',
+  staticIPName,
   `--project=${projectID}`,
   '--global',
-  '--format=get(address)'
-]).catch(() => createIP(projectID));
+  '--format=get(address)',
+]).catch(() => createIP(projectID)
+  .then(() => obtainIP(projectID)));
 
 // Check DNS exists or create tenant_name.retailsvc.dev/com
 const checkDNS = async (env, fullDNS) => {
-  let dnsList = JSON.parse(
+  const dnsList = JSON.parse(
     await gcloudOutput([
       'dns',
       'record-sets',
@@ -55,28 +61,27 @@ const checkDNS = async (env, fullDNS) => {
       `--zone=${await DNSZone(env)}`,
       '--project=extenda',
       `--filter=${fullDNS}`,
-      '--format=json']));
+      '--format=json']),
+  );
   for (const dns of dnsList) {
-    let name = dns.name.slice(0, -1);
-    if (name === fullDNS)
-      return true;
+    const name = dns.name.slice(0, -1);
+    if (name === fullDNS) return true;
   }
   return false;
-}
+};
 
 const createDNS = async (env, fullDNS, loadBalancerIP) => {
   const dnsExists = await checkDNS(env, fullDNS);
   if (dnsExists) {
-    core.info('DNS already exists!')
+    core.info('DNS already exists!');
     return;
   }
   await addDnsRecord('dns', fullDNS, loadBalancerIP);
   core.info('DNS created!');
-  return;
-}
+};
 
 // Check firewall rule exists or create
-const setupFirewallRule = async (projectID) => await gcloudOutput([
+const setupFirewallRule = async (projectID) => gcloudOutput([
   'compute',
   'firewall-rules',
   'create',
@@ -86,135 +91,155 @@ const setupFirewallRule = async (projectID) => await gcloudOutput([
   '--direction=ingress',
   '--source-ranges=130.211.0.0/22,35.191.0.0/16',
   '--rules=tcp:80',
-  `--project=${projectID}`
+  `--project=${projectID}`,
 ]).catch(() => core.info('Firewall rule already exists!'));
 
 // Create healthcheck if not exists
 
-const setupHealthCheck = async (projectID) => await gcloudOutput([
+const setupHealthCheck = async (projectID) => gcloudOutput([
   'compute',
   'health-checks',
   'create',
   'tcp',
-  'txengine-health',
+  healthcheckName,
   '--global',
   '--use-serving-port',
   '--check-interval=10s',
-  `--project=${projectID}`
+  `--project=${projectID}`,
 ]).catch(() => core.info('Health check already exists!'));
 
-// Check if NEG exists
-const checkNEG = async (tenantName, projectID, zone) => await gcloudOutput([
-  'compute',
-  'network-endpoint-groups',
-  'describe',
-  `${tenantName}-txengine`,
-  `--project=${projectID}`,
-  `--zone=${zone}`
-]);
-
-// Add NEG backend to backend-service
-const addBackend = async (tenantName, projectID, zone) => await gcloudOutput([
-  'compute',
-  'backend-services',
-  'add-backend',
-  `${tenantName}-txengine`,
-  `--network-endpoint-group=${tenantName}-txengine`,
-  `--network-endpoint-group-zone=${zone}`,
-  `--project=${projectID}`,
-  '--global',
-  '--balancing-mode=rate',
-  '--max-rate-per-endpoint=1'
-]).catch(() => core.info('Backend already added to service!'));
-
-// Create backend-service 
-const setupBackendService = async (tenantName, projectID) => await gcloudOutput([
-  'compute',
-  'backend-services',
-  'create',
-  `${tenantName}-txengine`,
-  '--protocol=HTTP',
-  '--port-name=http',
-  '--connection-draining-timeout=300s',
-  '--health-checks=txengine-health',
-  '--global',
-  '--enable-logging',
-  '--logging-sample-rate=1',
-  `--project=${projectID}`
-]).catch(() => core.info('Backend service already exists!'));
-
 // Create 404 bucket
-const create404Bucket = async (tenantName, projectID) => await gcloudOutput([
+const create404Bucket = async (tenantName, projectID) => gcloudOutput([
   'mb',
   '-c',
   'standard',
-  `-l`,
+  '-l',
   'europe-west1',
   '-p',
   projectID,
   '-b',
   'on',
-  'gs://txengine-404'
+  `gs://${backendBucketName}`,
 ], 'gsutil')
   .then(() => gcloudOutput([
     'compute',
     'backend-buckets',
     'create',
-    'txengine-404',
-    '--gcs-bucket-name=txengine-404',
-    `--project=${projectID}`
+    backendBucketName,
+    `--gcs-bucket-name=${backendBucketName}`,
+    `--project=${projectID}`,
   ]))
-  .catch(() => core.info('bucket already exists'));
+  .catch(() => core.info('Bucket already exists!'));
 
-// Create forwarding rule
-const createLoadbalancer = async (projectID) => await gcloudOutput([
+// Create loadbalancer rule
+const createLoadbalancer = async (projectID) => gcloudOutput([
   'compute',
   'url-maps',
   'create',
-  'txengine-lb',
+  loadBalancerName,
   `--project=${projectID}`,
-  '--default-backend-bucket=txengine-404'
-]).catch(() => core.info('Loadbalancer already exist'));
-
-// Create certificate containing old domains and new
-const createCertificate = async (fullDNS, projectID) => await gcloudOutput([
-  'compute',
-  'ssl-certificates',
-  'create',
-  'cert-test',
-  `--domains=${fullDNS}`,
-  `--project=${projectID}`,
-  '--global'
-]).catch(() => core.info('Certificate already exists!'));
-// Add certficate to frontend, if more than 2 remove oldest
+  `--default-backend-bucket=${backendBucketName}`,
+]).catch(() => core.info('Loadbalancer already exists!'));
 
 // Add route to lb for new backend
-const createHttpsProxy = async (projectID) => await gcloudOutput([
+const updateHttpsProxy = async (projectID, certificates) => gcloudOutput([
+  'compute',
+  'target-https-proxies',
+  'update',
+  'https-lb-proxy',
+  `--url-map=${loadBalancerName}`,
+  `--ssl-certificates=${certificates}`,
+  `--project=${projectID}`,
+]).then(() => core.info('Certificates updated successfully!'));
+
+const createHttpsProxy = async (projectID, certificates) => gcloudOutput([
   'compute',
   'target-https-proxies',
   'create',
   'https-lb-proxy',
-  '--url-map=txengine-lb',
-  '--ssl-certificates=cert-test',
-  `--project=${projectID}`
-]).catch(() => core.info('Https proxy already exists!'));;
+  `--url-map=${loadBalancerName}`,
+  `--ssl-certificates=${certificates}`,
+  `--project=${projectID}`,
+]).catch(() => updateHttpsProxy(projectID, certificates));
 
-const createForwardingRule = async (projectID) => await gcloudOutput([
+const createHttpProxy = async (projectID) => gcloudOutput([
+  'compute',
+  'target-http-proxies',
+  'create',
+  'http-lb-proxy',
+  `--url-map=${loadBalancerName}`,
+  `--project=${projectID}`,
+]).catch(() => core.info('Http proxy already exists!'));
+
+const createForwardingRule = async (projectID, HTTP) => gcloudOutput([
   'compute',
   'forwarding-rules',
   'create',
-  'txengine-https',
-  '--address=txengine-https-ip',
-  '--target-https-proxy=https-lb-proxy',
+  HTTP ? 'txengine-http' : 'txengine-https',
+  `--address=${staticIPName}`,
+  HTTP ? '--target-http-proxy=http-lb-proxy' : '--target-https-proxy=https-lb-proxy',
   '--global',
   `--project=${projectID}`,
-  '--ports=443'
-]).catch(() => core.info('Forwarding rule already exist'));
+  HTTP ? '--ports=80' : '--ports=443',
+]).catch(() => core.info('Forwarding rule already exists!'));
+
+// Create backend-service
+const setupBackendService = async (name, projectID) => gcloudOutput([
+  'compute',
+  'backend-services',
+  'create',
+  `${name}`,
+  '--protocol=HTTP',
+  '--port-name=http',
+  '--connection-draining-timeout=300s',
+  `--health-checks=${healthcheckName}`,
+  '--global',
+  '--enable-logging',
+  '--logging-sample-rate=1',
+  `--project=${projectID}`,
+]).catch(() => core.info('Backend service already exists!'));
+
+// Check if NEG exists
+const checkNEG = async (tenantName, projectID, zone) => gcloudOutput([
+  'compute',
+  'network-endpoint-groups',
+  'describe',
+  `${tenantName}-txengine`,
+  `--project=${projectID}`,
+  `--zone=${zone}`,
+]);
+
+// Add NEG backend to backend-service
+const addBackend = async (name, projectID, zone) => gcloudOutput([
+  'compute',
+  'backend-services',
+  'add-backend',
+  `${name}`,
+  `--network-endpoint-group=${name}`,
+  `--network-endpoint-group-zone=${zone}`,
+  `--project=${projectID}`,
+  '--global',
+  '--balancing-mode=rate',
+  '--max-rate-per-endpoint=1',
+]).catch(() => core.info('Backend already added to service!'));
+
+const setupBackendURLMapping = async (host, tenant, projectID) => gcloudOutput([
+  'compute',
+  'url-maps',
+  'add-path-matcher',
+  loadBalancerName,
+  `--project=${projectID}`,
+  `--default-service=${tenant}-txengine`,
+  `--path-matcher-name=${tenant}-posserver`,
+  `--path-rules=/ReferenceDataWebService=${tenant}-posserver`,
+  '--global',
+  `--new-hosts=${host}`,
+]).catch(() => core.info('Url-mapping already exists!'));
 
 // Caller method
-const configureDomains = async (env, tenant, countryCode, debug = false, zone = 'europe-west1-d') => {
+const configureDomains = async (env, tenant, countryCode, zone = 'europe-west1-d', debug = false) => {
   debugMode = debug;
-  tenantName = `${tenant}${countryCode && tenant ? `-${countryCode}` : ''}`;
+  const tenantName = `${tenant}${countryCode && tenant ? `-${countryCode}` : ''}`;
   const fullDNS = `${tenantName !== '' ? `${tenantName}.` : ''}txengine.retailsvc.${env === 'staging' ? 'dev' : 'com'}`;
   const clusterProject = env === 'staging' ? 'experience-staging-b807' : 'experience-prod-852a';
 
@@ -226,23 +251,29 @@ const configureDomains = async (env, tenant, countryCode, debug = false, zone = 
   await createDNS(env, fullDNS, loadBalancerIP);
   core.info('Creating healthcheck');
   await setupHealthCheck(clusterProject);
-  core.info('Creating backend service');
-  await setupBackendService(tenantName, clusterProject);
   core.info('Creating 404-bucket');
   await create404Bucket(tenantName, clusterProject);
   core.info('Creating loadbalancer');
   await createLoadbalancer(clusterProject);
-  core.info('Creating SSL-certificate');
-  await createCertificate(fullDNS, clusterProject);
-  core.info('Creating https proxy');
-  await createHttpsProxy(clusterProject);
-  core.info('Creating forwarding rule');
-  await createForwardingRule(clusterProject);
+  const certificates = await handleCertificates(fullDNS, clusterProject);
+  core.info('Creating proxies');
+  if (certificates) {
+    await createHttpsProxy(clusterProject, certificates);
+  }
+  await createHttpProxy(clusterProject);
+  core.info('Creating forwarding rules');
+  await createForwardingRule(clusterProject, false);
+  await createForwardingRule(clusterProject, true);
+  core.info('Creating backend service');
+  await setupBackendService(`${tenantName}-txengine`, clusterProject);
+  await setupBackendService(`${tenantName}-posserver`, clusterProject);
   core.info('Adding backend NEG to backend service');
   await checkNEG(tenantName, clusterProject, zone)
-    .then(() => addBackend(tenantName, clusterProject, zone))
-    .catch(() => { throw new Error('The NEG was not found! make sure the deployment is correct') });
+    .then(() => addBackend(`${tenantName}-txengine`, clusterProject, zone))
+    .then(() => addBackend(`${tenantName}-posserver`, clusterProject, zone))
+    .catch(() => { throw new Error('The NEG was not found! make sure the deployment is correct'); });
+  core.info('Setup url-mapping');
+  await setupBackendURLMapping(fullDNS, tenantName, clusterProject);
+};
 
-}
-
-configureDomains('staging', 'test', 'se', false)
+module.exports = configureDomains;
