@@ -33328,6 +33328,25 @@ const action = async () => {
 
   const client = new GitHub(githubToken);
   const [owner, repo] = repository.split('/');
+
+  const comments = await client.issues.listComments({
+    owner,
+    repo,
+    issue_number: pullRequest.number,
+  });
+
+  const skipDeleting = comments.some((iterComment) => iterComment.body.includes('Applied the following directories'));
+
+  for (const iterComment of comments) {
+    if ((iterComment.body.includes(':white_check_mark: Terraform plan with no changes') || iterComment.body.includes(':mag: Terraform plan changes')) && !skipDeleting) {
+      client.issues.deleteComment({
+        owner,
+        repo,
+        comment_id: iterComment.id,
+      });
+    }
+  }
+
   await client.issues.createComment({
     owner,
     repo,
