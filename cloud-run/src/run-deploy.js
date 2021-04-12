@@ -11,6 +11,7 @@ const authenticateKubeCtl = require('./kubectl-auth');
 const cleanRevisions = require('./clean-revisions');
 const checkServiceAccount = require('./check-sa');
 const runScan = require('./vulnerability-scanning');
+const generateDeployLog = require('./deploy-log');
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -217,6 +218,10 @@ const runDeploy = async (
 
   if (service.platform.gke && cluster) {
     await cleanRevisions(name, projectId, cluster.uri, cluster.clusterLocation, maxRevisions);
+  }
+
+  if (gcloudExitCode === 0 && env === 'prod') {
+    generateDeployLog(name);
   }
 
   return {
