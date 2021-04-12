@@ -102,7 +102,7 @@ const action = async () => {
   const client = new GitHub(githubToken);
   const [owner, repo] = repository.split('/');
 
-  const comments = await client.issues.listComments({
+  const { data: comments } = await client.issues.listComments({
     owner,
     repo,
     issue_number: pullRequest.number,
