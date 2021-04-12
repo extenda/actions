@@ -3,7 +3,7 @@ jest.mock('@actions/core');
 jest.mock('../src/generate-outputs');
 
 const mockComment = jest.fn();
-const mockListComments = jest.fn(() => []);
+const mockListComments = jest.fn(() => ({ data: [] }));
 const mockDeleteComment = jest.fn();
 
 jest.mock('@actions/github', () => ({
@@ -216,11 +216,13 @@ Next section. Preserved.
   test('It delete previous plan comments', async () => {
     core.getInput.mockReset();
     generateOutputs.mockResolvedValueOnce([]);
-    mockListComments.mockImplementation(() => [
-      { id: 1, body: 'comment 1' },
-      { id: 2, body: ':white_check_mark: Terraform plan with no changes' },
-      { id: 3, body: ':mag: Terraform plan changes' },
-    ]);
+    mockListComments.mockImplementation(() => ({
+      data: [
+        { id: 1, body: 'comment 1' },
+        { id: 2, body: ':white_check_mark: Terraform plan with no changes' },
+        { id: 3, body: ':mag: Terraform plan changes' },
+      ],
+    }));
     await action();
     expect(mockDeleteComment).toHaveBeenCalledTimes(2);
   });
@@ -228,12 +230,14 @@ Next section. Preserved.
   test('It does not delete previous plan comments if apply comment exists', async () => {
     core.getInput.mockReset();
     generateOutputs.mockResolvedValueOnce([]);
-    mockListComments.mockImplementation(() => [
-      { id: 1, body: 'comment 1' },
-      { id: 2, body: ':white_check_mark: Terraform plan with no changes' },
-      { id: 3, body: ':mag: Terraform plan changes' },
-      { id: 4, body: 'Applied the following directories' },
-    ]);
+    mockListComments.mockImplementation(() => ({
+      data: [
+        { id: 1, body: 'comment 1' },
+        { id: 2, body: ':white_check_mark: Terraform plan with no changes' },
+        { id: 3, body: ':mag: Terraform plan changes' },
+        { id: 4, body: 'Applied the following directories' },
+      ],
+    }));
     await action();
     expect(mockDeleteComment).toHaveBeenCalledTimes(0);
   });
