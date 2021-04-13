@@ -45,6 +45,7 @@ const configureIAM = async (
   } = iam;
 
 
+  const errors = [];
   const promises = [];
   const cluster = await getClusterInfo(projectId);
   // Connect to cluster
@@ -67,7 +68,7 @@ const configureIAM = async (
           return createNamespace(projectId, true, namespace)
             .then(() => setupSystem(
               namespace, systemName, env, repository, styraToken, styraUrl, systemOwners, consumers,
-            )).catch((err) => core.error(err));
+            )).catch((err) => errors.push(err));
         }
         core.info(`system '${systemName}' already exists in ${styraUrl}`);
         return checkOwners(system.id, styraToken, styraUrl, systemOwners)
@@ -81,10 +82,19 @@ const configureIAM = async (
 
   // Next, update IAM system
   if (!skipIAM) {
-    return setupPermissions(permissions, permissionPrefix)
+    await setupPermissions(permissions, permissionPrefix)
       .then((fullPermissions) => handlePermissions(fullPermissions, iamToken, iamUrl))
-      .then(() => setupRoles(roles, permissionPrefix, iamToken, iamUrl));
+      .then(() => setupRoles(roles, permissionPrefix, iamToken, iamUrl))
+      .catch((err) => errors.push(err));
   }
+
+  if (errors.length > 0) {
+    for (const error of errors) {
+      core.error(error);
+    }
+    throw new Error('Errors occurred. Fix issues and rerun the action!');
+  }
+
   return null;
 };
 
