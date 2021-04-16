@@ -1,27 +1,26 @@
 const exec = require('@actions/exec');
+const core = require('@actions/core');
 
-const generateFolders = async (cloudrunServiceName) => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = (now.getMonth() + 1).toString().padStart(2, '0');
-  const day = now.getDate().toString().padStart(2, '0');
-  const hour = now.getHours();
-  const minute = now.getMinutes();
-  const second = now.getSeconds();
-  await exec.exec('mkdir', [
+const generateFolders = async (cloudrunServiceName, type = 'deployments', date = new Date()) => {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const hour = date.getHours();
+  const minute = date.getMinutes();
+  const second = date.getSeconds();
+  return exec.exec('mkdir', [
     '-pv',
-    `${cloudrunServiceName}/${year}_${month}/deployments/`,
+    `${cloudrunServiceName}/${year}_${month}/${type}/`,
   ]).then(() => exec.exec('touch', [
-    `${cloudrunServiceName}/${year}_${month}/deployments/${day}_${hour}:${minute}:${second}`,
+    `${cloudrunServiceName}/${year}_${month}/${type}/${day}_${hour}:${minute}:${second}`,
   ]));
 };
 
-const generateDeployLog = async (cloudrunServiceName) => generateFolders(cloudrunServiceName)
-  .then(() => exec.exec('gsutil', [
-    'cp',
-    '-r',
-    cloudrunServiceName,
-    'gs://dora-metrics',
-  ]));
+const uploadToBucket = async (cloudrunServiceName) => exec.exec('gsutil', [
+  'cp',
+  '-r',
+  cloudrunServiceName,
+  'gs://dora-metrics',
+]).catch((err) => core.info(`upload to bucket failed reason: ${err}`));
 
-module.exports = generateDeployLog;
+module.exports = { generateFolders, uploadToBucket };

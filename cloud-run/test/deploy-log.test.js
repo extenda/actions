@@ -1,7 +1,8 @@
 const exec = require('@actions/exec');
-const generateDeployLog = require('../src/deploy-log');
+const { generateFolders, uploadToBucket } = require('../src/deploy-log');
 
 jest.mock('@actions/exec');
+jest.mock('@actions/core');
 
 describe('Generate and upload deploy log', () => {
   afterEach(() => {
@@ -10,11 +11,14 @@ describe('Generate and upload deploy log', () => {
 
   test('It executes all parts', async () => {
     exec.exec.mockResolvedValueOnce(0);
+    exec.exec.mockResolvedValueOnce(0);
+    exec.exec.mockResolvedValueOnce(0);
     const now = new Date();
     const year = now.getFullYear();
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
 
-    await generateDeployLog('test-service');
+    await generateFolders('test-service');
+    await uploadToBucket('test-service');
     expect(exec.exec).toHaveBeenCalledTimes(3);
     expect(exec.exec).toHaveBeenNthCalledWith(1, 'mkdir', [
       '-pv',

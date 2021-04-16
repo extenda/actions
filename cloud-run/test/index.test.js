@@ -8,6 +8,8 @@ const action = require('../src/index');
 const runDeploy = require('../src/run-deploy');
 const serviceDef = require('../src/service-definition');
 
+const jiraClient = { jiraUsername: '', jiraPassword: '', jiraProjectKey: '' };
+
 describe('Cloud Run Action', () => {
   afterEach(() => {
     jest.resetAllMocks();
@@ -20,15 +22,19 @@ describe('Cloud Run Action', () => {
       .mockReturnValueOnce('gcr.io/project/image:tag')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('dns')
-      .mockReturnValueOnce('false');
+      .mockReturnValueOnce('false')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('');
     runDeploy.mockResolvedValueOnce({});
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(6);
+    expect(core.getInput).toHaveBeenCalledTimes(9);
     expect(runDeploy).toHaveBeenCalledWith(
       'service-account',
       {},
       'gcr.io/project/image:tag',
+      jiraClient,
       false,
     );
   });
@@ -40,16 +46,20 @@ describe('Cloud Run Action', () => {
       .mockReturnValueOnce('gcr.io/project/image:tag')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('dns')
-      .mockReturnValueOnce('false');
+      .mockReturnValueOnce('false')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('');
     runDeploy.mockResolvedValueOnce({});
 
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(6);
+    expect(core.getInput).toHaveBeenCalledTimes(9);
     expect(runDeploy).toHaveBeenCalledWith(
       'service-account',
       {},
       'gcr.io/project/image:tag',
+      jiraClient,
       false,
     );
   });
@@ -61,16 +71,20 @@ describe('Cloud Run Action', () => {
       .mockReturnValueOnce('gcr.io/project/image:tag')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('dns')
-      .mockReturnValueOnce('true');
+      .mockReturnValueOnce('true')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('');
     runDeploy.mockResolvedValueOnce({});
 
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(6);
+    expect(core.getInput).toHaveBeenCalledTimes(9);
     expect(runDeploy).toHaveBeenCalledWith(
       'service-account',
       {},
       'gcr.io/project/image:tag',
+      jiraClient,
       true,
     );
   });

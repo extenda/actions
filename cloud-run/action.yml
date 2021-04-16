@@ -36,6 +36,21 @@ inputs:
       Flag to enable verbose debug logging on gcloud.
     required: false
     default: 'false'
+  jiraUsername:
+    description: |
+      The jira username
+    required: false
+    default: ''
+  jiraPassword:
+    description: |
+      The jira password
+    required: false
+    default: ''
+  jiraProjectKey:
+    description: |
+      The jira project key
+    required: false
+    default: ''
 runs:
   using: node12
   main: dist/index.js

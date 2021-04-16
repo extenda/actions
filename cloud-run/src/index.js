@@ -12,9 +12,13 @@ const action = async () => {
   const domainBindingsEnv = core.getInput('domain-mappings-env') || '';
   const dnsProjectLabel = core.getInput('dns-project-label') || 'dns';
   const verbose = (core.getInput('verbose') || 'false');
+  const jiraUsername = core.getInput('jiraUsername') || '';
+  const jiraPassword = core.getInput('jiraPassword') || '';
+  const jiraProjectKey = core.getInput('jiraProjectKey') || '';
 
+  const jiraClient = { jiraUsername, jiraPassword, jiraProjectKey };
   const service = loadServiceDefinition(serviceFile, jsonSchema);
-  await runDeploy(serviceAccountKey, service, image, verbose === 'true')
+  await runDeploy(serviceAccountKey, service, image, jiraClient, verbose === 'true')
     .then(({ cluster }) => configureDomains(
       service,
       cluster,
