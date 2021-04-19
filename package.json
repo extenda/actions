@@ -9,7 +9,7 @@
     "build:docker:win32": "docker run --rm -t -v \"%cd%\":/work -w /work node:12-alpine sh -c \"npm run build\"",
     "build:docker:default": "docker run --rm -t -v $(pwd):/work -w /work node:12-alpine sh -c 'npm run build'",
     "install": "node .scripts/install-modules.js",
-    "test": "jest --silent",
+    "test": "jest",
     "posttest": "node .scripts/create-sonar-properties.js",
     "lint:js": "run-script-os",
     "lint:js:win32": "docker run --rm -t -v \"%cd%\":/work -w /work node:12-alpine sh -c \"npm run lint:js\"",

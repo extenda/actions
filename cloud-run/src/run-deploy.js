@@ -11,8 +11,7 @@ const authenticateKubeCtl = require('./kubectl-auth');
 const cleanRevisions = require('./clean-revisions');
 const checkServiceAccount = require('./check-sa');
 const runScan = require('./vulnerability-scanning');
-const { generateFolders, uploadToBucket } = require('./deploy-log');
-const generateBugLog = require('./bug-log');
+const { generateFolders, uploadToBucket } = require('../../dora-metrics/src/deploy-log');
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -162,7 +161,6 @@ const runDeploy = async (
   serviceAccountKey,
   service,
   image,
-  jiraClient,
   verbose = false,
   retryInterval = 5000,
 ) => {
@@ -220,19 +218,6 @@ const runDeploy = async (
 
   if (service.platform.gke && cluster) {
     await cleanRevisions(name, projectId, cluster.uri, cluster.clusterLocation, maxRevisions);
-  }
-
-  if (gcloudExitCode === 0 && env === 'prod') {
-    await generateFolders(name).then(uploadToBucket(name));
-  }
-  const {
-    jiraUsername,
-    jiraPassword,
-    jiraProjectKey,
-  } = jiraClient;
-
-  if (jiraUsername && jiraPassword && jiraProjectKey) {
-    await generateBugLog(jiraUsername, jiraPassword, jiraProjectKey, name);
   }
 
   return {

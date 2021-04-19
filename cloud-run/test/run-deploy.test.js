@@ -8,18 +8,16 @@ jest.mock('../src/create-namespace');
 jest.mock('../src/check-sa');
 jest.mock('../src/kubectl-auth');
 jest.mock('../src/get-revision');
-jest.mock('../src/deploy-log');
-jest.mock('../src/bug-log');
+jest.mock('../../dora-metrics/src/deploy-log');
 
 const exec = require('@actions/exec');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const runDeploy = require('../src/run-deploy');
 const { getClusterInfo } = require('../src/cluster-info');
 const scan = require('../src/vulnerability-scanning');
-const { generateFolders, uploadToBucket } = require('../src/deploy-log');
+const { generateFolders, uploadToBucket } = require('../../dora-metrics/src/deploy-log');
 
 const serviceAccountKey = Buffer.from('test', 'utf8').toString('base64');
-const jiraClient = { jiraUsername: '', jiraPassword: '', jiraProjectKey: '' };
 
 const orgEnv = process.env;
 
@@ -52,7 +50,6 @@ describe('Run Deploy', () => {
       serviceAccountKey,
       service,
       'gcr.io/test-staging-project/my-service:tag',
-      jiraClient,
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
@@ -92,7 +89,6 @@ describe('Run Deploy', () => {
       serviceAccountKey,
       service,
       'gcr.io/test-staging-project-staging-ab12/my-service:tag',
-      jiraClient,
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
@@ -141,7 +137,6 @@ describe('Run Deploy', () => {
       serviceAccountKey,
       service,
       'gcr.io/test-staging-project/my-service:tag',
-      jiraClient,
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--use-http2']));
@@ -165,7 +160,6 @@ describe('Run Deploy', () => {
       serviceAccountKey,
       service,
       'gcr.io/test-staging-project/my-service:tag',
-      jiraClient,
       'policy.rego',
       true,
     );
@@ -197,7 +191,6 @@ describe('Run Deploy', () => {
       serviceAccountKey,
       service,
       'gcr.io/test-staging-project/my-service:tag',
-      jiraClient,
     );
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
       'run', 'deploy', 'my-service',
@@ -234,7 +227,6 @@ describe('Run Deploy', () => {
       serviceAccountKey,
       service,
       'gcr.io/test-staging-project/my-service:tag',
-      jiraClient,
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.not.arrayContaining(['--allow-unauthenticated']));
@@ -260,7 +252,6 @@ describe('Run Deploy', () => {
       serviceAccountKey,
       service,
       'gcr.io/test-staging-project/my-service:tag',
-      jiraClient,
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--set-cloudsql-instances=MY-INSTANCE']));
@@ -287,7 +278,6 @@ describe('Run Deploy', () => {
       serviceAccountKey,
       service,
       'gcr.io/test-staging-project/my-service:tag',
-      jiraClient,
     );
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--clear-cloudsql-instances']));
   });
@@ -318,7 +308,6 @@ describe('Run Deploy', () => {
       serviceAccountKey,
       service,
       'gcr.io/test-staging-project/my-service:tag',
-      jiraClient,
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(getClusterInfo).toHaveBeenCalled();
@@ -367,7 +356,6 @@ describe('Run Deploy', () => {
       serviceAccountKey,
       service,
       'gcr.io/test-staging-project/my-service:tag',
-      jiraClient,
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec).toHaveBeenCalledTimes(2);
@@ -421,7 +409,6 @@ describe('Run Deploy', () => {
       serviceAccountKey,
       service,
       'gcr.io/test-staging-project/my-service:tag',
-      jiraClient,
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec).toHaveBeenCalledTimes(2);
@@ -465,7 +452,6 @@ describe('Run Deploy', () => {
       serviceAccountKey,
       service,
       'gcr.io/test-staging-project/my-service:tag',
-      jiraClient,
     )).rejects.toEqual(
       new Error('Managed Cloud Run must be configured with CPU count [1,2]. Use of millicpu is not supported.'),
     );
@@ -490,7 +476,6 @@ describe('Run Deploy', () => {
       serviceAccountKey,
       service,
       'gcr.io/test-staging-project/my-service:tag',
-      jiraClient,
     )).rejects.toEqual(
       new Error('Cloud Run GKE must be configured with millicpu. Use of CPU count is not supported.'),
     );
@@ -519,7 +504,6 @@ describe('Run Deploy', () => {
       serviceAccountKey,
       service,
       'gcr.io/test-staging-project/my-service:tag',
-      jiraClient,
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec).toHaveBeenCalledTimes(2);
@@ -616,7 +600,6 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       serviceAccountKey,
       service,
       'gcr.io/test-staging-project/my-service:tag',
-      jiraClient,
       false,
       10,
     );
@@ -698,7 +681,6 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       serviceAccountKey,
       service,
       'gcr.io/test-staging-project/my-service:tag',
-      jiraClient,
       false,
       10,
     );
@@ -732,7 +714,6 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       serviceAccountKey,
       service,
       'gcr.io/test-staging-project/my-service:tag',
-      jiraClient,
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(generateFolders).toHaveBeenCalledTimes(1);
