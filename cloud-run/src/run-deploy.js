@@ -11,7 +11,6 @@ const authenticateKubeCtl = require('./kubectl-auth');
 const cleanRevisions = require('./clean-revisions');
 const checkServiceAccount = require('./check-sa');
 const runScan = require('./vulnerability-scanning');
-const { generateFolders, uploadToBucket } = require('../../dora-metrics/src/deploy-log');
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,

@@ -15,7 +15,6 @@ const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const runDeploy = require('../src/run-deploy');
 const { getClusterInfo } = require('../src/cluster-info');
 const scan = require('../src/vulnerability-scanning');
-const { generateFolders, uploadToBucket } = require('../../dora-metrics/src/deploy-log');
 
 const serviceAccountKey = Buffer.from('test', 'utf8').toString('base64');
 
@@ -687,36 +686,5 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
 
     expect(scan).toHaveBeenCalledTimes(0);
     expect(returnValue.gcloudExitCode).toEqual(0);
-  });
-
-
-  test('It can trigger generate deploy log', async () => {
-    getClusterInfo.mockResolvedValueOnce({
-      project: 'tribe-prod-1234',
-      cluster: 'k8s-cluster',
-      clusterLocation: 'europe-west1',
-      uri: 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
-    });
-    exec.exec.mockResolvedValueOnce(0);
-    generateFolders.mockResolvedValueOnce(0);
-    setupGcloud.mockResolvedValueOnce('test-prod-project');
-    const service = {
-      name: 'my-service',
-      memory: '256Mi',
-      cpu: '233m',
-      platform: {
-        gke: {
-          connectivity: 'external',
-        },
-      },
-    };
-    const returnValue = await runDeploy(
-      serviceAccountKey,
-      service,
-      'gcr.io/test-staging-project/my-service:tag',
-    );
-    expect(returnValue.gcloudExitCode).toEqual(0);
-    expect(generateFolders).toHaveBeenCalledTimes(1);
-    expect(uploadToBucket).toHaveBeenCalledTimes(1);
   });
 });

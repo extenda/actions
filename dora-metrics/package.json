@@ -1,0 +1,19 @@
+{
+  "name": "cloud-run",
+  "version": "0.0.1-local",
+  "private": true,
+  "description": "Deploy to Cloud Run",
+  "main": "dist/index.js",
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/exec": "^1.0.4",
+    "@google-cloud/storage": "^5.8.3",
+    "jira-client": "^6.21.1",
+    "jsonschema": "^1.2.5",
+    "slack-notify": "^0.1.7",
+    "yaml": "^1.8.2"
+  },
+  "devDependencies": {
+    "mock-fs": "^4.11.0"
+  }
+}

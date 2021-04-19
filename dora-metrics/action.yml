@@ -1,0 +1,23 @@
+name: Cloud Run
+description: Deploy to Cloud Run
+author: Extenda Retail
+inputs:
+  produc-name:
+    description: |
+      The product name for you service. (example scan&go, iam)
+    required: true
+  jira-username:
+    description: |
+      The jira username
+    required: true
+  jira-password:
+    description: |
+      The jira password
+    required: true
+  jira-project-key:
+    description: |
+      The jira project key
+    required: true
+runs:
+  using: node12
+  main: dist/index.js
