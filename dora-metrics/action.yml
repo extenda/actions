@@ -4,7 +4,7 @@ author: Extenda Retail
 inputs:
   produc-name:
     description: |
-      The product name for you service. (example scan&go, iam)
+      The product name for you service. (example scan & go, iam)
     required: true
   jira-username:
     description: |

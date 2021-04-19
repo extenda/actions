@@ -8,7 +8,6 @@ jest.mock('../src/create-namespace');
 jest.mock('../src/check-sa');
 jest.mock('../src/kubectl-auth');
 jest.mock('../src/get-revision');
-jest.mock('../../dora-metrics/src/deploy-log');
 
 const exec = require('@actions/exec');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');

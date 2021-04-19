@@ -33,5 +33,5 @@ jobs:
           product-name: Scan & Go
           jira-username: ${{ env.JIRA_USERNAME }}
           jira-password: ${{ env.JIRA_PASSWORD }}
-          jira-project-key: ELY
+          jira-project-key: MCPE
 ```
