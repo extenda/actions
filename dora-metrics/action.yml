@@ -1,8 +1,8 @@
-name: Cloud Run
-description: Deploy to Cloud Run
+name: dora-metrics
+description: Log deployment and bugs for DORA
 author: Extenda Retail
 inputs:
-  produc-name:
+  product-name:
     description: |
       The product name for you service. (example scan & go, iam)
     required: true

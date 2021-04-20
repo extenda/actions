@@ -43266,19 +43266,19 @@ const core = __webpack_require__(6341);
 const JiraClient = __webpack_require__(1371);
 const { generateFolders } = __webpack_require__(6765);
 
-const handleIssues = async (issue, clanName) => {
+const handleIssues = async (issue, productName) => {
   const promises = [];
   if (issue) {
     for (const bug of issue.issues) {
       const issueFields = bug.fields;
       const bugCreatedDate = issueFields.created;
-      promises.push(generateFolders(clanName, 'bugs', new Date(bugCreatedDate)));
+      promises.push(generateFolders(productName, 'bugs', new Date(bugCreatedDate)));
     }
   }
   return Promise.all(promises);
 };
 
-const generateBugLog = async (jiraUsername, jiraPassword, projectKey, clanName) => {
+const generateBugLog = async (jiraUsername, jiraPassword, projectKey, productName) => {
   const client = new JiraClient({
     protocol: 'https',
     host: 'jira.extendaretail.com',
@@ -43289,7 +43289,7 @@ const generateBugLog = async (jiraUsername, jiraPassword, projectKey, clanName) 
   });
 
   const serviceIssues = await client.searchJira(`project=${projectKey} AND issueType=bug`, { maxResults: 1000 }).catch(() => core.info('No bugs found for service!'));
-  await handleIssues(serviceIssues, clanName);
+  await handleIssues(serviceIssues, productName);
 };
 
 module.exports = generateBugLog;
@@ -43303,7 +43303,7 @@ module.exports = generateBugLog;
 const exec = __webpack_require__(6936);
 const core = __webpack_require__(6341);
 
-const generateFolders = async (cloudrunServiceName, type = 'deployments', date = new Date()) => {
+const generateFolders = async (productName, type = 'deployments', date = new Date()) => {
   const year = date.getFullYear();
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const day = date.getDate().toString().padStart(2, '0');
@@ -43312,16 +43312,16 @@ const generateFolders = async (cloudrunServiceName, type = 'deployments', date =
   const second = date.getSeconds();
   return exec.exec('mkdir', [
     '-pv',
-    `${cloudrunServiceName}/${year}_${month}/${type}/`,
+    `${productName}/${year}_${month}/${type}/`,
   ]).then(() => exec.exec('touch', [
-    `${cloudrunServiceName}/${year}_${month}/${type}/${day}_${hour}:${minute}:${second}`,
+    `${productName}/${year}_${month}/${type}/${day}_${hour}:${minute}:${second}`,
   ]));
 };
 
-const uploadToBucket = async (cloudrunServiceName) => exec.exec('gsutil', [
+const uploadToBucket = async (productName) => exec.exec('gsutil', [
   'cp',
   '-r',
-  cloudrunServiceName,
+  productName,
   'gs://dora-metrics',
 ]).catch((err) => core.info(`upload to bucket failed reason: ${err}`));
 

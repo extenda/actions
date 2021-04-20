@@ -1,7 +1,7 @@
 const exec = require('@actions/exec');
 const core = require('@actions/core');
 
-const generateFolders = async (cloudrunServiceName, type = 'deployments', date = new Date()) => {
+const generateFolders = async (productName, type = 'deployments', date = new Date()) => {
   const year = date.getFullYear();
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const day = date.getDate().toString().padStart(2, '0');
@@ -10,16 +10,16 @@ const generateFolders = async (cloudrunServiceName, type = 'deployments', date =
   const second = date.getSeconds();
   return exec.exec('mkdir', [
     '-pv',
-    `${cloudrunServiceName}/${year}_${month}/${type}/`,
+    `${productName}/${year}_${month}/${type}/`,
   ]).then(() => exec.exec('touch', [
-    `${cloudrunServiceName}/${year}_${month}/${type}/${day}_${hour}:${minute}:${second}`,
+    `${productName}/${year}_${month}/${type}/${day}_${hour}:${minute}:${second}`,
   ]));
 };
 
-const uploadToBucket = async (cloudrunServiceName) => exec.exec('gsutil', [
+const uploadToBucket = async (productName) => exec.exec('gsutil', [
   'cp',
   '-r',
-  cloudrunServiceName,
+  productName,
   'gs://dora-metrics',
 ]).catch((err) => core.info(`upload to bucket failed reason: ${err}`));
 
