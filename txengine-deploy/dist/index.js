@@ -75126,7 +75126,7 @@ const action = async () => {
 
   await createManifests(secretServiceAccountKey, envConfig)
     .then((manifest) => deploy(manifest, timeoutSeconds));
-  await configureDomains(projectId.includes('-staging-') ? 'staging' : 'prod', tenantName, countryCode);
+  await configureDomains(projectId.includes('-staging-') ? 'staging' : 'prod', tenantName, countryCode, 'europe-west1-d', true);
 };
 
 if (require.main === require.cache[eval('__filename')]) {
