@@ -34,6 +34,7 @@ const run = async () => {
 
     core.setOutput('version', release.version);
     core.setOutput('release-tag', `${release.tagName}`);
+    core.setOutput('release-changelog', `${release.changelog}`);
   } catch (err) {
     core.setFailed(err.message);
   }
