@@ -4,6 +4,7 @@ jest.mock('../src/deploy');
 jest.mock('../src/kubectl');
 jest.mock('../src/manifests');
 jest.mock('../src/env-config');
+jest.mock('../src/configure-domains');
 jest.mock('../../setup-gcloud/src/setup-gcloud');
 
 const core = require('@actions/core');
@@ -32,7 +33,7 @@ describe('txengine-deploy', () => {
       secrets: {},
     });
 
-    kubectl.configure.mockResolvedValueOnce({ projectId: 'test-project' });
+    kubectl.configure.mockResolvedValueOnce('test-staging-project');
     createManifests.mockResolvedValueOnce(({
       file: 'file.yaml',
       content: 'test',
