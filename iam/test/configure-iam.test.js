@@ -13,6 +13,7 @@ jest.mock('../src/handle-consumers');
 jest.mock('../../cloud-run/src/kubectl-auth');
 
 const request = require('request');
+const core = require('@actions/core');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const createNamespace = require('../../cloud-run/src/create-namespace');
 const configureIam = require('../src/configure-iam');
@@ -232,8 +233,49 @@ Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md
       JSON.stringify(checkSystem)));
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
-    await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], false);
+    await expect(configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], false))
+      .rejects.toEqual(new Error('Errors occurred. Fix issues and rerun the action!'));
+    expect(core.error).toHaveBeenCalledTimes(1);
     expect(setupSystem).toHaveBeenCalledTimes(0);
     expect(request).toHaveBeenCalledTimes(1);
+  });
+
+  test('It will print all errors at the end', async () => {
+    createNamespace.mockRejectedValue(new Error(`Namespace not found, please make sure your service is setup correctly!
+Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md#services for more information`));
+
+    setupGcloud.mockResolvedValueOnce('test-project');
+    projectInfo.mockReturnValueOnce({ env: 'staging' });
+
+    const iam = {
+      'permission-prefix': 'test',
+      services: [
+        {
+          name: 'test-service',
+          repository: 'test-repo',
+        },
+        {
+          name: 'test-service1',
+          repository: 'test-repo1',
+        },
+      ],
+    };
+
+    const checkSystem = {
+      result: [
+        {
+          name: 'test-wrong-staging',
+        },
+      ],
+    };
+    request.mockImplementation((conf, cb) => cb(null, { statusCode: 404 },
+      JSON.stringify(checkSystem)));
+    setupPermissions.mockRejectedValueOnce(new Error('Could not fetch permission https://apiurl.test.dev/api/v1/permissions/test.test.get. Reason: bad request 400'));
+
+    await expect(configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], false))
+      .rejects.toEqual(new Error('Errors occurred. Fix issues and rerun the action!'));
+    expect(core.error).toHaveBeenCalledTimes(3);
+    expect(setupSystem).toHaveBeenCalledTimes(0);
+    expect(request).toHaveBeenCalledTimes(2);
   });
 });
