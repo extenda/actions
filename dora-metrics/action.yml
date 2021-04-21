@@ -1,0 +1,23 @@
+name: dora-metrics
+description: Log deployment and bugs for DORA
+author: Extenda Retail
+inputs:
+  product-name:
+    description: |
+      The product name for you service. (example scan & go, iam)
+    required: true
+  jira-username:
+    description: |
+      The jira username
+    required: true
+  jira-password:
+    description: |
+      The jira password
+    required: true
+  jira-project-key:
+    description: |
+      The jira project key
+    required: true
+runs:
+  using: node12
+  main: dist/index.js
