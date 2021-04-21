@@ -74575,12 +74575,11 @@ module.exports = __webpack_require__(3333).YAML
 /***/ 4455:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const exec = __webpack_require__(2176);
 const core = __webpack_require__(6341);
 const { addDnsRecord } = __webpack_require__(6644);
 const handleCertificates = __webpack_require__(8109);
+const gcloudOutput = __webpack_require__(6133);
 
-let debugMode;
 const staticIPName = 'txengine-https-ip';
 const loadBalancerName = 'txengine-lb';
 const healthcheckName = 'txengine-health';
@@ -74591,19 +74590,6 @@ const DNSZone = async (env) => {
     return 'retailsvc-dev';
   }
   return 'retailsvc-com';
-};
-
-const gcloudOutput = async (args, bin = 'gcloud') => {
-  let output = '';
-  await exec.exec(bin, args, {
-    silent: !debugMode,
-    listeners: {
-      stdout: (data) => {
-        output += data.toString('utf8');
-      },
-    },
-  });
-  return output.trim();
 };
 
 // Create/fetch static IP named txengine-https
@@ -74814,8 +74800,7 @@ const setupBackendURLMapping = async (host, tenant, projectID) => gcloudOutput([
 ]).catch(() => core.info('Url-mapping already exists!'));
 
 // Caller method
-const configureDomains = async (env, tenant, countryCode, zone = 'europe-west1-d', debug = false) => {
-  debugMode = debug;
+const configureDomains = async (env, tenant, countryCode, zone = 'europe-west1-d') => {
   const tenantName = `${tenant}${countryCode && tenant ? `-${countryCode}` : ''}`;
   const fullDNS = `${tenantName !== '' ? `${tenantName}.` : ''}txengine.retailsvc.${env === 'staging' ? 'dev' : 'com'}`;
   const clusterProject = env === 'staging' ? 'experience-staging-b807' : 'experience-prod-852a';
@@ -74850,10 +74835,10 @@ const configureDomains = async (env, tenant, countryCode, zone = 'europe-west1-d
     .then(() => addBackend(`${tenantName}-posserver`, clusterProject, zone))
     .catch(() => { throw new Error('The NEG was not found! make sure the deployment is correct'); });
   core.info('Setup url-mapping');
-  await setupBackendURLMapping(fullDNS, tenantName, clusterProject);
+  return setupBackendURLMapping(fullDNS, tenantName, clusterProject);
 };
 
-module.exports = { configureDomains, gcloudOutput };
+module.exports = configureDomains;
 
 
 /***/ }),
@@ -74979,11 +74964,34 @@ module.exports = prepareEnvConfig;
 
 /***/ }),
 
+/***/ 6133:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const exec = __webpack_require__(2176);
+
+const gcloudOutput = async (args, bin = 'gcloud') => {
+  let output = '';
+  await exec.exec(bin, args, {
+    silent: true,
+    listeners: {
+      stdout: (data) => {
+        output += data.toString('utf8');
+      },
+    },
+  });
+  return output.trim();
+};
+
+module.exports = gcloudOutput;
+
+
+/***/ }),
+
 /***/ 8109:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const core = __webpack_require__(6341);
-const { gcloudOutput } = __webpack_require__(4455);
+const gcloudOutput = __webpack_require__(6133);
 
 const MAX_DOMAINS = 100;
 const MAX_CERTIFICATES = 13;
@@ -75090,7 +75098,7 @@ const kubectl = __webpack_require__(3954);
 const deploy = __webpack_require__(6029);
 const prepareEnvConfig = __webpack_require__(4961);
 const createManifests = __webpack_require__(6469);
-const { configureDomains } = __webpack_require__(4455);
+const configureDomains = __webpack_require__(4455);
 
 const action = async () => {
   const deployServiceAccountKey = core.getInput('deploy-service-account-key', { required: true });

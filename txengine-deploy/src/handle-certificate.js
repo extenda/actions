@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const { gcloudOutput } = require('./configure-domains');
+const gcloudOutput = require('./gcloud-output');
 
 const MAX_DOMAINS = 100;
 const MAX_CERTIFICATES = 13;

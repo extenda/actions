@@ -4,7 +4,7 @@ const kubectl = require('./kubectl');
 const deploy = require('./deploy');
 const prepareEnvConfig = require('./env-config');
 const createManifests = require('./manifests');
-const { configureDomains } = require('./configure-domains');
+const configureDomains = require('./configure-domains');
 
 const action = async () => {
   const deployServiceAccountKey = core.getInput('deploy-service-account-key', { required: true });
