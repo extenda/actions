@@ -12,7 +12,8 @@ describe('env-config', () => {
 
   beforeEach(() => {
     mockLoadSecret.mockResolvedValueOnce('localhost')
-      .mockResolvedValueOnce('my-password');
+      .mockResolvedValueOnce('my-password')
+      .mockResolvedValueOnce('my-pg-password');
   });
 
   test('It creates config variables', async () => {
@@ -39,9 +40,11 @@ describe('env-config', () => {
     expect(secrets).toEqual({
       DATABASE_HOST: 'localhost',
       DATABASE_PASSWORD: 'my-password',
+      PGPASSWORD: 'my-pg-password',
     });
 
     expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_private_address');
+    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_master_password');
     expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_master_password');
   });
 
@@ -120,6 +123,7 @@ describe('env-config', () => {
       DATABASE_PASSWORD: 'my-password',
       MY_SECRET1: 'my-first-secret',
       MY_SECRET2: 'my-second-secret',
+      PGPASSWORD: 'my-pg-password',
     });
 
     expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_private_address');

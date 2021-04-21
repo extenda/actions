@@ -1,6 +1,6 @@
 const exec = require('@actions/exec');
 const core = require('@actions/core');
-const configureDomains = require('../src/configure-domains');
+const { configureDomains } = require('../src/configure-domains');
 const handleCertificates = require('../src/handle-certificate');
 
 

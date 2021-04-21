@@ -74853,7 +74853,7 @@ const configureDomains = async (env, tenant, countryCode, zone = 'europe-west1-d
   await setupBackendURLMapping(fullDNS, tenantName, clusterProject);
 };
 
-module.exports = configureDomains;
+module.exports = { configureDomains, gcloudOutput };
 
 
 /***/ }),
@@ -74868,7 +74868,7 @@ const deploy = async ({ file, namespace, tenantName }, timeoutSeconds) => {
   await kubectl.exec(['apply', '-f', file]);
 
   // Roll out
-  await kubectl.exec([
+  return kubectl.exec([
     'rollout',
     'status',
     'statefulset',
@@ -74918,6 +74918,7 @@ const defaultEnvironment = (projectId, tenantName, countryCode) => ({
   DATABASE_HOST: `sm://${projectId}/${tenantName}_${getConditionalCountryCodeString(countryCode)}postgresql_private_address`,
   DATABASE_USER: 'postgres',
   DATABASE_PASSWORD: `sm://${projectId}/${tenantName}_${getConditionalCountryCodeString(countryCode)}postgresql_master_password`,
+  PGPASSWORD: `sm://${projectId}/${tenantName}_${getConditionalCountryCodeString(countryCode)}postgresql_master_password`,
   SERVICE_PROJECT_ID: projectId,
   SERVICE_ENVIRONMENT: projectId.includes('-staging-') ? 'staging' : 'prod',
 });
@@ -74981,24 +74982,11 @@ module.exports = prepareEnvConfig;
 /***/ 8109:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const exec = __webpack_require__(2176);
 const core = __webpack_require__(6341);
+const { gcloudOutput } = __webpack_require__(4455);
 
 const MAX_DOMAINS = 100;
 const MAX_CERTIFICATES = 13;
-
-const gcloudOutput = async (args, bin = 'gcloud') => {
-  let output = '';
-  await exec.exec(bin, args, {
-    silent: false,
-    listeners: {
-      stdout: (data) => {
-        output += data.toString('utf8');
-      },
-    },
-  });
-  return output.trim();
-};
 
 // Create certificate containing old domains and new
 const createCertificate = async (domains, projectID, name) => gcloudOutput([
@@ -75102,7 +75090,7 @@ const kubectl = __webpack_require__(3954);
 const deploy = __webpack_require__(6029);
 const prepareEnvConfig = __webpack_require__(4961);
 const createManifests = __webpack_require__(6469);
-const configureDomains = __webpack_require__(4455);
+const { configureDomains } = __webpack_require__(4455);
 
 const action = async () => {
   const deployServiceAccountKey = core.getInput('deploy-service-account-key', { required: true });
@@ -75125,8 +75113,8 @@ const action = async () => {
   );
 
   await createManifests(secretServiceAccountKey, envConfig)
-    .then((manifest) => deploy(manifest, timeoutSeconds));
-  await configureDomains(projectId.includes('-staging-') ? 'staging' : 'prod', tenantName, countryCode, 'europe-west1-d', true);
+    .then((manifest) => deploy(manifest, timeoutSeconds))
+    .then(() => configureDomains(projectId.includes('-staging-') ? 'staging' : 'prod', tenantName, countryCode));
 };
 
 if (require.main === require.cache[eval('__filename')]) {

@@ -5,7 +5,7 @@ const deploy = async ({ file, namespace, tenantName }, timeoutSeconds) => {
   await kubectl.exec(['apply', '-f', file]);
 
   // Roll out
-  await kubectl.exec([
+  return kubectl.exec([
     'rollout',
     'status',
     'statefulset',

@@ -276,4 +276,4 @@ const configureDomains = async (env, tenant, countryCode, zone = 'europe-west1-d
   await setupBackendURLMapping(fullDNS, tenantName, clusterProject);
 };
 
-module.exports = configureDomains;
+module.exports = { configureDomains, gcloudOutput };

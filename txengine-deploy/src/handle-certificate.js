@@ -1,21 +1,8 @@
-const exec = require('@actions/exec');
 const core = require('@actions/core');
+const { gcloudOutput } = require('./configure-domains');
 
 const MAX_DOMAINS = 100;
 const MAX_CERTIFICATES = 13;
-
-const gcloudOutput = async (args, bin = 'gcloud') => {
-  let output = '';
-  await exec.exec(bin, args, {
-    silent: false,
-    listeners: {
-      stdout: (data) => {
-        output += data.toString('utf8');
-      },
-    },
-  });
-  return output.trim();
-};
 
 // Create certificate containing old domains and new
 const createCertificate = async (domains, projectID, name) => gcloudOutput([
