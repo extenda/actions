@@ -1,0 +1,14 @@
+{
+  "name": "cloud-run",
+  "version": "0.0.1-local",
+  "private": true,
+  "description": "Deploy to Cloud Run",
+  "main": "dist/index.js",
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "jira-client": "^6.21.1"
+  },
+  "devDependencies": {
+    "mock-fs": "^4.11.0"
+  }
+}
