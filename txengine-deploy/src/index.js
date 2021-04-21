@@ -4,6 +4,7 @@ const kubectl = require('./kubectl');
 const deploy = require('./deploy');
 const prepareEnvConfig = require('./env-config');
 const createManifests = require('./manifests');
+const configureDomains = require('./configure-domains');
 
 const action = async () => {
   const deployServiceAccountKey = core.getInput('deploy-service-account-key', { required: true });
@@ -25,8 +26,9 @@ const action = async () => {
     inputEnvironment,
   );
 
-  await createManifests(secretServiceAccountKey, envConfig)
-    .then((manifest) => deploy(manifest, timeoutSeconds));
+  const manifest = await createManifests(secretServiceAccountKey, envConfig);
+  await deploy(manifest, timeoutSeconds);
+  await configureDomains(projectId.includes('-staging-') ? 'staging' : 'prod', tenantName, countryCode);
 };
 
 if (require.main === module) {
