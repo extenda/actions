@@ -75120,9 +75120,9 @@ const action = async () => {
     inputEnvironment,
   );
 
-  await createManifests(secretServiceAccountKey, envConfig)
-    .then((manifest) => deploy(manifest, timeoutSeconds))
-    .then(() => configureDomains(projectId.includes('-staging-') ? 'staging' : 'prod', tenantName, countryCode));
+  const manifest = await createManifests(secretServiceAccountKey, envConfig);
+  await deploy(manifest, timeoutSeconds);
+  await configureDomains(projectId.includes('-staging-') ? 'staging' : 'prod', tenantName, countryCode);
 };
 
 if (require.main === require.cache[eval('__filename')]) {
