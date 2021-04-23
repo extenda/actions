@@ -1,4 +1,5 @@
 jest.mock('../src/kubectl');
+jest.mock('../src/create-tenant-nfs-dir');
 const kubectl = require('../src/kubectl');
 
 const deploy = require('../src/deploy');

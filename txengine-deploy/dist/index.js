@@ -52574,13 +52574,13 @@ module.exports = setup;
 if (typeof process === 'undefined' || process.type === 'renderer' || process.browser === true || process.__nwjs) {
 	module.exports = __webpack_require__(506);
 } else {
-	module.exports = __webpack_require__(5698);
+	module.exports = __webpack_require__(6285);
 }
 
 
 /***/ }),
 
-/***/ 5698:
+/***/ 6285:
 /***/ ((module, exports, __webpack_require__) => {
 
 /**
@@ -63407,7 +63407,7 @@ var settle = __webpack_require__(3315);
 var cookies = __webpack_require__(7202);
 var buildURL = __webpack_require__(9951);
 var buildFullPath = __webpack_require__(5270);
-var parseHeaders = __webpack_require__(3476);
+var parseHeaders = __webpack_require__(8952);
 var isURLSameOrigin = __webpack_require__(2361);
 var createError = __webpack_require__(2400);
 
@@ -64685,7 +64685,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
 
 /***/ }),
 
-/***/ 3476:
+/***/ 8952:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -74578,7 +74578,7 @@ module.exports = __webpack_require__(3333).YAML
 const core = __webpack_require__(6341);
 const { addDnsRecord } = __webpack_require__(6644);
 const handleCertificates = __webpack_require__(8109);
-const gcloudOutput = __webpack_require__(6133);
+const gcloudOutput = __webpack_require__(3476);
 
 const staticIPName = 'txengine-https-ip';
 const loadBalancerName = 'txengine-lb';
@@ -74843,12 +74843,48 @@ module.exports = configureDomains;
 
 /***/ }),
 
+/***/ 5698:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const core = __webpack_require__(6341);
+const gcloudOutput = __webpack_require__(3476);
+
+const getNFSPodName = async () => gcloudOutput([
+  'get',
+  'pod',
+  '--namespace=txengine-nfs-server',
+  '-o=json',
+], 'kubectl');
+
+const createTenantDir = async (nfsPodName, tenantName) => gcloudOutput([
+  'exec',
+  '--namespace=txengine-nfs-server',
+  nfsPodName,
+  '--',
+  'mkdir',
+  `/exports/${tenantName}`,
+], 'kubectl').catch(() => core.info('Tenant directory already setup for nfs server!'));
+
+const handleNFSServer = async (tenantName) => {
+  const nfsPodName = JSON.parse(await getNFSPodName()).items[0].metadata.name;
+  return createTenantDir(nfsPodName, tenantName);
+};
+
+module.exports = handleNFSServer;
+
+
+/***/ }),
+
 /***/ 6029:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
+const handleNFSServer = __webpack_require__(5698);
 const kubectl = __webpack_require__(3954);
 
 const deploy = async ({ file, namespace, tenantName }, timeoutSeconds) => {
+  // Setup tenant directory on nfs
+  await handleNFSServer(tenantName);
+
   // Apply
   await kubectl.exec(['apply', '-f', file]);
 
@@ -74964,7 +75000,7 @@ module.exports = prepareEnvConfig;
 
 /***/ }),
 
-/***/ 6133:
+/***/ 3476:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const exec = __webpack_require__(2176);
@@ -74991,7 +75027,7 @@ module.exports = gcloudOutput;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const core = __webpack_require__(6341);
-const gcloudOutput = __webpack_require__(6133);
+const gcloudOutput = __webpack_require__(3476);
 
 const MAX_DOMAINS = 100;
 const MAX_CERTIFICATES = 13;

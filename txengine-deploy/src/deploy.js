@@ -1,6 +1,10 @@
+const handleNFSServer = require('./create-tenant-nfs-dir');
 const kubectl = require('./kubectl');
 
 const deploy = async ({ file, namespace, tenantName }, timeoutSeconds) => {
+  // Setup tenant directory on nfs
+  await handleNFSServer(tenantName);
+
   // Apply
   await kubectl.exec(['apply', '-f', file]);
 
