@@ -31,6 +31,7 @@ jobs:
       - uses: extenda/actions/dora-metrics@v0
         with:
           product-name: Scan & Go
+          product-component: shopNDrop
           jira-username: ${{ env.JIRA_USERNAME }}
           jira-password: ${{ env.JIRA_PASSWORD }}
           jira-project-key: MCPE

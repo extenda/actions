@@ -43278,7 +43278,7 @@ const handleIssues = async (issue, productName) => {
   return Promise.all(promises);
 };
 
-const generateBugLog = async (jiraUsername, jiraPassword, projectKey, productName) => {
+const generateBugLog = async (jiraUsername, jiraPassword, projectKey, productName, component) => {
   const client = new JiraClient({
     protocol: 'https',
     host: 'jira.extendaretail.com',
@@ -43288,7 +43288,7 @@ const generateBugLog = async (jiraUsername, jiraPassword, projectKey, productNam
     strictSSL: true,
   });
 
-  const serviceIssues = await client.searchJira(`project=${projectKey} AND issueType=bug`, { maxResults: 1000 }).catch(() => core.info('No bugs found for service!'));
+  const serviceIssues = await client.searchJira(`project=${projectKey} AND issueType=bug AND component=${component}`, { maxResults: 1000 }).catch(() => core.info('No bugs found for service!'));
   await handleIssues(serviceIssues, productName);
 };
 
@@ -43340,12 +43340,13 @@ const { generateFolders, uploadToBucket } = __webpack_require__(6765);
 
 const action = async () => {
   const productName = core.getInput('product-name', { required: true });
+  const component = core.getInput('product-component', { required: true });
   const jiraUsername = core.getInput('jira-username', { required: true });
   const jiraPassword = core.getInput('jira-password', { required: true });
   const jiraProjectKey = core.getInput('jira-project-key', { required: true });
 
   await generateFolders(productName);
-  await generateBugLog(jiraUsername, jiraPassword, jiraProjectKey, productName);
+  await generateBugLog(jiraUsername, jiraPassword, jiraProjectKey, productName, component);
   await uploadToBucket(productName);
 };
 
