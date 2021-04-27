@@ -4,7 +4,7 @@ author: Extenda Retail
 inputs:
   product-component:
     description: |
-      The product component for you service. (example ScanNDrop)
+      The product component for you service. (example mcpe-selfscan)
     required: true
   product-name:
     description: |
