@@ -5,12 +5,13 @@ const { generateFolders, uploadToBucket } = require('./deploy-log');
 
 const action = async () => {
   const productName = core.getInput('product-name', { required: true });
+  const component = core.getInput('product-component', { required: true });
   const jiraUsername = core.getInput('jira-username', { required: true });
   const jiraPassword = core.getInput('jira-password', { required: true });
   const jiraProjectKey = core.getInput('jira-project-key', { required: true });
 
   await generateFolders(productName);
-  await generateBugLog(jiraUsername, jiraPassword, jiraProjectKey, productName);
+  await generateBugLog(jiraUsername, jiraPassword, jiraProjectKey, productName, component);
   await uploadToBucket(productName);
 };
 

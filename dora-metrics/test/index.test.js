@@ -15,17 +15,19 @@ describe('DORA metrics action', () => {
 
   test('It can run the action', async () => {
     core.getInput.mockReturnValueOnce('iam')
+      .mockReturnValueOnce('product-component')
       .mockReturnValueOnce('jira-username')
       .mockReturnValueOnce('jira-password')
       .mockReturnValueOnce('jira-project-key');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(4);
+    expect(core.getInput).toHaveBeenCalledTimes(5);
     expect(generateBugLog).toHaveBeenCalledWith(
       'jira-username',
       'jira-password',
       'jira-project-key',
       'iam',
+      'product-component',
     );
     expect(generateFolders).toHaveBeenCalledWith(
       'iam',

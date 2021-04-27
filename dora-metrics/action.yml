@@ -2,6 +2,10 @@ name: dora-metrics
 description: Log deployment and bugs for DORA
 author: Extenda Retail
 inputs:
+  product-component:
+    description: |
+      The product component for you service. (example mcpe-selfscan)
+    required: true
   product-name:
     description: |
       The product name for you service. (example scan & go, iam)

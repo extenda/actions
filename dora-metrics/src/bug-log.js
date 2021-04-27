@@ -14,7 +14,7 @@ const handleIssues = async (issue, productName) => {
   return Promise.all(promises);
 };
 
-const generateBugLog = async (jiraUsername, jiraPassword, projectKey, productName) => {
+const generateBugLog = async (jiraUsername, jiraPassword, projectKey, productName, component) => {
   const client = new JiraClient({
     protocol: 'https',
     host: 'jira.extendaretail.com',
@@ -24,7 +24,7 @@ const generateBugLog = async (jiraUsername, jiraPassword, projectKey, productNam
     strictSSL: true,
   });
 
-  const serviceIssues = await client.searchJira(`project=${projectKey} AND issueType=bug`, { maxResults: 1000 }).catch(() => core.info('No bugs found for service!'));
+  const serviceIssues = await client.searchJira(`project=${projectKey} AND issueType=bug AND component=${component}`, { maxResults: 1000 }).catch(() => core.info('No bugs found for service!'));
   await handleIssues(serviceIssues, productName);
 };
 
