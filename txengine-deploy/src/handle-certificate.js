@@ -43,7 +43,7 @@ const handleCertificates = async (domainName, project) => {
 
   const certificateList = await listCertificates(project);
   const certificateListNames = [];
-  const totalCertificates = certificateList.length;
+  const totalCertificates = certificateList ? certificateList.length : 0;
 
   for (const certificate of certificateList) {
     const version = parseInt(certificate.name.split('-')[2].substring(1), 10);
