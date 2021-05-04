@@ -9,7 +9,7 @@ const deploy = async ({ file, namespace, tenantName }, timeoutSeconds) => {
   await kubectl.exec(['apply', '-f', file]);
 
   // Roll out
-  return kubectl.exec([
+  await kubectl.exec([
     'rollout',
     'status',
     'statefulset',
@@ -17,6 +17,9 @@ const deploy = async ({ file, namespace, tenantName }, timeoutSeconds) => {
     `--timeout=${timeoutSeconds}s`,
     `--namespace=${namespace}`,
   ]);
+
+  return checkStatus(namespace);
+
 };
 
 module.exports = deploy;
