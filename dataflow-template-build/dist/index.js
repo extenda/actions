@@ -1558,7 +1558,7 @@ function copyFile(srcFile, destFile, force) {
 const exec = __webpack_require__(2176);
 
 // Dataflow build gcloud cmd
-const dataflowBuild = async (templatePath, image, sdkLanguage, metadataPath) => {
+const dataflowBuild = async (templatePath, image, sdkLanguage, metadataPath, jarPath, envVars) => {
   const args = [
     'dataflow',
     'flex-template',
@@ -1569,6 +1569,12 @@ const dataflowBuild = async (templatePath, image, sdkLanguage, metadataPath) => 
   ];
   if (metadataPath !== '') {
     args.push(`--metadata-file=${metadataPath}`);
+  }
+  if (jarPath !== '') {
+    args.push(`--jar=${jarPath}`);
+  }
+  if (envVars !== '') {
+    args.push(`--env=${envVars}`);
   }
   return exec.exec('gcloud', args);
 };
@@ -1592,9 +1598,11 @@ const action = async () => {
   const metadataPath = core.getInput('metadata-path') || '';
   const sdkLanguage = core.getInput('sdk-language') || 'JAVA';
   const templatePath = core.getInput('template-path', { required: true });
+  const jarPath = core.getInput('jar') || '';
+  const envVars = core.getInput('env') || '';
 
   await setupGcloud(serviceAccountKey, process.env.GCLOUD_INSTALLED_VERSION || 'latest');
-  await dataflowBuild(templatePath, image, sdkLanguage, metadataPath);
+  await dataflowBuild(templatePath, image, sdkLanguage, metadataPath, jarPath, envVars);
 };
 
 if (require.main === require.cache[eval('__filename')]) {
