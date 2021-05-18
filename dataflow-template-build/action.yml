@@ -2,9 +2,15 @@ name: Build Dataflow flex template
 description: Build a dataflow flex template
 author: Extenda Retail
 inputs:
+  env:
+    description: Environment variables to create for the Dockerfile.
+    required: false
   image:
     description: The path to the docker image which will contain the dataflow job.
     required: true
+  jar:
+    description: Local path to your dataflow pipeline jar file and all their dependent jar files required for the flex template classpath.
+    required: false
   metadata-path:
     description: The metadata file path.
     required: false
