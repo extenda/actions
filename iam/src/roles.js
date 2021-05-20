@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const axios = require('axios');
+const { iamApiErrorToString } = require('./util/iam-api-error-to-string');
 
 const createRole = async (
   iamToken, roleId, roleName, rolePermissions, iamUrl,
@@ -20,7 +21,7 @@ const createRole = async (
   core.info(message);
   return message;
 }).catch((err) => {
-  throw new Error(`Couldn't add role '${roleId}'. Reason: ${err.message} ${err.response.data.error || ''}`);
+  throw new Error(iamApiErrorToString(err, `Couldn't add role '${roleId}'`));
 });
 
 
@@ -42,7 +43,7 @@ const updateRole = async (
   core.info(message);
   return message;
 }).catch((err) => {
-  throw new Error(`Couldn't update role '${roleId}'. Reason: ${err.message} ${err.response.data.error || ''}`);
+  throw new Error(iamApiErrorToString(err, `Couldn't update role '${roleId}'`));
 });
 
 const getRole = async (
@@ -59,7 +60,7 @@ const getRole = async (
     if (err.response.status === 404) {
       return true;
     }
-    throw new Error(`Could not fetch role from iam-service. Reason: ${err.message} ${err.response.data.error || ''}`);
+    throw new Error(iamApiErrorToString(err, 'Could not fetch role from iam-service'));
   });
 
 function arraysEqual(rolePermissions, newPermissions) {

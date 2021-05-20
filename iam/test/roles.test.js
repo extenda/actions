@@ -123,7 +123,7 @@ describe('Setup roles and handle', () => {
     axios.mockRejectedValueOnce({ message: 'Error', response: { status: 500, data: { error: 'Message' } } });
 
     await expect(getRole('iam-token', 'iam-url', 'sys-id.admin'))
-      .rejects.toEqual(new Error('Could not fetch role from iam-service. Reason: Error Message'));
+      .rejects.toThrow('Could not fetch role from iam-service. Request failed with code: [500] and error [Message]');
 
     expect(axios).toHaveBeenCalledTimes(1);
   });
@@ -143,7 +143,7 @@ describe('Setup roles and handle', () => {
 
     await expect(createRole('iam-token', 'sys-id.admin', 'sys-id admin',
       ['sys-id.resources.get', 'sys-id.resources-create'], 'iam-url'))
-      .rejects.toEqual(new Error('Couldn\'t add role \'sys-id.admin\'. Reason: Error Message'));
+      .rejects.toThrow('Couldn\'t add role \'sys-id.admin\'. Request failed with code: [500] and error [Message]');
 
     expect(axios).toHaveBeenCalledTimes(1);
   });
@@ -163,7 +163,7 @@ describe('Setup roles and handle', () => {
 
     await expect(updateRole('iam-token', 'sys-id.admin', 'sys-id admin',
       ['sys-id.resources.get', 'sys-id.resources-create'], 'iam-url'))
-      .rejects.toEqual(new Error('Couldn\'t update role \'sys-id.admin\'. Reason: Error Message'));
+      .rejects.toThrow('Couldn\'t update role \'sys-id.admin\'. Request failed with code: [500] and error [Message]');
 
     expect(axios).toHaveBeenCalledTimes(1);
   });
