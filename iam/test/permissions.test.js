@@ -82,7 +82,7 @@ describe('Setup permissions and handle', () => {
     result.set('test.resource.get', 'Get resource');
 
     await expect(handlePermissions(result, 'iam-token', 'api-url')).rejects
-      .toEqual(new Error('Failed to update permission test.resource.get. Request failed with code: [404] and error [Message]'));
+      .toThrow('Failed to update permission test.resource.get. Request failed with code: [404] and error [Message]');
 
     expect(axios).toHaveBeenCalledTimes(2);
   });
