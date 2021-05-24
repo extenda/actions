@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const axios = require('axios');
+const { iamApiErrorToString } = require('./utils/iam-api-error-to-string');
 
 const updateAddPermission = async (
   iamToken, permissionId, permissionDesc, method, iamUrl,
@@ -13,6 +14,7 @@ const updateAddPermission = async (
   } else {
     url += `/${permissionId}`;
   }
+  const action = method === 'PUT' ? 'update' : 'create';
   return axios({
     url,
     method,
@@ -21,14 +23,10 @@ const updateAddPermission = async (
       'content-type': 'application/json',
     },
     data,
-  }).then((response) => {
-    if (response.status === 200) {
-      core.info(`permission '${permissionId}' created.`);
-    } else {
-      core.info(`permission '${permissionId}' updated.`);
-    }
+  }).then(() => {
+    core.info(`permission '${permissionId}' ${action}d.`);
   }).catch((err) => {
-    throw new Error(`Failed to create/update permission ${permissionId}. Reason: ${err.message} ${err.response.data.error || ''}`);
+    throw new Error(iamApiErrorToString(err, `Failed to ${action} permission ${permissionId}`));
   });
 };
 
@@ -47,7 +45,7 @@ const getPermission = async (
   if (err.response.status === 404) {
     return 'POST';
   }
-  throw new Error(`Could not fetch permission ${iamUrl}/api/v1/permissions/${permissionId}. Reason: ${err.message} ${err.response.data.error || ''}`);
+  throw new Error(iamApiErrorToString(err, `Could not fetch permission ${permissionId}`));
 });
 
 const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
