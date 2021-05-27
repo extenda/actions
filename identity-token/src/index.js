@@ -12,7 +12,7 @@ const action = async () => {
   const token = await fetchToken(serviceAccount, audiences);
   core.setSecret(token);
   core.exportVariable('IDENTITY_TOKEN', token);
-  core.setOutput('iam-token', token);
+  core.setOutput('identity-token', token);
 };
 
 if (require.main === module) {

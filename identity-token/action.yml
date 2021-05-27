@@ -13,6 +13,9 @@ inputs:
       The service account key which will be used for authentication.
       The account key should be a base64 encoded JSON key stored as a secret.
     required: true
+outputs:
+  identity-token:
+    description: Identity token
 runs:
   using: node12
   main: dist/index.js
