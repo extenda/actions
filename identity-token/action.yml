@@ -3,7 +3,7 @@ description: Obtain an identity token for the specified service account
 author: Extenda Retail
 inputs:
   audiences:
-    description: Comma-separated list of audiences which are the intended recipients of the token.
+    description: The audience which is the intended recipient of the token.
     required: true
   service-account:
     description: Service account to print the identity token for. Full service account name needs to be specified.
