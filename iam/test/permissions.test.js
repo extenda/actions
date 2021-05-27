@@ -76,13 +76,13 @@ describe('Setup permissions and handle', () => {
     };
 
     axios.mockResolvedValueOnce({ status: 200, data: getSystemResult })
-      .mockRejectedValueOnce({ message: 'Not found', response: { status: 404, data: { error: 'Message' } } });
+      .mockRejectedValueOnce({ message: 'Not found', response: { status: 404, data: { error: 'Not found' } } });
 
     const result = new Map();
     result.set('test.resource.get', 'Get resource');
 
     await expect(handlePermissions(result, 'iam-token', 'api-url')).rejects
-      .toEqual(new Error('Failed to create/update permission test.resource.get. Reason: Not found Message'));
+      .toThrow('Failed to update permission test.resource.get. Request failed with code [404] and error [Not found]');
 
     expect(axios).toHaveBeenCalledTimes(2);
   });
