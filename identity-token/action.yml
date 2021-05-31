@@ -1,0 +1,21 @@
+name: Identity token
+description: Obtain an identity token for the specified service account
+author: Extenda Retail
+inputs:
+  audiences:
+    description: The audience which is the intended recipient of the token.
+    required: true
+  service-account:
+    description: Service account to print the identity token for. Full service account name needs to be specified.
+    required: true
+  service-account-key:
+    description:
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+outputs:
+  identity-token:
+    description: Identity token
+runs:
+  using: node12
+  main: dist/index.js
