@@ -161,11 +161,9 @@ The consumers will be available in your das system by importing data.consumers. 
 example policy
 
 ```
-import data.consumers.services
-
 allow = true {
   http_request.method == "GET"
   parsed_path == ["quotes"]
-  googletoken.check_service_account("quotes.list", services)
+  googletoken.check("quotes.list")
 }
 ```

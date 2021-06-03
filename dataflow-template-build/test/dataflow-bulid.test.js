@@ -13,6 +13,8 @@ describe('Build Dataflow template', () => {
       'gcr.io/project/image:tag',
       'JAVA',
       'metadata.json',
+      'code.jar',
+      'key=value',
     );
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
@@ -23,14 +25,18 @@ describe('Build Dataflow template', () => {
       '--image=gcr.io/project/image:tag',
       '--sdk-language=JAVA',
       '--metadata-file=metadata.json',
+      '--jar=code.jar',
+      '--env=key=value',
     ]);
   });
 
-  test('Build template without metadata flag', async () => {
+  test('Build template without optional flags', async () => {
     dataflowBuild(
       'gs://test/dataflow/template.json',
       'gcr.io/project/image:tag',
       'JAVA',
+      '',
+      '',
       '',
     );
     expect(exec.exec).toHaveBeenCalledTimes(1);
