@@ -62,7 +62,8 @@ describe('deploy', () => {
     ) => opts.listeners.stdout((revisionList)));
     exec.exec.mockResolvedValueOnce(2);
 
-    await deploy({ file: 'manifest.yaml', namespace: 'namespace', tenantName: 'tenant' });
+    await expect(deploy({ file: 'manifest.yaml', namespace: 'namespace', tenantName: 'tenant' }))
+      .rejects.toEqual(new Error('Deployment failed, Rollback was initiated!'));
     expect(kubectl.exec).toHaveBeenNthCalledWith(2,
       expect.arrayContaining(['rollout', '--timeout=120s']));
     expect(kubectl.exec).toHaveBeenNthCalledWith(3,

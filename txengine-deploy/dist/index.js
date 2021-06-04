@@ -74907,10 +74907,11 @@ const deploy = async ({ file, namespace, tenantName }) => {
       `--to-revision=${latestRevision}`,
       `--namespace=${namespace}`,
     ]).then(() => checkStatusAndKillFailingPods(namespace))
-      .catch(() => { throw new Error('Unable to undo rollout!'); });
+      .then(() => {
+        throw new Error('Deployment failed, Rollback was initiated!');
+      });
   }
 };
-
 
 module.exports = deploy;
 
@@ -75329,6 +75330,20 @@ const parseStatus = async (statuses) => {
   return true;
 };
 
+const killPod = async (podName, status, namespace) => {
+  if (!status) {
+    core.info(`failing pod detected, deleting ${podName}...`);
+    return gcloudOutput([
+      'delete',
+      'pod',
+      podName,
+      '-n',
+      namespace,
+    ], 'kubectl');
+  }
+  return null;
+};
+
 const checkStatusAndKillFailingPods = async (namespace) => {
   const serviceList = JSON.parse(await gcloudOutput([
     'get',
@@ -75343,18 +75358,7 @@ const checkStatusAndKillFailingPods = async (namespace) => {
   for (const service of serviceList) {
     const podName = service.spec.hostname;
     promises.push(parseStatus(service.status.conditions)
-      .then(async (status) => {
-        if (!status) {
-          core.info(`failing pod detected, deleting ${podName}...`);
-          await gcloudOutput([
-            'delete',
-            'pod',
-            podName,
-            '-n',
-            namespace,
-          ], 'kubectl');
-        }
-      }));
+      .then((status) => killPod(podName, status, namespace)));
   }
   return Promise.resolve(promises);
 };

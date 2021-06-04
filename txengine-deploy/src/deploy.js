@@ -59,9 +59,9 @@ const deploy = async ({ file, namespace, tenantName }) => {
       `--to-revision=${latestRevision}`,
       `--namespace=${namespace}`,
     ]).then(() => checkStatusAndKillFailingPods(namespace))
-      .catch(() => { throw new Error('Unable to undo rollout!'); });
+      .catch((err) => { throw new Error(`Unable to undo rollout! ${err}`); });
+    throw new Error('Deployment failed, Rollback was initiated!');
   }
 };
-
 
 module.exports = deploy;
