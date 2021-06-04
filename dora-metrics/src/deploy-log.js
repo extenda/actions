@@ -21,6 +21,9 @@ const uploadToBucket = async (productName) => exec.exec('gsutil', [
   '-r',
   productName,
   'gs://dora-metrics',
-]).catch((err) => core.info(`upload to bucket failed reason: ${err}`));
+]).catch((err) => {
+  core.info(`upload to bucket failed reason: ${err}`);
+  throw err;
+});
 
 module.exports = { generateFolders, uploadToBucket };
