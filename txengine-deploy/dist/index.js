@@ -74907,9 +74907,8 @@ const deploy = async ({ file, namespace, tenantName }) => {
       `--to-revision=${latestRevision}`,
       `--namespace=${namespace}`,
     ]).then(() => checkStatusAndKillFailingPods(namespace))
-      .then(() => {
-        throw new Error('Deployment failed, Rollback was initiated!');
-      });
+      .catch((err) => { throw new Error(`Unable to undo rollout! ${err}`); });
+    throw new Error('Deployment failed, Rollback was initiated!');
   }
 };
 
