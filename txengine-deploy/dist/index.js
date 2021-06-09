@@ -74756,6 +74756,7 @@ const setupBackendService = async (name, projectID) => gcloudOutput([
   '--port-name=http',
   '--connection-draining-timeout=300s',
   `--health-checks=${healthcheckName}`,
+  '--timeout=120s',
   '--global',
   '--enable-logging',
   '--logging-sample-rate=1',
