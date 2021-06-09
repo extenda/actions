@@ -1,7 +1,9 @@
 const exec = require('@actions/exec');
+const core = require('@actions/core');
 const handleCertificates = require('../src/handle-certificate');
 
 jest.mock('@actions/exec');
+jest.mock('@actions/core');
 
 const certificateListJson = [{
   creationTimestamp: '2021-03-11T06:32:08.781-08:00',
@@ -230,5 +232,25 @@ describe('handle certificates', () => {
       '--global',
     ],
     expect.anything());
+  });
+
+  test('It creates certificate when there is none existing', async () => {
+    exec.exec.mockImplementationOnce((
+      cmd, args, opts,
+    ) => opts.listeners.stdout('[]'));
+    exec.exec.mockResolvedValue(0);
+    await handleCertificates('testrunner-no.txengine.retailsvc.dev', 'experience-staging-b807');
+    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(exec.exec).toHaveBeenNthCalledWith(2, 'gcloud', [
+      'compute',
+      'ssl-certificates',
+      'create',
+      'txengine-certs-v1',
+      '--domains=testrunner-no.txengine.retailsvc.dev',
+      '--project=experience-staging-b807',
+      '--global',
+    ],
+    expect.anything());
+    expect(core.info).toHaveBeenCalledTimes(0);
   });
 });

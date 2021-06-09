@@ -42,7 +42,7 @@ describe('txengine-deploy', () => {
 
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(7);
+    expect(core.getInput).toHaveBeenCalledTimes(6);
     expect(kubectl.configure).toHaveBeenCalledWith('deploy-account');
     expect(createManifests).toHaveBeenCalledTimes(1);
     expect(deploy).toHaveBeenCalledTimes(1);

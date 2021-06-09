@@ -12,7 +12,6 @@ const action = async () => {
   const image = core.getInput('image', { required: true });
   const tenantName = core.getInput('tenant-name', { required: true });
   const countryCode = core.getInput('country-code') || '';
-  const timeoutSeconds = core.getInput('deploy-timeout') || 180;
   const inputEnvironment = core.getInput('environment');
 
   const projectId = await kubectl.configure(deployServiceAccountKey);
@@ -27,7 +26,7 @@ const action = async () => {
   );
 
   const manifest = await createManifests(secretServiceAccountKey, envConfig);
-  await deploy(manifest, timeoutSeconds);
+  await deploy(manifest);
   await configureDomains(projectId.includes('-staging-') ? 'staging' : 'prod', tenantName, countryCode);
 };
 

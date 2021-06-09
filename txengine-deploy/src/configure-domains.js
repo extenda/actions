@@ -95,7 +95,7 @@ const setupHealthCheck = async (projectID) => gcloudOutput([
 ]).catch(() => core.info('Health check already exists!'));
 
 // Create 404 bucket
-const create404Bucket = async (tenantName, projectID) => gcloudOutput([
+const create404Bucket = async (projectID, postfix) => gcloudOutput([
   'mb',
   '-c',
   'standard',
@@ -105,26 +105,26 @@ const create404Bucket = async (tenantName, projectID) => gcloudOutput([
   projectID,
   '-b',
   'on',
-  `gs://${backendBucketName}`,
+  `gs://${backendBucketName + postfix}`,
 ], 'gsutil')
   .then(() => gcloudOutput([
     'compute',
     'backend-buckets',
     'create',
-    backendBucketName,
-    `--gcs-bucket-name=${backendBucketName}`,
+    backendBucketName + postfix,
+    `--gcs-bucket-name=${backendBucketName + postfix}`,
     `--project=${projectID}`,
   ]))
   .catch(() => core.info('Bucket already exists!'));
 
 // Create loadbalancer rule
-const createLoadbalancer = async (projectID) => gcloudOutput([
+const createLoadbalancer = async (projectID, postfix) => gcloudOutput([
   'compute',
   'url-maps',
   'create',
   loadBalancerName,
   `--project=${projectID}`,
-  `--default-backend-bucket=${backendBucketName}`,
+  `--default-backend-bucket=${backendBucketName + postfix}`,
 ]).catch(() => core.info('Loadbalancer already exists!'));
 
 // Add route to lb for new backend
@@ -237,9 +237,9 @@ const configureDomains = async (env, tenant, countryCode, zone = 'europe-west1-d
   core.info('Creating healthcheck');
   await setupHealthCheck(clusterProject);
   core.info('Creating 404-bucket');
-  await create404Bucket(tenantName, clusterProject);
+  await create404Bucket(clusterProject, env === 'prod' ? 'prod' : '');
   core.info('Creating loadbalancer');
-  await createLoadbalancer(clusterProject);
+  await createLoadbalancer(clusterProject, env === 'prod' ? 'prod' : '');
   const certificates = await handleCertificates(fullDNS, clusterProject);
   core.info('Creating proxies');
   if (certificates) {

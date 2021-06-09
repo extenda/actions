@@ -63407,7 +63407,7 @@ var settle = __webpack_require__(3315);
 var cookies = __webpack_require__(7202);
 var buildURL = __webpack_require__(9951);
 var buildFullPath = __webpack_require__(5270);
-var parseHeaders = __webpack_require__(3476);
+var parseHeaders = __webpack_require__(8952);
 var isURLSameOrigin = __webpack_require__(2361);
 var createError = __webpack_require__(2400);
 
@@ -64685,7 +64685,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
 
 /***/ }),
 
-/***/ 3476:
+/***/ 8952:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -74578,7 +74578,7 @@ module.exports = __webpack_require__(3333).YAML
 const core = __webpack_require__(6341);
 const { addDnsRecord } = __webpack_require__(6644);
 const handleCertificates = __webpack_require__(8109);
-const gcloudOutput = __webpack_require__(6133);
+const gcloudOutput = __webpack_require__(3476);
 
 const staticIPName = 'txengine-https-ip';
 const loadBalancerName = 'txengine-lb';
@@ -74672,7 +74672,7 @@ const setupHealthCheck = async (projectID) => gcloudOutput([
 ]).catch(() => core.info('Health check already exists!'));
 
 // Create 404 bucket
-const create404Bucket = async (tenantName, projectID) => gcloudOutput([
+const create404Bucket = async (projectID, postfix) => gcloudOutput([
   'mb',
   '-c',
   'standard',
@@ -74682,26 +74682,26 @@ const create404Bucket = async (tenantName, projectID) => gcloudOutput([
   projectID,
   '-b',
   'on',
-  `gs://${backendBucketName}`,
+  `gs://${backendBucketName + postfix}`,
 ], 'gsutil')
   .then(() => gcloudOutput([
     'compute',
     'backend-buckets',
     'create',
-    backendBucketName,
-    `--gcs-bucket-name=${backendBucketName}`,
+    backendBucketName + postfix,
+    `--gcs-bucket-name=${backendBucketName + postfix}`,
     `--project=${projectID}`,
   ]))
   .catch(() => core.info('Bucket already exists!'));
 
 // Create loadbalancer rule
-const createLoadbalancer = async (projectID) => gcloudOutput([
+const createLoadbalancer = async (projectID, postfix) => gcloudOutput([
   'compute',
   'url-maps',
   'create',
   loadBalancerName,
   `--project=${projectID}`,
-  `--default-backend-bucket=${backendBucketName}`,
+  `--default-backend-bucket=${backendBucketName + postfix}`,
 ]).catch(() => core.info('Loadbalancer already exists!'));
 
 // Add route to lb for new backend
@@ -74814,9 +74814,9 @@ const configureDomains = async (env, tenant, countryCode, zone = 'europe-west1-d
   core.info('Creating healthcheck');
   await setupHealthCheck(clusterProject);
   core.info('Creating 404-bucket');
-  await create404Bucket(tenantName, clusterProject);
+  await create404Bucket(clusterProject, env === 'prod' ? 'prod' : '');
   core.info('Creating loadbalancer');
-  await createLoadbalancer(clusterProject);
+  await createLoadbalancer(clusterProject, env === 'prod' ? 'prod' : '');
   const certificates = await handleCertificates(fullDNS, clusterProject);
   core.info('Creating proxies');
   if (certificates) {
@@ -74846,21 +74846,70 @@ module.exports = configureDomains;
 /***/ 6029:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
+const core = __webpack_require__(6341);
+const gcloudOutput = __webpack_require__(3476);
 const kubectl = __webpack_require__(3954);
+const checkStatusAndKillFailingPods = __webpack_require__(5722);
 
-const deploy = async ({ file, namespace, tenantName }, timeoutSeconds) => {
-  // Apply
+const getLatestRevision = async (revisionsList) => {
+  const revisions = revisionsList.split(/[\r\n]+/);
+  return revisions[revisions.length - 1];
+};
+
+const deploy = async ({ file, namespace, tenantName }) => {
+  let rolloutFailed = false;
+
+  // Fetch latest revision for rollback
+  const latestRevision = await gcloudOutput([
+    'rollout',
+    'history',
+    'statefulset',
+    `${tenantName}-txengine-service`,
+    `--namespace=${namespace}`,
+  ], 'kubectl').then((revisionsList) => getLatestRevision(revisionsList))
+    .catch(() => core.info('No previous revision found! unable to rollback on failure'));
+
+  // Set timeout depending on replicas
+  const replicas = await gcloudOutput([
+    'get',
+    'statefulset',
+    `${tenantName}-txengine-service`,
+    `--namespace=${namespace}`,
+    '--output=json',
+  ], 'kubectl').then((statefulsetJson) => JSON.parse(statefulsetJson).status.currentReplicas)
+    .catch((err) => core.info(`Unable to read statefulset. ${err}`));
+  const timeoutSeconds = !replicas ? 120 : replicas * 120;
+
+  // Apply manifests
   await kubectl.exec(['apply', '-f', file]);
 
+  // Check status and kill failing pods
+  await checkStatusAndKillFailingPods(namespace);
+
   // Roll out
-  return kubectl.exec([
+  await kubectl.exec([
     'rollout',
     'status',
     'statefulset',
     `${tenantName}-txengine-service`,
     `--timeout=${timeoutSeconds}s`,
     `--namespace=${namespace}`,
-  ]);
+  ]).catch(() => { rolloutFailed = true; });
+
+  // If rollout fails rollback and kill failing pods
+  if (rolloutFailed) {
+    core.info('issue found with deployment, rolling back to last revision');
+    await kubectl.exec([
+      'rollout',
+      'undo',
+      'statefulset',
+      `${tenantName}-txengine-service`,
+      `--to-revision=${latestRevision}`,
+      `--namespace=${namespace}`,
+    ]).then(() => checkStatusAndKillFailingPods(namespace))
+      .catch((err) => { throw new Error(`Unable to undo rollout! ${err}`); });
+    throw new Error('Deployment failed, Rollback was initiated!');
+  }
 };
 
 module.exports = deploy;
@@ -74964,7 +75013,7 @@ module.exports = prepareEnvConfig;
 
 /***/ }),
 
-/***/ 6133:
+/***/ 3476:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const exec = __webpack_require__(2176);
@@ -74991,7 +75040,7 @@ module.exports = gcloudOutput;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const core = __webpack_require__(6341);
-const gcloudOutput = __webpack_require__(6133);
+const gcloudOutput = __webpack_require__(3476);
 
 const MAX_DOMAINS = 100;
 const MAX_CERTIFICATES = 13;
@@ -75035,7 +75084,7 @@ const handleCertificates = async (domainName, project) => {
 
   const certificateList = await listCertificates(project);
   const certificateListNames = [];
-  const totalCertificates = certificateList.length;
+  const totalCertificates = certificateList ? certificateList.length : 0;
 
   for (const certificate of certificateList) {
     const version = parseInt(certificate.name.split('-')[2].substring(1), 10);
@@ -75106,7 +75155,6 @@ const action = async () => {
   const image = core.getInput('image', { required: true });
   const tenantName = core.getInput('tenant-name', { required: true });
   const countryCode = core.getInput('country-code') || '';
-  const timeoutSeconds = core.getInput('deploy-timeout') || 180;
   const inputEnvironment = core.getInput('environment');
 
   const projectId = await kubectl.configure(deployServiceAccountKey);
@@ -75121,7 +75169,7 @@ const action = async () => {
   );
 
   const manifest = await createManifests(secretServiceAccountKey, envConfig);
-  await deploy(manifest, timeoutSeconds);
+  await deploy(manifest);
   await configureDomains(projectId.includes('-staging-') ? 'staging' : 'prod', tenantName, countryCode);
 };
 
@@ -75262,6 +75310,59 @@ const createManifests = async (
   });
 
 module.exports = createManifests;
+
+
+/***/ }),
+
+/***/ 5722:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const core = __webpack_require__(6341);
+const gcloudOutput = __webpack_require__(3476);
+
+const parseStatus = async (statuses) => {
+  for (const status of statuses) {
+    if (status.status !== 'True') {
+      return false;
+    }
+  }
+  return true;
+};
+
+const killPod = async (podName, status, namespace) => {
+  if (!status) {
+    core.info(`failing pod detected, deleting ${podName}...`);
+    return gcloudOutput([
+      'delete',
+      'pod',
+      podName,
+      '-n',
+      namespace,
+    ], 'kubectl');
+  }
+  return null;
+};
+
+const checkStatusAndKillFailingPods = async (namespace) => {
+  const serviceList = JSON.parse(await gcloudOutput([
+    'get',
+    'pod',
+    '-n',
+    namespace,
+    '-o',
+    'json',
+  ], 'kubectl')).items;
+
+  const promises = [];
+  for (const service of serviceList) {
+    const podName = service.spec.hostname;
+    promises.push(parseStatus(service.status.conditions)
+      .then((status) => killPod(podName, status, namespace)));
+  }
+  return Promise.resolve(promises);
+};
+
+module.exports = checkStatusAndKillFailingPods;
 
 
 /***/ }),
