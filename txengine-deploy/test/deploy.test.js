@@ -27,7 +27,7 @@ describe('deploy', () => {
 
     await deploy({ file: 'manifest.yaml', namespace: 'namespace', tenantName: 'tenant' });
     expect(kubectl.exec).toHaveBeenNthCalledWith(2,
-      expect.arrayContaining(['rollout', '--timeout=120s']));
+      expect.arrayContaining(['rollout', '--timeout=300s']));
   });
 
   test('It can get latest revision', async () => {
@@ -44,7 +44,7 @@ describe('deploy', () => {
 
     await deploy({ file: 'manifest.yaml', namespace: 'namespace', tenantName: 'tenant' });
     expect(kubectl.exec).toHaveBeenNthCalledWith(2,
-      expect.arrayContaining(['rollout', '--timeout=120s']));
+      expect.arrayContaining(['rollout', '--timeout=300s']));
   });
 
   test('It can handle rollback', async () => {
@@ -52,6 +52,7 @@ describe('deploy', () => {
 2
 3
 4
+
 `;
     kubectl.exec.mockResolvedValueOnce(0);
     kubectl.exec.mockRejectedValueOnce(0);
@@ -65,7 +66,7 @@ describe('deploy', () => {
     await expect(deploy({ file: 'manifest.yaml', namespace: 'namespace', tenantName: 'tenant' }))
       .rejects.toEqual(new Error('Deployment failed, Rollback was initiated!'));
     expect(kubectl.exec).toHaveBeenNthCalledWith(2,
-      expect.arrayContaining(['rollout', '--timeout=120s']));
+      expect.arrayContaining(['rollout', '--timeout=300s']));
     expect(kubectl.exec).toHaveBeenNthCalledWith(3,
       expect.arrayContaining(['rollout', '--to-revision=4']));
   });
