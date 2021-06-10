@@ -5,7 +5,7 @@ const checkStatusAndKillFailingPods = require('./rollback');
 
 const getLatestRevision = async (revisionsList) => {
   const revisions = revisionsList.split(/[\r\n]+/);
-  return revisions[revisions.length - 1];
+  return parseInt(revisions[revisions.length - 1].trim(), 10);
 };
 
 const deploy = async ({ file, namespace, tenantName }) => {
@@ -30,7 +30,7 @@ const deploy = async ({ file, namespace, tenantName }) => {
     '--output=json',
   ], 'kubectl').then((statefulsetJson) => JSON.parse(statefulsetJson).status.currentReplicas)
     .catch((err) => core.info(`Unable to read statefulset. ${err}`));
-  const timeoutSeconds = !replicas ? 120 : replicas * 120;
+  const timeoutSeconds = !replicas || replicas < 2 ? 300 : replicas * 200;
 
   // Apply manifests
   await kubectl.exec(['apply', '-f', file]);
