@@ -1644,7 +1644,7 @@ const fetchToken = async (serviceAccount, audiences) => {
     },
   });
 
-  return token;
+  return token.trim();
 };
 
 module.exports = fetchToken;
