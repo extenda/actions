@@ -16,7 +16,7 @@ The following example generates and stores all bugs into a bucket that will be u
 on: push
 
 jobs:
-  staging:
+  prod:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -32,6 +32,12 @@ jobs:
           secrets: |
             JIRA_USERNAME: jira-username
             JIRA_PASSWORD: jira-password
+
+      - name: Deploy to production
+        uses: extenda/actions/cloud-run@v0
+        with:
+          service-account-key: ${{ secrets.GCLOUD_AUTH_PROD }}
+          image: eu.gcr.io/extenda/mcpe-selfscan:${{ steps.vars.outputs.tag }}
 
       - uses: extenda/actions/dora-metrics@v0
         with:
