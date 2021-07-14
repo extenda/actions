@@ -24,6 +24,7 @@ The following actions are available
   * [jira-releasenotes](jira-releasenotes#readme)
   * [kubernetes](kubernetes#readme)
   * [maven](maven#readme)
+  * [nexus-auth-npm](nexus-auth-npm#readme)
   * [repository-dispatch](repository-dispatch#readme)
   * [rs-create-installerpkg](rs-create-installerpkg#readme)
   * [rs-permission-converter](rs-permission-converter#readme)
