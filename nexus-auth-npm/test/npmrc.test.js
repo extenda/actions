@@ -24,7 +24,7 @@ describe('npmrc', () => {
       outputDir: '~/output',
     });
 
-    const contents = await readFile(join('~', '.npmrc'), { encoding: 'utf-8' });
+    const contents = await readFile(join('~/output', '.npmrc'), { encoding: 'utf-8' });
     expect(contents).toEqual(expectedNpmrc);
   });
 });
