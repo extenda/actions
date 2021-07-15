@@ -3,15 +3,17 @@ description:
   Authorizes to nexus registry with NEXUS_USERNAME and NEXUS_PASSWORD envs
   optionally fetching them from gcp-secret-manager. Produces .npmrc file with auth data.
 inputs:
-  fetch-auth-secrets:
-    description: Whether or not to fetch NEXUS_USERNAME and NEXUS_PASSWORD from gcp-secret-manager
+  service-account-key:
+    description:
+      GCP service account key used to to fetch
+      NEXUS_USERNAME and NEXUS_PASSWORD from gcp-secret-manager.
+      If will be used only if credentials were not provided
     required: false
-    default: "true"
   nexus-username:
-    description: Nexus username
+    description: Nexus username, used instead of NEXUS_USERNAME env if provided
     required: false
   nexus-password:
-    description: Nexus password
+    description: Nexus password, used instead of NEXUS_PASSWORD env if provided
     required: false
   npmrc-dir:
     description: .npmrc file folder destination
