@@ -5,8 +5,10 @@ This GitHub Action runs Maven preconfigured for Extenda Retail's Nexus Repositor
   * Use Maven Central for open-source dependencies
   * Use [repo.extendaretail.com](https://repo.extendaretail.com) for everything else
 
-It also supports semantic versioning from git tags. It will automatically update POM versions according to
-[conventional-version](../conventional-version#readme) before building.
+It also supports:
+  * Semantic versioning from git tags. It will automatically update POM versions according to
+[conventional-version](../conventional-version#readme) before building
+  * Automatic caching of the `~/.m2/repository`
 
 ## Usage
 
@@ -37,7 +39,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-java@v1
         with:
@@ -60,7 +64,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
 
       - uses: extenda/actions/gcp-secret-manager@v0
         with:
@@ -91,7 +95,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
 
       - uses: extenda/actions/gcp-secret-manager@v0
         with:
@@ -111,9 +115,13 @@ jobs:
           version: pom.xml
 ```
 
-#### Usage With Cache
+#### Usage Without Cache
 
-This examples uses a [`cache`](https://github.com/actions/cache#readme) for the Maven dependencies.
+By the default, the action will use a cache based on the hash of all `pom.xml` files
+in your repository. It is possible to specify the cache and restore keys using
+input variables.
+
+In this example, the cache will be disabled with the use of an empty input variable.
 
 ```
 on: push
@@ -122,7 +130,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
 
       - uses: extenda/actions/gcp-secret-manager@v0
         with:
@@ -135,16 +143,10 @@ jobs:
         with:
           java-version: 11
 
-      - uses: actions/cache@v1
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
       - name: Unit tests
         uses: extenda/actions/maven@v0
         with:
+          cache-key: ''
           args: test
 ```
 
@@ -167,7 +169,9 @@ jobs:
     needs: test
     if: github.ref == refs/heads/master
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - uses: extenda/actions/gcp-secret-manager@v0
         with:
@@ -190,5 +194,5 @@ jobs:
         uses: extenda/actions/maven@v0
         with:
           args: deploy
-          version: ${{ steps.release.outputs.version }}
+          version: ${{ steps.release.outputs.version }}
 ```

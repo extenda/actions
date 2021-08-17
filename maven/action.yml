@@ -7,6 +7,19 @@ inputs:
   version:
     description: The project version to build. This is set in the POMs before building
     required: false
+  cache-key:
+    description: |
+      The cache key to use. Set to an empty value to disable the automatically configured cache.
+    default: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+    required: false
+  cache-restore-keys:
+    description: |
+      The cache restore keys. This value only needs to be modified if the cache key prefixes has
+      been changed. Multiple keys can be specified using spaces or line breaks as separator.
+    default: ${{ runner.os }}-maven-
+    required: false
 runs:
   using: node12
   main: dist/index.js
+  pre: dist/pre-hook.js
+  post: dist/post-hook.js
