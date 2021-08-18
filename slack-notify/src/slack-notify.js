@@ -1,11 +1,13 @@
-
 const core = require('@actions/core');
 const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
-const buildFormData = async (channel, message, file) => {
+const buildFormData = (channel, message, file) => {
+  if (!fs.existsSync(file)) {
+    throw new Error(`File not found: ${file}`);
+  }
   const formData = new FormData();
   formData.append('file', fs.createReadStream(file));
   formData.append('channels', channel);
@@ -35,21 +37,24 @@ const postMessageToSlackChannel = async (
     channel: slackData.channel,
     text: message,
   },
-}).catch((err) => {
-  core.error(`Unable to send notification on slack! reason:\n${err}`);
-});
+}).then(() => true)
+  .catch((err) => {
+    core.error(`Unable to send notification on slack! reason:\n${err}`);
+    return false;
+  });
 
 const postFileToSlackChannel = async (slackData, message, file) => {
-  const formData = await buildFormData(slackData.channel, message, file);
+  const formData = buildFormData(slackData.channel, message, file);
   const headers = { Authorization: `Bearer ${slackData.token}`, ...formData.getHeaders() };
-  axios({
+  return axios({
     url: 'https://slack.com/api/files.upload',
     method: 'POST',
     data: formData,
     headers,
-  })
+  }).then(() => true)
     .catch((err) => {
       core.error(`Unable to send notification on slack! reason:\n${err}`);
+      return false;
     });
 };
 
@@ -65,10 +70,9 @@ const notifySlackWithFile = async (
 
 const notifySlack = async (serviceAccount, message, channelName, file) => {
   if (file) {
-    await notifySlackWithFile(serviceAccount, message, channelName, file);
-  } else {
-    await notifySlackMessage(serviceAccount, message, channelName);
+    return notifySlackWithFile(serviceAccount, message, channelName, file);
   }
+  return notifySlackMessage(serviceAccount, message, channelName);
 };
 
 module.exports = notifySlack;

@@ -18,6 +18,23 @@ inputs:
       been changed. Multiple keys can be specified using spaces or line breaks as separator.
     default: ${{ runner.os }}-maven-
     required: false
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: false
+  nexus-username-secret-name:
+    description: |
+      The secret name in GCP secret manager that contains a Nexus user name.
+      This value will not be used if `NEXUS_USERNAME` is already set as an env var.
+    default: nexus-username
+    required: false
+  nexus-password-secret-name:
+    description: |
+      The secret name in GCP secret manager that contains a Nexus user password.
+      This value will not be used if `NEXUS_PASSWORD` is already set as an env var.
+    default: nexus-password
+    required: false
 runs:
   using: node12
   main: dist/index.js

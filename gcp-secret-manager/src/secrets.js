@@ -2,6 +2,7 @@ const core = require('@actions/core');
 const YAML = require('yaml');
 const { GoogleAuth } = require('google-auth-library');
 const createKeyFile = require('../../utils/src/create-key-file');
+const checkEnv = require('../../utils/src/check-env');
 
 let client;
 
@@ -44,8 +45,27 @@ const loadSecret = async (serviceAccountKey, name) => {
     });
 };
 
+const loadSecretIntoEnv = async (serviceAccountKey, secretName, envVar, exportVariable = false) => {
+  let secret;
+  if (process.env[envVar]) {
+    core.debug(`Using explicit ${envVar} env var`);
+    secret = process.env[envVar];
+  } else if (serviceAccountKey && secretName) {
+    core.debug(`Load '${secretName}' from secret manager`);
+    secret = await loadSecret(serviceAccountKey, secretName);
+    process.env[envVar] = secret;
+    if (exportVariable) {
+      core.exportVariable(envVar, secret);
+    }
+  } else {
+    checkEnv([envVar]);
+  }
+  return secret;
+};
+
 module.exports = {
   loadSecret,
+  loadSecretIntoEnv,
   loadSecrets,
   parseInputYaml,
 };

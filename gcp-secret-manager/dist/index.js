@@ -50239,6 +50239,7 @@ const core = __webpack_require__(6341);
 const YAML = __webpack_require__(5024);
 const { GoogleAuth } = __webpack_require__(2177);
 const createKeyFile = __webpack_require__(2597);
+const checkEnv = __webpack_require__(9045);
 
 let client;
 
@@ -50281,8 +50282,27 @@ const loadSecret = async (serviceAccountKey, name) => {
     });
 };
 
+const loadSecretIntoEnv = async (serviceAccountKey, secretName, envVar, exportVariable = false) => {
+  let secret;
+  if (process.env[envVar]) {
+    core.debug(`Using explicit ${envVar} env var`);
+    secret = process.env[envVar];
+  } else if (serviceAccountKey && secretName) {
+    core.debug(`Load '${secretName}' from secret manager`);
+    secret = await loadSecret(serviceAccountKey, secretName);
+    process.env[envVar] = secret;
+    if (exportVariable) {
+      core.exportVariable(envVar, secret);
+    }
+  } else {
+    checkEnv([envVar]);
+  }
+  return secret;
+};
+
 module.exports = {
   loadSecret,
+  loadSecretIntoEnv,
   loadSecrets,
   parseInputYaml,
 };
