@@ -55969,14 +55969,13 @@ module.exports = action;
 /***/ 9221:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-
 const core = __webpack_require__(6341);
 const axios = __webpack_require__(9090);
 const FormData = __webpack_require__(8060);
 const fs = __webpack_require__(5747);
 const { loadSecret } = __webpack_require__(8652);
 
-const buildFormData = async (channel, message, file) => {
+const buildFormData = (channel, message, file) => {
   if (!fs.existsSync(file)) {
     throw new Error(`File not found: ${file}`);
   }
@@ -56016,7 +56015,7 @@ const postMessageToSlackChannel = async (
   });
 
 const postFileToSlackChannel = async (slackData, message, file) => {
-  const formData = await buildFormData(slackData.channel, message, file);
+  const formData = buildFormData(slackData.channel, message, file);
   const headers = { Authorization: `Bearer ${slackData.token}`, ...formData.getHeaders() };
   return axios({
     url: 'https://slack.com/api/files.upload',

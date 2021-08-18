@@ -1,11 +1,10 @@
-
 const core = require('@actions/core');
 const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
-const buildFormData = async (channel, message, file) => {
+const buildFormData = (channel, message, file) => {
   if (!fs.existsSync(file)) {
     throw new Error(`File not found: ${file}`);
   }
@@ -45,7 +44,7 @@ const postMessageToSlackChannel = async (
   });
 
 const postFileToSlackChannel = async (slackData, message, file) => {
-  const formData = await buildFormData(slackData.channel, message, file);
+  const formData = buildFormData(slackData.channel, message, file);
   const headers = { Authorization: `Bearer ${slackData.token}`, ...formData.getHeaders() };
   return axios({
     url: 'https://slack.com/api/files.upload',
