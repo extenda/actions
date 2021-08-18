@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const fs = require('fs');
 const mvn = require('./mvn');
-const { run, checkEnv } = require('../../utils');
+const { run } = require('../../utils');
 const versions = require('../../utils/src/versions');
 const loadNexusCredentials = require('./nexus-credentials');
 

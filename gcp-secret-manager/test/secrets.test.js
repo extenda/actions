@@ -85,7 +85,6 @@ EXPORT_AS: my-secret
     test('It fails if values are not resolved', async () => {
       await expect(loadSecretIntoEnv('', 'my-secret', 'MY_SECRET'))
         .rejects.toThrow('Missing env var: MY_SECRET');
-
     });
   });
 });

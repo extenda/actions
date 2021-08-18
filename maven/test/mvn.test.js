@@ -114,7 +114,7 @@ describe('Maven', () => {
       loadNexusCredentials.mockResolvedValueOnce(null);
     });
 
-    afterEach(() =>{
+    afterEach(() => {
       jest.resetAllMocks();
     });
 
