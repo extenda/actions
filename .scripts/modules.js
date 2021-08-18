@@ -5,30 +5,46 @@ const chalk = require('chalk');
 
 const basedir = path.resolve(__dirname, '../');
 
-/* eslint-disable no-console */
+const serial = (funcs) => funcs.reduce((promise, func) => promise.then((result) => func().then(
+  Array.prototype.concat.bind(result),
+)), Promise.resolve([]));
 
-const execModule = async (dir, command) => {
+/* eslint-disable no-console */
+const execModule = async (dir, commands) => {
   const module = path.relative(basedir, dir);
-  let output = chalk.blue(`> ${command}\n`);
+  const execCommands = commands instanceof Function ? commands(module) : [commands];
   process.env.FORCE_COLOR = 'true';
-  return exec.exec(command, '', {
-    cwd: dir,
-    silent: true,
-    listeners: {
-      stdout: (data) => {
-        output += data.toString();
+
+  const executions = execCommands.map((command) => () => {
+    let output = chalk.blue(`> ${command}\n`);
+    return exec.exec(command, '', {
+      cwd: dir,
+      silent: true,
+      listeners: {
+        stdout: (data) => {
+          output += data.toString();
+        },
+        stderr: (data) => {
+          output += data.toString();
+        },
       },
-      stderr: (data) => {
-        output += data.toString();
-      },
-    },
-  }).catch((err) => {
-    console.log(chalk.white.bgRed(`FAILED ${dir}`), err.message);
-    process.exitCode = 1;
-  }).finally(() => {
+    }).then(() => output)
+      .catch((err) => {
+        output += `${chalk.white.bgRed(`FAILED ${dir}`)} ${err.message}`;
+        process.exitCode = 1;
+        return output;
+      });
+  });
+
+  await serial(executions).then((outputs) => {
     console.group(`${chalk.green(`actions/${module}`)}`);
-    console.log(output.trim(), '\n');
+    console.log(outputs.join('\n').trim(), '\n');
     console.groupEnd();
+
+    // Fail fast if a task has failed.
+    if (process.exitCode === 1) {
+      process.exit();
+    }
   });
 };
 
@@ -39,8 +55,8 @@ const findModules = () => fs.readdirSync(basedir)
 
 const eachModules = (fn) => findModules().forEach(fn);
 
-const execModules = async (command) => Promise.all(
-  findModules().map((dir) => execModule(dir, command)),
+const execModules = async (commands) => Promise.all(
+  findModules().map((dir) => execModule(dir, commands)),
 );
 
 /* eslint-enable no-console */

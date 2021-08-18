@@ -1,0 +1,1 @@
+require('./maven-cache').saveCache();
