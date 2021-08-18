@@ -11,9 +11,11 @@ fs = require('fs');
 jest.mock('@actions/exec');
 jest.mock('@actions/core');
 jest.mock('../../utils/src/versions');
+jest.mock('../src/nexus-credentials');
 const exec = require('@actions/exec');
 const core = require('@actions/core');
 const versions = require('../../utils/src/versions');
+const loadNexusCredentials = require('../src/nexus-credentials');
 
 const mvn = require('../src/mvn');
 const action = require('../src/index');
@@ -109,11 +111,24 @@ describe('Maven', () => {
       process.env.NEXUS_USERNAME = 'user';
       process.env.NEXUS_PASSWORD = 'pwd';
       versions.getBuildVersion.mockResolvedValue('1.0.0-SNAPSHOT');
+      loadNexusCredentials.mockResolvedValueOnce(null);
     });
 
-    test('It requires Nexus credentials', async () => {
+    afterEach(() =>{
+      jest.resetAllMocks();
+    });
+
+    test('It resolves nexus-credentials', async () => {
       delete process.env.NEXUS_USERNAME;
-      await expect(action()).rejects.toEqual(new Error('Missing env var: NEXUS_USERNAME'));
+
+      core.getInput.mockReturnValueOnce('compile')
+        .mockReturnValueOnce('pom.xml')
+        .mockReturnValueOnce('service-account-key')
+        .mockReturnValueOnce('nexus-username')
+        .mockReturnValueOnce('nexus-password');
+
+      await action();
+      expect(loadNexusCredentials).toHaveBeenCalled();
     });
 
     test('It initializes Maven once', async () => {

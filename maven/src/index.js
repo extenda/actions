@@ -3,6 +3,7 @@ const fs = require('fs');
 const mvn = require('./mvn');
 const { run, checkEnv } = require('../../utils');
 const versions = require('../../utils/src/versions');
+const loadNexusCredentials = require('./nexus-credentials');
 
 const setVersion = async (version) => core.group(
   `Set version ${version}`,
@@ -19,7 +20,10 @@ const action = async () => {
   const args = core.getInput('args', { required: true });
   const version = core.getInput('version');
 
-  checkEnv(['NEXUS_USERNAME', 'NEXUS_PASSWORD']);
+  const serviceAccountKey = core.getInput('service-account-key') || '';
+  const nexusUsernameSecretName = core.getInput('nexus-username-secret-name') || '';
+  const nexusPasswordSecretName = core.getInput('nexus-password-secret-name') || '';
+  await loadNexusCredentials(serviceAccountKey, nexusUsernameSecretName, nexusPasswordSecretName);
 
   const hasPom = pomExists(args);
 

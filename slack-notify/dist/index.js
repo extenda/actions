@@ -50221,6 +50221,7 @@ const core = __webpack_require__(2085);
 const YAML = __webpack_require__(2055);
 const { GoogleAuth } = __webpack_require__(4800);
 const createKeyFile = __webpack_require__(2597);
+const checkEnv = __webpack_require__(9045);
 
 let client;
 
@@ -50263,8 +50264,24 @@ const loadSecret = async (serviceAccountKey, name) => {
     });
 };
 
+const loadSecretIntoEnv = async (serviceAccountKey, secretName, envVar) => {
+  let secret;
+  if (process.env[envVar]) {
+    core.debug(`Using explicit ${envVar} env var`);
+    secret = process.env[envVar];
+  } else if (serviceAccountKey && secretName) {
+    core.debug(`Load '${secretName}' from secret manager`);
+    secret = await loadSecret(serviceAccountKey, secretName);
+    process.env[envVar] = secret;
+  } else {
+    checkEnv([envVar]);
+  }
+  return secret;
+};
+
 module.exports = {
   loadSecret,
+  loadSecretIntoEnv,
   loadSecrets,
   parseInputYaml,
 };
@@ -55960,6 +55977,9 @@ const fs = __webpack_require__(5747);
 const { loadSecret } = __webpack_require__(8652);
 
 const buildFormData = async (channel, message, file) => {
+  if (!fs.existsSync(file)) {
+    throw new Error(`File not found: ${file}`);
+  }
   const formData = new FormData();
   formData.append('file', fs.createReadStream(file));
   formData.append('channels', channel);
@@ -55989,21 +56009,24 @@ const postMessageToSlackChannel = async (
     channel: slackData.channel,
     text: message,
   },
-}).catch((err) => {
-  core.error(`Unable to send notification on slack! reason:\n${err}`);
-});
+}).then(() => true)
+  .catch((err) => {
+    core.error(`Unable to send notification on slack! reason:\n${err}`);
+    return false;
+  });
 
 const postFileToSlackChannel = async (slackData, message, file) => {
   const formData = await buildFormData(slackData.channel, message, file);
   const headers = { Authorization: `Bearer ${slackData.token}`, ...formData.getHeaders() };
-  axios({
+  return axios({
     url: 'https://slack.com/api/files.upload',
     method: 'POST',
     data: formData,
     headers,
-  })
+  }).then(() => true)
     .catch((err) => {
       core.error(`Unable to send notification on slack! reason:\n${err}`);
+      return false;
     });
 };
 
@@ -56019,10 +56042,9 @@ const notifySlackWithFile = async (
 
 const notifySlack = async (serviceAccount, message, channelName, file) => {
   if (file) {
-    await notifySlackWithFile(serviceAccount, message, channelName, file);
-  } else {
-    await notifySlackMessage(serviceAccount, message, channelName);
+    return notifySlackWithFile(serviceAccount, message, channelName, file);
   }
+  return notifySlackMessage(serviceAccount, message, channelName);
 };
 
 module.exports = notifySlack;
