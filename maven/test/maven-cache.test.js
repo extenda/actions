@@ -63,5 +63,5 @@ describe('Maven cache', () => {
       [path.join(homedir(), '.m2', 'repository')],
       'test-maven-12345',
     );
-  })
+  });
 });
