@@ -20,6 +20,7 @@ jest.mock('google-auth-library', () => ({
   },
 }));
 
+const core = require('@actions/core');
 const {
   parseInputYaml,
   loadSecrets,
@@ -27,7 +28,6 @@ const {
   loadSecretIntoEnv,
 } = require('../src/secrets');
 
-const core = require('@actions/core');
 
 const orgEnv = process.env;
 
