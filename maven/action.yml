@@ -22,7 +22,6 @@ inputs:
     description: |
       The service account key which will be used for authentication.
       The account key should be a base64 encoded JSON key stored as a secret.
-    default: ${{ secrets.SECRET_AUTH }}
     required: false
   nexus-username-secret-name:
     description: |

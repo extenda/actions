@@ -73313,14 +73313,13 @@ function populateMaps (extensions, types) {
 /***/ 81478:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-
 const core = __webpack_require__(17377);
 const axios = __webpack_require__(72536);
 const FormData = __webpack_require__(98946);
 const fs = __webpack_require__(35747);
 const { loadSecret } = __webpack_require__(48652);
 
-const buildFormData = async (channel, message, file) => {
+const buildFormData = (channel, message, file) => {
   if (!fs.existsSync(file)) {
     throw new Error(`File not found: ${file}`);
   }
@@ -73360,7 +73359,7 @@ const postMessageToSlackChannel = async (
   });
 
 const postFileToSlackChannel = async (slackData, message, file) => {
-  const formData = await buildFormData(slackData.channel, message, file);
+  const formData = buildFormData(slackData.channel, message, file);
   const headers = { Authorization: `Bearer ${slackData.token}`, ...formData.getHeaders() };
   return axios({
     url: 'https://slack.com/api/files.upload',
