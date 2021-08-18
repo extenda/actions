@@ -27,6 +27,8 @@ const {
   loadSecretIntoEnv,
 } = require('../src/secrets');
 
+const core = require('@actions/core');
+
 const orgEnv = process.env;
 
 describe('Secrets Manager', () => {
@@ -69,6 +71,18 @@ EXPORT_AS: my-secret
       );
       expect(secret).toEqual('test-value');
       expect(process.env.MY_SECRET).toEqual('test-value');
+    });
+
+    test('It exports variables', async () => {
+      const exportVariable = jest.spyOn(core, 'exportVariable');
+      const secret = await loadSecretIntoEnv(
+        'service-account-key',
+        'my-secret',
+        'MY_SECRET',
+        true,
+      );
+      expect(exportVariable).toHaveBeenCalledWith('MY_SECRET', secret);
+      exportVariable.mockReset();
     });
 
     test('It preserves set env.vars', async () => {

@@ -50282,7 +50282,7 @@ const loadSecret = async (serviceAccountKey, name) => {
     });
 };
 
-const loadSecretIntoEnv = async (serviceAccountKey, secretName, envVar) => {
+const loadSecretIntoEnv = async (serviceAccountKey, secretName, envVar, exportVariable = false) => {
   let secret;
   if (process.env[envVar]) {
     core.debug(`Using explicit ${envVar} env var`);
@@ -50291,6 +50291,9 @@ const loadSecretIntoEnv = async (serviceAccountKey, secretName, envVar) => {
     core.debug(`Load '${secretName}' from secret manager`);
     secret = await loadSecret(serviceAccountKey, secretName);
     process.env[envVar] = secret;
+    if (exportVariable) {
+      core.exportVariable(envVar, secret);
+    }
   } else {
     checkEnv([envVar]);
   }
