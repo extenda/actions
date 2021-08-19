@@ -12,7 +12,8 @@
     "@actions/cache": "^1.0.7",
     "@actions/core": "^1.2.6",
     "@actions/exec": "^1.0.4",
-    "@actions/io": "^1.0.1"
+    "@actions/io": "^1.0.1",
+    "fast-glob": "^3.2.7"
   },
   "devDependencies": {
     "mock-fs": "^4.11.0"
