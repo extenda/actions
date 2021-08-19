@@ -45,7 +45,7 @@ describe('Maven cache', () => {
   afterEach(() => {
     jest.resetAllMocks();
     mockFs.restore();
-  })
+  });
 
   test('It uses cache inputs', async () => {
     core.getInput.mockReturnValue('value');
