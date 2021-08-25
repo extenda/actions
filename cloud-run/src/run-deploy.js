@@ -133,7 +133,7 @@ const gkeArguments = async (args, service, projectId) => {
   return cluster;
 };
 
-const canaryArguments = async (args, canary) => {
+const canaryArguments = async (args, canary, projectId, project, env) => {
   const {
     enabled,
     steps,
@@ -148,7 +148,7 @@ const canaryArguments = async (args, canary) => {
   } = thresholds;
 
   args.push(
-    `--update-labels=sre.canary.enabled=${enabled},sre.canary.steps=${steps},sre.canary.intervall=${intervall},sre.canary.thresholds.latency99=${latency99},sre.canary.thresholds.latency95=${latency95},sre.canary.thresholds.latency50=${latency50},sre.canary.thresholds.error=${errorRates}`,
+    `--labels=service_project_id=${projectId},service_project=${project},service_env=${env},sre.canary.enabled=${enabled},sre.canary.steps=${steps},sre.canary.intervall=${intervall},sre.canary.thresholds.latency99=${latency99},sre.canary.thresholds.latency95=${latency95},sre.canary.thresholds.latency50=${latency50},sre.canary.thresholds.error=${errorRates}`,
     '--no-traffic',
   );
 };
@@ -219,8 +219,11 @@ const runDeploy = async (
     `--concurrency=${concurrency}`,
     `--max-instances=${numericOrDefault(maxInstances)}`,
     `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
-    `--labels=service_project_id=${projectId},service_project=${project},service_env=${env}`,
   ];
+
+  if(!canary){
+    args.push(`--labels=service_project_id=${projectId},service_project=${project},service_env=${env}`);
+  }
 
   if (verbose) {
     args.push('--verbosity=debug');
@@ -235,7 +238,7 @@ const runDeploy = async (
   if (service.platform.gke) {
     cluster = await gkeArguments(args, service, projectId);
     if (canary) {
-      await canaryArguments(args, service.canary);
+      await canaryArguments(args, service.canary, projectId, project, env);
     }
   }
 

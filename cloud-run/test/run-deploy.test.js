@@ -755,7 +755,6 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       '--concurrency=10',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
       '--cpu=100m',
       '--min-instances=default',
       '--platform=gke',
@@ -764,7 +763,7 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       '--connectivity=external',
       '--no-use-http2',
       '--namespace=my-service',
-      '--update-labels=sre.canary.enabled=true,sre.canary.steps=10,50,80,sre.canary.intervall=10,sre.canary.thresholds.latency99=5,sre.canary.thresholds.latency95=2,sre.canary.thresholds.latency50=1,sre.canary.thresholds.error=1',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=true,sre.canary.steps=10,50,80,sre.canary.intervall=10,sre.canary.thresholds.latency99=5,sre.canary.thresholds.latency95=2,sre.canary.thresholds.latency50=1,sre.canary.thresholds.error=1',
       '--no-traffic',
     ], expect.anything());
   });
