@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
+const gcloudOutput = require('./gcloud-output');
 const getLatestRevision = require('./get-revision');
 
 const FIVE_MINUTES = 300000;
@@ -115,6 +116,7 @@ const waitForRevision = async (
   args,
   namespace,
   cluster,
+  canary,
   sleepMs = 10000,
   timeoutMs = FIVE_MINUTES,
 ) => {
@@ -124,6 +126,17 @@ const waitForRevision = async (
     }
 
     const revision = await findRevision(output, namespace, cluster);
+
+    if (canary.enabled) {
+      // update traffic on revision based on steps
+      await gcloudOutput([
+        'run',
+        'services',
+        'update-traffic',
+        namespace,
+        `--to-revisions=${revision}=${canary.steps.split(',')[0]}`
+      ]);
+    }
 
     core.info(`Waiting for revision "${revision}" to become active...`);
     let revisionStatus = {};

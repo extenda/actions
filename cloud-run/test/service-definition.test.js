@@ -306,4 +306,46 @@ platform:
       },
     });
   });
+  test('canary check threshold required', () => {
+    mockFs({
+      'cloud-run.yaml': `
+name: service
+memory: 256Mi
+cpu: 1
+platform:
+  managed:
+    allow-unauthenticated: true
+    region: eu-west1
+canary:
+  enabled: true
+`,
+    });
+    expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
+      .toThrow(`cloud-run.yaml is not valid.
+0: instance.canary requires property \"thresholds\
+`);
+  });
+
+  test('canary check threshold latencies required', () => {
+    mockFs({
+      'cloud-run.yaml': `
+name: service
+memory: 256Mi
+cpu: 1
+platform:
+  managed:
+    allow-unauthenticated: true
+    region: eu-west1
+canary:
+  thresholds:
+    latency99: 5s
+`,
+    });
+    expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
+      .toThrow(`cloud-run.yaml is not valid.
+0: instance.canary.thresholds requires property \"latency95\"
+1: instance.canary.thresholds requires property \"latency50\"
+2: instance.canary.thresholds requires property \"error-rate\"
+`);
+  });
 });

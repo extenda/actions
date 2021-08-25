@@ -1,4 +1,5 @@
 jest.mock('../src/get-revision');
+jest.mock('../src/gcloud-output');
 const exec = require('@actions/exec');
 const core = require('@actions/core');
 const waitForRevision = require('../src/wait-revision');
@@ -52,6 +53,18 @@ const clusterInput = {
   clusterLocation: 'europe-west1',
 };
 
+const canarySpec = {
+  enabled: false,
+  steps: '10,50,80',
+  intervall: 10,
+  thresholds: {
+    latency99: '5',
+    latency95: '2',
+    latency50: '1',
+    'error-rate': '1',
+  },
+};
+
 let debugSpy;
 
 describe('Wait for revision', () => {
@@ -101,6 +114,7 @@ describe('Wait for revision', () => {
       GCLOUD_ARGS,
       'service-name',
       clusterInput,
+      canarySpec,
       10,
     );
     expect(response).toEqual(0);
@@ -113,6 +127,7 @@ describe('Wait for revision', () => {
       GCLOUD_ARGS,
       'service-name',
       clusterInput,
+      canarySpec,
     );
     expect(response).toEqual(0);
     expect(exec.exec).not.toHaveBeenCalled();
@@ -133,6 +148,7 @@ describe('Wait for revision', () => {
       GCLOUD_ARGS,
       'service-name',
       clusterInput,
+      canarySpec,
       10,
     )).rejects.toEqual(new Error('Deploy failed for unknown reasons'));
     expect(exec.exec).not.toHaveBeenCalled();
@@ -148,6 +164,7 @@ describe('Wait for revision', () => {
       GCLOUD_ARGS,
       'service-name',
       clusterInput,
+      canarySpec,
       10,
     )).rejects.toEqual(new Error('Invalid JSON: Failed to load status for revision "xxxxxxx-00013-loc". Reason: Unexpected token E in JSON at position 0'));
     expect(exec.exec).toHaveBeenCalled();
@@ -190,6 +207,7 @@ describe('Wait for revision', () => {
       GCLOUD_ARGS,
       'service-name',
       clusterInput,
+      canarySpec,
       10,
       100,
     )).rejects.toEqual(new Error('Timed out after while for revision "xxxxxxx-00013-loc".'));
@@ -235,6 +253,7 @@ describe('Wait for revision', () => {
       GCLOUD_ARGS,
       'service-name',
       clusterInput,
+      canarySpec,
       10,
     )).rejects.toEqual(new Error('Revision failed "ready" condition with reason: ExitCode60\nContainer failed with: failed to access secret...'));
     expect(exec.exec).toHaveBeenCalled();
@@ -277,6 +296,7 @@ describe('Wait for revision', () => {
       GCLOUD_ARGS,
       'service-name',
       clusterInput,
+      canarySpec,
       10,
     );
     expect(response).toEqual(0);
@@ -321,6 +341,7 @@ describe('Wait for revision', () => {
       GCLOUD_ARGS,
       'service-name',
       clusterInput,
+      canarySpec,
       10,
       100,
     );
@@ -366,6 +387,7 @@ describe('Wait for revision', () => {
       GCLOUD_ARGS,
       'test-service',
       clusterInput,
+      canarySpec,
       10,
       100,
     );

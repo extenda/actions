@@ -19,6 +19,18 @@ const serviceAccountKey = Buffer.from('test', 'utf8').toString('base64');
 
 const orgEnv = process.env;
 
+const canarySpec = {
+  enabled: true,
+  steps: '10,50,80',
+  intervall: 10,
+  thresholds: {
+    latency99: '5',
+    latency95: '2',
+    latency50: '1',
+    'error-rate': '1',
+  },
+};
+
 describe('Run Deploy', () => {
   beforeEach(() => {
     process.env = { ...orgEnv };
@@ -593,6 +605,17 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
           connectivity: 'external',
         },
       },
+      canary: {
+        enabled: true,
+        steps: '10,50,80',
+        intervall: 10,
+        thresholds: {
+          latency99: '5',
+          latency95: '2',
+          latency50: '1',
+          'error-rate': '1',
+        },
+      }
     };
     const returnValue = await runDeploy(
       serviceAccountKey,
@@ -674,6 +697,17 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
           connectivity: 'external',
         },
       },
+      canary: {
+        enabled: true,
+        steps: '10,50,80',
+        intervall: 10,
+        thresholds: {
+          latency99: '5',
+          latency95: '2',
+          latency50: '1',
+          'error-rate': '1',
+        },
+      }
     };
     const returnValue = await runDeploy(
       serviceAccountKey,
@@ -686,4 +720,65 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
     expect(scan).toHaveBeenCalledTimes(0);
     expect(returnValue.gcloudExitCode).toEqual(0);
   });
+  test('It can deploy to Cloud Run on GKE and tag for canary', async () => {
+    getClusterInfo.mockResolvedValueOnce({
+      project: 'tribe-staging-1234',
+      cluster: 'k8s-cluster',
+      clusterLocation: 'europe-west1',
+      uri: 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
+    });
+    exec.exec.mockResolvedValueOnce(0);
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      cpu: '100m',
+      canary: {
+        enabled: true,
+        steps: '10,50,80',
+        intervall: '10',
+        thresholds: {
+          latency99: '5',
+          latency95: '2',
+          latency50: '1',
+          'error-rate': '1',
+        },
+      },
+      platform: {
+        gke: {
+          connectivity: 'external',
+        },
+      },
+    };
+    const returnValue = await runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-staging-project/my-service:tag',
+    );
+    expect(returnValue.gcloudExitCode).toEqual(0);
+    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(getClusterInfo).toHaveBeenCalledWith('test-staging-project', undefined);
+    expect(setupGcloud).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledWith('gcloud', [
+      'run', 'deploy', 'my-service',
+      '--image=gcr.io/test-staging-project/my-service:tag',
+      '--project=test-staging-project',
+      '--memory=256Mi',
+      '--concurrency=10',
+      '--max-instances=default',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
+      '--cpu=100m',
+      '--min-instances=default',
+      '--platform=gke',
+      '--cluster=projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
+      '--cluster-location=europe-west1',
+      '--connectivity=external',
+      '--no-use-http2',
+      '--namespace=my-service',
+      '--update-labels=sre.canary.enabled=true,sre.canary.steps=10,50,80,sre.canary.intervall=10,sre.canary.thresholds.latency99=5,sre.canary.thresholds.latency95=2,sre.canary.thresholds.latency50=1,sre.canary.thresholds.error=1',
+      '--no-traffic',
+    ], expect.anything());
+  });
+
 });

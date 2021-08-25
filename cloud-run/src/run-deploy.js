@@ -133,6 +133,26 @@ const gkeArguments = async (args, service, projectId) => {
   return cluster;
 };
 
+const canaryArguments = async (args, canary) => {
+  const {
+    enabled,
+    steps,
+    intervall,
+    thresholds,
+  } = canary;
+  const {
+    latency99,
+    latency95,
+    latency50,
+    'error-rate': errorRates,
+  } = thresholds;
+
+  args.push(
+    `--update-labels=sre.canary.enabled=${enabled},sre.canary.steps=${steps},sre.canary.intervall=${intervall},sre.canary.thresholds.latency99=${latency99},sre.canary.thresholds.latency95=${latency95},sre.canary.thresholds.latency50=${latency50},sre.canary.thresholds.error=${errorRates}`,
+    '--no-traffic',
+  );
+}
+
 const execWithOutput = async (args) => {
   let stdout = '';
   let stderr = '';
@@ -165,6 +185,10 @@ const runDeploy = async (
 ) => {
   // Authenticate gcloud with our service-account
   const projectId = await gcloudAuth(serviceAccountKey);
+  let canary = false;
+  if (service.canary && service.canary.enabled) {
+    canary = true;
+  }
 
   if (process.platform !== 'win32') {
     await runScan(serviceAccountKey, image);
@@ -210,10 +234,13 @@ const runDeploy = async (
 
   if (service.platform.gke) {
     cluster = await gkeArguments(args, service, projectId);
+    if (canary) {
+      await canaryArguments(args, service.canary);
+    }
   }
 
   const gcloudExitCode = await execWithOutput(args)
-    .then((response) => waitForRevision(response, args, service.name, cluster, retryInterval));
+    .then((response) => waitForRevision(response, args, service.name, cluster, service.canary, retryInterval));
 
   if (service.platform.gke && cluster) {
     await cleanRevisions(name, projectId, cluster.uri, cluster.clusterLocation, maxRevisions);
