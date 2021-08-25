@@ -19,18 +19,6 @@ const serviceAccountKey = Buffer.from('test', 'utf8').toString('base64');
 
 const orgEnv = process.env;
 
-const canarySpec = {
-  enabled: true,
-  steps: '10,50,80',
-  intervall: 10,
-  thresholds: {
-    latency99: '5',
-    latency95: '2',
-    latency50: '1',
-    'error-rate': '1',
-  },
-};
-
 describe('Run Deploy', () => {
   beforeEach(() => {
     process.env = { ...orgEnv };
@@ -615,7 +603,7 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
           latency50: '1',
           'error-rate': '1',
         },
-      }
+      },
     };
     const returnValue = await runDeploy(
       serviceAccountKey,
@@ -707,7 +695,7 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
           latency50: '1',
           'error-rate': '1',
         },
-      }
+      },
     };
     const returnValue = await runDeploy(
       serviceAccountKey,
@@ -780,5 +768,4 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       '--no-traffic',
     ], expect.anything());
   });
-
 });

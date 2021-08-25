@@ -11000,6 +11000,51 @@ module.exports = {
       ],
       additionalProperties: false,
     },
+    canary: {
+      type: 'object',
+      properties: {
+        enabled: {
+          type: 'boolean',
+          default: true,
+        },
+        steps: {
+          type: 'string',
+          default: '10,50,80',
+        },
+        intervall: {
+          type: 'string',
+          default: '10',
+        },
+        thresholds: {
+          type: 'object',
+          properties: {
+            latency99: {
+              type: 'string',
+            },
+            latency95: {
+              type: 'string',
+            },
+            latency50: {
+              type: 'string',
+            },
+            'error-rate': {
+              type: 'string',
+            },
+          },
+          required: [
+            'latency99',
+            'latency95',
+            'latency50',
+            'error-rate',
+          ],
+          additionalProperties: false,
+        },
+      },
+      required: [
+        'thresholds',
+      ],
+      additionalProperties: false,
+    },
   },
   required: [
     'cpu',
@@ -11636,6 +11681,26 @@ const gkeArguments = async (args, service, projectId) => {
   return cluster;
 };
 
+const canaryArguments = async (args, canary) => {
+  const {
+    enabled,
+    steps,
+    intervall,
+    thresholds,
+  } = canary;
+  const {
+    latency99,
+    latency95,
+    latency50,
+    'error-rate': errorRates,
+  } = thresholds;
+
+  args.push(
+    `--update-labels=sre.canary.enabled=${enabled},sre.canary.steps=${steps},sre.canary.intervall=${intervall},sre.canary.thresholds.latency99=${latency99},sre.canary.thresholds.latency95=${latency95},sre.canary.thresholds.latency50=${latency50},sre.canary.thresholds.error=${errorRates}`,
+    '--no-traffic',
+  );
+};
+
 const execWithOutput = async (args) => {
   let stdout = '';
   let stderr = '';
@@ -11668,6 +11733,10 @@ const runDeploy = async (
 ) => {
   // Authenticate gcloud with our service-account
   const projectId = await gcloudAuth(serviceAccountKey);
+  let canary = false;
+  if (service.canary && service.canary.enabled) {
+    canary = true;
+  }
 
   if (process.platform !== 'win32') {
     await runScan(serviceAccountKey, image);
@@ -11713,10 +11782,20 @@ const runDeploy = async (
 
   if (service.platform.gke) {
     cluster = await gkeArguments(args, service, projectId);
+    if (canary) {
+      await canaryArguments(args, service.canary);
+    }
   }
 
   const gcloudExitCode = await execWithOutput(args)
-    .then((response) => waitForRevision(response, args, service.name, cluster, retryInterval));
+    .then((response) => waitForRevision(
+      response,
+      args,
+      service.name,
+      cluster,
+      service.canary,
+      retryInterval,
+    ));
 
   if (service.platform.gke && cluster) {
     await cleanRevisions(name, projectId, cluster.uri, cluster.clusterLocation, maxRevisions);
@@ -11925,6 +12004,7 @@ module.exports = runScan;
 
 const core = __webpack_require__(6341);
 const exec = __webpack_require__(22176);
+const gcloudOutput = __webpack_require__(13476);
 const getLatestRevision = __webpack_require__(50638);
 
 const FIVE_MINUTES = 300000;
@@ -12040,6 +12120,7 @@ const waitForRevision = async (
   args,
   namespace,
   cluster,
+  canary,
   sleepMs = 10000,
   timeoutMs = FIVE_MINUTES,
 ) => {
@@ -12049,6 +12130,17 @@ const waitForRevision = async (
     }
 
     const revision = await findRevision(output, namespace, cluster);
+
+    if (canary.enabled) {
+      // update traffic on revision based on steps
+      await gcloudOutput([
+        'run',
+        'services',
+        'update-traffic',
+        namespace,
+        `--to-revisions=${revision}=${canary.steps.split(',')[0]}`,
+      ]);
+    }
 
     core.info(`Waiting for revision "${revision}" to become active...`);
     let revisionStatus = {};

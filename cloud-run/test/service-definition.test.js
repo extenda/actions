@@ -322,7 +322,7 @@ canary:
     });
     expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
       .toThrow(`cloud-run.yaml is not valid.
-0: instance.canary requires property \"thresholds\
+0: instance.canary requires property "thresholds"
 `);
   });
 
@@ -343,9 +343,33 @@ canary:
     });
     expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
       .toThrow(`cloud-run.yaml is not valid.
-0: instance.canary.thresholds requires property \"latency95\"
-1: instance.canary.thresholds requires property \"latency50\"
-2: instance.canary.thresholds requires property \"error-rate\"
+0: instance.canary.thresholds requires property "latency95"
+1: instance.canary.thresholds requires property "latency50"
+2: instance.canary.thresholds requires property "error-rate"
 `);
+  });
+
+  test('canary enabled works', () => {
+    mockFs({
+      'cloud-run.yaml': `
+name: service
+memory: 256Mi
+cpu: 1
+platform:
+  managed:
+    allow-unauthenticated: true
+    region: eu-west1
+canary: 
+  enabled: true
+  steps: '10,50,80'
+  intervall: '10'
+  thresholds: 
+    latency99: '5'
+    latency95: '2'
+    latency50: '1'
+    error-rate: '1'
+`,
+    });
+    expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema).not.toThrow());
   });
 });

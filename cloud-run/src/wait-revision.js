@@ -134,7 +134,7 @@ const waitForRevision = async (
         'services',
         'update-traffic',
         namespace,
-        `--to-revisions=${revision}=${canary.steps.split(',')[0]}`
+        `--to-revisions=${revision}=${canary.steps.split(',')[0]}`,
       ]);
     }
 

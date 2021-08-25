@@ -151,7 +151,7 @@ const canaryArguments = async (args, canary) => {
     `--update-labels=sre.canary.enabled=${enabled},sre.canary.steps=${steps},sre.canary.intervall=${intervall},sre.canary.thresholds.latency99=${latency99},sre.canary.thresholds.latency95=${latency95},sre.canary.thresholds.latency50=${latency50},sre.canary.thresholds.error=${errorRates}`,
     '--no-traffic',
   );
-}
+};
 
 const execWithOutput = async (args) => {
   let stdout = '';
@@ -240,7 +240,14 @@ const runDeploy = async (
   }
 
   const gcloudExitCode = await execWithOutput(args)
-    .then((response) => waitForRevision(response, args, service.name, cluster, service.canary, retryInterval));
+    .then((response) => waitForRevision(
+      response,
+      args,
+      service.name,
+      cluster,
+      service.canary,
+      retryInterval,
+    ));
 
   if (service.platform.gke && cluster) {
     await cleanRevisions(name, projectId, cluster.uri, cluster.clusterLocation, maxRevisions);
