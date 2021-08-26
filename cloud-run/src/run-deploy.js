@@ -221,7 +221,7 @@ const runDeploy = async (
     `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
   ];
 
-  if(!canary){
+  if (!canary) {
     args.push(`--labels=service_project_id=${projectId},service_project=${project},service_env=${env}`);
   }
 

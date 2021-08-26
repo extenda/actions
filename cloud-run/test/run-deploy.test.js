@@ -8,7 +8,7 @@ jest.mock('../src/create-namespace');
 jest.mock('../src/check-sa');
 jest.mock('../src/kubectl-auth');
 jest.mock('../src/get-revision');
-
+jest.setTimeout(30000);
 const exec = require('@actions/exec');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const runDeploy = require('../src/run-deploy');
@@ -24,6 +24,7 @@ describe('Run Deploy', () => {
     process.env = { ...orgEnv };
     process.env.GITHUB_SHA = '63633c0'; // v.0.18.0
   });
+
   afterEach(() => {
     jest.resetAllMocks();
     mockFs.restore();
@@ -709,6 +710,34 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
     expect(returnValue.gcloudExitCode).toEqual(0);
   });
   test('It can deploy to Cloud Run on GKE and tag for canary', async () => {
+    const revisionStatus = {
+      status: {
+        conditions: [
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            severity: 'Info',
+            status: 'True',
+            type: 'Active',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'ContainerHealthy',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'Ready',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'ResourcesAvailable',
+          },
+        ],
+      },
+    };
+
     getClusterInfo.mockResolvedValueOnce({
       project: 'tribe-staging-1234',
       cluster: 'k8s-cluster',
@@ -716,6 +745,11 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       uri: 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
     });
     exec.exec.mockResolvedValueOnce(0);
+    exec.exec.mockResolvedValueOnce(0);
+    exec.exec.mockImplementationOnce((cmd, args, opts) => {
+      opts.listeners.stdout(Buffer.from(JSON.stringify(revisionStatus), 'utf8'));
+      return Promise.resolve(0);
+    });
     setupGcloud.mockResolvedValueOnce('test-staging-project');
     const service = {
       name: 'my-service',
@@ -744,7 +778,7 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       'gcr.io/test-staging-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
-    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(exec.exec).toHaveBeenCalledTimes(4);
     expect(getClusterInfo).toHaveBeenCalledWith('test-staging-project', undefined);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [

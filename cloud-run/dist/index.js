@@ -11769,7 +11769,7 @@ const runDeploy = async (
     `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
   ];
 
-  if(!canary){
+  if (!canary) {
     args.push(`--labels=service_project_id=${projectId},service_project=${project},service_env=${env}`);
   }
 
@@ -12127,21 +12127,26 @@ const waitForRevision = async (
   sleepMs = 10000,
   timeoutMs = FIVE_MINUTES,
 ) => {
-  if (status !== 0) {
+  if (status !== 0 || (canary && canary.enabled)) {
     if (!args.includes('--platform=gke')) {
       throw new Error('Wait is not supported for managed cloud run');
     }
 
-    const revision = await findRevision(output, namespace, cluster);
+    let revision = '';
+    if (canary && canary.enabled) {
+      revision = await getLatestRevision(namespace, cluster);
+    } else {
+      revision = await findRevision(output, namespace, cluster);
+    }
 
     if (canary.enabled) {
-      // update traffic on revision based on steps
+      // update traffic on latest revision based on steps
       await gcloudOutput([
         'run',
         'services',
         'update-traffic',
         namespace,
-        `--to-revisions=${revision}=${canary.steps.split(',')[0]}`,
+        `--to-revisions=${revision}=${canary.steps.split('.')[0]}`,
       ]);
     }
 
