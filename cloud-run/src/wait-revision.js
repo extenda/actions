@@ -140,6 +140,9 @@ const waitForRevision = async (
         'update-traffic',
         namespace,
         `--to-revisions=${revision}=${canary.steps.split('.')[0]}`,
+        `--namespace=${namespace}`,
+        `--project=${cluster.project}`,
+        '--platform=gke',
       ]);
     }
 
