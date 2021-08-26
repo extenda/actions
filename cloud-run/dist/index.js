@@ -12147,6 +12147,8 @@ const waitForRevision = async (
         'update-traffic',
         namespace,
         `--to-revisions=${revision}=${canary.steps.split('.')[0]}`,
+        `--cluster=${cluster}`,
+        `--cluster-location=${cluster.clusterLocation}`,
         `--namespace=${namespace}`,
         `--project=${cluster.project}`,
         '--platform=gke',
