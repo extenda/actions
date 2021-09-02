@@ -221,7 +221,7 @@ describe('Run Deploy', () => {
     getClusterInfo.mockResolvedValueOnce({});
     exec.exec.mockResolvedValue(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project');
-    
+
     const image = 'gcr.io/test-project/my-service:tag';
     const service = {
       name: 'deployment-name',
