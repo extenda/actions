@@ -33,6 +33,7 @@ describe('Run Deploy', () => {
   beforeAll(() => {
     process.env = { ...orgEnv };
     process.env.GITHUB_WORKSPACE = 'extenda/test-repo';
+    setupGcloud.mockResolvedValueOnce('project-id');
   });
 
   afterAll(() => {
@@ -54,7 +55,6 @@ describe('Run Deploy', () => {
       cluster: 'cluster',
       clusterLocation: 'cluster-location',
     });
-    setupGcloud.mockResolvedValueOnce('project-id');
     exec.exec.mockResolvedValue(0);
     const image = 'gcr.io/test-project/my-service:tag';
     const name = 'deployment-name';
