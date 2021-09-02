@@ -5,8 +5,8 @@ const parseEnvironmentArgs = (environment, projectId) => {
       .replace('sm://*/', `sm://${projectId}/`);
     args[name] = value;
   });
-  args[SERVICE_PROJECT_ID] = projectId;
-  args[SERVICE_ENVIRONMENT] = projectId.includes('-staging-') ? 'staging' : 'prod';
+  args['SERVICE_PROJECT_ID'] = projectId;
+  args['SERVICE_ENVIRONMENT'] = projectId.includes('-staging-') ? 'staging' : 'prod';
   return args;
 };
 
