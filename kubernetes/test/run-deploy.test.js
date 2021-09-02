@@ -33,7 +33,6 @@ describe('Run Deploy', () => {
   beforeAll(() => {
     process.env = { ...orgEnv };
     process.env.GITHUB_WORKSPACE = 'extenda/test-repo';
-    setupGcloud.mockResolvedValueOnce('project-id');
   });
 
   afterAll(() => {
@@ -56,6 +55,7 @@ describe('Run Deploy', () => {
       clusterLocation: 'cluster-location',
     });
     exec.exec.mockResolvedValue(0);
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
     const image = 'gcr.io/test-project/my-service:tag';
     const name = 'deployment-name';
     await runDeploy(
@@ -74,6 +74,7 @@ describe('Run Deploy', () => {
   test('It calls patchService', async () => {
     getClusterInfo.mockResolvedValueOnce({});
     exec.exec.mockResolvedValue(0);
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
 
     const service = {
       name: 'service-name',
@@ -97,6 +98,7 @@ describe('Run Deploy', () => {
   test('It will deploy StatefulSet when storage is defined', async () => {
     getClusterInfo.mockResolvedValueOnce({});
     exec.exec.mockResolvedValue(0);
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
 
     const dryRun = undefined;
     const service = {
@@ -126,6 +128,7 @@ describe('Run Deploy', () => {
   test('It will deploy Deployment when storage is not required', async () => {
     getClusterInfo.mockResolvedValueOnce({});
     exec.exec.mockResolvedValue(0);
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
 
     const dryRun = undefined;
     const service = {
@@ -152,6 +155,8 @@ describe('Run Deploy', () => {
   test('It calls kustomize on yaml files and build', async () => {
     getClusterInfo.mockResolvedValueOnce({});
     exec.exec.mockResolvedValue(0);
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
+
     const image = 'gcr.io/test-project/my-service:tag';
     const name = 'deployment-name';
     await runDeploy(
@@ -185,6 +190,8 @@ describe('Run Deploy', () => {
   test('It calls applyAutoscale with storage (stateful set), autoscale parameters and dryRun', async () => {
     getClusterInfo.mockResolvedValueOnce({});
     exec.exec.mockResolvedValue(0);
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
+
     const image = 'gcr.io/test-project/my-service:tag';
     const service = {
       name: 'deployment-name',
@@ -213,6 +220,8 @@ describe('Run Deploy', () => {
   test('It calls applyAutoscale without storage, autoscale parameters and dryRun', async () => {
     getClusterInfo.mockResolvedValueOnce({});
     exec.exec.mockResolvedValue(0);
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
+    
     const image = 'gcr.io/test-project/my-service:tag';
     const service = {
       name: 'deployment-name',
