@@ -65,7 +65,7 @@ describe('Run Deploy', () => {
     );
 
     expect(createNamespace).toHaveBeenCalledWith(
-      'project-id',
+      'test-staging-project',
       'skip',
       'deployment-name',
     );
