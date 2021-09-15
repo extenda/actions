@@ -5,7 +5,7 @@
 
 # actions
 
-This is a monorepo containing GitHub Actions by Extenda Retail. These actions provides reusable logic for
+This is a monorepo containing GitHub Actions by Extenda Retail. These actions provide reusable logic for
 the fundamental parts of our CI/CD pipelines.
 
 The following actions are available
@@ -25,6 +25,10 @@ The following actions are available
   * [kubernetes](kubernetes#readme)
   * [maven](maven#readme)
   * [nexus-auth-npm](nexus-auth-npm#readme)
+  * [pact-broker](pact-broker#readme)
+  * [pact-can-i-deploy](pact-can-i-deploy#readme)
+  * [pact-publish](pact-publish#readme)
+  * [pact-tag-version](pact-tag-version#readme)
   * [repository-dispatch](repository-dispatch#readme)
   * [rs-create-installerpkg](rs-create-installerpkg#readme)
   * [rs-permission-converter](rs-permission-converter#readme)
