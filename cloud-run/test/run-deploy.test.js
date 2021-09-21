@@ -597,7 +597,7 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       canary: {
         enabled: true,
         steps: '10,50,80',
-        intervall: 10,
+        interval: 10,
         thresholds: {
           latency99: '5',
           latency95: '2',
@@ -689,7 +689,7 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       canary: {
         enabled: true,
         steps: '10,50,80',
-        intervall: 10,
+        interval: 10,
         thresholds: {
           latency99: '5',
           latency95: '2',
@@ -757,8 +757,8 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       cpu: '100m',
       canary: {
         enabled: true,
-        steps: '10,50,80',
-        intervall: '10',
+        steps: '10.50.80',
+        interval: '10',
         thresholds: {
           latency99: '5',
           latency95: '2',
@@ -797,7 +797,7 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       '--connectivity=external',
       '--no-use-http2',
       '--namespace=my-service',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=true,sre.canary.steps=10,50,80,sre.canary.intervall=10,sre.canary.thresholds.latency99=5,sre.canary.thresholds.latency95=2,sre.canary.thresholds.latency50=1,sre.canary.thresholds.error=1',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=true,sre.canary.steps=10.50.80,sre.canary.interval=10,sre.canary.thresholds.latency99=5,sre.canary.thresholds.latency95=2,sre.canary.thresholds.latency50=1,sre.canary.thresholds.error=1',
       '--no-traffic',
     ], expect.anything());
   });

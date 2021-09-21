@@ -11011,7 +11011,7 @@ module.exports = {
           type: 'string',
           default: '10,50,80',
         },
-        intervall: {
+        interval: {
           type: 'string',
           default: '10',
         },
@@ -11685,7 +11685,7 @@ const canaryArguments = async (args, canary, projectId, project, env) => {
   const {
     enabled,
     steps,
-    intervall,
+    interval,
     thresholds,
   } = canary;
   const {
@@ -11696,7 +11696,7 @@ const canaryArguments = async (args, canary, projectId, project, env) => {
   } = thresholds;
 
   args.push(
-    `--labels=service_project_id=${projectId},service_project=${project},service_env=${env},sre.canary.enabled=${enabled},sre.canary.steps=${steps},sre.canary.intervall=${intervall},sre.canary.thresholds.latency99=${latency99},sre.canary.thresholds.latency95=${latency95},sre.canary.thresholds.latency50=${latency50},sre.canary.thresholds.error=${errorRates}`,
+    `--labels=service_project_id=${projectId},service_project=${project},service_env=${env},sre.canary.enabled=${enabled},sre.canary.steps=${steps},sre.canary.interval=${interval},sre.canary.thresholds.latency99=${latency99},sre.canary.thresholds.latency95=${latency95},sre.canary.thresholds.latency50=${latency50},sre.canary.thresholds.error=${errorRates}`,
     '--no-traffic',
   );
 };

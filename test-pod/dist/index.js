@@ -10855,7 +10855,7 @@ module.exports = {
           type: 'string',
           default: '10,50,80',
         },
-        intervall: {
+        interval: {
           type: 'string',
           default: '10',
         },
