@@ -1,0 +1,32 @@
+name: Pact tag version
+description: Tag a pact version as released
+inputs:
+  service-account-key:
+    description: >
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+  application-name:
+    description: The pact participant application name.
+    required: true
+  release-tag:
+    description: The semantic release tag.
+    required: true
+  env:
+    description: The release environment (tag).
+    required: false
+    default: prod
+
+runs:
+  using: composite
+  steps:
+    - name: Create Pact release
+      uses: extenda/actions/pact-broker@v0
+      with:
+        service-account-key: ${{ inputs.service-account-key }}
+        args: |-
+          broker create-version-tag \
+          --pacticipant=${{ inputs.application-name }} \
+          --version=${{ github.sha }} \
+          --tag=${{ inputs.release-tag }} \
+          --tag=${{ inputs.env }}

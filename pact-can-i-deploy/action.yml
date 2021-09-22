@@ -1,0 +1,45 @@
+name: Can I deploy?
+description: Ask a Pact broker if the application can be deployed
+inputs:
+  service-account-key:
+    description: >
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+  application-name:
+    description: The pact participant application name
+    required: true
+  env:
+    description: The deployment environment (tag)
+    required: false
+    default: prod
+  dry-run:
+    description: Dry-run the assertion. This means we allow failed or unverified pacts.
+    required: false
+    default: 'false'
+  retry-while-unknown:
+    description: >
+      The number of times to retry while there is an unknown verification result
+      (ie. the provider verification is likely still running).
+    required: false
+    default: '2'
+  retry-interval:
+    description: The time between retries in seconds.
+    required: false
+    default: '10'
+
+runs:
+  using: composite
+  steps:
+    - name: Can i deploy?
+      uses: extenda/actions/pact-broker@v0
+      with:
+        service-account-key: ${{ inputs.service-account-key }}
+        args: |-
+          broker can-i-deploy \
+          --pacticipant=${{ inputs.application-name }} \
+          --version=${{ github.sha }} \
+          --to=${{ inputs.env }} \
+          --dry-run=${{ inputs.dry-run }} \
+          --retry-while-unknown=${{ inputs.retry-while-unknown }} \
+          --retry-interval=${{ inputs.retry-interval }}

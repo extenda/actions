@@ -33281,8 +33281,7 @@ const createComment = (changes, workingDirectory, footer) => {
 
   if (footer) {
     comment.push(
-      // Remove line breaks, but preserve paragraphs.
-      footer.split('\n\n').map((p) => p.replace(/\n/g, ' ')).join('\n\n'),
+      footer,
       '',
     );
   }

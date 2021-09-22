@@ -1,0 +1,33 @@
+name: Pact Broker CLI
+description: Interact with an authorized Pact Broker
+inputs:
+  service-account-key:
+    description: >
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+  args:
+    description: The pact broker arguments.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Get pact broker credentials
+      uses: extenda/actions/gcp-secret-manager@v0
+      with:
+        service-account-key: ${{ inputs.service-account-key }}
+        secrets: |
+          PACT_BROKER_URL: pact-broker-url
+          PACT_BROKER_USERNAME: pact-broker-username
+          PACT_BROKER_PASSWORD: pact-broker-password
+
+    - name: Pact broker CLI
+      shell: bash
+      run: |
+        docker run --rm -w /pacts -v $(pwd):/pacts \
+          pactfoundation/pact-cli:latest \
+          ${{ inputs.args }} \
+          --broker-base-url="${{ env.PACT_BROKER_URL }}" \
+          --broker-username='${{ env.PACT_BROKER_USERNAME }}' \
+          --broker-password='${{ env.PACT_BROKER_PASSWORD }}' \
