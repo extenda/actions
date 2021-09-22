@@ -33242,7 +33242,8 @@ const moduleEmoji = (summary) => {
 };
 
 const outputToMarkdown = ({ module, output }) => {
-  const summary = output.trim().split('\n').pop();
+  const planSummary = output.match(/Plan: .+/);
+  const summary = planSummary ? planSummary[0] : output.trim().split('\n').pop();
   const emoji = moduleEmoji(summary);
   return [
     `#### ${emoji} \`${module}\``,
