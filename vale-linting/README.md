@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Lint natural language with Vale
-        uses: extenda/actions/vale@v0
+        uses: extenda/actions/vale-linting@v0
         with:
           exclude: .github/**/*
 ```
