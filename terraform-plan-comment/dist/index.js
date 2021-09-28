@@ -33135,7 +33135,8 @@ const terraformShow = async (plan) => {
 
 const filterUnchanged = (outputs) => outputs.filter(
   ({ output }) => !output.includes(' 0 to add, 0 to change, 0 to destroy.')
-    && !output.includes('No changes. Infrastructure is up-to-date.'),
+    && !output.includes('No changes. Infrastructure is up-to-date.')
+    && !output.includes('No changes. Your infrastructure matches the configuration.'),
 );
 
 const filterIgnored = (outputs, ignoredRegexp) => outputs.filter(
@@ -33242,7 +33243,8 @@ const moduleEmoji = (summary) => {
 };
 
 const outputToMarkdown = ({ module, output }) => {
-  const summary = output.trim().split('\n').pop();
+  const planSummary = output.match(/Plan:.+/);
+  const summary = planSummary ? planSummary[0] : output.trim().split('\n').pop();
   const emoji = moduleEmoji(summary);
   return [
     `#### ${emoji} \`${module}\``,

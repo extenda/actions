@@ -119,7 +119,7 @@ Plan nested output
 
   test('It can generate comment for single plan', async () => {
     generateOutputs.mockResolvedValueOnce([
-      { module: 'work', output: 'Plan output\nPlan: 1 to add, 0 to change, 0 to destroy\n\n', status: 0 },
+      { module: 'work', output: 'Plan output\nPlan: 1 to add, 0 to change, 0 to destroy\n\nOther text below\n', status: 0 },
     ]);
 
     const comment = await action();
@@ -136,6 +136,7 @@ The output only includes modules with changes.
 Plan output
 Plan: 1 to add, 0 to change, 0 to destroy
 
+Other text below
 
 \`\`\`
 
