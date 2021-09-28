@@ -262,7 +262,7 @@ platform:
     region: europe-west1
 ```
 
-The following example enables `canary for  service`. New revision of a service will not service 100% of traffic from the start.
+The following example enables `canary` for  service. New revision of a service will not service 100% of traffic from the start.
 Instead traffic percentage will be updated each `canary.interval` minutes using `canary.steps` values.
 On each step metrics for latest revision will be fetched and compared to `canary.thresholds`.
 If current metrics do not exceed thresholds, traffic will be increased otherwise servie will rollback to previous revision.
