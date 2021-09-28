@@ -68,16 +68,23 @@ By default, the action will load `cloud-run.yaml` from the repository base direc
 The YAML syntax is formally defined with [JSON Schema](src/cloud-run-schema.js). The following table explains what
 properties are required and not.
 
-| Property                   | Description                                                                                                                                                       | Required | Default Value |
-|:---------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------|:--------------|
-| `name`                     | The service name.                                                                                                                                                 | Yes      |               |
-| `memory`                   | Set a memory limit, for example `256Mi`, `512Mi` or `1Gi`.                                                                                                        | Yes      |               |
-| `cpu`                      | The CPU limit for the service. For managed Cloud Run, use core count `1` or `2`. For Cloud Run on GKE, use millicpu (e.g., `200m`).                               | Yes      |               |
-| `concurrency`              | The max concurrent requests per container. Will scale with cpu if left blank (`250m` sets 20 in concurrency).                                        | No       | `10-100`          |
-| `max-instances`            | The maximum number of container instances to run. Set to `-1` to use the platform default (recommended).                                                          | No       | `-1`          |
-| `max-revisions`            | The maximum number of cloudrun revisions to save. Set to `4` to use the platform default (recommended).                                                          | No       | `4`          |
-| `environment`<top>\*</top> | A map of environment variables. The values can be Secret Manager URLs on the form `sm://*/my-secret` where `*` will be replaced by the project ID at deploy time. | No       | -             |
-| `enable-http2`             | Flag to enable HTTP/2. Application must support h2c to work correctly with HTTP/2                                                                                 | No       | `false`       |
+| Property                           | Description                                                                                                                                                       | Required | Default Value |
+|:-----------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------|:--------------|
+| `name`                             | The service name.                                                                                                                                                 | Yes      |               |
+| `memory`                           | Set a memory limit, for example `256Mi`, `512Mi` or `1Gi`.                                                                                                        | Yes      |               |
+| `cpu`                              | The CPU limit for the service. For managed Cloud Run, use core count `1` or `2`. For Cloud Run on GKE, use millicpu (e.g., `200m`).                               | Yes      |               |
+| `concurrency`                      | The max concurrent requests per container. Will scale with cpu if left blank (`250m` sets 20 in concurrency).                                                     | No       | `10-100`      |
+| `max-instances`                    | The maximum number of container instances to run. Set to `-1` to use the platform default (recommended).                                                          | No       | `-1`          |
+| `max-revisions`                    | The maximum number of cloudrun revisions to save. Set to `4` to use the platform default (recommended).                                                           | No       | `4`           |
+| `environment`<top>\*</top>         | A map of environment variables. The values can be Secret Manager URLs on the form `sm://*/my-secret` where `*` will be replaced by the project ID at deploy time. | No       | -             |
+| `enable-http2`                     | Flag to enable HTTP/2. Application must support h2c to work correctly with HTTP/2                                                                                 | No       | `false`       |
+| `canary.enabled`                   | Flag, that enables canary deployment. You must also specify `canary.steps`, `canary.thresholds` for canary to work                                                | No       | `false`       |
+| `canary.steps`                     | Dot-separated list of traffic percentages that will be set to new revision each `canary.interval` period                                                          | No       | `10.50.80`    |
+| `canary.interval`                  | Interval (in minutes) for each step. Also metrics for rollout/rollback decision will be fetched for `canary.interval` period (should not be less that 10)         | No       | `10`          |
+| `canary.thresholds.latency99`      | Latency 99 percentile threshold (im milliseconds). If last revision had latency 99 percentile above threshold, service will rollback to previous revision         | No       | -             |
+| `canary.thresholds.latency95`      | Latency 95 percentile threshold (im milliseconds). If last revision had latency 95 percentile above threshold, service will rollback to previous revision         | No       | -             |
+| `canary.thresholds.latency50`      | Latency 50 percentile threshold (im milliseconds). If last revision had latency 50 percentile above threshold, service will rollback to previous revision         | No       | -             |
+| `canary.thresholds.error-rate`     | Error rate threshold (in percents). Percentage of 5xx responses in service. If last revision exceeds threshold, service will rollback to previous revision        | No       | -             |
 
 <top>\*</top> Once set, this value can only be unset by passing `[]` (empty array) as value.
 
@@ -232,3 +239,30 @@ jobs:
           service-definition: cloud-run.yaml
           image: eu.gcr.io/extenda/my-service:$GITHUB_SHA
 ```
+
+#### Canary deployment
+
+Given the following `cloud-run.yaml`:
+```yaml
+name: my-service
+memory: 256Mi
+cpu: 1
+canary:
+  enabled: true
+  steps: '10.50.80' # 10% traffic, 20% traffic, 80% traffic and 100% (implicit)
+  interval: '10'
+  thresholds:
+    latency99: '1500' # 1500 ms
+    latency95: '500' # 500 ms
+    latency50: '100' # 100 ms
+    error-rate: '1' # 1% of all requests
+platform:
+  managed:
+    allow-unauthenticated: true
+    region: europe-west1
+```
+
+The following example enables `canary for  service`. New revision of a service will not service 100% of traffic from the start.
+Instead traffic percentage will be updated each `canary.interval` minutes using `canary.steps` values.
+On each step metrics for latest revision will be fetched and compared to `canary.thresholds`.
+If current metrics do not exceed thresholds, traffic will be increased otherwise servie will rollback to previous revision.
