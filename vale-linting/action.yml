@@ -2,18 +2,14 @@ name: Vale linting
 description: Vale is a command-line tool that brings code-like linting to prose.
 inputs:
   exclude:
-    description: A file or files that should be excluded from linting.
+    description: |
+      A file or files that should be excluded from linting.
+      New line separated string with micromatch patterns to exclude files.
     required: false
 
 runs:
   using: composite
   steps:
-    - uses: extenda/actions/gcp-secret-manager@v0
-      with:
-        service-account-key: ${{ secrets.SECRET_AUTH }}
-        secrets: |
-          TOKEN: github-token
-
     - name: Lint natural language with Vale
       # Change to the latest version/tag
       uses: l0kal/vale-action@master
@@ -23,19 +19,7 @@ runs:
         files: __onlyModified
         config: https://raw.githubusercontent.com/extenda/docker-vale/master/vale.ini
         exclude: ${{ inputs.exclude }}
-        debug: true
+        passCondition: |
+          errors < 1;
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Status of Vale job
-      id: status-vale
-      run: |
-       curl \
-        -H "Accept: application/vnd.github.v3+json" \
-        -H "Authorization: token ${{ env.TOKEN }}" \
-        https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs > jobs.json
-        echo "::set-output name=JOB_STATUS::$(cat jobs.json | jq '.jobs[-1].conclusion' | xargs -L 1)"
-
-    - name: Fail
-      if: ${{ steps.status-vale.outputs.JOB_STATUS == 'failure' }}
-      run: exit 1
