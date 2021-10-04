@@ -57,10 +57,30 @@ module.exports = {
       additionalProperties: {
         type: 'array',
         items: {
-          type: 'string',
-          minLength: 1,
-          maxLength: 16,
-          pattern: '^[a-z][-a-z]{1,15}$',
+          oneOf: [
+            {
+              type: 'string',
+              minLength: 1,
+              maxLength: 16,
+              pattern: '^[a-z][-a-z]{1,15}$',
+            },
+            {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'string',
+                  minLength: 1,
+                  maxLength: 16,
+                  pattern: '^[a-z][-a-z]{1,15}$',
+                },
+                alias: {
+                  type: 'string',
+                  minLength: 1,
+                  maxLength: 256,
+                },
+              },
+            },
+          ],
         },
       },
       propertyNames: {
