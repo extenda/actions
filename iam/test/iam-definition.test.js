@@ -154,7 +154,31 @@ roles:
       });
       expect(() => loadIamDefinition('iam.yaml'))
         .toThrow(`iam.yaml is not valid.
-0: instance.permissions.test[0] does not match pattern "^[a-z][-a-z]{1,15}$"
+0: instance.permissions.test[0] is not exactly one from [subschema 0],[subschema 1]
+`);
+    });
+
+    test('It throws for invalid permission with alias', () => {
+      mockFs({
+        'iam.yaml': `
+permission-prefix: tst
+services:
+  - name: test
+    repository: actions
+permissions:
+  test:
+    - id: alias
+      alias: ${'a'.repeat(257)}
+roles:
+  - id: admin
+    name: admin name
+    desc: A description
+    permissions: []
+`,
+      });
+      expect(() => loadIamDefinition('iam.yaml'))
+        .toThrow(`iam.yaml is not valid.
+0: instance.permissions.test[0] is not exactly one from [subschema 0],[subschema 1]
 `);
     });
 
@@ -168,6 +192,8 @@ services:
 permissions:
   test:
     - create
+    - id: delete
+      alias: delete
 roles:
   - id: admin
     name: Test Admin
