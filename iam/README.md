@@ -43,23 +43,25 @@ will be processed independent of others.
 The YAML syntax is formally defined with [JSON Schema](src/iam-schema.js). The following table explains what
 properties are required and not.
 
-| Property                                      | Description                                                                                      | Required |
-|:----------------------------------------------|:-------------------------------------------------------------------------------------------------|:---------|
-| `name`                                        | The name of the service system                                                                   | No       |
-| `permission-prefix`                           | The permission prefix, this will be prefixed to every permission and roles id. ([a-z][-a-z]{2})  | Yes      |
-| `services`                                    | A list of services that need a DAS system                                                        | Yes      |
-| `services.name`                               | The service name of the system to be created                                                     | Yes      |
-| `services.repository`                         | The description of the service                                                                   | Yes      |
-| `services.allowed-consumers`                  | A list of clans and services allowed to consume this service                                     | No       |
-| `services.allowed-consumers.clan`             | Your clan name subscribing to this service                                                       | Yes      |
-| `services.allowed-consumers.service-accounts` | A list of service accounts allowed to consume this service. (Full service account name required) | Yes      |
-| `permissions`                                 | An object containing the permissions for this service. (keys [a-z][-a-z]{1,15})                  | Yes      |
-| `permissions.<resource>`                      | Array containing the verbs for the `<resource>`. (items [a-z][-a-z]{1,15})                       | Yes      |
-| `roles`                                       | An list of roles that should exist for this service                                              | No       |
-| `roles.id`                                    | The role id ([a-z][-a-z]{1,19})                                                                  | Yes      |
-| `roles.name`                                  | The role name                                                                                    | Yes      |
-| `roles.desc`                                  | The description of the role, (max 200 characters)                                                | Yes      |
-| `roles.permissions`                           | An list of permissions this role should contain (items ^[a-z][-a-z]{1,15}\.[a-z][-a-z]{1,15}$)   | Yes      |
+| Property                                      | Description                                                                                                 | Required |
+|:----------------------------------------------|:------------------------------------------------------------------------------------------------------------|:---------|
+| `name`                                        | The name of the service system                                                                              | No       |
+| `permission-prefix`                           | The permission prefix, this will be prefixed to every permission and roles id. ([a-z][-a-z]{2})             | Yes      |
+| `services`                                    | A list of services that need a DAS system                                                                   | Yes      |
+| `services.name`                               | The service name of the system to be created                                                                | Yes      |
+| `services.repository`                         | The description of the service                                                                              | Yes      |
+| `services.allowed-consumers`                  | A list of clans and services allowed to consume this service                                                | No       |
+| `services.allowed-consumers.clan`             | Your clan name subscribing to this service                                                                  | Yes      |
+| `services.allowed-consumers.service-accounts` | A list of service accounts allowed to consume this service. (Full service account name required)            | Yes      |
+| `permissions`                                 | An object containing the permissions for this service. (keys [a-z][-a-z]{1,15})                             | Yes      |
+| `permissions.<resource>`                      | Array containing the verbs for the `<resource>`. (items: ids [a-z][-a-z]{1,15} or objects documented below) | Yes      |
+| `permissions.<resource>.id`                   | Permission id [a-z][-a-z]{1,15}                                                                             | Yes      |
+| `permissions.<resource>.alias`                | Permission alias (max 256 characters)                                                                       | Yes      |
+| `roles`                                       | An list of roles that should exist for this service                                                         | No       |
+| `roles.id`                                    | The role id ([a-z][-a-z]{1,19})                                                                             | Yes      |
+| `roles.name`                                  | The role name                                                                                               | Yes      |
+| `roles.desc`                                  | The description of the role, (max 200 characters)                                                           | Yes      |
+| `roles.permissions`                           | An list of permissions this role should contain (items ^[a-z][-a-z]{1,15}\.[a-z][-a-z]{1,15}$)              | Yes      |
 
 ### YAML Examples
 
@@ -76,6 +78,8 @@ services:
     repository: braveheart-quotes-webclient-backend
 permissions:
   favorite:
+    - id: delete
+      alias: delete-alias
     - toggle
     - list
   quote:
