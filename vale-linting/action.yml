@@ -12,7 +12,7 @@ runs:
   steps:
     - name: Lint natural language with Vale
       # Change to the latest version/tag
-      uses: l0kal/vale-action@master
+      uses: extenda/vale-action@master
       with:
         styles: |
           https://github.com/extenda/docker-vale/releases/download/latest/Extenda.zip
