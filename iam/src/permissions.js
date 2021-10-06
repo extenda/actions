@@ -3,11 +3,12 @@ const axios = require('axios');
 const { iamApiErrorToString } = require('./utils/iam-api-error-to-string');
 
 const updateAddPermission = async (
-  iamToken, permissionId, permissionDesc, method, iamUrl,
+  iamToken, permissionId, permissionDesc, method, iamUrl, permissionAlias,
 ) => {
   let url = `${iamUrl}/api/v1/permissions`;
   const data = {
     description: permissionDesc,
+    alias: permissionAlias,
   };
   if (method !== 'PUT') {
     data.id = permissionId;
@@ -31,7 +32,7 @@ const updateAddPermission = async (
 };
 
 const getPermission = async (
-  iamToken, permissionId, permissionDesc, iamUrl,
+  iamToken, permissionId, permissionDesc, iamUrl, permissionAlias,
 ) => axios({
   url: `${iamUrl}/api/v1/permissions/${permissionId}`,
   method: 'GET',
@@ -39,8 +40,8 @@ const getPermission = async (
     authorization: `Bearer ${iamToken}`,
   },
 }).then((response) => {
-  const { description = null } = response.data;
-  return description === permissionDesc ? 'NONE' : 'PUT';
+  const { description = null, alias = null } = response.data;
+  return description === permissionDesc || alias === permissionAlias ? 'NONE' : 'PUT';
 }).catch((err) => {
   if (err.response.status === 404) {
     return 'POST';
@@ -50,13 +51,13 @@ const getPermission = async (
 
 const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
   const promises = [];
-  fullPermissions.forEach((desc, id) => {
+  fullPermissions.forEach(({ description, alias }, id) => {
     core.info(`handling permission for '${id}'`);
-    promises.push(getPermission(iamToken, id, desc, iamUrl)
+    promises.push(getPermission(iamToken, id, description, iamUrl, alias)
       .then((status) => {
         if (status !== 'NONE') {
           core.info(`permission '${id}' require update (${status})`);
-          return updateAddPermission(iamToken, id, desc, status, iamUrl);
+          return updateAddPermission(iamToken, id, description, status, iamUrl, alias);
         }
         core.info(`permission '${id}' exists`);
         return null;
@@ -70,11 +71,17 @@ const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
 
 const setupPermissions = async (permissions, systemId) => {
   const fullPermissions = new Map();
-  Object.keys(permissions).forEach((permission) => {
-    Object.values(permissions[permission]).forEach((verb) => {
-      const id = `${systemId}.${permission}.${verb}`;
+  Object.keys(permissions).forEach((noun) => {
+    Object.values(permissions[noun]).forEach((verb) => {
       const description = '';
-      fullPermissions.set(id, description);
+      if (typeof verb === 'string') {
+        const id = `${systemId}.${noun}.${verb}`;
+        fullPermissions.set(id, { description });
+      } else {
+        const id = `${systemId}.${noun}.${verb.id}`;
+        const { alias } = verb;
+        fullPermissions.set(id, { description, alias });
+      }
     });
   });
   return fullPermissions;
