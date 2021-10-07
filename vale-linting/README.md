@@ -27,4 +27,6 @@ jobs:
         uses: extenda/actions/vale-linting@v0
         with:
           exclude: .github/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
