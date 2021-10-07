@@ -133,6 +133,7 @@ describe('Branch info test suite', () => {
     const buildNumber = '6';
     const shortSha = '921103d';
 
+    expect(getco)
     expect(getComposedVersionString(version, 'master', buildNumber, shortSha)).toBe('1.1.0');
     expect(getComposedVersionString(version, 'MASTER', buildNumber, shortSha)).toBe('1.1.0');
     expect(getComposedVersionString(version, 'dev', buildNumber, shortSha)).toBe('1.1.0-dev-6-921103d');

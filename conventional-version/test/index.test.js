@@ -24,4 +24,9 @@ describe('Get latest version', () => {
     await action();
     expect(getBranchNameSemver).toHaveBeenCalledWith('refs/heads/feature-branch-1');
   });
+
+  test('Get the version ', async () => {
+    await action();
+    expect(getBranchNameSemver).toHaveBeenCalledWith('refs/heads/feature-branch-1');
+  });
 });
