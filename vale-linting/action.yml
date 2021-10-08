@@ -16,7 +16,6 @@ runs:
       with:
         styles: |
           https://github.com/extenda/docker-vale/releases/download/latest/Extenda.zip
-        files: __onlyModified
         config: https://raw.githubusercontent.com/extenda/docker-vale/master/vale.ini
         exclude: ${{ inputs.exclude }}
         passCondition: |
