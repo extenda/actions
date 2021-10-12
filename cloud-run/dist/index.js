@@ -12139,21 +12139,19 @@ const waitForRevision = async (
       revision = await findRevision(output, namespace, cluster);
     }
 
-    if (canary.enabled) {
-      // update traffic on latest revision based on steps
-      await gcloudOutput([
-        'run',
-        'services',
-        'update-traffic',
-        namespace,
-        `--to-revisions=${revision}=${canary.steps.split('.')[0]}`,
-        `--cluster=${cluster.cluster}`,
-        `--cluster-location=${cluster.clusterLocation}`,
-        `--namespace=${namespace}`,
-        `--project=${cluster.project}`,
-        '--platform=gke',
-      ]);
-    }
+    // update traffic on latest revision based on steps
+    await gcloudOutput([
+      'run',
+      'services',
+      'update-traffic',
+      namespace,
+      `--to-revisions=${revision}=${canary.enabled ? canary.steps.split('.')[0] : 100}`,
+      `--cluster=${cluster.cluster}`,
+      `--cluster-location=${cluster.clusterLocation}`,
+      `--namespace=${namespace}`,
+      `--project=${cluster.project}`,
+      '--platform=gke',
+    ]);
 
     core.info(`Waiting for revision "${revision}" to become active...`);
     let revisionStatus = {};
