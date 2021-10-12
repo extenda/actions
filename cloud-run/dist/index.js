@@ -12151,6 +12151,7 @@ const waitForRevision = async (
       `--namespace=${namespace}`,
       `--project=${cluster.project}`,
       '--platform=gke',
+      '--no-user-output-enabled',
     ]);
 
     core.info(`Waiting for revision "${revision}" to become active...`);
