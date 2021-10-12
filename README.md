@@ -12,6 +12,7 @@ The following actions are available
 
   * [cloud-run](cloud-run#readme)
   * [commitlint](commitlint#readme)
+  * [component-tests](component-tests#readme)
   * [conventional-release](conventional-release#readme)
   * [conventional-version](conventional-version#readme)
   * [dataflow-template-build](dataflow-template-build#readme)
