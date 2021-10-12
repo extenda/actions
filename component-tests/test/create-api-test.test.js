@@ -1,7 +1,7 @@
 const { load: parseYaml } = require('js-yaml');
 const { readFile } = require('fs').promises;
-const { join } = require('path');
-const { createApiTest } = require('./create-api-test');
+const { resolve } = require('path');
+const { createApiTest } = require('../src/create-api-test');
 
 const spy = jest.fn();
 const mockCall = (method, url) => ({
@@ -22,7 +22,7 @@ jest.mock('supertest', () => ({
 
 describe('createApiTest function', () => {
   test('it runs correct tests', async () => {
-    const yaml = parseYaml(await readFile(join(__dirname, 'tests.yml')));
+    const yaml = parseYaml(await readFile(resolve(__dirname, '../src/tests.yml')));
     const test = createApiTest('', '');
     for (const [request, expected] of Object.entries(yaml)) {
       // eslint-disable-next-line no-await-in-loop
