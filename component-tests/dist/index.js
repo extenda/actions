@@ -17620,8 +17620,8 @@ const { run } = __webpack_require__(1898);
 
 async function main() {
   try {
-    const iamToken = getInput('iam-token', { required: true });
-    const url = getInput('url', { required: true });
+    const iamToken = getInput('auth-token', { required: true });
+    const url = getInput('base-url', { required: true });
     const test = createApiTest(url, iamToken);
 
     const testsFile = getInput('tests', { required: true });
