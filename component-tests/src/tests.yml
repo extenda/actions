@@ -1,0 +1,2 @@
+POST /api/v1/permissions: { code: 400 }
+GET /api/v1/permissions: { code: 200, body: { field: value } }
