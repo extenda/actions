@@ -1,11 +1,9 @@
 {
   "name": "component-tests",
-  "version": "1.0.0",
-  "description": "",
-  "author": "",
+  "version": "0.0.1-local",
+  "description": "Run API ping tests",
   "private": true,
-  "main": "index.js",
-  "license": "UNLICENSED",
+  "main": "dist/index.js",
   "dependencies": {
     "@actions/core": "^1.2.7",
     "@actions/github": "^4.0.0",
