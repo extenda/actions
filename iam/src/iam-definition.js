@@ -12,6 +12,9 @@ const loadFile = (iamFile) => {
 };
 
 const sortAndCompare = (array, docPath, result) => {
+  if (!Array.isArray(array)) {
+    result.addError(`${docPath} is not an array`);
+  }
   const sorted = array.slice(0).sort((a, b) => {
     const getVerb = (value) => (typeof value === 'string' ? value : value.id);
     return getVerb(a).localeCompare(getVerb(b), 'en-US');
