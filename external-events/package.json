@@ -1,0 +1,20 @@
+{
+  "name": "external-events",
+  "version": "1.0.0-local",
+  "private": true,
+  "description": "This github action synchronises external events config with `External events` service.",
+  "main": "dist/index.js",
+  "license": "ISC",
+  "dependencies": {
+    "@actions/core": "^1.6.0",
+    "axios": "^0.24.0",
+    "camelcase-keys": "^7.0.1",
+    "fast-glob": "^3.2.7",
+    "joi": "^17.4.2",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "mock-fs": "^5.1.2",
+    "nock": "^13.2.1"
+  }
+}
