@@ -32056,7 +32056,7 @@ function createExeApi(auth) {
 
   const addToken = async (config) => ({
     ...config,
-    headers: { ...config.headers, authorization: await fetchToken(auth) },
+    headers: { ...config.headers, authorization: `Bearer ${await fetchToken(auth)}` },
   });
   const formatError = (err) => {
     const { status, data } = err.response;
