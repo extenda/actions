@@ -21,6 +21,9 @@ module.exports = {
           repository: {
             type: 'string',
           },
+          'styra-name': {
+            type: 'string',
+          },
           'allowed-consumers': {
             type: 'array',
             items: {

@@ -2,13 +2,14 @@ const core = require('@actions/core');
 const request = require('request');
 const { setupPermissions, handlePermissions } = require('./permissions');
 const { setupRoles } = require('./roles');
-const { setupSystem } = require('./create-system');
+const { setupSystem, buildOpaConfig, applyConfiguration } = require('./create-system');
 const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 const createNamespace = require('../../cloud-run/src/create-namespace');
 const checkOwners = require('./handle-owners');
 const checkRepository = require('./handle-repository');
 const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
 const handleConsumers = require('./handle-consumers');
+const gcloudOutput = require('../../txengine-deploy/src/gcloud-output');
 
 const checkSystem = async (
   systemName, styraToken, styraUrl,
@@ -34,6 +35,31 @@ const checkSystem = async (
   });
 });
 
+const checkNamespace = async (
+  namespace,
+) => {
+  const opaConfigStatus = await gcloudOutput(
+    'get',
+    'cm',
+    'opa-envoy-config',
+    `--namespace=${namespace}`,
+    'kubectl',
+  );
+  if (opaConfigStatus.includes('(NotFound):')) {
+    return false;
+  }
+  return true;
+};
+
+const updateMiscelaneous = async (
+  systemName, styraUrl, system, styraToken, systemOwners, repository, consumers,
+) => {
+  core.info(`system '${systemName}' already exists in ${styraUrl}, running updates!`);
+  return checkOwners(system.id, styraToken, styraUrl, systemOwners)
+    .then(() => checkRepository(system, styraToken, styraUrl, repository)
+      .then(() => handleConsumers(system.id, styraToken, styraUrl, consumers, systemName)));
+};
+
 const configureIAM = async (
   iam, styraToken, styraUrl, iamUrl, iamToken, env, projectId, systemOwners, skipIAM,
 ) => {
@@ -51,16 +77,21 @@ const configureIAM = async (
   // Connect to cluster
   await authenticateKubeCtl(cluster);
 
-  services.forEach(({ name: namespace, repository, 'allowed-consumers': consumers }) => {
-    const systemName = `${permissionPrefix}.${namespace}-${env}`;
+  services.forEach(({
+    name: namespace, repository, 'allowed-consumers': consumers, 'styra-name': styraName,
+  }) => {
+    const systemName = styraName ? `${permissionPrefix}.${styraName}-${env}` : `${permissionPrefix}.${namespace}-${env}`;
 
     // 1. Check if DAS system exists
     // If system doesn't exist
-    //    2. Create namespace
-    //    3. Create DAS system
+    //   2. Create namespace
+    //   3. Create DAS system
+    // If shared system
+    //  2. Configure namespace
     // If system exists
-    //    2. Update owners
-    //    3. Update repository reference
+    //   2. Update owners
+    //   3. Update repository reference
+    //   4. Update consumers
     promises.push(checkSystem(systemName, styraToken, styraUrl)
       .then((system) => {
         if (system.id === '') {
@@ -70,10 +101,24 @@ const configureIAM = async (
               namespace, systemName, env, repository, styraToken, styraUrl, systemOwners, consumers,
             )).catch((err) => errors.push(err));
         }
-        core.info(`system '${systemName}' already exists in ${styraUrl}`);
-        return checkOwners(system.id, styraToken, styraUrl, systemOwners)
-          .then(() => checkRepository(system, styraToken, styraUrl, repository)
-            .then(() => handleConsumers(system.id, styraToken, styraUrl, consumers, systemName)));
+
+        if (styraName) {
+          // Check if service is configured
+          return checkNamespace(namespace).then((exists) => {
+            if (!exists) {
+              return createNamespace(projectId, true, namespace)
+                .then(() => buildOpaConfig(system.id, styraToken, namespace, styraUrl)
+                  .then((opaConfig) => applyConfiguration(opaConfig, systemName)
+                    .then(() => core.info(`opa successfully setup for ${namespace}`))));
+            }
+            return updateMiscelaneous(
+              systemName, styraUrl, system, styraToken, systemOwners, repository, consumers,
+            );
+          }).catch((err) => errors.push(err));
+        }
+        return updateMiscelaneous(
+          systemName, styraUrl, system, styraToken, systemOwners, repository, consumers,
+        );
       }));
   });
 

@@ -11,6 +11,7 @@ jest.mock('../src/handle-repository');
 jest.mock('../src/handle-owners');
 jest.mock('../src/handle-consumers');
 jest.mock('../../cloud-run/src/kubectl-auth');
+jest.mock('../../txengine-deploy/src/gcloud-output');
 
 const request = require('request');
 const core = require('@actions/core');
@@ -22,9 +23,32 @@ const checkOwners = require('../src/handle-owners');
 const projectInfo = require('../../cloud-run/src/project-info');
 const { setupPermissions, handlePermissions } = require('../src/permissions');
 const { setupRoles } = require('../src/roles');
-const { setupSystem } = require('../src/create-system');
+const { setupSystem, buildOpaConfig, applyConfiguration } = require('../src/create-system');
+const gcloudOutput = require('../../txengine-deploy/src/gcloud-output');
 
 const allowedConsumers = [{ clan: 'test', 'service-accounts': ['sa1', 'sa2'] }];
+
+const opaConfig = `
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: opa-envoy-config
+  namespace: test-service
+data:
+  conf.yaml: |
+    services:
+      - name: styra
+        url: https://test.styra.com
+        credentials:
+          bearer:
+            token: "styra-token"
+    labels:
+      system-id: "system-id"
+      system-type: "envoy"
+    discovery:
+      name: discovery
+      prefix: "/systems/system-id"
+      `;
 
 describe('Configure iam', () => {
   afterEach(() => {
@@ -238,6 +262,63 @@ Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md
     expect(core.error).toHaveBeenCalledTimes(1);
     expect(setupSystem).toHaveBeenCalledTimes(0);
     expect(request).toHaveBeenCalledTimes(1);
+  });
+
+  test('It will handle shared system', async () => {
+    setupGcloud.mockResolvedValueOnce('test-project');
+    createNamespace.mockResolvedValue(null);
+    projectInfo.mockReturnValueOnce({ env: 'staging' });
+    const iam = {
+      'permission-prefix': 'test',
+      services: [{
+        name: 'test-service',
+        repository: 'test-repo',
+        'styra-name': 'system-name',
+      },
+      {
+        name: 'test-service1',
+        repository: 'test-repo',
+        'styra-name': 'system-name',
+      }],
+
+    };
+
+    const checkSystem = {
+      result: [
+        {
+          name: 'test.system-name-staging',
+          id: 'some-id',
+        },
+      ],
+    };
+    const checkSystem1 = {
+      result: [
+        {
+          name: 'test.system-name-staging',
+          id: 'some-id',
+        },
+      ],
+    };
+    const fullPermissions = {
+      'test.test.get': 'test desc',
+      'test.test.create': 'test1 desc',
+    };
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
+      JSON.stringify(checkSystem)));
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
+      JSON.stringify(checkSystem1)));
+    gcloudOutput.mockResolvedValue('Error from server (NotFound): namespaces "test-service" not found');
+    checkOwners.mockResolvedValue(null);
+    checkRepository.mockResolvedValue(null);
+    buildOpaConfig.mockResolvedValue(opaConfig);
+    applyConfiguration.mockResolvedValue(null);
+
+    setupPermissions.mockResolvedValueOnce(fullPermissions);
+
+    await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], false);
+    expect(core.error).toHaveBeenCalledTimes(0);
+    expect(core.info).toHaveBeenCalledTimes(2);
+    expect(request).toHaveBeenCalledTimes(2);
   });
 
   test('It will print all errors at the end', async () => {
