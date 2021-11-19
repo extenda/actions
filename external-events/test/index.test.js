@@ -25,11 +25,10 @@ function mockIdpTokenCall() {
 }
 
 function mockExeSyncCall(id, response, dryRun = false) {
+  // ignore version
+  const { version, ...payload } = camelcaseKeys(configFixtures.validParsed, { deep: true });
   const exeNock = nock('https://exe-management.retailsvc.com')
-    .post(
-      '/api/v1/internal/event-sources:sync',
-      camelcaseKeys(configFixtures.validParsed, { deep: true }),
-    )
+    .post('/api/v1/internal/event-sources:sync', payload)
     .query({ dryRun })
     .reply(200, response);
   return () => expect(exeNock.isDone()).toEqual(true);

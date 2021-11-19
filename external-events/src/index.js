@@ -32,6 +32,8 @@ async function action() {
   let failed = false;
   for (const [file, def] of Object.entries(definitions)) {
     core.startGroup(`Sync definitions from ${file}`);
+    // ignore version for now, as we have ony one version
+    delete def.version;
     // eslint-disable-next-line no-await-in-loop
     const { data } = await exeApi.post(
       `/api/v1/internal/event-sources:sync?dryRun=${dryRun}`,
