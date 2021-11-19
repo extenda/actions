@@ -32056,7 +32056,7 @@ function createExeApi(auth) {
 
   const addToken = async (config) => {
     const token = await fetchToken(auth);
-    core.info(`Request ${token}`);
+    core.info(`Request ${Buffer.from(token.split('.')[1], 'base64').toString()}`);
     return ({
       ...config,
       headers: { ...config.headers, authorization: await fetchToken(auth) },
