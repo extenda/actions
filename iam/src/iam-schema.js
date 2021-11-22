@@ -73,12 +73,15 @@ module.exports = {
                   maxLength: 16,
                   pattern: '^[a-z][-a-z]{1,15}$',
                 },
+                description: {
+                  type: 'string',
+                },
                 alias: {
                   type: 'string',
-                  minLength: 1,
                   maxLength: 256,
                 },
               },
+              required: ['id'],
             },
           ],
         },
