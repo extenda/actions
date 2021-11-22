@@ -38,13 +38,12 @@ const checkSystem = async (
 const checkNamespace = async (
   namespace,
 ) => {
-  const opaConfigStatus = await gcloudOutput(
+  const opaConfigStatus = await gcloudOutput([
     'get',
     'cm',
     'opa-envoy-config',
-    `--namespace=${namespace}`,
-    'kubectl',
-  );
+    `--namespace=${namespace}`],
+  'kubectl');
   if (opaConfigStatus.includes('(NotFound):')) {
     return false;
   }
@@ -81,13 +80,10 @@ const configureIAM = async (
     name: namespace, repository, 'allowed-consumers': consumers, 'styra-name': styraName,
   }) => {
     const systemName = styraName ? `${permissionPrefix}.${styraName}-${env}` : `${permissionPrefix}.${namespace}-${env}`;
-
     // 1. Check if DAS system exists
     // If system doesn't exist
     //   2. Create namespace
     //   3. Create DAS system
-    // If shared system
-    //  2. Configure namespace
     // If system exists
     //   2. Update owners
     //   3. Update repository reference
@@ -98,7 +94,14 @@ const configureIAM = async (
           core.info(`creating system '${systemName}' in ${styraUrl}`);
           return createNamespace(projectId, true, namespace)
             .then(() => setupSystem(
-              namespace, systemName, env, repository, styraToken, styraUrl, systemOwners, consumers,
+              namespace,
+              systemName,
+              env,
+              repository,
+              styraToken,
+              styraUrl,
+              systemOwners,
+              consumers,
             )).catch((err) => errors.push(err));
         }
 
