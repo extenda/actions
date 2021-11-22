@@ -37,18 +37,12 @@ const checkSystem = async (
 
 const checkNamespace = async (
   namespace,
-) => {
-  const opaConfigStatus = await gcloudOutput([
-    'get',
-    'cm',
-    'opa-envoy-config',
-    `--namespace=${namespace}`],
-  'kubectl');
-  if (opaConfigStatus.includes('(NotFound):')) {
-    return false;
-  }
-  return true;
-};
+) => gcloudOutput([
+  'get',
+  'cm',
+  'opa-envoy-config',
+  `--namespace=${namespace}`],
+'kubectl').then(() => true).catch(() => false);
 
 const updateMiscelaneous = async (
   systemName, styraUrl, system, styraToken, systemOwners, repository, consumers,
