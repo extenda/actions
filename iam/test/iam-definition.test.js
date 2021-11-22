@@ -1,4 +1,5 @@
 const mockFs = require('mock-fs');
+const { m } = require('multiline-str');
 const loadIamDefinition = require('../src/iam-definition');
 
 describe('IAM Definition', () => {
@@ -180,6 +181,52 @@ roles:
         .toThrow(`iam.yaml is not valid.
 0: instance.permissions.test[0] is not exactly one from [subschema 0],[subschema 1]
 `);
+    });
+
+    test('It allows settings permission description', () => {
+      mockFs({
+        'iam.yaml': m`
+            permission-prefix: tst
+            services:
+              - name: test
+                repository: actions
+            permissions:
+              test:
+                - id: action
+                  description: Perform some action
+            roles:
+              - id: admin
+                name: admin name
+                desc: A description
+                permissions: []
+            `,
+      });
+
+      expect(loadIamDefinition('iam.yaml')).toStrictEqual({
+        'permission-prefix': 'tst',
+        permissions: {
+          test: [
+            {
+              id: 'action',
+              description: 'Perform some action',
+            },
+          ],
+        },
+        roles: [
+          {
+            id: 'admin',
+            name: 'admin name',
+            desc: 'A description',
+            permissions: [],
+          },
+        ],
+        services: [
+          {
+            name: 'test',
+            repository: 'actions',
+          },
+        ],
+      });
     });
 
     test('It validates a valid YAML file', () => {
