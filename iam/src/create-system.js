@@ -5,13 +5,13 @@ const fs = require('fs');
 const yaml = require('js-yaml'); // FIXME what YAML lib is used?
 const handleConsumers = require('./handle-consumers');
 
-const applyConfiguration = async (opaConfig, systemName) => {
-  fs.writeFileSync(systemName, yaml.safeDump(opaConfig));
+const applyConfiguration = async (opaConfig, fileName) => {
+  fs.writeFileSync(fileName, yaml.safeDump(opaConfig));
   return exec.exec('kubectl', [
     'apply',
     '-f',
-    systemName,
-  ]).then(() => fs.unlinkSync(systemName));
+    fileName,
+  ]).then(() => fs.unlinkSync(fileName));
 };
 
 const sendInvites = async (
