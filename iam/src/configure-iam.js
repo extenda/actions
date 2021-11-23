@@ -128,7 +128,7 @@ const configureIAM = async (
 
   sharedSystems.forEach(async (systemInfo, systemName) => {
     promises.push(checkSystem(systemName, styraToken, styraUrl)
-      .then((system) => {
+      .then(async (system) => {
         if (system.id === '') {
           const namespace = systemInfo.namespace[0];
           core.info(`creating system '${systemName}' in ${styraUrl}`);
@@ -144,24 +144,26 @@ const configureIAM = async (
               systemInfo.consumers,
             )).catch((err) => errors.push(err));
         }
-        systemInfo.namespace.forEach((namespace) => promises.push(checkNamespace(namespace)
-          .then((exists) => {
-            if (!exists) {
-              return createNamespace(projectId, true, namespace)
-                .then(() => buildOpaConfig(system.id, styraToken, namespace, styraUrl)
-                  .then((opaConfig) => applyConfiguration(opaConfig, `${systemName}-${namespace}`)
-                    .then(() => core.info(`opa successfully setup for ${namespace}`))));
-            }
-            return updateMiscelaneous(
-              systemName,
-              styraUrl,
-              system,
-              styraToken,
-              systemOwners,
-              systemInfo.repository,
-              systemInfo.consumers,
-            );
-          }).catch((err) => errors.push(err))));
+        for (const namespace of systemInfo.namespace) {
+          promises.push(checkNamespace(namespace)
+            .then((exists) => {
+              if (!exists) {
+                return createNamespace(projectId, true, namespace)
+                  .then(() => buildOpaConfig(system.id, styraToken, namespace, styraUrl)
+                    .then((opaConfig) => applyConfiguration(opaConfig, `${systemName}-${namespace}`)
+                      .then(() => core.info(`opa successfully setup for ${namespace} in ${env} environment`))));
+              }
+              return updateMiscelaneous(
+                systemName,
+                styraUrl,
+                system,
+                styraToken,
+                systemOwners,
+                systemInfo.repository,
+                systemInfo.consumers,
+              );
+            }).catch((err) => errors.push(err)));
+        }
         return null;
       }));
   });
