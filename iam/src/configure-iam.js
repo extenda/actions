@@ -53,6 +53,22 @@ const updateMiscelaneous = async (
       .then(() => handleConsumers(system.id, styraToken, styraUrl, consumers, systemName)));
 };
 
+const updateSharedSystems = async (
+  sharedSystems, systemName, namespace, repository, consumers,
+) => {
+  let serviceInfo = sharedSystems.get(systemName);
+  if (!serviceInfo) {
+    serviceInfo = {
+      namespace: [namespace],
+      repository,
+      consumers,
+    };
+    sharedSystems.set(systemName, serviceInfo);
+  } else {
+    serviceInfo.namespace.push(namespace);
+  }
+};
+
 const configureIAM = async (
   iam, styraToken, styraUrl, iamUrl, iamToken, env, projectId, systemOwners, skipIAM,
 ) => {
@@ -88,17 +104,9 @@ const configureIAM = async (
     //      4. Update repository reference
     //      5. Update consumers
     if (styraName) {
-      let serviceInfo = sharedSystems.get(systemName);
-      if (!serviceInfo) {
-        serviceInfo = {
-          namespace: [namespace],
-          repository,
-          consumers,
-        };
-        sharedSystems.set(systemName, serviceInfo);
-      } else {
-        serviceInfo.namespace.push(namespace);
-      }
+      promises.push(updateSharedSystems(
+        sharedSystems, systemName, namespace, repository, consumers,
+      ));
     } else {
       promises.push(checkSystem(systemName, styraToken, styraUrl)
         .then((system) => {
