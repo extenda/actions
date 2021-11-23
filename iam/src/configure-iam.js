@@ -47,7 +47,7 @@ const checkNamespace = async (
 const updateMiscelaneous = async (
   systemName, styraUrl, system, styraToken, systemOwners, repository, consumers,
 ) => {
-  core.info(`system '${systemName}' already exists in ${styraUrl}, running updates!`);
+  core.info(`Running updates for system: '${systemName}'`);
   return checkOwners(system.id, styraToken, styraUrl, systemOwners)
     .then(() => checkRepository(system, styraToken, styraUrl, repository)
       .then(() => handleConsumers(system.id, styraToken, styraUrl, consumers, systemName)));
@@ -138,10 +138,11 @@ const configureIAM = async (
   sharedSystems.forEach(async (systemInfo, systemName) => {
     promises.push(checkSystem(systemName, styraToken, styraUrl)
       .then(async (system) => {
-        if (system.id === '') {
+        let systemId = system.id;
+        if (systemId === '') {
           const namespace = systemInfo.namespace[0];
           core.info(`creating system '${systemName}' in ${styraUrl}`);
-          return createNamespace(projectId, true, namespace)
+          await createNamespace(projectId, true, namespace)
             .then(() => setupSystem(
               namespace,
               systemName,
@@ -152,13 +153,14 @@ const configureIAM = async (
               systemOwners,
               systemInfo.consumers,
             )).catch((err) => errors.push(err));
+          systemId = await checkSystem(systemName, styraToken, styraUrl);
         }
         for (const namespace of systemInfo.namespace) {
           namespacePromises.push(checkNamespace(namespace)
             .then((exists) => {
               if (!exists) {
                 return createNamespace(projectId, true, namespace)
-                  .then(() => buildOpaConfig(system.id, styraToken, namespace, styraUrl)
+                  .then(() => buildOpaConfig(systemId, styraToken, namespace, styraUrl)
                     .then((opaConfig) => applyConfiguration(opaConfig, `${systemName}-${namespace}`)
                       .then(() => core.info(`opa successfully setup for ${namespace} in ${env} environment`))));
               }
