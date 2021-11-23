@@ -126,6 +126,7 @@ const configureIAM = async (
   // Wait for K8s and DAS system.
   await Promise.all(promises);
 
+  const namespacePromises = [];
   sharedSystems.forEach(async (systemInfo, systemName) => {
     promises.push(checkSystem(systemName, styraToken, styraUrl)
       .then(async (system) => {
@@ -145,7 +146,7 @@ const configureIAM = async (
             )).catch((err) => errors.push(err));
         }
         for (const namespace of systemInfo.namespace) {
-          promises.push(checkNamespace(namespace)
+          namespacePromises.push(checkNamespace(namespace)
             .then((exists) => {
               if (!exists) {
                 return createNamespace(projectId, true, namespace)
@@ -164,7 +165,7 @@ const configureIAM = async (
               );
             }).catch((err) => errors.push(err)));
         }
-        return null;
+        return Promise.all(namespacePromises);
       }));
   });
 
