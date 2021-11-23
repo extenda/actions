@@ -63,9 +63,9 @@ const configureIAM = async (
     roles,
   } = iam;
 
-
   const errors = [];
   const promises = [];
+  const sharedSystems = new Map();
   const cluster = await getClusterInfo(projectId);
   // Connect to cluster
   await authenticateKubeCtl(cluster);
@@ -74,52 +74,97 @@ const configureIAM = async (
     name: namespace, repository, 'allowed-consumers': consumers, 'styra-name': styraName,
   }) => {
     const systemName = styraName ? `${permissionPrefix}.${styraName}-${env}` : `${permissionPrefix}.${namespace}-${env}`;
-    // 1. Check if DAS system exists
-    // If system doesn't exist
-    //   2. Create namespace
-    //   3. Create DAS system
-    // If system exists
-    //   2. Update owners
-    //   3. Update repository reference
-    //   4. Update consumers
+
+    // 1. check if shared system
+    // IF shared system
+    //    2. Sort services for later handling
+    // IF not shared system
+    //    2. Check if DAS system exists
+    //    If system doesn't exist
+    //      3. Create namespace
+    //      4. Create DAS system
+    //    If system exists
+    //      3. Update owners
+    //      4. Update repository reference
+    //      5. Update consumers
+    if (styraName) {
+      let serviceInfo = sharedSystems.get(systemName);
+      if (!serviceInfo) {
+        serviceInfo = {
+          namespace: [namespace],
+          repository,
+          consumers,
+        };
+        sharedSystems.set(systemName, serviceInfo);
+      } else {
+        serviceInfo.namespace.push(namespace);
+      }
+    } else {
+      promises.push(checkSystem(systemName, styraToken, styraUrl)
+        .then((system) => {
+          if (system.id === '') {
+            core.info(`creating system '${systemName}' in ${styraUrl}`);
+            return createNamespace(projectId, true, namespace)
+              .then(() => setupSystem(
+                namespace,
+                systemName,
+                env,
+                repository,
+                styraToken,
+                styraUrl,
+                systemOwners,
+                consumers,
+              )).catch((err) => errors.push(err));
+          }
+          return updateMiscelaneous(
+            systemName, styraUrl, system, styraToken, systemOwners, repository, consumers,
+          );
+        }));
+    }
+  });
+
+  // Wait for K8s and DAS system.
+  await Promise.all(promises);
+
+  sharedSystems.forEach(async (systemInfo, systemName) => {
     promises.push(checkSystem(systemName, styraToken, styraUrl)
       .then((system) => {
         if (system.id === '') {
+          const namespace = systemInfo.namespace[0];
           core.info(`creating system '${systemName}' in ${styraUrl}`);
           return createNamespace(projectId, true, namespace)
             .then(() => setupSystem(
               namespace,
               systemName,
               env,
-              repository,
+              systemInfo.repository,
               styraToken,
               styraUrl,
               systemOwners,
-              consumers,
+              systemInfo.consumers,
             )).catch((err) => errors.push(err));
         }
-
-        if (styraName) {
-          // Check if service is configured
-          return checkNamespace(namespace).then((exists) => {
-            if (!exists) {
-              return createNamespace(projectId, true, namespace)
-                .then(() => buildOpaConfig(system.id, styraToken, namespace, styraUrl)
-                  .then((opaConfig) => applyConfiguration(opaConfig, systemName)
-                    .then(() => core.info(`opa successfully setup for ${namespace}`))));
-            }
-            return updateMiscelaneous(
-              systemName, styraUrl, system, styraToken, systemOwners, repository, consumers,
-            );
-          }).catch((err) => errors.push(err));
-        }
-        return updateMiscelaneous(
-          systemName, styraUrl, system, styraToken, systemOwners, repository, consumers,
-        );
+        systemInfo.namespace.forEach((namespace) => checkNamespace(namespace).then((exists) => {
+          if (!exists) {
+            return createNamespace(projectId, true, namespace)
+              .then(() => buildOpaConfig(system.id, styraToken, namespace, styraUrl)
+                .then((opaConfig) => applyConfiguration(opaConfig, systemName)
+                  .then(() => core.info(`opa successfully setup for ${namespace}`))));
+          }
+          return updateMiscelaneous(
+            systemName,
+            styraUrl,
+            system,
+            styraToken,
+            systemOwners,
+            systemInfo.repository,
+            systemInfo.consumers,
+          );
+        }).catch((err) => errors.push(err)));
+        return null;
       }));
   });
 
-  // Wait for K8s and DAS system.
   await Promise.all(promises);
 
   // Next, update IAM system
