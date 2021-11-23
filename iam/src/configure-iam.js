@@ -144,23 +144,24 @@ const configureIAM = async (
               systemInfo.consumers,
             )).catch((err) => errors.push(err));
         }
-        systemInfo.namespace.forEach((namespace) => checkNamespace(namespace).then((exists) => {
-          if (!exists) {
-            return createNamespace(projectId, true, namespace)
-              .then(() => buildOpaConfig(system.id, styraToken, namespace, styraUrl)
-                .then((opaConfig) => applyConfiguration(opaConfig, `${namespace}-${env}`)
-                  .then(() => core.info(`opa successfully setup for ${namespace}`))));
-          }
-          return updateMiscelaneous(
-            systemName,
-            styraUrl,
-            system,
-            styraToken,
-            systemOwners,
-            systemInfo.repository,
-            systemInfo.consumers,
-          );
-        }).catch((err) => errors.push(err)));
+        systemInfo.namespace.forEach((namespace) => promises.push(checkNamespace(namespace)
+          .then((exists) => {
+            if (!exists) {
+              return createNamespace(projectId, true, namespace)
+                .then(() => buildOpaConfig(system.id, styraToken, namespace, styraUrl)
+                  .then((opaConfig) => applyConfiguration(opaConfig, `${systemName}-${namespace}`)
+                    .then(() => core.info(`opa successfully setup for ${namespace}`))));
+            }
+            return updateMiscelaneous(
+              systemName,
+              styraUrl,
+              system,
+              styraToken,
+              systemOwners,
+              systemInfo.repository,
+              systemInfo.consumers,
+            );
+          }).catch((err) => errors.push(err))));
         return null;
       }));
   });
