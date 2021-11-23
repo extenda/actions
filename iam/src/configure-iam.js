@@ -148,7 +148,7 @@ const configureIAM = async (
           if (!exists) {
             return createNamespace(projectId, true, namespace)
               .then(() => buildOpaConfig(system.id, styraToken, namespace, styraUrl)
-                .then((opaConfig) => applyConfiguration(opaConfig, namespace)
+                .then((opaConfig) => applyConfiguration(opaConfig, `${namespace}-${env}`)
                   .then(() => core.info(`opa successfully setup for ${namespace}`))));
           }
           return updateMiscelaneous(
