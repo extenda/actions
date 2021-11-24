@@ -12,12 +12,10 @@ This action is used to sync `EXE` configuration from your repo with `EXE Service
 Expected structure of our common repo:
 
 At the root of repo you should create directory `external-events`.
-Under that directory you can have multiple `*.yaml` with [this structure](#Configuration example).
+Under that directory you can have multiple `*.yaml`
 Each `system-prefix` in each file must be unique.
 
-Configuration example
-
-### Configuration example
+Example (external-events/iam.yaml)
 ```yaml
 version: 1 # (required) always 1 for now
 # id for event source is generated from template {system}.{name}.{version}
@@ -51,6 +49,7 @@ event-sources: # (required) list of event sources for your system
 
 # Action setup example
 
+.github/workflows/exe.yml
 ```yaml
 name: External events
 on:
