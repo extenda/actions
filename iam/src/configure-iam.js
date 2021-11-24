@@ -56,10 +56,10 @@ const updateMiscelaneous = async (
 const updateNamespaces = async (
   systemInfo, systemOwners, systemName, projectId, system, styraToken, styraUrl, env, errors,
 ) => {
-  const checkedSystem = system;
+  let checkedSystem = system;
   const namespacePromises = [];
-  if (checkedSystem.id === '') {
-    checkedSystem.id = await checkSystem(systemName, styraToken, styraUrl);
+  if (system.id === '') {
+    checkedSystem = await checkSystem(systemName, styraToken, styraUrl);
   }
   for (const namespace of systemInfo.namespace) {
     namespacePromises.push(checkNamespace(namespace)
