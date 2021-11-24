@@ -14,6 +14,19 @@ event-sources:
 
 const validParsed = jsYaml.load(valid);
 
+const valid2 = `
+version: 1
+system-prefix: tst
+event-sources:
+  - name: event
+    version: v10
+    display-name: test event
+    subscription-name: projects/project-id/subscriptions/tst.public.output.events.v1+tst.event
+    content-type: text/plain
+`;
+
+const valid2Parsed = jsYaml.load(valid2);
+
 const invalid = `
 version: 1
 system-prefix: iam-invalid
@@ -29,7 +42,9 @@ const invalidParsed = jsYaml.load(invalid);
 
 module.exports = {
   valid,
+  valid2,
   validParsed,
+  valid2Parsed,
   invalid,
   invalidParsed,
 };
