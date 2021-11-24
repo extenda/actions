@@ -53,6 +53,33 @@ const updateMiscelaneous = async (
       .then(() => handleConsumers(system.id, styraToken, styraUrl, consumers, systemName)));
 };
 
+const updateNamespaces = async (
+  systemInfo, systemOwners, systemName, projectId, system, styraToken, styraUrl, env, errors,
+) => {
+  const namespacePromises = [];
+  for (const namespace of systemInfo.namespace) {
+    namespacePromises.push(checkNamespace(namespace)
+      .then((exists) => {
+        if (!exists) {
+          return createNamespace(projectId, true, namespace)
+            .then(() => buildOpaConfig(system.id, styraToken, namespace, styraUrl)
+              .then((opaConfig) => applyConfiguration(opaConfig, `${systemName}-${namespace}`)
+                .then(() => core.info(`opa successfully setup for ${namespace} in ${env} environment`))));
+        }
+        return updateMiscelaneous(
+          systemName,
+          styraUrl,
+          system,
+          styraToken,
+          systemOwners,
+          systemInfo.repository,
+          systemInfo.consumers,
+        );
+      }).catch((err) => errors.push(err)));
+  }
+  return Promise.all(namespacePromises);
+};
+
 const updateSharedSystems = async (
   sharedSystems, systemName, namespace, repository, consumers,
 ) => {
@@ -134,15 +161,13 @@ const configureIAM = async (
   // Wait for K8s and DAS system.
   await Promise.all(promises);
 
-  const namespacePromises = [];
   sharedSystems.forEach(async (systemInfo, systemName) => {
     promises.push(checkSystem(systemName, styraToken, styraUrl)
       .then(async (system) => {
-        let systemId = system.id;
-        if (systemId === '') {
+        if (system.id === '') {
           const namespace = systemInfo.namespace[0];
           core.info(`creating system '${systemName}' in ${styraUrl}`);
-          await createNamespace(projectId, true, namespace)
+          return createNamespace(projectId, true, namespace)
             .then(() => setupSystem(
               namespace,
               systemName,
@@ -152,30 +177,29 @@ const configureIAM = async (
               styraUrl,
               systemOwners,
               systemInfo.consumers,
+            )).then(() => updateNamespaces(
+              systemInfo,
+              systemOwners,
+              systemName,
+              projectId,
+              system,
+              styraToken,
+              styraUrl,
+              env,
+              errors,
             )).catch((err) => errors.push(err));
-          systemId = await checkSystem(systemName, styraToken, styraUrl);
         }
-        for (const namespace of systemInfo.namespace) {
-          namespacePromises.push(checkNamespace(namespace)
-            .then((exists) => {
-              if (!exists) {
-                return createNamespace(projectId, true, namespace)
-                  .then(() => buildOpaConfig(systemId, styraToken, namespace, styraUrl)
-                    .then((opaConfig) => applyConfiguration(opaConfig, `${systemName}-${namespace}`)
-                      .then(() => core.info(`opa successfully setup for ${namespace} in ${env} environment`))));
-              }
-              return updateMiscelaneous(
-                systemName,
-                styraUrl,
-                system,
-                styraToken,
-                systemOwners,
-                systemInfo.repository,
-                systemInfo.consumers,
-              );
-            }).catch((err) => errors.push(err)));
-        }
-        return Promise.all(namespacePromises);
+        return updateNamespaces(
+          systemInfo,
+          systemOwners,
+          systemName,
+          projectId,
+          system,
+          styraToken,
+          styraUrl,
+          env,
+          errors,
+        );
       }));
   });
 
