@@ -56,20 +56,24 @@ const updateMiscelaneous = async (
 const updateNamespaces = async (
   systemInfo, systemOwners, systemName, projectId, system, styraToken, styraUrl, env, errors,
 ) => {
+  const checkedSystem = system;
   const namespacePromises = [];
+  if (checkedSystem.id === '') {
+    checkedSystem.id = await checkSystem(systemName, styraToken, styraUrl);
+  }
   for (const namespace of systemInfo.namespace) {
     namespacePromises.push(checkNamespace(namespace)
       .then((exists) => {
         if (!exists) {
           return createNamespace(projectId, true, namespace)
-            .then(() => buildOpaConfig(system.id, styraToken, namespace, styraUrl)
+            .then(() => buildOpaConfig(checkedSystem.id, styraToken, namespace, styraUrl)
               .then((opaConfig) => applyConfiguration(opaConfig, `${systemName}-${namespace}`)
                 .then(() => core.info(`opa successfully setup for ${namespace} in ${env} environment`))));
         }
         return updateMiscelaneous(
           systemName,
           styraUrl,
-          system,
+          checkedSystem,
           styraToken,
           systemOwners,
           systemInfo.repository,
