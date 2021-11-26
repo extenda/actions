@@ -56,7 +56,8 @@ properties are required and not.
 | `permissions`                                 | An object containing the permissions for this service. (keys [a-z][-a-z]{1,15})                             | Yes      |
 | `permissions.<resource>`                      | Array containing the verbs for the `<resource>`. (items: ids [a-z][-a-z]{1,15} or objects documented below) | Yes      |
 | `permissions.<resource>.id`                   | Permission id [a-z][-a-z]{1,15}                                                                             | Yes      |
-| `permissions.<resource>.alias`                | Permission alias (max 256 characters)                                                                       | Yes      |
+| `permissions.<resource>.alias`                | Permission alias (max 256 characters)                                                                       | No       |
+| `permissions.<resource>.description`          | Permission description                                                                                      | No       |
 | `roles`                                       | An list of roles that should exist for this service                                                         | No       |
 | `roles.id`                                    | The role id ([a-z][-a-z]{1,19})                                                                             | Yes      |
 | `roles.name`                                  | The role name                                                                                               | Yes      |
