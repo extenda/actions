@@ -130,7 +130,7 @@ conflict.retailsvc.dev  other-service
   });
 
   test('It adds test domains for prod', async () => {
-    exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput(``, opts))
+    exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput('', opts))
       .mockResolvedValueOnce(0)
       .mockResolvedValueOnce(0)
       .mockResolvedValueOnce(0)
