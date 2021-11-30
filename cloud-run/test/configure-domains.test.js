@@ -128,4 +128,32 @@ conflict.retailsvc.dev  other-service
     const domains = await configureDomains(service, undefined, 'prod', 'dns-project');
     expect(domains).toEqual([]);
   });
+
+  test('It adds test domains for prod', async () => {
+    exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput(``, opts))
+      .mockResolvedValueOnce(0)
+      .mockResolvedValueOnce(0)
+      .mockResolvedValueOnce(0)
+      .mockImplementationOnce((bin, args, opts) => mockOutput('* 10.10.10.1', opts));
+
+    const service = {
+      name: 'test-service',
+      platform: {
+        gke: {
+          connectivity: 'external',
+          'domain-mappings': {
+            prod: [
+              'test-service.retailsvc.com',
+            ],
+            staging: [
+              'test-service.retailsvc.dev',
+            ],
+          },
+        },
+      },
+    };
+
+    const domains = await configureDomains(service, mockCluster, 'prod', 'dns-project');
+    expect(domains).toEqual(['test-service.retailsvc.com', 'test-service.retailsvc-test.com']);
+  });
 });
