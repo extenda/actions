@@ -19259,8 +19259,8 @@ const checkRequiredNumberOfPodsIsRunning = async (
     }
 
     // Check the number of pods in running state to be equal to expected number of replicas.
-    if (podsInRunningState === numberOfReplicasToBeRunning 
-      && (podsNotInRunningState === 0 || isNaN(podsNotInRunningState))) {
+    if (podsInRunningState === numberOfReplicasToBeRunning
+      && (podsNotInRunningState === 0 || Number.isNaN(Number(podsNotInRunningState)))) {
       return;
     }
     /* eslint-disable no-await-in-loop */
