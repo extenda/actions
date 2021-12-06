@@ -19214,7 +19214,7 @@ const checkRequiredNumberOfPodsIsRunning = async (
     '| wc -l',
   ];
 
-  // Arguments to return number of pods 
+  // Arguments to return number of pods
   // that have status NOT Running which can be: Pending, Succeeded, Failed, Unknown.
   const getNonRunningPodsArgs = [
     'get',
@@ -19259,13 +19259,12 @@ const checkRequiredNumberOfPodsIsRunning = async (
     }
 
     // Check the number of pods in running state to be equal to expected number of replicas.
-    if ( podsInRunningState == numberOfReplicasToBeRunning && podsNotInRunningState == 0 ) {
+    if (podsInRunningState === numberOfReplicasToBeRunning && podsNotInRunningState === 0) {
       return;
-    } else {
-      /* eslint-disable no-await-in-loop */
-      await timer(retryMs); // Tries again after X milliseconds
-      /* eslint-enable no-await-in-loop */
     }
+    /* eslint-disable no-await-in-loop */
+    await timer(retryMs); // Tries again after X milliseconds
+    /* eslint-enable no-await-in-loop */
   }
   throw new Error(
     `Deployment failed. Number of running pods is lower then expected replica count after ${retryMs * 3} milliseconds.`,
@@ -19913,8 +19912,8 @@ const runDeploy = async (
   await applyKubectl(serviceDefinition.name, deploymentType, dryRun);
 
   await checkRequiredNumberOfPodsIsRunning(
-    serviceDefinition.name, serviceDefinition.replicas, 5000
-    );
+    serviceDefinition.name, serviceDefinition.replicas, 5000,
+  );
 
   // Applies autoscale if the configuration exists in service definition
   // Deletes existing autoscale definition if the configuration is not found in service definition

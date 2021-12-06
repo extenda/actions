@@ -88,9 +88,9 @@ describe('Check number of pods running', () => {
     exec.exec
       .mockImplementationOnce((bin, args, opts) => mockOutput('3', opts)).mockResolvedValue(0);
     exec.exec
-      .mockImplementationOnce((bin, args, opts) =>mockErrorOutput(
-          'Error from server (connection refused): could not establish connection',
-          opts,
+      .mockImplementationOnce((bin, args, opts) => mockErrorOutput(
+        'Error from server (connection refused): could not establish connection',
+        opts,
       ))
       .mockResolvedValue(1);
 
