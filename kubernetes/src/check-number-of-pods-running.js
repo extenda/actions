@@ -21,24 +21,26 @@ const checkRequiredNumberOfPodsIsRunning = async (
     'pods',
     '--field-selector=status.phase=Running',
     `--namespace=${deploymentName}`,
-    `--no-headers=true`,
-    `| wc -l`,
+    '--no-headers=true',
+    '| wc -l',
   ];
 
-  // Arguments to return number of pods that have status NOT Running which can be: Pending, Succeeded, Failed, Unknown.
+  // Arguments to return number of pods 
+  // that have status NOT Running which can be: Pending, Succeeded, Failed, Unknown.
   const getNonRunningPodsArgs = [
     'get',
     'pods',
     '--field-selector=status.phase!=Running',
     `--namespace=${deploymentName}`,
-    `--no-headers=true`,
-    `| wc -l`,
+    '--no-headers=true',
+    '| wc -l',
   ];
 
-  for (let i = 0; i < 3; i+=1) {
+  for (let i = 0; i < 3; i += 1) {
     let podsInRunningState = 0;
     try {
       // Execute kubectl with args and rout output to variable.
+      /* eslint-disable no-await-in-loop */
       await exec.exec('kubectl', getRunningPodsArgs, {
         listeners: {
           stdout: (data) => {
@@ -46,6 +48,7 @@ const checkRequiredNumberOfPodsIsRunning = async (
           },
         },
       });
+      /* eslint-enable no-await-in-loop */
     } catch (err) {
       // Ignored
     }
@@ -53,6 +56,7 @@ const checkRequiredNumberOfPodsIsRunning = async (
     let podsNotInRunningState = 0;
     try {
       // Execute kubectl with args and rout output to variable.
+      /* eslint-disable no-await-in-loop */
       await exec.exec('kubectl', getNonRunningPodsArgs, {
         listeners: {
           stdout: (data) => {
@@ -60,18 +64,18 @@ const checkRequiredNumberOfPodsIsRunning = async (
           },
         },
       });
+      /* eslint-enable no-await-in-loop */
     } catch (err) {
       // Ignored
     }
 
     // Check the number of pods in running state to be equal to expected number of replicas.
-    if (
-      podsInRunningState !== numberOfReplicasToBeRunning || podsNotInRunningState >= 0
-    ) {
-      await timer(retryMs); // Tries again after X milliseconds
-      continue;
-    } else {
+    if ( podsInRunningState == numberOfReplicasToBeRunning && podsNotInRunningState == 0 ) {
       return;
+    } else {
+      /* eslint-disable no-await-in-loop */
+      await timer(retryMs); // Tries again after X milliseconds
+      /* eslint-enable no-await-in-loop */
     }
   }
   throw new Error(

@@ -60,8 +60,8 @@ const applyAutoscale = async (deploymentName, deploymentType, autoscale, permane
     return;
   }
 
-// Horizontal pod autoscaler spec template.
-const hpaYaml = `
+  // Horizontal pod autoscaler spec template.
+  const hpaYaml = `
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:

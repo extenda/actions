@@ -20,20 +20,20 @@ const getRunningPodsArgs = [
   'get',
   'pods',
   '--field-selector=status.phase=Running',
-  `--namespace=testDeploymentName`,
-  `--no-headers=true`,
-  `| wc -l`,
+  '--namespace=testDeploymentName',
+  '--no-headers=true',
+  '| wc -l',
 ];
 
-// Arguments to return number of pods that have status 
+// Arguments to return number of pods that have status
 // NOT Running which can be: Pending, Succeeded, Failed, Unknown.
 const getNonRunningPodsArgs = [
   'get',
   'pods',
   '--field-selector=status.phase!=Running',
-  `--namespace=testDeploymentName`,
-  `--no-headers=true`,
-  `| wc -l`,
+  '--namespace=testDeploymentName',
+  '--no-headers=true',
+  '| wc -l',
 ];
 
 describe('Check number of pods running', () => {
@@ -49,15 +49,15 @@ describe('Check number of pods running', () => {
   test('It throws error if namespace does not exist', async () => {
     exec.exec
       .mockImplementationOnce((bin, args, opts) => mockErrorOutput(
-          'Error from server (NotFound): running pods not found',
-          opts,
-        ),)
+        'Error from server (NotFound): running pods not found',
+        opts,
+      ))
       .mockResolvedValue(0);
     await expect(
       checkRequiredNumberOfPodsIsRunning('testDeploymentName', 3, 10),
     ).rejects.toEqual(
       new Error(
-        `Deployment failed. Number of running pods is lower then expected replica count after 30 milliseconds.`,
+        'Deployment failed. Number of running pods is lower then expected replica count after 30 milliseconds.',
       ),
     );
 
@@ -68,9 +68,9 @@ describe('Check number of pods running', () => {
   test('It fails on unknown error', async () => {
     exec.exec
       .mockImplementationOnce((bin, args, opts) => mockErrorOutput(
-          'Error from server (connection refused): could not establish connection',
-          opts,
-        ),)
+        'Error from server (connection refused): could not establish connection',
+        opts,
+      ))
       .mockResolvedValue(0);
     await expect(
       checkRequiredNumberOfPodsIsRunning('testDeploymentName', 3, 10),
@@ -81,18 +81,17 @@ describe('Check number of pods running', () => {
     );
     expect(exec.exec).toHaveBeenCalledTimes(6);
     // Checks that the second time exec was called it was with non-running parameters.
-    expect(exec.exec.mock.calls[1][1]).toEqual(getNonRunningPodsArgs); 
+    expect(exec.exec.mock.calls[1][1]).toEqual(getNonRunningPodsArgs);
   });
 
   test('It reuses namespace if exists', async () => {
     exec.exec
-      .mockImplementationOnce((bin, args, opts) => mockOutput('3', opts),).mockResolvedValue(0);
+      .mockImplementationOnce((bin, args, opts) => mockOutput('3', opts)).mockResolvedValue(0);
     exec.exec
-      .mockImplementationOnce((bin, args, opts) =>
-      mockErrorOutput(
-        'Error from server (connection refused): could not establish connection',
-        opts,
-      ),)
+      .mockImplementationOnce((bin, args, opts) =>mockErrorOutput(
+          'Error from server (connection refused): could not establish connection',
+          opts,
+      ))
       .mockResolvedValue(1);
 
     await checkRequiredNumberOfPodsIsRunning('testDeploymentName', 3, 10);

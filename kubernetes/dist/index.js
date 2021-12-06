@@ -19100,8 +19100,8 @@ const applyAutoscale = async (deploymentName, deploymentType, autoscale, permane
     return;
   }
 
-// Horizontal pod autoscaler spec template.
-const hpaYaml = `
+  // Horizontal pod autoscaler spec template.
+  const hpaYaml = `
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
@@ -19210,24 +19210,26 @@ const checkRequiredNumberOfPodsIsRunning = async (
     'pods',
     '--field-selector=status.phase=Running',
     `--namespace=${deploymentName}`,
-    `--no-headers=true`,
-    `| wc -l`,
+    '--no-headers=true',
+    '| wc -l',
   ];
 
-  // Arguments to return number of pods that have status NOT Running which can be: Pending, Succeeded, Failed, Unknown.
+  // Arguments to return number of pods 
+  // that have status NOT Running which can be: Pending, Succeeded, Failed, Unknown.
   const getNonRunningPodsArgs = [
     'get',
     'pods',
     '--field-selector=status.phase!=Running',
     `--namespace=${deploymentName}`,
-    `--no-headers=true`,
-    `| wc -l`,
+    '--no-headers=true',
+    '| wc -l',
   ];
 
-  for (let i = 0; i < 3; i+=1) {
+  for (let i = 0; i < 3; i += 1) {
     let podsInRunningState = 0;
     try {
       // Execute kubectl with args and rout output to variable.
+      /* eslint-disable no-await-in-loop */
       await exec.exec('kubectl', getRunningPodsArgs, {
         listeners: {
           stdout: (data) => {
@@ -19235,6 +19237,7 @@ const checkRequiredNumberOfPodsIsRunning = async (
           },
         },
       });
+      /* eslint-enable no-await-in-loop */
     } catch (err) {
       // Ignored
     }
@@ -19242,6 +19245,7 @@ const checkRequiredNumberOfPodsIsRunning = async (
     let podsNotInRunningState = 0;
     try {
       // Execute kubectl with args and rout output to variable.
+      /* eslint-disable no-await-in-loop */
       await exec.exec('kubectl', getNonRunningPodsArgs, {
         listeners: {
           stdout: (data) => {
@@ -19249,18 +19253,18 @@ const checkRequiredNumberOfPodsIsRunning = async (
           },
         },
       });
+      /* eslint-enable no-await-in-loop */
     } catch (err) {
       // Ignored
     }
 
     // Check the number of pods in running state to be equal to expected number of replicas.
-    if (
-      podsInRunningState !== numberOfReplicasToBeRunning || podsNotInRunningState >= 0
-    ) {
-      await timer(retryMs); // Tries again after X milliseconds
-      continue;
-    } else {
+    if ( podsInRunningState == numberOfReplicasToBeRunning && podsNotInRunningState == 0 ) {
       return;
+    } else {
+      /* eslint-disable no-await-in-loop */
+      await timer(retryMs); // Tries again after X milliseconds
+      /* eslint-enable no-await-in-loop */
     }
   }
   throw new Error(
@@ -19280,7 +19284,7 @@ const fs = __webpack_require__(5747);
 const path = __webpack_require__(5622);
 
 /**
- * Creates files on the file system: 
+ * Creates files on the file system:
  * service.yaml, statefulSet.yaml, deployment.yaml, configmap.yaml, kustomization.yaml.
  * @param deploymentName Service name that is ingested into the files.
  */
@@ -19401,9 +19405,9 @@ module.exports = createBaseKustomizeFiles;
 /**
  * Creates dictionary of environmental variables from the provided definition.
  * @param environment Definition of environmental variables (part of service definition).
- * @param projectId Project id in GCP. 
+ * @param projectId Project id in GCP.
  * Is used to determine values for SERVICE_PROJECT_ID and SERVICE_ENVIRONMENT.
- * @returns A dictionary of environmental variables where the key equals 
+ * @returns A dictionary of environmental variables where the key equals
  * the name of the variable and value equals its value.
  */
 const parseEnvironmentArgs = (environment, projectId) => {
@@ -19774,7 +19778,7 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
 /**
  * Applies patch function to the kubernetes manifest file.
  * Reads file from filesystem. Writes it back to the same place after patch is applied.
- * @param manifest Kubernetes manifest file name. 
+ * @param manifest Kubernetes manifest file name.
  * File must exist in ./kustomize folder. Ex.: statefulset.yml
  * @param patcher Function to be applied to the manifest file.
  */
@@ -19852,7 +19856,7 @@ const kustomizeResource = async (resource) => {
  The account key should be a base64 encoded JSON key stored as a secret.
  * @param serviceDefinition The service specification definition.
  * @param image The Docker image to deploy to Kubernetes.
- * @param dryRun Instructs not to perform actual kubernetes deployment. 
+ * @param dryRun Instructs not to perform actual kubernetes deployment.
  * Set to 'true' to only simulate deploying the final Kubernetes manifest.
  */
 const runDeploy = async (
@@ -19871,7 +19875,7 @@ const runDeploy = async (
   // Adds ports and removes clusterIp from spec
   patchManifest('service.yml', (ymlFileName) => patchServiceYaml(serviceDefinition, ymlFileName));
 
-  // Adds environment variables specified in the definition 
+  // Adds environment variables specified in the definition
   // as well as SERVICE_PROJECT_ID and SERVICE_ENVIRONMENT.
   patchManifest('configmap.yml', (ymlFileName) => {
     const args = parseEnvironmentArgs(serviceDefinition.environment, projectId);
@@ -19881,7 +19885,7 @@ const runDeploy = async (
   // The storage being requested requires the deployment type to be StatefulSet.
   const deploymentType = serviceDefinition.storage ? 'statefulset' : 'deployment';
 
-  // Change parameters to the ones specified in the definition: 
+  // Change parameters to the ones specified in the definition:
   // replicas, storage as well as requests and limits for the resources.
   if (deploymentType === 'statefulset') {
     patchManifest('statefulSet.yml', (ymlFileName) => patchStatefulSetYaml(serviceDefinition, ymlFileName));
@@ -19909,11 +19913,12 @@ const runDeploy = async (
   await applyKubectl(serviceDefinition.name, deploymentType, dryRun);
 
   await checkRequiredNumberOfPodsIsRunning(
-    serviceDefinition.name, serviceDefinition.replicas, 5000);
+    serviceDefinition.name, serviceDefinition.replicas, 5000
+    );
 
   // Applies autoscale if the configuration exists in service definition
   // Deletes existing autoscale definition if the configuration is not found in service definition
-  await applyAutoscale(serviceDefinition.name, deploymentType, 
+  await applyAutoscale(serviceDefinition.name, deploymentType,
     serviceDefinition.autoscale, serviceDefinition.replicas, dryRun);
 };
 

@@ -28,7 +28,7 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
 /**
  * Applies patch function to the kubernetes manifest file.
  * Reads file from filesystem. Writes it back to the same place after patch is applied.
- * @param manifest Kubernetes manifest file name. 
+ * @param manifest Kubernetes manifest file name.
  * File must exist in ./kustomize folder. Ex.: statefulset.yml
  * @param patcher Function to be applied to the manifest file.
  */
@@ -106,7 +106,7 @@ const kustomizeResource = async (resource) => {
  The account key should be a base64 encoded JSON key stored as a secret.
  * @param serviceDefinition The service specification definition.
  * @param image The Docker image to deploy to Kubernetes.
- * @param dryRun Instructs not to perform actual kubernetes deployment. 
+ * @param dryRun Instructs not to perform actual kubernetes deployment.
  * Set to 'true' to only simulate deploying the final Kubernetes manifest.
  */
 const runDeploy = async (
@@ -125,7 +125,7 @@ const runDeploy = async (
   // Adds ports and removes clusterIp from spec
   patchManifest('service.yml', (ymlFileName) => patchServiceYaml(serviceDefinition, ymlFileName));
 
-  // Adds environment variables specified in the definition 
+  // Adds environment variables specified in the definition
   // as well as SERVICE_PROJECT_ID and SERVICE_ENVIRONMENT.
   patchManifest('configmap.yml', (ymlFileName) => {
     const args = parseEnvironmentArgs(serviceDefinition.environment, projectId);
@@ -135,7 +135,7 @@ const runDeploy = async (
   // The storage being requested requires the deployment type to be StatefulSet.
   const deploymentType = serviceDefinition.storage ? 'statefulset' : 'deployment';
 
-  // Change parameters to the ones specified in the definition: 
+  // Change parameters to the ones specified in the definition:
   // replicas, storage as well as requests and limits for the resources.
   if (deploymentType === 'statefulset') {
     patchManifest('statefulSet.yml', (ymlFileName) => patchStatefulSetYaml(serviceDefinition, ymlFileName));
@@ -163,11 +163,12 @@ const runDeploy = async (
   await applyKubectl(serviceDefinition.name, deploymentType, dryRun);
 
   await checkRequiredNumberOfPodsIsRunning(
-    serviceDefinition.name, serviceDefinition.replicas, 5000);
+    serviceDefinition.name, serviceDefinition.replicas, 5000
+    );
 
   // Applies autoscale if the configuration exists in service definition
   // Deletes existing autoscale definition if the configuration is not found in service definition
-  await applyAutoscale(serviceDefinition.name, deploymentType, 
+  await applyAutoscale(serviceDefinition.name, deploymentType,
     serviceDefinition.autoscale, serviceDefinition.replicas, dryRun);
 };
 
