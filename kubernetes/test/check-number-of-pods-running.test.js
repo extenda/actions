@@ -84,7 +84,7 @@ describe('Check number of pods running', () => {
     expect(exec.exec.mock.calls[1][1]).toEqual(getNonRunningPodsArgs);
   });
 
-  test('It reuses namespace if exists', async () => {
+  test('It executes successfully when running pods is equal to 3 and non-running to 0', async () => {
     exec.exec
       .mockImplementationOnce((bin, args, opts) => mockOutput('3', opts)).mockResolvedValue(0);
     exec.exec
