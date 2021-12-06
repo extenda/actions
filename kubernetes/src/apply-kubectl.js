@@ -1,7 +1,7 @@
 const exec = require('@actions/exec');
 
 /**
-Applies the existing kustomize from ./kustomize folder. 
+Applies the existing kustomize from ./kustomize folder.
 If not dry-run then triggers a rolling update for the service.
 Watches the rollout status until it's done.
 */
@@ -20,7 +20,6 @@ const applyKubectl = async (deploymentName, deploymentType, dryRun = false) => {
   await exec.exec('kubectl', applyArgs);
 
   if (!dryRun) {
-    
     await exec.exec('kubectl', [
       'rollout',
       'status',
@@ -29,7 +28,6 @@ const applyKubectl = async (deploymentName, deploymentType, dryRun = false) => {
       `--namespace=${deploymentName}`,
       '--watch=true',
     ]);
-  
   }
 };
 

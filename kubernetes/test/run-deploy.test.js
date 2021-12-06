@@ -237,5 +237,6 @@ describe('Run Deploy', () => {
     );
 
     expect(applyAutoscale).toHaveBeenCalledWith(service.name, 'deployment', undefined, service.replicas, dryRun);
+    expect(checkRequiredNumberOfPodsIsRunning).toHaveBeenCalledTimes(1);
   });
 });

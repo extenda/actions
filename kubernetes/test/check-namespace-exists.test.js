@@ -1,4 +1,5 @@
 const exec = require('@actions/exec');
+
 jest.mock('@actions/exec');
 
 const mockFs = require('mock-fs');
@@ -18,7 +19,7 @@ describe('Check the namespace exists', () => {
     mockFs.restore();
     jest.resetAllMocks();
   });
-  
+
   test('It throws error if namespace does not exist', async () => {
     exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput('Error from server (NotFound): namespaces "deploymentNamespace" not found', opts))
       .mockResolvedValue(0);

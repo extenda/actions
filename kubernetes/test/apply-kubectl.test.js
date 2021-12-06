@@ -36,7 +36,7 @@ describe('Kubectl applies manifest', () => {
         deploymentType,
         deployment,
         `--namespace=${deployment}`,
-        "--watch=true",
+        '--watch=true',
       ],
     );
   });

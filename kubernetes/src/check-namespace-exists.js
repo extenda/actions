@@ -1,7 +1,6 @@
 const exec = require('@actions/exec');
 
 /**
- * 
  * @param namespace Namespace name to be searched for.
  * @returns True if namespace exists in GCP. False if namespace is not found.
  */
@@ -29,7 +28,7 @@ const getNamespace = async (namespace) => {
 };
 
 /**
- * Checks that namespace is created for the service in gcp. 
+ * Checks that namespace is created for the service in gcp.
  * Throws error if it's not there.
  * @param namespace Namespace name to be searched for.
  */

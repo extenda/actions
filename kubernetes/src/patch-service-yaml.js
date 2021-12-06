@@ -9,7 +9,7 @@ const patchServiceYaml = (serviceDefinition, serviceYaml) => {
 
   if (serviceDefinition.ports && serviceDefinition.ports.length) {
     patchedService.spec.ports = serviceDefinition.ports;
-    
+
     // remove clusterIp:NONE from template
     delete patchedService.spec.clusterIP;
   }

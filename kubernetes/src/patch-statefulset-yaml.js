@@ -26,12 +26,12 @@ const patchStatefulSetYaml = (serviceDefinition, statefulsetYaml) => {
   statefulSet.spec.volumeClaimTemplates[0].spec.resources.requests.storage = volume;
 
   // Default parameters in template are set to:
-  //requests:
-  //  cpu: 100m
-  //  memory: 256Mi
-  //limits:
-  //  cpu: 100m
-  //  memory: 256Mi
+  // requests:
+  //   cpu: 100m
+  //   memory: 256Mi
+  // limits:
+  //   cpu: 100m
+  //   memory: 256Mi
   if (requests) {
     statefulSet.spec.template.spec.containers[0].resources.requests.cpu = requests.cpu;
     statefulSet.spec.template.spec.containers[0].resources.requests.memory = requests.memory;

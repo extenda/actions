@@ -1,7 +1,7 @@
 const exec = require('@actions/exec');
 const fs = require('fs');
 
-const getAutoscale = async (deploymentName) =>{
+const getAutoscale = async (deploymentName) => {
   // We introduce this variable to get the output of the kubectl command.
   let errOutput = '';
   // Trying to get autoscaler first. Only delete it if it exists.
@@ -21,7 +21,7 @@ const getAutoscale = async (deploymentName) =>{
     throw err;
   }
   return true;
-}
+};
 
 /**
  * Only removes autoscale configuration if it exists.
@@ -29,10 +29,9 @@ const getAutoscale = async (deploymentName) =>{
  */
 const removeAutoscale = async (deploymentName, deploymentType, permanentReplicas, dryRunArg) => {
   // Check if the autoscale configuration exists for deployment.
-  let autoscaleExists = await getAutoscale(deploymentName);
+  const autoscaleExists = await getAutoscale(deploymentName);
   // If it doesn't exist there's nothing to do.
-  if(!autoscaleExists)
-  {
+  if (!autoscaleExists) {
     return;
   }
   // Delete existing autoscaler configuration.
@@ -42,10 +41,9 @@ const removeAutoscale = async (deploymentName, deploymentType, permanentReplicas
 };
 
 /**
- * Applies autoscale configuration to the existing deployment. 
+ * Applies autoscale configuration to the existing deployment.
  * If autoscale configuration is not provided, autoscaling will be deleted from services' spec.
  * Provided deploymentType must be consistent with the one of the existing service.
- * 
  * @param  deploymentName service name
  * @param  deploymentType statefulSet or deployment
  * @param  autoscale configuration must include minReplicas, maxReplicas and cpuPercent
@@ -62,7 +60,7 @@ const applyAutoscale = async (deploymentName, deploymentType, autoscale, permane
     return;
   }
 
-//Horizontal pod autoscaler spec template.
+// Horizontal pod autoscaler spec template.
 const hpaYaml = `
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
