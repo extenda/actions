@@ -21,7 +21,7 @@ describe('clean revisions', () => {
   test('clean revisions', async () => {
     exec.exec.mockImplementationOnce((
       cmd, args, opts,
-    ) => opts.listeners.stdout(revisionsListString));
+    ) => opts.listeners.stderr(revisionsListString));
     cleanRevisions('service-name', 'test-staging-t3st', 'k8s-cluster', 'europe-west1', 3);
     expect(exec.exec).toHaveBeenCalledTimes(1);
   });

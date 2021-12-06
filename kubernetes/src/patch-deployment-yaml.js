@@ -1,5 +1,9 @@
 const yaml = require('yaml');
 
+/**
+ * Patches deployment specification with values provided in service definition.
+ * @returns Patched deployment specification yaml in string format.
+ */
 const patchDeploymentYaml = (service, deploymentYaml) => {
   const deployment = yaml.parse(deploymentYaml);
 
