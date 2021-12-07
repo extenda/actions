@@ -34,8 +34,8 @@ describe('Setup permissions and handle', () => {
     };
 
     const result = new Map();
-    result.set('test.resource.get', { description: '', alias: 'get' });
-    result.set('test.resource.create', { description: '', alias: 'create' });
+    result.set('test.resource.get', { alias: 'get' });
+    result.set('test.resource.create', { alias: 'create' });
 
     await expect(setupPermissions(permissions, 'test'))
       .resolves.toEqual(result);
