@@ -1,6 +1,6 @@
 # vale-linting
 
-This is a composite GitHub Action to make it easy to run a [Vale Linter](https://github.com/errata-ai/vale).
+This is a composite GitHub Action to make it easy to run a [Vale Linter](https://github.com/extenda/vale-action).
 
 ## Usage
 
