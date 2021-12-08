@@ -11202,6 +11202,13 @@ const configureDomains = async (
 
   const domains = domainMappings[env] || [];
 
+  // If prod and retailsvc.com is listed, add retailsvc-test.com
+  if (env === 'prod') {
+    const testDomains = domains.filter((d) => d.endsWith('retailsvc.com'))
+      .map((d) => d.replace('retailsvc.com', 'retailsvc-test.com'));
+    domains.push(...testDomains);
+  }
+
   if (connectivity === 'external' && domains.length > 0) {
     const newDomains = await getNewDomains(domains, name, cluster, namespace);
 
