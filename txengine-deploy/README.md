@@ -19,6 +19,7 @@ The action will always set the following environment and secrets:
   * `DATABASE_PASSWORD`
   * `SERVICE_PROJECT_ID` - the GCP project ID
   * `SERVICE_ENVIRONMENT` - one of `staging` or `prod`
+  * `LAUNCH_DARKLY_ACCESS_KEY` - the SDK key to use LaunchDarkly as a feature flag provider
 
 ## Usage
 
