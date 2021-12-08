@@ -33,6 +33,7 @@ const defaultEnvironment = (projectId, tenantName, countryCode) => ({
   PGPASSWORD: `sm://${projectId}/${tenantName}_${getConditionalCountryCodeString(countryCode)}postgresql_master_password`,
   SERVICE_PROJECT_ID: projectId,
   SERVICE_ENVIRONMENT: projectId.includes('-staging-') ? 'staging' : 'prod',
+  LAUNCH_DARKLY_ACCESS_KEY: `sm://${projectId}/launchdarkly-sdk-key`,
 });
 
 const loadAllSecrets = async (serviceAccountKey, secrets) => {

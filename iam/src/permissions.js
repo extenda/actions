@@ -40,8 +40,8 @@ const getPermission = async (
     authorization: `Bearer ${iamToken}`,
   },
 }).then((response) => {
-  const { description = null, alias = null } = response.data;
-  return description === permissionDesc || alias === permissionAlias ? 'NONE' : 'PUT';
+  const { description, alias } = response.data;
+  return description === permissionDesc && alias === permissionAlias ? 'NONE' : 'PUT';
 }).catch((err) => {
   if (err.response.status === 404) {
     return 'POST';
@@ -73,13 +73,12 @@ const setupPermissions = async (permissions, systemId) => {
   const fullPermissions = new Map();
   Object.keys(permissions).forEach((noun) => {
     Object.values(permissions[noun]).forEach((verb) => {
-      const description = '';
       if (typeof verb === 'string') {
         const id = `${systemId}.${noun}.${verb}`;
-        fullPermissions.set(id, { description });
+        fullPermissions.set(id, { description: '' });
       } else {
         const id = `${systemId}.${noun}.${verb.id}`;
-        const { alias } = verb;
+        const { alias, description } = verb;
         fullPermissions.set(id, { description, alias });
       }
     });
