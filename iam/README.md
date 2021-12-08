@@ -50,6 +50,7 @@ properties are required and not.
 | `services`                                    | A list of services that need a DAS system                                                                   | Yes      |
 | `services.name`                               | The service name of the system to be created                                                                | Yes      |
 | `services.repository`                         | The description of the service                                                                              | Yes      |
+| `services.styra-name`                         | Set a styra system name for sharing policy between services                                                 | No       |
 | `services.allowed-consumers`                  | A list of clans and services allowed to consume this service                                                | No       |
 | `services.allowed-consumers.clan`             | Your clan name subscribing to this service                                                                  | Yes      |
 | `services.allowed-consumers.service-accounts` | A list of service accounts allowed to consume this service. (Full service account name required)            | Yes      |
@@ -152,6 +153,37 @@ roles:
       - quote.get
       - quote.list
       - quote.update
+  - id: viewer
+    name: Braveheart quotes viwer
+    desc: view access
+    permissions:
+      - quote.get
+      - quote.list
+
+
+```
+
+#### Setup a shared system for services
+
+This example defines a YAML file that creates a shared system for 2 services ( service-a and service-b)
+```yaml
+name: quotes service
+permission-prefix: bhq
+services:
+  - name: service-a
+    repository: service-a
+    styra-name: styra-system-name
+  - name: service-b
+    repository: service-b
+    styra-name: styra-system-name
+permissions:
+  quote:
+    - create
+    - delete
+    - get
+    - list
+    - update
+roles:
   - id: viewer
     name: Braveheart quotes viwer
     desc: view access
