@@ -16,6 +16,7 @@ runs:
       with:
         styles: |
           https://github.com/extenda/docker-vale/releases/download/latest/Extenda.zip
+          https://github.com/errata-ai/Google/releases/latest/download/Google.zip
         config: https://raw.githubusercontent.com/extenda/docker-vale/master/vale.ini
         exclude: ${{ inputs.exclude }}
         passCondition: |
