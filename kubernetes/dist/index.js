@@ -10787,53 +10787,6 @@ module.exports = {
 
 /***/ }),
 
-/***/ 8494:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-const exec = __webpack_require__(8972);
-const { setOpaInjectionLabels } = __webpack_require__(5892);
-
-const getNamespace = async (namespace) => {
-  let output = '';
-  try {
-    await exec.exec('kubectl', [
-      'get',
-      'namespace',
-      namespace,
-    ], {
-      listeners: {
-        stderr: (data) => {
-          output += data.toString('utf8');
-        },
-      },
-    });
-  } catch (err) {
-    if (output.includes('(NotFound)')) {
-      return false;
-    }
-    throw new Error(`Could not get namespace information! reason: ${err.message || 'unknown'}`);
-  }
-  return true;
-};
-
-const createNamespace = async (projectId,
-  opaEnabled,
-  namespace) => {
-  if (!await getNamespace(namespace)) {
-    throw new Error(`Namespace not found, please make sure your service is setup correctly!
-Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md#services for more information`);
-  }
-
-  if (opaEnabled !== 'skip') {
-    await setOpaInjectionLabels(namespace, opaEnabled);
-  }
-};
-
-module.exports = createNamespace;
-
-
-/***/ }),
-
 /***/ 8295:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -10911,33 +10864,6 @@ const loadServiceDefinition = (serviceFile, schema) => {
 };
 
 module.exports = loadServiceDefinition;
-
-
-/***/ }),
-
-/***/ 5892:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-const exec = __webpack_require__(8972);
-
-const setLabel = async (namespace, label, value) => exec.exec('kubectl', [
-  'label',
-  'namespace',
-  namespace,
-  `${label}=${value}`,
-  '--overwrite=true',
-]);
-
-const setOpaInjectionLabels = async (namespace, opaEnabled) => {
-  const opaInjection = opaEnabled ? 'enabled' : 'disabled';
-  await setLabel(namespace, 'opa-istio-injection', opaInjection);
-  await setLabel(namespace, 'istio-injection', opaInjection);
-};
-
-module.exports = {
-  setLabel,
-  setOpaInjectionLabels,
-};
 
 
 /***/ }),
@@ -19073,7 +18999,13 @@ module.exports = __webpack_require__(3333).YAML
 
 const exec = __webpack_require__(2176);
 
-const applyKubectl = async (deployment, deploymentType, dryRun = false) => {
+/**
+Applies the existing kustomize from ./kustomize folder.
+If not dry-run then triggers a rolling update for the service.
+Watches the rollout status until it's done.
+*/
+const applyKubectl = async (deploymentName, deploymentType, dryRun = false) => {
+  // Form additional argument for the kubectl command
   const applyArgs = [
     'apply',
     '-k',
@@ -19083,6 +19015,7 @@ const applyKubectl = async (deployment, deploymentType, dryRun = false) => {
     applyArgs.push('--dry-run=client');
   }
 
+  // Apply changes and trigger rolling update
   await exec.exec('kubectl', applyArgs);
 
   if (!dryRun) {
@@ -19090,8 +19023,9 @@ const applyKubectl = async (deployment, deploymentType, dryRun = false) => {
       'rollout',
       'status',
       deploymentType,
-      deployment,
-      `--namespace=${deployment}`,
+      deploymentName,
+      `--namespace=${deploymentName}`,
+      '--watch=true',
     ]);
   }
 };
@@ -19107,8 +19041,10 @@ module.exports = applyKubectl;
 const exec = __webpack_require__(2176);
 const fs = __webpack_require__(5747);
 
-const removeAutoscale = async (deploymentName, deploymentType, permanentReplicas, dryRunArg) => {
+const getAutoscale = async (deploymentName) => {
+  // We introduce this variable to get the output of the kubectl command.
   let errOutput = '';
+  // Trying to get autoscaler first. Only delete it if it exists.
   try {
     await exec.exec('kubectl', ['get', 'hpa', deploymentName, `--namespace=${deploymentName}`],
       {
@@ -19120,25 +19056,51 @@ const removeAutoscale = async (deploymentName, deploymentType, permanentReplicas
       });
   } catch (err) {
     if (errOutput.includes('(NotFound)')) {
-      return;
+      return false;
     }
     throw err;
   }
+  return true;
+};
 
+/**
+ * Only removes autoscale configuration if it exists.
+ * Manually scales the number of replicas to the provided value.
+ */
+const removeAutoscale = async (deploymentName, deploymentType, permanentReplicas, dryRunArg) => {
+  // Check if the autoscale configuration exists for deployment.
+  const autoscaleExists = await getAutoscale(deploymentName);
+  // If it doesn't exist there's nothing to do.
+  if (!autoscaleExists) {
+    return;
+  }
+  // Delete existing autoscaler configuration.
   await exec.exec('kubectl', ['delete', 'hpa', deploymentName, `--namespace=${deploymentName}`, ...dryRunArg]);
+  // Manually scale replicas to the provided value.
   await exec.exec('kubectl', ['scale', deploymentType, deploymentName, `--namespace=${deploymentName}`, `--replicas=${permanentReplicas}`, ...dryRunArg]);
 };
 
-
+/**
+ * Applies autoscale configuration to the existing deployment.
+ * If autoscale configuration is not provided, autoscaling will be deleted from services' spec.
+ * Provided deploymentType must be consistent with the one of the existing service.
+ * @param  deploymentName service name
+ * @param  deploymentType statefulSet or deployment
+ * @param  autoscale configuration must include minReplicas, maxReplicas and cpuPercent
+ * @param  permanentReplicas value to be used if autoscale configuration is deleted
+ * @param  dryRun if true no actual changes will be applied to production
+ */
 const applyAutoscale = async (deploymentName, deploymentType, autoscale, permanentReplicas,
   dryRun) => {
   const dryRunArg = dryRun ? ['--dry-run=client'] : [];
 
+  // If there's no autoscale parameters provided we remove autoscale configuration from deployment
   if (autoscale == null) {
     await removeAutoscale(deploymentName, deploymentType, permanentReplicas, dryRunArg);
     return;
   }
 
+  // Horizontal pod autoscaler spec template.
   const hpaYaml = `
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
@@ -19161,12 +19123,156 @@ spec:
         averageUtilization: ${autoscale.cpuPercent}
 `;
 
+  // Write hpa template to disc to apply afterwards.
   fs.writeFileSync('hpa.yml', hpaYaml);
 
+  // Apply the autoscale configuration from above.
   await exec.exec('kubectl', ['apply', '-f', 'hpa.yml', ...dryRunArg]);
 };
 
 module.exports = applyAutoscale;
+
+
+/***/ }),
+
+/***/ 2632:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const exec = __webpack_require__(2176);
+
+/**
+ * @param namespace Namespace name to be searched for.
+ * @returns True if namespace exists in GCP. False if namespace is not found.
+ */
+const getNamespace = async (namespace) => {
+  let output = '';
+  try {
+    await exec.exec('kubectl', [
+      'get',
+      'namespace',
+      namespace,
+    ], {
+      listeners: {
+        stderr: (data) => {
+          output += data.toString('utf8');
+        },
+      },
+    });
+  } catch (err) {
+    if (output.includes('(NotFound)')) {
+      return false;
+    }
+    throw new Error(`Could not get namespace information! reason: ${err.message || 'unknown'}`);
+  }
+  return true;
+};
+
+/**
+ * Checks that namespace is created for the service in gcp.
+ * Throws error if it's not there.
+ * @param namespace Namespace name to be searched for.
+ */
+const checkNamespaceExists = async (namespace) => {
+  if (!await getNamespace(namespace)) {
+    throw new Error(`Namespace not found, please make sure your service is setup correctly!
+Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md#services for more information`);
+  }
+};
+
+module.exports = checkNamespaceExists;
+
+
+/***/ }),
+
+/***/ 6343:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const exec = __webpack_require__(2176);
+
+/**
+ * Simple timer to wait for a specified amount of time.
+ * @param ms Number of milliseconds to wait
+ */
+const timer = (ms) => new Promise((res) => setTimeout(res, ms));
+
+/**
+Verifies that the number of pods running for deployment is equal to the expected number of replicas.
+*/
+const checkRequiredNumberOfPodsIsRunning = async (
+  deploymentName,
+  numberOfReplicasToBeRunning,
+  retryMs,
+) => {
+  // Form additional argument for the kubectl command.
+  // Arguments to return number of pods that have status Running.
+  const getRunningPodsArgs = [
+    'get',
+    'pods',
+    '--field-selector=status.phase=Running',
+    `--namespace=${deploymentName}`,
+    '--no-headers=true',
+    '| wc -l',
+  ];
+
+  // Arguments to return number of pods
+  // that have status NOT Running which can be: Pending, Succeeded, Failed, Unknown.
+  const getNonRunningPodsArgs = [
+    'get',
+    'pods',
+    '--field-selector=status.phase!=Running',
+    `--namespace=${deploymentName}`,
+    '--no-headers=true',
+    '| wc -l',
+  ];
+
+  for (let i = 0; i < 3; i += 1) {
+    let podsInRunningState = 0;
+    try {
+      // Execute kubectl with args and rout output to variable.
+      /* eslint-disable no-await-in-loop */
+      await exec.exec('kubectl', getRunningPodsArgs, {
+        listeners: {
+          stdout: (data) => {
+            podsInRunningState += parseInt(data.toString('utf8').trim(), 10);
+          },
+        },
+      });
+      /* eslint-enable no-await-in-loop */
+    } catch (err) {
+      // Ignored
+    }
+
+    let podsNotInRunningState = 0;
+    try {
+      // Execute kubectl with args and rout output to variable.
+      /* eslint-disable no-await-in-loop */
+      await exec.exec('kubectl', getNonRunningPodsArgs, {
+        listeners: {
+          stdout: (data) => {
+            podsNotInRunningState += parseInt(data.toString('utf8').trim(), 10);
+          },
+        },
+      });
+      /* eslint-enable no-await-in-loop */
+    } catch (err) {
+      // Ignored
+    }
+
+    // Check the number of pods in running state to be equal to expected number of replicas.
+    if (podsInRunningState === numberOfReplicasToBeRunning
+      && (podsNotInRunningState === 0 || Number.isNaN(Number(podsNotInRunningState)))) {
+      return;
+    }
+    /* eslint-disable no-await-in-loop */
+    await timer(retryMs); // Tries again after X milliseconds
+    /* eslint-enable no-await-in-loop */
+  }
+  throw new Error(
+    `Deployment failed. Number of running pods is lower then expected replica count after ${retryMs * 3} milliseconds.`,
+  );
+};
+
+module.exports = checkRequiredNumberOfPodsIsRunning;
 
 
 /***/ }),
@@ -19177,7 +19283,12 @@ module.exports = applyAutoscale;
 const fs = __webpack_require__(5747);
 const path = __webpack_require__(5622);
 
-const createBaseKustomize = (deploymentName) => {
+/**
+ * Creates files on the file system:
+ * service.yaml, statefulSet.yaml, deployment.yaml, configmap.yaml, kustomization.yaml.
+ * @param deploymentName Service name that is ingested into the files.
+ */
+const createBaseKustomizeFiles = (deploymentName) => {
   const yamls = {
     service: `
 apiVersion: v1
@@ -19283,7 +19394,7 @@ resources:
   });
 };
 
-module.exports = createBaseKustomize;
+module.exports = createBaseKustomizeFiles;
 
 
 /***/ }),
@@ -19291,6 +19402,14 @@ module.exports = createBaseKustomize;
 /***/ 6762:
 /***/ ((module) => {
 
+/**
+ * Creates dictionary of environmental variables from the provided definition.
+ * @param environment Definition of environmental variables (part of service definition).
+ * @param projectId Project id in GCP.
+ * Is used to determine values for SERVICE_PROJECT_ID and SERVICE_ENVIRONMENT.
+ * @returns A dictionary of environmental variables where the key equals
+ * the name of the variable and value equals its value.
+ */
 const parseEnvironmentArgs = (environment, projectId) => {
   const args = {};
   Object.keys(environment || {}).forEach((name) => {
@@ -19318,12 +19437,16 @@ const kubernetesSchema = __webpack_require__(6099);
 const loadServiceDefinition = __webpack_require__(7933);
 
 const action = async () => {
+  // Get params from action input
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const serviceFile = core.getInput('service-definition') || 'kubernetes.yaml';
   const image = core.getInput('image', { required: true });
   const dryRun = core.getInput('dry-run') === 'true';
 
+  // Uses function from cloud-run action src to retrieve service definition from yaml file
   const service = loadServiceDefinition(serviceFile, kubernetesSchema);
+
+  // Execute functions needed to deploy the application
   await runDeploy(serviceAccountKey, service, image, dryRun);
 };
 
@@ -19447,9 +19570,12 @@ module.exports = {
 const exec = __webpack_require__(2176);
 const { loadTool } = __webpack_require__(1898);
 
-const KUSTOMIZE_VERSION = '3.8.4';
+const KUSTOMIZE_VERSION = '4.4.1';
 const KUSTOMIZE_URI = `https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz`;
 
+/**
+ * Executes kustomize command with provided arguments.
+ */
 const execKustomize = async (args) => {
   const kustomize = await loadTool({
     tool: 'kustomize',
@@ -19480,6 +19606,12 @@ module.exports = execKustomize;
 
 const yaml = __webpack_require__(5024);
 
+/**
+ * Adds environment variables to configmap specification.
+ * @param environmentArgs Dictionary of environment variables.
+ * @param configMapYaml Configmap specification.
+ * @returns Patched configmap specification yaml in string format.
+ */
 const patchConfigMapYaml = (environmentArgs, configMapYaml) => {
   const configMap = yaml.parse(configMapYaml);
 
@@ -19498,6 +19630,10 @@ module.exports = patchConfigMapYaml;
 
 const yaml = __webpack_require__(5024);
 
+/**
+ * Patches deployment specification with values provided in service definition.
+ * @returns Patched deployment specification yaml in string format.
+ */
 const patchDeploymentYaml = (service, deploymentYaml) => {
   const deployment = yaml.parse(deploymentYaml);
 
@@ -19532,11 +19668,16 @@ module.exports = patchDeploymentYaml;
 
 const yaml = __webpack_require__(5024);
 
-const patchServiceYaml = (service, serviceYaml) => {
+/**
+ * Patches service specification with properties from provided service definition.
+ * @returns Patched service specification yaml in string format.
+ */
+const patchServiceYaml = (serviceDefinition, serviceYaml) => {
   const patchedService = yaml.parse(serviceYaml);
 
-  if (service.ports && service.ports.length) {
-    patchedService.spec.ports = service.ports;
+  if (serviceDefinition.ports && serviceDefinition.ports.length) {
+    patchedService.spec.ports = serviceDefinition.ports;
+
     // remove clusterIp:NONE from template
     delete patchedService.spec.clusterIP;
   }
@@ -19554,9 +19695,14 @@ module.exports = patchServiceYaml;
 
 const yaml = __webpack_require__(5024);
 
-const patchStatefulSetYaml = (service, containerYaml) => {
-  const statefulSet = yaml.parse(containerYaml);
+/**
+ * Patches statefulset specification with values provided in service definition.
+ * @returns Patched statefulset specification yaml in string format.
+ */
+const patchStatefulSetYaml = (serviceDefinition, statefulsetYaml) => {
+  const statefulSet = yaml.parse(statefulsetYaml);
 
+  // Extracts only needed data from service definition
   const {
     requests,
     limits,
@@ -19565,12 +19711,22 @@ const patchStatefulSetYaml = (service, containerYaml) => {
       volume = '1Gi',
       mountPath = '/data/storage',
     },
-  } = service;
+  } = serviceDefinition;
 
+  // Set replica count to the one in the definition
   statefulSet.spec.replicas = replicas;
+
+  // Set storage parameters to the ones from definition
   statefulSet.spec.template.spec.containers[0].volumeMounts[0].mountPath = mountPath;
   statefulSet.spec.volumeClaimTemplates[0].spec.resources.requests.storage = volume;
 
+  // Default parameters in template are set to:
+  // requests:
+  //   cpu: 100m
+  //   memory: 256Mi
+  // limits:
+  //   cpu: 100m
+  //   memory: 256Mi
   if (requests) {
     statefulSet.spec.template.spec.containers[0].resources.requests.cpu = requests.cpu;
     statefulSet.spec.template.spec.containers[0].resources.requests.memory = requests.memory;
@@ -19595,24 +19751,37 @@ module.exports = patchStatefulSetYaml;
 const path = __webpack_require__(5622);
 const fs = __webpack_require__(5747);
 const { getClusterInfo } = __webpack_require__(7955);
-const createNamespace = __webpack_require__(8494);
 const setupGcloud = __webpack_require__(7095);
+const checkNamespaceExists = __webpack_require__(2632);
 const execKustomize = __webpack_require__(6250);
 const patchStatefulSetYaml = __webpack_require__(8768);
 const patchDeploymentYaml = __webpack_require__(9309);
 const patchServiceYaml = __webpack_require__(1270);
 const patchConfigMapYaml = __webpack_require__(1556);
 const parseEnvironmentArgs = __webpack_require__(6762);
-const createBaseKustomize = __webpack_require__(1773);
+const createBaseKustomizeFiles = __webpack_require__(1773);
 const applyKubectl = __webpack_require__(4601);
+const checkRequiredNumberOfPodsIsRunning = __webpack_require__(6343);
 const authenticateKubeCtl = __webpack_require__(693);
 const applyAutoscale = __webpack_require__(6858);
 
+/**
+ * Downloads, configures, authenticates to GCloud.
+ * Creates some environmental variables.
+ * @returns projectId in form of id from gcp. Example: enterprise-staging-fc38.
+ */
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
   process.env.GCLOUD_INSTALLED_VERSION || 'latest',
 );
 
+/**
+ * Applies patch function to the kubernetes manifest file.
+ * Reads file from filesystem. Writes it back to the same place after patch is applied.
+ * @param manifest Kubernetes manifest file name.
+ * File must exist in ./kustomize folder. Ex.: statefulset.yml
+ * @param patcher Function to be applied to the manifest file.
+ */
 const patchManifest = (manifest, patcher) => {
   const yamlPath = path.join('kustomize', manifest);
   let deploymentYaml = fs.readFileSync(yamlPath, 'utf8');
@@ -19620,6 +19789,10 @@ const patchManifest = (manifest, patcher) => {
   fs.writeFileSync(yamlPath, deploymentYaml);
 };
 
+/**
+ * Sets namespace using kustomize.
+ * @param namespace Namespace name to be set.
+ */
 const kustomizeNamespace = async (namespace) => {
   await execKustomize([
     'edit',
@@ -19629,6 +19802,10 @@ const kustomizeNamespace = async (namespace) => {
   ]);
 };
 
+/**
+ * Sets the image to be used during deployment.
+ * @param image Image to be used during deployment.
+ */
 const kustomizeImage = async (image) => {
   await execKustomize([
     'edit',
@@ -19638,6 +19815,10 @@ const kustomizeImage = async (image) => {
   ]);
 };
 
+/**
+ * Adds label to deployment.
+ * @param name Label name to be added.
+ */
 const kustomizeLabels = async (name) => {
   await execKustomize([
     'edit',
@@ -19647,12 +19828,19 @@ const kustomizeLabels = async (name) => {
   ]);
 };
 
+/**
+ * Runs kustomize build.
+ */
 const kustomizeBuild = async () => {
   await execKustomize([
     'build',
   ]);
 };
 
+/**
+ * Adds resource specification.
+ * @param {*} resource Resource to be used during deployment.
+ */
 const kustomizeResource = async (resource) => {
   await execKustomize([
     'edit',
@@ -19662,45 +19850,76 @@ const kustomizeResource = async (resource) => {
   ]);
 };
 
+/**
+ * Prepares kubernetes files and deploys the new version of the application.
+ * @param serviceAccountKey The service account key which will be used for authentication.
+ The account key should be a base64 encoded JSON key stored as a secret.
+ * @param serviceDefinition The service specification definition.
+ * @param image The Docker image to deploy to Kubernetes.
+ * @param dryRun Instructs not to perform actual kubernetes deployment.
+ * Set to 'true' to only simulate deploying the final Kubernetes manifest.
+ */
 const runDeploy = async (
   serviceAccountKey,
-  service,
+  serviceDefinition,
   image,
   dryRun,
 ) => {
-  createBaseKustomize(service.name);
-
+  // Gets some info from gcloud.
   const projectId = await gcloudAuth(serviceAccountKey);
   const cluster = await getClusterInfo(projectId);
 
-  patchManifest('service.yml', (yml) => patchServiceYaml(service, yml));
+  // Creates kustomize files.
+  createBaseKustomizeFiles(serviceDefinition.name);
 
-  patchManifest('configmap.yml', (yml) => {
-    const args = parseEnvironmentArgs(service.environment, projectId);
-    return patchConfigMapYaml(args, yml);
+  // Adds ports and removes clusterIp from spec
+  patchManifest('service.yml', (ymlFileName) => patchServiceYaml(serviceDefinition, ymlFileName));
+
+  // Adds environment variables specified in the definition
+  // as well as SERVICE_PROJECT_ID and SERVICE_ENVIRONMENT.
+  patchManifest('configmap.yml', (ymlFileName) => {
+    const args = parseEnvironmentArgs(serviceDefinition.environment, projectId);
+    return patchConfigMapYaml(args, ymlFileName);
   });
 
-  const deploymentType = service.storage ? 'statefulset' : 'deployment';
+  // The storage being requested requires the deployment type to be StatefulSet.
+  const deploymentType = serviceDefinition.storage ? 'statefulset' : 'deployment';
+
+  // Change parameters to the ones specified in the definition:
+  // replicas, storage as well as requests and limits for the resources.
   if (deploymentType === 'statefulset') {
-    patchManifest('statefulSet.yml', (yml) => patchStatefulSetYaml(service, yml));
+    patchManifest('statefulSet.yml', (ymlFileName) => patchStatefulSetYaml(serviceDefinition, ymlFileName));
     await kustomizeResource('statefulSet.yml');
   } else {
-    patchManifest('deployment.yml', (yml) => patchDeploymentYaml(service, yml));
+    patchManifest('deployment.yml', (ymlFileName) => patchDeploymentYaml(serviceDefinition, ymlFileName));
     await kustomizeResource('deployment.yml');
   }
 
-  const opaEnabled = 'skip';
+  // Authenticates kubectl command against cluster.
   await authenticateKubeCtl(cluster);
-  await createNamespace(projectId, opaEnabled, service.name);
 
-  await kustomizeNamespace(service.name);
+  // Checks namespace existence in GCP.
+  await checkNamespaceExists(serviceDefinition.name);
+
+  // Run kustomize commands for resource files
+  await kustomizeNamespace(serviceDefinition.name);
   await kustomizeImage(image);
-  await kustomizeLabels(service.name);
+  await kustomizeLabels(serviceDefinition.name);
+
+  // Run kustomize build
   await kustomizeBuild();
 
-  await applyKubectl(service.name, deploymentType, dryRun);
+  // Applies the kustomizations and triggers a rolling update
+  await applyKubectl(serviceDefinition.name, deploymentType, dryRun);
 
-  await applyAutoscale(service.name, deploymentType, service.autoscale, service.replicas, dryRun);
+  await checkRequiredNumberOfPodsIsRunning(
+    serviceDefinition.name, serviceDefinition.replicas, 5000,
+  );
+
+  // Applies autoscale if the configuration exists in service definition
+  // Deletes existing autoscale definition if the configuration is not found in service definition
+  await applyAutoscale(serviceDefinition.name, deploymentType,
+    serviceDefinition.autoscale, serviceDefinition.replicas, dryRun);
 };
 
 module.exports = runDeploy;
