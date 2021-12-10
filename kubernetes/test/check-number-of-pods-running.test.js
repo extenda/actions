@@ -41,6 +41,14 @@ const getNonRunningPodsArgs = [
   '| wc -l',
 ];
 
+const getRunningPodsNoSelectorArgs = [
+  'get',
+  'pods',
+  '--namespace=testDeploymentName',
+  '--no-headers=true',
+  '-o json | jq -r \'.items[].status.phase\' | grep -o \'Running\' -c ',
+];
+
 describe('Check number of pods running', () => {
   beforeEach(() => {
     mockFs({});
@@ -92,6 +100,8 @@ describe('Check number of pods running', () => {
     expect(exec.exec.mock.calls.length).toBeGreaterThan(3);
     // Checks that the second time exec was called it was with non-running parameters.
     expect(exec.exec.mock.calls[2][1]).toEqual(getNonRunningPodsArgs);
+    expect(exec.exec.mock.calls[7][1]).toEqual(getRunningPodsNoSelectorArgs);
+    expect(exec.exec.mock.calls[8][1]).toEqual(['config','view']);
   });
 
   test('It executes successfully when running pods is equal to 3 and non-running to 0', async () => {
@@ -113,5 +123,10 @@ describe('Check number of pods running', () => {
       'namespace',
       'deploymentNamespace',
     ]);
+  });
+
+  test('It does nothing when dry-run is provided', async () => {
+    await checkRequiredNumberOfPodsIsRunning('testDeploymentName', 3, 10);
+    expect(exec.exec).toHaveBeenCalledTimes(0);
   });
 });
