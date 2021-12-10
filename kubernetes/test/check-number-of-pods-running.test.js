@@ -101,7 +101,7 @@ describe('Check number of pods running', () => {
     // Checks that the second time exec was called it was with non-running parameters.
     expect(exec.exec.mock.calls[2][1]).toEqual(getNonRunningPodsArgs);
     expect(exec.exec.mock.calls[7][1]).toEqual(getRunningPodsNoSelectorArgs);
-    expect(exec.exec.mock.calls[8][1]).toEqual(['config','view']);
+    expect(exec.exec.mock.calls[8][1]).toEqual(['config', 'view']);
   });
 
   test('It executes successfully when running pods is equal to 3 and non-running to 0', async () => {
