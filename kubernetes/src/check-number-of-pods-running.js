@@ -19,8 +19,7 @@ const checkRequiredNumberOfPodsIsRunning = async (
   const getRunningPodsArgs = [
     'get',
     'pods',
-    '--field-selector=status.phase=Running',
-    `--namespace=${deploymentName}`,
+    `--field-selector=metadata.labels.app=${deploymentName},status.phase=Running`,
     '--no-headers=true',
     '| wc -l',
   ];
@@ -30,8 +29,7 @@ const checkRequiredNumberOfPodsIsRunning = async (
   const getNonRunningPodsArgs = [
     'get',
     'pods',
-    '--field-selector=status.phase!=Running',
-    `--namespace=${deploymentName}`,
+    `--field-selector=metadata.labels.app=${deploymentName},status.phase!=Running`,
     '--no-headers=true',
     '| wc -l',
   ];

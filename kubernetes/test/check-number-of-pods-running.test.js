@@ -19,8 +19,7 @@ const mockOutput = (data, opts) => {
 const getRunningPodsArgs = [
   'get',
   'pods',
-  '--field-selector=status.phase=Running',
-  '--namespace=testDeploymentName',
+  '--field-selector=metadata.labels.app=testDeploymentName,status.phase=Running',
   '--no-headers=true',
   '| wc -l',
 ];
@@ -30,8 +29,7 @@ const getRunningPodsArgs = [
 const getNonRunningPodsArgs = [
   'get',
   'pods',
-  '--field-selector=status.phase!=Running',
-  '--namespace=testDeploymentName',
+  '--field-selector=metadata.labels.app=testDeploymentName,status.phase!=Running',
   '--no-headers=true',
   '| wc -l',
 ];
