@@ -14,6 +14,16 @@ const checkRequiredNumberOfPodsIsRunning = async (
   numberOfReplicasToBeRunning,
   retryMs,
 ) => {
+  // Form arguments to set current namespace for kubectl commands
+  const setCurrentNamespaceArgs = [
+    'config',
+    'set-context',
+    '--current',
+    `--namespace=${deploymentName}`,
+  ];
+
+  await exec.exec('kubectl', setCurrentNamespaceArgs);
+
   // Form additional argument for the kubectl command.
   // Arguments to return number of pods that have status Running.
   const getRunningPodsArgs = [
