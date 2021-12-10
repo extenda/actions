@@ -163,7 +163,7 @@ const runDeploy = async (
   await applyKubectl(serviceDefinition.name, deploymentType, dryRun);
 
   await checkRequiredNumberOfPodsIsRunning(
-    serviceDefinition.name, serviceDefinition.replicas, 5000,
+    serviceDefinition.name, serviceDefinition.replicas, 5000, dryRun,
   );
 
   // Applies autoscale if the configuration exists in service definition

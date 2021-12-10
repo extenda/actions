@@ -19202,82 +19202,122 @@ const checkRequiredNumberOfPodsIsRunning = async (
   deploymentName,
   numberOfReplicasToBeRunning,
   retryMs,
+  dryRun,
 ) => {
-  // Form arguments to set current namespace for kubectl commands
-  const setCurrentNamespaceArgs = [
-    'config',
-    'set-context',
-    '--current',
-    `--namespace=${deploymentName}`,
-  ];
+  // This for now will only run if the dryRun is provided for development and testing purposes.
+  if(dryRun)
+  {
+    // Form arguments to set current namespace for kubectl commands
+    const setCurrentNamespaceArgs = [
+      'config',
+      'set-context',
+      '--current',
+      `--namespace=${deploymentName}`,
+    ];
 
-  await exec.exec('kubectl', setCurrentNamespaceArgs);
+    await exec.exec('kubectl', setCurrentNamespaceArgs);
 
-  // Form additional argument for the kubectl command.
-  // Arguments to return number of pods that have status Running.
-  const getRunningPodsArgs = [
-    'get',
-    'pods',
-    '--field-selector=status.phase=Running',
-    '--no-headers=true',
-    '| wc -l',
-  ];
+    // Form additional argument for the kubectl command.
+    // Arguments to return number of pods that have status Running.
+    const getRunningPodsArgs = [
+      'get',
+      'pods',
+      '--field-selector=status.phase=Running',
+      '--no-headers=true',
+      '| wc -l',
+    ];
 
-  // Arguments to return number of pods
-  // that have status NOT Running which can be: Pending, Succeeded, Failed, Unknown.
-  const getNonRunningPodsArgs = [
-    'get',
-    'pods',
-    '--field-selector=status.phase!=Running',
-    '--no-headers=true',
-    '| wc -l',
-  ];
+    // Arguments to return number of pods
+    // that have status NOT Running which can be: Pending, Succeeded, Failed, Unknown.
+    const getNonRunningPodsArgs = [
+      'get',
+      'pods',
+      '--field-selector=status.phase!=Running',
+      '--no-headers=true',
+      '| wc -l',
+    ];
 
-  for (let i = 0; i < 3; i += 1) {
-    let podsInRunningState = 0;
-    try {
-      // Execute kubectl with args and rout output to variable.
-      /* eslint-disable no-await-in-loop */
-      await exec.exec('kubectl', getRunningPodsArgs, {
-        listeners: {
-          stdout: (data) => {
-            podsInRunningState += parseInt(data.toString('utf8').trim(), 10);
+    for (let i = 0; i < 3; i += 1) {
+      let podsInRunningState = 0;
+      try {
+        // Execute kubectl with args and rout output to variable.
+        /* eslint-disable no-await-in-loop */
+        await exec.exec('kubectl', getRunningPodsArgs, {
+          listeners: {
+            stdout: (data) => {
+              podsInRunningState += parseInt(data.toString('utf8').trim(), 10);
+            },
           },
-        },
-      });
-      /* eslint-enable no-await-in-loop */
-    } catch (err) {
-      // Ignored
-    }
+        });
+        /* eslint-enable no-await-in-loop */
+      } catch (err) {
+        // Ignored
+      }
 
-    let podsNotInRunningState = 0;
-    try {
-      // Execute kubectl with args and rout output to variable.
-      /* eslint-disable no-await-in-loop */
-      await exec.exec('kubectl', getNonRunningPodsArgs, {
-        listeners: {
-          stdout: (data) => {
-            podsNotInRunningState += parseInt(data.toString('utf8').trim(), 10);
+      let podsNotInRunningState = 0;
+      try {
+        // Execute kubectl with args and rout output to variable.
+        /* eslint-disable no-await-in-loop */
+        await exec.exec('kubectl', getNonRunningPodsArgs, {
+          listeners: {
+            stdout: (data) => {
+              podsNotInRunningState += parseInt(data.toString('utf8').trim(), 10);
+            },
           },
-        },
-      });
+        });
+        /* eslint-enable no-await-in-loop */
+      } catch (err) {
+        // Ignored
+      }
+
+      // Check the number of pods in running state to be equal to expected number of replicas.
+      if (podsInRunningState === numberOfReplicasToBeRunning
+        && (podsNotInRunningState === 0 || Number.isNaN(Number(podsNotInRunningState)))) {
+        return;
+      }
+      /* eslint-disable no-await-in-loop */
+      await timer(retryMs); // Tries again after X milliseconds
       /* eslint-enable no-await-in-loop */
-    } catch (err) {
-      // Ignored
     }
 
-    // Check the number of pods in running state to be equal to expected number of replicas.
-    if (podsInRunningState === numberOfReplicasToBeRunning
-      && (podsNotInRunningState === 0 || Number.isNaN(Number(podsNotInRunningState)))) {
-      return;
-    }
-    /* eslint-disable no-await-in-loop */
-    await timer(retryMs); // Tries again after X milliseconds
-    /* eslint-enable no-await-in-loop */
+    // Test code area
+
+    // kubectl get pods -n pnp-price-spec-ks --no-headers=true -o json 
+    // | jq -r '.items[].status.phase' | grep -o 'Running' -c
+    const getRunningPodsNoSelectorArgs = [
+      'get',
+      'pods',
+      `--namespace=${deploymentName}`,
+      '--no-headers=true',
+      '-o json | jq -r \'.items[].status.phase\' | grep -o \'Running\' -c ',
+    ];
+
+    await exec.exec('kubectl', getRunningPodsNoSelectorArgs, {
+      listeners: {
+        stdout: (data) => {
+          console.log(parseInt(data.toString('utf8').trim(), 10));
+        },
+      },
+    });
+
+    // kubectl config view
+    const configViewArgs = [
+      'config',
+      'view',
+    ];
+    await exec.exec('kubectl', configViewArgs, {
+      listeners: {
+        stdout: (data) => {
+          console.log(data.toString('utf8'));
+        },
+      },
+    });
+    // Test code area ended
+
+    throw new Error(
+      `Deployment failed. Number of running pods is lower then expected replica count after ${retryMs * 3} milliseconds.`,
+    );
   }
-  throw new Error(
-    `Deployment failed. Number of running pods is lower then expected replica count after ${retryMs * 3} milliseconds.`,
-  );
 };
 
 module.exports = checkRequiredNumberOfPodsIsRunning;
@@ -19921,7 +19961,7 @@ const runDeploy = async (
   await applyKubectl(serviceDefinition.name, deploymentType, dryRun);
 
   await checkRequiredNumberOfPodsIsRunning(
-    serviceDefinition.name, serviceDefinition.replicas, 5000,
+    serviceDefinition.name, serviceDefinition.replicas, 5000, dryRun,
   );
 
   // Applies autoscale if the configuration exists in service definition

@@ -61,7 +61,7 @@ describe('Check number of pods running', () => {
       ))
       .mockResolvedValue(0);
     await expect(
-      checkRequiredNumberOfPodsIsRunning('testDeploymentName', 3, 10),
+      checkRequiredNumberOfPodsIsRunning('testDeploymentName', 3, 10, true),
     ).rejects.toEqual(
       new Error(
         'Deployment failed. Number of running pods is lower then expected replica count after 30 milliseconds.',
@@ -83,13 +83,13 @@ describe('Check number of pods running', () => {
       ))
       .mockResolvedValue(0);
     await expect(
-      checkRequiredNumberOfPodsIsRunning('testDeploymentName', 3, 10),
+      checkRequiredNumberOfPodsIsRunning('testDeploymentName', 3, 10, true),
     ).rejects.toEqual(
       new Error(
         'Deployment failed. Number of running pods is lower then expected replica count after 30 milliseconds.',
       ),
     );
-    expect(exec.exec).toHaveBeenCalledTimes(7);
+    expect(exec.exec.mock.calls.length).toBeGreaterThan(3);
     // Checks that the second time exec was called it was with non-running parameters.
     expect(exec.exec.mock.calls[2][1]).toEqual(getNonRunningPodsArgs);
   });
@@ -106,7 +106,7 @@ describe('Check number of pods running', () => {
       ))
       .mockResolvedValue(1);
 
-    await checkRequiredNumberOfPodsIsRunning('testDeploymentName', 3, 10);
+    await checkRequiredNumberOfPodsIsRunning('testDeploymentName', 3, 10, true);
     expect(exec.exec).toHaveBeenCalledTimes(3);
     expect(exec.exec).not.toHaveBeenCalledWith('kubectl', [
       'create',
