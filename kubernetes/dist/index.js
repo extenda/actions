@@ -19205,8 +19205,7 @@ const checkRequiredNumberOfPodsIsRunning = async (
   dryRun,
 ) => {
   // This for now will only run if the dryRun is provided for development and testing purposes.
-  if(dryRun)
-  {
+  if (dryRun) {
     // Form arguments to set current namespace for kubectl commands
     const setCurrentNamespaceArgs = [
       'config',
@@ -19282,7 +19281,7 @@ const checkRequiredNumberOfPodsIsRunning = async (
 
     // Test code area
 
-    // kubectl get pods -n pnp-price-spec-ks --no-headers=true -o json 
+    // kubectl get pods -n pnp-price-spec-ks --no-headers=true -o json
     // | jq -r '.items[].status.phase' | grep -o 'Running' -c
     const getRunningPodsNoSelectorArgs = [
       'get',
