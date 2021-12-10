@@ -26,7 +26,7 @@ const setCurrentNamespaceArgs = [
 const getRunningPodsArgs = [
   'get',
   'pods',
-  '--field-selector=metadata.labels.app=testDeploymentName,status.phase=Running',
+  '--field-selector=status.phase=Running',
   '--no-headers=true',
   '| wc -l',
 ];
@@ -36,7 +36,7 @@ const getRunningPodsArgs = [
 const getNonRunningPodsArgs = [
   'get',
   'pods',
-  '--field-selector=metadata.labels.app=testDeploymentName,status.phase!=Running',
+  '--field-selector=status.phase!=Running',
   '--no-headers=true',
   '| wc -l',
 ];
