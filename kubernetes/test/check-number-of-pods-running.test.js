@@ -20,7 +20,7 @@ const setCurrentNamespaceArgs = [
   'config',
   'set-context',
   '--current',
-  `--namespace=testDeploymentName`,
+  '--namespace=testDeploymentName',
 ];
 
 const getRunningPodsArgs = [
