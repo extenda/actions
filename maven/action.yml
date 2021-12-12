@@ -8,11 +8,15 @@ inputs:
     description: The project version to build. This is set in the POMs before building
     required: false
   cache-key:
+    deprecationMessage: |
+      Caching is no longer supported. Use the maven cache feature in `actions/setup-java@v2`.
     description: |
       The cache key to use. Set to an empty value to disable the automatically configured cache.
     default: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
     required: false
   cache-restore-keys:
+    deprecationMessage: |
+      Caching is no longer supported. Use the maven cache feature in `actions/setup-java@v2`.
     description: |
       The cache restore keys. This value only needs to be modified if the cache key prefixes has
       been changed. Multiple keys can be specified using spaces or line breaks as separator.

@@ -106,6 +106,35 @@ describe('Maven', () => {
     expect(exec.exec).toHaveBeenCalledWith('mvn -B -V -f missing-pom.xml package');
   });
 
+  test('It supports maven wrapper (linux)', async () => {
+    mockFs({
+      mvnw: '',
+      'mvnw.cmd': '',
+    });
+    const spy = jest.spyOn(os, 'platform');
+    spy.mockReturnValueOnce('linux');
+    exec.exec.mockResolvedValueOnce(0);
+
+    await mvn.run('help:effective-pom');
+    expect(exec.exec).toHaveBeenCalledWith('./mvnw -B -V help:effective-pom');
+
+    spy.mockRestore();
+  });
+
+  test('It supports maven wrapper (win32)', async () => {
+    mockFs({
+      mvnw: '',
+      'mvnw.cmd': '',
+    });
+    const spy = jest.spyOn(os, 'platform');
+    spy.mockReturnValueOnce('win32');
+    exec.exec.mockResolvedValueOnce(0);
+
+    await mvn.run('help:effective-pom');
+    expect(exec.exec).toHaveBeenCalledWith('mvnw.cmd -B -V help:effective-pom');
+    spy.mockRestore();
+  });
+
   describe('Action', () => {
     beforeEach(() => {
       process.env.NEXUS_USERNAME = 'user';
