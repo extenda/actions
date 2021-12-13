@@ -2,12 +2,19 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 const io = require('@actions/io');
 const path = require('path');
+const fs = require('fs');
 const os = require('os');
 
 const mavenHome = path.join(os.homedir(), '.m2');
 const mavenSettings = path.join(mavenHome, 'settings.xml');
 
-const run = async (args) => exec.exec(`mvn -B -V ${args}`);
+const run = async (args) => {
+  let executable = os.platform() === 'win32' ? 'mvnw.cmd' : './mvnw';
+  if (!fs.existsSync(executable)) {
+    executable = 'mvn';
+  }
+  return exec.exec(`${executable} -B -V ${args}`);
+};
 
 const setVersion = async (newVersion) => {
   core.info(`Build version: ${newVersion}`);
