@@ -42,5 +42,3 @@ inputs:
 runs:
   using: node12
   main: dist/index.js
-  pre: dist/pre/index.js
-  post: dist/post/index.js
