@@ -11,7 +11,9 @@ jobs:
   commitlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Lint pull request title
         uses: ./commitlint
@@ -22,4 +24,4 @@ jobs:
         if: always()
         uses: ./commitlint
         with:
-          relaxed: ${{ contains(job.status, 'success') }}
+          relaxed: ${{ contains(job.status, 'success') }}
