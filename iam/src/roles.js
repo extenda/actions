@@ -68,8 +68,8 @@ function arraysEqual(rolePermissions, newPermissions) {
   if (rolePermissions == null || newPermissions == null) return false;
   if (rolePermissions.length !== newPermissions.length) return false;
 
-  for (let i = 0; i < rolePermissions.length; i += 1) {
-    if (rolePermissions[i] !== newPermissions[i]) return false;
+  for (const index in rolePermissions) {
+    if (rolePermissions[index] !== newPermissions[index]) return false;
   }
   return true;
 }
@@ -79,7 +79,9 @@ const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
   roles.forEach((role) => {
     const roleId = `${systemId}.${role.id}`;
     const roleDesc = role.desc;
-    const rolePermissions = role.permissions.map((p) => `${systemId}.${p}`);
+    const rolePermissions = role.permissions.map(
+      (permissionId) => createPermissionId(systemId, permissionId)
+    );
 
     core.info(`fetching data for ${roleId}`);
     promises.push(getRole(iamToken, iamUrl, roleId).then((roleResult) => {
@@ -102,6 +104,22 @@ const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
   await Promise.all(promises);
   core.info('All roles processed');
 };
+
+/**
+ * @param systemId {string}
+ * @param permission {string}
+ */
+function createPermissionId(systemId, permissionId) {
+  return isFullyQualifiedPermissionId(permissionId)
+    ? permissionId
+    : `${systemId}.${permissionId}`;
+}
+
+/** @param permission {string} */
+function isFullyQualifiedPermissionId(permission) {
+  return /^[a-z][-a-z]{2}\.[a-z][-a-z]{1,15}\.[a-z][-a-z]{1,15}$/.test(permission);
+  return [...permission].filter(x => x === '.').length === 2;
+}
 
 module.exports = {
   setupRoles, getRole, createRole, updateRole, arraysEqual,
