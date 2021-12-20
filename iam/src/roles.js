@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 const core = require('@actions/core');
 const axios = require('axios');
 const { iamApiErrorToString } = require('./utils/iam-api-error-to-string');
@@ -80,7 +81,7 @@ const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
     const roleId = `${systemId}.${role.id}`;
     const roleDesc = role.desc;
     const rolePermissions = role.permissions.map(
-      (permissionId) => createPermissionId(systemId, permissionId)
+      (permissionId) => createPermissionId(systemId, permissionId),
     );
 
     core.info(`fetching data for ${roleId}`);
@@ -116,9 +117,8 @@ function createPermissionId(systemId, permissionId) {
 }
 
 /** @param permission {string} */
-function isFullyQualifiedPermissionId(permission) {
-  return /^[a-z][-a-z]{2}\.[a-z][-a-z]{1,15}\.[a-z][-a-z]{1,15}$/.test(permission);
-  return [...permission].filter(x => x === '.').length === 2;
+function isFullyQualifiedPermissionId(permissionId) {
+  return permissionId.split('.').length === 3;
 }
 
 module.exports = {
