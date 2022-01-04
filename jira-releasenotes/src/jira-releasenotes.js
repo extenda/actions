@@ -81,7 +81,6 @@ const createReleaseNotes = async ({
       })
       .catch((err) => core.warning(`Failed to update issue. ${err.message}`)));
   });
-
   return Promise.all(requests);
 };
 
