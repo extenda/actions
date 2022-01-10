@@ -1,10 +1,15 @@
 const yaml = require('yaml');
 
-const patchServiceYaml = (service, serviceYaml) => {
+/**
+ * Patches service specification with properties from provided service definition.
+ * @returns Patched service specification yaml in string format.
+ */
+const patchServiceYaml = (serviceDefinition, serviceYaml) => {
   const patchedService = yaml.parse(serviceYaml);
 
-  if (service.ports && service.ports.length) {
-    patchedService.spec.ports = service.ports;
+  if (serviceDefinition.ports && serviceDefinition.ports.length) {
+    patchedService.spec.ports = serviceDefinition.ports;
+
     // remove clusterIp:NONE from template
     delete patchedService.spec.clusterIP;
   }

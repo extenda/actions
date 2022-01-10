@@ -63,7 +63,7 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValue(0);
 
     await configureDomains('staging', 'testrunner', 'se');
-    expect(exec.exec).toHaveBeenCalledTimes(16);
+    expect(exec.exec).toHaveBeenCalledTimes(18);
   });
 
   test('It can obtain ip if ip is not created', async () => {
@@ -77,7 +77,7 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValue(0);
 
     await configureDomains('prod', 'testrunner', 'se');
-    expect(exec.exec).toHaveBeenCalledTimes(18);
+    expect(exec.exec).toHaveBeenCalledTimes(20);
   });
 
   test('It can create dns if it doesnt exists', async () => {
@@ -89,7 +89,7 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValue(0);
 
     await configureDomains('staging', 'testrunner', 'no');
-    expect(exec.exec).toHaveBeenCalledTimes(16);
+    expect(exec.exec).toHaveBeenCalledTimes(18);
   });
 
   test('It can check that firewall rule already exists', async () => {
@@ -101,7 +101,7 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValue(0);
 
     await configureDomains('staging', 'testrunner', 'no');
-    expect(exec.exec).toHaveBeenCalledTimes(16);
+    expect(exec.exec).toHaveBeenCalledTimes(18);
     expect(core.info).toHaveBeenNthCalledWith(3, 'Firewall rule already exists!');
     expect(core.info).toHaveBeenCalledTimes(13);
   });
@@ -115,7 +115,7 @@ describe('configure domains', () => {
     exec.exec.mockRejectedValueOnce(0);
 
     await configureDomains('staging', 'testrunner', 'no');
-    expect(exec.exec).toHaveBeenCalledTimes(16);
+    expect(exec.exec).toHaveBeenCalledTimes(18);
     expect(core.info).toHaveBeenNthCalledWith(6, 'Health check already exists!');
     expect(core.info).toHaveBeenCalledTimes(13);
   });
@@ -130,7 +130,7 @@ describe('configure domains', () => {
     exec.exec.mockRejectedValueOnce(0);
 
     await configureDomains('staging', 'testrunner', 'no');
-    expect(exec.exec).toHaveBeenCalledTimes(15);
+    expect(exec.exec).toHaveBeenCalledTimes(17);
     expect(core.info).toHaveBeenNthCalledWith(7, 'Bucket already exists!');
     expect(core.info).toHaveBeenCalledTimes(13);
   });
@@ -147,7 +147,7 @@ describe('configure domains', () => {
     exec.exec.mockRejectedValueOnce(0);
 
     await configureDomains('staging', 'testrunner', 'no');
-    expect(exec.exec).toHaveBeenCalledTimes(16);
+    expect(exec.exec).toHaveBeenCalledTimes(18);
     expect(core.info).toHaveBeenNthCalledWith(8, 'Loadbalancer already exists!');
     expect(core.info).toHaveBeenCalledTimes(13);
   });
@@ -167,7 +167,7 @@ describe('configure domains', () => {
     exec.exec.mockRejectedValueOnce(0);
 
     await configureDomains('staging', 'testrunner', 'no');
-    expect(exec.exec).toHaveBeenCalledTimes(18);
+    expect(exec.exec).toHaveBeenCalledTimes(20);
     expect(core.info).toHaveBeenCalledTimes(13);
     expect(exec.exec).toHaveBeenNthCalledWith(9, 'gcloud', [
       'compute',
@@ -194,7 +194,7 @@ describe('configure domains', () => {
     exec.exec.mockRejectedValueOnce(0);
 
     await configureDomains('staging', 'testrunner', 'no');
-    expect(exec.exec).toHaveBeenCalledTimes(16);
+    expect(exec.exec).toHaveBeenCalledTimes(18);
     expect(core.info).toHaveBeenNthCalledWith(9, 'Http proxy already exists!');
     expect(core.info).toHaveBeenCalledTimes(13);
   });
@@ -213,7 +213,7 @@ describe('configure domains', () => {
     exec.exec.mockRejectedValueOnce(0);
 
     await configureDomains('staging', 'testrunner', 'no');
-    expect(exec.exec).toHaveBeenCalledTimes(16);
+    expect(exec.exec).toHaveBeenCalledTimes(18);
     expect(core.info).toHaveBeenNthCalledWith(10, 'Forwarding rule already exists!');
     expect(core.info).toHaveBeenCalledTimes(13);
   });
@@ -234,7 +234,7 @@ describe('configure domains', () => {
     exec.exec.mockRejectedValueOnce(0);
 
     await configureDomains('staging', 'testrunner', 'no');
-    expect(exec.exec).toHaveBeenCalledTimes(16);
+    expect(exec.exec).toHaveBeenCalledTimes(18);
     expect(core.info).toHaveBeenNthCalledWith(11, 'Backend service already exists!');
     expect(core.info).toHaveBeenCalledTimes(13);
   });
@@ -258,7 +258,7 @@ describe('configure domains', () => {
     exec.exec.mockRejectedValueOnce(0);
 
     await configureDomains('staging', 'testrunner', 'no');
-    expect(exec.exec).toHaveBeenCalledTimes(16);
+    expect(exec.exec).toHaveBeenCalledTimes(18);
     expect(core.info).toHaveBeenNthCalledWith(12, 'Backend already added to service!');
     expect(core.info).toHaveBeenCalledTimes(13);
   });
@@ -304,10 +304,12 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockResolvedValueOnce(0);
+    exec.exec.mockResolvedValueOnce(0);
+    exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockRejectedValueOnce(0);
 
     await configureDomains('staging', 'testrunner', 'no');
-    expect(exec.exec).toHaveBeenCalledTimes(16);
+    expect(exec.exec).toHaveBeenCalledTimes(18);
     expect(core.info).toHaveBeenNthCalledWith(13, 'Url-mapping already exists!');
     expect(core.info).toHaveBeenCalledTimes(13);
   });
@@ -321,10 +323,10 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValue(0);
 
     await configureDomains('staging', 'testrunner', 'no');
-    expect(exec.exec).toHaveBeenCalledTimes(16);
+    expect(exec.exec).toHaveBeenCalledTimes(18);
     expect(core.info).toHaveBeenCalledTimes(12);
 
-    expect(exec.exec).toHaveBeenNthCalledWith(16, 'gcloud', [
+    expect(exec.exec).toHaveBeenNthCalledWith(18, 'gcloud', [
       'compute',
       'url-maps',
       'add-path-matcher',

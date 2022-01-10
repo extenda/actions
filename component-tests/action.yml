@@ -1,0 +1,15 @@
+name: component-tests
+description: Component tests for IAM API
+inputs:
+  auth-token:
+    description: Authorization token
+    required: true
+  tests:
+    description: Component tests yaml file
+    required: true
+  base-url:
+    description: Url that will be pinged
+    required: true
+runs:
+  using: node12
+  main: dist/index.js

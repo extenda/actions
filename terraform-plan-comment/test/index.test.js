@@ -119,7 +119,7 @@ Plan nested output
 
   test('It can generate comment for single plan', async () => {
     generateOutputs.mockResolvedValueOnce([
-      { module: 'work', output: 'Plan output\nPlan: 1 to add, 0 to change, 0 to destroy\n\n', status: 0 },
+      { module: 'work', output: 'Plan output\nPlan: 1 to add, 0 to change, 0 to destroy\n\nOther text below\n', status: 0 },
     ]);
 
     const comment = await action();
@@ -136,6 +136,7 @@ The output only includes modules with changes.
 Plan output
 Plan: 1 to add, 0 to change, 0 to destroy
 
+Other text below
 
 \`\`\`
 
@@ -197,14 +198,15 @@ Plan: 1 to add, 0 to change, 0 to destroy
       .mockReturnValueOnce('')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('')
-      .mockReturnValueOnce('Custom footer with\nremoved\nnew line and *markdown*\n\nNext section. Preserved.');
+      .mockReturnValueOnce('Custom footer with\nnew line and *markdown*\n\nNext section. Preserved.');
     generateOutputs.mockResolvedValueOnce([]);
     const comment = await action();
     expect(comment).toEqual(`### :white_check_mark: Terraform plan with no changes
 
 Terraform plan reported no changes.
 
-Custom footer with removed new line and *markdown*
+Custom footer with
+new line and *markdown*
 
 Next section. Preserved.
 

@@ -12,7 +12,10 @@ const loadFile = (iamFile) => {
 };
 
 const sortAndCompare = (array, docPath, result) => {
-  const sorted = array.slice(0).sort((a, b) => a.localeCompare(b, 'en-US'));
+  const sorted = array.slice(0).sort((a, b) => {
+    const getVerb = (value) => (typeof value === 'string' ? value : value.id);
+    return getVerb(a).localeCompare(getVerb(b), 'en-US');
+  });
   for (let i = 0; i < array.length; i += 1) {
     if (array[i] !== sorted[i]) {
       const err = result.addError('is not sorted alphabetically');

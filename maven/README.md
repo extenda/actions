@@ -8,8 +8,9 @@ This GitHub Action runs Maven preconfigured for Extenda Retail's Nexus Repositor
 It also supports:
   * Semantic versioning from git tags. It will automatically update POM versions according to
 [conventional-version](../conventional-version#readme) before building
-  * Automatic caching of the `~/.m2/repository`
+  * ~~Automatic caching of the `~/.m2/repository`&nbsp;~~
   * Loading Nexus repository credentials from GCP secret manager
+  * Use of Maven Wrapper (`mvnw` or `mvnw.cmd`) when detected
 
 ## Usage
 
@@ -50,9 +51,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         with:
+          distribution: adopt
           java-version: 11
+          cache: maven
 
       - name: Unit tests
         uses: extenda/actions/maven@v0
@@ -74,9 +77,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         with:
+          distribution: adopt
           java-version: 11
+          cache: maven
 
       - name: Unit tests
         uses: extenda/actions/maven@v0
@@ -103,9 +108,11 @@ jobs:
             NEXUS_PASSWORD: nexus-password
             NEXUS_USERNAME: nexus-username
 
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         with:
+          distribution: adopt
           java-version: 11
+          cache: maven
 
       - name: Unit tests
         uses: extenda/actions/maven@v0
@@ -134,50 +141,17 @@ jobs:
             NEXUS_PASSWORD: nexus-password
             NEXUS_USERNAME: nexus-username
 
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         with:
+          distribution: adopt
           java-version: 11
+          cache: maven
 
       - name: Unit tests
         uses: extenda/actions/maven@v0
         with:
           args: test
           version: pom.xml
-```
-
-#### Usage Without Cache
-
-By the default, the action will use a cache based on the hash of all `pom.xml` files
-in your repository. It is possible to specify the cache and restore keys using
-input variables.
-
-In this example, the cache will be disabled with the use of an empty input variable.
-
-```
-on: push
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: extenda/actions/gcp-secret-manager@v0
-        with:
-          service-account-key: ${{ secrets.SECRET_AUTH }}
-          secrets: |
-            NEXUS_PASSWORD: nexus-password
-            NEXUS_USERNAME: nexus-username
-
-      - uses: actions/setup-java@v1
-        with:
-          java-version: 11
-
-      - name: Unit tests
-        uses: extenda/actions/maven@v0
-        with:
-          cache-key: ''
-          args: test
 ```
 
 #### Release
@@ -210,9 +184,11 @@ jobs:
             NEXUS_PASSWORD: nexus-password
             NEXUS_USERNAME: nexus-username
 
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         with:
+          distribution: adopt
           java-version: 11
+          cache: maven
 
       - name: Create release
         uses: extenda/actions/conventional-release@v0

@@ -18,8 +18,24 @@ describe('Setup permissions and handle', () => {
     };
 
     const result = new Map();
-    result.set('test.resource.get', '');
-    result.set('test.resource.create', '');
+    result.set('test.resource.get', { description: '' });
+    result.set('test.resource.create', { description: '' });
+
+    await expect(setupPermissions(permissions, 'test'))
+      .resolves.toEqual(result);
+  });
+
+  test('it can create a map with permissions from the iam when aliases are in', async () => {
+    const permissions = {
+      resource: [
+        { id: 'get', alias: 'get' },
+        { id: 'create', alias: 'create' },
+      ],
+    };
+
+    const result = new Map();
+    result.set('test.resource.get', { alias: 'get' });
+    result.set('test.resource.create', { alias: 'create' });
 
     await expect(setupPermissions(permissions, 'test'))
       .resolves.toEqual(result);
@@ -34,7 +50,7 @@ describe('Setup permissions and handle', () => {
     axios.mockResolvedValueOnce({ status: 200, data: getSystemResult });
 
     const result = new Map();
-    result.set('test.resource.get', 'Get resource');
+    result.set('test.resource.get', { description: 'Get resource' });
 
     await handlePermissions(result, 'iam-token', 'api-url');
 
@@ -46,7 +62,7 @@ describe('Setup permissions and handle', () => {
       .mockResolvedValueOnce({ status: 201 });
 
     const result = new Map();
-    result.set('test.resource.get', 'Get resource');
+    result.set('test.resource.get', { description: 'Get resource' });
 
     await handlePermissions(result, 'iam-token', 'api-url');
 
@@ -62,7 +78,7 @@ describe('Setup permissions and handle', () => {
     axios.mockResolvedValue({ status: 200, data: getSystemResult });
 
     const result = new Map();
-    result.set('test.resource.get', 'Get resource');
+    result.set('test.resource.get', { description: 'Get resource' });
 
     await handlePermissions(result, 'iam-token', 'api-url');
 
@@ -79,7 +95,7 @@ describe('Setup permissions and handle', () => {
       .mockRejectedValueOnce({ message: 'Not found', response: { status: 404, data: { error: 'Not found' } } });
 
     const result = new Map();
-    result.set('test.resource.get', 'Get resource');
+    result.set('test.resource.get', { description: 'Get resource' });
 
     await expect(handlePermissions(result, 'iam-token', 'api-url')).rejects
       .toThrow('Failed to update permission test.resource.get. Request failed with code [404] and error [Not found]');

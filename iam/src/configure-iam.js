@@ -82,10 +82,13 @@ const configureIAM = async (
 
   // Next, update IAM system
   if (!skipIAM) {
-    await setupPermissions(permissions, permissionPrefix)
-      .then((fullPermissions) => handlePermissions(fullPermissions, iamToken, iamUrl))
-      .then(() => setupRoles(roles, permissionPrefix, iamToken, iamUrl))
-      .catch((err) => errors.push(err));
+    try {
+      const fullPermissions = await setupPermissions(permissions, permissionPrefix);
+      await handlePermissions(fullPermissions, iamToken, iamUrl);
+      await setupRoles(roles, permissionPrefix, iamToken, iamUrl, fullPermissions);
+    } catch (e) {
+      errors.push(e);
+    }
   }
 
   if (errors.length > 0) {

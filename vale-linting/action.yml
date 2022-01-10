@@ -1,0 +1,23 @@
+name: Vale linting
+description: Vale is a command-line tool that brings code-like linting to prose.
+inputs:
+  exclude:
+    description: |
+      A file or files that should be excluded from linting.
+      New line separated string with micromatch patterns to exclude files.
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Lint natural language with Vale
+      # Change to the latest version/tag
+      uses: extenda/vale-action@master
+      with:
+        styles: |
+          https://github.com/extenda/docker-vale/releases/download/latest/Extenda.zip
+          https://github.com/errata-ai/Google/releases/latest/download/Google.zip
+        config: https://raw.githubusercontent.com/extenda/docker-vale/master/vale.ini
+        exclude: ${{ inputs.exclude }}
+        passCondition: |
+          errors < 1;

@@ -13,7 +13,8 @@ describe('env-config', () => {
   beforeEach(() => {
     mockLoadSecret.mockResolvedValueOnce('localhost')
       .mockResolvedValueOnce('my-password')
-      .mockResolvedValueOnce('my-pg-password');
+      .mockResolvedValueOnce('my-pg-password')
+      .mockResolvedValueOnce('my-launch-darkly-access-key');
   });
 
   test('It creates config variables', async () => {
@@ -41,11 +42,13 @@ describe('env-config', () => {
       DATABASE_HOST: 'localhost',
       DATABASE_PASSWORD: 'my-password',
       PGPASSWORD: 'my-pg-password',
+      LAUNCH_DARKLY_ACCESS_KEY: 'my-launch-darkly-access-key',
     });
 
     expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_private_address');
     expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_master_password');
     expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_master_password');
+    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'launchdarkly-sdk-key');
   });
 
   test('It can handle optional country code', async () => {
@@ -124,12 +127,14 @@ describe('env-config', () => {
       MY_SECRET1: 'my-first-secret',
       MY_SECRET2: 'my-second-secret',
       PGPASSWORD: 'my-pg-password',
+      LAUNCH_DARKLY_ACCESS_KEY: 'my-launch-darkly-access-key',
     });
 
     expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_private_address');
     expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_master_password');
     expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'secret1');
     expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'secret2');
+    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'launchdarkly-sdk-key');
   });
 
   test('It throws if accessing secrets from wrong project', async () => {

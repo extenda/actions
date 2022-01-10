@@ -5,13 +5,14 @@
 
 # actions
 
-This is a monorepo containing GitHub Actions by Extenda Retail. These actions provides reusable logic for
+This is a monorepo containing GitHub Actions by Extenda Retail. These actions provide reusable logic for
 the fundamental parts of our CI/CD pipelines.
 
 The following actions are available
 
   * [cloud-run](cloud-run#readme)
   * [commitlint](commitlint#readme)
+  * [component-tests](component-tests#readme)
   * [conventional-release](conventional-release#readme)
   * [conventional-version](conventional-version#readme)
   * [dataflow-template-build](dataflow-template-build#readme)
@@ -25,6 +26,10 @@ The following actions are available
   * [kubernetes](kubernetes#readme)
   * [maven](maven#readme)
   * [nexus-auth-npm](nexus-auth-npm#readme)
+  * [pact-broker](pact-broker#readme)
+  * [pact-can-i-deploy](pact-can-i-deploy#readme)
+  * [pact-publish](pact-publish#readme)
+  * [pact-tag-version](pact-tag-version#readme)
   * [repository-dispatch](repository-dispatch#readme)
   * [rs-create-installerpkg](rs-create-installerpkg#readme)
   * [rs-permission-converter](rs-permission-converter#readme)
@@ -42,6 +47,7 @@ The following actions are available
   * [terraform-plan-comment](terraform-plan-comment#readme)
   * [test-pod](test-pod#readme)
   * [txengine-deploy](txengine-deploy#readme)
+  * [vale-linting](vale-linting#readme)
 
 ## :rocket: Workflow Examples
 

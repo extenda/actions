@@ -1,0 +1,22 @@
+name: External events
+description: Define configuration for external events service
+author: Extenda Retail
+inputs:
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication
+      to the secrets manager.
+    required: true
+  definitions:
+    description: |
+      External events configuration definition.
+    required: false
+    default: external-events/*.yaml
+  dry-run:
+    description: |
+      If 'true', action will be done.
+    required: false
+    default: 'false'
+runs:
+  using: node12
+  main: dist/index.js

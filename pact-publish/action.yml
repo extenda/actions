@@ -1,0 +1,23 @@
+name: Pact publish
+description: Publish pacts to a Pact Broker
+inputs:
+  service-account-key:
+    description: >
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+  pacts-directory:
+    description: The pacts directory.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Publish pacts
+      uses: extenda/actions/pact-broker@v0
+      with:
+        service-account-key: ${{ inputs.service-account-key }}
+        args: |-
+          broker publish "${{ inputs.pacts-directory }}" \
+          --tag="$(git rev-parse --abbrev-ref HEAD)" \
+          --consumer-app-version=${{ github.sha }}

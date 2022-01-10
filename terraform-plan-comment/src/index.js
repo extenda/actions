@@ -15,7 +15,8 @@ const moduleEmoji = (summary) => {
 };
 
 const outputToMarkdown = ({ module, output }) => {
-  const summary = output.trim().split('\n').pop();
+  const planSummary = output.match(/Plan:.+/);
+  const summary = planSummary ? planSummary[0] : output.trim().split('\n').pop();
   const emoji = moduleEmoji(summary);
   return [
     `#### ${emoji} \`${module}\``,
@@ -53,8 +54,7 @@ const createComment = (changes, workingDirectory, footer) => {
 
   if (footer) {
     comment.push(
-      // Remove line breaks, but preserve paragraphs.
-      footer.split('\n\n').map((p) => p.replace(/\n/g, ' ')).join('\n\n'),
+      footer,
       '',
     );
   }

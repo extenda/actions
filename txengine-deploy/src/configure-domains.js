@@ -253,11 +253,15 @@ const configureDomains = async (env, tenant, countryCode, zone = 'europe-west1-d
   core.info('Creating backend service');
   await setupBackendService(`${tenantName}-txengine`, clusterProject);
   await setupBackendService(`${tenantName}-posserver`, clusterProject);
+
   core.info('Adding backend NEG to backend service');
   await checkNEG(tenantName, clusterProject, zone)
     .then(() => addBackend(`${tenantName}-txengine`, clusterProject, zone))
     .then(() => addBackend(`${tenantName}-posserver`, clusterProject, zone))
+    .then(() => addBackend(`${tenantName}-txengine`, clusterProject, 'europe-west1-c'))
+    .then(() => addBackend(`${tenantName}-posserver`, clusterProject, 'europe-west1-c'))
     .catch(() => { throw new Error('The NEG was not found! make sure the deployment is correct'); });
+
   core.info('Setup url-mapping');
   return setupBackendURLMapping(fullDNS, tenantName, clusterProject);
 };

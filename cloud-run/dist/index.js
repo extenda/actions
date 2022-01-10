@@ -11247,6 +11247,13 @@ const configureDomains = async (
 
   const domains = domainMappings[env] || [];
 
+  // If prod and retailsvc.com is listed, add retailsvc-test.com
+  if (env === 'prod') {
+    const testDomains = domains.filter((d) => d.endsWith('retailsvc.com'))
+      .map((d) => d.replace('retailsvc.com', 'retailsvc-test.com'));
+    domains.push(...testDomains);
+  }
+
   if (connectivity === 'external' && domains.length > 0) {
     const newDomains = await getNewDomains(domains, name, cluster, namespace);
 
@@ -11948,13 +11955,13 @@ const buildReport = async (scanResults, image) => {
 
 const installTrivy = async () => {
   await exec.exec('wget', [
-    'https://github.com/aquasecurity/trivy/releases/download/v0.15.0/trivy_0.15.0_Linux-64bit.deb',
+    'https://github.com/aquasecurity/trivy/releases/download/v0.20.0/trivy_0.20.0_Linux-64bit.deb',
   ], {
     silent: true,
   });
   await exec.exec('sudo dpkg', [
     '-i',
-    'trivy_0.15.0_Linux-64bit.deb',
+    'trivy_0.20.0_Linux-64bit.deb',
   ], {
     silent: true,
   });
@@ -11993,7 +12000,7 @@ const runScan = async (serviceAccount, image) => installTrivy()
   .then(() => scanImage(image, false)
     .then(() => scanImage(image, true)
       .then((report) => sendSlackAlert(serviceAccount, report).catch((err) => {
-        core.info('Unable to notify slack channel! Make sure your credentails are correctly stored in your clan secret manager!');
+        core.info('Unable to notify slack channel! Make sure your credentials are correctly stored in your clan secret manager!');
         core.info(err.message);
       }))));
 

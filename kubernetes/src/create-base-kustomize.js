@@ -1,7 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 
-const createBaseKustomize = (deploymentName) => {
+/**
+ * Creates files on the file system:
+ * service.yaml, statefulSet.yaml, deployment.yaml, configmap.yaml, kustomization.yaml.
+ * @param deploymentName Service name that is ingested into the files.
+ */
+const createBaseKustomizeFiles = (deploymentName) => {
   const yamls = {
     service: `
 apiVersion: v1
@@ -107,4 +112,4 @@ resources:
   });
 };
 
-module.exports = createBaseKustomize;
+module.exports = createBaseKustomizeFiles;
