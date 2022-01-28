@@ -1,8 +1,10 @@
 const request = require('request');
 
-const fetchPolicy = (styraUrl, styraToken, systemId) => new Promise((resolve, reject) => {
+const fetchPolicy = (
+  styraUrl, styraToken, systemId, policyType,
+) => new Promise((resolve, reject) => {
   request({
-    uri: `${styraUrl}/v1/policies/systems/${systemId}/policy/com.styra.envoy.ingress/rules/rules`,
+    uri: `${styraUrl}/v1/policies/systems/${systemId}/policy/com.styra.envoy.${policyType}/rules/rules`,
     method: 'GET',
     headers: {
       'Content-type': 'application/json',
@@ -12,7 +14,7 @@ const fetchPolicy = (styraUrl, styraToken, systemId) => new Promise((resolve, re
   (error, res, body) => {
     if (!error && res.statusCode === 200) {
       const jsonBody = JSON.parse(body);
-      resolve(jsonBody.result.modules['ingress.rego']);
+      resolve(jsonBody.result.modules[`${policyType}.rego`]);
     } else {
       reject(new Error(`Couldn't fetch policy for system with id: ${systemId}`));
     }
@@ -20,18 +22,23 @@ const fetchPolicy = (styraUrl, styraToken, systemId) => new Promise((resolve, re
 });
 
 const pushPolicyProd = (
-  styraUrl, styraToken, systemId, ingressRego,
+  styraUrl, styraToken, systemId, rego, policyType,
 ) => new Promise((resolve, reject) => {
+  let modules = {};
+  if (policyType === 'app') {
+    modules = { 'app.rego': rego };
+  } else {
+    modules = { 'ingress.rego': rego };
+  }
+
   const policyBody = {
-    modules: {
-      'ingress.rego': ingressRego,
-    },
+    modules,
     signature: {
       signatures: [],
     },
   };
   request({
-    uri: `${styraUrl}/v1/policies/systems/${systemId}/policy/com.styra.envoy.ingress/rules/rules`,
+    uri: `${styraUrl}/v1/policies/systems/${systemId}/policy/com.styra.envoy.${policyType}/rules/rules`,
     method: 'PUT',
     headers: {
       'Content-type': 'application/json',
@@ -48,8 +55,8 @@ const pushPolicyProd = (
   });
 });
 
-const pushPolicy = async (styraUrl, token, systemId, prodSystemId) => fetchPolicy(
-  styraUrl, token, systemId,
-).then((ingressRego) => pushPolicyProd(styraUrl, token, prodSystemId, ingressRego));
+const pushPolicy = async (styraUrl, token, systemId, prodSystemId, policyType) => fetchPolicy(
+  styraUrl, token, systemId, policyType,
+).then((ingressRego) => pushPolicyProd(styraUrl, token, prodSystemId, ingressRego, policyType));
 
 module.exports = pushPolicy;

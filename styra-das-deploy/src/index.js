@@ -16,6 +16,14 @@ const action = async () => {
     styraToken,
     styraStagingId,
     styraProdId,
+    'ingress',
+  );
+  await pushPolicy(
+    styraUrl,
+    styraToken,
+    styraStagingId,
+    styraProdId,
+    'app',
   );
 };
 
