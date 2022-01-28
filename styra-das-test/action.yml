@@ -21,6 +21,11 @@ inputs:
       The styra DAS url
     default: https://extendaretail.svc.styra.com
     required: false
+  policy-type:
+    description: |
+      The policy you are testing, ingress or app ( default: ingress )
+    default: ingress
+    required: false
 runs:
   using: docker
   image: Dockerfile
@@ -28,4 +33,5 @@ runs:
     STYRA_ORGANIZATION_ID: extendaretail.svc.styra.com
     STYRA_TOKEN: ${{ inputs.styra-das-token }}
     STYRA_SYSTEM_NAME: ${{ inputs.permission-prefix }}.${{ inputs.service-name }}-staging
+    STYRA_POLICY_TYPE: ${{ inputs.policy-type }}
   args: []

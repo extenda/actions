@@ -7,6 +7,12 @@ The following files are expected to exist in your project:
 - `policies/policy/com.styra.envoy.ingress/test/test/test.rego`
 - `policies/policy/com.styra.envoy.ingress/rules/rules/ingress.rego`
 
+If running tests on app policy type these files are expected:
+
+- `policies/policy/com.styra.envoy.app/test/test/test.rego`
+- `policies/policy/com.styra.envoy.app/rules/rules/app.rego`
+
+
 The DAS system name is expected to follow the Extenda Retail naming convention:
 `<permission-prefix>.<service-name>-staging`.
 
