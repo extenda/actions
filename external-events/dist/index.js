@@ -31929,12 +31929,11 @@ const yaml = __webpack_require__(23196);
 const fg = __webpack_require__(12411);
 const { readFileSync } = __webpack_require__(35747);
 const core = __webpack_require__(6341);
-const jsYaml = __webpack_require__(23196);
 const { validateExeConfig } = __webpack_require__(32642);
 
 function loadDefinition(path) {
   core.info(`Loading ${path} config file`);
-  return yaml.load(readFileSync(path, 'utf-8'), { filename: path, schema: jsYaml.FAILSAFE_SCHEMA });
+  return yaml.load(readFileSync(path, 'utf-8'), { filename: path });
 }
 
 function validateSystemPrefixUnique(defs) {
@@ -32010,7 +32009,7 @@ const schema = joi.object({
       'content-type': joi.string().required(),
       disabled: joi.boolean().default(false),
       deprecated: joi.object({
-        'valid-until': joi.string().isoDate().required(),
+        'removal-date': joi.string().isoDate().required(),
         message: joi.string().max(256),
         'replaced-with': joi.string().regex(/^[a-z][-a-z]{2}\.[a-z][-a-z\d]{0,64}\.v\d{1,10}$/),
       }),

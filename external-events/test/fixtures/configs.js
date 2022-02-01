@@ -11,12 +11,12 @@ event-sources:
     content-type: application/json
     disabled: true
     deprecated: 
-      valid-until: "2022-02-01"
+      removal-date: "2022-02-01"
       message: message
       replaced-with: iam.group-created.v2
 `;
 
-const validParsed = jsYaml.load(valid, { schema: jsYaml.FAILSAFE_SCHEMA });
+const validParsed = jsYaml.load(valid);
 
 const valid2 = `
 version: 1
@@ -29,7 +29,7 @@ event-sources:
     content-type: text/plain
 `;
 
-const valid2Parsed = jsYaml.load(valid2, { schema: jsYaml.FAILSAFE_SCHEMA });
+const valid2Parsed = jsYaml.load(valid2);
 
 const invalid = `
 version: 1
@@ -41,11 +41,11 @@ event-sources:
     content-type: application/json
     disabled: yes
     deprecated: 
-      valid-until: 2022/02/01
+      removal-date: 2022/02/01
       replaced-with: invalid.group-created.v2
 `;
 
-const invalidParsed = jsYaml.load(invalid, { schema: jsYaml.FAILSAFE_SCHEMA });
+const invalidParsed = jsYaml.load(invalid);
 
 module.exports = {
   valid,

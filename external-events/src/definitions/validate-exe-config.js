@@ -12,7 +12,7 @@ const schema = joi.object({
       'content-type': joi.string().required(),
       disabled: joi.boolean().default(false),
       deprecated: joi.object({
-        'valid-until': joi.string().isoDate().required(),
+        'removal-date': joi.string().isoDate().required(),
         message: joi.string().max(256),
         'replaced-with': joi.string().regex(/^[a-z][-a-z]{2}\.[a-z][-a-z\d]{0,64}\.v\d{1,10}$/),
       }),
