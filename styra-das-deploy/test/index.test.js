@@ -20,6 +20,7 @@ describe('run push policy', () => {
       .mockReturnValueOnce('test')
       .mockReturnValueOnce('service-namespace');
     pushPolicy.mockResolvedValueOnce({});
+    pushPolicy.mockResolvedValueOnce({});
     await action();
 
     expect(core.getInput).toHaveBeenCalledTimes(4);
@@ -28,6 +29,14 @@ describe('run push policy', () => {
       'token',
       'systemId-staging',
       'systemId-prod',
+      'ingress',
+    );
+    expect(pushPolicy).toHaveBeenCalledWith(
+      'extenda',
+      'token',
+      'systemId-staging',
+      'systemId-prod',
+      'app',
     );
   });
 });
