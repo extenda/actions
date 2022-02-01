@@ -6,7 +6,7 @@ module.exports =
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse("{\"name\":\"joi\",\"description\":\"Object schema validation\",\"version\":\"17.4.2\",\"repository\":\"git://github.com/sideway/joi\",\"main\":\"lib/index.js\",\"types\":\"lib/index.d.ts\",\"browser\":\"dist/joi-browser.min.js\",\"files\":[\"lib/**/*\",\"dist/*\"],\"keywords\":[\"schema\",\"validation\"],\"dependencies\":{\"@hapi/hoek\":\"^9.0.0\",\"@hapi/topo\":\"^5.0.0\",\"@sideway/address\":\"^4.1.0\",\"@sideway/formula\":\"^3.0.0\",\"@sideway/pinpoint\":\"^2.0.0\"},\"devDependencies\":{\"@hapi/bourne\":\"2.x.x\",\"@hapi/code\":\"8.x.x\",\"@hapi/joi-legacy-test\":\"npm:@hapi/joi@15.x.x\",\"@hapi/lab\":\"24.x.x\",\"typescript\":\"4.3.x\"},\"scripts\":{\"prepublishOnly\":\"cd browser && npm install && npm run build\",\"test\":\"lab -t 100 -a @hapi/code -L -Y\",\"test-cov-html\":\"lab -r html -o coverage.html -a @hapi/code\"},\"license\":\"BSD-3-Clause\",\"_resolved\":\"https://repo.extendaretail.com/repository/npm-group/joi/-/joi-17.4.2.tgz\",\"_integrity\":\"sha512-Lm56PP+n0+Z2A2rfRvsfWVDXGEWjXxatPopkQ8qQ5mxCEhwHG+Ettgg5o98FFaxilOxozoa14cFhrE/hOzh/Nw==\",\"_from\":\"joi@17.4.2\"}");
+module.exports = JSON.parse("{\"name\":\"joi\",\"description\":\"Object schema validation\",\"version\":\"17.4.2\",\"repository\":\"git://github.com/sideway/joi\",\"main\":\"lib/index.js\",\"types\":\"lib/index.d.ts\",\"browser\":\"dist/joi-browser.min.js\",\"files\":[\"lib/**/*\",\"dist/*\"],\"keywords\":[\"schema\",\"validation\"],\"dependencies\":{\"@hapi/hoek\":\"^9.0.0\",\"@hapi/topo\":\"^5.0.0\",\"@sideway/address\":\"^4.1.0\",\"@sideway/formula\":\"^3.0.0\",\"@sideway/pinpoint\":\"^2.0.0\"},\"devDependencies\":{\"@hapi/bourne\":\"2.x.x\",\"@hapi/code\":\"8.x.x\",\"@hapi/joi-legacy-test\":\"npm:@hapi/joi@15.x.x\",\"@hapi/lab\":\"24.x.x\",\"typescript\":\"4.3.x\"},\"scripts\":{\"prepublishOnly\":\"cd browser && npm install && npm run build\",\"test\":\"lab -t 100 -a @hapi/code -L -Y\",\"test-cov-html\":\"lab -r html -o coverage.html -a @hapi/code\"},\"license\":\"BSD-3-Clause\"}");
 
 /***/ }),
 
@@ -31929,11 +31929,12 @@ const yaml = __webpack_require__(23196);
 const fg = __webpack_require__(12411);
 const { readFileSync } = __webpack_require__(35747);
 const core = __webpack_require__(6341);
+const jsYaml = __webpack_require__(23196);
 const { validateExeConfig } = __webpack_require__(32642);
 
 function loadDefinition(path) {
   core.info(`Loading ${path} config file`);
-  return yaml.load(readFileSync(path, 'utf-8'), { filename: path });
+  return yaml.load(readFileSync(path, 'utf-8'), { filename: path, schema: jsYaml.FAILSAFE_SCHEMA });
 }
 
 function validateSystemPrefixUnique(defs) {
@@ -32008,6 +32009,11 @@ const schema = joi.object({
       'subscription-name': joi.string().regex(/^projects\/[a-z][a-z0-9-]{5,29}\/subscriptions\/[A-Za-z0-9-_.~+%]{3,255}$/).required(),
       'content-type': joi.string().required(),
       disabled: joi.boolean().default(false),
+      deprecated: joi.object({
+        'valid-until': joi.string().isoDate().required(),
+        message: joi.string().max(256),
+        'replaced-with': joi.string().regex(/^[a-z][-a-z]{2}\.[a-z][-a-z\d]{0,64}\.v\d{1,10}$/),
+      }),
     }))
     .required(),
 });
