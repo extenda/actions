@@ -185,10 +185,6 @@ const runDeploy = async (
 ) => {
   // Authenticate gcloud with our service-account
   const projectId = await gcloudAuth(serviceAccountKey);
-  let canary = false;
-  if (service.canary && service.canary.enabled) {
-    canary = true;
-  }
 
   if (process.platform !== 'win32') {
     await runScan(serviceAccountKey, image);
@@ -198,6 +194,11 @@ const runDeploy = async (
     project,
     env,
   } = projectInfo(projectId);
+
+  let canary = false;
+  if (service.canary && service.canary.enabled && env === 'prod') {
+    canary = true;
+  }
 
   const {
     name,
@@ -237,7 +238,7 @@ const runDeploy = async (
 
   if (service.platform.gke) {
     cluster = await gkeArguments(args, service, projectId);
-    if (canary && env === 'prod') {
+    if (canary) {
       await canaryArguments(args, service.canary, projectId, project, env);
     }
   }
