@@ -11792,7 +11792,7 @@ const runDeploy = async (
 
   if (service.platform.gke) {
     cluster = await gkeArguments(args, service, projectId);
-    if (canary) {
+    if (canary && env === 'prod') {
       await canaryArguments(args, service.canary, projectId, project, env);
     }
   }
@@ -12016,6 +12016,7 @@ const core = __webpack_require__(6341);
 const exec = __webpack_require__(22176);
 const gcloudOutput = __webpack_require__(13476);
 const getLatestRevision = __webpack_require__(50638);
+const projectInfo = __webpack_require__(645);
 
 const FIVE_MINUTES = 300000;
 
@@ -12146,13 +12147,15 @@ const waitForRevision = async (
       revision = await findRevision(output, namespace, cluster);
     }
 
+    const env = await projectInfo(cluster.project).env;
+
     // update traffic on latest revision based on steps
     await gcloudOutput([
       'run',
       'services',
       'update-traffic',
       namespace,
-      `--to-revisions=${revision}=${canary.enabled ? canary.steps.split('.')[0] : 100}`,
+      `--to-revisions=${revision}=${canary.enabled && env === 'prod' ? canary.steps.split('.')[0] : 100}`,
       `--cluster=${cluster.cluster}`,
       `--cluster-location=${cluster.clusterLocation}`,
       `--namespace=${namespace}`,

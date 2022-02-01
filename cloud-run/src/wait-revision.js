@@ -2,6 +2,7 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 const gcloudOutput = require('./gcloud-output');
 const getLatestRevision = require('./get-revision');
+const projectInfo = require('./project-info');
 
 const FIVE_MINUTES = 300000;
 
@@ -132,13 +133,15 @@ const waitForRevision = async (
       revision = await findRevision(output, namespace, cluster);
     }
 
+    const env = await projectInfo(cluster.project).env;
+
     // update traffic on latest revision based on steps
     await gcloudOutput([
       'run',
       'services',
       'update-traffic',
       namespace,
-      `--to-revisions=${revision}=${canary.enabled ? canary.steps.split('.')[0] : 100}`,
+      `--to-revisions=${revision}=${canary.enabled && env === 'prod' ? canary.steps.split('.')[0] : 100}`,
       `--cluster=${cluster.cluster}`,
       `--cluster-location=${cluster.clusterLocation}`,
       `--namespace=${namespace}`,

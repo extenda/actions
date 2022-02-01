@@ -237,7 +237,7 @@ const runDeploy = async (
 
   if (service.platform.gke) {
     cluster = await gkeArguments(args, service, projectId);
-    if (canary) {
+    if (canary && env === 'prod') {
       await canaryArguments(args, service.canary, projectId, project, env);
     }
   }
