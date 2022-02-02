@@ -61,7 +61,7 @@ describe('Run Deploy', () => {
       '--concurrency=80',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
       '--service-account=cloudrun-runtime@test-staging-project.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
@@ -100,7 +100,7 @@ describe('Run Deploy', () => {
       '--concurrency=80',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project-staging-ab12,SERVICE_ENVIRONMENT=staging',
-      '--labels=service_project_id=test-staging-project-staging-ab12,service_project=test-staging-project,service_env=staging',
+      '--labels=service_project_id=test-staging-project-staging-ab12,service_project=test-staging-project,service_env=staging,sre.canary.enabled=false',
       '--service-account=cloudrun-runtime@test-staging-project-staging-ab12.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
@@ -199,7 +199,7 @@ describe('Run Deploy', () => {
       '--concurrency=80',
       '--max-instances=default',
       '--set-env-vars=KEY1=value,KEY2=sm://test-staging-project/my-secret,SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
       '--service-account=cloudrun-runtime@test-staging-project.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
@@ -311,7 +311,7 @@ describe('Run Deploy', () => {
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(getClusterInfo).toHaveBeenCalled();
     expect(setupGcloud).toHaveBeenCalledTimes(1);
-    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(exec.exec).toHaveBeenCalledTimes(3);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
       'run', 'deploy', 'my-service',
       '--image=gcr.io/test-staging-project/my-service:tag',
@@ -320,7 +320,7 @@ describe('Run Deploy', () => {
       '--concurrency=32',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
       '--cpu=400m',
       '--min-instances=default',
       '--platform=gke',
@@ -357,7 +357,7 @@ describe('Run Deploy', () => {
       'gcr.io/test-staging-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
-    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(exec.exec).toHaveBeenCalledTimes(3);
     expect(getClusterInfo).toHaveBeenCalledWith('test-staging-project', undefined);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
@@ -368,7 +368,7 @@ describe('Run Deploy', () => {
       '--concurrency=10',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
       '--cpu=100m',
       '--min-instances=default',
       '--platform=gke',
@@ -410,7 +410,7 @@ describe('Run Deploy', () => {
       'gcr.io/test-staging-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
-    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(exec.exec).toHaveBeenCalledTimes(3);
     expect(getClusterInfo).toHaveBeenCalledWith('test-staging-project', 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster');
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
@@ -421,7 +421,7 @@ describe('Run Deploy', () => {
       '--concurrency=50',
       '--max-instances=100',
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
       '--cpu=400m',
       '--min-instances=1',
       '--platform=gke',
@@ -505,7 +505,7 @@ describe('Run Deploy', () => {
       'gcr.io/test-staging-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
-    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(exec.exec).toHaveBeenCalledTimes(3);
     expect(getClusterInfo).toHaveBeenCalledWith('test-staging-project', undefined);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
@@ -516,7 +516,7 @@ describe('Run Deploy', () => {
       '--concurrency=19',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
       '--cpu=233m',
       '--min-instances=default',
       '--platform=gke',

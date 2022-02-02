@@ -11778,7 +11778,7 @@ const runDeploy = async (
   ];
 
   if (!canary) {
-    args.push(`--labels=service_project_id=${projectId},service_project=${project},service_env=${env}`);
+    args.push(`--labels=service_project_id=${projectId},service_project=${project},service_env=${env},sre.canary.enabled=false`);
   }
 
   if (verbose) {
@@ -12128,6 +12128,33 @@ const printStatus = (revisionStatus) => {
   return `${completed} (${values})`;
 };
 
+const updateTraffic = async (revision, cluster, canary, namespace) => {
+  const env = await projectInfo(cluster.project).env;
+  let rev = revision;
+  if (!revision) {
+    rev = await getLatestRevision(namespace, cluster);
+  }
+
+  let target = `--to-revisions=${rev}=100`;
+  if ((canary && canary.enabled) && env === 'prod') {
+    target = `--to-revisions=${rev}=${canary.steps.split('.')[0]}`;
+  }
+
+  return gcloudOutput([
+    'run',
+    'services',
+    'update-traffic',
+    namespace,
+    target,
+    `--cluster=${cluster.cluster}`,
+    `--cluster-location=${cluster.clusterLocation}`,
+    `--namespace=${namespace}`,
+    `--project=${cluster.project}`,
+    '--platform=gke',
+    '--no-user-output-enabled',
+  ]);
+};
+
 const waitForRevision = async (
   { status, output },
   args,
@@ -12148,23 +12175,8 @@ const waitForRevision = async (
     } else {
       revision = await findRevision(output, namespace, cluster);
     }
-
-    const env = await projectInfo(cluster.project).env;
-
     // update traffic on latest revision based on steps
-    await gcloudOutput([
-      'run',
-      'services',
-      'update-traffic',
-      namespace,
-      `--to-revisions=${revision}=${canary.enabled && env === 'prod' ? canary.steps.split('.')[0] : 100}`,
-      `--cluster=${cluster.cluster}`,
-      `--cluster-location=${cluster.clusterLocation}`,
-      `--namespace=${namespace}`,
-      `--project=${cluster.project}`,
-      '--platform=gke',
-      '--no-user-output-enabled',
-    ]);
+    await updateTraffic(revision, cluster, canary, namespace);
 
     core.info(`Waiting for revision "${revision}" to become active...`);
     let revisionStatus = {};
@@ -12180,6 +12192,10 @@ const waitForRevision = async (
       core.info(`Deploy status is: ${printStatus(revisionStatus)}`);
     } while (!isRevisionCompleted(revisionStatus));
     /* eslint-enable no-await-in-loop */
+  } else if (status === 0) {
+    if (args.includes('--platform=gke')) {
+      await updateTraffic(null, cluster, canary, namespace);
+    }
   }
   return 0;
 };
