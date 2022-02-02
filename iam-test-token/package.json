@@ -7,6 +7,6 @@
   "dependencies": {
     "@actions/core": "^1.2.6",
     "@actions/exec": "^1.0.4",
-    "axios": "^0.20.0"
+    "axios": "^0.25.0"
   }
 }

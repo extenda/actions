@@ -8,7 +8,7 @@
     "@actions/core": "^1.2.6",
     "@actions/exec": "^1.0.4",
     "@actions/io": "^1.0.2",
-    "axios": "^0.19.2",
+    "axios": "^0.25.0",
     "uuid": "^8.0.0"
   },
   "devDependencies": {
