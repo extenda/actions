@@ -60,26 +60,22 @@ const parseConditions = (conditions) => {
 const getRevisionStatus = async (revision, args) => {
   const findArg = (match) => args.find((a) => a.startsWith(match));
   let stdout = '';
-  try {
-    await exec.exec('gcloud', [
-      'run', 'revisions', 'describe', revision,
-      findArg('--project='),
-      findArg('--platform='),
-      findArg('--cluster='),
-      findArg('--cluster-location='),
-      findArg('--namespace='),
-      '--format=json',
-    ], {
-      silent: false,
-      listeners: {
-        stdout: (data) => {
-          stdout += data.toString('utf8');
-        },
+  await exec.exec('gcloud', [
+    'run', 'revisions', 'describe', revision,
+    findArg('--project='),
+    findArg('--platform='),
+    findArg('--cluster='),
+    findArg('--cluster-location='),
+    findArg('--namespace='),
+    '--format=json',
+  ], {
+    silent: true,
+    listeners: {
+      stdout: (data) => {
+        stdout += data.toString('utf8');
       },
-    });
-  } catch (err) {
-    core.info(err);
-  }
+    },
+  });
 
   try {
     const { status: { conditions } } = JSON.parse(stdout.trim());
@@ -166,7 +162,7 @@ const waitForRevision = async (
       revision = await findRevision(output, namespace, cluster);
     }
     // update traffic on latest revision based on steps
-    await updateTraffic(revision, cluster, canary, namespace);
+    core.info(await updateTraffic(revision, cluster, canary, namespace));
 
     core.info(`Waiting for revision "${revision}" to become active...`);
     let revisionStatus = {};
@@ -184,7 +180,7 @@ const waitForRevision = async (
     /* eslint-enable no-await-in-loop */
   } else if (status === 0) {
     if (args.includes('--platform=gke')) {
-      await updateTraffic(null, cluster, canary, namespace);
+      core.info(await updateTraffic(null, cluster, canary, namespace));
     }
   }
   return 0;
