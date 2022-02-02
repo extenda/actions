@@ -12026,6 +12026,7 @@ const findRevision = async (output, namespace, cluster) => {
     /ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: 0\/\d+ nodes/,
     /ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: Unable to fetch image "([^"]+)": failed to resolve image to digest: Get "([^"]+)": context deadline exceeded./,
     /ERROR: \(gcloud\.run\.deploy\) Ingress reconciliation failed/,
+    /ERROR: \(gcloud\.run\.services\.update-traffic\) Revision "([^"]+)" {2}failed to become ready./,
     /ERROR: gcloud crashed \(OSError\): Could not find a suitable TLS CA certificate bundle, invalid path: ([^"]+)/,
     new RegExp(`ERROR: \\(gcloud\\.run\\.deploy\\) Configuration "${namespace}" does not have any ready Revision.`),
   ];
