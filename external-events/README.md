@@ -35,6 +35,10 @@ event-sources: # (required) list of event sources for your system
     # removing of event sources is not supported for now. instead you can disable it.
     # event source will still work, but it will not be available for new webhooks
     disabled: true
+    deprecated: # (optional) deprecation metadata
+      removal-date: "2020-02-02" # (required) YYYY-MM-DD, should be explicitly specified as a string with double quotes
+      message: any string # (optional) will be displayed along with event messages
+      replaced-with: iam.group-created.v2 # (optional) event source id that will replace the deprecated
   - name: group-created
     version: v2
     display-name: IAM Group was created
