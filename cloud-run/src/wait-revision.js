@@ -125,20 +125,24 @@ const updateTraffic = async (revision, cluster, canary, namespace) => {
   if ((canary && canary.enabled) && env === 'prod') {
     target = `--to-revisions=${rev}=${canary.steps.split('.')[0]}`;
   }
-
-  return gcloudOutput([
-    'run',
-    'services',
-    'update-traffic',
-    namespace,
-    target,
-    `--cluster=${cluster.cluster}`,
-    `--cluster-location=${cluster.clusterLocation}`,
-    `--namespace=${namespace}`,
-    `--project=${cluster.project}`,
-    '--platform=gke',
-    '--no-user-output-enabled',
-  ]);
+  try {
+    return gcloudOutput([
+      'run',
+      'services',
+      'update-traffic',
+      namespace,
+      target,
+      `--cluster=${cluster.cluster}`,
+      `--cluster-location=${cluster.clusterLocation}`,
+      `--namespace=${namespace}`,
+      `--project=${cluster.project}`,
+      '--platform=gke',
+      '--no-user-output-enabled',
+    ]);
+  } catch (error) {
+    core.info(error);
+    return 0;
+  }
 };
 
 const waitForRevision = async (
