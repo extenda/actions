@@ -79827,7 +79827,7 @@ module.exports = handleCertificates;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const core = __webpack_require__(6341);
-const { run } = __webpack_require__(1898);
+const { run, failIfNotTrunkBased } = __webpack_require__(1898);
 const kubectl = __webpack_require__(3954);
 const deploy = __webpack_require__(66029);
 const prepareEnvConfig = __webpack_require__(24961);
@@ -79841,6 +79841,8 @@ const action = async () => {
   const tenantName = core.getInput('tenant-name', { required: true });
   const countryCode = core.getInput('country-code') || '';
   const inputEnvironment = core.getInput('environment');
+
+  failIfNotTrunkBased();
 
   const projectId = await kubectl.configure(deployServiceAccountKey);
 
@@ -100376,12 +100378,14 @@ const run = __webpack_require__(96252);
 const gitConfig = __webpack_require__(14722);
 const loadTool = __webpack_require__(7828);
 const loadGitHubToken = __webpack_require__(92282);
+const failIfNotTrunkBased = __webpack_require__(66103);
 
 // Note that src/versions are NOT included here because it adds 2.2MBs to every package
 // that uses the utils module. If versions are to be used, include the file explicitly.
 
 module.exports = {
   checkEnv,
+  failIfNotTrunkBased,
   gitConfig,
   loadTool,
   loadGitHubToken,
@@ -100527,6 +100531,28 @@ const run = async (action) => {
 };
 
 module.exports = run;
+
+
+/***/ }),
+
+/***/ 66103:
+/***/ ((module) => {
+
+const isAllowedBranch = (ref) => ref === 'refs/heads/master' || ref === 'refs/heads/main';
+
+/**
+ * Raise an error if the branch isn't a master or main branch. This helps us enforce trunk
+ * based workflows.
+ * @throws Error if invoked on an unexpected branch.
+ */
+const failIfNotTrunkBased = () => {
+  const ref = process.env.GITHUB_REF;
+  if (!isAllowedBranch(ref) && !ref.startsWith('refs/tags/')) {
+    throw new Error(`Action not allowed on ref ${ref}. You must follow trunk-based development and invoke this action from master, main or a release tag`);
+  }
+};
+
+module.exports = failIfNotTrunkBased;
 
 
 /***/ }),

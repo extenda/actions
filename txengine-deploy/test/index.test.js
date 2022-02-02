@@ -15,9 +15,18 @@ const deploy = require('../src/deploy');
 
 const action = require('../src/index');
 
+const orgEnv = process.env;
+
 describe('txengine-deploy', () => {
+  beforeEach(() => {
+    process.env = {
+      ...orgEnv,
+      GITHUB_REF: 'refs/heads/master',
+    };
+  });
   afterEach(() => {
     jest.resetAllMocks();
+    process.env = orgEnv;
   });
 
   test('It can deploy txengine', async () => {
@@ -46,5 +55,11 @@ describe('txengine-deploy', () => {
     expect(kubectl.configure).toHaveBeenCalledWith('deploy-account');
     expect(createManifests).toHaveBeenCalledTimes(1);
     expect(deploy).toHaveBeenCalledTimes(1);
+  });
+
+  test('It rejects action if not trunk-based', async () => {
+    core.getInput.mockReturnValue('test');
+    process.env.GITHUB_REF = 'refs/heads/develop';
+    await expect(action()).rejects.toThrow(/^Action not allowed on ref refs\/heads\/develop/);
   });
 });

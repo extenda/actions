@@ -15785,12 +15785,14 @@ const run = __webpack_require__(9748);
 const gitConfig = __webpack_require__(1086);
 const loadTool = __webpack_require__(8570);
 const loadGitHubToken = __webpack_require__(8487);
+const failIfNotTrunkBased = __webpack_require__(5023);
 
 // Note that src/versions are NOT included here because it adds 2.2MBs to every package
 // that uses the utils module. If versions are to be used, include the file explicitly.
 
 module.exports = {
   checkEnv,
+  failIfNotTrunkBased,
   gitConfig,
   loadTool,
   loadGitHubToken,
@@ -15936,6 +15938,28 @@ const run = async (action) => {
 };
 
 module.exports = run;
+
+
+/***/ }),
+
+/***/ 5023:
+/***/ ((module) => {
+
+const isAllowedBranch = (ref) => ref === 'refs/heads/master' || ref === 'refs/heads/main';
+
+/**
+ * Raise an error if the branch isn't a master or main branch. This helps us enforce trunk
+ * based workflows.
+ * @throws Error if invoked on an unexpected branch.
+ */
+const failIfNotTrunkBased = () => {
+  const ref = process.env.GITHUB_REF;
+  if (!isAllowedBranch(ref) && !ref.startsWith('refs/tags/')) {
+    throw new Error(`Action not allowed on ref ${ref}. You must follow trunk-based development and invoke this action from master, main or a release tag`);
+  }
+};
+
+module.exports = failIfNotTrunkBased;
 
 
 /***/ }),

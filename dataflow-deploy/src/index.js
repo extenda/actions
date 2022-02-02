@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const { run } = require('../../utils');
+const { run, failIfNotTrunkBased } = require('../../utils');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const deployJob = require('./deploy-job');
 const drainJob = require('./drain-job');
@@ -18,6 +18,8 @@ const action = async () => {
   const network = core.getInput('network') || 'tribe-network';
   const maxWorkers = core.getInput('max-workers') || '';
   const numWorkers = core.getInput('num-workers') || '';
+
+  failIfNotTrunkBased();
 
   const newJobName = `${jobName}-${jobVersion}`;
 
