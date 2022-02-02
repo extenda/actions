@@ -12075,22 +12075,26 @@ const parseConditions = (conditions) => {
 const getRevisionStatus = async (revision, args) => {
   const findArg = (match) => args.find((a) => a.startsWith(match));
   let stdout = '';
-  await exec.exec('gcloud', [
-    'run', 'revisions', 'describe', revision,
-    findArg('--project='),
-    findArg('--platform='),
-    findArg('--cluster='),
-    findArg('--cluster-location='),
-    findArg('--namespace='),
-    '--format=json',
-  ], {
-    silent: true,
-    listeners: {
-      stdout: (data) => {
-        stdout += data.toString('utf8');
+  try {
+    await exec.exec('gcloud', [
+      'run', 'revisions', 'describe', revision,
+      findArg('--project='),
+      findArg('--platform='),
+      findArg('--cluster='),
+      findArg('--cluster-location='),
+      findArg('--namespace='),
+      '--format=json',
+    ], {
+      silent: false,
+      listeners: {
+        stdout: (data) => {
+          stdout += data.toString('utf8');
+        },
       },
-    },
-  });
+    });
+  } catch (err) {
+    core.info(err);
+  }
 
   try {
     const { status: { conditions } } = JSON.parse(stdout.trim());
@@ -12140,24 +12144,20 @@ const updateTraffic = async (revision, cluster, canary, namespace) => {
   if ((canary && canary.enabled) && env === 'prod') {
     target = `--to-revisions=${rev}=${canary.steps.split('.')[0]}`;
   }
-  try {
-    return gcloudOutput([
-      'run',
-      'services',
-      'update-traffic',
-      namespace,
-      target,
-      `--cluster=${cluster.cluster}`,
-      `--cluster-location=${cluster.clusterLocation}`,
-      `--namespace=${namespace}`,
-      `--project=${cluster.project}`,
-      '--platform=gke',
-      '--no-user-output-enabled',
-    ]);
-  } catch (error) {
-    core.info(error);
-    return 0;
-  }
+
+  return gcloudOutput([
+    'run',
+    'services',
+    'update-traffic',
+    namespace,
+    target,
+    `--cluster=${cluster.cluster}`,
+    `--cluster-location=${cluster.clusterLocation}`,
+    `--namespace=${namespace}`,
+    `--project=${cluster.project}`,
+    '--platform=gke',
+    '--no-user-output-enabled',
+  ]);
 };
 
 const waitForRevision = async (
