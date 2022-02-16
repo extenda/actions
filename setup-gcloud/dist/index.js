@@ -6257,7 +6257,8 @@ const setupGcloud = __webpack_require__(4543);
 
 run(async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
-  const version = core.getInput('version') || 'latest';
+  // const version = core.getInput('version') || 'latest';
+  const version = '365.0.0';
   const exportCredentials = core.getInput('export-default-credentials') || 'false';
   await setupGcloud(serviceAccountKey, version, exportCredentials === 'true');
 });
@@ -8375,14 +8376,7 @@ function bytesToUuid(buf, offset) {
     bth[buf[i++]], bth[buf[i++]]
   ]).join('');
 }
-  
-run(async () => {
-  const serviceAccountKey = core.getInput('service-account-key', { required: true });
-  // const version = core.getInput('version') || 'latest';
-  const version = '365.0.0';
-  const exportCredentials = core.getInput('export-default-credentials') || 'false';
-  await setupGcloud(serviceAccountKey, version, exportCredentials === 'true');
-});
+
 module.exports = bytesToUuid;
 
 
