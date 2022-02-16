@@ -180,7 +180,7 @@ const waitForRevision = async (
     /* eslint-enable no-await-in-loop */
   } else if (status === 0) {
     if (args.includes('--platform=gke')) {
-      core.info(await updateTraffic(null, cluster, canary, namespace));
+      await updateTraffic(null, cluster, canary, namespace);
     }
   }
   return 0;
