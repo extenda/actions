@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const { run } = require('../../utils');
+const { run, failIfNotTrunkBased } = require('../../utils');
 const kubectl = require('./kubectl');
 const deploy = require('./deploy');
 const prepareEnvConfig = require('./env-config');
@@ -13,6 +13,8 @@ const action = async () => {
   const tenantName = core.getInput('tenant-name', { required: true });
   const countryCode = core.getInput('country-code') || '';
   const inputEnvironment = core.getInput('environment');
+
+  failIfNotTrunkBased();
 
   const projectId = await kubectl.configure(deployServiceAccountKey);
 

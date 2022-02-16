@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const { run } = require('../../utils');
+const { run, failIfNotTrunkBased } = require('../../utils');
 const loadServiceDefinition = require('./service-definition');
 const runDeploy = require('./run-deploy');
 const configureDomains = require('./configure-domains');
@@ -12,6 +12,8 @@ const action = async () => {
   const domainBindingsEnv = core.getInput('domain-mappings-env') || '';
   const dnsProjectLabel = core.getInput('dns-project-label') || 'dns';
   const verbose = (core.getInput('verbose') || 'false');
+
+  failIfNotTrunkBased();
 
   const service = loadServiceDefinition(serviceFile, jsonSchema);
   await runDeploy(serviceAccountKey, service, image, verbose === 'true')
