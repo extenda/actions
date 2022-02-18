@@ -74,13 +74,7 @@ spec:
     name: ${deploymentName}
   minReplicas: ${autoscale.minReplicas}
   maxReplicas: ${autoscale.maxReplicas}
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: ${autoscale.cpuPercent}
+  targetCPUUtilizationPercentage: ${autoscale.cpuPercent}
 `;
 
   // Write hpa template to disc to apply afterwards.
