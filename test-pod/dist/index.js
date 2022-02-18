@@ -10844,6 +10844,51 @@ module.exports = {
       ],
       additionalProperties: false,
     },
+    canary: {
+      type: 'object',
+      properties: {
+        enabled: {
+          type: 'boolean',
+          default: true,
+        },
+        steps: {
+          type: 'string',
+          default: '10,50,80',
+        },
+        interval: {
+          type: 'string',
+          default: '10',
+        },
+        thresholds: {
+          type: 'object',
+          properties: {
+            latency99: {
+              type: 'string',
+            },
+            latency95: {
+              type: 'string',
+            },
+            latency50: {
+              type: 'string',
+            },
+            'error-rate': {
+              type: 'string',
+            },
+          },
+          required: [
+            'latency99',
+            'latency95',
+            'latency50',
+            'error-rate',
+          ],
+          additionalProperties: false,
+        },
+      },
+      required: [
+        'thresholds',
+      ],
+      additionalProperties: false,
+    },
   },
   required: [
     'cpu',

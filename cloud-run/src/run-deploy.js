@@ -133,6 +133,26 @@ const gkeArguments = async (args, service, projectId) => {
   return cluster;
 };
 
+const canaryArguments = async (args, canary, projectId, project, env) => {
+  const {
+    enabled,
+    steps,
+    interval,
+    thresholds,
+  } = canary;
+  const {
+    latency99,
+    latency95,
+    latency50,
+    'error-rate': errorRates,
+  } = thresholds;
+
+  args.push(
+    `--labels=service_project_id=${projectId},service_project=${project},service_env=${env},sre.canary.enabled=${enabled},sre.canary.steps=${steps},sre.canary.interval=${interval},sre.canary.thresholds.latency99=${latency99},sre.canary.thresholds.latency95=${latency95},sre.canary.thresholds.latency50=${latency50},sre.canary.thresholds.error=${errorRates}`,
+    '--no-traffic',
+  );
+};
+
 const execWithOutput = async (args) => {
   let stdout = '';
   let stderr = '';
@@ -175,6 +195,11 @@ const runDeploy = async (
     env,
   } = projectInfo(projectId);
 
+  let canary = false;
+  if (service.canary && service.canary.enabled && env === 'prod') {
+    canary = true;
+  }
+
   const {
     name,
     memory,
@@ -195,8 +220,11 @@ const runDeploy = async (
     `--concurrency=${concurrency}`,
     `--max-instances=${numericOrDefault(maxInstances)}`,
     `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
-    `--labels=service_project_id=${projectId},service_project=${project},service_env=${env}`,
   ];
+
+  if (!canary) {
+    args.push(`--labels=service_project_id=${projectId},service_project=${project},service_env=${env},sre.canary.enabled=false`);
+  }
 
   if (verbose) {
     args.push('--verbosity=debug');
@@ -210,10 +238,20 @@ const runDeploy = async (
 
   if (service.platform.gke) {
     cluster = await gkeArguments(args, service, projectId);
+    if (canary) {
+      await canaryArguments(args, service.canary, projectId, project, env);
+    }
   }
 
   const gcloudExitCode = await execWithOutput(args)
-    .then((response) => waitForRevision(response, args, service.name, cluster, retryInterval));
+    .then((response) => waitForRevision(
+      response,
+      args,
+      service.name,
+      cluster,
+      service.canary,
+      retryInterval,
+    ));
 
   if (service.platform.gke && cluster) {
     await cleanRevisions(name, projectId, cluster.uri, cluster.clusterLocation, maxRevisions);

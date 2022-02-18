@@ -1,6 +1,8 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
+const gcloudOutput = require('./gcloud-output');
 const getLatestRevision = require('./get-revision');
+const projectInfo = require('./project-info');
 
 const FIVE_MINUTES = 300000;
 
@@ -9,6 +11,8 @@ const findRevision = async (output, namespace, cluster) => {
     /ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: 0\/\d+ nodes/,
     /ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: Unable to fetch image "([^"]+)": failed to resolve image to digest: Get "([^"]+)": context deadline exceeded./,
     /ERROR: \(gcloud\.run\.deploy\) Ingress reconciliation failed/,
+    /ERROR: \(gcloud\.run\.services\.update-traffic\) Revision "([^"]+)" failed to become ready./,
+    /ERROR: gcloud crashed \(OSError\): Could not find a suitable TLS CA certificate bundle, invalid path: ([^"]+)/,
     new RegExp(`ERROR: \\(gcloud\\.run\\.deploy\\) Configuration "${namespace}" does not have any ready Revision.`),
   ];
   let match;
@@ -110,20 +114,55 @@ const printStatus = (revisionStatus) => {
   return `${completed} (${values})`;
 };
 
+const updateTraffic = async (revision, cluster, canary, namespace) => {
+  const env = await projectInfo(cluster.project).env;
+  let rev = revision;
+  if (!revision) {
+    rev = await getLatestRevision(namespace, cluster);
+  }
+
+  let target = `--to-revisions=${rev}=100`;
+  if ((canary && canary.enabled) && env === 'prod') {
+    target = `--to-revisions=${rev}=${canary.steps.split('.')[0]}`;
+  }
+
+  return gcloudOutput([
+    'run',
+    'services',
+    'update-traffic',
+    namespace,
+    target,
+    `--cluster=${cluster.cluster}`,
+    `--cluster-location=${cluster.clusterLocation}`,
+    `--namespace=${namespace}`,
+    `--project=${cluster.project}`,
+    '--platform=gke',
+    '--no-user-output-enabled',
+  ]);
+};
+
 const waitForRevision = async (
   { status, output },
   args,
   namespace,
   cluster,
+  canary,
   sleepMs = 10000,
   timeoutMs = FIVE_MINUTES,
 ) => {
-  if (status !== 0) {
+  if (status !== 0 || (canary && canary.enabled)) {
     if (!args.includes('--platform=gke')) {
       throw new Error('Wait is not supported for managed cloud run');
     }
 
-    const revision = await findRevision(output, namespace, cluster);
+    let revision = '';
+    if (canary && canary.enabled) {
+      revision = await getLatestRevision(namespace, cluster);
+    } else {
+      revision = await findRevision(output, namespace, cluster);
+    }
+    // update traffic on latest revision based on steps
+    core.info(await updateTraffic(revision, cluster, canary, namespace));
 
     core.info(`Waiting for revision "${revision}" to become active...`);
     let revisionStatus = {};
@@ -139,6 +178,8 @@ const waitForRevision = async (
       core.info(`Deploy status is: ${printStatus(revisionStatus)}`);
     } while (!isRevisionCompleted(revisionStatus));
     /* eslint-enable no-await-in-loop */
+  } else if (args.includes('--platform=gke')) {
+    await updateTraffic(null, cluster, canary, namespace);
   }
   return 0;
 };

@@ -11008,6 +11008,51 @@ module.exports = {
       ],
       additionalProperties: false,
     },
+    canary: {
+      type: 'object',
+      properties: {
+        enabled: {
+          type: 'boolean',
+          default: true,
+        },
+        steps: {
+          type: 'string',
+          default: '10,50,80',
+        },
+        interval: {
+          type: 'string',
+          default: '10',
+        },
+        thresholds: {
+          type: 'object',
+          properties: {
+            latency99: {
+              type: 'string',
+            },
+            latency95: {
+              type: 'string',
+            },
+            latency50: {
+              type: 'string',
+            },
+            'error-rate': {
+              type: 'string',
+            },
+          },
+          required: [
+            'latency99',
+            'latency95',
+            'latency50',
+            'error-rate',
+          ],
+          additionalProperties: false,
+        },
+      },
+      required: [
+        'thresholds',
+      ],
+      additionalProperties: false,
+    },
   },
   required: [
     'cpu',
@@ -11653,6 +11698,26 @@ const gkeArguments = async (args, service, projectId) => {
   return cluster;
 };
 
+const canaryArguments = async (args, canary, projectId, project, env) => {
+  const {
+    enabled,
+    steps,
+    interval,
+    thresholds,
+  } = canary;
+  const {
+    latency99,
+    latency95,
+    latency50,
+    'error-rate': errorRates,
+  } = thresholds;
+
+  args.push(
+    `--labels=service_project_id=${projectId},service_project=${project},service_env=${env},sre.canary.enabled=${enabled},sre.canary.steps=${steps},sre.canary.interval=${interval},sre.canary.thresholds.latency99=${latency99},sre.canary.thresholds.latency95=${latency95},sre.canary.thresholds.latency50=${latency50},sre.canary.thresholds.error=${errorRates}`,
+    '--no-traffic',
+  );
+};
+
 const execWithOutput = async (args) => {
   let stdout = '';
   let stderr = '';
@@ -11695,6 +11760,11 @@ const runDeploy = async (
     env,
   } = projectInfo(projectId);
 
+  let canary = false;
+  if (service.canary && service.canary.enabled && env === 'prod') {
+    canary = true;
+  }
+
   const {
     name,
     memory,
@@ -11715,8 +11785,11 @@ const runDeploy = async (
     `--concurrency=${concurrency}`,
     `--max-instances=${numericOrDefault(maxInstances)}`,
     `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
-    `--labels=service_project_id=${projectId},service_project=${project},service_env=${env}`,
   ];
+
+  if (!canary) {
+    args.push(`--labels=service_project_id=${projectId},service_project=${project},service_env=${env},sre.canary.enabled=false`);
+  }
 
   if (verbose) {
     args.push('--verbosity=debug');
@@ -11730,10 +11803,20 @@ const runDeploy = async (
 
   if (service.platform.gke) {
     cluster = await gkeArguments(args, service, projectId);
+    if (canary) {
+      await canaryArguments(args, service.canary, projectId, project, env);
+    }
   }
 
   const gcloudExitCode = await execWithOutput(args)
-    .then((response) => waitForRevision(response, args, service.name, cluster, retryInterval));
+    .then((response) => waitForRevision(
+      response,
+      args,
+      service.name,
+      cluster,
+      service.canary,
+      retryInterval,
+    ));
 
   if (service.platform.gke && cluster) {
     await cleanRevisions(name, projectId, cluster.uri, cluster.clusterLocation, maxRevisions);
@@ -11942,7 +12025,9 @@ module.exports = runScan;
 
 const core = __webpack_require__(6341);
 const exec = __webpack_require__(22176);
+const gcloudOutput = __webpack_require__(13476);
 const getLatestRevision = __webpack_require__(50638);
+const projectInfo = __webpack_require__(645);
 
 const FIVE_MINUTES = 300000;
 
@@ -11951,6 +12036,8 @@ const findRevision = async (output, namespace, cluster) => {
     /ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: 0\/\d+ nodes/,
     /ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: Unable to fetch image "([^"]+)": failed to resolve image to digest: Get "([^"]+)": context deadline exceeded./,
     /ERROR: \(gcloud\.run\.deploy\) Ingress reconciliation failed/,
+    /ERROR: \(gcloud\.run\.services\.update-traffic\) Revision "([^"]+)" failed to become ready./,
+    /ERROR: gcloud crashed \(OSError\): Could not find a suitable TLS CA certificate bundle, invalid path: ([^"]+)/,
     new RegExp(`ERROR: \\(gcloud\\.run\\.deploy\\) Configuration "${namespace}" does not have any ready Revision.`),
   ];
   let match;
@@ -12052,20 +12139,55 @@ const printStatus = (revisionStatus) => {
   return `${completed} (${values})`;
 };
 
+const updateTraffic = async (revision, cluster, canary, namespace) => {
+  const env = await projectInfo(cluster.project).env;
+  let rev = revision;
+  if (!revision) {
+    rev = await getLatestRevision(namespace, cluster);
+  }
+
+  let target = `--to-revisions=${rev}=100`;
+  if ((canary && canary.enabled) && env === 'prod') {
+    target = `--to-revisions=${rev}=${canary.steps.split('.')[0]}`;
+  }
+
+  return gcloudOutput([
+    'run',
+    'services',
+    'update-traffic',
+    namespace,
+    target,
+    `--cluster=${cluster.cluster}`,
+    `--cluster-location=${cluster.clusterLocation}`,
+    `--namespace=${namespace}`,
+    `--project=${cluster.project}`,
+    '--platform=gke',
+    '--no-user-output-enabled',
+  ]);
+};
+
 const waitForRevision = async (
   { status, output },
   args,
   namespace,
   cluster,
+  canary,
   sleepMs = 10000,
   timeoutMs = FIVE_MINUTES,
 ) => {
-  if (status !== 0) {
+  if (status !== 0 || (canary && canary.enabled)) {
     if (!args.includes('--platform=gke')) {
       throw new Error('Wait is not supported for managed cloud run');
     }
 
-    const revision = await findRevision(output, namespace, cluster);
+    let revision = '';
+    if (canary && canary.enabled) {
+      revision = await getLatestRevision(namespace, cluster);
+    } else {
+      revision = await findRevision(output, namespace, cluster);
+    }
+    // update traffic on latest revision based on steps
+    core.info(await updateTraffic(revision, cluster, canary, namespace));
 
     core.info(`Waiting for revision "${revision}" to become active...`);
     let revisionStatus = {};
@@ -12081,6 +12203,8 @@ const waitForRevision = async (
       core.info(`Deploy status is: ${printStatus(revisionStatus)}`);
     } while (!isRevisionCompleted(revisionStatus));
     /* eslint-enable no-await-in-loop */
+  } else if (args.includes('--platform=gke')) {
+    await updateTraffic(null, cluster, canary, namespace);
   }
   return 0;
 };
