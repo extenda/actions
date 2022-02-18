@@ -283,9 +283,6 @@ SOFTWARE.
 
 action-utils
 
-add-stream
-MIT
-
 array-ify
 MIT
 
