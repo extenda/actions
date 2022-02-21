@@ -12037,7 +12037,6 @@ const findRevision = async (output, namespace, cluster) => {
     /ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed with message: Unable to fetch image "([^"]+)": failed to resolve image to digest: Get "([^"]+)": context deadline exceeded./,
     /ERROR: \(gcloud\.run\.deploy\) Ingress reconciliation failed/,
     /ERROR: \(gcloud\.run\.services\.update-traffic\) Revision "([^"]+)" failed to become ready./,
-    /ERROR: gcloud crashed \(OSError\): Could not find a suitable TLS CA certificate bundle, invalid path: ([^"]+)/,
     new RegExp(`ERROR: \\(gcloud\\.run\\.deploy\\) Configuration "${namespace}" does not have any ready Revision.`),
   ];
   let match;
@@ -12187,7 +12186,8 @@ const waitForRevision = async (
       revision = await findRevision(output, namespace, cluster);
     }
     // update traffic on latest revision based on steps
-    core.info(await updateTraffic(revision, cluster, canary, namespace));
+    await updateTraffic(revision, cluster, canary, namespace)
+      .catch((err) => { core.error(`gcloud execution failed: ${err.message}`); });
 
     core.info(`Waiting for revision "${revision}" to become active...`);
     let revisionStatus = {};
@@ -12204,7 +12204,8 @@ const waitForRevision = async (
     } while (!isRevisionCompleted(revisionStatus));
     /* eslint-enable no-await-in-loop */
   } else if (args.includes('--platform=gke')) {
-    await updateTraffic(null, cluster, canary, namespace);
+    await updateTraffic(null, cluster, canary, namespace)
+      .catch((err) => { core.error(`gcloud execution failed: ${err.message}`); });
   }
   return 0;
 };
