@@ -1,0 +1,14 @@
+{
+  "name": "binary-auth-attestation",
+  "version": "0.0.1-local",
+  "private": true,
+  "description": "Sign and create a Binary Auth attestation",
+  "main": "dist/index.js",
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/exec": "^1.0.4"
+  },
+  "devDependencies": {
+    "mock-fs": "^4.11.0"
+  }
+}
