@@ -5,10 +5,10 @@ jest.mock('../../setup-gcloud/src/setup-gcloud');
 const core = require('@actions/core');
 const action = require('../src/index');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
-const { 
+const {
   createAttestation,
-  getArtifactUrl
- } = require('../src/create-sign-attestion');
+  getArtifactUrl,
+} = require('../src/create-sign-attestion');
 
 describe('Binary Auth Action', () => {
   afterEach(() => {
@@ -38,7 +38,7 @@ describe('Binary Auth Action', () => {
       'europe-west1',
       'global-keyring',
       'key',
-      '1'
+      '1',
     );
   });
 });

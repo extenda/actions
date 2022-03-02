@@ -2,7 +2,7 @@ jest.mock('@actions/exec');
 const exec = require('@actions/exec');
 const {
   createAttestation,
-  getArtifactUrl
+  getArtifactUrl,
 } = require('../src/create-sign-attestion');
 
 describe('Create attestation', () => {
@@ -36,7 +36,7 @@ describe('Create attestation', () => {
       '--keyversion-location=europe-west1',
       '--keyversion-keyring=global-keyring',
       '--keyversion-key=key',
-      '--keyversion=1'
+      '--keyversion=1',
     ]);
   });
 
@@ -51,7 +51,7 @@ describe('Create attestation', () => {
       'images',
       'describe',
       'eu.gcr.io/my-iamge:sha1787',
-      `--format='get(image_summary.digest)'`,
+      '--format="get(image_summary.digest)"',
     ]);
   });
 });

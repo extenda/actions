@@ -18,26 +18,25 @@ const createAttestation = async (
     `--keyversion-location=${keyversionLocation}`,
     `--keyversion-keyring=${keyversionKeyring}`,
     `--keyversion-key=${keyversionKey}`,
-    `--keyversion=${keyversion}`
+    `--keyversion=${keyversion}`,
   ];
   return exec.exec('gcloud', args);
 };
 
-
 const getArtifactUrl = async (sha, imagePath) => {
-  const container = `${imagePath}:${sha}`
+  const container = `${imagePath}:${sha}`;
   const args = [
     'container',
     'images',
     'describe',
     container,
-    `--format='get(image_summary.digest)'`
+    '--format="get(image_summary.digest)"',
   ];
   const digest = exec.exec('gcloud', args);
-  return `${imagePath}@${digest}`
+  return `${imagePath}@${digest}`;
 };
 
 module.exports = {
   createAttestation,
-  getArtifactUrl
+  getArtifactUrl,
 };

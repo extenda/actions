@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const { createAttestation, getArtifactUrl }  = require('./create-sign-attestion');
+const { createAttestation, getArtifactUrl } = require('./create-sign-attestion');
 const { run } = require('../../utils');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 
@@ -12,14 +12,22 @@ const action = async () => {
   const keyversionKeyring = core.getInput('keyversion-keyring') || 'global-keyring-binary';
   const keyversionKey = core.getInput('keyversion-key') || 'quality-assurance-attestor-key';
   const keyversion = core.getInput('keyversion') || '1';
-  const imagePath =  core.getInput('image-path', { required: true });
+  const imagePath = core.getInput('image-path', { required: true });
 
   const sha = process.env.GITHUB_SHA;
   const artifactUrl = await getArtifactUrl(sha, imagePath);
 
   await setupGcloud(serviceAccountKey, process.env.GCLOUD_INSTALLED_VERSION || 'latest');
-  await createAttestation(artifactUrl, attestor, attestorProject, keyversionProject, keyversionLocation,
-    keyversionKeyring, keyversionKey, keyversion);
+  await createAttestation(
+    artifactUrl,
+    attestor,
+    attestorProject,
+    keyversionProject,
+    keyversionLocation,
+    keyversionKeyring,
+    keyversionKey,
+    keyversion,
+  );
 };
 
 if (require.main === module) {

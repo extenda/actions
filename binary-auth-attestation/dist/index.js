@@ -2846,28 +2846,27 @@ const createAttestation = async (
     `--keyversion-location=${keyversionLocation}`,
     `--keyversion-keyring=${keyversionKeyring}`,
     `--keyversion-key=${keyversionKey}`,
-    `--keyversion=${keyversion}`
+    `--keyversion=${keyversion}`,
   ];
   return exec.exec('gcloud', args);
 };
 
-
 const getArtifactUrl = async (sha, imagePath) => {
-  const container = `${imagePath}:${sha}`
+  const container = `${imagePath}:${sha}`;
   const args = [
     'container',
     'images',
     'describe',
     container,
-    `--format='get(image_summary.digest)'`
+    '--format="get(image_summary.digest)"',
   ];
   const digest = exec.exec('gcloud', args);
-  return `${imagePath}@${digest}`
+  return `${imagePath}@${digest}`;
 };
 
 module.exports = {
   createAttestation,
-  getArtifactUrl
+  getArtifactUrl,
 };
 
 
@@ -2877,7 +2876,7 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const core = __webpack_require__(6341);
-const { createAttestation, getArtifactUrl }  = __webpack_require__(4772);
+const { createAttestation, getArtifactUrl } = __webpack_require__(4772);
 const { run } = __webpack_require__(1898);
 const setupGcloud = __webpack_require__(7095);
 
@@ -2890,14 +2889,22 @@ const action = async () => {
   const keyversionKeyring = core.getInput('keyversion-keyring') || 'global-keyring-binary';
   const keyversionKey = core.getInput('keyversion-key') || 'quality-assurance-attestor-key';
   const keyversion = core.getInput('keyversion') || '1';
-  const imagePath =  core.getInput('image-path', { required: true });
+  const imagePath = core.getInput('image-path', { required: true });
 
   const sha = process.env.GITHUB_SHA;
   const artifactUrl = await getArtifactUrl(sha, imagePath);
 
   await setupGcloud(serviceAccountKey, process.env.GCLOUD_INSTALLED_VERSION || 'latest');
-  await createAttestation(artifactUrl, attestor, attestorProject, keyversionProject, keyversionLocation,
-    keyversionKeyring, keyversionKey, keyversion);
+  await createAttestation(
+    artifactUrl,
+    attestor,
+    attestorProject,
+    keyversionProject,
+    keyversionLocation,
+    keyversionKeyring,
+    keyversionKey,
+    keyversion,
+  );
 };
 
 if (require.main === require.cache[eval('__filename')]) {
