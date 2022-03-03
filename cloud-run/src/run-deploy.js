@@ -219,7 +219,7 @@ const runDeploy = async (
     `--memory=${memory}`,
     `--concurrency=${concurrency}`,
     `--max-instances=${numericOrDefault(maxInstances)}`,
-    `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
+    `--set-env-vars=${createEnvironmentArgs(environment, projectId, image)}`,
   ];
 
   if (!canary) {

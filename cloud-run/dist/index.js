@@ -11405,7 +11405,7 @@ module.exports = {
 /***/ 66762:
 /***/ ((module) => {
 
-const createEnvironmentArgs = (environment, projectId) => {
+const createEnvironmentArgs = (environment, projectId, containerImage) => {
   const args = [];
   Object.keys(environment).forEach((name) => {
     const value = environment[name]
@@ -11414,6 +11414,7 @@ const createEnvironmentArgs = (environment, projectId) => {
   });
   args.push(`SERVICE_PROJECT_ID=${projectId}`);
   args.push(`SERVICE_ENVIRONMENT=${projectId.includes('-staging-') ? 'staging' : 'prod'}`);
+  args.push(`SERVICE_CONTAINER_IMAGE=${containerImage}`);
   return args.join(',');
 };
 
@@ -11784,7 +11785,7 @@ const runDeploy = async (
     `--memory=${memory}`,
     `--concurrency=${concurrency}`,
     `--max-instances=${numericOrDefault(maxInstances)}`,
-    `--set-env-vars=${createEnvironmentArgs(environment, projectId)}`,
+    `--set-env-vars=${createEnvironmentArgs(environment, projectId, image)}`,
   ];
 
   if (!canary) {

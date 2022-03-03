@@ -47,6 +47,17 @@ See [action.yml](action.yml).
 This action requires a GCP service account key with permission to deploy the cloud run services.
 Once created, the JSON key should be `base64` encoded and added as secret in the GitHub repository.
 
+
+### Environment variables
+
+This action adds the following default environment variables to the Cloud Run serivce:
+
+- `SERVICE_PROJECT_ID`: The GCloud project ID
+- `SERVICE_ENVIRONMENT`: Either `staging` or `prod`
+- `SERVICE_CONTAINER_IMAGE`: The used Docker image for the deployment
+
+Furthermore, this action ensures to resolve `*` from secret definitions with `sm://*/my-secret` the project ID.
+
 ### DNS mappings
 
 For fully automated DNS mappings on GKE, the following conditions must be met.
