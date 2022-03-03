@@ -2865,9 +2865,19 @@ const getArtifactUrl = async (sha, imagePath) => {
     'images',
     'describe',
     container,
-    '--format=\'get(image_summary.digest)\'',
+    '--format=get(image_summary.digest)',
   ];
-  const digest = exec.exec('gcloud', args);
+
+  let digest = '';
+  await exec.exec('gcloud', args, {
+    silent: false,
+    listeners: {
+      stdout: (data) => {
+        digest += data.toString('utf8');
+      },
+    },
+  });
+
   return `${imagePath}@${digest}`;
 };
 

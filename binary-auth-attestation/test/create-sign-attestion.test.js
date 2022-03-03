@@ -5,6 +5,11 @@ const {
   getArtifactUrl,
 } = require('../src/create-sign-attestion');
 
+const mockExecListeners = (output) => (cmd, args, opts) => {
+  opts.listeners.stdout(Buffer.from(output, 'utf8'));
+  return Promise.resolve(0);
+};
+
 describe('Create attestation', () => {
   afterEach(() => {
     jest.resetAllMocks();
@@ -41,17 +46,14 @@ describe('Create attestation', () => {
   });
 
   test('Get artifact URL', async () => {
-    getArtifactUrl(
+    const digest = 'sha1787';
+    exec.exec
+      .mockImplementationOnce(mockExecListeners(digest));
+
+    await getArtifactUrl(
       'sha1787',
       'eu.gcr.io/my-iamge',
     );
     expect(exec.exec).toHaveBeenCalledTimes(1);
-    expect(exec.exec).toHaveBeenCalledWith('gcloud', [
-      'container',
-      'images',
-      'describe',
-      'eu.gcr.io/my-iamge:sha1787',
-      '--format=\'get(image_summary.digest)\'',
-    ]);
   });
 });
