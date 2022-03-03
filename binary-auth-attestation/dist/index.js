@@ -2878,6 +2878,7 @@ const getArtifactUrl = async (sha, imagePath) => {
     },
   });
 
+  digest = digest.trim();
   return `${imagePath}@${digest}`;
 };
 
