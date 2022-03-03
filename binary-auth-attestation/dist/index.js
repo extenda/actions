@@ -2830,8 +2830,15 @@ const exec = __webpack_require__(2176);
 
 // Binauthz attestations gcloud cmd
 const createAttestation = async (
-  artifactUrl, attestor, attestorProject, keyversionProject, keyversionLocation,
-  keyversionKeyring, keyversionKey, keyversion) => {
+  artifactUrl,
+  attestor,
+  attestorProject,
+  keyversionProject,
+  keyversionLocation,
+  keyversionKeyring,
+  keyversionKey,
+  keyversion,
+) => {
   const args = [
     '--quiet',
     'beta',
@@ -2858,7 +2865,7 @@ const getArtifactUrl = async (sha, imagePath) => {
     'images',
     'describe',
     container,
-    '--format="get(image_summary.digest)"',
+    '--format=\'get(image_summary.digest)\'',
   ];
   const digest = exec.exec('gcloud', args);
   return `${imagePath}@${digest}`;

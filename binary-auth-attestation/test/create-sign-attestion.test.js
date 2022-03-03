@@ -51,7 +51,7 @@ describe('Create attestation', () => {
       'images',
       'describe',
       'eu.gcr.io/my-iamge:sha1787',
-      '--format="get(image_summary.digest)"',
+      '--format=\'get(image_summary.digest)\'',
     ]);
   });
 });
