@@ -18333,12 +18333,9 @@ module.exports = {
 /***/ 52425:
 /***/ ((module) => {
 
-/* eslint-disable node/no-deprecated-api */
-
 var toString = Object.prototype.toString
 
 var isModern = (
-  typeof Buffer !== 'undefined' &&
   typeof Buffer.alloc === 'function' &&
   typeof Buffer.allocUnsafe === 'function' &&
   typeof Buffer.from === 'function'
@@ -22801,8 +22798,8 @@ module.exports = conventionalCommitsFilter
 "use strict";
 
 
-const isMatch = __webpack_require__(29181)
-const modifyValues = __webpack_require__(18451)
+var isMatch = __webpack_require__(29181)
+var modifyValues = __webpack_require__(18451)
 
 function modifyValue (val) {
   if (typeof val === 'string') {
@@ -22817,9 +22814,9 @@ function conventionalCommitsFilter (commits) {
     throw new TypeError('Expected an array')
   }
 
-  let ret = []
-  const ignores = []
-  const remove = []
+  var ret = []
+  var ignores = []
+  var remove = []
   commits.forEach(function (commit) {
     if (commit.revert) {
       ignores.push(commit)
@@ -22830,12 +22827,12 @@ function conventionalCommitsFilter (commits) {
 
   // Filter out reverted commits
   ret = ret.filter(function (commit) {
-    let ignoreThis = false
+    var ignoreThis = false
 
     commit = commit.raw ? modifyValues(commit.raw, modifyValue) : modifyValues(commit, modifyValue)
 
     ignores.some(function (ignoreCommit) {
-      const ignore = modifyValues(ignoreCommit.revert, modifyValue)
+      var ignore = modifyValues(ignoreCommit.revert, modifyValue)
 
       ignoreThis = isMatch(commit, ignore)
 
@@ -23516,8 +23513,7 @@ function conventionalRecommendedBump (optionsArgument, parserOptsArgument, cbArg
     gitSemverTags({
       lernaTags: !!options.lernaPackage,
       package: options.lernaPackage,
-      tagPrefix: options.tagPrefix,
-      skipUnstable: options.skipUnstable
+      tagPrefix: options.tagPrefix
     }, (err, tags) => {
       if (err) {
         return cb(err)
@@ -23561,10 +23557,10 @@ function noop () {}
 "use strict";
 
 
-const parser = __webpack_require__(10014)
-const regex = __webpack_require__(59509)
-const through = __webpack_require__(25596)
-const _ = __webpack_require__(63555)
+var parser = __webpack_require__(10014)
+var regex = __webpack_require__(59509)
+var through = __webpack_require__(25596)
+var _ = __webpack_require__(63555)
 
 function assignOpts (options) {
   options = _.extend({
@@ -23582,7 +23578,7 @@ function assignOpts (options) {
       'resolved'
     ],
     issuePrefixes: ['#'],
-    noteKeywords: ['BREAKING CHANGE', 'BREAKING-CHANGE'],
+    noteKeywords: ['BREAKING CHANGE'],
     fieldPattern: /^-(.*?)-$/,
     revertPattern: /^Revert\s"([\s\S]*)"\s*This reverts commit (\w*)\./,
     revertCorrespondence: ['header', 'hash'],
@@ -23632,10 +23628,10 @@ function assignOpts (options) {
 
 function conventionalCommitsParser (options) {
   options = assignOpts(options)
-  const reg = regex(options)
+  var reg = regex(options)
 
   return through.obj(function (data, enc, cb) {
-    let commit
+    var commit
 
     try {
       commit = parser(data.toString(), options, reg)
@@ -23653,7 +23649,7 @@ function conventionalCommitsParser (options) {
 
 function sync (commit, options) {
   options = assignOpts(options)
-  const reg = regex(options)
+  var reg = regex(options)
 
   return parser(commit, options, reg)
 }
@@ -23669,23 +23665,11 @@ module.exports.sync = sync
 
 "use strict";
 
-const _ = __webpack_require__(63555)
+var trimOffNewlines = __webpack_require__(17778)
+var _ = __webpack_require__(63555)
 
-const CATCH_ALL = /()(.+)/gi
-const SCISSOR = '# ------------------------ >8 ------------------------'
-
-function trimOffNewlines (input) {
-  const result = input.match(/[^\r\n]/)
-  if (!result) {
-    return ''
-  }
-  const firstIndex = result.index
-  let lastIndex = input.length - 1
-  while (input[lastIndex] === '\r' || input[lastIndex] === '\n') {
-    lastIndex--
-  }
-  return input.substring(firstIndex, lastIndex + 1)
-}
+var CATCH_ALL = /()(.+)/gi
+var SCISSOR = '# ------------------------ >8 ------------------------'
 
 function append (src, line) {
   if (src) {
@@ -23704,7 +23688,7 @@ function getCommentFilter (char) {
 }
 
 function truncateToScissor (lines) {
-  const scissorIndex = lines.indexOf(SCISSOR)
+  var scissorIndex = lines.indexOf(SCISSOR)
 
   if (scissorIndex === -1) {
     return lines
@@ -23714,29 +23698,29 @@ function truncateToScissor (lines) {
 }
 
 function getReferences (input, regex) {
-  const references = []
-  let referenceSentences
-  let referenceMatch
+  var references = []
+  var referenceSentences
+  var referenceMatch
 
-  const reApplicable = input.match(regex.references) !== null
+  var reApplicable = input.match(regex.references) !== null
     ? regex.references
     : CATCH_ALL
 
   while ((referenceSentences = reApplicable.exec(input))) {
-    const action = referenceSentences[1] || null
-    const sentence = referenceSentences[2]
+    var action = referenceSentences[1] || null
+    var sentence = referenceSentences[2]
 
     while ((referenceMatch = regex.referenceParts.exec(sentence))) {
-      let owner = null
-      let repository = referenceMatch[1] || ''
-      const ownerRepo = repository.split('/')
+      var owner = null
+      var repository = referenceMatch[1] || ''
+      var ownerRepo = repository.split('/')
 
       if (ownerRepo.length > 1) {
         owner = ownerRepo.shift()
         repository = ownerRepo.join('/')
       }
 
-      const reference = {
+      var reference = {
         action: action,
         owner: owner,
         repository: repository || null,
@@ -23769,37 +23753,39 @@ function parser (raw, options, regex) {
     throw new TypeError('Expected regex')
   }
 
-  let currentProcessedField
-  let mentionsMatch
-  const otherFields = {}
-  const commentFilter = typeof options.commentChar === 'string'
+  var headerMatch
+  var mergeMatch
+  var currentProcessedField
+  var mentionsMatch
+  var revertMatch
+  var otherFields = {}
+  var commentFilter = typeof options.commentChar === 'string'
     ? getCommentFilter(options.commentChar)
     : passTrough
-  const gpgFilter = line => !line.match(/^\s*gpg:/)
 
-  const rawLines = trimOffNewlines(raw).split(/\r?\n/)
-  const lines = truncateToScissor(rawLines).filter(commentFilter).filter(gpgFilter)
+  var rawLines = trimOffNewlines(raw).split(/\r?\n/)
+  var lines = truncateToScissor(rawLines).filter(commentFilter)
 
-  let continueNote = false
-  let isBody = true
-  const headerCorrespondence = _.map(options.headerCorrespondence, function (part) {
+  var continueNote = false
+  var isBody = true
+  var headerCorrespondence = _.map(options.headerCorrespondence, function (part) {
     return part.trim()
   })
-  const revertCorrespondence = _.map(options.revertCorrespondence, function (field) {
+  var revertCorrespondence = _.map(options.revertCorrespondence, function (field) {
     return field.trim()
   })
-  const mergeCorrespondence = _.map(options.mergeCorrespondence, function (field) {
+  var mergeCorrespondence = _.map(options.mergeCorrespondence, function (field) {
     return field.trim()
   })
 
-  let body = null
-  let footer = null
-  let header = null
-  const mentions = []
-  let merge = null
-  const notes = []
-  const references = []
-  let revert = null
+  var body = null
+  var footer = null
+  var header = null
+  var mentions = []
+  var merge = null
+  var notes = []
+  var references = []
+  var revert = null
 
   if (lines.length === 0) {
     return {
@@ -23819,25 +23805,22 @@ function parser (raw, options, regex) {
 
   // msg parts
   merge = lines.shift()
-  const mergeParts = {}
-  const headerParts = {}
+  var mergeParts = {}
+  var headerParts = {}
   body = ''
   footer = ''
 
-  const mergeMatch = merge.match(options.mergePattern)
+  mergeMatch = merge.match(options.mergePattern)
   if (mergeMatch && options.mergePattern) {
     merge = mergeMatch[0]
 
     header = lines.shift()
-    while (header !== undefined && !header.trim()) {
+    while (!header.trim()) {
       header = lines.shift()
-    }
-    if (!header) {
-      header = ''
     }
 
     _.forEach(mergeCorrespondence, function (partName, index) {
-      const partValue = mergeMatch[index + 1] || null
+      var partValue = mergeMatch[index + 1] || null
       mergeParts[partName] = partValue
     })
   } else {
@@ -23849,10 +23832,10 @@ function parser (raw, options, regex) {
     })
   }
 
-  const headerMatch = header.match(options.headerPattern)
+  headerMatch = header.match(options.headerPattern)
   if (headerMatch) {
     _.forEach(headerCorrespondence, function (partName, index) {
-      const partValue = headerMatch[index + 1] || null
+      var partValue = headerMatch[index + 1] || null
       headerParts[partName] = partValue
     })
   } else {
@@ -23869,7 +23852,7 @@ function parser (raw, options, regex) {
   // body or footer
   _.forEach(lines, function (line) {
     if (options.fieldPattern) {
-      const fieldMatch = options.fieldPattern.exec(line)
+      var fieldMatch = options.fieldPattern.exec(line)
 
       if (fieldMatch) {
         currentProcessedField = fieldMatch[1]
@@ -23884,16 +23867,16 @@ function parser (raw, options, regex) {
       }
     }
 
-    let referenceMatched
+    var referenceMatched
 
     // this is a new important note
-    const notesMatch = line.match(regex.notes)
+    var notesMatch = line.match(regex.notes)
     if (notesMatch) {
       continueNote = true
       isBody = false
       footer = append(footer, line)
 
-      const note = {
+      var note = {
         title: notesMatch[1],
         text: notesMatch[2]
       }
@@ -23903,7 +23886,7 @@ function parser (raw, options, regex) {
       return
     }
 
-    const lineReferences = getReferences(line, {
+    var lineReferences = getReferences(line, {
       references: regex.references,
       referenceParts: regex.referenceParts
     })
@@ -23937,7 +23920,7 @@ function parser (raw, options, regex) {
   })
 
   if (options.breakingHeaderPattern && notes.length === 0) {
-    const breakingHeader = header.match(options.breakingHeaderPattern)
+    var breakingHeader = header.match(options.breakingHeaderPattern)
     if (breakingHeader) {
       const noteText = breakingHeader[3] // the description of the change.
       notes.push({
@@ -23952,11 +23935,11 @@ function parser (raw, options, regex) {
   }
 
   // does this commit revert any other commit?
-  const revertMatch = raw.match(options.revertPattern)
+  revertMatch = raw.match(options.revertPattern)
   if (revertMatch) {
     revert = {}
     _.forEach(revertCorrespondence, function (partName, index) {
-      const partValue = revertMatch[index + 1] || null
+      var partValue = revertMatch[index + 1] || null
       revert[partName] = partValue
     })
   } else {
@@ -23969,7 +23952,7 @@ function parser (raw, options, regex) {
     return note
   })
 
-  const msg = _.merge(headerParts, mergeParts, {
+  var msg = _.merge(headerParts, mergeParts, {
     merge: merge,
     header: header,
     body: body ? trimOffNewlines(body) : null,
@@ -23994,7 +23977,7 @@ module.exports = parser
 "use strict";
 
 
-const reNomatch = /(?!.*)/
+var reNomatch = /(?!.*)/
 
 function join (array, joiner) {
   return array
@@ -24007,18 +23990,12 @@ function join (array, joiner) {
     .join(joiner)
 }
 
-function getNotesRegex (noteKeywords, notesPattern) {
+function getNotesRegex (noteKeywords) {
   if (!noteKeywords) {
     return reNomatch
   }
 
-  const noteKeywordsSelection = join(noteKeywords, '|')
-
-  if (!notesPattern) {
-    return new RegExp('^[\\s|*]*(' + noteKeywordsSelection + ')[:\\s]+(.*)', 'i')
-  }
-
-  return notesPattern(noteKeywordsSelection)
+  return new RegExp('^[\\s|*]*(' + join(noteKeywords, '|') + ')[:\\s]+(.*)', 'i')
 }
 
 function getReferencePartsRegex (issuePrefixes, issuePrefixesCaseSensitive) {
@@ -24026,7 +24003,7 @@ function getReferencePartsRegex (issuePrefixes, issuePrefixesCaseSensitive) {
     return reNomatch
   }
 
-  const flags = issuePrefixesCaseSensitive ? 'g' : 'gi'
+  var flags = issuePrefixesCaseSensitive ? 'g' : 'gi'
   return new RegExp('(?:.*?)??\\s*([\\w-\\.\\/]*?)??(' + join(issuePrefixes, '|') + ')([\\w-]*\\d+)', flags)
 }
 
@@ -24036,15 +24013,15 @@ function getReferencesRegex (referenceActions) {
     return /()(.+)/gi
   }
 
-  const joinedKeywords = join(referenceActions, '|')
+  var joinedKeywords = join(referenceActions, '|')
   return new RegExp('(' + joinedKeywords + ')(?:\\s+(.*?))(?=(?:' + joinedKeywords + ')|$)', 'gi')
 }
 
 module.exports = function (options) {
   options = options || {}
-  const reNotes = getNotesRegex(options.noteKeywords, options.notesPattern)
-  const reReferenceParts = getReferencePartsRegex(options.issuePrefixes, options.issuePrefixesCaseSensitive)
-  const reReferences = getReferencesRegex(options.referenceActions)
+  var reNotes = getNotesRegex(options.noteKeywords)
+  var reReferenceParts = getReferencePartsRegex(options.issuePrefixes, options.issuePrefixesCaseSensitive)
+  var reReferences = getReferencesRegex(options.referenceActions)
 
   return {
     notes: reNotes,
@@ -26289,101 +26266,96 @@ RedirectableRequest.prototype._processResponse = function (response) {
   // the user agent MAY automatically redirect its request to the URI
   // referenced by the Location field value,
   // even if the specific status code is not understood.
-
-  // If the response is not a redirect; return it as-is
   var location = response.headers.location;
-  if (!location || this._options.followRedirects === false ||
-      statusCode < 300 || statusCode >= 400) {
+  if (location && this._options.followRedirects !== false &&
+      statusCode >= 300 && statusCode < 400) {
+    // Abort the current request
+    abortRequest(this._currentRequest);
+    // Discard the remainder of the response to avoid waiting for data
+    response.destroy();
+
+    // RFC7231§6.4: A client SHOULD detect and intervene
+    // in cyclical redirections (i.e., "infinite" redirection loops).
+    if (++this._redirectCount > this._options.maxRedirects) {
+      this.emit("error", new TooManyRedirectsError());
+      return;
+    }
+
+    // RFC7231§6.4: Automatic redirection needs to done with
+    // care for methods not known to be safe, […]
+    // RFC7231§6.4.2–3: For historical reasons, a user agent MAY change
+    // the request method from POST to GET for the subsequent request.
+    if ((statusCode === 301 || statusCode === 302) && this._options.method === "POST" ||
+        // RFC7231§6.4.4: The 303 (See Other) status code indicates that
+        // the server is redirecting the user agent to a different resource […]
+        // A user agent can perform a retrieval request targeting that URI
+        // (a GET or HEAD request if using HTTP) […]
+        (statusCode === 303) && !/^(?:GET|HEAD)$/.test(this._options.method)) {
+      this._options.method = "GET";
+      // Drop a possible entity and headers related to it
+      this._requestBodyBuffers = [];
+      removeMatchingHeaders(/^content-/i, this._options.headers);
+    }
+
+    // Drop the Host header, as the redirect might lead to a different host
+    var currentHostHeader = removeMatchingHeaders(/^host$/i, this._options.headers);
+
+    // If the redirect is relative, carry over the host of the last request
+    var currentUrlParts = url.parse(this._currentUrl);
+    var currentHost = currentHostHeader || currentUrlParts.host;
+    var currentUrl = /^\w+:/.test(location) ? this._currentUrl :
+      url.format(Object.assign(currentUrlParts, { host: currentHost }));
+
+    // Determine the URL of the redirection
+    var redirectUrl;
+    try {
+      redirectUrl = url.resolve(currentUrl, location);
+    }
+    catch (cause) {
+      this.emit("error", new RedirectionError(cause));
+      return;
+    }
+
+    // Create the redirected request
+    debug("redirecting to", redirectUrl);
+    this._isRedirect = true;
+    var redirectUrlParts = url.parse(redirectUrl);
+    Object.assign(this._options, redirectUrlParts);
+
+    // Drop the confidential headers when redirecting to another domain
+    if (!(redirectUrlParts.host === currentHost || isSubdomainOf(redirectUrlParts.host, currentHost))) {
+      removeMatchingHeaders(/^(?:authorization|cookie)$/i, this._options.headers);
+    }
+
+    // Evaluate the beforeRedirect callback
+    if (typeof this._options.beforeRedirect === "function") {
+      var responseDetails = { headers: response.headers };
+      try {
+        this._options.beforeRedirect.call(null, this._options, responseDetails);
+      }
+      catch (err) {
+        this.emit("error", err);
+        return;
+      }
+      this._sanitizeOptions(this._options);
+    }
+
+    // Perform the redirected request
+    try {
+      this._performRequest();
+    }
+    catch (cause) {
+      this.emit("error", new RedirectionError(cause));
+    }
+  }
+  else {
+    // The response is not a redirect; return it as-is
     response.responseUrl = this._currentUrl;
     response.redirects = this._redirects;
     this.emit("response", response);
 
     // Clean up
     this._requestBodyBuffers = [];
-    return;
-  }
-
-  // The response is a redirect, so abort the current request
-  abortRequest(this._currentRequest);
-  // Discard the remainder of the response to avoid waiting for data
-  response.destroy();
-
-  // RFC7231§6.4: A client SHOULD detect and intervene
-  // in cyclical redirections (i.e., "infinite" redirection loops).
-  if (++this._redirectCount > this._options.maxRedirects) {
-    this.emit("error", new TooManyRedirectsError());
-    return;
-  }
-
-  // RFC7231§6.4: Automatic redirection needs to done with
-  // care for methods not known to be safe, […]
-  // RFC7231§6.4.2–3: For historical reasons, a user agent MAY change
-  // the request method from POST to GET for the subsequent request.
-  if ((statusCode === 301 || statusCode === 302) && this._options.method === "POST" ||
-      // RFC7231§6.4.4: The 303 (See Other) status code indicates that
-      // the server is redirecting the user agent to a different resource […]
-      // A user agent can perform a retrieval request targeting that URI
-      // (a GET or HEAD request if using HTTP) […]
-      (statusCode === 303) && !/^(?:GET|HEAD)$/.test(this._options.method)) {
-    this._options.method = "GET";
-    // Drop a possible entity and headers related to it
-    this._requestBodyBuffers = [];
-    removeMatchingHeaders(/^content-/i, this._options.headers);
-  }
-
-  // Drop the Host header, as the redirect might lead to a different host
-  var currentHostHeader = removeMatchingHeaders(/^host$/i, this._options.headers);
-
-  // If the redirect is relative, carry over the host of the last request
-  var currentUrlParts = url.parse(this._currentUrl);
-  var currentHost = currentHostHeader || currentUrlParts.host;
-  var currentUrl = /^\w+:/.test(location) ? this._currentUrl :
-    url.format(Object.assign(currentUrlParts, { host: currentHost }));
-
-  // Determine the URL of the redirection
-  var redirectUrl;
-  try {
-    redirectUrl = url.resolve(currentUrl, location);
-  }
-  catch (cause) {
-    this.emit("error", new RedirectionError(cause));
-    return;
-  }
-
-  // Create the redirected request
-  debug("redirecting to", redirectUrl);
-  this._isRedirect = true;
-  var redirectUrlParts = url.parse(redirectUrl);
-  Object.assign(this._options, redirectUrlParts);
-
-  // Drop confidential headers when redirecting to a less secure protocol
-  // or to a different domain that is not a superdomain
-  if (redirectUrlParts.protocol !== currentUrlParts.protocol &&
-     redirectUrlParts.protocol !== "https:" ||
-     redirectUrlParts.host !== currentHost &&
-     !isSubdomain(redirectUrlParts.host, currentHost)) {
-    removeMatchingHeaders(/^(?:authorization|cookie)$/i, this._options.headers);
-  }
-
-  // Evaluate the beforeRedirect callback
-  if (typeof this._options.beforeRedirect === "function") {
-    var responseDetails = { headers: response.headers };
-    try {
-      this._options.beforeRedirect.call(null, this._options, responseDetails);
-    }
-    catch (err) {
-      this.emit("error", err);
-      return;
-    }
-    this._sanitizeOptions(this._options);
-  }
-
-  // Perform the redirected request
-  try {
-    this._performRequest();
-  }
-  catch (cause) {
-    this.emit("error", new RedirectionError(cause));
   }
 };
 
@@ -26517,7 +26489,7 @@ function abortRequest(request) {
   request.abort();
 }
 
-function isSubdomain(subdomain, domain) {
+function isSubdomainOf(subdomain, domain) {
   const dot = subdomain.length - domain.length - 1;
   return dot > 0 && subdomain[dot] === "." && subdomain.endsWith(domain);
 }
