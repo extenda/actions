@@ -223,7 +223,7 @@ const runDeploy = async (
   ];
 
   if (!canary) {
-    args.push(`--labels=service_project_id=${projectId},service_project=${project},service_env=${env},sre.canary.enabled=false`);
+    args.push(`--labels=service_project_id=${projectId},service_project=${project},service_env=${env}${service.platform.managed ? '' : ',sre.canary.enabled=false'}`);
   }
 
   if (verbose) {
