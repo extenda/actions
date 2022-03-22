@@ -1,9 +1,6 @@
-// const axios = require('axios');
-//
-// const getLatestVersion = async () => axios.get('https://dl.google.com/dl/cloudsdk/channels/rapid/components-2.json')
-//   .then((response) => response.data.version);
+const axios = require('axios');
 
-// Pin the version to a version known to support canary rollout.
-const getPinnedVersion = async () => '365.0.0';
+const getLatestVersion = async () => axios.get('https://dl.google.com/dl/cloudsdk/channels/rapid/components-2.json')
+  .then((response) => response.data.version);
 
-module.exports = getPinnedVersion;
+module.exports = getLatestVersion;
