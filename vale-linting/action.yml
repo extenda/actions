@@ -10,6 +10,10 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Get a default vale.ini
+      run: |
+        wget -O ../.vale.ini https://raw.githubusercontent.com/extenda/docker-vale/master/vale.ini
+      shell: bash
     - name: Lint natural language with Vale
       # Change to the latest version/tag
       uses: extenda/vale-action@master
@@ -17,7 +21,6 @@ runs:
         styles: |
           https://github.com/extenda/docker-vale/releases/download/latest/Extenda.zip
           https://github.com/errata-ai/Google/releases/latest/download/Google.zip
-        config: https://raw.githubusercontent.com/extenda/docker-vale/master/vale.ini
         exclude: ${{ inputs.exclude }}
         passCondition: |
           errors < 1;
