@@ -76,7 +76,7 @@ describe('handle certificates', () => {
     exec.exec.mockResolvedValue(0);
     const newCertificates = await handleCertificates('testrunner-no.txengine.retailsvc.dev', 'experience-staging-b807');
     expect(newCertificates).toEqual(expectedResult);
-    expect(exec.exec).toHaveBeenCalledTimes(3);
+    expect(exec.exec).toHaveBeenCalledTimes(4);
   });
 
   test('It can handle certificates when domain doesnt exist and certificate and domain limit is reached', async () => {
@@ -121,7 +121,7 @@ describe('handle certificates', () => {
     exec.exec.mockResolvedValue(0);
     const newCertificates = await handleCertificates('testrunner-no.txengine.retailsvc.dev', 'experience-staging-b807');
     expect(newCertificates).toEqual(expectedResult);
-    expect(exec.exec).toHaveBeenCalledTimes(3);
+    expect(exec.exec).toHaveBeenCalledTimes(4);
   });
 
   test('It creates certificate with 1 domain when last created reaches max domains', async () => {
@@ -166,8 +166,8 @@ describe('handle certificates', () => {
     exec.exec.mockResolvedValue(0);
     const newCertificates = await handleCertificates('testrunner-no.txengine.retailsvc.dev', 'experience-staging-b807');
     expect(newCertificates).toEqual(expectedResult);
-    expect(exec.exec).toHaveBeenCalledTimes(3);
-    expect(exec.exec).toHaveBeenNthCalledWith(3, 'gcloud', [
+    expect(exec.exec).toHaveBeenCalledTimes(4);
+    expect(exec.exec).toHaveBeenNthCalledWith(4, 'gcloud', [
       'compute',
       'ssl-certificates',
       'create',
@@ -221,8 +221,8 @@ describe('handle certificates', () => {
     exec.exec.mockResolvedValue(0);
     const newCertificates = await handleCertificates('testrunner-no.txengine.retailsvc.dev', 'experience-staging-b807');
     expect(newCertificates).toEqual(expectedResult);
-    expect(exec.exec).toHaveBeenCalledTimes(3);
-    expect(exec.exec).toHaveBeenNthCalledWith(3, 'gcloud', [
+    expect(exec.exec).toHaveBeenCalledTimes(4);
+    expect(exec.exec).toHaveBeenNthCalledWith(4, 'gcloud', [
       'compute',
       'ssl-certificates',
       'create',
