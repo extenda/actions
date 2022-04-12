@@ -35591,13 +35591,28 @@ const createComment = (changes, workingDirectory, footer) => {
       '',
     );
   } else {
-    comment.push(
-      '### :mag: Terraform plan changes',
-      '',
-      'The output only includes modules with changes.',
-      '',
-      ...changes,
-    );
+    // Convert changes to string
+    const changesString = changes.toString();
+    // If changes + footer + header is longer than 65536 chars the comment will fail
+    // Footer is usually around 1000 chars
+    if (changesString.length > 64400) {
+      comment.push(
+        '### :mag: Terraform plan changes',
+        '',
+        'The plan is to long to post in a github comment',
+        'Verify the Terraform plan output in the plan action',
+        'If the plan looks alright it can be applied according to below',
+        '',
+      );
+    } else {
+      comment.push(
+        '### :mag: Terraform plan changes',
+        '',
+        'The output only includes modules with changes.',
+        '',
+        ...changes,
+      );
+    }
   }
 
   if (footer) {
