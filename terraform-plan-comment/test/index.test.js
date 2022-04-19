@@ -157,18 +157,18 @@ Other text below
 
   test('It can generate comment for too large plan', async () => {
     function makeid(length) {
-        var result           = '';
-        var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz #0123456789?%';
-        var charactersLength = characters.length;
-        for ( var i = 0; i < length; i++ ) {
-          result += characters.charAt(Math.floor(Math.random() *
- charactersLength));
-       }
-       return result;
+      let result = '';
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz #0123456789?%';
+      const charactersLength = characters.length;
+      let i = 0;
+      for (i; i < length; i += 1) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      }
+      return result;
     }
-    const long_plan = 'Plan'.concat(makeid(65000));
+    const longPlan = 'Plan'.concat(makeid(65000));
     generateOutputs.mockResolvedValueOnce([
-      { module: 'work', output: long_plan, status: 0 },
+      { module: 'work', output: longPlan, status: 0 },
     ]);
     const comment = await action();
     expect(comment).toEqual(`### :mag: Terraform plan changes\n\nThe plan is to long to post in a github comment\nVerify the Terraform plan output in the plan action\nIf the plan looks alright it can be applied according to below\n\n*Workflow: \`Terraform\`*\n*Working directory: \`${process.cwd()}\`*`);

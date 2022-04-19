@@ -45,10 +45,10 @@ const createComment = (changes, workingDirectory, footer) => {
   } else {
     // Convert changes to string
     const changesString = changes.toString();
-    const comment_limit = 62000;
+    const commentLimit = 62000;
     // If changes + footer + header is longer than 65536 chars the comment will fail
     // Footer is usually around 1000 chars
-    if (changesString.length > comment_limit) {
+    if (changesString.length > commentLimit) {
       comment.push(
         '### :mag: Terraform plan changes',
         '',
