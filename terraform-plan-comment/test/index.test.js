@@ -156,7 +156,7 @@ Other text below
 
 
   test('It can generate comment for too large plan', async () => {
-    function makeid(length) {
+    function makeLongTestPlan(length) {
       let result = '';
       const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz #0123456789?%';
       const charactersLength = characters.length;
@@ -166,7 +166,7 @@ Other text below
       }
       return result;
     }
-    const longPlan = 'Plan'.concat(makeid(65000));
+    const longPlan = 'Plan'.concat(makeLongTestPlan(65000));
     generateOutputs.mockResolvedValueOnce([
       { module: 'work', output: longPlan, status: 0 },
     ]);
