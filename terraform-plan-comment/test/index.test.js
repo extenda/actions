@@ -166,7 +166,7 @@ Other text below
       }
       return result;
     }
-    const longPlan = 'Plan'.concat(makeLongTestPlan(65000));
+    const longPlan = 'Plan'.concat(makeLongTestPlan(250000));
     generateOutputs.mockResolvedValueOnce([
       { module: 'work', output: longPlan, status: 0 },
     ]);
