@@ -78,11 +78,11 @@ jobs:
 
   release:
     steps:
-      - name: Create Pact release
+      - name: Create pact release
         uses: extenda/actions/pact-tag-version@v0
         with:
           service-account-key: ${{ secrets.SECRET_AUTH }}
-          application-name: payment-router
+          application-name: my-application
           release-tag: ${{ steps.release.outputs.release-tag }}
 ```
 
@@ -103,8 +103,7 @@ jobs:
           uuid: a-uuid-that-you-generate
 ```
 
-This exemplifies the webhook action. Note the `types` value that maps to the `repository-dispatch-id` value
-that we used in the webhook creation above.
+This exemplifies the webhook action. Note the `types` value that maps to the `repository-dispatch-id` value (can be omitted, default is `verify-pacts`) above.
 
 ##### verify-pacts.yaml
 ```yaml

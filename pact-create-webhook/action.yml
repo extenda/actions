@@ -18,8 +18,9 @@ inputs:
     required: false
     default: 'contract-requiring-verification-published'
   repository-dispatch-id:
-    description: The webhook identifier in Github Actions
-    required: true
+    description: The webhook identifier in Github Actions.
+    required: false
+    default: 'verify-pacts'
 
 runs:
   using: composite
