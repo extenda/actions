@@ -47,7 +47,7 @@ jobs:
             --consumer-app-version=${{ github.sha }}
 ```
 
-To set up a flow between two projects you need to use these steps:
+To set up a flow between two projects, these steps can be an inspiration:
 
 #### Consumer
 
@@ -68,21 +68,29 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Can i deploy?
+      - name: Can I deploy?
         uses: extenda/actions/pact-can-i-deploy@v0
         with:
           service-account-key: ${{ secrets.SECRET_AUTH }}
           application-name: my-application
-          env: prod
           retry-while-unknown: 60
           retry-interval: 10
+
+  release:
+    steps:
+      - name: Create Pact release
+        uses: extenda/actions/pact-tag-version@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          application-name: payment-router
+          release-tag: ${{ steps.release.outputs.release-tag }}
 ```
 
 #### Provider
 
-The step configuration to create a webhook. This is placed just before the actual step to
-trigger verification (e.g. the IT test to verify Pacts).
+The step to create a webhook. This should run before any verifications.
 
+##### commit.yaml
 ```yaml
 jobs:
   test:
@@ -95,7 +103,10 @@ jobs:
           uuid: a-uuid-that-you-generate
 ```
 
-This exemplifies the webhook action. Note the 'types' that maps to the name that we used above.
+This exemplifies the webhook action. Note the `types` value that maps to the `repository-dispatch-id` value
+that we used in the webhook creation above.
+
+##### verify-pacts.yaml
 ```yaml
 name: Verify pacts
 on:
@@ -157,8 +168,9 @@ An example of the Maven POM profile. All Pact verification tests are suffixed wi
           <systemProperties>
             <pactbroker.auth.username>${env.PACT_BROKER_USERNAME}</pactbroker.auth.username>
             <pactbroker.auth.password>${env.PACT_BROKER_PASSWORD}</pactbroker.auth.password>
-            <pact.provider.version>${env.GITHUB_SHA}</pact.provider.version>
+            <pactbroker.consumerversionselectors.tags>prod</pactbroker.consumerversionselectors.tags>
             <pactbroker.providerTags>${env.GITHUB_BRANCH}</pactbroker.providerTags>
+            <pact.provider.version>${env.GITHUB_SHA}</pact.provider.version>
             <pact.verifier.publishResults>true</pact.verifier.publishResults>
           </systemProperties>
         </configuration>
