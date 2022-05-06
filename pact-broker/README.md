@@ -195,11 +195,9 @@ An example of the Maven POM profile. All Pact verification tests are suffixed wi
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
-          <reuseForks>true</reuseForks>
           <includes>
             <include>**/*PactIT.java</include>
           </includes>
-          <!-- Need to include all as it is possible that by default some tests are excluded -->
           <excludes>
             <exclude>none</exclude>
           </excludes>
