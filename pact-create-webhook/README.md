@@ -33,6 +33,6 @@ jobs:
         uses: extenda/actions/pact-create-webhook@v0
         with:
           service-account-key: ${{ secrets.SECRET_AUTH }}
-          repository-dispatch-id: verify-pacts
+          application-name: my-application
           uuid: a-uuid-that-you-generate
 ```

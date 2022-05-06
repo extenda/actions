@@ -31,7 +31,7 @@ runs:
         secrets: |
           PACT_SECRET: github-token
 
-    - name: Create Pact Broker provider webhook
+    - name: Create Pact broker provider webhook
       uses: extenda/actions/pact-broker@v0
       with:
         service-account-key: ${{ inputs.service-account-key }}
@@ -43,4 +43,4 @@ runs:
           --user='extenda-devops-bot:${{ env.PACT_SECRET }}' \
           --provider=${{ inputs.application-name }} \
           --${{ inputs.pact-event-type }} \
-          --data='{"event_type":"${{ inputs.repository-dispatch-id }}"}'
+          --data='{"event_type":"${{ inputs.repository-dispatch-id }}","client_payload":{"pact-url":"${pactbroker.pactUrl}"}}'

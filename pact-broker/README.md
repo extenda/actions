@@ -110,12 +110,15 @@ jobs:
         with:
           service-account-key: ${{ secrets.SECRET_AUTH }}
           repository-dispatch-id: verify-pacts
+          application-name: my-application
           uuid: a-uuid-that-you-generate
 
       - name: Verify pacts
         uses: extenda/actions/maven@v0
         timeout-minutes: 15
         with:
+          ## Maven profile; optionally filter out just the PactIT tests (not the same profile as below!)
+          ## or run all IT tests together.
           args: verify -T1C -P pact-tests
           service-account-key: ${{ secrets.SECRET_AUTH }}
 
@@ -137,7 +140,7 @@ jobs:
           release-version: ${{ steps.release.outputs.version }}
 ```
 
-This exemplifies the webhook action. Note the `types` value that maps to the `repository-dispatch-id` value (can be omitted, default is `verify-pacts`) above.
+This exemplifies the webhook action. Note the `types` value below that maps to the `repository-dispatch-id` value above (can be omitted, default is `verify-pacts`) above.
 
 ##### verify-pacts.yaml
 ```yaml
@@ -171,7 +174,7 @@ jobs:
         uses: extenda/actions/maven@v0
         timeout-minutes: 15
         with:
-          args: verify -P pact-tests -T1C
+          args: verify -P pact-webhook -T1C
           service-account-key: ${{ secrets.SECRET_AUTH }}
 ```
 
@@ -179,8 +182,8 @@ An example of the Maven POM profile. All Pact verification tests are suffixed wi
 
 ```xml
 <profile>
-  <!-- Maven Profile to only run the pact tests -->
-  <id>pact-tests</id>
+  <!-- Maven Profile triggered from the Github webhook (verify-pacts.yaml) -->
+  <id>pact-webhook</id>
   <build>
     <plugins>
       <plugin>
@@ -192,18 +195,18 @@ An example of the Maven POM profile. All Pact verification tests are suffixed wi
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
+          <reuseForks>true</reuseForks>
           <includes>
             <include>**/*PactIT.java</include>
           </includes>
+          <!-- Need to include all as it is possible that by default some tests are excluded -->
           <excludes>
             <exclude>none</exclude>
           </excludes>
           <systemProperties>
             <pactbroker.auth.username>${env.PACT_BROKER_USERNAME}</pactbroker.auth.username>
             <pactbroker.auth.password>${env.PACT_BROKER_PASSWORD}</pactbroker.auth.password>
-            <pactbroker.consumerversionselectors.tags>prod</pactbroker.consumerversionselectors.tags>
-            <pactbroker.providerTags>${env.GITHUB_BRANCH}</pactbroker.providerTags>
-            <pact.provider.version>${env.GITHUB_SHA}</pact.provider.version>
+            <pactbroker.url>${env.PACT_URL}</pactbroker.url>
             <pact.verifier.publishResults>true</pact.verifier.publishResults>
           </systemProperties>
         </configuration>
