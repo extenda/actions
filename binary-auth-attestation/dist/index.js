@@ -2858,8 +2858,9 @@ const createAttestation = async (
   return exec.exec('gcloud', args);
 };
 
-const getArtifactUrl = async (sha, imagePath) => {
-  const container = `${imagePath}:${sha}`;
+const getArtifactUrl = async (tag, imagePath) => {
+  const imageName = imagePath.split(':')[0] || imagePath;
+  const container = `${imageName}:${tag}`;
   const args = [
     'container',
     'images',
@@ -2879,7 +2880,7 @@ const getArtifactUrl = async (sha, imagePath) => {
   });
 
   digest = digest.trim();
-  return `${imagePath}@${digest}`;
+  return `${imageName}@${digest}`;
 };
 
 module.exports = {
@@ -2909,8 +2910,8 @@ const action = async () => {
   const keyversion = core.getInput('keyversion') || '1';
   const imagePath = core.getInput('image-path', { required: true });
 
-  const sha = process.env.GITHUB_SHA;
-  const artifactUrl = await getArtifactUrl(sha, imagePath);
+  const tag = imagePath.split(':')[1] || process.env.GITHUB_SHA;
+  const artifactUrl = await getArtifactUrl(tag, imagePath);
 
   await setupGcloud(serviceAccountKey, process.env.GCLOUD_INSTALLED_VERSION || 'latest');
   await createAttestation(
