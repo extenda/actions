@@ -45,15 +45,23 @@ describe('Create attestation', () => {
     ]);
   });
 
-  test('Get artifact URL', async () => {
-    const digest = 'sha1787';
+  test('Get artifact URL with default tag', async () => {
+    const imagePath = 'eu.gcr.io/my-image';
+    const digest = 'djdq1787';
     exec.exec
       .mockImplementationOnce(mockExecListeners(digest));
 
-    await getArtifactUrl(
-      'sha1787',
-      'eu.gcr.io/my-iamge',
-    );
+    expect(await getArtifactUrl('tag', imagePath)).toEqual('eu.gcr.io/my-image@djdq1787');
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+  });
+
+  test('Get artifact URL provided a tag in the imagePath', async () => {
+    const imagePath = 'eu.gcr.io/my-image:tag1';
+    const digest = 'dut6h1787';
+    exec.exec
+      .mockImplementationOnce(mockExecListeners(digest));
+
+    expect(await getArtifactUrl('tag1', imagePath)).toEqual('eu.gcr.io/my-image@dut6h1787');
     expect(exec.exec).toHaveBeenCalledTimes(1);
   });
 });

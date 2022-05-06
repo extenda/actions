@@ -14,8 +14,8 @@ const action = async () => {
   const keyversion = core.getInput('keyversion') || '1';
   const imagePath = core.getInput('image-path', { required: true });
 
-  const sha = process.env.GITHUB_SHA;
-  const artifactUrl = await getArtifactUrl(sha, imagePath);
+  const tag = imagePath.split(':')[1] || process.env.GITHUB_SHA;
+  const artifactUrl = await getArtifactUrl(tag, imagePath);
 
   await setupGcloud(serviceAccountKey, process.env.GCLOUD_INSTALLED_VERSION || 'latest');
   await createAttestation(
