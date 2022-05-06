@@ -9,6 +9,7 @@ actions built on top of this:
   * [pact-can-i-deploy](../pact-can-i-deploy#readme)
   * [pact-create-webhook](../pact-create-webhook#readme)
   * [pact-publish](../pact-publish#readme)
+  * [pact-record-deployment](../pact-record-deployment#readme)
   * [pact-tag-version](../pact-tag-version#readme)
 
 ## Usage
@@ -84,11 +85,20 @@ jobs:
           service-account-key: ${{ secrets.SECRET_AUTH }}
           application-name: my-application
           release-tag: ${{ steps.release.outputs.release-tag }}
+
+  production:
+    steps:
+      - name: Deploy pact to Production
+        uses: extenda/actions/pact-record-deployment@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          application-name: my-application
+          release-version: ${{ steps.release.outputs.version }}
 ```
 
 #### Provider
 
-The step to create a webhook. This should run before any verifications.
+The step to create the webhook should run before any verifications.
 
 ##### commit.yaml
 ```yaml
@@ -101,6 +111,30 @@ jobs:
           service-account-key: ${{ secrets.SECRET_AUTH }}
           repository-dispatch-id: verify-pacts
           uuid: a-uuid-that-you-generate
+
+      - name: Verify pacts
+        uses: extenda/actions/maven@v0
+        timeout-minutes: 15
+        with:
+          args: verify -T1C -P pact-tests
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+
+      - name: Can I deploy?
+        uses: extenda/actions/pact-can-i-deploy@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          application-name: my-application
+          retry-while-unknown: 60
+          retry-interval: 10
+
+  release:
+    steps:
+      - name: Deploy pact to Production
+        uses: extenda/actions/pact-record-deployment@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          application-name: my-application
+          release-version: ${{ steps.release.outputs.version }}
 ```
 
 This exemplifies the webhook action. Note the `types` value that maps to the `repository-dispatch-id` value (can be omitted, default is `verify-pacts`) above.
