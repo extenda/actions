@@ -19,5 +19,5 @@ runs:
         service-account-key: ${{ inputs.service-account-key }}
         args: |-
           broker publish "${{ inputs.pacts-directory }}" \
-          --tag="$(git rev-parse --abbrev-ref HEAD)" \
+          --branch="$(git rev-parse --abbrev-ref HEAD)" \
           --consumer-app-version=${{ github.sha }}
