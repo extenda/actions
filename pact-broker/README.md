@@ -172,6 +172,8 @@ jobs:
 
       - name: Verify pacts
         uses: extenda/actions/maven@v0
+        env:
+          PACT_URL: ${{ github.event.client_payload.pact-url }}
         timeout-minutes: 15
         with:
           args: verify -P pact-webhook -T1C
