@@ -32,7 +32,7 @@ jobs:
       - name: Attest image
         uses: extenda/actions/binary-auth-attestation@v0
         with:
-          image-path: eu.gcr.io/extenda/image-name
+          image-path: eu.gcr.io/extenda/image-name:${{ github.sha }}
           service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
 
       - name: Deploy to Staging

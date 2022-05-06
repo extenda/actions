@@ -30,8 +30,9 @@ const createAttestation = async (
   return exec.exec('gcloud', args);
 };
 
-const getArtifactUrl = async (sha, imagePath) => {
-  const container = `${imagePath}:${sha}`;
+const getArtifactUrl = async (tag, imagePath) => {
+  const imageName = imagePath.split(':')[0] || imagePath;
+  const container = `${imageName}:${tag}`;
   const args = [
     'container',
     'images',
@@ -51,7 +52,7 @@ const getArtifactUrl = async (sha, imagePath) => {
   });
 
   digest = digest.trim();
-  return `${imagePath}@${digest}`;
+  return `${imageName}@${digest}`;
 };
 
 module.exports = {
