@@ -1,0 +1,27 @@
+name: Create/update pact version
+description: >
+  Creates/updates a pact version of a pact in a Pact Broker.
+  The reason this action exists is that it is otherwise not possible to
+  set a branch on the provider side of a pact.
+inputs:
+  service-account-key:
+    description: >
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+  application-name:
+    description: The pact participant application name
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Create/update pact version
+      uses: extenda/actions/pact-broker@v0
+      with:
+        service-account-key: ${{ inputs.service-account-key }}
+        args: |-
+          broker create-or-update-version \
+          --pacticipant=${{ inputs.application-name }} \
+          --branch="$(git rev-parse --abbrev-ref HEAD)" \
+          --version=${{ github.sha }}
