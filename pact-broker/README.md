@@ -44,7 +44,7 @@ jobs:
           service-account-key: ${{ secrets.SECRET_AUTH }}
           args: |-
             broker publish target/pacts \
-            --tag="$(git rev-parse --abbrev-ref HEAD)" \
+            --branch="$(git rev-parse --abbrev-ref HEAD)" \
             --consumer-app-version=${{ github.sha }}
 ```
 
