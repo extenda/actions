@@ -16,7 +16,7 @@ access to any other resources in your project.
 
 ### Examples
 
-The following example shows how the action can be used to publish pacts that's been created during consumer tests.
+The following example shows how the action can be used to create/update a pact (will contain a branch).
 
 ```yaml
 on: push
