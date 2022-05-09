@@ -37,7 +37,7 @@ runs:
         service-account-key: ${{ inputs.service-account-key }}
         args: |-
           broker create-or-update-webhook \
-          "https://api.github.com/repos/extenda/${{ github.repository }}/dispatches" \
+          "https://api.github.com/repos/${{ github.repository }}/dispatches" \
           --uuid=${{ inputs.uuid }} \
           --request='POST' \
           --user='extenda-devops-bot:${{ env.PACT_SECRET }}' \
