@@ -7,6 +7,7 @@ This is a low-level action and most end users should instead look ot the higher-
 actions built on top of this:
 
   * [pact-can-i-deploy](../pact-can-i-deploy#readme)
+  * [pact-create-version](../pact-create-version#readme)
   * [pact-create-webhook](../pact-create-webhook#readme)
   * [pact-publish](../pact-publish#readme)
   * [pact-record-deployment](../pact-record-deployment#readme)
@@ -121,6 +122,12 @@ jobs:
           ## or run all IT tests together.
           args: verify -T1C -P pact-tests
           service-account-key: ${{ secrets.SECRET_AUTH }}
+
+      - name: Create/update pact version
+        uses: extenda/actions/pact-create-version@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          application-name: my-application
 
       - name: Can I deploy?
         uses: extenda/actions/pact-can-i-deploy@v0
