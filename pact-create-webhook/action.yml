@@ -43,4 +43,4 @@ runs:
           --user='extenda-devops-bot:${{ env.PACT_SECRET }}' \
           --provider=${{ inputs.application-name }} \
           --${{ inputs.pact-event-type }} \
-          --data='{"event_type":"${{ inputs.repository-dispatch-id }}","client_payload":{"pact-url":"${pactbroker.pactUrl}"}}'
+          --data='{"event_type":"${{ inputs.repository-dispatch-id }}","client_payload":{"pact-consumers":"${pactbroker.consumerName}","pact-url":"${pactbroker.pactUrl}"}}'
