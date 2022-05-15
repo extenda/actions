@@ -19437,6 +19437,7 @@ const checkRequiredNumberOfPodsIsRunning = async (
     await exec.exec('kubectl', getRunningPodsNoSelectorArgs, {
       listeners: {
         stdout: (data) => {
+          // eslint-disable-next-line no-console
           console.log(parseInt(data.toString('utf8').trim(), 10));
         },
       },
@@ -19450,6 +19451,7 @@ const checkRequiredNumberOfPodsIsRunning = async (
     await exec.exec('kubectl', configViewArgs, {
       listeners: {
         stdout: (data) => {
+          // eslint-disable-next-line no-console
           console.log(data.toString('utf8'));
         },
       },
