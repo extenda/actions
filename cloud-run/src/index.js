@@ -8,6 +8,7 @@ const jsonSchema = require('./cloud-run-schema');
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const serviceFile = core.getInput('service-definition') || 'cloud-run.yaml';
+  const servicePatch = core.getInput('service-definition-patch');
   const image = core.getInput('image', { required: true });
   const domainBindingsEnv = core.getInput('domain-mappings-env') || '';
   const dnsProjectLabel = core.getInput('dns-project-label') || 'dns';
@@ -15,7 +16,7 @@ const action = async () => {
 
   failIfNotTrunkBased();
 
-  const service = loadServiceDefinition(serviceFile, jsonSchema);
+  const service = loadServiceDefinition(serviceFile, jsonSchema, servicePatch);
   await runDeploy(serviceAccountKey, service, image, verbose === 'true')
     .then(({ cluster }) => configureDomains(
       service,

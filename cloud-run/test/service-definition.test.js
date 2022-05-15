@@ -359,11 +359,11 @@ platform:
   managed:
     allow-unauthenticated: true
     region: eu-west1
-canary: 
+canary:
   enabled: true
   steps: '10,50,80'
   intervall: '10'
-  thresholds: 
+  thresholds:
     latency99: '5'
     latency95: '2'
     latency50: '1'
@@ -371,5 +371,70 @@ canary:
 `,
     });
     expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema).not.toThrow());
+  });
+
+  test('It can patch the service definition', () => {
+    mockFs({
+      'cloud-run.yaml': `
+name: service
+memory: 256Mi
+cpu: 1
+
+environment:
+  NAME: value
+  SECRET: sm://*/secret-name
+
+platform:
+  gke:
+    connectivity: external
+    domain-mappings:
+      staging:
+        - test-service.domain.dev
+      prod:
+        - test-service.domain.com
+`,
+    });
+
+    const yamlPatch = `
+name: patch-service
+cpu: 200m
+min-instances: 2
+environment:
+  NAME: replaced
+  PATCH: added
+platform:
+  gke:
+    domain-mappings:
+      staging:
+        - patch-service.domain.dev
+      prod:
+        - patch-service.domain.com
+    `;
+
+    const service = loadServiceDefinition('cloud-run.yaml', cloudRunSchema, yamlPatch);
+    expect(service).toMatchObject({
+      name: 'patch-service',
+      memory: '256Mi',
+      cpu: '200m',
+      'min-instances': 2,
+      environment: {
+        NAME: 'replaced',
+        SECRET: 'sm://*/secret-name',
+        PATCH: 'added',
+      },
+      platform: {
+        gke: {
+          connectivity: 'external',
+          'domain-mappings': {
+            staging: [
+              'patch-service.domain.dev',
+            ],
+            prod: [
+              'patch-service.domain.com',
+            ]
+          }
+        }
+      }
+    });
   });
 });
