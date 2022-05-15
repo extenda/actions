@@ -431,10 +431,10 @@ platform:
             ],
             prod: [
               'patch-service.domain.com',
-            ]
-          }
-        }
-      }
+            ],
+          },
+        },
+      },
     });
   });
 });
