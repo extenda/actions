@@ -34,19 +34,16 @@ CVE-2018-14618
 CVE-2019-1543
 ````
 
-This will be usefull when you are forced to use an image with a known vulnerability.
+This will be useful when you are forced to use an image with a known vulnerability.
 
 ## Usage
 
 See [action.yml](action.yml).
 
-
-
 ### Secrets
 
 This action requires a GCP service account key with permission to deploy the cloud run services.
 Once created, the JSON key should be `base64` encoded and added as secret in the GitHub repository.
-
 
 ### Environment variables
 
