@@ -52996,7 +52996,7 @@ exports.toCommandValue = toCommandValue;
 /***/ 8571:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const { getInput } = __webpack_require__(6341);
+const { getInput, getBooleanInput } = __webpack_require__(6341);
 const { run } = __webpack_require__(1898);
 const { validateOrFetchNexusCredentials } = __webpack_require__(6453);
 const { createNpmrcFile } = __webpack_require__(5859);
@@ -53006,6 +53006,7 @@ const action = async () => {
   const password = getInput('nexus-password') || process.env.NEXUS_PASSWORD;
   const serviceAccountKey = getInput('service-account-key');
   const outputDir = getInput('npmrc-dir') || '.';
+  const authForPublishing = getBooleanInput('auth-for-publishing') || false;
 
   const credentials = await validateOrFetchNexusCredentials({
     username,
@@ -53016,6 +53017,7 @@ const action = async () => {
   await createNpmrcFile({
     credentials,
     outputDir,
+    authForPublishing,
   });
 };
 
@@ -53082,12 +53084,19 @@ const { join } = __webpack_require__(5622);
  *     password: string,
  *   },
  *   outputDir: string,
+ *   authForPublishing?: boolean,
  * }}
  */
-const createNpmrcFile = async ({ credentials: { username, password }, outputDir }) => {
+const createNpmrcFile = async ({
+  credentials:
+  { username, password },
+  authForPublishing,
+  outputDir,
+}) => {
   const nexusToken = Buffer.from(`${username}:${password}`).toString('base64');
+  const repo = authForPublishing ? 'npm-private' : 'npm-group';
   const contents = `
-@hiiretail:registry = https://repo.extendaretail.com/repository/npm-group/
+@hiiretail:registry = https://repo.extendaretail.com/repository/${repo}/
 //repo.extendaretail.com/repository/npm-group/:email = nexus@extenda.com
 //repo.extendaretail.com/repository/npm-group/:always-auth = true
 //repo.extendaretail.com/repository/npm-group/:_auth = ${nexusToken}

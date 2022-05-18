@@ -474,7 +474,7 @@ actions will always be accessible from a `v{MAJOR}` branch that points to the la
 For example `v1` will point to `v1.1.2` after it has been released.
 
 ### Conventional Commits
-
+g
 The project is versioned with [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) conventions.
 
   * Make sure your commits to `master` always follow conventional commits
