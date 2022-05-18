@@ -12,9 +12,9 @@ const expectedNpmrcForInstall = `
 
 const expectedNpmrcForPublish = `
 @hiiretail:registry = https://repo.extendaretail.com/repository/npm-private/
-//repo.extendaretail.com/repository/npm-group/:email = nexus@extenda.com
-//repo.extendaretail.com/repository/npm-group/:always-auth = true
-//repo.extendaretail.com/repository/npm-group/:_auth = dXNlcm5hbWU6cGFzc3dvcmQ=
+//repo.extendaretail.com/repository/npm-private/:email = nexus@extenda.com
+//repo.extendaretail.com/repository/npm-private/:always-auth = true
+//repo.extendaretail.com/repository/npm-private/:_auth = dXNlcm5hbWU6cGFzc3dvcmQ=
 `;
 
 
