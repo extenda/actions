@@ -82,6 +82,7 @@ describe('Check number of pods running', () => {
   });
 
   test('It fails on unknown error', async () => {
+    // eslint-disable-next-line no-console
     console.log = jest.fn();
     // Call before the retry.
     exec.exec
@@ -147,6 +148,7 @@ describe('Check number of pods running', () => {
     expect(exec.exec.mock.calls[2][1]).toEqual(getNonRunningPodsArgs);
     expect(exec.exec.mock.calls[7][1]).toEqual(getRunningPodsNoSelectorArgs);
     expect(exec.exec.mock.calls[8][1]).toEqual(['config', 'view']);
+    // eslint-disable-next-line no-console
     expect(console.log).toHaveBeenCalledTimes(2);
   });
 

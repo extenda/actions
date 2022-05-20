@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const { run } = require('../../utils');
+const { run, failIfNotTrunkBased } = require('../../utils');
 const runDeploy = require('./run-deploy');
 const kubernetesSchema = require('./kubernetes-schema');
 const loadServiceDefinition = require('../../cloud-run/src/service-definition');
@@ -10,6 +10,8 @@ const action = async () => {
   const serviceFile = core.getInput('service-definition') || 'kubernetes.yaml';
   const image = core.getInput('image', { required: true });
   const dryRun = core.getInput('dry-run') === 'true';
+
+  failIfNotTrunkBased();
 
   // Uses function from cloud-run action src to retrieve service definition from yaml file
   const service = loadServiceDefinition(serviceFile, kubernetesSchema);

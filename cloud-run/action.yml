@@ -12,6 +12,16 @@ inputs:
       The service YAML specification.
     required: false
     default: cloud-run.yaml
+  service-definition-patch:
+    description: |
+      Inlined YAML to patch into the included service definition.
+        * Objects are merged
+        * Properties are replaced
+        * Lists are replaced
+
+      The patch mechanism can be used to modify settings that differ between
+      staging and production.
+    required: false
   image:
     description: The Docker image to deploy to Cloud Run.
     required: true

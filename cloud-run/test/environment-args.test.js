@@ -5,9 +5,18 @@ describe('Environment args', () => {
     const args = createEnvArgs({
       KEY_1: 'value1',
       KEY_2: 'value2',
-    }, 'test-staging-project');
+    }, 'test-staging-project', 'testrunner:v1.5.0');
 
-    expect(args).toEqual('KEY_1=value1,KEY_2=value2,SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging');
+    expect(args).toContain('KEY_1=value1,KEY_2=value2');
+  });
+
+  test('It populates default env variables', () => {
+    const args = createEnvArgs({
+      KEY_1: 'value1',
+      KEY_2: 'value2',
+    }, 'test-staging-project', 'testrunner:v1.5.0');
+
+    expect(args).toContain('SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=testrunner:v1.5.0');
   });
 
   test('It can update secret manager URLs', () => {
@@ -15,8 +24,8 @@ describe('Environment args', () => {
       KEY_1: 'value1',
       KEY_2: 'sm://*/my-secret',
       KEY_3: 'sm://other/shared-secret',
-    }, 'test-prod-project');
+    }, 'test-prod-project', 'testrunner:v1.5.0');
 
-    expect(args).toEqual('KEY_1=value1,KEY_2=sm://test-prod-project/my-secret,KEY_3=sm://other/shared-secret,SERVICE_PROJECT_ID=test-prod-project,SERVICE_ENVIRONMENT=prod');
+    expect(args).toContain('KEY_2=sm://test-prod-project/my-secret,KEY_3=sm://other/shared-secret');
   });
 });

@@ -1,0 +1,39 @@
+name: Record pact deployment
+description: Instruct a Pact broker record the pact as deployed
+inputs:
+  service-account-key:
+    description: >
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+  application-instance:
+    description: >
+      The application instance to which the deployment has
+      occurred - a logical identifier required to differentiate
+      deployments when there are multiple instances of the same
+      application in an environment.
+    required: false
+  application-name:
+    description: The pact participant application name
+    required: true
+  env:
+    description: The deployment environment (prod/staging)
+    required: false
+    default: prod
+  release-version:
+    description: The release (semantic) version
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Record pact deployment
+      uses: extenda/actions/pact-broker@v0
+      with:
+        service-account-key: ${{ inputs.service-account-key }}
+        args: |-
+          broker record-deployment \
+          --pacticipant=${{ inputs.application-name }} \
+          --environment=${{ inputs.env }} \
+          --application-instance=${{ inputs.application-instance }} \
+          --version=${{ inputs.release-version }}

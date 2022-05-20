@@ -8,7 +8,7 @@ jest.mock('../src/create-namespace');
 jest.mock('../src/check-sa');
 jest.mock('../src/kubectl-auth');
 jest.mock('../src/get-revision');
-
+jest.setTimeout(30000);
 const exec = require('@actions/exec');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const runDeploy = require('../src/run-deploy');
@@ -24,6 +24,7 @@ describe('Run Deploy', () => {
     process.env = { ...orgEnv };
     process.env.GITHUB_SHA = '63633c0'; // v.0.18.0
   });
+
   afterEach(() => {
     jest.resetAllMocks();
     mockFs.restore();
@@ -59,7 +60,7 @@ describe('Run Deploy', () => {
       '--memory=256Mi',
       '--concurrency=80',
       '--max-instances=default',
-      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
       '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
       '--service-account=cloudrun-runtime@test-staging-project.iam.gserviceaccount.com',
       '--cpu=1',
@@ -98,7 +99,7 @@ describe('Run Deploy', () => {
       '--memory=256Mi',
       '--concurrency=80',
       '--max-instances=default',
-      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project-staging-ab12,SERVICE_ENVIRONMENT=staging',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project-staging-ab12,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project-staging-ab12/my-service:tag',
       '--labels=service_project_id=test-staging-project-staging-ab12,service_project=test-staging-project,service_env=staging',
       '--service-account=cloudrun-runtime@test-staging-project-staging-ab12.iam.gserviceaccount.com',
       '--cpu=1',
@@ -197,7 +198,7 @@ describe('Run Deploy', () => {
       '--memory=256Mi',
       '--concurrency=80',
       '--max-instances=default',
-      '--set-env-vars=KEY1=value,KEY2=sm://test-staging-project/my-secret,SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
+      '--set-env-vars=KEY1=value,KEY2=sm://test-staging-project/my-secret,SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
       '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
       '--service-account=cloudrun-runtime@test-staging-project.iam.gserviceaccount.com',
       '--cpu=1',
@@ -310,7 +311,7 @@ describe('Run Deploy', () => {
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(getClusterInfo).toHaveBeenCalled();
     expect(setupGcloud).toHaveBeenCalledTimes(1);
-    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(exec.exec).toHaveBeenCalledTimes(3);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
       'run', 'deploy', 'my-service',
       '--image=gcr.io/test-staging-project/my-service:tag',
@@ -318,8 +319,8 @@ describe('Run Deploy', () => {
       '--memory=256Mi',
       '--concurrency=32',
       '--max-instances=default',
-      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
       '--cpu=400m',
       '--min-instances=default',
       '--platform=gke',
@@ -356,7 +357,7 @@ describe('Run Deploy', () => {
       'gcr.io/test-staging-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
-    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(exec.exec).toHaveBeenCalledTimes(3);
     expect(getClusterInfo).toHaveBeenCalledWith('test-staging-project', undefined);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
@@ -366,8 +367,8 @@ describe('Run Deploy', () => {
       '--memory=256Mi',
       '--concurrency=10',
       '--max-instances=default',
-      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
       '--cpu=100m',
       '--min-instances=default',
       '--platform=gke',
@@ -409,7 +410,7 @@ describe('Run Deploy', () => {
       'gcr.io/test-staging-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
-    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(exec.exec).toHaveBeenCalledTimes(3);
     expect(getClusterInfo).toHaveBeenCalledWith('test-staging-project', 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster');
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
@@ -419,8 +420,8 @@ describe('Run Deploy', () => {
       '--memory=256Mi',
       '--concurrency=50',
       '--max-instances=100',
-      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
       '--cpu=400m',
       '--min-instances=1',
       '--platform=gke',
@@ -504,7 +505,7 @@ describe('Run Deploy', () => {
       'gcr.io/test-staging-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
-    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(exec.exec).toHaveBeenCalledTimes(3);
     expect(getClusterInfo).toHaveBeenCalledWith('test-staging-project', undefined);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
@@ -514,8 +515,8 @@ describe('Run Deploy', () => {
       '--memory=256Mi',
       '--concurrency=19',
       '--max-instances=default',
-      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
+      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
       '--cpu=233m',
       '--min-instances=default',
       '--platform=gke',
@@ -591,6 +592,17 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       platform: {
         gke: {
           connectivity: 'external',
+        },
+      },
+      canary: {
+        enabled: true,
+        steps: '10,50,80',
+        interval: 10,
+        thresholds: {
+          latency99: '5',
+          latency95: '2',
+          latency50: '1',
+          'error-rate': '1',
         },
       },
     };
@@ -674,6 +686,17 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
           connectivity: 'external',
         },
       },
+      canary: {
+        enabled: true,
+        steps: '10,50,80',
+        interval: 10,
+        thresholds: {
+          latency99: '5',
+          latency95: '2',
+          latency50: '1',
+          'error-rate': '1',
+        },
+      },
     };
     const returnValue = await runDeploy(
       serviceAccountKey,
@@ -685,5 +708,97 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
 
     expect(scan).toHaveBeenCalledTimes(0);
     expect(returnValue.gcloudExitCode).toEqual(0);
+  });
+  test('It can deploy to Cloud Run on GKE and tag for canary', async () => {
+    const revisionStatus = {
+      status: {
+        conditions: [
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            severity: 'Info',
+            status: 'True',
+            type: 'Active',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'ContainerHealthy',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'Ready',
+          },
+          {
+            lastTransitionTime: '2020-08-31T09:45:11Z',
+            status: 'True',
+            type: 'ResourcesAvailable',
+          },
+        ],
+      },
+    };
+
+    getClusterInfo.mockResolvedValueOnce({
+      project: 'tribe-prod-1234',
+      cluster: 'k8s-cluster',
+      clusterLocation: 'europe-west1',
+      uri: 'projects/tribe-prod-1234/zones/europe-west1/clusters/k8s-cluster',
+    });
+    exec.exec.mockResolvedValueOnce(0);
+    exec.exec.mockResolvedValueOnce(0);
+    exec.exec.mockImplementationOnce((cmd, args, opts) => {
+      opts.listeners.stdout(Buffer.from(JSON.stringify(revisionStatus), 'utf8'));
+      return Promise.resolve(0);
+    });
+    setupGcloud.mockResolvedValueOnce('test-prod-project');
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      cpu: '100m',
+      canary: {
+        enabled: true,
+        steps: '10.50.80',
+        interval: '10',
+        thresholds: {
+          latency99: '5',
+          latency95: '2',
+          latency50: '1',
+          'error-rate': '1',
+        },
+      },
+      platform: {
+        gke: {
+          connectivity: 'external',
+        },
+      },
+    };
+    const returnValue = await runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-prod-project/my-service:tag',
+    );
+    expect(returnValue.gcloudExitCode).toEqual(0);
+    expect(exec.exec).toHaveBeenCalledTimes(4);
+    expect(getClusterInfo).toHaveBeenCalledWith('test-prod-project', undefined);
+    expect(setupGcloud).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledWith('gcloud', [
+      'run', 'deploy', 'my-service',
+      '--image=gcr.io/test-prod-project/my-service:tag',
+      '--project=test-prod-project',
+      '--memory=256Mi',
+      '--concurrency=10',
+      '--max-instances=default',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-prod-project,SERVICE_ENVIRONMENT=prod,SERVICE_CONTAINER_IMAGE=gcr.io/test-prod-project/my-service:tag',
+      '--cpu=100m',
+      '--min-instances=default',
+      '--platform=gke',
+      '--cluster=projects/tribe-prod-1234/zones/europe-west1/clusters/k8s-cluster',
+      '--cluster-location=europe-west1',
+      '--connectivity=external',
+      '--no-use-http2',
+      '--namespace=my-service',
+      '--labels=service_project_id=test-prod-project,service_project=test,service_env=prod,sre.canary.enabled=true,sre.canary.steps=10.50.80,sre.canary.interval=10,sre.canary.thresholds.latency99=5,sre.canary.thresholds.latency95=2,sre.canary.thresholds.latency50=1,sre.canary.thresholds.error=1',
+      '--no-traffic',
+    ], expect.anything());
   });
 });

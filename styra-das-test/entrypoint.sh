@@ -11,9 +11,9 @@ fi
 
 # Run tests
 OUTPUT="$(/usr/local/bin/styra-cli validate tests "$SYSTEM_ID" --all \
-  -p policy/com.styra.envoy.ingress/test/test/test.rego=policies/policy/com.styra.envoy.ingress/test/test/test.rego \
-  -p policy/com.styra.envoy.ingress/rules/rules/ingress.rego=policies/policy/com.styra.envoy.ingress/rules/rules/ingress.rego \
-  --policy-type ingress)"
+  -p policy/com.styra.envoy.${STYRA_POLICY_TYPE}/test/test/test.rego=policies/policy/com.styra.envoy.${STYRA_POLICY_TYPE}/test/test/test.rego \
+  -p policy/com.styra.envoy.${STYRA_POLICY_TYPE}/rules/rules/${STYRA_POLICY_TYPE}.rego=policies/policy/com.styra.envoy.${STYRA_POLICY_TYPE}/rules/rules/${STYRA_POLICY_TYPE}.rego \
+  --policy-type ${STYRA_POLICY_TYPE})"
 
 echo "$OUTPUT"
 

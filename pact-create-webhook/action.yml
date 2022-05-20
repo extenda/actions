@@ -1,0 +1,46 @@
+name: Create Pact Broker provider webhook
+description: Instruct a Pact broker to create a provider webhook
+inputs:
+  service-account-key:
+    description: >
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+  application-name:
+    description: The pact participant application name
+    required: false
+    default: ${{ github.repository }}
+  uuid:
+    description: A string identifying the webhook
+    required: true
+  pact-event-type:
+    description: The Pact event type
+    required: false
+    default: 'contract-requiring-verification-published'
+  repository-dispatch-id:
+    description: The webhook identifier in Github Actions.
+    required: false
+    default: 'verify-pacts'
+
+runs:
+  using: composite
+  steps:
+    - uses: extenda/actions/gcp-secret-manager@v0
+      with:
+        service-account-key: ${{ inputs.service-account-key }}
+        secrets: |
+          PACT_SECRET: github-token
+
+    - name: Create Pact broker provider webhook
+      uses: extenda/actions/pact-broker@v0
+      with:
+        service-account-key: ${{ inputs.service-account-key }}
+        args: |-
+          broker create-or-update-webhook \
+          "https://api.github.com/repos/${{ github.repository }}/dispatches" \
+          --uuid=${{ inputs.uuid }} \
+          --request='POST' \
+          --user='extenda-devops-bot:${{ env.PACT_SECRET }}' \
+          --provider=${{ inputs.application-name }} \
+          --${{ inputs.pact-event-type }} \
+          --data='{"event_type":"${{ inputs.repository-dispatch-id }}","client_payload":{"pact-consumers":"${pactbroker.consumerName}","pact-url":"${pactbroker.pactUrl}"}}'

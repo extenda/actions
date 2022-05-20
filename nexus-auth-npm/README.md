@@ -28,6 +28,27 @@ jobs:
 
 ```
 
+If you need to setup npm to publish to Nexus, use special flag to set correct repo
+
+```yaml
+jobs:
+  prod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Auth to Nexus npm registry
+        uses: extenda/actions/nexus-auth-npm@v0
+        with:
+          auth-for-publishing: true
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+
+      - name: Install dependencies
+        run: npm ci
+
+```
+
+
 ## Internal dependencies
 
 This action depends on gcp-secret-manager action in this repo.
