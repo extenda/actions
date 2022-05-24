@@ -1,8 +1,6 @@
 jest.mock('@actions/exec');
 const exec = require('@actions/exec');
-const {
-  getImageDigest,
-} = require('../src/image-digest');
+const getImageDigest = require('../src/image-digest');
 
 const mockExecListeners = (output) => (cmd, args, opts) => {
   opts.listeners.stdout(Buffer.from(output, 'utf8'));

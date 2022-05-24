@@ -24,6 +24,4 @@ const getImageDigest = async (image) => {
   return `${imageName}@${digest}`;
 };
 
-module.exports = {
-  getImageDigest,
-};
+module.exports = getImageDigest;

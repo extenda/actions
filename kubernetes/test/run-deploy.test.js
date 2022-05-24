@@ -11,6 +11,7 @@ jest.mock('../src/patch-statefulset-yaml');
 jest.mock('../src/kustomize');
 jest.mock('../src/apply-kubectl');
 jest.mock('../src/autoscale');
+jest.mock('../src/image-digest');
 jest.mock('../../utils', () => ({
   loadTool: jest.fn(),
 }));
@@ -28,6 +29,7 @@ const checkNamespaceExists = require('../src/check-namespace-exists');
 const checkRequiredNumberOfPodsIsRunning = require('../src/check-number-of-pods-running');
 const applyKubectl = require('../src/apply-kubectl');
 const applyAutoscale = require('../src/autoscale');
+const getImageDigest = require('../src/image-digest');
 
 const orgEnv = process.env;
 
@@ -58,6 +60,7 @@ describe('Run Deploy', () => {
     });
     exec.exec.mockResolvedValue(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project');
+    getImageDigest.mockResolvedValueOnce('gcr.io/test-project/my-service@sha256:111');
     const image = 'gcr.io/test-project/my-service:tag';
     const name = 'deployment-name';
     await runDeploy(
@@ -156,6 +159,7 @@ describe('Run Deploy', () => {
     getClusterInfo.mockResolvedValueOnce({});
     exec.exec.mockResolvedValue(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project');
+    getImageDigest.mockResolvedValueOnce('gcr.io/test-project/my-service@sha256:111');
 
     const image = 'gcr.io/test-project/my-service:tag';
     const name = 'deployment-name';
@@ -174,7 +178,7 @@ describe('Run Deploy', () => {
       'edit',
       'set',
       'image',
-      `eu.gcr.io/extenda/IMAGE:TAG=${image}`,
+      'gcr.io/test-project/my-service@sha256:111',
     ]);
     expect(kustomize).toHaveBeenNthCalledWith(4, [
       'edit',

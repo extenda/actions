@@ -58,7 +58,7 @@ const kustomizeNamespace = async (namespace) => {
  * @param image Image to be used during deployment.
  */
 const kustomizeImage = async (image) => {
-  const imageDigest = getImageDigest(image);
+  const imageDigest = await getImageDigest(image);
   await execKustomize([
     'edit',
     'set',
