@@ -14,6 +14,7 @@ const applyKubectl = require('./apply-kubectl');
 const checkRequiredNumberOfPodsIsRunning = require('./check-number-of-pods-running');
 const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
 const applyAutoscale = require('./autoscale');
+const getImageDigest = require('./image-digest')
 
 /**
  * Downloads, configures, authenticates to GCloud.
@@ -57,11 +58,12 @@ const kustomizeNamespace = async (namespace) => {
  * @param image Image to be used during deployment.
  */
 const kustomizeImage = async (image) => {
+  const imageDigest = getImageDigest(image);
   await execKustomize([
     'edit',
     'set',
     'image',
-    `eu.gcr.io/extenda/IMAGE:TAG=${image}`,
+    imageDigest,
   ]);
 };
 
