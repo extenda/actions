@@ -19619,6 +19619,40 @@ module.exports = parseEnvironmentArgs;
 
 /***/ }),
 
+/***/ 9971:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const exec = __webpack_require__(2176);
+
+const getImageDigest = async (image) => {
+  const imageName = image.split(':')[0];
+  const args = [
+    'container',
+    'images',
+    'describe',
+    image,
+    '--format=get(image_summary.digest)',
+  ];
+
+  let digest = '';
+  await exec.exec('gcloud', args, {
+    silent: false,
+    listeners: {
+      stdout: (data) => {
+        digest += data.toString('utf8');
+      },
+    },
+  });
+
+  digest = digest.trim();
+  return `${imageName}@${digest}`;
+};
+
+module.exports = getImageDigest;
+
+
+/***/ }),
+
 /***/ 8571:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -19958,6 +19992,7 @@ const applyKubectl = __webpack_require__(4601);
 const checkRequiredNumberOfPodsIsRunning = __webpack_require__(6343);
 const authenticateKubeCtl = __webpack_require__(693);
 const applyAutoscale = __webpack_require__(6858);
+const getImageDigest = __webpack_require__(9971);
 
 /**
  * Downloads, configures, authenticates to GCloud.
@@ -20001,11 +20036,12 @@ const kustomizeNamespace = async (namespace) => {
  * @param image Image to be used during deployment.
  */
 const kustomizeImage = async (image) => {
+  const imageDigest = await getImageDigest(image);
   await execKustomize([
     'edit',
     'set',
     'image',
-    `eu.gcr.io/extenda/IMAGE:TAG=${image}`,
+    imageDigest,
   ]);
 };
 
