@@ -60,8 +60,8 @@ describe('Run Deploy', () => {
     });
     exec.exec.mockResolvedValue(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project');
-    getImageDigest.mockResolvedValueOnce('gcr.io/test-project/my-service@sha256:111');
-    const image = 'gcr.io/test-project/my-service:tag';
+    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-project/my-service@sha256:111');
+    const image = 'eu.gcr.io/test-project/my-service:tag';
     const name = 'deployment-name';
     await runDeploy(
       'service-account',
@@ -88,7 +88,7 @@ describe('Run Deploy', () => {
           targetPort: 8080,
         }],
     };
-    const image = 'gcr.io/test-project/my-service:tag';
+    const image = 'eu.gcr.io/test-project/my-service:tag';
     await runDeploy(
       'service-account',
       service,
@@ -111,7 +111,7 @@ describe('Run Deploy', () => {
         mountPath: '/data/storage',
       },
     };
-    const image = 'gcr.io/test-project/my-service:tag';
+    const image = 'eu.gcr.io/test-project/my-service:tag';
     await runDeploy(
       'service-account',
       service,
@@ -138,7 +138,7 @@ describe('Run Deploy', () => {
       name: 'deployment-name',
       storage: undefined,
     };
-    const image = 'gcr.io/test-project/my-service:tag';
+    const image = 'eu.gcr.io/test-project/my-service:tag';
     await runDeploy(
       'service-account',
       service,
@@ -159,9 +159,9 @@ describe('Run Deploy', () => {
     getClusterInfo.mockResolvedValueOnce({});
     exec.exec.mockResolvedValue(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project');
-    getImageDigest.mockResolvedValueOnce('gcr.io/test-project/my-service@sha256:111');
+    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-project/my-service@sha256:111');
 
-    const image = 'gcr.io/test-project/my-service:tag';
+    const image = 'eu.gcr.io/test-project/my-service:tag';
     const name = 'deployment-name';
     await runDeploy(
       'service-account',
@@ -178,7 +178,7 @@ describe('Run Deploy', () => {
       'edit',
       'set',
       'image',
-      'gcr.io/test-project/my-service@sha256:111',
+      'eu.gcr.io/extenda/IMAGE:TAG=eu.gcr.io/test-project/my-service@sha256:111',
     ]);
     expect(kustomize).toHaveBeenNthCalledWith(4, [
       'edit',
@@ -196,7 +196,7 @@ describe('Run Deploy', () => {
     exec.exec.mockResolvedValue(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project');
 
-    const image = 'gcr.io/test-project/my-service:tag';
+    const image = 'eu.gcr.io/test-project/my-service:tag';
     const service = {
       name: 'deployment-name',
       storage: {
@@ -226,7 +226,7 @@ describe('Run Deploy', () => {
     exec.exec.mockResolvedValue(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project');
 
-    const image = 'gcr.io/test-project/my-service:tag';
+    const image = 'eu.gcr.io/test-project/my-service:tag';
     const service = {
       name: 'deployment-name',
       replicas: 1,

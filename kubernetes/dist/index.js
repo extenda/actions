@@ -20041,7 +20041,7 @@ const kustomizeImage = async (image) => {
     'edit',
     'set',
     'image',
-    imageDigest,
+    `eu.gcr.io/extenda/IMAGE:TAG=${imageDigest}`,
   ]);
 };
 
