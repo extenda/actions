@@ -22717,6 +22717,7 @@ const core = __webpack_require__(6341);
 const exec = __webpack_require__(2176);
 const { getShortSha } = __webpack_require__(8258);
 const { extractOutput, LogFilter } = __webpack_require__(8207);
+const { getImageDigest } = __webpack_require__(1898);
 
 const podName = async () => {
   const repo = process.env.GITHUB_REPOSITORY.split('/')[1];
@@ -22801,6 +22802,7 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl, trimPrefix
 const runPod = async ({ name, namespace }, image, configMap, trimPrefix) => {
   const pod = await podName();
 
+  const imageDigest = await getImageDigest(image);
   const args = [
     'run',
     pod,
@@ -22809,7 +22811,7 @@ const runPod = async ({ name, namespace }, image, configMap, trimPrefix) => {
     '--restart=Never',
     '--pod-running-timeout=15m',
     '--wait=true',
-    `--image=${image}`,
+    `--image=${imageDigest}`,
     '-n',
     namespace,
   ];
@@ -22825,7 +22827,7 @@ const runPod = async ({ name, namespace }, image, configMap, trimPrefix) => {
   });
 
   const json = JSON.stringify(
-    createOverride(pod, namespace, image, configMap, serviceUrl, trimPrefix),
+    createOverride(pod, namespace, imageDigest, configMap, serviceUrl, trimPrefix),
   );
   args.push(`--overrides=${json}`);
 
@@ -43309,6 +43311,40 @@ module.exports = gitConfig;
 
 /***/ }),
 
+/***/ 640:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const exec = __webpack_require__(9393);
+
+const getImageDigest = async (image) => {
+  const imageName = image.split(':')[0];
+  const args = [
+    'container',
+    'images',
+    'describe',
+    image,
+    '--format=get(image_summary.digest)',
+  ];
+
+  let digest = '';
+  await exec.exec('gcloud', args, {
+    silent: false,
+    listeners: {
+      stdout: (data) => {
+        digest += data.toString('utf8');
+      },
+    },
+  });
+
+  digest = digest.trim();
+  return `${imageName}@${digest}`;
+};
+
+module.exports = getImageDigest;
+
+
+/***/ }),
+
 /***/ 1898:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -43318,6 +43354,7 @@ const gitConfig = __webpack_require__(4722);
 const loadTool = __webpack_require__(7828);
 const loadGitHubToken = __webpack_require__(2282);
 const failIfNotTrunkBased = __webpack_require__(6103);
+const getImageDigest = __webpack_require__(640);
 
 // Note that src/versions are NOT included here because it adds 2.2MBs to every package
 // that uses the utils module. If versions are to be used, include the file explicitly.
@@ -43329,6 +43366,7 @@ module.exports = {
   loadTool,
   loadGitHubToken,
   run,
+  getImageDigest,
 };
 
 

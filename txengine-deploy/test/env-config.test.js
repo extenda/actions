@@ -3,7 +3,12 @@ jest.mock('../../gcp-secret-manager/src/secrets', () => ({
   loadSecret: mockLoadSecret,
 }));
 
+jest.mock('../../utils', () => ({
+  getImageDigest: jest.fn(),
+}));
+
 const prepareEnvConfig = require('../src/env-config');
+const { getImageDigest } = require('../../utils/src');
 
 describe('env-config', () => {
   afterEach(() => {
@@ -18,17 +23,18 @@ describe('env-config', () => {
   });
 
   test('It creates config variables', async () => {
+    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-staging-project/my-service@sha256:111');
     const { replaceTokens, configMap, secrets } = await prepareEnvConfig(
       'deploy-secret-key',
       'test-prod-project',
-      'eu.gcr.io/extenda/test:v1.0.0',
+      'eu.gcr.io/test-staging-project/my-service@sha256:111',
       'testrunner',
       'SE',
     );
 
     expect(replaceTokens).toEqual({
       NAMESPACE: 'testrunner-se-txengine',
-      CONTAINER_IMAGE: 'eu.gcr.io/extenda/test:v1.0.0',
+      CONTAINER_IMAGE: 'eu.gcr.io/test-staging-project/my-service@sha256:111',
       TENANT_NAME: 'testrunner-se',
     });
 
@@ -52,10 +58,11 @@ describe('env-config', () => {
   });
 
   test('It can handle optional country code', async () => {
+    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-staging-project/my-service@sha256:111');
     const { replaceTokens } = await prepareEnvConfig(
       'deploy-secret-key',
       'test-staging-project',
-      'eu.gcr.io/extenda/test:v1.0.0',
+      'eu.gcr.io/test-staging-project/my-service@sha256:111',
       'testrunner',
     );
 
@@ -70,7 +77,7 @@ describe('env-config', () => {
     const { replaceTokens } = await prepareEnvConfig(
       'deploy-secret-key',
       'test-staging-project',
-      'eu.gcr.io/extenda/test:v1.0.0',
+      'eu.gcr.io/test-staging-project/my-service@sha256:111',
       'testrunner',
       '',
     );
@@ -83,10 +90,11 @@ describe('env-config', () => {
   });
 
   test('It can detect staging environment', async () => {
+    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-staging-project/my-service@sha256:111');
     const { configMap } = await prepareEnvConfig(
       'deploy-secret-key',
       'test-staging-project',
-      'eu.gcr.io/extenda/test:v1.0.0',
+      'eu.gcr.io/test-staging-project/my-service@sha256:111',
       'testrunner',
       'SE',
     );
@@ -97,12 +105,13 @@ describe('env-config', () => {
   });
 
   test('It handles additional environment with secrets', async () => {
+    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-staging-project/my-service@sha256:111');
     mockLoadSecret.mockResolvedValueOnce('my-first-secret')
       .mockResolvedValueOnce('my-second-secret');
     const { replaceTokens, configMap, secrets } = await prepareEnvConfig(
       'deploy-secret-key',
       'test-prod-project',
-      'eu.gcr.io/extenda/test:v1.0.0',
+      'eu.gcr.io/test-staging-project/my-service@sha256:111',
       'testrunner',
       'SE',
       'MY_CONFIG: my-value\nMY_SECRET1: sm://*/secret1\nMY_SECRET2: sm://test-prod-project/secret2',
@@ -110,7 +119,7 @@ describe('env-config', () => {
 
     expect(replaceTokens).toEqual({
       NAMESPACE: 'testrunner-se-txengine',
-      CONTAINER_IMAGE: 'eu.gcr.io/extenda/test:v1.0.0',
+      CONTAINER_IMAGE: 'eu.gcr.io/test-staging-project/my-service@sha256:111',
       TENANT_NAME: 'testrunner-se',
     });
 
@@ -138,10 +147,11 @@ describe('env-config', () => {
   });
 
   test('It throws if accessing secrets from wrong project', async () => {
+    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-staging-project/my-service@sha256:111');
     await expect(prepareEnvConfig(
       'deploy-secret-key',
       'test-prod-project',
-      'eu.gcr.io/extenda/test:v1.0.0',
+      'eu.gcr.io/test-staging-project/my-service@sha256:111',
       'testrunner',
       'SE',
       'MY_SECRET2: sm://invalid-project/secret',
@@ -153,7 +163,7 @@ describe('env-config', () => {
     await expect(prepareEnvConfig(
       'deploy-secret-key',
       'test-prod-project',
-      'eu.gcr.io/extenda/test:v1.0.0',
+      'eu.gcr.io/test-staging-project/my-service@sha256:111',
       'testrunner',
       'SE',
       'MY_SECRET2: sm://*/secret',

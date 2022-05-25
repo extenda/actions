@@ -11,9 +11,9 @@ jest.mock('../src/patch-statefulset-yaml');
 jest.mock('../src/kustomize');
 jest.mock('../src/apply-kubectl');
 jest.mock('../src/autoscale');
-jest.mock('../src/image-digest');
 jest.mock('../../utils', () => ({
   loadTool: jest.fn(),
+  getImageDigest: jest.fn(),
 }));
 
 const exec = require('@actions/exec');
@@ -29,7 +29,7 @@ const checkNamespaceExists = require('../src/check-namespace-exists');
 const checkRequiredNumberOfPodsIsRunning = require('../src/check-number-of-pods-running');
 const applyKubectl = require('../src/apply-kubectl');
 const applyAutoscale = require('../src/autoscale');
-const getImageDigest = require('../src/image-digest');
+const { getImageDigest } = require('../../utils/src');
 
 const orgEnv = process.env;
 

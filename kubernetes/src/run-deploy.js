@@ -14,7 +14,7 @@ const applyKubectl = require('./apply-kubectl');
 const checkRequiredNumberOfPodsIsRunning = require('./check-number-of-pods-running');
 const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
 const applyAutoscale = require('./autoscale');
-const getImageDigest = require('./image-digest');
+const { getImageDigest } = require('../../utils/src');
 
 /**
  * Downloads, configures, authenticates to GCloud.

@@ -79616,6 +79616,7 @@ module.exports = deploy;
 
 const yaml = __webpack_require__(75024);
 const { loadSecret } = __webpack_require__(48652);
+const { getImageDigest } = __webpack_require__(1898);
 
 const createReplaceTokens = (projectId, image, tenantName, countryCode) => {
   let tenantLowerCase = tenantName.toLowerCase();
@@ -79675,7 +79676,8 @@ const prepareEnvConfig = async (
   countryCode,
   environmentString = '',
 ) => {
-  const replaceTokens = createReplaceTokens(projectId, image, tenantName, countryCode);
+  const imageDigest = await getImageDigest(image);
+  const replaceTokens = createReplaceTokens(projectId, imageDigest, tenantName, countryCode);
   const environment = {
     ...defaultEnvironment(projectId, tenantName.toLowerCase(), countryCode),
     ...parseEnvironment(environmentString, projectId),
@@ -100396,6 +100398,40 @@ module.exports = gitConfig;
 
 /***/ }),
 
+/***/ 90640:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const exec = __webpack_require__(9393);
+
+const getImageDigest = async (image) => {
+  const imageName = image.split(':')[0];
+  const args = [
+    'container',
+    'images',
+    'describe',
+    image,
+    '--format=get(image_summary.digest)',
+  ];
+
+  let digest = '';
+  await exec.exec('gcloud', args, {
+    silent: false,
+    listeners: {
+      stdout: (data) => {
+        digest += data.toString('utf8');
+      },
+    },
+  });
+
+  digest = digest.trim();
+  return `${imageName}@${digest}`;
+};
+
+module.exports = getImageDigest;
+
+
+/***/ }),
+
 /***/ 1898:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -100405,6 +100441,7 @@ const gitConfig = __webpack_require__(14722);
 const loadTool = __webpack_require__(7828);
 const loadGitHubToken = __webpack_require__(92282);
 const failIfNotTrunkBased = __webpack_require__(66103);
+const getImageDigest = __webpack_require__(90640);
 
 // Note that src/versions are NOT included here because it adds 2.2MBs to every package
 // that uses the utils module. If versions are to be used, include the file explicitly.
@@ -100416,6 +100453,7 @@ module.exports = {
   loadTool,
   loadGitHubToken,
   run,
+  getImageDigest,
 };
 
 

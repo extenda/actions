@@ -1,9 +1,13 @@
 jest.mock('@actions/exec');
 jest.mock('../src/extract-output');
+jest.mock('../../utils', () => ({
+  getImageDigest: jest.fn(),
+}));
 
 const exec = require('@actions/exec');
 const podRun = require('../src/run-pod');
 const extract = require('../src/extract-output');
+const { getImageDigest } = require('../../utils/src');
 
 const orgEnv = process.env;
 
@@ -23,6 +27,7 @@ describe('Pod run', () => {
   });
 
   test('It will run test without config map', async () => {
+    getImageDigest.mockResolvedValueOnce('myimage@sha256:111');
     await podRun({ name: '', namespace: 'test' }, 'myimage', null, false);
     const override = {
       apiVersion: 'v1',
@@ -38,7 +43,7 @@ describe('Pod run', () => {
       spec: {
         containers: [{
           name: 'actions-15b1e98-test',
-          image: 'myimage',
+          image: 'myimage@sha256:111',
         }],
       },
     };
@@ -50,7 +55,7 @@ describe('Pod run', () => {
       '--restart=Never',
       '--pod-running-timeout=15m',
       '--wait=true',
-      '--image=myimage',
+      '--image=myimage@sha256:111',
       '-n',
       'test',
       `--overrides=${JSON.stringify(override)}`,
@@ -58,6 +63,7 @@ describe('Pod run', () => {
   });
 
   test('It will run test with complete config map', async () => {
+    getImageDigest.mockResolvedValueOnce('myimage@sha256:111');
     await podRun({ name: 'test', namespace: 'test' }, 'myimage', {
       name: 'testmap',
       workingDirectory: true,
@@ -78,7 +84,7 @@ describe('Pod run', () => {
       spec: {
         containers: [{
           name: 'actions-15b1e98-test',
-          image: 'myimage',
+          image: 'myimage@sha256:111',
           workingDir: '/work',
           volumeMounts: [{
             mountPath: '/work',
@@ -108,6 +114,7 @@ describe('Pod run', () => {
   });
 
   test('It will run test without entrypoint in map', async () => {
+    getImageDigest.mockResolvedValueOnce('myimage@sha256:111');
     await podRun({ name: '', namespace: 'test' }, 'myimage', {
       name: 'testmap',
       workingDirectory: true,
@@ -128,7 +135,7 @@ describe('Pod run', () => {
       spec: {
         containers: [{
           name: 'actions-15b1e98-test',
-          image: 'myimage',
+          image: 'myimage@sha256:111',
           workingDir: '/work',
           volumeMounts: [{
             mountPath: '/work',
@@ -150,6 +157,7 @@ describe('Pod run', () => {
   });
 
   test('It will include TESTPOD_ env vars', async () => {
+    getImageDigest.mockResolvedValueOnce('myimage@sha256:111');
     process.env.TESTPOD_API_KEY = 'my-secret';
     process.env.TESTPOD_VERBOSE = 'true';
     const override = {
@@ -166,7 +174,7 @@ describe('Pod run', () => {
       spec: {
         containers: [{
           name: 'actions-15b1e98-test',
-          image: 'myimage',
+          image: 'myimage@sha256:111',
           env: [
             {
               name: 'TESTPOD_API_KEY',
@@ -194,6 +202,7 @@ describe('Pod run', () => {
   });
 
   test('It will trim TESTPOD_ prefixes from env vars', async () => {
+    getImageDigest.mockResolvedValueOnce('myimage@sha256:111');
     process.env.TESTPOD_API_KEY = 'my-secret';
     process.env.TESTPOD_VERBOSE = 'true';
     const override = {
@@ -210,7 +219,7 @@ describe('Pod run', () => {
       spec: {
         containers: [{
           name: 'actions-15b1e98-test',
-          image: 'myimage',
+          image: 'myimage@sha256:111',
           env: [
             {
               name: 'API_KEY',
@@ -225,6 +234,7 @@ describe('Pod run', () => {
       },
     };
     await podRun({ name: '', namespace: 'test' }, 'myimage', null, true);
+    getImageDigest.mockResolvedValueOnce('myimage@sha256:111');
     expect(exec.exec.mock.calls[0][1]).toEqual(
       expect.arrayContaining([
         '--env=API_KEY=my-secret',
@@ -238,6 +248,7 @@ describe('Pod run', () => {
   });
 
   test('It will save output', async () => {
+    getImageDigest.mockResolvedValueOnce('myimage@sha256:111');
     const override = {
       apiVersion: 'v1',
       metadata: {
@@ -252,7 +263,7 @@ describe('Pod run', () => {
       spec: {
         containers: [{
           name: 'actions-15b1e98-test',
-          image: 'myimage',
+          image: 'myimage@sha256:111',
         }],
       },
     };
