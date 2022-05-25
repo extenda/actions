@@ -132,3 +132,15 @@ const run = async () => {
   console.log('Changes', release.changelog);
 }
 ```
+
+#### `async getImageDigest(image)`
+
+Return a digest for the provided image.
+
+```javascript
+const { getImageDigest } = require('../../.utils/src');
+
+const run = async () => {
+  const imageDigest = await getImageDigest('eu.gcr.io/my-image:tag123');
+};
+```

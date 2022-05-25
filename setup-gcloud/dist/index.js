@@ -26679,6 +26679,40 @@ module.exports = gitConfig;
 
 /***/ }),
 
+/***/ 640:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const exec = __webpack_require__(9393);
+
+const getImageDigest = async (image) => {
+  const imageName = image.split(':')[0];
+  const args = [
+    'container',
+    'images',
+    'describe',
+    image,
+    '--format=get(image_summary.digest)',
+  ];
+
+  let digest = '';
+  await exec.exec('gcloud', args, {
+    silent: false,
+    listeners: {
+      stdout: (data) => {
+        digest += data.toString('utf8');
+      },
+    },
+  });
+
+  digest = digest.trim();
+  return `${imageName}@${digest}`;
+};
+
+module.exports = getImageDigest;
+
+
+/***/ }),
+
 /***/ 1898:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -26688,6 +26722,7 @@ const gitConfig = __webpack_require__(4722);
 const loadTool = __webpack_require__(7828);
 const loadGitHubToken = __webpack_require__(2282);
 const failIfNotTrunkBased = __webpack_require__(6103);
+const getImageDigest = __webpack_require__(640);
 
 // Note that src/versions are NOT included here because it adds 2.2MBs to every package
 // that uses the utils module. If versions are to be used, include the file explicitly.
@@ -26699,6 +26734,7 @@ module.exports = {
   loadTool,
   loadGitHubToken,
   run,
+  getImageDigest,
 };
 
 
