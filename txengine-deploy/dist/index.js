@@ -79616,6 +79616,7 @@ module.exports = deploy;
 
 const yaml = __webpack_require__(75024);
 const { loadSecret } = __webpack_require__(48652);
+const { getImageDigest } = __webpack_require__(1898);
 
 const createReplaceTokens = (projectId, image, tenantName, countryCode) => {
   let tenantLowerCase = tenantName.toLowerCase();
@@ -79675,7 +79676,8 @@ const prepareEnvConfig = async (
   countryCode,
   environmentString = '',
 ) => {
-  const replaceTokens = createReplaceTokens(projectId, image, tenantName, countryCode);
+  const imageDigest = await getImageDigest(image);
+  const replaceTokens = createReplaceTokens(projectId, imageDigest, tenantName, countryCode);
   const environment = {
     ...defaultEnvironment(projectId, tenantName.toLowerCase(), countryCode),
     ...parseEnvironment(environmentString, projectId),

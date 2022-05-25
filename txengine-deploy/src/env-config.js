@@ -1,5 +1,6 @@
 const yaml = require('yaml');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
+const { getImageDigest } = require('../../utils/src');
 
 const createReplaceTokens = (projectId, image, tenantName, countryCode) => {
   let tenantLowerCase = tenantName.toLowerCase();
@@ -59,7 +60,8 @@ const prepareEnvConfig = async (
   countryCode,
   environmentString = '',
 ) => {
-  const replaceTokens = createReplaceTokens(projectId, image, tenantName, countryCode);
+  const imageDigest = await getImageDigest(image);
+  const replaceTokens = createReplaceTokens(projectId, imageDigest, tenantName, countryCode);
   const environment = {
     ...defaultEnvironment(projectId, tenantName.toLowerCase(), countryCode),
     ...parseEnvironment(environmentString, projectId),
