@@ -31,7 +31,8 @@ They can be used for misc functionality on the webhook job, reporting to Slack e
     "pact-provider": "${pactbroker.providerName}",
     "pact-provider-branch": "${pactbroker.providerVersionBranch}",
     "pact-provider-version": "${pactbroker.providerVersionNumber}",
-    "pact-url": "${pactbroker.pactUrl}"
+    "pact-url": "${pactbroker.pactUrl}",
+    "pact-verification-result-url": "${pactbroker.verificationResultUrl}"
   }
 }
 ```
