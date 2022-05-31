@@ -65,7 +65,7 @@ platform:
         'cloud-run.yaml': `
 name: service
 memory: 1Gi
-min-instances: 7
+min-instances: 21
 cpu: 1
 platform:
   managed:
@@ -75,7 +75,7 @@ platform:
       });
       expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
         .toThrow(`cloud-run.yaml is not valid.
-0: instance.min-instances must have a maximum value of 5`);
+0: instance.min-instances must have a maximum value of 20`);
     });
 
     test('It throws for missing allow-unauthenticated', () => {

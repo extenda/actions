@@ -10894,7 +10894,7 @@ module.exports = {
     'min-instances': {
       type: 'integer',
       minimum: -1,
-      maximum: 5,
+      maximum: 20,
       default: -1,
     },
     environment: {
