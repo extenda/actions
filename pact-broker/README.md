@@ -174,7 +174,8 @@ jobs:
           fetch-depth: 0
 
       # Optionally enable to inspect webhook contents
-      #- run: echo "${{ github.event.client_payload }}"
+      #- name: Dump webhook contents
+      #  run: echo "${{ toJSON(github.event.client_payload) }}"
 
       - uses: extenda/actions/gcp-secret-manager@v0
         with:
