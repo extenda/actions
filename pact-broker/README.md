@@ -159,10 +159,23 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      PACT_CONSUMER: ${{ github.event.client_payload.pact-consumer }}
+      PACT_CONSUMER_BRANCH: ${{ github.event.client_payload.pact-consumer-branch }}
+      PACT_CONSUMER_VERSION: ${{ github.event.client_payload.pact-consumer-version }}
+      PACT_PROVIDER: ${{ github.event.client_payload.pact-provider }}
+      PACT_PROVIDER_BRANCH: ${{ github.event.client_payload.pact-provider-branch }}
+      PACT_PROVIDER_VERSION: ${{ github.event.client_payload.pact-provider-version }}
+      PACT_URL: ${{ github.event.client_payload.pact-url }}
+      PACT_VERIFICATION_RESULT_URL: ${{ github.event.client_payload.pact-verification-result-url }}
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      # Optionally enable to inspect webhook contents
+      #- name: Dump webhook contents
+      #  run: echo "${{ toJSON(github.event.client_payload) }}"
 
       - uses: extenda/actions/gcp-secret-manager@v0
         with:
@@ -179,8 +192,6 @@ jobs:
 
       - name: Verify pacts
         uses: extenda/actions/maven@v0
-        env:
-          PACT_URL: ${{ github.event.client_payload.pact-url }}
         timeout-minutes: 15
         with:
           args: verify -P pact-webhook -T1C
