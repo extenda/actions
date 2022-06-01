@@ -47,7 +47,6 @@ The following actions are available
   * [terraform-plan-comment](terraform-plan-comment#readme)
   * [test-pod](test-pod#readme)
   * [txengine-deploy](txengine-deploy#readme)
-  * [vale-linting](vale-linting#readme)
 
 ## :rocket: Workflow Examples
 
