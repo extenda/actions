@@ -2,7 +2,7 @@
 set -e
 
 # Lookup the System ID from system name.
-SYSTEM_ID=$(/usr/local/bin/styra-cli get systems | grep "$STYRA_SYSTEM_NAME" | awk '{print $1}')
+SYSTEM_ID=$(curl -X GET "https://extendaretail.svc.styra.com/v1/systems?compact=false&name=$STYRA_SYSTEM_NAME" -H "authorization: $STYRA_TOKEN" -H "content-type: application/json" | jq -r '.result[0].id')
 
 if [ -z "$SYSTEM_ID" ]; then
   echo "Not found. No system matching name '${STYRA_SYSTEM_NAME}'"
