@@ -294,6 +294,7 @@ describe('Run Deploy', () => {
       name: 'my-service',
       memory: '256Mi',
       cpu: '400m',
+      'min-instances': 1,
       platform: {
         gke: {
           cluster: 'k8s-cluster',
@@ -322,7 +323,7 @@ describe('Run Deploy', () => {
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
       '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
       '--cpu=400m',
-      '--min-instances=default',
+      '--min-instances=0',
       '--platform=gke',
       '--cluster=projects/test-staging-project/zones/europe-west1/clusters/k8s-cluster',
       '--cluster-location=europe-west1',
@@ -370,7 +371,7 @@ describe('Run Deploy', () => {
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
       '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
       '--cpu=100m',
-      '--min-instances=default',
+      '--min-instances=0',
       '--platform=gke',
       '--cluster=projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
       '--cluster-location=europe-west1',
@@ -382,13 +383,13 @@ describe('Run Deploy', () => {
 
   test('It can deploy to Cloud Run on GKE and discover cluster-location', async () => {
     getClusterInfo.mockResolvedValueOnce({
-      project: 'tribe-staging-12345',
+      project: 'tribe-prod-12345',
       cluster: 'k8s-cluster',
       clusterLocation: 'europe-west1',
-      uri: 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
+      uri: 'projects/tribe-prod-1234/zones/europe-west1/clusters/k8s-cluster',
     });
     exec.exec.mockResolvedValueOnce(0);
-    setupGcloud.mockResolvedValueOnce('test-staging-project');
+    setupGcloud.mockResolvedValueOnce('test-prod-project');
     const service = {
       name: 'my-service',
       memory: '256Mi',
@@ -398,7 +399,7 @@ describe('Run Deploy', () => {
       'max-instances': 100,
       platform: {
         gke: {
-          cluster: 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
+          cluster: 'projects/tribe-prod-1234/zones/europe-west1/clusters/k8s-cluster',
           connectivity: 'external',
           namespace: 'default',
         },
@@ -407,25 +408,25 @@ describe('Run Deploy', () => {
     const returnValue = await runDeploy(
       serviceAccountKey,
       service,
-      'gcr.io/test-staging-project/my-service:tag',
+      'gcr.io/test-prod-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(exec.exec).toHaveBeenCalledTimes(3);
-    expect(getClusterInfo).toHaveBeenCalledWith('test-staging-project', 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster');
+    expect(getClusterInfo).toHaveBeenCalledWith('test-prod-project', 'projects/tribe-prod-1234/zones/europe-west1/clusters/k8s-cluster');
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
       'run', 'deploy', 'my-service',
-      '--image=gcr.io/test-staging-project/my-service:tag',
-      '--project=test-staging-project',
+      '--image=gcr.io/test-prod-project/my-service:tag',
+      '--project=test-prod-project',
       '--memory=256Mi',
       '--concurrency=50',
       '--max-instances=100',
-      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-prod-project,SERVICE_ENVIRONMENT=prod,SERVICE_CONTAINER_IMAGE=gcr.io/test-prod-project/my-service:tag',
+      '--labels=service_project_id=test-prod-project,service_project=test,service_env=prod,sre.canary.enabled=false',
       '--cpu=400m',
       '--min-instances=1',
       '--platform=gke',
-      '--cluster=projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
+      '--cluster=projects/tribe-prod-1234/zones/europe-west1/clusters/k8s-cluster',
       '--cluster-location=europe-west1',
       '--connectivity=external',
       '--no-use-http2',
@@ -518,7 +519,7 @@ describe('Run Deploy', () => {
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
       '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
       '--cpu=233m',
-      '--min-instances=default',
+      '--min-instances=0',
       '--platform=gke',
       '--cluster=projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
       '--cluster-location=europe-west1',
