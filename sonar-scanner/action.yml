@@ -20,6 +20,9 @@ inputs:
   maven-args:
     description: Custom maven scan command
     required: false
+  npm-args:
+    description: Custom node scan command
+    required: false
   dotnet-args:
     description: Custom Sonar arguments that will be appended to the dotnet scanner command
     required: false
