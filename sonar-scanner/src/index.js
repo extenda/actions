@@ -36,6 +36,7 @@ const action = async () => {
     dotnet: core.getInput('dotnet-args'),
     gradle: core.getInput('gradle-args'),
     maven: core.getInput('maven-args'),
+    npm: core.getInput('npm-args'),
   };
 
   const isSonarQube = hostUrl.startsWith('https://sonar.extenda.io');
