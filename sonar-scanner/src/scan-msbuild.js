@@ -42,11 +42,11 @@ const scanWithJavaHome = async (args) => {
 
 const beginScan = async (hostUrl, mainBranch, sonarScanner, customArgs = '') => {
   await core.group('Install dotnet-sonarscanner', async () => {
-    const [, version = ''] = sonarScanner.split('-');
+    const [, scannerVersion = ''] = sonarScanner.split('-');
     let versionArg = '';
-    if (version !== '') {
-      core.warning(`Using pinned dotnet-scanner version ${version}`);
-      versionArg = `--version ${version}`;
+    if (scannerVersion !== '') {
+      core.warning(`Using pinned dotnet-scanner version ${scannerVersion}`);
+      versionArg = `--version ${scannerVersion}`;
     } else if (hostUrl.startsWith('https://sonar.extenda.io')) {
       versionArg = '--version 4.10.0';
     }

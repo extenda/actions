@@ -88,20 +88,20 @@ describe('Scan MSBuild', () => {
     platformSpy.mockRestore();
   });
 
-  if (fs.existsSync('/usr/lib/jvm')) {
-    test('It can set JAVA_HOME', async () => {
-      // Create marker file
-      const files = {};
-      files[markerFile] = '';
-      mockFs(files);
+  test('It can set JAVA_HOME', async () => {
+    // Create marker file
+    const files = {
+      '/usr/lib/jvm/adoptopenjdk-11-hotspot-amd64/bin': '',
+    };
+    files[markerFile] = '';
+    mockFs(files);
 
-      const platformSpy = jest.spyOn(os, 'platform').mockReturnValueOnce('linux');
-      await scanMsBuild('https://sonar.extenda.io', 'master', 'dotnet');
-      expect(Object.keys(exec.exec.mock.calls[0][2].env)).toContain('JAVA_HOME');
-      expect(exec.exec.mock.calls[0][2].env).toMatchObject({
-        JAVA_HOME: '/usr/lib/jvm/adoptopenjdk-11-hotspot-amd64',
-      });
-      platformSpy.mockRestore();
+    const platformSpy = jest.spyOn(os, 'platform').mockReturnValueOnce('linux');
+    await scanMsBuild('https://sonar.extenda.io', 'master', 'dotnet');
+    expect(Object.keys(exec.exec.mock.calls[0][2].env)).toContain('JAVA_HOME');
+    expect(exec.exec.mock.calls[0][2].env).toMatchObject({
+      JAVA_HOME: '/usr/lib/jvm/adoptopenjdk-11-hotspot-amd64',
     });
-  }
+    platformSpy.mockRestore();
+  });
 });
