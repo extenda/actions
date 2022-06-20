@@ -61,7 +61,7 @@ describe('Scan MSBuild', () => {
     // Create marker file
     fs.closeSync(fs.openSync(markerFile, 'w'));
 
-    const platformSpy = jest.spyOn(os, 'platform').mockReturnValue('win32');
+    const platformSpy = jest.spyOn(os, 'platform').mockReturnValueOnce('win32');
     await scanMsBuild('https://sonar.extenda.io', 'master', 'dotnet');
     expect(Object.keys(exec.exec.mock.calls[0][2].env)).not.toContain('JAVA_HOME');
     platformSpy.mockRestore();
@@ -72,7 +72,7 @@ describe('Scan MSBuild', () => {
     fs.closeSync(fs.openSync(markerFile, 'w'));
     process.env.JDK_BASEDIR = '/tmp/missing';
 
-    const platformSpy = jest.spyOn(os, 'platform').mockReturnValue('linux');
+    const platformSpy = jest.spyOn(os, 'platform').mockReturnValueOnce('linux');
     await scanMsBuild('https://sonar.extenda.io', 'master', 'dotnet');
     expect(Object.keys(exec.exec.mock.calls[0][2].env)).not.toContain('JAVA_HOME');
     platformSpy.mockRestore();
@@ -81,7 +81,7 @@ describe('Scan MSBuild', () => {
   if (fs.existsSync('/usr/lib/jvm')) {
     test('It can set JAVA_HOME', async () => {
       fs.closeSync(fs.openSync(markerFile, 'w'));
-      const platformSpy = jest.spyOn(os, 'platform').mockReturnValue('linux');
+      const platformSpy = jest.spyOn(os, 'platform').mockReturnValueOnce('linux');
       await scanMsBuild('https://sonar.extenda.io', 'master', 'dotnet');
       expect(Object.keys(exec.exec.mock.calls[0][2].env)).toContain('JAVA_HOME');
       expect(exec.exec.mock.calls[0][2].env).toMatchObject({
