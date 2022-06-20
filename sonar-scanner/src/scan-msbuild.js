@@ -40,9 +40,17 @@ const scanWithJavaHome = async (args) => {
   return exec.exec(scanner, args, { env });
 };
 
-const beginScan = async (hostUrl, mainBranch, customArgs = '') => {
+const beginScan = async (hostUrl, mainBranch, sonarScanner, customArgs = '') => {
   await core.group('Install dotnet-sonarscanner', async () => {
-    await exec.exec(`dotnet tool install -g dotnet-sonarscanner ${hostUrl.startsWith('https://sonar.extenda.io') ? '--version 4.10.0' : ''}`);
+    const [, version = ''] = sonarScanner.split('-');
+    let versionArg = '';
+    if (version !== '') {
+      core.warning(`Using pinned dotnet-scanner version ${version}`);
+      versionArg = `--version ${version}`;
+    } else if (hostUrl.startsWith('https://sonar.extenda.io')) {
+      versionArg = '--version 4.10.0';
+    }
+    await exec.exec(`dotnet tool install -g dotnet-sonarscanner ${versionArg}`);
   });
 
   const version = await getBuildVersion(`-${process.env.GITHUB_SHA}`);
@@ -66,11 +74,11 @@ const finishScan = async (hostUrl) => {
   });
 };
 
-const scanMsBuild = async (hostUrl, mainBranch, customArgs = '') => {
+const scanMsBuild = async (hostUrl, mainBranch, sonarScanner, customArgs = '') => {
   if (!fs.existsSync(markerFile)) {
     // Create marker and begin scan
     fs.closeSync(fs.openSync(markerFile, 'w'));
-    await beginScan(hostUrl, mainBranch, customArgs);
+    await beginScan(hostUrl, mainBranch, sonarScanner, customArgs);
     return false;
   }
 

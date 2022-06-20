@@ -112,7 +112,7 @@ describe('Sonar-Scanner Action', () => {
     checkQualityGate.mockResolvedValueOnce(0);
     scanMsBuild.mockResolvedValueOnce(true);
     await action();
-    expect(scanMsBuild).toHaveBeenCalledWith('https://sonarcloud.io', 'master', '');
+    expect(scanMsBuild).toHaveBeenCalledWith('https://sonarcloud.io', 'master', 'dotnet', '');
     expect(checkQualityGate).toHaveBeenCalled();
   });
 

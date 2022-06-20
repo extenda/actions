@@ -8,6 +8,8 @@ inputs:
     description: |
       The sonar scanner to use. Valid values are 'auto', 'maven', 'gradle', 'node' and 'dotnet'.
       The default value 'auto' will attempt to perform auto-discovery. Auto-discovery does not work for 'dotnet'.
+      For 'dotnet' it is possible to pin the scanner to a specific version, for example 'dotnet-5.6.0'. Only pin the
+      dotnet scanner version if you are using an old dotnet version that is no longer supported by the latest version.
     required: true
     default: auto
   main-branch:
