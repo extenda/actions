@@ -1,3 +1,5 @@
+const path = require('path');
+
 const mockFs = require('mock-fs');
 
 // Mock out tools download
@@ -10,7 +12,6 @@ jest.mock('@actions/core');
 
 const core = require('@actions/core');
 const exec = require('@actions/exec');
-const os = require('os');
 const setupGcloud = require('../src/setup-gcloud');
 
 const jsonKey = {
@@ -72,10 +73,6 @@ describe('Setup Gcloud', () => {
     exec.exec.mockResolvedValueOnce(0);
     await setupGcloud(base64Key, 'latest', true);
     expect(core.exportVariable.mock.calls[0][0]).toEqual('GOOGLE_APPLICATION_CREDENTIALS');
-    if (os.platform() === 'win32') {
-      expect(core.exportVariable.mock.calls[0][1]).toContain('\\workspace\\');
-    } else {
-      expect(core.exportVariable.mock.calls[0][1]).toContain('/workspace/');
-    }
+    expect(core.exportVariable.mock.calls[0][1]).toContain(`${path.sep}workspace${path.sep}`);
   });
 });
