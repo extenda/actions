@@ -39,6 +39,9 @@ inputs:
       This value will not be used if `NEXUS_PASSWORD` is already set as an env var.
     default: nexus-password
     required: false
+  working-dir:
+    description: Working dir to run action from
+    required: false
 runs:
   using: node12
   main: dist/index.js

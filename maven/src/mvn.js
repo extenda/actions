@@ -8,17 +8,17 @@ const os = require('os');
 const mavenHome = path.join(os.homedir(), '.m2');
 const mavenSettings = path.join(mavenHome, 'settings.xml');
 
-const run = async (args) => {
+const run = async (args, workingDir = './') => {
   let executable = os.platform() === 'win32' ? 'mvnw.cmd' : './mvnw';
   if (!fs.existsSync(executable)) {
     executable = 'mvn';
   }
-  return exec.exec(`${executable} -B -V ${args}`);
+  return exec.exec(`${executable} -B -V ${args}`, undefined, { cwd: workingDir });
 };
 
-const setVersion = async (newVersion) => {
+const setVersion = async (newVersion, workingDir = './') => {
   core.info(`Build version: ${newVersion}`);
-  await run(`versions:set -DnewVersion=${newVersion} -DgenerateBackupPoms=false`);
+  await run(`versions:set -DnewVersion=${newVersion} -DgenerateBackupPoms=false`, workingDir);
 };
 
 const copySettings = async () => {
