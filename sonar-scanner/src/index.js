@@ -27,6 +27,8 @@ const action = async () => {
   const mainBranch = core.getInput('main-branch', { required: true });
   const sonarScanner = core.getInput('sonar-scanner', { required: true });
   const verbose = core.getInput('verbose') === 'true';
+  const reportPath = core.getInput('report-path');
+
 
   if (verbose) {
     process.env.SONAR_VERBOSE = 'true';
@@ -69,7 +71,7 @@ const action = async () => {
 
   if (waitForQualityGate) {
     // Wait for the quality gate status to update
-    const status = await core.group('Check Quality Gate', async () => checkQualityGate());
+    const status = await core.group('Check Quality Gate', async () => checkQualityGate(reportPath));
     if (status.statusCode !== 0) {
       process.exitCode = core.ExitCode.Failure;
     }
