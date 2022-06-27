@@ -11796,7 +11796,7 @@ const managedArguments = async (args, service, projectId) => {
 };
 
 const gkeArguments = async (args, service, projectId) => {
-  const { env } = projectInfo(projectId);
+  // const { env } = projectInfo(projectId);
   const {
     name,
     cpu,
@@ -11817,10 +11817,10 @@ const gkeArguments = async (args, service, projectId) => {
 
   const cluster = await getClusterInfo(projectId, configuredCluster);
 
-  let argsMinInstances = numericOrDefault(minInstances);
-  if (env === 'staging') {
-    argsMinInstances = 0;
-  }
+  const argsMinInstances = numericOrDefault(minInstances);
+  // if (env === 'staging') {
+  //   argsMinInstances = 0;
+  // }
 
   args.push(
     `--cpu=${cpu}`,
