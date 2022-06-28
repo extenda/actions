@@ -23,7 +23,7 @@ const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key') || '';
   const nexusUsernameSecretName = core.getInput('nexus-username-secret-name') || '';
   const nexusPasswordSecretName = core.getInput('nexus-password-secret-name') || '';
-  const workingDir = core.getInput('working-dir');
+  const workingDir = core.getInput('working-directory');
 
   await loadNexusCredentials(serviceAccountKey, nexusUsernameSecretName, nexusPasswordSecretName);
 
