@@ -1,0 +1,14 @@
+{
+  "name": "translations",
+  "version": "0.0.1-local",
+  "private": true,
+  "description": "Create resources for translation",
+  "main": "dist/index.js",
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@crowdin/crowdin-api-client": "1.18.2"
+  },
+  "devDependencies": {
+    "mock-fs": "^4.11.0"
+  }
+}

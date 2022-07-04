@@ -1,0 +1,17 @@
+name: Crowdin translations
+description: Create projects and other resources for translations
+author: Extenda Retail
+inputs:
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication
+      to the secrets manager.
+    required: true
+  translations-definition:
+    description: |
+      Crowdin config YAML specification.
+    required: false
+    default: translations.yaml
+runs:
+  using: node12
+  main: dist/index.js
