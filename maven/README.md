@@ -171,7 +171,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == refs/heads/master
+    if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v2
         with:
