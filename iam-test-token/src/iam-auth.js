@@ -10,7 +10,9 @@ const fetchIamToken = async (apiKey, apiEmail, apiPassword, apiTenantId) => axio
   },
 ).then((response) => response.data.idToken)
   .catch((err) => {
-    throw new Error(`Authentication failed. HTTP status: ${err.response.status}. Reason: ${err.response.data || 'N/A'}`);
+    const { data = {} } = err.response;
+    const reason = JSON.stringify(data);
+    throw new Error(`Authentication failed. HTTP status: ${err.response.status}. Reason: ${reason}`);
   });
 
 module.exports = fetchIamToken;

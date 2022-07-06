@@ -18,9 +18,9 @@ describe('fetch iam-api token', () => {
   });
 
   test('It throws exception on login failure', async () => {
-    axios.post.mockRejectedValueOnce({ response: { status: 403, data: 'A message' } });
+    axios.post.mockRejectedValueOnce({ response: { status: 403, data: { message: 'A message' } } });
     await expect(fetchIamToken('key', 'email', 'password', 'tenantId'))
-      .rejects.toEqual(new Error('Authentication failed. HTTP status: 403. Reason: A message'));
+      .rejects.toEqual(new Error('Authentication failed. HTTP status: 403. Reason: {"message":"A message"}'));
     expect(axios.post).toHaveBeenCalledTimes(1);
   });
 });
