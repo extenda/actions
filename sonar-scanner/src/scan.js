@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
 const fs = require('fs');
-const { createParams } = require('./params');
+const {createParams} = require('./params');
 const mvn = require('../../maven/src/mvn');
 
 const isAutoDiscovered = (sonarScanner, file) => sonarScanner === 'auto' && fs.existsSync(file);
@@ -35,16 +35,19 @@ const scan = async (hostUrl, mainBranch, sonarScanner = 'auto', customCommands =
   if (commands.gradle) {
     core.info('Scan with Gradle');
     return exec.exec(`./gradlew ${commands.gradle} ${params}`);
-  } if (commands.maven) {
+  }
+  if (commands.maven) {
     core.info('Scan with Maven');
     return mvn.run(`${commands.maven} ${params}`);
-  } if (commands.yarn) {
+  }
+  if (commands.yarn) {
     core.info('Scan with Yarn');
     await core.group('Install sonarqube-scanner', async () => {
       await exec.exec('yarn add -D sonarqube-scanner');
     });
     return exec.exec(`${commands.yarn} ${params}`);
-  } if (commands.npm) {
+  }
+  if (commands.npm) {
     core.info('Scan with NPM');
     await core.group('Install sonarqube-scanner', async () => {
       await exec.exec('npm install sonarqube-scanner --no-save');
