@@ -78,6 +78,15 @@ describe('Scan', () => {
     expect(exec.exec.mock.calls[1][0]).toEqual('node_modules/.bin/sonar-scanner -Dsonar.verbose=false');
   });
 
+  test('It discovers yarn', async () => {
+    fs({ 'package.json': '{}' });
+    fs({ 'yarn.lock': '{}' });
+    await scan('https://sonarcloud.io', 'master', 'auto');
+    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(exec.exec.mock.calls[0][0]).toEqual('yarn add -D sonarqube-scanner');
+    expect(exec.exec.mock.calls[1][0]).toEqual('node_modules/.bin/sonar-scanner -Dsonar.verbose=false');
+  });
+
   test('It throws for unsupported sonar-scanner', async () => {
     fs({ 'empty.txt': '' });
     await expect(scan('https://sonarcloud.io', 'master', 'auto'))
