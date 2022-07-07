@@ -37,6 +37,7 @@ const action = async () => {
     gradle: core.getInput('gradle-args'),
     maven: core.getInput('maven-args'),
     npm: core.getInput('npm-args'),
+    yarn: core.getInput('yarn-args'),
   };
 
   const isSonarQube = hostUrl.startsWith('https://sonar.extenda.io');
