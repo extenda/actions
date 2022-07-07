@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
 const fs = require('fs');
-const {createParams} = require('./params');
+const { createParams } = require('./params');
 const mvn = require('../../maven/src/mvn');
 
 const isAutoDiscovered = (sonarScanner, file) => sonarScanner === 'auto' && fs.existsSync(file);
