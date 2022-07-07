@@ -38,7 +38,7 @@ const scan = async (hostUrl, mainBranch, sonarScanner = 'auto', customCommands =
   } if (commands.maven) {
     core.info('Scan with Maven');
     return mvn.run(`${commands.maven} ${params}`);
-  }  if (commands.yarn) {
+  } if (commands.yarn) {
     core.info('Scan with Yarn');
     await core.group('Install sonarqube-scanner', async () => {
       await exec.exec('yarn add -D sonarqube-scanner');
