@@ -79,7 +79,7 @@ const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
   const promises = [];
   roles.forEach((role) => {
     const roleId = `${systemId}.${role.id}`;
-    const roleDesc = role.desc;
+    const roleName = role.name;
     const rolePermissions = role.permissions.map(
       (permissionId) => createPermissionId(systemId, permissionId),
     );
@@ -88,12 +88,12 @@ const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
     promises.push(getRole(iamToken, iamUrl, roleId).then((roleResult) => {
       if (roleResult === true) {
         core.info(`creating role '${roleId}'`);
-        return createRole(iamToken, roleId, roleDesc, rolePermissions, iamUrl)
+        return createRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
           .then((message) => core.info(message));
       }
-      if (!arraysEqual(roleResult.permissions, rolePermissions) || roleResult.name !== roleDesc) {
+      if (!arraysEqual(roleResult.permissions, rolePermissions) || roleResult.name !== roleName) {
         core.info(`updating role '${roleId}'`);
-        return updateRole(iamToken, roleId, roleDesc, rolePermissions, iamUrl)
+        return updateRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
           .then((message) => core.info(message));
       }
       core.info(`role '${roleId} exists`);
