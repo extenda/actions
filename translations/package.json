@@ -6,7 +6,12 @@
   "main": "dist/index.js",
   "dependencies": {
     "@actions/core": "^1.2.6",
-    "@crowdin/crowdin-api-client": "1.18.2"
+    "@actions/github": "^4.0.0",
+    "@crowdin/crowdin-api-client": "1.18.2",
+    "@octokit/rest": "^18.3.5",
+    "fast-glob": "^3.2.11",
+    "jsonschema": "^1.4.0",
+    "yaml": "^1.8.2"
   },
   "devDependencies": {
     "mock-fs": "^4.11.0"

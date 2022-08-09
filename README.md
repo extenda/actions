@@ -33,6 +33,7 @@ The following actions are available
   * [repository-dispatch](repository-dispatch#readme)
   * [rs-create-installerpkg](rs-create-installerpkg#readme)
   * [rs-permission-converter](rs-permission-converter#readme)
+  * [translations](translations#readme)
   * [setup-gcloud](setup-gcloud#readme)
   * [setup-git](setup-git#readme)
   * [setup-msbuild](setup-msbuild#readme)

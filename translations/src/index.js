@@ -1,26 +1,23 @@
-const { run } = require('../../utils');
 const core = require('@actions/core');
-const crowdin = require('@crowdin/crowdin-api-client');
+const { run } = require('../../utils');
+
+const loadSpecDefinition = require('./load-definition');
+const { handleProject } = require('./handle-project');
+const uploadFiles = require('./upload-files');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
+  const crowdinFile = core.getInput('translations-definition') || 'translations.yaml';
 
+  const githubToken = await loadSecret(serviceAccountKey, 'github-token');
   const crowdinToken = await loadSecret(serviceAccountKey, 'crowdin-token');
 
-  const {
-    projectsGroupsApi,
-    uploadStorageApi,
-    sourceFilesApi,
-    translationsApi
-  } = new crowdin.default({
-    token: crowdinToken,
-    organization: 'extenda'
-  });
+  const spec = loadSpecDefinition(crowdinFile);
 
-  const createProject = await projectsGroupsApi.addProject({name: 'my-project', sourceLanguageId: 'English'});
-  console.log(createProject);
+  await handleProject(crowdinToken, spec);
 
+  await uploadFiles(githubToken, crowdinToken, spec);
 };
 
 if (require.main === module) {
