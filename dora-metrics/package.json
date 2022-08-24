@@ -5,7 +5,7 @@
   "description": "Deploy to Cloud Run",
   "main": "dist/index.js",
   "dependencies": {
-    "@actions/core": "^1.2.6",
+    "@actions/core": "^1.9.1",
     "jira-client": "^6.21.1"
   },
   "devDependencies": {
