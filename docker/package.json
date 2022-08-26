@@ -5,6 +5,9 @@
   "description": "Docker build, tag, and push with default registry URL",
   "main": "dist/index.js",
   "dependencies": {
-    "@actions/core": "^1.2.6"
+    "@actions/core": "^1.9.1"
+  },
+  "devDependencies": {
+    "mock-fs": "^4.11.0"
   }
 }
