@@ -54,11 +54,10 @@ describe('Pod run', () => {
       '--attach',
       '--restart=Never',
       '--pod-running-timeout=15m',
-      '--wait=true',
       '--image=myimage@sha256:111',
       '-n',
       'test',
-      `--overrides=${JSON.stringify(override)}`,
+      `--overrides='${JSON.stringify(override)}'`,
     ], expect.objectContaining({ silent: true }));
   });
 
@@ -108,7 +107,7 @@ describe('Pod run', () => {
     expect(exec.exec.mock.calls[0][1]).toEqual(
       expect.arrayContaining([
         '--env=SERVICE_URL=http://test.test',
-        `--overrides=${JSON.stringify(override)}`,
+        `--overrides='${JSON.stringify(override)}'`,
       ]),
     );
   });
@@ -152,7 +151,7 @@ describe('Pod run', () => {
       },
     };
     expect(exec.exec.mock.calls[0][1]).toEqual(
-      expect.arrayContaining([`--overrides=${JSON.stringify(override)}`]),
+      expect.arrayContaining([`--overrides='${JSON.stringify(override)}'`]),
     );
   });
 
@@ -193,7 +192,7 @@ describe('Pod run', () => {
       expect.arrayContaining([
         '--env=TESTPOD_API_KEY=my-secret',
         '--env=TESTPOD_VERBOSE=true',
-        `--overrides=${JSON.stringify(override)}`,
+        `--overrides='${JSON.stringify(override)}'`,
       ]),
     );
     expect(exec.exec.mock.calls[0][1]).not.toEqual(
@@ -239,7 +238,7 @@ describe('Pod run', () => {
       expect.arrayContaining([
         '--env=API_KEY=my-secret',
         '--env=VERBOSE=true',
-        `--overrides=${JSON.stringify(override)}`,
+        `--overrides='${JSON.stringify(override)}'`,
       ]),
     );
     expect(exec.exec.mock.calls[0][1]).not.toEqual(
@@ -274,7 +273,7 @@ describe('Pod run', () => {
     await podRun({ name: '', namespace: 'test' }, 'myimage', null, false);
     expect(exec.exec.mock.calls[0][1]).toEqual(
       expect.arrayContaining([
-        `--overrides=${JSON.stringify(override)}`,
+        `--overrides='${JSON.stringify(override)}'`,
       ]),
     );
     expect(extract.extractOutput).toHaveBeenCalled();
