@@ -28539,7 +28539,7 @@ const runPod = async ({ name, namespace }, image, configMap, trimPrefix) => {
   const json = JSON.stringify(
     createOverride(pod, namespace, imageDigest, configMap, serviceUrl, trimPrefix),
   );
-  args.push(`--overrides='${json}'`);
+  args.push(`--overrides=${json}`);
 
   let output = '';
   const filter = new LogFilter();
