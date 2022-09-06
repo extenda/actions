@@ -66,16 +66,18 @@ describe('Setup Gcloud', () => {
 
   test('It can export GOOGLE_APPLICATION_CREDENTIALS and copy tmp file', async () => {
     process.env.GITHUB_WORKSPACE = '/workspace';
+    process.env.RUNNER_TEMP = '/tmp';
     mockFs({
       '/workspace': {},
+      '/tmp': {},
     });
     exec.exec.mockResolvedValueOnce(0);
     await setupGcloud(base64Key, 'latest', true);
     expect(core.exportVariable.mock.calls[0][0]).toEqual('GOOGLE_APPLICATION_CREDENTIALS');
     if (os.platform() === 'win32') {
-      expect(core.exportVariable.mock.calls[0][1]).toContain('\\workspace\\');
+      expect(core.exportVariable.mock.calls[0][1]).toContain('\\tmp\\');
     } else {
-      expect(core.exportVariable.mock.calls[0][1]).toContain('/workspace/');
+      expect(core.exportVariable.mock.calls[0][1]).toContain('/tmp/');
     }
   });
 });
