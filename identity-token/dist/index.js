@@ -3565,7 +3565,7 @@ const fetchToken = async (serviceAccount, audiences) => {
   ];
   let token = '';
   await exec.exec('gcloud', args, {
-    silent: true,
+    silent: false,
     listeners: {
       stdout: (data) => {
         token += data.toString('utf8');
