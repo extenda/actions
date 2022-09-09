@@ -3588,14 +3588,19 @@ const core = __webpack_require__(6341);
 const fetchToken = __webpack_require__(8287);
 const { run } = __webpack_require__(1898);
 const setupGcloud = __webpack_require__(7095);
+const updateAccess = __webpack_require__(5169);
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const serviceAccount = core.getInput('service-account', { required: true });
   const audiences = core.getInput('audiences', { required: true });
 
-  await setupGcloud(serviceAccountKey, process.env.GCLOUD_INSTALLED_VERSION || 'latest');
+  const projectID = await setupGcloud(serviceAccountKey, process.env.GCLOUD_INSTALLED_VERSION || 'latest');
+
+  await updateAccess(serviceAccountKey, serviceAccount, projectID, 'add');
   const token = await fetchToken(serviceAccount, audiences);
+  await updateAccess(serviceAccountKey, serviceAccount, projectID, 'remove');
+
   core.setSecret(token);
   core.exportVariable('IDENTITY_TOKEN', token);
   core.setOutput('identity-token', token);
@@ -3606,6 +3611,29 @@ if (require.main === require.cache[eval('__filename')]) {
 }
 
 module.exports = action;
+
+
+/***/ }),
+
+/***/ 5169:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const exec = __webpack_require__(2176);
+
+const updateAccess = async (CICDServiceAccount, serviceAccount, projectID, action) => {
+  const args = [
+    'iam',
+    'service-accounts',
+    serviceAccount,
+    `${action}-iam-policy-binding`,
+    `--project=${projectID}`,
+    `--member=serviceAccount:${CICDServiceAccount}`,
+    '--role=roles/iam.serviceAccountTokenCreator',
+  ];
+  await exec.exec('gcloud', args);
+};
+
+module.exports = updateAccess;
 
 
 /***/ }),
