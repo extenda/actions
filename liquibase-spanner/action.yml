@@ -1,0 +1,52 @@
+# action.yml
+name: 'liquibase-spanner'
+description: 'Validate, Prepare and Execute Liquibase CLI'
+inputs:
+  operation: # [update, updateCount, tag, updateToTag, rollback, rollbackCount, rollbackToDate, updateSQL, futureRollbackSQL, status, history, diff]
+    description: 'Operation to run'
+    required: true
+  classpath: # string
+    description: 'Path to Change Log directory'
+    required: false
+  changeLogFile: # string
+    description: 'Name of Change Log File'
+    required: false
+  serviceAccountKey: # string
+    description: 'GCloud service account key'
+    required: true
+  spannerExtensionUrl: # string
+    description: 'Url of a spanner extension jar file'
+    required: false
+    default: 'https://github.com/cloudspannerecosystem/liquibase-spanner/releases/download/4.10.0/liquibase-spanner-4.10.0-all.jar'
+  url: # string
+    description: 'Database URL'
+    required: true
+  count: # integer
+    description: 'Count for updateCount and rollbackCount'
+    required: false
+  tag: # string
+    description: 'Tag for tag, updateToTag, and rollback'
+    required: false
+  date: # string
+    description: 'Date for rollbackToDate'
+    required: false
+  referenceUrl: # string
+    description: 'Reference URL for diff'
+    required: false
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.operation }}
+    - ${{ inputs.classpath }}
+    - ${{ inputs.changeLogFile }}
+    - ${{ inputs.serviceAccountKey }}
+    - ${{ inputs.spannerExtensionUrl }}
+    - ${{ inputs.url }}
+    - ${{ inputs.count }}
+    - ${{ inputs.tag }}
+    - ${{ inputs.date }}
+    - ${{ inputs.referenceUrl }}
+branding:
+  icon: database
+  color: red
