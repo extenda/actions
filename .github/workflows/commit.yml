@@ -9,7 +9,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Node
+      - name: Install Node 12
         uses: actions/setup-node@v2
         with:
           node-version: 12
@@ -52,6 +52,11 @@ jobs:
             echo "::error::Did you remember to run 'npm run build'?"
             exit 1
           fi
+
+      - name: Install Node 16
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
 
       - name: Analyze with SonarCloud
         uses: ./sonar-scanner

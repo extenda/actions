@@ -406,7 +406,7 @@ before running actions.
 
 Development tools needed are:
 
-  * Latest Node 12 LTS release
+  * Latest Node 16 LTS release
   * Docker
   * Pre-commit
 
