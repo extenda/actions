@@ -6,13 +6,13 @@
   "scripts": {
     "build": "node .scripts/build-modules.js",
     "build:docker": "run-script-os",
-    "build:docker:win32": "docker run --rm -t -v \"%cd%\":/work -w /work node:12-alpine sh -c \"npm run build\"",
-    "build:docker:default": "docker run --rm -t -v $(pwd):/work -w /work node:12-alpine sh -c 'npm run build'",
+    "build:docker:win32": "docker run --rm -t -v \"%cd%\":/work -w /work node:16-alpine sh -c \"npm run build\"",
+    "build:docker:default": "docker run --rm -t -v $(pwd):/work -w /work node:16-alpine sh -c 'npm run build'",
     "install": "node .scripts/install-modules.js",
     "test": "jest --silent",
     "posttest": "node .scripts/create-sonar-properties.js",
     "lint:js": "run-script-os",
-    "lint:js:win32": "docker run --rm -t -v \"%cd%\":/work -w /work node:12-alpine sh -c \"npm run lint:js\"",
+    "lint:js:win32": "docker run --rm -t -v \"%cd%\":/work -w /work node:16-alpine sh -c \"npm run lint:js\"",
     "lint:js:default": "eslint .scripts/*.js */src/*.js */test/*.js --no-ignore"
   },
   "repository": "github:extenda/actions",

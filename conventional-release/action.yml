@@ -17,5 +17,5 @@ outputs:
   release-changelog:
     description: The latest release change log
 runs:
-  using: node12
+  using: node16
   main: dist/index.js
