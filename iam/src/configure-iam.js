@@ -44,7 +44,6 @@ const configureIAM = async (
     roles,
   } = iam;
 
-
   const errors = [];
   const promises = [];
   const cluster = await getClusterInfo(projectId);

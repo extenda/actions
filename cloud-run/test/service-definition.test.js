@@ -180,7 +180,6 @@ platform:
     });
   });
 
-
   test('It supports environment variables', () => {
     mockFs({
       'cloud-run.yaml': `

@@ -15,7 +15,6 @@ const sendHttp = async (
   throw new Error(`Request to ${url} failed. Reason: ${err.message}`);
 });
 
-
 const sendHttpWithRetries = async (url, token, body, attempts, backoffSeconds) => {
   /* eslint-disable no-await-in-loop */
   for (let i = 0; i < attempts; i += 1) {

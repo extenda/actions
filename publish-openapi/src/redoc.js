@@ -53,7 +53,6 @@ const updateIndex = async (file, addToIndex, title) => {
   });
 };
 
-
 const uploadIndex = async (fileToUpload, uploadLocation) => exec.exec('gsutil', [
   'cp',
   fileToUpload,

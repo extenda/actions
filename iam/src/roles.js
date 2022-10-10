@@ -25,7 +25,6 @@ const createRole = async (
   throw new Error(iamApiErrorToString(err, `Couldn't add role '${roleId}'`));
 });
 
-
 const updateRole = async (
   iamToken, roleId, roleName, rolePermissions, iamUrl,
 ) => axios({

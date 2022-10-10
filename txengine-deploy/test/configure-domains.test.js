@@ -3,7 +3,6 @@ const core = require('@actions/core');
 const configureDomains = require('../src/configure-domains');
 const handleCertificates = require('../src/handle-certificate');
 
-
 jest.mock('@actions/exec');
 jest.mock('../src/handle-certificate');
 jest.mock('../../cloud-run/src/dns-record');

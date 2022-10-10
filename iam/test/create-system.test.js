@@ -9,7 +9,6 @@ const request = require('request');
 const exec = require('@actions/exec');
 const { setupSystem } = require('../src/create-system');
 
-
 const systemOwners = ['test@mail.com'];
 const opaConfig = `
 kind: ConfigMap

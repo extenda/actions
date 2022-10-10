@@ -5,7 +5,6 @@ const core = require('@actions/core');
 const action = require('../src/index');
 const deployDocumentation = require('../src/redoc');
 
-
 describe('Api documentation action', () => {
   afterEach(() => {
     jest.resetAllMocks();

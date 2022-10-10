@@ -1,4 +1,3 @@
-
 const projectInfo = (projectId) => {
   const parsed = projectId.split(/^(.+)-(prod|staging)(-.*)?$/).filter(Boolean);
   return {

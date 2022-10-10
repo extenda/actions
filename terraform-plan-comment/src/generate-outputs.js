@@ -55,7 +55,6 @@ const filterIgnored = (outputs, ignoredRegexp) => outputs.filter(
 
 const sortModulePaths = (outputs) => outputs.sort((a, b) => a.module.localeCompare(b.module));
 
-
 const modulePath = (plan) => {
   let planDir = plan;
 
@@ -75,7 +74,6 @@ const modulePath = (plan) => {
   }
   return path.dirname(plan);
 };
-
 
 const moduleName = (plan, workingDirectory) => {
   let planDir = plan;

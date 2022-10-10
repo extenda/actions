@@ -154,7 +154,6 @@ Other text below
     expect(mockComment).toHaveBeenCalled();
   });
 
-
   test('It can generate comment for too large plan', async () => {
     function makeLongTestPlan(length) {
       let result = '';

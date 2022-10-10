@@ -4,7 +4,7 @@ jest.mock('child_process');
 const mockFs = require('mock-fs');
 const core = require('@actions/core');
 const cp = require('child_process');
-const docker = require('../src/docker.js');
+const docker = require('../src/docker');
 
 describe('core and cp methods', () => {
   afterEach(() => {

@@ -8,7 +8,6 @@ const { validateOrFetchNexusCredentials } = require('../src/nexus-credentials');
 const { createNpmrcFile } = require('../src/npmrc');
 const action = require('../src/index');
 
-
 describe('Auth to Nexus npm registry action', () => {
   let envRestore;
 

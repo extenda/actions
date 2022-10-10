@@ -1,4 +1,3 @@
-
 jest.mock('@actions/core');
 jest.mock('../../cloud-run/src/project-info');
 jest.mock('../../cloud-run/src/cluster-info');
@@ -26,7 +25,6 @@ jest.mock('@actions/github', () => ({
   },
 }));
 
-
 describe('get system owners', () => {
   afterEach(() => {
     jest.resetAllMocks();
@@ -47,7 +45,7 @@ describe('get system owners', () => {
       data: {
         content: Buffer.from(`
 members:
-  users: 
+  users:
     - name: test
       email: test@mail.com
       `, 'utf8').toString('base64'),
