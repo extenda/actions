@@ -24,9 +24,7 @@ const initSlack = async (serviceAccount, channelName) => {
   return { token: slackToken, channel };
 };
 
-const postMessageToSlackChannel = async (
-  slackData, message,
-) => axios({
+const postMessageToSlackChannel = async (slackData, message) => axios({
   url: 'https://slack.com/api/chat.postMessage',
   method: 'POST',
   headers: {
@@ -59,12 +57,17 @@ const postFileToSlackChannel = async (slackData, message, file) => {
 };
 
 const notifySlackMessage = async (
-  serviceAccount, message, channelName,
+  serviceAccount,
+  message,
+  channelName,
 ) => initSlack(serviceAccount, channelName)
   .then((slackData) => postMessageToSlackChannel(slackData, message));
 
 const notifySlackWithFile = async (
-  serviceAccount, message, channelName, file,
+  serviceAccount,
+  message,
+  channelName,
+  file,
 ) => initSlack(serviceAccount, channelName)
   .then((slackData) => postFileToSlackChannel(slackData, message, file));
 

@@ -1,8 +1,6 @@
 const axios = require('axios');
 
-const fetchSystemId = async (
-  styraUrl, styraToken, systemName,
-) => {
+const fetchSystemId = async (styraUrl, styraToken, systemName) => {
   const url = `${styraUrl}/v1/systems?compact=true&name=${systemName}`;
   return axios({
     url,

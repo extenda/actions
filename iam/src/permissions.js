@@ -3,7 +3,12 @@ const axios = require('axios');
 const { iamApiErrorToString } = require('./utils/iam-api-error-to-string');
 
 const updateAddPermission = async (
-  iamToken, permissionId, permissionDesc, method, iamUrl, permissionAlias,
+  iamToken,
+  permissionId,
+  permissionDesc,
+  method,
+  iamUrl,
+  permissionAlias,
 ) => {
   let url = `${iamUrl}/api/v1/permissions`;
   const data = {
@@ -32,7 +37,11 @@ const updateAddPermission = async (
 };
 
 const getPermission = async (
-  iamToken, permissionId, permissionDesc, iamUrl, permissionAlias,
+  iamToken,
+  permissionId,
+  permissionDesc,
+  iamUrl,
+  permissionAlias,
 ) => axios({
   url: `${iamUrl}/api/v1/permissions/${permissionId}`,
   method: 'GET',

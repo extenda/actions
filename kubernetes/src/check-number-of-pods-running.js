@@ -4,7 +4,9 @@ const exec = require('@actions/exec');
  * Simple timer to wait for a specified amount of time.
  * @param ms Number of milliseconds to wait
  */
-const timer = (ms) => new Promise((res) => setTimeout(res, ms));
+const timer = (ms) => new Promise((res) => {
+  setTimeout(res, ms);
+});
 
 /**
 Verifies that the number of pods running for deployment is equal to the expected number of replicas.

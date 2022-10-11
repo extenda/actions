@@ -23,7 +23,9 @@ describe('handle certificates', () => {
 
   test('It can handle certificates when domain exists', async () => {
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(certificateListJson)));
     exec.exec.mockResolvedValue(0);
     await handleCertificates('testrunner-se.txengine.retailsvc.dev', 'experience-staging-b807');
@@ -32,21 +34,27 @@ describe('handle certificates', () => {
 
   test('It can handle certificates when domain doesnt exist', async () => {
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(certificateListJson)));
     exec.exec.mockResolvedValue(0);
     await handleCertificates('testrunner-no.txengine.retailsvc.dev', 'experience-staging-b807');
     expect(exec.exec).toHaveBeenCalledTimes(2);
-    expect(exec.exec).toHaveBeenNthCalledWith(2, 'gcloud', [
-      'compute',
-      'ssl-certificates',
-      'create',
-      'txengine-certs-v2',
-      '--domains=testrunner-se.txengine.retailsvc.dev,testrunner-dk.txengine.retailsvc.dev,testrunner-no.txengine.retailsvc.dev',
-      '--project=experience-staging-b807',
-      '--global',
-    ],
-    expect.anything());
+    expect(exec.exec).toHaveBeenNthCalledWith(
+      2,
+      'gcloud',
+      [
+        'compute',
+        'ssl-certificates',
+        'create',
+        'txengine-certs-v2',
+        '--domains=testrunner-se.txengine.retailsvc.dev,testrunner-dk.txengine.retailsvc.dev,testrunner-no.txengine.retailsvc.dev',
+        '--project=experience-staging-b807',
+        '--global',
+      ],
+      expect.anything(),
+    );
   });
 
   test('It can handle certificates when domain doesnt exist and certificate limit is reached', async () => {
@@ -71,7 +79,9 @@ describe('handle certificates', () => {
     expectedResult = expectedResult.join(',');
 
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(certificateListJsonMaxCert)));
     exec.exec.mockResolvedValue(0);
     const newCertificates = await handleCertificates('testrunner-no.txengine.retailsvc.dev', 'experience-staging-b807');
@@ -116,7 +126,9 @@ describe('handle certificates', () => {
     expectedResult = expectedResult.join(',');
 
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(certificateListJsonMaxCert)));
     exec.exec.mockResolvedValue(0);
     const newCertificates = await handleCertificates('testrunner-no.txengine.retailsvc.dev', 'experience-staging-b807');
@@ -161,22 +173,28 @@ describe('handle certificates', () => {
     expectedResult = expectedResult.join(',');
 
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(certificateListJsonMaxCert)));
     exec.exec.mockResolvedValue(0);
     const newCertificates = await handleCertificates('testrunner-no.txengine.retailsvc.dev', 'experience-staging-b807');
     expect(newCertificates).toEqual(expectedResult);
     expect(exec.exec).toHaveBeenCalledTimes(4);
-    expect(exec.exec).toHaveBeenNthCalledWith(4, 'gcloud', [
-      'compute',
-      'ssl-certificates',
-      'create',
-      'txengine-certs-v13',
-      '--domains=testrunner-no.txengine.retailsvc.dev',
-      '--project=experience-staging-b807',
-      '--global',
-    ],
-    expect.anything());
+    expect(exec.exec).toHaveBeenNthCalledWith(
+      4,
+      'gcloud',
+      [
+        'compute',
+        'ssl-certificates',
+        'create',
+        'txengine-certs-v13',
+        '--domains=testrunner-no.txengine.retailsvc.dev',
+        '--project=experience-staging-b807',
+        '--global',
+      ],
+      expect.anything(),
+    );
   });
 
   test('It creates certificate with 1 domain when last created reaches max domains', async () => {
@@ -216,41 +234,53 @@ describe('handle certificates', () => {
     expectedResult = expectedResult.join(',');
 
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(certificateListJsonMaxCert)));
     exec.exec.mockResolvedValue(0);
     const newCertificates = await handleCertificates('testrunner-no.txengine.retailsvc.dev', 'experience-staging-b807');
     expect(newCertificates).toEqual(expectedResult);
     expect(exec.exec).toHaveBeenCalledTimes(4);
-    expect(exec.exec).toHaveBeenNthCalledWith(4, 'gcloud', [
-      'compute',
-      'ssl-certificates',
-      'create',
-      'txengine-certs-v13',
-      '--domains=testrunner-no.txengine.retailsvc.dev',
-      '--project=experience-staging-b807',
-      '--global',
-    ],
-    expect.anything());
+    expect(exec.exec).toHaveBeenNthCalledWith(
+      4,
+      'gcloud',
+      [
+        'compute',
+        'ssl-certificates',
+        'create',
+        'txengine-certs-v13',
+        '--domains=testrunner-no.txengine.retailsvc.dev',
+        '--project=experience-staging-b807',
+        '--global',
+      ],
+      expect.anything(),
+    );
   });
 
   test('It creates certificate when there is none existing', async () => {
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout('[]'));
     exec.exec.mockResolvedValue(0);
     await handleCertificates('testrunner-no.txengine.retailsvc.dev', 'experience-staging-b807');
     expect(exec.exec).toHaveBeenCalledTimes(2);
-    expect(exec.exec).toHaveBeenNthCalledWith(2, 'gcloud', [
-      'compute',
-      'ssl-certificates',
-      'create',
-      'txengine-certs-v1',
-      '--domains=testrunner-no.txengine.retailsvc.dev',
-      '--project=experience-staging-b807',
-      '--global',
-    ],
-    expect.anything());
+    expect(exec.exec).toHaveBeenNthCalledWith(
+      2,
+      'gcloud',
+      [
+        'compute',
+        'ssl-certificates',
+        'create',
+        'txengine-certs-v1',
+        '--domains=testrunner-no.txengine.retailsvc.dev',
+        '--project=experience-staging-b807',
+        '--global',
+      ],
+      expect.anything(),
+    );
     expect(core.info).toHaveBeenCalledTimes(0);
   });
 });

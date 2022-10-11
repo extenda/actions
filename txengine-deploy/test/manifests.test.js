@@ -55,9 +55,7 @@ describe('manifests', () => {
       },
       {
         name: '01-file1.yaml',
-        content: Buffer.from(
-          '---\nname: file1\n', 'utf8',
-        ).toString('base64'),
+        content: Buffer.from('---\nname: file1\n', 'utf8').toString('base64'),
       }],
     });
 
@@ -97,9 +95,7 @@ describe('manifests', () => {
       },
       {
         name: '01-file1.yaml',
-        content: Buffer.from(
-          '---\nname: file1\nnamespace: $NAMESPACE', 'utf8',
-        ).toString('base64'),
+        content: Buffer.from('---\nname: file1\nnamespace: $NAMESPACE', 'utf8').toString('base64'),
       }],
     });
     const vars = {
@@ -129,8 +125,10 @@ describe('manifests', () => {
     mockContent.mockResolvedValueOnce({
       data: [{
         name: '00-file0.yaml',
-        content: Buffer.from(mockYaml,
-          'utf8').toString('base64'),
+        content: Buffer.from(
+          mockYaml,
+          'utf8',
+        ).toString('base64'),
       }],
     });
     const vars = {
@@ -164,8 +162,10 @@ describe('manifests', () => {
     mockContent.mockResolvedValueOnce({
       data: [{
         name: '00-file0.yaml',
-        content: Buffer.from(mockYaml,
-          'utf8').toString('base64'),
+        content: Buffer.from(
+          mockYaml,
+          'utf8',
+        ).toString('base64'),
       }],
     });
     const vars = {

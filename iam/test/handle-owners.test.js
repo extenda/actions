@@ -18,8 +18,11 @@ describe('Check and update owners', () => {
         ],
       },
     };
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
-      JSON.stringify(getOwners)));
+    request.mockImplementationOnce((conf, cb) => cb(
+      null,
+      { statusCode: 200 },
+      JSON.stringify(getOwners),
+    ));
     await checkOwners('system-id', 'token', 'styra-url', ['test@mail.com']);
 
     expect(updateOwners).toHaveBeenCalledTimes(0);
@@ -34,8 +37,11 @@ describe('Check and update owners', () => {
         ],
       },
     };
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
-      JSON.stringify(getOwners)));
+    request.mockImplementationOnce((conf, cb) => cb(
+      null,
+      { statusCode: 200 },
+      JSON.stringify(getOwners),
+    ));
     await checkOwners('system-id', 'token', 'styra-url', ['test@mail.com', 'test1@mail.com']);
 
     expect(updateOwners).toHaveBeenCalledTimes(1);

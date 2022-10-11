@@ -57,7 +57,9 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(DNSListJSON)));
     exec.exec.mockResolvedValue(0);
 
@@ -71,7 +73,9 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValueOnce('199.199.199.198');
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(DNSListJSONProd)));
     exec.exec.mockResolvedValue(0);
 
@@ -83,7 +87,9 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValueOnce('199.199.199.199');
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(DNSListJSON)));
     exec.exec.mockResolvedValue(0);
 
@@ -95,7 +101,9 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValueOnce('199.199.199.199');
     exec.exec.mockRejectedValueOnce(0);
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(DNSListJSON)));
     exec.exec.mockResolvedValue(0);
 
@@ -109,7 +117,9 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValueOnce('199.199.199.199');
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(DNSListJSON)));
     exec.exec.mockRejectedValueOnce(0);
 
@@ -123,7 +133,9 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValueOnce('199.199.199.199');
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(DNSListJSON)));
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockRejectedValueOnce(0);
@@ -138,7 +150,9 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValueOnce('199.199.199.199');
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(DNSListJSON)));
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockResolvedValueOnce(0);
@@ -157,7 +171,9 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValueOnce('199.199.199.199');
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(DNSListJSON)));
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockResolvedValueOnce(0);
@@ -168,23 +184,29 @@ describe('configure domains', () => {
     await configureDomains('staging', 'testrunner', 'no');
     expect(exec.exec).toHaveBeenCalledTimes(20);
     expect(core.info).toHaveBeenCalledTimes(13);
-    expect(exec.exec).toHaveBeenNthCalledWith(9, 'gcloud', [
-      'compute',
-      'target-https-proxies',
-      'update',
-      'https-lb-proxy',
-      '--url-map=txengine-lb',
-      `--ssl-certificates=${newDomains}`,
-      '--project=experience-staging-b807',
-    ],
-    expect.anything());
+    expect(exec.exec).toHaveBeenNthCalledWith(
+      9,
+      'gcloud',
+      [
+        'compute',
+        'target-https-proxies',
+        'update',
+        'https-lb-proxy',
+        '--url-map=txengine-lb',
+        `--ssl-certificates=${newDomains}`,
+        '--project=experience-staging-b807',
+      ],
+      expect.anything(),
+    );
   });
 
   test('It can check that http proxy already exists', async () => {
     exec.exec.mockResolvedValueOnce('199.199.199.199');
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(DNSListJSON)));
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockResolvedValueOnce(0);
@@ -202,7 +224,9 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValueOnce('199.199.199.199');
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(DNSListJSON)));
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockResolvedValueOnce(0);
@@ -221,7 +245,9 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValueOnce('199.199.199.199');
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(DNSListJSON)));
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockResolvedValueOnce(0);
@@ -242,7 +268,9 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValueOnce('199.199.199.199');
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(DNSListJSON)));
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockResolvedValueOnce(0);
@@ -266,7 +294,9 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValueOnce('199.199.199.199');
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(DNSListJSON)));
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockResolvedValueOnce(0);
@@ -289,7 +319,9 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValueOnce('199.199.199.199');
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(DNSListJSON)));
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockResolvedValueOnce(0);
@@ -317,7 +349,9 @@ describe('configure domains', () => {
     exec.exec.mockResolvedValueOnce('199.199.199.199');
     exec.exec.mockResolvedValueOnce(0);
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(DNSListJSON)));
     exec.exec.mockResolvedValue(0);
 
@@ -325,18 +359,22 @@ describe('configure domains', () => {
     expect(exec.exec).toHaveBeenCalledTimes(18);
     expect(core.info).toHaveBeenCalledTimes(12);
 
-    expect(exec.exec).toHaveBeenNthCalledWith(18, 'gcloud', [
-      'compute',
-      'url-maps',
-      'add-path-matcher',
-      'txengine-lb',
-      '--project=experience-staging-b807',
-      '--default-service=testrunner-no-txengine',
-      '--path-matcher-name=testrunner-no-posserver',
-      '--path-rules=/ReferenceDataWebService=testrunner-no-posserver',
-      '--global',
-      '--new-hosts=testrunner-no.txengine.retailsvc.dev',
-    ],
-    expect.anything());
+    expect(exec.exec).toHaveBeenNthCalledWith(
+      18,
+      'gcloud',
+      [
+        'compute',
+        'url-maps',
+        'add-path-matcher',
+        'txengine-lb',
+        '--project=experience-staging-b807',
+        '--default-service=testrunner-no-txengine',
+        '--path-matcher-name=testrunner-no-posserver',
+        '--path-rules=/ReferenceDataWebService=testrunner-no-posserver',
+        '--global',
+        '--new-hosts=testrunner-no.txengine.retailsvc.dev',
+      ],
+      expect.anything(),
+    );
   });
 });

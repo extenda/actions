@@ -1,28 +1,31 @@
 const request = require('request');
 
-const fetchMaskLog = (
-  styraUrl, styraToken, systemId,
-) => new Promise((resolve, reject) => {
-  request({
-    uri: `${styraUrl}/v1/policies/systems/${systemId}/system/log`,
-    method: 'GET',
-    headers: {
-      'Content-type': 'application/json',
-      Authorization: `bearer ${styraToken}`,
+const fetchMaskLog = (styraUrl, styraToken, systemId) => new Promise((resolve, reject) => {
+  request(
+    {
+      uri: `${styraUrl}/v1/policies/systems/${systemId}/system/log`,
+      method: 'GET',
+      headers: {
+        'Content-type': 'application/json',
+        Authorization: `bearer ${styraToken}`,
+      },
     },
-  },
-  (error, res, body) => {
-    if (!error && res.statusCode === 200) {
-      const jsonBody = JSON.parse(body);
-      resolve(jsonBody.result.modules['mask.rego']);
-    } else {
-      reject(new Error(`Couldn't fetch mask for system with id: ${systemId}`));
-    }
-  });
+    (error, res, body) => {
+      if (!error && res.statusCode === 200) {
+        const jsonBody = JSON.parse(body);
+        resolve(jsonBody.result.modules['mask.rego']);
+      } else {
+        reject(new Error(`Couldn't fetch mask for system with id: ${systemId}`));
+      }
+    },
+  );
 });
 
 const pushMaskLogProd = (
-  styraUrl, styraToken, systemId, maskPolicy,
+  styraUrl,
+  styraToken,
+  systemId,
+  maskPolicy,
 ) => new Promise((resolve, reject) => {
   const modules = { 'mask.rego': maskPolicy };
 
@@ -50,8 +53,12 @@ const pushMaskLogProd = (
   });
 });
 
-const pushMask = async (styraUrl, token, systemId, prodSystemId) => fetchMaskLog(
-  styraUrl, token, systemId,
-).then((maskPolicy) => pushMaskLogProd(styraUrl, token, prodSystemId, maskPolicy));
+const pushMask = async (
+  styraUrl,
+  token,
+  systemId,
+  prodSystemId,
+) => fetchMaskLog(styraUrl, token, systemId)
+  .then((maskPolicy) => pushMaskLogProd(styraUrl, token, prodSystemId, maskPolicy));
 
 module.exports = pushMask;

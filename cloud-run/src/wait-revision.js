@@ -87,7 +87,9 @@ const getRevisionStatus = async (revision, args) => {
   }
 };
 
-const timer = (ms) => new Promise((res) => setTimeout(res, ms));
+const timer = (ms) => new Promise((res) => {
+  setTimeout(res, ms);
+});
 
 const isRevisionCompleted = (revisionStatus) => {
   const keys = ['active', 'ready', 'containerHealthy', 'resourcesAvailable'];

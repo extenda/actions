@@ -111,7 +111,10 @@ const action = async () => {
   }
 
   const comment = await generateOutputs(
-    workingDirectory, planFile, maxThreads, ignoredResourcesRegexp,
+    workingDirectory,
+    planFile,
+    maxThreads,
+    ignoredResourcesRegexp,
   ).then((outputs) => outputs.map(outputToMarkdown))
     .then((outputs) => createComment(outputs, workingDirectory, footer));
 

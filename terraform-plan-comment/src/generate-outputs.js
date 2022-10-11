@@ -50,7 +50,7 @@ const filterUnchanged = (outputs) => outputs.filter(
 
 const filterIgnored = (outputs, ignoredRegexp) => outputs.filter(
   ({ output }) => !(ignoredRegexp && new RegExp(`# ${ignoredRegexp} `).test(output)
-    && new RegExp(' (0|1) to add, (0|1) to change, (0|1) to destroy').test(output)),
+    && / (0|1) to add, (0|1) to change, (0|1) to destroy/.test(output)),
 );
 
 const sortModulePaths = (outputs) => outputs.sort((a, b) => a.module.localeCompare(b.module));

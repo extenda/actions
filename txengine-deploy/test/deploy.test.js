@@ -17,8 +17,10 @@ describe('deploy', () => {
 
     await deploy({ file: 'manifest.yaml', namespace: 'namespace', tenantName: 'tenant' });
     expect(kubectl.exec).toHaveBeenNthCalledWith(1, ['apply', '-f', 'manifest.yaml']);
-    expect(kubectl.exec).toHaveBeenNthCalledWith(2,
-      expect.arrayContaining(['rollout', 'tenant-txengine-service', '--namespace=namespace']));
+    expect(kubectl.exec).toHaveBeenNthCalledWith(
+      2,
+      expect.arrayContaining(['rollout', 'tenant-txengine-service', '--namespace=namespace']),
+    );
   });
 
   test('It can use a specified timeout', async () => {
@@ -26,8 +28,10 @@ describe('deploy', () => {
     kubectl.exec.mockResolvedValueOnce(0);
 
     await deploy({ file: 'manifest.yaml', namespace: 'namespace', tenantName: 'tenant' });
-    expect(kubectl.exec).toHaveBeenNthCalledWith(2,
-      expect.arrayContaining(['rollout', '--timeout=300s']));
+    expect(kubectl.exec).toHaveBeenNthCalledWith(
+      2,
+      expect.arrayContaining(['rollout', '--timeout=300s']),
+    );
   });
 
   test('It can get latest revision', async () => {
@@ -43,8 +47,10 @@ describe('deploy', () => {
     exec.exec.mockResolvedValueOnce(0);
 
     await deploy({ file: 'manifest.yaml', namespace: 'namespace', tenantName: 'tenant' });
-    expect(kubectl.exec).toHaveBeenNthCalledWith(2,
-      expect.arrayContaining(['rollout', '--timeout=300s']));
+    expect(kubectl.exec).toHaveBeenNthCalledWith(
+      2,
+      expect.arrayContaining(['rollout', '--timeout=300s']),
+    );
   });
 
   test('It can handle rollback', async () => {
@@ -58,16 +64,18 @@ describe('deploy', () => {
     kubectl.exec.mockRejectedValueOnce(0);
     kubectl.exec.mockResolvedValueOnce(0);
 
-    exec.exec.mockImplementationOnce((
-      cmd, args, opts,
-    ) => opts.listeners.stdout((revisionList)));
+    exec.exec.mockImplementationOnce((cmd, args, opts) => opts.listeners.stdout((revisionList)));
     exec.exec.mockResolvedValueOnce(2);
 
     await expect(deploy({ file: 'manifest.yaml', namespace: 'namespace', tenantName: 'tenant' }))
       .rejects.toEqual(new Error('Deployment failed, Rollback was initiated!'));
-    expect(kubectl.exec).toHaveBeenNthCalledWith(2,
-      expect.arrayContaining(['rollout', '--timeout=300s']));
-    expect(kubectl.exec).toHaveBeenNthCalledWith(3,
-      expect.arrayContaining(['rollout', '--to-revision=4']));
+    expect(kubectl.exec).toHaveBeenNthCalledWith(
+      2,
+      expect.arrayContaining(['rollout', '--timeout=300s']),
+    );
+    expect(kubectl.exec).toHaveBeenNthCalledWith(
+      3,
+      expect.arrayContaining(['rollout', '--to-revision=4']),
+    );
   });
 });

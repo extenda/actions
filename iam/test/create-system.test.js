@@ -51,12 +51,21 @@ describe('create system in styra-das', () => {
         },
       },
     };
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
-      createSystemResult));
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
-      opaConfig));
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
-      createSystemResult));
+    request.mockImplementationOnce((conf, cb) => cb(
+      null,
+      { statusCode: 200 },
+      createSystemResult,
+    ));
+    request.mockImplementationOnce((conf, cb) => cb(
+      null,
+      { statusCode: 200 },
+      opaConfig,
+    ));
+    request.mockImplementationOnce((conf, cb) => cb(
+      null,
+      { statusCode: 200 },
+      createSystemResult,
+    ));
     request.mockImplementationOnce((conf, cb) => cb(null));
     request.mockImplementationOnce((conf, cb) => cb(null));
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 }));
@@ -85,10 +94,16 @@ describe('create system in styra-das', () => {
         },
       },
     };
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
-      createSystemResult));
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
-      opaConfig));
+    request.mockImplementationOnce((conf, cb) => cb(
+      null,
+      { statusCode: 200 },
+      createSystemResult,
+    ));
+    request.mockImplementationOnce((conf, cb) => cb(
+      null,
+      { statusCode: 200 },
+      opaConfig,
+    ));
     request.mockImplementationOnce((conf, cb) => cb(null));
     request.mockImplementationOnce((conf, cb) => cb(null));
     request.mockImplementationOnce((conf, cb) => cb(null));
@@ -112,8 +127,11 @@ describe('create system in styra-das', () => {
       code: 'Invalid repository',
       message: 'Error message',
     };
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 400 },
-      createSystemResult));
+    request.mockImplementationOnce((conf, cb) => cb(
+      null,
+      { statusCode: 400 },
+      createSystemResult,
+    ));
     exec.exec.mockResolvedValueOnce(0);
     await expect(
       setupSystem('test-service', 'test.test-service-prod', 'prod', 'test-repo', 'styra-token', 'https://test.styra.com', systemOwners),

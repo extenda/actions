@@ -21,7 +21,7 @@ const action = require('../src/index');
 const orgEnv = process.env;
 const getInput = jest.spyOn(core, 'getInput');
 
-const mockInputs = (hostUrl, scanner = 'auto', verbose = false, reportPath) => {
+const mockInputs = (hostUrl, scanner = 'auto', verbose = false, reportPath = '') => {
   getInput.mockReturnValueOnce(hostUrl)
     .mockReturnValueOnce('master')
     .mockReturnValueOnce(scanner)

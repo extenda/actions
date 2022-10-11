@@ -65,7 +65,8 @@ describe('run action', () => {
       'iam-pass',
       'iam-tenant',
     );
-    expect(configureIam).toHaveBeenNthCalledWith(1,
+    expect(configureIam).toHaveBeenNthCalledWith(
+      1,
       {},
       'styra-token',
       'https://extendaretail.styra.com',
@@ -74,8 +75,10 @@ describe('run action', () => {
       'staging',
       'test-staging-332',
       ['test@mail.com'],
-      true);
-    expect(configureIam).toHaveBeenNthCalledWith(2,
+      true,
+    );
+    expect(configureIam).toHaveBeenNthCalledWith(
+      2,
       {},
       'styra-token',
       'https://extendaretail.styra.com',
@@ -84,7 +87,8 @@ describe('run action', () => {
       'prod',
       'test-prod-332',
       ['test@mail.com'],
-      false);
+      false,
+    );
   });
 
   test('It can run the action for IAM api correctly', async () => {
@@ -118,7 +122,8 @@ describe('run action', () => {
       'iam-pass',
       'iam-tenant',
     );
-    expect(configureIam).toHaveBeenNthCalledWith(1,
+    expect(configureIam).toHaveBeenNthCalledWith(
+      1,
       {},
       'styra-token',
       'https://extendaretail.styra.com',
@@ -127,8 +132,10 @@ describe('run action', () => {
       'staging',
       'test-staging-332',
       ['test@mail.com'],
-      false);
-    expect(configureIam).toHaveBeenNthCalledWith(2,
+      false,
+    );
+    expect(configureIam).toHaveBeenNthCalledWith(
+      2,
       {},
       'styra-token',
       'https://extendaretail.styra.com',
@@ -137,7 +144,8 @@ describe('run action', () => {
       'prod',
       'test-prod-332',
       ['test@mail.com'],
-      false);
+      false,
+    );
   });
 
   test('It can run for multiple files', async () => {

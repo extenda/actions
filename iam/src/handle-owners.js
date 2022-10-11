@@ -3,9 +3,7 @@ const core = require('@actions/core');
 const { arraysEqual } = require('./roles');
 const { updateOwners } = require('./create-system');
 
-const getOwners = async (
-  systemId, token, styraUrl,
-) => new Promise((resolve, reject) => {
+const getOwners = async (systemId, token, styraUrl) => new Promise((resolve, reject) => {
   const url = `${styraUrl}/v1/authz/rolebindings/systems/${systemId}/owners`;
   request({
     uri: url,
@@ -24,7 +22,10 @@ const getOwners = async (
 });
 
 const checkOwners = async (
-  systemId, token, styraUrl, clanMembers,
+  systemId,
+  token,
+  styraUrl,
+  clanMembers,
 ) => getOwners(systemId, token, styraUrl)
   .then((currentOwners) => {
     if (!arraysEqual(currentOwners, clanMembers)) {
