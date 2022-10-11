@@ -39309,9 +39309,7 @@ WError.prototype.cause = function we_cause(c)
 
 const axios = __nccwpck_require__(9090);
 
-const fetchSystemId = async (
-  styraUrl, styraToken, systemName,
-) => {
+const fetchSystemId = async (styraUrl, styraToken, systemName) => {
   const url = `${styraUrl}/v1/systems?compact=true&name=${systemName}`;
   return axios({
     url,
@@ -39385,29 +39383,32 @@ module.exports = action;
 
 const request = __nccwpck_require__(5469);
 
-const fetchMaskLog = (
-  styraUrl, styraToken, systemId,
-) => new Promise((resolve, reject) => {
-  request({
-    uri: `${styraUrl}/v1/policies/systems/${systemId}/system/log`,
-    method: 'GET',
-    headers: {
-      'Content-type': 'application/json',
-      Authorization: `bearer ${styraToken}`,
+const fetchMaskLog = (styraUrl, styraToken, systemId) => new Promise((resolve, reject) => {
+  request(
+    {
+      uri: `${styraUrl}/v1/policies/systems/${systemId}/system/log`,
+      method: 'GET',
+      headers: {
+        'Content-type': 'application/json',
+        Authorization: `bearer ${styraToken}`,
+      },
     },
-  },
-  (error, res, body) => {
-    if (!error && res.statusCode === 200) {
-      const jsonBody = JSON.parse(body);
-      resolve(jsonBody.result.modules['mask.rego']);
-    } else {
-      reject(new Error(`Couldn't fetch mask for system with id: ${systemId}`));
-    }
-  });
+    (error, res, body) => {
+      if (!error && res.statusCode === 200) {
+        const jsonBody = JSON.parse(body);
+        resolve(jsonBody.result.modules['mask.rego']);
+      } else {
+        reject(new Error(`Couldn't fetch mask for system with id: ${systemId}`));
+      }
+    },
+  );
 });
 
 const pushMaskLogProd = (
-  styraUrl, styraToken, systemId, maskPolicy,
+  styraUrl,
+  styraToken,
+  systemId,
+  maskPolicy,
 ) => new Promise((resolve, reject) => {
   const modules = { 'mask.rego': maskPolicy };
 
@@ -39435,9 +39436,13 @@ const pushMaskLogProd = (
   });
 });
 
-const pushMask = async (styraUrl, token, systemId, prodSystemId) => fetchMaskLog(
-  styraUrl, token, systemId,
-).then((maskPolicy) => pushMaskLogProd(styraUrl, token, prodSystemId, maskPolicy));
+const pushMask = async (
+  styraUrl,
+  token,
+  systemId,
+  prodSystemId,
+) => fetchMaskLog(styraUrl, token, systemId)
+  .then((maskPolicy) => pushMaskLogProd(styraUrl, token, prodSystemId, maskPolicy));
 
 module.exports = pushMask;
 
@@ -39450,28 +39455,37 @@ module.exports = pushMask;
 const request = __nccwpck_require__(5469);
 
 const fetchPolicy = (
-  styraUrl, styraToken, systemId, policyType,
+  styraUrl,
+  styraToken,
+  systemId,
+  policyType,
 ) => new Promise((resolve, reject) => {
-  request({
-    uri: `${styraUrl}/v1/policies/systems/${systemId}/policy/com.styra.envoy.${policyType}/rules/rules`,
-    method: 'GET',
-    headers: {
-      'Content-type': 'application/json',
-      Authorization: `bearer ${styraToken}`,
+  request(
+    {
+      uri: `${styraUrl}/v1/policies/systems/${systemId}/policy/com.styra.envoy.${policyType}/rules/rules`,
+      method: 'GET',
+      headers: {
+        'Content-type': 'application/json',
+        Authorization: `bearer ${styraToken}`,
+      },
     },
-  },
-  (error, res, body) => {
-    if (!error && res.statusCode === 200) {
-      const jsonBody = JSON.parse(body);
-      resolve(jsonBody.result.modules[`${policyType}.rego`]);
-    } else {
-      reject(new Error(`Couldn't fetch policy for system with id: ${systemId}`));
-    }
-  });
+    (error, res, body) => {
+      if (!error && res.statusCode === 200) {
+        const jsonBody = JSON.parse(body);
+        resolve(jsonBody.result.modules[`${policyType}.rego`]);
+      } else {
+        reject(new Error(`Couldn't fetch policy for system with id: ${systemId}`));
+      }
+    },
+  );
 });
 
 const pushPolicyProd = (
-  styraUrl, styraToken, systemId, rego, policyType,
+  styraUrl,
+  styraToken,
+  systemId,
+  rego,
+  policyType,
 ) => new Promise((resolve, reject) => {
   let modules = {};
   if (policyType === 'app') {
@@ -39504,9 +39518,14 @@ const pushPolicyProd = (
   });
 });
 
-const pushPolicy = async (styraUrl, token, systemId, prodSystemId, policyType) => fetchPolicy(
-  styraUrl, token, systemId, policyType,
-).then((ingressRego) => pushPolicyProd(styraUrl, token, prodSystemId, ingressRego, policyType));
+const pushPolicy = async (
+  styraUrl,
+  token,
+  systemId,
+  prodSystemId,
+  policyType,
+) => fetchPolicy(styraUrl, token, systemId, policyType)
+  .then((ingressRego) => pushPolicyProd(styraUrl, token, prodSystemId, ingressRego, policyType));
 
 module.exports = pushPolicy;
 
@@ -53345,30 +53364,6 @@ module.exports = Object.assign(simpleGit, { gitP: gitP2, simpleGit });
 
 /***/ }),
 
-/***/ 5889:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-console.error(`=============================================
-simple-git has supported promises / async await since version 2.6.0.
- Importing from 'simple-git/promise' has been deprecated and will
- report this error until the next major release of version 4.
-
-To upgrade, change all 'simple-git/promise' imports to just 'simple-git'
-=============================================`);
-
-const simpleGit = __nccwpck_require__(8183);
-
-module.exports = Object.assign(
-   function () {
-      return simpleGit.gitP.apply(null, arguments);
-   },
-   simpleGit,
-   { default: simpleGit.gitP }
-);
-
-
-/***/ }),
-
 /***/ 9559:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -54489,7 +54484,7 @@ module.exports = checkEnv;
 /***/ 4722:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const git = __nccwpck_require__(5889)();
+const git = __nccwpck_require__(8183)();
 
 const basicAuth = () => {
   const buffer = Buffer.from(`github-actions:${process.env.GITHUB_TOKEN}`, 'utf8');
@@ -54502,8 +54497,10 @@ const basicAuth = () => {
  */
 const gitConfig = async () => git.addConfig('user.email', 'devops@extendaretail.com')
   .then(() => git.addConfig('user.name', 'GitHub Actions'))
-  .then(() => git.addConfig('http.https://github.com/.extraheader',
-    `AUTHORIZATION: ${basicAuth()}`));
+  .then(() => git.addConfig(
+    'http.https://github.com/.extraheader',
+    `AUTHORIZATION: ${basicAuth()}`,
+  ));
 
 module.exports = gitConfig;
 

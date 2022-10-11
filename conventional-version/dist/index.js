@@ -71827,7 +71827,7 @@ try {
 /***/ 8258:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const git = __nccwpck_require__(5889)();
+const git = __nccwpck_require__(8183)();
 
 const isPreRelease = (branchName) => branchName !== 'master';
 
@@ -72021,43 +72021,52 @@ const withConventionalConfig = async (version, fn) => {
   }), 'utf8');
 
   try {
-    return fn({
-      config,
-      tagPrefix,
-      releaseCount,
-      pkg: {
-        path: __dirname,
+    return fn(
+      {
+        config,
+        tagPrefix,
+        releaseCount,
+        pkg: {
+          path: __dirname,
+        },
       },
-    },
-    {
-      issue: 'issues',
-      commit: 'commit',
-    },
-    {},
-    {
-      referenceActions: [
-        'close',
-        'closes',
-        'closed',
-        'fix',
-        'fixes',
-        'fixed',
-        'resolve',
-        'resolves',
-        'resolved',
-      ],
-    },
-    {});
+      {
+        issue: 'issues',
+        commit: 'commit',
+      },
+      {},
+      {
+        referenceActions: [
+          'close',
+          'closes',
+          'closed',
+          'fix',
+          'fixes',
+          'fixed',
+          'resolve',
+          'resolves',
+          'resolved',
+        ],
+      },
+      {},
+    );
   } finally {
     fs.unlinkSync(dummyPackageJson);
   }
 };
 
 const getCommitStream = async (version) => withConventionalConfig(
-  version, (options, context, gitRawCommitsOpts, parserOpts, writerOpts) => mergeConfig(
-    options, context, gitRawCommitsOpts, parserOpts, writerOpts,
-  ).then((data) => gitRawCommits(data.gitRawCommitsOpts, data.gitRawExecOpts)
-    .pipe(conventionalCommitsParser(data.parserOpts))),
+  version,
+  (options, context, gitRawCommitsOpts, parserOpts, writerOpts) => mergeConfig(
+    options,
+    context,
+    gitRawCommitsOpts,
+    parserOpts,
+    writerOpts,
+  ).then((data) => gitRawCommits(
+    data.gitRawCommitsOpts,
+    data.gitRawExecOpts,
+  ).pipe(conventionalCommitsParser(data.parserOpts))),
 );
 
 /**
@@ -72088,7 +72097,8 @@ const getConventionalCommits = async () => {
  * @returns {Promise<string>}
  */
 const getChangelog = async (version) => withConventionalConfig(
-  version, (options, context, gitRawCommitsOpts, parserOpts, writerOpts) => {
+  version,
+  (options, context, gitRawCommitsOpts, parserOpts, writerOpts) => {
     const out = conventionalChangelog(options, context, gitRawCommitsOpts, parserOpts, writerOpts);
     return streamToString(out).then((notes) => notes.trim());
   },
@@ -72107,7 +72117,7 @@ module.exports = {
 /***/ 4722:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const git = __nccwpck_require__(5889)();
+const git = __nccwpck_require__(8183)();
 
 const basicAuth = () => {
   const buffer = Buffer.from(`github-actions:${process.env.GITHUB_TOKEN}`, 'utf8');
@@ -72120,8 +72130,10 @@ const basicAuth = () => {
  */
 const gitConfig = async () => git.addConfig('user.email', 'devops@extendaretail.com')
   .then(() => git.addConfig('user.name', 'GitHub Actions'))
-  .then(() => git.addConfig('http.https://github.com/.extraheader',
-    `AUTHORIZATION: ${basicAuth()}`));
+  .then(() => git.addConfig(
+    'http.https://github.com/.extraheader',
+    `AUTHORIZATION: ${basicAuth()}`,
+  ));
 
 module.exports = gitConfig;
 

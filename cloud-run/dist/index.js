@@ -6160,9 +6160,11 @@ const getNamespace = async (namespace) => {
   return true;
 };
 
-const createNamespace = async (projectId,
+const createNamespace = async (
+  projectId,
   opaEnabled,
-  namespace) => {
+  namespace,
+) => {
   if (!await getNamespace(namespace)) {
     throw new Error(`Namespace not found, please make sure your service is setup correctly!
 Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md#services for more information`);
@@ -6963,7 +6965,9 @@ const getRevisionStatus = async (revision, args) => {
   }
 };
 
-const timer = (ms) => new Promise((res) => setTimeout(res, ms));
+const timer = (ms) => new Promise((res) => {
+  setTimeout(res, ms);
+});
 
 const isRevisionCompleted = (revisionStatus) => {
   const keys = ['active', 'ready', 'containerHealthy', 'resourcesAvailable'];
@@ -77757,9 +77761,7 @@ const initSlack = async (serviceAccount, channelName) => {
   return { token: slackToken, channel };
 };
 
-const postMessageToSlackChannel = async (
-  slackData, message,
-) => axios({
+const postMessageToSlackChannel = async (slackData, message) => axios({
   url: 'https://slack.com/api/chat.postMessage',
   method: 'POST',
   headers: {
@@ -77792,12 +77794,17 @@ const postFileToSlackChannel = async (slackData, message, file) => {
 };
 
 const notifySlackMessage = async (
-  serviceAccount, message, channelName,
+  serviceAccount,
+  message,
+  channelName,
 ) => initSlack(serviceAccount, channelName)
   .then((slackData) => postMessageToSlackChannel(slackData, message));
 
 const notifySlackWithFile = async (
-  serviceAccount, message, channelName, file,
+  serviceAccount,
+  message,
+  channelName,
+  file,
 ) => initSlack(serviceAccount, channelName)
   .then((slackData) => postFileToSlackChannel(slackData, message, file));
 
@@ -95370,30 +95377,6 @@ module.exports = Object.assign(simpleGit, { gitP: gitP2, simpleGit });
 
 /***/ }),
 
-/***/ 25889:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-console.error(`=============================================
-simple-git has supported promises / async await since version 2.6.0.
- Importing from 'simple-git/promise' has been deprecated and will
- report this error until the next major release of version 4.
-
-To upgrade, change all 'simple-git/promise' imports to just 'simple-git'
-=============================================`);
-
-const simpleGit = __nccwpck_require__(18183);
-
-module.exports = Object.assign(
-   function () {
-      return simpleGit.gitP.apply(null, arguments);
-   },
-   simpleGit,
-   { default: simpleGit.gitP }
-);
-
-
-/***/ }),
-
 /***/ 89559:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -97361,7 +97344,7 @@ module.exports = createKeyFile;
 /***/ 14722:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const git = __nccwpck_require__(25889)();
+const git = __nccwpck_require__(18183)();
 
 const basicAuth = () => {
   const buffer = Buffer.from(`github-actions:${process.env.GITHUB_TOKEN}`, 'utf8');
@@ -97374,8 +97357,10 @@ const basicAuth = () => {
  */
 const gitConfig = async () => git.addConfig('user.email', 'devops@extendaretail.com')
   .then(() => git.addConfig('user.name', 'GitHub Actions'))
-  .then(() => git.addConfig('http.https://github.com/.extraheader',
-    `AUTHORIZATION: ${basicAuth()}`));
+  .then(() => git.addConfig(
+    'http.https://github.com/.extraheader',
+    `AUTHORIZATION: ${basicAuth()}`,
+  ));
 
 module.exports = gitConfig;
 

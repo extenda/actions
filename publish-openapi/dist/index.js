@@ -3863,7 +3863,9 @@ const exec = __nccwpck_require__(2176);
 const core = __nccwpck_require__(6341);
 const fs = __nccwpck_require__(7147);
 
-const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const wait = (ms) => new Promise((resolve) => {
+  setTimeout(resolve, ms);
+});
 
 const installRedoc = async () => exec.exec('sudo', [
   'npm',
@@ -17835,30 +17837,6 @@ module.exports = Object.assign(simpleGit, { gitP: gitP2, simpleGit });
 
 /***/ }),
 
-/***/ 5889:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-console.error(`=============================================
-simple-git has supported promises / async await since version 2.6.0.
- Importing from 'simple-git/promise' has been deprecated and will
- report this error until the next major release of version 4.
-
-To upgrade, change all 'simple-git/promise' imports to just 'simple-git'
-=============================================`);
-
-const simpleGit = __nccwpck_require__(8183);
-
-module.exports = Object.assign(
-   function () {
-      return simpleGit.gitP.apply(null, arguments);
-   },
-   simpleGit,
-   { default: simpleGit.gitP }
-);
-
-
-/***/ }),
-
 /***/ 9559:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -18979,7 +18957,7 @@ module.exports = checkEnv;
 /***/ 4722:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const git = __nccwpck_require__(5889)();
+const git = __nccwpck_require__(8183)();
 
 const basicAuth = () => {
   const buffer = Buffer.from(`github-actions:${process.env.GITHUB_TOKEN}`, 'utf8');
@@ -18992,8 +18970,10 @@ const basicAuth = () => {
  */
 const gitConfig = async () => git.addConfig('user.email', 'devops@extendaretail.com')
   .then(() => git.addConfig('user.name', 'GitHub Actions'))
-  .then(() => git.addConfig('http.https://github.com/.extraheader',
-    `AUTHORIZATION: ${basicAuth()}`));
+  .then(() => git.addConfig(
+    'http.https://github.com/.extraheader',
+    `AUTHORIZATION: ${basicAuth()}`,
+  ));
 
 module.exports = gitConfig;
 

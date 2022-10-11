@@ -9617,14 +9617,17 @@ const getAutoscale = async (deploymentName) => {
   let errOutput = '';
   // Trying to get autoscaler first. Only delete it if it exists.
   try {
-    await exec.exec('kubectl', ['get', 'hpa', deploymentName, `--namespace=${deploymentName}`],
+    await exec.exec(
+      'kubectl',
+      ['get', 'hpa', deploymentName, `--namespace=${deploymentName}`],
       {
         listeners: {
           stderr: (data) => {
             errOutput += data.toString('utf8');
           },
         },
-      });
+      },
+    );
   } catch (err) {
     if (errOutput.includes('(NotFound)')) {
       return false;
@@ -9661,8 +9664,13 @@ const removeAutoscale = async (deploymentName, deploymentType, permanentReplicas
  * @param  permanentReplicas value to be used if autoscale configuration is deleted
  * @param  dryRun if true no actual changes will be applied to production
  */
-const applyAutoscale = async (deploymentName, deploymentType, autoscale, permanentReplicas,
-  dryRun) => {
+const applyAutoscale = async (
+  deploymentName,
+  deploymentType,
+  autoscale,
+  permanentReplicas,
+  dryRun,
+) => {
   const dryRunArg = dryRun ? ['--dry-run=client'] : [];
 
   // If there's no autoscale parameters provided we remove autoscale configuration from deployment
@@ -9758,7 +9766,9 @@ const exec = __nccwpck_require__(2176);
  * Simple timer to wait for a specified amount of time.
  * @param ms Number of milliseconds to wait
  */
-const timer = (ms) => new Promise((res) => setTimeout(res, ms));
+const timer = (ms) => new Promise((res) => {
+  setTimeout(res, ms);
+});
 
 /**
 Verifies that the number of pods running for deployment is equal to the expected number of replicas.
@@ -10402,7 +10412,7 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
 const patchManifest = (manifest, patcher) => {
   const yamlPath = path.join('kustomize', manifest);
   let deploymentYaml = fs.readFileSync(yamlPath, 'utf8');
-  deploymentYaml = patcher(deploymentYaml);
+  deploymentYaml = patcher(deploymentYaml) || Buffer.from('');
   fs.writeFileSync(yamlPath, deploymentYaml);
 };
 
@@ -10531,13 +10541,21 @@ const runDeploy = async (
   await applyKubectl(serviceDefinition.name, deploymentType, dryRun);
 
   await checkRequiredNumberOfPodsIsRunning(
-    serviceDefinition.name, serviceDefinition.replicas, 5000, dryRun,
+    serviceDefinition.name,
+    serviceDefinition.replicas,
+    5000,
+    dryRun,
   );
 
   // Applies autoscale if the configuration exists in service definition
   // Deletes existing autoscale definition if the configuration is not found in service definition
-  await applyAutoscale(serviceDefinition.name, deploymentType,
-    serviceDefinition.autoscale, serviceDefinition.replicas, dryRun);
+  await applyAutoscale(
+    serviceDefinition.name,
+    deploymentType,
+    serviceDefinition.autoscale,
+    serviceDefinition.replicas,
+    dryRun,
+  );
 };
 
 module.exports = runDeploy;
@@ -36739,30 +36757,6 @@ module.exports = Object.assign(simpleGit, { gitP: gitP2, simpleGit });
 
 /***/ }),
 
-/***/ 5889:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-console.error(`=============================================
-simple-git has supported promises / async await since version 2.6.0.
- Importing from 'simple-git/promise' has been deprecated and will
- report this error until the next major release of version 4.
-
-To upgrade, change all 'simple-git/promise' imports to just 'simple-git'
-=============================================`);
-
-const simpleGit = __nccwpck_require__(8183);
-
-module.exports = Object.assign(
-   function () {
-      return simpleGit.gitP.apply(null, arguments);
-   },
-   simpleGit,
-   { default: simpleGit.gitP }
-);
-
-
-/***/ }),
-
 /***/ 9559:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -38730,7 +38724,7 @@ module.exports = createKeyFile;
 /***/ 4722:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const git = __nccwpck_require__(5889)();
+const git = __nccwpck_require__(8183)();
 
 const basicAuth = () => {
   const buffer = Buffer.from(`github-actions:${process.env.GITHUB_TOKEN}`, 'utf8');
@@ -38743,8 +38737,10 @@ const basicAuth = () => {
  */
 const gitConfig = async () => git.addConfig('user.email', 'devops@extendaretail.com')
   .then(() => git.addConfig('user.name', 'GitHub Actions'))
-  .then(() => git.addConfig('http.https://github.com/.extraheader',
-    `AUTHORIZATION: ${basicAuth()}`));
+  .then(() => git.addConfig(
+    'http.https://github.com/.extraheader',
+    `AUTHORIZATION: ${basicAuth()}`,
+  ));
 
 module.exports = gitConfig;
 
