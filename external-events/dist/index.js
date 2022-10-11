@@ -6,7 +6,7 @@ module.exports =
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse("{\"name\":\"joi\",\"description\":\"Object schema validation\",\"version\":\"17.4.2\",\"repository\":\"git://github.com/sideway/joi\",\"main\":\"lib/index.js\",\"types\":\"lib/index.d.ts\",\"browser\":\"dist/joi-browser.min.js\",\"files\":[\"lib/**/*\",\"dist/*\"],\"keywords\":[\"schema\",\"validation\"],\"dependencies\":{\"@hapi/hoek\":\"^9.0.0\",\"@hapi/topo\":\"^5.0.0\",\"@sideway/address\":\"^4.1.0\",\"@sideway/formula\":\"^3.0.0\",\"@sideway/pinpoint\":\"^2.0.0\"},\"devDependencies\":{\"@hapi/bourne\":\"2.x.x\",\"@hapi/code\":\"8.x.x\",\"@hapi/joi-legacy-test\":\"npm:@hapi/joi@15.x.x\",\"@hapi/lab\":\"24.x.x\",\"typescript\":\"4.3.x\"},\"scripts\":{\"prepublishOnly\":\"cd browser && npm install && npm run build\",\"test\":\"lab -t 100 -a @hapi/code -L -Y\",\"test-cov-html\":\"lab -r html -o coverage.html -a @hapi/code\"},\"license\":\"BSD-3-Clause\",\"_resolved\":\"https://repo.extendaretail.com/repository/npm-group/joi/-/joi-17.4.2.tgz\",\"_integrity\":\"sha512-Lm56PP+n0+Z2A2rfRvsfWVDXGEWjXxatPopkQ8qQ5mxCEhwHG+Ettgg5o98FFaxilOxozoa14cFhrE/hOzh/Nw==\",\"_from\":\"joi@17.4.2\"}");
+module.exports = JSON.parse("{\"name\":\"joi\",\"description\":\"Object schema validation\",\"version\":\"17.4.2\",\"repository\":\"git://github.com/sideway/joi\",\"main\":\"lib/index.js\",\"types\":\"lib/index.d.ts\",\"browser\":\"dist/joi-browser.min.js\",\"files\":[\"lib/**/*\",\"dist/*\"],\"keywords\":[\"schema\",\"validation\"],\"dependencies\":{\"@hapi/hoek\":\"^9.0.0\",\"@hapi/topo\":\"^5.0.0\",\"@sideway/address\":\"^4.1.0\",\"@sideway/formula\":\"^3.0.0\",\"@sideway/pinpoint\":\"^2.0.0\"},\"devDependencies\":{\"@hapi/bourne\":\"2.x.x\",\"@hapi/code\":\"8.x.x\",\"@hapi/joi-legacy-test\":\"npm:@hapi/joi@15.x.x\",\"@hapi/lab\":\"24.x.x\",\"typescript\":\"4.3.x\"},\"scripts\":{\"prepublishOnly\":\"cd browser && npm install && npm run build\",\"test\":\"lab -t 100 -a @hapi/code -L -Y\",\"test-cov-html\":\"lab -r html -o coverage.html -a @hapi/code\"},\"license\":\"BSD-3-Clause\"}");
 
 /***/ }),
 
@@ -87542,6 +87542,22 @@ module.exports = {
 
 /***/ }),
 
+/***/ 67415:
+/***/ ((module) => {
+
+"use strict";
+
+
+module.exports = (flag, argv = process.argv) => {
+	const prefix = flag.startsWith('-') ? '' : (flag.length === 1 ? '-' : '--');
+	const position = argv.indexOf(prefix + flag);
+	const terminatorPosition = argv.indexOf('--');
+	return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
+};
+
+
+/***/ }),
+
 /***/ 92227:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -87549,7 +87565,7 @@ module.exports = {
 
 const os = __webpack_require__(12087);
 const tty = __webpack_require__(33867);
-const hasFlag = __webpack_require__(39096);
+const hasFlag = __webpack_require__(67415);
 
 const {env} = process;
 
@@ -87684,22 +87700,6 @@ module.exports = {
 	supportsColor: getSupportLevel,
 	stdout: translateLevel(supportsColor(true, tty.isatty(1))),
 	stderr: translateLevel(supportsColor(true, tty.isatty(2)))
-};
-
-
-/***/ }),
-
-/***/ 39096:
-/***/ ((module) => {
-
-"use strict";
-
-
-module.exports = (flag, argv = process.argv) => {
-	const prefix = flag.startsWith('-') ? '' : (flag.length === 1 ? '-' : '--');
-	const position = argv.indexOf(prefix + flag);
-	const terminatorPosition = argv.indexOf('--');
-	return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
 };
 
 

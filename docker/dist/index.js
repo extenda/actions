@@ -2429,7 +2429,6 @@ const run = () => {
     const registry = urlhelper.getRegistryUrl(registryInput);
     docker.login(registry);
 
-
     const imageName = `${registry}/${image}`; // :${tag}
     docker.build(imageName, buildArgs, tags);
 

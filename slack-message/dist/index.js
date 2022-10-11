@@ -54514,6 +54514,22 @@ module.exports = {
 
 /***/ }),
 
+/***/ 7415:
+/***/ ((module) => {
+
+"use strict";
+
+
+module.exports = (flag, argv = process.argv) => {
+	const prefix = flag.startsWith('-') ? '' : (flag.length === 1 ? '-' : '--');
+	const position = argv.indexOf(prefix + flag);
+	const terminatorPosition = argv.indexOf('--');
+	return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
+};
+
+
+/***/ }),
+
 /***/ 2227:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -54521,7 +54537,7 @@ module.exports = {
 
 const os = __webpack_require__(2087);
 const tty = __webpack_require__(3867);
-const hasFlag = __webpack_require__(9096);
+const hasFlag = __webpack_require__(7415);
 
 const {env} = process;
 
@@ -54656,22 +54672,6 @@ module.exports = {
 	supportsColor: getSupportLevel,
 	stdout: translateLevel(supportsColor(true, tty.isatty(1))),
 	stderr: translateLevel(supportsColor(true, tty.isatty(2)))
-};
-
-
-/***/ }),
-
-/***/ 9096:
-/***/ ((module) => {
-
-"use strict";
-
-
-module.exports = (flag, argv = process.argv) => {
-	const prefix = flag.startsWith('-') ? '' : (flag.length === 1 ? '-' : '--');
-	const position = argv.indexOf(prefix + flag);
-	const terminatorPosition = argv.indexOf('--');
-	return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
 };
 
 
