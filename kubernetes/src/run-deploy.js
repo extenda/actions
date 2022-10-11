@@ -36,7 +36,7 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
 const patchManifest = (manifest, patcher) => {
   const yamlPath = path.join('kustomize', manifest);
   let deploymentYaml = fs.readFileSync(yamlPath, 'utf8');
-  deploymentYaml = patcher(deploymentYaml);
+  deploymentYaml = patcher(deploymentYaml) || Buffer.from('');
   fs.writeFileSync(yamlPath, deploymentYaml);
 };
 
