@@ -65009,30 +65009,6 @@ module.exports = Object.assign(simpleGit, { gitP: gitP2, simpleGit });
 
 /***/ }),
 
-/***/ 5889:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-console.error(`=============================================
-simple-git has supported promises / async await since version 2.6.0.
- Importing from 'simple-git/promise' has been deprecated and will
- report this error until the next major release of version 4.
-
-To upgrade, change all 'simple-git/promise' imports to just 'simple-git'
-=============================================`);
-
-const simpleGit = __nccwpck_require__(8183);
-
-module.exports = Object.assign(
-   function () {
-      return simpleGit.gitP.apply(null, arguments);
-   },
-   simpleGit,
-   { default: simpleGit.gitP }
-);
-
-
-/***/ }),
-
 /***/ 2204:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -72367,7 +72343,7 @@ module.exports = failIfNotTrunkBased;
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const core = __nccwpck_require__(4006);
-const git = __nccwpck_require__(5889)();
+const git = __nccwpck_require__(8183)();
 const semver = __nccwpck_require__(8679);
 const gitConfig = __nccwpck_require__(4722);
 const changes = __nccwpck_require__(7405);
