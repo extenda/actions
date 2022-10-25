@@ -9492,6 +9492,56 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 8571:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const core = __nccwpck_require__(6341);
+const github = __nccwpck_require__(8809);
+const { checkEnv } = __nccwpck_require__(1898);
+const versions = __nccwpck_require__(2418);
+
+const createGitHubRelease = async (release) => {
+  const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
+  const { owner, repo } = github.context.repo;
+
+  const response = await octokit.rest.repos.createRelease({
+    owner,
+    repo,
+    tag_name: release.tagName,
+    name: `Release ${release.version}`,
+    body: release.changelog,
+  });
+
+  const { data } = response;
+  core.info(`Created GitHub release ${data.html_url}`);
+};
+
+const run = async () => {
+  try {
+    const tagPrefix = core.getInput('tag-prefix', { required: true });
+
+    checkEnv(['GITHUB_TOKEN']);
+
+    versions.setTagPrefix(tagPrefix);
+    const release = await versions.tagReleaseVersion();
+
+    await createGitHubRelease(release);
+
+    core.info(`Created release tag ${release.tagName}`);
+
+    core.setOutput('version', release.version);
+    core.setOutput('release-tag', `${release.tagName}`);
+    core.setOutput('release-changelog', `${release.changelog}`);
+  } catch (err) {
+    core.setFailed(err.message);
+  }
+};
+
+module.exports = run;
+
+
+/***/ }),
+
 /***/ 6332:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -83256,55 +83306,12 @@ module.exports = JSON.parse('["0BSD","AAL","ADSL","AFL-1.1","AFL-1.2","AFL-2.0",
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
-(() => {
-const core = __nccwpck_require__(6341);
-const { context, GitHub } = __nccwpck_require__(8809);
-const { checkEnv } = __nccwpck_require__(1898);
-const versions = __nccwpck_require__(2418);
-
-const createGitHubRelease = async (release) => {
-  const github = new GitHub(process.env.GITHUB_TOKEN);
-  const { owner, repo } = context.repo;
-
-  const response = await github.repos.createRelease({
-    owner,
-    repo,
-    tag_name: release.tagName,
-    name: `Release ${release.version}`,
-    body: release.changelog,
-  });
-
-  const { data } = response;
-  core.info(`Created GitHub release ${data.html_url}`);
-};
-
-const run = async () => {
-  try {
-    const tagPrefix = core.getInput('tag-prefix', { required: true });
-
-    checkEnv(['GITHUB_TOKEN']);
-
-    versions.setTagPrefix(tagPrefix);
-    const release = await versions.tagReleaseVersion();
-
-    await createGitHubRelease(release);
-
-    core.info(`Created release tag ${release.tagName}`);
-
-    core.setOutput('version', release.version);
-    core.setOutput('release-tag', `${release.tagName}`);
-    core.setOutput('release-changelog', `${release.changelog}`);
-  } catch (err) {
-    core.setFailed(err.message);
-  }
-};
-
-run();
-
-})();
-
-module.exports = __webpack_exports__;
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __nccwpck_require__(8571);
+/******/ 	module.exports = __webpack_exports__;
+/******/ 	
 /******/ })()
 ;

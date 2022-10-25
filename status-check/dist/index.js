@@ -64437,7 +64437,7 @@ function wrappy (fn, cb) {
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const core = __nccwpck_require__(6341);
-const { GitHub } = __nccwpck_require__(8809);
+const github = __nccwpck_require__(8809);
 const { run, loadGitHubToken } = __nccwpck_require__(1898);
 const { loadSecret } = __nccwpck_require__(8652);
 
@@ -64458,7 +64458,7 @@ const checkRun = async (repository, sha, context, state, description, targetUrl)
   const validState = validateState(state);
 
   const token = await loadGitHubToken(loadSecret);
-  const octokit = new GitHub(token);
+  const octokit = github.getOctokit(token);
 
   const [owner, repo] = repository.split('/');
 
@@ -64475,7 +64475,7 @@ const checkRun = async (repository, sha, context, state, description, targetUrl)
     args.target_url = targetUrl;
   }
 
-  return octokit.repos.createStatus(args);
+  return octokit.rest.repos.createStatus(args);
 };
 
 const action = async () => {

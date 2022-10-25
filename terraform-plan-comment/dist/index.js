@@ -17551,7 +17551,7 @@ module.exports = generateOutputs;
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const core = __nccwpck_require__(6341);
-const { GitHub } = __nccwpck_require__(8809);
+const github = __nccwpck_require__(8809);
 const { run } = __nccwpck_require__(1898);
 const { getPullRequestInfo } = __nccwpck_require__(2672);
 const generateOutputs = __nccwpck_require__(3385);
@@ -17670,10 +17670,10 @@ const action = async () => {
   ).then((outputs) => outputs.map(outputToMarkdown))
     .then((outputs) => createComment(outputs, workingDirectory, footer));
 
-  const client = new GitHub(githubToken);
+  const octokit = github.getOctokit(githubToken);
   const [owner, repo] = repository.split('/');
 
-  const { data: comments } = await client.issues.listComments({
+  const { data: comments } = await octokit.rest.issues.listComments({
     owner,
     repo,
     issue_number: pullRequest.number,
@@ -17683,7 +17683,7 @@ const action = async () => {
 
   for (const iterComment of comments) {
     if ((iterComment.body.includes(':white_check_mark: Terraform plan with no changes') || iterComment.body.includes(':mag: Terraform plan changes')) && !skipDeleting) {
-      client.issues.deleteComment({
+      octokit.rest.issues.deleteComment({
         owner,
         repo,
         comment_id: iterComment.id,
@@ -17691,7 +17691,7 @@ const action = async () => {
     }
   }
 
-  await client.issues.createComment({
+  await octokit.rest.issues.createComment({
     owner,
     repo,
     issue_number: pullRequest.number,

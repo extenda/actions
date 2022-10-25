@@ -64437,7 +64437,7 @@ function wrappy (fn, cb) {
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const core = __nccwpck_require__(6341);
-const { GitHub, context } = __nccwpck_require__(8809);
+const github = __nccwpck_require__(8809);
 const { run, loadGitHubToken } = __nccwpck_require__(1898);
 const { loadSecret } = __nccwpck_require__(8652);
 
@@ -64451,7 +64451,7 @@ const createPayload = (payloadString) => {
   }
 
   return {
-    github: context.payload,
+    github: github.context.payload,
   };
 };
 
@@ -64463,8 +64463,8 @@ const action = async () => {
   const clientPayload = createPayload(payloadString);
   const [owner, repo] = repository.split('/');
 
-  const octokit = new GitHub(token);
-  return octokit.repos.createDispatchEvent({
+  const octokit = github.getOctokit(token);
+  return octokit.rest.repos.createDispatchEvent({
     owner,
     repo,
     event_type: eventType,
