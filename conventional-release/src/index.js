@@ -1,13 +1,13 @@
 const core = require('@actions/core');
-const { context, GitHub } = require('@actions/github');
+const github = require('@actions/github');
 const { checkEnv } = require('../../utils');
 const versions = require('../../utils/src/versions');
 
 const createGitHubRelease = async (release) => {
-  const github = new GitHub(process.env.GITHUB_TOKEN);
-  const { owner, repo } = context.repo;
+  const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
+  const { owner, repo } = github.context.repo;
 
-  const response = await github.repos.createRelease({
+  const response = await octokit.rest.repos.createRelease({
     owner,
     repo,
     tag_name: release.tagName,
@@ -40,4 +40,4 @@ const run = async () => {
   }
 };
 
-run();
+module.exports = run;
