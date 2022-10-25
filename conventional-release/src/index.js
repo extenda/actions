@@ -1,6 +1,6 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const { checkEnv } = require('../../utils');
+const { checkEnv, run } = require('../../utils');
 const versions = require('../../utils/src/versions');
 
 const createGitHubRelease = async (release) => {
@@ -19,7 +19,7 @@ const createGitHubRelease = async (release) => {
   core.info(`Created GitHub release ${data.html_url}`);
 };
 
-const run = async () => {
+const action = async () => {
   try {
     const tagPrefix = core.getInput('tag-prefix', { required: true });
 
@@ -40,4 +40,8 @@ const run = async () => {
   }
 };
 
-module.exports = run;
+if (require.main === module) {
+  run(action);
+}
+
+module.exports = action;
