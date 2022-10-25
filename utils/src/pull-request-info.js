@@ -1,13 +1,13 @@
 const core = require('@actions/core');
-const { GitHub } = require('@actions/github');
+const github = require('@actions/github');
 let { context } = require('@actions/github');
 
 let pullRequestCache;
 
 const fetchPullRequestInfo = async (githubToken) => {
-  const octokit = new GitHub(githubToken);
+  const octokit = github.getOctokit(githubToken);
   const { owner, repo } = context.repo;
-  return octokit.pulls.list({
+  return octokit.rest.pulls.list({
     owner,
     repo,
     state: 'open',
