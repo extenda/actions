@@ -9497,7 +9497,7 @@ function wrappy (fn, cb) {
 
 const core = __nccwpck_require__(6341);
 const github = __nccwpck_require__(8809);
-const { checkEnv } = __nccwpck_require__(1898);
+const { checkEnv, run } = __nccwpck_require__(1898);
 const versions = __nccwpck_require__(2418);
 
 const createGitHubRelease = async (release) => {
@@ -9516,7 +9516,7 @@ const createGitHubRelease = async (release) => {
   core.info(`Created GitHub release ${data.html_url}`);
 };
 
-const run = async () => {
+const action = async () => {
   try {
     const tagPrefix = core.getInput('tag-prefix', { required: true });
 
@@ -9537,7 +9537,11 @@ const run = async () => {
   }
 };
 
-module.exports = run;
+if (require.main === require.cache[eval('__filename')]) {
+  run(action);
+}
+
+module.exports = action;
 
 
 /***/ }),
