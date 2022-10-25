@@ -27,7 +27,7 @@ jest.mock('@actions/github', () => ({
 }));
 
 const core = require('@actions/core');
-const run = require('../src/index');
+const action = require('../src/index');
 
 let orgEnv;
 
@@ -56,7 +56,7 @@ describe('conventional-release', () => {
       },
     });
 
-    await run();
+    await action();
 
     expect(mockRelease).toHaveBeenCalledWith({
       owner: 'extenda',
