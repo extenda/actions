@@ -25,7 +25,6 @@ describe('getClusterInfo', () => {
     expect(exec.exec.mock.calls[1][1]).toEqual(expect.arrayContaining(['--quiet', 'container', 'clusters', '--format=value(NAME,LOCATION)']));
   });
 
-
   test('It throws for non-clan project', async () => {
     exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput('', opts));
     await expect(getClusterInfo('tribe-clan-prod-12345')).rejects

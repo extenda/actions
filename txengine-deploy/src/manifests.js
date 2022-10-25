@@ -28,7 +28,7 @@ const fetchFileContent = async (files) => {
 const loadManifests = async (secretServiceAccountKey) => {
   const token = await loadSecret(secretServiceAccountKey, 'github-token');
   const octokit = github.getOctokit(token);
-  return octokit.repos.getContent({
+  return octokit.rest.repos.getContent({
     owner: 'extenda',
     repo: 'hiiretail-transaction-engine',
     path: '.k8s/txengine',

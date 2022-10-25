@@ -61,7 +61,9 @@ const getQualityGateStatus = async (serverUrl, analysisId) => axios.get(
   { auth: await sonarAuth() },
 ).then((response) => response.data.projectStatus);
 
-const timer = (ms) => new Promise((res) => setTimeout(res, ms));
+const timer = (ms) => new Promise((res) => {
+  setTimeout(res, ms);
+});
 
 const result = (statusCode, report, qgStatus = null) => ({
   statusCode,

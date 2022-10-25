@@ -17,8 +17,11 @@ describe('fetch and push policy', () => {
         },
       },
     };
-    request.mockImplementation((conf, cb) => cb(null, { statusCode: 200 },
-      JSON.stringify(mockReturn)));
+    request.mockImplementation((conf, cb) => cb(
+      null,
+      { statusCode: 200 },
+      JSON.stringify(mockReturn),
+    ));
     await pushMask('https://test.url.com', 'token', 'staging-id', 'prod-id');
 
     expect(request).toHaveBeenCalledTimes(2);
@@ -39,8 +42,11 @@ describe('fetch and push policy', () => {
         },
       },
     };
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
-      JSON.stringify(mockReturn)));
+    request.mockImplementationOnce((conf, cb) => cb(
+      null,
+      { statusCode: 200 },
+      JSON.stringify(mockReturn),
+    ));
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 400 }, ''));
 
     await expect(pushMask('https://test.url.com', 'token', 'staging-id', 'prod-id')).rejects.toEqual(new Error('Couldn\'t update mask for production system'));

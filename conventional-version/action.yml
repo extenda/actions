@@ -36,5 +36,5 @@ outputs:
       Develop=<version>-<branch-name-friendly>-<build-number>-<short-sha>,
       Feature=<version>-<branch-name-friendly>-<short-sha>
 runs:
-  using: node12
+  using: node16
   main: dist/index.js

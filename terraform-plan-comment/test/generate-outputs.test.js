@@ -40,7 +40,6 @@ const mockOutput = async (data, opts, success = true) => {
   return Promise.reject(new Error('Exit with error'));
 };
 
-
 describe('Generate Terraform plan output', () => {
   afterEach(() => {
     mockFs.restore();

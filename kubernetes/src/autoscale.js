@@ -6,14 +6,17 @@ const getAutoscale = async (deploymentName) => {
   let errOutput = '';
   // Trying to get autoscaler first. Only delete it if it exists.
   try {
-    await exec.exec('kubectl', ['get', 'hpa', deploymentName, `--namespace=${deploymentName}`],
+    await exec.exec(
+      'kubectl',
+      ['get', 'hpa', deploymentName, `--namespace=${deploymentName}`],
       {
         listeners: {
           stderr: (data) => {
             errOutput += data.toString('utf8');
           },
         },
-      });
+      },
+    );
   } catch (err) {
     if (errOutput.includes('(NotFound)')) {
       return false;
@@ -50,8 +53,13 @@ const removeAutoscale = async (deploymentName, deploymentType, permanentReplicas
  * @param  permanentReplicas value to be used if autoscale configuration is deleted
  * @param  dryRun if true no actual changes will be applied to production
  */
-const applyAutoscale = async (deploymentName, deploymentType, autoscale, permanentReplicas,
-  dryRun) => {
+const applyAutoscale = async (
+  deploymentName,
+  deploymentType,
+  autoscale,
+  permanentReplicas,
+  dryRun,
+) => {
   const dryRunArg = dryRun ? ['--dry-run=client'] : [];
 
   // If there's no autoscale parameters provided we remove autoscale configuration from deployment

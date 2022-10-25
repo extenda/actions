@@ -36,7 +36,7 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
 const patchManifest = (manifest, patcher) => {
   const yamlPath = path.join('kustomize', manifest);
   let deploymentYaml = fs.readFileSync(yamlPath, 'utf8');
-  deploymentYaml = patcher(deploymentYaml);
+  deploymentYaml = patcher(deploymentYaml) || Buffer.from('');
   fs.writeFileSync(yamlPath, deploymentYaml);
 };
 
@@ -165,13 +165,21 @@ const runDeploy = async (
   await applyKubectl(serviceDefinition.name, deploymentType, dryRun);
 
   await checkRequiredNumberOfPodsIsRunning(
-    serviceDefinition.name, serviceDefinition.replicas, 5000, dryRun,
+    serviceDefinition.name,
+    serviceDefinition.replicas,
+    5000,
+    dryRun,
   );
 
   // Applies autoscale if the configuration exists in service definition
   // Deletes existing autoscale definition if the configuration is not found in service definition
-  await applyAutoscale(serviceDefinition.name, deploymentType,
-    serviceDefinition.autoscale, serviceDefinition.replicas, dryRun);
+  await applyAutoscale(
+    serviceDefinition.name,
+    deploymentType,
+    serviceDefinition.autoscale,
+    serviceDefinition.replicas,
+    dryRun,
+  );
 };
 
 module.exports = runDeploy;

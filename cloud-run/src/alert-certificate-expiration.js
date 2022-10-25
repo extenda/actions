@@ -9,7 +9,6 @@ const alertOnExpiration = async (expirationDate, serviceAccount, clusterProject)
   }
 };
 
-
 const certificateExpiration = async (serviceAccount, clusterProject) => {
   let output = '';
   await exec.exec('kubectl', [

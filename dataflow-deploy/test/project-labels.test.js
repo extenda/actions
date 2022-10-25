@@ -8,9 +8,7 @@ describe('Get projects labels', () => {
   });
 
   test('Labels added', async () => {
-    exec.exec.mockImplementationOnce((
-      cmd, args, opts,
-    ) => {
+    exec.exec.mockImplementationOnce((cmd, args, opts) => {
       opts.listeners.stdout('--- cc: \'640\'');
       return Promise.resolve(0);
     });

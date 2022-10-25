@@ -1,9 +1,7 @@
 const axios = require('axios');
 const core = require('@actions/core');
 
-const sendHttp = async (
-  url, token, body,
-) => axios({
+const sendHttp = async (url, token, body) => axios({
   url,
   method: 'PUT',
   data: body,
@@ -14,7 +12,6 @@ const sendHttp = async (
 }).catch((err) => {
   throw new Error(`Request to ${url} failed. Reason: ${err.message}`);
 });
-
 
 const sendHttpWithRetries = async (url, token, body, attempts, backoffSeconds) => {
   /* eslint-disable no-await-in-loop */
@@ -27,7 +24,9 @@ const sendHttpWithRetries = async (url, token, body, attempts, backoffSeconds) =
       if (i === attempts - 1) {
         throw new Error(error.message);
       }
-      await new Promise((r) => setTimeout(r, (backoffSeconds * 1000)));
+      await new Promise((r) => {
+        setTimeout(r, (backoffSeconds * 1000));
+      });
     } else {
       break;
     }
@@ -46,7 +45,12 @@ const upsertDatasource = async (systemID, styraToken, styraUrl, retries, backoff
 };
 
 const updateConsumers = async (
-  systemID, styraToken, styraUrl, services, retries, backoffSeconds,
+  systemID,
+  styraToken,
+  styraUrl,
+  services,
+  retries,
+  backoffSeconds,
 ) => {
   const url = `${styraUrl}/v1/data/systems/${systemID}/consumers`;
   const body = {
@@ -56,7 +60,13 @@ const updateConsumers = async (
 };
 
 const handleConsumers = async (
-  systemID, styraToken, styraUrl, consumers, systemName, retries = 3, backoffSeconds = 1,
+  systemID,
+  styraToken,
+  styraUrl,
+  consumers,
+  systemName,
+  retries = 3,
+  backoffSeconds = 1,
 ) => {
   const allowedConsumers = [];
   if (consumers) {

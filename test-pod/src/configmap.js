@@ -8,7 +8,6 @@ const mapName = async () => {
   return `${repo}-${sha}`;
 };
 
-
 const createConfigMap = async ({ namespace }, workingDirectory, entrypoint) => {
   const name = await mapName();
 

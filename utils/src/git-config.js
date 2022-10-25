@@ -1,4 +1,4 @@
-const git = require('simple-git/promise')();
+const git = require('simple-git')();
 
 const basicAuth = () => {
   const buffer = Buffer.from(`github-actions:${process.env.GITHUB_TOKEN}`, 'utf8');
@@ -11,7 +11,9 @@ const basicAuth = () => {
  */
 const gitConfig = async () => git.addConfig('user.email', 'devops@extendaretail.com')
   .then(() => git.addConfig('user.name', 'GitHub Actions'))
-  .then(() => git.addConfig('http.https://github.com/.extraheader',
-    `AUTHORIZATION: ${basicAuth()}`));
+  .then(() => git.addConfig(
+    'http.https://github.com/.extraheader',
+    `AUTHORIZATION: ${basicAuth()}`,
+  ));
 
 module.exports = gitConfig;

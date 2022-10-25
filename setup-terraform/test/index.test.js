@@ -24,7 +24,6 @@ describe('Setup Terraform', () => {
     jest.spyOn(os, 'platform');
     os.platform.mockReturnValue('linux');
 
-
     mockFs({
       '.terraform-version': '1.2.0',
       '.terragrunt-version': '1.0.0',

@@ -3,9 +3,7 @@ const core = require('@actions/core');
 const axios = require('axios');
 const { iamApiErrorToString } = require('./utils/iam-api-error-to-string');
 
-const createRole = async (
-  iamToken, roleId, roleName, rolePermissions, iamUrl,
-) => axios({
+const createRole = async (iamToken, roleId, roleName, rolePermissions, iamUrl) => axios({
   url: `${iamUrl}/api/v1/roles`,
   method: 'POST',
   headers: {
@@ -25,10 +23,7 @@ const createRole = async (
   throw new Error(iamApiErrorToString(err, `Couldn't add role '${roleId}'`));
 });
 
-
-const updateRole = async (
-  iamToken, roleId, roleName, rolePermissions, iamUrl,
-) => axios({
+const updateRole = async (iamToken, roleId, roleName, rolePermissions, iamUrl) => axios({
   url: `${iamUrl}/api/v1/roles/${roleId}`,
   method: 'PUT',
   headers: {
@@ -47,9 +42,7 @@ const updateRole = async (
   throw new Error(iamApiErrorToString(err, `Couldn't update role '${roleId}'`));
 });
 
-const getRole = async (
-  iamToken, iamUrl, roleId,
-) => axios({
+const getRole = async (iamToken, iamUrl, roleId) => axios({
   url: `${iamUrl}/api/v1/roles/${roleId}`,
   method: 'GET',
   headers: {

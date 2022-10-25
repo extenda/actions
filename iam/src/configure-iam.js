@@ -10,9 +10,7 @@ const checkRepository = require('./handle-repository');
 const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
 const handleConsumers = require('./handle-consumers');
 
-const checkSystem = async (
-  systemName, styraToken, styraUrl,
-) => new Promise((resolve) => {
+const checkSystem = async (systemName, styraToken, styraUrl) => new Promise((resolve) => {
   const url = `${styraUrl}/v1/systems?compact=false&name=${systemName}`;
   request({
     uri: url,
@@ -35,7 +33,15 @@ const checkSystem = async (
 });
 
 const configureIAM = async (
-  iam, styraToken, styraUrl, iamUrl, iamToken, env, projectId, systemOwners, skipIAM,
+  iam,
+  styraToken,
+  styraUrl,
+  iamUrl,
+  iamToken,
+  env,
+  projectId,
+  systemOwners,
+  skipIAM,
 ) => {
   const {
     'permission-prefix': permissionPrefix,
@@ -43,7 +49,6 @@ const configureIAM = async (
     permissions,
     roles,
   } = iam;
-
 
   const errors = [];
   const promises = [];
@@ -67,7 +72,14 @@ const configureIAM = async (
           core.info(`creating system '${systemName}' in ${styraUrl}`);
           return createNamespace(projectId, true, namespace)
             .then(() => setupSystem(
-              namespace, systemName, env, repository, styraToken, styraUrl, systemOwners, consumers,
+              namespace,
+              systemName,
+              env,
+              repository,
+              styraToken,
+              styraUrl,
+              systemOwners,
+              consumers,
             )).catch((err) => errors.push(err));
         }
         core.info(`system '${systemName}' already exists in ${styraUrl}`);

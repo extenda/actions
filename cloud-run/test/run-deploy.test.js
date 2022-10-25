@@ -256,7 +256,6 @@ describe('Run Deploy', () => {
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--set-cloudsql-instances=MY-INSTANCE']));
   });
 
-
   test('It can deploy with --clear-sql-instances', async () => {
     exec.exec.mockResolvedValueOnce(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project');

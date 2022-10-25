@@ -141,7 +141,6 @@ describe('Setup consumers and update datasource', () => {
     expect(axios).toHaveBeenCalledTimes(2);
   });
 
-
   test('it throws error with retries for data', async () => {
     axios.mockRejectedValueOnce({ status: 500, message: 'service unavailable' });
     axios.mockRejectedValueOnce({ status: 500, message: 'service unavailable' });

@@ -14,9 +14,7 @@ const applyConfiguration = async (opaConfig, systemName) => {
   ]).then(() => fs.unlinkSync(systemName));
 };
 
-const sendInvites = async (
-  token, styraUrl, user,
-) => new Promise((resolve, reject) => {
+const sendInvites = async (token, styraUrl, user) => new Promise((resolve, reject) => {
   core.info(user);
   const userBody = {
     user_id: user,
@@ -42,7 +40,10 @@ const sendInvites = async (
 });
 
 const setOwners = async (
-  systemId, token, styraUrl, systemOwners,
+  systemId,
+  token,
+  styraUrl,
+  systemOwners,
 ) => new Promise((resolve, reject) => {
   const ownerBody = {
     description: '',
@@ -70,7 +71,10 @@ const setOwners = async (
 });
 
 const updateOwners = async (
-  systemId, token, styraUrl, systemOwners,
+  systemId,
+  token,
+  styraUrl,
+  systemOwners,
 ) => setOwners(systemId, token, styraUrl, systemOwners)
   .then((invites) => {
     if (invites) {
@@ -87,9 +91,7 @@ const updateOwners = async (
     return null;
   });
 
-const setLabels = async (
-  systemId, env, token, styraUrl,
-) => new Promise((resolve, reject) => {
+const setLabels = async (systemId, env, token, styraUrl) => new Promise((resolve, reject) => {
   const labelBody = {
     modules: {
       'labels.rego': `package metadata.${systemId}.labels\n\nlabels = {\n  "system-type": "envoy",\n  "environment": "${env}"\n}\n`,
@@ -117,9 +119,7 @@ const setLabels = async (
   });
 });
 
-const setDefaultPolicy = async (
-  systemId, token, styraUrl,
-) => new Promise((resolve, reject) => {
+const setDefaultPolicy = async (systemId, token, styraUrl) => new Promise((resolve, reject) => {
   const policyBody = {
     modules: {
       'ingress.rego': 'package policy["com.styra.envoy.ingress"].rules.rules\n\nimport data.dataset\n\ndefault allow = true\n',
@@ -147,9 +147,7 @@ const setDefaultPolicy = async (
   });
 });
 
-const setDefaultDataset = async (
-  systemId, token, styraUrl,
-) => new Promise((resolve, reject) => {
+const setDefaultDataset = async (systemId, token, styraUrl) => new Promise((resolve, reject) => {
   const datasetBody = {
     jwt: {
       aud: [
@@ -181,9 +179,7 @@ const setDefaultDataset = async (
   });
 });
 
-const getTokenFromOpaConfig = async (
-  url, token,
-) => new Promise((resolve, reject) => {
+const getTokenFromOpaConfig = async (url, token) => new Promise((resolve, reject) => {
   request({
     uri: url,
     method: 'GET',
@@ -231,7 +227,12 @@ discovery:
 };
 
 const createSystem = async (
-  namespace, systemName, repo, token, styraUrl, env,
+  namespace,
+  systemName,
+  repo,
+  token,
+  styraUrl,
+  env,
 ) => new Promise((resolve, reject) => {
   let createSystemBody = {
     name: systemName,

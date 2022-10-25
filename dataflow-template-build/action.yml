@@ -28,5 +28,5 @@ inputs:
     description: The bucket location of the flex template file.
     required: true
 runs:
-  using: node12
+  using: node16
   main: dist/index.js
