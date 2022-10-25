@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const { GitHub, context } = require('@actions/github');
+const github = require('@actions/github');
 const { run, loadGitHubToken } = require('../../utils');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
@@ -13,7 +13,7 @@ const createPayload = (payloadString) => {
   }
 
   return {
-    github: context.payload,
+    github: github.context.payload,
   };
 };
 
@@ -25,8 +25,8 @@ const action = async () => {
   const clientPayload = createPayload(payloadString);
   const [owner, repo] = repository.split('/');
 
-  const octokit = new GitHub(token);
-  return octokit.repos.createDispatchEvent({
+  const octokit = github.getOctokit(token);
+  return octokit.rest.repos.createDispatchEvent({
     owner,
     repo,
     event_type: eventType,
