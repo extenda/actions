@@ -193,11 +193,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install Node 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
       - name: Create release
         uses: ./conventional-release
         id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node dist/index.js
 
       - name: Update release branch
         run: |
