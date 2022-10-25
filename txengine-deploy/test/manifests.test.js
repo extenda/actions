@@ -14,8 +14,10 @@ jest.mock('../../gcp-secret-manager/src/secrets', () => ({
 const mockContent = jest.fn();
 jest.mock('@actions/github', () => ({
   getOctokit: () => ({
-    repos: {
-      getContent: mockContent,
+    rest: {
+      repos: {
+        getContent: mockContent,
+      },
     },
   }),
 }));
