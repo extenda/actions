@@ -37,7 +37,7 @@ const checkRun = async (repository, sha, context, state, description, targetUrl)
     args.target_url = targetUrl;
   }
 
-  return octokit.rest.repos.createStatus(args);
+  return octokit.rest.repos.createCommitStatus(args);
 };
 
 const action = async () => {

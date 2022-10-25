@@ -7,7 +7,7 @@ jest.mock('@actions/github', () => ({
   getOctokit: () => ({
     rest: {
       repos: {
-        createStatus: mockCreate,
+        createCommitStatus: mockCreate,
       },
     },
   }),
