@@ -7,15 +7,15 @@ const mockListComments = jest.fn(() => ({ data: [] }));
 const mockDeleteComment = jest.fn();
 
 jest.mock('@actions/github', () => ({
-  GitHub: function GitHub() {
-    return {
+  getOctokit: () => ({
+    rest: {
       issues: {
         createComment: mockComment,
         listComments: mockListComments,
         deleteComment: mockDeleteComment,
       },
-    };
-  },
+    },
+  }),
   context: {
     repo: () => ({
       owner: 'extenda',
