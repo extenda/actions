@@ -198,4 +198,4 @@ Procfile          text
 
 # Dist files are collapsed in GitHub diffs.
 # https://thoughtbot.com/blog/github-diff-supression
-*/dist/**         text eol=lf linguist-generated
+*/dist/**         text !eol linguist-generated
