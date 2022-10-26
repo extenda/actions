@@ -210,6 +210,8 @@ jobs:
 
       - name: Create release
         uses: ./conventional-release
+        with:
+          name: Actions
         id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
