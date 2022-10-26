@@ -23,7 +23,7 @@
 *.html            text diff=html
 *.inc             text
 *.ini             text
-*.js              text
+*.js              text eol=lf
 *.json            text
 *.jsx             text
 *.less            text
@@ -198,4 +198,4 @@ Procfile          text
 
 # Dist files are collapsed in GitHub diffs.
 # https://thoughtbot.com/blog/github-diff-supression
-*/dist/**         linguist-generated
+*/dist/**         text eol=lf linguist-generated
