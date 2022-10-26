@@ -60,7 +60,7 @@ jobs:
         run: npm ci
 
       - name: Rebuild dist files
-        run: npm run build:docker
+        run: npm run build
 
       - name: Check compiled dist/* files
         run: |
