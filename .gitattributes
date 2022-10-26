@@ -196,7 +196,9 @@ Procfile          text
 # Ignore files (like .npmignore or .gitignore)
 *.*ignore         text
 
-# Generated dist contents
+# Generated dist contents are plain text
+*/dist/*          text
+
 # Dist files are collapsed in GitHub diffs.
 # https://thoughtbot.com/blog/github-diff-supression
 */dist/**         linguist-generated
