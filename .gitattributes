@@ -197,7 +197,7 @@ Procfile          text
 *.*ignore         text
 
 # Generated dist contents are plain text
-*/dist/*          text
+*/dist/**         text
 
 # Dist files are collapsed in GitHub diffs.
 # https://thoughtbot.com/blog/github-diff-supression
