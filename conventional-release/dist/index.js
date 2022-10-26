@@ -9500,15 +9500,14 @@ const github = __nccwpck_require__(8809);
 const { checkEnv, run } = __nccwpck_require__(1898);
 const versions = __nccwpck_require__(2418);
 
-const createGitHubRelease = async (release) => {
+const createGitHubRelease = async (release, name) => {
   const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
   const { owner, repo } = github.context.repo;
-
   const response = await octokit.rest.repos.createRelease({
     owner,
     repo,
     tag_name: release.tagName,
-    name: `Release ${release.version}`,
+    name: `${name} ${release.version}`,
     body: release.changelog,
   });
 
@@ -9519,13 +9518,14 @@ const createGitHubRelease = async (release) => {
 const action = async () => {
   try {
     const tagPrefix = core.getInput('tag-prefix', { required: true });
+    const name = core.getInput('name') || 'Release';
 
     checkEnv(['GITHUB_TOKEN']);
 
     versions.setTagPrefix(tagPrefix);
     const release = await versions.tagReleaseVersion();
 
-    await createGitHubRelease(release);
+    await createGitHubRelease(release, name);
 
     core.info(`Created release tag ${release.tagName}`);
 

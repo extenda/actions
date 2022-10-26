@@ -26,14 +26,14 @@ The following environment variables are required.
 
 This example creates a new release. The `outputs` of the action are used to build the software project.
 
-```
+```yaml
 on: push
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3
 
       - name: Create release
         uses: extenda/actions/conventional-release@v0
@@ -44,6 +44,27 @@ jobs:
       - name: Publish release
         run: |
           npm ci
-          npm version ${{ steps.release.outputs.version }} --no-git-tag-version
+          npm version ${{ steps.release.outputs.version }} --no-git-tag-version
           npm publish
+```
+
+### Custom tag prefix and name
+
+```yaml
+on: push
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Create release
+        uses: extenda/actions/conventional-release@v0
+        with:
+          tag-prefix: custom-
+          name: My Project
+        id: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```

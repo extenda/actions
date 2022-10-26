@@ -44,10 +44,7 @@ describe('conventional-release', () => {
   });
 
   test('It can create a release', async () => {
-    core.getInput
-      .mockReturnValueOnce('extenda/test-repo')
-      .mockReturnValueOnce('test-event')
-      .mockReturnValueOnce('');
+    core.getInput.mockReturnValueOnce('extenda/test-repo');
     mockTag.mockReturnValueOnce({
       tagName: 'extenda/test-repo',
       version: '0.0.1',
@@ -67,5 +64,31 @@ describe('conventional-release', () => {
       },
       tag_name: 'extenda/test-repo',
     });
+    expect(core.getInput).toHaveBeenCalledTimes(2);
+  });
+
+  test('It can use a custom name prefix', async () => {
+    core.getInput.mockReturnValueOnce('extenda/test-repo')
+      .mockReturnValueOnce('Extenda Actions');
+    mockTag.mockReturnValueOnce({
+      tagName: 'extenda/test-repo',
+      version: '0.0.1',
+      changelog: {
+        html_url: 'extenda.io',
+      },
+    });
+
+    await action();
+
+    expect(mockRelease).toHaveBeenCalledWith({
+      owner: 'extenda',
+      repo: 'test-repo',
+      name: 'Extenda Actions 0.0.1',
+      body: {
+        html_url: 'extenda.io',
+      },
+      tag_name: 'extenda/test-repo',
+    });
+    expect(core.getInput).toHaveBeenCalledTimes(2);
   });
 });
