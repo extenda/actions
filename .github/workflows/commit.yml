@@ -64,11 +64,12 @@ jobs:
 
       - name: Check compiled dist/* files
         run: |
-          if [ "$(git diff --ignore-space-at-eol '*/dist/**' | wc -l)" -gt "0" ]; then
+          git add '*/dist/**'
+          if [ "$(git diff --staged --ignore-space-at-eol '*/dist/**' | wc -l)" -gt "0" ]; then
             echo ""
             echo "::error::Found uncommitted changes to compiled javascripts."
             echo ""
-            git diff '*/dist/**'
+            git diff --staged '*/dist/**'
             echo ""
             echo "::error::Did you remember to run 'npm run build'?"
             exit 1
