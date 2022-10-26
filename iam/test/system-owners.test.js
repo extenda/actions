@@ -12,8 +12,10 @@ const mockContents = jest.fn();
 
 jest.mock('@actions/github', () => ({
   getOctokit: () => ({
-    repos: {
-      getContent: mockContents,
+    rest: {
+      repos: {
+        getContent: mockContents,
+      },
     },
   }),
   context: {
