@@ -56,9 +56,6 @@ jobs:
           cache: npm
           cache-dependency-path: '**/package-lock.json'
 
-      - name: Install dependencies
-        run: npm ci
-
       - name: Rebuild dist files
         run: npm run build
 
