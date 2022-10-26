@@ -12,7 +12,7 @@ repos:
         -   id: remove-crlf
         -   id: remove-tabs
             args: [ --whitespaces-count=2 ]
-  - repo: git@github.com:extenda/pre-commit-hooks.git
+  - repo: https://github.com/extenda/pre-commit-hooks.git
     rev: v0.7
     hooks:
       - id: commitlint

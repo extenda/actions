@@ -426,7 +426,7 @@ Use the NPM scripts in the root `package.json` to install and build the complete
 ```bash
 $ npm install --no-bin-links
 ```
-Runs `npm install` on all Javascript packages.
+Runs `npm install` on all Javascript packages. Prefer `npm ci` on first install or to reinstall local dependencies.
 
 ```bash
 $ npm run lint:js
@@ -439,14 +439,10 @@ $ npm test
 Runs Jest everywhere.
 
 ```bash
-$ npm run build
-```
-Runs `npm run build` on all Javascript projects. This recompiles the package into its `dist` directory.
-
-```bash
 $ npm run build:docker
 ```
-Same as `npm run build`, but builds the project in a Docker container to ensure strictly identical output across platforms.
+Runs `npm run build` on all modules. This recompiles the package into its `dist` directory. The project
+builds in a Docker container to ensure strictly identical output across platforms.
 
 #### Tips
 
