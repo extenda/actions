@@ -28,7 +28,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-java@v1
         with:
@@ -56,7 +58,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-java@v1
         with:
