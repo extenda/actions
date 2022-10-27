@@ -66,6 +66,7 @@ describe('Run Deploy', () => {
       '--cpu=1',
       '--platform=managed',
       '--region=eu-west1',
+      '--vpc-connector=None',
       '--allow-unauthenticated',
     ], expect.anything());
   });
@@ -105,6 +106,7 @@ describe('Run Deploy', () => {
       '--cpu=1',
       '--platform=managed',
       '--region=eu-west1',
+      '--vpc-connector=None',
       '--allow-unauthenticated',
     ], expect.anything());
   });
@@ -204,6 +206,7 @@ describe('Run Deploy', () => {
       '--cpu=1',
       '--platform=managed',
       '--region=eu-west1',
+      '--vpc-connector=None',
       '--allow-unauthenticated',
     ], expect.anything());
   });
@@ -278,6 +281,32 @@ describe('Run Deploy', () => {
       'gcr.io/test-staging-project/my-service:tag',
     );
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--clear-cloudsql-instances']));
+  });
+
+  test('It can deploy with vpc-connector', async () => {
+    exec.exec.mockResolvedValueOnce(0);
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
+    process.env.GITHUB_SHA = '382aee2'; // Not tagged
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      cpu: 1,
+      platform: {
+        managed: {
+          region: 'eu-west1',
+          'allow-unauthenticated': true,
+          'cloudsql-instances': [],
+          'vpc-connector': 'test-staging-project/vpc-connector',
+        },
+      },
+    };
+    await runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-staging-project/my-service:tag',
+    );
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--vpc-connector=test-staging-project/vpc-connector']));
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.not.arrayContaining(['--vpc-egress=all-traffic']));
   });
 
   test('It can deploy to Cloud Run on GKE', async () => {

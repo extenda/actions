@@ -6466,6 +6466,8 @@ const managedArguments = async (args, service, projectId) => {
         'cloudsql-instances': cloudSqlInstances = undefined,
         region,
         'service-account': runtimeAccountEmail = 'cloudrun-runtime',
+        'vpc-connector': vpcConnectorName = 'None',
+        'vpc-egress': vpcEgress = 'private-ranges-only',
       },
     },
   } = service;
@@ -6481,7 +6483,12 @@ const managedArguments = async (args, service, projectId) => {
     `--cpu=${cpu}`,
     '--platform=managed',
     `--region=${region}`,
+    `--vpc-connector=${vpcConnectorName}`
   );
+
+  if (vpcConnectorName !== 'None') {
+    args.push(`--vpc-egress=${vpcEgress}`);
+  }
 
   if (Array.isArray(cloudSqlInstances)) {
     if (cloudSqlInstances.length === 0) {
