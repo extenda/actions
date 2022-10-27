@@ -72,7 +72,7 @@ const managedArguments = async (args, service, projectId) => {
     `--cpu=${cpu}`,
     '--platform=managed',
     `--region=${region}`,
-    `--vpc-connector=${vpcConnectorName}`
+    `--vpc-connector=${vpcConnectorName}`,
   );
 
   if (vpcConnectorName !== 'None') {
