@@ -77,18 +77,42 @@ module.exports = {
     },
     autoscale: {
       type: 'object',
-      properties: {
-        minReplicas: {
-          type: 'integer',
+      oneOf: [
+        {
+          type: 'object',
+          properties: {
+            minReplicas: {
+              type: 'integer',
+            },
+            maxReplicas: {
+              type: 'integer',
+            },
+            cpuPercent: {
+              type: 'integer',
+            },
+          },
+          additionalProperties: false,
         },
-        maxReplicas: {
-          type: 'integer',
+        {
+          type: 'object',
+          properties: {
+            minReplicas: {
+              type: 'integer',
+            },
+            maxReplicas: {
+              type: 'integer',
+            },
+            subscriptionName: {
+              type: 'string',
+            },
+            targetAverageUndeliveredMessages: {
+              type: 'number',
+            },
+            required: ['subscriptionName', 'targetAverageUndeliveredMessages'],
+          },
+          additionalProperties: false,
         },
-        cpuPercent: {
-          type: 'integer',
-        },
-      },
-      additionalProperties: false,
+      ],
     },
   },
   required: [

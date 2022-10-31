@@ -1,6 +1,18 @@
 const exec = require('@actions/exec');
 const fs = require('fs');
 
+const getAutoscaleType = (autoscale) => {
+  if (!autoscale) {
+    return null;
+  }
+
+  if (autoscale.subscriptionName) {
+    return 'PUBSUB';
+  }
+
+  return 'CPU';
+};
+
 const getAutoscale = async (deploymentName) => {
   // We introduce this variable to get the output of the kubectl command.
   let errOutput = '';
@@ -49,7 +61,8 @@ const removeAutoscale = async (deploymentName, deploymentType, permanentReplicas
  * Provided deploymentType must be consistent with the one of the existing service.
  * @param  deploymentName service name
  * @param  deploymentType statefulSet or deployment
- * @param  autoscale configuration must include minReplicas, maxReplicas and cpuPercent
+ * @param  autoscale configuration must include minReplicas, maxReplicas and (cpuPercent OR
+ *  subscriptionName and targetAverageValue),
  * @param  permanentReplicas value to be used if autoscale configuration is deleted
  * @param  dryRun if true no actual changes will be applied to production
  */
@@ -61,15 +74,17 @@ const applyAutoscale = async (
   dryRun,
 ) => {
   const dryRunArg = dryRun ? ['--dry-run=client'] : [];
+  const autoscaleType = getAutoscaleType(autoscale);
 
   // If there's no autoscale parameters provided we remove autoscale configuration from deployment
-  if (autoscale == null) {
+  if (!autoscaleType) {
     await removeAutoscale(deploymentName, deploymentType, permanentReplicas, dryRunArg);
     return;
   }
 
-  // Horizontal pod autoscaler spec template.
-  const hpaYaml = `
+  if (autoscaleType === 'CPU') {
+    // Horizontal pod CPU autoscaler spec template.
+    const hpaYaml = `
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
@@ -85,8 +100,41 @@ spec:
   targetCPUUtilizationPercentage: ${autoscale.cpuPercent}
 `;
 
-  // Write hpa template to disc to apply afterwards.
-  fs.writeFileSync('hpa.yml', hpaYaml);
+    // Write hpa template to disc to apply afterwards.
+    fs.writeFileSync('hpa.yml', hpaYaml);
+  }
+
+  if (autoscaleType === 'PUBSUB') {
+    // Horizontal pod PUBSUB autoscaler spec template.
+    const hpaYaml = `
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ${deploymentName}
+  namespace: ${deploymentName}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: ${deploymentType}
+    name: ${deploymentName}
+  minReplicas: ${autoscale.minReplicas}
+  maxReplicas: ${autoscale.maxReplicas}
+  metrics:
+  - external:
+      metric:
+        name: pubsub.googleapis.com|subscription|num_undelivered_messages
+        selector:
+          matchLabels:
+            resource.labels.subscription_id: ${autoscale.subscriptionName}
+      target:
+        type: AverageValue
+        averageValue: ${autoscale.targetAverageUndeliveredMessages}
+    type: External
+`;
+
+    // Write hpa template to disc to apply afterwards.
+    fs.writeFileSync('hpa.yml', hpaYaml);
+  }
 
   // Apply the autoscale configuration from above.
   await exec.exec('kubectl', ['apply', '-f', 'hpa.yml', ...dryRunArg]);

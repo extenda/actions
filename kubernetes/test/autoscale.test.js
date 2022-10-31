@@ -1,5 +1,6 @@
 const exec = require('@actions/exec');
 const mockFs = require('mock-fs');
+const fs = require('fs');
 const applyAutoscale = require('../src/autoscale');
 
 jest.mock('@actions/exec');
@@ -60,18 +61,79 @@ describe('Kubectl applies autoscaler', () => {
     expect(exec.exec).toHaveBeenCalledTimes(1);
   });
 
-  test('It will apply autoscale when configuration provided', async () => {
+  test('It will apply CPU autoscale when configuration provided', async () => {
     const dryRun = false;
     const deployment = 'deployment';
     const deploymentType = 'deployment-type';
     const permanentReplicas = 2;
-    const autoscale = { minReplicas: 1, maxReplicas: 6 };
+    const autoscale = { minReplicas: 1, maxReplicas: 6, cpuPercent: 25 };
 
     await applyAutoscale(deployment, deploymentType, autoscale, permanentReplicas, dryRun);
 
+    const hpaYaml = fs.readFileSync('hpa.yml').toString();
+
     expect(exec.exec).not.toHaveBeenCalledWith('kubectl', ['get', 'hpa', deployment], expect.anything());
     expect(exec.exec).toHaveBeenCalledWith('kubectl', ['apply', '-f', 'hpa.yml']);
-
     expect(exec.exec).toHaveBeenCalledTimes(1);
+
+    expect(hpaYaml).toBe(`
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: deployment
+  namespace: deployment
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: deployment-type
+    name: deployment
+  minReplicas: 1
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 25
+`);
+  });
+
+  test('It will apply Pubsub autoscale when configuration provided', async () => {
+    const dryRun = false;
+    const deployment = 'deployment';
+    const deploymentType = 'deployment-type';
+    const permanentReplicas = 2;
+    const autoscale = {
+      minReplicas: 1, maxReplicas: 6, subscriptionName: 'subscription', targetAverageUndeliveredMessages: 30,
+    };
+
+    await applyAutoscale(deployment, deploymentType, autoscale, permanentReplicas, dryRun);
+
+    const hpaYaml = fs.readFileSync('hpa.yml').toString();
+
+    expect(exec.exec).not.toHaveBeenCalledWith('kubectl', ['get', 'hpa', deployment], expect.anything());
+    expect(exec.exec).toHaveBeenCalledWith('kubectl', ['apply', '-f', 'hpa.yml']);
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+
+    expect(hpaYaml).toBe(`
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: deployment
+  namespace: deployment
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: deployment-type
+    name: deployment
+  minReplicas: 1
+  maxReplicas: 6
+  metrics:
+  - external:
+      metric:
+        name: pubsub.googleapis.com|subscription|num_undelivered_messages
+        selector:
+          matchLabels:
+            resource.labels.subscription_id: subscription
+      target:
+        type: AverageValue
+        averageValue: 30
+    type: External
+`);
   });
 });
