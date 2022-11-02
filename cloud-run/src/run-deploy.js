@@ -11,7 +11,6 @@ const authenticateKubeCtl = require('./kubectl-auth');
 const cleanRevisions = require('./clean-revisions');
 const checkServiceAccount = require('./check-sa');
 const runScan = require('./vulnerability-scanning');
-const notifySlack = require('../../slack-notify/src/slack-notify');
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -210,11 +209,10 @@ const runDeploy = async (
     environment = [],
   } = service;
 
-  let product = service.product;
-  if (service.product === undefined) {
-    product = 'product-not-set';
+  let productLabel = service.product;
+  if (productLabel === undefined) {
+    productLabel = 'product-not-set';
   }
-
 
   if (!isManagedCloudRun(service.cpu)) {
     await checkServiceAccount(name, projectId);
@@ -230,7 +228,7 @@ const runDeploy = async (
   ];
 
   if (!canary) {
-    args.push(`--labels=service_project_id=${projectId},service_project=${project},product=${product},service_env=${env}${service.platform.managed ? '' : ',sre.canary.enabled=false'}`);
+    args.push(`--labels=service_project_id=${projectId},service_project=${project},product=${productLabel},service_env=${env}${service.platform.managed ? '' : ',sre.canary.enabled=false'}`);
   }
 
   if (verbose) {
@@ -245,7 +243,7 @@ const runDeploy = async (
   if (service.platform.gke) {
     cluster = await gkeArguments(args, service, projectId);
     if (canary) {
-      await canaryArguments(args, service.canary, projectId, project, product, env);
+      await canaryArguments(args, service.canary, projectId, project, productLabel, env);
     }
   }
 

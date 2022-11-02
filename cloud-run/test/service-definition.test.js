@@ -324,7 +324,6 @@ platform:
     });
   });
 
-
   test('It can process a yaml with product', () => {
     mockFs({
       'cloud-run.yaml': `
