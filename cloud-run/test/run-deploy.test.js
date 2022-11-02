@@ -38,6 +38,7 @@ describe('Run Deploy', () => {
       name: 'my-service',
       memory: '256Mi',
       cpu: 1,
+      product: 'test-product',
       platform: {
         managed: {
           region: 'eu-west1',
@@ -61,7 +62,7 @@ describe('Run Deploy', () => {
       '--concurrency=80',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
+      '--labels=service_project_id=test-staging-project,service_project=test,product=test-product,service_env=staging',
       '--service-account=cloudrun-runtime@test-staging-project.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
@@ -77,6 +78,7 @@ describe('Run Deploy', () => {
       name: 'my-service',
       memory: '256Mi',
       cpu: 1,
+      product: 'test-product',
       platform: {
         managed: {
           region: 'eu-west1',
@@ -100,7 +102,7 @@ describe('Run Deploy', () => {
       '--concurrency=80',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project-staging-ab12,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project-staging-ab12/my-service:tag',
-      '--labels=service_project_id=test-staging-project-staging-ab12,service_project=test-staging-project,service_env=staging',
+      '--labels=service_project_id=test-staging-project-staging-ab12,service_project=test-staging-project,product=test-product,service_env=staging',
       '--service-account=cloudrun-runtime@test-staging-project-staging-ab12.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
@@ -174,6 +176,7 @@ describe('Run Deploy', () => {
       name: 'my-service',
       memory: '256Mi',
       cpu: 1,
+      product: 'test-product',
       environment: {
         KEY1: 'value',
         KEY2: 'sm://*/my-secret',
@@ -199,7 +202,7 @@ describe('Run Deploy', () => {
       '--concurrency=80',
       '--max-instances=default',
       '--set-env-vars=KEY1=value,KEY2=sm://test-staging-project/my-secret,SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
+      '--labels=service_project_id=test-staging-project,service_project=test,product=test-product,service_env=staging',
       '--service-account=cloudrun-runtime@test-staging-project.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
@@ -293,6 +296,7 @@ describe('Run Deploy', () => {
       name: 'my-service',
       memory: '256Mi',
       cpu: '400m',
+      product: 'test-product',
       'min-instances': 1,
       platform: {
         gke: {
@@ -320,7 +324,7 @@ describe('Run Deploy', () => {
       '--concurrency=32',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
+      '--labels=service_project_id=test-staging-project,service_project=test,product=test-product,service_env=staging,sre.canary.enabled=false',
       '--cpu=400m',
       '--min-instances=1',
       '--platform=gke',
@@ -333,6 +337,55 @@ describe('Run Deploy', () => {
   });
 
   test('It can deploy to Cloud Run on GKE and discover cluster', async () => {
+    getClusterInfo.mockResolvedValueOnce({
+      project: 'tribe-staging-1234',
+      cluster: 'k8s-cluster',
+      clusterLocation: 'europe-west1',
+      uri: 'projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
+    });
+    exec.exec.mockResolvedValueOnce(0);
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      cpu: '100m',
+      product: 'test-product',
+      platform: {
+        gke: {
+          connectivity: 'external',
+        },
+      },
+    };
+    const returnValue = await runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-staging-project/my-service:tag',
+    );
+    expect(returnValue.gcloudExitCode).toEqual(0);
+    expect(exec.exec).toHaveBeenCalledTimes(3);
+    expect(getClusterInfo).toHaveBeenCalledWith('test-staging-project', undefined);
+    expect(setupGcloud).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledWith('gcloud', [
+      'run', 'deploy', 'my-service',
+      '--image=gcr.io/test-staging-project/my-service:tag',
+      '--project=test-staging-project',
+      '--memory=256Mi',
+      '--concurrency=10',
+      '--max-instances=default',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
+      '--labels=service_project_id=test-staging-project,service_project=test,product=test-product,service_env=staging,sre.canary.enabled=false',
+      '--cpu=100m',
+      '--min-instances=default',
+      '--platform=gke',
+      '--cluster=projects/tribe-staging-1234/zones/europe-west1/clusters/k8s-cluster',
+      '--cluster-location=europe-west1',
+      '--connectivity=external',
+      '--no-use-http2',
+      '--namespace=my-service',
+    ], expect.anything());
+  });
+
+  test('It can deploy to Cloud Run and set product label if product is not set', async () => {
     getClusterInfo.mockResolvedValueOnce({
       project: 'tribe-staging-1234',
       cluster: 'k8s-cluster',
@@ -368,7 +421,7 @@ describe('Run Deploy', () => {
       '--concurrency=10',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
+      '--labels=service_project_id=test-staging-project,service_project=test,product=product-not-set,service_env=staging,sre.canary.enabled=false',
       '--cpu=100m',
       '--min-instances=default',
       '--platform=gke',
@@ -393,6 +446,7 @@ describe('Run Deploy', () => {
       name: 'my-service',
       memory: '256Mi',
       cpu: '400m',
+      product: 'test-product',
       concurrency: 50,
       'min-instances': 1,
       'max-instances': 100,
@@ -421,7 +475,7 @@ describe('Run Deploy', () => {
       '--concurrency=50',
       '--max-instances=100',
       '--set-env-vars=SERVICE_PROJECT_ID=test-prod-project,SERVICE_ENVIRONMENT=prod,SERVICE_CONTAINER_IMAGE=gcr.io/test-prod-project/my-service:tag',
-      '--labels=service_project_id=test-prod-project,service_project=test,service_env=prod,sre.canary.enabled=false',
+      '--labels=service_project_id=test-prod-project,service_project=test,product=test-product,service_env=prod,sre.canary.enabled=false',
       '--cpu=400m',
       '--min-instances=1',
       '--platform=gke',
@@ -493,6 +547,7 @@ describe('Run Deploy', () => {
       name: 'my-service',
       memory: '256Mi',
       cpu: '233m',
+      product: 'test-product',
       platform: {
         gke: {
           connectivity: 'external',
@@ -516,7 +571,7 @@ describe('Run Deploy', () => {
       '--concurrency=19',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
+      '--labels=service_project_id=test-staging-project,service_project=test,product=test-product,service_env=staging,sre.canary.enabled=false',
       '--cpu=233m',
       '--min-instances=default',
       '--platform=gke',
@@ -755,6 +810,7 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       name: 'my-service',
       memory: '256Mi',
       cpu: '100m',
+      product: 'test-product',
       canary: {
         enabled: true,
         steps: '10.50.80',
@@ -797,7 +853,7 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       '--connectivity=external',
       '--no-use-http2',
       '--namespace=my-service',
-      '--labels=service_project_id=test-prod-project,service_project=test,service_env=prod,sre.canary.enabled=true,sre.canary.steps=10.50.80,sre.canary.interval=10,sre.canary.thresholds.latency99=5,sre.canary.thresholds.latency95=2,sre.canary.thresholds.latency50=1,sre.canary.thresholds.error=1',
+      '--labels=service_project_id=test-prod-project,service_project=test,product=test-product,service_env=prod,sre.canary.enabled=true,sre.canary.steps=10.50.80,sre.canary.interval=10,sre.canary.thresholds.latency99=5,sre.canary.thresholds.latency95=2,sre.canary.thresholds.latency50=1,sre.canary.thresholds.error=1',
       '--no-traffic',
     ], expect.anything());
   });

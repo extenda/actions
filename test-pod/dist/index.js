@@ -5598,6 +5598,11 @@ module.exports = {
     name: {
       type: 'string',
     },
+    product: {
+      type: 'string',
+      default: 'product-not-set',
+      pattern: '^[a-zA-Z0-9-_]+$',
+    },
     'max-instances': {
       type: 'integer',
       default: -1,

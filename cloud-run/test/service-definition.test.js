@@ -60,6 +60,24 @@ platform:
 0: instance.memory does not match pattern "^[0-9]+(M|G)i"`);
     });
 
+    test('It throws for invalid product string', () => {
+      mockFs({
+        'cloud-run.yaml': `
+name: service
+memory: 256Mi
+cpu: 1
+product: test%product
+platform:
+  managed:
+    allow-unauthenticated: true
+    region: eu-west1
+`,
+      });
+      expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
+        .toThrow(`cloud-run.yaml is not valid.
+0: instance.product does not match pattern "^[a-zA-Z0-9-_]+$"`);
+    });
+
     test('It throws for invalid min-instances', () => {
       mockFs({
         'cloud-run.yaml': `
@@ -305,6 +323,53 @@ platform:
       },
     });
   });
+
+
+  test('It can process a yaml with product', () => {
+    mockFs({
+      'cloud-run.yaml': `
+name: test-service
+memory: 256Mi
+cpu: 400m
+product: test-product
+concurrency: 80
+max-instances: 20
+min-instances: 1
+platform:
+  gke:
+    cluster: test
+    connectivity: internal
+    domain-mappings:
+      staging:
+        - test-service.domain.dev
+      prod:
+        - test-service.domain.com
+    opa-enabled: true
+`,
+    });
+    const service = loadServiceDefinition('cloud-run.yaml', cloudRunSchema);
+    expect(service).toMatchObject({
+      name: 'test-service',
+      memory: '256Mi',
+      cpu: '400m',
+      product: 'test-product',
+      concurrency: 80,
+      'max-instances': 20,
+      'min-instances': 1,
+      platform: {
+        gke: {
+          cluster: 'test',
+          connectivity: 'internal',
+          'opa-enabled': true,
+          'domain-mappings': {
+            staging: ['test-service.domain.dev'],
+            prod: ['test-service.domain.com'],
+          },
+        },
+      },
+    });
+  });
+
   test('canary check threshold required', () => {
     mockFs({
       'cloud-run.yaml': `

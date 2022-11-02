@@ -5745,6 +5745,11 @@ module.exports = {
     name: {
       type: 'string',
     },
+    product: {
+      type: 'string',
+      default: 'product-not-set',
+      pattern: '^[a-zA-Z0-9-_]+$',
+    },
     'max-instances': {
       type: 'integer',
       default: -1,
@@ -6422,6 +6427,7 @@ const authenticateKubeCtl = __nccwpck_require__(6104);
 const cleanRevisions = __nccwpck_require__(92695);
 const checkServiceAccount = __nccwpck_require__(20498);
 const runScan = __nccwpck_require__(57994);
+const notifySlack = __nccwpck_require__(81478);
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,
@@ -6544,7 +6550,7 @@ const gkeArguments = async (args, service, projectId) => {
   return cluster;
 };
 
-const canaryArguments = async (args, canary, projectId, project, env) => {
+const canaryArguments = async (args, canary, projectId, project, product, env) => {
   const {
     enabled,
     steps,
@@ -6559,7 +6565,7 @@ const canaryArguments = async (args, canary, projectId, project, env) => {
   } = thresholds;
 
   args.push(
-    `--labels=service_project_id=${projectId},service_project=${project},service_env=${env},sre.canary.enabled=${enabled},sre.canary.steps=${steps},sre.canary.interval=${interval},sre.canary.thresholds.latency99=${latency99},sre.canary.thresholds.latency95=${latency95},sre.canary.thresholds.latency50=${latency50},sre.canary.thresholds.error=${errorRates}`,
+    `--labels=service_project_id=${projectId},service_project=${project},product=${product},service_env=${env},sre.canary.enabled=${enabled},sre.canary.steps=${steps},sre.canary.interval=${interval},sre.canary.thresholds.latency99=${latency99},sre.canary.thresholds.latency95=${latency95},sre.canary.thresholds.latency50=${latency50},sre.canary.thresholds.error=${errorRates}`,
     '--no-traffic',
   );
 };
@@ -6620,6 +6626,12 @@ const runDeploy = async (
     environment = [],
   } = service;
 
+  let product = service.product;
+  if (service.product === undefined) {
+    product = 'product-not-set';
+  }
+
+
   if (!isManagedCloudRun(service.cpu)) {
     await checkServiceAccount(name, projectId);
   }
@@ -6634,7 +6646,7 @@ const runDeploy = async (
   ];
 
   if (!canary) {
-    args.push(`--labels=service_project_id=${projectId},service_project=${project},service_env=${env}${service.platform.managed ? '' : ',sre.canary.enabled=false'}`);
+    args.push(`--labels=service_project_id=${projectId},service_project=${project},product=${product},service_env=${env}${service.platform.managed ? '' : ',sre.canary.enabled=false'}`);
   }
 
   if (verbose) {
@@ -6649,7 +6661,7 @@ const runDeploy = async (
   if (service.platform.gke) {
     cluster = await gkeArguments(args, service, projectId);
     if (canary) {
-      await canaryArguments(args, service.canary, projectId, project, env);
+      await canaryArguments(args, service.canary, projectId, project, product, env);
     }
   }
 
