@@ -53,9 +53,9 @@ const action = async () => {
 
   let waitForQualityGate = false;
 
-  if (sonarScanner === 'dotnet') {
+  if (sonarScanner.startsWith('dotnet')) {
     // MSBuild scanning
-    waitForQualityGate = await scanMsBuild(hostUrl, mainBranch, scanCommands.dotnet);
+    waitForQualityGate = await scanMsBuild(hostUrl, mainBranch, sonarScanner, scanCommands.dotnet);
   } else {
     // Perform the scanning for everything else.
     await core.group('Run Sonar analysis', async () => scan(hostUrl, mainBranch, sonarScanner, scanCommands));
