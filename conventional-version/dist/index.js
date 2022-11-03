@@ -10077,10 +10077,10 @@ module.exports = function (config) {
   })
 
   return Q.all([
-    readFile(__nccwpck_require__.ab + "template.hbs", 'utf-8'),
-    readFile(__nccwpck_require__.ab + "header.hbs", 'utf-8'),
-    readFile(__nccwpck_require__.ab + "commit.hbs", 'utf-8'),
-    readFile(__nccwpck_require__.ab + "footer.hbs", 'utf-8')
+    "{{> header}}\n\n{{#if noteGroups}}\n{{#each noteGroups}}\n\n### ⚠ {{title}}\n\n{{#each notes}}\n* {{#if commit.scope}}**{{commit.scope}}:** {{/if}}{{text}}\n{{/each}}\n{{/each}}\n{{/if}}\n{{#each commitGroups}}\n\n{{#if title}}\n### {{title}}\n\n{{/if}}\n{{#each commits}}\n{{> commit root=@root}}\n{{/each}}\n\n{{/each}}\n",
+    "## {{#if @root.linkCompare~}}\n  [{{version}}]({{compareUrlFormat}})\n{{~else}}\n  {{~version}}\n{{~/if}}\n{{~#if title}} \"{{title}}\"\n{{~/if}}\n{{~#if date}} ({{date}})\n{{/if}}\n",
+    "*{{#if scope}} **{{scope}}:**\n{{~/if}} {{#if subject}}\n  {{~subject}}\n{{~else}}\n  {{~header}}\n{{~/if}}\n\n{{~!-- commit link --}}{{~#if hash}} {{#if @root.linkReferences~}}\n  ([{{shortHash}}]({{commitUrlFormat}}))\n{{~else}}\n  {{~shortHash}}\n{{~/if}}{{~/if}}\n\n{{~!-- commit references --}}\n{{~#if references~}}\n  , closes\n  {{~#each references}} {{#if @root.linkReferences~}}\n    [\n    {{~#if this.owner}}\n      {{~this.owner}}/\n    {{~/if}}\n    {{~this.repository}}{{this.prefix}}{{this.issue}}]({{issueUrlFormat}})\n  {{~else}}\n    {{~#if this.owner}}\n      {{~this.owner}}/\n    {{~/if}}\n    {{~this.repository}}{{this.prefix}}{{this.issue}}\n  {{~/if}}{{/each}}\n{{~/if}}\n\n",
+    ""
   ])
     .spread((template, header, commit, footer) => {
       const writerOpts = getWriterOpts(config)
@@ -12024,10 +12024,10 @@ function conventionalChangelogWriterInit (context, options) {
     includeDetails: false,
     ignoreReverted: true,
     doFlush: true,
-    mainTemplate: readFileSync(__nccwpck_require__.ab + "template1.hbs", 'utf-8'),
-    headerPartial: readFileSync(__nccwpck_require__.ab + "header1.hbs", 'utf-8'),
-    commitPartial: readFileSync(__nccwpck_require__.ab + "commit1.hbs", 'utf-8'),
-    footerPartial: readFileSync(__nccwpck_require__.ab + "footer1.hbs", 'utf-8')
+    mainTemplate: "{{> header}}\n\n{{#each commitGroups}}\n{{#each commits}}\n{{> commit root=@root}}\n{{/each}}\n{{/each}}\n\n{{> footer}}\n\n\n",
+    headerPartial: "## {{#if isPatch~}} <small>\n  {{~/if~}} {{version}}\n  {{~#if title}} \"{{title}}\"\n  {{~/if~}}\n  {{~#if date}} ({{date}})\n  {{~/if~}}\n  {{~#if isPatch~}} </small>\n  {{~/if}}\n\n",
+    commitPartial: "* {{header}}\n\n{{~!-- commit link --}} {{#if @root.linkReferences~}}\n  ([{{hash}}](\n  {{~#if @root.repository}}\n    {{~#if @root.host}}\n      {{~@root.host}}/\n    {{~/if}}\n    {{~#if @root.owner}}\n      {{~@root.owner}}/\n    {{~/if}}\n    {{~@root.repository}}\n  {{~else}}\n    {{~@root.repoUrl}}\n  {{~/if}}/\n  {{~@root.commit}}/{{hash}}))\n{{~else}}\n  {{~hash}}\n{{~/if}}\n\n{{~!-- commit references --}}\n{{~#if references~}}\n  , closes\n  {{~#each references}} {{#if @root.linkReferences~}}\n    [\n    {{~#if this.owner}}\n      {{~this.owner}}/\n    {{~/if}}\n    {{~this.repository}}#{{this.issue}}](\n    {{~#if @root.repository}}\n      {{~#if @root.host}}\n        {{~@root.host}}/\n      {{~/if}}\n      {{~#if this.repository}}\n        {{~#if this.owner}}\n          {{~this.owner}}/\n        {{~/if}}\n        {{~this.repository}}\n      {{~else}}\n        {{~#if @root.owner}}\n          {{~@root.owner}}/\n        {{~/if}}\n          {{~@root.repository}}\n        {{~/if}}\n    {{~else}}\n      {{~@root.repoUrl}}\n    {{~/if}}/\n    {{~@root.issue}}/{{this.issue}})\n  {{~else}}\n    {{~#if this.owner}}\n      {{~this.owner}}/\n    {{~/if}}\n    {{~this.repository}}#{{this.issue}}\n  {{~/if}}{{/each}}\n{{~/if}}\n\n",
+    footerPartial: "{{#if noteGroups}}\n{{#each noteGroups}}\n\n### {{title}}\n\n{{#each notes}}\n* {{text}}\n{{/each}}\n{{/each}}\n{{/if}}\n"
   }, options)
 
   if ((!_.isFunction(options.transform) && _.isObject(options.transform)) || _.isUndefined(options.transform)) {
