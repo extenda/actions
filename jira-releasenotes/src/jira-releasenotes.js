@@ -78,9 +78,9 @@ const createReleaseNotes = async ({
         }
         core.info(`Skip issue ${issueKey}. It already has a release note`);
         return null;
-      }));
+      })
+      .catch((err) => core.warning(`Failed to update issue. ${err.message}`)));
   });
-
   return Promise.all(requests);
 };
 
