@@ -83,5 +83,47 @@ ports:
           }],
       });
     });
+
+    test('It loads CPU autoscale config', () => {
+      mockFs({
+        'kubernetes.yaml': `
+name: kubernetes
+autoscale:
+  minReplicas: 1
+  maxReplicas: 25
+  cpuPercent: 25
+`,
+      });
+      const serviceDef = loadServiceDefinition('kubernetes.yaml', kubernetesSchema);
+      expect(serviceDef).toMatchObject({
+        autoscale: {
+          cpuPercent: 25,
+          maxReplicas: 25,
+          minReplicas: 1,
+        },
+      });
+    });
+
+    test('It loads Pubsub autoscale config', () => {
+      mockFs({
+        'kubernetes.yaml': `
+name: kubernetes
+autoscale:
+  minReplicas: 1
+  maxReplicas: 25
+  subscriptionName: subscription
+  targetAverageUndeliveredMessages: 30
+`,
+      });
+      const serviceDef = loadServiceDefinition('kubernetes.yaml', kubernetesSchema);
+      expect(serviceDef).toMatchObject({
+        autoscale: {
+          subscriptionName: 'subscription',
+          targetAverageUndeliveredMessages: 30,
+          maxReplicas: 25,
+          minReplicas: 1,
+        },
+      });
+    });
   });
 });
