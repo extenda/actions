@@ -11,7 +11,6 @@ jest.mock('@actions/core');
 
 const core = require('@actions/core');
 const exec = require('@actions/exec');
-const os = require('os');
 const setupGcloud = require('../src/setup-gcloud');
 
 const jsonKey = {
