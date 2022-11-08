@@ -11,10 +11,10 @@ const getDownloadUrl = require('./download-url');
 const getLatestVersion = require('./latest-version');
 
 const copyCredentials = async (tmpKeyFile) => {
-  if (!process.env.GITHUB_WORKSPACE) {
+  if (!process.env.RUNNER_TEMP) {
     return tmpKeyFile;
   }
-  const dest = path.join(process.env.GITHUB_WORKSPACE, uuidv4());
+  const dest = path.join(process.env.RUNNER_TEMP, uuidv4());
   return io.cp(tmpKeyFile, dest).then(() => dest);
 };
 
