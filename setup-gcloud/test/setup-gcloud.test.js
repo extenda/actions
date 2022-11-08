@@ -1,4 +1,5 @@
 const mockFs = require('mock-fs');
+const path = require('path');
 
 // Mock out tools download
 jest.mock('../../utils', () => ({
@@ -29,7 +30,14 @@ describe('Setup Gcloud', () => {
   });
 
   beforeEach(() => {
-    process.env = { ...orgEnv };
+    process.env = {
+      RUNNER_TEMP: '/tmp',
+      ...orgEnv,
+    };
+
+    const filesystem = {};
+    filesystem[process.env.RUNNER_TEMP] = {};
+    mockFs(filesystem);
   });
 
   afterAll(() => {
@@ -37,7 +45,6 @@ describe('Setup Gcloud', () => {
   });
 
   test('It can configure gcloud latest', async () => {
-    mockFs({});
     exec.exec.mockResolvedValueOnce(0);
     await setupGcloud(base64Key);
     expect(exec.exec).toHaveBeenCalledTimes(1);
@@ -47,7 +54,6 @@ describe('Setup Gcloud', () => {
   });
 
   test('It can configure gcloud 280.0.0', async () => {
-    mockFs({});
     exec.exec.mockResolvedValueOnce(0);
     await setupGcloud(base64Key, '280.0.0');
     expect(exec.exec).toHaveBeenCalledTimes(1);
@@ -58,24 +64,17 @@ describe('Setup Gcloud', () => {
   });
 
   test('It can export GOOGLE_APPLICATION_CREDENTIALS', async () => {
-    mockFs({});
     exec.exec.mockResolvedValueOnce(0);
     await setupGcloud(base64Key, 'latest', true);
     expect(core.exportVariable.mock.calls[0][0]).toEqual('GOOGLE_APPLICATION_CREDENTIALS');
   });
 
   test('It can export GOOGLE_APPLICATION_CREDENTIALS and copy tmp file', async () => {
-    process.env.RUNNER_TEMP = '/tmp';
-    const config = {};
-    config[process.env.RUNNER_TEMP] = {};
-    mockFs(config);
     exec.exec.mockResolvedValueOnce(0);
     await setupGcloud(base64Key, 'latest', true);
     expect(core.exportVariable.mock.calls[0][0]).toEqual('GOOGLE_APPLICATION_CREDENTIALS');
-    if (os.platform() === 'win32') {
-      expect(core.exportVariable.mock.calls[0][1]).toContain('\\tmp\\');
-    } else {
-      expect(core.exportVariable.mock.calls[0][1]).toContain('/tmp/');
-    }
+
+    const keyFile = path.parse(core.exportVariable.mock.calls[0][1]);
+    expect(keyFile.dir).toEqual(path.normalize(process.env.RUNNER_TEMP));
   });
 });
