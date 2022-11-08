@@ -5641,6 +5641,14 @@ module.exports = {
               type: 'string',
               default: 'cloudrun-runtime',
             },
+            'vpc-connector': {
+              type: 'string',
+              default: 'None',
+            },
+            'vpc-egress': {
+              type: 'string',
+              default: 'private-ranges-only',
+            },
           },
           required: [
             'region',

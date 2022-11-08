@@ -283,7 +283,33 @@ describe('Run Deploy', () => {
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--clear-cloudsql-instances']));
   });
 
-  test('It can deploy with vpc-connector', async () => {
+  test('It can deploy with vpc-connector for prod service', async () => {
+    exec.exec.mockResolvedValueOnce(0);
+    setupGcloud.mockResolvedValueOnce('test-prod-project');
+    process.env.GITHUB_SHA = '382aee2'; // Not tagged
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      cpu: 1,
+      platform: {
+        managed: {
+          region: 'eu-west1',
+          'allow-unauthenticated': true,
+          'cloudsql-instances': [],
+          'vpc-connector': 'test-prod-project/vpc-connector',
+        },
+      },
+    };
+    await runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-prod-project/my-service:tag',
+    );
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--vpc-connector=test-prod-project/vpc-connector']));
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--vpc-egress=private-ranges-only']));
+  });
+
+  test('It will not deploy vpc-connector for staging service', async () => {
     exec.exec.mockResolvedValueOnce(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project');
     process.env.GITHUB_SHA = '382aee2'; // Not tagged
@@ -296,7 +322,8 @@ describe('Run Deploy', () => {
           region: 'eu-west1',
           'allow-unauthenticated': true,
           'cloudsql-instances': [],
-          'vpc-connector': 'test-staging-project/vpc-connector',
+          'vpc-connector': 'test-prod-project/vpc-connector',
+          'vpc-egress': 'private-ranges-only',
         },
       },
     };
@@ -305,8 +332,8 @@ describe('Run Deploy', () => {
       service,
       'gcr.io/test-staging-project/my-service:tag',
     );
-    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--vpc-connector=test-staging-project/vpc-connector']));
-    expect(exec.exec.mock.calls[0][1]).toEqual(expect.not.arrayContaining(['--vpc-egress=all-traffic']));
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--vpc-connector=None']));
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.not.arrayContaining(['--vpc-egress=private-ranges-only']));
   });
 
   test('It can deploy to Cloud Run on GKE', async () => {

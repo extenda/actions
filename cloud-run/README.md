@@ -104,6 +104,8 @@ These properties only apply to Managed Cloud Run:
 | `platform.managed.region`                          | The region in which to run the service.                                                                                                                          | Yes      |                    |
 | `platform.managed.cloudsql-instances`<top>\*</top> | A list of [Cloud SQL instance names](https://cloud.google.com/sdk/gcloud/reference/run/deploy#--add-cloudsql-instances) this service can connect to.             | No       | -                  |
 | `platform.managed.service-account`                 | The runtime service account used by the Cloud Run service. Either a fully-qualified email or a prefix where the default project email is appended automatically. | No       | `cloudrun-runtime` |
+| `platform.managed.vpc-connector`                   | The fully qualified name of the Serverless VPC Access connector e.g. `projects/PROJECT_ID/locations/REGION/connectors/CONNECTOR_NAME` (ONLY FOR PROD services)  | No       | `None` |
+| `platform.managed.vpc-egress`                      | The outbound traffic to send through the VPC connector for the service | No       | `private-ranges-only` |
 
 <top>\*</top> Once set, this value can only be unset by passing `[]` (empty array) as value.
 
@@ -137,6 +139,22 @@ platform:
     region: europe-west1
 ```
 
+### Cloud Run with Serverless VPC connector for a service
+This example defines a Cloud Run service (production only) that is deployed with a VPC connector with all the outbound traffic being send through the VPC connector.
+```yaml
+name: my-service
+memory: 256Mi
+cpu: 1
+environment:
+  DEBUG_LOG: 'false'
+  SECRET_NAME: sm://*/secret-name
+platform:
+  managed:
+    allow-unauthenticated: true
+    region: europe-west1
+    vpc-connector: projects/test-prod-project/locations/europe-west1/connectors/vpc-connector
+    vpc-egress: all-traffic
+```
 ### Cloud Run on auto-discovered GKE
 
 This example defines a Cloud Run service that runs on Cloud Run on GKE.
