@@ -14530,7 +14530,7 @@ const configureGcloud = async (serviceAccountKey, exportCredentials) => {
       core.exportVariable('GOOGLE_APPLICATION_CREDENTIALS', keyFile);
     });
   }
-  
+
   await exec.exec(gcloud, [
     'components',
     'install',

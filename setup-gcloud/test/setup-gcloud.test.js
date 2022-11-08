@@ -46,7 +46,7 @@ describe('Setup Gcloud', () => {
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
     expect(core.exportVariable).toHaveBeenCalledWith('CLOUDSDK_CORE_PROJECT', 'test-project');
   });
-  
+
   test('It can configure gcloud 280.0.0', async () => {
     mockFs({});
     exec.exec.mockResolvedValueOnce(0);
