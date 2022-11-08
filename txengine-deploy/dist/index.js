@@ -67406,6 +67406,7 @@ const configureGcloud = async (serviceAccountKey, exportCredentials) => {
     'install',
     'gke-gcloud-auth-plugin',
     '--quiet',
+    '--no-user-output-enabled',
   ]);
 
   await exec.exec(gcloud, [
