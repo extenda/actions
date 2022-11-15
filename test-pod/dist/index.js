@@ -14540,6 +14540,14 @@ const configureGcloud = async (serviceAccountKey, exportCredentials) => {
   }
 
   await exec.exec(gcloud, [
+    'components',
+    'install',
+    'gke-gcloud-auth-plugin',
+    '--quiet',
+    '--no-user-output-enabled',
+  ]);
+
+  await exec.exec(gcloud, [
     '--quiet',
     'auth',
     'activate-service-account',
@@ -14571,6 +14579,7 @@ const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredenti
     core.exportVariable('CLOUDSDK_CORE_PROJECT', projectId);
     core.setOutput('project-id', projectId);
     core.exportVariable('GCLOUD_INSTALLED_VERSION', semver);
+    core.exportVariable('USE_GKE_GCLOUD_AUTH_PLUGIN', 'True');
     return projectId;
   });
 };

@@ -46,8 +46,9 @@ describe('Setup Gcloud', () => {
   test('It can configure gcloud latest', async () => {
     exec.exec.mockResolvedValueOnce(0);
     await setupGcloud(base64Key);
-    expect(exec.exec).toHaveBeenCalledTimes(1);
-    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['auth', 'activate-service-account']));
+    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['install', 'gke-gcloud-auth-plugin']));
+    expect(exec.exec.mock.calls[1][1]).toEqual(expect.arrayContaining(['auth', 'activate-service-account']));
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
     expect(core.exportVariable).toHaveBeenCalledWith('CLOUDSDK_CORE_PROJECT', 'test-project');
   });
@@ -55,8 +56,9 @@ describe('Setup Gcloud', () => {
   test('It can configure gcloud 280.0.0', async () => {
     exec.exec.mockResolvedValueOnce(0);
     await setupGcloud(base64Key, '280.0.0');
-    expect(exec.exec).toHaveBeenCalledTimes(1);
-    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['auth', 'activate-service-account']));
+    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['install', 'gke-gcloud-auth-plugin']));
+    expect(exec.exec.mock.calls[1][1]).toEqual(expect.arrayContaining(['auth', 'activate-service-account']));
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
     expect(core.exportVariable).toHaveBeenCalledWith('CLOUDSDK_CORE_PROJECT', 'test-project');
     expect(core.exportVariable).toHaveBeenCalledWith('GCLOUD_INSTALLED_VERSION', '280.0.0');
