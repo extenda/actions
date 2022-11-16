@@ -132,7 +132,8 @@ describe('Configure iam', () => {
       allowedConsumers,
       'iam-token',
       'https://apiurl.test.dev',
-    );    expect(request).toHaveBeenCalledTimes(1);
+    );
+    expect(request).toHaveBeenCalledTimes(1);
   });
 
   test('it skips roles and permissions', async () => {
