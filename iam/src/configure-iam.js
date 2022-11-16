@@ -67,13 +67,30 @@ const configureIAM = async (
           core.info(`creating system '${systemName}' in ${styraUrl}`);
           return createNamespace(projectId, true, namespace)
             .then(() => setupSystem(
-              namespace, systemName, env, repository, styraToken, styraUrl, systemOwners, consumers,
+              namespace,
+              systemName,
+              env,
+              repository,
+              styraToken,
+              styraUrl,
+              systemOwners,
+              consumers,
+              iamToken,
+              iamUrl,
             )).catch((err) => errors.push(err));
         }
         core.info(`system '${systemName}' already exists in ${styraUrl}`);
         return checkOwners(system.id, styraToken, styraUrl, systemOwners)
           .then(() => checkRepository(system, styraToken, styraUrl, repository)
-            .then(() => handleConsumers(system.id, styraToken, styraUrl, consumers, systemName)));
+            .then(() => handleConsumers(
+              system.id,
+              styraToken,
+              styraUrl,
+              consumers,
+              systemName,
+              iamToken,
+              iamUrl,
+            )));
       }));
   });
 

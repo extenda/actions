@@ -63,7 +63,7 @@ describe('create system in styra-das', () => {
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 }));
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 400 }));
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 }));
-    await setupSystem('test-service', 'test.test-service-staging', 'staging', 'test-repo', 'styra-token', 'https://test.styra.com', systemOwners);
+    await setupSystem('test-service', 'test.test-service-staging', 'staging', 'test-repo', 'styra-token', 'https://test.styra.com', systemOwners, 'iam-token', 'https://apiurl.test.dev');
 
     expect(request).toHaveBeenCalledTimes(6);
     expect(exec.exec).toHaveBeenCalledTimes(1);
@@ -97,7 +97,7 @@ describe('create system in styra-das', () => {
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 400 }));
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 }));
     exec.exec.mockResolvedValueOnce(0);
-    await setupSystem('test-service', 'test.test-service-prod', 'prod', 'test-repo', 'styra-token', 'https://test.styra.com', systemOwners);
+    await setupSystem('test-service', 'test.test-service-prod', 'prod', 'test-repo', 'styra-token', 'https://test.styra.com', systemOwners, 'iam-token', 'https://apiurl.test.dev');
     expect(request).toHaveBeenCalledTimes(8);
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('kubectl', [
@@ -117,7 +117,7 @@ describe('create system in styra-das', () => {
       createSystemResult));
     exec.exec.mockResolvedValueOnce(0);
     await expect(
-      setupSystem('test-service', 'test.test-service-prod', 'prod', 'test-repo', 'styra-token', 'https://test.styra.com', systemOwners),
+      setupSystem('test-service', 'test.test-service-prod', 'prod', 'test-repo', 'styra-token', 'https://test.styra.com', systemOwners, 'iam-token', 'https://apiurl.test.dev'),
     )
       .resolves.toEqual(null);
     expect(request).toHaveBeenCalledTimes(1);

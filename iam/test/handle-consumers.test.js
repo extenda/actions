@@ -38,12 +38,24 @@ describe('Setup consumers and update datasource', () => {
         services: ['sa1', 'sa2', 'sa1tes1', 'sa2test2'],
       },
     };
+    const styraSystemMapping = {
+      url: 'https://apiurl.test.dev/api/internal/styra-systems/system-name',
+      method: 'POST',
+      headers: {
+        authorization: 'Bearer iam-token',
+        'content-type': 'application/json',
+      },
+      data: {
+        styraSystemId: 'systemID',
+      },
+    };
 
-    await handleConsumers('systemID', 'token', 'styraUrl', allowedConsumers, 'system-name');
+    await handleConsumers('systemID', 'token', 'styraUrl', allowedConsumers, 'system-name', 'iam-token', 'https://apiurl.test.dev');
 
     expect(axios).toHaveBeenNthCalledWith(1, createDatasource);
     expect(axios).toHaveBeenNthCalledWith(2, setData);
-    expect(axios).toHaveBeenCalledTimes(2);
+    expect(axios).toHaveBeenNthCalledWith(3, styraSystemMapping);
+    expect(axios).toHaveBeenCalledTimes(3);
   });
 
   test('it runs even if no allowed consumers', async () => {
@@ -62,13 +74,13 @@ describe('Setup consumers and update datasource', () => {
       },
     };
     expect(axios).toHaveBeenNthCalledWith(2, setData);
-    expect(axios).toHaveBeenCalledTimes(2);
+    expect(axios).toHaveBeenCalledTimes(3);
   });
 
   test('it throws error on failing to setup datasource', async () => {
     axios.mockRejectedValue({ status: 500, message: 'service unavailable' });
 
-    await expect(handleConsumers('systemID', 'token', 'styraUrl', allowedConsumers, 'system-name', 1, 0)).rejects
+    await expect(handleConsumers('systemID', 'token', 'styraUrl', allowedConsumers, 'system-name', 'iam-token', 'https://apiurl.test.dev', 1, 0)).rejects
       .toEqual(new Error('Request to styraUrl/v1/datasources/systems/systemID/consumers failed. Reason: service unavailable'));
     expect(axios).toHaveBeenCalledTimes(1);
   });
@@ -90,7 +102,7 @@ describe('Setup consumers and update datasource', () => {
       },
     };
 
-    await expect(handleConsumers('systemID', 'token', 'styraUrl', allowedConsumers, 'system-name', 1, 0)).rejects
+    await expect(handleConsumers('systemID', 'token', 'styraUrl', allowedConsumers, 'system-name', 'iam-token', 'https://apiurl.test.dev', 1, 0)).rejects
       .toEqual(new Error('Request to styraUrl/v1/data/systems/systemID/consumers failed. Reason: service unavailable'));
     expect(axios).toHaveBeenNthCalledWith(1, createDatasource);
     expect(axios).toHaveBeenCalledTimes(2);
@@ -101,6 +113,7 @@ describe('Setup consumers and update datasource', () => {
     axios.mockResolvedValueOnce({ status: 200 });
     axios.mockRejectedValueOnce({ status: 500, message: 'service unavailable' });
     axios.mockRejectedValueOnce({ status: 500, message: 'service unavailable' });
+    axios.mockResolvedValueOnce({ status: 200 });
     axios.mockResolvedValueOnce({ status: 200 });
 
     const createDatasource = {
@@ -126,21 +139,33 @@ describe('Setup consumers and update datasource', () => {
         services: ['sa1', 'sa2', 'sa1tes1', 'sa2test2'],
       },
     };
-    await handleConsumers('systemID', 'token', 'styraUrl', allowedConsumers, 'system-name', 3, 0);
+    const styraSystemMapping = {
+      url: 'https://apiurl.test.dev/api/internal/styra-systems/system-name',
+      method: 'POST',
+      headers: {
+        authorization: 'Bearer iam-token',
+        'content-type': 'application/json',
+      },
+      data: {
+        styraSystemId: 'systemID',
+      },
+    };
+
+    await handleConsumers('systemID', 'token', 'styraUrl', allowedConsumers, 'system-name', 'iam-token', 'https://apiurl.test.dev', 3, 0);
     expect(axios).toHaveBeenNthCalledWith(2, createDatasource);
     expect(axios).toHaveBeenNthCalledWith(5, setData);
-    expect(axios).toHaveBeenCalledTimes(5);
+    expect(axios).toHaveBeenNthCalledWith(6, styraSystemMapping);
+    expect(axios).toHaveBeenCalledTimes(6);
   });
 
   test('it throws error with retries for datasource', async () => {
     axios.mockRejectedValueOnce({ status: 500, message: 'service unavailable' });
     axios.mockRejectedValueOnce({ status: 500, message: 'service unavailable' });
 
-    await expect(handleConsumers('systemID', 'token', 'styraUrl', allowedConsumers, 'system-name', 2, 0)).rejects
+    await expect(handleConsumers('systemID', 'token', 'styraUrl', allowedConsumers, 'system-name', 'iam-token', 'https://apiurl.test.dev', 2, 0)).rejects
       .toEqual(new Error('Request to styraUrl/v1/datasources/systems/systemID/consumers failed. Reason: service unavailable'));
     expect(axios).toHaveBeenCalledTimes(2);
   });
-
 
   test('it throws error with retries for data', async () => {
     axios.mockRejectedValueOnce({ status: 500, message: 'service unavailable' });
@@ -163,7 +188,7 @@ describe('Setup consumers and update datasource', () => {
       },
     };
 
-    await expect(handleConsumers('systemID', 'token', 'styraUrl', allowedConsumers, 'system-name', 3, 0)).rejects
+    await expect(handleConsumers('systemID', 'token', 'styraUrl', allowedConsumers, 'system-name', 'iam-token', 'https://apiurl.test.dev', 3, 0)).rejects
       .toEqual(new Error('Request to styraUrl/v1/data/systems/systemID/consumers failed. Reason: service unavailable'));
     expect(axios).toHaveBeenNthCalledWith(3, createDatasource);
     expect(axios).toHaveBeenCalledTimes(6);
