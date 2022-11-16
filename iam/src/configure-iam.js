@@ -80,12 +80,22 @@ const configureIAM = async (
               styraUrl,
               systemOwners,
               consumers,
+              iamToken,
+              iamUrl,
             )).catch((err) => errors.push(err));
         }
         core.info(`system '${systemName}' already exists in ${styraUrl}`);
         return checkOwners(system.id, styraToken, styraUrl, systemOwners)
           .then(() => checkRepository(system, styraToken, styraUrl, repository)
-            .then(() => handleConsumers(system.id, styraToken, styraUrl, consumers, systemName)));
+            .then(() => handleConsumers(
+              system.id,
+              styraToken,
+              styraUrl,
+              consumers,
+              systemName,
+              iamToken,
+              iamUrl,
+            )));
       }));
   });
 
