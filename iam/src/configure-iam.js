@@ -44,11 +44,11 @@ const configureIAM = async (
   skipIAM,
 ) => {
   const {
-          'permission-prefix': permissionPrefix,
-          services,
-          permissions,
-          roles,
-        } = iam;
+    'permission-prefix': permissionPrefix,
+    services,
+    permissions,
+    roles,
+  } = iam;
 
   const errors = [];
   const promises = [];
