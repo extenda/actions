@@ -26,7 +26,9 @@ describe('get latest revision', () => {
 
   test('get latest revision', async () => {
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(revisionsListString));
     expect(getLatestRevision('namespace', cluster)).resolves.toEqual('rev-00009-tst');
     expect(exec.exec).toHaveBeenCalledTimes(1);

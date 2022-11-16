@@ -36,5 +36,5 @@ outputs:
   imageFullName:
     description: 'Full name of the Docker image'
 runs:
-  using: 'node12'
+  using: node16
   main: 'dist/index.js'

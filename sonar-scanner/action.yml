@@ -52,5 +52,5 @@ inputs:
     description: Use a specific path to get the Sonar report for the quality gate
     required: false
 runs:
-  using: node12
+  using: node16
   main: dist/index.js

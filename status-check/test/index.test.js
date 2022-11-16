@@ -4,13 +4,13 @@ jest.mock('../../utils');
 const mockCreate = jest.fn();
 
 jest.mock('@actions/github', () => ({
-  GitHub: function GitHub() {
-    return {
+  getOctokit: () => ({
+    rest: {
       repos: {
-        createStatus: mockCreate,
+        createCommitStatus: mockCreate,
       },
-    };
-  },
+    },
+  }),
 }));
 
 const core = require('@actions/core');
@@ -32,7 +32,8 @@ describe('status-check', () => {
   });
 
   test('It can create a new check', async () => {
-    core.getInput.mockReturnValueOnce('extenda/test-repo')
+    core.getInput
+      .mockReturnValueOnce('extenda/test-repo')
       .mockReturnValueOnce('sha-value')
       .mockReturnValueOnce('my-check')
       .mockReturnValueOnce('pending')
@@ -55,7 +56,8 @@ describe('status-check', () => {
     process.env.GITHUB_REPOSITORY = 'extenda/test-repo';
     process.env.GITHUB_SHA = 'sha-value';
 
-    core.getInput.mockReturnValueOnce('')
+    core.getInput
+      .mockReturnValueOnce('')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('my-check')
       .mockReturnValueOnce('success')
@@ -76,7 +78,8 @@ describe('status-check', () => {
   });
 
   test('It fails on invalid status', async () => {
-    core.getInput.mockReturnValueOnce('extenda/test-repo')
+    core.getInput
+      .mockReturnValueOnce('extenda/test-repo')
       .mockReturnValueOnce('sha-value')
       .mockReturnValueOnce('my-check')
       .mockReturnValueOnce('skipped')

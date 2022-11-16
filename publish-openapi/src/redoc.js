@@ -2,7 +2,9 @@ const exec = require('@actions/exec');
 const core = require('@actions/core');
 const fs = require('fs');
 
-const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const wait = (ms) => new Promise((resolve) => {
+  setTimeout(resolve, ms);
+});
 
 const installRedoc = async () => exec.exec('sudo', [
   'npm',
@@ -52,7 +54,6 @@ const updateIndex = async (file, addToIndex, title) => {
     if (err) { core.error(err); }
   });
 };
-
 
 const uploadIndex = async (fileToUpload, uploadLocation) => exec.exec('gsutil', [
   'cp',

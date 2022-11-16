@@ -1,4 +1,3 @@
-
 jest.mock('@actions/core');
 jest.mock('../../cloud-run/src/project-info');
 jest.mock('../../cloud-run/src/cluster-info');
@@ -13,8 +12,10 @@ const mockContents = jest.fn();
 
 jest.mock('@actions/github', () => ({
   getOctokit: () => ({
-    repos: {
-      getContent: mockContents,
+    rest: {
+      repos: {
+        getContent: mockContents,
+      },
     },
   }),
   context: {
@@ -25,7 +26,6 @@ jest.mock('@actions/github', () => ({
     payload: {},
   },
 }));
-
 
 describe('get system owners', () => {
   afterEach(() => {
@@ -47,7 +47,7 @@ describe('get system owners', () => {
       data: {
         content: Buffer.from(`
 members:
-  users: 
+  users:
     - name: test
       email: test@mail.com
       `, 'utf8').toString('base64'),

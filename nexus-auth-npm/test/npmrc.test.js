@@ -17,7 +17,6 @@ const expectedNpmrcForPublish = `
 //repo.extendaretail.com/repository/npm-private/:_auth = dXNlcm5hbWU6cGFzc3dvcmQ=
 `;
 
-
 describe('npmrc', () => {
   afterEach(() => {
     jest.resetAllMocks();

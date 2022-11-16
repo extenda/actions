@@ -44,7 +44,9 @@ jobs:
   commitlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Lint pull request title
         uses: extenda/actions/commitlint@v0
@@ -55,7 +57,7 @@ jobs:
         if: always()
         uses: extenda/actions/commitlint@v0
         with:
-          relaxed: ${{ contains(job.status, 'success') }}
+          relaxed: ${{ contains(job.status, 'success') }}
 ```
 
 ### Validate pull request title and all commit messages
@@ -73,7 +75,9 @@ jobs:
   commitlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Lint pull request title
         uses: extenda/actions/commitlint@v0

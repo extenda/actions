@@ -12,7 +12,6 @@ const mockUnpack = async (file, dest) => {
   return dest;
 };
 
-
 jest.mock('@actions/tool-cache', () => {
   const realTc = jest.requireActual('@actions/tool-cache');
   return {

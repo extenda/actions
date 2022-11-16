@@ -11,10 +11,10 @@ const getDownloadUrl = require('./download-url');
 const getLatestVersion = require('./latest-version');
 
 const copyCredentials = async (tmpKeyFile) => {
-  if (!process.env.GITHUB_WORKSPACE) {
+  if (!process.env.RUNNER_TEMP) {
     return tmpKeyFile;
   }
-  const dest = path.join(process.env.GITHUB_WORKSPACE, uuidv4());
+  const dest = path.join(process.env.RUNNER_TEMP, uuidv4());
   return io.cp(tmpKeyFile, dest).then(() => dest);
 };
 
@@ -28,6 +28,14 @@ const configureGcloud = async (serviceAccountKey, exportCredentials) => {
       core.exportVariable('GOOGLE_APPLICATION_CREDENTIALS', keyFile);
     });
   }
+
+  await exec.exec(gcloud, [
+    'components',
+    'install',
+    'gke-gcloud-auth-plugin',
+    '--quiet',
+    '--no-user-output-enabled',
+  ]);
 
   await exec.exec(gcloud, [
     '--quiet',
@@ -61,6 +69,7 @@ const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredenti
     core.exportVariable('CLOUDSDK_CORE_PROJECT', projectId);
     core.setOutput('project-id', projectId);
     core.exportVariable('GCLOUD_INSTALLED_VERSION', semver);
+    core.exportVariable('USE_GKE_GCLOUD_AUTH_PLUGIN', 'True');
     return projectId;
   });
 };

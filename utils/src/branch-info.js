@@ -1,4 +1,4 @@
-const git = require('simple-git/promise')();
+const git = require('simple-git')();
 
 const isPreRelease = (branchName) => branchName !== 'master';
 

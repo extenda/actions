@@ -9,6 +9,10 @@ inputs:
     description: The release tag prefix
     required: true
     default: v
+  name:
+    description: The product name to include in the release title. This should not contain a version.
+    required: false
+    default: Release
 outputs:
   release-tag:
     description: The created release tag
@@ -17,5 +21,5 @@ outputs:
   release-changelog:
     description: The latest release change log
 runs:
-  using: node12
+  using: node16
   main: dist/index.js

@@ -4,7 +4,7 @@ inputs:
   branch-name-short:
     description: The branch name to publish the installer package for. This is the only the last part of branch name. Single word as develop, master or rc-17.11
     required: false
-    default: null  
+    default: null
   builder-type:
     description: single, multiple or singleflat. Single = Creates single installer package based on source files or source directory. Multiple = Creates multiple installer packaages, one for each directory inside the source directory specified. singleflat = Creates a single installer package and flattens directories to root directory.
     required: true
@@ -48,5 +48,5 @@ inputs:
     required: true
     default: null
 runs:
-  using: node12
+  using: node16
   main: dist/index.js

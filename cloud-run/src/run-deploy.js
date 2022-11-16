@@ -230,7 +230,6 @@ const runDeploy = async (
     args.push('--verbosity=debug');
   }
 
-
   let cluster;
   if (service.platform.managed) {
     await managedArguments(args, service, projectId);

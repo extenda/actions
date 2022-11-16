@@ -54,7 +54,6 @@ describe('Pod run', () => {
       '--attach',
       '--restart=Never',
       '--pod-running-timeout=15m',
-      '--wait=true',
       '--image=myimage@sha256:111',
       '-n',
       'test',

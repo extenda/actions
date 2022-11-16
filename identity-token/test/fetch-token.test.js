@@ -2,7 +2,6 @@ jest.mock('@actions/exec');
 const exec = require('@actions/exec');
 const fetchToken = require('../src/fetch-token');
 
-
 const mockExecListeners = (output) => (cmd, args, opts) => {
   opts.listeners.stdout(Buffer.from(output, 'utf8'));
   return Promise.resolve(0);

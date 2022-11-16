@@ -20,9 +20,7 @@ const uploadMapping = async (systemId, systemName, iamToken, iamUrl) => axios({
   throw new Error(iamApiErrorToString(err, `Could not add mapping for '${systemName}'`));
 });
 
-const sendHttp = async (
-  url, token, body,
-) => axios({
+const sendHttp = async (url, token, body) => axios({
   url,
   method: 'PUT',
   data: body,
@@ -33,7 +31,6 @@ const sendHttp = async (
 }).catch((err) => {
   throw new Error(`Request to ${url} failed. Reason: ${err.message}`);
 });
-
 
 const sendHttpWithRetries = async (url, token, body, attempts, backoffSeconds) => {
   /* eslint-disable no-await-in-loop */
@@ -46,7 +43,9 @@ const sendHttpWithRetries = async (url, token, body, attempts, backoffSeconds) =
       if (i === attempts - 1) {
         throw new Error(error.message);
       }
-      await new Promise((r) => setTimeout(r, (backoffSeconds * 1000)));
+      await new Promise((r) => {
+        setTimeout(r, (backoffSeconds * 1000));
+      });
     } else {
       break;
     }
@@ -65,7 +64,12 @@ const upsertDatasource = async (systemID, styraToken, styraUrl, retries, backoff
 };
 
 const updateConsumers = async (
-  systemID, styraToken, styraUrl, services, retries, backoffSeconds,
+  systemID,
+  styraToken,
+  styraUrl,
+  services,
+  retries,
+  backoffSeconds,
 ) => {
   const url = `${styraUrl}/v1/data/systems/${systemID}/consumers`;
   const body = {

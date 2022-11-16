@@ -18,7 +18,6 @@ jest.mock('../../utils', () => ({
   loadTool: jest.fn(),
 }));
 
-
 describe('RS installer package tests', () => {
   afterEach(() => {
     jest.resetAllMocks();

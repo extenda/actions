@@ -40,5 +40,5 @@ inputs:
     required: false
     default: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 runs:
-  using: node12
+  using: node16
   main: dist/index.js

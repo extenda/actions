@@ -29,7 +29,6 @@ const action = async () => {
   const verbose = core.getInput('verbose') === 'true';
   const reportPath = core.getInput('report-path');
 
-
   if (verbose) {
     process.env.SONAR_VERBOSE = 'true';
   }

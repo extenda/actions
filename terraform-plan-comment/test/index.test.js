@@ -7,15 +7,15 @@ const mockListComments = jest.fn(() => ({ data: [] }));
 const mockDeleteComment = jest.fn();
 
 jest.mock('@actions/github', () => ({
-  GitHub: function GitHub() {
-    return {
+  getOctokit: () => ({
+    rest: {
       issues: {
         createComment: mockComment,
         listComments: mockListComments,
         deleteComment: mockDeleteComment,
       },
-    };
-  },
+    },
+  }),
   context: {
     repo: () => ({
       owner: 'extenda',
@@ -153,7 +153,6 @@ Other text below
     expect(comment).toEqual(`### :white_check_mark: Terraform plan with no changes\n\nTerraform plan reported no changes.\n\n*Workflow: \`Terraform\`*\n*Working directory: \`${process.cwd()}\`*`);
     expect(mockComment).toHaveBeenCalled();
   });
-
 
   test('It can generate comment for too large plan', async () => {
     function makeLongTestPlan(length) {

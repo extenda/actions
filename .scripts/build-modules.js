@@ -4,7 +4,7 @@ const { modules } = require('./modules');
 
 const ncc = '../node_modules/@vercel/ncc/dist/ncc/cli.js';
 
-const build = (file, out = 'dist') => `node ${ncc} build ${file} --license licenses.txt -o ${out}`;
+const build = (file, out = 'dist') => `node ${ncc} build ${file} -o ${out} --target es2018`;
 
 (async () => {
   modules.each((dir) => {

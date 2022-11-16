@@ -95,7 +95,6 @@ const runPod = async ({ name, namespace }, image, configMap, trimPrefix) => {
     '--attach',
     '--restart=Never',
     '--pod-running-timeout=15m',
-    '--wait=true',
     `--image=${imageDigest}`,
     '-n',
     namespace,

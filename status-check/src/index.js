@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const { GitHub } = require('@actions/github');
+const github = require('@actions/github');
 const { run, loadGitHubToken } = require('../../utils');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
@@ -20,7 +20,7 @@ const checkRun = async (repository, sha, context, state, description, targetUrl)
   const validState = validateState(state);
 
   const token = await loadGitHubToken(loadSecret);
-  const octokit = new GitHub(token);
+  const octokit = github.getOctokit(token);
 
   const [owner, repo] = repository.split('/');
 
@@ -37,7 +37,7 @@ const checkRun = async (repository, sha, context, state, description, targetUrl)
     args.target_url = targetUrl;
   }
 
-  return octokit.repos.createStatus(args);
+  return octokit.rest.repos.createCommitStatus(args);
 };
 
 const action = async () => {

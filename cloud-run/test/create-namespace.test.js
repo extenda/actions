@@ -4,7 +4,6 @@ const mockFs = require('mock-fs');
 const exec = require('@actions/exec');
 const createNamespace = require('../src/create-namespace');
 
-
 const mockOutput = (data, opts) => {
   opts.listeners.stderr(Buffer.from(`${data}\n`, 'utf8'));
   return Promise.reject(new Error('exit code 1'));

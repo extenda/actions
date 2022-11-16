@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const git = require('simple-git/promise')();
+const git = require('simple-git')();
 const semver = require('semver');
 const gitConfig = require('./git-config');
 const changes = require('./conventionalchanges');

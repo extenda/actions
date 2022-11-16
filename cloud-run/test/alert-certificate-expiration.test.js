@@ -17,7 +17,9 @@ describe('Alert platform team on slack', () => {
 
   test('it does not alert if certificate expires in over 30 days', async () => {
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(certificatesList)));
     loadSecrets.mockResolvedValueOnce('secret');
 
@@ -27,7 +29,9 @@ describe('Alert platform team on slack', () => {
 
   test('it alerts if certificate expires in less than 29 days', async () => {
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(JSON.stringify(certificatesListExpired)));
     loadSecrets.mockResolvedValueOnce('secret');
 
