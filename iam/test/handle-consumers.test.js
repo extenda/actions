@@ -168,12 +168,12 @@ describe('Setup consumers and update datasource', () => {
   });
 
   test('it throws error for upload styra system mapping', async () => {
-    axios.mockRejectedValueOnce({ status: 500, message: 'service unavailable' });
-    axios.mockRejectedValueOnce({ status: 500, message: 'service unavailable' });
+    axios.mockResolvedValueOnce({ status: 200 });
+    axios.mockResolvedValueOnce({ status: 200 });
     axios.mockRejectedValueOnce({ status: 500, message: 'service unavailable' });
 
     await expect(handleConsumers('systemID', 'token', 'styraUrl', allowedConsumers, 'system-name', 'iam-token', 'https://apiurl.test.dev', 2, 0)).rejects
-      .toEqual(new Error('Request to styraUrl/v1/datasources/systems/systemID/consumers failed. Reason: service unavailable'));
+      .toEqual(new Error('Could not add mapping for \'system-name\'. Unexpected error for iam api: service unavailable'));
     expect(axios).toHaveBeenCalledTimes(3);
   });
 
