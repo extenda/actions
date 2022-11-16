@@ -287,6 +287,8 @@ const setupSystem = async (
   styraUrl,
   systemOwners,
   consumers,
+  iamToken,
+  iamUrl,
 ) => {
   const promises = [];
   const systemResult = await createSystem(service, systemName, repo, token, styraUrl, env);
@@ -302,6 +304,15 @@ const setupSystem = async (
   promises.push(updateOwners(systemResult.result.id, token, styraUrl, systemOwners));
   promises.push(applyConfiguration(opaConfig, systemName));
   promises.push(handleConsumers(systemResult.result.id, token, styraUrl, consumers, systemName));
+  promises.push(handleConsumers(
+    systemResult.result.id,
+    token,
+    styraUrl,
+    consumers,
+    systemName,
+    iamToken,
+    iamUrl,
+  ));
 
   return Promise.all(promises);
 };
