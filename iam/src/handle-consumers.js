@@ -1,24 +1,5 @@
 const axios = require('axios');
 const core = require('@actions/core');
-const { iamApiErrorToString } = require('./utils/iam-api-error-to-string');
-
-const uploadMapping = async (systemId, systemName, iamToken, iamUrl) => axios({
-  url: `${iamUrl}/api/internal/styra-systems/${systemName}`,
-  method: 'POST',
-  headers: {
-    'content-type': 'application/json',
-    authorization: `Bearer ${iamToken}`,
-  },
-  data: {
-    styraSystemId: systemId,
-  },
-}).then(() => {
-  const message = `styra system mapping '${systemName}' added`;
-  core.info(message);
-  return message;
-}).catch((err) => {
-  throw new Error(iamApiErrorToString(err, `Could not add mapping for '${systemName}'`));
-});
 
 const sendHttp = async (url, token, body) => axios({
   url,
@@ -84,8 +65,6 @@ const handleConsumers = async (
   styraUrl,
   consumers,
   systemName,
-  iamToken,
-  iamUrl,
   retries = 3,
   backoffSeconds = 1,
 ) => {
@@ -99,7 +78,6 @@ const handleConsumers = async (
   }
   await upsertDatasource(systemID, styraToken, styraUrl, retries, backoffSeconds);
   await updateConsumers(systemID, styraToken, styraUrl, allowedConsumers, retries, backoffSeconds);
-  await uploadMapping(systemID, systemName, iamToken, iamUrl);
 
   core.info(`consumers handled for ${systemName}`);
 };
