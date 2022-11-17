@@ -5,7 +5,7 @@ const { modules } = require("./modules");
 const ncc = "../node_modules/.bin/esbuild";
 
 const build = (file, out = "dist/index.js") =>
-  `${ncc} ${file} --bundle --platform=node --outfile=${out} --target=es2018`;
+  `${ncc} ${file} --bundle --platform=node --minify --outfile=${out} --target=es2018`;
 
 (async () => {
   modules.each((dir) => {
