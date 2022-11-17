@@ -1,5 +1,5 @@
 const exec = require('@actions/exec');
-const axios = require("axios");
+const axios = require('axios');
 const core = require('@actions/core');
 const request = require('request');
 const fs = require('fs');
@@ -24,7 +24,6 @@ const uploadMapping = async (systemId, systemName, iamToken, iamUrl) => axios({
 }).catch((err) => {
   throw new Error(iamApiErrorToString(err, `Could not add mapping for '${systemName}'`));
 });
-
 
 const applyConfiguration = async (opaConfig, systemName) => {
   fs.writeFileSync(systemName, yaml.safeDump(opaConfig));

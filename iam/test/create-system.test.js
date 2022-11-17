@@ -6,11 +6,10 @@ jest.mock('@actions/exec');
 jest.mock('request');
 jest.mock('../src/handle-consumers');
 
-const request         = require('request');
-const exec            = require('@actions/exec');
+const request = require('request');
+const exec = require('@actions/exec');
+const axios = require('axios');
 const { setupSystem } = require('../src/create-system');
-const axios           = require("axios");
-const handleConsumers = require("../src/handle-consumers");
 
 const systemOwners = ['test@mail.com'];
 const opaConfig = `
