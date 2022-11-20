@@ -34,7 +34,6 @@ const scanWithJavaHome = async (args) => {
       env.JAVA_HOME = javaHome;
     }
   }
-  console.log('scanWithJavaHome', env);
   if (typeof args === 'string') {
     return exec.exec(`${scanner} ${args}`, [], { env });
   }
