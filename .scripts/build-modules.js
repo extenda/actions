@@ -20,12 +20,12 @@ const copyStaticAssetsPlugin = ({ sourceDir, destDir, filesToCopy }) => ({
   },
 });
 
-const build = (baseDir) => {
+const build = async (baseDir) => {
   const srcDir = path.join(baseDir, 'src');
   const destDir = path.join(baseDir, 'dist');
 
   console.time(`build ${baseDir}`);
-  esbuild.build({
+  await esbuild.build({
     entryPoints: [`${srcDir}/index.js`],
     platform: 'node',
     bundle: true,
