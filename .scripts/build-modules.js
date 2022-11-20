@@ -24,6 +24,7 @@ const build = (baseDir) => {
   const srcDir = path.join(baseDir, 'src');
   const destDir = path.join(baseDir, 'dist');
 
+  console.time(`build ${baseDir}`);
   esbuild.build({
     entryPoints: [`${srcDir}/index.js`],
     platform: 'node',
@@ -38,6 +39,7 @@ const build = (baseDir) => {
       }),
     ],
   });
+  console.timeEnd(`build ${baseDir}`);
 };
 
 (async () => {
