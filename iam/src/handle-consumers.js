@@ -78,6 +78,7 @@ const handleConsumers = async (
   }
   await upsertDatasource(systemID, styraToken, styraUrl, retries, backoffSeconds);
   await updateConsumers(systemID, styraToken, styraUrl, allowedConsumers, retries, backoffSeconds);
+
   core.info(`consumers handled for ${systemName}`);
 };
 
