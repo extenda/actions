@@ -28,7 +28,7 @@ const getSystemOwners = async (githubToken, serviceAccountKey) => {
     });
 
   const clanEmails = [];
-  const clanYaml = yaml.safeLoad(clanYamlFile);
+  const clanYaml = yaml.load(clanYamlFile);
   Object.keys(clanYaml.members.users).forEach((user) => {
     clanEmails.push(clanYaml.members.users[user].email);
   });
