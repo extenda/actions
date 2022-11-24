@@ -26,7 +26,7 @@ const uploadMapping = async (systemId, systemName, iamToken, iamUrl) => axios({
 });
 
 const applyConfiguration = async (opaConfig, systemName) => {
-  fs.writeFileSync(systemName, yaml.safeDump(opaConfig));
+  fs.writeFileSync(systemName, yaml.dump(opaConfig));
   return exec.exec('kubectl', [
     'apply',
     '-f',
@@ -213,7 +213,7 @@ const getTokenFromOpaConfig = async (url, token) => new Promise((resolve, reject
       reject(new Error(error));
     } else {
       const configYaml = yaml.loadAll(body)[0].data['conf.yaml'];
-      resolve(yaml.safeLoad(configYaml).services[0].credentials.bearer.token);
+      resolve(yaml.load(configYaml).services[0].credentials.bearer.token);
     }
   });
 });
