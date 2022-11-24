@@ -212,7 +212,7 @@ const getTokenFromOpaConfig = async (url, token) => new Promise((resolve, reject
     if (error) {
       reject(new Error(error));
     } else {
-      const configYaml = yaml.safeLoadAll(body)[0].data['conf.yaml'];
+      const configYaml = yaml.loadAll(body)[0].data['conf.yaml'];
       resolve(yaml.safeLoad(configYaml).services[0].credentials.bearer.token);
     }
   });
