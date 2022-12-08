@@ -11,9 +11,7 @@ const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
 const handleConsumers = require('./handle-consumers');
 const gcloudOutput = require('../../txengine-deploy/src/gcloud-output');
 
-const checkSystem = async (
-  systemName, styraToken, styraUrl,
-) => new Promise((resolve) => {
+const checkSystem = async (systemName, styraToken, styraUrl) => new Promise((resolve) => {
   const url = `${styraUrl}/v1/systems?compact=false&name=${systemName}`;
   request({
     uri: url,
@@ -101,7 +99,15 @@ const updateSharedSystems = async (
 };
 
 const configureIAM = async (
-  iam, styraToken, styraUrl, iamUrl, iamToken, env, projectId, systemOwners, skipIAM,
+  iam,
+  styraToken,
+  styraUrl,
+  iamUrl,
+  iamToken,
+  env,
+  projectId,
+  systemOwners,
+  skipIAM,
 ) => {
   const {
     'permission-prefix': permissionPrefix,
@@ -153,6 +159,8 @@ const configureIAM = async (
                 styraUrl,
                 systemOwners,
                 consumers,
+                iamToken,
+                iamUrl,
               )).catch((err) => errors.push(err));
           }
           return updateMiscelaneous(

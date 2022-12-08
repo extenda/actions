@@ -26,15 +26,19 @@ event-sources: # (required) list of event sources for your system
     display-name: IAM Group was created # (required) human readable name for event source
     # (required)
     # push subscription that will push events to external event dispatch API
-    # TODO: replace link with internal doc link, that will explain how to push events.
-    # (doc) https://developer.hiiretail.com/docs/exe/public/concepts/EVENT-SOURCE
+    # (doc) https://github.com/extenda/engineering-cloud-core-common/tree/master/docs/exe/internal
+    # if you're using the Ingest Dispatch API, you can use a stub value for subscription:
+    # projects/cloud-core-prod-2d76/subscriptions/exe.public.output.events.v1+exe.event
     subscription-name: projects/iam-prod-4aad/subscriptions/iam.public.output.events.v1+iam.group-created
     # (required) content type of data from subscription above. usually application/json
     content-type: application/json
     # (optional, default - false)
-    # removing of event sources is not supported for now. instead you can disable it.
     # event source will still work, but it will not be available for new webhooks
     disabled: true
+    deprecated: # (optional) deprecation metadata, the ES may be deleted after the "removal-date"
+      removal-date: "2020-02-02" # (required) YYYY-MM-DD, should be explicitly specified as a string with double quotes
+      message: any string # (optional) will be displayed along with event messages
+      replaced-with: iam.group-created.v2 # (optional) event source id that will replace the deprecated
   - name: group-created
     version: v2
     display-name: IAM Group was created

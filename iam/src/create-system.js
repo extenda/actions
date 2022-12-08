@@ -1,22 +1,40 @@
 const exec = require('@actions/exec');
+const axios = require('axios');
 const core = require('@actions/core');
 const request = require('request');
 const fs = require('fs');
 const yaml = require('js-yaml'); // FIXME what YAML lib is used?
 const handleConsumers = require('./handle-consumers');
+const { iamApiErrorToString } = require('./utils/iam-api-error-to-string');
 
-const applyConfiguration = async (opaConfig, fileName) => {
-  fs.writeFileSync(fileName, yaml.safeDump(opaConfig));
+const uploadMapping = async (systemId, systemName, iamToken, iamUrl) => axios({
+  url: `${iamUrl}/api/internal/styra-systems/${systemName}`,
+  method: 'PUT',
+  headers: {
+    'content-type': 'application/json',
+    authorization: `Bearer ${iamToken}`,
+  },
+  data: {
+    styraSystemId: systemId,
+  },
+}).then(() => {
+  const message = `styra system mapping '${systemName}' added`;
+  core.info(message);
+  return message;
+}).catch((err) => {
+  throw new Error(iamApiErrorToString(err, `Could not add mapping for '${systemName}'`));
+});
+
+const applyConfiguration = async (opaConfig, systemName) => {
+  fs.writeFileSync(systemName, yaml.dump(opaConfig));
   return exec.exec('kubectl', [
     'apply',
     '-f',
-    fileName,
-  ]).then(() => fs.unlinkSync(fileName));
+    systemName,
+  ]).then(() => fs.unlinkSync(systemName));
 };
 
-const sendInvites = async (
-  token, styraUrl, user,
-) => new Promise((resolve, reject) => {
+const sendInvites = async (token, styraUrl, user) => new Promise((resolve, reject) => {
   core.info(user);
   const userBody = {
     user_id: user,
@@ -42,7 +60,10 @@ const sendInvites = async (
 });
 
 const setOwners = async (
-  systemId, token, styraUrl, systemOwners,
+  systemId,
+  token,
+  styraUrl,
+  systemOwners,
 ) => new Promise((resolve, reject) => {
   const ownerBody = {
     description: '',
@@ -70,7 +91,10 @@ const setOwners = async (
 });
 
 const updateOwners = async (
-  systemId, token, styraUrl, systemOwners,
+  systemId,
+  token,
+  styraUrl,
+  systemOwners,
 ) => setOwners(systemId, token, styraUrl, systemOwners)
   .then((invites) => {
     if (invites) {
@@ -87,9 +111,7 @@ const updateOwners = async (
     return null;
   });
 
-const setLabels = async (
-  systemId, env, token, styraUrl,
-) => new Promise((resolve, reject) => {
+const setLabels = async (systemId, env, token, styraUrl) => new Promise((resolve, reject) => {
   const labelBody = {
     modules: {
       'labels.rego': `package metadata.${systemId}.labels\n\nlabels = {\n  "system-type": "envoy",\n  "environment": "${env}"\n}\n`,
@@ -117,9 +139,7 @@ const setLabels = async (
   });
 });
 
-const setDefaultPolicy = async (
-  systemId, token, styraUrl,
-) => new Promise((resolve, reject) => {
+const setDefaultPolicy = async (systemId, token, styraUrl) => new Promise((resolve, reject) => {
   const policyBody = {
     modules: {
       'ingress.rego': 'package policy["com.styra.envoy.ingress"].rules.rules\n\nimport data.dataset\n\ndefault allow = true\n',
@@ -147,9 +167,7 @@ const setDefaultPolicy = async (
   });
 });
 
-const setDefaultDataset = async (
-  systemId, token, styraUrl,
-) => new Promise((resolve, reject) => {
+const setDefaultDataset = async (systemId, token, styraUrl) => new Promise((resolve, reject) => {
   const datasetBody = {
     jwt: {
       aud: [
@@ -181,9 +199,7 @@ const setDefaultDataset = async (
   });
 });
 
-const getTokenFromOpaConfig = async (
-  url, token,
-) => new Promise((resolve, reject) => {
+const getTokenFromOpaConfig = async (url, token) => new Promise((resolve, reject) => {
   request({
     uri: url,
     method: 'GET',
@@ -196,8 +212,8 @@ const getTokenFromOpaConfig = async (
     if (error) {
       reject(new Error(error));
     } else {
-      const configYaml = yaml.safeLoadAll(body)[0].data['conf.yaml'];
-      resolve(yaml.safeLoad(configYaml).services[0].credentials.bearer.token);
+      const configYaml = yaml.loadAll(body)[0].data['conf.yaml'];
+      resolve(yaml.load(configYaml).services[0].credentials.bearer.token);
     }
   });
 });
@@ -231,7 +247,12 @@ discovery:
 };
 
 const createSystem = async (
-  namespace, systemName, repo, token, styraUrl, env,
+  namespace,
+  systemName,
+  repo,
+  token,
+  styraUrl,
+  env,
 ) => new Promise((resolve, reject) => {
   let createSystemBody = {
     name: systemName,
@@ -286,6 +307,8 @@ const setupSystem = async (
   styraUrl,
   systemOwners,
   consumers,
+  iamToken,
+  iamUrl,
 ) => {
   const promises = [];
   const systemResult = await createSystem(service, systemName, repo, token, styraUrl, env);
@@ -300,6 +323,7 @@ const setupSystem = async (
   promises.push(setDefaultDataset(systemResult.result.id, token, styraUrl));
   promises.push(updateOwners(systemResult.result.id, token, styraUrl, systemOwners));
   promises.push(applyConfiguration(opaConfig, systemName));
+  promises.push(uploadMapping(systemResult.result.id, systemName, iamToken, iamUrl));
   promises.push(handleConsumers(systemResult.result.id, token, styraUrl, consumers, systemName));
 
   return Promise.all(promises);

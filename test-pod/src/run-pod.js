@@ -2,6 +2,7 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 const { getShortSha } = require('../../utils/src/branch-info');
 const { extractOutput, LogFilter } = require('./extract-output');
+const { getImageDigest } = require('../../utils/src');
 
 const podName = async () => {
   const repo = process.env.GITHUB_REPOSITORY.split('/')[1];
@@ -86,6 +87,7 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl, trimPrefix
 const runPod = async ({ name, namespace }, image, configMap, trimPrefix) => {
   const pod = await podName();
 
+  const imageDigest = await getImageDigest(image);
   const args = [
     'run',
     pod,
@@ -93,8 +95,7 @@ const runPod = async ({ name, namespace }, image, configMap, trimPrefix) => {
     '--attach',
     '--restart=Never',
     '--pod-running-timeout=15m',
-    '--wait=true',
-    `--image=${image}`,
+    `--image=${imageDigest}`,
     '-n',
     namespace,
   ];
@@ -110,7 +111,7 @@ const runPod = async ({ name, namespace }, image, configMap, trimPrefix) => {
   });
 
   const json = JSON.stringify(
-    createOverride(pod, namespace, image, configMap, serviceUrl, trimPrefix),
+    createOverride(pod, namespace, imageDigest, configMap, serviceUrl, trimPrefix),
   );
   args.push(`--overrides=${json}`);
 

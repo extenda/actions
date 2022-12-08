@@ -19,6 +19,10 @@ inputs:
     description: .npmrc file folder destination
     default: "."
     required: false
+  auth-for-publishing:
+    default: "false"
+    description: Specify if publish config needs to be generated, by default read-only access will be provided
+    required: false
 runs:
-  using: node12
+  using: node16
   main: dist/index.js

@@ -89,8 +89,11 @@ describe('Configure iam', () => {
         { create: 'test1 desc' },
       ],
     };
-    request.mockImplementation((conf, cb) => cb(null, { statusCode: 200 },
-      JSON.stringify(checkSystem)));
+    request.mockImplementation((conf, cb) => cb(
+      null,
+      { statusCode: 200 },
+      JSON.stringify(checkSystem),
+    ));
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
     await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'project-staging-321', [], false);
@@ -135,13 +138,25 @@ describe('Configure iam', () => {
       'test.test.get': 'test desc',
       'test.test.create': 'test1 desc',
     };
-    request.mockImplementation((conf, cb) => cb(null, { statusCode: 404 },
-      JSON.stringify(checkSystem)));
+    request.mockImplementation((conf, cb) => cb(
+      null,
+      { statusCode: 404 },
+      JSON.stringify(checkSystem),
+    ));
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
     await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], false);
     expect(setupSystem).toHaveBeenCalledWith(
-      'test-service', 'test.test-service-staging', 'staging', 'test-repo', 'styra-token', 'https://extendaretail.styra.com', [], allowedConsumers,
+      'test-service',
+      'test.test-service-staging',
+      'staging',
+      'test-repo',
+      'styra-token',
+      'https://extendaretail.styra.com',
+      [],
+      allowedConsumers,
+      'iam-token',
+      'https://apiurl.test.dev',
     );
     expect(request).toHaveBeenCalledTimes(1);
   });
@@ -171,14 +186,26 @@ describe('Configure iam', () => {
       'test.test.get': 'test desc',
       'test.test.create': 'test1 desc',
     };
-    request.mockImplementation((conf, cb) => cb(null, { statusCode: 404 },
-      JSON.stringify(checkSystem)));
+    request.mockImplementation((conf, cb) => cb(
+      null,
+      { statusCode: 404 },
+      JSON.stringify(checkSystem),
+    ));
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
     await expect(configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], true))
       .resolves.toEqual(null);
     expect(setupSystem).toHaveBeenCalledWith(
-      'test-service', 'test.test-service-staging', 'staging', 'test-repo', 'styra-token', 'https://extendaretail.styra.com', [], allowedConsumers,
+      'test-service',
+      'test.test-service-staging',
+      'staging',
+      'test-repo',
+      'styra-token',
+      'https://extendaretail.styra.com',
+      [],
+      allowedConsumers,
+      'iam-token',
+      'https://apiurl.test.dev',
     );
     expect(request).toHaveBeenCalledTimes(1);
   });
@@ -212,20 +239,19 @@ describe('Configure iam', () => {
       'test.test.get': 'test desc',
       'test.test.create': 'test1 desc',
     };
-    request.mockImplementation((conf, cb) => cb(null, { statusCode: 200 },
-      JSON.stringify(checkSystem)));
+    request.mockImplementation((conf, cb) => cb(
+      null,
+      { statusCode: 200 },
+      JSON.stringify(checkSystem),
+    ));
     checkOwners.mockResolvedValueOnce(null);
     checkRepository.mockResolvedValueOnce(null);
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
     await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], true);
     expect(setupSystem).toHaveBeenCalledTimes(0);
-    expect(checkOwners).toHaveBeenCalledWith(
-      'existing-system', 'styra-token', 'https://extendaretail.styra.com', [],
-    );
-    expect(checkRepository).toHaveBeenCalledWith(
-      resultBody, 'styra-token', 'https://extendaretail.styra.com', 'test-repo',
-    );
+    expect(checkOwners).toHaveBeenCalledWith('existing-system', 'styra-token', 'https://extendaretail.styra.com', []);
+    expect(checkRepository).toHaveBeenCalledWith(resultBody, 'styra-token', 'https://extendaretail.styra.com', 'test-repo');
     expect(request).toHaveBeenCalledTimes(1);
   });
 
@@ -254,8 +280,11 @@ Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md
       'test.test.get': 'test desc',
       'test.test.create': 'test1 desc',
     };
-    request.mockImplementation((conf, cb) => cb(null, { statusCode: 404 },
-      JSON.stringify(checkSystem)));
+    request.mockImplementation((conf, cb) => cb(
+      null,
+      { statusCode: 404 },
+      JSON.stringify(checkSystem),
+    ));
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
     await expect(configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], false))
@@ -341,8 +370,11 @@ Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md
         },
       ],
     };
-    request.mockImplementation((conf, cb) => cb(null, { statusCode: 404 },
-      JSON.stringify(checkSystem)));
+    request.mockImplementation((conf, cb) => cb(
+      null,
+      { statusCode: 404 },
+      JSON.stringify(checkSystem),
+    ));
     setupPermissions.mockRejectedValueOnce(new Error('Could not fetch permission https://apiurl.test.dev/api/v1/permissions/test.test.get. Reason: bad request 400'));
 
     await expect(configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], false))

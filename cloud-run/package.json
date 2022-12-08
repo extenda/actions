@@ -5,8 +5,9 @@
   "description": "Deploy to Cloud Run",
   "main": "dist/index.js",
   "dependencies": {
-    "@actions/core": "^1.2.6",
+    "@actions/core": "^1.10.0",
     "@actions/exec": "^1.0.4",
+    "deepmerge": "^4.2.2",
     "jsonschema": "^1.2.5",
     "slack-notify": "^0.1.7",
     "yaml": "^1.8.2"

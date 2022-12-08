@@ -28,7 +28,6 @@ const {
   loadSecretIntoEnv,
 } = require('../src/secrets');
 
-
 const orgEnv = process.env;
 
 describe('Secrets Manager', () => {

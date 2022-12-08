@@ -1,4 +1,4 @@
-const { getInput } = require('@actions/core');
+const { getInput, getBooleanInput } = require('@actions/core');
 const { run } = require('../../utils/src');
 const { validateOrFetchNexusCredentials } = require('./nexus-credentials');
 const { createNpmrcFile } = require('./npmrc');
@@ -8,6 +8,7 @@ const action = async () => {
   const password = getInput('nexus-password') || process.env.NEXUS_PASSWORD;
   const serviceAccountKey = getInput('service-account-key');
   const outputDir = getInput('npmrc-dir') || '.';
+  const authForPublishing = getBooleanInput('auth-for-publishing') || false;
 
   const credentials = await validateOrFetchNexusCredentials({
     username,
@@ -18,6 +19,7 @@ const action = async () => {
   await createNpmrcFile({
     credentials,
     outputDir,
+    authForPublishing,
   });
 };
 

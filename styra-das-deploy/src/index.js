@@ -2,6 +2,7 @@ const core = require('@actions/core');
 const { run } = require('../../utils/src');
 const pushPolicy = require('./push-policy');
 const fetchSystemId = require('./fetch-system-id');
+const pushMask = require('./push-mask');
 
 const action = async () => {
   const styraUrl = core.getInput('styra-url') || 'https://extendaretail.svc.styra.com';
@@ -12,6 +13,20 @@ const action = async () => {
   const styraStagingId = await fetchSystemId(styraUrl, styraToken, `${permissionPrefix}.${serviceName}-staging`);
   const styraProdId = await fetchSystemId(styraUrl, styraToken, `${permissionPrefix}.${serviceName}-prod`);
   await pushPolicy(
+    styraUrl,
+    styraToken,
+    styraStagingId,
+    styraProdId,
+    'ingress',
+  );
+  await pushPolicy(
+    styraUrl,
+    styraToken,
+    styraStagingId,
+    styraProdId,
+    'app',
+  );
+  await pushMask(
     styraUrl,
     styraToken,
     styraStagingId,

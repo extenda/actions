@@ -51,7 +51,8 @@ const execModule = async (dir, commands) => {
 const findModules = () => fs.readdirSync(basedir)
   .map((file) => path.join(basedir, file))
   .filter((file) => fs.lstatSync(file).isDirectory())
-  .filter((dir) => fs.existsSync(path.join(dir, 'package.json')));
+  .filter((dir) => fs.existsSync(path.join(dir, 'package.json')))
+  .sort((a, b) => a.localeCompare(b));
 
 const eachModules = (fn) => findModules().forEach(fn);
 

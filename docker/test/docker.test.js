@@ -1,37 +1,31 @@
 jest.mock('@actions/core');
 jest.mock('child_process');
-jest.mock('fs');
 
+const mockFs = require('mock-fs');
 const core = require('@actions/core');
 const cp = require('child_process');
-const fs = require('fs');
-
-const docker = require('../src/docker.js');
-// const maxBufferSize = require('../src/settings');
+const docker = require('../src/docker');
 
 describe('core and cp methods', () => {
   afterEach(() => {
     core.getInput.mockReset();
     core.setFailed.mockReset();
     cp.execSync.mockReset();
-    fs.existsSync.mockReset();
   });
 
   afterAll(() => {
     core.getInput.mockRestore();
     core.setFailed.mockRestore();
     cp.execSync.mockRestore();
-    fs.existsSync.mockRestore();
+    mockFs.restore();
   });
 
   describe('Build image', () => {
     test('No Dockerfile', () => {
+      mockFs({});
       const dockerfile = 'Dockerfile.nonexistent';
       core.getInput.mockReturnValue(dockerfile);
-      fs.existsSync.mockReturnValueOnce(false);
-
       docker.build('gcr.io/some-project/image:v1');
-      expect(fs.existsSync).toHaveBeenCalledWith(dockerfile);
       expect(core.setFailed).toHaveBeenCalledWith(`Dockerfile does not exist in location ${dockerfile}`);
     });
 
@@ -41,12 +35,15 @@ describe('core and cp methods', () => {
       const tags = ['v1'];
       const image = 'gcr.io/some-project/image';
 
+      mockFs({
+        Dockerfile: '',
+        folder: {},
+      });
+
       core.getInput.mockReturnValueOnce(dockerfile);
       core.getInput.mockReturnValueOnce(dockerContext);
-      fs.existsSync.mockReturnValueOnce(true);
 
       docker.build(image, null, tags);
-      expect(fs.existsSync).toHaveBeenCalledWith(dockerfile);
       expect(cp.execSync).toHaveBeenCalledWith(`docker build -f ${dockerfile} -t ${image}:${tags[0]} ${dockerContext}`);
     });
 
@@ -56,12 +53,15 @@ describe('core and cp methods', () => {
       const tags = ['v2', 'latest'];
       const image = 'gcr.io/some-project/image';
 
+      mockFs({
+        Dockerfile: '',
+        folder: {},
+      });
+
       core.getInput.mockReturnValueOnce(dockerfile);
       core.getInput.mockReturnValueOnce(dockerContext);
-      fs.existsSync.mockReturnValueOnce(true);
 
       docker.build(image, null, tags);
-      expect(fs.existsSync).toHaveBeenCalledWith(dockerfile);
       expect(cp.execSync).toHaveBeenCalledWith(`docker build -f ${dockerfile} -t ${image}:${tags[0]} -t ${image}:${tags[1]} ${dockerContext}`);
     });
 
@@ -71,12 +71,15 @@ describe('core and cp methods', () => {
       const image = 'docker.io/this-project/that-image';
       const buildArgs = ['VERSION=latest', 'BUILD_DATE=2020-01-14'];
 
+      mockFs({
+        Dockerfile: '',
+        folder: {},
+      });
+
       core.getInput.mockReturnValueOnce(dockerfile);
       core.getInput.mockReturnValueOnce(dockerContext);
-      fs.existsSync.mockReturnValueOnce(true);
 
       docker.build(image, buildArgs);
-      expect(fs.existsSync).toHaveBeenCalledWith(dockerfile);
       expect(cp.execSync).toHaveBeenCalledWith(
         `docker build -f Dockerfile -t ${image} --build-arg VERSION=latest --build-arg BUILD_DATE=2020-01-14 ${dockerContext}`,
       );

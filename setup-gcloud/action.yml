@@ -21,5 +21,5 @@ outputs:
   project-id:
     description: The default project ID associated with the service account.
 runs:
-  using: node12
+  using: node16
   main: dist/index.js

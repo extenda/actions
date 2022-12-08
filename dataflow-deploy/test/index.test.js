@@ -11,9 +11,17 @@ const drainJob = require('../src/drain-job');
 const deployJob = require('../src/deploy-job');
 const { getTribeProject } = require('../../cloud-run/src/cluster-info');
 
+const orgEnv = process.env;
+
 describe('deploy dataflow Action', () => {
+  beforeEach(() => {
+    process.env = { ...orgEnv };
+    process.env.GITHUB_REF = 'refs/heads/master';
+  });
+
   afterEach(() => {
     jest.resetAllMocks();
+    process.env = orgEnv;
   });
 
   test('It can run the action', async () => {
@@ -98,5 +106,11 @@ describe('deploy dataflow Action', () => {
       'europe-west1',
       'test-project-342',
     );
+  });
+
+  test('It rejects action if not trunk-based', async () => {
+    core.getInput.mockReturnValue('test');
+    process.env.GITHUB_REF = 'refs/heads/develop';
+    await expect(action()).rejects.toThrow(/^Action not allowed on ref refs\/heads\/develop/);
   });
 });

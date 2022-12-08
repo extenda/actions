@@ -1,7 +1,6 @@
 const { agent } = require('supertest');
 const core = require('@actions/core');
 
-
 /**
  * @param {string} baseUrl
  * @param {string} apiToken

@@ -3,7 +3,8 @@ jest.mock('../../setup-gcloud/src/setup-gcloud');
 jest.mock('../../cloud-run/src/cluster-info');
 jest.mock('../../cloud-run/src/project-info');
 jest.mock('../../cloud-run/src/kubectl-auth');
-jest.mock('../../cloud-run/src/create-namespace');
+jest.mock('../src/check-namespace-exists');
+jest.mock('../src/check-number-of-pods-running');
 jest.mock('../src/patch-deployment-yaml');
 jest.mock('../src/patch-service-yaml');
 jest.mock('../src/patch-statefulset-yaml');
@@ -12,6 +13,7 @@ jest.mock('../src/apply-kubectl');
 jest.mock('../src/autoscale');
 jest.mock('../../utils', () => ({
   loadTool: jest.fn(),
+  getImageDigest: jest.fn(),
 }));
 
 const exec = require('@actions/exec');
@@ -19,13 +21,15 @@ const mockFs = require('mock-fs');
 const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const patchDeployment = require('../src/patch-deployment-yaml');
-const patchService = require('../src/patch-service-yaml');
-const patchStatefulSet = require('../src/patch-statefulset-yaml');
+const patchServiceYaml = require('../src/patch-service-yaml');
+const patchStatefulSetYaml = require('../src/patch-statefulset-yaml');
 const runDeploy = require('../src/run-deploy');
 const kustomize = require('../src/kustomize');
-const createNamespace = require('../../cloud-run/src/create-namespace');
+const checkNamespaceExists = require('../src/check-namespace-exists');
+const checkRequiredNumberOfPodsIsRunning = require('../src/check-number-of-pods-running');
 const applyKubectl = require('../src/apply-kubectl');
 const applyAutoscale = require('../src/autoscale');
+const { getImageDigest } = require('../../utils/src');
 
 const orgEnv = process.env;
 
@@ -48,7 +52,7 @@ describe('Run Deploy', () => {
     jest.resetAllMocks();
   });
 
-  test('It calls create namespace', async () => {
+  test('It calls check namespace exists', async () => {
     getClusterInfo.mockResolvedValueOnce({
       project: 'project',
       cluster: 'cluster',
@@ -56,7 +60,8 @@ describe('Run Deploy', () => {
     });
     exec.exec.mockResolvedValue(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project');
-    const image = 'gcr.io/test-project/my-service:tag';
+    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-project/my-service@sha256:111');
+    const image = 'eu.gcr.io/test-project/my-service:tag';
     const name = 'deployment-name';
     await runDeploy(
       'service-account',
@@ -64,9 +69,7 @@ describe('Run Deploy', () => {
       image,
     );
 
-    expect(createNamespace).toHaveBeenCalledWith(
-      'test-staging-project',
-      'skip',
+    expect(checkNamespaceExists).toHaveBeenCalledWith(
       'deployment-name',
     );
   });
@@ -85,14 +88,14 @@ describe('Run Deploy', () => {
           targetPort: 8080,
         }],
     };
-    const image = 'gcr.io/test-project/my-service:tag';
+    const image = 'eu.gcr.io/test-project/my-service:tag';
     await runDeploy(
       'service-account',
       service,
       image,
     );
 
-    expect(patchService).toHaveBeenCalledWith(service, expect.anything());
+    expect(patchServiceYaml).toHaveBeenCalledWith(service, expect.anything());
   });
 
   test('It will deploy StatefulSet when storage is defined', async () => {
@@ -108,14 +111,14 @@ describe('Run Deploy', () => {
         mountPath: '/data/storage',
       },
     };
-    const image = 'gcr.io/test-project/my-service:tag';
+    const image = 'eu.gcr.io/test-project/my-service:tag';
     await runDeploy(
       'service-account',
       service,
       image,
     );
 
-    expect(patchStatefulSet).toHaveBeenCalledWith(service, expect.anything());
+    expect(patchStatefulSetYaml).toHaveBeenCalledWith(service, expect.anything());
     expect(kustomize).toHaveBeenCalledWith([
       'edit',
       'add',
@@ -135,7 +138,7 @@ describe('Run Deploy', () => {
       name: 'deployment-name',
       storage: undefined,
     };
-    const image = 'gcr.io/test-project/my-service:tag';
+    const image = 'eu.gcr.io/test-project/my-service:tag';
     await runDeploy(
       'service-account',
       service,
@@ -156,8 +159,9 @@ describe('Run Deploy', () => {
     getClusterInfo.mockResolvedValueOnce({});
     exec.exec.mockResolvedValue(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project');
+    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-project/my-service@sha256:111');
 
-    const image = 'gcr.io/test-project/my-service:tag';
+    const image = 'eu.gcr.io/test-project/my-service:tag';
     const name = 'deployment-name';
     await runDeploy(
       'service-account',
@@ -174,7 +178,7 @@ describe('Run Deploy', () => {
       'edit',
       'set',
       'image',
-      `eu.gcr.io/extenda/IMAGE:TAG=${image}`,
+      'eu.gcr.io/extenda/IMAGE:TAG=eu.gcr.io/test-project/my-service@sha256:111',
     ]);
     expect(kustomize).toHaveBeenNthCalledWith(4, [
       'edit',
@@ -192,7 +196,7 @@ describe('Run Deploy', () => {
     exec.exec.mockResolvedValue(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project');
 
-    const image = 'gcr.io/test-project/my-service:tag';
+    const image = 'eu.gcr.io/test-project/my-service:tag';
     const service = {
       name: 'deployment-name',
       storage: {
@@ -222,7 +226,7 @@ describe('Run Deploy', () => {
     exec.exec.mockResolvedValue(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project');
 
-    const image = 'gcr.io/test-project/my-service:tag';
+    const image = 'eu.gcr.io/test-project/my-service:tag';
     const service = {
       name: 'deployment-name',
       replicas: 1,
@@ -237,5 +241,6 @@ describe('Run Deploy', () => {
     );
 
     expect(applyAutoscale).toHaveBeenCalledWith(service.name, 'deployment', undefined, service.replicas, dryRun);
+    expect(checkRequiredNumberOfPodsIsRunning).toHaveBeenCalledTimes(1);
   });
 });

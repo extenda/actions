@@ -7,15 +7,15 @@ const mockListComments = jest.fn(() => ({ data: [] }));
 const mockDeleteComment = jest.fn();
 
 jest.mock('@actions/github', () => ({
-  GitHub: function GitHub() {
-    return {
+  getOctokit: () => ({
+    rest: {
       issues: {
         createComment: mockComment,
         listComments: mockListComments,
         deleteComment: mockDeleteComment,
       },
-    };
-  },
+    },
+  }),
   context: {
     repo: () => ({
       owner: 'extenda',
@@ -151,6 +151,26 @@ Other text below
     generateOutputs.mockResolvedValueOnce([]);
     const comment = await action();
     expect(comment).toEqual(`### :white_check_mark: Terraform plan with no changes\n\nTerraform plan reported no changes.\n\n*Workflow: \`Terraform\`*\n*Working directory: \`${process.cwd()}\`*`);
+    expect(mockComment).toHaveBeenCalled();
+  });
+
+  test('It can generate comment for too large plan', async () => {
+    function makeLongTestPlan(length) {
+      let result = '';
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz #0123456789?%';
+      const charactersLength = characters.length;
+      let i = 0;
+      for (i; i < length; i += 1) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      }
+      return result;
+    }
+    const longPlan = 'Plan'.concat(makeLongTestPlan(250000));
+    generateOutputs.mockResolvedValueOnce([
+      { module: 'work', output: longPlan, status: 0 },
+    ]);
+    const comment = await action();
+    expect(comment).toEqual(`### :mag: Terraform plan changes\n\nThe plan is to long to post in a github comment\nVerify the Terraform plan output in the plan action\nIf the plan looks alright it can be applied according to below\n\n*Workflow: \`Terraform\`*\n*Working directory: \`${process.cwd()}\`*`);
     expect(mockComment).toHaveBeenCalled();
   });
 

@@ -20,6 +20,9 @@ inputs:
   maven-args:
     description: Custom maven scan command
     required: false
+  npm-args:
+    description: Custom node scan command
+    required: false
   dotnet-args:
     description: Custom Sonar arguments that will be appended to the dotnet scanner command
     required: false
@@ -45,6 +48,9 @@ inputs:
     description: Enable verbose logging in the sonar scanner.
     required: false
     default: 'false'
+  report-path:
+    description: Use a specific path to get the Sonar report for the quality gate
+    required: false
 runs:
-  using: node12
+  using: node16
   main: dist/index.js

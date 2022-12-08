@@ -16,7 +16,12 @@ const gcloudAuth = async (serviceAccountKey) => setupGcloud(
 );
 
 const setupEnvironment = async (
-  serviceAccountKey, gcloudAuthKey, iam, styraUrl, iamUrl, systemOwners,
+  serviceAccountKey,
+  gcloudAuthKey,
+  iam,
+  styraUrl,
+  iamUrl,
+  systemOwners,
 ) => {
   const projectId = await gcloudAuth(gcloudAuthKey);
   const { env: projectEnv } = projectInfo(projectId);
@@ -46,7 +51,15 @@ const setupEnvironment = async (
     iamToken = await fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenant);
   }
   return configureIAM(
-    iam, styraToken, styraUrl, url, iamToken, projectEnv, projectId, systemOwners, skipIAM,
+    iam,
+    styraToken,
+    styraUrl,
+    url,
+    iamToken,
+    projectEnv,
+    projectId,
+    systemOwners,
+    skipIAM,
   );
 };
 
@@ -74,14 +87,24 @@ const action = async () => {
       core.info('Update staging');
       // eslint-disable-next-line no-await-in-loop
       await setupEnvironment(
-        serviceAccountKey, serviceAccountKeyStaging, iam, styraUrl, iamUrl, systemOwners,
+        serviceAccountKey,
+        serviceAccountKeyStaging,
+        iam,
+        styraUrl,
+        iamUrl,
+        systemOwners,
       );
 
       if (!skipProd) {
         core.info('Update prod');
         // eslint-disable-next-line no-await-in-loop
         await setupEnvironment(
-          serviceAccountKey, serviceAccountKeyProd, iam, styraUrl, iamUrl, systemOwners,
+          serviceAccountKey,
+          serviceAccountKeyProd,
+          iam,
+          styraUrl,
+          iamUrl,
+          systemOwners,
         );
       }
     }

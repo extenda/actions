@@ -14,7 +14,9 @@ describe('check service account', () => {
 
   test('it checks service account exists', async () => {
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(revisionsListString));
     checkServiceAccount('service-name', 'test-staging-t3st');
     expect(exec.exec).toHaveBeenCalledTimes(1);
@@ -22,7 +24,9 @@ describe('check service account', () => {
 
   test('it checks service account doesn\'t exist', async () => {
     exec.exec.mockImplementationOnce((
-      cmd, args, opts,
+      cmd,
+      args,
+      opts,
     ) => opts.listeners.stdout(revisionsListString));
     await expect(checkServiceAccount('service-name3', 'test-staging-t3st')).rejects
       .toEqual(new Error('This service has no service account. Please refer to "https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md#services" for help'));

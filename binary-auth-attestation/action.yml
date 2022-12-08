@@ -1,0 +1,51 @@
+name: Binary Auth attestation
+description: Sign and create a Binary Authorization attestation using a Cloud KMS key
+author: Extenda Retail
+inputs:
+  attestor:
+    description: |
+      ID of the attestor or fully qualified identifier for the attestor.
+    default: "quality-assurance-attestor"
+    required: false
+  attestor-project:
+    description: |
+      Project ID of the Google Cloud project for the attestor.
+    default: "platform-prod-2481"
+    required: false
+  keyversion-project:
+    description: |
+      Project ID of the Google Cloud project for the CryptoKeyVersion.
+    default: "platform-prod-2481"
+    required: false
+  keyversion-location:
+    description: |
+      The location of the CryptoKeyVersion.
+    default: "europe-west1"
+    required: false
+  keyversion-keyring:
+    description: |
+      The keyring of the CryptoKeyVersion.
+    default: "global-keyring-binary"
+    required: false
+  keyversion-key:
+    description: |
+      The key of the CryptoKeyVersion.
+    default: "quality-assurance-attestor-key"
+    required: false
+  keyversion:
+    description: |
+      ID of the CryptoKeyVersion or fully qualified identifier for the CryptoKeyVersion.
+    default: "1"
+    required: false
+  image-path:
+    description: |
+      Image URL in the format eu.gcr.io/extenda/image
+    required: true
+  service-account-key:
+    description:
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+runs:
+  using: node16
+  main: dist/index.js

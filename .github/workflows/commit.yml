@@ -5,21 +5,16 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-
-      - name: Install Node
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
         with:
-          node-version: 12
+          fetch-depth: 0
 
-      - name: Cache node modules
-        uses: actions/cache@v1
-        id: cache
+      - name: Install Node 16
+        uses: actions/setup-node@v3
         with:
-          path: ~/.npm
-          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.OS }}-node-
+          node-version: 16
+          cache: npm
+          cache-dependency-path: '**/package-lock.json'
 
       - name: Install dependencies
         run: npm ci
@@ -30,26 +25,12 @@ jobs:
 
       - name: Run tests
         run: |
-          echo "::stop-commands::jest-output"
+          echo "::stop-commands::`echo -n ${{ github.token }} | sha256sum | head -c 64`"
           npm test -- --ci
-          echo "::jest-output::"
+          echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
         env:
-          NEXUS_USERNAME: ${{secrets.NEXUS_USERNAME}}
-          NEXUS_PASSWORD: ${{secrets.NEXUS_PASSWORD}}
-
-      - name: Check compiled dist/* files
-        run: |
-          npm run build
-          git add "*/dist/**"
-          if [ -n "$(git diff-index --exit-code HEAD '*/dist/**')" ]; then
-            echo ""
-            echo "::error::Found uncommitted changes to compiled javascripts."
-            echo ""
-            git diff-index --stat HEAD '*/dist/**'
-            echo ""
-            echo "::error::Did you remember to run 'npm run build'?"
-            exit 1
-          fi
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
       - name: Analyze with SonarCloud
         uses: ./sonar-scanner
@@ -63,11 +44,44 @@ jobs:
           sonar-host: https://sonar.extenda.io
           service-account-key: ${{ secrets.SECRET_AUTH }}
 
+  verify-dist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Node 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: npm
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Rebuild dist files
+        run: npm run build
+
+      - name: Check compiled dist/* files
+        run: |
+          git add '*/dist/**'
+          if [ "$(git diff --staged --ignore-space-at-eol '*/dist/**' | wc -l)" -gt "0" ]; then
+            echo ""
+            echo "::error::Found uncommitted changes to compiled javascripts."
+            echo ""
+            git diff --staged '*/dist/**'
+            echo ""
+            echo "::error::Did you remember to run 'npm run build'?"
+            exit 1
+          fi
+
   acceptance-windows:
     runs-on: windows-latest
-    needs: test
+    needs:
+      - test
+      - verify-dist
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -99,13 +113,16 @@ jobs:
 
   acceptance-linux:
     runs-on: ubuntu-latest
-    needs: test
+    needs:
+      - test
+      - verify-dist
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
 
       - name: Install Java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
+          distribution: adopt
           java-version: 11
 
       - name: Run Maven (no POM)
@@ -183,13 +200,18 @@ jobs:
     if: github.ref == 'refs/heads/master'
     needs:
       - test
+      - verify-dist
       - acceptance-windows
       - acceptance-linux
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Create release
         uses: ./conventional-release
+        with:
+          name: Actions
         id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

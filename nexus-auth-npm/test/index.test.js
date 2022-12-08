@@ -8,7 +8,6 @@ const { validateOrFetchNexusCredentials } = require('../src/nexus-credentials');
 const { createNpmrcFile } = require('../src/npmrc');
 const action = require('../src/index');
 
-
 describe('Auth to Nexus npm registry action', () => {
   let envRestore;
 
@@ -41,6 +40,7 @@ describe('Auth to Nexus npm registry action', () => {
         username: 'nexus-username',
         password: 'nexus-password',
       },
+      authForPublishing: false,
       outputDir: 'npmrc-dir',
     });
   });
@@ -74,6 +74,7 @@ describe('Auth to Nexus npm registry action', () => {
         username: 'env-nexus-username',
         password: 'env-nexus-password',
       },
+      authForPublishing: false,
       outputDir: '.',
     });
   });

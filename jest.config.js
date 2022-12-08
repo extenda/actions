@@ -21,4 +21,5 @@ module.exports = {
   ],
   rootDir: process.cwd(),
   testEnvironment: 'node',
+  maxWorkers: '50%',
 };

@@ -117,7 +117,7 @@ module.exports = {
             type: 'array',
             items: {
               type: 'string',
-              pattern: '^[a-z][-a-z]{1,15}\\.[a-z][-a-z]{1,15}$',
+              pattern: '^(?:[a-z][-a-z]{2}\\.)?[a-z][-a-z]{1,15}\\.[a-z][-a-z]{1,15}$',
             },
           },
         },

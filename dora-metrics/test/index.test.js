@@ -2,7 +2,6 @@ jest.mock('@actions/core');
 jest.mock('../src/bug-log');
 jest.mock('../src/deploy-log');
 
-
 const core = require('@actions/core');
 const action = require('../src/index');
 const generateBugLog = require('../src/bug-log');

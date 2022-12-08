@@ -4,13 +4,13 @@ jest.mock('../../utils');
 const mockDispatch = jest.fn();
 
 jest.mock('@actions/github', () => ({
-  GitHub: function GitHub() {
-    return {
+  getOctokit: () => ({
+    rest: {
       repos: {
         createDispatchEvent: mockDispatch,
       },
-    };
-  },
+    },
+  }),
   context: {
     repo: () => ({
       owner: 'extenda',
@@ -37,10 +37,13 @@ describe('repository-dispatch', () => {
   });
 
   test('It can dispatch an event', async () => {
-    core.getInput.mockReturnValueOnce('extenda/test-repo')
+    core.getInput
+      .mockReturnValueOnce('extenda/test-repo')
       .mockReturnValueOnce('test-event')
       .mockReturnValueOnce('');
+
     await action();
+
     expect(mockDispatch).toHaveBeenCalledWith({
       owner: 'extenda',
       repo: 'test-repo',

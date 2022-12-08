@@ -15,12 +15,22 @@ const createCertificate = async (domains, projectID, name) => gcloudOutput([
   '--global',
 ]);
 
+const deleteCertificateFromProxy = async (projectID, certificates) => gcloudOutput([
+  'compute',
+  'target-https-proxies',
+  'update',
+  'https-lb-proxy',
+  `--ssl-certificates=${certificates.join(',')}`,
+  `--project=${projectID}`,
+]).then(() => core.info('Certificates updated successfully!'));
+
 const deleteCertificate = async (projectID, name) => gcloudOutput([
   'compute',
   'ssl-certificates',
   'delete',
   name,
   `--project=${projectID}`,
+  '--quiet',
   '--global',
 ]);
 
@@ -81,6 +91,7 @@ const handleCertificates = async (domainName, project) => {
     await createCertificate(newDomains, project, newCertificateName);
   } else {
     certificateListNames.splice(certificateListNames.indexOf(firstCreatedName), 1);
+    await deleteCertificateFromProxy(project, certificateListNames);
     await deleteCertificate(project, firstCreatedName);
     if (lastCreatedDomains.length < MAX_DOMAINS) {
       await createCertificate(newDomains, project, newCertificateName);

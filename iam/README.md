@@ -104,6 +104,7 @@ roles:
     name: Braveheart Quotes User
     desc: Read and like movie quotes.
     permissions:
+      - iam.permission.list # permissions from external services are also supported
       - favorite.toggle
       - favorite.list
       - quote.get

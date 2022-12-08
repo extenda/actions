@@ -1,10 +1,9 @@
+/* eslint-disable no-use-before-define */
 const core = require('@actions/core');
 const axios = require('axios');
 const { iamApiErrorToString } = require('./utils/iam-api-error-to-string');
 
-const createRole = async (
-  iamToken, roleId, roleName, rolePermissions, iamUrl,
-) => axios({
+const createRole = async (iamToken, roleId, roleName, rolePermissions, iamUrl) => axios({
   url: `${iamUrl}/api/v1/roles`,
   method: 'POST',
   headers: {
@@ -24,10 +23,7 @@ const createRole = async (
   throw new Error(iamApiErrorToString(err, `Couldn't add role '${roleId}'`));
 });
 
-
-const updateRole = async (
-  iamToken, roleId, roleName, rolePermissions, iamUrl,
-) => axios({
+const updateRole = async (iamToken, roleId, roleName, rolePermissions, iamUrl) => axios({
   url: `${iamUrl}/api/v1/roles/${roleId}`,
   method: 'PUT',
   headers: {
@@ -46,9 +42,7 @@ const updateRole = async (
   throw new Error(iamApiErrorToString(err, `Couldn't update role '${roleId}'`));
 });
 
-const getRole = async (
-  iamToken, iamUrl, roleId,
-) => axios({
+const getRole = async (iamToken, iamUrl, roleId) => axios({
   url: `${iamUrl}/api/v1/roles/${roleId}`,
   method: 'GET',
   headers: {
@@ -68,8 +62,8 @@ function arraysEqual(rolePermissions, newPermissions) {
   if (rolePermissions == null || newPermissions == null) return false;
   if (rolePermissions.length !== newPermissions.length) return false;
 
-  for (let i = 0; i < rolePermissions.length; i += 1) {
-    if (rolePermissions[i] !== newPermissions[i]) return false;
+  for (const index in rolePermissions) {
+    if (rolePermissions[index] !== newPermissions[index]) return false;
   }
   return true;
 }
@@ -78,19 +72,21 @@ const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
   const promises = [];
   roles.forEach((role) => {
     const roleId = `${systemId}.${role.id}`;
-    const roleDesc = role.desc;
-    const rolePermissions = role.permissions.map((p) => `${systemId}.${p}`);
+    const roleName = role.name;
+    const rolePermissions = role.permissions.map(
+      (permissionId) => createPermissionId(systemId, permissionId),
+    );
 
     core.info(`fetching data for ${roleId}`);
     promises.push(getRole(iamToken, iamUrl, roleId).then((roleResult) => {
       if (roleResult === true) {
         core.info(`creating role '${roleId}'`);
-        return createRole(iamToken, roleId, roleDesc, rolePermissions, iamUrl)
+        return createRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
           .then((message) => core.info(message));
       }
-      if (!arraysEqual(roleResult.permissions, rolePermissions) || roleResult.name !== roleDesc) {
+      if (!arraysEqual(roleResult.permissions, rolePermissions) || roleResult.name !== roleName) {
         core.info(`updating role '${roleId}'`);
-        return updateRole(iamToken, roleId, roleDesc, rolePermissions, iamUrl)
+        return updateRole(iamToken, roleId, roleName, rolePermissions, iamUrl)
           .then((message) => core.info(message));
       }
       core.info(`role '${roleId} exists`);
@@ -102,6 +98,21 @@ const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
   await Promise.all(promises);
   core.info('All roles processed');
 };
+
+/**
+ * @param systemId {string}
+ * @param permission {string}
+ */
+function createPermissionId(systemId, permissionId) {
+  return isFullyQualifiedPermissionId(permissionId)
+    ? permissionId
+    : `${systemId}.${permissionId}`;
+}
+
+/** @param permission {string} */
+function isFullyQualifiedPermissionId(permissionId) {
+  return permissionId.split('.').length === 3;
+}
 
 module.exports = {
   setupRoles, getRole, createRole, updateRole, arraysEqual,

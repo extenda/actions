@@ -21,9 +21,7 @@ const getJobs = async (region, jobName, newJobId, projectId) => {
   return output.trim().split(/[\r\n]+/);
 };
 
-const drainJob = async (
-  newJobId, jobName, region, projectId,
-) => {
+const drainJob = async (newJobId, jobName, region, projectId) => {
   const jobs = await getJobs(region, jobName, newJobId, projectId);
   if (jobs[0] === '') {
     return true;

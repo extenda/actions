@@ -1,14 +1,14 @@
 const mockPulls = jest.fn();
 
 jest.mock('@actions/github', () => ({
-  GitHub: function GitHub() {
-    return {
+  getOctokit: () => ({
+    rest: {
       pulls: {
         list: mockPulls,
       },
-    };
-  },
-  context: {},
+    },
+    context: {},
+  }),
 }));
 
 const pullInfo = require('../src/pull-request-info');

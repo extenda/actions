@@ -74,7 +74,6 @@ describe('action', () => {
     };
     const expectExeToBeCalled = mockExeSyncCall('iam.group-created.v1', response, dryRun);
 
-
     expect(await action()).toBeUndefined();
 
     expectExeToBeCalled();
@@ -98,7 +97,6 @@ describe('action', () => {
       success: false,
     };
     const expectExeToBeCalled = mockExeSyncCall('iam.group-created.v1', response);
-
 
     await expect(action()).rejects.toThrowError('Sync process had some errors (see details above).');
 

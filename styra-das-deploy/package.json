@@ -5,9 +5,9 @@
   "description": "publish staging policy into production DAS system",
   "main": "dist/index.js",
   "dependencies": {
-    "@actions/core": "^1.2.6",
+    "@actions/core": "^1.10.0",
     "@actions/exec": "^1.0.4",
-    "axios": "^0.20.0",
+    "axios": "^0.25.0",
     "jsonschema": "^1.2.5",
     "request": "^2.88.2",
     "yaml": "^1.8.2"

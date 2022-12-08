@@ -14,6 +14,7 @@ describe('Setup roles and handle', () => {
   const roles = [
     {
       id: 'admin',
+      name: 'sys-id admin',
       desc: 'sys-id admin',
       permissions: [
         'resource.get',
@@ -131,8 +132,13 @@ describe('Setup roles and handle', () => {
   test('it creates a new role', async () => {
     axios.mockResolvedValueOnce({ status: 200 });
 
-    await expect(createRole('iam-token', 'sys-id.admin', 'sys-id admin',
-      ['sys-id.resources.get', 'sys-id.resources-create'], 'iam-url'))
+    await expect(createRole(
+      'iam-token',
+      'sys-id.admin',
+      'sys-id admin',
+      ['sys-id.resources.get', 'sys-id.resources-create'],
+      'iam-url',
+    ))
       .resolves.toEqual('role \'sys-id.admin\' added');
 
     expect(axios).toHaveBeenCalledTimes(1);
@@ -141,8 +147,13 @@ describe('Setup roles and handle', () => {
   test('it failes to create a new role', async () => {
     axios.mockRejectedValueOnce({ message: 'Error', response: { status: 500, data: { error: 'Message' } } });
 
-    await expect(createRole('iam-token', 'sys-id.admin', 'sys-id admin',
-      ['sys-id.resources.get', 'sys-id.resources-create'], 'iam-url'))
+    await expect(createRole(
+      'iam-token',
+      'sys-id.admin',
+      'sys-id admin',
+      ['sys-id.resources.get', 'sys-id.resources-create'],
+      'iam-url',
+    ))
       .rejects.toThrow('Couldn\'t add role \'sys-id.admin\'. Request failed with code [500] and error [Message]');
 
     expect(axios).toHaveBeenCalledTimes(1);
@@ -151,8 +162,13 @@ describe('Setup roles and handle', () => {
   test('it updates a role', async () => {
     axios.mockResolvedValueOnce({ status: 200 });
 
-    await expect(updateRole('iam-token', 'sys-id.admin', 'sys-id admin',
-      ['sys-id.resources.get', 'sys-id.resources-create'], 'iam-url'))
+    await expect(updateRole(
+      'iam-token',
+      'sys-id.admin',
+      'sys-id admin',
+      ['sys-id.resources.get', 'sys-id.resources-create'],
+      'iam-url',
+    ))
       .resolves.toEqual('role \'sys-id.admin\' updated');
 
     expect(axios).toHaveBeenCalledTimes(1);
@@ -161,8 +177,13 @@ describe('Setup roles and handle', () => {
   test('it failes to update a role', async () => {
     axios.mockRejectedValueOnce({ message: 'Error', response: { status: 500, data: { error: 'Message' } } });
 
-    await expect(updateRole('iam-token', 'sys-id.admin', 'sys-id admin',
-      ['sys-id.resources.get', 'sys-id.resources-create'], 'iam-url'))
+    await expect(updateRole(
+      'iam-token',
+      'sys-id.admin',
+      'sys-id admin',
+      ['sys-id.resources.get', 'sys-id.resources-create'],
+      'iam-url',
+    ))
       .rejects.toThrow('Couldn\'t update role \'sys-id.admin\'. Request failed with code [500] and error [Message]');
 
     expect(axios).toHaveBeenCalledTimes(1);

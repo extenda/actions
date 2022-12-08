@@ -17,7 +17,7 @@ const getSystemOwners = async (githubToken, serviceAccountKey) => {
   const cluster = await getClusterInfo(projectId, undefined);
   const { project: tribe } = projectInfo(cluster.project);
 
-  const clanYamlFile = await octokit.repos.getContent({
+  const clanYamlFile = await octokit.rest.repos.getContent({
     owner: 'extenda',
     repo: 'tf-infra-gcp',
     path: `organization/extendaretail-com/departments/product-development/${tribe}/clans/${clan}/clan.yaml`,
@@ -28,7 +28,7 @@ const getSystemOwners = async (githubToken, serviceAccountKey) => {
     });
 
   const clanEmails = [];
-  const clanYaml = yaml.safeLoad(clanYamlFile);
+  const clanYaml = yaml.load(clanYamlFile);
   Object.keys(clanYaml.members.users).forEach((user) => {
     clanEmails.push(clanYaml.members.users[user].email);
   });

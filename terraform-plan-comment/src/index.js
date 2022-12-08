@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const { GitHub } = require('@actions/github');
+const github = require('@actions/github');
 const { run } = require('../../utils');
 const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
 const generateOutputs = require('./generate-outputs');
@@ -43,13 +43,29 @@ const createComment = (changes, workingDirectory, footer) => {
       '',
     );
   } else {
-    comment.push(
-      '### :mag: Terraform plan changes',
-      '',
-      'The output only includes modules with changes.',
-      '',
-      ...changes,
-    );
+    // Convert changes to string
+    const changesString = changes.toString();
+    const commentLimit = 250000;
+    // If changes + footer + header is longer than 260000 chars the comment will fail
+    // Footer is usually around 1000 chars
+    if (changesString.length > commentLimit) {
+      comment.push(
+        '### :mag: Terraform plan changes',
+        '',
+        'The plan is to long to post in a github comment',
+        'Verify the Terraform plan output in the plan action',
+        'If the plan looks alright it can be applied according to below',
+        '',
+      );
+    } else {
+      comment.push(
+        '### :mag: Terraform plan changes',
+        '',
+        'The output only includes modules with changes.',
+        '',
+        ...changes,
+      );
+    }
   }
 
   if (footer) {
@@ -95,14 +111,17 @@ const action = async () => {
   }
 
   const comment = await generateOutputs(
-    workingDirectory, planFile, maxThreads, ignoredResourcesRegexp,
+    workingDirectory,
+    planFile,
+    maxThreads,
+    ignoredResourcesRegexp,
   ).then((outputs) => outputs.map(outputToMarkdown))
     .then((outputs) => createComment(outputs, workingDirectory, footer));
 
-  const client = new GitHub(githubToken);
+  const octokit = github.getOctokit(githubToken);
   const [owner, repo] = repository.split('/');
 
-  const { data: comments } = await client.issues.listComments({
+  const { data: comments } = await octokit.rest.issues.listComments({
     owner,
     repo,
     issue_number: pullRequest.number,
@@ -112,7 +131,7 @@ const action = async () => {
 
   for (const iterComment of comments) {
     if ((iterComment.body.includes(':white_check_mark: Terraform plan with no changes') || iterComment.body.includes(':mag: Terraform plan changes')) && !skipDeleting) {
-      client.issues.deleteComment({
+      octokit.rest.issues.deleteComment({
         owner,
         repo,
         comment_id: iterComment.id,
@@ -120,7 +139,7 @@ const action = async () => {
     }
   }
 
-  await client.issues.createComment({
+  await octokit.rest.issues.createComment({
     owner,
     repo,
     issue_number: pullRequest.number,

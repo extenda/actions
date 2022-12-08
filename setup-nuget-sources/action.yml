@@ -16,5 +16,5 @@ inputs:
       { name: <string>, source: <string>, username: <string>, password: <string>, apikey: <string> }
     required: true
 runs:
-  using: node12
+  using: node16
   main: dist/index.js

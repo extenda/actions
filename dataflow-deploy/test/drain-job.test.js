@@ -8,9 +8,7 @@ describe('drain dataflow job', () => {
   });
 
   test('it drains job', async () => {
-    exec.exec.mockImplementationOnce((
-      cmd, args, opts,
-    ) => opts.listeners.stdout('jobId-122'));
+    exec.exec.mockImplementationOnce((cmd, args, opts) => opts.listeners.stdout('jobId-122'));
     drainJob(
       'jobId-123',
       'job-name-10',
@@ -21,9 +19,7 @@ describe('drain dataflow job', () => {
   });
 
   test('it finds no old job', async () => {
-    exec.exec.mockImplementationOnce((
-      cmd, args, opts,
-    ) => opts.listeners.stdout(''));
+    exec.exec.mockImplementationOnce((cmd, args, opts) => opts.listeners.stdout(''));
     expect(drainJob(
       'jobId-123',
       'job-name-10',

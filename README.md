@@ -47,7 +47,6 @@ The following actions are available
   * [terraform-plan-comment](terraform-plan-comment#readme)
   * [test-pod](test-pod#readme)
   * [txengine-deploy](txengine-deploy#readme)
-  * [vale-linting](vale-linting#readme)
 
 ## :rocket: Workflow Examples
 
@@ -76,29 +75,20 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-
-      - uses: extenda/actions/gcp-secret-manager@v0
+      - uses: actions/checkout@v3
         with:
-          service-account-key: ${{ secrets.SECRET_AUTH }}
-          secrets: |
-            NEXUS_PASSWORD: nexus-password
-            NEXUS_USERNAME: nexus-username
+          fetch-depth: 0
 
-      - uses: actions/cache@v1
+      - uses: actions/setup-java@v2
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - uses: actions/setup-java@v1
-        with:
-          java-version: 11
+          distribution: temurin
+          java-version: 17
+          cache: maven
 
       - name: Run tests
         uses: extenda/actions/maven@v0
         with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
           args: verify
 
       - name: Scan with SonarCloud
@@ -112,14 +102,9 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/master'
     steps:
-      - uses: actions/checkout@v1
-
-      - uses: extenda/actions/gcp-secret-manager@v0
+      - uses: actions/checkout@v3
         with:
-          service-account-key: ${{ secrets.SECRET_AUTH }}
-          secrets: |
-            NEXUS_PASSWORD: nexus-password
-            NEXUS_USERNAME: nexus-username
+          fetch-depth: 0
 
       - name: Create release
         uses: extenda/actions/conventional-release@v0
@@ -127,21 +112,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/cache@v1
+      - uses: actions/setup-java@v2
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - uses: actions/setup-java@v1
-        with:
-          java-version: 11
+          distribution: temurin
+          java-version: 17
+          cache: maven
 
       - name: Build release
         uses: extenda/actions/maven@v0
         with:
           args: deploy -DskipTests
+          service-account-key: ${{ secrets.SECRET_AUTH }}
           version: ${{ steps.release.outputs.version }}
 ```
 
@@ -166,7 +147,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - uses: extenda/actions/gcp-secret-manager@v0
         with:
@@ -214,7 +197,7 @@ jobs:
           sonar-host: https://sonar.extenda.io
           sonar-scanner: dotnet
           main-branch: develop
-          service-account-key: ${{ secrets.SECRET_AUTH }}
+          service-account-key: ${{ secrets.SECRET_AUTH }}
 
       - name: Build
         run: |
@@ -234,14 +217,16 @@ jobs:
           sonar-host: https://sonar.extenda.io
           sonar-scanner: dotnet
           main-branch: develop
-          service-account-key: ${{ secrets.SECRET_AUTH }}
+          service-account-key: ${{ secrets.SECRET_AUTH }}
 
   release:
     runs-on: ubuntu-latest
     needs: test
     if: github.ref == 'refs/heads/master'
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - uses: extenda/actions/gcp-secret-manager@v0
         with:
@@ -286,7 +271,7 @@ jobs:
               {
                 "name": "Extenda",
                 "source": "https://repo.extendaretail.com/repository/nuget-group/",
-                "username": "${{ env.NEXUS_USERNAME }}",
+                "username": "${{ env.NEXUS_USERNAME }}",
                 "password": "${{ env.NEXUS_PASSWORD }}",
                 "apikey": "${{ env.NUGET_API_KEY }}"
               }]
@@ -329,13 +314,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-
-      - uses: extenda/actions/gcp-secret-manager@v0
+      - uses: actions/checkout@v3
         with:
-          service-account-key: ${{ secrets.SECRET_AUTH }}
-          secrets: |
-            SONAR_TOKEN: sonarcloud-token
+          fetch-depth: 0
 
       - name: NPM install
         run: npm ci
@@ -363,7 +344,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Create release
         uses: extenda/actions/conventional-release@v0
@@ -407,7 +390,7 @@ before running actions.
 
 Development tools needed are:
 
-  * Latest Node 12 LTS release
+  * Latest Node 16 LTS release
   * Docker
   * Pre-commit
 
@@ -427,7 +410,7 @@ Use the NPM scripts in the root `package.json` to install and build the complete
 ```bash
 $ npm install --no-bin-links
 ```
-Runs `npm install` on all Javascript packages.
+Runs `npm install` on all Javascript packages. Prefer `npm ci` on first install or to reinstall local dependencies.
 
 ```bash
 $ npm run lint:js
@@ -440,14 +423,10 @@ $ npm test
 Runs Jest everywhere.
 
 ```bash
-$ npm run build
-```
-Runs `npm run build` on all Javascript projects. This recompiles the package into its `dist` directory.
-
-```bash
 $ npm run build:docker
 ```
-Same as `npm run build`, but builds the project in a Docker container to ensure strictly identical output across platforms.
+Runs `npm run build` on all modules. This recompiles the package into its `dist` directory. The project
+builds in a Docker container to ensure strictly identical output across platforms.
 
 #### Tips
 
@@ -474,7 +453,7 @@ actions will always be accessible from a `v{MAJOR}` branch that points to the la
 For example `v1` will point to `v1.1.2` after it has been released.
 
 ### Conventional Commits
-
+g
 The project is versioned with [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) conventions.
 
   * Make sure your commits to `master` always follow conventional commits

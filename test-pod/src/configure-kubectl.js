@@ -54,5 +54,4 @@ const configureKubeCtl = async (serviceAccountKey, clusterInput, namespaceInput)
   };
 };
 
-
 module.exports = configureKubeCtl;
