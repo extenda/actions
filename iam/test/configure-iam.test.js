@@ -325,14 +325,16 @@ Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md
       'test.test.get': 'test desc',
       'test.test.create': 'test1 desc',
     };
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 },
-      JSON.stringify(checkSystem)));
+    request.mockImplementationOnce((conf, cb) => cb(
+      null,
+      { statusCode: 200 },
+      JSON.stringify(checkSystem),
+    ));
     gcloudOutput.mockRejectedValue(new Error('Error from server (NotFound): namespaces "test-service" not found'));
     checkOwners.mockResolvedValue(null);
     checkRepository.mockResolvedValue(null);
     buildOpaConfig.mockResolvedValue(opaConfig);
     applyConfiguration.mockResolvedValue(null);
-
 
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 

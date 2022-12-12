@@ -35,15 +35,23 @@ const checkSystem = async (systemName, styraToken, styraUrl) => new Promise((res
 
 const checkNamespace = async (
   namespace,
-) => gcloudOutput([
-  'get',
-  'cm',
-  'opa-envoy-config',
-  `--namespace=${namespace}`],
-'kubectl').then(() => true).catch(() => false);
+) => gcloudOutput(
+  [
+    'get',
+    'cm',
+    'opa-envoy-config',
+    `--namespace=${namespace}`],
+  'kubectl',
+).then(() => true).catch(() => false);
 
 const updateMiscelaneous = async (
-  systemName, styraUrl, system, styraToken, systemOwners, repository, consumers,
+  systemName,
+  styraUrl,
+  system,
+  styraToken,
+  systemOwners,
+  repository,
+  consumers,
 ) => {
   core.info(`Running updates for system: '${systemName}'`);
   return checkOwners(system.id, styraToken, styraUrl, systemOwners)
@@ -52,7 +60,15 @@ const updateMiscelaneous = async (
 };
 
 const updateNamespaces = async (
-  systemInfo, systemOwners, systemName, projectId, system, styraToken, styraUrl, env, errors,
+  systemInfo,
+  systemOwners,
+  systemName,
+  projectId,
+  system,
+  styraToken,
+  styraUrl,
+  env,
+  errors,
 ) => {
   let checkedSystem = system;
   const namespacePromises = [];
@@ -82,9 +98,7 @@ const updateNamespaces = async (
   return Promise.all(namespacePromises);
 };
 
-const updateSharedSystems = async (
-  sharedSystems, systemName, namespace, repository, consumers,
-) => {
+const updateSharedSystems = async (sharedSystems, systemName, namespace, repository, consumers) => {
   let serviceInfo = sharedSystems.get(systemName);
   if (!serviceInfo) {
     serviceInfo = {
@@ -142,7 +156,11 @@ const configureIAM = async (
     //      5. Update consumers
     if (styraName) {
       promises.push(updateSharedSystems(
-        sharedSystems, systemName, namespace, repository, consumers,
+        sharedSystems,
+        systemName,
+        namespace,
+        repository,
+        consumers,
       ));
     } else {
       promises.push(checkSystem(systemName, styraToken, styraUrl)
@@ -164,7 +182,13 @@ const configureIAM = async (
               )).catch((err) => errors.push(err));
           }
           return updateMiscelaneous(
-            systemName, styraUrl, system, styraToken, systemOwners, repository, consumers,
+            systemName,
+            styraUrl,
+            system,
+            styraToken,
+            systemOwners,
+            repository,
+            consumers,
           );
         }));
     }

@@ -23,7 +23,7 @@ const copyStaticAssetsPlugin = ({ sourceDir, destDir, filesToCopy }) => ({
 const build = async (baseDir) => {
   const srcDir = path.join(baseDir, 'src');
   const destDir = path.join(baseDir, 'dist');
-
+  /* eslint-disable no-console */
   console.time(`build ${baseDir}`);
   await esbuild.build({
     entryPoints: [`${srcDir}/index.js`],
@@ -40,6 +40,7 @@ const build = async (baseDir) => {
     ],
   });
   console.timeEnd(`build ${baseDir}`);
+  /* eslint-enable no-console */
 };
 
 (async () => {
