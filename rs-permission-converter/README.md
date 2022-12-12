@@ -24,7 +24,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@master  
+      - uses: actions/checkout@master
 
       - name: Create sql file from permission xml
         uses: extenda/actions/rs-permission-converter@v0

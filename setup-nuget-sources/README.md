@@ -28,7 +28,7 @@ jobs:
             NEXUS_PASSWORD: nexus-password
             NEXUS_USERNAME: nexus-username
             NUGET_API_KEY: nuget-api-key
-            
+
       - uses: actions/checkout@v1
 
       - name: Setup NuGet
