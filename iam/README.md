@@ -27,7 +27,7 @@ jobs:
           service-account-key-staging: ${{ secrets.GCLOUD_AUTH_STAGING }} # Used to configure and create DAS-system on the correct cluster/environment (required)
           service-account-key-prod: ${{ secrets.GCLOUD_AUTH_PROD }} # Used to configure and create DAS-system on the correct cluster/environment (required)
           iam-definition: iam/*.yaml # default will match iam/*.yaml
-          styra-url: https://extendaretail.svc.styra.com # default https://extendaretail.svc.styra.com 
+          styra-url: https://extendaretail.svc.styra.com # default https://extendaretail.svc.styra.com
 ```
 
 ## IAM YAML
@@ -43,26 +43,27 @@ will be processed independent of others.
 The YAML syntax is formally defined with [JSON Schema](src/iam-schema.js). The following table explains what
 properties are required and not.
 
-| Property                                      | Description                                                                                                          | Required |
-|:----------------------------------------------|:---------------------------------------------------------------------------------------------------------------------|:---------|
-| `name`                                        | The name of the service system                                                                                       | No       |
-| `permission-prefix`                           | The permission prefix, this will be prefixed to every permission and roles id. ([a-z][-a-z]{2})                      | Yes      |
-| `services`                                    | A list of services that need a DAS system                                                                            | Yes      |
-| `services.name`                               | The service name of the system to be created                                                                         | Yes      |
-| `services.repository`                         | The description of the service                                                                                       | Yes      |
-| `services.allowed-consumers`                  | A list of clans and services allowed to consume this service                                                         | No       |
-| `services.allowed-consumers.clan`             | Your clan name subscribing to this service                                                                           | Yes      |
-| `services.allowed-consumers.service-accounts` | A list of service accounts allowed to consume this service. (Full service account name required)                     | Yes      |
-| `permissions`                                 | An object containing the permissions for this service. (keys [a-z][-a-z]{1,15})                                      | Yes      |
-| `permissions.<resource>`                      | Array containing the verbs for the `<resource>`. (items: ids [a-z][-a-z]{1,15} or objects documented below)          | Yes      |
-| `permissions.<resource>.id`                   | Permission id [a-z][-a-z]{1,15}                                                                                      | Yes      |
-| `permissions.<resource>.alias`                | Permission alias (max 256 characters)                                                                                | No       |
-| `permissions.<resource>.description`          | Permission description                                                                                               | No       |
-| `roles`                                       | An list of roles that should exist for this service                                                                  | No       |
-| `roles.id`                                    | The role id ([a-z][-a-z]{1,19})                                                                                      | Yes      |
-| `roles.name`                                  | The role name                                                                                                        | Yes      |
-| `roles.desc`                                  | The description of the role, (max 200 characters)                                                                    | Yes      |
-| `roles.permissions`                           | An list of permissions this role should contain (items ^(?:[a-z][-a-z]{2}\\.)?[a-z][-a-z]{1,15}\.[a-z][-a-z]{1,15}$) | Yes      |
+| Property                                      | Description                                                                                                 | Required |
+|:----------------------------------------------|:------------------------------------------------------------------------------------------------------------|:---------|
+| `name`                                        | The name of the service system                                                                              | No       |
+| `permission-prefix`                           | The permission prefix, this will be prefixed to every permission and roles id. ([a-z][-a-z]{2})             | Yes      |
+| `services`                                    | A list of services that need a DAS system                                                                   | Yes      |
+| `services.name`                               | The service name of the system to be created                                                                | Yes      |
+| `services.repository`                         | The description of the service                                                                              | Yes      |
+| `services.styra-name`                         | Set a styra system name for sharing policy between services                                                 | No       |
+| `services.allowed-consumers`                  | A list of clans and services allowed to consume this service                                                | No       |
+| `services.allowed-consumers.clan`             | Your clan name subscribing to this service                                                                  | Yes      |
+| `services.allowed-consumers.service-accounts` | A list of service accounts allowed to consume this service. (Full service account name required)            | Yes      |
+| `permissions`                                 | An object containing the permissions for this service. (keys [a-z][-a-z]{1,15})                             | Yes      |
+| `permissions.<resource>`                      | Array containing the verbs for the `<resource>`. (items: ids [a-z][-a-z]{1,15} or objects documented below) | Yes      |
+| `permissions.<resource>.id`                   | Permission id [a-z][-a-z]{1,15}                                                                             | Yes      |
+| `permissions.<resource>.alias`                | Permission alias (max 256 characters)                                                                       | No       |
+| `permissions.<resource>.description`          | Permission description                                                                                      | No       |
+| `roles`                                       | An list of roles that should exist for this service                                                         | No       |
+| `roles.id`                                    | The role id ([a-z][-a-z]{1,19})                                                                             | Yes      |
+| `roles.name`                                  | The role name                                                                                               | Yes      |
+| `roles.desc`                                  | The description of the role, (max 200 characters)                                                           | Yes      |
+| `roles.permissions`                           | An list of permissions this role should contain (items ^[a-z][-a-z]{1,15}\.[a-z][-a-z]{1,15}$)              | Yes      |
 
 ### YAML Examples
 
@@ -153,6 +154,37 @@ roles:
       - quote.get
       - quote.list
       - quote.update
+  - id: viewer
+    name: Braveheart quotes viwer
+    desc: view access
+    permissions:
+      - quote.get
+      - quote.list
+
+
+```
+
+#### Setup a shared system for services
+
+This example defines a YAML file that creates a shared system for 2 services ( service-a and service-b)
+```yaml
+name: quotes service
+permission-prefix: bhq
+services:
+  - name: service-a
+    repository: service-a
+    styra-name: styra-system-name
+  - name: service-b
+    repository: service-b
+    styra-name: styra-system-name
+permissions:
+  quote:
+    - create
+    - delete
+    - get
+    - list
+    - update
+roles:
   - id: viewer
     name: Braveheart quotes viwer
     desc: view access

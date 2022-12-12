@@ -10,7 +10,7 @@ event-sources:
     subscription-name: projects/iam-prod-4aad/subscriptions/iam.public.output.events.v1+iam.group-created
     content-type: application/json
     disabled: true
-    deprecated: 
+    deprecated:
       removal-date: "2022-02-01"
       message: message
       replaced-with: iam.group-created.v2
@@ -40,7 +40,7 @@ event-sources:
     display-name: IAM Group was created
     content-type: application/json
     disabled: yes
-    deprecated: 
+    deprecated:
       removal-date: 2022/02/01
       replaced-with: invalid.group-created.v2
 `;

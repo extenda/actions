@@ -24,7 +24,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@master  
+      - uses: actions/checkout@master
 
       - uses: actions/cache@v1
         with:

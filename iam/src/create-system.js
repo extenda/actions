@@ -329,4 +329,6 @@ const setupSystem = async (
   return Promise.all(promises);
 };
 
-module.exports = { setupSystem, updateOwners };
+module.exports = {
+  setupSystem, updateOwners, buildOpaConfig, applyConfiguration,
+};

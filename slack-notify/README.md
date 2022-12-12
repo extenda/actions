@@ -17,7 +17,7 @@ See [action.yml](action.yml).
 #### Without channel input
 
 This example will load a `slack-token` named slack-notify-token from the GCP Secret Manager accessible using
-the provided `service-account-key`. 
+the provided `service-account-key`.
 If no channel is set this action will automatically look for the clan_slack_channelsecret stored in your clan secret manager and referese your clan monitoring channel.
 
 ```yaml

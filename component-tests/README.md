@@ -23,7 +23,7 @@ jobs:
         with:
           auth-token: ${{ env.AUTH_TOKEN }} # Used as the 'Bearer' auth to make requests to the service and test permissions
           base-url: https://iam-api.retailsvc.dev/
-          tests: ./tests/component-tests/tests.yaml 
+          tests: ./tests/component-tests/tests.yaml
 ```
 
 ## Tests YAML

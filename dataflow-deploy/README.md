@@ -85,7 +85,7 @@ jobs:
   dataflow-template-build:
     runs-on: ubuntu-latest
     steps:
-          
+
       - name: Determine version
         uses: extenda/actions/conventional-version@v0
         id: semver

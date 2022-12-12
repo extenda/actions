@@ -12,7 +12,7 @@ describe('Versions', () => {
   test('It will use default version if no release exists', async () => {
     versions.setTagPrefix('test-');
     const tag = await versions.getLatestReleaseTag();
-    expect(tag).toEqual('test-0.0.0');
+    expect(tag).toEqual('test-0.0.1');
   });
 
   test('it returns a build version', async () => {

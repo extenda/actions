@@ -75,12 +75,12 @@ jobs:
 
 #### Send message at release
 
-Posting a Slack message at the end of the release stage of a build can be done by adding the `@github` bot to a Slack 
+Posting a Slack message at the end of the release stage of a build can be done by adding the `@github` bot to a Slack
 channel and then configuring it so it doesn't post messages for anything else than the Slack Action.
 
 Start by subscribing the bot to a repository from a channel as described above. Configuring the bot can be done with
 `github unsubscribe extenda/actions pulls statuses commits releases`.
-This will disable the bot from sending messages when there are new pull requests, new commits to the default branch 
+This will disable the bot from sending messages when there are new pull requests, new commits to the default branch
 and published releases.
 
 Then use this Action according to the usage with Secret Manager.
