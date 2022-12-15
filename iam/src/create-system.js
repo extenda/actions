@@ -7,23 +7,28 @@ const yaml = require('js-yaml'); // FIXME what YAML lib is used?
 const handleConsumers = require('./handle-consumers');
 const { iamApiErrorToString } = require('./utils/iam-api-error-to-string');
 
-const uploadMapping = async (systemId, systemName, iamToken, iamUrl) => axios({
-  url: `${iamUrl}/api/internal/styra-systems/${systemName}`,
-  method: 'PUT',
-  headers: {
-    'content-type': 'application/json',
-    authorization: `Bearer ${iamToken}`,
-  },
-  data: {
-    styraSystemId: systemId,
-  },
-}).then(() => {
-  const message = `styra system mapping '${systemName}' added`;
-  core.info(message);
-  return message;
-}).catch((err) => {
-  throw new Error(iamApiErrorToString(err, `Could not add mapping for '${systemName}'`));
-});
+const uploadMapping = async (systemId, systemName, iamToken, iamUrl) => {
+  core.info(`Uploading mapping for ${systemName} to IAM`);
+  core.info(`IAM URL: ${iamUrl}. Iam token length: ${iamToken ? iamToken.length : 'undefined'}`);
+
+  return axios({
+    url: `${iamUrl}/api/internal/styra-systems/${systemName}`,
+    method: 'PUT',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${iamToken}`,
+    },
+    data: {
+      styraSystemId: systemId,
+    },
+  }).then(() => {
+    const message = `styra system mapping '${systemName}' added`;
+    core.info(message);
+    return message;
+  }).catch((err) => {
+    throw new Error(iamApiErrorToString(err, `Could not add mapping for '${systemName}'`));
+  });
+}
 
 const applyConfiguration = async (opaConfig, systemName) => {
   fs.writeFileSync(systemName, yaml.dump(opaConfig));
