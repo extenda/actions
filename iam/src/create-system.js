@@ -323,8 +323,15 @@ const setupSystem = async (
   promises.push(setDefaultDataset(systemResult.result.id, token, styraUrl));
   promises.push(updateOwners(systemResult.result.id, token, styraUrl, systemOwners));
   promises.push(applyConfiguration(opaConfig, systemName));
-  promises.push(uploadMapping(systemResult.result.id, systemName, iamToken, iamUrl));
   promises.push(handleConsumers(systemResult.result.id, token, styraUrl, consumers, systemName));
+
+  if (env === 'prod') {
+    // uploading prod and staging system mapping if env is prod
+    // because stating env does not have valid IAM token
+    const stagingSystemName = systemName.replace(/-prod$/, '-staging');
+    promises.push(uploadMapping(systemResult.result.id, systemName, iamToken, iamUrl));
+    promises.push(uploadMapping(systemResult.result.id, stagingSystemName, iamToken, iamUrl));
+  }
 
   return Promise.all(promises);
 };
