@@ -7,28 +7,23 @@ const yaml = require('js-yaml'); // FIXME what YAML lib is used?
 const handleConsumers = require('./handle-consumers');
 const { iamApiErrorToString } = require('./utils/iam-api-error-to-string');
 
-const uploadMapping = async (systemId, systemName, iamToken, iamUrl) => {
-  core.info(`Uploading mapping for ${systemName} to IAM`);
-  core.info(`IAM URL: ${iamUrl}. Iam token length: ${iamToken ? iamToken.length : 'undefined'}`);
-
-  return axios({
-    url: `${iamUrl}/api/internal/styra-systems/${systemName}`,
-    method: 'PUT',
-    headers: {
-      'content-type': 'application/json',
-      authorization: `Bearer ${iamToken}`,
-    },
-    data: {
-      styraSystemId: systemId,
-    },
-  }).then(() => {
-    const message = `styra system mapping '${systemName}' added`;
-    core.info(message);
-    return message;
-  }).catch((err) => {
-    throw new Error(iamApiErrorToString(err, `Could not add mapping for '${systemName}'`));
-  });
-}
+const uploadMapping = async (systemId, systemName, iamToken, iamUrl) => axios({
+  url: `${iamUrl}/api/internal/styra-systems/${systemName}`,
+  method: 'PUT',
+  headers: {
+    'content-type': 'application/json',
+    authorization: `Bearer ${iamToken}`,
+  },
+  data: {
+    styraSystemId: systemId,
+  },
+}).then(() => {
+  const message = `styra system mapping '${systemName}' added`;
+  core.info(message);
+  return message;
+}).catch((err) => {
+  throw new Error(iamApiErrorToString(err, `Could not add mapping for '${systemName}'`));
+});
 
 const applyConfiguration = async (opaConfig, systemName) => {
   fs.writeFileSync(systemName, yaml.dump(opaConfig));
@@ -328,8 +323,15 @@ const setupSystem = async (
   promises.push(setDefaultDataset(systemResult.result.id, token, styraUrl));
   promises.push(updateOwners(systemResult.result.id, token, styraUrl, systemOwners));
   promises.push(applyConfiguration(opaConfig, systemName));
-  promises.push(uploadMapping(systemResult.result.id, systemName, iamToken, iamUrl));
   promises.push(handleConsumers(systemResult.result.id, token, styraUrl, consumers, systemName));
+
+  if (env === 'prod') {
+    // uploading prod and staging system mapping if env is prod
+    // because stating env does not have valid IAM token
+    const stagingSystemName = systemName.replace(/-prod$/, '-staging');
+    promises.push(uploadMapping(systemResult.result.id, systemName, iamToken, iamUrl));
+    promises.push(uploadMapping(systemResult.result.id, stagingSystemName, iamToken, iamUrl));
+  }
 
   return Promise.all(promises);
 };

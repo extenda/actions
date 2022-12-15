@@ -74,10 +74,12 @@ describe('create system in styra-das', () => {
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 400 }));
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 }));
     axios.mockResolvedValueOnce({ status: 200 });
+    axios.mockResolvedValueOnce({ status: 200 });
 
     await setupSystem('test-service', 'test.test-service-staging', 'staging', 'test-repo', 'styra-token', 'https://test.styra.com', systemOwners, [], 'iam-token', 'https://apiurl.test.dev');
 
     expect(request).toHaveBeenCalledTimes(6);
+    expect(axios).toHaveBeenCalledTimes(2);
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('kubectl', [
       'apply',
@@ -118,6 +120,7 @@ describe('create system in styra-das', () => {
     exec.exec.mockResolvedValueOnce(0);
     await setupSystem('test-service', 'test.test-service-prod', 'prod', 'test-repo', 'styra-token', 'https://test.styra.com', systemOwners, [], 'iam-token', 'https://apiurl.test.dev');
     expect(request).toHaveBeenCalledTimes(8);
+    expect(axios).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('kubectl', [
       'apply',
