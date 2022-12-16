@@ -330,6 +330,9 @@ const setupSystem = async (
     // uploading prod and staging system mapping if env is prod
     // because stating env does not have valid IAM token
     const stagingSystemName = systemName.replace(/-prod$/, '-staging');
+    core.info(`Uploading mapping for staging system ${stagingSystemName} and prod system ${systemName}`);
+    core.info(`${checkSystem}`);
+
     const stagingSystem = await checkSystem(stagingSystemName, token, styraUrl);
 
     core.info(`Uploading mapping for staging system ${stagingSystemName} and prod system ${systemName}`);
