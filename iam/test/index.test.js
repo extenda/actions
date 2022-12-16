@@ -13,7 +13,7 @@ jest.mock('../../gcp-secret-manager/src/secrets');
 const core = require('@actions/core');
 const fg = require('fast-glob');
 const action = require('../src/index');
-const configureIam = require('../src/configure-iam');
+const { configureIAM } = require('../src/configure-iam');
 const fetchIamToken = require('../../iam-test-token/src/iam-auth');
 const loadIamDefinition = require('../src/iam-definition');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
@@ -65,7 +65,7 @@ describe('run action', () => {
       'iam-pass',
       'iam-tenant',
     );
-    expect(configureIam).toHaveBeenNthCalledWith(
+    expect(configureIAM).toHaveBeenNthCalledWith(
       1,
       {},
       'styra-token',
@@ -77,7 +77,7 @@ describe('run action', () => {
       ['test@mail.com'],
       true,
     );
-    expect(configureIam).toHaveBeenNthCalledWith(
+    expect(configureIAM).toHaveBeenNthCalledWith(
       2,
       {},
       'styra-token',
@@ -122,7 +122,7 @@ describe('run action', () => {
       'iam-pass',
       'iam-tenant',
     );
-    expect(configureIam).toHaveBeenNthCalledWith(
+    expect(configureIAM).toHaveBeenNthCalledWith(
       1,
       {},
       'styra-token',
@@ -134,7 +134,7 @@ describe('run action', () => {
       ['test@mail.com'],
       false,
     );
-    expect(configureIam).toHaveBeenNthCalledWith(
+    expect(configureIAM).toHaveBeenNthCalledWith(
       2,
       {},
       'styra-token',
@@ -189,6 +189,6 @@ describe('run action', () => {
 
     expect(loadIamDefinition).toHaveBeenCalledTimes(2);
     expect(fetchIamToken).not.toHaveBeenCalled();
-    expect(configureIam).not.toHaveBeenCalled();
+    expect(configureIAM).not.toHaveBeenCalled();
   });
 });

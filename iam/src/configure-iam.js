@@ -115,4 +115,7 @@ const configureIAM = async (
   return null;
 };
 
-module.exports = configureIAM;
+module.exports = {
+  configureIAM,
+  checkSystem,
+};
