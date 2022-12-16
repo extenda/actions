@@ -335,6 +335,8 @@ const setupSystem = async (
 
     const stagingSystem = await checkSystem(stagingSystemName, token, styraUrl);
 
+    core.info(`Uploading mapping for staging system ${stagingSystemName} and prod system ${systemName}`);
+
     promises.push(uploadMapping(systemResult.result.id, systemName, iamToken, iamUrl));
     promises.push(uploadMapping(stagingSystem.id, stagingSystemName, iamToken, iamUrl));
   }
