@@ -1,5 +1,4 @@
 const core = require('@actions/core');
-const request = require('request');
 const { setupPermissions, handlePermissions } = require('./permissions');
 const { setupRoles } = require('./roles');
 const { setupSystem } = require('./create-system');
@@ -9,28 +8,7 @@ const checkOwners = require('./handle-owners');
 const checkRepository = require('./handle-repository');
 const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
 const handleConsumers = require('./handle-consumers');
-
-const checkSystem = async (systemName, styraToken, styraUrl) => new Promise((resolve) => {
-  const url = `${styraUrl}/v1/systems?compact=false&name=${systemName}`;
-  request({
-    uri: url,
-    method: 'GET',
-    headers: {
-      'Content-type': 'application/json',
-      Authorization: `bearer ${styraToken}`,
-    },
-  }, (error, res, body) => {
-    if (!error) {
-      const jsonBody = JSON.parse(body);
-      jsonBody.result.forEach((result) => {
-        if (result.name === `${systemName}`) {
-          resolve(result);
-        }
-      });
-      resolve({ id: '' });
-    }
-  });
-});
+const checkSystem = require('./check-system');
 
 const configureIAM = async (
   iam,
