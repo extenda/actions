@@ -111,13 +111,20 @@ describe('create system in styra-das', () => {
     request.mockImplementationOnce((conf, cb) => cb(null));
     request.mockImplementationOnce((conf, cb) => cb(null));
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 400 }));
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 }, JSON.stringify({
+      result: [{
+        id: '3q54hw45hwrt',
+        name: 'test.test-service-staging',
+      }],
+    })));
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 400 }));
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 }));
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 400 }));
+
     axios.mockResolvedValueOnce({ status: 200 });
     axios.mockResolvedValueOnce({ status: 200 });
     exec.exec.mockResolvedValueOnce(0);
     await setupSystem('test-service', 'test.test-service-prod', 'prod', 'test-repo', 'styra-token', 'https://test.styra.com', systemOwners, [], 'iam-token', 'https://apiurl.test.dev');
-    expect(request).toHaveBeenCalledTimes(8);
+    expect(request).toHaveBeenCalledTimes(9);
     expect(axios).toHaveBeenCalledTimes(2);
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('kubectl', [
@@ -173,7 +180,14 @@ describe('create system in styra-das', () => {
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 }));
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 }));
     request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 }));
-    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 }));
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 200 }, JSON.stringify({
+      result: [{
+        id: '3q54hw45hwrt',
+        name: 'test.test-service-staging',
+      }],
+    })));
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 400 }));
+    request.mockImplementationOnce((conf, cb) => cb(null, { statusCode: 400 }));
     axios.mockRejectedValueOnce({ status: 500, message: 'service unavailable' });
     axios.mockRejectedValueOnce({ status: 500, message: 'service unavailable' });
     exec.exec.mockResolvedValueOnce(0);

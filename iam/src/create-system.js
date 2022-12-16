@@ -6,6 +6,7 @@ const fs = require('fs');
 const yaml = require('js-yaml'); // FIXME what YAML lib is used?
 const handleConsumers = require('./handle-consumers');
 const { iamApiErrorToString } = require('./utils/iam-api-error-to-string');
+const { checkSystem } = require('./configure-iam');
 
 const uploadMapping = async (systemId, systemName, iamToken, iamUrl) => axios({
   url: `${iamUrl}/api/internal/styra-systems/${systemName}`,
@@ -329,8 +330,10 @@ const setupSystem = async (
     // uploading prod and staging system mapping if env is prod
     // because stating env does not have valid IAM token
     const stagingSystemName = systemName.replace(/-prod$/, '-staging');
+    const stagingSystem = await checkSystem(stagingSystemName, token, styraUrl);
+
     promises.push(uploadMapping(systemResult.result.id, systemName, iamToken, iamUrl));
-    promises.push(uploadMapping(systemResult.result.id, stagingSystemName, iamToken, iamUrl));
+    promises.push(uploadMapping(stagingSystem.id, stagingSystemName, iamToken, iamUrl));
   }
 
   return Promise.all(promises);

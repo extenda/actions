@@ -16,7 +16,7 @@ const request = require('request');
 const core = require('@actions/core');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const createNamespace = require('../../cloud-run/src/create-namespace');
-const configureIam = require('../src/configure-iam');
+const { configureIAM } = require('../src/configure-iam');
 const checkRepository = require('../src/handle-repository');
 const checkOwners = require('../src/handle-owners');
 const projectInfo = require('../../cloud-run/src/project-info');
@@ -71,7 +71,7 @@ describe('Configure iam', () => {
     ));
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
-    await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'project-staging-321', [], false);
+    await configureIAM(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'project-staging-321', [], false);
 
     expect(request).toHaveBeenCalledTimes(1);
     expect(setupPermissions).toHaveBeenCalledWith(
@@ -120,7 +120,7 @@ describe('Configure iam', () => {
     ));
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
-    await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], false);
+    await configureIAM(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], false);
     expect(setupSystem).toHaveBeenCalledWith(
       'test-service',
       'test.test-service-staging',
@@ -168,7 +168,7 @@ describe('Configure iam', () => {
     ));
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
-    await expect(configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], true))
+    await expect(configureIAM(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], true))
       .resolves.toEqual(null);
     expect(setupSystem).toHaveBeenCalledWith(
       'test-service',
@@ -223,7 +223,7 @@ describe('Configure iam', () => {
     checkRepository.mockResolvedValueOnce(null);
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
-    await configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], true);
+    await configureIAM(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], true);
     expect(setupSystem).toHaveBeenCalledTimes(0);
     expect(checkOwners).toHaveBeenCalledWith('existing-system', 'styra-token', 'https://extendaretail.styra.com', []);
     expect(checkRepository).toHaveBeenCalledWith(resultBody, 'styra-token', 'https://extendaretail.styra.com', 'test-repo');
@@ -262,7 +262,7 @@ Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md
     ));
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
-    await expect(configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], false))
+    await expect(configureIAM(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], false))
       .rejects.toEqual(new Error('Errors occurred. Fix issues and rerun the action!'));
     expect(core.error).toHaveBeenCalledTimes(1);
     expect(setupSystem).toHaveBeenCalledTimes(0);
@@ -304,7 +304,7 @@ Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md
     ));
     setupPermissions.mockRejectedValueOnce(new Error('Could not fetch permission https://apiurl.test.dev/api/v1/permissions/test.test.get. Reason: bad request 400'));
 
-    await expect(configureIam(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], false))
+    await expect(configureIAM(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'test-staging-123', [], false))
       .rejects.toEqual(new Error('Errors occurred. Fix issues and rerun the action!'));
     expect(core.error).toHaveBeenCalledTimes(3);
     expect(setupSystem).toHaveBeenCalledTimes(0);
