@@ -23,6 +23,7 @@ describe('Run Deploy', () => {
   beforeEach(() => {
     process.env = { ...orgEnv };
     process.env.GITHUB_SHA = '63633c0'; // v.0.18.0
+    process.env.ENABLE_TRIVY = 'true';
   });
 
   afterEach(() => {
@@ -32,6 +33,7 @@ describe('Run Deploy', () => {
   });
 
   test('It can deploy to managed Cloud Run', async () => {
+    process.env.ENABLE_TRIVY = 'false';
     exec.exec.mockResolvedValueOnce(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project');
     const service = {
