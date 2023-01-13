@@ -187,7 +187,9 @@ const runDeploy = async (
   const projectId = await gcloudAuth(serviceAccountKey);
 
   if (process.platform !== 'win32') {
-    await runScan(serviceAccountKey, image);
+    if (process.env.ENABLE_TRIVY === 'true') {
+      await runScan(serviceAccountKey, image);
+    }
   }
 
   const {
