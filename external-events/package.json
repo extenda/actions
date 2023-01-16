@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "license": "ISC",
   "dependencies": {
-    "@actions/core": "^1.9.1",
+    "@actions/core": "^1.10.0",
     "axios": "^0.24.0",
     "camelcase-keys": "^7.0.1",
     "fast-glob": "^3.2.7",

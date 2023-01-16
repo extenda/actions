@@ -1,12 +1,33 @@
 const exec = require('@actions/exec');
+const axios = require('axios');
 const core = require('@actions/core');
 const request = require('request');
 const fs = require('fs');
 const yaml = require('js-yaml'); // FIXME what YAML lib is used?
 const handleConsumers = require('./handle-consumers');
+const { iamApiErrorToString } = require('./utils/iam-api-error-to-string');
+const checkSystem = require('./check-system');
+
+const uploadMapping = async (systemId, systemName, iamToken, iamUrl) => axios({
+  url: `${iamUrl}/api/internal/styra-systems/${systemName}`,
+  method: 'PUT',
+  headers: {
+    'content-type': 'application/json',
+    authorization: `Bearer ${iamToken}`,
+  },
+  data: {
+    styraSystemId: systemId,
+  },
+}).then(() => {
+  const message = `styra system mapping '${systemName}' added`;
+  core.info(message);
+  return message;
+}).catch((err) => {
+  throw new Error(iamApiErrorToString(err, `Could not add mapping for '${systemName}'`));
+});
 
 const applyConfiguration = async (opaConfig, systemName) => {
-  fs.writeFileSync(systemName, yaml.safeDump(opaConfig));
+  fs.writeFileSync(systemName, yaml.dump(opaConfig));
   return exec.exec('kubectl', [
     'apply',
     '-f',
@@ -192,8 +213,8 @@ const getTokenFromOpaConfig = async (url, token) => new Promise((resolve, reject
     if (error) {
       reject(new Error(error));
     } else {
-      const configYaml = yaml.safeLoadAll(body)[0].data['conf.yaml'];
-      resolve(yaml.safeLoad(configYaml).services[0].credentials.bearer.token);
+      const configYaml = yaml.loadAll(body)[0].data['conf.yaml'];
+      resolve(yaml.load(configYaml).services[0].credentials.bearer.token);
     }
   });
 });
@@ -287,6 +308,8 @@ const setupSystem = async (
   styraUrl,
   systemOwners,
   consumers,
+  iamToken,
+  iamUrl,
 ) => {
   const promises = [];
   const systemResult = await createSystem(service, systemName, repo, token, styraUrl, env);
@@ -303,7 +326,19 @@ const setupSystem = async (
   promises.push(applyConfiguration(opaConfig, systemName));
   promises.push(handleConsumers(systemResult.result.id, token, styraUrl, consumers, systemName));
 
+  if (env === 'prod') {
+    // uploading prod and staging system mapping if env is prod
+    // because stating env does not have valid IAM token
+    const stagingSystemName = systemName.replace(/-prod$/, '-staging');
+
+    core.info(`Uploading mapping for staging system ${stagingSystemName} and prod system ${systemName}`);
+    const stagingSystem = await checkSystem(stagingSystemName, token, styraUrl);
+
+    promises.push(uploadMapping(systemResult.result.id, systemName, iamToken, iamUrl));
+    promises.push(uploadMapping(stagingSystem.id, stagingSystemName, iamToken, iamUrl));
+  }
+
   return Promise.all(promises);
 };
 
-module.exports = { setupSystem, updateOwners };
+module.exports = { setupSystem, updateOwners, checkSystem };

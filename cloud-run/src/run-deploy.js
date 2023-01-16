@@ -153,7 +153,7 @@ const gkeArguments = async (args, service, projectId) => {
   return cluster;
 };
 
-const canaryArguments = async (args, canary, projectId, project, env) => {
+const canaryArguments = async (args, canary, projectId, project, env, customLabels) => {
   const {
     enabled,
     steps,
@@ -168,7 +168,7 @@ const canaryArguments = async (args, canary, projectId, project, env) => {
   } = thresholds;
 
   args.push(
-    `--labels=service_project_id=${projectId},service_project=${project},service_env=${env},sre.canary.enabled=${enabled},sre.canary.steps=${steps},sre.canary.interval=${interval},sre.canary.thresholds.latency99=${latency99},sre.canary.thresholds.latency95=${latency95},sre.canary.thresholds.latency50=${latency50},sre.canary.thresholds.error=${errorRates}`,
+    `--labels=${customLabels}service_project_id=${projectId},service_project=${project},environment=${env},service_env=${env},sre.canary.enabled=${enabled},sre.canary.steps=${steps},sre.canary.interval=${interval},sre.canary.thresholds.latency99=${latency99},sre.canary.thresholds.latency95=${latency95},sre.canary.thresholds.latency50=${latency50},sre.canary.thresholds.error=${errorRates}`,
     '--no-traffic',
   );
 };
@@ -207,7 +207,9 @@ const runDeploy = async (
   const projectId = await gcloudAuth(serviceAccountKey);
 
   if (process.platform !== 'win32') {
-    await runScan(serviceAccountKey, image);
+    if (process.env.ENABLE_TRIVY === 'true') {
+      await runScan(serviceAccountKey, image);
+    }
   }
 
   const {
@@ -229,6 +231,18 @@ const runDeploy = async (
     environment = [],
   } = service;
 
+  // Note the comma at the end of custom labels
+  let customLabels = '';
+  let labelKey = '';
+  if (service.labels !== undefined) {
+    const { labels } = service;
+    for (labelKey in labels) {
+      if (Object.prototype.hasOwnProperty.call(labels, labelKey)) {
+        customLabels = `${customLabels}${labelKey}=${labels[labelKey]},`;
+      }
+    }
+  }
+
   if (!isManagedCloudRun(service.cpu)) {
     await checkServiceAccount(name, projectId);
   }
@@ -243,7 +257,7 @@ const runDeploy = async (
   ];
 
   if (!canary) {
-    args.push(`--labels=service_project_id=${projectId},service_project=${project},service_env=${env}${service.platform.managed ? '' : ',sre.canary.enabled=false'}`);
+    args.push(`--labels=${customLabels}service_project_id=${projectId},service_project=${project},environment=${env},service_env=${env}${service.platform.managed ? '' : ',sre.canary.enabled=false'}`);
   }
 
   if (verbose) {
@@ -258,7 +272,7 @@ const runDeploy = async (
   if (service.platform.gke) {
     cluster = await gkeArguments(args, service, projectId);
     if (canary) {
-      await canaryArguments(args, service.canary, projectId, project, env);
+      await canaryArguments(args, service.canary, projectId, project, env, customLabels);
     }
   }
 
