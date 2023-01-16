@@ -116,6 +116,7 @@ describe('Run Deploy', () => {
       '--cpu=1',
       '--platform=managed',
       '--region=eu-west1',
+      '--vpc-connector=None',
       '--allow-unauthenticated',
     ], expect.anything());
   });
