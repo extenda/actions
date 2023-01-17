@@ -255,7 +255,7 @@ describe('Run Deploy', () => {
       labels: undefined,
     };
     await runDeploy(
-      'service-account',
+      serviceAccount,
       service,
       image,
     );
