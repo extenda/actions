@@ -55,9 +55,15 @@ const managedArguments = async (args, service, projectId) => {
         'cloudsql-instances': cloudSqlInstances = undefined,
         region,
         'service-account': runtimeAccountEmail = 'cloudrun-runtime',
+        'vpc-connector': vpcConnectorName = 'None',
+        'vpc-egress': vpcEgress = 'private-ranges-only',
       },
     },
   } = service;
+
+  const {
+    env,
+  } = projectInfo(projectId);
 
   if (!isManagedCloudRun(cpu)) {
     throw new Error('Managed Cloud Run must be configured with CPU count [1,2]. Use of millicpu is not supported.');
@@ -71,6 +77,20 @@ const managedArguments = async (args, service, projectId) => {
     '--platform=managed',
     `--region=${region}`,
   );
+
+  if (env === 'prod') {
+    args.push(
+      `--vpc-connector=${vpcConnectorName}`,
+    );
+  } else {
+    args.push(
+      '--vpc-connector=None',
+    );
+  }
+
+  if (vpcConnectorName !== 'None' && env === 'prod') {
+    args.push(`--vpc-egress=${vpcEgress}`);
+  }
 
   if (Array.isArray(cloudSqlInstances)) {
     if (cloudSqlInstances.length === 0) {
