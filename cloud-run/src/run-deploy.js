@@ -78,13 +78,9 @@ const managedArguments = async (args, service, projectId) => {
     `--region=${region}`,
   );
 
-  if (env === 'prod') {
+  if (vpcConnectorName !== 'None' && env === 'prod') {
     args.push(
       `--vpc-connector=${vpcConnectorName}`,
-    );
-  } else {
-    args.push(
-      '--vpc-connector=None',
     );
   }
 

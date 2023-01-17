@@ -68,7 +68,6 @@ describe('Run Deploy', () => {
       '--cpu=1',
       '--platform=managed',
       '--region=eu-west1',
-      '--vpc-connector=None',
       '--allow-unauthenticated',
     ], expect.anything());
   });
@@ -116,7 +115,6 @@ describe('Run Deploy', () => {
       '--cpu=1',
       '--platform=managed',
       '--region=eu-west1',
-      '--vpc-connector=None',
       '--allow-unauthenticated',
     ], expect.anything());
   });
@@ -160,7 +158,6 @@ describe('Run Deploy', () => {
       '--cpu=1',
       '--platform=managed',
       '--region=eu-west1',
-      '--vpc-connector=None',
       '--allow-unauthenticated',
     ], expect.anything());
   });
@@ -264,7 +261,6 @@ describe('Run Deploy', () => {
       '--cpu=1',
       '--platform=managed',
       '--region=eu-west1',
-      '--vpc-connector=None',
       '--allow-unauthenticated',
     ], expect.anything());
   });
@@ -390,7 +386,7 @@ describe('Run Deploy', () => {
       service,
       'gcr.io/test-staging-project/my-service:tag',
     );
-    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--vpc-connector=None']));
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.not.arrayContaining(['--vpc-connector=test-prod-project/vpc-connector']));
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.not.arrayContaining(['--vpc-egress=private-ranges-only']));
   });
 
