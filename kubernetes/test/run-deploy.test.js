@@ -191,6 +191,88 @@ describe('Run Deploy', () => {
     ]);
   });
 
+  test('It calls kustomize on service and sets labels', async () => {
+    getClusterInfo.mockResolvedValueOnce({});
+    exec.exec.mockResolvedValue(0);
+    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-project/my-service@sha256:111');
+
+    const serviceAccount = setupGcloud.mockResolvedValueOnce('test-staging-project');
+    const image = 'eu.gcr.io/test-project/my-service:tag';
+    const service = {
+      name: 'deployment-name',
+      labels: {
+        product: 'test-product',
+        component: 'test-component',
+        'tenant-alias': 'multi-tenant',
+      },
+    };
+    await runDeploy(
+      serviceAccount,
+      service,
+      image,
+    );
+    expect(kustomize).toHaveBeenCalledWith([
+      'edit',
+      'add',
+      'label',
+      `product:${service.labels.product}`,
+    ]);
+    expect(kustomize).toHaveBeenCalledWith([
+      'edit',
+      'add',
+      'label',
+      `component:${service.labels.component}`,
+    ]);
+    expect(kustomize).toHaveBeenCalledWith([
+      'edit',
+      'add',
+      'label',
+      `tenant-alias:${service.labels['tenant-alias']}`,
+    ]);
+    expect(kustomize).toHaveBeenCalledWith([
+      'edit',
+      'add',
+      'label',
+      `app:${service.name}`,
+    ]);
+    expect(kustomize).toHaveBeenCalledWith([
+      'edit',
+      'add',
+      'label',
+      `environment:staging`,
+    ]);
+  });
+
+  test('It can set handle label undefined labels service', async () => {
+    getClusterInfo.mockResolvedValueOnce({});
+    exec.exec.mockResolvedValue(0);
+    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-project/my-service@sha256:111');
+
+    const serviceAccount = setupGcloud.mockResolvedValueOnce('test-prod-project');
+    const image = 'eu.gcr.io/test-project/my-service:tag';
+    const service = {
+      name: 'deployment-name',
+      labels: undefined,
+    };
+    await runDeploy(
+      'service-account',
+      service,
+      image,
+    );
+    expect(kustomize).toHaveBeenCalledWith([
+      'edit',
+      'add',
+      'label',
+      `app:${service.name}`,
+    ]);
+    expect(kustomize).toHaveBeenCalledWith([
+      'edit',
+      'add',
+      'label',
+      `environment:prod`,
+    ]);
+  });
+
   test('It calls applyAutoscale with storage (stateful set), autoscale parameters and dryRun', async () => {
     getClusterInfo.mockResolvedValueOnce({});
     exec.exec.mockResolvedValue(0);
