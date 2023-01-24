@@ -239,7 +239,7 @@ describe('Run Deploy', () => {
       'edit',
       'add',
       'label',
-      `environment:staging`,
+      'environment:staging',
     ]);
   });
 
@@ -269,7 +269,7 @@ describe('Run Deploy', () => {
       'edit',
       'add',
       'label',
-      `environment:prod`,
+      'environment:prod',
     ]);
   });
 
