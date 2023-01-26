@@ -26,7 +26,7 @@ const findReportFile = () => {
 
 const getTaskReport = async (reportFile) => {
   if (!fs.existsSync(reportFile)) {
-    throw new `File not found ${reportFile}`();
+    throw new Error(`File not found ${reportFile}`);
   }
 
   const reader = readline.createInterface({
