@@ -12,7 +12,7 @@ const through2 = require('through2');
 const mergeConfig = require('conventional-changelog-core/lib/merge-config');
 const { getTagAtCommit } = require('./branch-info');
 
-const tagPrefix = process.env.TAG_PREFIX || 'v';
+let tagPrefix = process.env.TAG_PREFIX || 'v';
 
 /**
  * Returns the recommended version bump based on conventional commits since last tag.
@@ -126,9 +126,16 @@ const getChangelog = async (version) => withConventionalConfig(
   },
 );
 
+const setTagPrefix = (prefix) => {
+  tagPrefix = prefix;
+};
+
+const getTagPrefix = () => tagPrefix;
+
 module.exports = {
   getRecommendedBump,
   getChangelog,
   getConventionalCommits,
-  tagPrefix,
+  setTagPrefix,
+  getTagPrefix,
 };
