@@ -10,12 +10,12 @@ const DEFAULT_VERSION = '0.0.0';
  * Returns the latest tagged release matching the tag prefix.
  * @returns {Promise<string>}
  */
-const getLatestReleaseTag = async () => git.tags(['--sort=-version:refname', '--merged', 'HEAD', `${changes.tagPrefix}*`])
+const getLatestReleaseTag = async () => git.tags(['--sort=-version:refname', '--merged', 'HEAD', `${changes.getTagPrefix()}*`])
   .then((tags) => {
     if (tags.all.length === 0) {
-      core.info(`No release tags with prefix '${changes.tagPrefix}' exists, use ${changes.tagPrefix}${DEFAULT_VERSION}`);
+      core.info(`No release tags with prefix '${changes.getTagPrefix()}' exists, use ${changes.getTagPrefix()}${DEFAULT_VERSION}`);
     }
-    return tags.all[0] || `${changes.tagPrefix}${DEFAULT_VERSION}`;
+    return tags.all[0] || `${changes.getTagPrefix()}${DEFAULT_VERSION}`;
   });
 
 /**
@@ -23,7 +23,7 @@ const getLatestReleaseTag = async () => git.tags(['--sort=-version:refname', '--
  * @returns {Promise<string>}
  */
 const getLatestRelease = async () => getLatestReleaseTag()
-  .then((tag) => tag.replace(changes.tagPrefix, ''));
+  .then((tag) => tag.replace(changes.getTagPrefix(), ''));
 
 /**
  * Returns the version to build. This version number is determined by the last release number
@@ -33,7 +33,14 @@ const getLatestRelease = async () => getLatestReleaseTag()
  */
 const getBuildVersion = async (versionSuffix = '') => {
   const latestRelease = await getLatestRelease();
+
+  console.log('Latest release', latestRelease);
+  console.log('tag prefix', changes.getTagPrefix());
+
   const releaseType = await changes.getRecommendedBump();
+
+  console.log('Recommended bump', releaseType);
+
   core.info(`Conventional commits '${releaseType}' bump from ${latestRelease}`);
   return semver.inc(semver.coerce(latestRelease), releaseType).concat(versionSuffix);
 };
@@ -45,12 +52,11 @@ const getBuildVersion = async (versionSuffix = '') => {
 const tagReleaseVersion = async () => {
   const version = await getBuildVersion();
   const changelog = await changes.getChangelog(version);
-  const tagName = `${changes.tagPrefix}${version}`;
+  const tagName = `${changes.getTagPrefix()}${version}`;
   await gitConfig().then(() => git.addAnnotatedTag(
     tagName,
     `Release ${version}`,
-  ))
-    .then(() => git.pushTags());
+  )).then(() => git.pushTags());
   return {
     changelog,
     tagName,
@@ -59,7 +65,7 @@ const tagReleaseVersion = async () => {
 };
 
 const setTagPrefix = (prefix) => {
-  changes.tagPrefix = prefix;
+  changes.setTagPrefix(prefix);
 };
 
 module.exports = {
