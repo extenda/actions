@@ -32,22 +32,18 @@ module.exports = {
         component: {
           type: 'string',
           default: 'component-not-set',
-          pattern: '^[a-z-]+$',
         },
         product: {
           type: 'string',
           default: 'product-not-set',
-          pattern: '^[a-z-]+$',
         },
         'iso-country': {
           type: 'string',
           default: 'global',
-          pattern: '^[a-z]+$',
         },
         'tenant-alias': {
           type: 'string',
           default: 'not-tenant-specific',
-          pattern: '^[a-z-]+$',
         },
       },
       patternProperties: {
