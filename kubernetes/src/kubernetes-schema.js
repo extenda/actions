@@ -26,31 +26,6 @@ module.exports = {
       },
       additionalProperties: false,
     },
-    labels: {
-      type: 'object',
-      properties: {
-        component: {
-          type: 'string',
-          default: 'component-not-set',
-        },
-        product: {
-          type: 'string',
-          default: 'product-not-set',
-        },
-        'iso-country': {
-          type: 'string',
-          default: 'global',
-        },
-        'tenant-alias': {
-          type: 'string',
-          default: 'not-tenant-specific',
-        },
-      },
-      patternProperties: {
-        '^[a-z-]+$': { type: 'string', pattern: '^[a-z-]+$' },
-      },
-      additionalProperties: false,
-    },
     limits: {
       type: 'object',
       properties: {
