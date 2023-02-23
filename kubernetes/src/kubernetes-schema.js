@@ -31,22 +31,22 @@ module.exports = {
       properties: {
         component: {
           type: 'string',
-          default: 'component-not-set',
+          default: 'no-component',
           pattern: '^[a-z-]+$',
         },
         product: {
           type: 'string',
-          default: 'product-not-set',
+          default: 'no-product',
           pattern: '^[a-z-]+$',
         },
         'iso-country': {
           type: 'string',
-          default: 'global',
+          default: 'no-country',
           pattern: '^[a-z-]+$',
         },
         'tenant-alias': {
           type: 'string',
-          default: 'not-tenant-specific',
+          default: 'multi-tenant',
           pattern: '^[a-z-]+$',
         },
       },
