@@ -19,7 +19,7 @@ const action = async () => {
 
   await setupGcloud(serviceAccountKey, process.env.GCLOUD_INSTALLED_VERSION || 'latest');
   try {
-      await createAttestation(
+    await createAttestation(
       artifactUrl,
       attestor,
       attestorProject,
@@ -30,10 +30,10 @@ const action = async () => {
       keyversion,
     );
   } catch (err) {
-    if (err.includes('is the subject of a conflict: Could not create occurrence ID')) {
-      return "Image already attested. Continue workflow";
-    } else {
+    if (!(err.includes('is the subject of a conflict: Could not create occurrence ID'))) {
       throw new Error(err);
+    } else {
+      core.info('Image already attested');
     }
   }
 };
