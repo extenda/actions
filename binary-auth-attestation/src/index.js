@@ -16,7 +16,6 @@ const action = async () => {
 
   const tag = imagePath.split(':')[1] || process.env.GITHUB_SHA;
   const artifactUrl = await getArtifactUrl(tag, imagePath);
-  const errorMessage = 'subject of a conflict: Could not create occurrence ID';
 
   await setupGcloud(serviceAccountKey, process.env.GCLOUD_INSTALLED_VERSION || 'latest');
   try {
@@ -31,10 +30,10 @@ const action = async () => {
       keyversion,
     );
   } catch (err) {
-    if (!(err.includes(errorMessage))) {
-      throw new Error(err);
-    } else {
+    if (err.toString().includes('subject of a conflict: Could not create occurrence ID')) {
       core.info('Image already attested');
+    } else {
+      throw new Error(err);
     }
   }
 };
