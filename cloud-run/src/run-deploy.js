@@ -270,11 +270,6 @@ const runDeploy = async (
     if (canary) {
       await canaryArguments(args, service.canary, projectId, project, env, customLabels);
     }
-
-    // Temporary deploy protection!
-    if (cluster.uri.includes('experience-prod-852a')) {
-      throw new Error(`Prohibit deploy to ${cluster.uri}`);
-    }
   }
 
   const gcloudExitCode = await execWithOutput(args)
