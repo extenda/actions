@@ -34,40 +34,42 @@ const configureIAM = async (
   // Connect to cluster
   await authenticateKubeCtl(cluster);
 
-  services.forEach(({ name: namespace, repository, 'allowed-consumers': consumers }) => {
-    const systemName = `${permissionPrefix}.${namespace}-${env}`;
+  if (services) {
+    services.forEach(({ name: namespace, repository, 'allowed-consumers': consumers }) => {
+      const systemName = `${permissionPrefix}.${namespace}-${env}`;
 
-    // 1. Check if DAS system exists
-    // If system doesn't exist
-    //    2. Create namespace
-    //    3. Create DAS system
-    // If system exists
-    //    2. Update owners
-    //    3. Update repository reference
-    promises.push(checkSystem(systemName, styraToken, styraUrl)
-      .then((system) => {
-        if (system.id === '') {
-          core.info(`creating system '${systemName}' in ${styraUrl}`);
-          return createNamespace(projectId, true, namespace)
-            .then(() => setupSystem(
-              namespace,
-              systemName,
-              env,
-              repository,
-              styraToken,
-              styraUrl,
-              systemOwners,
-              consumers,
-              iamToken,
-              iamUrl,
-            )).catch((err) => errors.push(err));
-        }
-        core.info(`system '${systemName}' already exists in ${styraUrl}`);
-        return checkOwners(system.id, styraToken, styraUrl, systemOwners)
-          .then(() => checkRepository(system, styraToken, styraUrl, repository)
-            .then(() => handleConsumers(system.id, styraToken, styraUrl, consumers, systemName)));
-      }));
-  });
+      // 1. Check if DAS system exists
+      // If system doesn't exist
+      //    2. Create namespace
+      //    3. Create DAS system
+      // If system exists
+      //    2. Update owners
+      //    3. Update repository reference
+      promises.push(checkSystem(systemName, styraToken, styraUrl)
+        .then((system) => {
+          if (system.id === '') {
+            core.info(`creating system '${systemName}' in ${styraUrl}`);
+            return createNamespace(projectId, true, namespace)
+              .then(() => setupSystem(
+                namespace,
+                systemName,
+                env,
+                repository,
+                styraToken,
+                styraUrl,
+                systemOwners,
+                consumers,
+                iamToken,
+                iamUrl,
+              )).catch((err) => errors.push(err));
+          }
+          core.info(`system '${systemName}' already exists in ${styraUrl}`);
+          return checkOwners(system.id, styraToken, styraUrl, systemOwners)
+            .then(() => checkRepository(system, styraToken, styraUrl, repository)
+              .then(() => handleConsumers(system.id, styraToken, styraUrl, consumers, systemName)));
+        }));
+    });
+  }
 
   // Wait for K8s and DAS system.
   await Promise.all(promises);

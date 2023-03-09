@@ -13,24 +13,23 @@ describe('IAM Definition', () => {
       .toThrow('iam specification file not found: iam.yaml');
   });
 
-
   // Uncomment test to allow yaml without
   describe('Schema validation', () => {
-//     test('It throws for missing services', () => {
-//       mockFs({
-//         'iam.yaml': `
-// permission-prefix: tst
-// name: test
-// permissions:
-//   test:
-//     - verb
-// `,
-//       });
-//       expect(() => loadIamDefinition('iam.yaml'))
-//         .toThrow(`iam.yaml is not valid.
-// 0: instance requires property "services"
-// `);
-//     });
+    //     test('It throws for missing services', () => {
+    //       mockFs({
+    //         'iam.yaml': `
+    // permission-prefix: tst
+    // name: test
+    // permissions:
+    //   test:
+    //     - verb
+    // `,
+    //       });
+    //       expect(() => loadIamDefinition('iam.yaml'))
+    //         .toThrow(`iam.yaml is not valid.
+    // 0: instance requires property "services"
+    // `);
+    //     });
 
     test('It throws for missing permission-prefix', () => {
       mockFs({
