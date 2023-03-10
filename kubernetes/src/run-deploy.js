@@ -68,15 +68,44 @@ const kustomizeImage = async (image) => {
 };
 
 /**
- * Adds label to deployment.
- * @param name Label name to be added.
+ * Adds labels to deployment.
+ * @param service.labels Custom Labels to be added.
+ * @param service.name Label to be added.
  */
-const kustomizeLabels = async (name) => {
+const kustomizeLabels = async (service, projectId) => {
+  // If there are any service.labels add them
+  if (service.labels !== undefined) {
+    const { labels } = service;
+    let labelKey = '';
+    const promises = [];
+    for (labelKey in labels) {
+      if (Object.prototype.hasOwnProperty.call(labels, labelKey)) {
+        promises.push(execKustomize([
+          'edit',
+          'add',
+          'label',
+          `${labelKey}:${labels[labelKey]}`,
+        ]));
+      }
+    }
+    await Promise.all(promises);
+  }
+
+  // Always add the app label
   await execKustomize([
     'edit',
     'add',
     'label',
-    `app:${name}`,
+    `app:${service.name}`,
+  ]);
+
+  // Always add environment label, projectId should always include staging or prod.
+  const environment = projectId.includes('-staging-') ? 'staging' : 'prod';
+  await execKustomize([
+    'edit',
+    'add',
+    'label',
+    `environment:${environment}`,
   ]);
 };
 
@@ -156,7 +185,7 @@ const runDeploy = async (
   // Run kustomize commands for resource files
   await kustomizeNamespace(serviceDefinition.name);
   await kustomizeImage(image);
-  await kustomizeLabels(serviceDefinition.name);
+  await kustomizeLabels(serviceDefinition, projectId);
 
   // Run kustomize build
   await kustomizeBuild();

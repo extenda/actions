@@ -63,6 +63,68 @@ limits:
       });
     });
 
+    test('It loads labels', () => {
+      mockFs({
+        'kubernetes.yaml': `
+name: kubernetes
+requests:
+  memory: 128Mi
+  cpu: 100m
+limits:
+  memory: 256Mi
+  cpu: 300m
+labels:
+  product: testproduct
+  component: testcomponent
+  random-label-key: random-label-value
+`,
+      });
+      const serviceDef = loadServiceDefinition('kubernetes.yaml', kubernetesSchema);
+      expect(serviceDef).toMatchObject({
+        requests: {
+          cpu: '100m',
+          memory: '128Mi',
+        },
+        limits: {
+          cpu: '300m',
+          memory: '256Mi',
+        },
+        labels: {
+          product: 'testproduct',
+          component: 'testcomponent',
+          'random-label-key': 'random-label-value',
+        },
+      });
+    });
+
+    test('It does not load faulty labels', () => {
+      mockFs({
+        'kubernetes.yaml': `
+name: kubernetes
+labels:
+  product_1: testproduct
+  component: testcomponent
+`,
+      });
+      expect(() => loadServiceDefinition('kubernetes.yaml', kubernetesSchema))
+        .toThrow(`kubernetes.yaml is not valid.
+0: instance.labels additionalProperty "product_1" exists in instance when not allowed`);
+    });
+
+    test('It does not allow wrong pattern in label values', () => {
+      mockFs({
+        'kubernetes.yaml': `
+name: kubernetes
+labels:
+  product: test_product
+  component: testcomponent
+`,
+      });
+      expect(() => loadServiceDefinition('kubernetes.yaml', kubernetesSchema))
+        .toThrow(`kubernetes.yaml is not valid.
+0: instance.labels.product does not match pattern "^[a-z-]+$"`);
+    });
+
     test('It loads ports', () => {
       mockFs({
         'kubernetes.yaml': `
