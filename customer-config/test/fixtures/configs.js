@@ -5,7 +5,7 @@ version: 1
 system-prefix: che
 definitions:
   - name: receipt-layout
-    version: v1 
+    version: v1
     display-name: Receipt Layout config
     schema-location: https://example.com/receipt-layout-schema.json
     default-value:
@@ -19,7 +19,7 @@ version: 1
 system-prefix: tst
 definitions:
   - name: receipt-layout
-    version: v1 
+    version: v1
     schema-location: https://example.com/receipt-layout-schema.json
     display-name: Receipt Layout config
 `;
@@ -31,7 +31,7 @@ version: 1
 system-prefix: tst-invalid
 definitions:
   - name: true
-    version: v11.23 
+    version: v11.23
     display-name: 1337
 `;
 
