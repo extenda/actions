@@ -84,6 +84,7 @@ properties are required and not.
 | `concurrency`                      | The max concurrent requests per container. Will scale with cpu if left blank (`250m` sets 20 in concurrency).                                                     | No       | `10-100`      |
 | `max-instances`                    | The maximum number of container instances to run. Set to `-1` to use the platform default (recommended).                                                          | No       | `-1`          |
 | `max-revisions`                    | The maximum number of cloudrun revisions to save. Set to `4` to use the platform default (recommended).                                                           | No       | `4`           |
+| `labels`                           | A map of optional labels to add to the deploy. All labels must follow kebab-case convention. Lower case alphabetical with hyphen separator. The following labels are validated: `component`, `ìso-country`, `product` and `tenant-alias` with value accrding to regex `^[a-z-]+$`, i.e only `a-z` and `-` allowed. Both `product` and `component` should be applicable for most services, while `tenant-alias` and `iso-country` are only applicable for tenant and country specific services. Custom labels can also be added as long as they follow kebab-case for both key and value. | No       | n/a           |
 | `environment`<top>\*</top>         | A map of environment variables. The values can be Secret Manager URLs on the form `sm://*/my-secret` where `*` will be replaced by the project ID at deploy time. | No       | -             |
 | `enable-http2`                     | Flag to enable HTTP/2. Application must support h2c to work correctly with HTTP/2                                                                                 | No       | `false`       |
 | `canary.enabled`                   | Flag, that enables canary deployment. You must also specify `canary.steps`, `canary.thresholds` for canary to work                                                | No       | `false`       |
@@ -104,6 +105,8 @@ These properties only apply to Managed Cloud Run:
 | `platform.managed.region`                          | The region in which to run the service.                                                                                                                          | Yes      |                    |
 | `platform.managed.cloudsql-instances`<top>\*</top> | A list of [Cloud SQL instance names](https://cloud.google.com/sdk/gcloud/reference/run/deploy#--add-cloudsql-instances) this service can connect to.             | No       | -                  |
 | `platform.managed.service-account`                 | The runtime service account used by the Cloud Run service. Either a fully-qualified email or a prefix where the default project email is appended automatically. | No       | `cloudrun-runtime` |
+| `platform.managed.vpc-connector`                   | The fully qualified name of the Serverless VPC Access connector e.g. `projects/PROJECT_ID/locations/REGION/connectors/CONNECTOR_NAME` (ONLY FOR PROD services)  | No       | `None` |
+| `platform.managed.vpc-egress`                      | The outbound traffic to send through the VPC connector for the service | No       | `private-ranges-only` |
 
 <top>\*</top> Once set, this value can only be unset by passing `[]` (empty array) as value.
 
@@ -137,6 +140,22 @@ platform:
     region: europe-west1
 ```
 
+### Cloud Run with Serverless VPC connector for a service
+This example defines a Cloud Run service (production only) that is deployed with a VPC connector with all the outbound traffic being send through the VPC connector.
+```yaml
+name: my-service
+memory: 256Mi
+cpu: 1
+environment:
+  DEBUG_LOG: 'false'
+  SECRET_NAME: sm://*/secret-name
+platform:
+  managed:
+    allow-unauthenticated: true
+    region: europe-west1
+    vpc-connector: projects/test-prod-project/locations/europe-west1/connectors/vpc-connector
+    vpc-egress: all-traffic
+```
 ### Cloud Run on auto-discovered GKE
 
 This example defines a Cloud Run service that runs on Cloud Run on GKE.
@@ -274,3 +293,24 @@ The following example enables `canary` for  service. New revision of a service w
 Instead traffic percentage will be updated each `canary.interval` minutes using `canary.steps` values.
 On each step metrics for latest revision will be fetched and compared to `canary.thresholds`.
 If current metrics do not exceed thresholds, traffic will be increased otherwise servie will rollback to previous revision.
+
+#### Deployment with labels
+
+The following example shows how to add labels to the service. `component`, `iso-country`, `product` and `tenant-alias` are used in reports and must be on the format below. `iso-county` is the two lower case letters country code and should only be used in country specific services. `tenant-alias` is the alias for the tenant that can be found in iam and should only be used in tenant specific services. `product` is the product the service belong to. `component` is the product component that the service belong to. It is possible to also add custom labels as seen below. Both keys and values should be kebab-case, i.e. lower case with hyphen as word separator.
+
+Given the following `cloud-run.yaml`:
+```yaml
+name: my-service
+memory: 256Mi
+cpu: 1
+labels:
+  component: component-in-sellable-product
+  iso-country: se
+  product: sellable-product
+  tenant-alias: foodstore
+  custom-label: custom-value
+platform:
+  managed:
+    allow-unauthenticated: true
+    region: europe-west1
+```

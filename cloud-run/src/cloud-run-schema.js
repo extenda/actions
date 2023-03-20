@@ -30,6 +30,35 @@ module.exports = {
     name: {
       type: 'string',
     },
+    labels: {
+      type: 'object',
+      properties: {
+        component: {
+          type: 'string',
+          default: 'component-not-set',
+          pattern: '^[a-z-]+$',
+        },
+        product: {
+          type: 'string',
+          default: 'product-not-set',
+          pattern: '^[a-z-]+$',
+        },
+        'iso-country': {
+          type: 'string',
+          default: 'global',
+          pattern: '^[a-z]+$',
+        },
+        'tenant-alias': {
+          type: 'string',
+          default: 'not-tenant-specific',
+          pattern: '^[a-z-]+$',
+        },
+      },
+      patternProperties: {
+        '^[a-z-]+$': { type: 'string', pattern: '^[a-z-]+$' },
+      },
+      additionalProperties: false,
+    },
     'max-instances': {
       type: 'integer',
       default: -1,
@@ -72,6 +101,14 @@ module.exports = {
             'service-account': {
               type: 'string',
               default: 'cloudrun-runtime',
+            },
+            'vpc-connector': {
+              type: 'string',
+              default: 'None',
+            },
+            'vpc-egress': {
+              type: 'string',
+              default: 'private-ranges-only',
             },
           },
           required: [

@@ -23,6 +23,7 @@ describe('Run Deploy', () => {
   beforeEach(() => {
     process.env = { ...orgEnv };
     process.env.GITHUB_SHA = '63633c0'; // v.0.18.0
+    process.env.ENABLE_TRIVY = 'true';
   });
 
   afterEach(() => {
@@ -32,6 +33,7 @@ describe('Run Deploy', () => {
   });
 
   test('It can deploy to managed Cloud Run', async () => {
+    process.env.ENABLE_TRIVY = 'false';
     exec.exec.mockResolvedValueOnce(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project');
     const service = {
@@ -61,7 +63,7 @@ describe('Run Deploy', () => {
       '--concurrency=80',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
+      '--labels=service_project_id=test-staging-project,service_project=test,environment=staging,service_env=staging',
       '--service-account=cloudrun-runtime@test-staging-project.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
@@ -70,13 +72,21 @@ describe('Run Deploy', () => {
     ], expect.anything());
   });
 
-  test('It parse projectId and set labels', async () => {
+  test('It can handle random and validated labels', async () => {
     exec.exec.mockResolvedValueOnce(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project-staging-ab12');
     const service = {
       name: 'my-service',
       memory: '256Mi',
       cpu: 1,
+      labels: {
+        product: 'test-product',
+        'tenant-alias': 'test-tenant-alias',
+        random2: 'random_value2',
+        random1: 'random_value1',
+        component: 'test-component',
+        'iso-country': 'se',
+      },
       platform: {
         managed: {
           region: 'eu-west1',
@@ -100,7 +110,50 @@ describe('Run Deploy', () => {
       '--concurrency=80',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project-staging-ab12,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project-staging-ab12/my-service:tag',
-      '--labels=service_project_id=test-staging-project-staging-ab12,service_project=test-staging-project,service_env=staging',
+      '--labels=product=test-product,tenant-alias=test-tenant-alias,random2=random_value2,random1=random_value1,component=test-component,iso-country=se,service_project_id=test-staging-project-staging-ab12,service_project=test-staging-project,environment=staging,service_env=staging',
+      '--service-account=cloudrun-runtime@test-staging-project-staging-ab12.iam.gserviceaccount.com',
+      '--cpu=1',
+      '--platform=managed',
+      '--region=eu-west1',
+      '--allow-unauthenticated',
+    ], expect.anything());
+  });
+
+  test('It parse projectId and set labels', async () => {
+    exec.exec.mockResolvedValueOnce(0);
+    setupGcloud.mockResolvedValueOnce('test-staging-project-staging-ab12');
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      cpu: 1,
+      labels: {
+        product: 'test-product',
+        'tenant-alias': 'test-tenant-alias',
+      },
+      platform: {
+        managed: {
+          region: 'eu-west1',
+          'allow-unauthenticated': true,
+        },
+      },
+    };
+    const returnValue = await runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-staging-project-staging-ab12/my-service:tag',
+    );
+    expect(returnValue.gcloudExitCode).toEqual(0);
+    expect(setupGcloud).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledWith('gcloud', [
+      'run', 'deploy', 'my-service',
+      '--image=gcr.io/test-staging-project-staging-ab12/my-service:tag',
+      '--project=test-staging-project-staging-ab12',
+      '--memory=256Mi',
+      '--concurrency=80',
+      '--max-instances=default',
+      '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project-staging-ab12,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project-staging-ab12/my-service:tag',
+      '--labels=product=test-product,tenant-alias=test-tenant-alias,service_project_id=test-staging-project-staging-ab12,service_project=test-staging-project,environment=staging,service_env=staging',
       '--service-account=cloudrun-runtime@test-staging-project-staging-ab12.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
@@ -174,6 +227,10 @@ describe('Run Deploy', () => {
       name: 'my-service',
       memory: '256Mi',
       cpu: 1,
+      labels: {
+        product: 'test-product',
+        'tenant-alias': 'test-tenant-alias',
+      },
       environment: {
         KEY1: 'value',
         KEY2: 'sm://*/my-secret',
@@ -199,7 +256,7 @@ describe('Run Deploy', () => {
       '--concurrency=80',
       '--max-instances=default',
       '--set-env-vars=KEY1=value,KEY2=sm://test-staging-project/my-secret,SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging',
+      '--labels=product=test-product,tenant-alias=test-tenant-alias,service_project_id=test-staging-project,service_project=test,environment=staging,service_env=staging',
       '--service-account=cloudrun-runtime@test-staging-project.iam.gserviceaccount.com',
       '--cpu=1',
       '--platform=managed',
@@ -280,6 +337,59 @@ describe('Run Deploy', () => {
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--clear-cloudsql-instances']));
   });
 
+  test('It can deploy with vpc-connector for prod service', async () => {
+    exec.exec.mockResolvedValueOnce(0);
+    setupGcloud.mockResolvedValueOnce('test-prod-project');
+    process.env.GITHUB_SHA = '382aee2'; // Not tagged
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      cpu: 1,
+      platform: {
+        managed: {
+          region: 'eu-west1',
+          'allow-unauthenticated': true,
+          'cloudsql-instances': [],
+          'vpc-connector': 'test-prod-project/vpc-connector',
+        },
+      },
+    };
+    await runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-prod-project/my-service:tag',
+    );
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--vpc-connector=test-prod-project/vpc-connector']));
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['--vpc-egress=private-ranges-only']));
+  });
+
+  test('It will not deploy vpc-connector for staging service', async () => {
+    exec.exec.mockResolvedValueOnce(0);
+    setupGcloud.mockResolvedValueOnce('test-staging-project');
+    process.env.GITHUB_SHA = '382aee2'; // Not tagged
+    const service = {
+      name: 'my-service',
+      memory: '256Mi',
+      cpu: 1,
+      platform: {
+        managed: {
+          region: 'eu-west1',
+          'allow-unauthenticated': true,
+          'cloudsql-instances': [],
+          'vpc-connector': 'test-prod-project/vpc-connector',
+          'vpc-egress': 'private-ranges-only',
+        },
+      },
+    };
+    await runDeploy(
+      serviceAccountKey,
+      service,
+      'gcr.io/test-staging-project/my-service:tag',
+    );
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.not.arrayContaining(['--vpc-connector=test-prod-project/vpc-connector']));
+    expect(exec.exec.mock.calls[0][1]).toEqual(expect.not.arrayContaining(['--vpc-egress=private-ranges-only']));
+  });
+
   test('It can deploy to Cloud Run on GKE', async () => {
     exec.exec.mockResolvedValueOnce(0);
     getClusterInfo.mockResolvedValueOnce({
@@ -293,6 +403,10 @@ describe('Run Deploy', () => {
       name: 'my-service',
       memory: '256Mi',
       cpu: '400m',
+      labels: {
+        product: 'test-product',
+        'tenant-alias': 'test-tenant-alias',
+      },
       'min-instances': 1,
       platform: {
         gke: {
@@ -320,7 +434,7 @@ describe('Run Deploy', () => {
       '--concurrency=32',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
+      '--labels=product=test-product,tenant-alias=test-tenant-alias,service_project_id=test-staging-project,service_project=test,environment=staging,service_env=staging,sre.canary.enabled=false',
       '--cpu=400m',
       '--min-instances=1',
       '--platform=gke',
@@ -345,6 +459,10 @@ describe('Run Deploy', () => {
       name: 'my-service',
       memory: '256Mi',
       cpu: '100m',
+      labels: {
+        product: 'test-product',
+        'tenant-alias': 'test-tenant-alias',
+      },
       platform: {
         gke: {
           connectivity: 'external',
@@ -368,7 +486,7 @@ describe('Run Deploy', () => {
       '--concurrency=10',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
+      '--labels=product=test-product,tenant-alias=test-tenant-alias,service_project_id=test-staging-project,service_project=test,environment=staging,service_env=staging,sre.canary.enabled=false',
       '--cpu=100m',
       '--min-instances=default',
       '--platform=gke',
@@ -421,7 +539,7 @@ describe('Run Deploy', () => {
       '--concurrency=50',
       '--max-instances=100',
       '--set-env-vars=SERVICE_PROJECT_ID=test-prod-project,SERVICE_ENVIRONMENT=prod,SERVICE_CONTAINER_IMAGE=gcr.io/test-prod-project/my-service:tag',
-      '--labels=service_project_id=test-prod-project,service_project=test,service_env=prod,sre.canary.enabled=false',
+      '--labels=service_project_id=test-prod-project,service_project=test,environment=prod,service_env=prod,sre.canary.enabled=false',
       '--cpu=400m',
       '--min-instances=1',
       '--platform=gke',
@@ -493,6 +611,10 @@ describe('Run Deploy', () => {
       name: 'my-service',
       memory: '256Mi',
       cpu: '233m',
+      labels: {
+        product: 'test-product',
+        'tenant-alias': 'test-tenant-alias',
+      },
       platform: {
         gke: {
           connectivity: 'external',
@@ -516,7 +638,7 @@ describe('Run Deploy', () => {
       '--concurrency=19',
       '--max-instances=default',
       '--set-env-vars=SERVICE_PROJECT_ID=test-staging-project,SERVICE_ENVIRONMENT=staging,SERVICE_CONTAINER_IMAGE=gcr.io/test-staging-project/my-service:tag',
-      '--labels=service_project_id=test-staging-project,service_project=test,service_env=staging,sre.canary.enabled=false',
+      '--labels=product=test-product,tenant-alias=test-tenant-alias,service_project_id=test-staging-project,service_project=test,environment=staging,service_env=staging,sre.canary.enabled=false',
       '--cpu=233m',
       '--min-instances=default',
       '--platform=gke',
@@ -755,6 +877,10 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       name: 'my-service',
       memory: '256Mi',
       cpu: '100m',
+      labels: {
+        product: 'test-product',
+        'tenant-alias': 'test-tenant-alias',
+      },
       canary: {
         enabled: true,
         steps: '10.50.80',
@@ -797,7 +923,7 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       '--connectivity=external',
       '--no-use-http2',
       '--namespace=my-service',
-      '--labels=service_project_id=test-prod-project,service_project=test,service_env=prod,sre.canary.enabled=true,sre.canary.steps=10.50.80,sre.canary.interval=10,sre.canary.thresholds.latency99=5,sre.canary.thresholds.latency95=2,sre.canary.thresholds.latency50=1,sre.canary.thresholds.error=1',
+      '--labels=product=test-product,tenant-alias=test-tenant-alias,service_project_id=test-prod-project,service_project=test,environment=prod,service_env=prod,sre.canary.enabled=true,sre.canary.steps=10.50.80,sre.canary.interval=10,sre.canary.thresholds.latency99=5,sre.canary.thresholds.latency95=2,sre.canary.thresholds.latency50=1,sre.canary.thresholds.error=1',
       '--no-traffic',
     ], expect.anything());
   });

@@ -130,7 +130,6 @@ module.exports = {
   },
   required: [
     'permission-prefix',
-    'services',
     'permissions',
   ],
   additionalProperties: false,

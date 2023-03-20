@@ -60,6 +60,84 @@ platform:
 0: instance.memory does not match pattern "^[0-9]+(M|G)i"`);
     });
 
+    test('It throws for invalid product string', () => {
+      mockFs({
+        'cloud-run.yaml': `
+name: service
+memory: 256Mi
+cpu: 1
+labels:
+  product: test%product
+platform:
+  managed:
+    allow-unauthenticated: true
+    region: eu-west1
+`,
+      });
+      expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
+        .toThrow(`cloud-run.yaml is not valid.
+0: instance.labels.product does not match pattern "^[a-z-]+$"`);
+    });
+
+    test('It throws for invalid label tenant-alias value', () => {
+      mockFs({
+        'cloud-run.yaml': `
+name: service
+memory: 256Mi
+cpu: 1
+labels:
+  tenant-alias: test_alias
+platform:
+  managed:
+    allow-unauthenticated: true
+    region: eu-west1
+`,
+      });
+      expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
+        .toThrow(`cloud-run.yaml is not valid.
+0: instance.labels.tenant-alias does not match pattern "^[a-z-]+$"`);
+    });
+
+    test('It throws for invalid custom label key', () => {
+      mockFs({
+        'cloud-run.yaml': `
+name: service
+memory: 256Mi
+cpu: 1
+labels:
+  product: test-product
+  custom_label: test-label
+platform:
+  managed:
+    allow-unauthenticated: true
+    region: eu-west1
+`,
+      });
+      expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
+        .toThrow(`cloud-run.yaml is not valid.
+0: instance.labels additionalProperty "custom_label" exists in instance when not allowed`);
+    });
+
+    test('It throws for invalid custom label value', () => {
+      mockFs({
+        'cloud-run.yaml': `
+name: service
+memory: 256Mi
+cpu: 1
+labels:
+  product: test-product
+  custom-label: test_label
+platform:
+  managed:
+    allow-unauthenticated: true
+    region: eu-west1
+`,
+      });
+      expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
+        .toThrow(`cloud-run.yaml is not valid.
+0: instance.labels.custom-label does not match pattern "^[a-z-]+$"`);
+    });
+
     test('It throws for invalid min-instances', () => {
       mockFs({
         'cloud-run.yaml': `
@@ -305,6 +383,103 @@ platform:
       },
     });
   });
+
+  test('It can process a yaml with label product', () => {
+    mockFs({
+      'cloud-run.yaml': `
+name: test-service
+memory: 256Mi
+cpu: 400m
+labels:
+  product: test-product
+concurrency: 80
+max-instances: 20
+min-instances: 1
+platform:
+  gke:
+    cluster: test
+    connectivity: internal
+    domain-mappings:
+      staging:
+        - test-service.domain.dev
+      prod:
+        - test-service.domain.com
+    opa-enabled: true
+`,
+    });
+    const service = loadServiceDefinition('cloud-run.yaml', cloudRunSchema);
+    expect(service).toMatchObject({
+      name: 'test-service',
+      memory: '256Mi',
+      cpu: '400m',
+      labels: {
+        product: 'test-product',
+      },
+      concurrency: 80,
+      'max-instances': 20,
+      'min-instances': 1,
+      platform: {
+        gke: {
+          cluster: 'test',
+          connectivity: 'internal',
+          'opa-enabled': true,
+          'domain-mappings': {
+            staging: ['test-service.domain.dev'],
+            prod: ['test-service.domain.com'],
+          },
+        },
+      },
+    });
+  });
+
+  test('It can process a yaml with label tenant-alias', () => {
+    mockFs({
+      'cloud-run.yaml': `
+name: test-service
+memory: 256Mi
+cpu: 400m
+labels:
+  tenant-alias: test-tenant-alias
+concurrency: 80
+max-instances: 20
+min-instances: 1
+platform:
+  gke:
+    cluster: test
+    connectivity: internal
+    domain-mappings:
+      staging:
+        - test-service.domain.dev
+      prod:
+        - test-service.domain.com
+    opa-enabled: true
+`,
+    });
+    const service = loadServiceDefinition('cloud-run.yaml', cloudRunSchema);
+    expect(service).toMatchObject({
+      name: 'test-service',
+      memory: '256Mi',
+      cpu: '400m',
+      labels: {
+        'tenant-alias': 'test-tenant-alias',
+      },
+      concurrency: 80,
+      'max-instances': 20,
+      'min-instances': 1,
+      platform: {
+        gke: {
+          cluster: 'test',
+          connectivity: 'internal',
+          'opa-enabled': true,
+          'domain-mappings': {
+            staging: ['test-service.domain.dev'],
+            prod: ['test-service.domain.com'],
+          },
+        },
+      },
+    });
+  });
+
   test('canary check threshold required', () => {
     mockFs({
       'cloud-run.yaml': `
@@ -358,6 +533,36 @@ platform:
   managed:
     allow-unauthenticated: true
     region: eu-west1
+canary:
+  enabled: true
+  steps: '10,50,80'
+  intervall: '10'
+  thresholds:
+    latency99: '5'
+    latency95: '2'
+    latency50: '1'
+    error-rate: '1'
+`,
+    });
+    expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema).not.toThrow());
+  });
+
+  test('random kebab-case labels works', () => {
+    mockFs({
+      'cloud-run.yaml': `
+name: service
+memory: 256Mi
+cpu: 1
+platform:
+  managed:
+    allow-unauthenticated: true
+    region: eu-west1
+labels:
+  randomlabel: test
+  random-label: test
+  label-random-test: random-test
+  tenant-alias: tenant-test
+  component: testcomponent
 canary:
   enabled: true
   steps: '10,50,80'
