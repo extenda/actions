@@ -27,11 +27,11 @@ function mockIdpTokenCall() {
 function mockCccSyncCall(id, response, dryRun = false) {
   // ignore version
   const { version, ...payload } = camelcaseKeys(configFixtures.validParsed, { deep: true });
-  const exeNock = nock('https://ccc-api.retailsvc.com')
+  const cccNock = nock('https://ccc-api.retailsvc.com')
     .post('/api/v1/internal/configurations:sync', payload)
     .query({ dryRun })
     .reply(200, response);
-  return () => expect(exeNock.isDone()).toEqual(true);
+  return () => expect(cccNock.isDone()).toEqual(true);
 }
 
 describe('action', () => {
@@ -96,10 +96,10 @@ describe('action', () => {
       report: [{ id: 'che.receipt-layout.v1', success: false, error: 'test error' }],
       success: false,
     };
-    const expectExeToBeCalled = mockCccSyncCall('che.receipt-layout.v1', response);
+    const expectCccToBeCalled = mockCccSyncCall('che.receipt-layout.v1', response);
 
     await expect(action()).rejects.toThrowError('Sync process had some errors (see details above).');
 
-    expectExeToBeCalled();
+    expectCccToBeCalled();
   });
 });

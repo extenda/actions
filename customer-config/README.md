@@ -39,6 +39,6 @@ jobs:
         uses: extenda/actions/customer-config@v0
         with:
           service-account-key: ${{ secrets.SECRET_AUTH }}
-          definitions: customer-config/*.yaml # default is `external-events/*.yaml`
+          definitions: customer-config/*.yaml # default is `customer-config/*.yaml`
           dry-run: ${{ github.ref != 'refs/heads/master' }}
 ```

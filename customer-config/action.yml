@@ -9,7 +9,7 @@ inputs:
     required: true
   definitions:
     description: |
-      External events configuration definition.
+      Customer controlled configuration definition.
     required: false
     default: customer-config/*.yaml
   dry-run:
