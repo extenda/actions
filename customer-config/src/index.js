@@ -3,7 +3,7 @@ const camelcaseKeys = require('camelcase-keys');
 const { run } = require('../../utils');
 const { loadDefinitions } = require('../../external-events/src/utils/load-sync-definitions');
 const { createApi } = require('../../external-events/src/utils/create-api');
-const { loadSecrets } = require('../../external-events/src/secrets-manager/load-secrets');
+const { loadSecrets } = require('./secrets-manager/load-secrets');
 const { validateCccConfig } = require('./validate/validate-ccc-config');
 
 function printSyncResult(report) {

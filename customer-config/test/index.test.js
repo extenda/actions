@@ -1,6 +1,6 @@
 jest.mock('@actions/core');
 jest.mock('fast-glob');
-jest.mock('../../external-events/src/secrets-manager/load-secrets');
+jest.mock('../src/secrets-manager/load-secrets');
 
 const core = require('@actions/core');
 const mockFs = require('mock-fs');
@@ -8,7 +8,7 @@ const fg = require('fast-glob');
 const nock = require('nock');
 const camelcaseKeys = require('camelcase-keys');
 const configFixtures = require('./fixtures/configs');
-const { loadSecrets } = require('../../external-events/src/secrets-manager/load-secrets');
+const { loadSecrets } = require('../src/secrets-manager/load-secrets');
 const { secrets } = require('./fixtures/secrets');
 const action = require('../src/index');
 
