@@ -58,6 +58,7 @@ spec:
       name: ${deploymentName}
     spec:
       accessModes: [ "ReadWriteOnce" ]
+      storageClassName: pd-standard
       resources:
         requests:
           storage: 1Gi
