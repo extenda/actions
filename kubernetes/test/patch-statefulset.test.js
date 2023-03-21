@@ -15,7 +15,7 @@ describe('Patches statefulSet.yml', () => {
     storage: {
       volume: '1Gi',
       mountPath: '/data/new_path',
-      storageClassName: 'pd-sdd',
+      storageClassName: 'pd-ssd',
     },
   };
 
@@ -56,7 +56,7 @@ spec:
       name: statefulset
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: pd-ssd
+      storageClassName: pd-standard
       resources:
         requests:
           storage: 256Mi`;
@@ -88,6 +88,7 @@ spec:
         volumeClaimTemplates: expect.arrayContaining([
           expect.objectContaining({
             spec: expect.objectContaining({
+              storageClassName: 'pd-ssd',
               resources: expect.objectContaining({
                 requests: expect.objectContaining({
                   storage: '1Gi',
