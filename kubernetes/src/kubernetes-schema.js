@@ -69,6 +69,11 @@ module.exports = {
           pattern: '^\\/[\\d\\w\\-_\\/]+$',
           default: '/data/storage',
         },
+        storageClassName: {
+          type: 'string',
+          pattern: '^pd\\-+(standard|balanced|sdd|extreme)$',
+          default: 'pd-standard',
+        },
       },
       additionalProperties: false,
     },

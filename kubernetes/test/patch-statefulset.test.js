@@ -15,6 +15,7 @@ describe('Patches statefulSet.yml', () => {
     storage: {
       volume: '1Gi',
       mountPath: '/data/new_path',
+      storageClassName: 'pd-sdd',
     },
   };
 
@@ -55,6 +56,7 @@ spec:
       name: statefulset
     spec:
       accessModes: [ "ReadWriteOnce" ]
+      storageClassName: pd-ssd
       resources:
         requests:
           storage: 256Mi`;
