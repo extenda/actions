@@ -88,7 +88,7 @@ spec:
         volumeClaimTemplates: expect.arrayContaining([
           expect.objectContaining({
             spec: expect.objectContaining({
-              storageClassName: 'pd-ssd1',
+              storageClassName: 'pd-ssd',
               resources: expect.objectContaining({
                 requests: expect.objectContaining({
                   storage: '1Gi',
