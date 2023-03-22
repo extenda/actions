@@ -1,5 +1,4 @@
 const axios = require('axios');
-const core = require('@actions/core');
 
 /**
  * @param auth {{key: string, email: string, pass: string, gipTenantId}}
@@ -35,14 +34,18 @@ async function fetchToken({
 }
 
 /**
- * Returns EXE API client.
- * @param auth {{key: string, email: string, pass: string, gipTenantId}}
+ * Returns API client.
+ * @param config {{
+ *    name: string,
+ *    url: string,
+ *    auth: {key: string, email: string, pass: string, gipTenantId}
+ *  }}
  * @return {import('axios').AxiosInstance}
  */
 
-function createExeApi(auth) {
+function createApi({ name, url, auth }) {
   const instance = axios.create({
-    baseURL: 'https://exe-management.retailsvc.com',
+    baseURL: url,
   });
 
   const addToken = async (config) => ({
@@ -51,7 +54,7 @@ function createExeApi(auth) {
   });
   const formatError = (err) => {
     const { status, data } = err.response;
-    const msg = `EXE API call failed: [${status}] - ${data.message || data.error}`;
+    const msg = `${name} API call failed: [${status}] - ${data.message || data.error}`;
     throw new Error(msg);
   };
   instance.interceptors.request.use(addToken, formatError);
@@ -59,4 +62,4 @@ function createExeApi(auth) {
   return instance;
 }
 
-module.exports = { createExeApi };
+module.exports = { createApi };

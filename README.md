@@ -18,6 +18,7 @@ The following actions are available
   * [dataflow-template-build](dataflow-template-build#readme)
   * [docker](docker#readme)
   * [dataflow-deploy](dataflow-deploy#readme)
+  * [customer-config](customer-config#readme)
   * [gcp-secret-manager](gcp-secret-manager#readme)
   * [iam](iam#readme)
   * [iam-test-token](iam-test-token#readme)
