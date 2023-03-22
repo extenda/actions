@@ -29,7 +29,7 @@ const patchStatefulSetYaml = (serviceDefinition, statefulsetYaml) => {
   if (storageClassName) {
     statefulSet.spec.volumeClaimTemplates[0].spec.storageClassName = storageClassName;
   }
-  
+
   // Default parameters in template are set to:
   // requests:
   //   cpu: 100m
