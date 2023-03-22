@@ -1,10 +1,10 @@
 const core = require('@actions/core');
 const camelcaseKeys = require('camelcase-keys');
-const { loadSecrets } = require('./secrets-manager/load-secrets');
 const { run } = require('../../utils');
-const { createApi } = require('./utils/create-api');
-const { loadDefinitions } = require('./utils/load-sync-definitions');
-const { validateExeConfig } = require('./validate/validate-exe-config');
+const { loadDefinitions } = require('../../external-events/src/utils/load-sync-definitions');
+const { createApi } = require('../../external-events/src/utils/create-api');
+const { loadSecrets } = require('./secrets-manager/load-secrets');
+const { validateCccConfig } = require('./validate/validate-ccc-config');
 
 function printSyncResult(report) {
   for (const {
@@ -12,9 +12,7 @@ function printSyncResult(report) {
   } of report) {
     if (success) {
       // eslint-disable-next-line no-unused-expressions
-      performedAction
-        ? core.info(`[${id}]: ${performedAction}`)
-        : core.info(`[${id}]: no changes`);
+      core.info(`[${id}]: ${performedAction}`);
     } else {
       core.error(`[${id}]: ${error}`);
     }
@@ -24,15 +22,11 @@ function printSyncResult(report) {
 async function action() {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const dryRun = core.getBooleanInput('dry-run') === true;
-  const definitionsGlob = core.getInput('definitions') || 'external-events/*.yaml';
+  const definitionsGlob = core.getInput('definitions') || 'customer-config/*.yaml';
 
-  const definitions = await loadDefinitions(definitionsGlob, validateExeConfig);
+  const definitions = await loadDefinitions(definitionsGlob, validateCccConfig);
   const secrets = await loadSecrets(serviceAccountKey);
-  const exeApi = createApi({
-    name: 'external-events',
-    auth: secrets,
-    url: 'https://exe-management.retailsvc.com',
-  });
+  const cccApi = createApi({ name: 'customer-config', auth: secrets, url: 'https://ccc-api.retailsvc.com' });
 
   let failed = false;
   for (const [file, def] of Object.entries(definitions)) {
@@ -40,8 +34,8 @@ async function action() {
     // ignore version for now, as we have ony one version
     delete def.version;
     // eslint-disable-next-line no-await-in-loop
-    const { data } = await exeApi.post(
-      `/api/v1/internal/event-sources:sync?dryRun=${dryRun}`,
+    const { data } = await cccApi.post(
+      `/api/v1/internal/configurations:sync?dryRun=${dryRun}`,
       camelcaseKeys(def, { deep: true }),
     );
 
