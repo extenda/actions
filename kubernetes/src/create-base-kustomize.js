@@ -58,7 +58,6 @@ spec:
       name: ${deploymentName}
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: standard-rwo
       resources:
         requests:
           storage: 1Gi

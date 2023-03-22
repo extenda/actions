@@ -243,7 +243,6 @@ spec:
       name: ${e}
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: standard-rwo
       resources:
         requests:
           storage: 1Gi
