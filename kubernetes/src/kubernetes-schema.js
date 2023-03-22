@@ -71,8 +71,8 @@ module.exports = {
         },
         storageClassName: {
           type: 'string',
-          pattern: '^pd\\-+(standard|balanced|ssd|extreme)$',
-          default: 'pd-standard',
+          pattern: '^(standard|premium)+\\-rwo$',
+          default: 'standard-rwo',
         },
       },
       additionalProperties: false,
