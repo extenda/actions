@@ -10,8 +10,8 @@ async function loadSecrets(serviceAccountKey) {
 
   return {
     key: await getSecret('iam-api-key-prod'),
-    email: await getSecret('exe-api-email'),
-    pass: await getSecret('exe-api-pass'),
+    email: await getSecret('ccc-sync-admin'),
+    pass: await getSecret('ccc-sync-pass'),
     gipTenantId: await getSecret('exe-api-tenant-id'),
   };
 }
