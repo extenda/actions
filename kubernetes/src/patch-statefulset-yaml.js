@@ -15,7 +15,7 @@ const patchStatefulSetYaml = (serviceDefinition, statefulsetYaml) => {
     storage: {
       volume = '1Gi',
       mountPath = '/data/storage',
-      storageClassName = 'pd-standard',
+      storageClassName = 'standard-rwo',
     },
   } = serviceDefinition;
 
