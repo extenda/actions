@@ -50,5 +50,3 @@ if (require.main === module) {
 }
 
 module.exports = action;
-
-action();
