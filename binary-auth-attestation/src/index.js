@@ -30,7 +30,8 @@ const action = async () => {
       keyversion,
     );
   } catch (err) {
-    if (err.toString().includes('subject of a conflict: Could not create occurrence ID')) {
+    console.log(err.toString());
+    if (err.toString().includes('occurrence')) {
       core.info('Image already attested');
     } else {
       throw new Error(err);
