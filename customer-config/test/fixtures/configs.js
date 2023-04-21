@@ -22,6 +22,7 @@ definitions:
     version: v1
     schema-location: https://example.com/receipt-layout-schema.json
     display-name: Receipt Layout config
+    default-value: abc
 `;
 
 const valid2Parsed = jsYaml.load(valid2);

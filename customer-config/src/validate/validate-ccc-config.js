@@ -9,7 +9,7 @@ const schema = joi.object({
       version: joi.string().regex(/^v\d{1,10}$/).required(),
       'display-name': joi.string().min(3).max(256).required(),
       'schema-location': joi.string().uri().required(),
-      'default-value': joi.any(),
+      'default-value': joi.any().required(),
     }))
     .required(),
 });

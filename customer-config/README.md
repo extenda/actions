@@ -9,14 +9,14 @@ See [action.yml](action.yml)
 
 Example (customer-config/che.yaml)
 ```yaml
-version: 1 # (required) always 1 for now
-system-prefix: che # (required)
-definitions: # (required) list of config definitions for your system
-  - name: receipt-layout # (required) name (part of generated id)
-    version: v1 # (required) version (part of generated id)
-    display-name: Receipt Layout config # (required) human-readable name for the configuration
-    schema-location: https://example.com/schema.json # (required) location of the JSON schema
-    default-value: # (optional) default value for the configuration
+version: 1 # always 1 for now
+system-prefix: che
+definitions: # list of config definitions for your system
+  - name: receipt-layout # name (part of generated id)
+    version: v1 # version (part of generated id)
+    display-name: Receipt Layout config # human-readable name for the configuration
+    schema-location: https://example.com/schema.json # location of the JSON schema
+    default-value: # default value for the configuration
       layout: default
 ```
 
