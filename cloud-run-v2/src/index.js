@@ -11,8 +11,7 @@ const configureInternalDomain = require('./loadbalancing/internal/create-interna
 const configureExternalDomain = require('./loadbalancing/external/create-external-backend');
 const configureExternalLBFrontend = require('./loadbalancing/external/create-external-frontend');
 const configureInternalFrontend = require('./loadbalancing/internal/create-internal-frontend');
-const { failIfNotTrunkBased } = require('../../utils/src');
-
+const { run, failIfNotTrunkBased } = require('../../utils');
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
@@ -21,9 +20,9 @@ const action = async () => {
   // const verbose = (core.getInput('verbose') || 'false');
 
   failIfNotTrunkBased();
-  const projectID = await kubectl.configure(serviceAccountKey);
-  const service = loadServiceDefinition(serviceFile, jsonSchema);
+  const projectID = await gcloudAuth(serviceAccountKey);
   await kubectl.configureProject(projectID);
+  const service = loadServiceDefinition(serviceFile, jsonSchema);
 
   const {
     project: clanName,
