@@ -1,7 +1,7 @@
 var fs = require('fs');
 
 // TODO: ADD Labels and environment
-const manifestTemplate = async (name, image, minInstances, maxInstances, cpuThreshold, cpuRequest, memoryRequest) => {
+const manifestTemplate = async (name, image, minInstances, maxInstances, cpuThreshold, cpuRequest, memoryRequest, version, environment, opa) => {
 
 // labels and env
 return `---
@@ -24,7 +24,7 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8000
+      targetPort: ${ opa ? '8000' : '8080' }
       name: http
 ---
 apiVersion: apps/v1
@@ -34,6 +34,7 @@ metadata:
   namespace: ${name}
   labels:
     app: ${name}
+    version: ${version}
 spec:
   replicas: 1
   selector:
@@ -48,7 +49,7 @@ spec:
       containers:
       - image: ${image}
         imagePullPolicy: IfNotPresent
-        name: ${name}
+        name: user-container
         ports:
         - containerPort: 8080
           protocol: TCP
@@ -56,6 +57,10 @@ spec:
           requests:
             cpu: ${cpuRequest}
             memory: ${memoryRequest}
+        env:${environment.map(env => `
+        - name: ${env.name}
+          value: ${env.value}`).join('')}
+      ${opa ? `
       - image: eu.gcr.io/extenda/envoy:test
         ports:
           - containerPort: 8000
@@ -92,6 +97,7 @@ spec:
         - name: opa
           configMap:
             name: opa-envoy-config
+      ` : ``}
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -115,15 +121,22 @@ spec:
 `
 }
 
-const buildManifest = async (image, service) => {
+const buildManifest = async (image, service, version, projectId) => {
   const {
     name,
     memory,
     cpu,
     'max-instances': maxInstances = -1,
+    'opa-enabled': opa = false,
     environment = [],
   } = service;
-  const content = await manifestTemplate(name, image, 1, 100, 50, cpu, memory);
+
+  const envArray = Object.entries(environment).map(([key, value]) => ({
+    name: key,
+    value: value.replace('*', projectId)
+  }));
+  envArray.push({name: 'SERVICE_NAME', value: name});
+  const content = await manifestTemplate(name, image, 1, 100, 50, cpu, memory, version, envArray, opa);
   fs.writeFile('manifest.yaml', content, function (err) {
     if (err) throw err;
     console.log('Saved manifest!');

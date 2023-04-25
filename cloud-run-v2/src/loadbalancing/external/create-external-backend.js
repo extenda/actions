@@ -1,23 +1,23 @@
 
 const core = require('@actions/core');
-const gcloudOutput = require('../utils/gcloud-output');
+const gcloudOutput = require('../../utils/gcloud-output');
 
 
 // Create backend-service
-const setupBackendService = async (name, projectID, hcName) => gcloudOutput([
+const setupBackendService = async (name, projectID) => gcloudOutput([
   'compute',
   'backend-services',
   'create',
-  `${name}-backend`,
+  `${name}-external-backend`,
   '--protocol=HTTP',
   '--port-name=http',
   '--connection-draining-timeout=300s',
-  `--health-checks=${hcName}-hc`,
-  '--timeout=120s',
+  `--health-checks=${projectID}-external-hc`,
+  '--timeout=300s',
   '--global',
   '--enable-logging',
   '--logging-sample-rate=1',
-  '--load-balancing-scheme=EXTERNAL_MANAGED',
+  '--load-balancing-scheme=EXTERNAL',
   `--project=${projectID}`,
 ]).catch(() => true);
 
@@ -46,7 +46,7 @@ const addBackend = async (name, projectID, zone) => gcloudOutput([
   'compute',
   'backend-services',
   'add-backend',
-  `${name}-backend`,
+  `${name}-external-backend`,
   `--network-endpoint-group=${name}-neg`,
   `--network-endpoint-group-zone=${zone}`,
   `--project=${projectID}`,
@@ -55,27 +55,21 @@ const addBackend = async (name, projectID, zone) => gcloudOutput([
   '--max-rate-per-endpoint=1',
 ]).catch(() => core.info('Backend already added to service!'));
 
-const setupBackendURLMapping = async (host, projectID, name, loadbalancerName) => gcloudOutput([
+const setupBackendURLMapping = async (host, projectID, name, env) => gcloudOutput([
   'compute',
   'url-maps',
   'add-path-matcher',
-  `${loadbalancerName}-lb`,
+  projectID.split("-" + env)[0] + "-" + env + "-lb-external",
   `--project=${projectID}`,
-  `--default-service=${name}-backend`,
-  `--path-matcher-name=${name}-backend`,
-  `--path-rules=/*=${name}-backend`,
+  `--default-service=${name}-external-backend`,
+  `--path-matcher-name=${name}-external-backend`,
   '--global',
   `--new-hosts=${host}`,
 ]).catch(() => core.info('Url-mapping already exists!'));
 
-const configureDomain = async (projectID, name, private, host, env, clanName) => {
-
-  const nameConv = `${clanName}-${private ? 'int' : 'ext'}-${env}`
-
+const configureDomain = async (projectID, name, env, host) => {
   core.info('Creating backend service');
-  const backendExists = await setupBackendService(name, projectID, nameConv);
-  if(backendExists)
-    return;
+  const backendExists = await setupBackendService(name, projectID);
 
   core.info('Adding backend NEG to backend service');
   await checkNEGs(projectID, name)
@@ -85,12 +79,12 @@ const configureDomain = async (projectID, name, private, host, env, clanName) =>
     .catch(() => { throw new Error('The NEG was not found! make sure the deployment is correct'); });
 
   core.info('Setup url-mapping');
-  return setupBackendURLMapping(host, projectID, name, nameConv);
+  return setupBackendURLMapping(host, projectID, name, env);
 };
 
-const configureDomains = async (projectID, name, host, env, clanName) => {
-  await configureDomain(projectID, name, false, host, env, clanName);
-  //await configureDomain(projectID, name, true, host, env, clanName);
+const configureExternalDomain = async (projectID, name, env, host) => {
+  console.log(host);
+  await configureDomain(projectID, name, env, host);
 };
 
-module.exports = configureDomains;
+module.exports = configureExternalDomain;
