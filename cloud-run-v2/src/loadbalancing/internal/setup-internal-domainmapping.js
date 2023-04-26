@@ -12,6 +12,7 @@ const createDNSzone = async (projectID, env) => gcloudOutput([
   `--dns-name=internal.retailsvc.com`,
   `--visibility=private`,
   `--networks=clan-network`,
+  `--quiet`,
 ]).catch(() => core.info('managed dns zone already exists'));
 
 const createRecordSet = async (projectID, env, name, ip) => gcloudOutput([
