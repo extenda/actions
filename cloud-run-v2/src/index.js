@@ -54,7 +54,7 @@ const action = async () => {
     await configureExternalDomain(projectID, name, env, host);
   }
   await configureInternalDomain(projectID, name, env);
-  await configureInternalFrontend(projectID, env);
+  await configureInternalFrontend(projectID, name, env);
 };
 
 if (require.main === module) {

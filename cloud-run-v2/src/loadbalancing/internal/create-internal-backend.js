@@ -101,7 +101,6 @@ const configureInternalDomain = async (projectID, name, env) => {
   await configureBackend(projectID, name, region);
   await createInternalLoadbalancer(projectID, env, name);
   core.info('Setup url-mapping');
-  await setupInternalDomainMapping(projectID, env, name);
   return setupBackendURLMapping(host, projectID, name, env, region);
 };
 

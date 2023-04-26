@@ -25,6 +25,7 @@ const createRecordSet = async (projectID, env, name, ip) => gcloudOutput([
   `--type=A`,
   `--ttl=300`,
   `--rrdatas=${ip}`,
+  `--quiet`,
 ]).catch(() => core.info('managed dns zone already exists'));
 
 const obtainInternalIp = async (projectId) => gcloudOutput([

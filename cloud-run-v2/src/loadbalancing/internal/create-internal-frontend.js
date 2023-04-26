@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const gcloudOutput = require("../../utils/gcloud-output");
+const setupInternalDomainMapping = require('./setup-internal-domainmapping');
 
 const updateHttpProxy = async (projectID, env) => gcloudOutput([
   'compute',
@@ -36,11 +37,11 @@ const createForwardingRule = async (projectID) => gcloudOutput([
   '--ports=80',
 ]).catch(() => core.info('Forwarding rule already exists!'));
 
-const configureInternalFrontend = async (projectID, env) => {
+const configureInternalFrontend = async (projectID, name, env) => {
   await createHttpProxy(projectID, env);
   core.info('Creating forwarding rules');
   await createForwardingRule(projectID);
-
+  await setupInternalDomainMapping(projectID, env, name);
 }
 
 module.exports = configureInternalFrontend;
