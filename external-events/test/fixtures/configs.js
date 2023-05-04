@@ -1,4 +1,4 @@
-const jsYaml = require('js-yaml');
+const jsYaml = require("js-yaml");
 
 const valid = `
 version: 1
@@ -10,6 +10,7 @@ event-sources:
     subscription-name: projects/iam-prod-4aad/subscriptions/iam.public.output.events.v1+iam.group-created
     content-type: application/json
     disabled: true
+    schemaUrl: https://raw.githubusercontent.com/extenda/hiiretail-json-schema-registry/master/external-events/cloud-core/event-source-schema.json
     deprecated: 
       removal-date: "2022-02-01"
       message: message
@@ -40,6 +41,7 @@ event-sources:
     display-name: IAM Group was created
     content-type: application/json
     disabled: yes
+    schemaUrl: invalid-url 
     deprecated: 
       removal-date: 2022/02/01
       replaced-with: invalid.group-created.v2

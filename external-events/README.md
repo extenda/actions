@@ -1,6 +1,7 @@
 # External events GitHub Action
 
 This GitHub action synchronises 'external events' config with `External events` service.
+
 # Usage
 
 See [action.yml](action.yml)
@@ -16,6 +17,7 @@ Under that directory you can have multiple `*.yaml`
 Each `system-prefix` in each file must be unique.
 
 Example (external-events/iam.yaml)
+
 ```yaml
 version: 1 # (required) always 1 for now
 # id for event source is generated from template {system}.{name}.{version}
@@ -35,6 +37,9 @@ event-sources: # (required) list of event sources for your system
     # (optional, default - false)
     # event source will still work, but it will not be available for new webhooks
     disabled: true
+    # (optional)
+    # url to json schema for event source messages
+    schemaUrl: https://raw.githubusercontent.com/extenda/hiiretail-json-schema-registry/master/external-events/cloud-core/event-source-schema.json
     deprecated: # (optional) deprecation metadata, the ES may be deleted after the "removal-date"
       removal-date: "2020-02-02" # (required) YYYY-MM-DD, should be explicitly specified as a string with double quotes
       message: any string # (optional) will be displayed along with event messages
@@ -54,6 +59,7 @@ event-sources: # (required) list of event sources for your system
 # Action setup example
 
 .github/workflows/exe.yml
+
 ```yaml
 name: External events
 on:
