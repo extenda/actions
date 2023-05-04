@@ -15,6 +15,7 @@ const patchStatefulSetYaml = (serviceDefinition, statefulsetYaml) => {
     storage: {
       volume = '1Gi',
       mountPath = '/data/storage',
+      storageClassName,
     },
   } = serviceDefinition;
 
@@ -24,6 +25,10 @@ const patchStatefulSetYaml = (serviceDefinition, statefulsetYaml) => {
   // Set storage parameters to the ones from definition
   statefulSet.spec.template.spec.containers[0].volumeMounts[0].mountPath = mountPath;
   statefulSet.spec.volumeClaimTemplates[0].spec.resources.requests.storage = volume;
+
+  if (storageClassName) {
+    statefulSet.spec.volumeClaimTemplates[0].spec.storageClassName = storageClassName;
+  }
 
   // Default parameters in template are set to:
   // requests:

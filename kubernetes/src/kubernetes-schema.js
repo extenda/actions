@@ -69,6 +69,11 @@ module.exports = {
           pattern: '^\\/[\\d\\w\\-_\\/]+$',
           default: '/data/storage',
         },
+        storageClassName: {
+          type: 'string',
+          pattern: '^(standard|premium)+\\-rwo$',
+          default: 'standard-rwo',
+        },
       },
       additionalProperties: false,
     },

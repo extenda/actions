@@ -2,7 +2,6 @@ const yaml = require('js-yaml');
 const fg = require('fast-glob');
 const { readFileSync } = require('fs');
 const core = require('@actions/core');
-const { validateExeConfig } = require('./validate-exe-config');
 
 function loadDefinition(path) {
   core.info(`Loading ${path} config file`);
@@ -25,18 +24,18 @@ function validateSystemPrefixUnique(defs) {
     .map(([system, files]) => `system-prefix ${system} is duplicated in files [${files}]`);
 }
 
-function validateDefsSchema(defs) {
-  const validateDef = (file, config) => validateExeConfig(config).map((err) => `${file}:${err}`);
+function validateDefsSchema(defs, validateFn) {
+  const validateDef = (file, config) => validateFn(config).map((err) => `${file}:${err}`);
   return defs.reduce((acc, [file, config]) => [...acc, ...validateDef(file, config)], []);
 }
 
-function validateDefs(defs) {
+function validateDefs(defs, validateFn) {
   const errors = [];
 
   const defsEntries = Object.entries(defs);
 
   errors.push(...validateSystemPrefixUnique(defsEntries));
-  errors.push(...validateDefsSchema(defsEntries));
+  errors.push(...validateDefsSchema(defsEntries, validateFn));
 
   if (errors.length > 0) {
     errors.forEach((err) => core.error(err));
@@ -44,7 +43,7 @@ function validateDefs(defs) {
   }
 }
 
-async function loadDefinitions(glob) {
+async function loadDefinitions(glob, validateFn) {
   core.startGroup('Definitions load');
   core.info(`Loading files by glob - ${glob}`);
   const files = fg.sync([glob], { onlyFiles: true });
@@ -54,7 +53,7 @@ async function loadDefinitions(glob) {
     [file]: loadDefinition(file),
   }), {});
 
-  validateDefs(defs);
+  validateDefs(defs, validateFn);
 
   core.endGroup();
   return defs;
