@@ -1,4 +1,4 @@
-const jsYaml = require("js-yaml");
+const jsYaml = require('js-yaml');
 
 const valid = `
 version: 1
