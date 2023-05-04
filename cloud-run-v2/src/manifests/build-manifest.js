@@ -3,8 +3,8 @@ var fs = require('fs');
 // TODO: ADD Labels and environment
 const manifestTemplate = async (name, image, minInstances, maxInstances, cpuThreshold, cpuRequest, memoryRequest, version, environment, opa) => {
 
-// labels and env
-return `---
+  // labels and env
+  return `---
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -24,7 +24,7 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: ${ opa ? '8000' : '8080' }
+      targetPort: ${opa ? '8000' : '8080'}
       name: http
 ---
 apiVersion: apps/v1
@@ -34,7 +34,6 @@ metadata:
   namespace: ${name}
   labels:
     app: ${name}
-    version: ${version}
 spec:
   replicas: 1
   selector:
@@ -121,7 +120,50 @@ spec:
 `
 }
 
-const buildManifest = async (image, service, version, projectId) => {
+const createSkaffoldManifest = async () => {
+  return `apiVersion: skaffold/v2beta16
+kind: Config
+deploy:
+  kubectl:
+    manifests:
+      - k8s-*
+`
+}
+
+const createCloudDeployPipe = async (name, projectID, clanName, env) => {
+  return `apiVersion: deploy.cloud.google.com/v1
+kind: DeliveryPipeline
+metadata:
+  name: ${name}
+description: ${name} pipeline
+serialPipeline:
+  stages:
+  - targetId: ${clanName}-cluster-${env}
+    profiles: []
+---
+apiVersion: deploy.cloud.google.com/v1
+kind: Target
+metadata:
+  name: ${clanName}-cluster-${env}
+description: k8s-cluster
+gke:
+  cluster: projects/${projectID}/locations/europe-west1/clusters/${clanName}-cluster-${env}
+  `
+}
+
+const generateManifest = async (fileName, content) => {
+  fs.writeFile(`${fileName}`, content, function (err) {
+    if (err) throw err;
+  });
+}
+
+const prepareGcloudDeploy = async (name, projectID, clanName, env) => {
+  await generateManifest('skaffold.yaml', await createSkaffoldManifest());
+  await generateManifest('clouddeploy.yaml', await createCloudDeployPipe(name, projectID, clanName, env));
+}
+
+const buildManifest = async (image, service, version, projectId, clanName, env) => {
+
   const {
     name,
     memory,
@@ -135,21 +177,11 @@ const buildManifest = async (image, service, version, projectId) => {
     name: key,
     value: value.replace('*', projectId)
   }));
-  envArray.push({name: 'SERVICE_NAME', value: name});
-  const content = await manifestTemplate(name, image, 1, 100, 50, cpu, memory, version, envArray, opa);
-  fs.writeFile('manifest.yaml', content, function (err) {
-    if (err) throw err;
-    console.log('Saved manifest!');
-  });
+  envArray.push({ name: 'SERVICE_NAME', value: name });
+
+  await prepareGcloudDeploy(name, projectId, clanName, env);
+  await generateManifest('k8s-manifest.yaml', await manifestTemplate(name, image, 1, 100, 50, cpu, memory, version, envArray, opa));
+
 }
 
-const backupManifest = async (yaml) => 
-  fs.writeFile('manifest-backup.yaml', yaml, function (err) {
-    if (err) throw err;
-    console.log('Saved backup manifest!');
-  });
-
-module.exports = { 
-  buildManifest, 
-  backupManifest,
-};
+module.exports = { buildManifest };
