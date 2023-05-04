@@ -1,6 +1,6 @@
 const exec = require('@actions/exec');
 const setupGcloud = require('../../../setup-gcloud/src/setup-gcloud');
-const { getClusterDetails } = require('./cluster-info');
+const { getClusterDetails, getClusterInfo } = require('./cluster-info');
 const gcloudOutput = require('./gcloud-output');
 
 const configure = async (serviceAccountKey) => {

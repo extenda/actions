@@ -34,27 +34,28 @@ const action = async () => {
     platform,
     name,
   } = service;
-  
-  //setup manifests (hpa, deploy, negs)
-  const version = crypto.randomUUID();
-  await buildManifest(image, service, version, projectID);
-  await deploy(service.name, version);
-  
-  
-  let host = [];
-  if (env == 'staging') {
-    host = platform.gke["domain-mappings"].staging;
-  } else {
-    host = platform.gke["domain-mappings"].prod;
-  }
 
-  await createExternalLoadbalancer(projectID, env);
-  if (host) {
-    await configureExternalLBFrontend(projectID, env, host);
-    await configureExternalDomain(projectID, name, env, host);
+  //setup manifests (hpa, deploy, negs)
+  const version = new Date().getTime();
+  await buildManifest(image, service, version, projectID, clanName, env);
+  const succesfullDeploy = await deploy(projectID, service.name, version);
+
+  if (succesfullDeploy) {
+    let host = [];
+    if (env == 'staging') {
+      host = platform.gke["domain-mappings"].staging;
+    } else {
+      host = platform.gke["domain-mappings"].prod;
+    }
+
+    await createExternalLoadbalancer(projectID, env);
+    if (host) {
+      await configureExternalLBFrontend(projectID, env, host);
+      await configureExternalDomain(projectID, name, env, host);
+    }
+    await configureInternalDomain(projectID, name, env);
+    await configureInternalFrontend(projectID, name, env);
   }
-  await configureInternalDomain(projectID, name, env);
-  await configureInternalFrontend(projectID, name, env);
 };
 
 if (require.main === module) {
