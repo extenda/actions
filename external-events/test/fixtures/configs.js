@@ -41,7 +41,7 @@ event-sources:
     display-name: IAM Group was created
     content-type: application/json
     disabled: yes
-    schemaUrl: invalid-url 
+    schemaUrl: invalid-url
     deprecated:
       removal-date: 2022/02/01
       replaced-with: invalid.group-created.v2
