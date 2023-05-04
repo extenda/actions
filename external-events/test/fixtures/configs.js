@@ -11,7 +11,7 @@ event-sources:
     content-type: application/json
     disabled: true
     schemaUrl: https://raw.githubusercontent.com/extenda/hiiretail-json-schema-registry/master/external-events/cloud-core/event-source-schema.json
-    deprecated: 
+    deprecated:
       removal-date: "2022-02-01"
       message: message
       replaced-with: iam.group-created.v2
@@ -42,7 +42,7 @@ event-sources:
     content-type: application/json
     disabled: yes
     schemaUrl: invalid-url 
-    deprecated: 
+    deprecated:
       removal-date: 2022/02/01
       replaced-with: invalid.group-created.v2
 `;
