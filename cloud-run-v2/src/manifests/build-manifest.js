@@ -138,13 +138,13 @@ metadata:
 description: ${name} pipeline
 serialPipeline:
   stages:
-  - targetId: GKE
+  - targetId: gke
     profiles: []
 ---
 apiVersion: deploy.cloud.google.com/v1
 kind: Target
 metadata:
-  name: GKE
+  name: gke
 description: k8s-cluster
 gke:
   cluster: projects/${projectID}/locations/europe-west1/clusters/${clanName}-cluster-${env}
