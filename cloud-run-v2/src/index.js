@@ -1,5 +1,4 @@
 const { buildManifest } = require('./manifests/build-manifest');
-var crypto = require('crypto')
 const core = require('@actions/core');
 const loadServiceDefinition = require('./utils/service-definition');
 const jsonSchema = require('./utils/cloud-run-schema');
@@ -37,9 +36,8 @@ const action = async () => {
 
   //setup manifests (hpa, deploy, negs)
   const version = new Date().getTime();
-  await buildManifest(image, service, version, projectID, clanName, env);
+  await buildManifest(image, service, projectID, clanName, env);
   const succesfullDeploy = await deploy(projectID, service.name, version);
-
   if (succesfullDeploy) {
     let host = [];
     if (env == 'staging') {
@@ -55,6 +53,8 @@ const action = async () => {
     }
     await configureInternalDomain(projectID, name, env);
     await configureInternalFrontend(projectID, name, env);
+  } else {
+    throw new Error('Deployment failed! Check container logs and status for error!');
   }
 };
 
