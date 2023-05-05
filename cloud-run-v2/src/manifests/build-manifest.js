@@ -1,9 +1,8 @@
 var fs = require('fs');
 
 // TODO: ADD Labels and environment
-const manifestTemplate = async (name, image, minInstances, maxInstances, cpuThreshold, cpuRequest, memoryRequest, version, environment, opa) => {
+const manifestTemplate = async (name, image, minInstances, maxInstances, cpuThreshold, cpuRequest, memoryRequest, environment, labels, opa) => {
 
-  // labels and env
   return `---
 apiVersion: v1
 kind: Namespace
@@ -32,7 +31,8 @@ kind: Deployment
 metadata:
   name: ${name}
   namespace: ${name}
-  labels:
+  labels:${labels.map(label => `
+    ${label.name}: ${label.value}`).join('')}
     app: ${name}
 spec:
   replicas: 1
@@ -162,25 +162,33 @@ const prepareGcloudDeploy = async (name, projectID, clanName, env) => {
   await generateManifest('clouddeploy.yaml', await createCloudDeployPipe(name, projectID, clanName, env));
 }
 
-const buildManifest = async (image, service, version, projectId, clanName, env) => {
+const buildManifest = async (image, service, projectId, clanName, env) => {
 
   const {
     name,
     memory,
     cpu,
-    'max-instances': maxInstances = -1,
+    'max-instances': maxInstances = 50,
+    'min-instances': minInstances = 1,
     'opa-enabled': opa = false,
     environment = [],
+    labels = [],
   } = service;
 
   const envArray = Object.entries(environment).map(([key, value]) => ({
     name: key,
-    value: value.replace('*', projectId)
+    value: value.replace('*', projectId),
+  }));
+  const labelArray = Object.entries(labels).map(([key, value]) => ({
+    name: key,
+    value: value,
   }));
   envArray.push({ name: 'SERVICE_NAME', value: name });
+  envArray.push({ name: 'SERVICE_ENVIRONMENT', value: env });
+  envArray.push({ name: 'CLAN_NAME', value: clanName });
 
   await prepareGcloudDeploy(name, projectId, clanName, env);
-  await generateManifest('k8s-manifest.yaml', await manifestTemplate(name, image, 1, 100, 50, cpu, memory, version, envArray, opa));
+  await generateManifest('k8s-manifest.yaml', await manifestTemplate(name, image, minInstances, maxInstances, 50, cpu, memory, envArray, labelArray, opa));
 
 }
 
