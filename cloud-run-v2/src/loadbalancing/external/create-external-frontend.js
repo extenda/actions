@@ -75,7 +75,7 @@ const configureExternalLBFrontend = async (projectID, env, host) => {
   core.info('Obtaining ip for loadbalancer');
   const loadBalancerIP = await obtainIP(projectID);
   const loadBalancerName = projectID.split("-" + env)[0] + "-" + env + "-lb-external";
-  
+
   core.info('Creating proxies');
   await createSSLPolicy(projectID);
   const certificates = await handleCertificates(host, projectID)
