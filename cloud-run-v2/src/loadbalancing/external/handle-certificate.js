@@ -4,7 +4,6 @@ const gcloudOutput = require('../../utils/gcloud-output');
 const MAX_DOMAINS = 100;
 const MAX_CERTIFICATES = 13;
 
-// Create certificate containing old domains and new
 const createCertificate = async (domains, projectID, name) => gcloudOutput([
   'compute',
   'ssl-certificates',
@@ -15,11 +14,11 @@ const createCertificate = async (domains, projectID, name) => gcloudOutput([
   '--global',
 ]).then(() => core.info('Certificate already exists!'));
 
-const deleteCertificateFromProxy = async (projectID, certificates, private) => gcloudOutput([
+const deleteCertificateFromProxy = async (projectID, certificates) => gcloudOutput([
   'compute',
   'target-https-proxies',
   'update',
-  `https-lb-proxy-${private}`,
+  `https-lb-proxy-external`,
   `--ssl-certificates=${certificates.join(',')}`,
   `--project=${projectID}`,
 ]).then(() => core.info('Certificates updated successfully!'));

@@ -30,7 +30,7 @@ const createLoadbalancer = async (projectID, env) => gcloudOutput([
   projectID.split("-" + env)[0] + "-" + env + "-lb-external",
   `--project=${projectID}`,
   `--default-backend-bucket=${projectID.split("-" + env)[0] + "-" + env}-404`,
-]).catch(() => false);
+]);
 
 // Create healthcheck if not exists
 const setupHealthCheck = async (projectID) => gcloudOutput([

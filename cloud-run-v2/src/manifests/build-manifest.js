@@ -177,7 +177,7 @@ const buildManifest = async (image, service, projectId, clanName, env) => {
 
   const envArray = Object.entries(environment).map(([key, value]) => ({
     name: key,
-    value: value.replace('*', projectId),
+    value: value.match(/^[0-9]+$/) == null ? value.replace('*', projectId) : `'${value}'`,
   }));
   const labelArray = Object.entries(labels).map(([key, value]) => ({
     name: key,
@@ -192,4 +192,4 @@ const buildManifest = async (image, service, projectId, clanName, env) => {
 
 }
 
-module.exports = { buildManifest };
+module.exports = buildManifest;

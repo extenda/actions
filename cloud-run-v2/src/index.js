@@ -1,9 +1,8 @@
-const { buildManifest } = require('./manifests/build-manifest');
 const core = require('@actions/core');
+const buildManifest = require('./manifests/build-manifest');
 const loadServiceDefinition = require('./utils/service-definition');
 const jsonSchema = require('./utils/cloud-run-schema');
 const deploy = require('./manifests/deploy');
-const kubectl = require('./utils/kubectl');
 const projectInfo = require('../../cloud-run/src/project-info');
 const createExternalLoadbalancer = require('./loadbalancing/external/create-external-loadbalancer');
 const configureInternalDomain = require('./loadbalancing/internal/create-internal-backend');
@@ -21,7 +20,6 @@ const action = async () => {
 
   failIfNotTrunkBased();
   const projectID = await setupGcloud(serviceAccountKey);
-  await kubectl.configureProject(projectID);
   const service = loadServiceDefinition(serviceFile, jsonSchema);
 
   const {
@@ -34,16 +32,16 @@ const action = async () => {
     name,
   } = service;
 
-  //setup manifests (hpa, deploy, negs)
+  // setup manifests (hpa, deploy, negs)
   const version = new Date().getTime();
   await buildManifest(image, service, projectID, clanName, env);
   const succesfullDeploy = await deploy(projectID, service.name, version);
   if (succesfullDeploy) {
     let host = [];
-    if (env == 'staging') {
-      host = platform.gke["domain-mappings"].staging;
+    if (env === 'staging') {
+      host = platform.gke['domain-mappings'].staging;
     } else {
-      host = platform.gke["domain-mappings"].prod;
+      host = platform.gke['domain-mappings'].prod;
     }
 
     await createExternalLoadbalancer(projectID, env);
