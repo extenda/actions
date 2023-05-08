@@ -68,12 +68,11 @@ describe('createExternalLoadbalancer', () => {
   it('should not create a bucket or load balancer if they already exist', async () => {
     const projectID = 'my-project-id';
     const env = 'staging';
-
-    gcloudOutput
-      .mockRejectedValueOnce()
-      .mockReturnValueOnce(true)
-      .mockRejectedValueOnce()
-      .mockRejectedValueOnce();
+    
+    gcloudOutput.mockRejectedValueOnce();
+    gcloudOutput.mockImplementation(() => Promise.resolve());
+    gcloudOutput.mockRejectedValueOnce();
+    gcloudOutput.mockRejectedValueOnce();
 
     await createExternalLoadbalancer(projectID, env);
 
