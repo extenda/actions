@@ -1,5 +1,4 @@
 const gcloudOutput = require('../utils/gcloud-output');
-const kubectl = require('../utils/kubectl');
 const core = require('@actions/core');
 
 const FIVE_MINUTES = 300000;

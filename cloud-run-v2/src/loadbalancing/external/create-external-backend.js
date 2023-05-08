@@ -69,7 +69,7 @@ const setupBackendURLMapping = async (host, projectID, name, env) => gcloudOutpu
 
 const configureDomain = async (projectID, name, env, host) => {
   core.info('Creating backend service');
-  const backendExists = await setupBackendService(name, projectID);
+  await setupBackendService(name, projectID);
 
   core.info('Adding backend NEG to backend service');
   await checkNEGs(projectID, name)
@@ -83,7 +83,6 @@ const configureDomain = async (projectID, name, env, host) => {
 };
 
 const configureExternalDomain = async (projectID, name, env, host) => {
-  console.log(host);
   await configureDomain(projectID, name, env, host);
 };
 
