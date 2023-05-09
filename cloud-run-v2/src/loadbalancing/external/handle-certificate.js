@@ -43,8 +43,7 @@ const listCertificates = async (clusterProject) => JSON.parse(await gcloudOutput
 ]));
 
 const handleCertificates = async (hosts, project) => {
-
-  let domainName = hosts;
+  let domainName = [...hosts];
   let firstCreatedDate = new Date();
   let firstCreatedName = '';
 
@@ -87,6 +86,7 @@ const handleCertificates = async (hosts, project) => {
       }
     }
   }
+  
   if (domainName.length === 0) {
     return certificateListNames.join(',');
   }
