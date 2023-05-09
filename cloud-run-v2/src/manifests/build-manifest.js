@@ -184,7 +184,9 @@ const buildManifest = async (image, service, projectId, clanName, env) => {
     value: value,
   }));
   envArray.push({ name: 'SERVICE_NAME', value: name });
+  envArray.push({ name: 'SERVICE_PROJECT_ID', value: projectId });
   envArray.push({ name: 'SERVICE_ENVIRONMENT', value: env });
+  envArray.push({ name: 'SERVICE_CONTAINER_IMAGE', value: image });
   envArray.push({ name: 'CLAN_NAME', value: clanName });
 
   await prepareGcloudDeploy(name, projectId, clanName, env);
