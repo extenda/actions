@@ -16,7 +16,6 @@ jest.mock('../src/utils/service-definition');
 jest.mock('../src/utils/cloud-run-schema');
 jest.mock('../src/manifests/deploy');
 jest.mock('../src/manifests/build-manifest');
-jest.mock('../src/utils/kubectl');
 jest.mock('../../cloud-run/src/project-info');
 jest.mock('../src/loadbalancing/external/create-external-loadbalancer');
 jest.mock('../src/loadbalancing/internal/create-internal-backend');
