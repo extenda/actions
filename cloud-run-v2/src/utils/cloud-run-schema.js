@@ -120,6 +120,36 @@ module.exports = {
         gke: {
           type: 'object',
           properties: {
+            readiness: {
+              type: 'object',
+              properties: {
+                http: {
+                  type: 'object',
+                  additionalProperties: false,
+                  properties: {
+                    path: {
+                      type: 'string',
+                      default: '/health',
+                    },
+                    port: {
+                      type: 'string',
+                      default: '8080',
+                    },
+                    required: ['path'],
+                  },
+                },
+                grpc: {
+                  additionalProperties: false,
+                  type: 'object',
+                  properties: {
+                    port: {
+                      type: 'string',
+                      default: '8080',
+                    },
+                  },
+                },
+              },
+            },
             cluster: {
               type: 'string',
             },

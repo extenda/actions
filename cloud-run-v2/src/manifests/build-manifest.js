@@ -49,6 +49,15 @@ spec:
       - image: ${image}
         imagePullPolicy: IfNotPresent
         name: user-container
+#   commented out until workflow tests are done
+#        readinessProbe:
+#          ${readiness === 'http' ? 'http' : 'grpc'}:
+#            ${readiness !== 'grpc' ? `path: ${readinessPath}` : ''}
+#            port: 8080
+#          initialDelaySeconds: 3
+#          periodSeconds: 5
+#          failureThreshold: 10
+#          timeoutSeconds: 10
         ports:
         - containerPort: 8080
           protocol: TCP
@@ -173,8 +182,19 @@ const buildManifest = async (image, service, projectId, clanName, env) => {
     'opa-enabled': opa = false,
     environment = [],
     labels = [],
+    platform,
   } = service;
 
+  let readiness = 'http';
+  let readinessPath = '/health';
+  try {
+    if(platform.gke.readiness.grpc) {
+      readiness = 'grpc';
+    }
+    if(platform.gke.readiness.http.path) {
+      readinessPath = platform.gke.readiness.http.path;
+    }
+  } catch {}
   const envArray = Object.entries(environment).map(([key, value]) => ({
     name: key,
     value: value.match(/^[0-9]+$/) == null ? value.replace('*', projectId) : `'${value}'`,

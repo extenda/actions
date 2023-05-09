@@ -1,4 +1,3 @@
-const projectInfo = require("../../utils/project-info");
 const gcloudOutput = require("../../utils/gcloud-output");
 const core = require('@actions/core');
 
