@@ -55,7 +55,7 @@ const addBackend = async (name, projectID, zone) => gcloudOutput([
   '--max-rate-per-endpoint=1',
 ]).catch(() => core.info('Backend already added to service!'));
 
-const setupBackendURLMapping = async (host, projectID, name, env) => gcloudOutput([
+const createPathMatcher = async (host, projectID, name, env) => gcloudOutput([
   'compute',
   'url-maps',
   'add-path-matcher',
@@ -66,6 +66,63 @@ const setupBackendURLMapping = async (host, projectID, name, env) => gcloudOutpu
   '--global',
   `--new-hosts=${host}`,
 ]).catch(() => core.info('Url-mapping already exists!'));
+
+const setupBackendURLMapping = async (newHosts, projectID, name, env) => {
+
+  let pathMatcherExists = false;
+  const urlMapsInfo = JSON.parse(await gcloudOutput([
+    'compute',
+    'url-maps',
+    'describe',
+    `${projectID.split("-" + env)[0]}-${env}-lb-external`,
+    `--project=${projectID}`,
+    '--format=json',
+  ]));
+
+  // check if path matcher exists
+  if (urlMapsInfo.pathMatchers) {
+    for (const pathMatcher of urlMapsInfo.pathMatchers) {
+      if (pathMatcher["name"] === `${name}-external-backend`) {
+        pathMatcherExists = true;
+        break;
+      }
+    }
+  }
+
+  // check if hosts exists in path rules if path matcher exists
+  if (pathMatcherExists) {
+    for (const hostRule of urlMapsInfo.hostRules) {
+      // find the correct pathMatcher
+      if (hostRule.pathMatcher === `${name}-external-backend`) {
+        // compare hosts in path matchers with hosts in cloudrun yaml
+        for (const host of hostRule.hosts) {
+          for (const newHost of newHosts) {
+            if (host === newHost) {
+              var index = newHosts.indexOf(newHost);
+              newHosts.splice(index, 1);
+            }
+          }
+        }
+      }
+    }
+    // if new hosts need to be added to the pathmatcher
+    if (newHosts.length > 0) {
+      return await gcloudOutput([
+        'compute',
+        'url-maps',
+        'add-host-rule',
+        `${projectID.split("-" + env)[0]}-${env}-lb-external`,
+        `--hosts=${newHosts.join(',')}`,
+        `--path-matcher-name=${name}-external-backend`,
+        `--project=${projectID}`,
+      ]);
+    }
+    return;
+  } else {
+    // if path matcher doesn't exists create it with the new hosts
+    return createPathMatcher(newHosts, projectID, name, env);
+  }
+};
 
 const configureDomain = async (projectID, name, env, host) => {
   core.info('Creating backend service');
@@ -79,7 +136,9 @@ const configureDomain = async (projectID, name, env, host) => {
     .catch(() => { throw new Error('The NEG was not found! make sure the deployment is correct'); });
 
   core.info('Setup url-mapping');
-  return setupBackendURLMapping(host, projectID, name, env);
+  if (host) {
+    await setupBackendURLMapping(host, projectID, name, env);
+  }
 };
 
 const configureExternalDomain = async (projectID, name, env, host) => {

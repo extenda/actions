@@ -5,17 +5,53 @@ jest.mock('../../../src/utils/gcloud-output', () => {
   return jest.fn().mockImplementation(() => Promise.resolve());
 });
 
+const describeUrlMap = JSON.stringify({
+  "creationTimestamp": "2020-00-00T00:00:00.000-07:00",
+  "defaultService": "https://www.googleapis.com/compute/v1/projects/project-staging/global/backendBuckets/def",
+  "fingerprint": "jfockNs=",
+  "hostRules": [
+    {
+      "hosts": [
+        "example.org",
+        "test.retailsvc.com"
+      ],
+      "pathMatcher": "service-name-external-backend"
+    }
+  ],
+  "pathMatchers": [
+    {
+      "defaultService": "https://www.googleapis.com/compute/v1/projects/project-staging/global/backendServices/service-name-external-backend",
+      "name": "service-name-external-backend"
+    }
+  ],
+});
+const describeUrlMapNoPathMatcher = JSON.stringify({
+  "creationTimestamp": "2020-00-00T00:00:00.000-07:00",
+  "defaultService": "https://www.googleapis.com/compute/v1/projects/project-staging/global/backendBuckets/def",
+  "fingerprint": "jfockNs=",
+});
+
 describe('configureExternalDomain', () => {
   const mockProjectID = 'project-staging';
   const mockServiceName = 'service-name';
   const mockEnv = 'staging';
-  const mockHost = 'example.com';
+  const mockHost = ['example.com'];
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should setup domain and backend correctly', async () => {
+
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce(describeUrlMap);
+
     await configureExternalDomain(mockProjectID, mockServiceName, mockEnv, mockHost);
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(1, expect.arrayContaining([
@@ -104,6 +140,41 @@ describe('configureExternalDomain', () => {
     expect(gcloudOutput).toHaveBeenNthCalledWith(8, expect.arrayContaining([
       'compute',
       'url-maps',
+      'describe',
+      `project-staging-lb-external`,
+      `--project=${mockProjectID}`,
+      '--format=json'
+    ]));
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(9, expect.arrayContaining([
+      'compute',
+      'url-maps',
+      'add-host-rule',
+      `project-staging-lb-external`,
+      '--hosts=example.com',
+      '--path-matcher-name=service-name-external-backend',
+      `--project=${mockProjectID}`,
+    ]));
+
+    expect(gcloudOutput).toHaveBeenCalledTimes(9);
+
+  });
+  it('should setup pathMatcher if no pathmatcher exists', async () => {
+
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce(describeUrlMapNoPathMatcher);
+
+    await configureExternalDomain(mockProjectID, mockServiceName, mockEnv, mockHost);
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(9, expect.arrayContaining([
+      'compute',
+      'url-maps',
       'add-path-matcher',
       `project-staging-lb-external`,
       `--project=${mockProjectID}`,
@@ -112,7 +183,7 @@ describe('configureExternalDomain', () => {
       '--global',
       `--new-hosts=${mockHost}`,
     ]));
-    expect(gcloudOutput).toHaveBeenCalledTimes(8);
+    expect(gcloudOutput).toHaveBeenCalledTimes(9);
 
   });
 });
