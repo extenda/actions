@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const gcloudOutput = require("../../utils/gcloud-output");
 const handleCertificates = require('./handle-certificate');
+const setupExternalDomainMapping = require('./setup-external-domainmapping');
 
 // Create/fetch static IP
 const createIP = async (projectID) => gcloudOutput([
@@ -70,17 +71,17 @@ const createSSLPolicy = async (projectID) => gcloudOutput([
 ]).catch(() => core.info('SSLPolicy already exist'));
 
 
-const configureExternalLBFrontend = async (projectID, env, host) => {
+const configureExternalLBFrontend = async (projectID, env, hosts, migrate) => {
 
   core.info('Obtaining ip for loadbalancer');
   const loadBalancerIP = await obtainIP(projectID);
+  await setupExternalDomainMapping(hosts, migrate, loadBalancerIP);
   const loadBalancerName = projectID.split("-" + env)[0] + "-" + env + "-lb-external";
 
   core.info('Creating proxies');
   await createSSLPolicy(projectID);
-  const certificates = await handleCertificates(host, projectID)
+  const certificates = await handleCertificates(hosts, projectID)
   await createHttpsProxy(projectID, certificates, loadBalancerName);
-
   core.info('Creating forwarding rules');
   await createForwardingRule(projectID, loadBalancerIP);
 

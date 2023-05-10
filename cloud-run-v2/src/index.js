@@ -16,6 +16,7 @@ const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const serviceFile = core.getInput('service-definition') || 'cloud-run.yaml';
   const image = core.getInput('image', { required: true });
+  const migrate = core.getInput('migrate') || false;
   // const verbose = (core.getInput('verbose') || 'false');
 
   failIfNotTrunkBased();
@@ -46,7 +47,7 @@ const action = async () => {
 
     await createExternalLoadbalancer(projectID, env);
     if (host) {
-      await configureExternalLBFrontend(projectID, env, host);
+      await configureExternalLBFrontend(projectID, env, host, migrate);
       await configureExternalDomain(projectID, name, env, host);
     }
     await configureInternalDomain(projectID, name, env);

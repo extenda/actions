@@ -15,6 +15,10 @@ inputs:
   image:
     description: The Docker image to deploy to Cloud Run.
     required: true
+  migrate:
+    description: Migrate the dns mappings to the new loadbalancer
+    required: false
+    default: 'false'
 runs:
   using: node16
   main: dist/index.js
