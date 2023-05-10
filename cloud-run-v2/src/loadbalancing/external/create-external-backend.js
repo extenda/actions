@@ -124,7 +124,7 @@ const setupBackendURLMapping = async (newHosts, projectID, name, env) => {
   }
 };
 
-const configureDomain = async (projectID, name, env, host) => {
+const configureExternalDomain = async (projectID, name, env, host) => {
   core.info('Creating backend service');
   await setupBackendService(name, projectID);
 
@@ -139,10 +139,6 @@ const configureDomain = async (projectID, name, env, host) => {
   if (host) {
     await setupBackendURLMapping(host, projectID, name, env);
   }
-};
-
-const configureExternalDomain = async (projectID, name, env, host) => {
-  await configureDomain(projectID, name, env, host);
 };
 
 module.exports = configureExternalDomain;
