@@ -16,6 +16,7 @@ definitions: # list of config definitions for your system
     version: v1 # version (part of generated id)
     display-name: Receipt Layout config # human-readable name for the configuration
     schema-location: https://example.com/schema.json # location of the JSON schema
+    max-caching-level: tenants/self # max target level for automatic caching
     default-value: # default value for the configuration
       layout: default
 ```
