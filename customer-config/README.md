@@ -18,6 +18,9 @@ definitions: # list of config definitions for your system
     schema-location: https://example.com/schema.json # location of the JSON schema
     default-value: # default value for the configuration
       layout: default
+
+    # (optional) max target level for automatic caching
+    max-caching-level: tenants/self # default value
 ```
 
 # Action setup example
