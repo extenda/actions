@@ -1,5 +1,4 @@
 const gcloudOutput = require("../../utils/gcloud-output");
-const core = require('@actions/core');
 
 const createLoadbalancer = async (projectID, env, backendService) => gcloudOutput([
   'compute',
@@ -14,7 +13,7 @@ const createLoadbalancer = async (projectID, env, backendService) => gcloudOutpu
 const createInternalLoadbalancer = async (projectID, env, name) => {
   //TODO: check if loadbalancer exists and return
   const backendService = `${name}-internal-backend`;
-  await createLoadbalancer(projectID, env, backendService);
+  return await createLoadbalancer(projectID, env, backendService);
 }
 
 module.exports = createInternalLoadbalancer;

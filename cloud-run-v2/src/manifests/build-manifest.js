@@ -1,7 +1,7 @@
 var fs = require('fs');
 
 // TODO: ADD Labels and environment
-const manifestTemplate = async (name, image, minInstances, maxInstances, cpuThreshold, cpuRequest, memoryRequest, environment, labels, opa) => {
+const manifestTemplate = async (name, image, minInstances, maxInstances, cpuThreshold, cpuRequest, memoryRequest, environment, labels, opa, readiness, readinessPath) => {
 
   return `---
 apiVersion: v1
@@ -49,15 +49,14 @@ spec:
       - image: ${image}
         imagePullPolicy: IfNotPresent
         name: user-container
-#   commented out until workflow tests are done
-#        readinessProbe:
-#          ${readiness === 'http' ? 'http' : 'grpc'}:
-#            ${readiness !== 'grpc' ? `path: ${readinessPath}` : ''}
-#            port: 8080
-#          initialDelaySeconds: 3
-#          periodSeconds: 5
-#          failureThreshold: 10
-#          timeoutSeconds: 10
+        readinessProbe:
+          ${readiness === 'http' ? 'http' : 'grpc'}:
+            ${readiness !== 'grpc' ? `path: ${readinessPath}` : ''}
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 5
+          failureThreshold: 10
+          timeoutSeconds: 10
         ports:
         - containerPort: 8080
           protocol: TCP
@@ -187,14 +186,14 @@ const buildManifest = async (image, service, projectId, clanName, env) => {
 
   let readiness = 'http';
   let readinessPath = '/health';
-  try {
-    if(platform.gke.readiness.grpc) {
+  if (platform && platform.gke && platform.gke.readiness) {
+    if (platform.gke.readiness.grpc) {
       readiness = 'grpc';
     }
-    if(platform.gke.readiness.http.path) {
+    if (platform.gke.readiness.http && platform.gke.readiness.http.path) {
       readinessPath = platform.gke.readiness.http.path;
     }
-  } catch {}
+  }
   const envArray = Object.entries(environment).map(([key, value]) => ({
     name: key,
     value: value.match(/^[0-9]+$/) == null ? value.replace('*', projectId) : `'${value}'`,
@@ -210,7 +209,7 @@ const buildManifest = async (image, service, projectId, clanName, env) => {
   envArray.push({ name: 'CLAN_NAME', value: clanName });
 
   await prepareGcloudDeploy(name, projectId, clanName, env);
-  await generateManifest('k8s-manifest.yaml', await manifestTemplate(name, image, minInstances, maxInstances, 50, cpu, memory, envArray, labelArray, opa));
+  await generateManifest('k8s-manifest.yaml', await manifestTemplate(name, image, minInstances, maxInstances, 50, cpu, memory, envArray, labelArray, opa, readiness, readinessPath));
 
 }
 

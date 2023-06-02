@@ -42,5 +42,4 @@ describe('handleCertificates', () => {
     expect(result).toContain('extenda-certs-v3');
     expect(gcloudOutput).toHaveBeenCalledTimes(2);
   });
-
 });
