@@ -61,7 +61,7 @@ describe('Action', () => {
     setupGcloud.mockResolvedValueOnce('project-id');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(3);
+    expect(core.getInput).toHaveBeenCalledTimes(4);
     expect(buildManifest).toHaveBeenCalledWith(
       'gcr.io/project/image:tag',
       serviceDef,
@@ -77,6 +77,7 @@ describe('Action', () => {
       'project-id',
       'staging',
       ['example.com'],
+      false,
     );
     expect(configureInternalFrontend).toHaveBeenCalledWith(
       'project-id',
@@ -110,7 +111,7 @@ describe('Action', () => {
     setupGcloud.mockResolvedValueOnce('project-id');
 
     await expect(action()).rejects.toThrow('Deployment failed! Check container logs and status for error!');
-    expect(core.getInput).toHaveBeenCalledTimes(3);
+    expect(core.getInput).toHaveBeenCalledTimes(4);
     expect(buildManifest).toHaveBeenCalledWith(
       'gcr.io/project/image:tag',
       serviceDef,

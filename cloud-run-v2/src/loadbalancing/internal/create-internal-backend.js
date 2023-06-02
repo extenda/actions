@@ -2,8 +2,6 @@
 const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
 const createInternalLoadbalancer = require('./create-internal-loadbalancer');
-const setupInternalDomainMapping = require('./setup-internal-domainmapping');
-
 
 // Create backend-service
 const setupBackendService = async (name, projectID, region) => gcloudOutput([
@@ -33,7 +31,7 @@ const checkNEG = async (projectID, zone, name) => gcloudOutput([
   `--zone=${zone}`,
 ]);
 
-// Check if NEG exists
+// Check if NEGs exists
 const checkNEGs = async (projectID, name) => {
   const zones = ['europe-west1-d', 'europe-west1-c', 'europe-west1-b'];
   const promises = [];
