@@ -120,36 +120,6 @@ module.exports = {
         gke: {
           type: 'object',
           properties: {
-            readiness: {
-              type: 'object',
-              properties: {
-                http: {
-                  type: 'object',
-                  additionalProperties: false,
-                  properties: {
-                    path: {
-                      type: 'string',
-                      default: '/health',
-                    },
-                    port: {
-                      type: 'string',
-                      default: '8080',
-                    },
-                    required: ['path'],
-                  },
-                },
-                grpc: {
-                  additionalProperties: false,
-                  type: 'object',
-                  properties: {
-                    port: {
-                      type: 'string',
-                      default: '8080',
-                    },
-                  },
-                },
-              },
-            },
             cluster: {
               type: 'string',
             },
@@ -159,6 +129,16 @@ module.exports = {
                 'external',
                 'internal',
               ],
+            },
+            'readiness-type': {
+              type: 'string',
+              enum: [
+                'grpc',
+                'http',
+              ],
+            },
+            'readiness-path': {
+              type: 'string',
             },
             'domain-mappings': {
               type: 'object',

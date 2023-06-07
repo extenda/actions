@@ -50,13 +50,13 @@ spec:
         imagePullPolicy: IfNotPresent
         name: user-container
         readinessProbe:
-          ${readiness === 'http' ? 'http' : 'grpc'}:
-            ${readiness !== 'grpc' ? `path: ${readinessPath}` : ''}
-            port: 8080
+          httpGet:
+            path: ${readinessPath}
+            port: ${readiness !== 'grpc' ? `8080` : '8085'}
           initialDelaySeconds: 3
           periodSeconds: 5
           failureThreshold: 10
-          timeoutSeconds: 10
+          timeoutSeconds: 3
         ports:
         - containerPort: 8080
           protocol: TCP
@@ -67,6 +67,26 @@ spec:
         env:${environment.map(env => `
         - name: ${env.name}
           value: ${env.value}`).join('')}
+      ${readiness === 'grpc' ? `
+      - image: eu.gcr.io/extenda/platform/healthcheck:v1.0
+        imagePullPolicy: IfNotPresent
+        name: healthchecker
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8085
+          initialDelaySeconds: 3
+          periodSeconds: 5
+          failureThreshold: 10
+          timeoutSeconds: 3
+        ports:
+        - containerPort: 8085
+          protocol: TCP
+        resources:
+          requests:
+            cpu: "0.5"
+            memory: ${memoryRequest}
+      ` : ``}
       ${opa ? `
       - image: eu.gcr.io/extenda/envoy:test
         ports:
@@ -186,14 +206,13 @@ const buildManifest = async (image, service, projectId, clanName, env) => {
 
   let readiness = 'http';
   let readinessPath = '/health';
-  if (platform && platform.gke && platform.gke.readiness) {
-    if (platform.gke.readiness.grpc) {
-      readiness = 'grpc';
-    }
-    if (platform.gke.readiness.http && platform.gke.readiness.http.path) {
-      readinessPath = platform.gke.readiness.http.path;
+  if (platform && platform.gke && platform.gke['readiness-type']) {
+    readiness = platform.gke['readiness-type'];
+    if (platform.gke['readiness-path'] && platform.gke['readiness-type'] === 'http' ) {
+      readinessPath = platform.gke['readiness-path'];
     }
   }
+
   const envArray = Object.entries(environment).map(([key, value]) => ({
     name: key,
     value: value.match(/^[0-9]+$/) == null ? value.replace('*', projectId) : `'${value}'`,
