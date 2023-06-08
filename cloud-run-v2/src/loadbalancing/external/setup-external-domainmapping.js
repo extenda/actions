@@ -44,7 +44,7 @@ const setupExternalDomainMapping = async (hosts, migrate, loadBalancerIP) => {
           // create recordset if doesn't exist
           await createUpdateRecordSet(zone, projectID, host, loadBalancerIP, 'create');
         } else {
-          if (migrate && loadBalancerIP != recordSetIP) {
+          if (migrate === 'true' && loadBalancerIP != recordSetIP) {
             // update recordset if migrate true and ip is mismatch
             await createUpdateRecordSet(zone, projectID, host, loadBalancerIP, 'update');
           } else {
