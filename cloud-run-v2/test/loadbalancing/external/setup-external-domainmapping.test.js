@@ -5,7 +5,7 @@ jest.mock('../../../src/utils/gcloud-output');
 
 describe('setupExternalDomainMapping', () => {
   const hosts = ['host1.example.com', 'host2.example.com'];
-  const migrate = true;
+  const migrate = 'true';
   const loadBalancerIP = '1.2.3.4';
 
   afterEach(() => {
@@ -111,7 +111,7 @@ describe('setupExternalDomainMapping', () => {
 
   it('should not migrate when migrate is false and IP matches', async () => {
     const hosts = ['example.com'];
-    const migrate = false;
+    const migrate = 'false';
     const loadBalancerIP = '1.2.3.4';
 
     const projectID = 'extenda';
