@@ -16,7 +16,7 @@ const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const serviceFile = core.getInput('service-definition') || 'cloud-run.yaml';
   const image = core.getInput('image', { required: true });
-  const migrate = core.getInput('migrate') || false;
+  const migrate = core.getInput('migrate') || 'false';
   // const verbose = (core.getInput('verbose') || 'false');
 
   failIfNotTrunkBased();
@@ -35,8 +35,9 @@ const action = async () => {
 
   // setup manifests (hpa, deploy, negs)
   const version = new Date().getTime();
-  await buildManifest(image, service, projectID, clanName, env);
+  const serviceType = await buildManifest(image, service, projectID, clanName, env);
   const succesfullDeploy = await deploy(projectID, service.name, version);
+
   if (succesfullDeploy) {
     let host = [];
     if (env === 'staging') {
@@ -48,9 +49,9 @@ const action = async () => {
     await createExternalLoadbalancer(projectID, env);
     if (host) {
       await configureExternalLBFrontend(projectID, env, host, migrate);
-      await configureExternalDomain(projectID, name, env, host);
+      await configureExternalDomain(projectID, name, env, host, serviceType);
     }
-    await configureInternalDomain(projectID, name, env);
+    await configureInternalDomain(projectID, name, env, serviceType);
     await configureInternalFrontend(projectID, name, env);
   } else {
     throw new Error('Deployment failed! Check container logs and status for error!');

@@ -4,16 +4,16 @@ const gcloudOutput = require('../../utils/gcloud-output');
 const createInternalLoadbalancer = require('./create-internal-loadbalancer');
 
 // Create backend-service
-const setupBackendService = async (name, projectID, region) => gcloudOutput([
+const setupBackendService = async (name, projectID, region, serviceType) => gcloudOutput([
   'compute',
   'backend-services',
   'create',
   `${name}-internal-backend`,
-  '--protocol=HTTP',
+  `--protocol=${serviceType === 'grpc' ? 'HTTP2' : 'HTTP'}`,
   '--port-name=http',
   '--connection-draining-timeout=300s',
-  `--health-checks=${projectID}-internal-hc`,
-  '--timeout=120s',
+  `--health-checks=${projectID}-internal${serviceType === 'grpc' ? '-grpc-': '-'}hc`,
+  '--timeout=300s',
   `--region=${region}`,
   '--health-checks-region=europe-west1',
   '--load-balancing-scheme=INTERNAL_MANAGED',
@@ -67,9 +67,9 @@ const setupBackendURLMapping = async (host, projectID, name, env, region) => gcl
   `--new-hosts=${host}`,
 ]).catch(() => core.info('Url-mapping already exists!'));
 
-const configureBackend = async (projectID, name, region) => {
+const configureBackend = async (projectID, name, region, serviceType) => {
   core.info('Creating backend service');
-  const backendExists = await setupBackendService(name, projectID, region);
+  const backendExists = await setupBackendService(name, projectID, region, serviceType);
 
   core.info('Adding backend NEG to backend service');
   await checkNEGs(projectID, name)
@@ -92,11 +92,11 @@ const setupHealthCheck = async (projectID, region) => gcloudOutput([
   `--project=${projectID}`,
 ]).catch(() => core.info('Health check already exists!'));
 
-const configureInternalDomain = async (projectID, name, env) => {
+const configureInternalDomain = async (projectID, name, env, serviceType) => {
   let host = name + ".internal.retailsvc.com";
   let region = 'europe-west1';
   await setupHealthCheck(projectID, region);
-  await configureBackend(projectID, name, region);
+  await configureBackend(projectID, name, region, serviceType);
   await createInternalLoadbalancer(projectID, env, name);
   core.info('Setup url-mapping');
   return setupBackendURLMapping(host, projectID, name, env, region);

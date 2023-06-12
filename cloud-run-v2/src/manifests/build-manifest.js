@@ -228,8 +228,9 @@ const buildManifest = async (image, service, projectId, clanName, env) => {
   envArray.push({ name: 'CLAN_NAME', value: clanName });
 
   await prepareGcloudDeploy(name, projectId, clanName, env);
+  // FETCH OPA CONFIG AND ADD TO MANIFEST
   await generateManifest('k8s-manifest.yaml', await manifestTemplate(name, image, minInstances, maxInstances, 50, cpu, memory, envArray, labelArray, opa, readiness, readinessPath));
-
+  return readiness;
 }
 
 module.exports = buildManifest;

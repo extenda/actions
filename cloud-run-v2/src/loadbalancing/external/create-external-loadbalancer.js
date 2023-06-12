@@ -45,12 +45,25 @@ const setupHealthCheck = async (projectID) => gcloudOutput([
   `--project=${projectID}`,
 ]).catch(() => core.info('Health check already exists!'));
 
+const setupHealthCheckGRPC = async (projectID) => gcloudOutput([
+  'compute',
+  'health-checks',
+  'create',
+  'tcp',
+  projectID + "-external-grpc-hc",
+  '--global',
+  '--port=8085',
+  '--check-interval=10s',
+  `--project=${projectID}`,
+]).catch(() => core.info('Health check already exists!'));
+
 const createExternalLoadbalancer = async (projectID, env) => {
   //TODO: check if loadbalancer exists and return
 
   await create404Bucket(projectID, env);
   await createLoadbalancer(projectID, env);
   await setupHealthCheck(projectID);
+  await setupHealthCheckGRPC(projectID);
 }
 
 module.exports = createExternalLoadbalancer;
