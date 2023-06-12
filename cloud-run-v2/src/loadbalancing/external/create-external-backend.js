@@ -2,17 +2,16 @@
 const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
 
-
 // Create backend-service
-const setupBackendService = async (name, projectID) => gcloudOutput([
+const setupBackendService = async (name, projectID, serviceType) => gcloudOutput([
   'compute',
   'backend-services',
   'create',
   `${name}-external-backend`,
-  '--protocol=HTTP',
+  `--protocol=${serviceType === 'grpc' ? 'HTTP2' : 'HTTP'}`,
   '--port-name=http',
   '--connection-draining-timeout=300s',
-  `--health-checks=${projectID}-external-hc`,
+  `--health-checks=${projectID}-external${serviceType === 'grpc' ? '-grpc-': '-'}hc`,
   '--timeout=300s',
   '--global',
   '--enable-logging',
@@ -124,9 +123,9 @@ const setupBackendURLMapping = async (newHosts, projectID, name, env) => {
   }
 };
 
-const configureExternalDomain = async (projectID, name, env, host) => {
+const configureExternalDomain = async (projectID, name, env, host, serviceType) => {
   core.info('Creating backend service');
-  await setupBackendService(name, projectID);
+  await setupBackendService(name, projectID, serviceType);
 
   core.info('Adding backend NEG to backend service');
   await checkNEGs(projectID, name)

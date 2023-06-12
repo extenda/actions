@@ -77,7 +77,7 @@ describe('Action', () => {
       'project-id',
       'staging',
       ['example.com'],
-      false,
+      'false',
     );
     expect(configureInternalFrontend).toHaveBeenCalledWith(
       'project-id',
