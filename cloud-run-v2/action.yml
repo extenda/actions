@@ -4,8 +4,11 @@ author: Extenda Retail
 inputs:
   service-account-key:
     description: |
-      The service account key which will be used for authentication.
-      The account key should be a base64 encoded JSON key stored as a secret.
+      The service account key which will be used for authentication against the clan project.
+    required: true
+  service-account-key-pipeline-secrets:
+    description: |
+      The service account key which will be used for authentication aginst the pipeline secrets project.
     required: true
   service-definition:
     description: |

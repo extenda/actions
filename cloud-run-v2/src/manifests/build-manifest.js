@@ -1,6 +1,8 @@
 var fs = require('fs');
+const checkSystem = require('./check-system');
+const buildOpaConfig = require('./opa-config');
 
-// TODO: ADD Labels and environment
+
 const manifestTemplate = async (name, image, minInstances, maxInstances, cpuThreshold, cpuRequest, memoryRequest, environment, labels, opa, readiness, readinessPath) => {
 
   return `---
@@ -190,10 +192,11 @@ const prepareGcloudDeploy = async (name, projectID, clanName, env) => {
   await generateManifest('clouddeploy.yaml', await createCloudDeployPipe(name, projectID, clanName, env));
 }
 
-const buildManifest = async (image, service, projectId, clanName, env) => {
+const buildManifest = async (image, service, projectId, clanName, env, styraToken) => {
 
   const {
     name,
+    'permission-prefix': permissionPrefix,
     memory,
     cpu,
     'max-instances': maxInstances = 50,
@@ -204,11 +207,14 @@ const buildManifest = async (image, service, projectId, clanName, env) => {
     platform,
   } = service;
 
+  const styraUrl = 'https://extendaretail.svc.styra.com';
+  const styraSystemName = `${permissionPrefix}-${name}-${env}`;
+
   let readiness = 'http';
   let readinessPath = '/health';
   if (platform && platform.gke && platform.gke['readiness-type']) {
     readiness = platform.gke['readiness-type'];
-    if (platform.gke['readiness-path'] && platform.gke['readiness-type'] === 'http' ) {
+    if (platform.gke['readiness-path'] && platform.gke['readiness-type'] === 'http') {
       readinessPath = platform.gke['readiness-path'];
     }
   }
@@ -228,9 +234,18 @@ const buildManifest = async (image, service, projectId, clanName, env) => {
   envArray.push({ name: 'CLAN_NAME', value: clanName });
 
   await prepareGcloudDeploy(name, projectId, clanName, env);
-  // FETCH OPA CONFIG AND ADD TO MANIFEST
-  await generateManifest('k8s-manifest.yaml', await manifestTemplate(name, image, minInstances, maxInstances, 50, cpu, memory, envArray, labelArray, opa, readiness, readinessPath));
-  return readiness;
+  console.log(opa);
+  if (opa) {
+    const system = await checkSystem(styraSystemName, styraToken, styraUrl);
+    if (system.id === '') {
+      throw new Error(`Styra system not found with the name ${styraSystemName}`);
+    } else {
+      await generateManifest('k8s-opa-config.yaml', await buildOpaConfig(system.id, styraToken, name, styraUrl));
+    };
+  }
+
+    await generateManifest('k8s-manifest.yaml', await manifestTemplate(name, image, minInstances, maxInstances, 50, cpu, memory, envArray, labelArray, opa, readiness, readinessPath));
+    return readiness;
 }
 
 module.exports = buildManifest;

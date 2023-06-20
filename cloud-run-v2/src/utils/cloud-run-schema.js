@@ -30,6 +30,12 @@ module.exports = {
     name: {
       type: 'string',
     },
+    'opa-enabled': {
+      type: 'boolean',
+    },
+    'permission-prefix': {
+      type: 'string',
+    },
     labels: {
       type: 'object',
       properties: {
@@ -160,9 +166,6 @@ module.exports = {
             },
             namespace: {
               type: 'string',
-            },
-            'opa-enabled': {
-              type: 'boolean',
             },
           },
           required: [
