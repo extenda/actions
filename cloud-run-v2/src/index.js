@@ -11,23 +11,27 @@ const configureExternalLBFrontend = require('./loadbalancing/external/create-ext
 const configureInternalFrontend = require('./loadbalancing/internal/create-internal-frontend');
 const { run, failIfNotTrunkBased } = require('../../utils');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
+const loadCredentials = require('./utils/load-credentials');
 
 const action = async () => {
-  const serviceAccountKey = core.getInput('service-account-key', { required: true });
+  const serviceAccountKeyPipeline = core.getInput('service-account-key-pipeline-secrets', { required: false });
+  const serviceAccountKeyCICD = core.getInput('service-account-key', { required: true });
   const serviceFile = core.getInput('service-definition') || 'cloud-run.yaml';
   const image = core.getInput('image', { required: true });
   const migrate = core.getInput('migrate') || 'false';
   // const verbose = (core.getInput('verbose') || 'false');
 
   failIfNotTrunkBased();
-  const projectID = await setupGcloud(serviceAccountKey);
-  const service = loadServiceDefinition(serviceFile, jsonSchema);
-
+  const projectID = await setupGcloud(serviceAccountKeyCICD);
+  
   const {
     project: clanName,
     env,
   } = projectInfo(projectID);
+  
+  const styraToken = await loadCredentials(serviceAccountKeyPipeline, env);
 
+  const service = loadServiceDefinition(serviceFile, jsonSchema);
   const {
     platform,
     name,
@@ -35,7 +39,7 @@ const action = async () => {
 
   // setup manifests (hpa, deploy, negs)
   const version = new Date().getTime();
-  const serviceType = await buildManifest(image, service, projectID, clanName, env);
+  const serviceType = await buildManifest(image, service, projectID, clanName, env, styraToken);
   const succesfullDeploy = await deploy(projectID, service.name, version);
 
   if (succesfullDeploy) {

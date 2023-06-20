@@ -10,7 +10,9 @@ const configureExternalLBFrontend = require('../src/loadbalancing/external/creat
 const configureInternalFrontend = require('../src/loadbalancing/internal/create-internal-frontend');
 const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
 const action = require('../src/index');
+const loadCredentials = require ('../src/utils/load-credentials');
 
+jest.mock('../src/utils/load-credentials');
 jest.mock('@actions/core');
 jest.mock('../src/utils/service-definition');
 jest.mock('../src/utils/cloud-run-schema');
@@ -32,8 +34,11 @@ describe('Action', () => {
 
   test('It can run the action', async () => {
     core.getInput.mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('clan-service-account')
       .mockReturnValueOnce('cloud-run.yaml')
       .mockReturnValueOnce('gcr.io/project/image:tag');
+    loadCredentials.mockResolvedValueOnce('styra-token');
+
     const serviceDef = {
       platform: {
         gke: {
@@ -61,13 +66,14 @@ describe('Action', () => {
     setupGcloud.mockResolvedValueOnce('project-id');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(4);
+    expect(core.getInput).toHaveBeenCalledTimes(5);
     expect(buildManifest).toHaveBeenCalledWith(
       'gcr.io/project/image:tag',
       serviceDef,
       'project-id',
       'clan-name',
       'staging',
+      'styra-token',
     );
     expect(createExternalLoadbalancer).toHaveBeenCalledWith(
       'project-id',
@@ -87,8 +93,10 @@ describe('Action', () => {
   });
   test('It can fail the action', async () => {
     core.getInput.mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('clan-service-account')
       .mockReturnValueOnce('cloud-run.yaml')
       .mockReturnValueOnce('gcr.io/project/image:tag');
+    loadCredentials.mockResolvedValueOnce('styra-token');
     const serviceDef = {
       platform: {
         gke: {
@@ -111,13 +119,14 @@ describe('Action', () => {
     setupGcloud.mockResolvedValueOnce('project-id');
 
     await expect(action()).rejects.toThrow('Deployment failed! Check container logs and status for error!');
-    expect(core.getInput).toHaveBeenCalledTimes(4);
+    expect(core.getInput).toHaveBeenCalledTimes(5);
     expect(buildManifest).toHaveBeenCalledWith(
       'gcr.io/project/image:tag',
       serviceDef,
       'project-id',
       'clan-name',
       'staging',
+      'styra-token',
     );
   });
 });
