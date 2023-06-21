@@ -208,7 +208,7 @@ const buildManifest = async (image, service, projectId, clanName, env, styraToke
   } = service;
 
   const styraUrl = 'https://extendaretail.svc.styra.com';
-  const styraSystemName = `${permissionPrefix}-${name}-${env}`;
+  const styraSystemName = `${permissionPrefix}.${name}-${env}`;
 
   let readiness = 'http';
   let readinessPath = '/health';
@@ -234,7 +234,6 @@ const buildManifest = async (image, service, projectId, clanName, env, styraToke
   envArray.push({ name: 'CLAN_NAME', value: clanName });
 
   await prepareGcloudDeploy(name, projectId, clanName, env);
-  console.log(opa);
   if (opa) {
     const system = await checkSystem(styraSystemName, styraToken, styraUrl);
     if (system.id === '') {
