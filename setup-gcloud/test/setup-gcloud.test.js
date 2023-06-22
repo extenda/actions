@@ -45,7 +45,7 @@ describe('Setup Gcloud', () => {
 
   test('It can configure gcloud latest', async () => {
     exec.exec.mockResolvedValueOnce(0);
-    await setupGcloud(base64Key);
+    await setupGcloud(base64Key, false);
     expect(exec.exec).toHaveBeenCalledTimes(2);
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['install', 'gke-gcloud-auth-plugin']));
     expect(exec.exec.mock.calls[1][1]).toEqual(expect.arrayContaining(['auth', 'activate-service-account']));
@@ -55,7 +55,7 @@ describe('Setup Gcloud', () => {
 
   test('It can configure gcloud 280.0.0', async () => {
     exec.exec.mockResolvedValueOnce(0);
-    await setupGcloud(base64Key, '280.0.0');
+    await setupGcloud(base64Key, true, '280.0.0');
     expect(exec.exec).toHaveBeenCalledTimes(2);
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['install', 'gke-gcloud-auth-plugin']));
     expect(exec.exec.mock.calls[1][1]).toEqual(expect.arrayContaining(['auth', 'activate-service-account']));
@@ -66,13 +66,13 @@ describe('Setup Gcloud', () => {
 
   test('It can export GOOGLE_APPLICATION_CREDENTIALS', async () => {
     exec.exec.mockResolvedValueOnce(0);
-    await setupGcloud(base64Key, 'latest', true);
+    await setupGcloud(base64Key, false, 'latest', true);
     expect(core.exportVariable.mock.calls[0][0]).toEqual('GOOGLE_APPLICATION_CREDENTIALS');
   });
 
   test('It can export GOOGLE_APPLICATION_CREDENTIALS and copy tmp file', async () => {
     exec.exec.mockResolvedValueOnce(0);
-    await setupGcloud(base64Key, 'latest', true);
+    await setupGcloud(base64Key, true, 'latest', true);
     expect(core.exportVariable.mock.calls[0][0]).toEqual('GOOGLE_APPLICATION_CREDENTIALS');
 
     const keyFile = path.parse(core.exportVariable.mock.calls[0][1]);
