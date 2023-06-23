@@ -62,12 +62,18 @@ const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredenti
   fs.mkdirSync(cacheDir, { recursive: true });
 
   const paths = [cacheDir];
-
   const key = `cache-gcloud-${semver}`;
-  const cacheId = await cache.restoreCache(paths, key, [`${semver}`]);
+
+  const restoreKeys = [
+    'cache-gcloud-',
+    `${semver}`
+  ];
+
+  const cacheId = await cache.restoreCache(paths, key, restoreKeys);
+  core.info(`CACHE ID ${cacheId}`);
 
   if (cacheId) {
-    core.info(`Found cache with ID: ${cacheId}`);
+    core.info(`Cache hit: Found cache with key ${cacheId}`);
     const gcloud = path.join(cacheDir, 'google-cloud-sdk');
     core.addPath(path.join(gcloud, 'bin'));
   } else {
