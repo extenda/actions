@@ -59,7 +59,7 @@ const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredenti
   const downloadUrl = getDownloadUrl(semver);
 
   const paths = [
-    `/opt/hostedtoolcache/gcloud/${semver}`
+    `/opt/hostedtoolcache`
   ];
 
   const key = `cache-gcloud-${semver}`;
