@@ -59,14 +59,17 @@ const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredenti
 
   const findCachedDir = tc.find('gcloud', semver);
   if (!findCachedDir) {
+    core.info(`Downloading gcloud version: ${semver}`);
     const gcloudPath = await tc.downloadTool(downloadUrl);
     const extractedPath = await tc.extractTar(path.join(gcloudPath));
     const toolPath = await tc.cacheDir(extractedPath, 'gcloud', semver);
     const gcloudBinPath = path.join(toolPath, 'google-cloud-sdk', 'bin');
     core.addPath(gcloudBinPath);
+  } else {
+    core.info(`Found gcloud version: ${semver}`);
+    core.addPath(findCachedDir);
   }
 
-  core.addPath(findCachedDir);
   return configureGcloud(serviceAccountKey, exportCredentials)
     .then((projectId) => {
       core.exportVariable('CLOUDSDK_CORE_PROJECT', projectId);
