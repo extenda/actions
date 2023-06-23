@@ -4,8 +4,9 @@ const fs = require('fs');
 const core = require('@actions/core');
 const exec = require('@actions/exec');
 const io = require('@actions/io');
+const cache = require('@actions/cache');
 const { v4: uuidv4 } = require('uuid');
-const tc = require('@actions/tool-cache');
+const { loadTool } = require('../../utils');
 const createKeyFile = require('../../utils/src/create-key-file');
 const getDownloadUrl = require('./download-url');
 const getLatestVersion = require('./latest-version');
@@ -57,17 +58,22 @@ const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredenti
   }
   const downloadUrl = getDownloadUrl(semver);
 
-  const findCachedDir = tc.find('gcloud', semver);
-  if (!findCachedDir) {
-    core.info(`Downloading gcloud version: ${semver}`);
-    const gcloudPath = await tc.downloadTool(downloadUrl);
-    const extractedPath = await tc.extractTar(path.join(gcloudPath));
-    const toolPath = await tc.cacheDir(extractedPath, 'gcloud', semver);
-    const gcloudBinPath = path.join(toolPath, 'google-cloud-sdk', 'bin');
-    core.addPath(gcloudBinPath);
-  } else {
-    core.info(`Found gcloud version: ${semver}`);
-    core.addPath(findCachedDir);
+  const paths = [
+    `/opt/hostedtoolcache/gcloud/${semver}`
+  ];
+
+  const key = `cache-gcloud-${semver}`;
+  const cacheId = await cache.saveCache(paths, key)
+
+  let gcloud;
+  if (cacheId == -1) {
+    gcloud = await loadTool({
+      tool: 'gcloud',
+      binary: 'google-cloud-sdk',
+      version: semver,
+      downloadUrl,
+    });
+    core.addPath(path.join(gcloud, 'bin'));
   }
 
   return configureGcloud(serviceAccountKey, exportCredentials)
