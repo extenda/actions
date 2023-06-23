@@ -1,9 +1,10 @@
 const mockFs = require('mock-fs');
 const path = require('path');
 
-// Mock out tools download
-jest.mock('../../utils', () => ({
-  loadTool: async () => Promise.resolve('gcloud'),
+jest.mock('@actions/tool-cache', () => ({
+  downloadTool: jest.fn(),
+  extractTar: jest.fn(),
+  cacheDir: jest.fn().mockResolvedValue('/tmp/cache/gcloud'),
 }));
 
 jest.mock('@actions/exec');
@@ -23,7 +24,7 @@ const orgEnv = process.env;
 
 describe('Setup Gcloud', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     process.env = orgEnv;
     mockFs.restore();
   });
@@ -45,37 +46,45 @@ describe('Setup Gcloud', () => {
 
   test('It can configure gcloud latest', async () => {
     exec.exec.mockResolvedValueOnce(0);
-    await setupGcloud(base64Key, false);
+    const expectedBinPath = path.join('/tmp', 'cache', 'gcloud', 'google-cloud-sdk', 'bin');
+    await setupGcloud(base64Key);
     expect(exec.exec).toHaveBeenCalledTimes(2);
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['install', 'gke-gcloud-auth-plugin']));
     expect(exec.exec.mock.calls[1][1]).toEqual(expect.arrayContaining(['auth', 'activate-service-account']));
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
     expect(core.exportVariable).toHaveBeenCalledWith('CLOUDSDK_CORE_PROJECT', 'test-project');
+    expect(core.addPath).toHaveBeenCalledWith(expectedBinPath);
   });
 
   test('It can configure gcloud 280.0.0', async () => {
     exec.exec.mockResolvedValueOnce(0);
-    await setupGcloud(base64Key, true, '280.0.0');
+    await setupGcloud(base64Key, '280.0.0');
+    const expectedBinPath = path.join('/tmp', 'cache', 'gcloud', 'google-cloud-sdk', 'bin');
     expect(exec.exec).toHaveBeenCalledTimes(2);
     expect(exec.exec.mock.calls[0][1]).toEqual(expect.arrayContaining(['install', 'gke-gcloud-auth-plugin']));
     expect(exec.exec.mock.calls[1][1]).toEqual(expect.arrayContaining(['auth', 'activate-service-account']));
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
     expect(core.exportVariable).toHaveBeenCalledWith('CLOUDSDK_CORE_PROJECT', 'test-project');
     expect(core.exportVariable).toHaveBeenCalledWith('GCLOUD_INSTALLED_VERSION', '280.0.0');
+    expect(core.addPath).toHaveBeenCalledWith(expectedBinPath);
   });
 
   test('It can export GOOGLE_APPLICATION_CREDENTIALS', async () => {
     exec.exec.mockResolvedValueOnce(0);
-    await setupGcloud(base64Key, false, 'latest', true);
+    const expectedBinPath = path.join('/tmp', 'cache', 'gcloud', 'google-cloud-sdk', 'bin');
+    await setupGcloud(base64Key, 'latest', true);
     expect(core.exportVariable.mock.calls[0][0]).toEqual('GOOGLE_APPLICATION_CREDENTIALS');
+    expect(core.addPath).toHaveBeenCalledWith(expectedBinPath);
   });
 
   test('It can export GOOGLE_APPLICATION_CREDENTIALS and copy tmp file', async () => {
     exec.exec.mockResolvedValueOnce(0);
-    await setupGcloud(base64Key, true, 'latest', true);
+    const expectedBinPath = path.join('/tmp', 'cache', 'gcloud', 'google-cloud-sdk', 'bin');
+    await setupGcloud(base64Key, 'latest', true);
     expect(core.exportVariable.mock.calls[0][0]).toEqual('GOOGLE_APPLICATION_CREDENTIALS');
 
     const keyFile = path.parse(core.exportVariable.mock.calls[0][1]);
     expect(keyFile.dir).toEqual(path.normalize(process.env.RUNNER_TEMP));
+    expect(core.addPath).toHaveBeenCalledWith(expectedBinPath);
   });
 });
