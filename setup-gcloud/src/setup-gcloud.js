@@ -58,22 +58,28 @@ const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredenti
   }
   const downloadUrl = getDownloadUrl(semver);
 
-  const paths = [
-    `/opt/hostedtoolcache`
-  ];
+  const cacheDir = path.join(process.env.RUNNER_TOOL_CACHE, 'gcloud', semver);
+  fs.mkdirSync(cacheDir, { recursive: true });
+
+  const paths = [cacheDir];
 
   const key = `cache-gcloud-${semver}`;
-  const cacheId = await cache.saveCache(paths, key)
+  const cacheId = await cache.restoreCache(paths, key, [`${semver}`]);
 
-  let gcloud;
-  if (cacheId == -1) {
-    gcloud = await loadTool({
+  if (cacheId) {
+    core.info(`Found cache with ID: ${cacheId}`);
+    const gcloud = path.join(cacheDir, 'google-cloud-sdk');
+    core.addPath(path.join(gcloud, 'bin'));
+  } else {
+    const gcloud = await loadTool({
       tool: 'gcloud',
       binary: 'google-cloud-sdk',
       version: semver,
       downloadUrl,
     });
+
     core.addPath(path.join(gcloud, 'bin'));
+    await cache.saveCache(paths, key);
   }
 
   return configureGcloud(serviceAccountKey, exportCredentials)
