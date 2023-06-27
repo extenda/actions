@@ -129,7 +129,7 @@ metadata:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ${e}-neg
+  name: ${e}
   namespace: ${e}
   annotations:
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"${e}-neg"}}}'

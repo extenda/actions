@@ -2,7 +2,6 @@ var fs = require('fs');
 const checkSystem = require('./check-system');
 const buildOpaConfig = require('./opa-config');
 
-
 const manifestTemplate = async (name, image, minInstances, maxInstances, cpuThreshold, cpuRequest, memoryRequest, environment, labels, opa, readiness, readinessPath) => {
 
   return `---
@@ -14,7 +13,7 @@ metadata:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ${name}-neg
+  name: ${name}
   namespace: ${name}
   annotations:
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"${name}-neg"}}}'
