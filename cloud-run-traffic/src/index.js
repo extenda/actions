@@ -52,7 +52,7 @@ function getRevisionsList(service, projectId) {
   );
 }
 
-function routeTraffic(service, percentage, projectId) {
+function routeTraffic(service, targetRevision, percentage, projectId) {
   return execGCloud(
     [
       "run",
@@ -90,7 +90,7 @@ async function action() {
     );
   }
 
-  await routeTraffic(service, percentage, projectId);
+  await routeTraffic(service, targetRevision, percentage, projectId);
 }
 
 if (require.main === module) {
