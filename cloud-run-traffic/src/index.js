@@ -3,9 +3,8 @@ const exec = require("@actions/exec");
 const { run } = require("../../utils/src");
 const setupGcloud = require("../../setup-gcloud/src/setup-gcloud");
 
-async function execGCloud(args, options = {}) {
+async function execGCloud(args) {
   let stdout = "";
-  let stderr = "";
 
   core.info(`[running] gcloud "${args.join('" "')}"`);
   await exec.exec("gcloud", args, {
@@ -14,17 +13,10 @@ async function execGCloud(args, options = {}) {
       stdout: (data) => {
         stdout += data.toString("utf8");
       },
-      stderr: (data) => {
-        stderr += data.toString("utf8");
-      },
     },
   });
 
-  if (stderr) {
-    throw new Error(stderr);
-  }
-
-  return options.json ? JSON.parse(stdout) : stdout;
+  return stdout;
 }
 
 function validatePercentage(_percentage) {
@@ -38,33 +30,27 @@ function validatePercentage(_percentage) {
 }
 
 function getRevisionsList(service, projectId) {
-  return execGCloud(
-    [
-      "run",
-      "revisions",
-      "list",
-      `--service=${service}`,
-      "--region=europe-west1",
-      `--project=${projectId}`,
-      "--format=json",
-    ],
-    { json: true }
-  );
+  return execGCloud([
+    "run",
+    "revisions",
+    "list",
+    `--service=${service}`,
+    "--region=europe-west1",
+    `--project=${projectId}`,
+    '--format="value[](name)"',
+  ]).then((str) => str.split("\n").map((s) => s.trim()));
 }
 
 function routeTraffic(service, targetRevision, percentage, projectId) {
-  return execGCloud(
-    [
-      "run",
-      "services",
-      "update-traffic",
-      service,
-      `--to-revisions=${targetRevision}=${percentage}`,
-      "--region=europe-west1",
-      `--project=${projectId}`,
-    ],
-    { json: true }
-  );
+  return execGCloud([
+    "run",
+    "services",
+    "update-traffic",
+    service,
+    `--to-revisions=${targetRevision}=${percentage}`,
+    "--region=europe-west1",
+    `--project=${projectId}`,
+  ]);
 }
 
 async function action() {
@@ -84,7 +70,7 @@ async function action() {
 
   const revisions = await getRevisionsList(service, projectId);
 
-  if (!revisions.some(({ metadata }) => metadata.name === targetRevision)) {
+  if (!revisions.some((revision) => revision === targetRevision)) {
     throw new Error(
       `Revision ${targetRevision} not found for service ${service}`
     );
