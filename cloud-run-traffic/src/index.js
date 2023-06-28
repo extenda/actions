@@ -84,7 +84,7 @@ async function action() {
 
   const revisions = await getRevisionsList(service, projectId);
 
-  if (!revisions.sone(({ metadata }) => metadata.name === targetRevision)) {
+  if (!revisions.some(({ metadata }) => metadata.name === targetRevision)) {
     throw new Error(
       `Revision ${targetRevision} not found for service ${service}`
     );

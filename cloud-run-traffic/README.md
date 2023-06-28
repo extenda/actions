@@ -16,6 +16,8 @@ on:
     inputs:
       revision:
         required: true
+      service:
+        required: true
       percentage:
         required: false
         default: '100'
@@ -31,6 +33,7 @@ jobs:
         with:
           service-account-key: ${{ secrets.GCLOUD_AUTH }} # required
           # service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }} # staging
+          service: ${{ github.event.inputs.service }} # required
           revision: ${{ github.event.inputs.revision }} # required
           percentage: ${{ github.event.inputs.percentage }} # optional. 100 by default
 ```
