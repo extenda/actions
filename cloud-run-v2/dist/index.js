@@ -141,7 +141,7 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: ${c?"8000":"8080"}
-      name: http
+      name: ${l==="grpc"?"HTTP2":"http"}
 ---
 apiVersion: apps/v1
 kind: Deployment

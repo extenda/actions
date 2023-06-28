@@ -25,7 +25,7 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: ${opa ? '8000' : '8080'}
-      name: http
+      name: ${readiness === 'grpc' ? 'HTTP2' : 'http'}
 ---
 apiVersion: apps/v1
 kind: Deployment
