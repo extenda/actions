@@ -1,0 +1,11 @@
+{
+  "name": "customer-config",
+  "version": "1.0.0-local",
+  "private": true,
+  "description": "This github action routes traffic for cloud run service.",
+  "main": "dist/index.js",
+  "license": "ISC",
+  "dependencies": {
+    "@actions/core": "^1.10.0"
+  }
+}

@@ -1,0 +1,27 @@
+name: Cloud Run Traffic
+description: |
+  A simple action for managing Cloud Run revisions traffic.
+  Can be used for rollbacks or gradual rollouts.
+author: Extenda Retail
+inputs:
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication
+      to the google cloud.
+    required: true
+  service:
+    description: |
+      The revision to route traffic to.
+    required: true
+  target-revision:
+    description: |
+      The revision to route traffic to.
+    required: true
+  percentage:
+    description: |
+      The percentage of traffic to route to the revision.
+    required: false
+    default: '100'
+runs:
+  using: node16
+  main: dist/index.js
