@@ -5,6 +5,7 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 const io = require('@actions/io');
 const cache = require('@actions/cache');
+const toolCache = require('@actions/tool-cache');
 const { v4: uuidv4 } = require('uuid');
 const { loadTool } = require('../../utils');
 const createKeyFile = require('../../utils/src/create-key-file');
@@ -50,42 +51,45 @@ const configureGcloud = async (serviceAccountKey, exportCredentials) => {
   return projectId;
 };
 
-const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredentials = false) => {
+const setupGcloud = async (serviceAccountKey, useCache, version = 'latest', exportCredentials = false) => {
   let semver = version;
+  const TOOL_NAME = 'gcloud';
   if (!semver || semver === 'latest') {
     semver = await getLatestVersion();
     core.info(`Use latest gcloud version: ${semver}`);
   }
   const downloadUrl = getDownloadUrl(semver);
 
-  const cacheDir = path.join(process.env.RUNNER_TOOL_CACHE, 'gcloud', semver);
-  fs.mkdirSync(cacheDir, { recursive: true });
+  const cachedPath = toolCache.find(TOOL_NAME, semver);
+  if (cachedPath) {
+    core.info(`Using cached gcloud install: ${cachedPath}`);
+  }
 
-  const paths = [cacheDir];
-  const key = `cache-gcloud-${semver}`;
+  const cacheKey = `${TOOL_NAME}-${semver}`;
+  if (useCache) {
+    const restorePath = path.join(process.env.RUNNER_TOOL_CACHE, TOOL_NAME, semver, os.arch());
+    core.info(`Attempting restore of ${cacheKey} to ${restorePath}`);
+    const restoredKey = await cache.restoreCache([restorePath], cacheKey);
+    if (restoredKey) {
+      core.info(`Using cached gcloud install: ${restorePath}`);
+    } else {
+      core.info(`No cached version found. Downloading gcloud ${semver}`);
 
-  const restoreKeys = [
-    'cache-gcloud-',
-    `${semver}`
-  ];
+      const gcloud = await loadTool({
+        tool: 'gcloud',
+        binary: 'google-cloud-sdk',
+        version: semver,
+        downloadUrl,
+      });
 
-  const cacheId = await cache.restoreCache(paths, key, restoreKeys);
-  core.info(`CACHE ID ${cacheId}`);
+      const binPath = path.join(gcloud, 'bin');
+      const cachePath = await toolCache.cacheDir(binPath, TOOL_NAME, semver);
 
-  if (cacheId) {
-    core.info(`Cache hit: Found cache with key ${cacheId}`);
-    const gcloud = path.join(cacheDir, 'google-cloud-sdk');
-    core.addPath(path.join(gcloud, 'bin'));
-  } else {
-    const gcloud = await loadTool({
-      tool: 'gcloud',
-      binary: 'google-cloud-sdk',
-      version: semver,
-      downloadUrl,
-    });
-
-    core.addPath(path.join(gcloud, 'bin'));
-    await cache.saveCache(paths, key);
+      if (useCache) {
+        core.info(`Adding gcloud ${semver} at ${cachePath} to local cache ${cacheKey}`);
+        await cache.saveCache([cachePath], cacheKey);
+      }
+    }
   }
 
   return configureGcloud(serviceAccountKey, exportCredentials)
