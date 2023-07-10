@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
-const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
+const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
 const checkNamespaceExists = require('./check-namespace-exists');
 const execKustomize = require('./kustomize');
 const patchStatefulSetYaml = require('./patch-statefulset-yaml');

@@ -1,5 +1,5 @@
 jest.mock('@actions/exec');
-jest.mock('../../setup-gcloud/src/setup-gcloud');
+jest.mock('../../setup-gcloud-base/src/setup-gcloud');
 jest.mock('../../cloud-run/src/cluster-info');
 jest.mock('../../cloud-run/src/project-info');
 jest.mock('../../cloud-run/src/kubectl-auth');
@@ -19,7 +19,7 @@ jest.mock('../../utils', () => ({
 const exec = require('@actions/exec');
 const mockFs = require('mock-fs');
 const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
-const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
+const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
 const patchDeployment = require('../src/patch-deployment-yaml');
 const patchServiceYaml = require('../src/patch-service-yaml');
 const patchStatefulSetYaml = require('../src/patch-statefulset-yaml');

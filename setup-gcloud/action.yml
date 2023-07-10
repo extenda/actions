@@ -1,6 +1,5 @@
-name: Setup GCloud
-description: Setup the GCloud CLI
-author: Extenda Retail
+name: Setup gcloud
+description: Setup the gcloud CLI and cache it for further use
 inputs:
   service-account-key:
     description: |
@@ -17,9 +16,28 @@ inputs:
       Google Cloud CLIs and APIs will automatically use this environment variable to find credentials.
     required: false
     default: 'false'
-outputs:
-  project-id:
-    description: The default project ID associated with the service account.
+
 runs:
-  using: node16
-  main: dist/index.js
+  using: composite
+  steps:
+    - name: Get gcloud latest version
+      run: |
+        url="https://dl.google.com/dl/cloudsdk/channels/rapid/components-2.json"
+        version=$(curl -s "$url" | grep -o '"version": "[^"]*' | cut -d'"' -f4)
+        echo "gcloud_version=$version" >> $GITHUB_ENV
+
+      - name: Cache Gcloud packages
+        uses: actions/cache@v3
+        id: gcloud-cache
+        with:
+          key: ${{ runner.os }}-cache-gcloud-${{ env.gcloud_version }}
+          path: |
+            /opt/hostedtoolcache/gcloud/${{ env.gcloud_version }}
+
+      - uses: extenda/actions/setup-gcloud-base@v0
+        id: gcloud
+        with:
+          service-account-key: ${{ inputs.service-account-key }}
+          version: ${{ inputs.version }}
+          export-default-credentials: ${{ inputs.export-default-credentials }}
+          cache: steps.gcloud-cache.outputs.cache-hit

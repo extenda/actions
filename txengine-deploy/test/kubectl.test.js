@@ -1,4 +1,4 @@
-jest.mock('../../setup-gcloud/src/setup-gcloud');
+jest.mock('../../setup-gcloud-base/src/setup-gcloud');
 jest.mock('@actions/exec');
 const mockClusterInfo = jest.fn();
 jest.mock('../../cloud-run/src/cluster-info', () => ({
@@ -7,7 +7,7 @@ jest.mock('../../cloud-run/src/cluster-info', () => ({
 jest.mock('../../cloud-run/src/kubectl-auth');
 
 const exec = require('@actions/exec');
-const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
+const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
 const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
 
 const kubectl = require('../src/kubectl');

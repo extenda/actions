@@ -1,6 +1,6 @@
 const core = require('@actions/core');
 const { run, failIfNotTrunkBased } = require('../../utils');
-const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
+const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
 const deployJob = require('./deploy-job');
 const drainJob = require('./drain-job');
 const { getTribeProject } = require('../../cloud-run/src/cluster-info');

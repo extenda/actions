@@ -49,7 +49,7 @@ const configureGcloud = async (serviceAccountKey, exportCredentials) => {
   return projectId;
 };
 
-const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredentials = false) => {
+const setupGcloud = async (serviceAccountKey, cacheGcloud, version = 'latest', exportCredentials = false) => {
   let semver = version;
   if (!semver || semver === 'latest') {
     semver = await getLatestVersion();
@@ -57,21 +57,25 @@ const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredenti
   }
   const downloadUrl = getDownloadUrl(semver);
 
-  return loadTool({
-    tool: 'gcloud',
-    binary: 'google-cloud-sdk',
-    version: semver,
-    downloadUrl,
-  }).then((gcloud) => {
+  let gcloud;
+  if (cacheGcloud) {
+    gcloud = await loadTool({
+      tool: 'gcloud',
+      binary: 'google-cloud-sdk',
+      version: semver,
+      downloadUrl,
+    });
     core.addPath(path.join(gcloud, 'bin'));
-    return configureGcloud(serviceAccountKey, exportCredentials);
-  }).then((projectId) => {
-    core.exportVariable('CLOUDSDK_CORE_PROJECT', projectId);
-    core.setOutput('project-id', projectId);
-    core.exportVariable('GCLOUD_INSTALLED_VERSION', semver);
-    core.exportVariable('USE_GKE_GCLOUD_AUTH_PLUGIN', 'True');
-    return projectId;
-  });
+  }
+
+  return configureGcloud(serviceAccountKey, exportCredentials)
+    .then((projectId) => {
+      core.exportVariable('CLOUDSDK_CORE_PROJECT', projectId);
+      core.setOutput('project-id', projectId);
+      core.exportVariable('GCLOUD_INSTALLED_VERSION', semver);
+      core.exportVariable('USE_GKE_GCLOUD_AUTH_PLUGIN', 'True');
+      return projectId;
+    });
 };
 
 module.exports = setupGcloud;

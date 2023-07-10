@@ -1,4 +1,4 @@
-const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
+const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
 const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
 const loadServiceDefinition = require('../../cloud-run/src/service-definition');

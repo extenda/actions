@@ -1,5 +1,5 @@
 jest.mock('@actions/core');
-jest.mock('../../setup-gcloud/src/setup-gcloud', () => () => 'stub-project-id');
+jest.mock('../../setup-gcloud-base/src/setup-gcloud', () => () => 'stub-project-id');
 jest.mock('@actions/exec', () => ({
   exec: jest.fn(),
 }));
