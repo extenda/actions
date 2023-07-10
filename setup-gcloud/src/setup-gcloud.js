@@ -75,15 +75,12 @@ const setupGcloud = async (serviceAccountKey, useCache, version = 'latest', expo
     } else {
       core.info(`No cached version found. Downloading gcloud ${semver}`);
 
-      const gcloud = await loadTool({
-        tool: 'gcloud',
-        binary: 'google-cloud-sdk',
-        version: semver,
-        downloadUrl,
-      });
+      const gcloudPath = await toolCache.downloadTool(downloadUrl);
+      const extractedPath = await toolCache.extractTar(gcloudPath);
+      const cachePath = await toolCache.cacheDir(extractedPath, 'gcloud', semver);
 
-      const binPath = path.join(gcloud, 'bin');
-      const cachePath = await toolCache.cacheDir(binPath, TOOL_NAME, semver);
+      const gcloudBinPath = path.join(cachePath, 'google-cloud-sdk', 'bin');
+      core.addPath(gcloudBinPath);
 
       if (useCache) {
         core.info(`Adding gcloud ${semver} at ${cachePath} to local cache ${cacheKey}`);
