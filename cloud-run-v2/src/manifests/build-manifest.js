@@ -89,7 +89,7 @@ spec:
             memory: ${memoryRequest}
       ` : ``}
       ${opa ? `
-      - image: eu.gcr.io/extenda/envoy:grpc
+      - image: eu.gcr.io/extenda/envoy:test
         ports:
           - containerPort: 8000
             protocol: TCP
