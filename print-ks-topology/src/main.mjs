@@ -1,5 +1,5 @@
 import fs from 'fs';
-const core = require('@actions/core');
+import * as core from '@actions/core';
 
 class SubTopology {
     static pattern = /Sub-topology: ([0-9]*)/;
