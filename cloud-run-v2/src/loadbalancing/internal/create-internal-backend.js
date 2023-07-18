@@ -12,7 +12,7 @@ const setupBackendService = async (name, projectID, region, serviceType) => gclo
   `--protocol=${serviceType === 'grpc' ? 'HTTP2' : 'HTTP'}`,
   '--port-name=http',
   '--connection-draining-timeout=300s',
-  `--health-checks=${projectID}-internal${serviceType === 'grpc' ? '-grpc-': '-'}hc`,
+  `--health-checks=${projectID}-internal-hc`,
   '--timeout=300s',
   `--region=${region}`,
   '--health-checks-region=europe-west1',

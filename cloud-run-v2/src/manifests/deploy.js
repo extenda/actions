@@ -1,7 +1,7 @@
 const gcloudOutput = require('../utils/gcloud-output');
 const core = require('@actions/core');
 
-const FIVE_MINUTES = 300000;
+const EIGHT_MINUTES = 480000;
 const timer = (ms) => new Promise((res) => {
   setTimeout(res, ms);
 });
@@ -41,7 +41,7 @@ const runGcloudDeploy = async (projectID, name, version) => {
 
   core.info(`Waiting for deployment "${name}" to become active...`);
   const sleepMs = 10000;
-  const timeoutMs = FIVE_MINUTES;
+  const timeoutMs = EIGHT_MINUTES;
   const t0 = Date.now();
   let status = '';
   /* eslint-disable no-await-in-loop */

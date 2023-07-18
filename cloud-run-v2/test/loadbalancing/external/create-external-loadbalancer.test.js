@@ -77,7 +77,7 @@ describe('createExternalLoadbalancer', () => {
 
     await createExternalLoadbalancer(projectID, env);
 
-    expect(gcloudOutput).toHaveBeenCalledTimes(4);
+    expect(gcloudOutput).toHaveBeenCalledTimes(3);
     expect(gcloudOutput).toHaveBeenNthCalledWith(1, [
       'mb',
       '-c',

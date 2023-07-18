@@ -68,28 +68,8 @@ spec:
         env:${environment.map(env => `
         - name: ${env.name}
           value: ${env.value}`).join('')}
-      ${readiness === 'grpc' ? `
-      - image: eu.gcr.io/extenda/platform/healthcheck:v1.0
-        imagePullPolicy: IfNotPresent
-        name: healthchecker
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 8085
-          initialDelaySeconds: 3
-          periodSeconds: 5
-          failureThreshold: 10
-          timeoutSeconds: 3
-        ports:
-        - containerPort: 8085
-          protocol: TCP
-        resources:
-          requests:
-            cpu: "0.5"
-            memory: ${memoryRequest}
-      ` : ``}
       ${opa ? `
-      - image: eu.gcr.io/extenda/envoy:test
+      - image: eu.gcr.io/extenda/envoy${readiness === 'grpc' ? 'grpc' : 'http'}
         ports:
           - containerPort: 8000
             protocol: TCP
