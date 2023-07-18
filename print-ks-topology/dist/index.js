@@ -12,4 +12,4 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``)}f.g
 ${Fe.toMermaid(r)}
 \`\`\`
 ----`,o=/### Kafka Stream Topology\n([\s\S]*?)\n----/;o.test(n)?n=n.replace(o,s):n+=`
-`+s,ve.writeFileSync(t,n,"utf-8"),console.log("README.md updated successfully.")}catch(e){console.error("An error occurred while updating the README.md:",e),return}}oi();
+`+s,ve.writeFileSync(t,n,"utf-8"),console.log("README.md updated successfully.")}catch(e){console.error("An error occurred while updating the README.md:",e),process.exit(1)}}oi();

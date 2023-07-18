@@ -193,7 +193,7 @@ async function generateTopology() {
         console.log('README.md updated successfully.');
     } catch (error) {
         console.error('An error occurred while updating the README.md:', error);
-        return;
+        process.exit(1);
     }
 }
 
