@@ -7,6 +7,8 @@
     "@actions/core": "^1.10.0"
   },
   "devDependencies": {
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4",
     "@babel/cli": "^7.22.9",
     "@babel/preset-env": "^7.22.9"
   }
