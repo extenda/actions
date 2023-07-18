@@ -11,7 +11,7 @@ const setupBackendService = async (name, projectID, serviceType) => gcloudOutput
   `--protocol=${serviceType === 'grpc' ? 'HTTP2' : 'HTTP'}`,
   '--port-name=http',
   '--connection-draining-timeout=300s',
-  `--health-checks=${projectID}-external${serviceType === 'grpc' ? '-grpc-': '-'}hc`,
+  `--health-checks=${projectID}-external-hc`,
   '--timeout=300s',
   '--global',
   '--enable-logging',
