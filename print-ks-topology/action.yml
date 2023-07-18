@@ -1,0 +1,14 @@
+name: Print-Topology
+description: Print Kafka Stream Processor's topology in mermaid format.
+inputs:
+  topologyFilePath:
+    description: 'Path to the topology file'
+    required: false
+    default: 'docs/topology/stream.txt'
+  readmeFilePath:
+    description: 'Path to the README file'
+    required: false
+    default: 'README.md'
+runs:
+  using: node16
+  main: dist/main.js
