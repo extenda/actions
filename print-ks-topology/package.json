@@ -1,0 +1,13 @@
+{
+  "name": "print-topology",
+  "version": "1.0.0-local",
+  "private": true,
+  "main": "dist/main.js",
+  "dependencies": {
+    "@actions/core": "^1.10.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.22.9",
+    "@babel/preset-env": "^7.22.9"
+  }
+}
