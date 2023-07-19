@@ -33,7 +33,7 @@ const setupExternalDomainMapping = async (hosts, migrate, loadBalancerIP) => {
     `--project=${projectID}`,
     '--format=json',
   ]));
-  const hostsToHandle = hosts.split(',');
+  const hostsToHandle = hosts.toString().split(',');
   core.info("listing all hosts:" + hostsToHandle);
   for (const host of hostsToHandle) {
     core.info("handling " + host);
