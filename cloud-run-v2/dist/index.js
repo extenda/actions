@@ -169,9 +169,10 @@ spec:
         imagePullPolicy: IfNotPresent
         name: user-container
         readinessProbe:
-          httpGet:
+        ${l!=="grpc"?`  httpGet:
             path: ${p}
-            port: 8080
+            port: 8080`:`  grpc:
+            port: 8080`}
           initialDelaySeconds: 3
           periodSeconds: 5
           failureThreshold: 10
