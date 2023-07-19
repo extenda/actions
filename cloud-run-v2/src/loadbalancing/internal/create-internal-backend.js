@@ -68,10 +68,10 @@ const setupBackendURLMapping = async (host, projectID, name, env, region) => gcl
 ]).catch(() => core.info('Url-mapping already exists!'));
 
 const configureBackend = async (projectID, name, region, serviceType) => {
-  core.info('Creating backend service');
-  const backendExists = await setupBackendService(name, projectID, region, serviceType);
+  core.info('Creating internal backend service');
+  await setupBackendService(name, projectID, region, serviceType);
 
-  core.info('Adding backend NEG to backend service');
+  core.info('Adding backend NEG to internal backend service');
   await checkNEGs(projectID, name)
     .then(() => addBackend(name, projectID, 'europe-west1-d'))
     .then(() => addBackend(name, projectID, 'europe-west1-c'))
