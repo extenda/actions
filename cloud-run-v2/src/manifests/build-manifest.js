@@ -17,6 +17,8 @@ metadata:
   namespace: ${name}
   annotations:
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"${name}-neg"}}}'
+  labels:
+    networking.gke.io/service-name: ${name}
 spec:
   type: NodePort
   selector:
