@@ -1,4 +1,5 @@
 const gcloudOutput = require("../../utils/gcloud-output")
+const core = require('@actions/core');
 
 const getRecordSetIP = async (zone, projectID, host) => gcloudOutput([
   'dns',
@@ -32,20 +33,26 @@ const setupExternalDomainMapping = async (hosts, migrate, loadBalancerIP) => {
     `--project=${projectID}`,
     '--format=json',
   ]));
+  core.info("listing all hosts:" + hosts);
   for (const host of hosts) {
+    core.info("handling " + host);
     // get domain
     const hostZone = host.split(".").slice(-2).join('.');
+    core.info("hostzone is " + hostZone + " for: " + host);
     for (const dnsZone of DNSZones) {
       if (`${hostZone}.` === dnsZone.dnsName) {
         const zone = dnsZone.name;
         // check if host already exists and if ip needs to be updated
         const recordSetIP = await getRecordSetIP(zone, projectID, host);
+        core.info("handling " + host + " recordsetIP set to currently: " + recordSetIP);
         if (!recordSetIP) {
           // create recordset if doesn't exist
+          core.info("creating " + host + " with ip: " + recordSetIP);
           await createUpdateRecordSet(zone, projectID, host, loadBalancerIP, 'create');
         } else {
           if (migrate === 'true' && loadBalancerIP != recordSetIP) {
             // update recordset if migrate true and ip is mismatch
+            core.info("migrating " + host + " to ip: " + recordSetIP);
             await createUpdateRecordSet(zone, projectID, host, loadBalancerIP, 'update');
           } else {
             // if migrate false remove host from host array to avoid certificates creation
