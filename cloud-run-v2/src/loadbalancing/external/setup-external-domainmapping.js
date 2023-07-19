@@ -34,7 +34,7 @@ const setupExternalDomainMapping = async (hosts, migrate, loadBalancerIP) => {
     '--format=json',
   ]));
   core.info("listing all hosts:" + hosts);
-  for (const host of hosts) {
+  for (const host of hosts.split(',')) {
     core.info("handling " + host);
     // get domain
     const hostZone = host.split(".").slice(-2).join('.');
