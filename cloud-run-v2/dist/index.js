@@ -171,7 +171,7 @@ spec:
         readinessProbe:
           httpGet:
             path: ${p}
-            port: ${l!=="grpc"?"8080":"8085"}
+            port: 8080
           initialDelaySeconds: 3
           periodSeconds: 5
           failureThreshold: 10
@@ -187,7 +187,7 @@ spec:
         - name: ${d.name}
           value: ${d.value}`).join("")}
       ${c?`
-      - image: eu.gcr.io/extenda/envoy${l==="grpc"?"grpc":"http"}
+      - image: eu.gcr.io/extenda/envoy:${l==="grpc"?"grpc":"http"}
         ports:
           - containerPort: 8000
             protocol: TCP
