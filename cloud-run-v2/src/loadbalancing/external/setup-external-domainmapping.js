@@ -57,6 +57,7 @@ const setupExternalDomainMapping = async (hosts, migrate, loadBalancerIP) => {
             await createUpdateRecordSet(zone, projectID, host, loadBalancerIP, 'update');
           } else {
             // if migrate false remove host from host array to avoid certificates creation
+            core.info("removing " + host + " from certificate handling due to migrate false");
             var index = hosts.indexOf(host);
             if (index !== -1) {
               hosts.splice(index, 1);
