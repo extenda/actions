@@ -57,7 +57,7 @@ spec:
         `  httpGet:
             path: ${readinessPath}
             port: 8080` : 
-        `  grpc:
+        `  tcpSocket:
             port: 8080`}
           initialDelaySeconds: 3
           periodSeconds: 5
