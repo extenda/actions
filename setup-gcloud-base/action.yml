@@ -18,7 +18,7 @@ inputs:
     required: false
     default: 'false'
   cache:
-    description: Cache GCloud version if set to false
+    description: Is GCloud cached?
     required: false
     default: false
 outputs:

@@ -58,7 +58,7 @@ const setupGcloud = async (serviceAccountKey, gcloudIsCached, version = 'latest'
   const downloadUrl = getDownloadUrl(semver);
 
   let gcloud;
-  if (!gcloudIsCached) {
+  if (gcloudIsCached) {
     gcloud = await loadTool({
       tool: 'gcloud',
       binary: 'google-cloud-sdk',
