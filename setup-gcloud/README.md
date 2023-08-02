@@ -1,4 +1,4 @@
-# setup-gcloud-base
+# setup-gcloud
 
 This is a composite GitHub Action to set up and configure the gcloud CLI and cache it for further use. This action uses a setup-gcloud-base action, see more details [setup-gcloud-base](https://github.com/extenda/actions/tree/master/setup-gcloud-base)
 
