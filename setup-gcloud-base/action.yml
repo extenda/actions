@@ -18,9 +18,9 @@ inputs:
     required: false
     default: 'false'
   cache:
-    description: Cache Gcloud version if set to false
+    description: Cache GCloud version if set to false
     required: false
-    default: true
+    default: false
 outputs:
   project-id:
     description: The default project ID associated with the service account.

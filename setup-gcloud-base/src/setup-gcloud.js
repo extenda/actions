@@ -49,7 +49,7 @@ const configureGcloud = async (serviceAccountKey, exportCredentials) => {
   return projectId;
 };
 
-const setupGcloud = async (serviceAccountKey, cacheGcloud, version = 'latest', exportCredentials = false) => {
+const setupGcloud = async (serviceAccountKey, gcloudIsCached, version = 'latest', exportCredentials = false) => {
   let semver = version;
   if (!semver || semver === 'latest') {
     semver = await getLatestVersion();
@@ -58,7 +58,7 @@ const setupGcloud = async (serviceAccountKey, cacheGcloud, version = 'latest', e
   const downloadUrl = getDownloadUrl(semver);
 
   let gcloud;
-  if (cacheGcloud) {
+  if (!gcloudIsCached) {
     gcloud = await loadTool({
       tool: 'gcloud',
       binary: 'google-cloud-sdk',
