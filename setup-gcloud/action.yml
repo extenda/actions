@@ -19,6 +19,7 @@ inputs:
 outputs:
   project-id:
     description: The default project ID associated with the service account.
+    value: ${{ steps.gcloud.outputs.project-id }}
 
 runs:
   using: composite
