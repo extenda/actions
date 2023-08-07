@@ -39,7 +39,7 @@ runs:
         path: |
           /opt/hostedtoolcache/gcloud/${{ env.gcloud_version }}
 
-    - uses: extenda/actions/setup-gcloud-base@feat/create-composite-action
+    - uses: extenda/actions/setup-gcloud-base@v0
       id: gcloud
       with:
         service-account-key: ${{ inputs.service-account-key }}
