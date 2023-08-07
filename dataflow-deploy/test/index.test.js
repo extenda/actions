@@ -1,12 +1,12 @@
 jest.mock('@actions/core');
 jest.mock('../src/deploy-job');
 jest.mock('../src/drain-job');
-jest.mock('../../setup-gcloud/src/setup-gcloud');
+jest.mock('../../setup-gcloud-base/src/setup-gcloud');
 jest.mock('../../cloud-run/src/cluster-info');
 
 const core = require('@actions/core');
 const action = require('../src/index');
-const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
+const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
 const drainJob = require('../src/drain-job');
 const deployJob = require('../src/deploy-job');
 const { getTribeProject } = require('../../cloud-run/src/cluster-info');

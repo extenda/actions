@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const dataflowBuild = require('./dataflow-build');
 const { run } = require('../../utils');
-const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
+const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });

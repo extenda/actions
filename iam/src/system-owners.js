@@ -3,7 +3,7 @@ const core = require('@actions/core');
 const yaml = require('js-yaml');
 const projectInfo = require('../../cloud-run/src/project-info');
 const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
-const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
+const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
 
 const gcloudAuth = async (serviceAccountKey) => setupGcloud(
   serviceAccountKey,

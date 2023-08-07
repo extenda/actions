@@ -1,0 +1,29 @@
+name: Setup GCloud
+description: Setup the GCloud CLI
+author: Extenda Retail
+inputs:
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication.
+      The account key should be a base64 encoded JSON key stored as a secret.
+    required: true
+  version:
+    description: Optional gcloud version to install. Defaults to 'latest'.
+    required: false
+    default: latest
+  export-default-credentials:
+    description: |
+      Export the path to the credentials as `GOOGLE_APPLICATION_CREDENTIALS` to be used in subsequent steps.
+      Google Cloud CLIs and APIs will automatically use this environment variable to find credentials.
+    required: false
+    default: 'false'
+  cache:
+    description: Is GCloud cached?
+    required: false
+    default: false
+outputs:
+  project-id:
+    description: The default project ID associated with the service account.
+runs:
+  using: node16
+  main: dist/index.js

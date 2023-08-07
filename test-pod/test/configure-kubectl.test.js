@@ -1,9 +1,9 @@
 const mockFs = require('mock-fs');
-const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
+const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
 const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
 
-jest.mock('../../setup-gcloud/src/setup-gcloud');
+jest.mock('../../setup-gcloud-base/src/setup-gcloud');
 jest.mock('../../cloud-run/src/cluster-info');
 jest.mock('../../cloud-run/src/kubectl-auth');
 
