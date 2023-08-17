@@ -111,89 +111,89 @@ jobs:
           echo VERSION=${{ steps.version.outputs.version }}
           echo RELEASE_TAG=${{ steps.version.outputs.release-tag }}
 
-  # acceptance-linux:
-  #   runs-on: ubuntu-latest
-  #   needs:
-  #     - test
-  #     - verify-dist
-  #   steps:
-  #     - uses: actions/checkout@v3
+  acceptance-linux:
+    runs-on: ubuntu-latest
+    needs:
+      - test
+      - verify-dist
+    steps:
+      - uses: actions/checkout@v3
 
-  #     - name: Install Java
-  #       uses: actions/setup-java@v3
-  #       with:
-  #         distribution: adopt
-  #         java-version: 11
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: adopt
+          java-version: 11
 
-  #     - name: Run Maven (no POM)
-  #       uses: ./maven
-  #       with:
-  #         args: --version
-  #       env:
-  #         NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-  #         NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      - name: Run Maven (no POM)
+        uses: ./maven
+        with:
+          args: --version
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-  #     - name: Run Maven CLI
-  #       run: mvn dependency:get -Dartifact=se.extenda.maven:commonpom:2.5.1:pom
-  #       env:
-  #         NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-  #         NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      - name: Run Maven CLI
+        run: mvn dependency:get -Dartifact=se.extenda.maven:commonpom:2.5.1:pom
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-  #     - name: GCP Secret Manager
-  #       uses: ./gcp-secret-manager
-  #       with:
-  #         service-account-key: ${{ secrets.SECRET_AUTH }}
-  #         secrets: |
-  #           TEST_TOKEN: sonarqube-token
+      - name: GCP Secret Manager
+        uses: ./gcp-secret-manager
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          secrets: |
+            TEST_TOKEN: sonarqube-token
 
-  #     - name: Assert GCP secrets
-  #       run: |
-  #         if [ -n "$TEST_TOKEN" ]; then
-  #           echo "Secret successfully set to env"
-  #         else
-  #           echo "Failed to set secret to env"
-  #           exit 1
-  #         fi
+      - name: Assert GCP secrets
+        run: |
+          if [ -n "$TEST_TOKEN" ]; then
+            echo "Secret successfully set to env"
+          else
+            echo "Failed to set secret to env"
+            exit 1
+          fi
 
-  #     - name: Setup Gcloud
-  #       uses: ./setup-gcloud
-  #       id: gcloud
-  #       with:
-  #         service-account-key: ${{ secrets.SECRET_AUTH }}
+      # - name: Setup Gcloud
+      #   uses: ./setup-gcloud
+      #   id: gcloud
+      #   with:
+      #     service-account-key: ${{ secrets.SECRET_AUTH }}
 
-  #     - name: Test Gcloud
-  #       run: |
-  #         gcloud --version
-  #         gsutil --version
-  #         if [ "${{ steps.gcloud.outputs.project-id }}" == "" ]; then
-  #           echo "Failed to set project-id"
-  #           exit 1
-  #         fi
+      # - name: Test Gcloud
+      #   run: |
+      #     gcloud --version
+      #     gsutil --version
+      #     if [ "${{ steps.gcloud.outputs.project-id }}" == "" ]; then
+      #       echo "Failed to set project-id"
+      #       exit 1
+      #     fi
 
-  #     - name: Setup Terraform
-  #       uses: ./setup-terraform
-  #       with:
-  #         terraform-version: 0.11.14
-  #         terragrunt-version: 0.23.3
+      - name: Setup Terraform
+        uses: ./setup-terraform
+        with:
+          terraform-version: 0.11.14
+          terragrunt-version: 0.23.3
 
-  #     - name: Test Terraform
-  #       run: |
-  #         terraform -version
-  #         if [[ "$(terraform -version)" != *"v0.11.14"* ]]; then
-  #           echo "Did not find expected terraform v0.11.14"
-  #           which -a terraform
-  #           exit 1
-  #         fi
-  #         terragrunt -version
+      - name: Test Terraform
+        run: |
+          terraform -version
+          if [[ "$(terraform -version)" != *"v0.11.14"* ]]; then
+            echo "Did not find expected terraform v0.11.14"
+            which -a terraform
+            exit 1
+          fi
+          terragrunt -version
 
-  #     - name: Conventional version
-  #       uses: ./conventional-version
-  #       id: version
+      - name: Conventional version
+        uses: ./conventional-version
+        id: version
 
-  #     - name: Print version
-  #       run: |
-  #         echo VERSION=${{ steps.version.outputs.version }}
-  #         echo RELEASE_TAG=${{ steps.version.outputs.release-tag }}
+      - name: Print version
+        run: |
+          echo VERSION=${{ steps.version.outputs.version }}
+          echo RELEASE_TAG=${{ steps.version.outputs.release-tag }}
 
   release:
     runs-on: ubuntu-latest
@@ -202,7 +202,7 @@ jobs:
       - test
       - verify-dist
       - acceptance-windows
-      # - acceptance-linux
+      - acceptance-linux
     steps:
       - uses: actions/checkout@v3
         with:
