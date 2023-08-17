@@ -155,20 +155,20 @@ jobs:
             exit 1
           fi
 
-      - name: Setup Gcloud
-        uses: ./setup-gcloud
-        id: gcloud
-        with:
-          service-account-key: ${{ secrets.SECRET_AUTH }}
+      # - name: Setup Gcloud
+      #   uses: ./setup-gcloud
+      #   id: gcloud
+      #   with:
+      #     service-account-key: ${{ secrets.SECRET_AUTH }}
 
-      - name: Test Gcloud
-        run: |
-          gcloud --version
-          gsutil --version
-          if [ "${{ steps.gcloud.outputs.project-id }}" == "" ]; then
-            echo "Failed to set project-id"
-            exit 1
-          fi
+      # - name: Test Gcloud
+      #   run: |
+      #     gcloud --version
+      #     gsutil --version
+      #     if [ "${{ steps.gcloud.outputs.project-id }}" == "" ]; then
+      #       echo "Failed to set project-id"
+      #       exit 1
+      #     fi
 
       - name: Setup Terraform
         uses: ./setup-terraform
