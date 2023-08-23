@@ -1,0 +1,324 @@
+{
+  "$id": "cloud-deploy.schema.json",
+  "type": "object",
+  "properties": {
+    "security": {
+      "$ref": "#/$defs/Security"
+    },
+    "environments": {
+      "$ref": "#/$defs/Environments"
+    }
+  },
+  "required": [
+    "security",
+    "environments"
+  ],
+  "oneOf": [
+    {
+      "title": "cloud-run",
+      "required": ["cloud-run"],
+      "properties": {
+        "cloud-run": {
+          "$ref": "#/$defs/CloudRun"
+        }
+      }
+    },
+    {
+      "title": "kubernetes",
+      "required": ["kubernetes"],
+      "properties": {
+        "kubernetes": {
+          "$ref": "#/$defs/Kubernetes"
+        }
+      }
+    }
+  ],
+
+  "$defs": {
+    "CloudRun": {
+      "description": "Managed Cloud Run service",
+      "type": "object",
+      "required": [
+        "service",
+        "resources",
+        "protocol",
+        "scaling"
+      ],
+      "properties": {
+        "service": {
+          "$ref": "#/$defs/ServiceName"
+        },
+        "resources": {
+          "$ref": "#/$defs/Resources"
+        },
+        "protocol": {
+          "$ref": "#/$defs/Protocol"
+        },
+        "scaling": {
+          "description": "Scaling settings for Cloud Run",
+          "type": "object",
+          "required": [
+            "concurrency"
+          ],
+          "properties": {
+            "concurrency": {
+              "description": "Concurrent number of requests that an instance can handle.",
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 1000
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "Kubernetes": {
+      "oneOf": [
+        {
+          "title": "deployment",
+          "description": "Kubernetes deployment",
+          "type": "object",
+          "required": [
+            "deployment"
+          ],
+          "properties": {
+            "deployment": {
+              "$ref": "#/$defs/KubernetesService"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "statefulSet",
+          "description": "Kubernetes StatefulSet",
+          "type": "object",
+          "required": [
+            "statefulset"
+          ],
+          "properties": {
+            "deployment": {
+              "$ref": "#/$defs/KubernetesService"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "KubernetesService": {
+      "description": "A kubernetes service",
+      "required": [
+        "service",
+        "resources",
+        "protocol",
+        "scaling",
+        "volumes"
+      ],
+      "properties": {
+        "service": {
+          "$ref": "#/$defs/ServiceName"
+        },
+        "resources": {
+          "$ref": "#/$defs/Resources"
+        },
+        "protocol": {
+          "$ref": "#/$defs/Protocol"
+        },
+        "scaling": {
+          "description": "Scaling settings for Kubernetes",
+          "type": "object",
+          "required": [
+            "cpu"
+          ],
+          "properties": {
+            "cpu": {
+              "description": "Average CPU percentage utilization for scaling.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "additionalProperties": false
+        },
+        "volumes": {
+          "description": "Volumes to mount",
+          "type": "array",
+          "items": {
+            "description": "A volume mount",
+            "type": "object",
+            "required": [
+              "size",
+              "mount-path"
+            ],
+            "properties": {
+              "disk-type": {
+                "description": "The disk type",
+                "type": "string",
+                "enum": [
+                  "hdd",
+                  "ssd"
+                ],
+                "default": "hdd"
+              },
+              "size": {
+                "description": "The disk size",
+                "type": "string",
+                "pattern": "^[0-9]+(M|G)i"
+              },
+              "mount-path": {
+                "description": "The mount path",
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ServiceName": {
+      "description": "Service name",
+      "type": "string"
+    },
+    "Protocol": {
+      "description": "The type of protocol. Make sure to set http2 if this service is using gRPC or WebSockets",
+      "type": "string",
+      "enum": [
+        "http",
+        "http2"
+      ]
+    },
+    "Resources": {
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "description": "Number of requested CPU cores",
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 8
+        },
+        "memory": {
+          "description": "Amount of memory to request",
+          "type": "string",
+          "pattern": "^[0-9]+(M|G)i"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Security": {
+      "oneOf": [
+        {
+          "title": "none",
+          "description": "Do not use platform security features",
+          "type": "string",
+          "constant": "none"
+        },
+        {
+          "title": "security-settings",
+          "description": "Security settings",
+          "type": "object",
+          "required": [
+            "open-policy-agent"
+          ],
+          "properties": {
+            "open-policy-agent": {
+              "description": "Open Policy Agent settings",
+              "type": "object",
+              "required": [
+                "permission-prefix"
+              ],
+              "properties": {
+                "permission-prefix": {
+                  "description": "Styra permission prefix",
+                  "type": "string",
+                  "pattern": "^[a-z]{3}$"
+                },
+                "resources": {
+                  "$ref": "#/$defs/Resources",
+                  "default": {
+                    "cpu": 0.5,
+                    "memory": "512Mi"
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            "envoy": {
+              "description": "Envoy Proxy settings",
+              "required": [
+                "resources"
+              ],
+              "properties": {
+                "resources": {
+                  "$ref": "#/$defs/Resources"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Environments": {
+      "description": "Deploy environments",
+      "type": "object",
+      "request": [
+        "production",
+        "staging"
+      ],
+      "properties": {
+        "production": {
+          "description": "Production environment",
+          "$ref": "#/$defs/Environment"
+        },
+        "staging": {
+          "description": "Staging environment",
+          "$ref": "#/$defs/Environment"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Environment": {
+      "description": "A deploy environment",
+      "type": "object",
+      "required": [
+        "min-instances"
+      ],
+      "properties": {
+        "min-instances": {
+          "description": "Minimum number of instances",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "max-instances": {
+          "description": "Maximum number of instances",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000,
+          "default": 100
+        },
+        "domain-mappings": {
+          "description": "Service domain mappings",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "env": {
+          "description": "Environment variables and secrets",
+          "type": "object"
+        },
+        "regions": {
+          "description": "A list of regions in case of multi-regional deploy",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
