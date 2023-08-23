@@ -1,5 +1,7 @@
 # kubernetes
 
+**:warning: This action is deprecated and will be removed in v1.**
+
 This is a GitHub Action to deploy a service to Kubernetes.
 
 ## Usage

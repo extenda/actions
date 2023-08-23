@@ -1,5 +1,7 @@
 # Docker Build & Push Action
 
+**:warning: This action is deprecated and will be removed in v1.**
+
 Builds a Docker image and pushes it to the private registry of your choosing.
 
 Forked and modified to fit Extenda GitHub Actions.
