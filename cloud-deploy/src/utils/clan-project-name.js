@@ -1,4 +1,3 @@
-
 /**
  * Remove the random numbers from a clan project. If we start with clan-prod-123
  * this returns clan-prod-404.
