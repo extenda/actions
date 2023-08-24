@@ -132,6 +132,9 @@ environments:
 
 ### Kubernetes StatefulSet
 
+An internal Kubernetes StatefulSet that doesn't use Open Policy Agent. The stateful set has a volume mounted for
+persistent disk shared in the set.
+
 ```yaml
 kubernetes:
   service: my-service
@@ -153,16 +156,11 @@ environments:
   production:
     min-instances: 3
     max-instances: 3
-    domain-mappings:
-      - my-service.retailsvc.com
-      - my-service.retailsvc-test.com
     env: &env
       KEY: value
   staging:
     min-instances: 1
     max-instances: 1
-    domain-mappings:
-      - my-service.retailsvc.dev
     env:
       <<: *env
 ```
