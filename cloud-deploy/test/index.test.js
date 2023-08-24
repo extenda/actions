@@ -15,7 +15,6 @@ const loadCredentials = require('../src/utils/load-credentials');
 jest.mock('../src/utils/load-credentials');
 jest.mock('@actions/core');
 jest.mock('../src/utils/service-definition');
-jest.mock('../src/utils/cloud-run-schema');
 jest.mock('../src/manifests/deploy');
 jest.mock('../src/manifests/build-manifest');
 jest.mock('../../cloud-run/src/project-info');
@@ -25,7 +24,7 @@ jest.mock('../src/loadbalancing/external/create-external-backend');
 jest.mock('../src/loadbalancing/external/create-external-frontend');
 jest.mock('../src/loadbalancing/internal/create-internal-frontend');
 jest.mock('../../utils');
-jest.mock('../../setup-gcloud/src/setup-gcloud');
+jest.mock('../../setup-gcloud-base/src/setup-gcloud');
 
 describe('Action', () => {
   afterEach(() => {
