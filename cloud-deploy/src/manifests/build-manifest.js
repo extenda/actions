@@ -1,10 +1,8 @@
-var fs = require('fs');
+const fs = require('fs');
 const checkSystem = require('./check-system');
 const buildOpaConfig = require('./opa-config');
 
-const manifestTemplate = async (name, image, minInstances, maxInstances, cpuThreshold, cpuRequest, memoryRequest, environment, labels, opa, readiness, readinessPath) => {
-
-  return `---
+const manifestTemplate = async (name, image, minInstances, maxInstances, cpuThreshold, cpuRequest, memoryRequest, environment, labels, opa, readiness, readinessPath) => `---
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -34,7 +32,7 @@ kind: Deployment
 metadata:
   name: ${name}
   namespace: ${name}
-  labels:${labels.map(label => `
+  labels:${labels.map((label) => `
     ${label.name}: ${label.value}`).join('')}
     app: ${name}
 spec:
@@ -53,11 +51,11 @@ spec:
         imagePullPolicy: IfNotPresent
         name: user-container
         readinessProbe:
-        ${readiness !== 'grpc' ? 
-        `  httpGet:
+        ${readiness !== 'grpc'
+    ? `  httpGet:
             path: ${readinessPath}
-            port: 8080` : 
-        `  tcpSocket:
+            port: 8080`
+    : `  tcpSocket:
             port: 8080`}
           initialDelaySeconds: 3
           periodSeconds: 5
@@ -70,7 +68,7 @@ spec:
           requests:
             cpu: ${cpuRequest}
             memory: ${memoryRequest}
-        env:${environment.map(env => `
+        env:${environment.map((env) => `
         - name: ${env.name}
           value: ${env.value}`).join('')}
       ${opa ? `
@@ -110,7 +108,7 @@ spec:
         - name: opa
           configMap:
             name: opa-envoy-config
-      ` : ``}
+      ` : ''}
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -131,21 +129,17 @@ spec:
         target:
           type: Utilization
           averageUtilization: ${cpuThreshold}
-`
-}
+`;
 
-const createSkaffoldManifest = async () => {
-  return `apiVersion: skaffold/v2beta16
+const createSkaffoldManifest = async () => `apiVersion: skaffold/v2beta16
 kind: Config
 deploy:
   kubectl:
     manifests:
       - k8s-*
-`
-}
+`;
 
-const createCloudDeployPipe = async (name, projectID, clanName, env) => {
-  return `apiVersion: deploy.cloud.google.com/v1
+const createCloudDeployPipe = async (name, projectID, clanName, env) => `apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
   name: ${name}
@@ -162,22 +156,20 @@ metadata:
 description: k8s-cluster
 gke:
   cluster: projects/${projectID}/locations/europe-west1/clusters/${clanName}-cluster-${env}
-  `
-}
+  `;
 
 const generateManifest = async (fileName, content) => {
-  fs.writeFile(`${fileName}`, content, function (err) {
+  fs.writeFile(`${fileName}`, content, (err) => {
     if (err) throw err;
   });
-}
+};
 
 const prepareGcloudDeploy = async (name, projectID, clanName, env) => {
   await generateManifest('skaffold.yaml', await createSkaffoldManifest());
   await generateManifest('clouddeploy.yaml', await createCloudDeployPipe(name, projectID, clanName, env));
-}
+};
 
 const buildManifest = async (image, service, projectId, clanName, env, styraToken) => {
-
   const {
     name,
     'permission-prefix': permissionPrefix,
@@ -209,7 +201,7 @@ const buildManifest = async (image, service, projectId, clanName, env, styraToke
   }));
   const labelArray = Object.entries(labels).map(([key, value]) => ({
     name: key,
-    value: value,
+    value,
   }));
   envArray.push({ name: 'SERVICE_NAME', value: name });
   envArray.push({ name: 'SERVICE_PROJECT_ID', value: projectId });
@@ -224,11 +216,11 @@ const buildManifest = async (image, service, projectId, clanName, env, styraToke
       throw new Error(`Styra system not found with the name ${styraSystemName}`);
     } else {
       await generateManifest('k8s-opa-config.yaml', await buildOpaConfig(system.id, styraToken, name, styraUrl));
-    };
+    }
   }
 
-    await generateManifest('k8s-manifest.yaml', await manifestTemplate(name, image, minInstances, maxInstances, 50, cpu, memory, envArray, labelArray, opa, readiness, readinessPath));
-    return readiness;
-}
+  await generateManifest('k8s-manifest.yaml', await manifestTemplate(name, image, minInstances, maxInstances, 50, cpu, memory, envArray, labelArray, opa, readiness, readinessPath));
+  return readiness;
+};
 
 module.exports = buildManifest;

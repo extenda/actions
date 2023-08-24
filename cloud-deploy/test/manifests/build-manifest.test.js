@@ -1,13 +1,12 @@
 const fs = require('fs');
+const yaml = require('js-yaml');
 const buildManifest = require('../../src/manifests/build-manifest');
 const checkSystem = require('../../src/manifests/check-system');
 const buildOpaConfig = require('../../src/manifests/opa-config');
-const yaml = require('js-yaml');
 
 jest.mock('fs');
 jest.mock('../../src/manifests/check-system');
 jest.mock('../../src/manifests/opa-config');
-
 
 describe('buildManifest', () => {
   afterEach(() => {
@@ -55,23 +54,23 @@ describe('buildManifest', () => {
       1,
       'skaffold.yaml',
       expect.stringContaining('apiVersion: skaffold/v2beta16\nkind: Config\ndeploy:\n  kubectl:\n    manifests:\n      - k8s-*\n'),
-      expect.any(Function)
+      expect.any(Function),
     );
 
     expect(mockWriteFile).toHaveBeenNthCalledWith(
       2,
       'clouddeploy.yaml',
       expect.stringContaining(
-        'apiVersion: deploy.cloud.google.com/v1\nkind: DeliveryPipeline\nmetadata:\n  name: example-service\n'
+        'apiVersion: deploy.cloud.google.com/v1\nkind: DeliveryPipeline\nmetadata:\n  name: example-service\n',
       ),
-      expect.any(Function)
+      expect.any(Function),
     );
 
     expect(mockWriteFile).toHaveBeenNthCalledWith(
       3,
       'k8s-manifest.yaml',
       expect.stringContaining('---\napiVersion: v1\nkind: Namespace\nmetadata:\n  name: example-service\n'),
-      expect.any(Function)
+      expect.any(Function),
     );
   });
 
@@ -142,24 +141,23 @@ describe('buildManifest', () => {
       1,
       'skaffold.yaml',
       expect.stringContaining('apiVersion: skaffold/v2beta16\nkind: Config\ndeploy:\n  kubectl:\n    manifests:\n      - k8s-*\n'),
-      expect.any(Function)
+      expect.any(Function),
     );
 
     expect(mockWriteFile).toHaveBeenNthCalledWith(
       2,
       'clouddeploy.yaml',
       expect.stringContaining(
-        'apiVersion: deploy.cloud.google.com/v1\nkind: DeliveryPipeline\nmetadata:\n  name: example-service\n'
+        'apiVersion: deploy.cloud.google.com/v1\nkind: DeliveryPipeline\nmetadata:\n  name: example-service\n',
       ),
-      expect.any(Function)
+      expect.any(Function),
     );
 
     expect(mockWriteFile).toHaveBeenNthCalledWith(
       4,
       'k8s-manifest.yaml',
       expect.stringContaining('---\napiVersion: v1\nkind: Namespace\nmetadata:\n  name: example-service\n'),
-      expect.any(Function)
+      expect.any(Function),
     );
   });
-
 });

@@ -1,4 +1,5 @@
 const axios = require('axios');
+const core = require('@actions/core');
 
 /**
  * @param auth {{key: string, email: string, pass: string, gipTenantId}}
@@ -25,7 +26,7 @@ async function fetchToken({
     tokenCache = result.data.idToken;
     return tokenCache;
   } catch (e) {
-    console.log(e);
+    core.error(e.message);
     const err = e.response
       ? `code - ${e.response.status}, data - ${JSON.stringify(e.response.data)}`
       : e.message;
