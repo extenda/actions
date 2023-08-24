@@ -2,16 +2,10 @@ const fs = require('fs');
 const yaml = require('yaml');
 const core = require('@actions/core');
 const { validate } = require('jsonschema');
+const jsonSchema = require('./cloud-deploy.schema.json');
 
-const loadFile = (serviceFile) => {
-  if (!fs.existsSync(serviceFile)) {
-    throw Error(`Service specification file not found: ${serviceFile}`);
-  }
-  return yaml.parse(fs.readFileSync(serviceFile, 'utf8'));
-};
-
-const validateSchema = (serviceFile, spec, schema) => {
-  const result = validate(spec, schema);
+const validateSchema = (serviceFile, spec) => {
+  const result = validate(spec, jsonSchema);
   if (!result.valid) {
     const message = `${serviceFile} is not valid.\n${result.toString()}`;
     core.error(message);
@@ -19,10 +13,12 @@ const validateSchema = (serviceFile, spec, schema) => {
   }
 };
 
-const loadServiceDefinition = (serviceFile, schema) => {
-  let spec = loadFile(serviceFile);
-
-  validateSchema(serviceFile, spec, schema);
+const loadServiceDefinition = (serviceFile) => {
+  if (!fs.existsSync(serviceFile)) {
+    throw Error(`Service specification file not found: ${serviceFile}`);
+  }
+  const spec = yaml.parse(fs.readFileSync(serviceFile, 'utf8'));
+  validateSchema(serviceFile, spec);
   return spec;
 };
 
