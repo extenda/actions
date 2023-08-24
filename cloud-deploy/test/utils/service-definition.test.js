@@ -18,6 +18,10 @@ cloud-run:
   scaling:
     concurrency: 80
 
+labels:
+  product: test
+  foo: bar
+
 security:
   open-policy-agent:
     permission-prefix: mye
