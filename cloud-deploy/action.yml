@@ -1,10 +1,10 @@
-name: Cloud Run v2
-description: Deploy to Cloud Run and gke autopilot
+name: Cloud Deploy
+description: Deploy to Google Cloud with Cloud Deploy.
 author: Extenda Retail
 inputs:
   service-account-key-pipeline-secrets:
     description: |
-      The service account key which will be used for authentication aginst the pipeline secrets project.
+      The service account key which will be used for authentication against the pipeline secrets project.
       Necessary if OPA is enabled.
     required: false
   service-account-key:
