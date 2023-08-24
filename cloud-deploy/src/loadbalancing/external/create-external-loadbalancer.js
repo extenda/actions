@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
+const projectWithoutNumbers = require('../../utils/clan-project-name');
 
 const create404Bucket = async (projectID, env) => gcloudOutput([
   'mb',
@@ -11,14 +12,14 @@ const create404Bucket = async (projectID, env) => gcloudOutput([
   projectID,
   '-b',
   'on',
-  `gs://${`${projectID.split(`-${env}`)[0]}-${env}`}-404`,
+  `gs://${projectWithoutNumbers(projectID, env)}-404`,
 ], 'gsutil')
   .then(() => gcloudOutput([
     'compute',
     'backend-buckets',
     'create',
-    `${projectID.split(`-${env}`)[0]}-${env}-404`,
-    `--gcs-bucket-name=${`${projectID.split(`-${env}`)[0]}-${env}`}-404`,
+    `${projectWithoutNumbers(projectID, env)}-404`,
+    `--gcs-bucket-name=${projectWithoutNumbers(projectID, env)}-404`,
     `--project=${projectID}`,
   ]))
   .catch(() => core.info('bucket already created!'));
@@ -27,9 +28,9 @@ const createLoadbalancer = async (projectID, env) => gcloudOutput([
   'compute',
   'url-maps',
   'create',
-  `${projectID.split(`-${env}`)[0]}-${env}-lb-external`,
+  `${projectWithoutNumbers(projectID, env)}-lb-external`,
   `--project=${projectID}`,
-  `--default-backend-bucket=${`${projectID.split(`-${env}`)[0]}-${env}`}-404`,
+  `--default-backend-bucket=${projectWithoutNumbers(projectID, env)}-404`,
 ]).catch(() => false);
 
 // Create healthcheck if not exists

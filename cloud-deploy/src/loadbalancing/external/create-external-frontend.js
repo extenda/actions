@@ -2,6 +2,7 @@ const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
 const handleCertificates = require('./handle-certificate');
 const setupExternalDomainMapping = require('./setup-external-domainmapping');
+const projectWithoutNumbers = require('../../utils/clan-project-name');
 
 // Create/fetch static IP
 const createIP = async (projectID) => gcloudOutput([
@@ -74,7 +75,7 @@ const configureExternalLBFrontend = async (projectID, env, hosts, migrate) => {
   core.info('Obtaining ip for loadbalancer');
   const loadBalancerIP = await obtainIP(projectID);
   await setupExternalDomainMapping(hosts, migrate, loadBalancerIP);
-  const loadBalancerName = `${projectID.split(`-${env}`)[0]}-${env}-lb-external`;
+  const loadBalancerName = `${projectWithoutNumbers(projectID, env)}-lb-external`;
 
   core.info('Creating proxies');
   await createSSLPolicy(projectID);

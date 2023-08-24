@@ -1,11 +1,12 @@
 const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
+const { projectWithoutNumbers } = require('../../utils/clan-project-name');
 
 const createDNSzone = async (projectID, env) => gcloudOutput([
   'dns',
   'managed-zones',
   'create',
-  `${projectID.split(`-${env}`)[0]}-${env}`,
+  `${projectWithoutNumbers(projectID, env)}`,
   `--project=${projectID}`,
   '--description=A private internal managed dns zone',
   '--dns-name=internal.retailsvc.com',
@@ -20,7 +21,7 @@ const createRecordSet = async (projectID, env, name, ip) => gcloudOutput([
   'create',
   `${name}.internal.retailsvc.com`,
   `--project=${projectID}`,
-  `--zone=${projectID.split(`-${env}`)[0]}-${env}`,
+  `--zone=${projectWithoutNumbers(projectID, env)}`,
   '--type=A',
   '--ttl=300',
   `--rrdatas=${ip}`,

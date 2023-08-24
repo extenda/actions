@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
 const createInternalLoadbalancer = require('./create-internal-loadbalancer');
+const { projectWithoutNumbers } = require('../../utils/clan-project-name');
 
 // Create backend-service
 const setupBackendService = async (name, projectID, region, serviceType) => gcloudOutput([
@@ -57,7 +58,7 @@ const setupBackendURLMapping = async (host, projectID, name, env, region) => gcl
   'compute',
   'url-maps',
   'add-path-matcher',
-  `${projectID.split(`-${env}`)[0]}-${env}-lb-internal`,
+  `${projectWithoutNumbers(projectID, env)}-lb-internal`,
   `--project=${projectID}`,
   `--default-service=${name}-internal-backend`,
   `--path-matcher-name=${name}-internal-backend`,

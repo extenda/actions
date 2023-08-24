@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
+const { projectWithoutNumbers } = require('../../utils/clan-project-name');
 
 // Create backend-service
 const setupBackendService = async (name, projectID, serviceType) => gcloudOutput([
@@ -57,7 +58,7 @@ const createPathMatcher = async (host, projectID, name, env) => gcloudOutput([
   'compute',
   'url-maps',
   'add-path-matcher',
-  `${projectID.split(`-${env}`)[0]}-${env}-lb-external`,
+  `${projectWithoutNumbers(projectID, env)}-lb-external`,
   `--project=${projectID}`,
   `--default-service=${name}-external-backend`,
   `--path-matcher-name=${name}-external-backend`,
@@ -71,7 +72,7 @@ const setupBackendURLMapping = async (newHosts, projectID, name, env) => {
     'compute',
     'url-maps',
     'describe',
-    `${projectID.split(`-${env}`)[0]}-${env}-lb-external`,
+    `${projectWithoutNumbers(projectID, env)}-lb-external`,
     `--project=${projectID}`,
     '--format=json',
   ]));
@@ -108,7 +109,7 @@ const setupBackendURLMapping = async (newHosts, projectID, name, env) => {
         'compute',
         'url-maps',
         'add-host-rule',
-        `${projectID.split(`-${env}`)[0]}-${env}-lb-external`,
+        `${projectWithoutNumbers(projectID, env)}-lb-external`,
         `--hosts=${newHosts.join(',')}`,
         `--path-matcher-name=${name}-external-backend`,
         `--project=${projectID}`,

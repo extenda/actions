@@ -1,10 +1,11 @@
 const gcloudOutput = require('../../utils/gcloud-output');
+const { projectWithoutNumbers } = require('../../utils/clan-project-name');
 
 const createLoadbalancer = async (projectID, env, backendService) => gcloudOutput([
   'compute',
   'url-maps',
   'create',
-  `${projectID.split(`-${env}`)[0]}-${env}-lb-internal`,
+  `${projectWithoutNumbers(projectID, env)}-lb-internal`,
   `--project=${projectID}`,
   '--region=europe-west1',
   `--default-service=${backendService}`,
