@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const buildManifest = require('./manifests/build-manifest');
 const loadServiceDefinition = require('./utils/service-definition');
-const jsonSchema = require('./utils/cloud-run-schema');
+const jsonSchema = require('./utils/cloud-deploy.schema.json');
 const deploy = require('./manifests/deploy');
 const projectInfo = require('../../cloud-run/src/project-info');
 const createExternalLoadbalancer = require('./loadbalancing/external/create-external-loadbalancer');
@@ -23,12 +23,12 @@ const action = async () => {
 
   failIfNotTrunkBased();
   const projectID = await setupGcloud(serviceAccountKeyCICD);
-  
+
   const {
     project: clanName,
     env,
   } = projectInfo(projectID);
-  
+
   const styraToken = await loadCredentials(serviceAccountKeyPipeline, env);
 
   const service = loadServiceDefinition(serviceFile, jsonSchema);

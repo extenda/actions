@@ -1,5 +1,6 @@
 {
   "$id": "cloud-deploy.schema.json",
+  "title": "CloudDeploy",
   "type": "object",
   "properties": {
     "security": {
@@ -15,7 +16,7 @@
   ],
   "oneOf": [
     {
-      "title": "cloud-run",
+      "title": "CloudRun",
       "required": ["cloud-run"],
       "properties": {
         "cloud-run": {
@@ -24,7 +25,7 @@
       }
     },
     {
-      "title": "kubernetes",
+      "title": "Kubernetes",
       "required": ["kubernetes"],
       "properties": {
         "kubernetes": {
@@ -36,6 +37,7 @@
 
   "$defs": {
     "CloudRun": {
+      "title": "CloudRun",
       "description": "Managed Cloud Run service",
       "type": "object",
       "required": [
@@ -55,6 +57,7 @@
           "$ref": "#/$defs/Protocol"
         },
         "scaling": {
+          "title": "ScalingCloudRun",
           "description": "Scaling settings for Cloud Run",
           "type": "object",
           "required": [
@@ -74,41 +77,12 @@
       "additionalProperties": false
     },
     "Kubernetes": {
-      "oneOf": [
-        {
-          "title": "deployment",
-          "description": "Kubernetes deployment",
-          "type": "object",
-          "required": [
-            "deployment"
-          ],
-          "properties": {
-            "deployment": {
-              "$ref": "#/$defs/KubernetesService"
-            }
-          },
-          "additionalProperties": false
-        },
-        {
-          "title": "statefulSet",
-          "description": "Kubernetes StatefulSet",
-          "type": "object",
-          "required": [
-            "statefulset"
-          ],
-          "properties": {
-            "deployment": {
-              "$ref": "#/$defs/KubernetesService"
-            }
-          },
-          "additionalProperties": false
-        }
-      ]
-    },
-    "KubernetesService": {
+      "title": "Kubernetes",
       "description": "A kubernetes service",
+      "type": "object",
       "required": [
         "service",
+        "type",
         "resources",
         "protocol",
         "scaling"
@@ -117,6 +91,14 @@
         "service": {
           "$ref": "#/$defs/ServiceName"
         },
+        "type": {
+          "description": "The type of service",
+          "type": "string",
+          "enum": [
+            "Deployment",
+            "StatefulSet"
+          ]
+        },
         "resources": {
           "$ref": "#/$defs/Resources"
         },
@@ -124,6 +106,7 @@
           "$ref": "#/$defs/Protocol"
         },
         "scaling": {
+          "title": "ScalingKubernetes",
           "description": "Scaling settings for Kubernetes",
           "type": "object",
           "required": [
@@ -140,9 +123,11 @@
           "additionalProperties": false
         },
         "volumes": {
+          "title": "Volumes",
           "description": "Volumes to mount",
           "type": "array",
           "items": {
+            "title": "Volume",
             "description": "A volume mount",
             "type": "object",
             "required": [
@@ -176,10 +161,12 @@
       "additionalProperties": false
     },
     "ServiceName": {
+      "title": "ServiceName",
       "description": "Service name",
       "type": "string"
     },
     "Protocol": {
+      "title": "Protocol",
       "description": "The type of protocol. Make sure to set http2 if this service is using gRPC or WebSockets",
       "type": "string",
       "enum": [
@@ -188,6 +175,8 @@
       ]
     },
     "Resources": {
+      "title": "Resources",
+      "description": "The requested resources",
       "type": "object",
       "properties": {
         "cpu": {
@@ -205,15 +194,16 @@
       "additionalProperties": false
     },
     "Security": {
+      "title": "Security",
       "oneOf": [
         {
-          "title": "none",
+          "title": "SecurityNone",
           "description": "Do not use platform security features",
           "type": "string",
           "constant": "none"
         },
         {
-          "title": "security-settings",
+          "title": "SecuritySettings",
           "description": "Security settings",
           "type": "object",
           "required": [
@@ -221,6 +211,7 @@
           ],
           "properties": {
             "open-policy-agent": {
+              "title": "OpenPolicyAgent",
               "description": "Open Policy Agent settings",
               "type": "object",
               "required": [
@@ -243,7 +234,9 @@
               "additionalProperties": false
             },
             "envoy": {
+              "title": "Envoy",
               "description": "Envoy Proxy settings",
+              "type": "object",
               "required": [
                 "resources"
               ],
@@ -260,6 +253,7 @@
       ]
     },
     "Environments": {
+      "title": "Environments",
       "description": "Deploy environments",
       "type": "object",
       "request": [
@@ -273,12 +267,23 @@
         },
         "staging": {
           "description": "Staging environment",
-          "$ref": "#/$defs/Environment"
+          "oneOf": [
+            {
+              "title": "StagingNone",
+              "description": "Do not use a staging environment",
+              "type": "string",
+              "constant": "none"
+            },
+            {
+              "$ref": "#/$defs/Environment"
+            }
+          ]
         }
       },
       "additionalProperties": false
     },
     "Environment": {
+      "title": "Environment",
       "description": "A deploy environment",
       "type": "object",
       "required": [
@@ -299,20 +304,27 @@
           "default": 100
         },
         "domain-mappings": {
+          "title": "DomainMappings",
           "description": "Service domain mappings",
           "type": "array",
           "items": {
+            "title": "Domain",
+            "description": "Fully qualified domain name",
             "type": "string"
           }
         },
         "env": {
+          "title": "EnvVars",
           "description": "Environment variables and secrets",
           "type": "object"
         },
         "regions": {
+          "title": "Regions",
           "description": "A list of regions in case of multi-regional deploy",
           "type": "array",
           "items": {
+            "title": "GoogleRegion",
+            "description": "A Google Cloud region, e.g. europe-west1",
             "type": "string"
           }
         }

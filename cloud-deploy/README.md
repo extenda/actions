@@ -11,6 +11,8 @@ It supports three types of deployment targets
 
 See [action.yml](action.yml).
 
+See the [schema documentation](schema_doc.md) for details about the `cloud-deploy.yaml`.
+
 ### Secrets
 
 This action requires a GCP service account key with permission to deploy the cloud run services.
@@ -61,14 +63,14 @@ A Kubernetes deployment with Open Policy Agent and Envoy resources customized.
 
 ```yaml
 kubernetes:
-  deployment:
-    service: my-service
-    resources:
-      cpu: 1
-      memory: 512Mi
-    protocol: http
-    scaling:
-      cpu: 50
+  service: my-service
+  type: deployment
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    cpu: 50
 
 security:
   open-policy-agent:
@@ -105,14 +107,14 @@ An internal Kubernetes gRPC service that doesn't use Open Policy Agent. This ser
 
 ```yaml
 kubernetes:
-  deployment:
-    service: my-service
-    resources:
-      cpu: 1
-      memory: 512Mi
-    protocol: http2
-    scaling:
-      cpu: 50
+  service: my-service
+  type: deployment
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http2
+  scaling:
+    cpu: 50
 
 security: 'none'
 
@@ -132,18 +134,18 @@ environments:
 
 ```yaml
 kubernetes:
-  statefulset:
-    service: my-service
-    resources:
-      cpu: 1
-      memory: 512Mi
-    protocol: http
-    scaling:
-      cpu: 50
-    volume:
-      disk-type: ssd
-      size: 5Gi
-      mount-path: /mnt/shared/data
+  service: my-service
+  type: stateful-set
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    cpu: 50
+  volume:
+    disk-type: ssd
+    size: 5Gi
+    mount-path: /mnt/shared/data
 
 security: 'none'
 

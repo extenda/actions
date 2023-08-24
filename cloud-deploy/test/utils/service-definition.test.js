@@ -1,5 +1,5 @@
 const mockFs = require('mock-fs');
-const loadServiceDefinition = require('../src/service-definition');
+const loadServiceDefinition = require('../../src/utils/service-definition');
 
 describe('Service Definition', () => {
   afterEach(() => {
@@ -26,21 +26,18 @@ environments:
   production:
     min-instances: 1
     domain-mappings:
-      subdomain: my-service
-      domains:
-        - retailsvc.com
-        - retailsvc-test.com
+      - my-service.retailsvc.com
+      - my-service.retailsvc-test.com
     env: &env
       KEY: value
   staging:
     min-instances: 0
     max-instances: 1
     domain-mappings:
-      subdomain: my-service
-      domains:
-        - retailsvc.dev
+      - my-service.retailsvc.dev
     env:
       <<: *env
+      KEY2: value2
       `,
     });
 
@@ -61,10 +58,66 @@ environments:
       environments: {
         production: {
           'min-instances': 1,
-          'domain-mappings': {
-            subdomain: 'my-service',
-            domains: ['retailsvc.com', 'retailsvc-test.com'],
+          'domain-mappings': [
+            'my-service.retailsvc.com',
+            'my-service.retailsvc-test.com',
+          ],
+        },
+        staging: {
+          env: {
+            KEY: 'value',
+            KEY2: 'value2',
           },
+        },
+      },
+    });
+  });
+
+  test('It can parse a Kubernetes deployment', async () => {
+    mockFs({
+      'cloud-deploy.yaml': `
+kubernetes:
+  type: Deployment
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    cpu: 50
+
+security: none
+
+environments:
+  production:
+    min-instances: 1
+    domain-mappings:
+      - my-service.retailsvc.com
+      - my-service.retailsvc-test.com
+    env: &env
+      KEY: value
+  staging: none
+      `,
+    });
+
+    const spec = loadServiceDefinition('cloud-deploy.yaml');
+    expect(spec).toMatchObject({
+      kubernetes: {
+        service: 'my-service',
+        type: 'Deployment',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+      },
+      security: 'none',
+      environments: {
+        production: {
+          'min-instances': 1,
+          'domain-mappings': [
+            'my-service.retailsvc.com',
+            'my-service.retailsvc-test.com',
+          ],
         },
       },
     });
