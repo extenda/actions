@@ -1,6 +1,6 @@
 const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
-const projectWithoutNumbers = require('../../utils/clan-project-name');
+const { projectWithoutNumbers } = require('../../utils/clan-project-name');
 
 const create404Bucket = async (projectID, env) => gcloudOutput([
   'mb',

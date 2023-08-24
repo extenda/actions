@@ -2,7 +2,7 @@ const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
 const handleCertificates = require('./handle-certificate');
 const setupExternalDomainMapping = require('./setup-external-domainmapping');
-const projectWithoutNumbers = require('../../utils/clan-project-name');
+const { projectWithoutNumbers } = require('../../utils/clan-project-name');
 
 // Create/fetch static IP
 const createIP = async (projectID) => gcloudOutput([
