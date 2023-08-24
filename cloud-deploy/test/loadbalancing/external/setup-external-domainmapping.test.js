@@ -1,12 +1,18 @@
-const gcloudOutput = require("../../../src/utils/gcloud-output");
+const gcloudOutput = require('../../../src/utils/gcloud-output');
 const setupExternalDomainMapping = require('../../../src/loadbalancing/external/setup-external-domainmapping');
 
 jest.mock('../../../src/utils/gcloud-output');
 
 describe('setupExternalDomainMapping', () => {
-  const hosts = ['host1.example.com', 'host2.example.com'];
-  const migrate = 'true';
-  const loadBalancerIP = '1.2.3.4';
+  let hosts;
+  let migrate;
+  let loadBalancerIP;
+
+  beforeEach(() => {
+    hosts = ['host1.example.com', 'host2.example.com'];
+    migrate = 'true';
+    loadBalancerIP = '1.2.3.4';
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -28,7 +34,7 @@ describe('setupExternalDomainMapping', () => {
       'dns',
       'managed-zones',
       'list',
-      `--project=extenda`,
+      '--project=extenda',
       '--format=json',
     ]);
     expect(gcloudOutput).toHaveBeenNthCalledWith(3, [
@@ -39,7 +45,7 @@ describe('setupExternalDomainMapping', () => {
       '--type=A',
       '--rrdatas=1.2.3.4',
       '--zone=example-com',
-      `--project=extenda`,
+      '--project=extenda',
       '--ttl=300',
     ]);
   });
@@ -59,7 +65,7 @@ describe('setupExternalDomainMapping', () => {
       'dns',
       'managed-zones',
       'list',
-      `--project=extenda`,
+      '--project=extenda',
       '--format=json',
     ]);
     expect(gcloudOutput).toHaveBeenNthCalledWith(3, [
@@ -70,7 +76,7 @@ describe('setupExternalDomainMapping', () => {
       '--type=A',
       '--rrdatas=4.3.2.1',
       '--zone=example-com',
-      `--project=extenda`,
+      '--project=extenda',
       '--ttl=300',
     ]);
   });
@@ -85,12 +91,11 @@ describe('setupExternalDomainMapping', () => {
     gcloudOutput.mockResolvedValueOnce('1.2.3.4');
     await setupExternalDomainMapping(hosts, false, '4.3.2.1');
 
-    expect(gcloudOutput).toHaveBeenCalledTimes(2);
     expect(gcloudOutput).toHaveBeenNthCalledWith(1, [
       'dns',
       'managed-zones',
       'list',
-      `--project=extenda`,
+      '--project=extenda',
       '--format=json',
     ]);
 
@@ -100,9 +105,32 @@ describe('setupExternalDomainMapping', () => {
       'describe',
       'host1.example.com',
       '--type=A',
-      `--zone=example-com`,
-      `--project=extenda`,
-      `--format=get(rrdatas)`,
+      '--zone=example-com',
+      '--project=extenda',
+      '--format=get(rrdatas)',
+    ]);
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(3, [
+      'dns',
+      'record-sets',
+      'describe',
+      'host2.example.com',
+      '--type=A',
+      '--zone=example-com',
+      '--project=extenda',
+      '--format=get(rrdatas)',
+    ]);
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(4, [
+      'dns',
+      'record-sets',
+      'create',
+      'host2.example.com',
+      '--type=A',
+      '--rrdatas=4.3.2.1',
+      '--zone=example-com',
+      '--project=extenda',
+      '--ttl=300',
     ]);
 
     // Check that the hosts array was modified correctly
@@ -110,9 +138,9 @@ describe('setupExternalDomainMapping', () => {
   });
 
   it('should not migrate when migrate is false and IP matches', async () => {
-    const hosts = ['example.com'];
-    const migrate = 'false';
-    const loadBalancerIP = '1.2.3.4';
+    hosts = ['example.com'];
+    migrate = 'false';
+    loadBalancerIP = '1.2.3.4';
 
     const projectID = 'extenda';
     const DNSZones = [
@@ -138,9 +166,9 @@ describe('setupExternalDomainMapping', () => {
       'describe',
       'example.com',
       '--type=A',
-      `--zone=example-com`,
+      '--zone=example-com',
       `--project=${projectID}`,
-      `--format=get(rrdatas)`,
+      '--format=get(rrdatas)',
     ]);
 
     // Check that the hosts array was modified correctly
