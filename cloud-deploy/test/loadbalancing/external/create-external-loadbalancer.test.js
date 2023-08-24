@@ -32,15 +32,15 @@ describe('createExternalLoadbalancer', () => {
       projectID,
       '-b',
       'on',
-      `gs://${projectID.split("-" + env)[0] + "-" + env}-404`,
+      `gs://${`${projectID.split(`-${env}`)[0]}-${env}`}-404`,
     ], 'gsutil');
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(2, [
       'compute',
       'backend-buckets',
       'create',
-      `${projectID.split("-" + env)[0]}-${env}-404`,
-      `--gcs-bucket-name=${projectID.split("-" + env)[0]}-${env}-404`,
+      `${projectID.split(`-${env}`)[0]}-${env}-404`,
+      `--gcs-bucket-name=${projectID.split(`-${env}`)[0]}-${env}-404`,
       `--project=${projectID}`,
     ]);
 
@@ -48,9 +48,9 @@ describe('createExternalLoadbalancer', () => {
       'compute',
       'url-maps',
       'create',
-      `${projectID.split("-" + env)[0]}-${env}-lb-external`,
+      `${projectID.split(`-${env}`)[0]}-${env}-lb-external`,
       `--project=${projectID}`,
-      `--default-backend-bucket=${projectID.split("-" + env)[0]}-${env}-404`,
+      `--default-backend-bucket=${projectID.split(`-${env}`)[0]}-${env}-404`,
     ]);
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(4, [
@@ -69,7 +69,7 @@ describe('createExternalLoadbalancer', () => {
   it('should not create a bucket or load balancer if they already exist', async () => {
     const projectID = 'my-project-id';
     const env = 'staging';
-    
+
     gcloudOutput.mockRejectedValueOnce();
     gcloudOutput.mockImplementation(() => Promise.resolve());
     gcloudOutput.mockRejectedValueOnce();
@@ -88,16 +88,16 @@ describe('createExternalLoadbalancer', () => {
       projectID,
       '-b',
       'on',
-      `gs://${projectID.split("-" + env)[0] + "-" + env}-404`,
+      `gs://${`${projectID.split(`-${env}`)[0]}-${env}`}-404`,
     ], 'gsutil');
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(2, [
       'compute',
       'url-maps',
       'create',
-      `${projectID.split("-" + env)[0]}-${env}-lb-external`,
+      `${projectID.split(`-${env}`)[0]}-${env}-lb-external`,
       `--project=${projectID}`,
-      `--default-backend-bucket=${projectID.split("-" + env)[0]}-${env}-404`,
+      `--default-backend-bucket=${projectID.split(`-${env}`)[0]}-${env}-404`,
     ]);
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(3, [

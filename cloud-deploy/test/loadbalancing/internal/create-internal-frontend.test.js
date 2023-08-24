@@ -26,7 +26,7 @@ describe('configureInternalFrontend', () => {
       'target-http-proxies',
       'create',
       'http-lb-proxy-internal',
-      `--url-map=${projectID.split('-' + env)[0]}-${env}-lb-internal`,
+      `--url-map=${projectID.split(`-${env}`)[0]}-${env}-lb-internal`,
       '--region=europe-west1',
       `--project=${projectID}`,
     ]);
@@ -58,7 +58,7 @@ describe('configureInternalFrontend', () => {
     const projectID = 'my-project';
     const name = 'my-service';
     const env = 'dev';
-    
+
     await configureInternalFrontend(projectID, name, env);
 
     expect(gcloudOutput).toHaveBeenCalledWith([
@@ -66,7 +66,7 @@ describe('configureInternalFrontend', () => {
       'target-http-proxies',
       'create',
       'http-lb-proxy-internal',
-      `--url-map=${projectID.split('-' + env)[0]}-${env}-lb-internal`,
+      `--url-map=${projectID.split(`-${env}`)[0]}-${env}-lb-internal`,
       '--region=europe-west1',
       `--project=${projectID}`,
     ]);
@@ -76,7 +76,7 @@ describe('configureInternalFrontend', () => {
       'target-http-proxies',
       'update',
       'http-lb-proxy-internal',
-      `--url-map=${projectID.split('-' + env)[0]}-${env}-lb-internal`,
+      `--url-map=${projectID.split(`-${env}`)[0]}-${env}-lb-internal`,
       '--region=europe-west1',
       `--project=${projectID}`,
     ]);

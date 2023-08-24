@@ -3,7 +3,6 @@ const gcloudOutput = require('../../../src/utils/gcloud-output');
 
 jest.mock('../../../src/utils/gcloud-output');
 
-
 describe('createInternalLoadbalancer', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -22,7 +21,7 @@ describe('createInternalLoadbalancer', () => {
       'compute',
       'url-maps',
       'create',
-      `${projectID.split('-' + env)[0]}-${env}-lb-internal`,
+      `${projectID.split(`-${env}`)[0]}-${env}-lb-internal`,
       `--project=${projectID}`,
       '--region=europe-west1',
       `--default-service=${name}-internal-backend`,
@@ -42,7 +41,7 @@ describe('createInternalLoadbalancer', () => {
       'compute',
       'url-maps',
       'create',
-      `${projectID.split('-' + env)[0]}-${env}-lb-internal`,
+      `${projectID.split(`-${env}`)[0]}-${env}-lb-internal`,
       `--project=${projectID}`,
       '--region=europe-west1',
       `--default-service=${name}-internal-backend`,

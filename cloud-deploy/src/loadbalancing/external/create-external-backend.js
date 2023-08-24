@@ -1,4 +1,3 @@
-
 const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
 
@@ -34,11 +33,11 @@ const checkNEG = async (projectID, zone, name) => gcloudOutput([
 const checkNEGs = async (projectID, name) => {
   const zones = ['europe-west1-d', 'europe-west1-c', 'europe-west1-b'];
   const promises = [];
-  zones.forEach((zone) => { 
+  zones.forEach((zone) => {
     promises.push(checkNEG(projectID, zone, name));
   });
   return Promise.resolve(promises);
-}
+};
 
 // Add NEG backend to backend-service
 const addBackend = async (name, projectID, zone) => gcloudOutput([
@@ -58,7 +57,7 @@ const createPathMatcher = async (host, projectID, name, env) => gcloudOutput([
   'compute',
   'url-maps',
   'add-path-matcher',
-  projectID.split("-" + env)[0] + "-" + env + "-lb-external",
+  `${projectID.split(`-${env}`)[0]}-${env}-lb-external`,
   `--project=${projectID}`,
   `--default-service=${name}-external-backend`,
   `--path-matcher-name=${name}-external-backend`,
@@ -67,13 +66,12 @@ const createPathMatcher = async (host, projectID, name, env) => gcloudOutput([
 ]).catch(() => core.info('Url-mapping already exists!'));
 
 const setupBackendURLMapping = async (newHosts, projectID, name, env) => {
-
   let pathMatcherExists = false;
   const urlMapsInfo = JSON.parse(await gcloudOutput([
     'compute',
     'url-maps',
     'describe',
-    `${projectID.split("-" + env)[0]}-${env}-lb-external`,
+    `${projectID.split(`-${env}`)[0]}-${env}-lb-external`,
     `--project=${projectID}`,
     '--format=json',
   ]));
@@ -81,7 +79,7 @@ const setupBackendURLMapping = async (newHosts, projectID, name, env) => {
   // check if path matcher exists
   if (urlMapsInfo.pathMatchers) {
     for (const pathMatcher of urlMapsInfo.pathMatchers) {
-      if (pathMatcher["name"] === `${name}-external-backend`) {
+      if (pathMatcher.name === `${name}-external-backend`) {
         pathMatcherExists = true;
         break;
       }
@@ -97,7 +95,7 @@ const setupBackendURLMapping = async (newHosts, projectID, name, env) => {
         for (const host of hostRule.hosts) {
           for (const newHost of newHosts) {
             if (host === newHost) {
-              var index = newHosts.indexOf(newHost);
+              const index = newHosts.indexOf(newHost);
               newHosts.splice(index, 1);
             }
           }
@@ -106,21 +104,20 @@ const setupBackendURLMapping = async (newHosts, projectID, name, env) => {
     }
     // if new hosts need to be added to the pathmatcher
     if (newHosts.length > 0) {
-      return await gcloudOutput([
+      return gcloudOutput([
         'compute',
         'url-maps',
         'add-host-rule',
-        `${projectID.split("-" + env)[0]}-${env}-lb-external`,
+        `${projectID.split(`-${env}`)[0]}-${env}-lb-external`,
         `--hosts=${newHosts.join(',')}`,
         `--path-matcher-name=${name}-external-backend`,
         `--project=${projectID}`,
       ]);
     }
-    return;
-  } else {
-    // if path matcher doesn't exists create it with the new hosts
-    return createPathMatcher(newHosts, projectID, name, env);
   }
+
+  // if path matcher doesn't exists create it with the new hosts
+  return createPathMatcher(newHosts, projectID, name, env);
 };
 
 const configureExternalDomain = async (projectID, name, env, host, serviceType) => {

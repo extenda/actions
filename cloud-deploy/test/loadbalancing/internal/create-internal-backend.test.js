@@ -32,7 +32,7 @@ describe('configureInternalDomain', () => {
         '--use-serving-port',
         '--check-interval=10s',
         `--project=${projectID}`,
-      ]
+      ],
     );
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(
@@ -51,19 +51,19 @@ describe('configureInternalDomain', () => {
         '--health-checks-region=europe-west1',
         '--load-balancing-scheme=INTERNAL_MANAGED',
         `--project=${projectID}`,
-      ]
+      ],
     );
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(
       3,
       [
-        "compute",
-        "network-endpoint-groups",
-        "describe",
+        'compute',
+        'network-endpoint-groups',
+        'describe',
         `${name}-neg`,
         `--project=${projectID}`,
-        "--zone=europe-west1-d",
-      ]
+        '--zone=europe-west1-d',
+      ],
     );
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(
@@ -79,7 +79,7 @@ describe('configureInternalDomain', () => {
         '--region=europe-west1',
         '--balancing-mode=rate',
         '--max-rate-per-endpoint=1',
-      ]
+      ],
     );
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(
@@ -95,7 +95,7 @@ describe('configureInternalDomain', () => {
         '--region=europe-west1',
         '--balancing-mode=rate',
         '--max-rate-per-endpoint=1',
-      ]
+      ],
     );
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(
@@ -111,7 +111,7 @@ describe('configureInternalDomain', () => {
         '--region=europe-west1',
         '--balancing-mode=rate',
         '--max-rate-per-endpoint=1',
-      ]
+      ],
     );
 
     expect(createInternalLoadbalancer).toHaveBeenCalledWith(projectID, env, name);
@@ -122,13 +122,13 @@ describe('configureInternalDomain', () => {
         'compute',
         'url-maps',
         'add-path-matcher',
-        `${projectID.split('-' + env)[0]}-${env}-lb-internal`,
+        `${projectID.split(`-${env}`)[0]}-${env}-lb-internal`,
         `--project=${projectID}`,
         `--default-service=${name}-internal-backend`,
         `--path-matcher-name=${name}-internal-backend`,
         '--region=europe-west1',
         `--new-hosts=${name}.internal.retailsvc.com`,
-      ]
+      ],
     );
   });
 });

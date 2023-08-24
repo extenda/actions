@@ -1,34 +1,33 @@
 const configureExternalDomain = require('../../../src/loadbalancing/external/create-external-backend');
 const gcloudOutput = require('../../../src/utils/gcloud-output');
+
 jest.mock('@actions/core');
-jest.mock('../../../src/utils/gcloud-output', () => {
-  return jest.fn().mockImplementation(() => Promise.resolve());
-});
+jest.mock('../../../src/utils/gcloud-output', () => jest.fn().mockImplementation(() => Promise.resolve()));
 
 const describeUrlMap = JSON.stringify({
-  "creationTimestamp": "2020-00-00T00:00:00.000-07:00",
-  "defaultService": "https://www.googleapis.com/compute/v1/projects/project-staging/global/backendBuckets/def",
-  "fingerprint": "jfockNs=",
-  "hostRules": [
+  creationTimestamp: '2020-00-00T00:00:00.000-07:00',
+  defaultService: 'https://www.googleapis.com/compute/v1/projects/project-staging/global/backendBuckets/def',
+  fingerprint: 'jfockNs=',
+  hostRules: [
     {
-      "hosts": [
-        "example.org",
-        "test.retailsvc.com"
+      hosts: [
+        'example.org',
+        'test.retailsvc.com',
       ],
-      "pathMatcher": "service-name-external-backend"
-    }
+      pathMatcher: 'service-name-external-backend',
+    },
   ],
-  "pathMatchers": [
+  pathMatchers: [
     {
-      "defaultService": "https://www.googleapis.com/compute/v1/projects/project-staging/global/backendServices/service-name-external-backend",
-      "name": "service-name-external-backend"
-    }
+      defaultService: 'https://www.googleapis.com/compute/v1/projects/project-staging/global/backendServices/service-name-external-backend',
+      name: 'service-name-external-backend',
+    },
   ],
 });
 const describeUrlMapNoPathMatcher = JSON.stringify({
-  "creationTimestamp": "2020-00-00T00:00:00.000-07:00",
-  "defaultService": "https://www.googleapis.com/compute/v1/projects/project-staging/global/backendBuckets/def",
-  "fingerprint": "jfockNs=",
+  creationTimestamp: '2020-00-00T00:00:00.000-07:00',
+  defaultService: 'https://www.googleapis.com/compute/v1/projects/project-staging/global/backendBuckets/def',
+  fingerprint: 'jfockNs=',
 });
 
 describe('configureExternalDomain', () => {
@@ -42,7 +41,6 @@ describe('configureExternalDomain', () => {
   });
 
   it('should setup domain and backend correctly', async () => {
-
     gcloudOutput.mockResolvedValueOnce();
     gcloudOutput.mockResolvedValueOnce();
     gcloudOutput.mockResolvedValueOnce();
@@ -77,7 +75,7 @@ describe('configureExternalDomain', () => {
       'describe',
       expect.any(String),
       `--project=${mockProjectID}`,
-      `--zone=europe-west1-d`,
+      '--zone=europe-west1-d',
     ]));
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(3, expect.arrayContaining([
@@ -86,7 +84,7 @@ describe('configureExternalDomain', () => {
       'describe',
       expect.any(String),
       `--project=${mockProjectID}`,
-      `--zone=europe-west1-c`,
+      '--zone=europe-west1-c',
     ]));
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(4, expect.arrayContaining([
@@ -95,7 +93,7 @@ describe('configureExternalDomain', () => {
       'describe',
       expect.any(String),
       `--project=${mockProjectID}`,
-      `--zone=europe-west1-b`,
+      '--zone=europe-west1-b',
     ]));
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(5, expect.arrayContaining([
@@ -104,7 +102,7 @@ describe('configureExternalDomain', () => {
       'add-backend',
       `${mockServiceName}-external-backend`,
       `--network-endpoint-group=${mockServiceName}-neg`,
-      `--network-endpoint-group-zone=europe-west1-d`,
+      '--network-endpoint-group-zone=europe-west1-d',
       `--project=${mockProjectID}`,
       '--global',
       '--balancing-mode=rate',
@@ -117,7 +115,7 @@ describe('configureExternalDomain', () => {
       'add-backend',
       `${mockServiceName}-external-backend`,
       `--network-endpoint-group=${mockServiceName}-neg`,
-      `--network-endpoint-group-zone=europe-west1-c`,
+      '--network-endpoint-group-zone=europe-west1-c',
       `--project=${mockProjectID}`,
       '--global',
       '--balancing-mode=rate',
@@ -130,7 +128,7 @@ describe('configureExternalDomain', () => {
       'add-backend',
       `${mockServiceName}-external-backend`,
       `--network-endpoint-group=${mockServiceName}-neg`,
-      `--network-endpoint-group-zone=europe-west1-b`,
+      '--network-endpoint-group-zone=europe-west1-b',
       `--project=${mockProjectID}`,
       '--global',
       '--balancing-mode=rate',
@@ -141,26 +139,24 @@ describe('configureExternalDomain', () => {
       'compute',
       'url-maps',
       'describe',
-      `project-staging-lb-external`,
+      'project-staging-lb-external',
       `--project=${mockProjectID}`,
-      '--format=json'
+      '--format=json',
     ]));
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(9, expect.arrayContaining([
       'compute',
       'url-maps',
       'add-host-rule',
-      `project-staging-lb-external`,
+      'project-staging-lb-external',
       '--hosts=example.com',
       '--path-matcher-name=service-name-external-backend',
       `--project=${mockProjectID}`,
     ]));
 
     expect(gcloudOutput).toHaveBeenCalledTimes(9);
-
   });
   it('should setup pathMatcher if no pathmatcher exists', async () => {
-
     gcloudOutput.mockResolvedValueOnce();
     gcloudOutput.mockResolvedValueOnce();
     gcloudOutput.mockResolvedValueOnce();
@@ -176,7 +172,7 @@ describe('configureExternalDomain', () => {
       'compute',
       'url-maps',
       'add-path-matcher',
-      `project-staging-lb-external`,
+      'project-staging-lb-external',
       `--project=${mockProjectID}`,
       `--default-service=${mockServiceName}-external-backend`,
       `--path-matcher-name=${mockServiceName}-external-backend`,
@@ -184,6 +180,5 @@ describe('configureExternalDomain', () => {
       `--new-hosts=${mockHost}`,
     ]));
     expect(gcloudOutput).toHaveBeenCalledTimes(9);
-
   });
 });

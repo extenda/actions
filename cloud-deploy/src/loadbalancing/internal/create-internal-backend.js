@@ -1,4 +1,3 @@
-
 const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
 const createInternalLoadbalancer = require('./create-internal-loadbalancer');
@@ -20,7 +19,6 @@ const setupBackendService = async (name, projectID, region, serviceType) => gclo
   `--project=${projectID}`,
 ]).catch(() => true);
 
-
 // Check if NEG exists
 const checkNEG = async (projectID, zone, name) => gcloudOutput([
   'compute',
@@ -39,7 +37,7 @@ const checkNEGs = async (projectID, name) => {
     promises.push(checkNEG(projectID, zone, name));
   });
   return Promise.resolve(promises);
-}
+};
 
 // Add NEG backend to backend-service
 const addBackend = async (name, projectID, zone) => gcloudOutput([
@@ -50,7 +48,7 @@ const addBackend = async (name, projectID, zone) => gcloudOutput([
   `--network-endpoint-group=${name}-neg`,
   `--network-endpoint-group-zone=${zone}`,
   `--project=${projectID}`,
-  `--region=europe-west1`,
+  '--region=europe-west1',
   '--balancing-mode=rate',
   '--max-rate-per-endpoint=1',
 ]).catch(() => core.info('Backend already added to service!'));
@@ -59,7 +57,7 @@ const setupBackendURLMapping = async (host, projectID, name, env, region) => gcl
   'compute',
   'url-maps',
   'add-path-matcher',
-  projectID.split("-" + env)[0] + "-" + env + "-lb-internal",
+  `${projectID.split(`-${env}`)[0]}-${env}-lb-internal`,
   `--project=${projectID}`,
   `--default-service=${name}-internal-backend`,
   `--path-matcher-name=${name}-internal-backend`,
@@ -85,7 +83,7 @@ const setupHealthCheck = async (projectID, region) => gcloudOutput([
   'health-checks',
   'create',
   'tcp',
-  projectID + "-internal-hc",
+  `${projectID}-internal-hc`,
   `--region=${region}`,
   '--use-serving-port',
   '--check-interval=10s',
@@ -93,8 +91,8 @@ const setupHealthCheck = async (projectID, region) => gcloudOutput([
 ]).catch(() => core.info('Health check already exists!'));
 
 const configureInternalDomain = async (projectID, name, env, serviceType) => {
-  let host = name + ".internal.retailsvc.com";
-  let region = 'europe-west1';
+  const host = `${name}.internal.retailsvc.com`;
+  const region = 'europe-west1';
   await setupHealthCheck(projectID, region);
   await configureBackend(projectID, name, region, serviceType);
   await createInternalLoadbalancer(projectID, env, name);

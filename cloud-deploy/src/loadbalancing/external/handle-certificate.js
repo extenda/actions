@@ -18,7 +18,7 @@ const deleteCertificateFromProxy = async (projectID, certificates) => gcloudOutp
   'compute',
   'target-https-proxies',
   'update',
-  `https-lb-proxy-external`,
+  'https-lb-proxy-external',
   `--ssl-certificates=${certificates.join(',')}`,
   `--project=${projectID}`,
 ]).then(() => core.info('Certificates updated successfully!'));
@@ -38,12 +38,12 @@ const listCertificates = async (clusterProject) => JSON.parse(await gcloudOutput
   'ssl-certificates',
   'list',
   `--project=${clusterProject}`,
-  `--filter=extenda-certs-v`,
+  '--filter=extenda-certs-v',
   '--format=json',
 ]));
 
 const handleCertificates = async (hosts, project) => {
-  let domainName = [...hosts];
+  const domainName = [...hosts];
   let firstCreatedDate = new Date();
   let firstCreatedName = '';
 
@@ -77,7 +77,7 @@ const handleCertificates = async (hosts, project) => {
     for (const domain of certificate.managed.domains) {
       for (const newDomains of domainName) {
         if (domain === newDomains) {
-          var index = domainName.indexOf(newDomains);
+          const index = domainName.indexOf(newDomains);
           if (index !== -1) {
             domainName.splice(index, 1);
           }
@@ -86,7 +86,7 @@ const handleCertificates = async (hosts, project) => {
       }
     }
   }
-  
+
   if (domainName.length === 0) {
     return certificateListNames.join(',');
   }

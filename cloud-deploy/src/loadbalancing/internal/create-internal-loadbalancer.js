@@ -1,19 +1,19 @@
-const gcloudOutput = require("../../utils/gcloud-output");
+const gcloudOutput = require('../../utils/gcloud-output');
 
 const createLoadbalancer = async (projectID, env, backendService) => gcloudOutput([
   'compute',
   'url-maps',
   'create',
-  projectID.split("-" + env)[0] + "-" + env + "-lb-internal",
+  `${projectID.split(`-${env}`)[0]}-${env}-lb-internal`,
   `--project=${projectID}`,
-  `--region=europe-west1`,
+  '--region=europe-west1',
   `--default-service=${backendService}`,
 ]).catch(() => false);
 
 const createInternalLoadbalancer = async (projectID, env, name) => {
-  //TODO: check if loadbalancer exists and return
+  // TODO: check if loadbalancer exists and return
   const backendService = `${name}-internal-backend`;
-  return await createLoadbalancer(projectID, env, backendService);
-}
+  return createLoadbalancer(projectID, env, backendService);
+};
 
 module.exports = createInternalLoadbalancer;
