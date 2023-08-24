@@ -10,7 +10,7 @@ const configureExternalDomain = require('./loadbalancing/external/create-externa
 const configureExternalLBFrontend = require('./loadbalancing/external/create-external-frontend');
 const configureInternalFrontend = require('./loadbalancing/internal/create-internal-frontend');
 const { run, failIfNotTrunkBased } = require('../../utils');
-const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
+const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
 const loadCredentials = require('./utils/load-credentials');
 
 const action = async () => {

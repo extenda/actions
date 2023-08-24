@@ -8,9 +8,9 @@ const configureInternalDomain = require('../src/loadbalancing/internal/create-in
 const configureExternalDomain = require('../src/loadbalancing/external/create-external-backend');
 const configureExternalLBFrontend = require('../src/loadbalancing/external/create-external-frontend');
 const configureInternalFrontend = require('../src/loadbalancing/internal/create-internal-frontend');
-const setupGcloud = require('../../setup-gcloud/src/setup-gcloud');
+const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
 const action = require('../src/index');
-const loadCredentials = require ('../src/utils/load-credentials');
+const loadCredentials = require('../src/utils/load-credentials');
 
 jest.mock('../src/utils/load-credentials');
 jest.mock('@actions/core');
