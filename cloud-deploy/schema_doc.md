@@ -283,7 +283,7 @@ Must be one of:
 | **Type**     | `array of object` |
 | **Required** | No                |
 
-**Description:** Volumes to mount
+**Description:** Volumes to mount. Volumes are only supported with StatefulSet.
 
 |                      | Array restrictions |
 | -------------------- | ------------------ |
@@ -770,4 +770,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-08-24 at 17:37:41 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-08-24 at 19:53:11 +0200

@@ -127,7 +127,7 @@
         },
         "volumes": {
           "title": "Volumes",
-          "description": "Volumes to mount",
+          "description": "Volumes to mount. Volumes are only supported with StatefulSet.",
           "type": "array",
           "items": {
             "title": "Volume",
