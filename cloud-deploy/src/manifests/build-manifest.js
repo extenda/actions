@@ -1,9 +1,9 @@
-var fs = require('fs');
+const fs = require('fs');
 const yaml = require('js-yaml');
 const checkSystem = require('./check-system');
 const buildOpaConfig = require('./opa-config');
 
-const convertToYaml = json => yaml.dump(json);
+const convertToYaml = (json) => yaml.dump(json);
 
 const manifestTemplate = async (
   name,
@@ -24,7 +24,7 @@ const manifestTemplate = async (
     apiVersion: 'v1',
     kind: 'Namespace',
     metadata: {
-      name: name,
+      name,
     },
   };
 
@@ -32,7 +32,7 @@ const manifestTemplate = async (
     apiVersion: 'v1',
     kind: 'Service',
     metadata: {
-      name: name,
+      name,
       namespace: name,
       annotations: {
         'cloud.google.com/neg': `{"exposed_ports":{"80":{"name":"${name}-neg"}}}`,
@@ -61,11 +61,11 @@ const manifestTemplate = async (
     apiVersion: 'apps/v1',
     kind: type,
     metadata: {
-      name: name,
+      name,
       namespace: name,
       labels: {
         app: name,
-        ...Object.fromEntries(labels.map(label => [label.name, label.value])),
+        ...Object.fromEntries(labels.map((label) => [label.name, label.value])),
       },
     },
     spec: {
@@ -85,18 +85,18 @@ const manifestTemplate = async (
           serviceAccountName: 'workload-identity-sa',
           containers: [
             {
-              image: image,
+              image,
               imagePullPolicy: 'IfNotPresent',
               name: 'user-container',
               ...(volumes && type.toLowerCase() === 'statefulset'
                 ? {
-                    volumeMounts: [
-                      {
-                        mountPath: volumes['mount-path'],
-                        name: name,
-                      },
-                    ],
-                  }
+                  volumeMounts: [
+                    {
+                      mountPath: volumes['mount-path'],
+                      name,
+                    },
+                  ],
+                }
                 : {}),
               readinessProbe: {
                 tcpSocket: {
@@ -119,99 +119,99 @@ const manifestTemplate = async (
                   memory: memoryRequest,
                 },
               },
-              env: environment.map(env => ({
+              env: environment.map((env) => ({
                 name: env.name,
                 value: env.value,
               })),
             },
             ...(opa && type === 'Deployment'
               ? [
-                  {
-                    image: `eu.gcr.io/extenda/envoy:${protocol === 'http' ? 'http' : 'grpc'}`,
-                    ports: [
-                      {
-                        containerPort: 8000,
-                        protocol: 'TCP',
-                      },
-                    ],
-                    imagePullPolicy: 'IfNotPresent',
-                    resources: {
-                      requests: {
-                        cpu: '0.5',
-                        memory: '1Gi',
-                      },
+                {
+                  image: `eu.gcr.io/extenda/envoy:${protocol === 'http' ? 'http' : 'grpc'}`,
+                  ports: [
+                    {
+                      containerPort: 8000,
+                      protocol: 'TCP',
                     },
-                    name: 'envoy',
-                  },
-                  {
-                    image: 'openpolicyagent/opa:0.50.2-envoy-rootless',
-                    name: 'opa',
-                    ports: [
-                      {
-                        containerPort: 8181,
-                      },
-                    ],
-                    imagePullPolicy: 'IfNotPresent',
-                    args: ['run', '--server', '--config-file=/config/conf.yaml', '--log-level=error'],
-                    volumeMounts: [
-                      {
-                        name: 'opa',
-                        readOnly: true,
-                        mountPath: '/config',
-                      },
-                    ],
-                    readinessProbe: {
-                      httpGet: {
-                        path: '/health?bundles',
-                        port: 8181,
-                      },
-                      initialDelaySeconds: 10,
-                      periodSeconds: 5,
-                      timeoutSeconds: 5,
-                      failureThreshold: 5,
+                  ],
+                  imagePullPolicy: 'IfNotPresent',
+                  resources: {
+                    requests: {
+                      cpu: '0.5',
+                      memory: '1Gi',
                     },
                   },
-                ]
+                  name: 'envoy',
+                },
+                {
+                  image: 'openpolicyagent/opa:0.50.2-envoy-rootless',
+                  name: 'opa',
+                  ports: [
+                    {
+                      containerPort: 8181,
+                    },
+                  ],
+                  imagePullPolicy: 'IfNotPresent',
+                  args: ['run', '--server', '--config-file=/config/conf.yaml', '--log-level=error'],
+                  volumeMounts: [
+                    {
+                      name: 'opa',
+                      readOnly: true,
+                      mountPath: '/config',
+                    },
+                  ],
+                  readinessProbe: {
+                    httpGet: {
+                      path: '/health?bundles',
+                      port: 8181,
+                    },
+                    initialDelaySeconds: 10,
+                    periodSeconds: 5,
+                    timeoutSeconds: 5,
+                    failureThreshold: 5,
+                  },
+                },
+              ]
               : []),
           ],
           volumes: opa && type === 'Deployment' ? [{ name: 'opa', configMap: { name: 'opa-envoy-config' } }] : [],
           ...(volumes && type.toLowerCase() === 'statefulset'
             ? {
-                volumeClaimTemplates: [
-                  {
-                    metadata: {
-                      name: `${name}`,
-                    },
-                    spec: {
-                      accessModes: ['ReadWriteOnce'],
-                      storageClassName: volumes['disk-type'] === 'hdd' ? 'standard' : 'premium-rwo',
-                      resources: {
-                        requests: {
-                          storage: volumes.size,
-                        },
+              volumeClaimTemplates: [
+                {
+                  metadata: {
+                    name: `${name}`,
+                  },
+                  spec: {
+                    accessModes: ['ReadWriteOnce'],
+                    storageClassName: volumes['disk-type'] === 'hdd' ? 'standard' : 'premium-rwo',
+                    resources: {
+                      requests: {
+                        storage: volumes.size,
                       },
                     },
                   },
-                ],
-              }
+                },
+              ],
+            }
             : {}),
         },
       },
     },
   };
 
-  let hpa = {
+  const hpa = {
     apiVersion: 'autoscaling/v2',
     kind: 'HorizontalPodAutoscaler',
     metadata: {
-      name: name,
+      name,
       namespace: name,
     },
     spec: {
       scaleTargetRef: {
         apiVersion: 'apps/v1',
         kind: 'deployment',
-        name: name,
+        name,
       },
       minReplicas: minInstances,
       maxReplicas: maxInstances,
@@ -237,18 +237,15 @@ const manifestTemplate = async (
   return [namespace, service, deployment, hpa];
 };
 
-const createSkaffoldManifest = async () => {
-  return `apiVersion: skaffold/v2beta16
+const createSkaffoldManifest = async () => `apiVersion: skaffold/v2beta16
 kind: Config
 deploy:
   kubectl:
     manifests:
       - k8s-*
-`
-}
+`;
 
-const createCloudDeployPipe = async (name, projectID, clanName, env) => {
-  return `apiVersion: deploy.cloud.google.com/v1
+const createCloudDeployPipe = async (name, projectID, clanName, env) => `apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
   name: ${name}
@@ -265,22 +262,20 @@ metadata:
 description: k8s-cluster
 gke:
   cluster: projects/${projectID}/locations/europe-west1/clusters/${clanName}-cluster-${env}
-  `
-}
+  `;
 
 const generateManifest = async (fileName, content) => {
-  fs.writeFile(`${fileName}`, content, function (err) {
+  fs.writeFile(`${fileName}`, content, (err) => {
     if (err) throw err;
   });
-}
+};
 
 const prepareGcloudDeploy = async (name, projectID, clanName, env) => {
   await generateManifest('skaffold.yaml', await createSkaffoldManifest());
   await generateManifest('clouddeploy.yaml', await createCloudDeployPipe(name, projectID, clanName, env));
-}
+};
 
 const buildManifest = async (image, deployYaml, projectId, clanName, deployEnv, styraToken) => {
-
   let opa = false;
 
   const {
@@ -301,13 +296,13 @@ const buildManifest = async (image, deployYaml, projectId, clanName, deployEnv, 
 
   const {
     staging,
-    production
-  } = environments
+    production,
+  } = environments;
 
   const {
     'min-instances': minInstances,
     'max-instances': maxInstances,
-    env: environment
+    env: environment,
   } = deployEnv === 'staging' ? staging : production;
 
   const envArray = Object.entries(environment).map(([key, value]) => ({
@@ -317,7 +312,7 @@ const buildManifest = async (image, deployYaml, projectId, clanName, deployEnv, 
 
   const labelArray = Object.entries(labels).map(([key, value]) => ({
     name: key,
-    value: value,
+    value,
   }));
 
   envArray.push({ name: 'SERVICE_NAME', value: name });
@@ -337,7 +332,7 @@ const buildManifest = async (image, deployYaml, projectId, clanName, deployEnv, 
       throw new Error(`Styra system not found with the name ${styraSystemName}`);
     } else {
       await generateManifest('k8s-opa-config.yaml', await buildOpaConfig(system.id, styraToken, name, styraUrl));
-    };
+    }
   }
 
   const manifests = await manifestTemplate(
@@ -356,11 +351,8 @@ const buildManifest = async (image, deployYaml, projectId, clanName, deployEnv, 
     volumes,
   );
 
-
-  const convertedManifests = manifests.map(doc => convertToYaml(doc)).join('---\n');
+  const convertedManifests = manifests.map((doc) => convertToYaml(doc)).join('---\n');
   await generateManifest('k8s-manifest.yaml', convertedManifests);
-
-  return;
-}
+};
 
 module.exports = buildManifest;

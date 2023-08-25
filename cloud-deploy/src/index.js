@@ -40,15 +40,15 @@ const action = async () => {
 
   const {
     staging,
-    production
-  } = environments
+    production,
+  } = environments;
 
   const {
     'domain-mappings': domainMappings,
   } = env === 'staging' ? staging : production;
 
   const serviceName = kubernetes.service;
-  const protocol = kubernetes.protocol;
+  const { protocol } = kubernetes;
 
   // setup manifests (hpa, deploy, negs)
   const version = new Date().getTime();
