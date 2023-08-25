@@ -19,6 +19,10 @@ const manifestTemplate = async (
   opa,
   protocol,
   volumes,
+  envoyCpu,
+  envoyMemory,
+  opaCpu,
+  opaMemory,
 ) => {
   const namespace = {
     apiVersion: 'v1',
@@ -137,8 +141,8 @@ const manifestTemplate = async (
                   imagePullPolicy: 'IfNotPresent',
                   resources: {
                     requests: {
-                      cpu: '0.5',
-                      memory: '1Gi',
+                      cpu: envoyCpu,
+                      memory: envoyMemory,
                     },
                   },
                   name: 'envoy',
@@ -152,6 +156,12 @@ const manifestTemplate = async (
                     },
                   ],
                   imagePullPolicy: 'IfNotPresent',
+                  resources: {
+                    requests: {
+                      cpu: opaCpu,
+                      memory: opaMemory,
+                    },
+                  },
                   args: ['run', '--server', '--config-file=/config/conf.yaml', '--log-level=error'],
                   volumeMounts: [
                     {
@@ -300,6 +310,20 @@ const buildManifest = async (image, deployYaml, projectId, clanName, deployEnv, 
   } = environments;
 
   const {
+    'open-policy-agent': openpolicyagent,
+    envoy,
+  } = security;
+
+  const {
+    resources: opaResources = { cpu: 0.5, memory: '512Mi' },
+    'permission-prefix': permissionPrefix,
+  } = openpolicyagent || {};
+
+  const {
+    resources: envoyResources = { cpu: 0.5, memory: '512Mi' },
+  } = envoy || {};
+
+  const {
     'min-instances': minInstances,
     'max-instances': maxInstances,
     env: environment,
@@ -322,9 +346,8 @@ const buildManifest = async (image, deployYaml, projectId, clanName, deployEnv, 
   envArray.push({ name: 'CLAN_NAME', value: clanName });
 
   await prepareGcloudDeploy(name, projectId, clanName, deployEnv);
-  if (security['open-policy-agent']) {
+  if (permissionPrefix) {
     opa = true;
-    const permissionPrefix = security['open-policy-agent']['permission-prefix'];
     const styraUrl = 'https://extendaretail.svc.styra.com';
     const styraSystemName = `${permissionPrefix}.${name}-${deployEnv}`;
     const system = await checkSystem(styraSystemName, styraToken, styraUrl);
@@ -349,6 +372,10 @@ const buildManifest = async (image, deployYaml, projectId, clanName, deployEnv, 
     opa,
     protocol,
     volumes,
+    envoyResources.cpu,
+    envoyResources.memory,
+    opaResources.cpu,
+    opaResources.memory,
   );
 
   const convertedManifests = manifests.map((doc) => convertToYaml(doc)).join('---\n');

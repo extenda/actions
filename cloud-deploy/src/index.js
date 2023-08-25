@@ -33,8 +33,6 @@ const action = async () => {
   const deployYaml = loadServiceDefinition(serviceFile);
   const {
     kubernetes,
-    'cloud-run': cloudRun,
-    security,
     environments,
   } = deployYaml;
 
