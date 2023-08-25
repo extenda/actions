@@ -9,7 +9,7 @@ const setupBackendService = async (name, projectID, region, serviceType) => gclo
   'backend-services',
   'create',
   `${name}-internal-backend`,
-  `--protocol=${serviceType === 'grpc' ? 'HTTP2' : 'HTTP'}`,
+  `--protocol=${serviceType === 'http2' ? 'HTTP2' : 'HTTP'}`,
   '--port-name=http',
   '--connection-draining-timeout=300s',
   `--health-checks=${projectID}-internal-hc`,
@@ -92,7 +92,7 @@ const setupHealthCheck = async (projectID, region) => gcloudOutput([
 ]).catch(() => core.info('Health check already exists!'));
 
 const configureInternalDomain = async (projectID, name, env, serviceType) => {
-  const host = `${name}.internal.retailsvc.com`;
+  const host = `${name}.internal`;
   const region = 'europe-west1';
   await setupHealthCheck(projectID, region);
   await configureBackend(projectID, name, region, serviceType);

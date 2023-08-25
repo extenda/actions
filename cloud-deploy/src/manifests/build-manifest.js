@@ -1,145 +1,254 @@
-const fs = require('fs');
+var fs = require('fs');
+const yaml = require('js-yaml');
 const checkSystem = require('./check-system');
 const buildOpaConfig = require('./opa-config');
 
-const manifestTemplate = async (name, image, minInstances, maxInstances, cpuThreshold, cpuRequest, memoryRequest, environment, labels, opa, readiness, readinessPath) => `---
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: ${name}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ${name}
-  namespace: ${name}
-  annotations:
-    cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"${name}-neg"}}}'
-  labels:
-    networking.gke.io/service-name: ${name}
-spec:
-  type: NodePort
-  selector:
-    app: ${name}
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: ${opa ? '8000' : '8080'}
-      name: ${readiness === 'grpc' ? 'http2' : 'http'}
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ${name}
-  namespace: ${name}
-  labels:${labels.map((label) => `
-    ${label.name}: ${label.value}`).join('')}
-    app: ${name}
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: ${name}
-  template:
-    metadata:
-      labels:
-        app: ${name}
-    spec:
-      serviceAccountName: workload-identity-sa
-      containers:
-      - image: ${image}
-        imagePullPolicy: IfNotPresent
-        name: user-container
-        readinessProbe:
-        ${readiness !== 'grpc'
-    ? `  httpGet:
-            path: ${readinessPath}
-            port: 8080`
-    : `  tcpSocket:
-            port: 8080`}
-          initialDelaySeconds: 3
-          periodSeconds: 5
-          failureThreshold: 10
-          timeoutSeconds: 3
-        ports:
-        - containerPort: 8080
-          protocol: TCP
-        resources:
-          requests:
-            cpu: ${cpuRequest}
-            memory: ${memoryRequest}
-        env:${environment.map((env) => `
-        - name: ${env.name}
-          value: ${env.value}`).join('')}
-      ${opa ? `
-      - image: eu.gcr.io/extenda/envoy:${readiness === 'grpc' ? 'grpc' : 'http'}
-        ports:
-          - containerPort: 8000
-            protocol: TCP
-        imagePullPolicy: IfNotPresent
-        resources:
-          requests:
-            cpu: "0.5"
-            memory: 1Gi
-        name: envoy
-      - image: openpolicyagent/opa:0.50.2-envoy-rootless
-        name: opa
-        ports:
-          - containerPort: 8181
-        imagePullPolicy: IfNotPresent
-        args:
-          - "run"
-          - "--server"
-          - "--config-file=/config/conf.yaml"
-          - "--log-level=error"
-        volumeMounts:
-        - name: opa
-          readOnly: true
-          mountPath: /config
-        readinessProbe:
-          httpGet:
-            path: /health?bundles
-            port: 8181
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          timeoutSeconds: 5
-          failureThreshold: 5
-      volumes:
-        - name: opa
-          configMap:
-            name: opa-envoy-config
-      ` : ''}
----
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: ${name}
-  namespace: ${name}
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: deployment
-    name: ${name}
-  minReplicas: ${minInstances}
-  maxReplicas: ${maxInstances}
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: ${cpuThreshold}
-`;
+const convertToYaml = json => yaml.dump(json);
 
-const createSkaffoldManifest = async () => `apiVersion: skaffold/v2beta16
+const manifestTemplate = async (
+  name,
+  type,
+  image,
+  minInstances,
+  maxInstances,
+  cpuThreshold,
+  cpuRequest,
+  memoryRequest,
+  environment,
+  labels,
+  opa,
+  protocol,
+  volumes,
+) => {
+  const namespace = {
+    apiVersion: 'v1',
+    kind: 'Namespace',
+    metadata: {
+      name: name,
+    },
+  };
+
+  const service = {
+    apiVersion: 'v1',
+    kind: 'Service',
+    metadata: {
+      name: name,
+      namespace: name,
+      annotations: {
+        'cloud.google.com/neg': `{"exposed_ports":{"80":{"name":"${name}-neg"}}}`,
+      },
+      labels: {
+        'networking.gke.io/service-name': name,
+      },
+    },
+    spec: {
+      type: 'NodePort',
+      selector: {
+        app: name,
+      },
+      ports: [
+        {
+          protocol: 'TCP',
+          port: 80,
+          targetPort: opa ? 8000 : 8080,
+          name: protocol === 'http' ? 'http' : 'http2',
+        },
+      ],
+    },
+  };
+
+  const deployment = {
+    apiVersion: 'apps/v1',
+    kind: type,
+    metadata: {
+      name: name,
+      namespace: name,
+      labels: {
+        app: name,
+        ...Object.fromEntries(labels.map(label => [label.name, label.value])),
+      },
+    },
+    spec: {
+      replicas: minInstances,
+      selector: {
+        matchLabels: {
+          app: name,
+        },
+      },
+      template: {
+        metadata: {
+          labels: {
+            app: name,
+          },
+        },
+        spec: {
+          serviceAccountName: 'workload-identity-sa',
+          containers: [
+            {
+              image: image,
+              imagePullPolicy: 'IfNotPresent',
+              name: 'user-container',
+              ...(volumes && type.toLowerCase() === 'statefulset'
+                ? {
+                    volumeMounts: [
+                      {
+                        mountPath: volumes['mount-path'],
+                        name: name,
+                      },
+                    ],
+                  }
+                : {}),
+              readinessProbe: {
+                tcpSocket: {
+                  port: 8080,
+                },
+                initialDelaySeconds: 3,
+                periodSeconds: 5,
+                failureThreshold: 10,
+                timeoutSeconds: 3,
+              },
+              ports: [
+                {
+                  containerPort: 8080,
+                  protocol: 'TCP',
+                },
+              ],
+              resources: {
+                requests: {
+                  cpu: cpuRequest,
+                  memory: memoryRequest,
+                },
+              },
+              env: environment.map(env => ({
+                name: env.name,
+                value: env.value,
+              })),
+            },
+            ...(opa && type === 'Deployment'
+              ? [
+                  {
+                    image: `eu.gcr.io/extenda/envoy:${protocol === 'http' ? 'http' : 'grpc'}`,
+                    ports: [
+                      {
+                        containerPort: 8000,
+                        protocol: 'TCP',
+                      },
+                    ],
+                    imagePullPolicy: 'IfNotPresent',
+                    resources: {
+                      requests: {
+                        cpu: '0.5',
+                        memory: '1Gi',
+                      },
+                    },
+                    name: 'envoy',
+                  },
+                  {
+                    image: 'openpolicyagent/opa:0.50.2-envoy-rootless',
+                    name: 'opa',
+                    ports: [
+                      {
+                        containerPort: 8181,
+                      },
+                    ],
+                    imagePullPolicy: 'IfNotPresent',
+                    args: ['run', '--server', '--config-file=/config/conf.yaml', '--log-level=error'],
+                    volumeMounts: [
+                      {
+                        name: 'opa',
+                        readOnly: true,
+                        mountPath: '/config',
+                      },
+                    ],
+                    readinessProbe: {
+                      httpGet: {
+                        path: '/health?bundles',
+                        port: 8181,
+                      },
+                      initialDelaySeconds: 10,
+                      periodSeconds: 5,
+                      timeoutSeconds: 5,
+                      failureThreshold: 5,
+                    },
+                  },
+                ]
+              : []),
+          ],
+          volumes: opa && type === 'Deployment' ? [{ name: 'opa', configMap: { name: 'opa-envoy-config' } }] : [],
+          ...(volumes && type.toLowerCase() === 'statefulset'
+            ? {
+                volumeClaimTemplates: [
+                  {
+                    metadata: {
+                      name: `${name}`,
+                    },
+                    spec: {
+                      accessModes: ['ReadWriteOnce'],
+                      storageClassName: volumes['disk-type'] === 'hdd' ? 'standard' : 'premium-rwo',
+                      resources: {
+                        requests: {
+                          storage: volumes.size,
+                        },
+                      },
+                    },
+                  },
+                ],
+              }
+            : {}),
+        },
+      },
+    },
+  };
+
+  let hpa = {
+    apiVersion: 'autoscaling/v2',
+    kind: 'HorizontalPodAutoscaler',
+    metadata: {
+      name: name,
+      namespace: name,
+    },
+    spec: {
+      scaleTargetRef: {
+        apiVersion: 'apps/v1',
+        kind: 'deployment',
+        name: name,
+      },
+      minReplicas: minInstances,
+      maxReplicas: maxInstances,
+      metrics: [
+        {
+          type: 'Resource',
+          resource: {
+            name: 'cpu',
+            target: {
+              type: 'Utilization',
+              averageUtilization: cpuThreshold,
+            },
+          },
+        },
+      ],
+    },
+  };
+
+  if (minInstances === maxInstances) {
+    return [namespace, service, deployment];
+  }
+
+  return [namespace, service, deployment, hpa];
+};
+
+const createSkaffoldManifest = async () => {
+  return `apiVersion: skaffold/v2beta16
 kind: Config
 deploy:
   kubectl:
     manifests:
       - k8s-*
-`;
+`
+}
 
-const createCloudDeployPipe = async (name, projectID, clanName, env) => `apiVersion: deploy.cloud.google.com/v1
+const createCloudDeployPipe = async (name, projectID, clanName, env) => {
+  return `apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
   name: ${name}
@@ -156,71 +265,102 @@ metadata:
 description: k8s-cluster
 gke:
   cluster: projects/${projectID}/locations/europe-west1/clusters/${clanName}-cluster-${env}
-  `;
+  `
+}
 
 const generateManifest = async (fileName, content) => {
-  fs.writeFile(`${fileName}`, content, (err) => {
+  fs.writeFile(`${fileName}`, content, function (err) {
     if (err) throw err;
   });
-};
+}
 
 const prepareGcloudDeploy = async (name, projectID, clanName, env) => {
   await generateManifest('skaffold.yaml', await createSkaffoldManifest());
   await generateManifest('clouddeploy.yaml', await createCloudDeployPipe(name, projectID, clanName, env));
-};
+}
 
-const buildManifest = async (image, service, projectId, clanName, env, styraToken) => {
+const buildManifest = async (image, deployYaml, projectId, clanName, deployEnv, styraToken) => {
+
+  let opa = false;
+
   const {
-    name,
-    'permission-prefix': permissionPrefix,
-    memory,
-    cpu,
-    'max-instances': maxInstances = 50,
-    'min-instances': minInstances = 1,
-    'opa-enabled': opa = false,
-    environment = [],
+    kubernetes,
     labels = [],
-    platform,
-  } = service;
+    security,
+    environments = [],
+    volumes,
+  } = deployYaml;
 
-  const styraUrl = 'https://extendaretail.svc.styra.com';
-  const styraSystemName = `${permissionPrefix}.${name}-${env}`;
+  const {
+    type,
+    service: name,
+    protocol,
+    resources,
+    scaling,
+  } = kubernetes;
 
-  let readiness = 'http';
-  let readinessPath = '/health';
-  if (platform && platform.gke && platform.gke['readiness-type']) {
-    readiness = platform.gke['readiness-type'];
-    if (platform.gke['readiness-path'] && platform.gke['readiness-type'] === 'http') {
-      readinessPath = platform.gke['readiness-path'];
-    }
-  }
+  const {
+    staging,
+    production
+  } = environments
+
+  const {
+    'min-instances': minInstances,
+    'max-instances': maxInstances,
+    env: environment
+  } = deployEnv === 'staging' ? staging : production;
 
   const envArray = Object.entries(environment).map(([key, value]) => ({
     name: key,
     value: value.match(/^[0-9]+$/) == null ? value.replace('*', projectId) : `'${value}'`,
   }));
+
   const labelArray = Object.entries(labels).map(([key, value]) => ({
     name: key,
-    value,
+    value: value,
   }));
+
   envArray.push({ name: 'SERVICE_NAME', value: name });
   envArray.push({ name: 'SERVICE_PROJECT_ID', value: projectId });
-  envArray.push({ name: 'SERVICE_ENVIRONMENT', value: env });
+  envArray.push({ name: 'SERVICE_ENVIRONMENT', value: deployEnv });
   envArray.push({ name: 'SERVICE_CONTAINER_IMAGE', value: image });
   envArray.push({ name: 'CLAN_NAME', value: clanName });
 
-  await prepareGcloudDeploy(name, projectId, clanName, env);
-  if (opa) {
+  await prepareGcloudDeploy(name, projectId, clanName, deployEnv);
+  if (security['open-policy-agent']) {
+    opa = true;
+    const permissionPrefix = security['open-policy-agent']['permission-prefix'];
+    const styraUrl = 'https://extendaretail.svc.styra.com';
+    const styraSystemName = `${permissionPrefix}.${name}-${deployEnv}`;
     const system = await checkSystem(styraSystemName, styraToken, styraUrl);
     if (system.id === '') {
       throw new Error(`Styra system not found with the name ${styraSystemName}`);
     } else {
       await generateManifest('k8s-opa-config.yaml', await buildOpaConfig(system.id, styraToken, name, styraUrl));
-    }
+    };
   }
 
-  await generateManifest('k8s-manifest.yaml', await manifestTemplate(name, image, minInstances, maxInstances, 50, cpu, memory, envArray, labelArray, opa, readiness, readinessPath));
-  return readiness;
-};
+  const manifests = await manifestTemplate(
+    name,
+    type,
+    image,
+    minInstances,
+    maxInstances,
+    scaling.cpu,
+    resources.cpu,
+    resources.memory,
+    envArray,
+    labelArray,
+    opa,
+    protocol,
+    volumes,
+  );
+
+
+  const convertedManifests = manifests.map(doc => convertToYaml(doc)).join('---\n');
+  await generateManifest('k8s-manifest.yaml', convertedManifests);
+
+  return;
+}
 
 module.exports = buildManifest;

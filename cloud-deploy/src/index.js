@@ -1,7 +1,6 @@
 const core = require('@actions/core');
 const buildManifest = require('./manifests/build-manifest');
 const loadServiceDefinition = require('./utils/service-definition');
-const jsonSchema = require('./utils/cloud-deploy.schema.json');
 const deploy = require('./manifests/deploy');
 const projectInfo = require('../../cloud-run/src/project-info');
 const createExternalLoadbalancer = require('./loadbalancing/external/create-external-loadbalancer');
@@ -31,32 +30,39 @@ const action = async () => {
 
   const styraToken = await loadCredentials(serviceAccountKeyPipeline, env);
 
-  const service = loadServiceDefinition(serviceFile, jsonSchema);
+  const deployYaml = loadServiceDefinition(serviceFile);
   const {
-    platform,
-    name,
-  } = service;
+    kubernetes,
+    'cloud-run': cloudRun,
+    security,
+    environments,
+  } = deployYaml;
+
+  const {
+    staging,
+    production
+  } = environments
+
+  const {
+    'domain-mappings': domainMappings,
+  } = env === 'staging' ? staging : production;
+
+  const serviceName = kubernetes.service;
+  const protocol = kubernetes.protocol;
 
   // setup manifests (hpa, deploy, negs)
   const version = new Date().getTime();
-  const serviceType = await buildManifest(image, service, projectID, clanName, env, styraToken);
-  const succesfullDeploy = await deploy(projectID, service.name, version);
+  await buildManifest(image, deployYaml, projectID, clanName, env, styraToken);
+  const succesfullDeploy = await deploy(projectID, serviceName, version);
 
   if (succesfullDeploy) {
-    let host = [];
-    if (env === 'staging') {
-      host = platform.gke['domain-mappings'].staging;
-    } else {
-      host = platform.gke['domain-mappings'].prod;
-    }
-
     await createExternalLoadbalancer(projectID, env);
-    if (host) {
-      await configureExternalLBFrontend(projectID, env, host, migrate);
-      await configureExternalDomain(projectID, name, env, host, serviceType);
+    if (domainMappings) {
+      await configureExternalLBFrontend(projectID, env, domainMappings, migrate);
+      await configureExternalDomain(projectID, serviceName, env, domainMappings, protocol);
     }
-    await configureInternalDomain(projectID, name, env, serviceType);
-    await configureInternalFrontend(projectID, name, env);
+    await configureInternalDomain(projectID, serviceName, env, protocol);
+    await configureInternalFrontend(projectID, serviceName, env);
   } else {
     throw new Error('Deployment failed! Check container logs and status for error!');
   }
