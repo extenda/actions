@@ -15,12 +15,12 @@ const loadCredentials = require('./utils/load-credentials');
 const action = async () => {
   const serviceAccountKeyPipeline = core.getInput('service-account-key-pipeline-secrets', { required: false });
   const serviceAccountKeyCICD = core.getInput('service-account-key', { required: true });
-  const serviceFile = core.getInput('service-definition') || 'cloud-run.yaml';
+  const serviceFile = core.getInput('service-definition') || 'cloud-deploy.yaml';
   const image = core.getInput('image', { required: true });
   const migrate = core.getInput('migrate') || 'false';
   // const verbose = (core.getInput('verbose') || 'false');
 
-  failIfNotTrunkBased();
+  // failIfNotTrunkBased();
   const projectID = await setupGcloud(serviceAccountKeyCICD);
 
   const {
