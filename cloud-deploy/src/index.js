@@ -8,9 +8,9 @@ const configureInternalDomain = require('./loadbalancing/internal/create-interna
 const configureExternalDomain = require('./loadbalancing/external/create-external-backend');
 const configureExternalLBFrontend = require('./loadbalancing/external/create-external-frontend');
 const configureInternalFrontend = require('./loadbalancing/internal/create-internal-frontend');
-const { run, failIfNotTrunkBased } = require('../../utils');
+const { run } = require('../../utils');
 const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
-const loadCredentials = require('./utils/load-credentials');
+const readSecret = require('./utils/load-credentials');
 
 const action = async () => {
   const serviceAccountKeyPipeline = core.getInput('service-account-key-pipeline-secrets', { required: false });
@@ -28,7 +28,8 @@ const action = async () => {
     env,
   } = projectInfo(projectID);
 
-  const styraToken = await loadCredentials(serviceAccountKeyPipeline, env);
+  const styraToken = await readSecret(serviceAccountKeyPipeline, env, 'styra-das-token', 'STYRA_TOKEN');
+  const http2Certificate = await readSecret(serviceAccountKeyPipeline, env, 'envoy-http2-certs', 'HTTPS_CERTIFICATES');
 
   const deployYaml = loadServiceDefinition(serviceFile);
   const {
@@ -50,7 +51,7 @@ const action = async () => {
 
   // setup manifests (hpa, deploy, negs)
   const version = new Date().getTime();
-  await buildManifest(image, deployYaml, projectID, clanName, env, styraToken);
+  await buildManifest(image, deployYaml, projectID, clanName, env, styraToken, http2Certificate);
   const succesfullDeploy = await deploy(projectID, serviceName, version);
 
   if (succesfullDeploy) {

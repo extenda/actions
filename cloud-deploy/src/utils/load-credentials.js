@@ -17,9 +17,9 @@ const getSecret = async (serviceAccountKey, secretName, envVar) => {
   return secret;
 };
 
-const loadCredentials = async (serviceAccountKey, env) => {
-  core.info(`Load credentials for ${env}`);
-  return getSecret(serviceAccountKey, 'styra-das-token', 'STYRA_TOKEN');
+const readSecret = async (serviceAccountKey, env, secretName, envName) => {
+  core.info(`Load secret ${secretName} for ${env}`);
+  return getSecret(serviceAccountKey, secretName, envName);
 };
 
-module.exports = loadCredentials;
+module.exports = readSecret;

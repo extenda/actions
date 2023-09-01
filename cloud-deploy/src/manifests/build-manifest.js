@@ -5,6 +5,41 @@ const buildOpaConfig = require('./opa-config');
 
 const convertToYaml = (json) => yaml.dump(json);
 
+const volumeSetup = (opa, protocol, type) => {
+  const volumes = [];
+  if (opa && type === 'Deployment') {
+    volumes.push({ name: 'opa', configMap: { name: 'opa-envoy-config' } });
+    if (protocol === 'http2') {
+      volumes.push({ name: 'extenda-certs', secret: { secretName: 'envoy-http2-certs' } });
+    }
+  }
+  return volumes;
+};
+
+const securityContainerVolumeMountSetup = (opa, protocol, type) => {
+  const volumeMounts = [];
+  if (opa && type === 'Deployment') {
+    volumeMounts.push({ mountPath: '/config', name: 'opa', readOnly: true });
+    if (protocol === 'http2') {
+      volumeMounts.push({ mountPath: '/etc/extenda/certs', name: 'extenda-certs', readOnly: true });
+    }
+  }
+  return volumeMounts;
+};
+
+const userContainerVolumeMountSetup = (opa, protocol, type, volumes, name) => {
+  const volumeMounts = [];
+  if (volumes && type.toLowerCase() === 'statefulset') {
+    volumeMounts.push({ mountPath: volumes[0]['mount-path'], name });
+  }
+  if (opa && type === 'Deployment') {
+    if (protocol === 'http2') {
+      volumeMounts.push({ mountPath: '/etc/extenda/certs', name: 'extenda-certs', readOnly: true });
+    }
+  }
+  return volumeMounts;
+};
+
 const manifestTemplate = async (
   name,
   type,
@@ -24,6 +59,16 @@ const manifestTemplate = async (
   opaCpu,
   opaMemory,
 ) => {
+  const deploymentVolumes = volumeSetup(opa, protocol, type);
+  const userVolumeMounts = userContainerVolumeMountSetup(opa, protocol, type, volumes, name);
+  const securityVolumeMounts = securityContainerVolumeMountSetup(
+    opa,
+    protocol,
+    type,
+    volumes,
+    name,
+  );
+
   const namespace = {
     apiVersion: 'v1',
     kind: 'Namespace',
@@ -92,16 +137,7 @@ const manifestTemplate = async (
               image,
               imagePullPolicy: 'IfNotPresent',
               name: 'user-container',
-              ...(volumes && type.toLowerCase() === 'statefulset'
-                ? {
-                  volumeMounts: [
-                    {
-                      mountPath: volumes['mount-path'],
-                      name,
-                    },
-                  ],
-                }
-                : {}),
+              volumeMounts: userVolumeMounts,
               readinessProbe: {
                 tcpSocket: {
                   port: 8080,
@@ -131,28 +167,11 @@ const manifestTemplate = async (
             ...(opa && type === 'Deployment'
               ? [
                 {
-                  image: `eu.gcr.io/extenda/envoy:${protocol === 'http' ? 'http' : 'grpc'}`,
+                  image: 'eu.gcr.io/extenda/security:authz',
+                  name: 'security-auth',
                   ports: [
                     {
-                      containerPort: 8000,
-                      protocol: 'TCP',
-                    },
-                  ],
-                  imagePullPolicy: 'IfNotPresent',
-                  resources: {
-                    requests: {
-                      cpu: envoyCpu,
-                      memory: envoyMemory,
-                    },
-                  },
-                  name: 'envoy',
-                },
-                {
-                  image: 'openpolicyagent/opa:0.50.2-envoy-rootless',
-                  name: 'opa',
-                  ports: [
-                    {
-                      containerPort: 8181,
+                      containerPort: 9001,
                     },
                   ],
                   imagePullPolicy: 'IfNotPresent',
@@ -162,20 +181,17 @@ const manifestTemplate = async (
                       memory: opaMemory,
                     },
                   },
-                  args: ['run', '--server', '--config-file=/config/conf.yaml', '--log-level=error'],
-                  volumeMounts: [
-                    {
-                      name: 'opa',
-                      readOnly: true,
-                      mountPath: '/config',
-                    },
-                  ],
+                  env: {
+                    name: 'ENVOY_PROTOCOL',
+                    value: protocol === 'http' ? 'http' : 'http2',
+                  },
+                  volumeMounts: securityVolumeMounts,
                   readinessProbe: {
                     httpGet: {
-                      path: '/health?bundles',
-                      port: 8181,
+                      path: '/health',
+                      port: 9001,
                     },
-                    initialDelaySeconds: 10,
+                    initialDelaySeconds: 5,
                     periodSeconds: 5,
                     timeoutSeconds: 5,
                     failureThreshold: 5,
@@ -184,7 +200,7 @@ const manifestTemplate = async (
               ]
               : []),
           ],
-          volumes: opa && type === 'Deployment' ? [{ name: 'opa', configMap: { name: 'opa-envoy-config' } }] : [],
+          volumes: deploymentVolumes,
           ...(volumes && type.toLowerCase() === 'statefulset'
             ? {
               volumeClaimTemplates: [
@@ -194,10 +210,10 @@ const manifestTemplate = async (
                   },
                   spec: {
                     accessModes: ['ReadWriteOnce'],
-                    storageClassName: volumes['disk-type'] === 'hdd' ? 'standard' : 'premium-rwo',
+                    storageClassName: volumes[0]['disk-type'] === 'hdd' ? 'standard' : 'premium-rwo',
                     resources: {
                       requests: {
-                        storage: volumes.size,
+                        storage: volumes[0].size,
                       },
                     },
                   },
@@ -285,7 +301,15 @@ const prepareGcloudDeploy = async (name, projectID, clanName, env) => {
   await generateManifest('clouddeploy.yaml', await createCloudDeployPipe(name, projectID, clanName, env));
 };
 
-const buildManifest = async (image, deployYaml, projectId, clanName, deployEnv, styraToken) => {
+const buildManifest = async (
+  image,
+  deployYaml,
+  projectId,
+  clanName,
+  deployEnv,
+  styraToken,
+  http2Certificate,
+) => {
   let opa = false;
 
   const {
@@ -326,7 +350,7 @@ const buildManifest = async (image, deployYaml, projectId, clanName, deployEnv, 
   const {
     'min-instances': minInstances,
     'max-instances': maxInstances,
-    env: environment,
+    env: environment = [],
   } = deployEnv === 'staging' ? staging : production;
 
   const envArray = Object.entries(environment).map(([key, value]) => ({
@@ -344,6 +368,8 @@ const buildManifest = async (image, deployYaml, projectId, clanName, deployEnv, 
   envArray.push({ name: 'SERVICE_ENVIRONMENT', value: deployEnv });
   envArray.push({ name: 'SERVICE_CONTAINER_IMAGE', value: image });
   envArray.push({ name: 'CLAN_NAME', value: clanName });
+  envArray.push({ name: 'PORT', value: '8080' });
+  envArray.push({ name: 'K_SERVICE', value: name });
 
   await prepareGcloudDeploy(name, projectId, clanName, deployEnv);
   if (permissionPrefix) {
@@ -380,6 +406,7 @@ const buildManifest = async (image, deployYaml, projectId, clanName, deployEnv, 
 
   const convertedManifests = manifests.map((doc) => convertToYaml(doc)).join('---\n');
   await generateManifest('k8s-manifest.yaml', convertedManifests);
+  await generateManifest('k8s-certificates.yaml', http2Certificate);
 };
 
 module.exports = buildManifest;
