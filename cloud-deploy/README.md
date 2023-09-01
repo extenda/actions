@@ -145,12 +145,12 @@ kubernetes:
   protocol: http
   scaling:
     cpu: 50
-  volume:
-    disk-type: ssd
-    size: 5Gi
-    mount-path: /mnt/shared/data
+  volumes:
+    - disk-type: ssd
+      size: 5Gi
+      mount-path: /mnt/shared/data
 
-security: 'none'
+security: none
 
 environments:
   production:
