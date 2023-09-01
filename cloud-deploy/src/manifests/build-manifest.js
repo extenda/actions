@@ -181,10 +181,10 @@ const manifestTemplate = async (
                       memory: opaMemory,
                     },
                   },
-                  env: {
+                  env: [{
                     name: 'ENVOY_PROTOCOL',
                     value: protocol === 'http' ? 'http' : 'http2',
-                  },
+                  }],
                   volumeMounts: securityVolumeMounts,
                   readinessProbe: {
                     httpGet: {
