@@ -59,6 +59,9 @@
         "protocol": {
           "$ref": "#/$defs/Protocol"
         },
+        "timeout": {
+          "$ref": "#/$defs/RequestTimeout"
+        },
         "scaling": {
           "title": "ScalingCloudRun",
           "description": "Scaling settings for Cloud Run",
@@ -107,6 +110,9 @@
         },
         "protocol": {
           "$ref": "#/$defs/Protocol"
+        },
+        "timeout": {
+          "$ref": "#/$defs/RequestTimeout"
         },
         "scaling": {
           "title": "ScalingKubernetes",
@@ -176,6 +182,14 @@
         "http",
         "http2"
       ]
+    },
+    "RequestTimeout": {
+      "title": "RequestTimeout",
+      "description": "The request timeout in seconds",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3600,
+      "default": 300
     },
     "Resources": {
       "title": "Resources",

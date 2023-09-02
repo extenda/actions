@@ -97,7 +97,8 @@ environments:
 
 ### Kubernetes Deployment as internal service
 
-An internal Kubernetes gRPC service that doesn't use IAM security. This service will only be available on the internal domain.
+An internal Kubernetes gRPC service that doesn't use IAM security. The request timeout has been increased from the
+default 300s to 900s. This service will only be available on the internal domain.
 
 ```yaml
 kubernetes:
@@ -107,6 +108,7 @@ kubernetes:
     cpu: 1
     memory: 512Mi
   protocol: http2
+  timeout: 900
   scaling:
     cpu: 50
 
