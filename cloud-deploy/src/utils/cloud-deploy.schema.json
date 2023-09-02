@@ -206,49 +206,24 @@
           "constant": "none"
         },
         {
-          "title": "SecuritySettings",
-          "description": "Security settings",
+          "title": "IAMSettings",
+          "description": "IAM Security settings",
           "type": "object",
           "required": [
-            "open-policy-agent"
+            "permission-prefix"
           ],
           "properties": {
-            "open-policy-agent": {
-              "title": "OpenPolicyAgent",
-              "description": "Open Policy Agent settings",
-              "type": "object",
-              "required": [
-                "permission-prefix"
-              ],
-              "properties": {
-                "permission-prefix": {
-                  "description": "Styra permission prefix",
-                  "type": "string",
-                  "pattern": "^[a-z]{3}$"
-                },
-                "resources": {
-                  "$ref": "#/$defs/Resources",
-                  "default": {
-                    "cpu": 0.5,
-                    "memory": "512Mi"
-                  }
-                }
-              },
-              "additionalProperties": false
+            "permission-prefix": {
+              "description": "IAM permission prefix",
+              "type": "string",
+              "pattern": "^[a-z]{3}$"
             },
-            "envoy": {
-              "title": "Envoy",
-              "description": "Envoy Proxy settings",
-              "type": "object",
-              "required": [
-                "resources"
-              ],
-              "properties": {
-                "resources": {
-                  "$ref": "#/$defs/Resources"
-                }
-              },
-              "additionalProperties": false
+            "resources": {
+              "$ref": "#/$defs/Resources",
+              "default": {
+                "cpu": 0.5,
+                "memory": "512Mi"
+              }
             }
           },
           "additionalProperties": false

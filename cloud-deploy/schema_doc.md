@@ -28,14 +28,11 @@
   - [3.5. Pattern Property `CloudDeploy > labels > Label`](#labels_pattern1)
 - [4. Property `CloudDeploy > security`](#security)
   - [4.1. Property `CloudDeploy > security > oneOf > SecurityNone`](#security_oneOf_i0)
-  - [4.2. Property `CloudDeploy > security > oneOf > SecuritySettings`](#security_oneOf_i1)
-    - [4.2.1. Property `CloudDeploy > security > oneOf > SecuritySettings > open-policy-agent`](#security_oneOf_i1_open-policy-agent)
-      - [4.2.1.1. Property `CloudDeploy > security > oneOf > SecuritySettings > open-policy-agent > permission-prefix`](#security_oneOf_i1_open-policy-agent_permission-prefix)
-      - [4.2.1.2. Property `CloudDeploy > security > oneOf > SecuritySettings > open-policy-agent > resources`](#security_oneOf_i1_open-policy-agent_resources)
-        - [4.2.1.2.1. Property `CloudDeploy > security > oneOf > SecuritySettings > open-policy-agent > resources > cpu`](#security_oneOf_i1_open-policy-agent_resources_cpu)
-        - [4.2.1.2.2. Property `CloudDeploy > security > oneOf > SecuritySettings > open-policy-agent > resources > memory`](#security_oneOf_i1_open-policy-agent_resources_memory)
-    - [4.2.2. Property `CloudDeploy > security > oneOf > SecuritySettings > envoy`](#security_oneOf_i1_envoy)
-      - [4.2.2.1. Property `CloudDeploy > security > oneOf > SecuritySettings > envoy > resources`](#security_oneOf_i1_envoy_resources)
+  - [4.2. Property `CloudDeploy > security > oneOf > IAMSettings`](#security_oneOf_i1)
+    - [4.2.1. Property `CloudDeploy > security > oneOf > IAMSettings > permission-prefix`](#security_oneOf_i1_permission-prefix)
+    - [4.2.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources`](#security_oneOf_i1_resources)
+      - [4.2.2.1. Property `CloudDeploy > security > oneOf > IAMSettings > resources > cpu`](#security_oneOf_i1_resources_cpu)
+      - [4.2.2.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources > memory`](#security_oneOf_i1_resources_memory)
 - [5. Property `CloudDeploy > environments`](#environments)
   - [5.1. Property `CloudDeploy > environments > production`](#environments_production)
     - [5.1.1. Property `CloudDeploy > environments > production > min-instances`](#environments_production_min-instances)
@@ -94,12 +91,12 @@
 
 **Description:** Managed Cloud Run service
 
-| Property                                      | Pattern | Type             | Deprecated | Definition                                                           | Title/Description                                                                        |
-| --------------------------------------------- | ------- | ---------------- | ---------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| + [service](#oneOf_i0_cloud-run_service )     | No      | string           | No         | In #/$defs/ServiceName                                               | Service name                                                                             |
-| + [resources](#oneOf_i0_cloud-run_resources ) | No      | object           | No         | Same as [resources](#security_oneOf_i1_open-policy-agent_resources ) | The requested resources                                                                  |
-| + [protocol](#oneOf_i0_cloud-run_protocol )   | No      | enum (of string) | No         | In #/$defs/Protocol                                                  | The type of protocol. Make sure to set http2 if this service is using gRPC or WebSockets |
-| + [scaling](#oneOf_i0_cloud-run_scaling )     | No      | object           | No         | -                                                                    | ScalingCloudRun                                                                          |
+| Property                                      | Pattern | Type             | Deprecated | Definition                                         | Title/Description                                                                        |
+| --------------------------------------------- | ------- | ---------------- | ---------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| + [service](#oneOf_i0_cloud-run_service )     | No      | string           | No         | In #/$defs/ServiceName                             | Service name                                                                             |
+| + [resources](#oneOf_i0_cloud-run_resources ) | No      | object           | No         | Same as [resources](#security_oneOf_i1_resources ) | The requested resources                                                                  |
+| + [protocol](#oneOf_i0_cloud-run_protocol )   | No      | enum (of string) | No         | In #/$defs/Protocol                                | The type of protocol. Make sure to set http2 if this service is using gRPC or WebSockets |
+| + [scaling](#oneOf_i0_cloud-run_scaling )     | No      | object           | No         | -                                                  | ScalingCloudRun                                                                          |
 
 #### <a name="oneOf_i0_cloud-run_service"></a>1.1.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > service`
 
@@ -113,12 +110,12 @@
 
 #### <a name="oneOf_i0_cloud-run_resources"></a>1.1.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > resources`
 
-|                           |                                                             |
-| ------------------------- | ----------------------------------------------------------- |
-| **Type**                  | `object`                                                    |
-| **Required**              | Yes                                                         |
-| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.")     |
-| **Same definition as**    | [resources](#security_oneOf_i1_open-policy-agent_resources) |
+|                           |                                                         |
+| ------------------------- | ------------------------------------------------------- |
+| **Type**                  | `object`                                                |
+| **Required**              | Yes                                                     |
+| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
+| **Same definition as**    | [resources](#security_oneOf_i1_resources)               |
 
 **Description:** The requested resources
 
@@ -191,14 +188,14 @@ Must be one of:
 
 **Description:** A kubernetes service
 
-| Property                                       | Pattern | Type             | Deprecated | Definition                                                           | Title/Description                                                                        |
-| ---------------------------------------------- | ------- | ---------------- | ---------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| + [service](#oneOf_i1_kubernetes_service )     | No      | string           | No         | Same as [service](#oneOf_i0_cloud-run_service )                      | Service name                                                                             |
-| + [type](#oneOf_i1_kubernetes_type )           | No      | enum (of string) | No         | -                                                                    | The type of service                                                                      |
-| + [resources](#oneOf_i1_kubernetes_resources ) | No      | object           | No         | Same as [resources](#security_oneOf_i1_open-policy-agent_resources ) | The requested resources                                                                  |
-| + [protocol](#oneOf_i1_kubernetes_protocol )   | No      | enum (of string) | No         | Same as [protocol](#oneOf_i0_cloud-run_protocol )                    | The type of protocol. Make sure to set http2 if this service is using gRPC or WebSockets |
-| + [scaling](#oneOf_i1_kubernetes_scaling )     | No      | object           | No         | -                                                                    | ScalingKubernetes                                                                        |
-| - [volumes](#oneOf_i1_kubernetes_volumes )     | No      | array of object  | No         | -                                                                    | Volumes                                                                                  |
+| Property                                       | Pattern | Type             | Deprecated | Definition                                         | Title/Description                                                                        |
+| ---------------------------------------------- | ------- | ---------------- | ---------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| + [service](#oneOf_i1_kubernetes_service )     | No      | string           | No         | Same as [service](#oneOf_i0_cloud-run_service )    | Service name                                                                             |
+| + [type](#oneOf_i1_kubernetes_type )           | No      | enum (of string) | No         | -                                                  | The type of service                                                                      |
+| + [resources](#oneOf_i1_kubernetes_resources ) | No      | object           | No         | Same as [resources](#security_oneOf_i1_resources ) | The requested resources                                                                  |
+| + [protocol](#oneOf_i1_kubernetes_protocol )   | No      | enum (of string) | No         | Same as [protocol](#oneOf_i0_cloud-run_protocol )  | The type of protocol. Make sure to set http2 if this service is using gRPC or WebSockets |
+| + [scaling](#oneOf_i1_kubernetes_scaling )     | No      | object           | No         | -                                                  | ScalingKubernetes                                                                        |
+| - [volumes](#oneOf_i1_kubernetes_volumes )     | No      | array of object  | No         | -                                                  | Volumes                                                                                  |
 
 #### <a name="oneOf_i1_kubernetes_service"></a>2.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > service`
 
@@ -225,12 +222,12 @@ Must be one of:
 
 #### <a name="oneOf_i1_kubernetes_resources"></a>2.1.3. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > resources`
 
-|                           |                                                             |
-| ------------------------- | ----------------------------------------------------------- |
-| **Type**                  | `object`                                                    |
-| **Required**              | Yes                                                         |
-| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.")     |
-| **Same definition as**    | [resources](#security_oneOf_i1_open-policy-agent_resources) |
+|                           |                                                         |
+| ------------------------- | ------------------------------------------------------- |
+| **Type**                  | `object`                                                |
+| **Required**              | Yes                                                     |
+| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
+| **Same definition as**    | [resources](#security_oneOf_i1_resources)               |
 
 **Description:** The requested resources
 
@@ -438,10 +435,10 @@ must respect the following conditions
 | **Additional properties** | [[Any type: allowed]](# "Additional Properties of any type are allowed.") |
 | **Defined in**            | #/$defs/Security                                                          |
 
-| One of(Option)                         |
-| -------------------------------------- |
-| [SecurityNone](#security_oneOf_i0)     |
-| [SecuritySettings](#security_oneOf_i1) |
+| One of(Option)                     |
+| ---------------------------------- |
+| [SecurityNone](#security_oneOf_i0) |
+| [IAMSettings](#security_oneOf_i1)  |
 
 ### <a name="security_oneOf_i0"></a>4.1. Property `CloudDeploy > security > oneOf > SecurityNone`
 
@@ -454,9 +451,9 @@ must respect the following conditions
 
 **Description:** Do not use platform security features
 
-### <a name="security_oneOf_i1"></a>4.2. Property `CloudDeploy > security > oneOf > SecuritySettings`
+### <a name="security_oneOf_i1"></a>4.2. Property `CloudDeploy > security > oneOf > IAMSettings`
 
-**Title:** SecuritySettings
+**Title:** IAMSettings
 
 |                           |                                                         |
 | ------------------------- | ------------------------------------------------------- |
@@ -464,44 +461,27 @@ must respect the following conditions
 | **Required**              | No                                                      |
 | **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
 
-**Description:** Security settings
+**Description:** IAM Security settings
 
-| Property                                                     | Pattern | Type   | Deprecated | Definition | Title/Description |
-| ------------------------------------------------------------ | ------- | ------ | ---------- | ---------- | ----------------- |
-| + [open-policy-agent](#security_oneOf_i1_open-policy-agent ) | No      | object | No         | -          | OpenPolicyAgent   |
-| - [envoy](#security_oneOf_i1_envoy )                         | No      | object | No         | -          | Envoy             |
+| Property                                                     | Pattern | Type   | Deprecated | Definition           | Title/Description       |
+| ------------------------------------------------------------ | ------- | ------ | ---------- | -------------------- | ----------------------- |
+| + [permission-prefix](#security_oneOf_i1_permission-prefix ) | No      | string | No         | -                    | IAM permission prefix   |
+| - [resources](#security_oneOf_i1_resources )                 | No      | object | No         | In #/$defs/Resources | The requested resources |
 
-#### <a name="security_oneOf_i1_open-policy-agent"></a>4.2.1. Property `CloudDeploy > security > oneOf > SecuritySettings > open-policy-agent`
-
-**Title:** OpenPolicyAgent
-
-|                           |                                                         |
-| ------------------------- | ------------------------------------------------------- |
-| **Type**                  | `object`                                                |
-| **Required**              | Yes                                                     |
-| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
-
-**Description:** Open Policy Agent settings
-
-| Property                                                                       | Pattern | Type   | Deprecated | Definition           | Title/Description       |
-| ------------------------------------------------------------------------------ | ------- | ------ | ---------- | -------------------- | ----------------------- |
-| + [permission-prefix](#security_oneOf_i1_open-policy-agent_permission-prefix ) | No      | string | No         | -                    | Styra permission prefix |
-| - [resources](#security_oneOf_i1_open-policy-agent_resources )                 | No      | object | No         | In #/$defs/Resources | The requested resources |
-
-##### <a name="security_oneOf_i1_open-policy-agent_permission-prefix"></a>4.2.1.1. Property `CloudDeploy > security > oneOf > SecuritySettings > open-policy-agent > permission-prefix`
+#### <a name="security_oneOf_i1_permission-prefix"></a>4.2.1. Property `CloudDeploy > security > oneOf > IAMSettings > permission-prefix`
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | Yes      |
 
-**Description:** Styra permission prefix
+**Description:** IAM permission prefix
 
 | Restrictions                      |                                                                             |
 | --------------------------------- | --------------------------------------------------------------------------- |
 | **Must match regular expression** | ```^[a-z]{3}$``` [Test](https://regex101.com/?regex=%5E%5Ba-z%5D%7B3%7D%24) |
 
-##### <a name="security_oneOf_i1_open-policy-agent_resources"></a>4.2.1.2. Property `CloudDeploy > security > oneOf > SecuritySettings > open-policy-agent > resources`
+#### <a name="security_oneOf_i1_resources"></a>4.2.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources`
 
 |                           |                                                         |
 | ------------------------- | ------------------------------------------------------- |
@@ -513,12 +493,12 @@ must respect the following conditions
 
 **Description:** The requested resources
 
-| Property                                                           | Pattern | Type   | Deprecated | Definition | Title/Description             |
-| ------------------------------------------------------------------ | ------- | ------ | ---------- | ---------- | ----------------------------- |
-| - [cpu](#security_oneOf_i1_open-policy-agent_resources_cpu )       | No      | number | No         | -          | Number of requested CPU cores |
-| - [memory](#security_oneOf_i1_open-policy-agent_resources_memory ) | No      | string | No         | -          | Amount of memory to request   |
+| Property                                         | Pattern | Type   | Deprecated | Definition | Title/Description             |
+| ------------------------------------------------ | ------- | ------ | ---------- | ---------- | ----------------------------- |
+| - [cpu](#security_oneOf_i1_resources_cpu )       | No      | number | No         | -          | Number of requested CPU cores |
+| - [memory](#security_oneOf_i1_resources_memory ) | No      | string | No         | -          | Amount of memory to request   |
 
-##### <a name="security_oneOf_i1_open-policy-agent_resources_cpu"></a>4.2.1.2.1. Property `CloudDeploy > security > oneOf > SecuritySettings > open-policy-agent > resources > cpu`
+##### <a name="security_oneOf_i1_resources_cpu"></a>4.2.2.1. Property `CloudDeploy > security > oneOf > IAMSettings > resources > cpu`
 
 |              |          |
 | ------------ | -------- |
@@ -532,7 +512,7 @@ must respect the following conditions
 | **Minimum**  | &ge; 0.5 |
 | **Maximum**  | &le; 8   |
 
-##### <a name="security_oneOf_i1_open-policy-agent_resources_memory"></a>4.2.1.2.2. Property `CloudDeploy > security > oneOf > SecuritySettings > open-policy-agent > resources > memory`
+##### <a name="security_oneOf_i1_resources_memory"></a>4.2.2.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources > memory`
 
 |              |          |
 | ------------ | -------- |
@@ -544,33 +524,6 @@ must respect the following conditions
 | Restrictions                      |                                                                                      |
 | --------------------------------- | ------------------------------------------------------------------------------------ |
 | **Must match regular expression** | ```^[0-9]+(M\|G)i``` [Test](https://regex101.com/?regex=%5E%5B0-9%5D%2B%28M%7CG%29i) |
-
-#### <a name="security_oneOf_i1_envoy"></a>4.2.2. Property `CloudDeploy > security > oneOf > SecuritySettings > envoy`
-
-**Title:** Envoy
-
-|                           |                                                         |
-| ------------------------- | ------------------------------------------------------- |
-| **Type**                  | `object`                                                |
-| **Required**              | No                                                      |
-| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
-
-**Description:** Envoy Proxy settings
-
-| Property                                           | Pattern | Type   | Deprecated | Definition                                                           | Title/Description       |
-| -------------------------------------------------- | ------- | ------ | ---------- | -------------------------------------------------------------------- | ----------------------- |
-| + [resources](#security_oneOf_i1_envoy_resources ) | No      | object | No         | Same as [resources](#security_oneOf_i1_open-policy-agent_resources ) | The requested resources |
-
-##### <a name="security_oneOf_i1_envoy_resources"></a>4.2.2.1. Property `CloudDeploy > security > oneOf > SecuritySettings > envoy > resources`
-
-|                           |                                                             |
-| ------------------------- | ----------------------------------------------------------- |
-| **Type**                  | `object`                                                    |
-| **Required**              | Yes                                                         |
-| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.")     |
-| **Same definition as**    | [resources](#security_oneOf_i1_open-policy-agent_resources) |
-
-**Description:** The requested resources
 
 ## <a name="environments"></a>5. Property `CloudDeploy > environments`
 
@@ -770,4 +723,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-08-24 at 19:53:11 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-09-02 at 21:12:13 +0200

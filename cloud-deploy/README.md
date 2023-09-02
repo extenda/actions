@@ -24,7 +24,7 @@ The action will read a `cloud-deploy.yaml` file for its configuration.
 
 ### Managed Cloud Run
 
-Managed Cloud Run service with Open Policy Agent (OPA) for security. OPA and its Envoy proxy will use default resources.
+Managed Cloud Run service with Hii Retail IAM security. The security sidecar will use default resources.
 
 ```yaml
 cloud-run:
@@ -37,8 +37,7 @@ cloud-run:
     concurrency: 80
 
 security:
-  open-policy-agent:
-    permission-prefix: mye
+  permission-prefix: mye
 
 environments:
   production:
@@ -59,7 +58,7 @@ environments:
 
 ### Kubernetes deployment
 
-A Kubernetes deployment with Open Policy Agent and Envoy resources customized.
+A Kubernetes deployment with IAM security resources customized.
 
 ```yaml
 kubernetes:
@@ -73,15 +72,10 @@ kubernetes:
     cpu: 50
 
 security:
-  open-policy-agent:
-    permission-prefix: mye
-    resources:
-      cpu: 0.5
-      memory: 512Mi
-  envoy:
-    resources:
-      cpu: 0.5
-      memory: 512Mi
+  permission-prefix: mye
+  resources:
+    cpu: 1
+    memory: 1Gi
 
 environments:
   production:
@@ -103,7 +97,7 @@ environments:
 
 ### Kubernetes Deployment as internal service
 
-An internal Kubernetes gRPC service that doesn't use Open Policy Agent. This service will only be available on the internal domain.
+An internal Kubernetes gRPC service that doesn't use IAM security. This service will only be available on the internal domain.
 
 ```yaml
 kubernetes:

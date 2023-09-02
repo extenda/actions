@@ -54,8 +54,6 @@ const manifestTemplate = async (
   opa,
   protocol,
   volumes,
-  envoyCpu,
-  envoyMemory,
   opaCpu,
   opaMemory,
 ) => {
@@ -334,18 +332,9 @@ const buildManifest = async (
   } = environments;
 
   const {
-    'open-policy-agent': openpolicyagent,
-    envoy,
-  } = security;
-
-  const {
-    resources: opaResources = { cpu: 0.5, memory: '512Mi' },
     'permission-prefix': permissionPrefix,
-  } = openpolicyagent || {};
-
-  const {
-    resources: envoyResources = { cpu: 0.5, memory: '512Mi' },
-  } = envoy || {};
+    resources: opaResources = { cpu: 0.5, memory: '512Mi' },
+  } = (security === 'none' ? {} : security || {});
 
   const {
     'min-instances': minInstances,
@@ -398,8 +387,6 @@ const buildManifest = async (
     opa,
     protocol,
     volumes,
-    envoyResources.cpu,
-    envoyResources.memory,
     opaResources.cpu,
     opaResources.memory,
   );

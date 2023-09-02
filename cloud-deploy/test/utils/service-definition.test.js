@@ -23,8 +23,7 @@ labels:
   foo: bar
 
 security:
-  open-policy-agent:
-    permission-prefix: mye
+  permission-prefix: mye
 
 environments:
   production:
@@ -55,9 +54,7 @@ environments:
         },
       },
       security: {
-        'open-policy-agent': {
-          'permission-prefix': 'mye',
-        },
+        'permission-prefix': 'mye',
       },
       environments: {
         production: {
