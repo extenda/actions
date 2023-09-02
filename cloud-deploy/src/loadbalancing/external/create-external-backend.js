@@ -8,7 +8,7 @@ const setupBackendService = async (name, projectID, serviceType) => gcloudOutput
   'backend-services',
   'create',
   `${name}-external-backend`,
-  `--protocol=${serviceType === 'grpc' ? 'HTTP2' : 'HTTP'}`,
+  `--protocol=${serviceType === 'http2' ? 'HTTP2' : 'HTTP'}`,
   '--port-name=http',
   '--connection-draining-timeout=300s',
   `--health-checks=${projectID}-external-hc`,
