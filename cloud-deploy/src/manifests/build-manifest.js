@@ -307,6 +307,8 @@ const buildManifest = async (
   deployEnv,
   styraToken,
   http2Certificate,
+  internalCert,
+  internalCertKey,
 ) => {
   let opa = false;
 
@@ -394,6 +396,8 @@ const buildManifest = async (
   const convertedManifests = manifests.map((doc) => convertToYaml(doc)).join('---\n');
   await generateManifest('k8s-manifest.yaml', convertedManifests);
   await generateManifest('k8s-certificates.yaml', http2Certificate);
+  await generateManifest('cert.cert', internalCert);
+  await generateManifest('key.key', internalCertKey);
 };
 
 module.exports = buildManifest;

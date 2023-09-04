@@ -34,6 +34,8 @@ const action = async () => {
 
   const styraToken = await readSecret(serviceAccountKeyPipeline, env, 'styra-das-token', 'STYRA_TOKEN');
   const http2Certificate = await readSecret(serviceAccountKeyPipeline, env, 'envoy-http2-certs', 'HTTPS_CERTIFICATES');
+  const internalHttpsCertificateKey = await readSecret(serviceAccountKeyPipeline, env, 'internal-https-certs-key', 'INTERNAL_HTTPS_CERTIFICATES_KEY');
+  const internalHttpsCertificateCrt = await readSecret(serviceAccountKeyPipeline, env, 'internal-https-certs-crt', 'INTERNAL_HTTPS_CERTIFICATES_CRT');
 
   const deployYaml = loadServiceDefinition(serviceFile);
   const {
@@ -58,7 +60,17 @@ const action = async () => {
 
   // setup manifests (hpa, deploy, negs)
   const version = new Date().getTime();
-  await buildManifest(image, deployYaml, projectID, clanName, env, styraToken, http2Certificate);
+  await buildManifest(
+    image,
+    deployYaml,
+    projectID,
+    clanName,
+    env,
+    styraToken,
+    http2Certificate,
+    internalHttpsCertificateCrt,
+    internalHttpsCertificateKey,
+  );
   const succesfullDeploy = await deploy(projectID, serviceName, version);
 
   if (succesfullDeploy) {
@@ -68,7 +80,7 @@ const action = async () => {
       await configureExternalDomain(projectID, serviceName, env, domainMappings, protocol, timeout);
     }
     await configureInternalDomain(projectID, serviceName, env, protocol, timeout);
-    await configureInternalFrontend(projectID, serviceName, env);
+    await configureInternalFrontend(projectID, serviceName, env, protocol);
   } else {
     throw new Error('Deployment failed! Check container logs and status for error!');
   }

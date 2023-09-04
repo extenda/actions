@@ -28,18 +28,18 @@ const createRecordSet = async (projectID, env, name, ip) => gcloudOutput([
   '--quiet',
 ]).catch(() => core.info('managed dns zone already exists'));
 
-const obtainInternalIp = async (projectId) => gcloudOutput([
+const obtainInternalIp = async (projectId, protcol) => gcloudOutput([
   'compute',
   'forwarding-rules',
   'list',
   `--project=${projectId}`,
-  '--filter=name=(\'http-proxy-internal\')',
+  `--filter=name=('http${protcol === 'http2' ? 's' : ''}-proxy-internal')`,
   '--format=get(IPAddress)',
 ]);
 
-const setupInternalDomainMapping = async (projectID, env, name) => {
+const setupInternalDomainMapping = async (projectID, env, name, protocol) => {
   await createDNSzone(projectID, env);
-  const ip = await obtainInternalIp(projectID);
+  const ip = await obtainInternalIp(projectID, protocol);
   await createRecordSet(projectID, env, name, ip);
 };
 
