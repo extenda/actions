@@ -97,11 +97,11 @@ const setupHealthCheck = async (projectID, region) => gcloudOutput([
   `--project=${projectID}`,
 ]).catch(() => core.info('Health check already exists!'));
 
-const configureInternalDomain = async (projectID, name, env, serviceType) => {
+const configureInternalDomain = async (projectID, name, env, serviceType, connectionTimeout) => {
   const host = `${name}.internal`;
   const region = 'europe-west1';
   await setupHealthCheck(projectID, region);
-  await configureBackend(projectID, name, region, serviceType);
+  await configureBackend(projectID, name, region, serviceType, connectionTimeout);
   await createInternalLoadbalancer(projectID, env, name);
   core.info('Setup url-mapping');
   return setupBackendURLMapping(host, projectID, name, env, region);
