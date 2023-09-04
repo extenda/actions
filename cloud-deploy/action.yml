@@ -2,11 +2,10 @@ name: Cloud Deploy
 description: Deploy to Google Cloud with Cloud Deploy.
 author: Extenda Retail
 inputs:
-  service-account-key-pipeline-secrets:
+  secrets-account-key:
     description: |
-      The service account key which will be used for authentication against the pipeline secrets project.
-      Necessary if OPA is enabled.
-    required: false
+      The service account key which will be used to access CI/CD pipeline secrets.
+    required: true
   service-account-key:
     description: |
       The service account key which will be used for authentication against the clan project.
@@ -19,10 +18,13 @@ inputs:
   image:
     description: The Docker image to deploy to Cloud Run.
     required: true
-  migrate:
-    description: Migrate the dns mappings to the new loadbalancer
+  update-dns:
+    description: |
+      Set how DNS should be updated. Use `if-missing` to only create DNS if an
+      entry does not exist. Use `always` to update the DNS entry if is missing or
+      if the existing entry does not match the load balancer IP for the service.
     required: false
-    default: 'false'
+    default: if-missing
 runs:
   using: node16
   main: dist/index.js

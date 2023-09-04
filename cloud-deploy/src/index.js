@@ -13,11 +13,15 @@ const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
 const readSecret = require('./utils/load-credentials');
 
 const action = async () => {
-  const serviceAccountKeyPipeline = core.getInput('service-account-key-pipeline-secrets', { required: false });
+  const serviceAccountKeyPipeline = core.getInput('secrets-account-key', { required: true });
   const serviceAccountKeyCICD = core.getInput('service-account-key', { required: true });
   const serviceFile = core.getInput('service-definition') || 'cloud-deploy.yaml';
   const image = core.getInput('image', { required: true });
-  const migrate = core.getInput('migrate') || 'false';
+  const updateDns = core.getInput('update-dns');
+
+  // Only migrate DNS if explicitly set to always.
+  const migrate = updateDns === 'always';
+
   // const verbose = (core.getInput('verbose') || 'false');
 
   // failIfNotTrunkBased();
