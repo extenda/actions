@@ -3,7 +3,12 @@ const gcloudOutput = require('../../utils/gcloud-output');
 const { projectWithoutNumbers } = require('../../utils/clan-project-name');
 
 // Create backend-service
-const setupBackendService = async (name, projectID, serviceType) => gcloudOutput([
+const setupBackendService = async (
+  name,
+  projectID,
+  serviceType,
+  connectionTimeout,
+) => gcloudOutput([
   'compute',
   'backend-services',
   'create',
@@ -12,7 +17,7 @@ const setupBackendService = async (name, projectID, serviceType) => gcloudOutput
   '--port-name=http',
   '--connection-draining-timeout=300s',
   `--health-checks=${projectID}-external-hc`,
-  '--timeout=300s',
+  `--timeout=${connectionTimeout}s`,
   '--global',
   '--enable-logging',
   '--logging-sample-rate=1',
@@ -121,9 +126,16 @@ const setupBackendURLMapping = async (newHosts, projectID, name, env) => {
   return createPathMatcher(newHosts, projectID, name, env);
 };
 
-const configureExternalDomain = async (projectID, name, env, host, serviceType) => {
+const configureExternalDomain = async (
+  projectID,
+  name,
+  env,
+  host,
+  serviceType,
+  connectionTimeout,
+) => {
   core.info('Creating backend service');
-  await setupBackendService(name, projectID, serviceType);
+  await setupBackendService(name, projectID, serviceType, connectionTimeout);
 
   core.info('Adding backend NEG to backend service');
   await checkNEGs(projectID, name)

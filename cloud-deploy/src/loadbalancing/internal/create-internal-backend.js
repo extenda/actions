@@ -4,7 +4,13 @@ const createInternalLoadbalancer = require('./create-internal-loadbalancer');
 const { projectWithoutNumbers } = require('../../utils/clan-project-name');
 
 // Create backend-service
-const setupBackendService = async (name, projectID, region, serviceType) => gcloudOutput([
+const setupBackendService = async (
+  name,
+  projectID,
+  region,
+  serviceType,
+  connectionTimeout,
+) => gcloudOutput([
   'compute',
   'backend-services',
   'create',
@@ -13,7 +19,7 @@ const setupBackendService = async (name, projectID, region, serviceType) => gclo
   '--port-name=http',
   '--connection-draining-timeout=300s',
   `--health-checks=${projectID}-internal-hc`,
-  '--timeout=300s',
+  `--timeout=${connectionTimeout}s`,
   `--region=${region}`,
   '--health-checks-region=europe-west1',
   '--load-balancing-scheme=INTERNAL_MANAGED',
@@ -66,9 +72,9 @@ const setupBackendURLMapping = async (host, projectID, name, env, region) => gcl
   `--new-hosts=${host}`,
 ]).catch(() => core.info('Url-mapping already exists!'));
 
-const configureBackend = async (projectID, name, region, serviceType) => {
+const configureBackend = async (projectID, name, region, serviceType, connectionTimeout) => {
   core.info('Creating internal backend service');
-  await setupBackendService(name, projectID, region, serviceType);
+  await setupBackendService(name, projectID, region, serviceType, connectionTimeout);
 
   core.info('Adding backend NEG to internal backend service');
   await checkNEGs(projectID, name)

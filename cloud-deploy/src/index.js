@@ -38,6 +38,12 @@ const action = async () => {
   } = deployYaml;
 
   const {
+    timeout = 300,
+    service: serviceName,
+    protocol,
+  } = kubernetes;
+
+  const {
     staging,
     production,
   } = environments;
@@ -45,9 +51,6 @@ const action = async () => {
   const {
     'domain-mappings': domainMappings,
   } = env === 'staging' ? staging : production;
-
-  const serviceName = kubernetes.service;
-  const { protocol } = kubernetes;
 
   // setup manifests (hpa, deploy, negs)
   const version = new Date().getTime();
@@ -58,9 +61,9 @@ const action = async () => {
     await createExternalLoadbalancer(projectID, env);
     if (domainMappings) {
       await configureExternalLBFrontend(projectID, env, domainMappings, migrate);
-      await configureExternalDomain(projectID, serviceName, env, domainMappings, protocol);
+      await configureExternalDomain(projectID, serviceName, env, domainMappings, protocol, timeout);
     }
-    await configureInternalDomain(projectID, serviceName, env, protocol);
+    await configureInternalDomain(projectID, serviceName, env, protocol, timeout);
     await configureInternalFrontend(projectID, serviceName, env);
   } else {
     throw new Error('Deployment failed! Check container logs and status for error!');
