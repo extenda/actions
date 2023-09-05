@@ -1,10 +1,8 @@
 const core = require('@actions/core');
 const gcloudOutput = require('../utils/gcloud-output');
+const { retryUntil } = require('../utils/retry-until');
 
 const EIGHT_MINUTES = 480000;
-const timer = (ms) => new Promise((res) => {
-  setTimeout(res, ms);
-});
 
 const deployRelease = async (projectID, name, version) => gcloudOutput([
   'deploy',
@@ -40,20 +38,16 @@ const runGcloudDeploy = async (projectID, name, version) => {
   await deployRelease(projectID, name, version);
 
   core.info(`Waiting for deployment "${name}" to become active...`);
-  const sleepMs = 10000;
-  const timeoutMs = EIGHT_MINUTES;
-  const t0 = Date.now();
-  let status = '';
-  /* eslint-disable no-await-in-loop */
-  do {
-    if (Date.now() - t0 > timeoutMs) {
-      throw new Error('Timed out waiting for deployment to become ready!');
-    }
-    await timer(sleepMs);
-    status = await getDeployState(projectID, name, version);
-    core.info(`Deploy status is: ${status}`);
-  } while (status !== 'SUCCEEDED' && status !== 'FAILED');
-  /* eslint-enable no-await-in-loop */
+
+  const status = await retryUntil(
+    () => getDeployState(projectID, name, version),
+    (value) => {
+      core.info(`Deploy status is: ${value}`);
+      // Stop polling if status is terminal.
+      return value === 'SUCCEEDED' || value === 'FAILED';
+    },
+    EIGHT_MINUTES,
+  );
   return status === 'SUCCEEDED';
 };
 
