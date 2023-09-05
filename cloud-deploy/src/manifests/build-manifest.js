@@ -63,8 +63,6 @@ const manifestTemplate = async (
     opa,
     protocol,
     type,
-    volumes,
-    name,
   );
 
   const namespace = {

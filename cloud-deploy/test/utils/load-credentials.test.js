@@ -1,37 +1,43 @@
-const secrets = require('../../../gcp-secret-manager/src/secrets');
+const core = require('@actions/core');
+const { loadSecret } = require('../../../gcp-secret-manager/src/secrets');
+const { checkEnv } = require('../../../utils');
+const readSecret = require('../../src/utils/load-credentials');
 
+jest.mock('@actions/core');
 jest.mock('../../../gcp-secret-manager/src/secrets');
+jest.mock('../../../utils');
 
-const loadCredentials = require('../../src/utils/load-credentials');
-
-const orgEnv = process.env;
-
-describe('iam Credentials', () => {
-  beforeEach(() => {
-    process.env = { ...orgEnv };
-    delete process.env.API_EMAIL;
-    delete process.env.API_PASSWORD;
-    delete process.env.API_KEY;
-    delete process.env.API_TENANT;
-    delete process.env.STYRA_TOKEN;
-  });
-
+describe('readSecret', () => {
   afterEach(() => {
-    jest.resetAllMocks();
-    process.env = orgEnv;
+    jest.clearAllMocks();
   });
 
-  test('It uses existing env vars', async () => {
-    process.env.STYRA_TOKEN = 'styra-token';
-    const styraToken = await loadCredentials('serviceAccount', 'prod', 'styra-token', 'STYRA_TOKEN');
-    expect(styraToken).toEqual('styra-token');
-    expect(secrets.loadSecret).not.toHaveBeenCalled();
+  it('should load secret from environment variable when available', async () => {
+    const envVar = 'SECRET_ENV_VAR';
+    process.env[envVar] = 'secret_value';
+    const secretValue = 'secret_value';
+
+    const result = await readSecret('SA', 'test', 'secretName', envVar);
+
+    expect(result).toBe(secretValue);
+    expect(core.info).toHaveBeenCalledWith('Load secret secretName for test');
+    expect(loadSecret).not.toHaveBeenCalled();
+    expect(checkEnv).not.toHaveBeenCalled();
   });
 
-  test('It can load secrets', async () => {
-    secrets.loadSecret.mockResolvedValueOnce('styra-token');
-    const styraToken = await loadCredentials('serviceAccount', 'staging', 'styra-token', 'STYRA_TOKEN');
-    expect(styraToken).toEqual('styra-token');
-    expect(secrets.loadSecret).toHaveBeenCalled();
+  it('should load secret from Secret Manager when serviceAccountKey is provided', async () => {
+    const envVar = null;
+    const serviceAccountKey = 'service_account_key';
+    const secretName = 'some-secret';
+    const secretValue = 'secret_value';
+
+    loadSecret.mockResolvedValue(secretValue);
+
+    const result = await readSecret(serviceAccountKey, 'test', secretName, envVar);
+
+    expect(result).toBe(secretValue);
+    expect(core.info).toHaveBeenCalledWith(`Load secret ${secretName} for test`);
+    expect(loadSecret).toHaveBeenCalledWith(serviceAccountKey, secretName);
+    expect(checkEnv).not.toHaveBeenCalled();
   });
 });
