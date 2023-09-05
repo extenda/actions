@@ -46,7 +46,6 @@ describe('createInternalLoadbalancer', () => {
       '--region=europe-west1',
       `--default-service=${name}-internal-backend`,
     ]);
-
     expect(result).toBe(false);
   });
 });

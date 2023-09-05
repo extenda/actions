@@ -17,8 +17,10 @@ describe('configureInternalDomain', () => {
     const projectID = 'my-project';
     const name = 'my-service';
     const env = 'dev';
+    const protocol = 'http';
+    const connectionTimeout = 300;
 
-    await configureInternalDomain(projectID, name, env);
+    await configureInternalDomain(projectID, name, env, protocol, connectionTimeout);
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(
       1,
@@ -127,7 +129,7 @@ describe('configureInternalDomain', () => {
         `--default-service=${name}-internal-backend`,
         `--path-matcher-name=${name}-internal-backend`,
         '--region=europe-west1',
-        `--new-hosts=${name}.internal.retailsvc.com`,
+        `--new-hosts=${name}.internal`,
       ],
     );
   });

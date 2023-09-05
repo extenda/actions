@@ -26,7 +26,6 @@ jest.mock('../src/loadbalancing/internal/create-internal-frontend');
 jest.mock('../../utils');
 jest.mock('../../setup-gcloud-base/src/setup-gcloud');
 
-
 const serviceDef = {
   kubernetes: {
     type: 'Deployment',

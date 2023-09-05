@@ -51,7 +51,6 @@ describe('configureInternalFrontend', () => {
   });
 
   test('should configure internal frontend for http2 correctly', async () => {
-
     const projectID = 'my-project';
     const name = 'my-service';
     const env = 'dev';
@@ -59,18 +58,18 @@ describe('configureInternalFrontend', () => {
 
     await configureInternalFrontend(projectID, name, env, protocol);
 
-    expect(gcloudOutput).toHaveBeenNthCalledWith(1,[
+    expect(gcloudOutput).toHaveBeenNthCalledWith(1, [
       'compute',
       'ssl-certificates',
       'create',
       'extenda-internal-certificate',
-      `--certificate=cert.cert`,
-      `--private-key=key.key`,
+      '--certificate=cert.cert',
+      '--private-key=key.key',
       `--project=${projectID}`,
       '--region=europe-west1',
     ]);
-    
-    expect(gcloudOutput).toHaveBeenNthCalledWith(2,[
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(2, [
       'compute',
       'target-https-proxies',
       'create',
@@ -81,7 +80,7 @@ describe('configureInternalFrontend', () => {
       `--project=${projectID}`,
     ]);
 
-    expect(gcloudOutput).toHaveBeenNthCalledWith(3,[
+    expect(gcloudOutput).toHaveBeenNthCalledWith(3, [
       'compute',
       'forwarding-rules',
       'create',

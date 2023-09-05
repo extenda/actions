@@ -50,7 +50,7 @@ describe('configureExternalDomain', () => {
     gcloudOutput.mockResolvedValueOnce();
     gcloudOutput.mockResolvedValueOnce(describeUrlMap);
 
-    await configureExternalDomain(mockProjectID, mockServiceName, mockEnv, mockHost);
+    await configureExternalDomain(mockProjectID, mockServiceName, mockEnv, mockHost, 'http', 300);
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(1, expect.arrayContaining([
       'compute',
