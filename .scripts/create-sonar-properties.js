@@ -33,6 +33,7 @@ sonar.exclusions=**/__mocks__/**
 sonar.tests=${tests.join(',')}
 sonar.javascript.lcov.reportPaths=coverage/lcov.info
 sonar.testExecutionReportPaths=test-results/sonar-report.xml
+sonar.cpd.exclusion=cloud-run/**/*.js
 `;
 
   fs.writeFileSync(path.join(__dirname, '..', 'sonar-project.properties'), properties, 'utf-8');
