@@ -32,16 +32,15 @@ jobs:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
       - name: Analyze with SonarCloud
         uses: ./sonar-scanner
         with:
           sonar-host: https://sonarcloud.io
-          service-account-key: ${{ secrets.SECRET_AUTH }}
-
-      - name: Analyze with SonarQube
-        uses: ./sonar-scanner
-        with:
-          sonar-host: https://sonar.extenda.io
           service-account-key: ${{ secrets.SECRET_AUTH }}
 
   verify-dist:

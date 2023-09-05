@@ -13,7 +13,7 @@
     "posttest": "node .scripts/create-sonar-properties.js",
     "lint:js": "run-script-os",
     "lint:js:win32": "docker run --rm -t -v \"%cd%\":/work -w /work node:16-alpine sh -c \"npm run lint:js\"",
-    "lint:js:default": "eslint .scripts/*.js */src/*.js */test/*.js --no-ignore --fix"
+    "lint:js:default": "eslint \".scripts/*.js\" \"*/src/**/*.js\" \"*/test/**/*.js\" --no-ignore --fix"
   },
   "repository": "github:extenda/actions",
   "author": {
@@ -26,13 +26,17 @@
   "devDependencies": {
     "@actions/exec": "^1.1.1",
     "chalk": "^4.1.2",
+    "esbuild": "^0.15.14",
     "eslint": "^8.25.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
     "fs-extra": "^10.1.0",
     "jest": "^29.1.2",
     "jest-sonar": "^0.2.12",
-    "run-script-os": "^1.1.6",
-    "esbuild": "^0.15.14"
+    "run-script-os": "^1.1.6"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "request": "^2.88.2"
   }
 }

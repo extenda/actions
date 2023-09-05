@@ -1,0 +1,368 @@
+{
+  "$id": "cloud-deploy.schema.json",
+  "title": "CloudDeploy",
+  "type": "object",
+  "properties": {
+    "labels": {
+      "$ref": "#/$defs/Labels"
+    },
+    "security": {
+      "$ref": "#/$defs/Security"
+    },
+    "environments": {
+      "$ref": "#/$defs/Environments"
+    }
+  },
+  "required": [
+    "security",
+    "environments"
+  ],
+  "oneOf": [
+    {
+      "title": "CloudRun",
+      "required": ["cloud-run"],
+      "properties": {
+        "cloud-run": {
+          "$ref": "#/$defs/CloudRun"
+        }
+      }
+    },
+    {
+      "title": "Kubernetes",
+      "required": ["kubernetes"],
+      "properties": {
+        "kubernetes": {
+          "$ref": "#/$defs/Kubernetes"
+        }
+      }
+    }
+  ],
+
+  "$defs": {
+    "CloudRun": {
+      "title": "CloudRun",
+      "description": "Managed Cloud Run service",
+      "type": "object",
+      "required": [
+        "service",
+        "resources",
+        "protocol",
+        "scaling"
+      ],
+      "properties": {
+        "service": {
+          "$ref": "#/$defs/ServiceName"
+        },
+        "resources": {
+          "$ref": "#/$defs/Resources"
+        },
+        "protocol": {
+          "$ref": "#/$defs/Protocol"
+        },
+        "timeout": {
+          "$ref": "#/$defs/RequestTimeout"
+        },
+        "scaling": {
+          "title": "ScalingCloudRun",
+          "description": "Scaling settings for Cloud Run",
+          "type": "object",
+          "required": [
+            "concurrency"
+          ],
+          "properties": {
+            "concurrency": {
+              "description": "Concurrent number of requests that an instance can handle.",
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 1000
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "Kubernetes": {
+      "title": "Kubernetes",
+      "description": "A kubernetes service",
+      "type": "object",
+      "required": [
+        "service",
+        "type",
+        "resources",
+        "protocol",
+        "scaling"
+      ],
+      "properties": {
+        "service": {
+          "$ref": "#/$defs/ServiceName"
+        },
+        "type": {
+          "description": "The type of service",
+          "type": "string",
+          "enum": [
+            "Deployment",
+            "StatefulSet"
+          ]
+        },
+        "resources": {
+          "$ref": "#/$defs/Resources"
+        },
+        "protocol": {
+          "$ref": "#/$defs/Protocol"
+        },
+        "timeout": {
+          "$ref": "#/$defs/RequestTimeout"
+        },
+        "scaling": {
+          "title": "ScalingKubernetes",
+          "description": "Scaling settings for Kubernetes",
+          "type": "object",
+          "required": [
+            "cpu"
+          ],
+          "properties": {
+            "cpu": {
+              "description": "Average CPU percentage utilization for scaling.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "additionalProperties": false
+        },
+        "volumes": {
+          "title": "Volumes",
+          "description": "Volumes to mount. Volumes are only supported with StatefulSet.",
+          "type": "array",
+          "items": {
+            "title": "Volume",
+            "description": "A volume mount",
+            "type": "object",
+            "required": [
+              "size",
+              "mount-path"
+            ],
+            "properties": {
+              "disk-type": {
+                "description": "The disk type",
+                "type": "string",
+                "enum": [
+                  "hdd",
+                  "ssd"
+                ],
+                "default": "hdd"
+              },
+              "size": {
+                "description": "The disk size",
+                "type": "string",
+                "pattern": "^[0-9]+(M|G)i"
+              },
+              "mount-path": {
+                "description": "The mount path",
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ServiceName": {
+      "title": "ServiceName",
+      "description": "Service name",
+      "type": "string"
+    },
+    "Protocol": {
+      "title": "Protocol",
+      "description": "The type of protocol. Make sure to set http2 if this service is using gRPC or WebSockets",
+      "type": "string",
+      "enum": [
+        "http",
+        "http2"
+      ]
+    },
+    "RequestTimeout": {
+      "title": "RequestTimeout",
+      "description": "The request timeout in seconds",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3600,
+      "default": 300
+    },
+    "Resources": {
+      "title": "Resources",
+      "description": "The requested resources",
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "description": "Number of requested CPU cores",
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 8
+        },
+        "memory": {
+          "description": "Amount of memory to request",
+          "type": "string",
+          "pattern": "^[0-9]+(M|G)i"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Security": {
+      "title": "Security",
+      "oneOf": [
+        {
+          "title": "SecurityNone",
+          "description": "Do not use platform security features",
+          "type": "string",
+          "constant": "none"
+        },
+        {
+          "title": "IAMSettings",
+          "description": "IAM Security settings",
+          "type": "object",
+          "required": [
+            "permission-prefix"
+          ],
+          "properties": {
+            "permission-prefix": {
+              "description": "IAM permission prefix",
+              "type": "string",
+              "pattern": "^[a-z]{3}$"
+            },
+            "resources": {
+              "$ref": "#/$defs/Resources",
+              "default": {
+                "cpu": 0.5,
+                "memory": "512Mi"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Environments": {
+      "title": "Environments",
+      "description": "Deploy environments",
+      "type": "object",
+      "request": [
+        "production",
+        "staging"
+      ],
+      "properties": {
+        "production": {
+          "description": "Production environment",
+          "$ref": "#/$defs/Environment"
+        },
+        "staging": {
+          "description": "Staging environment",
+          "oneOf": [
+            {
+              "title": "StagingNone",
+              "description": "Do not use a staging environment",
+              "type": "string",
+              "constant": "none"
+            },
+            {
+              "$ref": "#/$defs/Environment"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "Environment": {
+      "title": "Environment",
+      "description": "A deploy environment",
+      "type": "object",
+      "required": [
+        "min-instances"
+      ],
+      "properties": {
+        "min-instances": {
+          "description": "Minimum number of instances",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "max-instances": {
+          "description": "Maximum number of instances",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000,
+          "default": 100
+        },
+        "domain-mappings": {
+          "title": "DomainMappings",
+          "description": "Service domain mappings",
+          "type": "array",
+          "items": {
+            "title": "Domain",
+            "description": "Fully qualified domain name",
+            "type": "string"
+          }
+        },
+        "env": {
+          "title": "EnvVars",
+          "description": "Environment variables and secrets",
+          "type": "object",
+          "patternProperties": {
+            "^[A-Z0-9_]+$": {
+              "title": "EnvVar",
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "regions": {
+          "title": "Regions",
+          "description": "A list of regions in case of multi-regional deploy",
+          "type": "array",
+          "items": {
+            "title": "GoogleRegion",
+            "description": "A Google Cloud region, e.g. europe-west1",
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "Labels": {
+      "title": "Labels",
+      "type": "object",
+      "properties": {
+        "component": {
+          "$ref": "#/$defs/Label",
+          "default": "component-not-set"
+        },
+        "product": {
+          "$ref": "#/$defs/Label",
+          "default": "product-not-set"
+        },
+        "iso-country": {
+          "$ref": "#/$defs/Label",
+          "default": "global"
+        },
+        "tenant-alias": {
+          "$ref": "#/$defs/Label",
+          "default": "not-tenant-specific"
+        }
+      },
+      "patternProperties": {
+        "^[a-z-]+$": {
+          "$ref": "#/$defs/Label"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Label": {
+      "title": "Label",
+      "description": "A label value",
+      "type": "string",
+      "pattern": "^[a-z-]+$"
+    }
+  }
+}

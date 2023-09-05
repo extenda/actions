@@ -1,0 +1,30 @@
+name: Cloud Deploy
+description: Deploy to Google Cloud with Cloud Deploy.
+author: Extenda Retail
+inputs:
+  secrets-account-key:
+    description: |
+      The service account key which will be used to access CI/CD pipeline secrets.
+    required: true
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication against the clan project.
+    required: true
+  service-definition:
+    description: |
+      The service YAML specification.
+    required: false
+    default: cloud-deploy.yaml
+  image:
+    description: The Docker image to deploy to Cloud Run.
+    required: true
+  update-dns:
+    description: |
+      Set how DNS should be updated. Use `if-missing` to only create DNS if an
+      entry does not exist. Use `always` to update the DNS entry if is missing or
+      if the existing entry does not match the load balancer IP for the service.
+    required: false
+    default: if-missing
+runs:
+  using: node16
+  main: dist/index.js

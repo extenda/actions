@@ -34,12 +34,7 @@ const getLatestRelease = async () => getLatestReleaseTag()
 const getBuildVersion = async (versionSuffix = '') => {
   const latestRelease = await getLatestRelease();
 
-  console.log('Latest release', latestRelease);
-  console.log('tag prefix', changes.getTagPrefix());
-
   const releaseType = await changes.getRecommendedBump();
-
-  console.log('Recommended bump', releaseType);
 
   core.info(`Conventional commits '${releaseType}' bump from ${latestRelease}`);
   return semver.inc(semver.coerce(latestRelease), releaseType).concat(versionSuffix);
