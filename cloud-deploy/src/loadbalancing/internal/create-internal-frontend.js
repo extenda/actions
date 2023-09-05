@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
 const setupInternalDomainMapping = require('./setup-internal-domainmapping');
+const { projectWithoutNumbers } = require('../../utils/clan-project-name');
 
 const createCertificate = async (projectID, region = 'europe-west1') => gcloudOutput([
   'compute',
@@ -18,7 +19,7 @@ const createHttpProxy = async (projectID, env) => gcloudOutput([
   'target-http-proxies',
   'create',
   'http-lb-proxy-internal',
-  `--url-map=${projectID.split(`-${env}`)[0]}-${env}-lb-internal`,
+  `--url-map=${projectWithoutNumbers(projectID, env)}-lb-internal`,
   '--region=europe-west1',
   `--project=${projectID}`,
 ]).catch(() => core.info('proxy already exists'));
@@ -29,7 +30,7 @@ const createHttpsProxy = async (projectID, env) => gcloudOutput([
   'create',
   'https-lb-proxy-internal',
   '--ssl-certificates=extenda-internal-certificate',
-  `--url-map=${projectID.split(`-${env}`)[0]}-${env}-lb-internal`,
+  `--url-map=${projectWithoutNumbers(projectID, env)}-lb-internal`,
   '--region=europe-west1',
   `--project=${projectID}`,
 ]).catch(() => core.info('proxy already exists'));
