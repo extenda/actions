@@ -43,17 +43,6 @@ jobs:
           sonar-host: https://sonarcloud.io
           service-account-key: ${{ secrets.SECRET_AUTH }}
 
-      - uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 8
-
-      - name: Analyze with SonarQube
-        uses: ./sonar-scanner
-        with:
-          sonar-host: https://sonar.extenda.io
-          service-account-key: ${{ secrets.SECRET_AUTH }}
-
   verify-dist:
     runs-on: ubuntu-latest
     steps:
