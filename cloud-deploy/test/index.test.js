@@ -71,7 +71,9 @@ describe('Action', () => {
     loadCredentials.mockResolvedValueOnce('styra-token')
       .mockResolvedValueOnce('envoy-certs')
       .mockResolvedValueOnce('internal-key')
-      .mockResolvedValueOnce('internal-cert');
+      .mockResolvedValueOnce('internal-cert')
+      .mockResolvedValueOnce('external-cert')
+      .mockResolvedValueOnce('external-key');
 
     loadServiceDefinition.mockReturnValueOnce(serviceDef);
     projectInfo.mockReturnValueOnce({
@@ -99,6 +101,8 @@ describe('Action', () => {
       'envoy-certs',
       'internal-cert',
       'internal-key',
+      'external-cert',
+      'external-key',
     );
     expect(createExternalLoadbalancer).toHaveBeenCalledWith(
       'project-id',
@@ -125,7 +129,9 @@ describe('Action', () => {
     loadCredentials.mockResolvedValueOnce('styra-token')
       .mockResolvedValueOnce('envoy-certs')
       .mockResolvedValueOnce('internal-key')
-      .mockResolvedValueOnce('internal-cert');
+      .mockResolvedValueOnce('internal-cert')
+      .mockResolvedValueOnce('external-cert')
+      .mockResolvedValueOnce('external-key');
 
     loadServiceDefinition.mockReturnValueOnce(serviceDef);
     projectInfo.mockReturnValueOnce({
@@ -148,6 +154,8 @@ describe('Action', () => {
       'envoy-certs',
       'internal-cert',
       'internal-key',
+      'external-cert',
+      'external-key',
     );
   });
 });

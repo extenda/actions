@@ -4,6 +4,17 @@ const gcloudOutput = require('../../utils/gcloud-output');
 const MAX_DOMAINS = 100;
 const MAX_CERTIFICATES = 13;
 
+const createExtendaBaseCertificate = async (projectID) => gcloudOutput([
+  'compute',
+  'ssl-certificates',
+  'create',
+  'extenda-external-certificate',
+  '--certificate=external_cert.cert',
+  '--private-key=external_key.key',
+  `--project=${projectID}`,
+  '--global',
+]).catch(() => core.info('Certificate already exists!'));
+
 const createCertificate = async (domains, projectID, name) => gcloudOutput([
   'compute',
   'ssl-certificates',
@@ -43,6 +54,8 @@ const listCertificates = async (clusterProject) => JSON.parse(await gcloudOutput
 ]));
 
 const handleCertificates = async (hosts, project) => {
+  await createExtendaBaseCertificate(project);
+
   const domainName = [...hosts];
   let firstCreatedDate = new Date();
   let firstCreatedName = '';
@@ -53,6 +66,7 @@ const handleCertificates = async (hosts, project) => {
 
   const certificateList = await listCertificates(project);
   const certificateListNames = [];
+  certificateListNames.push('extenda-external-certificate');
   const totalCertificates = certificateList ? certificateList.length : 0;
 
   for (const certificate of certificateList) {
