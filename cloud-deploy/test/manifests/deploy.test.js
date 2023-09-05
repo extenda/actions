@@ -1,6 +1,6 @@
 const gcloudOutput = require('../../src/utils/gcloud-output');
 const deploy = require('../../src/manifests/deploy');
-const { setRetryDelay } = require('../../src/utils/retry-until')
+const { setRetryDelay } = require('../../src/utils/retry-until');
 
 jest.mock('../../src/utils/gcloud-output');
 
@@ -20,7 +20,6 @@ describe('manifests/deploy', () => {
   });
 
   test('It will wait for deploy to succeed', async () => {
-
     gcloudOutput.mockResolvedValueOnce('') // deploy apply
       .mockResolvedValueOnce('') // deploy release
       .mockResolvedValueOnce('IN PROGRESS') // deploy state

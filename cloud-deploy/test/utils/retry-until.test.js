@@ -1,7 +1,6 @@
 const { retryUntil, setRetryDelay } = require('../../src/utils/retry-until');
 
 describe('utils/retry-until', () => {
-
   beforeEach(() => {
     setRetryDelay(100, 300);
   });
