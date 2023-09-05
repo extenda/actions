@@ -1,5 +1,7 @@
 # rs-create-installerpkg
 
+**:warning: This action is deprecated and will be removed in v1.**
+
 This GitHub Action generates a zipped RS installer package artifact. Installer packages will have the file extension pkg.zip
 NEXUS_USERNAME and NEXUS_PASSWORD env needs to be set to be able to download the binary from Nexus.
 
@@ -24,7 +26,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@master  
+      - uses: actions/checkout@master
 
       - uses: actions/cache@v1
         with:

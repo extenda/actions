@@ -1,5 +1,7 @@
 # test-pod
 
+**:warning: This action is deprecated and will be removed in v1.**
+
 GitHub Action to run acceptance tests in a Kubernetes Pod. Use this action to test internal services that are not
 reachable directly from GitHub Actions.
 
@@ -172,7 +174,7 @@ jobs:
           service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
           image: eu.gcr.io/extenda/example-test:${{ github.sha }}
         env:
-          TESTPOD_API_KEY: ${{ secrets.API_KEY }}  
+          TESTPOD_API_KEY: ${{ secrets.API_KEY }}
 ```
 
 ### Test that saves reports on the GitHub runner
@@ -184,7 +186,7 @@ write the files to standard out itself.
 The action supports a single file transfer on the following format
   1. Write `test-pod-output BEGIN` to standard out to start the transfer
   2. Create a TAR archive with the files to transfer, Base64 encode it and write it to standard out
-  3. Write `test-pod-output END` to standard out to end the transfer  
+  3. Write `test-pod-output END` to standard out to end the transfer
 
 We recommend performing the file transfer in the `entrypoint` action input script,
 or in your custom docker image's `entrypoint`.

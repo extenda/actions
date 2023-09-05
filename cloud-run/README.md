@@ -1,5 +1,7 @@
 # cloud-run
 
+**:warning: This action is deprecated and will be removed in v1.**
+
 This is a GitHub Action to deploy a service to Cloud Run.
 
 When deploying to Cloud Run on GKE, the action will also conditionally deploy or configure the following

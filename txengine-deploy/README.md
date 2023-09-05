@@ -1,5 +1,7 @@
 # txengine-deploy
 
+**:warning: This action is deprecated and will be removed in v1.**
+
 GitHub Action to deploy a tenant-specific Transaction Engine. This action is used internally at Extenda Retail for a
 repeatable and scalable deployment of applications.
 

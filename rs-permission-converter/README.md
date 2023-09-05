@@ -1,5 +1,7 @@
 # rs-permission-converter
 
+**:warning: This action is deprecated and will be removed in v1.**
+
 This GitHub Action converts a permission.xml file into sql file or into resx files. It is the xml file that is the master when adding new access rights and translations.
 
 ## Usage
@@ -24,7 +26,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@master  
+      - uses: actions/checkout@master
 
       - name: Create sql file from permission xml
         uses: extenda/actions/rs-permission-converter@v0

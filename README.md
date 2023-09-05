@@ -10,13 +10,13 @@ the fundamental parts of our CI/CD pipelines.
 
 The following actions are available
 
-  * [cloud-run](cloud-run#readme)
+  * ~~[cloud-run](cloud-run#readme)~~
   * [commitlint](commitlint#readme)
   * [component-tests](component-tests#readme)
   * [conventional-release](conventional-release#readme)
   * [conventional-version](conventional-version#readme)
   * [dataflow-template-build](dataflow-template-build#readme)
-  * [docker](docker#readme)
+  * ~~[docker](docker#readme)~~
   * [dataflow-deploy](dataflow-deploy#readme)
   * [customer-config](customer-config#readme)
   * [gcp-secret-manager](gcp-secret-manager#readme)
@@ -24,7 +24,7 @@ The following actions are available
   * [iam-test-token](iam-test-token#readme)
   * [jira-release](jira-release#readme)
   * [jira-releasenotes](jira-releasenotes#readme)
-  * [kubernetes](kubernetes#readme)
+  * ~~[kubernetes](kubernetes#readme)~~
   * [maven](maven#readme)
   * [nexus-auth-npm](nexus-auth-npm#readme)
   * [pact-broker](pact-broker#readme)
@@ -32,22 +32,22 @@ The following actions are available
   * [pact-publish](pact-publish#readme)
   * [pact-tag-version](pact-tag-version#readme)
   * [repository-dispatch](repository-dispatch#readme)
-  * [rs-create-installerpkg](rs-create-installerpkg#readme)
-  * [rs-permission-converter](rs-permission-converter#readme)
+  * ~~[rs-create-installerpkg](rs-create-installerpkg#readme)~~
+  * ~~[rs-permission-converter](rs-permission-converter#readme)~~
   * [setup-gcloud](setup-gcloud#readme)
   * [setup-git](setup-git#readme)
   * [setup-msbuild](setup-msbuild#readme)
   * [setup-nuget-sources](setup-nuget-sources#readme)
   * [setup-terraform](setup-terraform#readme)
-  * [slack-message](slack-message#readme)
+  * ~~[slack-message](slack-message#readme)~~
   * [slack-notify](slack-notify#readme)
   * [sonar-scanner](sonar-scanner#readme)
   * [status-check](status-check#readme)
   * [styra-das-deploy](styra-das-deploy#readme)
   * [styra-das-test](styra-das-test#readme)
   * [terraform-plan-comment](terraform-plan-comment#readme)
-  * [test-pod](test-pod#readme)
-  * [txengine-deploy](txengine-deploy#readme)
+  * ~~[test-pod](test-pod#readme)~~
+  * ~~[txengine-deploy](txengine-deploy#readme)~~
 
 ## :rocket: Workflow Examples
 

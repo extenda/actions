@@ -1,5 +1,7 @@
 # Deploy api documentation
 
+**:warning: This action is deprecated and will be removed in v1.**
+
 This is a GitHub Action to deploy api documentation that will be made available on the url:
 https://api-docs.hiiretail.com
 
