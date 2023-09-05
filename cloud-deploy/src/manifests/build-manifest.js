@@ -307,6 +307,8 @@ const buildManifest = async (
   http2Certificate,
   internalCert,
   internalCertKey,
+  externalCert,
+  externalCertKey,
 ) => {
   let opa = false;
 
@@ -396,6 +398,8 @@ const buildManifest = async (
   await generateManifest('k8s-certificates.yaml', http2Certificate);
   await generateManifest('cert.cert', internalCert);
   await generateManifest('key.key', internalCertKey);
+  await generateManifest('external_cert.cert', externalCert);
+  await generateManifest('external_key.key', externalCertKey);
 };
 
 module.exports = buildManifest;
