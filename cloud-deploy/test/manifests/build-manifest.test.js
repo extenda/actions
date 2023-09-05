@@ -18,65 +18,82 @@ describe('buildManifest', () => {
 
     const image = 'example-image:latest';
     const service = {
-      name: 'example-service',
-      memory: '512Mi',
-      cpu: '1',
-      'max-instances': 10,
-      'min-instances': 1,
-      'opa-enabled': false,
-      environment: {
-        KEY1: 'value1',
-        KEY2: 'value2',
+      kubernetes: {
+        type: 'Deployment',
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          cpu: 40,
+        },
       },
+      security: 'none',
       labels: {
         label1: 'labelValue1',
         label2: 'labelValue2',
       },
-      platform: {
-        gke: {
-          readiness: {
-            http: {
-              path: '/custom-health',
-            },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
           },
         },
+        staging: 'none',
       },
     };
     const projectId = 'example-project';
     const clanName = 'example-clan';
-    const env = 'dev';
+    const env = 'production';
 
     await buildManifest(image, service, projectId, clanName, env, 'styra-token');
 
-    expect(mockWriteFile).toHaveBeenCalledTimes(3);
+    expect(checkSystem).not.toHaveBeenCalled();
 
-    expect(mockWriteFile).toHaveBeenNthCalledWith(
-      1,
+    expect(mockWriteFile).toHaveBeenCalledWith(
       'skaffold.yaml',
-      expect.stringContaining('apiVersion: skaffold/v2beta16\nkind: Config\ndeploy:\n  kubectl:\n    manifests:\n      - k8s-*\n'),
-      expect.any(Function),
+      expect.stringContaining(`apiVersion: skaffold/v2beta16
+kind: Config
+deploy:
+  kubectl:
+    manifests:
+      - k8s-*`),
+      expect.anything(),
     );
 
-    expect(mockWriteFile).toHaveBeenNthCalledWith(
-      2,
+    expect(mockWriteFile).toHaveBeenCalledWith(
       'clouddeploy.yaml',
-      expect.stringContaining(
-        'apiVersion: deploy.cloud.google.com/v1\nkind: DeliveryPipeline\nmetadata:\n  name: example-service\n',
-      ),
-      expect.any(Function),
+      expect.stringContaining(`apiVersion: deploy.cloud.google.com/v1
+kind: DeliveryPipeline
+metadata:
+  name: example-service`),
+      expect.anything(),
     );
 
-    expect(mockWriteFile).toHaveBeenNthCalledWith(
-      3,
+    expect(mockWriteFile).not.toHaveBeenCalledWith(
+      'k8s-opa-config.yaml',
+      expect.any(String),
+      expect.anything(),
+    );
+
+    expect(mockWriteFile).toHaveBeenCalledWith(
       'k8s-manifest.yaml',
-      expect.stringContaining('---\napiVersion: v1\nkind: Namespace\nmetadata:\n  name: example-service\n'),
+      expect.stringContaining(`apiVersion: v1
+kind: Namespace
+metadata:
+  name: example-service`),
       expect.any(Function),
     );
   });
 
   test('should generate opa manifest', async () => {
     const mockWriteFile = jest.spyOn(fs, 'writeFile').mockImplementation();
-    checkSystem.mockImplementation(() => Promise.resolve({ id: 'some-id' }));
+    checkSystem.mockResolvedValueOnce({ id: 'some-id' });
 
     const opaConfig = {
       kind: 'ConfigMap',
@@ -101,32 +118,39 @@ describe('buildManifest', () => {
       },
     };
 
-    buildOpaConfig.mockImplementation(() => Promise.resolve(yaml.dump(opaConfig)));
+    buildOpaConfig.mockResolvedValueOnce(yaml.dump(opaConfig));
 
     const image = 'example-image:latest';
     const service = {
-      name: 'example-service',
-      memory: '512Mi',
-      'opa-enabled': true,
-      cpu: '1',
-      'max-instances': 10,
-      'min-instances': 1,
-      environment: {
-        KEY1: 'value1',
-        KEY2: 'value2',
+      kubernetes: {
+        type: 'Deployment',
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          cpu: 40,
+        },
+      },
+      security: {
+        'permission-prefix': 'tst',
       },
       labels: {
         label1: 'labelValue1',
         label2: 'labelValue2',
       },
-      platform: {
-        gke: {
-          readiness: {
-            http: {
-              path: '/custom-health',
-            },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
           },
         },
+        staging: 'none',
       },
     };
     const projectId = 'example-project';
@@ -135,29 +159,18 @@ describe('buildManifest', () => {
 
     await buildManifest(image, service, projectId, clanName, env, 'styra-token');
 
-    expect(mockWriteFile).toHaveBeenCalledTimes(4);
-
-    expect(mockWriteFile).toHaveBeenNthCalledWith(
-      1,
-      'skaffold.yaml',
-      expect.stringContaining('apiVersion: skaffold/v2beta16\nkind: Config\ndeploy:\n  kubectl:\n    manifests:\n      - k8s-*\n'),
-      expect.any(Function),
-    );
-
-    expect(mockWriteFile).toHaveBeenNthCalledWith(
-      2,
-      'clouddeploy.yaml',
-      expect.stringContaining(
-        'apiVersion: deploy.cloud.google.com/v1\nkind: DeliveryPipeline\nmetadata:\n  name: example-service\n',
-      ),
-      expect.any(Function),
-    );
-
-    expect(mockWriteFile).toHaveBeenNthCalledWith(
-      4,
-      'k8s-manifest.yaml',
-      expect.stringContaining('---\napiVersion: v1\nkind: Namespace\nmetadata:\n  name: example-service\n'),
-      expect.any(Function),
+    expect(mockWriteFile).toHaveBeenCalledWith(
+      'k8s-opa-config.yaml',
+      expect.stringContaining(`kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: opa-envoy-config
+  namespace: service-name
+data:
+  conf.yaml: |
+    services:
+        - name: styra`),
+      expect.anything(),
     );
   });
 });
