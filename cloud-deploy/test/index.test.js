@@ -26,6 +26,39 @@ jest.mock('../src/loadbalancing/internal/create-internal-frontend');
 jest.mock('../../utils');
 jest.mock('../../setup-gcloud-base/src/setup-gcloud');
 
+
+const serviceDef = {
+  kubernetes: {
+    type: 'Deployment',
+    service: 'service-name',
+    resources: {
+      cpu: 1,
+      memory: '512Mi',
+    },
+    protocol: 'http',
+    scaling: {
+      cpu: 40,
+    },
+  },
+  security: 'none',
+  environments: {
+    production: {
+      'min-instances': 1,
+      'max-instances': 10,
+      env: {
+        KEY1: 'value1',
+        KEY2: 'value2',
+      },
+    },
+    staging: {
+      'min-instances': 1,
+      'max-instances': 1,
+      env: {},
+      'domain-mappings': ['example.com'],
+    },
+  },
+};
+
 describe('Action', () => {
   afterEach(() => {
     jest.resetAllMocks();
@@ -36,19 +69,10 @@ describe('Action', () => {
       .mockReturnValueOnce('clan-service-account')
       .mockReturnValueOnce('cloud-run.yaml')
       .mockReturnValueOnce('gcr.io/project/image:tag');
-    loadCredentials.mockResolvedValueOnce('styra-token');
-
-    const serviceDef = {
-      platform: {
-        gke: {
-          'domain-mappings': {
-            staging: ['example.com'],
-            prod: ['example.com'],
-          },
-        },
-      },
-      name: 'service-name',
-    };
+    loadCredentials.mockResolvedValueOnce('styra-token')
+      .mockResolvedValueOnce('envoy-certs')
+      .mockResolvedValueOnce('internal-key')
+      .mockResolvedValueOnce('internal-cert');
 
     loadServiceDefinition.mockReturnValueOnce(serviceDef);
     projectInfo.mockReturnValueOnce({
@@ -73,6 +97,9 @@ describe('Action', () => {
       'clan-name',
       'staging',
       'styra-token',
+      'envoy-certs',
+      'internal-cert',
+      'internal-key',
     );
     expect(createExternalLoadbalancer).toHaveBeenCalledWith(
       'project-id',
@@ -82,12 +109,13 @@ describe('Action', () => {
       'project-id',
       'staging',
       ['example.com'],
-      'false',
+      false,
     );
     expect(configureInternalFrontend).toHaveBeenCalledWith(
       'project-id',
       'service-name',
       'staging',
+      'http',
     );
   });
   test('It can fail the action', async () => {
@@ -95,18 +123,10 @@ describe('Action', () => {
       .mockReturnValueOnce('clan-service-account')
       .mockReturnValueOnce('cloud-run.yaml')
       .mockReturnValueOnce('gcr.io/project/image:tag');
-    loadCredentials.mockResolvedValueOnce('styra-token');
-    const serviceDef = {
-      platform: {
-        gke: {
-          'domain-mappings': {
-            staging: ['example.com'],
-            prod: ['example.com'],
-          },
-        },
-      },
-      name: 'service-name',
-    };
+    loadCredentials.mockResolvedValueOnce('styra-token')
+      .mockResolvedValueOnce('envoy-certs')
+      .mockResolvedValueOnce('internal-key')
+      .mockResolvedValueOnce('internal-cert');
 
     loadServiceDefinition.mockReturnValueOnce(serviceDef);
     projectInfo.mockReturnValueOnce({
@@ -126,6 +146,9 @@ describe('Action', () => {
       'clan-name',
       'staging',
       'styra-token',
+      'envoy-certs',
+      'internal-cert',
+      'internal-key',
     );
   });
 });
