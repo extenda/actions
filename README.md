@@ -10,6 +10,7 @@ the fundamental parts of our CI/CD pipelines.
 
 The following actions are available
 
+  * [cloud-deploy](cloud-deploy#readme)
   * ~~[cloud-run](cloud-run#readme)~~
   * [commitlint](commitlint#readme)
   * [component-tests](component-tests#readme)
@@ -80,7 +81,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
@@ -113,7 +114,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
