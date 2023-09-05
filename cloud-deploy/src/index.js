@@ -20,7 +20,8 @@ const action = async () => {
   const updateDns = core.getInput('update-dns');
 
   // Only migrate DNS if explicitly set to always.
-  const migrate = updateDns === 'always';
+  const migrate = `${updateDns}`.trim().toLowerCase() === 'always';
+  core.info(`update-dns set to '${updateDns}' results in migrate=${migrate}`);
 
   // const verbose = (core.getInput('verbose') || 'false');
 
