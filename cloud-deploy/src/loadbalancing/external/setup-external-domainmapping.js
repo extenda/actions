@@ -58,7 +58,7 @@ const setupExternalDomainMapping = async (hosts, migrate, loadBalancerIP) => {
           core.info(`creating ${host} with ip: ${recordSetIP}`);
           // eslint-disable-next-line no-await-in-loop
           await createUpdateRecordSet(zone, projectID, host, loadBalancerIP, 'create');
-        } else if (migrate === 'true' && loadBalancerIP !== recordSetIP) {
+        } else if (migrate && loadBalancerIP !== recordSetIP) {
           // update recordset if migrate true and ip is mismatch
           core.info(`migrating ${host} to ip: ${recordSetIP}`);
           // eslint-disable-next-line no-await-in-loop
