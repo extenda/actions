@@ -7,6 +7,7 @@ const buildOpaConfig = require('../../src/manifests/opa-config');
 jest.mock('fs');
 jest.mock('../../src/manifests/check-system');
 jest.mock('../../src/manifests/opa-config');
+jest.mock('../../src/utils/add-namespace');
 
 describe('buildManifest', () => {
   afterEach(() => {
