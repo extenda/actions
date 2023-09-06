@@ -340,7 +340,7 @@ const buildManifest = async (
 
   const {
     'min-instances': minInstances,
-    'max-instances': maxInstances,
+    'max-instances': maxInstances = 100,
     env: environment = [],
   } = deployEnv === 'staging' ? staging : production;
 
