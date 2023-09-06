@@ -2,6 +2,7 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 const checkSystem = require('./check-system');
 const buildOpaConfig = require('./opa-config');
+const { addNamespace } = require('../utils/add-namespace');
 
 const convertToYaml = (json) => yaml.dump(json);
 
@@ -395,7 +396,7 @@ const buildManifest = async (
 
   const convertedManifests = manifests.map((doc) => convertToYaml(doc)).join('---\n');
   await generateManifest('k8s-manifest.yaml', convertedManifests);
-  await generateManifest('k8s-certificates.yaml', http2Certificate);
+  await generateManifest('k8s-certificates.yaml', await addNamespace(http2Certificate, name));
   await generateManifest('cert.cert', internalCert);
   await generateManifest('key.key', internalCertKey);
   await generateManifest('external_cert.cert', externalCert);
