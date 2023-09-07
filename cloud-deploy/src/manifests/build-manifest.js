@@ -287,7 +287,6 @@ const buildManifest = async (
     labels = [],
     security,
     environments = [],
-    volumes,
   } = deployYaml;
 
   const {
@@ -296,6 +295,7 @@ const buildManifest = async (
     protocol,
     resources,
     scaling,
+    volumes,
   } = kubernetes;
 
   const {
