@@ -287,11 +287,7 @@ gke:
   cluster: projects/${projectID}/locations/europe-west1/clusters/${clanName}-cluster-${env}
   `;
 
-const generateManifest = async (fileName, content) => {
-  fs.writeFile(`${fileName}`, content, (err) => {
-    if (err) throw err;
-  });
-};
+const generateManifest = (fileName, content) => fs.writeFileSync(fileName, content, { encoding: 'utf-8' });
 
 const prepareGcloudDeploy = async (name, projectID, clanName, env) => {
   await generateManifest('skaffold.yaml', await createSkaffoldManifest());
@@ -395,12 +391,20 @@ const buildManifest = async (
   );
 
   const convertedManifests = manifests.map((doc) => convertToYaml(doc)).join('---\n');
-  await generateManifest('k8s-manifest.yaml', convertedManifests);
-  await generateManifest('k8s-certificates.yaml', await addNamespace(http2Certificate, name));
-  await generateManifest('cert.cert', internalCert);
-  await generateManifest('key.key', internalCertKey);
-  await generateManifest('external_cert.cert', externalCert);
-  await generateManifest('external_key.key', externalCertKey);
+  generateManifest('k8s-manifest.yaml', convertedManifests);
+  generateManifest('k8s-certificates.yaml', await addNamespace(http2Certificate, name));
+  generateManifest('cert.cert', internalCert);
+  generateManifest('key.key', internalCertKey);
+  generateManifest('external_cert.cert', externalCert);
+  generateManifest('external_key.key', externalCertKey);
+
+  if (!fs.existsSync('.gcloudignore')) {
+    fs.writeFileSync('.gcloudignore', `*
+!k8s-*
+!skaffold.yaml
+!clouddeploy.yaml
+`, { encoding: 'utf-8' });
+  }
 };
 
 module.exports = buildManifest;
