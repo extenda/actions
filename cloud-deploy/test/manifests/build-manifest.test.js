@@ -101,6 +101,14 @@ metadata:
       { encoding: 'utf-8' },
     );
 
+    expect(mockWriteFile).toHaveBeenCalledWith(
+      'k8s-manifest.yaml',
+      expect.stringContaining(`
+            - name: SECRET
+              value: sm://example-project/test-secret`),
+      { encoding: 'utf-8' },
+    );
+
     expect(mockWriteFile).toHaveBeenCalledWith('.gcloudignore', `*
 !k8s-*
 !skaffold.yaml
