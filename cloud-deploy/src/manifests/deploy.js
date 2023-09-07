@@ -2,8 +2,6 @@ const core = require('@actions/core');
 const gcloudOutput = require('../utils/gcloud-output');
 const { retryUntil } = require('../utils/retry-until');
 
-const EIGHT_MINUTES = 480000;
-
 const deployRelease = async (projectID, name, version) => gcloudOutput([
   'deploy',
   'releases',
@@ -46,7 +44,6 @@ const runGcloudDeploy = async (projectID, name, version) => {
       // Stop polling if status is terminal.
       return value === 'SUCCEEDED' || value === 'FAILED';
     },
-    EIGHT_MINUTES,
   );
   return status === 'SUCCEEDED';
 };

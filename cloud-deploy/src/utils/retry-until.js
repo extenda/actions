@@ -18,7 +18,7 @@ const setRetryDelay = (delayMillis, timeoutMillis) => {
  * @param timeoutMillis the maximum wait time in milliseconds or -1 to use the default timeout
  * @returns {Promise<any>} a promise that completes with the last output from queryFn
  */
-const retryUntil = async (queryFn, checkFn, timeoutMillis) => {
+const retryUntil = async (queryFn, checkFn, timeoutMillis = -1) => {
   const t0 = Date.now();
   let output = '';
 
