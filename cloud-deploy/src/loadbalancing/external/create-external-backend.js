@@ -2,6 +2,23 @@ const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
 const { projectWithoutNumbers } = require('../../utils/clan-project-name');
 
+// update backend service
+const updateBackendService = async (
+  name,
+  projectID,
+  serviceType,
+  connectionTimeout,
+) => gcloudOutput([
+  'compute',
+  'backend-services',
+  'update',
+  `${name}-external-backend`,
+  `--protocol=${serviceType === 'http2' ? 'HTTP2' : 'HTTP'}`,
+  `--timeout=${connectionTimeout}s`,
+  '--global',
+  `--project=${projectID}`,
+]).catch(() => true);
+
 // Create backend-service
 const setupBackendService = async (
   name,
@@ -23,7 +40,7 @@ const setupBackendService = async (
   '--logging-sample-rate=1',
   '--load-balancing-scheme=EXTERNAL',
   `--project=${projectID}`,
-]).catch(() => true);
+]).catch(() => updateBackendService(name, projectID, serviceType, connectionTimeout));
 
 // Check if NEG exists
 const checkNEG = async (projectID, zone, name) => gcloudOutput([

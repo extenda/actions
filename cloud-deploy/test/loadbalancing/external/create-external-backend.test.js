@@ -181,4 +181,43 @@ describe('configureExternalDomain', () => {
     ]));
     expect(gcloudOutput).toHaveBeenCalledTimes(9);
   });
+
+  it('it should update if backend exists', async () => {
+    gcloudOutput.mockRejectedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce(describeUrlMapNoPathMatcher);
+
+    await configureExternalDomain(mockProjectID, mockServiceName, mockEnv, mockHost, 'http', 300);
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(10, expect.arrayContaining([
+      'compute',
+      'url-maps',
+      'add-path-matcher',
+      'project-staging-lb-external',
+      `--project=${mockProjectID}`,
+      `--default-service=${mockServiceName}-external-backend`,
+      `--path-matcher-name=${mockServiceName}-external-backend`,
+      '--global',
+      `--new-hosts=${mockHost}`,
+    ]));
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(2, expect.arrayContaining([
+      'compute',
+      'backend-services',
+      'update',
+      `${mockServiceName}-external-backend`,
+      `--protocol=HTTP`,
+      `--timeout=300s`,
+      '--global',
+      `--project=${mockProjectID}`,
+    ]));
+
+    expect(gcloudOutput).toHaveBeenCalledTimes(10);
+  });
 });
