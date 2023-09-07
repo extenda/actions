@@ -15,7 +15,7 @@ describe('buildManifest', () => {
   });
 
   test('should generate manifest file with correct content', async () => {
-    const mockWriteFile = jest.spyOn(fs, 'writeFile').mockImplementation();
+    const mockWriteFile = jest.spyOn(fs, 'writeFileSync').mockImplementation();
 
     const image = 'example-image:latest';
     const service = {
@@ -64,7 +64,7 @@ deploy:
   kubectl:
     manifests:
       - k8s-*`),
-      expect.anything(),
+      { encoding: 'utf-8' },
     );
 
     expect(mockWriteFile).toHaveBeenCalledWith(
@@ -73,13 +73,13 @@ deploy:
 kind: DeliveryPipeline
 metadata:
   name: example-service`),
-      expect.anything(),
+      { encoding: 'utf-8' },
     );
 
     expect(mockWriteFile).not.toHaveBeenCalledWith(
       'k8s-opa-config.yaml',
       expect.any(String),
-      expect.anything(),
+      { encoding: 'utf-8' },
     );
 
     expect(mockWriteFile).toHaveBeenCalledWith(
@@ -88,12 +88,18 @@ metadata:
 kind: Namespace
 metadata:
   name: example-service`),
-      expect.any(Function),
+      { encoding: 'utf-8' },
     );
+
+    expect(mockWriteFile).toHaveBeenCalledWith('.gcloudignore', `*
+!k8s-*
+!skaffold.yaml
+!clouddeploy.yaml
+`, { encoding: 'utf-8' });
   });
 
   test('should generate opa manifest', async () => {
-    const mockWriteFile = jest.spyOn(fs, 'writeFile').mockImplementation();
+    const mockWriteFile = jest.spyOn(fs, 'writeFileSync').mockImplementation();
     checkSystem.mockResolvedValueOnce({ id: 'some-id' });
 
     const opaConfig = {
@@ -171,7 +177,7 @@ data:
   conf.yaml: |
     services:
         - name: styra`),
-      expect.anything(),
+      { encoding: 'utf-8' },
     );
   });
 });
