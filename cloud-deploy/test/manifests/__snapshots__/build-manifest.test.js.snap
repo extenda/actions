@@ -1,0 +1,258 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildManifest should generate manifest file with correct content 1`] = `
+[
+  "k8s-manifest.yaml",
+  "apiVersion: v1
+kind: Namespace
+metadata:
+  name: example-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-service
+  namespace: example-service
+  annotations:
+    cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
+  labels:
+    networking.gke.io/service-name: example-service
+spec:
+  type: NodePort
+  selector:
+    app: example-service
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+      name: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-service
+  namespace: example-service
+  labels:
+    app: example-service
+    label1: labelValue1
+    label2: labelValue2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: example-service
+  template:
+    metadata:
+      labels:
+        app: example-service
+    spec:
+      serviceAccountName: workload-identity-sa
+      containers:
+        - image: example-image:latest
+          imagePullPolicy: IfNotPresent
+          name: user-container
+          volumeMounts: []
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            failureThreshold: 10
+            timeoutSeconds: 3
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 1
+              memory: 512Mi
+          env:
+            - name: KEY1
+              value: value1
+            - name: KEY2
+              value: value2
+            - name: KEY3
+              value: '8080'
+            - name: SECRET
+              value: sm://example-project/test-secret
+            - name: SERVICE_NAME
+              value: example-service
+            - name: SERVICE_PROJECT_ID
+              value: example-project
+            - name: SERVICE_ENVIRONMENT
+              value: production
+            - name: SERVICE_CONTAINER_IMAGE
+              value: example-image:latest
+            - name: CLAN_NAME
+              value: example-clan
+            - name: PORT
+              value: '8080'
+            - name: K_SERVICE
+              value: example-service
+      volumes: []
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: example-service
+  namespace: example-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: deployment
+    name: example-service
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 40
+",
+  {
+    "encoding": "utf-8",
+  },
+]
+`;
+
+exports[`buildManifest should generate opa manifest 1`] = `
+[
+  "k8s-manifest.yaml",
+  "apiVersion: v1
+kind: Namespace
+metadata:
+  name: example-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-service
+  namespace: example-service
+  annotations:
+    cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
+  labels:
+    networking.gke.io/service-name: example-service
+spec:
+  type: NodePort
+  selector:
+    app: example-service
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+      name: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-service
+  namespace: example-service
+  labels:
+    app: example-service
+    label1: labelValue1
+    label2: labelValue2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: example-service
+  template:
+    metadata:
+      labels:
+        app: example-service
+    spec:
+      serviceAccountName: workload-identity-sa
+      containers:
+        - image: example-image:latest
+          imagePullPolicy: IfNotPresent
+          name: user-container
+          volumeMounts: []
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            failureThreshold: 10
+            timeoutSeconds: 3
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 1
+              memory: 512Mi
+          env:
+            - name: KEY1
+              value: value1
+            - name: KEY2
+              value: value2
+            - name: SERVICE_NAME
+              value: example-service
+            - name: SERVICE_PROJECT_ID
+              value: example-project
+            - name: SERVICE_ENVIRONMENT
+              value: dev
+            - name: SERVICE_CONTAINER_IMAGE
+              value: example-image:latest
+            - name: CLAN_NAME
+              value: example-clan
+            - name: PORT
+              value: '8080'
+            - name: K_SERVICE
+              value: example-service
+        - image: eu.gcr.io/extenda/security:authz
+          name: security-auth
+          ports:
+            - containerPort: 9001
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 0.5
+              memory: 512Mi
+          env:
+            - name: ENVOY_PROTOCOL
+              value: http
+          volumeMounts:
+            - mountPath: /config
+              name: opa
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 9001
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 5
+      volumes:
+        - name: opa
+          configMap:
+            name: opa-envoy-config
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: example-service
+  namespace: example-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: deployment
+    name: example-service
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 40
+",
+  {
+    "encoding": "utf-8",
+  },
+]
+`;

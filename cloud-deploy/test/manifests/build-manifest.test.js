@@ -114,6 +114,9 @@ metadata:
 !skaffold.yaml
 !clouddeploy.yaml
 `, { encoding: 'utf-8' });
+
+    // Snapshot test for k8s-manifest.yaml.
+    expect(mockWriteFile.mock.calls[2]).toMatchSnapshot();
   });
 
   test('should generate opa manifest', async () => {
@@ -197,5 +200,7 @@ data:
         - name: styra`),
       { encoding: 'utf-8' },
     );
+    // Snapshot test for k8s-manifest.yaml.
+    expect(mockWriteFile.mock.calls[3]).toMatchSnapshot();
   });
 });
