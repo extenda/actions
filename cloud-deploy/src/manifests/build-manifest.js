@@ -343,7 +343,7 @@ const buildManifest = async (
 
   const envArray = Object.entries(environment).map(([key, value]) => ({
     name: key,
-    value: value.match(/^\d+$/) == null ? value.replace('*', projectId) : `'${value}'`,
+    value: value.replace('sm://*/', `sm://${projectId}/`),
   }));
 
   const labelArray = Object.entries(labels).map(([key, value]) => ({

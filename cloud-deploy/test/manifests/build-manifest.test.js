@@ -43,6 +43,8 @@ describe('buildManifest', () => {
           env: {
             KEY1: 'value1',
             KEY2: 'value2',
+            KEY3: '8080',
+            SECRET: 'sm://*/test-secret',
           },
         },
         staging: 'none',
@@ -88,6 +90,22 @@ metadata:
 kind: Namespace
 metadata:
   name: example-service`),
+      { encoding: 'utf-8' },
+    );
+
+    expect(mockWriteFile).toHaveBeenCalledWith(
+      'k8s-manifest.yaml',
+      expect.stringContaining(`
+            - name: KEY3
+              value: '8080'`),
+      { encoding: 'utf-8' },
+    );
+
+    expect(mockWriteFile).toHaveBeenCalledWith(
+      'k8s-manifest.yaml',
+      expect.stringContaining(`
+            - name: SECRET
+              value: sm://example-project/test-secret`),
       { encoding: 'utf-8' },
     );
 
