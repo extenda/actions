@@ -62,8 +62,8 @@ A Kubernetes deployment with IAM security resources customized.
 
 ```yaml
 kubernetes:
+  type: Deployment
   service: my-service
-  type: deployment
   resources:
     cpu: 1
     memory: 512Mi
@@ -102,8 +102,8 @@ default 300s to 900s. This service will only be available on the internal domain
 
 ```yaml
 kubernetes:
+  type: Deployment
   service: my-service
-  type: deployment
   resources:
     cpu: 1
     memory: 512Mi
@@ -133,8 +133,8 @@ persistent disk shared in the set.
 
 ```yaml
 kubernetes:
+  type: StatefulSet
   service: my-service
-  type: stateful-set
   resources:
     cpu: 1
     memory: 512Mi
