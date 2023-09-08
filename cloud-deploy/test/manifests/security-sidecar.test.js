@@ -19,7 +19,7 @@ describe('manifests/security-sidecar', () => {
       'images',
       'describe',
       'eu.gcr.io/extenda/security:authz',
-      '--format="get(image_summary.digest)"',
+      '--format=get(image_summary.digest)',
     ]);
   });
   test('It uses a sha256 digest with image', async () => {
