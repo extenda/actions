@@ -64,6 +64,16 @@ spec:
             requests:
               cpu: 1
               memory: 512Mi
+          volumeClaimTemplates:
+            - metadata:
+                name: example-service
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                storageClassName: premium-rwo
+                resources:
+                  requests:
+                    storage: 1Gi
           env:
             - name: KEY1
               value: value1
@@ -84,16 +94,6 @@ spec:
             - name: K_SERVICE
               value: example-service
       volumes: []
-      volumeClaimTemplates:
-        - metadata:
-            name: example-service
-          spec:
-            accessModes:
-              - ReadWriteOnce
-            storageClassName: premium-rwo
-            resources:
-              requests:
-                storage: 1Gi
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler

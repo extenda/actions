@@ -142,6 +142,26 @@ const manifestTemplate = async (
                   memory: memoryRequest,
                 },
               },
+              ...(volumes && type.toLowerCase() === 'statefulset'
+              ? {
+                volumeClaimTemplates: [
+                  {
+                    metadata: {
+                      name: `${name}`,
+                    },
+                    spec: {
+                      accessModes: ['ReadWriteOnce'],
+                      storageClassName: volumes[0]['disk-type'] === 'hdd' ? 'standard' : 'premium-rwo',
+                      resources: {
+                        requests: {
+                          storage: volumes[0].size,
+                        },
+                      },
+                    },
+                  },
+                ],
+              }
+              : {}),
               env: environment.map((env) => ({
                 name: env.name,
                 value: env.value,
@@ -171,26 +191,6 @@ const manifestTemplate = async (
               : []),
           ],
           volumes: deploymentVolumes,
-          ...(volumes && type.toLowerCase() === 'statefulset'
-            ? {
-              volumeClaimTemplates: [
-                {
-                  metadata: {
-                    name: `${name}`,
-                  },
-                  spec: {
-                    accessModes: ['ReadWriteOnce'],
-                    storageClassName: volumes[0]['disk-type'] === 'hdd' ? 'standard' : 'premium-rwo',
-                    resources: {
-                      requests: {
-                        storage: volumes[0].size,
-                      },
-                    },
-                  },
-                },
-              ],
-            }
-            : {}),
         },
       },
     },
