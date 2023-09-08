@@ -11,6 +11,7 @@ const configureInternalFrontend = require('./loadbalancing/internal/create-inter
 const { run, failIfNotTrunkBased } = require('../../utils');
 const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
 const readSecret = require('./utils/load-credentials');
+const runScan = require('./utils/vulnerability-scanning');
 
 const action = async () => {
   const serviceAccountKeyPipeline = core.getInput('secrets-account-key', { required: true });
@@ -66,6 +67,13 @@ const action = async () => {
   const {
     'domain-mappings': domainMappings,
   } = env === 'staging' ? staging : production;
+
+  // Trivvy scanning
+  if (process.platform !== 'win32') {
+    if (process.env.ENABLE_TRIVY === 'true') {
+      await runScan(serviceAccountKeyCICD, image);
+    }
+  }
 
   // setup manifests (hpa, deploy, negs)
   const version = new Date().getTime();
