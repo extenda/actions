@@ -70,7 +70,7 @@ const action = async () => {
 
   // Trivvy scanning
   if (process.platform !== 'win32') {
-    if (process.env.ENABLE_TRIVY === 'true') {
+    if (env !== 'staging') {
       await runScan(serviceAccountKeyCICD, image);
     }
   }
