@@ -5,28 +5,7 @@ jest.mock('../../src/utils/gcloud-output');
 
 describe('manifests/security-sidecar', () => {
   beforeEach(() => {
-    gcloudOutput.mockResolvedValueOnce(`[
-  {
-    "digest": "sha256:043112bde49f2244cf9e4c44d059603a7c056d13ad61ef3492f04374ac9a0396",
-    "tags": [
-      "66d83f7268fd539ba053dcae1e8f40d9b00601f2",
-      "authz",
-      "v0.2.0"
-    ],
-    "timestamp": {
-      "datetime": "2023-09-07 16:37:06+02:00",
-      "day": 7,
-      "fold": 0,
-      "hour": 16,
-      "microsecond": 0,
-      "minute": 37,
-      "month": 9,
-      "second": 6,
-      "year": 2023
-    }
-  }
-]
-`);
+    gcloudOutput.mockResolvedValueOnce('sha256:043112bde49f2244cf9e4c44d059603a7c056d13ad61ef3492f04374ac9a0396');
   });
 
   afterEach(() => {
@@ -38,10 +17,9 @@ describe('manifests/security-sidecar', () => {
     expect(gcloudOutput).toHaveBeenCalledWith([
       'container',
       'images',
-      'list-tags',
-      'eu.gcr.io/extenda/security',
-      '--filter="tags:authz"',
-      '--format=json',
+      'describe',
+      'eu.gcr.io/extenda/security:authz',
+      '--format="get(image_summary.digest)"',
     ]);
   });
   test('It uses a sha256 digest with image', async () => {
