@@ -1,22 +1,32 @@
+const mockFs = require('mock-fs');
 const fs = require('fs');
 const yaml = require('js-yaml');
 const buildManifest = require('../../src/manifests/build-manifest');
 const checkSystem = require('../../src/manifests/check-system');
 const buildOpaConfig = require('../../src/manifests/opa-config');
+const securitySpec = require('../../src/manifests/security-sidecar');
+const { addNamespace } = require('../../src/utils/add-namespace');
 
-jest.mock('fs');
 jest.mock('../../src/manifests/check-system');
 jest.mock('../../src/manifests/opa-config');
 jest.mock('../../src/utils/add-namespace');
+jest.mock('../../src/manifests/security-sidecar');
+
+const readFileSync = (file) => fs.readFileSync(file, { encoding: 'utf-8' });
 
 describe('buildManifest', () => {
   afterEach(() => {
     jest.clearAllMocks();
+    mockFs.restore();
+  });
+
+  beforeEach(() => {
+    mockFs({});
+    addNamespace.mockResolvedValueOnce('');
   });
 
   test('should generate manifest file with correct content', async () => {
-    const mockWriteFile = jest.spyOn(fs, 'writeFileSync').mockImplementation();
-
+    // const mockWriteFile = jest.spyOn(fs, 'writeFileSync').mockImplementation();'
     const image = 'example-image:latest';
     const service = {
       kubernetes: {
@@ -54,71 +64,61 @@ describe('buildManifest', () => {
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, 'styra-token');
+    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '');
 
     expect(checkSystem).not.toHaveBeenCalled();
+    expect(securitySpec).not.toHaveBeenCalled();
 
-    expect(mockWriteFile).toHaveBeenCalledWith(
-      'skaffold.yaml',
-      expect.stringContaining(`apiVersion: skaffold/v2beta16
+    expect(readFileSync('skaffold.yaml')).toContain(`apiVersion: skaffold/v2beta16
 kind: Config
 deploy:
   kubectl:
     manifests:
-      - k8s-*`),
-      { encoding: 'utf-8' },
-    );
+      - k8s-*`);
 
-    expect(mockWriteFile).toHaveBeenCalledWith(
-      'clouddeploy.yaml',
-      expect.stringContaining(`apiVersion: deploy.cloud.google.com/v1
+    expect(readFileSync('clouddeploy.yaml')).toContain(`apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
-  name: example-service`),
-      { encoding: 'utf-8' },
-    );
+  name: example-service`);
 
-    expect(mockWriteFile).not.toHaveBeenCalledWith(
-      'k8s-opa-config.yaml',
-      expect.any(String),
-      { encoding: 'utf-8' },
-    );
+    expect(fs.existsSync('k8s-opa-config.yaml')).toEqual(false);
 
-    expect(mockWriteFile).toHaveBeenCalledWith(
-      'k8s-manifest.yaml',
-      expect.stringContaining(`apiVersion: v1
+    const k8sManifest = readFileSync('k8s-manifest.yaml');
+
+    expect(k8sManifest).toContain(`apiVersion: v1
 kind: Namespace
 metadata:
-  name: example-service`),
-      { encoding: 'utf-8' },
-    );
+  name: example-service`);
 
-    expect(mockWriteFile).toHaveBeenCalledWith(
-      'k8s-manifest.yaml',
-      expect.stringContaining(`
+    expect(k8sManifest).toContain(`
             - name: KEY3
-              value: '8080'`),
-      { encoding: 'utf-8' },
-    );
+              value: '8080'`);
 
-    expect(mockWriteFile).toHaveBeenCalledWith(
-      'k8s-manifest.yaml',
-      expect.stringContaining(`
+    expect(k8sManifest).toContain(`
             - name: SECRET
-              value: sm://example-project/test-secret`),
-      { encoding: 'utf-8' },
-    );
+              value: sm://example-project/test-secret`);
 
-    expect(mockWriteFile).toHaveBeenCalledWith('.gcloudignore', `*
+    expect(readFileSync('.gcloudignore')).toEqual(`*
 !k8s-*
 !skaffold.yaml
 !clouddeploy.yaml
-`, { encoding: 'utf-8' });
+`);
+
+    // Snapshot test for k8s-manifest.yaml.
+    mockFs.restore();
+    expect(k8sManifest).toMatchSnapshot();
   });
 
   test('should generate opa manifest', async () => {
-    const mockWriteFile = jest.spyOn(fs, 'writeFileSync').mockImplementation();
+    // const mockWriteFile = jest.spyOn(fs, 'writeFileSync').mockImplementation();
     checkSystem.mockResolvedValueOnce({ id: 'some-id' });
+    securitySpec.mockResolvedValueOnce({
+      name: 'security-authz',
+      image: 'eu.gcr.io/extenda/security:authz',
+      ports: [{ containerPort: 9001 }],
+      env: [{ name: 'ENVOY_PROTOCOL', value: 'http' }],
+      volumeMounts: [{ mountPath: '/config', name: 'opa', readOnly: true }],
+    });
 
     const opaConfig = {
       kind: 'ConfigMap',
@@ -182,11 +182,9 @@ metadata:
     const clanName = 'example-clan';
     const env = 'dev';
 
-    await buildManifest(image, service, projectId, clanName, env, 'styra-token');
+    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '');
 
-    expect(mockWriteFile).toHaveBeenCalledWith(
-      'k8s-opa-config.yaml',
-      expect.stringContaining(`kind: ConfigMap
+    expect(readFileSync('k8s-opa-config.yaml')).toContain(`kind: ConfigMap
 apiVersion: v1
 metadata:
   name: opa-envoy-config
@@ -194,8 +192,93 @@ metadata:
 data:
   conf.yaml: |
     services:
-        - name: styra`),
-      { encoding: 'utf-8' },
-    );
+        - name: styra`);
+
+    // Snapshot test for k8s-manifest.yaml.
+    const manifest = readFileSync('k8s-manifest.yaml');
+    mockFs.restore();
+    expect(manifest).toMatchSnapshot();
+  });
+
+  test('It should generate manifest without HPA for static StatefulSet', async () => {
+    const image = 'example-image:latest';
+    const service = {
+      kubernetes: {
+        type: 'StatefulSet',
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          cpu: 40,
+        },
+      },
+      security: 'none',
+      environments: {
+        production: {
+          'min-instances': 3,
+          'max-instances': 3,
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'dev';
+
+    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '');
+
+    // Snapshot test for k8s-manifest.yaml.
+    const manifest = readFileSync('k8s-manifest.yaml');
+    mockFs.restore();
+    expect(manifest).toMatchSnapshot();
+  });
+
+  test('It should generate manifest with volumes for StatefulSet', async () => {
+
+    const image = 'example-image:latest';
+    const service = {
+      kubernetes: {
+        type: 'StatefulSet',
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          cpu: 40,
+        },
+        volumes: [{
+          'disk-type': 'ssd',
+          size: '1Gi',
+          'mount-path': '/mnt/shared/data',
+        }],
+      },
+      security: 'none',
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+          },
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'dev';
+
+    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '');
+
+    // Snapshot test for k8s-manifest.yaml.
+    const manifest = readFileSync('k8s-manifest.yaml');
+    mockFs.restore();
+    expect(manifest).toMatchSnapshot();
   });
 });

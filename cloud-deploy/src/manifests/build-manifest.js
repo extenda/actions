@@ -3,6 +3,7 @@ const yaml = require('js-yaml');
 const checkSystem = require('./check-system');
 const buildOpaConfig = require('./opa-config');
 const { addNamespace } = require('../utils/add-namespace');
+const securitySpec = require('./security-sidecar');
 
 const convertToYaml = (json) => yaml.dump(json);
 
@@ -15,17 +16,6 @@ const volumeSetup = (opa, protocol, type) => {
     }
   }
   return volumes;
-};
-
-const securityContainerVolumeMountSetup = (opa, protocol, type) => {
-  const volumeMounts = [];
-  if (opa && type === 'Deployment') {
-    volumeMounts.push({ mountPath: '/config', name: 'opa', readOnly: true });
-    if (protocol === 'http2') {
-      volumeMounts.push({ mountPath: '/etc/extenda/certs', name: 'extenda-certs', readOnly: true });
-    }
-  }
-  return volumeMounts;
 };
 
 const userContainerVolumeMountSetup = (opa, protocol, type, volumes, name) => {
@@ -60,11 +50,7 @@ const manifestTemplate = async (
 ) => {
   const deploymentVolumes = volumeSetup(opa, protocol, type);
   const userVolumeMounts = userContainerVolumeMountSetup(opa, protocol, type, volumes, name);
-  const securityVolumeMounts = securityContainerVolumeMountSetup(
-    opa,
-    protocol,
-    type,
-  );
+  const securityContainer = opa ? await securitySpec(protocol) : {};
 
   const namespace = {
     apiVersion: 'v1',
@@ -162,39 +148,26 @@ const manifestTemplate = async (
               })),
             },
             ...(opa && type === 'Deployment'
-              ? [
-                {
-                  image: 'eu.gcr.io/extenda/security:authz',
-                  name: 'security-auth',
-                  ports: [
-                    {
-                      containerPort: 9001,
-                    },
-                  ],
-                  imagePullPolicy: 'IfNotPresent',
-                  resources: {
-                    requests: {
-                      cpu: opaCpu,
-                      memory: opaMemory,
-                    },
-                  },
-                  env: [{
-                    name: 'ENVOY_PROTOCOL',
-                    value: protocol === 'http' ? 'http' : 'http2',
-                  }],
-                  volumeMounts: securityVolumeMounts,
-                  readinessProbe: {
-                    httpGet: {
-                      path: '/health',
-                      port: 9001,
-                    },
-                    initialDelaySeconds: 5,
-                    periodSeconds: 5,
-                    timeoutSeconds: 5,
-                    failureThreshold: 5,
+              ? [{
+                ...securityContainer,
+                imagePullPolicy: 'IfNotPresent',
+                resources: {
+                  requests: {
+                    cpu: opaCpu,
+                    memory: opaMemory,
                   },
                 },
-              ]
+                readinessProbe: {
+                  httpGet: {
+                    path: '/health',
+                    port: 9001,
+                  },
+                  initialDelaySeconds: 5,
+                  periodSeconds: 5,
+                  timeoutSeconds: 5,
+                  failureThreshold: 5,
+                },
+              }]
               : []),
           ],
           volumes: deploymentVolumes,
@@ -314,7 +287,6 @@ const buildManifest = async (
     labels = [],
     security,
     environments = [],
-    volumes,
   } = deployYaml;
 
   const {
@@ -323,6 +295,7 @@ const buildManifest = async (
     protocol,
     resources,
     scaling,
+    volumes,
   } = kubernetes;
 
   const {
