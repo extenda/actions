@@ -7,7 +7,7 @@ const getSecurityImage = async () => gcloudOutput([
   'images',
   'describe',
   `${IMAGE_NAME}:authz`,
-  '--format="get(image_summary.digest)"',
+  '--format=get(image_summary.digest)',
 ]).then((digest) => `${IMAGE_NAME}@${digest}`);
 
 const volumeMounts = (protocol) => {
