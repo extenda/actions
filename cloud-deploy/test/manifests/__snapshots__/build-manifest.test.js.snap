@@ -37,6 +37,16 @@ spec:
   selector:
     matchLabels:
       app: example-service
+  volumeClaimTemplates:
+    - metadata:
+        name: example-service
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: premium-rwo
+        resources:
+          requests:
+            storage: 1Gi
   template:
     metadata:
       labels:
@@ -64,16 +74,6 @@ spec:
             requests:
               cpu: 1
               memory: 512Mi
-          volumeClaimTemplates:
-            - metadata:
-                name: example-service
-              spec:
-                accessModes:
-                  - ReadWriteOnce
-                storageClassName: premium-rwo
-                resources:
-                  requests:
-                    storage: 1Gi
           env:
             - name: KEY1
               value: value1
