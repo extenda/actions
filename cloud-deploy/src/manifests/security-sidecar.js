@@ -5,13 +5,10 @@ const IMAGE_NAME = 'eu.gcr.io/extenda/security';
 const getSecurityImage = async () => gcloudOutput([
   'container',
   'images',
-  'list-tags',
-  IMAGE_NAME,
-  '--filter="tags:authz"',
-  '--format=json',
-])
-  .then(JSON.parse)
-  .then((json) => `${IMAGE_NAME}@${json[0].digest}`);
+  'describe',
+  `${IMAGE_NAME}:authz`,
+  '--format="get(image_summary.digest)"',
+]).then((digest) => `${IMAGE_NAME}@${digest}`);
 
 const volumeMounts = (protocol) => {
   const volumes = [];
