@@ -15,6 +15,7 @@
   },
   "required": [
     "security",
+    "labels",
     "environments"
   ],
   "oneOf": [
@@ -333,14 +334,16 @@
     "Labels": {
       "title": "Labels",
       "type": "object",
+      "required": [
+        "component",
+        "product"
+      ],
       "properties": {
         "component": {
-          "$ref": "#/$defs/Label",
-          "default": "component-not-set"
+          "$ref": "#/$defs/Label"
         },
         "product": {
-          "$ref": "#/$defs/Label",
-          "default": "product-not-set"
+          "$ref": "#/$defs/Label"
         },
         "iso-country": {
           "$ref": "#/$defs/Label",
@@ -348,7 +351,7 @@
         },
         "tenant-alias": {
           "$ref": "#/$defs/Label",
-          "default": "not-tenant-specific"
+          "default": "multi-tenant"
         }
       },
       "patternProperties": {

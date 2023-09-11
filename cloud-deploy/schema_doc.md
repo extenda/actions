@@ -59,7 +59,7 @@
 
 | Property                         | Pattern | Type   | Deprecated | Definition              | Title/Description   |
 | -------------------------------- | ------- | ------ | ---------- | ----------------------- | ------------------- |
-| - [labels](#labels )             | No      | object | No         | In #/$defs/Labels       | -                   |
+| + [labels](#labels )             | No      | object | No         | In #/$defs/Labels       | -                   |
 | + [security](#security )         | No      | object | No         | In #/$defs/Security     | -                   |
 | + [environments](#environments ) | No      | object | No         | In #/$defs/Environments | Deploy environments |
 
@@ -384,26 +384,25 @@ Must be one of:
 |                           |                                                         |
 | ------------------------- | ------------------------------------------------------- |
 | **Type**                  | `object`                                                |
-| **Required**              | No                                                      |
+| **Required**              | Yes                                                     |
 | **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
 | **Defined in**            | #/$defs/Labels                                          |
 
 | Property                                | Pattern | Type   | Deprecated | Definition                              | Title/Description |
 | --------------------------------------- | ------- | ------ | ---------- | --------------------------------------- | ----------------- |
-| - [component](#labels_component )       | No      | string | No         | In #/$defs/Label                        | A label value     |
-| - [product](#labels_product )           | No      | string | No         | Same as [component](#labels_component ) | A label value     |
+| + [component](#labels_component )       | No      | string | No         | In #/$defs/Label                        | A label value     |
+| + [product](#labels_product )           | No      | string | No         | Same as [component](#labels_component ) | A label value     |
 | - [iso-country](#labels_iso-country )   | No      | string | No         | Same as [component](#labels_component ) | A label value     |
 | - [tenant-alias](#labels_tenant-alias ) | No      | string | No         | Same as [component](#labels_component ) | A label value     |
 | - [^[a-z-]+$](#labels_pattern1 )        | Yes     | string | No         | Same as [component](#labels_component ) | A label value     |
 
 ### <a name="labels_component"></a>3.1. Property `CloudDeploy > labels > component`
 
-|                |                       |
-| -------------- | --------------------- |
-| **Type**       | `string`              |
-| **Required**   | No                    |
-| **Default**    | `"component-not-set"` |
-| **Defined in** | #/$defs/Label         |
+|                |               |
+| -------------- | ------------- |
+| **Type**       | `string`      |
+| **Required**   | Yes           |
+| **Defined in** | #/$defs/Label |
 
 **Description:** A label value
 
@@ -416,8 +415,7 @@ Must be one of:
 |                        |                                |
 | ---------------------- | ------------------------------ |
 | **Type**               | `string`                       |
-| **Required**           | No                             |
-| **Default**            | `"product-not-set"`            |
+| **Required**           | Yes                            |
 | **Same definition as** | [component](#labels_component) |
 
 **Description:** A label value
@@ -439,7 +437,7 @@ Must be one of:
 | ---------------------- | ------------------------------ |
 | **Type**               | `string`                       |
 | **Required**           | No                             |
-| **Default**            | `"not-tenant-specific"`        |
+| **Default**            | `"multi-tenant"`               |
 | **Same definition as** | [component](#labels_component) |
 
 **Description:** A label value
@@ -754,4 +752,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-09-03 at 00:02:49 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-09-11 at 11:42:31 +0200

@@ -45,6 +45,8 @@ describe('buildManifest', () => {
       labels: {
         label1: 'labelValue1',
         label2: 'labelValue2',
+        product: 'actions',
+        component: 'jest',
       },
       environments: {
         production: {
@@ -163,6 +165,8 @@ metadata:
         'permission-prefix': 'tst',
       },
       labels: {
+        product: 'actions',
+        component: 'jest',
         label1: 'labelValue1',
         label2: 'labelValue2',
       },
@@ -216,6 +220,10 @@ data:
         },
       },
       security: 'none',
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
       environments: {
         production: {
           'min-instances': 3,
@@ -258,6 +266,12 @@ data:
         }],
       },
       security: 'none',
+      labels: {
+        product: 'actions',
+        component: 'jest',
+        'iso-country': 'se',
+        'tenant-alias': 'testrunner',
+      },
       environments: {
         production: {
           'min-instances': 1,

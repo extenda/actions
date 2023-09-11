@@ -39,6 +39,10 @@ cloud-run:
 security:
   permission-prefix: mye
 
+labels:
+  product: my-product
+  component: my-component
+
 environments:
   production:
     min-instances: 1
@@ -77,6 +81,10 @@ security:
     cpu: 1
     memory: 1Gi
 
+labels:
+  product: my-product
+  component: my-component
+
 environments:
   production:
     min-instances: 1
@@ -112,7 +120,11 @@ kubernetes:
   scaling:
     cpu: 50
 
-security: 'none'
+security: none
+
+labels:
+  product: my-product
+  component: my-component
 
 environments:
   production:
@@ -147,6 +159,10 @@ kubernetes:
       mount-path: /mnt/shared/data
 
 security: none
+
+labels:
+  product: my-product
+  component: my-component
 
 environments:
   production:

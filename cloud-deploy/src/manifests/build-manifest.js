@@ -319,6 +319,14 @@ const buildManifest = async (
     value: value.replace('sm://*/', `sm://${projectId}/`),
   }));
 
+  // Default label values.
+  if (!labels['tenant-alias']) {
+    labels['tenant-alias'] = 'multi-tenant';
+  }
+  if (!labels['iso-country']) {
+    labels['iso-country'] = 'global';
+  }
+
   const labelArray = Object.entries(labels).map(([key, value]) => ({
     name: key,
     value,
