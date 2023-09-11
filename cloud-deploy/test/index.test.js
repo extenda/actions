@@ -40,6 +40,10 @@ const serviceDef = {
     },
   },
   security: 'none',
+  labels: {
+    product: 'actions',
+    component: 'jest',
+  },
   environments: {
     production: {
       'min-instances': 1,
