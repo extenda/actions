@@ -245,7 +245,6 @@ data:
   });
 
   test('It should generate manifest with volumes for StatefulSet', async () => {
-
     const image = 'example-image:latest';
     const service = {
       kubernetes: {

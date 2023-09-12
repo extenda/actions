@@ -1,6 +1,6 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
-const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
+const { setupGcloud } = require('../../setup-gcloud');
 const getRuntimeAccount = require('./runtime-account');
 const createEnvironmentArgs = require('./environment-args');
 const { getClusterInfo } = require('./cluster-info');
@@ -11,11 +11,6 @@ const authenticateKubeCtl = require('./kubectl-auth');
 const cleanRevisions = require('./clean-revisions');
 const checkServiceAccount = require('./check-sa');
 const runScan = require('./vulnerability-scanning');
-
-const gcloudAuth = async (serviceAccountKey) => setupGcloud(
-  serviceAccountKey,
-  process.env.GCLOUD_INSTALLED_VERSION || 'latest',
-);
 
 const numericOrDefault = (value) => (value >= 0 ? value : 'default');
 
@@ -200,7 +195,7 @@ const runDeploy = async (
   retryInterval = 5000,
 ) => {
   // Authenticate gcloud with our service-account
-  const projectId = await gcloudAuth(serviceAccountKey);
+  const projectId = await setupGcloud(serviceAccountKey);
 
   if (process.platform !== 'win32') {
     if (process.env.ENABLE_TRIVY === 'true') {

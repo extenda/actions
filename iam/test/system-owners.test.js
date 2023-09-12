@@ -1,12 +1,12 @@
 jest.mock('@actions/core');
 jest.mock('../../cloud-run/src/project-info');
 jest.mock('../../cloud-run/src/cluster-info');
-jest.mock('../../setup-gcloud-base/src/setup-gcloud');
+jest.mock('../../setup-gcloud');
 
 const projectInfo = require('../../cloud-run/src/project-info');
 const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 const getSystemOwners = require('../src/system-owners');
-const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
+const { setupGcloud } = require('../../setup-gcloud');
 
 const mockContents = jest.fn();
 

@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const { createAttestation, getArtifactUrl } = require('./create-sign-attestion');
 const { run } = require('../../utils');
-const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
+const { setupGcloud } = require('../../setup-gcloud');
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
@@ -17,7 +17,7 @@ const action = async () => {
   const tag = imagePath.split(':')[1] || process.env.GITHUB_SHA;
   const artifactUrl = await getArtifactUrl(tag, imagePath);
 
-  await setupGcloud(serviceAccountKey, process.env.GCLOUD_INSTALLED_VERSION || 'latest');
+  await setupGcloud(serviceAccountKey);
   await createAttestation(
     artifactUrl,
     attestor,
