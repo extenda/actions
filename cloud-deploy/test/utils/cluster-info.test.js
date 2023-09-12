@@ -1,7 +1,6 @@
 jest.mock('@actions/exec');
 jest.mock('../../src/utils/gcloud-output');
 
-const exec = require('@actions/exec');
 const { getClusterInfo } = require('../../src/utils/cluster-info');
 const execGcloud = require('../../src/utils/gcloud-output');
 
