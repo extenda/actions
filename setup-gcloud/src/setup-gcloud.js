@@ -52,6 +52,7 @@ const installComponents = async () => execGcloud([
   'components',
   'install',
   'gke-gcloud-auth-plugin',
+  'beta',
   '--quiet',
   '--no-user-output-enabled',
 ]).then(() => {
