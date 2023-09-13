@@ -1030,4 +1030,9 @@ test('It returns a sorted list of revisions', async () => {
     },
   ]);
   expect(exec).toHaveBeenCalled();
+  expect(exec).toHaveBeenCalledWith(
+    'gcloud',
+    expect.arrayContaining(['--format=json']),
+    expect.anything(),
+  );
 });
