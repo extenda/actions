@@ -4,7 +4,7 @@ const core = require('@actions/core');
 const io = require('@actions/io');
 const { restoreCache, saveCache } = require('@actions/cache');
 const { v4: uuid } = require('uuid');
-const { loadTool } = require('../../utils');
+const { loadTool, findTool } = require('../../utils');
 const createKeyFile = require('../../utils/src/create-key-file');
 const getDownloadUrl = require('./download-url');
 const getLatestVersion = require('./latest-version');
@@ -92,23 +92,27 @@ const authenticateGcloud = async (serviceAccountKey, exportCredentials) => {
 const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredentials = false) => {
   const gcloudVersion = await getGcloudVersion(version);
   const cachePath = path.join(process.env.RUNNER_TOOL_CACHE, 'gcloud', gcloudVersion);
-  const cacheKey = `${process.env.RUNNER_OS}-gcloud-cache-${gcloudVersion}-v${CACHE_VERSION}`;
+  const cacheKey = `${process.env.RUNNER_OS}-${process.env.RUNNER_ARCH}-gcloud-cache-${gcloudVersion}-v${CACHE_VERSION}`;
+  const toolInfo = {
+    tool: 'gcloud',
+    binary: 'google-cloud-sdk',
+    version: gcloudVersion,
+  };
 
   const restoredKey = await restoreCache([cachePath], cacheKey);
   if (restoredKey === undefined) {
     core.info(`Install gcloud ${gcloudVersion}`);
     const downloadUrl = getDownloadUrl(gcloudVersion);
     await loadTool({
-      tool: 'gcloud',
-      binary: 'google-cloud-sdk',
-      version: gcloudVersion,
+      ...toolInfo,
       downloadUrl,
-    }).then(() => updatePath(cachePath))
+    }).then((toolPath) => updatePath(toolPath))
       .then(() => installComponents())
       .then(() => saveCache([cachePath], cacheKey));
   } else {
     core.info(`Use cached gcloud ${gcloudVersion}`);
-    await updatePath(cachePath);
+    await findTool(toolInfo)
+      .then((toolPath) => updatePath(toolPath));
   }
 
   core.exportVariable('GCLOUD_INSTALLED_VERSION', gcloudVersion);

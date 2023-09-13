@@ -2,8 +2,10 @@ const mockFs = require('mock-fs');
 const path = require('path');
 
 // Mock out tools download
+const mockFindTool = jest.fn();
 jest.mock('../../utils', () => ({
   loadTool: async () => Promise.resolve('gcloud'),
+  findTool: mockFindTool,
 }));
 
 jest.mock('@actions/cache');
@@ -34,6 +36,7 @@ describe('Setup Gcloud', () => {
     process.env = {
       RUNNER_TEMP: '/tmp',
       RUNNER_TOOL_CACHE: '/opt/toolcache',
+      RUNNER_ARCH: 'X64',
       ...orgEnv,
     };
 
@@ -70,6 +73,7 @@ describe('Setup Gcloud', () => {
   test('It can configure gcloud 280.0.0 from cache', async () => {
     exec.exec.mockResolvedValueOnce(0);
     restoreCache.mockResolvedValueOnce('found');
+    mockFindTool.mockResolvedValueOnce(path.join(process.env.RUNNER_TOOL_CACHE, 'gcloud', 'x64'));
     await setupGcloud(base64Key, '280.0.0');
     expect(exec.exec).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith(
@@ -80,6 +84,7 @@ describe('Setup Gcloud', () => {
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
     expect(core.exportVariable).toHaveBeenCalledWith('CLOUDSDK_CORE_PROJECT', 'test-project');
     expect(core.exportVariable).toHaveBeenCalledWith('GCLOUD_INSTALLED_VERSION', '280.0.0');
+    expect(mockFindTool).toHaveBeenCalled();
   });
 
   test('It can export GOOGLE_APPLICATION_CREDENTIALS', async () => {
@@ -92,6 +97,7 @@ describe('Setup Gcloud', () => {
   test('It can export GOOGLE_APPLICATION_CREDENTIALS and copy tmp file', async () => {
     exec.exec.mockResolvedValueOnce(0);
     restoreCache.mockResolvedValueOnce('found');
+    mockFindTool.mockResolvedValueOnce(path.join(process.env.RUNNER_TOOL_CACHE, 'gcloud', 'x64'));
     await setupGcloud(base64Key, 'latest', true);
     expect(core.exportVariable).toHaveBeenNthCalledWith(
       2,
