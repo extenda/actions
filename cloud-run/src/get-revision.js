@@ -1,27 +1,14 @@
-const exec = require('@actions/exec');
+const getRevisions = require('./get-revisions');
 
-const getLatestRevision = async (namespace, { cluster, clusterLocation, project }) => {
-  let output = '';
-  await exec.exec('gcloud', [
-    'run',
-    'revisions',
-    'list',
-    `--namespace=${namespace}`,
-    `--project=${project}`,
-    `--cluster=${cluster}`,
-    `--cluster-location=${clusterLocation}`,
-    '--platform=gke',
-    '--format=value(REVISION)',
-  ], {
-    silent: true,
-    listeners: {
-      stdout: (data) => {
-        output += data.toString('utf8');
-      },
-    },
+const getLatestRevision = async (
+  namespace,
+  { cluster, clusterLocation, project },
+) => getRevisions(namespace, cluster, clusterLocation, project)
+  .then((revisions) => {
+    if (!revisions) {
+      throw new Error('No revisions');
+    }
+    return revisions[0].name; // First revision is the latest.
   });
-  const list = output.trim().split(/[\r\n]+/);
-  return list[list.length - 1];
-};
 
 module.exports = getLatestRevision;
