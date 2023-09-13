@@ -10,6 +10,7 @@
     "@actions/exec": "^1.0.4",
     "@actions/io": "^1.0.2",
     "axios": "^0.25.0",
+    "fast-glob": "^3.3.1",
     "uuid": "^8.0.0"
   },
   "devDependencies": {

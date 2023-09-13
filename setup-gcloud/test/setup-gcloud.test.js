@@ -1,9 +1,10 @@
 const mockFs = require('mock-fs');
+const fs = require('fs');
 const path = require('path');
 
 // Mock out tools download
 jest.mock('../../utils', () => ({
-  loadTool: async () => Promise.resolve('gcloud'),
+  loadTool: async () => Promise.resolve('/gcloud'),
   findTool: jest.fn(),
 }));
 
@@ -40,14 +41,15 @@ describe('Setup Gcloud', () => {
     };
 
     const filesystem = {
-      'gcloud/.install/.backup': {},
+      '/gcloud/innerdir/__pycache__': {},
+      '/gcloud/.install/.backup': {},
+      '/testdir/__pycache__': {},
     };
     filesystem[process.env.RUNNER_TEMP] = {};
     mockFs(filesystem);
-  });
-
-  afterAll(() => {
-    mockFs.restore();
+    expect(fs.existsSync('/gcloud/innerdir/__pycache__')).toEqual(true);
+    expect(fs.existsSync('/gcloud/.install/.backup')).toEqual(true);
+    expect(fs.existsSync('/testdir/__pycache__')).toEqual(true);
   });
 
   test('It can configure gcloud latest', async () => {
@@ -69,6 +71,9 @@ describe('Setup Gcloud', () => {
     );
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
     expect(core.exportVariable).toHaveBeenCalledWith('CLOUDSDK_CORE_PROJECT', 'test-project');
+    expect(fs.existsSync('/gcloud/innerdir/__pycache__')).toEqual(false);
+    expect(fs.existsSync('/gcloud/.install/.backup')).toEqual(false);
+    expect(fs.existsSync('/testdir/__pycache__')).toEqual(true);
   });
 
   test('It can configure gcloud 280.0.0 from cache', async () => {

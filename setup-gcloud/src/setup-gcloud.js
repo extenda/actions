@@ -3,6 +3,7 @@ const fs = require('fs');
 const core = require('@actions/core');
 const io = require('@actions/io');
 const { restoreCache, saveCache } = require('@actions/cache');
+const glob = require('fast-glob');
 const { v4: uuid } = require('uuid');
 const { loadTool } = require('../../utils');
 const createKeyFile = require('../../utils/src/create-key-file');
@@ -68,7 +69,16 @@ const installComponents = async (toolPath) => {
     core.exportVariable('USE_GKE_GCLOUD_AUTH_PLUGIN', 'True');
     return null;
   });
-  fs.rmdirSync(path.join(toolPath, '.install', '.backup'), { recursive: true });
+  fs.rmSync(path.join(toolPath, '.install', '.backup'), { recursive: true });
+  glob.sync('**/__pycache__', {
+    cwd: toolPath,
+    dot: true,
+    onlyDirectories: true,
+    absolute: true,
+  }).forEach((pycache) => {
+    fs.rmSync(pycache, { recursive: true });
+  });
+  return null;
 };
 
 /**
