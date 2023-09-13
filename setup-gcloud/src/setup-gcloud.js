@@ -113,16 +113,13 @@ const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredenti
     await loadTool({
       ...toolInfo,
       downloadUrl,
-    }).then((toolPath) => {
-      core.info(`toolPath=${toolPath}, cachePath=${cachePath}`);
-      updatePath(toolPath);
-    })
+    }).then(updatePath)
       .then(() => installComponents())
       .then(() => saveCache([cachePath], cacheKey));
   } else {
     core.info(`Use cached gcloud ${gcloudVersion}`);
     await findTool(toolInfo)
-      .then((toolPath) => updatePath(toolPath));
+      .then(updatePath);
   }
 
   core.exportVariable('GCLOUD_INSTALLED_VERSION', gcloudVersion);
