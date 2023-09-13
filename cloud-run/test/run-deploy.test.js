@@ -8,12 +8,15 @@ jest.mock('../src/create-namespace');
 jest.mock('../src/check-sa');
 jest.mock('../src/kubectl-auth');
 jest.mock('../src/get-revision');
+jest.mock('../src/get-revisions');
+
 jest.setTimeout(30000);
 const exec = require('@actions/exec');
 const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
 const runDeploy = require('../src/run-deploy');
 const { getClusterInfo } = require('../src/cluster-info');
 const scan = require('../src/vulnerability-scanning');
+const getRevisions = require('../src/get-revisions');
 
 const serviceAccountKey = Buffer.from('test', 'utf8').toString('base64');
 
@@ -24,6 +27,8 @@ describe('Run Deploy', () => {
     process.env = { ...orgEnv };
     process.env.GITHUB_SHA = '63633c0'; // v.0.18.0
     process.env.ENABLE_TRIVY = 'true';
+
+    getRevisions.mockResolvedValueOnce([{ name: 'rev-00001-tst', creationTimestamp: '0' }]);
   });
 
   afterEach(() => {
@@ -425,7 +430,8 @@ describe('Run Deploy', () => {
     expect(returnValue.gcloudExitCode).toEqual(0);
     expect(getClusterInfo).toHaveBeenCalled();
     expect(setupGcloud).toHaveBeenCalledTimes(1);
-    expect(exec.exec).toHaveBeenCalledTimes(3);
+    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(getRevisions).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
       'run', 'deploy', 'my-service',
       '--image=gcr.io/test-staging-project/my-service:tag',
@@ -475,7 +481,8 @@ describe('Run Deploy', () => {
       'gcr.io/test-staging-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
-    expect(exec.exec).toHaveBeenCalledTimes(3);
+    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(getRevisions).toHaveBeenCalledTimes(1);
     expect(getClusterInfo).toHaveBeenCalledWith('test-staging-project', undefined);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
@@ -528,7 +535,8 @@ describe('Run Deploy', () => {
       'gcr.io/test-prod-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
-    expect(exec.exec).toHaveBeenCalledTimes(3);
+    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(getRevisions).toHaveBeenCalledTimes(1);
     expect(getClusterInfo).toHaveBeenCalledWith('test-prod-project', 'projects/tribe-prod-1234/zones/europe-west1/clusters/k8s-cluster');
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
@@ -627,7 +635,8 @@ describe('Run Deploy', () => {
       'gcr.io/test-staging-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
-    expect(exec.exec).toHaveBeenCalledTimes(3);
+    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(getRevisions).toHaveBeenCalledTimes(1);
     expect(getClusterInfo).toHaveBeenCalledWith('test-staging-project', undefined);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
@@ -904,7 +913,8 @@ ERROR: (gcloud.run.deploy) Revision "xxxxxxx-00013-loc" failed with message: 0/3
       'gcr.io/test-prod-project/my-service:tag',
     );
     expect(returnValue.gcloudExitCode).toEqual(0);
-    expect(exec.exec).toHaveBeenCalledTimes(4);
+    expect(exec.exec).toHaveBeenCalledTimes(3);
+    expect(getRevisions).toHaveBeenCalledTimes(1);
     expect(getClusterInfo).toHaveBeenCalledWith('test-prod-project', undefined);
     expect(setupGcloud).toHaveBeenCalledTimes(1);
     expect(exec.exec).toHaveBeenCalledWith('gcloud', [
