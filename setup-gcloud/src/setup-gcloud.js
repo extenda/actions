@@ -38,27 +38,38 @@ const getGcloudVersion = async (providedVersion) => {
   return semver;
 };
 
-const updatePath = async (cachePath) => {
-  core.addPath(path.join(cachePath, 'bin'));
+/**
+ * Add gcloud to the path.
+ * @param toolPath the cached tool path
+ * @returns {Promise<string>} the tool path directory
+ */
+const updatePath = async (toolPath) => {
+  const binPath = path.join(toolPath, 'bin');
+  core.info(`Add ${binPath} to PATH`);
+  core.addPath(binPath);
+  return toolPath;
 };
 
 /**
  * Install additional gcloud components. This method only runs if gcloud isn't cached.
  * Remember to bump the CACHE_VERSION constant if you modify this method.
- *
+ * @param toolPath the gcloud tool path
  * @returns {Promise<void>} a promise completed with gcloud
  */
-const installComponents = async () => execGcloud([
-  'components',
-  'install',
-  'gke-gcloud-auth-plugin',
-  'beta',
-  '--quiet',
-  '--no-user-output-enabled',
-]).then(() => {
-  core.exportVariable('USE_GKE_GCLOUD_AUTH_PLUGIN', 'True');
-  return null;
-});
+const installComponents = async (toolPath) => {
+  await execGcloud([
+    'components',
+    'install',
+    'gke-gcloud-auth-plugin',
+    'beta',
+    '--quiet',
+    '--no-user-output-enabled',
+  ]).then(() => {
+    core.exportVariable('USE_GKE_GCLOUD_AUTH_PLUGIN', 'True');
+    return null;
+  });
+  fs.rmdirSync(path.join(toolPath, '.install', '.backup'), { recursive: true });
+};
 
 /**
  * Authenticate gcloud with provided service account.
@@ -114,7 +125,7 @@ const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredenti
       ...toolInfo,
       downloadUrl,
     }).then(updatePath)
-      .then(() => installComponents())
+      .then(installComponents)
       .then(() => saveCache([cachePath], cacheKey));
   } else {
     core.info(`Use cached gcloud ${gcloudVersion}`);

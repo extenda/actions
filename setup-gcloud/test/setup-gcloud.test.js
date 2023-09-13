@@ -40,7 +40,9 @@ describe('Setup Gcloud', () => {
       ...orgEnv,
     };
 
-    const filesystem = {};
+    const filesystem = {
+      'gcloud/.install/.backup': {},
+    };
     filesystem[process.env.RUNNER_TEMP] = {};
     mockFs(filesystem);
   });
