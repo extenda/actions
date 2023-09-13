@@ -108,25 +108,25 @@ const manifestTemplate = async (
         },
       },
       ...(volumes && type.toLowerCase() === 'statefulset'
-      ? {
-        volumeClaimTemplates: [
-          {
-            metadata: {
-              name: `${name}`,
-            },
-            spec: {
-              accessModes: ['ReadWriteOnce'],
-              storageClassName: volumes[0]['disk-type'] === 'hdd' ? 'standard' : 'premium-rwo',
-              resources: {
-                requests: {
-                  storage: volumes[0].size,
+        ? {
+          volumeClaimTemplates: [
+            {
+              metadata: {
+                name: `${name}`,
+              },
+              spec: {
+                accessModes: ['ReadWriteOnce'],
+                storageClassName: volumes[0]['disk-type'] === 'hdd' ? 'standard' : 'premium-rwo',
+                resources: {
+                  requests: {
+                    storage: volumes[0].size,
+                  },
                 },
               },
             },
-          },
-        ],
-      }
-      : {}),
+          ],
+        }
+        : {}),
       template: {
         metadata: {
           labels: {

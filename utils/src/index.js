@@ -1,7 +1,7 @@
 const checkEnv = require('./check-env');
 const run = require('./run');
 const gitConfig = require('./git-config');
-const loadTool = require('./load-binary');
+const { loadTool, find: findTool } = require('./load-binary');
 const loadGitHubToken = require('./load-github-token');
 const failIfNotTrunkBased = require('./trunk-killswitch');
 const getImageDigest = require('./image-digest');
@@ -13,6 +13,7 @@ module.exports = {
   checkEnv,
   failIfNotTrunkBased,
   gitConfig,
+  findTool,
   loadTool,
   loadGitHubToken,
   run,

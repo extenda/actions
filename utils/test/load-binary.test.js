@@ -27,7 +27,7 @@ jest.mock('axios');
 
 const tc = require('@actions/tool-cache');
 const axios = require('axios');
-const loadTool = require('../src/load-binary');
+const { loadTool } = require('../src/load-binary');
 
 const vswhere = {
   tool: 'vswhere',

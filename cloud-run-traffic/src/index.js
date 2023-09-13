@@ -1,23 +1,6 @@
 const core = require('@actions/core');
-const exec = require('@actions/exec');
 const { run } = require('../../utils/src');
-const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
-
-async function execGCloud(args) {
-  let stdout = '';
-
-  core.info(`[running] gcloud "${args.join('" "')}"`);
-  await exec.exec('gcloud', args, {
-    silent: false,
-    listeners: {
-      stdout: (data) => {
-        stdout += data.toString('utf8');
-      },
-    },
-  });
-
-  return stdout;
-}
+const { setupGcloud, execGcloud } = require('../../setup-gcloud');
 
 function validatePercentage(_percentage) {
   const percentage = +_percentage;
@@ -30,7 +13,7 @@ function validatePercentage(_percentage) {
 }
 
 function getRevisionsList(service, projectId) {
-  return execGCloud([
+  return execGcloud([
     'run',
     'revisions',
     'list',
@@ -42,7 +25,7 @@ function getRevisionsList(service, projectId) {
 }
 
 function routeTraffic(service, targetRevision, percentage, projectId) {
-  return execGCloud([
+  return execGcloud([
     'run',
     'services',
     'update-traffic',
@@ -61,10 +44,7 @@ async function action() {
   const targetRevision = core.getInput('target-revision', { required: true });
   const percentage = validatePercentage(core.getInput('percentage') || '100');
 
-  const projectId = await setupGcloud(
-    serviceAccountKey,
-    process.env.GCLOUD_INSTALLED_VERSION || 'latest',
-  );
+  const projectId = await setupGcloud(serviceAccountKey);
 
   const revisions = await getRevisionsList(service, projectId);
 

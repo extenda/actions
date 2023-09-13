@@ -1,10 +1,10 @@
 jest.mock('@actions/core');
 jest.mock('../src/fetch-token');
-jest.mock('../../setup-gcloud-base/src/setup-gcloud');
+jest.mock('../../setup-gcloud');
 
 const core = require('@actions/core');
 const action = require('../src/index');
-const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
+const { setupGcloud } = require('../../setup-gcloud');
 const fetchToken = require('../src/fetch-token');
 
 describe('Fetch identity token action', () => {

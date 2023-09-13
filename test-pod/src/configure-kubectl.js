@@ -1,4 +1,4 @@
-const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
+const { setupGcloud } = require('../../setup-gcloud');
 const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
 const loadServiceDefinition = require('../../cloud-run/src/service-definition');
@@ -33,10 +33,7 @@ const resolveClusterAndNamespace = (clusterInput, namespaceInput) => {
 
 const configureKubeCtl = async (serviceAccountKey, clusterInput, namespaceInput) => {
   // Authenticate GCloud
-  const projectId = await setupGcloud(
-    serviceAccountKey,
-    process.env.GCLOUD_INSTALLED_VERSION || 'latest',
-  );
+  const projectId = await setupGcloud(serviceAccountKey);
 
   // Resolve cluster and namespace.
   const { cluster, name, namespace } = resolveClusterAndNamespace(clusterInput, namespaceInput);
