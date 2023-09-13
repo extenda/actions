@@ -129,8 +129,7 @@ const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredenti
       .then(() => saveCache([cachePath], cacheKey));
   } else {
     core.info(`Use cached gcloud ${gcloudVersion}`);
-    await findTool(toolInfo)
-      .then(updatePath);
+    await updatePath(cachePath);
   }
 
   core.exportVariable('GCLOUD_INSTALLED_VERSION', gcloudVersion);
