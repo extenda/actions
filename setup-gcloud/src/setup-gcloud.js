@@ -101,6 +101,7 @@ const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredenti
     process.env.RUNNER_TOOL_CACHE,
     toolInfo.tool,
     gcloudVersion,
+    process.env.RUNNER_ARCH.toLowerCase(),
     toolInfo.binary,
   );
   const cacheKey = `${process.env.RUNNER_OS}-${process.env.RUNNER_ARCH}-gcloud-cache-${gcloudVersion}-v${CACHE_VERSION}`;
