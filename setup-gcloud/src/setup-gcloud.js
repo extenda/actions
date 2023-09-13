@@ -92,13 +92,13 @@ const authenticateGcloud = async (serviceAccountKey, exportCredentials) => {
 
 const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredentials = false) => {
   const gcloudVersion = await getGcloudVersion(version);
-  const cachePath = path.join(process.env.RUNNER_TOOL_CACHE, 'gcloud', gcloudVersion);
-  const cacheKey = `${process.env.RUNNER_OS}-${process.env.RUNNER_ARCH}-gcloud-cache-${gcloudVersion}-v${CACHE_VERSION}`;
   const toolInfo = {
     tool: 'gcloud',
     binary: 'google-cloud-sdk',
     version: gcloudVersion,
   };
+  const cachePath = path.join(process.env.RUNNER_TOOL_CACHE, toolInfo.tool, gcloudVersion, toolInfo.binary);
+  const cacheKey = `${process.env.RUNNER_OS}-${process.env.RUNNER_ARCH}-gcloud-cache-${gcloudVersion}-v${CACHE_VERSION}`;
 
   const restoredKey = await restoreCache([cachePath], cacheKey);
   if (restoredKey === undefined) {
