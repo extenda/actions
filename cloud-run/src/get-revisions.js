@@ -11,10 +11,9 @@ const getRevisions = async (namespace, project, cluster, location) => {
     `--cluster=${cluster}`,
     `--cluster-location=${location}`,
     '--platform=gke',
-    '--filter=false',
-    '--format=value(REVISION)',
+    '--format=json',
   ], {
-    silent: true,
+    silent: false,
     listeners: {
       stdout: (data) => {
         output += data.toString('utf8');
