@@ -97,7 +97,12 @@ const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredenti
     binary: 'google-cloud-sdk',
     version: gcloudVersion,
   };
-  const cachePath = path.join(process.env.RUNNER_TOOL_CACHE, toolInfo.tool, gcloudVersion, toolInfo.binary);
+  const cachePath = path.join(
+    process.env.RUNNER_TOOL_CACHE,
+    toolInfo.tool,
+    gcloudVersion,
+    toolInfo.binary,
+  );
   const cacheKey = `${process.env.RUNNER_OS}-${process.env.RUNNER_ARCH}-gcloud-cache-${gcloudVersion}-v${CACHE_VERSION}`;
 
   const restoredKey = await restoreCache([cachePath], cacheKey);
