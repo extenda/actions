@@ -1,7 +1,6 @@
 const fs = require('fs');
 const { resolve } = require('path');
 const exec = require('@actions/exec');
-const rmdir = require('rmdir');
 const { extractOutput, LogFilter } = require('../src/extract-output');
 
 const outputCommand = (patterns) => [
@@ -44,7 +43,10 @@ describe('Extract output', () => {
   });
 
   afterEach(() => {
-    rmdir(resolve('test-pod-output'));
+    const dir = resolve('test-pod-output');
+    if (fs.existsSync(dir)) {
+      fs.rmdirSync(dir, { recursive: true });
+    }
   });
 
   test('It filters output with LogFilter', () => {
