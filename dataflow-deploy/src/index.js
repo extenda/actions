@@ -1,6 +1,6 @@
 const core = require('@actions/core');
 const { run, failIfNotTrunkBased } = require('../../utils');
-const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
+const { setupGcloud } = require('../../setup-gcloud');
 const deployJob = require('./deploy-job');
 const drainJob = require('./drain-job');
 const { getTribeProject } = require('../../cloud-run/src/cluster-info');
@@ -23,7 +23,7 @@ const action = async () => {
 
   const newJobName = `${jobName}-${jobVersion}`;
 
-  const projectId = await setupGcloud(serviceAccountKey, process.env.GCLOUD_INSTALLED_VERSION || 'latest');
+  const projectId = await setupGcloud(serviceAccountKey);
   const tribeProject = await getTribeProject(projectId);
   const subnetwork = `https://www.googleapis.com/compute/v1/projects/${tribeProject}/regions/${region}/subnetworks/clan-resources`;
 

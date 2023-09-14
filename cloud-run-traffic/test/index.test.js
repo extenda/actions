@@ -1,17 +1,19 @@
 jest.mock('@actions/core');
-jest.mock('../../setup-gcloud-base/src/setup-gcloud', () => () => 'stub-project-id');
-jest.mock('@actions/exec', () => ({
-  exec: jest.fn(),
-}));
+jest.mock('../../setup-gcloud');
 
 const core = require('@actions/core');
-const exec = require('@actions/exec');
+const { setupGcloud, execGcloud } = require('../../setup-gcloud');
 const action = require('../src/index');
 
 describe('action', () => {
   beforeEach(() => {
+    setupGcloud.mockResolvedValue('stub-project-id');
+  });
+
+  afterEach(() => {
     jest.resetAllMocks();
   });
+
   it('routes traffic to new revision', async () => {
     const stubValues = {
       'service-account-key': 'service-account-key-stub',
@@ -21,12 +23,7 @@ describe('action', () => {
     };
 
     core.getInput.mockImplementation((name) => stubValues[name]);
-
-    exec.exec.mockImplementation((command, args, options) => {
-      if (args.includes('list')) {
-        options.listeners.stdout(stubValues['target-revision']);
-      }
-    });
+    execGcloud.mockResolvedValueOnce(stubValues['target-revision']);
     expect(await action()).toBeUndefined();
 
     expect(core.getInput).toHaveBeenCalledWith('service-account-key', {
@@ -38,45 +35,27 @@ describe('action', () => {
     });
     expect(core.getInput).toHaveBeenCalledWith('percentage');
 
-    expect(exec.exec).toHaveBeenCalledTimes(2);
+    expect(execGcloud).toHaveBeenCalledTimes(2);
 
-    expect(exec.exec).toHaveBeenCalledWith(
-      'gcloud',
-      [
-        'run',
-        'revisions',
-        'list',
-        `--service=${stubValues.service}`,
-        '--region=europe-west1',
-        `--project=${'stub-project-id'}`,
-        '--format="value[](name)"',
-      ],
-      {
-        silent: false,
-        listeners: {
-          stdout: expect.any(Function),
-        },
-      },
-    );
+    expect(execGcloud).toHaveBeenCalledWith([
+      'run',
+      'revisions',
+      'list',
+      `--service=${stubValues.service}`,
+      '--region=europe-west1',
+      '--project=stub-project-id',
+      '--format="value[](name)"',
+    ]);
 
-    expect(exec.exec).toHaveBeenCalledWith(
-      'gcloud',
-      [
-        'run',
-        'services',
-        'update-traffic',
-        stubValues.service,
-        `--to-revisions=${stubValues['target-revision']}=${stubValues.percentage}`,
-        '--region=europe-west1',
-        `--project=${'stub-project-id'}`,
-      ],
-      {
-        silent: false,
-        listeners: {
-          stdout: expect.any(Function),
-        },
-      },
-    );
+    expect(execGcloud).toHaveBeenCalledWith([
+      'run',
+      'services',
+      'update-traffic',
+      stubValues.service,
+      `--to-revisions=${stubValues['target-revision']}=${stubValues.percentage}`,
+      '--region=europe-west1',
+      '--project=stub-project-id',
+    ]);
   });
 
   it('fails to route traffic if revision is missing', async () => {
@@ -89,11 +68,8 @@ describe('action', () => {
 
     core.getInput.mockImplementation((name) => stubValues[name]);
 
-    exec.exec.mockImplementation((command, args, options) => {
-      if (args.includes('list')) {
-        options.listeners.stdout('other-revision');
-      }
-    });
+    execGcloud.mockResolvedValueOnce('other-revision');
+
     await expect(action()).rejects.toThrow(
       'Revision revision1 not found for service service1',
     );
@@ -107,25 +83,16 @@ describe('action', () => {
     });
     expect(core.getInput).toHaveBeenCalledWith('percentage');
 
-    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(execGcloud).toHaveBeenCalledTimes(1);
 
-    expect(exec.exec).toHaveBeenCalledWith(
-      'gcloud',
-      [
-        'run',
-        'revisions',
-        'list',
-        `--service=${stubValues.service}`,
-        '--region=europe-west1',
-        `--project=${'stub-project-id'}`,
-        '--format="value[](name)"',
-      ],
-      {
-        silent: false,
-        listeners: {
-          stdout: expect.any(Function),
-        },
-      },
-    );
+    expect(execGcloud).toHaveBeenCalledWith([
+      'run',
+      'revisions',
+      'list',
+      `--service=${stubValues.service}`,
+      '--region=europe-west1',
+      '--project=stub-project-id',
+      '--format="value[](name)"',
+    ]);
   });
 });

@@ -5,7 +5,7 @@ jest.mock('../src/kubectl');
 jest.mock('../src/manifests');
 jest.mock('../src/env-config');
 jest.mock('../src/configure-domains');
-jest.mock('../../setup-gcloud-base/src/setup-gcloud');
+jest.mock('../../setup-gcloud');
 
 const core = require('@actions/core');
 const kubectl = require('../src/kubectl');

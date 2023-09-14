@@ -1,17 +1,7 @@
-const exec = require('@actions/exec');
+const getRevisions = require('../src/get-revisions');
 const getLatestRevision = require('../src/get-revision');
 
-jest.mock('@actions/exec');
-
-const revisionsListString = [`rev-00001-tst
-rev-00002-tst
-rev-00003-tst
-rev-00004-tst
-rev-00005-tst
-rev-00006-tst
-rev-00007-tst
-rev-00008-tst
-rev-00009-tst`];
+jest.mock('../src/get-revisions');
 
 const cluster = {
   project: 'project-id',
@@ -25,12 +15,18 @@ describe('get latest revision', () => {
   });
 
   test('get latest revision', async () => {
-    exec.exec.mockImplementationOnce((
-      cmd,
-      args,
-      opts,
-    ) => opts.listeners.stdout(revisionsListString));
+    getRevisions.mockResolvedValueOnce([
+      { name: 'rev-00009-tst', creationTimestamp: '0' },
+      { name: 'rev-00008-tst', creationTimestamp: '0' },
+      { name: 'rev-00007-tst', creationTimestamp: '0' },
+      { name: 'rev-00006-tst', creationTimestamp: '0' },
+      { name: 'rev-00005-tst', creationTimestamp: '0' },
+      { name: 'rev-00004-tst', creationTimestamp: '0' },
+      { name: 'rev-00003-tst', creationTimestamp: '0' },
+      { name: 'rev-00002-tst', creationTimestamp: '0' },
+      { name: 'rev-00001-tst', creationTimestamp: '0' },
+    ]);
     expect(getLatestRevision('namespace', cluster)).resolves.toEqual('rev-00009-tst');
-    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(getRevisions).toHaveBeenCalledTimes(1);
   });
 });

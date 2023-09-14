@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const dataflowBuild = require('./dataflow-build');
 const { run } = require('../../utils');
-const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
+const { setupGcloud } = require('../../setup-gcloud');
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
@@ -12,7 +12,7 @@ const action = async () => {
   const jarPath = core.getInput('jar') || '';
   const envVars = core.getInput('env') || '';
 
-  await setupGcloud(serviceAccountKey, process.env.GCLOUD_INSTALLED_VERSION || 'latest');
+  await setupGcloud(serviceAccountKey);
   await dataflowBuild(templatePath, image, sdkLanguage, metadataPath, jarPath, envVars);
 };
 

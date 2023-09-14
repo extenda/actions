@@ -2,7 +2,7 @@ jest.mock('@actions/core');
 jest.mock('request');
 jest.mock('../src/roles');
 jest.mock('../src/permissions');
-jest.mock('../../setup-gcloud-base/src/setup-gcloud');
+jest.mock('../../setup-gcloud');
 jest.mock('../../cloud-run/src/project-info');
 jest.mock('../src/create-system');
 jest.mock('../../cloud-run/src/cluster-info');
@@ -14,7 +14,7 @@ jest.mock('../../cloud-run/src/kubectl-auth');
 
 const request = require('request');
 const core = require('@actions/core');
-const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
+const { setupGcloud } = require('../../setup-gcloud');
 const createNamespace = require('../../cloud-run/src/create-namespace');
 const { configureIAM } = require('../src/configure-iam');
 const checkRepository = require('../src/handle-repository');

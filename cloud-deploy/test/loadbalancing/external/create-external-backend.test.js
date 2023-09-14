@@ -212,8 +212,8 @@ describe('configureExternalDomain', () => {
       'backend-services',
       'update',
       `${mockServiceName}-external-backend`,
-      `--protocol=HTTP`,
-      `--timeout=300s`,
+      '--protocol=HTTP',
+      '--timeout=300s',
       '--global',
       `--project=${mockProjectID}`,
     ]));
