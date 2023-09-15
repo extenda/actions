@@ -17,7 +17,7 @@ inputs:
   spannerExtensionUrl: # string
     description: 'Url of a spanner extension jar file'
     required: false
-    default: 'https://github.com/cloudspannerecosystem/liquibase-spanner/releases/download/4.17.0/liquibase-spanner-4.17.0-all.jar'
+    default: 'https://github.com/cloudspannerecosystem/liquibase-spanner/releases/download/4.23.0/liquibase-spanner-all.jar'
   url: # string
     description: 'Database URL'
     required: true
