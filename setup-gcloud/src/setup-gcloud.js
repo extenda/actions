@@ -9,7 +9,7 @@ const { loadTool } = require('../../utils');
 const createKeyFile = require('../../utils/src/create-key-file');
 const getDownloadUrl = require('./download-url');
 const getLatestVersion = require('./latest-version');
-const execGcloud = require('./exec-gcloud');
+const { execGcloud } = require('./exec-gcloud');
 
 // Increment this version if the list of installed components are modified.
 const CACHE_VERSION = '1';
