@@ -20,9 +20,6 @@ describe('Create namespace', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
-  });
-
-  afterAll(() => {
     mockFs.restore();
   });
 
