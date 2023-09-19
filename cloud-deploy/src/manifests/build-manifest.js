@@ -238,7 +238,7 @@ kind: Config
 deploy:
   kubectl:
     manifests:
-      - k8s-*
+      - k8s(deploy)-*
 `;
 
 const createCloudDeployPipe = async (name, projectID, clanName, env) => `apiVersion: deploy.cloud.google.com/v1
@@ -349,7 +349,7 @@ const buildManifest = async (
     if (system.id === '') {
       throw new Error(`Styra system not found with the name ${styraSystemName}`);
     } else {
-      await generateManifest('k8s-opa-config.yaml', await buildOpaConfig(system.id, styraToken, name, styraUrl));
+      await generateManifest('k8s(deploy)-opa-config.yaml', await buildOpaConfig(system.id, styraToken, name, styraUrl));
     }
   }
 
@@ -372,8 +372,8 @@ const buildManifest = async (
   );
 
   const convertedManifests = manifests.map((doc) => convertToYaml(doc)).join('---\n');
-  generateManifest('k8s-manifest.yaml', convertedManifests);
-  generateManifest('k8s-certificates.yaml', await addNamespace(http2Certificate, name));
+  generateManifest('k8s(deploy)-manifest.yaml', convertedManifests);
+  generateManifest('k8s(deploy)-certificates.yaml', await addNamespace(http2Certificate, name));
   generateManifest('cert.cert', internalCert);
   generateManifest('key.key', internalCertKey);
   generateManifest('external_cert.cert', externalCert);
@@ -381,7 +381,7 @@ const buildManifest = async (
 
   if (!fs.existsSync('.gcloudignore')) {
     fs.writeFileSync('.gcloudignore', `*
-!k8s-*
+!k8s(deploy)-*
 !skaffold.yaml
 !clouddeploy.yaml
 `, { encoding: 'utf-8' });

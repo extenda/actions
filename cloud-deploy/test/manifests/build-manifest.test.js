@@ -76,16 +76,16 @@ kind: Config
 deploy:
   kubectl:
     manifests:
-      - k8s-*`);
+      - k8s(deploy)-*`);
 
     expect(readFileSync('clouddeploy.yaml')).toContain(`apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
   name: example-service`);
 
-    expect(fs.existsSync('k8s-opa-config.yaml')).toEqual(false);
+    expect(fs.existsSync('k8s(deploy)-opa-config.yaml')).toEqual(false);
 
-    const k8sManifest = readFileSync('k8s-manifest.yaml');
+    const k8sManifest = readFileSync('k8s(deploy)-manifest.yaml');
 
     expect(k8sManifest).toContain(`apiVersion: v1
 kind: Namespace
@@ -101,7 +101,7 @@ metadata:
               value: sm://example-project/test-secret`);
 
     expect(readFileSync('.gcloudignore')).toEqual(`*
-!k8s-*
+!k8s(deploy)-*
 !skaffold.yaml
 !clouddeploy.yaml
 `);
@@ -188,7 +188,7 @@ metadata:
 
     await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '');
 
-    expect(readFileSync('k8s-opa-config.yaml')).toContain(`kind: ConfigMap
+    expect(readFileSync('k8s(deploy)-opa-config.yaml')).toContain(`kind: ConfigMap
 apiVersion: v1
 metadata:
   name: opa-envoy-config
@@ -199,7 +199,7 @@ data:
         - name: styra`);
 
     // Snapshot test for k8s-manifest.yaml.
-    const manifest = readFileSync('k8s-manifest.yaml');
+    const manifest = readFileSync('k8s(deploy)-manifest.yaml');
     mockFs.restore();
     expect(manifest).toMatchSnapshot();
   });
@@ -239,7 +239,7 @@ data:
     await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '');
 
     // Snapshot test for k8s-manifest.yaml.
-    const manifest = readFileSync('k8s-manifest.yaml');
+    const manifest = readFileSync('k8s(deploy)-manifest.yaml');
     mockFs.restore();
     expect(manifest).toMatchSnapshot();
   });
@@ -290,7 +290,7 @@ data:
     await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '');
 
     // Snapshot test for k8s-manifest.yaml.
-    const manifest = readFileSync('k8s-manifest.yaml');
+    const manifest = readFileSync('k8s(deploy)-manifest.yaml');
     mockFs.restore();
     expect(manifest).toMatchSnapshot();
   });
