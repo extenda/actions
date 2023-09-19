@@ -28,7 +28,11 @@ const createNamespace = async (
   projectId,
   opaEnabled,
   namespace,
+  skipNamespace = false,
 ) => {
+  if(skipNamespace) {
+    return;
+  }
   if (!await getNamespace(namespace)) {
     throw new Error(`Namespace not found, please make sure your service is setup correctly!
 Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md#services for more information`);
