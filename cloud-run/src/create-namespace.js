@@ -30,7 +30,7 @@ const createNamespace = async (
   namespace,
   skipNamespace = false,
 ) => {
-  if(skipNamespace) {
+  if (skipNamespace) {
     return;
   }
   if (!await getNamespace(namespace)) {

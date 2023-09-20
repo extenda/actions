@@ -4,9 +4,9 @@ jest.mock('../../cloud-run/src/cluster-info');
 jest.mock('../../setup-gcloud');
 
 const projectInfo = require('../../cloud-run/src/project-info');
-const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
+// const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 const getSystemOwners = require('../src/system-owners');
-const { setupGcloud } = require('../../setup-gcloud');
+const { setupGcloud, execGcloud } = require('../../setup-gcloud');
 
 const mockContents = jest.fn();
 
@@ -32,17 +32,12 @@ describe('get system owners', () => {
     jest.resetAllMocks();
   });
   test('it can return clan member from yaml', async () => {
-    setupGcloud.mockResolvedValueOnce('test');
-    projectInfo.mockResolvedValueOnce('tribe');
-    const clusterInfoResponse = {
-      project: 'tribe-prod-1242',
-    };
-
-    getClusterInfo.mockReturnValue(clusterInfoResponse);
+    setupGcloud.mockResolvedValueOnce('test-prod-123');
+    projectInfo.mockResolvedValueOnce({ project: 'test' });
+    execGcloud
+      .mockResolvedValueOnce([{}, {}, { id: '000111' }])
+      .mockResolvedValueOnce('tribe');
     const serviceAccountKey = 'service-account';
-
-    projectInfo.mockResolvedValueOnce({ project: 'test-prod-123' });
-    getClusterInfo.mockReturnValue(clusterInfoResponse);
     mockContents.mockResolvedValueOnce({
       data: {
         content: Buffer.from(`
@@ -54,6 +49,16 @@ members:
       },
     });
 
-    await getSystemOwners('token', serviceAccountKey);
+    const owners = await getSystemOwners('token', serviceAccountKey);
+    expect(owners).toEqual(['test@mail.com']);
+    expect(execGcloud).toHaveBeenCalledTimes(2);
+    expect(execGcloud).toHaveBeenCalledWith(['projects', 'get-ancestors', 'test-prod-123', '--format=json']);
+    expect(execGcloud).toHaveBeenCalledWith([
+      'resource-manager',
+      'folders',
+      'describe',
+      '000111',
+      '--format=value(displayName)',
+    ]);
   });
 });
