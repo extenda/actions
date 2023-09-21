@@ -23,6 +23,7 @@ const projectInfo = require('../../cloud-run/src/project-info');
 const { setupPermissions, handlePermissions } = require('../src/permissions');
 const { setupRoles } = require('../src/roles');
 const { setupSystem } = require('../src/create-system');
+const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 
 const allowedConsumers = [{ clan: 'test', 'service-accounts': ['sa1', 'sa2'] }];
 
@@ -187,6 +188,7 @@ describe('Configure iam', () => {
 
   test('it handles owners and repository if system exists', async () => {
     createNamespace.mockResolvedValueOnce(null);
+    getClusterInfo.mockRejectedValueOnce('Error');
 
     setupGcloud.mockResolvedValueOnce('test-project');
     projectInfo.mockReturnValueOnce({ env: 'staging' });
