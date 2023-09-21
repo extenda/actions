@@ -1,23 +1,21 @@
 const github = require('@actions/github');
 const core = require('@actions/core');
 const yaml = require('js-yaml');
+const fs = require('fs');
 const projectInfo = require('../../cloud-run/src/project-info');
-const { setupGcloud, execGcloud } = require('../../setup-gcloud');
+const { setupGcloud } = require('../../setup-gcloud');
+
+const getTribe = () => {
+  const commonHcl = fs.readFileSync('infra/common.hcl', 'utf-8');
+  const tribeLine = commonHcl.split('\n').find((line) => line.match(/^\s+tribe_name/));
+  return tribeLine.substring(tribeLine.indexOf('"') + 1, tribeLine.lastIndexOf('"'));
+};
 
 const getSystemOwners = async (githubToken, serviceAccountKey) => {
   const octokit = github.getOctokit(githubToken);
   const projectId = await setupGcloud(serviceAccountKey);
   const { project: clan } = projectInfo(projectId);
-
-  const ancestors = await execGcloud(['projects', 'get-ancestors', projectId, '--format=json']);
-  // Second ancestor is the tribe folder.
-  const tribe = await execGcloud([
-    'resource-manager',
-    'folders',
-    'describe',
-    ancestors[2].id,
-    '--format=value(displayName)',
-  ]);
+  const tribe = getTribe();
 
   const clanYamlFile = await octokit.rest.repos.getContent({
     owner: 'extenda',
