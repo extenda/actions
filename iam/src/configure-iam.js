@@ -36,7 +36,7 @@ const configureIAM = async (
     await authenticateKubeCtl(cluster);
   } catch (error) {
     skipNamespace = true;
-    core.info('no cluster to connect to.. // ERROR: ' + error);
+    core.info(`no cluster to connect to.. // ERROR: ${error}`);
   }
   // Connect to cluster
 
