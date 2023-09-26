@@ -7,9 +7,9 @@ const securitySpec = require('./security-sidecar');
 
 const convertToYaml = (json) => yaml.dump(json);
 
-const volumeSetup = (opa, protocol, type) => {
+const volumeSetup = (opa, protocol, type = 'none') => {
   const volumes = [];
-  if (opa && type === 'Deployment') {
+  if (opa && type.toLowerCase() !== 'statefulset') {
     volumes.push({ name: 'opa', configMap: { name: 'opa-envoy-config' } });
     if (protocol === 'http2') {
       volumes.push({ name: 'extenda-certs', secret: { secretName: 'envoy-http2-certs' } });
@@ -29,6 +29,114 @@ const userContainerVolumeMountSetup = (opa, protocol, type, volumes, name) => {
     }
   }
   return volumeMounts;
+};
+
+const cloudrunManifestTemplate = async (
+  name,
+  image,
+  opa,
+  labels,
+  protocol,
+  environment,
+  minInstances,
+  maxInstances,
+  containerConcurrency,
+  cpu,
+  memory,
+  opaCpu,
+  opaMemory,
+  timeoutSeconds,
+  serviceAccountName,
+) => {
+  labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
+  const volumes = opa ? volumeSetup(opa, protocol) : undefined;
+  const ports = opa ? undefined : [{ containerPort: 8080 }];
+
+  const containers = [{
+    image,
+    name: 'user-container',
+    ports,
+    resources: {
+      limits: {
+        cpu,
+        memory,
+      },
+    },
+    env: environment.map((env) => ({
+      name: env.name,
+      value: env.value,
+    })),
+    startupProbe: {
+      tcpSocket: {
+        port: 8080,
+      },
+      initialDelaySeconds: 3,
+      periodSeconds: 5,
+      failureThreshold: 10,
+      timeoutSeconds: 3,
+    },
+  }];
+
+  if (opa) {
+    const resources = {
+      limits: {
+        cpu: opaCpu,
+        memory: opaMemory,
+      },
+    };
+    const securityContainer = await securitySpec(protocol);
+    securityContainer.resources = resources;
+    containers.push(securityContainer);
+  }
+
+  const service = {
+    apiVersion: 'serving.knative.dev/v1',
+    kind: 'Service',
+    metadata: {
+      name,
+      labels: {
+        app: name,
+        ...Object.fromEntries(labels.map((label) => [label.name, label.value])),
+      },
+      annotations: {
+        'run.googleapis.com/launch-stage': 'BETA',
+        'autoscaling.knative.dev/minScale': minInstances,
+        'autoscaling.knative.dev/maxScale': maxInstances,
+      },
+    },
+    spec: {
+      template: {
+        metadata: {
+          annotations: {
+            'run.googleapis.com/execution-environment': 'gen2',
+          },
+        },
+        spec: {
+          containerConcurrency,
+          timeoutSeconds,
+          serviceAccountName,
+          containers,
+          volumes,
+        },
+      },
+      traffic: [{
+        percent: 100,
+        latestRevision: true,
+      }],
+    },
+  };
+
+  /*
+      volumes:
+      - name: opa
+        secret:
+          secretName: opa-config
+          items:
+          - key: latest
+            path: conf.yaml
+*/
+
+  return service;
 };
 
 const manifestTemplate = async (
@@ -108,25 +216,25 @@ const manifestTemplate = async (
         },
       },
       ...(volumes && type.toLowerCase() === 'statefulset'
-      ? {
-        volumeClaimTemplates: [
-          {
-            metadata: {
-              name: `${name}`,
-            },
-            spec: {
-              accessModes: ['ReadWriteOnce'],
-              storageClassName: volumes[0]['disk-type'] === 'hdd' ? 'standard' : 'premium-rwo',
-              resources: {
-                requests: {
-                  storage: volumes[0].size,
+        ? {
+          volumeClaimTemplates: [
+            {
+              metadata: {
+                name: `${name}`,
+              },
+              spec: {
+                accessModes: ['ReadWriteOnce'],
+                storageClassName: volumes[0]['disk-type'] === 'hdd' ? 'standard' : 'premium-rwo',
+                resources: {
+                  requests: {
+                    storage: volumes[0].size,
+                  },
                 },
               },
             },
-          },
-        ],
-      }
-      : {}),
+          ],
+        }
+        : {}),
       template: {
         metadata: {
           labels: {
@@ -233,23 +341,48 @@ const manifestTemplate = async (
   return [namespace, service, deployment, hpa];
 };
 
-const createSkaffoldManifest = async () => `apiVersion: skaffold/v2beta16
-kind: Config
-deploy:
-  kubectl:
-    manifests:
-      - k8s-*
-`;
+const createSkaffoldManifest = async (target) => {
+  const apiVersion = 'skaffold/v4beta6';
+  const kind = 'Config';
+  let deploy = {
+    kubectl: {
+      manifests: [
+        'k8s-*',
+      ],
+    },
+  };
+  if (target === 'cloudrun') {
+    const manifests = {
+      rawYaml: [
+        'cloudrun-service.yaml',
+      ],
+    };
+    deploy = {
+      cloudrun: {},
+    };
+    return {
+      apiVersion,
+      kind,
+      manifests,
+      deploy,
+    };
+  }
 
-const createCloudDeployPipe = async (name, projectID, clanName, env) => `apiVersion: deploy.cloud.google.com/v1
+  return {
+    apiVersion,
+    kind,
+    deploy,
+  };
+};
+
+const createCloudDeployPipe = async (name, projectID, clanName, env, target = 'gke') => `apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
   name: ${name}
 description: ${name} pipeline
 serialPipeline:
   stages:
-  - targetId: gke
-    profiles: []
+  - targetId: ${target}
 ---
 apiVersion: deploy.cloud.google.com/v1
 kind: Target
@@ -258,13 +391,21 @@ metadata:
 description: k8s-cluster
 gke:
   cluster: projects/${projectID}/locations/europe-west1/clusters/${clanName}-cluster-${env}
-  `;
+---
+apiVersion: deploy.cloud.google.com/v1
+kind: Target
+metadata:
+  name: cloudrun
+description: cloudrun deployment
+run:
+  location: projects/${projectID}/locations/europe-west1
+`;
 
 const generateManifest = (fileName, content) => fs.writeFileSync(fileName, content, { encoding: 'utf-8' });
 
-const prepareGcloudDeploy = async (name, projectID, clanName, env) => {
-  await generateManifest('skaffold.yaml', await createSkaffoldManifest());
-  await generateManifest('clouddeploy.yaml', await createCloudDeployPipe(name, projectID, clanName, env));
+const prepareGcloudDeploy = async (name, projectID, clanName, env, target) => {
+  generateManifest('skaffold.yaml', convertToYaml(await createSkaffoldManifest(target)));
+  generateManifest('clouddeploy.yaml', await createCloudDeployPipe(name, projectID, clanName, env, target));
 };
 
 const buildManifest = async (
@@ -274,6 +415,7 @@ const buildManifest = async (
   clanName,
   deployEnv,
   styraToken,
+  timeout,
   http2Certificate,
   internalCert,
   internalCertKey,
@@ -283,6 +425,7 @@ const buildManifest = async (
   let opa = false;
 
   const {
+    'cloud-run': cloudrun,
     kubernetes,
     labels = [],
     security,
@@ -290,13 +433,13 @@ const buildManifest = async (
   } = deployYaml;
 
   const {
-    type,
+    type = {},
     service: name,
     protocol,
     resources,
     scaling,
     volumes,
-  } = kubernetes;
+  } = kubernetes || cloudrun;
 
   const {
     staging,
@@ -329,10 +472,10 @@ const buildManifest = async (
   envArray.push({ name: 'SERVICE_ENVIRONMENT', value: deployEnv });
   envArray.push({ name: 'SERVICE_CONTAINER_IMAGE', value: image });
   envArray.push({ name: 'CLAN_NAME', value: clanName });
-  envArray.push({ name: 'PORT', value: '8080' });
-  envArray.push({ name: 'K_SERVICE', value: name });
 
-  await prepareGcloudDeploy(name, projectId, clanName, deployEnv);
+  const serviceAccount = `${name}@${projectId}.iam.gserviceaccount.com`;
+
+  await prepareGcloudDeploy(name, projectId, clanName, deployEnv, kubernetes ? 'gke' : 'cloudrun');
   if (permissionPrefix) {
     opa = true;
     const styraUrl = 'https://extendaretail.svc.styra.com';
@@ -341,31 +484,54 @@ const buildManifest = async (
     if (system.id === '') {
       throw new Error(`Styra system not found with the name ${styraSystemName}`);
     } else {
-      await generateManifest('k8s-opa-config.yaml', await buildOpaConfig(system.id, styraToken, name, styraUrl));
+      generateManifest('k8s-opa-config.yaml', await buildOpaConfig(system.id, styraToken, name, styraUrl));
     }
   }
+  if (kubernetes) {
+    envArray.push({ name: 'PORT', value: '8080' });
+    envArray.push({ name: 'K_SERVICE', value: name });
 
-  const manifests = await manifestTemplate(
-    name,
-    type,
-    image,
-    minInstances,
-    maxInstances,
-    scaling.cpu,
-    resources.cpu,
-    resources.memory,
-    envArray,
-    labelArray,
-    opa,
-    protocol,
-    volumes,
-    opaResources.cpu,
-    opaResources.memory,
-  );
+    const manifests = await manifestTemplate(
+      name,
+      type,
+      image,
+      minInstances,
+      maxInstances,
+      scaling.cpu,
+      resources.cpu,
+      resources.memory,
+      envArray,
+      labelArray,
+      opa,
+      protocol,
+      volumes,
+      opaResources.cpu,
+      opaResources.memory,
+    );
 
-  const convertedManifests = manifests.map((doc) => convertToYaml(doc)).join('---\n');
-  generateManifest('k8s-manifest.yaml', convertedManifests);
-  generateManifest('k8s-certificates.yaml', await addNamespace(http2Certificate, name));
+    const convertedManifests = manifests.map((doc) => convertToYaml(doc)).join('---\n');
+    generateManifest('k8s-manifest.yaml', convertedManifests);
+    generateManifest('k8s-certificates.yaml', await addNamespace(http2Certificate, name));
+  } else {
+    const cloudrunManifest = await cloudrunManifestTemplate(
+      name,
+      image,
+      false, // set to variable opa once implemented
+      labelArray,
+      protocol,
+      envArray,
+      minInstances,
+      maxInstances,
+      scaling.concurrency,
+      resources.cpu,
+      resources.memory,
+      opaResources.cpu,
+      opaResources.memory,
+      timeout,
+      serviceAccount,
+    );
+    generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));
+  }
   generateManifest('cert.cert', internalCert);
   generateManifest('key.key', internalCertKey);
   generateManifest('external_cert.cert', externalCert);
@@ -376,6 +542,7 @@ const buildManifest = async (
 !k8s-*
 !skaffold.yaml
 !clouddeploy.yaml
+!cloudrun-service.yaml
 `, { encoding: 'utf-8' });
   }
 };
