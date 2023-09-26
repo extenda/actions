@@ -168,7 +168,7 @@ kind: DeliveryPipeline
 metadata:
   name: example-service`);
 
-    expect(fs.existsSync('k8s-opa-config.yaml')).toEqual(false);
+    expect(fs.existsSync('k8s(deploy)opa-config.yaml')).toEqual(false);
 
     const k8sManifest = readFileSync('cloudrun-service.yaml');
 
@@ -190,7 +190,7 @@ metadata:
       containerConcurrency: 40`);
 
     expect(readFileSync('.gcloudignore')).toEqual(`*
-!k8s-*
+!k8s(deploy)-*
 !skaffold.yaml
 !clouddeploy.yaml
 !cloudrun-service.yaml

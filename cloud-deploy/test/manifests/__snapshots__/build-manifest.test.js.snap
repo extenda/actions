@@ -215,6 +215,8 @@ metadata:
     app: example-service
     label1: labelValue1
     label2: labelValue2
+    tenant-alias: multi-tenant
+    iso-country: global
   annotations:
     run.googleapis.com/launch-stage: BETA
     autoscaling.knative.dev/minScale: 1
