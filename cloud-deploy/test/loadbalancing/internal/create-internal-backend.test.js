@@ -20,7 +20,7 @@ describe('configureInternalDomain', () => {
     const protocol = 'http';
     const connectionTimeout = 300;
 
-    await configureInternalDomain(projectID, name, env, protocol, connectionTimeout);
+    await configureInternalDomain(projectID, name, env, protocol, connectionTimeout, true);
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(
       1,
@@ -38,26 +38,26 @@ describe('configureInternalDomain', () => {
     );
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(
-      2,
+      3,
       [
         'compute',
         'backend-services',
         'create',
         `${name}-internal-backend`,
-        '--protocol=HTTP',
         '--port-name=http',
         '--connection-draining-timeout=300s',
-        `--health-checks=${projectID}-internal-hc`,
-        '--timeout=300s',
         '--region=europe-west1',
         '--health-checks-region=europe-west1',
         '--load-balancing-scheme=INTERNAL_MANAGED',
         `--project=${projectID}`,
+        '--protocol=HTTP',
+        `--health-checks=${projectID}-internal-hc`,
+        '--timeout=300s',
       ],
     );
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(
-      3,
+      4,
       [
         'compute',
         'network-endpoint-groups',
@@ -69,7 +69,7 @@ describe('configureInternalDomain', () => {
     );
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(
-      6,
+      7,
       [
         'compute',
         'backend-services',
@@ -79,23 +79,7 @@ describe('configureInternalDomain', () => {
         '--network-endpoint-group-zone=europe-west1-d',
         `--project=${projectID}`,
         '--region=europe-west1',
-        '--balancing-mode=rate',
-        '--max-rate-per-endpoint=1',
-      ],
-    );
-
-    expect(gcloudOutput).toHaveBeenNthCalledWith(
-      7,
-      [
-        'compute',
-        'backend-services',
-        'add-backend',
-        `${name}-internal-backend`,
-        `--network-endpoint-group=${name}-neg`,
-        '--network-endpoint-group-zone=europe-west1-c',
-        `--project=${projectID}`,
-        '--region=europe-west1',
-        '--balancing-mode=rate',
+        '--balancing-mode=RATE',
         '--max-rate-per-endpoint=1',
       ],
     );
@@ -108,10 +92,26 @@ describe('configureInternalDomain', () => {
         'add-backend',
         `${name}-internal-backend`,
         `--network-endpoint-group=${name}-neg`,
+        '--network-endpoint-group-zone=europe-west1-c',
+        `--project=${projectID}`,
+        '--region=europe-west1',
+        '--balancing-mode=RATE',
+        '--max-rate-per-endpoint=1',
+      ],
+    );
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(
+      9,
+      [
+        'compute',
+        'backend-services',
+        'add-backend',
+        `${name}-internal-backend`,
+        `--network-endpoint-group=${name}-neg`,
         '--network-endpoint-group-zone=europe-west1-b',
         `--project=${projectID}`,
         '--region=europe-west1',
-        '--balancing-mode=rate',
+        '--balancing-mode=RATE',
         '--max-rate-per-endpoint=1',
       ],
     );
@@ -119,7 +119,7 @@ describe('configureInternalDomain', () => {
     expect(createInternalLoadbalancer).toHaveBeenCalledWith(projectID, env, name);
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(
-      9,
+      10,
       [
         'compute',
         'url-maps',
