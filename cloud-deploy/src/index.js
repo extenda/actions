@@ -9,7 +9,7 @@ const configureExternalDomain = require('./loadbalancing/external/create-externa
 const configureExternalLBFrontend = require('./loadbalancing/external/create-external-frontend');
 const configureInternalFrontend = require('./loadbalancing/internal/create-internal-frontend');
 const { run, failIfNotTrunkBased } = require('../../utils');
-const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
+const { setupGcloud } = require('../../setup-gcloud');
 const readSecret = require('./utils/load-credentials');
 const runScan = require('./utils/vulnerability-scanning');
 
@@ -29,11 +29,7 @@ const action = async () => {
   failIfNotTrunkBased();
 
   // Ensure our gcloud is available and installed.
-  const projectID = await setupGcloud(
-    serviceAccountKeyCICD,
-    true,
-    process.env.GCLOUD_INSTALLED_VERSION || 'latest',
-  );
+  const projectID = await setupGcloud(serviceAccountKeyCICD);
 
   const {
     project: clanName,

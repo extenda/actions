@@ -19,7 +19,8 @@ cloud-run:
     concurrency: 80
 
 labels:
-  product: test
+  component: jest
+  product: my-product
   foo: bar
 
 security:
@@ -88,6 +89,10 @@ kubernetes:
     cpu: 50
 
 security: none
+
+labels:
+  component: jest
+  product: my-product
 
 environments:
   production:

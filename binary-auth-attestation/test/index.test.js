@@ -1,10 +1,10 @@
 jest.mock('@actions/core');
 jest.mock('../src/create-sign-attestion');
-jest.mock('../../setup-gcloud-base/src/setup-gcloud');
+jest.mock('../../setup-gcloud');
 
 const core = require('@actions/core');
 const action = require('../src/index');
-const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
+const { setupGcloud } = require('../../setup-gcloud');
 const {
   createAttestation,
   getArtifactUrl,

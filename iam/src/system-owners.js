@@ -1,21 +1,21 @@
 const github = require('@actions/github');
 const core = require('@actions/core');
 const yaml = require('js-yaml');
+const fs = require('fs');
 const projectInfo = require('../../cloud-run/src/project-info');
-const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
-const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
+const { setupGcloud } = require('../../setup-gcloud');
 
-const gcloudAuth = async (serviceAccountKey) => setupGcloud(
-  serviceAccountKey,
-  process.env.GCLOUD_INSTALLED_VERSION || 'latest',
-);
+const getTribe = () => {
+  const commonHcl = fs.readFileSync('infra/common.hcl', 'utf-8');
+  const tribeLine = commonHcl.split('\n').find((line) => line.match(/^\s+tribe_name/));
+  return tribeLine.substring(tribeLine.indexOf('"') + 1, tribeLine.lastIndexOf('"'));
+};
 
 const getSystemOwners = async (githubToken, serviceAccountKey) => {
   const octokit = github.getOctokit(githubToken);
-  const projectId = await gcloudAuth(serviceAccountKey);
+  const projectId = await setupGcloud(serviceAccountKey);
   const { project: clan } = projectInfo(projectId);
-  const cluster = await getClusterInfo(projectId, undefined);
-  const { project: tribe } = projectInfo(cluster.project);
+  const tribe = getTribe();
 
   const clanYamlFile = await octokit.rest.repos.getContent({
     owner: 'extenda',

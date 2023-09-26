@@ -5,15 +5,10 @@ const loadIamDefinition = require('./iam-definition');
 const { configureIAM } = require('./configure-iam');
 const loadCredentials = require('./load-credentials');
 const fetchIamToken = require('../../iam-test-token/src/iam-auth');
-const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
+const { setupGcloud } = require('../../setup-gcloud');
 const projectInfo = require('../../cloud-run/src/project-info');
 const getSystemOwners = require('./system-owners');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
-
-const gcloudAuth = async (serviceAccountKey) => setupGcloud(
-  serviceAccountKey,
-  process.env.GCLOUD_INSTALLED_VERSION || 'latest',
-);
 
 const setupEnvironment = async (
   serviceAccountKey,
@@ -23,7 +18,7 @@ const setupEnvironment = async (
   iamUrl,
   systemOwners,
 ) => {
-  const projectId = await gcloudAuth(gcloudAuthKey);
+  const projectId = await setupGcloud(gcloudAuthKey);
   const { env: projectEnv } = projectInfo(projectId);
 
   // Skip IAM handling if staging (not iam-api)

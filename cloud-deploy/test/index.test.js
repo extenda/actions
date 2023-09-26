@@ -8,7 +8,7 @@ const configureInternalDomain = require('../src/loadbalancing/internal/create-in
 const configureExternalDomain = require('../src/loadbalancing/external/create-external-backend');
 const configureExternalLBFrontend = require('../src/loadbalancing/external/create-external-frontend');
 const configureInternalFrontend = require('../src/loadbalancing/internal/create-internal-frontend');
-const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
+const { setupGcloud } = require('../../setup-gcloud');
 const action = require('../src/index');
 const loadCredentials = require('../src/utils/load-credentials');
 
@@ -24,7 +24,7 @@ jest.mock('../src/loadbalancing/external/create-external-backend');
 jest.mock('../src/loadbalancing/external/create-external-frontend');
 jest.mock('../src/loadbalancing/internal/create-internal-frontend');
 jest.mock('../../utils');
-jest.mock('../../setup-gcloud-base/src/setup-gcloud');
+jest.mock('../../setup-gcloud');
 
 const serviceDef = {
   kubernetes: {
@@ -40,6 +40,10 @@ const serviceDef = {
     },
   },
   security: 'none',
+  labels: {
+    product: 'actions',
+    component: 'jest',
+  },
   environments: {
     production: {
       'min-instances': 1,

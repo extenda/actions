@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+const { execGcloud } = require('../../setup-gcloud');
 
 // Binauthz attestations gcloud cmd
 const createAttestation = async (
@@ -27,7 +27,7 @@ const createAttestation = async (
     `--keyversion-key=${keyversionKey}`,
     `--keyversion=${keyversion}`,
   ];
-  return exec.exec('gcloud', args);
+  return execGcloud(args);
 };
 
 const getArtifactUrl = async (tag, imagePath) => {
@@ -40,18 +40,7 @@ const getArtifactUrl = async (tag, imagePath) => {
     container,
     '--format=get(image_summary.digest)',
   ];
-
-  let digest = '';
-  await exec.exec('gcloud', args, {
-    silent: false,
-    listeners: {
-      stdout: (data) => {
-        digest += data.toString('utf8');
-      },
-    },
-  });
-
-  digest = digest.trim();
+  const digest = await execGcloud(args);
   return `${imageName}@${digest}`;
 };
 

@@ -1,14 +1,9 @@
-jest.mock('@actions/exec');
-const exec = require('@actions/exec');
+jest.mock('../../setup-gcloud');
+const { execGcloud } = require('../../setup-gcloud');
 const {
   createAttestation,
   getArtifactUrl,
 } = require('../src/create-sign-attestion');
-
-const mockExecListeners = (output) => (cmd, args, opts) => {
-  opts.listeners.stdout(Buffer.from(output, 'utf8'));
-  return Promise.resolve(0);
-};
 
 describe('Create attestation', () => {
   afterEach(() => {
@@ -26,8 +21,9 @@ describe('Create attestation', () => {
       'key',
       '1',
     );
-    expect(exec.exec).toHaveBeenCalledTimes(1);
-    expect(exec.exec).toHaveBeenCalledWith('gcloud', [
+    execGcloud.mockResolvedValueOnce('digest2626');
+    expect(execGcloud).toHaveBeenCalledTimes(1);
+    expect(execGcloud).toHaveBeenCalledWith([
       '--quiet',
       'beta',
       'container',
@@ -48,20 +44,18 @@ describe('Create attestation', () => {
   test('Get artifact URL with default tag', async () => {
     const imagePath = 'eu.gcr.io/my-image';
     const digest = 'djdq1787';
-    exec.exec
-      .mockImplementationOnce(mockExecListeners(digest));
+    execGcloud.mockResolvedValueOnce(digest);
 
     expect(await getArtifactUrl('tag', imagePath)).toEqual('eu.gcr.io/my-image@djdq1787');
-    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(execGcloud).toHaveBeenCalledTimes(1);
   });
 
   test('Get artifact URL provided a tag in the imagePath', async () => {
     const imagePath = 'eu.gcr.io/my-image:tag1';
     const digest = 'dut6h1787';
-    exec.exec
-      .mockImplementationOnce(mockExecListeners(digest));
+    execGcloud.mockResolvedValueOnce(digest);
 
     expect(await getArtifactUrl('tag1', imagePath)).toEqual('eu.gcr.io/my-image@dut6h1787');
-    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(execGcloud).toHaveBeenCalledTimes(1);
   });
 });

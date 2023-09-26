@@ -74,4 +74,4 @@ const loadTool = async ({
   return find(options).then((cachedTool) => downloadIfMissing(options, cachedTool));
 };
 
-module.exports = loadTool;
+module.exports = { find, loadTool };

@@ -13,6 +13,7 @@
     "jsonschema": "^1.4.0",
     "multiline-str": "^1.0.0",
     "request": "^2.88.2",
+    "uuid": "^9.0.0",
     "yaml": "^1.8.2"
   },
   "devDependencies": {

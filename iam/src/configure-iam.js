@@ -30,9 +30,15 @@ const configureIAM = async (
 
   const errors = [];
   const promises = [];
-  const cluster = await getClusterInfo(projectId);
+  let skipNamespace = false;
+  try {
+    const cluster = await getClusterInfo(projectId);
+    await authenticateKubeCtl(cluster);
+  } catch (error) {
+    skipNamespace = true;
+    core.info(`no cluster to connect to.. // ERROR: ${error}`);
+  }
   // Connect to cluster
-  await authenticateKubeCtl(cluster);
 
   if (services) {
     services.forEach(({ name: namespace, repository, 'allowed-consumers': consumers }) => {
@@ -49,7 +55,7 @@ const configureIAM = async (
         .then((system) => {
           if (system.id === '') {
             core.info(`creating system '${systemName}' in ${styraUrl}`);
-            return createNamespace(projectId, true, namespace)
+            return createNamespace(projectId, true, namespace, skipNamespace)
               .then(() => setupSystem(
                 namespace,
                 systemName,

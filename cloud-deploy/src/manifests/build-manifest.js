@@ -347,7 +347,7 @@ const createSkaffoldManifest = async (target) => {
   let deploy = {
     kubectl: {
       manifests: [
-        'k8s-*',
+        'k8s(deploy)-*',
       ],
     },
   };
@@ -462,6 +462,14 @@ const buildManifest = async (
     value: value.replace('sm://*/', `sm://${projectId}/`),
   }));
 
+  // Default label values.
+  if (!labels['tenant-alias']) {
+    labels['tenant-alias'] = 'multi-tenant';
+  }
+  if (!labels['iso-country']) {
+    labels['iso-country'] = 'global';
+  }
+
   const labelArray = Object.entries(labels).map(([key, value]) => ({
     name: key,
     value,
@@ -484,7 +492,7 @@ const buildManifest = async (
     if (system.id === '') {
       throw new Error(`Styra system not found with the name ${styraSystemName}`);
     } else {
-      generateManifest('k8s-opa-config.yaml', await buildOpaConfig(system.id, styraToken, name, styraUrl));
+      generateManifest('k8s(deploy)-opa-config.yaml', await buildOpaConfig(system.id, styraToken, name, styraUrl));
     }
   }
   if (kubernetes) {
@@ -510,8 +518,8 @@ const buildManifest = async (
     );
 
     const convertedManifests = manifests.map((doc) => convertToYaml(doc)).join('---\n');
-    generateManifest('k8s-manifest.yaml', convertedManifests);
-    generateManifest('k8s-certificates.yaml', await addNamespace(http2Certificate, name));
+    generateManifest('k8s(deploy)-manifest.yaml', convertedManifests);
+    generateManifest('k8s(deploy)-certificates.yaml', await addNamespace(http2Certificate, name));
   } else {
     const cloudrunManifest = await cloudrunManifestTemplate(
       name,
@@ -539,7 +547,7 @@ const buildManifest = async (
 
   if (!fs.existsSync('.gcloudignore')) {
     fs.writeFileSync('.gcloudignore', `*
-!k8s-*
+!k8s(deploy)-*
 !skaffold.yaml
 !clouddeploy.yaml
 !cloudrun-service.yaml

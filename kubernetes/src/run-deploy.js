@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
-const setupGcloud = require('../../setup-gcloud-base/src/setup-gcloud');
+const { setupGcloud } = require('../../setup-gcloud');
 const checkNamespaceExists = require('./check-namespace-exists');
 const execKustomize = require('./kustomize');
 const patchStatefulSetYaml = require('./patch-statefulset-yaml');
@@ -15,16 +15,6 @@ const checkRequiredNumberOfPodsIsRunning = require('./check-number-of-pods-runni
 const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
 const applyAutoscale = require('./autoscale');
 const { getImageDigest } = require('../../utils/src');
-
-/**
- * Downloads, configures, authenticates to GCloud.
- * Creates some environmental variables.
- * @returns projectId in form of id from gcp. Example: enterprise-staging-fc38.
- */
-const gcloudAuth = async (serviceAccountKey) => setupGcloud(
-  serviceAccountKey,
-  process.env.GCLOUD_INSTALLED_VERSION || 'latest',
-);
 
 /**
  * Applies patch function to the kubernetes manifest file.
@@ -118,7 +108,7 @@ const runDeploy = async (
   dryRun,
 ) => {
   // Gets some info from gcloud.
-  const projectId = await gcloudAuth(serviceAccountKey);
+  const projectId = await setupGcloud(serviceAccountKey);
   const cluster = await getClusterInfo(projectId);
 
   // Creates kustomize files.

@@ -32,6 +32,10 @@ metadata:
   namespace: example-service
   labels:
     app: example-service
+    product: actions
+    component: jest
+    iso-country: se
+    tenant-alias: testrunner
 spec:
   replicas: 1
   selector:
@@ -149,6 +153,10 @@ metadata:
   namespace: example-service
   labels:
     app: example-service
+    product: actions
+    component: jest
+    tenant-alias: multi-tenant
+    iso-country: global
 spec:
   replicas: 3
   selector:
@@ -295,6 +303,10 @@ metadata:
     app: example-service
     label1: labelValue1
     label2: labelValue2
+    product: actions
+    component: jest
+    tenant-alias: multi-tenant
+    iso-country: global
 spec:
   replicas: 1
   selector:
@@ -404,8 +416,12 @@ metadata:
   namespace: example-service
   labels:
     app: example-service
+    product: actions
+    component: jest
     label1: labelValue1
     label2: labelValue2
+    tenant-alias: multi-tenant
+    iso-country: global
 spec:
   replicas: 1
   selector:
