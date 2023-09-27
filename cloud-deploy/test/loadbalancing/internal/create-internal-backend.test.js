@@ -133,4 +133,172 @@ describe('configureInternalDomain', () => {
       ],
     );
   });
+
+  test('should setup internal domain with correct parameters if cloudrun', async () => {
+    gcloudOutput.mockImplementation(() => Promise.resolve());
+    createInternalLoadbalancer.mockImplementation(() => Promise.resolve());
+
+    const projectID = 'my-project';
+    const name = 'my-service';
+    const env = 'dev';
+    const protocol = 'http';
+    const connectionTimeout = 300;
+
+    await configureInternalDomain(projectID, name, env, protocol, connectionTimeout, false);
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(
+      1,
+      [
+        'compute',
+        'health-checks',
+        'create',
+        'tcp',
+        `${projectID}-internal-hc`,
+        '--region=europe-west1',
+        '--use-serving-port',
+        '--check-interval=10s',
+        `--project=${projectID}`,
+      ],
+    );
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(
+      3,
+      [
+        'compute',
+        'backend-services',
+        'create',
+        `${name}-internal-backend`,
+        '--port-name=http',
+        '--connection-draining-timeout=300s',
+        '--region=europe-west1',
+        '--health-checks-region=europe-west1',
+        '--load-balancing-scheme=INTERNAL_MANAGED',
+        `--project=${projectID}`,
+        '--protocol=HTTPS',
+      ],
+    );
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(
+      4,
+      [
+        'compute',
+        'network-endpoint-groups',
+        'create',
+        `${name}-cloudrun`,
+        '--cloud-run-service=my-service',
+        '--network-endpoint-type=serverless',
+        `--project=${projectID}`,
+        '--region=europe-west1',
+      ],
+    );
+
+    expect(createInternalLoadbalancer).toHaveBeenCalledWith(projectID, env, name);
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(
+      6,
+      [
+        'compute',
+        'url-maps',
+        'add-path-matcher',
+        `${projectID.split(`-${env}`)[0]}-${env}-lb-internal`,
+        `--project=${projectID}`,
+        `--default-service=${name}-internal-backend`,
+        `--path-matcher-name=${name}-internal-backend`,
+        '--region=europe-west1',
+        `--new-hosts=${name}.internal`,
+      ],
+    );
+  });
+
+  test('should setup internal domain with correct parameters if cloudrun', async () => {
+    const status = {
+      backends: [
+        {
+          group: 'zone/service/my-service-neg',
+        },
+      ],
+    };
+
+    // gcloudOutput.mockImplementation(() => Promise.resolve());
+    createInternalLoadbalancer.mockImplementation(() => Promise.resolve());
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce(JSON.stringify(status));
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockRejectedValueOnce();
+
+    const projectID = 'my-project';
+    const name = 'my-service';
+    const env = 'dev';
+    const protocol = 'http';
+    const connectionTimeout = 300;
+
+    await configureInternalDomain(projectID, name, env, protocol, connectionTimeout, false);
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(
+      1,
+      [
+        'compute',
+        'health-checks',
+        'create',
+        'tcp',
+        `${projectID}-internal-hc`,
+        '--region=europe-west1',
+        '--use-serving-port',
+        '--check-interval=10s',
+        `--project=${projectID}`,
+      ],
+    );
+    expect(gcloudOutput).toHaveBeenNthCalledWith(
+      2,
+      [
+        'compute',
+        'backend-services',
+        'describe',
+        `${name}-internal-backend`,
+        '--region=europe-west1',
+        `--project=${projectID}`,
+        '--format=json',
+      ],
+    );
+    expect(gcloudOutput).toHaveBeenNthCalledWith(
+      3,
+      [
+        'compute',
+        'url-maps',
+        'remove-path-matcher',
+        'my-project-dev-lb-internal',
+        `--path-matcher-name=${name}-internal-backend`,
+        '--region=europe-west1',
+        `--project=${projectID}`,
+      ],
+    );
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(
+      4,
+      [
+        'compute',
+        'backend-services',
+        'delete',
+        `${name}-internal-backend`,
+        '--region=europe-west1',
+        '--quiet',
+        `--project=${projectID}`,
+      ],
+    );
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(
+      6,
+      [
+        'compute',
+        'backend-services',
+        'update',
+        `${name}-internal-backend`,
+        '--no-health-checks',
+        '--region=europe-west1',
+        `--project=${projectID}`,
+        '--protocol=HTTPS',
+      ],
+    );
+  });
 });
