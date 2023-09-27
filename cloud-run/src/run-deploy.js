@@ -267,25 +267,26 @@ const runDeploy = async (
     }
   }
 
-  const gcloudExitCode = await execWithOutput(args)
-    .then((response) => waitForRevision(
-      response,
-      args,
-      service.name,
+  try {
+    const gcloudExitCode = await execWithOutput(args)
+      .then((response) => waitForRevision(
+        response,
+        args,
+        service.name,
+        cluster,
+        service.canary,
+        retryInterval,
+      ));
+    return {
+      gcloudExitCode,
+      projectId,
       cluster,
-      service.canary,
-      retryInterval,
-    ));
-
-  if (service.platform.gke && cluster) {
-    await cleanRevisions(name, projectId, cluster.uri, cluster.clusterLocation, maxRevisions);
+    };
+  } finally {
+    if (service.platform.gke && cluster) {
+      await cleanRevisions(name, projectId, cluster.uri, cluster.clusterLocation, maxRevisions);
+    }
   }
-
-  return {
-    gcloudExitCode,
-    projectId,
-    cluster,
-  };
 };
 
 module.exports = runDeploy;
