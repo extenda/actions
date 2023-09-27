@@ -86,6 +86,7 @@ const action = async () => {
     clanName,
     env,
     styraToken,
+    timeout,
     http2Certificate,
     internalHttpsCertificateCrt,
     internalHttpsCertificateKey,
