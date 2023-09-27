@@ -2,6 +2,17 @@ const core = require('@actions/core');
 const gcloudOutput = require('../utils/gcloud-output');
 const { retryUntil } = require('../utils/retry-until');
 
+const allowAllRequests = async (projectID, name) => gcloudOutput([
+  'run',
+  'services',
+  'add-iam-policy-binding',
+  name,
+  '--member=allUsers',
+  '--role=roles/run.invoker',
+  '--region=europe-west1',
+  `--project=${projectID}`,
+]);
+
 const deployRelease = async (projectID, name, version) => gcloudOutput([
   'deploy',
   'releases',
@@ -48,10 +59,13 @@ const runGcloudDeploy = async (projectID, name, version) => {
   return status === 'SUCCEEDED';
 };
 
-const deploy = async (projectID, name, version) => {
+const deploy = async (projectID, name, version, platformGKE) => {
   const success = await runGcloudDeploy(projectID, name, version);
   if (success) {
     core.info(`Deployment of ${name} completed successfully`);
+    if (!platformGKE) {
+      await allowAllRequests(projectID, name);
+    }
     return true;
   }
   core.info(`Deployment of ${name} failed`);

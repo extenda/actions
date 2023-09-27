@@ -100,8 +100,7 @@ const cloudrunManifestTemplate = async (
       },
       annotations: {
         'run.googleapis.com/launch-stage': 'BETA',
-        'autoscaling.knative.dev/minScale': minInstances,
-        'autoscaling.knative.dev/maxScale': maxInstances,
+        'run.googleapis.com/ingress': 'internal-and-cloud-load-balancing',
       },
     },
     spec: {
@@ -109,6 +108,10 @@ const cloudrunManifestTemplate = async (
         metadata: {
           annotations: {
             'run.googleapis.com/execution-environment': 'gen2',
+            'autoscaling.knative.dev/minScale': minInstances,
+            'autoscaling.knative.dev/maxScale': maxInstances,
+            'run.googleapis.com/network-interfaces': '[{"network":"clan-network","subnetwork":"k8s-subnet"}]',
+            'run.googleapis.com/vpc-access-egress': 'all-traffic',
           },
         },
         spec: {

@@ -29,7 +29,7 @@ describe('manifests/deploy', () => {
     const result = await deploy('my-project', 'my-service', '0.0.1-local');
     expect(result).toEqual(true);
 
-    expect(gcloudOutput).toHaveBeenCalledTimes(5);
+    expect(gcloudOutput).toHaveBeenCalledTimes(6);
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(1, [
       'deploy',
