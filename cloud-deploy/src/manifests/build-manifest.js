@@ -1,5 +1,6 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
+const core = require('@actions/core');
 const checkSystem = require('./check-system');
 const buildOpaConfig = require('./opa-config');
 const { addNamespace } = require('../utils/add-namespace');
@@ -404,7 +405,13 @@ run:
   location: projects/${projectID}/locations/europe-west1
 `;
 
-const generateManifest = (fileName, content) => fs.writeFileSync(fileName, content, { encoding: 'utf-8' });
+const generateManifest = (fileName, content) => {
+  core.info(`generating ${fileName}`);
+  if (!content) {
+    core.error(`content is undefined for ${fileName}`);
+  }
+  fs.writeFileSync(fileName, content, { encoding: 'utf-8' });
+};
 
 const prepareGcloudDeploy = async (name, projectID, clanName, env, target) => {
   generateManifest('skaffold.yaml', convertToYaml(await createSkaffoldManifest(target)));
