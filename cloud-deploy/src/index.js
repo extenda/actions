@@ -91,7 +91,7 @@ const action = async () => {
     externalHttpsCertificateKey,
   );
 
-  const succesfullDeploy = await deploy(projectID, serviceName, version);
+  const succesfullDeploy = await deploy(projectID, serviceName, version, platformGKE);
 
   if (succesfullDeploy) {
     await createExternalLoadbalancer(projectID, env);
