@@ -71,7 +71,7 @@ describe('buildManifest', () => {
     expect(checkSystem).not.toHaveBeenCalled();
     expect(securitySpec).not.toHaveBeenCalled();
 
-    expect(readFileSync('skaffold.yaml')).toContain(`apiVersion: skaffold/v4beta6
+    expect(readFileSync('skaffold.yaml')).toContain(`apiVersion: skaffold/v2beta16
 kind: Config
 deploy:
   kubectl:
@@ -154,7 +154,7 @@ metadata:
     expect(checkSystem).not.toHaveBeenCalled();
     expect(securitySpec).not.toHaveBeenCalled();
 
-    expect(readFileSync('skaffold.yaml')).toContain(`apiVersion: skaffold/v4beta6
+    expect(readFileSync('skaffold.yaml')).toContain(`apiVersion: skaffold/v2beta16
 kind: Config
 manifests:
   rawYaml:
