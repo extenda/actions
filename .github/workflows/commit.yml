@@ -77,7 +77,6 @@ jobs:
   acceptance-windows:
     runs-on: windows-latest
     needs:
-      - test
       - verify-dist
     steps:
       - uses: actions/checkout@v3
@@ -110,16 +109,9 @@ jobs:
           echo VERSION=${{ steps.version.outputs.version }}
           echo RELEASE_TAG=${{ steps.version.outputs.release-tag }}
 
-      - name: Setup Gcloud
-        uses: ./setup-gcloud
-        id: gcloud
-        with:
-          service-account-key: ${{ secrets.SECRET_AUTH }}
-
   acceptance-linux:
     runs-on: ubuntu-latest
     needs:
-      - test
       - verify-dist
     steps:
       - uses: actions/checkout@v3
