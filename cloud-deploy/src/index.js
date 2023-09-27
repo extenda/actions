@@ -70,6 +70,7 @@ const action = async () => {
   // Trivvy scanning
   if (process.platform !== 'win32') {
     if (env !== 'staging') {
+      core.info('Run Trivy scanning');
       await runScan(serviceAccountKeyCICD, image);
     }
   }
@@ -77,6 +78,7 @@ const action = async () => {
   // setup manifests (hpa, deploy, negs)
   const version = new Date().getTime();
 
+  core.info('Build manifests');
   await buildManifest(
     image,
     deployYaml,
@@ -91,9 +93,10 @@ const action = async () => {
     externalHttpsCertificateKey,
   );
 
-  const succesfullDeploy = await deploy(projectID, serviceName, version, platformGKE);
+  core.info('Run cloud-deploy');
+  const succesfulDeploy = await deploy(projectID, serviceName, version, platformGKE);
 
-  if (succesfullDeploy) {
+  if (succesfulDeploy) {
     await createExternalLoadbalancer(projectID, env);
     if (domainMappings) {
       await configureExternalLBFrontend(projectID, env, [...domainMappings], migrate);
