@@ -21,9 +21,8 @@ const cleanRevisions = async (namespace, project, cluster, location, maxRevision
   await getRevisions(namespace, project, cluster, location)
     .then((revisions) => revisions.map((rev) => rev.name))
     .then((revisions) => {
-      const length = revisions.length - maxRevisions;
-      if (length > 0) {
-        for (let i = 0; i < length; i += 1) {
+      if (revisions.length > maxRevisions) {
+        for (let i = maxRevisions; i < revisions.length; i += 1) {
           core.info(`deleting revision '${revisions[i]}'`);
           promises.push(deleteRevision(namespace, project, cluster, location, revisions[i]));
         }
