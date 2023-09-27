@@ -45,7 +45,8 @@ const action = async () => {
 
   const deployYaml = loadServiceDefinition(serviceFile);
   const {
-    kubernetes,
+    'cloud-run': cloudrun = {},
+    kubernetes = {},
     environments,
   } = deployYaml;
 
@@ -53,7 +54,7 @@ const action = async () => {
     timeout = 300,
     service: serviceName,
     protocol,
-  } = kubernetes;
+  } = kubernetes || cloudrun;
 
   const {
     staging,
@@ -63,6 +64,8 @@ const action = async () => {
   const {
     'domain-mappings': domainMappings,
   } = env === 'staging' ? staging : production;
+
+  const platformGKE = !cloudrun;
 
   // Trivvy scanning
   if (process.platform !== 'win32') {
@@ -88,15 +91,23 @@ const action = async () => {
     externalHttpsCertificateKey,
   );
 
-  const succesfullDeploy = await deploy(projectID, serviceName, version);
+  const succesfullDeploy = await deploy(projectID, serviceName, version, platformGKE);
 
   if (succesfullDeploy) {
     await createExternalLoadbalancer(projectID, env);
     if (domainMappings) {
-      await configureExternalLBFrontend(projectID, env, domainMappings, migrate);
-      await configureExternalDomain(projectID, serviceName, env, domainMappings, protocol, timeout);
+      await configureExternalLBFrontend(projectID, env, [...domainMappings], migrate);
+      await configureExternalDomain(
+        projectID,
+        serviceName,
+        env,
+        domainMappings,
+        protocol,
+        timeout,
+        platformGKE,
+      );
     }
-    await configureInternalDomain(projectID, serviceName, env, protocol, timeout);
+    await configureInternalDomain(projectID, serviceName, env, protocol, timeout, platformGKE);
     await configureInternalFrontend(projectID, serviceName, env, protocol);
   } else {
     throw new Error('Deployment failed! Check container logs and status for error!');

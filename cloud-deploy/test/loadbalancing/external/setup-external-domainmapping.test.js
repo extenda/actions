@@ -172,6 +172,6 @@ describe('setupExternalDomainMapping', () => {
     ]);
 
     // Check that the hosts array was modified correctly
-    expect(hosts).toEqual([]);
+    expect(hosts).toEqual(['example.com']);
   });
 });

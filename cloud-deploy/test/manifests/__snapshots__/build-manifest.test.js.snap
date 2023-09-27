@@ -206,6 +206,74 @@ spec:
 "
 `;
 
+exports[`buildManifest should generate manifest cloudrun file with correct content 1`] = `
+"apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: example-service
+  labels:
+    app: example-service
+    label1: labelValue1
+    label2: labelValue2
+    tenant-alias: multi-tenant
+    iso-country: global
+  annotations:
+    run.googleapis.com/launch-stage: BETA
+    run.googleapis.com/ingress: internal-and-cloud-load-balancing
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/execution-environment: gen2
+        autoscaling.knative.dev/minScale: 1
+        autoscaling.knative.dev/maxScale: 10
+        run.googleapis.com/network-interfaces: '[{"network":"clan-network","subnetwork":"k8s-subnet"}]'
+        run.googleapis.com/vpc-access-egress: all-traffic
+    spec:
+      containerConcurrency: 40
+      timeoutSeconds: ''
+      serviceAccountName: example-service@example-project.iam.gserviceaccount.com
+      containers:
+        - image: example-image:latest
+          name: user-container
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 1
+              memory: 512Mi
+          env:
+            - name: KEY1
+              value: value1
+            - name: KEY2
+              value: value2
+            - name: KEY3
+              value: '8080'
+            - name: SECRET
+              value: sm://example-project/test-secret
+            - name: SERVICE_NAME
+              value: example-service
+            - name: SERVICE_PROJECT_ID
+              value: example-project
+            - name: SERVICE_ENVIRONMENT
+              value: production
+            - name: SERVICE_CONTAINER_IMAGE
+              value: example-image:latest
+            - name: CLAN_NAME
+              value: example-clan
+          startupProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            failureThreshold: 10
+            timeoutSeconds: 3
+  traffic:
+    - percent: 100
+      latestRevision: true
+"
+`;
+
 exports[`buildManifest should generate manifest file with correct content 1`] = `
 "apiVersion: v1
 kind: Namespace
