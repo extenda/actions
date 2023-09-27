@@ -17,6 +17,7 @@ const loadServiceDefinition = (serviceFile) => {
   if (!fs.existsSync(serviceFile)) {
     throw Error(`Service specification file not found: ${serviceFile}`);
   }
+  core.info(`Load service specification from ${serviceFile}`);
   const spec = yaml.parse(fs.readFileSync(serviceFile, 'utf8'), { merge: true });
   validateSchema(serviceFile, spec);
   return spec;
