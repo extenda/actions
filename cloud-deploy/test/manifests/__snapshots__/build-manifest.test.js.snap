@@ -1,5 +1,73 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`buildManifest It should generate cloud run service with annotations 1`] = `
+"apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: example-service
+  labels:
+    app: example-service
+    product: actions
+    component: jest
+    tenant-alias: multi-tenant
+    iso-country: global
+  annotations:
+    run.googleapis.com/launch-stage: BETA
+    run.googleapis.com/ingress: internal-and-cloud-load-balancing
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/execution-environment: gen2
+        autoscaling.knative.dev/minScale: 1
+        autoscaling.knative.dev/maxScale: 100
+        run.googleapis.com/cpu-throttling: 'false'
+        run.googleapis.com/startup-cpu-boost: 'true'
+        run.googleapis.com/sessionAffinity: 'true'
+        run.googleapis.com/network-interfaces: '[{"network":"clan-network","subnetwork":"k8s-subnet"}]'
+        run.googleapis.com/vpc-access-egress: all-traffic
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: ''
+      serviceAccountName: example-service@example-project.iam.gserviceaccount.com
+      containers:
+        - image: example-image:latest
+          name: user-container
+          ports:
+            - name: http1
+              containerPort: 8080
+          resources:
+            limits:
+              cpu: 1
+              memory: 512Mi
+          env:
+            - name: KEY1
+              value: value1
+            - name: KEY2
+              value: value2
+            - name: SERVICE_NAME
+              value: example-service
+            - name: SERVICE_PROJECT_ID
+              value: example-project
+            - name: SERVICE_ENVIRONMENT
+              value: dev
+            - name: SERVICE_CONTAINER_IMAGE
+              value: example-image:latest
+            - name: CLAN_NAME
+              value: example-clan
+          startupProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            failureThreshold: 10
+            timeoutSeconds: 3
+  traffic:
+    - percent: 100
+      latestRevision: true
+"
+`;
+
 exports[`buildManifest It should generate manifest with volumes for StatefulSet 1`] = `
 "apiVersion: v1
 kind: Namespace
@@ -227,6 +295,9 @@ spec:
         run.googleapis.com/execution-environment: gen2
         autoscaling.knative.dev/minScale: 1
         autoscaling.knative.dev/maxScale: 10
+        run.googleapis.com/cpu-throttling: 'true'
+        run.googleapis.com/startup-cpu-boost: 'false'
+        run.googleapis.com/sessionAffinity: 'false'
         run.googleapis.com/network-interfaces: '[{"network":"clan-network","subnetwork":"k8s-subnet"}]'
         run.googleapis.com/vpc-access-egress: all-traffic
         run.googleapis.com/cloudsql-instances: instance-name
@@ -238,7 +309,7 @@ spec:
         - image: example-image:latest
           name: user-container
           ports:
-            - name: http
+            - name: http1
               containerPort: 8080
           resources:
             limits:

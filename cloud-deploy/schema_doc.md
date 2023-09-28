@@ -8,6 +8,9 @@
     - [1.1.4. Property `CloudDeploy > oneOf > CloudRun > cloud-run > timeout`](#oneOf_i0_cloud-run_timeout)
     - [1.1.5. Property `CloudDeploy > oneOf > CloudRun > cloud-run > scaling`](#oneOf_i0_cloud-run_scaling)
       - [1.1.5.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > scaling > concurrency`](#oneOf_i0_cloud-run_scaling_concurrency)
+    - [1.1.6. Property `CloudDeploy > oneOf > CloudRun > cloud-run > startup-cpu-boost`](#oneOf_i0_cloud-run_startup-cpu-boost)
+    - [1.1.7. Property `CloudDeploy > oneOf > CloudRun > cloud-run > cpu-throttling`](#oneOf_i0_cloud-run_cpu-throttling)
+    - [1.1.8. Property `CloudDeploy > oneOf > CloudRun > cloud-run > session-affinity`](#oneOf_i0_cloud-run_session-affinity)
 - [2. Property `CloudDeploy > oneOf > Kubernetes`](#oneOf_i1)
   - [2.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes`](#oneOf_i1_kubernetes)
     - [2.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > service`](#oneOf_i1_kubernetes_service)
@@ -93,13 +96,16 @@
 
 **Description:** Managed Cloud Run service
 
-| Property                                      | Pattern | Type             | Deprecated | Definition                                         | Title/Description                                                                        |
-| --------------------------------------------- | ------- | ---------------- | ---------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| + [service](#oneOf_i0_cloud-run_service )     | No      | string           | No         | In #/$defs/ServiceName                             | Service name                                                                             |
-| + [resources](#oneOf_i0_cloud-run_resources ) | No      | object           | No         | Same as [resources](#security_oneOf_i1_resources ) | The requested resources                                                                  |
-| + [protocol](#oneOf_i0_cloud-run_protocol )   | No      | enum (of string) | No         | In #/$defs/Protocol                                | The type of protocol. Make sure to set http2 if this service is using gRPC or WebSockets |
-| - [timeout](#oneOf_i0_cloud-run_timeout )     | No      | integer          | No         | In #/$defs/RequestTimeout                          | The request timeout in seconds                                                           |
-| + [scaling](#oneOf_i0_cloud-run_scaling )     | No      | object           | No         | -                                                  | ScalingCloudRun                                                                          |
+| Property                                                      | Pattern | Type             | Deprecated | Definition                                         | Title/Description                                                                        |
+| ------------------------------------------------------------- | ------- | ---------------- | ---------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| + [service](#oneOf_i0_cloud-run_service )                     | No      | string           | No         | In #/$defs/ServiceName                             | Service name                                                                             |
+| + [resources](#oneOf_i0_cloud-run_resources )                 | No      | object           | No         | Same as [resources](#security_oneOf_i1_resources ) | The requested resources                                                                  |
+| + [protocol](#oneOf_i0_cloud-run_protocol )                   | No      | enum (of string) | No         | In #/$defs/Protocol                                | The type of protocol. Make sure to set http2 if this service is using gRPC or WebSockets |
+| - [timeout](#oneOf_i0_cloud-run_timeout )                     | No      | integer          | No         | In #/$defs/RequestTimeout                          | The request timeout in seconds                                                           |
+| + [scaling](#oneOf_i0_cloud-run_scaling )                     | No      | object           | No         | -                                                  | ScalingCloudRun                                                                          |
+| - [startup-cpu-boost](#oneOf_i0_cloud-run_startup-cpu-boost ) | No      | boolean          | No         | -                                                  | Whether to allocate extra CPU to containers on startup.                                  |
+| - [cpu-throttling](#oneOf_i0_cloud-run_cpu-throttling )       | No      | boolean          | No         | -                                                  | Whether to throttle the CPU when the container is not actively serving requests.         |
+| - [session-affinity](#oneOf_i0_cloud-run_session-affinity )   | No      | boolean          | No         | -                                                  | Whether to enable session affinity for connections to the service.                       |
 
 #### <a name="oneOf_i0_cloud-run_service"></a>1.1.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > service`
 
@@ -181,6 +187,36 @@ Must be one of:
 | ------------ | --------- |
 | **Minimum**  | &ge; 10   |
 | **Maximum**  | &le; 1000 |
+
+#### <a name="oneOf_i0_cloud-run_startup-cpu-boost"></a>1.1.6. Property `CloudDeploy > oneOf > CloudRun > cloud-run > startup-cpu-boost`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether to allocate extra CPU to containers on startup.
+
+#### <a name="oneOf_i0_cloud-run_cpu-throttling"></a>1.1.7. Property `CloudDeploy > oneOf > CloudRun > cloud-run > cpu-throttling`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Whether to throttle the CPU when the container is not actively serving requests.
+
+#### <a name="oneOf_i0_cloud-run_session-affinity"></a>1.1.8. Property `CloudDeploy > oneOf > CloudRun > cloud-run > session-affinity`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether to enable session affinity for connections to the service.
 
 ## <a name="oneOf_i1"></a>2. Property `CloudDeploy > oneOf > Kubernetes`
 
@@ -752,4 +788,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-09-11 at 11:42:31 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-09-28 at 15:48:06 +0200
