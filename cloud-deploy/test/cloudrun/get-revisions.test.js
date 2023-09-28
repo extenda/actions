@@ -1,5 +1,4 @@
 jest.mock('@actions/exec');
-const { exec } = require('@actions/exec');
 const { execGcloud } = require('../../../setup-gcloud');
 const getRevisions = require('../../src/cloudrun/get-revisions');
 
