@@ -346,7 +346,7 @@ const manifestTemplate = async (
 };
 
 const createSkaffoldManifest = async (target) => {
-  const apiVersion = 'skaffold/v2beta16';
+  let apiVersion = 'skaffold/v2beta16';
   const kind = 'Config';
   let deploy = {
     kubectl: {
@@ -356,6 +356,7 @@ const createSkaffoldManifest = async (target) => {
     },
   };
   if (target === 'cloudrun') {
+    apiVersion = 'skaffold/v4beta6';
     const manifests = {
       rawYaml: [
         'cloudrun-service.yaml',
