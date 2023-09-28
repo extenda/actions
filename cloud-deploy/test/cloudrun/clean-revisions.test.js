@@ -68,7 +68,7 @@ describe('clean revisions', () => {
       { name: 'rev-00006-tst', creationTimestamp: '6' },
     ]);
     execGcloud.mockResolvedValue(0);
-    await cleanRevisions('service-name', 'test-staging-t3st', 'k8s-cluster', 'europe-west1', 3);
+    await cleanRevisions('service-name', 'test-staging-t3st', 'europe-west1', 3);
     expect(getRevisions).toHaveBeenCalledWith('service-name', 'test-staging-t3st', 'europe-west1');
     expect(execGcloud).toHaveBeenCalledTimes(1);
     expect(execGcloud).toHaveBeenCalledWith(expect.arrayContaining(['delete', 'rev-00006-tst']));
