@@ -237,7 +237,8 @@ spec:
         - image: example-image:latest
           name: user-container
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: 8080
           resources:
             limits:
               cpu: 1
