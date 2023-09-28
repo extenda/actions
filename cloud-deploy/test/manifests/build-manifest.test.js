@@ -154,7 +154,7 @@ metadata:
     expect(checkSystem).not.toHaveBeenCalled();
     expect(securitySpec).not.toHaveBeenCalled();
 
-    expect(readFileSync('skaffold.yaml')).toContain(`apiVersion: skaffold/v2beta16
+    expect(readFileSync('skaffold.yaml')).toContain(`apiVersion: skaffold/v4beta6
 kind: Config
 manifests:
   rawYaml:
