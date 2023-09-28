@@ -229,6 +229,7 @@ spec:
         autoscaling.knative.dev/maxScale: 10
         run.googleapis.com/network-interfaces: '[{"network":"clan-network","subnetwork":"k8s-subnet"}]'
         run.googleapis.com/vpc-access-egress: all-traffic
+        run.googleapis.com/cloudsql-instances: instance-name
     spec:
       containerConcurrency: 40
       timeoutSeconds: ''
@@ -252,6 +253,8 @@ spec:
               value: '8080'
             - name: SECRET
               value: sm://example-project/test-secret
+            - name: SQL_INSTANCE_NAME
+              value: sm://example-project/test-instance-name
             - name: SERVICE_NAME
               value: example-service
             - name: SERVICE_PROJECT_ID

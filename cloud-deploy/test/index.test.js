@@ -108,6 +108,7 @@ describe('Action', () => {
       'internal-key',
       'external-cert',
       'external-key',
+      'clan-service-account',
     );
     expect(createExternalLoadbalancer).toHaveBeenCalledWith(
       'project-id',
@@ -162,6 +163,7 @@ describe('Action', () => {
       'internal-key',
       'external-cert',
       'external-key',
+      'clan-service-account',
     );
   });
 });

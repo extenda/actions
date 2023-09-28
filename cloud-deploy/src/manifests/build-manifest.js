@@ -5,6 +5,7 @@ const checkSystem = require('./check-system');
 const buildOpaConfig = require('./opa-config');
 const { addNamespace } = require('../utils/add-namespace');
 const securitySpec = require('./security-sidecar');
+const readSecret = require('../utils/load-credentials');
 
 const convertToYaml = (json) => yaml.dump(json);
 
@@ -48,10 +49,23 @@ const cloudrunManifestTemplate = async (
   opaMemory,
   timeoutSeconds,
   serviceAccountName,
+  SQLInstance,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
   const volumes = opa ? volumeSetup(opa, protocol) : undefined;
   const ports = opa ? undefined : [{ name: protocol === 'http2' ? 'h2c' : 'http', containerPort: 8080 }];
+
+  const annotations = {
+    'run.googleapis.com/execution-environment': 'gen2',
+    'autoscaling.knative.dev/minScale': minInstances,
+    'autoscaling.knative.dev/maxScale': maxInstances,
+    'run.googleapis.com/network-interfaces': '[{"network":"clan-network","subnetwork":"k8s-subnet"}]',
+    'run.googleapis.com/vpc-access-egress': 'all-traffic',
+  };
+
+  if (SQLInstance) {
+    annotations['run.googleapis.com/cloudsql-instances'] = SQLInstance;
+  }
 
   const containers = [{
     image,
@@ -107,13 +121,7 @@ const cloudrunManifestTemplate = async (
     spec: {
       template: {
         metadata: {
-          annotations: {
-            'run.googleapis.com/execution-environment': 'gen2',
-            'autoscaling.knative.dev/minScale': minInstances,
-            'autoscaling.knative.dev/maxScale': maxInstances,
-            'run.googleapis.com/network-interfaces': '[{"network":"clan-network","subnetwork":"k8s-subnet"}]',
-            'run.googleapis.com/vpc-access-egress': 'all-traffic',
-          },
+          annotations,
         },
         spec: {
           containerConcurrency,
@@ -432,8 +440,10 @@ const buildManifest = async (
   internalCertKey,
   externalCert,
   externalCertKey,
+  cicdServiceAccount,
 ) => {
   let opa = false;
+  let SQLInstanceName;
 
   const {
     'cloud-run': cloudrun,
@@ -492,6 +502,16 @@ const buildManifest = async (
   envArray.push({ name: 'SERVICE_CONTAINER_IMAGE', value: image });
   envArray.push({ name: 'CLAN_NAME', value: clanName });
 
+  // check if env contains SQL_INSTANCE_NAME
+  for (const envVar of envArray) {
+    if (envVar.name === 'SQL_INSTANCE_NAME') {
+      const secretName = envVar.value.split('/').pop();
+      /* eslint-disable no-await-in-loop */
+      SQLInstanceName = await readSecret(cicdServiceAccount, deployEnv, secretName, 'SQL_INSTANCE_NAME');
+      /* eslint-enable no-await-in-loop */
+    }
+  }
+
   const serviceAccount = `${name}@${projectId}.iam.gserviceaccount.com`;
 
   await prepareGcloudDeploy(name, projectId, clanName, deployEnv, kubernetes ? 'gke' : 'cloudrun');
@@ -548,6 +568,7 @@ const buildManifest = async (
       opaResources.memory,
       timeout,
       serviceAccount,
+      SQLInstanceName,
     );
     generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));
   }
