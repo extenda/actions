@@ -6,11 +6,13 @@ const checkSystem = require('../../src/manifests/check-system');
 const buildOpaConfig = require('../../src/manifests/opa-config');
 const securitySpec = require('../../src/manifests/security-sidecar');
 const { addNamespace } = require('../../src/utils/add-namespace');
+const readSecret = require('../../src/utils/load-credentials');
 
 jest.mock('../../src/manifests/check-system');
 jest.mock('../../src/manifests/opa-config');
 jest.mock('../../src/utils/add-namespace');
 jest.mock('../../src/manifests/security-sidecar');
+jest.mock('../../src/utils/load-credentials');
 
 const readFileSync = (file) => fs.readFileSync(file, { encoding: 'utf-8' });
 
@@ -113,6 +115,7 @@ metadata:
   });
 
   test('should generate manifest cloudrun file with correct content', async () => {
+    readSecret.mockResolvedValueOnce('instance-name');
     const image = 'example-image:latest';
     const service = {
       'cloud-run': {
@@ -140,6 +143,7 @@ metadata:
             KEY2: 'value2',
             KEY3: '8080',
             SECRET: 'sm://*/test-secret',
+            SQL_INSTANCE_NAME: 'sm://*/test-instance-name',
           },
         },
         staging: 'none',
