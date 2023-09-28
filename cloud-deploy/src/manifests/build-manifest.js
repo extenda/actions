@@ -53,7 +53,7 @@ const cloudrunManifestTemplate = async (
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
   const volumes = opa ? volumeSetup(opa, protocol) : undefined;
-  const ports = opa ? undefined : [{ containerPort: 8080 }];
+  const ports = opa ? undefined : [{ name: protocol === 'http2' ? 'h2c' : 'http', containerPort: 8080 }];
 
   const annotations = {
     'run.googleapis.com/execution-environment': 'gen2',
