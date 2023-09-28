@@ -92,6 +92,7 @@ const action = async () => {
     internalHttpsCertificateKey,
     externalHttpsCertificateCrt,
     externalHttpsCertificateKey,
+    serviceAccountKeyCICD,
   );
 
   core.info('Run cloud-deploy');
