@@ -50,15 +50,24 @@ const cloudrunManifestTemplate = async (
   timeoutSeconds,
   serviceAccountName,
   SQLInstance,
+  cpuThrottling,
+  cpuBoost,
+  sessionAffinity,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
   const volumes = opa ? volumeSetup(opa, protocol) : undefined;
-  const ports = opa ? undefined : [{ name: protocol === 'http2' ? 'h2c' : 'http', containerPort: 8080 }];
+  const ports = opa ? undefined : [{
+    name: protocol === 'http2' ? 'h2c' : 'http1',
+    containerPort: 8080,
+  }];
 
   const annotations = {
     'run.googleapis.com/execution-environment': 'gen2',
     'autoscaling.knative.dev/minScale': minInstances,
     'autoscaling.knative.dev/maxScale': maxInstances,
+    'run.googleapis.com/cpu-throttling': `${cpuThrottling}`,
+    'run.googleapis.com/startup-cpu-boost': `${cpuBoost}`,
+    'run.googleapis.com/sessionAffinity': `${sessionAffinity}`,
     'run.googleapis.com/network-interfaces': '[{"network":"clan-network","subnetwork":"k8s-subnet"}]',
     'run.googleapis.com/vpc-access-egress': 'all-traffic',
   };
@@ -116,6 +125,7 @@ const cloudrunManifestTemplate = async (
       annotations: {
         'run.googleapis.com/launch-stage': 'BETA',
         'run.googleapis.com/ingress': 'internal-and-cloud-load-balancing',
+        // 'run.googleapis.com/binary-authorization': 'default',
       },
     },
     spec: {
@@ -552,6 +562,11 @@ const buildManifest = async (
     generateManifest('k8s(deploy)-manifest.yaml', convertedManifests);
     generateManifest('k8s(deploy)-certificates.yaml', await addNamespace(http2Certificate, name));
   } else {
+    const {
+      'cpu-throttling': cpuThrottling = true,
+      'startup-cpu-boost': cpuBoost = false,
+      'session-affinity': sessionAffinity = false,
+    } = cloudrun;
     const cloudrunManifest = await cloudrunManifestTemplate(
       name,
       image,
@@ -569,6 +584,9 @@ const buildManifest = async (
       timeout,
       serviceAccount,
       SQLInstanceName,
+      cpuThrottling,
+      cpuBoost,
+      sessionAffinity,
     );
     generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));
   }

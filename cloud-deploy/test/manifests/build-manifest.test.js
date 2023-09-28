@@ -388,4 +388,49 @@ data:
     mockFs.restore();
     expect(manifest).toMatchSnapshot();
   });
+
+  test('It should generate cloud run service with annotations', async () => {
+    const image = 'example-image:latest';
+    const service = {
+      'cloud-run': {
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          concurrency: 80,
+        },
+        'startup-cpu-boost': true,
+        'cpu-throttling': false,
+        'session-affinity': true,
+      },
+      security: 'none',
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+          },
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'dev';
+
+    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
+
+    // Snapshot test for cloudrun-service.yaml.
+    const manifest = readFileSync('cloudrun-service.yaml');
+    mockFs.restore();
+    expect(manifest).toMatchSnapshot();
+  });
 });

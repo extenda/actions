@@ -79,6 +79,21 @@
             }
           },
           "additionalProperties": false
+        },
+        "startup-cpu-boost": {
+          "description": "Whether to allocate extra CPU to containers on startup.",
+          "type": "boolean",
+          "default": false
+        },
+        "cpu-throttling": {
+          "description": "Whether to throttle the CPU when the container is not actively serving requests.",
+          "type": "boolean",
+          "default": true
+        },
+        "session-affinity": {
+          "description": "Whether to enable session affinity for connections to the service.",
+          "type": "boolean",
+          "default": false
         }
       },
       "additionalProperties": false
