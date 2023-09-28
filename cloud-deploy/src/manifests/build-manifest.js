@@ -61,7 +61,7 @@ const cloudrunManifestTemplate = async (
     'autoscaling.knative.dev/maxScale': maxInstances,
     'run.googleapis.com/network-interfaces': '[{"network":"clan-network","subnetwork":"k8s-subnet"}]',
     'run.googleapis.com/vpc-access-egress': 'all-traffic',
-  }
+  };
 
   if (SQLInstance) {
     annotations['run.googleapis.com/cloudsql-instances'] = SQLInstance;
@@ -443,7 +443,7 @@ const buildManifest = async (
   cicdServiceAccount,
 ) => {
   let opa = false;
-  let SQLInstanceName = undefined;
+  let SQLInstanceName;
 
   const {
     'cloud-run': cloudrun,
@@ -503,10 +503,12 @@ const buildManifest = async (
   envArray.push({ name: 'CLAN_NAME', value: clanName });
 
   // check if env contains SQL_INSTANCE_NAME
-  for (env of envArray) {
-    if (env.name === 'SQL_INSTANCE_NAME') {
-      const secretName = env.value.split('/').pop();
+  for (const envVar of envArray) {
+    if (envVar.name === 'SQL_INSTANCE_NAME') {
+      const secretName = envVar.value.split('/').pop();
+      /* eslint-disable no-await-in-loop */
       SQLInstanceName = await readSecret(cicdServiceAccount, deployEnv, secretName, 'SQL_INSTANCE_NAME');
+      /* eslint-enable no-await-in-loop */
     }
   }
 
