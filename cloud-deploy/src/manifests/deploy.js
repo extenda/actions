@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const gcloudOutput = require('../utils/gcloud-output');
 const { retryUntil } = require('../utils/retry-until');
+const cleanRevisions = require('../cloudrun/clean-revisions');
 
 const allowAllRequests = async (projectID, name) => gcloudOutput([
   'run',
@@ -66,10 +67,15 @@ const deploy = async (projectID, name, version, platformGKE) => {
     if (!platformGKE) {
       await allowAllRequests(projectID, name);
     }
-    return true;
+  } else {
+    core.info(`Deployment of ${name} failed`);
   }
-  core.info(`Deployment of ${name} failed`);
-  return false;
+
+  if (!platformGKE) {
+    await cleanRevisions(name, projectID, 'europe-west1', 3);
+  }
+
+  return success;
 };
 
 module.exports = deploy;

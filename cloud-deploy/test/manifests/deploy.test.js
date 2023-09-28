@@ -1,8 +1,10 @@
 const gcloudOutput = require('../../src/utils/gcloud-output');
 const deploy = require('../../src/manifests/deploy');
 const { setRetryDelay } = require('../../src/utils/retry-until');
+const cleanRevisions = require('../../src/cloudrun/clean-revisions');
 
 jest.mock('../../src/utils/gcloud-output');
+jest.mock('../../src/cloudrun/clean-revisions');
 
 const progressCommand = expect.arrayContaining([
   'deploy',
@@ -26,10 +28,11 @@ describe('manifests/deploy', () => {
       .mockResolvedValueOnce('IN PROGRESS') // deploy state
       .mockResolvedValueOnce('SUCCEEDED'); // deploy state
 
-    const result = await deploy('my-project', 'my-service', '0.0.1-local');
+    const result = await deploy('my-project', 'my-service', '0.0.1-local', false);
     expect(result).toEqual(true);
 
     expect(gcloudOutput).toHaveBeenCalledTimes(6);
+    expect(cleanRevisions).toHaveBeenCalled();
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(1, [
       'deploy',
@@ -61,8 +64,9 @@ describe('manifests/deploy', () => {
       .mockResolvedValueOnce('IN PROGRESS') // deploy state
       .mockResolvedValueOnce('FAILED'); // deploy state
 
-    const result = await deploy('my-project', 'my-service', '0.0.1-local');
+    const result = await deploy('my-project', 'my-service', '0.0.1-local', true);
     expect(result).toEqual(false);
+    expect(cleanRevisions).not.toHaveBeenCalled();
 
     expect(gcloudOutput).toHaveBeenCalledTimes(5);
 
