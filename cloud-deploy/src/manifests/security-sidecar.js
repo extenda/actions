@@ -1,14 +1,6 @@
-const gcloudOutput = require('../utils/gcloud-output');
+const getImageWithSha256 = require('./image-sha256');
 
 const IMAGE_NAME = 'eu.gcr.io/extenda/security';
-
-const getSecurityImage = async () => gcloudOutput([
-  'container',
-  'images',
-  'describe',
-  `${IMAGE_NAME}:authz`,
-  '--format=get(image_summary.digest)',
-]).then((digest) => `${IMAGE_NAME}@${digest}`);
 
 const volumeMounts = (protocol) => {
   const volumes = [];
@@ -19,7 +11,7 @@ const volumeMounts = (protocol) => {
   return volumes;
 };
 
-const securitySpec = async (protocol) => getSecurityImage()
+const securitySpec = async (protocol) => getImageWithSha256(`${IMAGE_NAME}:authz`)
   .then((image) => ({
     name: 'security-authz',
     image,

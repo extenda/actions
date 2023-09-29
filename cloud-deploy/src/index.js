@@ -12,12 +12,13 @@ const { run, failIfNotTrunkBased } = require('../../utils');
 const { setupGcloud } = require('../../setup-gcloud');
 const readSecret = require('./utils/load-credentials');
 const runScan = require('./utils/vulnerability-scanning');
+const getImageWithSha256 = require('./manifests/image-sha256');
 
 const action = async () => {
   const serviceAccountKeyPipeline = core.getInput('secrets-account-key', { required: true });
   const serviceAccountKeyCICD = core.getInput('service-account-key', { required: true });
   const serviceFile = core.getInput('service-definition') || 'cloud-deploy.yaml';
-  const image = core.getInput('image', { required: true });
+  const userImage = core.getInput('image', { required: true });
   const updateDns = core.getInput('update-dns');
 
   // Only migrate DNS if explicitly set to always.
@@ -49,6 +50,10 @@ const action = async () => {
     kubernetes,
     environments,
   } = deployYaml;
+
+  const image = await getImageWithSha256(userImage);
+  core.info(`Provided image ${userImage} resolved to ${image}`);
+  deployYaml.labels['original-image'] = userImage;
 
   const {
     timeout = 300,
