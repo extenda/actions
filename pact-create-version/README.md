@@ -34,4 +34,6 @@ jobs:
         with:
           service-account-key: ${{ secrets.SECRET_AUTH }}
           application-name: my-application
+          # optionally
+          # version: ${{ needs.release.outputs.release-version }}
 ```
