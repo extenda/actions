@@ -624,18 +624,22 @@ test('It returns a sorted list of revisions', async () => {
     {
       name: 'fiscal-signing-service-ln30f1gz',
       creationTimestamp: '2023-09-28T10:06:03.488086Z',
+      active: true,
     },
     {
       name: 'fiscal-signing-service-00096-s25',
       creationTimestamp: '2023-09-28T09:11:12.919435Z',
+      active: false,
     },
     {
       name: 'fiscal-signing-service-ln2xqs4o',
       creationTimestamp: '2023-09-28T08:51:12.221528Z',
+      active: false,
     },
     {
       name: 'fiscal-signing-service-ln2wl9pg',
       creationTimestamp: '2023-09-28T08:18:55.518248Z',
+      active: false,
     },
   ]);
   expect(execGcloud).toHaveBeenCalledWith(
