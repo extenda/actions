@@ -12,6 +12,10 @@ inputs:
   release-tag:
     description: The semantic release tag.
     required: true
+  release-version:
+    description: The semantic release version.
+    required: false
+    default: ${{ github.sha }}
   env:
     description: The release environment (tag).
     required: false
@@ -27,6 +31,6 @@ runs:
         args: |-
           broker create-version-tag \
           --pacticipant=${{ inputs.application-name }} \
-          --version=${{ github.sha }} \
+          --version=${{ inputs.release-version }} \
           --tag=${{ inputs.release-tag }} \
           --tag=${{ inputs.env }}

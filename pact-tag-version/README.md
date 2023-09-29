@@ -42,4 +42,5 @@ jobs:
           service-account-key: ${{ secrets.SECRET_AUTH }}
           application-name: my-application-name
           release-tag: ${{ steps.release.outputs.release-tag }}
+          release-version: ${{ steps.release.outputs.release-version }}
 ```
