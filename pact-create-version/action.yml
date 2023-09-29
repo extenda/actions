@@ -12,6 +12,10 @@ inputs:
   application-name:
     description: The pact participant application name
     required: true
+  version:
+    description: The version to update the pact with.
+    required: false
+    default: ${{ github.sha }}
 
 runs:
   using: composite
@@ -24,4 +28,4 @@ runs:
           broker create-or-update-version \
           --pacticipant=${{ inputs.application-name }} \
           --branch="$(git rev-parse --abbrev-ref HEAD)" \
-          --version=${{ github.sha }}
+          --version=${{ inputs.version }}
