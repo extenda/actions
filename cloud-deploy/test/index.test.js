@@ -11,6 +11,7 @@ const configureInternalFrontend = require('../src/loadbalancing/internal/create-
 const { setupGcloud } = require('../../setup-gcloud');
 const action = require('../src/index');
 const loadCredentials = require('../src/utils/load-credentials');
+const getImageWithSha256 = require('../src/manifests/image-sha256');
 
 jest.mock('../src/utils/load-credentials');
 jest.mock('@actions/core');
@@ -25,6 +26,7 @@ jest.mock('../src/loadbalancing/external/create-external-frontend');
 jest.mock('../src/loadbalancing/internal/create-internal-frontend');
 jest.mock('../../utils');
 jest.mock('../../setup-gcloud');
+jest.mock('../src/manifests/image-sha256');
 
 const serviceDef = {
   kubernetes: {
@@ -80,6 +82,7 @@ describe('Action', () => {
       .mockResolvedValueOnce('external-key');
 
     loadServiceDefinition.mockReturnValueOnce(serviceDef);
+    getImageWithSha256.mockResolvedValueOnce('gcr.io/project/image@sha256:1');
     projectInfo.mockReturnValueOnce({
       project: 'clan-name',
       env: 'staging',
@@ -96,7 +99,7 @@ describe('Action', () => {
 
     expect(core.getInput).toHaveBeenCalledTimes(5);
     expect(buildManifest).toHaveBeenCalledWith(
-      'gcr.io/project/image:tag',
+      'gcr.io/project/image@sha256:1',
       serviceDef,
       'project-id',
       'clan-name',
@@ -140,6 +143,7 @@ describe('Action', () => {
       .mockResolvedValueOnce('external-key');
 
     loadServiceDefinition.mockReturnValueOnce(serviceDef);
+    getImageWithSha256.mockResolvedValueOnce('gcr.io/project/image@sha256:1');
     projectInfo.mockReturnValueOnce({
       project: 'clan-name',
       env: 'staging',
@@ -151,7 +155,7 @@ describe('Action', () => {
     await expect(action()).rejects.toThrow('Deployment failed! Check container logs and status for error!');
     expect(core.getInput).toHaveBeenCalledTimes(5);
     expect(buildManifest).toHaveBeenCalledWith(
-      'gcr.io/project/image:tag',
+      'gcr.io/project/image@sha256:1',
       serviceDef,
       'project-id',
       'clan-name',

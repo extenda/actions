@@ -1,11 +1,11 @@
 const securitySpec = require('../../src/manifests/security-sidecar');
-const gcloudOutput = require('../../src/utils/gcloud-output');
+const getImageWithSha256 = require('../../src/manifests/image-sha256');
 
-jest.mock('../../src/utils/gcloud-output');
+jest.mock('../../src/manifests/image-sha256');
 
 describe('manifests/security-sidecar', () => {
   beforeEach(() => {
-    gcloudOutput.mockResolvedValueOnce('sha256:043112bde49f2244cf9e4c44d059603a7c056d13ad61ef3492f04374ac9a0396');
+    getImageWithSha256.mockResolvedValueOnce('eu.gcr.io/extenda/security@sha256:043112bde49f2244cf9e4c44d059603a7c056d13ad61ef3492f04374ac9a0396');
   });
 
   afterEach(() => {
@@ -14,14 +14,9 @@ describe('manifests/security-sidecar', () => {
 
   test('It invokes gcloud list-images with correct args', async () => {
     await securitySpec('http');
-    expect(gcloudOutput).toHaveBeenCalledWith([
-      'container',
-      'images',
-      'describe',
-      'eu.gcr.io/extenda/security:authz',
-      '--format=get(image_summary.digest)',
-    ]);
+    expect(getImageWithSha256).toHaveBeenCalledWith('eu.gcr.io/extenda/security:authz');
   });
+
   test('It uses a sha256 digest with image', async () => {
     const security = await securitySpec('http');
     expect(security).toMatchObject({
@@ -45,7 +40,7 @@ describe('manifests/security-sidecar', () => {
         readOnly: true,
       }],
     });
-    expect(gcloudOutput).toHaveBeenCalledTimes(1);
+    expect(getImageWithSha256).toHaveBeenCalledTimes(1);
   });
 
   test('It mounts certificates for http/2', async () => {
@@ -67,6 +62,6 @@ describe('manifests/security-sidecar', () => {
           readOnly: true,
         }],
     });
-    expect(gcloudOutput).toHaveBeenCalledTimes(1);
+    expect(getImageWithSha256).toHaveBeenCalledTimes(1);
   });
 });
