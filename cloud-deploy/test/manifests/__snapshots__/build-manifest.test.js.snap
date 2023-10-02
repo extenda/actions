@@ -299,7 +299,7 @@ spec:
         run.googleapis.com/startup-cpu-boost: 'false'
         run.googleapis.com/sessionAffinity: 'false'
         run.googleapis.com/network-interfaces: '[{"network":"clan-network","subnetwork":"k8s-subnet"}]'
-        run.googleapis.com/vpc-access-egress: all-traffic
+        run.googleapis.com/vpc-access-egress: private-ranges-only
         run.googleapis.com/cloudsql-instances: instance-name
     spec:
       containerConcurrency: 40

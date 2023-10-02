@@ -74,6 +74,7 @@ const cloudrunManifestTemplate = async (
 
   if (SQLInstance) {
     annotations['run.googleapis.com/cloudsql-instances'] = SQLInstance;
+    annotations['run.googleapis.com/vpc-access-egress'] = 'private-ranges-only';
   }
 
   const containers = [{
