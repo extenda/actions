@@ -53,7 +53,6 @@ const action = async () => {
 
   const image = await getImageWithSha256(userImage);
   core.info(`Provided image ${userImage} resolved to ${image}`);
-  deployYaml.labels['original-image'] = userImage;
 
   const {
     timeout = 300,
