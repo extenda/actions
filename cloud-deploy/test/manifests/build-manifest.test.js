@@ -511,9 +511,9 @@ data:
       }],
     };
 
-    checkSystem.mockResolvedValueOnce({system: {id: 'system-id'}});
+    checkSystem.mockResolvedValueOnce({ system: { id: 'system-id' } });
     securitySpec.mockResolvedValueOnce(securityContainer);
-    buildOpaConfig.mockResolvedValueOnce({config: yaml.dump(opaConfig), systemId: 'system-id', token: 'token' });
+    buildOpaConfig.mockResolvedValueOnce({ config: yaml.dump(opaConfig), systemId: 'system-id', token: 'token' });
 
     await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
 
@@ -522,5 +522,4 @@ data:
     mockFs.restore();
     expect(manifest).toMatchSnapshot();
   });
-
 });

@@ -17,7 +17,9 @@ const getBackendStatus = async (name, projectID) => {
     const { backends } = status;
     const backendService = backends[0].group;
     if (backendService.includes('neg')) {
-      return { backends, platform: 'gke' };
+      return {
+        backends, platform: 'gke', protocol: status.protocol, timeout: status.timeoutSec,
+      };
     }
     return { backends, platform: 'cloudrun' };
   } catch (err) {
@@ -278,6 +280,9 @@ const configureExternalDomain = async (
   }
 
   if (platformGKE) {
+    if (backendStatus && !doSwitch) {
+      await updateBackendService(name, projectID, serviceType, connectionTimeout, platformGKE);
+    }
     core.info('Adding backend NEG to backend service');
     await checkNEGs(projectID, name)
       .then(() => addBackend(name, projectID, 'europe-west1-d', platformGKE))
