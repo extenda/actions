@@ -53,9 +53,9 @@ const cloudrunManifestTemplate = async (
   cpuThrottling,
   cpuBoost,
   sessionAffinity,
+  styraSystemInfo,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
-  const volumes = opa ? volumeSetup(opa, protocol) : undefined;
   const ports = opa ? undefined : [{
     name: protocol === 'http2' ? 'h2c' : 'http1',
     containerPort: 8080,
@@ -69,12 +69,11 @@ const cloudrunManifestTemplate = async (
     'run.googleapis.com/startup-cpu-boost': `${cpuBoost}`,
     'run.googleapis.com/sessionAffinity': `${sessionAffinity}`,
     'run.googleapis.com/network-interfaces': '[{"network":"clan-network","subnetwork":"k8s-subnet"}]',
-    'run.googleapis.com/vpc-access-egress': 'all-traffic',
+    'run.googleapis.com/vpc-access-egress': 'private-ranges-only',
   };
 
   if (SQLInstance) {
     annotations['run.googleapis.com/cloudsql-instances'] = SQLInstance;
-    annotations['run.googleapis.com/vpc-access-egress'] = 'private-ranges-only';
   }
 
   const containers = [{
@@ -110,7 +109,10 @@ const cloudrunManifestTemplate = async (
       },
     };
     const securityContainer = await securitySpec(protocol);
+    securityContainer.env.push({ name: 'OPA_CONFIG_SERVICE_TOKEN', value: `${styraSystemInfo.token}` });
+    securityContainer.env.push({ name: 'OPA_CONFIG_SYSTEM_ID', value: styraSystemInfo.systemId });
     securityContainer.resources = resources;
+    securityContainer.volumeMounts = undefined;
     containers.push(securityContainer);
   }
 
@@ -139,7 +141,6 @@ const cloudrunManifestTemplate = async (
           timeoutSeconds,
           serviceAccountName,
           containers,
-          volumes,
         },
       },
       traffic: [{
@@ -148,16 +149,6 @@ const cloudrunManifestTemplate = async (
       }],
     },
   };
-
-  /*
-      volumes:
-      - name: opa
-        secret:
-          secretName: opa-config
-          items:
-          - key: latest
-            path: conf.yaml
-*/
 
   return service;
 };
@@ -526,6 +517,7 @@ const buildManifest = async (
   const serviceAccount = `${name}@${projectId}.iam.gserviceaccount.com`;
 
   await prepareGcloudDeploy(name, projectId, clanName, deployEnv, kubernetes ? 'gke' : 'cloudrun');
+  let styraSystemInfo;
   if (permissionPrefix) {
     opa = true;
     const styraUrl = 'https://extendaretail.svc.styra.com';
@@ -534,7 +526,8 @@ const buildManifest = async (
     if (system.id === '') {
       throw new Error(`Styra system not found with the name ${styraSystemName}`);
     } else {
-      generateManifest('k8s(deploy)-opa-config.yaml', await buildOpaConfig(system.id, styraToken, name, styraUrl));
+      styraSystemInfo = await buildOpaConfig(system.id, styraToken, name, styraUrl);
+      generateManifest('k8s(deploy)-opa-config.yaml', styraSystemInfo.config);
     }
   }
   if (kubernetes) {
@@ -571,7 +564,7 @@ const buildManifest = async (
     const cloudrunManifest = await cloudrunManifestTemplate(
       name,
       image,
-      false, // set to variable opa once implemented
+      opa,
       labelArray,
       protocol,
       envArray,
@@ -588,6 +581,7 @@ const buildManifest = async (
       cpuThrottling,
       cpuBoost,
       sessionAffinity,
+      styraSystemInfo,
     );
     generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));
   }

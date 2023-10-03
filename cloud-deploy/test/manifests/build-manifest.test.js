@@ -239,7 +239,7 @@ metadata:
       },
     };
 
-    buildOpaConfig.mockResolvedValueOnce(yaml.dump(opaConfig));
+    buildOpaConfig.mockResolvedValueOnce({ config: yaml.dump(opaConfig) });
 
     const image = 'example-image:latest';
     const service = {
@@ -425,6 +425,95 @@ data:
     const projectId = 'example-project';
     const clanName = 'example-clan';
     const env = 'dev';
+
+    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
+
+    // Snapshot test for cloudrun-service.yaml.
+    const manifest = readFileSync('cloudrun-service.yaml');
+    mockFs.restore();
+    expect(manifest).toMatchSnapshot();
+  });
+
+  test('It should generate cloud run service with security', async () => {
+    const image = 'example-image:latest';
+    const service = {
+      'cloud-run': {
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          concurrency: 80,
+        },
+        'startup-cpu-boost': true,
+        'cpu-throttling': false,
+        'session-affinity': true,
+      },
+      security: {
+        'permission-prefix': 'tst',
+      },
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+          },
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'dev';
+
+    const opaConfig = {
+      kind: 'ConfigMap',
+      apiVersion: 'v1',
+      metadata: {
+        name: 'opa-envoy-config',
+        namespace: 'service-name',
+      },
+      data: {
+        'conf.yaml': `services:
+    - name: styra
+      url: url
+      credentials:
+        bearer:
+          token: "styraToken"
+  labels:
+    system-id: "some-id"
+    system-type: "envoy"
+  discovery:
+    name: discovery
+    prefix: "/systems/some-id"\n`,
+      },
+    };
+
+    const securityContainer = {
+      name: 'security-authz',
+      image: 'image',
+      ports: [
+        {
+          name: 'http1',
+          containerPort: 8000,
+        },
+      ],
+      env: [{
+        name: 'ENVOY_PROTOCOL',
+        value: 'http',
+      }],
+    };
+
+    checkSystem.mockResolvedValueOnce({ system: { id: 'system-id' } });
+    securitySpec.mockResolvedValueOnce(securityContainer);
+    buildOpaConfig.mockResolvedValueOnce({ config: yaml.dump(opaConfig), systemId: 'system-id', token: 'token' });
 
     await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
 

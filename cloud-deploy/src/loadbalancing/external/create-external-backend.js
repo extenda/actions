@@ -278,6 +278,9 @@ const configureExternalDomain = async (
   }
 
   if (platformGKE) {
+    if (backendStatus && !doSwitch) {
+      await updateBackendService(name, projectID, serviceType, connectionTimeout, platformGKE);
+    }
     core.info('Adding backend NEG to backend service');
     await checkNEGs(projectID, name)
       .then(() => addBackend(name, projectID, 'europe-west1-d', platformGKE))

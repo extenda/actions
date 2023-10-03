@@ -1,4 +1,5 @@
 const { execGcloud } = require('../../../setup-gcloud');
+
 const getImageWithSha256 = async (semanticImage) => execGcloud([
   'container',
   'images',
