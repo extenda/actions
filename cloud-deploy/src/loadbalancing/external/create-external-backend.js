@@ -17,9 +17,7 @@ const getBackendStatus = async (name, projectID) => {
     const { backends } = status;
     const backendService = backends[0].group;
     if (backendService.includes('neg')) {
-      return {
-        backends, platform: 'gke', protocol: status.protocol, timeout: status.timeoutSec,
-      };
+      return { backends, platform: 'gke' };
     }
     return { backends, platform: 'cloudrun' };
   } catch (err) {
