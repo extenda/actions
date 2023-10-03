@@ -45,7 +45,7 @@ discovery:
   prefix: "/systems/${systemId}"\n`,
     },
   };
-  return yaml.dump(opaConfig);
+  return { config: yaml.dump(opaConfig), systemId, token };
 };
 
 module.exports = buildOpaConfig;

@@ -239,7 +239,7 @@ metadata:
       },
     };
 
-    buildOpaConfig.mockResolvedValueOnce(yaml.dump(opaConfig));
+    buildOpaConfig.mockResolvedValueOnce({ config: yaml.dump(opaConfig) });
 
     const image = 'example-image:latest';
     const service = {

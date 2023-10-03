@@ -16,7 +16,10 @@ const securitySpec = async (protocol) => getImageWithSha256(`${IMAGE_NAME}:authz
     name: 'security-authz',
     image,
     ports: [
-      { containerPort: 9001 },
+      {
+        name: protocol === 'http2' ? 'h2c' : 'http1',
+        containerPort: 8000,
+      },
     ],
     env: [{
       name: 'ENVOY_PROTOCOL',

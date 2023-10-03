@@ -29,7 +29,7 @@ describe('manifests/security-sidecar', () => {
     expect(security).toEqual({
       name: 'security-authz',
       image: 'eu.gcr.io/extenda/security@sha256:043112bde49f2244cf9e4c44d059603a7c056d13ad61ef3492f04374ac9a0396',
-      ports: [{ containerPort: 9001 }],
+      ports: [{ name: 'http1', containerPort: 8000 }],
       env: [{
         name: 'ENVOY_PROTOCOL',
         value: 'http',

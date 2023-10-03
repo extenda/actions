@@ -32,7 +32,7 @@ describe('buildOpaConfig', () => {
     });
 
     const opaConfigYAML = await buildOpaConfig(systemId, styraToken, namespace, styraUrl);
-    const opaConfig = yaml.load(opaConfigYAML);
+    const opaConfig = yaml.load(opaConfigYAML.config);
 
     expect(opaConfig.kind).toBe('ConfigMap');
     expect(opaConfig.metadata.name).toBe('opa-envoy-config');
