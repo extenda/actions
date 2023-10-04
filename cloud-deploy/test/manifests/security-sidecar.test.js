@@ -64,4 +64,16 @@ describe('manifests/security-sidecar', () => {
     });
     expect(getImageWithSha256).toHaveBeenCalledTimes(1);
   });
+
+  test('It sets h2c on ENVOY_PROTOCOL for cloudrun', async () => {
+    const security = await securitySpec('http2', false);
+    expect(security).toMatchObject({
+      env: [{
+        name: 'ENVOY_PROTOCOL',
+        value: 'h2c',
+      }],
+    });
+    expect(getImageWithSha256).toHaveBeenCalledTimes(1);
+  });
+
 });
