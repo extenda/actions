@@ -60,6 +60,42 @@ environments:
       <<: *env
 ```
 
+Managed Cloud Run service with SQL instance connection
+
+```yaml
+cloud-run:
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    concurrency: 80
+
+security:
+  permission-prefix: mye
+
+labels:
+  product: my-product
+  component: my-component
+
+environments:
+  production:
+    min-instances: 1
+    domain-mappings:
+      - my-service.retailsvc.com
+      - my-service.retailsvc-test.com
+    env: &env
+      SQL_INSTANCE_NAME: sm://*/secret-name # Important ENV variable
+  staging:
+    min-instances: 0
+    max-instances: 1
+    domain-mappings:
+      - my-service.retailsvc.dev
+    env:
+      <<: *env
+```
+
 ### Kubernetes deployment
 
 A Kubernetes deployment with IAM security resources customized.

@@ -11,21 +11,32 @@ const volumeMounts = (protocol) => {
   return volumes;
 };
 
-const securitySpec = async (protocol) => getImageWithSha256(`${IMAGE_NAME}:authz`)
-  .then((image) => ({
-    name: 'security-authz',
-    image,
-    ports: [
-      {
-        name: protocol === 'http2' ? 'h2c' : 'http1',
-        containerPort: 8000,
-      },
-    ],
-    env: [{
-      name: 'ENVOY_PROTOCOL',
-      value: protocol === 'http' ? 'http' : 'http2',
-    }],
-    volumeMounts: volumeMounts(protocol),
-  }));
+const securitySpec = async (protocol, platformGKE = true) => getImageWithSha256(`${IMAGE_NAME}:authz`)
+  .then((image) => {
+    const env = [];
+    if (platformGKE) {
+      env.push({
+        name: 'ENVOY_PROTOCOL',
+        value: protocol === 'http' ? 'http' : 'http2',
+      });
+    } else {
+      env.push({
+        name: 'ENVOY_PROTOCOL',
+        value: protocol === 'http' ? 'http' : 'h2c',
+      });
+    }
+    return {
+      name: 'security-authz',
+      image,
+      ports: [
+        {
+          name: protocol === 'http2' ? 'h2c' : 'http1',
+          containerPort: 8000,
+        },
+      ],
+      env,
+      volumeMounts: volumeMounts(protocol),
+    };
+  });
 
 module.exports = securitySpec;

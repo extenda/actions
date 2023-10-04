@@ -108,7 +108,7 @@ const cloudrunManifestTemplate = async (
         memory: opaMemory,
       },
     };
-    const securityContainer = await securitySpec(protocol);
+    const securityContainer = await securitySpec(protocol, false);
     securityContainer.env.push({ name: 'OPA_CONFIG_SERVICE_TOKEN', value: `${styraSystemInfo.token}` });
     securityContainer.env.push({ name: 'OPA_CONFIG_SYSTEM_ID', value: styraSystemInfo.systemId });
     securityContainer.resources = resources;
