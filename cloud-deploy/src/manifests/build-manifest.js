@@ -348,7 +348,7 @@ const manifestTemplate = async (
     },
   };
 
-  if (minInstances === maxInstances) {
+  if (minInstances === maxInstances && type.toLowerCase() === 'statefulset') {
     return [namespace, service, deployment];
   }
 
