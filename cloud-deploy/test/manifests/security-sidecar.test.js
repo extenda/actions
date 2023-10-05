@@ -34,6 +34,16 @@ describe('manifests/security-sidecar', () => {
         name: 'ENVOY_PROTOCOL',
         value: 'http',
       }],
+      livenessProbe: {
+        httpGet: {
+          path: '/health',
+          port: 9001,
+        },
+        initialDelaySeconds: 5,
+        periodSeconds: 10,
+        timeoutSeconds: 5,
+        failureThreshold: 5,
+      },
       volumeMounts: [{
         mountPath: '/config',
         name: 'opa',
@@ -75,5 +85,4 @@ describe('manifests/security-sidecar', () => {
     });
     expect(getImageWithSha256).toHaveBeenCalledTimes(1);
   });
-
 });

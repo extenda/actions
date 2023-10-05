@@ -35,6 +35,16 @@ const securitySpec = async (protocol, platformGKE = true) => getImageWithSha256(
         },
       ],
       env,
+      livenessProbe: {
+        httpGet: {
+          path: '/health',
+          port: 9001,
+        },
+        initialDelaySeconds: 5,
+        periodSeconds: 10,
+        timeoutSeconds: 5,
+        failureThreshold: 5,
+      },
       volumeMounts: volumeMounts(protocol),
     };
   });
