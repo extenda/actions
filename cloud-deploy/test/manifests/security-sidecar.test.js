@@ -75,5 +75,4 @@ describe('manifests/security-sidecar', () => {
     });
     expect(getImageWithSha256).toHaveBeenCalledTimes(1);
   });
-
 });

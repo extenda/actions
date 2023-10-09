@@ -15,11 +15,17 @@ const getBackendStatus = async (name, projectID) => {
       '--format=json',
     ]));
     const { backends } = status;
+    let platform = 'cloudrun';
     const backendService = backends[0].group;
-    if (backendService.includes('neg')) {
-      return { backends, platform: 'gke' };
+    const { sampleRate } = status.logConfig;
+    const { protocol } = status;
+    const timeout = status.timeoutSec;
+    if (backendService.includes('-neg')) {
+      platform = 'gke';
     }
-    return { backends, platform: 'cloudrun' };
+    return {
+      backends, platform, sampleRate, protocol, timeout,
+    };
   } catch (err) {
     return null;
   }
@@ -59,9 +65,11 @@ const updateBackendService = async (
   ];
 
   if (platformGKE) {
+    args.push('--logging-sample-rate=1');
     args.push(`--protocol=${serviceType === 'http2' ? 'HTTP2' : 'HTTP'}`);
     args.push(`--timeout=${connectionTimeout}s`);
   } else {
+    args.push('--logging-sample-rate=0');
     args.push('--protocol=HTTPS');
   }
   return gcloudOutput(args).catch(() => true);
@@ -84,17 +92,18 @@ const setupBackendService = async (
     '--connection-draining-timeout=300s',
     '--global',
     '--enable-logging',
-    '--logging-sample-rate=1',
     '--load-balancing-scheme=EXTERNAL',
     `--project=${projectID}`,
   ];
   if (platformGKE) {
+    args.push('--logging-sample-rate=1');
     args.push(`--protocol=${serviceType === 'http2' ? 'HTTP2' : 'HTTP'}`);
     args.push(`--health-checks=${projectID}-external-hc`);
     args.push(`--timeout=${connectionTimeout}s`);
   }
   if (!platformGKE) {
     args.push('--protocol=HTTPS');
+    args.push('--logging-sample-rate=0');
   }
   return gcloudOutput(args).catch(() => updateBackendService(
     name,
@@ -272,6 +281,11 @@ const configureExternalDomain = async (
   }
 
   if (!platformGKE) {
+    if (backendStatus && !doSwitch) {
+      if (backendStatus.sampleRate !== 0) {
+        await updateBackendService(name, projectID, serviceType, connectionTimeout, platformGKE);
+      }
+    }
     // create serverless neg
     await createServerlessNeg(name, projectID, 'europe-west1');
     await addBackend(name, projectID, 'europe-west1', platformGKE);
@@ -279,7 +293,10 @@ const configureExternalDomain = async (
 
   if (platformGKE) {
     if (backendStatus && !doSwitch) {
-      await updateBackendService(name, projectID, serviceType, connectionTimeout, platformGKE);
+      if (backendStatus.protocol !== serviceType.toUpperCase()
+        || backendStatus.timeout !== connectionTimeout) {
+        await updateBackendService(name, projectID, serviceType, connectionTimeout, platformGKE);
+      }
     }
     core.info('Adding backend NEG to backend service');
     await checkNEGs(projectID, name)
