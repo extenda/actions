@@ -248,6 +248,11 @@
               "type": "string",
               "pattern": "^[a-z]{3}$"
             },
+            "system-name": {
+              "description": "IAM system name defaults to service name",
+              "type": "string",
+              "pattern": "^[a-z-]+$"
+            },
             "resources": {
               "$ref": "#/$defs/Resources",
               "default": {

@@ -35,9 +35,10 @@
   - [4.1. Property `CloudDeploy > security > oneOf > SecurityNone`](#security_oneOf_i0)
   - [4.2. Property `CloudDeploy > security > oneOf > IAMSettings`](#security_oneOf_i1)
     - [4.2.1. Property `CloudDeploy > security > oneOf > IAMSettings > permission-prefix`](#security_oneOf_i1_permission-prefix)
-    - [4.2.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources`](#security_oneOf_i1_resources)
-      - [4.2.2.1. Property `CloudDeploy > security > oneOf > IAMSettings > resources > cpu`](#security_oneOf_i1_resources_cpu)
-      - [4.2.2.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources > memory`](#security_oneOf_i1_resources_memory)
+    - [4.2.2. Property `CloudDeploy > security > oneOf > IAMSettings > system-name`](#security_oneOf_i1_system-name)
+    - [4.2.3. Property `CloudDeploy > security > oneOf > IAMSettings > resources`](#security_oneOf_i1_resources)
+      - [4.2.3.1. Property `CloudDeploy > security > oneOf > IAMSettings > resources > cpu`](#security_oneOf_i1_resources_cpu)
+      - [4.2.3.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources > memory`](#security_oneOf_i1_resources_memory)
 - [5. Property `CloudDeploy > environments`](#environments)
   - [5.1. Property `CloudDeploy > environments > production`](#environments_production)
     - [5.1.1. Property `CloudDeploy > environments > production > min-instances`](#environments_production_min-instances)
@@ -528,10 +529,11 @@ must respect the following conditions
 
 **Description:** IAM Security settings
 
-| Property                                                     | Pattern | Type   | Deprecated | Definition           | Title/Description       |
-| ------------------------------------------------------------ | ------- | ------ | ---------- | -------------------- | ----------------------- |
-| + [permission-prefix](#security_oneOf_i1_permission-prefix ) | No      | string | No         | -                    | IAM permission prefix   |
-| - [resources](#security_oneOf_i1_resources )                 | No      | object | No         | In #/$defs/Resources | The requested resources |
+| Property                                                     | Pattern | Type   | Deprecated | Definition           | Title/Description                        |
+| ------------------------------------------------------------ | ------- | ------ | ---------- | -------------------- | ---------------------------------------- |
+| + [permission-prefix](#security_oneOf_i1_permission-prefix ) | No      | string | No         | -                    | IAM permission prefix                    |
+| - [system-name](#security_oneOf_i1_system-name )             | No      | string | No         | -                    | IAM system name defaults to service name |
+| - [resources](#security_oneOf_i1_resources )                 | No      | object | No         | In #/$defs/Resources | The requested resources                  |
 
 #### <a name="security_oneOf_i1_permission-prefix"></a>4.2.1. Property `CloudDeploy > security > oneOf > IAMSettings > permission-prefix`
 
@@ -546,7 +548,20 @@ must respect the following conditions
 | --------------------------------- | --------------------------------------------------------------------------- |
 | **Must match regular expression** | ```^[a-z]{3}$``` [Test](https://regex101.com/?regex=%5E%5Ba-z%5D%7B3%7D%24) |
 
-#### <a name="security_oneOf_i1_resources"></a>4.2.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources`
+#### <a name="security_oneOf_i1_system-name"></a>4.2.2. Property `CloudDeploy > security > oneOf > IAMSettings > system-name`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** IAM system name defaults to service name
+
+| Restrictions                      |                                                                         |
+| --------------------------------- | ----------------------------------------------------------------------- |
+| **Must match regular expression** | ```^[a-z-]+$``` [Test](https://regex101.com/?regex=%5E%5Ba-z-%5D%2B%24) |
+
+#### <a name="security_oneOf_i1_resources"></a>4.2.3. Property `CloudDeploy > security > oneOf > IAMSettings > resources`
 
 |                           |                                                         |
 | ------------------------- | ------------------------------------------------------- |
@@ -563,7 +578,7 @@ must respect the following conditions
 | - [cpu](#security_oneOf_i1_resources_cpu )       | No      | number | No         | -          | Number of requested CPU cores |
 | - [memory](#security_oneOf_i1_resources_memory ) | No      | string | No         | -          | Amount of memory to request   |
 
-##### <a name="security_oneOf_i1_resources_cpu"></a>4.2.2.1. Property `CloudDeploy > security > oneOf > IAMSettings > resources > cpu`
+##### <a name="security_oneOf_i1_resources_cpu"></a>4.2.3.1. Property `CloudDeploy > security > oneOf > IAMSettings > resources > cpu`
 
 |              |          |
 | ------------ | -------- |
@@ -577,7 +592,7 @@ must respect the following conditions
 | **Minimum**  | &ge; 0.5 |
 | **Maximum**  | &le; 8   |
 
-##### <a name="security_oneOf_i1_resources_memory"></a>4.2.2.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources > memory`
+##### <a name="security_oneOf_i1_resources_memory"></a>4.2.3.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources > memory`
 
 |              |          |
 | ------------ | -------- |
@@ -788,4 +803,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-09-28 at 15:48:06 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-10-11 at 11:39:01 +0200
