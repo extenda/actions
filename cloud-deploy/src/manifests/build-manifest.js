@@ -472,6 +472,7 @@ const buildManifest = async (
   const {
     'permission-prefix': permissionPrefix,
     resources: opaResources = { cpu: 0.5, memory: '512Mi' },
+    'styra-name': styraMonorepoName = name,
   } = (security === 'none' ? {} : security || {});
 
   const {
@@ -521,7 +522,7 @@ const buildManifest = async (
   if (permissionPrefix) {
     opa = true;
     const styraUrl = 'https://extendaretail.svc.styra.com';
-    const styraSystemName = `${permissionPrefix}.${name}-${deployEnv}`;
+    const styraSystemName = `${permissionPrefix}.${styraMonorepoName}-${deployEnv}`;
     const system = await checkSystem(styraSystemName, styraToken, styraUrl);
     if (system.id === '') {
       throw new Error(`Styra system not found with the name ${styraSystemName}`);

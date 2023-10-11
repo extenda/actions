@@ -248,6 +248,11 @@
               "type": "string",
               "pattern": "^[a-z]{3}$"
             },
+            "styra-name": {
+              "description": "IAM system name used for monorepo",
+              "type": "string",
+              "pattern": "^[a-z-]+$"
+            },
             "resources": {
               "$ref": "#/$defs/Resources",
               "default": {
