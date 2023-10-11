@@ -31,6 +31,14 @@ describe('manifests/security-sidecar', () => {
       image: 'eu.gcr.io/extenda/security@sha256:043112bde49f2244cf9e4c44d059603a7c056d13ad61ef3492f04374ac9a0396',
       ports: [{ name: 'http1', containerPort: 8000 }],
       env: [{
+        name: 'LAUNCHDARKLY_SDK_KEY',
+        value: '',
+      },
+      {
+        name: 'OPA_CONFIG_SYSTEM_NAME',
+        value: '',
+      },
+      {
         name: 'ENVOY_PROTOCOL',
         value: 'http',
       }],
@@ -57,6 +65,14 @@ describe('manifests/security-sidecar', () => {
     const security = await securitySpec('http2');
     expect(security).toMatchObject({
       env: [{
+        name: 'LAUNCHDARKLY_SDK_KEY',
+        value: '',
+      },
+      {
+        name: 'OPA_CONFIG_SYSTEM_NAME',
+        value: '',
+      },
+      {
         name: 'ENVOY_PROTOCOL',
         value: 'http2',
       }],
@@ -79,6 +95,14 @@ describe('manifests/security-sidecar', () => {
     const security = await securitySpec('http2', false);
     expect(security).toMatchObject({
       env: [{
+        name: 'LAUNCHDARKLY_SDK_KEY',
+        value: '',
+      },
+      {
+        name: 'OPA_CONFIG_SYSTEM_NAME',
+        value: '',
+      },
+      {
         name: 'ENVOY_PROTOCOL',
         value: 'h2c',
       }],

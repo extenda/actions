@@ -13,7 +13,14 @@ const volumeMounts = (protocol) => {
 
 const securitySpec = async (protocol, platformGKE = true) => getImageWithSha256(`${IMAGE_NAME}:authz`)
   .then((image) => {
-    const env = [];
+    const env = [{
+      name: 'LAUNCHDARKLY_SDK_KEY',
+      value: process.env.SEC_LAUNCHDARKLY_SDK_KEY || '',
+    },
+    {
+      name: 'OPA_CONFIG_SYSTEM_NAME',
+      value: process.env.IAM_SYSTEM_NAME || '',
+    }];
     if (platformGKE) {
       env.push({
         name: 'ENVOY_PROTOCOL',
