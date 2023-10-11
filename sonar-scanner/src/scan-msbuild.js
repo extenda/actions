@@ -11,13 +11,13 @@ const markerFile = path.join(os.homedir(), '.github_action_sonar.txt');
 
 const scanner = path.join(os.homedir(), '.dotnet', 'tools', 'dotnet-sonarscanner');
 
-// Any 11+ openJDK will work for us.
-const findJava11 = async () => {
+// JDK 11 will soon be deprecated. Need atleast JDK 17.
+const findJava17 = async () => {
   try {
     const basedir = process.env.JDK_BASEDIR || '/usr/lib/jvm';
     const jdks = fs.readdirSync(basedir);
     core.info(`Available JDKs: ${jdks.join(', ')}`);
-    const jdk = jdks.find((f) => f.startsWith('adoptopenjdk-1'));
+    const jdk = jdks.find((f) => f.startsWith('temurin-17'));
     return jdk ? path.join(basedir, jdk) : null;
   } catch (err) {
     core.error('/usr/lib/jvm not found');
@@ -28,7 +28,7 @@ const findJava11 = async () => {
 const scanWithJavaHome = async (args) => {
   const env = { ...process.env };
   if (os.platform() !== 'win32') {
-    const javaHome = await findJava11();
+    const javaHome = await findJava17();
     if (javaHome) {
       core.info(`Set JAVA_HOME=${javaHome}`);
       env.JAVA_HOME = javaHome;
