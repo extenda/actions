@@ -5,6 +5,7 @@ const buildManifest = require('../../src/manifests/build-manifest');
 const checkSystem = require('../../src/manifests/check-system');
 const buildOpaConfig = require('../../src/manifests/opa-config');
 const securitySpec = require('../../src/manifests/security-sidecar');
+const handleStatefulset = require('../../src/manifests/statefulset-workaround');
 const { addNamespace } = require('../../src/utils/add-namespace');
 const readSecret = require('../../src/utils/load-credentials');
 
@@ -13,6 +14,7 @@ jest.mock('../../src/manifests/opa-config');
 jest.mock('../../src/utils/add-namespace');
 jest.mock('../../src/manifests/security-sidecar');
 jest.mock('../../src/utils/load-credentials');
+jest.mock('../../src/manifests/statefulset-workaround');
 
 const readFileSync = (file) => fs.readFileSync(file, { encoding: 'utf-8' });
 
@@ -299,6 +301,7 @@ data:
   });
 
   test('It should generate manifest without HPA for static StatefulSet', async () => {
+    handleStatefulset.mockResolvedValueOnce();
     const image = 'example-image:latest';
     const service = {
       kubernetes: {
@@ -312,6 +315,52 @@ data:
         scaling: {
           cpu: 40,
         },
+      },
+      security: 'none',
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 3,
+          'max-instances': 3,
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'dev';
+
+    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
+
+    // Snapshot test for k8s-manifest.yaml.
+    const manifest = readFileSync('k8s(deploy)-manifest.yaml');
+    mockFs.restore();
+    expect(manifest).toMatchSnapshot();
+  });
+  test('It should generate manifest with volume for StatefulSet', async () => {
+    handleStatefulset.mockResolvedValueOnce();
+    const image = 'example-image:latest';
+    const volumes = [{
+      'disk-type': 'ssd',
+      size: '10Gi',
+      'mount-path': '/mnt/data',
+    }];
+    const service = {
+      kubernetes: {
+        type: 'StatefulSet',
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          cpu: 40,
+        },
+        volumes,
       },
       security: 'none',
       labels: {
