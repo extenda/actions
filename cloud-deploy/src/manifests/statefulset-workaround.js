@@ -22,7 +22,7 @@ const handleStatefulset = async (projectID, name, clanName, env, volumeSize) => 
 
   if (!statefulset) {
     // Not an existing stateful set.
-    return;
+    return [];
   }
 
   // 3. Compare new volume size with currently deployed
