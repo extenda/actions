@@ -27,6 +27,7 @@ const handleStatefulset = async (projectID, name, clanName, env, volumeSize) => 
     const volumeClaimTemplates = statefulsetSpecs.volumeClaimTemplates[0];
     statefulsetVolumeSize = volumeClaimTemplates.spec.resources.requests.storage;
   }
+  const promises = [];
   if (statefulsetVolumeSize !== volumeSize) {
     // 4. if different update all pvcs
     const persistantVolumeClaims = JSON.parse(await gcloudOutput([
@@ -35,7 +36,6 @@ const handleStatefulset = async (projectID, name, clanName, env, volumeSize) => 
       `--namespace=${name}`,
       '--output=json',
     ], 'kubectl', true));
-    const promises = [];
     for (const pvc of persistantVolumeClaims.items) {
       const pvcName = pvc.metadata.name;
       promises.push(gcloudOutput([
@@ -48,14 +48,15 @@ const handleStatefulset = async (projectID, name, clanName, env, volumeSize) => 
     }
     await Promise.all(promises);
     // 5. remove sts with kubectl delete sts (name) -n (namespace) --cascade=orphan
-    await gcloudOutput([
+    promises.push(gcloudOutput([
       'delete',
       'sts',
       name,
       `--namespace=${name}`,
       '--cascade=orphan',
-    ], 'kubectl');
+    ], 'kubectl'));
   }
+  return promises;
 };
 
 module.exports = handleStatefulset;
