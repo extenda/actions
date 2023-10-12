@@ -3,7 +3,7 @@ const handleStatefulset = require('../../src/manifests/statefulset-workaround');
 
 jest.mock('../../src/utils/gcloud-output', () => jest.fn().mockImplementation(() => Promise.resolve()));
 
-describe('configureExternalDomain', () => {
+describe('statefulset-workaround', () => {
   const mockProjectID = 'project-staging';
   const mockServiceName = 'service-name';
   const mockEnv = 'staging';

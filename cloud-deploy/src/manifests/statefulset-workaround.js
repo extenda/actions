@@ -20,6 +20,11 @@ const handleStatefulset = async (projectID, name, clanName, env, volumeSize) => 
     '--output=json',
   ], 'kubectl', true));
 
+  if (!statefulset) {
+    // Not an existing stateful set.
+    return [];
+  }
+
   // 3. Compare new volume size with currently deployed
   const statefulsetSpecs = statefulset.items[0].spec;
   let statefulsetVolumeSize = 0;
