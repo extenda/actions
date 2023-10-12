@@ -6,6 +6,7 @@ const buildOpaConfig = require('./opa-config');
 const { addNamespace } = require('../utils/add-namespace');
 const securitySpec = require('./security-sidecar');
 const readSecret = require('../utils/load-credentials');
+const handleStatefulset = require('./statefulset-workaround');
 
 const convertToYaml = (json) => yaml.dump(json);
 
@@ -328,7 +329,7 @@ const manifestTemplate = async (
     spec: {
       scaleTargetRef: {
         apiVersion: 'apps/v1',
-        kind: 'deployment',
+        kind: type,
         name,
       },
       minReplicas: minInstances,
@@ -553,6 +554,9 @@ const buildManifest = async (
       opaResources.memory,
     );
 
+    if (type === 'StatefulSet' && volumes) {
+      await handleStatefulset(projectId, name, clanName, deployEnv, volumes[0].size);
+    }
     const convertedManifests = manifests.map((doc) => convertToYaml(doc)).join('---\n');
     generateManifest('k8s(deploy)-manifest.yaml', convertedManifests);
     generateManifest('k8s(deploy)-certificates.yaml', await addNamespace(http2Certificate, name));
