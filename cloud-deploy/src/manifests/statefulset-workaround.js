@@ -20,7 +20,7 @@ const handleStatefulset = async (projectID, name, clanName, env, volumeSize) => 
     '--output=json',
   ], 'kubectl', true));
 
-  if (!statefulset) {
+  if (!statefulset.items[0]) {
     // Not an existing stateful set.
     return [];
   }
