@@ -21,6 +21,7 @@ const mvn = require('../src/mvn');
 const action = require('../src/index');
 
 const orgEnv = process.env;
+const defaultArgs = '-B -V --no-transfer-progress';
 
 describe('Maven', () => {
   afterAll(() => {
@@ -102,21 +103,21 @@ describe('Maven', () => {
     const status = await mvn.run('--version');
     expect(status).toEqual(0);
     expect(exec.exec).toHaveBeenCalledTimes(1);
-    expect(exec.exec).toHaveBeenCalledWith('mvn -B -V --version', undefined, { cwd: './' });
+    expect(exec.exec).toHaveBeenCalledWith(`mvn ${defaultArgs} --version`, undefined, { cwd: './' });
   });
 
   test('Build success', async () => {
     exec.exec.mockResolvedValueOnce(0);
     const status = await mvn.run('-f test/pom.xml package').catch(() => 1);
     expect(status).toEqual(0);
-    expect(exec.exec).toHaveBeenCalledWith('mvn -B -V -f test/pom.xml package', undefined, { cwd: './' });
+    expect(exec.exec).toHaveBeenCalledWith(`mvn ${defaultArgs} -f test/pom.xml package`, undefined, { cwd: './' });
   });
 
   test('Build failure', async () => {
     exec.exec.mockResolvedValueOnce(1);
     const status = await mvn.run('-f missing-pom.xml package').catch(() => 1);
     expect(status).toEqual(1);
-    expect(exec.exec).toHaveBeenCalledWith('mvn -B -V -f missing-pom.xml package', undefined, { cwd: './' });
+    expect(exec.exec).toHaveBeenCalledWith(`mvn ${defaultArgs} -f missing-pom.xml package`, undefined, { cwd: './' });
   });
 
   test('It supports maven wrapper (linux)', async () => {
@@ -129,7 +130,7 @@ describe('Maven', () => {
     exec.exec.mockResolvedValueOnce(0);
 
     await mvn.run('help:effective-pom');
-    expect(exec.exec).toHaveBeenCalledWith('./mvnw -B -V help:effective-pom', undefined, { cwd: './' });
+    expect(exec.exec).toHaveBeenCalledWith(`./mvnw ${defaultArgs} help:effective-pom`, undefined, { cwd: './' });
 
     spy.mockRestore();
   });
@@ -144,7 +145,7 @@ describe('Maven', () => {
     exec.exec.mockResolvedValueOnce(0);
 
     await mvn.run('help:effective-pom');
-    expect(exec.exec).toHaveBeenCalledWith('mvnw.cmd -B -V help:effective-pom', undefined, { cwd: './' });
+    expect(exec.exec).toHaveBeenCalledWith(`mvnw.cmd ${defaultArgs} help:effective-pom`, undefined, { cwd: './' });
     spy.mockRestore();
   });
 
@@ -178,7 +179,7 @@ describe('Maven', () => {
       exec.exec.mockResolvedValue(0);
       await action();
       expect(exec.exec).toHaveBeenCalledTimes(1);
-      expect(exec.exec).toHaveBeenCalledWith('mvn -B -V package', undefined, { cwd: 'package' });
+      expect(exec.exec).toHaveBeenCalledWith(`mvn ${defaultArgs} package`, undefined, { cwd: 'package' });
       expect(core.exportVariable).toHaveBeenCalledTimes(1);
       expect(core.exportVariable).toHaveBeenCalledWith('MAVEN_INIT', 'true');
       process.env.MAVEN_INIT = 'true';
@@ -191,7 +192,7 @@ describe('Maven', () => {
       exec.exec.mockResolvedValueOnce(1);
       await action();
       expect(exec.exec).toHaveBeenCalledTimes(1);
-      expect(exec.exec).toHaveBeenCalledWith('mvn -B -V package', undefined, { cwd: './' });
+      expect(exec.exec).toHaveBeenCalledWith(`mvn ${defaultArgs} package`, undefined, { cwd: './' });
     });
 
     test('It will update version once for existing POM', async () => {
@@ -204,16 +205,16 @@ describe('Maven', () => {
       expect(exec.exec).toHaveBeenCalledTimes(2);
       expect(exec.exec).toHaveBeenNthCalledWith(
         1,
-        'mvn -B -V versions:set -DnewVersion=1.0.0-SNAPSHOT -DgenerateBackupPoms=false',
+        `mvn ${defaultArgs} versions:set -DnewVersion=1.0.0-SNAPSHOT -DgenerateBackupPoms=false`,
         undefined,
         { cwd: './' },
       );
-      expect(exec.exec).toHaveBeenNthCalledWith(2, 'mvn -B -V package -f test/pom.xml', undefined, { cwd: './' });
+      expect(exec.exec).toHaveBeenNthCalledWith(2, `mvn ${defaultArgs} package -f test/pom.xml`, undefined, { cwd: './' });
 
       core.getInput.mockReturnValueOnce('package');
       await action();
       expect(exec.exec).toHaveBeenCalledTimes(3);
-      expect(exec.exec).toHaveBeenNthCalledWith(3, 'mvn -B -V package', undefined, { cwd: './' });
+      expect(exec.exec).toHaveBeenNthCalledWith(3, `mvn ${defaultArgs} package`, undefined, { cwd: './' });
     });
 
     test('It will honor original version if set as pom.xml', async () => {
@@ -225,7 +226,7 @@ describe('Maven', () => {
 
       expect(versions.getBuildVersion).not.toHaveBeenCalled();
       expect(exec.exec).toHaveBeenCalledTimes(1);
-      expect(exec.exec).toHaveBeenCalledWith('mvn -B -V package -f test/pom.xml', undefined, { cwd: './' });
+      expect(exec.exec).toHaveBeenCalledWith(`mvn ${defaultArgs} package -f test/pom.xml`, undefined, { cwd: './' });
     });
 
     test('It will set explicit version when defined', async () => {
@@ -239,11 +240,11 @@ describe('Maven', () => {
       expect(exec.exec).toHaveBeenCalledTimes(2);
       expect(exec.exec).toHaveBeenNthCalledWith(
         1,
-        'mvn -B -V versions:set -DnewVersion=2.0.0 -DgenerateBackupPoms=false',
+        `mvn ${defaultArgs} versions:set -DnewVersion=2.0.0 -DgenerateBackupPoms=false`,
         undefined,
         { cwd: './' },
       );
-      expect(exec.exec).toHaveBeenNthCalledWith(2, 'mvn -B -V package -f test/pom.xml', undefined, { cwd: './' });
+      expect(exec.exec).toHaveBeenNthCalledWith(2, `mvn ${defaultArgs} package -f test/pom.xml`, undefined, { cwd: './' });
     });
 
     test('It accounts for using working dir setting', async () => {
@@ -264,11 +265,11 @@ describe('Maven', () => {
       expect(exec.exec).toHaveBeenCalledTimes(2);
       expect(exec.exec).toHaveBeenNthCalledWith(
         1,
-        'mvn -B -V versions:set -DnewVersion=2.0.0 -DgenerateBackupPoms=false',
+        `mvn ${defaultArgs} versions:set -DnewVersion=2.0.0 -DgenerateBackupPoms=false`,
         undefined,
         { cwd: 'nested-directory/test' },
       );
-      expect(exec.exec).toHaveBeenNthCalledWith(2, 'mvn -B -V package', undefined, { cwd: 'nested-directory/test' });
+      expect(exec.exec).toHaveBeenNthCalledWith(2, `mvn ${defaultArgs} package`, undefined, { cwd: 'nested-directory/test' });
     });
   });
 });
