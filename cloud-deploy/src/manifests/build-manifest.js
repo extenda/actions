@@ -110,8 +110,10 @@ const cloudrunManifestTemplate = async (
       },
     };
     const securityContainer = await securitySpec(protocol, false);
-    securityContainer.env.push({ name: 'OPA_CONFIG_SERVICE_TOKEN', value: `${styraSystemInfo.token}` });
-    securityContainer.env.push({ name: 'OPA_CONFIG_SYSTEM_ID', value: styraSystemInfo.systemId });
+    securityContainer.env.push(
+      { name: 'OPA_CONFIG_SERVICE_TOKEN', value: `${styraSystemInfo.token}` },
+      { name: 'OPA_CONFIG_SYSTEM_ID', value: styraSystemInfo.systemId },
+    );
     securityContainer.resources = resources;
     securityContainer.volumeMounts = undefined;
     containers.push(securityContainer);
@@ -529,6 +531,7 @@ const buildManifest = async (
       throw new Error(`Styra system not found with the name ${styraSystemName}`);
     } else {
       styraSystemInfo = await buildOpaConfig(system.id, styraToken, name, styraUrl);
+      process.env.IAM_SYSTEM_NAME = styraSystemName;
       generateManifest('k8s(deploy)-opa-config.yaml', styraSystemInfo.config);
     }
   }
