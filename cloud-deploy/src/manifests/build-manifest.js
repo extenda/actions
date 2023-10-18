@@ -351,10 +351,6 @@ const manifestTemplate = async (
     },
   };
 
-  if (minInstances === maxInstances && type.toLowerCase() === 'statefulset') {
-    return [namespace, service, deployment];
-  }
-
   return [namespace, service, deployment, hpa];
 };
 

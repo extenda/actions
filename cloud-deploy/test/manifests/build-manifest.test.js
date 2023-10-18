@@ -300,46 +300,6 @@ data:
     expect(manifest).toMatchSnapshot();
   });
 
-  test('It should generate manifest without HPA for static StatefulSet', async () => {
-    handleStatefulset.mockResolvedValueOnce();
-    const image = 'example-image:latest';
-    const service = {
-      kubernetes: {
-        type: 'StatefulSet',
-        service: 'example-service',
-        resources: {
-          cpu: 1,
-          memory: '512Mi',
-        },
-        protocol: 'http',
-        scaling: {
-          cpu: 40,
-        },
-      },
-      security: 'none',
-      labels: {
-        product: 'actions',
-        component: 'jest',
-      },
-      environments: {
-        production: {
-          'min-instances': 3,
-          'max-instances': 3,
-        },
-        staging: 'none',
-      },
-    };
-    const projectId = 'example-project';
-    const clanName = 'example-clan';
-    const env = 'dev';
-
-    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
-
-    // Snapshot test for k8s-manifest.yaml.
-    const manifest = readFileSync('k8s(deploy)-manifest.yaml');
-    mockFs.restore();
-    expect(manifest).toMatchSnapshot();
-  });
   test('It should generate manifest with volume for StatefulSet', async () => {
     handleStatefulset.mockResolvedValueOnce();
     const image = 'example-image:latest';
