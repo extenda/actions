@@ -15,7 +15,7 @@ jest.mock('../../cloud-run/src/kubectl-auth');
 const request = require('request');
 const core = require('@actions/core');
 const { setupGcloud } = require('../../setup-gcloud');
-const createNamespace = require('../../cloud-run/src/create-namespace')
+const createNamespace = require('../../cloud-run/src/create-namespace');
 const configureStyraDas = require('../src/configure-styra-das');
 const checkRepository = require('../src/handle-repository');
 const checkOwners = require('../src/handle-owners');
@@ -60,7 +60,6 @@ describe('Configure Styra DAS', () => {
       { statusCode: 200 },
       JSON.stringify(checkSystem),
     ));
-
 
     await configureStyraDas(iam, 'styra-token', 'https://extendaretail.styra.com', 'https://apiurl.test.dev', 'iam-token', 'staging', 'project-staging-321', [], false);
 
