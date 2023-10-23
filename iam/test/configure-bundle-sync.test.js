@@ -38,7 +38,7 @@ describe('Configure bundle sync', () => {
     };
 
     await configureBundleSync(iam, 'prod');
-    expect(execGcloud).toHaveBeenCalledWith(['auth', 'print-identity-token']);
+    expect(execGcloud).toHaveBeenCalledWith(['auth', 'print-identity-token', '--audiences=iam-das-worker']);
     expect(axios.put).toHaveBeenCalledWith(
       expect.stringContaining('/systems/tst.my-test-prod'),
       null,

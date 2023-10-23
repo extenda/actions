@@ -2,11 +2,12 @@ const core = require('@actions/core');
 const axios = require('axios');
 const { execGcloud } = require('../../setup-gcloud');
 
-const baseUrl = 'https://iam-das-worker.retailsvc.com';
+const baseUrl = 'https://iam-das-worker.retailsvc.com/api/v1';
 
 const getToken = async () => execGcloud([
   'auth',
   'print-identity-token',
+  '--audiences=iam-das-worker',
 ]);
 
 const configureBundleSync = async (iam, env) => {
