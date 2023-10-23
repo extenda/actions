@@ -3,6 +3,8 @@ const fg = require('fast-glob');
 const { run } = require('../../utils');
 const loadIamDefinition = require('./iam-definition');
 const { configureIAM } = require('./configure-iam');
+const configureStyraDas = require('./configure-styra-das');
+const configureBundleSync = require('./configure-bundle-sync');
 const loadCredentials = require('./load-credentials');
 const fetchIamToken = require('../../iam-test-token/src/iam-auth');
 const { setupGcloud } = require('../../setup-gcloud');
@@ -45,7 +47,8 @@ const setupEnvironment = async (
   if (!skipIAM) {
     iamToken = await fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenant);
   }
-  return configureIAM(
+
+  await configureStyraDas(
     iam,
     styraToken,
     styraUrl,
@@ -54,6 +57,14 @@ const setupEnvironment = async (
     projectEnv,
     projectId,
     systemOwners,
+  );
+
+  await configureBundleSync(iam, projectEnv);
+
+  return configureIAM(
+    iam,
+    url,
+    iamToken,
     skipIAM,
   );
 };
