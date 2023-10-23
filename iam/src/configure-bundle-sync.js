@@ -2,7 +2,7 @@ const core = require('@actions/core');
 const axios = require('axios');
 const { execGcloud } = require('../../setup-gcloud');
 
-const baseUrl = 'https://iam-das-worker-ksnqbtps5a-ew.a.run.app';
+const baseUrl = 'https://iam-das-worker.retailsvc.com';
 
 const getToken = async () => execGcloud([
   'auth',
