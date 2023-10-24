@@ -12,6 +12,7 @@ const { setupGcloud } = require('../../setup-gcloud');
 const action = require('../src/index');
 const loadCredentials = require('../src/utils/load-credentials');
 const getImageWithSha256 = require('../src/manifests/image-sha256');
+const publishPolicies = require('../src/policies/publish-policies');
 
 jest.mock('../src/utils/load-credentials');
 jest.mock('@actions/core');
@@ -27,6 +28,7 @@ jest.mock('../src/loadbalancing/internal/create-internal-frontend');
 jest.mock('../../utils');
 jest.mock('../../setup-gcloud');
 jest.mock('../src/manifests/image-sha256');
+jest.mock('../src/policies/publish-policies');
 
 const serviceDef = {
   kubernetes: {
@@ -95,9 +97,11 @@ describe('Action', () => {
     configureInternalDomain.mockResolvedValueOnce();
     configureInternalFrontend.mockResolvedValueOnce();
     setupGcloud.mockResolvedValueOnce('project-id');
+    publishPolicies.mockResolvedValueOnce();
     await action();
 
     expect(core.getInput).toHaveBeenCalledTimes(5);
+    expect(publishPolicies).toHaveBeenCalledWith('service-name', 'staging', 'tag', serviceDef);
     expect(buildManifest).toHaveBeenCalledWith(
       'gcr.io/project/image@sha256:1',
       serviceDef,

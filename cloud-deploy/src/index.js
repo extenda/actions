@@ -13,6 +13,7 @@ const { setupGcloud } = require('../../setup-gcloud');
 const readSecret = require('./utils/load-credentials');
 const runScan = require('./utils/vulnerability-scanning');
 const getImageWithSha256 = require('./manifests/image-sha256');
+const publishPolicies = require('./policies/publish-policies');
 
 const action = async () => {
   const serviceAccountKeyPipeline = core.getInput('secrets-account-key', { required: true });
@@ -99,6 +100,8 @@ const action = async () => {
     externalHttpsCertificateKey,
     serviceAccountKeyCICD,
   );
+
+  await publishPolicies(serviceName, env, (userImage.split(':')[1] || version), deployYaml);
 
   core.info('Run cloud-deploy');
   const succesfulDeploy = await deploy(projectID, serviceName, version, platformGKE);
