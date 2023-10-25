@@ -69,20 +69,31 @@ describe('Setup permissions and handle', () => {
     expect(axios).toHaveBeenCalledTimes(2);
   });
 
-  test('it can update permissions', async () => {
+  test('it can update multiple permissions', async () => {
     const getSystemResult = {
-      id: 'test.resource.get',
+      id: 'test.resource.getN',
       description: 'Get res',
     };
 
     axios.mockResolvedValue({ status: 200, data: getSystemResult });
 
     const result = new Map();
-    result.set('test.resource.get', { description: 'Get resource' });
+    result.set('test.resource.get1', { description: 'Get resource' });
+    result.set('test.resource.get2', { description: 'Get resource' });
+    result.set('test.resource.get3', { description: 'Get resource' });
+    result.set('test.resource.get4', { description: 'Get resource' });
+    result.set('test.resource.get5', { description: 'Get resource' });
+    result.set('test.resource.get6', { description: 'Get resource' });
+    result.set('test.resource.get7', { description: 'Get resource' });
+    result.set('test.resource.get8', { description: 'Get resource' });
+    result.set('test.resource.get9', { description: 'Get resource' });
+    result.set('test.resource.get10', { description: 'Get resource' });
+    result.set('test.resource.get11', { description: 'Get resource' });
+    result.set('test.resource.get12', { description: 'Get resource' });
 
     await handlePermissions(result, 'iam-token', 'api-url');
 
-    expect(axios).toHaveBeenCalledTimes(2);
+    expect(axios).toHaveBeenCalledTimes(24);
   });
 
   test('it fails update permissions', async () => {
