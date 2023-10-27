@@ -531,4 +531,153 @@ data:
     mockFs.restore();
     expect(manifest).toMatchSnapshot();
   });
+
+  test('should generate manifest file with correct content for availability high', async () => {
+    const image = 'example-image:latest';
+    const service = {
+      kubernetes: {
+        type: 'Deployment',
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          cpu: 40,
+        },
+        availability: 'high',
+      },
+      security: 'none',
+      labels: {
+        label1: 'labelValue1',
+        label2: 'labelValue2',
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+            KEY3: '8080',
+            SECRET: 'sm://*/test-secret',
+          },
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'production';
+
+    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
+    const k8sManifest = readFileSync('k8s(deploy)-manifest.yaml');
+
+    // Snapshot test for k8s-manifest.yaml.
+    mockFs.restore();
+    expect(k8sManifest).toMatchSnapshot();
+  });
+  test('should generate manifest file with correct content for availability low', async () => {
+    const image = 'example-image:latest';
+    const service = {
+      kubernetes: {
+        type: 'Deployment',
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          cpu: 40,
+        },
+        availability: 'low',
+      },
+      security: 'none',
+      labels: {
+        label1: 'labelValue1',
+        label2: 'labelValue2',
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+            KEY3: '8080',
+            SECRET: 'sm://*/test-secret',
+          },
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'production';
+
+    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
+    const k8sManifest = readFileSync('k8s(deploy)-manifest.yaml');
+
+    // Snapshot test for k8s-manifest.yaml.
+    mockFs.restore();
+    expect(k8sManifest).toMatchSnapshot();
+  });
+  test('should generate manifest file with correct content for staging', async () => {
+    const image = 'example-image:latest';
+    const service = {
+      kubernetes: {
+        type: 'Deployment',
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          cpu: 40,
+        },
+      },
+      security: 'none',
+      labels: {
+        label1: 'labelValue1',
+        label2: 'labelValue2',
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+            KEY3: '8080',
+            SECRET: 'sm://*/test-secret',
+          },
+        },
+        staging: {
+          'min-instances': 1,
+          'max-instances': 2,
+          env: {
+            KEY1: 'value1',
+          },
+        },
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'staging';
+
+    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
+    const k8sManifest = readFileSync('k8s(deploy)-manifest.yaml');
+    // Snapshot test for k8s-manifest.yaml.
+    mockFs.restore();
+    expect(k8sManifest).toMatchSnapshot();
+  });
 });

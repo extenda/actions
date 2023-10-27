@@ -130,6 +130,9 @@
         "timeout": {
           "$ref": "#/$defs/RequestTimeout"
         },
+        "availability": {
+          "$ref": "#/$defs/Availability"
+        },
         "scaling": {
           "title": "ScalingKubernetes",
           "description": "Scaling settings for Kubernetes",
@@ -206,6 +209,15 @@
       "minimum": 1,
       "maximum": 3600,
       "default": 300
+    },
+    "Availability": {
+      "title": "Availability",
+      "description": "Availability to configure priority on autoscaling",
+      "type": "string",
+      "enum": [
+        "low",
+        "high"
+      ]
     },
     "Resources": {
       "title": "Resources",

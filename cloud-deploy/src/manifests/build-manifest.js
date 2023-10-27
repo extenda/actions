@@ -172,10 +172,26 @@ const manifestTemplate = async (
   volumes,
   opaCpu,
   opaMemory,
+  deployEnv,
+  availability,
 ) => {
+  // initialize manifest components
+
+  let annotations = {};
   const deploymentVolumes = volumeSetup(opa, protocol, type);
   const userVolumeMounts = userContainerVolumeMountSetup(opa, protocol, type, volumes, name);
   const securityContainer = opa ? await securitySpec(protocol) : {};
+  const nodeSelector = deployEnv === 'staging' || availability === 'low'
+    ? { 'cloud.google.com/gke-spot': 'true' } : undefined;
+
+  if (availability === 'high' && deployEnv !== 'staging') {
+    annotations['cluster-autoscaler.kubernetes.io/safe-to-evict'] = 'false';
+  }
+  if (Object.keys(annotations).length === 0) {
+    annotations = undefined;
+  }
+
+  // setup manifest
 
   const namespace = {
     apiVersion: 'v1',
@@ -254,11 +270,13 @@ const manifestTemplate = async (
         : {}),
       template: {
         metadata: {
+          annotations,
           labels: {
             app: name,
           },
         },
         spec: {
+          nodeSelector,
           serviceAccountName: 'workload-identity-sa',
           containers: [
             {
@@ -458,6 +476,7 @@ const buildManifest = async (
     type = {},
     service: name,
     protocol,
+    availability = null,
     resources,
     scaling,
     volumes,
@@ -551,6 +570,8 @@ const buildManifest = async (
       volumes,
       opaResources.cpu,
       opaResources.memory,
+      deployEnv,
+      availability,
     );
 
     if (type === 'StatefulSet' && volumes) {
