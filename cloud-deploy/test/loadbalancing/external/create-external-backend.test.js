@@ -3,6 +3,7 @@ const gcloudOutput = require('../../../src/utils/gcloud-output');
 
 jest.mock('@actions/core');
 jest.mock('../../../src/loadbalancing/external/fix-path-matchers');
+jest.mock('../../../src/utils/error-handler');
 jest.mock('../../../src/utils/gcloud-output', () => jest.fn().mockImplementation(() => Promise.resolve()));
 
 const describeUrlMap = JSON.stringify({

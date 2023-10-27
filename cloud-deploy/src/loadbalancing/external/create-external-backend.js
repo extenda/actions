@@ -2,6 +2,7 @@ const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
 const { projectWithoutNumbers } = require('../../utils/clan-project-name');
 const fixPathMatchers = require('./fix-path-matchers');
+const handleError = require('../../utils/error-handler');
 
 const getBackendStatus = async (name, projectID) => {
   try {
@@ -44,7 +45,7 @@ const createServerlessNeg = async (
   '--network-endpoint-type=serverless',
   `--project=${projectID}`,
   `--region=${region}`,
-]).catch(() => true);
+]).catch((err) => handleError(err, 'Create cloudrun NEG'));
 
 // update backend service
 const updateBackendService = async (
@@ -72,7 +73,7 @@ const updateBackendService = async (
     args.push('--logging-sample-rate=0');
     args.push('--protocol=HTTPS');
   }
-  return gcloudOutput(args).catch(() => true);
+  return gcloudOutput(args).catch((err) => handleError(err, 'Update backend service'));
 };
 
 // Create backend-service
@@ -126,7 +127,7 @@ const deleteBackendService = async (
     `${projectWithoutNumbers(projectID, env)}-lb-external`,
     `--path-matcher-name=${name}-external-backend`,
     `--project=${projectID}`,
-  ]).catch(() => true);
+  ]).catch((err) => handleError(err, 'Remove url from path-matcher'));
   const args = [
     'compute',
     'backend-services',
@@ -136,7 +137,7 @@ const deleteBackendService = async (
     '--quiet',
     `--project=${projectID}`,
   ];
-  return gcloudOutput(args).catch(() => true);
+  return gcloudOutput(args).catch((err) => handleError(err, 'Remove backend service'));
 };
 
 // Check if NEG exists
@@ -175,7 +176,7 @@ const addBackend = async (name, projectID, zone, platformGKE) => {
     args.push('--balancing-mode=RATE');
     args.push('--max-rate-per-endpoint=1');
   }
-  return gcloudOutput(args).catch(() => core.info('Backend already added to service!'));
+  return gcloudOutput(args).catch((err) => handleError(err, 'Adding backend to loadbalancer'));
 };
 
 const createPathMatcher = async (host, projectID, name, env) => gcloudOutput([
@@ -188,7 +189,7 @@ const createPathMatcher = async (host, projectID, name, env) => gcloudOutput([
   `--path-matcher-name=${name}-external-backend`,
   '--global',
   `--new-hosts=${host}`,
-]).catch(() => false);
+]).catch((err) => handleError(err, 'Create path matcher'));
 
 const setupBackendURLMapping = async (newHosts, projectID, name, env) => {
   let pathMatcherExists = false;

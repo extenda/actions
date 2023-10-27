@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
+const handleError = require('../../utils/error-handler');
 
 const MAX_DOMAINS = 100;
 const MAX_CERTIFICATES = 13;
@@ -13,7 +14,7 @@ const createExtendaBaseCertificate = async (projectID) => gcloudOutput([
   '--private-key=external_key.key',
   `--project=${projectID}`,
   '--global',
-]).catch(() => core.info('Certificate already exists!'));
+]).catch((err) => handleError(err, 'Create extenda-cert'));
 
 const createCertificate = async (domains, projectID, name) => gcloudOutput([
   'compute',
