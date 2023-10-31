@@ -34,7 +34,7 @@ describe('Configure bundle sync', () => {
 
     await configureBundleSync(iam, 'prod');
     expect(axios.create).toHaveBeenCalledWith({
-      baseUrl: 'https://iam-das-worker.retailsvc.com/api/v1',
+      baseURL: 'https://iam-das-worker.retailsvc.com/api/v1',
       headers: { authorization: 'Bearer idToken' },
     });
 

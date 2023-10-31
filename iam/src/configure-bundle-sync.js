@@ -8,7 +8,7 @@ const configureBundleSync = async (iam, env) => {
   const { 'permission-prefix': permissionPrefix, services = [] } = iam;
 
   const dasWorker = axios.create({
-    baseUrl: 'https://iam-das-worker.retailsvc.com/api/v1',
+    baseURL: 'https://iam-das-worker.retailsvc.com/api/v1',
     headers: { authorization: `Bearer ${await getToken()}` },
   });
 
