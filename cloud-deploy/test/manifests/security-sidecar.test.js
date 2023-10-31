@@ -52,11 +52,7 @@ describe('manifests/security-sidecar', () => {
         timeoutSeconds: 5,
         failureThreshold: 5,
       },
-      volumeMounts: [{
-        mountPath: '/config',
-        name: 'opa',
-        readOnly: true,
-      }],
+      volumeMounts: [],
     });
     expect(getImageWithSha256).toHaveBeenCalledTimes(1);
   });
@@ -76,17 +72,11 @@ describe('manifests/security-sidecar', () => {
         name: 'ENVOY_PROTOCOL',
         value: 'http2',
       }],
-      volumeMounts: [
-        {
-          mountPath: '/config',
-          name: 'opa',
-          readOnly: true,
-        },
-        {
-          mountPath: '/etc/extenda/certs',
-          name: 'extenda-certs',
-          readOnly: true,
-        }],
+      volumeMounts: [{
+        mountPath: '/etc/extenda/certs',
+        name: 'extenda-certs',
+        readOnly: true,
+      }],
     });
     expect(getImageWithSha256).toHaveBeenCalledTimes(1);
   });

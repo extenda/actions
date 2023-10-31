@@ -922,7 +922,7 @@ spec:
 "
 `;
 
-exports[`buildManifest should generate opa manifest 1`] = `
+exports[`buildManifest should set OPA env vars 1`] = `
 "apiVersion: v1
 kind: Namespace
 metadata:
@@ -1016,6 +1016,10 @@ spec:
           env:
             - name: ENVOY_PROTOCOL
               value: http
+            - name: OPA_CONFIG_SERVICE_TOKEN
+              value: styraToken
+            - name: OPA_CONFIG_SYSTEM_ID
+              value: some-id
           volumeMounts:
             - mountPath: /config
               name: opa
@@ -1033,10 +1037,7 @@ spec:
             periodSeconds: 5
             timeoutSeconds: 5
             failureThreshold: 5
-      volumes:
-        - name: opa
-          configMap:
-            name: opa-envoy-config
+      volumes: []
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
