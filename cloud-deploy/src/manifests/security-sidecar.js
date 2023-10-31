@@ -4,7 +4,6 @@ const IMAGE_NAME = 'eu.gcr.io/extenda/security';
 
 const volumeMounts = (protocol) => {
   const volumes = [];
-  volumes.push({ mountPath: '/config', name: 'opa', readOnly: true });
   if (protocol === 'http2') {
     volumes.push({ mountPath: '/etc/extenda/certs', name: 'extenda-certs', readOnly: true });
   }

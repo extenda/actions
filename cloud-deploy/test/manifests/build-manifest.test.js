@@ -207,7 +207,7 @@ metadata:
     expect(k8sManifest).toMatchSnapshot();
   });
 
-  test('should generate opa manifest', async () => {
+  test('should set OPA env vars', async () => {
     // const mockWriteFile = jest.spyOn(fs, 'writeFileSync').mockImplementation();
     checkSystem.mockResolvedValueOnce({ id: 'some-id' });
     securitySpec.mockResolvedValueOnce({
@@ -241,7 +241,7 @@ metadata:
       },
     };
 
-    buildOpaConfig.mockResolvedValueOnce({ config: yaml.dump(opaConfig) });
+    buildOpaConfig.mockResolvedValueOnce({ config: yaml.dump(opaConfig), token: 'styraToken', systemId: 'some-id' });
 
     const image = 'example-image:latest';
     const service = {
@@ -283,16 +283,6 @@ metadata:
     const env = 'dev';
 
     await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
-
-    expect(readFileSync('k8s(deploy)-opa-config.yaml')).toContain(`kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: opa-envoy-config
-  namespace: service-name
-data:
-  conf.yaml: |
-    services:
-        - name: styra`);
 
     // Snapshot test for k8s-manifest.yaml.
     const manifest = readFileSync('k8s(deploy)-manifest.yaml');

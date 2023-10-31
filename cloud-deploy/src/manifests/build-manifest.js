@@ -13,7 +13,6 @@ const convertToYaml = (json) => yaml.dump(json);
 const volumeSetup = (opa, protocol, type = 'none') => {
   const volumes = [];
   if (opa && type.toLowerCase() !== 'statefulset') {
-    volumes.push({ name: 'opa', configMap: { name: 'opa-envoy-config' } });
     if (protocol === 'http2') {
       volumes.push({ name: 'extenda-certs', secret: { secretName: 'envoy-http2-certs' } });
     }
@@ -174,6 +173,7 @@ const manifestTemplate = async (
   opaMemory,
   deployEnv,
   availability,
+  styraSystemInfo,
 ) => {
   // initialize manifest components
 
@@ -181,6 +181,13 @@ const manifestTemplate = async (
   const deploymentVolumes = volumeSetup(opa, protocol, type);
   const userVolumeMounts = userContainerVolumeMountSetup(opa, protocol, type, volumes, name);
   const securityContainer = opa ? await securitySpec(protocol) : {};
+  if (opa) {
+    securityContainer.env.push(
+      { name: 'OPA_CONFIG_SERVICE_TOKEN', value: `${styraSystemInfo.token}` },
+      { name: 'OPA_CONFIG_SYSTEM_ID', value: styraSystemInfo.systemId },
+    );
+  }
+
   const nodeSelector = deployEnv === 'staging' || availability === 'low'
     ? { 'cloud.google.com/gke-spot': 'true' } : undefined;
 
@@ -545,9 +552,11 @@ const buildManifest = async (
     if (system.id === '') {
       throw new Error(`Styra system not found with the name ${styraSystemName}`);
     } else {
+      // Required until we no longer load Styra DAS config.
       styraSystemInfo = await buildOpaConfig(system.id, styraToken, name, styraUrl);
+
+      // Our new GCS system name.
       process.env.IAM_SYSTEM_NAME = styraSystemName;
-      generateManifest('k8s(deploy)-opa-config.yaml', styraSystemInfo.config);
     }
   }
   if (kubernetes) {
@@ -572,6 +581,7 @@ const buildManifest = async (
       opaResources.memory,
       deployEnv,
       availability,
+      styraSystemInfo,
     );
 
     if (type === 'StatefulSet' && volumes) {
