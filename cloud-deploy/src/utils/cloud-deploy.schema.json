@@ -227,7 +227,7 @@
         "cpu": {
           "description": "Number of requested CPU cores",
           "type": "number",
-          "minimum": 0.5,
+          "minimum": 0.25,
           "maximum": 8
         },
         "memory": {
