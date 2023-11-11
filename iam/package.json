@@ -8,7 +8,7 @@
     "@actions/core": "^1.10.0",
     "@actions/exec": "^1.0.4",
     "@actions/github": "^5.1.1",
-    "axios": "^1.5.1",
+    "axios": "^1.6.0",
     "fast-glob": "^3.2.4",
     "jsonschema": "^1.4.0",
     "multiline-str": "^1.0.0",
