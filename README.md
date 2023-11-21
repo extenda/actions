@@ -23,6 +23,7 @@ The following actions are available
   * [gcp-secret-manager](gcp-secret-manager#readme)
   * [iam](iam#readme)
   * [iam-test-token](iam-test-token#readme)
+  * [identity-token](identity-token#readme)
   * [jira-release](jira-release#readme)
   * [jira-releasenotes](jira-releasenotes#readme)
   * ~~[kubernetes](kubernetes#readme)~~
