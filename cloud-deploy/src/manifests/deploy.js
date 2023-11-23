@@ -2,6 +2,7 @@ const core = require('@actions/core');
 const gcloudOutput = require('../utils/gcloud-output');
 const { retryUntil } = require('../utils/retry-until');
 const cleanRevisions = require('../cloudrun/clean-revisions');
+const { projectWithoutNumbers } = require('../utils/clan-project-name');
 
 const allowAllRequests = async (projectID, name) => gcloudOutput([
   'run',
@@ -68,7 +69,16 @@ const deploy = async (projectID, name, version, platformGKE) => {
       await allowAllRequests(projectID, name);
     }
   } else {
-    core.info(`Deployment of ${name} failed`);
+    core.error(`Deployment of ${name} failed`);
+    core.info(`pipeline link: https://console.cloud.google.com/deploy/delivery-pipelines/europe-west1/${name}?project=${projectID}`);
+    const project = projectWithoutNumbers(projectID);
+    const clan = project.split('-')[0];
+    const env = project.split('-')[1];
+    let link = `https://console.cloud.google.com/run/detail/europe-west1/${name}/logs?project=${projectID}`;
+    if (platformGKE) {
+      link = `https://console.cloud.google.com/kubernetes/deployment/europe-west1/${clan}-cluster-${env}/${name}/${name}/logs?project=${projectID}`;
+    }
+    core.info(`logs link: ${link}`);
   }
 
   if (!platformGKE) {
