@@ -1,4 +1,3 @@
-const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
 const { projectWithoutNumbers } = require('../../utils/clan-project-name');
 
@@ -13,7 +12,7 @@ const createDNSzone = async (projectID, env) => gcloudOutput([
   '--visibility=private',
   '--networks=clan-network',
   '--quiet',
-]).catch(() => core.info('managed dns zone already exists'));
+]);
 
 const createRecordSet = async (projectID, env, name, ip) => gcloudOutput([
   'dns',
@@ -26,7 +25,7 @@ const createRecordSet = async (projectID, env, name, ip) => gcloudOutput([
   '--ttl=300',
   `--rrdatas=${ip}`,
   '--quiet',
-]).catch(() => core.info('managed dns zone already exists'));
+]);
 
 const obtainInternalIp = async (projectId, protcol) => gcloudOutput([
   'compute',

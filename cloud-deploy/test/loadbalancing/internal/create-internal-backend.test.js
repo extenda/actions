@@ -54,6 +54,9 @@ describe('configureInternalDomain', () => {
         `--health-checks=${projectID}-internal-hc`,
         '--timeout=300s',
       ],
+      'gcloud',
+      true,
+      true,
     );
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(
@@ -176,6 +179,9 @@ describe('configureInternalDomain', () => {
         `--project=${projectID}`,
         '--protocol=HTTPS',
       ],
+      'gcloud',
+      true,
+      true,
     );
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(

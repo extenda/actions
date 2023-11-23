@@ -9,7 +9,7 @@ const createLoadbalancer = async (projectID, env, backendService) => gcloudOutpu
   `--project=${projectID}`,
   '--region=europe-west1',
   `--default-service=${backendService}`,
-]).catch(() => false);
+]);
 
 const createInternalLoadbalancer = async (projectID, env, name) => {
   // TODO: check if loadbalancer exists and return

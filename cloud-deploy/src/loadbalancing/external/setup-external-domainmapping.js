@@ -10,7 +10,7 @@ const getRecordSetIP = async (zone, projectID, host) => gcloudOutput([
   `--zone=${zone}`,
   `--project=${projectID}`,
   '--format=get(rrdatas)',
-]).catch(() => false);
+]);
 
 const createUpdateRecordSet = async (
   zone,
@@ -28,7 +28,7 @@ const createUpdateRecordSet = async (
   `--zone=${zone}`,
   `--project=${projectID}`,
   '--ttl=300',
-]).catch(() => false);
+]);
 
 const setupExternalDomainMapping = async (hosts, migrate, loadBalancerIP) => {
   const projectID = 'extenda';

@@ -1,4 +1,3 @@
-const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
 const { projectWithoutNumbers } = require('../../utils/clan-project-name');
 
@@ -21,8 +20,7 @@ const create404Bucket = async (projectID, env) => gcloudOutput([
     `${projectWithoutNumbers(projectID, env)}-404`,
     `--gcs-bucket-name=${projectWithoutNumbers(projectID, env)}-404`,
     `--project=${projectID}`,
-  ]))
-  .catch(() => core.info('bucket already created!'));
+  ]));
 
 const createLoadbalancer = async (projectID, env) => gcloudOutput([
   'compute',
@@ -31,7 +29,7 @@ const createLoadbalancer = async (projectID, env) => gcloudOutput([
   `${projectWithoutNumbers(projectID, env)}-lb-external`,
   `--project=${projectID}`,
   `--default-backend-bucket=${projectWithoutNumbers(projectID, env)}-404`,
-]).catch(() => false);
+]);
 
 // Create healthcheck if not exists
 const setupHealthCheck = async (projectID) => gcloudOutput([
@@ -44,7 +42,7 @@ const setupHealthCheck = async (projectID) => gcloudOutput([
   '--use-serving-port',
   '--check-interval=10s',
   `--project=${projectID}`,
-]).catch(() => core.info('Health check already exists!'));
+]);
 
 const createExternalLoadbalancer = async (projectID, env) => {
   // TODO: check if loadbalancer exists and return
