@@ -17,7 +17,7 @@ describe('handle errors', () => {
   });
 
   test('It can identify was not found error and continue', async () => {
-    const errorMessage = `ERROR: (gcloud.compute.url-maps.create) Could not fetch resource:
+    const errorMessage = `ERROR: (gcloud.compute.url-maps.describe) Could not fetch resource:
     - The resource 'projects/xxx/global/urlMaps/xxx-prod-lb-external' was not found`;
     const action = 'network-endpoint-group';
 

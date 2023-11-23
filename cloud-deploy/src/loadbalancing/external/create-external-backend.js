@@ -175,7 +175,7 @@ const addBackend = async (name, projectID, zone, platformGKE) => {
     args.push('--balancing-mode=RATE');
     args.push('--max-rate-per-endpoint=1');
   }
-  return gcloudOutput(args, 'gcloud', false, false);
+  return gcloudOutput(args);
 };
 
 const createPathMatcher = async (host, projectID, name, env) => gcloudOutput([

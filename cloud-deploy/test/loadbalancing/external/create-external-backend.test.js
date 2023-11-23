@@ -111,7 +111,7 @@ describe('configureExternalDomain', () => {
       '--global',
       '--balancing-mode=RATE',
       '--max-rate-per-endpoint=1',
-    ]), 'gcloud', expect.anything(), expect.anything());
+    ]));
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(7, expect.arrayContaining([
       'compute',
@@ -124,7 +124,7 @@ describe('configureExternalDomain', () => {
       '--global',
       '--balancing-mode=RATE',
       '--max-rate-per-endpoint=1',
-    ]), 'gcloud', expect.anything(), expect.anything());
+    ]));
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(8, expect.arrayContaining([
       'compute',
@@ -137,7 +137,7 @@ describe('configureExternalDomain', () => {
       '--global',
       '--balancing-mode=RATE',
       '--max-rate-per-endpoint=1',
-    ]), 'gcloud', expect.anything(), expect.anything());
+    ]));
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(9, expect.arrayContaining([
       'compute',

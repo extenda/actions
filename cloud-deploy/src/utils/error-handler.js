@@ -10,7 +10,7 @@ const handleError = async (errorMessage, action) => {
   if (errorMessage.includes('already exists') || errorMessage.includes('Duplicate network endpoint')) {
     message = `${action} failed with: already exists`;
   }
-  if (errorMessage.includes('was not found' || !action.includes('Remove'))) {
+  if (errorMessage.includes('was not found') && (!action.includes('delete') && !action.includes('remove'))) {
     message = `${action} failed with: was not found, creating...`;
   }
   core.info(message);

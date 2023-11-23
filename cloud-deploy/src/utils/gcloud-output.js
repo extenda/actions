@@ -1,13 +1,6 @@
 const exec = require('@actions/exec');
-const os = require('os');
 const handleError = require('./error-handler');
-
-const findExecutable = (executable) => {
-  if (executable === 'gcloud' || !executable) {
-    return os.platform() === 'win32' ? 'gcloud.cmd' : 'gcloud';
-  }
-  return executable;
-};
+const { findExecutable } = require('../../../setup-gcloud/src/exec-gcloud');
 
 /**
  * Execute gcloud and return the standard output.
@@ -19,7 +12,6 @@ const findExecutable = (executable) => {
 const execGcloud = async (args, executable = 'gcloud', silent = true, skipErrorHandling = false) => {
   let output = '';
   let stderr = '';
-  let error = false;
   await exec.exec(findExecutable(executable), args, {
     silent,
     listeners: {
@@ -31,15 +23,13 @@ const execGcloud = async (args, executable = 'gcloud', silent = true, skipErrorH
       },
     },
   }).catch((err) => {
-    error = true;
     if (skipErrorHandling) {
       throw err;
+    } else {
+      const action = `${args[1]} ${args[2]} ${args[3]}`;
+      handleError(stderr.trim(), action);
     }
   });
-  if (error && !skipErrorHandling) {
-    const action = `${args[1]} ${args[2]} ${args[3]}`;
-    await handleError(stderr.trim(), action);
-  }
   return output.trim();
 };
 
