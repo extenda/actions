@@ -221,13 +221,12 @@ describe('configureExternalDomain', () => {
   });
 
   it('it should do switch to cloudrun from gke', async () => {
-
     const status = {
       backends: [{
-        group: 'service-name-neg'
+        group: 'service-name-neg',
       }],
       logConfig: {
-        sampleRate: 1.0
+        sampleRate: 1.0,
       },
       protocol: 'http',
       timeoutSec: '300s',
@@ -252,7 +251,7 @@ describe('configureExternalDomain', () => {
       `--path-matcher-name=${mockServiceName}-external-backend`,
       `--project=${mockProjectID}`,
     ]));
-    
+
     expect(gcloudOutput).toHaveBeenNthCalledWith(3, expect.arrayContaining([
       'compute',
       'backend-services',
@@ -271,9 +270,9 @@ describe('configureExternalDomain', () => {
       `--cloud-run-service=${mockServiceName}`,
       '--network-endpoint-type=serverless',
       `--project=${mockProjectID}`,
-      `--region=europe-west1`,
+      '--region=europe-west1',
     ]));
-    
+
     expect(gcloudOutput).toHaveBeenNthCalledWith(8, expect.arrayContaining([
       'compute',
       'url-maps',
@@ -290,13 +289,12 @@ describe('configureExternalDomain', () => {
   });
 
   it('it should do switch to gke from cloudrun', async () => {
-
     const status = {
       backends: [{
-        group: 'service-name-cloudrun'
+        group: 'service-name-cloudrun',
       }],
       logConfig: {
-        sampleRate: 1.0
+        sampleRate: 1.0,
       },
       protocol: 'http',
       timeoutSec: '300s',
@@ -325,7 +323,7 @@ describe('configureExternalDomain', () => {
       `--path-matcher-name=${mockServiceName}-external-backend`,
       `--project=${mockProjectID}`,
     ]));
-    
+
     expect(gcloudOutput).toHaveBeenNthCalledWith(3, expect.arrayContaining([
       'compute',
       'backend-services',
@@ -335,7 +333,7 @@ describe('configureExternalDomain', () => {
       '--quiet',
       `--project=${mockProjectID}`,
     ]));
-    
+
     expect(gcloudOutput).toHaveBeenNthCalledWith(12, expect.arrayContaining([
       'compute',
       'url-maps',

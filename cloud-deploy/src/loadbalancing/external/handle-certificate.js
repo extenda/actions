@@ -1,6 +1,5 @@
 const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
-const handleError = require('../../utils/error-handler');
 
 const MAX_DOMAINS = 100;
 const MAX_CERTIFICATES = 13;

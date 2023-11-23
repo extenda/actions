@@ -1,8 +1,6 @@
-const core = require('@actions/core');
 const gcloudOutput = require('../../../src/utils/gcloud-output');
 const configureInternalFrontend = require('../../../src/loadbalancing/internal/create-internal-frontend');
 const setupInternalDomainMapping = require('../../../src/loadbalancing/internal/setup-internal-domainmapping');
-const handleError = require('../../../src/utils/error-handler');
 
 jest.mock('@actions/core');
 jest.mock('../../../src/utils/gcloud-output');

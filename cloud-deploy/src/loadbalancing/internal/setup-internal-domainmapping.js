@@ -1,4 +1,3 @@
-const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
 const { projectWithoutNumbers } = require('../../utils/clan-project-name');
 

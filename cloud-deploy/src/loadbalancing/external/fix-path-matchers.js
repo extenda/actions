@@ -1,6 +1,5 @@
 const gcloudOutput = require('../../utils/gcloud-output');
 const { projectWithoutNumbers } = require('../../utils/clan-project-name');
-const handleError = require('../../utils/error-handler');
 
 const removePathMatcher = async (projectID, env, name) => gcloudOutput([
   'compute',

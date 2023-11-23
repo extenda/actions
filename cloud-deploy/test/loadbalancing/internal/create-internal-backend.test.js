@@ -53,7 +53,10 @@ describe('configureInternalDomain', () => {
         '--protocol=HTTP',
         `--health-checks=${projectID}-internal-hc`,
         '--timeout=300s',
-      ], 'gcloud', true, true,
+      ],
+      'gcloud',
+      true,
+      true,
     );
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(
@@ -175,7 +178,10 @@ describe('configureInternalDomain', () => {
         '--load-balancing-scheme=INTERNAL_MANAGED',
         `--project=${projectID}`,
         '--protocol=HTTPS',
-      ], 'gcloud', true, true
+      ],
+      'gcloud',
+      true,
+      true,
     );
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(

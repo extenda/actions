@@ -1,33 +1,28 @@
-const core = require('@actions/core');
 const gcloudOutput = require('../../utils/gcloud-output');
 const { projectWithoutNumbers } = require('../../utils/clan-project-name');
 
-const create404Bucket = async (projectID, env) => {
-  return gcloudOutput([
-    'mb',
-    '-c',
-    'standard',
-    '-l',
-    'europe-west1',
-    '-p',
-    projectID,
-    '-b',
-    'on',
-    `gs://${projectWithoutNumbers(projectID, env)}-404`,
-  ], 'gsutil')
-    .then(() => {
-      return gcloudOutput([
-        'compute',
-        'backend-buckets',
-        'create',
-        `${projectWithoutNumbers(projectID, env)}-404`,
-        `--gcs-bucket-name=${projectWithoutNumbers(projectID, env)}-404`,
-        `--project=${projectID}`,
-      ])
-    });
-};
+const create404Bucket = async (projectID, env) => gcloudOutput([
+  'mb',
+  '-c',
+  'standard',
+  '-l',
+  'europe-west1',
+  '-p',
+  projectID,
+  '-b',
+  'on',
+  `gs://${projectWithoutNumbers(projectID, env)}-404`,
+], 'gsutil')
+  .then(() => gcloudOutput([
+    'compute',
+    'backend-buckets',
+    'create',
+    `${projectWithoutNumbers(projectID, env)}-404`,
+    `--gcs-bucket-name=${projectWithoutNumbers(projectID, env)}-404`,
+    `--project=${projectID}`,
+  ]));
 
-const createLoadbalancer = async (projectID, env) => await gcloudOutput([
+const createLoadbalancer = async (projectID, env) => gcloudOutput([
   'compute',
   'url-maps',
   'create',
@@ -35,7 +30,6 @@ const createLoadbalancer = async (projectID, env) => await gcloudOutput([
   `--project=${projectID}`,
   `--default-backend-bucket=${projectWithoutNumbers(projectID, env)}-404`,
 ]);
-
 
 // Create healthcheck if not exists
 const setupHealthCheck = async (projectID) => gcloudOutput([

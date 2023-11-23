@@ -1,9 +1,7 @@
-const core = require('@actions/core');
 const setupInternalDomainMapping = require('../../../src/loadbalancing/internal/setup-internal-domainmapping');
 const gcloudOutput = require('../../../src/utils/gcloud-output');
 
 jest.mock('../../../src/utils/gcloud-output');
-jest.mock('@actions/core');
 
 describe('setupInternalDomainMapping', () => {
   afterEach(() => {

@@ -14,7 +14,7 @@ const getBackendStatus = async (name, projectID) => {
       `--project=${projectID}`,
       '--format=json',
     ], 'gcloud', true, true));
-    let { backends } = status;
+    const { backends } = status;
     let platform = 'cloudrun';
     const backendService = backends[0].group;
     if (backendService.includes('-neg')) {

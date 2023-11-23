@@ -32,7 +32,7 @@ const execGcloud = async (args, executable = 'gcloud', silent = true, skipErrorH
     },
   }).catch((err) => {
     error = true;
-    if(skipErrorHandling) {
+    if (skipErrorHandling) {
       throw err;
     }
   });
