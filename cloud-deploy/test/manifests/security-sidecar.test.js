@@ -3,9 +3,15 @@ const getImageWithSha256 = require('../../src/manifests/image-sha256');
 
 jest.mock('../../src/manifests/image-sha256');
 
+const originalEnv = process.env;
+
 describe('manifests/security-sidecar', () => {
   beforeEach(() => {
     getImageWithSha256.mockResolvedValueOnce('eu.gcr.io/extenda/security@sha256:043112bde49f2244cf9e4c44d059603a7c056d13ad61ef3492f04374ac9a0396');
+    process.env = { ...originalEnv };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
   });
 
   afterEach(() => {
@@ -13,8 +19,15 @@ describe('manifests/security-sidecar', () => {
   });
 
   test('It invokes gcloud list-images with correct args', async () => {
+    process.env.IAM_SYSTEM_NAME = 'tst.test-prod';
     await securitySpec('http');
     expect(getImageWithSha256).toHaveBeenCalledWith('eu.gcr.io/extenda/security:authz');
+  });
+
+  test('It uses native-authz in staging', async () => {
+    process.env.IAM_SYSTEM_NAME = 'tst.test-staging';
+    await securitySpec('http');
+    expect(getImageWithSha256).toHaveBeenCalledWith('eu.gcr.io/extenda/security:native-authz');
   });
 
   test('It uses a sha256 digest with image', async () => {
@@ -52,11 +65,7 @@ describe('manifests/security-sidecar', () => {
         timeoutSeconds: 5,
         failureThreshold: 5,
       },
-      volumeMounts: [{
-        mountPath: '/config',
-        name: 'opa',
-        readOnly: true,
-      }],
+      volumeMounts: [],
     });
     expect(getImageWithSha256).toHaveBeenCalledTimes(1);
   });
@@ -76,17 +85,11 @@ describe('manifests/security-sidecar', () => {
         name: 'ENVOY_PROTOCOL',
         value: 'http2',
       }],
-      volumeMounts: [
-        {
-          mountPath: '/config',
-          name: 'opa',
-          readOnly: true,
-        },
-        {
-          mountPath: '/etc/extenda/certs',
-          name: 'extenda-certs',
-          readOnly: true,
-        }],
+      volumeMounts: [{
+        mountPath: '/etc/extenda/certs',
+        name: 'extenda-certs',
+        readOnly: true,
+      }],
     });
     expect(getImageWithSha256).toHaveBeenCalledTimes(1);
   });

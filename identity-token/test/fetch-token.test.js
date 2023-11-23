@@ -1,11 +1,7 @@
-jest.mock('@actions/exec');
-const exec = require('@actions/exec');
+const { execGcloud } = require('../../setup-gcloud');
 const fetchToken = require('../src/fetch-token');
 
-const mockExecListeners = (output) => (cmd, args, opts) => {
-  opts.listeners.stdout(Buffer.from(output, 'utf8'));
-  return Promise.resolve(0);
-};
+jest.mock('../../setup-gcloud');
 
 describe('Obtain an identity token', () => {
   afterEach(() => {
@@ -14,13 +10,17 @@ describe('Obtain an identity token', () => {
 
   test('Fetch token', async () => {
     const token = 'yJhbGciOiJSUzI1NiIsImtpZCI6Im';
-    exec.exec
-      .mockImplementationOnce(mockExecListeners(token));
-
+    execGcloud.mockResolvedValueOnce(token);
     fetchToken(
       'my-sa@example.iam.gserviceaccount.com',
       'bhq-braveheart-quotes',
     );
-    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(execGcloud).toHaveBeenCalledWith([
+      'auth',
+      'print-identity-token',
+      '--impersonate-service-account=my-sa@example.iam.gserviceaccount.com',
+      '--include-email',
+      '--audiences=bhq-braveheart-quotes',
+    ]);
   });
 });

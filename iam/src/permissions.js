@@ -59,23 +59,42 @@ const getPermission = async (
 });
 
 const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
-  const promises = [];
-  fullPermissions.forEach(({ description, alias }, id) => {
-    core.info(`handling permission for '${id}'`);
-    promises.push(getPermission(iamToken, id, description, iamUrl, alias)
-      .then((status) => {
-        if (status !== 'NONE') {
-          core.info(`permission '${id}' require update (${status})`);
-          return updateAddPermission(iamToken, id, description, status, iamUrl, alias);
-        }
-        core.info(`permission '${id}' exists`);
-        return null;
-      }));
+  // Split permissions into chunks of 10 to not overload IAM with too many concurrent requests.
+  const chunks = [new Map()];
+  const chunkSize = 10;
+  let chunkIndex = 0;
+  fullPermissions.forEach((value, key) => {
+    if (chunks[chunkIndex].size >= chunkSize) {
+      chunks[chunkIndex += 1] = new Map();
+    }
+    chunks[chunkIndex].set(key, value);
   });
+
+  const promises = [];
+
+  for (let i = 0; i < chunks.length; i += 1) {
+    const it = chunks[i][Symbol.iterator]();
+    for (const [id, { description, alias }] of it) {
+      core.info(`handling permission for '${id}'`);
+      promises.push(getPermission(iamToken, id, description, iamUrl, alias)
+        .then((status) => {
+          if (status !== 'NONE') {
+            core.info(`permission '${id}' require update (${status})`);
+            return updateAddPermission(iamToken, id, description, status, iamUrl, alias);
+          }
+          core.info(`permission '${id}' exists`);
+          return null;
+        }));
+      // Complete the chunk.
+      // eslint-disable-next-line no-await-in-loop
+      await Promise.all(promises);
+    }
+  }
 
   // We wait here to make sure we resolve all promises that updates permissions.
   await Promise.all(promises);
   core.info('All permissions processed.');
+  return null;
 };
 
 const setupPermissions = async (permissions, systemId) => {

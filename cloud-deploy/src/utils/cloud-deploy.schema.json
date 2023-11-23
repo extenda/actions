@@ -130,6 +130,9 @@
         "timeout": {
           "$ref": "#/$defs/RequestTimeout"
         },
+        "availability": {
+          "$ref": "#/$defs/Availability"
+        },
         "scaling": {
           "title": "ScalingKubernetes",
           "description": "Scaling settings for Kubernetes",
@@ -207,6 +210,15 @@
       "maximum": 3600,
       "default": 300
     },
+    "Availability": {
+      "title": "Availability",
+      "description": "Availability to configure priority on autoscaling",
+      "type": "string",
+      "enum": [
+        "low",
+        "high"
+      ]
+    },
     "Resources": {
       "title": "Resources",
       "description": "The requested resources",
@@ -215,7 +227,7 @@
         "cpu": {
           "description": "Number of requested CPU cores",
           "type": "number",
-          "minimum": 0.5,
+          "minimum": 0.25,
           "maximum": 8
         },
         "memory": {
