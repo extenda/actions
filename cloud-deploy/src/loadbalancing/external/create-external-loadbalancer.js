@@ -24,42 +24,31 @@ const create404Bucket = async (projectID, env) => {
         `--gcs-bucket-name=${projectWithoutNumbers(projectID, env)}-404`,
         `--project=${projectID}`,
       ])
-    }).catch(() => true);
+    });
 };
 
-const createLoadbalancer = async (projectID, env) => {
-  let output = "";
-  try {
-    output = await gcloudOutput([
-      'compute',
-      'url-maps',
-      'create',
-      `${projectWithoutNumbers(projectID, env)}-lb-external`,
-      `--project=${projectID}`,
-      `--default-backend-bucket=${projectWithoutNumbers(projectID, env)}-404`,
-    ])
-    core.info("output:" + output);
-  }
-  catch {
+const createLoadbalancer = async (projectID, env) => await gcloudOutput([
+  'compute',
+  'url-maps',
+  'create',
+  `${projectWithoutNumbers(projectID, env)}-lb-external`,
+  `--project=${projectID}`,
+  `--default-backend-bucket=${projectWithoutNumbers(projectID, env)}-404`,
+]);
 
-  }
-  return output;
-};
 
 // Create healthcheck if not exists
-const setupHealthCheck = async (projectID) => {
-  return gcloudOutput([
-    'compute',
-    'health-checks',
-    'create',
-    'tcp',
-    `${projectID}-external-hc`,
-    '--global',
-    '--use-serving-port',
-    '--check-interval=10s',
-    `--project=${projectID}`,
-  ]);
-};
+const setupHealthCheck = async (projectID) => gcloudOutput([
+  'compute',
+  'health-checks',
+  'create',
+  'tcp',
+  `${projectID}-external-hc`,
+  '--global',
+  '--use-serving-port',
+  '--check-interval=10s',
+  `--project=${projectID}`,
+]);
 
 const createExternalLoadbalancer = async (projectID, env) => {
   // TODO: check if loadbalancer exists and return

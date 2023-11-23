@@ -27,9 +27,9 @@ describe('configureExternalLBFrontend', () => {
 
     await configureExternalLBFrontend(projectID, env, host);
 
-    expect(gcloudOutput).toHaveBeenNthCalledWith(1, ['compute', 'addresses', 'describe', `${projectID}-lb-external-ip`, `--project=${projectID}`, '--global', '--format=get(address)']);
+    expect(gcloudOutput).toHaveBeenNthCalledWith(1, ['compute', 'addresses', 'describe', `${projectID}-lb-external-ip`, `--project=${projectID}`, '--global', '--format=get(address)'], 'gcloud', expect.anything(), expect.anything());
     expect(gcloudOutput).toHaveBeenNthCalledWith(2, ['compute', 'ssl-policies', 'create', 'extenda-ssl-policy', '--profile=MODERN', '--min-tls-version=1.2', `--project=${projectID}`, '--global']);
-    expect(gcloudOutput).toHaveBeenNthCalledWith(3, ['compute', 'target-https-proxies', 'create', 'https-lb-proxy-external', `--url-map=${projectID}-${env}-lb-external`, expect.any(String), '--ssl-policy=extenda-ssl-policy', `--project=${projectID}`]);
+    expect(gcloudOutput).toHaveBeenNthCalledWith(3, ['compute', 'target-https-proxies', 'create', 'https-lb-proxy-external', `--url-map=${projectID}-${env}-lb-external`, expect.any(String), '--ssl-policy=extenda-ssl-policy', `--project=${projectID}`], 'gcloud', expect.anything(), expect.anything());
     expect(gcloudOutput).toHaveBeenNthCalledWith(4, ['compute', 'forwarding-rules', 'create', 'https-proxy-external', '--address=1.2.3.4', '--target-https-proxy=https-lb-proxy-external', '--global', `--project=${projectID}`, '--ports=443']);
   });
 
@@ -43,7 +43,7 @@ describe('configureExternalLBFrontend', () => {
 
     await configureExternalLBFrontend(projectID, env, host);
 
-    expect(gcloudOutput).toHaveBeenNthCalledWith(5, ['compute', 'target-https-proxies', 'create', 'https-lb-proxy-external', `--url-map=${projectID}-${env}-lb-external`, expect.any(String), '--ssl-policy=extenda-ssl-policy', `--project=${projectID}`]);
+    expect(gcloudOutput).toHaveBeenNthCalledWith(5, ['compute', 'target-https-proxies', 'create', 'https-lb-proxy-external', `--url-map=${projectID}-${env}-lb-external`, expect.any(String), '--ssl-policy=extenda-ssl-policy', `--project=${projectID}`], 'gcloud', expect.anything(), expect.anything());
     expect(gcloudOutput).toHaveBeenNthCalledWith(6, ['compute', 'forwarding-rules', 'create', 'https-proxy-external', expect.any(String), '--target-https-proxy=https-lb-proxy-external', '--global', `--project=${projectID}`, '--ports=443']);
   });
 

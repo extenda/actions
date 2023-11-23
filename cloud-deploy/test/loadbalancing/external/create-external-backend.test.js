@@ -71,7 +71,7 @@ describe('configureExternalDomain', () => {
       '--logging-sample-rate=1',
       '--load-balancing-scheme=EXTERNAL',
       `--project=${mockProjectID}`,
-    ]));
+    ]), 'gcloud', expect.anything(), expect.anything());
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(3, expect.arrayContaining([
       'compute',
@@ -111,7 +111,7 @@ describe('configureExternalDomain', () => {
       '--global',
       '--balancing-mode=RATE',
       '--max-rate-per-endpoint=1',
-    ]));
+    ]), 'gcloud', expect.anything(), expect.anything());
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(7, expect.arrayContaining([
       'compute',
@@ -124,7 +124,7 @@ describe('configureExternalDomain', () => {
       '--global',
       '--balancing-mode=RATE',
       '--max-rate-per-endpoint=1',
-    ]));
+    ]), 'gcloud', expect.anything(), expect.anything());
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(8, expect.arrayContaining([
       'compute',
@@ -137,7 +137,7 @@ describe('configureExternalDomain', () => {
       '--global',
       '--balancing-mode=RATE',
       '--max-rate-per-endpoint=1',
-    ]));
+    ]), 'gcloud', expect.anything(), expect.anything());
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(9, expect.arrayContaining([
       'compute',
@@ -218,5 +218,136 @@ describe('configureExternalDomain', () => {
     ]));
 
     expect(gcloudOutput).toHaveBeenCalledTimes(7);
+  });
+
+  it('it should do switch to cloudrun from gke', async () => {
+
+    const status = {
+      backends: [{
+        group: 'service-name-neg'
+      }],
+      logConfig: {
+        sampleRate: 1.0
+      },
+      protocol: 'http',
+      timeoutSec: '300s',
+    };
+
+    gcloudOutput.mockResolvedValueOnce(JSON.stringify(status));
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce(describeUrlMapNoPathMatcher);
+    gcloudOutput.mockResolvedValueOnce();
+
+    await configureExternalDomain(mockProjectID, mockServiceName, mockEnv, mockHost, 'http', 300, false);
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(2, expect.arrayContaining([
+      'compute',
+      'url-maps',
+      'remove-path-matcher',
+      `${mockProjectID}-lb-external`,
+      `--path-matcher-name=${mockServiceName}-external-backend`,
+      `--project=${mockProjectID}`,
+    ]));
+    
+    expect(gcloudOutput).toHaveBeenNthCalledWith(3, expect.arrayContaining([
+      'compute',
+      'backend-services',
+      'delete',
+      `${mockServiceName}-external-backend`,
+      '--global',
+      '--quiet',
+      `--project=${mockProjectID}`,
+    ]));
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(5, expect.arrayContaining([
+      'compute',
+      'network-endpoint-groups',
+      'create',
+      `${mockServiceName}-cloudrun`,
+      `--cloud-run-service=${mockServiceName}`,
+      '--network-endpoint-type=serverless',
+      `--project=${mockProjectID}`,
+      `--region=europe-west1`,
+    ]));
+    
+    expect(gcloudOutput).toHaveBeenNthCalledWith(8, expect.arrayContaining([
+      'compute',
+      'url-maps',
+      'add-path-matcher',
+      'project-staging-lb-external',
+      `--project=${mockProjectID}`,
+      `--default-service=${mockServiceName}-external-backend`,
+      `--path-matcher-name=${mockServiceName}-external-backend`,
+      '--global',
+      `--new-hosts=${mockHost}`,
+    ]));
+
+    expect(gcloudOutput).toHaveBeenCalledTimes(8);
+  });
+
+  it('it should do switch to gke from cloudrun', async () => {
+
+    const status = {
+      backends: [{
+        group: 'service-name-cloudrun'
+      }],
+      logConfig: {
+        sampleRate: 1.0
+      },
+      protocol: 'http',
+      timeoutSec: '300s',
+    };
+
+    gcloudOutput.mockResolvedValueOnce(JSON.stringify(status));
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce();
+    gcloudOutput.mockResolvedValueOnce(describeUrlMapNoPathMatcher);
+    gcloudOutput.mockResolvedValueOnce();
+
+    await configureExternalDomain(mockProjectID, mockServiceName, mockEnv, mockHost, 'http', 300, true);
+
+    expect(gcloudOutput).toHaveBeenNthCalledWith(2, expect.arrayContaining([
+      'compute',
+      'url-maps',
+      'remove-path-matcher',
+      `${mockProjectID}-lb-external`,
+      `--path-matcher-name=${mockServiceName}-external-backend`,
+      `--project=${mockProjectID}`,
+    ]));
+    
+    expect(gcloudOutput).toHaveBeenNthCalledWith(3, expect.arrayContaining([
+      'compute',
+      'backend-services',
+      'delete',
+      `${mockServiceName}-external-backend`,
+      '--global',
+      '--quiet',
+      `--project=${mockProjectID}`,
+    ]));
+    
+    expect(gcloudOutput).toHaveBeenNthCalledWith(12, expect.arrayContaining([
+      'compute',
+      'url-maps',
+      'add-path-matcher',
+      'project-staging-lb-external',
+      `--project=${mockProjectID}`,
+      `--default-service=${mockServiceName}-external-backend`,
+      `--path-matcher-name=${mockServiceName}-external-backend`,
+      '--global',
+      `--new-hosts=${mockHost}`,
+    ]));
+
+    expect(gcloudOutput).toHaveBeenCalledTimes(12);
   });
 });

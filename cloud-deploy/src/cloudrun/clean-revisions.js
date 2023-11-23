@@ -1,6 +1,6 @@
 const core = require('@actions/core');
 const getRevisions = require('./get-revisions');
-const { execGcloud } = require('../../../setup-gcloud');
+const execGcloud = require('../utils/gcloud-output');
 
 const deleteRevision = async (revisionName, project, region) => execGcloud([
   'run',
@@ -11,7 +11,7 @@ const deleteRevision = async (revisionName, project, region) => execGcloud([
   `--project=${project}`,
   `--region=${region}`,
   '--no-user-output-enabled',
-]);
+], 'gcloud', true, true);
 
 const cleanRevisions = async (service, project, region, maxRevisions) => {
   const promises = [];

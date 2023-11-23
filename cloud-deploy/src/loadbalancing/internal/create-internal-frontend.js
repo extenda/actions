@@ -12,7 +12,7 @@ const createCertificate = async (projectID, region = 'europe-west1') => gcloudOu
   '--private-key=key.key',
   `--project=${projectID}`,
   `--region=${region}`,
-]).catch(() => core.info('Certificate already exists!'));
+]);
 
 const createHttpProxy = async (projectID, env) => gcloudOutput([
   'compute',
@@ -22,7 +22,7 @@ const createHttpProxy = async (projectID, env) => gcloudOutput([
   `--url-map=${projectWithoutNumbers(projectID, env)}-lb-internal`,
   '--region=europe-west1',
   `--project=${projectID}`,
-]).catch(() => core.info('proxy already exists'));
+]);
 
 const createHttpsProxy = async (projectID, env) => gcloudOutput([
   'compute',
@@ -33,7 +33,7 @@ const createHttpsProxy = async (projectID, env) => gcloudOutput([
   `--url-map=${projectWithoutNumbers(projectID, env)}-lb-internal`,
   '--region=europe-west1',
   `--project=${projectID}`,
-]).catch(() => core.info('proxy already exists'));
+]);
 
 const createForwardingRule = async (projectID) => gcloudOutput([
   'compute',
@@ -48,7 +48,7 @@ const createForwardingRule = async (projectID) => gcloudOutput([
   '--region=europe-west1',
   `--project=${projectID}`,
   '--ports=80',
-]).catch(() => core.info('Forwarding rule already exists!'));
+]);
 
 const createHttpsForwardingRule = async (projectID) => gcloudOutput([
   'compute',
@@ -63,7 +63,7 @@ const createHttpsForwardingRule = async (projectID) => gcloudOutput([
   '--region=europe-west1',
   `--project=${projectID}`,
   '--ports=443',
-]).catch(() => core.info('Forwarding rule already exists!'));
+]);
 
 const configureInternalFrontend = async (projectID, name, env, protocol) => {
   if (protocol === 'http2') {

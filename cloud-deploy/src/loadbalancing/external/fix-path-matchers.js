@@ -1,5 +1,6 @@
 const gcloudOutput = require('../../utils/gcloud-output');
 const { projectWithoutNumbers } = require('../../utils/clan-project-name');
+const handleError = require('../../utils/error-handler');
 
 const removePathMatcher = async (projectID, env, name) => gcloudOutput([
   'compute',
@@ -8,7 +9,7 @@ const removePathMatcher = async (projectID, env, name) => gcloudOutput([
   `${projectWithoutNumbers(projectID, env)}-lb-external`,
   `--path-matcher-name=${name}`,
   `--project=${projectID}`,
-]).catch(() => true);
+]);
 
 const checkURLMap = async (projectID, env) => gcloudOutput([
   'compute',

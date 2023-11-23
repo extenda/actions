@@ -14,7 +14,7 @@ const createExtendaBaseCertificate = async (projectID) => gcloudOutput([
   '--private-key=external_key.key',
   `--project=${projectID}`,
   '--global',
-]).catch((err) => handleError(err, 'Create extenda-cert'));
+]);
 
 const createCertificate = async (domains, projectID, name) => gcloudOutput([
   'compute',
@@ -96,7 +96,7 @@ const handleCertificates = async (hosts, project) => {
           if (index !== -1) {
             domainName.splice(index, 1);
           }
-          core.info('Domain exists in certificate');
+          core.info(`Domain ${domain} exists in certificate`);
         }
       }
     }
