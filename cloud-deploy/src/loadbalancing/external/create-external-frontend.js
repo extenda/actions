@@ -23,7 +23,7 @@ const obtainIP = async (projectID) => gcloudOutput([
   `--project=${projectID}`,
   '--global',
   '--format=get(address)',
-]).catch(() => createIP(projectID)
+], 'gcloud', true, true).catch(() => createIP(projectID)
   .then(() => obtainIP(projectID)));
 
 const updateHttpsProxy = async (projectID, certificates, loadBalancerName) => gcloudOutput([
@@ -46,7 +46,7 @@ const createHttpsProxy = async (projectID, certificates, loadBalancerName) => gc
   `--ssl-certificates=${certificates}`,
   '--ssl-policy=extenda-ssl-policy',
   `--project=${projectID}`,
-]).catch(() => updateHttpsProxy(projectID, certificates, loadBalancerName));
+], 'gcloud', true, true).catch(() => updateHttpsProxy(projectID, certificates, loadBalancerName));
 
 const createForwardingRule = async (projectID, IP) => gcloudOutput([
   'compute',
@@ -58,7 +58,7 @@ const createForwardingRule = async (projectID, IP) => gcloudOutput([
   '--global',
   `--project=${projectID}`,
   '--ports=443',
-]).catch(() => core.info('Forwarding rule already exists!'));
+]);
 
 const createSSLPolicy = async (projectID) => gcloudOutput([
   'compute',
@@ -69,7 +69,7 @@ const createSSLPolicy = async (projectID) => gcloudOutput([
   '--min-tls-version=1.2',
   `--project=${projectID}`,
   '--global',
-]).catch(() => core.info('SSLPolicy already exist'));
+]);
 
 const configureExternalLBFrontend = async (projectID, env, hosts, migrate) => {
   core.info('Obtaining ip for loadbalancer');

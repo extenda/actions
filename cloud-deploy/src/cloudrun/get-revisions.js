@@ -1,4 +1,4 @@
-const { execGcloud } = require('../../../setup-gcloud');
+const execGcloud = require('../utils/gcloud-output');
 
 const isActive = (conditions) => {
   const activeStatus = conditions.find((c) => c.type === 'Active' && c.status === 'True');
@@ -14,7 +14,7 @@ const getRevisions = async (service, project, region) => {
     `--project=${project}`,
     `--region=${region}`,
     '--format=json',
-  ]);
+  ], 'gcloud', true, true);
 
   // Return a sorted array of revisions with newest to oldest.
   return JSON.parse(output.trim())

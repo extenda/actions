@@ -8,7 +8,7 @@ const removePathMatcher = async (projectID, env, name) => gcloudOutput([
   `${projectWithoutNumbers(projectID, env)}-lb-external`,
   `--path-matcher-name=${name}`,
   `--project=${projectID}`,
-]).catch(() => true);
+]);
 
 const checkURLMap = async (projectID, env) => gcloudOutput([
   'compute',

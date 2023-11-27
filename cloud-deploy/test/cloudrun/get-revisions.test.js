@@ -1,8 +1,8 @@
 jest.mock('@actions/exec');
-const { execGcloud } = require('../../../setup-gcloud');
+const execGcloud = require('../../src/utils/gcloud-output');
 const getRevisions = require('../../src/cloudrun/get-revisions');
 
-jest.mock('../../../setup-gcloud');
+jest.mock('../../src/utils/gcloud-output');
 
 const GCLOUD_JSON_OUTPUT = `[
   {
@@ -642,12 +642,10 @@ test('It returns a sorted list of revisions', async () => {
       active: false,
     },
   ]);
-  expect(execGcloud).toHaveBeenCalledWith(
-    expect.arrayContaining([
-      '--service=fiscal-signing-service',
-      '--project=fiscal-staging-dc48',
-      '--region=europe-west1',
-      '--format=json',
-    ]),
-  );
+  expect(execGcloud).toHaveBeenCalledWith(expect.arrayContaining([
+    '--service=fiscal-signing-service',
+    '--project=fiscal-staging-dc48',
+    '--region=europe-west1',
+    '--format=json',
+  ]), 'gcloud', expect.anything(), expect.anything());
 });

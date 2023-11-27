@@ -38,7 +38,7 @@ const createServerlessNeg = async (
   '--network-endpoint-type=serverless',
   `--project=${projectID}`,
   `--region=${region}`,
-]).catch(() => true);
+]);
 
 const deleteBackendService = async (
   name,
@@ -53,7 +53,7 @@ const deleteBackendService = async (
     `--path-matcher-name=${name}-internal-backend`,
     '--region=europe-west1',
     `--project=${projectID}`,
-  ]).catch(() => true);
+  ]);
   const args = [
     'compute',
     'backend-services',
@@ -63,7 +63,7 @@ const deleteBackendService = async (
     '--quiet',
     `--project=${projectID}`,
   ];
-  return gcloudOutput(args).catch(() => true);
+  return gcloudOutput(args);
 };
 
 // update backend service
@@ -90,7 +90,7 @@ const updateBackendService = async (
   } else {
     args.push('--protocol=HTTPS');
   }
-  return gcloudOutput(args).catch(() => true);
+  return gcloudOutput(args);
 };
 
 // Create backend-service
@@ -121,7 +121,7 @@ const setupBackendService = async (
   if (!platformGKE) {
     args.push('--protocol=HTTPS');
   }
-  return gcloudOutput(args).catch(() => updateBackendService(
+  return gcloudOutput(args, 'gcloud', true, true).catch(() => updateBackendService(
     name,
     projectID,
     serviceType,
@@ -166,7 +166,7 @@ const addBackend = async (name, projectID, zone, platformGKE) => {
     args.push('--balancing-mode=RATE');
     args.push('--max-rate-per-endpoint=1');
   }
-  return gcloudOutput(args).catch(() => core.info('Backend already added to service!'));
+  return gcloudOutput(args);
 };
 
 const setupBackendURLMapping = async (host, projectID, name, env, region) => gcloudOutput([
@@ -179,7 +179,7 @@ const setupBackendURLMapping = async (host, projectID, name, env, region) => gcl
   `--path-matcher-name=${name}-internal-backend`,
   `--region=${region}`,
   `--new-hosts=${host}`,
-]).catch(() => core.info('Url-mapping already exists!'));
+]);
 
 const configureBackend = async (
   projectID,
@@ -235,7 +235,7 @@ const setupHealthCheck = async (projectID, region) => gcloudOutput([
   '--use-serving-port',
   '--check-interval=10s',
   `--project=${projectID}`,
-]).catch(() => core.info('Health check already exists!'));
+]);
 
 const configureInternalDomain = async (
   projectID,
@@ -250,7 +250,7 @@ const configureInternalDomain = async (
   await setupHealthCheck(projectID, region);
   await configureBackend(projectID, name, region, serviceType, connectionTimeout, platformGKE, env);
   await createInternalLoadbalancer(projectID, env, name);
-  core.info('Setup url-mapping');
+  core.info('Setup internal url-mapping');
   return setupBackendURLMapping(host, projectID, name, env, region);
 };
 

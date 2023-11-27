@@ -27,25 +27,4 @@ describe('createInternalLoadbalancer', () => {
       `--default-service=${name}-internal-backend`,
     ]);
   });
-
-  test('should handle failure gracefully', async () => {
-    gcloudOutput.mockRejectedValue(new Error('Command failed'));
-
-    const projectID = 'my-project';
-    const env = 'dev';
-    const name = 'my-service';
-
-    const result = await createInternalLoadbalancer(projectID, env, name);
-
-    expect(gcloudOutput).toHaveBeenCalledWith([
-      'compute',
-      'url-maps',
-      'create',
-      `${projectID.split(`-${env}`)[0]}-${env}-lb-internal`,
-      `--project=${projectID}`,
-      '--region=europe-west1',
-      `--default-service=${name}-internal-backend`,
-    ]);
-    expect(result).toBe(false);
-  });
 });

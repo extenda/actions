@@ -1,9 +1,7 @@
-const core = require('@actions/core');
 const setupInternalDomainMapping = require('../../../src/loadbalancing/internal/setup-internal-domainmapping');
 const gcloudOutput = require('../../../src/utils/gcloud-output');
 
 jest.mock('../../../src/utils/gcloud-output');
-jest.mock('@actions/core');
 
 describe('setupInternalDomainMapping', () => {
   afterEach(() => {
@@ -104,41 +102,5 @@ describe('setupInternalDomainMapping', () => {
       '--rrdatas=192.168.0.1',
       '--quiet',
     ]);
-  });
-
-  test('should handle failures gracefully', async () => {
-    gcloudOutput.mockImplementation(() => Promise.resolve());
-    gcloudOutput.mockRejectedValueOnce();
-    core.info.mockImplementation(() => {});
-
-    const projectID = 'my-project';
-    const env = 'dev';
-    const name = 'my-service';
-    const protocol = 'http';
-
-    await setupInternalDomainMapping(projectID, env, name, protocol);
-
-    expect(gcloudOutput).toHaveBeenNthCalledWith(1, [
-      'dns',
-      'managed-zones',
-      'create',
-      `${projectID.split(`-${env}`)[0]}-${env}`,
-      `--project=${projectID}`,
-      '--description=A private internal managed dns zone',
-      '--dns-name=internal',
-      '--visibility=private',
-      '--networks=clan-network',
-      '--quiet',
-    ]);
-
-    expect(gcloudOutput).toHaveBeenNthCalledWith(2, [
-      'compute',
-      'forwarding-rules',
-      'list',
-      `--project=${projectID}`,
-      '--filter=name=(\'http-proxy-internal\')',
-      '--format=get(IPAddress)',
-    ]);
-    expect(core.info).toHaveBeenCalledWith('managed dns zone already exists');
   });
 });

@@ -1,9 +1,9 @@
-const { execGcloud } = require('../../../setup-gcloud');
+const execGcloud = require('../../src/utils/gcloud-output');
 const cleanRevisions = require('../../src/cloudrun/clean-revisions');
 const getRevisions = require('../../src/cloudrun/get-revisions');
 
 jest.mock('../../src/cloudrun/get-revisions');
-jest.mock('../../../setup-gcloud');
+jest.mock('../../src/utils/gcloud-output');
 
 describe('clean revisions', () => {
   afterEach(() => {
@@ -40,12 +40,12 @@ describe('clean revisions', () => {
       '--project=test-staging-t3st',
       '--region=europe-west1',
       '--no-user-output-enabled',
-    ]);
-    expect(execGcloud).toHaveBeenCalledWith(expect.arrayContaining(['delete', 'rev-00005-tst']));
-    expect(execGcloud).toHaveBeenCalledWith(expect.arrayContaining(['delete', 'rev-00004-tst']));
-    expect(execGcloud).toHaveBeenCalledWith(expect.arrayContaining(['delete', 'rev-00003-tst']));
-    expect(execGcloud).toHaveBeenCalledWith(expect.arrayContaining(['delete', 'rev-00002-tst']));
-    expect(execGcloud).toHaveBeenCalledWith(expect.arrayContaining(['delete', 'rev-00001-tst']));
+    ], 'gcloud', expect.anything(), expect.anything());
+    expect(execGcloud).toHaveBeenCalledWith(expect.arrayContaining(['delete', 'rev-00005-tst']), 'gcloud', expect.anything(), expect.anything());
+    expect(execGcloud).toHaveBeenCalledWith(expect.arrayContaining(['delete', 'rev-00004-tst']), 'gcloud', expect.anything(), expect.anything());
+    expect(execGcloud).toHaveBeenCalledWith(expect.arrayContaining(['delete', 'rev-00003-tst']), 'gcloud', expect.anything(), expect.anything());
+    expect(execGcloud).toHaveBeenCalledWith(expect.arrayContaining(['delete', 'rev-00002-tst']), 'gcloud', expect.anything(), expect.anything());
+    expect(execGcloud).toHaveBeenCalledWith(expect.arrayContaining(['delete', 'rev-00001-tst']), 'gcloud', expect.anything(), expect.anything());
   });
 
   test('Clean revisions not needed', async () => {
@@ -71,7 +71,7 @@ describe('clean revisions', () => {
     await cleanRevisions('service-name', 'test-staging-t3st', 'europe-west1', 3);
     expect(getRevisions).toHaveBeenCalledWith('service-name', 'test-staging-t3st', 'europe-west1');
     expect(execGcloud).toHaveBeenCalledTimes(1);
-    expect(execGcloud).toHaveBeenCalledWith(expect.arrayContaining(['delete', 'rev-00006-tst']));
+    expect(execGcloud).toHaveBeenCalledWith(expect.arrayContaining(['delete', 'rev-00006-tst']), 'gcloud', expect.anything(), expect.anything());
   });
 
   test('Preserve old still active revision', async () => {
@@ -84,6 +84,6 @@ describe('clean revisions', () => {
     execGcloud.mockResolvedValue(0);
     await cleanRevisions('service-name', 'test-staging-t3st', 'europe-west1', 3);
     expect(getRevisions).toHaveBeenCalledWith('service-name', 'test-staging-t3st', 'europe-west1');
-    expect(execGcloud).not.toHaveBeenCalledWith(expect.arrayContaining(['delete', 'rev-00006-tst']));
+    expect(execGcloud).not.toHaveBeenCalledWith(expect.arrayContaining(['delete', 'rev-00006-tst']), 'gcloud', expect.anything(), expect.anything());
   });
 });

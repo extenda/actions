@@ -13,16 +13,16 @@ const getBackendStatus = async (name, projectID) => {
       '--global',
       `--project=${projectID}`,
       '--format=json',
-    ]));
+    ], 'gcloud', true, true));
     const { backends } = status;
     let platform = 'cloudrun';
     const backendService = backends[0].group;
-    const { sampleRate } = status.logConfig;
-    const { protocol } = status;
-    const timeout = status.timeoutSec;
     if (backendService.includes('-neg')) {
       platform = 'gke';
     }
+    const { sampleRate } = status.logConfig;
+    const { protocol } = status;
+    const timeout = status.timeoutSec;
     return {
       backends, platform, sampleRate, protocol, timeout,
     };
@@ -44,7 +44,7 @@ const createServerlessNeg = async (
   '--network-endpoint-type=serverless',
   `--project=${projectID}`,
   `--region=${region}`,
-]).catch(() => true);
+]);
 
 // update backend service
 const updateBackendService = async (
@@ -72,7 +72,7 @@ const updateBackendService = async (
     args.push('--logging-sample-rate=0');
     args.push('--protocol=HTTPS');
   }
-  return gcloudOutput(args).catch(() => true);
+  return gcloudOutput(args);
 };
 
 // Create backend-service
@@ -105,7 +105,7 @@ const setupBackendService = async (
     args.push('--protocol=HTTPS');
     args.push('--logging-sample-rate=0');
   }
-  return gcloudOutput(args).catch(() => updateBackendService(
+  return gcloudOutput(args, 'gcloud', true, true).catch(() => updateBackendService(
     name,
     projectID,
     serviceType,
@@ -126,7 +126,7 @@ const deleteBackendService = async (
     `${projectWithoutNumbers(projectID, env)}-lb-external`,
     `--path-matcher-name=${name}-external-backend`,
     `--project=${projectID}`,
-  ]).catch(() => true);
+  ]);
   const args = [
     'compute',
     'backend-services',
@@ -136,7 +136,7 @@ const deleteBackendService = async (
     '--quiet',
     `--project=${projectID}`,
   ];
-  return gcloudOutput(args).catch(() => true);
+  return gcloudOutput(args);
 };
 
 // Check if NEG exists
@@ -175,7 +175,7 @@ const addBackend = async (name, projectID, zone, platformGKE) => {
     args.push('--balancing-mode=RATE');
     args.push('--max-rate-per-endpoint=1');
   }
-  return gcloudOutput(args).catch(() => core.info('Backend already added to service!'));
+  return gcloudOutput(args);
 };
 
 const createPathMatcher = async (host, projectID, name, env) => gcloudOutput([
@@ -188,7 +188,7 @@ const createPathMatcher = async (host, projectID, name, env) => gcloudOutput([
   `--path-matcher-name=${name}-external-backend`,
   '--global',
   `--new-hosts=${host}`,
-]).catch(() => false);
+]);
 
 const setupBackendURLMapping = async (newHosts, projectID, name, env) => {
   let pathMatcherExists = false;
@@ -263,7 +263,6 @@ const configureExternalDomain = async (
 
   // check backend exists and what platform state it is in
   const backendStatus = await getBackendStatus(name, projectID);
-
   // if no create
   if (!backendStatus) {
     core.info('Creating backend service');
@@ -273,7 +272,6 @@ const configureExternalDomain = async (
     || (backendStatus.platform === 'cloudrun' && platformGKE)) {
     doSwitch = true;
   }
-
   // remove all backends if switch is true and add new
   if (doSwitch) {
     await deleteBackendService(name, projectID, env);
@@ -307,7 +305,7 @@ const configureExternalDomain = async (
   }
 
   if (host) {
-    core.info('Setup url-mapping');
+    core.info('Setup external url-mapping');
     await setupBackendURLMapping(host, projectID, name, env);
   }
 };
