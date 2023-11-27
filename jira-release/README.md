@@ -31,7 +31,7 @@ The following environment variables are required.
 
 This example would run the `jira-release` job after a `release` job that has created a git tag. The job will
 populate issues with release notes and then create the JIRA release, set the fix version in all issues and finally
-release the JIRA version. Note the use of `${{ steps.outputs.semver.release-version }}` to obtain the semantic version
+release the JIRA version. Note the use of `${{ steps.outputs.semver.release-version }}` to obtain the semantic version
 that was tagged in the `release` job.
 
 ```yaml
