@@ -274,6 +274,7 @@ const configureExternalDomain = async (
   }
   // remove all backends if switch is true and add new
   if (doSwitch) {
+    core.info(`Switching traffic from ${backendStatus.platform} to ${platformGKE ? 'gke' : 'cloudrun'}`);
     await deleteBackendService(name, projectID, env);
     await setupBackendService(name, projectID, serviceType, connectionTimeout, platformGKE);
   }

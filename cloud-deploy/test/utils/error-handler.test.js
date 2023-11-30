@@ -22,7 +22,7 @@ describe('handle errors', () => {
     const action = 'network-endpoint-group';
 
     await handleError(errorMessage, action);
-    expect(core.info).toHaveBeenCalledWith(`${action} failed with: was not found, creating...`);
+    expect(core.info).toHaveBeenCalledWith(`${action} resulted in: was not found`);
   });
 
   test('It can identify already exists error and continue', async () => {
@@ -31,14 +31,14 @@ describe('handle errors', () => {
     const action = 'loadbalancer';
 
     await handleError(errorMessage, action);
-    expect(core.info).toHaveBeenCalledWith(`${action} failed with: already exists`);
+    expect(core.info).toHaveBeenCalledWith(`${action} resulted in: already exists`);
   });
 
   test('It can identify false error and print action succeeded', async () => {
-    const errorMessage = '';
+    const errorMessage = 'failed';
     const action = 'Remove loadbalancer';
 
     await handleError(errorMessage, action);
-    expect(core.info).toHaveBeenCalledWith(`${action} succeded`);
+    expect(core.info).toHaveBeenCalledWith(`${action} resulted in: failed`);
   });
 });
