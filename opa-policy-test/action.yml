@@ -1,0 +1,26 @@
+name: OPA policy test
+description: |
+  Execute unit tests for Rego rules using OPA and a GCS bundle.
+  Policies are expected to be located in `policies/policy`.
+inputs:
+  service-account-key:
+    description: |
+      The service account key which will be used for authentication against GCS.
+    required: true
+  gcs-bucket:
+    description: The GCS bucket name. This value can include a prefix (folder).
+    default: authz-bundles/systems
+  permission-prefix:
+    description: |
+      The permission-prefix setup for the service in you clan-common-repo. If this is specified,
+      the `service-name` must also be specified. If not provided, the value is read from
+      `cloud-deploy.yaml`.
+    required: false
+  service-name:
+    description: |
+      The name of the service. If this is specified, the `permission-prefix` must also be specified.
+      If not provided, the value is read from `cloud-deploy.yaml`.
+    required: false
+runs:
+  using: node16
+  main: dist/index.js

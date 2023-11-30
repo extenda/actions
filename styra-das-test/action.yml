@@ -27,11 +27,10 @@ inputs:
     default: ingress
     required: false
 runs:
-  using: docker
-  image: Dockerfile
-  env:
-    STYRA_ORGANIZATION_ID: extendaretail.svc.styra.com
-    STYRA_TOKEN: ${{ inputs.styra-das-token }}
-    STYRA_SYSTEM_NAME: ${{ inputs.permission-prefix }}.${{ inputs.service-name }}-staging
-    STYRA_POLICY_TYPE: ${{ inputs.policy-type }}
-  args: []
+  using: composite
+  steps:
+    - uses: extenda/actions/opa-policy-test@feat/opa-policy-test
+      with:
+        service-account-key: inherit
+        permission-prefix: ${{ inputs.permission-prefix }}
+        service-name: ${{ inputs.service-name }}

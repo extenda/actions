@@ -1,5 +1,7 @@
 # styra-das-test
 
+**:warning: This action is deprecated and will be removed in v1. Use [opa-policy-test](../opa-policy-test#readme) instead.**
+
 An opinionated action to execute unit tests for Rego rules inside Styra DAS.
 
 The following files are expected to exist in your project:
