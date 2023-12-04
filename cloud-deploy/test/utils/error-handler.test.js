@@ -41,4 +41,13 @@ describe('handle errors', () => {
     await handleError(errorMessage, action);
     expect(core.info).toHaveBeenCalledWith(`${action} resulted in: failed`);
   });
+
+  test('It can identify already used error and throw error', async () => {
+    const errorMessage = `ERROR: (gcloud.compute.backend-services.delete) Some requests did not succeed:
+    - The backend_service resource 'projects/xx/regions/europe-west1/backendServices/xxx-internal-backend' is already being used by 'projects/xxx/regions/europe-west1/urlMaps/xxx-lb-internal'`;
+
+    await expect(handleError(errorMessage))
+      .rejects.toEqual(new Error('Unable to remove backend due to being used elsewhere, please contact platform team'));
+  });
+
 });
