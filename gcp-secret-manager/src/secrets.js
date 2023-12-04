@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const YAML = require('yaml');
 const checkEnv = require('../../utils/src/check-env');
-const { setupGcloud , execGcloud } = require('../../setup-gcloud');
+const { setupGcloud, execGcloud } = require('../../setup-gcloud');
 
 let projectId;
 

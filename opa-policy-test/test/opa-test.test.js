@@ -11,5 +11,5 @@ test('It can run an OPA test', async () => {
   const result = await opaTest('test-bundle');
   expect(result).toEqual(0);
   expect(loadTool).toHaveBeenCalled();
-  expect(exec).toHaveBeenCalledWith('opa', ['test', '--bundle', 'test-bundle']);
+  expect(exec).toHaveBeenCalledWith('opa_linux_amd64_static', ['test', '--bundle', 'test-bundle']);
 });
