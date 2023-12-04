@@ -58,6 +58,7 @@ const downloadIfMissing = async (options, cachedTool) => {
       // Raw file
       const tmpFile = path.join(tmpDir, binary);
       await io.cp(downloadUuid, tmpFile);
+      fs.chmodSync(tmpFile, '0777');
     }
     await tc.cacheDir(tmpDir, tool, version);
     return find(options);

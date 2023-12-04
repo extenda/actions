@@ -6,7 +6,6 @@
   "main": "dist/index.js",
   "dependencies": {
     "@actions/core": "^1.10.0",
-    "google-auth-library": "^9.0.0",
     "yaml": "^1.7.2"
   }
 }
