@@ -42,8 +42,6 @@ const action = async () => {
   const http2Certificate = await readSecret(serviceAccountKeyPipeline, env, 'envoy-http2-certs', 'HTTPS_CERTIFICATES');
   const internalHttpsCertificateKey = await readSecret(serviceAccountKeyPipeline, env, 'internal-https-certs-key', 'INTERNAL_HTTPS_CERTIFICATES_KEY');
   const internalHttpsCertificateCrt = await readSecret(serviceAccountKeyPipeline, env, 'internal-https-certs-crt', 'INTERNAL_HTTPS_CERTIFICATES_CRT');
-  const externalHttpsCertificateCrt = await readSecret(serviceAccountKeyPipeline, env, 'external-https-certs-crt', 'EXTERNAL_HTTPS_CERTIFICATES_CRT');
-  const externalHttpsCertificateKey = await readSecret(serviceAccountKeyPipeline, env, 'external-https-certs-key', 'EXTERNAL_HTTPS_CERTIFICATES_KEY');
   await readSecret(serviceAccountKeyPipeline, env, 'sec-launchdarkly-sdk-key', 'SEC_LAUNCHDARKLY_SDK_KEY');
 
   const deployYaml = loadServiceDefinition(serviceFile);
@@ -96,8 +94,6 @@ const action = async () => {
     http2Certificate,
     internalHttpsCertificateCrt,
     internalHttpsCertificateKey,
-    externalHttpsCertificateCrt,
-    externalHttpsCertificateKey,
     serviceAccountKeyCICD,
   );
 

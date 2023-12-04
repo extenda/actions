@@ -464,8 +464,6 @@ const buildManifest = async (
   http2Certificate,
   internalCert,
   internalCertKey,
-  externalCert,
-  externalCertKey,
   cicdServiceAccount,
 ) => {
   let opa = false;
@@ -622,8 +620,6 @@ const buildManifest = async (
   }
   generateManifest('cert.cert', internalCert);
   generateManifest('key.key', internalCertKey);
-  generateManifest('external_cert.cert', externalCert);
-  generateManifest('external_key.key', externalCertKey);
 
   if (!fs.existsSync('.gcloudignore')) {
     fs.writeFileSync('.gcloudignore', `*

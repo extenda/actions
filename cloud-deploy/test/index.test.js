@@ -79,9 +79,7 @@ describe('Action', () => {
     loadCredentials.mockResolvedValueOnce('styra-token')
       .mockResolvedValueOnce('envoy-certs')
       .mockResolvedValueOnce('internal-key')
-      .mockResolvedValueOnce('internal-cert')
-      .mockResolvedValueOnce('external-cert')
-      .mockResolvedValueOnce('external-key');
+      .mockResolvedValueOnce('internal-cert');
 
     loadServiceDefinition.mockReturnValueOnce(serviceDef);
     getImageWithSha256.mockResolvedValueOnce('gcr.io/project/image@sha256:1');
@@ -113,8 +111,6 @@ describe('Action', () => {
       'envoy-certs',
       'internal-cert',
       'internal-key',
-      'external-cert',
-      'external-key',
       'clan-service-account',
     );
     expect(createExternalLoadbalancer).toHaveBeenCalledWith(
@@ -142,9 +138,7 @@ describe('Action', () => {
     loadCredentials.mockResolvedValueOnce('styra-token')
       .mockResolvedValueOnce('envoy-certs')
       .mockResolvedValueOnce('internal-key')
-      .mockResolvedValueOnce('internal-cert')
-      .mockResolvedValueOnce('external-cert')
-      .mockResolvedValueOnce('external-key');
+      .mockResolvedValueOnce('internal-cert');
 
     loadServiceDefinition.mockReturnValueOnce(serviceDef);
     getImageWithSha256.mockResolvedValueOnce('gcr.io/project/image@sha256:1');
@@ -169,8 +163,6 @@ describe('Action', () => {
       'envoy-certs',
       'internal-cert',
       'internal-key',
-      'external-cert',
-      'external-key',
       'clan-service-account',
     );
   });

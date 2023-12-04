@@ -31,8 +31,8 @@ describe('handleCertificates', () => {
     gcloudOutput.mockResolvedValueOnce(existingCerts);
 
     const result = await handleCertificates(hosts, project);
-    expect(result).toEqual('extenda-external-certificate,extenda-certs-v1,extenda-certs-v2');
-    expect(gcloudOutput).toHaveBeenCalledTimes(2);
+    expect(result).toEqual('extenda-certs-v1,extenda-certs-v2');
+    expect(gcloudOutput).toHaveBeenCalledTimes(1);
   });
 
   it('should create a new certificate with domains that do not exist in existing certificates', async () => {
@@ -43,6 +43,6 @@ describe('handleCertificates', () => {
 
     const result = await handleCertificates(hosts, project);
     expect(result).toContain('extenda-certs-v3');
-    expect(gcloudOutput).toHaveBeenCalledTimes(3);
+    expect(gcloudOutput).toHaveBeenCalledTimes(2);
   });
 });
