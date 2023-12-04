@@ -43,7 +43,12 @@ const loadSecrets = async (serviceAccountKey, secrets = {}) => {
         core.exportVariable(env, secret);
       }));
   });
-  return Promise.all(results).finally(() => restorePreviousGcloudAccount());
+
+  try {
+    return await Promise.all(results);
+  } finally {
+    await restorePreviousGcloudAccount();
+  }
 };
 
 const loadSecret = async (serviceAccountKey, name, restoreAccount = true) => {
