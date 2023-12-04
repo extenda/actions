@@ -9,7 +9,7 @@ const opaTest = require('./opa-test');
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
-  const bucketName = core.getInput('bucket-name');
+  const bucketName = core.getInput('gcs-bucket');
 
   if (!fs.existsSync(path.join('policies', 'policy'))) {
     throw new Error('No policies found. Exit. Expected folder: policies/policy');
