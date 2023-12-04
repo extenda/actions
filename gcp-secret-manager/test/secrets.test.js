@@ -1,32 +1,13 @@
-/**
- * @jest-environment node
- */
-
-jest.mock('google-auth-library', () => ({
-  // eslint-disable-next-line object-shorthand
-  GoogleAuth: function GoogleAuth() {
-    return {
-      getClient: async () => Promise.resolve({
-        projectId: 'test-project',
-        request: async () => Promise.resolve({
-          data: {
-            payload: {
-              data: 'dGVzdC12YWx1ZQ==', // echo -n test-value | base64
-            },
-          },
-        }),
-      }),
-    };
-  },
-}));
-
 const core = require('@actions/core');
+const { setupGcloud, execGcloud } = require('../../setup-gcloud');
 const {
   parseInputYaml,
   loadSecrets,
   loadSecret,
   loadSecretIntoEnv,
 } = require('../src/secrets');
+
+jest.mock('../../setup-gcloud');
 
 const orgEnv = process.env;
 
@@ -37,6 +18,7 @@ describe('Secrets Manager', () => {
 
   afterEach(() => {
     process.env = orgEnv;
+    jest.clearAllMocks();
   });
 
   test('It can parse input YAML', () => {
@@ -52,17 +34,46 @@ EXPORT_AS: my-secret
   });
 
   test('It can load secrets', async () => {
-    await loadSecrets('', { TEST_TOKEN: 'test-token' });
+    setupGcloud.mockResolvedValueOnce('test-project');
+    execGcloud.mockResolvedValueOnce('test-value')
+      .mockResolvedValueOnce(JSON.stringify([{
+        account: 'test',
+        status: 'ACTIVE',
+      }], null, 2));
+    await loadSecrets('test', { TEST_TOKEN: 'test-token' });
     expect(process.env.TEST_TOKEN).toEqual('test-value');
   });
 
-  test('It can load a single secret', async () => {
+  test('It can load a single secret and restore account', async () => {
+    setupGcloud.mockResolvedValueOnce('test-project');
+    execGcloud.mockResolvedValueOnce('test-value')
+      .mockResolvedValueOnce(JSON.stringify([{
+        account: 'test',
+        status: 'ACTIVE',
+      }, {
+        account: 'other',
+        status: '',
+      }], null, 2))
+      .mockResolvedValueOnce('other-project');
     const secret = await loadSecret('', 'test-token');
     expect(secret).toEqual('test-value');
+    expect(setupGcloud).toHaveBeenCalled();
+    expect(execGcloud).toHaveBeenNthCalledWith(1, [
+      'secrets', 'versions', 'access', 'latest', '--secret=test-token', '--project=test-project',
+    ]);
+    expect(execGcloud).toHaveBeenNthCalledWith(2, ['auth', 'list', '--format=json']);
+    expect(execGcloud).toHaveBeenNthCalledWith(3, ['config', 'set', 'account', 'other']);
   });
 
   describe('loadSecretIntoEnv', () => {
     test('It sets env vars from secrets', async () => {
+      setupGcloud.mockResolvedValueOnce('test-project');
+      execGcloud.mockResolvedValueOnce('test-value')
+        .mockResolvedValueOnce(JSON.stringify([{
+          account: 'test',
+          status: 'ACTIVE',
+        }], null, 2));
+
       const secret = await loadSecretIntoEnv(
         'service-account-key',
         'my-secret',
@@ -70,9 +81,21 @@ EXPORT_AS: my-secret
       );
       expect(secret).toEqual('test-value');
       expect(process.env.MY_SECRET).toEqual('test-value');
+      expect(setupGcloud).toHaveBeenCalled();
+      expect(execGcloud).toHaveBeenNthCalledWith(1, [
+        'secrets', 'versions', 'access', 'latest', '--secret=my-secret', '--project=test-project',
+      ]);
+      expect(execGcloud).toHaveBeenNthCalledWith(2, ['auth', 'list', '--format=json']);
     });
 
     test('It exports variables', async () => {
+      setupGcloud.mockResolvedValueOnce('test-project');
+      execGcloud.mockResolvedValueOnce('test-value')
+        .mockResolvedValueOnce(JSON.stringify([{
+          account: 'test',
+          status: 'ACTIVE',
+        }], null, 2));
+
       const exportVariable = jest.spyOn(core, 'exportVariable');
       const secret = await loadSecretIntoEnv(
         'service-account-key',
@@ -85,6 +108,13 @@ EXPORT_AS: my-secret
     });
 
     test('It preserves set env.vars', async () => {
+      setupGcloud.mockResolvedValueOnce('test-project');
+      execGcloud.mockResolvedValueOnce('test-value')
+        .mockResolvedValueOnce(JSON.stringify([{
+          account: 'test',
+          status: 'ACTIVE',
+        }], null, 2));
+
       process.env.MY_SECRET = 'existing-value';
       const secret = await loadSecretIntoEnv(
         'service-account-key',
@@ -96,6 +126,12 @@ EXPORT_AS: my-secret
     });
 
     test('It fails if values are not resolved', async () => {
+      setupGcloud.mockResolvedValueOnce('test-project');
+      execGcloud.mockRejectedValueOnce(new Error('Not found'))
+        .mockResolvedValueOnce(JSON.stringify([{
+          account: 'test',
+          status: 'ACTIVE',
+        }], null, 2));
       await expect(loadSecretIntoEnv('', 'my-secret', 'MY_SECRET'))
         .rejects.toThrow('Missing env var: MY_SECRET');
     });
