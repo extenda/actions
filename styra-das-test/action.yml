@@ -29,7 +29,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: extenda/actions/opa-policy-test@feat/opa-policy-test
+    - uses: extenda/actions/opa-policy-test@v0
       with:
         service-account-key: inherit
         permission-prefix: ${{ inputs.permission-prefix }}
