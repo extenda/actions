@@ -60,9 +60,9 @@ EXPORT_AS: my-secret
     expect(setupGcloud).toHaveBeenCalled();
     expect(execGcloud).toHaveBeenNthCalledWith(1, [
       'secrets', 'versions', 'access', 'latest', '--secret=test-token', '--project=test-project',
-    ]);
-    expect(execGcloud).toHaveBeenNthCalledWith(2, ['auth', 'list', '--format=json']);
-    expect(execGcloud).toHaveBeenNthCalledWith(3, ['config', 'set', 'account', 'other']);
+    ], 'gcloud', true);
+    expect(execGcloud).toHaveBeenNthCalledWith(2, ['auth', 'list', '--format=json'], 'gcloud', true);
+    expect(execGcloud).toHaveBeenNthCalledWith(3, ['config', 'set', 'account', 'other'], 'gcloud', true);
   });
 
   describe('loadSecretIntoEnv', () => {
@@ -84,8 +84,8 @@ EXPORT_AS: my-secret
       expect(setupGcloud).toHaveBeenCalled();
       expect(execGcloud).toHaveBeenNthCalledWith(1, [
         'secrets', 'versions', 'access', 'latest', '--secret=my-secret', '--project=test-project',
-      ]);
-      expect(execGcloud).toHaveBeenNthCalledWith(2, ['auth', 'list', '--format=json']);
+      ], 'gcloud', true);
+      expect(execGcloud).toHaveBeenNthCalledWith(2, ['auth', 'list', '--format=json'], 'gcloud', true);
     });
 
     test('It exports variables', async () => {

@@ -49,5 +49,4 @@ describe('handle errors', () => {
     await expect(handleError(errorMessage))
       .rejects.toEqual(new Error('Unable to remove backend due to being used elsewhere, please contact platform team'));
   });
-
 });
