@@ -11,6 +11,7 @@
     - [1.1.6. Property `CloudDeploy > oneOf > CloudRun > cloud-run > startup-cpu-boost`](#oneOf_i0_cloud-run_startup-cpu-boost)
     - [1.1.7. Property `CloudDeploy > oneOf > CloudRun > cloud-run > cpu-throttling`](#oneOf_i0_cloud-run_cpu-throttling)
     - [1.1.8. Property `CloudDeploy > oneOf > CloudRun > cloud-run > session-affinity`](#oneOf_i0_cloud-run_session-affinity)
+    - [1.1.9. Property `CloudDeploy > oneOf > CloudRun > cloud-run > vpc-connector`](#oneOf_i0_cloud-run_vpc-connector)
 - [2. Property `CloudDeploy > oneOf > Kubernetes`](#oneOf_i1)
   - [2.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes`](#oneOf_i1_kubernetes)
     - [2.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > service`](#oneOf_i1_kubernetes_service)
@@ -108,6 +109,7 @@
 | - [startup-cpu-boost](#oneOf_i0_cloud-run_startup-cpu-boost ) | No      | boolean          | No         | -                                                  | Whether to allocate extra CPU to containers on startup.                                  |
 | - [cpu-throttling](#oneOf_i0_cloud-run_cpu-throttling )       | No      | boolean          | No         | -                                                  | Whether to throttle the CPU when the container is not actively serving requests.         |
 | - [session-affinity](#oneOf_i0_cloud-run_session-affinity )   | No      | boolean          | No         | -                                                  | Whether to enable session affinity for connections to the service.                       |
+| - [vpc-connector](#oneOf_i0_cloud-run_vpc-connector )         | No      | boolean          | No         | -                                                  | Whether to use the vpc connector or direct connection to the vpc                         |
 
 #### <a name="oneOf_i0_cloud-run_service"></a>1.1.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > service`
 
@@ -219,6 +221,16 @@ Must be one of:
 | **Default**  | `false`   |
 
 **Description:** Whether to enable session affinity for connections to the service.
+
+#### <a name="oneOf_i0_cloud-run_vpc-connector"></a>1.1.9. Property `CloudDeploy > oneOf > CloudRun > cloud-run > vpc-connector`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether to use the vpc connector or direct connection to the vpc
 
 ## <a name="oneOf_i1"></a>2. Property `CloudDeploy > oneOf > Kubernetes`
 
@@ -603,10 +615,10 @@ must respect the following conditions
 
 **Description:** Number of requested CPU cores
 
-| Restrictions |          |
-| ------------ | -------- |
-| **Minimum**  | &ge; 0.5 |
-| **Maximum**  | &le; 8   |
+| Restrictions |           |
+| ------------ | --------- |
+| **Minimum**  | &ge; 0.25 |
+| **Maximum**  | &le; 8    |
 
 ##### <a name="security_oneOf_i1_resources_memory"></a>4.2.3.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources > memory`
 
@@ -819,4 +831,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-10-27 at 12:58:27 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-12-05 at 13:10:44 +0100

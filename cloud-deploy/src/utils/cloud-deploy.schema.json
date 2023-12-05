@@ -94,6 +94,11 @@
           "description": "Whether to enable session affinity for connections to the service.",
           "type": "boolean",
           "default": false
+        },
+        "vpc-connector": {
+          "description": "Whether to use the vpc connector or direct connection to the vpc",
+          "type": "boolean",
+          "default": false
         }
       },
       "additionalProperties": false

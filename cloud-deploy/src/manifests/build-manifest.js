@@ -54,6 +54,8 @@ const cloudrunManifestTemplate = async (
   cpuBoost,
   sessionAffinity,
   styraSystemInfo,
+  connector,
+  clanName,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
   const ports = opa ? undefined : [{
@@ -68,10 +70,14 @@ const cloudrunManifestTemplate = async (
     'run.googleapis.com/cpu-throttling': `${cpuThrottling}`,
     'run.googleapis.com/startup-cpu-boost': `${cpuBoost}`,
     'run.googleapis.com/sessionAffinity': `${sessionAffinity}`,
-    'run.googleapis.com/network-interfaces': '[{"network":"clan-network","subnetwork":"k8s-subnet"}]',
-    'run.googleapis.com/vpc-access-egress': 'private-ranges-only',
   };
-
+  if (connector) {
+    annotations['run.googleapis.com/vpc-access-connector'] = `${clanName}-vpc-connector`;
+    annotations['run.googleapis.com/vpc-access-egress'] = 'all-traffic';
+  } else {
+    annotations['run.googleapis.com/network-interfaces'] = '[{"network":"clan-network","subnetwork":"k8s-subnet"}]';
+    annotations['run.googleapis.com/vpc-access-egress'] = 'private-ranges-only';
+  }
   if (SQLInstance) {
     annotations['run.googleapis.com/cloudsql-instances'] = SQLInstance;
   }
@@ -593,6 +599,7 @@ const buildManifest = async (
       'cpu-throttling': cpuThrottling = true,
       'startup-cpu-boost': cpuBoost = false,
       'session-affinity': sessionAffinity = false,
+      'vpc-connector': connector = false,
     } = cloudrun;
     const cloudrunManifest = await cloudrunManifestTemplate(
       name,
@@ -615,6 +622,8 @@ const buildManifest = async (
       cpuBoost,
       sessionAffinity,
       styraSystemInfo,
+      connector,
+      clanName,
     );
     generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));
   }

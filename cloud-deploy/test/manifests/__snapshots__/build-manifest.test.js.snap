@@ -92,8 +92,8 @@ spec:
         run.googleapis.com/cpu-throttling: 'false'
         run.googleapis.com/startup-cpu-boost: 'true'
         run.googleapis.com/sessionAffinity: 'true'
-        run.googleapis.com/network-interfaces: '[{"network":"clan-network","subnetwork":"k8s-subnet"}]'
-        run.googleapis.com/vpc-access-egress: private-ranges-only
+        run.googleapis.com/vpc-access-connector: example-clan-vpc-connector
+        run.googleapis.com/vpc-access-egress: all-traffic
     spec:
       containerConcurrency: 80
       timeoutSeconds: ''
