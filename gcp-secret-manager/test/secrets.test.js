@@ -18,7 +18,7 @@ describe('Secrets Manager', () => {
 
   afterEach(() => {
     process.env = orgEnv;
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   test('It can parse input YAML', () => {
@@ -44,7 +44,7 @@ EXPORT_AS: my-secret
 
   test('It can load a single secret and restore account', async () => {
     setupGcloud.mockResolvedValueOnce('test-project');
-    execGcloud.mockResolvedValueOnce('"test2@test')
+    execGcloud.mockResolvedValueOnce('"test2@test"')
       .mockResolvedValueOnce('test-value')
       .mockResolvedValueOnce('"pipeline-secret@test"')
       .mockResolvedValueOnce('');
@@ -60,18 +60,22 @@ EXPORT_AS: my-secret
     expect(execGcloud).toHaveBeenNthCalledWith(2, [
       'secrets', 'versions', 'access', 'latest', '--secret=test-token', '--project=test-project',
     ], 'gcloud', true);
-    expect(execGcloud).toHaveBeenNthCalledWith(3, ['config', 'get', 'account'], 'gcloud', true);
-    expect(execGcloud).toHaveBeenNthCalledWith(4, ['config', 'set', 'account', 'other'], 'gcloud', true);
+    expect(execGcloud).toHaveBeenNthCalledWith(
+      3,
+      ['config', 'get', 'account', '--format=json'],
+      'gcloud',
+      true,
+    );
+    expect(execGcloud).toHaveBeenNthCalledWith(4, ['config', 'set', 'account', 'test2@test'], 'gcloud', true);
   });
 
   describe('loadSecretIntoEnv', () => {
     test('It sets env vars from secrets', async () => {
       setupGcloud.mockResolvedValueOnce('test-project');
-      execGcloud.mockResolvedValueOnce('test-value')
-        .mockResolvedValueOnce(JSON.stringify([{
-          account: 'test',
-          status: 'ACTIVE',
-        }], null, 2));
+      execGcloud.mockResolvedValueOnce('"test2@test"')
+          .mockResolvedValueOnce('test-value')
+          .mockResolvedValueOnce('"pipeline-secret@test"')
+          .mockResolvedValueOnce('');
 
       const secret = await loadSecretIntoEnv(
         'service-account-key',
@@ -81,10 +85,9 @@ EXPORT_AS: my-secret
       expect(secret).toEqual('test-value');
       expect(process.env.MY_SECRET).toEqual('test-value');
       expect(setupGcloud).toHaveBeenCalled();
-      expect(execGcloud).toHaveBeenNthCalledWith(1, [
+      expect(execGcloud).toHaveBeenNthCalledWith(2, [
         'secrets', 'versions', 'access', 'latest', '--secret=my-secret', '--project=test-project',
       ], 'gcloud', true);
-      expect(execGcloud).toHaveBeenNthCalledWith(2, ['auth', 'list', '--format=json'], 'gcloud', true);
     });
 
     test('It exports variables', async () => {
