@@ -449,6 +449,7 @@ metadata:
         'startup-cpu-boost': true,
         'cpu-throttling': false,
         'session-affinity': true,
+        'vpc-connector': true,
       },
       security: {
         'permission-prefix': 'tst',
