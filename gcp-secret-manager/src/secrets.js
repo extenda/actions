@@ -7,13 +7,13 @@ let projectId;
 
 const restorePreviousGcloudAccount = async () => {
   if (projectId != null) {
-    const accounts = await execGcloud(['auth', 'list', '--format=json']).then(JSON.parse);
+    const accounts = await execGcloud(['auth', 'list', '--format=json'], 'gcloud', true).then(JSON.parse);
     if (accounts.length > 1) {
       const previous = accounts.find((a) => !a.account.includes(projectId) && a.status !== 'ACTIVE');
       if (previous) {
         const { account } = previous;
         core.info(`Restore gcloud account ${account}`);
-        await execGcloud(['config', 'set', 'account', account]);
+        await execGcloud(['config', 'set', 'account', account], 'gcloud', true);
       }
     }
     projectId = null;
@@ -27,7 +27,7 @@ const accessSecretValue = async (name) => execGcloud([
   'latest',
   `--secret=${name}`,
   `--project=${projectId}`,
-]);
+], 'gcloud', true);
 
 const parseInputYaml = (secretsYaml) => YAML.parse(secretsYaml);
 
