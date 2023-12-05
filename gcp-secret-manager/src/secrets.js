@@ -11,6 +11,12 @@ const getGcloudAccount = async () => execGcloud(
   'gcloud',
   true,
 ).then(JSON.parse)
+  .then((account) => {
+    if (typeof account === 'string' && account.length > 0) {
+      return account;
+    }
+    return null;
+  })
   .catch(() => null);
 
 const prepareGcloud = async (serviceAccountKey) => {
