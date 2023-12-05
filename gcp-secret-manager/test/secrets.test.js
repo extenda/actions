@@ -35,11 +35,16 @@ EXPORT_AS: my-secret
 
   test('It can load secrets', async () => {
     setupGcloud.mockResolvedValueOnce('test-project');
-    execGcloud.mockRejectedValueOnce(new Error('No user'))
+    execGcloud.mockResolvedValueOnce([])
       .mockResolvedValueOnce('test-value')
       .mockResolvedValueOnce('"test@test"');
     await loadSecrets('test', { TEST_TOKEN: 'test-token' });
     expect(process.env.TEST_TOKEN).toEqual('test-value');
+    expect(execGcloud).not.toHaveBeenCalledWith(
+      expect.arrayContaining(['config', 'set', 'account']),
+      'gcloud',
+      true,
+    );
   });
 
   test('It can load a single secret and restore account', async () => {
@@ -73,9 +78,9 @@ EXPORT_AS: my-secret
     test('It sets env vars from secrets', async () => {
       setupGcloud.mockResolvedValueOnce('test-project');
       execGcloud.mockResolvedValueOnce('"test2@test"')
-          .mockResolvedValueOnce('test-value')
-          .mockResolvedValueOnce('"pipeline-secret@test"')
-          .mockResolvedValueOnce('');
+        .mockResolvedValueOnce('test-value')
+        .mockResolvedValueOnce('"pipeline-secret@test"')
+        .mockResolvedValueOnce('');
 
       const secret = await loadSecretIntoEnv(
         'service-account-key',
