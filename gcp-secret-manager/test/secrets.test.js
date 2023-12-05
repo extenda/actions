@@ -35,34 +35,33 @@ EXPORT_AS: my-secret
 
   test('It can load secrets', async () => {
     setupGcloud.mockResolvedValueOnce('test-project');
-    execGcloud.mockResolvedValueOnce('test-value')
-      .mockResolvedValueOnce(JSON.stringify([{
-        account: 'test',
-        status: 'ACTIVE',
-      }], null, 2));
+    execGcloud.mockRejectedValueOnce(new Error('No user'))
+      .mockResolvedValueOnce('test-value')
+      .mockResolvedValueOnce('"test@test"');
     await loadSecrets('test', { TEST_TOKEN: 'test-token' });
     expect(process.env.TEST_TOKEN).toEqual('test-value');
   });
 
   test('It can load a single secret and restore account', async () => {
     setupGcloud.mockResolvedValueOnce('test-project');
-    execGcloud.mockResolvedValueOnce('test-value')
-      .mockResolvedValueOnce(JSON.stringify([{
-        account: 'test',
-        status: 'ACTIVE',
-      }, {
-        account: 'other',
-        status: '',
-      }], null, 2))
-      .mockResolvedValueOnce('other-project');
+    execGcloud.mockResolvedValueOnce('"test2@test')
+      .mockResolvedValueOnce('test-value')
+      .mockResolvedValueOnce('"pipeline-secret@test"')
+      .mockResolvedValueOnce('');
     const secret = await loadSecret('', 'test-token');
     expect(secret).toEqual('test-value');
     expect(setupGcloud).toHaveBeenCalled();
-    expect(execGcloud).toHaveBeenNthCalledWith(1, [
+    expect(execGcloud).toHaveBeenNthCalledWith(
+      1,
+      ['config', 'get', 'account', '--format=json'],
+      'gcloud',
+      true,
+    );
+    expect(execGcloud).toHaveBeenNthCalledWith(2, [
       'secrets', 'versions', 'access', 'latest', '--secret=test-token', '--project=test-project',
     ], 'gcloud', true);
-    expect(execGcloud).toHaveBeenNthCalledWith(2, ['auth', 'list', '--format=json'], 'gcloud', true);
-    expect(execGcloud).toHaveBeenNthCalledWith(3, ['config', 'set', 'account', 'other'], 'gcloud', true);
+    expect(execGcloud).toHaveBeenNthCalledWith(3, ['config', 'get', 'account'], 'gcloud', true);
+    expect(execGcloud).toHaveBeenNthCalledWith(4, ['config', 'set', 'account', 'other'], 'gcloud', true);
   });
 
   describe('loadSecretIntoEnv', () => {

@@ -3,21 +3,30 @@ const YAML = require('yaml');
 const checkEnv = require('../../utils/src/check-env');
 const { setupGcloud, execGcloud } = require('../../setup-gcloud');
 
+let previousAccount;
 let projectId;
 
+const getGcloudAccount = async () => execGcloud(
+  ['config', 'get', 'account', '--format=json'],
+  'gcloud',
+  true,
+).then(JSON.parse)
+  .catch(() => null);
+
+const prepareGcloud = async (serviceAccountKey) => {
+  previousAccount = await getGcloudAccount();
+  return setupGcloud(serviceAccountKey);
+};
+
 const restorePreviousGcloudAccount = async () => {
-  if (projectId != null) {
-    const accounts = await execGcloud(['auth', 'list', '--format=json'], 'gcloud', true).then(JSON.parse);
-    if (accounts.length > 1) {
-      const previous = accounts.find((a) => !a.account.includes(projectId) && a.status !== 'ACTIVE');
-      if (previous) {
-        const { account } = previous;
-        core.info(`Restore gcloud account ${account}`);
-        await execGcloud(['config', 'set', 'account', account], 'gcloud', true);
-      }
+  if (previousAccount) {
+    const current = await getGcloudAccount();
+    if (previousAccount !== current) {
+      core.info(`Restore gcloud account ${previousAccount}`);
+      await execGcloud(['config', 'set', 'account', previousAccount], 'gcloud', true);
     }
-    projectId = null;
   }
+  previousAccount = null;
 };
 
 const accessSecretValue = async (name) => execGcloud([
@@ -32,7 +41,7 @@ const accessSecretValue = async (name) => execGcloud([
 const parseInputYaml = (secretsYaml) => YAML.parse(secretsYaml);
 
 const loadSecrets = async (serviceAccountKey, secrets = {}) => {
-  projectId = await setupGcloud(serviceAccountKey);
+  projectId = await prepareGcloud(serviceAccountKey);
 
   const results = [];
   Object.keys(secrets).forEach((env) => {
@@ -51,20 +60,14 @@ const loadSecrets = async (serviceAccountKey, secrets = {}) => {
   }
 };
 
-const loadSecret = async (serviceAccountKey, name, restoreAccount = true) => {
-  if (!projectId) {
-    projectId = await setupGcloud(serviceAccountKey);
-  }
-  const value = accessSecretValue(name)
+const loadSecret = async (serviceAccountKey, name) => {
+  projectId = await prepareGcloud(serviceAccountKey);
+  const value = await accessSecretValue(name)
     .then((secret) => {
       core.setSecret(secret);
       return secret;
     });
-
-  if (restoreAccount) {
-    await restorePreviousGcloudAccount();
-  }
-
+  await restorePreviousGcloudAccount();
   return value;
 };
 
@@ -75,7 +78,7 @@ const loadSecretIntoEnv = async (serviceAccountKey, secretName, envVar, exportVa
     secret = process.env[envVar];
   } else if (serviceAccountKey && secretName) {
     core.debug(`Load '${secretName}' from secret manager`);
-    secret = await loadSecret(serviceAccountKey, secretName, false);
+    secret = await loadSecret(serviceAccountKey, secretName);
     process.env[envVar] = secret;
     if (exportVariable) {
       core.exportVariable(envVar, secret);
@@ -83,7 +86,6 @@ const loadSecretIntoEnv = async (serviceAccountKey, secretName, envVar, exportVa
   } else {
     checkEnv([envVar]);
   }
-  await restorePreviousGcloudAccount();
   return secret;
 };
 
