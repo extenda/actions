@@ -10,7 +10,7 @@ const schema = joi.object({
       'display-name': joi.string().min(3).max(256).required(),
       'schema-location': joi.string().uri().required(),
       'default-value': joi.any().required(),
-      'max-caching-level': joi.string().optional(),
+      'max-tree-depth': joi.string().optional(),
     }))
     .required(),
 });
