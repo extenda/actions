@@ -19,8 +19,9 @@ definitions: # list of config definitions for your system
     default-value: # default value for the configuration
       layout: default
 
-    # (optional) max target level for automatic caching
-    max-caching-level: tenants/self # default value
+    # (optional) max tree depth for a kind.
+    # all targets bellow specified level for this target will be ignored
+    max-tree-depth: business-units/*/workstations/*
 ```
 
 # Action setup example

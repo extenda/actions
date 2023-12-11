@@ -8,7 +8,7 @@ definitions:
     version: v1
     display-name: Receipt Layout config
     schema-location: https://example.com/receipt-layout-schema.json
-    max-caching-level: tenants/self
+    max-tree-depth: tenants/self
     default-value:
       layout: default
 `;
@@ -22,7 +22,7 @@ definitions:
   - name: receipt-layout
     version: v1
     schema-location: https://example.com/receipt-layout-schema.json
-    max-caching-level: tenants/self
+    max-tree-depth: tenants/self
     display-name: Receipt Layout config
     default-value: abc
 `;
