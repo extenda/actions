@@ -54,6 +54,45 @@ describe('Publish policies', () => {
     );
   });
 
+  test('It will publish policies if monorepo', async () => {
+    mockFs({
+      'policies/policy/com.styra.envoy.ingress/rules/rules/ingress.rego': 'ingress',
+      'policies/policy/com.styra.envoy.ingress/test/test/test.rego': 'test',
+      'policies/system/log/mask.rego': 'mask',
+    });
+
+    axios.put.mockResolvedValueOnce({ status: 200 });
+    await publishPolicies(
+      'my-service',
+      'prod',
+      '0.0.1-local',
+      {
+        security: {
+          'permission-prefix': 'tst',
+          'system-name': 'service123',
+        },
+      },
+    );
+
+    expect(execGcloud).toHaveBeenCalledWith(['auth', 'print-identity-token', '--audiences=iam-das-worker']);
+    expect(axios.put).toHaveBeenCalledWith(
+      'https://iam-das-worker.retailsvc.com/api/v1/systems/tst.service123-prod/policies',
+      {
+        revision: '0.0.1-local',
+        files: expect.arrayContaining([
+          { path: 'policy/com.styra.envoy.ingress/rules/rules/ingress.rego', content: 'ingress' },
+          { path: 'policy/com.styra.envoy.ingress/test/test/test.rego', content: 'test' },
+          { path: 'system/log/mask.rego', content: 'mask' },
+        ]),
+      },
+      {
+        headers: {
+          authorization: 'Bearer idToken',
+        },
+      },
+    );
+  });
+
   test('It will not upload policies if prefix not set', async () => {
     mockFs({
       'policies/policy/com.styra.envoy.ingress/rules/rules/ingress.rego': 'ingress',

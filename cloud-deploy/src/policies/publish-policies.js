@@ -34,9 +34,9 @@ const createPayload = (version) => {
 };
 
 const publishPolicies = async (serviceName, env, version, deployYaml) => {
-  const { security: { 'permission-prefix': permissionPrefix } } = deployYaml;
+  const { security: { 'permission-prefix': permissionPrefix, 'system-name': systemName } } = deployYaml;
   if (permissionPrefix && fs.existsSync(path.join('policies', 'policy'))) {
-    const systemId = `${permissionPrefix}.${serviceName}-${env}`;
+    const systemId = `${permissionPrefix}.${systemName || serviceName}-${env}`;
     core.info(`Publish security policies for ${systemId}`);
     const idToken = await execGcloud(['auth', 'print-identity-token', '--audiences=iam-das-worker']);
     await axios.put(
