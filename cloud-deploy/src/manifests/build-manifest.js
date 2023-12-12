@@ -118,6 +118,7 @@ const cloudrunManifestTemplate = async (
     securityContainer.env.push(
       { name: 'OPA_CONFIG_SERVICE_TOKEN', value: `${styraSystemInfo.token}` },
       { name: 'OPA_CONFIG_SYSTEM_ID', value: styraSystemInfo.systemId },
+      { name: 'CPU_LIMIT', value: `${opaCpu}` },
     );
     securityContainer.resources = resources;
     securityContainer.volumeMounts = undefined;
@@ -191,6 +192,7 @@ const manifestTemplate = async (
     securityContainer.env.push(
       { name: 'OPA_CONFIG_SERVICE_TOKEN', value: `${styraSystemInfo.token}` },
       { name: 'OPA_CONFIG_SYSTEM_ID', value: styraSystemInfo.systemId },
+      { name: 'CPU_LIMIT', value: `${opaCpu}` },
     );
   }
 
