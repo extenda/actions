@@ -139,6 +139,8 @@ spec:
               value: token
             - name: OPA_CONFIG_SYSTEM_ID
               value: system-id
+            - name: CPU_LIMIT
+              value: '0.5'
           resources:
             limits:
               cpu: 0.5
@@ -1020,6 +1022,8 @@ spec:
               value: styraToken
             - name: OPA_CONFIG_SYSTEM_ID
               value: some-id
+            - name: CPU_LIMIT
+              value: '0.5'
           volumeMounts:
             - mountPath: /config
               name: opa
