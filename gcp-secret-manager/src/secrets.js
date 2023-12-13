@@ -42,7 +42,11 @@ const accessSecretValue = async (name) => execGcloud([
   'latest',
   `--secret=${name}`,
   `--project=${projectId}`,
-], 'gcloud', true);
+  '--format=json',
+], 'gcloud', true)
+  .then(JSON.parse)
+  .then((json) => json.payload.data)
+  .then((secret) => Buffer.from(secret, 'base64').toString('utf8'));
 
 const parseInputYaml = (secretsYaml) => YAML.parse(secretsYaml);
 

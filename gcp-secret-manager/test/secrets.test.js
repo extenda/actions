@@ -9,6 +9,12 @@ const {
 
 jest.mock('../../setup-gcloud');
 
+const SECRET_JSON = JSON.stringify({
+  payload: {
+    data: Buffer.from('test-value', 'utf-8').toString('base64'),
+  },
+}, null, 2);
+
 const orgEnv = process.env;
 
 describe('Secrets Manager', () => {
@@ -36,7 +42,7 @@ EXPORT_AS: my-secret
   test('It can load secrets', async () => {
     setupGcloud.mockResolvedValueOnce('test-project');
     execGcloud.mockResolvedValueOnce([])
-      .mockResolvedValueOnce('test-value')
+      .mockResolvedValueOnce(SECRET_JSON)
       .mockResolvedValueOnce('"test@test"');
     await loadSecrets('test', { TEST_TOKEN: 'test-token' });
     expect(process.env.TEST_TOKEN).toEqual('test-value');
@@ -50,7 +56,7 @@ EXPORT_AS: my-secret
   test('It can load a single secret and restore account', async () => {
     setupGcloud.mockResolvedValueOnce('test-project');
     execGcloud.mockResolvedValueOnce('"test2@test"')
-      .mockResolvedValueOnce('test-value')
+      .mockResolvedValueOnce(SECRET_JSON)
       .mockResolvedValueOnce('"pipeline-secret@test"')
       .mockResolvedValueOnce('');
     const secret = await loadSecret('', 'test-token');
@@ -63,7 +69,7 @@ EXPORT_AS: my-secret
       true,
     );
     expect(execGcloud).toHaveBeenNthCalledWith(2, [
-      'secrets', 'versions', 'access', 'latest', '--secret=test-token', '--project=test-project',
+      'secrets', 'versions', 'access', 'latest', '--secret=test-token', '--project=test-project', '--format=json',
     ], 'gcloud', true);
     expect(execGcloud).toHaveBeenNthCalledWith(
       3,
@@ -78,7 +84,7 @@ EXPORT_AS: my-secret
     test('It sets env vars from secrets', async () => {
       setupGcloud.mockResolvedValueOnce('test-project');
       execGcloud.mockResolvedValueOnce('"test2@test"')
-        .mockResolvedValueOnce('test-value')
+        .mockResolvedValueOnce(SECRET_JSON)
         .mockResolvedValueOnce('"pipeline-secret@test"')
         .mockResolvedValueOnce('');
 
@@ -91,13 +97,15 @@ EXPORT_AS: my-secret
       expect(process.env.MY_SECRET).toEqual('test-value');
       expect(setupGcloud).toHaveBeenCalled();
       expect(execGcloud).toHaveBeenNthCalledWith(2, [
-        'secrets', 'versions', 'access', 'latest', '--secret=my-secret', '--project=test-project',
+        'secrets', 'versions', 'access', 'latest', '--secret=my-secret', '--project=test-project', '--format=json',
       ], 'gcloud', true);
     });
 
     test('It exports variables', async () => {
       setupGcloud.mockResolvedValueOnce('test-project');
-      execGcloud.mockResolvedValueOnce('test-value')
+      execGcloud
+        .mockResolvedValueOnce('"test2@test"')
+        .mockResolvedValueOnce(SECRET_JSON)
         .mockResolvedValueOnce(JSON.stringify([{
           account: 'test',
           status: 'ACTIVE',
@@ -110,13 +118,14 @@ EXPORT_AS: my-secret
         'MY_SECRET',
         true,
       );
+      expect(secret).toEqual('test-value');
       expect(exportVariable).toHaveBeenCalledWith('MY_SECRET', secret);
       exportVariable.mockReset();
     });
 
     test('It preserves set env.vars', async () => {
       setupGcloud.mockResolvedValueOnce('test-project');
-      execGcloud.mockResolvedValueOnce('test-value')
+      execGcloud.mockResolvedValueOnce(SECRET_JSON)
         .mockResolvedValueOnce(JSON.stringify([{
           account: 'test',
           status: 'ACTIVE',
