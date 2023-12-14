@@ -14,7 +14,7 @@ const getCommands = (sonarScanner, custom) => {
   }
 
   if (sonarScanner === 'maven' || custom.maven || isAutoDiscovered(sonarScanner, 'pom.xml')) {
-    commands.maven = custom.maven || 'org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar';
+    commands.maven = custom.maven || 'org.sonarsource.scanner.maven:sonar-maven-plugin:3.10.0.2594:sonar';
   }
 
   if (sonarScanner === 'node' || custom.npm || isAutoDiscovered(sonarScanner, 'package.json')) {
