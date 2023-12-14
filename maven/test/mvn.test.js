@@ -195,6 +195,34 @@ describe('Maven', () => {
       expect(exec.exec).toHaveBeenCalledWith(`mvn ${defaultArgs} package`, undefined, { cwd: './' });
     });
 
+    test('It honors workingDir if provided', async () => {
+      mockFs(getFs('abc'));
+
+      core.getInput.mockReturnValueOnce('package')
+        .mockReturnValueOnce(undefined)
+        .mockReturnValueOnce(undefined)
+        .mockReturnValueOnce(undefined)
+        .mockReturnValueOnce(undefined)
+        .mockReturnValueOnce('./abc/test');
+      exec.exec.mockResolvedValueOnce(1);
+
+      await action();
+
+      // expect(exec.exec).toHaveBeenCalledTimes(2);
+      expect(exec.exec).toHaveBeenNthCalledWith(
+        1,
+        `mvn ${defaultArgs} versions:set -DnewVersion=1.0.0-SNAPSHOT -DgenerateBackupPoms=false`,
+        undefined,
+        { cwd: './abc/test' },
+      );
+      expect(exec.exec).toHaveBeenNthCalledWith(
+        2,
+        `mvn ${defaultArgs} package`,
+        undefined,
+        { cwd: './abc/test' },
+      );
+    });
+
     test('It will update version once for existing POM', async () => {
       core.getInput.mockReturnValueOnce('package -f test/pom.xml');
       exec.exec.mockResolvedValue(0);

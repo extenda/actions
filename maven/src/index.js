@@ -33,7 +33,7 @@ const action = async () => {
     await mvn.copySettings();
     core.exportVariable('MAVEN_INIT', 'true');
     if (!version && hasPom) {
-      await versions.getBuildVersion('-SNAPSHOT').then(setVersion);
+      await versions.getBuildVersion('-SNAPSHOT').then((v) => setVersion(v, workingDir));
     }
   }
 
