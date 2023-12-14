@@ -52,19 +52,15 @@ const parseInputYaml = (secretsYaml) => YAML.parse(secretsYaml);
 
 const loadSecrets = async (serviceAccountKey, secrets = {}) => {
   projectId = await prepareGcloud(serviceAccountKey);
-
-  const results = [];
-  Object.keys(secrets).forEach((env) => {
-    const name = secrets[env];
-    results.push(accessSecretValue(name)
-      .then((secret) => {
-        core.setSecret(secret);
-        core.exportVariable(env, secret);
-      }));
-  });
-
   try {
-    return await Promise.all(results);
+    for (const env of Object.keys(secrets)) {
+      const name = secrets[env];
+      core.info(`Load secret '${name}'`);
+      // eslint-disable-next-line no-await-in-loop
+      const secret = await accessSecretValue(name);
+      core.setSecret(secret);
+      core.exportVariable(env, secret);
+    }
   } finally {
     await restorePreviousGcloudAccount();
   }
