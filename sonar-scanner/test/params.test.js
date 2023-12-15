@@ -8,6 +8,18 @@ const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
 
 const orgEnv = process.env;
 
+const expected = {
+  'sonar.token': '-Dsonar.token=sonar',
+  'sonar.host.url.extenda': '-Dsonar.host.url=https://sonar.extenda.io',
+  'sonar.host.url.sonarcloud': '-Dsonar.host.url=https://sonarcloud.io',
+  'sonar.host.url.sonarqube': '-Dsonar.host.url=https://sonarqube.io',
+  'sonar.organization': '-Dsonar.organization=extenda',
+  'sonar.projectName': '-Dsonar.projectName=actions',
+  'sonar.projectKey': '-Dsonar.projectKey=extenda_actions',
+  'sonar.pullrequest': '-Dsonar.pullrequest',
+  'sonar.branch.name': '-Dsonar.branch.name',
+};
+
 describe('Sonar Parameters', () => {
   beforeAll(() => {
     process.env = { ...orgEnv };
@@ -36,26 +48,26 @@ describe('Sonar Parameters', () => {
 
     test('SonarCloud', async () => {
       const result = await createParams('https://sonarcloud.io', 'master');
-      expect(result).toContain('-Dsonar.login=sonar');
-      expect(result).toContain('-Dsonar.host.url=https://sonarcloud.io');
-      expect(result).toContain('-Dsonar.organization=extenda');
-      expect(result).toContain('-Dsonar.projectName=actions');
-      expect(result).toContain('-Dsonar.projectKey=extenda_actions');
-      expect(result).not.toContain('-Dsonar.pullrequest');
-      expect(result).not.toContain('-Dsonar.branch.name');
+      expect(result).toContain(expected['sonar.token']);
+      expect(result).toContain(expected['sonar.host.url.sonarcloud']);
+      expect(result).toContain(expected['sonar.organization']);
+      expect(result).toContain(expected['sonar.projectName']);
+      expect(result).toContain(expected['sonar.projectKey']);
+      expect(result).not.toContain(expected['sonar.pullrequest']);
+      expect(result).not.toContain(expected['sonar.branch.name']);
     });
 
     test('SonarQube', async () => {
       const result = await createParams('https://sonar.extenda.io', 'master');
-      expect(result).toContain('-Dsonar.login=sonar');
-      expect(result).toContain('-Dsonar.host.url=https://sonar.extenda.io');
-      expect(result).toContain('-Dsonar.projectName=actions');
-      expect(result).not.toContain('-Dsonar.branch.name');
+      expect(result).toContain(expected['sonar.token']);
+      expect(result).toContain(expected['sonar.host.url.extenda']);
+      expect(result).toContain(expected['sonar.projectName']);
+      expect(result).not.toContain(expected['sonar.branch.name']);
     });
 
     test('MS Params', async () => {
       const result = await createParams('https://sonarcloud.io', 'master', true);
-      expect(result).toContain('/d:sonar.login=sonar');
+      expect(result).toContain('/d:sonar.token=sonar');
       expect(result).toContain('/d:sonar.host.url=https://sonarcloud.io');
       expect(result).toContain('/o:extenda');
       expect(result).toContain('/n:actions');
@@ -89,11 +101,11 @@ describe('Sonar Parameters', () => {
 
     test('SonarCloud', async () => {
       const result = await createParams('https://sonarcloud.io', 'master');
-      expect(result).toContain('-Dsonar.login=sonar');
-      expect(result).toContain('-Dsonar.host.url=https://sonarcloud.io');
-      expect(result).toContain('-Dsonar.organization=extenda');
-      expect(result).toContain('-Dsonar.projectName=actions');
-      expect(result).toContain('-Dsonar.projectKey=extenda_actions');
+      expect(result).toContain(expected['sonar.token']);
+      expect(result).toContain(expected['sonar.host.url.sonarcloud']);
+      expect(result).toContain(expected['sonar.organization']);
+      expect(result).toContain(expected['sonar.projectName']);
+      expect(result).toContain(expected['sonar.projectKey']);
 
       expect(result).toContain('-Dsonar.pullrequest.base=master');
       expect(result).toContain('-Dsonar.pullrequest.branch=feature/test');
@@ -104,9 +116,9 @@ describe('Sonar Parameters', () => {
 
     test('sonar.extenda.io', async () => {
       const result = await createParams('https://sonar.extenda.io', 'master');
-      expect(result).toContain('-Dsonar.login=sonar');
-      expect(result).toContain('-Dsonar.host.url=https://sonar.extenda.io');
-      expect(result).toContain('-Dsonar.projectName=actions');
+      expect(result).toContain(expected['sonar.token']);
+      expect(result).toContain(expected['sonar.host.url.extenda']);
+      expect(result).toContain(expected['sonar.projectName']);
       expect(result).toContain('-Dsonar.github.oauth=');
       expect(result).toContain('-Dsonar.analysis.mode=preview');
       expect(result).toContain('-Dsonar.github.repository=extenda/actions');
@@ -115,9 +127,9 @@ describe('Sonar Parameters', () => {
 
     test('Any SonarQube', async () => {
       const result = await createParams('https://sonarqube.io', 'master');
-      expect(result).toContain('-Dsonar.login=sonar');
-      expect(result).toContain('-Dsonar.host.url=https://sonarqube.io');
-      expect(result).toContain('-Dsonar.projectName=actions');
+      expect(result).toContain(expected['sonar.token']);
+      expect(result).toContain(expected['sonar.host.url.sonarqube']);
+      expect(result).toContain(expected['sonar.projectName']);
       expect(result).not.toContain('-Dsonar.analysis.mode=preview');
     });
   });
