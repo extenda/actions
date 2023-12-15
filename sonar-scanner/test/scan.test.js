@@ -78,7 +78,7 @@ describe('Scan', () => {
     test('It supports working-directory', async () => {
       fs(ALL_FILE_TYPES);
       await scan('https://sonarcloud.io', 'master', 'gradle', { gradle: 'scan' }, 'test');
-      expect(exec.exec.mock.calls[0][1]).toEqual({ cwd: 'test' });
+      expect(exec.exec.mock.calls[0][2]).toEqual({ cwd: 'test' });
     });
   });
 
@@ -94,8 +94,8 @@ describe('Scan', () => {
     test('It supports working-directory', async () => {
       fs({ 'test/package.json': '{}' });
       await scan('https://sonarcloud.io', 'master', 'auto', {}, 'test');
-      expect(exec.exec.mock.calls[0][1]).toEqual({ cwd: 'test' });
-      expect(exec.exec.mock.calls[1][1]).toEqual({ cwd: 'test' });
+      expect(exec.exec.mock.calls[0][2]).toEqual({ cwd: 'test' });
+      expect(exec.exec.mock.calls[1][2]).toEqual({ cwd: 'test' });
     });
   });
 
@@ -113,8 +113,8 @@ describe('Scan', () => {
       fs({ 'test/package.json': '{}' });
       fs({ 'test/yarn.lock': '{}' });
       await scan('https://sonarcloud.io', 'master', 'auto', {}, 'test');
-      expect(exec.exec.mock.calls[0][1]).toEqual({ cwd: 'test' });
-      expect(exec.exec.mock.calls[1][1]).toEqual({ cwd: 'test' });
+      expect(exec.exec.mock.calls[0][2]).toEqual({ cwd: 'test' });
+      expect(exec.exec.mock.calls[1][2]).toEqual({ cwd: 'test' });
     });
   });
 

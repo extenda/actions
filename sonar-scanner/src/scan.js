@@ -34,7 +34,7 @@ const scan = async (hostUrl, mainBranch, sonarScanner = 'auto', customCommands =
 
   if (commands.gradle) {
     core.info('Scan with Gradle');
-    return exec.exec(`./gradlew ${commands.gradle} ${params}`, { cwd: workingDir });
+    return exec.exec(`./gradlew ${commands.gradle} ${params}`, [], { cwd: workingDir });
   }
   if (commands.maven) {
     core.info('Scan with Maven');
@@ -44,16 +44,16 @@ const scan = async (hostUrl, mainBranch, sonarScanner = 'auto', customCommands =
   if (commands.yarn) {
     core.info('Scan with Yarn');
     await core.group('Install sonarqube-scanner', async () => {
-      await exec.exec('yarn add -D sonarqube-scanner', { cwd: workingDir });
+      await exec.exec('yarn add -D sonarqube-scanner', [], { cwd: workingDir });
     });
-    return exec.exec(`${commands.yarn} ${params}`, { cwd: workingDir });
+    return exec.exec(`${commands.yarn} ${params}`, [], { cwd: workingDir });
   }
   if (commands.npm) {
     core.info('Scan with NPM');
     await core.group('Install sonarqube-scanner', async () => {
-      await exec.exec('npm install sonarqube-scanner --no-save', { cwd: workingDir });
+      await exec.exec('npm install sonarqube-scanner --no-save', [], { cwd: workingDir });
     });
-    return exec.exec(`${commands.npm} ${params}`, { cwd: workingDir });
+    return exec.exec(`${commands.npm} ${params}`, [], { cwd: workingDir });
   }
   throw new Error('No supported sonar-scanner detected.');
 };
