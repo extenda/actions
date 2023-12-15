@@ -15,7 +15,8 @@ const createSonarCloudProject = async (hostUrl, workingDir) => {
   const repo = process.env.GITHUB_REPOSITORY.split('/');
   let project = repo.join('_');
   if (workingDir && workingDir !== '.') {
-    project = `${project}_${workingDir}`;
+    const suffix = workingDir.replace(/^\.\/?/g, '');
+    project = `${project}_${suffix}`;
   }
 
   if (await projectExists(hostUrl, repo[0], project)) {

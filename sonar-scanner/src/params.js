@@ -1,7 +1,7 @@
 const { credentials } = require('./sonar-credentials');
 const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
 
-const createParams = async (hostUrl, mainBranch, workDir = '.', msParams = false, extraParams = {}) => {
+const createParams = async (hostUrl, mainBranch, workingDir = '.', msParams = false, extraParams = {}) => {
   const sonarCloud = hostUrl.startsWith('https://sonarcloud.io');
   const { githubToken, sonarToken } = await credentials(hostUrl);
   const props = { ...extraParams };
@@ -12,7 +12,7 @@ const createParams = async (hostUrl, mainBranch, workDir = '.', msParams = false
 
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
   const pullRequest = await getPullRequestInfo(githubToken);
-  let suffix = workDir.replace(/^\.\/?/g, '');
+  let suffix = workingDir.replace(/^\.\/?/g, '');
   suffix = suffix ? `_${suffix}` : '';
   const suffixedRepo = `${repo}${suffix}`;
 

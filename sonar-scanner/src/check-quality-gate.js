@@ -9,12 +9,12 @@ const REPORT_TASK_FILE = 'report-task.txt';
 const PROP_TASK_URL = 'ceTaskUrl';
 const PROP_SERVER_URL = 'serverUrl';
 
-const findReportFile = (cwd = '.') => {
+const findReportFile = (workingDir = '.') => {
   const paths = [
-    path.join(cwd, '.scannerwork'), // npm
-    path.join(cwd, 'target', 'sonar'), // maven
-    path.join(cwd, 'build', 'sonar'), // gradle
-    path.join(cwd, '.sonarqube', 'out', '.sonar'), // dotnet
+    path.join(workingDir, '.scannerwork'), // npm
+    path.join(workingDir, 'target', 'sonar'), // maven
+    path.join(workingDir, 'build', 'sonar'), // gradle
+    path.join(workingDir, '.sonarqube', 'out', '.sonar'), // dotnet
   ];
   const reportFile = paths.map((p) => path.join(p, REPORT_TASK_FILE))
     .find((p) => fs.existsSync(p));
@@ -71,8 +71,8 @@ const result = (statusCode, report, qgStatus = null) => ({
   qgStatus,
 });
 
-const checkQualityGate = async (reportFile = null, cwd = '.', sleepMs = 2000) => {
-  const report = await getTaskReport(reportFile || findReportFile(cwd));
+const checkQualityGate = async (reportFile = null, workingDir = '.', sleepMs = 2000) => {
+  const report = await getTaskReport(reportFile || findReportFile(workingDir));
   let task = { status: 'UNKNOWN' };
 
   /* eslint-disable no-await-in-loop */

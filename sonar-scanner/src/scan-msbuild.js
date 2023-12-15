@@ -25,7 +25,7 @@ const findJava17 = async () => {
   }
 };
 
-const scanWithJavaHome = async (args, cwd = '.') => {
+const scanWithJavaHome = async (args, workingDir = '.') => {
   const env = { ...process.env };
   if (os.platform() !== 'win32') {
     const javaHome = await findJava17();
@@ -35,14 +35,14 @@ const scanWithJavaHome = async (args, cwd = '.') => {
     }
   }
   if (typeof args === 'string') {
-    return exec.exec(`${scanner} ${args}`, [], { env, cwd });
+    return exec.exec(`${scanner} ${args}`, [], { env, cwd: workingDir });
   }
-  return exec.exec(scanner, args, { env, cwd });
+  return exec.exec(scanner, args, { env, cwd: workingDir });
 };
 
-const beginScan = async (hostUrl, mainBranch, cwd, customArgs = '') => {
+const beginScan = async (hostUrl, mainBranch, workingDir, customArgs = '') => {
   await core.group('Install dotnet-sonarscanner', async () => {
-    await exec.exec(`dotnet tool install -g dotnet-sonarscanner ${hostUrl.startsWith('https://sonar.extenda.io') ? '--version 4.10.0' : ''}`, [], { cwd });
+    await exec.exec(`dotnet tool install -g dotnet-sonarscanner ${hostUrl.startsWith('https://sonar.extenda.io') ? '--version 4.10.0' : ''}`, [], { cwd: workingDir });
   });
 
   const version = await getBuildVersion(`-${process.env.GITHUB_SHA}`);
@@ -52,17 +52,17 @@ const beginScan = async (hostUrl, mainBranch, cwd, customArgs = '') => {
     'sonar.cs.vstest.reportsPaths': '**/*.trx',
     'sonar.cs.opencover.reportsPaths': '**/coverage.opencover.xml',
   };
-  const params = await createParams(hostUrl, mainBranch, cwd, true, extraParams);
+  const params = await createParams(hostUrl, mainBranch, workingDir, true, extraParams);
 
   await core.group('Begin Sonar analysis', async () => {
-    await scanWithJavaHome(`begin ${params} ${customArgs}`, cwd);
+    await scanWithJavaHome(`begin ${params} ${customArgs}`, workingDir);
   });
 };
 
-const finishScan = async (hostUrl, cwd) => {
+const finishScan = async (hostUrl, workingDir) => {
   await core.group('End Sonar analysis', async () => {
     const { sonarToken } = await credentials(hostUrl);
-    await scanWithJavaHome(['end', `/d:sonar.login=${sonarToken}`], cwd);
+    await scanWithJavaHome(['end', `/d:sonar.login=${sonarToken}`], workingDir);
   });
 };
 
