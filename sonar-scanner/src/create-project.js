@@ -11,9 +11,13 @@ const projectExists = async (hostUrl, organization, project) => axios.get(
   return components && components.length > 0 && components[0].key === project;
 });
 
-const createSonarCloudProject = async (hostUrl) => {
+const createSonarCloudProject = async (hostUrl, workingDir) => {
   const repo = process.env.GITHUB_REPOSITORY.split('/');
-  const project = repo.join('_');
+  let project = repo.join('_');
+  if (workingDir && workingDir !== '.') {
+    const suffix = workingDir.replace(/^\.\/?/g, '');
+    project = `${project}_${suffix}`;
+  }
 
   if (await projectExists(hostUrl, repo[0], project)) {
     core.debug(`Project '${project}' exists in ${hostUrl}`);
@@ -36,9 +40,9 @@ const createSonarCloudProject = async (hostUrl) => {
   });
 };
 
-const createProject = async (hostUrl) => {
+const createProject = async (hostUrl, workingDir = '.') => {
   if (hostUrl.startsWith('https://sonarcloud.io')) {
-    return createSonarCloudProject(hostUrl);
+    return createSonarCloudProject(hostUrl, workingDir);
   }
   return Promise.resolve();
 };

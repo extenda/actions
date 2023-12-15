@@ -40,6 +40,7 @@ describe('Sonar Parameters', () => {
       const result = await createParams(
         'https://sonarcloud.io',
         'master',
+        '.',
         false,
         { extra: 'test' },
       );
@@ -53,6 +54,7 @@ describe('Sonar Parameters', () => {
       expect(result).toContain(expected['sonar.organization']);
       expect(result).toContain(expected['sonar.projectName']);
       expect(result).toContain(expected['sonar.projectKey']);
+      expect(result).not.toContain(`${expected['sonar.projectKey']}_`);
       expect(result).not.toContain(expected['sonar.pullrequest']);
       expect(result).not.toContain(expected['sonar.branch.name']);
     });
@@ -66,12 +68,60 @@ describe('Sonar Parameters', () => {
     });
 
     test('MS Params', async () => {
-      const result = await createParams('https://sonarcloud.io', 'master', true);
+      const result = await createParams('https://sonarcloud.io', 'master', '.', true);
       expect(result).toContain('/d:sonar.token=sonar');
       expect(result).toContain('/d:sonar.host.url=https://sonarcloud.io');
       expect(result).toContain('/o:extenda');
       expect(result).toContain('/n:actions');
       expect(result).toContain('/k:extenda_actions');
+      expect(result).not.toContain('/d:sonar.pullrequest=');
+      expect(result).not.toContain('/d:sonar.branch.name=');
+      expect(result).not.toContain('/k:extenda_actions_');
+    });
+  });
+
+  describe('Mono repo', () => {
+    beforeEach(() => {
+      process.env.GITHUB_EVENT_PATH = path.join(__dirname, 'push-event.json');
+    });
+
+    test('Extra Parameters', async () => {
+      const result = await createParams(
+        'https://sonarcloud.io',
+        'master',
+        './test',
+        false,
+        { extra: 'test' },
+      );
+      expect(result).toContain('-Dextra=test');
+    });
+
+    test('SonarCloud', async () => {
+      const result = await createParams('https://sonarcloud.io', 'master', './test');
+      expect(result).toContain(expected['sonar.token']);
+      expect(result).toContain(expected['sonar.host.url.sonarcloud']);
+      expect(result).toContain(expected['sonar.organization']);
+      expect(result).toContain(`${expected['sonar.projectName']}_test`);
+      expect(result).toContain(`${expected['sonar.projectKey']}_test`);
+      expect(result).not.toContain(expected['sonar.pullrequest']);
+      expect(result).not.toContain(expected['sonar.branch.name']);
+    });
+
+    test('SonarQube', async () => {
+      const result = await createParams('https://sonar.extenda.io', 'master', './test');
+      expect(result).toContain(expected['sonar.token']);
+      expect(result).toContain(expected['sonar.host.url.extenda']);
+      expect(result).toContain(`${expected['sonar.projectName']}_test`);
+      expect(result).not.toContain(expected['sonar.branch.name']);
+    });
+
+    test('MS Params', async () => {
+      const result = await createParams('https://sonarcloud.io', 'master', './test', true);
+      expect(result).toContain('/d:sonar.token=sonar');
+      expect(result).toContain('/d:sonar.host.url=https://sonarcloud.io');
+      expect(result).toContain('/o:extenda');
+      expect(result).toContain('/n:actions_test');
+      expect(result).toContain('/k:extenda_actions_test');
       expect(result).not.toContain('/d:sonar.pullrequest=');
       expect(result).not.toContain('/d:sonar.branch.name=');
     });

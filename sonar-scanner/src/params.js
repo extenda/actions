@@ -1,7 +1,7 @@
 const { credentials } = require('./sonar-credentials');
 const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
 
-const createParams = async (hostUrl, mainBranch, msParams = false, extraParams = {}) => {
+const createParams = async (hostUrl, mainBranch, workingDir = '.', msParams = false, extraParams = {}) => {
   const sonarCloud = hostUrl.startsWith('https://sonarcloud.io');
   const { githubToken, sonarToken } = await credentials(hostUrl);
   const props = { ...extraParams };
@@ -12,30 +12,33 @@ const createParams = async (hostUrl, mainBranch, msParams = false, extraParams =
 
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
   const pullRequest = await getPullRequestInfo(githubToken);
+  let suffix = workingDir.replace(/^\.\/?/g, '');
+  suffix = suffix ? `_${suffix}` : '';
+  const suffixedRepo = `${repo}${suffix}`;
 
   if (process.env.SONAR_VERBOSE === 'true') {
     props['sonar.verbose'] = 'true';
   }
 
   if (msParams) {
-    props['/n:'] = repo;
+    props['/n:'] = suffixedRepo;
   } else {
-    props['sonar.projectName'] = repo;
+    props['sonar.projectName'] = suffixedRepo;
   }
 
   if (msParams) {
     // Note: For other build tools, we assume legacy sonar project key is
     // provided by Maven/Gradle or sonar props file.
-    props['/k:'] = `${owner}_${repo}`;
+    props['/k:'] = `${owner}_${suffixedRepo}`;
   }
 
   if (sonarCloud) {
     if (msParams) {
-      // MSBuild uses other prefixes for this variables.
+      // MSBuild uses other prefixes for these variables.
       props['/o:'] = owner;
     } else {
       props['sonar.organization'] = owner;
-      props['sonar.projectKey'] = `${owner}_${repo}`;
+      props['sonar.projectKey'] = `${owner}_${suffixedRepo}`;
     }
   }
 

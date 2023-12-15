@@ -51,6 +51,9 @@ inputs:
   report-path:
     description: Use a specific path to get the Sonar report for the quality gate
     required: false
+  working-directory:
+    description: The working directory. Defaults to the current working directory.
+    required: false
 runs:
   using: node16
   main: dist/index.js
