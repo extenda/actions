@@ -1,10 +1,11 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
 const fs = require('fs');
+const path = require('path');
 const { createParams } = require('./params');
 const mvn = require('../../maven/src/mvn');
 
-const isAutoDiscovered = (sonarScanner, workingDir, file) => sonarScanner === 'auto' && fs.existsSync(`${workingDir}/${file}`);
+const isAutoDiscovered = (sonarScanner, workingDir, file) => sonarScanner === 'auto' && fs.existsSync(`${path.join(workingDir, file)}`);
 
 const getCommands = (sonarScanner, custom, workingDir = '.') => {
   const commands = {};
