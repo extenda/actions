@@ -28,6 +28,7 @@ const action = async () => {
   const sonarScanner = core.getInput('sonar-scanner', { required: true });
   const verbose = core.getInput('verbose') === 'true';
   const reportPath = core.getInput('report-path');
+  const workingDir = core.getInput('working-directory');
 
   if (verbose) {
     process.env.SONAR_VERBOSE = 'true';
@@ -49,7 +50,7 @@ const action = async () => {
   }
 
   // Auto-create SonarCloud projects
-  await createProject(hostUrl);
+  await createProject(hostUrl, workingDir);
 
   let waitForQualityGate = false;
 
@@ -58,19 +59,22 @@ const action = async () => {
     waitForQualityGate = await scanMsBuild(hostUrl, mainBranch, scanCommands.dotnet);
   } else {
     // Perform the scanning for everything else.
-    await core.group('Run Sonar analysis', async () => scan(hostUrl, mainBranch, sonarScanner, scanCommands));
+    await core.group('Run Sonar analysis', async () => scan(hostUrl, mainBranch, sonarScanner, scanCommands, workingDir));
     waitForQualityGate = true;
   }
 
-  if (waitForQualityGate && isSonarQube && isPullRequest()) {
+  if (waitForQualityGate && isSonarQube && await isPullRequest()) {
     // No quality gate analysis is performed for PRs on sonar.extenda.io
     core.info(`Skipping Quality Gate. Not supported for PRs on ${hostUrl}`);
+    waitForQualityGate = false;
+  }
+  if (waitForQualityGate && isSonarQube) {
     waitForQualityGate = false;
   }
 
   if (waitForQualityGate) {
     // Wait for the quality gate status to update
-    const status = await core.group('Check Quality Gate', async () => checkQualityGate(reportPath));
+    const status = await core.group('Check Quality Gate', async () => checkQualityGate(reportPath, workingDir));
     if (status.statusCode !== 0) {
       process.exitCode = core.ExitCode.Failure;
     }

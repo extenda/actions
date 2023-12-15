@@ -21,12 +21,13 @@ const action = require('../src/index');
 const orgEnv = process.env;
 const getInput = jest.spyOn(core, 'getInput');
 
-const mockInputs = (hostUrl, scanner = 'auto', verbose = false, reportPath = '') => {
+const mockInputs = (hostUrl, scanner = 'auto', verbose = false, reportPath = '', cwd = '.') => {
   getInput.mockReturnValueOnce(hostUrl)
     .mockReturnValueOnce('master')
     .mockReturnValueOnce(scanner)
     .mockReturnValueOnce(verbose ? 'true' : 'false')
-    .mockReturnValueOnce(reportPath);
+    .mockReturnValueOnce(reportPath)
+    .mockReturnValueOnce(cwd);
 };
 
 const mockPullRequest = (isPullRequest) => {
@@ -39,6 +40,14 @@ const mockPullRequest = (isPullRequest) => {
   } else {
     getPullRequestInfo.mockResolvedValueOnce(undefined);
   }
+};
+
+const defaultCommands = {
+  dotnet: undefined,
+  gradle: undefined,
+  maven: undefined,
+  npm: undefined,
+  yarn: undefined,
 };
 
 describe('Sonar-Scanner Action', () => {
@@ -71,10 +80,17 @@ describe('Sonar-Scanner Action', () => {
     process.env.GITHUB_REF = 'refs/heads/feature/test';
     mockInputs('https://sonar.extenda.io');
     mockPullRequest(true);
+    mockPullRequest(true);
 
     await action();
 
-    expect(scan).toHaveBeenCalledWith('https://sonar.extenda.io', 'master', 'auto', { gradle: undefined, maven: undefined });
+    expect(scan).toHaveBeenCalledWith(
+      'https://sonar.extenda.io',
+      'master',
+      'auto',
+      defaultCommands,
+      '.',
+    );
     expect(checkQualityGate).not.toHaveBeenCalled();
   });
 
@@ -84,7 +100,13 @@ describe('Sonar-Scanner Action', () => {
 
     await action();
 
-    expect(scan).toHaveBeenCalledWith('https://sonar.extenda.io', 'master', 'auto', { gradle: undefined, maven: undefined });
+    expect(scan).toHaveBeenCalledWith(
+      'https://sonar.extenda.io',
+      'master',
+      'auto',
+      defaultCommands,
+      '.',
+    );
     expect(checkQualityGate).not.toHaveBeenCalled();
   });
 
@@ -101,7 +123,7 @@ describe('Sonar-Scanner Action', () => {
     mockPullRequest(false);
     checkQualityGate.mockResolvedValueOnce(0);
     await action();
-    expect(checkQualityGate).toHaveBeenCalledWith('./path/to/report.txt');
+    expect(checkQualityGate).toHaveBeenCalledWith('./path/to/report.txt', '.');
   });
 
   test('It will use scan for auto', async () => {
@@ -132,5 +154,24 @@ describe('Sonar-Scanner Action', () => {
     await action();
     expect(scan).toHaveBeenCalled();
     expect(checkQualityGate).not.toHaveBeenCalled();
+  });
+
+  test('It will handle working-directory scans', async () => {
+    process.env.GITHUB_REF = 'refs/heads/feature/test';
+    mockInputs('https://sonarcloud.io', 'auto', false, '', './test');
+    mockPullRequest(true);
+    mockPullRequest(true);
+    checkQualityGate.mockResolvedValueOnce(0);
+
+    await action();
+
+    expect(scan).toHaveBeenCalledWith(
+      'https://sonarcloud.io',
+      'master',
+      'auto',
+      defaultCommands,
+      './test',
+    );
+    expect(checkQualityGate).toHaveBeenCalled();
   });
 });

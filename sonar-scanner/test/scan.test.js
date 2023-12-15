@@ -47,6 +47,12 @@ describe('Scan', () => {
       expect(mvn.run).toHaveBeenCalledTimes(1);
       expect(mvn.run.mock.calls[0][0]).toContain('scan');
     });
+
+    test('It supports working-directory', async () => {
+      fs(ALL_FILE_TYPES);
+      await scan('https://sonarcloud.io', 'master', 'maven', { maven: 'scan' }, 'test');
+      expect(mvn.run.mock.calls[0][0]).toContain('-f test');
+    });
   });
 
   describe('Gradle', () => {
@@ -68,23 +74,48 @@ describe('Scan', () => {
       expect(exec.exec).toHaveBeenCalledTimes(1);
       expect(exec.exec.mock.calls[0][0]).toEqual('./gradlew scan -Dsonar.verbose=false');
     });
+
+    test('It supports working-directory', async () => {
+      fs(ALL_FILE_TYPES);
+      await scan('https://sonarcloud.io', 'master', 'gradle', { gradle: 'scan' }, 'test');
+      expect(exec.exec.mock.calls[0][1]).toEqual({ cwd: 'test' });
+    });
   });
 
-  test('It discovers node', async () => {
-    fs({ 'package.json': '{}' });
-    await scan('https://sonarcloud.io', 'master', 'auto');
-    expect(exec.exec).toHaveBeenCalledTimes(2);
-    expect(exec.exec.mock.calls[0][0]).toEqual('npm install sonarqube-scanner --no-save');
-    expect(exec.exec.mock.calls[1][0]).toEqual('node_modules/.bin/sonar-scanner -Dsonar.verbose=false');
+  describe('Node', () => {
+    test('It discovers node', async () => {
+      fs({ 'package.json': '{}' });
+      await scan('https://sonarcloud.io', 'master', 'auto');
+      expect(exec.exec).toHaveBeenCalledTimes(2);
+      expect(exec.exec.mock.calls[0][0]).toEqual('npm install sonarqube-scanner --no-save');
+      expect(exec.exec.mock.calls[1][0]).toEqual('node_modules/.bin/sonar-scanner -Dsonar.verbose=false');
+    });
+
+    test('It supports working-directory', async () => {
+      fs({ 'test/package.json': '{}' });
+      await scan('https://sonarcloud.io', 'master', 'auto', {}, 'test');
+      expect(exec.exec.mock.calls[0][1]).toEqual({ cwd: 'test' });
+      expect(exec.exec.mock.calls[1][1]).toEqual({ cwd: 'test' });
+    });
   });
 
-  test('It discovers yarn', async () => {
-    fs({ 'package.json': '{}' });
-    fs({ 'yarn.lock': '{}' });
-    await scan('https://sonarcloud.io', 'master', 'auto');
-    expect(exec.exec).toHaveBeenCalledTimes(2);
-    expect(exec.exec.mock.calls[0][0]).toEqual('yarn add -D sonarqube-scanner');
-    expect(exec.exec.mock.calls[1][0]).toEqual('node_modules/.bin/sonar-scanner -Dsonar.verbose=false');
+  describe('Yarn', () => {
+    test('It discovers yarn', async () => {
+      fs({ 'package.json': '{}' });
+      fs({ 'yarn.lock': '{}' });
+      await scan('https://sonarcloud.io', 'master', 'auto');
+      expect(exec.exec).toHaveBeenCalledTimes(2);
+      expect(exec.exec.mock.calls[0][0]).toEqual('yarn add -D sonarqube-scanner');
+      expect(exec.exec.mock.calls[1][0]).toEqual('node_modules/.bin/sonar-scanner -Dsonar.verbose=false');
+    });
+
+    test('It supports working-directory', async () => {
+      fs({ 'test/package.json': '{}' });
+      fs({ 'test/yarn.lock': '{}' });
+      await scan('https://sonarcloud.io', 'master', 'auto', {}, 'test');
+      expect(exec.exec.mock.calls[0][1]).toEqual({ cwd: 'test' });
+      expect(exec.exec.mock.calls[1][1]).toEqual({ cwd: 'test' });
+    });
   });
 
   test('It throws for unsupported sonar-scanner', async () => {
