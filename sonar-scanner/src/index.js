@@ -28,7 +28,7 @@ const action = async () => {
   const sonarScanner = core.getInput('sonar-scanner', { required: true });
   const verbose = core.getInput('verbose') === 'true';
   const reportPath = core.getInput('report-path');
-  const workingDir = core.getInput('working-directory');
+  const workingDir = core.getInput('working-directory') || '.';
 
   if (verbose) {
     process.env.SONAR_VERBOSE = 'true';
