@@ -6,7 +6,11 @@ const createParams = async (hostUrl, mainBranch, workingDir = '.', msParams = fa
   const { githubToken, sonarToken } = await credentials(hostUrl);
   const props = { ...extraParams };
   props['sonar.host.url'] = hostUrl;
-  props['sonar.token'] = sonarToken;
+  if (sonarCloud) {
+    props['sonar.token'] = sonarToken;
+  } else {
+    props['sonar.login'] = sonarToken;
+  }
 
   const branch = process.env.GITHUB_REF.replace('refs/heads/', '');
 
