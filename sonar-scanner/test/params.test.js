@@ -10,6 +10,7 @@ const orgEnv = process.env;
 
 const expected = {
   'sonar.token': '-Dsonar.token=sonar',
+  'sonar.login': '-Dsonar.login=sonar',
   'sonar.host.url.extenda': '-Dsonar.host.url=https://sonar.extenda.io',
   'sonar.host.url.sonarcloud': '-Dsonar.host.url=https://sonarcloud.io',
   'sonar.host.url.sonarqube': '-Dsonar.host.url=https://sonarqube.io',
@@ -61,7 +62,7 @@ describe('Sonar Parameters', () => {
 
     test('SonarQube', async () => {
       const result = await createParams('https://sonar.extenda.io', 'master');
-      expect(result).toContain(expected['sonar.token']);
+      expect(result).toContain(expected['sonar.login']);
       expect(result).toContain(expected['sonar.host.url.extenda']);
       expect(result).toContain(expected['sonar.projectName']);
       expect(result).not.toContain(expected['sonar.branch.name']);
@@ -109,7 +110,7 @@ describe('Sonar Parameters', () => {
 
     test('SonarQube', async () => {
       const result = await createParams('https://sonar.extenda.io', 'master', './test');
-      expect(result).toContain(expected['sonar.token']);
+      expect(result).toContain(expected['sonar.login']);
       expect(result).toContain(expected['sonar.host.url.extenda']);
       expect(result).toContain(`${expected['sonar.projectName']}_test`);
       expect(result).not.toContain(expected['sonar.branch.name']);
@@ -166,7 +167,8 @@ describe('Sonar Parameters', () => {
 
     test('sonar.extenda.io', async () => {
       const result = await createParams('https://sonar.extenda.io', 'master');
-      expect(result).toContain(expected['sonar.token']);
+      expect(result).toContain(expected['sonar.login']);
+      expect(result).not.toContain(expected['sonar.token']);
       expect(result).toContain(expected['sonar.host.url.extenda']);
       expect(result).toContain(expected['sonar.projectName']);
       expect(result).toContain('-Dsonar.github.oauth=');
@@ -177,7 +179,7 @@ describe('Sonar Parameters', () => {
 
     test('Any SonarQube', async () => {
       const result = await createParams('https://sonarqube.io', 'master');
-      expect(result).toContain(expected['sonar.token']);
+      expect(result).toContain(expected['sonar.login']);
       expect(result).toContain(expected['sonar.host.url.sonarqube']);
       expect(result).toContain(expected['sonar.projectName']);
       expect(result).not.toContain('-Dsonar.analysis.mode=preview');
