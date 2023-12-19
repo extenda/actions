@@ -27,18 +27,18 @@ const createRecordSet = async (projectID, env, name, ip) => gcloudOutput([
   '--quiet',
 ]);
 
-const obtainInternalIp = async (projectId, protcol) => gcloudOutput([
+const obtainInternalIp = async (projectId, protcol, platformGKE) => gcloudOutput([
   'compute',
   'forwarding-rules',
   'list',
   `--project=${projectId}`,
-  `--filter=name=('http${protcol === 'http2' ? 's' : ''}-proxy-internal')`,
+  `--filter=name=('http${protcol === 'http2' && platformGKE ? 's' : ''}-proxy-internal')`,
   '--format=get(IPAddress)',
 ]);
 
-const setupInternalDomainMapping = async (projectID, env, name, protocol) => {
+const setupInternalDomainMapping = async (projectID, env, name, protocol, platformGKE) => {
   await createDNSzone(projectID, env);
-  const ip = await obtainInternalIp(projectID, protocol);
+  const ip = await obtainInternalIp(projectID, protocol, platformGKE);
   await createRecordSet(projectID, env, name, ip);
 };
 

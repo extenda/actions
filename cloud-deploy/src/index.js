@@ -117,7 +117,7 @@ const action = async () => {
       );
     }
     await configureInternalDomain(projectID, serviceName, env, protocol, timeout, platformGKE);
-    await configureInternalFrontend(projectID, serviceName, env, protocol);
+    await configureInternalFrontend(projectID, serviceName, env, protocol, platformGKE);
   } else {
     throw new Error('Deployment failed! Check container logs and status for error!');
   }

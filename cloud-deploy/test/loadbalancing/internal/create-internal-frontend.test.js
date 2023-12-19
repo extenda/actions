@@ -11,7 +11,7 @@ describe('configureInternalFrontend', () => {
     jest.clearAllMocks();
   });
 
-  test('should configure internal frontend with correct parameters', async () => {
+  test('should configure internal frontend for cloudrun with correct parameters', async () => {
     gcloudOutput.mockResolvedValue();
 
     const projectID = 'my-project';
@@ -19,7 +19,7 @@ describe('configureInternalFrontend', () => {
     const env = 'dev';
     const protocol = 'http';
 
-    await configureInternalFrontend(projectID, name, env, protocol);
+    await configureInternalFrontend(projectID, name, env, protocol, false);
 
     expect(gcloudOutput).toHaveBeenCalledWith([
       'compute',
@@ -46,16 +46,54 @@ describe('configureInternalFrontend', () => {
       '--ports=80',
     ]);
 
-    expect(setupInternalDomainMapping).toHaveBeenCalledWith(projectID, env, name, protocol);
+    expect(setupInternalDomainMapping).toHaveBeenCalledWith(projectID, env, name, protocol, false);
   });
 
-  test('should configure internal frontend for http2 correctly', async () => {
+  test('should configure internal frontend for gke with correct parameters', async () => {
+    gcloudOutput.mockResolvedValue();
+
+    const projectID = 'my-project';
+    const name = 'my-service';
+    const env = 'dev';
+    const protocol = 'http';
+
+    await configureInternalFrontend(projectID, name, env, protocol, true);
+
+    expect(gcloudOutput).toHaveBeenCalledWith([
+      'compute',
+      'target-http-proxies',
+      'create',
+      'http-lb-proxy-internal',
+      `--url-map=${projectID.split(`-${env}`)[0]}-${env}-lb-internal`,
+      '--region=europe-west1',
+      `--project=${projectID}`,
+    ]);
+
+    expect(gcloudOutput).toHaveBeenCalledWith([
+      'compute',
+      'forwarding-rules',
+      'create',
+      'http-proxy-internal',
+      '--load-balancing-scheme=INTERNAL_MANAGED',
+      '--subnet=k8s-subnet',
+      '--network=clan-network',
+      '--target-http-proxy=http-lb-proxy-internal',
+      '--target-http-proxy-region=europe-west1',
+      '--region=europe-west1',
+      `--project=${projectID}`,
+      '--ports=80',
+    ]);
+
+    expect(setupInternalDomainMapping).toHaveBeenCalledWith(projectID, env, name, protocol, true);
+  });
+
+  test('should configure internal frontend for http2 on gke correctly', async () => {
     const projectID = 'my-project';
     const name = 'my-service';
     const env = 'dev';
     const protocol = 'http2';
 
-    await configureInternalFrontend(projectID, name, env, protocol);
+    await configureInternalFrontend(projectID, name, env, protocol, true);
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(1, [
       'compute',
@@ -94,6 +132,43 @@ describe('configureInternalFrontend', () => {
       '--ports=443',
     ]);
 
-    expect(setupInternalDomainMapping).toHaveBeenCalledWith(projectID, env, name, protocol);
+    expect(setupInternalDomainMapping).toHaveBeenCalledWith(projectID, env, name, protocol, true);
+  });
+
+  test('should configure internal frontend for http2 on cloudrun with http frontend correctly', async () => {
+    const projectID = 'my-project';
+    const name = 'my-service';
+    const env = 'dev';
+    const protocol = 'http2';
+
+    await configureInternalFrontend(projectID, name, env, protocol, false);
+
+
+    expect(gcloudOutput).toHaveBeenCalledWith([
+      'compute',
+      'target-http-proxies',
+      'create',
+      'http-lb-proxy-internal',
+      `--url-map=${projectID.split(`-${env}`)[0]}-${env}-lb-internal`,
+      '--region=europe-west1',
+      `--project=${projectID}`,
+    ]);
+
+    expect(gcloudOutput).toHaveBeenCalledWith([
+      'compute',
+      'forwarding-rules',
+      'create',
+      'http-proxy-internal',
+      '--load-balancing-scheme=INTERNAL_MANAGED',
+      '--subnet=k8s-subnet',
+      '--network=clan-network',
+      '--target-http-proxy=http-lb-proxy-internal',
+      '--target-http-proxy-region=europe-west1',
+      '--region=europe-west1',
+      `--project=${projectID}`,
+      '--ports=80',
+    ]);
+
+    expect(setupInternalDomainMapping).toHaveBeenCalledWith(projectID, env, name, protocol, false);
   });
 });

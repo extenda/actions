@@ -128,6 +128,7 @@ describe('Action', () => {
       'service-name',
       'staging',
       'http',
+      true
     );
   });
   test('It can fail the action', async () => {
