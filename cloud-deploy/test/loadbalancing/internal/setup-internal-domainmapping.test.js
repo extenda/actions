@@ -66,7 +66,7 @@ describe('setupInternalDomainMapping', () => {
     const name = 'my-service';
     const protocol = 'http2';
 
-    await setupInternalDomainMapping(projectID, env, name, protocol);
+    await setupInternalDomainMapping(projectID, env, name, protocol, true);
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(1, [
       'dns',

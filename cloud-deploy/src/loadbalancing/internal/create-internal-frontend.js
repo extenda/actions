@@ -64,8 +64,8 @@ const createHttpsForwardingRule = async (projectID) => gcloudOutput([
   '--ports=443',
 ]);
 
-const configureInternalFrontend = async (projectID, name, env, protocol) => {
-  if (protocol === 'http2') {
+const configureInternalFrontend = async (projectID, name, env, protocol, platformGKE) => {
+  if (protocol === 'http2' && platformGKE) {
     await createCertificate(projectID);
     await createHttpsProxy(projectID, env);
     await createHttpsForwardingRule(projectID);
@@ -73,7 +73,7 @@ const configureInternalFrontend = async (projectID, name, env, protocol) => {
     await createHttpProxy(projectID, env);
     await createForwardingRule(projectID);
   }
-  await setupInternalDomainMapping(projectID, env, name, protocol);
+  await setupInternalDomainMapping(projectID, env, name, protocol, platformGKE);
 };
 
 module.exports = configureInternalFrontend;
