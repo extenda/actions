@@ -58,6 +58,7 @@ const action = async () => {
     timeout = 300,
     service: serviceName,
     protocol,
+    'internal-traffic': internalTraffic = true,
   } = kubernetes || cloudrun;
 
   const {
@@ -116,8 +117,10 @@ const action = async () => {
         platformGKE,
       );
     }
-    await configureInternalDomain(projectID, serviceName, env, protocol, timeout, platformGKE);
-    await configureInternalFrontend(projectID, serviceName, env, protocol, platformGKE);
+    if (internalTraffic) {
+      await configureInternalDomain(projectID, serviceName, env, protocol, timeout, platformGKE);
+      await configureInternalFrontend(projectID, serviceName, env, protocol, platformGKE);
+    }
   } else {
     throw new Error('Deployment failed! Check container logs and status for error!');
   }
