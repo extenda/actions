@@ -12,6 +12,7 @@
     - [1.1.7. Property `CloudDeploy > oneOf > CloudRun > cloud-run > cpu-throttling`](#oneOf_i0_cloud-run_cpu-throttling)
     - [1.1.8. Property `CloudDeploy > oneOf > CloudRun > cloud-run > session-affinity`](#oneOf_i0_cloud-run_session-affinity)
     - [1.1.9. Property `CloudDeploy > oneOf > CloudRun > cloud-run > vpc-connector`](#oneOf_i0_cloud-run_vpc-connector)
+    - [1.1.10. Property `CloudDeploy > oneOf > CloudRun > cloud-run > internal-traffic`](#oneOf_i0_cloud-run_internal-traffic)
 - [2. Property `CloudDeploy > oneOf > Kubernetes`](#oneOf_i1)
   - [2.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes`](#oneOf_i1_kubernetes)
     - [2.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > service`](#oneOf_i1_kubernetes_service)
@@ -110,6 +111,7 @@
 | - [cpu-throttling](#oneOf_i0_cloud-run_cpu-throttling )       | No      | boolean          | No         | -                                                  | Whether to throttle the CPU when the container is not actively serving requests.         |
 | - [session-affinity](#oneOf_i0_cloud-run_session-affinity )   | No      | boolean          | No         | -                                                  | Whether to enable session affinity for connections to the service.                       |
 | - [vpc-connector](#oneOf_i0_cloud-run_vpc-connector )         | No      | boolean          | No         | -                                                  | Whether to use the vpc connector or direct connection to the vpc                         |
+| - [internal-traffic](#oneOf_i0_cloud-run_internal-traffic )   | No      | boolean          | No         | -                                                  | Wheter to setup internal traffic or not                                                  |
 
 #### <a name="oneOf_i0_cloud-run_service"></a>1.1.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > service`
 
@@ -231,6 +233,16 @@ Must be one of:
 | **Default**  | `false`   |
 
 **Description:** Whether to use the vpc connector or direct connection to the vpc
+
+#### <a name="oneOf_i0_cloud-run_internal-traffic"></a>1.1.10. Property `CloudDeploy > oneOf > CloudRun > cloud-run > internal-traffic`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Wheter to setup internal traffic or not
 
 ## <a name="oneOf_i1"></a>2. Property `CloudDeploy > oneOf > Kubernetes`
 
@@ -831,4 +843,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-12-05 at 13:10:44 +0100
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-12-22 at 13:28:07 +0100
