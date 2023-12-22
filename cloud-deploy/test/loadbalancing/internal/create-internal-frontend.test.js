@@ -143,7 +143,6 @@ describe('configureInternalFrontend', () => {
 
     await configureInternalFrontend(projectID, name, env, protocol, false);
 
-
     expect(gcloudOutput).toHaveBeenCalledWith([
       'compute',
       'target-http-proxies',

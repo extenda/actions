@@ -65,6 +65,42 @@ const serviceDef = {
     },
   },
 };
+const serviceDefNoInternal = {
+  kubernetes: {
+    type: 'Deployment',
+    service: 'service-name',
+    'internal-traffic': false,
+    resources: {
+      cpu: 1,
+      memory: '512Mi',
+    },
+    protocol: 'http',
+    scaling: {
+      cpu: 40,
+    },
+  },
+  security: 'none',
+  labels: {
+    product: 'actions',
+    component: 'jest',
+  },
+  environments: {
+    production: {
+      'min-instances': 1,
+      'max-instances': 10,
+      env: {
+        KEY1: 'value1',
+        KEY2: 'value2',
+      },
+    },
+    staging: {
+      'min-instances': 1,
+      'max-instances': 1,
+      env: {},
+      'domain-mappings': ['example.com'],
+    },
+  },
+};
 
 describe('Action', () => {
   afterEach(() => {
@@ -128,7 +164,7 @@ describe('Action', () => {
       'service-name',
       'staging',
       'http',
-      true
+      true,
     );
   });
   test('It can fail the action', async () => {
@@ -166,5 +202,59 @@ describe('Action', () => {
       'internal-key',
       'clan-service-account',
     );
+  });
+  test('It can run the action without internal traffic', async () => {
+    core.getInput.mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('clan-service-account')
+      .mockReturnValueOnce('cloud-run.yaml')
+      .mockReturnValueOnce('gcr.io/project/image:tag');
+    loadCredentials.mockResolvedValueOnce('styra-token')
+      .mockResolvedValueOnce('envoy-certs')
+      .mockResolvedValueOnce('internal-key')
+      .mockResolvedValueOnce('internal-cert');
+
+    loadServiceDefinition.mockReturnValueOnce(serviceDefNoInternal);
+    getImageWithSha256.mockResolvedValueOnce('gcr.io/project/image@sha256:1');
+    projectInfo.mockReturnValueOnce({
+      project: 'clan-name',
+      env: 'staging',
+    });
+    buildManifest.mockResolvedValueOnce();
+    deploy.mockResolvedValueOnce(true);
+    createExternalLoadbalancer.mockResolvedValueOnce();
+    configureExternalLBFrontend.mockResolvedValueOnce();
+    configureExternalDomain.mockResolvedValueOnce();
+    configureInternalDomain.mockResolvedValueOnce();
+    configureInternalFrontend.mockResolvedValueOnce();
+    setupGcloud.mockResolvedValueOnce('project-id');
+    publishPolicies.mockResolvedValueOnce();
+    await action();
+
+    expect(core.getInput).toHaveBeenCalledTimes(5);
+    expect(publishPolicies).toHaveBeenCalledWith('service-name', 'staging', 'tag', serviceDefNoInternal);
+    expect(buildManifest).toHaveBeenCalledWith(
+      'gcr.io/project/image@sha256:1',
+      serviceDefNoInternal,
+      'project-id',
+      'clan-name',
+      'staging',
+      'styra-token',
+      300,
+      'envoy-certs',
+      'internal-cert',
+      'internal-key',
+      'clan-service-account',
+    );
+    expect(createExternalLoadbalancer).toHaveBeenCalledWith(
+      'project-id',
+      'staging',
+    );
+    expect(configureExternalLBFrontend).toHaveBeenCalledWith(
+      'project-id',
+      'staging',
+      ['example.com'],
+      false,
+    );
+    expect(configureInternalFrontend).not.toHaveBeenCalled();
   });
 });
