@@ -24,8 +24,9 @@ describe('manifests/security-sidecar', () => {
     expect(getImageWithSha256).toHaveBeenCalledWith('eu.gcr.io/extenda/security:authz');
   });
 
-  test('It uses native-authz in staging', async () => {
+  test('It uses native-authz from SECURITY_IMAGE_TAG env var', async () => {
     process.env.IAM_SYSTEM_NAME = 'tst.test-staging';
+    process.env.SECURITY_IMAGE_TAG = 'native-authz';
     await securitySpec('http');
     expect(getImageWithSha256).toHaveBeenCalledWith('eu.gcr.io/extenda/security:native-authz');
   });

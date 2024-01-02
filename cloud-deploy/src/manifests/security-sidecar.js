@@ -11,8 +11,7 @@ const volumeMounts = (protocol) => {
 };
 
 const securitySpec = async (protocol, platformGKE = true) => {
-  const opaSystemName = process.env.IAM_SYSTEM_NAME || '';
-  const imageTag = opaSystemName.endsWith('-staging') ? 'native-authz' : 'authz';
+  const imageTag = process.env.SECURITY_IMAGE_TAG || 'authz';
   return getImageWithSha256(`${IMAGE_NAME}:${imageTag}`)
     .then((image) => {
       const env = [{
