@@ -9,7 +9,6 @@ jest.mock('../../setup-gcloud');
 jest.mock('fast-glob');
 jest.mock('@actions/github');
 jest.mock('../../cloud-run/src/cluster-info');
-jest.mock('../src/system-owners');
 jest.mock('../../gcp-secret-manager/src/secrets');
 
 const core = require('@actions/core');
@@ -23,8 +22,6 @@ const loadIamDefinition = require('../src/iam-definition');
 const { setupGcloud } = require('../../setup-gcloud');
 const loadCredentials = require('../src/load-credentials');
 const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
-const getSystemOwners = require('../src/system-owners');
-const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
 const credentials = {
   styraToken: 'styra-token',
@@ -40,8 +37,6 @@ describe('run action', () => {
   });
 
   test('It can run the action', async () => {
-    loadSecret.mockResolvedValue('token');
-    getSystemOwners.mockResolvedValueOnce(['test@mail.com']);
     setupGcloud.mockResolvedValueOnce('test-staging-332');
     setupGcloud.mockResolvedValueOnce('test-prod-332');
     loadCredentials.mockResolvedValue(credentials);
@@ -77,8 +72,6 @@ describe('run action', () => {
   });
 
   test('It can run the action for IAM api correctly', async () => {
-    loadSecret.mockResolvedValue('token');
-    getSystemOwners.mockResolvedValueOnce(['test@mail.com']);
     setupGcloud.mockResolvedValueOnce('test-staging-332');
     setupGcloud.mockResolvedValueOnce('test-prod-332');
     loadCredentials.mockResolvedValue(credentials);
@@ -115,8 +108,6 @@ describe('run action', () => {
   });
 
   test('It can run for multiple files', async () => {
-    loadSecret.mockResolvedValue('token');
-    getSystemOwners.mockResolvedValueOnce(['test@mail.com']);
     const clusterInfoResponse = {
       project: 'tribe-prod-1242',
     };
