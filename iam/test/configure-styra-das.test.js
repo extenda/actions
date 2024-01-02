@@ -110,6 +110,7 @@ describe('Configure Styra DAS', () => {
       allowedConsumers,
       'iam-token',
       'https://apiurl.test.dev',
+      false,
     );
     expect(request).toHaveBeenCalledTimes(1);
   });
@@ -159,6 +160,7 @@ describe('Configure Styra DAS', () => {
       allowedConsumers,
       'iam-token',
       'https://apiurl.test.dev',
+      false,
     );
     expect(request).toHaveBeenCalledTimes(1);
   });
