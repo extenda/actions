@@ -69,30 +69,9 @@ describe('run action', () => {
       'iam-pass',
       'iam-tenant',
     );
-    expect(configureStyraDas).toHaveBeenNthCalledWith(
-      1,
-      {},
-      'styra-token',
-      'https://extendaretail.styra.com',
-      'https://iam-api.retailsvc.com',
-      '',
-      'staging',
-      'test-staging-332',
-      ['test@mail.com'],
-    );
+    expect(configureStyraDas).not.toHaveBeenCalled();
     expect(configureBundleSync).toHaveBeenNthCalledWith(1, {}, 'staging');
     expect(configureIAM).toHaveBeenNthCalledWith(1, {}, 'https://iam-api.retailsvc.com', '', true);
-    expect(configureStyraDas).toHaveBeenNthCalledWith(
-      2,
-      {},
-      'styra-token',
-      'https://extendaretail.styra.com',
-      'https://iam-api.retailsvc.com',
-      'iam-token',
-      'prod',
-      'test-prod-332',
-      ['test@mail.com'],
-    );
     expect(configureBundleSync).toHaveBeenNthCalledWith(2, {}, 'prod');
     expect(configureIAM).toHaveBeenNthCalledWith(2, {}, 'https://iam-api.retailsvc.com', 'iam-token', false);
   });
@@ -128,30 +107,9 @@ describe('run action', () => {
       'iam-pass',
       'iam-tenant',
     );
-    expect(configureStyraDas).toHaveBeenNthCalledWith(
-      1,
-      {},
-      'styra-token',
-      'https://extendaretail.styra.com',
-      'https://iam-api.retailsvc.dev',
-      'iam-token',
-      'staging',
-      'test-staging-332',
-      ['test@mail.com'],
-    );
+    expect(configureStyraDas).not.toHaveBeenCalled();
     expect(configureBundleSync).toHaveBeenNthCalledWith(1, {}, 'staging');
     expect(configureIAM).toHaveBeenNthCalledWith(1, {}, 'https://iam-api.retailsvc.dev', 'iam-token', false);
-    expect(configureStyraDas).toHaveBeenNthCalledWith(
-      2,
-      {},
-      'styra-token',
-      'https://extendaretail.styra.com',
-      'https://iam-api.retailsvc.com',
-      'iam-token',
-      'prod',
-      'test-prod-332',
-      ['test@mail.com'],
-    );
     expect(configureBundleSync).toHaveBeenNthCalledWith(2, {}, 'prod');
     expect(configureIAM).toHaveBeenNthCalledWith(2, {}, 'https://iam-api.retailsvc.com', 'iam-token', false);
   });

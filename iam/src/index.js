@@ -48,16 +48,16 @@ const setupEnvironment = async (
     iamToken = await fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenant);
   }
 
-  await configureStyraDas(
-    iam,
-    styraToken,
-    styraUrl,
-    url,
-    iamToken,
-    projectEnv,
-    projectId,
-    systemOwners,
-  );
+  // await configureStyraDas(
+  //   iam,
+  //   styraToken,
+  //   styraUrl,
+  //   url,
+  //   iamToken,
+  //   projectEnv,
+  //   projectId,
+  //   systemOwners,
+  // );
 
   await configureBundleSync(iam, projectEnv);
 
