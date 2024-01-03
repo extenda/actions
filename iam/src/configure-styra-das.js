@@ -62,6 +62,7 @@ const configureStyraDas = async (
                 consumers,
                 iamToken,
                 iamUrl,
+                skipNamespace,
               )).catch((err) => errors.push(err));
           }
           core.info(`system '${systemName}' already exists in ${styraUrl}`);

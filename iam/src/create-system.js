@@ -310,6 +310,7 @@ const setupSystem = async (
   consumers,
   iamToken,
   iamUrl,
+  skipNamespace = false,
 ) => {
   const promises = [];
   const systemResult = await createSystem(service, systemName, repo, token, styraUrl, env);
@@ -323,7 +324,9 @@ const setupSystem = async (
   promises.push(setDefaultPolicy(systemResult.result.id, token, styraUrl));
   promises.push(setDefaultDataset(systemResult.result.id, token, styraUrl));
   promises.push(updateOwners(systemResult.result.id, token, styraUrl, systemOwners));
-  promises.push(applyConfiguration(opaConfig, systemName));
+  if (!skipNamespace) {
+    promises.push(applyConfiguration(opaConfig, systemName));
+  }
   promises.push(handleConsumers(systemResult.result.id, token, styraUrl, consumers, systemName));
 
   if (env === 'prod') {
