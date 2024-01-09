@@ -90,7 +90,7 @@ describe('Sonar Parameters', () => {
       const result = await createParams(
         'https://sonarcloud.io',
         'master',
-        './test',
+        './build/test',
         false,
         { extra: 'test' },
       );
@@ -98,7 +98,7 @@ describe('Sonar Parameters', () => {
     });
 
     test('SonarCloud', async () => {
-      const result = await createParams('https://sonarcloud.io', 'master', './test');
+      const result = await createParams('https://sonarcloud.io', 'master', './build/test');
       expect(result).toContain(expected['sonar.token']);
       expect(result).toContain(expected['sonar.host.url.sonarcloud']);
       expect(result).toContain(expected['sonar.organization']);
@@ -109,7 +109,7 @@ describe('Sonar Parameters', () => {
     });
 
     test('SonarQube', async () => {
-      const result = await createParams('https://sonar.extenda.io', 'master', './test');
+      const result = await createParams('https://sonar.extenda.io', 'master', './build/test');
       expect(result).toContain(expected['sonar.login']);
       expect(result).toContain(expected['sonar.host.url.extenda']);
       expect(result).toContain(`${expected['sonar.projectName']}_test`);
@@ -117,7 +117,7 @@ describe('Sonar Parameters', () => {
     });
 
     test('MS Params', async () => {
-      const result = await createParams('https://sonarcloud.io', 'master', './test', true);
+      const result = await createParams('https://sonarcloud.io', 'master', './build/test', true);
       expect(result).toContain('/d:sonar.token=sonar');
       expect(result).toContain('/d:sonar.host.url=https://sonarcloud.io');
       expect(result).toContain('/o:extenda');
