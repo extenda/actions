@@ -50,8 +50,8 @@ describe('Scan', () => {
 
     test('It supports working-directory', async () => {
       fs(ALL_FILE_TYPES);
-      await scan('https://sonarcloud.io', 'master', 'maven', { maven: 'scan' }, 'test');
-      expect(mvn.run.mock.calls[0][0]).toContain('-f test');
+      await scan('https://sonarcloud.io', 'master', 'maven', { maven: 'scan' }, './build/test');
+      expect(mvn.run.mock.calls[0][0]).toContain('-f ./build/test');
     });
   });
 

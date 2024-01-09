@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const axios = require('axios');
+const path = require('path');
 const qs = require('qs');
 const { sonarAuth } = require('./sonar-credentials');
 
@@ -15,7 +16,7 @@ const createSonarCloudProject = async (hostUrl, workingDir) => {
   const repo = process.env.GITHUB_REPOSITORY.split('/');
   let project = repo.join('_');
   if (workingDir && workingDir !== '.') {
-    const suffix = workingDir.replace(/^\.\/?/g, '');
+    const suffix = path.basename(workingDir);
     project = `${project}_${suffix}`;
   }
 

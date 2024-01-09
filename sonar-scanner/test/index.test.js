@@ -158,7 +158,7 @@ describe('Sonar-Scanner Action', () => {
 
   test('It will handle working-directory scans', async () => {
     process.env.GITHUB_REF = 'refs/heads/feature/test';
-    mockInputs('https://sonarcloud.io', 'auto', false, '', './test');
+    mockInputs('https://sonarcloud.io', 'auto', false, '', './build/test');
     mockPullRequest(true);
     mockPullRequest(true);
     checkQualityGate.mockResolvedValueOnce(0);
@@ -170,7 +170,7 @@ describe('Sonar-Scanner Action', () => {
       'master',
       'auto',
       defaultCommands,
-      './test',
+      './build/test',
     );
     expect(checkQualityGate).toHaveBeenCalled();
   });
