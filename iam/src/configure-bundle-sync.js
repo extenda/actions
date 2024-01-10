@@ -6,11 +6,7 @@ const getToken = async () => execGcloud(['auth', 'print-identity-token', '--audi
 
 const configureBundleSync = async (iam, env) => {
   const { 'permission-prefix': permissionPrefix, services = [] } = iam;
-
-  const dasWorker = axios.create({
-    baseURL: 'https://iam-das-worker.retailsvc.com/api/v1',
-    headers: { authorization: `Bearer ${await getToken()}` },
-  });
+  const token = await getToken();
 
   for (const system of services) {
     const { name, 'allowed-consumers': consumers } = system;
@@ -18,6 +14,13 @@ const configureBundleSync = async (iam, env) => {
     const systemId = `${permissionPrefix}.${name}-${env}`;
 
     core.info(`Upsert system ${systemId}`);
+
+    // staging IAM systems are updated by staging iam-das-worker
+    const dasWorkerEnv = permissionPrefix === 'iam' && env === 'staging' ? 'dev' : 'com';
+    const dasWorker = axios.create({
+      baseURL: `https://iam-das-worker.retailsvc.${dasWorkerEnv}/api/v1`,
+      headers: { authorization: `Bearer ${token}` },
+    });
 
     // eslint-disable-next-line no-await-in-loop
     await dasWorker.put(`/systems/${systemId}`);
