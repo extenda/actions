@@ -1,6 +1,5 @@
 jest.mock('@actions/core');
 jest.mock('../src/configure-iam');
-jest.mock('../src/configure-styra-das');
 jest.mock('../src/configure-bundle-sync');
 jest.mock('../src/iam-definition');
 jest.mock('../../iam-test-token/src/iam-auth');
@@ -15,7 +14,6 @@ const core = require('@actions/core');
 const fg = require('fast-glob');
 const action = require('../src/index');
 const { configureIAM } = require('../src/configure-iam');
-const configureStyraDas = require('../src/configure-styra-das');
 const configureBundleSync = require('../src/configure-bundle-sync');
 const fetchIamToken = require('../../iam-test-token/src/iam-auth');
 const loadIamDefinition = require('../src/iam-definition');
@@ -64,7 +62,6 @@ describe('run action', () => {
       'iam-pass',
       'iam-tenant',
     );
-    expect(configureStyraDas).not.toHaveBeenCalled();
     expect(configureBundleSync).toHaveBeenNthCalledWith(1, {}, 'staging');
     expect(configureIAM).toHaveBeenNthCalledWith(1, {}, 'https://iam-api.retailsvc.com', '', true);
     expect(configureBundleSync).toHaveBeenNthCalledWith(2, {}, 'prod');
@@ -100,7 +97,6 @@ describe('run action', () => {
       'iam-pass',
       'iam-tenant',
     );
-    expect(configureStyraDas).not.toHaveBeenCalled();
     expect(configureBundleSync).toHaveBeenNthCalledWith(1, {}, 'staging');
     expect(configureIAM).toHaveBeenNthCalledWith(1, {}, 'https://iam-api.retailsvc.dev', 'iam-token', false);
     expect(configureBundleSync).toHaveBeenNthCalledWith(2, {}, 'prod');
@@ -147,6 +143,5 @@ describe('run action', () => {
     expect(loadIamDefinition).toHaveBeenCalledTimes(2);
     expect(fetchIamToken).not.toHaveBeenCalled();
     expect(configureIAM).not.toHaveBeenCalled();
-    expect(configureStyraDas).not.toHaveBeenCalled();
   });
 });
