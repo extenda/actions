@@ -46,7 +46,7 @@ The following actions are available
   * [slack-notify](slack-notify#readme)
   * [sonar-scanner](sonar-scanner#readme)
   * [status-check](status-check#readme)
-  * [styra-das-deploy](styra-das-deploy#readme)
+  * ~~[styra-das-deploy](styra-das-deploy#readme)~~
   * ~~[styra-das-test](styra-das-test#readme)~~
   * [terraform-plan-comment](terraform-plan-comment#readme)
   * ~~[test-pod](test-pod#readme)~~
