@@ -1,5 +1,7 @@
 # styra-das-deploy
 
+**:warning: This action is deprecated and will be removed in v1.**
+
 This is an opinionated GitHub Action to publish a DAS staging policy to its matching DAS production system.
 
 The action makes the following assumptions:
