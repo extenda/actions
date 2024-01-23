@@ -1,6 +1,5 @@
 jest.mock('@actions/core');
 jest.mock('../src/configure-iam');
-jest.mock('../src/configure-styra-das');
 jest.mock('../src/configure-bundle-sync');
 jest.mock('../src/iam-definition');
 jest.mock('../../iam-test-token/src/iam-auth');
@@ -9,22 +8,18 @@ jest.mock('../../setup-gcloud');
 jest.mock('fast-glob');
 jest.mock('@actions/github');
 jest.mock('../../cloud-run/src/cluster-info');
-jest.mock('../src/system-owners');
 jest.mock('../../gcp-secret-manager/src/secrets');
 
 const core = require('@actions/core');
 const fg = require('fast-glob');
 const action = require('../src/index');
 const { configureIAM } = require('../src/configure-iam');
-const configureStyraDas = require('../src/configure-styra-das');
 const configureBundleSync = require('../src/configure-bundle-sync');
 const fetchIamToken = require('../../iam-test-token/src/iam-auth');
 const loadIamDefinition = require('../src/iam-definition');
 const { setupGcloud } = require('../../setup-gcloud');
 const loadCredentials = require('../src/load-credentials');
 const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
-const getSystemOwners = require('../src/system-owners');
-const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 
 const credentials = {
   styraToken: 'styra-token',
@@ -40,8 +35,6 @@ describe('run action', () => {
   });
 
   test('It can run the action', async () => {
-    loadSecret.mockResolvedValue('token');
-    getSystemOwners.mockResolvedValueOnce(['test@mail.com']);
     setupGcloud.mockResolvedValueOnce('test-staging-332');
     setupGcloud.mockResolvedValueOnce('test-prod-332');
     loadCredentials.mockResolvedValue(credentials);
@@ -69,37 +62,13 @@ describe('run action', () => {
       'iam-pass',
       'iam-tenant',
     );
-    expect(configureStyraDas).toHaveBeenNthCalledWith(
-      1,
-      {},
-      'styra-token',
-      'https://extendaretail.styra.com',
-      'https://iam-api.retailsvc.com',
-      '',
-      'staging',
-      'test-staging-332',
-      ['test@mail.com'],
-    );
     expect(configureBundleSync).toHaveBeenNthCalledWith(1, {}, 'staging');
     expect(configureIAM).toHaveBeenNthCalledWith(1, {}, 'https://iam-api.retailsvc.com', '', true);
-    expect(configureStyraDas).toHaveBeenNthCalledWith(
-      2,
-      {},
-      'styra-token',
-      'https://extendaretail.styra.com',
-      'https://iam-api.retailsvc.com',
-      'iam-token',
-      'prod',
-      'test-prod-332',
-      ['test@mail.com'],
-    );
     expect(configureBundleSync).toHaveBeenNthCalledWith(2, {}, 'prod');
     expect(configureIAM).toHaveBeenNthCalledWith(2, {}, 'https://iam-api.retailsvc.com', 'iam-token', false);
   });
 
   test('It can run the action for IAM api correctly', async () => {
-    loadSecret.mockResolvedValue('token');
-    getSystemOwners.mockResolvedValueOnce(['test@mail.com']);
     setupGcloud.mockResolvedValueOnce('test-staging-332');
     setupGcloud.mockResolvedValueOnce('test-prod-332');
     loadCredentials.mockResolvedValue(credentials);
@@ -128,37 +97,13 @@ describe('run action', () => {
       'iam-pass',
       'iam-tenant',
     );
-    expect(configureStyraDas).toHaveBeenNthCalledWith(
-      1,
-      {},
-      'styra-token',
-      'https://extendaretail.styra.com',
-      'https://iam-api.retailsvc.dev',
-      'iam-token',
-      'staging',
-      'test-staging-332',
-      ['test@mail.com'],
-    );
     expect(configureBundleSync).toHaveBeenNthCalledWith(1, {}, 'staging');
     expect(configureIAM).toHaveBeenNthCalledWith(1, {}, 'https://iam-api.retailsvc.dev', 'iam-token', false);
-    expect(configureStyraDas).toHaveBeenNthCalledWith(
-      2,
-      {},
-      'styra-token',
-      'https://extendaretail.styra.com',
-      'https://iam-api.retailsvc.com',
-      'iam-token',
-      'prod',
-      'test-prod-332',
-      ['test@mail.com'],
-    );
     expect(configureBundleSync).toHaveBeenNthCalledWith(2, {}, 'prod');
     expect(configureIAM).toHaveBeenNthCalledWith(2, {}, 'https://iam-api.retailsvc.com', 'iam-token', false);
   });
 
   test('It can run for multiple files', async () => {
-    loadSecret.mockResolvedValue('token');
-    getSystemOwners.mockResolvedValueOnce(['test@mail.com']);
     const clusterInfoResponse = {
       project: 'tribe-prod-1242',
     };
@@ -198,6 +143,5 @@ describe('run action', () => {
     expect(loadIamDefinition).toHaveBeenCalledTimes(2);
     expect(fetchIamToken).not.toHaveBeenCalled();
     expect(configureIAM).not.toHaveBeenCalled();
-    expect(configureStyraDas).not.toHaveBeenCalled();
   });
 });

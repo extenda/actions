@@ -30,6 +30,7 @@ inputs:
       The styra url
     required: false
     default: https://extendaretail.svc.styra.com
+    deprecationMessage: Styra DAS synchronization is no longer supported.
   dry-run:
     description: |
       If 'true' stop after validating the YAML schema. No remote systems will be updated.

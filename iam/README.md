@@ -27,7 +27,6 @@ jobs:
           service-account-key-staging: ${{ secrets.GCLOUD_AUTH_STAGING }} # Used to configure and create DAS-system on the correct cluster/environment (required)
           service-account-key-prod: ${{ secrets.GCLOUD_AUTH_PROD }} # Used to configure and create DAS-system on the correct cluster/environment (required)
           iam-definition: iam/*.yaml # default will match iam/*.yaml
-          styra-url: https://extendaretail.svc.styra.com # default https://extendaretail.svc.styra.com 
 ```
 
 ## IAM YAML
@@ -68,7 +67,7 @@ properties are required and not.
 
 #### Create permissions and roles
 
-This example defines a YAML file that creates roles and permissions for the DAS system `bhq`
+This example defines a YAML file that creates roles and permissions for the system `bhq`
 ```yaml
 name: Braveheart Quotes
 permission-prefix: bhq
@@ -114,7 +113,7 @@ roles:
 
 #### Create consumers for services
 
-This example defines a YAML file that creates roles and permissions for the DAS system `bhq`
+This example defines a YAML file that creates roles and permissions for the system `bhq`
 ```yaml
 name: quotes service
 permission-prefix: bhq

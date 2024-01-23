@@ -1,7 +1,6 @@
 const core = require('@actions/core');
 const { setupPermissions, handlePermissions } = require('./permissions');
 const { setupRoles } = require('./roles');
-const checkSystem = require('./check-system');
 
 const configureIAM = async (
   iam,
@@ -40,5 +39,4 @@ const configureIAM = async (
 
 module.exports = {
   configureIAM,
-  checkSystem,
 };
