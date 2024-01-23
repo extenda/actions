@@ -10,7 +10,7 @@ inputs:
   version:
     description: Optional gcloud version to install. Defaults to 'latest'.
     required: false
-    default: latest
+    default: 460.0.0 # Temporary workaround until 461.0.0 is patched.
   export-default-credentials:
     description: |
       Export the path to the credentials as `GOOGLE_APPLICATION_CREDENTIALS` to be used in subsequent steps.
