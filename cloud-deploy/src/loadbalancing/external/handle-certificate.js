@@ -55,6 +55,11 @@ const handleCertificates = async (hosts, project) => {
   const certificateListNames = [];
   const totalCertificates = certificateList ? certificateList.length : 0;
 
+  // temporary for iam-prod
+  if (project === 'iam-prod-4aad') {
+    certificateListNames.push('extenda-base-certificate');
+  }
+
   for (const certificate of certificateList) {
     const version = parseInt(certificate.name.split('-')[2].substring(1), 10);
     const created = new Date(certificate.creationTimestamp);
