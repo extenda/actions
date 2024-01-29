@@ -1,6 +1,6 @@
+const path = require('path');
 const { credentials } = require('./sonar-credentials');
 const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
-const path = require('path');
 
 const createParams = async (hostUrl, mainBranch, workingDir = '.', msParams = false, extraParams = {}) => {
   const sonarCloud = hostUrl.startsWith('https://sonarcloud.io');
