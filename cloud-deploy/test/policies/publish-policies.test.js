@@ -1,16 +1,15 @@
 const mockFs = require('mock-fs');
-const axios = require('axios');
+const { Axios } = require('axios');
 const { execGcloud } = require('../../../setup-gcloud');
 const publishPolicies = require('../../src/policies/publish-policies');
 
-jest.mock('axios');
 jest.mock('../../../setup-gcloud');
 
 describe('Publish policies', () => {
   let axiosPut;
 
   beforeEach(() => {
-    axiosPut = jest.spyOn(axios.Axios.prototype, 'put');
+    axiosPut = jest.spyOn(Axios.prototype, 'put');
     execGcloud.mockResolvedValueOnce('idToken');
   });
 
