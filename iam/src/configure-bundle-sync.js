@@ -1,6 +1,6 @@
 const core = require('@actions/core');
-const axios = require('axios');
 const { execGcloud } = require('../../setup-gcloud');
+const createDasWorkerClient = require('./das-worker-client');
 
 const getToken = async () => execGcloud(['auth', 'print-identity-token', '--audiences=iam-das-worker']);
 
@@ -15,12 +15,7 @@ const configureBundleSync = async (iam, env) => {
 
     core.info(`Upsert system ${systemId}`);
 
-    // staging IAM systems are updated by staging iam-das-worker
-    const dasWorkerEnv = permissionPrefix === 'iam' && env === 'staging' ? 'dev' : 'com';
-    const dasWorker = axios.create({
-      baseURL: `https://iam-das-worker.retailsvc.${dasWorkerEnv}/api/v1`,
-      headers: { authorization: `Bearer ${token}` },
-    });
+    const dasWorker = createDasWorkerClient(systemId, token);
 
     // eslint-disable-next-line no-await-in-loop
     await dasWorker.put(`/systems/${systemId}`);
