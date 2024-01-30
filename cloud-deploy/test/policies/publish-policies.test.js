@@ -1,15 +1,17 @@
 const mockFs = require('mock-fs');
-const { Axios } = require('axios');
+const axios = require('axios');
 const { execGcloud } = require('../../../setup-gcloud');
 const publishPolicies = require('../../src/policies/publish-policies');
 
+jest.mock('axios');
 jest.mock('../../../setup-gcloud');
 
 describe('Publish policies', () => {
-  let axiosPut;
+  let mockPut;
 
   beforeEach(() => {
-    axiosPut = jest.spyOn(Axios.prototype, 'put');
+    mockPut = jest.fn().mockResolvedValueOnce({});
+    axios.create.mockReturnValue({ put: mockPut });
     execGcloud.mockResolvedValueOnce('idToken');
   });
 
@@ -25,7 +27,7 @@ describe('Publish policies', () => {
       'policies/system/log/mask.rego': 'mask',
     });
 
-    axiosPut.mockResolvedValueOnce({ status: 200 });
+    mockPut.mockResolvedValueOnce({ status: 200 });
     await publishPolicies(
       'my-service',
       'prod',
@@ -38,7 +40,7 @@ describe('Publish policies', () => {
     );
 
     expect(execGcloud).toHaveBeenCalledWith(['auth', 'print-identity-token', '--audiences=iam-das-worker']);
-    expect(axiosPut).toHaveBeenCalledWith(
+    expect(mockPut).toHaveBeenCalledWith(
       '/systems/tst.my-service-prod/policies',
       {
         revision: '0.0.1-local',
@@ -58,7 +60,7 @@ describe('Publish policies', () => {
       'policies/system/log/mask.rego': 'mask',
     });
 
-    axiosPut.mockResolvedValueOnce({ status: 200 });
+    mockPut.mockResolvedValueOnce({ status: 200 });
     await publishPolicies(
       'my-service',
       'prod',
@@ -72,7 +74,7 @@ describe('Publish policies', () => {
     );
 
     expect(execGcloud).toHaveBeenCalledWith(['auth', 'print-identity-token', '--audiences=iam-das-worker']);
-    expect(axiosPut).toHaveBeenCalledWith(
+    expect(mockPut).toHaveBeenCalledWith(
       '/systems/tst.service123-prod/policies',
       {
         revision: '0.0.1-local',
@@ -98,7 +100,7 @@ describe('Publish policies', () => {
       },
     );
     expect(execGcloud).not.toHaveBeenCalled();
-    expect(axiosPut).not.toHaveBeenCalled();
+    expect(mockPut).not.toHaveBeenCalled();
   });
 
   test('It will not upload policies if files does not exist', async () => {
@@ -114,7 +116,7 @@ describe('Publish policies', () => {
       },
     );
     expect(execGcloud).not.toHaveBeenCalled();
-    expect(axiosPut).not.toHaveBeenCalled();
+    expect(mockPut).not.toHaveBeenCalled();
   });
 
   test('It adds default log mask', async () => {
@@ -123,7 +125,7 @@ describe('Publish policies', () => {
       'policies/policy/com.styra.envoy.ingress/test/test/test.rego': 'test',
     });
 
-    axiosPut.mockResolvedValueOnce({ status: 200 });
+    mockPut.mockResolvedValueOnce({ status: 200 });
     await publishPolicies(
       'my-service',
       'prod',
@@ -136,7 +138,7 @@ describe('Publish policies', () => {
     );
 
     expect(execGcloud).toHaveBeenCalled();
-    expect(axiosPut).toHaveBeenCalledWith(
+    expect(mockPut).toHaveBeenCalledWith(
       '/systems/tst.my-service-prod/policies',
       {
         revision: '0.0.1-local',
@@ -155,7 +157,7 @@ describe('Publish policies', () => {
       'policies/policy/com.styra.envoy.ingress/test/test/test.rego': 'test',
     });
 
-    axiosPut.mockRejectedValueOnce(new Error('TEST'));
+    mockPut.mockRejectedValueOnce(new Error('TEST'));
     await expect(publishPolicies(
       'my-service',
       'prod',
@@ -168,7 +170,7 @@ describe('Publish policies', () => {
     )).rejects.toThrow(new Error('TEST'));
 
     expect(execGcloud).toHaveBeenCalled();
-    expect(axiosPut).toHaveBeenCalledWith(
+    expect(mockPut).toHaveBeenCalledWith(
       '/systems/tst.my-service-prod/policies',
       {
         revision: '0.0.1-local',
