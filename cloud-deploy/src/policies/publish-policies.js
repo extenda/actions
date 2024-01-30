@@ -36,11 +36,13 @@ const createPayload = (version) => {
 const publishPolicies = async (serviceName, env, version, deployYaml) => {
   const { security: { 'permission-prefix': permissionPrefix, 'system-name': systemName } } = deployYaml;
   if (permissionPrefix && fs.existsSync(path.join('policies', 'policy'))) {
+    // staging IAM systems are updated by staging iam-das-worker
+    const dasWorkerEnv = permissionPrefix === 'iam' && env === 'staging' ? 'dev' : 'com';
     const systemId = `${permissionPrefix}.${systemName || serviceName}-${env}`;
     core.info(`Publish security policies for ${systemId}`);
     const idToken = await execGcloud(['auth', 'print-identity-token', '--audiences=iam-das-worker']);
     await axios.put(
-      `https://iam-das-worker.retailsvc.com/api/v1/systems/${systemId}/policies`,
+      `https://iam-das-worker.retailsvc.${dasWorkerEnv}/api/v1/systems/${systemId}/policies`,
       createPayload(version),
       {
         headers: {
