@@ -7,11 +7,7 @@ jest.mock('axios');
 jest.mock('../../../setup-gcloud');
 
 describe('Publish policies', () => {
-  let mockPut;
-
   beforeEach(() => {
-    mockPut = jest.fn().mockResolvedValueOnce({});
-    axios.create.mockReturnValue({ put: mockPut });
     execGcloud.mockResolvedValueOnce('idToken');
   });
 
@@ -27,7 +23,7 @@ describe('Publish policies', () => {
       'policies/system/log/mask.rego': 'mask',
     });
 
-    mockPut.mockResolvedValueOnce({ status: 200 });
+    axios.put.mockResolvedValueOnce({ status: 200 });
     await publishPolicies(
       'my-service',
       'prod',
@@ -40,8 +36,8 @@ describe('Publish policies', () => {
     );
 
     expect(execGcloud).toHaveBeenCalledWith(['auth', 'print-identity-token', '--audiences=iam-das-worker']);
-    expect(mockPut).toHaveBeenCalledWith(
-      '/systems/tst.my-service-prod/policies',
+    expect(axios.put).toHaveBeenCalledWith(
+      'https://iam-das-worker.retailsvc.com/api/v1/systems/tst.my-service-prod/policies',
       {
         revision: '0.0.1-local',
         files: expect.arrayContaining([
@@ -49,6 +45,11 @@ describe('Publish policies', () => {
           { path: 'policy/com.styra.envoy.ingress/test/test/test.rego', content: 'test' },
           { path: 'system/log/mask.rego', content: 'mask' },
         ]),
+      },
+      {
+        headers: {
+          authorization: 'Bearer idToken',
+        },
       },
     );
   });
@@ -60,7 +61,7 @@ describe('Publish policies', () => {
       'policies/system/log/mask.rego': 'mask',
     });
 
-    mockPut.mockResolvedValueOnce({ status: 200 });
+    axios.put.mockResolvedValueOnce({ status: 200 });
     await publishPolicies(
       'my-service',
       'prod',
@@ -74,8 +75,8 @@ describe('Publish policies', () => {
     );
 
     expect(execGcloud).toHaveBeenCalledWith(['auth', 'print-identity-token', '--audiences=iam-das-worker']);
-    expect(mockPut).toHaveBeenCalledWith(
-      '/systems/tst.service123-prod/policies',
+    expect(axios.put).toHaveBeenCalledWith(
+      'https://iam-das-worker.retailsvc.com/api/v1/systems/tst.service123-prod/policies',
       {
         revision: '0.0.1-local',
         files: expect.arrayContaining([
@@ -83,6 +84,11 @@ describe('Publish policies', () => {
           { path: 'policy/com.styra.envoy.ingress/test/test/test.rego', content: 'test' },
           { path: 'system/log/mask.rego', content: 'mask' },
         ]),
+      },
+      {
+        headers: {
+          authorization: 'Bearer idToken',
+        },
       },
     );
   });
@@ -100,7 +106,7 @@ describe('Publish policies', () => {
       },
     );
     expect(execGcloud).not.toHaveBeenCalled();
-    expect(mockPut).not.toHaveBeenCalled();
+    expect(axios.put).not.toHaveBeenCalled();
   });
 
   test('It will not upload policies if files does not exist', async () => {
@@ -116,7 +122,7 @@ describe('Publish policies', () => {
       },
     );
     expect(execGcloud).not.toHaveBeenCalled();
-    expect(mockPut).not.toHaveBeenCalled();
+    expect(axios.put).not.toHaveBeenCalled();
   });
 
   test('It adds default log mask', async () => {
@@ -125,7 +131,7 @@ describe('Publish policies', () => {
       'policies/policy/com.styra.envoy.ingress/test/test/test.rego': 'test',
     });
 
-    mockPut.mockResolvedValueOnce({ status: 200 });
+    axios.put.mockResolvedValueOnce({ status: 200 });
     await publishPolicies(
       'my-service',
       'prod',
@@ -138,8 +144,8 @@ describe('Publish policies', () => {
     );
 
     expect(execGcloud).toHaveBeenCalled();
-    expect(mockPut).toHaveBeenCalledWith(
-      '/systems/tst.my-service-prod/policies',
+    expect(axios.put).toHaveBeenCalledWith(
+      'https://iam-das-worker.retailsvc.com/api/v1/systems/tst.my-service-prod/policies',
       {
         revision: '0.0.1-local',
         files: expect.arrayContaining([
@@ -147,6 +153,11 @@ describe('Publish policies', () => {
           { path: 'policy/com.styra.envoy.ingress/test/test/test.rego', content: 'test' },
           { path: 'system/log/mask.rego', content: expect.stringContaining('mask["/input/attributes/request/http/headers/authorization"]') },
         ]),
+      },
+      {
+        headers: {
+          authorization: 'Bearer idToken',
+        },
       },
     );
   });
@@ -157,7 +168,7 @@ describe('Publish policies', () => {
       'policies/policy/com.styra.envoy.ingress/test/test/test.rego': 'test',
     });
 
-    mockPut.mockRejectedValueOnce(new Error('TEST'));
+    axios.put.mockRejectedValueOnce(new Error('TEST'));
     await expect(publishPolicies(
       'my-service',
       'prod',
@@ -170,8 +181,8 @@ describe('Publish policies', () => {
     )).rejects.toThrow(new Error('TEST'));
 
     expect(execGcloud).toHaveBeenCalled();
-    expect(mockPut).toHaveBeenCalledWith(
-      '/systems/tst.my-service-prod/policies',
+    expect(axios.put).toHaveBeenCalledWith(
+      'https://iam-das-worker.retailsvc.com/api/v1/systems/tst.my-service-prod/policies',
       {
         revision: '0.0.1-local',
         files: expect.arrayContaining([
@@ -179,6 +190,11 @@ describe('Publish policies', () => {
           { path: 'policy/com.styra.envoy.ingress/test/test/test.rego', content: 'test' },
           { path: 'system/log/mask.rego', content: expect.any(String) },
         ]),
+      },
+      {
+        headers: {
+          authorization: 'Bearer idToken',
+        },
       },
     );
   });

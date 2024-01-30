@@ -1,9 +1,10 @@
 const core = require('@actions/core');
+const axios = require('axios');
 const fs = require('fs');
 const glob = require('fast-glob');
 const path = require('path');
 const { execGcloud } = require('../../../setup-gcloud');
-const createDasWorkerClient = require('../../../iam/src/das-worker-client');
+const getDasWorkerBaseUrl = require('../../../iam/src/das-worker-base-url');
 
 const DEFAULT_LOG_MASK = `package system.log
 
@@ -36,15 +37,18 @@ const createPayload = (version) => {
 const publishPolicies = async (serviceName, env, version, deployYaml) => {
   const { security: { 'permission-prefix': permissionPrefix, 'system-name': systemName } } = deployYaml;
   if (permissionPrefix && fs.existsSync(path.join('policies', 'policy'))) {
+    const dasWorkerBaseUrl = getDasWorkerBaseUrl(systemId);
     const systemId = `${permissionPrefix}.${systemName || serviceName}-${env}`;
     core.info(`Publish security policies for ${systemId}`);
-
-    const token = await execGcloud(['auth', 'print-identity-token', '--audiences=iam-das-worker']);
-    const dasWorker = createDasWorkerClient(systemId, token);
-
-    await dasWorker.put(
-      `/systems/${systemId}/policies`,
+    const idToken = await execGcloud(['auth', 'print-identity-token', '--audiences=iam-das-worker']);
+    await axios.put(
+      `${dasWorkerBaseUrl}/systems/${systemId}/policies`,
       createPayload(version),
+      {
+        headers: {
+          authorization: `Bearer ${idToken}`,
+        },
+      },
     );
   }
 };

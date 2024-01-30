@@ -1,6 +1,7 @@
+const axios = require('axios');
 const core = require('@actions/core');
 const { execGcloud } = require('../../setup-gcloud');
-const createDasWorkerClient = require('./das-worker-client');
+const getDasWorkerBaseUrl = require('./das-worker-base-url');
 
 const getToken = async () => execGcloud(['auth', 'print-identity-token', '--audiences=iam-das-worker']);
 
@@ -15,7 +16,10 @@ const configureBundleSync = async (iam, env) => {
 
     core.info(`Upsert system ${systemId}`);
 
-    const dasWorker = createDasWorkerClient(systemId, token);
+    const dasWorker = axios.create({
+      baseURL: getDasWorkerBaseUrl(systemId, token),
+      headers: { authorization: `Bearer ${token}` },
+    });
 
     // eslint-disable-next-line no-await-in-loop
     await dasWorker.put(`/systems/${systemId}`);
