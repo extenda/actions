@@ -57,7 +57,6 @@ describe('Jira Release Action', () => {
       .mockReturnValueOnce('')
       .mockReturnValueOnce('2.0.0');
     createJiraRelease.mockRejectedValueOnce(new Error('Test'));
-
-     await expect(action()).resolves.not.toThrow();
+    await expect(action()).resolves.not.toThrow();
   });
 });
