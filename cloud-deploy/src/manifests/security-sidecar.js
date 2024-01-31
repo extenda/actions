@@ -50,8 +50,8 @@ const securitySpec = async (protocol, platformGKE = true) => {
           },
           initialDelaySeconds: 5,
           periodSeconds: 10,
-          timeoutSeconds: 5,
-          failureThreshold: 5,
+          timeoutSeconds: 3,
+          failureThreshold: 3,
         },
         volumeMounts: volumeMounts(protocol),
       };

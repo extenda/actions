@@ -100,10 +100,10 @@ const cloudrunManifestTemplate = async (
       tcpSocket: {
         port: 8080,
       },
-      initialDelaySeconds: 3,
-      periodSeconds: 5,
-      failureThreshold: 10,
-      timeoutSeconds: 3,
+      initialDelaySeconds: 0,
+      periodSeconds: 240,
+      failureThreshold: 1,
+      timeoutSeconds: 240,
     },
   }];
 
