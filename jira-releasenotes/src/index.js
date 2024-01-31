@@ -15,5 +15,5 @@ run(async () => {
     host,
     projectKey,
     releaseNoteField,
-  });
+  }).catch((err) => core.error(`Failed to create release notes. Reason: ${err.message}`));
 });
