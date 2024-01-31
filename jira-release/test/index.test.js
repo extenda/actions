@@ -38,6 +38,8 @@ describe('Jira Release Action', () => {
       .mockReturnValueOnce('')
       .mockReturnValueOnce('2.0.0');
 
+    createJiraRelease.mockResolvedValueOnce(0);
+
     await action();
     expect(createJiraRelease).toHaveBeenCalledWith({
       protocol: 'https',
@@ -46,5 +48,16 @@ describe('Jira Release Action', () => {
       component: '',
       version: '2.0.0',
     });
+  });
+
+  test('It catches Jira error', async () => {
+    core.getInput.mockReturnValueOnce('https')
+      .mockReturnValueOnce('jira.test.com')
+      .mockReturnValueOnce('TEST')
+      .mockReturnValueOnce('')
+      .mockReturnValueOnce('2.0.0');
+    createJiraRelease.mockRejectedValueOnce(new Error('Test'));
+
+     await expect(action()).resolves.not.toThrow();
   });
 });
