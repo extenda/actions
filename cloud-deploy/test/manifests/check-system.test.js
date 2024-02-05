@@ -1,31 +1,21 @@
 jest.mock('@actions/core');
 jest.mock('request');
+jest.mock('../../src/utils/gcloud-output', () => jest.fn().mockImplementation(() => Promise.resolve()));
 
-const request = require('request');
-const checkSystem = require('../../src/manifests/check-system');
+const checkIamSystem = require('../../src/manifests/check-system');
+const execGcloud = require('../../src/utils/gcloud-output');
 
-describe('Check styra system', () => {
+describe('Check iam bundles system', () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  test('It can check system exists', async () => {
-    const systemInfo = {
-      result: [
-        {
-          name: 'test-staging',
-        },
-      ],
-    };
-
-    request.mockImplementation((conf, cb) => cb(
-      null,
-      { statusCode: 200 },
-      JSON.stringify(systemInfo),
-    ));
-
-    await checkSystem('systemName', 'styraToken', 'styraUrl');
-
-    expect(request).toHaveBeenCalledTimes(1);
+  test('It can check bundle exists', async () => {
+    execGcloud.mockResolvedValueOnce(true);
+    await checkIamSystem('systemName');
+    expect(execGcloud).toHaveBeenNthCalledWith(1, [
+      'ls',
+      'gs://authz-bundles/systems/systemName.tar.gz',
+    ], 'gsutil', expect.anything(), expect.anything());
   });
 });

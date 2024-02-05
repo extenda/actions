@@ -1,9 +1,7 @@
 const mockFs = require('mock-fs');
 const fs = require('fs');
-const yaml = require('js-yaml');
 const buildManifest = require('../../src/manifests/build-manifest');
 const checkSystem = require('../../src/manifests/check-system');
-const buildOpaConfig = require('../../src/manifests/opa-config');
 const securitySpec = require('../../src/manifests/security-sidecar');
 const handleStatefulset = require('../../src/manifests/statefulset-workaround');
 const { addNamespace } = require('../../src/utils/add-namespace');
@@ -70,7 +68,7 @@ describe('buildManifest', () => {
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
 
     expect(checkSystem).not.toHaveBeenCalled();
     expect(securitySpec).not.toHaveBeenCalled();
@@ -155,7 +153,7 @@ metadata:
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
 
     expect(checkSystem).not.toHaveBeenCalled();
     expect(securitySpec).not.toHaveBeenCalled();
@@ -209,7 +207,7 @@ metadata:
 
   test('should set OPA env vars', async () => {
     // const mockWriteFile = jest.spyOn(fs, 'writeFileSync').mockImplementation();
-    checkSystem.mockResolvedValueOnce({ id: 'some-id' });
+    checkSystem.mockResolvedValueOnce(true);
     securitySpec.mockResolvedValueOnce({
       name: 'security-authz',
       image: 'eu.gcr.io/extenda/security:authz',
@@ -217,31 +215,6 @@ metadata:
       env: [{ name: 'ENVOY_PROTOCOL', value: 'http' }],
       volumeMounts: [{ mountPath: '/config', name: 'opa', readOnly: true }],
     });
-
-    const opaConfig = {
-      kind: 'ConfigMap',
-      apiVersion: 'v1',
-      metadata: {
-        name: 'opa-envoy-config',
-        namespace: 'service-name',
-      },
-      data: {
-        'conf.yaml': `services:
-    - name: styra
-      url: url
-      credentials:
-        bearer:
-          token: "styraToken"
-  labels:
-    system-id: "some-id"
-    system-type: "envoy"
-  discovery:
-    name: discovery
-    prefix: "/systems/some-id"\n`,
-      },
-    };
-
-    buildOpaConfig.mockResolvedValueOnce({ config: yaml.dump(opaConfig), token: 'styraToken', systemId: 'some-id' });
 
     const image = 'example-image:latest';
     const service = {
@@ -282,7 +255,7 @@ metadata:
     const clanName = 'example-clan';
     const env = 'dev';
 
-    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
 
     // Snapshot test for k8s-manifest.yaml.
     const manifest = readFileSync('k8s(deploy)-manifest.yaml');
@@ -329,7 +302,7 @@ metadata:
     const clanName = 'example-clan';
     const env = 'dev';
 
-    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
 
     // Snapshot test for k8s-manifest.yaml.
     const manifest = readFileSync('k8s(deploy)-manifest.yaml');
@@ -380,7 +353,7 @@ metadata:
     const clanName = 'example-clan';
     const env = 'dev';
 
-    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
 
     // Snapshot test for k8s-manifest.yaml.
     const manifest = readFileSync('k8s(deploy)-manifest.yaml');
@@ -425,7 +398,7 @@ metadata:
     const clanName = 'example-clan';
     const env = 'dev';
 
-    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
 
     // Snapshot test for cloudrun-service.yaml.
     const manifest = readFileSync('cloudrun-service.yaml');
@@ -473,29 +446,6 @@ metadata:
     const clanName = 'example-clan';
     const env = 'dev';
 
-    const opaConfig = {
-      kind: 'ConfigMap',
-      apiVersion: 'v1',
-      metadata: {
-        name: 'opa-envoy-config',
-        namespace: 'service-name',
-      },
-      data: {
-        'conf.yaml': `services:
-    - name: styra
-      url: url
-      credentials:
-        bearer:
-          token: "styraToken"
-  labels:
-    system-id: "some-id"
-    system-type: "envoy"
-  discovery:
-    name: discovery
-    prefix: "/systems/some-id"\n`,
-      },
-    };
-
     const securityContainer = {
       name: 'security-authz',
       image: 'image',
@@ -511,11 +461,10 @@ metadata:
       }],
     };
 
-    checkSystem.mockResolvedValueOnce({ system: { id: 'system-id' } });
+    checkSystem.mockResolvedValueOnce(true);
     securitySpec.mockResolvedValueOnce(securityContainer);
-    buildOpaConfig.mockResolvedValueOnce({ config: yaml.dump(opaConfig), systemId: 'system-id', token: 'token' });
 
-    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
 
     // Snapshot test for cloudrun-service.yaml.
     const manifest = readFileSync('cloudrun-service.yaml');
@@ -564,7 +513,7 @@ metadata:
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
     const k8sManifest = readFileSync('k8s(deploy)-manifest.yaml');
 
     // Snapshot test for k8s-manifest.yaml.
@@ -612,9 +561,8 @@ metadata:
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
     const k8sManifest = readFileSync('k8s(deploy)-manifest.yaml');
-
     // Snapshot test for k8s-manifest.yaml.
     mockFs.restore();
     expect(k8sManifest).toMatchSnapshot();
@@ -665,10 +613,55 @@ metadata:
     const clanName = 'example-clan';
     const env = 'staging';
 
-    await buildManifest(image, service, projectId, clanName, env, 'styra-token', '', '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
     const k8sManifest = readFileSync('k8s(deploy)-manifest.yaml');
     // Snapshot test for k8s-manifest.yaml.
     mockFs.restore();
     expect(k8sManifest).toMatchSnapshot();
+  });
+
+  test('It should generate cloud run service with security', async () => {
+    const image = 'example-image:latest';
+    const service = {
+      'cloud-run': {
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          concurrency: 80,
+        },
+        'startup-cpu-boost': true,
+        'cpu-throttling': false,
+        'session-affinity': true,
+        'vpc-connector': true,
+      },
+      security: {
+        'permission-prefix': 'tst',
+      },
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+          },
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'dev';
+
+    checkSystem.mockResolvedValueOnce(false);
+
+    await expect(buildManifest(image, service, projectId, clanName, env, '', '', '', '', '')).rejects.toThrow('Bundle not found with the name tst.example-service-dev');
   });
 });

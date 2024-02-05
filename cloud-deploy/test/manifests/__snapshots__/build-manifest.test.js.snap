@@ -135,10 +135,6 @@ spec:
           env:
             - name: ENVOY_PROTOCOL
               value: http
-            - name: OPA_CONFIG_SERVICE_TOKEN
-              value: token
-            - name: OPA_CONFIG_SYSTEM_ID
-              value: system-id
             - name: CPU_LIMIT
               value: '0.5'
           resources:
@@ -1018,10 +1014,6 @@ spec:
           env:
             - name: ENVOY_PROTOCOL
               value: http
-            - name: OPA_CONFIG_SERVICE_TOKEN
-              value: styraToken
-            - name: OPA_CONFIG_SYSTEM_ID
-              value: some-id
             - name: CPU_LIMIT
               value: '0.5'
           volumeMounts:
