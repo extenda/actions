@@ -620,7 +620,7 @@ metadata:
     expect(k8sManifest).toMatchSnapshot();
   });
 
-  test('It should generate cloud run service with security', async () => {
+  test('It should fail deploy if bundle is missing', async () => {
     const image = 'example-image:latest';
     const service = {
       'cloud-run': {
