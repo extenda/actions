@@ -12,7 +12,7 @@ inputs:
   jira-host:
     description: The JIRA host name
     required: true
-    default: jira.extendaretail.com
+    default: extendaretail.atlassian.net
   field-releasenote:
     description: The human friendly custom JIRA field name to populate with release notes
     required: true
