@@ -1,25 +1,12 @@
-const request = require('request');
+const execGcloud = require('../utils/gcloud-output');
 
-const checkSystem = async (systemName, styraToken, styraUrl) => new Promise((resolve) => {
-  const url = `${styraUrl}/v1/systems?compact=false&name=${systemName}`;
-  request({
-    uri: url,
-    method: 'GET',
-    headers: {
-      'Content-type': 'application/json',
-      Authorization: `bearer ${styraToken}`,
-    },
-  }, (error, res, body) => {
-    if (!error) {
-      const jsonBody = JSON.parse(body);
-      jsonBody.result.forEach((result) => {
-        if (result.name === `${systemName}`) {
-          resolve(result);
-        }
-      });
-      resolve({ id: '' });
-    }
-  });
-});
+const checkIamSystem = async (systemName) => {
+  const bucketPointer = `gs://authz-bundles/systems/${systemName}.tar.gz`;
+  const result = await execGcloud([
+    'ls',
+    bucketPointer,
+  ], 'gsutil', true, true).then(() => true).catch(() => false);
+  return result;
+};
 
-module.exports = checkSystem;
+module.exports = checkIamSystem;

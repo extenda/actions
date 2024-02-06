@@ -1,12 +1,11 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
 const core = require('@actions/core');
-const checkSystem = require('./check-system');
-const buildOpaConfig = require('./opa-config');
 const { addNamespace } = require('../utils/add-namespace');
 const securitySpec = require('./security-sidecar');
 const readSecret = require('../utils/load-credentials');
 const handleStatefulset = require('./statefulset-workaround');
+const checkIamSystem = require('./check-system');
 
 const convertToYaml = (json) => yaml.dump(json);
 
@@ -53,7 +52,6 @@ const cloudrunManifestTemplate = async (
   cpuThrottling,
   cpuBoost,
   sessionAffinity,
-  styraSystemInfo,
   connector,
   clanName,
 ) => {
@@ -116,8 +114,6 @@ const cloudrunManifestTemplate = async (
     };
     const securityContainer = await securitySpec(protocol, false);
     securityContainer.env.push(
-      { name: 'OPA_CONFIG_SERVICE_TOKEN', value: `${styraSystemInfo.token}` },
-      { name: 'OPA_CONFIG_SYSTEM_ID', value: styraSystemInfo.systemId },
       { name: 'CPU_LIMIT', value: `${opaCpu}` },
     );
     securityContainer.resources = resources;
@@ -180,7 +176,6 @@ const manifestTemplate = async (
   opaMemory,
   deployEnv,
   availability,
-  styraSystemInfo,
 ) => {
   // initialize manifest components
 
@@ -190,8 +185,6 @@ const manifestTemplate = async (
   const securityContainer = opa ? await securitySpec(protocol) : {};
   if (opa) {
     securityContainer.env.push(
-      { name: 'OPA_CONFIG_SERVICE_TOKEN', value: `${styraSystemInfo.token}` },
-      { name: 'OPA_CONFIG_SYSTEM_ID', value: styraSystemInfo.systemId },
       { name: 'CPU_LIMIT', value: `${opaCpu}` },
     );
   }
@@ -467,7 +460,6 @@ const buildManifest = async (
   projectId,
   clanName,
   deployEnv,
-  styraToken,
   timeout,
   http2Certificate,
   internalCert,
@@ -549,20 +541,14 @@ const buildManifest = async (
   const serviceAccount = `${name}@${projectId}.iam.gserviceaccount.com`;
 
   await prepareGcloudDeploy(name, projectId, clanName, deployEnv, kubernetes ? 'gke' : 'cloudrun');
-  let styraSystemInfo;
   if (permissionPrefix) {
     opa = true;
-    const styraUrl = 'https://extendaretail.svc.styra.com';
-    const styraSystemName = `${permissionPrefix}.${systemName}-${deployEnv}`;
-    const system = await checkSystem(styraSystemName, styraToken, styraUrl);
-    if (system.id === '') {
-      throw new Error(`Styra system not found with the name ${styraSystemName}`);
+    const bundleName = `${permissionPrefix}.${systemName}-${deployEnv}`;
+    if (!await checkIamSystem(bundleName)) {
+      throw new Error(`Bundle not found with the name ${bundleName}`);
     } else {
-      // Required until we no longer load Styra DAS config.
-      styraSystemInfo = await buildOpaConfig(system.id, styraToken, name, styraUrl);
-
       // Our new GCS system name.
-      process.env.IAM_SYSTEM_NAME = styraSystemName;
+      process.env.IAM_SYSTEM_NAME = bundleName;
     }
   }
   if (kubernetes) {
@@ -587,7 +573,6 @@ const buildManifest = async (
       opaResources.memory,
       deployEnv,
       availability,
-      styraSystemInfo,
     );
 
     if (type === 'StatefulSet' && volumes) {
@@ -623,7 +608,6 @@ const buildManifest = async (
       cpuThrottling,
       cpuBoost,
       sessionAffinity,
-      styraSystemInfo,
       connector,
       clanName,
     );
