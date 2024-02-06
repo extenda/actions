@@ -112,8 +112,7 @@ describe('Action', () => {
       .mockReturnValueOnce('clan-service-account')
       .mockReturnValueOnce('cloud-run.yaml')
       .mockReturnValueOnce('gcr.io/project/image:tag');
-    loadCredentials.mockResolvedValueOnce('styra-token')
-      .mockResolvedValueOnce('envoy-certs')
+    loadCredentials.mockResolvedValueOnce('envoy-certs')
       .mockResolvedValueOnce('internal-key')
       .mockResolvedValueOnce('internal-cert');
 
@@ -142,7 +141,6 @@ describe('Action', () => {
       'project-id',
       'clan-name',
       'staging',
-      'styra-token',
       300,
       'envoy-certs',
       'internal-cert',
@@ -172,8 +170,7 @@ describe('Action', () => {
       .mockReturnValueOnce('clan-service-account')
       .mockReturnValueOnce('cloud-run.yaml')
       .mockReturnValueOnce('gcr.io/project/image:tag');
-    loadCredentials.mockResolvedValueOnce('styra-token')
-      .mockResolvedValueOnce('envoy-certs')
+    loadCredentials.mockResolvedValueOnce('envoy-certs')
       .mockResolvedValueOnce('internal-key')
       .mockResolvedValueOnce('internal-cert');
 
@@ -195,7 +192,6 @@ describe('Action', () => {
       'project-id',
       'clan-name',
       'staging',
-      'styra-token',
       300,
       'envoy-certs',
       'internal-cert',
@@ -208,8 +204,7 @@ describe('Action', () => {
       .mockReturnValueOnce('clan-service-account')
       .mockReturnValueOnce('cloud-run.yaml')
       .mockReturnValueOnce('gcr.io/project/image:tag');
-    loadCredentials.mockResolvedValueOnce('styra-token')
-      .mockResolvedValueOnce('envoy-certs')
+    loadCredentials.mockResolvedValueOnce('envoy-certs')
       .mockResolvedValueOnce('internal-key')
       .mockResolvedValueOnce('internal-cert');
 
@@ -238,7 +233,6 @@ describe('Action', () => {
       'project-id',
       'clan-name',
       'staging',
-      'styra-token',
       300,
       'envoy-certs',
       'internal-cert',
