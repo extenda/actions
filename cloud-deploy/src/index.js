@@ -38,7 +38,6 @@ const action = async () => {
     env,
   } = projectInfo(projectID);
 
-  const styraToken = await readSecret(serviceAccountKeyPipeline, env, 'styra-das-token', 'STYRA_TOKEN');
   const http2Certificate = await readSecret(serviceAccountKeyPipeline, env, 'envoy-http2-certs', 'HTTPS_CERTIFICATES');
   const internalHttpsCertificateKey = await readSecret(serviceAccountKeyPipeline, env, 'internal-https-certs-key', 'INTERNAL_HTTPS_CERTIFICATES_KEY');
   const internalHttpsCertificateCrt = await readSecret(serviceAccountKeyPipeline, env, 'internal-https-certs-crt', 'INTERNAL_HTTPS_CERTIFICATES_CRT');
@@ -90,7 +89,6 @@ const action = async () => {
     projectID,
     clanName,
     env,
-    styraToken,
     timeout,
     http2Certificate,
     internalHttpsCertificateCrt,
