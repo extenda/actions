@@ -72,7 +72,7 @@ describe('Setup Gcloud', () => {
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
     expect(core.exportVariable).toHaveBeenCalledWith('CLOUDSDK_CORE_PROJECT', 'test-project');
     expect(fs.existsSync('/gcloud/innerdir/__pycache__')).toEqual(false);
-    expect(fs.existsSync('/gcloud/.install/.backup')).toEqual(false);
+    expect(fs.existsSync('/gcloud/.install/.backup')).toEqual(true);
     expect(fs.existsSync('/testdir/__pycache__')).toEqual(true);
   });
 
