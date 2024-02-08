@@ -69,7 +69,10 @@ const installComponents = async (toolPath) => {
     core.exportVariable('USE_GKE_GCLOUD_AUTH_PLUGIN', 'True');
     return null;
   });
-  fs.rmSync(path.join(toolPath, '.install', '.backup'), { recursive: true });
+  // Ensure install backups are empty.
+  const installBackup = path.join(toolPath, '.install', '.backup');
+  fs.rmSync(installBackup, { recursive: true });
+  fs.mkdirSync(installBackup, { recursive: true });
   glob.sync('**/__pycache__', {
     cwd: toolPath,
     dot: true,
