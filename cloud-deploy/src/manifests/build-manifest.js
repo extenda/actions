@@ -586,7 +586,7 @@ const buildManifest = async (
       'cpu-throttling': cpuThrottling = true,
       'startup-cpu-boost': cpuBoost = false,
       'session-affinity': sessionAffinity = false,
-      'vpc-connector': connector = false,
+      'vpc-connector': connector = true,
     } = cloudrun;
     const cloudrunManifest = await cloudrunManifestTemplate(
       name,
