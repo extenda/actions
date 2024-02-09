@@ -30,5 +30,5 @@ outputs:
   iam-token:
     description: The test user's ID token.
 runs:
-  using: node20
+  using: node18
   main: dist/index.js

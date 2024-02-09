@@ -21,5 +21,5 @@ outputs:
   release-changelog:
     description: The latest release change log
 runs:
-  using: node20
+  using: node18
   main: dist/index.js

@@ -43,5 +43,5 @@ inputs:
     description: Working dir to run action from
     required: false
 runs:
-  using: node20
+  using: node18
   main: dist/index.js

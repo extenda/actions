@@ -20,5 +20,5 @@ inputs:
     default: https://extendaretail.svc.styra.com
     required: false
 runs:
-  using: node20
+  using: node18
   main: dist/index.js

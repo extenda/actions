@@ -11,5 +11,5 @@ inputs:
     description: Url that will be pinged
     required: true
 runs:
-  using: node20
+  using: node18
   main: dist/index.js

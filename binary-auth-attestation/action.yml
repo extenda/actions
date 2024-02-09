@@ -47,5 +47,5 @@ inputs:
       The account key should be a base64 encoded JSON key stored as a secret.
     required: true
 runs:
-  using: node20
+  using: node18
   main: dist/index.js
