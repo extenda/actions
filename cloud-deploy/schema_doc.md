@@ -230,7 +230,7 @@ Must be one of:
 | ------------ | --------- |
 | **Type**     | `boolean` |
 | **Required** | No        |
-| **Default**  | `false`   |
+| **Default**  | `true`   |
 
 **Description:** Whether to use the vpc connector or direct connection to the vpc
 
