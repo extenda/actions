@@ -230,7 +230,7 @@ Must be one of:
 | ------------ | --------- |
 | **Type**     | `boolean` |
 | **Required** | No        |
-| **Default**  | `false`   |
+| **Default**  | `true`    |
 
 **Description:** Whether to use the vpc connector or direct connection to the vpc
 
@@ -843,4 +843,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-12-22 at 13:28:07 +0100
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2024-02-09 at 15:11:43 +0100

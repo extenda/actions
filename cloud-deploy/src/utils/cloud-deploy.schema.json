@@ -98,7 +98,7 @@
         "vpc-connector": {
           "description": "Whether to use the vpc connector or direct connection to the vpc",
           "type": "boolean",
-          "default": false
+          "default": true
         },
         "internal-traffic": {
           "description": "Wheter to setup internal traffic or not",
