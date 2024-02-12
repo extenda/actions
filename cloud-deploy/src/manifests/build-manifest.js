@@ -6,6 +6,7 @@ const securitySpec = require('./security-sidecar');
 const readSecret = require('../utils/load-credentials');
 const handleStatefulset = require('./statefulset-workaround');
 const checkIamSystem = require('./check-system');
+const checkVpcConnector = require('../utils/check-vpc-connector');
 
 const convertToYaml = (json) => yaml.dump(json);
 
@@ -53,7 +54,7 @@ const cloudrunManifestTemplate = async (
   cpuBoost,
   sessionAffinity,
   connector,
-  clanName,
+  connectorName
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
   const ports = opa ? undefined : [{
@@ -70,7 +71,7 @@ const cloudrunManifestTemplate = async (
     'run.googleapis.com/sessionAffinity': `${sessionAffinity}`,
   };
   if (connector) {
-    annotations['run.googleapis.com/vpc-access-connector'] = `${clanName}-vpc-connector`;
+    annotations['run.googleapis.com/vpc-access-connector'] = `${connectorName}`;
     annotations['run.googleapis.com/vpc-access-egress'] = 'all-traffic';
   } else {
     annotations['run.googleapis.com/network-interfaces'] = '[{"network":"clan-network","subnetwork":"k8s-subnet"}]';
@@ -588,6 +589,12 @@ const buildManifest = async (
       'session-affinity': sessionAffinity = false,
       'vpc-connector': connector = true,
     } = cloudrun;
+
+    var connectorName = `${clanName}-vpc-connector`;
+    if(connector) {
+      connectorName = await checkVpcConnector(projectId, 'europe-west1', connectorName);
+    }
+
     const cloudrunManifest = await cloudrunManifestTemplate(
       name,
       image,
@@ -609,7 +616,7 @@ const buildManifest = async (
       cpuBoost,
       sessionAffinity,
       connector,
-      clanName,
+      connectorName,
     );
     generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));
   }

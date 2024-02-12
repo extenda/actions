@@ -6,6 +6,7 @@ const securitySpec = require('../../src/manifests/security-sidecar');
 const handleStatefulset = require('../../src/manifests/statefulset-workaround');
 const { addNamespace } = require('../../src/utils/add-namespace');
 const readSecret = require('../../src/utils/load-credentials');
+const checkVpcConnector = require('../../src/utils/check-vpc-connector');
 
 jest.mock('../../src/manifests/check-system');
 jest.mock('../../src/manifests/opa-config');
@@ -13,6 +14,7 @@ jest.mock('../../src/utils/add-namespace');
 jest.mock('../../src/manifests/security-sidecar');
 jest.mock('../../src/utils/load-credentials');
 jest.mock('../../src/manifests/statefulset-workaround');
+jest.mock('../../src/utils/check-vpc-connector');
 
 const readFileSync = (file) => fs.readFileSync(file, { encoding: 'utf-8' });
 
@@ -116,6 +118,7 @@ metadata:
 
   test('should generate manifest cloudrun file with correct content', async () => {
     readSecret.mockResolvedValueOnce('instance-name');
+    checkVpcConnector.mockResolvedValueOnce('example-clan-vpc-connector');
     const image = 'example-image:latest';
     const service = {
       'cloud-run': {
@@ -362,6 +365,7 @@ metadata:
   });
 
   test('It should generate cloud run service with annotations', async () => {
+    checkVpcConnector.mockResolvedValueOnce('example-clan-vpc-connector');
     const image = 'example-image:latest';
     const service = {
       'cloud-run': {
@@ -407,6 +411,7 @@ metadata:
   });
 
   test('It should generate cloud run service with security', async () => {
+    checkVpcConnector.mockResolvedValueOnce('example-clan-vpc-connector');
     const image = 'example-image:latest';
     const service = {
       'cloud-run': {
