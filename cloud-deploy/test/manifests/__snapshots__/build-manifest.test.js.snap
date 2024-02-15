@@ -434,9 +434,15 @@ spec:
             - name: KEY3
               value: '8080'
             - name: SECRET
-              value: sm://example-project/test-secret
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: test-secret
             - name: SQL_INSTANCE_NAME
-              value: sm://example-project/test-instance-name
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: test-instance-name
             - name: SERVICE_NAME
               value: example-service
             - name: SERVICE_PROJECT_ID

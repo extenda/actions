@@ -190,7 +190,10 @@ metadata:
 
     expect(k8sManifest).toContain(`
             - name: SECRET
-              value: sm://example-project/test-secret`);
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: test-secret`);
 
     expect(k8sManifest).toContain(`
     spec:

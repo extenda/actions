@@ -54,7 +54,7 @@ const cloudrunManifestTemplate = async (
   cpuBoost,
   sessionAffinity,
   connector,
-  connectorName
+  connectorName,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
   const ports = opa ? undefined : [{
@@ -94,6 +94,7 @@ const cloudrunManifestTemplate = async (
     env: environment.map((env) => ({
       name: env.name,
       value: env.value,
+      valueFrom: env.valueFrom,
     })),
     startupProbe: {
       tcpSocket: {
@@ -590,9 +591,23 @@ const buildManifest = async (
       'vpc-connector': connector = true,
     } = cloudrun;
 
-    var connectorName = `${clanName}-vpc-connector`;
-    if(connector) {
+    let connectorName = `${clanName}-vpc-connector`;
+    if (connector) {
       connectorName = await checkVpcConnector(projectId, 'europe-west1', connectorName);
+    }
+
+    for (const env of envArray) {
+      const { value } = env;
+      if (value.includes('sm://')) {
+        const secretName = value.split('/').pop();
+        env.valueFrom = {
+          secretKeyRef: {
+            key: 'latest',
+            name: secretName,
+          },
+        };
+        env.value = undefined;
+      }
     }
 
     const cloudrunManifest = await cloudrunManifestTemplate(
