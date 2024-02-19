@@ -35,7 +35,7 @@ describe('action', () => {
     });
     expect(core.getInput).toHaveBeenCalledWith('percentage');
 
-    expect(execGcloud).toHaveBeenCalledTimes(2);
+    expect(execGcloud).toHaveBeenCalledTimes(1);
 
     expect(execGcloud).toHaveBeenCalledWith([
       'run',
