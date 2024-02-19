@@ -12,18 +12,6 @@ function validatePercentage(_percentage) {
   return percentage;
 }
 
-function getRevisionsList(service, projectId) {
-  return execGcloud([
-    'run',
-    'revisions',
-    'list',
-    `--service=${service}`,
-    '--region=europe-west1',
-    `--project=${projectId}`,
-    '--format="value[](name)"',
-  ]).then((str) => str.split('\n').map((s) => s.trim()));
-}
-
 function routeTraffic(service, targetRevision, percentage, projectId) {
   return execGcloud([
     'run',
@@ -45,14 +33,6 @@ async function action() {
   const percentage = validatePercentage(core.getInput('percentage') || '100');
 
   const projectId = await setupGcloud(serviceAccountKey);
-
-  const revisions = await getRevisionsList(service, projectId);
-
-  if (!revisions.some((revision) => revision === targetRevision)) {
-    throw new Error(
-      `Revision ${targetRevision} not found for service ${service}\n`,
-    );
-  }
 
   await routeTraffic(service, targetRevision, percentage, projectId);
 }
