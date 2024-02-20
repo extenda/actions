@@ -7,6 +7,7 @@ const readSecret = require('../utils/load-credentials');
 const handleStatefulset = require('./statefulset-workaround');
 const checkIamSystem = require('./check-system');
 const checkVpcConnector = require('../utils/check-vpc-connector');
+const getRevisions = require('../cloudrun/get-revisions');
 
 const convertToYaml = (json) => yaml.dump(json);
 
@@ -55,6 +56,7 @@ const cloudrunManifestTemplate = async (
   sessionAffinity,
   connector,
   connectorName,
+  activeRevisionName,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
   const ports = opa ? undefined : [{
@@ -79,6 +81,21 @@ const cloudrunManifestTemplate = async (
   }
   if (SQLInstance) {
     annotations['run.googleapis.com/cloudsql-instances'] = SQLInstance;
+  }
+
+  const traffic = [
+    {
+      percent: 100,
+      latestRevision: true,
+    },
+  ];
+
+  if (activeRevisionName !== '') {
+    traffic[0].percent = 0;
+    traffic.push({
+      percent: 100,
+      revisionName: activeRevisionName,
+    });
   }
 
   const containers = [{
@@ -150,10 +167,7 @@ const cloudrunManifestTemplate = async (
           containers,
         },
       },
-      traffic: [{
-        percent: 100,
-        latestRevision: true,
-      }],
+      traffic,
     },
   };
 
@@ -487,12 +501,17 @@ const buildManifest = async (
     resources,
     scaling,
     volumes,
+    traffic = {},
   } = kubernetes || cloudrun;
 
   const {
     staging,
     production,
   } = environments;
+
+  const {
+    'serve-traffic': serveTraffic = true,
+  } = traffic;
 
   const {
     'permission-prefix': permissionPrefix,
@@ -610,6 +629,22 @@ const buildManifest = async (
       }
     }
 
+    let activeRevisionName = '';
+    if (!serveTraffic) {
+      activeRevisionName = await getRevisions(name, projectId, 'europe-west1').then((revisions) => {
+        const checkMultipleActive = [];
+        for (const revision of revisions) {
+          if (revision.active === true) {
+            checkMultipleActive.push(revision.name);
+          }
+        }
+        if (checkMultipleActive.length > 1) {
+          throw new Error('2 active revisions found, set revision to 100% traffic before deploying');
+        }
+        return checkMultipleActive[0];
+      });
+    }
+
     const cloudrunManifest = await cloudrunManifestTemplate(
       name,
       image,
@@ -632,6 +667,7 @@ const buildManifest = async (
       sessionAffinity,
       connector,
       connectorName,
+      activeRevisionName,
     );
     generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));
   }

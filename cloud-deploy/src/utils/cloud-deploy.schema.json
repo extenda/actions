@@ -80,6 +80,22 @@
           },
           "additionalProperties": false
         },
+        "traffic": {
+          "title": "TrafficCloudRun",
+          "description": "Traffic settings for Cloud Run",
+          "type": "object",
+          "required": [
+            "serve-traffic"
+          ],
+          "properties": {
+            "serve-traffic": {
+              "description": "Deploy revision with or without traffic",
+              "type": "boolean",
+              "default": true
+            }
+          },
+          "additionalProperties": false
+        },
         "startup-cpu-boost": {
           "description": "Whether to allocate extra CPU to containers on startup.",
           "type": "boolean",
