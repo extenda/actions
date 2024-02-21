@@ -8,11 +8,13 @@
     - [1.1.4. Property `CloudDeploy > oneOf > CloudRun > cloud-run > timeout`](#oneOf_i0_cloud-run_timeout)
     - [1.1.5. Property `CloudDeploy > oneOf > CloudRun > cloud-run > scaling`](#oneOf_i0_cloud-run_scaling)
       - [1.1.5.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > scaling > concurrency`](#oneOf_i0_cloud-run_scaling_concurrency)
-    - [1.1.6. Property `CloudDeploy > oneOf > CloudRun > cloud-run > startup-cpu-boost`](#oneOf_i0_cloud-run_startup-cpu-boost)
-    - [1.1.7. Property `CloudDeploy > oneOf > CloudRun > cloud-run > cpu-throttling`](#oneOf_i0_cloud-run_cpu-throttling)
-    - [1.1.8. Property `CloudDeploy > oneOf > CloudRun > cloud-run > session-affinity`](#oneOf_i0_cloud-run_session-affinity)
-    - [1.1.9. Property `CloudDeploy > oneOf > CloudRun > cloud-run > vpc-connector`](#oneOf_i0_cloud-run_vpc-connector)
-    - [1.1.10. Property `CloudDeploy > oneOf > CloudRun > cloud-run > internal-traffic`](#oneOf_i0_cloud-run_internal-traffic)
+    - [1.1.6. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic`](#oneOf_i0_cloud-run_traffic)
+      - [1.1.6.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > serve-traffic`](#oneOf_i0_cloud-run_traffic_serve-traffic)
+    - [1.1.7. Property `CloudDeploy > oneOf > CloudRun > cloud-run > startup-cpu-boost`](#oneOf_i0_cloud-run_startup-cpu-boost)
+    - [1.1.8. Property `CloudDeploy > oneOf > CloudRun > cloud-run > cpu-throttling`](#oneOf_i0_cloud-run_cpu-throttling)
+    - [1.1.9. Property `CloudDeploy > oneOf > CloudRun > cloud-run > session-affinity`](#oneOf_i0_cloud-run_session-affinity)
+    - [1.1.10. Property `CloudDeploy > oneOf > CloudRun > cloud-run > vpc-connector`](#oneOf_i0_cloud-run_vpc-connector)
+    - [1.1.11. Property `CloudDeploy > oneOf > CloudRun > cloud-run > internal-traffic`](#oneOf_i0_cloud-run_internal-traffic)
 - [2. Property `CloudDeploy > oneOf > Kubernetes`](#oneOf_i1)
   - [2.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes`](#oneOf_i1_kubernetes)
     - [2.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > service`](#oneOf_i1_kubernetes_service)
@@ -107,6 +109,7 @@
 | + [protocol](#oneOf_i0_cloud-run_protocol )                   | No      | enum (of string) | No         | In #/$defs/Protocol                                | The type of protocol. Make sure to set http2 if this service is using gRPC or WebSockets |
 | - [timeout](#oneOf_i0_cloud-run_timeout )                     | No      | integer          | No         | In #/$defs/RequestTimeout                          | The request timeout in seconds                                                           |
 | + [scaling](#oneOf_i0_cloud-run_scaling )                     | No      | object           | No         | -                                                  | ScalingCloudRun                                                                          |
+| - [traffic](#oneOf_i0_cloud-run_traffic )                     | No      | object           | No         | -                                                  | TrafficCloudRun                                                                          |
 | - [startup-cpu-boost](#oneOf_i0_cloud-run_startup-cpu-boost ) | No      | boolean          | No         | -                                                  | Whether to allocate extra CPU to containers on startup.                                  |
 | - [cpu-throttling](#oneOf_i0_cloud-run_cpu-throttling )       | No      | boolean          | No         | -                                                  | Whether to throttle the CPU when the container is not actively serving requests.         |
 | - [session-affinity](#oneOf_i0_cloud-run_session-affinity )   | No      | boolean          | No         | -                                                  | Whether to enable session affinity for connections to the service.                       |
@@ -194,7 +197,33 @@ Must be one of:
 | **Minimum**  | &ge; 10   |
 | **Maximum**  | &le; 1000 |
 
-#### <a name="oneOf_i0_cloud-run_startup-cpu-boost"></a>1.1.6. Property `CloudDeploy > oneOf > CloudRun > cloud-run > startup-cpu-boost`
+#### <a name="oneOf_i0_cloud-run_traffic"></a>1.1.6. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic`
+
+**Title:** TrafficCloudRun
+
+|                           |                                                         |
+| ------------------------- | ------------------------------------------------------- |
+| **Type**                  | `object`                                                |
+| **Required**              | No                                                      |
+| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
+
+**Description:** Traffic settings for Cloud Run
+
+| Property                                                      | Pattern | Type    | Deprecated | Definition | Title/Description                       |
+| ------------------------------------------------------------- | ------- | ------- | ---------- | ---------- | --------------------------------------- |
+| + [serve-traffic](#oneOf_i0_cloud-run_traffic_serve-traffic ) | No      | boolean | No         | -          | Deploy revision with or without traffic |
+
+##### <a name="oneOf_i0_cloud-run_traffic_serve-traffic"></a>1.1.6.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > serve-traffic`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | Yes       |
+| **Default**  | `true`    |
+
+**Description:** Deploy revision with or without traffic
+
+#### <a name="oneOf_i0_cloud-run_startup-cpu-boost"></a>1.1.7. Property `CloudDeploy > oneOf > CloudRun > cloud-run > startup-cpu-boost`
 
 |              |           |
 | ------------ | --------- |
@@ -204,7 +233,7 @@ Must be one of:
 
 **Description:** Whether to allocate extra CPU to containers on startup.
 
-#### <a name="oneOf_i0_cloud-run_cpu-throttling"></a>1.1.7. Property `CloudDeploy > oneOf > CloudRun > cloud-run > cpu-throttling`
+#### <a name="oneOf_i0_cloud-run_cpu-throttling"></a>1.1.8. Property `CloudDeploy > oneOf > CloudRun > cloud-run > cpu-throttling`
 
 |              |           |
 | ------------ | --------- |
@@ -214,7 +243,7 @@ Must be one of:
 
 **Description:** Whether to throttle the CPU when the container is not actively serving requests.
 
-#### <a name="oneOf_i0_cloud-run_session-affinity"></a>1.1.8. Property `CloudDeploy > oneOf > CloudRun > cloud-run > session-affinity`
+#### <a name="oneOf_i0_cloud-run_session-affinity"></a>1.1.9. Property `CloudDeploy > oneOf > CloudRun > cloud-run > session-affinity`
 
 |              |           |
 | ------------ | --------- |
@@ -224,7 +253,7 @@ Must be one of:
 
 **Description:** Whether to enable session affinity for connections to the service.
 
-#### <a name="oneOf_i0_cloud-run_vpc-connector"></a>1.1.9. Property `CloudDeploy > oneOf > CloudRun > cloud-run > vpc-connector`
+#### <a name="oneOf_i0_cloud-run_vpc-connector"></a>1.1.10. Property `CloudDeploy > oneOf > CloudRun > cloud-run > vpc-connector`
 
 |              |           |
 | ------------ | --------- |
@@ -234,7 +263,7 @@ Must be one of:
 
 **Description:** Whether to use the vpc connector or direct connection to the vpc
 
-#### <a name="oneOf_i0_cloud-run_internal-traffic"></a>1.1.10. Property `CloudDeploy > oneOf > CloudRun > cloud-run > internal-traffic`
+#### <a name="oneOf_i0_cloud-run_internal-traffic"></a>1.1.11. Property `CloudDeploy > oneOf > CloudRun > cloud-run > internal-traffic`
 
 |              |           |
 | ------------ | --------- |
@@ -843,4 +872,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2024-02-09 at 15:11:43 +0100
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2024-02-20 at 19:46:35 +0100

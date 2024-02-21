@@ -7,6 +7,7 @@ const handleStatefulset = require('../../src/manifests/statefulset-workaround');
 const { addNamespace } = require('../../src/utils/add-namespace');
 const readSecret = require('../../src/utils/load-credentials');
 const checkVpcConnector = require('../../src/utils/check-vpc-connector');
+const getRevisions = require('../../src/cloudrun/get-revisions');
 
 jest.mock('../../src/manifests/check-system');
 jest.mock('../../src/manifests/opa-config');
@@ -15,6 +16,7 @@ jest.mock('../../src/manifests/security-sidecar');
 jest.mock('../../src/utils/load-credentials');
 jest.mock('../../src/manifests/statefulset-workaround');
 jest.mock('../../src/utils/check-vpc-connector');
+jest.mock('../../src/cloudrun/get-revisions');
 
 const readFileSync = (file) => fs.readFileSync(file, { encoding: 'utf-8' });
 
@@ -671,5 +673,133 @@ metadata:
     checkSystem.mockResolvedValueOnce(false);
 
     await expect(buildManifest(image, service, projectId, clanName, env, '', '', '', '', '')).rejects.toThrow('Bundle not found with the name tst.example-service-dev');
+  });
+
+  test('It should set traffic to 0 of new revision if serve traffic is false', async () => {
+    checkVpcConnector.mockResolvedValueOnce('example-clan-vpc-connector');
+    const image = 'example-image:latest';
+    const service = {
+      'cloud-run': {
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          concurrency: 80,
+        },
+        traffic: {
+          'serve-traffic': false,
+        },
+      },
+      security: 'none',
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+          },
+        },
+        staging: 'none',
+      },
+    };
+
+    const revisionList = [
+      {
+        name: 'example-service-lsublujx',
+        creationTimestamp: '2000-01-20T12:07:33.625666Z',
+        active: true,
+      },
+      {
+        name: 'example-service-lsp6cqoi',
+        creationTimestamp: '2000-01-16T21:41:40.238306Z',
+        active: false,
+      },
+      {
+        name: 'example-service-lsovta6v',
+        creationTimestamp: '2000-01-16T16:46:36.362567Z',
+        active: false,
+      },
+    ];
+
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'dev';
+
+    getRevisions.mockResolvedValueOnce(revisionList);
+
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+
+    const manifest = readFileSync('cloudrun-service.yaml');
+    mockFs.restore();
+    expect(manifest).toMatchSnapshot();
+  });
+
+  test('It should fail deploy if more than 1 active revisions while serve traffic false', async () => {
+    checkVpcConnector.mockResolvedValueOnce('example-clan-vpc-connector');
+    const image = 'example-image:latest';
+    const service = {
+      'cloud-run': {
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          concurrency: 80,
+        },
+        traffic: {
+          'serve-traffic': false,
+        },
+      },
+      security: 'none',
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+          },
+        },
+        staging: 'none',
+      },
+    };
+
+    const revisionList = [
+      {
+        name: 'example-service-lsublujx',
+        creationTimestamp: '2000-01-20T12:07:33.625666Z',
+        active: true,
+      },
+      {
+        name: 'example-service-lsp6cqoi',
+        creationTimestamp: '2000-01-16T21:41:40.238306Z',
+        active: true,
+      },
+      {
+        name: 'example-service-lsovta6v',
+        creationTimestamp: '2000-01-16T16:46:36.362567Z',
+        active: false,
+      },
+    ];
+
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'dev';
+
+    getRevisions.mockResolvedValueOnce(revisionList);
+
+    await expect(buildManifest(image, service, projectId, clanName, env, '', '', '', '', '')).rejects.toThrow('2 active revisions found, set revision to 100% traffic before deploying');
   });
 });
