@@ -21,7 +21,7 @@ const action = async () => {
   const serviceFile = core.getInput('service-definition') || 'cloud-deploy.yaml';
   const userImage = core.getInput('image', { required: true });
   const updateDns = core.getInput('update-dns');
-  //const workflowEnvironmentVariables = (core.getInput('workflow-env-vars') || '');
+  const workflowEnvironmentVariables = (core.getInput('workflow-env-vars') || '');
 
   // Only migrate DNS if explicitly set to always.
   const migrate = `${updateDns}`.trim().toLowerCase() === 'always';
@@ -73,16 +73,12 @@ const action = async () => {
   const platformGKE = !cloudrun;
 
   // Trivvy scanning
-  if (false && process.platform !== 'win32') {
+  if (process.platform !== 'win32') {
     if (env !== 'staging') {
       core.info('Run Trivy scanning');
       await runScan(serviceAccountKeyCICD, image);
     }
   }
-
-  core.info('Env 1:', env);
-  env.push({ name: 'CONFIG_INPUT_TOPIC', value: 'pnp.public.output.price-specifications.v6-VERIFIED' });
-  core.info('Env 2:', env);
 
   // setup manifests (hpa, deploy, negs)
   const version = new Date().getTime();
@@ -99,6 +95,7 @@ const action = async () => {
     internalHttpsCertificateCrt,
     internalHttpsCertificateKey,
     serviceAccountKeyCICD,
+    workflowEnvironmentVariables,
   );
 
   await publishPolicies(serviceName, env, (userImage.split(':')[1] || version), deployYaml);
