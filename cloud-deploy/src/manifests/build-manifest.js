@@ -547,7 +547,9 @@ const buildManifest = async (
 
   workflowEnvironmentVariables.split(",")
     .map(pair => pair.split("="))
-    .forEach(pair => envArray.push({ name: pair[0], value: pair[1] }));
+    .forEach(pair => { if (pair[0]) {
+      envArray.push({ name: pair[0], value: pair[1] })
+    }});
 
   envArray.push({ name: 'SERVICE_NAME', value: name });
   envArray.push({ name: 'SERVICE_PROJECT_ID', value: projectId });
