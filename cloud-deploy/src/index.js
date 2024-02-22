@@ -80,8 +80,9 @@ const action = async () => {
     }
   }
 
+  core.info('Env 1:', env);
   env.push({ name: 'CONFIG_INPUT_TOPIC', value: 'pnp.public.output.price-specifications.v6-VERIFIED' });
-
+  core.info('Env 2:', env);
 
   // setup manifests (hpa, deploy, negs)
   const version = new Date().getTime();
