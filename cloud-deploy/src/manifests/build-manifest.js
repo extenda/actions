@@ -520,6 +520,12 @@ const buildManifest = async (
     'system-name': systemName = name,
   } = (security === 'none' ? {} : security || {});
 
+
+  workflowEnvironmentVariables.split(",")
+  .map(pair => pair.split("="))
+  .forEach(pair => envArray.push({ name: pair[0], value: pair[1] }));
+
+
   const {
     'min-instances': minInstances,
     'max-instances': maxInstances = 100,
@@ -544,17 +550,12 @@ const buildManifest = async (
     value,
   }));
 
-  workflowEnvironmentVariables.split(",")
-  .map(pair => pair.split("="))
-  .forEach(pair => envArray.push({ name: pair[0], value: pair[1] }));
-
   envArray.push({ name: 'SERVICE_NAME', value: name });
   envArray.push({ name: 'SERVICE_PROJECT_ID', value: projectId });
   envArray.push({ name: 'SERVICE_ENVIRONMENT', value: deployEnv });
   envArray.push({ name: 'SERVICE_CONTAINER_IMAGE', value: image });
   envArray.push({ name: 'CLAN_NAME', value: clanName });
-
-  core.info(`env-array: ${envArray}`);
+  envArray.push({ name: 'CONFIG_INPUT_TOPIC', value: 'pnp.public.output.price-specifications.v6' });
   
 
   // check if env contains SQL_INSTANCE_NAME
@@ -580,7 +581,6 @@ const buildManifest = async (
       process.env.IAM_SYSTEM_NAME = bundleName;
     }
   }
-
 
   if (kubernetes) {
     envArray.push({ name: 'PORT', value: '8080' });
