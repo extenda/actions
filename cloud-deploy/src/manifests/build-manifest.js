@@ -630,7 +630,7 @@ const buildManifest = async (
     }
 
     let activeRevisionName = '';
-    if (!serveTraffic) {
+    if (!serveTraffic && deployEnv !== 'staging') {
       activeRevisionName = await getRevisions(name, projectId, 'europe-west1').then((revisions) => {
         const checkMultipleActive = [];
         for (const revision of revisions) {
