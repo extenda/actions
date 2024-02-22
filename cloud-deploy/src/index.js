@@ -21,7 +21,7 @@ const action = async () => {
   const serviceFile = core.getInput('service-definition') || 'cloud-deploy.yaml';
   const userImage = core.getInput('image', { required: true });
   const updateDns = core.getInput('update-dns');
-  const workflowEnvironmentVariables = (core.getInput('workflow-env-vars') || '');
+  //const workflowEnvironmentVariables = (core.getInput('workflow-env-vars') || '');
 
   // Only migrate DNS if explicitly set to always.
   const migrate = `${updateDns}`.trim().toLowerCase() === 'always';
