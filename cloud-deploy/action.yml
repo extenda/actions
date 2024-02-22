@@ -25,6 +25,9 @@ inputs:
       if the existing entry does not match the load balancer IP for the service.
     required: false
     default: if-missing
+  workflow-env-vars:
+    description: Workflow inputs to pass as environment variables
+    required: false
 runs:
   using: node16
   main: dist/index.js
