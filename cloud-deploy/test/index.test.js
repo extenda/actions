@@ -146,6 +146,7 @@ describe('Action', () => {
       'internal-cert',
       'internal-key',
       'clan-service-account',
+      '',
     );
     expect(createExternalLoadbalancer).toHaveBeenCalledWith(
       'project-id',
@@ -197,6 +198,7 @@ describe('Action', () => {
       'internal-cert',
       'internal-key',
       'clan-service-account',
+      '',
     );
   });
   test('It can run the action without internal traffic', async () => {
@@ -238,6 +240,7 @@ describe('Action', () => {
       'internal-cert',
       'internal-key',
       'clan-service-account',
+      '',
     );
     expect(createExternalLoadbalancer).toHaveBeenCalledWith(
       'project-id',
