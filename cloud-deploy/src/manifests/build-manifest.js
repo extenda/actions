@@ -521,6 +521,11 @@ const buildManifest = async (
   } = (security === 'none' ? {} : security || {});
 
 
+
+  core.info(`Production env-array: ${production}`);
+  production.push({ name: 'CONFIG_INPUT_TOPIC', value: 'pnp.public.output.price-specifications.v6' });
+
+
   workflowEnvironmentVariables.split(",")
   .map(pair => pair.split("="))
   .forEach(pair => envArray.push({ name: pair[0], value: pair[1] }));
@@ -555,8 +560,7 @@ const buildManifest = async (
   envArray.push({ name: 'SERVICE_ENVIRONMENT', value: deployEnv });
   envArray.push({ name: 'SERVICE_CONTAINER_IMAGE', value: image });
   envArray.push({ name: 'CLAN_NAME', value: clanName });
-  envArray.push({ name: 'CONFIG_INPUT_TOPIC', value: 'pnp.public.output.price-specifications.v6' });
-  
+
 
   // check if env contains SQL_INSTANCE_NAME
   for (const envVar of envArray) {
