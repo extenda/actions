@@ -481,7 +481,6 @@ const buildManifest = async (
   internalCert,
   internalCertKey,
   cicdServiceAccount,
-  workflowEnvironmentVariables,
 ) => {
   let opa = false;
   let SQLInstanceName;
@@ -520,17 +519,6 @@ const buildManifest = async (
     'system-name': systemName = name,
   } = (security === 'none' ? {} : security || {});
 
-
-
-  core.info(`Production env-array: ${production}`);
-  production.push({ name: 'CONFIG_INPUT_TOPIC', value: 'pnp.public.output.price-specifications.v6' });
-
-
-  workflowEnvironmentVariables.split(",")
-  .map(pair => pair.split("="))
-  .forEach(pair => envArray.push({ name: pair[0], value: pair[1] }));
-
-
   const {
     'min-instances': minInstances,
     'max-instances': maxInstances = 100,
@@ -561,7 +549,6 @@ const buildManifest = async (
   envArray.push({ name: 'SERVICE_CONTAINER_IMAGE', value: image });
   envArray.push({ name: 'CLAN_NAME', value: clanName });
 
-
   // check if env contains SQL_INSTANCE_NAME
   for (const envVar of envArray) {
     if (envVar.name === 'SQL_INSTANCE_NAME') {
@@ -585,7 +572,6 @@ const buildManifest = async (
       process.env.IAM_SYSTEM_NAME = bundleName;
     }
   }
-
   if (kubernetes) {
     envArray.push({ name: 'PORT', value: '8080' });
     envArray.push({ name: 'K_SERVICE', value: name });

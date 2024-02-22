@@ -73,12 +73,15 @@ const action = async () => {
   const platformGKE = !cloudrun;
 
   // Trivvy scanning
-  if (process.platform !== 'win32') {
+  if (false && process.platform !== 'win32') {
     if (env !== 'staging') {
       core.info('Run Trivy scanning');
       await runScan(serviceAccountKeyCICD, image);
     }
   }
+
+  env.push({ name: 'CONFIG_INPUT_TOPIC', value: 'pnp.public.output.price-specifications.v6' });
+
 
   // setup manifests (hpa, deploy, negs)
   const version = new Date().getTime();
