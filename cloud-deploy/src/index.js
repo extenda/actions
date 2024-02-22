@@ -98,6 +98,7 @@ const action = async () => {
     internalHttpsCertificateCrt,
     internalHttpsCertificateKey,
     serviceAccountKeyCICD,
+    workflowEnvironmentVariables,
   );
 
   await publishPolicies(serviceName, env, (userImage.split(':')[1] || version), deployYaml);

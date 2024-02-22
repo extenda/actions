@@ -481,6 +481,7 @@ const buildManifest = async (
   internalCert,
   internalCertKey,
   cicdServiceAccount,
+  workflowEnvironmentVariables,
 ) => {
   let opa = false;
   let SQLInstanceName;
@@ -542,6 +543,10 @@ const buildManifest = async (
     name: key,
     value,
   }));
+
+  workflowEnvironmentVariables.split(",")
+  .map(pair => pair.split("="))
+  .forEach(pair => envArray.push({ name: pair[0], value: pair[1] }));
 
   envArray.push({ name: 'SERVICE_NAME', value: name });
   envArray.push({ name: 'SERVICE_PROJECT_ID', value: projectId });
