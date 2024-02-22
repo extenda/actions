@@ -191,7 +191,6 @@ const runDeploy = async (
   serviceAccountKey,
   service,
   image,
-  workflowEnvironmentVariables,
   verbose = false,
   retryInterval = 5000,
 ) => {
@@ -245,7 +244,7 @@ const runDeploy = async (
     `--memory=${memory}`,
     `--concurrency=${concurrency}`,
     `--max-instances=${numericOrDefault(maxInstances)}`,
-    `--set-env-vars=${createEnvironmentArgs(environment, projectId, image, workflowEnvironmentVariables)}`,
+    `--set-env-vars=${createEnvironmentArgs(environment, projectId, image)}`,
   ];
 
   if (!canary) {
