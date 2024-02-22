@@ -80,7 +80,7 @@ const action = async () => {
     }
   }
 
-  env.push({ name: 'CONFIG_INPUT_TOPIC', value: 'pnp.public.output.price-specifications.v6' });
+  env.push({ name: 'CONFIG_INPUT_TOPIC', value: 'pnp.public.output.price-specifications.v6-VERIFIED' });
 
 
   // setup manifests (hpa, deploy, negs)
@@ -98,7 +98,6 @@ const action = async () => {
     internalHttpsCertificateCrt,
     internalHttpsCertificateKey,
     serviceAccountKeyCICD,
-    workflowEnvironmentVariables,
   );
 
   await publishPolicies(serviceName, env, (userImage.split(':')[1] || version), deployYaml);
