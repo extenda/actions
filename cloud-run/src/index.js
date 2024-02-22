@@ -13,11 +13,12 @@ const action = async () => {
   const domainBindingsEnv = core.getInput('domain-mappings-env') || '';
   const dnsProjectLabel = core.getInput('dns-project-label') || 'dns';
   const verbose = (core.getInput('verbose') || 'false');
+  const workflowEnvironmentVariables = (core.getInput('workflow-env-vars') || '');
 
   failIfNotTrunkBased();
 
   const service = loadServiceDefinition(serviceFile, jsonSchema, servicePatch);
-  await runDeploy(serviceAccountKey, service, image, verbose === 'true')
+  await runDeploy(serviceAccountKey, service, image, workflowEnvironmentVariables, verbose === 'true')
     .then(({ cluster }) => configureDomains(
       service,
       cluster,
