@@ -72,7 +72,7 @@ describe('buildManifest', () => {
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','WORKFLOW_INPUT1=value1,WORKFLOW_INPUT2=value2');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','');
 
     expect(checkSystem).not.toHaveBeenCalled();
     expect(securitySpec).not.toHaveBeenCalled();
