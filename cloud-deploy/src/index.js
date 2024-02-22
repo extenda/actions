@@ -51,9 +51,6 @@ const action = async () => {
     environments,
   } = deployYaml;
 
-  core.info(`workflow-env-vars: ${workflowEnvironmentVariables}`);
-  core.info(`environments: ${environments}`);
-
   const image = await getImageWithSha256(userImage);
   core.info(`Provided image ${userImage} resolved to ${image}`);
 

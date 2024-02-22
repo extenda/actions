@@ -554,6 +554,9 @@ const buildManifest = async (
   envArray.push({ name: 'SERVICE_CONTAINER_IMAGE', value: image });
   envArray.push({ name: 'CLAN_NAME', value: clanName });
 
+  core.info(`env-array: ${envArray}`);
+  
+
   // check if env contains SQL_INSTANCE_NAME
   for (const envVar of envArray) {
     if (envVar.name === 'SQL_INSTANCE_NAME') {
@@ -577,6 +580,8 @@ const buildManifest = async (
       process.env.IAM_SYSTEM_NAME = bundleName;
     }
   }
+
+
   if (kubernetes) {
     envArray.push({ name: 'PORT', value: '8080' });
     envArray.push({ name: 'K_SERVICE', value: name });
