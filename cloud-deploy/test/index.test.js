@@ -133,7 +133,7 @@ describe('Action', () => {
     publishPolicies.mockResolvedValueOnce();
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(5);
+    expect(core.getInput).toHaveBeenCalledTimes(6);
     expect(publishPolicies).toHaveBeenCalledWith('service-name', 'staging', 'tag', serviceDef);
     expect(buildManifest).toHaveBeenCalledWith(
       'gcr.io/project/image@sha256:1',
@@ -185,7 +185,7 @@ describe('Action', () => {
     setupGcloud.mockResolvedValueOnce('project-id');
 
     await expect(action()).rejects.toThrow('Deployment failed! Check container logs and status for error!');
-    expect(core.getInput).toHaveBeenCalledTimes(5);
+    expect(core.getInput).toHaveBeenCalledTimes(6);
     expect(buildManifest).toHaveBeenCalledWith(
       'gcr.io/project/image@sha256:1',
       serviceDef,
@@ -225,7 +225,7 @@ describe('Action', () => {
     publishPolicies.mockResolvedValueOnce();
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(5);
+    expect(core.getInput).toHaveBeenCalledTimes(6);
     expect(publishPolicies).toHaveBeenCalledWith('service-name', 'staging', 'tag', serviceDefNoInternal);
     expect(buildManifest).toHaveBeenCalledWith(
       'gcr.io/project/image@sha256:1',
