@@ -63,6 +63,8 @@ describe('buildManifest', () => {
             KEY2: 'value2',
             KEY3: '8080',
             SECRET: 'sm://*/test-secret',
+            WORKFLOW_INPUT1: 'value1',
+            WORKFLOW_INPUT2: 'value2',
           },
         },
         staging: 'none',
@@ -72,7 +74,7 @@ describe('buildManifest', () => {
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','WORKFLOW_INPUT1=value1,WORKFLOW_INPUT2=value2');
 
     expect(checkSystem).not.toHaveBeenCalled();
     expect(securitySpec).not.toHaveBeenCalled();
@@ -158,7 +160,7 @@ metadata:
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','');
 
     expect(checkSystem).not.toHaveBeenCalled();
     expect(securitySpec).not.toHaveBeenCalled();
@@ -263,7 +265,7 @@ metadata:
     const clanName = 'example-clan';
     const env = 'dev';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','');
 
     // Snapshot test for k8s-manifest.yaml.
     const manifest = readFileSync('k8s(deploy)-manifest.yaml');
@@ -310,7 +312,7 @@ metadata:
     const clanName = 'example-clan';
     const env = 'dev';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','');
 
     // Snapshot test for k8s-manifest.yaml.
     const manifest = readFileSync('k8s(deploy)-manifest.yaml');
@@ -361,7 +363,7 @@ metadata:
     const clanName = 'example-clan';
     const env = 'dev';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','');
 
     // Snapshot test for k8s-manifest.yaml.
     const manifest = readFileSync('k8s(deploy)-manifest.yaml');
@@ -407,7 +409,7 @@ metadata:
     const clanName = 'example-clan';
     const env = 'dev';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','');
 
     // Snapshot test for cloudrun-service.yaml.
     const manifest = readFileSync('cloudrun-service.yaml');
@@ -474,7 +476,7 @@ metadata:
     checkSystem.mockResolvedValueOnce(true);
     securitySpec.mockResolvedValueOnce(securityContainer);
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','');
 
     // Snapshot test for cloudrun-service.yaml.
     const manifest = readFileSync('cloudrun-service.yaml');
@@ -523,7 +525,7 @@ metadata:
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','');
     const k8sManifest = readFileSync('k8s(deploy)-manifest.yaml');
 
     // Snapshot test for k8s-manifest.yaml.
@@ -571,7 +573,7 @@ metadata:
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','');
     const k8sManifest = readFileSync('k8s(deploy)-manifest.yaml');
     // Snapshot test for k8s-manifest.yaml.
     mockFs.restore();
@@ -623,7 +625,7 @@ metadata:
     const clanName = 'example-clan';
     const env = 'staging';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '', '');
     const k8sManifest = readFileSync('k8s(deploy)-manifest.yaml');
     // Snapshot test for k8s-manifest.yaml.
     mockFs.restore();
@@ -672,7 +674,7 @@ metadata:
 
     checkSystem.mockResolvedValueOnce(false);
 
-    await expect(buildManifest(image, service, projectId, clanName, env, '', '', '', '', '')).rejects.toThrow('Bundle not found with the name tst.example-service-dev');
+    await expect(buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','')).rejects.toThrow('Bundle not found with the name tst.example-service-dev');
   });
 
   test('It should set traffic to 0 of new revision if serve traffic is false', async () => {
@@ -734,7 +736,7 @@ metadata:
 
     getRevisions.mockResolvedValueOnce(revisionList);
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','');
 
     const manifest = readFileSync('cloudrun-service.yaml');
     mockFs.restore();
@@ -800,6 +802,6 @@ metadata:
 
     getRevisions.mockResolvedValueOnce(revisionList);
 
-    await expect(buildManifest(image, service, projectId, clanName, env, '', '', '', '', '')).rejects.toThrow('2 active revisions found, set revision to 100% traffic before deploying');
+    await expect(buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','')).rejects.toThrow('2 active revisions found, set revision to 100% traffic before deploying');
   });
 });
