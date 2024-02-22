@@ -63,8 +63,6 @@ describe('buildManifest', () => {
             KEY2: 'value2',
             KEY3: '8080',
             SECRET: 'sm://*/test-secret',
-            WORKFLOW_INPUT1: 'value1',
-            WORKFLOW_INPUT2: 'value2',
           },
         },
         staging: 'none',
