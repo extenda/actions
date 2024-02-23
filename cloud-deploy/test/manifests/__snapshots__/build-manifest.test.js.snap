@@ -613,6 +613,10 @@ spec:
               value: '8080'
             - name: SECRET
               value: sm://example-project/test-secret
+            - name: WORKFLOW_INPUT1
+              value: value1
+            - name: WORKFLOW_INPUT2
+              value: value2
             - name: SERVICE_NAME
               value: example-service
             - name: SERVICE_PROJECT_ID

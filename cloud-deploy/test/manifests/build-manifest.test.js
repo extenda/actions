@@ -72,7 +72,7 @@ describe('buildManifest', () => {
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','WORKFLOW_INPUT1=value1\nWORKFLOW_INPUT2=value2');
 
     expect(checkSystem).not.toHaveBeenCalled();
     expect(securitySpec).not.toHaveBeenCalled();
@@ -158,7 +158,7 @@ metadata:
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','WORKFLOW_INPUT_IGNORED=');
 
     expect(checkSystem).not.toHaveBeenCalled();
     expect(securitySpec).not.toHaveBeenCalled();
