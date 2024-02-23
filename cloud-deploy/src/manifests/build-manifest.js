@@ -557,7 +557,10 @@ const buildManifest = async (
   envArray.push({ name: 'SERVICE_CONTAINER_IMAGE', value: image });
   envArray.push({ name: 'CLAN_NAME', value: clanName });
 
-  core.info(`env-array: ${envArray}`);
+  core.info(`Environment variables: `);
+  envArray.forEach(pair => 
+      console.log(pair.name +'=' + pair.value)
+    )
   
 
   // check if env contains SQL_INSTANCE_NAME
