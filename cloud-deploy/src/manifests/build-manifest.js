@@ -545,10 +545,9 @@ const buildManifest = async (
     value,
   }));
 
-  workflowEnvironmentVariables.split(/[\r\n]+/)
-    .map(pair => pair.trim().split("="))
-    .forEach(pair => { if (pair[0] && pair[1]) {
-      envArray.push({ name: pair[0].trim(), value: pair[1].trim() })
+  workflowEnvironmentVariables.split(/[\r\n]+/).map(pair => pair.trim().split("="))
+    .forEach(keyValue => { if (keyValue[0] && keyValue[1]) {
+      envArray.push({ name: keyValue[0].trim(), value: keyValue[1].trim() })
     }});
 
   envArray.push({ name: 'SERVICE_NAME', value: name });
@@ -556,12 +555,6 @@ const buildManifest = async (
   envArray.push({ name: 'SERVICE_ENVIRONMENT', value: deployEnv });
   envArray.push({ name: 'SERVICE_CONTAINER_IMAGE', value: image });
   envArray.push({ name: 'CLAN_NAME', value: clanName });
-
-  core.info(`Environment variables: `);
-  envArray.forEach(pair => 
-      console.log(pair.name +'=' + pair.value)
-    )
-  
 
   // check if env contains SQL_INSTANCE_NAME
   for (const envVar of envArray) {
@@ -586,7 +579,6 @@ const buildManifest = async (
       process.env.IAM_SYSTEM_NAME = bundleName;
     }
   }
-
   if (kubernetes) {
     envArray.push({ name: 'PORT', value: '8080' });
     envArray.push({ name: 'K_SERVICE', value: name });
