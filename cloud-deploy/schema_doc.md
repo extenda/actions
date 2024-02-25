@@ -702,9 +702,6 @@ must respect the following conditions
 
 **Description:** IAM Service, user and group accounts
 
-| Restrictions                      |                                                                                       |
-| --------------------------------- | ------------------------------------------------------------------------------------- |
-| **Must match regular expression** | ```^[a-z0-9]{240}$``` [Test](https://regex101.com/?regex=%5E%5Ba-z0-9%5D%7B240%7D%24) |
 |                      | Array restrictions |
 | -------------------- | ------------------ |
 | **Min items**        | N/A                |
@@ -911,4 +908,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2024-02-25 at 15:05:02 +0100
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2024-02-25 at 17:38:51 +0100
