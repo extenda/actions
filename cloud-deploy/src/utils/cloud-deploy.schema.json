@@ -21,7 +21,9 @@
   "oneOf": [
     {
       "title": "CloudRun",
-      "required": ["cloud-run"],
+      "required": [
+        "cloud-run"
+      ],
       "properties": {
         "cloud-run": {
           "$ref": "#/$defs/CloudRun"
@@ -30,7 +32,9 @@
     },
     {
       "title": "Kubernetes",
-      "required": ["kubernetes"],
+      "required": [
+        "kubernetes"
+      ],
       "properties": {
         "kubernetes": {
           "$ref": "#/$defs/Kubernetes"
@@ -38,7 +42,6 @@
       }
     }
   ],
-
   "$defs": {
     "CloudRun": {
       "title": "CloudRun",
@@ -297,6 +300,21 @@
                 "cpu": 0.5,
                 "memory": "512Mi"
               }
+            }
+          }
+        },
+        {
+          "title": "IAMBindingSettings",
+          "description": "IAM binding Security settings",
+          "type": "object",
+          "required": [
+            "service-accounts"
+          ],
+          "properties": {
+            "service-accounts": {
+              "description": "IAM permission prefix",
+              "type": "array",
+              "pattern": "^[a-z0-9]{240}$"
             }
           },
           "additionalProperties": false

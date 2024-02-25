@@ -3,17 +3,7 @@ const gcloudOutput = require('../utils/gcloud-output');
 const { retryUntil } = require('../utils/retry-until');
 const cleanRevisions = require('../cloudrun/clean-revisions');
 const { projectWithoutNumbers } = require('../utils/clan-project-name');
-
-const allowAllRequests = async (projectID, name) => gcloudOutput([
-  'run',
-  'services',
-  'add-iam-policy-binding',
-  name,
-  '--member=allUsers',
-  '--role=roles/run.invoker',
-  '--region=europe-west1',
-  `--project=${projectID}`,
-]);
+const setupAuthorization = require('../cloudrun/iam-bindings');
 
 const deployRelease = async (projectID, name, version) => gcloudOutput([
   'deploy',
@@ -61,12 +51,12 @@ const runGcloudDeploy = async (projectID, name, version) => {
   return status === 'SUCCEEDED';
 };
 
-const deploy = async (projectID, name, version, platformGKE) => {
+const deploy = async (projectID, name, version, platformGKE, accounts = []) => {
   const success = await runGcloudDeploy(projectID, name, version);
   if (success) {
     core.info(`Deployment of ${name} completed successfully`);
     if (!platformGKE) {
-      await allowAllRequests(projectID, name);
+      await setupAuthorization(projectID, name, accounts);
     }
   } else {
     core.error(`Deployment of ${name} failed`);

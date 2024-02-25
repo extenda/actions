@@ -44,6 +44,8 @@
     - [4.2.3. Property `CloudDeploy > security > oneOf > IAMSettings > resources`](#security_oneOf_i1_resources)
       - [4.2.3.1. Property `CloudDeploy > security > oneOf > IAMSettings > resources > cpu`](#security_oneOf_i1_resources_cpu)
       - [4.2.3.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources > memory`](#security_oneOf_i1_resources_memory)
+  - [4.3. Property `CloudDeploy > security > oneOf > IAMBindingSettings`](#security_oneOf_i2)
+    - [4.3.1. Property `CloudDeploy > security > oneOf > IAMBindingSettings > service-accounts`](#security_oneOf_i2_service-accounts)
 - [5. Property `CloudDeploy > environments`](#environments)
   - [5.1. Property `CloudDeploy > environments > production`](#environments_production)
     - [5.1.1. Property `CloudDeploy > environments > production > min-instances`](#environments_production_min-instances)
@@ -570,10 +572,11 @@ must respect the following conditions
 | **Additional properties** | [[Any type: allowed]](# "Additional Properties of any type are allowed.") |
 | **Defined in**            | #/$defs/Security                                                          |
 
-| One of(Option)                     |
-| ---------------------------------- |
-| [SecurityNone](#security_oneOf_i0) |
-| [IAMSettings](#security_oneOf_i1)  |
+| One of(Option)                           |
+| ---------------------------------------- |
+| [SecurityNone](#security_oneOf_i0)       |
+| [IAMSettings](#security_oneOf_i1)        |
+| [IAMBindingSettings](#security_oneOf_i2) |
 
 ### <a name="security_oneOf_i0"></a>4.1. Property `CloudDeploy > security > oneOf > SecurityNone`
 
@@ -590,11 +593,11 @@ must respect the following conditions
 
 **Title:** IAMSettings
 
-|                           |                                                         |
-| ------------------------- | ------------------------------------------------------- |
-| **Type**                  | `object`                                                |
-| **Required**              | No                                                      |
-| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
+|                           |                                                                           |
+| ------------------------- | ------------------------------------------------------------------------- |
+| **Type**                  | `object`                                                                  |
+| **Required**              | No                                                                        |
+| **Additional properties** | [[Any type: allowed]](# "Additional Properties of any type are allowed.") |
 
 **Description:** IAM Security settings
 
@@ -673,6 +676,42 @@ must respect the following conditions
 | Restrictions                      |                                                                                      |
 | --------------------------------- | ------------------------------------------------------------------------------------ |
 | **Must match regular expression** | ```^[0-9]+(M\|G)i``` [Test](https://regex101.com/?regex=%5E%5B0-9%5D%2B%28M%7CG%29i) |
+
+### <a name="security_oneOf_i2"></a>4.3. Property `CloudDeploy > security > oneOf > IAMBindingSettings`
+
+**Title:** IAMBindingSettings
+
+|                           |                                                         |
+| ------------------------- | ------------------------------------------------------- |
+| **Type**                  | `object`                                                |
+| **Required**              | No                                                      |
+| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
+
+**Description:** IAM binding Security settings
+
+| Property                                                   | Pattern | Type  | Deprecated | Definition | Title/Description     |
+| ---------------------------------------------------------- | ------- | ----- | ---------- | ---------- | --------------------- |
+| + [service-accounts](#security_oneOf_i2_service-accounts ) | No      | array | No         | -          | IAM permission prefix |
+
+#### <a name="security_oneOf_i2_service-accounts"></a>4.3.1. Property `CloudDeploy > security > oneOf > IAMBindingSettings > service-accounts`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | Yes     |
+
+**Description:** IAM permission prefix
+
+| Restrictions                      |                                                                                       |
+| --------------------------------- | ------------------------------------------------------------------------------------- |
+| **Must match regular expression** | ```^[a-z0-9]{240}$``` [Test](https://regex101.com/?regex=%5E%5Ba-z0-9%5D%7B240%7D%24) |
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
 
 ## <a name="environments"></a>5. Property `CloudDeploy > environments`
 
@@ -872,4 +911,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2024-02-20 at 19:46:35 +0100
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2024-02-23 at 17:31:28 +0100
