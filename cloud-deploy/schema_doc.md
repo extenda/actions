@@ -689,9 +689,9 @@ must respect the following conditions
 
 **Description:** IAM binding Security settings
 
-| Property                                                   | Pattern | Type  | Deprecated | Definition | Title/Description     |
-| ---------------------------------------------------------- | ------- | ----- | ---------- | ---------- | --------------------- |
-| + [service-accounts](#security_oneOf_i2_service-accounts ) | No      | array | No         | -          | IAM permission prefix |
+| Property                                                   | Pattern | Type  | Deprecated | Definition | Title/Description                    |
+| ---------------------------------------------------------- | ------- | ----- | ---------- | ---------- | ------------------------------------ |
+| + [service-accounts](#security_oneOf_i2_service-accounts ) | No      | array | No         | -          | IAM Service, user and group accounts |
 
 #### <a name="security_oneOf_i2_service-accounts"></a>4.3.1. Property `CloudDeploy > security > oneOf > IAMBindingSettings > service-accounts`
 
@@ -700,7 +700,7 @@ must respect the following conditions
 | **Type**     | `array` |
 | **Required** | Yes     |
 
-**Description:** IAM permission prefix
+**Description:** IAM Service, user and group accounts
 
 | Restrictions                      |                                                                                       |
 | --------------------------------- | ------------------------------------------------------------------------------------- |
@@ -911,4 +911,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2024-02-23 at 17:31:28 +0100
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2024-02-25 at 15:05:02 +0100

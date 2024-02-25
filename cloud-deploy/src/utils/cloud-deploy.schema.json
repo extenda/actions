@@ -312,7 +312,7 @@
           ],
           "properties": {
             "service-accounts": {
-              "description": "IAM permission prefix",
+              "description": "IAM Service, user and group accounts",
               "type": "array",
               "pattern": "^[a-z0-9]{240}$"
             }
