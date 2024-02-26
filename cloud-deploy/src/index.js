@@ -67,8 +67,16 @@ const action = async () => {
   } = environments;
 
   const {
-    'service-accounts': IAMServiceAccounts = [],
+    consumers,
   } = (security === 'none' ? {} : security || {});
+
+  const {
+    'service-accounts': IAMServiceAccounts = [],
+  } = consumers || {};
+
+  if (!cloudrun && consumers) {
+    throw new Error('Consumers security configuration is only for cloud-run');
+  }
 
   const {
     'domain-mappings': domainMappings,

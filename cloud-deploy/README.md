@@ -109,13 +109,14 @@ cloud-run:
     concurrency: 80
 
 security:
-  service-accounts:
-    - my-service@project-id.iam.gserviceaccount.com
-    - user:user-account@extendaretail.com
-    - group:group-account@extendaretail.com
-  audiences:
-    - https://my-service.retailsvc.com
-    - my-service
+  consumers:
+    service-accounts:
+      - my-service@project-id.iam.gserviceaccount.com
+      - user:user-account@extendaretail.com
+      - group:group-account@extendaretail.com
+    audiences:
+      - https://my-service.retailsvc.com
+      - my-service
 
 ```
 

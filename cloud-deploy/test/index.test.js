@@ -251,4 +251,72 @@ describe('Action', () => {
     );
     expect(configureInternalFrontend).not.toHaveBeenCalled();
   });
+
+  test('It will throw error if consumers are set for kubernetes', async () => {
+    core.getInput.mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('clan-service-account')
+      .mockReturnValueOnce('cloud-run.yaml')
+      .mockReturnValueOnce('gcr.io/project/image:tag');
+    loadCredentials.mockResolvedValueOnce('envoy-certs')
+      .mockResolvedValueOnce('internal-key')
+      .mockResolvedValueOnce('internal-cert');
+
+    const serviceDefconsumers = {
+      kubernetes: {
+        type: 'Deployment',
+        service: 'service-name',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          cpu: 40,
+        },
+      },
+      security: {
+        consumers: {
+          'service-accounts': ['some-account'],
+          audiences: ['some-audience'],
+        },
+      },
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+          },
+        },
+        staging: {
+          'min-instances': 1,
+          'max-instances': 1,
+          env: {},
+          'domain-mappings': ['example.com'],
+        },
+      },
+    };
+
+    loadServiceDefinition.mockReturnValueOnce(serviceDefconsumers);
+    getImageWithSha256.mockResolvedValueOnce('gcr.io/project/image@sha256:1');
+    projectInfo.mockReturnValueOnce({
+      project: 'clan-name',
+      env: 'staging',
+    });
+    buildManifest.mockResolvedValueOnce();
+    deploy.mockResolvedValueOnce(true);
+    createExternalLoadbalancer.mockResolvedValueOnce();
+    configureExternalLBFrontend.mockResolvedValueOnce();
+    configureExternalDomain.mockResolvedValueOnce();
+    configureInternalDomain.mockResolvedValueOnce();
+    configureInternalFrontend.mockResolvedValueOnce();
+    setupGcloud.mockResolvedValueOnce('project-id');
+    publishPolicies.mockResolvedValueOnce();
+    await expect(action()).rejects.toThrow('Consumers security configuration is only for cloud-run');
+  });
 });

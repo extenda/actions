@@ -300,7 +300,8 @@
                 "cpu": 0.5,
                 "memory": "512Mi"
               }
-            }
+            },
+            "additionalProperties": false
           }
         },
         {
@@ -308,19 +309,38 @@
           "description": "IAM binding Security settings",
           "type": "object",
           "required": [
-            "service-accounts"
+            "consumers"
           ],
           "properties": {
-            "service-accounts": {
-              "description": "IAM Service, user and group accounts",
-              "type": "array"
+            "consumers": {
+              "description": "IAM service Consumers",
+              "type": "object",
+              "required": [
+                "service-accounts"
+              ],
+              "properties": {
+                "service-accounts": {
+                  "description": "IAM Service, user and group accounts",
+                  "type": "array",
+                  "items": {
+                    "title": "ConsumerAccount",
+                    "description": "A google user, service or group account",
+                    "type": "string"
+                  }
+                },
+                "audiences": {
+                  "description": "IAM service custom audiences allowed",
+                  "type": "array",
+                  "items": {
+                    "title": "ConsumerAudience",
+                    "description": "An audience allowed through the service",
+                    "type": "string"
+                  }
+                }
+              }
             },
-            "audiences": {
-              "description": "IAM service custom audiences allowed",
-              "type": "array"
-            }
-          },
-          "additionalProperties": false
+            "additionalProperties": false
+          }
         }
       ]
     },

@@ -524,8 +524,12 @@ const buildManifest = async (
     'permission-prefix': permissionPrefix,
     resources: opaResources = { cpu: 0.5, memory: '512Mi' },
     'system-name': systemName = name,
-    audiences = [],
+    consumers = {},
   } = (security === 'none' ? {} : security || {});
+
+  const {
+    audiences = [],
+  } = consumers;
 
   const {
     'min-instances': minInstances,

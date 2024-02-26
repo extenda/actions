@@ -818,12 +818,14 @@ metadata:
         },
       },
       security: {
-        'service-accounts': [
-          'example-service@example-project.gserviceaccount.com',
-          'user:some-user@domain.com',
-          'group:some-group@domain.com',
-        ],
-        audiences: ['example-service', 'https://example-service.domain.com'],
+        consumers: {
+          'service-accounts': [
+            'example-service@example-project.gserviceaccount.com',
+            'user:some-user@domain.com',
+            'group:some-group@domain.com',
+          ],
+          audiences: ['example-service', 'https://example-service.domain.com'],
+        },
       },
       labels: {
         product: 'actions',
