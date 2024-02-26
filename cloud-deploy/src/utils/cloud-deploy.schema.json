@@ -314,6 +314,10 @@
             "service-accounts": {
               "description": "IAM Service, user and group accounts",
               "type": "array"
+            },
+            "audiences": {
+              "description": "IAM service custom audiences allowed",
+              "type": "array"
             }
           },
           "additionalProperties": false

@@ -46,6 +46,7 @@
       - [4.2.3.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources > memory`](#security_oneOf_i1_resources_memory)
   - [4.3. Property `CloudDeploy > security > oneOf > IAMBindingSettings`](#security_oneOf_i2)
     - [4.3.1. Property `CloudDeploy > security > oneOf > IAMBindingSettings > service-accounts`](#security_oneOf_i2_service-accounts)
+    - [4.3.2. Property `CloudDeploy > security > oneOf > IAMBindingSettings > audiences`](#security_oneOf_i2_audiences)
 - [5. Property `CloudDeploy > environments`](#environments)
   - [5.1. Property `CloudDeploy > environments > production`](#environments_production)
     - [5.1.1. Property `CloudDeploy > environments > production > min-instances`](#environments_production_min-instances)
@@ -692,6 +693,7 @@ must respect the following conditions
 | Property                                                   | Pattern | Type  | Deprecated | Definition | Title/Description                    |
 | ---------------------------------------------------------- | ------- | ----- | ---------- | ---------- | ------------------------------------ |
 | + [service-accounts](#security_oneOf_i2_service-accounts ) | No      | array | No         | -          | IAM Service, user and group accounts |
+| - [audiences](#security_oneOf_i2_audiences )               | No      | array | No         | -          | IAM service custom audiences allowed |
 
 #### <a name="security_oneOf_i2_service-accounts"></a>4.3.1. Property `CloudDeploy > security > oneOf > IAMBindingSettings > service-accounts`
 
@@ -701,6 +703,23 @@ must respect the following conditions
 | **Required** | Yes     |
 
 **Description:** IAM Service, user and group accounts
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+#### <a name="security_oneOf_i2_audiences"></a>4.3.2. Property `CloudDeploy > security > oneOf > IAMBindingSettings > audiences`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** IAM service custom audiences allowed
 
 |                      | Array restrictions |
 | -------------------- | ------------------ |
@@ -908,4 +927,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2024-02-25 at 17:38:51 +0100
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2024-02-26 at 09:36:11 +0100

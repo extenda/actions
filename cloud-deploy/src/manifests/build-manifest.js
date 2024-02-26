@@ -57,12 +57,23 @@ const cloudrunManifestTemplate = async (
   connector,
   connectorName,
   activeRevisionName,
+  audiences,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
   const ports = opa ? undefined : [{
     name: protocol === 'http2' ? 'h2c' : 'http1',
     containerPort: 8080,
   }];
+
+  const baseAnnotations = {
+    // 'run.googleapis.com/launch-stage': 'BETA',
+    'run.googleapis.com/ingress': 'internal-and-cloud-load-balancing',
+    // 'run.googleapis.com/binary-authorization': 'default',
+  };
+
+  if (audiences.length > 0) {
+    baseAnnotations['run.googleapis.com/custom-audiences'] = `[${audiences.map((audience) => `"${audience}"`)}]`;
+  }
 
   const annotations = {
     'run.googleapis.com/execution-environment': 'gen2',
@@ -149,11 +160,7 @@ const cloudrunManifestTemplate = async (
         app: name,
         ...Object.fromEntries(labels.map((label) => [label.name, label.value])),
       },
-      annotations: {
-        'run.googleapis.com/launch-stage': 'BETA',
-        'run.googleapis.com/ingress': 'internal-and-cloud-load-balancing',
-        // 'run.googleapis.com/binary-authorization': 'default',
-      },
+      annotations: baseAnnotations,
     },
     spec: {
       template: {
@@ -517,6 +524,7 @@ const buildManifest = async (
     'permission-prefix': permissionPrefix,
     resources: opaResources = { cpu: 0.5, memory: '512Mi' },
     'system-name': systemName = name,
+    audiences = [],
   } = (security === 'none' ? {} : security || {});
 
   const {
@@ -669,6 +677,7 @@ const buildManifest = async (
       connector,
       connectorName,
       activeRevisionName,
+      audiences,
     );
     generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));
   }

@@ -96,6 +96,29 @@ environments:
       <<: *env
 ```
 
+Managed Cloud Run service with IAM bindings setup
+
+```yaml
+cloud-run:
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    concurrency: 80
+
+security:
+  service-accounts:
+    - my-service@project-id.iam.gserviceaccount.com
+    - user:user-account@extendaretail.com
+    - group:group-account@extendaretail.com
+  audiences:
+    - https://my-service.retailsvc.com
+    - my-service
+
+```
+
 ### Kubernetes deployment
 
 A Kubernetes deployment with IAM security resources customized.
