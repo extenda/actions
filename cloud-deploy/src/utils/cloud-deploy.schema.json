@@ -21,7 +21,9 @@
   "oneOf": [
     {
       "title": "CloudRun",
-      "required": ["cloud-run"],
+      "required": [
+        "cloud-run"
+      ],
       "properties": {
         "cloud-run": {
           "$ref": "#/$defs/CloudRun"
@@ -30,7 +32,9 @@
     },
     {
       "title": "Kubernetes",
-      "required": ["kubernetes"],
+      "required": [
+        "kubernetes"
+      ],
       "properties": {
         "kubernetes": {
           "$ref": "#/$defs/Kubernetes"
@@ -38,7 +42,6 @@
       }
     }
   ],
-
   "$defs": {
     "CloudRun": {
       "title": "CloudRun",
@@ -297,9 +300,47 @@
                 "cpu": 0.5,
                 "memory": "512Mi"
               }
-            }
-          },
-          "additionalProperties": false
+            },
+            "additionalProperties": false
+          }
+        },
+        {
+          "title": "IAMBindingSettings",
+          "description": "IAM binding Security settings",
+          "type": "object",
+          "required": [
+            "consumers"
+          ],
+          "properties": {
+            "consumers": {
+              "description": "IAM service Consumers",
+              "type": "object",
+              "required": [
+                "service-accounts"
+              ],
+              "properties": {
+                "service-accounts": {
+                  "description": "IAM Service, user and group accounts",
+                  "type": "array",
+                  "items": {
+                    "title": "ConsumerAccount",
+                    "description": "A google user, service or group account",
+                    "type": "string"
+                  }
+                },
+                "audiences": {
+                  "description": "IAM service custom audiences allowed",
+                  "type": "array",
+                  "items": {
+                    "title": "ConsumerAudience",
+                    "description": "An audience allowed through the service",
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "additionalProperties": false
+          }
         }
       ]
     },

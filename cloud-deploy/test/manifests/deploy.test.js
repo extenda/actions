@@ -5,6 +5,7 @@ const cleanRevisions = require('../../src/cloudrun/clean-revisions');
 
 jest.mock('../../src/utils/gcloud-output');
 jest.mock('../../src/cloudrun/clean-revisions');
+jest.mock('../../src/cloudrun/iam-bindings');
 
 const progressCommand = expect.arrayContaining([
   'deploy',
@@ -31,7 +32,7 @@ describe('manifests/deploy', () => {
     const result = await deploy('my-project', 'my-service', '0.0.1-local', false);
     expect(result).toEqual(true);
 
-    expect(gcloudOutput).toHaveBeenCalledTimes(6);
+    expect(gcloudOutput).toHaveBeenCalledTimes(5);
     expect(cleanRevisions).toHaveBeenCalled();
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(1, [

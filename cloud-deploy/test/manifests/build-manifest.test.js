@@ -802,4 +802,54 @@ metadata:
 
     await expect(buildManifest(image, service, projectId, clanName, env, '', '', '', '', '')).rejects.toThrow('2 active revisions found, set revision to 100% traffic before deploying');
   });
+
+  test('It should deploy with iam bindings and audiences', async () => {
+    const image = 'example-image:latest';
+    const service = {
+      'cloud-run': {
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          concurrency: 80,
+        },
+      },
+      security: {
+        consumers: {
+          'service-accounts': [
+            'example-service@example-project.gserviceaccount.com',
+            'user:some-user@domain.com',
+            'group:some-group@domain.com',
+          ],
+          audiences: ['example-service', 'https://example-service.domain.com'],
+        },
+      },
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+          },
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'dev';
+
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+
+    const manifest = readFileSync('cloudrun-service.yaml');
+    mockFs.restore();
+    expect(manifest).toMatchSnapshot();
+  });
 });

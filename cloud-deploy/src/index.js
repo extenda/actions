@@ -48,6 +48,7 @@ const action = async () => {
     'cloud-run': cloudrun,
     kubernetes,
     environments,
+    security,
   } = deployYaml;
 
   const image = await getImageWithSha256(userImage);
@@ -64,6 +65,18 @@ const action = async () => {
     staging,
     production,
   } = environments;
+
+  const {
+    consumers,
+  } = (security === 'none' ? {} : security || {});
+
+  const {
+    'service-accounts': IAMServiceAccounts = [],
+  } = consumers || {};
+
+  if (!cloudrun && consumers) {
+    throw new Error('Consumers security configuration is only for cloud-run');
+  }
 
   const {
     'domain-mappings': domainMappings,
@@ -99,7 +112,13 @@ const action = async () => {
   await publishPolicies(serviceName, env, (userImage.split(':')[1] || version), deployYaml);
 
   core.info('Run cloud-deploy');
-  const succesfulDeploy = await deploy(projectID, serviceName, version, platformGKE);
+  const succesfulDeploy = await deploy(
+    projectID,
+    serviceName,
+    version,
+    platformGKE,
+    IAMServiceAccounts,
+  );
 
   if (succesfulDeploy) {
     await createExternalLoadbalancer(projectID, env);
