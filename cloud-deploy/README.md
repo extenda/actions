@@ -120,6 +120,32 @@ security:
 
 ```
 
+Managed Cloud Run service with scheduled scaling for production
+
+```yaml
+cloud-run:
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    concurrency: 80
+    schedule:
+      - service-hours: 07:00-22:00
+        region: europe-west1
+
+environments:
+  production:
+    min-instances: 1
+
+```
+
+```
+service-hours: ## all times in UTC ( scale up at 07:00, scale down to 0 at 22:00)
+min-instances: ## the value the scaleup will use
+region: ## unused but will be used once we roll out to more regions
+```
 ### Kubernetes deployment
 
 A Kubernetes deployment with IAM security resources customized.
