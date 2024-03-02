@@ -132,7 +132,7 @@ cloud-run:
   scaling:
     concurrency: 80
     schedule:
-      - service-hours: 07:00-22:00
+      - scale-hours: 07:00-22:00
         region: europe-west1
 
 environments:
