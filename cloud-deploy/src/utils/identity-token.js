@@ -1,11 +1,5 @@
-const { GoogleAuth } = require('google-auth-library');
+const { execGcloud } = require('../../../setup-gcloud');
 
-const targetAudience = 'cloud-deploy';
-const googleAuth = new GoogleAuth();
-
-const getToken = async () => {
-  const client = await googleAuth.getIdTokenClient(targetAudience);
-  return client.idTokenProvider.fetchIdToken(targetAudience);
-};
+const getToken = async (audience = 'cloud-deploy') => execGcloud(['auth', 'print-identity-token', `--audiences=${audience}`]);
 
 module.exports = getToken;

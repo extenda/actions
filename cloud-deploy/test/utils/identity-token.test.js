@@ -1,5 +1,7 @@
-const { GoogleAuth } = require('google-auth-library');
 const getToken = require('../../src/utils/identity-token');
+const { execGcloud } = require('../../../setup-gcloud');
+
+jest.mock('../../../setup-gcloud');
 
 describe('getToken function', () => {
   beforeEach(() => {
@@ -7,23 +9,10 @@ describe('getToken function', () => {
   });
 
   it('should fetch and return the id token', async () => {
-    const targetAudience = 'cloud-deploy';
-    const mockIdToken = 'mocked-id-token';
+    execGcloud.mockResolvedValue('token');
+    const result = await getToken('cloud-deploy');
 
-    const idTokenProviderMock = {
-      fetchIdToken: jest.fn().mockResolvedValue(mockIdToken),
-    };
-
-    const getIdTokenClientMock = jest.fn().mockResolvedValue({
-      idTokenProvider: idTokenProviderMock,
-    });
-
-    jest.spyOn(GoogleAuth.prototype, 'getIdTokenClient').mockImplementation(getIdTokenClientMock);
-
-    const result = await getToken();
-
-    expect(result).toBe(mockIdToken);
-    expect(getIdTokenClientMock).toHaveBeenCalledWith(targetAudience);
-    expect(idTokenProviderMock.fetchIdToken).toHaveBeenCalledWith(targetAudience);
+    expect(result).toBe('token');
+    expect(execGcloud).toHaveBeenCalledWith(['auth', 'print-identity-token', '--audiences=cloud-deploy']);
   });
 });
