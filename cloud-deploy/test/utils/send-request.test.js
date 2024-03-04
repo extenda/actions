@@ -21,15 +21,9 @@ describe('Send request to platform api', () => {
     jest.clearAllMocks();
   });
   it('should send scale setup request successfully', async () => {
-    // Mock getToken function
     getToken.mockResolvedValue('token');
-
-    // Mock axios.post function
     axios.post.mockResolvedValue({ status: 200 });
-
     await sendScaleSetup(service, projectid, region, platform, mininstances, scaleup, scaledown);
-
-    // Assert that axios.post was called with the correct arguments
     expect(axios.post).toHaveBeenCalledWith(
       '/scaling/setup',
       {
@@ -49,21 +43,13 @@ describe('Send request to platform api', () => {
         },
       },
     );
-
-    // Assert that core.info was called
     expect(core.info).toHaveBeenCalledWith(expect.stringContaining('/scaling/setup with response code 200'));
   });
 
   it('should log error on request failure', async () => {
-    // Mock getToken function
     getToken.mockResolvedValue('token');
-
-    // Mock axios.post function
     axios.post.mockRejectedValue('some error');
-
     await sendScaleSetup(service, projectid, region, platform, mininstances, scaleup, scaledown);
-
-    // Assert that axios.post was called with the correct arguments
     expect(axios.post).toHaveBeenCalledWith(
       '/scaling/setup',
       {
@@ -83,8 +69,6 @@ describe('Send request to platform api', () => {
         },
       },
     );
-
-    // Assert that core.info was called
     expect(core.error).toHaveBeenCalledWith(expect.stringContaining('some error'));
   });
 });

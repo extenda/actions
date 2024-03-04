@@ -1,4 +1,3 @@
-// getToken.test.js
 const { GoogleAuth } = require('google-auth-library');
 const getToken = require('../../src/utils/identity-token');
 

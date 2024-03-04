@@ -120,6 +120,11 @@ security:
 
 ```
 
+```
+service-accounts: ## service accounts allowed access to the service for user or group accounts add prefix
+audiences: ## the audience allowed on the generated tokens
+```
+
 Managed Cloud Run service with scheduled scaling for production
 
 ```yaml
