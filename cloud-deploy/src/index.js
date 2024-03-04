@@ -14,6 +14,7 @@ const readSecret = require('./utils/load-credentials');
 const runScan = require('./utils/vulnerability-scanning');
 const getImageWithSha256 = require('./manifests/image-sha256');
 const publishPolicies = require('./policies/publish-policies');
+const sendScaleSetup = require('./utils/send-request');
 
 const action = async () => {
   const serviceAccountKeyPipeline = core.getInput('secrets-account-key', { required: true });
@@ -59,6 +60,7 @@ const action = async () => {
     service: serviceName,
     protocol,
     'internal-traffic': internalTraffic = true,
+    scaling,
   } = kubernetes || cloudrun;
 
   const {
@@ -80,6 +82,7 @@ const action = async () => {
 
   const {
     'domain-mappings': domainMappings,
+    'min-instances': minInstances,
   } = env === 'staging' ? staging : production;
 
   const platformGKE = !cloudrun;
@@ -121,6 +124,24 @@ const action = async () => {
   );
 
   if (succesfulDeploy) {
+    // Setup scaling scheduler
+    if (scaling.schedule && env === 'prod' && minInstances > 0) {
+      const requests = [];
+      for (const schedule of scaling.schedule) {
+        // check region match once region is implemented
+        const [scaleUp, scaleDown] = schedule['scale-hours'].split('-');
+        requests.push(sendScaleSetup(
+          serviceName,
+          projectID,
+          'europe-west1',
+          platformGKE ? 'kubernetes' : 'cloudrun',
+          minInstances,
+          scaleUp,
+          scaleDown,
+        ));
+      }
+      await Promise.all(requests);
+    }
     await createExternalLoadbalancer(projectID, env);
     if (domainMappings) {
       await configureExternalLBFrontend(projectID, env, [...domainMappings], migrate);

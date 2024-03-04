@@ -79,6 +79,12 @@
               "type": "integer",
               "minimum": 10,
               "maximum": 1000
+            },
+            "schedule": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ScheduledScaling"
+              }
             }
           },
           "additionalProperties": false
@@ -263,6 +269,26 @@
           "description": "Amount of memory to request",
           "type": "string",
           "pattern": "^[0-9]+(M|G)i"
+        }
+      }
+    },
+    "ScheduledScaling": {
+      "title": "ScheduledScaling",
+      "description": "Scale in and out on demand",
+      "type": "object",
+      "required": [
+        "scale-hours"
+      ],
+      "properties": {
+        "scale-hours": {
+          "description": "A string representing the hours to be scaled out",
+          "type": "string",
+          "pattern": "^[0-2]{1}[0-9]{1}:[0-5]{1}[0-9]{1}-[0-2]{1}[0-9]{1}:[0-5]{1}[0-9]{1}"
+        },
+        "region": {
+          "description": "The region to target",
+          "type": "string",
+          "default": "europe-west1"
         }
       },
       "additionalProperties": false

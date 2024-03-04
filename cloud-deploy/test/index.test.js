@@ -13,6 +13,8 @@ const action = require('../src/index');
 const loadCredentials = require('../src/utils/load-credentials');
 const getImageWithSha256 = require('../src/manifests/image-sha256');
 const publishPolicies = require('../src/policies/publish-policies');
+const sendScaleSetup = require('../src/utils/send-request');
+const runScan = require('../src/utils/vulnerability-scanning');
 
 jest.mock('../src/utils/load-credentials');
 jest.mock('@actions/core');
@@ -29,6 +31,8 @@ jest.mock('../../utils');
 jest.mock('../../setup-gcloud');
 jest.mock('../src/manifests/image-sha256');
 jest.mock('../src/policies/publish-policies');
+jest.mock('../src/utils/send-request');
+jest.mock('../src/utils/vulnerability-scanning');
 
 const serviceDef = {
   kubernetes: {
@@ -318,5 +322,77 @@ describe('Action', () => {
     setupGcloud.mockResolvedValueOnce('project-id');
     publishPolicies.mockResolvedValueOnce();
     await expect(action()).rejects.toThrow('Consumers security configuration is only for cloud-run');
+  });
+
+  test('It will setup scaling schedule', async () => {
+    core.getInput.mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('clan-service-account')
+      .mockReturnValueOnce('cloud-run.yaml')
+      .mockReturnValueOnce('gcr.io/project/image:tag');
+    loadCredentials.mockResolvedValueOnce('envoy-certs')
+      .mockResolvedValueOnce('internal-key')
+      .mockResolvedValueOnce('internal-cert');
+
+    const serviceDefconsumers = {
+      'cloud-run': {
+        service: 'service-name',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          concurrency: 40,
+          schedule: [{
+            'scale-hours': '08:00-20:00',
+          }],
+        },
+      },
+      security: {
+        consumers: {
+          'service-accounts': ['some-account'],
+          audiences: ['some-audience'],
+        },
+      },
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+          },
+        },
+        staging: {
+          'min-instances': 1,
+          'max-instances': 1,
+          env: {},
+          'domain-mappings': ['example.com'],
+        },
+      },
+    };
+
+    loadServiceDefinition.mockReturnValueOnce(serviceDefconsumers);
+    getImageWithSha256.mockResolvedValueOnce('gcr.io/project/image@sha256:1');
+    projectInfo.mockReturnValueOnce({
+      project: 'clan-name',
+      env: 'prod',
+    });
+    buildManifest.mockResolvedValueOnce();
+    deploy.mockResolvedValueOnce(true);
+    createExternalLoadbalancer.mockResolvedValueOnce();
+    configureExternalLBFrontend.mockResolvedValueOnce();
+    configureExternalDomain.mockResolvedValueOnce();
+    configureInternalDomain.mockResolvedValueOnce();
+    configureInternalFrontend.mockResolvedValueOnce();
+    setupGcloud.mockResolvedValueOnce('project-id');
+    publishPolicies.mockResolvedValueOnce();
+    runScan.mockResolvedValueOnce();
+    await action();
+    expect(sendScaleSetup).toHaveBeenCalledTimes(1);
   });
 });
