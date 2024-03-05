@@ -22,5 +22,5 @@ inputs:
       If not provided, the value is read from `cloud-deploy.yaml`.
     required: false
 runs:
-  using: node18
+  using: node20
   main: dist/index.js

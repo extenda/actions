@@ -48,5 +48,5 @@ inputs:
     required: true
     default: null
 runs:
-  using: node18
+  using: node20
   main: dist/index.js

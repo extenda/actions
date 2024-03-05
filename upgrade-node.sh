@@ -1,6 +1,6 @@
 #!/bin/sh
-FROM=16
-TO=18
+FROM=18
+TO=20
 
 echo 'Replace all node versions in "action.yml" files ...'
 find . -type f -name action.yml -exec sed -i "s/using: node$FROM/using: node$TO/g" {} +

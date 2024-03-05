@@ -18,5 +18,5 @@ inputs:
       The path to a file you want to send in the notification.
     required: false
 runs:
-  using: node18
+  using: node20
   main: dist/index.js

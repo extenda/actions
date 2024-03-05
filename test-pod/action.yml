@@ -39,5 +39,5 @@ inputs:
       Example: TEST_POD_API_KEY is exposed to test pod as API_KEY.
     required: false
 runs:
-  using: node18
+  using: node20
   main: dist/index.js
