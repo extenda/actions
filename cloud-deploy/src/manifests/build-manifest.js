@@ -43,7 +43,7 @@ const cloudrunManifestTemplate = async (
   environment,
   minInstances,
   maxInstances,
-  containerConcurrency,
+  scaling,
   cpu,
   memory,
   opaCpu,
@@ -64,6 +64,7 @@ const cloudrunManifestTemplate = async (
     name: protocol === 'http2' ? 'h2c' : 'http1',
     containerPort: 8080,
   }];
+  const containerConcurrency = scaling.concurrency;
 
   const baseAnnotations = {
     // 'run.googleapis.com/launch-stage': 'BETA',
@@ -83,6 +84,13 @@ const cloudrunManifestTemplate = async (
     'run.googleapis.com/startup-cpu-boost': `${cpuBoost}`,
     'run.googleapis.com/sessionAffinity': `${sessionAffinity}`,
   };
+
+  if (scaling.schedule && minInstances > 0) {
+    baseAnnotations['run.googleapis.com/launch-stage'] = 'BETA';
+    baseAnnotations['run.googleapis.com/minScale'] = minInstances;
+    annotations['autoscaling.knative.dev/minScale'] = 0;
+  }
+
   if (connector) {
     annotations['run.googleapis.com/vpc-access-connector'] = `${connectorName}`;
     annotations['run.googleapis.com/vpc-access-egress'] = 'all-traffic';
@@ -667,7 +675,7 @@ const buildManifest = async (
       envArray,
       minInstances,
       maxInstances,
-      scaling.concurrency,
+      scaling,
       resources.cpu,
       resources.memory,
       opaResources.cpu,
