@@ -36,6 +36,7 @@
     "run-script-os": "^1.1.6"
   },
   "dependencies": {
+    "axios-retry": "^4.0.0",
     "js-yaml": "^4.1.0",
     "request": "^2.88.2"
   }
