@@ -24,5 +24,5 @@ inputs:
     description: Specify if publish config needs to be generated, by default read-only access will be provided
     required: false
 runs:
-  using: node16
+  using: node20
   main: dist/index.js

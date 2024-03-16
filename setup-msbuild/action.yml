@@ -1,5 +1,5 @@
 name: Setup MSBuild
 description: Uses VSWhere to locate latest MSBuild and add it to PATH
 runs:
-  using: node16
+  using: node20
   main: dist/index.js

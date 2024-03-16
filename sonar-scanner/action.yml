@@ -55,5 +55,5 @@ inputs:
     description: The working directory. Defaults to the current working directory.
     required: false
 runs:
-  using: node16
+  using: node20
   main: dist/index.js

@@ -17,5 +17,5 @@ inputs:
     description: The bucket to upload the generated files to
     required: false
 runs:
-  using: node16
+  using: node20
   main: dist/index.js
