@@ -15,6 +15,7 @@ const runScan = require('./utils/vulnerability-scanning');
 const getImageWithSha256 = require('./manifests/image-sha256');
 const publishPolicies = require('./policies/publish-policies');
 const sendScaleSetup = require('./utils/send-request');
+const { checkPolicyExists, setCloudArmorPolicyTarget, checkPolicyTarget } = require('./loadbalancing/external/cloud-armor');
 
 const action = async () => {
   const serviceAccountKeyPipeline = core.getInput('secrets-account-key', { required: true });
@@ -70,14 +71,24 @@ const action = async () => {
 
   const {
     consumers,
+    'cloud-armor': cloudArmor,
   } = (security === 'none' ? {} : security || {});
 
   const {
     'service-accounts': IAMServiceAccounts = [],
   } = consumers || {};
 
+  const {
+    'policy-name': cloudArmorPolicy = '',
+  } = cloudArmor || {};
+
   if (!cloudrun && consumers) {
     throw new Error('Consumers security configuration is only for cloud-run');
+  }
+
+  // fail early if cloud armor policy doesn't exist
+  if (cloudArmorPolicy) {
+    await checkPolicyExists(cloudArmorPolicy, projectID);
   }
 
   const {
@@ -154,6 +165,15 @@ const action = async () => {
         timeout,
         platformGKE,
       );
+      // Check if backend needs to be updated true if match false if needs to update
+      const updateCloudArmorPolicy = await checkPolicyTarget(
+        serviceName,
+        cloudArmorPolicy,
+        projectID,
+      );
+      if (!updateCloudArmorPolicy) {
+        await setCloudArmorPolicyTarget(serviceName, cloudArmorPolicy, projectID);
+      }
     }
     if (internalTraffic) {
       await configureInternalDomain(projectID, serviceName, env, protocol, timeout, platformGKE);

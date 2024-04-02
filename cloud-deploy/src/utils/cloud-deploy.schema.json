@@ -306,6 +306,7 @@
           "title": "IAMSettings",
           "description": "IAM Security settings",
           "type": "object",
+          "additionalProperties": false,
           "required": [
             "permission-prefix"
           ],
@@ -327,20 +328,27 @@
                 "memory": "512Mi"
               }
             },
-            "additionalProperties": false
+            "cloud-armor": {
+              "$ref": "#/$defs/CloudArmor"
+            }
           }
         },
         {
           "title": "IAMBindingSettings",
           "description": "IAM binding Security settings",
           "type": "object",
+          "additionalProperties": false,
           "required": [
             "consumers"
           ],
           "properties": {
+            "cloud-armor": {
+              "$ref": "#/$defs/CloudArmor"
+            },
             "consumers": {
               "description": "IAM service Consumers",
               "type": "object",
+              "additionalProperties": false,
               "required": [
                 "service-accounts"
               ],
@@ -364,8 +372,21 @@
                   }
                 }
               }
-            },
-            "additionalProperties": false
+            }
+          }
+        },
+        {
+          "title": "CloudArmor",
+          "description": "Use cloud armor policy",
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "cloud-armor"
+          ],
+          "properties": {
+            "cloud-armor": {
+              "$ref": "#/$defs/CloudArmor"
+            }
           }
         }
       ]
@@ -399,6 +420,21 @@
         }
       },
       "additionalProperties": false
+    },
+    "CloudArmor": {
+      "title": "CloudArmor",
+      "description": "Use cloud armor policy",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy-name"
+      ],
+      "properties": {
+        "policy-name": {
+          "description": "Cloud armor policy name",
+          "type": "string"
+        }
+      }
     },
     "Environment": {
       "title": "Environment",
