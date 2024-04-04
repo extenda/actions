@@ -61,15 +61,14 @@ const updateBackendService = async (
     `${name}-external-backend`,
     platformGKE ? `--health-checks=${projectID}-external-hc` : '--no-health-checks',
     '--global',
+    '--logging-sample-rate=1',
     `--project=${projectID}`,
   ];
 
   if (platformGKE) {
-    args.push('--logging-sample-rate=1');
     args.push(`--protocol=${serviceType === 'http2' ? 'HTTP2' : 'HTTP'}`);
     args.push(`--timeout=${connectionTimeout}s`);
   } else {
-    args.push('--logging-sample-rate=0');
     args.push('--protocol=HTTPS');
   }
   return gcloudOutput(args);
@@ -92,18 +91,17 @@ const setupBackendService = async (
     '--connection-draining-timeout=300s',
     '--global',
     '--enable-logging',
+    '--logging-sample-rate=1',
     '--load-balancing-scheme=EXTERNAL',
     `--project=${projectID}`,
   ];
   if (platformGKE) {
-    args.push('--logging-sample-rate=1');
     args.push(`--protocol=${serviceType === 'http2' ? 'HTTP2' : 'HTTP'}`);
     args.push(`--health-checks=${projectID}-external-hc`);
     args.push(`--timeout=${connectionTimeout}s`);
   }
   if (!platformGKE) {
     args.push('--protocol=HTTPS');
-    args.push('--logging-sample-rate=0');
   }
   return gcloudOutput(args, 'gcloud', true, true).catch(() => updateBackendService(
     name,
@@ -280,11 +278,6 @@ const configureExternalDomain = async (
   }
 
   if (!platformGKE) {
-    if (backendStatus && !doSwitch) {
-      if (backendStatus.sampleRate !== 0) {
-        await updateBackendService(name, projectID, serviceType, connectionTimeout, platformGKE);
-      }
-    }
     // create serverless neg
     await createServerlessNeg(name, projectID, 'europe-west1');
     await addBackend(name, projectID, 'europe-west1', platformGKE);
