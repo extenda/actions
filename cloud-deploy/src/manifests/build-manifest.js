@@ -174,6 +174,10 @@ const cloudrunManifestTemplate = async (
       template: {
         metadata: {
           annotations,
+          labels: {
+            app: name,
+            ...Object.fromEntries(labels.map((label) => [label.name, label.value])),
+          },
         },
         spec: {
           containerConcurrency,

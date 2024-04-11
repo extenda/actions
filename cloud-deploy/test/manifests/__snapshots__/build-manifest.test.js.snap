@@ -26,6 +26,12 @@ spec:
         run.googleapis.com/sessionAffinity: 'false'
         run.googleapis.com/vpc-access-connector: undefined
         run.googleapis.com/vpc-access-egress: all-traffic
+      labels:
+        app: example-service
+        product: actions
+        component: jest
+        tenant-alias: multi-tenant
+        iso-country: global
     spec:
       containerConcurrency: 80
       timeoutSeconds: ''
@@ -93,6 +99,12 @@ spec:
         run.googleapis.com/sessionAffinity: 'true'
         run.googleapis.com/vpc-access-connector: example-clan-vpc-connector
         run.googleapis.com/vpc-access-egress: all-traffic
+      labels:
+        app: example-service
+        product: actions
+        component: jest
+        tenant-alias: multi-tenant
+        iso-country: global
     spec:
       containerConcurrency: 80
       timeoutSeconds: ''
@@ -160,6 +172,12 @@ spec:
         run.googleapis.com/sessionAffinity: 'true'
         run.googleapis.com/vpc-access-connector: example-clan-vpc-connector
         run.googleapis.com/vpc-access-egress: all-traffic
+      labels:
+        app: example-service
+        product: actions
+        component: jest
+        tenant-alias: multi-tenant
+        iso-country: global
     spec:
       containerConcurrency: 80
       timeoutSeconds: ''
@@ -241,6 +259,12 @@ spec:
         run.googleapis.com/sessionAffinity: 'false'
         run.googleapis.com/vpc-access-connector: undefined
         run.googleapis.com/vpc-access-egress: all-traffic
+      labels:
+        app: example-service
+        product: actions
+        component: jest
+        tenant-alias: multi-tenant
+        iso-country: global
     spec:
       containerConcurrency: 80
       timeoutSeconds: ''
@@ -546,6 +570,12 @@ spec:
         run.googleapis.com/sessionAffinity: 'false'
         run.googleapis.com/vpc-access-connector: example-clan-vpc-connector
         run.googleapis.com/vpc-access-egress: all-traffic
+      labels:
+        app: example-service
+        product: actions
+        component: jest
+        tenant-alias: multi-tenant
+        iso-country: global
     spec:
       containerConcurrency: 80
       timeoutSeconds: ''
@@ -616,6 +646,12 @@ spec:
         run.googleapis.com/vpc-access-connector: example-clan-vpc-connector
         run.googleapis.com/vpc-access-egress: all-traffic
         run.googleapis.com/cloudsql-instances: instance-name
+      labels:
+        app: example-service
+        label1: labelValue1
+        label2: labelValue2
+        tenant-alias: multi-tenant
+        iso-country: global
     spec:
       containerConcurrency: 40
       timeoutSeconds: ''
