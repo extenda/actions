@@ -8,7 +8,7 @@ const configureInternalDomain = require('./loadbalancing/internal/create-interna
 const configureExternalDomain = require('./loadbalancing/external/create-external-backend');
 const configureExternalLBFrontend = require('./loadbalancing/external/create-external-frontend');
 const configureInternalFrontend = require('./loadbalancing/internal/create-internal-frontend');
-const { run, failIfNotTrunkBased } = require('../../utils');
+const { run, failIfNotTrunkBased, shouldIDeploy } = require('../../utils');
 const { setupGcloud } = require('../../setup-gcloud');
 const readSecret = require('./utils/load-credentials');
 const runScan = require('./utils/vulnerability-scanning');
@@ -39,6 +39,8 @@ const action = async () => {
     project: clanName,
     env,
   } = projectInfo(projectID);
+
+  shouldIDeploy(env);
 
   const http2Certificate = await readSecret(serviceAccountKeyPipeline, env, 'envoy-http2-certs', 'HTTPS_CERTIFICATES');
   const internalHttpsCertificateKey = await readSecret(serviceAccountKeyPipeline, env, 'internal-https-certs-key', 'INTERNAL_HTTPS_CERTIFICATES_KEY');
