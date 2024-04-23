@@ -587,6 +587,7 @@ const buildManifest = async (
   const serviceAccount = `${name}@${projectId}.iam.gserviceaccount.com`;
 
   await prepareGcloudDeploy(name, projectId, clanName, deployEnv, kubernetes ? 'gke' : 'cloudrun');
+  console.log('Checking if OPA is enabled', permissionPrefix, useSidecar, security);
   if (permissionPrefix && useSidecar) {
     opa = true;
     const bundleName = `${permissionPrefix}.${systemName}-${deployEnv}`;
