@@ -75,7 +75,7 @@ describe('buildManifest', () => {
     await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
 
     expect(securitySpec).not.toHaveBeenCalled();
-    const manifest = readFileSync('cloudrun-service.yaml');
+    const manifest = readFileSync('k8s(deploy)-manifest.yaml');
     mockFs.restore();
     expect(manifest).toMatchSnapshot();
   });
