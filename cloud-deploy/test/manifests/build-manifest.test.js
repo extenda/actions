@@ -32,8 +32,6 @@ describe('buildManifest', () => {
   });
 
   test('does not deploy sidecar if use-sidecar is false', async () => {
-    checkSystem.mockResolvedValueOnce(true);
-
     const image = 'example-image:latest';
     const service = {
       kubernetes: {
@@ -78,7 +76,7 @@ describe('buildManifest', () => {
 
     mockFs.restore();
     expect(securitySpec).not.toHaveBeenCalled();
-  })
+  });
 
   test('should generate manifest file with correct content', async () => {
     // const mockWriteFile = jest.spyOn(fs, 'writeFileSync').mockImplementation();'
