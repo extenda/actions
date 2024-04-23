@@ -74,8 +74,10 @@ describe('buildManifest', () => {
 
     await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
 
-    mockFs.restore();
     expect(securitySpec).not.toHaveBeenCalled();
+    const manifest = readFileSync('cloudrun-service.yaml');
+    mockFs.restore();
+    expect(manifest).toMatchSnapshot();
   });
 
   test('should generate manifest file with correct content', async () => {
