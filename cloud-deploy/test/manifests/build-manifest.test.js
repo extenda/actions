@@ -31,6 +31,55 @@ describe('buildManifest', () => {
     addNamespace.mockResolvedValueOnce('');
   });
 
+  test('does not deploy sidecar if use-sidecar is false', async () => {
+    checkSystem.mockResolvedValueOnce(true);
+
+    const image = 'example-image:latest';
+    const service = {
+      kubernetes: {
+        type: 'Deployment',
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          cpu: 40,
+        },
+      },
+      security: {
+        'permission-prefix': 'tst',
+        'use-sidecar': false,
+      },
+      labels: {
+        product: 'actions',
+        component: 'jest',
+        label1: 'labelValue1',
+        label2: 'labelValue2',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+          },
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'dev';
+
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+
+    mockFs.restore();
+    expect(securitySpec).not.toHaveBeenCalled();
+  })
+
   test('should generate manifest file with correct content', async () => {
     // const mockWriteFile = jest.spyOn(fs, 'writeFileSync').mockImplementation();'
     const image = 'example-image:latest';

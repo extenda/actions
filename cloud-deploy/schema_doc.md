@@ -44,12 +44,13 @@
   - [4.1. Property `CloudDeploy > security > oneOf > SecurityNone`](#security_oneOf_i0)
   - [4.2. Property `CloudDeploy > security > oneOf > IAMSettings`](#security_oneOf_i1)
     - [4.2.1. Property `CloudDeploy > security > oneOf > IAMSettings > permission-prefix`](#security_oneOf_i1_permission-prefix)
-    - [4.2.2. Property `CloudDeploy > security > oneOf > IAMSettings > system-name`](#security_oneOf_i1_system-name)
-    - [4.2.3. Property `CloudDeploy > security > oneOf > IAMSettings > resources`](#security_oneOf_i1_resources)
-      - [4.2.3.1. Property `CloudDeploy > security > oneOf > IAMSettings > resources > cpu`](#security_oneOf_i1_resources_cpu)
-      - [4.2.3.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources > memory`](#security_oneOf_i1_resources_memory)
-    - [4.2.4. Property `CloudDeploy > security > oneOf > IAMSettings > cloud-armor`](#security_oneOf_i1_cloud-armor)
-      - [4.2.4.1. Property `CloudDeploy > security > oneOf > IAMSettings > cloud-armor > policy-name`](#security_oneOf_i1_cloud-armor_policy-name)
+    - [4.2.2. Property `CloudDeploy > security > oneOf > IAMSettings > use-sidecar`](#security_oneOf_i1_use-sidecar)
+    - [4.2.3. Property `CloudDeploy > security > oneOf > IAMSettings > system-name`](#security_oneOf_i1_system-name)
+    - [4.2.4. Property `CloudDeploy > security > oneOf > IAMSettings > resources`](#security_oneOf_i1_resources)
+      - [4.2.4.1. Property `CloudDeploy > security > oneOf > IAMSettings > resources > cpu`](#security_oneOf_i1_resources_cpu)
+      - [4.2.4.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources > memory`](#security_oneOf_i1_resources_memory)
+    - [4.2.5. Property `CloudDeploy > security > oneOf > IAMSettings > cloud-armor`](#security_oneOf_i1_cloud-armor)
+      - [4.2.5.1. Property `CloudDeploy > security > oneOf > IAMSettings > cloud-armor > policy-name`](#security_oneOf_i1_cloud-armor_policy-name)
   - [4.3. Property `CloudDeploy > security > oneOf > IAMBindingSettings`](#security_oneOf_i2)
     - [4.3.1. Property `CloudDeploy > security > oneOf > IAMBindingSettings > cloud-armor`](#security_oneOf_i2_cloud-armor)
     - [4.3.2. Property `CloudDeploy > security > oneOf > IAMBindingSettings > consumers`](#security_oneOf_i2_consumers)
@@ -674,12 +675,13 @@ must respect the following conditions
 
 **Description:** IAM Security settings
 
-| Property                                                     | Pattern | Type   | Deprecated | Definition            | Title/Description                        |
-| ------------------------------------------------------------ | ------- | ------ | ---------- | --------------------- | ---------------------------------------- |
-| + [permission-prefix](#security_oneOf_i1_permission-prefix ) | No      | string | No         | -                     | IAM permission prefix                    |
-| - [system-name](#security_oneOf_i1_system-name )             | No      | string | No         | -                     | IAM system name defaults to service name |
-| - [resources](#security_oneOf_i1_resources )                 | No      | object | No         | In #/$defs/Resources  | The requested resources                  |
-| - [cloud-armor](#security_oneOf_i1_cloud-armor )             | No      | object | No         | In #/$defs/CloudArmor | Use cloud armor policy                   |
+| Property                                                     | Pattern | Type    | Deprecated | Definition            | Title/Description                        |
+| ------------------------------------------------------------ | ------- | ------- | ---------- | --------------------- | ---------------------------------------- |
+| + [permission-prefix](#security_oneOf_i1_permission-prefix ) | No      | string  | No         | -                     | IAM permission prefix                    |
+| - [use-sidecar](#security_oneOf_i1_use-sidecar )             | No      | boolean | No         | -                     | Flag to deploy a sidecar for OPA         |
+| - [system-name](#security_oneOf_i1_system-name )             | No      | string  | No         | -                     | IAM system name defaults to service name |
+| - [resources](#security_oneOf_i1_resources )                 | No      | object  | No         | In #/$defs/Resources  | The requested resources                  |
+| - [cloud-armor](#security_oneOf_i1_cloud-armor )             | No      | object  | No         | In #/$defs/CloudArmor | Use cloud armor policy                   |
 
 #### <a name="security_oneOf_i1_permission-prefix"></a>4.2.1. Property `CloudDeploy > security > oneOf > IAMSettings > permission-prefix`
 
@@ -694,7 +696,17 @@ must respect the following conditions
 | --------------------------------- | --------------------------------------------------------------------------- |
 | **Must match regular expression** | ```^[a-z]{3}$``` [Test](https://regex101.com/?regex=%5E%5Ba-z%5D%7B3%7D%24) |
 
-#### <a name="security_oneOf_i1_system-name"></a>4.2.2. Property `CloudDeploy > security > oneOf > IAMSettings > system-name`
+#### <a name="security_oneOf_i1_use-sidecar"></a>4.2.2. Property `CloudDeploy > security > oneOf > IAMSettings > use-sidecar`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Flag to deploy a sidecar for OPA
+
+#### <a name="security_oneOf_i1_system-name"></a>4.2.3. Property `CloudDeploy > security > oneOf > IAMSettings > system-name`
 
 |              |          |
 | ------------ | -------- |
@@ -707,7 +719,7 @@ must respect the following conditions
 | --------------------------------- | ----------------------------------------------------------------------- |
 | **Must match regular expression** | ```^[a-z-]+$``` [Test](https://regex101.com/?regex=%5E%5Ba-z-%5D%2B%24) |
 
-#### <a name="security_oneOf_i1_resources"></a>4.2.3. Property `CloudDeploy > security > oneOf > IAMSettings > resources`
+#### <a name="security_oneOf_i1_resources"></a>4.2.4. Property `CloudDeploy > security > oneOf > IAMSettings > resources`
 
 |                           |                                                                           |
 | ------------------------- | ------------------------------------------------------------------------- |
@@ -724,7 +736,7 @@ must respect the following conditions
 | - [cpu](#security_oneOf_i1_resources_cpu )       | No      | number | No         | -          | Number of requested CPU cores |
 | - [memory](#security_oneOf_i1_resources_memory ) | No      | string | No         | -          | Amount of memory to request   |
 
-##### <a name="security_oneOf_i1_resources_cpu"></a>4.2.3.1. Property `CloudDeploy > security > oneOf > IAMSettings > resources > cpu`
+##### <a name="security_oneOf_i1_resources_cpu"></a>4.2.4.1. Property `CloudDeploy > security > oneOf > IAMSettings > resources > cpu`
 
 |              |          |
 | ------------ | -------- |
@@ -738,7 +750,7 @@ must respect the following conditions
 | **Minimum**  | &ge; 0.25 |
 | **Maximum**  | &le; 8    |
 
-##### <a name="security_oneOf_i1_resources_memory"></a>4.2.3.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources > memory`
+##### <a name="security_oneOf_i1_resources_memory"></a>4.2.4.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources > memory`
 
 |              |          |
 | ------------ | -------- |
@@ -751,7 +763,7 @@ must respect the following conditions
 | --------------------------------- | ------------------------------------------------------------------------------------ |
 | **Must match regular expression** | ```^[0-9]+(M\|G)i``` [Test](https://regex101.com/?regex=%5E%5B0-9%5D%2B%28M%7CG%29i) |
 
-#### <a name="security_oneOf_i1_cloud-armor"></a>4.2.4. Property `CloudDeploy > security > oneOf > IAMSettings > cloud-armor`
+#### <a name="security_oneOf_i1_cloud-armor"></a>4.2.5. Property `CloudDeploy > security > oneOf > IAMSettings > cloud-armor`
 
 |                           |                                                         |
 | ------------------------- | ------------------------------------------------------- |
@@ -766,7 +778,7 @@ must respect the following conditions
 | ------------------------------------------------------------ | ------- | ------ | ---------- | ---------- | ----------------------- |
 | + [policy-name](#security_oneOf_i1_cloud-armor_policy-name ) | No      | string | No         | -          | Cloud armor policy name |
 
-##### <a name="security_oneOf_i1_cloud-armor_policy-name"></a>4.2.4.1. Property `CloudDeploy > security > oneOf > IAMSettings > cloud-armor > policy-name`
+##### <a name="security_oneOf_i1_cloud-armor_policy-name"></a>4.2.5.1. Property `CloudDeploy > security > oneOf > IAMSettings > cloud-armor > policy-name`
 
 |              |          |
 | ------------ | -------- |
@@ -1107,4 +1119,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2024-03-28 at 09:01:55 +0100
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2024-04-23 at 11:37:10 +0300

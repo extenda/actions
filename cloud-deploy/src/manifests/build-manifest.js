@@ -534,6 +534,7 @@ const buildManifest = async (
 
   const {
     'permission-prefix': permissionPrefix,
+    'use-sidecar': useSidecar,
     resources: opaResources = { cpu: 0.5, memory: '512Mi' },
     'system-name': systemName = name,
     consumers = {},
@@ -586,7 +587,7 @@ const buildManifest = async (
   const serviceAccount = `${name}@${projectId}.iam.gserviceaccount.com`;
 
   await prepareGcloudDeploy(name, projectId, clanName, deployEnv, kubernetes ? 'gke' : 'cloudrun');
-  if (permissionPrefix) {
+  if (permissionPrefix && useSidecar) {
     opa = true;
     const bundleName = `${permissionPrefix}.${systemName}-${deployEnv}`;
     if (!await checkIamSystem(bundleName)) {
