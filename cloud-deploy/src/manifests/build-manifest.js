@@ -534,7 +534,7 @@ const buildManifest = async (
 
   const {
     'permission-prefix': permissionPrefix,
-    'use-sidecar': useSidecar,
+    'use-sidecar': useSidecar = true,
     resources: opaResources = { cpu: 0.5, memory: '512Mi' },
     'system-name': systemName = name,
     consumers = {},
