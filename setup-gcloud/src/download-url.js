@@ -16,7 +16,8 @@ const platforms = {
 };
 
 const getDownloadUrl = (version) => {
-  const arch = os.arch() === 'x64' ? 'x86_64' : os.arch();
+  let arch = os.arch() === 'x64' ? 'x86_64' : os.arch();
+  arch = arch === 'arm64' ? 'arm' : arch;
   if (!platforms[os.platform()]) {
     throw new Error(`Unsupported platform ${os.platform()}`);
   }

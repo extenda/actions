@@ -24,6 +24,14 @@ describe('Get gcloud download URL', () => {
     expect(url).toEqual('https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-282.0.0-darwin-x86_64.tar.gz');
   });
 
+  test('It can create a MacOS URL for arm64', async () => {
+    os.platform.mockReturnValue('darwin');
+    os.arch.mockReturnValue('arm64');
+
+    const url = getDownloadUrl('282.0.0');
+    expect(url).toEqual('https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-282.0.0-darwin-arm.tar.gz');
+  });
+
   test('It can create a Linux URL', async () => {
     os.platform.mockReturnValue('linux');
     os.arch.mockReturnValue('x86_64');
