@@ -52,7 +52,7 @@ describe('handleCertificates', () => {
     gcloudOutput.mockResolvedValueOnce(existingCerts);
 
     const result = await handleCertificates(hosts, 'iam-prod-4aad');
-    expect(result).toEqual('extenda-base-certificate,extenda-certs-v1,extenda-certs-v2');
+    expect(result).toEqual('extenda-certs-v1,extenda-certs-v2');
     expect(gcloudOutput).toHaveBeenCalledTimes(1);
   });
 });
