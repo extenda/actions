@@ -8,6 +8,7 @@ const handleStatefulset = require('./statefulset-workaround');
 const checkIamSystem = require('./check-system');
 const checkVpcConnector = require('../utils/check-vpc-connector');
 const getRevisions = require('../cloudrun/get-revisions');
+const configMapManifest = require('./vpa-scaler-configmap');
 
 const convertToYaml = (json) => yaml.dump(json);
 
@@ -619,6 +620,10 @@ const buildManifest = async (
       deployEnv,
       availability,
     );
+
+    if(scaling.vertical) {
+      generateManifest('k8s(deploy)-configmap.yaml', await configMapManifest(name, type, resources.cpu, resources.memory, scaling.vertical));
+    }
 
     if (type === 'StatefulSet' && volumes) {
       await handleStatefulset(projectId, name, clanName, deployEnv, volumes[0].size);
