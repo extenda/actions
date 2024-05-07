@@ -13,7 +13,7 @@ const action = require('../src/index');
 const loadCredentials = require('../src/utils/load-credentials');
 const getImageWithSha256 = require('../src/manifests/image-sha256');
 const publishPolicies = require('../src/policies/publish-policies');
-const sendScaleSetup = require('../src/utils/send-request');
+const { sendScaleSetup, sendDeployInfo } = require('../src/utils/send-request');
 const runScan = require('../src/utils/vulnerability-scanning');
 const { checkPolicyExists, checkPolicyTarget, setCloudArmorPolicyTarget } = require('../src/loadbalancing/external/cloud-armor');
 
@@ -396,6 +396,7 @@ describe('Action', () => {
     runScan.mockResolvedValueOnce();
     await action();
     expect(sendScaleSetup).toHaveBeenCalledTimes(1);
+    expect(sendDeployInfo).toHaveBeenCalledTimes(1);
   });
 
   test('It will setup cloud armor policy', async () => {

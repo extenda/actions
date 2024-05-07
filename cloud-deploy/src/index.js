@@ -14,7 +14,7 @@ const readSecret = require('./utils/load-credentials');
 const runScan = require('./utils/vulnerability-scanning');
 const getImageWithSha256 = require('./manifests/image-sha256');
 const publishPolicies = require('./policies/publish-policies');
-const sendScaleSetup = require('./utils/send-request');
+const { sendScaleSetup, sendDeployInfo } = require('./utils/send-request');
 const { checkPolicyExists, setCloudArmorPolicyTarget, checkPolicyTarget } = require('./loadbalancing/external/cloud-armor');
 
 const action = async () => {
@@ -40,6 +40,7 @@ const action = async () => {
     env,
   } = projectInfo(projectID);
 
+  const slackChannel = await readSecret(serviceAccountKeyPipeline, env, 'clan_slack_channel', 'CLAN_SLACK_CHANNEL');
   const http2Certificate = await readSecret(serviceAccountKeyPipeline, env, 'envoy-http2-certs', 'HTTPS_CERTIFICATES');
   const internalHttpsCertificateKey = await readSecret(serviceAccountKeyPipeline, env, 'internal-https-certs-key', 'INTERNAL_HTTPS_CERTIFICATES_KEY');
   const internalHttpsCertificateCrt = await readSecret(serviceAccountKeyPipeline, env, 'internal-https-certs-crt', 'INTERNAL_HTTPS_CERTIFICATES_CRT');
@@ -151,6 +152,24 @@ const action = async () => {
           scaleDown,
         ));
       }
+      await Promise.all(requests);
+    }
+    // Send deploy information when deployed to production
+    if (env === 'prod') {
+      const requests = [];
+      const timestamp = new Date().toISOString();
+      const githubRepository = process.env.GITHUB_REPOSITORY;
+      const githubSHA = process.env.GITHUB_SHA;
+
+      requests.push(sendDeployInfo(
+        serviceName,
+        timestamp,
+        version,
+        projectID,
+        githubRepository,
+        githubSHA,
+        slackChannel,
+      ));
       await Promise.all(requests);
     }
     await createExternalLoadbalancer(projectID, env);

@@ -1,6 +1,6 @@
 const core = require('@actions/core');
 const axios = require('axios');
-const sendScaleSetup = require('../../src/utils/send-request');
+const { sendScaleSetup, sendDeployInfo } = require('../../src/utils/send-request');
 const getToken = require('../../src/utils/identity-token');
 
 jest.mock('@actions/core');
@@ -15,6 +15,11 @@ const platform = 'cloud-run';
 const mininstances = 1;
 const scaleup = '08:00';
 const scaledown = '20:00';
+const timestamp = new Date().toISOString();
+const version = 'v1.1.1';
+const githubRepository = 'repository';
+const githubSHA = 'githubsha';
+const slackChannel = 'slackchannel';
 
 describe('Send request to platform api', () => {
   afterEach(() => {
@@ -46,7 +51,7 @@ describe('Send request to platform api', () => {
     expect(core.info).toHaveBeenCalledWith(expect.stringContaining('/scaling/setup with response code 200'));
   });
 
-  it('should log error on request failure', async () => {
+  it('should log error on request failure for sendScaleSetup', async () => {
     getToken.mockResolvedValue('token');
     axios.post.mockRejectedValue('some error');
     await sendScaleSetup(service, projectid, region, platform, mininstances, scaleup, scaledown);
@@ -61,6 +66,71 @@ describe('Send request to platform api', () => {
         scaleup,
         scaledown,
         scaled: true,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'bearer token',
+        },
+      },
+    );
+    expect(core.error).toHaveBeenCalledWith(expect.stringContaining('some error'));
+  });
+  it('should send deploy information request successfully', async () => {
+    getToken.mockResolvedValue('token');
+    axios.post.mockResolvedValue({ status: 200 });
+    await sendDeployInfo(
+      service,
+      timestamp,
+      version,
+      projectid,
+      githubRepository,
+      githubSHA,
+      slackChannel
+    );
+    expect(axios.post).toHaveBeenCalledWith(
+      '/deployinfo/add',
+      {
+        service,
+        timestamp,
+        version,
+        projectid,
+        githubRepository,
+        githubSHA,
+        slackChannel,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'bearer token',
+        },
+      },
+    );
+    expect(core.info).toHaveBeenCalledWith(expect.stringContaining('/deployinfo/add with response code 200'));
+  });
+
+  it('should log error on request failure for sendDeployInfo', async () => {
+    getToken.mockResolvedValue('token');
+    axios.post.mockRejectedValue('some error');
+    await sendDeployInfo(
+      service,
+      timestamp,
+      version,
+      projectid,
+      githubRepository,
+      githubSHA,
+      slackChannel
+    );
+    expect(axios.post).toHaveBeenCalledWith(
+      '/deployinfo/add',
+      {
+        service,
+        timestamp,
+        version,
+        projectid,
+        githubRepository,
+        githubSHA,
+        slackChannel,
       },
       {
         headers: {
