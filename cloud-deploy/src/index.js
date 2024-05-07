@@ -40,11 +40,11 @@ const action = async () => {
     env,
   } = projectInfo(projectID);
 
-  const slackChannel = await readSecret(serviceAccountKeyPipeline, env, 'clan_slack_channel', 'CLAN_SLACK_CHANNEL');
   const http2Certificate = await readSecret(serviceAccountKeyPipeline, env, 'envoy-http2-certs', 'HTTPS_CERTIFICATES');
   const internalHttpsCertificateKey = await readSecret(serviceAccountKeyPipeline, env, 'internal-https-certs-key', 'INTERNAL_HTTPS_CERTIFICATES_KEY');
   const internalHttpsCertificateCrt = await readSecret(serviceAccountKeyPipeline, env, 'internal-https-certs-crt', 'INTERNAL_HTTPS_CERTIFICATES_CRT');
   await readSecret(serviceAccountKeyPipeline, env, 'sec-launchdarkly-sdk-key', 'SEC_LAUNCHDARKLY_SDK_KEY');
+  await readSecret(serviceAccountKeyPipeline, env, 'clan_slack_channel', 'CLAN_SLACK_CHANNEL');
 
   const deployYaml = loadServiceDefinition(serviceFile);
   const {
@@ -160,6 +160,7 @@ const action = async () => {
       const timestamp = new Date().toISOString();
       const githubRepository = process.env.GITHUB_REPOSITORY;
       const githubSHA = process.env.GITHUB_SHA;
+      const slackChannel = process.env.CLAN_SLACK_CHANNEL;
 
       requests.push(sendDeployInfo(
         serviceName,
