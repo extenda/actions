@@ -162,6 +162,16 @@ const action = async () => {
       await readSecret(serviceAccountKeyCICD, env, 'clan_slack_channel', 'CLAN_SLACK_CHANNEL');
       const slackChannel = process.env.CLAN_SLACK_CHANNEL;
 
+      core.info(`deployinfo request body:
+        serviceName: ${serviceName}
+        timestamp: ${timestamp}
+        version: ${version}
+        projectID: ${projectID}
+        githubRepository: ${githubRepository}
+        githubSHA: ${githubSHA}
+        slackChannel: ${slackChannel}
+      `);
+
       requests.push(sendDeployInfo(
         serviceName,
         timestamp,
