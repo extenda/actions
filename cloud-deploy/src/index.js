@@ -157,7 +157,7 @@ const action = async () => {
     if (env === 'prod') {
       const requests = [];
       const timestamp = new Date().toISOString();
-      const githubRepository = process.env.GITHUB_REPOSITORY;
+      const githubRepository = `https://github.com/${process.env.GITHUB_REPOSITORY}`;
       const githubSHA = process.env.GITHUB_SHA;
       const slackChannel = await readSecret(serviceAccountKeyCICD, env, 'clan_slack_channel', 'CLAN_SLACK_CHANNEL');
 
