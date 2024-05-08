@@ -159,18 +159,7 @@ const action = async () => {
       const timestamp = new Date().toISOString();
       const githubRepository = process.env.GITHUB_REPOSITORY;
       const githubSHA = process.env.GITHUB_SHA;
-      await readSecret(serviceAccountKeyCICD, env, 'clan_slack_channel', 'CLAN_SLACK_CHANNEL');
-      const slackChannel = process.env.CLAN_SLACK_CHANNEL;
-
-      core.info(`deployinfo request body:
-        serviceName: ${serviceName}
-        timestamp: ${timestamp}
-        version: ${version}
-        projectID: ${projectID}
-        githubRepository: ${githubRepository}
-        githubSHA: ${githubSHA}
-        slackChannel: ${slackChannel}
-      `);
+      const slackChannel = await readSecret(serviceAccountKeyCICD, env, 'clan_slack_channel', 'CLAN_SLACK_CHANNEL');
 
       requests.push(sendDeployInfo(
         serviceName,
