@@ -45,9 +45,9 @@ const sendDeployInfo = async (
   timestamp,
   version,
   projectid,
-  githubRepository,
-  githubSHA,
-  slackChannel,
+  githubrepository,
+  githubsha,
+  slackchannel,
 ) => {
   const url = '/deployinfo/add';
   const headers = {
@@ -59,9 +59,9 @@ const sendDeployInfo = async (
     timestamp,
     version,
     projectid,
-    githubRepository,
-    githubSHA,
-    slackChannel,
+    githubrepository,
+    githubsha,
+    slackchannel,
   };
   return axios.post(url, data, {
     headers,

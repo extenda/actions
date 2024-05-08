@@ -17,9 +17,9 @@ const scaleup = '08:00';
 const scaledown = '20:00';
 const timestamp = new Date().toISOString();
 const version = 'v1.1.1';
-const githubRepository = 'repository';
-const githubSHA = 'githubsha';
-const slackChannel = 'slackchannel';
+const githubrepository = 'repository';
+const githubsha = 'githubsha';
+const slackchannel = 'slackchannel';
 
 describe('Send request to platform api', () => {
   afterEach(() => {
@@ -84,9 +84,9 @@ describe('Send request to platform api', () => {
       timestamp,
       version,
       projectid,
-      githubRepository,
-      githubSHA,
-      slackChannel
+      githubrepository,
+      githubsha,
+      slackchannel
     );
     expect(axios.post).toHaveBeenCalledWith(
       '/deployinfo/add',
@@ -95,9 +95,9 @@ describe('Send request to platform api', () => {
         timestamp,
         version,
         projectid,
-        githubRepository,
-        githubSHA,
-        slackChannel,
+        githubrepository,
+        githubsha,
+        slackchannel,
       },
       {
         headers: {
@@ -117,9 +117,9 @@ describe('Send request to platform api', () => {
       timestamp,
       version,
       projectid,
-      githubRepository,
-      githubSHA,
-      slackChannel
+      githubrepository,
+      githubsha,
+      slackchannel
     );
     expect(axios.post).toHaveBeenCalledWith(
       '/deployinfo/add',
@@ -128,9 +128,9 @@ describe('Send request to platform api', () => {
         timestamp,
         version,
         projectid,
-        githubRepository,
-        githubSHA,
-        slackChannel,
+        githubrepository,
+        githubsha,
+        slackchannel,
       },
       {
         headers: {
