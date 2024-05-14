@@ -50,7 +50,7 @@ cases:
     expect:
       element: '[data-testid="page-title"]'
       toInclude: 'Audit'
-  
+
   - name: 'Receipt journal'
     setup:
       url: 'https://testrunner.hiiretail.com/in-store/receipt-journal'
