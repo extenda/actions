@@ -1,0 +1,23 @@
+name: UI Health Check
+description: |
+  A simple action, that takes in config and visits by a URL to check
+  if the UI is up and running.
+author: Extenda Retail
+inputs:
+  config-path:
+    description: 'Path to the config file'
+    required: true
+    default: './config.yaml'
+  username:
+    description: 'Username for basic auth'
+    required: true
+  password:
+    description: 'Password for basic auth'
+    required: true
+  tenant:
+    description: 'Tenant for basic auth'
+    required: false
+    default: 'testrunner'
+runs:
+  using: node16
+  main: dist/index.js
