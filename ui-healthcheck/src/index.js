@@ -12,7 +12,7 @@ async function action() {
 
   install.on('close', (code) => {
     if (code !== 0) {
-      console.error(`playwright install process exited with code ${code}`);
+      core.error(`playwright install process exited with code ${code}`);
       process.exit(code);
     } else {
       const test = spawn('npx', ['playwright', 'test', '--reporter', 'github'], {
@@ -26,19 +26,19 @@ async function action() {
       });
 
       test.stdout.on('data', (data) => {
-        console.log(`stdout: ${data}`);
+        core.info(`stdout: ${data}`);
       });
 
       test.stderr.on('data', (data) => {
-        console.error(`stderr: ${data}`);
+        core.error(`stderr: ${data}`);
       });
 
-      test.on('close', (code) => {
+      test.on('close', (testCode) => {
         if (code !== 0) {
-          console.error(`playwright test process exited with code ${code}`);
-          process.exit(code);
+          core.error(`playwright test process exited with code ${testCode}`);
+          process.exit(testCode);
         } else {
-          console.log('All good!');
+          core.info('All good!');
         }
       });
     }
