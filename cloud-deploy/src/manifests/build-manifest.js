@@ -622,8 +622,8 @@ const buildManifest = async (
       availability,
     );
 
-    await connectToCluster( clanName, deployEnv, projectId );
-    if(scaling.vertical) {
+    await connectToCluster(clanName, deployEnv, projectId);
+    if (scaling.vertical) {
       generateManifest('k8s(deploy)-configmap.yaml', await configMapManifest(name, type, resources.cpu, resources.memory, scaling.vertical));
     } else {
       await removeScalerConfiguration(name);

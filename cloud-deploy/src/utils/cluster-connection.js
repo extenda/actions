@@ -1,4 +1,4 @@
-const execGcloud = require("./gcloud-output");
+const execGcloud = require('./gcloud-output');
 
 const connectToCluster = async (clanName, env, projectID) => execGcloud([
   'container',

@@ -1,12 +1,12 @@
-const execGcloud = require("../utils/gcloud-output");
+const execGcloud = require('../utils/gcloud-output');
 
-const convertCPU = (cpu) => cpu * 1000 + 'm';
+const convertCPU = (cpu) => `${cpu * 1000}m`;
 const convertMemory = (memory) => {
-  if (memory.endsWith('Gi')) {
-    return (parseInt(memory) * 1000) + 'Mi';
+  if (memory.includes('Gi')) {
+    return `${parseFloat(memory, 10) * 1000}Mi`;
   }
   return memory;
-}
+};
 const removeScalerConfiguration = async (service) => execGcloud([
   'delete',
   'configmap',
@@ -18,7 +18,7 @@ const removeScalerConfiguration = async (service) => execGcloud([
 const configMapManifest = async (service, type, CPU, Memory, scaling) => {
   const {
     'increments-cpu': incrementsCPU,
-    'threshold': threshold,
+    threshold,
     'max-cpu': maxCPU,
     'max-memory': maxMemory,
   } = scaling;
@@ -39,10 +39,10 @@ const configMapManifest = async (service, type, CPU, Memory, scaling) => {
     '--output=yaml',
     '--dry-run=client',
   ];
-  return execGcloud(args, 'kubectl', false);
-}
+  return execGcloud(args, 'kubectl', true);
+};
 
 module.exports = {
   configMapManifest,
   removeScalerConfiguration,
-}
+};

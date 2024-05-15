@@ -1,7 +1,6 @@
 const gcloudOutput = require('../utils/gcloud-output');
 
 const handleStatefulset = async (name, volumeSize) => {
-
   // 2. Fetch currently deployed statefulset
   const statefulset = JSON.parse(await gcloudOutput([
     'get',
