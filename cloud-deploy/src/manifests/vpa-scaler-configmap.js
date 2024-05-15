@@ -1,16 +1,24 @@
 const execGcloud = require("../utils/gcloud-output");
 
-const convertCPU = (cpu) => cpu*1000 + 'm';
+const convertCPU = (cpu) => cpu * 1000 + 'm';
 const convertMemory = (memory) => {
-  if (memory.endsWith('Gi')){
-    return (parseInt(memory)*1000) + 'Mi';
+  if (memory.endsWith('Gi')) {
+    return (parseInt(memory) * 1000) + 'Mi';
   }
   return memory;
 }
-const configMapManifest = async (namespace, type, CPU, Memory, scaling) => {
+const removeScalerConfiguration = async (service) => execGcloud([
+  'delete',
+  'configmap',
+  'vpa-scaler-configuration',
+  `--namespace=${service}`,
+], 'kubectl', true, true)
+  .catch(() => true); // consider configmap deleted or doesn't exist
+
+const configMapManifest = async (service, type, CPU, Memory, scaling) => {
   const {
     'increments-cpu': incrementsCPU,
-    'threshold-cpu': threshold,
+    'threshold': threshold,
     'max-cpu': maxCPU,
     'max-memory': maxMemory,
   } = scaling;
@@ -18,7 +26,7 @@ const configMapManifest = async (namespace, type, CPU, Memory, scaling) => {
     'create',
     'configmap',
     'vpa-scaler-configuration',
-    `--namespace=${namespace}`,
+    `--namespace=${service}`,
     `--from-literal=type=${type}`,
     `--from-literal=incrementsCPU=${convertCPU(incrementsCPU)}`,
     `--from-literal=thresholdCPU=${threshold}%`,
@@ -31,9 +39,10 @@ const configMapManifest = async (namespace, type, CPU, Memory, scaling) => {
     '--output=yaml',
     '--dry-run=client',
   ];
-  return execGcloud(args, 'kubectl', true);
+  return execGcloud(args, 'kubectl', false);
 }
 
-module.exports = configMapManifest;
-const run = async () => console.log(await configMapManifest('platform-vpa-scaler', 'deployment', '0.25', '512Mi', {'increments-cpu': '1.5', 'threshold-cpu': '50', 'max-cpu': '4', 'max-memory': '5000Mi'}));
-run();
+module.exports = {
+  configMapManifest,
+  removeScalerConfiguration,
+}

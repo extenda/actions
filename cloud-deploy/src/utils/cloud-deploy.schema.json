@@ -196,13 +196,13 @@
                   "description": "CPU request increase on scale out trigger",
                   "type": "number",
                   "minimum": 0.5,
-                  "maximum": 5
+                  "maximum": 2
                 },
                 "max-cpu": {
                   "description": "Max CPU allowed on scale out",
                   "type": "number",
                   "minimum": 0.25,
-                  "maximum": 12
+                  "maximum": 10
                 },
                 "max-memory": {
                   "description": "Max memory allowed on scale out in (Mi)",

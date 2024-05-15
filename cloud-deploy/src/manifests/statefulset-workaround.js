@@ -1,18 +1,8 @@
 const gcloudOutput = require('../utils/gcloud-output');
 
-const handleStatefulset = async (projectID, name, clanName, env, volumeSize) => {
-  // 1. Connect to cluster
-  await gcloudOutput([
-    'container',
-    'clusters',
-    'get-credentials',
-    `${clanName}-cluster-${env}`,
-    '--region=europe-west1',
-    `--project=${projectID}`,
-  ]);
+const handleStatefulset = async (name, volumeSize) => {
 
   // 2. Fetch currently deployed statefulset
-
   const statefulset = JSON.parse(await gcloudOutput([
     'get',
     'sts',

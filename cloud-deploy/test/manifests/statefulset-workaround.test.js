@@ -28,27 +28,18 @@ describe('statefulset-workaround', () => {
         },
       }],
     };
-    gcloudOutput.mockResolvedValueOnce();
     gcloudOutput.mockResolvedValueOnce(JSON.stringify(statefulset));
 
-    await handleStatefulset(mockProjectID, mockServiceName, 'clanName', mockEnv, '5Gi');
+    await handleStatefulset(mockServiceName, '5Gi');
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(1, expect.arrayContaining([
-      'container',
-      'clusters',
-      'get-credentials',
-      'clanName-cluster-staging',
-      '--region=europe-west1',
-      `--project=${mockProjectID}`,
-    ]));
-    expect(gcloudOutput).toHaveBeenNthCalledWith(2, expect.arrayContaining([
       'get',
       'sts',
       `--namespace=${mockServiceName}`,
       '--output=json',
     ]), expect.anything(), expect.anything());
 
-    expect(gcloudOutput).toHaveBeenCalledTimes(2);
+    expect(gcloudOutput).toHaveBeenCalledTimes(1);
   });
 
   it('should update pvcs', async () => {
@@ -74,41 +65,32 @@ describe('statefulset-workaround', () => {
         },
       }],
     };
-    gcloudOutput.mockResolvedValueOnce();
     gcloudOutput.mockResolvedValueOnce(JSON.stringify(statefulset));
     gcloudOutput.mockResolvedValueOnce(JSON.stringify(pvcs));
 
-    await handleStatefulset(mockProjectID, mockServiceName, 'clanName', mockEnv, '5Gi');
+    await handleStatefulset(mockServiceName, '5Gi');
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(1, expect.arrayContaining([
-      'container',
-      'clusters',
-      'get-credentials',
-      'clanName-cluster-staging',
-      '--region=europe-west1',
-      `--project=${mockProjectID}`,
-    ]));
-    expect(gcloudOutput).toHaveBeenNthCalledWith(2, expect.arrayContaining([
       'get',
       'sts',
       `--namespace=${mockServiceName}`,
       '--output=json',
     ]), expect.anything(), expect.anything());
 
-    expect(gcloudOutput).toHaveBeenNthCalledWith(3, expect.arrayContaining([
+    expect(gcloudOutput).toHaveBeenNthCalledWith(2, expect.arrayContaining([
       'get',
       'pvc',
       `--namespace=${mockServiceName}`,
       '--output=json',
     ]), expect.anything(), expect.anything());
 
-    expect(gcloudOutput).toHaveBeenNthCalledWith(5, expect.arrayContaining([
+    expect(gcloudOutput).toHaveBeenNthCalledWith(4, expect.arrayContaining([
       'delete',
       'sts',
       mockServiceName,
       `--namespace=${mockServiceName}`,
       '--cascade=orphan',
     ]), expect.anything());
-    expect(gcloudOutput).toHaveBeenCalledTimes(5);
+    expect(gcloudOutput).toHaveBeenCalledTimes(4);
   });
 });
