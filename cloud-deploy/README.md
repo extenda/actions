@@ -194,6 +194,33 @@ environments:
       <<: *env
 ```
 
+### Kubernetes deployment With vertical scaling
+
+A Kubernetes deployment with vertical scaling configured
+
+```yaml
+kubernetes:
+  type: Deployment
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    cpu: 50
+    vertical:
+      threshold: 50 # threshold of when to scale on cpu
+      increments-cpu: 1 # the cpu increase each scale up trigger will increase CPU by
+      max-cpu: 5 # the max cpu that the scaler will scale up to
+      max-memory: 8Gi # the max memory the scaler will scale up to
+
+```
+
+The autoscaler functions with the following parameters:
+* Each minute it will check pod cpu usage, if 1 of the pods is using cpu abve the threshold a scale up will trigger
+* A scale up event can only be triggered after 8 minutes from the last scale up if cpu is above threshold
+* A scale down event will only trigger 30 minutes after last scale up when cpu is below threshold
+
 ### Kubernetes Deployment as internal service
 
 An internal Kubernetes gRPC service that doesn't use IAM security. The request timeout has been increased from the
