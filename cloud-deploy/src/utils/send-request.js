@@ -40,4 +40,42 @@ const sendScaleSetup = async (
     });
 };
 
-module.exports = sendScaleSetup;
+const sendDeployInfo = async (
+  service,
+  timestamp,
+  version,
+  projectid,
+  githubrepository,
+  githubsha,
+  slackchannel,
+) => {
+  const url = '/deployinfo/add';
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `bearer ${await getToken()}`,
+  };
+  const data = {
+    service,
+    timestamp,
+    version,
+    projectid,
+    githubrepository,
+    githubsha,
+    slackchannel,
+  };
+  return axios.post(url, data, {
+    headers,
+  })
+    .then((response) => {
+      const statuscode = response.status;
+      core.info(`response from ${url} with response code ${statuscode}`);
+    })
+    .catch((error) => {
+      core.error(`${error}`);
+    });
+};
+
+module.exports = {
+  sendScaleSetup,
+  sendDeployInfo,
+};
