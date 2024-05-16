@@ -153,6 +153,7 @@ async function action() {
       process.exit(npmCode);
     } else {
       const install = spawn('npx', ['playwright', 'install']);
+      let isError = false;
 
       install.on('close', (code) => {
         if (code !== 0) {
@@ -170,15 +171,17 @@ async function action() {
           });
 
           test.stdout.on('data', (data) => {
+            isError = /error/ig.test(data.toString());
             core.info(`stdout: ${data}`);
           });
 
           test.stderr.on('data', (data) => {
+            isError = /error/ig.test(data.toString());
             core.error(`stderr: ${data}`);
           });
 
           test.on('close', (testCode) => {
-            if (code !== 0) {
+            if (code !== 0 || isError) {
               core.error(`playwright test process exited with code ${testCode}`);
               process.exit(testCode);
             } else {
