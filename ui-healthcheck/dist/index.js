@@ -125,11 +125,6 @@ export default defineConfig({
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
     },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
   ],
 });
 `)}function t$(){Z6("./health-check",{recursive:!0}),PQ("./health-check/index.playwright.js",`
