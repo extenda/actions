@@ -152,7 +152,7 @@ async function action() {
       core.error(`npm install process exited with code ${npmCode}`);
       process.exit(npmCode);
     } else {
-      const install = spawn('npx', ['playwright', 'install', '--with-deps']);
+      const install = spawn('npx', ['playwright', 'install']);
 
       install.on('close', (code) => {
         if (code !== 0) {
