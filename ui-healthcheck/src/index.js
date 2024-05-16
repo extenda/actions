@@ -143,13 +143,14 @@ async function action() {
   generateHealthCheck();
 
   const npmInstall = spawn('npm', ['install']);
-  const install = spawn('npx', ['playwright', 'install']);
 
   npmInstall.on('close', (npmCode) => {
     if (npmCode !== 0) {
       core.error(`npm install process exited with code ${npmCode}`);
       process.exit(npmCode);
     } else {
+      const install = spawn('npx', ['playwright', 'install']);
+
       install.on('close', (code) => {
         if (code !== 0) {
           core.error(`playwright install process exited with code ${code}`);
