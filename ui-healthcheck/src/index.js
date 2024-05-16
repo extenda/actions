@@ -3,6 +3,32 @@ const core = require('@actions/core');
 const { writeFileSync, mkdirSync } = require('fs');
 const { run } = require('../../utils/src');
 
+function generatePackageJson() {
+  writeFileSync(
+    'package.json',
+    `
+{
+  "name": "health-checks",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.10.0"
+  },
+  "dependencies": {
+    "@actions/core": "^1.10.0",
+    "yaml": "^2.3.4"
+  }
+}
+  `,
+  );
+}
+
 function generatePlaywrightConfig() {
   writeFileSync(
     './playwright.config.ts',
@@ -107,50 +133,54 @@ main();
 }
 
 async function action() {
-  // const configPath = core.getInput('config-path', { required: true });
-  // const username = core.getInput('username', { required: true });
-  // const password = core.getInput('password', { required: true });
-  // const tenant = core.getInput('tenant', { required: true });
+  const configPath = core.getInput('config-path', { required: true });
+  const username = core.getInput('username', { required: true });
+  const password = core.getInput('password', { required: true });
+  const tenant = core.getInput('tenant', { required: true });
 
-  const password = 'uu4beOUlzOrBpdM)';
-  const username = 'TEST_UI_HEALTH_CHEKS@extendaretail.com';
-  const tenant = 'testrunner';
-  const configPath = 'hehe.yml';
-
+  generatePackageJson();
   generatePlaywrightConfig();
   generateHealthCheck();
 
+  const npmInstall = spawn('npm', ['install']);
   const install = spawn('npx', ['playwright', 'install']);
 
-  install.on('close', (code) => {
-    if (code !== 0) {
-      core.error(`playwright install process exited with code ${code}`);
-      process.exit(code);
+  npmInstall.on('close', (npmCode) => {
+    if (npmCode !== 0) {
+      core.error(`npm install process exited with code ${npmCode}`);
+      process.exit(npmCode);
     } else {
-      const test = spawn('npx', ['playwright', 'test', '--reporter', 'github'], {
-        env: {
-          TENANT: tenant,
-          USERNAME: username,
-          PASSWORD: password,
-          CONFIG_PATH: configPath,
-          ...process.env,
-        },
-      });
-
-      test.stdout.on('data', (data) => {
-        core.info(`stdout: ${data}`);
-      });
-
-      test.stderr.on('data', (data) => {
-        core.error(`stderr: ${data}`);
-      });
-
-      test.on('close', (testCode) => {
+      install.on('close', (code) => {
         if (code !== 0) {
-          core.error(`playwright test process exited with code ${testCode}`);
-          process.exit(testCode);
+          core.error(`playwright install process exited with code ${code}`);
+          process.exit(code);
         } else {
-          core.info('All good!');
+          const test = spawn('npx', ['playwright', 'test', '--reporter', 'github'], {
+            env: {
+              TENANT: tenant,
+              USERNAME: username,
+              PASSWORD: password,
+              CONFIG_PATH: configPath,
+              ...process.env,
+            },
+          });
+
+          test.stdout.on('data', (data) => {
+            core.info(`stdout: ${data}`);
+          });
+
+          test.stderr.on('data', (data) => {
+            core.error(`stderr: ${data}`);
+          });
+
+          test.on('close', (testCode) => {
+            if (code !== 0) {
+              core.error(`playwright test process exited with code ${testCode}`);
+              process.exit(testCode);
+            } else {
+              core.info('All good!');
+            }
+          });
         }
       });
     }
