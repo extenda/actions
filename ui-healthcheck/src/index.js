@@ -144,15 +144,16 @@ async function action() {
 
   const npmInstall = spawn('npm', ['install']);
 
+  npmInstall.stdout.on('data', (data) => {
+    core.info(`stdout: ${data}`);
+  });
+
+  npmInstall.stderr.on('data', (data) => {
+    core.error(`stderr: ${data}`);
+  });
+
   npmInstall.on('close', (npmCode) => {
     if (npmCode !== 0) {
-      npmInstall.stdout.on('data', (data) => {
-        core.info(`stdout: ${data}`);
-      });
-
-      npmInstall.stderr.on('data', (data) => {
-        core.error(`stderr: ${data}`);
-      });
       core.error(`npm install process exited with code ${npmCode}`);
       process.exit(npmCode);
     } else {
