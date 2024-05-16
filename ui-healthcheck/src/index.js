@@ -146,8 +146,13 @@ async function action() {
 
   npmInstall.on('close', (npmCode) => {
     if (npmCode !== 0) {
-      console.log(npmInstall.stdout.read()?.toString());
-      console.log(npmInstall.stderr.read()?.toString());
+      npmInstall.stdout.on('data', (data) => {
+        core.info(`stdout: ${data}`);
+      });
+
+      npmInstall.stderr.on('data', (data) => {
+        core.error(`stderr: ${data}`);
+      });
       core.error(`npm install process exited with code ${npmCode}`);
       process.exit(npmCode);
     } else {
