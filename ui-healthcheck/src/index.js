@@ -146,6 +146,8 @@ async function action() {
 
   npmInstall.on('close', (npmCode) => {
     if (npmCode !== 0) {
+      console.log(npmInstall.stdout.read().toString());
+      console.log(npmInstall.stderr.read().toString());
       core.error(`npm install process exited with code ${npmCode}`);
       process.exit(npmCode);
     } else {
