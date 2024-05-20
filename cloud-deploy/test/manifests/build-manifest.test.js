@@ -17,6 +17,7 @@ jest.mock('../../src/utils/load-credentials');
 jest.mock('../../src/manifests/statefulset-workaround');
 jest.mock('../../src/utils/check-vpc-connector');
 jest.mock('../../src/cloudrun/get-revisions');
+jest.mock('../../src/utils/cluster-connection');
 
 const readFileSync = (file) => fs.readFileSync(file, { encoding: 'utf-8' });
 

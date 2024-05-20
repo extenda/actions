@@ -86,7 +86,7 @@ describe('Send request to platform api', () => {
       projectid,
       githubrepository,
       githubsha,
-      slackchannel
+      slackchannel,
     );
     expect(axios.post).toHaveBeenCalledWith(
       '/deployinfo/add',
@@ -119,7 +119,7 @@ describe('Send request to platform api', () => {
       projectid,
       githubrepository,
       githubsha,
-      slackchannel
+      slackchannel,
     );
     expect(axios.post).toHaveBeenCalledWith(
       '/deployinfo/add',

@@ -181,6 +181,35 @@
               "type": "integer",
               "minimum": 0,
               "maximum": 100
+            },
+            "vertical": {
+              "description": "Config for vertical scaling",
+              "type": "object",
+              "properties": {
+                "threshold": {
+                  "description": "CPU percentage utilization for 1 pod to trigger vertical scaling.",
+                  "type": "integer",
+                  "minimum": 10,
+                  "maximum": 100
+                },
+                "increments-cpu": {
+                  "description": "CPU request increase on scale out trigger",
+                  "type": "number",
+                  "minimum": 0.5,
+                  "maximum": 2
+                },
+                "max-cpu": {
+                  "description": "Max CPU allowed on scale out",
+                  "type": "number",
+                  "minimum": 0.25,
+                  "maximum": 10
+                },
+                "max-memory": {
+                  "description": "Max memory allowed on scale out in (Mi)",
+                  "type": "string",
+                  "pattern": "^[0-9]+(M|G)i"
+                }
+              }
             }
           },
           "additionalProperties": false
