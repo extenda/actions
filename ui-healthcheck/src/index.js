@@ -181,9 +181,9 @@ async function action() {
           });
 
           test.on('close', (testCode) => {
-            if (code !== 0 || isError) {
-              core.error(`playwright test process exited with code ${testCode}`);
-              process.exit(testCode);
+            if (testCode !== 0 || isError) {
+              core.error(`playwright test process exited with code ${testCode < 0 ? 1 : testCode}`);
+              process.exit(testCode < 0 ? 1 : testCode);
             } else {
               core.info('All good!');
             }
