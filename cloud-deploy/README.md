@@ -256,6 +256,51 @@ environments:
       <<: *env
 ```
 
+### Kubernetes Deployment with Prometheus monitoring
+
+Autopilot includes managed Prometheus and we can use that to scrape metrics from pods by configuring
+a `PodMonitoring` resource. This example will collect metrics every 60 seconds from the default
+path `/metrics`. Scraping is performed on the internal service port 8080 and will not pass through the security sidecar.
+
+```yaml
+kubernetes:
+  type: Deployment
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    cpu: 50
+  monitoring:
+    prometheus:
+      interval: 60
+
+security:
+  permission-prefix: mye
+
+labels:
+  product: my-product
+  component: my-component
+
+environments:
+  production:
+    min-instances: 1
+    max-instances: 20
+    domain-mappings:
+      - my-service.retailsvc.com
+      - my-service.retailsvc-test.com
+    env: &env
+      KEY: value
+  staging:
+    min-instances: 0
+    max-instances: 1
+    domain-mappings:
+      - my-service.retailsvc.dev
+    env:
+      <<: *env
+```
+
 ### Kubernetes StatefulSet
 
 An internal Kubernetes StatefulSet that doesn't use Open Policy Agent. The stateful set has a volume mounted for
@@ -293,4 +338,20 @@ environments:
     max-instances: 1
     env:
       <<: *env
+```
+
+## Development
+
+The `cloud-deploy` JSON schema documentation is generated with [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans).
+
+Install it with pip
+
+```bash
+pip install json-schema-for-humans
+```
+
+And use the command below to update the generated documentation.
+
+```bash
+generate-schema-doc --config template_name=md cloud-deploy/src/utils/cloud-deploy.schema.json cloud-deploy/schema_doc.md
 ```

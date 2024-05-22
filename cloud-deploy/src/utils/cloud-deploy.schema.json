@@ -248,6 +248,35 @@
             },
             "additionalProperties": false
           }
+        },
+        "monitoring": {
+          "$ref": "#/$defs/Monitoring"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Monitoring": {
+      "title": "Monitoring",
+      "type": "object",
+      "properties": {
+        "prometheus": {
+          "type": "object",
+          "required": [
+            "interval"
+          ],
+          "properties": {
+            "interval": {
+              "type": "integer",
+              "description": "The scrape interval in seconds",
+              "minimum": 10
+            },
+            "path": {
+              "type": "string",
+              "description": "The scrape path",
+              "default": "/metrics"
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

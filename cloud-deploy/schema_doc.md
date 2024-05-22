@@ -39,6 +39,10 @@
         - [2.1.8.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > volumes > Volume > disk-type`](#oneOf_i1_kubernetes_volumes_items_disk-type)
         - [2.1.8.1.2. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > volumes > Volume > size`](#oneOf_i1_kubernetes_volumes_items_size)
         - [2.1.8.1.3. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > volumes > Volume > mount-path`](#oneOf_i1_kubernetes_volumes_items_mount-path)
+    - [2.1.9. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > monitoring`](#oneOf_i1_kubernetes_monitoring)
+      - [2.1.9.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > monitoring > prometheus`](#oneOf_i1_kubernetes_monitoring_prometheus)
+        - [2.1.9.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > monitoring > prometheus > interval`](#oneOf_i1_kubernetes_monitoring_prometheus_interval)
+        - [2.1.9.1.2. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > monitoring > prometheus > path`](#oneOf_i1_kubernetes_monitoring_prometheus_path)
 - [3. Property `CloudDeploy > labels`](#labels)
   - [3.1. Property `CloudDeploy > labels > component`](#labels_component)
   - [3.2. Property `CloudDeploy > labels > product`](#labels_product)
@@ -387,6 +391,7 @@ Must be one of:
 | - [availability](#oneOf_i1_kubernetes_availability ) | No      | enum (of string) | No         | In #/$defs/Availability                            | Availability to configure priority on autoscaling                                        |
 | + [scaling](#oneOf_i1_kubernetes_scaling )           | No      | object           | No         | -                                                  | ScalingKubernetes                                                                        |
 | - [volumes](#oneOf_i1_kubernetes_volumes )           | No      | array of object  | No         | -                                                  | Volumes                                                                                  |
+| - [monitoring](#oneOf_i1_kubernetes_monitoring )     | No      | object           | No         | In #/$defs/Monitoring                              | -                                                                                        |
 
 #### <a name="oneOf_i1_kubernetes_service"></a>2.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > service`
 
@@ -636,6 +641,55 @@ Must be one of:
 | **Required** | Yes      |
 
 **Description:** The mount path
+
+#### <a name="oneOf_i1_kubernetes_monitoring"></a>2.1.9. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > monitoring`
+
+|                           |                                                         |
+| ------------------------- | ------------------------------------------------------- |
+| **Type**                  | `object`                                                |
+| **Required**              | No                                                      |
+| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
+| **Defined in**            | #/$defs/Monitoring                                      |
+
+| Property                                                    | Pattern | Type   | Deprecated | Definition | Title/Description |
+| ----------------------------------------------------------- | ------- | ------ | ---------- | ---------- | ----------------- |
+| - [prometheus](#oneOf_i1_kubernetes_monitoring_prometheus ) | No      | object | No         | -          | -                 |
+
+##### <a name="oneOf_i1_kubernetes_monitoring_prometheus"></a>2.1.9.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > monitoring > prometheus`
+
+|                           |                                                         |
+| ------------------------- | ------------------------------------------------------- |
+| **Type**                  | `object`                                                |
+| **Required**              | No                                                      |
+| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
+
+| Property                                                           | Pattern | Type    | Deprecated | Definition | Title/Description              |
+| ------------------------------------------------------------------ | ------- | ------- | ---------- | ---------- | ------------------------------ |
+| + [interval](#oneOf_i1_kubernetes_monitoring_prometheus_interval ) | No      | integer | No         | -          | The scrape interval in seconds |
+| - [path](#oneOf_i1_kubernetes_monitoring_prometheus_path )         | No      | string  | No         | -          | The scrape path                |
+
+##### <a name="oneOf_i1_kubernetes_monitoring_prometheus_interval"></a>2.1.9.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > monitoring > prometheus > interval`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | Yes       |
+
+**Description:** The scrape interval in seconds
+
+| Restrictions |         |
+| ------------ | ------- |
+| **Minimum**  | &ge; 10 |
+
+##### <a name="oneOf_i1_kubernetes_monitoring_prometheus_path"></a>2.1.9.1.2. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > monitoring > prometheus > path`
+
+|              |              |
+| ------------ | ------------ |
+| **Type**     | `string`     |
+| **Required** | No           |
+| **Default**  | `"/metrics"` |
+
+**Description:** The scrape path
 
 ## <a name="labels"></a>3. Property `CloudDeploy > labels`
 
@@ -1185,4 +1239,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2024-05-15 at 10:27:37 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2024-05-22 at 12:11:23 +0200

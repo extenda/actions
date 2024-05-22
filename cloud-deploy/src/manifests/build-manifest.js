@@ -10,6 +10,7 @@ const checkVpcConnector = require('../utils/check-vpc-connector');
 const getRevisions = require('../cloudrun/get-revisions');
 const { configMapManifest, removeScalerConfiguration } = require('./vpa-scaler-configmap');
 const connectToCluster = require('../utils/cluster-connection');
+const { deletePodMonitor, podMonitorManifest } = require('./pod-monitoring');
 
 const convertToYaml = (json) => yaml.dump(json);
 
@@ -523,6 +524,7 @@ const buildManifest = async (
     scaling,
     volumes,
     traffic = {},
+    monitoring = {},
   } = kubernetes || cloudrun;
 
   const {
@@ -635,6 +637,18 @@ const buildManifest = async (
     const convertedManifests = manifests.map((doc) => convertToYaml(doc)).join('---\n');
     generateManifest('k8s(deploy)-manifest.yaml', convertedManifests);
     generateManifest('k8s(deploy)-certificates.yaml', await addNamespace(http2Certificate, name));
+
+    if (deployEnv === 'production') {
+      const podMonitor = podMonitorManifest(name, monitoring);
+      if (podMonitor) {
+        generateManifest(
+          'k8s(deploy)-podmonitor.yaml',
+          convertToYaml(podMonitor),
+        );
+      } else {
+        await deletePodMonitor(name);
+      }
+    }
   } else {
     const {
       'cpu-throttling': cpuThrottling = true,

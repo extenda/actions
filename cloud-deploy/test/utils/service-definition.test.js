@@ -313,6 +313,10 @@ kubernetes:
   protocol: http
   scaling:
     cpu: 50
+  monitoring:
+    prometheus:
+      interval: 30
+      path: /test
 
 security: none
 
@@ -340,6 +344,12 @@ environments:
         resources: {
           cpu: 1,
           memory: '512Mi',
+        },
+        monitoring: {
+          prometheus: {
+            interval: 30,
+            path: '/test',
+          },
         },
       },
       security: 'none',
