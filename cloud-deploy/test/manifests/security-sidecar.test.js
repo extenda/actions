@@ -113,4 +113,27 @@ describe('manifests/security-sidecar', () => {
     });
     expect(getImageWithSha256).toHaveBeenCalledTimes(1);
   });
+
+  test('It supports custom bucket name', async () => {
+    process.env.SECURITY_BUCKET_NAME = 'my-bucket';
+    const security = await securitySpec('http', false);
+    expect(security).toMatchObject({
+      env: [{
+        name: 'LAUNCHDARKLY_SDK_KEY',
+        value: '',
+      },
+      {
+        name: 'OPA_CONFIG_SYSTEM_NAME',
+        value: '',
+      },
+      {
+        name: 'ENVOY_PROTOCOL',
+        value: 'http',
+      },
+      {
+        name: 'OPA_CONFIG_BUCKET_NAME',
+        value: 'my-bucket',
+      }],
+    });
+  });
 });
