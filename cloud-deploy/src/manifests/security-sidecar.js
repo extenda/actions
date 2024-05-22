@@ -33,6 +33,14 @@ const securitySpec = async (protocol, platformGKE = true) => {
           value: protocol === 'http' ? 'http' : 'h2c',
         });
       }
+
+      const customBucketName = process.env.SECURITY_BUCKET_NAME;
+      if (customBucketName) {
+        env.push({
+          name: 'OPA_CONFIG_BUCKET_NAME',
+          value: customBucketName,
+        });
+      }
       return {
         name: 'security-authz',
         image,
