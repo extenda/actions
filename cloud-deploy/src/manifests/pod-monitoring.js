@@ -1,10 +1,11 @@
 const core = require('@actions/core');
 const execGcloud = require('../utils/gcloud-output');
 
-const deletePodMonitor = async (namespace) => execGcloud([
+const deletePodMonitor = async (name) => execGcloud([
   'delete',
   'podmonitorings',
-  `--namespace=${namespace}`,
+  `--namespace=${name}`,
+  name,
 ], 'kubectl', true, true)
   .then(() => core.info('Deleted old pod monitoring resource'))
   .catch(() => true); // succeed even if resource does not exist

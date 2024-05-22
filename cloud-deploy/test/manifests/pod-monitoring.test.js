@@ -36,7 +36,7 @@ describe('manifests/pod-monitoring', () => {
     gcloudOutput.mockResolvedValueOnce(0);
     await deletePodMonitor('test');
     expect(gcloudOutput).toHaveBeenCalledWith(
-      ['delete', 'podmonitorings', '--namespace=test'],
+      ['delete', 'podmonitorings', '--namespace=test', 'test'],
       'kubectl',
       true,
       true,
@@ -47,7 +47,7 @@ describe('manifests/pod-monitoring', () => {
     gcloudOutput.mockRejectedValueOnce(1);
     await deletePodMonitor('test');
     expect(gcloudOutput).toHaveBeenCalledWith(
-      ['delete', 'podmonitorings', '--namespace=test'],
+      ['delete', 'podmonitorings', '--namespace=test', 'test'],
       'kubectl',
       true,
       true,
