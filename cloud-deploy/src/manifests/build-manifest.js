@@ -638,9 +638,10 @@ const buildManifest = async (
     generateManifest('k8s(deploy)-manifest.yaml', convertedManifests);
     generateManifest('k8s(deploy)-certificates.yaml', await addNamespace(http2Certificate, name));
 
-    if (deployEnv === 'production') {
+    if (deployEnv !== 'staging') {
       const podMonitor = podMonitorManifest(name, monitoring);
       if (podMonitor) {
+        core.info('Create PodMonitoring resource');
         generateManifest(
           'k8s(deploy)-podmonitor.yaml',
           convertToYaml(podMonitor),
