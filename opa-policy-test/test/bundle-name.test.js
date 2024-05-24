@@ -18,6 +18,13 @@ test('It can use provided input', () => {
   expect(getBundleName()).toEqual('tst.test-system-staging.tar.gz');
 });
 
+test('It can use provided input (including environment)', () => {
+  core.getInput.mockReturnValueOnce('tst')
+    .mockReturnValueOnce('test-system')
+    .mockReturnValueOnce('prod');
+  expect(getBundleName()).toEqual('tst.test-system-prod.tar.gz');
+});
+
 test('It fails if cloud-deploy and input is missing', () => {
   mockFs({});
   core.getInput.mockReturnValueOnce('tst')

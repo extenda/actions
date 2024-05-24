@@ -21,6 +21,12 @@ inputs:
       The name of the service. If this is specified, the `permission-prefix` must also be specified.
       If not provided, the value is read from `cloud-deploy.yaml`.
     required: false
+  service-environment:
+    description: |
+      Service environment ("staging" or "prod"), used to determine the name of the bundle file.
+      For use in `iam.*` systems only.
+    required: false
+    default: staging
 runs:
   using: node16
   main: dist/index.js
