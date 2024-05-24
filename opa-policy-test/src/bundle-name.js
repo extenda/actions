@@ -52,7 +52,7 @@ const getBundleName = () => {
   } catch (err) {
     core.info('Read service definition from cloud-deploy.yaml');
     const { permissionPrefix, serviceName } = readFromCloudDeploy();
-    bundleName = createBundleName(permissionPrefix, serviceName);
+    bundleName = createBundleName(permissionPrefix, serviceName, core.getInput('service-environment'));
   }
   return bundleName;
 };
