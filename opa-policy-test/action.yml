@@ -23,7 +23,7 @@ inputs:
     required: false
   service-environment:
     description: |
-      Service environment ("staging" or "prod"), used for determine the name of the bundle file.
+      Service environment ("staging" or "prod"), used to determine the name of the bundle file.
       For use in `iam.*` systems only.
     required: false
     default: staging
