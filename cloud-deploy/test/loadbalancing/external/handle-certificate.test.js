@@ -46,13 +46,13 @@ describe('handleCertificates', () => {
     expect(gcloudOutput).toHaveBeenCalledTimes(2);
   });
 
-  it('should return a list of certificates string with base certificate if project is iam', async () => {
+  it('should return a list of certificates string with base certificate if project is pnp', async () => {
     const hosts = ['example.com', 'www.example1.com'];
     gcloudOutput.mockResolvedValueOnce(existingCerts);
     gcloudOutput.mockResolvedValueOnce(existingCerts);
 
-    const result = await handleCertificates(hosts, 'iam-prod-4aad');
-    expect(result).toEqual('extenda-certs-v1,extenda-certs-v2');
+    const result = await handleCertificates(hosts, 'pnp-prod-2c90');
+    expect(result).toEqual('extenda-wildcard-cert,extenda-certs-v1,extenda-certs-v2');
     expect(gcloudOutput).toHaveBeenCalledTimes(1);
   });
 });
