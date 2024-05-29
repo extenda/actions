@@ -54,6 +54,10 @@ const handleCertificates = async (hosts, project) => {
   const certificateList = await listCertificates(project);
   const certificateListNames = [];
   const totalCertificates = certificateList ? certificateList.length : 0;
+  // add wildcard cert to pnp loadbalancer
+  if (project === 'pnp-prod-2c90' || project === 'pnp-staging-dcfd') {
+    certificateListNames.push('extenda-wildcard-cert');
+  }
 
   for (const certificate of certificateList) {
     const version = parseInt(certificate.name.split('-')[2].substring(1), 10);
