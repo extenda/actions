@@ -11,7 +11,7 @@ const PROP_SERVER_URL = 'serverUrl';
 
 const findReportFile = (workingDir = '.') => {
   const paths = [
-    path.join(workingDir, '.scannerwork'), // npm
+    path.join(workingDir, '.sonar'), // npm
     path.join(workingDir, 'target', 'sonar'), // maven
     path.join(workingDir, 'build', 'sonar'), // gradle
     path.join(workingDir, '.sonarqube', 'out', '.sonar'), // dotnet
