@@ -170,9 +170,9 @@ const cloudrunManifestTemplate = async (
     const collectorContainer = await collectorSidecar(monitoring);
     if (collectorContainer) {
       containers.push(collectorContainer);
-      // The collector should start after and shutdown before the user-container service.
+      // The collector should start after and shutdown before the user-container.
       annotations['run.googleapis.com/container-dependencies'] = JSON.stringify({
-        collector: [name],
+        collector: ['user-container'],
       });
     }
   }
