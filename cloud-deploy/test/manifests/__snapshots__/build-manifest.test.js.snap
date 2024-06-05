@@ -25,7 +25,7 @@ spec:
         run.googleapis.com/sessionAffinity: 'false'
         run.googleapis.com/vpc-access-connector: undefined
         run.googleapis.com/vpc-access-egress: all-traffic
-        run.googleapis.com/container-dependencies: '{"collector":["example-service"]}'
+        run.googleapis.com/container-dependencies: '{"collector":["user-container"]}'
       labels:
         app: example-service
         product: actions
