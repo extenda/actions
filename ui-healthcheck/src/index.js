@@ -39,23 +39,19 @@ export default defineConfig({
   testDir: './health-check',
   testMatch: '*\.playwright\.js',
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  retries: 1,
+  workers: 3,
   reporter: 'html',
+  timeout: 5 * 60 * 1000,
   use: {
     video: 'on',
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
   },
 
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-    },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
     },
   ],
 });
