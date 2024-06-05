@@ -165,7 +165,7 @@ const cloudrunManifestTemplate = async (
     containers.push(securityContainer);
   }
 
-  if (monitoring && deployEnv !== 'staging') {
+  if (monitoring) {
     // We only collect metrics in prod.
     const collectorContainer = await collectorSidecar(monitoring);
     if (collectorContainer) {

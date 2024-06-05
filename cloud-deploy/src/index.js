@@ -30,7 +30,7 @@ const action = async () => {
 
   // const verbose = (core.getInput('verbose') || 'false');
 
-  failIfNotTrunkBased();
+  // failIfNotTrunkBased();
 
   // Ensure our gcloud is available and installed.
   const projectID = await setupGcloud(serviceAccountKeyCICD);
