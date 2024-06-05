@@ -19,7 +19,7 @@ const collectorSpec = async (monitoring) => {
     SCRAPE_INTERVAL: interval,
   };
 
-  const image = await getImageWithSha256('eu.gcr.io/extenda/run-gmp-sidecar:v1.0.0');
+  const image = await getImageWithSha256('eu.gcr.io/extenda/run-gmp-collector:v1.0.0');
 
   return {
     image,

@@ -8,7 +8,7 @@ const configureInternalDomain = require('./loadbalancing/internal/create-interna
 const configureExternalDomain = require('./loadbalancing/external/create-external-backend');
 const configureExternalLBFrontend = require('./loadbalancing/external/create-external-frontend');
 const configureInternalFrontend = require('./loadbalancing/internal/create-internal-frontend');
-const { run, failIfNotTrunkBased } = require('../../utils');
+const { run } = require('../../utils');
 const { setupGcloud } = require('../../setup-gcloud');
 const readSecret = require('./utils/load-credentials');
 const runScan = require('./utils/vulnerability-scanning');
@@ -29,8 +29,6 @@ const action = async () => {
   core.info(`update-dns set to '${updateDns}' results in migrate=${migrate}`);
 
   // const verbose = (core.getInput('verbose') || 'false');
-
-  // failIfNotTrunkBased();
 
   // Ensure our gcloud is available and installed.
   const projectID = await setupGcloud(serviceAccountKeyCICD);
