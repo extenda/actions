@@ -5,7 +5,7 @@ jest.mock('../../src/manifests/image-sha256');
 
 describe('collector-sidecar', () => {
   beforeEach(() => {
-    getImageWithSha256.mockResolvedValueOnce('eu.gcr.io/extenda/run-gmp-sidecar@sha256:123');
+    getImageWithSha256.mockResolvedValueOnce('eu.gcr.io/extenda/run-gmp-collector@sha256:123');
   });
   afterEach(() => {
     jest.clearAllMocks();
@@ -23,7 +23,7 @@ describe('collector-sidecar', () => {
       },
     });
     expect(container).toEqual({
-      image: 'eu.gcr.io/extenda/run-gmp-sidecar@sha256:123',
+      image: 'eu.gcr.io/extenda/run-gmp-collector@sha256:123',
       name: 'collector',
       resources: {
         limits: {
