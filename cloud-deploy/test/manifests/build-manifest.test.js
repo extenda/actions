@@ -8,6 +8,8 @@ const { addNamespace } = require('../../src/utils/add-namespace');
 const readSecret = require('../../src/utils/load-credentials');
 const checkVpcConnector = require('../../src/utils/check-vpc-connector');
 const getRevisions = require('../../src/cloudrun/get-revisions');
+const getImageWithSha256 = require('../../src/manifests/image-sha256');
+
 
 jest.mock('../../src/manifests/check-system');
 jest.mock('../../src/manifests/opa-config');
@@ -18,6 +20,7 @@ jest.mock('../../src/manifests/statefulset-workaround');
 jest.mock('../../src/utils/check-vpc-connector');
 jest.mock('../../src/cloudrun/get-revisions');
 jest.mock('../../src/utils/cluster-connection');
+jest.mock('../../src/manifests/image-sha256');
 
 const readFileSync = (file) => fs.readFileSync(file, { encoding: 'utf-8' });
 
@@ -30,6 +33,7 @@ describe('buildManifest', () => {
   beforeEach(() => {
     mockFs({});
     addNamespace.mockResolvedValueOnce('');
+    getImageWithSha256.mockImplementation((name) => Promise.resolve(`${name.split(':')[0]}@sha256:123`));
   });
 
   test('should generate manifest file with correct content', async () => {
@@ -959,5 +963,49 @@ metadata:
     mockFs.restore();
     expect(k8sManifest).toMatchSnapshot();
     expect(podMonitorManifest).toMatchSnapshot();
+  });
+
+  test('It generates a collector sidecar if monitoring is configured on Cloud Run', async () => {
+    const image = 'example-image:latest';
+    const service = {
+      'cloud-run': {
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          concurrency: 40,
+        },
+        monitoring: {
+          prometheus: {
+            interval: 15,
+          },
+        },
+      },
+      security: 'none',
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {},
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'production';
+
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    const manifest = readFileSync('cloudrun-service.yaml');
+    mockFs.restore();
+    expect(manifest).toMatchSnapshot();
+
   });
 });

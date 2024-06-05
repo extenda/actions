@@ -15,6 +15,7 @@ const podMonitorManifest = (name, monitoring) => {
     prometheus: {
       interval = -1,
       path = '/metrics',
+      port = 8080,
     } = {},
   } = monitoring;
 
@@ -34,7 +35,7 @@ const podMonitorManifest = (name, monitoring) => {
         matchLabels: { app: name },
       },
       endpoints: [{
-        port: 8080,
+        port,
         path,
         interval: `${interval}s`,
       }],
