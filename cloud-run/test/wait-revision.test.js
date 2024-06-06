@@ -166,7 +166,7 @@ describe('Wait for revision', () => {
       clusterInput,
       canarySpec,
       10,
-    )).rejects.toEqual(new Error('Invalid JSON: Failed to load status for revision "xxxxxxx-00013-loc". Reason: Unexpected token E in JSON at position 0'));
+    )).rejects.toEqual(new Error('Invalid JSON: Failed to load status for revision "xxxxxxx-00013-loc". Reason: Unexpected token \'E\', "ERROR: No JSON" is not valid JSON'));
     expect(exec.exec).toHaveBeenCalled();
   });
 

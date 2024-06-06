@@ -22,4 +22,5 @@ module.exports = {
   rootDir: process.cwd(),
   testEnvironment: 'node',
   maxWorkers: '50%',
+  setupFiles: ['./jest.setup.js'],
 };

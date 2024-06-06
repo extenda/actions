@@ -36,7 +36,8 @@ const createPayload = (version) => {
     fs.mkdirSync(path.dirname(logFile), { recursive: true });
     fs.writeFileSync(logFile, DEFAULT_LOG_MASK, 'utf-8');
   }
-  const files = glob.sync('policies/**/*.rego').map(loadRego);
+  const files = glob.sync('policies/**/*.rego', { fs }).map(loadRego);
+
   return {
     revision: version,
     files,

@@ -6,13 +6,13 @@
   "scripts": {
     "build": "node .scripts/build-modules.js",
     "build:docker": "run-script-os",
-    "build:docker:win32": "docker pull node:16-alpine && docker run --rm -t -v \"%cd%\":/work -w /work node:16-alpine sh -c \"npm run build\"",
-    "build:docker:default": "docker pull node:16-alpine && docker run --rm -t -v $(pwd):/work -w /work node:16-alpine sh -c 'npm ci && npm run build'",
+    "build:docker:win32": "docker pull node:20-alpine && docker run --rm -t -v \"%cd%\":/work -w /work node:20-alpine sh -c \"npm run build\"",
+    "build:docker:default": "docker pull node:20-alpine && docker run --rm -t -v $(pwd):/work -w /work node:20-alpine sh -c 'npm ci && npm run build'",
     "install": "node .scripts/install-modules.js",
     "test": "jest --silent",
     "posttest": "node .scripts/create-sonar-properties.js",
     "lint:js": "run-script-os",
-    "lint:js:win32": "docker run --rm -t -v \"%cd%\":/work -w /work node:16-alpine sh -c \"npm run lint:js\"",
+    "lint:js:win32": "docker run --rm -t -v \"%cd%\":/work -w /work node:20-alpine sh -c \"npm run lint:js\"",
     "lint:js:default": "eslint \".scripts/*.js\" \"*/src/**/*.js\" \"*/test/**/*.js\" --no-ignore --fix"
   },
   "repository": "github:extenda/actions",
@@ -33,6 +33,7 @@
     "fs-extra": "^10.1.0",
     "jest": "^29.1.2",
     "jest-sonar": "^0.2.12",
+    "memfs": "^4.9.2",
     "mock-fs": "^5.2.0",
     "run-script-os": "^1.1.6"
   },

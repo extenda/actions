@@ -394,7 +394,7 @@ before running actions.
 
 Development tools needed are:
 
-  * Latest Node 16 LTS release
+  * Latest Node 20 LTS release
   * Docker
   * Pre-commit
 
