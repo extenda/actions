@@ -9,8 +9,5 @@
     "@actions/exec": "^1.0.4",
     "@actions/io": "^1.0.2",
     "yaml": "^1.8.2"
-  },
-  "devDependencies": {
-    "mock-fs": "^4.11.0"
   }
 }

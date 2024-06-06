@@ -7,8 +7,5 @@
   "dependencies": {
     "@actions/core": "^1.10.0",
     "semver": "^7.3.2"
-  },
-  "devDependencies": {
-    "mock-fs": "^4.11.0"
   }
 }

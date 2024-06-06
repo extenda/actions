@@ -7,8 +7,5 @@
   "dependencies": {
     "@actions/core": "^1.10.0",
     "jira-client": "^6.21.1"
-  },
-  "devDependencies": {
-    "mock-fs": "^4.11.0"
   }
 }
