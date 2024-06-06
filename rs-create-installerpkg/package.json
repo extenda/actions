@@ -10,7 +10,6 @@
     "node-fetch": "^2.6.7"
   },
   "devDependencies": {
-    "jest-fetch-mock": "^3.0.3",
-    "mock-fs": "^4.11.0"
+    "jest-fetch-mock": "^3.0.3"
   }
 }

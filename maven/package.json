@@ -10,8 +10,5 @@
     "@actions/exec": "^1.0.4",
     "@actions/io": "^1.0.1",
     "uuid": "^9.0.0"
-  },
-  "devDependencies": {
-    "mock-fs": "^4.11.0"
   }
 }
