@@ -16,8 +16,8 @@ jest.mock('../../utils', () => ({
   getImageDigest: jest.fn(),
 }));
 
-const exec = require('@actions/exec');
 const mockFs = require('mock-fs');
+const exec = require('@actions/exec');
 const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 const { setupGcloud } = require('../../setup-gcloud');
 const patchDeployment = require('../src/patch-deployment-yaml');

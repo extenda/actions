@@ -1,5 +1,5 @@
-const exec = require('@actions/exec');
 const mockFs = require('mock-fs');
+const exec = require('@actions/exec');
 const fs = require('fs');
 const applyAutoscale = require('../src/autoscale');
 

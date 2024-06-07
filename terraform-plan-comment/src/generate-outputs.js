@@ -116,7 +116,7 @@ const generateOutputs = async (workingDirectory, planFile, maxThreads, ignoredRe
     .then((changed) => {
       changed.forEach(({ plan }) => {
         const planwWithChanges = path.join(modulePath(plan), `${planFile}.changes`);
-        fs.copyFile(plan, planwWithChanges, () => {
+        fs.copyFileSync(plan, planwWithChanges, () => {
           core.info(`Save plan with changes to ${planwWithChanges}`);
         });
       });

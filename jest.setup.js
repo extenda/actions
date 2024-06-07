@@ -1,14 +1,20 @@
-/* eslint-disable global-require */
-
 const memfs = require('memfs');
 
-const mockFs = function mock(volume = { }) {
-  memfs.vol.reset();
-  memfs.vol.fromJSON(volume);
-  memfs.vol.mkdirSync('.', { recursive: true });
-};
+const mock = { fs: jest.requireActual('fs') };
 
-mockFs.restore = function restore() {};
+/**
+ * Calling require("mock-fs") will make jest
+ *   return memfs.fs for further calls to require("fs")
+ */
+jest.mock('mock-fs', () => {
+  mock.fs = memfs.fs;
 
-jest.mock('mock-fs', () => mockFs);
-jest.mock('fs', () => require('memfs').fs);
+  return Object.assign((volume = { }) => {
+    memfs.vol.reset();
+    memfs.vol.fromNestedJSON(volume);
+    memfs.vol.mkdirSync('.', { recursive: true });
+    memfs.vol.mkdirSync('/tmp', { recursive: true });
+  }, { restore: () => {} });
+});
+
+jest.mock('fs', () => mock.fs);

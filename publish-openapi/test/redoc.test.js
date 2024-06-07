@@ -1,7 +1,8 @@
+const mockFs = require('mock-fs');
+
 jest.mock('@actions/core');
 jest.mock('@actions/exec');
 let fs = require('fs');
-const mockFs = require('mock-fs');
 const exec = require('@actions/exec');
 const deployDocumentation = require('../src/redoc');
 
