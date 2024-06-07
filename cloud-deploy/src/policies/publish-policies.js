@@ -37,7 +37,6 @@ const createPayload = (version) => {
     fs.writeFileSync(logFile, DEFAULT_LOG_MASK, 'utf-8');
   }
   const files = glob.sync('policies/**/*.rego').map(loadRego);
-
   return {
     revision: version,
     files,

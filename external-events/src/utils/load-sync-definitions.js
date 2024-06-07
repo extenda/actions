@@ -1,11 +1,11 @@
 const yaml = require('js-yaml');
-const fs = require('fs');
+const { readFileSync } = require('fs');
 const fg = require('fast-glob');
 const core = require('@actions/core');
 
 function loadDefinition(path) {
   core.info(`Loading ${path} config file`);
-  return yaml.load(fs.readFileSync(path, 'utf-8'), { filename: path });
+  return yaml.load(readFileSync(path, 'utf-8'), { filename: path });
 }
 
 function validateSystemPrefixUnique(defs) {
