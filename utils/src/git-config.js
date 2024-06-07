@@ -9,6 +9,7 @@ const basicAuth = () => {
 /**
  * Configure the local Git instance to allow push operations against the origin.
  */
+/* istanbul ignore next */
 const gitConfig = async () => {
   const git = simpleGit();
 

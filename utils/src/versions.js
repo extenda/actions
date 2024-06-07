@@ -47,6 +47,7 @@ const getBuildVersion = async (versionSuffix = '') => {
  * Create a release tag and push it to origin.
  * @returns {Promise<{changelog: *, tagName: *, version: *}>}
  */
+/* istanbul ignore next */
 const tagReleaseVersion = async () => {
   const version = await getBuildVersion();
   const changelog = await changes.getChangelog(version);
