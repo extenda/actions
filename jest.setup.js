@@ -1,12 +1,12 @@
-const memfs = require('memfs');
-
 const mock = { fs: jest.requireActual('fs') };
 
 /**
  * Calling require("mock-fs") will make jest
  *   return memfs.fs for further calls to require("fs")
- */
+*/
 jest.mock('mock-fs', () => {
+  const memfs = jest.requireActual('memfs');
+
   mock.fs = memfs.fs;
 
   return Object.assign((volume = { }) => {
