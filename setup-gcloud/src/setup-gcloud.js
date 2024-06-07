@@ -80,7 +80,6 @@ const installComponents = async (toolPath) => {
     dot: true,
     onlyDirectories: true,
     absolute: true,
-    fs,
   }).forEach((pycache) => {
     fs.rmSync(pycache, { recursive: true });
   });

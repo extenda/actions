@@ -1,6 +1,6 @@
 const yaml = require('js-yaml');
-const { readFileSync } = require('fs');
 const fg = require('fast-glob');
+const { readFileSync } = require('fs');
 const core = require('@actions/core');
 
 function loadDefinition(path) {
