@@ -1,5 +1,4 @@
 const core = require('@actions/core');
-const fs = require('fs');
 const fg = require('fast-glob');
 const { run } = require('../../utils');
 const loadIamDefinition = require('./iam-definition');
@@ -64,7 +63,7 @@ const action = async () => {
   const dryRun = core.getInput('dry-run') === 'true';
   const skipProd = core.getInput('skip-prod') === 'true';
 
-  const iamFiles = fg.sync(iamFileGlob, { onlyFiles: true, fs });
+  const iamFiles = fg.sync(iamFileGlob, { onlyFiles: true });
 
   for (const iamFile of iamFiles) {
     core.startGroup(`Process ${iamFile}`);

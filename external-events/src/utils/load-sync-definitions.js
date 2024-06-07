@@ -46,7 +46,7 @@ function validateDefs(defs, validateFn) {
 async function loadDefinitions(glob, validateFn) {
   core.startGroup('Definitions load');
   core.info(`Loading files by glob - ${glob}`);
-  const files = fg.sync([glob], { onlyFiles: true, fs });
+  const files = fg.sync([glob], { onlyFiles: true });
 
   const defs = files.reduce((acc, file) => ({
     ...acc,

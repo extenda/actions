@@ -13,7 +13,7 @@ const terraformShow = async (plan) => {
 
   const terragruntCache = fg.sync(
     `${path.dirname(plan)}/**/.terragrunt-cache/*/*`,
-    { dot: true, onlyDirectories: true, fs },
+    { dot: true, onlyDirectories: true },
   );
   if (terragruntCache.length > 0) {
     [cwd] = terragruntCache;
@@ -60,7 +60,7 @@ const modulePath = (plan) => {
 
   const terragruntCache = fg.sync(
     `${path.dirname(plan)}/**/.terragrunt-cache`,
-    { dot: true, onlyDirectories: true, fs },
+    { dot: true, onlyDirectories: true },
   );
 
   if (terragruntCache.length > 0) {
@@ -80,7 +80,7 @@ const moduleName = (plan, workingDirectory) => {
 
   const terragruntCache = fg.sync(
     `${path.dirname(plan)}/**/.terragrunt-cache`,
-    { dot: true, onlyDirectories: true, fs },
+    { dot: true, onlyDirectories: true },
   );
 
   if (terragruntCache.length > 0) {
@@ -97,7 +97,7 @@ const moduleName = (plan, workingDirectory) => {
 
 const generateOutputs = async (workingDirectory, planFile, maxThreads, ignoredResourcesRegexp) => {
   const source = `${workingDirectory}/**/${planFile}`;
-  const plans = fg.sync(source, { dot: true, fs });
+  const plans = fg.sync(source, { dot: true });
   core.info(`Found ${plans.length} plan(s) for glob ${source}`);
   const promises = [];
   const limit = pLimit(parseInt(maxThreads, 10) || 1);
