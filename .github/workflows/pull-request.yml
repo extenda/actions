@@ -1,5 +1,5 @@
 name: pull-request
-on: pull_request_target
+on: pull_request
 
 jobs:
   update-dist-files:
@@ -8,14 +8,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: 'Dependabot: Rebuild dist files'
-        uses: ./.github/actions/build-dist
-
       - uses: extenda/actions/gcp-secret-manager@v0
         with:
           service-account-key: ${{ secrets.SECRET_AUTH }}
           secrets: |
             COMMIT_TOKEN: github-token
+
+      - name: 'Dependabot: Rebuild dist files'
+        uses: ./.github/actions/build-dist
 
       - name: 'Dependabot: Update changed dist/* files'
         run: |
@@ -24,6 +24,7 @@ jobs:
             bash .github/actions/commit-changes.sh
           else
             echo "No changes to dist files"
+            git status
           fi
         env:
           BRANCH_NAME: ${{ github.ref_name }}
