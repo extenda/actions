@@ -5,8 +5,8 @@
   "description": "Deploy to Cloud Run",
   "main": "dist/index.js",
   "dependencies": {
-    "deepmerge": "^4.2.2",
-    "jsonschema": "^1.2.5",
-    "yaml": "^1.8.2"
+    "deepmerge": "^4.3.1",
+    "jsonschema": "^1.4.1",
+    "yaml": "^2.4.5"
   }
 }
