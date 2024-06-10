@@ -1,9 +1,7 @@
-let fs = require('fs');
-
 const mockFs = require('mock-fs');
-const createBaseKustomize = require('../src/create-base-kustomize');
+const fs = require('fs');
 
-fs = require('fs');
+const createBaseKustomize = require('../src/create-base-kustomize');
 
 describe('Creates base kustomize yaml files', () => {
   beforeEach(() => {

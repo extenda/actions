@@ -1,8 +1,8 @@
+const mockFs = require('mock-fs');
 const exec = require('@actions/exec');
 
 jest.mock('@actions/exec');
 
-const mockFs = require('mock-fs');
 const checkNamespaceExists = require('../src/check-namespace-exists');
 
 const mockOutput = (data, opts) => {

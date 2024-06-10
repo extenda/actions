@@ -1,8 +1,7 @@
+const mockFs = require('mock-fs');
 const exec = require('@actions/exec');
 
 jest.mock('@actions/exec');
-
-const mockFs = require('mock-fs');
 
 const checkRequiredNumberOfPodsIsRunning = require('../src/check-number-of-pods-running');
 

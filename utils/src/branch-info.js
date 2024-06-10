@@ -1,4 +1,4 @@
-const git = require('simple-git')();
+const simpleGit = require('simple-git');
 
 const isPreRelease = (branchName) => branchName !== 'master';
 
@@ -88,10 +88,10 @@ const getBranchNameSemver = (currentRef) => {
 
 const getShortSha = async (sha, shaSize = null) => {
   const args = [shaSize ? `--short=${shaSize}` : '--short', sha];
-  return git.revparse(args);
+  return simpleGit().revparse(args);
 };
 
-const getTagAtCommit = async (sha) => git.tag(['--points-at', sha])
+const getTagAtCommit = async (sha) => simpleGit().tag(['--points-at', sha])
   .then((output) => output.trim());
 
 const getComposedVersionString = (version, branchNameFriendly, buildNumber, shortSha) => {
