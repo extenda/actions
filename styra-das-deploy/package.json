@@ -3,8 +3,5 @@
   "version": "0.0.1-local",
   "private": true,
   "description": "publish staging policy into production DAS system",
-  "main": "dist/index.js",
-  "dependencies": {
-    "@actions/core": "^1.10.0"
-  }
+  "main": "dist/index.js"
 }
