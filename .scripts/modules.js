@@ -69,5 +69,6 @@ module.exports = {
   modules: {
     each: eachModules,
     exec: execModules,
+    list: findModules,
   },
 };
