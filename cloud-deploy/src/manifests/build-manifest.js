@@ -11,6 +11,7 @@ const getRevisions = require('../cloudrun/get-revisions');
 const { configMapManifest, removeScalerConfiguration } = require('./vpa-scaler-configmap');
 const connectToCluster = require('../utils/cluster-connection');
 const { deletePodMonitor, podMonitorManifest } = require('./pod-monitoring');
+const collectorSidecar = require('./collector-sidecar');
 
 const convertToYaml = (json) => yaml.dump(json);
 
@@ -61,6 +62,8 @@ const cloudrunManifestTemplate = async (
   connectorName,
   activeRevisionName,
   audiences,
+  monitoring,
+  deployEnv,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
   const ports = opa ? undefined : [{
@@ -160,6 +163,18 @@ const cloudrunManifestTemplate = async (
     securityContainer.resources = resources;
     securityContainer.volumeMounts = undefined;
     containers.push(securityContainer);
+  }
+
+  if (monitoring && deployEnv !== 'staging') {
+    // We only collect metrics in prod.
+    const collectorContainer = await collectorSidecar(monitoring);
+    if (collectorContainer) {
+      containers.push(collectorContainer);
+      // The collector should start after and shutdown before the user-container.
+      annotations['run.googleapis.com/container-dependencies'] = JSON.stringify({
+        collector: ['user-container'],
+      });
+    }
   }
 
   const service = {
@@ -718,6 +733,8 @@ const buildManifest = async (
       connectorName,
       activeRevisionName,
       audiences,
+      monitoring,
+      deployEnv,
     );
     generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));
   }

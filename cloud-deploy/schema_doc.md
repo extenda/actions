@@ -19,6 +19,11 @@
     - [1.1.9. Property `CloudDeploy > oneOf > CloudRun > cloud-run > session-affinity`](#oneOf_i0_cloud-run_session-affinity)
     - [1.1.10. Property `CloudDeploy > oneOf > CloudRun > cloud-run > vpc-connector`](#oneOf_i0_cloud-run_vpc-connector)
     - [1.1.11. Property `CloudDeploy > oneOf > CloudRun > cloud-run > internal-traffic`](#oneOf_i0_cloud-run_internal-traffic)
+    - [1.1.12. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring`](#oneOf_i0_cloud-run_monitoring)
+      - [1.1.12.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus`](#oneOf_i0_cloud-run_monitoring_prometheus)
+        - [1.1.12.1.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > interval`](#oneOf_i0_cloud-run_monitoring_prometheus_interval)
+        - [1.1.12.1.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > path`](#oneOf_i0_cloud-run_monitoring_prometheus_path)
+        - [1.1.12.1.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > port`](#oneOf_i0_cloud-run_monitoring_prometheus_port)
 - [2. Property `CloudDeploy > oneOf > Kubernetes`](#oneOf_i1)
   - [2.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes`](#oneOf_i1_kubernetes)
     - [2.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > service`](#oneOf_i1_kubernetes_service)
@@ -40,9 +45,6 @@
         - [2.1.8.1.2. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > volumes > Volume > size`](#oneOf_i1_kubernetes_volumes_items_size)
         - [2.1.8.1.3. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > volumes > Volume > mount-path`](#oneOf_i1_kubernetes_volumes_items_mount-path)
     - [2.1.9. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > monitoring`](#oneOf_i1_kubernetes_monitoring)
-      - [2.1.9.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > monitoring > prometheus`](#oneOf_i1_kubernetes_monitoring_prometheus)
-        - [2.1.9.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > monitoring > prometheus > interval`](#oneOf_i1_kubernetes_monitoring_prometheus_interval)
-        - [2.1.9.1.2. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > monitoring > prometheus > path`](#oneOf_i1_kubernetes_monitoring_prometheus_path)
 - [3. Property `CloudDeploy > labels`](#labels)
   - [3.1. Property `CloudDeploy > labels > component`](#labels_component)
   - [3.2. Property `CloudDeploy > labels > product`](#labels_product)
@@ -138,7 +140,8 @@
 | - [cpu-throttling](#oneOf_i0_cloud-run_cpu-throttling )       | No      | boolean          | No         | -                                                  | Whether to throttle the CPU when the container is not actively serving requests.         |
 | - [session-affinity](#oneOf_i0_cloud-run_session-affinity )   | No      | boolean          | No         | -                                                  | Whether to enable session affinity for connections to the service.                       |
 | - [vpc-connector](#oneOf_i0_cloud-run_vpc-connector )         | No      | boolean          | No         | -                                                  | Whether to use the vpc connector or direct connection to the vpc                         |
-| - [internal-traffic](#oneOf_i0_cloud-run_internal-traffic )   | No      | boolean          | No         | -                                                  | Wheter to setup internal traffic or not                                                  |
+| - [internal-traffic](#oneOf_i0_cloud-run_internal-traffic )   | No      | boolean          | No         | -                                                  | Whether to setup internal traffic or not                                                 |
+| - [monitoring](#oneOf_i0_cloud-run_monitoring )               | No      | object           | No         | In #/$defs/Monitoring                              | -                                                                                        |
 
 #### <a name="oneOf_i0_cloud-run_service"></a>1.1.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > service`
 
@@ -354,7 +357,67 @@ Must be one of:
 | **Required** | No        |
 | **Default**  | `true`    |
 
-**Description:** Wheter to setup internal traffic or not
+**Description:** Whether to setup internal traffic or not
+
+#### <a name="oneOf_i0_cloud-run_monitoring"></a>1.1.12. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring`
+
+|                           |                                                         |
+| ------------------------- | ------------------------------------------------------- |
+| **Type**                  | `object`                                                |
+| **Required**              | No                                                      |
+| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
+| **Defined in**            | #/$defs/Monitoring                                      |
+
+| Property                                                   | Pattern | Type   | Deprecated | Definition | Title/Description |
+| ---------------------------------------------------------- | ------- | ------ | ---------- | ---------- | ----------------- |
+| - [prometheus](#oneOf_i0_cloud-run_monitoring_prometheus ) | No      | object | No         | -          | -                 |
+
+##### <a name="oneOf_i0_cloud-run_monitoring_prometheus"></a>1.1.12.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus`
+
+|                           |                                                         |
+| ------------------------- | ------------------------------------------------------- |
+| **Type**                  | `object`                                                |
+| **Required**              | No                                                      |
+| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
+
+| Property                                                          | Pattern | Type    | Deprecated | Definition | Title/Description              |
+| ----------------------------------------------------------------- | ------- | ------- | ---------- | ---------- | ------------------------------ |
+| + [interval](#oneOf_i0_cloud-run_monitoring_prometheus_interval ) | No      | integer | No         | -          | The scrape interval in seconds |
+| - [path](#oneOf_i0_cloud-run_monitoring_prometheus_path )         | No      | string  | No         | -          | The scrape path                |
+| - [port](#oneOf_i0_cloud-run_monitoring_prometheus_port )         | No      | integer | No         | -          | The scrape port                |
+
+##### <a name="oneOf_i0_cloud-run_monitoring_prometheus_interval"></a>1.1.12.1.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > interval`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | Yes       |
+
+**Description:** The scrape interval in seconds
+
+| Restrictions |         |
+| ------------ | ------- |
+| **Minimum**  | &ge; 10 |
+
+##### <a name="oneOf_i0_cloud-run_monitoring_prometheus_path"></a>1.1.12.1.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > path`
+
+|              |              |
+| ------------ | ------------ |
+| **Type**     | `string`     |
+| **Required** | No           |
+| **Default**  | `"/metrics"` |
+
+**Description:** The scrape path
+
+##### <a name="oneOf_i0_cloud-run_monitoring_prometheus_port"></a>1.1.12.1.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > port`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `8080`    |
+
+**Description:** The scrape port
 
 ## <a name="oneOf_i1"></a>2. Property `CloudDeploy > oneOf > Kubernetes`
 
@@ -381,17 +444,17 @@ Must be one of:
 
 **Description:** A kubernetes service
 
-| Property                                             | Pattern | Type             | Deprecated | Definition                                         | Title/Description                                                                        |
-| ---------------------------------------------------- | ------- | ---------------- | ---------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| + [service](#oneOf_i1_kubernetes_service )           | No      | string           | No         | Same as [service](#oneOf_i0_cloud-run_service )    | Service name                                                                             |
-| + [type](#oneOf_i1_kubernetes_type )                 | No      | enum (of string) | No         | -                                                  | The type of service                                                                      |
-| + [resources](#oneOf_i1_kubernetes_resources )       | No      | object           | No         | Same as [resources](#security_oneOf_i1_resources ) | The requested resources                                                                  |
-| + [protocol](#oneOf_i1_kubernetes_protocol )         | No      | enum (of string) | No         | Same as [protocol](#oneOf_i0_cloud-run_protocol )  | The type of protocol. Make sure to set http2 if this service is using gRPC or WebSockets |
-| - [timeout](#oneOf_i1_kubernetes_timeout )           | No      | integer          | No         | Same as [timeout](#oneOf_i0_cloud-run_timeout )    | The request timeout in seconds                                                           |
-| - [availability](#oneOf_i1_kubernetes_availability ) | No      | enum (of string) | No         | In #/$defs/Availability                            | Availability to configure priority on autoscaling                                        |
-| + [scaling](#oneOf_i1_kubernetes_scaling )           | No      | object           | No         | -                                                  | ScalingKubernetes                                                                        |
-| - [volumes](#oneOf_i1_kubernetes_volumes )           | No      | array of object  | No         | -                                                  | Volumes                                                                                  |
-| - [monitoring](#oneOf_i1_kubernetes_monitoring )     | No      | object           | No         | In #/$defs/Monitoring                              | -                                                                                        |
+| Property                                             | Pattern | Type             | Deprecated | Definition                                            | Title/Description                                                                        |
+| ---------------------------------------------------- | ------- | ---------------- | ---------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| + [service](#oneOf_i1_kubernetes_service )           | No      | string           | No         | Same as [service](#oneOf_i0_cloud-run_service )       | Service name                                                                             |
+| + [type](#oneOf_i1_kubernetes_type )                 | No      | enum (of string) | No         | -                                                     | The type of service                                                                      |
+| + [resources](#oneOf_i1_kubernetes_resources )       | No      | object           | No         | Same as [resources](#security_oneOf_i1_resources )    | The requested resources                                                                  |
+| + [protocol](#oneOf_i1_kubernetes_protocol )         | No      | enum (of string) | No         | Same as [protocol](#oneOf_i0_cloud-run_protocol )     | The type of protocol. Make sure to set http2 if this service is using gRPC or WebSockets |
+| - [timeout](#oneOf_i1_kubernetes_timeout )           | No      | integer          | No         | Same as [timeout](#oneOf_i0_cloud-run_timeout )       | The request timeout in seconds                                                           |
+| - [availability](#oneOf_i1_kubernetes_availability ) | No      | enum (of string) | No         | In #/$defs/Availability                               | Availability to configure priority on autoscaling                                        |
+| + [scaling](#oneOf_i1_kubernetes_scaling )           | No      | object           | No         | -                                                     | ScalingKubernetes                                                                        |
+| - [volumes](#oneOf_i1_kubernetes_volumes )           | No      | array of object  | No         | -                                                     | Volumes                                                                                  |
+| - [monitoring](#oneOf_i1_kubernetes_monitoring )     | No      | object           | No         | Same as [monitoring](#oneOf_i0_cloud-run_monitoring ) | -                                                                                        |
 
 #### <a name="oneOf_i1_kubernetes_service"></a>2.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > service`
 
@@ -649,47 +712,7 @@ Must be one of:
 | **Type**                  | `object`                                                |
 | **Required**              | No                                                      |
 | **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
-| **Defined in**            | #/$defs/Monitoring                                      |
-
-| Property                                                    | Pattern | Type   | Deprecated | Definition | Title/Description |
-| ----------------------------------------------------------- | ------- | ------ | ---------- | ---------- | ----------------- |
-| - [prometheus](#oneOf_i1_kubernetes_monitoring_prometheus ) | No      | object | No         | -          | -                 |
-
-##### <a name="oneOf_i1_kubernetes_monitoring_prometheus"></a>2.1.9.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > monitoring > prometheus`
-
-|                           |                                                         |
-| ------------------------- | ------------------------------------------------------- |
-| **Type**                  | `object`                                                |
-| **Required**              | No                                                      |
-| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
-
-| Property                                                           | Pattern | Type    | Deprecated | Definition | Title/Description              |
-| ------------------------------------------------------------------ | ------- | ------- | ---------- | ---------- | ------------------------------ |
-| + [interval](#oneOf_i1_kubernetes_monitoring_prometheus_interval ) | No      | integer | No         | -          | The scrape interval in seconds |
-| - [path](#oneOf_i1_kubernetes_monitoring_prometheus_path )         | No      | string  | No         | -          | The scrape path                |
-
-##### <a name="oneOf_i1_kubernetes_monitoring_prometheus_interval"></a>2.1.9.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > monitoring > prometheus > interval`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `integer` |
-| **Required** | Yes       |
-
-**Description:** The scrape interval in seconds
-
-| Restrictions |         |
-| ------------ | ------- |
-| **Minimum**  | &ge; 10 |
-
-##### <a name="oneOf_i1_kubernetes_monitoring_prometheus_path"></a>2.1.9.1.2. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > monitoring > prometheus > path`
-
-|              |              |
-| ------------ | ------------ |
-| **Type**     | `string`     |
-| **Required** | No           |
-| **Default**  | `"/metrics"` |
-
-**Description:** The scrape path
+| **Same definition as**    | [monitoring](#oneOf_i0_cloud-run_monitoring)            |
 
 ## <a name="labels"></a>3. Property `CloudDeploy > labels`
 
@@ -1239,4 +1262,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2024-05-22 at 12:11:23 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2024-06-04 at 23:50:21 +0200

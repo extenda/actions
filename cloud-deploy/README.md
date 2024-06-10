@@ -262,6 +262,8 @@ Autopilot includes managed Prometheus and we can use that to scrape metrics from
 a `PodMonitoring` resource. This example will collect metrics every 60 seconds from the default
 path `/metrics`. Scraping is performed on the internal service port 8080 and will not pass through the security sidecar.
 
+Monitoring is also supported on Cloud Run services and will use a sidecar to collect the metrics.
+
 ```yaml
 kubernetes:
   type: Deployment

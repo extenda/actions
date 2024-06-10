@@ -126,9 +126,12 @@
           "default": true
         },
         "internal-traffic": {
-          "description": "Wheter to setup internal traffic or not",
+          "description": "Whether to setup internal traffic or not",
           "type": "boolean",
           "default": true
+        },
+        "monitoring": {
+          "$ref": "#/$defs/Monitoring"
         }
       },
       "additionalProperties": false
@@ -274,6 +277,11 @@
               "type": "string",
               "description": "The scrape path",
               "default": "/metrics"
+            },
+            "port": {
+              "type": "integer",
+              "description": "The scrape port",
+              "default": 8080
             }
           },
           "additionalProperties": false
