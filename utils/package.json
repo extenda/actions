@@ -8,20 +8,20 @@
     "postinstall": "node scripts/inline-conventionalcommit-templates.js"
   },
   "dependencies": {
-    "@actions/github": "^5.1.1",
-    "@actions/io": "^1.1.2",
-    "@actions/tool-cache": "1.1.2",
-    "axios": "^1.6.2",
-    "conventional-changelog-conventionalcommits": "^5.0.0",
-    "conventional-changelog-core": "^4.2.4",
-    "conventional-commits-parser": "^3.2.4",
-    "conventional-recommended-bump": "^6.1.0",
-    "git-raw-commits": "~2.0.11",
-    "semver": "^7.3.8",
-    "simple-git": "^3.14.1",
-    "stream-to-string": "^1.2.0",
+    "@actions/github": "^6.0.0",
+    "@actions/io": "^1.1.3",
+    "@actions/tool-cache": "2.0.1",
+    "axios": "^1.7.2",
+    "conventional-changelog-conventionalcommits": "^8.0.0",
+    "conventional-changelog-core": "^8.0.0",
+    "conventional-commits-parser": "^6.0.0",
+    "conventional-recommended-bump": "^10.0.0",
+    "git-raw-commits": "~5.0.0",
+    "semver": "^7.6.2",
+    "simple-git": "^3.25.0",
+    "stream-to-string": "^1.2.1",
     "through2": "^4.0.2",
-    "tmp": "^0.2.1",
-    "uuid": "^9.0.0"
+    "tmp": "^0.2.3",
+    "uuid": "^10.0.0"
   }
 }
