@@ -6,7 +6,7 @@ for file_path in $(git diff --name-only '*/dist/**'); do
   changed_files_json="$changed_files_json
   {
     \"path\": \"$file_path\",
-    \"content\": \"$(base64 < "$file_path")\"
+    \"contents\": \"$(base64 < "$file_path")\"
   },"
 done
 
@@ -14,13 +14,7 @@ done
 changed_files_json=${changed_files_json::-1}
 
 graphql_request='{
-  "query": "mutation ('\$'input: CreateCommitOnBranchInput!) {
-    createCommitOnBranch(input: '\$'input) {
-      commit {
-        url
-      }
-    }
-  }",
+  "query": "mutation ('\$'input: CreateCommitOnBranchInput!) { createCommitOnBranch(input: '\$'input) { commit { url } } }",
   "variables": {
     "input": {
       "branch": {
@@ -28,22 +22,21 @@ graphql_request='{
         "branchName": "'"$GITHUB_HEAD_REF"'"
       },
       "message": {
-        "headline": "build(deps): Update dist files",
+        "headline": "build(deps): Update dist files [skip ci]"
       },
       "fileChanges": {
         "additions": [
           '"$changed_files_json"'
         ]
       },
-      "expectedHeadOid": "'$GITHUB_SHA'"
+      "expectedHeadOid": "'"$GITHUB_SHA"'"
     }
   }
 }'
 
 echo "$graphql_request" > request.json
 
-response=$(curl "$GITHUB_API_URL/graphql" --silent \
-  --write-out '%{stderr}HTTP status: %{response_code}\n\n' \
+response=$(curl -sS "$GITHUB_API_URL/graphql" \
   -H "Authorization: bearer $GITHUB_TOKEN" \
   --data @request.json)
 
@@ -52,10 +45,10 @@ rm request.json
 # Print the results
 url=$(echo "$response" | jq -r '.data.createCommitOnBranch.commit.url')
 if [ "$url" != "null" ]; then
-  echo "$url"
+  echo "Changes pushed to: $url"
   exit 0
 else
   error=$(echo "$response" | jq -r '.errors[0].message')
-  echo "$error"
+  echo "An error occurred: $error"
   exit 1
 fi
