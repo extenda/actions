@@ -4,11 +4,19 @@
 version: 2
 updates:
   - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      root:
+        patterns:
+          - '*'
+  - package-ecosystem: npm
     directory: /binary-auth-attestation
     schedule:
       interval: weekly
     groups:
-      actions:
+      binary-auth-attestation:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -16,7 +24,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      cloud-deploy:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -24,7 +32,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      cloud-run:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -32,7 +40,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      cloud-run-traffic:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -40,7 +48,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      component-tests:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -48,7 +56,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      conventional-release:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -56,7 +64,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      conventional-version:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -64,7 +72,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      customer-config:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -72,7 +80,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      dataflow-deploy:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -80,7 +88,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      dataflow-template-build:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -88,7 +96,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      docker:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -96,7 +104,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      dora-metrics:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -104,7 +112,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      external-events:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -112,7 +120,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      gcp-secret-manager:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -120,7 +128,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      iam:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -128,7 +136,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      iam-test-token:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -136,7 +144,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      identity-token:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -144,7 +152,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      jira-release:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -152,7 +160,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      jira-releasenotes:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -160,7 +168,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      kubernetes:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -168,7 +176,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      maven:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -176,7 +184,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      nexus-auth-npm:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -184,7 +192,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      opa-policy-test:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -192,7 +200,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      publish-openapi:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -200,7 +208,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      repository-dispatch:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -208,7 +216,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      rs-create-installerpkg:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -216,7 +224,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      rs-permission-converter:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -224,7 +232,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      setup-gcloud:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -232,7 +240,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      setup-git:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -240,7 +248,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      setup-msbuild:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -248,7 +256,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      setup-nuget-sources:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -256,7 +264,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      setup-terraform:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -264,7 +272,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      slack-message:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -272,7 +280,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      slack-notify:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -280,7 +288,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      sonar-scanner:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -288,7 +296,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      status-check:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -296,7 +304,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      styra-das-deploy:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -304,7 +312,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      terraform-plan-comment:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -312,7 +320,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      test-pod:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -320,7 +328,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      txengine-deploy:
         patterns:
           - '*'
   - package-ecosystem: npm
@@ -328,7 +336,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      actions:
+      utils:
         patterns:
           - '*'
   - package-ecosystem: github-actions
