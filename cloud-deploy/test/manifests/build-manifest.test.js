@@ -12,7 +12,6 @@ const getImageWithSha256 = require('../../src/manifests/image-sha256');
 
 
 jest.mock('../../src/manifests/check-system');
-jest.mock('../../src/manifests/opa-config');
 jest.mock('../../src/utils/add-namespace');
 jest.mock('../../src/manifests/security-sidecar');
 jest.mock('../../src/utils/load-credentials');
