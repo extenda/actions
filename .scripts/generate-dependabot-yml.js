@@ -3,25 +3,30 @@ const path = require('path');
 const yaml = require('js-yaml');
 const { modules } = require('./modules');
 
+const definition = (directory, groupName) => {
+  const def = {
+    'package-ecosystem': 'npm',
+    directory: `/${directory}`,
+    schedule: {
+      interval: 'weekly',
+    },
+    groups: {},
+  };
+  def.groups[groupName] = {
+    patterns: ['*'],
+  };
+  return def;
+};
+
 const generateDependabot = () => {
   const actions = modules.list()
-    .map((dir) => '/' + path.relative(path.join(__dirname, '..'), dir))
-    .map((directory) => ({
-      'package-ecosystem': 'npm',
-      directory,
-      schedule: {
-        interval: 'weekly',
-      },
-      groups: {
-        actions: {
-          patterns: ['*'],
-        },
-      },
-    }));
+    .map((dir) => path.relative(path.join(__dirname, '..'), dir))
+    .map((directory) => definition(directory, path.basename(directory)));
 
   const dependabot = {
     version: 2,
     updates: [
+      definition('', 'root'),
       ... actions,
       {
         'package-ecosystem': 'github-actions',
