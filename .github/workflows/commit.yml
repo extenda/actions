@@ -43,15 +43,13 @@ jobs:
 
   verify-dist:
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: ./.github/actions/build-dist
 
       - name: Check compiled dist/* files
-        if: github.actor != 'dependabot[bot]'
         run: |
           git add '*/dist/**'
           if [ "$(git diff --staged --ignore-space-at-eol '*/dist/**' | wc -l)" -gt "0" ]; then
@@ -64,28 +62,15 @@ jobs:
             exit 1
           fi
 
-      - name: 'Dependabot: Update changed dist/* files'
-        if: github.actor == 'dependabot[bot]'
-        run: |
-          if [ "$(git diff --ignore-space-at-eol '*/dist/**' | wc -l)" -gt "0" ]; then
-            bash .github/actions/commit-changes.sh
-          fi
-        env:
-          BRANCH_NAME: ${{ github.ref_name }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   acceptance-windows:
     runs-on: windows-latest
+    if: github.actor != 'dependabot[bot]'
     needs:
       - verify-dist
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
-      - name: 'Dependabot: Rebuild dist files'
-        if: github.actor == 'dependabot[bot]'
-        uses: ./.github/actions/build-dist
 
       - uses: ./setup-msbuild
 
@@ -140,14 +125,11 @@ jobs:
 
   acceptance-linux:
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
     needs:
       - verify-dist
     steps:
       - uses: actions/checkout@v3
-
-      - name: 'Dependabot: Rebuild dist files'
-        if: github.actor == 'dependabot[bot]'
-        uses: ./.github/actions/build-dist
 
       - name: Install Java
         uses: actions/setup-java@v3
