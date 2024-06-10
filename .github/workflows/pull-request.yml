@@ -1,0 +1,31 @@
+name: pull-request
+on: pull_request_target
+
+permissions: write-all
+
+jobs:
+  update-dist-files:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 'Dependabot: Rebuild dist files'
+        uses: ./.github/actions/build-dist
+
+      - uses: extenda/actions/gcp-secret-manager@v0
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          secrets: |
+            COMMIT_TOKEN: github-token
+
+      - name: 'Dependabot: Update changed dist/* files'
+        run: |
+          if [ "$(git diff --ignore-space-at-eol '*/dist/**' | wc -l)" -gt "0" ]; then
+            bash .github/actions/commit-changes.sh
+          fi
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+          GITHUB_TOKEN: ${{ env.COMMIT_TOKEN }}
