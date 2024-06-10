@@ -45,6 +45,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: ./.github/actions/build-dist
 
@@ -65,12 +67,8 @@ jobs:
       - name: 'Dependabot: Update changed dist/* files'
         if: github.actor == 'dependabot[bot]'
         run: |
-          git add '*/dist/**'
-          if [ "$(git diff --staged --ignore-space-at-eol '*/dist/**' | wc -l)" -gt "0" ]; then
-            git config --local user.email "github-actions[bot]@users.noreply.github.com"
-            git config --local user.name "github-actions[bot]"
-            git commit -m "build(deps): Update dist files"
-            git push
+          if [ "$(git diff --ignore-space-at-eol '*/dist/**' | wc -l)" -gt "0" ]; then
+            bash .github/actions/commit-changes.sh
           fi
 
   acceptance-windows:
