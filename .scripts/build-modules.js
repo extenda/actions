@@ -2,6 +2,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const esbuild = require('esbuild');
 const { modules } = require('./modules');
+const generateDependabot = require('./generate-dependabot-yml');
 
 const copyStaticAssetsPlugin = ({ sourceDir, destDir, filesToCopy }) => ({
   name: 'copy-static-assets',
@@ -49,4 +50,5 @@ const build = async (baseDir) => {
     fs.removeSync(path.join(dir, 'dist'));
     build(dir);
   });
+  generateDependabot();
 })();
