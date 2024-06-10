@@ -1,5 +1,4 @@
 jest.mock('@actions/core');
-jest.mock('request');
 jest.mock('../../src/utils/gcloud-output', () => jest.fn().mockImplementation(() => Promise.resolve()));
 
 const checkIamSystem = require('../../src/manifests/check-system');
