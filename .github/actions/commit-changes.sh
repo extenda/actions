@@ -13,13 +13,15 @@ done
 # Remove last comma
 changed_files_json=${changed_files_json::-1}
 
+echo "Push changes to branch $BRANCH_NAME with HEAD $GITHUB_SHA"
+
 graphql_request='{
   "query": "mutation ('\$'input: CreateCommitOnBranchInput!) { createCommitOnBranch(input: '\$'input) { commit { url } } }",
   "variables": {
     "input": {
       "branch": {
         "repositoryNameWithOwner": "extenda/actions",
-        "branchName": "'"$GITHUB_HEAD_REF"'"
+        "branchName": "'"$BRANCH_NAME"'"
       },
       "message": {
         "headline": "build(deps): Update dist files [skip ci]"
