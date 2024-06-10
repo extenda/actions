@@ -4,6 +4,7 @@ on: pull_request
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
     steps:
       - uses: actions/checkout@v3
         with:
