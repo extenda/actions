@@ -5,12 +5,12 @@
   "description": "Deploy to GKE Autopilot",
   "main": "dist/index.js",
   "dependencies": {
-    "axios": "^1.6.2",
-    "axios-retry": "^4.0.0",
+    "axios": "^1.7.2",
+    "axios-retry": "^4.4.0",
     "deepmerge": "^4.3.1",
-    "fast-glob": "^3.3.1",
-    "google-auth-library": "^9.6.3",
+    "fast-glob": "^3.3.2",
+    "google-auth-library": "^9.10.0",
     "jsonschema": "^1.4.1",
-    "yaml": "^2.2.1"
+    "yaml": "^2.4.5"
   }
 }
