@@ -3,8 +3,5 @@
   "version": "0.0.1-local",
   "description": "Determine the project version based on conventional commit conventions",
   "private": true,
-  "main": "dist/index.js",
-  "dependencies": {
-    "@actions/core": "^1.10.0"
-  }
+  "main": "dist/index.js"
 }
