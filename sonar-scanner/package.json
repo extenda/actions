@@ -10,8 +10,5 @@
     "@actions/io": "^1.0.1",
     "axios": "^1.6.2",
     "qs": "^6.9.1"
-  },
-  "devDependencies": {
-    "mock-fs": "^4.11.0"
   }
 }

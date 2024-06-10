@@ -10,8 +10,5 @@
     "@actions/github": "^5.1.1",
     "axios": "^1.6.2",
     "yaml": "^1.10.0"
-  },
-  "devDependencies": {
-    "mock-fs": "^4.13.0"
   }
 }
