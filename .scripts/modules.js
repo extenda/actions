@@ -10,7 +10,7 @@ const serial = (funcs) => funcs.reduce((promise, func) => promise.then((result) 
 )), Promise.resolve([]));
 
 /* eslint-disable no-console */
-const execModule = async (dir, commands) => {
+const execModule = async (dir, commands, exitOnError) => {
   const module = path.relative(basedir, dir);
   const execCommands = commands instanceof Function ? commands(module) : [commands];
   process.env.FORCE_COLOR = 'true';
@@ -31,7 +31,9 @@ const execModule = async (dir, commands) => {
     }).then(() => output)
       .catch((err) => {
         output += `${chalk.white.bgRed(`FAILED ${dir}`)} ${err.message}`;
-        process.exitCode = 1;
+        if (exitOnError) {
+          process.exitCode = 1;
+        }
         return output;
       });
   });
@@ -56,8 +58,8 @@ const findModules = () => fs.readdirSync(basedir)
 
 const eachModules = (fn) => findModules().forEach(fn);
 
-const execModules = async (commands) => Promise.all(
-  findModules().map((dir) => execModule(dir, commands)),
+const execModules = async (commands, exitOnError=true) => Promise.all(
+  findModules().map((dir) => execModule(dir, commands, exitOnError)),
 );
 
 /* eslint-enable no-console */
