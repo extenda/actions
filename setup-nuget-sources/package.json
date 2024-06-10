@@ -5,6 +5,6 @@
   "description": "Setting nuget sources in NuGet.Config file",
   "main": "dist/index.js",
   "dependencies": {
-    "replace-in-file": "^5.0.2"
+    "replace-in-file": "^7.2.0"
   }
 }
