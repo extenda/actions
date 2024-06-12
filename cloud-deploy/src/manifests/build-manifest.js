@@ -66,8 +66,6 @@ const cloudrunManifestTemplate = async (
   deployEnv,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
-  //const jobTriggerUrl = `${ process.env.GITHUB_SERVER_URL }/${ process.env.GITHUB_REPOSITORY }/actions/runs/${ process.env.GITHUB_RUN_ID }/attempts/${ process.env.GITHUB_RUN_ATTEMPT }`;
-  labels.push({ 'job-trigger-url': 'job-trigger-url' });
 
   const ports = opa ? undefined : [{
     name: protocol === 'http2' ? 'h2c' : 'http1',
@@ -583,6 +581,13 @@ const buildManifest = async (
   if (!labels['iso-country']) {
     labels['iso-country'] = 'global';
   }
+
+  const githubServerUrl = process.env.GITHUB_SERVER_URL;
+  const githubRepository = process.env.GITHUB_REPOSITORY;
+  const githubRunID = process.env.GITHUB_RUN_ID;
+  const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
+  const jobTriggerUrl = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`;
+  labels.push({ 'job-trigger-url': jobTriggerUrl });
 
   const labelArray = Object.entries(labels).map(([key, value]) => ({
     name: key,
