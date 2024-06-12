@@ -587,7 +587,7 @@ const buildManifest = async (
   const githubRunID = process.env.GITHUB_RUN_ID;
   const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
   var jobTriggerUrl = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`;
-  let [jobTriggerUrlBegin, jobTriggerUrlMiddle, jobTriggerUrlEnd] = jobTriggerUrl.toLowerCase().match(/.{1,63}/g);
+  var [jobTriggerUrlBegin, jobTriggerUrlMiddle, jobTriggerUrlEnd] = jobTriggerUrl.toLowerCase().match(/.{1,63}/g);
   if (!jobTriggerUrlEnd) {
     jobTriggerUrlEnd = '';
   }
