@@ -589,10 +589,10 @@ const buildManifest = async (
   var jobTriggerUrl = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`;
   var [jobTriggerUrlBegin, jobTriggerUrlMiddle, jobTriggerUrlEnd] = jobTriggerUrl.toLowerCase().match(/.{1,63}/g);
   if (!jobTriggerUrlEnd) {
-    jobTriggerUrlEnd = '';
+    jobTriggerUrlEnd = 'null';
   }
   if (!jobTriggerUrlMiddle) {
-    jobTriggerUrlMiddle = '';
+    jobTriggerUrlMiddle = 'null';
   }
   labels['job-trigger-url-part-begin'] = jobTriggerUrlBegin;
   labels['job-trigger-url-part-middle'] = jobTriggerUrlMiddle;
