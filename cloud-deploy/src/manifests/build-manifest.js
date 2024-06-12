@@ -587,7 +587,7 @@ const buildManifest = async (
   const githubRunID = process.env.GITHUB_RUN_ID;
   const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
   const jobTriggerUrl = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`;
-  labels.push({ 'job-trigger-url': jobTriggerUrl });
+  labels.push['job-trigger-url'] = jobTriggerUrl;
 
   const labelArray = Object.entries(labels).map(([key, value]) => ({
     name: key,
