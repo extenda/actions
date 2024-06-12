@@ -586,8 +586,12 @@ const buildManifest = async (
   const githubRepository = process.env.GITHUB_REPOSITORY;
   const githubRunID = process.env.GITHUB_RUN_ID;
   const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
-  const jobTriggerUrl = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`;
-  labels['job-trigger-url'] = jobTriggerUrl;
+  var jobTriggerUrl = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`;
+  jobTriggerUrl = jobTriggerUrl.toLowerCase();
+  const arrjobTriggerUrl = jobTriggerUrl.toLowerCase().match(/.{1,63}/g);
+  labels['job-trigger-url-part-begin'] = arrjobTriggerUrl[0];
+  labels['job-trigger-url-part-middle'] = arrjobTriggerUrl[1];
+  labels['job-trigger-url-part-end'] = arrjobTriggerUrl[2];
 
   const labelArray = Object.entries(labels).map(([key, value]) => ({
     name: key,
