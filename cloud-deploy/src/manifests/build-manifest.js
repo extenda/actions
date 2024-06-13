@@ -64,6 +64,7 @@ const cloudrunManifestTemplate = async (
   audiences,
   monitoring,
   deployEnv,
+  annotations,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
 
@@ -83,21 +84,12 @@ const cloudrunManifestTemplate = async (
     baseAnnotations['run.googleapis.com/custom-audiences'] = `[${audiences.map((audience) => `"${audience}"`)}]`;
   }
 
-  const githubServerUrl = process.env.GITHUB_SERVER_URL;
-  const githubRepository = process.env.GITHUB_REPOSITORY;
-  const githubRunID = process.env.GITHUB_RUN_ID;
-  const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
-  var jobTrigger = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
-
-  const annotations = {
-    'run.googleapis.com/execution-environment': 'gen2',
-    'autoscaling.knative.dev/minScale': minInstances,
-    'autoscaling.knative.dev/maxScale': maxInstances,
-    'run.googleapis.com/cpu-throttling': `${cpuThrottling}`,
-    'run.googleapis.com/startup-cpu-boost': `${cpuBoost}`,
-    'run.googleapis.com/sessionAffinity': `${sessionAffinity}`,
-    'job-trigger': `${jobTrigger}`,
-  };
+  annotations['run.googleapis.com/execution-environment'] = 'gen2';
+  annotations['autoscaling.knative.dev/minScale'] = minInstances;
+  annotations['autoscaling.knative.dev/maxScale'] = maxInstances;
+  annotations['run.googleapis.com/cpu-throttling'] = `${cpuThrottling}`;
+  annotations['run.googleapis.com/startup-cpu-boost'] = `${cpuBoost}`;
+  annotations['run.googleapis.com/sessionAffinity'] = `${sessionAffinity}`;
 
   if (scaling.schedule && minInstances > 0) {
     baseAnnotations['run.googleapis.com/launch-stage'] = 'BETA';
@@ -237,10 +229,10 @@ const manifestTemplate = async (
   opaMemory,
   deployEnv,
   availability,
+  annotations,
 ) => {
   // initialize manifest components
 
-  let annotations = {};
   const deploymentVolumes = volumeSetup(opa, protocol, type);
   const userVolumeMounts = userContainerVolumeMountSetup(opa, protocol, type, volumes, name);
   const securityContainer = opa ? await securitySpec(protocol) : {};
@@ -253,12 +245,16 @@ const manifestTemplate = async (
   const nodeSelector = deployEnv === 'staging' || availability === 'low'
     ? { 'cloud.google.com/gke-spot': 'true' } : undefined;
 
-  if (availability === 'high' && deployEnv !== 'staging') {
-    annotations['cluster-autoscaler.kubernetes.io/safe-to-evict'] = 'false';
-  }
-  if (Object.keys(annotations).length === 0) {
-    annotations = undefined;
-  }
+  // Seems the annotations was not used after this at all looking below it??
+  // Now we passing annotations it is wise to disable this. Check with platform team
+  // if (availability === 'high' && deployEnv !== 'staging') {
+  //   annotations['cluster-autoscaler.kubernetes.io/safe-to-evict'] = 'false';
+  // }
+  // if (Object.keys(annotations).length === 0) {
+  //   annotations = undefined;
+  // }
+
+  annotations['cloud.google.com/neg'] = `{"exposed_ports":{"80":{"name":"${name}-neg"}}}`;
 
   // setup manifest
 
@@ -276,9 +272,7 @@ const manifestTemplate = async (
     metadata: {
       name,
       namespace: name,
-      annotations: {
-        'cloud.google.com/neg': `{"exposed_ports":{"80":{"name":"${name}-neg"}}}`,
-      },
+      annotations: annotations,
       labels: {
         'networking.gke.io/service-name': name,
       },
@@ -594,6 +588,16 @@ const buildManifest = async (
     value,
   }));
 
+  const githubServerUrl = process.env.GITHUB_SERVER_URL;
+  const githubRepository = process.env.GITHUB_REPOSITORY;
+  const githubRunID = process.env.GITHUB_RUN_ID;
+  const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
+  var jobTrigger = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
+
+  const annotations = {
+    'job-trigger': `${jobTrigger}`,
+  };
+
   envArray.push({ name: 'SERVICE_NAME', value: name });
   envArray.push({ name: 'SERVICE_PROJECT_ID', value: projectId });
   envArray.push({ name: 'SERVICE_ENVIRONMENT', value: deployEnv });
@@ -645,6 +649,7 @@ const buildManifest = async (
       opaResources.memory,
       deployEnv,
       availability,
+      annotations,
     );
 
     await connectToCluster(clanName, deployEnv, projectId);
@@ -743,6 +748,7 @@ const buildManifest = async (
       audiences,
       monitoring,
       deployEnv,
+      annotations,
     );
     generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));
   }
