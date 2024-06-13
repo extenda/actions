@@ -64,7 +64,7 @@ const cloudrunManifestTemplate = async (
   audiences,
   monitoring,
   deployEnv,
-  annotations,
+  baseAnnotations,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
 
@@ -74,22 +74,22 @@ const cloudrunManifestTemplate = async (
   }];
   const containerConcurrency = scaling.concurrency;
 
-  const baseAnnotations = {
-    // 'run.googleapis.com/launch-stage': 'BETA',
-    'run.googleapis.com/ingress': 'internal-and-cloud-load-balancing',
-    // 'run.googleapis.com/binary-authorization': 'default',
-  };
+  baseAnnotations['run.googleapis.com/ingress'] = 'internal-and-cloud-load-balancing';
+  // baseAnnotations['run.googleapis.com/launch-stage'] = 'BETA';
+  // baseAnnotations['run.googleapis.com/binary-authorization'] = 'default';
 
   if (audiences.length > 0) {
     baseAnnotations['run.googleapis.com/custom-audiences'] = `[${audiences.map((audience) => `"${audience}"`)}]`;
   }
 
-  annotations['run.googleapis.com/execution-environment'] = 'gen2';
-  annotations['autoscaling.knative.dev/minScale'] = minInstances;
-  annotations['autoscaling.knative.dev/maxScale'] = maxInstances;
-  annotations['run.googleapis.com/cpu-throttling'] = `${cpuThrottling}`;
-  annotations['run.googleapis.com/startup-cpu-boost'] = `${cpuBoost}`;
-  annotations['run.googleapis.com/sessionAffinity'] = `${sessionAffinity}`;
+  const annotations = {
+    'run.googleapis.com/execution-environment': 'gen2',
+    'autoscaling.knative.dev/minScale': minInstances,
+    'autoscaling.knative.dev/maxScale': maxInstances,
+    'run.googleapis.com/cpu-throttling': `${cpuThrottling}`,
+    'run.googleapis.com/startup-cpu-boost': `${cpuBoost}`,
+    'run.googleapis.com/sessionAffinity': `${sessionAffinity}`,
+  };
 
   if (scaling.schedule && minInstances > 0) {
     baseAnnotations['run.googleapis.com/launch-stage'] = 'BETA';
@@ -229,7 +229,7 @@ const manifestTemplate = async (
   opaMemory,
   deployEnv,
   availability,
-  annotations,
+  baseAnnotations,
 ) => {
   // initialize manifest components
 
@@ -594,7 +594,7 @@ const buildManifest = async (
   const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
   var jobTrigger = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
 
-  const annotations = {
+  const baseAnnotations = {
     'job-trigger': `${jobTrigger}`,
   };
 
@@ -649,7 +649,7 @@ const buildManifest = async (
       opaResources.memory,
       deployEnv,
       availability,
-      annotations,
+      baseAnnotations,
     );
 
     await connectToCluster(clanName, deployEnv, projectId);
@@ -748,7 +748,7 @@ const buildManifest = async (
       audiences,
       monitoring,
       deployEnv,
-      annotations,
+      baseAnnotations,
     );
     generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));
   }
