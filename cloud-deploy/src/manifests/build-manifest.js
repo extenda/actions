@@ -245,16 +245,12 @@ const manifestTemplate = async (
   const nodeSelector = deployEnv === 'staging' || availability === 'low'
     ? { 'cloud.google.com/gke-spot': 'true' } : undefined;
 
-  // Seems the annotations was not used after this at all looking below it??
-  // Now we passing annotations it is wise to disable this. Check with platform team
-  // if (availability === 'high' && deployEnv !== 'staging') {
-  //   annotations['cluster-autoscaler.kubernetes.io/safe-to-evict'] = 'false';
-  // }
-  // if (Object.keys(annotations).length === 0) {
-  //   annotations = undefined;
-  // }
-
-  annotations['cloud.google.com/neg'] = `{"exposed_ports":{"80":{"name":"${name}-neg"}}}`;
+  if (availability === 'high' && deployEnv !== 'staging') {
+    annotations['cluster-autoscaler.kubernetes.io/safe-to-evict'] = 'false';
+  }
+  if (Object.keys(annotations).length === 0) {
+    annotations = undefined;
+  }
 
   // setup manifest
 
@@ -272,7 +268,9 @@ const manifestTemplate = async (
     metadata: {
       name,
       namespace: name,
-      annotations: annotations,
+      annotations: {
+        'cloud.google.com/neg': `{"exposed_ports":{"80":{"name":"${name}-neg"}}}`,
+      },
       labels: {
         'networking.gke.io/service-name': name,
       },
