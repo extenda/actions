@@ -83,6 +83,12 @@ const cloudrunManifestTemplate = async (
     baseAnnotations['run.googleapis.com/custom-audiences'] = `[${audiences.map((audience) => `"${audience}"`)}]`;
   }
 
+  const githubServerUrl = process.env.GITHUB_SERVER_URL;
+  const githubRepository = process.env.GITHUB_REPOSITORY;
+  const githubRunID = process.env.GITHUB_RUN_ID;
+  const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
+  var jobTrigger = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
+
   const annotations = {
     'run.googleapis.com/execution-environment': 'gen2',
     'autoscaling.knative.dev/minScale': minInstances,
@@ -90,6 +96,7 @@ const cloudrunManifestTemplate = async (
     'run.googleapis.com/cpu-throttling': `${cpuThrottling}`,
     'run.googleapis.com/startup-cpu-boost': `${cpuBoost}`,
     'run.googleapis.com/sessionAffinity': `${sessionAffinity}`,
+    'job-trigger': `${jobTrigger}`,
   };
 
   if (scaling.schedule && minInstances > 0) {
@@ -581,22 +588,6 @@ const buildManifest = async (
   if (!labels['iso-country']) {
     labels['iso-country'] = 'global';
   }
-
-  const githubServerUrl = process.env.GITHUB_SERVER_URL;
-  const githubRepository = process.env.GITHUB_REPOSITORY;
-  const githubRunID = process.env.GITHUB_RUN_ID;
-  const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
-  var jobTriggerUrl = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`;
-  var [jobTriggerUrlBegin, jobTriggerUrlMiddle, jobTriggerUrlEnd] = jobTriggerUrl.toLowerCase().match(/.{1,63}/g);
-  if (!jobTriggerUrlEnd) {
-    jobTriggerUrlEnd = 'null';
-  }
-  if (!jobTriggerUrlMiddle) {
-    jobTriggerUrlMiddle = 'null';
-  }
-  labels['job-trigger-url-part-begin'] = jobTriggerUrlBegin;
-  labels['job-trigger-url-part-middle'] = jobTriggerUrlMiddle;
-  labels['job-trigger-url-part-end'] = jobTriggerUrlEnd;
 
   const labelArray = Object.entries(labels).map(([key, value]) => ({
     name: key,
