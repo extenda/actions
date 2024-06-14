@@ -941,7 +941,7 @@ metadata:
   name: example-service
   namespace: example-service
   annotations:
-    job-trigger: https://github.com/extenda/actions/actions/runs/9515838043/attempts/1
+    job-trigger: https://github.com/extenda/actions/actions/runs/9515838043/attempts/1/pieter-was-here/
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
   labels:
     networking.gke.io/service-name: example-service
