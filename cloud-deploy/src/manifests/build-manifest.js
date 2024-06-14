@@ -527,6 +527,18 @@ const buildManifest = async (
   let opa = false;
   let SQLInstanceName;
 
+  const githubServerUrl = process.env.GITHUB_SERVER_URL;
+  const githubRepository = process.env.GITHUB_REPOSITORY;
+  const githubRunID = process.env.GITHUB_RUN_ID;
+  const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
+  var jobTrigger = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
+  if (!githubServerUrl) {
+    jobTrigger = `https://github.com/extenda/actions/actions/runs/9515838043/attempts/1`
+  }
+const baseAnnotations = {
+    'job-trigger': `${jobTrigger}`,
+  };
+
   const {
     'cloud-run': cloudrun,
     kubernetes,
@@ -590,16 +602,6 @@ const buildManifest = async (
     name: key,
     value,
   }));
-
-  const githubServerUrl = process.env.GITHUB_SERVER_URL;
-  const githubRepository = process.env.GITHUB_REPOSITORY;
-  const githubRunID = process.env.GITHUB_RUN_ID;
-  const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
-  var jobTrigger = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
-
-  const baseAnnotations = {
-    'job-trigger': `${jobTrigger}`,
-  };
 
   envArray.push({ name: 'SERVICE_NAME', value: name });
   envArray.push({ name: 'SERVICE_PROJECT_ID', value: projectId });
