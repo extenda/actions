@@ -252,6 +252,8 @@ const manifestTemplate = async (
     annotations = undefined;
   }
 
+  baseAnnotations['cloud.google.com/neg'] = `{"exposed_ports":{"80":{"name":"${name}-neg"}}}`;
+
   // setup manifest
 
   const namespace = {
@@ -268,9 +270,7 @@ const manifestTemplate = async (
     metadata: {
       name,
       namespace: name,
-      annotations: {
-        'cloud.google.com/neg': `{"exposed_ports":{"80":{"name":"${name}-neg"}}}`,
-      },
+      annotations: baseAnnotations,
       labels: {
         'networking.gke.io/service-name': name,
       },
