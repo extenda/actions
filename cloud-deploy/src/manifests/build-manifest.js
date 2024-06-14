@@ -74,7 +74,7 @@ const cloudrunManifestTemplate = async (
   }];
   const containerConcurrency = scaling.concurrency;
 
-  // eslint-disable no-param-reassign
+  /* eslint-disable no-param-reassign */
   baseAnnotations['run.googleapis.com/ingress'] = 'internal-and-cloud-load-balancing';
   // baseAnnotations['run.googleapis.com/launch-stage'] = 'BETA';
   // baseAnnotations['run.googleapis.com/binary-authorization'] = 'default';
@@ -97,7 +97,7 @@ const cloudrunManifestTemplate = async (
     baseAnnotations['run.googleapis.com/minScale'] = minInstances;
     annotations['autoscaling.knative.dev/minScale'] = 0;
   }
-// eslint-enable no-param-reassign
+/* eslint-enable no-param-reassign */
 
   if (connector) {
     annotations['run.googleapis.com/vpc-access-connector'] = `${connectorName}`;
@@ -255,9 +255,9 @@ const manifestTemplate = async (
     annotations = undefined;
   }
 
-  // eslint-disable no-param-reassign
+  /* eslint-disable no-param-reassign */
   baseAnnotations['cloud.google.com/neg'] = `{"exposed_ports":{"80":{"name":"${name}-neg"}}}`;
-  // eslint-enable no-param-reassign
+  /* eslint-enable no-param-reassign */
 
   // setup manifest
 
