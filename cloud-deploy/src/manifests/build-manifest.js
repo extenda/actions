@@ -233,6 +233,7 @@ const manifestTemplate = async (
 ) => {
   // initialize manifest components
 
+  let annotations = {};
   const deploymentVolumes = volumeSetup(opa, protocol, type);
   const userVolumeMounts = userContainerVolumeMountSetup(opa, protocol, type, volumes, name);
   const securityContainer = opa ? await securitySpec(protocol) : {};
