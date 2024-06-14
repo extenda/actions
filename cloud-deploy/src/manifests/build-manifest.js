@@ -74,12 +74,12 @@ const cloudrunManifestTemplate = async (
   }];
   const containerConcurrency = scaling.concurrency;
 
-  baseAnnotations['run.googleapis.com/ingress'] = 'internal-and-cloud-load-balancing';
-  // baseAnnotations['run.googleapis.com/launch-stage'] = 'BETA';
-  // baseAnnotations['run.googleapis.com/binary-authorization'] = 'default';
+  baseAnnotations.push({ 'run.googleapis.com/ingress': 'internal-and-cloud-load-balancing' });
+//  baseAnnotations.push({ 'run.googleapis.com/launch-stage': 'BETA' });
+//  baseAnnotations.push({ 'run.googleapis.com/binary-authorization': 'default' });
 
   if (audiences.length > 0) {
-    baseAnnotations['run.googleapis.com/custom-audiences'] = `[${audiences.map((audience) => `"${audience}"`)}]`;
+    baseAnnotations.push({ 'run.googleapis.com/custom-audiences': `[${audiences.map((audience) => `"${audience}"`)}]` });
   }
 
   const annotations = {
@@ -92,8 +92,8 @@ const cloudrunManifestTemplate = async (
   };
 
   if (scaling.schedule && minInstances > 0) {
-    baseAnnotations['run.googleapis.com/launch-stage'] = 'BETA';
-    baseAnnotations['run.googleapis.com/minScale'] = minInstances;
+    baseAnnotations.push({ 'run.googleapis.com/launch-stage': 'BETA' });
+    baseAnnotations.push({ 'run.googleapis.com/minScale': minInstances });
     annotations['autoscaling.knative.dev/minScale'] = 0;
   }
 
@@ -253,7 +253,7 @@ const manifestTemplate = async (
     annotations = undefined;
   }
 
-  baseAnnotations['cloud.google.com/neg'] = `{"exposed_ports":{"80":{"name":"${name}-neg"}}}`;
+  baseAnnotations.push({ 'cloud.google.com/neg': `{"exposed_ports":{"80":{"name":"${name}-neg"}}}` });
 
   // setup manifest
 
