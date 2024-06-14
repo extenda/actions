@@ -12,6 +12,7 @@ metadata:
     tenant-alias: multi-tenant
     iso-country: global
   annotations:
+    job-trigger: undefined/undefined/actions/runs/undefined/attempts/undefined
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
 spec:
   template:
@@ -95,6 +96,7 @@ metadata:
   name: example-service
   namespace: example-service
   annotations:
+    job-trigger: undefined/undefined/actions/runs/undefined/attempts/undefined
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
   labels:
     networking.gke.io/service-name: example-service
@@ -225,6 +227,7 @@ metadata:
     tenant-alias: multi-tenant
     iso-country: global
   annotations:
+    job-trigger: undefined/undefined/actions/runs/undefined/attempts/undefined
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
     run.googleapis.com/custom-audiences: '["example-service","https://example-service.domain.com"]'
 spec:
@@ -299,6 +302,7 @@ metadata:
     tenant-alias: multi-tenant
     iso-country: global
   annotations:
+    job-trigger: undefined/undefined/actions/runs/undefined/attempts/undefined
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
 spec:
   template:
@@ -372,6 +376,7 @@ metadata:
     tenant-alias: multi-tenant
     iso-country: global
   annotations:
+    job-trigger: undefined/undefined/actions/runs/undefined/attempts/undefined
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
 spec:
   template:
@@ -456,6 +461,7 @@ metadata:
     tenant-alias: multi-tenant
     iso-country: global
   annotations:
+    job-trigger: undefined/undefined/actions/runs/undefined/attempts/undefined
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
     run.googleapis.com/custom-audiences: '["example-service","https://example-service.domain.com"]'
     run.googleapis.com/launch-stage: BETA
@@ -532,6 +538,7 @@ metadata:
   name: example-service
   namespace: example-service
   annotations:
+    job-trigger: undefined/undefined/actions/runs/undefined/attempts/undefined
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
   labels:
     networking.gke.io/service-name: example-service
@@ -649,6 +656,7 @@ metadata:
   name: example-service
   namespace: example-service
   annotations:
+    job-trigger: undefined/undefined/actions/runs/undefined/attempts/undefined
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
   labels:
     networking.gke.io/service-name: example-service
@@ -770,6 +778,7 @@ metadata:
     tenant-alias: multi-tenant
     iso-country: global
   annotations:
+    job-trigger: undefined/undefined/actions/runs/undefined/attempts/undefined
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
 spec:
   template:
@@ -845,6 +854,7 @@ metadata:
     tenant-alias: multi-tenant
     iso-country: global
   annotations:
+    job-trigger: undefined/undefined/actions/runs/undefined/attempts/undefined
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
 spec:
   template:
@@ -931,6 +941,7 @@ metadata:
   name: example-service
   namespace: example-service
   annotations:
+    job-trigger: undefined/undefined/actions/runs/undefined/attempts/undefined
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
   labels:
     networking.gke.io/service-name: example-service
@@ -1046,6 +1057,7 @@ metadata:
   name: example-service
   namespace: example-service
   annotations:
+    job-trigger: undefined/undefined/actions/runs/undefined/attempts/undefined
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
   labels:
     networking.gke.io/service-name: example-service
@@ -1163,6 +1175,7 @@ metadata:
   name: example-service
   namespace: example-service
   annotations:
+    job-trigger: undefined/undefined/actions/runs/undefined/attempts/undefined
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
   labels:
     networking.gke.io/service-name: example-service
@@ -1280,6 +1293,7 @@ metadata:
   name: example-service
   namespace: example-service
   annotations:
+    job-trigger: undefined/undefined/actions/runs/undefined/attempts/undefined
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
   labels:
     networking.gke.io/service-name: example-service
@@ -1391,6 +1405,7 @@ metadata:
   name: example-service
   namespace: example-service
   annotations:
+    job-trigger: undefined/undefined/actions/runs/undefined/attempts/undefined
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
   labels:
     networking.gke.io/service-name: example-service

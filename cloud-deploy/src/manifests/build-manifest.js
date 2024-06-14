@@ -595,7 +595,7 @@ const buildManifest = async (
   const githubRepository = process.env.GITHUB_REPOSITORY;
   const githubRunID = process.env.GITHUB_RUN_ID;
   const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
-  var jobTrigger = `'${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }'`.toLowerCase();
+  var jobTrigger = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
 
   const baseAnnotations = {
     'job-trigger': `${jobTrigger}`,
