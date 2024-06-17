@@ -9,8 +9,6 @@ const readSecret = require('../../src/utils/load-credentials');
 const checkVpcConnector = require('../../src/utils/check-vpc-connector');
 const getRevisions = require('../../src/cloudrun/get-revisions');
 const getImageWithSha256 = require('../../src/manifests/image-sha256');
-const { addAbortListener } = require('events');
-
 
 jest.mock('../../src/manifests/check-system');
 jest.mock('../../src/utils/add-namespace');
