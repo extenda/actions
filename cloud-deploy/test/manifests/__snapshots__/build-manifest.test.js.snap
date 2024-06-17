@@ -14,11 +14,7 @@ metadata:
   annotations:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
-    cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
-    run.googleapis.com/custom-audiences: '["example-service","https://example-service.domain.com"]'
-    run.googleapis.com/launch-stage: BETA
-    run.googleapis.com/minScale: 1
 spec:
   template:
     metadata:
@@ -104,10 +100,6 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
-    run.googleapis.com/ingress: internal-and-cloud-load-balancing
-    run.googleapis.com/custom-audiences: '["example-service","https://example-service.domain.com"]'
-    run.googleapis.com/launch-stage: BETA
-    run.googleapis.com/minScale: 1
   labels:
     networking.gke.io/service-name: example-service
 spec:
@@ -239,7 +231,6 @@ metadata:
   annotations:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
-    cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
     run.googleapis.com/custom-audiences: '["example-service","https://example-service.domain.com"]'
 spec:
@@ -316,7 +307,6 @@ metadata:
   annotations:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
-    cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
 spec:
   template:
@@ -392,7 +382,6 @@ metadata:
   annotations:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
-    cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
 spec:
   template:
@@ -479,7 +468,6 @@ metadata:
   annotations:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
-    cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
     run.googleapis.com/custom-audiences: '["example-service","https://example-service.domain.com"]'
     run.googleapis.com/launch-stage: BETA
@@ -559,7 +547,6 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
-    run.googleapis.com/ingress: internal-and-cloud-load-balancing
   labels:
     networking.gke.io/service-name: example-service
 spec:
@@ -679,7 +666,6 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
-    run.googleapis.com/ingress: internal-and-cloud-load-balancing
   labels:
     networking.gke.io/service-name: example-service
 spec:
@@ -802,7 +788,6 @@ metadata:
   annotations:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
-    cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
 spec:
   template:
@@ -880,7 +865,6 @@ metadata:
   annotations:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
-    cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
 spec:
   template:
@@ -1087,7 +1071,6 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
-    run.googleapis.com/ingress: internal-and-cloud-load-balancing
   labels:
     networking.gke.io/service-name: example-service
 spec:
@@ -1207,7 +1190,6 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
-    run.googleapis.com/ingress: internal-and-cloud-load-balancing
   labels:
     networking.gke.io/service-name: example-service
 spec:
@@ -1327,7 +1309,6 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
-    run.googleapis.com/ingress: internal-and-cloud-load-balancing
   labels:
     networking.gke.io/service-name: example-service
 spec:
@@ -1441,7 +1422,6 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
-    run.googleapis.com/ingress: internal-and-cloud-load-balancing
   labels:
     networking.gke.io/service-name: example-service
 spec:

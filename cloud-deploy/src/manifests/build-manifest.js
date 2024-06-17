@@ -523,7 +523,6 @@ const buildManifest = async (
   internalCert,
   internalCertKey,
   cicdServiceAccount,
-  basemetadata,
 ) => {
   let opa = false;
   let SQLInstanceName;
@@ -536,9 +535,14 @@ const buildManifest = async (
     environments = [],
   } = deployYaml;
 
-  const {
-    baseAnnotations = [],
-  } = basemetadata;
+  const githubServerUrl = process.env.GITHUB_SERVER_URL;
+  const githubRepo = process.env.GITHUB_REPOSITORY;
+  const githubRunID = process.env.GITHUB_RUN_ID;
+  const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
+  const jobTrigger = `${ githubServerUrl }/${ githubRepo }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
+  const baseAnnotations = {
+    'job-trigger': `${jobTrigger}`,
+  };
 
   const {
     type = {},
