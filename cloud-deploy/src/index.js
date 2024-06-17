@@ -108,6 +108,16 @@ const action = async () => {
 
   // setup manifests (hpa, deploy, negs)
   const version = new Date().getTime();
+  const githubServerUrl = process.env.GITHUB_SERVER_URL;
+  const githubRepository = process.env.GITHUB_REPOSITORY;
+  const githubRunID = process.env.GITHUB_RUN_ID;
+  const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
+  const jobTrigger = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
+  const basemetadata = {
+    baseAnnotations: {
+      'job-trigger': `${jobTrigger}`,
+    },
+};
 
   core.info('Build manifests');
   await buildManifest(
@@ -121,6 +131,7 @@ const action = async () => {
     internalHttpsCertificateCrt,
     internalHttpsCertificateKey,
     serviceAccountKeyCICD,
+    basemetadata,
   );
 
   await publishPolicies(serviceName, env, (userImage.split(':')[1] || version), deployYaml);

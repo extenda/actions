@@ -108,6 +108,22 @@ const serviceDefNoInternal = {
   },
 };
 
+//'job-trigger': 'https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1',
+process.env.GITHUB_SERVER_URL = 'https://github.com/example-organization';
+process.env.GITHUB_REPOSITORY = 'example-repository';
+process.env.GITHUB_RUN_ID = 'example-run-id';
+process.env.GITHUB_RUN_ATTEMPT = '1';
+const githubServerUrl = process.env.GITHUB_SERVER_URL;
+const githubRepository = process.env.GITHUB_REPOSITORY;
+const githubRunID = process.env.GITHUB_RUN_ID;
+const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
+const jobTrigger = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
+const basemetadata = {
+  baseAnnotations: {
+    'job-trigger': `${jobTrigger}`,
+  },
+};
+
 describe('Action', () => {
   afterEach(() => {
     jest.resetAllMocks();
@@ -152,6 +168,7 @@ describe('Action', () => {
       'internal-cert',
       'internal-key',
       'clan-service-account',
+      basemetadata,
     );
     expect(createExternalLoadbalancer).toHaveBeenCalledWith(
       'project-id',
@@ -178,7 +195,8 @@ describe('Action', () => {
       .mockReturnValueOnce('gcr.io/project/image:tag');
     loadCredentials.mockResolvedValueOnce('envoy-certs')
       .mockResolvedValueOnce('internal-key')
-      .mockResolvedValueOnce('internal-cert');
+      .mockResolvedValueOnce('internal-cert')
+      .mockResolvedValueOnce(basemetadata);
 
     loadServiceDefinition.mockReturnValueOnce(serviceDef);
     getImageWithSha256.mockResolvedValueOnce('gcr.io/project/image@sha256:1');
@@ -203,6 +221,7 @@ describe('Action', () => {
       'internal-cert',
       'internal-key',
       'clan-service-account',
+      basemetadata,
     );
   });
   test('It can run the action without internal traffic', async () => {
@@ -244,6 +263,7 @@ describe('Action', () => {
       'internal-cert',
       'internal-key',
       'clan-service-account',
+      basemetadata,
     );
     expect(createExternalLoadbalancer).toHaveBeenCalledWith(
       'project-id',
