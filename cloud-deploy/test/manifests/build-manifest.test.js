@@ -410,12 +410,12 @@ metadata:
     const projectId = 'example-project';
     const clanName = 'example-clan';
     const env = 'dev';
-    process.env['GITHUB_SERVER_URL'] = 'https://github.com/example-organization';
-    process.env['GITHUB_REPOSITORY'] = 'example-repository';
-    process.env['GITHUB_RUN_ID'] = 'example-run-id';
-    process.env['GITHUB_RUN_ATTEMPT'] = '1';
-
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    const githubServerUrl = 'https://github.com/example-organization';
+    const githubRepository = 'example-repository';
+    const githubRunID = 'example-run-id';
+    const githubRunAttempt = '1';
+    var jobTrigger = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '', jobTrigger);
 
     // Snapshot test for cloudrun-service.yaml.
     const manifest = readFileSync('cloudrun-service.yaml');

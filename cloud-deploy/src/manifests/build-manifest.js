@@ -523,19 +523,20 @@ const buildManifest = async (
   internalCert,
   internalCertKey,
   cicdServiceAccount,
+  jobTrigger,
 ) => {
   let opa = false;
   let SQLInstanceName;
 
-  const githubServerUrl = process.env.GITHUB_SERVER_URL;
-  const githubRepository = process.env.GITHUB_REPOSITORY;
-  const githubRunID = process.env.GITHUB_RUN_ID;
-  const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
-  var jobTrigger = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
-
-  const baseAnnotations = {
-    'job-trigger': `${jobTrigger}`,
-  };
+  let baseAnnotations = {};
+  if (!jobTrigger) {
+    const githubServerUrl = process.env.GITHUB_SERVER_URL;
+    const githubRepository = process.env.GITHUB_REPOSITORY;
+    const githubRunID = process.env.GITHUB_RUN_ID;
+    const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
+    var jobTrigger = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
+  }
+  baseAnnotations['job-trigger'] = `${jobTrigger}`;
 
   const {
     'cloud-run': cloudrun,
