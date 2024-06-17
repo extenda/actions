@@ -114,10 +114,10 @@ process.env.GITHUB_REPOSITORY = 'example-repository';
 process.env.GITHUB_RUN_ID = 'example-run-id';
 process.env.GITHUB_RUN_ATTEMPT = '1';
 const githubServerUrl = process.env.GITHUB_SERVER_URL;
-const githubRepository = process.env.GITHUB_REPOSITORY;
+const githubRepo = process.env.GITHUB_REPOSITORY;
 const githubRunID = process.env.GITHUB_RUN_ID;
 const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
-const jobTrigger = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
+const jobTrigger = `${ githubServerUrl }/${ githubRepo }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
 const basemetadata = {
   baseAnnotations: {
     'job-trigger': `${jobTrigger}`,
