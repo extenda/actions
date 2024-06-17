@@ -532,10 +532,8 @@ const buildManifest = async (
   const githubRunID = process.env.GITHUB_RUN_ID;
   const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
   var jobTrigger = `${ githubServerUrl }/${ githubRepository }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
-  if (!githubServerUrl) {
-    jobTrigger = `https://github.com/extenda/actions/actions/runs/9515838043/attempts/1`
-  }
-const baseAnnotations = {
+
+  const baseAnnotations = {
     'job-trigger': `${jobTrigger}`,
   };
 
