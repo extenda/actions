@@ -64,19 +64,20 @@ const cloudrunManifestTemplate = async (
   audiences,
   monitoring,
   deployEnv,
+  baseAnnotations,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
+
   const ports = opa ? undefined : [{
     name: protocol === 'http2' ? 'h2c' : 'http1',
     containerPort: 8080,
   }];
   const containerConcurrency = scaling.concurrency;
 
-  const baseAnnotations = {
-    // 'run.googleapis.com/launch-stage': 'BETA',
-    'run.googleapis.com/ingress': 'internal-and-cloud-load-balancing',
-    // 'run.googleapis.com/binary-authorization': 'default',
-  };
+  /* eslint-disable no-param-reassign */
+  baseAnnotations['run.googleapis.com/ingress'] = 'internal-and-cloud-load-balancing';
+  // baseAnnotations['run.googleapis.com/launch-stage'] = 'BETA';
+  // baseAnnotations['run.googleapis.com/binary-authorization'] = 'default';
 
   if (audiences.length > 0) {
     baseAnnotations['run.googleapis.com/custom-audiences'] = `[${audiences.map((audience) => `"${audience}"`)}]`;
@@ -96,6 +97,7 @@ const cloudrunManifestTemplate = async (
     baseAnnotations['run.googleapis.com/minScale'] = minInstances;
     annotations['autoscaling.knative.dev/minScale'] = 0;
   }
+/* eslint-enable no-param-reassign */
 
   if (connector) {
     annotations['run.googleapis.com/vpc-access-connector'] = `${connectorName}`;
@@ -229,6 +231,7 @@ const manifestTemplate = async (
   opaMemory,
   deployEnv,
   availability,
+  baseAnnotations,
 ) => {
   // initialize manifest components
 
@@ -252,6 +255,10 @@ const manifestTemplate = async (
     annotations = undefined;
   }
 
+  /* eslint-disable no-param-reassign */
+  baseAnnotations['cloud.google.com/neg'] = `{"exposed_ports":{"80":{"name":"${name}-neg"}}}`;
+  /* eslint-enable no-param-reassign */
+
   // setup manifest
 
   const namespace = {
@@ -268,9 +275,7 @@ const manifestTemplate = async (
     metadata: {
       name,
       namespace: name,
-      annotations: {
-        'cloud.google.com/neg': `{"exposed_ports":{"80":{"name":"${name}-neg"}}}`,
-      },
+      annotations: baseAnnotations,
       labels: {
         'networking.gke.io/service-name': name,
       },
@@ -530,6 +535,15 @@ const buildManifest = async (
     environments = [],
   } = deployYaml;
 
+  const githubServerUrl = process.env.GITHUB_SERVER_URL;
+  const githubRepo = process.env.GITHUB_REPOSITORY;
+  const githubRunID = process.env.GITHUB_RUN_ID;
+  const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
+  const jobTrigger = `${ githubServerUrl }/${ githubRepo }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
+  const baseAnnotations = {
+    'job-trigger': `${jobTrigger}`,
+  };
+
   const {
     type = {},
     service: name,
@@ -637,6 +651,7 @@ const buildManifest = async (
       opaResources.memory,
       deployEnv,
       availability,
+      baseAnnotations,
     );
 
     await connectToCluster(clanName, deployEnv, projectId);
@@ -735,6 +750,7 @@ const buildManifest = async (
       audiences,
       monitoring,
       deployEnv,
+      baseAnnotations,
     );
     generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));
   }

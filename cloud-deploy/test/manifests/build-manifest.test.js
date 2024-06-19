@@ -10,7 +10,6 @@ const checkVpcConnector = require('../../src/utils/check-vpc-connector');
 const getRevisions = require('../../src/cloudrun/get-revisions');
 const getImageWithSha256 = require('../../src/manifests/image-sha256');
 
-
 jest.mock('../../src/manifests/check-system');
 jest.mock('../../src/utils/add-namespace');
 jest.mock('../../src/manifests/security-sidecar');
@@ -22,17 +21,26 @@ jest.mock('../../src/utils/cluster-connection');
 jest.mock('../../src/manifests/image-sha256');
 
 const readFileSync = (file) => fs.readFileSync(file, { encoding: 'utf-8' });
+const originalEnv = process.env;
 
 describe('buildManifest', () => {
   afterEach(() => {
     jest.clearAllMocks();
     mockFs.restore();
+    process.env = originalEnv;
   });
 
   beforeEach(() => {
     mockFs({});
     addNamespace.mockResolvedValueOnce('');
     getImageWithSha256.mockImplementation((name) => Promise.resolve(`${name.split(':')[0]}@sha256:123`));
+    process.env = {
+      ...originalEnv,
+      GITHUB_SERVER_URL: 'https://github.com/example-organization',
+      GITHUB_REPOSITORY: 'example-repository',
+      GITHUB_RUN_ID: 'example-run-id',
+      GITHUB_RUN_ATTEMPT: '1',
+    };
   });
 
   test('should generate manifest file with correct content', async () => {
