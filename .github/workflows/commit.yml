@@ -125,7 +125,12 @@ jobs:
           fi
 
   acceptance-linux:
-    runs-on: ubuntu-latest
+    name: ${{ matrix.job-name }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+        job-name: [acceptance-linux]
+    runs-on: ${{ matrix.os }}
     if: github.actor != 'dependabot[bot]'
     needs:
       - verify-dist
