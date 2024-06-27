@@ -10,8 +10,8 @@ const schema = joi.object({
       'display-name': joi.string().min(3).max(256).required(),
       'subscription-name': joi.string().regex(/^projects\/[a-z][a-z0-9-]{5,29}\/subscriptions\/[A-Za-z0-9-_.~+%]{3,255}$/).required(),
       'content-type': joi.string().required(),
+      schemaUrl: joi.string().uri().required(),
       disabled: joi.boolean().default(false),
-      schemaUrl: joi.string().uri().optional(),
       deprecated: joi.object({
         'removal-date': joi.string().isoDate().required(),
         message: joi.string().max(256),

@@ -27,6 +27,7 @@ event-sources:
     version: v10
     display-name: test event
     subscription-name: projects/project-id/subscriptions/tst.public.output.events.v1+tst.event
+    schemaUrl: https://raw.githubusercontent.com/extenda/hiiretail-json-schema-registry/master/external-events/cloud-core/event-source-schema.json
     content-type: text/plain
 `;
 
