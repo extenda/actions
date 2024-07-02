@@ -138,7 +138,7 @@ export async function login(page, url, tenant) {
   await page.goto(
     \`https://\${
       tenant ?? tenantFromUrl
-    }.hiiretail.com/login?returnUrl=${properUrl}\`
+    }.hiiretail.com/login?returnUrl=\${properUrl}\`
   );
   await page.getByTestId('emailInput').click();
   await page.getByTestId('emailInput').fill(USER);
