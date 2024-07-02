@@ -136,7 +136,9 @@ export async function login(page, url, tenant) {
   const properUrl = tenant ? url.replace('{tenant}', tenant) : url;
 
   await page.goto(
-    \`https://${tenant??tenantFromUrl}.hiiretail.com/login?returnUrl=${properUrl}\`
+    \`https://\${
+      tenant ?? tenantFromUrl
+    }.hiiretail.com/login?returnUrl=${properUrl}\`
   );
   await page.getByTestId('emailInput').click();
   await page.getByTestId('emailInput').fill(USER);

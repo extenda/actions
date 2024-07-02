@@ -76,7 +76,7 @@ export async function login(page, url, tenant) {
   const properUrl = tenant ? url.replace('{tenant}', tenant) : url;
 
   await page.goto(
-    \`https://${
+    \`https://\${
       tenant ?? tenantFromUrl
     }.hiiretail.com/login?returnUrl=${properUrl}\`
   );
