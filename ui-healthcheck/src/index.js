@@ -1,11 +1,11 @@
-const { spawn } = require('child_process');
-const core = require('@actions/core');
-const { writeFileSync, mkdirSync } = require('fs');
-const { run } = require('../../utils/src');
+const { spawn } = require("child_process");
+const core = require("@actions/core");
+const { writeFileSync, mkdirSync } = require("fs");
+const { run } = require("../../utils/src");
 
 function generatePackageJson() {
   writeFileSync(
-    'package.json',
+    "package.json",
     `
 {
   "name": "health-checks",
@@ -25,13 +25,13 @@ function generatePackageJson() {
     "yaml": "^2.3.4"
   }
 }
-  `,
+  `
   );
 }
 
 function generatePlaywrightConfig() {
   writeFileSync(
-    './playwright.config.ts',
+    "./playwright.config.ts",
     `
 import { defineConfig, devices } from '@playwright/test';
 
@@ -55,14 +55,14 @@ export default defineConfig({
     },
   ],
 });
-`,
+`
   );
 }
 
 function generateHealthCheck() {
-  mkdirSync('./health-check', { recursive: true });
+  mkdirSync("./health-check", { recursive: true });
   writeFileSync(
-    './health-check/index.playwright.js',
+    "./health-check/index.playwright.js",
     `
 const { test, expect: Expect } = require("@playwright/test");
 const { parse } = require("yaml");
@@ -70,25 +70,62 @@ const { readFileSync } = require("fs");
 
 const PASSWORD = process.env.PASSWORD;
 const USER = process.env.USERNAME;
-const TEST_TENANT = process.env.TENANT;
 
-export async function login(page, url) {
+export async function login(page, url, tenant) {
+  const tenantFromUrl = url.replace('https://', '').split('.').at(0);
+  const properUrl = tenant ? url.replace('{tenant}', tenant) : url;
+
   await page.goto(
-    \`https://\${TEST_TENANT}.hiiretail.com/login?returnUrl=\${url}\`
+    \`https://${
+      tenant ?? tenantFromUrl
+    }.hiiretail.com/login?returnUrl=${properUrl}\`
   );
-  await page.getByTestId("emailInput").click();
-  await page.getByTestId("emailInput").fill(USER);
+  await page.getByTestId('emailInput').click();
+  await page.getByTestId('emailInput').fill(USER);
 
-  await page.getByTestId("passwordInput").click();
-  await page.getByTestId("passwordInput").fill(PASSWORD);
+  await page.getByTestId('passwordInput').click();
+  await page.getByTestId('passwordInput').fill(PASSWORD);
 
-  await page.getByTestId("login-btn").click();
+  await page.getByTestId('login-btn').click();
 }
 
 function main() {
-  const config = parse(readFileSync(process.env.CONFIG_PATH, "utf8"));
+  const config = parse(readFileSync(process.env.CONFIG_PATH, 'utf8'));
 
-  for (const { name, setup, expect } of config.cases) {
+  for (const { name, setup, expect, matrix } of config.cases) {
+    if (matrix && matrix.tenant) {
+      for (const tenant of matrix.tenant) {
+        test(name, async ({ page }) => {
+          if (setup?.requireLogin) {
+            await login(page, setup.url, tenant);
+          } else {
+            await page.goto(setup.url);
+          }
+
+          const element = await page.waitForSelector(expect?.element);
+          const elementText = await element.textContent();
+
+          if (expect?.includes) {
+            await Expect(elementText?.includes(expect?.includes)).toBeTruthy();
+          }
+
+          if (expect?.toHaveText) {
+            await Expect(elementText?.trim()).toEqual(expect?.toHaveText);
+          }
+
+          if (expect?.to === 'be-visible' || expect?.to === 'exist') {
+            await Expect(page.locator(expect?.element)).toBeVisible();
+          }
+
+          if (expect?.to === 'not-be-visible' || expect?.to === 'not-exist') {
+            await Expect(page.locator(expect?.element)).not.toBeVisible();
+          }
+        });
+      }
+      
+      continue;
+    }
+
     test(name, async ({ page }) => {
       if (setup?.requireLogin) {
         await login(page, setup.url);
@@ -107,11 +144,11 @@ function main() {
         await Expect(elementText?.trim()).toEqual(expect?.toHaveText);
       }
 
-      if (expect?.to === "be-visible" || expect?.to === "exist") {
+      if (expect?.to === 'be-visible' || expect?.to === 'exist') {
         await Expect(page.locator(expect?.element)).toBeVisible();
       }
 
-      if (expect?.to === "not-be-visible" || expect?.to === "not-exist") {
+      if (expect?.to === 'not-be-visible' || expect?.to === 'not-exist') {
         await Expect(page.locator(expect?.element)).not.toBeVisible();
       }
     });
@@ -119,69 +156,75 @@ function main() {
 }
 
 main();
-    `,
+    `
   );
 }
 
 async function action() {
-  const configPath = core.getInput('config-path', { required: true });
-  const username = core.getInput('username', { required: true });
-  const password = core.getInput('password', { required: true });
-  const tenant = core.getInput('tenant', { required: true });
+  const configPath = core.getInput("config-path", { required: true });
+  const username = core.getInput("username", { required: true });
+  const password = core.getInput("password", { required: true });
 
   generatePackageJson();
   generatePlaywrightConfig();
   generateHealthCheck();
 
-  const npmInstall = spawn('npm', ['install']);
+  const npmInstall = spawn("npm", ["install"]);
 
-  npmInstall.stdout.on('data', (data) => {
+  npmInstall.stdout.on("data", (data) => {
     core.info(`stdout: ${data}`);
   });
 
-  npmInstall.stderr.on('data', (data) => {
+  npmInstall.stderr.on("data", (data) => {
     core.error(`stderr: ${data}`);
   });
 
-  npmInstall.on('close', (npmCode) => {
+  npmInstall.on("close", (npmCode) => {
     if (npmCode !== 0) {
       core.error(`npm install process exited with code ${npmCode}`);
       process.exit(npmCode);
     } else {
-      const install = spawn('npx', ['playwright', 'install']);
+      const install = spawn("npx", ["playwright", "install"]);
       let isError = false;
 
-      install.on('close', (code) => {
+      install.on("close", (code) => {
         if (code !== 0) {
           core.error(`playwright install process exited with code ${code}`);
           process.exit(code);
         } else {
-          const test = spawn('npx', ['playwright', 'test', '--reporter', 'github'], {
-            env: {
-              TENANT: tenant,
-              USERNAME: username,
-              PASSWORD: password,
-              CONFIG_PATH: configPath,
-              ...process.env,
-            },
-          });
+          const test = spawn(
+            "npx",
+            ["playwright", "test", "--reporter", "github"],
+            {
+              env: {
+                USERNAME: username,
+                PASSWORD: password,
+                CONFIG_PATH: configPath,
+                ...process.env,
+              },
+            }
+          );
 
-          test.stdout.on('data', (data) => {
-            isError = /error/ig.test(data.toString());
+          test.stdout.on("data", (data) => {
+            isError = /error/gi.test(data.toString());
             core.info(`stdout: ${data}`);
           });
 
-          test.stderr.on('data', (data) => {
-            isError = /error/ig.test(data.toString());
+          test.stderr.on("data", (data) => {
+            isError = /error/gi.test(data.toString());
             core.error(`stderr: ${data}`);
           });
 
-          test.on('close', (testCode) => {
+          test.on("close", (testCode) => {
             if (testCode !== 0 || isError) {
-              core.error(`playwright test process exited with code ${testCode < 0 ? 1 : testCode}`);
+              core.error(
+                `playwright test process exited with code ${
+                  testCode < 0 ? 1 : testCode
+                }`
+              );
               process.exit(testCode < 0 ? 1 : testCode);
             } else {
-              core.info('All good!');
+              core.info("All good!");
             }
           });
         }

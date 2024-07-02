@@ -1,34 +1,42 @@
-const exec = require('@actions/exec');
-const path = require('path');
-const fs = require('fs');
-const chalk = require('chalk');
+const exec = require("@actions/exec");
+const path = require("path");
+const fs = require("fs");
+const chalk = require("chalk");
 
-const basedir = path.resolve(__dirname, '../');
+const basedir = path.resolve(__dirname, "../");
 
-const serial = (funcs) => funcs.reduce((promise, func) => promise.then((result) => func().then(
-  Array.prototype.concat.bind(result),
-)), Promise.resolve([]));
+const serial = (funcs) =>
+  funcs.reduce(
+    (promise, func) =>
+      promise.then((result) =>
+        func().then(Array.prototype.concat.bind(result))
+      ),
+    Promise.resolve([])
+  );
 
 /* eslint-disable no-console */
 const execModule = async (dir, commands) => {
   const module = path.relative(basedir, dir);
-  const execCommands = commands instanceof Function ? commands(module) : [commands];
-  process.env.FORCE_COLOR = 'true';
+  const execCommands =
+    commands instanceof Function ? commands(module) : [commands];
+  process.env.FORCE_COLOR = "true";
 
   const executions = execCommands.map((command) => () => {
     let output = chalk.blue(`> ${command}\n`);
-    return exec.exec(command, '', {
-      cwd: dir,
-      silent: true,
-      listeners: {
-        stdout: (data) => {
-          output += data.toString();
+    return exec
+      .exec(command, "", {
+        cwd: dir,
+        silent: true,
+        listeners: {
+          stdout: (data) => {
+            output += data.toString();
+          },
+          stderr: (data) => {
+            output += data.toString();
+          },
         },
-        stderr: (data) => {
-          output += data.toString();
-        },
-      },
-    }).then(() => output)
+      })
+      .then(() => output)
       .catch((err) => {
         output += `${chalk.white.bgRed(`FAILED ${dir}`)} ${err.message}`;
         process.exitCode = 1;
@@ -38,7 +46,7 @@ const execModule = async (dir, commands) => {
 
   await serial(executions).then((outputs) => {
     console.group(`${chalk.green(`actions/${module}`)}`);
-    console.log(outputs.join('\n').trim(), '\n');
+    console.log(outputs.join("\n").trim(), "\n");
     console.groupEnd();
 
     // Fail fast if a task has failed.
@@ -48,22 +56,31 @@ const execModule = async (dir, commands) => {
   });
 };
 
-const findModules = () => fs.readdirSync(basedir)
-  .map((file) => path.join(basedir, file))
-  .filter((file) => fs.lstatSync(file).isDirectory())
-  .filter((dir) => fs.existsSync(path.join(dir, 'package.json')))
-  .sort((a, b) => a.localeCompare(b));
+const findModules = () =>
+  fs
+    .readdirSync(basedir)
+    .map((file) => path.join(basedir, file))
+    .filter((file) => fs.lstatSync(file).isDirectory())
+    .filter((dir) => fs.existsSync(path.join(dir, "package.json")))
+    .sort((a, b) => a.localeCompare(b))
+    .filter((dir) => {
+      console.log(dir);
+      return dir.includes("ui-health");
+    });
 
 const eachModules = (fn) => findModules().forEach(fn);
 
-const execModules = async (commands) => Promise.all(
-  findModules().map((dir) => execModule(dir, commands)),
-);
+const execModules = async (commands, exitOnError = true) =>
+  Promise.all(
+    findModules().map((dir) => execModule(dir, commands, exitOnError))
+  );
 
 /* eslint-enable no-console */
 
 module.exports = {
-  npmArgument: JSON.parse(process.env.npm_config_argv || '{"original": []}').original.join(' '),
+  npmArgument: JSON.parse(
+    process.env.npm_config_argv || '{"original": []}'
+  ).original.join(" "),
   modules: {
     each: eachModules,
     exec: execModules,

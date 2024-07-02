@@ -10,14 +10,10 @@ inputs:
     default: './config.yaml'
   username:
     description: 'Username for basic auth'
-    required: true
+    required: false
   password:
     description: 'Password for basic auth'
-    required: true
-  tenant:
-    description: 'Tenant for basic auth'
     required: false
-    default: 'testrunner'
 runs:
   using: node16
   main: dist/index.js
