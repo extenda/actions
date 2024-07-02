@@ -162,8 +162,8 @@ main();
 
 async function action() {
   const configPath = core.getInput("config-path", { required: true });
-  const username = core.getInput("username", { required: true });
-  const password = core.getInput("password", { required: true });
+  const username = core.getInput("username", { required: false });
+  const password = core.getInput("password", { required: false });
 
   generatePackageJson();
   generatePlaywrightConfig();
