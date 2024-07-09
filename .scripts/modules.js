@@ -58,7 +58,7 @@ const findModules = () => fs.readdirSync(basedir)
 
 const eachModules = (fn) => findModules().forEach(fn);
 
-const execModules = async (commands, exitOnError=true) => Promise.all(
+const execModules = async (commands, exitOnError = true) => Promise.all(
   findModules().map((dir) => execModule(dir, commands, exitOnError)),
 );
 

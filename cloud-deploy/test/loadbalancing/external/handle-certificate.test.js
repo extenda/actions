@@ -55,4 +55,14 @@ describe('handleCertificates', () => {
     expect(result).toEqual('extenda-wildcard-cert,extenda-certs-v1,extenda-certs-v2');
     expect(gcloudOutput).toHaveBeenCalledTimes(1);
   });
+
+  it('should return a list of certificates string with base certificate if project is sre', async () => {
+    const hosts = ['example.com', 'www.example1.com'];
+    gcloudOutput.mockResolvedValueOnce(existingCerts);
+    gcloudOutput.mockResolvedValueOnce(existingCerts);
+
+    const result = await handleCertificates(hosts, 'sre-prod-5462');
+    expect(result).toEqual('all-wildcard-domains,extenda-certs-v1,extenda-certs-v2');
+    expect(gcloudOutput).toHaveBeenCalledTimes(1);
+  });
 });

@@ -27,7 +27,7 @@ const generateDependabot = () => {
     version: 2,
     updates: [
       definition('', 'root'),
-      ... actions,
+      ...actions,
       {
         'package-ecosystem': 'github-actions',
         directory: '/',

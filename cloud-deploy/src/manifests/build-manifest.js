@@ -97,7 +97,7 @@ const cloudrunManifestTemplate = async (
     baseAnnotations['run.googleapis.com/minScale'] = minInstances;
     annotations['autoscaling.knative.dev/minScale'] = 0;
   }
-/* eslint-enable no-param-reassign */
+  /* eslint-enable no-param-reassign */
 
   if (connector) {
     annotations['run.googleapis.com/vpc-access-connector'] = `${connectorName}`;
@@ -539,7 +539,7 @@ const buildManifest = async (
   const githubRepo = process.env.GITHUB_REPOSITORY;
   const githubRunID = process.env.GITHUB_RUN_ID;
   const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
-  const jobTrigger = `${ githubServerUrl }/${ githubRepo }/actions/runs/${ githubRunID }/attempts/${ githubRunAttempt }`.toLowerCase();
+  const jobTrigger = `${githubServerUrl}/${githubRepo}/actions/runs/${githubRunID}/attempts/${githubRunAttempt}`.toLowerCase();
   const baseAnnotations = {
     'job-trigger': `${jobTrigger}`,
   };
