@@ -59,6 +59,11 @@ const handleCertificates = async (hosts, project) => {
     certificateListNames.push('extenda-wildcard-cert');
   }
 
+  // add wildcard cert to sre loadbalancer
+  if (project === 'sre-prod-5462' || project === 'sre-staging-53a5') {
+    certificateListNames.push('all-wildcard-domains');
+  }
+
   for (const certificate of certificateList) {
     const version = parseInt(certificate.name.split('-')[2].substring(1), 10);
     const created = new Date(certificate.creationTimestamp);

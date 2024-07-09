@@ -1013,6 +1013,5 @@ metadata:
     const manifest = readFileSync('cloudrun-service.yaml');
     mockFs.restore();
     expect(manifest).toMatchSnapshot();
-
   });
 });
