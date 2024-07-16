@@ -6,7 +6,7 @@ const schema = joi.object({
   definitions: joi.array()
     .items(joi.object({
       name: joi.string().regex(/^[a-z][-a-z\d]{0,64}$/).required(),
-      version: joi.string().regex(/^v\d{1,10}$/).required(),
+      version: joi.string().regex(/^(v\d{1,10}|preview)$/).required(),
       'display-name': joi.string().min(3).max(256).required(),
       'schema-location': joi.string().uri().required(),
       'default-value': joi.any().required(),
