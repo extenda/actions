@@ -10,7 +10,7 @@ const createGitHubRelease = async (release, name) => {
     owner,
     repo,
     tag_name: release.tagName,
-    name: `${name} ${release.version}`,
+    name: name === 'v' ? name + release.version : `${name} ${release.version}`,
     body: release.changelog,
   });
 
