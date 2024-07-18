@@ -91,4 +91,30 @@ describe('conventional-release', () => {
     });
     expect(core.getInput).toHaveBeenCalledTimes(2);
   });
+
+  test('It can use a custom name prefix v', async () => {
+    core.getInput.mockReturnValueOnce('extenda/test-repo')
+      .mockReturnValueOnce('v');
+    mockTag.mockReturnValueOnce({
+      tagName: 'extenda/test-repo',
+      version: '0.0.1',
+      changelog: {
+        html_url: 'extenda.io',
+      },
+    });
+
+    await action();
+
+    expect(mockRelease).toHaveBeenCalledWith({
+      owner: 'extenda',
+      repo: 'test-repo',
+      name: 'v0.0.1',
+      body: {
+        html_url: 'extenda.io',
+      },
+      tag_name: 'extenda/test-repo',
+    });
+    expect(core.getInput).toHaveBeenCalledTimes(2);
+  });
+
 });
