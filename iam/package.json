@@ -5,12 +5,12 @@
   "description": "Publish permissions to Hii Retail IAM",
   "main": "dist/index.js",
   "dependencies": {
-    "@actions/github": "^5.1.1",
-    "axios": "^1.6.2",
-    "fast-glob": "^3.2.4",
-    "jsonschema": "^1.4.0",
-    "multiline-str": "^1.0.0",
-    "uuid": "^9.0.0",
-    "yaml": "^1.8.2"
+    "@actions/github": "^6.0.0",
+    "axios": "^1.7.2",
+    "fast-glob": "^3.3.2",
+    "jsonschema": "^1.4.1",
+    "multiline-str": "^1.0.4",
+    "uuid": "^10.0.0",
+    "yaml": "^2.5.0"
   }
 }
