@@ -3,9 +3,21 @@ const path = require('path');
 const yaml = require('js-yaml');
 const { modules } = require('./modules');
 
+// List of deprecated actions that we don't want to waste time bumping dependencies in.
+const DEPRECATED_ACTIONS = [
+  'cloud-run',
+  'docker',
+  'kubernetes',
+  'test-pod',
+  'rs-create-installerpkg',
+  'rs-permission-converter',
+  'slack-message',
+  'txengine-deploy',
+];
+
 const generateDependabot = () => {
   const actions = modules.list()
-    .map((dir) => path.relative(path.join(__dirname, '..'), dir));
+    .map((dir) => path.relative(path.join(__dirname, '..'), dir)).filter((action) => !DEPRECATED_ACTIONS.includes(action));
 
   const dependabot = {
     version: 2,

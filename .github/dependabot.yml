@@ -15,7 +15,6 @@ updates:
     directories:
       - binary-auth-attestation
       - cloud-deploy
-      - cloud-run
       - cloud-run-traffic
       - component-tests
       - conventional-release
@@ -23,7 +22,6 @@ updates:
       - customer-config
       - dataflow-deploy
       - dataflow-template-build
-      - docker
       - dora-metrics
       - external-events
       - gcp-secret-manager
@@ -32,27 +30,21 @@ updates:
       - identity-token
       - jira-release
       - jira-releasenotes
-      - kubernetes
       - maven
       - nexus-auth-npm
       - opa-policy-test
       - publish-openapi
       - repository-dispatch
-      - rs-create-installerpkg
-      - rs-permission-converter
       - setup-gcloud
       - setup-git
       - setup-msbuild
       - setup-nuget-sources
       - setup-terraform
-      - slack-message
       - slack-notify
       - sonar-scanner
       - status-check
       - styra-das-deploy
       - terraform-plan-comment
-      - test-pod
-      - txengine-deploy
       - utils
     schedule:
       interval: weekly
