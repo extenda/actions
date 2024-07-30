@@ -33,6 +33,20 @@ const generateDependabot = () => {
             patterns: ['*'],
           }
         },
+        ignore: [
+          // conventional-commits in /utils are not possible to update without major rework.
+          { 'dependency-name': 'conventional-changelog-conventionalcommits' },
+          { 'dependency-name': 'conventional-changelog-core' },
+          { 'dependency-name': 'conventional-commits-parser' },
+          { 'dependency-name': 'conventional-recommended-bump' },
+          { 'dependency-name': 'git-raw-commits' },
+
+          // camelcase-keys became a module in v8.
+          {
+            'dependency-name': 'camelcase-keys',
+            'versions': ['>= 8'],
+          },
+        ]
       },
       {
         'package-ecosystem': 'github-actions',
