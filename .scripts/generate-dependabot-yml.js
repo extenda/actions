@@ -56,7 +56,13 @@ const generateDependabot = () => {
           // camelcase-keys became a module in v8.
           {
             'dependency-name': 'camelcase-keys',
-            'versions': ['>= 8'],
+            versions: ['>= 8'],
+          },
+
+          // replace-in-file must be pinned at v5 (module)
+          {
+            'dependency-name': 'replace-in-file',
+            versions: ['<= 6'],
           },
         ]
       },

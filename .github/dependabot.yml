@@ -61,6 +61,9 @@ updates:
       - dependency-name: camelcase-keys
         versions:
           - '>= 8'
+      - dependency-name: replace-in-file
+        versions:
+          - <= 6
   - package-ecosystem: github-actions
     directory: /
     schedule:
