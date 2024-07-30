@@ -20,13 +20,13 @@ const inlineTemplates = (module, sourceFileName, replaceTextFn) => {
 };
 
 inlineTemplates(
-  'conventional-changelog-conventionalcommits',
-  'writer-opts.js',
+  'conventional-changelog-conventionalcommits/src',
+  'writer.js',
   (template) => `readFile(resolve(__dirname, './templates/${template}'), 'utf-8')`,
 );
 
 inlineTemplates(
   'conventional-changelog-writer',
-  'index.js',
+  'dist/index.js',
   (template) => `readFileSync(join(__dirname, 'templates/${template}'), 'utf-8')`,
 );
