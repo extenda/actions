@@ -115,7 +115,7 @@ platform:
       });
       expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
         .toThrow(`cloud-run.yaml is not valid.
-0: instance.labels additionalProperty "custom_label" exists in instance when not allowed`);
+0: instance.labels is not allowed to have the additional property "custom_label"`);
     });
 
     test('It throws for invalid custom label value', () => {
@@ -153,7 +153,7 @@ platform:
       });
       expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
         .toThrow(`cloud-run.yaml is not valid.
-0: instance.min-instances must have a maximum value of 10`);
+0: instance.min-instances must be less than or equal to 10`);
     });
 
     test('It throws for missing allow-unauthenticated', () => {

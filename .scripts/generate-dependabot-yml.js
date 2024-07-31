@@ -78,6 +78,11 @@ const generateDependabot = () => {
             'dependency-name': 'chalk',
             versions: ['>= 5'],
           },
+          // p-limit is an ESM from v4
+          {
+            'dependency-name': 'p-limit',
+            versions: ['>= 4'],
+          },
         ]
       },
       {

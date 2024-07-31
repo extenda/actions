@@ -70,6 +70,9 @@ updates:
       - dependency-name: chalk
         versions:
           - '>= 5'
+      - dependency-name: p-limit
+        versions:
+          - '>= 4'
   - package-ecosystem: github-actions
     directory: /
     schedule:

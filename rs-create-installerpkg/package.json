@@ -5,7 +5,7 @@
   "description": "Build RS installer package",
   "main": "dist/index.js",
   "dependencies": {
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.7.0"
   },
   "devDependencies": {
     "jest-fetch-mock": "^3.0.3"

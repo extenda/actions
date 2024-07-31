@@ -29,6 +29,8 @@ const tc = require('@actions/tool-cache');
 const axios = require('axios');
 const { loadTool } = require('../src/load-binary');
 
+const orgEnv = process.env;
+
 const vswhere = {
   tool: 'vswhere',
   binary: 'vswhere.exe',
@@ -45,6 +47,10 @@ const gcloud = {
 
 describe('Load tool', () => {
   beforeEach(() => {
+    process.env = {
+      ...orgEnv,
+      RUNNER_TOOL_CACHE: '/Users/actions/cache',
+    };
     mockFs({
       '/Users/actions/cache': {
         'tmp-1': 'vswhere raw binary',
@@ -58,6 +64,7 @@ describe('Load tool', () => {
   afterEach(() => {
     jest.resetAllMocks();
     mockFs.restore();
+    process.env = orgEnv;
   });
 
   test('It can download a raw binary', async () => {
