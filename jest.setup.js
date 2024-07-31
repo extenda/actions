@@ -6,6 +6,7 @@ const mock = { fs: jest.requireActual('fs') };
 */
 jest.mock('mock-fs', () => {
   const memfs = jest.requireActual('memfs');
+  const os = jest.requireActual('os');
 
   mock.fs = memfs.fs;
 
@@ -14,6 +15,7 @@ jest.mock('mock-fs', () => {
     memfs.vol.fromNestedJSON(volume);
     memfs.vol.mkdirSync('.', { recursive: true });
     memfs.vol.mkdirSync('/tmp', { recursive: true });
+    memfs.vol.mkdirSync(os.tmpdir(), { recursive: true });
   }, { restore: () => {} });
 });
 

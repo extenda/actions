@@ -426,6 +426,12 @@ $ npm test
 ```
 Runs Jest everywhere.
 
+If tests fails due to short-sha being unexpected length, consider configuring the default on your repository
+
+```bash
+$ git config core.abbrev 7
+```
+
 ```bash
 $ npm run build:docker
 ```
