@@ -24,7 +24,7 @@ graphql_request='{
         "branchName": "'"$BRANCH_NAME"'"
       },
       "message": {
-        "headline": "build(deps): Update dist files"
+        "headline": "build(deps): Update dist files [skip dependabot]"
       },
       "fileChanges": {
         "additions": [
