@@ -53,16 +53,22 @@ const generateDependabot = () => {
           { 'dependency-name': 'conventional-recommended-bump' },
           { 'dependency-name': 'git-raw-commits' },
 
-          // camelcase-keys became a module in v8.
+          // camelcase-keys is an ESM from v7
           {
             'dependency-name': 'camelcase-keys',
             versions: ['>= 8'],
           },
 
-          // replace-in-file must be pinned at v5 (module)
+          // replace-in-file is an ESM from v6
           {
             'dependency-name': 'replace-in-file',
-            versions: ['<= 6'],
+            versions: ['>= 6'],
+          },
+
+          // node fetch is an ESM from v3
+          {
+            'dependency-name': 'node-fetch',
+            versions: ['>= 3'],
           },
         ]
       },

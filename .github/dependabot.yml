@@ -63,7 +63,10 @@ updates:
           - '>= 8'
       - dependency-name: replace-in-file
         versions:
-          - <= 6
+          - '>= 6'
+      - dependency-name: node-fetch
+        versions:
+          - '>= 3'
   - package-ecosystem: github-actions
     directory: /
     schedule:
