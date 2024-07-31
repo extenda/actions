@@ -17,7 +17,9 @@ const DEPRECATED_ACTIONS = [
 
 const generateDependabot = () => {
   const actions = modules.list()
-    .map((dir) => path.relative(path.join(__dirname, '..'), dir)).filter((action) => !DEPRECATED_ACTIONS.includes(action));
+    .map((dir) => path.relative(path.join(__dirname, '..'), dir))
+    .filter((action) => !DEPRECATED_ACTIONS.includes(action))
+    .map((dir) => `/${dir}`);
 
   const dependabot = {
     version: 2,
@@ -65,10 +67,16 @@ const generateDependabot = () => {
             versions: ['>= 6'],
           },
 
-          // node fetch is an ESM from v3
+          // node-fetch is an ESM from v3
           {
             'dependency-name': 'node-fetch',
             versions: ['>= 3'],
+          },
+
+          // chalk is an ESM from v5
+          {
+            'dependency-name': 'chalk',
+            versions: ['>= 5'],
           },
         ]
       },

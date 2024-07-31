@@ -13,39 +13,39 @@ updates:
           - '*'
   - package-ecosystem: npm
     directories:
-      - binary-auth-attestation
-      - cloud-deploy
-      - cloud-run-traffic
-      - component-tests
-      - conventional-release
-      - conventional-version
-      - customer-config
-      - dataflow-deploy
-      - dataflow-template-build
-      - dora-metrics
-      - external-events
-      - gcp-secret-manager
-      - iam
-      - iam-test-token
-      - identity-token
-      - jira-release
-      - jira-releasenotes
-      - maven
-      - nexus-auth-npm
-      - opa-policy-test
-      - publish-openapi
-      - repository-dispatch
-      - setup-gcloud
-      - setup-git
-      - setup-msbuild
-      - setup-nuget-sources
-      - setup-terraform
-      - slack-notify
-      - sonar-scanner
-      - status-check
-      - styra-das-deploy
-      - terraform-plan-comment
-      - utils
+      - /binary-auth-attestation
+      - /cloud-deploy
+      - /cloud-run-traffic
+      - /component-tests
+      - /conventional-release
+      - /conventional-version
+      - /customer-config
+      - /dataflow-deploy
+      - /dataflow-template-build
+      - /dora-metrics
+      - /external-events
+      - /gcp-secret-manager
+      - /iam
+      - /iam-test-token
+      - /identity-token
+      - /jira-release
+      - /jira-releasenotes
+      - /maven
+      - /nexus-auth-npm
+      - /opa-policy-test
+      - /publish-openapi
+      - /repository-dispatch
+      - /setup-gcloud
+      - /setup-git
+      - /setup-msbuild
+      - /setup-nuget-sources
+      - /setup-terraform
+      - /slack-notify
+      - /sonar-scanner
+      - /status-check
+      - /styra-das-deploy
+      - /terraform-plan-comment
+      - /utils
     schedule:
       interval: weekly
     groups:
@@ -67,6 +67,9 @@ updates:
       - dependency-name: node-fetch
         versions:
           - '>= 3'
+      - dependency-name: chalk
+        versions:
+          - '>= 5'
   - package-ecosystem: github-actions
     directory: /
     schedule:
