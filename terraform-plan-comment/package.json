@@ -7,6 +7,6 @@
   "dependencies": {
     "@actions/github": "^6.0.0",
     "fast-glob": "^3.3.2",
-    "p-limit": "^6.1.0"
+    "p-limit": "^3.1.0"
   }
 }
