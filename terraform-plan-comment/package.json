@@ -5,8 +5,8 @@
   "private": true,
   "main": "dist/index.js",
   "dependencies": {
-    "@actions/github": "^5.1.1",
-    "fast-glob": "^3.2.2",
-    "p-limit": "^3.0.1"
+    "@actions/github": "^6.0.0",
+    "fast-glob": "^3.3.2",
+    "p-limit": "^6.1.0"
   }
 }
