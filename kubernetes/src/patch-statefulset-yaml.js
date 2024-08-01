@@ -12,22 +12,21 @@ const patchStatefulSetYaml = (serviceDefinition, statefulsetYaml) => {
     requests,
     limits,
     replicas = 1,
-    storage: {
-      volume = '1Gi',
-      mountPath = '/data/storage',
-      storageClassName,
-    },
+    storage: { volume = '1Gi', mountPath = '/data/storage', storageClassName },
   } = serviceDefinition;
 
   // Set replica count to the one in the definition
   statefulSet.spec.replicas = replicas;
 
   // Set storage parameters to the ones from definition
-  statefulSet.spec.template.spec.containers[0].volumeMounts[0].mountPath = mountPath;
-  statefulSet.spec.volumeClaimTemplates[0].spec.resources.requests.storage = volume;
+  statefulSet.spec.template.spec.containers[0].volumeMounts[0].mountPath =
+    mountPath;
+  statefulSet.spec.volumeClaimTemplates[0].spec.resources.requests.storage =
+    volume;
 
   if (storageClassName) {
-    statefulSet.spec.volumeClaimTemplates[0].spec.storageClassName = storageClassName;
+    statefulSet.spec.volumeClaimTemplates[0].spec.storageClassName =
+      storageClassName;
   }
 
   // Default parameters in template are set to:
@@ -38,13 +37,17 @@ const patchStatefulSetYaml = (serviceDefinition, statefulsetYaml) => {
   //   cpu: 100m
   //   memory: 256Mi
   if (requests) {
-    statefulSet.spec.template.spec.containers[0].resources.requests.cpu = requests.cpu;
-    statefulSet.spec.template.spec.containers[0].resources.requests.memory = requests.memory;
+    statefulSet.spec.template.spec.containers[0].resources.requests.cpu =
+      requests.cpu;
+    statefulSet.spec.template.spec.containers[0].resources.requests.memory =
+      requests.memory;
   }
 
   if (limits) {
-    statefulSet.spec.template.spec.containers[0].resources.limits.cpu = limits.cpu;
-    statefulSet.spec.template.spec.containers[0].resources.limits.memory = limits.memory;
+    statefulSet.spec.template.spec.containers[0].resources.limits.cpu =
+      limits.cpu;
+    statefulSet.spec.template.spec.containers[0].resources.limits.memory =
+      limits.memory;
   }
 
   return yaml.stringify(statefulSet);

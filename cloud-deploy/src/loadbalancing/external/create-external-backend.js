@@ -5,15 +5,22 @@ const fixPathMatchers = require('./fix-path-matchers');
 
 const getBackendStatus = async (name, projectID) => {
   try {
-    const status = JSON.parse(await gcloudOutput([
-      'compute',
-      'backend-services',
-      'describe',
-      `${name}-external-backend`,
-      '--global',
-      `--project=${projectID}`,
-      '--format=json',
-    ], 'gcloud', true, true));
+    const status = JSON.parse(
+      await gcloudOutput(
+        [
+          'compute',
+          'backend-services',
+          'describe',
+          `${name}-external-backend`,
+          '--global',
+          `--project=${projectID}`,
+          '--format=json',
+        ],
+        'gcloud',
+        true,
+        true,
+      ),
+    );
     const { backends } = status;
     let platform = 'cloudrun';
     const backendService = backends[0].group;
@@ -24,27 +31,28 @@ const getBackendStatus = async (name, projectID) => {
     const { protocol } = status;
     const timeout = status.timeoutSec;
     return {
-      backends, platform, sampleRate, protocol, timeout,
+      backends,
+      platform,
+      sampleRate,
+      protocol,
+      timeout,
     };
-  } catch (err) {
+  } catch {
     return null;
   }
 };
 
-const createServerlessNeg = async (
-  name,
-  projectID,
-  region,
-) => gcloudOutput([
-  'compute',
-  'network-endpoint-groups',
-  'create',
-  `${name}-cloudrun`,
-  `--cloud-run-service=${name}`,
-  '--network-endpoint-type=serverless',
-  `--project=${projectID}`,
-  `--region=${region}`,
-]);
+const createServerlessNeg = async (name, projectID, region) =>
+  gcloudOutput([
+    'compute',
+    'network-endpoint-groups',
+    'create',
+    `${name}-cloudrun`,
+    `--cloud-run-service=${name}`,
+    '--network-endpoint-type=serverless',
+    `--project=${projectID}`,
+    `--region=${region}`,
+  ]);
 
 // update backend service
 const updateBackendService = async (
@@ -59,7 +67,9 @@ const updateBackendService = async (
     'backend-services',
     'update',
     `${name}-external-backend`,
-    platformGKE ? `--health-checks=${projectID}-external-hc` : '--no-health-checks',
+    platformGKE
+      ? `--health-checks=${projectID}-external-hc`
+      : '--no-health-checks',
     '--global',
     `--project=${projectID}`,
   ];
@@ -105,20 +115,18 @@ const setupBackendService = async (
     args.push('--protocol=HTTPS');
     args.push('--logging-sample-rate=0');
   }
-  return gcloudOutput(args, 'gcloud', true, true).catch(() => updateBackendService(
-    name,
-    projectID,
-    serviceType,
-    connectionTimeout,
-    platformGKE,
-  ));
+  return gcloudOutput(args, 'gcloud', true, true).catch(() =>
+    updateBackendService(
+      name,
+      projectID,
+      serviceType,
+      connectionTimeout,
+      platformGKE,
+    ),
+  );
 };
 
-const deleteBackendService = async (
-  name,
-  projectID,
-  env,
-) => {
+const deleteBackendService = async (name, projectID, env) => {
   await gcloudOutput([
     'compute',
     'url-maps',
@@ -140,14 +148,15 @@ const deleteBackendService = async (
 };
 
 // Check if NEG exists
-const checkNEG = async (projectID, zone, name) => gcloudOutput([
-  'compute',
-  'network-endpoint-groups',
-  'describe',
-  `${name}-neg`,
-  `--project=${projectID}`,
-  `--zone=${zone}`,
-]);
+const checkNEG = async (projectID, zone, name) =>
+  gcloudOutput([
+    'compute',
+    'network-endpoint-groups',
+    'describe',
+    `${name}-neg`,
+    `--project=${projectID}`,
+    `--zone=${zone}`,
+  ]);
 
 // Check if NEG exists
 const checkNEGs = async (projectID, name) => {
@@ -178,28 +187,31 @@ const addBackend = async (name, projectID, zone, platformGKE) => {
   return gcloudOutput(args);
 };
 
-const createPathMatcher = async (host, projectID, name, env) => gcloudOutput([
-  'compute',
-  'url-maps',
-  'add-path-matcher',
-  `${projectWithoutNumbers(projectID, env)}-lb-external`,
-  `--project=${projectID}`,
-  `--default-service=${name}-external-backend`,
-  `--path-matcher-name=${name}-external-backend`,
-  '--global',
-  `--new-hosts=${host}`,
-]);
+const createPathMatcher = async (host, projectID, name, env) =>
+  gcloudOutput([
+    'compute',
+    'url-maps',
+    'add-path-matcher',
+    `${projectWithoutNumbers(projectID, env)}-lb-external`,
+    `--project=${projectID}`,
+    `--default-service=${name}-external-backend`,
+    `--path-matcher-name=${name}-external-backend`,
+    '--global',
+    `--new-hosts=${host}`,
+  ]);
 
 const setupBackendURLMapping = async (newHosts, projectID, name, env) => {
   let pathMatcherExists = false;
-  const urlMapsInfo = JSON.parse(await gcloudOutput([
-    'compute',
-    'url-maps',
-    'describe',
-    `${projectWithoutNumbers(projectID, env)}-lb-external`,
-    `--project=${projectID}`,
-    '--format=json',
-  ]));
+  const urlMapsInfo = JSON.parse(
+    await gcloudOutput([
+      'compute',
+      'url-maps',
+      'describe',
+      `${projectWithoutNumbers(projectID, env)}-lb-external`,
+      `--project=${projectID}`,
+      '--format=json',
+    ]),
+  );
 
   // check if path matcher exists
   if (urlMapsInfo.pathMatchers) {
@@ -266,23 +278,44 @@ const configureExternalDomain = async (
   // if no create
   if (!backendStatus) {
     core.info('Creating backend service');
-    await setupBackendService(name, projectID, serviceType, connectionTimeout, platformGKE);
+    await setupBackendService(
+      name,
+      projectID,
+      serviceType,
+      connectionTimeout,
+      platformGKE,
+    );
   } else if (
-    (backendStatus.platform === 'gke' && !platformGKE)
-    || (backendStatus.platform === 'cloudrun' && platformGKE)) {
+    (backendStatus.platform === 'gke' && !platformGKE) ||
+    (backendStatus.platform === 'cloudrun' && platformGKE)
+  ) {
     doSwitch = true;
   }
   // remove all backends if switch is true and add new
   if (doSwitch) {
-    core.info(`Switching traffic from ${backendStatus.platform} to ${platformGKE ? 'gke' : 'cloudrun'}`);
+    core.info(
+      `Switching traffic from ${backendStatus.platform} to ${platformGKE ? 'gke' : 'cloudrun'}`,
+    );
     await deleteBackendService(name, projectID, env);
-    await setupBackendService(name, projectID, serviceType, connectionTimeout, platformGKE);
+    await setupBackendService(
+      name,
+      projectID,
+      serviceType,
+      connectionTimeout,
+      platformGKE,
+    );
   }
 
   if (!platformGKE) {
     if (backendStatus && !doSwitch) {
       if (backendStatus.sampleRate !== 0) {
-        await updateBackendService(name, projectID, serviceType, connectionTimeout, platformGKE);
+        await updateBackendService(
+          name,
+          projectID,
+          serviceType,
+          connectionTimeout,
+          platformGKE,
+        );
       }
     }
     // create serverless neg
@@ -292,9 +325,17 @@ const configureExternalDomain = async (
 
   if (platformGKE) {
     if (backendStatus && !doSwitch) {
-      if (backendStatus.protocol !== serviceType.toUpperCase()
-        || backendStatus.timeout !== connectionTimeout) {
-        await updateBackendService(name, projectID, serviceType, connectionTimeout, platformGKE);
+      if (
+        backendStatus.protocol !== serviceType.toUpperCase() ||
+        backendStatus.timeout !== connectionTimeout
+      ) {
+        await updateBackendService(
+          name,
+          projectID,
+          serviceType,
+          connectionTimeout,
+          platformGKE,
+        );
       }
     }
     core.info('Adding backend NEG to backend service');
@@ -302,7 +343,11 @@ const configureExternalDomain = async (
       .then(() => addBackend(name, projectID, 'europe-west1-d', platformGKE))
       .then(() => addBackend(name, projectID, 'europe-west1-c', platformGKE))
       .then(() => addBackend(name, projectID, 'europe-west1-b', platformGKE))
-      .catch(() => { throw new Error('The NEG was not found! make sure the deployment is correct'); });
+      .catch(() => {
+        throw new Error(
+          'The NEG was not found! make sure the deployment is correct',
+        );
+      });
   }
 
   if (host) {

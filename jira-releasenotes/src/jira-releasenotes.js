@@ -7,19 +7,13 @@ const findJiraChanges = async (projectKey) => {
   const commits = await getConventionalCommits();
   const issues = {};
   commits.forEach((commit) => {
-    const {
-      scope,
-      type,
-      subject,
-      body,
-      footer,
-      notes,
-      hash,
-    } = commit;
+    const { scope, type, subject, body, footer, notes, hash } = commit;
     const content = `${scope} ${subject} ${body || ''} ${footer || ''}`;
     new Set(content.match(issueIdRegEx)).forEach((issueKey) => {
       if (issues[issueKey]) {
-        core.warning(`${issueKey} was referred by multiple commits. Last entry wins!`);
+        core.warning(
+          `${issueKey} was referred by multiple commits. Last entry wins!`,
+        );
       }
       issues[issueKey] = {
         subject,
@@ -33,12 +27,15 @@ const findJiraChanges = async (projectKey) => {
   return issues;
 };
 
-const findCustomFieldId = async (client, fieldName) => client.listFields()
-  .then((fields) => fields.find((f) => f.name === fieldName).id);
+const findCustomFieldId = async (client, fieldName) =>
+  client
+    .listFields()
+    .then((fields) => fields.find((f) => f.name === fieldName).id);
 
 const createUpdate = (change, releaseNoteFieldId) => {
   const update = { fields: {} };
-  update.fields[releaseNoteFieldId] = `${change.subject}\n\n${change.body}`.trim();
+  update.fields[releaseNoteFieldId] =
+    `${change.subject}\n\n${change.body}`.trim();
   // TODO Add BREAKING CHANGE information somewhere?
   return update;
 };
@@ -68,17 +65,23 @@ const createReleaseNotes = async ({
   const requests = [];
   Object.keys(changes).forEach((issueKey) => {
     const change = changes[issueKey];
-    requests.push(client.getIssue(issueKey, `summary, fixVersions, resolution, status, ${releaseNoteFieldId}`)
-      .then((issue) => {
-        if (issue.fields[releaseNoteFieldId] === null) {
-          const update = createUpdate(change, releaseNoteFieldId);
-          return client.updateIssue(issueKey, update).then(() => {
-            core.info(`Issue ${issueKey} was updated with a release note`);
-          });
-        }
-        core.info(`Skip issue ${issueKey}. It already has a release note`);
-        return null;
-      }));
+    requests.push(
+      client
+        .getIssue(
+          issueKey,
+          `summary, fixVersions, resolution, status, ${releaseNoteFieldId}`,
+        )
+        .then((issue) => {
+          if (issue.fields[releaseNoteFieldId] === null) {
+            const update = createUpdate(change, releaseNoteFieldId);
+            return client.updateIssue(issueKey, update).then(() => {
+              core.info(`Issue ${issueKey} was updated with a release note`);
+            });
+          }
+          core.info(`Skip issue ${issueKey}. It already has a release note`);
+          return null;
+        }),
+    );
   });
 
   return Promise.all(requests);

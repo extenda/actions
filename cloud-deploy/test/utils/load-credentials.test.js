@@ -33,10 +33,17 @@ describe('readSecret', () => {
 
     loadSecret.mockResolvedValue(secretValue);
 
-    const result = await readSecret(serviceAccountKey, 'test', secretName, envVar);
+    const result = await readSecret(
+      serviceAccountKey,
+      'test',
+      secretName,
+      envVar,
+    );
 
     expect(result).toBe(secretValue);
-    expect(core.info).toHaveBeenCalledWith(`Load secret ${secretName} for test`);
+    expect(core.info).toHaveBeenCalledWith(
+      `Load secret ${secretName} for test`,
+    );
     expect(loadSecret).toHaveBeenCalledWith(serviceAccountKey, secretName);
     expect(checkEnv).not.toHaveBeenCalled();
   });

@@ -34,7 +34,9 @@ describe('loadDefinitions', () => {
     fg.sync.mockReturnValue([file]);
     mockFs({ [file]: configsFixtures.invalid });
 
-    await expect(loadDefinitions(glob, validateExeConfig)).rejects.toThrowError('Configuration validation failed (see details above).');
+    await expect(loadDefinitions(glob, validateExeConfig)).rejects.toThrowError(
+      'Configuration validation failed (see details above).',
+    );
   });
 
   it('fails, if found multiple files with the same system-prefix', async () => {
@@ -48,6 +50,8 @@ describe('loadDefinitions', () => {
       [file2]: configsFixtures.valid,
     });
 
-    await expect(loadDefinitions(glob, validateExeConfig)).rejects.toThrowError('Configuration validation failed (see details above).');
+    await expect(loadDefinitions(glob, validateExeConfig)).rejects.toThrowError(
+      'Configuration validation failed (see details above).',
+    );
   });
 });

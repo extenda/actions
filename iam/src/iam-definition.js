@@ -25,20 +25,24 @@ const sortAndCompare = (array, docPath, result) => {
 };
 
 const validateAlphaSort = (spec, result) => {
-  const {
-    services = [],
-    permissions = {},
-    roles = [],
-  } = spec;
+  const { services = [], permissions = {}, roles = [] } = spec;
 
-  sortAndCompare(services.map((service) => service.name), 'services', result);
+  sortAndCompare(
+    services.map((service) => service.name),
+    'services',
+    result,
+  );
 
   services.forEach((service, serviceIndex) => {
     const allowedConsumers = service['allowed-consumers'];
     if (allowedConsumers) {
       allowedConsumers.forEach((consumerGroup, index) => {
         const serviceAccounts = consumerGroup['service-accounts'];
-        sortAndCompare(serviceAccounts, `services[${serviceIndex}]['allowed-consumers'][${index}]['service-accounts']`, result);
+        sortAndCompare(
+          serviceAccounts,
+          `services[${serviceIndex}]['allowed-consumers'][${index}]['service-accounts']`,
+          result,
+        );
       });
     }
   });
@@ -48,7 +52,11 @@ const validateAlphaSort = (spec, result) => {
     sortAndCompare(permissions[noun], `permissions.${noun}`, result);
   });
 
-  sortAndCompare(roles.map((role) => role.id), 'roles', result);
+  sortAndCompare(
+    roles.map((role) => role.id),
+    'roles',
+    result,
+  );
   roles.forEach((role, index) => {
     sortAndCompare(role.permissions, `roles[${index}].permissions`, result);
   });

@@ -15,12 +15,7 @@ const deployJob = async (
   maxWorkers,
   numWorkers,
 ) => {
-  const args = [
-    'dataflow',
-    mode,
-    'run',
-    newJobName,
-  ];
+  const args = ['dataflow', mode, 'run', newJobName];
   if (mode === 'flex-template') {
     args.push(`--template-file-gcs-location=${templatePath}`);
   } else {
@@ -57,9 +52,15 @@ const deployJob = async (
   });
 
   if (mode === 'flex-template') {
-    return jobId.trim().split(/[\r\n]+/)[3].substr(6);
+    return jobId
+      .trim()
+      .split(/[\r\n]+/)[3]
+      .substr(6);
   }
-  return jobId.trim().split(/[\r\n]+/)[2].substr(4);
+  return jobId
+    .trim()
+    .split(/[\r\n]+/)[2]
+    .substr(4);
 };
 
 module.exports = deployJob;

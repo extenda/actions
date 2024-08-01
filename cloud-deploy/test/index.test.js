@@ -15,7 +15,11 @@ const getImageWithSha256 = require('../src/manifests/image-sha256');
 const publishPolicies = require('../src/policies/publish-policies');
 const { sendScaleSetup, sendDeployInfo } = require('../src/utils/send-request');
 const runScan = require('../src/utils/vulnerability-scanning');
-const { checkPolicyExists, checkPolicyTarget, setCloudArmorPolicyTarget } = require('../src/loadbalancing/external/cloud-armor');
+const {
+  checkPolicyExists,
+  checkPolicyTarget,
+  setCloudArmorPolicyTarget,
+} = require('../src/loadbalancing/external/cloud-armor');
 
 jest.mock('../src/utils/load-credentials');
 jest.mock('@actions/core');
@@ -114,11 +118,13 @@ describe('Action', () => {
   });
 
   test('It can run the action', async () => {
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('clan-service-account')
       .mockReturnValueOnce('cloud-run.yaml')
       .mockReturnValueOnce('gcr.io/project/image:tag');
-    loadCredentials.mockResolvedValueOnce('envoy-certs')
+    loadCredentials
+      .mockResolvedValueOnce('envoy-certs')
       .mockResolvedValueOnce('internal-key')
       .mockResolvedValueOnce('internal-cert');
 
@@ -140,7 +146,12 @@ describe('Action', () => {
     await action();
 
     expect(core.getInput).toHaveBeenCalledTimes(5);
-    expect(publishPolicies).toHaveBeenCalledWith('service-name', 'staging', 'tag', serviceDef);
+    expect(publishPolicies).toHaveBeenCalledWith(
+      'service-name',
+      'staging',
+      'tag',
+      serviceDef,
+    );
     expect(buildManifest).toHaveBeenCalledWith(
       'gcr.io/project/image@sha256:1',
       serviceDef,
@@ -172,11 +183,13 @@ describe('Action', () => {
     );
   });
   test('It can fail the action', async () => {
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('clan-service-account')
       .mockReturnValueOnce('cloud-run.yaml')
       .mockReturnValueOnce('gcr.io/project/image:tag');
-    loadCredentials.mockResolvedValueOnce('envoy-certs')
+    loadCredentials
+      .mockResolvedValueOnce('envoy-certs')
       .mockResolvedValueOnce('internal-key')
       .mockResolvedValueOnce('internal-cert');
 
@@ -190,7 +203,9 @@ describe('Action', () => {
     deploy.mockResolvedValueOnce(false);
     setupGcloud.mockResolvedValueOnce('project-id');
 
-    await expect(action()).rejects.toThrow('Deployment failed! Check container logs and status for error!');
+    await expect(action()).rejects.toThrow(
+      'Deployment failed! Check container logs and status for error!',
+    );
     expect(core.getInput).toHaveBeenCalledTimes(5);
     expect(buildManifest).toHaveBeenCalledWith(
       'gcr.io/project/image@sha256:1',
@@ -206,11 +221,13 @@ describe('Action', () => {
     );
   });
   test('It can run the action without internal traffic', async () => {
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('clan-service-account')
       .mockReturnValueOnce('cloud-run.yaml')
       .mockReturnValueOnce('gcr.io/project/image:tag');
-    loadCredentials.mockResolvedValueOnce('envoy-certs')
+    loadCredentials
+      .mockResolvedValueOnce('envoy-certs')
       .mockResolvedValueOnce('internal-key')
       .mockResolvedValueOnce('internal-cert');
 
@@ -232,7 +249,12 @@ describe('Action', () => {
     await action();
 
     expect(core.getInput).toHaveBeenCalledTimes(5);
-    expect(publishPolicies).toHaveBeenCalledWith('service-name', 'staging', 'tag', serviceDefNoInternal);
+    expect(publishPolicies).toHaveBeenCalledWith(
+      'service-name',
+      'staging',
+      'tag',
+      serviceDefNoInternal,
+    );
     expect(buildManifest).toHaveBeenCalledWith(
       'gcr.io/project/image@sha256:1',
       serviceDefNoInternal,
@@ -259,11 +281,13 @@ describe('Action', () => {
   });
 
   test('It will throw error if consumers are set for kubernetes', async () => {
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('clan-service-account')
       .mockReturnValueOnce('cloud-run.yaml')
       .mockReturnValueOnce('gcr.io/project/image:tag');
-    loadCredentials.mockResolvedValueOnce('envoy-certs')
+    loadCredentials
+      .mockResolvedValueOnce('envoy-certs')
       .mockResolvedValueOnce('internal-key')
       .mockResolvedValueOnce('internal-cert');
 
@@ -323,15 +347,19 @@ describe('Action', () => {
     configureInternalFrontend.mockResolvedValueOnce();
     setupGcloud.mockResolvedValueOnce('project-id');
     publishPolicies.mockResolvedValueOnce();
-    await expect(action()).rejects.toThrow('Consumers security configuration is only for cloud-run');
+    await expect(action()).rejects.toThrow(
+      'Consumers security configuration is only for cloud-run',
+    );
   });
 
   test('It will setup scaling schedule', async () => {
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('clan-service-account')
       .mockReturnValueOnce('cloud-run.yaml')
       .mockReturnValueOnce('gcr.io/project/image:tag');
-    loadCredentials.mockResolvedValueOnce('envoy-certs')
+    loadCredentials
+      .mockResolvedValueOnce('envoy-certs')
       .mockResolvedValueOnce('internal-key')
       .mockResolvedValueOnce('internal-cert');
 
@@ -345,9 +373,11 @@ describe('Action', () => {
         protocol: 'http',
         scaling: {
           concurrency: 40,
-          schedule: [{
-            'scale-hours': '08:00-20:00',
-          }],
+          schedule: [
+            {
+              'scale-hours': '08:00-20:00',
+            },
+          ],
         },
       },
       security: {
@@ -400,11 +430,13 @@ describe('Action', () => {
   });
 
   test('It will setup cloud armor policy', async () => {
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('clan-service-account')
       .mockReturnValueOnce('cloud-run.yaml')
       .mockReturnValueOnce('gcr.io/project/image:tag');
-    loadCredentials.mockResolvedValueOnce('envoy-certs')
+    loadCredentials
+      .mockResolvedValueOnce('envoy-certs')
       .mockResolvedValueOnce('internal-key')
       .mockResolvedValueOnce('internal-cert');
 
@@ -418,9 +450,11 @@ describe('Action', () => {
         protocol: 'http',
         scaling: {
           concurrency: 40,
-          schedule: [{
-            'scale-hours': '08:00-20:00',
-          }],
+          schedule: [
+            {
+              'scale-hours': '08:00-20:00',
+            },
+          ],
         },
       },
       security: {

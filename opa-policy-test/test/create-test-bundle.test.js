@@ -48,14 +48,18 @@ test('It can create a test bundle', async () => {
     'gs://authz-bundles/systems/tst.test-system-staging.tar.gz',
     'test-bundle/bundle.tar.gz',
   ]);
-  expect(exec).toHaveBeenCalledWith('tar', ['-xf', 'test-bundle/bundle.tar.gz', '-C', 'test-bundle']);
+  expect(exec).toHaveBeenCalledWith('tar', [
+    '-xf',
+    'test-bundle/bundle.tar.gz',
+    '-C',
+    'test-bundle',
+  ]);
   expect(copyPolicies).toHaveBeenCalledWith('test-bundle');
 });
 
 test('It fails if bundle does not exist', async () => {
   execGcloud.mockRejectedValueOnce(new Error('TEST'));
-  await expect(() => createTestBundle(
-    'tst.test-system-staging.tar.gz',
-    'authz-bundles/systems',
-  )).rejects.toThrow();
+  await expect(() =>
+    createTestBundle('tst.test-system-staging.tar.gz', 'authz-bundles/systems'),
+  ).rejects.toThrow();
 });

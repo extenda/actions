@@ -30,7 +30,8 @@ describe('txengine-deploy', () => {
   });
 
   test('It can deploy txengine', async () => {
-    core.getInput.mockReturnValueOnce('deploy-account')
+    core.getInput
+      .mockReturnValueOnce('deploy-account')
       .mockReturnValueOnce('secret-account')
       .mockReturnValueOnce('image')
       .mockReturnValueOnce('tenant')
@@ -43,11 +44,11 @@ describe('txengine-deploy', () => {
     });
 
     kubectl.configure.mockResolvedValueOnce('test-staging-project');
-    createManifests.mockResolvedValueOnce(({
+    createManifests.mockResolvedValueOnce({
       file: 'file.yaml',
       content: 'test',
       namespace: 'test-namespace',
-    }));
+    });
 
     await action();
 
@@ -60,6 +61,8 @@ describe('txengine-deploy', () => {
   test('It rejects action if not trunk-based', async () => {
     core.getInput.mockReturnValue('test');
     process.env.GITHUB_REF = 'refs/heads/develop';
-    await expect(action()).rejects.toThrow(/^Action not allowed on ref refs\/heads\/develop/);
+    await expect(action()).rejects.toThrow(
+      /^Action not allowed on ref refs\/heads\/develop/,
+    );
   });
 });

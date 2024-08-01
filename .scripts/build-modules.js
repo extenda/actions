@@ -25,7 +25,6 @@ const build = async (baseDir) => {
   const srcDir = path.join(baseDir, 'src');
   const destDir = path.join(baseDir, 'dist');
 
-  // eslint-disable-next-line no-console
   console.time(`build ${baseDir}`);
   await esbuild.build({
     entryPoints: [`${srcDir}/index.js`],
@@ -41,7 +40,7 @@ const build = async (baseDir) => {
       }),
     ],
   });
-  // eslint-disable-next-line no-console
+
   console.timeEnd(`build ${baseDir}`);
 };
 

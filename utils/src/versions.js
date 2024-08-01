@@ -13,9 +13,16 @@ const DEFAULT_VERSION = '0.0.0';
 const getLatestReleaseTag = async () => {
   const git = simpleGit();
 
-  const tags = await git.tags(['--sort=-version:refname', '--merged', 'HEAD', `${changes.getTagPrefix()}*`]);
+  const tags = await git.tags([
+    '--sort=-version:refname',
+    '--merged',
+    'HEAD',
+    `${changes.getTagPrefix()}*`,
+  ]);
   if (tags.all.length === 0) {
-    core.info(`No release tags with prefix '${changes.getTagPrefix()}' exists, use ${changes.getTagPrefix()}${DEFAULT_VERSION}`);
+    core.info(
+      `No release tags with prefix '${changes.getTagPrefix()}' exists, use ${changes.getTagPrefix()}${DEFAULT_VERSION}`,
+    );
   }
 
   return tags.all[0] || `${changes.getTagPrefix()}${DEFAULT_VERSION}`;
@@ -25,8 +32,8 @@ const getLatestReleaseTag = async () => {
  * Returns the latest semantic release matching the tag prefix.
  * @returns {Promise<string>}
  */
-const getLatestRelease = async () => getLatestReleaseTag()
-  .then((tag) => tag.replace(changes.getTagPrefix(), ''));
+const getLatestRelease = async () =>
+  getLatestReleaseTag().then((tag) => tag.replace(changes.getTagPrefix(), ''));
 
 /**
  * Returns the version to build. This version number is determined by the last release number
@@ -40,7 +47,9 @@ const getBuildVersion = async (versionSuffix = '') => {
   const releaseType = await changes.getRecommendedBump();
 
   core.info(`Conventional commits '${releaseType}' bump from ${latestRelease}`);
-  return semver.inc(semver.coerce(latestRelease), releaseType).concat(versionSuffix);
+  return semver
+    .inc(semver.coerce(latestRelease), releaseType)
+    .concat(versionSuffix);
 };
 
 /**

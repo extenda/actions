@@ -26,14 +26,16 @@ const action = async () => {
   const [owner, repo] = repository.split('/');
 
   const octokit = github.getOctokit(token);
-  return octokit.rest.repos.createDispatchEvent({
-    owner,
-    repo,
-    event_type: eventType,
-    client_payload: clientPayload,
-  }).then(() => {
-    core.info(`Dispatched ${eventType} to ${repository}.`);
-  });
+  return octokit.rest.repos
+    .createDispatchEvent({
+      owner,
+      repo,
+      event_type: eventType,
+      client_payload: clientPayload,
+    })
+    .then(() => {
+      core.info(`Dispatched ${eventType} to ${repository}.`);
+    });
 };
 
 if (require.main === module) {

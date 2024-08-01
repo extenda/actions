@@ -12,8 +12,9 @@ afterEach(() => {
 
 test('It throws if feature branch', () => {
   process.env.GITHUB_REF = 'refs/heads/feature/test-name';
-  expect(() => failIfNotTrunkBased())
-    .toThrowError(/^Action not allowed on ref refs\/heads\/feature\/test-name/);
+  expect(() => failIfNotTrunkBased()).toThrowError(
+    /^Action not allowed on ref refs\/heads\/feature\/test-name/,
+  );
 });
 
 test('It allows from main branch', () => {

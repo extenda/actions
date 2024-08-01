@@ -6,10 +6,14 @@ const drainJob = require('./drain-job');
 const { getTribeProject } = require('../../cloud-run/src/cluster-info');
 
 const action = async () => {
-  const serviceAccountKey = core.getInput('service-account-key', { required: true });
+  const serviceAccountKey = core.getInput('service-account-key', {
+    required: true,
+  });
   const jobName = core.getInput('job-name', { required: true });
   const jobVersion = core.getInput('job-version', { required: true });
-  const dataflowServiceAccount = core.getInput('dataflow-service-account', { required: true });
+  const dataflowServiceAccount = core.getInput('dataflow-service-account', {
+    required: true,
+  });
   const templatePath = core.getInput('template-path', { required: true });
   const jobType = core.getInput('job-type') || 'job';
   const parameters = core.getInput('parameters') || '';
@@ -40,8 +44,7 @@ const action = async () => {
     subnetwork,
     maxWorkers,
     numWorkers,
-  )
-    .then((jobId) => drainJob(jobId, jobName, region, projectId));
+  ).then((jobId) => drainJob(jobId, jobName, region, projectId));
 };
 
 if (require.main === module) {

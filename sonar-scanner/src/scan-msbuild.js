@@ -9,7 +9,12 @@ const { credentials } = require('./sonar-credentials');
 
 const markerFile = path.join(os.homedir(), '.github_action_sonar.txt');
 
-const scanner = path.join(os.homedir(), '.dotnet', 'tools', 'dotnet-sonarscanner');
+const scanner = path.join(
+  os.homedir(),
+  '.dotnet',
+  'tools',
+  'dotnet-sonarscanner',
+);
 
 // JDK 11 will soon be deprecated. Need atleast JDK 17.
 const findJava17 = async () => {
@@ -19,7 +24,7 @@ const findJava17 = async () => {
     core.info(`Available JDKs: ${jdks.join(', ')}`);
     const jdk = jdks.find((f) => f.startsWith('temurin-17'));
     return jdk ? path.join(basedir, jdk) : null;
-  } catch (err) {
+  } catch {
     core.error('/usr/lib/jvm not found');
     return null;
   }
@@ -42,7 +47,11 @@ const scanWithJavaHome = async (args, workingDir = '.') => {
 
 const beginScan = async (hostUrl, mainBranch, workingDir, customArgs = '') => {
   await core.group('Install dotnet-sonarscanner', async () => {
-    await exec.exec(`dotnet tool install -g dotnet-sonarscanner ${hostUrl.startsWith('https://sonar.extenda.io') ? '--version 4.10.0' : ''}`, [], { cwd: workingDir });
+    await exec.exec(
+      `dotnet tool install -g dotnet-sonarscanner ${hostUrl.startsWith('https://sonar.extenda.io') ? '--version 4.10.0' : ''}`,
+      [],
+      { cwd: workingDir },
+    );
   });
 
   const version = await getBuildVersion(`-${process.env.GITHUB_SHA}`);
@@ -52,7 +61,13 @@ const beginScan = async (hostUrl, mainBranch, workingDir, customArgs = '') => {
     'sonar.cs.vstest.reportsPaths': '**/*.trx',
     'sonar.cs.opencover.reportsPaths': '**/coverage.opencover.xml',
   };
-  const params = await createParams(hostUrl, mainBranch, workingDir, true, extraParams);
+  const params = await createParams(
+    hostUrl,
+    mainBranch,
+    workingDir,
+    true,
+    extraParams,
+  );
 
   await core.group('Begin Sonar analysis', async () => {
     await scanWithJavaHome(`begin ${params} ${customArgs}`, workingDir);
@@ -66,7 +81,12 @@ const finishScan = async (hostUrl, workingDir) => {
   });
 };
 
-const scanMsBuild = async (hostUrl, mainBranch, customArgs = '', workingDir = '.') => {
+const scanMsBuild = async (
+  hostUrl,
+  mainBranch,
+  customArgs = '',
+  workingDir = '.',
+) => {
   if (!fs.existsSync(markerFile)) {
     // Create marker and begin scan
     fs.closeSync(fs.openSync(markerFile, 'w'));

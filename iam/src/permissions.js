@@ -29,11 +29,18 @@ const updateAddPermission = async (
       'content-type': 'application/json',
     },
     data,
-  }).then(() => {
-    core.info(`permission '${permissionId}' ${action}d.`);
-  }).catch((err) => {
-    throw new Error(iamApiErrorToString(err, `Failed to ${action} permission ${permissionId}`));
-  });
+  })
+    .then(() => {
+      core.info(`permission '${permissionId}' ${action}d.`);
+    })
+    .catch((err) => {
+      throw new Error(
+        iamApiErrorToString(
+          err,
+          `Failed to ${action} permission ${permissionId}`,
+        ),
+      );
+    });
 };
 
 const getPermission = async (
@@ -42,21 +49,28 @@ const getPermission = async (
   permissionDesc,
   iamUrl,
   permissionAlias,
-) => axios({
-  url: `${iamUrl}/api/v1/permissions/${permissionId}`,
-  method: 'GET',
-  headers: {
-    authorization: `Bearer ${iamToken}`,
-  },
-}).then((response) => {
-  const { description, alias } = response.data;
-  return description === permissionDesc && alias === permissionAlias ? 'NONE' : 'PUT';
-}).catch((err) => {
-  if (err.response.status === 404) {
-    return 'POST';
-  }
-  throw new Error(iamApiErrorToString(err, `Could not fetch permission ${permissionId}`));
-});
+) =>
+  axios({
+    url: `${iamUrl}/api/v1/permissions/${permissionId}`,
+    method: 'GET',
+    headers: {
+      authorization: `Bearer ${iamToken}`,
+    },
+  })
+    .then((response) => {
+      const { description, alias } = response.data;
+      return description === permissionDesc && alias === permissionAlias
+        ? 'NONE'
+        : 'PUT';
+    })
+    .catch((err) => {
+      if (err.response.status === 404) {
+        return 'POST';
+      }
+      throw new Error(
+        iamApiErrorToString(err, `Could not fetch permission ${permissionId}`),
+      );
+    });
 
 const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
   // Split permissions into chunks of 10 to not overload IAM with too many concurrent requests.
@@ -65,7 +79,7 @@ const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
   let chunkIndex = 0;
   fullPermissions.forEach((value, key) => {
     if (chunks[chunkIndex].size >= chunkSize) {
-      chunks[chunkIndex += 1] = new Map();
+      chunks[(chunkIndex += 1)] = new Map();
     }
     chunks[chunkIndex].set(key, value);
   });
@@ -76,17 +90,27 @@ const handlePermissions = async (fullPermissions, iamToken, iamUrl) => {
     const it = chunks[i][Symbol.iterator]();
     for (const [id, { description, alias }] of it) {
       core.info(`handling permission for '${id}'`);
-      promises.push(getPermission(iamToken, id, description, iamUrl, alias)
-        .then((status) => {
-          if (status !== 'NONE') {
-            core.info(`permission '${id}' require update (${status})`);
-            return updateAddPermission(iamToken, id, description, status, iamUrl, alias);
-          }
-          core.info(`permission '${id}' exists`);
-          return null;
-        }));
+      promises.push(
+        getPermission(iamToken, id, description, iamUrl, alias).then(
+          (status) => {
+            if (status !== 'NONE') {
+              core.info(`permission '${id}' require update (${status})`);
+              return updateAddPermission(
+                iamToken,
+                id,
+                description,
+                status,
+                iamUrl,
+                alias,
+              );
+            }
+            core.info(`permission '${id}' exists`);
+            return null;
+          },
+        ),
+      );
       // Complete the chunk.
-      // eslint-disable-next-line no-await-in-loop
+
       await Promise.all(promises);
     }
   }

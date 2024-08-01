@@ -21,7 +21,9 @@ const jsonKey = {
   project_id: 'test-project',
 };
 
-const base64Key = Buffer.from(JSON.stringify(jsonKey), 'utf8').toString('base64');
+const base64Key = Buffer.from(JSON.stringify(jsonKey), 'utf8').toString(
+  'base64',
+);
 
 const orgEnv = process.env;
 
@@ -70,7 +72,10 @@ describe('Setup Gcloud', () => {
       expect.anything(),
     );
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
-    expect(core.exportVariable).toHaveBeenCalledWith('CLOUDSDK_CORE_PROJECT', 'test-project');
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'CLOUDSDK_CORE_PROJECT',
+      'test-project',
+    );
     expect(fs.existsSync('/gcloud/innerdir/__pycache__')).toEqual(false);
     expect(fs.existsSync('/gcloud/.install/.backup')).toEqual(true);
     expect(fs.existsSync('/testdir/__pycache__')).toEqual(true);
@@ -87,15 +92,24 @@ describe('Setup Gcloud', () => {
       expect.anything(),
     );
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
-    expect(core.exportVariable).toHaveBeenCalledWith('CLOUDSDK_CORE_PROJECT', 'test-project');
-    expect(core.exportVariable).toHaveBeenCalledWith('GCLOUD_INSTALLED_VERSION', '280.0.0');
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'CLOUDSDK_CORE_PROJECT',
+      'test-project',
+    );
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'GCLOUD_INSTALLED_VERSION',
+      '280.0.0',
+    );
   });
 
   test('It can export GOOGLE_APPLICATION_CREDENTIALS', async () => {
     exec.exec.mockResolvedValueOnce(0);
     restoreCache.mockResolvedValueOnce(undefined);
     await setupGcloud(base64Key, 'latest', true);
-    expect(core.exportVariable).toHaveBeenCalledWith('GOOGLE_APPLICATION_CREDENTIALS', expect.any(String));
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'GOOGLE_APPLICATION_CREDENTIALS',
+      expect.any(String),
+    );
   });
 
   test('It can export GOOGLE_APPLICATION_CREDENTIALS and copy tmp file', async () => {

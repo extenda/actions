@@ -1,7 +1,14 @@
 const exec = require('@actions/exec');
 
 // Dataflow build gcloud cmd
-const dataflowBuild = async (templatePath, image, sdkLanguage, metadataPath, jarPath, envVars) => {
+const dataflowBuild = async (
+  templatePath,
+  image,
+  sdkLanguage,
+  metadataPath,
+  jarPath,
+  envVars,
+) => {
   const args = [
     'dataflow',
     'flex-template',

@@ -5,34 +5,37 @@ const cleanRevisions = require('../cloudrun/clean-revisions');
 const { projectWithoutNumbers } = require('../utils/clan-project-name');
 const setupAuthorization = require('../cloudrun/iam-bindings');
 
-const deployRelease = async (projectID, name, version) => gcloudOutput([
-  'deploy',
-  'releases',
-  'create',
-  `${name}-${version}`,
-  `--delivery-pipeline=${name}`,
-  `--project=${projectID}`,
-  '--region=europe-west1',
-]);
+const deployRelease = async (projectID, name, version) =>
+  gcloudOutput([
+    'deploy',
+    'releases',
+    'create',
+    `${name}-${version}`,
+    `--delivery-pipeline=${name}`,
+    `--project=${projectID}`,
+    '--region=europe-west1',
+  ]);
 
-const applyDeployment = async (projectID) => gcloudOutput([
-  'deploy',
-  'apply',
-  '--file=clouddeploy.yaml',
-  `--project=${projectID}`,
-  '--region=europe-west1',
-]);
+const applyDeployment = async (projectID) =>
+  gcloudOutput([
+    'deploy',
+    'apply',
+    '--file=clouddeploy.yaml',
+    `--project=${projectID}`,
+    '--region=europe-west1',
+  ]);
 
-const getDeployState = async (projectID, name, version) => gcloudOutput([
-  'deploy',
-  'rollouts',
-  'list',
-  `--project=${projectID}`,
-  '--region=europe-west1',
-  `--release=${name}-${version}`,
-  `--delivery-pipeline=${name}`,
-  '--format=get(state)',
-]);
+const getDeployState = async (projectID, name, version) =>
+  gcloudOutput([
+    'deploy',
+    'rollouts',
+    'list',
+    `--project=${projectID}`,
+    '--region=europe-west1',
+    `--release=${name}-${version}`,
+    `--delivery-pipeline=${name}`,
+    '--format=get(state)',
+  ]);
 
 const runGcloudDeploy = async (projectID, name, version) => {
   await applyDeployment(projectID);
@@ -60,7 +63,9 @@ const deploy = async (projectID, name, version, platformGKE, accounts = []) => {
     }
   } else {
     core.error(`Deployment of ${name} failed`);
-    core.info(`pipeline link: https://console.cloud.google.com/deploy/delivery-pipelines/europe-west1/${name}?project=${projectID}`);
+    core.info(
+      `pipeline link: https://console.cloud.google.com/deploy/delivery-pipelines/europe-west1/${name}?project=${projectID}`,
+    );
     const project = projectWithoutNumbers(projectID);
     const clan = project.split('-')[0];
     const env = project.split('-')[1];

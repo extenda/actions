@@ -1,7 +1,9 @@
 const core = require('@actions/core');
 const JiraClient = require('jira-client');
 const semver = require('semver');
-const { findJiraChanges } = require('../../jira-releasenotes/src/jira-releasenotes');
+const {
+  findJiraChanges,
+} = require('../../jira-releasenotes/src/jira-releasenotes');
 
 const releaseName = (projectKey, component, version) => {
   const release = [projectKey];
@@ -37,9 +39,7 @@ const getOrCreateRelease = async (client, { key, id }, name) => {
 
 const createUpdate = ({ id }) => ({
   update: {
-    fixVersions: [
-      { add: { id } },
-    ],
+    fixVersions: [{ add: { id } }],
   },
 });
 
@@ -63,8 +63,13 @@ const createJiraRelease = async ({
 
   const project = await client.getProject(projectKey);
 
-  if (component && !project.components.find((list) => list.name === component)) {
-    throw new Error(`'${component}' is not a valid JIRA component in project '${projectKey}'`);
+  if (
+    component &&
+    !project.components.find((list) => list.name === component)
+  ) {
+    throw new Error(
+      `'${component}' is not a valid JIRA component in project '${projectKey}'`,
+    );
   }
 
   const release = await getOrCreateRelease(client, project, name);
@@ -82,17 +87,22 @@ const createJiraRelease = async ({
 
   if (!release.released) {
     core.info(`Release version ${name}`);
-    await client.updateVersion({
-      id: release.id,
-      projectId: release.projectId,
-      releaseDate: new Date().toISOString().split('T')[0],
-      released: true,
-    }).then(() => {
-      core.info(`Version ${name} is now released`);
-    }).catch((err) => {
-      core.error(`Failed to release version ${name}. It must be manually released in JIRA. Reason: ${err.message}`);
-      return null;
-    });
+    await client
+      .updateVersion({
+        id: release.id,
+        projectId: release.projectId,
+        releaseDate: new Date().toISOString().split('T')[0],
+        released: true,
+      })
+      .then(() => {
+        core.info(`Version ${name} is now released`);
+      })
+      .catch((err) => {
+        core.error(
+          `Failed to release version ${name}. It must be manually released in JIRA. Reason: ${err.message}`,
+        );
+        return null;
+      });
   } else {
     core.warning(`Version ${name} was already released in JIRA`);
   }

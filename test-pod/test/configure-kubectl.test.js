@@ -45,8 +45,9 @@ describe('Configure KubeCtl', () => {
 
   test('It fails if cloud-run.yaml is missing', async () => {
     mockFs({});
-    await expect(configureKubeCtl('sa', '', '')).rejects
-      .toEqual(new Error('Service specification file not found: cloud-run.yaml'));
+    await expect(configureKubeCtl('sa', '', '')).rejects.toEqual(
+      new Error('Service specification file not found: cloud-run.yaml'),
+    );
   });
 
   test('It will find cluster if definition is missing', async () => {

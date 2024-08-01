@@ -57,7 +57,8 @@ describe('repository-dispatch', () => {
   });
 
   test('It can dispatch a custom payload', async () => {
-    core.getInput.mockReturnValueOnce('extenda/test-repo')
+    core.getInput
+      .mockReturnValueOnce('extenda/test-repo')
       .mockReturnValueOnce('test-event')
       .mockReturnValueOnce('{"custom": "value"}');
     await action();
@@ -86,11 +87,14 @@ describe('repository-dispatch', () => {
       key11: 'value11',
     };
 
-    core.getInput.mockReturnValueOnce('extenda/test-repo')
+    core.getInput
+      .mockReturnValueOnce('extenda/test-repo')
       .mockReturnValueOnce('test-event')
       .mockReturnValueOnce(JSON.stringify(bigObject));
 
-    await expect(action()).rejects.toEqual(new Error('client-payload can at most contain 10 top-level keys'));
+    await expect(action()).rejects.toEqual(
+      new Error('client-payload can at most contain 10 top-level keys'),
+    );
     expect(mockDispatch).not.toHaveBeenCalled();
   });
 });

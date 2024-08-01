@@ -7,13 +7,18 @@ const convertMemory = (memory) => {
   }
   return memory;
 };
-const removeScalerConfiguration = async (service) => execGcloud([
-  'delete',
-  'configmap',
-  'vpa-scaler-configuration',
-  `--namespace=${service}`,
-], 'kubectl', true, true)
-  .catch(() => true); // consider configmap deleted or doesn't exist
+const removeScalerConfiguration = async (service) =>
+  execGcloud(
+    [
+      'delete',
+      'configmap',
+      'vpa-scaler-configuration',
+      `--namespace=${service}`,
+    ],
+    'kubectl',
+    true,
+    true,
+  ).catch(() => true); // consider configmap deleted or doesn't exist
 
 const configMapManifest = async (service, type, CPU, Memory, scaling) => {
   const {

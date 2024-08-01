@@ -75,14 +75,16 @@ const installComponents = async (toolPath) => {
     fs.rmSync(installBackup, { recursive: true });
     fs.mkdirSync(installBackup, { recursive: true });
   }
-  glob.sync('**/__pycache__', {
-    cwd: toolPath,
-    dot: true,
-    onlyDirectories: true,
-    absolute: true,
-  }).forEach((pycache) => {
-    fs.rmSync(pycache, { recursive: true });
-  });
+  glob
+    .sync('**/__pycache__', {
+      cwd: toolPath,
+      dot: true,
+      onlyDirectories: true,
+      absolute: true,
+    })
+    .forEach((pycache) => {
+      fs.rmSync(pycache, { recursive: true });
+    });
   return null;
 };
 
@@ -110,13 +112,19 @@ const authenticateGcloud = async (serviceAccountKey, exportCredentials) => {
     });
   }
 
-  const { project_id: projectId = '' } = JSON.parse(fs.readFileSync(tmpKeyFile, 'utf8'));
+  const { project_id: projectId = '' } = JSON.parse(
+    fs.readFileSync(tmpKeyFile, 'utf8'),
+  );
 
   core.exportVariable('CLOUDSDK_CORE_PROJECT', projectId);
   return projectId;
 };
 
-const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredentials = false) => {
+const setupGcloud = async (
+  serviceAccountKey,
+  version = 'latest',
+  exportCredentials = false,
+) => {
   const gcloudVersion = await getGcloudVersion(version);
   const toolInfo = {
     tool: 'gcloud',
@@ -139,7 +147,8 @@ const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredenti
     await loadTool({
       ...toolInfo,
       downloadUrl,
-    }).then(updatePath)
+    })
+      .then(updatePath)
       .then(installComponents)
       .then(() => saveCache([cachePath], cacheKey));
   } else {
@@ -149,11 +158,12 @@ const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredenti
 
   core.exportVariable('GCLOUD_INSTALLED_VERSION', gcloudVersion);
 
-  return authenticateGcloud(serviceAccountKey, exportCredentials)
-    .then((projectId) => {
+  return authenticateGcloud(serviceAccountKey, exportCredentials).then(
+    (projectId) => {
       core.setOutput('project-id', projectId);
       return projectId;
-    });
+    },
+  );
 };
 
 module.exports = setupGcloud;

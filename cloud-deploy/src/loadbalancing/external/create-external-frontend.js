@@ -5,71 +5,86 @@ const setupExternalDomainMapping = require('./setup-external-domainmapping');
 const { projectWithoutNumbers } = require('../../utils/clan-project-name');
 
 // Create/fetch static IP
-const createIP = async (projectID) => gcloudOutput([
-  'compute',
-  'addresses',
-  'create',
-  `${projectID}-lb-external-ip`,
-  `--project=${projectID}`,
-  '--global',
-  '--ip-version=IPV4',
-]);
+const createIP = async (projectID) =>
+  gcloudOutput([
+    'compute',
+    'addresses',
+    'create',
+    `${projectID}-lb-external-ip`,
+    `--project=${projectID}`,
+    '--global',
+    '--ip-version=IPV4',
+  ]);
 
-const obtainIP = async (projectID) => gcloudOutput([
-  'compute',
-  'addresses',
-  'describe',
-  `${projectID}-lb-external-ip`,
-  `--project=${projectID}`,
-  '--global',
-  '--format=get(address)',
-], 'gcloud', true, true).catch(() => createIP(projectID)
-  .then(() => obtainIP(projectID)));
+const obtainIP = async (projectID) =>
+  gcloudOutput(
+    [
+      'compute',
+      'addresses',
+      'describe',
+      `${projectID}-lb-external-ip`,
+      `--project=${projectID}`,
+      '--global',
+      '--format=get(address)',
+    ],
+    'gcloud',
+    true,
+    true,
+  ).catch(() => createIP(projectID).then(() => obtainIP(projectID)));
 
-const updateHttpsProxy = async (projectID, certificates, loadBalancerName) => gcloudOutput([
-  'compute',
-  'target-https-proxies',
-  'update',
-  'https-lb-proxy-external',
-  `--url-map=${loadBalancerName}`,
-  `--ssl-certificates=${certificates}`,
-  '--ssl-policy=extenda-ssl-policy',
-  `--project=${projectID}`,
-]).then(() => core.info('Certificates updated successfully!'));
+const updateHttpsProxy = async (projectID, certificates, loadBalancerName) =>
+  gcloudOutput([
+    'compute',
+    'target-https-proxies',
+    'update',
+    'https-lb-proxy-external',
+    `--url-map=${loadBalancerName}`,
+    `--ssl-certificates=${certificates}`,
+    '--ssl-policy=extenda-ssl-policy',
+    `--project=${projectID}`,
+  ]).then(() => core.info('Certificates updated successfully!'));
 
-const createHttpsProxy = async (projectID, certificates, loadBalancerName) => gcloudOutput([
-  'compute',
-  'target-https-proxies',
-  'create',
-  'https-lb-proxy-external',
-  `--url-map=${loadBalancerName}`,
-  `--ssl-certificates=${certificates}`,
-  '--ssl-policy=extenda-ssl-policy',
-  `--project=${projectID}`,
-], 'gcloud', true, true).catch(() => updateHttpsProxy(projectID, certificates, loadBalancerName));
+const createHttpsProxy = async (projectID, certificates, loadBalancerName) =>
+  gcloudOutput(
+    [
+      'compute',
+      'target-https-proxies',
+      'create',
+      'https-lb-proxy-external',
+      `--url-map=${loadBalancerName}`,
+      `--ssl-certificates=${certificates}`,
+      '--ssl-policy=extenda-ssl-policy',
+      `--project=${projectID}`,
+    ],
+    'gcloud',
+    true,
+    true,
+  ).catch(() => updateHttpsProxy(projectID, certificates, loadBalancerName));
 
-const createForwardingRule = async (projectID, IP) => gcloudOutput([
-  'compute',
-  'forwarding-rules',
-  'create',
-  'https-proxy-external',
-  `--address=${IP}`,
-  '--target-https-proxy=https-lb-proxy-external',
-  '--global',
-  `--project=${projectID}`,
-  '--ports=443',
-]);
+const createForwardingRule = async (projectID, IP) =>
+  gcloudOutput([
+    'compute',
+    'forwarding-rules',
+    'create',
+    'https-proxy-external',
+    `--address=${IP}`,
+    '--target-https-proxy=https-lb-proxy-external',
+    '--global',
+    `--project=${projectID}`,
+    '--ports=443',
+  ]);
 
-const createSSLPolicy = async (projectID) => gcloudOutput([
-  'compute',
-  'ssl-policies',
-  'create',
-  'extenda-ssl-policy',
-  '--profile=MODERN',
-  '--min-tls-version=1.2',
-  `--project=${projectID}`,
-  '--global',
-]);
+const createSSLPolicy = async (projectID) =>
+  gcloudOutput([
+    'compute',
+    'ssl-policies',
+    'create',
+    'extenda-ssl-policy',
+    '--profile=MODERN',
+    '--min-tls-version=1.2',
+    `--project=${projectID}`,
+    '--global',
+  ]);
 
 const configureExternalLBFrontend = async (projectID, env, hosts, migrate) => {
   core.info('Obtaining ip for loadbalancer');

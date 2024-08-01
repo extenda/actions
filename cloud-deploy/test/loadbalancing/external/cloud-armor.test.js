@@ -1,8 +1,14 @@
-const { setCloudArmorPolicyTarget, checkPolicyExists, checkPolicyTarget } = require('../../../src/loadbalancing/external/cloud-armor');
+const {
+  setCloudArmorPolicyTarget,
+  checkPolicyExists,
+  checkPolicyTarget,
+} = require('../../../src/loadbalancing/external/cloud-armor');
 const gcloudOutput = require('../../../src/utils/gcloud-output');
 
 jest.mock('@actions/core');
-jest.mock('../../../src/utils/gcloud-output', () => jest.fn().mockImplementation(() => Promise.resolve()));
+jest.mock('../../../src/utils/gcloud-output', () =>
+  jest.fn().mockImplementation(() => Promise.resolve()),
+);
 
 describe('Add cloud armor target', () => {
   const mockProjectID = 'project-staging';
@@ -16,7 +22,11 @@ describe('Add cloud armor target', () => {
   it('Should setup the cloud armor policy target', async () => {
     gcloudOutput.mockResolvedValueOnce();
 
-    await setCloudArmorPolicyTarget(mockServiceName, mockPolicyName, mockProjectID);
+    await setCloudArmorPolicyTarget(
+      mockServiceName,
+      mockPolicyName,
+      mockProjectID,
+    );
     expect(gcloudOutput).toHaveBeenNthCalledWith(1, [
       'compute',
       'backend-services',
@@ -33,19 +43,29 @@ describe('Add cloud armor target', () => {
     gcloudOutput.mockResolvedValueOnce();
 
     await checkPolicyExists(mockPolicyName, mockProjectID);
-    expect(gcloudOutput).toHaveBeenNthCalledWith(1, [
-      'compute',
-      'security-policies',
-      'describe',
-      mockPolicyName,
-      `--project=${mockProjectID}`,
-    ], 'gcloud', expect.anything(), expect.anything());
+    expect(gcloudOutput).toHaveBeenNthCalledWith(
+      1,
+      [
+        'compute',
+        'security-policies',
+        'describe',
+        mockPolicyName,
+        `--project=${mockProjectID}`,
+      ],
+      'gcloud',
+      expect.anything(),
+      expect.anything(),
+    );
     expect(gcloudOutput).toHaveBeenCalledTimes(1);
   });
 
   it('Should fail if cloud armor policy does not exist', async () => {
     gcloudOutput.mockRejectedValueOnce();
-    await expect(checkPolicyExists(mockPolicyName, mockProjectID)).rejects.toThrow(`No cloud armor policy with name "${mockPolicyName}" found`);
+    await expect(
+      checkPolicyExists(mockPolicyName, mockProjectID),
+    ).rejects.toThrow(
+      `No cloud armor policy with name "${mockPolicyName}" found`,
+    );
   });
 
   it('Should check the backend security policy is already added', async () => {
@@ -54,7 +74,11 @@ describe('Add cloud armor target', () => {
     });
     gcloudOutput.mockResolvedValueOnce(mockDescribeObject);
 
-    const result = await checkPolicyTarget(mockServiceName, mockPolicyName, mockProjectID);
+    const result = await checkPolicyTarget(
+      mockServiceName,
+      mockPolicyName,
+      mockProjectID,
+    );
     expect(gcloudOutput).toHaveBeenNthCalledWith(1, [
       'compute',
       'backend-services',
@@ -74,7 +98,11 @@ describe('Add cloud armor target', () => {
     });
     gcloudOutput.mockResolvedValueOnce(mockDescribeObject);
 
-    const result = await checkPolicyTarget(mockServiceName, 'some-policy-name', mockProjectID);
+    const result = await checkPolicyTarget(
+      mockServiceName,
+      'some-policy-name',
+      mockProjectID,
+    );
     expect(gcloudOutput).toHaveBeenNthCalledWith(1, [
       'compute',
       'backend-services',
@@ -94,7 +122,11 @@ describe('Add cloud armor target', () => {
     });
     gcloudOutput.mockResolvedValueOnce(mockDescribeObject);
 
-    const result = await checkPolicyTarget(mockServiceName, 'some-policy-name', mockProjectID);
+    const result = await checkPolicyTarget(
+      mockServiceName,
+      'some-policy-name',
+      mockProjectID,
+    );
     expect(gcloudOutput).toHaveBeenNthCalledWith(1, [
       'compute',
       'backend-services',

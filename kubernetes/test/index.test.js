@@ -24,7 +24,8 @@ describe('Kubernetes Action', () => {
 
   test('It can run the action', async () => {
     serviceDefinition.mockReturnValueOnce({});
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce(serviceDefinition)
       .mockReturnValueOnce('image:tag')
       .mockReturnValueOnce('true');
@@ -43,6 +44,8 @@ describe('Kubernetes Action', () => {
   test('It rejects action if not trunk-based', async () => {
     core.getInput.mockReturnValue('test');
     process.env.GITHUB_REF = 'refs/heads/develop';
-    await expect(action()).rejects.toThrow(/^Action not allowed on ref refs\/heads\/develop/);
+    await expect(action()).rejects.toThrow(
+      /^Action not allowed on ref refs\/heads\/develop/,
+    );
   });
 });

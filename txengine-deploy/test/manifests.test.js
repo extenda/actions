@@ -32,7 +32,9 @@ describe('manifests', () => {
 
   beforeEach(() => {
     mockFs({});
-    mockLoadSecret.mockResolvedValueOnce('ip').mockResolvedValueOnce('password');
+    mockLoadSecret
+      .mockResolvedValueOnce('ip')
+      .mockResolvedValueOnce('password');
   });
 
   test('It can collect files into one', async () => {
@@ -44,21 +46,20 @@ describe('manifests', () => {
     axios.mockResolvedValueOnce({ data: mockYaml2, status: 200 });
     axios.mockResolvedValueOnce({ data: mockYaml3, status: 200 });
     mockContent.mockResolvedValueOnce({
-      data: [{
-        name: '02-file2.yaml',
-        content: Buffer.from('---\nname: file2\n', 'utf8').toString('base64'),
-      },
-      {
-        name: '00-file0.yaml',
-        content: Buffer.from(
-          '---\nname: file0\n',
-          'utf8',
-        ).toString('base64'),
-      },
-      {
-        name: '01-file1.yaml',
-        content: Buffer.from('---\nname: file1\n', 'utf8').toString('base64'),
-      }],
+      data: [
+        {
+          name: '02-file2.yaml',
+          content: Buffer.from('---\nname: file2\n', 'utf8').toString('base64'),
+        },
+        {
+          name: '00-file0.yaml',
+          content: Buffer.from('---\nname: file0\n', 'utf8').toString('base64'),
+        },
+        {
+          name: '01-file1.yaml',
+          content: Buffer.from('---\nname: file1\n', 'utf8').toString('base64'),
+        },
+      ],
     });
 
     const vars = {
@@ -69,14 +70,17 @@ describe('manifests', () => {
     const result = await createManifests('secret-account', vars);
     expect(axios).toHaveBeenCalledTimes(3);
     expect(result.file).toEqual('.k8s/generated/00-manifest.yaml');
-    expect(result.content).toEqual('---\nname: file0\n---\nname: file1\n---\nname: file2\n');
+    expect(result.content).toEqual(
+      '---\nname: file0\n---\nname: file1\n---\nname: file2\n',
+    );
     expect(result.namespace).toEqual('txengine-tenant-se');
     expect(fs.existsSync(result.file)).toEqual(true);
     expect(fs.readFileSync(result.file, 'utf8')).toEqual(result.content);
   });
 
   test('It can replace token variables in manifest', async () => {
-    const mockYaml1 = '---\nname: file0\nnamespace: $NAMESPACE\nimage: $CONTAINER_IMAGE\n';
+    const mockYaml1 =
+      '---\nname: file0\nnamespace: $NAMESPACE\nimage: $CONTAINER_IMAGE\n';
     const mockYaml2 = '---\nname: file1\nnamespace: $NAMESPACE';
     const mockYaml3 = '---\nname: file2\n';
 
@@ -84,21 +88,26 @@ describe('manifests', () => {
     axios.mockResolvedValueOnce({ data: mockYaml2, status: 200 });
     axios.mockResolvedValueOnce({ data: mockYaml3, status: 200 });
     mockContent.mockResolvedValueOnce({
-      data: [{
-        name: '02-file2.yaml',
-        content: Buffer.from('---\nname: file2\n', 'utf8').toString('base64'),
-      },
-      {
-        name: '00-file0.yaml',
-        content: Buffer.from(
-          '---\nname: file0\nnamespace: $NAMESPACE\nimage: $CONTAINER_IMAGE\n',
-          'utf8',
-        ).toString('base64'),
-      },
-      {
-        name: '01-file1.yaml',
-        content: Buffer.from('---\nname: file1\nnamespace: $NAMESPACE', 'utf8').toString('base64'),
-      }],
+      data: [
+        {
+          name: '02-file2.yaml',
+          content: Buffer.from('---\nname: file2\n', 'utf8').toString('base64'),
+        },
+        {
+          name: '00-file0.yaml',
+          content: Buffer.from(
+            '---\nname: file0\nnamespace: $NAMESPACE\nimage: $CONTAINER_IMAGE\n',
+            'utf8',
+          ).toString('base64'),
+        },
+        {
+          name: '01-file1.yaml',
+          content: Buffer.from(
+            '---\nname: file1\nnamespace: $NAMESPACE',
+            'utf8',
+          ).toString('base64'),
+        },
+      ],
     });
     const vars = {
       replaceTokens: {
@@ -125,13 +134,12 @@ describe('manifests', () => {
     `;
     axios.mockResolvedValueOnce({ data: mockYaml, status: 200 });
     mockContent.mockResolvedValueOnce({
-      data: [{
-        name: '00-file0.yaml',
-        content: Buffer.from(
-          mockYaml,
-          'utf8',
-        ).toString('base64'),
-      }],
+      data: [
+        {
+          name: '00-file0.yaml',
+          content: Buffer.from(mockYaml, 'utf8').toString('base64'),
+        },
+      ],
     });
     const vars = {
       replaceTokens: {},
@@ -162,13 +170,12 @@ describe('manifests', () => {
     `;
     axios.mockResolvedValueOnce({ data: mockYaml, status: 200 });
     mockContent.mockResolvedValueOnce({
-      data: [{
-        name: '00-file0.yaml',
-        content: Buffer.from(
-          mockYaml,
-          'utf8',
-        ).toString('base64'),
-      }],
+      data: [
+        {
+          name: '00-file0.yaml',
+          content: Buffer.from(mockYaml, 'utf8').toString('base64'),
+        },
+      ],
     });
     const vars = {
       replaceTokens: {},
@@ -197,13 +204,12 @@ describe('manifests', () => {
     `;
     axios.mockResolvedValueOnce({ data: mockYaml, status: 200 });
     mockContent.mockResolvedValueOnce({
-      data: [{
-        name: '00-file0.yaml',
-        content: Buffer.from(
-          mockYaml,
-          'utf8',
-        ).toString('base64'),
-      }],
+      data: [
+        {
+          name: '00-file0.yaml',
+          content: Buffer.from(mockYaml, 'utf8').toString('base64'),
+        },
+      ],
     });
     const vars = {
       replaceTokens: {},

@@ -14,7 +14,9 @@ const findRevision = async (output, namespace, cluster) => {
     /ERROR: \(gcloud\.run\.deploy\) unsuccessfully observed a new generation/,
     /ERROR: \(gcloud\.run\.deploy\) Revision "([^"]+)" failed to become ready./,
     /ERROR: \(gcloud\.run\.services\.update-traffic\) Revision "([^"]+)" failed to become ready./,
-    new RegExp(`ERROR: \\(gcloud\\.run\\.deploy\\) Configuration "${namespace}" does not have any ready Revision.`),
+    new RegExp(
+      `ERROR: \\(gcloud\\.run\\.deploy\\) Configuration "${namespace}" does not have any ready Revision.`,
+    ),
   ];
   let match;
   failureMatches.forEach((failureMatch) => {
@@ -45,7 +47,8 @@ const parseConditions = (conditions) => {
   };
 
   conditions.forEach((condition) => {
-    const type = condition.type.charAt(0).toLowerCase() + condition.type.slice(1);
+    const type =
+      condition.type.charAt(0).toLowerCase() + condition.type.slice(1);
     const status = condition.status === 'True';
     revisionStatus[type] = {
       status,
@@ -61,51 +64,68 @@ const parseConditions = (conditions) => {
 const getRevisionStatus = async (revision, args) => {
   const findArg = (match) => args.find((a) => a.startsWith(match));
   let stdout = '';
-  await exec.exec('gcloud', [
-    'run', 'revisions', 'describe', revision,
-    findArg('--project='),
-    findArg('--platform='),
-    findArg('--cluster='),
-    findArg('--cluster-location='),
-    findArg('--namespace='),
-    '--format=json',
-  ], {
-    silent: true,
-    listeners: {
-      stdout: (data) => {
-        stdout += data.toString('utf8');
+  await exec.exec(
+    'gcloud',
+    [
+      'run',
+      'revisions',
+      'describe',
+      revision,
+      findArg('--project='),
+      findArg('--platform='),
+      findArg('--cluster='),
+      findArg('--cluster-location='),
+      findArg('--namespace='),
+      '--format=json',
+    ],
+    {
+      silent: true,
+      listeners: {
+        stdout: (data) => {
+          stdout += data.toString('utf8');
+        },
       },
     },
-  });
+  );
 
   try {
-    const { status: { conditions } } = JSON.parse(stdout.trim());
+    const {
+      status: { conditions },
+    } = JSON.parse(stdout.trim());
     core.debug(JSON.stringify(conditions, null, 2));
     return parseConditions(conditions);
   } catch (err) {
-    throw new Error(`Invalid JSON: Failed to load status for revision "${revision}". Reason: ${err.message}`);
+    throw new Error(
+      `Invalid JSON: Failed to load status for revision "${revision}". Reason: ${err.message}`,
+    );
   }
 };
 
-const timer = (ms) => new Promise((res) => {
-  setTimeout(res, ms);
-});
+const timer = (ms) =>
+  new Promise((res) => {
+    setTimeout(res, ms);
+  });
 
 const isRevisionCompleted = (revisionStatus) => {
   const keys = ['active', 'ready', 'containerHealthy', 'resourcesAvailable'];
-  const success = keys.map((key) => revisionStatus[key].status)
+  const success = keys
+    .map((key) => revisionStatus[key].status)
     .reduce((prev, status) => prev && status, true);
 
   if (!success) {
     // Check if we should fail fast
-    keys.map((key) => {
-      const { reason = null, message = '' } = revisionStatus[key];
-      return { key, reason, message };
-    }).forEach(({ key, reason, message }) => {
-      if (typeof reason === 'string' && reason.startsWith('ExitCode')) {
-        throw new Error(`Revision failed "${key}" condition with reason: ${reason}\n${message || ''}`);
-      }
-    });
+    keys
+      .map((key) => {
+        const { reason = null, message = '' } = revisionStatus[key];
+        return { key, reason, message };
+      })
+      .forEach(({ key, reason, message }) => {
+        if (typeof reason === 'string' && reason.startsWith('ExitCode')) {
+          throw new Error(
+            `Revision failed "${key}" condition with reason: ${reason}\n${message || ''}`,
+          );
+        }
+      });
   }
   return success;
 };
@@ -113,7 +133,8 @@ const isRevisionCompleted = (revisionStatus) => {
 const printStatus = (revisionStatus) => {
   const completed = isRevisionCompleted(revisionStatus);
   const values = Object.keys(revisionStatus)
-    .map((k) => `${k}=${revisionStatus[k].status}`).join(', ');
+    .map((k) => `${k}=${revisionStatus[k].status}`)
+    .join(', ');
   return `${completed} (${values})`;
 };
 
@@ -125,7 +146,7 @@ const updateTraffic = async (revision, cluster, canary, namespace) => {
   }
 
   let target = `--to-revisions=${rev}=100`;
-  if ((canary && canary.enabled) && env === 'prod') {
+  if (canary && canary.enabled && env === 'prod') {
     target = `--to-revisions=${rev}=${canary.steps.split('.')[0]}`;
   }
 
@@ -165,13 +186,13 @@ const waitForRevision = async (
       revision = await findRevision(output, namespace, cluster);
     }
     // update traffic on latest revision based on steps
-    await updateTraffic(revision, cluster, canary, namespace)
-      .catch((err) => { core.error(`gcloud execution failed: ${err.message}`); });
+    await updateTraffic(revision, cluster, canary, namespace).catch((err) => {
+      core.error(`gcloud execution failed: ${err.message}`);
+    });
 
     core.info(`Waiting for revision "${revision}" to become active...`);
     let revisionStatus = {};
 
-    /* eslint-disable no-await-in-loop */
     const t0 = Date.now();
     do {
       if (Date.now() - t0 > timeoutMs) {
@@ -181,10 +202,10 @@ const waitForRevision = async (
       revisionStatus = await getRevisionStatus(revision, args);
       core.info(`Deploy status is: ${printStatus(revisionStatus)}`);
     } while (!isRevisionCompleted(revisionStatus));
-    /* eslint-enable no-await-in-loop */
   } else if (args.includes('--platform=gke')) {
-    await updateTraffic(null, cluster, canary, namespace)
-      .catch((err) => { core.error(`gcloud execution failed: ${err.message}`); });
+    await updateTraffic(null, cluster, canary, namespace).catch((err) => {
+      core.error(`gcloud execution failed: ${err.message}`);
+    });
   }
   return 0;
 };

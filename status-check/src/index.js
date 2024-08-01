@@ -16,7 +16,14 @@ const validateState = (state) => {
   }
 };
 
-const checkRun = async (repository, sha, context, state, description, targetUrl) => {
+const checkRun = async (
+  repository,
+  sha,
+  context,
+  state,
+  description,
+  targetUrl,
+) => {
   const validState = validateState(state);
 
   const token = await loadGitHubToken(loadSecret);
@@ -41,7 +48,8 @@ const checkRun = async (repository, sha, context, state, description, targetUrl)
 };
 
 const action = async () => {
-  const repository = core.getInput('repository') || process.env.GITHUB_REPOSITORY;
+  const repository =
+    core.getInput('repository') || process.env.GITHUB_REPOSITORY;
   const sha = core.getInput('sha') || process.env.GITHUB_SHA;
   const context = core.getInput('context', { required: true });
   const state = core.getInput('state', { required: true });

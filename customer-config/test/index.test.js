@@ -26,7 +26,10 @@ function mockIdpTokenCall() {
 
 function mockCccSyncCall(id, response, dryRun = false) {
   // ignore version
-  const { version, ...payload } = camelcaseKeys(configFixtures.validParsed, { deep: true });
+  // eslint-disable-next-line no-unused-vars
+  const { version, ...payload } = camelcaseKeys(configFixtures.validParsed, {
+    deep: true,
+  });
   const cccNock = nock('https://ccc-api.retailsvc.com')
     .post('/api/v1/internal/configurations:sync', payload)
     .query({ dryRun })
@@ -55,35 +58,44 @@ describe('action', () => {
     mockFs.restore();
   });
 
-  it.each([false, true])('calls ccc api with correct definitions dryRun=%s', async (dryRun) => {
-    const file = 'customer-config/*.yaml';
-    core.getInput
-      .mockReturnValue('serviceAcc')
-      .mockReturnValue(file);
+  it.each([false, true])(
+    'calls ccc api with correct definitions dryRun=%s',
+    async (dryRun) => {
+      const file = 'customer-config/*.yaml';
+      core.getInput.mockReturnValue('serviceAcc').mockReturnValue(file);
 
-    core.getBooleanInput.mockReturnValue(dryRun);
+      core.getBooleanInput.mockReturnValue(dryRun);
 
-    fg.sync.mockReturnValue([file]);
+      fg.sync.mockReturnValue([file]);
 
-    mockFs({ [file]: configFixtures.valid });
-    loadSecrets.mockResolvedValue(secrets);
+      mockFs({ [file]: configFixtures.valid });
+      loadSecrets.mockResolvedValue(secrets);
 
-    const response = {
-      report: [{ id: 'che.receipt-layout.v1', success: true, performedAction: 'created' }],
-      success: true,
-    };
-    const expectCccToBeCalled = mockCccSyncCall('che.receipt-layout.v1', response, dryRun);
+      const response = {
+        report: [
+          {
+            id: 'che.receipt-layout.v1',
+            success: true,
+            performedAction: 'created',
+          },
+        ],
+        success: true,
+      };
+      const expectCccToBeCalled = mockCccSyncCall(
+        'che.receipt-layout.v1',
+        response,
+        dryRun,
+      );
 
-    expect(await action()).toBeUndefined();
+      expect(await action()).toBeUndefined();
 
-    expectCccToBeCalled();
-  });
+      expectCccToBeCalled();
+    },
+  );
 
   it('fails, if sync process was not successful', async () => {
     const file = 'customer-config/*.yaml';
-    core.getInput
-      .mockReturnValue('serviceAcc')
-      .mockReturnValue(file);
+    core.getInput.mockReturnValue('serviceAcc').mockReturnValue(file);
 
     core.getBooleanInput.mockReturnValue(false);
 
@@ -93,12 +105,19 @@ describe('action', () => {
     loadSecrets.mockResolvedValue(secrets);
 
     const response = {
-      report: [{ id: 'che.receipt-layout.v1', success: false, error: 'test error' }],
+      report: [
+        { id: 'che.receipt-layout.v1', success: false, error: 'test error' },
+      ],
       success: false,
     };
-    const expectCccToBeCalled = mockCccSyncCall('che.receipt-layout.v1', response);
+    const expectCccToBeCalled = mockCccSyncCall(
+      'che.receipt-layout.v1',
+      response,
+    );
 
-    await expect(action()).rejects.toThrowError('Sync process had some errors (see details above).');
+    await expect(action()).rejects.toThrowError(
+      'Sync process had some errors (see details above).',
+    );
 
     expectCccToBeCalled();
   });

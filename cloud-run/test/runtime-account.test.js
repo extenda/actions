@@ -3,7 +3,9 @@ const getRuntimeAccount = require('../src/runtime-account');
 describe('Runtime Email Account', () => {
   test('It appends fully-qualified email for prefix', () => {
     const account = getRuntimeAccount('test-account', 'test-project-1234');
-    expect(account).toEqual('test-account@test-project-1234.iam.gserviceaccount.com');
+    expect(account).toEqual(
+      'test-account@test-project-1234.iam.gserviceaccount.com',
+    );
   });
 
   test('It preserves fully-qualified email argument', () => {

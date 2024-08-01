@@ -17,7 +17,13 @@ describe('Run redoc deploy', () => {
 
   test('It can run the action and the files are generated', async () => {
     mockFs({});
-    await deployDocumentation('yamlfile', 'apiName', 'version', 'bucket', 'systemName');
+    await deployDocumentation(
+      'yamlfile',
+      'apiName',
+      'version',
+      'bucket',
+      'systemName',
+    );
 
     expect(fs.existsSync('Versionsindex.html')).toEqual(true);
     expect(fs.existsSync('APIsindex.html')).toEqual(true);

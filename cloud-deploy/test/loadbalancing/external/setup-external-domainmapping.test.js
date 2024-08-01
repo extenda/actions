@@ -19,10 +19,12 @@ describe('setupExternalDomainMapping', () => {
   });
 
   it('should create record set if it does not exist', async () => {
-    const DNSZones = [{
-      dnsName: 'example.com.',
-      name: 'example-com',
-    }];
+    const DNSZones = [
+      {
+        dnsName: 'example.com.',
+        name: 'example-com',
+      },
+    ];
 
     gcloudOutput.mockResolvedValueOnce(JSON.stringify(DNSZones));
     gcloudOutput.mockImplementation(() => Promise.resolve(false));
@@ -51,10 +53,12 @@ describe('setupExternalDomainMapping', () => {
   });
 
   it('should update record set if it exists and migrate is true', async () => {
-    const DNSZones = [{
-      dnsName: 'example.com.',
-      name: 'example-com',
-    }];
+    const DNSZones = [
+      {
+        dnsName: 'example.com.',
+        name: 'example-com',
+      },
+    ];
 
     gcloudOutput.mockResolvedValueOnce(JSON.stringify(DNSZones));
     gcloudOutput.mockResolvedValueOnce('1.2.3.4');
@@ -82,10 +86,12 @@ describe('setupExternalDomainMapping', () => {
   });
 
   it('should remove host from hosts array if record set exists and migrate is false', async () => {
-    const DNSZones = [{
-      dnsName: 'example.com.',
-      name: 'example-com',
-    }];
+    const DNSZones = [
+      {
+        dnsName: 'example.com.',
+        name: 'example-com',
+      },
+    ];
 
     gcloudOutput.mockResolvedValueOnce(JSON.stringify(DNSZones));
     gcloudOutput.mockResolvedValueOnce('1.2.3.4');
@@ -143,9 +149,7 @@ describe('setupExternalDomainMapping', () => {
     loadBalancerIP = '1.2.3.4';
 
     const projectID = 'extenda';
-    const DNSZones = [
-      { name: 'example-com', dnsName: 'example.com.' },
-    ];
+    const DNSZones = [{ name: 'example-com', dnsName: 'example.com.' }];
     gcloudOutput.mockResolvedValueOnce(JSON.stringify(DNSZones));
     gcloudOutput.mockResolvedValueOnce('1.2.3.4');
 

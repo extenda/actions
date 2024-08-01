@@ -1,17 +1,21 @@
 const execGcloud = require('./gcloud-output');
 
-const matchName = (connectorName, nameConvention) => connectorName === nameConvention;
+const matchName = (connectorName, nameConvention) =>
+  connectorName === nameConvention;
 
-const listVpcConnectors = async (project, region) => JSON.parse(await execGcloud([
-  'compute',
-  'networks',
-  'vpc-access',
-  'connectors',
-  'list',
-  `--region=${region}`,
-  `--project=${project}`,
-  '--format=json',
-]));
+const listVpcConnectors = async (project, region) =>
+  JSON.parse(
+    await execGcloud([
+      'compute',
+      'networks',
+      'vpc-access',
+      'connectors',
+      'list',
+      `--region=${region}`,
+      `--project=${project}`,
+      '--format=json',
+    ]),
+  );
 
 const checkVpcConnector = async (project, region, name) => {
   const vpcConnectors = await listVpcConnectors(project, region);

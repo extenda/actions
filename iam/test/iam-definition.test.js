@@ -9,8 +9,9 @@ describe('IAM Definition', () => {
 
   test('It throws for file not found', () => {
     mockFs({});
-    expect(() => loadIamDefinition('iam.yaml'))
-      .toThrow('iam specification file not found: iam.yaml');
+    expect(() => loadIamDefinition('iam.yaml')).toThrow(
+      'iam specification file not found: iam.yaml',
+    );
   });
 
   // Uncomment test to allow yaml without

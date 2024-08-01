@@ -11,7 +11,13 @@ const action = async () => {
   const jiraProjectKey = core.getInput('jira-project-key', { required: true });
 
   await generateFolders(productName);
-  await generateBugLog(jiraUsername, jiraPassword, jiraProjectKey, productName, component);
+  await generateBugLog(
+    jiraUsername,
+    jiraPassword,
+    jiraProjectKey,
+    productName,
+    component,
+  );
   await uploadToBucket(productName);
 };
 

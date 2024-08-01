@@ -39,17 +39,29 @@ describe('check vpc connector', () => {
   });
 
   test('It can return name if listed connectors match', async () => {
-    gcloudOuput.mockResolvedValueOnce(JSON.stringify(listVpcConnectorsWithoutMatchingName));
+    gcloudOuput.mockResolvedValueOnce(
+      JSON.stringify(listVpcConnectorsWithoutMatchingName),
+    );
 
-    const connector = await checkVpcConnector('some-project', 'europe-west1', 'some-connector');
+    const connector = await checkVpcConnector(
+      'some-project',
+      'europe-west1',
+      'some-connector',
+    );
     expect(connector).toEqual('some-connector');
     expect(gcloudOuput).toHaveBeenCalledTimes(1);
   });
 
   test('It can return name if no match but connector exists on network', async () => {
-    gcloudOuput.mockResolvedValueOnce(JSON.stringify(listVpcConnectorsWithoutMatchingName));
+    gcloudOuput.mockResolvedValueOnce(
+      JSON.stringify(listVpcConnectorsWithoutMatchingName),
+    );
 
-    const connector = await checkVpcConnector('some-project', 'europe-west1', 'some-connector123');
+    const connector = await checkVpcConnector(
+      'some-project',
+      'europe-west1',
+      'some-connector123',
+    );
     expect(connector).toEqual('some-connector');
     expect(gcloudOuput).toHaveBeenCalledTimes(1);
   });
@@ -57,7 +69,9 @@ describe('check vpc connector', () => {
   test('It can fail if no connector on clan-network', async () => {
     gcloudOuput.mockResolvedValueOnce(JSON.stringify([]));
 
-    await expect(checkVpcConnector('some-project', 'europe-west1', 'some-connector')).rejects.toThrow('No connector found for this project some-project');
+    await expect(
+      checkVpcConnector('some-project', 'europe-west1', 'some-connector'),
+    ).rejects.toThrow('No connector found for this project some-project');
     expect(gcloudOuput).toHaveBeenCalledTimes(1);
   });
 });

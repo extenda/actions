@@ -2,11 +2,21 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 const replace = require('replace-in-file');
 
-const setNuGetSource = async (configFile, { name, source }, { username, password }) => {
+const setNuGetSource = async (
+  configFile,
+  { name, source },
+  { username, password },
+) => {
   const args = ['sources', 'add', '-Name', name, '-Source', source];
   if (username && password) {
     core.info('Username and Password is being used when setting source');
-    args.push('-Username', username, '-Password', password, '-StorePasswordInClearText');
+    args.push(
+      '-Username',
+      username,
+      '-Password',
+      password,
+      '-StorePasswordInClearText',
+    );
   }
   args.push('-ConfigFile', configFile);
   return exec.exec('nuget', args);
@@ -14,9 +24,12 @@ const setNuGetSource = async (configFile, { name, source }, { username, password
 
 const setNuGetApiKey = async (configFile, { apikey, source }) => {
   const args = [
-    'setapikey', apikey,
-    '-source', source,
-    '-ConfigFile', configFile,
+    'setapikey',
+    apikey,
+    '-source',
+    source,
+    '-ConfigFile',
+    configFile,
     '-NonInteractive',
   ];
   return exec.exec('nuget', args);

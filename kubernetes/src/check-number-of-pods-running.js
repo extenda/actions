@@ -4,9 +4,10 @@ const exec = require('@actions/exec');
  * Simple timer to wait for a specified amount of time.
  * @param ms Number of milliseconds to wait
  */
-const timer = (ms) => new Promise((res) => {
-  setTimeout(res, ms);
-});
+const timer = (ms) =>
+  new Promise((res) => {
+    setTimeout(res, ms);
+  });
 
 /**
 Verifies that the number of pods running for deployment is equal to the expected number of replicas.
@@ -53,7 +54,7 @@ const checkRequiredNumberOfPodsIsRunning = async (
       let podsInRunningState = 0;
       try {
         // Execute kubectl with args and rout output to variable.
-        /* eslint-disable no-await-in-loop */
+
         await exec.exec('kubectl', getRunningPodsArgs, {
           listeners: {
             stdout: (data) => {
@@ -61,35 +62,38 @@ const checkRequiredNumberOfPodsIsRunning = async (
             },
           },
         });
-        /* eslint-enable no-await-in-loop */
-      } catch (err) {
+      } catch {
         // Ignored
       }
 
       let podsNotInRunningState = 0;
       try {
         // Execute kubectl with args and rout output to variable.
-        /* eslint-disable no-await-in-loop */
+
         await exec.exec('kubectl', getNonRunningPodsArgs, {
           listeners: {
             stdout: (data) => {
-              podsNotInRunningState += parseInt(data.toString('utf8').trim(), 10);
+              podsNotInRunningState += parseInt(
+                data.toString('utf8').trim(),
+                10,
+              );
             },
           },
         });
-        /* eslint-enable no-await-in-loop */
-      } catch (err) {
+      } catch {
         // Ignored
       }
 
       // Check the number of pods in running state to be equal to expected number of replicas.
-      if (podsInRunningState === numberOfReplicasToBeRunning
-        && (podsNotInRunningState === 0 || Number.isNaN(Number(podsNotInRunningState)))) {
+      if (
+        podsInRunningState === numberOfReplicasToBeRunning &&
+        (podsNotInRunningState === 0 ||
+          Number.isNaN(Number(podsNotInRunningState)))
+      ) {
         return;
       }
-      /* eslint-disable no-await-in-loop */
+
       await timer(retryMs); // Tries again after X milliseconds
-      /* eslint-enable no-await-in-loop */
     }
 
     // Test code area
@@ -101,27 +105,22 @@ const checkRequiredNumberOfPodsIsRunning = async (
       'pods',
       `--namespace=${deploymentName}`,
       '--no-headers=true',
-      '-o json | jq -r \'.items[].status.phase\' | grep -o \'Running\' -c ',
+      "-o json | jq -r '.items[].status.phase' | grep -o 'Running' -c ",
     ];
 
     await exec.exec('kubectl', getRunningPodsNoSelectorArgs, {
       listeners: {
         stdout: (data) => {
-          // eslint-disable-next-line no-console
           console.log(parseInt(data.toString('utf8').trim(), 10));
         },
       },
     });
 
     // kubectl config view
-    const configViewArgs = [
-      'config',
-      'view',
-    ];
+    const configViewArgs = ['config', 'view'];
     await exec.exec('kubectl', configViewArgs, {
       listeners: {
         stdout: (data) => {
-          // eslint-disable-next-line no-console
           console.log(data.toString('utf8'));
         },
       },

@@ -1,7 +1,12 @@
 const gcloudOutput = require('../../src/utils/gcloud-output');
-const { configMapManifest, removeScalerConfiguration } = require('../../src/manifests/vpa-scaler-configmap');
+const {
+  configMapManifest,
+  removeScalerConfiguration,
+} = require('../../src/manifests/vpa-scaler-configmap');
 
-jest.mock('../../src/utils/gcloud-output', () => jest.fn().mockImplementation(() => Promise.resolve()));
+jest.mock('../../src/utils/gcloud-output', () =>
+  jest.fn().mockImplementation(() => Promise.resolve()),
+);
 
 describe('VPA scaler configuration', () => {
   const mockServiceName = 'service-name';
@@ -47,49 +52,66 @@ describe('VPA scaler configuration', () => {
         mockMemory,
         mockScalingConfig,
       ),
-    )
-      .resolves.toEqual(mockConfigMapResult);
-    expect(gcloudOutput).toHaveBeenNthCalledWith(1, expect.arrayContaining([
-      'create',
-      'configmap',
-      'vpa-scaler-configuration',
-      `--namespace=${mockServiceName}`,
-      `--from-literal=type=${mockType}`,
-      '--from-literal=incrementsCPU=1000m',
-      '--from-literal=thresholdCPU=50%',
-      '--from-literal=currentCPU=1500m',
-      '--from-literal=currentMemory=2500Mi',
-      '--from-literal=maxCPU=5000m',
-      '--from-literal=minCPU=1500m',
-      '--from-literal=maxMemory=8000Mi',
-      '--from-literal=minMemory=2500Mi',
-      '--output=yaml',
-      '--dry-run=client',
-    ]), expect.anything(), expect.anything());
+    ).resolves.toEqual(mockConfigMapResult);
+    expect(gcloudOutput).toHaveBeenNthCalledWith(
+      1,
+      expect.arrayContaining([
+        'create',
+        'configmap',
+        'vpa-scaler-configuration',
+        `--namespace=${mockServiceName}`,
+        `--from-literal=type=${mockType}`,
+        '--from-literal=incrementsCPU=1000m',
+        '--from-literal=thresholdCPU=50%',
+        '--from-literal=currentCPU=1500m',
+        '--from-literal=currentMemory=2500Mi',
+        '--from-literal=maxCPU=5000m',
+        '--from-literal=minCPU=1500m',
+        '--from-literal=maxMemory=8000Mi',
+        '--from-literal=minMemory=2500Mi',
+        '--output=yaml',
+        '--dry-run=client',
+      ]),
+      expect.anything(),
+      expect.anything(),
+    );
 
     expect(gcloudOutput).toHaveBeenCalledTimes(1);
   });
 
   it('Should generate the correct scaler configuarion using Mi', async () => {
     gcloudOutput.mockResolvedValueOnce(mockConfigMapResult);
-    await expect(configMapManifest(mockServiceName, mockType, mockCPU, '2500Mi', mockScalingConfig)).resolves.toEqual(mockConfigMapResult);
-    expect(gcloudOutput).toHaveBeenNthCalledWith(1, expect.arrayContaining([
-      'create',
-      'configmap',
-      'vpa-scaler-configuration',
-      `--namespace=${mockServiceName}`,
-      `--from-literal=type=${mockType}`,
-      '--from-literal=incrementsCPU=1000m',
-      '--from-literal=thresholdCPU=50%',
-      '--from-literal=currentCPU=1500m',
-      '--from-literal=currentMemory=2500Mi',
-      '--from-literal=maxCPU=5000m',
-      '--from-literal=minCPU=1500m',
-      '--from-literal=maxMemory=8000Mi',
-      '--from-literal=minMemory=2500Mi',
-      '--output=yaml',
-      '--dry-run=client',
-    ]), expect.anything(), expect.anything());
+    await expect(
+      configMapManifest(
+        mockServiceName,
+        mockType,
+        mockCPU,
+        '2500Mi',
+        mockScalingConfig,
+      ),
+    ).resolves.toEqual(mockConfigMapResult);
+    expect(gcloudOutput).toHaveBeenNthCalledWith(
+      1,
+      expect.arrayContaining([
+        'create',
+        'configmap',
+        'vpa-scaler-configuration',
+        `--namespace=${mockServiceName}`,
+        `--from-literal=type=${mockType}`,
+        '--from-literal=incrementsCPU=1000m',
+        '--from-literal=thresholdCPU=50%',
+        '--from-literal=currentCPU=1500m',
+        '--from-literal=currentMemory=2500Mi',
+        '--from-literal=maxCPU=5000m',
+        '--from-literal=minCPU=1500m',
+        '--from-literal=maxMemory=8000Mi',
+        '--from-literal=minMemory=2500Mi',
+        '--output=yaml',
+        '--dry-run=client',
+      ]),
+      expect.anything(),
+      expect.anything(),
+    );
 
     expect(gcloudOutput).toHaveBeenCalledTimes(1);
   });
@@ -97,12 +119,18 @@ describe('VPA scaler configuration', () => {
   it('Should be able to delete scaler configuration', async () => {
     gcloudOutput.mockResolvedValueOnce();
     await removeScalerConfiguration(mockServiceName);
-    expect(gcloudOutput).toHaveBeenNthCalledWith(1, expect.arrayContaining([
-      'delete',
-      'configmap',
-      'vpa-scaler-configuration',
-      `--namespace=${mockServiceName}`,
-    ]), expect.anything(), expect.anything(), expect.anything());
+    expect(gcloudOutput).toHaveBeenNthCalledWith(
+      1,
+      expect.arrayContaining([
+        'delete',
+        'configmap',
+        'vpa-scaler-configuration',
+        `--namespace=${mockServiceName}`,
+      ]),
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+    );
 
     expect(gcloudOutput).toHaveBeenCalledTimes(1);
   });
@@ -110,12 +138,18 @@ describe('VPA scaler configuration', () => {
   it('Should be fail quietly if configuration does not exist', async () => {
     gcloudOutput.mockRejectedValueOnce();
     await removeScalerConfiguration(mockServiceName);
-    expect(gcloudOutput).toHaveBeenNthCalledWith(1, expect.arrayContaining([
-      'delete',
-      'configmap',
-      'vpa-scaler-configuration',
-      `--namespace=${mockServiceName}`,
-    ]), expect.anything(), expect.anything(), expect.anything());
+    expect(gcloudOutput).toHaveBeenNthCalledWith(
+      1,
+      expect.arrayContaining([
+        'delete',
+        'configmap',
+        'vpa-scaler-configuration',
+        `--namespace=${mockServiceName}`,
+      ]),
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+    );
 
     expect(gcloudOutput).toHaveBeenCalledTimes(1);
   });

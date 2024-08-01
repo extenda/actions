@@ -23,7 +23,8 @@ describe('Cloud Run Action', () => {
   test('It can run the action', async () => {
     process.env.GITHUB_REF = 'refs/heads/master';
     serviceDef.mockReturnValueOnce({});
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('cloud-run.yaml')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('gcr.io/project/image:tag')
@@ -45,7 +46,8 @@ describe('Cloud Run Action', () => {
   test('It can run without optional args', async () => {
     process.env.GITHUB_REF = 'refs/heads/master';
     serviceDef.mockReturnValueOnce({});
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('gcr.io/project/image:tag')
@@ -68,7 +70,8 @@ describe('Cloud Run Action', () => {
   test('It can run with verbose flag set', async () => {
     process.env.GITHUB_REF = 'refs/heads/main';
     serviceDef.mockReturnValueOnce({});
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('gcr.io/project/image:tag')
@@ -91,13 +94,16 @@ describe('Cloud Run Action', () => {
   test('It cannot run the action if branch is not master or main', async () => {
     process.env.GITHUB_REF = 'refs/heads/develop';
     serviceDef.mockReturnValueOnce({});
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('cloud-run.yaml')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('gcr.io/project/image:tag')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('dns')
       .mockReturnValueOnce('false');
-    await expect(action()).rejects.toThrow(/^Action not allowed on ref refs\/heads\/develop/);
+    await expect(action()).rejects.toThrow(
+      /^Action not allowed on ref refs\/heads\/develop/,
+    );
   });
 });

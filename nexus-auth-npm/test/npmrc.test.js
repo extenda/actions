@@ -31,7 +31,9 @@ describe('npmrc', () => {
       outputDir: '~/output',
     });
 
-    const contents = await readFile(join('~/output', '.npmrc'), { encoding: 'utf-8' });
+    const contents = await readFile(join('~/output', '.npmrc'), {
+      encoding: 'utf-8',
+    });
     expect(contents).toEqual(expectedNpmrcForInstall);
   });
 
@@ -44,7 +46,9 @@ describe('npmrc', () => {
       outputDir: '~/output',
     });
 
-    const contents = await readFile(join('~/output', '.npmrc'), { encoding: 'utf-8' });
+    const contents = await readFile(join('~/output', '.npmrc'), {
+      encoding: 'utf-8',
+    });
     expect(contents).toEqual(expectedNpmrcForPublish);
   });
 });

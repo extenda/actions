@@ -1,5 +1,8 @@
 const gcloudOutput = require('../../src/utils/gcloud-output');
-const { podMonitorManifest, deletePodMonitor } = require('../../src/manifests/pod-monitoring');
+const {
+  podMonitorManifest,
+  deletePodMonitor,
+} = require('../../src/manifests/pod-monitoring');
 
 jest.mock('../../src/utils/gcloud-output');
 
@@ -23,11 +26,13 @@ describe('manifests/pod-monitoring', () => {
             app: 'test',
           },
         },
-        endpoints: [{
-          interval: '15s',
-          path: '/metrics',
-          port: 8080,
-        }],
+        endpoints: [
+          {
+            interval: '15s',
+            path: '/metrics',
+            port: 8080,
+          },
+        ],
       },
     });
   });

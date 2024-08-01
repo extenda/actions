@@ -20,14 +20,17 @@ run(async () => {
   const fallback = core.getInput('fallback');
   const token = await loadGitHubToken(loadSecret);
 
-  const response = await fetch(`https://slack.github.com/repos/${process.env.GITHUB_REPOSITORY}`, {
-    method: 'post',
-    body: JSON.stringify(createMessage(title, text, fallback)),
-    headers: {
-      'content-type': 'application/json; charset=UTF-8',
-      authorization: `token ${token}`,
+  const response = await fetch(
+    `https://slack.github.com/repos/${process.env.GITHUB_REPOSITORY}`,
+    {
+      method: 'post',
+      body: JSON.stringify(createMessage(title, text, fallback)),
+      headers: {
+        'content-type': 'application/json; charset=UTF-8',
+        authorization: `token ${token}`,
+      },
     },
-  });
+  );
 
   const body = await response.json();
   core.info(`API status: ${response.status}, body: ${JSON.stringify(body)}`);

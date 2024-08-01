@@ -20,46 +20,53 @@ const setupEnvironment = async (
   const { env: projectEnv } = projectInfo(projectId);
 
   // Skip IAM handling if staging (not iam-api)
-  let skipIAM = (projectEnv === 'staging');
+  let skipIAM = projectEnv === 'staging';
   // By default we always target prod iam-api unless explicitly told not to.
   let credentialsEnv = 'prod';
   let url = iamUrl;
   if (projectEnv === 'staging' && iamUrl.endsWith('retailsvc.dev')) {
     credentialsEnv = 'staging';
     skipIAM = false;
-    core.warning(`IAM definitions has been explicitly configured to publish to ${iamUrl} which is the STAGING environment.`);
+    core.warning(
+      `IAM definitions has been explicitly configured to publish to ${iamUrl} which is the STAGING environment.`,
+    );
   } else if (projectEnv === 'prod' && iamUrl.endsWith('retailsvc.dev')) {
     url = iamUrl.replace('dev', 'com');
   }
 
-  const {
-    iamApiEmail,
-    iamApiPassword,
-    iamApiKey,
-    iamApiTenant,
-  } = await loadCredentials(serviceAccountKey, credentialsEnv);
+  const { iamApiEmail, iamApiPassword, iamApiKey, iamApiTenant } =
+    await loadCredentials(serviceAccountKey, credentialsEnv);
   let iamToken = '';
   if (!skipIAM) {
-    iamToken = await fetchIamToken(iamApiKey, iamApiEmail, iamApiPassword, iamApiTenant);
+    iamToken = await fetchIamToken(
+      iamApiKey,
+      iamApiEmail,
+      iamApiPassword,
+      iamApiTenant,
+    );
   }
 
   await configureBundleSync(iam, projectEnv);
 
-  return configureIAM(
-    iam,
-    url,
-    iamToken,
-    skipIAM,
-  );
+  return configureIAM(iam, url, iamToken, skipIAM);
 };
 
 const action = async () => {
-  const serviceAccountKey = core.getInput('service-account-key', { required: true });
-  const serviceAccountKeyStaging = core.getInput('service-account-key-staging', { required: true });
-  const serviceAccountKeyProd = core.getInput('service-account-key-prod', { required: true });
+  const serviceAccountKey = core.getInput('service-account-key', {
+    required: true,
+  });
+  const serviceAccountKeyStaging = core.getInput(
+    'service-account-key-staging',
+    { required: true },
+  );
+  const serviceAccountKeyProd = core.getInput('service-account-key-prod', {
+    required: true,
+  });
   const iamFileGlob = core.getInput('iam-definition') || 'iam/*.yaml';
-  const iamUrl = core.getInput('iam-api-url') || 'https://iam-api.retailsvc.com';
-  const styraUrl = core.getInput('styra-url') || 'https://extendaretail.svc.styra.com';
+  const iamUrl =
+    core.getInput('iam-api-url') || 'https://iam-api.retailsvc.com';
+  const styraUrl =
+    core.getInput('styra-url') || 'https://extendaretail.svc.styra.com';
   const dryRun = core.getInput('dry-run') === 'true';
   const skipProd = core.getInput('skip-prod') === 'true';
 
@@ -72,7 +79,7 @@ const action = async () => {
       // We MUST process these files one by one as we depend on external tools
 
       core.info('Update staging');
-      // eslint-disable-next-line no-await-in-loop
+
       await setupEnvironment(
         serviceAccountKey,
         serviceAccountKeyStaging,
@@ -83,7 +90,7 @@ const action = async () => {
 
       if (!skipProd) {
         core.info('Update prod');
-        // eslint-disable-next-line no-await-in-loop
+
         await setupEnvironment(
           serviceAccountKey,
           serviceAccountKeyProd,

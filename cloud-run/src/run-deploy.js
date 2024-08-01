@@ -32,7 +32,8 @@ const setDefaultConcurrency = (cpu) => {
   } else {
     miliCPU = cpu.replace(/\D/g, '');
   }
-  let defaultConcurrency = cloudDefaultConcurrency * (miliCPU / cloudDefaultCPU);
+  let defaultConcurrency =
+    cloudDefaultConcurrency * (miliCPU / cloudDefaultCPU);
   if (defaultConcurrency > maxConcurrency) {
     defaultConcurrency = maxConcurrency;
   } else if (defaultConcurrency < minConcurrency) {
@@ -56,27 +57,24 @@ const managedArguments = async (args, service, projectId) => {
     },
   } = service;
 
-  const {
-    env,
-  } = projectInfo(projectId);
+  const { env } = projectInfo(projectId);
 
   if (!isManagedCloudRun(cpu)) {
-    throw new Error('Managed Cloud Run must be configured with CPU count [1,2]. Use of millicpu is not supported.');
+    throw new Error(
+      'Managed Cloud Run must be configured with CPU count [1,2]. Use of millicpu is not supported.',
+    );
   }
 
-  const runtimeAccount = await getRuntimeAccount(runtimeAccountEmail, projectId);
+  const runtimeAccount = await getRuntimeAccount(
+    runtimeAccountEmail,
+    projectId,
+  );
   args.push(`--service-account=${runtimeAccount}`);
 
-  args.push(
-    `--cpu=${cpu}`,
-    '--platform=managed',
-    `--region=${region}`,
-  );
+  args.push(`--cpu=${cpu}`, '--platform=managed', `--region=${region}`);
 
   if (vpcConnectorName !== 'None' && env === 'prod') {
-    args.push(
-      `--vpc-connector=${vpcConnectorName}`,
-    );
+    args.push(`--vpc-connector=${vpcConnectorName}`);
   }
 
   if (vpcConnectorName !== 'None' && env === 'prod') {
@@ -114,7 +112,9 @@ const gkeArguments = async (args, service, projectId) => {
   } = service;
 
   if (isManagedCloudRun(cpu)) {
-    throw new Error('Cloud Run GKE must be configured with millicpu. Use of CPU count is not supported.');
+    throw new Error(
+      'Cloud Run GKE must be configured with millicpu. Use of CPU count is not supported.',
+    );
   }
 
   const cluster = await getClusterInfo(projectId, configuredCluster);
@@ -144,13 +144,15 @@ const gkeArguments = async (args, service, projectId) => {
   return cluster;
 };
 
-const canaryArguments = async (args, canary, projectId, project, env, customLabels) => {
-  const {
-    enabled,
-    steps,
-    interval,
-    thresholds,
-  } = canary;
+const canaryArguments = async (
+  args,
+  canary,
+  projectId,
+  project,
+  env,
+  customLabels,
+) => {
+  const { enabled, steps, interval, thresholds } = canary;
   const {
     latency99,
     latency95,
@@ -167,19 +169,21 @@ const canaryArguments = async (args, canary, projectId, project, env, customLabe
 const execWithOutput = async (args) => {
   let stdout = '';
   let stderr = '';
-  const status = await exec.exec('gcloud', args, {
-    listeners: {
-      stdout: (data) => {
-        stdout += data.toString('utf8');
+  const status = await exec
+    .exec('gcloud', args, {
+      listeners: {
+        stdout: (data) => {
+          stdout += data.toString('utf8');
+        },
+        stderr: (data) => {
+          stderr += data.toString('utf8');
+        },
       },
-      stderr: (data) => {
-        stderr += data.toString('utf8');
-      },
-    },
-  }).catch((err) => {
-    core.error(`gcloud execution failed: ${err.message}`);
-    stdout += stderr;
-  });
+    })
+    .catch((err) => {
+      core.error(`gcloud execution failed: ${err.message}`);
+      stdout += stderr;
+    });
 
   return {
     status,
@@ -203,10 +207,7 @@ const runDeploy = async (
     }
   }
 
-  const {
-    project,
-    env,
-  } = projectInfo(projectId);
+  const { project, env } = projectInfo(projectId);
 
   let canary = false;
   if (service.canary && service.canary.enabled && env === 'prod') {
@@ -238,7 +239,10 @@ const runDeploy = async (
     await checkServiceAccount(name, projectId);
   }
 
-  const args = ['run', 'deploy', name,
+  const args = [
+    'run',
+    'deploy',
+    name,
     `--image=${image}`,
     `--project=${projectId}`,
     `--memory=${memory}`,
@@ -248,7 +252,9 @@ const runDeploy = async (
   ];
 
   if (!canary) {
-    args.push(`--labels=${customLabels}service_project_id=${projectId},service_project=${project},environment=${env},service_env=${env}${service.platform.managed ? '' : ',sre.canary.enabled=false'}`);
+    args.push(
+      `--labels=${customLabels}service_project_id=${projectId},service_project=${project},environment=${env},service_env=${env}${service.platform.managed ? '' : ',sre.canary.enabled=false'}`,
+    );
   }
 
   if (verbose) {
@@ -263,20 +269,28 @@ const runDeploy = async (
   if (service.platform.gke) {
     cluster = await gkeArguments(args, service, projectId);
     if (canary) {
-      await canaryArguments(args, service.canary, projectId, project, env, customLabels);
+      await canaryArguments(
+        args,
+        service.canary,
+        projectId,
+        project,
+        env,
+        customLabels,
+      );
     }
   }
 
   try {
-    const gcloudExitCode = await execWithOutput(args)
-      .then((response) => waitForRevision(
+    const gcloudExitCode = await execWithOutput(args).then((response) =>
+      waitForRevision(
         response,
         args,
         service.name,
         cluster,
         service.canary,
         retryInterval,
-      ));
+      ),
+    );
     return {
       gcloudExitCode,
       projectId,
@@ -284,7 +298,13 @@ const runDeploy = async (
     };
   } finally {
     if (service.platform.gke && cluster) {
-      await cleanRevisions(name, projectId, cluster.uri, cluster.clusterLocation, maxRevisions);
+      await cleanRevisions(
+        name,
+        projectId,
+        cluster.uri,
+        cluster.clusterLocation,
+        maxRevisions,
+      );
     }
   }
 };

@@ -20,18 +20,20 @@ spec:
 `;
 
     const output = yaml.parse(patchServiceYaml(service, serviceYml));
-    expect(output).toMatchObject(expect.objectContaining({
-      spec: {
-        type: 'ClusterIP',
-        ports: [
-          {
-            protocol: 'TCP',
-            port: 80,
-            targetPort: 8080,
-          },
-        ],
-      },
-    }));
+    expect(output).toMatchObject(
+      expect.objectContaining({
+        spec: {
+          type: 'ClusterIP',
+          ports: [
+            {
+              protocol: 'TCP',
+              port: 80,
+              targetPort: 8080,
+            },
+          ],
+        },
+      }),
+    );
   });
 
   test('It leaves clusterIp:NONE if no ports specified', () => {
@@ -44,11 +46,13 @@ spec:
 `;
 
     const output = yaml.parse(patchServiceYaml(service, serviceYml));
-    expect(output).toMatchObject(expect.objectContaining({
-      spec: {
-        type: 'ClusterIP',
-        clusterIP: 'None',
-      },
-    }));
+    expect(output).toMatchObject(
+      expect.objectContaining({
+        spec: {
+          type: 'ClusterIP',
+          clusterIP: 'None',
+        },
+      }),
+    );
   });
 });

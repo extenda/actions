@@ -68,7 +68,8 @@ describe('conventional-release', () => {
   });
 
   test('It can use a custom name prefix', async () => {
-    core.getInput.mockReturnValueOnce('extenda/test-repo')
+    core.getInput
+      .mockReturnValueOnce('extenda/test-repo')
       .mockReturnValueOnce('Extenda Actions');
     mockTag.mockReturnValueOnce({
       tagName: 'extenda/test-repo',

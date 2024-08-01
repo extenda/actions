@@ -5,43 +5,49 @@ const MAX_DOMAINS = 100;
 const MAX_CERTIFICATES = 13;
 
 // Create certificate containing old domains and new
-const createCertificate = async (domains, projectID, name) => gcloudOutput([
-  'compute',
-  'ssl-certificates',
-  'create',
-  name,
-  `--domains=${domains}`,
-  `--project=${projectID}`,
-  '--global',
-]);
+const createCertificate = async (domains, projectID, name) =>
+  gcloudOutput([
+    'compute',
+    'ssl-certificates',
+    'create',
+    name,
+    `--domains=${domains}`,
+    `--project=${projectID}`,
+    '--global',
+  ]);
 
-const deleteCertificateFromProxy = async (projectID, certificates) => gcloudOutput([
-  'compute',
-  'target-https-proxies',
-  'update',
-  'https-lb-proxy',
-  `--ssl-certificates=${certificates.join(',')}`,
-  `--project=${projectID}`,
-]).then(() => core.info('Certificates updated successfully!'));
+const deleteCertificateFromProxy = async (projectID, certificates) =>
+  gcloudOutput([
+    'compute',
+    'target-https-proxies',
+    'update',
+    'https-lb-proxy',
+    `--ssl-certificates=${certificates.join(',')}`,
+    `--project=${projectID}`,
+  ]).then(() => core.info('Certificates updated successfully!'));
 
-const deleteCertificate = async (projectID, name) => gcloudOutput([
-  'compute',
-  'ssl-certificates',
-  'delete',
-  name,
-  `--project=${projectID}`,
-  '--quiet',
-  '--global',
-]);
+const deleteCertificate = async (projectID, name) =>
+  gcloudOutput([
+    'compute',
+    'ssl-certificates',
+    'delete',
+    name,
+    `--project=${projectID}`,
+    '--quiet',
+    '--global',
+  ]);
 
-const listCertificates = async (clusterProject) => JSON.parse(await gcloudOutput([
-  'compute',
-  'ssl-certificates',
-  'list',
-  `--project=${clusterProject}`,
-  '--filter=txengine-certs-',
-  '--format=json',
-]));
+const listCertificates = async (clusterProject) =>
+  JSON.parse(
+    await gcloudOutput([
+      'compute',
+      'ssl-certificates',
+      'list',
+      `--project=${clusterProject}`,
+      '--filter=txengine-certs-',
+      '--format=json',
+    ]),
+  );
 
 const handleCertificates = async (domainName, project) => {
   let firstCreatedDate = new Date();
@@ -60,7 +66,10 @@ const handleCertificates = async (domainName, project) => {
     const created = new Date(certificate.creationTimestamp);
     certificateListNames.push(certificate.name);
 
-    if (firstCreatedDate > created && certificate.managed.domains.length < MAX_DOMAINS) {
+    if (
+      firstCreatedDate > created &&
+      certificate.managed.domains.length < MAX_DOMAINS
+    ) {
       firstCreatedDate = created;
       firstCreatedName = certificate.name;
     }
@@ -90,7 +99,10 @@ const handleCertificates = async (domainName, project) => {
   if (totalCertificates < MAX_CERTIFICATES) {
     await createCertificate(newDomains, project, newCertificateName);
   } else {
-    certificateListNames.splice(certificateListNames.indexOf(firstCreatedName), 1);
+    certificateListNames.splice(
+      certificateListNames.indexOf(firstCreatedName),
+      1,
+    );
     await deleteCertificateFromProxy(project, certificateListNames);
     await deleteCertificate(project, firstCreatedName);
     if (lastCreatedDomains.length < MAX_DOMAINS) {

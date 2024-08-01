@@ -9,8 +9,9 @@ describe('Service Definition', () => {
 
   test('It throws for file not found', () => {
     mockFs({});
-    expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema))
-      .toThrow('Service specification file not found: cloud-run.yaml');
+    expect(() =>
+      loadServiceDefinition('cloud-run.yaml', cloudRunSchema),
+    ).toThrow('Service specification file not found: cloud-run.yaml');
   });
 
   describe('Schema validation', () => {
@@ -299,7 +300,9 @@ platform:
     });
 
     const service = loadServiceDefinition('cloud-run.yaml', cloudRunSchema);
-    expect(service.platform.managed['cloudsql-instances']).toEqual(['Postgres-RANDOM123']);
+    expect(service.platform.managed['cloudsql-instances']).toEqual([
+      'Postgres-RANDOM123',
+    ]);
   });
 
   test('It can process a valid managed definition', () => {
@@ -333,9 +336,7 @@ platform:
       platform: {
         managed: {
           region: 'eu-west1',
-          'cloudsql-instances': [
-            'Postgres-RANDOM123',
-          ],
+          'cloudsql-instances': ['Postgres-RANDOM123'],
         },
       },
     });
@@ -544,7 +545,9 @@ canary:
     error-rate: '1'
 `,
     });
-    expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema).not.toThrow());
+    expect(() =>
+      loadServiceDefinition('cloud-run.yaml', cloudRunSchema).not.toThrow(),
+    );
   });
 
   test('random kebab-case labels works', () => {
@@ -574,7 +577,9 @@ canary:
     error-rate: '1'
 `,
     });
-    expect(() => loadServiceDefinition('cloud-run.yaml', cloudRunSchema).not.toThrow());
+    expect(() =>
+      loadServiceDefinition('cloud-run.yaml', cloudRunSchema).not.toThrow(),
+    );
   });
 
   test('It can patch the service definition', () => {
@@ -615,7 +620,11 @@ platform:
         - patch-service.domain.com
     `;
 
-    const service = loadServiceDefinition('cloud-run.yaml', cloudRunSchema, yamlPatch);
+    const service = loadServiceDefinition(
+      'cloud-run.yaml',
+      cloudRunSchema,
+      yamlPatch,
+    );
     expect(service).toMatchObject({
       name: 'patch-service',
       memory: '256Mi',
@@ -630,12 +639,8 @@ platform:
         gke: {
           connectivity: 'external',
           'domain-mappings': {
-            staging: [
-              'patch-service.domain.dev',
-            ],
-            prod: [
-              'patch-service.domain.com',
-            ],
+            staging: ['patch-service.domain.dev'],
+            prod: ['patch-service.domain.com'],
           },
         },
       },

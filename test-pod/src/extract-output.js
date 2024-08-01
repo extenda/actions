@@ -23,7 +23,9 @@ const extractOutput = async (rawOutput) => {
     core.debug('No test-pod-output');
     return null;
   }
-  core.info(`Unpack test-pod output. Buffer size: ${Buffer.byteLength(data, 'binary')} bytes`);
+  core.info(
+    `Unpack test-pod output. Buffer size: ${Buffer.byteLength(data, 'binary')} bytes`,
+  );
   const tarFile = path.join(os.tmpdir(), `test-pod-output-${Date.now()}.tar`);
   fs.writeFileSync(tarFile, data, 'binary');
   return extractTar(tarFile, 'test-pod-output');

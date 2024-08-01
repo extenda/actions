@@ -49,17 +49,21 @@ describe('rollback', () => {
         },
       ],
     };
-    exec.exec.mockImplementationOnce((
-      cmd,
-      args,
-      opts,
-    ) => opts.listeners.stdout(JSON.stringify(podList)));
+    exec.exec.mockImplementationOnce((cmd, args, opts) =>
+      opts.listeners.stdout(JSON.stringify(podList)),
+    );
 
     await checkStatusAndKillFailingPods('namespace');
     expect(exec.exec).toHaveBeenNthCalledWith(
       2,
       'kubectl',
-      expect.arrayContaining(['delete', 'pod', 'testrunner-txengine-1', '-n', 'namespace']),
+      expect.arrayContaining([
+        'delete',
+        'pod',
+        'testrunner-txengine-1',
+        '-n',
+        'namespace',
+      ]),
       expect.anything(),
     );
   });

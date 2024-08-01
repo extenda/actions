@@ -7,11 +7,8 @@ const { loadDefinitions } = require('./utils/load-sync-definitions');
 const { validateExeConfig } = require('./validate/validate-exe-config');
 
 function printSyncResult(report) {
-  for (const {
-    id, success, performedAction, error,
-  } of report) {
+  for (const { id, success, performedAction, error } of report) {
     if (success) {
-      // eslint-disable-next-line no-unused-expressions
       performedAction
         ? core.info(`[${id}]: ${performedAction}`)
         : core.info(`[${id}]: no changes`);
@@ -22,9 +19,12 @@ function printSyncResult(report) {
 }
 
 async function action() {
-  const serviceAccountKey = core.getInput('service-account-key', { required: true });
+  const serviceAccountKey = core.getInput('service-account-key', {
+    required: true,
+  });
   const dryRun = core.getBooleanInput('dry-run') === true;
-  const definitionsGlob = core.getInput('definitions') || 'external-events/*.yaml';
+  const definitionsGlob =
+    core.getInput('definitions') || 'external-events/*.yaml';
 
   const definitions = await loadDefinitions(definitionsGlob, validateExeConfig);
   const secrets = await loadSecrets(serviceAccountKey);
@@ -39,7 +39,7 @@ async function action() {
     core.startGroup(`Sync definitions from ${file}`);
     // ignore version for now, as we have ony one version
     delete def.version;
-    // eslint-disable-next-line no-await-in-loop
+
     const { data } = await exeApi.post(
       `/api/v1/internal/event-sources:sync?dryRun=${dryRun}`,
       camelcaseKeys(def, { deep: true }),

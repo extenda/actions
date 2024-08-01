@@ -3,18 +3,11 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 const { loadTool } = require('../../utils');
 
-const BINARY_NAME = os.platform() !== 'win32'
-  ? 'PermissionConverter'
-  : 'PermissionConverter.exe';
+const BINARY_NAME =
+  os.platform() !== 'win32' ? 'PermissionConverter' : 'PermissionConverter.exe';
 
 const permissionConvCommand = async (converter, args) => {
-  const {
-    type,
-    workDir,
-    permFile,
-    sqlFile,
-    outputDir,
-  } = args;
+  const { type, workDir, permFile, sqlFile, outputDir } = args;
 
   const params = [];
   params.push(type);

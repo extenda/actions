@@ -28,7 +28,8 @@ describe('deploy dataflow Action', () => {
     setupGcloud.mockReturnValueOnce('test-project-342');
     getTribeProject.mockReturnValueOnce('test-project-123');
     deployJob.mockResolvedValueOnce('jobId');
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('job-name')
       .mockReturnValueOnce('10')
       .mockReturnValueOnce('dataflow-sa')
@@ -40,7 +41,9 @@ describe('deploy dataflow Action', () => {
       .mockReturnValueOnce('tribe-network')
       .mockReturnValueOnce('1')
       .mockReturnValueOnce('4')
-      .mockReturnValueOnce('https://www.googleapis.com/compute/v1/projects/test-project-123/regions/europe-west4/subnetworks/clan-resources');
+      .mockReturnValueOnce(
+        'https://www.googleapis.com/compute/v1/projects/test-project-123/regions/europe-west4/subnetworks/clan-resources',
+      );
     await action();
 
     expect(core.getInput).toHaveBeenCalledTimes(12);
@@ -71,7 +74,8 @@ describe('deploy dataflow Action', () => {
     deployJob.mockResolvedValueOnce('jobId');
     getTribeProject.mockReturnValueOnce('test-project-123');
     deployJob.mockResolvedValueOnce('jobId');
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('job-name')
       .mockReturnValueOnce('10')
       .mockReturnValueOnce('dataflow-sa')
@@ -111,6 +115,8 @@ describe('deploy dataflow Action', () => {
   test('It rejects action if not trunk-based', async () => {
     core.getInput.mockReturnValue('test');
     process.env.GITHUB_REF = 'refs/heads/develop';
-    await expect(action()).rejects.toThrow(/^Action not allowed on ref refs\/heads\/develop/);
+    await expect(action()).rejects.toThrow(
+      /^Action not allowed on ref refs\/heads\/develop/,
+    );
   });
 });

@@ -7,8 +7,12 @@ const createManifests = require('./manifests');
 const configureDomains = require('./configure-domains');
 
 const action = async () => {
-  const deployServiceAccountKey = core.getInput('deploy-service-account-key', { required: true });
-  const secretServiceAccountKey = core.getInput('secret-service-account-key', { required: true });
+  const deployServiceAccountKey = core.getInput('deploy-service-account-key', {
+    required: true,
+  });
+  const secretServiceAccountKey = core.getInput('secret-service-account-key', {
+    required: true,
+  });
   const image = core.getInput('image', { required: true });
   const tenantName = core.getInput('tenant-name', { required: true });
   const countryCode = core.getInput('country-code') || '';
@@ -29,7 +33,11 @@ const action = async () => {
 
   const manifest = await createManifests(secretServiceAccountKey, envConfig);
   await deploy(manifest);
-  await configureDomains(projectId.includes('-staging-') ? 'staging' : 'prod', tenantName, countryCode);
+  await configureDomains(
+    projectId.includes('-staging-') ? 'staging' : 'prod',
+    tenantName,
+    countryCode,
+  );
 };
 
 if (require.main === module) {

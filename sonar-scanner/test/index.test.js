@@ -21,8 +21,15 @@ const action = require('../src/index');
 const orgEnv = process.env;
 const getInput = jest.spyOn(core, 'getInput');
 
-const mockInputs = (hostUrl, scanner = 'auto', verbose = false, reportPath = '', cwd = '.') => {
-  getInput.mockReturnValueOnce(hostUrl)
+const mockInputs = (
+  hostUrl,
+  scanner = 'auto',
+  verbose = false,
+  reportPath = '',
+  cwd = '.',
+) => {
+  getInput
+    .mockReturnValueOnce(hostUrl)
     .mockReturnValueOnce('master')
     .mockReturnValueOnce(scanner)
     .mockReturnValueOnce(verbose ? 'true' : 'false')
@@ -143,7 +150,11 @@ describe('Sonar-Scanner Action', () => {
     checkQualityGate.mockResolvedValueOnce(0);
     scanMsBuild.mockResolvedValueOnce(true);
     await action();
-    expect(scanMsBuild).toHaveBeenCalledWith('https://sonarcloud.io', 'master', '');
+    expect(scanMsBuild).toHaveBeenCalledWith(
+      'https://sonarcloud.io',
+      'master',
+      '',
+    );
     expect(checkQualityGate).toHaveBeenCalled();
   });
 

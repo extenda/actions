@@ -45,7 +45,8 @@ const run = async () => {
       binary: 'vswhere.exe',
       version: VSWHERE_VERSION,
       downloadUrl: `https://github.com/microsoft/vswhere/releases/download/${VSWHERE_VERSION}/vswhere.exe`,
-    }).then(findMSBuild)
+    })
+      .then(findMSBuild)
       .then((msbuild) => {
         core.info(`MSBuild directory '${msbuild}' added to PATH.`);
         return core.addPath(msbuild);

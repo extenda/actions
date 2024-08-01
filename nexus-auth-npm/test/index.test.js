@@ -17,7 +17,8 @@ describe('Auth to Nexus npm registry action', () => {
   });
 
   it('fetches credentials and creates .npmrc file', async () => {
-    getInput.mockReturnValueOnce('nexus-username')
+    getInput
+      .mockReturnValueOnce('nexus-username')
       .mockReturnValueOnce('nexus-password')
       .mockReturnValueOnce('service-account-key')
       .mockReturnValueOnce('npmrc-dir');
@@ -51,7 +52,8 @@ describe('Auth to Nexus npm registry action', () => {
       NEXUS_PASSWORD: 'env-nexus-password',
     });
 
-    getInput.mockReturnValueOnce(undefined)
+    getInput
+      .mockReturnValueOnce(undefined)
       .mockReturnValueOnce(undefined)
       .mockReturnValueOnce('service-account-key')
       .mockReturnValueOnce(undefined);

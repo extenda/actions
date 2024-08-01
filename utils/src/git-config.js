@@ -1,7 +1,10 @@
 const simpleGit = require('simple-git');
 
 const basicAuth = () => {
-  const buffer = Buffer.from(`github-actions:${process.env.GITHUB_TOKEN}`, 'utf8');
+  const buffer = Buffer.from(
+    `github-actions:${process.env.GITHUB_TOKEN}`,
+    'utf8',
+  );
   const credentials = buffer.toString('base64');
   return `basic ${credentials}`;
 };

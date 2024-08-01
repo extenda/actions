@@ -22,18 +22,22 @@ describe('createExternalLoadbalancer', () => {
 
     await createExternalLoadbalancer(projectID, env);
 
-    expect(gcloudOutput).toHaveBeenNthCalledWith(1, [
-      'mb',
-      '-c',
-      'standard',
-      '-l',
-      'europe-west1',
-      '-p',
-      projectID,
-      '-b',
-      'on',
-      `gs://${`${projectID.split(`-${env}`)[0]}-${env}`}-404`,
-    ], 'gsutil');
+    expect(gcloudOutput).toHaveBeenNthCalledWith(
+      1,
+      [
+        'mb',
+        '-c',
+        'standard',
+        '-l',
+        'europe-west1',
+        '-p',
+        projectID,
+        '-b',
+        'on',
+        `gs://${`${projectID.split(`-${env}`)[0]}-${env}`}-404`,
+      ],
+      'gsutil',
+    );
 
     expect(gcloudOutput).toHaveBeenNthCalledWith(2, [
       'compute',
