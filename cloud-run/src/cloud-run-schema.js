@@ -111,10 +111,7 @@ module.exports = {
               default: 'private-ranges-only',
             },
           },
-          required: [
-            'region',
-            'allow-unauthenticated',
-          ],
+          required: ['region', 'allow-unauthenticated'],
           additionalProperties: false,
         },
         gke: {
@@ -125,10 +122,7 @@ module.exports = {
             },
             connectivity: {
               type: 'string',
-              enum: [
-                'external',
-                'internal',
-              ],
+              enum: ['external', 'internal'],
             },
             'domain-mappings': {
               type: 'object',
@@ -155,9 +149,7 @@ module.exports = {
               type: 'boolean',
             },
           },
-          required: [
-            'connectivity',
-          ],
+          required: ['connectivity'],
           additionalProperties: false,
         },
       },
@@ -204,26 +196,14 @@ module.exports = {
               type: 'string',
             },
           },
-          required: [
-            'latency99',
-            'latency95',
-            'latency50',
-            'error-rate',
-          ],
+          required: ['latency99', 'latency95', 'latency50', 'error-rate'],
           additionalProperties: false,
         },
       },
-      required: [
-        'thresholds',
-      ],
+      required: ['thresholds'],
       additionalProperties: false,
     },
   },
-  required: [
-    'cpu',
-    'name',
-    'memory',
-    'platform',
-  ],
+  required: ['cpu', 'name', 'memory', 'platform'],
   additionalProperties: false,
 };

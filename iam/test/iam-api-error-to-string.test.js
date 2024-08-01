@@ -4,7 +4,10 @@ describe('iamApiErrorToString', () => {
   test('http 400 error', () => {
     const err = {
       response: {
-        data: { error: 'bad request', messages: ['field1 is invalid', 'field1 is invalid'] },
+        data: {
+          error: 'bad request',
+          messages: ['field1 is invalid', 'field1 is invalid'],
+        },
         status: 400,
       },
     };

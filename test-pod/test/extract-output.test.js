@@ -12,14 +12,16 @@ const outputCommand = (patterns) => [
 const execTarCommand = async () => {
   const tarCommand = outputCommand(['src', '*.json']);
   let output = '';
-  return exec.exec(tarCommand.shift(), tarCommand, {
-    silent: true,
-    listeners: {
-      stdout: (data) => {
-        output += data.toString('utf8');
+  return exec
+    .exec(tarCommand.shift(), tarCommand, {
+      silent: true,
+      listeners: {
+        stdout: (data) => {
+          output += data.toString('utf8');
+        },
       },
-    },
-  }).then(() => output.trim());
+    })
+    .then(() => output.trim());
 };
 
 const getFiles = (dir) => {
@@ -59,13 +61,19 @@ describe('Extract output', () => {
     expect(write).toHaveBeenCalledWith(Buffer.from('start', 'utf8'));
 
     filter.log(Buffer.from('test-pod-output BEGIN', 'utf8'), stream);
-    expect(write).not.toHaveBeenCalledWith(Buffer.from('test-pod-output BEGIN', 'utf8'));
+    expect(write).not.toHaveBeenCalledWith(
+      Buffer.from('test-pod-output BEGIN', 'utf8'),
+    );
 
     filter.log(Buffer.from('base 64 encoded TAR data', 'utf8'), stream);
-    expect(write).not.toHaveBeenCalledWith(Buffer.from('base 64 encoded TAR data', 'utf8'));
+    expect(write).not.toHaveBeenCalledWith(
+      Buffer.from('base 64 encoded TAR data', 'utf8'),
+    );
 
     filter.log(Buffer.from('test-pod-output END', 'utf8'), stream);
-    expect(write).not.toHaveBeenCalledWith(Buffer.from('test-pod-output END', 'utf8'));
+    expect(write).not.toHaveBeenCalledWith(
+      Buffer.from('test-pod-output END', 'utf8'),
+    );
 
     filter.log(Buffer.from('done', 'utf8'), stream);
     expect(write).toHaveBeenCalledWith(Buffer.from('done', 'utf8'));
@@ -79,12 +87,16 @@ describe('Extract output', () => {
   });
 
   test('It will discard output with missing END', async () => {
-    const output = await extractOutput('test-pod-output BEGIN\nBinary data\nMore data');
+    const output = await extractOutput(
+      'test-pod-output BEGIN\nBinary data\nMore data',
+    );
     expect(output).toBeNull();
   });
 
   test('It will discard output with END before BEGIN', async () => {
-    const output = await extractOutput('test-pod-output END\nBinary data\ntest-pod-output BEGIN');
+    const output = await extractOutput(
+      'test-pod-output END\nBinary data\ntest-pod-output BEGIN',
+    );
     expect(output).toBeNull();
   });
 
@@ -100,11 +112,13 @@ describe('Extract output', () => {
       await extractOutput(output);
       const outputDir = resolve('test-pod-output');
       const files = getFiles(outputDir);
-      expect(files).toEqual(expect.arrayContaining([
-        resolve(outputDir, 'src/extract-output.js'),
-        resolve(outputDir, 'package.json'),
-        resolve(outputDir, 'package-lock.json'),
-      ]));
+      expect(files).toEqual(
+        expect.arrayContaining([
+          resolve(outputDir, 'src/extract-output.js'),
+          resolve(outputDir, 'package.json'),
+          resolve(outputDir, 'package-lock.json'),
+        ]),
+      );
     });
   }
 });

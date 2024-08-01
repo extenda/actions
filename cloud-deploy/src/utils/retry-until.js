@@ -1,9 +1,10 @@
 let retryDelayMillis = 10000;
 let defaultTimeoutMillis = 900000; // Default timeout is 15m.
 
-const timer = (ms) => new Promise((res) => {
-  setTimeout(res, ms);
-});
+const timer = (ms) =>
+  new Promise((res) => {
+    setTimeout(res, ms);
+  });
 
 const setRetryDelay = (delayMillis, timeoutMillis) => {
   retryDelayMillis = delayMillis;
@@ -27,7 +28,7 @@ const retryUntil = async (queryFn, checkFn, timeoutMillis = -1) => {
     if (Date.now() - t0 > timeout) {
       throw new Error('Timed out waiting for condition');
     }
-    // eslint-disable-next-line no-await-in-loop
+
     output = await timer(retryDelayMillis).then(() => queryFn());
   } while (!checkFn(output));
   return output;

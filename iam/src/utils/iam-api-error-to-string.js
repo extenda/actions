@@ -7,7 +7,10 @@
 
 function iamApiErrorToString(e, description = 'IAM API Error') {
   if (e.response) {
-    const { data: { messages, error }, status } = e.response;
+    const {
+      data: { messages, error },
+      status,
+    } = e.response;
     return `${description}. Request failed with code [${status}] and error [${messages || error}]`;
   }
 

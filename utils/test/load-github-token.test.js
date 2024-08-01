@@ -13,25 +13,34 @@ describe('Load GitHub Token', () => {
   });
 
   test('It will fail if missing github-token-name', async () => {
-    core.getInput.mockReturnValueOnce('')
+    core.getInput
+      .mockReturnValueOnce('')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('sa');
 
-    await expect(loadGitHubToken(jest.fn())).rejects
-      .toEqual(new Error('Missing input. The secret-name must be set with service-account-key'));
+    await expect(loadGitHubToken(jest.fn())).rejects.toEqual(
+      new Error(
+        'Missing input. The secret-name must be set with service-account-key',
+      ),
+    );
   });
 
   test('It will fail if missing service-account-key', async () => {
-    core.getInput.mockReturnValueOnce('')
+    core.getInput
+      .mockReturnValueOnce('')
       .mockReturnValueOnce('github-token')
       .mockReturnValueOnce('');
 
-    await expect(loadGitHubToken(jest.fn())).rejects
-      .toEqual(new Error('Missing input. Either provide github-token or service-account-key'));
+    await expect(loadGitHubToken(jest.fn())).rejects.toEqual(
+      new Error(
+        'Missing input. Either provide github-token or service-account-key',
+      ),
+    );
   });
 
   test('It will load token using callback', async () => {
-    core.getInput.mockReturnValueOnce('')
+    core.getInput
+      .mockReturnValueOnce('')
       .mockReturnValueOnce('github-token')
       .mockReturnValueOnce('sa');
     const loadSecret = jest.fn();

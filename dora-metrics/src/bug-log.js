@@ -8,13 +8,21 @@ const handleIssues = async (issue, productName) => {
     for (const bug of issue.issues) {
       const issueFields = bug.fields;
       const bugCreatedDate = issueFields.created;
-      promises.push(generateFolders(productName, 'bugs', new Date(bugCreatedDate)));
+      promises.push(
+        generateFolders(productName, 'bugs', new Date(bugCreatedDate)),
+      );
     }
   }
   return Promise.all(promises);
 };
 
-const generateBugLog = async (jiraUsername, jiraPassword, projectKey, productName, component) => {
+const generateBugLog = async (
+  jiraUsername,
+  jiraPassword,
+  projectKey,
+  productName,
+  component,
+) => {
   const client = new JiraClient({
     protocol: 'https',
     host: 'jira.extendaretail.com',
@@ -24,7 +32,12 @@ const generateBugLog = async (jiraUsername, jiraPassword, projectKey, productNam
     strictSSL: true,
   });
 
-  const serviceIssues = await client.searchJira(`project="${projectKey}" AND issueType=bug AND component="${component}"`, { maxResults: 1000 }).catch(() => core.info('No bugs found for service!'));
+  const serviceIssues = await client
+    .searchJira(
+      `project="${projectKey}" AND issueType=bug AND component="${component}"`,
+      { maxResults: 1000 },
+    )
+    .catch(() => core.info('No bugs found for service!'));
   await handleIssues(serviceIssues, productName);
 };
 

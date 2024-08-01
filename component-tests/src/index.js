@@ -14,7 +14,6 @@ async function main() {
     const tests = parseYaml(await readFile(testsFile));
 
     for (const [request, expected] of Object.entries(tests)) {
-      // eslint-disable-next-line no-await-in-loop
       await test(request, expected);
     }
 

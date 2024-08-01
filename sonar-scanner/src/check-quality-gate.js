@@ -16,7 +16,8 @@ const findReportFile = (workingDir = '.') => {
     path.join(workingDir, 'build', 'sonar'), // gradle
     path.join(workingDir, '.sonarqube', 'out', '.sonar'), // dotnet
   ];
-  const reportFile = paths.map((p) => path.join(p, REPORT_TASK_FILE))
+  const reportFile = paths
+    .map((p) => path.join(p, REPORT_TASK_FILE))
     .find((p) => fs.existsSync(p));
   if (!reportFile) {
     throw new Error(`Could not find ${REPORT_TASK_FILE}`);
@@ -47,23 +48,29 @@ const getTaskReport = async (reportFile) => {
   return properties;
 };
 
-const getTaskStatus = async (taskUrl) => axios.get(taskUrl, { auth: await sonarAuth() })
-  .then((response) => {
-    const { data: { task } } = response;
+const getTaskStatus = async (taskUrl) =>
+  axios.get(taskUrl, { auth: await sonarAuth() }).then((response) => {
+    const {
+      data: { task },
+    } = response;
     return {
       analysisId: task.analysisId,
       status: task.status,
     };
   });
 
-const getQualityGateStatus = async (serverUrl, analysisId) => axios.get(
-  `${serverUrl}/api/qualitygates/project_status?analysisId=${analysisId}`,
-  { auth: await sonarAuth() },
-).then((response) => response.data.projectStatus);
+const getQualityGateStatus = async (serverUrl, analysisId) =>
+  axios
+    .get(
+      `${serverUrl}/api/qualitygates/project_status?analysisId=${analysisId}`,
+      { auth: await sonarAuth() },
+    )
+    .then((response) => response.data.projectStatus);
 
-const timer = (ms) => new Promise((res) => {
-  setTimeout(res, ms);
-});
+const timer = (ms) =>
+  new Promise((res) => {
+    setTimeout(res, ms);
+  });
 
 const result = (statusCode, report, qgStatus = null) => ({
   statusCode,
@@ -71,16 +78,18 @@ const result = (statusCode, report, qgStatus = null) => ({
   qgStatus,
 });
 
-const checkQualityGate = async (reportFile = null, workingDir = '.', sleepMs = 2000) => {
+const checkQualityGate = async (
+  reportFile = null,
+  workingDir = '.',
+  sleepMs = 2000,
+) => {
   const report = await getTaskReport(reportFile || findReportFile(workingDir));
   let task = { status: 'UNKNOWN' };
 
-  /* eslint-disable no-await-in-loop */
   const t0 = Date.now();
   const THREE_MINUTES = 3 * 60 * 1000;
   while (!['CANCELLED', 'FAILED', 'SUCCESS'].includes(task.status)) {
     if (task.status !== 'UNKNOWN') {
-      // eslint-disable-next-line no-await-in-loop
       await timer(sleepMs);
     }
 
@@ -102,18 +111,22 @@ const checkQualityGate = async (reportFile = null, workingDir = '.', sleepMs = 2
     return result(500, report);
   }
   if (task.status === 'TIMEOUT') {
-    core.warning('Sonar job failed to complete within 3 minutes -- assume success');
+    core.warning(
+      'Sonar job failed to complete within 3 minutes -- assume success',
+    );
     return result(0, report);
   }
 
-  const qgStatus = await getQualityGateStatus(report[PROP_SERVER_URL], task.analysisId);
+  const qgStatus = await getQualityGateStatus(
+    report[PROP_SERVER_URL],
+    task.analysisId,
+  );
   core.info(`Sonar Quality Gate status is ${qgStatus.status}`);
   if (qgStatus.status !== 'OK') {
     core.error('Quality gate is not OK -- exit with error');
     return result(1, report, qgStatus);
   }
   return result(0, report, qgStatus);
-  /* eslint-enable no-await-in-loop */
 };
 
 module.exports = {

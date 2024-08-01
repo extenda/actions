@@ -23,16 +23,21 @@ describe('Jira Release Action', () => {
 
   test('It fails for missing JIRA_USERNAME', async () => {
     delete process.env.JIRA_USERNAME;
-    await expect(action()).rejects.toEqual(new Error('Missing env var: JIRA_USERNAME'));
+    await expect(action()).rejects.toEqual(
+      new Error('Missing env var: JIRA_USERNAME'),
+    );
   });
 
   test('It fails for missing JIRA_PASSWORD', async () => {
     delete process.env.JIRA_PASSWORD;
-    await expect(action()).rejects.toEqual(new Error('Missing env var: JIRA_PASSWORD'));
+    await expect(action()).rejects.toEqual(
+      new Error('Missing env var: JIRA_PASSWORD'),
+    );
   });
 
   test('It will use passed inputs', async () => {
-    core.getInput.mockReturnValueOnce('https')
+    core.getInput
+      .mockReturnValueOnce('https')
       .mockReturnValueOnce('jira.test.com')
       .mockReturnValueOnce('TEST')
       .mockReturnValueOnce('')
@@ -51,7 +56,8 @@ describe('Jira Release Action', () => {
   });
 
   test('It catches Jira error', async () => {
-    core.getInput.mockReturnValueOnce('https')
+    core.getInput
+      .mockReturnValueOnce('https')
       .mockReturnValueOnce('jira.test.com')
       .mockReturnValueOnce('TEST')
       .mockReturnValueOnce('')

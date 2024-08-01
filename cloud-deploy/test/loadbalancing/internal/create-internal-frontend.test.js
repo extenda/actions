@@ -46,7 +46,13 @@ describe('configureInternalFrontend', () => {
       '--ports=80',
     ]);
 
-    expect(setupInternalDomainMapping).toHaveBeenCalledWith(projectID, env, name, protocol, false);
+    expect(setupInternalDomainMapping).toHaveBeenCalledWith(
+      projectID,
+      env,
+      name,
+      protocol,
+      false,
+    );
   });
 
   test('should configure internal frontend for gke with correct parameters', async () => {
@@ -84,7 +90,13 @@ describe('configureInternalFrontend', () => {
       '--ports=80',
     ]);
 
-    expect(setupInternalDomainMapping).toHaveBeenCalledWith(projectID, env, name, protocol, true);
+    expect(setupInternalDomainMapping).toHaveBeenCalledWith(
+      projectID,
+      env,
+      name,
+      protocol,
+      true,
+    );
   });
 
   test('should configure internal frontend for http2 on gke correctly', async () => {
@@ -132,7 +144,13 @@ describe('configureInternalFrontend', () => {
       '--ports=443',
     ]);
 
-    expect(setupInternalDomainMapping).toHaveBeenCalledWith(projectID, env, name, protocol, true);
+    expect(setupInternalDomainMapping).toHaveBeenCalledWith(
+      projectID,
+      env,
+      name,
+      protocol,
+      true,
+    );
   });
 
   test('should configure internal frontend for http2 on cloudrun with http frontend correctly', async () => {
@@ -168,6 +186,12 @@ describe('configureInternalFrontend', () => {
       '--ports=80',
     ]);
 
-    expect(setupInternalDomainMapping).toHaveBeenCalledWith(projectID, env, name, protocol, false);
+    expect(setupInternalDomainMapping).toHaveBeenCalledWith(
+      projectID,
+      env,
+      name,
+      protocol,
+      false,
+    );
   });
 });

@@ -1,13 +1,8 @@
 const getImageWithSha256 = require('./image-sha256');
 
 const collectorSpec = async (monitoring) => {
-  const {
-    prometheus: {
-      interval = -1,
-      path = '/metrics',
-      port = 8080,
-    } = {},
-  } = monitoring || {};
+  const { prometheus: { interval = -1, path = '/metrics', port = 8080 } = {} } =
+    monitoring || {};
 
   if (interval < 0) {
     return null;
@@ -19,7 +14,9 @@ const collectorSpec = async (monitoring) => {
     SCRAPE_INTERVAL: interval,
   };
 
-  const image = await getImageWithSha256('eu.gcr.io/extenda/run-gmp-collector:v1.0.5');
+  const image = await getImageWithSha256(
+    'eu.gcr.io/extenda/run-gmp-collector:v1.0.5',
+  );
 
   return {
     image,

@@ -46,7 +46,9 @@ describe('Create attestation', () => {
     const digest = 'djdq1787';
     execGcloud.mockResolvedValueOnce(digest);
 
-    expect(await getArtifactUrl('tag', imagePath)).toEqual('eu.gcr.io/my-image@djdq1787');
+    expect(await getArtifactUrl('tag', imagePath)).toEqual(
+      'eu.gcr.io/my-image@djdq1787',
+    );
     expect(execGcloud).toHaveBeenCalledTimes(1);
   });
 
@@ -55,7 +57,9 @@ describe('Create attestation', () => {
     const digest = 'dut6h1787';
     execGcloud.mockResolvedValueOnce(digest);
 
-    expect(await getArtifactUrl('tag1', imagePath)).toEqual('eu.gcr.io/my-image@dut6h1787');
+    expect(await getArtifactUrl('tag1', imagePath)).toEqual(
+      'eu.gcr.io/my-image@dut6h1787',
+    );
     expect(execGcloud).toHaveBeenCalledTimes(1);
   });
 });

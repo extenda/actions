@@ -40,7 +40,9 @@ describe('create packaage Action', () => {
       .mockReturnValueOnce('output')
       .mockReturnValueOnce('Test_PkgName')
       .mockReturnValueOnce('1.0.1-testversion')
-      .mockReturnValueOnce('https://repo.extendaretail.com/repository/raw-hosted/RS/')
+      .mockReturnValueOnce(
+        'https://repo.extendaretail.com/repository/raw-hosted/RS/',
+      )
       .mockReturnValueOnce('')
       .mockReturnValueOnce(__dirname)
       .mockReturnValueOnce('workdir');
@@ -70,7 +72,9 @@ describe('create packaage Action', () => {
       .mockReturnValueOnce('output')
       .mockReturnValueOnce('Test_PkgName')
       .mockReturnValueOnce('1.0.1-testversion')
-      .mockReturnValueOnce('https://repo.extendaretail.com/repository/raw-hosted/RS/')
+      .mockReturnValueOnce(
+        'https://repo.extendaretail.com/repository/raw-hosted/RS/',
+      )
       .mockReturnValueOnce('')
       .mockReturnValueOnce(__dirname)
       .mockReturnValueOnce('workdir');

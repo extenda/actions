@@ -1009,8 +1009,15 @@ const GCLOUD_JSON_OUTPUT = `[
 ]`;
 
 test('It returns a sorted list of revisions', async () => {
-  exec.mockImplementationOnce((cmd, args, opts) => mockOutput(GCLOUD_JSON_OUTPUT, opts));
-  const revisions = await getRevisions('namespace', 'project', 'cluster', 'location');
+  exec.mockImplementationOnce((cmd, args, opts) =>
+    mockOutput(GCLOUD_JSON_OUTPUT, opts),
+  );
+  const revisions = await getRevisions(
+    'namespace',
+    'project',
+    'cluster',
+    'location',
+  );
   expect(revisions).toEqual([
     {
       name: 'isrg-es-sandbox-checkout-api-00034',

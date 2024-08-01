@@ -7,11 +7,7 @@ const exec = require('@actions/exec');
 const getNamespace = async (namespace) => {
   let output = '';
   try {
-    await exec.exec('kubectl', [
-      'get',
-      'namespace',
-      namespace,
-    ], {
+    await exec.exec('kubectl', ['get', 'namespace', namespace], {
       listeners: {
         stderr: (data) => {
           output += data.toString('utf8');
@@ -22,7 +18,9 @@ const getNamespace = async (namespace) => {
     if (output.includes('(NotFound)')) {
       return false;
     }
-    throw new Error(`Could not get namespace information! reason: ${err.message || 'unknown'}`);
+    throw new Error(
+      `Could not get namespace information! reason: ${err.message || 'unknown'}`,
+    );
   }
   return true;
 };
@@ -33,7 +31,7 @@ const getNamespace = async (namespace) => {
  * @param namespace Namespace name to be searched for.
  */
 const checkNamespaceExists = async (namespace) => {
-  if (!await getNamespace(namespace)) {
+  if (!(await getNamespace(namespace))) {
     throw new Error(`Namespace not found, please make sure your service is setup correctly!
 Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md#services for more information`);
   }

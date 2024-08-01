@@ -1,7 +1,9 @@
 const connectToCluster = require('../../src/utils/cluster-connection');
 const gcloudOutput = require('../../src/utils/gcloud-output');
 
-jest.mock('../../src/utils/gcloud-output', () => jest.fn().mockImplementation(() => Promise.resolve()));
+jest.mock('../../src/utils/gcloud-output', () =>
+  jest.fn().mockImplementation(() => Promise.resolve()),
+);
 
 describe('cluster connection', () => {
   const mockProjectID = 'project-staging';
@@ -16,14 +18,17 @@ describe('cluster connection', () => {
 
     await connectToCluster('clanName', mockEnv, mockProjectID);
 
-    expect(gcloudOutput).toHaveBeenNthCalledWith(1, expect.arrayContaining([
-      'container',
-      'clusters',
-      'get-credentials',
-      'clanName-cluster-staging',
-      '--region=europe-west1',
-      `--project=${mockProjectID}`,
-    ]));
+    expect(gcloudOutput).toHaveBeenNthCalledWith(
+      1,
+      expect.arrayContaining([
+        'container',
+        'clusters',
+        'get-credentials',
+        'clanName-cluster-staging',
+        '--region=europe-west1',
+        `--project=${mockProjectID}`,
+      ]),
+    );
 
     expect(gcloudOutput).toHaveBeenCalledTimes(1);
   });

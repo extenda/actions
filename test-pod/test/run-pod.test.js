@@ -41,33 +41,44 @@ describe('Pod run', () => {
         },
       },
       spec: {
-        containers: [{
-          name: 'actions-15b1e98-test',
-          image: 'myimage@sha256:111',
-        }],
+        containers: [
+          {
+            name: 'actions-15b1e98-test',
+            image: 'myimage@sha256:111',
+          },
+        ],
       },
     };
-    expect(exec.exec).toHaveBeenCalledWith('kubectl', [
-      'run',
-      'actions-15b1e98-test',
-      '--rm',
-      '--attach',
-      '--restart=Never',
-      '--pod-running-timeout=15m',
-      '--image=myimage@sha256:111',
-      '-n',
-      'test',
-      `--overrides=${JSON.stringify(override)}`,
-    ], expect.objectContaining({ silent: true }));
+    expect(exec.exec).toHaveBeenCalledWith(
+      'kubectl',
+      [
+        'run',
+        'actions-15b1e98-test',
+        '--rm',
+        '--attach',
+        '--restart=Never',
+        '--pod-running-timeout=15m',
+        '--image=myimage@sha256:111',
+        '-n',
+        'test',
+        `--overrides=${JSON.stringify(override)}`,
+      ],
+      expect.objectContaining({ silent: true }),
+    );
   });
 
   test('It will run test with complete config map', async () => {
     getImageDigest.mockResolvedValueOnce('myimage@sha256:111');
-    await podRun({ name: 'test', namespace: 'test' }, 'myimage', {
-      name: 'testmap',
-      workingDirectory: true,
-      entrypoint: true,
-    }, false);
+    await podRun(
+      { name: 'test', namespace: 'test' },
+      'myimage',
+      {
+        name: 'testmap',
+        workingDirectory: true,
+        entrypoint: true,
+      },
+      false,
+    );
 
     const override = {
       apiVersion: 'v1',
@@ -81,27 +92,35 @@ describe('Pod run', () => {
         },
       },
       spec: {
-        containers: [{
-          name: 'actions-15b1e98-test',
-          image: 'myimage@sha256:111',
-          workingDir: '/work',
-          volumeMounts: [{
-            mountPath: '/work',
-            name: 'workspace',
-            readOnly: false,
-          }],
-          env: [{
-            name: 'SERVICE_URL',
-            value: 'http://test.test',
-          }],
-          command: ['/bin/sh', 'entrypoint.sh'],
-        }],
-        volumes: [{
-          name: 'workspace',
-          configMap: {
-            name: 'testmap',
+        containers: [
+          {
+            name: 'actions-15b1e98-test',
+            image: 'myimage@sha256:111',
+            workingDir: '/work',
+            volumeMounts: [
+              {
+                mountPath: '/work',
+                name: 'workspace',
+                readOnly: false,
+              },
+            ],
+            env: [
+              {
+                name: 'SERVICE_URL',
+                value: 'http://test.test',
+              },
+            ],
+            command: ['/bin/sh', 'entrypoint.sh'],
           },
-        }],
+        ],
+        volumes: [
+          {
+            name: 'workspace',
+            configMap: {
+              name: 'testmap',
+            },
+          },
+        ],
       },
     };
     expect(exec.exec.mock.calls[0][1]).toEqual(
@@ -114,11 +133,16 @@ describe('Pod run', () => {
 
   test('It will run test without entrypoint in map', async () => {
     getImageDigest.mockResolvedValueOnce('myimage@sha256:111');
-    await podRun({ name: '', namespace: 'test' }, 'myimage', {
-      name: 'testmap',
-      workingDirectory: true,
-      entrypoint: false,
-    }, false);
+    await podRun(
+      { name: '', namespace: 'test' },
+      'myimage',
+      {
+        name: 'testmap',
+        workingDirectory: true,
+        entrypoint: false,
+      },
+      false,
+    );
 
     const override = {
       apiVersion: 'v1',
@@ -132,22 +156,28 @@ describe('Pod run', () => {
         },
       },
       spec: {
-        containers: [{
-          name: 'actions-15b1e98-test',
-          image: 'myimage@sha256:111',
-          workingDir: '/work',
-          volumeMounts: [{
-            mountPath: '/work',
-            name: 'workspace',
-            readOnly: false,
-          }],
-        }],
-        volumes: [{
-          name: 'workspace',
-          configMap: {
-            name: 'testmap',
+        containers: [
+          {
+            name: 'actions-15b1e98-test',
+            image: 'myimage@sha256:111',
+            workingDir: '/work',
+            volumeMounts: [
+              {
+                mountPath: '/work',
+                name: 'workspace',
+                readOnly: false,
+              },
+            ],
           },
-        }],
+        ],
+        volumes: [
+          {
+            name: 'workspace',
+            configMap: {
+              name: 'testmap',
+            },
+          },
+        ],
       },
     };
     expect(exec.exec.mock.calls[0][1]).toEqual(
@@ -171,20 +201,22 @@ describe('Pod run', () => {
         },
       },
       spec: {
-        containers: [{
-          name: 'actions-15b1e98-test',
-          image: 'myimage@sha256:111',
-          env: [
-            {
-              name: 'TESTPOD_API_KEY',
-              value: 'my-secret',
-            },
-            {
-              name: 'TESTPOD_VERBOSE',
-              value: 'true',
-            },
-          ],
-        }],
+        containers: [
+          {
+            name: 'actions-15b1e98-test',
+            image: 'myimage@sha256:111',
+            env: [
+              {
+                name: 'TESTPOD_API_KEY',
+                value: 'my-secret',
+              },
+              {
+                name: 'TESTPOD_VERBOSE',
+                value: 'true',
+              },
+            ],
+          },
+        ],
       },
     };
     await podRun({ name: '', namespace: 'test' }, 'myimage', null, false);
@@ -216,20 +248,22 @@ describe('Pod run', () => {
         },
       },
       spec: {
-        containers: [{
-          name: 'actions-15b1e98-test',
-          image: 'myimage@sha256:111',
-          env: [
-            {
-              name: 'API_KEY',
-              value: 'my-secret',
-            },
-            {
-              name: 'VERBOSE',
-              value: 'true',
-            },
-          ],
-        }],
+        containers: [
+          {
+            name: 'actions-15b1e98-test',
+            image: 'myimage@sha256:111',
+            env: [
+              {
+                name: 'API_KEY',
+                value: 'my-secret',
+              },
+              {
+                name: 'VERBOSE',
+                value: 'true',
+              },
+            ],
+          },
+        ],
       },
     };
     await podRun({ name: '', namespace: 'test' }, 'myimage', null, true);
@@ -260,10 +294,12 @@ describe('Pod run', () => {
         },
       },
       spec: {
-        containers: [{
-          name: 'actions-15b1e98-test',
-          image: 'myimage@sha256:111',
-        }],
+        containers: [
+          {
+            name: 'actions-15b1e98-test',
+            image: 'myimage@sha256:111',
+          },
+        ],
       },
     };
 
@@ -272,9 +308,7 @@ describe('Pod run', () => {
 
     await podRun({ name: '', namespace: 'test' }, 'myimage', null, false);
     expect(exec.exec.mock.calls[0][1]).toEqual(
-      expect.arrayContaining([
-        `--overrides=${JSON.stringify(override)}`,
-      ]),
+      expect.arrayContaining([`--overrides=${JSON.stringify(override)}`]),
     );
     expect(extract.extractOutput).toHaveBeenCalled();
   });

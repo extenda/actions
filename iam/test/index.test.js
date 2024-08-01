@@ -44,7 +44,8 @@ describe('run action', () => {
     };
 
     getClusterInfo.mockReturnValueOnce(clusterInfoResponse);
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('service-account-staging')
       .mockReturnValueOnce('service-account-prod')
       .mockReturnValueOnce('iam.yaml')
@@ -63,9 +64,21 @@ describe('run action', () => {
       'iam-tenant',
     );
     expect(configureBundleSync).toHaveBeenNthCalledWith(1, {}, 'staging');
-    expect(configureIAM).toHaveBeenNthCalledWith(1, {}, 'https://iam-api.retailsvc.com', '', true);
+    expect(configureIAM).toHaveBeenNthCalledWith(
+      1,
+      {},
+      'https://iam-api.retailsvc.com',
+      '',
+      true,
+    );
     expect(configureBundleSync).toHaveBeenNthCalledWith(2, {}, 'prod');
-    expect(configureIAM).toHaveBeenNthCalledWith(2, {}, 'https://iam-api.retailsvc.com', 'iam-token', false);
+    expect(configureIAM).toHaveBeenNthCalledWith(
+      2,
+      {},
+      'https://iam-api.retailsvc.com',
+      'iam-token',
+      false,
+    );
   });
 
   test('It can run the action for IAM api correctly', async () => {
@@ -78,7 +91,8 @@ describe('run action', () => {
     };
 
     getClusterInfo.mockReturnValueOnce(clusterInfoResponse);
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('service-account-staging')
       .mockReturnValueOnce('service-account-prod')
       .mockReturnValueOnce('iam.yaml')
@@ -98,9 +112,21 @@ describe('run action', () => {
       'iam-tenant',
     );
     expect(configureBundleSync).toHaveBeenNthCalledWith(1, {}, 'staging');
-    expect(configureIAM).toHaveBeenNthCalledWith(1, {}, 'https://iam-api.retailsvc.dev', 'iam-token', false);
+    expect(configureIAM).toHaveBeenNthCalledWith(
+      1,
+      {},
+      'https://iam-api.retailsvc.dev',
+      'iam-token',
+      false,
+    );
     expect(configureBundleSync).toHaveBeenNthCalledWith(2, {}, 'prod');
-    expect(configureIAM).toHaveBeenNthCalledWith(2, {}, 'https://iam-api.retailsvc.com', 'iam-token', false);
+    expect(configureIAM).toHaveBeenNthCalledWith(
+      2,
+      {},
+      'https://iam-api.retailsvc.com',
+      'iam-token',
+      false,
+    );
   });
 
   test('It can run for multiple files', async () => {
@@ -112,7 +138,8 @@ describe('run action', () => {
 
     setupGcloud.mockResolvedValue('test-prod-332');
     loadCredentials.mockResolvedValue(credentials);
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('service-account-staging')
       .mockReturnValueOnce('service-account-prod')
       .mockReturnValueOnce('iam/*.yaml')
@@ -129,7 +156,8 @@ describe('run action', () => {
   test('Dry-run stops after loading schema', async () => {
     setupGcloud.mockResolvedValue('test-prod-332');
     loadCredentials.mockResolvedValue(credentials);
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('service-account-staging')
       .mockReturnValueOnce('service-account-prod')
       .mockReturnValueOnce('iam/*.yaml')

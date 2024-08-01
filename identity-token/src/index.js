@@ -4,7 +4,9 @@ const { run } = require('../../utils/src');
 const { setupGcloud } = require('../../setup-gcloud');
 
 const action = async () => {
-  const serviceAccountKey = core.getInput('service-account-key', { required: true });
+  const serviceAccountKey = core.getInput('service-account-key', {
+    required: true,
+  });
   const serviceAccount = core.getInput('service-account', { required: true });
   const audiences = core.getInput('audiences', { required: true });
 

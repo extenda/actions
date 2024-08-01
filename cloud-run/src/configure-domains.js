@@ -6,30 +6,36 @@ const authenticateKubeCtl = require('./kubectl-auth');
 const { addDnsRecord } = require('./dns-record');
 const certificateExpiration = require('./alert-certificate-expiration');
 
-const listDomains = async ({ cluster, clusterLocation, project }, namespace) => gcloud([
-  'run',
-  'domain-mappings',
-  'list',
-  '--platform=gke',
-  `--project=${project}`,
-  `--cluster=${cluster}`,
-  `--cluster-location=${clusterLocation}`,
-  `--namespace=${namespace}`,
-  '--format=value(DOMAIN,SERVICE)',
-]).then((result) => result.split('\n'))
-  .then((list) => list.reduce((prev, value) => {
-    const [domain, service] = value.split(/\s+/);
-    const update = { ...prev };
-    update[domain] = service;
-    return update;
-  }, {}));
+const listDomains = async ({ cluster, clusterLocation, project }, namespace) =>
+  gcloud([
+    'run',
+    'domain-mappings',
+    'list',
+    '--platform=gke',
+    `--project=${project}`,
+    `--cluster=${cluster}`,
+    `--cluster-location=${clusterLocation}`,
+    `--namespace=${namespace}`,
+    '--format=value(DOMAIN,SERVICE)',
+  ])
+    .then((result) => result.split('\n'))
+    .then((list) =>
+      list.reduce((prev, value) => {
+        const [domain, service] = value.split(/\s+/);
+        const update = { ...prev };
+        update[domain] = service;
+        return update;
+      }, {}),
+    );
 
 const getNewDomains = async (domains, name, cluster, namespace) => {
   const mappings = await listDomains(cluster, namespace);
   return domains.filter((domain) => {
     const existing = mappings[domain];
     if (existing && existing !== name) {
-      throw Error(`Conflict: Domain ${domain} already mapped to service ${existing}`);
+      throw Error(
+        `Conflict: Domain ${domain} already mapped to service ${existing}`,
+      );
     }
     return !existing;
   });
@@ -57,10 +63,7 @@ const createDomainMapping = async (
   ]);
 };
 
-const enableHttpRedirectOnDomain = async (
-  domain,
-  namespace,
-) => {
+const enableHttpRedirectOnDomain = async (domain, namespace) => {
   core.info(`Enable http redirect for '${domain}'`);
   return exec.exec('kubectl', [
     'annotate',
@@ -72,7 +75,8 @@ const enableHttpRedirectOnDomain = async (
   ]);
 };
 
-const determineEnv = (project) => (project.includes('staging') ? 'staging' : 'prod');
+const determineEnv = (project) =>
+  project.includes('staging') ? 'staging' : 'prod';
 
 const configureDomains = async (
   service,
@@ -102,7 +106,8 @@ const configureDomains = async (
 
   // If prod and retailsvc.com is listed, add retailsvc-test.com
   if (env === 'prod') {
-    const testDomains = domains.filter((d) => d.endsWith('retailsvc.com'))
+    const testDomains = domains
+      .filter((d) => d.endsWith('retailsvc.com'))
       .map((d) => d.replace('retailsvc.com', 'retailsvc-test.com'));
     domains.push(...testDomains);
   }
@@ -115,9 +120,15 @@ const configureDomains = async (
     const promises = [];
     const limit = pLimit(1);
     newDomains.forEach((domain) => {
-      promises.push(limit(() => createDomainMapping(cluster, domain, name, namespace)
-        .then((ipAddress) => addDnsRecord(dnsProjectLabel, domain, ipAddress))
-        .then(() => enableHttpRedirectOnDomain(domain, namespace))));
+      promises.push(
+        limit(() =>
+          createDomainMapping(cluster, domain, name, namespace)
+            .then((ipAddress) =>
+              addDnsRecord(dnsProjectLabel, domain, ipAddress),
+            )
+            .then(() => enableHttpRedirectOnDomain(domain, namespace)),
+        ),
+      );
     });
     await Promise.all(promises);
 

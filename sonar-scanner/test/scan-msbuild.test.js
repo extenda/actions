@@ -35,7 +35,9 @@ describe('Scan MSBuild', () => {
     expect(output).toEqual(false);
     expect(fs.existsSync(markerFile)).toEqual(true);
     expect(exec.exec.mock.calls.length).toEqual(2);
-    expect(exec.exec.mock.calls[0][0]).toEqual('dotnet tool install -g dotnet-sonarscanner --version 4.10.0');
+    expect(exec.exec.mock.calls[0][0]).toEqual(
+      'dotnet tool install -g dotnet-sonarscanner --version 4.10.0',
+    );
     expect(exec.exec.mock.calls[1][0]).toContain('dotnet-sonarscanner');
     expect(exec.exec.mock.calls[1][0]).toContain('begin');
   });
@@ -58,7 +60,9 @@ describe('Scan MSBuild', () => {
 
     const platformSpy = jest.spyOn(os, 'platform').mockReturnValue('win32');
     await scanMsBuild('https://sonar.extenda.io', 'master');
-    expect(Object.keys(exec.exec.mock.calls[0][2].env)).not.toContain('JAVA_HOME');
+    expect(Object.keys(exec.exec.mock.calls[0][2].env)).not.toContain(
+      'JAVA_HOME',
+    );
     platformSpy.mockRestore();
   });
 
@@ -69,7 +73,9 @@ describe('Scan MSBuild', () => {
 
     const platformSpy = jest.spyOn(os, 'platform').mockReturnValue('linux');
     await scanMsBuild('https://sonar.extenda.io', 'master');
-    expect(Object.keys(exec.exec.mock.calls[0][2].env)).not.toContain('JAVA_HOME');
+    expect(Object.keys(exec.exec.mock.calls[0][2].env)).not.toContain(
+      'JAVA_HOME',
+    );
     platformSpy.mockRestore();
   });
 });

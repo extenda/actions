@@ -30,59 +30,66 @@ const checkMembers = async (members, accounts) => {
   return { toAdd, toRemove: members };
 };
 
-const allowAllRequests = async (projectID, name) => gcloudOutput([
-  'run',
-  'services',
-  'add-iam-policy-binding',
-  name,
-  '--member=allUsers',
-  '--role=roles/run.invoker',
-  '--region=europe-west1',
-  `--project=${projectID}`,
-]);
+const allowAllRequests = async (projectID, name) =>
+  gcloudOutput([
+    'run',
+    'services',
+    'add-iam-policy-binding',
+    name,
+    '--member=allUsers',
+    '--role=roles/run.invoker',
+    '--region=europe-west1',
+    `--project=${projectID}`,
+  ]);
 
-const getPolicyBindings = async (projectID, name) => gcloudOutput([
-  'run',
-  'services',
-  'get-iam-policy',
-  name,
-  '--region=europe-west1',
-  `--project=${projectID}`,
-  '--format=json',
-]);
+const getPolicyBindings = async (projectID, name) =>
+  gcloudOutput([
+    'run',
+    'services',
+    'get-iam-policy',
+    name,
+    '--region=europe-west1',
+    `--project=${projectID}`,
+    '--format=json',
+  ]);
 
-const allowAccountRequests = async (projectID, name, account) => gcloudOutput([
-  'run',
-  'services',
-  'add-iam-policy-binding',
-  name,
-  `--member=${account}`,
-  '--role=roles/run.invoker',
-  '--region=europe-west1',
-  `--project=${projectID}`,
-]);
+const allowAccountRequests = async (projectID, name, account) =>
+  gcloudOutput([
+    'run',
+    'services',
+    'add-iam-policy-binding',
+    name,
+    `--member=${account}`,
+    '--role=roles/run.invoker',
+    '--region=europe-west1',
+    `--project=${projectID}`,
+  ]);
 
-const disallowAccountRequests = async (projectID, name, account) => gcloudOutput([
-  'run',
-  'services',
-  'remove-iam-policy-binding',
-  name,
-  `--member=${account}`,
-  '--role=roles/run.invoker',
-  '--region=europe-west1',
-  `--project=${projectID}`,
-]);
+const disallowAccountRequests = async (projectID, name, account) =>
+  gcloudOutput([
+    'run',
+    'services',
+    'remove-iam-policy-binding',
+    name,
+    `--member=${account}`,
+    '--role=roles/run.invoker',
+    '--region=europe-west1',
+    `--project=${projectID}`,
+  ]);
 const setupAuthorization = async (projectID, name, accounts) => {
   if (accounts.length === 0) {
     await allowAllRequests(projectID, name);
   } else {
-    const currentPolicyBindings = JSON.parse(await getPolicyBindings(projectID, name));
+    const currentPolicyBindings = JSON.parse(
+      await getPolicyBindings(projectID, name),
+    );
     if (!currentPolicyBindings.bindings) {
-      currentPolicyBindings.bindings = [{ members: [], role: 'roles/run.invoker' }];
+      currentPolicyBindings.bindings = [
+        { members: [], role: 'roles/run.invoker' },
+      ];
     }
     for (const policy of currentPolicyBindings.bindings) {
       if (policy.role === 'roles/run.invoker') {
-        /* eslint-disable no-await-in-loop */
         const addRemoveMember = await checkMembers(policy.members, accounts);
         for (const removeMember of addRemoveMember.toRemove) {
           core.info(`remove iam binding: ${removeMember}`);
@@ -91,7 +98,6 @@ const setupAuthorization = async (projectID, name, accounts) => {
         for (const addMember of addRemoveMember.toAdd) {
           core.info(`add iam binding: ${addMember}`);
           await allowAccountRequests(projectID, name, addMember);
-          /* eslint-enable no-await-in-loop */
         }
         break;
       }

@@ -13,12 +13,22 @@ const podName = async () => {
 const TEST_POD_ENV_PREFIX = 'TESTPOD_';
 const PREFIX_LEN = TEST_POD_ENV_PREFIX.length;
 
-const podEnv = (trimPrefix) => Object
-  .entries(process.env)
-  .filter(([envName]) => envName.startsWith(TEST_POD_ENV_PREFIX))
-  .map(([envName, envValue]) => [trimPrefix ? envName.slice(PREFIX_LEN) : envName, envValue]);
+const podEnv = (trimPrefix) =>
+  Object.entries(process.env)
+    .filter(([envName]) => envName.startsWith(TEST_POD_ENV_PREFIX))
+    .map(([envName, envValue]) => [
+      trimPrefix ? envName.slice(PREFIX_LEN) : envName,
+      envValue,
+    ]);
 
-const createOverride = (pod, namespace, image, configMap, serviceUrl, trimPrefix) => {
+const createOverride = (
+  pod,
+  namespace,
+  image,
+  configMap,
+  serviceUrl,
+  trimPrefix,
+) => {
   const container = {
     name: pod,
     image,
@@ -26,18 +36,22 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl, trimPrefix
 
   if (configMap) {
     container.workingDir = '/work';
-    container.volumeMounts = [{
-      mountPath: '/work',
-      name: 'workspace',
-      readOnly: false,
-    }];
+    container.volumeMounts = [
+      {
+        mountPath: '/work',
+        name: 'workspace',
+        readOnly: false,
+      },
+    ];
   }
 
   if (serviceUrl) {
-    container.env = [{
-      name: 'SERVICE_URL',
-      value: serviceUrl,
-    }];
+    container.env = [
+      {
+        name: 'SERVICE_URL',
+        value: serviceUrl,
+      },
+    ];
   }
 
   podEnv(trimPrefix).forEach(([envName, envValue]) => {
@@ -66,19 +80,19 @@ const createOverride = (pod, namespace, image, configMap, serviceUrl, trimPrefix
       },
     },
     spec: {
-      containers: [
-        container,
-      ],
+      containers: [container],
     },
   };
 
   if (configMap) {
-    override.spec.volumes = [{
-      name: 'workspace',
-      configMap: {
-        name: configMap.name,
+    override.spec.volumes = [
+      {
+        name: 'workspace',
+        configMap: {
+          name: configMap.name,
+        },
       },
-    }];
+    ];
   }
 
   return override;
@@ -111,30 +125,41 @@ const runPod = async ({ name, namespace }, image, configMap, trimPrefix) => {
   });
 
   const json = JSON.stringify(
-    createOverride(pod, namespace, imageDigest, configMap, serviceUrl, trimPrefix),
+    createOverride(
+      pod,
+      namespace,
+      imageDigest,
+      configMap,
+      serviceUrl,
+      trimPrefix,
+    ),
   );
   args.push(`--overrides=${json}`);
 
   let output = '';
   const filter = new LogFilter();
   core.info(`kubectl ${args.join(' ')}`);
-  return exec.exec('kubectl', args, {
-    silent: true,
-    listeners: {
-      stdout: (data) => {
-        filter.log(data, process.stdout);
-        output += data.toString('utf8');
+  return exec
+    .exec('kubectl', args, {
+      silent: true,
+      listeners: {
+        stdout: (data) => {
+          filter.log(data, process.stdout);
+          output += data.toString('utf8');
+        },
+        stderr: (data) => {
+          process.stderr.write(data);
+        },
       },
-      stderr: (data) => {
-        process.stderr.write(data);
-      },
-    },
-  }).then((result) => extractOutput(output).then((dest) => {
-    if (dest) {
-      core.info(`Output saved to: ${dest}`);
-    }
-    return result;
-  }));
+    })
+    .then((result) =>
+      extractOutput(output).then((dest) => {
+        if (dest) {
+          core.info(`Output saved to: ${dest}`);
+        }
+        return result;
+      }),
+    );
 };
 
 module.exports = runPod;

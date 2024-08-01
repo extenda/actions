@@ -26,7 +26,9 @@ describe('core and cp methods', () => {
       const dockerfile = 'Dockerfile.nonexistent';
       core.getInput.mockReturnValue(dockerfile);
       docker.build('gcr.io/some-project/image:v1');
-      expect(core.setFailed).toHaveBeenCalledWith(`Dockerfile does not exist in location ${dockerfile}`);
+      expect(core.setFailed).toHaveBeenCalledWith(
+        `Dockerfile does not exist in location ${dockerfile}`,
+      );
     });
 
     test('Dockerfile exists', () => {
@@ -44,7 +46,9 @@ describe('core and cp methods', () => {
       core.getInput.mockReturnValueOnce(dockerContext);
 
       docker.build(image, null, tags);
-      expect(cp.execSync).toHaveBeenCalledWith(`docker build -f ${dockerfile} -t ${image}:${tags[0]} ${dockerContext}`);
+      expect(cp.execSync).toHaveBeenCalledWith(
+        `docker build -f ${dockerfile} -t ${image}:${tags[0]} ${dockerContext}`,
+      );
     });
 
     test('Multiple tags', () => {
@@ -62,7 +66,9 @@ describe('core and cp methods', () => {
       core.getInput.mockReturnValueOnce(dockerContext);
 
       docker.build(image, null, tags);
-      expect(cp.execSync).toHaveBeenCalledWith(`docker build -f ${dockerfile} -t ${image}:${tags[0]} -t ${image}:${tags[1]} ${dockerContext}`);
+      expect(cp.execSync).toHaveBeenCalledWith(
+        `docker build -f ${dockerfile} -t ${image}:${tags[0]} -t ${image}:${tags[1]} ${dockerContext}`,
+      );
     });
 
     test('Build with build args', () => {
@@ -92,15 +98,16 @@ describe('core and cp methods', () => {
       const username = 'user';
       const password = 'areallysecurepassword';
 
-      core.getInput
-        .mockReturnValueOnce(username)
-        .mockReturnValueOnce(password);
+      core.getInput.mockReturnValueOnce(username).mockReturnValueOnce(password);
 
       docker.login(registry);
 
-      expect(cp.execSync).toHaveBeenCalledWith(`docker login -u ${username} --password-stdin ${registry}`, {
-        input: password,
-      });
+      expect(cp.execSync).toHaveBeenCalledWith(
+        `docker login -u ${username} --password-stdin ${registry}`,
+        {
+          input: password,
+        },
+      );
     });
 
     test('ECR login', () => {
@@ -115,8 +122,13 @@ describe('core and cp methods', () => {
 
       docker.login(registry);
 
-      expect(cp.execSync).toHaveBeenCalledWith('aws ecr get-login-password --region us-east-1');
-      expect(cp.execSync).toHaveBeenCalledWith(`docker login -u AWS --password-stdin ${registry}`, { input: 'JWT' });
+      expect(cp.execSync).toHaveBeenCalledWith(
+        'aws ecr get-login-password --region us-east-1',
+      );
+      expect(cp.execSync).toHaveBeenCalledWith(
+        `docker login -u AWS --password-stdin ${registry}`,
+        { input: 'JWT' },
+      );
     });
 
     test("returns undefined if empty login and doesn't execute command", () => {

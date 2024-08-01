@@ -3,8 +3,8 @@ const simpleGit = require('simple-git');
 const isPreRelease = (branchName) => branchName !== 'master';
 
 const getBranchType = (branchName) => {
-  const devPattern = /(^dev$|^develop$)/gmi;
-  const masterPattern = /^master$/gmi;
+  const devPattern = /(^dev$|^develop$)/gim;
+  const masterPattern = /^master$/gim;
 
   if (devPattern.test(branchName)) {
     return 'dev';
@@ -91,10 +91,17 @@ const getShortSha = async (sha, shaSize = null) => {
   return simpleGit().revparse(args);
 };
 
-const getTagAtCommit = async (sha) => simpleGit().tag(['--points-at', sha])
-  .then((output) => output.trim());
+const getTagAtCommit = async (sha) =>
+  simpleGit()
+    .tag(['--points-at', sha])
+    .then((output) => output.trim());
 
-const getComposedVersionString = (version, branchNameFriendly, buildNumber, shortSha) => {
+const getComposedVersionString = (
+  version,
+  branchNameFriendly,
+  buildNumber,
+  shortSha,
+) => {
   if (!branchNameFriendly) {
     throw Error('branchNameFriendly is null, undefined, or empty');
   }

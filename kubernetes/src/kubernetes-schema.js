@@ -120,8 +120,6 @@ module.exports = {
       ],
     },
   },
-  required: [
-    'name',
-  ],
+  required: ['name'],
   additionalProperties: false,
 };

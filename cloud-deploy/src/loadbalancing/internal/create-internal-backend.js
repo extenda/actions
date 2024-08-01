@@ -5,46 +5,41 @@ const { projectWithoutNumbers } = require('../../utils/clan-project-name');
 
 const getBackendStatus = async (name, projectID) => {
   try {
-    const status = JSON.parse(await gcloudOutput([
-      'compute',
-      'backend-services',
-      'describe',
-      `${name}-internal-backend`,
-      '--region=europe-west1',
-      `--project=${projectID}`,
-      '--format=json',
-    ]));
+    const status = JSON.parse(
+      await gcloudOutput([
+        'compute',
+        'backend-services',
+        'describe',
+        `${name}-internal-backend`,
+        '--region=europe-west1',
+        `--project=${projectID}`,
+        '--format=json',
+      ]),
+    );
     const { backends } = status;
     const backendService = backends[0].group;
     if (backendService.includes('neg')) {
       return { backends, platform: 'gke' };
     }
     return { backends, platform: 'cloudrun' };
-  } catch (err) {
+  } catch {
     return null;
   }
 };
 
-const createServerlessNeg = async (
-  name,
-  projectID,
-  region,
-) => gcloudOutput([
-  'compute',
-  'network-endpoint-groups',
-  'create',
-  `${name}-cloudrun`,
-  `--cloud-run-service=${name}`,
-  '--network-endpoint-type=serverless',
-  `--project=${projectID}`,
-  `--region=${region}`,
-]);
+const createServerlessNeg = async (name, projectID, region) =>
+  gcloudOutput([
+    'compute',
+    'network-endpoint-groups',
+    'create',
+    `${name}-cloudrun`,
+    `--cloud-run-service=${name}`,
+    '--network-endpoint-type=serverless',
+    `--project=${projectID}`,
+    `--region=${region}`,
+  ]);
 
-const deleteBackendService = async (
-  name,
-  projectID,
-  env,
-) => {
+const deleteBackendService = async (name, projectID, env) => {
   await gcloudOutput([
     'compute',
     'url-maps',
@@ -79,7 +74,9 @@ const updateBackendService = async (
     'backend-services',
     'update',
     `${name}-internal-backend`,
-    platformGKE ? `--health-checks=${projectID}-external-hc` : '--no-health-checks',
+    platformGKE
+      ? `--health-checks=${projectID}-external-hc`
+      : '--no-health-checks',
     '--region=europe-west1',
     `--project=${projectID}`,
   ];
@@ -121,24 +118,27 @@ const setupBackendService = async (
   if (!platformGKE) {
     args.push('--protocol=HTTPS');
   }
-  return gcloudOutput(args, 'gcloud', true, true).catch(() => updateBackendService(
-    name,
-    projectID,
-    serviceType,
-    connectionTimeout,
-    platformGKE,
-  ));
+  return gcloudOutput(args, 'gcloud', true, true).catch(() =>
+    updateBackendService(
+      name,
+      projectID,
+      serviceType,
+      connectionTimeout,
+      platformGKE,
+    ),
+  );
 };
 
 // Check if NEG exists
-const checkNEG = async (projectID, zone, name) => gcloudOutput([
-  'compute',
-  'network-endpoint-groups',
-  'describe',
-  `${name}-neg`,
-  `--project=${projectID}`,
-  `--zone=${zone}`,
-]);
+const checkNEG = async (projectID, zone, name) =>
+  gcloudOutput([
+    'compute',
+    'network-endpoint-groups',
+    'describe',
+    `${name}-neg`,
+    `--project=${projectID}`,
+    `--zone=${zone}`,
+  ]);
 
 // Check if NEGs exists
 const checkNEGs = async (projectID, name) => {
@@ -169,17 +169,18 @@ const addBackend = async (name, projectID, zone, platformGKE) => {
   return gcloudOutput(args);
 };
 
-const setupBackendURLMapping = async (host, projectID, name, env, region) => gcloudOutput([
-  'compute',
-  'url-maps',
-  'add-path-matcher',
-  `${projectWithoutNumbers(projectID, env)}-lb-internal`,
-  `--project=${projectID}`,
-  `--default-service=${name}-internal-backend`,
-  `--path-matcher-name=${name}-internal-backend`,
-  `--region=${region}`,
-  `--new-hosts=${host}`,
-]);
+const setupBackendURLMapping = async (host, projectID, name, env, region) =>
+  gcloudOutput([
+    'compute',
+    'url-maps',
+    'add-path-matcher',
+    `${projectWithoutNumbers(projectID, env)}-lb-internal`,
+    `--project=${projectID}`,
+    `--default-service=${name}-internal-backend`,
+    `--path-matcher-name=${name}-internal-backend`,
+    `--region=${region}`,
+    `--new-hosts=${host}`,
+  ]);
 
 const configureBackend = async (
   projectID,
@@ -199,16 +200,29 @@ const configureBackend = async (
   // create if not existing
   if (!backendStatus) {
     core.info('Creating internal backend service');
-    await setupBackendService(name, projectID, serviceType, connectionTimeout, platformGKE);
+    await setupBackendService(
+      name,
+      projectID,
+      serviceType,
+      connectionTimeout,
+      platformGKE,
+    );
   } else if (
-    (backendStatus.platform === 'gke' && !platformGKE)
-    || (backendStatus.platform === 'cloudrun' && platformGKE)) {
+    (backendStatus.platform === 'gke' && !platformGKE) ||
+    (backendStatus.platform === 'cloudrun' && platformGKE)
+  ) {
     doSwitch = true;
   }
 
   if (doSwitch) {
     await deleteBackendService(name, projectID, env);
-    await setupBackendService(name, projectID, serviceType, connectionTimeout, platformGKE);
+    await setupBackendService(
+      name,
+      projectID,
+      serviceType,
+      connectionTimeout,
+      platformGKE,
+    );
   }
 
   if (platformGKE) {
@@ -217,7 +231,11 @@ const configureBackend = async (
       .then(() => addBackend(name, projectID, 'europe-west1-d', platformGKE))
       .then(() => addBackend(name, projectID, 'europe-west1-c', platformGKE))
       .then(() => addBackend(name, projectID, 'europe-west1-b', platformGKE))
-      .catch(() => { throw new Error('The NEG was not found! make sure the deployment is correct'); });
+      .catch(() => {
+        throw new Error(
+          'The NEG was not found! make sure the deployment is correct',
+        );
+      });
   } else {
     await createServerlessNeg(name, projectID, region);
     await addBackend(name, projectID, region, platformGKE);
@@ -225,17 +243,18 @@ const configureBackend = async (
 };
 
 // Create healthcheck if not exists
-const setupHealthCheck = async (projectID, region) => gcloudOutput([
-  'compute',
-  'health-checks',
-  'create',
-  'tcp',
-  `${projectID}-internal-hc`,
-  `--region=${region}`,
-  '--use-serving-port',
-  '--check-interval=10s',
-  `--project=${projectID}`,
-]);
+const setupHealthCheck = async (projectID, region) =>
+  gcloudOutput([
+    'compute',
+    'health-checks',
+    'create',
+    'tcp',
+    `${projectID}-internal-hc`,
+    `--region=${region}`,
+    '--use-serving-port',
+    '--check-interval=10s',
+    `--project=${projectID}`,
+  ]);
 
 const configureInternalDomain = async (
   projectID,
@@ -248,7 +267,15 @@ const configureInternalDomain = async (
   const host = `${name}.internal`;
   const region = 'europe-west1';
   await setupHealthCheck(projectID, region);
-  await configureBackend(projectID, name, region, serviceType, connectionTimeout, platformGKE, env);
+  await configureBackend(
+    projectID,
+    name,
+    region,
+    serviceType,
+    connectionTimeout,
+    platformGKE,
+    env,
+  );
   await createInternalLoadbalancer(projectID, env, name);
   core.info('Setup internal url-mapping');
   return setupBackendURLMapping(host, projectID, name, env, region);

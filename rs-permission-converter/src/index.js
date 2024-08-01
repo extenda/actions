@@ -6,7 +6,8 @@ const run = async () => {
   try {
     checkEnv(['NEXUS_USERNAME', 'NEXUS_PASSWORD']);
 
-    const binaryVersion = core.getInput('tool-version', { required: false }) || '1.0.0';
+    const binaryVersion =
+      core.getInput('tool-version', { required: false }) || '1.0.0';
     const type = core.getInput('type', { required: true });
     const workDir = core.getInput('work-directory', { required: true });
     const permFile = core.getInput('permission-file', { required: true });

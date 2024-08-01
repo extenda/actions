@@ -17,7 +17,10 @@ storage:
   mountPath: /data/storage
 `,
       });
-      const serviceDef = loadServiceDefinition('kubernetes.yaml', kubernetesSchema);
+      const serviceDef = loadServiceDefinition(
+        'kubernetes.yaml',
+        kubernetesSchema,
+      );
       expect(serviceDef).toMatchObject({
         storage: {
           volume: '1Gi',
@@ -32,10 +35,15 @@ storage:
 name: kubernetes
 `,
       });
-      const serviceDef = loadServiceDefinition('kubernetes.yaml', kubernetesSchema);
-      expect(serviceDef).toMatchObject(expect.not.objectContaining({
-        storage: expect.anything(),
-      }));
+      const serviceDef = loadServiceDefinition(
+        'kubernetes.yaml',
+        kubernetesSchema,
+      );
+      expect(serviceDef).toMatchObject(
+        expect.not.objectContaining({
+          storage: expect.anything(),
+        }),
+      );
     });
 
     test('It loads cpu and memory definitions', () => {
@@ -50,7 +58,10 @@ limits:
   cpu: 300m
 `,
       });
-      const serviceDef = loadServiceDefinition('kubernetes.yaml', kubernetesSchema);
+      const serviceDef = loadServiceDefinition(
+        'kubernetes.yaml',
+        kubernetesSchema,
+      );
       expect(serviceDef).toMatchObject({
         requests: {
           cpu: '100m',
@@ -73,14 +84,18 @@ ports:
     targetPort: 8080
 `,
       });
-      const serviceDef = loadServiceDefinition('kubernetes.yaml', kubernetesSchema);
+      const serviceDef = loadServiceDefinition(
+        'kubernetes.yaml',
+        kubernetesSchema,
+      );
       expect(serviceDef).toMatchObject({
         ports: [
           {
             protocol: 'TCP',
             port: 80,
             targetPort: 8080,
-          }],
+          },
+        ],
       });
     });
 
@@ -94,7 +109,10 @@ autoscale:
   cpuPercent: 25
 `,
       });
-      const serviceDef = loadServiceDefinition('kubernetes.yaml', kubernetesSchema);
+      const serviceDef = loadServiceDefinition(
+        'kubernetes.yaml',
+        kubernetesSchema,
+      );
       expect(serviceDef).toMatchObject({
         autoscale: {
           cpuPercent: 25,
@@ -115,7 +133,10 @@ autoscale:
   targetAverageUndeliveredMessages: 30
 `,
       });
-      const serviceDef = loadServiceDefinition('kubernetes.yaml', kubernetesSchema);
+      const serviceDef = loadServiceDefinition(
+        'kubernetes.yaml',
+        kubernetesSchema,
+      );
       expect(serviceDef).toMatchObject({
         autoscale: {
           subscriptionName: 'subscription',

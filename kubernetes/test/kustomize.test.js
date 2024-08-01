@@ -24,7 +24,11 @@ describe('Run Kustomize', () => {
     const args = ['edit', 'set'];
     await kustomize(args);
 
-    expect(exec.exec).toHaveBeenCalledWith(tool, args, expect.objectContaining({ cwd: 'kustomize' }));
+    expect(exec.exec).toHaveBeenCalledWith(
+      tool,
+      args,
+      expect.objectContaining({ cwd: 'kustomize' }),
+    );
     expect(exec.exec).toHaveBeenCalledTimes(1);
   });
 });

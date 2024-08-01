@@ -33,7 +33,9 @@ describe('buildManifest', () => {
   beforeEach(() => {
     mockFs({});
     addNamespace.mockResolvedValueOnce('');
-    getImageWithSha256.mockImplementation((name) => Promise.resolve(`${name.split(':')[0]}@sha256:123`));
+    getImageWithSha256.mockImplementation((name) =>
+      Promise.resolve(`${name.split(':')[0]}@sha256:123`),
+    );
     process.env = {
       ...originalEnv,
       GITHUB_SERVER_URL: 'https://github.com/example-organization',
@@ -84,19 +86,32 @@ describe('buildManifest', () => {
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
 
     expect(checkSystem).not.toHaveBeenCalled();
     expect(securitySpec).not.toHaveBeenCalled();
 
-    expect(readFileSync('skaffold.yaml')).toContain(`apiVersion: skaffold/v2beta16
+    expect(readFileSync('skaffold.yaml'))
+      .toContain(`apiVersion: skaffold/v2beta16
 kind: Config
 deploy:
   kubectl:
     manifests:
       - k8s(deploy)-*`);
 
-    expect(readFileSync('clouddeploy.yaml')).toContain(`apiVersion: deploy.cloud.google.com/v1
+    expect(readFileSync('clouddeploy.yaml'))
+      .toContain(`apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
   name: example-service`);
@@ -170,12 +185,24 @@ metadata:
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
 
     expect(checkSystem).not.toHaveBeenCalled();
     expect(securitySpec).not.toHaveBeenCalled();
 
-    expect(readFileSync('skaffold.yaml')).toContain(`apiVersion: skaffold/v4beta6
+    expect(readFileSync('skaffold.yaml'))
+      .toContain(`apiVersion: skaffold/v4beta6
 kind: Config
 manifests:
   rawYaml:
@@ -184,7 +211,8 @@ deploy:
   cloudrun: {}
 `);
 
-    expect(readFileSync('clouddeploy.yaml')).toContain(`apiVersion: deploy.cloud.google.com/v1
+    expect(readFileSync('clouddeploy.yaml'))
+      .toContain(`apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
   name: example-service`);
@@ -275,7 +303,18 @@ metadata:
     const clanName = 'example-clan';
     const env = 'dev';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
 
     // Snapshot test for k8s-manifest.yaml.
     const manifest = readFileSync('k8s(deploy)-manifest.yaml');
@@ -286,11 +325,13 @@ metadata:
   test('It should generate manifest with volume for StatefulSet', async () => {
     handleStatefulset.mockResolvedValueOnce();
     const image = 'example-image:latest';
-    const volumes = [{
-      'disk-type': 'ssd',
-      size: '10Gi',
-      'mount-path': '/mnt/data',
-    }];
+    const volumes = [
+      {
+        'disk-type': 'ssd',
+        size: '10Gi',
+        'mount-path': '/mnt/data',
+      },
+    ];
     const service = {
       kubernetes: {
         type: 'StatefulSet',
@@ -322,7 +363,18 @@ metadata:
     const clanName = 'example-clan';
     const env = 'dev';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
 
     // Snapshot test for k8s-manifest.yaml.
     const manifest = readFileSync('k8s(deploy)-manifest.yaml');
@@ -344,11 +396,13 @@ metadata:
         scaling: {
           cpu: 40,
         },
-        volumes: [{
-          'disk-type': 'ssd',
-          size: '1Gi',
-          'mount-path': '/mnt/shared/data',
-        }],
+        volumes: [
+          {
+            'disk-type': 'ssd',
+            size: '1Gi',
+            'mount-path': '/mnt/shared/data',
+          },
+        ],
       },
       security: 'none',
       labels: {
@@ -373,7 +427,18 @@ metadata:
     const clanName = 'example-clan';
     const env = 'dev';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
 
     // Snapshot test for k8s-manifest.yaml.
     const manifest = readFileSync('k8s(deploy)-manifest.yaml');
@@ -419,7 +484,18 @@ metadata:
     const clanName = 'example-clan';
     const env = 'dev';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
 
     // Snapshot test for cloudrun-service.yaml.
     const manifest = readFileSync('cloudrun-service.yaml');
@@ -477,16 +553,29 @@ metadata:
           containerPort: 8000,
         },
       ],
-      env: [{
-        name: 'ENVOY_PROTOCOL',
-        value: 'http',
-      }],
+      env: [
+        {
+          name: 'ENVOY_PROTOCOL',
+          value: 'http',
+        },
+      ],
     };
 
     checkSystem.mockResolvedValueOnce(true);
     securitySpec.mockResolvedValueOnce(securityContainer);
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
 
     // Snapshot test for cloudrun-service.yaml.
     const manifest = readFileSync('cloudrun-service.yaml');
@@ -535,7 +624,18 @@ metadata:
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
     const k8sManifest = readFileSync('k8s(deploy)-manifest.yaml');
 
     // Snapshot test for k8s-manifest.yaml.
@@ -583,7 +683,18 @@ metadata:
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
     const k8sManifest = readFileSync('k8s(deploy)-manifest.yaml');
     // Snapshot test for k8s-manifest.yaml.
     mockFs.restore();
@@ -635,7 +746,18 @@ metadata:
     const clanName = 'example-clan';
     const env = 'staging';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
     const k8sManifest = readFileSync('k8s(deploy)-manifest.yaml');
     // Snapshot test for k8s-manifest.yaml.
     mockFs.restore();
@@ -684,7 +806,20 @@ metadata:
 
     checkSystem.mockResolvedValueOnce(false);
 
-    await expect(buildManifest(image, service, projectId, clanName, env, '', '', '', '', '')).rejects.toThrow('Bundle not found with the name tst.example-service-dev');
+    await expect(
+      buildManifest(
+        image,
+        service,
+        projectId,
+        clanName,
+        env,
+        '',
+        '',
+        '',
+        '',
+        '',
+      ),
+    ).rejects.toThrow('Bundle not found with the name tst.example-service-dev');
   });
 
   test('It should set traffic to 0 of new revision if serve traffic is false', async () => {
@@ -746,7 +881,18 @@ metadata:
 
     getRevisions.mockResolvedValueOnce(revisionList);
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
 
     const manifest = readFileSync('cloudrun-service.yaml');
     mockFs.restore();
@@ -812,7 +958,22 @@ metadata:
 
     getRevisions.mockResolvedValueOnce(revisionList);
 
-    await expect(buildManifest(image, service, projectId, clanName, env, '', '', '', '', '')).rejects.toThrow('2 active revisions found, set revision to 100% traffic before deploying');
+    await expect(
+      buildManifest(
+        image,
+        service,
+        projectId,
+        clanName,
+        env,
+        '',
+        '',
+        '',
+        '',
+        '',
+      ),
+    ).rejects.toThrow(
+      '2 active revisions found, set revision to 100% traffic before deploying',
+    );
   });
 
   test('It should deploy with iam bindings and audiences', async () => {
@@ -858,7 +1019,18 @@ metadata:
     const clanName = 'example-clan';
     const env = 'dev';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
 
     const manifest = readFileSync('cloudrun-service.yaml');
     mockFs.restore();
@@ -877,9 +1049,11 @@ metadata:
         protocol: 'http',
         scaling: {
           concurrency: 80,
-          schedule: [{
-            'scale-hours': '08:00-20:00',
-          }],
+          schedule: [
+            {
+              'scale-hours': '08:00-20:00',
+            },
+          ],
         },
       },
       security: {
@@ -911,7 +1085,18 @@ metadata:
     const clanName = 'example-clan';
     const env = 'dev';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
 
     const manifest = readFileSync('cloudrun-service.yaml');
     mockFs.restore();
@@ -961,7 +1146,18 @@ metadata:
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
 
     const k8sManifest = readFileSync('k8s(deploy)-manifest.yaml');
     const podMonitorManifest = readFileSync('k8s(deploy)-podmonitor.yaml');
@@ -1009,7 +1205,18 @@ metadata:
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '');
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
     const manifest = readFileSync('cloudrun-service.yaml');
     mockFs.restore();
     expect(manifest).toMatchSnapshot();

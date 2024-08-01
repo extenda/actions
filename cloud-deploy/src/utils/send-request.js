@@ -28,9 +28,10 @@ const sendScaleSetup = async (
     scaledown,
     scaled: true,
   };
-  return axios.post(url, data, {
-    headers,
-  })
+  return axios
+    .post(url, data, {
+      headers,
+    })
     .then((response) => {
       const statuscode = response.status;
       core.info(`response from ${url} with response code ${statuscode}`);
@@ -63,9 +64,10 @@ const sendDeployInfo = async (
     githubsha,
     slackchannel,
   };
-  return axios.post(url, data, {
-    headers,
-  })
+  return axios
+    .post(url, data, {
+      headers,
+    })
     .then((response) => {
       const statuscode = response.status;
       core.info(`response from ${url} with response code ${statuscode}`);

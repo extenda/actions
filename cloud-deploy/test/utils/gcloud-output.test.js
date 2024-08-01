@@ -38,6 +38,9 @@ describe('execGcloud', () => {
       silent: true,
       listeners: expect.any(Object),
     });
-    expect(handleError).toHaveBeenCalledWith('Mocked Error Output', 'create url-maps name');
+    expect(handleError).toHaveBeenCalledWith(
+      'Mocked Error Output',
+      'create url-maps name',
+    );
   });
 });

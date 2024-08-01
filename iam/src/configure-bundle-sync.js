@@ -3,7 +3,8 @@ const core = require('@actions/core');
 const { execGcloud } = require('../../setup-gcloud');
 const getDasWorkerBaseUrl = require('./das-worker-base-url');
 
-const getToken = async () => execGcloud(['auth', 'print-identity-token', '--audiences=iam-das-worker']);
+const getToken = async () =>
+  execGcloud(['auth', 'print-identity-token', '--audiences=iam-das-worker']);
 
 const configureBundleSync = async (iam, env) => {
   const { 'permission-prefix': permissionPrefix, services = [] } = iam;
@@ -21,12 +22,11 @@ const configureBundleSync = async (iam, env) => {
       headers: { authorization: `Bearer ${token}` },
     });
 
-    // eslint-disable-next-line no-await-in-loop
     await dasWorker.put(`/systems/${systemId}`);
 
     if (consumers && consumers.length > 0) {
       core.info(`Update consumers for ${systemId}`);
-      // eslint-disable-next-line no-await-in-loop
+
       await dasWorker.put(`/systems/${systemId}/datasets/consumers`, {
         services: consumers.flatMap(
           ({ 'service-accounts': serviceAccounts }) => serviceAccounts,

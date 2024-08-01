@@ -4,13 +4,20 @@ const path = require('path');
 const qs = require('qs');
 const { sonarAuth } = require('./sonar-credentials');
 
-const projectExists = async (hostUrl, organization, project) => axios.get(
-  `${hostUrl}/api/projects/search?organization=${organization}&q=${project}`,
-  { auth: await sonarAuth(hostUrl) },
-).then((response) => {
-  const { data: { components } } = response;
-  return components && components.length > 0 && components[0].key === project;
-});
+const projectExists = async (hostUrl, organization, project) =>
+  axios
+    .get(
+      `${hostUrl}/api/projects/search?organization=${organization}&q=${project}`,
+      { auth: await sonarAuth(hostUrl) },
+    )
+    .then((response) => {
+      const {
+        data: { components },
+      } = response;
+      return (
+        components && components.length > 0 && components[0].key === project
+      );
+    });
 
 const createSonarCloudProject = async (hostUrl, workingDir) => {
   const repo = process.env.GITHUB_REPOSITORY.split('/');
@@ -25,20 +32,27 @@ const createSonarCloudProject = async (hostUrl, workingDir) => {
     return Promise.resolve();
   }
 
-  return axios.post(`${hostUrl}/api/projects/create`, qs.stringify({
-    name: repo[1],
-    organization: repo[0],
-    project,
-  }), {
-    auth: await sonarAuth(hostUrl),
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
-    },
-  }).then(() => {
-    core.info(`Created project '${project}' in ${hostUrl}`);
-  }).catch(() => {
-    core.error(`Failed to create '${project}' in ${hostUrl}`);
-  });
+  return axios
+    .post(
+      `${hostUrl}/api/projects/create`,
+      qs.stringify({
+        name: repo[1],
+        organization: repo[0],
+        project,
+      }),
+      {
+        auth: await sonarAuth(hostUrl),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+        },
+      },
+    )
+    .then(() => {
+      core.info(`Created project '${project}' in ${hostUrl}`);
+    })
+    .catch(() => {
+      core.error(`Failed to create '${project}' in ${hostUrl}`);
+    });
 };
 
 const createProject = async (hostUrl, workingDir = '.') => {

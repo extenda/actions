@@ -11,18 +11,16 @@ describe('Setup permissions and handle', () => {
 
   test('it can create a map with permissions from the iam', async () => {
     const permissions = {
-      resource: [
-        'get',
-        'create',
-      ],
+      resource: ['get', 'create'],
     };
 
     const result = new Map();
     result.set('test.resource.get', { description: '' });
     result.set('test.resource.create', { description: '' });
 
-    await expect(setupPermissions(permissions, 'test'))
-      .resolves.toEqual(result);
+    await expect(setupPermissions(permissions, 'test')).resolves.toEqual(
+      result,
+    );
   });
 
   test('it can create a map with permissions from the iam when aliases are in', async () => {
@@ -37,8 +35,9 @@ describe('Setup permissions and handle', () => {
     result.set('test.resource.get', { alias: 'get' });
     result.set('test.resource.create', { alias: 'create' });
 
-    await expect(setupPermissions(permissions, 'test'))
-      .resolves.toEqual(result);
+    await expect(setupPermissions(permissions, 'test')).resolves.toEqual(
+      result,
+    );
   });
 
   test('it can get permissions that exists', async () => {
@@ -57,8 +56,9 @@ describe('Setup permissions and handle', () => {
     expect(axios).toHaveBeenCalledTimes(1);
   });
 
-  test('it can create permissions if it doesn\'t exist', async () => {
-    axios.mockRejectedValueOnce({ response: { status: 404 } })
+  test("it can create permissions if it doesn't exist", async () => {
+    axios
+      .mockRejectedValueOnce({ response: { status: 404 } })
       .mockResolvedValueOnce({ status: 201 });
 
     const result = new Map();
@@ -102,14 +102,21 @@ describe('Setup permissions and handle', () => {
       description: 'Get res',
     };
 
-    axios.mockResolvedValueOnce({ status: 200, data: getSystemResult })
-      .mockRejectedValueOnce({ message: 'Not found', response: { status: 404, data: { error: 'Not found' } } });
+    axios
+      .mockResolvedValueOnce({ status: 200, data: getSystemResult })
+      .mockRejectedValueOnce({
+        message: 'Not found',
+        response: { status: 404, data: { error: 'Not found' } },
+      });
 
     const result = new Map();
     result.set('test.resource.get', { description: 'Get resource' });
 
-    await expect(handlePermissions(result, 'iam-token', 'api-url')).rejects
-      .toThrow('Failed to update permission test.resource.get. Request failed with code [404] and error [Not found]');
+    await expect(
+      handlePermissions(result, 'iam-token', 'api-url'),
+    ).rejects.toThrow(
+      'Failed to update permission test.resource.get. Request failed with code [404] and error [Not found]',
+    );
 
     expect(axios).toHaveBeenCalledTimes(2);
   });

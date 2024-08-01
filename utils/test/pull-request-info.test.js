@@ -58,11 +58,13 @@ describe('Pull Request Info', () => {
       ref: 'refs/heads/feature/test',
     });
     mockPulls.mockResolvedValueOnce({
-      data: [{
-        base: { ref: 'base-ref' },
-        head: { ref: 'head-ref', sha: '123456' },
-        number: '2',
-      }],
+      data: [
+        {
+          base: { ref: 'base-ref' },
+          head: { ref: 'head-ref', sha: '123456' },
+          number: '2',
+        },
+      ],
     });
     const info = await pullInfo.getPullRequestInfo('TOKEN');
     expect(info).toMatchObject({

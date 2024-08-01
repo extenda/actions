@@ -4,43 +4,49 @@ const gcloudOutput = require('../../utils/gcloud-output');
 const MAX_DOMAINS = 100;
 const MAX_CERTIFICATES = 13;
 
-const createCertificate = async (domains, projectID, name) => gcloudOutput([
-  'compute',
-  'ssl-certificates',
-  'create',
-  name,
-  `--domains=${domains}`,
-  `--project=${projectID}`,
-  '--global',
-]).then(() => core.info('Certificate already exists!'));
+const createCertificate = async (domains, projectID, name) =>
+  gcloudOutput([
+    'compute',
+    'ssl-certificates',
+    'create',
+    name,
+    `--domains=${domains}`,
+    `--project=${projectID}`,
+    '--global',
+  ]).then(() => core.info('Certificate already exists!'));
 
-const deleteCertificateFromProxy = async (projectID, certificates) => gcloudOutput([
-  'compute',
-  'target-https-proxies',
-  'update',
-  'https-lb-proxy-external',
-  `--ssl-certificates=${certificates.join(',')}`,
-  `--project=${projectID}`,
-]).then(() => core.info('Certificates updated successfully!'));
+const deleteCertificateFromProxy = async (projectID, certificates) =>
+  gcloudOutput([
+    'compute',
+    'target-https-proxies',
+    'update',
+    'https-lb-proxy-external',
+    `--ssl-certificates=${certificates.join(',')}`,
+    `--project=${projectID}`,
+  ]).then(() => core.info('Certificates updated successfully!'));
 
-const deleteCertificate = async (projectID, name) => gcloudOutput([
-  'compute',
-  'ssl-certificates',
-  'delete',
-  name,
-  `--project=${projectID}`,
-  '--quiet',
-  '--global',
-]);
+const deleteCertificate = async (projectID, name) =>
+  gcloudOutput([
+    'compute',
+    'ssl-certificates',
+    'delete',
+    name,
+    `--project=${projectID}`,
+    '--quiet',
+    '--global',
+  ]);
 
-const listCertificates = async (clusterProject) => JSON.parse(await gcloudOutput([
-  'compute',
-  'ssl-certificates',
-  'list',
-  `--project=${clusterProject}`,
-  '--filter=extenda-certs-v',
-  '--format=json',
-]));
+const listCertificates = async (clusterProject) =>
+  JSON.parse(
+    await gcloudOutput([
+      'compute',
+      'ssl-certificates',
+      'list',
+      `--project=${clusterProject}`,
+      '--filter=extenda-certs-v',
+      '--format=json',
+    ]),
+  );
 
 const handleCertificates = async (hosts, project) => {
   const domainName = [...hosts];
@@ -69,7 +75,10 @@ const handleCertificates = async (hosts, project) => {
     const created = new Date(certificate.creationTimestamp);
     certificateListNames.push(certificate.name);
 
-    if (firstCreatedDate > created && certificate.managed.domains.length < MAX_DOMAINS) {
+    if (
+      firstCreatedDate > created &&
+      certificate.managed.domains.length < MAX_DOMAINS
+    ) {
       firstCreatedDate = created;
       firstCreatedName = certificate.name;
     }
@@ -107,7 +116,10 @@ const handleCertificates = async (hosts, project) => {
   if (totalCertificates < MAX_CERTIFICATES) {
     await createCertificate(newDomains, project, newCertificateName);
   } else {
-    certificateListNames.splice(certificateListNames.indexOf(firstCreatedName), 1);
+    certificateListNames.splice(
+      certificateListNames.indexOf(firstCreatedName),
+      1,
+    );
     await deleteCertificateFromProxy(project, certificateListNames);
     await deleteCertificate(project, firstCreatedName);
     if (lastCreatedDomains.length < MAX_DOMAINS) {

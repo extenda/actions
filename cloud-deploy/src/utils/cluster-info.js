@@ -12,12 +12,18 @@ const getTribeProject = async (projectId) => {
     `--filter=NAME~${suffix}$ AND PROJECT_ID!=${projectId}`,
     '--format=value(PROJECT_ID)',
   ]);
-  const projects = output.split('\n').filter((s) => s && !s.startsWith('hiidentity-'));
+  const projects = output
+    .split('\n')
+    .filter((s) => s && !s.startsWith('hiidentity-'));
   if (projects.length === 0) {
-    throw new Error(`Could not find GKE project with suffix ${suffix}, or missing permissions to list it.`);
+    throw new Error(
+      `Could not find GKE project with suffix ${suffix}, or missing permissions to list it.`,
+    );
   }
   if (projects.length > 1) {
-    throw new Error(`There is more than one project with suffix ${suffix}, can't determine which one is tribe project`);
+    throw new Error(
+      `There is more than one project with suffix ${suffix}, can't determine which one is tribe project`,
+    );
   }
   const tribeProject = projects[0];
   core.info(`Found project ${tribeProject}`);
@@ -50,7 +56,12 @@ const getClusterDetails = async (project, cluster) => {
 };
 
 const getClusterInfo = async (projectId, cluster = '') => {
-  if (cluster && cluster.includes('projects/') && cluster.includes('zones/') && cluster.includes('clusters/')) {
+  if (
+    cluster &&
+    cluster.includes('projects/') &&
+    cluster.includes('zones/') &&
+    cluster.includes('clusters/')
+  ) {
     // Cluster is already fully qualified
     const info = cluster.split('/');
     return {

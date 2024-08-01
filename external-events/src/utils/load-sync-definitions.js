@@ -11,7 +11,12 @@ function loadDefinition(path) {
 function validateSystemPrefixUnique(defs) {
   // all files where systemPrefix duplicates
   const duplicates = defs.reduce((acc, [file, config], idx) => {
-    if (defs.some(([, _config], _idx) => _config['system-prefix'] === config['system-prefix'] && _idx !== idx)) {
+    if (
+      defs.some(
+        ([, _config], _idx) =>
+          _config['system-prefix'] === config['system-prefix'] && _idx !== idx,
+      )
+    ) {
       if (!acc[config['system-prefix']]) {
         acc[config['system-prefix']] = [];
       }
@@ -19,14 +24,19 @@ function validateSystemPrefixUnique(defs) {
     }
     return acc;
   }, {});
-  return Object
-    .entries(duplicates)
-    .map(([system, files]) => `system-prefix ${system} is duplicated in files [${files}]`);
+  return Object.entries(duplicates).map(
+    ([system, files]) =>
+      `system-prefix ${system} is duplicated in files [${files}]`,
+  );
 }
 
 function validateDefsSchema(defs, validateFn) {
-  const validateDef = (file, config) => validateFn(config).map((err) => `${file}:${err}`);
-  return defs.reduce((acc, [file, config]) => [...acc, ...validateDef(file, config)], []);
+  const validateDef = (file, config) =>
+    validateFn(config).map((err) => `${file}:${err}`);
+  return defs.reduce(
+    (acc, [file, config]) => [...acc, ...validateDef(file, config)],
+    [],
+  );
 }
 
 function validateDefs(defs, validateFn) {
@@ -48,10 +58,13 @@ async function loadDefinitions(glob, validateFn) {
   core.info(`Loading files by glob - ${glob}`);
   const files = fg.sync([glob], { onlyFiles: true });
 
-  const defs = files.reduce((acc, file) => ({
-    ...acc,
-    [file]: loadDefinition(file),
-  }), {});
+  const defs = files.reduce(
+    (acc, file) => ({
+      ...acc,
+      [file]: loadDefinition(file),
+    }),
+    {},
+  );
 
   validateDefs(defs, validateFn);
 

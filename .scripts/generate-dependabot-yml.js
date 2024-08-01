@@ -16,7 +16,8 @@ const DEPRECATED_ACTIONS = [
 ];
 
 const generateDependabot = () => {
-  const actions = modules.list()
+  const actions = modules
+    .list()
     .map((dir) => path.relative(path.join(__dirname, '..'), dir))
     .filter((action) => !DEPRECATED_ACTIONS.includes(action))
     .map((dir) => `/${dir}`);
@@ -33,7 +34,7 @@ const generateDependabot = () => {
         groups: {
           root: {
             patterns: ['*'],
-          }
+          },
         },
       },
       {
@@ -45,7 +46,7 @@ const generateDependabot = () => {
         groups: {
           actions: {
             patterns: ['*'],
-          }
+          },
         },
         ignore: [
           // conventional-commits in /utils are not possible to update without major rework.
@@ -83,7 +84,7 @@ const generateDependabot = () => {
             'dependency-name': 'p-limit',
             versions: ['>= 4'],
           },
-        ]
+        ],
       },
       {
         'package-ecosystem': 'github-actions',

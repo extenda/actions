@@ -7,17 +7,18 @@ let pullRequestCache;
 const fetchPullRequestInfo = async (githubToken) => {
   const octokit = github.getOctokit(githubToken);
   const { owner, repo } = context.repo;
-  return octokit.rest.pulls.list({
-    owner,
-    repo,
-    state: 'open',
-    head: `${owner}:${context.ref.replace('refs/heads/', '')}`,
-  }).then((response) => response.data.find(
-    (pr) => pr.head.sha === context.sha,
-  )).catch((err) => {
-    core.warning(`Failed to find pull requests. Reason: ${err.message}`);
-    return undefined;
-  });
+  return octokit.rest.pulls
+    .list({
+      owner,
+      repo,
+      state: 'open',
+      head: `${owner}:${context.ref.replace('refs/heads/', '')}`,
+    })
+    .then((response) => response.data.find((pr) => pr.head.sha === context.sha))
+    .catch((err) => {
+      core.warning(`Failed to find pull requests. Reason: ${err.message}`);
+      return undefined;
+    });
 };
 
 const getPullRequestInfo = async (githubToken) => {

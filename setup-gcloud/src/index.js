@@ -4,9 +4,12 @@ const setupGcloud = require('./setup-gcloud');
 const { execGcloud } = require('./exec-gcloud');
 
 const action = async () => {
-  const serviceAccountKey = core.getInput('service-account-key', { required: true });
+  const serviceAccountKey = core.getInput('service-account-key', {
+    required: true,
+  });
   const version = core.getInput('version') || 'latest';
-  const exportCredentials = core.getInput('export-default-credentials') || 'false';
+  const exportCredentials =
+    core.getInput('export-default-credentials') || 'false';
   await setupGcloud(serviceAccountKey, version, exportCredentials === 'true');
 };
 

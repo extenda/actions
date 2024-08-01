@@ -16,14 +16,17 @@ describe('env-config', () => {
   });
 
   beforeEach(() => {
-    mockLoadSecret.mockResolvedValueOnce('localhost')
+    mockLoadSecret
+      .mockResolvedValueOnce('localhost')
       .mockResolvedValueOnce('my-password')
       .mockResolvedValueOnce('my-pg-password')
       .mockResolvedValueOnce('my-launch-darkly-access-key');
   });
 
   test('It creates config variables', async () => {
-    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-staging-project/my-service@sha256:111');
+    getImageDigest.mockResolvedValueOnce(
+      'eu.gcr.io/test-staging-project/my-service@sha256:111',
+    );
     const { replaceTokens, configMap, secrets } = await prepareEnvConfig(
       'deploy-secret-key',
       'test-prod-project',
@@ -51,14 +54,28 @@ describe('env-config', () => {
       LAUNCH_DARKLY_ACCESS_KEY: 'my-launch-darkly-access-key',
     });
 
-    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_private_address');
-    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_master_password');
-    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_master_password');
-    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'launchdarkly-sdk-key');
+    expect(mockLoadSecret).toHaveBeenCalledWith(
+      'deploy-secret-key',
+      'testrunner_SE_postgresql_private_address',
+    );
+    expect(mockLoadSecret).toHaveBeenCalledWith(
+      'deploy-secret-key',
+      'testrunner_SE_postgresql_master_password',
+    );
+    expect(mockLoadSecret).toHaveBeenCalledWith(
+      'deploy-secret-key',
+      'testrunner_SE_postgresql_master_password',
+    );
+    expect(mockLoadSecret).toHaveBeenCalledWith(
+      'deploy-secret-key',
+      'launchdarkly-sdk-key',
+    );
   });
 
   test('It can handle optional country code', async () => {
-    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-staging-project/my-service@sha256:111');
+    getImageDigest.mockResolvedValueOnce(
+      'eu.gcr.io/test-staging-project/my-service@sha256:111',
+    );
     const { replaceTokens } = await prepareEnvConfig(
       'deploy-secret-key',
       'test-staging-project',
@@ -69,8 +86,14 @@ describe('env-config', () => {
     expect(replaceTokens).toMatchObject({
       NAMESPACE: 'testrunner-txengine',
     });
-    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_postgresql_private_address');
-    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_postgresql_master_password');
+    expect(mockLoadSecret).toHaveBeenCalledWith(
+      'deploy-secret-key',
+      'testrunner_postgresql_private_address',
+    );
+    expect(mockLoadSecret).toHaveBeenCalledWith(
+      'deploy-secret-key',
+      'testrunner_postgresql_master_password',
+    );
   });
 
   test('It can handle empty country code', async () => {
@@ -85,12 +108,20 @@ describe('env-config', () => {
     expect(replaceTokens).toMatchObject({
       NAMESPACE: 'testrunner-txengine',
     });
-    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_postgresql_private_address');
-    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_postgresql_master_password');
+    expect(mockLoadSecret).toHaveBeenCalledWith(
+      'deploy-secret-key',
+      'testrunner_postgresql_private_address',
+    );
+    expect(mockLoadSecret).toHaveBeenCalledWith(
+      'deploy-secret-key',
+      'testrunner_postgresql_master_password',
+    );
   });
 
   test('It can detect staging environment', async () => {
-    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-staging-project/my-service@sha256:111');
+    getImageDigest.mockResolvedValueOnce(
+      'eu.gcr.io/test-staging-project/my-service@sha256:111',
+    );
     const { configMap } = await prepareEnvConfig(
       'deploy-secret-key',
       'test-staging-project',
@@ -105,8 +136,11 @@ describe('env-config', () => {
   });
 
   test('It handles additional environment with secrets', async () => {
-    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-staging-project/my-service@sha256:111');
-    mockLoadSecret.mockResolvedValueOnce('my-first-secret')
+    getImageDigest.mockResolvedValueOnce(
+      'eu.gcr.io/test-staging-project/my-service@sha256:111',
+    );
+    mockLoadSecret
+      .mockResolvedValueOnce('my-first-secret')
       .mockResolvedValueOnce('my-second-secret');
     const { replaceTokens, configMap, secrets } = await prepareEnvConfig(
       'deploy-secret-key',
@@ -139,34 +173,55 @@ describe('env-config', () => {
       LAUNCH_DARKLY_ACCESS_KEY: 'my-launch-darkly-access-key',
     });
 
-    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_private_address');
-    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'testrunner_SE_postgresql_master_password');
+    expect(mockLoadSecret).toHaveBeenCalledWith(
+      'deploy-secret-key',
+      'testrunner_SE_postgresql_private_address',
+    );
+    expect(mockLoadSecret).toHaveBeenCalledWith(
+      'deploy-secret-key',
+      'testrunner_SE_postgresql_master_password',
+    );
     expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'secret1');
     expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'secret2');
-    expect(mockLoadSecret).toHaveBeenCalledWith('deploy-secret-key', 'launchdarkly-sdk-key');
+    expect(mockLoadSecret).toHaveBeenCalledWith(
+      'deploy-secret-key',
+      'launchdarkly-sdk-key',
+    );
   });
 
   test('It throws if accessing secrets from wrong project', async () => {
-    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-staging-project/my-service@sha256:111');
-    await expect(prepareEnvConfig(
-      'deploy-secret-key',
-      'test-prod-project',
+    getImageDigest.mockResolvedValueOnce(
       'eu.gcr.io/test-staging-project/my-service@sha256:111',
-      'testrunner',
-      'SE',
-      'MY_SECRET2: sm://invalid-project/secret',
-    )).rejects.toEqual(new Error('Secrets can only be loaded from target project: test-prod-project'));
+    );
+    await expect(
+      prepareEnvConfig(
+        'deploy-secret-key',
+        'test-prod-project',
+        'eu.gcr.io/test-staging-project/my-service@sha256:111',
+        'testrunner',
+        'SE',
+        'MY_SECRET2: sm://invalid-project/secret',
+      ),
+    ).rejects.toEqual(
+      new Error(
+        'Secrets can only be loaded from target project: test-prod-project',
+      ),
+    );
   });
 
   test('It throws if failing to resolve secret', async () => {
     mockLoadSecret.mockRejectedValueOnce(new Error('Unknown secret'));
-    await expect(prepareEnvConfig(
-      'deploy-secret-key',
-      'test-prod-project',
-      'eu.gcr.io/test-staging-project/my-service@sha256:111',
-      'testrunner',
-      'SE',
-      'MY_SECRET2: sm://*/secret',
-    )).rejects.toEqual(new Error("Failed to access secret 'secret'. Reason: Unknown secret"));
+    await expect(
+      prepareEnvConfig(
+        'deploy-secret-key',
+        'test-prod-project',
+        'eu.gcr.io/test-staging-project/my-service@sha256:111',
+        'testrunner',
+        'SE',
+        'MY_SECRET2: sm://*/secret',
+      ),
+    ).rejects.toEqual(
+      new Error("Failed to access secret 'secret'. Reason: Unknown secret"),
+    );
   });
 });

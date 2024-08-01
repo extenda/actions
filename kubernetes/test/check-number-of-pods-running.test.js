@@ -45,7 +45,7 @@ const getRunningPodsNoSelectorArgs = [
   'pods',
   '--namespace=testDeploymentName',
   '--no-headers=true',
-  '-o json | jq -r \'.items[].status.phase\' | grep -o \'Running\' -c ',
+  "-o json | jq -r '.items[].status.phase' | grep -o 'Running' -c ",
 ];
 
 describe('Check number of pods running', () => {
@@ -59,13 +59,14 @@ describe('Check number of pods running', () => {
   });
 
   test('It throws error if namespace does not exist', async () => {
+    exec.exec.mockImplementationOnce().mockResolvedValue(0);
     exec.exec
-      .mockImplementationOnce().mockResolvedValue(0);
-    exec.exec
-      .mockImplementationOnce((bin, args, opts) => mockErrorOutput(
-        'Error from server (NotFound): running pods not found',
-        opts,
-      ))
+      .mockImplementationOnce((bin, args, opts) =>
+        mockErrorOutput(
+          'Error from server (NotFound): running pods not found',
+          opts,
+        ),
+      )
       .mockResolvedValue(0);
     await expect(
       checkRequiredNumberOfPodsIsRunning('testDeploymentName', 3, 10, true),
@@ -81,47 +82,57 @@ describe('Check number of pods running', () => {
   });
 
   test('It fails on unknown error', async () => {
-    // eslint-disable-next-line no-console
     console.log = jest.fn();
     // Call before the retry.
-    exec.exec
-      .mockImplementationOnce().mockResolvedValue(0);
+    exec.exec.mockImplementationOnce().mockResolvedValue(0);
     // Calls inside of the retry.
     exec.exec
-      .mockImplementationOnce((bin, args, opts) => mockErrorOutput(
-        'Error from server (connection refused): could not establish connection',
-        opts,
-      ))
+      .mockImplementationOnce((bin, args, opts) =>
+        mockErrorOutput(
+          'Error from server (connection refused): could not establish connection',
+          opts,
+        ),
+      )
       .mockResolvedValue(0);
     exec.exec
-      .mockImplementationOnce((bin, args, opts) => mockErrorOutput(
-        'Error from server (connection refused): could not establish connection',
-        opts,
-      ))
+      .mockImplementationOnce((bin, args, opts) =>
+        mockErrorOutput(
+          'Error from server (connection refused): could not establish connection',
+          opts,
+        ),
+      )
       .mockResolvedValue(0);
     exec.exec
-      .mockImplementationOnce((bin, args, opts) => mockErrorOutput(
-        'Error from server (connection refused): could not establish connection',
-        opts,
-      ))
+      .mockImplementationOnce((bin, args, opts) =>
+        mockErrorOutput(
+          'Error from server (connection refused): could not establish connection',
+          opts,
+        ),
+      )
       .mockResolvedValue(0);
     exec.exec
-      .mockImplementationOnce((bin, args, opts) => mockErrorOutput(
-        'Error from server (connection refused): could not establish connection',
-        opts,
-      ))
+      .mockImplementationOnce((bin, args, opts) =>
+        mockErrorOutput(
+          'Error from server (connection refused): could not establish connection',
+          opts,
+        ),
+      )
       .mockResolvedValue(0);
     exec.exec
-      .mockImplementationOnce((bin, args, opts) => mockErrorOutput(
-        'Error from server (connection refused): could not establish connection',
-        opts,
-      ))
+      .mockImplementationOnce((bin, args, opts) =>
+        mockErrorOutput(
+          'Error from server (connection refused): could not establish connection',
+          opts,
+        ),
+      )
       .mockResolvedValue(0);
     exec.exec
-      .mockImplementationOnce((bin, args, opts) => mockErrorOutput(
-        'Error from server (connection refused): could not establish connection',
-        opts,
-      ))
+      .mockImplementationOnce((bin, args, opts) =>
+        mockErrorOutput(
+          'Error from server (connection refused): could not establish connection',
+          opts,
+        ),
+      )
       .mockResolvedValue(0);
 
     // Calls outside of the retry.
@@ -129,10 +140,12 @@ describe('Check number of pods running', () => {
       .mockImplementationOnce((bin, args, opts) => mockOutput('3', opts))
       .mockResolvedValue(0);
     exec.exec
-      .mockImplementationOnce((bin, args, opts) => mockOutput(
-        'Error from server (connection refused): could not establish connection',
-        opts,
-      ))
+      .mockImplementationOnce((bin, args, opts) =>
+        mockOutput(
+          'Error from server (connection refused): could not establish connection',
+          opts,
+        ),
+      )
       .mockResolvedValue(0);
 
     await expect(
@@ -147,20 +160,22 @@ describe('Check number of pods running', () => {
     expect(exec.exec.mock.calls[2][1]).toEqual(getNonRunningPodsArgs);
     expect(exec.exec.mock.calls[7][1]).toEqual(getRunningPodsNoSelectorArgs);
     expect(exec.exec.mock.calls[8][1]).toEqual(['config', 'view']);
-    // eslint-disable-next-line no-console
+
     expect(console.log).toHaveBeenCalledTimes(2);
   });
 
   test('It executes successfully when running pods is equal to 3 and non-running to 0', async () => {
+    exec.exec.mockImplementationOnce().mockResolvedValue(0);
     exec.exec
-      .mockImplementationOnce().mockResolvedValue(0);
+      .mockImplementationOnce((bin, args, opts) => mockOutput('3', opts))
+      .mockResolvedValue(0);
     exec.exec
-      .mockImplementationOnce((bin, args, opts) => mockOutput('3', opts)).mockResolvedValue(0);
-    exec.exec
-      .mockImplementationOnce((bin, args, opts) => mockErrorOutput(
-        'Error from server (connection refused): could not establish connection',
-        opts,
-      ))
+      .mockImplementationOnce((bin, args, opts) =>
+        mockErrorOutput(
+          'Error from server (connection refused): could not establish connection',
+          opts,
+        ),
+      )
       .mockResolvedValue(1);
 
     await checkRequiredNumberOfPodsIsRunning('testDeploymentName', 3, 10, true);

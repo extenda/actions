@@ -40,15 +40,26 @@ describe('send Message to slack', () => {
 
   test('It throws on missing file', async () => {
     axios.mockRejectedValueOnce({ status: 500 });
-    await expect(notifySlack('service-account', 'text', 'channel-name', 'missing-file.txt'))
-      .rejects.toThrow('File not found: missing-file.txt');
+    await expect(
+      notifySlack(
+        'service-account',
+        'text',
+        'channel-name',
+        'missing-file.txt',
+      ),
+    ).rejects.toThrow('File not found: missing-file.txt');
     expect(axios).not.toHaveBeenCalled();
     expect(loadSecret).toHaveBeenCalledTimes(1);
   });
 
   test('Can send message with file', async () => {
     axios.mockResolvedValueOnce({ status: 200 });
-    const result = await notifySlack('service-account', 'text', 'channel', path.join(__dirname, '..', 'action.yml'));
+    const result = await notifySlack(
+      'service-account',
+      'text',
+      'channel',
+      path.join(__dirname, '..', 'action.yml'),
+    );
     expect(result).toEqual(true);
     expect(axios).toHaveBeenCalledTimes(1);
     expect(loadSecret).toHaveBeenCalledTimes(1);

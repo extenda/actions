@@ -2,7 +2,13 @@ const cp = require('child_process');
 const core = require('@actions/core');
 const fs = require('fs');
 
-const createBuildCommand = (dockerfile, imageName, buildArgs, dockerContext, tags) => {
+const createBuildCommand = (
+  dockerfile,
+  imageName,
+  buildArgs,
+  dockerContext,
+  tags,
+) => {
   let buildCommandPrefix = `docker build -f ${dockerfile}`;
 
   if (tags) {
@@ -28,14 +34,24 @@ const build = (imageName, buildArgs, tags) => {
     core.setFailed(`Dockerfile does not exist in location ${dockerfile}`);
   }
 
-  const buildCmd = createBuildCommand(dockerfile, imageName, buildArgs, dockerContext, tags);
+  const buildCmd = createBuildCommand(
+    dockerfile,
+    imageName,
+    buildArgs,
+    dockerContext,
+    tags,
+  );
   core.info(`Building Docker image (${imageName}): ${buildCmd}`);
   cp.execSync(buildCmd);
 };
 
 const isEcr = (registry) => registry && registry.includes('amazonaws');
 
-const getRegion = (registry) => registry.substring(registry.indexOf('ecr.') + 4, registry.indexOf('.amazonaws'));
+const getRegion = (registry) =>
+  registry.substring(
+    registry.indexOf('ecr.') + 4,
+    registry.indexOf('.amazonaws'),
+  );
 
 const login = (registry) => {
   if (!registry) {

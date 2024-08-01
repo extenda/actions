@@ -7,11 +7,7 @@ Watches the rollout status until it's done.
 */
 const applyKubectl = async (deploymentName, deploymentType, dryRun = false) => {
   // Form additional argument for the kubectl command
-  const applyArgs = [
-    'apply',
-    '-k',
-    './kustomize',
-  ];
+  const applyArgs = ['apply', '-k', './kustomize'];
   if (dryRun) {
     applyArgs.push('--dry-run=client');
   }

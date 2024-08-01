@@ -38,7 +38,7 @@ describe('setupInternalDomainMapping', () => {
       'forwarding-rules',
       'list',
       `--project=${projectID}`,
-      '--filter=name=(\'http-proxy-internal\')',
+      "--filter=name=('http-proxy-internal')",
       '--format=get(IPAddress)',
     ]);
 
@@ -86,7 +86,7 @@ describe('setupInternalDomainMapping', () => {
       'forwarding-rules',
       'list',
       `--project=${projectID}`,
-      '--filter=name=(\'https-proxy-internal\')',
+      "--filter=name=('https-proxy-internal')",
       '--format=get(IPAddress)',
     ]);
 

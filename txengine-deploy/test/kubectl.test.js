@@ -29,6 +29,10 @@ describe('kubectl', () => {
   test('It can execute kubectl', async () => {
     exec.exec.mockResolvedValueOnce(0);
     await kubectl.exec(['apply', '-f', 'test.yaml']);
-    expect(exec.exec).toHaveBeenCalledWith('kubectl', ['apply', '-f', 'test.yaml']);
+    expect(exec.exec).toHaveBeenCalledWith('kubectl', [
+      'apply',
+      '-f',
+      'test.yaml',
+    ]);
   });
 });

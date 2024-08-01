@@ -1,6 +1,9 @@
 const core = require('@actions/core');
 const axios = require('axios');
-const { sendScaleSetup, sendDeployInfo } = require('../../src/utils/send-request');
+const {
+  sendScaleSetup,
+  sendDeployInfo,
+} = require('../../src/utils/send-request');
 const getToken = require('../../src/utils/identity-token');
 
 jest.mock('@actions/core');
@@ -28,7 +31,15 @@ describe('Send request to platform api', () => {
   it('should send scale setup request successfully', async () => {
     getToken.mockResolvedValue('token');
     axios.post.mockResolvedValue({ status: 200 });
-    await sendScaleSetup(service, projectid, region, platform, mininstances, scaleup, scaledown);
+    await sendScaleSetup(
+      service,
+      projectid,
+      region,
+      platform,
+      mininstances,
+      scaleup,
+      scaledown,
+    );
     expect(axios.post).toHaveBeenCalledWith(
       '/scaling/setup',
       {
@@ -48,13 +59,23 @@ describe('Send request to platform api', () => {
         },
       },
     );
-    expect(core.info).toHaveBeenCalledWith(expect.stringContaining('/scaling/setup with response code 200'));
+    expect(core.info).toHaveBeenCalledWith(
+      expect.stringContaining('/scaling/setup with response code 200'),
+    );
   });
 
   it('should log error on request failure for sendScaleSetup', async () => {
     getToken.mockResolvedValue('token');
     axios.post.mockRejectedValue('some error');
-    await sendScaleSetup(service, projectid, region, platform, mininstances, scaleup, scaledown);
+    await sendScaleSetup(
+      service,
+      projectid,
+      region,
+      platform,
+      mininstances,
+      scaleup,
+      scaledown,
+    );
     expect(axios.post).toHaveBeenCalledWith(
       '/scaling/setup',
       {
@@ -74,7 +95,9 @@ describe('Send request to platform api', () => {
         },
       },
     );
-    expect(core.error).toHaveBeenCalledWith(expect.stringContaining('some error'));
+    expect(core.error).toHaveBeenCalledWith(
+      expect.stringContaining('some error'),
+    );
   });
   it('should send deploy information request successfully', async () => {
     getToken.mockResolvedValue('token');
@@ -106,7 +129,9 @@ describe('Send request to platform api', () => {
         },
       },
     );
-    expect(core.info).toHaveBeenCalledWith(expect.stringContaining('/deployinfo/add with response code 200'));
+    expect(core.info).toHaveBeenCalledWith(
+      expect.stringContaining('/deployinfo/add with response code 200'),
+    );
   });
 
   it('should log error on request failure for sendDeployInfo', async () => {
@@ -139,6 +164,8 @@ describe('Send request to platform api', () => {
         },
       },
     );
-    expect(core.error).toHaveBeenCalledWith(expect.stringContaining('some error'));
+    expect(core.error).toHaveBeenCalledWith(
+      expect.stringContaining('some error'),
+    );
   });
 });

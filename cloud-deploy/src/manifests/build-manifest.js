@@ -8,7 +8,10 @@ const handleStatefulset = require('./statefulset-workaround');
 const checkIamSystem = require('./check-system');
 const checkVpcConnector = require('../utils/check-vpc-connector');
 const getRevisions = require('../cloudrun/get-revisions');
-const { configMapManifest, removeScalerConfiguration } = require('./vpa-scaler-configmap');
+const {
+  configMapManifest,
+  removeScalerConfiguration,
+} = require('./vpa-scaler-configmap');
 const connectToCluster = require('../utils/cluster-connection');
 const { deletePodMonitor, podMonitorManifest } = require('./pod-monitoring');
 const collectorSidecar = require('./collector-sidecar');
@@ -19,7 +22,10 @@ const volumeSetup = (opa, protocol, type = 'none') => {
   const volumes = [];
   if (opa && type.toLowerCase() !== 'statefulset') {
     if (protocol === 'http2') {
-      volumes.push({ name: 'extenda-certs', secret: { secretName: 'envoy-http2-certs' } });
+      volumes.push({
+        name: 'extenda-certs',
+        secret: { secretName: 'envoy-http2-certs' },
+      });
     }
   }
   return volumes;
@@ -32,7 +38,11 @@ const userContainerVolumeMountSetup = (opa, protocol, type, volumes, name) => {
   }
   if (opa && type === 'Deployment') {
     if (protocol === 'http2') {
-      volumeMounts.push({ mountPath: '/etc/extenda/certs', name: 'extenda-certs', readOnly: true });
+      volumeMounts.push({
+        mountPath: '/etc/extenda/certs',
+        name: 'extenda-certs',
+        readOnly: true,
+      });
     }
   }
   return volumeMounts;
@@ -68,19 +78,24 @@ const cloudrunManifestTemplate = async (
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
 
-  const ports = opa ? undefined : [{
-    name: protocol === 'http2' ? 'h2c' : 'http1',
-    containerPort: 8080,
-  }];
+  const ports = opa
+    ? undefined
+    : [
+        {
+          name: protocol === 'http2' ? 'h2c' : 'http1',
+          containerPort: 8080,
+        },
+      ];
   const containerConcurrency = scaling.concurrency;
 
-  /* eslint-disable no-param-reassign */
-  baseAnnotations['run.googleapis.com/ingress'] = 'internal-and-cloud-load-balancing';
+  baseAnnotations['run.googleapis.com/ingress'] =
+    'internal-and-cloud-load-balancing';
   // baseAnnotations['run.googleapis.com/launch-stage'] = 'BETA';
   // baseAnnotations['run.googleapis.com/binary-authorization'] = 'default';
 
   if (audiences.length > 0) {
-    baseAnnotations['run.googleapis.com/custom-audiences'] = `[${audiences.map((audience) => `"${audience}"`)}]`;
+    baseAnnotations['run.googleapis.com/custom-audiences'] =
+      `[${audiences.map((audience) => `"${audience}"`)}]`;
   }
 
   const annotations = {
@@ -97,13 +112,13 @@ const cloudrunManifestTemplate = async (
     baseAnnotations['run.googleapis.com/minScale'] = minInstances;
     annotations['autoscaling.knative.dev/minScale'] = 0;
   }
-  /* eslint-enable no-param-reassign */
 
   if (connector) {
     annotations['run.googleapis.com/vpc-access-connector'] = `${connectorName}`;
     annotations['run.googleapis.com/vpc-access-egress'] = 'all-traffic';
   } else {
-    annotations['run.googleapis.com/network-interfaces'] = '[{"network":"clan-network","subnetwork":"k8s-subnet"}]';
+    annotations['run.googleapis.com/network-interfaces'] =
+      '[{"network":"clan-network","subnetwork":"k8s-subnet"}]';
     annotations['run.googleapis.com/vpc-access-egress'] = 'private-ranges-only';
   }
   if (SQLInstance) {
@@ -125,31 +140,33 @@ const cloudrunManifestTemplate = async (
     });
   }
 
-  const containers = [{
-    image,
-    name: 'user-container',
-    ports,
-    resources: {
-      limits: {
-        cpu,
-        memory,
+  const containers = [
+    {
+      image,
+      name: 'user-container',
+      ports,
+      resources: {
+        limits: {
+          cpu,
+          memory,
+        },
+      },
+      env: environment.map((env) => ({
+        name: env.name,
+        value: env.value,
+        valueFrom: env.valueFrom,
+      })),
+      startupProbe: {
+        tcpSocket: {
+          port: 8080,
+        },
+        initialDelaySeconds: 0,
+        periodSeconds: 240,
+        failureThreshold: 1,
+        timeoutSeconds: 240,
       },
     },
-    env: environment.map((env) => ({
-      name: env.name,
-      value: env.value,
-      valueFrom: env.valueFrom,
-    })),
-    startupProbe: {
-      tcpSocket: {
-        port: 8080,
-      },
-      initialDelaySeconds: 0,
-      periodSeconds: 240,
-      failureThreshold: 1,
-      timeoutSeconds: 240,
-    },
-  }];
+  ];
 
   if (opa) {
     const resources = {
@@ -159,9 +176,7 @@ const cloudrunManifestTemplate = async (
       },
     };
     const securityContainer = await securitySpec(protocol, false);
-    securityContainer.env.push(
-      { name: 'CPU_LIMIT', value: `${opaCpu}` },
-    );
+    securityContainer.env.push({ name: 'CPU_LIMIT', value: `${opaCpu}` });
     securityContainer.resources = resources;
     securityContainer.volumeMounts = undefined;
     containers.push(securityContainer);
@@ -173,9 +188,11 @@ const cloudrunManifestTemplate = async (
     if (collectorContainer) {
       containers.push(collectorContainer);
       // The collector should start after and shutdown before the user-container.
-      annotations['run.googleapis.com/container-dependencies'] = JSON.stringify({
-        collector: ['user-container'],
-      });
+      annotations['run.googleapis.com/container-dependencies'] = JSON.stringify(
+        {
+          collector: ['user-container'],
+        },
+      );
     }
   }
 
@@ -196,7 +213,9 @@ const cloudrunManifestTemplate = async (
           annotations,
           labels: {
             app: name,
-            ...Object.fromEntries(labels.map((label) => [label.name, label.value])),
+            ...Object.fromEntries(
+              labels.map((label) => [label.name, label.value]),
+            ),
           },
         },
         spec: {
@@ -237,16 +256,22 @@ const manifestTemplate = async (
 
   let annotations = {};
   const deploymentVolumes = volumeSetup(opa, protocol, type);
-  const userVolumeMounts = userContainerVolumeMountSetup(opa, protocol, type, volumes, name);
+  const userVolumeMounts = userContainerVolumeMountSetup(
+    opa,
+    protocol,
+    type,
+    volumes,
+    name,
+  );
   const securityContainer = opa ? await securitySpec(protocol) : {};
   if (opa) {
-    securityContainer.env.push(
-      { name: 'CPU_LIMIT', value: `${opaCpu}` },
-    );
+    securityContainer.env.push({ name: 'CPU_LIMIT', value: `${opaCpu}` });
   }
 
-  const nodeSelector = deployEnv === 'staging' || availability === 'low'
-    ? { 'cloud.google.com/gke-spot': 'true' } : undefined;
+  const nodeSelector =
+    deployEnv === 'staging' || availability === 'low'
+      ? { 'cloud.google.com/gke-spot': 'true' }
+      : undefined;
 
   if (availability === 'high' && deployEnv !== 'staging') {
     annotations['cluster-autoscaler.kubernetes.io/safe-to-evict'] = 'false';
@@ -255,9 +280,8 @@ const manifestTemplate = async (
     annotations = undefined;
   }
 
-  /* eslint-disable no-param-reassign */
-  baseAnnotations['cloud.google.com/neg'] = `{"exposed_ports":{"80":{"name":"${name}-neg"}}}`;
-  /* eslint-enable no-param-reassign */
+  baseAnnotations['cloud.google.com/neg'] =
+    `{"exposed_ports":{"80":{"name":"${name}-neg"}}}`;
 
   // setup manifest
 
@@ -316,23 +340,26 @@ const manifestTemplate = async (
       },
       ...(volumes && type.toLowerCase() === 'statefulset'
         ? {
-          volumeClaimTemplates: [
-            {
-              metadata: {
-                name: `${name}`,
-              },
-              spec: {
-                accessModes: ['ReadWriteOnce'],
-                storageClassName: volumes[0]['disk-type'] === 'hdd' ? 'standard' : 'premium-rwo',
-                resources: {
-                  requests: {
-                    storage: volumes[0].size,
+            volumeClaimTemplates: [
+              {
+                metadata: {
+                  name: `${name}`,
+                },
+                spec: {
+                  accessModes: ['ReadWriteOnce'],
+                  storageClassName:
+                    volumes[0]['disk-type'] === 'hdd'
+                      ? 'standard'
+                      : 'premium-rwo',
+                  resources: {
+                    requests: {
+                      storage: volumes[0].size,
+                    },
                   },
                 },
               },
-            },
-          ],
-        }
+            ],
+          }
         : {}),
       template: {
         metadata: {
@@ -377,26 +404,28 @@ const manifestTemplate = async (
               })),
             },
             ...(opa && type === 'Deployment'
-              ? [{
-                ...securityContainer,
-                imagePullPolicy: 'IfNotPresent',
-                resources: {
-                  requests: {
-                    cpu: opaCpu,
-                    memory: opaMemory,
+              ? [
+                  {
+                    ...securityContainer,
+                    imagePullPolicy: 'IfNotPresent',
+                    resources: {
+                      requests: {
+                        cpu: opaCpu,
+                        memory: opaMemory,
+                      },
+                    },
+                    readinessProbe: {
+                      httpGet: {
+                        path: '/health',
+                        port: 9001,
+                      },
+                      initialDelaySeconds: 5,
+                      periodSeconds: 5,
+                      timeoutSeconds: 5,
+                      failureThreshold: 5,
+                    },
                   },
-                },
-                readinessProbe: {
-                  httpGet: {
-                    path: '/health',
-                    port: 9001,
-                  },
-                  initialDelaySeconds: 5,
-                  periodSeconds: 5,
-                  timeoutSeconds: 5,
-                  failureThreshold: 5,
-                },
-              }]
+                ]
               : []),
           ],
           volumes: deploymentVolumes,
@@ -443,17 +472,13 @@ const createSkaffoldManifest = async (target) => {
   const kind = 'Config';
   let deploy = {
     kubectl: {
-      manifests: [
-        'k8s(deploy)-*',
-      ],
+      manifests: ['k8s(deploy)-*'],
     },
   };
   if (target === 'cloudrun') {
     apiVersion = 'skaffold/v4beta6';
     const manifests = {
-      rawYaml: [
-        'cloudrun-service.yaml',
-      ],
+      rawYaml: ['cloudrun-service.yaml'],
     };
     deploy = {
       cloudrun: {},
@@ -473,7 +498,13 @@ const createSkaffoldManifest = async (target) => {
   };
 };
 
-const createCloudDeployPipe = async (name, projectID, clanName, env, target = 'gke') => `apiVersion: deploy.cloud.google.com/v1
+const createCloudDeployPipe = async (
+  name,
+  projectID,
+  clanName,
+  env,
+  target = 'gke',
+) => `apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
   name: ${name}
@@ -508,8 +539,14 @@ const generateManifest = (fileName, content) => {
 };
 
 const prepareGcloudDeploy = async (name, projectID, clanName, env, target) => {
-  generateManifest('skaffold.yaml', convertToYaml(await createSkaffoldManifest(target)));
-  generateManifest('clouddeploy.yaml', await createCloudDeployPipe(name, projectID, clanName, env, target));
+  generateManifest(
+    'skaffold.yaml',
+    convertToYaml(await createSkaffoldManifest(target)),
+  );
+  generateManifest(
+    'clouddeploy.yaml',
+    await createCloudDeployPipe(name, projectID, clanName, env, target),
+  );
 };
 
 const buildManifest = async (
@@ -539,7 +576,8 @@ const buildManifest = async (
   const githubRepo = process.env.GITHUB_REPOSITORY;
   const githubRunID = process.env.GITHUB_RUN_ID;
   const githubRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
-  const jobTrigger = `${githubServerUrl}/${githubRepo}/actions/runs/${githubRunID}/attempts/${githubRunAttempt}`.toLowerCase();
+  const jobTrigger =
+    `${githubServerUrl}/${githubRepo}/actions/runs/${githubRunID}/attempts/${githubRunAttempt}`.toLowerCase();
   const baseAnnotations = {
     'job-trigger': `${jobTrigger}`,
   };
@@ -556,25 +594,18 @@ const buildManifest = async (
     monitoring = {},
   } = kubernetes || cloudrun;
 
-  const {
-    staging,
-    production,
-  } = environments;
+  const { staging, production } = environments;
 
-  const {
-    'serve-traffic': serveTraffic = true,
-  } = traffic;
+  const { 'serve-traffic': serveTraffic = true } = traffic;
 
   const {
     'permission-prefix': permissionPrefix,
     resources: opaResources = { cpu: 0.5, memory: '512Mi' },
     'system-name': systemName = name,
     consumers = {},
-  } = (security === 'none' ? {} : security || {});
+  } = security === 'none' ? {} : security || {};
 
-  const {
-    audiences = [],
-  } = consumers;
+  const { audiences = [] } = consumers;
 
   const {
     'min-instances': minInstances,
@@ -610,19 +641,29 @@ const buildManifest = async (
   for (const envVar of envArray) {
     if (envVar.name === 'SQL_INSTANCE_NAME') {
       const secretName = envVar.value.split('/').pop();
-      /* eslint-disable no-await-in-loop */
-      SQLInstanceName = await readSecret(cicdServiceAccount, deployEnv, secretName, 'SQL_INSTANCE_NAME');
-      /* eslint-enable no-await-in-loop */
+
+      SQLInstanceName = await readSecret(
+        cicdServiceAccount,
+        deployEnv,
+        secretName,
+        'SQL_INSTANCE_NAME',
+      );
     }
   }
 
   const serviceAccount = `${name}@${projectId}.iam.gserviceaccount.com`;
 
-  await prepareGcloudDeploy(name, projectId, clanName, deployEnv, kubernetes ? 'gke' : 'cloudrun');
+  await prepareGcloudDeploy(
+    name,
+    projectId,
+    clanName,
+    deployEnv,
+    kubernetes ? 'gke' : 'cloudrun',
+  );
   if (permissionPrefix) {
     opa = true;
     const bundleName = `${permissionPrefix}.${systemName}-${deployEnv}`;
-    if (!await checkIamSystem(bundleName)) {
+    if (!(await checkIamSystem(bundleName))) {
       throw new Error(`Bundle not found with the name ${bundleName}`);
     } else {
       // Our new GCS system name.
@@ -656,7 +697,16 @@ const buildManifest = async (
 
     await connectToCluster(clanName, deployEnv, projectId);
     if (scaling.vertical) {
-      generateManifest('k8s(deploy)-configmap.yaml', await configMapManifest(name, type, resources.cpu, resources.memory, scaling.vertical));
+      generateManifest(
+        'k8s(deploy)-configmap.yaml',
+        await configMapManifest(
+          name,
+          type,
+          resources.cpu,
+          resources.memory,
+          scaling.vertical,
+        ),
+      );
     } else {
       await removeScalerConfiguration(name);
     }
@@ -664,9 +714,14 @@ const buildManifest = async (
     if (type === 'StatefulSet' && volumes) {
       await handleStatefulset(name, volumes[0].size);
     }
-    const convertedManifests = manifests.map((doc) => convertToYaml(doc)).join('---\n');
+    const convertedManifests = manifests
+      .map((doc) => convertToYaml(doc))
+      .join('---\n');
     generateManifest('k8s(deploy)-manifest.yaml', convertedManifests);
-    generateManifest('k8s(deploy)-certificates.yaml', await addNamespace(http2Certificate, name));
+    generateManifest(
+      'k8s(deploy)-certificates.yaml',
+      await addNamespace(http2Certificate, name),
+    );
 
     if (deployEnv !== 'staging') {
       const podMonitor = podMonitorManifest(name, monitoring);
@@ -690,7 +745,11 @@ const buildManifest = async (
 
     let connectorName = `${clanName}-vpc-connector`;
     if (connector) {
-      connectorName = await checkVpcConnector(projectId, 'europe-west1', connectorName);
+      connectorName = await checkVpcConnector(
+        projectId,
+        'europe-west1',
+        connectorName,
+      );
     }
 
     for (const env of envArray) {
@@ -710,7 +769,11 @@ const buildManifest = async (
     let activeRevisionName = '';
     if (!serveTraffic && deployEnv !== 'staging') {
       core.info('Checking active revisions');
-      activeRevisionName = await getRevisions(name, projectId, 'europe-west1').then((revisions) => {
+      activeRevisionName = await getRevisions(
+        name,
+        projectId,
+        'europe-west1',
+      ).then((revisions) => {
         const checkMultipleActive = [];
         for (const revision of revisions) {
           if (revision.active === true) {
@@ -718,7 +781,9 @@ const buildManifest = async (
           }
         }
         if (checkMultipleActive.length > 1) {
-          throw new Error('2 active revisions found, set revision to 100% traffic before deploying');
+          throw new Error(
+            '2 active revisions found, set revision to 100% traffic before deploying',
+          );
         }
         return checkMultipleActive[0];
       });
@@ -758,12 +823,16 @@ const buildManifest = async (
   generateManifest('key.key', internalCertKey);
 
   if (!fs.existsSync('.gcloudignore')) {
-    fs.writeFileSync('.gcloudignore', `*
+    fs.writeFileSync(
+      '.gcloudignore',
+      `*
 !k8s(deploy)-*
 !skaffold.yaml
 !clouddeploy.yaml
 !cloudrun-service.yaml
-`, { encoding: 'utf-8' });
+`,
+      { encoding: 'utf-8' },
+    );
   }
 };
 

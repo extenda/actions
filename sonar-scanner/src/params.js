@@ -2,7 +2,13 @@ const path = require('path');
 const { credentials } = require('./sonar-credentials');
 const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
 
-const createParams = async (hostUrl, mainBranch, workingDir = '.', msParams = false, extraParams = {}) => {
+const createParams = async (
+  hostUrl,
+  mainBranch,
+  workingDir = '.',
+  msParams = false,
+  extraParams = {},
+) => {
   const sonarCloud = hostUrl.startsWith('https://sonarcloud.io');
   const { githubToken, sonarToken } = await credentials(hostUrl);
   const props = { ...extraParams };
@@ -53,7 +59,8 @@ const createParams = async (hostUrl, mainBranch, workingDir = '.', msParams = fa
       props['sonar.pullrequest.branch'] = pullRequest.head.ref;
       props['sonar.pullrequest.key'] = pullRequest.number;
       props['sonar.pullrequest.provider'] = 'github';
-      props['sonar.pullrequest.github.repository'] = process.env.GITHUB_REPOSITORY;
+      props['sonar.pullrequest.github.repository'] =
+        process.env.GITHUB_REPOSITORY;
     } else if (hostUrl === 'https://sonar.extenda.io') {
       // SonarQube 6
       props['sonar.github.oauth'] = githubToken;

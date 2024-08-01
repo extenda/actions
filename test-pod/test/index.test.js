@@ -15,7 +15,8 @@ describe('test-pod Action', () => {
   });
 
   beforeEach(() => {
-    core.getInput.mockReturnValueOnce('sa')
+    core.getInput
+      .mockReturnValueOnce('sa')
       .mockReturnValueOnce('myimage')
       .mockReturnValueOnce('namespace')
       .mockReturnValueOnce('cluster')
@@ -31,8 +32,17 @@ describe('test-pod Action', () => {
     runPod.mockResolvedValueOnce(0);
     await action();
     expect(configureKubeCtl).toHaveBeenCalledWith('sa', 'cluster', 'namespace');
-    expect(createConfigMap).toHaveBeenCalledWith({ namespace: 'namespace' }, 'dir', 'entrypoint');
-    expect(runPod).toHaveBeenCalledWith({ namespace: 'namespace' }, 'myimage', { name: 'configmap' }, true);
+    expect(createConfigMap).toHaveBeenCalledWith(
+      { namespace: 'namespace' },
+      'dir',
+      'entrypoint',
+    );
+    expect(runPod).toHaveBeenCalledWith(
+      { namespace: 'namespace' },
+      'myimage',
+      { name: 'configmap' },
+      true,
+    );
     expect(deleteConfigMap).toHaveBeenCalledWith({ namespace: 'namespace' });
   });
 

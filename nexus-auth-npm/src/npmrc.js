@@ -12,8 +12,7 @@ const { join } = require('path');
  * }}
  */
 const createNpmrcFile = async ({
-  credentials:
-  { username, password },
+  credentials: { username, password },
   authForPublishing,
   outputDir,
 }) => {

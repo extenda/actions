@@ -38,23 +38,42 @@ const nugetXml = `<?xml version="1.0" encoding="utf-8"?>
 
 describe('Setup Nuget Sources tests', () => {
   beforeAll(() => {
-    fs.writeFileSync(`${__dirname}/NuGet-test.config`, nugetXml, { encoding: 'utf8', flag: 'w' });
+    fs.writeFileSync(`${__dirname}/NuGet-test.config`, nugetXml, {
+      encoding: 'utf8',
+      flag: 'w',
+    });
   });
 
   test('Generate regex from url', () => {
-    expect(generateRegexPattern('https://repo.extendaretail.com/repository/nuget-group/')).toEqual(/^\s*(.*"https:\/\/repo.extendaretail.com\/repository\/nuget-group\/\/?"\s*\/>)$/gm);
-    expect(generateRegexPattern('https://repo.extendaretail.com/repository/nuget-group')).toEqual(/^\s*(.*"https:\/\/repo.extendaretail.com\/repository\/nuget-group\/?"\s*\/>)$/gm);
-    expect(generateRegexPattern('https://api.nuget.org/v3/index.json')).toEqual(/^\s*(.*"https:\/\/api.nuget.org\/v3\/index.json\/?"\s*\/>)$/gm);
+    expect(
+      generateRegexPattern(
+        'https://repo.extendaretail.com/repository/nuget-group/',
+      ),
+    ).toEqual(
+      /^\s*(.*"https:\/\/repo.extendaretail.com\/repository\/nuget-group\/\/?"\s*\/>)$/gm,
+    );
+    expect(
+      generateRegexPattern(
+        'https://repo.extendaretail.com/repository/nuget-group',
+      ),
+    ).toEqual(
+      /^\s*(.*"https:\/\/repo.extendaretail.com\/repository\/nuget-group\/?"\s*\/>)$/gm,
+    );
+    expect(generateRegexPattern('https://api.nuget.org/v3/index.json')).toEqual(
+      /^\s*(.*"https:\/\/api.nuget.org\/v3\/index.json\/?"\s*\/>)$/gm,
+    );
     expect(generateRegexPattern(null)).toEqual(null);
   });
 
   test('Comment out existing repo URLs', async () => {
     expect.assertions(2);
-    return commentOutSourceUrl(`${__dirname}/NuGet-test.config`, /^\s*(.*"https:\/\/repo.extendaretail.com\/repository\/nuget-group\/\/?"\s*\/>)$/gm)
-      .then((result) => {
-        expect(result.length).toEqual(1);
-        expect(result[0].hasChanged).toEqual(true);
-      });
+    return commentOutSourceUrl(
+      `${__dirname}/NuGet-test.config`,
+      /^\s*(.*"https:\/\/repo.extendaretail.com\/repository\/nuget-group\/\/?"\s*\/>)$/gm,
+    ).then((result) => {
+      expect(result.length).toEqual(1);
+      expect(result[0].hasChanged).toEqual(true);
+    });
   });
 
   test('Parsing NuGet source JSON', () => {

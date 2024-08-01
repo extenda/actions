@@ -63,42 +63,46 @@ spec:
 
   test('It patches replicas count', () => {
     const output = yaml.parse(patchStatefulSetYaml(service, statefulSetYaml));
-    expect(output).toMatchObject(expect.objectContaining({
-      spec: expect.objectContaining({ replicas: 3 }),
-    }));
+    expect(output).toMatchObject(
+      expect.objectContaining({
+        spec: expect.objectContaining({ replicas: 3 }),
+      }),
+    );
   });
 
   test('It patches storage', () => {
     const output = yaml.parse(patchStatefulSetYaml(service, statefulSetYaml));
-    expect(output).toMatchObject(expect.objectContaining({
-      spec: expect.objectContaining({
-        template: expect.objectContaining({
-          spec: expect.objectContaining({
-            containers: expect.arrayContaining([
-              expect.objectContaining({
-                volumeMounts: expect.arrayContaining([
-                  expect.objectContaining({
-                    mountPath: '/data/new_path',
-                  }),
-                ]),
-              }),
-            ]),
-          }),
-        }),
-        volumeClaimTemplates: expect.arrayContaining([
-          expect.objectContaining({
+    expect(output).toMatchObject(
+      expect.objectContaining({
+        spec: expect.objectContaining({
+          template: expect.objectContaining({
             spec: expect.objectContaining({
-              storageClassName: 'premium-rwo',
-              resources: expect.objectContaining({
-                requests: expect.objectContaining({
-                  storage: '1Gi',
+              containers: expect.arrayContaining([
+                expect.objectContaining({
+                  volumeMounts: expect.arrayContaining([
+                    expect.objectContaining({
+                      mountPath: '/data/new_path',
+                    }),
+                  ]),
+                }),
+              ]),
+            }),
+          }),
+          volumeClaimTemplates: expect.arrayContaining([
+            expect.objectContaining({
+              spec: expect.objectContaining({
+                storageClassName: 'premium-rwo',
+                resources: expect.objectContaining({
+                  requests: expect.objectContaining({
+                    storage: '1Gi',
+                  }),
                 }),
               }),
             }),
-          }),
-        ]),
+          ]),
+        }),
       }),
-    }));
+    );
   });
 
   test('It leaves default cpu and memory count', () => {
@@ -108,54 +112,60 @@ spec:
         mountPath: '/data/new_path',
       },
     };
-    const output = yaml.parse(patchStatefulSetYaml(serviceObj, statefulSetYaml));
-    expect(output).toMatchObject(expect.objectContaining({
-      spec: expect.objectContaining({
-        template: expect.objectContaining({
-          spec: expect.objectContaining({
-            containers: expect.arrayContaining([
-              expect.objectContaining({
-                resources: expect.objectContaining({
-                  requests: expect.objectContaining({
-                    cpu: '100m',
-                    memory: '256Mi',
-                  }),
-                  limits: expect.objectContaining({
-                    cpu: '100m',
-                    memory: '256Mi',
+    const output = yaml.parse(
+      patchStatefulSetYaml(serviceObj, statefulSetYaml),
+    );
+    expect(output).toMatchObject(
+      expect.objectContaining({
+        spec: expect.objectContaining({
+          template: expect.objectContaining({
+            spec: expect.objectContaining({
+              containers: expect.arrayContaining([
+                expect.objectContaining({
+                  resources: expect.objectContaining({
+                    requests: expect.objectContaining({
+                      cpu: '100m',
+                      memory: '256Mi',
+                    }),
+                    limits: expect.objectContaining({
+                      cpu: '100m',
+                      memory: '256Mi',
+                    }),
                   }),
                 }),
-              }),
-            ]),
+              ]),
+            }),
           }),
         }),
       }),
-    }));
+    );
   });
 
   test('It patches cpu and memory count', () => {
     const output = yaml.parse(patchStatefulSetYaml(service, statefulSetYaml));
-    expect(output).toMatchObject(expect.objectContaining({
-      spec: expect.objectContaining({
-        template: expect.objectContaining({
-          spec: expect.objectContaining({
-            containers: expect.arrayContaining([
-              expect.objectContaining({
-                resources: expect.objectContaining({
-                  requests: expect.objectContaining({
-                    cpu: '200m',
-                    memory: '512Mi',
-                  }),
-                  limits: expect.objectContaining({
-                    cpu: '400m',
-                    memory: '1024Mi',
+    expect(output).toMatchObject(
+      expect.objectContaining({
+        spec: expect.objectContaining({
+          template: expect.objectContaining({
+            spec: expect.objectContaining({
+              containers: expect.arrayContaining([
+                expect.objectContaining({
+                  resources: expect.objectContaining({
+                    requests: expect.objectContaining({
+                      cpu: '200m',
+                      memory: '512Mi',
+                    }),
+                    limits: expect.objectContaining({
+                      cpu: '400m',
+                      memory: '1024Mi',
+                    }),
                   }),
                 }),
-              }),
-            ]),
+              ]),
+            }),
           }),
         }),
       }),
-    }));
+    );
   });
 });

@@ -619,7 +619,11 @@ const GCLOUD_JSON_OUTPUT = `[
 
 test('It returns a sorted list of revisions', async () => {
   execGcloud.mockResolvedValueOnce(GCLOUD_JSON_OUTPUT);
-  const revisions = await getRevisions('fiscal-signing-service', 'fiscal-staging-dc48', 'europe-west1');
+  const revisions = await getRevisions(
+    'fiscal-signing-service',
+    'fiscal-staging-dc48',
+    'europe-west1',
+  );
   expect(revisions).toEqual([
     {
       name: 'fiscal-signing-service-ln30f1gz',
@@ -642,10 +646,15 @@ test('It returns a sorted list of revisions', async () => {
       active: false,
     },
   ]);
-  expect(execGcloud).toHaveBeenCalledWith(expect.arrayContaining([
-    '--service=fiscal-signing-service',
-    '--project=fiscal-staging-dc48',
-    '--region=europe-west1',
-    '--format=json',
-  ]), 'gcloud', expect.anything(), expect.anything());
+  expect(execGcloud).toHaveBeenCalledWith(
+    expect.arrayContaining([
+      '--service=fiscal-signing-service',
+      '--project=fiscal-staging-dc48',
+      '--region=europe-west1',
+      '--format=json',
+    ]),
+    'gcloud',
+    expect.anything(),
+    expect.anything(),
+  );
 });

@@ -7,9 +7,7 @@ const core = require('@actions/core');
  */
 
 let tokenCache = null;
-async function fetchToken({
-  key, email, pass, gipTenantId,
-}) {
+async function fetchToken({ key, email, pass, gipTenantId }) {
   if (tokenCache) {
     return tokenCache;
   }
@@ -51,7 +49,10 @@ function createApi({ name, url, auth }) {
 
   const addToken = async (config) => ({
     ...config,
-    headers: { ...config.headers, authorization: `Bearer ${await fetchToken(auth)}` },
+    headers: {
+      ...config.headers,
+      authorization: `Bearer ${await fetchToken(auth)}`,
+    },
   });
   const formatError = (err) => {
     const { status, data } = err.response;

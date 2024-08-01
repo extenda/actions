@@ -5,20 +5,21 @@ jest.mock('../../../src/utils/gcloud-output');
 
 describe('handleCertificates', () => {
   const project = 'test-staging-1223';
-  const existingCerts = JSON.stringify([{
-    name: 'extenda-certs-v1',
-    managed: {
-      domains: ['example.com', 'www.example1.com'],
+  const existingCerts = JSON.stringify([
+    {
+      name: 'extenda-certs-v1',
+      managed: {
+        domains: ['example.com', 'www.example1.com'],
+      },
+      creationTimestamp: '2022-05-01T00:00:00.000Z',
     },
-    creationTimestamp: '2022-05-01T00:00:00.000Z',
-  },
-  {
-    name: 'extenda-certs-v2',
-    managed: {
-      domains: ['example.org', 'www.example.org'],
+    {
+      name: 'extenda-certs-v2',
+      managed: {
+        domains: ['example.org', 'www.example.org'],
+      },
+      creationTimestamp: '2022-05-02T00:00:00.000Z',
     },
-    creationTimestamp: '2022-05-02T00:00:00.000Z',
-  },
   ]);
 
   beforeEach(() => {
@@ -52,7 +53,9 @@ describe('handleCertificates', () => {
     gcloudOutput.mockResolvedValueOnce(existingCerts);
 
     const result = await handleCertificates(hosts, 'pnp-prod-2c90');
-    expect(result).toEqual('extenda-wildcard-cert,extenda-certs-v1,extenda-certs-v2');
+    expect(result).toEqual(
+      'extenda-wildcard-cert,extenda-certs-v1,extenda-certs-v2',
+    );
     expect(gcloudOutput).toHaveBeenCalledTimes(1);
   });
 
@@ -62,7 +65,9 @@ describe('handleCertificates', () => {
     gcloudOutput.mockResolvedValueOnce(existingCerts);
 
     const result = await handleCertificates(hosts, 'sre-prod-5462');
-    expect(result).toEqual('all-wildcard-domains,extenda-certs-v1,extenda-certs-v2');
+    expect(result).toEqual(
+      'all-wildcard-domains,extenda-certs-v1,extenda-certs-v2',
+    );
     expect(gcloudOutput).toHaveBeenCalledTimes(1);
   });
 });

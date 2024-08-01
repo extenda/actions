@@ -206,9 +206,7 @@ environments:
           'policy-name': 'policy',
         },
         consumers: {
-          'service-accounts': [
-            'test@extenda.com',
-          ],
+          'service-accounts': ['test@extenda.com'],
         },
       },
       environments: {

@@ -11,7 +11,9 @@ describe('DNS record sets', () => {
   });
 
   test('It can add DNS record', async () => {
-    exec.exec.mockImplementation((bin, args, opts) => mockOutput('dns-project', opts));
+    exec.exec.mockImplementation((bin, args, opts) =>
+      mockOutput('dns-project', opts),
+    );
 
     await addDnsRecord('dns', 'my-service.test.com', '127.0.0.1');
     expect(exec.exec).toHaveBeenCalledTimes(4);
@@ -52,7 +54,9 @@ describe('DNS record sets', () => {
   });
 
   test('It caches DNS project', async () => {
-    exec.exec.mockImplementation((bin, args, opts) => mockOutput('dns-project', opts));
+    exec.exec.mockImplementation((bin, args, opts) =>
+      mockOutput('dns-project', opts),
+    );
 
     await addDnsRecord('dns', 'my-service.test.dev', '127.0.0.1');
     expect(exec.exec).toHaveBeenCalledTimes(4);
@@ -67,7 +71,8 @@ describe('DNS record sets', () => {
   });
 
   test('It skips DNS updates if DNS project not found', async () => {
-    exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput('', opts))
+    exec.exec
+      .mockImplementationOnce((bin, args, opts) => mockOutput('', opts))
       .mockResolvedValue(0);
     await addDnsRecord('not-found', 'my-service.test.com', '127.0.0.1');
     expect(exec.exec).toHaveBeenCalledTimes(1);

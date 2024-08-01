@@ -53,10 +53,26 @@ describe('Terraform plan comment', () => {
 
   test('It can generate comment for multiple plans', async () => {
     generateOutputs.mockResolvedValueOnce([
-      { module: 'folder/moduleA', output: 'Plan A output\n0 to add, 1 to change, 0 to destroy', status: 0 },
-      { module: 'folder/moduleB', output: 'Plan B output\n1 to add, 0 to change, 0 to destroy', status: 0 },
-      { module: 'folder/nested/moduleC', output: 'Plan C output\n1 to add, 1 to change, 1 to destroy', status: 0 },
-      { module: 'folder/nested', output: 'Plan nested output\n1 to add, 0 to change, 0 to destroy', status: 0 },
+      {
+        module: 'folder/moduleA',
+        output: 'Plan A output\n0 to add, 1 to change, 0 to destroy',
+        status: 0,
+      },
+      {
+        module: 'folder/moduleB',
+        output: 'Plan B output\n1 to add, 0 to change, 0 to destroy',
+        status: 0,
+      },
+      {
+        module: 'folder/nested/moduleC',
+        output: 'Plan C output\n1 to add, 1 to change, 1 to destroy',
+        status: 0,
+      },
+      {
+        module: 'folder/nested',
+        output: 'Plan nested output\n1 to add, 0 to change, 0 to destroy',
+        status: 0,
+      },
     ]);
 
     const comment = await action();
@@ -119,7 +135,12 @@ Plan nested output
 
   test('It can generate comment for single plan', async () => {
     generateOutputs.mockResolvedValueOnce([
-      { module: 'work', output: 'Plan output\nPlan: 1 to add, 0 to change, 0 to destroy\n\nOther text below\n', status: 0 },
+      {
+        module: 'work',
+        output:
+          'Plan output\nPlan: 1 to add, 0 to change, 0 to destroy\n\nOther text below\n',
+        status: 0,
+      },
     ]);
 
     const comment = await action();
@@ -150,18 +171,23 @@ Other text below
   test('It can generate comment for no changes', async () => {
     generateOutputs.mockResolvedValueOnce([]);
     const comment = await action();
-    expect(comment).toEqual(`### :white_check_mark: Terraform plan with no changes\n\nTerraform plan reported no changes.\n\n*Workflow: \`Terraform\`*\n*Working directory: \`${process.cwd()}\`*`);
+    expect(comment).toEqual(
+      `### :white_check_mark: Terraform plan with no changes\n\nTerraform plan reported no changes.\n\n*Workflow: \`Terraform\`*\n*Working directory: \`${process.cwd()}\`*`,
+    );
     expect(mockComment).toHaveBeenCalled();
   });
 
   test('It can generate comment for too large plan', async () => {
     function makeLongTestPlan(length) {
       let result = '';
-      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz #0123456789?%';
+      const characters =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz #0123456789?%';
       const charactersLength = characters.length;
       let i = 0;
       for (i; i < length; i += 1) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        result += characters.charAt(
+          Math.floor(Math.random() * charactersLength),
+        );
       }
       return result;
     }
@@ -170,7 +196,9 @@ Other text below
       { module: 'work', output: longPlan, status: 0 },
     ]);
     const comment = await action();
-    expect(comment).toEqual(`### :mag: Terraform plan changes\n\nThe plan is to long to post in a github comment\nVerify the Terraform plan output in the plan action\nIf the plan looks alright it can be applied according to below\n\n*Workflow: \`Terraform\`*\n*Working directory: \`${process.cwd()}\`*`);
+    expect(comment).toEqual(
+      `### :mag: Terraform plan changes\n\nThe plan is to long to post in a github comment\nVerify the Terraform plan output in the plan action\nIf the plan looks alright it can be applied according to below\n\n*Workflow: \`Terraform\`*\n*Working directory: \`${process.cwd()}\`*`,
+    );
     expect(mockComment).toHaveBeenCalled();
   });
 
@@ -178,14 +206,17 @@ Other text below
     getPullRequestInfo.mockReset();
     getPullRequestInfo.mockResolvedValueOnce(null);
     const comment = await action();
-    expect(core.warning).toHaveBeenCalledWith('Skipping execution - No open pull-request found.');
+    expect(core.warning).toHaveBeenCalledWith(
+      'Skipping execution - No open pull-request found.',
+    );
     expect(generateOutputs).not.toHaveBeenCalled();
     expect(comment).toBeNull();
   });
 
   test('It can generate comment for custom repo and pull number', async () => {
     core.getInput.mockReset();
-    core.getInput.mockReturnValueOnce('plan.out')
+    core.getInput
+      .mockReturnValueOnce('plan.out')
       .mockReturnValueOnce('infra')
       .mockReturnValueOnce('github-token')
       .mockReturnValueOnce('extenda/test-repo')
@@ -202,13 +233,16 @@ Other text below
 
   test('It throws if remote repository and no pull number is provided', async () => {
     core.getInput.mockReset();
-    core.getInput.mockReturnValueOnce('plan.out')
+    core.getInput
+      .mockReturnValueOnce('plan.out')
       .mockReturnValueOnce('infra')
       .mockReturnValueOnce('github-token')
       .mockReturnValueOnce('extenda/test-repo')
       .mockReturnValueOnce('');
     generateOutputs.mockResolvedValueOnce([]);
-    await expect(action()).rejects.toEqual(new Error('pull-request-number must be provided for remote repository.'));
+    await expect(action()).rejects.toEqual(
+      new Error('pull-request-number must be provided for remote repository.'),
+    );
   });
 
   test('It can generate a custom footer', async () => {
@@ -218,10 +252,13 @@ Other text below
       .mockReturnValueOnce('')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('')
-      .mockReturnValueOnce('Custom footer with\nnew line and *markdown*\n\nNext section. Preserved.');
+      .mockReturnValueOnce(
+        'Custom footer with\nnew line and *markdown*\n\nNext section. Preserved.',
+      );
     generateOutputs.mockResolvedValueOnce([]);
     const comment = await action();
-    expect(comment).toEqual(`### :white_check_mark: Terraform plan with no changes
+    expect(comment)
+      .toEqual(`### :white_check_mark: Terraform plan with no changes
 
 Terraform plan reported no changes.
 

@@ -16,7 +16,9 @@ const moduleEmoji = (summary) => {
 
 const outputToMarkdown = ({ module, output }) => {
   const planSummary = output.match(/Plan:.+/);
-  const summary = planSummary ? planSummary[0] : output.trim().split('\n').pop();
+  const summary = planSummary
+    ? planSummary[0]
+    : output.trim().split('\n').pop();
   const emoji = moduleEmoji(summary);
   return [
     `#### ${emoji} \`${module}\``,
@@ -69,10 +71,7 @@ const createComment = (changes, workingDirectory, footer) => {
   }
 
   if (footer) {
-    comment.push(
-      footer,
-      '',
-    );
+    comment.push(footer, '');
   }
 
   comment.push(
@@ -87,14 +86,17 @@ const action = async () => {
   const planFile = core.getInput('plan-file') || 'plan.out';
   const workingDirectory = core.getInput('working-directory') || process.cwd();
   const githubToken = core.getInput('github-token') || process.env.GITHUB_TOKEN;
-  const repository = core.getInput('repository') || process.env.GITHUB_REPOSITORY;
+  const repository =
+    core.getInput('repository') || process.env.GITHUB_REPOSITORY;
   const pullRequestNumber = core.getInput('pull-request-number');
   const footer = core.getInput('footer');
   const maxThreads = core.getInput('max-terraform-processes');
   const ignoredResourcesRegexp = core.getInput('ignored-resources-regexp');
 
   if (repository !== process.env.GITHUB_REPOSITORY && !pullRequestNumber) {
-    throw new Error('pull-request-number must be provided for remote repository.');
+    throw new Error(
+      'pull-request-number must be provided for remote repository.',
+    );
   }
 
   let pullRequest;
@@ -115,7 +117,8 @@ const action = async () => {
     planFile,
     maxThreads,
     ignoredResourcesRegexp,
-  ).then((outputs) => outputs.map(outputToMarkdown))
+  )
+    .then((outputs) => outputs.map(outputToMarkdown))
     .then((outputs) => createComment(outputs, workingDirectory, footer));
 
   const octokit = github.getOctokit(githubToken);
@@ -127,10 +130,18 @@ const action = async () => {
     issue_number: pullRequest.number,
   });
 
-  const skipDeleting = comments.some((iterComment) => iterComment.body.includes('Applied the following directories'));
+  const skipDeleting = comments.some((iterComment) =>
+    iterComment.body.includes('Applied the following directories'),
+  );
 
   for (const iterComment of comments) {
-    if ((iterComment.body.includes(':white_check_mark: Terraform plan with no changes') || iterComment.body.includes(':mag: Terraform plan changes')) && !skipDeleting) {
+    if (
+      (iterComment.body.includes(
+        ':white_check_mark: Terraform plan with no changes',
+      ) ||
+        iterComment.body.includes(':mag: Terraform plan changes')) &&
+      !skipDeleting
+    ) {
       octokit.rest.issues.deleteComment({
         owner,
         repo,

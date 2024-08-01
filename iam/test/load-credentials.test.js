@@ -27,13 +27,8 @@ describe('iam Credentials', () => {
     process.env.API_KEY_prod = 'key';
     process.env.API_TENANT_prod = 'tenant';
     process.env.STYRA_TOKEN = 'styra-token';
-    const {
-      styraToken,
-      iamApiEmail,
-      iamApiPassword,
-      iamApiKey,
-      iamApiTenant,
-    } = await loadCredentials('serviceAccount', 'prod');
+    const { styraToken, iamApiEmail, iamApiPassword, iamApiKey, iamApiTenant } =
+      await loadCredentials('serviceAccount', 'prod');
     expect(styraToken).toEqual('styra-token');
     expect(iamApiEmail).toEqual('email');
     expect(iamApiPassword).toEqual('password');
@@ -48,13 +43,8 @@ describe('iam Credentials', () => {
     secrets.loadSecret.mockResolvedValueOnce('password');
     secrets.loadSecret.mockResolvedValueOnce('key');
     secrets.loadSecret.mockResolvedValueOnce('tenant');
-    const {
-      styraToken,
-      iamApiEmail,
-      iamApiPassword,
-      iamApiKey,
-      iamApiTenant,
-    } = await loadCredentials('serviceAccount', 'staging');
+    const { styraToken, iamApiEmail, iamApiPassword, iamApiKey, iamApiTenant } =
+      await loadCredentials('serviceAccount', 'staging');
     expect(styraToken).toEqual('styra-token');
     expect(iamApiEmail).toEqual('email');
     expect(iamApiPassword).toEqual('password');

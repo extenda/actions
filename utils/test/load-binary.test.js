@@ -7,8 +7,16 @@ const mockUnpack = async (file, dest) => {
   const sdk = path.join(dest, 'google-cloud-sdk');
   fs.mkdirSync(sdk);
   fs.mkdirSync(path.join(sdk, 'bin'));
-  fs.writeFileSync(path.join(sdk, 'bin', 'gcloud'), 'gcloud executable', 'utf8');
-  fs.writeFileSync(path.join(sdk, 'bin', 'gsutil'), 'gsutil executable', 'utf8');
+  fs.writeFileSync(
+    path.join(sdk, 'bin', 'gcloud'),
+    'gcloud executable',
+    'utf8',
+  );
+  fs.writeFileSync(
+    path.join(sdk, 'bin', 'gsutil'),
+    'gsutil executable',
+    'utf8',
+  );
   return dest;
 };
 

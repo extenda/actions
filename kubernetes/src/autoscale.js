@@ -42,7 +42,12 @@ const getAutoscale = async (deploymentName) => {
  * Only removes autoscale configuration if it exists.
  * Manually scales the number of replicas to the provided value.
  */
-const removeAutoscale = async (deploymentName, deploymentType, permanentReplicas, dryRunArg) => {
+const removeAutoscale = async (
+  deploymentName,
+  deploymentType,
+  permanentReplicas,
+  dryRunArg,
+) => {
   // Check if the autoscale configuration exists for deployment.
   const autoscaleExists = await getAutoscale(deploymentName);
   // If it doesn't exist there's nothing to do.
@@ -50,9 +55,22 @@ const removeAutoscale = async (deploymentName, deploymentType, permanentReplicas
     return;
   }
   // Delete existing autoscaler configuration.
-  await exec.exec('kubectl', ['delete', 'hpa', deploymentName, `--namespace=${deploymentName}`, ...dryRunArg]);
+  await exec.exec('kubectl', [
+    'delete',
+    'hpa',
+    deploymentName,
+    `--namespace=${deploymentName}`,
+    ...dryRunArg,
+  ]);
   // Manually scale replicas to the provided value.
-  await exec.exec('kubectl', ['scale', deploymentType, deploymentName, `--namespace=${deploymentName}`, `--replicas=${permanentReplicas}`, ...dryRunArg]);
+  await exec.exec('kubectl', [
+    'scale',
+    deploymentType,
+    deploymentName,
+    `--namespace=${deploymentName}`,
+    `--replicas=${permanentReplicas}`,
+    ...dryRunArg,
+  ]);
 };
 
 /**
@@ -78,7 +96,12 @@ const applyAutoscale = async (
 
   // If there's no autoscale parameters provided we remove autoscale configuration from deployment
   if (!autoscaleType) {
-    await removeAutoscale(deploymentName, deploymentType, permanentReplicas, dryRunArg);
+    await removeAutoscale(
+      deploymentName,
+      deploymentType,
+      permanentReplicas,
+      dryRunArg,
+    );
     return;
   }
 
