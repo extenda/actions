@@ -428,6 +428,7 @@ const manifestTemplate = async (
                 ]
               : []),
           ],
+          terminationGracePeriodSeconds: 90,
           volumes: deploymentVolumes,
         },
       },
