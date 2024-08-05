@@ -251,7 +251,6 @@ const manifestTemplate = async (
   deployEnv,
   availability,
   baseAnnotations,
-  terminationGracePeriod,
 ) => {
   // initialize manifest components
 
@@ -429,7 +428,7 @@ const manifestTemplate = async (
                 ]
               : []),
           ],
-          terminationGracePeriodSeconds: terminationGracePeriod,
+          terminationGracePeriodSeconds: 90,
           volumes: deploymentVolumes,
         },
       },
@@ -695,7 +694,6 @@ const buildManifest = async (
       deployEnv,
       availability,
       baseAnnotations,
-      kubernetes['termination-grace-period'] || 60,
     );
 
     await connectToCluster(clanName, deployEnv, projectId);

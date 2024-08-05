@@ -168,13 +168,6 @@
         "timeout": {
           "$ref": "#/$defs/RequestTimeout"
         },
-        "termination-grace-period": {
-          "description": "The termination grace period in seconds.",
-          "type": "integer",
-          "minimum": 30,
-          "maximum": 300,
-          "default": 60
-        },
         "availability": {
           "$ref": "#/$defs/Availability"
         },
