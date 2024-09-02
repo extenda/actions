@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "dependencies": {
     "@actions/github": "^6.0.0",
-    "axios": "^1.7.4",
+    "axios": "^1.7.7",
     "fast-glob": "^3.3.2",
     "jsonschema": "^1.4.1",
     "multiline-str": "^1.0.4",
