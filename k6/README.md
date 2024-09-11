@@ -1,4 +1,4 @@
-# k6-runner
+# k6
 
 GitHub Action to run K6 acceptance test in your pipeline.
 
