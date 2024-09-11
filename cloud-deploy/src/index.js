@@ -3,23 +3,18 @@ const buildManifest = require('./manifests/build-manifest');
 const loadServiceDefinition = require('./utils/service-definition');
 const deploy = require('./manifests/deploy');
 const projectInfo = require('../../cloud-run/src/project-info');
-const createExternalLoadbalancer = require('./loadbalancing/external/create-external-loadbalancer');
-const configureInternalDomain = require('./loadbalancing/internal/create-internal-backend');
-const configureExternalDomain = require('./loadbalancing/external/create-external-backend');
-const configureExternalLBFrontend = require('./loadbalancing/external/create-external-frontend');
-const configureInternalFrontend = require('./loadbalancing/internal/create-internal-frontend');
 const { run, failIfNotTrunkBased } = require('../../utils');
 const { setupGcloud } = require('../../setup-gcloud');
 const readSecret = require('./utils/load-credentials');
 const runScan = require('./utils/vulnerability-scanning');
 const getImageWithSha256 = require('./manifests/image-sha256');
 const publishPolicies = require('./policies/publish-policies');
-const { sendScaleSetup, sendDeployInfo } = require('./utils/send-request');
+const { checkPolicyExists } = require('./loadbalancing/external/cloud-armor');
 const {
-  checkPolicyExists,
-  setCloudArmorPolicyTarget,
-  checkPolicyTarget,
-} = require('./loadbalancing/external/cloud-armor');
+  sendScaleSetup,
+  sendDeployInfo,
+  sendDeployRequest,
+} = require('./utils/send-request');
 
 const action = async () => {
   const serviceAccountKeyPipeline = core.getInput('secrets-account-key', {
@@ -108,8 +103,11 @@ const action = async () => {
     await checkPolicyExists(cloudArmorPolicy, projectID);
   }
 
-  const { 'domain-mappings': domainMappings, 'min-instances': minInstances } =
-    env === 'staging' ? staging : production;
+  const {
+    'domain-mappings': domainMappings,
+    'path-mappings': pathMappings = [],
+    'min-instances': minInstances,
+  } = env === 'staging' ? staging : production;
 
   const platformGKE = !cloudrun;
 
@@ -201,54 +199,88 @@ const action = async () => {
       );
       await Promise.all(requests);
     }
-    await createExternalLoadbalancer(projectID, env);
-    if (domainMappings) {
-      await configureExternalLBFrontend(
-        projectID,
-        env,
-        [...domainMappings],
-        migrate,
-      );
-      await configureExternalDomain(
-        projectID,
-        serviceName,
-        env,
-        domainMappings,
-        protocol,
-        timeout,
-        platformGKE,
-      );
-      // Check if backend needs to be updated true if match false if needs to update
-      const updateCloudArmorPolicy = await checkPolicyTarget(
-        serviceName,
-        cloudArmorPolicy,
-        projectID,
-      );
-      if (!updateCloudArmorPolicy) {
-        await setCloudArmorPolicyTarget(
-          serviceName,
-          cloudArmorPolicy,
-          projectID,
-        );
+
+    const deployData = {
+      serviceName,
+      projectID,
+      platform: platformGKE ? 'kubernetes' : 'cloud-run',
+      protocol,
+      timeout,
+      region: 'europe-west',
+      migrate,
+      cloudArmorPolicy,
+      internalTraffic,
+      loggingSampleRate: 0,
+      domainMappings,
+      pathMappings,
+    };
+    Object.keys(deployData).forEach((key) =>
+      deployData[key] === undefined ? delete deployData[key] : {},
+    );
+    if (pathMappings) {
+      for (const pathMap of pathMappings) {
+        if (pathMap.service) {
+          pathMap.target = `service/${pathMap.service}`;
+          delete pathMap.service;
+        }
+        if (pathMap.bucket) {
+          pathMap.target = `bucket/${pathMap.bucket}`;
+          delete pathMap.bucket;
+        }
       }
     }
-    if (internalTraffic) {
-      await configureInternalDomain(
-        projectID,
-        serviceName,
-        env,
-        protocol,
-        timeout,
-        platformGKE,
-      );
-      await configureInternalFrontend(
-        projectID,
-        serviceName,
-        env,
-        protocol,
-        platformGKE,
-      );
+    if (env === 'staging') {
+      await sendDeployRequest(deployData);
     }
+
+    //     await createExternalLoadbalancer(projectID, env);
+    //     if (domainMappings) {
+    //       await configureExternalLBFrontend(
+    //         projectID,
+    //         env,
+    //         [...domainMappings],
+    //         migrate,
+    //       );
+    //       await configureExternalDomain(
+    //         projectID,
+    //         serviceName,
+    //         env,
+    //         domainMappings,
+    //         protocol,
+    //         timeout,
+    //         platformGKE,
+    //       );
+    //       // Check if backend needs to be updated true if match false if needs to update
+    //       const updateCloudArmorPolicy = await checkPolicyTarget(
+    //         serviceName,
+    //         cloudArmorPolicy,
+    //         projectID,
+    //       );
+    //       if (!updateCloudArmorPolicy) {
+    //         await setCloudArmorPolicyTarget(
+    //           serviceName,
+    //           cloudArmorPolicy,
+    //           projectID,
+    //         );
+    //       }
+    //     }
+    //     if (internalTraffic) {
+    //       await configureInternalDomain(
+    //         projectID,
+    //         serviceName,
+    //         env,
+    //         protocol,
+    //         timeout,
+    //         platformGKE,
+    //       );
+    //       await configureInternalFrontend(
+    //         projectID,
+    //         serviceName,
+    //         env,
+    //         protocol,
+    //         platformGKE,
+    //       );
+    //     }
   } else {
     throw new Error(
       'Deployment failed! Check container logs and status for error!',

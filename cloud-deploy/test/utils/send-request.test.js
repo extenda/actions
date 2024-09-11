@@ -3,6 +3,7 @@ const axios = require('axios');
 const {
   sendScaleSetup,
   sendDeployInfo,
+  sendDeployRequest,
 } = require('../../src/utils/send-request');
 const getToken = require('../../src/utils/identity-token');
 
@@ -23,6 +24,42 @@ const version = 'v1.1.1';
 const githubrepository = 'repository';
 const githubsha = 'githubsha';
 const slackchannel = 'slackchannel';
+
+const serviceDef = {
+  kubernetes: {
+    type: 'Deployment',
+    service: 'service-name',
+    resources: {
+      cpu: 1,
+      memory: '512Mi',
+    },
+    protocol: 'http',
+    scaling: {
+      cpu: 40,
+    },
+  },
+  security: 'none',
+  labels: {
+    product: 'actions',
+    component: 'jest',
+  },
+  environments: {
+    production: {
+      'min-instances': 1,
+      'max-instances': 10,
+      env: {
+        KEY1: 'value1',
+        KEY2: 'value2',
+      },
+    },
+    staging: {
+      'min-instances': 1,
+      'max-instances': 1,
+      env: {},
+      'domain-mappings': ['example.com'],
+    },
+  },
+};
 
 describe('Send request to platform api', () => {
   afterEach(() => {
@@ -166,6 +203,25 @@ describe('Send request to platform api', () => {
     );
     expect(core.error).toHaveBeenCalledWith(
       expect.stringContaining('some error'),
+    );
+  });
+
+  it('should send deploy setup request successfully', async () => {
+    getToken.mockResolvedValue('token');
+    axios.post.mockResolvedValue({ status: 200 });
+    await sendDeployRequest(serviceDef);
+    expect(axios.post).toHaveBeenCalledWith(
+      '/loadbalancer/deploy',
+      serviceDef,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'bearer token',
+        },
+      },
+    );
+    expect(core.info).toHaveBeenCalledWith(
+      expect.stringContaining('/loadbalancer/deploy with response code 200'),
     );
   });
 });

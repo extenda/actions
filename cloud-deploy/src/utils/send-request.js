@@ -4,6 +4,27 @@ const getToken = require('./identity-token');
 
 axios.defaults.baseURL = 'https://platform-api.retailsvc.com';
 
+const sendRequest = async (url, data) =>
+  axios
+    .post(url, data, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `bearer ${await getToken()}`,
+      },
+    })
+    .then((response) => {
+      const statuscode = response.status;
+      core.info(`response from ${url} with response code ${statuscode}`);
+    })
+    .catch((error) => {
+      core.error(`${error}`);
+    });
+
+const sendDeployRequest = async (data) => {
+  const url = '/loadbalancer/deploy';
+  return sendRequest(url, data);
+};
+
 const sendScaleSetup = async (
   service,
   projectid,
@@ -14,10 +35,6 @@ const sendScaleSetup = async (
   scaledown,
 ) => {
   const url = '/scaling/setup';
-  const headers = {
-    'Content-Type': 'application/json',
-    Authorization: `bearer ${await getToken()}`,
-  };
   const data = {
     service,
     projectid,
@@ -28,17 +45,7 @@ const sendScaleSetup = async (
     scaledown,
     scaled: true,
   };
-  return axios
-    .post(url, data, {
-      headers,
-    })
-    .then((response) => {
-      const statuscode = response.status;
-      core.info(`response from ${url} with response code ${statuscode}`);
-    })
-    .catch((error) => {
-      core.error(`${error}`);
-    });
+  return sendRequest(url, data);
 };
 
 const sendDeployInfo = async (
@@ -51,10 +58,6 @@ const sendDeployInfo = async (
   slackchannel,
 ) => {
   const url = '/deployinfo/add';
-  const headers = {
-    'Content-Type': 'application/json',
-    Authorization: `bearer ${await getToken()}`,
-  };
   const data = {
     service,
     timestamp,
@@ -64,20 +67,11 @@ const sendDeployInfo = async (
     githubsha,
     slackchannel,
   };
-  return axios
-    .post(url, data, {
-      headers,
-    })
-    .then((response) => {
-      const statuscode = response.status;
-      core.info(`response from ${url} with response code ${statuscode}`);
-    })
-    .catch((error) => {
-      core.error(`${error}`);
-    });
+  return sendRequest(url, data);
 };
 
 module.exports = {
   sendScaleSetup,
   sendDeployInfo,
+  sendDeployRequest,
 };
