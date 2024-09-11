@@ -397,7 +397,7 @@ environments:
         - /test/*
         - /api/v1/test/*
         service: test-service
-      - paths: 
+      - paths:
         - /api/v1/*
         bucket: test-bucket
     env: &env

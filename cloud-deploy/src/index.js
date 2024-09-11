@@ -92,7 +92,7 @@ const action = async () => {
 
   const { 'service-accounts': IAMServiceAccounts = [] } = consumers || {};
 
-  const { 'policy-name': cloudArmorPolicy = '' } = cloudArmor || {};
+  const { 'policy-name': cloudArmorPolicy = undefined } = cloudArmor || {};
 
   if (!cloudrun && consumers) {
     throw new Error('Consumers security configuration is only for cloud-run');
@@ -206,7 +206,7 @@ const action = async () => {
       platform: platformGKE ? 'kubernetes' : 'cloud-run',
       protocol,
       timeout,
-      region: 'europe-west',
+      region: 'europe-west1',
       migrate,
       cloudArmorPolicy,
       internalTraffic,
@@ -232,55 +232,6 @@ const action = async () => {
     if (env === 'staging') {
       await sendDeployRequest(deployData);
     }
-
-    //     await createExternalLoadbalancer(projectID, env);
-    //     if (domainMappings) {
-    //       await configureExternalLBFrontend(
-    //         projectID,
-    //         env,
-    //         [...domainMappings],
-    //         migrate,
-    //       );
-    //       await configureExternalDomain(
-    //         projectID,
-    //         serviceName,
-    //         env,
-    //         domainMappings,
-    //         protocol,
-    //         timeout,
-    //         platformGKE,
-    //       );
-    //       // Check if backend needs to be updated true if match false if needs to update
-    //       const updateCloudArmorPolicy = await checkPolicyTarget(
-    //         serviceName,
-    //         cloudArmorPolicy,
-    //         projectID,
-    //       );
-    //       if (!updateCloudArmorPolicy) {
-    //         await setCloudArmorPolicyTarget(
-    //           serviceName,
-    //           cloudArmorPolicy,
-    //           projectID,
-    //         );
-    //       }
-    //     }
-    //     if (internalTraffic) {
-    //       await configureInternalDomain(
-    //         projectID,
-    //         serviceName,
-    //         env,
-    //         protocol,
-    //         timeout,
-    //         platformGKE,
-    //       );
-    //       await configureInternalFrontend(
-    //         projectID,
-    //         serviceName,
-    //         env,
-    //         protocol,
-    //         platformGKE,
-    //       );
-    //     }
   } else {
     throw new Error(
       'Deployment failed! Check container logs and status for error!',
