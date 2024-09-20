@@ -42,7 +42,7 @@ const action = async () => {
   failIfNotTrunkBased();
 
   // Ensure our gcloud is available and installed.
-  const projectID = await setupGcloud(serviceAccountKeyCICD);
+  const projectID = await setupGcloud(serviceAccountKeyCICD, 'latest', true);
 
   const { project: clanName, env } = projectInfo(projectID);
 
