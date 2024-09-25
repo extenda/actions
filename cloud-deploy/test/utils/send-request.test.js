@@ -3,6 +3,7 @@ const axios = require('axios');
 const {
   sendScaleSetup,
   sendDeployInfo,
+  sendVulnerabilityCount,
 } = require('../../src/utils/send-request');
 const getToken = require('../../src/utils/identity-token');
 
@@ -156,6 +157,56 @@ describe('Send request to platform api', () => {
         githubrepository,
         githubsha,
         slackchannel,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'bearer token',
+        },
+      },
+    );
+    expect(core.error).toHaveBeenCalledWith(
+      expect.stringContaining('some error'),
+    );
+  });
+
+  it('should send vulnerability counter request successfully', async () => {
+    getToken.mockResolvedValue('token');
+    axios.post.mockResolvedValue({ status: 200 });
+    await sendVulnerabilityCount(
+      service,
+      1
+    );
+    expect(axios.post).toHaveBeenCalledWith(
+      '/security/vulnerability/counter',
+      {
+        service,
+        critical: 1,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'bearer token',
+        },
+      },
+    );
+    expect(core.info).toHaveBeenCalledWith(
+      expect.stringContaining('/security/vulnerability/counter with response code 200'),
+    );
+  });
+
+  it('should send vulnerability counter request and fail', async () => {
+    getToken.mockResolvedValue('token');
+    axios.post.mockRejectedValue('some error');
+    await sendVulnerabilityCount(
+      service,
+      1
+    );
+    expect(axios.post).toHaveBeenCalledWith(
+      '/security/vulnerability/counter',
+      {
+        service,
+        critical: 1,
       },
       {
         headers: {
