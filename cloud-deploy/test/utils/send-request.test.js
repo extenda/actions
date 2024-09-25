@@ -173,10 +173,7 @@ describe('Send request to platform api', () => {
   it('should send vulnerability counter request successfully', async () => {
     getToken.mockResolvedValue('token');
     axios.post.mockResolvedValue({ status: 200 });
-    await sendVulnerabilityCount(
-      service,
-      1
-    );
+    await sendVulnerabilityCount(service, 1);
     expect(axios.post).toHaveBeenCalledWith(
       '/security/vulnerability/counter',
       {
@@ -191,17 +188,16 @@ describe('Send request to platform api', () => {
       },
     );
     expect(core.info).toHaveBeenCalledWith(
-      expect.stringContaining('/security/vulnerability/counter with response code 200'),
+      expect.stringContaining(
+        '/security/vulnerability/counter with response code 200',
+      ),
     );
   });
 
   it('should send vulnerability counter request and fail', async () => {
     getToken.mockResolvedValue('token');
     axios.post.mockRejectedValue('some error');
-    await sendVulnerabilityCount(
-      service,
-      1
-    );
+    await sendVulnerabilityCount(service, 1);
     expect(axios.post).toHaveBeenCalledWith(
       '/security/vulnerability/counter',
       {
