@@ -564,7 +564,7 @@
                   "title": "path",
                   "description": "Fully qualified path",
                   "type": "string",
-                  "pattern": "^\/(.*)(\/\\*)$"
+                  "pattern": "^\/(.*)$"
                 }
               }
             }
