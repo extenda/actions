@@ -566,6 +566,12 @@
                   "type": "string",
                   "pattern": "^\/(.*)$"
                 }
+              },
+              "path-rewrite": {
+                "title": "Path rewrite",
+                "description": "The path prefix that will be used on the target service",
+                "type": "string",
+                "constant": "none"
               }
             }
           }

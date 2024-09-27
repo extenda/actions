@@ -227,6 +227,10 @@ const action = async () => {
           pathMap.target = `bucket/${pathMap.bucket}`;
           delete pathMap.bucket;
         }
+        if (pathMap['path-rewrite']) {
+          pathMap.rewrite = pathMap['path-rewrite'];
+          delete pathMap['path-rewrite'];
+        }
       }
     }
     if (env === 'staging') {

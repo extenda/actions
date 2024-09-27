@@ -400,6 +400,7 @@ environments:
       - paths:
         - /api/v1/*
         bucket: test-bucket
+        path-rewrite: /
     env: &env
       KEY: value
   staging: none
@@ -429,6 +430,17 @@ environments:
           'domain-mappings': [
             'my-service.retailsvc.com',
             'my-service.retailsvc-test.com',
+          ],
+          'path-mappings': [
+            {
+              paths: ['/test/*', '/api/v1/test/*'],
+              service: 'test-service',
+            },
+            {
+              paths: ['/api/v1/*'],
+              bucket: 'test-bucket',
+              'path-rewrite': '/',
+            },
           ],
         },
       },
