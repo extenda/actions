@@ -117,7 +117,7 @@ const action = async () => {
   if (process.platform !== 'win32') {
     if (env !== 'staging') {
       core.info('Run Trivy scanning');
-      await runScan(serviceAccountKeyCICD, image);
+      await runScan(serviceAccountKeyCICD, image, serviceName);
     }
   }
 
