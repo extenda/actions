@@ -311,4 +311,94 @@ describe('Action', () => {
     expect(sendScaleSetup).toHaveBeenCalledTimes(1);
     expect(sendDeployInfo).toHaveBeenCalledTimes(1);
   });
+
+  test('It will send loadbalancer deploy request', async () => {
+    core.getInput
+      .mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('clan-service-account')
+      .mockReturnValueOnce('cloud-run.yaml')
+      .mockReturnValueOnce('gcr.io/project/image:tag');
+    loadCredentials
+      .mockResolvedValueOnce('envoy-certs')
+      .mockResolvedValueOnce('internal-key')
+      .mockResolvedValueOnce('internal-cert');
+
+    const serviceDefPathmappings = {
+      'cloud-run': {
+        service: 'service-name',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          concurrency: 40,
+          schedule: [
+            {
+              'scale-hours': '08:00-20:00',
+            },
+          ],
+        },
+      },
+      security: {
+        consumers: {
+          'service-accounts': ['some-account'],
+          audiences: ['some-audience'],
+        },
+      },
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+          },
+          'domain-mappings': ['example.com'],
+          'path-mappings': [
+            {
+              paths: ['/login/*'],
+              service: 'some-service',
+              'path-rewrite': '/',
+            },
+            {
+              paths: ['/bucket/*'],
+              bucket: 'some-bucket',
+              'path-rewrite': '/',
+            },
+          ],
+        },
+        staging: {
+          'min-instances': 1,
+          'max-instances': 1,
+          env: {},
+          'domain-mappings': ['example.com'],
+        },
+      },
+    };
+
+    loadServiceDefinition.mockReturnValueOnce(serviceDefPathmappings);
+    getImageWithSha256.mockResolvedValueOnce('gcr.io/project/image@sha256:1');
+    projectInfo.mockReturnValueOnce({
+      project: 'clan-name',
+      env: 'prod',
+    });
+    buildManifest.mockResolvedValueOnce();
+    deploy.mockResolvedValueOnce(true);
+    createExternalLoadbalancer.mockResolvedValueOnce();
+    configureExternalLBFrontend.mockResolvedValueOnce();
+    configureExternalDomain.mockResolvedValueOnce();
+    configureInternalDomain.mockResolvedValueOnce();
+    configureInternalFrontend.mockResolvedValueOnce();
+    setupGcloud.mockResolvedValueOnce('project-id');
+    publishPolicies.mockResolvedValueOnce();
+    runScan.mockResolvedValueOnce();
+    await action();
+    expect(sendScaleSetup).toHaveBeenCalledTimes(1);
+    expect(sendDeployInfo).toHaveBeenCalledTimes(1);
+  });
 });

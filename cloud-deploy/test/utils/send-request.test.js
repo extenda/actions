@@ -4,6 +4,7 @@ const {
   sendScaleSetup,
   sendDeployInfo,
   sendVulnerabilityCount,
+  sendDeployRequest,
 } = require('../../src/utils/send-request');
 const getToken = require('../../src/utils/identity-token');
 
@@ -249,6 +250,45 @@ describe('Send request to platform api', () => {
     );
     expect(core.error).toHaveBeenCalledWith(
       expect.stringContaining('some error'),
+    );
+  });
+
+  it('should send deploy setup request successfully', async () => {
+    getToken.mockResolvedValue('token');
+    axios.post.mockResolvedValue({ status: 200 });
+    await sendDeployRequest(serviceDef);
+    expect(axios.post).toHaveBeenCalledWith(
+      '/loadbalancer/deploy',
+      serviceDef,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'bearer token',
+        },
+      },
+    );
+    expect(core.info).toHaveBeenCalledWith(
+      expect.stringContaining('/loadbalancer/deploy with response code 200'),
+    );
+  });
+
+  it('should send deploy setup request and fail the action on failure', async () => {
+    getToken.mockResolvedValue('token');
+    axios.post.mockRejectedValue({ status: 500, error: 'some error' });
+    await expect(sendDeployRequest(serviceDef)).rejects.toEqual(
+      new Error(
+        'Deployment rolled out successfully! loadbalancer setup failed!',
+      ),
+    );
+    expect(axios.post).toHaveBeenCalledWith(
+      '/loadbalancer/deploy',
+      serviceDef,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'bearer token',
+        },
+      },
     );
   });
 });

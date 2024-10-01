@@ -15,14 +15,22 @@ const sendRequest = async (url, data) =>
     .then((response) => {
       const statuscode = response.status;
       core.info(`response from ${url} with response code ${statuscode}`);
+      return true;
     })
     .catch((error) => {
       core.error(`${error}`);
+      return false;
     });
 
 const sendDeployRequest = async (data) => {
   const url = '/loadbalancer/deploy';
-  return sendRequest(url, data);
+  const result = await sendRequest(url, data);
+  if (!result) {
+    throw new Error(
+      'Deployment rolled out successfully! loadbalancer setup failed!',
+    );
+  }
+  return result;
 };
 
 const sendScaleSetup = async (
@@ -72,25 +80,11 @@ const sendDeployInfo = async (
 
 const sendVulnerabilityCount = async (service, critical) => {
   const url = '/security/vulnerability/counter';
-  const headers = {
-    'Content-Type': 'application/json',
-    Authorization: `bearer ${await getToken()}`,
-  };
   const data = {
     service,
     critical,
   };
-  return axios
-    .post(url, data, {
-      headers,
-    })
-    .then((response) => {
-      const statuscode = response.status;
-      core.info(`response from ${url} with response code ${statuscode}`);
-    })
-    .catch((error) => {
-      core.error(`${error}`);
-    });
+  return sendRequest(url, data);
 };
 
 module.exports = {

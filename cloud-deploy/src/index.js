@@ -233,9 +233,7 @@ const action = async () => {
         }
       }
     }
-    if (env === 'staging') {
-      await sendDeployRequest(deployData);
-    }
+    await sendDeployRequest(deployData);
   } else {
     throw new Error(
       'Deployment failed! Check container logs and status for error!',
