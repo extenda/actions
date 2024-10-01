@@ -37,7 +37,7 @@ const action = async () => {
   failIfNotTrunkBased();
 
   // Ensure our gcloud is available and installed.
-  const projectID = await setupGcloud(serviceAccountKeyCICD);
+  const projectID = await setupGcloud(serviceAccountKeyCICD, 'latest', true);
 
   const { project: clanName, env } = projectInfo(projectID);
 
@@ -115,7 +115,7 @@ const action = async () => {
   if (process.platform !== 'win32') {
     if (env !== 'staging') {
       core.info('Run Trivy scanning');
-      await runScan(serviceAccountKeyCICD, image);
+      await runScan(serviceAccountKeyCICD, image, serviceName);
     }
   }
 

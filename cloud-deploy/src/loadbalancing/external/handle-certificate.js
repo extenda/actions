@@ -66,7 +66,13 @@ const handleCertificates = async (hosts, project) => {
   }
 
   // add wildcard cert to sre loadbalancer
-  if (project === 'sre-prod-5462' || project === 'sre-staging-53a5') {
+  if (
+    project === 'sre-prod-5462' ||
+    project === 'sre-staging-53a5' ||
+    project === 'txengine-staging-c744' ||
+    project === 'txengine-prod-1c85' ||
+    project === 'cloud-core-prod-2d76'
+  ) {
     certificateListNames.push('all-wildcard-domains');
   }
 

@@ -70,8 +70,32 @@ const sendDeployInfo = async (
   return sendRequest(url, data);
 };
 
+const sendVulnerabilityCount = async (service, critical) => {
+  const url = '/security/vulnerability/counter';
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `bearer ${await getToken()}`,
+  };
+  const data = {
+    service,
+    critical,
+  };
+  return axios
+    .post(url, data, {
+      headers,
+    })
+    .then((response) => {
+      const statuscode = response.status;
+      core.info(`response from ${url} with response code ${statuscode}`);
+    })
+    .catch((error) => {
+      core.error(`${error}`);
+    });
+};
+
 module.exports = {
   sendScaleSetup,
   sendDeployInfo,
   sendDeployRequest,
+  sendVulnerabilityCount,
 };
