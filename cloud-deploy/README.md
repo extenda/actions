@@ -151,44 +151,6 @@ service-hours: ## all times in UTC ( scale up at 07:00, scale down to 0 at 22:00
 min-instances: ## the value the scaleup will use
 region: ## unused but will be used once we roll out to more regions
 ```
-
-Managed Cloud Run service with path-mappings
-
-```yaml
-cloud-run:
-  service: my-service
-  resources:
-    cpu: 1
-    memory: 512Mi
-  protocol: http
-  scaling:
-    concurrency: 80
-
-environments:
-  production:
-    min-instances: 1
-    domain-mappings:
-      - my-service.retailsvc.com
-      - my-service.retailsvc-test.com
-    path-mappings:
-      - paths:
-        - /login/*
-        - /api/v2/*
-        - /api/beta/*
-        service: my-service-a
-        path-rewrite: /
-      - paths:
-        - /api/v3/*
-        service: my-service-b
-```
-
-```
-service/bucket: ## An already existing service/bucket to target in the same project
-paths: ## Paths to setup for this target
-path-rewrite: ## Rewrite the path on the downstream service
-
-example: my-service.retailsvc.com/api/v2/feature will hit my-service-a with my-service.retailsvc.com/feature
-```
 ### Kubernetes deployment
 
 A Kubernetes deployment with IAM security resources customized.
