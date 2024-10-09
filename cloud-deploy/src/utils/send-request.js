@@ -4,6 +4,35 @@ const getToken = require('./identity-token');
 
 axios.defaults.baseURL = 'https://platform-api.retailsvc.com';
 
+const sendRequest = async (url, data) =>
+  axios
+    .post(url, data, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `bearer ${await getToken()}`,
+      },
+    })
+    .then((response) => {
+      const statuscode = response.status;
+      core.info(`response from ${url} with response code ${statuscode}`);
+      return true;
+    })
+    .catch((error) => {
+      core.error(`${error}`);
+      return false;
+    });
+
+const sendDeployRequest = async (data) => {
+  const url = '/loadbalancer/deploy';
+  const result = await sendRequest(url, data);
+  if (!result) {
+    throw new Error(
+      'Deployment rolled out successfully! loadbalancer setup failed!',
+    );
+  }
+  return result;
+};
+
 const sendScaleSetup = async (
   service,
   projectid,
@@ -14,10 +43,6 @@ const sendScaleSetup = async (
   scaledown,
 ) => {
   const url = '/scaling/setup';
-  const headers = {
-    'Content-Type': 'application/json',
-    Authorization: `bearer ${await getToken()}`,
-  };
   const data = {
     service,
     projectid,
@@ -28,17 +53,7 @@ const sendScaleSetup = async (
     scaledown,
     scaled: true,
   };
-  return axios
-    .post(url, data, {
-      headers,
-    })
-    .then((response) => {
-      const statuscode = response.status;
-      core.info(`response from ${url} with response code ${statuscode}`);
-    })
-    .catch((error) => {
-      core.error(`${error}`);
-    });
+  return sendRequest(url, data);
 };
 
 const sendDeployInfo = async (
@@ -51,10 +66,6 @@ const sendDeployInfo = async (
   slackchannel,
 ) => {
   const url = '/deployinfo/add';
-  const headers = {
-    'Content-Type': 'application/json',
-    Authorization: `bearer ${await getToken()}`,
-  };
   const data = {
     service,
     timestamp,
@@ -64,44 +75,21 @@ const sendDeployInfo = async (
     githubsha,
     slackchannel,
   };
-  return axios
-    .post(url, data, {
-      headers,
-    })
-    .then((response) => {
-      const statuscode = response.status;
-      core.info(`response from ${url} with response code ${statuscode}`);
-    })
-    .catch((error) => {
-      core.error(`${error}`);
-    });
+  return sendRequest(url, data);
 };
 
 const sendVulnerabilityCount = async (service, critical) => {
   const url = '/security/vulnerability/counter';
-  const headers = {
-    'Content-Type': 'application/json',
-    Authorization: `bearer ${await getToken()}`,
-  };
   const data = {
     service,
     critical,
   };
-  return axios
-    .post(url, data, {
-      headers,
-    })
-    .then((response) => {
-      const statuscode = response.status;
-      core.info(`response from ${url} with response code ${statuscode}`);
-    })
-    .catch((error) => {
-      core.error(`${error}`);
-    });
+  return sendRequest(url, data);
 };
 
 module.exports = {
   sendScaleSetup,
   sendDeployInfo,
+  sendDeployRequest,
   sendVulnerabilityCount,
 };

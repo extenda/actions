@@ -362,4 +362,88 @@ environments:
       },
     });
   });
+
+  test('It can parse pathmappings', async () => {
+    mockFs({
+      'cloud-deploy.yaml': `
+kubernetes:
+  type: Deployment
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    cpu: 50
+  monitoring:
+    prometheus:
+      interval: 30
+      path: /test
+
+security: none
+
+labels:
+  component: jest
+  product: my-product
+
+environments:
+  production:
+    min-instances: 1
+    domain-mappings:
+      - my-service.retailsvc.com
+      - my-service.retailsvc-test.com
+    path-mappings:
+      - paths:
+        - /test/*
+        - /api/v1/test/*
+        service: test-service
+      - paths:
+        - /api/v1/*
+        bucket: test-bucket
+        path-rewrite: /
+    env: &env
+      KEY: value
+  staging: none
+      `,
+    });
+
+    const spec = loadServiceDefinition('cloud-deploy.yaml');
+    expect(spec).toMatchObject({
+      kubernetes: {
+        service: 'my-service',
+        type: 'Deployment',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        monitoring: {
+          prometheus: {
+            interval: 30,
+            path: '/test',
+          },
+        },
+      },
+      security: 'none',
+      environments: {
+        production: {
+          'min-instances': 1,
+          'domain-mappings': [
+            'my-service.retailsvc.com',
+            'my-service.retailsvc-test.com',
+          ],
+          'path-mappings': [
+            {
+              paths: ['/test/*', '/api/v1/test/*'],
+              service: 'test-service',
+            },
+            {
+              paths: ['/api/v1/*'],
+              bucket: 'test-bucket',
+              'path-rewrite': '/',
+            },
+          ],
+        },
+      },
+    });
+  });
 });
