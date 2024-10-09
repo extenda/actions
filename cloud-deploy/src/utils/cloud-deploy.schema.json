@@ -533,6 +533,49 @@
             "type": "string"
           }
         },
+        "path-mappings": {
+          "title": "PathMappings",
+          "description": "Service path mappings",
+          "type": "array",
+          "items": {
+            "title": "PathRule",
+            "description": "PathRules",
+            "type": "object",
+            "properties": {
+              "oneOf": [
+                {
+                  "title": "Bucket target",
+                  "description": "Bucket target",
+                  "type": "string",
+                  "constant": "none"
+                },
+                {
+                  "title": "Service target",
+                  "description": "Service target",
+                  "type": "string",
+                  "constant": "none"
+                }
+              ],
+              "paths": {
+                "title": "Paths",
+                "description": "Target paths",
+                "type": "array",
+                "items": {
+                  "title": "path",
+                  "description": "Fully qualified path",
+                  "type": "string",
+                  "pattern": "^\/(.*)$"
+                }
+              },
+              "path-rewrite": {
+                "title": "Path rewrite",
+                "description": "The path prefix that will be used on the target service",
+                "type": "string",
+                "constant": "none"
+              }
+            }
+          }
+        },
         "env": {
           "title": "EnvVars",
           "description": "Environment variables and secrets",
