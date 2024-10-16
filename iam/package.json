@@ -11,6 +11,6 @@
     "jsonschema": "^1.4.1",
     "multiline-str": "^1.0.4",
     "uuid": "^10.0.0",
-    "yaml": "^2.5.0"
+    "yaml": "^2.6.0"
   }
 }
