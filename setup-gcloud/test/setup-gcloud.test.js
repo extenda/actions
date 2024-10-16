@@ -42,6 +42,8 @@ describe('Setup Gcloud', () => {
       ...orgEnv,
     };
 
+    delete process.env['GCLOUD_REQUESTED_VERSION'];
+
     const filesystem = {
       '/gcloud/innerdir/__pycache__': {},
       '/gcloud/.install/.backup': {},
