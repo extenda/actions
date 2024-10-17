@@ -19,10 +19,10 @@ const initSlack = async (serviceAccount, channelName) => {
   let channel = channelName;
   const slackToken = await loadSecret(serviceAccount, 'slack_notify_token');
   if (!channel) {
-    core.debug('Fetching channel name');
+    core.info('Fetching channel name');
     channel = await loadSecret(serviceAccount, 'clan_slack_channel');
   }
-  core.debug('Channel: ' + channel);
+  core.info(`Channel: ${channel}`);
   return { token: slackToken, channel };
 };
 
@@ -47,7 +47,7 @@ const postMessageToSlackChannel = async (slackData, message) =>
 
 const postFileToSlackChannel = async (slackData, message, file) => {
   const formData = buildFormData(slackData.channel, message, file);
-  core.debug('Formdata: ' + formData);
+  core.info(`Channel: ${slackData.channel}`);
   const headers = {
     Authorization: `Bearer ${slackData.token}`,
     ...formData.getHeaders(),
