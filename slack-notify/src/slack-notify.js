@@ -82,7 +82,7 @@ const notifySlackWithFile = async (
 
 const notifySlack = async (serviceAccount, message, channelName, file) => {
   if (file) {
-    core.debug('running notify slack with file');
+    core.info('running notify slack with file');
     return notifySlackWithFile(serviceAccount, message, channelName, file);
   }
   return notifySlackMessage(serviceAccount, message, channelName);
