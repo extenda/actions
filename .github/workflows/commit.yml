@@ -28,7 +28,7 @@ jobs:
       - name: Configure git short-sha length for tests
         run: |
           echo "Before: $(git rev-parse --short HEAD)"
-          git config core.abbr 7
+          git config --global core.abbr 7
           echo "After: $(git rev-parse --short HEAD)"
 
       - name: Run tests
