@@ -44,6 +44,7 @@ EXPORT_AS: my-secret
   });
 
   test('It can load secrets', async () => {
+    process.env.GCLOUD_INSTALLED_VERSION = '1';
     setupGcloud.mockResolvedValueOnce('test-project');
     execGcloud
       .mockResolvedValueOnce([])
@@ -59,6 +60,7 @@ EXPORT_AS: my-secret
   });
 
   test('It can load a single secret and restore account', async () => {
+    process.env.GCLOUD_INSTALLED_VERSION = '1';
     setupGcloud.mockResolvedValueOnce('test-project');
     execGcloud
       .mockResolvedValueOnce('"test2@test"')
@@ -104,6 +106,7 @@ EXPORT_AS: my-secret
 
   describe('loadSecretIntoEnv', () => {
     test('It sets env vars from secrets', async () => {
+      process.env.GCLOUD_INSTALLED_VERSION = '1';
       setupGcloud.mockResolvedValueOnce('test-project');
       execGcloud
         .mockResolvedValueOnce('"test2@test"')
@@ -136,6 +139,7 @@ EXPORT_AS: my-secret
     });
 
     test('It exports variables', async () => {
+      process.env.GCLOUD_INSTALLED_VERSION = '1';
       setupGcloud.mockResolvedValueOnce('test-project');
       execGcloud
         .mockResolvedValueOnce('"test2@test"')
