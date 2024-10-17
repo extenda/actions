@@ -26,7 +26,10 @@ jobs:
             NEXUS_PASSWORD: nexus-password
 
       - name: Configure git short-sha length for tests
-        run: git config core.abbr 7
+        run: |
+          echo "Before: $(git rev-parse --short HEAD)"
+          git config core.abbr 7
+          echo "After: $(git rev-parse --short HEAD)"
 
       - name: Run tests
         run: |
