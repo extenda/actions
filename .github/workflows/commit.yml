@@ -25,6 +25,9 @@ jobs:
             NEXUS_USERNAME: nexus-username
             NEXUS_PASSWORD: nexus-password
 
+      - name: Configure git short-sha length for tests
+        run: git config core.abbr 7
+
       - name: Run tests
         run: |
           echo "::stop-commands::`echo -n "$GITHUB_RUN_ID-$GITHUB_RUN_NUMBER" | sha256sum | head -c 64`"
