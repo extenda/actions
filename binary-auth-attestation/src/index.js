@@ -27,7 +27,7 @@ const action = async () => {
   const tag = imagePath.split(':')[1] || process.env.GITHUB_SHA;
   const artifactUrl = await getArtifactUrl(tag, imagePath);
 
-  await setupGcloud(serviceAccountKey, '460.0.0');
+  await setupGcloud(serviceAccountKey);
   await createAttestation(
     artifactUrl,
     attestor,
