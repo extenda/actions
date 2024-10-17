@@ -115,10 +115,10 @@ const action = async () => {
 
   // Trivvy scanning
   if (process.platform !== 'win32') {
-    if (env !== 'staging') {
-      core.info('Run Trivy scanning');
-      await runScan(serviceAccountKeyCICD, image, serviceName);
-    }
+    // if (env !== 'staging') {
+    core.info('Run Trivy scanning');
+    await runScan(serviceAccountKeyCICD, image, serviceName);
+    // }
   }
 
   // setup manifests (hpa, deploy, negs)
