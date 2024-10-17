@@ -42,6 +42,8 @@ describe('Setup Gcloud', () => {
       ...orgEnv,
     };
 
+    delete process.env['GCLOUD_REQUESTED_VERSION'];
+
     const filesystem = {
       '/gcloud/innerdir/__pycache__': {},
       '/gcloud/.install/.backup': {},
@@ -103,6 +105,7 @@ describe('Setup Gcloud', () => {
   });
 
   test('It can export GOOGLE_APPLICATION_CREDENTIALS', async () => {
+    process.env.GCLOUD_REQUESTED_VERSION = 'diff';
     exec.exec.mockResolvedValueOnce(0);
     restoreCache.mockResolvedValueOnce(undefined);
     await setupGcloud(base64Key, 'latest', true);
@@ -117,11 +120,21 @@ describe('Setup Gcloud', () => {
     restoreCache.mockResolvedValueOnce('found');
     await setupGcloud(base64Key, 'latest', true);
     expect(core.exportVariable).toHaveBeenNthCalledWith(
-      2,
+      3,
       'GOOGLE_APPLICATION_CREDENTIALS',
       expect.any(String),
     );
-    const keyFile = path.parse(core.exportVariable.mock.calls[1][1]);
+    const keyFile = path.parse(core.exportVariable.mock.calls[2][1]);
     expect(keyFile.dir).toEqual(path.normalize(process.env.RUNNER_TEMP));
+  });
+
+  test('setup-gcloud installs once for multiple setups on same version', async () => {
+    exec.exec.mockResolvedValueOnce(0);
+    process.env.GCLOUD_REQUESTED_VERSION = 'latest';
+    await setupGcloud(base64Key, 'latest', true);
+    expect(restoreCache).not.toHaveBeenCalled();
+
+    // Authenticate is still invoked.
+    expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
   });
 });
