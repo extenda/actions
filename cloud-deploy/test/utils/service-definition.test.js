@@ -94,6 +94,7 @@ labels:
 
 security:
   permission-prefix: mye
+  system-name: test-123
   cloud-armor:
     policy-name: policy
 
