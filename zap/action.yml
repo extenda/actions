@@ -8,6 +8,9 @@ inputs:
   openapi:
     description: 'Location of OpenAPI file (URL)'
     required: true
+  rules:
+    description: 'The tsv file that declares the rules'
+    required: false
   service-account-key:
     description: The service account to use
     required: true
@@ -36,7 +39,8 @@ runs:
 
     - name: Copy rules
       shell: bash
-      run: cp "${{ env.GITHUB_ACTION_PATH }}/rules.tsv" ./rules.tsv
+      run: |
+        cp "${{ inputs.rules }}" ./rules.tsv || cp "${{ github.action_path }}/rules.tsv" ./rules.tsv
 
     - name: ZAP Scan
       uses: zaproxy/action-api-scan@v0.8.0
