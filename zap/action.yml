@@ -40,11 +40,8 @@ runs:
     - name: Copy rules
       shell: bash
       run: |
-        cp "${{ inputs.rules }}" "${{ github.workspace }}/rules.tsv" || cp "${{ github.action_path }}/rules.tsv" "${{ github.workspace }}/rules.tsv"
-
-    - name: dump rules
-      shell: bash
-      run: cat "${{ github.workspace }}/rules.tsv"
+        cp "${{ inputs.rules }}" "${{ github.workspace }}/rules.tsv" 2>/dev/null || \
+        cp "${{ github.action_path }}/rules.tsv" "${{ github.workspace }}/rules.tsv"
 
     - name: ZAP Scan
       uses: zaproxy/action-api-scan@v0.8.0
