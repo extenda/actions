@@ -1,4 +1,4 @@
-default_stages: [commit]
+default_stages: [pre-commit]
 exclude: '^.*/dist/.*$'
 repos:
   -   repo: https://github.com/pre-commit/pre-commit-hooks
@@ -11,6 +11,8 @@ repos:
       hooks:
         -   id: remove-crlf
         -   id: remove-tabs
+            exclude_types:
+              - 'tsv'
             args: [ --whitespaces-count=2 ]
   - repo: https://github.com/extenda/pre-commit-hooks.git
     rev: v0.7
