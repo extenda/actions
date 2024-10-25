@@ -11,7 +11,7 @@ inputs:
   rules:
     description: 'The tsv file that declares the rules'
     required: false
-    default: './rules.tsv'
+    default: '${GITHUB_ACTION_PATH}/rules.tsv'
   service-account-key:
     description: The service account to use
     required: true
