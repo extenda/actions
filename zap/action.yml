@@ -44,7 +44,7 @@ runs:
 
     - name: dump rules
       shell: bash
-      run: cat "$(${{ github.workspace }}/rules.tsv"
+      run: cat "${{ github.workspace }}/rules.tsv"
 
     - name: ZAP Scan
       uses: zaproxy/action-api-scan@v0.8.0
