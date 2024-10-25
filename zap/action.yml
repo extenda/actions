@@ -11,7 +11,7 @@ inputs:
   rules:
     description: 'The tsv file that declares the rules'
     required: false
-    default: '${GITHUB_ACTION_PATH}/rules.tsv'
+    default: '${{ env.GITHUB_ACTION_PATH }}/rules.tsv'
   service-account-key:
     description: The service account to use
     required: true
@@ -38,13 +38,10 @@ runs:
         service-account: ${{ env.SERVICE_ACCOUNT }}
         audiences: ${{ inputs.audience }}
 
-    - name: Echoes
+    - name: Copy rules
       shell: bash
       run: |
-        echo ${GITHUB_ACTION_PATH}
-        echo ${{ env.GITHUB_ACTION_PATH }}
-        echo ${ github.action_path }
-        echo ${{ github.action_path }}
+        cp ${{ inputs.rules }} ./rules.tsv
 
     - name: ZAP Scan
       uses: zaproxy/action-api-scan@v0.8.0
