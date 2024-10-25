@@ -8,6 +8,9 @@ inputs:
   openapi:
     description: 'Location of OpenAPI file (URL)'
     required: true
+  service-account-key:
+    description: The service account to use
+    required: true
   slack-channel:
     description: 'The slack channel to notify'
     required: true
@@ -19,7 +22,7 @@ runs:
     - uses: extenda/actions/setup-gcloud@v0
       id: gcloud
       with:
-        service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
+        service-account-key: ${{ inputs.service-account-key }}
 
     - name: Extract service account
       shell: bash
@@ -27,7 +30,7 @@ runs:
 
     - uses: extenda/actions/identity-token@v0
       with:
-        service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
+        service-account-key: ${{ inputs.service-account-key }}
         service-account: ${{ env.SERVICE_ACCOUNT }}
         audiences: ${{ inputs.audience }}
 
@@ -57,4 +60,4 @@ runs:
           :heavy_exclamation_mark: ZAP API scanning found vulnerabilites!
           View job: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         channel: ${{ inputs.slack-channel }}
-        service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
+        service-account-key: ${{ inputs.service-account-key }}
