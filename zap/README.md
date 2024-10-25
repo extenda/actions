@@ -18,5 +18,6 @@ steps:
     with:
       audience: 'service-a'
       openapi: 'https://service-a.retailsvc.dev/api/v1/openapi.yaml'
+      service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
       slack-channel: 'my-team-channel'
 ```
