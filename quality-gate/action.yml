@@ -1,6 +1,6 @@
 # action.yml
-name: 'Code Quality'
-description: 'Trigger Qodana scan'
+name: 'Quality Gate'
+description: 'Assert code quality'
 inputs:
   coverage-dir:
     description: 'The coverage information path'
@@ -17,10 +17,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
     - name: Scan with Qodana
       uses: JetBrains/qodana-action@v2024.2
       if: github.actor != 'dependabot[bot]' && !contains(github.event.head_commit.message, '[skip quality]')

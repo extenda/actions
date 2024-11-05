@@ -1,6 +1,6 @@
-# Code Quality
+# Quality Gate
 
-GitHub Action to run code quality analysis in your pipeline.
+GitHub Action to run quality gate analysis in your pipeline.
 
 ### Usage
 
@@ -13,7 +13,7 @@ Minimal configuration:
 steps:
   - uses: ...
 
-  - uses: extenda/actions/code-quality@v0
+  - uses: extenda/actions/quality-gate@v0
     with:
       token: ${{ secrets.QODANA_TOKEN }}
       coverage-dir: './path/coverage'
@@ -24,7 +24,7 @@ Full configuration:
 steps:
   - uses: ...
 
-  - uses: extenda/actions/code-quality@v0
+  - uses: extenda/actions/quality-gate@v0
     with:
       token: ${{ secrets.QODANA_TOKEN }}
       coverage-dir: './path/coverage'
