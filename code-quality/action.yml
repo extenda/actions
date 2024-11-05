@@ -1,0 +1,30 @@
+# action.yml
+name: 'Code Quality'
+description: 'Trigger Qodana scan'
+inputs:
+  coverage-dir:
+    description: 'The coverage information path'
+    required: true
+  baseline:
+    description: |
+      A baseline file path. It contains the current level of coverage and is
+      treated as a starting point from where to collect new coverage information.
+    required: false
+    default: 'qodana.sarif.json'
+  token:
+    description: 'The authorization token'
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Scan with Qodana
+      uses: JetBrains/qodana-action@v2024.2
+      if: github.actor != 'dependabot[bot]' && !contains(github.event.head_commit.message, '[skip quality]')
+      with:
+        args: --coverage-dir,${{ inputs.coverage-dir }},--baseline,${{ inputs.baseline }}
+      env:
+        QODANA_TOKEN: ${{ inputs.token }}
