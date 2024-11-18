@@ -75,17 +75,14 @@ const validateConfig = (projectType, projectDirectory) => {
 };
 
 const qodanaSanity = (projectType, projectDirectory) => {
-  const qodanaYaml = path.join(projectDirectory, 'qodana.yaml');
-  let valid = true;
+  const qodanaYaml = path.resolve(projectDirectory, 'qodana.yaml');
   if (!fs.existsSync(qodanaYaml)) {
     core.warning(
       `${qodanaYaml} does not exist. Default config will be generated.`,
     );
     defaultConfig(projectType, projectDirectory);
-  } else {
-    valid = validateConfig(projectType, projectDirectory);
   }
-  return valid;
+  return validateConfig(projectType, projectDirectory);
 };
 
 module.exports = qodanaSanity;
