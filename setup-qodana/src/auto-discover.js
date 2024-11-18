@@ -29,15 +29,15 @@ const autoDiscover = (projectDirectory) => {
     return JVM;
   }
 
+  if (isMatch('**/*.cs', projectDirectory)) {
+    return DOTNET;
+  }
+
   if (
     isMatch('**/package.json', projectDirectory) ||
     isMatch('**/yarn.lock', projectDirectory)
   ) {
     return NODE;
-  }
-
-  if (isMatch('**/*.cs', projectDirectory)) {
-    return DOTNET;
   }
 
   return UNKNOWN;

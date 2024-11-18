@@ -8,7 +8,10 @@ afterEach(() => {
 describe('auto-discover', () => {
   describe('dotnet', () => {
     test('It matches *.cs', () => {
-      createFiles(['src/MyProject/Application.cs']);
+      createFiles([
+        'acceptance/cucumber/package.json',
+        'src/MyProject/Application.cs',
+      ]);
       expect(autoDiscover(root)).toEqual(projectType.DOTNET);
     });
   });
@@ -24,11 +27,14 @@ describe('auto-discover', () => {
   });
   describe('jvm', () => {
     test('It matches **/pom.xml', () => {
-      createFiles(['modules/my-module/pom.xml']);
+      createFiles([
+        'acceptance/cucumber/package.json',
+        'modules/my-module/pom.xml',
+      ]);
       expect(autoDiscover(root)).toEqual(projectType.JVM);
     });
     test('It matches pom.xml', () => {
-      createFiles(['pom.xml']);
+      createFiles(['acceptance/cucumber/package.json', 'pom.xml']);
       expect(autoDiscover(root)).toEqual(projectType.JVM);
     });
     test('It matches build.gradle', () => {
