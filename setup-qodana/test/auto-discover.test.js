@@ -39,7 +39,7 @@ describe('auto-discover', () => {
   describe('unknown', () => {
     test('It handles unknown', () => {
       createFiles([]);
-      expect(autoDiscover(root)).toEqual('');
+      expect(autoDiscover(root)).toEqual(projectType.UNKNOWN);
     });
   });
 });

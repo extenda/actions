@@ -12,6 +12,10 @@ const DOTNET = {
   ide: 'QDNET',
 };
 
+const UNKNOWN = {
+  ide: '',
+};
+
 const isMatch = (glob, cwd) => {
   const matches = fg.sync(glob, { cwd, ignore: ['**/node_modules'] });
   return matches.length > 0;
@@ -36,7 +40,7 @@ const autoDiscover = (projectDirectory) => {
     return DOTNET;
   }
 
-  return '';
+  return UNKNOWN;
 };
 
 module.exports = {
@@ -44,6 +48,7 @@ module.exports = {
     DOTNET,
     JVM,
     NODE,
+    UNKNOWN,
   },
   autoDiscover,
 };
