@@ -1,0 +1,14 @@
+{
+  "name": "setup-qodana",
+  "version": "0.0.1-local",
+  "private": true,
+  "description": "Setup and configure Qodana for use as a Quality Gate.",
+  "main": "dist/index.js",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "fast-glob": "^3.3.2"
+  },
+  "devDependencies": {
+    "nock": "^13.5.6"
+  }
+}

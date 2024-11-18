@@ -1,0 +1,24 @@
+name: Setup Qodana
+description: Setup and configure Qodana for use as a Quality Gate.
+inputs:
+  qodana-token:
+    description: The Qodana organization access token.
+    required: true
+  qodana-team:
+    description: The Qodana team name used to organize projects.
+    required: true
+  project-directory:
+    description: Root directory of the project (default '.')
+    default: '.'
+outputs:
+  baseline:
+    description: The baseline.sarif.json file.
+  coverage-dir:
+    description: The directory containing coverage reports.
+  args:
+    description: The comma-separated arguments to pass to the qodana action.
+  project-token:
+    description: The qodana project token.
+runs:
+  using: node20
+  main: dist/index.js
