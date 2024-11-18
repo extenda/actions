@@ -1,4 +1,3 @@
-const path = require('path');
 const { root, createFiles, removeFiles } = require('./test-files');
 const findBaseline = require('../src/baseline');
 
