@@ -24,7 +24,7 @@ runs:
       with:
         qodana-token: ${{ inputs.quality-gate-token }}
         qodana-team: ${{ inputs.code-owners }}
-        working-directory: ${{ inputs.working-directory }}
+        project-directory: ${{ inputs.working-directory }}
 
     - name: Scan with Qodana
       uses: extenda/qodana-action@feat/issue-number-discovery
