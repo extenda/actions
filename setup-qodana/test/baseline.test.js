@@ -5,20 +5,20 @@ afterEach(() => {
   removeFiles();
 });
 
-test('It can find baseline.sarif.json', () => {
-  createFiles(['README.md', 'baseline.sarif.json']);
+test('It can find qodana.sarif.json', () => {
+  createFiles(['README.md', 'qodana.sarif.json']);
   const baseline = findBaseline(root);
-  expect(baseline).toEqual('baseline.sarif.json');
+  expect(baseline).toEqual('qodana.sarif.json');
 });
 
-test('It uses first baseline.sarif.json', () => {
+test('It uses first qodana.sarif.json', () => {
   createFiles([
     'README.md',
-    '.qodana/baseline.sarif.json',
-    'src/baseline.sarif.json',
+    '.qodana/qodana.sarif.json',
+    'src/qodana.sarif.json',
   ]);
   const baseline = findBaseline(root);
-  expect(baseline).toEqual('.qodana/baseline.sarif.json');
+  expect(baseline).toEqual('.qodana/qodana.sarif.json');
 });
 
 test('It handles missing baseline', () => {

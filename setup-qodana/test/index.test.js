@@ -29,7 +29,7 @@ describe('setup-qodana', () => {
 
   test('It can setup qodana with baseline and coverage', async () => {
     core.getInput.mockReturnValueOnce('');
-    baseline.mockReturnValueOnce('baseline.sarif.json');
+    baseline.mockReturnValueOnce('qodana.sarif.json');
     coverageDirectory.mockReturnValueOnce('coverage');
     qodanaSanity.mockReturnValueOnce(true);
     await action();
@@ -45,12 +45,12 @@ describe('setup-qodana', () => {
     expect(core.setSecret).toHaveBeenLastCalledWith('project-token');
     expect(core.setOutput).toHaveBeenCalledWith(
       'baseline',
-      'baseline.sarif.json',
+      'qodana.sarif.json',
     );
     expect(core.setOutput).toHaveBeenCalledWith('coverage-dir', 'coverage');
     expect(core.setOutput).toHaveBeenLastCalledWith(
       'args',
-      '--baseline,baseline.sarif.json,--coverage-dir,coverage',
+      '--baseline,qodana.sarif.json,--coverage-dir,coverage',
     );
   });
   test('It can setup qodana without baseline and coverage', async () => {

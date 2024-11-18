@@ -2,7 +2,7 @@ const core = require('@actions/core');
 const fg = require('fast-glob');
 
 const findBaseline = (projectDirectory) => {
-  const baseline = fg.sync('**/baseline.sarif.json', {
+  const baseline = fg.sync('**/qodana.sarif.json', {
     cwd: projectDirectory,
     dot: true,
   });
@@ -10,7 +10,7 @@ const findBaseline = (projectDirectory) => {
     return '';
   } else if (baseline.length > 1) {
     core.warning(
-      `Found multiple 'baseline.sarif.json'. Will use: ${baseline[0]}`,
+      `Found multiple 'qodana.sarif.json'. Will use: ${baseline[0]}`,
     );
   }
   return baseline[0];
