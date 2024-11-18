@@ -19,7 +19,7 @@ runs:
   using: composite
   steps:
     - name: Setup Qodana
-      uses: ./${{ github.action_path }}/../setup-qodana
+      uses: extenda/actions/setup-qodana@feat/quality-gate
       id: setup-qodana
       with:
         qodana-token: ${{ inputs.quality-gate-token }}
