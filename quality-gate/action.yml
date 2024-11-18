@@ -15,21 +15,21 @@ inputs:
     required: true
   working-directory:
     description: The working directory.
-  runs:
-    using: composite
-    steps:
-      - name: Setup Qodana
-        uses: extenda/actions/setup-qodana@v0
-        id: setup-qodana
-        with:
-          qodana-token: ${{ inputs.quality-gate-token }}
-          qodana-team: ${{ inputs.code-owners }}
-          working-directory: ${{ inputs.working-directory }}
+runs:
+  using: composite
+  steps:
+    - name: Setup Qodana
+      uses: extenda/actions/setup-qodana@feat/quality-gate
+      id: setup-qodana
+      with:
+        qodana-token: ${{ inputs.quality-gate-token }}
+        qodana-team: ${{ inputs.code-owners }}
+        working-directory: ${{ inputs.working-directory }}
 
-      - name: Scan with Qodana
-        uses: extenda/qodana-action@feat/issue-number-discovery
-        with:
-          args: ${{ steps.setup-qodana.outputs.args }}
-          github-token: ${{ inputs.github-token }}
-        env:
-          QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}
+    - name: Scan with Qodana
+      uses: extenda/qodana-action@feat/issue-number-discovery
+      with:
+        args: ${{ steps.setup-qodana.outputs.args }}
+        github-token: ${{ inputs.github-token }}
+      env:
+        QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}
