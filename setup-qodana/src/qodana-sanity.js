@@ -2,6 +2,7 @@ const core = require('@actions/core');
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
+const { GENERATED_QODANA_YAML } = require('./constants');
 
 const defaultConfig = (projectType, projectDirectory) => {
   const qodanaYaml = {
@@ -81,6 +82,7 @@ const qodanaSanity = (projectType, projectDirectory) => {
       `${qodanaYaml} does not exist. Default config will be generated.`,
     );
     defaultConfig(projectType, projectDirectory);
+    core.saveState(GENERATED_QODANA_YAML, qodanaYaml);
   }
   return validateConfig(projectType, projectDirectory);
 };

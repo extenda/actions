@@ -5,6 +5,10 @@ const {
   projectType: { NODE },
 } = require('../src/auto-discover');
 const qodanaSanity = require('../src/qodana-sanity');
+const core = require('@actions/core');
+const { GENERATED_QODANA_YAML } = require('../src/constants');
+
+jest.mock('@actions/core');
 
 afterEach(() => {
   removeFiles();
@@ -16,6 +20,10 @@ test('It generates qodana.yaml if missing', () => {
   const qodanaYaml = path.resolve(root, 'qodana.yaml');
   expect(fs.existsSync(qodanaYaml)).toEqual(true);
   expect(fs.readFileSync(qodanaYaml, 'utf-8')).toMatchSnapshot();
+  expect(core.saveState).toHaveBeenCalledWith(
+    GENERATED_QODANA_YAML,
+    qodanaYaml,
+  );
 });
 
 describe('Quality Gate validation', () => {

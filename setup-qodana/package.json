@@ -5,10 +5,12 @@
   "description": "Setup and configure Qodana for use as a Quality Gate.",
   "main": "dist/index.js",
   "dependencies": {
+    "@actions/github": "^6.0.0",
     "axios": "^1.7.7",
     "fast-glob": "^3.3.2"
   },
   "devDependencies": {
+    "fetch-mock": "^12.2.0",
     "nock": "^13.5.6"
   }
 }

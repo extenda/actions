@@ -24,6 +24,7 @@ runs:
       with:
         qodana-token: ${{ inputs.quality-gate-token }}
         qodana-team: ${{ inputs.code-owners }}
+        github-token: ${{ inputs.github-token }}
         project-directory: ${{ inputs.working-directory }}
 
     - name: Scan with Qodana
