@@ -13,8 +13,6 @@ inputs:
       The team name of the code owners. This can be used to organize projects
       within the quality gate reporting dashboards.
     required: true
-  working-directory:
-    description: The working directory.
 runs:
   using: composite
   steps:
@@ -25,7 +23,6 @@ runs:
         qodana-token: ${{ inputs.quality-gate-token }}
         qodana-team: ${{ inputs.code-owners }}
         github-token: ${{ inputs.github-token }}
-        project-directory: ${{ inputs.working-directory }}
 
     - name: Scan with Qodana
       uses: extenda/qodana-action@feat/issue-number-discovery
