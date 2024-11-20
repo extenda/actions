@@ -6,25 +6,23 @@ const getOctokit = () => {
   return new github.getOctokit(token);
 };
 
-const getPullRequest = async (octokit) => {
-  if (github.context.payload.pull_request) {
-    core.debug('Use existing pull_request event');
-    return github.context.payload.pull_request;
+const getCurrentBranch = () => github.context.ref.replace('refs/heads/', '');
+
+const isFeatureBranch = async (octokit) => {
+  if (!github.context.ref.startsWith('refs/heads')) {
+    return false;
   }
-  core.debug('Find pull_request with octokit');
   const { owner, repo } = github.context.repo;
-  const branch = github.context.ref.replace('refs/heads/', '');
-  return octokit.rest.pulls
-    .list({
+  return octokit.rest.repos
+    .get({
       owner,
       repo,
-      head: `${owner}:${branch}`,
-      state: 'open',
     })
-    .then((response) => response.data[0]);
+    .then((response) => response.data.default_branch)
+    .then((defaultBranch) => defaultBranch !== getCurrentBranch());
 };
 
-const commitFiles = async (octokit, pullRequest, fileTree) => {
+const commitFiles = async (octokit, fileTree) => {
   const { owner, repo } = github.context.repo;
   return octokit.rest.git
     .createTree({
@@ -44,7 +42,7 @@ const commitFiles = async (octokit, pullRequest, fileTree) => {
       octokit.rest.git.updateRef({
         owner,
         repo,
-        ref: pullRequest.head.ref,
+        ref: github.context.ref,
         sha: commit.data.sha,
       }),
     );
@@ -52,6 +50,7 @@ const commitFiles = async (octokit, pullRequest, fileTree) => {
 
 module.exports = {
   getOctokit,
-  getPullRequest,
+  isFeatureBranch,
+  getCurrentBranch,
   commitFiles,
 };

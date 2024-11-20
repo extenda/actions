@@ -6,18 +6,20 @@ quality-gate composite.
 
 This action supports the following
 
-  * Project types
-    * TypeScript and JavaScript
-    * JVM Languages (Java, Kotlin)
-    * .NET Core (C#)
-  * Qodana Cloud project
-    * Create project and project-token
-  * Detect coverage directory
-    * lcov
-    * Jacoco XML
-  * Detect `baseline.sarif.json`
-  * Sanity-check `qodana.yaml`
-    * Generate `qodana.yaml` file if missing
-    * Validate and enforce quality gate metrics
-      * Fresh code
-      * Issue count
+* Project types
+  * TypeScript and JavaScript
+  * JVM Languages (Java, Kotlin)
+  * .NET Core (C#)
+* Qodana Cloud project
+  * Create project and project-token
+* Detect coverage directory
+  * lcov
+  * Jacoco XML
+* Detect `qodana.sarif.json`
+* Sanity-check `qodana.yaml`
+  * Generate `qodana.yaml` file if missing
+  * Validate and enforce quality gate metrics
+    * Fresh code
+    * Issue count
+* Push `qodana.yaml` and `qodana.sarif.json` to auto-configure Qodana on first run in a branch that isn't the default
+  branch. The baseline will only be included if the quality gate failed.

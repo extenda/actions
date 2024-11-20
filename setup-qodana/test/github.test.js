@@ -1,18 +1,17 @@
 const core = require('@actions/core');
 const fetchMock = require('fetch-mock').default;
-const { getOctokit, getPullRequest, commitFiles } = require('../src/github');
+const {
+  getOctokit,
+  getCurrentBranch,
+  isFeatureBranch,
+  commitFiles,
+} = require('../src/github');
 const github = require('@actions/github');
 
 jest.mock('@actions/core');
 
 const orgEnv = process.env;
 const orgRef = github.context.ref;
-
-const pullRequestData = {
-  head: { ref: 'refs/heads/feat/my-branch' },
-  base: { ref: 'refs/heads/master' },
-  number: 1,
-};
 
 const responseHeaders = {
   'x-github-media-type': 'github.v3; format=json',
@@ -23,10 +22,9 @@ beforeEach(() => {
   process.env = {
     ...orgEnv,
     GITHUB_REPOSITORY: 'extenda/actions',
-    GITHUB_REF: 'refs/heads/my-branch',
+    GITHUB_REF: 'refs/heads/feat/my-branch',
   };
-  // Mock the @actions/github context.
-  github.context.ref = 'refs/heads/my-branch';
+  github.context.ref = 'refs/heads/feat/my-branch';
   fetchMock.mockGlobal();
 });
 
@@ -49,19 +47,39 @@ test('It can create Octokit', () => {
   expect(core.getInput).toHaveBeenCalled();
 });
 
-test('It can get pull_request', async () => {
-  fetchMock.get(
-    'https://api.github.com/repos/extenda/actions/pulls?head=extenda%3Amy-branch&state=open',
-    {
-      status: 200,
-      body: JSON.stringify([pullRequestData], null, 0),
-      headers: responseHeaders,
-    },
-  );
+test('It can return current branch', () => {
+  expect(getCurrentBranch()).toEqual('feat/my-branch');
+});
 
+test('It can compare refs/pulls with default branch', async () => {
+  process.env.GITHUB_REF = github.context.ref = 'refs/pulls/1/merge';
   const octokit = github.getOctokit('pat-token', { request: fetchMock });
-  const pullRequest = await getPullRequest(octokit);
-  expect(pullRequest).toEqual(pullRequestData);
+  const result = await isFeatureBranch(octokit);
+  expect(result).toEqual(false);
+});
+
+test('It can detect a feature branch', async () => {
+  fetchMock.get('https://api.github.com/repos/extenda/actions', {
+    status: 200,
+    body: JSON.stringify({ default_branch: 'master' }, null, 0),
+    headers: responseHeaders,
+  });
+  const octokit = github.getOctokit('pat-token', { request: fetchMock });
+  const result = await isFeatureBranch(octokit);
+  expect(result).toEqual(true);
+  expect(fetchMock.callHistory.callLogs).toHaveLength(1);
+});
+
+test('It can detect the default branch', async () => {
+  process.env.GITHUB_REF = github.context.ref = 'refs/heads/master';
+  fetchMock.get('https://api.github.com/repos/extenda/actions', {
+    status: 200,
+    body: JSON.stringify({ default_branch: 'master' }, null, 0),
+    headers: responseHeaders,
+  });
+  const octokit = github.getOctokit('pat-token', { request: fetchMock });
+  const result = await isFeatureBranch(octokit);
+  expect(result).toEqual(false);
   expect(fetchMock.callHistory.callLogs).toHaveLength(1);
 });
 
@@ -87,7 +105,7 @@ test('It can commit files', async () => {
     );
 
   const octokit = github.getOctokit('pat-token', { request: fetchMock });
-  await commitFiles(octokit, pullRequestData, [
+  await commitFiles(octokit, [
     {
       path: 'qodana.yaml',
       content: '',

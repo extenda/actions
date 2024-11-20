@@ -10,8 +10,12 @@ const post = async () => {
   const generated = core.getState(GENERATED_QODANA_YAML);
 
   const octokit = github.getOctokit();
-  const pullRequest = await github.getPullRequest(octokit);
-  if (generated && pullRequest) {
+
+  const isFeatureBranch = await github.isFeatureBranch(octokit);
+  if (generated && !isFeatureBranch) {
+    core.warning(`Qodana configuration does not exist.
+    💡Run the quality gate in a feature branch or pull request to auto-configure Qodana.`);
+  } else if (generated) {
     const files = [];
     core.info('Add default qodana.yaml configuration.');
     files.push({
@@ -32,10 +36,10 @@ const post = async () => {
       }
     }
     return github
-      .commitFiles(octokit, pullRequest, files)
+      .commitFiles(octokit, files)
       .then(() => {
         core.info(
-          `Pushed initial qodana configuration to ${pullRequest.head.ref}`,
+          `Pushed initial qodana configuration to ${github.getCurrentBranch()}`,
         );
         return 0;
       })

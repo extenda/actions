@@ -20,9 +20,7 @@ describe('Post Action', () => {
     core.getState.mockReturnValueOnce(path.resolve(root, 'qodana.yaml'));
 
     github.getOctokit.mockReturnValueOnce({});
-    github.getPullRequest.mockResolvedValueOnce({
-      head: { ref: 'refs/pulls/1' },
-    });
+    github.isFeatureBranch.mockResolvedValueOnce(true);
     github.commitFiles.mockResolvedValueOnce({});
 
     const result = await post();
@@ -43,9 +41,7 @@ describe('Post Action', () => {
     core.getInput.mockReturnValueOnce('success');
 
     github.getOctokit.mockReturnValueOnce({});
-    github.getPullRequest.mockResolvedValueOnce({
-      head: { ref: 'refs/pulls/1' },
-    });
+    github.isFeatureBranch.mockResolvedValueOnce(true);
     github.commitFiles.mockResolvedValueOnce({});
 
     const result = await post();
@@ -54,13 +50,13 @@ describe('Post Action', () => {
     expect(github.commitFiles).not.toHaveBeenCalled();
   });
 
-  test('It does not commit if not pull request', async () => {
+  test('It does not commit if not feature branch', async () => {
     createFiles(['qodana.yaml']);
     core.getInput.mockReturnValueOnce('success');
     core.getState.mockReturnValueOnce(path.resolve(root, 'qodana.yaml'));
 
     github.getOctokit.mockReturnValueOnce({});
-    github.getPullRequest.mockResolvedValueOnce(undefined);
+    github.isFeatureBranch.mockResolvedValueOnce(false);
     github.commitFiles.mockResolvedValueOnce({});
 
     const result = await post();
@@ -76,9 +72,7 @@ describe('Post Action', () => {
     core.getState.mockReturnValueOnce(path.resolve(root, 'qodana.yaml'));
 
     github.getOctokit.mockReturnValueOnce({});
-    github.getPullRequest.mockResolvedValueOnce({
-      head: { ref: 'refs/pulls/1' },
-    });
+    github.isFeatureBranch.mockResolvedValueOnce(true);
     github.commitFiles.mockRejectedValueOnce(new Error('TEST'));
 
     const result = await post();
