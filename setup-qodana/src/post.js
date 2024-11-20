@@ -22,14 +22,18 @@ const post = async () => {
     💡Run the quality gate in a feature branch or pull request to auto-configure Qodana.`);
   } else if (generated) {
     const files = [];
-    core.info('Add default qodana.yaml configuration.');
+    core.info('🤖 Add default Qodana configuration');
     if (fs.existsSync(generated)) {
+      core.info('Add qodana.yaml');
       files.push({
         path: 'qodana.yaml',
         content: fs.readFileSync(generated, 'base64'),
       });
     } else {
-      core.error(`Generated qodana.yaml not found. Expected at: ${generated}`);
+      core.error(`qodana.yaml not found. Expected at: ${generated}`);
+      fs.readdirSync(path.dirname(generated)).forEach((file) => {
+        core.info(`  ${file}`);
+      });
     }
 
     if (qodanaFailure) {
@@ -38,11 +42,13 @@ const post = async () => {
         'qodana.sarif.json',
       );
       if (fs.existsSync(baseline)) {
-        core.info('Add initial qodana.sarif.json baseline');
+        core.info('Add qodana.sarif.json baseline');
         files.push({
           path: 'qodana.sarif.json',
           content: fs.readFileSync(baseline, 'base64'),
         });
+      } else {
+        core.warning(`qodana.sarif.json not found. Expected at: ${baseline}`);
       }
     }
     return github
