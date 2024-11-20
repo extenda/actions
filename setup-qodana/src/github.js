@@ -21,7 +21,7 @@ const getQodanaChecks = async (octokit) => {
       ref: sha,
     })
     .then((response) =>
-      response.data.filter((check) =>
+      response.data.check_runs.filter((check) =>
         check.name.toLowerCase().startsWith('qodana'),
       ),
     )

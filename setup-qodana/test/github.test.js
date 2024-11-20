@@ -81,18 +81,21 @@ test('It can get Qodana Checks', async () => {
     {
       status: 200,
       body: JSON.stringify(
-        [
-          {
-            name: 'pre-commit',
-            status: 'completed',
-            conclusion: 'success',
-          },
-          {
-            name: 'Qodana for JVM',
-            status: 'completed',
-            conclusion: 'failure',
-          },
-        ],
+        {
+          total_count: 2,
+          check_runs: [
+            {
+              name: 'pre-commit',
+              status: 'completed',
+              conclusion: 'success',
+            },
+            {
+              name: 'Qodana for JVM',
+              status: 'completed',
+              conclusion: 'failure',
+            },
+          ],
+        },
         null,
         0,
       ),
