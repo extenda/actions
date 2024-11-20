@@ -24,11 +24,9 @@ const defaultConfig = (projectType, projectDirectory) => {
     },
   };
 
-  fs.writeFileSync(
-    path.resolve(projectDirectory, 'qodana.yaml'),
-    yaml.dump(qodanaYaml, 'utf-8'),
-    'utf-8',
-  );
+  const generatedFile = path.resolve(projectDirectory, 'qodana.yaml');
+  fs.writeFileSync(generatedFile, yaml.dump(qodanaYaml, 'utf-8'), 'utf-8');
+  return generatedFile;
 };
 
 const validateConfig = (projectType, projectDirectory) => {
@@ -81,8 +79,10 @@ const qodanaSanity = (projectType, projectDirectory) => {
     core.warning(
       `${qodanaYaml} does not exist. Default config will be generated.`,
     );
-    defaultConfig(projectType, projectDirectory);
-    core.saveState(GENERATED_QODANA_YAML, qodanaYaml);
+    core.saveState(
+      GENERATED_QODANA_YAML,
+      defaultConfig(projectType, projectDirectory),
+    );
   }
   return validateConfig(projectType, projectDirectory);
 };

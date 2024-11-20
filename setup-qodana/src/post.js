@@ -23,10 +23,14 @@ const post = async () => {
   } else if (generated) {
     const files = [];
     core.info('Add default qodana.yaml configuration.');
-    files.push({
-      path: 'qodana.yaml',
-      content: fs.readFileSync(generated, 'base64'),
-    });
+    if (fs.existsSync(generated)) {
+      files.push({
+        path: 'qodana.yaml',
+        content: fs.readFileSync(generated, 'base64'),
+      });
+    } else {
+      core.error(`Generated qodana.yaml not found. Expected at: ${generated}`);
+    }
 
     if (qodanaFailure) {
       const baseline = path.resolve(
