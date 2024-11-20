@@ -18,7 +18,9 @@ const getGcloudAccount = async () =>
     .catch(() => null);
 
 const prepareGcloud = async (serviceAccountKey) => {
-  previousAccount = await getGcloudAccount();
+  if (process.env.GCLOUD_INSTALLED_VERSION) {
+    previousAccount = await getGcloudAccount();
+  }
   return setupGcloud(serviceAccountKey);
 };
 

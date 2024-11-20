@@ -9,7 +9,16 @@ const readSecret = require('./utils/load-credentials');
 const runScan = require('./utils/vulnerability-scanning');
 const getImageWithSha256 = require('./manifests/image-sha256');
 const publishPolicies = require('./policies/publish-policies');
-const { checkPolicyExists } = require('./loadbalancing/external/cloud-armor');
+const createExternalLoadbalancer = require('./loadbalancing/external/create-external-loadbalancer');
+const configureInternalDomain = require('./loadbalancing/internal/create-internal-backend');
+const configureExternalDomain = require('./loadbalancing/external/create-external-backend');
+const configureExternalLBFrontend = require('./loadbalancing/external/create-external-frontend');
+const configureInternalFrontend = require('./loadbalancing/internal/create-internal-frontend');
+const {
+  checkPolicyExists,
+  setCloudArmorPolicyTarget,
+  checkPolicyTarget,
+} = require('./loadbalancing/external/cloud-armor');
 const {
   sendScaleSetup,
   sendDeployInfo,
@@ -197,6 +206,55 @@ const action = async () => {
           slackChannel,
         ),
       );
+
+      await createExternalLoadbalancer(projectID, env);
+      if (domainMappings) {
+        await configureExternalLBFrontend(
+          projectID,
+          env,
+          [...domainMappings],
+          migrate,
+        );
+        await configureExternalDomain(
+          projectID,
+          serviceName,
+          env,
+          domainMappings,
+          protocol,
+          timeout,
+          platformGKE,
+        );
+        const updateCloudArmorPolicy = await checkPolicyTarget(
+          serviceName,
+          cloudArmorPolicy,
+          projectID,
+        );
+        if (!updateCloudArmorPolicy) {
+          await setCloudArmorPolicyTarget(
+            serviceName,
+            cloudArmorPolicy,
+            projectID,
+          );
+        }
+      }
+      if (internalTraffic) {
+        await configureInternalDomain(
+          projectID,
+          serviceName,
+          env,
+          protocol,
+          timeout,
+          platformGKE,
+        );
+        await configureInternalFrontend(
+          projectID,
+          serviceName,
+          env,
+          protocol,
+          platformGKE,
+        );
+      }
+
       await Promise.all(requests);
     }
 
@@ -233,6 +291,7 @@ const action = async () => {
         }
       }
     }
+    
     await sendDeployRequest(deployData);
   } else {
     throw new Error(
