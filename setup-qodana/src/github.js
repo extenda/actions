@@ -8,6 +8,32 @@ const getOctokit = () => {
 
 const getCurrentBranch = () => github.context.ref.replace('refs/heads/', '');
 
+const getQodanaChecks = async (octokit) => {
+  const { owner, repo } = github.context.repo;
+  let sha = github.context.sha;
+  if (github.context.payload.pull_request) {
+    sha = github.context.payload.pull_request.head.sha;
+  }
+  return octokit.rest.checks
+    .listForRef({
+      owner,
+      repo,
+      ref: sha,
+    })
+    .then((response) =>
+      response.data.filter((check) =>
+        check.name.toLowerCase().startsWith('qodana'),
+      ),
+    )
+    .then((checks) =>
+      checks.map((check) => ({
+        name: check.name,
+        conclusion: check.conclusion,
+        success: check.status === 'completed' && check.conclusion === 'success',
+      })),
+    );
+};
+
 const isFeatureBranch = async (octokit) => {
   if (!github.context.ref.startsWith('refs/heads')) {
     return false;
@@ -50,6 +76,7 @@ const commitFiles = async (octokit, fileTree) => {
 
 module.exports = {
   getOctokit,
+  getQodanaChecks,
   isFeatureBranch,
   getCurrentBranch,
   commitFiles,

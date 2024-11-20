@@ -6,10 +6,17 @@ const { GENERATED_QODANA_YAML } = require('./constants');
 const github = require('./github');
 
 const post = async () => {
-  const status = core.getInput('job-status');
   const generated = core.getState(GENERATED_QODANA_YAML);
 
   const octokit = github.getOctokit();
+
+  const qodanaFailure = await github
+    .getQodanaChecks(octokit)
+    .then((checks) => checks.some((check) => !check.success));
+
+  core.info(
+    `Post process Qodana with conclusion: ${qodanaFailure ? 'failure' : 'success'}`,
+  );
 
   const isFeatureBranch = await github.isFeatureBranch(octokit);
   if (generated && !isFeatureBranch) {
@@ -22,7 +29,8 @@ const post = async () => {
       path: 'qodana.yaml',
       content: fs.readFileSync(generated, 'base64'),
     });
-    if (status !== 'success') {
+
+    if (qodanaFailure) {
       const baseline = path.resolve(
         path.dirname(generated),
         'qodana.sarif.json',

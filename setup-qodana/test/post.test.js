@@ -15,8 +15,13 @@ afterEach(() => {
 describe('Post Action', () => {
   test('It commits generated files', async () => {
     createFiles(['qodana.yaml', 'qodana.sarif.json']);
-
-    core.getInput.mockReturnValueOnce('failure');
+    github.getQodanaChecks.mockResolvedValueOnce([
+      {
+        name: 'Qodana for JVM',
+        conclusion: 'failure',
+        success: false,
+      },
+    ]);
     core.getState.mockReturnValueOnce(path.resolve(root, 'qodana.yaml'));
 
     github.getOctokit.mockReturnValueOnce({});
@@ -34,8 +39,13 @@ describe('Post Action', () => {
 
   test('It does not commit if not generated', async () => {
     createFiles(['qodana.yaml']);
-    core.getInput.mockReturnValueOnce('success');
-
+    github.getQodanaChecks.mockResolvedValueOnce([
+      {
+        name: 'Qodana for JVM',
+        conclusion: 'success',
+        success: true,
+      },
+    ]);
     github.getOctokit.mockReturnValueOnce({});
     github.isFeatureBranch.mockResolvedValueOnce(true);
     github.commitFiles.mockResolvedValueOnce({});
@@ -48,9 +58,14 @@ describe('Post Action', () => {
 
   test('It does not commit if not feature branch', async () => {
     createFiles(['qodana.yaml']);
-    core.getInput.mockReturnValueOnce('success');
     core.getState.mockReturnValueOnce(path.resolve(root, 'qodana.yaml'));
-
+    github.getQodanaChecks.mockResolvedValueOnce([
+      {
+        name: 'Qodana for JVM',
+        conclusion: 'success',
+        success: true,
+      },
+    ]);
     github.getOctokit.mockReturnValueOnce({});
     github.isFeatureBranch.mockResolvedValueOnce(false);
     github.commitFiles.mockResolvedValueOnce({});
@@ -63,10 +78,14 @@ describe('Post Action', () => {
 
   test('It handles commit error', async () => {
     createFiles(['qodana.yaml', 'qodana.sarif.json']);
-
-    core.getInput.mockReturnValueOnce('failure');
     core.getState.mockReturnValueOnce(path.resolve(root, 'qodana.yaml'));
-
+    github.getQodanaChecks.mockResolvedValueOnce([
+      {
+        name: 'Qodana for JVM',
+        conclusion: 'failure',
+        success: false,
+      },
+    ]);
     github.getOctokit.mockReturnValueOnce({});
     github.isFeatureBranch.mockResolvedValueOnce(true);
     github.commitFiles.mockRejectedValueOnce(new Error('TEST'));

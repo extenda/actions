@@ -13,9 +13,6 @@ inputs:
   github-token:
     description: The GitHub Actions token.
     default: ${{ github.token }}
-  job-status:
-    description: Workaround to pass job status to post job step. This variable is not intended for manual setting
-    default: ${{ job.status }}
 outputs:
   baseline:
     description: The baseline.sarif.json file.
