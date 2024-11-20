@@ -14,9 +14,7 @@ const post = async () => {
     .getQodanaChecks(octokit)
     .then((checks) => checks.some((check) => !check.success));
 
-  core.info(
-    `Post process Qodana with conclusion: ${qodanaFailure ? 'failure' : 'success'}`,
-  );
+  core.info(`Qodana concluded with ${qodanaFailure ? 'failure' : 'success'}`);
 
   const isFeatureBranch = await github.isFeatureBranch(octokit);
   if (generated && !isFeatureBranch) {
