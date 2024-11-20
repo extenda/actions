@@ -46,6 +46,7 @@ const action = async () => {
 
   core.setOutput('args', args.join(','));
 
+  core.info(require('path').resolve(projectDirectory));
   fs.readdirSync(projectDirectory).forEach((file) => {
     core.info(`  ${file}`);
   });

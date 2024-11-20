@@ -24,6 +24,13 @@ runs:
         qodana-team: ${{ inputs.code-owners }}
         github-token: ${{ inputs.github-token }}
 
+    - name: List contents before
+      if: always()
+      run: |
+        pwd
+        ls -al
+      shell: bash
+
     - name: Scan with Qodana
       uses: extenda/qodana-action@feat/issue-number-discovery
       with:
@@ -32,7 +39,9 @@ runs:
       env:
         QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}
 
-    - name: List contents
+    - name: List contents after
       if: always()
-      run: ls -al
+      run: |
+        pwd
+        ls -al
       shell: bash
