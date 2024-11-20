@@ -9,8 +9,8 @@
     "axios-retry": "^4.5.0",
     "deepmerge": "^4.3.1",
     "fast-glob": "^3.3.2",
-    "google-auth-library": "^9.14.2",
+    "google-auth-library": "^9.15.0",
     "jsonschema": "^1.4.1",
-    "yaml": "^2.6.0"
+    "yaml": "^2.6.1"
   }
 }
