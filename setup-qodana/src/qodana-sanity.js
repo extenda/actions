@@ -79,10 +79,9 @@ const qodanaSanity = (projectType, projectDirectory) => {
     core.warning(
       `${qodanaYaml} does not exist. Default config will be generated.`,
     );
-    core.saveState(
-      GENERATED_QODANA_YAML,
-      defaultConfig(projectType, projectDirectory),
-    );
+    const generatedFile = defaultConfig(projectType, projectDirectory);
+    core.saveState(GENERATED_QODANA_YAML, generatedFile);
+    core.info(`Generated ${generatedFile}`);
   }
   return validateConfig(projectType, projectDirectory);
 };
