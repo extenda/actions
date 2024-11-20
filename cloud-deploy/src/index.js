@@ -291,7 +291,6 @@ const action = async () => {
         }
       }
     }
-    
     await sendDeployRequest(deployData);
   } else {
     throw new Error(
