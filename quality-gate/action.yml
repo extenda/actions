@@ -31,3 +31,8 @@ runs:
         github-token: ${{ inputs.github-token }}
       env:
         QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}
+
+    - name: List contents
+      if: always()
+      run: ls -al
+      shell: bash
