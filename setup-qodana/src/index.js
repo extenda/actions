@@ -5,6 +5,8 @@ const coverageDirectory = require('./coverage-dir');
 const findBaseline = require('./baseline');
 const qodanaSanity = require('./qodana-sanity');
 const { autoDiscover } = require('./auto-discover');
+const fs = require('fs');
+const path = require('path');
 
 const action = async () => {
   const qodanaToken = core.getInput('qodana-token', { required: true });
@@ -43,6 +45,10 @@ const action = async () => {
   }
 
   core.setOutput('args', args.join(','));
+
+  fs.readdirSync(projectDirectory).forEach((file) => {
+    core.info(`  ${file}`);
+  });
 };
 
 if (require.main === module) {
