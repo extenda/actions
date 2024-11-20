@@ -26,14 +26,10 @@ describe('Post Action', () => {
     const result = await post();
     expect(result).toEqual(0);
 
-    expect(github.commitFiles).toHaveBeenCalledWith(
-      expect.anything(),
-      { head: { ref: 'refs/pulls/1' } },
-      [
-        { path: 'qodana.yaml', content: '' },
-        { path: 'qodana.sarif.json', content: '' },
-      ],
-    );
+    expect(github.commitFiles).toHaveBeenCalledWith(expect.anything(), [
+      { path: 'qodana.yaml', content: '' },
+      { path: 'qodana.sarif.json', content: '' },
+    ]);
   });
 
   test('It does not commit if not generated', async () => {
