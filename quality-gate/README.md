@@ -8,6 +8,28 @@ The goal of this action is to hide implementation details of the active quality-
 support multiple vendors at the same time. When this action is implemented in a pipeline, Extenda Retail should be able
 to change the underlying quality-gate implementation without impacting pipelines.
 
+## Usage
+
+See [action.yml](action.yml).
+
+### Secrets
+
+This action can be used either with GCP Secret Manager or with GitHub Action secrets.
+
+If this action is used with GCP Secret Manager it requires a GCP service account key with permission to access
+secret payloads. Once created, the JSON key should be `base64` encoded and added as secret in the GitHub repository.
+
+It is recommended that the service account _only_ has permissions to access secrets. Do not allow modifications or
+access to any other resources in your project.
+
+To use the action with GitHub Actions secrets, set the `QUALITY_GATE_TOKEN` environment variable with the the secret
+value.
+
+### Examples
+
+This example showcases how a `push` based test workflow can include a quality-gate to measure both code quality and
+coverage.
+
 ```yaml
 on: push
 jobs:
@@ -32,6 +54,18 @@ jobs:
       - name: Quality Gate
         uses: extenda/actions/quality-gate@v0
         with:
-          quality-gate-token: ${{ secrets.QUALITY_GATE_TOKEN }}
+          secrets-account-key: ${{ secrets.SECRET_AUTH }}
           code-owners: platform-services
+```
+
+If GCP Secret Manager isn't in use, pass the `QUALITY_GATE_TOKEN` as an environment variable instead of using
+`secrets-account-key`.
+
+```yaml
+- name: Quality Gate
+  uses: extenda/actions/quality-gate@v0
+  with:
+    code-owners: platform-services
+  env:
+    QUALITY_GATE_TOKEN: ${{ secrets.QUALITY_GATE_TOKEN }}
 ```

@@ -1,13 +1,14 @@
 name: Quality Gate
 description: Enforce a quality gate on your software project.
 inputs:
+  secrets-account-key:
+    description: |
+      The service account key which will be used to access CI/CD pipeline secrets.
+      This must be set unless the `QUALITY_GATE_TOKEN` environment variable is set
+      with the access token for the service provider.
   github-token:
     description: The GitHub Actions token.
     default: ${{ github.token }}
-  quality-gate-token:
-    description: |
-      The access token of the quality gate service provider.
-    required: true
   code-owners:
     description: |
       The team name of the code owners. This can be used to organize projects
@@ -16,22 +17,21 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Resolve quality gate access token
+      if: env.QUALITY_GATE_TOKEN == ''
+      uses: extenda/actions/gcp-secret-manager@v0
+      with:
+        service-account-key: ${{ inputs.secrets-account-key }}
+        secrets: |
+          QUALITY_GATE_TOKEN: qodana-organization-token
+
     - name: Setup Qodana
       uses: extenda/actions/setup-qodana@feat/quality-gate
       id: setup-qodana
       with:
-        qodana-token: ${{ inputs.quality-gate-token }}
+        qodana-token: ${{ env.QUALITY_GATE_TOKEN }}
         qodana-team: ${{ inputs.code-owners }}
         github-token: ${{ inputs.github-token }}
-
-    - name: List contents before
-      if: always()
-      run: |
-        pwd
-        ls -al
-        git status
-        cat qodana_recommended.yaml
-      shell: bash
 
     - name: Scan with Qodana
       uses: extenda/qodana-action@feat/issue-number-discovery
@@ -40,12 +40,3 @@ runs:
         github-token: ${{ inputs.github-token }}
       env:
         QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}
-
-    - name: List contents after
-      if: always()
-      run: |
-        pwd
-        ls -al
-        git status
-        cat qodana_recommended.yaml
-      shell: bash
