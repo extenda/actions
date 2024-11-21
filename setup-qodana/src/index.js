@@ -1,12 +1,11 @@
 const core = require('@actions/core');
+const path = require('path');
 const { run } = require('../../utils');
 const createProject = require('./create-project');
 const coverageDirectory = require('./coverage-dir');
 const findBaseline = require('./baseline');
 const qodanaSanity = require('./qodana-sanity');
 const { autoDiscover } = require('./auto-discover');
-const fs = require('fs');
-const path = require('path');
 
 const action = async () => {
   const qodanaToken = core.getInput('qodana-token', { required: true });
@@ -34,7 +33,7 @@ const action = async () => {
     args.push('--project-dir', projectDirectory);
   }
 
-  args.push('--config', qodanaYamlFile);
+  args.push('--config', path.relative(process.cwd(), qodanaYamlFile));
 
   const baseline = findBaseline(projectDirectory);
   if (baseline) {
@@ -49,8 +48,6 @@ const action = async () => {
   }
 
   core.setOutput('args', args.join(','));
-
-  core.info(require('path').resolve(projectDirectory));
 };
 
 if (require.main === module) {
