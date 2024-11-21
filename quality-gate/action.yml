@@ -30,6 +30,7 @@ runs:
         pwd
         ls -al
         git status
+        cat qodana_recommended.yaml
       shell: bash
 
     - name: Scan with Qodana
@@ -46,4 +47,5 @@ runs:
         pwd
         ls -al
         git status
+        cat qodana_recommended.yaml
       shell: bash
