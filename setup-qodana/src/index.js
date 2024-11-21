@@ -15,7 +15,9 @@ const action = async () => {
 
   const projectType = autoDiscover(projectDirectory);
 
-  if (!qodanaSanity(projectType, projectDirectory)) {
+  const { qodanaYamlFile, valid } = qodanaSanity(projectType, projectDirectory);
+
+  if (!valid) {
     core.setFailed('qodana.yaml failed sanity checks');
     return;
   } else {
@@ -32,6 +34,8 @@ const action = async () => {
     args.push('--project-dir', projectDirectory);
   }
 
+  args.push('--config', qodanaYamlFile);
+
   const baseline = findBaseline(projectDirectory);
   if (baseline) {
     core.setOutput('baseline', baseline);
@@ -47,9 +51,6 @@ const action = async () => {
   core.setOutput('args', args.join(','));
 
   core.info(require('path').resolve(projectDirectory));
-  fs.readdirSync(projectDirectory).forEach((file) => {
-    core.info(`  ${file}`);
-  });
 };
 
 if (require.main === module) {

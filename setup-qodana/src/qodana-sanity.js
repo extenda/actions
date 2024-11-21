@@ -24,15 +24,16 @@ const defaultConfig = (projectType, projectDirectory) => {
     },
   };
 
-  const generatedFile = path.resolve(projectDirectory, 'qodana.yaml');
+  const generatedFile = path.resolve(
+    projectDirectory,
+    'qodana_recommended.yaml',
+  );
   fs.writeFileSync(generatedFile, yaml.dump(qodanaYaml, 'utf-8'), 'utf-8');
   return generatedFile;
 };
 
-const validateConfig = (projectType, projectDirectory) => {
-  const qodanaYaml = yaml.load(
-    fs.readFileSync(path.resolve(projectDirectory, 'qodana.yaml'), 'utf-8'),
-  );
+const validateConfig = (projectType, qodanaFile) => {
+  const qodanaYaml = yaml.load(fs.readFileSync(qodanaFile, 'utf-8'));
   const {
     ide,
     linter,
@@ -74,16 +75,19 @@ const validateConfig = (projectType, projectDirectory) => {
 };
 
 const qodanaSanity = (projectType, projectDirectory) => {
-  const qodanaYaml = path.resolve(projectDirectory, 'qodana.yaml');
+  let qodanaYaml = path.resolve(projectDirectory, 'qodana.yaml');
   if (!fs.existsSync(qodanaYaml)) {
     core.warning(
       `${qodanaYaml} does not exist. Default config will be generated.`,
     );
-    const generatedFile = defaultConfig(projectType, projectDirectory);
-    core.saveState(GENERATED_QODANA_YAML, generatedFile);
-    core.info(`Generated ${generatedFile}`);
+    qodanaYaml = defaultConfig(projectType, projectDirectory);
+    core.saveState(GENERATED_QODANA_YAML, qodanaYaml);
+    core.info(`Generated ${qodanaYaml}`);
   }
-  return validateConfig(projectType, projectDirectory);
+  return {
+    qodanaYamlFile: qodanaYaml,
+    valid: validateConfig(projectType, qodanaYaml),
+  };
 };
 
 module.exports = qodanaSanity;

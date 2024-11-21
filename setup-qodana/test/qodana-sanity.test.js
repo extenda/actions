@@ -16,14 +16,15 @@ afterEach(() => {
 
 test('It generates qodana.yaml if missing', () => {
   createFiles(['README.md']);
-  qodanaSanity(NODE, root);
-  const qodanaYaml = path.resolve(root, 'qodana.yaml');
-  expect(fs.existsSync(qodanaYaml)).toEqual(true);
-  expect(fs.readFileSync(qodanaYaml, 'utf-8')).toMatchSnapshot();
-  expect(core.saveState).toHaveBeenCalledWith(
-    GENERATED_QODANA_YAML,
-    qodanaYaml,
-  );
+  const result = qodanaSanity(NODE, root);
+  const generated = path.resolve(root, 'qodana_recommended.yaml');
+  expect(fs.existsSync(generated)).toEqual(true);
+  expect(fs.readFileSync(generated, 'utf-8')).toMatchSnapshot();
+  expect(core.saveState).toHaveBeenCalledWith(GENERATED_QODANA_YAML, generated);
+  expect(result).toEqual({
+    qodanaYamlFile: generated,
+    valid: true,
+  });
 });
 
 describe('Quality Gate validation', () => {
@@ -47,7 +48,10 @@ failureConditions:
     `,
       'utf-8',
     );
-    expect(qodanaSanity(NODE, root)).toEqual(true);
+    expect(qodanaSanity(NODE, root)).toEqual({
+      qodanaYamlFile: path.resolve(root, 'qodana.yaml'),
+      valid: true,
+    });
   });
   test('No critical issues allowed', () => {
     createFiles(['qodana.yaml']);
@@ -69,7 +73,10 @@ failureConditions:
     `,
       'utf-8',
     );
-    expect(qodanaSanity(NODE, root)).toEqual(false);
+    expect(qodanaSanity(NODE, root)).toEqual({
+      qodanaYamlFile: path.resolve(root, 'qodana.yaml'),
+      valid: false,
+    });
   });
   test('It requires 80 fresh code coverage', () => {
     createFiles(['qodana.yaml']);
@@ -91,7 +98,10 @@ failureConditions:
     `,
       'utf-8',
     );
-    expect(qodanaSanity(NODE, root)).toEqual(false);
+    expect(qodanaSanity(NODE, root)).toEqual({
+      qodanaYamlFile: path.resolve(root, 'qodana.yaml'),
+      valid: false,
+    });
   });
   test('It requires at least 50 total code coverage', () => {
     createFiles(['qodana.yaml']);
@@ -112,6 +122,9 @@ failureConditions:
     `,
       'utf-8',
     );
-    expect(qodanaSanity(NODE, root)).toEqual(false);
+    expect(qodanaSanity(NODE, root)).toEqual({
+      qodanaYamlFile: path.resolve(root, 'qodana.yaml'),
+      valid: false,
+    });
   });
 });

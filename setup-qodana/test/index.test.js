@@ -31,7 +31,10 @@ describe('setup-qodana', () => {
     core.getInput.mockReturnValueOnce('');
     baseline.mockReturnValueOnce('qodana.sarif.json');
     coverageDirectory.mockReturnValueOnce('coverage');
-    qodanaSanity.mockReturnValueOnce(true);
+    qodanaSanity.mockReturnValueOnce({
+      qodanaYamlFile: 'qodana.yaml',
+      valid: true,
+    });
     await action();
     expect(core.getInput).toHaveBeenCalledTimes(3);
     expect(createProject).toHaveBeenCalledWith('token', 'team');
@@ -50,14 +53,17 @@ describe('setup-qodana', () => {
     expect(core.setOutput).toHaveBeenCalledWith('coverage-dir', 'coverage');
     expect(core.setOutput).toHaveBeenLastCalledWith(
       'args',
-      '--baseline,qodana.sarif.json,--coverage-dir,coverage',
+      '--config,qodana.yaml,--baseline,qodana.sarif.json,--coverage-dir,coverage',
     );
   });
   test('It can setup qodana without baseline and coverage', async () => {
     core.getInput.mockReturnValueOnce('subdir');
     baseline.mockReturnValueOnce('');
     coverageDirectory.mockReturnValueOnce('');
-    qodanaSanity.mockReturnValueOnce(true);
+    qodanaSanity.mockReturnValueOnce({
+      qodanaYamlFile: 'qodana_recommended.yaml',
+      valid: true,
+    });
     await action();
     expect(core.getInput).toHaveBeenCalledTimes(3);
     expect(createProject).toHaveBeenCalledWith('token', 'team');
@@ -66,13 +72,16 @@ describe('setup-qodana', () => {
     expect(core.setOutput).toHaveBeenCalledTimes(2);
     expect(core.setOutput).toHaveBeenLastCalledWith(
       'args',
-      '--project-dir,subdir',
+      '--project-dir,subdir,--config,qodana_recommended.yaml',
     );
   });
   test('It will fail on sanity check failures', async () => {
     baseline.mockReturnValueOnce('');
     coverageDirectory.mockReturnValueOnce('');
-    qodanaSanity.mockReturnValueOnce(false);
+    qodanaSanity.mockReturnValueOnce({
+      qodanaYamlFile: 'qodana.yaml',
+      valid: false,
+    });
     await action();
     expect(core.setFailed).toHaveBeenCalled();
   });

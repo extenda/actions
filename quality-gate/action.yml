@@ -29,6 +29,7 @@ runs:
       run: |
         pwd
         ls -al
+        git status
       shell: bash
 
     - name: Scan with Qodana
@@ -44,4 +45,5 @@ runs:
       run: |
         pwd
         ls -al
+        git status
       shell: bash
