@@ -78,7 +78,7 @@ const qodanaSanity = (projectType, projectDirectory) => {
   let qodanaYaml = path.resolve(projectDirectory, 'qodana.yaml');
   if (!fs.existsSync(qodanaYaml)) {
     core.warning(
-      `${qodanaYaml} does not exist. Default config will be generated.`,
+      `${path.relative(process.cwd(), qodanaYaml)} does not exist. Recommended config will be generated.`,
     );
     qodanaYaml = defaultConfig(projectType, projectDirectory);
     core.saveState(GENERATED_QODANA_YAML, qodanaYaml);

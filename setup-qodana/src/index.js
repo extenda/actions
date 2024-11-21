@@ -20,7 +20,7 @@ const action = async () => {
     core.setFailed('qodana.yaml failed sanity checks');
     return;
   } else {
-    core.info('qodana.yaml is valid');
+    core.info('⭐️ qodana.yaml is valid');
   }
 
   const projectToken = await createProject(qodanaToken, qodanaTeam);
