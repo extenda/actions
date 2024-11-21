@@ -118,6 +118,7 @@ const action = async () => {
     'min-instances': minInstances,
   } = env === 'staging' ? staging : production;
 
+  const domainMappingsClone = [].concat(domainMappings);
   const platformGKE = !cloudrun;
 
   // Trivvy scanning
@@ -269,7 +270,7 @@ const action = async () => {
       cloudArmorPolicy,
       internalTraffic,
       loggingSampleRate: 0,
-      domainMappings,
+      domainMappings: domainMappingsClone,
       pathMappings,
     };
     Object.keys(deployData).forEach((key) =>
