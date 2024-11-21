@@ -26,6 +26,10 @@ runs:
         secrets: |
           QUALITY_GATE_TOKEN: qodana-organization-token
 
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v45
+
     - name: Setup Qodana
       uses: extenda/actions/setup-qodana@feat/quality-gate
       id: setup-qodana
@@ -39,5 +43,7 @@ runs:
       with:
         args: ${{ steps.setup-qodana.outputs.args }}
         github-token: ${{ inputs.github-token }}
+        # If qodana.yaml is added in this branch we do not enter PR mode.
+        pr-mode: ${{ contains(steps.changed-files.outputs.added-files, 'qodana.yaml') }}
       env:
         QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}
