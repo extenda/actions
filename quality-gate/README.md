@@ -55,7 +55,7 @@ jobs:
         uses: extenda/actions/quality-gate@v0
         with:
           secrets-account-key: ${{ secrets.SECRET_AUTH }}
-          code-owners: platform-services
+          collection: platform
 ```
 
 If GCP Secret Manager isn't in use, pass the `QUALITY_GATE_TOKEN` as an environment variable instead of using
@@ -65,7 +65,7 @@ If GCP Secret Manager isn't in use, pass the `QUALITY_GATE_TOKEN` as an environm
 - name: Quality Gate
   uses: extenda/actions/quality-gate@v0
   with:
-    code-owners: platform-services
+    collection: platform
   env:
     QUALITY_GATE_TOKEN: ${{ secrets.QUALITY_GATE_TOKEN }}
 ```

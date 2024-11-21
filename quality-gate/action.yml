@@ -9,10 +9,11 @@ inputs:
   github-token:
     description: The GitHub Actions token.
     default: ${{ github.token }}
-  code-owners:
+  collection:
     description: |
-      The team name of the code owners. This can be used to organize projects
-      within the quality gate reporting dashboards.
+      The collection name under which the project will be sorted. This can be a
+      team name or a category. This can be used to organize projects within
+      the quality gate reporting dashboards.
     required: true
 runs:
   using: composite
@@ -30,7 +31,7 @@ runs:
       id: setup-qodana
       with:
         qodana-token: ${{ env.QUALITY_GATE_TOKEN }}
-        qodana-team: ${{ inputs.code-owners }}
+        qodana-team: ${{ inputs.collection }}
         github-token: ${{ inputs.github-token }}
 
     - name: Scan with Qodana
