@@ -38,6 +38,10 @@ runs:
         qodana-team: ${{ inputs.collection }}
         github-token: ${{ inputs.github-token }}
 
+    - name: Log added files
+      run: echo ${{ steps.changed-files.outputs.added-files }}
+      shell: bash
+
     - name: Scan with Qodana
       uses: extenda/qodana-action@feat/issue-number-discovery
       with:
