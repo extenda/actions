@@ -9,7 +9,7 @@ const createProject = async (qodanaToken, qodanaTeam) => {
   return axios
     .create()
     .post(
-      'https://api.qodana.cloud/v1/organizations/teams/projects',
+      'https://api.qodana.cloud/v1/public/organizations/teams/projects',
       {
         teamName: qodanaTeam,
         projectName: qodanaProject,

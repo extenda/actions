@@ -5,7 +5,7 @@ const orgEnv = process.env;
 
 const mockQodana = (responseCode) =>
   nock('https://api.qodana.cloud')
-    .post('/v1/organizations/teams/projects', {
+    .post('/v1/public/organizations/teams/projects', {
       teamName: 'test',
       projectName: 'actions',
     })
