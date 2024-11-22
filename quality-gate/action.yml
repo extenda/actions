@@ -38,16 +38,12 @@ runs:
         qodana-team: ${{ inputs.collection }}
         github-token: ${{ inputs.github-token }}
 
-    - name: Log added files
-      run: echo ${{ steps.changed-files.outputs.added-files }}
-      shell: bash
-
     - name: Scan with Qodana
       uses: extenda/qodana-action@feat/issue-number-discovery
       with:
         args: ${{ steps.setup-qodana.outputs.args }}
         github-token: ${{ inputs.github-token }}
         # If qodana.yaml is added in this branch we do not enter PR mode.
-        pr-mode: ${{ contains(steps.changed-files.outputs.added-files, 'qodana.yaml') }}
+        pr-mode: ${{ contains(steps.changed-files.outputs.added-files, 'qodana.yaml') == false }}
       env:
         QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}
