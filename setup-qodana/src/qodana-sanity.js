@@ -76,7 +76,13 @@ const validateConfig = (projectType, qodanaFile) => {
 
 const qodanaSanity = (projectType, projectDirectory) => {
   let qodanaYaml = path.resolve(projectDirectory, 'qodana.yaml');
-  if (!fs.existsSync(qodanaYaml)) {
+  if (fs.existsSync(qodanaYaml)) {
+    // We copy the existing file to ensure it be found even if added in this current branch.
+    // Qodana seem to move around in the git history and can lose the file otherwise.
+    const qodanaCopy = path.resolve(projectDirectory, 'qodana_provided.yaml');
+    fs.copyFileSync(qodanaYaml, qodanaCopy);
+    qodanaYaml = qodanaCopy;
+  } else {
     core.warning(
       `${path.relative(process.cwd(), qodanaYaml)} does not exist. Recommended config will be generated.`,
     );

@@ -49,7 +49,7 @@ failureConditions:
       'utf-8',
     );
     expect(qodanaSanity(NODE, root)).toEqual({
-      qodanaYamlFile: path.resolve(root, 'qodana.yaml'),
+      qodanaYamlFile: path.resolve(root, 'qodana_provided.yaml'),
       valid: true,
     });
   });
@@ -74,7 +74,7 @@ failureConditions:
       'utf-8',
     );
     expect(qodanaSanity(NODE, root)).toEqual({
-      qodanaYamlFile: path.resolve(root, 'qodana.yaml'),
+      qodanaYamlFile: path.resolve(root, 'qodana_provided.yaml'),
       valid: false,
     });
   });
@@ -99,7 +99,7 @@ failureConditions:
       'utf-8',
     );
     expect(qodanaSanity(NODE, root)).toEqual({
-      qodanaYamlFile: path.resolve(root, 'qodana.yaml'),
+      qodanaYamlFile: path.resolve(root, 'qodana_provided.yaml'),
       valid: false,
     });
   });
@@ -123,7 +123,7 @@ failureConditions:
       'utf-8',
     );
     expect(qodanaSanity(NODE, root)).toEqual({
-      qodanaYamlFile: path.resolve(root, 'qodana.yaml'),
+      qodanaYamlFile: path.resolve(root, 'qodana_provided.yaml'),
       valid: false,
     });
   });
