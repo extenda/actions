@@ -35,7 +35,7 @@ const action = async () => {
 
   args.push('--config', path.relative(process.cwd(), qodanaYamlFile));
 
-  const baseline = findBaseline(projectDirectory);
+  const baseline = await findBaseline(projectDirectory);
   if (baseline) {
     core.setOutput('baseline', baseline);
     args.push('--baseline', baseline);

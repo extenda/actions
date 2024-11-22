@@ -29,7 +29,7 @@ describe('setup-qodana', () => {
 
   test('It can setup qodana with baseline and coverage', async () => {
     core.getInput.mockReturnValueOnce('');
-    baseline.mockReturnValueOnce('qodana.sarif.json');
+    baseline.mockResolvedValueOnce('qodana.sarif.json');
     coverageDirectory.mockReturnValueOnce('coverage');
     qodanaSanity.mockReturnValueOnce({
       qodanaYamlFile: 'qodana.yaml',
@@ -58,7 +58,7 @@ describe('setup-qodana', () => {
   });
   test('It can setup qodana without baseline and coverage', async () => {
     core.getInput.mockReturnValueOnce('subdir');
-    baseline.mockReturnValueOnce('');
+    baseline.mockResolvedValueOnce('');
     coverageDirectory.mockReturnValueOnce('');
     qodanaSanity.mockReturnValueOnce({
       qodanaYamlFile: 'qodana_recommended.yaml',
@@ -76,7 +76,7 @@ describe('setup-qodana', () => {
     );
   });
   test('It will fail on sanity check failures', async () => {
-    baseline.mockReturnValueOnce('');
+    baseline.mockResolvedValueOnce('');
     coverageDirectory.mockReturnValueOnce('');
     qodanaSanity.mockReturnValueOnce({
       qodanaYamlFile: 'qodana.yaml',
