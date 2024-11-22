@@ -16,6 +16,7 @@ This action supports the following
   * lcov
   * Jacoco XML
 * Detect `qodana.sarif.json`
+  * Decompress gzipped `qodana.sarif.json.gz` if detected
 * Sanity-check `qodana.yaml`
   * Generate `qodana.yaml` file if missing
   * Validate and enforce quality gate metrics
