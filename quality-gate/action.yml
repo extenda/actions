@@ -39,5 +39,6 @@ runs:
       with:
         args: ${{ steps.setup-qodana.outputs.args }}
         github-token: ${{ inputs.github-token }}
+        pr-mode: ${{ steps.setup-qodana.outputs.pr-mode }}
       env:
         QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}

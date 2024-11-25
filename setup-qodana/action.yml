@@ -22,6 +22,8 @@ outputs:
     description: The comma-separated arguments to pass to the qodana action.
   project-token:
     description: The qodana project token.
+  pr-mode:
+    description: Indicates if Qodana should run in pull request mode and do a diff-analysis.
 runs:
   using: node20
   main: dist/index.js

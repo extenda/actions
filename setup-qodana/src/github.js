@@ -1,4 +1,5 @@
 const core = require('@actions/core');
+const exec = require('@actions/exec');
 const github = require('@actions/github');
 
 const getOctokit = () => {
@@ -34,18 +35,38 @@ const getQodanaChecks = async (octokit) => {
     );
 };
 
-const isFeatureBranch = async (octokit) => {
-  if (!github.context.ref.startsWith('refs/heads')) {
-    return false;
-  }
+const getDefaultBranch = async (octokit) => {
   const { owner, repo } = github.context.repo;
   return octokit.rest.repos
     .get({
       owner,
       repo,
     })
-    .then((response) => response.data.default_branch)
-    .then((defaultBranch) => defaultBranch !== getCurrentBranch());
+    .then((response) => response.data.default_branch);
+};
+
+const getPullRequest = async (octokit) => {
+  if (github.context.payload.pull_request) {
+    return github.context.payload.pull_request;
+  }
+  const { owner, repo } = github.context.repo;
+  return octokit.rest.pulls
+    .list({
+      owner,
+      repo,
+      head: `${owner}:${getCurrentBranch()}`,
+      state: 'open',
+    })
+    .then((response) => response.data[0]);
+};
+
+const isFeatureBranch = async (octokit) => {
+  if (!github.context.ref.startsWith('refs/heads')) {
+    return false;
+  }
+  return getDefaultBranch(octokit).then(
+    (defaultBranch) => defaultBranch !== getCurrentBranch(),
+  );
 };
 
 const commitFiles = async (octokit, fileTree) => {
@@ -74,10 +95,44 @@ const commitFiles = async (octokit, fileTree) => {
     );
 };
 
+const mergeBase = async (base, head) => {
+  const output = await exec.getExecOutput('git', ['merge-base', base, head], {
+    ignoreReturnCode: true,
+  });
+  if (output.exitCode === 0) {
+    return output.stdout.trim();
+  }
+  return '';
+};
+
+const getQodanaPrSha = async (octokit) => {
+  const defaultBranch = await getDefaultBranch(octokit);
+  let sha = '';
+  let prMode = true;
+  if (defaultBranch === getCurrentBranch()) {
+    core.info(`Analysis of default branch: ${defaultBranch}`);
+    prMode = false;
+  } else {
+    const pullRequest = await getPullRequest(octokit);
+    const prNumber = pullRequest ? `(#${pullRequest.number})` : '';
+    core.info(`Analysis of feature branch: ${getCurrentBranch()} ${prNumber}`);
+    if (pullRequest) {
+      sha = await mergeBase(pullRequest.base.sha, pullRequest.head.sha);
+    } else {
+      sha = await mergeBase(`origin/${defaultBranch}`, github.context.sha);
+    }
+  }
+  return { sha, prMode };
+};
+
 module.exports = {
   getOctokit,
   getQodanaChecks,
+  getDefaultBranch,
   isFeatureBranch,
+  getPullRequest,
   getCurrentBranch,
   commitFiles,
+  getQodanaPrSha,
+  mergeBase,
 };

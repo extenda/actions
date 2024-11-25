@@ -6,6 +6,7 @@ const coverageDirectory = require('./coverage-dir');
 const findBaseline = require('./baseline');
 const qodanaSanity = require('./qodana-sanity');
 const { autoDiscover } = require('./auto-discover');
+const github = require('./github');
 
 const action = async () => {
   const qodanaToken = core.getInput('qodana-token', { required: true });
@@ -45,6 +46,14 @@ const action = async () => {
   if (coverageDir) {
     core.setOutput('coverage-dir', coverageDir);
     args.push('--coverage-dir', coverageDir);
+  }
+
+  const octokit = github.getOctokit();
+  const { sha, prMode } = await github.getQodanaPrSha(octokit);
+  core.setOutput('pr-mode', `${prMode}`);
+  if (sha) {
+    core.info(`:zap: Use Qodana pr-mode with sha ${sha}`);
+    core.exportVariable('QODANA_PR_SHA', sha);
   }
 
   core.setOutput('args', args.join(','));

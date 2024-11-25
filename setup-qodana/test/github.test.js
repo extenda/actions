@@ -1,15 +1,20 @@
 const core = require('@actions/core');
+const exec = require('@actions/exec');
 const fetchMock = require('fetch-mock').default;
 const {
   getOctokit,
   getQodanaChecks,
+  getDefaultBranch,
   getCurrentBranch,
+  getPullRequest,
   isFeatureBranch,
   commitFiles,
+  getQodanaPrSha,
 } = require('../src/github');
 const github = require('@actions/github');
 
 jest.mock('@actions/core');
+jest.mock('@actions/exec');
 
 const orgEnv = process.env;
 const orgRef = github.context.ref;
@@ -63,6 +68,18 @@ test('It can compare refs/pulls with default branch', async () => {
   expect(result).toEqual(false);
 });
 
+test('It can get the default branch', async () => {
+  fetchMock.get('https://api.github.com/repos/extenda/actions', {
+    status: 200,
+    body: JSON.stringify({ default_branch: 'master' }, null, 0),
+    headers: responseHeaders,
+  });
+  const octokit = github.getOctokit('pat-token', { request: fetchMock });
+  const result = await getDefaultBranch(octokit);
+  expect(result).toEqual('master');
+  expect(fetchMock.callHistory.callLogs).toHaveLength(1);
+});
+
 test('It can detect a feature branch', async () => {
   fetchMock.get('https://api.github.com/repos/extenda/actions', {
     status: 200,
@@ -72,6 +89,27 @@ test('It can detect a feature branch', async () => {
   const octokit = github.getOctokit('pat-token', { request: fetchMock });
   const result = await isFeatureBranch(octokit);
   expect(result).toEqual(true);
+  expect(fetchMock.callHistory.callLogs).toHaveLength(1);
+});
+
+test('It can detect a pull_request', async () => {
+  const pullRequestData = {
+    head: { ref: 'refs/heads/feat/my-branch' },
+    base: { ref: 'refs/heads/master' },
+    number: 1,
+  };
+  fetchMock.get(
+    'https://api.github.com/repos/extenda/actions/pulls?head=extenda%3Afeat%2Fmy-branch&state=open',
+    {
+      status: 200,
+      body: JSON.stringify([pullRequestData], null, 0),
+      headers: responseHeaders,
+    },
+  );
+
+  const octokit = github.getOctokit('pat-token', { request: fetchMock });
+  const pullRequest = await getPullRequest(octokit);
+  expect(pullRequest).toEqual(pullRequestData);
   expect(fetchMock.callHistory.callLogs).toHaveLength(1);
 });
 
@@ -156,4 +194,62 @@ test('It can commit files', async () => {
     },
   ]);
   expect(fetchMock.callHistory.callLogs).toHaveLength(3);
+});
+
+test('It can get Qodana SHA on PR', async () => {
+  github.context.ref = 'refs/heads/feat/my-branch2';
+  fetchMock.get(
+    'https://api.github.com/repos/extenda/actions/pulls?head=extenda%3Afeat%2Fmy-branch2&state=open',
+    {
+      status: 200,
+      body: JSON.stringify(
+        [
+          {
+            head: { sha: 'ddd111', ref: 'refs/heads/feat/my-branch2' },
+            base: { sha: 'abc123', ref: 'refs/heads/master' },
+            number: 2,
+          },
+        ],
+        null,
+        0,
+      ),
+      headers: responseHeaders,
+    },
+  );
+  fetchMock.get('https://api.github.com/repos/extenda/actions', {
+    status: 200,
+    body: JSON.stringify({ default_branch: 'master' }, null, 0),
+    headers: responseHeaders,
+  });
+
+  exec.getExecOutput.mockResolvedValueOnce({ exitCode: 0, stdout: 'abc123' });
+
+  const octokit = github.getOctokit('pat-token', { request: fetchMock });
+  const result = await getQodanaPrSha(octokit);
+  expect(result).toEqual({
+    prMode: true,
+    sha: 'abc123',
+  });
+  expect(fetchMock.callHistory.callLogs).toHaveLength(2);
+  expect(exec.getExecOutput).toHaveBeenCalledWith(
+    'git',
+    ['merge-base', 'abc123', 'ddd111'],
+    { ignoreReturnCode: true },
+  );
+});
+
+test('It skips Qodana SHA on default branch', async () => {
+  process.env.GITHUB_REF = github.context.ref = 'refs/heads/master';
+  fetchMock.get('https://api.github.com/repos/extenda/actions', {
+    status: 200,
+    body: JSON.stringify({ default_branch: 'master' }, null, 0),
+    headers: responseHeaders,
+  });
+  const octokit = github.getOctokit('pat-token', { request: fetchMock });
+  const result = await getQodanaPrSha(octokit);
+  expect(result).toEqual({
+    prMode: false,
+    sha: '',
+  });
+  expect(fetchMock.callHistory.callLogs).toHaveLength(1);
 });
