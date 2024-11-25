@@ -124,6 +124,13 @@ const getQodanaPrSha = async (octokit) => {
       sha = await mergeBase(`origin/${defaultBranch}`, github.context.sha);
     }
   }
+
+  const { head_commit: { message = '' } = {} } = github.context.payload;
+  if (message.includes('[force quality]') && prMode) {
+    core.warning('pr-mode disabled with [force quality] comment.');
+    prMode = false;
+  }
+
   return { sha, prMode, issueNumber };
 };
 
