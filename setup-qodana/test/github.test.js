@@ -229,6 +229,7 @@ test('It can get Qodana SHA on PR', async () => {
   expect(result).toEqual({
     prMode: true,
     sha: 'abc123',
+    issueNumber: 2,
   });
   expect(fetchMock.callHistory.callLogs).toHaveLength(2);
   expect(exec.getExecOutput).toHaveBeenCalledWith(
@@ -250,6 +251,7 @@ test('It skips Qodana SHA on default branch', async () => {
   expect(result).toEqual({
     prMode: false,
     sha: '',
+    issueNumber: -1,
   });
   expect(fetchMock.callHistory.callLogs).toHaveLength(1);
 });

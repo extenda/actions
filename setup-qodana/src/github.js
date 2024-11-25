@@ -109,6 +109,7 @@ const getQodanaPrSha = async (octokit) => {
   const defaultBranch = await getDefaultBranch(octokit);
   let sha = '';
   let prMode = true;
+  let issueNumber = -1;
   if (defaultBranch === getCurrentBranch()) {
     core.info(`Analysis of default branch: ${defaultBranch}`);
     prMode = false;
@@ -117,12 +118,13 @@ const getQodanaPrSha = async (octokit) => {
     const prNumber = pullRequest ? `(#${pullRequest.number})` : '';
     core.info(`Analysis of feature branch: ${getCurrentBranch()} ${prNumber}`);
     if (pullRequest) {
+      issueNumber = pullRequest.number;
       sha = await mergeBase(pullRequest.base.sha, pullRequest.head.sha);
     } else {
       sha = await mergeBase(`origin/${defaultBranch}`, github.context.sha);
     }
   }
-  return { sha, prMode };
+  return { sha, prMode, issueNumber };
 };
 
 module.exports = {

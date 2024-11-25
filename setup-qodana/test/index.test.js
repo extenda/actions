@@ -37,7 +37,11 @@ describe('setup-qodana', () => {
       qodanaYamlFile: 'qodana.yaml',
       valid: true,
     });
-    github.getQodanaPrSha.mockResolvedValueOnce({ prMode: false, sha: '' });
+    github.getQodanaPrSha.mockResolvedValueOnce({
+      prMode: false,
+      sha: '',
+      issueNumber: -1,
+    });
     await action();
     expect(core.getInput).toHaveBeenCalledTimes(3);
     expect(createProject).toHaveBeenCalledWith('token', 'team');
@@ -71,6 +75,7 @@ describe('setup-qodana', () => {
     github.getQodanaPrSha.mockResolvedValueOnce({
       prMode: true,
       sha: 'abc123',
+      issueNumber: 1,
     });
     await action();
     expect(core.getInput).toHaveBeenCalledTimes(3);
