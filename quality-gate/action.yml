@@ -45,5 +45,6 @@ runs:
         QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}
 
     - name: List files
+      if: always()
       run: ls -al
       shell: bash

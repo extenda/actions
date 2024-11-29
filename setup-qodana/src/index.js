@@ -51,7 +51,7 @@ const action = async () => {
   const octokit = github.getOctokit();
   const { sha, prMode, issueNumber } = await github.getQodanaPrSha(octokit);
   core.setOutput('pr-mode', `${prMode}`);
-  if (sha) {
+  if (prMode && sha) {
     core.info(
       `⚡️Use Qodana pr-mode with sha ${sha}${issueNumber > 0 ? `and issue number ${issueNumber}` : ''}`,
     );
