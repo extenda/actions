@@ -45,7 +45,7 @@ runs:
       if: ${{ inputs.service-account-key != '' && inputs.storage-bucket != '' && !contains(github.event.head_commit.message, '[skip quality]') }}
       run: |
         gcloud storage cp \
-          gs://${{ inputs.storage-bucket }}/${{ github.repository }}/qodana-sarif.json \
+          gs://qodana/${{ inputs.storage-bucket }}/${{ github.repository }}/qodana-sarif.json \
           managed-qodana.sarif.json || true
       shell: bash
 
@@ -82,7 +82,7 @@ runs:
           cp "$generated_baseline" generated-qodana.sarif.json
           gcloud storage cp \
             generated-qodana.sarif.json \
-            gs://${{ inputs.storage-bucket }}/${{ github.repository }}/qodana-sarif.json
+            gs://qodana/${{ inputs.storage-bucket }}/${{ github.repository }}/qodana-sarif.json
           echo "rerun=true" >> "$GITHUB_OUTPUT"
         fi
       shell: bash
