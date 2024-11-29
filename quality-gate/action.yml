@@ -72,7 +72,7 @@ runs:
       run: |
         generated_baseline="${{ runner.temp }}/qodana/results/qodana.sarif.json"
         gcs_path="gs://${{ inputs.storage-bucket }}/qodana/${{ github.repository }}/qodana-sarif.json"
-        ./${{ github.action_path }}/update-qodana-baseline.sh "$generated_baseline" "$gcs_path"
+        ${{ github.action_path }}/update-qodana-baseline.sh "$generated_baseline" "$gcs_path"
 
         echo ""
         echo -e "\033[01;31mQUALITY-GATE BASELINE CREATED - RERUN JOB\033[00m"
@@ -87,7 +87,7 @@ runs:
       run: |
         generated_baseline="${{ runner.temp }}/qodana/results/qodana.sarif.json"
         gcs_path="gs://${{ inputs.storage-bucket }}/qodana/${{ github.repository }}/qodana-sarif.json"
-        ./${{ github.action_path }}/update-qodana-baseline.sh "$generated_baseline" "$gcs_path"
+        ${{ github.action_path }}/update-qodana-baseline.sh "$generated_baseline" "$gcs_path"
 
         echo ""
         echo -e "\033[01;31mQUALITY-GATE BASELINE REBASED\033[00m"
