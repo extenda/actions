@@ -38,7 +38,7 @@ runs:
       uses: extenda/actions/setup-gcloud@v0
       if: inputs.service-account-key != ''
       with:
-        service-account-key: ${{ secrets.account-key }}
+        service-account-key: ${{ inputs.service-account-key }}
         export-default-credentials: 'true'
 
     - name: Download quality baseline from GCS
