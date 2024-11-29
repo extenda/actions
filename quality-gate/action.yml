@@ -44,29 +44,29 @@ runs:
       env:
         QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}
 
-    - name: List files on failure
-      if: failure()
-      run: |
-        ls -al ${{ runner.temp }}/qodana/results
-      shell: bash
-
     - name: Update qodana.sarif.json issues baseline
-      if: failure() && contains(github.event.head_commit.message, '[init quality]')
+      if: (failure() && contains(github.event.head_commit.message, '[force quality]')) || contains(github.event.head_commit.message, '[rebase quality]')
       id: init-baseline
       run: |
+        if [ -f qodana.sarif.json ];
+          echo "User-provided qodana.sarif.json exists. Baseline automation disabled."
+          echo "rerun=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
         generated_baseline="${{ runner.temp }}/qodana/results/qodana.sarif.json"
         if [ -f "$generated_baseline" ]; then
-          cp "$generated_baseline" qodana.sarif.json
-          echo "Here we would upload $generated_baseline to GCS"
+          cp "$generated_baseline" generated-qodana.sarif.json
+          echo "TODO: Here we would upload $generated_baseline to GCS"
           echo "rerun=true" >> "$GITHUB_OUTPUT"
         fi
       shell: bash
 
     - name: Rerun Qodana with issues baseline
       uses: extenda/qodana-action@feat/issue-number-discovery
-      if: failure() && steps.init-baseline.rerun == 'true'
+      if: always() && steps.init-baseline.rerun == 'true'
       with:
-        args: ${{ steps.setup-qodana.outputs.args }},--baseline,qodana.sarif.json
+        args: ${{ steps.setup-qodana.outputs.args }},--baseline,generated-qodana.sarif.json
         github-token: ${{ inputs.github-token }}
         pr-mode: ${{ steps.setup-qodana.outputs.pr-mode }}
       env:
