@@ -44,6 +44,12 @@ runs:
       env:
         QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}
 
+    - name: List files on failure
+      if: failure()
+      run: |
+        ls -al ${{ runner.temp }}/qodana/results
+      shell: bash
+
     - name: Update qodana.sarif.json issues baseline
       if: failure() && contains(github.event.head_commit.message, '[init quality]')
       id: init-baseline
