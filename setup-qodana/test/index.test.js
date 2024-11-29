@@ -47,7 +47,7 @@ describe('setup-qodana', () => {
     expect(createProject).toHaveBeenCalledWith('token', 'team');
     expect(autoDiscover).toHaveBeenCalledWith('.');
     expect(qodanaSanity).toHaveBeenCalledWith(NODE, '.');
-    expect(core.setOutput).toHaveBeenCalledTimes(5);
+    expect(core.setOutput).toHaveBeenCalledTimes(6);
     expect(core.setOutput).toHaveBeenCalledWith(
       'project-token',
       'project-token',
@@ -82,7 +82,7 @@ describe('setup-qodana', () => {
     expect(createProject).toHaveBeenCalledWith('token', 'team');
     expect(autoDiscover).toHaveBeenCalledWith('subdir');
     expect(qodanaSanity).toHaveBeenCalledWith(NODE, 'subdir');
-    expect(core.setOutput).toHaveBeenCalledTimes(3);
+    expect(core.setOutput).toHaveBeenCalledTimes(4);
     expect(core.setOutput).toHaveBeenLastCalledWith(
       'args',
       '--project-dir,subdir,--config,qodana_recommended.yaml',

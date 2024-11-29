@@ -49,7 +49,8 @@ const action = async () => {
   }
 
   const octokit = github.getOctokit();
-  const { sha, prMode, issueNumber } = await github.getQodanaPrSha(octokit);
+  const { sha, prMode, issueNumber, generateBaseline } =
+    await github.getQodanaPrSha(octokit);
   core.setOutput('pr-mode', `${prMode}`);
   if (prMode && sha) {
     core.info(
@@ -60,6 +61,7 @@ const action = async () => {
   if (issueNumber > 0) {
     core.exportVariable('QODANA_ISSUE_NUMBER', issueNumber);
   }
+  core.setOutput('generate-baseline', generateBaseline ? 'true' : 'false');
 
   core.setOutput('args', args.join(','));
 };

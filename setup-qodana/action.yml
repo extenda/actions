@@ -24,6 +24,8 @@ outputs:
     description: The qodana project token.
   pr-mode:
     description: Indicates if Qodana should run in pull request mode and do a diff-analysis.
+  update-baseline:
+    description: Indicates that the qodana.sarif.json baseline should updated after the run.
 runs:
   using: node20
   main: dist/index.js

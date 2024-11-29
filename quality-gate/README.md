@@ -12,6 +12,12 @@ to change the underlying quality-gate implementation without impacting pipelines
 
 See [action.yml](action.yml).
 
+The quality-gate action behavior can be controlled with the follow commit messages
+
+  * `[init quality]` - Use on first run to initialize a quality baseline
+  * `[rebase quality]` - Use to rebase the quality baseline, e.g. if baseline issues has been fixed
+  * `[skip quality]` - Skip the quality gate check
+
 ### Secrets
 
 This action can be used either with GCP Secret Manager or with GitHub Action secrets.

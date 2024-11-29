@@ -45,8 +45,8 @@ runs:
         QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}
 
     - name: Update qodana.sarif.json issues baseline
-      if: (failure() && contains(github.event.head_commit.message, '[force quality]')) || contains(github.event.head_commit.message, '[rebase quality]')
-      id: init-baseline
+      if: always() && steps.setup-qodana.outputs.generate-baseline == 'true'
+      id: update-baseline
       run: |
         if [ -f qodana.sarif.json ];
           echo "User-provided qodana.sarif.json exists. Baseline automation disabled."
@@ -64,7 +64,7 @@ runs:
 
     - name: Rerun Qodana with issues baseline
       uses: extenda/qodana-action@feat/issue-number-discovery
-      if: always() && steps.init-baseline.rerun == 'true'
+      if: always() && steps.update-baseline.outputs.rerun == 'true'
       with:
         args: ${{ steps.setup-qodana.outputs.args }},--baseline,generated-qodana.sarif.json
         github-token: ${{ inputs.github-token }}
