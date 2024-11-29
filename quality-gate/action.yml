@@ -46,5 +46,6 @@ runs:
 
     - name: List files
       if: always()
-      run: ls -al
+      run: |
+        ls -al ${{ runner.temp }}/qodana/results
       shell: bash
