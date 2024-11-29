@@ -44,8 +44,24 @@ runs:
       env:
         QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}
 
-    - name: List files
-      if: always()
+    - name: Update qodana.sarif.json issues baseline
+      if: failure() && contains(github.event.head_commit.message, '[init quality]')
+      id: init-baseline
       run: |
-        ls -al ${{ runner.temp }}/qodana/results
+        generated_baseline="${{ runner.temp }}/qodana/results/qodana.sarif.json"
+        if [ -f "$generated_baseline" ]; then
+          cp "$generated_baseline" qodana.sarif.json
+          echo "Here we would upload $generated_baseline to GCS"
+          echo "rerun=true" >> "$GITHUB_OUTPUT"
+        fi
       shell: bash
+
+    - name: Rerun Qodana with issues baseline
+      uses: extenda/qodana-action@feat/issue-number-discovery
+      if: failure() && steps.init-baseline.rerun == 'true'
+      with:
+        args: ${{ steps.setup-qodana.outputs.args }},--baseline,qodana.sarif.json
+        github-token: ${{ inputs.github-token }}
+        pr-mode: ${{ steps.setup-qodana.outputs.pr-mode }}
+      env:
+        QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}
