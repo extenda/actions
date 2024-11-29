@@ -110,7 +110,6 @@ const getQodanaPrSha = async (octokit) => {
   let sha = '';
   let prMode = true;
   let issueNumber = -1;
-  let generateBaseline = false;
   if (defaultBranch === getCurrentBranch()) {
     core.info(`Analysis of default branch: ${defaultBranch}`);
     prMode = false;
@@ -132,21 +131,15 @@ const getQodanaPrSha = async (octokit) => {
     prMode = false;
   }
   if (message.includes('[rebase quality]') && prMode) {
-    core.warning(
-      'pr-mode disabled with [rebase quality] comment. A new baseline will be generated.',
-    );
+    core.warning('pr-mode disabled with [rebase quality] comment.');
     prMode = false;
-    generateBaseline = true;
   }
   if (message.includes('[init quality]') && prMode) {
-    core.warning(
-      'pr-mode disabled with [init quality] comment. A baseline will be generated if required',
-    );
+    core.warning('pr-mode disabled with [init quality] comment.');
     prMode = false;
-    generateBaseline = true;
   }
 
-  return { sha, prMode, issueNumber, generateBaseline };
+  return { sha, prMode, issueNumber };
 };
 
 module.exports = {
