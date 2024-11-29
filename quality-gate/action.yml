@@ -42,7 +42,7 @@ runs:
         export-default-credentials: 'true'
 
     - name: Download quality baseline from GCS
-      if: inputs.service-account-key != '' && inputs.storage-bucket != ''
+      if: ${{ inputs.service-account-key != '' && inputs.storage-bucket != '' && !contains(github.event.head_commit.message, '[skip quality]') }}
       run: |
         gcloud storage cp \
           gs://${{ inputs.storage-bucket }}/${{ github.repository }}/qodana-sarif.json \
@@ -90,12 +90,10 @@ runs:
     - name: Rerun instructions
       if: always() && steps.update-baseline.outputs.rerun == 'true'
       run: |
-        cRed='\033[01;31m'
-        cNone='\033[00m'
         echo ""
-        echo ${cRed}QUALITY-GATE BASELINE UPDATED - RERUN JOB
-        echo ${cNone}
-        echo The quality-gate baseline has been created or updated.
-        echo A rerun of this job should now pass the quality-gate check.
+        echo -e "\033[01;31mQUALITY-GATE BASELINE UPDATED - RERUN JOB\033[00m"
+        echo ""
+        echo "The quality-gate baseline has been created or updated."
+        echo "A rerun of this job should now pass the quality-gate check."
         echo ""
       shell: bash
