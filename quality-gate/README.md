@@ -61,12 +61,12 @@ jobs:
       - name: Quality Gate
         uses: extenda/actions/quality-gate@v0
         with:
-          secrets-account-key: ${{ secrets.SECRET_AUTH }}
+          service-account-key: ${{ secrets.SECRET_AUTH }}
           collection: platform
 ```
 
 If GCP Secret Manager isn't in use, pass the `QUALITY_GATE_TOKEN` as an environment variable instead of using
-`secrets-account-key`.
+`service-account-key`.
 
 ```yaml
 - name: Quality Gate

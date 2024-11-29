@@ -1,11 +1,14 @@
 name: Quality Gate
 description: Enforce a quality gate on your software project.
 inputs:
-  secrets-account-key:
+  service-account-key:
     description: |
-      The service account key which will be used to access CI/CD pipeline secrets.
+      The service account key which will be used to access CI/CD pipeline secrets and
+      the storage bucket if data management is enabled.
+
       This must be set unless the `QUALITY_GATE_TOKEN` environment variable is set
       with the access token for the service provider.
+    default: ''
   github-token:
     description: The GitHub Actions token.
     default: ${{ github.token }}
@@ -15,6 +18,11 @@ inputs:
       team name or a category. This can be used to organize projects within
       the quality gate reporting dashboards.
     required: true
+  storage-bucket:
+    description: |
+      The GCS bucket used to store quality gate data. Set this to a blank string to
+      disable any data management performed by this action.
+    default: quality-gate-data
 runs:
   using: composite
   steps:
@@ -22,9 +30,24 @@ runs:
       if: env.QUALITY_GATE_TOKEN == ''
       uses: extenda/actions/gcp-secret-manager@v0
       with:
-        service-account-key: ${{ inputs.secrets-account-key }}
+        service-account-key: ${{ inputs.service-account-key }}
         secrets: |
           QUALITY_GATE_TOKEN: qodana-organization-token
+
+    - name: Setup gcloud
+      uses: extenda/actions/setup-gcloud@v0
+      if: inputs.service-account-key != ''
+      with:
+        service-account-key: ${{ secrets.account-key }}
+        export-default-credentials: 'true'
+
+    - name: Download quality baseline from GCS
+      if: inputs.service-account-key != '' && inputs.storage-bucket != ''
+      run: |
+        gcloud storage cp \
+          gs://${{ inputs.storage-bucket }}/${{ github.repository }}/qodana-sarif.json \
+          managed-qodana.sarif.json
+      shell: bash
 
     - name: Setup Qodana
       uses: extenda/actions/setup-qodana@feat/quality-gate
@@ -45,7 +68,7 @@ runs:
         QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}
 
     - name: Update qodana.sarif.json issues baseline
-      if: always() && steps.setup-qodana.outputs.generate-baseline == 'true'
+      if: always() && steps.setup-qodana.outputs.generate-baseline == 'true' && inputs.storage-bucket != ''
       id: update-baseline
       run: |
         if [ -f qodana.sarif.json ]; then
@@ -57,17 +80,22 @@ runs:
         generated_baseline="${{ runner.temp }}/qodana/results/qodana.sarif.json"
         if [ -f "$generated_baseline" ]; then
           cp "$generated_baseline" generated-qodana.sarif.json
-          echo "TODO: Here we would upload $generated_baseline to GCS"
+          gcloud storage cp \
+            generated-qodana.sarif.json \
+            gs://${{ inputs.storage-bucket }}/${{ github.repository }}/qodana-sarif.json
           echo "rerun=true" >> "$GITHUB_OUTPUT"
         fi
       shell: bash
 
-    - name: Rerun Qodana with issues baseline
-      uses: extenda/qodana-action@feat/issue-number-discovery
+    - name: Rerun instructions
       if: always() && steps.update-baseline.outputs.rerun == 'true'
-      with:
-        args: ${{ steps.setup-qodana.outputs.args }},--baseline,generated-qodana.sarif.json
-        github-token: ${{ inputs.github-token }}
-        pr-mode: ${{ steps.setup-qodana.outputs.pr-mode }}
-      env:
-        QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}
+      run: |
+        cRed='\033[01;31m'
+        cNone='\033[00m'
+        echo ""
+        echo ${cRed}QUALITY-GATE BASELINE UPDATED - RERUN JOB
+        echo ${cNone}
+        echo The quality-gate baseline has been created or updated.
+        echo A rerun of this job should now pass the quality-gate check.
+        echo ""
+      shell: bash

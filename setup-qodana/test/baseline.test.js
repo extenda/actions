@@ -54,3 +54,9 @@ test('It prioritizes qodana.sarif.json over json.gz', async () => {
   const baseline = await findBaseline(root);
   expect(baseline).toEqual('subdir/qodana.sarif.json');
 });
+
+test('It can find managed-qodana.sarif.json', async () => {
+  createFiles(['README.md', 'managed-qodana.sarif.json']);
+  const baseline = await findBaseline(root);
+  expect(baseline).toEqual('managed-qodana.sarif.json');
+});

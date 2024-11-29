@@ -27,11 +27,18 @@ const decompress = async (baseline) => {
 
 const findBaseline = async (projectDirectory) => {
   const baseline = fg
-    .sync(['**/qodana.sarif.json', '**/qodana.sarif.json.gz'], {
-      cwd: projectDirectory,
-      dot: true,
-      absolute: true,
-    })
+    .sync(
+      [
+        '**/qodana.sarif.json',
+        '**/qodana.sarif.json.gz',
+        '**/managed-qodana.sarif.json',
+      ],
+      {
+        cwd: projectDirectory,
+        dot: true,
+        absolute: true,
+      },
+    )
     .sort(baselineCompareFn);
 
   if (baseline.length === 0) {
