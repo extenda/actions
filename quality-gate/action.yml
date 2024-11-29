@@ -48,7 +48,7 @@ runs:
       if: always() && steps.setup-qodana.outputs.generate-baseline == 'true'
       id: update-baseline
       run: |
-        if [ -f qodana.sarif.json ];
+        if [ -f qodana.sarif.json ]; then
           echo "User-provided qodana.sarif.json exists. Baseline automation disabled."
           echo "rerun=false" >> "$GITHUB_OUTPUT"
           exit 0
