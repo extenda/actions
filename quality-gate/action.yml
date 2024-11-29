@@ -46,7 +46,7 @@ runs:
       run: |
         gcloud storage cp \
           gs://${{ inputs.storage-bucket }}/${{ github.repository }}/qodana-sarif.json \
-          managed-qodana.sarif.json
+          managed-qodana.sarif.json || true
       shell: bash
 
     - name: Setup Qodana
