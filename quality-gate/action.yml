@@ -43,3 +43,7 @@ runs:
         pr-mode: ${{ steps.setup-qodana.outputs.pr-mode }}
       env:
         QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}
+
+    - name: List files
+      run: ls -al
+      shell: bash
