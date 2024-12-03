@@ -3,11 +3,6 @@ const buildManifest = require('../src/manifests/build-manifest');
 const loadServiceDefinition = require('../src/utils/service-definition');
 const deploy = require('../src/manifests/deploy');
 const projectInfo = require('../../cloud-run/src/project-info');
-const createExternalLoadbalancer = require('../src/loadbalancing/external/create-external-loadbalancer');
-const configureInternalDomain = require('../src/loadbalancing/internal/create-internal-backend');
-const configureExternalDomain = require('../src/loadbalancing/external/create-external-backend');
-const configureExternalLBFrontend = require('../src/loadbalancing/external/create-external-frontend');
-const configureInternalFrontend = require('../src/loadbalancing/internal/create-internal-frontend');
 const { setupGcloud } = require('../../setup-gcloud');
 const action = require('../src/index');
 const loadCredentials = require('../src/utils/load-credentials');
@@ -22,18 +17,13 @@ jest.mock('../src/utils/service-definition');
 jest.mock('../src/manifests/deploy');
 jest.mock('../src/manifests/build-manifest');
 jest.mock('../../cloud-run/src/project-info');
-jest.mock('../src/loadbalancing/external/create-external-loadbalancer');
-jest.mock('../src/loadbalancing/internal/create-internal-backend');
-jest.mock('../src/loadbalancing/external/create-external-backend');
-jest.mock('../src/loadbalancing/external/create-external-frontend');
-jest.mock('../src/loadbalancing/internal/create-internal-frontend');
 jest.mock('../../utils');
 jest.mock('../../setup-gcloud');
 jest.mock('../src/manifests/image-sha256');
 jest.mock('../src/policies/publish-policies');
 jest.mock('../src/utils/send-request');
 jest.mock('../src/utils/vulnerability-scanning');
-jest.mock('../src/loadbalancing/external/cloud-armor');
+jest.mock('../src/utils/cloud-armor');
 
 const serviceDef = {
   kubernetes: {
@@ -95,11 +85,6 @@ describe('Action', () => {
     });
     buildManifest.mockResolvedValueOnce();
     deploy.mockResolvedValueOnce(true);
-    createExternalLoadbalancer.mockResolvedValueOnce();
-    configureExternalLBFrontend.mockResolvedValueOnce();
-    configureExternalDomain.mockResolvedValueOnce();
-    configureInternalDomain.mockResolvedValueOnce();
-    configureInternalFrontend.mockResolvedValueOnce();
     setupGcloud.mockResolvedValueOnce('project-id');
     publishPolicies.mockResolvedValueOnce();
     await action();
@@ -223,11 +208,6 @@ describe('Action', () => {
     });
     buildManifest.mockResolvedValueOnce();
     deploy.mockResolvedValueOnce(true);
-    createExternalLoadbalancer.mockResolvedValueOnce();
-    configureExternalLBFrontend.mockResolvedValueOnce();
-    configureExternalDomain.mockResolvedValueOnce();
-    configureInternalDomain.mockResolvedValueOnce();
-    configureInternalFrontend.mockResolvedValueOnce();
     setupGcloud.mockResolvedValueOnce('project-id');
     publishPolicies.mockResolvedValueOnce();
     await expect(action()).rejects.toThrow(
@@ -299,11 +279,6 @@ describe('Action', () => {
     });
     buildManifest.mockResolvedValueOnce();
     deploy.mockResolvedValueOnce(true);
-    createExternalLoadbalancer.mockResolvedValueOnce();
-    configureExternalLBFrontend.mockResolvedValueOnce();
-    configureExternalDomain.mockResolvedValueOnce();
-    configureInternalDomain.mockResolvedValueOnce();
-    configureInternalFrontend.mockResolvedValueOnce();
     setupGcloud.mockResolvedValueOnce('project-id');
     publishPolicies.mockResolvedValueOnce();
     runScan.mockResolvedValueOnce();
@@ -389,11 +364,6 @@ describe('Action', () => {
     });
     buildManifest.mockResolvedValueOnce();
     deploy.mockResolvedValueOnce(true);
-    createExternalLoadbalancer.mockResolvedValueOnce();
-    configureExternalLBFrontend.mockResolvedValueOnce();
-    configureExternalDomain.mockResolvedValueOnce();
-    configureInternalDomain.mockResolvedValueOnce();
-    configureInternalFrontend.mockResolvedValueOnce();
     setupGcloud.mockResolvedValueOnce('project-id');
     publishPolicies.mockResolvedValueOnce();
     runScan.mockResolvedValueOnce();
