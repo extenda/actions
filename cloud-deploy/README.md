@@ -170,7 +170,7 @@ environments:
 
 ```
 service-hours: ## all times in UTC ( scale up at 07:00, scale down to 0 at 22:00)*
-# scaling triggers every 30 minutes at :00 and :30 example if set to scale up at 07:50 it will scale up at 08:00 
+# scaling triggers every 30 minutes at :00 and :30 example if set to scale up at 07:50 it will scale up at 08:00
 min-instances: ## the value the scaleup will use
 region: ## unused but will be used once we roll out to more regions
 ```
