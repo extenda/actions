@@ -125,6 +125,28 @@ service-accounts: ## service accounts allowed access to the service for user or 
 audiences: ## the audience allowed on the generated tokens
 ```
 
+Managed Cloud Run service with cloud armor
+
+```yaml
+cloud-run:
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    concurrency: 80
+
+security:
+  cloud-armor:
+    policy-name: cloud-armor-policy-name
+
+```
+
+```
+policy-name: ## the name of the cloud armor policy used by the service
+```
+
 Managed Cloud Run service with scheduled scaling for production
 
 ```yaml
@@ -147,7 +169,8 @@ environments:
 ```
 
 ```
-service-hours: ## all times in UTC ( scale up at 07:00, scale down to 0 at 22:00)
+scale-hours: ## all times in UTC ( scale up at 07:00, scale down to 0 at 22:00)*
+# scaling triggers every 30 minutes at :00 and :30 example if set to scale up at 07:50 it will scale up at 08:00
 min-instances: ## the value the scaleup will use
 region: ## unused but will be used once we roll out to more regions
 ```
