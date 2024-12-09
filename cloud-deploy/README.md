@@ -125,6 +125,28 @@ service-accounts: ## service accounts allowed access to the service for user or 
 audiences: ## the audience allowed on the generated tokens
 ```
 
+Managed Cloud Run service with cloud armor
+
+```yaml
+cloud-run:
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    concurrency: 80
+
+security:
+  cloud-armor:
+    policy-name: cloud-armor-policy-name
+
+```
+
+```
+policy-name: ## the name of the cloud armor policy used by the service
+```
+
 Managed Cloud Run service with scheduled scaling for production
 
 ```yaml
