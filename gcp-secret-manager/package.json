@@ -5,6 +5,6 @@
   "description": "GCP Secret Manager",
   "main": "dist/index.js",
   "dependencies": {
-    "yaml": "^2.6.0"
+    "yaml": "^2.6.1"
   }
 }
