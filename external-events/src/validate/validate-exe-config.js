@@ -35,6 +35,12 @@ const schema = joi.object({
             .string()
             .regex(/^[a-z][-a-z]{2}\.[a-z][-a-z\d]{0,64}\.v\d{1,10}$/),
         }),
+        'exposed-attributes': joi.array().items(
+          joi.object({
+            attribute: joi.string().required(),
+            'exposed-as': joi.string().required(),
+          }),
+        ),
       }),
     )
     .required(),
