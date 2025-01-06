@@ -7,10 +7,10 @@
   "dependencies": {
     "@actions/github": "^6.0.0",
     "axios": "^1.7.9",
-    "fast-glob": "^3.3.2",
+    "fast-glob": "^3.3.3",
     "jsonschema": "^1.4.1",
     "multiline-str": "^1.0.4",
-    "uuid": "^11.0.3",
-    "yaml": "^2.6.1"
+    "uuid": "^11.0.4",
+    "yaml": "^2.7.0"
   }
 }
