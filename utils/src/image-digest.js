@@ -3,10 +3,12 @@ const exec = require('@actions/exec');
 const getImageDigest = async (image) => {
   const imageName = image.split(':')[0];
   const args = [
-    'container',
+    'artifacts',
+    'docker',
     'images',
-    'describe',
+    'list',
     image,
+    '--include-tags',
     '--format=get(image_summary.digest)',
   ];
 

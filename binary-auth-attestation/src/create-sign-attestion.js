@@ -34,10 +34,12 @@ const getArtifactUrl = async (tag, imagePath) => {
   const imageName = imagePath.split(':')[0] || imagePath;
   const container = `${imageName}:${tag}`;
   const args = [
-    'container',
+    'artifacts',
+    'docker',
     'images',
-    'describe',
+    'list',
     container,
+    '--include-tags',
     '--format=get(image_summary.digest)',
   ];
   const digest = await execGcloud(args);

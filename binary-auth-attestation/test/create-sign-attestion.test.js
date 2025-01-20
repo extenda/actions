@@ -50,6 +50,15 @@ describe('Create attestation', () => {
       'eu.gcr.io/my-image@djdq1787',
     );
     expect(execGcloud).toHaveBeenCalledTimes(1);
+    expect(execGcloud).toHaveBeenCalledWith([
+      'artifacts',
+      'docker',
+      'images',
+      'list',
+      'eu.gcr.io/my-image:tag',
+      '--include-tags',
+      '--format=get(image_summary.digest)',
+    ]);
   });
 
   test('Get artifact URL provided a tag in the imagePath', async () => {

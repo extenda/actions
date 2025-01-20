@@ -20,10 +20,12 @@ test('It resolves SHA256 tag from semver image', async () => {
   );
   expect(sha256Image).toEqual(`eu.gcr.io/extenda/actions-test@${SHA_VALUE}`);
   expect(execGcloud).toHaveBeenCalledWith([
-    'container',
+    'artifacts',
+    'docker',
     'images',
-    'describe',
+    'list',
     'eu.gcr.io/extenda/actions-test:v1.0.0',
+    '--include-tags',
     '--format=get(image_summary.digest)',
   ]);
 });
@@ -34,10 +36,12 @@ test('It can handle image without semver tag', async () => {
   );
   expect(sha256Image).toEqual(`eu.gcr.io/extenda/actions-test@${SHA_VALUE}`);
   expect(execGcloud).toHaveBeenCalledWith([
-    'container',
+    'artifacts',
+    'docker',
     'images',
-    'describe',
+    'list',
     'eu.gcr.io/extenda/actions-test',
+    '--include-tags',
     '--format=get(image_summary.digest)',
   ]);
 });
