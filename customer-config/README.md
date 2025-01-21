@@ -25,7 +25,7 @@ definitions: # list of config definitions for your system
     # (optional) enforce array item uniqueness by id
     # if true,
     # * all items in array will be checked for uniqueness by id
-    enforce-array-item-uniqueness-by-id: true 
+    enforce-array-item-uniqueness-by-id: true
 ```
 
 # Action setup example
