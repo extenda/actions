@@ -22,6 +22,10 @@ definitions: # list of config definitions for your system
     # (optional) max tree depth for a kind.
     # all targets bellow specified level for this target will be ignored
     max-tree-depth: business-units/*/workstations/*
+    # (optional) enforce array item uniqueness by id
+    # if true,
+    # * all items in array will be checked for uniqueness by id
+    enforce-array-item-uniqueness-by-id: true
 ```
 
 # Action setup example

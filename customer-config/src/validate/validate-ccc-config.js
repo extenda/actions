@@ -22,6 +22,10 @@ const schema = joi.object({
         'schema-location': joi.string().uri().required(),
         'default-value': joi.any().required(),
         'max-tree-depth': joi.string().optional(),
+        'enforce-array-item-uniqueness-by-id': joi
+          .boolean()
+          .default(false)
+          .optional(),
       }),
     )
     .required(),
