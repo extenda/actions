@@ -67,6 +67,18 @@ const createComment = (changes, workingDirectory, footer) => {
         '',
         ...changes,
       );
+      if (changesString.includes('destroyed')) {
+        comment.push(
+          '---',
+          '### :warning: You are about to destroy some resources',
+          'Check the following <ins>before</ins> applying:',
+          '* Make sure that no customers are using your resource.',
+          '* Make sure the resource is not used anywhere.',
+          '  * Search on https://github.com/extenda for your resource in all repositories.',
+          "* Make sure your common repository doesn't contain any configuration of your resource.",
+          '---',
+        );
+      }
     }
   }
 
