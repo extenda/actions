@@ -78,11 +78,12 @@ const sendDeployInfo = async (
   return sendRequest(url, data);
 };
 
-const sendVulnerabilityCount = async (service, critical) => {
-  const url = '/security/vulnerability/counter';
+const saveVulnerabilities = async (service, reportJson, labels) => {
+  const url = '/security/vulnerabilities/';
   const data = {
     service,
-    critical,
+    labels,
+    reportJson,
   };
   return sendRequest(url, data);
 };
@@ -91,5 +92,5 @@ module.exports = {
   sendScaleSetup,
   sendDeployInfo,
   sendDeployRequest,
-  sendVulnerabilityCount,
+  saveVulnerabilities,
 };
