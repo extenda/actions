@@ -115,7 +115,7 @@ const action = async () => {
 
   // Trivvy scanning
   if (process.platform !== 'win32') {
-    if (env !== 'staging') {
+    if (env !== 'staging' || projectID === 'quotes-staging-ccdf') {
       core.info('Run Trivy scanning');
       await runScan(serviceAccountKeyCICD, image, serviceName, labels);
     }
