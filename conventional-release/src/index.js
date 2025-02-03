@@ -12,10 +12,13 @@ const createGitHubRelease = async (release, name) => {
     tag_name: release.tagName,
     name: `${name} ${release.version}`,
     body: release.changelog,
+    prerelease: core.getBooleanInput('pre-release'),
+    make_latest: core.getBooleanInput('make-latest'),
   });
 
   const { data } = response;
   core.info(`Created GitHub release ${data.html_url}`);
+  return data;
 };
 
 const action = async () => {
@@ -28,13 +31,14 @@ const action = async () => {
     versions.setTagPrefix(tagPrefix);
     const release = await versions.tagReleaseVersion();
 
-    await createGitHubRelease(release, name);
+    const data = await createGitHubRelease(release, name);
 
     core.info(`Created release tag ${release.tagName}`);
 
     core.setOutput('version', release.version);
     core.setOutput('release-tag', `${release.tagName}`);
     core.setOutput('release-changelog', `${release.changelog}`);
+    core.setOutput('release-id', data.id);
   } catch (err) {
     core.setFailed(err.message);
   }

@@ -37,14 +37,12 @@ describe('conventional-release', () => {
   });
   beforeEach(() => {
     process.env.GITHUB_TOKEN = 'github-token';
-  });
-  afterEach(() => {
-    jest.resetAllMocks();
-    process.env = orgEnv;
-  });
-
-  test('It can create a release', async () => {
     core.getInput.mockReturnValueOnce('extenda/test-repo');
+    core.getBooleanInput = jest.fn().mockImplementation((name) => {
+      if (name === 'pre-release') return false;
+      if (name === 'make-latest') return true;
+      return false;
+    });
     mockTag.mockReturnValueOnce({
       tagName: 'extenda/test-repo',
       version: '0.0.1',
@@ -52,7 +50,14 @@ describe('conventional-release', () => {
         html_url: 'extenda.io',
       },
     });
+  });
 
+  afterEach(() => {
+    jest.resetAllMocks();
+    process.env = orgEnv;
+  });
+
+  test('It can create a release', async () => {
     await action();
 
     expect(mockRelease).toHaveBeenCalledWith({
@@ -63,33 +68,66 @@ describe('conventional-release', () => {
         html_url: 'extenda.io',
       },
       tag_name: 'extenda/test-repo',
+      prerelease: false,
+      make_latest: true,
     });
-    expect(core.getInput).toHaveBeenCalledTimes(2);
+  });
+
+  test('It fails if GITHUB_TOKEN is missing', async () => {
+    delete process.env.GITHUB_TOKEN;
+    await action();
+    expect(core.setFailed).toHaveBeenCalled();
+  });
+
+  test('It sets outputs after successful release', async () => {
+    const releaseData = {
+      id: 'release-123',
+      html_url: 'https://github.com/extenda/test-repo/releases/tag/v1.0.0',
+    };
+    mockRelease.mockResolvedValueOnce({ data: releaseData });
+
+    await action();
+
+    expect(core.setOutput).toHaveBeenCalledWith('version', '0.0.1');
+    expect(core.setOutput).toHaveBeenCalledWith(
+      'release-tag',
+      'extenda/test-repo',
+    );
   });
 
   test('It can use a custom name prefix', async () => {
-    core.getInput
-      .mockReturnValueOnce('extenda/test-repo')
-      .mockReturnValueOnce('Extenda Actions');
-    mockTag.mockReturnValueOnce({
-      tagName: 'extenda/test-repo',
-      version: '0.0.1',
-      changelog: {
-        html_url: 'extenda.io',
-      },
+    core.getInput.mockReturnValueOnce('Extenda Actions');
+
+    await action();
+
+    expect(mockRelease).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Extenda Actions 0.0.1',
+      }),
+    );
+  });
+
+  test('It can create a non-latest release', async () => {
+    core.getBooleanInput = jest.fn((name) => {
+      if (name === 'make-latest') return false;
     });
 
     await action();
 
-    expect(mockRelease).toHaveBeenCalledWith({
-      owner: 'extenda',
-      repo: 'test-repo',
-      name: 'Extenda Actions 0.0.1',
-      body: {
-        html_url: 'extenda.io',
-      },
-      tag_name: 'extenda/test-repo',
+    expect(mockRelease).toHaveBeenCalledWith(
+      expect.objectContaining({ make_latest: false }),
+    );
+  });
+
+  test('It can create a pre-release', async () => {
+    core.getBooleanInput = jest.fn((name) => {
+      if (name === 'pre-release') return true;
     });
-    expect(core.getInput).toHaveBeenCalledTimes(2);
+
+    await action();
+
+    expect(mockRelease).toHaveBeenCalledWith(
+      expect.objectContaining({ prerelease: true }),
+    );
   });
 });

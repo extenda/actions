@@ -13,6 +13,14 @@ inputs:
     description: The product name to include in the release title. This should not contain a version.
     required: false
     default: Release
+  pre-release:
+    description: Mark as pre-release
+    required: false
+    default: false
+  make-latest:
+    description: Mark as latest release
+    required: false
+    default: true
 outputs:
   release-tag:
     description: The created release tag
