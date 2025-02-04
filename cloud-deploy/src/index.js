@@ -72,6 +72,7 @@ const action = async () => {
     kubernetes,
     environments,
     security,
+    labels,
   } = deployYaml;
 
   const image = await getImageWithSha256(userImage);
@@ -114,9 +115,9 @@ const action = async () => {
 
   // Trivvy scanning
   if (process.platform !== 'win32') {
-    if (env !== 'staging') {
+    if (env !== 'staging' || projectID === 'quotes-staging-ccdf') {
       core.info('Run Trivy scanning');
-      await runScan(serviceAccountKeyCICD, image, serviceName);
+      await runScan(serviceAccountKeyCICD, image, serviceName, labels);
     }
   }
 
