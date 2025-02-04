@@ -69,7 +69,7 @@ describe('conventional-release', () => {
       },
       tag_name: 'extenda/test-repo',
       prerelease: false,
-      make_latest: true,
+      make_latest: 'true',
     });
   });
 
@@ -115,7 +115,7 @@ describe('conventional-release', () => {
     await action();
 
     expect(mockRelease).toHaveBeenCalledWith(
-      expect.objectContaining({ make_latest: false }),
+      expect.objectContaining({ make_latest: 'false' }),
     );
   });
 

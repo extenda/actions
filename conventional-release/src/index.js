@@ -13,7 +13,7 @@ const createGitHubRelease = async (release, name) => {
     name: `${name} ${release.version}`,
     body: release.changelog,
     prerelease: core.getBooleanInput('pre-release'),
-    make_latest: core.getBooleanInput('make-latest'),
+    make_latest: String(core.getBooleanInput('make-latest')),
   });
 
   const { data } = response;

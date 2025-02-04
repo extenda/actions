@@ -28,6 +28,8 @@ outputs:
     description: The tagged version
   release-changelog:
     description: The latest release change log
+  release-id:
+    description: The ID of the created GitHub release
 runs:
   using: node20
   main: dist/index.js
