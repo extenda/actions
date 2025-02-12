@@ -162,7 +162,6 @@ const setupGcloud = async (
           core.error(
             `Failed to save cache. Continue anyways. Message: ${err.message}`,
           );
-          return 0;
         });
     } else {
       core.info(`Use cached gcloud ${gcloudVersion}`);
