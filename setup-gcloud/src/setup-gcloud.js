@@ -157,7 +157,13 @@ const setupGcloud = async (
       })
         .then(updatePath)
         .then(installComponents)
-        .then(() => saveCache([cachePath], cacheKey));
+        .then(() => saveCache([cachePath], cacheKey))
+        .catch((err) => {
+          core.error(
+            `Failed to save cache. Continue anyways. Message: ${err.message}`,
+          );
+          return 0;
+        });
     } else {
       core.info(`Use cached gcloud ${gcloudVersion}`);
       await updatePath(cachePath);
