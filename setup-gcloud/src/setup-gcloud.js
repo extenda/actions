@@ -169,7 +169,7 @@ const setupGcloud = async (
         })
         .catch((err) => {
           core.error(
-            `Failed to save cache. Continue anyways. Message: ${err.message}`
+            `Failed to save cache. Continue anyways. Message: ${err.message}`,
           );
         });
     } else {
