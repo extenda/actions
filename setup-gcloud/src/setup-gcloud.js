@@ -157,10 +157,19 @@ const setupGcloud = async (
       })
         .then(updatePath)
         .then(installComponents)
-        .then(() => saveCache([cachePath], cacheKey))
+        .then(() => {
+          try {
+            return saveCache([cachePath], cacheKey);
+          } catch (err) {
+            core.error(`Failed to invoke saveCache. Message: ${err.message}`);
+          }
+        })
+        .then((n) => {
+          core.debug(`Saved cache with cacheId=${n}`);
+        })
         .catch((err) => {
           core.error(
-            `Failed to save cache. Continue anyways. Message: ${err.message}`,
+            `Failed to save cache. Continue anyways. Message: ${err.message}`
           );
         });
     } else {
