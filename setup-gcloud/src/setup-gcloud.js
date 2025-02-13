@@ -152,27 +152,21 @@ const setupGcloud = async (
     if (restoredKey === undefined) {
       core.info(`Install gcloud ${gcloudVersion}`);
       const downloadUrl = getDownloadUrl(gcloudVersion);
-      try {
-        await loadTool({
-          ...toolInfo,
-          downloadUrl,
+      await loadTool({
+        ...toolInfo,
+        downloadUrl,
+      })
+        .then(updatePath)
+        .then(installComponents)
+        .then(() => saveCache([cachePath], primaryCacheKey))
+        .then((n) => {
+          core.debug(`Saved cache with cacheId=${n}`);
         })
-          .then(updatePath)
-          .then(installComponents)
-          .then(() => saveCache([cachePath], primaryCacheKey))
-          .then((n) => {
-            core.debug(`Saved cache with cacheId=${n}`);
-          })
-          .catch((err) => {
-            core.error(
-              `Failed to save cache. Continue anyways. Message: ${err.message}`,
-            );
-          });
-      } catch (err) {
-        core.error(
-          `Failed to load tool or access cache. Continue anyways. Message: ${err.message}`,
-        );
-      }
+        .catch((err) => {
+          core.error(
+            `Failed to save cache. Continue anyways. Message: ${err.message}`,
+          );
+        });
     } else {
       core.info(`Use cached gcloud ${gcloudVersion}`);
       await updatePath(cachePath);
