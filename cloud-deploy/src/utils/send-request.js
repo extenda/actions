@@ -78,12 +78,18 @@ const sendDeployInfo = async (
   return sendRequest(url, data);
 };
 
-const saveVulnerabilities = async (service, reportJson, labels) => {
+const saveVulnerabilities = async (
+  service,
+  reportJson,
+  labels,
+  githubRepository,
+) => {
   const url = '/security/vulnerabilities/';
   const data = {
     service,
     labels,
     reportJson,
+    githubRepository,
   };
   return sendRequest(url, data);
 };
