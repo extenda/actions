@@ -145,9 +145,10 @@ const setupGcloud = async (
       process.env.RUNNER_ARCH.toLowerCase(),
       toolInfo.binary,
     );
-    const cacheKey = `${process.env.RUNNER_OS}-${process.env.RUNNER_ARCH}-gcloud-cache-${gcloudVersion}-v${CACHE_VERSION}`;
+    const restoreCacheKey = `${process.env.RUNNER_OS}-${process.env.RUNNER_ARCH}-gcloud-cache-${gcloudVersion}-v${CACHE_VERSION}`;
+    const primaryCacheKey = `${restoreCacheKey}-${crypto.randomUUID()}`;
 
-    const restoredKey = await restoreCache([cachePath], cacheKey);
+    const restoredKey = await restoreCache([cachePath], restoreCacheKey);
     if (restoredKey === undefined) {
       core.info(`Install gcloud ${gcloudVersion}`);
       const downloadUrl = getDownloadUrl(gcloudVersion);
@@ -157,7 +158,15 @@ const setupGcloud = async (
       })
         .then(updatePath)
         .then(installComponents)
-        .then(() => saveCache([cachePath], cacheKey));
+        .then(() => saveCache([cachePath], primaryCacheKey))
+        .then((n) => {
+          core.debug(`Saved cache with cacheId=${n}`);
+        })
+        .catch((err) => {
+          core.error(
+            `Failed to save cache. Continue anyways. Message: ${err.message}`,
+          );
+        });
     } else {
       core.info(`Use cached gcloud ${gcloudVersion}`);
       await updatePath(cachePath);
