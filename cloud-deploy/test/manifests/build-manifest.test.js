@@ -1274,4 +1274,59 @@ metadata:
     mockFs.restore();
     expect(manifest).toMatchSnapshot();
   });
+
+  test('It can deploy with NAT router and direct VPC old subnet', async () => {
+    checkVpcConnector.mockResolvedValueOnce('example-clan-vpc-connector');
+    const image = 'example-image:latest';
+    const service = {
+      'cloud-run': {
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          concurrency: 40,
+        },
+        traffic: {
+          'static-egress-ip': true,
+          'direct-vpc-connection': false,
+        },
+        'vpc-connector': false,
+      },
+      security: 'none',
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {},
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'production';
+
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
+    const manifest = readFileSync('cloudrun-service.yaml');
+    mockFs.restore();
+    expect(manifest).toMatchSnapshot();
+  });
 });
