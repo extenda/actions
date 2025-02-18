@@ -75,6 +75,8 @@ const cloudrunManifestTemplate = async (
   monitoring,
   deployEnv,
   baseAnnotations,
+  enableCloudNAT,
+  enableDirectVPC,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
 
@@ -113,12 +115,19 @@ const cloudrunManifestTemplate = async (
     annotations['autoscaling.knative.dev/minScale'] = 0;
   }
 
-  if (connector) {
+  if (enableDirectVPC) {
+    annotations['run.googleapis.com/network-interfaces'] =
+      '[{"network":"clan-network","subnetwork":"cloudrun-subnet"}]';
+  } else if (connector && !enableDirectVPC) {
     annotations['run.googleapis.com/vpc-access-connector'] = `${connectorName}`;
-    annotations['run.googleapis.com/vpc-access-egress'] = 'all-traffic';
-  } else {
+  } else if (!connector && !enableDirectVPC) {
     annotations['run.googleapis.com/network-interfaces'] =
       '[{"network":"clan-network","subnetwork":"k8s-subnet"}]';
+  }
+
+  if (enableCloudNAT) {
+    annotations['run.googleapis.com/vpc-access-egress'] = 'all-traffic';
+  } else {
     annotations['run.googleapis.com/vpc-access-egress'] = 'private-ranges-only';
   }
   if (SQLInstance) {
@@ -597,7 +606,11 @@ const buildManifest = async (
 
   const { staging, production } = environments;
 
-  const { 'serve-traffic': serveTraffic = true } = traffic;
+  const {
+    'serve-traffic': serveTraffic = true,
+    'static-egress-ip': enableCloudNAT = true,
+    'direct-vpc-connection': enableDirectVPC = false,
+  } = traffic;
 
   const {
     'permission-prefix': permissionPrefix,
@@ -817,6 +830,8 @@ const buildManifest = async (
       monitoring,
       deployEnv,
       baseAnnotations,
+      enableCloudNAT,
+      enableDirectVPC,
     );
     generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));
   }

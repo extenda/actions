@@ -101,6 +101,16 @@
               "description": "Deploy revision with or without traffic",
               "type": "boolean",
               "default": true
+            },
+            "static-egress-ip": {
+              "description": "Use the NAT router when making external requests",
+              "type": "boolean",
+              "default": true
+            },
+            "direct-vpc-connection": {
+              "description": "Whether to use the vpc connector or direct connection to the vpc",
+              "type": "boolean",
+              "default": false
             }
           },
           "additionalProperties": false
