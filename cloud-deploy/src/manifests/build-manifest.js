@@ -48,6 +48,29 @@ const userContainerVolumeMountSetup = (opa, protocol, type, volumes, name) => {
   return volumeMounts;
 };
 
+const configureNetworking = async (
+  annotations,
+  enableDirectVPC,
+  enableCloudNAT,
+  connector,
+  connectorName,
+) => {
+  if (enableDirectVPC) {
+    annotations['run.googleapis.com/network-interfaces'] =
+      '[{"network":"clan-network","subnetwork":"cloudrun-subnet"}]';
+  } else if (connector && !enableDirectVPC) {
+    annotations['run.googleapis.com/vpc-access-connector'] = `${connectorName}`;
+  } else if (!connector && !enableDirectVPC) {
+    annotations['run.googleapis.com/network-interfaces'] =
+      '[{"network":"clan-network","subnetwork":"k8s-subnet"}]';
+  }
+  if (enableCloudNAT) {
+    annotations['run.googleapis.com/vpc-access-egress'] = 'all-traffic';
+  } else {
+    annotations['run.googleapis.com/vpc-access-egress'] = 'private-ranges-only';
+  }
+};
+
 const cloudrunManifestTemplate = async (
   name,
   image,
@@ -115,25 +138,16 @@ const cloudrunManifestTemplate = async (
     annotations['autoscaling.knative.dev/minScale'] = 0;
   }
 
-  if (enableDirectVPC) {
-    annotations['run.googleapis.com/network-interfaces'] =
-      '[{"network":"clan-network","subnetwork":"cloudrun-subnet"}]';
-  } else if (connector && !enableDirectVPC) {
-    annotations['run.googleapis.com/vpc-access-connector'] = `${connectorName}`;
-  } else if (!connector && !enableDirectVPC) {
-    annotations['run.googleapis.com/network-interfaces'] =
-      '[{"network":"clan-network","subnetwork":"k8s-subnet"}]';
-  }
-
-  if (enableCloudNAT) {
-    annotations['run.googleapis.com/vpc-access-egress'] = 'all-traffic';
-  } else {
-    annotations['run.googleapis.com/vpc-access-egress'] = 'private-ranges-only';
-  }
+  await configureNetworking(
+    annotations,
+    enableDirectVPC,
+    enableCloudNAT,
+    connector,
+    connectorName,
+  );
   if (SQLInstance) {
     annotations['run.googleapis.com/cloudsql-instances'] = SQLInstance;
   }
-
   const traffic = [
     {
       percent: 100,
