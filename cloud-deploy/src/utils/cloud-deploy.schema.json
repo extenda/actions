@@ -94,7 +94,8 @@
           "description": "Traffic settings for Cloud Run",
           "type": "object",
           "required": [
-            "serve-traffic"
+            "static-egress-ip",
+            "direct-vpc-connection"
           ],
           "properties": {
             "serve-traffic": {
