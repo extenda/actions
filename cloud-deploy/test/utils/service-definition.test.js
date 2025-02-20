@@ -447,4 +447,84 @@ environments:
       },
     });
   });
+  test('It can read traffic variables', async () => {
+    mockFs({
+      'cloud-deploy.yaml': `
+cloud-run:
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    concurrency: 80
+  traffic:
+    serve-traffic: true
+    static-egress-ip: false
+    direct-vpc-connection: false
+
+security: none
+
+labels:
+  component: jest
+  product: my-product
+
+environments:
+  production:
+    min-instances: 1
+    domain-mappings:
+      - my-service.retailsvc.com
+      - my-service.retailsvc-test.com
+    path-mappings:
+      - paths:
+        - /test/*
+        - /api/v1/test/*
+        service: test-service
+      - paths:
+        - /api/v1/*
+        bucket: test-bucket
+        path-rewrite: /
+    env: &env
+      KEY: value
+  staging: none
+      `,
+    });
+
+    const spec = loadServiceDefinition('cloud-deploy.yaml');
+    expect(spec).toMatchObject({
+      'cloud-run': {
+        service: 'my-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        traffic: {
+          'serve-traffic': true,
+          'static-egress-ip': false,
+          'direct-vpc-connection': false,
+        },
+      },
+      security: 'none',
+      environments: {
+        production: {
+          'min-instances': 1,
+          'domain-mappings': [
+            'my-service.retailsvc.com',
+            'my-service.retailsvc-test.com',
+          ],
+          'path-mappings': [
+            {
+              paths: ['/test/*', '/api/v1/test/*'],
+              service: 'test-service',
+            },
+            {
+              paths: ['/api/v1/*'],
+              bucket: 'test-bucket',
+              'path-rewrite': '/',
+            },
+          ],
+        },
+      },
+    });
+  });
 });

@@ -22,9 +22,9 @@ Once created, the JSON key should be `base64` encoded and added as secret in the
 
 The action will read a `cloud-deploy.yaml` file for its configuration.
 
-### Managed Cloud Run
+## Managed Cloud Run
 
-Managed Cloud Run service with Hii Retail IAM security. The security sidecar will use default resources.
+### Managed Cloud Run service with Hii Retail IAM security. The security sidecar will use default resources.
 
 ```yaml
 cloud-run:
@@ -60,7 +60,7 @@ environments:
       <<: *env
 ```
 
-Managed Cloud Run service with SQL instance connection
+### Managed Cloud Run service with SQL instance connection
 
 ```yaml
 cloud-run:
@@ -96,7 +96,7 @@ environments:
       <<: *env
 ```
 
-Managed Cloud Run service with IAM bindings setup
+### Managed Cloud Run service with IAM bindings setup
 
 ```yaml
 cloud-run:
@@ -125,7 +125,7 @@ service-accounts: ## service accounts allowed access to the service for user or 
 audiences: ## the audience allowed on the generated tokens
 ```
 
-Managed Cloud Run service with cloud armor
+### Managed Cloud Run service with cloud armor
 
 ```yaml
 cloud-run:
@@ -147,7 +147,7 @@ security:
 policy-name: ## the name of the cloud armor policy used by the service
 ```
 
-Managed Cloud Run service with scheduled scaling for production
+### Managed Cloud Run service with scheduled scaling for production
 
 ```yaml
 cloud-run:
@@ -175,7 +175,7 @@ min-instances: ## the value the scaleup will use
 region: ## unused but will be used once we roll out to more regions
 ```
 
-Managed Cloud Run service with path-mappings
+### Managed Cloud Run service with path-mappings
 
 ```yaml
 cloud-run:
@@ -212,7 +212,32 @@ path-rewrite: ## Rewrite the path on the downstream service
 
 example: my-service.retailsvc.com/api/v2/feature will hit my-service-a with my-service.retailsvc.com/feature
 ```
-### Kubernetes deployment
+
+### Managed Cloud Run service on direct vpc without NAT router
+
+```yaml
+cloud-run:
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    concurrency: 80
+  traffic:
+    static-egress-ip: false
+    direct-vpc-connection: true
+
+environments:
+  production:
+    min-instances: 1
+```
+
+```
+static-egress-ip: ## If true service will use a static IP for egress traffic
+direct-vpc-connection: ## If true service will connect directly to the VPC and not use vpc connector
+```
+## Kubernetes deployment
 
 A Kubernetes deployment with IAM security resources customized.
 
