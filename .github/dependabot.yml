@@ -39,6 +39,7 @@ updates:
       - /setup-git
       - /setup-msbuild
       - /setup-nuget-sources
+      - /setup-qodana
       - /setup-terraform
       - /slack-notify
       - /sonar-scanner
