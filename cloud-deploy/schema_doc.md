@@ -317,16 +317,16 @@ Must be one of:
 
 | Property                                                                      | Pattern | Type    | Deprecated | Definition | Title/Description                                                |
 | ----------------------------------------------------------------------------- | ------- | ------- | ---------- | ---------- | ---------------------------------------------------------------- |
-| + [serve-traffic](#oneOf_i0_cloud-run_traffic_serve-traffic )                 | No      | boolean | No         | -          | Deploy revision with or without traffic                          |
-| - [static-egress-ip](#oneOf_i0_cloud-run_traffic_static-egress-ip )           | No      | boolean | No         | -          | Use the NAT router when making external requests                 |
-| - [direct-vpc-connection](#oneOf_i0_cloud-run_traffic_direct-vpc-connection ) | No      | boolean | No         | -          | Whether to use the vpc connector or direct connection to the vpc |
+| - [serve-traffic](#oneOf_i0_cloud-run_traffic_serve-traffic )                 | No      | boolean | No         | -          | Deploy revision with or without traffic                          |
+| + [static-egress-ip](#oneOf_i0_cloud-run_traffic_static-egress-ip )           | No      | boolean | No         | -          | Use the NAT router when making external requests                 |
+| + [direct-vpc-connection](#oneOf_i0_cloud-run_traffic_direct-vpc-connection ) | No      | boolean | No         | -          | Whether to use the vpc connector or direct connection to the vpc |
 
 ##### <a name="oneOf_i0_cloud-run_traffic_serve-traffic"></a>1.1.6.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > serve-traffic`
 
 |              |           |
 | ------------ | --------- |
 | **Type**     | `boolean` |
-| **Required** | Yes       |
+| **Required** | No        |
 | **Default**  | `true`    |
 
 **Description:** Deploy revision with or without traffic
@@ -336,7 +336,7 @@ Must be one of:
 |              |           |
 | ------------ | --------- |
 | **Type**     | `boolean` |
-| **Required** | No        |
+| **Required** | Yes       |
 | **Default**  | `true`    |
 
 **Description:** Use the NAT router when making external requests
@@ -346,7 +346,7 @@ Must be one of:
 |              |           |
 | ------------ | --------- |
 | **Type**     | `boolean` |
-| **Required** | No        |
+| **Required** | Yes       |
 | **Default**  | `false`   |
 
 **Description:** Whether to use the vpc connector or direct connection to the vpc
@@ -1455,4 +1455,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-02-18 at 21:02:46 +0100
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-02-20 at 09:32:51 +0100
