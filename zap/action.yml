@@ -44,7 +44,7 @@ runs:
         cp "${{ github.action_path }}/rules.tsv" "${{ github.workspace }}/rules.tsv"
 
     - name: ZAP Scan
-      uses: zaproxy/action-api-scan@v0.8.0
+      uses: zaproxy/action-api-scan@v0.9.0
       env:
         ZAP_AUTH_HEADER_VALUE: 'Bearer ${{ env.IDENTITY_TOKEN }}'
       with:
