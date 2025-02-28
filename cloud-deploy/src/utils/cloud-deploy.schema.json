@@ -393,6 +393,12 @@
               "type": "string",
               "pattern": "^[a-z]{3}$"
             },
+            "auth-proxy": {
+              "description": "Auth proxy to use",
+              "type": "string",
+              "enum": ["envoy-opa", "none"],
+              "default": "envoy-opa"
+            },
             "system-name": {
               "description": "IAM system name defaults to service name",
               "type": "string",

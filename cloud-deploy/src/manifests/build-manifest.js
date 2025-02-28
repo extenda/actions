@@ -628,6 +628,7 @@ const buildManifest = async (
 
   const {
     'permission-prefix': permissionPrefix,
+    'auth-proxy': authProxy = 'envoy-opa',
     resources: opaResources = { cpu: 0.5, memory: '512Mi' },
     'system-name': systemName = name,
     consumers = {},
@@ -688,7 +689,7 @@ const buildManifest = async (
     deployEnv,
     kubernetes ? 'gke' : 'cloudrun',
   );
-  if (permissionPrefix) {
+  if (permissionPrefix && authProxy === 'envoy-opa') {
     opa = true;
     const bundleName = `${permissionPrefix}.${systemName}-${deployEnv}`;
     if (!(await checkIamSystem(bundleName))) {
