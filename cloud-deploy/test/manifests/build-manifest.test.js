@@ -700,6 +700,7 @@ metadata:
     mockFs.restore();
     expect(k8sManifest).toMatchSnapshot();
   });
+
   test('should generate manifest file with correct content for staging', async () => {
     const image = 'example-image:latest';
     const service = {
@@ -1326,6 +1327,152 @@ metadata:
       '',
     );
     const manifest = readFileSync('cloudrun-service.yaml');
+    mockFs.restore();
+    expect(manifest).toMatchSnapshot();
+  });
+
+  test('deploys with envoy auth proxy if set to envoy-opa', async () => {
+    const image = 'example-image:latest';
+    const service = {
+      kubernetes: {
+        type: 'Deployment',
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          cpu: 40,
+        },
+      },
+      security: {
+        'permission-prefix': 'tst',
+        'auth-proxy': 'envoy-opa',
+      },
+      labels: {
+        label1: 'labelValue1',
+        label2: 'labelValue2',
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+            KEY3: '8080',
+            SECRET: 'sm://*/test-secret',
+          },
+        },
+        staging: 'none',
+      },
+    };
+
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'production';
+
+    const securityContainer = {
+      name: 'security-authz',
+      image: 'image',
+      ports: [
+        {
+          name: 'http1',
+          containerPort: 8000,
+        },
+      ],
+      env: [
+        {
+          name: 'ENVOY_PROTOCOL',
+          value: 'http',
+        },
+      ],
+    };
+
+    checkSystem.mockResolvedValueOnce(true);
+    securitySpec.mockResolvedValueOnce(securityContainer);
+
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
+
+    const manifest = readFileSync('k8s(deploy)-manifest.yaml');
+    mockFs.restore();
+    expect(manifest).toMatchSnapshot();
+  });
+
+  test('deploys without envoy auth proxy if set to none', async () => {
+    const image = 'example-image:latest';
+    const service = {
+      kubernetes: {
+        type: 'Deployment',
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          cpu: 40,
+        },
+      },
+      security: {
+        'permission-prefix': 'tst',
+        'auth-proxy': 'none',
+      },
+      labels: {
+        label1: 'labelValue1',
+        label2: 'labelValue2',
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+            KEY3: '8080',
+            SECRET: 'sm://*/test-secret',
+          },
+        },
+        staging: 'none',
+      },
+    };
+
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'production';
+
+    checkSystem.mockResolvedValueOnce(true);
+
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
+
+    const manifest = readFileSync('k8s(deploy)-manifest.yaml');
     mockFs.restore();
     expect(manifest).toMatchSnapshot();
   });
