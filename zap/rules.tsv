@@ -2,7 +2,9 @@
 # Change WARN to IGNORE to ignore rule or FAIL to fail if rule matches
 # Only the rule identifiers are used - the names are just for info
 # You can add your own messages to each rule by appending them after a tab on each line.
-100001	INFO	(Unexpected Content-Type was returned)
-10021	INFO	(X-Content-Type-Options Header Missing)
-10035	INFO	(Strict-Transport-Security Header Not Set)
-90022	INFO	(Application Error Disclosure)
+100001	IGNORE	(Unexpected Content-Type was returned)
+10021	IGNORE	(X-Content-Type-Options Header Missing)
+10035	IGNORE	(Strict-Transport-Security Header Not Set)
+10096	IGNORE	(Timestamp Disclosure)
+90004	IGNORE	(Insufficient Site Isolation Against Spectre Vulnerability)
+90022	IGNORE	(Application Error Disclosure)
