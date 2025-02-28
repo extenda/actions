@@ -937,6 +937,7 @@ must respect the following conditions
 | ------------ | ------------------ |
 | **Type**     | `enum (of string)` |
 | **Required** | No                 |
+| **Default**  | `"envoy-opa"`      |
 
 **Description:** Auth proxy to use
 
@@ -1470,4 +1471,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-02-28 at 11:59:51 +0100
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-02-28 at 12:51:58 +0100
