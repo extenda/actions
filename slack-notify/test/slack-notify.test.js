@@ -1,7 +1,6 @@
 jest.mock('axios');
 jest.mock('@actions/core');
 jest.mock('../../gcp-secret-manager/src/secrets');
-jest.mock('form-data');
 
 const path = require('path');
 const axios = require('axios');
