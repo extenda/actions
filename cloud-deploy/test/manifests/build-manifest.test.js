@@ -558,6 +558,10 @@ metadata:
           name: 'ENVOY_PROTOCOL',
           value: 'http',
         },
+        {
+          name: 'ENVOY_CORS',
+          value: 'false',
+        },
       ],
     };
 

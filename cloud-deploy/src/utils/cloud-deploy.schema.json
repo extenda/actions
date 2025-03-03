@@ -413,6 +413,10 @@
             },
             "cloud-armor": {
               "$ref": "#/$defs/CloudArmor"
+            },
+            "cors-preflight": {
+              "type": "boolean",
+              "default": "false"
             }
           }
         },

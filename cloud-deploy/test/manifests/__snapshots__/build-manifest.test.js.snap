@@ -585,6 +585,8 @@ spec:
           env:
             - name: ENVOY_PROTOCOL
               value: http
+            - name: ENVOY_CORS
+              value: 'false'
             - name: CPU_LIMIT
               value: '0.5'
           resources:
