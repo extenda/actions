@@ -199,7 +199,11 @@ const cloudrunManifestTemplate = async (
         memory: opaMemory,
       },
     };
-    const securityContainer = await securitySpec(protocol, false, corsPreflight);
+    const securityContainer = await securitySpec(
+      protocol,
+      false,
+      corsPreflight,
+    );
     securityContainer.env.push({ name: 'CPU_LIMIT', value: `${opaCpu}` });
     securityContainer.resources = resources;
     securityContainer.volumeMounts = undefined;
@@ -288,7 +292,9 @@ const manifestTemplate = async (
     volumes,
     name,
   );
-  const securityContainer = opa ? await securitySpec(protocol, true, corsPreflight) : {};
+  const securityContainer = opa
+    ? await securitySpec(protocol, true, corsPreflight)
+    : {};
   if (opa) {
     securityContainer.env.push({ name: 'CPU_LIMIT', value: `${opaCpu}` });
   }
