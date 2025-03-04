@@ -100,6 +100,7 @@ const cloudrunManifestTemplate = async (
   baseAnnotations,
   enableCloudNAT,
   enableDirectVPC,
+  corsEnabled,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
 
@@ -198,7 +199,7 @@ const cloudrunManifestTemplate = async (
         memory: opaMemory,
       },
     };
-    const securityContainer = await securitySpec(protocol, false);
+    const securityContainer = await securitySpec(protocol, false, corsEnabled);
     securityContainer.env.push({ name: 'CPU_LIMIT', value: `${opaCpu}` });
     securityContainer.resources = resources;
     securityContainer.volumeMounts = undefined;
@@ -274,6 +275,7 @@ const manifestTemplate = async (
   deployEnv,
   availability,
   baseAnnotations,
+  corsEnabled,
 ) => {
   // initialize manifest components
 
@@ -286,7 +288,9 @@ const manifestTemplate = async (
     volumes,
     name,
   );
-  const securityContainer = opa ? await securitySpec(protocol) : {};
+  const securityContainer = opa
+    ? await securitySpec(protocol, true, corsEnabled)
+    : {};
   if (opa) {
     securityContainer.env.push({ name: 'CPU_LIMIT', value: `${opaCpu}` });
   }
@@ -632,6 +636,7 @@ const buildManifest = async (
     resources: opaResources = { cpu: 0.5, memory: '512Mi' },
     'system-name': systemName = name,
     consumers = {},
+    cors: { enabled: corsEnabled = false } = {},
   } = security === 'none' ? {} : security || {};
 
   const { audiences = [] } = consumers;
@@ -722,6 +727,7 @@ const buildManifest = async (
       deployEnv,
       availability,
       baseAnnotations,
+      corsEnabled,
     );
 
     await connectToCluster(clanName, deployEnv, projectId);
@@ -847,6 +853,7 @@ const buildManifest = async (
       baseAnnotations,
       enableCloudNAT,
       enableDirectVPC,
+      corsEnabled,
     );
     generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));
   }

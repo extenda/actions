@@ -524,6 +524,7 @@ metadata:
       },
       security: {
         'permission-prefix': 'tst',
+        cors: { enabled: false },
       },
       labels: {
         product: 'actions',
@@ -557,6 +558,10 @@ metadata:
         {
           name: 'ENVOY_PROTOCOL',
           value: 'http',
+        },
+        {
+          name: 'ENVOY_CORS',
+          value: 'false',
         },
       ],
     };

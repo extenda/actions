@@ -14,7 +14,11 @@ const volumeMounts = (protocol) => {
   return volumes;
 };
 
-const securitySpec = async (protocol, platformGKE = true) => {
+const securitySpec = async (
+  protocol,
+  platformGKE = true,
+  corsEnabled = false,
+) => {
   const imageTag = process.env.SECURITY_IMAGE_TAG || 'authz';
   return getImageWithSha256(`${IMAGE_NAME}:${imageTag}`).then((image) => {
     const env = [
@@ -25,6 +29,10 @@ const securitySpec = async (protocol, platformGKE = true) => {
       {
         name: 'OPA_CONFIG_SYSTEM_NAME',
         value: process.env.IAM_SYSTEM_NAME || '',
+      },
+      {
+        name: 'ENVOY_CORS',
+        value: corsEnabled ? 'true' : 'false',
       },
     ];
     if (platformGKE) {

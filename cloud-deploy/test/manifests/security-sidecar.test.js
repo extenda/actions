@@ -62,6 +62,10 @@ describe('manifests/security-sidecar', () => {
           value: '',
         },
         {
+          name: 'ENVOY_CORS',
+          value: 'false',
+        },
+        {
           name: 'ENVOY_PROTOCOL',
           value: 'http',
         },
@@ -94,6 +98,10 @@ describe('manifests/security-sidecar', () => {
           value: '',
         },
         {
+          name: 'ENVOY_CORS',
+          value: 'false',
+        },
+        {
           name: 'ENVOY_PROTOCOL',
           value: 'http2',
         },
@@ -110,7 +118,7 @@ describe('manifests/security-sidecar', () => {
   });
 
   test('It sets h2c on ENVOY_PROTOCOL for cloudrun', async () => {
-    const security = await securitySpec('http2', false);
+    const security = await securitySpec('http2', false, true);
     expect(security).toMatchObject({
       env: [
         {
@@ -120,6 +128,10 @@ describe('manifests/security-sidecar', () => {
         {
           name: 'OPA_CONFIG_SYSTEM_NAME',
           value: '',
+        },
+        {
+          name: 'ENVOY_CORS',
+          value: 'true',
         },
         {
           name: 'ENVOY_PROTOCOL',
@@ -132,7 +144,7 @@ describe('manifests/security-sidecar', () => {
 
   test('It supports custom bucket name', async () => {
     process.env.SECURITY_BUCKET_NAME = 'my-bucket';
-    const security = await securitySpec('http', false);
+    const security = await securitySpec('http', false, false);
     expect(security).toMatchObject({
       env: [
         {
@@ -142,6 +154,10 @@ describe('manifests/security-sidecar', () => {
         {
           name: 'OPA_CONFIG_SYSTEM_NAME',
           value: '',
+        },
+        {
+          name: 'ENVOY_CORS',
+          value: 'false',
         },
         {
           name: 'ENVOY_PROTOCOL',

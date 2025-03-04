@@ -413,6 +413,12 @@
             },
             "cloud-armor": {
               "$ref": "#/$defs/CloudArmor"
+            },
+            "cors": {
+              "$ref": "#/$defs/CorsSettings",
+              "default": {
+                "enabled": false
+              }
             }
           }
         },
@@ -516,6 +522,22 @@
         "policy-name": {
           "description": "Cloud armor policy name",
           "type": "string"
+        }
+      }
+    },
+    "CorsSettings": {
+      "title": "CorsSettings",
+      "description": "CORS settings to apply on the security proxy. This settings only work with an auth-proxy",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled"
+      ],
+      "properties": {
+        "enabled": {
+          "description": "Enables CORS preflight requests in the auth proxy",
+          "type": "boolean",
+          "default": false
         }
       }
     },
