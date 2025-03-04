@@ -17,7 +17,7 @@ const volumeMounts = (protocol) => {
 const securitySpec = async (
   protocol,
   platformGKE = true,
-  corsPreflight = false,
+  corsEnabled = false,
 ) => {
   const imageTag = process.env.SECURITY_IMAGE_TAG || 'authz';
   return getImageWithSha256(`${IMAGE_NAME}:${imageTag}`).then((image) => {
@@ -32,7 +32,7 @@ const securitySpec = async (
       },
       {
         name: 'ENVOY_CORS',
-        value: corsPreflight ? 'true' : 'false',
+        value: corsEnabled ? 'true' : 'false',
       },
     ];
     if (platformGKE) {

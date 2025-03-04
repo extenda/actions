@@ -100,7 +100,7 @@ const cloudrunManifestTemplate = async (
   baseAnnotations,
   enableCloudNAT,
   enableDirectVPC,
-  corsPreflight,
+  corsEnabled,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
 
@@ -202,7 +202,7 @@ const cloudrunManifestTemplate = async (
     const securityContainer = await securitySpec(
       protocol,
       false,
-      corsPreflight,
+      corsEnabled,
     );
     securityContainer.env.push({ name: 'CPU_LIMIT', value: `${opaCpu}` });
     securityContainer.resources = resources;
@@ -279,7 +279,7 @@ const manifestTemplate = async (
   deployEnv,
   availability,
   baseAnnotations,
-  corsPreflight,
+  corsEnabled,
 ) => {
   // initialize manifest components
 
@@ -293,7 +293,7 @@ const manifestTemplate = async (
     name,
   );
   const securityContainer = opa
-    ? await securitySpec(protocol, true, corsPreflight)
+    ? await securitySpec(protocol, true, corsEnabled)
     : {};
   if (opa) {
     securityContainer.env.push({ name: 'CPU_LIMIT', value: `${opaCpu}` });
@@ -640,7 +640,7 @@ const buildManifest = async (
     resources: opaResources = { cpu: 0.5, memory: '512Mi' },
     'system-name': systemName = name,
     consumers = {},
-    'cors-preflight': corsPreflight = false,
+    cors: { enabled: corsEnabled = false } = {},
   } = security === 'none' ? {} : security || {};
 
   const { audiences = [] } = consumers;
@@ -731,7 +731,7 @@ const buildManifest = async (
       deployEnv,
       availability,
       baseAnnotations,
-      corsPreflight,
+      corsEnabled,
     );
 
     await connectToCluster(clanName, deployEnv, projectId);
@@ -857,7 +857,7 @@ const buildManifest = async (
       baseAnnotations,
       enableCloudNAT,
       enableDirectVPC,
-      corsPreflight,
+      corsEnabled,
     );
     generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));
   }

@@ -524,6 +524,7 @@ metadata:
       },
       security: {
         'permission-prefix': 'tst',
+        cors: { enabled: false },
       },
       labels: {
         product: 'actions',

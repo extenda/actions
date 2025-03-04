@@ -64,7 +64,8 @@
       - [4.2.4.2. Property `CloudDeploy > security > oneOf > IAMSettings > resources > memory`](#security_oneOf_i1_resources_memory)
     - [4.2.5. Property `CloudDeploy > security > oneOf > IAMSettings > cloud-armor`](#security_oneOf_i1_cloud-armor)
       - [4.2.5.1. Property `CloudDeploy > security > oneOf > IAMSettings > cloud-armor > policy-name`](#security_oneOf_i1_cloud-armor_policy-name)
-    - [4.2.6. Property `CloudDeploy > security > oneOf > IAMSettings > cors-preflight`](#security_oneOf_i1_cors-preflight)
+    - [4.2.6. Property `CloudDeploy > security > oneOf > IAMSettings > cors`](#security_oneOf_i1_cors)
+      - [4.2.6.1. Property `CloudDeploy > security > oneOf > IAMSettings > cors > enabled`](#security_oneOf_i1_cors_enabled)
   - [4.3. Property `CloudDeploy > security > oneOf > IAMBindingSettings`](#security_oneOf_i2)
     - [4.3.1. Property `CloudDeploy > security > oneOf > IAMBindingSettings > cloud-armor`](#security_oneOf_i2_cloud-armor)
     - [4.3.2. Property `CloudDeploy > security > oneOf > IAMBindingSettings > consumers`](#security_oneOf_i2_consumers)
@@ -861,14 +862,14 @@ must respect the following conditions
 
 **Description:** IAM Security settings
 
-| Property                                                     | Pattern | Type             | Deprecated | Definition            | Title/Description                        |
-| ------------------------------------------------------------ | ------- | ---------------- | ---------- | --------------------- | ---------------------------------------- |
-| + [permission-prefix](#security_oneOf_i1_permission-prefix ) | No      | string           | No         | -                     | IAM permission prefix                    |
-| - [auth-proxy](#security_oneOf_i1_auth-proxy )               | No      | enum (of string) | No         | -                     | Auth proxy to use                        |
-| - [system-name](#security_oneOf_i1_system-name )             | No      | string           | No         | -                     | IAM system name defaults to service name |
-| - [resources](#security_oneOf_i1_resources )                 | No      | object           | No         | In #/$defs/Resources  | The requested resources                  |
-| - [cloud-armor](#security_oneOf_i1_cloud-armor )             | No      | object           | No         | In #/$defs/CloudArmor | Use cloud armor policy                   |
-| - [cors-preflight](#security_oneOf_i1_cors-preflight )       | No      | boolean          | No         | -                     | -                                        |
+| Property                                                     | Pattern | Type             | Deprecated | Definition              | Title/Description                                                                        |
+| ------------------------------------------------------------ | ------- | ---------------- | ---------- | ----------------------- | ---------------------------------------------------------------------------------------- |
+| + [permission-prefix](#security_oneOf_i1_permission-prefix ) | No      | string           | No         | -                       | IAM permission prefix                                                                    |
+| - [auth-proxy](#security_oneOf_i1_auth-proxy )               | No      | enum (of string) | No         | -                       | Auth proxy to use                                                                        |
+| - [system-name](#security_oneOf_i1_system-name )             | No      | string           | No         | -                       | IAM system name defaults to service name                                                 |
+| - [resources](#security_oneOf_i1_resources )                 | No      | object           | No         | In #/$defs/Resources    | The requested resources                                                                  |
+| - [cloud-armor](#security_oneOf_i1_cloud-armor )             | No      | object           | No         | In #/$defs/CloudArmor   | Use cloud armor policy                                                                   |
+| - [cors](#security_oneOf_i1_cors )                           | No      | object           | No         | In #/$defs/CorsSettings | CORS settings to apply on the security proxy. This settings only work with an auth-proxy |
 
 #### <a name="security_oneOf_i1_permission-prefix"></a>4.2.1. Property `CloudDeploy > security > oneOf > IAMSettings > permission-prefix`
 
@@ -978,13 +979,31 @@ Must be one of:
 
 **Description:** Cloud armor policy name
 
-#### <a name="security_oneOf_i1_cors-preflight"></a>4.2.6. Property `CloudDeploy > security > oneOf > IAMSettings > cors-preflight`
+#### <a name="security_oneOf_i1_cors"></a>4.2.6. Property `CloudDeploy > security > oneOf > IAMSettings > cors`
+
+|                           |                                                         |
+| ------------------------- | ------------------------------------------------------- |
+| **Type**                  | `object`                                                |
+| **Required**              | No                                                      |
+| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
+| **Default**               | `{"enabled": false}`                                    |
+| **Defined in**            | #/$defs/CorsSettings                                    |
+
+**Description:** CORS settings to apply on the security proxy. This settings only work with an auth-proxy
+
+| Property                                      | Pattern | Type    | Deprecated | Definition | Title/Description                                 |
+| --------------------------------------------- | ------- | ------- | ---------- | ---------- | ------------------------------------------------- |
+| + [enabled](#security_oneOf_i1_cors_enabled ) | No      | boolean | No         | -          | Enables CORS preflight requests in the auth proxy |
+
+##### <a name="security_oneOf_i1_cors_enabled"></a>4.2.6.1. Property `CloudDeploy > security > oneOf > IAMSettings > cors > enabled`
 
 |              |           |
 | ------------ | --------- |
 | **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `"false"` |
+| **Required** | Yes       |
+| **Default**  | `false`   |
+
+**Description:** Enables CORS preflight requests in the auth proxy
 
 ### <a name="security_oneOf_i2"></a>4.3. Property `CloudDeploy > security > oneOf > IAMBindingSettings`
 
@@ -1417,4 +1436,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-03-03 at 16:26:09 +0100
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-03-04 at 13:01:44 +0100
