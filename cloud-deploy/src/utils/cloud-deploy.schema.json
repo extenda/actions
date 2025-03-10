@@ -272,6 +272,7 @@
     "Monitoring": {
       "title": "Monitoring",
       "type": "object",
+      "minProperties": 1,
       "properties": {
         "prometheus": {
           "type": "object",
@@ -293,6 +294,81 @@
               "type": "integer",
               "description": "The scrape port",
               "default": 8080
+            }
+          },
+          "additionalProperties": false
+        },
+        "open-telemetry": {
+          "type": "object",
+          "properties": {
+            "set-environment-variables": {
+              "description": "Set the Open Telemetry configuration as environment variables.",
+              "type": "boolean",
+              "default": true
+            },
+            "config": {
+              "oneOf": [
+                {
+                  "description": "Auto configure OTEL with default values.",
+                  "type": "string",
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "description": "OTEL configuration with custom settings.",
+                  "type": "object",
+                  "properties": {
+                    "sampler": {
+                      "description": "The trace sampler",
+                      "type": "string",
+                      "enum": [
+                        "always_on",
+                        "always_off",
+                        "traceidratio",
+                        "parentbased_always_on",
+                        "parentbased_always_off",
+                        "parentbased_traceidratio"
+                      ],
+                      "default": "parentbased_always_off"
+                    },
+                    "sampler-ratio": {
+                      "description": "The sampler ratio for ratio-based samplers",
+                      "type": "number",
+                      "minimum": 0.0,
+                      "maximum": 1.0,
+                      "default": 1.0
+                    },
+                    "propagators": {
+                      "description": "The context propagators to be used.",
+                      "type": "array",
+                      "item": {
+                        "type": "string",
+                        "enum": [
+                          "tracecontext",
+                          "baggage",
+                          "b3",
+                          "b3multi"
+                        ]
+                      },
+                      "default": [
+                        "tracecontext",
+                        "baggage"
+                      ]
+                    },
+                    "otlp-exporter-protocol": {
+                      "description": "The OTLP exporter protocol to use.",
+                      "type": "string",
+                      "enum": [
+                        "http/protobuf",
+                        "grpc"
+                      ],
+                      "default": "grpc"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
             }
           },
           "additionalProperties": false
