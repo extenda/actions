@@ -26,6 +26,15 @@
         - [1.1.12.1.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > interval`](#oneOf_i0_cloud-run_monitoring_prometheus_interval)
         - [1.1.12.1.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > path`](#oneOf_i0_cloud-run_monitoring_prometheus_path)
         - [1.1.12.1.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > port`](#oneOf_i0_cloud-run_monitoring_prometheus_port)
+      - [1.1.12.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry`](#oneOf_i0_cloud-run_monitoring_open-telemetry)
+        - [1.1.12.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > set-environment-variables`](#oneOf_i0_cloud-run_monitoring_open-telemetry_set-environment-variables)
+        - [1.1.12.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config)
+          - [1.1.12.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 0`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i0)
+          - [1.1.12.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1)
+            - [1.1.12.2.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > sampler`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_sampler)
+            - [1.1.12.2.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > sampler-ratio`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_sampler-ratio)
+            - [1.1.12.2.2.2.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > propagators`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_propagators)
+            - [1.1.12.2.2.2.4. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > otlp-exporter-protocol`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_otlp-exporter-protocol)
 - [2. Property `CloudDeploy > oneOf > Kubernetes`](#oneOf_i1)
   - [2.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes`](#oneOf_i1_kubernetes)
     - [2.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > service`](#oneOf_i1_kubernetes_service)
@@ -401,9 +410,10 @@ Must be one of:
 | **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
 | **Defined in**            | #/$defs/Monitoring                                      |
 
-| Property                                                   | Pattern | Type   | Deprecated | Definition | Title/Description |
-| ---------------------------------------------------------- | ------- | ------ | ---------- | ---------- | ----------------- |
-| - [prometheus](#oneOf_i0_cloud-run_monitoring_prometheus ) | No      | object | No         | -          | -                 |
+| Property                                                           | Pattern | Type   | Deprecated | Definition | Title/Description |
+| ------------------------------------------------------------------ | ------- | ------ | ---------- | ---------- | ----------------- |
+| - [prometheus](#oneOf_i0_cloud-run_monitoring_prometheus )         | No      | object | No         | -          | -                 |
+| - [open-telemetry](#oneOf_i0_cloud-run_monitoring_open-telemetry ) | No      | object | No         | -          | -                 |
 
 ##### <a name="oneOf_i0_cloud-run_monitoring_prometheus"></a>1.1.12.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus`
 
@@ -451,6 +461,136 @@ Must be one of:
 | **Default**  | `8080`    |
 
 **Description:** The scrape port
+
+##### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry"></a>1.1.12.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry`
+
+|                           |                                                         |
+| ------------------------- | ------------------------------------------------------- |
+| **Type**                  | `object`                                                |
+| **Required**              | No                                                      |
+| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
+
+| Property                                                                                                | Pattern | Type        | Deprecated | Definition | Title/Description                                              |
+| ------------------------------------------------------------------------------------------------------- | ------- | ----------- | ---------- | ---------- | -------------------------------------------------------------- |
+| - [set-environment-variables](#oneOf_i0_cloud-run_monitoring_open-telemetry_set-environment-variables ) | No      | boolean     | No         | -          | Set the Open Telemetry configuration as environment variables. |
+| - [config](#oneOf_i0_cloud-run_monitoring_open-telemetry_config )                                       | No      | Combination | No         | -          | -                                                              |
+
+##### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_set-environment-variables"></a>1.1.12.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > set-environment-variables`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Set the Open Telemetry configuration as environment variables.
+
+##### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config"></a>1.1.12.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config`
+
+|                           |                                                                           |
+| ------------------------- | ------------------------------------------------------------------------- |
+| **Type**                  | `combining`                                                               |
+| **Required**              | No                                                                        |
+| **Additional properties** | [[Any type: allowed]](# "Additional Properties of any type are allowed.") |
+
+| One of(Option)                                                          |
+| ----------------------------------------------------------------------- |
+| [item 0](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i0) |
+| [item 1](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1) |
+
+##### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i0"></a>1.1.12.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 0`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+
+**Description:** Auto configure OTEL with default values.
+
+Must be one of:
+* "auto"
+
+##### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1"></a>1.1.12.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1`
+
+|                           |                                                         |
+| ------------------------- | ------------------------------------------------------- |
+| **Type**                  | `object`                                                |
+| **Required**              | No                                                      |
+| **Additional properties** | [[Not allowed]](# "Additional Properties not allowed.") |
+
+**Description:** OTEL configuration with custom settings.
+
+| Property                                                                                                          | Pattern | Type             | Deprecated | Definition | Title/Description                          |
+| ----------------------------------------------------------------------------------------------------------------- | ------- | ---------------- | ---------- | ---------- | ------------------------------------------ |
+| - [sampler](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_sampler )                               | No      | enum (of string) | No         | -          | The trace sampler                          |
+| - [sampler-ratio](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_sampler-ratio )                   | No      | number           | No         | -          | The sampler ratio for ratio-based samplers |
+| - [propagators](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_propagators )                       | No      | array            | No         | -          | The context propagators to be used.        |
+| - [otlp-exporter-protocol](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_otlp-exporter-protocol ) | No      | enum (of string) | No         | -          | The OTLP exporter protocol to use.         |
+
+##### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_sampler"></a>1.1.12.2.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > sampler`
+
+|              |                            |
+| ------------ | -------------------------- |
+| **Type**     | `enum (of string)`         |
+| **Required** | No                         |
+| **Default**  | `"parentbased_always_off"` |
+
+**Description:** The trace sampler
+
+Must be one of:
+* "always_on"
+* "always_off"
+* "traceidratio"
+* "parentbased_always_on"
+* "parentbased_always_off"
+* "parentbased_traceidratio"
+
+##### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_sampler-ratio"></a>1.1.12.2.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > sampler-ratio`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `number` |
+| **Required** | No       |
+| **Default**  | `1.0`    |
+
+**Description:** The sampler ratio for ratio-based samplers
+
+| Restrictions |          |
+| ------------ | -------- |
+| **Minimum**  | &ge; 0.0 |
+| **Maximum**  | &le; 1.0 |
+
+##### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_propagators"></a>1.1.12.2.2.2.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > propagators`
+
+|              |                               |
+| ------------ | ----------------------------- |
+| **Type**     | `array`                       |
+| **Required** | No                            |
+| **Default**  | `["tracecontext", "baggage"]` |
+
+**Description:** The context propagators to be used.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+##### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_otlp-exporter-protocol"></a>1.1.12.2.2.2.4. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > otlp-exporter-protocol`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+| **Default**  | `"grpc"`           |
+
+**Description:** The OTLP exporter protocol to use.
+
+Must be one of:
+* "http/protobuf"
+* "grpc"
 
 ## <a name="oneOf_i1"></a>2. Property `CloudDeploy > oneOf > Kubernetes`
 
@@ -1436,4 +1576,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-03-04 at 13:01:44 +0100
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-03-10 at 11:32:24 +0100

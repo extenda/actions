@@ -527,4 +527,57 @@ environments:
       },
     });
   });
+  test('It can read default monitoring config', async () => {
+    mockFs({
+      'cloud-deploy.yaml': `
+cloud-run:
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    concurrency: 80
+  monitoring:
+    prometheus:
+      interval: 60
+    open-telemetry:
+      config: auto
+
+security: none
+
+labels:
+  component: jest
+  product: my-product
+
+environments:
+  production:
+    min-instances: 1
+    domain-mappings:
+      - my-service.retailsvc.com
+      - my-service.retailsvc-test.com
+    env: &env
+      KEY: value
+  staging: none
+      `,
+    });
+
+    const spec = loadServiceDefinition('cloud-deploy.yaml');
+    expect(spec).toMatchObject({
+      'cloud-run': {
+        service: 'my-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        monitoring: {
+          prometheus: {
+            interval: 60,
+          },
+          'open-telemetry': {},
+        },
+      },
+      security: 'none',
+    });
+  });
 });
