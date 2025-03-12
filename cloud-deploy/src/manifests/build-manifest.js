@@ -66,6 +66,10 @@ const configureNetworking = async (
   }
   if (enableCloudNAT) {
     annotations['run.googleapis.com/vpc-access-egress'] = 'all-traffic';
+    if (enableDirectVPC) {
+      annotations['run.googleapis.com/network-interfaces'] =
+        '[{"network":"clan-network","subnetwork":"k8s-subnet"}]';
+    }
   } else {
     annotations['run.googleapis.com/vpc-access-egress'] = 'private-ranges-only';
   }
