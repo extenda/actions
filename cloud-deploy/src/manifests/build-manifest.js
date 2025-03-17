@@ -209,12 +209,14 @@ const buildManifest = async (
     }
   }
 
-  // Add open telemetry config to the user-container.
-  Object.entries(userContainerCollectorEnv(name, image, monitoring)).forEach(
-    ([key, value]) => {
-      envArray.push({ name: key, value });
-    },
-  );
+  if (deployEnv !== 'staging') {
+    // Add open telemetry config to the user-container.
+    Object.entries(userContainerCollectorEnv(name, image, monitoring)).forEach(
+      ([key, value]) => {
+        envArray.push({ name: key, value });
+      },
+    );
+  }
 
   const serviceAccount = `${name}@${projectId}.iam.gserviceaccount.com`;
 
