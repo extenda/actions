@@ -86,7 +86,7 @@ const gkeManifestTemplate = async (
   baseAnnotations['cloud.google.com/neg'] =
     `{"exposed_ports":{"80":{"name":"${name}-neg"}}}`;
 
-  var collectorContainer = null;
+  let collectorContainer = null;
   if (monitoring && deployEnv !== 'staging') {
     // We only collect metrics in prod.
     collectorContainer = await kubernetesCollector(monitoring);
