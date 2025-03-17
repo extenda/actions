@@ -300,6 +300,9 @@
         },
         "open-telemetry": {
           "type": "object",
+          "required": [
+            "config"
+          ],
           "properties": {
             "set-environment-variables": {
               "description": "Set the Open Telemetry configuration as environment variables.",
