@@ -1174,6 +1174,69 @@ metadata:
     expect(podMonitorManifest).toMatchSnapshot();
   });
 
+  test('It generates a collector if OTEL configured', async () => {
+    const image = 'example-image:latest';
+    const service = {
+      kubernetes: {
+        type: 'Deployment',
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          cpu: 40,
+        },
+        monitoring: {
+          'open-telemetry': {
+            config: 'auto',
+          },
+        },
+      },
+      security: 'none',
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+            KEY3: '8080',
+            SECRET: 'sm://*/test-secret',
+          },
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'production';
+
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
+
+    const k8sManifest = readFileSync('k8s(deploy)-manifest.yaml');
+
+    // Snapshot test for k8s-manifest.yaml.
+    mockFs.restore();
+    expect(k8sManifest).toMatchSnapshot();
+  });
+
   test('It generates a collector sidecar if monitoring is configured on Cloud Run', async () => {
     const image = 'example-image:latest';
     const service = {
@@ -1190,6 +1253,63 @@ metadata:
         monitoring: {
           prometheus: {
             interval: 15,
+          },
+        },
+      },
+      security: 'none',
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {},
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'production';
+
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
+    const manifest = readFileSync('cloudrun-service.yaml');
+    mockFs.restore();
+    expect(manifest).toMatchSnapshot();
+  });
+
+  test('It generates a OTEL collector sidecar if OTEL is configured on Cloud Run', async () => {
+    const image = 'example-image:latest';
+    const service = {
+      'cloud-run': {
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          concurrency: 40,
+        },
+        monitoring: {
+          prometheus: {
+            interval: 15,
+          },
+          'open-telemetry': {
+            config: 'auto',
           },
         },
       },
