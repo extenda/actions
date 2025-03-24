@@ -1,6 +1,6 @@
 const getImageWithSha256 = require('./image-sha256');
 
-const getConfig = (monitoring) => {
+const getConfig = (serviceName, monitoring) => {
   const config = {
     prometheus: {
       enabled: false,
@@ -20,6 +20,7 @@ const getConfig = (monitoring) => {
       path,
       port,
       collectorEnv: {
+        SERVICE_NAME: serviceName,
         PROMETHEUS_SCRAPE_PATH: path,
         PROMETHEUS_SCRAPE_PORT: port,
         PROMETHEUS_SCRAPE_INTERVAL: interval,
@@ -49,6 +50,7 @@ const getConfig = (monitoring) => {
       propagators,
       otlpProtocol,
       collectorEnv: {
+        SERVICE_NAME: serviceName,
         CONFIG_OTEL: 'otel',
       },
     };
@@ -57,8 +59,8 @@ const getConfig = (monitoring) => {
   return config;
 };
 
-const cloudRunCollector = async (monitoring) => {
-  const config = getConfig(monitoring || {});
+const cloudRunCollector = async (serviceName, monitoring) => {
+  const config = getConfig(serviceName, monitoring || {});
 
   if (!config.prometheus.enabled && !config.openTelemetry.enabled) {
     return null;
@@ -90,6 +92,15 @@ const cloudRunCollector = async (monitoring) => {
       name,
       value: `${value}`,
     })),
+    startupProbe: {
+      tcpSocket: {
+        port: 13133,
+      },
+      initialDelaySeconds: 0,
+      periodSeconds: 240,
+      failureThreshold: 1,
+      timeoutSeconds: 240,
+    },
     livenessProbe: {
       httpGet: {
         path: '/health',
@@ -103,8 +114,8 @@ const cloudRunCollector = async (monitoring) => {
   };
 };
 
-const kubernetesCollector = async (monitoring) => {
-  const config = getConfig(monitoring || {});
+const kubernetesCollector = async (serviceName, monitoring) => {
+  const config = getConfig(serviceName, monitoring || {});
   if (!config.openTelemetry.enabled) {
     // We use PodMonitorResource for a managed GMP collector per node in GKE.
     return null;
@@ -144,7 +155,7 @@ const kubernetesCollector = async (monitoring) => {
 };
 
 const userContainerCollectorEnv = (serviceName, serviceImage, monitoring) => {
-  const { openTelemetry } = getConfig(monitoring);
+  const { openTelemetry } = getConfig(serviceName, monitoring);
 
   if (openTelemetry.enabled && openTelemetry.autoEnvironmentVariables) {
     const { otlpProtocol, sampler } = openTelemetry;

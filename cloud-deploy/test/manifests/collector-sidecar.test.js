@@ -19,11 +19,11 @@ describe('collector-sidecar', () => {
     jest.clearAllMocks();
   });
   test('It returns null if interval is missing', async () => {
-    const container = await cloudRunCollector(undefined);
+    const container = await cloudRunCollector('test', undefined);
     expect(container).toBeNull();
   });
   test('It creates a Cloud Run collector container for GMP', async () => {
-    const container = await cloudRunCollector({
+    const container = await cloudRunCollector('test', {
       prometheus: {
         path: '/metrics',
         port: 8081,
@@ -40,11 +40,21 @@ describe('collector-sidecar', () => {
         },
       },
       env: [
+        { name: 'SERVICE_NAME', value: 'test' },
         { name: 'PROMETHEUS_SCRAPE_PATH', value: '/metrics' },
         { name: 'PROMETHEUS_SCRAPE_PORT', value: '8081' },
         { name: 'PROMETHEUS_SCRAPE_INTERVAL', value: '15' },
         { name: 'CONFIG_PROMETHEUS', value: 'gmp' },
       ],
+      startupProbe: {
+        tcpSocket: {
+          port: 13133,
+        },
+        initialDelaySeconds: 0,
+        periodSeconds: 240,
+        timeoutSeconds: 240,
+        failureThreshold: 1,
+      },
       livenessProbe: {
         httpGet: {
           path: '/health',
@@ -58,7 +68,7 @@ describe('collector-sidecar', () => {
     });
   });
   test('It does not create a GKE collector for GMP', async () => {
-    const container = await kubernetesCollector({
+    const container = await kubernetesCollector('test', {
       prometheus: {
         interval: 60,
       },
@@ -66,7 +76,7 @@ describe('collector-sidecar', () => {
     expect(container).toBeNull();
   });
   test('It creates GKE collector for Open Telemetry, but not GMP', async () => {
-    const container = await kubernetesCollector({
+    const container = await kubernetesCollector('test', {
       prometheus: {
         interval: 60,
       },
@@ -85,10 +95,8 @@ describe('collector-sidecar', () => {
         },
       },
       env: [
-        {
-          name: 'CONFIG_OTEL',
-          value: 'otel',
-        },
+        { name: 'SERVICE_NAME', value: 'test' },
+        { name: 'CONFIG_OTEL', value: 'otel' },
       ],
       readinessProbe: {
         httpGet: {

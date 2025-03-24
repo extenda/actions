@@ -304,6 +304,8 @@ spec:
               cpu: '0.1'
               memory: 128Mi
           env:
+            - name: SERVICE_NAME
+              value: example-service
             - name: PROMETHEUS_SCRAPE_PATH
               value: /metrics
             - name: PROMETHEUS_SCRAPE_PORT
@@ -314,6 +316,13 @@ spec:
               value: gmp
             - name: CONFIG_OTEL
               value: otel
+          startupProbe:
+            tcpSocket:
+              port: 13133
+            initialDelaySeconds: 0
+            periodSeconds: 240
+            failureThreshold: 1
+            timeoutSeconds: 240
           livenessProbe:
             httpGet:
               path: /health
@@ -445,6 +454,8 @@ spec:
               cpu: '0.1'
               memory: 128Mi
           env:
+            - name: SERVICE_NAME
+              value: example-service
             - name: CONFIG_OTEL
               value: otel
           readinessProbe:
@@ -553,6 +564,8 @@ spec:
               cpu: '0.1'
               memory: 128Mi
           env:
+            - name: SERVICE_NAME
+              value: example-service
             - name: PROMETHEUS_SCRAPE_PATH
               value: /metrics
             - name: PROMETHEUS_SCRAPE_PORT
@@ -561,6 +574,13 @@ spec:
               value: '15'
             - name: CONFIG_PROMETHEUS
               value: gmp
+          startupProbe:
+            tcpSocket:
+              port: 13133
+            initialDelaySeconds: 0
+            periodSeconds: 240
+            failureThreshold: 1
+            timeoutSeconds: 240
           livenessProbe:
             httpGet:
               path: /health

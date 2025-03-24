@@ -89,7 +89,7 @@ const gkeManifestTemplate = async (
   let collectorContainer = null;
   if (monitoring && deployEnv !== 'staging') {
     // We only collect metrics in prod.
-    collectorContainer = await kubernetesCollector(monitoring);
+    collectorContainer = await kubernetesCollector(name, monitoring);
   }
 
   // setup manifest

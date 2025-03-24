@@ -165,7 +165,7 @@ const cloudrunManifestTemplate = async (
 
   if (monitoring && deployEnv !== 'staging') {
     // We only collect metrics in prod.
-    const collectorContainer = await cloudRunCollector(monitoring);
+    const collectorContainer = await cloudRunCollector(name, monitoring);
     if (collectorContainer) {
       containers.push(collectorContainer);
       // The collector should start after and shutdown before the user-container.
