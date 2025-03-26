@@ -59,6 +59,8 @@ const getConfig = (serviceName, monitoring) => {
   return config;
 };
 
+const imageTag = () => process.env.OTEL_COLLECTOR_IMAGE_TAG || 'v2.0.0';
+
 const cloudRunCollector = async (serviceName, monitoring) => {
   const config = getConfig(serviceName, monitoring || {});
 
@@ -76,7 +78,7 @@ const cloudRunCollector = async (serviceName, monitoring) => {
   }
 
   const image = await getImageWithSha256(
-    'eu.gcr.io/extenda/otel-collector:v2.0.0',
+    `eu.gcr.io/extenda/otel-collector:${imageTag()}`,
   );
 
   return {
@@ -122,7 +124,7 @@ const kubernetesCollector = async (serviceName, monitoring) => {
   }
 
   const image = await getImageWithSha256(
-    'eu.gcr.io/extenda/otel-collector:v2.0.0',
+    `eu.gcr.io/extenda/otel-collector:${imageTag()}`,
   );
 
   const env = config.openTelemetry.collectorEnv;
