@@ -19,6 +19,10 @@ inputs:
   version:
     description: The semantic version number to create a release for
     required: true
+  should-release:
+    description: Whether to release the version
+    required: false
+    default: "false"
 runs:
   using: node20
   main: dist/index.js

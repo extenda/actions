@@ -49,6 +49,7 @@ const createJiraRelease = async ({
   projectKey,
   component,
   version,
+  shouldRelease,
 }) => {
   const client = new JiraClient({
     protocol,
@@ -85,7 +86,7 @@ const createJiraRelease = async ({
   });
   await Promise.all(requests);
 
-  if (!release.released) {
+  if (!release.released && shouldRelease === 'true') {
     core.info(`Release version ${name}`);
     await client
       .updateVersion({
