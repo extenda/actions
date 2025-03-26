@@ -285,11 +285,11 @@ spec:
             - name: OTEL_TRACES_SAMPLER
               value: parentbased_always_off
             - name: OTEL_PROPAGATORS
-              value: tracecontext,baggage
+              value: b3,tracecontext,baggage
             - name: OTEL_EXPORTER_OTLP_PROTOCOL
               value: grpc
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: http://localhost:4318
+              value: http://localhost:4317
           startupProbe:
             tcpSocket:
               port: 8080
@@ -437,11 +437,11 @@ spec:
             - name: OTEL_TRACES_SAMPLER
               value: parentbased_always_off
             - name: OTEL_PROPAGATORS
-              value: tracecontext,baggage
+              value: b3,tracecontext,baggage
             - name: OTEL_EXPORTER_OTLP_PROTOCOL
               value: grpc
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: http://localhost:4318
+              value: http://localhost:4317
             - name: PORT
               value: '8080'
             - name: K_SERVICE

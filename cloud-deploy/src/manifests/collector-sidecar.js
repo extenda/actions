@@ -36,7 +36,7 @@ const getConfig = (serviceName, monitoring) => {
         config: {
           sampler = 'parentbased_always_off',
           'sampler-ratio': samplerRatio = 1.0,
-          propagators = ['tracecontext', 'baggage'],
+          propagators = ['b3', 'tracecontext', 'baggage'],
           'otlp-exporter-protocol': otlpProtocol = 'grpc',
         },
       },
@@ -163,8 +163,8 @@ const userContainerCollectorEnv = (serviceName, serviceImage, monitoring) => {
     const { otlpProtocol, sampler } = openTelemetry;
     const endpoint =
       otlpProtocol === 'grpc'
-        ? 'http://localhost:4318'
-        : 'http://localhost:4317';
+        ? 'http://localhost:4317'
+        : 'http://localhost:4318';
     const env = {
       OTEL_SERVICE_NAME: serviceName,
       OTEL_RESOURCE_ATTRIBUTES: `service.version=${serviceImage.split(':')[1] || 'v0.0.1-local'}`,

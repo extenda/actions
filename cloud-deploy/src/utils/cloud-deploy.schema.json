@@ -355,6 +355,7 @@
                         ]
                       },
                       "default": [
+                        "b3",
                         "tracecontext",
                         "baggage"
                       ]

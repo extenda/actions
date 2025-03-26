@@ -123,9 +123,9 @@ describe('collector-sidecar', () => {
       OTEL_METRICS_EXPORTER: 'otlp',
       OTEL_LOGS_EXPORTER: 'none',
       OTEL_TRACES_SAMPLER: 'parentbased_always_off',
-      OTEL_PROPAGATORS: 'tracecontext,baggage',
+      OTEL_PROPAGATORS: 'b3,tracecontext,baggage',
       OTEL_EXPORTER_OTLP_PROTOCOL: 'grpc',
-      OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4318',
+      OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4317',
     });
   });
   test('It sets custom OTEL environment for user-container', () => {
@@ -149,7 +149,7 @@ describe('collector-sidecar', () => {
       OTEL_TRACES_SAMPLER_ARG: '0.5',
       OTEL_PROPAGATORS: 'tracecontext',
       OTEL_EXPORTER_OTLP_PROTOCOL: 'http/protobuf',
-      OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4317',
+      OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4318',
     });
   });
   test('It does not set OTEL environment if OTEL is not enabled', async () => {
