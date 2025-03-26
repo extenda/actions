@@ -59,7 +59,7 @@ const getConfig = (serviceName, monitoring) => {
   return config;
 };
 
-const imageTag = () => process.env.OTEL_COLLECTOR_IMAGE_TAG || 'v2.0.0';
+const imageTag = () => process.env.OTEL_COLLECTOR_IMAGE_TAG || 'stable';
 
 const cloudRunCollector = async (serviceName, monitoring) => {
   const config = getConfig(serviceName, monitoring || {});
