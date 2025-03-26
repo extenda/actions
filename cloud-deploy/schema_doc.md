@@ -473,7 +473,7 @@ Must be one of:
 | Property                                                                                                | Pattern | Type        | Deprecated | Definition | Title/Description                                              |
 | ------------------------------------------------------------------------------------------------------- | ------- | ----------- | ---------- | ---------- | -------------------------------------------------------------- |
 | - [set-environment-variables](#oneOf_i0_cloud-run_monitoring_open-telemetry_set-environment-variables ) | No      | boolean     | No         | -          | Set the Open Telemetry configuration as environment variables. |
-| - [config](#oneOf_i0_cloud-run_monitoring_open-telemetry_config )                                       | No      | Combination | No         | -          | -                                                              |
+| + [config](#oneOf_i0_cloud-run_monitoring_open-telemetry_config )                                       | No      | Combination | No         | -          | -                                                              |
 
 ##### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_set-environment-variables"></a>1.1.12.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > set-environment-variables`
 
@@ -490,7 +490,7 @@ Must be one of:
 |                           |                                                                           |
 | ------------------------- | ------------------------------------------------------------------------- |
 | **Type**                  | `combining`                                                               |
-| **Required**              | No                                                                        |
+| **Required**              | Yes                                                                       |
 | **Additional properties** | [[Any type: allowed]](# "Additional Properties of any type are allowed.") |
 
 | One of(Option)                                                          |
@@ -562,11 +562,11 @@ Must be one of:
 
 ##### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_propagators"></a>1.1.12.2.2.2.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > propagators`
 
-|              |                               |
-| ------------ | ----------------------------- |
-| **Type**     | `array`                       |
-| **Required** | No                            |
-| **Default**  | `["tracecontext", "baggage"]` |
+|              |                                     |
+| ------------ | ----------------------------------- |
+| **Type**     | `array`                             |
+| **Required** | No                                  |
+| **Default**  | `["b3", "tracecontext", "baggage"]` |
 
 **Description:** The context propagators to be used.
 
@@ -1576,4 +1576,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-03-24 at 14:04:20 +0100
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-03-26 at 22:04:53 +0100

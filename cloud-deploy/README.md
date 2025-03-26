@@ -24,7 +24,9 @@ The action will read a `cloud-deploy.yaml` file for its configuration.
 
 ## Managed Cloud Run
 
-### Managed Cloud Run service with Hii Retail IAM security. The security sidecar will use default resources.
+### Managed Cloud Run service with Hii Retail IAM security.
+
+The security sidecar will use default resources.
 
 ```yaml
 cloud-run:
@@ -237,6 +239,41 @@ environments:
 static-egress-ip: ## If true service will use a static IP for egress traffic
 direct-vpc-connection: ## If true service will connect directly to the VPC and not use vpc connector
 ```
+
+### Managed Cloud Run with Prometheus and Open Telemetry
+
+A `collector` sidecar can be configured on Cloud Run to collect Prometheus and Open Telemetry metrics and traces.
+The same sidecar supports both Prometheus and Open Telemetry.
+
+Set the `prometheus` section if your service exposes an endpoint to be scraped. Scraping is performed
+on the internal service port 8080 and will not pass through the security sidecar.
+
+Set the `open-telemetry` key to active the Open Telemetry feature in the collector. The default `auto` configuration
+should be correct for most solutions on Google Cloud. The configuration is injected as environment variables
+on the user container to enable auto instrumentation on virtually any language and framework supported by
+Open Telemetry. The collector exposes an OTLP endpoint which is the default exporter.
+
+```yaml
+cloud-run:
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    concurrency: 80
+  monitoring:
+    prometheus:
+      interval: 60
+    open-telemetry:
+      config: auto
+
+environments:
+  production:
+    min-instances: 1
+```
+
+
 ## Kubernetes deployment
 
 A Kubernetes deployment with IAM security resources customized.
@@ -387,6 +424,46 @@ environments:
       - my-service.retailsvc.dev
     env:
       <<: *env
+```
+
+### Kubernetes Deployment with Open Telemetry
+
+Open Telemetry is supported on Autopilot by a collector sidecar. The configuration is the same as for Cloud Run,
+but differs in how it handles Prometheus. A sidecar is only used for Open Telemetry metrics and traces. Prometheus
+scraping is always configured with a `PodMonitoring` in Kubernetes.
+
+Metrics collection is supported in the same way for `StatefulSet`.
+
+```yaml
+kubernetes:
+  type: Deployment
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    cpu: 50
+  monitoring:
+    open-telemetry:
+      config: auto
+
+security:
+  permission-prefix: mye
+
+labels:
+  product: my-product
+  component: my-component
+
+environments:
+  production:
+    min-instances: 1
+    max-instances: 20
+    domain-mappings:
+      - my-service.retailsvc.com
+      - my-service.retailsvc-test.com
+    env:
+      KEY: value
 ```
 
 ### Kubernetes StatefulSet
