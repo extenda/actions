@@ -129,16 +129,21 @@ describe('collector-sidecar', () => {
     });
   });
   test('It sets custom OTEL environment for user-container', () => {
-    const env = userContainerCollectorEnv('my-service', 'image-no-tag', {
-      'open-telemetry': {
-        config: {
-          'otlp-exporter-protocol': 'http/protobuf',
-          sampler: 'traceidratio',
-          'sampler-ratio': '0.5',
-          propagators: ['tracecontext'],
+    const env = userContainerCollectorEnv(
+      'my-service',
+      'image-no-tag',
+      {
+        'open-telemetry': {
+          config: {
+            'otlp-exporter-protocol': 'http/protobuf',
+            sampler: 'traceidratio',
+            'sampler-ratio': '0.5',
+            propagators: ['tracecontext'],
+          },
         },
       },
-    });
+      true,
+    );
     expect(env).toEqual({
       OTEL_SERVICE_NAME: 'my-service',
       OTEL_RESOURCE_ATTRIBUTES: 'service.version=v0.0.1-local',
@@ -159,5 +164,15 @@ describe('collector-sidecar', () => {
       },
     });
     expect(env).toEqual({});
+  });
+  test('It disabled OTEL on staging', async () => {
+    const env = userContainerCollectorEnv('my-service', image, {
+      'open-telemetry': {
+        config: 'auto',
+      },
+    });
+    expect(env).toEqual({
+      OTEL_SDK_DISABLED: 'true',
+    });
   });
 });
