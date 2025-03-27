@@ -213,6 +213,284 @@ spec:
 "
 `;
 
+exports[`buildManifest It generates a OTEL collector sidecar if OTEL is configured on Cloud Run 1`] = `
+"apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: example-service
+  labels:
+    app: example-service
+    product: actions
+    component: jest
+    tenant-alias: multi-tenant
+    iso-country: global
+  annotations:
+    job-trigger: >-
+      https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
+    run.googleapis.com/ingress: internal-and-cloud-load-balancing
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/execution-environment: gen2
+        autoscaling.knative.dev/minScale: 1
+        autoscaling.knative.dev/maxScale: 10
+        run.googleapis.com/cpu-throttling: 'true'
+        run.googleapis.com/startup-cpu-boost: 'false'
+        run.googleapis.com/sessionAffinity: 'false'
+        run.googleapis.com/vpc-access-connector: undefined
+        run.googleapis.com/vpc-access-egress: all-traffic
+        run.googleapis.com/container-dependencies: '{"collector":["user-container"]}'
+      labels:
+        app: example-service
+        product: actions
+        component: jest
+        tenant-alias: multi-tenant
+        iso-country: global
+    spec:
+      containerConcurrency: 40
+      timeoutSeconds: ''
+      serviceAccountName: example-service@example-project.iam.gserviceaccount.com
+      containers:
+        - image: example-image:latest
+          name: user-container
+          ports:
+            - name: http1
+              containerPort: 8080
+          resources:
+            limits:
+              cpu: 1
+              memory: 512Mi
+          env:
+            - name: SERVICE_NAME
+              value: example-service
+            - name: SERVICE_PROJECT_ID
+              value: example-project
+            - name: SERVICE_ENVIRONMENT
+              value: production
+            - name: SERVICE_CONTAINER_IMAGE
+              value: example-image:latest
+            - name: CLAN_NAME
+              value: example-clan
+            - name: OTEL_SERVICE_NAME
+              value: example-service
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: service.version=latest
+            - name: OTEL_TRACES_EXPORTER
+              value: otlp
+            - name: OTEL_METRICS_EXPORTER
+              value: otlp
+            - name: OTEL_LOGS_EXPORTER
+              value: none
+            - name: OTEL_TRACES_SAMPLER
+              value: parentbased_always_off
+            - name: OTEL_PROPAGATORS
+              value: b3,tracecontext,baggage
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: grpc
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://localhost:4317
+          startupProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 240
+            failureThreshold: 1
+            timeoutSeconds: 240
+        - image: eu.gcr.io/extenda/otel-collector@sha256:123
+          name: collector
+          resources:
+            limits:
+              cpu: '0.1'
+              memory: 128Mi
+          env:
+            - name: SERVICE_NAME
+              value: example-service
+            - name: PROMETHEUS_SCRAPE_PATH
+              value: /metrics
+            - name: PROMETHEUS_SCRAPE_PORT
+              value: '8080'
+            - name: PROMETHEUS_SCRAPE_INTERVAL
+              value: '15'
+            - name: CONFIG_PROMETHEUS
+              value: gmp
+            - name: CONFIG_OTEL
+              value: otel
+          startupProbe:
+            tcpSocket:
+              port: 13133
+            initialDelaySeconds: 0
+            periodSeconds: 240
+            failureThreshold: 1
+            timeoutSeconds: 240
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 13133
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+  traffic:
+    - percent: 100
+      latestRevision: true
+"
+`;
+
+exports[`buildManifest It generates a collector if OTEL configured 1`] = `
+"apiVersion: v1
+kind: Namespace
+metadata:
+  name: example-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-service
+  namespace: example-service
+  annotations:
+    job-trigger: >-
+      https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
+    cloud.google.com/neg: '{"exposed_ports":{"80":{"name":"example-service-neg"}}}'
+  labels:
+    networking.gke.io/service-name: example-service
+spec:
+  type: NodePort
+  selector:
+    app: example-service
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+      name: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-service
+  namespace: example-service
+  labels:
+    app: example-service
+    product: actions
+    component: jest
+    tenant-alias: multi-tenant
+    iso-country: global
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: example-service
+  template:
+    metadata:
+      labels:
+        app: example-service
+    spec:
+      serviceAccountName: workload-identity-sa
+      containers:
+        - image: example-image:latest
+          imagePullPolicy: IfNotPresent
+          name: user-container
+          volumeMounts: []
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            failureThreshold: 10
+            timeoutSeconds: 3
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 1
+              memory: 512Mi
+          env:
+            - name: KEY1
+              value: value1
+            - name: KEY2
+              value: value2
+            - name: KEY3
+              value: '8080'
+            - name: SECRET
+              value: sm://example-project/test-secret
+            - name: SERVICE_NAME
+              value: example-service
+            - name: SERVICE_PROJECT_ID
+              value: example-project
+            - name: SERVICE_ENVIRONMENT
+              value: production
+            - name: SERVICE_CONTAINER_IMAGE
+              value: example-image:latest
+            - name: CLAN_NAME
+              value: example-clan
+            - name: OTEL_SERVICE_NAME
+              value: example-service
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: service.version=latest
+            - name: OTEL_TRACES_EXPORTER
+              value: otlp
+            - name: OTEL_METRICS_EXPORTER
+              value: otlp
+            - name: OTEL_LOGS_EXPORTER
+              value: none
+            - name: OTEL_TRACES_SAMPLER
+              value: parentbased_always_off
+            - name: OTEL_PROPAGATORS
+              value: b3,tracecontext,baggage
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: grpc
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://localhost:4317
+            - name: PORT
+              value: '8080'
+            - name: K_SERVICE
+              value: example-service
+        - image: eu.gcr.io/extenda/otel-collector@sha256:123
+          name: collector
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: '0.1'
+              memory: 128Mi
+          env:
+            - name: SERVICE_NAME
+              value: example-service
+            - name: CONFIG_OTEL
+              value: otel
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 13133
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+      terminationGracePeriodSeconds: 90
+      volumes: []
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: example-service
+  namespace: example-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: example-service
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 40
+"
+`;
+
 exports[`buildManifest It generates a collector sidecar if monitoring is configured on Cloud Run 1`] = `
 "apiVersion: serving.knative.dev/v1
 kind: Service
@@ -279,19 +557,38 @@ spec:
             periodSeconds: 240
             failureThreshold: 1
             timeoutSeconds: 240
-        - image: eu.gcr.io/extenda/run-gmp-collector@sha256:123
+        - image: eu.gcr.io/extenda/otel-collector@sha256:123
           name: collector
           resources:
             limits:
               cpu: '0.1'
               memory: 128Mi
           env:
-            - name: SCRAPE_PATH
+            - name: SERVICE_NAME
+              value: example-service
+            - name: PROMETHEUS_SCRAPE_PATH
               value: /metrics
-            - name: SCRAPE_PORT
+            - name: PROMETHEUS_SCRAPE_PORT
               value: '8080'
-            - name: SCRAPE_INTERVAL
+            - name: PROMETHEUS_SCRAPE_INTERVAL
               value: '15'
+            - name: CONFIG_PROMETHEUS
+              value: gmp
+          startupProbe:
+            tcpSocket:
+              port: 13133
+            initialDelaySeconds: 0
+            periodSeconds: 240
+            failureThreshold: 1
+            timeoutSeconds: 240
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 13133
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
   traffic:
     - percent: 100
       latestRevision: true
