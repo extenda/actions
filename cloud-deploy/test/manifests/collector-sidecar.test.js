@@ -158,19 +158,29 @@ describe('collector-sidecar', () => {
     });
   });
   test('It does not set OTEL environment if OTEL is not enabled', async () => {
-    const env = userContainerCollectorEnv('my-service', image, {
-      prometheus: {
-        interval: 60,
+    const env = userContainerCollectorEnv(
+      'my-service',
+      image,
+      {
+        prometheus: {
+          interval: 60,
+        },
       },
-    });
+      true,
+    );
     expect(env).toEqual({});
   });
   test('It disabled OTEL on staging', async () => {
-    const env = userContainerCollectorEnv('my-service', image, {
-      'open-telemetry': {
-        config: 'auto',
+    const env = userContainerCollectorEnv(
+      'my-service',
+      image,
+      {
+        'open-telemetry': {
+          config: 'auto',
+        },
       },
-    });
+      false,
+    );
     expect(env).toEqual({
       OTEL_SDK_DISABLED: 'true',
     });
