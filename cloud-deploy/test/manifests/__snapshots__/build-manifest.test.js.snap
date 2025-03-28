@@ -279,7 +279,7 @@ spec:
             - name: OTEL_TRACES_EXPORTER
               value: otlp
             - name: OTEL_METRICS_EXPORTER
-              value: otlp
+              value: none
             - name: OTEL_LOGS_EXPORTER
               value: none
             - name: OTEL_TRACES_SAMPLER
@@ -431,7 +431,7 @@ spec:
             - name: OTEL_TRACES_EXPORTER
               value: otlp
             - name: OTEL_METRICS_EXPORTER
-              value: otlp
+              value: none
             - name: OTEL_LOGS_EXPORTER
               value: none
             - name: OTEL_TRACES_SAMPLER
