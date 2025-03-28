@@ -251,7 +251,9 @@ on the internal service port 8080 and will not pass through the security sidecar
 Set the `open-telemetry` key to active the Open Telemetry feature in the collector. The default `auto` configuration
 should be correct for most solutions on Google Cloud. The configuration is injected as environment variables
 on the user container to enable auto instrumentation on virtually any language and framework supported by
-Open Telemetry. The collector exposes an OTLP endpoint which is the default exporter.
+Open Telemetry. The collector exposes an OTLP endpoint which is the default exporter. Note that the default
+configuration will only collect `traces`. Users can opt-in to OTEL `metrics` collection
+by setting `collect: [ traces, metrics ]`.
 
 ```yaml
 cloud-run:
@@ -429,8 +431,10 @@ environments:
 ### Kubernetes Deployment with Open Telemetry
 
 Open Telemetry is supported on Autopilot by a collector sidecar. The configuration is the same as for Cloud Run,
-but differs in how it handles Prometheus. A sidecar is only used for Open Telemetry metrics and traces. Prometheus
+but differs in how it handles Prometheus. A sidecar is only used for Open Telemetry traces and metrics. Prometheus
 scraping is always configured with a `PodMonitoring` in Kubernetes.
+
+Note that the default configuration will only collect `traces`. Users can opt-in to OTEL `metrics` collection.
 
 Metrics collection is supported in the same way for `StatefulSet`.
 

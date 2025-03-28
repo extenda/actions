@@ -368,6 +368,18 @@
                         "grpc"
                       ],
                       "default": "grpc"
+                    },
+                    "collect": {
+                      "description": "Signals that are to be exported to the collector.",
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "metrics",
+                          "traces"
+                        ]
+                      },
+                      "default": ["traces"]
                     }
                   },
                   "additionalProperties": false

@@ -38,6 +38,7 @@ const getConfig = (serviceName, monitoring) => {
           'sampler-ratio': samplerRatio = 1.0,
           propagators = ['b3', 'tracecontext', 'baggage'],
           'otlp-exporter-protocol': otlpProtocol = 'grpc',
+          collect = ['traces'],
         },
       },
     } = monitoring;
@@ -49,6 +50,7 @@ const getConfig = (serviceName, monitoring) => {
       samplerRatio,
       propagators,
       otlpProtocol,
+      collect,
       collectorEnv: {
         SERVICE_NAME: serviceName,
         CONFIG_OTEL: 'otel',
@@ -170,7 +172,7 @@ const userContainerCollectorEnv = (
         OTEL_SDK_DISABLED: 'true',
       };
     }
-    const { otlpProtocol, sampler } = openTelemetry;
+    const { otlpProtocol, sampler, collect } = openTelemetry;
     const endpoint =
       otlpProtocol === 'grpc'
         ? 'http://localhost:4317'
@@ -178,8 +180,8 @@ const userContainerCollectorEnv = (
     const env = {
       OTEL_SERVICE_NAME: serviceName,
       OTEL_RESOURCE_ATTRIBUTES: `service.version=${serviceImage.split(':')[1] || 'v0.0.1-local'}`,
-      OTEL_TRACES_EXPORTER: 'otlp',
-      OTEL_METRICS_EXPORTER: 'otlp',
+      OTEL_TRACES_EXPORTER: collect.includes('traces') ? 'otlp' : 'none',
+      OTEL_METRICS_EXPORTER: collect.includes('metrics') ? 'otlp' : 'none',
       OTEL_LOGS_EXPORTER: 'none',
       OTEL_TRACES_SAMPLER: sampler,
       OTEL_PROPAGATORS: openTelemetry.propagators.join(','),
