@@ -184,6 +184,9 @@ describe('collector-sidecar', () => {
     );
     expect(env).toEqual({
       OTEL_SDK_DISABLED: 'true',
+      OTEL_TRACES_EXPORTER: 'none',
+      OTEL_METRICS_EXPORTER: 'none',
+      OTEL_LOGS_EXPORTER: 'none',
     });
   });
 });
