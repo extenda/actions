@@ -206,6 +206,10 @@ const gkeManifestTemplate = async (
                   cpu: cpuRequest,
                   memory: memoryRequest,
                 },
+                limits: {
+                  cpu: cpuRequest,
+                  memory: memoryRequest,
+                },
               },
               env: environment.map((env) => ({
                 name: env.name,
