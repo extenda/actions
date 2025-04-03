@@ -15,8 +15,13 @@ inputs:
     description: Flag to indicate if commit validation is relaxed or not.
     required: false
     default: 'false'
+  enable-commit-validation:
+    description: 'Enable commit validation according to conventional commits format.'
+    required: false
+    default: false
+    type: boolean
 runs:
   using: docker
   image: docker://extenda/commitlint
   entrypoint: /usr/local/bin/action
-  args: ['-c', '${{ inputs.commit-sha }}', '-m', '${{ inputs.message }}', '-x', '${{ inputs.relaxed }}']
+  args: ['-c', '${{ inputs.commit-sha }}', '-m', '${{ inputs.message }}', '-x', '${{ inputs.relaxed }}', '-f', '${{ inputs.enable-pr-title-validation }}']
