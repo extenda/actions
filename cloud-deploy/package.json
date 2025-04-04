@@ -11,6 +11,6 @@
     "fast-glob": "^3.3.3",
     "google-auth-library": "^9.15.1",
     "jsonschema": "^1.5.0",
-    "yaml": "^2.7.0"
+    "yaml": "^2.7.1"
   }
 }
