@@ -227,7 +227,7 @@
                   "description": "interval between scale ups",
                   "type": "integer",
                   "minimum": 5,
-                  "maximum": 8
+                  "maximum": 15
                 }
               }
             }
