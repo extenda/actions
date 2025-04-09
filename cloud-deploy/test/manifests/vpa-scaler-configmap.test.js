@@ -18,6 +18,7 @@ describe('VPA scaler configuration', () => {
     threshold: 50,
     'max-cpu': 5,
     'max-memory': '8Gi',
+    'scale-up-interval': 5,
   };
 
   const mockConfigMapResult = `apiVersion: v1
@@ -27,6 +28,7 @@ describe('VPA scaler configuration', () => {
     incrementsCPU: 1000m
     maxCPU: 5000m
     maxMemory: 8000Mi
+    scaleUpInterval: 5
     minCPU: 1500m
     minMemory: 2500Mi
     thresholdCPU: 50%
@@ -69,6 +71,7 @@ describe('VPA scaler configuration', () => {
         '--from-literal=minCPU=1500m',
         '--from-literal=maxMemory=8000Mi',
         '--from-literal=minMemory=2500Mi',
+        '--from-literal=scaleUpInterval=5',
         '--output=yaml',
         '--dry-run=client',
       ]),
@@ -106,6 +109,7 @@ describe('VPA scaler configuration', () => {
         '--from-literal=minCPU=1500m',
         '--from-literal=maxMemory=8000Mi',
         '--from-literal=minMemory=2500Mi',
+        '--from-literal=scaleUpInterval=5',
         '--output=yaml',
         '--dry-run=client',
       ]),

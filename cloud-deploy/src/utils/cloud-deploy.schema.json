@@ -222,6 +222,12 @@
                   "description": "Max memory allowed on scale out in (Mi)",
                   "type": "string",
                   "pattern": "^[0-9]+(M|G)i"
+                },
+                "scale-up-interval": {
+                  "description": "interval between scale ups",
+                  "type": "integer",
+                  "minimum": 5,
+                  "maximum": 8
                 }
               }
             }

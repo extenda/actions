@@ -26,6 +26,7 @@ const configMapManifest = async (service, type, CPU, Memory, scaling) => {
     threshold,
     'max-cpu': maxCPU,
     'max-memory': maxMemory,
+    'scale-up-interval': scaleUpInterval,
   } = scaling;
   const args = [
     'create',
@@ -41,6 +42,7 @@ const configMapManifest = async (service, type, CPU, Memory, scaling) => {
     `--from-literal=minCPU=${convertCPU(CPU)}`,
     `--from-literal=maxMemory=${convertMemory(maxMemory)}`,
     `--from-literal=minMemory=${convertMemory(Memory)}`,
+    `--from-literal=scaleUpInterval=${scaleUpInterval}`,
     '--output=yaml',
     '--dry-run=client',
   ];
