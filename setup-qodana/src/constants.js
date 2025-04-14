@@ -1,0 +1,5 @@
+const GENERATED_QODANA_YAML = 'GENERATED_QODANA_YAML';
+
+module.exports = {
+  GENERATED_QODANA_YAML,
+};

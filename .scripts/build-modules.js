@@ -1,3 +1,4 @@
+const { existsSync } = require('fs');
 const fs = require('fs-extra');
 const path = require('path');
 const esbuild = require('esbuild');
@@ -40,6 +41,26 @@ const build = async (baseDir) => {
       }),
     ],
   });
+
+  if (existsSync(path.join(baseDir, 'src', 'pre.js'))) {
+    await esbuild.build({
+      entryPoints: [`${srcDir}/post.js`],
+      platform: 'node',
+      bundle: true,
+      minify: true,
+      outfile: `${destDir}/post.js`,
+    });
+  }
+
+  if (existsSync(path.join(baseDir, 'src', 'post.js'))) {
+    await esbuild.build({
+      entryPoints: [`${srcDir}/post.js`],
+      platform: 'node',
+      bundle: true,
+      minify: true,
+      outfile: `${destDir}/post.js`,
+    });
+  }
 
   console.timeEnd(`build ${baseDir}`);
 };
