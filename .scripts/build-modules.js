@@ -29,9 +29,13 @@ const build = async (baseDir) => {
   await esbuild.build({
     entryPoints: [`${srcDir}/index.js`],
     platform: 'node',
+    format: 'cjs',
     bundle: true,
     minify: false,
+    lineLimit: 120,
+    keepNames: true,
     outfile: `${destDir}/index.js`,
+    treeShaking: true,
     plugins: [
       copyStaticAssetsPlugin({
         sourceDir: srcDir,
