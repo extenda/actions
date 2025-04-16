@@ -30,7 +30,7 @@ const build = async (baseDir) => {
     entryPoints: [`${srcDir}/index.js`],
     platform: 'node',
     bundle: true,
-    minify: true,
+    minify: false,
     outfile: `${destDir}/index.js`,
     plugins: [
       copyStaticAssetsPlugin({
