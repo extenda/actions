@@ -31,7 +31,7 @@ const build = async (baseDir) => {
     platform: 'node',
     format: 'cjs',
     bundle: true,
-    minify: false,
+    minify: true,
     lineLimit: 120,
     keepNames: true,
     outfile: `${destDir}/index.js`,
