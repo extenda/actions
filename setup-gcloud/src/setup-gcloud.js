@@ -12,7 +12,7 @@ const getLatestVersion = require('./latest-version');
 const { execGcloud } = require('./exec-gcloud');
 
 // Increment this version if the list of installed components are modified.
-const CACHE_VERSION = '1';
+const CACHE_VERSION = '2';
 
 /**
  * Copy the credentials file outside the working directory. We want to store
