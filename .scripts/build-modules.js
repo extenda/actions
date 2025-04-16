@@ -31,11 +31,11 @@ const build = async (baseDir) => {
     platform: 'node',
     format: 'cjs',
     bundle: true,
-    minify: true,
+    minify: false,
     lineLimit: 120,
     keepNames: true,
-    outfile: `${destDir}/index.js`,
     treeShaking: true,
+    outfile: `${destDir}/index.js`,
     plugins: [
       copyStaticAssetsPlugin({
         sourceDir: srcDir,
