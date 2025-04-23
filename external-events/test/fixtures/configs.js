@@ -28,6 +28,10 @@ event-sources:
     display-name: test event
     subscription-name: projects/project-id/subscriptions/tst.public.output.events.v1+tst.event
     content-type: text/plain
+    schemaUrl: https://raw.githubusercontent.com/extenda/hiiretail-json-schema-registry/master/external-events/cloud-core/event-source-schema.json
+    exposed-attributes:
+      - attribute: Business-Day
+        exposed-as: businessday
 `;
 
 const valid2Parsed = jsYaml.load(valid2);

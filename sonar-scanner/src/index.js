@@ -45,7 +45,9 @@ const action = async () => {
   const isSonarQube = hostUrl.startsWith('https://sonar.extenda.io');
   const branchAnalysis = await isBranchAnalysis(mainBranch, hostUrl);
   if (isSonarQube && branchAnalysis) {
-    core.info(`${hostUrl} does not support multi-branch analysis. No analysis is performed.`);
+    core.info(
+      `${hostUrl} does not support multi-branch analysis. No analysis is performed.`,
+    );
     return;
   }
 
@@ -56,14 +58,20 @@ const action = async () => {
 
   if (sonarScanner === 'dotnet') {
     // MSBuild scanning
-    waitForQualityGate = await scanMsBuild(hostUrl, mainBranch, scanCommands.dotnet);
+    waitForQualityGate = await scanMsBuild(
+      hostUrl,
+      mainBranch,
+      scanCommands.dotnet,
+    );
   } else {
     // Perform the scanning for everything else.
-    await core.group('Run Sonar analysis', async () => scan(hostUrl, mainBranch, sonarScanner, scanCommands, workingDir));
+    await core.group('Run Sonar analysis', async () =>
+      scan(hostUrl, mainBranch, sonarScanner, scanCommands, workingDir),
+    );
     waitForQualityGate = true;
   }
 
-  if (waitForQualityGate && isSonarQube && await isPullRequest()) {
+  if (waitForQualityGate && isSonarQube && (await isPullRequest())) {
     // No quality gate analysis is performed for PRs on sonar.extenda.io
     core.info(`Skipping Quality Gate. Not supported for PRs on ${hostUrl}`);
     waitForQualityGate = false;
@@ -74,7 +82,9 @@ const action = async () => {
 
   if (waitForQualityGate) {
     // Wait for the quality gate status to update
-    const status = await core.group('Check Quality Gate', async () => checkQualityGate(reportPath, workingDir));
+    const status = await core.group('Check Quality Gate', async () =>
+      checkQualityGate(reportPath, workingDir),
+    );
     if (status.statusCode !== 0) {
       process.exitCode = core.ExitCode.Failure;
     }

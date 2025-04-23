@@ -1,5 +1,5 @@
-const exec = require('@actions/exec');
 const mockFs = require('mock-fs');
+const exec = require('@actions/exec');
 const applyKubectl = require('../src/apply-kubectl');
 
 jest.mock('@actions/exec');
@@ -20,25 +20,19 @@ describe('Kubectl applies manifest', () => {
     const deploymentType = 'deployment-type';
     await applyKubectl(deployment, deploymentType, dryRun);
 
-    expect(exec.exec).toHaveBeenCalledWith(
-      'kubectl',
-      [
-        'apply',
-        '-k',
-        './kustomize',
-      ],
-    );
-    expect(exec.exec).toHaveBeenCalledWith(
-      'kubectl',
-      [
-        'rollout',
-        'status',
-        deploymentType,
-        deployment,
-        `--namespace=${deployment}`,
-        '--watch=true',
-      ],
-    );
+    expect(exec.exec).toHaveBeenCalledWith('kubectl', [
+      'apply',
+      '-k',
+      './kustomize',
+    ]);
+    expect(exec.exec).toHaveBeenCalledWith('kubectl', [
+      'rollout',
+      'status',
+      deploymentType,
+      deployment,
+      `--namespace=${deployment}`,
+      '--watch=true',
+    ]);
   });
 
   test('It will not apply manifest and skip rollout status when running with dry-run', async () => {
@@ -47,15 +41,12 @@ describe('Kubectl applies manifest', () => {
     const deploymentType = 'deployment-type';
     await applyKubectl(deployment, deploymentType, dryRun);
 
-    expect(exec.exec).toHaveBeenCalledWith(
-      'kubectl',
-      [
-        'apply',
-        '-k',
-        './kustomize',
-        '--dry-run=client',
-      ],
-    );
+    expect(exec.exec).toHaveBeenCalledWith('kubectl', [
+      'apply',
+      '-k',
+      './kustomize',
+      '--dry-run=client',
+    ]);
     expect(exec.exec).toHaveBeenCalledTimes(1);
   });
 });

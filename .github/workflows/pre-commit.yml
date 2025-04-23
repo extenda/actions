@@ -4,15 +4,16 @@ on: pull_request
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
 
       - name: Run pre-commit
-        uses: pre-commit/actions@v2.0.3
+        uses: pre-commit/actions@v3.0.1
         with:
           extra_args: --from-ref=${{ github.event.pull_request.base.sha }} --to-ref=${{ github.sha }}

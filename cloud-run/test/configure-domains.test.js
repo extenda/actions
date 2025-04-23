@@ -19,31 +19,39 @@ describe('Configure domains', () => {
   });
 
   test('It configures only new domains', async () => {
-    exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput(`other-service.retailsvc.dev  other-service
+    exec.exec
+      .mockImplementationOnce((bin, args, opts) =>
+        mockOutput(
+          `other-service.retailsvc.dev  other-service
 existing.retailsvc.dev  test-service
-`, opts))
+`,
+          opts,
+        ),
+      )
       .mockResolvedValueOnce(0)
       .mockResolvedValueOnce(0)
       .mockResolvedValueOnce(0)
-      .mockImplementationOnce((bin, args, opts) => mockOutput('test-service.retailsvc.dev 10.10.10.1', opts));
+      .mockImplementationOnce((bin, args, opts) =>
+        mockOutput('test-service.retailsvc.dev 10.10.10.1', opts),
+      );
 
-    const newDomains = await configureDomains({
-      name: 'test-service',
-      platform: {
-        gke: {
-          connectivity: 'external',
-          'domain-mappings': {
-            prod: [
-              'test-service.retailsvc.com',
-            ],
-            staging: [
-              'test-service.retailsvc.dev',
-              'existing.retailsvc.dev',
-            ],
+    const newDomains = await configureDomains(
+      {
+        name: 'test-service',
+        platform: {
+          gke: {
+            connectivity: 'external',
+            'domain-mappings': {
+              prod: ['test-service.retailsvc.com'],
+              staging: ['test-service.retailsvc.dev', 'existing.retailsvc.dev'],
+            },
           },
         },
       },
-    }, mockCluster, '', 'dns-project');
+      mockCluster,
+      '',
+      'dns-project',
+    );
 
     expect(newDomains).toEqual(['test-service.retailsvc.dev']);
     expect(exec.exec.mock.calls[2][1]).toEqual([
@@ -63,9 +71,14 @@ existing.retailsvc.dev  test-service
   });
 
   test('It throws exception if domain mapping conflicts', async () => {
-    exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput(`other-service.retailsvc.dev  other-service
+    exec.exec.mockImplementationOnce((bin, args, opts) =>
+      mockOutput(
+        `other-service.retailsvc.dev  other-service
 conflict.retailsvc.dev  other-service
-`, opts));
+`,
+        opts,
+      ),
+    );
 
     const service = {
       name: 'test-service',
@@ -73,20 +86,20 @@ conflict.retailsvc.dev  other-service
         gke: {
           connectivity: 'external',
           'domain-mappings': {
-            prod: [
-              'test-service.retailsvc.com',
-            ],
-            staging: [
-              'test-service.retailsvc.dev',
-              'conflict.retailsvc.dev',
-            ],
+            prod: ['test-service.retailsvc.com'],
+            staging: ['test-service.retailsvc.dev', 'conflict.retailsvc.dev'],
           },
         },
       },
     };
 
-    await expect(configureDomains(service, mockCluster, '', 'dns-project')).rejects
-      .toEqual(new Error('Conflict: Domain conflict.retailsvc.dev already mapped to service other-service'));
+    await expect(
+      configureDomains(service, mockCluster, '', 'dns-project'),
+    ).rejects.toEqual(
+      new Error(
+        'Conflict: Domain conflict.retailsvc.dev already mapped to service other-service',
+      ),
+    );
   });
 
   test('It skips domains if not configured', async () => {
@@ -99,7 +112,12 @@ conflict.retailsvc.dev  other-service
       },
     };
 
-    const domains = await configureDomains(service, mockCluster, '', 'dns-project');
+    const domains = await configureDomains(
+      service,
+      mockCluster,
+      '',
+      'dns-project',
+    );
     expect(domains).toEqual([]);
   });
 
@@ -111,7 +129,12 @@ conflict.retailsvc.dev  other-service
       },
     };
 
-    const domains = await configureDomains(service, undefined, 'prod', 'dns-project');
+    const domains = await configureDomains(
+      service,
+      undefined,
+      'prod',
+      'dns-project',
+    );
     expect(domains).toEqual([]);
   });
 
@@ -125,16 +148,24 @@ conflict.retailsvc.dev  other-service
       },
     };
 
-    const domains = await configureDomains(service, undefined, 'prod', 'dns-project');
+    const domains = await configureDomains(
+      service,
+      undefined,
+      'prod',
+      'dns-project',
+    );
     expect(domains).toEqual([]);
   });
 
   test('It adds test domains for prod', async () => {
-    exec.exec.mockImplementationOnce((bin, args, opts) => mockOutput('', opts))
+    exec.exec
+      .mockImplementationOnce((bin, args, opts) => mockOutput('', opts))
       .mockResolvedValueOnce(0)
       .mockResolvedValueOnce(0)
       .mockResolvedValueOnce(0)
-      .mockImplementationOnce((bin, args, opts) => mockOutput('* 10.10.10.1', opts));
+      .mockImplementationOnce((bin, args, opts) =>
+        mockOutput('* 10.10.10.1', opts),
+      );
 
     const service = {
       name: 'test-service',
@@ -142,18 +173,22 @@ conflict.retailsvc.dev  other-service
         gke: {
           connectivity: 'external',
           'domain-mappings': {
-            prod: [
-              'test-service.retailsvc.com',
-            ],
-            staging: [
-              'test-service.retailsvc.dev',
-            ],
+            prod: ['test-service.retailsvc.com'],
+            staging: ['test-service.retailsvc.dev'],
           },
         },
       },
     };
 
-    const domains = await configureDomains(service, mockCluster, 'prod', 'dns-project');
-    expect(domains).toEqual(['test-service.retailsvc.com', 'test-service.retailsvc-test.com']);
+    const domains = await configureDomains(
+      service,
+      mockCluster,
+      'prod',
+      'dns-project',
+    );
+    expect(domains).toEqual([
+      'test-service.retailsvc.com',
+      'test-service.retailsvc-test.com',
+    ]);
   });
 });

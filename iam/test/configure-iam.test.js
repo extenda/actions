@@ -10,21 +10,22 @@ const { setupRoles } = require('../src/roles');
 
 const iam = {
   'permission-prefix': 'test',
-  services: [{
-    name: 'test-service',
-    repository: 'test-repo',
-  }],
+  services: [
+    {
+      name: 'test-service',
+      repository: 'test-repo',
+    },
+  ],
   permissions: {
-    res: [
-      { get: 'test desc' },
-      { create: 'test1 desc' },
-    ],
+    res: [{ get: 'test desc' }, { create: 'test1 desc' }],
   },
-  roles: [{
-    id: 'test',
-    name: 'Test',
-    permissions: ['res.get'],
-  }],
+  roles: [
+    {
+      id: 'test',
+      name: 'Test',
+      permissions: ['res.get'],
+    },
+  ],
 };
 
 describe('Configure IAM', () => {
@@ -38,26 +39,26 @@ describe('Configure IAM', () => {
       'test.res.create': 'test1 desc',
     };
     const permissions = {
-      res: [
-        { get: 'test desc' },
-        { create: 'test1 desc' },
-      ],
+      res: [{ get: 'test desc' }, { create: 'test1 desc' }],
     };
     setupPermissions.mockResolvedValueOnce(fullPermissions);
 
     await configureIAM(iam, 'https://apiurl.test.dev', 'iam-token', false);
 
-    expect(setupPermissions).toHaveBeenCalledWith(
-      permissions,
-      'test',
+    expect(setupPermissions).toHaveBeenCalledWith(permissions, 'test');
+    expect(handlePermissions).toHaveBeenCalledWith(
+      fullPermissions,
+      'iam-token',
+      'https://apiurl.test.dev',
     );
-    expect(handlePermissions).toHaveBeenCalledWith(fullPermissions, 'iam-token', 'https://apiurl.test.dev');
     expect(setupRoles).toHaveBeenCalledWith(
-      [{
-        id: 'test',
-        name: 'Test',
-        permissions: ['res.get'],
-      }],
+      [
+        {
+          id: 'test',
+          name: 'Test',
+          permissions: ['res.get'],
+        },
+      ],
       'test',
       'iam-token',
       'https://apiurl.test.dev',
@@ -71,10 +72,17 @@ describe('Configure IAM', () => {
   });
 
   test('It will print all errors at the end', async () => {
-    setupPermissions.mockRejectedValueOnce(new Error('Could not fetch permission https://apiurl.test.dev/api/v1/permissions/test.test.get. Reason: bad request 400'));
+    setupPermissions.mockRejectedValueOnce(
+      new Error(
+        'Could not fetch permission https://apiurl.test.dev/api/v1/permissions/test.test.get. Reason: bad request 400',
+      ),
+    );
 
-    await expect(configureIAM(iam, 'https://apiurl.test.dev', 'iam-token', false))
-      .rejects.toEqual(new Error('Errors occurred. Fix issues and rerun the action!'));
+    await expect(
+      configureIAM(iam, 'https://apiurl.test.dev', 'iam-token', false),
+    ).rejects.toEqual(
+      new Error('Errors occurred. Fix issues and rerun the action!'),
+    );
 
     expect(core.error).toHaveBeenCalledTimes(1);
   });

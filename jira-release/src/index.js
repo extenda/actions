@@ -17,7 +17,9 @@ const action = async () => {
     projectKey,
     component,
     version,
-  }).catch((err) => core.error(`Failed to create release in Jira. Reason: ${err.message}`));
+  }).catch((err) =>
+    core.error(`Failed to create release in Jira. Reason: ${err.message}`),
+  );
 };
 
 if (require.main === module) {

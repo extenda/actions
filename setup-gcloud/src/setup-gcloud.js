@@ -12,7 +12,7 @@ const getLatestVersion = require('./latest-version');
 const { execGcloud } = require('./exec-gcloud');
 
 // Increment this version if the list of installed components are modified.
-const CACHE_VERSION = '1';
+const CACHE_VERSION = '2';
 
 /**
  * Copy the credentials file outside the working directory. We want to store
@@ -71,16 +71,20 @@ const installComponents = async (toolPath) => {
   });
   // Ensure install backups are empty.
   const installBackup = path.join(toolPath, '.install', '.backup');
-  fs.rmSync(installBackup, { recursive: true });
-  fs.mkdirSync(installBackup, { recursive: true });
-  glob.sync('**/__pycache__', {
-    cwd: toolPath,
-    dot: true,
-    onlyDirectories: true,
-    absolute: true,
-  }).forEach((pycache) => {
-    fs.rmSync(pycache, { recursive: true });
-  });
+  if (fs.existsSync(installBackup)) {
+    fs.rmSync(installBackup, { recursive: true });
+    fs.mkdirSync(installBackup, { recursive: true });
+  }
+  glob
+    .sync('**/__pycache__', {
+      cwd: toolPath,
+      dot: true,
+      onlyDirectories: true,
+      absolute: true,
+    })
+    .forEach((pycache) => {
+      fs.rmSync(pycache, { recursive: true });
+    });
   return null;
 };
 
@@ -108,50 +112,77 @@ const authenticateGcloud = async (serviceAccountKey, exportCredentials) => {
     });
   }
 
-  const { project_id: projectId = '' } = JSON.parse(fs.readFileSync(tmpKeyFile, 'utf8'));
+  const { project_id: projectId = '' } = JSON.parse(
+    fs.readFileSync(tmpKeyFile, 'utf8'),
+  );
 
   core.exportVariable('CLOUDSDK_CORE_PROJECT', projectId);
   return projectId;
 };
 
-const setupGcloud = async (serviceAccountKey, version = 'latest', exportCredentials = false) => {
-  const gcloudVersion = await getGcloudVersion(version);
-  const toolInfo = {
-    tool: 'gcloud',
-    binary: 'google-cloud-sdk',
-    version: gcloudVersion,
-  };
-  const cachePath = path.join(
-    process.env.RUNNER_TOOL_CACHE,
-    toolInfo.tool,
-    gcloudVersion,
-    process.env.RUNNER_ARCH.toLowerCase(),
-    toolInfo.binary,
-  );
-  const cacheKey = `${process.env.RUNNER_OS}-${process.env.RUNNER_ARCH}-gcloud-cache-${gcloudVersion}-v${CACHE_VERSION}`;
-
-  const restoredKey = await restoreCache([cachePath], cacheKey);
-  if (restoredKey === undefined) {
-    core.info(`Install gcloud ${gcloudVersion}`);
-    const downloadUrl = getDownloadUrl(gcloudVersion);
-    await loadTool({
-      ...toolInfo,
-      downloadUrl,
-    }).then(updatePath)
-      .then(installComponents)
-      .then(() => saveCache([cachePath], cacheKey));
+const setupGcloud = async (
+  serviceAccountKey,
+  version = 'latest',
+  exportCredentials = false,
+) => {
+  // Optimize to only restore gcloud if version is mismatched.
+  if (process.env.GCLOUD_REQUESTED_VERSION === version) {
+    core.info(
+      `Reuse already installed gcloud (requested=${version}, actual=${process.env.GCLOUD_INSTALLED_VERSION})`,
+    );
   } else {
-    core.info(`Use cached gcloud ${gcloudVersion}`);
-    await updatePath(cachePath);
+    // Restore from cache or install on cache-miss.
+    const gcloudVersion = await getGcloudVersion(version);
+    const toolInfo = {
+      tool: 'gcloud',
+      binary: 'google-cloud-sdk',
+      version: gcloudVersion,
+    };
+    const cachePath = path.join(
+      process.env.RUNNER_TOOL_CACHE,
+      toolInfo.tool,
+      gcloudVersion,
+      process.env.RUNNER_ARCH.toLowerCase(),
+      toolInfo.binary,
+    );
+    const restoreCacheKey = `${process.env.RUNNER_OS}-${process.env.RUNNER_ARCH}-gcloud-cache-${gcloudVersion}-v${CACHE_VERSION}`;
+    const primaryCacheKey = `${restoreCacheKey}-${crypto.randomUUID()}`;
+
+    const restoredKey = await restoreCache([cachePath], restoreCacheKey);
+    if (restoredKey === undefined) {
+      core.info(`Install gcloud ${gcloudVersion}`);
+      const downloadUrl = getDownloadUrl(gcloudVersion);
+      await loadTool({
+        ...toolInfo,
+        downloadUrl,
+      })
+        .then(updatePath)
+        .then(installComponents)
+        .then(() => saveCache([cachePath], primaryCacheKey))
+        .then((n) => {
+          core.debug(`Saved cache with cacheId=${n}`);
+        })
+        .catch((err) => {
+          core.error(
+            `Failed to save cache. Continue anyways. Message: ${err.message}`,
+          );
+        });
+    } else {
+      core.info(`Use cached gcloud ${gcloudVersion}`);
+      await updatePath(cachePath);
+    }
+
+    core.exportVariable('GCLOUD_REQUESTED_VERSION', version);
+    core.exportVariable('GCLOUD_INSTALLED_VERSION', gcloudVersion);
   }
 
-  core.exportVariable('GCLOUD_INSTALLED_VERSION', gcloudVersion);
-
-  return authenticateGcloud(serviceAccountKey, exportCredentials)
-    .then((projectId) => {
+  // We always authenticate to not accidentally reuse incorrect credentials.
+  return authenticateGcloud(serviceAccountKey, exportCredentials).then(
+    (projectId) => {
       core.setOutput('project-id', projectId);
       return projectId;
-    });
+    },
+  );
 };
 
 module.exports = setupGcloud;

@@ -37,7 +37,7 @@ event-sources: # (required) list of event sources for your system
     # (optional, default - false)
     # event source will still work, but it will not be available for new webhooks
     disabled: true
-    # (optional)
+    # (required)
     # url to json schema for event source messages
     schemaUrl: https://raw.githubusercontent.com/extenda/hiiretail-json-schema-registry/master/external-events/cloud-core/event-source-schema.json
     deprecated: # (optional) deprecation metadata, the ES may be deleted after the "removal-date"

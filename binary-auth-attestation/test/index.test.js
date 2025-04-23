@@ -18,7 +18,8 @@ describe('Binary Auth Action', () => {
   test('It can run the action', async () => {
     setupGcloud.mockReturnValueOnce('test-project');
     getArtifactUrl.mockReturnValueOnce('eu.gcr.io/my-iamge@887686');
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('quality-assurance-attestor')
       .mockReturnValueOnce('attestor-project')
       .mockReturnValueOnce('key-project')

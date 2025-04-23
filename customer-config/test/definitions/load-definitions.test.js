@@ -3,7 +3,9 @@ jest.mock('fast-glob');
 const fg = require('fast-glob');
 const mockFs = require('mock-fs');
 const configsFixtures = require('../fixtures/configs');
-const { loadDefinitions } = require('../../../external-events/src/utils/load-sync-definitions');
+const {
+  loadDefinitions,
+} = require('../../../external-events/src/utils/load-sync-definitions');
 const { validateCccConfig } = require('../../src/validate/validate-ccc-config');
 
 describe('loadDefinitions', () => {
@@ -34,7 +36,9 @@ describe('loadDefinitions', () => {
     fg.sync.mockReturnValue([file]);
     mockFs({ [file]: configsFixtures.invalid });
 
-    await expect(loadDefinitions(glob, validateCccConfig)).rejects.toThrowError('Configuration validation failed (see details above).');
+    await expect(loadDefinitions(glob, validateCccConfig)).rejects.toThrowError(
+      'Configuration validation failed (see details above).',
+    );
   });
 
   it('fails, if found multiple files with the same system-prefix', async () => {
@@ -48,6 +52,8 @@ describe('loadDefinitions', () => {
       [file2]: configsFixtures.valid,
     });
 
-    await expect(loadDefinitions(glob, validateCccConfig)).rejects.toThrowError('Configuration validation failed (see details above).');
+    await expect(loadDefinitions(glob, validateCccConfig)).rejects.toThrowError(
+      'Configuration validation failed (see details above).',
+    );
   });
 });

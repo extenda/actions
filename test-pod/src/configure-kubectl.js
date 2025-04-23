@@ -31,12 +31,19 @@ const resolveClusterAndNamespace = (clusterInput, namespaceInput) => {
   };
 };
 
-const configureKubeCtl = async (serviceAccountKey, clusterInput, namespaceInput) => {
+const configureKubeCtl = async (
+  serviceAccountKey,
+  clusterInput,
+  namespaceInput,
+) => {
   // Authenticate GCloud
   const projectId = await setupGcloud(serviceAccountKey);
 
   // Resolve cluster and namespace.
-  const { cluster, name, namespace } = resolveClusterAndNamespace(clusterInput, namespaceInput);
+  const { cluster, name, namespace } = resolveClusterAndNamespace(
+    clusterInput,
+    namespaceInput,
+  );
 
   // Find cluster information
   const clusterInfo = await getClusterInfo(projectId, cluster);

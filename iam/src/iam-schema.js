@@ -33,22 +33,17 @@ module.exports = {
                   type: 'array',
                   items: {
                     type: 'string',
-                    // eslint-disable-next-line no-useless-escape
-                    pattern: '^[A-Za-z0-9_\-]+@[A-Za-z0-9_\-]+\.iam\.gserviceaccount\.com$',
+
+                    pattern:
+                      '^[A-Za-z0-9_-]+@[A-Za-z0-9_-]+.iam.gserviceaccount.com$',
                   },
                 },
               },
-              required: [
-                'clan',
-                'service-accounts',
-              ],
+              required: ['clan', 'service-accounts'],
             },
           },
         },
-        required: [
-          'name',
-          'repository',
-        ],
+        required: ['name', 'repository'],
         additionalProperties: false,
       },
     },
@@ -114,23 +109,16 @@ module.exports = {
             type: 'array',
             items: {
               type: 'string',
-              pattern: '^(?:[a-z][-a-z]{2}\\.)?[a-z][-a-z]{1,15}\\.[a-z][-a-z]{1,15}$',
+              pattern:
+                '^(?:[a-z][-a-z]{2}\\.)?[a-z][-a-z]{1,15}\\.[a-z][-a-z]{1,15}$',
             },
           },
         },
-        required: [
-          'id',
-          'name',
-          'desc',
-          'permissions',
-        ],
+        required: ['id', 'name', 'desc', 'permissions'],
         additionalProperties: false,
       },
     },
   },
-  required: [
-    'permission-prefix',
-    'permissions',
-  ],
+  required: ['permission-prefix', 'permissions'],
   additionalProperties: false,
 };

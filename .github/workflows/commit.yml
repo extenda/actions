@@ -1,38 +1,43 @@
 name: Commit
 on: push
 
+permissions: write-all
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Install Node 16
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: npm
-          cache-dependency-path: '**/package-lock.json'
-
-      - name: Install dependencies
-        run: npm ci
+      - uses: ./.github/actions/build-dist
 
       - name: Lint Javascript
+        run: npm run lint:js
+
+      - name: Read secrets used by tests
+        uses: ./gcp-secret-manager
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+          secrets: |
+            NEXUS_USERNAME: nexus-username
+            NEXUS_PASSWORD: nexus-password
+
+      - name: Configure git short-sha length for tests
         run: |
-          npm run lint:js
+          echo "Before: $(git rev-parse --short HEAD)"
+          git config core.abbrev 7
+          echo "After: $(git rev-parse --short HEAD)"
 
       - name: Run tests
         run: |
-          echo "::stop-commands::`echo -n ${{ github.token }} | sha256sum | head -c 64`"
+          echo "::stop-commands::`echo -n "$GITHUB_RUN_ID-$GITHUB_RUN_NUMBER" | sha256sum | head -c 64`"
           npm test -- --ci
-          echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+          echo "::`echo -n "$GITHUB_RUN_ID-$GITHUB_RUN_NUMBER" | sha256sum | head -c 64`::"
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
@@ -45,21 +50,11 @@ jobs:
 
   verify-dist:
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Install Node 16
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: npm
-          cache-dependency-path: '**/package-lock.json'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Rebuild dist files
-        run: npm run build
+      - uses: ./.github/actions/build-dist
 
       - name: Check compiled dist/* files
         run: |
@@ -76,10 +71,11 @@ jobs:
 
   acceptance-windows:
     runs-on: windows-latest
+    if: github.actor != 'dependabot[bot]'
     needs:
       - verify-dist
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -115,7 +111,6 @@ jobs:
           service-account-key: ${{ secrets.SECRET_AUTH }}
           secrets: |
             TEST_TOKEN: sonarqube-token
-            NEXUS_USER: nexus-username
             TEST2_TOKEN: sonarqube-token
 
       - name: Assert GCP secrets
@@ -128,13 +123,6 @@ jobs:
             exit 1
           fi
 
-          if [ "$NEXUS_USER" = "${{ secrets.NEXUS_USERNAME }}" ]; then
-            echo "Secret matches expectation"
-          else
-            echo "Secrets does not match"
-            exit 1
-          fi
-
           if [ "$TEST_TOKEN" = "$TEST2_TOKEN" ]; then
             echo "Secret matches expectation"
           else
@@ -143,14 +131,20 @@ jobs:
           fi
 
   acceptance-linux:
-    runs-on: ubuntu-latest
+    name: ${{ matrix.job-name }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+        job-name: [acceptance-linux]
+    runs-on: ${{ matrix.os }}
+    if: github.actor != 'dependabot[bot]'
     needs:
       - verify-dist
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: adopt
           java-version: 11
@@ -159,15 +153,10 @@ jobs:
         uses: ./maven
         with:
           args: --version
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+          service-account-key: ${{ secrets.SECRET_AUTH }}
 
       - name: Run Maven CLI
         run: mvn dependency:get -Dartifact=se.extenda.maven:commonpom:2.5.1:pom
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
       - name: GCP Secret Manager
         uses: ./gcp-secret-manager
@@ -175,7 +164,6 @@ jobs:
           service-account-key: ${{ secrets.SECRET_AUTH }}
           secrets: |
             TEST_TOKEN: sonarqube-token
-            NEXUS_USER: nexus-username
             TEST2_TOKEN: sonarqube-token
 
       - name: Assert GCP secrets
@@ -184,13 +172,6 @@ jobs:
             echo "Secret successfully set to env"
           else
             echo "Failed to set secret to env"
-            exit 1
-          fi
-
-          if [ "$NEXUS_USER" = "${{ secrets.NEXUS_USERNAME }}" ]; then
-            echo "Secret matches expectation"
-          else
-            echo "Secrets does not match"
             exit 1
           fi
 
@@ -250,7 +231,7 @@ jobs:
       - acceptance-windows
       - acceptance-linux
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 

@@ -49,7 +49,9 @@ const action = async () => {
 
     let semver = '';
     if (isPreRel) {
-      semver = await versions.getBuildVersion(`-${branchNameSemver}.${buildNumber}+${shortSha}`);
+      semver = await versions.getBuildVersion(
+        `-${branchNameSemver}.${buildNumber}+${shortSha}`,
+      );
     } else {
       semver = await versions.getBuildVersion();
     }
@@ -67,8 +69,12 @@ const action = async () => {
     const releaseVersion = await versions.getLatestRelease();
     core.setOutput('release-version', releaseVersion);
 
-    const composedVersion = branchinfo
-      .getComposedVersionString(version, branchNameFriendly, buildNumber, shortSha);
+    const composedVersion = branchinfo.getComposedVersionString(
+      version,
+      branchNameFriendly,
+      buildNumber,
+      shortSha,
+    );
     core.info(`composed-version-string: ${composedVersion}`);
     core.setOutput('composed-version-string', composedVersion);
   } catch (err) {

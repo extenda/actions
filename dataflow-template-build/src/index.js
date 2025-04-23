@@ -4,7 +4,9 @@ const { run } = require('../../utils');
 const { setupGcloud } = require('../../setup-gcloud');
 
 const action = async () => {
-  const serviceAccountKey = core.getInput('service-account-key', { required: true });
+  const serviceAccountKey = core.getInput('service-account-key', {
+    required: true,
+  });
   const image = core.getInput('image', { required: true });
   const metadataPath = core.getInput('metadata-path') || '';
   const sdkLanguage = core.getInput('sdk-language') || 'JAVA';
@@ -13,7 +15,14 @@ const action = async () => {
   const envVars = core.getInput('env') || '';
 
   await setupGcloud(serviceAccountKey);
-  await dataflowBuild(templatePath, image, sdkLanguage, metadataPath, jarPath, envVars);
+  await dataflowBuild(
+    templatePath,
+    image,
+    sdkLanguage,
+    metadataPath,
+    jarPath,
+    envVars,
+  );
 };
 
 if (require.main === module) {

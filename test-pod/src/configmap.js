@@ -11,13 +11,7 @@ const mapName = async () => {
 const createConfigMap = async ({ namespace }, workingDirectory, entrypoint) => {
   const name = await mapName();
 
-  const args = [
-    'create',
-    'configmap',
-    name,
-    '-n',
-    namespace,
-  ];
+  const args = ['create', 'configmap', name, '-n', namespace];
 
   const hasDir = workingDirectory !== '';
   const hasEntrypoint = entrypoint !== '';
@@ -34,26 +28,16 @@ const createConfigMap = async ({ namespace }, workingDirectory, entrypoint) => {
     args.push(`--from-file=entrypoint.sh=${entrypoint}`);
   }
 
-  return exec.exec('kubectl', args)
-    .then(() => ({
-      name,
-      workingDirectory: hasDir,
-      entrypoint: hasEntrypoint,
-    }));
+  return exec.exec('kubectl', args).then(() => ({
+    name,
+    workingDirectory: hasDir,
+    entrypoint: hasEntrypoint,
+  }));
 };
 
 const deleteConfigMap = async ({ namespace }) => {
   const name = await mapName();
-  return exec.exec(
-    'kubectl',
-    [
-      'delete',
-      'configmap',
-      name,
-      '-n',
-      namespace,
-    ],
-  );
+  return exec.exec('kubectl', ['delete', 'configmap', name, '-n', namespace]);
 };
 
 module.exports = {

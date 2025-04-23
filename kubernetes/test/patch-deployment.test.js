@@ -24,9 +24,11 @@ spec:
 `;
 
     const output = yaml.parse(patchDeploymentYaml(service, deployment));
-    expect(output).toMatchObject(expect.objectContaining({
-      spec: expect.objectContaining({ replicas: 3 }),
-    }));
+    expect(output).toMatchObject(
+      expect.objectContaining({
+        spec: expect.objectContaining({ replicas: 3 }),
+      }),
+    );
   });
 
   test('It leaves default cpu and memory count', () => {
@@ -48,28 +50,30 @@ spec:
               memory: 256Mi`;
 
     const output = yaml.parse(patchDeploymentYaml(service, deployment));
-    expect(output).toMatchObject(expect.objectContaining({
-      spec: expect.objectContaining({
-        template: expect.objectContaining({
-          spec: expect.objectContaining({
-            containers: expect.arrayContaining([
-              expect.objectContaining({
-                resources: expect.objectContaining({
-                  requests: expect.objectContaining({
-                    cpu: '100m',
-                    memory: '256Mi',
-                  }),
-                  limits: expect.objectContaining({
-                    cpu: '100m',
-                    memory: '256Mi',
+    expect(output).toMatchObject(
+      expect.objectContaining({
+        spec: expect.objectContaining({
+          template: expect.objectContaining({
+            spec: expect.objectContaining({
+              containers: expect.arrayContaining([
+                expect.objectContaining({
+                  resources: expect.objectContaining({
+                    requests: expect.objectContaining({
+                      cpu: '100m',
+                      memory: '256Mi',
+                    }),
+                    limits: expect.objectContaining({
+                      cpu: '100m',
+                      memory: '256Mi',
+                    }),
                   }),
                 }),
-              }),
-            ]),
+              ]),
+            }),
           }),
         }),
       }),
-    }));
+    );
   });
 
   test('It patches cpu and memory count', () => {
@@ -100,27 +104,29 @@ spec:
               memory: 256Mi`;
 
     const output = yaml.parse(patchDeploymentYaml(service, deployment));
-    expect(output).toMatchObject(expect.objectContaining({
-      spec: expect.objectContaining({
-        template: expect.objectContaining({
-          spec: expect.objectContaining({
-            containers: expect.arrayContaining([
-              expect.objectContaining({
-                resources: expect.objectContaining({
-                  requests: expect.objectContaining({
-                    cpu: '200m',
-                    memory: '512Mi',
-                  }),
-                  limits: expect.objectContaining({
-                    cpu: '400m',
-                    memory: '1024Mi',
+    expect(output).toMatchObject(
+      expect.objectContaining({
+        spec: expect.objectContaining({
+          template: expect.objectContaining({
+            spec: expect.objectContaining({
+              containers: expect.arrayContaining([
+                expect.objectContaining({
+                  resources: expect.objectContaining({
+                    requests: expect.objectContaining({
+                      cpu: '200m',
+                      memory: '512Mi',
+                    }),
+                    limits: expect.objectContaining({
+                      cpu: '400m',
+                      memory: '1024Mi',
+                    }),
                   }),
                 }),
-              }),
-            ]),
+              ]),
+            }),
           }),
         }),
       }),
-    }));
+    );
   });
 });

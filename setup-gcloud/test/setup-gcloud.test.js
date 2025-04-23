@@ -21,7 +21,9 @@ const jsonKey = {
   project_id: 'test-project',
 };
 
-const base64Key = Buffer.from(JSON.stringify(jsonKey), 'utf8').toString('base64');
+const base64Key = Buffer.from(JSON.stringify(jsonKey), 'utf8').toString(
+  'base64',
+);
 
 const orgEnv = process.env;
 
@@ -39,6 +41,8 @@ describe('Setup Gcloud', () => {
       RUNNER_ARCH: 'X64',
       ...orgEnv,
     };
+
+    delete process.env['GCLOUD_REQUESTED_VERSION'];
 
     const filesystem = {
       '/gcloud/innerdir/__pycache__': {},
@@ -70,7 +74,10 @@ describe('Setup Gcloud', () => {
       expect.anything(),
     );
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
-    expect(core.exportVariable).toHaveBeenCalledWith('CLOUDSDK_CORE_PROJECT', 'test-project');
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'CLOUDSDK_CORE_PROJECT',
+      'test-project',
+    );
     expect(fs.existsSync('/gcloud/innerdir/__pycache__')).toEqual(false);
     expect(fs.existsSync('/gcloud/.install/.backup')).toEqual(true);
     expect(fs.existsSync('/testdir/__pycache__')).toEqual(true);
@@ -87,15 +94,25 @@ describe('Setup Gcloud', () => {
       expect.anything(),
     );
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
-    expect(core.exportVariable).toHaveBeenCalledWith('CLOUDSDK_CORE_PROJECT', 'test-project');
-    expect(core.exportVariable).toHaveBeenCalledWith('GCLOUD_INSTALLED_VERSION', '280.0.0');
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'CLOUDSDK_CORE_PROJECT',
+      'test-project',
+    );
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'GCLOUD_INSTALLED_VERSION',
+      '280.0.0',
+    );
   });
 
   test('It can export GOOGLE_APPLICATION_CREDENTIALS', async () => {
+    process.env.GCLOUD_REQUESTED_VERSION = 'diff';
     exec.exec.mockResolvedValueOnce(0);
     restoreCache.mockResolvedValueOnce(undefined);
     await setupGcloud(base64Key, 'latest', true);
-    expect(core.exportVariable).toHaveBeenCalledWith('GOOGLE_APPLICATION_CREDENTIALS', expect.any(String));
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'GOOGLE_APPLICATION_CREDENTIALS',
+      expect.any(String),
+    );
   });
 
   test('It can export GOOGLE_APPLICATION_CREDENTIALS and copy tmp file', async () => {
@@ -103,11 +120,21 @@ describe('Setup Gcloud', () => {
     restoreCache.mockResolvedValueOnce('found');
     await setupGcloud(base64Key, 'latest', true);
     expect(core.exportVariable).toHaveBeenNthCalledWith(
-      2,
+      3,
       'GOOGLE_APPLICATION_CREDENTIALS',
       expect.any(String),
     );
-    const keyFile = path.parse(core.exportVariable.mock.calls[1][1]);
+    const keyFile = path.parse(core.exportVariable.mock.calls[2][1]);
     expect(keyFile.dir).toEqual(path.normalize(process.env.RUNNER_TEMP));
+  });
+
+  test('setup-gcloud installs once for multiple setups on same version', async () => {
+    exec.exec.mockResolvedValueOnce(0);
+    process.env.GCLOUD_REQUESTED_VERSION = 'latest';
+    await setupGcloud(base64Key, 'latest', true);
+    expect(restoreCache).not.toHaveBeenCalled();
+
+    // Authenticate is still invoked.
+    expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
   });
 });

@@ -13,7 +13,8 @@ describe('DORA metrics action', () => {
   });
 
   test('It can run the action', async () => {
-    core.getInput.mockReturnValueOnce('iam')
+    core.getInput
+      .mockReturnValueOnce('iam')
       .mockReturnValueOnce('product-component')
       .mockReturnValueOnce('jira-username')
       .mockReturnValueOnce('jira-password')
@@ -28,8 +29,6 @@ describe('DORA metrics action', () => {
       'iam',
       'product-component',
     );
-    expect(generateFolders).toHaveBeenCalledWith(
-      'iam',
-    );
+    expect(generateFolders).toHaveBeenCalledWith('iam');
   });
 });

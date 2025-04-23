@@ -35,7 +35,15 @@ describe('RS Permission Converter Tests', () => {
       sqlFile: 'sqlFile',
     });
     expect(loadTool).toHaveBeenCalledTimes(1);
-    expect(exec.exec.mock.calls[0][1]).toEqual(['sql', '-w', '/workDir', '-p', 'permFile', '-s', 'sqlFile']);
+    expect(exec.exec.mock.calls[0][1]).toEqual([
+      'sql',
+      '-w',
+      '/workDir',
+      '-p',
+      'permFile',
+      '-s',
+      'sqlFile',
+    ]);
   });
 
   test('the permission converter is called correctly for resx', async () => {
@@ -47,6 +55,14 @@ describe('RS Permission Converter Tests', () => {
       outputDir: 'outputDir',
     });
     expect(loadTool).toHaveBeenCalledTimes(1);
-    expect(exec.exec.mock.calls[0][1]).toEqual(['resx', '-w', '/workDir', '-p', 'permFile', '-o', 'outputDir']);
+    expect(exec.exec.mock.calls[0][1]).toEqual([
+      'resx',
+      '-w',
+      '/workDir',
+      '-p',
+      'permFile',
+      '-o',
+      'outputDir',
+    ]);
   });
 });

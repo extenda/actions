@@ -35,12 +35,7 @@ const patchManifest = (manifest, patcher) => {
  * @param namespace Namespace name to be set.
  */
 const kustomizeNamespace = async (namespace) => {
-  await execKustomize([
-    'edit',
-    'set',
-    'namespace',
-    namespace,
-  ]);
+  await execKustomize(['edit', 'set', 'namespace', namespace]);
 };
 
 /**
@@ -62,21 +57,14 @@ const kustomizeImage = async (image) => {
  * @param name Label name to be added.
  */
 const kustomizeLabels = async (name) => {
-  await execKustomize([
-    'edit',
-    'add',
-    'label',
-    `app:${name}`,
-  ]);
+  await execKustomize(['edit', 'add', 'label', `app:${name}`]);
 };
 
 /**
  * Runs kustomize build.
  */
 const kustomizeBuild = async () => {
-  await execKustomize([
-    'build',
-  ]);
+  await execKustomize(['build']);
 };
 
 /**
@@ -84,12 +72,7 @@ const kustomizeBuild = async () => {
  * @param {*} resource Resource to be used during deployment.
  */
 const kustomizeResource = async (resource) => {
-  await execKustomize([
-    'edit',
-    'add',
-    'resource',
-    resource,
-  ]);
+  await execKustomize(['edit', 'add', 'resource', resource]);
 };
 
 /**
@@ -115,7 +98,9 @@ const runDeploy = async (
   createBaseKustomizeFiles(serviceDefinition.name);
 
   // Adds ports and removes clusterIp from spec
-  patchManifest('service.yml', (ymlFileName) => patchServiceYaml(serviceDefinition, ymlFileName));
+  patchManifest('service.yml', (ymlFileName) =>
+    patchServiceYaml(serviceDefinition, ymlFileName),
+  );
 
   // Adds environment variables specified in the definition
   // as well as SERVICE_PROJECT_ID and SERVICE_ENVIRONMENT.
@@ -125,15 +110,21 @@ const runDeploy = async (
   });
 
   // The storage being requested requires the deployment type to be StatefulSet.
-  const deploymentType = serviceDefinition.storage ? 'statefulset' : 'deployment';
+  const deploymentType = serviceDefinition.storage
+    ? 'statefulset'
+    : 'deployment';
 
   // Change parameters to the ones specified in the definition:
   // replicas, storage as well as requests and limits for the resources.
   if (deploymentType === 'statefulset') {
-    patchManifest('statefulSet.yml', (ymlFileName) => patchStatefulSetYaml(serviceDefinition, ymlFileName));
+    patchManifest('statefulSet.yml', (ymlFileName) =>
+      patchStatefulSetYaml(serviceDefinition, ymlFileName),
+    );
     await kustomizeResource('statefulSet.yml');
   } else {
-    patchManifest('deployment.yml', (ymlFileName) => patchDeploymentYaml(serviceDefinition, ymlFileName));
+    patchManifest('deployment.yml', (ymlFileName) =>
+      patchDeploymentYaml(serviceDefinition, ymlFileName),
+    );
     await kustomizeResource('deployment.yml');
   }
 

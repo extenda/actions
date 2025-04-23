@@ -16,7 +16,8 @@ describe('Setup Terraform', () => {
   });
 
   beforeEach(() => {
-    loadTool.mockResolvedValueOnce('/downloads/terraform_x64/terraform')
+    loadTool
+      .mockResolvedValueOnce('/downloads/terraform_x64/terraform')
       .mockResolvedValueOnce('/downloads/terragrunt_x64/terragrunt');
   });
 
@@ -31,7 +32,8 @@ describe('Setup Terraform', () => {
       '/downloads/terraform_x64/terraform': '',
     });
 
-    core.getInput.mockReturnValueOnce('')
+    core.getInput
+      .mockReturnValueOnce('')
       .mockReturnValueOnce('false')
       .mockReturnValueOnce('.terragrunt-version');
 
@@ -57,7 +59,8 @@ describe('Setup Terraform', () => {
       '/downloads/terragrunt_x64/terragrunt': '',
       '/downloads/terraform_x64/terraform': '',
     });
-    core.getInput.mockReturnValueOnce('20.0.0')
+    core.getInput
+      .mockReturnValueOnce('20.0.0')
       .mockReturnValueOnce('false')
       .mockReturnValueOnce('10.0.0');
 
@@ -77,11 +80,14 @@ describe('Setup Terraform', () => {
     mockFs({
       '/downloads/terraform_x64/terraform': '',
     });
-    core.getInput.mockReturnValueOnce('20.0.0')
+    core.getInput
+      .mockReturnValueOnce('20.0.0')
       .mockReturnValueOnce('false')
       .mockReturnValueOnce('invalid value');
 
-    await expect(action()).rejects.toEqual(new Error('File not found: invalid value'));
+    await expect(action()).rejects.toEqual(
+      new Error('File not found: invalid value'),
+    );
   });
 
   test('It fails on invalid semver in file', async () => {
@@ -89,7 +95,9 @@ describe('Setup Terraform', () => {
       '.terraform-version': 'invalid-tf',
       '.terragrunt-version': 'invalid-tg',
     });
-    await expect(action()).rejects.toEqual(new Error('Invalid semver version: invalid-tf'));
+    await expect(action()).rejects.toEqual(
+      new Error('Invalid semver version: invalid-tf'),
+    );
   });
 
   test('It fails if file not found', async () => {
@@ -97,15 +105,16 @@ describe('Setup Terraform', () => {
 
     core.getInput.mockReturnValueOnce('.terraform-version');
 
-    await expect(action()).rejects.toEqual(new Error('File not found: .terraform-version'));
+    await expect(action()).rejects.toEqual(
+      new Error('File not found: .terraform-version'),
+    );
   });
 
   test('It can skip terragrunt', async () => {
     mockFs({
       '/downloads/terraform_x64/terraform': '',
     });
-    core.getInput.mockReturnValueOnce('20.0.0')
-      .mockReturnValueOnce('true');
+    core.getInput.mockReturnValueOnce('20.0.0').mockReturnValueOnce('true');
 
     await action();
     expect(loadTool).toHaveBeenCalledTimes(1);

@@ -8,27 +8,41 @@ const { addNamespace } = require('../../src/utils/add-namespace');
 const readSecret = require('../../src/utils/load-credentials');
 const checkVpcConnector = require('../../src/utils/check-vpc-connector');
 const getRevisions = require('../../src/cloudrun/get-revisions');
+const getImageWithSha256 = require('../../src/manifests/image-sha256');
 
 jest.mock('../../src/manifests/check-system');
-jest.mock('../../src/manifests/opa-config');
 jest.mock('../../src/utils/add-namespace');
 jest.mock('../../src/manifests/security-sidecar');
 jest.mock('../../src/utils/load-credentials');
 jest.mock('../../src/manifests/statefulset-workaround');
 jest.mock('../../src/utils/check-vpc-connector');
 jest.mock('../../src/cloudrun/get-revisions');
+jest.mock('../../src/utils/cluster-connection');
+jest.mock('../../src/manifests/image-sha256');
 
 const readFileSync = (file) => fs.readFileSync(file, { encoding: 'utf-8' });
+const originalEnv = process.env;
 
 describe('buildManifest', () => {
   afterEach(() => {
     jest.clearAllMocks();
     mockFs.restore();
+    process.env = originalEnv;
   });
 
   beforeEach(() => {
     mockFs({});
     addNamespace.mockResolvedValueOnce('');
+    getImageWithSha256.mockImplementation((name) =>
+      Promise.resolve(`${name.split(':')[0]}@sha256:123`),
+    );
+    process.env = {
+      ...originalEnv,
+      GITHUB_SERVER_URL: 'https://github.com/example-organization',
+      GITHUB_REPOSITORY: 'example-repository',
+      GITHUB_RUN_ID: 'example-run-id',
+      GITHUB_RUN_ATTEMPT: '1',
+    };
   });
 
   test('should generate manifest file with correct content', async () => {
@@ -72,19 +86,33 @@ describe('buildManifest', () => {
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','WORKFLOW_INPUT1=value1\nWORKFLOW_INPUT2=value2');
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+      'WORKFLOW_INPUT1=value1\nWORKFLOW_INPUT2=value2',
+    );
 
     expect(checkSystem).not.toHaveBeenCalled();
     expect(securitySpec).not.toHaveBeenCalled();
 
-    expect(readFileSync('skaffold.yaml')).toContain(`apiVersion: skaffold/v2beta16
+    expect(readFileSync('skaffold.yaml'))
+      .toContain(`apiVersion: skaffold/v2beta16
 kind: Config
 deploy:
   kubectl:
     manifests:
       - k8s(deploy)-*`);
 
-    expect(readFileSync('clouddeploy.yaml')).toContain(`apiVersion: deploy.cloud.google.com/v1
+    expect(readFileSync('clouddeploy.yaml'))
+      .toContain(`apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
   name: example-service`);
@@ -158,12 +186,13 @@ metadata:
     const clanName = 'example-clan';
     const env = 'production';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','WORKFLOW_INPUT_IGNORED=');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '', 'WORKFLOW_INPUT_IGNORED=');
 
     expect(checkSystem).not.toHaveBeenCalled();
     expect(securitySpec).not.toHaveBeenCalled();
 
-    expect(readFileSync('skaffold.yaml')).toContain(`apiVersion: skaffold/v4beta6
+    expect(readFileSync('skaffold.yaml'))
+      .toContain(`apiVersion: skaffold/v4beta6
 kind: Config
 manifests:
   rawYaml:
@@ -172,7 +201,8 @@ deploy:
   cloudrun: {}
 `);
 
-    expect(readFileSync('clouddeploy.yaml')).toContain(`apiVersion: deploy.cloud.google.com/v1
+    expect(readFileSync('clouddeploy.yaml'))
+      .toContain(`apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
   name: example-service`);
@@ -263,7 +293,7 @@ metadata:
     const clanName = 'example-clan';
     const env = 'dev';
 
-    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '','');
+    await buildManifest(image, service, projectId, clanName, env, '', '', '', '', '', '');
 
     // Snapshot test for k8s-manifest.yaml.
     const manifest = readFileSync('k8s(deploy)-manifest.yaml');
@@ -274,11 +304,13 @@ metadata:
   test('It should generate manifest with volume for StatefulSet', async () => {
     handleStatefulset.mockResolvedValueOnce();
     const image = 'example-image:latest';
-    const volumes = [{
-      'disk-type': 'ssd',
-      size: '10Gi',
-      'mount-path': '/mnt/data',
-    }];
+    const volumes = [
+      {
+        'disk-type': 'ssd',
+        size: '10Gi',
+        'mount-path': '/mnt/data',
+      },
+    ];
     const service = {
       kubernetes: {
         type: 'StatefulSet',
@@ -332,11 +364,13 @@ metadata:
         scaling: {
           cpu: 40,
         },
-        volumes: [{
-          'disk-type': 'ssd',
-          size: '1Gi',
-          'mount-path': '/mnt/shared/data',
-        }],
+        volumes: [
+          {
+            'disk-type': 'ssd',
+            size: '1Gi',
+            'mount-path': '/mnt/shared/data',
+          },
+        ],
       },
       security: 'none',
       labels: {
@@ -436,6 +470,7 @@ metadata:
       },
       security: {
         'permission-prefix': 'tst',
+        cors: { enabled: false },
       },
       labels: {
         product: 'actions',
@@ -465,10 +500,16 @@ metadata:
           containerPort: 8000,
         },
       ],
-      env: [{
-        name: 'ENVOY_PROTOCOL',
-        value: 'http',
-      }],
+      env: [
+        {
+          name: 'ENVOY_PROTOCOL',
+          value: 'http',
+        },
+        {
+          name: 'ENVOY_CORS',
+          value: 'false',
+        },
+      ],
     };
 
     checkSystem.mockResolvedValueOnce(true);
@@ -577,6 +618,7 @@ metadata:
     mockFs.restore();
     expect(k8sManifest).toMatchSnapshot();
   });
+
   test('should generate manifest file with correct content for staging', async () => {
     const image = 'example-image:latest';
     const service = {

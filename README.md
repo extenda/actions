@@ -394,7 +394,7 @@ before running actions.
 
 Development tools needed are:
 
-  * Latest Node 16 LTS release
+  * Latest Node 20 LTS release
   * Docker
   * Pre-commit
 
@@ -425,6 +425,12 @@ Runs `eslint` on all Javascript files everywhere.
 $ npm test
 ```
 Runs Jest everywhere.
+
+If tests fails due to short-sha being unexpected length, consider configuring the default on your repository
+
+```bash
+$ git config core.abbrev 7
+```
 
 ```bash
 $ npm run build:docker

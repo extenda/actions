@@ -6,15 +6,13 @@
   "main": "dist/index.js",
   "license": "ISC",
   "dependencies": {
-    "@actions/core": "^1.10.0",
-    "axios": "^1.6.2",
+    "axios": "^1.8.4",
     "camelcase-keys": "^7.0.1",
-    "fast-glob": "^3.2.7",
-    "joi": "^17.4.2",
+    "fast-glob": "^3.3.3",
+    "joi": "^17.13.3",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
-    "mock-fs": "^5.1.2",
-    "nock": "^13.2.1"
+    "nock": "^14.0.4"
   }
 }

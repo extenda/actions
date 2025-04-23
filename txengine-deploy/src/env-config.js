@@ -25,7 +25,8 @@ const parseEnvironment = (environment, projectId) => {
   return yaml.parse(environment.replace(/sm:\/\/\*\//g, `sm://${projectId}/`));
 };
 
-const getConditionalCountryCodeString = (countryCode) => (countryCode && countryCode.trim().length > 0 ? `${countryCode}_` : '');
+const getConditionalCountryCodeString = (countryCode) =>
+  countryCode && countryCode.trim().length > 0 ? `${countryCode}_` : '';
 
 const defaultEnvironment = (projectId, tenantName, countryCode) => ({
   DATABASE_HOST: `sm://${projectId}/${tenantName}_${getConditionalCountryCodeString(countryCode)}postgresql_private_address`,
@@ -41,12 +42,17 @@ const loadAllSecrets = async (serviceAccountKey, secrets) => {
   const results = [];
   const resolvedSecrets = {};
   Object.entries(secrets).forEach(([name, value]) => {
-    results.push(loadSecret(serviceAccountKey, value)
-      .then((secret) => {
-        resolvedSecrets[name] = secret;
-      }).catch((err) => {
-        throw new Error(`Failed to access secret '${value}'. Reason: ${err.message}`);
-      }));
+    results.push(
+      loadSecret(serviceAccountKey, value)
+        .then((secret) => {
+          resolvedSecrets[name] = secret;
+        })
+        .catch((err) => {
+          throw new Error(
+            `Failed to access secret '${value}'. Reason: ${err.message}`,
+          );
+        }),
+    );
   });
   await Promise.all(results);
   return resolvedSecrets;
@@ -61,7 +67,12 @@ const prepareEnvConfig = async (
   environmentString = '',
 ) => {
   const imageDigest = await getImageDigest(image);
-  const replaceTokens = createReplaceTokens(projectId, imageDigest, tenantName, countryCode);
+  const replaceTokens = createReplaceTokens(
+    projectId,
+    imageDigest,
+    tenantName,
+    countryCode,
+  );
   const environment = {
     ...defaultEnvironment(projectId, tenantName.toLowerCase(), countryCode),
     ...parseEnvironment(environmentString, projectId),
@@ -72,7 +83,9 @@ const prepareEnvConfig = async (
   Object.entries(environment).forEach(([name, value]) => {
     if (value.startsWith('sm://')) {
       if (!value.includes(projectId)) {
-        throw new Error(`Secrets can only be loaded from target project: ${projectId}`);
+        throw new Error(
+          `Secrets can only be loaded from target project: ${projectId}`,
+        );
       }
       secretsAsNames[name] = value.split('/').pop();
     } else {

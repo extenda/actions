@@ -6,7 +6,10 @@ const fetch = require('node-fetch');
 const path = require('path');
 const { loadTool } = require('../../utils');
 
-const getBinaryName = () => (os.platform() === 'win32' ? 'InstallerPackageBuilder.Core.Console.exe' : 'InstallerPackageBuilder.Core.Console');
+const getBinaryName = () =>
+  os.platform() === 'win32'
+    ? 'InstallerPackageBuilder.Core.Console.exe'
+    : 'InstallerPackageBuilder.Core.Console';
 
 const packageBuilderCommand = async (builder, args) => {
   const {
@@ -32,7 +35,7 @@ const packageBuilderCommand = async (builder, args) => {
   builderArgs.push('-od', outputDir);
   builderArgs.push('-pv', packageVersion);
 
-  const pattern = /^[^\r\n]*$/mg;
+  const pattern = /^[^\r\n]*$/gm;
   if (sourcePaths) {
     const groups = sourcePaths.match(pattern);
     if (groups != null) {
@@ -55,10 +58,7 @@ const packageBuilderCommand = async (builder, args) => {
     builderArgs.push('-sf', searchFilter);
   }
 
-  return exec.exec(
-    builder,
-    builderArgs,
-  );
+  return exec.exec(builder, builderArgs);
 };
 
 const downloadBuildTool = async (args) => {
@@ -80,13 +80,7 @@ const downloadBuildTool = async (args) => {
 };
 
 const publishPackageCommand = async (args) => {
-  const {
-    packageName,
-    packageVersion,
-    outputDir,
-    publishUrl,
-    branch,
-  } = args;
+  const { packageName, packageVersion, outputDir, publishUrl, branch } = args;
 
   const packageUrl = `${packageName}.pkg/${branch}/${packageName}.pkg.${packageVersion}.zip`;
   const fullpublishUrl = `${publishUrl}${packageUrl}`;
@@ -96,24 +90,32 @@ const publishPackageCommand = async (args) => {
   const data = fs.readFileSync(filePath);
 
   core.info(`PublishUrl: ${fullpublishUrl}`);
-  core.info(`user: ${process.env.NEXUS_USERNAME}, pass ${process.env.NEXUS_PASSWORD}`);
+  core.info(
+    `user: ${process.env.NEXUS_USERNAME}, pass ${process.env.NEXUS_PASSWORD}`,
+  );
   return fetch(fullpublishUrl, {
     method: 'PUT',
     body: data,
     headers: {
-      Authorization: `Basic ${Buffer.from(`${process.env.NEXUS_USERNAME}:${process.env.NEXUS_PASSWORD}`)
-        .toString('base64')}`,
+      Authorization: `Basic ${Buffer.from(
+        `${process.env.NEXUS_USERNAME}:${process.env.NEXUS_PASSWORD}`,
+      ).toString('base64')}`,
       'Content-length': fileSizeInBytes,
     },
-  }).then((response) => {
-    if (!response.ok) {
-      throw response;
-    }
-    core.info(`Package published successfully, server responded with ${response.status} ${response.statusText}`);
-    return response;
   })
+    .then((response) => {
+      if (!response.ok) {
+        throw response;
+      }
+      core.info(
+        `Package published successfully, server responded with ${response.status} ${response.statusText}`,
+      );
+      return response;
+    })
     .catch((err) => {
-      core.error(`Failed to publish package, server responded with ${err.status} ${err.statusText}`);
+      core.error(
+        `Failed to publish package, server responded with ${err.status} ${err.statusText}`,
+      );
       core.info(`Failed to publish package, server responded with ${err}`);
     });
 };
@@ -135,7 +137,8 @@ const buildPackage = async (args) => {
     if (builderType === 'multiple') {
       const fullPath = sourcePaths; // path.join(__dirname, sourcePaths);
       core.info(`Sourcepath fullname: ${fullPath}`);
-      const dirs = fs.readdirSync(fullPath)
+      const dirs = fs
+        .readdirSync(fullPath)
         .filter((f) => fs.statSync(path.join(fullPath, f)).isDirectory());
       dirs.forEach((dir) => {
         core.info(`DirectoryName: ${dir}`);

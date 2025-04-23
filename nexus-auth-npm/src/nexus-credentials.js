@@ -19,7 +19,11 @@ const fetchNexusCredentials = async (serviceAccountKey) => {
  * @param {{ username: string, password: string, serviceAccountKey?: string }}
  * @returns {Promise<{ username: string, password: string }>}
  */
-const validateOrFetchNexusCredentials = async ({ username, password, serviceAccountKey }) => {
+const validateOrFetchNexusCredentials = async ({
+  username,
+  password,
+  serviceAccountKey,
+}) => {
   if (username && password) {
     return { username, password };
   }

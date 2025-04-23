@@ -16,8 +16,8 @@ jest.mock('../../utils', () => ({
   getImageDigest: jest.fn(),
 }));
 
-const exec = require('@actions/exec');
 const mockFs = require('mock-fs');
+const exec = require('@actions/exec');
 const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
 const { setupGcloud } = require('../../setup-gcloud');
 const patchDeployment = require('../src/patch-deployment-yaml');
@@ -60,18 +60,14 @@ describe('Run Deploy', () => {
     });
     exec.exec.mockResolvedValue(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project');
-    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-project/my-service@sha256:111');
+    getImageDigest.mockResolvedValueOnce(
+      'eu.gcr.io/test-project/my-service@sha256:111',
+    );
     const image = 'eu.gcr.io/test-project/my-service:tag';
     const name = 'deployment-name';
-    await runDeploy(
-      'service-account',
-      { name },
-      image,
-    );
+    await runDeploy('service-account', { name }, image);
 
-    expect(checkNamespaceExists).toHaveBeenCalledWith(
-      'deployment-name',
-    );
+    expect(checkNamespaceExists).toHaveBeenCalledWith('deployment-name');
   });
 
   test('It calls patchService', async () => {
@@ -86,14 +82,11 @@ describe('Run Deploy', () => {
           protocol: 'TCP',
           port: 80,
           targetPort: 8080,
-        }],
+        },
+      ],
     };
     const image = 'eu.gcr.io/test-project/my-service:tag';
-    await runDeploy(
-      'service-account',
-      service,
-      image,
-    );
+    await runDeploy('service-account', service, image);
 
     expect(patchServiceYaml).toHaveBeenCalledWith(service, expect.anything());
   });
@@ -112,20 +105,23 @@ describe('Run Deploy', () => {
       },
     };
     const image = 'eu.gcr.io/test-project/my-service:tag';
-    await runDeploy(
-      'service-account',
-      service,
-      image,
-    );
+    await runDeploy('service-account', service, image);
 
-    expect(patchStatefulSetYaml).toHaveBeenCalledWith(service, expect.anything());
+    expect(patchStatefulSetYaml).toHaveBeenCalledWith(
+      service,
+      expect.anything(),
+    );
     expect(kustomize).toHaveBeenCalledWith([
       'edit',
       'add',
       'resource',
       'statefulSet.yml',
     ]);
-    expect(applyKubectl).toHaveBeenCalledWith(expect.anything(), 'statefulset', dryRun);
+    expect(applyKubectl).toHaveBeenCalledWith(
+      expect.anything(),
+      'statefulset',
+      dryRun,
+    );
   });
 
   test('It will deploy Deployment when storage is not required', async () => {
@@ -139,11 +135,7 @@ describe('Run Deploy', () => {
       storage: undefined,
     };
     const image = 'eu.gcr.io/test-project/my-service:tag';
-    await runDeploy(
-      'service-account',
-      service,
-      image,
-    );
+    await runDeploy('service-account', service, image);
 
     expect(patchDeployment).toHaveBeenCalledWith(service, expect.anything());
     expect(kustomize).toHaveBeenCalledWith([
@@ -152,22 +144,24 @@ describe('Run Deploy', () => {
       'resource',
       'deployment.yml',
     ]);
-    expect(applyKubectl).toHaveBeenCalledWith(expect.anything(), 'deployment', dryRun);
+    expect(applyKubectl).toHaveBeenCalledWith(
+      expect.anything(),
+      'deployment',
+      dryRun,
+    );
   });
 
   test('It calls kustomize on yaml files and build', async () => {
     getClusterInfo.mockResolvedValueOnce({});
     exec.exec.mockResolvedValue(0);
     setupGcloud.mockResolvedValueOnce('test-staging-project');
-    getImageDigest.mockResolvedValueOnce('eu.gcr.io/test-project/my-service@sha256:111');
+    getImageDigest.mockResolvedValueOnce(
+      'eu.gcr.io/test-project/my-service@sha256:111',
+    );
 
     const image = 'eu.gcr.io/test-project/my-service:tag';
     const name = 'deployment-name';
-    await runDeploy(
-      'service-account',
-      { name },
-      image,
-    );
+    await runDeploy('service-account', { name }, image);
     expect(kustomize).toHaveBeenNthCalledWith(2, [
       'edit',
       'set',
@@ -186,9 +180,7 @@ describe('Run Deploy', () => {
       'label',
       `app:${name}`,
     ]);
-    expect(kustomize).toHaveBeenLastCalledWith([
-      'build',
-    ]);
+    expect(kustomize).toHaveBeenLastCalledWith(['build']);
   });
 
   test('It calls applyAutoscale with storage (stateful set), autoscale parameters and dryRun', async () => {
@@ -211,14 +203,15 @@ describe('Run Deploy', () => {
     };
     const dryRun = true;
 
-    await runDeploy(
-      'service-account',
-      service,
-      image,
+    await runDeploy('service-account', service, image, dryRun);
+
+    expect(applyAutoscale).toHaveBeenCalledWith(
+      service.name,
+      'statefulset',
+      service.autoscale,
+      service.replicas,
       dryRun,
     );
-
-    expect(applyAutoscale).toHaveBeenCalledWith(service.name, 'statefulset', service.autoscale, service.replicas, dryRun);
   });
 
   test('It calls applyAutoscale without storage, autoscale parameters and dryRun', async () => {
@@ -233,14 +226,15 @@ describe('Run Deploy', () => {
     };
     const dryRun = undefined;
 
-    await runDeploy(
-      'service-account',
-      service,
-      image,
+    await runDeploy('service-account', service, image, dryRun);
+
+    expect(applyAutoscale).toHaveBeenCalledWith(
+      service.name,
+      'deployment',
+      undefined,
+      service.replicas,
       dryRun,
     );
-
-    expect(applyAutoscale).toHaveBeenCalledWith(service.name, 'deployment', undefined, service.replicas, dryRun);
     expect(checkRequiredNumberOfPodsIsRunning).toHaveBeenCalledTimes(1);
   });
 });

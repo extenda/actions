@@ -11,15 +11,9 @@ const readFromCloudDeploy = () => {
   const def = yaml.parse(fs.readFileSync(fileName, 'utf-8'));
 
   const {
-    'cloud-run': {
-      service: cloudRunService,
-    } = {},
-    kubernetes: {
-      service: gkeService,
-    } = {},
-    security: {
-      'permission-prefix': permissionPrefix,
-    } = {},
+    'cloud-run': { service: cloudRunService } = {},
+    kubernetes: { service: gkeService } = {},
+    security: { 'permission-prefix': permissionPrefix } = {},
   } = def;
 
   return {
@@ -28,7 +22,11 @@ const readFromCloudDeploy = () => {
   };
 };
 
-const createBundleName = (permissionPrefix, serviceName) => {
+const createBundleName = (
+  permissionPrefix,
+  serviceName,
+  serviceEnvironment,
+) => {
   if (!permissionPrefix) {
     throw new Error("Missing 'permission-prefix'");
   }
@@ -36,7 +34,9 @@ const createBundleName = (permissionPrefix, serviceName) => {
     throw new Error("Missing 'service-name'");
   }
 
-  return `${permissionPrefix}.${serviceName}-staging.tar.gz`;
+  const env = serviceEnvironment || 'staging';
+
+  return `${permissionPrefix}.${serviceName}-${env}.tar.gz`;
 };
 
 const getBundleName = () => {
@@ -45,11 +45,16 @@ const getBundleName = () => {
     bundleName = createBundleName(
       core.getInput('permission-prefix'),
       core.getInput('service-name'),
+      core.getInput('service-environment'),
     );
-  } catch (err) {
+  } catch {
     core.info('Read service definition from cloud-deploy.yaml');
     const { permissionPrefix, serviceName } = readFromCloudDeploy();
-    bundleName = createBundleName(permissionPrefix, serviceName);
+    bundleName = createBundleName(
+      permissionPrefix,
+      serviceName,
+      core.getInput('service-environment'),
+    );
   }
   return bundleName;
 };

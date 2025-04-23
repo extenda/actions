@@ -7,23 +7,28 @@ const mockSearchJira = jest.fn();
 jest.mock('../src/deploy-log');
 jest.mock('@actions/exec');
 jest.mock('@actions/core');
-jest.mock('jira-client', () => function JiraClient() {
-  return {
-    searchJira: mockSearchJira,
-  };
-});
+jest.mock(
+  'jira-client',
+  () =>
+    function JiraClient() {
+      return {
+        searchJira: mockSearchJira,
+      };
+    },
+);
 
 const issue = {
-  issues: [{
-    fields: {
-      created: '2020-08-31T09:45:11Z',
+  issues: [
+    {
+      fields: {
+        created: '2020-08-31T09:45:11Z',
+      },
     },
-  },
-  {
-    fields: {
-      created: '2020-09-31T09:45:11Z',
+    {
+      fields: {
+        created: '2020-09-31T09:45:11Z',
+      },
     },
-  },
   ],
 };
 

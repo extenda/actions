@@ -7,8 +7,16 @@ const mockUnpack = async (file, dest) => {
   const sdk = path.join(dest, 'google-cloud-sdk');
   fs.mkdirSync(sdk);
   fs.mkdirSync(path.join(sdk, 'bin'));
-  fs.writeFileSync(path.join(sdk, 'bin', 'gcloud'), 'gcloud executable', 'utf8');
-  fs.writeFileSync(path.join(sdk, 'bin', 'gsutil'), 'gsutil executable', 'utf8');
+  fs.writeFileSync(
+    path.join(sdk, 'bin', 'gcloud'),
+    'gcloud executable',
+    'utf8',
+  );
+  fs.writeFileSync(
+    path.join(sdk, 'bin', 'gsutil'),
+    'gsutil executable',
+    'utf8',
+  );
   return dest;
 };
 
@@ -29,6 +37,8 @@ const tc = require('@actions/tool-cache');
 const axios = require('axios');
 const { loadTool } = require('../src/load-binary');
 
+const orgEnv = process.env;
+
 const vswhere = {
   tool: 'vswhere',
   binary: 'vswhere.exe',
@@ -45,6 +55,10 @@ const gcloud = {
 
 describe('Load tool', () => {
   beforeEach(() => {
+    process.env = {
+      ...orgEnv,
+      RUNNER_TOOL_CACHE: '/Users/actions/cache',
+    };
     mockFs({
       '/Users/actions/cache': {
         'tmp-1': 'vswhere raw binary',
@@ -58,6 +72,7 @@ describe('Load tool', () => {
   afterEach(() => {
     jest.resetAllMocks();
     mockFs.restore();
+    process.env = orgEnv;
   });
 
   test('It can download a raw binary', async () => {

@@ -35,5 +35,5 @@ inputs:
     description: Pattern of resource names for ignore in pull request comment if only those resources are planned to change.
     required: false
 runs:
-  using: node16
+  using: node20
   main: dist/index.js

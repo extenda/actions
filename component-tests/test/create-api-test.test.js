@@ -22,16 +22,19 @@ jest.mock('supertest', () => ({
 
 describe('createApiTest function', () => {
   test('it runs correct tests', async () => {
-    const yaml = parseYaml(await readFile(resolve(__dirname, '../src/tests.yml')));
+    const yaml = parseYaml(
+      await readFile(resolve(__dirname, '../src/tests.yml')),
+    );
     const test = createApiTest('', '');
     for (const [request, expected] of Object.entries(yaml)) {
-      // eslint-disable-next-line no-await-in-loop
       await test(request, expected);
     }
     expect(spy).toBeCalledTimes(3);
     expect(spy).toBeCalledWith('POST', '/api/v1/permissions', 400);
     expect(spy).toBeCalledWith('GET', '/api/v1/permissions', 200);
-    expect(spy).toBeCalledWith('GET', '/api/v1/permissions', { field: 'value' });
+    expect(spy).toBeCalledWith('GET', '/api/v1/permissions', {
+      field: 'value',
+    });
 
     try {
       await test.status();

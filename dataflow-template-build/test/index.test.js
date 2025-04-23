@@ -14,7 +14,8 @@ describe('Dataflow Build Action', () => {
 
   test('It can run the action', async () => {
     setupGcloud.mockReturnValueOnce('test-project');
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('gs://test/dataflow/template.json')
       .mockReturnValueOnce('gcr.io/project/image:tag')
       .mockReturnValueOnce('JAVA')
@@ -35,7 +36,8 @@ describe('Dataflow Build Action', () => {
   });
 
   test('It can run the action without optional tags', async () => {
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('gs://test/dataflow/template.json')
       .mockReturnValueOnce('')
       .mockReturnValueOnce('gcr.io/project/image:tag')

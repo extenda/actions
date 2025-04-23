@@ -13,7 +13,9 @@ const {
 describe('Branch info test suite', () => {
   test('getBranchName() returns branch name or null', () => {
     expect(getBranchName('refs/heads/feature/RS-1234')).toBe('feature/RS-1234');
-    expect(getBranchName('refs/heads/feature/RS-1234_test_branch')).toBe('feature/RS-1234_test_branch');
+    expect(getBranchName('refs/heads/feature/RS-1234_test_branch')).toBe(
+      'feature/RS-1234_test_branch',
+    );
     expect(() => {
       getBranchName('wrong string');
     }).toThrow();
@@ -40,8 +42,12 @@ describe('Branch info test suite', () => {
 
   test('getBranchNameFriendly() returns a version suffix friendly string', () => {
     expect(getBranchNameFriendly('feature/RS-1234')).toBe('feature-rs-1234');
-    expect(getBranchNameFriendly('feature/RS-1234/lots/of/slash')).toBe('feature-rs-1234-lots-of-slash');
-    expect(getBranchNameFriendly('feature/RS-1234_test_branch')).toBe('feature-rs-1234-test-branch');
+    expect(getBranchNameFriendly('feature/RS-1234/lots/of/slash')).toBe(
+      'feature-rs-1234-lots-of-slash',
+    );
+    expect(getBranchNameFriendly('feature/RS-1234_test_branch')).toBe(
+      'feature-rs-1234-test-branch',
+    );
     expect(getBranchNameFriendly('master')).toBe('master');
     expect(getBranchNameFriendly('Master')).toBe('master');
     expect(getBranchNameFriendly('develop')).toBe('develop');
@@ -59,7 +65,9 @@ describe('Branch info test suite', () => {
 
   test('getBranchNameShort() returns last branch name or null', () => {
     expect(getBranchNameShort('refs/heads/feature/RS-1234')).toBe('RS-1234');
-    expect(getBranchNameShort('refs/heads/feature/RS-1234_test_branch')).toBe('RS-1234_test_branch');
+    expect(getBranchNameShort('refs/heads/feature/RS-1234_test_branch')).toBe(
+      'RS-1234_test_branch',
+    );
     expect(getBranchNameShort('master')).toBe('master');
     expect(getBranchNameShort('develop')).toBe('develop');
     expect(getBranchNameShort('RS-50991_AddScope')).toBe('RS-50991_AddScope');
@@ -78,7 +86,9 @@ describe('Branch info test suite', () => {
   });
 
   test('getBranchNameSemver() returns branch name with a-z and 0-9 only', () => {
-    expect(getBranchNameSemver('refs/heads/feature/RS-1234')).toBe('featureRS1234');
+    expect(getBranchNameSemver('refs/heads/feature/RS-1234')).toBe(
+      'featureRS1234',
+    );
     expect(getBranchNameSemver('master')).toBe('master');
     expect(getBranchNameSemver('develop')).toBe('develop');
     expect(getBranchNameSemver('RS-50991_AddScope')).toBe('RS50991AddScope');
@@ -133,14 +143,40 @@ describe('Branch info test suite', () => {
     const buildNumber = '6';
     const shortSha = '921103d';
 
-    expect(getComposedVersionString(version, 'master', buildNumber, shortSha)).toBe('1.1.0');
-    expect(getComposedVersionString(version, 'MASTER', buildNumber, shortSha)).toBe('1.1.0');
-    expect(getComposedVersionString(version, 'dev', buildNumber, shortSha)).toBe('1.1.0-dev-6-921103d');
-    expect(getComposedVersionString(version, 'Dev', buildNumber, shortSha)).toBe('1.1.0-dev-6-921103d');
-    expect(getComposedVersionString(version, 'develop', buildNumber, shortSha)).toBe('1.1.0-dev-6-921103d');
-    expect(getComposedVersionString(version, 'Develop', buildNumber, shortSha)).toBe('1.1.0-dev-6-921103d');
-    expect(getComposedVersionString(version, 'feature-other-stuff', buildNumber, shortSha)).toBe('1.1.0-feature-other-stuff-921103d');
-    expect(getComposedVersionString(version, 'Feature-OTHER-Stuff', buildNumber, shortSha)).toBe('1.1.0-feature-other-stuff-921103d');
+    expect(
+      getComposedVersionString(version, 'master', buildNumber, shortSha),
+    ).toBe('1.1.0');
+    expect(
+      getComposedVersionString(version, 'MASTER', buildNumber, shortSha),
+    ).toBe('1.1.0');
+    expect(
+      getComposedVersionString(version, 'dev', buildNumber, shortSha),
+    ).toBe('1.1.0-dev-6-921103d');
+    expect(
+      getComposedVersionString(version, 'Dev', buildNumber, shortSha),
+    ).toBe('1.1.0-dev-6-921103d');
+    expect(
+      getComposedVersionString(version, 'develop', buildNumber, shortSha),
+    ).toBe('1.1.0-dev-6-921103d');
+    expect(
+      getComposedVersionString(version, 'Develop', buildNumber, shortSha),
+    ).toBe('1.1.0-dev-6-921103d');
+    expect(
+      getComposedVersionString(
+        version,
+        'feature-other-stuff',
+        buildNumber,
+        shortSha,
+      ),
+    ).toBe('1.1.0-feature-other-stuff-921103d');
+    expect(
+      getComposedVersionString(
+        version,
+        'Feature-OTHER-Stuff',
+        buildNumber,
+        shortSha,
+      ),
+    ).toBe('1.1.0-feature-other-stuff-921103d');
 
     expect(() => {
       getComposedVersionString(version, null, buildNumber, shortSha);

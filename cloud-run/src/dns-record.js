@@ -4,12 +4,13 @@ const gcloud = require('./gcloud-output');
 
 let dnsProjectId;
 
-const findDnsProject = async (dnsProjectLabel) => gcloud([
-  'projects',
-  'list',
-  `--filter=labels:${dnsProjectLabel}`,
-  '--format=value(PROJECT_ID)',
-]);
+const findDnsProject = async (dnsProjectLabel) =>
+  gcloud([
+    'projects',
+    'list',
+    `--filter=labels:${dnsProjectLabel}`,
+    '--format=value(PROJECT_ID)',
+  ]);
 
 const dnsTransaction = async (domain, args) => {
   const zone = domain.split('.').slice(-2).join('-');
@@ -34,20 +35,24 @@ const addDnsRecord = async (dnsProjectLabel, domain, ipAddress) => {
   if (!dnsProjectId) {
     dnsProjectId = await findDnsProject(dnsProjectLabel);
     if (!dnsProjectId) {
-      core.error(`Could not find a project labeled '${dnsProjectLabel}'. DNS not updated.`);
+      core.error(
+        `Could not find a project labeled '${dnsProjectLabel}'. DNS not updated.`,
+      );
       return null;
     }
   }
 
   return dnsTransaction(domain, ['start'])
-    .then(() => dnsTransaction(domain, [
-      'add',
-      ipAddress,
-      `--name=${domain}`,
-      '--ttl=300',
-      '--type=A',
-    ]))
-    .then((() => dnsTransaction(domain, ['execute'])));
+    .then(() =>
+      dnsTransaction(domain, [
+        'add',
+        ipAddress,
+        `--name=${domain}`,
+        '--ttl=300',
+        '--type=A',
+      ]),
+    )
+    .then(() => dnsTransaction(domain, ['execute']));
 };
 
 const clearCache = () => {

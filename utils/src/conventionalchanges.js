@@ -2,7 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 
-const recommendedVersionBump = util.promisify(require('conventional-recommended-bump'));
+const recommendedVersionBump = util.promisify(
+  require('conventional-recommended-bump'),
+);
 const gitRawCommits = require('git-raw-commits');
 const conventionalCommitsParser = require('conventional-commits-parser');
 const conventionalChangelog = require('conventional-changelog-core');
@@ -29,7 +31,7 @@ const getRecommendedBump = async () => {
 const withConventionalConfig = async (version, fn) => {
   const config = await conventionalCommits();
   config.writerOpts.headerPartial = '';
-  const recommendedVersion = version || await getRecommendedBump();
+  const recommendedVersion = version || (await getRecommendedBump());
 
   // If current commit is tagged, include two releases.
   const tag = await getTagAtCommit(process.env.GITHUB_SHA || 'HEAD');
@@ -37,10 +39,14 @@ const withConventionalConfig = async (version, fn) => {
 
   // Create a dummy package.json
   const dummyPackageJson = path.join(__dirname, 'package.json');
-  fs.writeFileSync(dummyPackageJson, JSON.stringify({
-    name: 'Changelog',
-    version: recommendedVersion,
-  }), 'utf8');
+  fs.writeFileSync(
+    dummyPackageJson,
+    JSON.stringify({
+      name: 'Changelog',
+      version: recommendedVersion,
+    }),
+    'utf8',
+  );
 
   try {
     return fn(
@@ -77,19 +83,22 @@ const withConventionalConfig = async (version, fn) => {
   }
 };
 
-const getCommitStream = async (version) => withConventionalConfig(
-  version,
-  (options, context, gitRawCommitsOpts, parserOpts, writerOpts) => mergeConfig(
-    options,
-    context,
-    gitRawCommitsOpts,
-    parserOpts,
-    writerOpts,
-  ).then((data) => gitRawCommits(
-    data.gitRawCommitsOpts,
-    data.gitRawExecOpts,
-  ).pipe(conventionalCommitsParser(data.parserOpts))),
-);
+const getCommitStream = async (version) =>
+  withConventionalConfig(
+    version,
+    (options, context, gitRawCommitsOpts, parserOpts, writerOpts) =>
+      mergeConfig(
+        options,
+        context,
+        gitRawCommitsOpts,
+        parserOpts,
+        writerOpts,
+      ).then((data) =>
+        gitRawCommits(data.gitRawCommitsOpts, data.gitRawExecOpts).pipe(
+          conventionalCommitsParser(data.parserOpts),
+        ),
+      ),
+  );
 
 /**
  * Return all conventional commits from the previous version.
@@ -99,16 +108,21 @@ const getConventionalCommits = async () => {
   const commitStream = await getCommitStream();
   return new Promise((resolve, reject) => {
     const commits = [];
-    commitStream.on('finish', () => {
-      resolve(commits);
-    }).on('error', (err) => {
-      reject(err);
-    }).pipe(through2.obj((chunk, enc, cb) => {
-      if (chunk.type != null) {
-        commits.push(chunk);
-      }
-      cb();
-    }));
+    commitStream
+      .on('finish', () => {
+        resolve(commits);
+      })
+      .on('error', (err) => {
+        reject(err);
+      })
+      .pipe(
+        through2.obj((chunk, enc, cb) => {
+          if (chunk.type != null) {
+            commits.push(chunk);
+          }
+          cb();
+        }),
+      );
   });
 };
 
@@ -118,13 +132,20 @@ const getConventionalCommits = async () => {
  * @param version the name of the version built now
  * @returns {Promise<string>}
  */
-const getChangelog = async (version) => withConventionalConfig(
-  version,
-  (options, context, gitRawCommitsOpts, parserOpts, writerOpts) => {
-    const out = conventionalChangelog(options, context, gitRawCommitsOpts, parserOpts, writerOpts);
-    return streamToString(out).then((notes) => notes.trim());
-  },
-);
+const getChangelog = async (version) =>
+  withConventionalConfig(
+    version,
+    (options, context, gitRawCommitsOpts, parserOpts, writerOpts) => {
+      const out = conventionalChangelog(
+        options,
+        context,
+        gitRawCommitsOpts,
+        parserOpts,
+        writerOpts,
+      );
+      return streamToString(out).then((notes) => notes.trim());
+    },
+  );
 
 const setTagPrefix = (prefix) => {
   tagPrefix = prefix;

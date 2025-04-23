@@ -29,7 +29,10 @@ const platform = () => {
 };
 
 const action = async () => {
-  const terraformVersion = loadVersion('terraform-version', '.terraform-version');
+  const terraformVersion = loadVersion(
+    'terraform-version',
+    '.terraform-version',
+  );
 
   await loadTool({
     tool: 'terraform',
@@ -46,7 +49,10 @@ const action = async () => {
   const skipTerragrunt = core.getInput('skip-terragrunt') || 'false';
 
   if (skipTerragrunt !== 'true') {
-    const terragruntVersion = loadVersion('terragrunt-version', '.terragrunt-version');
+    const terragruntVersion = loadVersion(
+      'terragrunt-version',
+      '.terragrunt-version',
+    );
 
     await loadTool({
       tool: 'terragrunt',

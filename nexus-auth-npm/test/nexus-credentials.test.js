@@ -13,14 +13,18 @@ describe('nexus-credentials', () => {
   });
 
   it('returns passed credentials', async () => {
-    const res = await validateOrFetchNexusCredentials({ username: 'u', password: 'p' });
+    const res = await validateOrFetchNexusCredentials({
+      username: 'u',
+      password: 'p',
+    });
 
     expect(res).toEqual({ username: 'u', password: 'p' });
   });
 
   it('throws if credentials were not found', async () => {
-    await expect(validateOrFetchNexusCredentials({}))
-      .rejects.toThrow(new Error('Credentials are not found'));
+    await expect(validateOrFetchNexusCredentials({})).rejects.toThrow(
+      new Error('Credentials are not found'),
+    );
   });
 
   it('fetches credentials if they were not provided', async () => {
@@ -30,7 +34,9 @@ describe('nexus-credentials', () => {
     });
     loadSecrets.mockResolvedValueOnce();
 
-    const res = await validateOrFetchNexusCredentials({ serviceAccountKey: 'sac' });
+    const res = await validateOrFetchNexusCredentials({
+      serviceAccountKey: 'sac',
+    });
 
     expect(loadSecrets).toBeCalledWith('sac', {
       NEXUS_USERNAME: 'nexus-username',

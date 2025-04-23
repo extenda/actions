@@ -14,7 +14,8 @@ describe('Fetch identity token action', () => {
 
   test('It can run the action', async () => {
     setupGcloud.mockReturnValueOnce('test-project');
-    core.getInput.mockReturnValueOnce('service-account-key')
+    core.getInput
+      .mockReturnValueOnce('service-account-key')
       .mockReturnValueOnce('my-sa@example.iam.gserviceaccount.com')
       .mockReturnValueOnce('bhq-braveheart-quotes');
     await action();

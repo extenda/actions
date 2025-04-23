@@ -26,7 +26,9 @@ describe('get latest revision', () => {
       { name: 'rev-00002-tst', creationTimestamp: '0' },
       { name: 'rev-00001-tst', creationTimestamp: '0' },
     ]);
-    expect(getLatestRevision('namespace', cluster)).resolves.toEqual('rev-00009-tst');
+    expect(getLatestRevision('namespace', cluster)).resolves.toEqual(
+      'rev-00009-tst',
+    );
     expect(getRevisions).toHaveBeenCalledTimes(1);
   });
 });

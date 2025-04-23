@@ -86,6 +86,8 @@ describe('status-check', () => {
       .mockReturnValueOnce('Output title')
       .mockReturnValueOnce('');
 
-    await expect(action()).rejects.toEqual(new Error("Unsupported state: 'skipped'"));
+    await expect(action()).rejects.toEqual(
+      new Error("Unsupported state: 'skipped'"),
+    );
   });
 });

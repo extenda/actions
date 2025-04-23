@@ -5,16 +5,18 @@ const handleCertificates = require('../src/handle-certificate');
 jest.mock('@actions/exec');
 jest.mock('@actions/core');
 
-const certificateListJson = [{
-  creationTimestamp: '2021-03-11T06:32:08.781-08:00',
-  name: 'txengine-certs-v1',
-  managed: {
-    domains: [
-      'testrunner-se.txengine.retailsvc.dev',
-      'testrunner-dk.txengine.retailsvc.dev',
-    ],
+const certificateListJson = [
+  {
+    creationTimestamp: '2021-03-11T06:32:08.781-08:00',
+    name: 'txengine-certs-v1',
+    managed: {
+      domains: [
+        'testrunner-se.txengine.retailsvc.dev',
+        'testrunner-dk.txengine.retailsvc.dev',
+      ],
+    },
   },
-}];
+];
 
 describe('handle certificates', () => {
   afterEach(() => {
@@ -22,24 +24,26 @@ describe('handle certificates', () => {
   });
 
   test('It can handle certificates when domain exists', async () => {
-    exec.exec.mockImplementationOnce((
-      cmd,
-      args,
-      opts,
-    ) => opts.listeners.stdout(JSON.stringify(certificateListJson)));
+    exec.exec.mockImplementationOnce((cmd, args, opts) =>
+      opts.listeners.stdout(JSON.stringify(certificateListJson)),
+    );
     exec.exec.mockResolvedValue(0);
-    await handleCertificates('testrunner-se.txengine.retailsvc.dev', 'experience-staging-b807');
+    await handleCertificates(
+      'testrunner-se.txengine.retailsvc.dev',
+      'experience-staging-b807',
+    );
     expect(exec.exec).toHaveBeenCalledTimes(1);
   });
 
   test('It can handle certificates when domain doesnt exist', async () => {
-    exec.exec.mockImplementationOnce((
-      cmd,
-      args,
-      opts,
-    ) => opts.listeners.stdout(JSON.stringify(certificateListJson)));
+    exec.exec.mockImplementationOnce((cmd, args, opts) =>
+      opts.listeners.stdout(JSON.stringify(certificateListJson)),
+    );
     exec.exec.mockResolvedValue(0);
-    await handleCertificates('testrunner-no.txengine.retailsvc.dev', 'experience-staging-b807');
+    await handleCertificates(
+      'testrunner-no.txengine.retailsvc.dev',
+      'experience-staging-b807',
+    );
     expect(exec.exec).toHaveBeenCalledTimes(2);
     expect(exec.exec).toHaveBeenNthCalledWith(
       2,
@@ -78,13 +82,14 @@ describe('handle certificates', () => {
     expectedResult.splice(expectedResult.indexOf('txengine-certs-v0'), 1);
     expectedResult = expectedResult.join(',');
 
-    exec.exec.mockImplementationOnce((
-      cmd,
-      args,
-      opts,
-    ) => opts.listeners.stdout(JSON.stringify(certificateListJsonMaxCert)));
+    exec.exec.mockImplementationOnce((cmd, args, opts) =>
+      opts.listeners.stdout(JSON.stringify(certificateListJsonMaxCert)),
+    );
     exec.exec.mockResolvedValue(0);
-    const newCertificates = await handleCertificates('testrunner-no.txengine.retailsvc.dev', 'experience-staging-b807');
+    const newCertificates = await handleCertificates(
+      'testrunner-no.txengine.retailsvc.dev',
+      'experience-staging-b807',
+    );
     expect(newCertificates).toEqual(expectedResult);
     expect(exec.exec).toHaveBeenCalledTimes(4);
   });
@@ -125,13 +130,14 @@ describe('handle certificates', () => {
     expectedResult.splice(expectedResult.indexOf('txengine-certs-v1'), 1);
     expectedResult = expectedResult.join(',');
 
-    exec.exec.mockImplementationOnce((
-      cmd,
-      args,
-      opts,
-    ) => opts.listeners.stdout(JSON.stringify(certificateListJsonMaxCert)));
+    exec.exec.mockImplementationOnce((cmd, args, opts) =>
+      opts.listeners.stdout(JSON.stringify(certificateListJsonMaxCert)),
+    );
     exec.exec.mockResolvedValue(0);
-    const newCertificates = await handleCertificates('testrunner-no.txengine.retailsvc.dev', 'experience-staging-b807');
+    const newCertificates = await handleCertificates(
+      'testrunner-no.txengine.retailsvc.dev',
+      'experience-staging-b807',
+    );
     expect(newCertificates).toEqual(expectedResult);
     expect(exec.exec).toHaveBeenCalledTimes(4);
   });
@@ -172,13 +178,14 @@ describe('handle certificates', () => {
     expectedResult.splice(expectedResult.indexOf('txengine-certs-v0'), 1);
     expectedResult = expectedResult.join(',');
 
-    exec.exec.mockImplementationOnce((
-      cmd,
-      args,
-      opts,
-    ) => opts.listeners.stdout(JSON.stringify(certificateListJsonMaxCert)));
+    exec.exec.mockImplementationOnce((cmd, args, opts) =>
+      opts.listeners.stdout(JSON.stringify(certificateListJsonMaxCert)),
+    );
     exec.exec.mockResolvedValue(0);
-    const newCertificates = await handleCertificates('testrunner-no.txengine.retailsvc.dev', 'experience-staging-b807');
+    const newCertificates = await handleCertificates(
+      'testrunner-no.txengine.retailsvc.dev',
+      'experience-staging-b807',
+    );
     expect(newCertificates).toEqual(expectedResult);
     expect(exec.exec).toHaveBeenCalledTimes(4);
     expect(exec.exec).toHaveBeenNthCalledWith(
@@ -233,13 +240,14 @@ describe('handle certificates', () => {
     expectedResult.splice(expectedResult.indexOf('txengine-certs-v0'), 1);
     expectedResult = expectedResult.join(',');
 
-    exec.exec.mockImplementationOnce((
-      cmd,
-      args,
-      opts,
-    ) => opts.listeners.stdout(JSON.stringify(certificateListJsonMaxCert)));
+    exec.exec.mockImplementationOnce((cmd, args, opts) =>
+      opts.listeners.stdout(JSON.stringify(certificateListJsonMaxCert)),
+    );
     exec.exec.mockResolvedValue(0);
-    const newCertificates = await handleCertificates('testrunner-no.txengine.retailsvc.dev', 'experience-staging-b807');
+    const newCertificates = await handleCertificates(
+      'testrunner-no.txengine.retailsvc.dev',
+      'experience-staging-b807',
+    );
     expect(newCertificates).toEqual(expectedResult);
     expect(exec.exec).toHaveBeenCalledTimes(4);
     expect(exec.exec).toHaveBeenNthCalledWith(
@@ -259,13 +267,14 @@ describe('handle certificates', () => {
   });
 
   test('It creates certificate when there is none existing', async () => {
-    exec.exec.mockImplementationOnce((
-      cmd,
-      args,
-      opts,
-    ) => opts.listeners.stdout('[]'));
+    exec.exec.mockImplementationOnce((cmd, args, opts) =>
+      opts.listeners.stdout('[]'),
+    );
     exec.exec.mockResolvedValue(0);
-    await handleCertificates('testrunner-no.txengine.retailsvc.dev', 'experience-staging-b807');
+    await handleCertificates(
+      'testrunner-no.txengine.retailsvc.dev',
+      'experience-staging-b807',
+    );
     expect(exec.exec).toHaveBeenCalledTimes(2);
     expect(exec.exec).toHaveBeenNthCalledWith(
       2,

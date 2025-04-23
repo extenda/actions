@@ -1,10 +1,19 @@
 const core = require('@actions/core');
 const axios = require('axios');
+const axiosRetry = require('axios-retry').default;
 const fs = require('fs');
 const glob = require('fast-glob');
 const path = require('path');
 const { execGcloud } = require('../../../setup-gcloud');
 const getDasWorkerBaseUrl = require('../../../iam/src/das-worker-base-url');
+
+axiosRetry(axios, {
+  retries: 4,
+  retryDelay: (retryCount) => {
+    core.info(`Request to das sync worker failed.. retrying(${retryCount})`);
+    return retryCount * 500;
+  },
+});
 
 const DEFAULT_LOG_MASK = `package system.log
 
@@ -35,12 +44,21 @@ const createPayload = (version) => {
 };
 
 const publishPolicies = async (serviceName, env, version, deployYaml) => {
-  const { security: { 'permission-prefix': permissionPrefix, 'system-name': systemName } } = deployYaml;
+  const {
+    security: {
+      'permission-prefix': permissionPrefix,
+      'system-name': systemName,
+    },
+  } = deployYaml;
   if (permissionPrefix && fs.existsSync(path.join('policies', 'policy'))) {
     const systemId = `${permissionPrefix}.${systemName || serviceName}-${env}`;
     core.info(`Publish security policies for ${systemId}`);
     const dasWorkerBaseUrl = getDasWorkerBaseUrl(systemId);
-    const idToken = await execGcloud(['auth', 'print-identity-token', '--audiences=iam-das-worker']);
+    const idToken = await execGcloud([
+      'auth',
+      'print-identity-token',
+      '--audiences=iam-das-worker',
+    ]);
     await axios.put(
       `${dasWorkerBaseUrl}/systems/${systemId}/policies`,
       createPayload(version),

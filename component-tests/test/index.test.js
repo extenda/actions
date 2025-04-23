@@ -19,8 +19,7 @@ describe('run action', () => {
       .mockReturnValueOnce('token')
       .mockReturnValueOnce('url')
       .mockReturnValueOnce(resolve(__dirname, '../src/tests.yml'));
-    createApiTest
-      .mockReturnValueOnce(spy);
+    createApiTest.mockReturnValueOnce(spy);
     await action();
 
     expect(core.getInput).toHaveBeenCalledTimes(3);
@@ -28,7 +27,10 @@ describe('run action', () => {
     expect(createApiTest).toBeCalledWith('url', 'token');
     expect(spy).toHaveBeenCalledTimes(2);
     expect(spy).toBeCalledWith('POST /api/v1/permissions', { code: 400 });
-    expect(spy).toBeCalledWith('GET /api/v1/permissions', { body: { field: 'value' }, code: 200 });
+    expect(spy).toBeCalledWith('GET /api/v1/permissions', {
+      body: { field: 'value' },
+      code: 200,
+    });
   });
 
   test('runs the action with fail', async () => {
@@ -39,8 +41,7 @@ describe('run action', () => {
       .mockReturnValueOnce('token')
       .mockReturnValueOnce('url')
       .mockReturnValueOnce(resolve(__dirname, '../src/tests.yml'));
-    createApiTest
-      .mockReturnValueOnce(spy);
+    createApiTest.mockReturnValueOnce(spy);
     await action();
 
     expect(core.setFailed).toBeCalledWith('message');

@@ -29,7 +29,8 @@ describe('opa-policy-test', () => {
   });
 
   test('It can test an opa bundle', async () => {
-    core.getInput.mockReturnValueOnce('test-sa')
+    core.getInput
+      .mockReturnValueOnce('test-sa')
       .mockReturnValueOnce('authz-bundles/systems');
 
     setupGcloud.mockResolvedValueOnce('');
@@ -41,14 +42,18 @@ describe('opa-policy-test', () => {
 
     expect(result).toEqual(0);
     expect(getBundleName).toHaveBeenCalled();
-    expect(createTestBundle).toHaveBeenCalledWith('tst.test-system-staging.tar.gz', 'authz-bundles/systems');
+    expect(createTestBundle).toHaveBeenCalledWith(
+      'tst.test-system-staging.tar.gz',
+      'authz-bundles/systems',
+    );
     expect(opaTest).toHaveBeenCalledWith('test-bundle');
     expect(setupGcloud).toHaveBeenCalledWith('test-sa');
   });
 
   test('It fails on missing policies', async () => {
     mockFs({});
-    core.getInput.mockReturnValueOnce('inherit')
+    core.getInput
+      .mockReturnValueOnce('inherit')
       .mockReturnValueOnce('authz-bundles/systems');
 
     await expect(() => action()).rejects.toThrow('No policies found.');
@@ -60,7 +65,8 @@ describe('opa-policy-test', () => {
   });
 
   test('It fails if tests fails', async () => {
-    core.getInput.mockReturnValueOnce('inherit')
+    core.getInput
+      .mockReturnValueOnce('inherit')
       .mockReturnValueOnce('authz-bundles/systems');
 
     setupGcloud.mockResolvedValueOnce('');
@@ -70,7 +76,10 @@ describe('opa-policy-test', () => {
 
     await expect(() => action()).rejects.toEqual(1);
     expect(getBundleName).toHaveBeenCalled();
-    expect(createTestBundle).toHaveBeenCalledWith('tst.test-system-staging.tar.gz', 'authz-bundles/systems');
+    expect(createTestBundle).toHaveBeenCalledWith(
+      'tst.test-system-staging.tar.gz',
+      'authz-bundles/systems',
+    );
     expect(opaTest).toHaveBeenCalledWith('test-bundle');
     expect(setupGcloud).not.toHaveBeenCalled();
   });

@@ -24,52 +24,58 @@ const initSlack = async (serviceAccount, channelName) => {
   return { token: slackToken, channel };
 };
 
-const postMessageToSlackChannel = async (slackData, message) => axios({
-  url: 'https://slack.com/api/chat.postMessage',
-  method: 'POST',
-  headers: {
-    'content-type': 'application/json',
-    authorization: `Bearer ${slackData.token}`,
-  },
-  data: {
-    channel: slackData.channel,
-    text: message,
-  },
-}).then(() => true)
-  .catch((err) => {
-    core.error(`Unable to send notification on slack! reason:\n${err}`);
-    return false;
-  });
+const postMessageToSlackChannel = async (slackData, message) =>
+  axios({
+    url: 'https://slack.com/api/chat.postMessage',
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${slackData.token}`,
+    },
+    data: {
+      channel: slackData.channel,
+      text: message,
+    },
+  })
+    .then(() => true)
+    .catch((err) => {
+      core.error(`Unable to send notification on slack! reason:\n${err}`);
+      return false;
+    });
 
 const postFileToSlackChannel = async (slackData, message, file) => {
   const formData = buildFormData(slackData.channel, message, file);
-  const headers = { Authorization: `Bearer ${slackData.token}`, ...formData.getHeaders() };
+  const headers = {
+    Authorization: `Bearer ${slackData.token}`,
+    ...formData.getHeaders(),
+  };
   return axios({
     url: 'https://slack.com/api/files.upload',
     method: 'POST',
     data: formData,
     headers,
-  }).then(() => true)
+  })
+    .then(() => true)
     .catch((err) => {
       core.error(`Unable to send notification on slack! reason:\n${err}`);
       return false;
     });
 };
 
-const notifySlackMessage = async (
-  serviceAccount,
-  message,
-  channelName,
-) => initSlack(serviceAccount, channelName)
-  .then((slackData) => postMessageToSlackChannel(slackData, message));
+const notifySlackMessage = async (serviceAccount, message, channelName) =>
+  initSlack(serviceAccount, channelName).then((slackData) =>
+    postMessageToSlackChannel(slackData, message),
+  );
 
 const notifySlackWithFile = async (
   serviceAccount,
   message,
   channelName,
   file,
-) => initSlack(serviceAccount, channelName)
-  .then((slackData) => postFileToSlackChannel(slackData, message, file));
+) =>
+  initSlack(serviceAccount, channelName).then((slackData) =>
+    postFileToSlackChannel(slackData, message, file),
+  );
 
 const notifySlack = async (serviceAccount, message, channelName, file) => {
   if (file) {

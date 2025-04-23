@@ -4,11 +4,7 @@
   "private": true,
   "description": "Authorization to hiiretail npm nexus registry",
   "main": "dist/index.js",
-  "dependencies": {
-    "@actions/core": "^1.10.0"
-  },
   "devDependencies": {
-    "mock-fs": "^5.0.0",
     "mocked-env": "^1.3.5"
   }
 }

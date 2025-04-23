@@ -1,5 +1,4 @@
-require('jest-fetch-mock')
-  .enableMocks();
+require('jest-fetch-mock').enableMocks();
 
 const mockFs = require('mock-fs');
 const exec = require('@actions/exec');
@@ -22,14 +21,17 @@ describe('RS installer package tests', () => {
   afterEach(() => {
     jest.resetAllMocks();
     mockFs.restore();
-    // eslint-disable-next-line no-undef
+
     fetch.resetMocks();
   });
 
   test('packageBuilderCommand() executed with correct args', async () => {
-    mockFs({
-      output: {},
-    }, {});
+    mockFs(
+      {
+        output: {},
+      },
+      {},
+    );
     const args = {
       builderType: 'single',
       binaryVersion: '1.1.0',
@@ -45,28 +47,29 @@ describe('RS installer package tests', () => {
     };
     await packageBuilderCommand(loadTool, args);
 
-    expect(exec.exec)
-      .toHaveBeenCalledTimes(1);
-    expect(exec.exec.mock.calls[0][1])
-      .toEqual([
-        'single',
-        '-pn',
-        'Test_PkgName',
-        '-wd',
-        'workdir',
-        '-od',
-        'output',
-        '-pv',
-        '1.0.1-testversion',
-        '-sp',
-        __dirname,
-      ]);
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1]).toEqual([
+      'single',
+      '-pn',
+      'Test_PkgName',
+      '-wd',
+      'workdir',
+      '-od',
+      'output',
+      '-pv',
+      '1.0.1-testversion',
+      '-sp',
+      __dirname,
+    ]);
   });
 
   test('packageBuilderCommand() sets specified sourcePaths', async () => {
-    mockFs({
-      output: {},
-    }, {});
+    mockFs(
+      {
+        output: {},
+      },
+      {},
+    );
     const args = {
       builderType: 'single',
       binaryVersion: '1.1.0',
@@ -83,28 +86,29 @@ describe('RS installer package tests', () => {
 
     await packageBuilderCommand(loadTool, args);
 
-    expect(exec.exec)
-      .toHaveBeenCalledTimes(1);
-    expect(exec.exec.mock.calls[0][1])
-      .toEqual([
-        'single',
-        '-pn',
-        'Test_PkgName',
-        '-wd',
-        'workdir',
-        '-od',
-        'output',
-        '-pv',
-        '1.0.1-testversion',
-        '-sp',
-        'testSourcePaths',
-      ]);
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1]).toEqual([
+      'single',
+      '-pn',
+      'Test_PkgName',
+      '-wd',
+      'workdir',
+      '-od',
+      'output',
+      '-pv',
+      '1.0.1-testversion',
+      '-sp',
+      'testSourcePaths',
+    ]);
   });
 
   test('packageBuilderCommand() sets specified searchFilter', async () => {
-    mockFs({
-      output: {},
-    }, {});
+    mockFs(
+      {
+        output: {},
+      },
+      {},
+    );
     const args = {
       builderType: 'single',
       binaryVersion: '1.1.0',
@@ -122,30 +126,31 @@ describe('RS installer package tests', () => {
 
     await packageBuilderCommand(loadTool, args);
 
-    expect(exec.exec)
-      .toHaveBeenCalledTimes(1);
-    expect(exec.exec.mock.calls[0][1])
-      .toEqual([
-        'single',
-        '-pn',
-        'Test_PkgName',
-        '-wd',
-        'workdir',
-        '-od',
-        'output',
-        '-pv',
-        '1.0.1-testversion',
-        '-sp',
-        'testSourcePaths',
-        '-sf',
-        'testFilter',
-      ]);
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1]).toEqual([
+      'single',
+      '-pn',
+      'Test_PkgName',
+      '-wd',
+      'workdir',
+      '-od',
+      'output',
+      '-pv',
+      '1.0.1-testversion',
+      '-sp',
+      'testSourcePaths',
+      '-sf',
+      'testFilter',
+    ]);
   });
 
   test('packageBuilderCommand() does not set sourcePaths if none specified', async () => {
-    mockFs({
-      output: {},
-    }, {});
+    mockFs(
+      {
+        output: {},
+      },
+      {},
+    );
     const args = {
       builderType: 'single',
       binaryVersion: '1.1.0',
@@ -162,26 +167,27 @@ describe('RS installer package tests', () => {
 
     await packageBuilderCommand(loadTool, args);
 
-    expect(exec.exec)
-      .toHaveBeenCalledTimes(1);
-    expect(exec.exec.mock.calls[0][1])
-      .toEqual([
-        'single',
-        '-pn',
-        'Test_PkgName',
-        '-wd',
-        'workdir',
-        '-od',
-        'output',
-        '-pv',
-        '1.0.1-testversion',
-      ]);
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1]).toEqual([
+      'single',
+      '-pn',
+      'Test_PkgName',
+      '-wd',
+      'workdir',
+      '-od',
+      'output',
+      '-pv',
+      '1.0.1-testversion',
+    ]);
   });
 
   test('packageBuilderCommand() does not set packageName if none specified', async () => {
-    mockFs({
-      output: {},
-    }, {});
+    mockFs(
+      {
+        output: {},
+      },
+      {},
+    );
     const args = {
       builderType: 'single',
       binaryVersion: '1.1.0',
@@ -198,24 +204,25 @@ describe('RS installer package tests', () => {
 
     await packageBuilderCommand(loadTool, args);
 
-    expect(exec.exec)
-      .toHaveBeenCalledTimes(1);
-    expect(exec.exec.mock.calls[0][1])
-      .toEqual([
-        'single',
-        '-wd',
-        'workdir',
-        '-od',
-        'output',
-        '-pv',
-        '1.0.1-testversion',
-      ]);
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1]).toEqual([
+      'single',
+      '-wd',
+      'workdir',
+      '-od',
+      'output',
+      '-pv',
+      '1.0.1-testversion',
+    ]);
   });
 
   test('packageBuilderCommand() sets specified sourceFilePaths', async () => {
-    mockFs({
-      output: {},
-    }, {});
+    mockFs(
+      {
+        output: {},
+      },
+      {},
+    );
     const args = {
       builderType: 'single',
       binaryVersion: '1.1.0',
@@ -232,37 +239,40 @@ describe('RS installer package tests', () => {
 
     await packageBuilderCommand(loadTool, args);
 
-    expect(exec.exec)
-      .toHaveBeenCalledTimes(1);
-    expect(exec.exec.mock.calls[0][1])
-      .toEqual([
-        'single',
-        '-pn',
-        'Test_PkgName',
-        '-wd',
-        'workdir',
-        '-od',
-        'output',
-        '-pv',
-        '1.0.1-testversion',
-        '-sp',
-        __dirname,
-        '-sfp',
-        'testSourceFilePaths',
-      ]);
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1]).toEqual([
+      'single',
+      '-pn',
+      'Test_PkgName',
+      '-wd',
+      'workdir',
+      '-od',
+      'output',
+      '-pv',
+      '1.0.1-testversion',
+      '-sp',
+      __dirname,
+      '-sfp',
+      'testSourceFilePaths',
+    ]);
   });
 
   test('publishPackageCommand() reports success when received OK response', async () => {
-    mockFs({
-      output: {
-        'RS_TestPackage_1.0.0.pkg.zip': Buffer.from('test content'),
+    mockFs(
+      {
+        output: {
+          'RS_TestPackage_1.0.0.pkg.zip': Buffer.from('test content'),
+        },
       },
-    }, {});
-    // eslint-disable-next-line no-undef
-    fetch.mockResponse(JSON.stringify({
-      status: '200',
-      statusText: 'OK',
-    }));
+      {},
+    );
+
+    fetch.mockResponse(
+      JSON.stringify({
+        status: '200',
+        statusText: 'OK',
+      }),
+    );
 
     await publishPackageCommand({
       packageName: 'RS_TestPackage',
@@ -272,23 +282,22 @@ describe('RS installer package tests', () => {
       branch: 'develop',
       publishPackage: true,
     });
-    // eslint-disable-next-line no-undef
-    expect(fetch)
-      .toHaveBeenCalledTimes(1);
-    expect(core.info)
-      .toBeCalledTimes(3);
-    expect(core.error)
-      .not
-      .toBeCalled();
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(core.info).toBeCalledTimes(3);
+    expect(core.error).not.toBeCalled();
   });
 
   test('publishPackageCommand() reports error when response failed', async () => {
-    mockFs({
-      output: {
-        'RS_TestPackage_1.0.0.pkg.zip': Buffer.from('test content'),
+    mockFs(
+      {
+        output: {
+          'RS_TestPackage_1.0.0.pkg.zip': Buffer.from('test content'),
+        },
       },
-    }, {});
-    // eslint-disable-next-line no-undef
+      {},
+    );
+
     fetch.mockReject({
       status: '503',
       statusText: 'Test',
@@ -302,27 +311,23 @@ describe('RS installer package tests', () => {
       branch: 'develop',
       publishPackage: true,
     });
-    // eslint-disable-next-line no-undef
-    expect(fetch)
-      .toHaveBeenCalledTimes(1);
-    expect(core.error)
-      .toBeCalledTimes(1);
-    expect(core.error)
-      .toBeCalledWith('Failed to publish package, server responded with 503 Test');
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(core.error).toBeCalledTimes(1);
+    expect(core.error).toBeCalledWith(
+      'Failed to publish package, server responded with 503 Test',
+    );
   });
 
   test('getBinaryName() returns correct binary name', () => {
     jest.spyOn(os, 'platform');
     os.platform.mockReturnValue('win32');
-    expect(getBinaryName())
-      .toBe('InstallerPackageBuilder.Core.Console.exe');
+    expect(getBinaryName()).toBe('InstallerPackageBuilder.Core.Console.exe');
 
     os.platform.mockReturnValue('win33test');
-    expect(getBinaryName())
-      .toBe('InstallerPackageBuilder.Core.Console');
+    expect(getBinaryName()).toBe('InstallerPackageBuilder.Core.Console');
 
-    expect(os.platform)
-      .toBeCalledTimes(2);
+    expect(os.platform).toBeCalledTimes(2);
     jest.unmock('os');
   });
 
@@ -330,7 +335,8 @@ describe('RS installer package tests', () => {
     mockFs({
       workdir: {},
       output: {},
-      'output/Test_PkgName_1.0.1-testversion.pkg.zip': Buffer.from('test content'),
+      'output/Test_PkgName_1.0.1-testversion.pkg.zip':
+        Buffer.from('test content'),
     });
 
     loadTool.mockResolvedValueOnce('pkgbuilder');
@@ -348,31 +354,29 @@ describe('RS installer package tests', () => {
       publishPackage: true,
     });
 
-    expect(loadTool)
-      .toHaveBeenCalledTimes(1);
-    expect(exec.exec)
-      .toHaveBeenCalledTimes(1);
-    expect(exec.exec.mock.calls[0][1])
-      .toEqual([
-        'single',
-        '-pn',
-        'Test_PkgName',
-        '-wd',
-        'workdir',
-        '-od',
-        'output',
-        '-pv',
-        '1.0.1-testversion',
-        '-sp',
-        'output',
-      ]);
+    expect(loadTool).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1]).toEqual([
+      'single',
+      '-pn',
+      'Test_PkgName',
+      '-wd',
+      'workdir',
+      '-od',
+      'output',
+      '-pv',
+      '1.0.1-testversion',
+      '-sp',
+      'output',
+    ]);
   });
 
   test('It can run the builder without publish', async () => {
     mockFs({
       workdir: {},
       output: {},
-      'output/Test_PkgName_1.0.1-testversion.pkg.zip': Buffer.from('test content'),
+      'output/Test_PkgName_1.0.1-testversion.pkg.zip':
+        Buffer.from('test content'),
     });
 
     loadTool.mockResolvedValueOnce('pkgbuilder');
@@ -390,31 +394,29 @@ describe('RS installer package tests', () => {
       publishPackage: false,
     });
 
-    expect(loadTool)
-      .toHaveBeenCalledTimes(1);
-    expect(exec.exec)
-      .toHaveBeenCalledTimes(1);
-    expect(exec.exec.mock.calls[0][1])
-      .toEqual([
-        'single',
-        '-pn',
-        'Test_PkgName',
-        '-wd',
-        'workdir',
-        '-od',
-        'output',
-        '-pv',
-        '1.0.1-testversion',
-        '-sp',
-        __dirname,
-      ]);
+    expect(loadTool).toHaveBeenCalledTimes(1);
+    expect(exec.exec).toHaveBeenCalledTimes(1);
+    expect(exec.exec.mock.calls[0][1]).toEqual([
+      'single',
+      '-pn',
+      'Test_PkgName',
+      '-wd',
+      'workdir',
+      '-od',
+      'output',
+      '-pv',
+      '1.0.1-testversion',
+      '-sp',
+      __dirname,
+    ]);
   });
 
   test('buildPackage outputs sourcePaths', async () => {
     mockFs({
       workdir: {},
       sourcePathsTest: {},
-      'output/Test_PkgName_1.0.1-testversion.pkg.zip': Buffer.from('test content'),
+      'output/Test_PkgName_1.0.1-testversion.pkg.zip':
+        Buffer.from('test content'),
     });
 
     loadTool.mockResolvedValueOnce('pkgbuilder');
@@ -433,8 +435,12 @@ describe('RS installer package tests', () => {
     });
 
     expect(core.info).toHaveBeenCalledTimes(3);
-    expect(core.info.mock.calls[0][0]).toBe('PublishUrl: https://repo.extendaretail.com/repository/raw-hosted/RS/Test_PkgName.pkg/develop/Test_PkgName.pkg.1.0.1-testversion.zip');
-    expect(core.info.mock.calls[2][0]).toBe('Package published successfully, server responded with 200 OK');
+    expect(core.info.mock.calls[0][0]).toBe(
+      'PublishUrl: https://repo.extendaretail.com/repository/raw-hosted/RS/Test_PkgName.pkg/develop/Test_PkgName.pkg.1.0.1-testversion.zip',
+    );
+    expect(core.info.mock.calls[2][0]).toBe(
+      'Package published successfully, server responded with 200 OK',
+    );
   });
 
   test('buildPackage outputs directories multiple', async () => {
@@ -444,8 +450,7 @@ describe('RS installer package tests', () => {
         'test1_1.0.1-testversion.pkg.zip': Buffer.from('test content'),
       },
       sourcePathsTest: {
-        test1: {
-        },
+        test1: {},
       },
     });
 
@@ -465,9 +470,15 @@ describe('RS installer package tests', () => {
     });
 
     expect(core.info).toBeCalledWith('DirectoryName: test1');
-    expect(core.info.mock.calls[0][0]).toBe('Sourcepath fullname: sourcePathsTest');
+    expect(core.info.mock.calls[0][0]).toBe(
+      'Sourcepath fullname: sourcePathsTest',
+    );
     expect(core.info.mock.calls[1][0]).toBe('DirectoryName: test1');
-    expect(core.info.mock.calls[2][0]).toBe('PublishUrl: https://repo.extendaretail.com/repository/raw-hosted/RS/test1.pkg/develop/test1.pkg.1.0.1-testversion.zip');
-    expect(core.info.mock.calls[4][0]).toBe('Package published successfully, server responded with 200 OK');
+    expect(core.info.mock.calls[2][0]).toBe(
+      'PublishUrl: https://repo.extendaretail.com/repository/raw-hosted/RS/test1.pkg/develop/test1.pkg.1.0.1-testversion.zip',
+    );
+    expect(core.info.mock.calls[4][0]).toBe(
+      'Package published successfully, server responded with 200 OK',
+    );
   });
 });

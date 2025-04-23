@@ -106,7 +106,9 @@ describe('Wait for revision', () => {
       },
     };
     exec.exec.mockImplementationOnce((cmd, args, opts) => {
-      opts.listeners.stdout(Buffer.from(JSON.stringify(revisionStatus), 'utf8'));
+      opts.listeners.stdout(
+        Buffer.from(JSON.stringify(revisionStatus), 'utf8'),
+      );
       return Promise.resolve(0);
     });
     const response = await waitForRevision(
@@ -134,23 +136,30 @@ describe('Wait for revision', () => {
   });
 
   test('It does not wait for managed cloud run', async () => {
-    await expect(waitForRevision(
-      { status: 1, output: GCLOUD_ERROR_MSG_NODE_SCALING },
-      ['--platform=managed'],
-      10,
-    )).rejects.toEqual(new Error('Wait is not supported for managed cloud run'));
+    await expect(
+      waitForRevision(
+        { status: 1, output: GCLOUD_ERROR_MSG_NODE_SCALING },
+        ['--platform=managed'],
+        10,
+      ),
+    ).rejects.toEqual(new Error('Wait is not supported for managed cloud run'));
     expect(exec.exec).not.toHaveBeenCalled();
   });
 
   test('It fails on unrecognized deployment error (no wait)', async () => {
-    await expect(waitForRevision(
-      { status: 1, output: 'ERROR: Unexpected error for revision: "abc-123"' },
-      GCLOUD_ARGS,
-      'service-name',
-      clusterInput,
-      canarySpec,
-      10,
-    )).rejects.toEqual(new Error('Deploy failed for unknown reasons'));
+    await expect(
+      waitForRevision(
+        {
+          status: 1,
+          output: 'ERROR: Unexpected error for revision: "abc-123"',
+        },
+        GCLOUD_ARGS,
+        'service-name',
+        clusterInput,
+        canarySpec,
+        10,
+      ),
+    ).rejects.toEqual(new Error('Deploy failed for unknown reasons'));
     expect(exec.exec).not.toHaveBeenCalled();
   });
 
@@ -159,14 +168,20 @@ describe('Wait for revision', () => {
       opts.listeners.stdout(Buffer.from('ERROR: No JSON', 'utf8'));
       return Promise.resolve(0);
     });
-    await expect(waitForRevision(
-      { status: 1, output: GCLOUD_ERROR_MSG_NODE_SCALING },
-      GCLOUD_ARGS,
-      'service-name',
-      clusterInput,
-      canarySpec,
-      10,
-    )).rejects.toEqual(new Error('Invalid JSON: Failed to load status for revision "xxxxxxx-00013-loc". Reason: Unexpected token E in JSON at position 0'));
+    await expect(
+      waitForRevision(
+        { status: 1, output: GCLOUD_ERROR_MSG_NODE_SCALING },
+        GCLOUD_ARGS,
+        'service-name',
+        clusterInput,
+        canarySpec,
+        10,
+      ),
+    ).rejects.toEqual(
+      new Error(
+        'Invalid JSON: Failed to load status for revision "xxxxxxx-00013-loc". Reason: Unexpected token \'E\', "ERROR: No JSON" is not valid JSON',
+      ),
+    );
     expect(exec.exec).toHaveBeenCalled();
   });
 
@@ -199,18 +214,24 @@ describe('Wait for revision', () => {
       },
     };
     exec.exec.mockImplementation((cmd, args, opts) => {
-      opts.listeners.stdout(Buffer.from(JSON.stringify(revisionStatus), 'utf8'));
+      opts.listeners.stdout(
+        Buffer.from(JSON.stringify(revisionStatus), 'utf8'),
+      );
       return Promise.resolve(0);
     });
-    await expect(waitForRevision(
-      { status: 1, output: GCLOUD_ERROR_MSG_NODE_SCALING },
-      GCLOUD_ARGS,
-      'service-name',
-      clusterInput,
-      canarySpec,
-      10,
-      100,
-    )).rejects.toEqual(new Error('Timed out after while for revision "xxxxxxx-00013-loc".'));
+    await expect(
+      waitForRevision(
+        { status: 1, output: GCLOUD_ERROR_MSG_NODE_SCALING },
+        GCLOUD_ARGS,
+        'service-name',
+        clusterInput,
+        canarySpec,
+        10,
+        100,
+      ),
+    ).rejects.toEqual(
+      new Error('Timed out after while for revision "xxxxxxx-00013-loc".'),
+    );
     expect(exec.exec.mock.calls.length).toBeGreaterThan(1);
   });
 
@@ -245,17 +266,25 @@ describe('Wait for revision', () => {
       },
     };
     exec.exec.mockImplementation((cmd, args, opts) => {
-      opts.listeners.stdout(Buffer.from(JSON.stringify(revisionStatus), 'utf8'));
+      opts.listeners.stdout(
+        Buffer.from(JSON.stringify(revisionStatus), 'utf8'),
+      );
       return Promise.resolve(0);
     });
-    await expect(waitForRevision(
-      { status: 1, output: GCLOUD_ERROR_MSG_NODE_SCALING },
-      GCLOUD_ARGS,
-      'service-name',
-      clusterInput,
-      canarySpec,
-      10,
-    )).rejects.toEqual(new Error('Revision failed "ready" condition with reason: ExitCode60\nContainer failed with: failed to access secret...'));
+    await expect(
+      waitForRevision(
+        { status: 1, output: GCLOUD_ERROR_MSG_NODE_SCALING },
+        GCLOUD_ARGS,
+        'service-name',
+        clusterInput,
+        canarySpec,
+        10,
+      ),
+    ).rejects.toEqual(
+      new Error(
+        'Revision failed "ready" condition with reason: ExitCode60\nContainer failed with: failed to access secret...',
+      ),
+    );
     expect(exec.exec).toHaveBeenCalled();
   });
 
@@ -288,7 +317,9 @@ describe('Wait for revision', () => {
       },
     };
     exec.exec.mockImplementationOnce((cmd, args, opts) => {
-      opts.listeners.stdout(Buffer.from(JSON.stringify(revisionStatus), 'utf8'));
+      opts.listeners.stdout(
+        Buffer.from(JSON.stringify(revisionStatus), 'utf8'),
+      );
       return Promise.resolve(0);
     });
     const response = await waitForRevision(
@@ -333,7 +364,9 @@ describe('Wait for revision', () => {
     };
     getLatestRevision.mockResolvedValueOnce('service-revision');
     exec.exec.mockImplementationOnce((cmd, args, opts) => {
-      opts.listeners.stdout(Buffer.from(JSON.stringify(revisionStatus), 'utf8'));
+      opts.listeners.stdout(
+        Buffer.from(JSON.stringify(revisionStatus), 'utf8'),
+      );
       return Promise.resolve(0);
     });
     const response = await waitForRevision(
@@ -379,7 +412,9 @@ describe('Wait for revision', () => {
     };
     getLatestRevision.mockResolvedValueOnce('service-revision');
     exec.exec.mockImplementationOnce((cmd, args, opts) => {
-      opts.listeners.stdout(Buffer.from(JSON.stringify(revisionStatus), 'utf8'));
+      opts.listeners.stdout(
+        Buffer.from(JSON.stringify(revisionStatus), 'utf8'),
+      );
       return Promise.resolve(0);
     });
     const response = await waitForRevision(

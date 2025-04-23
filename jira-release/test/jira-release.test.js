@@ -4,15 +4,19 @@ const mockCreateVersion = jest.fn();
 const mockUpdateVersion = jest.fn();
 const mockUpdateIssue = jest.fn();
 
-jest.mock('jira-client', () => function JiraClient() {
-  return {
-    getProject: mockGetProject,
-    getVersions: mockGetVersions,
-    createVersion: mockCreateVersion,
-    updateVersion: mockUpdateVersion,
-    updateIssue: mockUpdateIssue,
-  };
-});
+jest.mock(
+  'jira-client',
+  () =>
+    function JiraClient() {
+      return {
+        getProject: mockGetProject,
+        getVersions: mockGetVersions,
+        createVersion: mockCreateVersion,
+        updateVersion: mockUpdateVersion,
+        updateIssue: mockUpdateIssue,
+      };
+    },
+);
 
 jest.mock('../../jira-releasenotes/src/jira-releasenotes', () => ({
   findJiraChanges: () => ({
@@ -49,18 +53,20 @@ describe('JIRA release', () => {
     mockGetProject.mockResolvedValueOnce({
       id: 12073,
       key: 'TEST',
-      components: [{
-        self: 'https://jiratest.extendaretail.com/rest/api/2/component/17744',
-        id: '17744',
-        name: 'Test',
-        isAssigneeTypeValid: false,
-      },
-      {
-        self: 'https://jiratest.extendaretail.com/rest/api/2/component/15845',
-        id: '15845',
-        name: 'Test 2',
-        isAssigneeTypeValid: false,
-      }],
+      components: [
+        {
+          self: 'https://jiratest.extendaretail.com/rest/api/2/component/17744',
+          id: '17744',
+          name: 'Test',
+          isAssigneeTypeValid: false,
+        },
+        {
+          self: 'https://jiratest.extendaretail.com/rest/api/2/component/15845',
+          id: '15845',
+          name: 'Test 2',
+          isAssigneeTypeValid: false,
+        },
+      ],
     });
     mockUpdateIssue.mockResolvedValue({});
   });
@@ -72,26 +78,36 @@ describe('JIRA release', () => {
   test('It fails for illegal project', async () => {
     mockGetProject.mockReset();
     mockGetProject.mockRejectedValueOnce(new Error('No project found'));
-    await expect(createJiraRelease({
-      ...args,
-      projectKey: 'FAIL',
-    })).rejects.toEqual(new Error('No project found'));
+    await expect(
+      createJiraRelease({
+        ...args,
+        projectKey: 'FAIL',
+      }),
+    ).rejects.toEqual(new Error('No project found'));
     expect(mockGetProject).toHaveBeenCalled();
   });
 
   test('It fails for illegal component', async () => {
-    await expect(createJiraRelease({
-      ...args,
-      component: 'Fail',
-    })).rejects.toEqual(new Error("'Fail' is not a valid JIRA component in project 'TEST'"));
+    await expect(
+      createJiraRelease({
+        ...args,
+        component: 'Fail',
+      }),
+    ).rejects.toEqual(
+      new Error("'Fail' is not a valid JIRA component in project 'TEST'"),
+    );
     expect(mockGetProject).toHaveBeenCalled();
   });
 
   test('It fails for invalid semver version', async () => {
-    await expect(createJiraRelease({
-      ...args,
-      version: 'customprefix-2.0.0',
-    })).rejects.toEqual(new Error("'customprefix-2.0.0' is not a semantic version"));
+    await expect(
+      createJiraRelease({
+        ...args,
+        version: 'customprefix-2.0.0',
+      }),
+    ).rejects.toEqual(
+      new Error("'customprefix-2.0.0' is not a semantic version"),
+    );
   });
 
   test('It can reuse existing release', async () => {
@@ -131,16 +147,18 @@ describe('JIRA release', () => {
   });
 
   test('It succeeds for already released version', async () => {
-    mockGetVersions.mockResolvedValueOnce([{
-      ...mockVersion,
-      released: true,
-    }]);
+    mockGetVersions.mockResolvedValueOnce([
+      {
+        ...mockVersion,
+        released: true,
+      },
+    ]);
     const releaseName = await createJiraRelease(args);
     expect(releaseName).toEqual('TEST 2.0.0');
     expect(mockUpdateVersion).not.toHaveBeenCalled();
   });
 
-  test('It logs, but succeeds if version can\'t be released', async () => {
+  test("It logs, but succeeds if version can't be released", async () => {
     mockGetVersions.mockResolvedValueOnce([]);
     mockCreateVersion.mockResolvedValueOnce(mockVersion);
     mockUpdateVersion.mockRejectedValueOnce(new Error('Unable to release'));

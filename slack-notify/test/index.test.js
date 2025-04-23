@@ -11,7 +11,8 @@ describe('slack notification', () => {
   });
 
   test('Can run the action', async () => {
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('text')
       .mockReturnValueOnce('channel-name');
     await action();
@@ -25,7 +26,8 @@ describe('slack notification', () => {
   });
 
   test('Can run the action with file', async () => {
-    core.getInput.mockReturnValueOnce('service-account')
+    core.getInput
+      .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('text')
       .mockReturnValueOnce('channel-name')
       .mockReturnValueOnce('file');

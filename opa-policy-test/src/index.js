@@ -8,11 +8,15 @@ const createTestBundle = require('./create-test-bundle');
 const opaTest = require('./opa-test');
 
 const action = async () => {
-  const serviceAccountKey = core.getInput('service-account-key', { required: true });
+  const serviceAccountKey = core.getInput('service-account-key', {
+    required: true,
+  });
   const bucketName = core.getInput('gcs-bucket');
 
   if (!fs.existsSync(path.join('policies', 'policy'))) {
-    throw new Error('No policies found. Exit. Expected folder: policies/policy');
+    throw new Error(
+      'No policies found. Exit. Expected folder: policies/policy',
+    );
   }
 
   // The "inherit" value indicates that we should reuse an existing gcloud authentication.

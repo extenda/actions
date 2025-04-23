@@ -29,5 +29,5 @@ inputs:
       JSON client payload. By default, the original GitHub event is forwarded under the `github` object key.
     required: false
 runs:
-  using: node16
+  using: node20
   main: dist/index.js
