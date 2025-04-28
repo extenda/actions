@@ -60,6 +60,7 @@ describe('buildManifest', () => {
         scaling: {
           cpu: 40,
         },
+        'termination-grace-period': 90,
       },
       security: 'none',
       labels: {
@@ -662,6 +663,7 @@ metadata:
           cpu: 40,
         },
         availability: 'low',
+        'termination-grace-period': 90,
       },
       security: 'none',
       labels: {

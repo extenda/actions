@@ -469,7 +469,7 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
-      terminationGracePeriodSeconds: 90
+      terminationGracePeriodSeconds: 30
       volumes: []
 ---
 apiVersion: autoscaling/v2
@@ -692,7 +692,7 @@ spec:
               value: '8080'
             - name: K_SERVICE
               value: example-service
-      terminationGracePeriodSeconds: 90
+      terminationGracePeriodSeconds: 30
       volumes: []
 ---
 apiVersion: autoscaling/v2
@@ -1149,7 +1149,7 @@ spec:
               value: '8080'
             - name: K_SERVICE
               value: example-service
-      terminationGracePeriodSeconds: 90
+      terminationGracePeriodSeconds: 30
       volumes: []
 ---
 apiVersion: autoscaling/v2
@@ -1276,7 +1276,7 @@ spec:
               value: '8080'
             - name: K_SERVICE
               value: example-service
-      terminationGracePeriodSeconds: 90
+      terminationGracePeriodSeconds: 30
       volumes: []
 ---
 apiVersion: autoscaling/v2
@@ -1497,7 +1497,7 @@ spec:
             periodSeconds: 5
             timeoutSeconds: 5
             failureThreshold: 5
-      terminationGracePeriodSeconds: 90
+      terminationGracePeriodSeconds: 30
       volumes: []
 ---
 apiVersion: autoscaling/v2
@@ -1618,7 +1618,7 @@ spec:
               value: '8080'
             - name: K_SERVICE
               value: example-service
-      terminationGracePeriodSeconds: 90
+      terminationGracePeriodSeconds: 30
       volumes: []
 ---
 apiVersion: autoscaling/v2
@@ -1950,7 +1950,7 @@ spec:
               value: '8080'
             - name: K_SERVICE
               value: example-service
-      terminationGracePeriodSeconds: 90
+      terminationGracePeriodSeconds: 30
       volumes: []
 ---
 apiVersion: autoscaling/v2
@@ -2190,7 +2190,7 @@ spec:
               value: '8080'
             - name: K_SERVICE
               value: example-service
-      terminationGracePeriodSeconds: 90
+      terminationGracePeriodSeconds: 30
       volumes: []
 ---
 apiVersion: autoscaling/v2
@@ -2333,7 +2333,7 @@ spec:
             periodSeconds: 5
             timeoutSeconds: 5
             failureThreshold: 5
-      terminationGracePeriodSeconds: 90
+      terminationGracePeriodSeconds: 30
       volumes: []
 ---
 apiVersion: autoscaling/v2

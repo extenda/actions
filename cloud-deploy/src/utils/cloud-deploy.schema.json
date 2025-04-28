@@ -182,6 +182,13 @@
         "availability": {
           "$ref": "#/$defs/Availability"
         },
+        "termination-grace-period": {
+          "description": "The termination grace period in seconds",
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 600,
+          "default": 30
+        },
         "scaling": {
           "title": "ScalingKubernetes",
           "description": "Scaling settings for Kubernetes",
