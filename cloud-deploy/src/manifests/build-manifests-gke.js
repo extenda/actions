@@ -52,6 +52,7 @@ const gkeManifestTemplate = async (
   availability,
   baseAnnotations,
   corsEnabled,
+  terminationGracePeriod,
 ) => {
   // initialize manifest components
 
@@ -242,7 +243,7 @@ const gkeManifestTemplate = async (
               : []),
             ...(collectorContainer ? [collectorContainer] : []),
           ],
-          terminationGracePeriodSeconds: 90,
+          terminationGracePeriodSeconds: terminationGracePeriod,
           volumes: deploymentVolumes,
         },
       },
