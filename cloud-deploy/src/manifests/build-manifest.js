@@ -238,7 +238,7 @@ const buildManifest = async (
   if (kubernetes) {
     envArray.push({ name: 'PORT', value: '8080' });
     envArray.push({ name: 'K_SERVICE', value: name });
-    const terminationGracePeriod = kubernetes['termination-grace-period'] || 30;
+    const terminationGracePeriod = kubernetes['termination-grace-period'] || 90;
 
     const manifests = await gkeManifestTemplate(
       name,
