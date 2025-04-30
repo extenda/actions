@@ -313,7 +313,7 @@ const buildManifest = async (
     } = cloudrun;
 
     let connectorName = `${clanName}-vpc-connector`;
-    if (connector) {
+    if (connector && !enableDirectVPC) {
       connectorName = await checkVpcConnector(
         projectId,
         'europe-west1',
