@@ -68307,6 +68307,7 @@ var require_axios = __commonJS({
     __name(bind, "bind");
     var { toString } = Object.prototype;
     var { getPrototypeOf } = Object;
+    var { iterator, toStringTag } = Symbol;
     var kindOf = /* @__PURE__ */ ((cache) => (thing) => {
       const str = toString.call(thing);
       return cache[str] || (cache[str] = str.slice(8, -1).toLowerCase());
@@ -68344,8 +68345,8 @@ var require_axios = __commonJS({
         return false;
       }
       const prototype2 = getPrototypeOf(val);
-      return (prototype2 === null || prototype2 === Object.prototype || Object.getPrototypeOf(prototype2) === null) && !(Symbol.
-      toStringTag in val) && !(Symbol.iterator in val);
+      return (prototype2 === null || prototype2 === Object.prototype || Object.getPrototypeOf(prototype2) === null) && !(toStringTag in
+      val) && !(iterator in val);
     }, "isPlainObject");
     var isDate = kindOfTest("Date");
     var isFile = kindOfTest("File");
@@ -68499,10 +68500,10 @@ efined");
       };
     })(typeof Uint8Array !== "undefined" && getPrototypeOf(Uint8Array));
     var forEachEntry = /* @__PURE__ */ __name((obj, fn) => {
-      const generator = obj && obj[Symbol.iterator];
-      const iterator = generator.call(obj);
+      const generator = obj && obj[iterator];
+      const _iterator = generator.call(obj);
       let result;
-      while ((result = iterator.next()) && !result.done) {
+      while ((result = _iterator.next()) && !result.done) {
         const pair = result.value;
         fn.call(obj, pair[0], pair[1]);
       }
@@ -68573,7 +68574,7 @@ efined");
       return value != null && Number.isFinite(value = +value) ? value : defaultValue;
     }, "toFiniteNumber");
     function isSpecCompliantForm(thing) {
-      return !!(thing && isFunction(thing.append) && thing[Symbol.toStringTag] === "FormData" && thing[Symbol.iterator]);
+      return !!(thing && isFunction(thing.append) && thing[toStringTag] === "FormData" && thing[iterator]);
     }
     __name(isSpecCompliantForm, "isSpecCompliantForm");
     var toJSONObject = /* @__PURE__ */ __name((obj) => {
@@ -68622,6 +68623,7 @@ efined");
     );
     var asap = typeof queueMicrotask !== "undefined" ? queueMicrotask.bind(_global) : typeof process !== "undefined" && process.
     nextTick || _setImmediate;
+    var isIterable = /* @__PURE__ */ __name((thing) => thing != null && isFunction(thing[iterator]), "isIterable");
     var utils$1 = {
       isArray,
       isArrayBuffer,
@@ -68678,7 +68680,8 @@ efined");
       isAsyncFn,
       isThenable,
       setImmediate: _setImmediate,
-      asap
+      asap,
+      isIterable
     };
     function AxiosError(message, code, config, request, response) {
       Error.call(this);
@@ -69358,10 +69361,15 @@ eaderName");
           setHeaders(header, valueOrRewrite);
         } else if (utils$1.isString(header) && (header = header.trim()) && !isValidHeaderName(header)) {
           setHeaders(parseHeaders(header), valueOrRewrite);
-        } else if (utils$1.isHeaders(header)) {
-          for (const [key, value] of header.entries()) {
-            setHeader(value, key, rewrite);
+        } else if (utils$1.isObject(header) && utils$1.isIterable(header)) {
+          let obj = {}, dest, key;
+          for (const entry of header) {
+            if (!utils$1.isArray(entry)) {
+              throw TypeError("Object iterator must return a key-value pair");
+            }
+            obj[key = entry[0]] = (dest = obj[key]) ? utils$1.isArray(dest) ? [...dest, entry[1]] : [dest, entry[1]] : entry[1];
           }
+          setHeaders(obj, valueOrRewrite);
         } else {
           header != null && setHeader(valueOrRewrite, header, rewrite);
         }
@@ -69466,6 +69474,9 @@ eaderName");
       toString() {
         return Object.entries(this.toJSON()).map(([header, value]) => header + ": " + value).join("\n");
       }
+      getSetCookie() {
+        return this.get("set-cookie") || [];
+      }
       get [Symbol.toStringTag]() {
         return "AxiosHeaders";
       }
@@ -69562,7 +69573,7 @@ eaderName");
       return requestedURL;
     }
     __name(buildFullPath, "buildFullPath");
-    var VERSION = "1.8.4";
+    var VERSION = "1.9.0";
     function parseProtocol(url2) {
       const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url2);
       return match && match[1] || "";
@@ -69781,7 +69792,7 @@ ename="${escapeName(value.name)}"` : ""}${CRLF}`;
         throw Error("boundary must be 10-70 characters long");
       }
       const boundaryBytes = textEncoder.encode("--" + boundary + CRLF);
-      const footerBytes = textEncoder.encode("--" + boundary + "--" + CRLF + CRLF);
+      const footerBytes = textEncoder.encode("--" + boundary + "--" + CRLF);
       let contentLength = footerBytes.byteLength;
       const parts = Array.from(form.entries()).map(([name, value]) => {
         const part = new FormDataPart(name, value);
@@ -70804,7 +70815,7 @@ d";
       }
     }, "readStream");
     var trackStream = /* @__PURE__ */ __name((stream2, chunkSize, onProgress, onFinish) => {
-      const iterator = readBytes(stream2, chunkSize);
+      const iterator2 = readBytes(stream2, chunkSize);
       let bytes = 0;
       let done;
       let _onFinish = /* @__PURE__ */ __name((e) => {
@@ -70816,7 +70827,7 @@ d";
       return new ReadableStream({
         async pull(controller) {
           try {
-            const { done: done2, value } = await iterator.next();
+            const { done: done2, value } = await iterator2.next();
             if (done2) {
               _onFinish();
               controller.close();
@@ -70835,7 +70846,7 @@ d";
         },
         cancel(reason) {
           _onFinish(reason);
-          return iterator.return();
+          return iterator2.return();
         }
       }, {
         highWaterMark: 2
@@ -70994,7 +71005,7 @@ d";
         });
       } catch (err) {
         unsubscribe && unsubscribe();
-        if (err && err.name === "TypeError" && /fetch/i.test(err.message)) {
+        if (err && err.name === "TypeError" && /Load failed|fetch/i.test(err.message)) {
           throw Object.assign(
             new AxiosError("Network Error", AxiosError.ERR_NETWORK, config, request),
             {
@@ -71175,7 +71186,7 @@ able in the build")
         __name(this, "Axios");
       }
       constructor(instanceConfig) {
-        this.defaults = instanceConfig;
+        this.defaults = instanceConfig || {};
         this.interceptors = {
           request: new InterceptorManager$1(),
           response: new InterceptorManager$1()
@@ -72587,5 +72598,5 @@ mime-types/index.js:
    *)
 
 axios/dist/node/axios.cjs:
-  (*! Axios v1.8.4 Copyright (c) 2025 Matt Zabriskie and contributors *)
+  (*! Axios v1.9.0 Copyright (c) 2025 Matt Zabriskie and contributors *)
 */
