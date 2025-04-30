@@ -87211,8 +87211,10 @@ module.exports = main;
 /*! Bundled license information:
 
 undici/lib/fetch/body.js:
+undici/lib/fetch/body.js:
   (*! formdata-polyfill. MIT License. Jimmy Wärting <https://jimmy.warting.se/opensource> *)
 
+undici/lib/websocket/frame.js:
 undici/lib/websocket/frame.js:
   (*! ws. MIT License. Einar Otto Stangvik <einaros@gmail.com> *)
 
@@ -87225,27 +87227,6 @@ methods/index.js:
    *)
 
 mime-db/index.js:
-  (*!
-   * mime-db
-   * Copyright(c) 2014 Jonathan Ong
-   * Copyright(c) 2015-2022 Douglas Christopher Wilson
-   * MIT Licensed
-   *)
-
-mime-types/index.js:
-  (*!
-   * mime-types
-   * Copyright(c) 2014 Jonathan Ong
-   * Copyright(c) 2015 Douglas Christopher Wilson
-   * MIT Licensed
-   *)
-
-undici/lib/fetch/body.js:
-  (*! formdata-polyfill. MIT License. Jimmy Wärting <https://jimmy.warting.se/opensource> *)
-
-undici/lib/websocket/frame.js:
-  (*! ws. MIT License. Einar Otto Stangvik <einaros@gmail.com> *)
-
 mime-db/index.js:
   (*!
    * mime-db
@@ -87254,6 +87235,7 @@ mime-db/index.js:
    * MIT Licensed
    *)
 
+mime-types/index.js:
 mime-types/index.js:
   (*!
    * mime-types
