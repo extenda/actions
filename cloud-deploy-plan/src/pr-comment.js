@@ -12,7 +12,7 @@ const postComment = async (githubToken, issueId, comment) => {
   const octokit = github.getOctokit(githubToken);
   const { owner, repo } = github.context.repo;
 
-  const marker = '<-- Posted by extenda/actions/cloud-deploy-plan -->';
+  const marker = '<small>Posted by extenda/actions/cloud-deploy-plan</small>';
   const body = `${comment}\n\n${marker}`;
 
   const { data: comments = [] } = await octokit.rest.issues.listComments({

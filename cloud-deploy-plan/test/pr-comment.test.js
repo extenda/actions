@@ -47,7 +47,7 @@ test('It can create a comment', async () => {
     owner: 'extenda',
     repo: 'actions',
     issue_number: 1,
-    body: 'test comment\n\n<-- Posted by extenda/actions/cloud-deploy-plan -->',
+    body: 'test comment\n\n<small>Posted by extenda/actions/cloud-deploy-plan</small>',
   });
   expect(mockUpdateComment).not.toHaveBeenCalled();
 });
@@ -58,7 +58,7 @@ test('It can update a comment', async () => {
       { id: 1, body: 'Random comment' },
       {
         id: 2,
-        body: 'Existing comment\n\n<-- Posted by extenda/actions/cloud-deploy-plan -->',
+        body: 'Existing comment\n\n<small>Posted by extenda/actions/cloud-deploy-plan</small>',
       },
     ],
   });
@@ -67,7 +67,7 @@ test('It can update a comment', async () => {
     owner: 'extenda',
     repo: 'actions',
     comment_id: 2,
-    body: 'Updated\n\n<-- Posted by extenda/actions/cloud-deploy-plan -->',
+    body: 'Updated\n\n<small>Posted by extenda/actions/cloud-deploy-plan</small>',
   });
   expect(mockCreateComment).not.toHaveBeenCalled();
 });
