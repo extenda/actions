@@ -60,7 +60,7 @@ const createComment = (filename, deployInfo) => {
       comment.push(
         '',
         '**:warning: Migrations**',
-        markdownList(domains.migrations).map(markdownMigration),
+        markdownList(domains.migrations.map(markdownMigration)),
       );
     }
 
