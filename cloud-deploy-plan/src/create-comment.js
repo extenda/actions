@@ -79,7 +79,7 @@ const createComment = (filename, deployInfo) => {
         markdownList(addedRoutes.map(markdownRoute)),
       );
     }
-    if (arrayNotEmpty(paths.removedRoutes)) {
+    if (arrayNotEmpty(paths.deletedRoutes)) {
       comment.push(
         '',
         '**:warning: Removed routes**',
