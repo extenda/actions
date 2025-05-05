@@ -1,7 +1,7 @@
 const appendJson = (filename, deployInfo) => [
   '',
   '<details>',
-  `<summary><h3>Changes from ${filename}</h3></summary>`,
+  `<summary><h4>:page_facing_up: ${filename}</h4></summary>`,
   '',
   '```json',
   JSON.stringify(deployInfo, null, 2),
@@ -14,7 +14,7 @@ const appendJson = (filename, deployInfo) => [
 const markdownList = (list) => list.map((e) => `  * ${e}`).join('\n');
 
 const markdownRoute = (route) =>
-  `Target ${route.target} on paths ${route.paths.map((p) => `\`${p}\``).join(', ')} with rewrite \`${route.rewrite || ''}\``;
+  `Target \`${route.target}\` on paths ${route.paths.map((p) => `\`${p}\``).join(', ')} with rewrite \`${route.rewrite || ''}\``;
 
 const markdownMigration = (migration) =>
   `Migrate \`${migration.host}\` from ${migration.service} in ${migration.projectid}`;
@@ -27,7 +27,7 @@ const markdownVulnerability = (vulnerability) => {
 };
 
 const createComment = (filename, deployInfo) => {
-  const comment = [appendJson(filename, deployInfo)];
+  const comment = [...appendJson(filename, deployInfo)];
   const serviceName = `\`${deployInfo.serviceName}\``;
   if (deployInfo.updates === false) {
     comment.push(`No changes to ${serviceName}.`);
