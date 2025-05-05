@@ -41,7 +41,7 @@ const action = async () => {
     );
 
     const comment = ['### :mag: Cloud Deploy plan\n', plans.join('\n\n')].join(
-      '\n',
+      '\n-----\n',
     );
 
     await postComment(githubToken, issueId, comment);

@@ -2,22 +2,19 @@ const appendJson = (deployInfo) => [
   '',
   '<details>',
   `<summary>Raw response</summary>`,
+  '',
   '```json',
   JSON.stringify(deployInfo, null, 2),
   '```',
+  '',
   '</details>',
+  '',
 ];
 
 const markdownList = (list) => list.map((e) => `  * ${e}`).join('\n');
 
-const markdownRoute = (route) => {
-  const jsonRoute = {
-    target: route.target,
-    paths: route.paths,
-    rewrite: route.rewrite,
-  };
-  return ['```json', JSON.stringify(jsonRoute, null, 2), '```'].join('\n');
-};
+const markdownRoute = (route) =>
+  `Target ${route.target} on paths ${route.paths.map((p) => `\`${p}\``).join(', ')} with rewrite \`${route.rewrite || ''}\``;
 
 const markdownMigration = (migration) =>
   `Migrate \`${migration.host}\` from ${migration.service} in ${migration.projectid}`;
@@ -30,7 +27,7 @@ const markdownVulnerability = (vulnerability) => {
 };
 
 const createComment = (filename, deployInfo) => {
-  const comment = ['#### ${filename}', ''];
+  const comment = [`#### ${filename}`, ''];
 
   const serviceName = `\`${deployInfo.serviceName}\``;
 
