@@ -42,6 +42,7 @@ const action = async () => {
 
     const comment = [
       '### :mag: Cloud Deploy plan\n',
+      'This plan outlines the changes that would be applied if this pull request is merged.',
       plans.join('\n\n-----\n\n'),
     ].join('\n');
 

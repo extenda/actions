@@ -1,7 +1,7 @@
 const appendJson = (filename, deployInfo) => [
   '',
   '<details>',
-  `<summary><h4>:page_facing_up: ${filename}</h4></summary>`,
+  `<summary><b>:page_facing_up: ${filename}</b></summary>`,
   '',
   '```json',
   JSON.stringify(deployInfo, null, 2),
