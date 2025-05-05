@@ -15,11 +15,14 @@ const arrayNotEmpty = (array) => Array.isArray(array) && array.length > 0;
 
 const markdownList = (list) => list.map((e) => `  * ${e}`).join('\n');
 
-const markdownRoute = (route) =>
-  `target \`${route.target}\` on paths ${route.paths.map((p) => `\`${p}\``).join(', ')} with rewrite \`${route.rewrite || ''}\``;
+const markdownRoute = (route) => {
+  const paths = route.paths.map((p) => `    - \`${p}\``).join('\n');
+  const rewrite = `\`${route.rewrite || ''}\``;
+  return `target \`${route.target}\` with rewrite ${rewrite} on paths:\n${paths}`;
+};
 
 const markdownMigration = (migration) =>
-  `Migrate \`${migration.host}\` from ${migration.service} in ${migration.projectid}`;
+  `\`${migration.host}\` from service \`${migration.service}\` in project \`${migration.projectid}\``;
 
 const markdownVulnerability = (vulnerability) => {
   const { vulnerabilityid: id, severity } = vulnerability;
@@ -40,11 +43,11 @@ const domains = (domains) => {
     entries.push(
       ...domains.migrations
         .map(markdownMigration)
-        .map((d) => `:orange_circle: ${d}`),
+        .map((d) => `:orange_circle: Migrate ${d}`),
     );
   }
   if (entries.length > 0) {
-    return ['**Changes to domain mappings**', markdownList(entries)];
+    return ['**Changes to domain mappings**', markdownList(entries), ''];
   }
   return [];
 };
@@ -73,7 +76,7 @@ const paths = (paths) => {
     );
   }
   if (entries.length > 0) {
-    return ['**Changes to path mappings**', markdownList(entries)];
+    return ['**Changes to path mappings**', markdownList(entries), ''];
   }
   return [];
 };
