@@ -71,19 +71,25 @@ const createComment = (filename, deployInfo) => {
     }
 
     const paths = deployInfo.updates.pathMappings || {};
-    const addedRoutes = paths.newRoutes || paths.updatedRoutes || [];
-    if (arrayNotEmpty(addedRoutes)) {
+    if (arrayNotEmpty(paths.newRoutes)) {
       comment.push(
         '',
         '**Added routes**',
-        markdownList(addedRoutes.map(markdownRoute)),
+        markdownList(paths.newRoutes.map(markdownRoute)),
+      );
+    }
+    if (arrayNotEmpty(paths.updatedRoutes)) {
+      comment.push(
+        '',
+        '**Updated routes**',
+        markdownList(paths.updatedRoutes.map(markdownRoute)),
       );
     }
     if (arrayNotEmpty(paths.deletedRoutes)) {
       comment.push(
         '',
         '**:warning: Removed routes**',
-        markdownList(paths.removedRoutes.map(markdownRoute)),
+        markdownList(paths.deletedRoutes.map(markdownRoute)),
       );
     }
   }
