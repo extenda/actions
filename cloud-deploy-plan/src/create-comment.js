@@ -16,7 +16,7 @@ const arrayNotEmpty = (array) => Array.isArray(array) && array.length > 0;
 const markdownList = (list) => list.map((e) => `  * ${e}`).join('\n');
 
 const markdownRoute = (route) =>
-  `Target \`${route.target}\` on paths ${route.paths.map((p) => `\`${p}\``).join(', ')} with rewrite \`${route.rewrite || ''}\``;
+  `target \`${route.target}\` on paths ${route.paths.map((p) => `\`${p}\``).join(', ')} with rewrite \`${route.rewrite || ''}\``;
 
 const markdownMigration = (migration) =>
   `Migrate \`${migration.host}\` from ${migration.service} in ${migration.projectid}`;
@@ -26,6 +26,56 @@ const markdownVulnerability = (vulnerability) => {
   const emoji =
     severity === 'CRITICAL' ? ':bangbang:' : ':heavy_exclamation_mark:';
   return `${emoji} [${id}](https://www.cve.org/CVERecord?id=${id})`;
+};
+
+const domains = (domains) => {
+  const entries = [];
+  if (arrayNotEmpty(domains.added)) {
+    entries.push(...domains.added.map((d) => `:green_circle: Add \`${d}\``));
+  }
+  if (arrayNotEmpty(domains.removed)) {
+    entries.push(...domains.removed.map((d) => `:red_circle: Remove \`${d}\``));
+  }
+  if (arrayNotEmpty(domains.migrations)) {
+    entries.push(
+      ...domains.migrations
+        .map(markdownMigration)
+        .map((d) => `:orange_circle: ${d}`),
+    );
+  }
+  if (entries.length > 0) {
+    return ['**Changes to domain mappings**', markdownList(entries)];
+  }
+  return [];
+};
+
+const paths = (paths) => {
+  const entries = [];
+  if (arrayNotEmpty(paths.newRoutes)) {
+    entries.push(
+      ...paths.newRoutes
+        .map(markdownRoute)
+        .map((p) => `:green_circle: Add ${p}`),
+    );
+  }
+  if (arrayNotEmpty(paths.updatedRoutes)) {
+    entries.push(
+      ...paths.updatedRoutes
+        .map(markdownRoute)
+        .map((p) => `:orange_circle: Update ${p}`),
+    );
+  }
+  if (arrayNotEmpty(paths.deletedRoutes)) {
+    entries.push(
+      ...paths.deletedRoutes
+        .map(markdownRoute)
+        .map((p) => `:red_circle: Remove ${p}`),
+    );
+  }
+  if (entries.length > 0) {
+    return ['**Changes to path mappings**', markdownList(entries)];
+  }
+  return [];
 };
 
 const createComment = (filename, deployInfo) => {
@@ -51,47 +101,8 @@ const createComment = (filename, deployInfo) => {
       }
     }
 
-    const domains = deployInfo.updates.domainMappings || {};
-    if (arrayNotEmpty(domains.added)) {
-      comment.push('', '**Added domains**', markdownList(domains.added));
-    }
-    if (arrayNotEmpty(domains.removed)) {
-      comment.push(
-        '',
-        '**:warning: Removed domains**',
-        markdownList(domains.removed),
-      );
-    }
-    if (arrayNotEmpty(domains.migrations)) {
-      comment.push(
-        '',
-        '**:warning: Migrations**',
-        markdownList(domains.migrations.map(markdownMigration)),
-      );
-    }
-
-    const paths = deployInfo.updates.pathMappings || {};
-    if (arrayNotEmpty(paths.newRoutes)) {
-      comment.push(
-        '',
-        '**Added routes**',
-        markdownList(paths.newRoutes.map(markdownRoute)),
-      );
-    }
-    if (arrayNotEmpty(paths.updatedRoutes)) {
-      comment.push(
-        '',
-        '**Updated routes**',
-        markdownList(paths.updatedRoutes.map(markdownRoute)),
-      );
-    }
-    if (arrayNotEmpty(paths.deletedRoutes)) {
-      comment.push(
-        '',
-        '**:warning: Removed routes**',
-        markdownList(paths.deletedRoutes.map(markdownRoute)),
-      );
-    }
+    comment.push(...domains(deployInfo.updates.domainMappings || {}));
+    comment.push(...paths(deployInfo.updates.pathMappings || {}));
   }
 
   if (deployInfo.vulnerabilities !== false) {

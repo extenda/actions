@@ -21,7 +21,7 @@ test('It can create a comment for domain changes', () => {
     },
     vulnerabilities: false,
   });
-  expect(comment).toContain('domains');
+  expect(comment).toContain('Changes to domain mappings');
 });
 
 test('It can create a comment for a new service', () => {
