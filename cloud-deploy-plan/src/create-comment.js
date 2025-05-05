@@ -101,6 +101,7 @@ const createComment = (filename, deployInfo) => {
         changes.forEach((key) =>
           comment.push(`${key} | ${deployInfo.updates[key]} |`),
         );
+        comment.push('');
       }
     }
 
