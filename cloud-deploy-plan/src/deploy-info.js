@@ -4,7 +4,7 @@ const axios = require('axios');
 const copyInfo = (platform, service, data) => {
   data.platform = platform;
   const o = service[platform];
-  data.serviceName = o.name;
+  data.serviceName = o.service;
   data.protocol = o.protocol || 'http';
   data.timeout = o.timeout || 300;
   data.sessionAffinity = o['session-affinity'] || false;

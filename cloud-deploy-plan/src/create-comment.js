@@ -71,14 +71,14 @@ const createComment = (filename, deployInfo) => {
     if (addedRoutes) {
       comment.push(
         '',
-        '** Added routes **',
+        '**Added routes**',
         markdownList(addedRoutes.map(markdownRoute)),
       );
     }
     if (paths.removedRoutes) {
       comment.push(
         '',
-        '**:warning: Removed routes **',
+        '**:warning: Removed routes**',
         markdownList(paths.removedRoutes.map(markdownRoute)),
       );
     }

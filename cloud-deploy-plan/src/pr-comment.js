@@ -24,7 +24,7 @@ const postComment = async (githubToken, issueId, comment) => {
   const existingComment = comments.find((c) => c.body.includes(marker));
   if (existingComment) {
     const commentId = existingComment.id;
-    core.info(`Update comment ${commentId})`);
+    core.info(`Update comment ${commentId}`);
     await octokit.rest.issues.updateComment({
       owner,
       repo,

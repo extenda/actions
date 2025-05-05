@@ -28,7 +28,7 @@ test('Get deploy info', async () => {
   const deployInfo = await getDeployInfo(
     {
       'cloud-run': {
-        name: 'testrunner-eu-checkout-api',
+        service: 'testrunner-eu-checkout-api',
         protocol: 'http',
         timeout: 300,
       },
