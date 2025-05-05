@@ -23,9 +23,9 @@ on: pull_request
 
 jobs:
   plan-deploy:
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     steps:
-      - uses: @actions/checkout@v4
+      - uses: actions/checkout@v4
       - uses: extenda/actions/cloud-deploy-plan@v0
         with:
           service-account-key: ${{ secrets.GCLOUD_AUTH_PROD }}
@@ -39,9 +39,9 @@ on: pull_request
 
 jobs:
   plan-deploy:
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     steps:
-      - uses: @actions/checkout@v4
+      - uses: actions/checkout@v4
       - uses: extenda/actions/cloud-deploy-plan@v0
         with:
           service-account-key: ${{ secrets.GCLOUD_AUTH_PROD }}
