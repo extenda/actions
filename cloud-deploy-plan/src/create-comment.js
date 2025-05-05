@@ -1,7 +1,7 @@
-const appendJson = (deployInfo) => [
+const appendJson = (filename, deployInfo) => [
   '',
   '<details>',
-  `<summary>Raw response</summary>`,
+  `<summary><h3>Changes from ${filename}</h3></summary>`,
   '',
   '```json',
   JSON.stringify(deployInfo, null, 2),
@@ -27,25 +27,23 @@ const markdownVulnerability = (vulnerability) => {
 };
 
 const createComment = (filename, deployInfo) => {
-  const comment = [`#### ${filename}`, ''];
-
+  const comment = [appendJson(filename, deployInfo)];
   const serviceName = `\`${deployInfo.serviceName}\``;
-
   if (deployInfo.updates === false) {
-    comment.push(`No changes to ${serviceName}.`, ...appendJson(deployInfo));
+    comment.push(`No changes to ${serviceName}.`);
   } else {
     if (deployInfo.updates.new) {
       comment.push(`${serviceName} is **new**.`);
     } else {
-      comment.push(`${serviceName} has changes!`);
+      comment.push(`${serviceName} has changes!`, '');
+      comment.push('| JSON property | New value |');
+      comment.push('|---|---|');
+      Object.keys(deployInfo.updates)
+        .filter((key) => !key.endsWith('Mappings'))
+        .forEach((key) =>
+          comment.push(`${key} | ${deployInfo.updates[key]} |`),
+        );
     }
-    comment.push(...appendJson(deployInfo));
-
-    comment.push('| JSON property | New value |');
-    comment.push('|---|---|');
-    Object.keys(deployInfo.updates)
-      .filter((key) => !key.endsWith('Mappings'))
-      .forEach((key) => comment.push(`${key} | ${deployInfo.updates[key]} |`));
 
     const domains = deployInfo.updates.domainMappings || {};
     if (domains.added) {
