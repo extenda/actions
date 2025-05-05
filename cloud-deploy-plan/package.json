@@ -1,0 +1,13 @@
+{
+  "name": "cloud-deploy-plan",
+  "version": "0.0.1-local",
+  "private": true,
+  "description": "Post a deploy comment to pull requests",
+  "main": "dist/index.js",
+  "dependencies": {
+    "@actions/github": "^6.0.0"
+  },
+  "devDependencies": {
+    "nock": "^14.0.4"
+  }
+}

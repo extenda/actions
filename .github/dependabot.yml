@@ -15,6 +15,7 @@ updates:
     directories:
       - /binary-auth-attestation
       - /cloud-deploy
+      - /cloud-deploy-plan
       - /cloud-run-traffic
       - /component-tests
       - /conventional-release
