@@ -13,7 +13,7 @@ const postComment = async (githubToken, issueId, comment) => {
   const { owner, repo } = github.context.repo;
 
   const marker = '<i>Posted by extenda/actions/cloud-deploy-plan</i>';
-  const body = `${comment}\n\n${marker}\n<i>${new Date()}</i>`;
+  const body = `${comment}\n\n${marker}\n<i>${new Date().toISOString()}</i>`;
 
   const { data: comments = [] } = await octokit.rest.issues.listComments({
     owner,
