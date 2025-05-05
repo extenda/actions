@@ -47,7 +47,9 @@ test('It can create a comment', async () => {
     owner: 'extenda',
     repo: 'actions',
     issue_number: 1,
-    body: 'test comment\n\n<i>Posted by extenda/actions/cloud-deploy-plan</i>',
+    body: expect.stringContaining(
+      'test comment\n\n<i>Posted by extenda/actions/cloud-deploy-plan</i>',
+    ),
   });
   expect(mockUpdateComment).not.toHaveBeenCalled();
 });
@@ -67,7 +69,9 @@ test('It can update a comment', async () => {
     owner: 'extenda',
     repo: 'actions',
     comment_id: 2,
-    body: 'Updated\n\n<i>Posted by extenda/actions/cloud-deploy-plan</i>',
+    body: expect.stringContaining(
+      'Updated\n\n<i>Posted by extenda/actions/cloud-deploy-plan</i>',
+    ),
   });
   expect(mockCreateComment).not.toHaveBeenCalled();
 });

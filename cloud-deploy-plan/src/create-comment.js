@@ -11,6 +11,8 @@ const appendJson = (filename, deployInfo) => [
   '',
 ];
 
+const arrayNotEmpty = (array) => Array.isArray(array) && array.length > 0;
+
 const markdownList = (list) => list.map((e) => `  * ${e}`).join('\n');
 
 const markdownRoute = (route) =>
@@ -36,27 +38,31 @@ const createComment = (filename, deployInfo) => {
       comment.push(`${serviceName} is **new**.`);
     } else {
       comment.push(`${serviceName} has changes!`, '');
-      comment.push('| JSON property | New value |');
-      comment.push('|---|---|');
-      Object.keys(deployInfo.updates)
-        .filter((key) => !key.endsWith('Mappings'))
-        .forEach((key) =>
+
+      const changes = Object.keys(deployInfo.updates).filter(
+        (key) => !key.endsWith('Mappings'),
+      );
+      if (arrayNotEmpty(changes)) {
+        comment.push('| JSON property | New value |');
+        comment.push('|---|---|');
+        changes.forEach((key) =>
           comment.push(`${key} | ${deployInfo.updates[key]} |`),
         );
+      }
     }
 
     const domains = deployInfo.updates.domainMappings || {};
-    if (domains.added) {
+    if (arrayNotEmpty(domains.added)) {
       comment.push('', '**Added domains**', markdownList(domains.added));
     }
-    if (domains.removed) {
+    if (arrayNotEmpty(domains.removed)) {
       comment.push(
         '',
         '**:warning: Removed domains**',
         markdownList(domains.removed),
       );
     }
-    if (domains.migrations) {
+    if (arrayNotEmpty(domains.migrations)) {
       comment.push(
         '',
         '**:warning: Migrations**',
@@ -65,15 +71,15 @@ const createComment = (filename, deployInfo) => {
     }
 
     const paths = deployInfo.updates.pathMappings || {};
-    const addedRoutes = paths.newRoutes || paths.updatedRoutes;
-    if (addedRoutes) {
+    const addedRoutes = paths.newRoutes || paths.updatedRoutes || [];
+    if (arrayNotEmpty(addedRoutes)) {
       comment.push(
         '',
         '**Added routes**',
         markdownList(addedRoutes.map(markdownRoute)),
       );
     }
-    if (paths.removedRoutes) {
+    if (arrayNotEmpty(paths.removedRoutes)) {
       comment.push(
         '',
         '**:warning: Removed routes**',
