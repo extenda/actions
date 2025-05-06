@@ -30,7 +30,7 @@ test('It can create a comment for a new service', () => {
     updates: {
       new: true,
       pathMappings: {
-        newRoutes: [
+        added: [
           {
             target: 'service/hiiretail-platform-api',
             paths: ['/platform-api/health', '/platform-api/health/*'],

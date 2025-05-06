@@ -54,25 +54,25 @@ const domains = (domains) => {
 
 const paths = (paths) => {
   const entries = [];
-  if (arrayNotEmpty(paths.newRoutes)) {
+  if (arrayNotEmpty(paths.added)) {
     entries.push(
-      ...paths.newRoutes
+      ...paths.added
         .map(markdownRoute)
         .map((p) => `:green_circle: Add ${p}`),
     );
   }
-  if (arrayNotEmpty(paths.updatedRoutes)) {
+  if (arrayNotEmpty(paths.removed)) {
     entries.push(
-      ...paths.updatedRoutes
-        .map(markdownRoute)
-        .map((p) => `:orange_circle: Update ${p}`),
-    );
-  }
-  if (arrayNotEmpty(paths.deletedRoutes)) {
-    entries.push(
-      ...paths.deletedRoutes
+      ...paths.removed
         .map(markdownRoute)
         .map((p) => `:red_circle: Remove ${p}`),
+    );
+  }
+  if (arrayNotEmpty(paths.updated)) {
+    entries.push(
+      ...paths.updated
+        .map(markdownRoute)
+        .map((p) => `:orange_circle: Update ${p}`),
     );
   }
   if (entries.length > 0) {
