@@ -1,0 +1,21 @@
+name: Cloud Deploy Plan
+description: Post a deploy plan to a pull request.
+author: Extenda Retail
+inputs:
+  service-account-key:
+    description: >
+      The service account key which will be used for authentication against the clan project.
+    required: true
+  service-definition:
+    description: >
+      The service YAML specification(s). This is a glob path pattern.
+      Multiple definition globs can be separated by new-line.
+    required: false
+    default: cloud-deploy.yaml
+  github-token:
+    description: The github access token.
+    required: false
+    default: ${{ github.token }}
+runs:
+  using: node20
+  main: dist/index.js

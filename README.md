@@ -10,7 +10,9 @@ the fundamental parts of our CI/CD pipelines.
 
 The following actions are available
 
+  * [binary-auth-attestation](binary-auth-attestation#readme)
   * [cloud-deploy](cloud-deploy#readme)
+  * [cloud-deploy-plan](cloud-deploy-plan#readme)
   * ~~[cloud-run](cloud-run#readme)~~
   * [commitlint](commitlint#readme)
   * [component-tests](component-tests#readme)

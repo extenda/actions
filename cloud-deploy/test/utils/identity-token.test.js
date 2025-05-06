@@ -13,10 +13,10 @@ describe('getToken function', () => {
     const result = await getToken('cloud-deploy');
 
     expect(result).toBe('token');
-    expect(execGcloud).toHaveBeenCalledWith([
-      'auth',
-      'print-identity-token',
-      '--audiences=cloud-deploy',
-    ]);
+    expect(execGcloud).toHaveBeenCalledWith(
+      ['auth', 'print-identity-token', '--audiences=cloud-deploy'],
+      'gcloud',
+      true,
+    );
   });
 });
