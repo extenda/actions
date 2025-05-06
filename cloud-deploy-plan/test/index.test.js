@@ -5,6 +5,7 @@ const getToken = require('../../cloud-deploy/src/utils/identity-token');
 const getDeployInfo = require('../src/deploy-info');
 const loadServiceDefinition = require('../../cloud-deploy/src/utils/service-definition');
 const { getPullRequestNumber, postComment } = require('../src/pr-comment');
+const resolveServiceFiles = require('../src/service-files');
 
 jest.mock('@actions/core');
 jest.mock('../src/deploy-info');
@@ -12,6 +13,7 @@ jest.mock('../src/pr-comment');
 jest.mock('../../cloud-deploy/src/utils/identity-token');
 jest.mock('../../setup-gcloud');
 jest.mock('../../cloud-deploy/src/utils/service-definition');
+jest.mock('../src/service-files');
 
 describe('cloud-deploy-plan', () => {
   beforeEach(() => {
@@ -28,6 +30,10 @@ describe('cloud-deploy-plan', () => {
       .mockReturnValueOnce('gh-token');
 
     core.getMultilineInput.mockReturnValueOnce([
+      'cloud-deploy1.yaml',
+      'cloud-deploy2.yaml',
+    ]);
+    resolveServiceFiles.mockReturnValueOnce([
       'cloud-deploy1.yaml',
       'cloud-deploy2.yaml',
     ]);
