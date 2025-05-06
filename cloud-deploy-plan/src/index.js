@@ -6,14 +6,15 @@ const getToken = require('../../cloud-deploy/src/utils/identity-token');
 const getDeployInfo = require('./deploy-info');
 const createComment = require('./create-comment');
 const { getPullRequestNumber, postComment } = require('./pr-comment');
+const resolveServiceFiles = require('./service-files');
 
 const action = async () => {
   const serviceAccountKeyCICD = core.getInput('service-account-key', {
     required: true,
   });
-  const serviceFiles = core.getMultilineInput('service-definition') || [
-    'cloud-deploy.yaml',
-  ];
+  const serviceFiles = resolveServiceFiles(
+    core.getMultilineInput('service-definition') || ['cloud-deploy.yaml'],
+  );
   const githubToken = core.getInput('github-token', { required: true });
 
   const issueId = await getPullRequestNumber(githubToken);

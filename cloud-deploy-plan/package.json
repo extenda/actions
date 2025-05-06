@@ -5,7 +5,8 @@
   "description": "Post a deploy comment to pull requests",
   "main": "dist/index.js",
   "dependencies": {
-    "@actions/github": "^6.0.0"
+    "@actions/github": "^6.0.0",
+    "fast-glob": "^3.3.3"
   },
   "devDependencies": {
     "nock": "^14.0.4"

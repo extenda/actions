@@ -32,6 +32,7 @@ jobs:
 ```
 
 If you use multiple cloud deploy YAML files, they can be separated by new lines.
+The service definition can be a glob pattern.
 
 ```yaml
 name: Cloud Deploy Plan
@@ -46,6 +47,6 @@ jobs:
         with:
           service-account-key: ${{ secrets.GCLOUD_AUTH_PROD }}
           service-definition: |
-            services/service-1/cloud-deploy.yaml
-            services/service-2/cloud-deploy.yaml
+            cloud-deploy.yaml
+            services/**/cloud-deploy.yaml
 ```
