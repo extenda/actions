@@ -1,14 +1,21 @@
 const core = require('@actions/core');
 const axios = require('axios');
 
+const readProperty = (object, propertyName, defaultValue) => {
+  if (propertyName in object) {
+    return object[propertyName];
+  }
+  return defaultValue;
+};
+
 const copyInfo = (platform, service, data) => {
   data.platform = platform;
   const o = service[platform];
   data.serviceName = o.service;
   data.protocol = o.protocol || 'http';
   data.timeout = o.timeout || 300;
-  data.sessionAffinity = o['session-affinity'] || false;
-  data.internalTraffic = o['internal-traffic'] || true;
+  data.sessionAffinity = readProperty(o, 'session-affinity', false);
+  data.internalTraffic = readProperty(o, 'internal-traffic', true);
 };
 
 const pathMappings = (env) => {
@@ -33,6 +40,10 @@ const pathMappings = (env) => {
 const getDeployInfo = async (service, projectId, bearerToken) => {
   const prod = service.environments.production;
 
+  const {
+    security: { 'cloud-armor': { 'policy-name': cloudArmorPolicy } = {} } = {},
+  } = service;
+
   const data = {
     projectID: projectId,
     // prod.regions
@@ -41,6 +52,7 @@ const getDeployInfo = async (service, projectId, bearerToken) => {
     loggingSampleRate: 0, // Not possible to set in service definition
     domainMappings: prod['domain-mappings'] || [],
     pathMappings: pathMappings(prod),
+    cloudArmorPolicy,
   };
 
   if ('cloud-run' in service) {
