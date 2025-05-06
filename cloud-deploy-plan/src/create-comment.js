@@ -56,9 +56,7 @@ const paths = (paths) => {
   const entries = [];
   if (arrayNotEmpty(paths.added)) {
     entries.push(
-      ...paths.added
-        .map(markdownRoute)
-        .map((p) => `:green_circle: Add ${p}`),
+      ...paths.added.map(markdownRoute).map((p) => `:green_circle: Add ${p}`),
     );
   }
   if (arrayNotEmpty(paths.removed)) {
