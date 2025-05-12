@@ -27,6 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: extenda/actions/cloud-deploy-plan@v0
+        if: github.actor != 'dependabot[bot]'
         with:
           service-account-key: ${{ secrets.GCLOUD_AUTH_PROD }}
 ```
@@ -44,6 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: extenda/actions/cloud-deploy-plan@v0
+        if: github.actor != 'dependabot[bot]'
         with:
           service-account-key: ${{ secrets.GCLOUD_AUTH_PROD }}
           service-definition: |
