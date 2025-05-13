@@ -25100,32 +25100,36 @@ size") : null;
       return $replace.call(String(s), /"/g, "&quot;");
     }
     __name(quote, "quote");
+    function canTrustToString(obj) {
+      return !toStringTag || !(typeof obj === "object" && (toStringTag in obj || typeof obj[toStringTag] !== "undefined"));
+    }
+    __name(canTrustToString, "canTrustToString");
     function isArray(obj) {
-      return toStr(obj) === "[object Array]" && (!toStringTag || !(typeof obj === "object" && toStringTag in obj));
+      return toStr(obj) === "[object Array]" && canTrustToString(obj);
     }
     __name(isArray, "isArray");
     function isDate(obj) {
-      return toStr(obj) === "[object Date]" && (!toStringTag || !(typeof obj === "object" && toStringTag in obj));
+      return toStr(obj) === "[object Date]" && canTrustToString(obj);
     }
     __name(isDate, "isDate");
     function isRegExp(obj) {
-      return toStr(obj) === "[object RegExp]" && (!toStringTag || !(typeof obj === "object" && toStringTag in obj));
+      return toStr(obj) === "[object RegExp]" && canTrustToString(obj);
     }
     __name(isRegExp, "isRegExp");
     function isError(obj) {
-      return toStr(obj) === "[object Error]" && (!toStringTag || !(typeof obj === "object" && toStringTag in obj));
+      return toStr(obj) === "[object Error]" && canTrustToString(obj);
     }
     __name(isError, "isError");
     function isString(obj) {
-      return toStr(obj) === "[object String]" && (!toStringTag || !(typeof obj === "object" && toStringTag in obj));
+      return toStr(obj) === "[object String]" && canTrustToString(obj);
     }
     __name(isString, "isString");
     function isNumber(obj) {
-      return toStr(obj) === "[object Number]" && (!toStringTag || !(typeof obj === "object" && toStringTag in obj));
+      return toStr(obj) === "[object Number]" && canTrustToString(obj);
     }
     __name(isNumber, "isNumber");
     function isBoolean(obj) {
-      return toStr(obj) === "[object Boolean]" && (!toStringTag || !(typeof obj === "object" && toStringTag in obj));
+      return toStr(obj) === "[object Boolean]" && canTrustToString(obj);
     }
     __name(isBoolean, "isBoolean");
     function isSymbol(obj) {
@@ -26037,6 +26041,7 @@ var require_get_intrinsic = __commonJS({
       "%eval%": eval,
       // eslint-disable-line no-eval
       "%EvalError%": $EvalError,
+      "%Float16Array%": typeof Float16Array === "undefined" ? undefined2 : Float16Array,
       "%Float32Array%": typeof Float32Array === "undefined" ? undefined2 : Float32Array,
       "%Float64Array%": typeof Float64Array === "undefined" ? undefined2 : Float64Array,
       "%FinalizationRegistry%": typeof FinalizationRegistry === "undefined" ? undefined2 : FinalizationRegistry,
@@ -26301,11 +26306,14 @@ var require_call_bound = __commonJS({
     var $indexOf = callBindBasic([GetIntrinsic("%String.prototype.indexOf%")]);
     module2.exports = /* @__PURE__ */ __name(function callBoundIntrinsic(name, allowMissing) {
       var intrinsic = (
-        /** @type {Parameters<typeof callBindBasic>[0][0]} */
+        /** @type {(this: unknown, ...args: unknown[]) => unknown} */
         GetIntrinsic(name, !!allowMissing)
       );
       if (typeof intrinsic === "function" && $indexOf(name, ".prototype.") > -1) {
-        return callBindBasic([intrinsic]);
+        return callBindBasic(
+          /** @type {const} */
+          [intrinsic]
+        );
       }
       return intrinsic;
     }, "callBoundIntrinsic");
@@ -39697,54 +39705,69 @@ var require_common2 = __commonJS({
         createDebug.namespaces = namespaces;
         createDebug.names = [];
         createDebug.skips = [];
-        let i;
-        const split = (typeof namespaces === "string" ? namespaces : "").split(/[\s,]+/);
-        const len = split.length;
-        for (i = 0; i < len; i++) {
-          if (!split[i]) {
-            continue;
-          }
-          namespaces = split[i].replace(/\*/g, ".*?");
-          if (namespaces[0] === "-") {
-            createDebug.skips.push(new RegExp("^" + namespaces.slice(1) + "$"));
+        const split = (typeof namespaces === "string" ? namespaces : "").trim().replace(" ", ",").split(",").filter(Boolean);
+        for (const ns of split) {
+          if (ns[0] === "-") {
+            createDebug.skips.push(ns.slice(1));
           } else {
-            createDebug.names.push(new RegExp("^" + namespaces + "$"));
+            createDebug.names.push(ns);
           }
         }
       }
       __name(enable, "enable");
+      function matchesTemplate(search, template) {
+        let searchIndex = 0;
+        let templateIndex = 0;
+        let starIndex = -1;
+        let matchIndex = 0;
+        while (searchIndex < search.length) {
+          if (templateIndex < template.length && (template[templateIndex] === search[searchIndex] || template[templateIndex] ===
+          "*")) {
+            if (template[templateIndex] === "*") {
+              starIndex = templateIndex;
+              matchIndex = searchIndex;
+              templateIndex++;
+            } else {
+              searchIndex++;
+              templateIndex++;
+            }
+          } else if (starIndex !== -1) {
+            templateIndex = starIndex + 1;
+            matchIndex++;
+            searchIndex = matchIndex;
+          } else {
+            return false;
+          }
+        }
+        while (templateIndex < template.length && template[templateIndex] === "*") {
+          templateIndex++;
+        }
+        return templateIndex === template.length;
+      }
+      __name(matchesTemplate, "matchesTemplate");
       function disable() {
         const namespaces = [
-          ...createDebug.names.map(toNamespace),
-          ...createDebug.skips.map(toNamespace).map((namespace) => "-" + namespace)
+          ...createDebug.names,
+          ...createDebug.skips.map((namespace) => "-" + namespace)
         ].join(",");
         createDebug.enable("");
         return namespaces;
       }
       __name(disable, "disable");
       function enabled(name) {
-        if (name[name.length - 1] === "*") {
-          return true;
-        }
-        let i;
-        let len;
-        for (i = 0, len = createDebug.skips.length; i < len; i++) {
-          if (createDebug.skips[i].test(name)) {
+        for (const skip of createDebug.skips) {
+          if (matchesTemplate(name, skip)) {
             return false;
           }
         }
-        for (i = 0, len = createDebug.names.length; i < len; i++) {
-          if (createDebug.names[i].test(name)) {
+        for (const ns of createDebug.names) {
+          if (matchesTemplate(name, ns)) {
             return true;
           }
         }
         return false;
       }
       __name(enabled, "enabled");
-      function toNamespace(regexp) {
-        return regexp.toString().substring(2, regexp.toString().length - 2).replace(/\.\*\?$/, "*");
-      }
-      __name(toNamespace, "toNamespace");
       function coerce(val) {
         if (val instanceof Error) {
           return val.stack || val.message;
@@ -40749,6 +40772,10 @@ var require_utils5 = __commonJS({
       }
       return header;
     };
+    exports2.normalizeHostname = (hostname) => {
+      const [, normalized] = hostname.match(/^\[([^\]]+)\]$/) || [];
+      return normalized || hostname;
+    };
     exports2.isObject = (object) => {
       return object !== null && typeof object === "object";
     };
@@ -40764,6 +40791,12 @@ var require_utils5 = __commonJS({
           target[key] = source[key];
         }
       }
+    };
+    exports2.isGzipOrDeflateEncoding = (res) => {
+      return new RegExp(/^\s*(?:deflate|gzip)\s*$/).test(res.headers["content-encoding"]);
+    };
+    exports2.isBrotliEncoding = (res) => {
+      return new RegExp(/^\s*(?:br)\s*$/).test(res.headers["content-encoding"]);
     };
   }
 });
@@ -41145,6 +41178,10 @@ var require_http2wrapper = __commonJS({
       };
     }
     __name(setProtocol, "setProtocol");
+    function normalizeIpv6Host(host) {
+      return net.isIP(host) === 6 ? `[${host}]` : host;
+    }
+    __name(normalizeIpv6Host, "normalizeIpv6Host");
     var Request2 = class extends Stream {
       static {
         __name(this, "Request");
@@ -41171,8 +41208,9 @@ var require_http2wrapper = __commonJS({
           sessionOptions.createConnection = this.createUnixConnection.bind(this);
         }
         this._headers = {};
-        const session = http2.connect(`${protocol}//${host}:${port}`, sessionOptions);
-        this.setHeader("host", `${host}:${port}`);
+        const normalizedHost = normalizeIpv6Host(host);
+        const session = http2.connect(`${protocol}//${normalizedHost}:${port}`, sessionOptions);
+        this.setHeader("host", `${normalizedHost}:${port}`);
         session.on("error", (error) => this.emit("error", error));
         this.session = session;
       }
@@ -41279,6 +41317,30 @@ var require_http2wrapper = __commonJS({
   }
 });
 
+// component-tests/node_modules/superagent/lib/node/decompress.js
+var require_decompress = __commonJS({
+  "component-tests/node_modules/superagent/lib/node/decompress.js"(exports2) {
+    "use strict";
+    var zlib = require("zlib");
+    var utils = require_utils5();
+    var {
+      isGzipOrDeflateEncoding,
+      isBrotliEncoding
+    } = utils;
+    exports2.chooseDecompresser = (res) => {
+      let decompresser;
+      if (isGzipOrDeflateEncoding(res)) {
+        decompresser = zlib.createUnzip();
+      } else if (isBrotliEncoding(res)) {
+        decompresser = zlib.createBrotliDecompress();
+      } else {
+        throw new Error("unknown content-encoding");
+      }
+      return decompresser;
+    };
+  }
+});
+
 // component-tests/node_modules/superagent/lib/node/unzip.js
 var require_unzip = __commonJS({
   "component-tests/node_modules/superagent/lib/node/unzip.js"(exports2) {
@@ -41287,24 +41349,26 @@ var require_unzip = __commonJS({
       StringDecoder
     } = require("string_decoder");
     var Stream = require("stream");
-    var zlib = require("zlib");
-    exports2.unzip = (request, res) => {
-      const unzip = zlib.createUnzip();
+    var {
+      chooseDecompresser
+    } = require_decompress();
+    exports2.decompress = (request, res) => {
+      let decompresser = chooseDecompresser(res);
       const stream = new Stream();
       let decoder;
       stream.req = request;
-      unzip.on("error", (error) => {
+      decompresser.on("error", (error) => {
         if (error && error.code === "Z_BUF_ERROR") {
           stream.emit("end");
           return;
         }
         stream.emit("error", error);
       });
-      res.pipe(unzip);
+      res.pipe(decompresser);
       res.setEncoding = (type) => {
         decoder = new StringDecoder(type);
       };
-      unzip.on("data", (buf) => {
+      decompresser.on("data", (buf) => {
         if (decoder) {
           const string_ = decoder.write(buf);
           if (string_.length > 0) stream.emit("data", string_);
@@ -41312,7 +41376,7 @@ var require_unzip = __commonJS({
           stream.emit("data", buf);
         }
       });
-      unzip.on("end", () => {
+      decompresser.on("end", () => {
         stream.emit("end");
       });
       const _on = res.on;
@@ -41714,13 +41778,18 @@ var require_node2 = __commonJS({
     var RequestBase = require_request_base();
     var http2 = require_http2wrapper();
     var {
-      unzip
+      decompress
     } = require_unzip();
     var Response2 = require_response2();
     var {
       mixin,
-      hasOwn
+      hasOwn,
+      isBrotliEncoding,
+      isGzipOrDeflateEncoding
     } = utils;
+    var {
+      chooseDecompresser
+    } = require_decompress();
     function request(method, url) {
       if (typeof url === "function") {
         return new exports2.Request("GET", method).end(url);
@@ -41748,7 +41817,12 @@ var require_node2 = __commonJS({
       "http2:": http2
     };
     exports2.serialize = {
-      "application/x-www-form-urlencoded": qs.stringify,
+      "application/x-www-form-urlencoded": /* @__PURE__ */ __name((obj) => {
+        return qs.stringify(obj, {
+          indices: false,
+          strictNullHandling: true
+        });
+      }, "application/x-www-form-urlencoded"),
       "application/json": safeStringify
     };
     exports2.parse = require_parsers();
@@ -41878,17 +41952,17 @@ var require_node2 = __commonJS({
         this.res = res;
         this._emitResponse();
         if (this._aborted) return;
-        if (this._shouldUnzip(res)) {
-          const unzipObject = zlib.createUnzip();
-          unzipObject.on("error", (error) => {
+        if (this._shouldDecompress(res)) {
+          let decompresser = chooseDecompresser(res);
+          decompresser.on("error", (error) => {
             if (error && error.code === "Z_BUF_ERROR") {
               stream.emit("end");
               return;
             }
             stream.emit("error", error);
           });
-          res.pipe(unzipObject).pipe(stream, options);
-          unzipObject.once("end", () => this.emit("end"));
+          res.pipe(decompresser).pipe(stream, options);
+          decompresser.once("end", () => this.emit("end"));
         } else {
           res.pipe(stream, options);
           res.once("end", () => this.emit("end"));
@@ -42035,7 +42109,7 @@ var require_node2 = __commonJS({
       options.method = this.method;
       options.port = url.port;
       options.path = path;
-      options.host = url.hostname;
+      options.host = utils.normalizeHostname(url.hostname);
       options.ca = this._ca;
       options.key = this._key;
       options.pfx = this._pfx;
@@ -42207,8 +42281,8 @@ var require_node2 = __commonJS({
           this.callback(null, this._emitResponse());
           return;
         }
-        if (this._shouldUnzip(res)) {
-          unzip(req, res);
+        if (this._shouldDecompress(res)) {
+          decompress(req, res);
         }
         let buffer = this._buffer;
         if (buffer === void 0 && mime2 in exports2.buffer) {
@@ -42385,14 +42459,8 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
         req.end(data);
       }
     };
-    Request2.prototype._shouldUnzip = (res) => {
-      if (res.statusCode === 204 || res.statusCode === 304) {
-        return false;
-      }
-      if (res.headers["content-length"] === "0") {
-        return false;
-      }
-      return /^\s*(?:deflate|gzip)\s*$/.test(res.headers["content-encoding"]);
+    Request2.prototype._shouldDecompress = (res) => {
+      return hasNonEmptyResponseContent(res) && (isGzipOrDeflateEncoding(res) || isBrotliEncoding(res));
     };
     Request2.prototype.connect = function(connectOverride) {
       if (typeof connectOverride === "string") {
@@ -42459,6 +42527,16 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
       return [301, 302, 303, 305, 307, 308].includes(code);
     }
     __name(isRedirect, "isRedirect");
+    function hasNonEmptyResponseContent(res) {
+      if (res.statusCode === 204 || res.statusCode === 304) {
+        return false;
+      }
+      if (res.headers["content-length"] === "0") {
+        return false;
+      }
+      return true;
+    }
+    __name(hasNonEmptyResponseContent, "hasNonEmptyResponseContent");
   }
 });
 

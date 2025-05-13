@@ -21816,6 +21816,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
 // setup-terraform/node_modules/semver/internal/constants.js
 var require_constants6 = __commonJS({
   "setup-terraform/node_modules/semver/internal/constants.js"(exports2, module2) {
+    "use strict";
     var SEMVER_SPEC_VERSION = "2.0.0";
     var MAX_LENGTH = 256;
     var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || /* istanbul ignore next */
@@ -21847,6 +21848,7 @@ var require_constants6 = __commonJS({
 // setup-terraform/node_modules/semver/internal/debug.js
 var require_debug = __commonJS({
   "setup-terraform/node_modules/semver/internal/debug.js"(exports2, module2) {
+    "use strict";
     var debug = typeof process === "object" && process.env && process.env.NODE_DEBUG && /\bsemver\b/i.test(process.env.NODE_DEBUG) ?
     (...args) => console.error("SEMVER", ...args) : () => {
     };
@@ -21857,6 +21859,7 @@ var require_debug = __commonJS({
 // setup-terraform/node_modules/semver/internal/re.js
 var require_re = __commonJS({
   "setup-terraform/node_modules/semver/internal/re.js"(exports2, module2) {
+    "use strict";
     var {
       MAX_SAFE_COMPONENT_LENGTH,
       MAX_SAFE_BUILD_LENGTH,
@@ -21899,8 +21902,8 @@ var require_re = __commonJS({
 )`);
     createToken("MAINVERSIONLOOSE", `(${src[t.NUMERICIDENTIFIERLOOSE]})\\.(${src[t.NUMERICIDENTIFIERLOOSE]})\\.(${src[t.
     NUMERICIDENTIFIERLOOSE]})`);
-    createToken("PRERELEASEIDENTIFIER", `(?:${src[t.NUMERICIDENTIFIER]}|${src[t.NONNUMERICIDENTIFIER]})`);
-    createToken("PRERELEASEIDENTIFIERLOOSE", `(?:${src[t.NUMERICIDENTIFIERLOOSE]}|${src[t.NONNUMERICIDENTIFIER]})`);
+    createToken("PRERELEASEIDENTIFIER", `(?:${src[t.NONNUMERICIDENTIFIER]}|${src[t.NUMERICIDENTIFIER]})`);
+    createToken("PRERELEASEIDENTIFIERLOOSE", `(?:${src[t.NONNUMERICIDENTIFIER]}|${src[t.NUMERICIDENTIFIERLOOSE]})`);
     createToken("PRERELEASE", `(?:-(${src[t.PRERELEASEIDENTIFIER]}(?:\\.${src[t.PRERELEASEIDENTIFIER]})*))`);
     createToken("PRERELEASELOOSE", `(?:-?(${src[t.PRERELEASEIDENTIFIERLOOSE]}(?:\\.${src[t.PRERELEASEIDENTIFIERLOOSE]})*\
 ))`);
@@ -21950,6 +21953,7 @@ var require_re = __commonJS({
 // setup-terraform/node_modules/semver/internal/parse-options.js
 var require_parse_options = __commonJS({
   "setup-terraform/node_modules/semver/internal/parse-options.js"(exports2, module2) {
+    "use strict";
     var looseOption = Object.freeze({ loose: true });
     var emptyOpts = Object.freeze({});
     var parseOptions = /* @__PURE__ */ __name((options) => {
@@ -21968,6 +21972,7 @@ var require_parse_options = __commonJS({
 // setup-terraform/node_modules/semver/internal/identifiers.js
 var require_identifiers = __commonJS({
   "setup-terraform/node_modules/semver/internal/identifiers.js"(exports2, module2) {
+    "use strict";
     var numeric = /^[0-9]+$/;
     var compareIdentifiers = /* @__PURE__ */ __name((a, b) => {
       const anum = numeric.test(a);
@@ -21989,9 +21994,10 @@ var require_identifiers = __commonJS({
 // setup-terraform/node_modules/semver/classes/semver.js
 var require_semver = __commonJS({
   "setup-terraform/node_modules/semver/classes/semver.js"(exports2, module2) {
+    "use strict";
     var debug = require_debug();
     var { MAX_LENGTH, MAX_SAFE_INTEGER } = require_constants6();
-    var { safeRe: re, safeSrc: src, t } = require_re();
+    var { safeRe: re, t } = require_re();
     var parseOptions = require_parse_options();
     var { compareIdentifiers } = require_identifiers();
     var SemVer = class _SemVer {
@@ -22140,8 +22146,7 @@ var require_semver = __commonJS({
             throw new Error("invalid increment argument: identifier is empty");
           }
           if (identifier) {
-            const r = new RegExp(`^${this.options.loose ? src[t.PRERELEASELOOSE] : src[t.PRERELEASE]}$`);
-            const match = `-${identifier}`.match(r);
+            const match = `-${identifier}`.match(this.options.loose ? re[t.PRERELEASELOOSE] : re[t.PRERELEASE]);
             if (!match || match[1] !== identifier) {
               throw new Error(`invalid identifier: ${identifier}`);
             }
@@ -22254,6 +22259,7 @@ var require_semver = __commonJS({
 // setup-terraform/node_modules/semver/functions/parse.js
 var require_parse2 = __commonJS({
   "setup-terraform/node_modules/semver/functions/parse.js"(exports2, module2) {
+    "use strict";
     var SemVer = require_semver();
     var parse = /* @__PURE__ */ __name((version, options, throwErrors = false) => {
       if (version instanceof SemVer) {
@@ -22275,6 +22281,7 @@ var require_parse2 = __commonJS({
 // setup-terraform/node_modules/semver/functions/valid.js
 var require_valid = __commonJS({
   "setup-terraform/node_modules/semver/functions/valid.js"(exports2, module2) {
+    "use strict";
     var parse = require_parse2();
     var valid = /* @__PURE__ */ __name((version, options) => {
       const v = parse(version, options);
@@ -22287,6 +22294,7 @@ var require_valid = __commonJS({
 // setup-terraform/node_modules/semver/functions/clean.js
 var require_clean = __commonJS({
   "setup-terraform/node_modules/semver/functions/clean.js"(exports2, module2) {
+    "use strict";
     var parse = require_parse2();
     var clean = /* @__PURE__ */ __name((version, options) => {
       const s = parse(version.trim().replace(/^[=v]+/, ""), options);
@@ -22299,6 +22307,7 @@ var require_clean = __commonJS({
 // setup-terraform/node_modules/semver/functions/inc.js
 var require_inc = __commonJS({
   "setup-terraform/node_modules/semver/functions/inc.js"(exports2, module2) {
+    "use strict";
     var SemVer = require_semver();
     var inc = /* @__PURE__ */ __name((version, release, options, identifier, identifierBase) => {
       if (typeof options === "string") {
@@ -22322,6 +22331,7 @@ var require_inc = __commonJS({
 // setup-terraform/node_modules/semver/functions/diff.js
 var require_diff = __commonJS({
   "setup-terraform/node_modules/semver/functions/diff.js"(exports2, module2) {
+    "use strict";
     var parse = require_parse2();
     var diff = /* @__PURE__ */ __name((version1, version2) => {
       const v1 = parse(version1, null, true);
@@ -22365,6 +22375,7 @@ var require_diff = __commonJS({
 // setup-terraform/node_modules/semver/functions/major.js
 var require_major = __commonJS({
   "setup-terraform/node_modules/semver/functions/major.js"(exports2, module2) {
+    "use strict";
     var SemVer = require_semver();
     var major = /* @__PURE__ */ __name((a, loose) => new SemVer(a, loose).major, "major");
     module2.exports = major;
@@ -22374,6 +22385,7 @@ var require_major = __commonJS({
 // setup-terraform/node_modules/semver/functions/minor.js
 var require_minor = __commonJS({
   "setup-terraform/node_modules/semver/functions/minor.js"(exports2, module2) {
+    "use strict";
     var SemVer = require_semver();
     var minor = /* @__PURE__ */ __name((a, loose) => new SemVer(a, loose).minor, "minor");
     module2.exports = minor;
@@ -22383,6 +22395,7 @@ var require_minor = __commonJS({
 // setup-terraform/node_modules/semver/functions/patch.js
 var require_patch = __commonJS({
   "setup-terraform/node_modules/semver/functions/patch.js"(exports2, module2) {
+    "use strict";
     var SemVer = require_semver();
     var patch = /* @__PURE__ */ __name((a, loose) => new SemVer(a, loose).patch, "patch");
     module2.exports = patch;
@@ -22392,6 +22405,7 @@ var require_patch = __commonJS({
 // setup-terraform/node_modules/semver/functions/prerelease.js
 var require_prerelease = __commonJS({
   "setup-terraform/node_modules/semver/functions/prerelease.js"(exports2, module2) {
+    "use strict";
     var parse = require_parse2();
     var prerelease = /* @__PURE__ */ __name((version, options) => {
       const parsed = parse(version, options);
@@ -22404,6 +22418,7 @@ var require_prerelease = __commonJS({
 // setup-terraform/node_modules/semver/functions/compare.js
 var require_compare = __commonJS({
   "setup-terraform/node_modules/semver/functions/compare.js"(exports2, module2) {
+    "use strict";
     var SemVer = require_semver();
     var compare = /* @__PURE__ */ __name((a, b, loose) => new SemVer(a, loose).compare(new SemVer(b, loose)), "compare");
     module2.exports = compare;
@@ -22413,6 +22428,7 @@ var require_compare = __commonJS({
 // setup-terraform/node_modules/semver/functions/rcompare.js
 var require_rcompare = __commonJS({
   "setup-terraform/node_modules/semver/functions/rcompare.js"(exports2, module2) {
+    "use strict";
     var compare = require_compare();
     var rcompare = /* @__PURE__ */ __name((a, b, loose) => compare(b, a, loose), "rcompare");
     module2.exports = rcompare;
@@ -22422,6 +22438,7 @@ var require_rcompare = __commonJS({
 // setup-terraform/node_modules/semver/functions/compare-loose.js
 var require_compare_loose = __commonJS({
   "setup-terraform/node_modules/semver/functions/compare-loose.js"(exports2, module2) {
+    "use strict";
     var compare = require_compare();
     var compareLoose = /* @__PURE__ */ __name((a, b) => compare(a, b, true), "compareLoose");
     module2.exports = compareLoose;
@@ -22431,6 +22448,7 @@ var require_compare_loose = __commonJS({
 // setup-terraform/node_modules/semver/functions/compare-build.js
 var require_compare_build = __commonJS({
   "setup-terraform/node_modules/semver/functions/compare-build.js"(exports2, module2) {
+    "use strict";
     var SemVer = require_semver();
     var compareBuild = /* @__PURE__ */ __name((a, b, loose) => {
       const versionA = new SemVer(a, loose);
@@ -22444,6 +22462,7 @@ var require_compare_build = __commonJS({
 // setup-terraform/node_modules/semver/functions/sort.js
 var require_sort = __commonJS({
   "setup-terraform/node_modules/semver/functions/sort.js"(exports2, module2) {
+    "use strict";
     var compareBuild = require_compare_build();
     var sort = /* @__PURE__ */ __name((list, loose) => list.sort((a, b) => compareBuild(a, b, loose)), "sort");
     module2.exports = sort;
@@ -22453,6 +22472,7 @@ var require_sort = __commonJS({
 // setup-terraform/node_modules/semver/functions/rsort.js
 var require_rsort = __commonJS({
   "setup-terraform/node_modules/semver/functions/rsort.js"(exports2, module2) {
+    "use strict";
     var compareBuild = require_compare_build();
     var rsort = /* @__PURE__ */ __name((list, loose) => list.sort((a, b) => compareBuild(b, a, loose)), "rsort");
     module2.exports = rsort;
@@ -22462,6 +22482,7 @@ var require_rsort = __commonJS({
 // setup-terraform/node_modules/semver/functions/gt.js
 var require_gt = __commonJS({
   "setup-terraform/node_modules/semver/functions/gt.js"(exports2, module2) {
+    "use strict";
     var compare = require_compare();
     var gt = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) > 0, "gt");
     module2.exports = gt;
@@ -22471,6 +22492,7 @@ var require_gt = __commonJS({
 // setup-terraform/node_modules/semver/functions/lt.js
 var require_lt = __commonJS({
   "setup-terraform/node_modules/semver/functions/lt.js"(exports2, module2) {
+    "use strict";
     var compare = require_compare();
     var lt = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) < 0, "lt");
     module2.exports = lt;
@@ -22480,6 +22502,7 @@ var require_lt = __commonJS({
 // setup-terraform/node_modules/semver/functions/eq.js
 var require_eq = __commonJS({
   "setup-terraform/node_modules/semver/functions/eq.js"(exports2, module2) {
+    "use strict";
     var compare = require_compare();
     var eq = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) === 0, "eq");
     module2.exports = eq;
@@ -22489,6 +22512,7 @@ var require_eq = __commonJS({
 // setup-terraform/node_modules/semver/functions/neq.js
 var require_neq = __commonJS({
   "setup-terraform/node_modules/semver/functions/neq.js"(exports2, module2) {
+    "use strict";
     var compare = require_compare();
     var neq = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) !== 0, "neq");
     module2.exports = neq;
@@ -22498,6 +22522,7 @@ var require_neq = __commonJS({
 // setup-terraform/node_modules/semver/functions/gte.js
 var require_gte = __commonJS({
   "setup-terraform/node_modules/semver/functions/gte.js"(exports2, module2) {
+    "use strict";
     var compare = require_compare();
     var gte = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) >= 0, "gte");
     module2.exports = gte;
@@ -22507,6 +22532,7 @@ var require_gte = __commonJS({
 // setup-terraform/node_modules/semver/functions/lte.js
 var require_lte = __commonJS({
   "setup-terraform/node_modules/semver/functions/lte.js"(exports2, module2) {
+    "use strict";
     var compare = require_compare();
     var lte = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) <= 0, "lte");
     module2.exports = lte;
@@ -22516,6 +22542,7 @@ var require_lte = __commonJS({
 // setup-terraform/node_modules/semver/functions/cmp.js
 var require_cmp = __commonJS({
   "setup-terraform/node_modules/semver/functions/cmp.js"(exports2, module2) {
+    "use strict";
     var eq = require_eq();
     var neq = require_neq();
     var gt = require_gt();
@@ -22565,6 +22592,7 @@ var require_cmp = __commonJS({
 // setup-terraform/node_modules/semver/functions/coerce.js
 var require_coerce = __commonJS({
   "setup-terraform/node_modules/semver/functions/coerce.js"(exports2, module2) {
+    "use strict";
     var SemVer = require_semver();
     var parse = require_parse2();
     var { safeRe: re, t } = require_re();
@@ -22610,6 +22638,7 @@ var require_coerce = __commonJS({
 // setup-terraform/node_modules/semver/internal/lrucache.js
 var require_lrucache = __commonJS({
   "setup-terraform/node_modules/semver/internal/lrucache.js"(exports2, module2) {
+    "use strict";
     var LRUCache = class {
       static {
         __name(this, "LRUCache");
@@ -22650,6 +22679,7 @@ var require_lrucache = __commonJS({
 // setup-terraform/node_modules/semver/classes/range.js
 var require_range = __commonJS({
   "setup-terraform/node_modules/semver/classes/range.js"(exports2, module2) {
+    "use strict";
     var SPACE_CHARACTERS = /\s+/g;
     var Range = class _Range {
       static {
@@ -23029,6 +23059,7 @@ var require_range = __commonJS({
 // setup-terraform/node_modules/semver/classes/comparator.js
 var require_comparator = __commonJS({
   "setup-terraform/node_modules/semver/classes/comparator.js"(exports2, module2) {
+    "use strict";
     var ANY = Symbol("SemVer ANY");
     var Comparator = class _Comparator {
       static {
@@ -23144,6 +23175,7 @@ var require_comparator = __commonJS({
 // setup-terraform/node_modules/semver/functions/satisfies.js
 var require_satisfies = __commonJS({
   "setup-terraform/node_modules/semver/functions/satisfies.js"(exports2, module2) {
+    "use strict";
     var Range = require_range();
     var satisfies = /* @__PURE__ */ __name((version, range, options) => {
       try {
@@ -23160,6 +23192,7 @@ var require_satisfies = __commonJS({
 // setup-terraform/node_modules/semver/ranges/to-comparators.js
 var require_to_comparators = __commonJS({
   "setup-terraform/node_modules/semver/ranges/to-comparators.js"(exports2, module2) {
+    "use strict";
     var Range = require_range();
     var toComparators = /* @__PURE__ */ __name((range, options) => new Range(range, options).set.map((comp) => comp.map(
     (c) => c.value).join(" ").trim().split(" ")), "toComparators");
@@ -23170,6 +23203,7 @@ var require_to_comparators = __commonJS({
 // setup-terraform/node_modules/semver/ranges/max-satisfying.js
 var require_max_satisfying = __commonJS({
   "setup-terraform/node_modules/semver/ranges/max-satisfying.js"(exports2, module2) {
+    "use strict";
     var SemVer = require_semver();
     var Range = require_range();
     var maxSatisfying = /* @__PURE__ */ __name((versions, range, options) => {
@@ -23198,6 +23232,7 @@ var require_max_satisfying = __commonJS({
 // setup-terraform/node_modules/semver/ranges/min-satisfying.js
 var require_min_satisfying = __commonJS({
   "setup-terraform/node_modules/semver/ranges/min-satisfying.js"(exports2, module2) {
+    "use strict";
     var SemVer = require_semver();
     var Range = require_range();
     var minSatisfying = /* @__PURE__ */ __name((versions, range, options) => {
@@ -23226,6 +23261,7 @@ var require_min_satisfying = __commonJS({
 // setup-terraform/node_modules/semver/ranges/min-version.js
 var require_min_version = __commonJS({
   "setup-terraform/node_modules/semver/ranges/min-version.js"(exports2, module2) {
+    "use strict";
     var SemVer = require_semver();
     var Range = require_range();
     var gt = require_gt();
@@ -23284,6 +23320,7 @@ var require_min_version = __commonJS({
 // setup-terraform/node_modules/semver/ranges/valid.js
 var require_valid2 = __commonJS({
   "setup-terraform/node_modules/semver/ranges/valid.js"(exports2, module2) {
+    "use strict";
     var Range = require_range();
     var validRange = /* @__PURE__ */ __name((range, options) => {
       try {
@@ -23299,6 +23336,7 @@ var require_valid2 = __commonJS({
 // setup-terraform/node_modules/semver/ranges/outside.js
 var require_outside = __commonJS({
   "setup-terraform/node_modules/semver/ranges/outside.js"(exports2, module2) {
+    "use strict";
     var SemVer = require_semver();
     var Comparator = require_comparator();
     var { ANY } = Comparator;
@@ -23367,6 +23405,7 @@ var require_outside = __commonJS({
 // setup-terraform/node_modules/semver/ranges/gtr.js
 var require_gtr = __commonJS({
   "setup-terraform/node_modules/semver/ranges/gtr.js"(exports2, module2) {
+    "use strict";
     var outside = require_outside();
     var gtr = /* @__PURE__ */ __name((version, range, options) => outside(version, range, ">", options), "gtr");
     module2.exports = gtr;
@@ -23376,6 +23415,7 @@ var require_gtr = __commonJS({
 // setup-terraform/node_modules/semver/ranges/ltr.js
 var require_ltr = __commonJS({
   "setup-terraform/node_modules/semver/ranges/ltr.js"(exports2, module2) {
+    "use strict";
     var outside = require_outside();
     var ltr = /* @__PURE__ */ __name((version, range, options) => outside(version, range, "<", options), "ltr");
     module2.exports = ltr;
@@ -23385,6 +23425,7 @@ var require_ltr = __commonJS({
 // setup-terraform/node_modules/semver/ranges/intersects.js
 var require_intersects = __commonJS({
   "setup-terraform/node_modules/semver/ranges/intersects.js"(exports2, module2) {
+    "use strict";
     var Range = require_range();
     var intersects = /* @__PURE__ */ __name((r1, r2, options) => {
       r1 = new Range(r1, options);
@@ -23398,6 +23439,7 @@ var require_intersects = __commonJS({
 // setup-terraform/node_modules/semver/ranges/simplify.js
 var require_simplify = __commonJS({
   "setup-terraform/node_modules/semver/ranges/simplify.js"(exports2, module2) {
+    "use strict";
     var satisfies = require_satisfies();
     var compare = require_compare();
     module2.exports = (versions, range, options) => {
@@ -23447,6 +23489,7 @@ var require_simplify = __commonJS({
 // setup-terraform/node_modules/semver/ranges/subset.js
 var require_subset = __commonJS({
   "setup-terraform/node_modules/semver/ranges/subset.js"(exports2, module2) {
+    "use strict";
     var Range = require_range();
     var Comparator = require_comparator();
     var { ANY } = Comparator;
@@ -23610,6 +23653,7 @@ var require_subset = __commonJS({
 // setup-terraform/node_modules/semver/index.js
 var require_semver2 = __commonJS({
   "setup-terraform/node_modules/semver/index.js"(exports2, module2) {
+    "use strict";
     var internalRe = require_re();
     var constants = require_constants6();
     var SemVer = require_semver();
