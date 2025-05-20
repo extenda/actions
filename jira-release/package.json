@@ -6,6 +6,6 @@
   "main": "dist/index.js",
   "dependencies": {
     "jira-client": "^8.2.2",
-    "semver": "^7.7.1"
+    "semver": "^7.7.2"
   }
 }
