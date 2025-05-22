@@ -30,7 +30,7 @@ runs:
         ignore-unfixed: true
         exit-code: '0'
         output: trivy-report.txt
-      
+
     - name: Check Trivy scan results
       id: trivy
       shell: bash
@@ -40,7 +40,7 @@ runs:
         else
           echo "vulnerable=false" >> $GITHUB_OUTPUT
         fi
-    
+
     - name: Send Slack notification if vulnerable
       if: steps.trivy.outputs.vulnerable == 'true'
       uses: extenda/actions/slack-notify@v0
