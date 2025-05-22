@@ -1,0 +1,53 @@
+name: Run Trivy vulnerability scanner
+description: Run Trivy vulnerability scanner and generate a report and save it to a Slack channel
+author: Extenda
+inputs:
+  image-ref:
+    description: The reference to the image to scan
+    required: true
+  application-name:
+    description: The name of the application
+    required: true
+  github-token:
+    description: The GitHub token to use for authentication in Slack
+    required: true
+  channel:
+    description: The Slack channel to send the notification to
+    required: true
+  level:
+    description: The level of vulnerability to check for (CRITICAL, HIGH, MEDIUM, LOW) ex. CRITICAL\|HIGH
+    required: false
+    default: CRITICAL\|HIGH
+runs:
+  using: composite
+  steps:
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: '${{ inputs.image-ref }}'
+        format: table
+        severity: CRITICAL,HIGH
+        ignore-unfixed: true
+        exit-code: '0'
+        output: trivy-report.txt
+      
+    - name: Check Trivy scan results
+      id: trivy
+      shell: bash
+      run: |
+        if grep -q "${{ inputs.level }}" trivy-report.txt; then
+          echo "vulnerable=true" >> $GITHUB_OUTPUT
+        else
+          echo "vulnerable=false" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Send Slack notification if vulnerable
+      if: steps.trivy.outputs.vulnerable == 'true'
+      uses: extenda/actions/slack-notify@v0
+      with:
+        text: |
+          The service's ${{ inputs.application-name}} image  ${{ inputs.image-ref }} has vulnerabilities :warning:
+          Please check the report for details.
+        file: trivy-report.txt
+        channel: ${{ inputs.channel }}
+        service-account-key: ${{ inputs.github-token }}
