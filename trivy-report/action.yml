@@ -8,8 +8,8 @@ inputs:
   application-name:
     description: The name of the application
     required: true
-  github-token:
-    description: The GitHub token to use for authentication in Slack
+  service-account-key:
+    description: The service account key to use for authentication for the Slack API
     required: true
   channel:
     description: The Slack channel to send the notification to
@@ -50,4 +50,4 @@ runs:
           Please check the report for details.
         file: trivy-report.txt
         channel: ${{ inputs.channel }}
-        service-account-key: ${{ inputs.github-token }}
+        service-account-key: ${{ inputs.service-account-key }}
