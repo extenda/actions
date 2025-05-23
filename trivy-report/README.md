@@ -10,7 +10,7 @@ This action generates a report from Trivy scan results. It takes the output of a
 |-------|-------------|---------|
 | image-ref | The image reference to scan. | `''` |
 | application-name | The name of the application. | `''` |
-| github-token | The GitHub token to use for authentication. | `''` |
+| service-account-key | The service account key used to authenticate in Slack API | `''` |
 | channel | The Slack channel to use for the report. | `''` |
 | level | The severity level that will trigger Slack notification | `'CRITICAL\|HIGH'` |
 
@@ -23,7 +23,7 @@ This action generates a report from Trivy scan results. It takes the output of a
   with:
     image-ref: '${{ env.IMAGE_NAME }}:${{ github.sha }}'
     application-name: ${{ env.APPLICATION_NAME }}
-    github-token: ${{ secrets.GCLOUD_AUTH_STAGING }}
+    service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
     channel: github-clan-eva
 
 ```
