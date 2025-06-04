@@ -6,7 +6,6 @@ const securitySpec = require('../../src/manifests/security-sidecar');
 const handleStatefulset = require('../../src/manifests/statefulset-workaround');
 const { addNamespace } = require('../../src/utils/add-namespace');
 const readSecret = require('../../src/utils/load-credentials');
-const checkVpcConnector = require('../../src/utils/check-vpc-connector');
 const getRevisions = require('../../src/cloudrun/get-revisions');
 const getImageWithSha256 = require('../../src/manifests/image-sha256');
 
@@ -15,7 +14,6 @@ jest.mock('../../src/utils/add-namespace');
 jest.mock('../../src/manifests/security-sidecar');
 jest.mock('../../src/utils/load-credentials');
 jest.mock('../../src/manifests/statefulset-workaround');
-jest.mock('../../src/utils/check-vpc-connector');
 jest.mock('../../src/cloudrun/get-revisions');
 jest.mock('../../src/utils/cluster-connection');
 jest.mock('../../src/manifests/image-sha256');
@@ -148,7 +146,6 @@ metadata:
 
   test('should generate manifest cloudrun file with correct content', async () => {
     readSecret.mockResolvedValueOnce('instance-name');
-    checkVpcConnector.mockResolvedValueOnce('example-clan-vpc-connector');
     const image = 'example-image:latest';
     const service = {
       'cloud-run': {
@@ -448,7 +445,6 @@ metadata:
   });
 
   test('It should generate cloud run service with annotations', async () => {
-    checkVpcConnector.mockResolvedValueOnce('example-clan-vpc-connector');
     const image = 'example-image:latest';
     const service = {
       'cloud-run': {
@@ -464,7 +460,11 @@ metadata:
         'startup-cpu-boost': true,
         'cpu-throttling': false,
         'session-affinity': true,
+        traffic: {
+          'static-egress-ip': false,
+        },
       },
+
       security: 'none',
       labels: {
         product: 'actions',
@@ -505,7 +505,6 @@ metadata:
   });
 
   test('It should generate cloud run service with security', async () => {
-    checkVpcConnector.mockResolvedValueOnce('example-clan-vpc-connector');
     const image = 'example-image:latest';
     const service = {
       'cloud-run': {
@@ -521,7 +520,9 @@ metadata:
         'startup-cpu-boost': true,
         'cpu-throttling': false,
         'session-affinity': true,
-        'vpc-connector': true,
+        traffic: {
+          'static-egress-ip': false,
+        },
       },
       security: {
         'permission-prefix': 'tst',
@@ -788,7 +789,6 @@ metadata:
         'startup-cpu-boost': true,
         'cpu-throttling': false,
         'session-affinity': true,
-        'vpc-connector': true,
       },
       security: {
         'permission-prefix': 'tst',
@@ -831,7 +831,6 @@ metadata:
   });
 
   test('It should set traffic to 0 of new revision if serve traffic is false', async () => {
-    checkVpcConnector.mockResolvedValueOnce('example-clan-vpc-connector');
     const image = 'example-image:latest';
     const service = {
       'cloud-run': {
@@ -908,7 +907,6 @@ metadata:
   });
 
   test('It should fail deploy if more than 1 active revisions while serve traffic false', async () => {
-    checkVpcConnector.mockResolvedValueOnce('example-clan-vpc-connector');
     const image = 'example-image:latest';
     const service = {
       'cloud-run': {
@@ -996,6 +994,9 @@ metadata:
         protocol: 'http',
         scaling: {
           concurrency: 80,
+        },
+        traffic: {
+          'static-egress-ip': false,
         },
       },
       security: {
@@ -1403,7 +1404,7 @@ metadata:
     expect(manifest).toMatchSnapshot();
   });
 
-  test('It allows for deploying on k8s subnet with NAT', async () => {
+  test('It allows for deploying on without VPC connection', async () => {
     const image = 'example-image:latest';
     const service = {
       'cloud-run': {
@@ -1417,64 +1418,9 @@ metadata:
           concurrency: 40,
         },
         traffic: {
-          'static-egress-ip': true,
-          'direct-vpc-connection': true,
-        },
-      },
-      security: 'none',
-      labels: {
-        product: 'actions',
-        component: 'jest',
-      },
-      environments: {
-        production: {
-          'min-instances': 1,
-          'max-instances': 10,
-          env: {},
-        },
-        staging: 'none',
-      },
-    };
-    const projectId = 'example-project';
-    const clanName = 'example-clan';
-    const env = 'production';
-
-    await buildManifest(
-      image,
-      service,
-      projectId,
-      clanName,
-      env,
-      '',
-      '',
-      '',
-      '',
-      '',
-    );
-    const manifest = readFileSync('cloudrun-service.yaml');
-    mockFs.restore();
-    expect(manifest).toMatchSnapshot();
-  });
-
-  test('It can deploy with NAT router and direct VPC old subnet', async () => {
-    checkVpcConnector.mockResolvedValueOnce('example-clan-vpc-connector');
-    const image = 'example-image:latest';
-    const service = {
-      'cloud-run': {
-        service: 'example-service',
-        resources: {
-          cpu: 1,
-          memory: '512Mi',
-        },
-        protocol: 'http',
-        scaling: {
-          concurrency: 40,
-        },
-        traffic: {
-          'static-egress-ip': true,
+          'static-egress-ip': false,
           'direct-vpc-connection': false,
         },
-        'vpc-connector': false,
       },
       security: 'none',
       labels: {

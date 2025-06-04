@@ -51,7 +51,8 @@
         "service",
         "resources",
         "protocol",
-        "scaling"
+        "scaling",
+        "traffic"
       ],
       "properties": {
         "service": {
@@ -94,8 +95,7 @@
           "description": "Traffic settings for Cloud Run",
           "type": "object",
           "required": [
-            "static-egress-ip",
-            "direct-vpc-connection"
+            "static-egress-ip"
           ],
           "properties": {
             "serve-traffic": {
@@ -111,7 +111,7 @@
             "direct-vpc-connection": {
               "description": "Whether to use the vpc connector or direct connection to the vpc",
               "type": "boolean",
-              "default": false
+              "default": true
             }
           },
           "additionalProperties": false
@@ -130,11 +130,6 @@
           "description": "Whether to enable session affinity for connections to the service.",
           "type": "boolean",
           "default": false
-        },
-        "vpc-connector": {
-          "description": "Whether to use the vpc connector or direct connection to the vpc",
-          "type": "boolean",
-          "default": true
         },
         "internal-traffic": {
           "description": "Whether to setup internal traffic or not",

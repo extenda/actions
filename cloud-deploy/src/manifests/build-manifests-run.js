@@ -5,26 +5,18 @@ const configureNetworking = async (
   annotations,
   enableDirectVPC,
   enableCloudNAT,
-  connector,
-  connectorName,
 ) => {
   if (enableDirectVPC) {
-    annotations['run.googleapis.com/network-interfaces'] =
-      '[{"network":"clan-network","subnetwork":"cloudrun-subnet"}]';
-  } else if (connector && !enableDirectVPC) {
-    annotations['run.googleapis.com/vpc-access-connector'] = `${connectorName}`;
-  } else if (!connector && !enableDirectVPC) {
-    annotations['run.googleapis.com/network-interfaces'] =
-      '[{"network":"clan-network","subnetwork":"k8s-subnet"}]';
-  }
-  if (enableCloudNAT) {
-    annotations['run.googleapis.com/vpc-access-egress'] = 'all-traffic';
-    if (enableDirectVPC) {
+    if (enableCloudNAT) {
       annotations['run.googleapis.com/network-interfaces'] =
-        '[{"network":"clan-network","subnetwork":"k8s-subnet"}]';
+        '[{"network":"clan-network","subnetwork":"nat-subnet"}]';
+      annotations['run.googleapis.com/vpc-access-egress'] = 'all-traffic';
+    } else {
+      annotations['run.googleapis.com/network-interfaces'] =
+        '[{"network":"clan-network","subnetwork":"cloudrun-subnet"}]';
+      annotations['run.googleapis.com/vpc-access-egress'] =
+        'private-ranges-only';
     }
-  } else {
-    annotations['run.googleapis.com/vpc-access-egress'] = 'private-ranges-only';
   }
 };
 
@@ -48,8 +40,6 @@ const cloudrunManifestTemplate = async (
   cpuThrottling,
   cpuBoost,
   sessionAffinity,
-  connector,
-  connectorName,
   activeRevisionName,
   audiences,
   monitoring,
@@ -96,13 +86,7 @@ const cloudrunManifestTemplate = async (
     annotations['autoscaling.knative.dev/minScale'] = 0;
   }
 
-  await configureNetworking(
-    annotations,
-    enableDirectVPC,
-    enableCloudNAT,
-    connector,
-    connectorName,
-  );
+  await configureNetworking(annotations, enableDirectVPC, enableCloudNAT);
   if (SQLInstance) {
     annotations['run.googleapis.com/cloudsql-instances'] = SQLInstance;
   }

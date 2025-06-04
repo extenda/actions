@@ -5,7 +5,6 @@ const { addNamespace } = require('../utils/add-namespace');
 const readSecret = require('../utils/load-credentials');
 const handleStatefulset = require('./statefulset-workaround');
 const checkIamSystem = require('./check-system');
-const checkVpcConnector = require('../utils/check-vpc-connector');
 const getRevisions = require('../cloudrun/get-revisions');
 const {
   configMapManifest,
@@ -151,7 +150,7 @@ const buildManifest = async (
   const {
     'serve-traffic': serveTraffic = true,
     'static-egress-ip': enableCloudNAT = true,
-    'direct-vpc-connection': enableDirectVPC = false,
+    'direct-vpc-connection': enableDirectVPC = true,
   } = traffic;
 
   const {
@@ -309,17 +308,7 @@ const buildManifest = async (
       'cpu-throttling': cpuThrottling = true,
       'startup-cpu-boost': cpuBoost = false,
       'session-affinity': sessionAffinity = false,
-      'vpc-connector': connector = true,
     } = cloudrun;
-
-    let connectorName = `${clanName}-vpc-connector`;
-    if (connector && !enableDirectVPC) {
-      connectorName = await checkVpcConnector(
-        projectId,
-        'europe-west1',
-        connectorName,
-      );
-    }
 
     for (const env of envArray) {
       const { value } = env;
@@ -378,8 +367,6 @@ const buildManifest = async (
       cpuThrottling,
       cpuBoost,
       sessionAffinity,
-      connector,
-      connectorName,
       activeRevisionName,
       audiences,
       monitoring,

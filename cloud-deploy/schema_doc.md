@@ -19,24 +19,23 @@
     - [1.1.7. Property `CloudDeploy > oneOf > CloudRun > cloud-run > startup-cpu-boost`](#oneOf_i0_cloud-run_startup-cpu-boost)
     - [1.1.8. Property `CloudDeploy > oneOf > CloudRun > cloud-run > cpu-throttling`](#oneOf_i0_cloud-run_cpu-throttling)
     - [1.1.9. Property `CloudDeploy > oneOf > CloudRun > cloud-run > session-affinity`](#oneOf_i0_cloud-run_session-affinity)
-    - [1.1.10. Property `CloudDeploy > oneOf > CloudRun > cloud-run > vpc-connector`](#oneOf_i0_cloud-run_vpc-connector)
-    - [1.1.11. Property `CloudDeploy > oneOf > CloudRun > cloud-run > internal-traffic`](#oneOf_i0_cloud-run_internal-traffic)
-    - [1.1.12. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring`](#oneOf_i0_cloud-run_monitoring)
-      - [1.1.12.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus`](#oneOf_i0_cloud-run_monitoring_prometheus)
-        - [1.1.12.1.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > interval`](#oneOf_i0_cloud-run_monitoring_prometheus_interval)
-        - [1.1.12.1.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > path`](#oneOf_i0_cloud-run_monitoring_prometheus_path)
-        - [1.1.12.1.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > port`](#oneOf_i0_cloud-run_monitoring_prometheus_port)
-      - [1.1.12.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry`](#oneOf_i0_cloud-run_monitoring_open-telemetry)
-        - [1.1.12.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > set-environment-variables`](#oneOf_i0_cloud-run_monitoring_open-telemetry_set-environment-variables)
-        - [1.1.12.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config)
-          - [1.1.12.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 0`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i0)
-          - [1.1.12.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1)
-            - [1.1.12.2.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > sampler`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_sampler)
-            - [1.1.12.2.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > sampler-ratio`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_sampler-ratio)
-            - [1.1.12.2.2.2.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > propagators`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_propagators)
-            - [1.1.12.2.2.2.4. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > otlp-exporter-protocol`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_otlp-exporter-protocol)
-            - [1.1.12.2.2.2.5. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > collect`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_collect)
-              - [1.1.12.2.2.2.5.1. CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > collect > collect items](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_collect_items)
+    - [1.1.10. Property `CloudDeploy > oneOf > CloudRun > cloud-run > internal-traffic`](#oneOf_i0_cloud-run_internal-traffic)
+    - [1.1.11. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring`](#oneOf_i0_cloud-run_monitoring)
+      - [1.1.11.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus`](#oneOf_i0_cloud-run_monitoring_prometheus)
+        - [1.1.11.1.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > interval`](#oneOf_i0_cloud-run_monitoring_prometheus_interval)
+        - [1.1.11.1.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > path`](#oneOf_i0_cloud-run_monitoring_prometheus_path)
+        - [1.1.11.1.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > port`](#oneOf_i0_cloud-run_monitoring_prometheus_port)
+      - [1.1.11.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry`](#oneOf_i0_cloud-run_monitoring_open-telemetry)
+        - [1.1.11.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > set-environment-variables`](#oneOf_i0_cloud-run_monitoring_open-telemetry_set-environment-variables)
+        - [1.1.11.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config)
+          - [1.1.11.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 0`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i0)
+          - [1.1.11.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1)
+            - [1.1.11.2.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > sampler`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_sampler)
+            - [1.1.11.2.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > sampler-ratio`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_sampler-ratio)
+            - [1.1.11.2.2.2.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > propagators`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_propagators)
+            - [1.1.11.2.2.2.4. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > otlp-exporter-protocol`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_otlp-exporter-protocol)
+            - [1.1.11.2.2.2.5. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > collect`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_collect)
+              - [1.1.11.2.2.2.5.1. CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > collect > collect items](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_collect_items)
 - [2. Property `CloudDeploy > oneOf > Kubernetes`](#oneOf_i1)
   - [2.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes`](#oneOf_i1_kubernetes)
     - [2.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > service`](#oneOf_i1_kubernetes_service)
@@ -161,11 +160,10 @@
 | + [protocol](#oneOf_i0_cloud-run_protocol )                   | No      | enum (of string) | No         | In #/$defs/Protocol                                | Protocol                                                                         |
 | - [timeout](#oneOf_i0_cloud-run_timeout )                     | No      | integer          | No         | In #/$defs/RequestTimeout                          | RequestTimeout                                                                   |
 | + [scaling](#oneOf_i0_cloud-run_scaling )                     | No      | object           | No         | -                                                  | ScalingCloudRun                                                                  |
-| - [traffic](#oneOf_i0_cloud-run_traffic )                     | No      | object           | No         | -                                                  | TrafficCloudRun                                                                  |
+| + [traffic](#oneOf_i0_cloud-run_traffic )                     | No      | object           | No         | -                                                  | TrafficCloudRun                                                                  |
 | - [startup-cpu-boost](#oneOf_i0_cloud-run_startup-cpu-boost ) | No      | boolean          | No         | -                                                  | Whether to allocate extra CPU to containers on startup.                          |
 | - [cpu-throttling](#oneOf_i0_cloud-run_cpu-throttling )       | No      | boolean          | No         | -                                                  | Whether to throttle the CPU when the container is not actively serving requests. |
 | - [session-affinity](#oneOf_i0_cloud-run_session-affinity )   | No      | boolean          | No         | -                                                  | Whether to enable session affinity for connections to the service.               |
-| - [vpc-connector](#oneOf_i0_cloud-run_vpc-connector )         | No      | boolean          | No         | -                                                  | Whether to use the vpc connector or direct connection to the vpc                 |
 | - [internal-traffic](#oneOf_i0_cloud-run_internal-traffic )   | No      | boolean          | No         | -                                                  | Whether to setup internal traffic or not                                         |
 | - [monitoring](#oneOf_i0_cloud-run_monitoring )               | No      | object           | No         | In #/$defs/Monitoring                              | Monitoring                                                                       |
 
@@ -326,7 +324,7 @@ Must be one of:
 |                           |             |
 | ------------------------- | ----------- |
 | **Type**                  | `object`    |
-| **Required**              | No          |
+| **Required**              | Yes         |
 | **Additional properties** | Not allowed |
 
 **Description:** Traffic settings for Cloud Run
@@ -335,7 +333,7 @@ Must be one of:
 | ----------------------------------------------------------------------------- | ------- | ------- | ---------- | ---------- | ---------------------------------------------------------------- |
 | - [serve-traffic](#oneOf_i0_cloud-run_traffic_serve-traffic )                 | No      | boolean | No         | -          | Deploy revision with or without traffic                          |
 | + [static-egress-ip](#oneOf_i0_cloud-run_traffic_static-egress-ip )           | No      | boolean | No         | -          | Use the NAT router when making external requests                 |
-| + [direct-vpc-connection](#oneOf_i0_cloud-run_traffic_direct-vpc-connection ) | No      | boolean | No         | -          | Whether to use the vpc connector or direct connection to the vpc |
+| - [direct-vpc-connection](#oneOf_i0_cloud-run_traffic_direct-vpc-connection ) | No      | boolean | No         | -          | Whether to use the vpc connector or direct connection to the vpc |
 
 ##### <a name="oneOf_i0_cloud-run_traffic_serve-traffic"></a>1.1.6.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > serve-traffic`
 
@@ -362,8 +360,8 @@ Must be one of:
 |              |           |
 | ------------ | --------- |
 | **Type**     | `boolean` |
-| **Required** | Yes       |
-| **Default**  | `false`   |
+| **Required** | No        |
+| **Default**  | `true`    |
 
 **Description:** Whether to use the vpc connector or direct connection to the vpc
 
@@ -397,17 +395,7 @@ Must be one of:
 
 **Description:** Whether to enable session affinity for connections to the service.
 
-#### <a name="oneOf_i0_cloud-run_vpc-connector"></a>1.1.10. Property `CloudDeploy > oneOf > CloudRun > cloud-run > vpc-connector`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `true`    |
-
-**Description:** Whether to use the vpc connector or direct connection to the vpc
-
-#### <a name="oneOf_i0_cloud-run_internal-traffic"></a>1.1.11. Property `CloudDeploy > oneOf > CloudRun > cloud-run > internal-traffic`
+#### <a name="oneOf_i0_cloud-run_internal-traffic"></a>1.1.10. Property `CloudDeploy > oneOf > CloudRun > cloud-run > internal-traffic`
 
 |              |           |
 | ------------ | --------- |
@@ -417,7 +405,7 @@ Must be one of:
 
 **Description:** Whether to setup internal traffic or not
 
-#### <a name="oneOf_i0_cloud-run_monitoring"></a>1.1.12. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring`
+#### <a name="oneOf_i0_cloud-run_monitoring"></a>1.1.11. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring`
 
 **Title:** Monitoring
 
@@ -433,7 +421,7 @@ Must be one of:
 | - [prometheus](#oneOf_i0_cloud-run_monitoring_prometheus )         | No      | object | No         | -          | -                 |
 | - [open-telemetry](#oneOf_i0_cloud-run_monitoring_open-telemetry ) | No      | object | No         | -          | -                 |
 
-##### <a name="oneOf_i0_cloud-run_monitoring_prometheus"></a>1.1.12.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus`
+##### <a name="oneOf_i0_cloud-run_monitoring_prometheus"></a>1.1.11.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -447,7 +435,7 @@ Must be one of:
 | - [path](#oneOf_i0_cloud-run_monitoring_prometheus_path )         | No      | string  | No         | -          | The scrape path                |
 | - [port](#oneOf_i0_cloud-run_monitoring_prometheus_port )         | No      | integer | No         | -          | The scrape port                |
 
-###### <a name="oneOf_i0_cloud-run_monitoring_prometheus_interval"></a>1.1.12.1.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > interval`
+###### <a name="oneOf_i0_cloud-run_monitoring_prometheus_interval"></a>1.1.11.1.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > interval`
 
 |              |           |
 | ------------ | --------- |
@@ -460,7 +448,7 @@ Must be one of:
 | ------------ | ------- |
 | **Minimum**  | &ge; 10 |
 
-###### <a name="oneOf_i0_cloud-run_monitoring_prometheus_path"></a>1.1.12.1.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > path`
+###### <a name="oneOf_i0_cloud-run_monitoring_prometheus_path"></a>1.1.11.1.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > path`
 
 |              |              |
 | ------------ | ------------ |
@@ -470,7 +458,7 @@ Must be one of:
 
 **Description:** The scrape path
 
-###### <a name="oneOf_i0_cloud-run_monitoring_prometheus_port"></a>1.1.12.1.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > port`
+###### <a name="oneOf_i0_cloud-run_monitoring_prometheus_port"></a>1.1.11.1.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > prometheus > port`
 
 |              |           |
 | ------------ | --------- |
@@ -480,7 +468,7 @@ Must be one of:
 
 **Description:** The scrape port
 
-##### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry"></a>1.1.12.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry`
+##### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry"></a>1.1.11.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -493,7 +481,7 @@ Must be one of:
 | - [set-environment-variables](#oneOf_i0_cloud-run_monitoring_open-telemetry_set-environment-variables ) | No      | boolean     | No         | -          | Set the Open Telemetry configuration as environment variables. |
 | + [config](#oneOf_i0_cloud-run_monitoring_open-telemetry_config )                                       | No      | Combination | No         | -          | -                                                              |
 
-###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_set-environment-variables"></a>1.1.12.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > set-environment-variables`
+###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_set-environment-variables"></a>1.1.11.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > set-environment-variables`
 
 |              |           |
 | ------------ | --------- |
@@ -503,7 +491,7 @@ Must be one of:
 
 **Description:** Set the Open Telemetry configuration as environment variables.
 
-###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config"></a>1.1.12.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config`
+###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config"></a>1.1.11.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -516,7 +504,7 @@ Must be one of:
 | [item 0](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i0) |
 | [item 1](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1) |
 
-###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i0"></a>1.1.12.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 0`
+###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i0"></a>1.1.11.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 0`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -528,7 +516,7 @@ Must be one of:
 Must be one of:
 * "auto"
 
-###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1"></a>1.1.12.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1`
+###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1"></a>1.1.11.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -546,7 +534,7 @@ Must be one of:
 | - [otlp-exporter-protocol](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_otlp-exporter-protocol ) | No      | enum (of string)          | No         | -          | The OTLP exporter protocol to use.                |
 | - [collect](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_collect )                               | No      | array of enum (of string) | No         | -          | Signals that are to be exported to the collector. |
 
-###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_sampler"></a>1.1.12.2.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > sampler`
+###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_sampler"></a>1.1.11.2.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > sampler`
 
 |              |                            |
 | ------------ | -------------------------- |
@@ -564,7 +552,7 @@ Must be one of:
 * "parentbased_always_off"
 * "parentbased_traceidratio"
 
-###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_sampler-ratio"></a>1.1.12.2.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > sampler-ratio`
+###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_sampler-ratio"></a>1.1.11.2.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > sampler-ratio`
 
 |              |          |
 | ------------ | -------- |
@@ -579,7 +567,7 @@ Must be one of:
 | **Minimum**  | N/A |
 | **Maximum**  | N/A |
 
-###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_propagators"></a>1.1.12.2.2.2.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > propagators`
+###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_propagators"></a>1.1.11.2.2.2.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > propagators`
 
 |              |                                     |
 | ------------ | ----------------------------------- |
@@ -597,7 +585,7 @@ Must be one of:
 | **Additional items** | False              |
 | **Tuple validation** | N/A                |
 
-###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_otlp-exporter-protocol"></a>1.1.12.2.2.2.4. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > otlp-exporter-protocol`
+###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_otlp-exporter-protocol"></a>1.1.11.2.2.2.4. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > otlp-exporter-protocol`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -611,7 +599,7 @@ Must be one of:
 * "http/protobuf"
 * "grpc"
 
-###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_collect"></a>1.1.12.2.2.2.5. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > collect`
+###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_collect"></a>1.1.11.2.2.2.5. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > collect`
 
 |              |                             |
 | ------------ | --------------------------- |
@@ -633,7 +621,7 @@ Must be one of:
 | -------------------------------------------------------------------------------------------- | ----------- |
 | [collect items](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_collect_items) | -           |
 
-###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_collect_items"></a>1.1.12.2.2.2.5.1. CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > collect > collect items
+###### <a name="oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_collect_items"></a>1.1.11.2.2.2.5.1. CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > collect > collect items
 
 |              |                    |
 | ------------ | ------------------ |
@@ -1711,4 +1699,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-05-21 at 10:51:03 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-06-04 at 23:17:26 +0200
