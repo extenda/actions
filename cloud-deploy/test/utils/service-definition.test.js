@@ -17,6 +17,8 @@ cloud-run:
   protocol: http
   scaling:
     concurrency: 80
+  traffic:
+    static-egress-ip: false
 
 labels:
   component: jest
@@ -86,6 +88,8 @@ cloud-run:
   protocol: http
   scaling:
     concurrency: 80
+  traffic:
+    static-egress-ip: false
 
 labels:
   component: jest
@@ -161,6 +165,8 @@ cloud-run:
   protocol: http
   scaling:
     concurrency: 80
+  traffic:
+    static-egress-ip: false
 
 labels:
   component: jest
@@ -239,6 +245,8 @@ cloud-run:
   protocol: http
   scaling:
     concurrency: 80
+  traffic:
+    static-egress-ip: false
 
 labels:
   component: jest
@@ -543,6 +551,8 @@ cloud-run:
       interval: 60
     open-telemetry:
       config: auto
+  traffic:
+    static-egress-ip: false
 
 security: none
 
