@@ -1,4 +1,4 @@
-const securitySpec = require('./security-sidecar');
+const { securitySpec } = require('./security-sidecar');
 const { cloudRunCollector } = require('./collector-sidecar');
 
 const configureNetworking = async (
@@ -58,6 +58,7 @@ const cloudrunManifestTemplate = async (
   enableCloudNAT,
   enableDirectVPC,
   corsEnabled,
+  securityPreviewTag,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
 
@@ -156,7 +157,12 @@ const cloudrunManifestTemplate = async (
         memory: opaMemory,
       },
     };
-    const securityContainer = await securitySpec(protocol, false, corsEnabled);
+    const securityContainer = await securitySpec(
+      protocol,
+      false,
+      corsEnabled,
+      securityPreviewTag,
+    );
     securityContainer.env.push({ name: 'CPU_LIMIT', value: `${opaCpu}` });
     securityContainer.resources = resources;
     securityContainer.volumeMounts = undefined;
