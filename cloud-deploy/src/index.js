@@ -219,9 +219,14 @@ const action = async () => {
       loggingSampleRate: 0,
       domainMappings: domainMappingsClone,
       pathMappings,
-      // securityVersion: security === 'none' ? 'none' : securityVersion(security),
-      // collectorVersion: monitoring ? collectorVersion(monitoring) : 'none',
+      securityVersion: security === 'none' ? 'none' : securityVersion(security),
+      collectorVersion: monitoring ? collectorVersion(monitoring) : 'none',
     };
+
+    // Temporary delete unsupported properties.
+    delete deployData.securityVersion;
+    delete deployData.collectorVersion;
+
     Object.keys(deployData).forEach((key) =>
       deployData[key] === undefined ? delete deployData[key] : {},
     );
