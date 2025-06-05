@@ -1,4 +1,6 @@
 const getImageWithSha256 = require('./image-sha256');
+const selectSemver = require('../utils/select-semver');
+const STABLE_TAG = 'v2.1.2';
 
 const getConfig = (serviceName, monitoring) => {
   const config = {
@@ -61,7 +63,13 @@ const getConfig = (serviceName, monitoring) => {
   return config;
 };
 
-const imageTag = () => process.env.OTEL_COLLECTOR_IMAGE_TAG || 'stable';
+const imageTag = (monitoring = {}) => {
+  const { 'preview-tag': collectorPreviewTag = null } = monitoring;
+  return selectSemver(
+    process.env.OTEL_COLLECTOR_IMAGE_TAG || collectorPreviewTag || STABLE_TAG,
+    STABLE_TAG,
+  );
+};
 
 const cloudRunCollector = async (serviceName, monitoring) => {
   const config = getConfig(serviceName, monitoring || {});
@@ -80,7 +88,7 @@ const cloudRunCollector = async (serviceName, monitoring) => {
   }
 
   const image = await getImageWithSha256(
-    `eu.gcr.io/extenda/otel-collector:${imageTag()}`,
+    `eu.gcr.io/extenda/otel-collector:${imageTag(monitoring)}`,
   );
 
   return {
@@ -200,6 +208,7 @@ const userContainerCollectorEnv = (
 };
 
 module.exports = {
+  imageTag,
   cloudRunCollector,
   kubernetesCollector,
   userContainerCollectorEnv,

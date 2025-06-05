@@ -15,6 +15,8 @@ const {
   sendDeployInfo,
   sendDeployRequest,
 } = require('./utils/send-request');
+const { securityVersion } = require('./manifests/security-sidecar');
+const { imageTag: collectorVersion } = require('./manifests/collector-sidecar');
 
 const action = async () => {
   const serviceAccountKeyPipeline = core.getInput('secrets-account-key', {
@@ -84,6 +86,7 @@ const action = async () => {
     protocol,
     'internal-traffic': internalTraffic = true,
     scaling,
+    monitoring,
   } = kubernetes || cloudrun;
 
   const { staging, production } = environments;
@@ -216,6 +219,8 @@ const action = async () => {
       loggingSampleRate: 0,
       domainMappings: domainMappingsClone,
       pathMappings,
+      // securityVersion: security === 'none' ? 'none' : securityVersion(security),
+      // collectorVersion: monitoring ? collectorVersion(monitoring) : 'none',
     };
     Object.keys(deployData).forEach((key) =>
       deployData[key] === undefined ? delete deployData[key] : {},

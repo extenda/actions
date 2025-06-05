@@ -1,4 +1,7 @@
-const securitySpec = require('../../src/manifests/security-sidecar');
+const {
+  STABLE_VERSION,
+  securitySpec,
+} = require('../../src/manifests/security-sidecar');
 const getImageWithSha256 = require('../../src/manifests/image-sha256');
 
 jest.mock('../../src/manifests/image-sha256');
@@ -24,7 +27,7 @@ describe('manifests/security-sidecar', () => {
     process.env.IAM_SYSTEM_NAME = 'tst.test-prod';
     await securitySpec('http');
     expect(getImageWithSha256).toHaveBeenCalledWith(
-      'eu.gcr.io/extenda/security:authz',
+      `eu.gcr.io/extenda/security:${STABLE_VERSION}`,
     );
   });
 

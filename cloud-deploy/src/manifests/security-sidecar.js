@@ -1,6 +1,11 @@
+const core = require('@actions/core');
 const getImageWithSha256 = require('./image-sha256');
+const selectSemver = require('../utils/select-semver');
 
 const IMAGE_NAME = 'eu.gcr.io/extenda/security';
+
+// The generally available and stable security sidecar version.
+const STABLE_VERSION = 'v1.5.5';
 
 const volumeMounts = (protocol) => {
   const volumes = [];
@@ -14,12 +19,20 @@ const volumeMounts = (protocol) => {
   return volumes;
 };
 
+const getImageTag = ({ 'preview-tag': previewTag = null } = {}) =>
+  selectSemver(
+    process.env.SECURITY_IMAGE_TAG || previewTag || STABLE_VERSION,
+    STABLE_VERSION,
+  );
+
 const securitySpec = async (
   protocol,
   platformGKE = true,
   corsEnabled = false,
+  previewTag = null,
 ) => {
-  const imageTag = process.env.SECURITY_IMAGE_TAG || 'authz';
+  const imageTag = getImageTag({ 'preview-tag': previewTag });
+  core.info(`Use image tag: ${imageTag}`);
   return getImageWithSha256(`${IMAGE_NAME}:${imageTag}`).then((image) => {
     const env = [
       {
@@ -79,4 +92,4 @@ const securitySpec = async (
   });
 };
 
-module.exports = securitySpec;
+module.exports = { STABLE_VERSION, securityVersion: getImageTag, securitySpec };
