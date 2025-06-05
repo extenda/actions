@@ -1,4 +1,4 @@
-const securitySpec = require('./security-sidecar');
+const { securitySpec } = require('./security-sidecar');
 const { kubernetesCollector } = require('./collector-sidecar');
 
 const volumeSetup = (opa, protocol, type = 'none') => {
@@ -53,6 +53,7 @@ const gkeManifestTemplate = async (
   baseAnnotations,
   corsEnabled,
   terminationGracePeriod,
+  securityPreviewTag,
 ) => {
   // initialize manifest components
 
@@ -66,7 +67,7 @@ const gkeManifestTemplate = async (
     name,
   );
   const securityContainer = opa
-    ? await securitySpec(protocol, true, corsEnabled)
+    ? await securitySpec(protocol, true, corsEnabled, securityPreviewTag)
     : {};
   if (opa) {
     securityContainer.env.push({ name: 'CPU_LIMIT', value: `${opaCpu}` });

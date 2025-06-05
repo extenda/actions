@@ -161,6 +161,7 @@ const buildManifest = async (
     'system-name': systemName = name,
     consumers = {},
     cors: { enabled: corsEnabled = false } = {},
+    'preview-tag': securityPreviewTag = null,
   } = security === 'none' ? {} : security || {};
 
   const { audiences = [] } = consumers;
@@ -262,6 +263,7 @@ const buildManifest = async (
       baseAnnotations,
       corsEnabled,
       terminationGracePeriod,
+      securityPreviewTag,
     );
 
     await connectToCluster(clanName, deployEnv, projectId);
@@ -388,6 +390,7 @@ const buildManifest = async (
       enableCloudNAT,
       enableDirectVPC,
       corsEnabled,
+      securityPreviewTag,
     );
     generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));
   }
