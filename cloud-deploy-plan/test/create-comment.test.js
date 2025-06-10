@@ -86,3 +86,14 @@ test('It includes vulnerabilities in comment', () => {
   });
   expect(comment).toContain('[CVE-2022-37434]');
 });
+
+test('It can create a comment with new and old values in changes', () => {
+  const comment = createComment('cloud-deploy.yaml', {
+    serviceName: 'checkout-service-manager-api',
+    updates: {
+      timeout: [600, 300],
+    },
+    vulnerabilities: false,
+  });
+  expect(comment).toContain('600 | 300');
+});
