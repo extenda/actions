@@ -94,11 +94,17 @@ const createComment = (filename, deployInfo) => {
         (key) => !key.endsWith('Mappings'),
       );
       if (arrayNotEmpty(changes)) {
-        comment.push('| JSON property | New value |');
-        comment.push('|---|---|');
-        changes.forEach((key) =>
-          comment.push(`${key} | ${deployInfo.updates[key]} |`),
-        );
+        comment.push('| JSON property | New value | Current value |');
+        comment.push('|---|---|---|');
+        changes.forEach((key) => {
+          const value = deployInfo.updates[key];
+          let newValue = value;
+          let currentValue = '-';
+          if (Array.isArray(value)) {
+            [newValue, currentValue] = value;
+          }
+          comment.push(`${key} | ${newValue} | ${currentValue} |`);
+        });
         comment.push('');
       }
     }
