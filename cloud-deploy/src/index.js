@@ -87,6 +87,7 @@ const action = async () => {
     'internal-traffic': internalTraffic = true,
     scaling,
     monitoring,
+    traffic = {},
   } = kubernetes || cloudrun;
 
   const { staging, production } = environments;
@@ -97,6 +98,8 @@ const action = async () => {
   const { 'service-accounts': IAMServiceAccounts = [] } = consumers || {};
 
   const { 'policy-name': cloudArmorPolicy = undefined } = cloudArmor || {};
+
+  const { 'static-egress-ip': staticEgress = true } = traffic;
 
   if (!cloudrun && consumers) {
     throw new Error('Consumers security configuration is only for cloud-run');
@@ -219,13 +222,10 @@ const action = async () => {
       loggingSampleRate: 0,
       domainMappings: domainMappingsClone,
       pathMappings,
+      staticEgress,
       securityVersion: security === 'none' ? 'none' : securityVersion(security),
       collectorVersion: monitoring ? collectorVersion(monitoring) : 'none',
     };
-
-    // Temporary delete unsupported properties.
-    delete deployData.securityVersion;
-    delete deployData.collectorVersion;
 
     Object.keys(deployData).forEach((key) =>
       deployData[key] === undefined ? delete deployData[key] : {},
