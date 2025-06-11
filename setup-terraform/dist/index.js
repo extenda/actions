@@ -45805,54 +45805,69 @@ var require_common = __commonJS({
         createDebug.namespaces = namespaces;
         createDebug.names = [];
         createDebug.skips = [];
-        let i;
-        const split = (typeof namespaces === "string" ? namespaces : "").split(/[\s,]+/);
-        const len = split.length;
-        for (i = 0; i < len; i++) {
-          if (!split[i]) {
-            continue;
-          }
-          namespaces = split[i].replace(/\*/g, ".*?");
-          if (namespaces[0] === "-") {
-            createDebug.skips.push(new RegExp("^" + namespaces.slice(1) + "$"));
+        const split = (typeof namespaces === "string" ? namespaces : "").trim().replace(/\s+/g, ",").split(",").filter(Boolean);
+        for (const ns of split) {
+          if (ns[0] === "-") {
+            createDebug.skips.push(ns.slice(1));
           } else {
-            createDebug.names.push(new RegExp("^" + namespaces + "$"));
+            createDebug.names.push(ns);
           }
         }
       }
       __name(enable, "enable");
+      function matchesTemplate(search, template) {
+        let searchIndex = 0;
+        let templateIndex = 0;
+        let starIndex = -1;
+        let matchIndex = 0;
+        while (searchIndex < search.length) {
+          if (templateIndex < template.length && (template[templateIndex] === search[searchIndex] || template[templateIndex] ===
+          "*")) {
+            if (template[templateIndex] === "*") {
+              starIndex = templateIndex;
+              matchIndex = searchIndex;
+              templateIndex++;
+            } else {
+              searchIndex++;
+              templateIndex++;
+            }
+          } else if (starIndex !== -1) {
+            templateIndex = starIndex + 1;
+            matchIndex++;
+            searchIndex = matchIndex;
+          } else {
+            return false;
+          }
+        }
+        while (templateIndex < template.length && template[templateIndex] === "*") {
+          templateIndex++;
+        }
+        return templateIndex === template.length;
+      }
+      __name(matchesTemplate, "matchesTemplate");
       function disable() {
         const namespaces = [
-          ...createDebug.names.map(toNamespace),
-          ...createDebug.skips.map(toNamespace).map((namespace) => "-" + namespace)
+          ...createDebug.names,
+          ...createDebug.skips.map((namespace) => "-" + namespace)
         ].join(",");
         createDebug.enable("");
         return namespaces;
       }
       __name(disable, "disable");
       function enabled(name) {
-        if (name[name.length - 1] === "*") {
-          return true;
-        }
-        let i;
-        let len;
-        for (i = 0, len = createDebug.skips.length; i < len; i++) {
-          if (createDebug.skips[i].test(name)) {
+        for (const skip of createDebug.skips) {
+          if (matchesTemplate(name, skip)) {
             return false;
           }
         }
-        for (i = 0, len = createDebug.names.length; i < len; i++) {
-          if (createDebug.names[i].test(name)) {
+        for (const ns of createDebug.names) {
+          if (matchesTemplate(name, ns)) {
             return true;
           }
         }
         return false;
       }
       __name(enabled, "enabled");
-      function toNamespace(regexp) {
-        return regexp.toString().substring(2, regexp.toString().length - 2).replace(/\.\*\?$/, "*");
-      }
-      __name(toNamespace, "toNamespace");
       function coerce(val) {
         if (val instanceof Error) {
           return val.stack || val.message;
@@ -46025,7 +46040,7 @@ in the next major version of `debug`.");
     function load() {
       let r;
       try {
-        r = exports2.storage.getItem("debug");
+        r = exports2.storage.getItem("debug") || exports2.storage.getItem("DEBUG");
       } catch (error) {
       }
       if (!r && typeof process !== "undefined" && "env" in process) {
@@ -46466,28 +46481,10 @@ var require_cjs = __commonJS({
     "use strict";
     var __create = Object.create;
     var __defProp2 = Object.defineProperty;
-    var __defProps = Object.defineProperties;
     var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-    var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
-    var __getOwnPropSymbols = Object.getOwnPropertySymbols;
     var __getProtoOf = Object.getPrototypeOf;
     var __hasOwnProp = Object.prototype.hasOwnProperty;
-    var __propIsEnum = Object.prototype.propertyIsEnumerable;
-    var __defNormalProp = /* @__PURE__ */ __name((obj, key, value) => key in obj ? __defProp2(obj, key, { enumerable: true,
-    configurable: true, writable: true, value }) : obj[key] = value, "__defNormalProp");
-    var __spreadValues = /* @__PURE__ */ __name((a, b) => {
-      for (var prop in b || (b = {}))
-        if (__hasOwnProp.call(b, prop))
-          __defNormalProp(a, prop, b[prop]);
-      if (__getOwnPropSymbols)
-        for (var prop of __getOwnPropSymbols(b)) {
-          if (__propIsEnum.call(b, prop))
-            __defNormalProp(a, prop, b[prop]);
-        }
-      return a;
-    }, "__spreadValues");
-    var __spreadProps = /* @__PURE__ */ __name((a, b) => __defProps(a, __getOwnPropDescs(b)), "__spreadProps");
     var __esm = /* @__PURE__ */ __name((fn, res) => /* @__PURE__ */ __name(function __init() {
       return fn && (res = (0, fn[__getOwnPropNames2(fn)[0]])(fn = 0)), res;
     }, "__init"), "__esm");
@@ -46509,32 +46506,15 @@ var require_cjs = __commonJS({
     }, "__copyProps");
     var __toESM = /* @__PURE__ */ __name((mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) :
     {}, __copyProps(
+      // If the importer is in node compatibility mode or this is not an ESM
+      // file that has been converted to a CommonJS file using a Babel-
+      // compatible transform (i.e. "__esModule" has not been set), then set
+      // "default" to the CommonJS "module.exports" for node compatibility.
       isNodeMode || !mod || !mod.__esModule ? __defProp2(target, "default", { value: mod, enumerable: true }) : target,
       mod
     )), "__toESM");
     var __toCommonJS = /* @__PURE__ */ __name((mod) => __copyProps(__defProp2({}, "__esModule", { value: true }), mod), "\
 __toCommonJS");
-    var __async = /* @__PURE__ */ __name((__this, __arguments, generator) => {
-      return new Promise((resolve, reject) => {
-        var fulfilled = /* @__PURE__ */ __name((value) => {
-          try {
-            step(generator.next(value));
-          } catch (e) {
-            reject(e);
-          }
-        }, "fulfilled");
-        var rejected = /* @__PURE__ */ __name((value) => {
-          try {
-            step(generator.throw(value));
-          } catch (e) {
-            reject(e);
-          }
-        }, "rejected");
-        var step = /* @__PURE__ */ __name((x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected),
-        "step");
-        step((generator = generator.apply(__this, __arguments)).next());
-      });
-    }, "__async");
     var GitError;
     var init_git_error = __esm({
       "src/lib/errors/git-error.ts"() {
@@ -46638,7 +46618,10 @@ __toCommonJS");
       }
     });
     function asFunction(source) {
-      return typeof source === "function" ? source : NOOP;
+      if (typeof source !== "function") {
+        return NOOP;
+      }
+      return source;
     }
     __name(asFunction, "asFunction");
     function isUserFunction(source) {
@@ -46746,7 +46729,7 @@ __toCommonJS");
     }
     __name(prefixedArray, "prefixedArray");
     function bufferToString(input) {
-      return (Array.isArray(input) ? Buffer.concat(input) : input).toString("utf-8");
+      return (Array.isArray(input) ? import_node_buffer.Buffer.concat(input) : input).toString("utf-8");
     }
     __name(bufferToString, "bufferToString");
     function pick(source, properties) {
@@ -46767,6 +46750,7 @@ __toCommonJS");
       return input;
     }
     __name(orVoid, "orVoid");
+    var import_node_buffer;
     var import_file_exists;
     var NULL;
     var NOOP;
@@ -46774,6 +46758,7 @@ __toCommonJS");
     var init_util = __esm({
       "src/lib/utils/util.ts"() {
         "use strict";
+        import_node_buffer = require("node:buffer");
         import_file_exists = require_dist();
         NULL = "\0";
         NOOP = /* @__PURE__ */ __name(() => {
@@ -46848,16 +46833,16 @@ __toCommonJS");
     var init_git_output_streams = __esm({
       "src/lib/utils/git-output-streams.ts"() {
         "use strict";
-        GitOutputStreams = class {
+        GitOutputStreams = class _GitOutputStreams {
           static {
-            __name(this, "GitOutputStreams");
+            __name(this, "_GitOutputStreams");
           }
           constructor(stdOut, stdErr) {
             this.stdOut = stdOut;
             this.stdErr = stdErr;
           }
           asStrings() {
-            return new GitOutputStreams(this.stdOut.toString("utf8"), this.stdErr.toString("utf8"));
+            return new _GitOutputStreams(this.stdOut.toString("utf8"), this.stdErr.toString("utf8"));
           }
         };
       }
@@ -46885,6 +46870,7 @@ __toCommonJS");
               this.useMatches = useMatches;
             }
           }
+          // @ts-ignore
           useMatches(target, match) {
             throw new Error(`LineParser:useMatches not implemented`);
           }
@@ -46923,7 +46909,7 @@ __toCommonJS");
     function createInstanceConfig(...options) {
       const baseDir = process.cwd();
       const config = Object.assign(
-        __spreadValues({ baseDir }, defaultOptions),
+        { baseDir, ...defaultOptions },
         ...options.filter((o) => typeof o === "object" && o)
       );
       config.baseDir = config.baseDir || baseDir;
@@ -46953,6 +46939,12 @@ __toCommonJS");
           commands2.push(value);
         } else if (filterPrimitives(value, ["boolean"])) {
           commands2.push(key + "=" + value);
+        } else if (Array.isArray(value)) {
+          for (const v of value) {
+            if (!filterPrimitives(v, ["string", "number"])) {
+              commands2.push(key + "=" + v);
+            }
+          }
         } else {
           commands2.push(key);
         }
@@ -47896,27 +47888,24 @@ N"),
       __name(configureTimeout, "configureTimeout");
       return {
         type: "spawn.after",
-        action(_0, _1) {
-          return __async(this, arguments, function* (_data, { spawned, close }) {
-            var _a3, _b;
-            const events = createEvents();
-            let deferClose = true;
-            let quickClose = /* @__PURE__ */ __name(() => void (deferClose = false), "quickClose");
-            (_a3 = spawned.stdout) == null ? void 0 : _a3.on("data", quickClose);
-            (_b = spawned.stderr) == null ? void 0 : _b.on("data", quickClose);
-            spawned.on("error", quickClose);
-            spawned.on("close", (code) => events.close(code));
-            spawned.on("exit", (code) => events.exit(code));
-            try {
-              yield events.result;
-              if (deferClose) {
-                yield delay(50);
-              }
-              close(events.exitCode);
-            } catch (err) {
-              close(events.exitCode, err);
+        async action(_data, { spawned, close }) {
+          const events = createEvents();
+          let deferClose = true;
+          let quickClose = /* @__PURE__ */ __name(() => void (deferClose = false), "quickClose");
+          spawned.stdout?.on("data", quickClose);
+          spawned.stderr?.on("data", quickClose);
+          spawned.on("error", quickClose);
+          spawned.on("close", (code) => events.close(code));
+          spawned.on("exit", (code) => events.exit(code));
+          try {
+            await events.result;
+            if (deferClose) {
+              await delay(50);
             }
-          });
+            close(events.exitCode);
+          } catch (err) {
+            close(events.exitCode, err);
+          }
         }
       };
     }
@@ -48073,11 +48062,10 @@ ther one or two strings`;
       const onProgress = {
         type: "spawn.after",
         action(_data, context) {
-          var _a2;
           if (!context.commands.includes(progressCommand)) {
             return;
           }
-          (_a2 = context.spawned.stderr) == null ? void 0 : _a2.on("data", (chunk) => {
+          context.spawned.stderr?.on("data", (chunk) => {
             const message = /^([\s\S]+?):\s*(\d+)% \((\d+)\/(\d+)\)/.exec(chunk.toString("utf8"));
             if (!message) {
               return;
@@ -48124,7 +48112,7 @@ ther one or two strings`;
       return {
         type: "spawn.options",
         action(data) {
-          return __spreadValues(__spreadValues({}, options), data);
+          return { ...options, ...data };
         }
       };
     }
@@ -48144,7 +48132,6 @@ ther one or two strings`;
         return {
           type: "spawn.after",
           action(_data, context) {
-            var _a2, _b;
             let timeout;
             function wait() {
               timeout && clearTimeout(timeout);
@@ -48152,9 +48139,8 @@ ther one or two strings`;
             }
             __name(wait, "wait");
             function stop() {
-              var _a3, _b2;
-              (_a3 = context.spawned.stdout) == null ? void 0 : _a3.off("data", wait);
-              (_b2 = context.spawned.stderr) == null ? void 0 : _b2.off("data", wait);
+              context.spawned.stdout?.off("data", wait);
+              context.spawned.stderr?.off("data", wait);
               context.spawned.off("exit", stop);
               context.spawned.off("close", stop);
               timeout && clearTimeout(timeout);
@@ -48165,8 +48151,8 @@ ther one or two strings`;
               context.kill(new GitPluginError(void 0, "timeout", `block timeout reached`));
             }
             __name(kill, "kill");
-            stdOut && ((_a2 = context.spawned.stdout) == null ? void 0 : _a2.on("data", wait));
-            stdErr && ((_b = context.spawned.stderr) == null ? void 0 : _b.on("data", wait));
+            stdOut && context.spawned.stdout?.on("data", wait);
+            stdErr && context.spawned.stderr?.on("data", wait);
             context.spawned.on("exit", stop);
             context.spawned.on("close", stop);
             wait();
@@ -48304,14 +48290,13 @@ ther one or two strings`;
         };
       }
     });
-    var _TasksPendingQueue;
     var TasksPendingQueue;
     var init_tasks_pending_queue = __esm({
       "src/lib/runners/tasks-pending-queue.ts"() {
         "use strict";
         init_git_error();
         init_git_logger();
-        _TasksPendingQueue = class {
+        TasksPendingQueue = class _TasksPendingQueue {
           static {
             __name(this, "_TasksPendingQueue");
           }
@@ -48373,9 +48358,10 @@ ther one or two strings`;
           static getName(name = "empty") {
             return `task:${name}:${++_TasksPendingQueue.counter}`;
           }
+          static {
+            this.counter = 0;
+          }
         };
-        TasksPendingQueue = _TasksPendingQueue;
-        TasksPendingQueue.counter = 0;
       }
     });
     function pluginContext(task, commands) {
@@ -48440,20 +48426,18 @@ ther one or two strings`;
             this._queue.push(task);
             return this._chain = this._chain.then(() => this.attemptTask(task));
           }
-          attemptTask(task) {
-            return __async(this, null, function* () {
-              const onScheduleComplete = yield this._scheduler.next();
-              const onQueueComplete = /* @__PURE__ */ __name(() => this._queue.complete(task), "onQueueComplete");
-              try {
-                const { logger } = this._queue.attempt(task);
-                return yield isEmptyTask(task) ? this.attemptEmptyTask(task, logger) : this.attemptRemoteTask(task, logger);
-              } catch (e) {
-                throw this.onFatalException(task, e);
-              } finally {
-                onQueueComplete();
-                onScheduleComplete();
-              }
-            });
+          async attemptTask(task) {
+            const onScheduleComplete = await this._scheduler.next();
+            const onQueueComplete = /* @__PURE__ */ __name(() => this._queue.complete(task), "onQueueComplete");
+            try {
+              const { logger } = this._queue.attempt(task);
+              return await (isEmptyTask(task) ? this.attemptEmptyTask(task, logger) : this.attemptRemoteTask(task, logger));
+            } catch (e) {
+              throw this.onFatalException(task, e);
+            } finally {
+              onQueueComplete();
+              onScheduleComplete();
+            }
           }
           onFatalException(task, e) {
             const gitError = e instanceof GitError ? Object.assign(e, { task }) : new GitError(task, e && String(e));
@@ -48461,34 +48445,30 @@ ther one or two strings`;
             this._queue.fatal(gitError);
             return gitError;
           }
-          attemptRemoteTask(task, logger) {
-            return __async(this, null, function* () {
-              const binary = this._plugins.exec("spawn.binary", "", pluginContext(task, task.commands));
-              const args = this._plugins.exec(
-                "spawn.args",
-                [...task.commands],
-                pluginContext(task, task.commands)
-              );
-              const raw = yield this.gitResponse(
-                task,
-                binary,
-                args,
-                this.outputHandler,
-                logger.step("SPAWN")
-              );
-              const outputStreams = yield this.handleTaskData(task, args, raw, logger.step("HANDLE"));
-              logger(`passing response to task's parser as a %s`, task.format);
-              if (isBufferTask(task)) {
-                return callTaskParser(task.parser, outputStreams);
-              }
-              return callTaskParser(task.parser, outputStreams.asStrings());
-            });
+          async attemptRemoteTask(task, logger) {
+            const binary = this._plugins.exec("spawn.binary", "", pluginContext(task, task.commands));
+            const args = this._plugins.exec(
+              "spawn.args",
+              [...task.commands],
+              pluginContext(task, task.commands)
+            );
+            const raw = await this.gitResponse(
+              task,
+              binary,
+              args,
+              this.outputHandler,
+              logger.step("SPAWN")
+            );
+            const outputStreams = await this.handleTaskData(task, args, raw, logger.step("HANDLE"));
+            logger(`passing response to task's parser as a %s`, task.format);
+            if (isBufferTask(task)) {
+              return callTaskParser(task.parser, outputStreams);
+            }
+            return callTaskParser(task.parser, outputStreams.asStrings());
           }
-          attemptEmptyTask(task, logger) {
-            return __async(this, null, function* () {
-              logger(`empty task bypassing child process to call to task's parser`);
-              return task.parser(this);
-            });
+          async attemptEmptyTask(task, logger) {
+            logger(`empty task bypassing child process to call to task's parser`);
+            return task.parser(this);
           }
           handleTaskData(task, args, result, logger) {
             const { exitCode, rejection, stdOut, stdErr } = result;
@@ -48497,7 +48477,10 @@ ther one or two strings`;
               const { error } = this._plugins.exec(
                 "task.error",
                 { error: rejection },
-                __spreadValues(__spreadValues({}, pluginContext(task, args)), result)
+                {
+                  ...pluginContext(task, args),
+                  ...result
+                }
               );
               if (error && task.onError) {
                 logger.info(`exitCode=%s handling with custom error handler`);
@@ -48530,79 +48513,80 @@ ther one or two strings`;
               done(new GitOutputStreams(Buffer.concat(stdOut), Buffer.concat(stdErr)));
             });
           }
-          gitResponse(task, command, args, outputHandler, logger) {
-            return __async(this, null, function* () {
-              const outputLogger = logger.sibling("output");
-              const spawnOptions = this._plugins.exec(
-                "spawn.options",
-                {
-                  cwd: this.cwd,
-                  env: this.env,
-                  windowsHide: true
-                },
-                pluginContext(task, task.commands)
+          async gitResponse(task, command, args, outputHandler, logger) {
+            const outputLogger = logger.sibling("output");
+            const spawnOptions = this._plugins.exec(
+              "spawn.options",
+              {
+                cwd: this.cwd,
+                env: this.env,
+                windowsHide: true
+              },
+              pluginContext(task, task.commands)
+            );
+            return new Promise((done) => {
+              const stdOut = [];
+              const stdErr = [];
+              logger.info(`%s %o`, command, args);
+              logger("%O", spawnOptions);
+              let rejection = this._beforeSpawn(task, args);
+              if (rejection) {
+                return done({
+                  stdOut,
+                  stdErr,
+                  exitCode: 9901,
+                  rejection
+                });
+              }
+              this._plugins.exec("spawn.before", void 0, {
+                ...pluginContext(task, args),
+                kill(reason) {
+                  rejection = reason || rejection;
+                }
+              });
+              const spawned = (0, import_child_process.spawn)(command, args, spawnOptions);
+              spawned.stdout.on(
+                "data",
+                onDataReceived(stdOut, "stdOut", logger, outputLogger.step("stdOut"))
               );
-              return new Promise((done) => {
-                const stdOut = [];
-                const stdErr = [];
-                logger.info(`%s %o`, command, args);
-                logger("%O", spawnOptions);
-                let rejection = this._beforeSpawn(task, args);
-                if (rejection) {
-                  return done({
+              spawned.stderr.on(
+                "data",
+                onDataReceived(stdErr, "stdErr", logger, outputLogger.step("stdErr"))
+              );
+              spawned.on("error", onErrorReceived(stdErr, logger));
+              if (outputHandler) {
+                logger(`Passing child process stdOut/stdErr to custom outputHandler`);
+                outputHandler(command, spawned.stdout, spawned.stderr, [...args]);
+              }
+              this._plugins.exec("spawn.after", void 0, {
+                ...pluginContext(task, args),
+                spawned,
+                close(exitCode, reason) {
+                  done({
                     stdOut,
                     stdErr,
-                    exitCode: 9901,
-                    rejection
+                    exitCode,
+                    rejection: rejection || reason
                   });
-                }
-                this._plugins.exec("spawn.before", void 0, __spreadProps(__spreadValues({}, pluginContext(task, args)), {
-                  kill(reason) {
-                    rejection = reason || rejection;
+                },
+                kill(reason) {
+                  if (spawned.killed) {
+                    return;
                   }
-                }));
-                const spawned = (0, import_child_process.spawn)(command, args, spawnOptions);
-                spawned.stdout.on(
-                  "data",
-                  onDataReceived(stdOut, "stdOut", logger, outputLogger.step("stdOut"))
-                );
-                spawned.stderr.on(
-                  "data",
-                  onDataReceived(stdErr, "stdErr", logger, outputLogger.step("stdErr"))
-                );
-                spawned.on("error", onErrorReceived(stdErr, logger));
-                if (outputHandler) {
-                  logger(`Passing child process stdOut/stdErr to custom outputHandler`);
-                  outputHandler(command, spawned.stdout, spawned.stderr, [...args]);
+                  rejection = reason;
+                  spawned.kill("SIGINT");
                 }
-                this._plugins.exec("spawn.after", void 0, __spreadProps(__spreadValues({}, pluginContext(task, args)), {
-                  spawned,
-                  close(exitCode, reason) {
-                    done({
-                      stdOut,
-                      stdErr,
-                      exitCode,
-                      rejection: rejection || reason
-                    });
-                  },
-                  kill(reason) {
-                    if (spawned.killed) {
-                      return;
-                    }
-                    rejection = reason;
-                    spawned.kill("SIGINT");
-                  }
-                }));
               });
             });
           }
           _beforeSpawn(task, args) {
             let rejection;
-            this._plugins.exec("spawn.before", void 0, __spreadProps(__spreadValues({}, pluginContext(task, args)), {
+            this._plugins.exec("spawn.before", void 0, {
+              ...pluginContext(task, args),
               kill(reason) {
                 rejection = reason || rejection;
               }
-            }));
+            });
             return rejection;
           }
         };
@@ -48641,7 +48625,7 @@ ther one or two strings`;
         callback(null, data);
       }, "onSuccess");
       const onError2 = /* @__PURE__ */ __name((err) => {
-        if ((err == null ? void 0 : err.task) === task) {
+        if (err?.task === task) {
           callback(
             err instanceof GitResponseError ? addDeprecationNoticeToError(err) : err,
             void 0
@@ -49070,8 +49054,8 @@ s will no longer be available in version 3`
               const inserted = /(\d+) i/.exec(summary);
               const deleted = /(\d+) d/.exec(summary);
               result.changed = asNumber(changed);
-              result.insertions = asNumber(inserted == null ? void 0 : inserted[1]);
-              result.deletions = asNumber(deleted == null ? void 0 : deleted[1]);
+              result.insertions = asNumber(inserted?.[1]);
+              result.deletions = asNumber(deleted?.[1]);
             }
           )
         ];
@@ -49121,7 +49105,7 @@ s will no longer be available in version 3`
             (result, [status, similarity, from, _to, to]) => {
               result.changed++;
               result.files.push({
-                file: to != null ? to : from,
+                file: to ?? from,
                 changes: 0,
                 insertions: 0,
                 deletions: 0,
@@ -49269,7 +49253,7 @@ s will no longer be available in version 3`
     __name(userOptions, "userOptions");
     function parseLogOptions(opt = {}, customArgs = []) {
       const splitter = filterType(opt.splitter, filterString, SPLITTER);
-      const format = !filterPrimitives(opt.format) && opt.format ? opt.format : {
+      const format = filterPlainObject(opt.format) ? opt.format : {
         hash: "%H",
         date: opt.strictDate === false ? "%ai" : "%aI",
         message: "%s",
@@ -49712,9 +49696,10 @@ s will no longer be available in version 3`
             result.repo = repo;
           }),
           new LineParser(/^updating local tracking ref '(.+)'/, (result, [local]) => {
-            result.ref = __spreadProps(__spreadValues({}, result.ref || {}), {
+            result.ref = {
+              ...result.ref || {},
               local
-            });
+            };
           }),
           new LineParser(/^[=*-]\s+([^:]+):(\S+)\s+\[(.+)]$/, (result, [local, remote, type]) => {
             result.pushed.push(pushResultPushedItem(local, remote, type));
@@ -49722,11 +49707,12 @@ s will no longer be available in version 3`
           new LineParser(
             /^Branch '([^']+)' set up to track remote branch '([^']+)' from '([^']+)'/,
             (result, [local, remote, remoteName]) => {
-              result.branch = __spreadProps(__spreadValues({}, result.branch || {}), {
+              result.branch = {
+                ...result.branch || {},
                 local,
                 remote,
                 remoteName
-              });
+              };
             }
           ),
           new LineParser(
@@ -49748,7 +49734,10 @@ s will no longer be available in version 3`
         parsePushResult = /* @__PURE__ */ __name((stdOut, stdErr) => {
           const pushDetail = parsePushDetail(stdOut, stdErr);
           const responseDetail = parseRemoteMessages(stdOut, stdErr);
-          return __spreadValues(__spreadValues({}, pushDetail), responseDetail);
+          return {
+            ...pushDetail,
+            ...responseDetail
+          };
         }, "parsePushResult");
         parsePushDetail = /* @__PURE__ */ __name((stdOut, stdErr) => {
           return parseStringResponse({ pushed: [] }, parsers5, [stdOut, stdErr]);
@@ -50186,7 +50175,7 @@ s will no longer be available in version 3`
             if (typeof directory === "string") {
               return this._runTask(changeWorkingDirectoryTask(directory, this._executor), next);
             }
-            if (typeof (directory == null ? void 0 : directory.path) === "string") {
+            if (typeof directory?.path === "string") {
               return this._runTask(
                 changeWorkingDirectoryTask(
                   directory.path,
@@ -50470,7 +50459,7 @@ s will no longer be available in version 3`
             }
           ),
           new LineParser(
-            new RegExp("^([*+]\\s)?(\\S+)\\s+([a-z0-9]+)\\s?(.*)$", "s"),
+            /^([*+]\s)?(\S+)\s+([a-z0-9]+)\s?(.*)$/s,
             (result, [current, name, commit, label]) => {
               result.push(branchStatus(current), false, name, commit, label);
             }
@@ -51431,7 +51420,6 @@ d"),
     }
     __name(gitExportFactory, "gitExportFactory");
     function gitInstanceFactory(baseDir, options) {
-      var _a2;
       const plugins = new PluginStore();
       const config = createInstanceConfig(
         baseDir && (typeof baseDir === "string" ? { baseDir } : baseDir) || {},
@@ -51455,7 +51443,7 @@ d"),
       config.spawnOptions && plugins.add(spawnOptionsPlugin(config.spawnOptions));
       plugins.add(errorDetectionPlugin(errorDetectionHandler(true)));
       config.errors && plugins.add(errorDetectionPlugin(config.errors));
-      customBinaryPlugin(plugins, config.binary, (_a2 = config.unsafe) == null ? void 0 : _a2.allowUnsafeCustomBinary);
+      customBinaryPlugin(plugins, config.binary, config.unsafe?.allowUnsafeCustomBinary);
       return new Git(config, plugins);
     }
     __name(gitInstanceFactory, "gitInstanceFactory");
@@ -63687,6 +63675,7 @@ fined" && typeof nonConfigurable !== "boolean") {
 // utils/node_modules/form-data/lib/populate.js
 var require_populate = __commonJS({
   "utils/node_modules/form-data/lib/populate.js"(exports2, module2) {
+    "use strict";
     module2.exports = function(dst, src) {
       Object.keys(src).forEach(function(prop) {
         dst[prop] = dst[prop] || src[prop];
@@ -63699,6 +63688,7 @@ var require_populate = __commonJS({
 // utils/node_modules/form-data/lib/form_data.js
 var require_form_data = __commonJS({
   "utils/node_modules/form-data/lib/form_data.js"(exports2, module2) {
+    "use strict";
     var CombinedStream = require_combined_stream();
     var util = require("util");
     var path2 = require("path");
@@ -63710,9 +63700,8 @@ var require_form_data = __commonJS({
     var mime = require_mime_types();
     var asynckit = require_asynckit();
     var setToStringTag = require_es_set_tostringtag();
+    var hasOwn = require_hasown();
     var populate = require_populate();
-    module2.exports = FormData2;
-    util.inherits(FormData2, CombinedStream);
     function FormData2(options) {
       if (!(this instanceof FormData2)) {
         return new FormData2(options);
@@ -63727,16 +63716,17 @@ var require_form_data = __commonJS({
       }
     }
     __name(FormData2, "FormData");
+    util.inherits(FormData2, CombinedStream);
     FormData2.LINE_BREAK = "\r\n";
     FormData2.DEFAULT_CONTENT_TYPE = "application/octet-stream";
     FormData2.prototype.append = function(field, value, options) {
       options = options || {};
-      if (typeof options == "string") {
+      if (typeof options === "string") {
         options = { filename: options };
       }
       var append = CombinedStream.prototype.append.bind(this);
-      if (typeof value == "number") {
-        value = "" + value;
+      if (typeof value === "number" || value == null) {
+        value = String(value);
       }
       if (Array.isArray(value)) {
         this._error(new Error("Arrays are not supported."));
@@ -63752,7 +63742,7 @@ var require_form_data = __commonJS({
     FormData2.prototype._trackLength = function(header, value, options) {
       var valueLength = 0;
       if (options.knownLength != null) {
-        valueLength += +options.knownLength;
+        valueLength += Number(options.knownLength);
       } else if (Buffer.isBuffer(value)) {
         valueLength = value.length;
       } else if (typeof value === "string") {
@@ -63760,8 +63750,7 @@ var require_form_data = __commonJS({
       }
       this._valueLength += valueLength;
       this._overheadLength += Buffer.byteLength(header) + FormData2.LINE_BREAK.length;
-      if (!value || !value.path && !(value.readable && Object.prototype.hasOwnProperty.call(value, "httpVersion")) && !(value instanceof
-      Stream)) {
+      if (!value || !value.path && !(value.readable && hasOwn(value, "httpVersion")) && !(value instanceof Stream)) {
         return;
       }
       if (!options.knownLength) {
@@ -63769,26 +63758,25 @@ var require_form_data = __commonJS({
       }
     };
     FormData2.prototype._lengthRetriever = function(value, callback) {
-      if (Object.prototype.hasOwnProperty.call(value, "fd")) {
+      if (hasOwn(value, "fd")) {
         if (value.end != void 0 && value.end != Infinity && value.start != void 0) {
           callback(null, value.end + 1 - (value.start ? value.start : 0));
         } else {
           fs2.stat(value.path, function(err, stat) {
-            var fileSize;
             if (err) {
               callback(err);
               return;
             }
-            fileSize = stat.size - (value.start ? value.start : 0);
+            var fileSize = stat.size - (value.start ? value.start : 0);
             callback(null, fileSize);
           });
         }
-      } else if (Object.prototype.hasOwnProperty.call(value, "httpVersion")) {
-        callback(null, +value.headers["content-length"]);
-      } else if (Object.prototype.hasOwnProperty.call(value, "httpModule")) {
+      } else if (hasOwn(value, "httpVersion")) {
+        callback(null, Number(value.headers["content-length"]));
+      } else if (hasOwn(value, "httpModule")) {
         value.on("response", function(response) {
           value.pause();
-          callback(null, +response.headers["content-length"]);
+          callback(null, Number(response.headers["content-length"]));
         });
         value.resume();
       } else {
@@ -63796,7 +63784,7 @@ var require_form_data = __commonJS({
       }
     };
     FormData2.prototype._multiPartHeader = function(field, value, options) {
-      if (typeof options.header == "string") {
+      if (typeof options.header === "string") {
         return options.header;
       }
       var contentDisposition = this._getContentDisposition(value, options);
@@ -63808,12 +63796,12 @@ var require_form_data = __commonJS({
         // if no content type. allow it to be empty array
         "Content-Type": [].concat(contentType || [])
       };
-      if (typeof options.header == "object") {
+      if (typeof options.header === "object") {
         populate(headers, options.header);
       }
       var header;
       for (var prop in headers) {
-        if (Object.prototype.hasOwnProperty.call(headers, prop)) {
+        if (hasOwn(headers, prop)) {
           header = headers[prop];
           if (header == null) {
             continue;
@@ -63829,34 +63817,33 @@ var require_form_data = __commonJS({
       return "--" + this.getBoundary() + FormData2.LINE_BREAK + contents + FormData2.LINE_BREAK;
     };
     FormData2.prototype._getContentDisposition = function(value, options) {
-      var filename, contentDisposition;
+      var filename;
       if (typeof options.filepath === "string") {
         filename = path2.normalize(options.filepath).replace(/\\/g, "/");
-      } else if (options.filename || value.name || value.path) {
-        filename = path2.basename(options.filename || value.name || value.path);
-      } else if (value.readable && Object.prototype.hasOwnProperty.call(value, "httpVersion")) {
+      } else if (options.filename || value && (value.name || value.path)) {
+        filename = path2.basename(options.filename || value && (value.name || value.path));
+      } else if (value && value.readable && hasOwn(value, "httpVersion")) {
         filename = path2.basename(value.client._httpMessage.path || "");
       }
       if (filename) {
-        contentDisposition = 'filename="' + filename + '"';
+        return 'filename="' + filename + '"';
       }
-      return contentDisposition;
     };
     FormData2.prototype._getContentType = function(value, options) {
       var contentType = options.contentType;
-      if (!contentType && value.name) {
+      if (!contentType && value && value.name) {
         contentType = mime.lookup(value.name);
       }
-      if (!contentType && value.path) {
+      if (!contentType && value && value.path) {
         contentType = mime.lookup(value.path);
       }
-      if (!contentType && value.readable && Object.prototype.hasOwnProperty.call(value, "httpVersion")) {
+      if (!contentType && value && value.readable && hasOwn(value, "httpVersion")) {
         contentType = value.headers["content-type"];
       }
       if (!contentType && (options.filepath || options.filename)) {
         contentType = mime.lookup(options.filepath || options.filename);
       }
-      if (!contentType && typeof value == "object") {
+      if (!contentType && value && typeof value === "object") {
         contentType = FormData2.DEFAULT_CONTENT_TYPE;
       }
       return contentType;
@@ -63880,13 +63867,16 @@ var require_form_data = __commonJS({
         "content-type": "multipart/form-data; boundary=" + this.getBoundary()
       };
       for (header in userHeaders) {
-        if (Object.prototype.hasOwnProperty.call(userHeaders, header)) {
+        if (hasOwn(userHeaders, header)) {
           formHeaders[header.toLowerCase()] = userHeaders[header];
         }
       }
       return formHeaders;
     };
     FormData2.prototype.setBoundary = function(boundary) {
+      if (typeof boundary !== "string") {
+        throw new TypeError("FormData boundary must be a string");
+      }
       this._boundary = boundary;
     };
     FormData2.prototype.getBoundary = function() {
@@ -63957,8 +63947,10 @@ var require_form_data = __commonJS({
       });
     };
     FormData2.prototype.submit = function(params, cb) {
-      var request, options, defaults = { method: "post" };
-      if (typeof params == "string") {
+      var request;
+      var options;
+      var defaults = { method: "post" };
+      if (typeof params === "string") {
         params = parseUrl(params);
         options = populate({
           port: params.port,
@@ -63969,11 +63961,11 @@ var require_form_data = __commonJS({
       } else {
         options = populate(params, defaults);
         if (!options.port) {
-          options.port = options.protocol == "https:" ? 443 : 80;
+          options.port = options.protocol === "https:" ? 443 : 80;
         }
       }
       options.headers = this.getHeaders(params.headers);
-      if (options.protocol == "https:") {
+      if (options.protocol === "https:") {
         request = https.request(options);
       } else {
         request = http.request(options);
@@ -64012,6 +64004,7 @@ var require_form_data = __commonJS({
       return "[object FormData]";
     };
     setToStringTag(FormData2, "FormData");
+    module2.exports = FormData2;
   }
 });
 
