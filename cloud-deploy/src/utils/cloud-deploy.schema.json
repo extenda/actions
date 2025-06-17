@@ -188,9 +188,6 @@
           "title": "ScalingKubernetes",
           "description": "Scaling settings for Kubernetes",
           "type": "object",
-          "required": [
-            "cpu"
-          ],
           "properties": {
             "cpu": {
               "description": "Average CPU percentage utilization for scaling.",
