@@ -38,7 +38,7 @@ describe('nexus-credentials', () => {
       serviceAccountKey: 'sac',
     });
 
-    expect(loadSecrets).toBeCalledWith('sac', {
+    expect(loadSecrets).toHaveBeenCalledWith('sac', {
       NEXUS_USERNAME: 'nexus-username',
       NEXUS_PASSWORD: 'nexus-password',
     });

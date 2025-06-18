@@ -36,7 +36,7 @@ describe('loadDefinitions', () => {
     fg.sync.mockReturnValue([file]);
     mockFs({ [file]: configsFixtures.invalid });
 
-    await expect(loadDefinitions(glob, validateCccConfig)).rejects.toThrowError(
+    await expect(loadDefinitions(glob, validateCccConfig)).rejects.toThrow(
       'Configuration validation failed (see details above).',
     );
   });
@@ -52,7 +52,7 @@ describe('loadDefinitions', () => {
       [file2]: configsFixtures.valid,
     });
 
-    await expect(loadDefinitions(glob, validateCccConfig)).rejects.toThrowError(
+    await expect(loadDefinitions(glob, validateCccConfig)).rejects.toThrow(
       'Configuration validation failed (see details above).',
     );
   });

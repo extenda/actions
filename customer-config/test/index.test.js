@@ -115,7 +115,7 @@ describe('action', () => {
       response,
     );
 
-    await expect(action()).rejects.toThrowError(
+    await expect(action()).rejects.toThrow(
       'Sync process had some errors (see details above).',
     );
 
