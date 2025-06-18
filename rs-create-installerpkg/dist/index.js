@@ -68792,6 +68792,9 @@ efined");
         if (utils$1.isDate(value)) {
           return value.toISOString();
         }
+        if (utils$1.isBoolean(value)) {
+          return value.toString();
+        }
         if (!useBlob && utils$1.isBlob(value)) {
           throw new AxiosError("Blob is not supported. Use a Buffer instead.");
         }
@@ -69560,7 +69563,7 @@ eaderName");
       return requestedURL;
     }
     __name(buildFullPath, "buildFullPath");
-    var VERSION = "1.9.0";
+    var VERSION = "1.10.0";
     function parseProtocol(url2) {
       const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url2);
       return match && match[1] || "";
@@ -70957,7 +70960,7 @@ d";
           duplex: "half",
           credentials: isCredentialsSupported ? withCredentials : void 0
         });
-        let response = await fetch(request);
+        let response = await fetch(request, fetchOptions);
         const isStreamResponse = supportsResponseStream && (responseType === "stream" || responseType === "response");
         if (supportsResponseStream && (onDownloadProgress || isStreamResponse && unsubscribe)) {
           const options = {};
@@ -72585,5 +72588,5 @@ mime-types/index.js:
    *)
 
 axios/dist/node/axios.cjs:
-  (*! Axios v1.9.0 Copyright (c) 2025 Matt Zabriskie and contributors *)
+  (*! Axios v1.10.0 Copyright (c) 2025 Matt Zabriskie and contributors *)
 */

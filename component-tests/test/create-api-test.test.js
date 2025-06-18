@@ -29,10 +29,10 @@ describe('createApiTest function', () => {
     for (const [request, expected] of Object.entries(yaml)) {
       await test(request, expected);
     }
-    expect(spy).toBeCalledTimes(3);
-    expect(spy).toBeCalledWith('POST', '/api/v1/permissions', 400);
-    expect(spy).toBeCalledWith('GET', '/api/v1/permissions', 200);
-    expect(spy).toBeCalledWith('GET', '/api/v1/permissions', {
+    expect(spy).toHaveBeenCalledTimes(3);
+    expect(spy).toHaveBeenCalledWith('POST', '/api/v1/permissions', 400);
+    expect(spy).toHaveBeenCalledWith('GET', '/api/v1/permissions', 200);
+    expect(spy).toHaveBeenCalledWith('GET', '/api/v1/permissions', {
       field: 'value',
     });
 

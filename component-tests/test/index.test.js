@@ -24,10 +24,10 @@ describe('run action', () => {
 
     expect(core.getInput).toHaveBeenCalledTimes(3);
     expect(createApiTest).toHaveBeenCalledTimes(1);
-    expect(createApiTest).toBeCalledWith('url', 'token');
+    expect(createApiTest).toHaveBeenCalledWith('url', 'token');
     expect(spy).toHaveBeenCalledTimes(2);
-    expect(spy).toBeCalledWith('POST /api/v1/permissions', { code: 400 });
-    expect(spy).toBeCalledWith('GET /api/v1/permissions', {
+    expect(spy).toHaveBeenCalledWith('POST /api/v1/permissions', { code: 400 });
+    expect(spy).toHaveBeenCalledWith('GET /api/v1/permissions', {
       body: { field: 'value' },
       code: 200,
     });
@@ -44,6 +44,6 @@ describe('run action', () => {
     createApiTest.mockReturnValueOnce(spy);
     await action();
 
-    expect(core.setFailed).toBeCalledWith('message');
+    expect(core.setFailed).toHaveBeenCalledWith('message');
   });
 });

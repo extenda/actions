@@ -284,8 +284,8 @@ describe('RS installer package tests', () => {
     });
 
     expect(fetch).toHaveBeenCalledTimes(1);
-    expect(core.info).toBeCalledTimes(3);
-    expect(core.error).not.toBeCalled();
+    expect(core.info).toHaveBeenCalledTimes(3);
+    expect(core.error).not.toHaveBeenCalled();
   });
 
   test('publishPackageCommand() reports error when response failed', async () => {
@@ -313,8 +313,8 @@ describe('RS installer package tests', () => {
     });
 
     expect(fetch).toHaveBeenCalledTimes(1);
-    expect(core.error).toBeCalledTimes(1);
-    expect(core.error).toBeCalledWith(
+    expect(core.error).toHaveBeenCalledTimes(1);
+    expect(core.error).toHaveBeenCalledWith(
       'Failed to publish package, server responded with 503 Test',
     );
   });
@@ -327,7 +327,7 @@ describe('RS installer package tests', () => {
     os.platform.mockReturnValue('win33test');
     expect(getBinaryName()).toBe('InstallerPackageBuilder.Core.Console');
 
-    expect(os.platform).toBeCalledTimes(2);
+    expect(os.platform).toHaveBeenCalledTimes(2);
     jest.unmock('os');
   });
 
@@ -469,7 +469,7 @@ describe('RS installer package tests', () => {
       publishPackage: true,
     });
 
-    expect(core.info).toBeCalledWith('DirectoryName: test1');
+    expect(core.info).toHaveBeenCalledWith('DirectoryName: test1');
     expect(core.info.mock.calls[0][0]).toBe(
       'Sourcepath fullname: sourcePathsTest',
     );
