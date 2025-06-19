@@ -213,10 +213,30 @@ const gkeManifestTemplate = async (
                   memory: memoryRequest,
                 },
               },
-              env: environment.map((env) => ({
-                name: env.name,
-                value: env.value,
-              })),
+              env: [
+                {
+                  name: 'POD_IP',
+                  valueFrom: {
+                    fieldRef: {
+                      fieldPath: 'status.podIP',
+                    },
+                  },
+                },
+                {
+                  name: 'CPU_REQUEST',
+                  valueFrom: {
+                    resourceFieldRef: {
+                      containerName: 'user-container',
+                      divisor: '1m',
+                      resource: 'requests.cpu',
+                    },
+                  },
+                },
+                ...environment.map((env) => ({
+                  name: env.name,
+                  value: env.value,
+                })),
+              ],
             },
             ...(opa && type === 'Deployment'
               ? [

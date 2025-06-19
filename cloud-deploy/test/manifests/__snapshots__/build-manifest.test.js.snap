@@ -336,6 +336,16 @@ spec:
               cpu: 1
               memory: 512Mi
           env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: CPU_REQUEST
+              valueFrom:
+                resourceFieldRef:
+                  containerName: user-container
+                  divisor: 1m
+                  resource: requests.cpu
             - name: KEY1
               value: value1
             - name: KEY2
@@ -597,6 +607,16 @@ spec:
               cpu: 1
               memory: 512Mi
           env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: CPU_REQUEST
+              valueFrom:
+                resourceFieldRef:
+                  containerName: user-container
+                  divisor: 1m
+                  resource: requests.cpu
             - name: KEY1
               value: value1
             - name: KEY2
@@ -1062,6 +1082,16 @@ spec:
               cpu: 1
               memory: 512Mi
           env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: CPU_REQUEST
+              valueFrom:
+                resourceFieldRef:
+                  containerName: user-container
+                  divisor: 1m
+                  resource: requests.cpu
             - name: SERVICE_NAME
               value: example-service
             - name: SERVICE_PROJECT_ID
@@ -1185,6 +1215,16 @@ spec:
               cpu: 1
               memory: 512Mi
           env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: CPU_REQUEST
+              valueFrom:
+                resourceFieldRef:
+                  containerName: user-container
+                  divisor: 1m
+                  resource: requests.cpu
             - name: KEY1
               value: value1
             - name: KEY2
@@ -1379,6 +1419,16 @@ spec:
               cpu: 1
               memory: 512Mi
           env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: CPU_REQUEST
+              valueFrom:
+                resourceFieldRef:
+                  containerName: user-container
+                  divisor: 1m
+                  resource: requests.cpu
             - name: KEY1
               value: value1
             - name: KEY2
@@ -1523,6 +1573,16 @@ spec:
               cpu: 1
               memory: 512Mi
           env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: CPU_REQUEST
+              valueFrom:
+                resourceFieldRef:
+                  containerName: user-container
+                  divisor: 1m
+                  resource: requests.cpu
             - name: KEY1
               value: value1
             - name: KEY2
@@ -1732,6 +1792,16 @@ spec:
               cpu: 1
               memory: 512Mi
           env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: CPU_REQUEST
+              valueFrom:
+                resourceFieldRef:
+                  containerName: user-container
+                  divisor: 1m
+                  resource: requests.cpu
             - name: KEY1
               value: value1
             - name: KEY2
@@ -1855,6 +1925,16 @@ spec:
               cpu: 1
               memory: 512Mi
           env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: CPU_REQUEST
+              valueFrom:
+                resourceFieldRef:
+                  containerName: user-container
+                  divisor: 1m
+                  resource: requests.cpu
             - name: KEY1
               value: value1
             - name: KEY2
@@ -1978,6 +2058,16 @@ spec:
               cpu: 1
               memory: 512Mi
           env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: CPU_REQUEST
+              valueFrom:
+                resourceFieldRef:
+                  containerName: user-container
+                  divisor: 1m
+                  resource: requests.cpu
             - name: KEY1
               value: value1
             - name: KEY2
@@ -2101,6 +2191,16 @@ spec:
               cpu: 1
               memory: 512Mi
           env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: CPU_REQUEST
+              valueFrom:
+                resourceFieldRef:
+                  containerName: user-container
+                  divisor: 1m
+                  resource: requests.cpu
             - name: KEY1
               value: value1
             - name: SERVICE_NAME
@@ -2216,6 +2316,16 @@ spec:
               cpu: 1
               memory: 512Mi
           env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: CPU_REQUEST
+              valueFrom:
+                resourceFieldRef:
+                  containerName: user-container
+                  divisor: 1m
+                  resource: requests.cpu
             - name: KEY1
               value: value1
             - name: KEY2
