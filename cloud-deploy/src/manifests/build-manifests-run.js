@@ -64,10 +64,7 @@ const cloudrunManifestTemplate = async (
 
   baseAnnotations['run.googleapis.com/ingress'] =
     'internal-and-cloud-load-balancing';
-  // baseAnnotations['run.googleapis.com/launch-stage'] = 'BETA';
-  if (deployEnv === 'staging') {
-    baseAnnotations['run.googleapis.com/binary-authorization'] = 'default';
-  }
+  baseAnnotations['run.googleapis.com/binary-authorization'] = 'default';
   if (audiences.length > 0) {
     baseAnnotations['run.googleapis.com/custom-audiences'] =
       `[${audiences.map((audience) => `"${audience}"`)}]`;

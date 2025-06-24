@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`buildManifest It allows for deploying on new vpc subnet without NAT 1`] = `
 "apiVersion: serving.knative.dev/v1
@@ -15,6 +15,7 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
+    run.googleapis.com/binary-authorization: default
 spec:
   template:
     metadata:
@@ -86,6 +87,7 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
+    run.googleapis.com/binary-authorization: default
 spec:
   template:
     metadata:
@@ -155,6 +157,7 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
+    run.googleapis.com/binary-authorization: default
 spec:
   template:
     metadata:
@@ -446,6 +449,7 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
+    run.googleapis.com/binary-authorization: default
 spec:
   template:
     metadata:
@@ -696,6 +700,7 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
+    run.googleapis.com/binary-authorization: default
     run.googleapis.com/custom-audiences: '["example-service","https://example-service.domain.com"]'
 spec:
   template:
@@ -772,6 +777,7 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
+    run.googleapis.com/binary-authorization: default
 spec:
   template:
     metadata:
@@ -847,6 +853,7 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
+    run.googleapis.com/binary-authorization: default
 spec:
   template:
     metadata:
@@ -935,6 +942,7 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
+    run.googleapis.com/binary-authorization: default
     run.googleapis.com/custom-audiences: '["example-service","https://example-service.domain.com"]'
     run.googleapis.com/launch-stage: BETA
     run.googleapis.com/minScale: 1
@@ -1283,6 +1291,7 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
+    run.googleapis.com/binary-authorization: default
 spec:
   template:
     metadata:
@@ -1645,6 +1654,7 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
+    run.googleapis.com/binary-authorization: default
 spec:
   template:
     metadata:
