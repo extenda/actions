@@ -32,6 +32,7 @@ test('Get deploy info', async () => {
         protocol: 'http',
         timeout: 300,
       },
+      security: 'none',
       environments: {
         production: {
           'domain-mappings': ['checkout-service-manager.retailsvc.com'],
