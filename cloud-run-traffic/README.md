@@ -28,8 +28,6 @@ jobs:
   prod:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-
       - name: Manage Traffic
         uses: extenda/actions/cloud-run-traffic@v0
         with:
