@@ -28,14 +28,12 @@ jobs:
   prod:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-
       - name: Manage Traffic
         uses: extenda/actions/cloud-run-traffic@v0
         with:
           service-account-key: ${{ secrets.GCLOUD_AUTH_PROD }} # required
           # service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }} # staging
           service: ${{ github.event.inputs.service }} # required
-          revision: ${{ github.event.inputs.revision }} # required
+          target-revision: ${{ github.event.inputs.revision }} # required
           percentage: ${{ github.event.inputs.percentage }} # optional. 100 by default
 ```
