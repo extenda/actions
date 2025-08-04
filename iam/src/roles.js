@@ -7,6 +7,7 @@ const createRole = async (
   roleId,
   roleName,
   rolePermissions,
+  roleFixedBindings,
   iamUrl,
 ) =>
   axios({
@@ -20,6 +21,7 @@ const createRole = async (
       id: roleId,
       name: roleName,
       permissions: rolePermissions,
+      fixedBindings: roleFixedBindings,
     },
   })
     .then(() => {
@@ -38,6 +40,7 @@ const updateRole = async (
   roleId,
   roleName,
   rolePermissions,
+  roleFixedBindings,
   iamUrl,
 ) =>
   axios({
@@ -50,6 +53,7 @@ const updateRole = async (
     data: {
       name: roleName,
       permissions: rolePermissions,
+      fixedBindings: roleFixedBindings,
     },
   })
     .then(() => {
@@ -104,6 +108,7 @@ const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
     const rolePermissions = role.permissions.map((permissionId) =>
       createPermissionId(systemId, permissionId),
     );
+    const roleFixedBindings = role['fixed-bindings'];
 
     core.info(`fetching data for ${roleId}`);
     promises.push(
@@ -115,11 +120,13 @@ const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
             roleId,
             roleName,
             rolePermissions,
+            roleFixedBindings,
             iamUrl,
           ).then((message) => core.info(message));
         }
         if (
           !arraysEqual(roleResult.permissions, rolePermissions) ||
+          !arraysEqual(roleResult.fixedBindings, roleFixedBindings) ||
           roleResult.name !== roleName
         ) {
           core.info(`updating role '${roleId}'`);
@@ -128,6 +135,7 @@ const setupRoles = async (roles, systemId, iamToken, iamUrl) => {
             roleId,
             roleName,
             rolePermissions,
+            roleFixedBindings,
             iamUrl,
           ).then((message) => core.info(message));
         }
