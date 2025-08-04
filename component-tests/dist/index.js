@@ -36854,6 +36854,7 @@ var require_form_data = __commonJS({
     var parseUrl = require("url").parse;
     var fs = require("fs");
     var Stream = require("stream").Stream;
+    var crypto = require("crypto");
     var mime = require_mime_types();
     var asynckit = require_asynckit();
     var setToStringTag = require_es_set_tostringtag();
@@ -37060,11 +37061,7 @@ var require_form_data = __commonJS({
       return Buffer.concat([dataBuffer, Buffer.from(this._lastBoundary())]);
     };
     FormData2.prototype._generateBoundary = function() {
-      var boundary = "--------------------------";
-      for (var i = 0; i < 24; i++) {
-        boundary += Math.floor(Math.random() * 10).toString(16);
-      }
-      this._boundary = boundary;
+      this._boundary = "--------------------------" + crypto.randomBytes(12).toString("hex");
     };
     FormData2.prototype.getLengthSync = function() {
       var knownLength = this._overheadLength + this._valueLength;
@@ -39707,7 +39704,7 @@ var require_common2 = __commonJS({
         createDebug.namespaces = namespaces;
         createDebug.names = [];
         createDebug.skips = [];
-        const split = (typeof namespaces === "string" ? namespaces : "").trim().replace(" ", ",").split(",").filter(Boolean);
+        const split = (typeof namespaces === "string" ? namespaces : "").trim().replace(/\s+/g, ",").split(",").filter(Boolean);
         for (const ns of split) {
           if (ns[0] === "-") {
             createDebug.skips.push(ns.slice(1));
@@ -39942,7 +39939,7 @@ in the next major version of `debug`.");
     function load() {
       let r;
       try {
-        r = exports2.storage.getItem("debug");
+        r = exports2.storage.getItem("debug") || exports2.storage.getItem("DEBUG");
       } catch (error) {
       }
       if (!r && typeof process !== "undefined" && "env" in process) {
@@ -41553,10 +41550,7 @@ y", "ok", "redirects", "timeout", "buffer", "serialize", "parse", "ca", "key", "
       }
     };
     for (const fn of defaults) {
-      Agent.prototype[fn] = function() {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
+      Agent.prototype[fn] = function(...args) {
         this._defaults.push({
           fn,
           args
@@ -41637,6 +41631,7 @@ var require_agent2 = __commonJS({
     };
     for (const name of methods) {
       const method = name.toUpperCase();
+      if (method === "QUERY") continue;
       Agent.prototype[name] = function(url, fn) {
         const request_ = new request.Request(method, url);
         request_.on("response", this._saveCookies.bind(this));
@@ -42302,7 +42297,35 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
             buffer = true;
           } else if (multipart) {
             const form = formidable.formidable();
-            parser = form.parse.bind(form);
+            parser = /* @__PURE__ */ __name((res2, callback) => {
+              const bridgeStream = new Stream.PassThrough();
+              bridgeStream.method = this.method || "POST";
+              bridgeStream.url = this.url || "/";
+              bridgeStream.httpVersion = res2.httpVersion || "1.1";
+              bridgeStream.headers = res2.headers || {};
+              bridgeStream.socket = res2.socket || {
+                readable: true
+              };
+              res2.pipe(bridgeStream);
+              form.parse(bridgeStream, (err, fields, files) => {
+                if (err) return callback(err);
+                const flattenedFields = {};
+                if (fields) {
+                  for (const key in fields) {
+                    const value = fields[key];
+                    flattenedFields[key] = Array.isArray(value) && value.length === 1 ? value[0] : value;
+                  }
+                }
+                const flattenedFiles = {};
+                if (files) {
+                  for (const key in files) {
+                    const value = files[key];
+                    flattenedFiles[key] = Array.isArray(value) && value.length === 1 ? value[0] : value;
+                  }
+                }
+                callback(null, flattenedFields, flattenedFiles);
+              });
+            }, "parser");
             buffer = true;
           } else if (isBinary(mime2)) {
             parser = exports2.parse.image;
@@ -42351,28 +42374,6 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
                 return this.callback(error);
               }
               if (parserHandlesEnd) {
-                if (multipart) {
-                  if (object) {
-                    for (const key in object) {
-                      const value = object[key];
-                      if (Array.isArray(value) && value.length === 1) {
-                        object[key] = value[0];
-                      } else {
-                        object[key] = value;
-                      }
-                    }
-                  }
-                  if (files) {
-                    for (const key in files) {
-                      const value = files[key];
-                      if (Array.isArray(value) && value.length === 1) {
-                        files[key] = value[0];
-                      } else {
-                        files[key] = value;
-                      }
-                    }
-                  }
-                }
                 this.emit("end");
                 this.callback(null, this._emitResponse(object, files));
               }
@@ -42646,7 +42647,7 @@ var require_test = __commonJS({
        * Defer invoking superagent's `.end()` until
        * the server is listening.
        *
-       * @param {Function} fn
+       * @param {?Function} fn
        * @api public
        */
       end(fn) {
@@ -42655,7 +42656,17 @@ var require_test = __commonJS({
           const localAssert = /* @__PURE__ */ __name(() => {
             this.assert(err, res, fn);
           }, "localAssert");
-          if (server && server._handle) return server.close(localAssert);
+          if (server && server._handle) {
+            return server.close((closeError) => {
+              if (closeError && closeError.code === "ERR_SERVER_NOT_RUNNING") {
+                return localAssert();
+              }
+              if (closeError) {
+                return localAssert();
+              }
+              localAssert();
+            });
+          }
           localAssert();
         });
         return this;
@@ -42690,7 +42701,29 @@ var require_test = __commonJS({
         if (!errorObj && resError instanceof Error && (!res || resError.status !== res.status)) {
           errorObj = resError;
         }
-        fn.call(this, errorObj || null, res);
+        if (fn) {
+          fn.call(this, errorObj || null, res);
+        }
+      }
+      /*
+        * Adds a set Authorization Bearer
+        *
+        * @param {Bearer} Bearer Token
+        * Shortcut for .set('Authorization', `Bearer ${token}`)
+        */
+      bearer(token) {
+        this.set("Authorization", `Bearer ${token}`);
+        return this;
+      }
+      /*
+        * Adds a set Authorization Bearer
+        *
+        * @param {Bearer} Bearer Token
+        * Shortcut for .set('Authorization', `Bearer ${token}`)
+        */
+      bearer(token) {
+        this.set("Authorization", `Bearer ${token}`);
+        return this;
       }
       /**
        * Perform assertions on a response body and return an Error upon failure.
@@ -42865,11 +42898,15 @@ var require_agent3 = __commonJS({
     }
     __name(TestAgent, "TestAgent");
     Object.setPrototypeOf(TestAgent.prototype, Agent.prototype);
+    var originalQuery = Agent.prototype.query;
     TestAgent.prototype.host = function(host) {
       this._host = host;
       return this;
     };
     methods.forEach(function(method) {
+      if (method === "query") {
+        return;
+      }
       TestAgent.prototype[method] = function(url, fn) {
         const req = new Test(this.app, method.toUpperCase(), url);
         if (this._options.http2) {
@@ -42886,6 +42923,7 @@ var require_agent3 = __commonJS({
         return req;
       };
     });
+    TestAgent.prototype.query = originalQuery;
     TestAgent.prototype.del = TestAgent.prototype.delete;
     module2.exports = TestAgent;
   }
