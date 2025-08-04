@@ -26,7 +26,7 @@ const getCommands = (sonarScanner, custom, workingDir = '.') => {
   ) {
     commands.maven =
       custom.maven ||
-      'org.sonarsource.scanner.maven:sonar-maven-plugin:5.0.0.4389:sonar';
+      'org.sonarsource.scanner.maven:sonar-maven-plugin:5.1.0.4751:sonar';
   }
 
   if (
