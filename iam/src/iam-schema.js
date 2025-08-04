@@ -113,6 +113,10 @@ module.exports = {
                 '^(?:[a-z][-a-z]{2}\\.)?[a-z][-a-z]{1,15}\\.[a-z][-a-z]{1,15}$',
             },
           },
+          'fixed-bindings': {
+            type: 'array',
+            items: { type: 'string' },
+          },
         },
         required: ['id', 'name', 'desc', 'permissions'],
         additionalProperties: false,
