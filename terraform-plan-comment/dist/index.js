@@ -85520,6 +85520,7 @@ var require_form_data = __commonJS({
     var parseUrl = require("url").parse;
     var fs = require("fs");
     var Stream = require("stream").Stream;
+    var crypto = require("crypto");
     var mime = require_mime_types();
     var asynckit = require_asynckit();
     var setToStringTag = require_es_set_tostringtag();
@@ -85726,11 +85727,7 @@ var require_form_data = __commonJS({
       return Buffer.concat([dataBuffer, Buffer.from(this._lastBoundary())]);
     };
     FormData2.prototype._generateBoundary = function() {
-      var boundary = "--------------------------";
-      for (var i = 0; i < 24; i++) {
-        boundary += Math.floor(Math.random() * 10).toString(16);
-      }
-      this._boundary = boundary;
+      this._boundary = "--------------------------" + crypto.randomBytes(12).toString("hex");
     };
     FormData2.prototype.getLengthSync = function() {
       var knownLength = this._overheadLength + this._valueLength;
@@ -86511,6 +86508,16 @@ var require_axios = __commonJS({
       return (prototype2 === null || prototype2 === Object.prototype || Object.getPrototypeOf(prototype2) === null) && !(toStringTag in
       val) && !(iterator in val);
     }, "isPlainObject");
+    var isEmptyObject = /* @__PURE__ */ __name((val) => {
+      if (!isObject(val) || isBuffer(val)) {
+        return false;
+      }
+      try {
+        return Object.keys(val).length === 0 && Object.getPrototypeOf(val) === Object.prototype;
+      } catch (e) {
+        return false;
+      }
+    }, "isEmptyObject");
     var isDate = kindOfTest("Date");
     var isFile = kindOfTest("File");
     var isBlob = kindOfTest("Blob");
@@ -86541,6 +86548,9 @@ var require_axios = __commonJS({
           fn.call(null, obj[i], i, obj);
         }
       } else {
+        if (isBuffer(obj)) {
+          return;
+        }
         const keys = allOwnKeys ? Object.getOwnPropertyNames(obj) : Object.keys(obj);
         const len = keys.length;
         let key;
@@ -86552,6 +86562,9 @@ var require_axios = __commonJS({
     }
     __name(forEach, "forEach");
     function findKey(obj, key) {
+      if (isBuffer(obj)) {
+        return null;
+      }
       key = key.toLowerCase();
       const keys = Object.keys(obj);
       let i = keys.length;
@@ -86747,6 +86760,9 @@ efined");
           if (stack.indexOf(source) >= 0) {
             return;
           }
+          if (isBuffer(source)) {
+            return source;
+          }
           if (!("toJSON" in source)) {
             stack[i] = source;
             const target = isArray(source) ? [] : {};
@@ -86798,6 +86814,7 @@ efined");
       isBoolean,
       isObject,
       isPlainObject,
+      isEmptyObject,
       isReadableStream,
       isRequest,
       isResponse,
@@ -87226,15 +87243,16 @@ efined");
       ...platform$1
     };
     function toURLEncodedForm(data, options) {
-      return toFormData(data, new platform.classes.URLSearchParams(), Object.assign({
+      return toFormData(data, new platform.classes.URLSearchParams(), {
         visitor: /* @__PURE__ */ __name(function(value, key, path, helpers) {
           if (platform.isNode && utils$1.isBuffer(value)) {
             this.append(key, value.toString("base64"));
             return false;
           }
           return helpers.defaultVisitor.apply(this, arguments);
-        }, "visitor")
-      }, options));
+        }, "visitor"),
+        ...options
+      });
     }
     __name(toURLEncodedForm, "toURLEncodedForm");
     function parsePropPath(name) {
@@ -87739,7 +87757,7 @@ eaderName");
       return requestedURL;
     }
     __name(buildFullPath, "buildFullPath");
-    var VERSION = "1.10.0";
+    var VERSION = "1.11.0";
     function parseProtocol(url2) {
       const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url2);
       return match && match[1] || "";
@@ -88064,7 +88082,7 @@ ename="${escapeName(value.name)}"` : ""}${CRLF}`;
           clearTimeout(timer);
           timer = null;
         }
-        fn.apply(null, args);
+        fn(...args);
       }, "invoke");
       const throttled = /* @__PURE__ */ __name((...args) => {
         const now = Date.now();
@@ -88740,7 +88758,7 @@ dersToObject");
         headers: /* @__PURE__ */ __name((a, b, prop) => mergeDeepProperties(headersToObject(a), headersToObject(b), prop,
         true), "headers")
       };
-      utils$1.forEach(Object.keys(Object.assign({}, config1, config2)), /* @__PURE__ */ __name(function computeConfigValue(prop) {
+      utils$1.forEach(Object.keys({ ...config1, ...config2 }), /* @__PURE__ */ __name(function computeConfigValue(prop) {
         const merge2 = mergeMap[prop] || mergeDeepProperties;
         const configValue = merge2(config1[prop], config2[prop], prop);
         utils$1.isUndefined(configValue) && merge2 !== mergeDirectKeys || (config[prop] = configValue);
@@ -89454,8 +89472,8 @@ able in the build")
         let len;
         if (!synchronousRequestInterceptors) {
           const chain = [dispatchRequest.bind(this), void 0];
-          chain.unshift.apply(chain, requestInterceptorChain);
-          chain.push.apply(chain, responseInterceptorChain);
+          chain.unshift(...requestInterceptorChain);
+          chain.push(...responseInterceptorChain);
           len = chain.length;
           promise = Promise.resolve(config);
           while (i < len) {
@@ -100719,7 +100737,7 @@ mime-types/index.js:
    *)
 
 axios/dist/node/axios.cjs:
-  (*! Axios v1.10.0 Copyright (c) 2025 Matt Zabriskie and contributors *)
+  (*! Axios v1.11.0 Copyright (c) 2025 Matt Zabriskie and contributors *)
 
 is-extglob/index.js:
   (*!
