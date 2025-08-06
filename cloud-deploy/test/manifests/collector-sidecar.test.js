@@ -23,13 +23,17 @@ describe('collector-sidecar', () => {
     expect(container).toBeNull();
   });
   test('It creates a Cloud Run collector container for GMP', async () => {
-    const container = await cloudRunCollector('test', {
-      prometheus: {
-        path: '/metrics',
-        port: 8081,
-        interval: 15,
+    const container = await cloudRunCollector(
+      'test',
+      {
+        prometheus: {
+          path: '/metrics',
+          port: 8081,
+          interval: 15,
+        },
       },
-    });
+      'v1.5.5',
+    );
     expect(container).toEqual({
       image: 'eu.gcr.io/extenda/otel-collector@sha256:123',
       name: 'collector',
@@ -65,6 +69,33 @@ describe('collector-sidecar', () => {
         timeoutSeconds: 3,
         failureThreshold: 3,
       },
+    });
+  });
+  test('It creates a security-authz pipeline for GMP for new security-authz', async () => {
+    const container = await cloudRunCollector(
+      'test',
+      {
+        prometheus: {
+          path: '/metrics',
+          port: 8081,
+          interval: 15,
+        },
+      },
+      'v1.6.0',
+    );
+    expect(container).toMatchObject({
+      name: 'collector',
+      env: [
+        { name: 'SERVICE_NAME', value: 'test' },
+        { name: 'PROMETHEUS_SCRAPE_PATH', value: '/metrics' },
+        { name: 'PROMETHEUS_SCRAPE_PORT', value: '8081' },
+        { name: 'PROMETHEUS_SCRAPE_INTERVAL', value: '15' },
+        { name: 'CONFIG_PROMETHEUS', value: 'gmp' },
+        {
+          name: 'CONFIG_PROMETHEUS_PIPELINES',
+          value: 'user-container security-authz',
+        },
+      ],
     });
   });
   test('It does not create a GKE collector for GMP', async () => {
