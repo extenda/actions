@@ -1,3 +1,4 @@
+const semver = require('semver');
 const getImageWithSha256 = require('./image-sha256');
 const selectSemver = require('../utils/select-semver');
 const STABLE_TAG = 'v2.1.2';
@@ -71,7 +72,7 @@ const imageTag = (monitoring = {}) => {
   );
 };
 
-const cloudRunCollector = async (serviceName, monitoring) => {
+const cloudRunCollector = async (serviceName, monitoring, securityVersion) => {
   const config = getConfig(serviceName, monitoring || {});
 
   if (!config.prometheus.enabled && !config.openTelemetry.enabled) {
@@ -81,6 +82,10 @@ const cloudRunCollector = async (serviceName, monitoring) => {
   let env = {};
   if (config.prometheus.enabled) {
     env = { ...env, ...config.prometheus.collectorEnv };
+    if (semver.compare(securityVersion, 'v1.6.0') >= 0) {
+      // The security sidecar is recent enough to support Prometheus scraping.
+      env.CONFIG_PROMETHEUS_PIPELINES = 'user-container security-authz';
+    }
   }
 
   if (config.openTelemetry.enabled) {
