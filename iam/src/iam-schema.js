@@ -96,7 +96,7 @@ module.exports = {
             type: 'string',
             minLength: 1,
             maxLength: 20,
-            pattern: '^[a-z][-a-z]{1,19}$',
+            pattern: '^[a-z][-a-z]{1,29}$',
           },
           desc: {
             type: 'string',

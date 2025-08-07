@@ -58,7 +58,7 @@ properties are required and not.
 | `permissions.<resource>.alias`                | Permission alias (max 256 characters)                                                                               | No       |
 | `permissions.<resource>.description`          | Permission description                                                                                              | No       |
 | `roles`                                       | A list of roles that should exist for this service                                                                  | No       |
-| `roles.id`                                    | The role id ([a-z][-a-z]{1,19})                                                                                     | Yes      |
+| `roles.id`                                    | The role id ([a-z][-a-z]{1,29})                                                                                     | Yes      |
 | `roles.name`                                  | The role name                                                                                                       | Yes      |
 | `roles.desc`                                  | The description of the role, (max 200 characters)                                                                   | Yes      |
 | `roles.permissions`                           | A list of permissions this role should contain (items ^(?:[a-z][-a-z]{2}\\.)?[a-z][-a-z]{1,15}\.[a-z][-a-z]{1,15}$) | Yes      |
