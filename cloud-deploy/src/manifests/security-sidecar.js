@@ -6,7 +6,7 @@ const { loadCacheKeys } = require('../utils/security-cache-keys');
 const IMAGE_NAME = 'eu.gcr.io/extenda/security';
 
 // The generally available and stable security sidecar version.
-const STABLE_VERSION = 'v1.5.5';
+const STABLE_VERSION = 'v1.5.6';
 
 const volumeMounts = (protocol) => {
   const volumes = [];
