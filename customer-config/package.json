@@ -13,6 +13,6 @@
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
-    "nock": "^14.0.8"
+    "nock": "^14.0.9"
   }
 }
