@@ -9,6 +9,6 @@
     "fast-glob": "^3.3.3"
   },
   "devDependencies": {
-    "nock": "^14.0.8"
+    "nock": "^14.0.9"
   }
 }
