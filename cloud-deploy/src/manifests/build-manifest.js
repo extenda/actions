@@ -293,17 +293,15 @@ const buildManifest = async (
       await addNamespace(http2Certificate, name),
     );
 
-    if (deployEnv !== 'staging') {
-      const podMonitor = podMonitorManifest(name, monitoring);
-      if (podMonitor) {
-        core.info('Create PodMonitoring resource');
-        generateManifest(
-          'k8s(deploy)-podmonitor.yaml',
-          convertToYaml(podMonitor),
-        );
-      } else {
-        await deletePodMonitor(name);
-      }
+    const podMonitor = podMonitorManifest(name, monitoring);
+    if (podMonitor) {
+      core.info('Create PodMonitoring resource');
+      generateManifest(
+        'k8s(deploy)-podmonitor.yaml',
+        convertToYaml(podMonitor),
+      );
+    } else {
+      await deletePodMonitor(name);
     }
   } else {
     const {
