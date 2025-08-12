@@ -171,23 +171,10 @@ const kubernetesCollector = async (serviceName, monitoring) => {
   };
 };
 
-const userContainerCollectorEnv = (
-  serviceName,
-  serviceImage,
-  monitoring,
-  isProdEnv = true,
-) => {
+const userContainerCollectorEnv = (serviceName, serviceImage, monitoring) => {
   const { openTelemetry } = getConfig(serviceName, monitoring);
 
   if (openTelemetry.enabled && openTelemetry.autoEnvironmentVariables) {
-    if (!isProdEnv) {
-      return {
-        OTEL_SDK_DISABLED: 'true',
-        OTEL_TRACES_EXPORTER: 'none',
-        OTEL_METRICS_EXPORTER: 'none',
-        OTEL_LOGS_EXPORTER: 'none',
-      };
-    }
     const { otlpProtocol, sampler, collect } = openTelemetry;
     const endpoint =
       otlpProtocol === 'grpc'
