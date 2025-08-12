@@ -89,8 +89,7 @@ const gkeManifestTemplate = async (
     `{"exposed_ports":{"80":{"name":"${name}-neg"}}}`;
 
   let collectorContainer = null;
-  if (monitoring && deployEnv !== 'staging') {
-    // We only collect metrics in prod.
+  if (monitoring) {
     collectorContainer = await kubernetesCollector(name, monitoring);
   }
 
