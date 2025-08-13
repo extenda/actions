@@ -158,7 +158,7 @@ const cloudrunManifestTemplate = async (
     const collectorContainer = await cloudRunCollector(
       name,
       monitoring,
-      opa ? securityVersion(securityPreviewTag) : 'v0.0.0',
+      opa ? securityVersion({ 'preview-tag': securityPreviewTag }) : 'v0.0.0',
     );
     if (collectorContainer) {
       containers.push(collectorContainer);
