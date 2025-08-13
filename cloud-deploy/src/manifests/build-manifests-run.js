@@ -1,4 +1,4 @@
-const { securitySpec } = require('./security-sidecar');
+const { securitySpec, securityVersion } = require('./security-sidecar');
 const { cloudRunCollector } = require('./collector-sidecar');
 
 const configureNetworking = async (
@@ -154,15 +154,19 @@ const cloudrunManifestTemplate = async (
     containers.push(securityContainer);
   }
 
-  if (monitoring && deployEnv !== 'staging') {
-    // We only collect metrics in prod.
-    const collectorContainer = await cloudRunCollector(name, monitoring);
+  if (monitoring) {
+    const collectorContainer = await cloudRunCollector(
+      name,
+      monitoring,
+      opa ? securityVersion({ 'preview-tag': securityPreviewTag }) : 'v0.0.0',
+    );
     if (collectorContainer) {
       containers.push(collectorContainer);
-      // The collector should start after and shutdown before the user-container.
+      // The collector should start before and shutdown after the user-container
+      // to ensure the OTEL endpoints are available for the user-container.
       annotations['run.googleapis.com/container-dependencies'] = JSON.stringify(
         {
-          collector: ['user-container'],
+          'user-container': ['collector'],
         },
       );
     }
