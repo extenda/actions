@@ -70,7 +70,7 @@ jobs:
           fi
 
   acceptance-windows:
-    runs-on: windows-latest
+    runs-on: windows-2025
     if: github.actor != 'dependabot[bot]'
     needs:
       - verify-dist
