@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`buildManifest It allows for deploying on new vpc subnet without NAT 1`] = `
 "apiVersion: serving.knative.dev/v1
@@ -167,7 +167,7 @@ spec:
         run.googleapis.com/sessionAffinity: 'false'
         run.googleapis.com/network-interfaces: '[{"network":"clan-network","subnetwork":"nat-subnet"}]'
         run.googleapis.com/vpc-access-egress: all-traffic
-        run.googleapis.com/container-dependencies: '{"collector":["user-container"]}'
+        run.googleapis.com/container-dependencies: '{"user-container":["collector"]}'
       labels:
         app: example-service
         product: actions
@@ -458,7 +458,7 @@ spec:
         run.googleapis.com/sessionAffinity: 'false'
         run.googleapis.com/network-interfaces: '[{"network":"clan-network","subnetwork":"nat-subnet"}]'
         run.googleapis.com/vpc-access-egress: all-traffic
-        run.googleapis.com/container-dependencies: '{"collector":["user-container"]}'
+        run.googleapis.com/container-dependencies: '{"user-container":["collector"]}'
       labels:
         app: example-service
         product: actions
