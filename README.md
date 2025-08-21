@@ -36,6 +36,7 @@ The following actions are available
   * [pact-can-i-deploy](pact-can-i-deploy#readme)
   * [pact-publish](pact-publish#readme)
   * [pact-tag-version](pact-tag-version#readme)
+  * [quality-gate](quality-gate#readme)
   * [repository-dispatch](repository-dispatch#readme)
   * ~~[rs-create-installerpkg](rs-create-installerpkg#readme)~~
   * ~~[rs-permission-converter](rs-permission-converter#readme)~~
