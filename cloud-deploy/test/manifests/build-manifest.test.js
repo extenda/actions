@@ -251,6 +251,64 @@ metadata:
     expect(k8sManifest).toMatchSnapshot();
   });
 
+  test('should generate exclude-logs label', async () => {
+    readSecret.mockResolvedValueOnce('instance-name');
+    const image = 'example-image:latest';
+    const service = {
+      'cloud-run': {
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          concurrency: 40,
+        },
+        'request-logs': {
+          'cloud-run': false,
+        },
+      },
+      security: 'none',
+      labels: {
+        label1: 'labelValue1',
+        label2: 'labelValue2',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {},
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'production';
+
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
+
+    const k8sManifest = readFileSync('cloudrun-service.yaml');
+
+    expect(k8sManifest).toContain('exclude-logs: cloud-run');
+
+    // Snapshot test for k8s-manifest.yaml.
+    mockFs.restore();
+    expect(k8sManifest).toMatchSnapshot();
+  });
+
   test('should set OPA env vars', async () => {
     // const mockWriteFile = jest.spyOn(fs, 'writeFileSync').mockImplementation();
     checkSystem.mockResolvedValueOnce(true);

@@ -184,6 +184,15 @@ const buildManifest = async (
     labels['iso-country'] = 'global';
   }
 
+  if (cloudrun) {
+    const { 'request-logs': { 'cloud-run': enableCloudRunLogs = true } = {} } =
+      cloudrun;
+    if (enableCloudRunLogs === false) {
+      // Add label used by exclude-filter that removes cloud-run request logs.
+      labels['exclude-logs'] = 'cloud-run';
+    }
+  }
+
   const labelArray = Object.entries(labels).map(([key, value]) => ({
     name: key,
     value,

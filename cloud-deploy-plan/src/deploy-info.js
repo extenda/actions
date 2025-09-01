@@ -27,6 +27,10 @@ const copyInfo = (platform, service, data) => {
     : 'none';
   const { traffic: { 'static-egress-ip': staticEgress = true } = {} } = o;
   data.staticEgress = staticEgress;
+  const {
+    'request-logs': { 'load-balancer': enableLoadBalancerLogs = false } = {},
+  } = o;
+  data.loggingSampleRate = enableLoadBalancerLogs ? 1 : 0;
 };
 
 const pathMappings = (env) => {
@@ -61,7 +65,6 @@ const getDeployInfo = async (service, projectId, bearerToken) => {
     // prod.regions
     region: 'europe-west1',
     migrate: true,
-    loggingSampleRate: 0, // Not possible to set in service definition
     domainMappings: prod['domain-mappings'] || [],
     pathMappings: pathMappings(prod),
     cloudArmorPolicy,

@@ -88,6 +88,7 @@ const action = async () => {
     scaling,
     monitoring,
     traffic = {},
+    'request-logs': { 'load-balancer': enableLoadBalancerLogs = false } = {},
   } = kubernetes || cloudrun;
 
   const { staging, production } = environments;
@@ -219,7 +220,7 @@ const action = async () => {
       migrate,
       cloudArmorPolicy,
       internalTraffic,
-      loggingSampleRate: 0,
+      loggingSampleRate: enableLoadBalancerLogs ? 1 : 0,
       domainMappings: domainMappingsClone,
       pathMappings,
       staticEgress,

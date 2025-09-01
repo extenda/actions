@@ -314,6 +314,10 @@ describe('Action', () => {
             },
           ],
         },
+        'request-logs': {
+          'cloud-run': false,
+          'load-balancer': true,
+        },
       },
       security: {
         consumers: {
