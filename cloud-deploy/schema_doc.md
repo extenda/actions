@@ -651,10 +651,10 @@ Must be one of:
 
 **Description:** Configure which request logs to use (if any).
 
-| Property                                                           | Pattern | Type    | Deprecated | Definition | Title/Description                                                                             |
-| ------------------------------------------------------------------ | ------- | ------- | ---------- | ---------- | --------------------------------------------------------------------------------------------- |
-| + [cloud-run](#oneOf_i0_cloud-run_request-logs_cloud-run )         | No      | boolean | No         | -          | Enable cloud-run request logs. The logs for 5xx requests are always logged, even if disabled. |
-| - [load-balancer](#oneOf_i0_cloud-run_request-logs_load-balancer ) | No      | boolean | No         | -          | Enable load balancer request logs. The logs will be enabled with 1.0 sample rate.             |
+| Property                                                           | Pattern | Type    | Deprecated | Definition | Title/Description                                                                                     |
+| ------------------------------------------------------------------ | ------- | ------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------- |
+| + [cloud-run](#oneOf_i0_cloud-run_request-logs_cloud-run )         | No      | boolean | No         | -          | Enable cloud-run request logs. The logs for 429 and 5xx requests are always logged, even if disabled. |
+| - [load-balancer](#oneOf_i0_cloud-run_request-logs_load-balancer ) | No      | boolean | No         | -          | Enable load balancer request logs. The logs will be enabled with 1.0 sample rate.                     |
 
 ##### <a name="oneOf_i0_cloud-run_request-logs_cloud-run"></a>1.1.12.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > request-logs > cloud-run`
 
@@ -664,7 +664,7 @@ Must be one of:
 | **Required** | Yes       |
 | **Default**  | `true`    |
 
-**Description:** Enable cloud-run request logs. The logs for 5xx requests are always logged, even if disabled.
+**Description:** Enable cloud-run request logs. The logs for 429 and 5xx requests are always logged, even if disabled.
 
 ##### <a name="oneOf_i0_cloud-run_request-logs_load-balancer"></a>1.1.12.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > request-logs > load-balancer`
 
@@ -1731,4 +1731,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-09-01 at 12:09:04 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-09-02 at 13:49:18 +0200

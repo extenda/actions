@@ -145,7 +145,7 @@
           "required": [ "cloud-run" ],
           "properties": {
             "cloud-run": {
-              "description": "Enable cloud-run request logs. The logs for 5xx requests are always logged, even if disabled.",
+              "description": "Enable cloud-run request logs. The logs for 429 and 5xx requests are always logged, even if disabled.",
               "type": "boolean",
               "default": true
             },
