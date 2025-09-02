@@ -138,6 +138,28 @@
         },
         "monitoring": {
           "$ref": "#/$defs/Monitoring"
+        },
+        "request-logs": {
+          "description": "Configure which request logs to use (if any).",
+          "type": "object",
+          "required": [ "cloud-run" ],
+          "properties": {
+            "cloud-run": {
+              "description": "Enable cloud-run request logs. The logs for 429 and 5xx requests are always logged, even if disabled.",
+              "type": "boolean",
+              "default": true
+            },
+            "load-balancer": {
+              "description": "Enable load balancer request logs. The logs will be enabled with 1.0 sample rate.",
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "additionalProperties": false,
+          "default": {
+            "cloud-run": true,
+            "load-balancer": false
+          }
         }
       },
       "additionalProperties": false
@@ -270,6 +292,22 @@
         },
         "monitoring": {
           "$ref": "#/$defs/Monitoring"
+        },
+        "request-logs": {
+          "description": "Configure which request logs to use (if any).",
+          "type": "object",
+          "required": [ "load-balancer" ],
+          "properties": {
+            "load-balancer": {
+              "description": "Enable load balancer request logs. The logs will be enabled with 1.0 sample rate.",
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "additionalProperties": false,
+          "default": {
+            "load-balancer": false
+          }
         }
       },
       "additionalProperties": false
