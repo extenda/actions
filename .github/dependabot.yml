@@ -74,6 +74,9 @@ updates:
       - dependency-name: p-limit
         versions:
           - '>= 4'
+      - dependency-name: uuid
+        versions:
+          - '>= 12'
   - package-ecosystem: github-actions
     directory: /
     schedule:
