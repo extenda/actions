@@ -84,6 +84,11 @@ const generateDependabot = () => {
             'dependency-name': 'p-limit',
             versions: ['>= 4'],
           },
+          // uuid is an ESM from v12
+          {
+            'dependency-name': 'uuid',
+            versions: ['>= 12'],
+          },
         ],
       },
       {
