@@ -38,9 +38,11 @@ const postFileToSlackChannel = async (slackData, message, file) => {
   }
   return uploadToBucket(file, 'gs://extenda-slack-notify-files').then(() => {
     const fileName = file.split('/').pop();
-    message = message + `\n <https://storage.cloud.google.com/extenda-slack-notify-files/${fileName}|See full report>`
+    message =
+      message +
+      `\n <https://storage.cloud.google.com/extenda-slack-notify-files/${fileName}|See full report>`;
     return postMessageToSlackChannel(slackData, message);
-  })
+  });
 };
 
 const notifySlackMessage = async (serviceAccount, message, channelName) =>

@@ -1,7 +1,7 @@
-const { execGcloud } = require("../../setup-gcloud/src");
-const uploadToBucket = require("../src/upload-to-bucket");
+const { execGcloud } = require('../../setup-gcloud/src');
+const uploadToBucket = require('../src/upload-to-bucket');
 
-jest.mock("../../setup-gcloud/src");
+jest.mock('../../setup-gcloud/src');
 
 describe('uploadToBucket', () => {
   beforeEach(() => {
@@ -16,12 +16,7 @@ describe('uploadToBucket', () => {
     await uploadToBucket(file, bucket);
 
     expect(execGcloud).toHaveBeenCalledTimes(1);
-    expect(execGcloud).toHaveBeenCalledWith([
-      'storage',
-      'cp',
-      file,
-      bucket,
-    ]);
+    expect(execGcloud).toHaveBeenCalledWith(['storage', 'cp', file, bucket]);
   });
 
   test('should throw an error if execGcloud fails', async () => {
