@@ -1,11 +1,13 @@
-jest.mock('axios');
-jest.mock('@actions/core');
-jest.mock('../../gcp-secret-manager/src/secrets');
-
 const path = require('path');
 const axios = require('axios');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 const notifySlack = require('../src/slack-notify');
+const uploadToBucket = require('../src/upload-to-bucket');
+
+jest.mock('axios');
+jest.mock('@actions/core');
+jest.mock('../../gcp-secret-manager/src/secrets');
+jest.mock('../src/upload-to-bucket', () => jest.fn());
 
 describe('send Message to slack', () => {
   afterEach(() => {
@@ -14,6 +16,7 @@ describe('send Message to slack', () => {
 
   beforeEach(() => {
     loadSecret.mockResolvedValue('secret');
+    uploadToBucket.mockResolvedValue();
   });
 
   test('Can send message without channel', async () => {
@@ -48,6 +51,7 @@ describe('send Message to slack', () => {
       ),
     ).rejects.toThrow('File not found: missing-file.txt');
     expect(axios).not.toHaveBeenCalled();
+    expect(uploadToBucket).not.toHaveBeenCalled();
     expect(loadSecret).toHaveBeenCalledTimes(1);
   });
 
@@ -61,6 +65,7 @@ describe('send Message to slack', () => {
     );
     expect(result).toEqual(true);
     expect(axios).toHaveBeenCalledTimes(1);
+    expect(uploadToBucket).toHaveBeenCalledTimes(1);
     expect(loadSecret).toHaveBeenCalledTimes(1);
   });
 });
