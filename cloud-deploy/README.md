@@ -338,7 +338,8 @@ kubernetes:
       increments-cpu: 1 # the cpu increase each scale up trigger will increase CPU by
       max-cpu: 5 # the max cpu that the scaler will scale up to
       max-memory: 8Gi # the max memory the scaler will scale up to
-
+      scale-up-interval: 8 # the number of minutes to wait before allowing a scale up after scale down
+      scale-up-threshold: 5 # the number of successful checks in a row before scaling up
 ```
 
 The autoscaler functions with the following parameters:
