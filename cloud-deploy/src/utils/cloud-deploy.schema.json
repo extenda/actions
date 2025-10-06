@@ -249,6 +249,13 @@
                   "type": "integer",
                   "minimum": 1,
                   "maximum": 15
+                },
+                "scale-up-threshold": {
+                  "description": "the number of successfull scale up checks(minutes) before a scale up is triggered",
+                  "type": "integer",
+                  "default": 1,
+                  "minimum": 1,
+                  "maximum": 10
                 }
               }
             }
