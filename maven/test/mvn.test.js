@@ -11,6 +11,7 @@ jest.mock('@actions/exec');
 jest.mock('@actions/core');
 jest.mock('../../utils/src/versions');
 jest.mock('../src/nexus-credentials');
+jest.mock('../../setup-gcloud');
 const exec = require('@actions/exec');
 const core = require('@actions/core');
 const versions = require('../../utils/src/versions');

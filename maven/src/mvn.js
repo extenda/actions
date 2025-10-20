@@ -28,12 +28,17 @@ const setVersion = async (newVersion, workingDir = './') => {
   );
 };
 
-const copySettings = async () => {
+const copySettings = async (hasExtensions) => {
   core.debug('Copy maven-settings.xml');
   await io.mkdirP(mavenHome);
 
   const settings = {
-    extenda: path.join(__dirname, 'extenda-maven-settings.xml'),
+    extenda: path.join(
+      __dirname,
+      hasExtensions
+        ? 'extenda-maven-gcp-settings.xml'
+        : 'extenda-maven-settings.xml',
+    ),
     AbalonAb: path.join(__dirname, 'AbalonAb-maven-settings.xml'),
   };
 
@@ -41,6 +46,7 @@ const copySettings = async () => {
   const settingsFile = settings[owner] || settings.extenda;
   core.info(`Copy settings file ${settingsFile}`);
   await io.cp(settingsFile, mavenSettings, { force: true });
+  return owner === settings.extenda && hasExtensions;
 };
 
 module.exports = {

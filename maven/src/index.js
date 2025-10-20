@@ -4,6 +4,7 @@ const path = require('path');
 const mvn = require('./mvn');
 const { run } = require('../../utils');
 const versions = require('../../utils/src/versions');
+const { setupGcloud } = require('../../setup-gcloud');
 const loadNexusCredentials = require('./nexus-credentials');
 
 const setVersion = async (version, workingDir = './') =>
@@ -19,6 +20,9 @@ const pomExists = (args, workingDir = './') =>
   args.includes('--file=') ||
   fs.existsSync(path.join(workingDir, 'pom.xml'));
 
+const extensionsExists = (workingDir = './') =>
+  fs.existsSync(path.join(workingDir, '.mvn', 'extensions.xml'));
+
 const action = async () => {
   const args = core.getInput('args', { required: true });
   const version = core.getInput('version');
@@ -29,16 +33,21 @@ const action = async () => {
     core.getInput('nexus-password-secret-name') || '';
   const workingDir = core.getInput('working-directory');
 
-  await loadNexusCredentials(
-    serviceAccountKey,
-    nexusUsernameSecretName,
-    nexusPasswordSecretName,
-  );
-
   const hasPom = pomExists(args, workingDir);
 
   if (!process.env.MAVEN_INIT) {
-    await mvn.copySettings();
+    const usesArtifactRegistry = await mvn.copySettings(
+      extensionsExists(workingDir),
+    );
+    if (usesArtifactRegistry) {
+      await setupGcloud(serviceAccountKey);
+    } else {
+      await loadNexusCredentials(
+        serviceAccountKey,
+        nexusUsernameSecretName,
+        nexusPasswordSecretName,
+      );
+    }
     core.exportVariable('MAVEN_INIT', 'true');
     if (!version && hasPom) {
       await versions
