@@ -57,6 +57,7 @@
         - [2.1.8.2.3. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > scaling > vertical > max-cpu`](#oneOf_i1_kubernetes_scaling_vertical_max-cpu)
         - [2.1.8.2.4. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > scaling > vertical > max-memory`](#oneOf_i1_kubernetes_scaling_vertical_max-memory)
         - [2.1.8.2.5. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > scaling > vertical > scale-up-interval`](#oneOf_i1_kubernetes_scaling_vertical_scale-up-interval)
+        - [2.1.8.2.6. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > scaling > vertical > scale-up-threshold`](#oneOf_i1_kubernetes_scaling_vertical_scale-up-threshold)
     - [2.1.9. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > volumes`](#oneOf_i1_kubernetes_volumes)
       - [2.1.9.1. CloudDeploy > oneOf > Kubernetes > kubernetes > volumes > Volume](#oneOf_i1_kubernetes_volumes_items)
         - [2.1.9.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > volumes > Volume > disk-type`](#oneOf_i1_kubernetes_volumes_items_disk-type)
@@ -866,13 +867,14 @@ Must be one of:
 
 **Description:** Config for vertical scaling
 
-| Property                                                                        | Pattern | Type    | Deprecated | Definition | Title/Description                                                 |
-| ------------------------------------------------------------------------------- | ------- | ------- | ---------- | ---------- | ----------------------------------------------------------------- |
-| - [threshold](#oneOf_i1_kubernetes_scaling_vertical_threshold )                 | No      | integer | No         | -          | CPU percentage utilization for 1 pod to trigger vertical scaling. |
-| - [increments-cpu](#oneOf_i1_kubernetes_scaling_vertical_increments-cpu )       | No      | number  | No         | -          | CPU request increase on scale out trigger                         |
-| - [max-cpu](#oneOf_i1_kubernetes_scaling_vertical_max-cpu )                     | No      | number  | No         | -          | Max CPU allowed on scale out                                      |
-| - [max-memory](#oneOf_i1_kubernetes_scaling_vertical_max-memory )               | No      | string  | No         | -          | Max memory allowed on scale out in (Mi)                           |
-| - [scale-up-interval](#oneOf_i1_kubernetes_scaling_vertical_scale-up-interval ) | No      | integer | No         | -          | interval between scale ups                                        |
+| Property                                                                          | Pattern | Type    | Deprecated | Definition | Title/Description                                                                 |
+| --------------------------------------------------------------------------------- | ------- | ------- | ---------- | ---------- | --------------------------------------------------------------------------------- |
+| - [threshold](#oneOf_i1_kubernetes_scaling_vertical_threshold )                   | No      | integer | No         | -          | CPU percentage utilization for 1 pod to trigger vertical scaling.                 |
+| - [increments-cpu](#oneOf_i1_kubernetes_scaling_vertical_increments-cpu )         | No      | number  | No         | -          | CPU request increase on scale out trigger                                         |
+| - [max-cpu](#oneOf_i1_kubernetes_scaling_vertical_max-cpu )                       | No      | number  | No         | -          | Max CPU allowed on scale out                                                      |
+| - [max-memory](#oneOf_i1_kubernetes_scaling_vertical_max-memory )                 | No      | string  | No         | -          | Max memory allowed on scale out in (Mi)                                           |
+| - [scale-up-interval](#oneOf_i1_kubernetes_scaling_vertical_scale-up-interval )   | No      | integer | No         | -          | interval between scale ups                                                        |
+| - [scale-up-threshold](#oneOf_i1_kubernetes_scaling_vertical_scale-up-threshold ) | No      | integer | No         | -          | the number of successfull scale up checks(minutes) before a scale up is triggered |
 
 ###### <a name="oneOf_i1_kubernetes_scaling_vertical_threshold"></a>2.1.8.2.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > scaling > vertical > threshold`
 
@@ -942,6 +944,21 @@ Must be one of:
 | ------------ | ------- |
 | **Minimum**  | &ge; 1  |
 | **Maximum**  | &le; 15 |
+
+###### <a name="oneOf_i1_kubernetes_scaling_vertical_scale-up-threshold"></a>2.1.8.2.6. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > scaling > vertical > scale-up-threshold`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `1`       |
+
+**Description:** the number of successfull scale up checks(minutes) before a scale up is triggered
+
+| Restrictions |         |
+| ------------ | ------- |
+| **Minimum**  | &ge; 1  |
+| **Maximum**  | &le; 10 |
 
 #### <a name="oneOf_i1_kubernetes_volumes"></a>2.1.9. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > volumes`
 
@@ -1797,4 +1814,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-10-21 at 07:25:46 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-10-02 at 09:03:02 +0200
