@@ -40,8 +40,10 @@ const action = async () => {
       extensionsExists(workingDir),
     );
     if (usesArtifactRegistry) {
+      core.info('Use GCP Artifact Registry as repository');
       await setupGcloud(serviceAccountKey);
     } else {
+      core.info('Use Nexus Repository Manager as repository');
       await loadNexusCredentials(
         serviceAccountKey,
         nexusUsernameSecretName,
