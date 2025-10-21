@@ -20,7 +20,6 @@ const filePreview = (file, maxLines = 26) => {
 };
 
 const initSlack = async (serviceAccount, channelName) => {
-  core.info('Initializing Slack notification...');
   let channel = channelName;
   const slackToken = await loadSecret(serviceAccount, 'slack_notify_token');
   if (!channel) {
@@ -52,7 +51,6 @@ const postFileToSlackChannel = async (slackData, message, file) => {
   if (!fs.existsSync(file)) {
     throw new Error(`File not found: ${file}`);
   }
-  core.info(`Uploading file to bucket for Slack notification: ${file}`);
   return uploadToBucket(file, 'gs://extenda-slack-notify-files').then(() => {
     const fileName = file.split('/').pop();
     const preview = filePreview(file);
@@ -81,7 +79,6 @@ const notifySlackWithFile = async (
 
 const notifySlack = async (serviceAccount, message, channelName, file) => {
   if (file) {
-    core.info(`Notifying Slack with file: ${file}`);
     return notifySlackWithFile(serviceAccount, message, channelName, file);
   }
   return notifySlackMessage(serviceAccount, message, channelName);
