@@ -46,7 +46,7 @@ const copySettings = async (hasExtensions) => {
   const settingsFile = settings[owner] || settings.extenda;
   core.info(`Copy settings file ${settingsFile}`);
   await io.cp(settingsFile, mavenSettings, { force: true });
-  return owner === settings.extenda && hasExtensions;
+  return owner === 'extenda' && hasExtensions;
 };
 
 module.exports = {
