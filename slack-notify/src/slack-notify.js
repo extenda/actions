@@ -4,6 +4,21 @@ const fs = require('fs');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
 const uploadToBucket = require('./upload-to-bucket');
 
+const filePreview = (file, maxLines = 26) => {
+  if (!fs.existsSync(file)) {
+    return '_File not found for preview_';
+  }
+  const content = fs.readFileSync(file, 'utf8');
+  const allLines = content.split('\n');
+  let lines = allLines.slice(0, maxLines);
+  let preview = lines.join('\n');
+  let note = '';
+  if (allLines.length > maxLines) {
+    note += '\nPreview truncated. Download the file to see full content...';
+  }
+  return `\n*Preview:*\n\`\`\`${preview}\`\`\`${note}`;
+};
+
 const initSlack = async (serviceAccount, channelName) => {
   let channel = channelName;
   const slackToken = await loadSecret(serviceAccount, 'slack_notify_token');
@@ -38,9 +53,11 @@ const postFileToSlackChannel = async (slackData, message, file) => {
   }
   return uploadToBucket(file, 'gs://extenda-slack-notify-files').then(() => {
     const fileName = file.split('/').pop();
+    const preview = filePreview(file);
     message =
       message +
-      `\n <https://storage.cloud.google.com/extenda-slack-notify-files/${fileName}|See full report>`;
+      preview +
+      `\n<https://storage.cloud.google.com/extenda-slack-notify-files/${fileName}|See full content>`;
     return postMessageToSlackChannel(slackData, message);
   });
 };
