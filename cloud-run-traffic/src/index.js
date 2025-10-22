@@ -1,40 +1,21 @@
 const core = require('@actions/core');
 const { run } = require('../../utils/src');
-const { setupGcloud, execGcloud } = require('../../setup-gcloud');
-
-function validatePercentage(_percentage) {
-  const percentage = +_percentage;
-
-  if (Number.isNaN(percentage) || percentage < 0 || percentage > 100) {
-    throw new Error('Percentage must be a valid number between 0 and 100');
-  }
-
-  return percentage;
-}
-
-function routeTraffic(service, targetRevision, percentage, projectId) {
-  return execGcloud([
-    'run',
-    'services',
-    'update-traffic',
-    service,
-    `--to-revisions=${targetRevision}=${percentage}`,
-    '--region=europe-west1',
-    `--project=${projectId}`,
-  ]);
-}
+const { setupGcloud } = require('../../setup-gcloud');
 
 async function action() {
   const serviceAccountKey = core.getInput('service-account-key', {
     required: true,
   });
   const service = core.getInput('service', { required: true });
-  const targetRevision = core.getInput('target-revision', { required: true });
-  const percentage = validatePercentage(core.getInput('percentage') || '100');
 
   const projectId = await setupGcloud(serviceAccountKey);
 
-  await routeTraffic(service, targetRevision, percentage, projectId);
+  const serviceManagerUrl = `https://operations.retailsvc.com/ui/platform/service-manager/${projectId}/${service}`;
+  const deprecationMsg =
+    'This action is deprecated and is going to be removed soon. ' +
+    `It's recommended to use [Service manager UI](${serviceManagerUrl}) instead.`;
+
+  throw new Error(deprecationMsg);
 }
 
 if (require.main === module) {
