@@ -1,5 +1,8 @@
 # Cloud Run Traffic
 
+> Notice: this action is deprecated and is going to be removed soon.
+> It's recommended to use [Service manager UI](https://operations.retailsvc.com/ui/platform/service-manager) instead.
+
 A simple action for managing Cloud Run revisions traffic. Can be used for rollbacks or gradual rollouts.
 
 # Usage
