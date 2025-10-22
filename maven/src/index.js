@@ -35,13 +35,14 @@ const action = async () => {
 
   const hasPom = pomExists(args, workingDir);
 
+  await setupGcloud(serviceAccountKey);
+
   if (!process.env.MAVEN_INIT) {
     const usesArtifactRegistry = await mvn.copySettings(
       extensionsExists(workingDir),
     );
     if (usesArtifactRegistry) {
       core.info('Use GCP Artifact Registry as repository');
-      await setupGcloud(serviceAccountKey);
     } else {
       core.info('Use Nexus Repository Manager as repository');
       await loadNexusCredentials(
