@@ -1,18 +1,22 @@
 const core = require('@actions/core');
 const axios = require('axios');
-const FormData = require('form-data');
 const fs = require('fs');
 const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
+const uploadToBucket = require('./upload-to-bucket');
 
-const buildFormData = (channel, message, file) => {
+const filePreview = (file, maxLines = 26) => {
   if (!fs.existsSync(file)) {
-    throw new Error(`File not found: ${file}`);
+    return '_File not found for preview_';
   }
-  const formData = new FormData();
-  formData.append('file', fs.createReadStream(file));
-  formData.append('channels', channel);
-  formData.append('initial_comment', message);
-  return formData;
+  const content = fs.readFileSync(file, 'utf8');
+  const allLines = content.split('\n');
+  let lines = allLines.slice(0, maxLines);
+  let preview = lines.join('\n');
+  let note = '';
+  if (allLines.length > maxLines) {
+    note += '\nPreview truncated. Download the file to see full content...';
+  }
+  return `\n*Preview:*\n\`\`\`${preview}\`\`\`${note}`;
 };
 
 const initSlack = async (serviceAccount, channelName) => {
@@ -44,22 +48,18 @@ const postMessageToSlackChannel = async (slackData, message) =>
     });
 
 const postFileToSlackChannel = async (slackData, message, file) => {
-  const formData = buildFormData(slackData.channel, message, file);
-  const headers = {
-    Authorization: `Bearer ${slackData.token}`,
-    ...formData.getHeaders(),
-  };
-  return axios({
-    url: 'https://slack.com/api/files.upload',
-    method: 'POST',
-    data: formData,
-    headers,
-  })
-    .then(() => true)
-    .catch((err) => {
-      core.error(`Unable to send notification on slack! reason:\n${err}`);
-      return false;
-    });
+  if (!fs.existsSync(file)) {
+    throw new Error(`File not found: ${file}`);
+  }
+  return uploadToBucket(file, 'gs://extenda-slack-notify-files').then(() => {
+    const fileName = file.split('/').pop();
+    const preview = filePreview(file);
+    message =
+      message +
+      preview +
+      `\n<https://storage.cloud.google.com/extenda-slack-notify-files/${fileName}|See full content>`;
+    return postMessageToSlackChannel(slackData, message);
+  });
 };
 
 const notifySlackMessage = async (serviceAccount, message, channelName) =>
