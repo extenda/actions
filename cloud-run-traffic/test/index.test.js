@@ -24,10 +24,11 @@ describe('action', () => {
 
     core.getInput.mockImplementation((name) => stubValues[name]);
     execGcloud.mockResolvedValueOnce(stubValues['target-revision']);
-    const serviceManagerUrl = 'https://operations.retailsvc.com/ui/platform/service-manager/stub-project-id/service1';
+    const serviceManagerUrl =
+      'https://operations.retailsvc.com/ui/platform/service-manager/stub-project-id/service1';
     await expect(action()).rejects.toThrow(
-      'This action is deprecated and is going to be removed soon. '
-      + `It's recommended to use [Service manager UI](${serviceManagerUrl}) instead.`,
+      'This action is deprecated and is going to be removed soon. ' +
+        `It's recommended to use [Service manager UI](${serviceManagerUrl}) instead.`,
     );
   });
 });

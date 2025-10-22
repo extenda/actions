@@ -11,8 +11,9 @@ async function action() {
   const projectId = await setupGcloud(serviceAccountKey);
 
   const serviceManagerUrl = `https://operations.retailsvc.com/ui/platform/service-manager/${projectId}/${service}`;
-  const deprecationMsg = 'This action is deprecated and is going to be removed soon. '
-  + `It's recommended to use [Service manager UI](${serviceManagerUrl}) instead.`;
+  const deprecationMsg =
+    'This action is deprecated and is going to be removed soon. ' +
+    `It's recommended to use [Service manager UI](${serviceManagerUrl}) instead.`;
 
   throw new Error(deprecationMsg);
 }
