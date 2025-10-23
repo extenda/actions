@@ -4,7 +4,7 @@ This GitHub Action runs Maven preconfigured for Extenda Retail's Google Cloud Ar
 
   * Use Maven Central for open-source dependencies
   * Use Artifact Registry for everything else
-  * The deprecated Nexus Registry is supported until the project contains `.mvn/extensions.xml`
+  * The deprecated Nexus Registry is used as a fallback when the project does not contain `.mvn/extensions.xml`
 
 It also supports:
   * Semantic versioning from git tags. It will automatically update POM versions according to
