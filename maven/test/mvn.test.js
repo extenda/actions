@@ -11,6 +11,7 @@ jest.mock('@actions/exec');
 jest.mock('@actions/core');
 jest.mock('../../utils/src/versions');
 jest.mock('../src/nexus-credentials');
+jest.mock('../../setup-gcloud');
 const exec = require('@actions/exec');
 const core = require('@actions/core');
 const versions = require('../../utils/src/versions');
@@ -31,6 +32,9 @@ describe('Maven', () => {
     const settingsPath = path.resolve(
       path.join(__dirname, '../src/extenda-maven-settings.xml'),
     );
+    const gcpSettingsPath = path.resolve(
+      path.join(__dirname, '../src/extenda-maven-gcp-settings.xml'),
+    );
     const abalonPath = path.resolve(
       path.join(__dirname, '../src/AbalonAb-maven-settings.xml'),
     );
@@ -48,6 +52,7 @@ describe('Maven', () => {
     }
 
     fileSystem[settingsPath] = '<extenda />';
+    fileSystem[gcpSettingsPath] = '<extenda-gar />';
     fileSystem[abalonPath] = '<abalon />';
     return fileSystem;
   };
@@ -99,6 +104,19 @@ describe('Maven', () => {
     expect(
       fs.readFileSync(path.join(os.homedir(), '.m2', 'settings.xml'), 'utf8'),
     ).toEqual('<extenda />');
+  });
+
+  test('Copy GAR settings', async () => {
+    process.env.GITHUB_REPOSITORY = 'extenda/test-repo';
+    const result = await mvn.copySettings(true);
+    expect(result).toEqual(true);
+    const exists = fs.existsSync(
+      path.join(os.homedir(), '.m2', 'settings.xml'),
+    );
+    expect(exists).toEqual(true);
+    expect(
+      fs.readFileSync(path.join(os.homedir(), '.m2', 'settings.xml'), 'utf8'),
+    ).toEqual('<extenda-gar />');
   });
 
   test('Copy Abalon settings', async () => {
