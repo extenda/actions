@@ -35,7 +35,9 @@ const action = async () => {
 
   const hasPom = pomExists(args, workingDir);
 
-  await setupGcloud(serviceAccountKey, 'latest', true);
+  if (serviceAccountKey) {
+    await setupGcloud(serviceAccountKey, 'latest', true);
+  }
 
   if (!process.env.MAVEN_INIT) {
     const usesArtifactRegistry = await mvn.copySettings(
