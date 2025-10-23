@@ -215,8 +215,8 @@ const action = async () => {
       // make request to platform api to refresh canary status for service if serve-traffic is set to false
       if (!serveTraffic) {
         const serviceInfo = {
-          serviceName,
-          projectID,
+          service: serviceName,
+          project: projectID,
         };
         requests.push(refreshCanaryStatus(serviceInfo));
       }

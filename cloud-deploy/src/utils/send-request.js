@@ -4,19 +4,14 @@ const getToken = require('./identity-token');
 
 axios.defaults.baseURL = 'https://platform-api.retailsvc.com';
 
-const sendRequest = async (url, data, method = 'post') => {
-  const config = {
-    method,
-    url,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `bearer ${await getToken()}`,
-    },
-  };
-  if (method === 'post') {
-    config.data = data;
-  }
-  return axios(config)
+const sendRequest = async (url, data) => {
+  return axios
+    .post(url, data, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `bearer ${await getToken()}`,
+      },
+    })
     .then((response) => {
       const statuscode = response.status;
       core.info(`response from ${url} with response code ${statuscode}`);
@@ -40,11 +35,11 @@ const sendDeployRequest = async (data) => {
 };
 
 const refreshCanaryStatus = async (data) => {
-  const url = `/info/services?project=${data.projectID}&service=${data.serviceName}`;
-  const result = await sendRequest(url, null, 'get');
+  const url = `/services/revisions/canary`;
+  const result = await sendRequest(url, data);
   if (!result) {
     throw new Error(
-      `Couldn't refresh canary status for service in platform api`,
+      `Couldn't update canary status for service in platform api`,
     );
   }
   return result;
