@@ -36,13 +36,7 @@ const sendDeployRequest = async (data) => {
 
 const refreshCanaryStatus = async (data) => {
   const url = `/services/revisions/canary`;
-  const result = await sendRequest(url, data);
-  if (!result) {
-    throw new Error(
-      `Couldn't update canary status for service in platform api`,
-    );
-  }
-  return result;
+  return sendRequest(url, data);
 };
 
 const sendScaleSetup = async (

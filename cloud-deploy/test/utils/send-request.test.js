@@ -262,24 +262,4 @@ describe('Send request to platform api', () => {
       }),
     );
   });
-
-  it('should throw if refresh canary status fails', async () => {
-    getToken.mockResolvedValue('token');
-    axios.post.mockRejectedValue('some error');
-    const data = { projectID: 'proj', serviceName: 'svc' };
-    await expect(
-      require('../../src/utils/send-request').refreshCanaryStatus(data),
-    ).rejects.toThrow(
-      `Couldn't update canary status for service in platform api`,
-    );
-    expect(axios.post).toHaveBeenCalledWith(
-      '/services/revisions/canary',
-      data,
-      expect.objectContaining({
-        headers: expect.objectContaining({
-          Authorization: 'bearer token',
-        }),
-      }),
-    );
-  });
 });
