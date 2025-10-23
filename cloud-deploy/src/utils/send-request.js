@@ -4,14 +4,19 @@ const getToken = require('./identity-token');
 
 axios.defaults.baseURL = 'https://platform-api.retailsvc.com';
 
-const sendRequest = async (url, data) =>
-  axios
-    .post(url, data, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `bearer ${await getToken()}`,
-      },
-    })
+const sendRequest = async (url, data, method = 'post') => {
+  const config = {
+    method,
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `bearer ${await getToken()}`,
+    },
+  };
+  if (method === 'post') {
+    config.data = data;
+  }
+  return axios(config)
     .then((response) => {
       const statuscode = response.status;
       core.info(`response from ${url} with response code ${statuscode}`);
@@ -21,6 +26,7 @@ const sendRequest = async (url, data) =>
       core.error(`${error}`);
       return false;
     });
+};
 
 const sendDeployRequest = async (data) => {
   const url = '/loadbalancer/deploy';
@@ -28,6 +34,17 @@ const sendDeployRequest = async (data) => {
   if (!result) {
     throw new Error(
       'Deployment rolled out successfully! loadbalancer setup failed!',
+    );
+  }
+  return result;
+};
+
+const refreshCanaryStatus = async (data) => {
+  const url = `/info/services?project=${data.projectID}&service=${data.serviceName}`;
+  const result = await sendRequest(url, null, 'get');
+  if (!result) {
+    throw new Error(
+      `Couldn't refresh canary status for service in platform api`,
     );
   }
   return result;
@@ -99,4 +116,5 @@ module.exports = {
   sendDeployInfo,
   sendDeployRequest,
   saveVulnerabilities,
+  refreshCanaryStatus,
 };
