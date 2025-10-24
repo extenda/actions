@@ -36,7 +36,7 @@ const action = async () => {
   const hasPom = pomExists(args, workingDir);
 
   if (serviceAccountKey) {
-    await setupGcloud(serviceAccountKey, 'latest', true);
+    await setupGcloud(serviceAccountKey);
   }
 
   if (!process.env.MAVEN_INIT) {
