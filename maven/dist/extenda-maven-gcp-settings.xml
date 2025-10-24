@@ -37,6 +37,19 @@
             <enabled>false</enabled>
           </snapshots>
         </repository>
+        <repository>
+          <id>artifact-registry-releases</id>
+          <releases>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+            <checksumPolicy>fail</checksumPolicy>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+          <url>artifactregistry://europe-west1-maven.pkg.dev/extenda/maven-releases</url>
+          <layout>default</layout>
+        </repository>
       </repositories>
       <pluginRepositories>
         <pluginRepository>
@@ -48,6 +61,19 @@
           <snapshots>
             <enabled>false</enabled>
           </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+          <id>artifact-registry-releases</id>
+          <releases>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+            <checksumPolicy>fail</checksumPolicy>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+          <url>artifactregistry://europe-west1-maven.pkg.dev/extenda/maven-releases</url>
+          <layout>default</layout>
         </pluginRepository>
       </pluginRepositories>
     </profile>
