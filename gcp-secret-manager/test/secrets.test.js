@@ -1,12 +1,7 @@
-const mockSetupGcloud = jest.fn();
-const mockExecGcloud = jest.fn();
-
-jest.mock('../../setup-gcloud', () => ({
-  withGcloud: jest.requireActual('../../setup-gcloud').withGcloud,
-  setupGcloud: mockSetupGcloud,
+const mockSetupGcloud = require('../../setup-gcloud/src/setup-gcloud');
+const {
   execGcloud: mockExecGcloud,
-}));
-
+} = require('../../setup-gcloud/src/exec-gcloud');
 const core = require('@actions/core');
 const {
   parseInputYaml,
@@ -14,6 +9,9 @@ const {
   loadSecret,
   loadSecretIntoEnv,
 } = require('../src/secrets');
+
+jest.mock('../../setup-gcloud/src/exec-gcloud');
+jest.mock('../../setup-gcloud/src/setup-gcloud');
 
 const SECRET_JSON = JSON.stringify(
   {
