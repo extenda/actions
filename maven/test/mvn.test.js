@@ -16,6 +16,7 @@ const exec = require('@actions/exec');
 const core = require('@actions/core');
 const versions = require('../../utils/src/versions');
 const loadNexusCredentials = require('../src/nexus-credentials');
+const { withGcloud } = require('../../setup-gcloud');
 
 const mvn = require('../src/mvn');
 const action = require('../src/index');
@@ -64,6 +65,9 @@ describe('Maven', () => {
 
     // Make sure core.group executes callbacks.
     core.group.mockImplementation((name, fn) => fn());
+
+    // Make sure withGcloud executes callbacks.
+    withGcloud.mockImplementation((name, fn) => fn(name));
   });
 
   afterEach(() => {

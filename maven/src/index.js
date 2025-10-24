@@ -4,7 +4,7 @@ const path = require('path');
 const mvn = require('./mvn');
 const { run } = require('../../utils');
 const versions = require('../../utils/src/versions');
-const { setupGcloud } = require('../../setup-gcloud');
+const { withGcloud } = require('../../setup-gcloud');
 const loadNexusCredentials = require('./nexus-credentials');
 
 const setVersion = async (version, workingDir = './') =>
@@ -35,10 +35,6 @@ const action = async () => {
 
   const hasPom = pomExists(args, workingDir);
 
-  if (serviceAccountKey) {
-    await setupGcloud(serviceAccountKey);
-  }
-
   if (!process.env.MAVEN_INIT) {
     const usesArtifactRegistry = await mvn.copySettings(
       extensionsExists(workingDir),
@@ -61,11 +57,19 @@ const action = async () => {
     }
   }
 
-  if (hasPom && version && version !== 'pom.xml') {
-    await setVersion(version, workingDir);
-  }
+  const execMaven = async () => {
+    if (hasPom && version && version !== 'pom.xml') {
+      await setVersion(version, workingDir);
+    }
 
-  await mvn.run(args, workingDir);
+    await mvn.run(args, workingDir);
+  };
+
+  if (serviceAccountKey) {
+    await withGcloud(serviceAccountKey, execMaven);
+  } else {
+    await execMaven();
+  }
 };
 
 if (require.main === module) {
