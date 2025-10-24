@@ -28,9 +28,10 @@ const restorePreviousGcloudAccount = async (previousAccount) => {
 /**
  * Execute <code>fn</code> with gcloud signed in with the provided service account.
  * Gcloud is restored to its previous state before the method returns.
+ * @template T the type returned by the callback function <code>fn</code>
  * @param {string} serviceAccountKey the google cloud service account key
- * @param {function(string): Promise<string|undefined>} fn an async function to execute
- * @return {Promise<void>} a promise that completes when the function has executed
+ * @param {function(string): Promise<T>} fn an async function to execute
+ * @return {Promise<T>} a promise that completes when the function has executed
  */
 const withGcloud = async (serviceAccountKey, fn) => {
   let previousAccount;
