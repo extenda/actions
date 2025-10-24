@@ -20,6 +20,7 @@ describe('With Gcloud', () => {
   });
 
   test('It can run without existing gcloud installation', async () => {
+    delete process.env.GCLOUD_INSTALLED_VERSION;
     const callback = jest.fn();
 
     await withGcloud('json-key', callback);
