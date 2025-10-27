@@ -65,8 +65,8 @@ describe('collector-sidecar', () => {
           port: 13133,
         },
         initialDelaySeconds: 5,
-        periodSeconds: 10,
-        timeoutSeconds: 3,
+        periodSeconds: 20,
+        timeoutSeconds: 10,
         failureThreshold: 3,
       },
     });
