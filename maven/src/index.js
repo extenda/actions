@@ -20,11 +20,17 @@ const pomExists = (args, workingDir = './') =>
   args.includes('--file=') ||
   fs.existsSync(path.join(workingDir, 'pom.xml'));
 
-const extensionsExists = (workingDir = './') =>
-  fs.existsSync(path.join(workingDir, '.mvn', 'extensions.xml'));
+const extensionsExists = (workingDir = './') => {
+  const extensionsFile = path.join(workingDir, '.mvn', 'extensions.xml');
+  if (fs.existsSync(extensionsFile)) {
+    const fileContent = fs.readFileSync(extensionsFile, 'utf8');
+    return fileContent.includes('artifactregistry-maven-wagon');
+  }
+  return false;
+};
 
-const authExec = async (serviceAccountKey, fn) => {
-  if (serviceAccountKey) {
+const authExec = async (usesArtifactRegistry, serviceAccountKey, fn) => {
+  if (usesArtifactRegistry && serviceAccountKey) {
     await withGcloud(serviceAccountKey, fn);
   } else {
     await fn();
@@ -43,9 +49,11 @@ const action = async () => {
 
   const hasPom = pomExists(args, workingDir);
 
+  let usesArtifactRegistry = false;
+
   if (!process.env.MAVEN_INIT) {
-    const usesArtifactRegistry = await mvn.copySettings(
-      extensionsExists(workingDir),
+    usesArtifactRegistry = await mvn.copySettings(
+      serviceAccountKey && extensionsExists(workingDir),
     );
     if (usesArtifactRegistry) {
       core.info('Use GCP Artifact Registry as repository');
@@ -64,7 +72,7 @@ const action = async () => {
           .getBuildVersion('-SNAPSHOT')
           .then((v) => setVersion(v, workingDir));
 
-      await authExec(serviceAccountKey, snapshotVersion);
+      await authExec(usesArtifactRegistry, serviceAccountKey, snapshotVersion);
     }
   }
 
@@ -74,7 +82,7 @@ const action = async () => {
     }
     await mvn.run(args, workingDir);
   };
-  await authExec(serviceAccountKey, execMaven);
+  await authExec(usesArtifactRegistry, serviceAccountKey, execMaven);
 };
 
 if (require.main === module) {
