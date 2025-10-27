@@ -249,6 +249,25 @@ describe('Maven', () => {
       expect(core.exportVariable).toHaveBeenCalledTimes(1);
     });
 
+    test('It uses artifact registry when extensions present', async () => {
+      core.getInput
+        .mockReturnValueOnce('compile')
+        .mockReturnValueOnce('1.0.0')
+        .mockReturnValueOnce('service-account-key');
+
+      const fileSystem = getFs();
+      fileSystem['.mvn/extensions.xml'] =
+        '<artifactId>artifactregistry-maven-wagon</artifactId>';
+      mockFs(fileSystem);
+
+      await action();
+      expect(
+        fs.readFileSync(path.join(os.homedir(), '.m2', 'settings.xml'), 'utf8'),
+      ).toEqual('<extenda-gar />');
+      expect(withGcloud).toHaveBeenCalled();
+      expect(loadNexusCredentials).not.toHaveBeenCalled();
+    });
+
     test('It skips versioning for missing POM', async () => {
       core.getInput.mockReturnValueOnce('package');
       exec.exec.mockResolvedValueOnce(1);
