@@ -29,8 +29,8 @@ const extensionsExists = (workingDir = './') => {
   return false;
 };
 
-const authExec = async (serviceAccountKey, fn) => {
-  if (serviceAccountKey) {
+const authExec = async (usesArtifactRegistry, serviceAccountKey, fn) => {
+  if (usesArtifactRegistry && serviceAccountKey) {
     await withGcloud(serviceAccountKey, fn);
   } else {
     await fn();
@@ -49,8 +49,10 @@ const action = async () => {
 
   const hasPom = pomExists(args, workingDir);
 
+  let usesArtifactRegistry = false;
+
   if (!process.env.MAVEN_INIT) {
-    const usesArtifactRegistry = await mvn.copySettings(
+    usesArtifactRegistry = await mvn.copySettings(
       serviceAccountKey && extensionsExists(workingDir),
     );
     if (usesArtifactRegistry) {
@@ -70,7 +72,7 @@ const action = async () => {
           .getBuildVersion('-SNAPSHOT')
           .then((v) => setVersion(v, workingDir));
 
-      await authExec(serviceAccountKey, snapshotVersion);
+      await authExec(usesArtifactRegistry, serviceAccountKey, snapshotVersion);
     }
   }
 
@@ -80,7 +82,7 @@ const action = async () => {
     }
     await mvn.run(args, workingDir);
   };
-  await authExec(serviceAccountKey, execMaven);
+  await authExec(usesArtifactRegistry, serviceAccountKey, execMaven);
 };
 
 if (require.main === module) {
