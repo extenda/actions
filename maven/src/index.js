@@ -23,6 +23,14 @@ const pomExists = (args, workingDir = './') =>
 const extensionsExists = (workingDir = './') =>
   fs.existsSync(path.join(workingDir, '.mvn', 'extensions.xml'));
 
+const authExec = async (serviceAccountKey, fn) => {
+  if (serviceAccountKey) {
+    await withGcloud(serviceAccountKey, fn);
+  } else {
+    await fn();
+  }
+};
+
 const action = async () => {
   const args = core.getInput('args', { required: true });
   const version = core.getInput('version');
@@ -51,9 +59,12 @@ const action = async () => {
     }
     core.exportVariable('MAVEN_INIT', 'true');
     if (!version && hasPom) {
-      await versions
-        .getBuildVersion('-SNAPSHOT')
-        .then((v) => setVersion(v, workingDir));
+      const snapshotVersion = async () =>
+        versions
+          .getBuildVersion('-SNAPSHOT')
+          .then((v) => setVersion(v, workingDir));
+
+      await authExec(serviceAccountKey, snapshotVersion);
     }
   }
 
@@ -61,15 +72,9 @@ const action = async () => {
     if (hasPom && version && version !== 'pom.xml') {
       await setVersion(version, workingDir);
     }
-
     await mvn.run(args, workingDir);
   };
-
-  if (serviceAccountKey) {
-    await withGcloud(serviceAccountKey, execMaven);
-  } else {
-    await execMaven();
-  }
+  await authExec(serviceAccountKey, execMaven);
 };
 
 if (require.main === module) {
