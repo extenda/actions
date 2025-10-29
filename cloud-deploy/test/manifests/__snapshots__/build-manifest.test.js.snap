@@ -1655,6 +1655,7 @@ metadata:
     job-trigger: >-
       https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
     run.googleapis.com/ingress: internal-and-cloud-load-balancing
+    run.googleapis.com/binary-authorization: default
 spec:
   template:
     metadata:
