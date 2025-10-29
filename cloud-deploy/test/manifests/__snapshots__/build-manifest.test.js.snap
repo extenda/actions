@@ -170,7 +170,7 @@ spec:
         run.googleapis.com/sessionAffinity: 'false'
         run.googleapis.com/network-interfaces: '[{"network":"clan-network","subnetwork":"nat-subnet"}]'
         run.googleapis.com/vpc-access-egress: all-traffic
-        run.googleapis.com/container-dependencies: '{"collector":["user-container"]}'
+        run.googleapis.com/container-dependencies: '{"user-container":["collector"]}'
       labels:
         app: example-service
         product: actions
@@ -258,8 +258,8 @@ spec:
               path: /health
               port: 13133
             initialDelaySeconds: 5
-            periodSeconds: 10
-            timeoutSeconds: 3
+            periodSeconds: 20
+            timeoutSeconds: 10
             failureThreshold: 3
   traffic:
     - percent: 100
@@ -462,7 +462,7 @@ spec:
         run.googleapis.com/sessionAffinity: 'false'
         run.googleapis.com/network-interfaces: '[{"network":"clan-network","subnetwork":"nat-subnet"}]'
         run.googleapis.com/vpc-access-egress: all-traffic
-        run.googleapis.com/container-dependencies: '{"collector":["user-container"]}'
+        run.googleapis.com/container-dependencies: '{"user-container":["collector"]}'
       labels:
         app: example-service
         product: actions
@@ -530,8 +530,8 @@ spec:
               path: /health
               port: 13133
             initialDelaySeconds: 5
-            periodSeconds: 10
-            timeoutSeconds: 3
+            periodSeconds: 20
+            timeoutSeconds: 10
             failureThreshold: 3
   traffic:
     - percent: 100
@@ -1636,6 +1636,79 @@ spec:
         target:
           type: Utilization
           averageUtilization: 40
+"
+`;
+
+exports[`buildManifest should generate exclude-logs label 1`] = `
+"apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: example-service
+  labels:
+    app: example-service
+    label1: labelValue1
+    label2: labelValue2
+    tenant-alias: multi-tenant
+    iso-country: global
+    exclude-logs: cloud-run
+  annotations:
+    job-trigger: >-
+      https://github.com/example-organization/example-repository/actions/runs/example-run-id/attempts/1
+    run.googleapis.com/ingress: internal-and-cloud-load-balancing
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/execution-environment: gen2
+        autoscaling.knative.dev/minScale: 1
+        autoscaling.knative.dev/maxScale: 10
+        run.googleapis.com/cpu-throttling: 'true'
+        run.googleapis.com/startup-cpu-boost: 'false'
+        run.googleapis.com/sessionAffinity: 'false'
+        run.googleapis.com/network-interfaces: '[{"network":"clan-network","subnetwork":"nat-subnet"}]'
+        run.googleapis.com/vpc-access-egress: all-traffic
+      labels:
+        app: example-service
+        label1: labelValue1
+        label2: labelValue2
+        tenant-alias: multi-tenant
+        iso-country: global
+        exclude-logs: cloud-run
+    spec:
+      containerConcurrency: 40
+      timeoutSeconds: ''
+      serviceAccountName: example-service@example-project.iam.gserviceaccount.com
+      containers:
+        - image: example-image:latest
+          name: user-container
+          ports:
+            - name: http1
+              containerPort: 8080
+          resources:
+            limits:
+              cpu: 1
+              memory: 512Mi
+          env:
+            - name: SERVICE_NAME
+              value: example-service
+            - name: SERVICE_PROJECT_ID
+              value: example-project
+            - name: SERVICE_ENVIRONMENT
+              value: production
+            - name: SERVICE_CONTAINER_IMAGE
+              value: example-image:latest
+            - name: CLAN_NAME
+              value: example-clan
+          startupProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 240
+            failureThreshold: 1
+            timeoutSeconds: 240
+  traffic:
+    - percent: 100
+      latestRevision: true
 "
 `;
 

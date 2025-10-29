@@ -23,13 +23,17 @@ describe('collector-sidecar', () => {
     expect(container).toBeNull();
   });
   test('It creates a Cloud Run collector container for GMP', async () => {
-    const container = await cloudRunCollector('test', {
-      prometheus: {
-        path: '/metrics',
-        port: 8081,
-        interval: 15,
+    const container = await cloudRunCollector(
+      'test',
+      {
+        prometheus: {
+          path: '/metrics',
+          port: 8081,
+          interval: 15,
+        },
       },
-    });
+      'v1.5.5',
+    );
     expect(container).toEqual({
       image: 'eu.gcr.io/extenda/otel-collector@sha256:123',
       name: 'collector',
@@ -61,10 +65,37 @@ describe('collector-sidecar', () => {
           port: 13133,
         },
         initialDelaySeconds: 5,
-        periodSeconds: 10,
-        timeoutSeconds: 3,
+        periodSeconds: 20,
+        timeoutSeconds: 10,
         failureThreshold: 3,
       },
+    });
+  });
+  test('It creates a security-authz pipeline for GMP for new security-authz', async () => {
+    const container = await cloudRunCollector(
+      'test',
+      {
+        prometheus: {
+          path: '/metrics',
+          port: 8081,
+          interval: 15,
+        },
+      },
+      'v1.6.0',
+    );
+    expect(container).toMatchObject({
+      name: 'collector',
+      env: [
+        { name: 'SERVICE_NAME', value: 'test' },
+        { name: 'PROMETHEUS_SCRAPE_PATH', value: '/metrics' },
+        { name: 'PROMETHEUS_SCRAPE_PORT', value: '8081' },
+        { name: 'PROMETHEUS_SCRAPE_INTERVAL', value: '15' },
+        { name: 'CONFIG_PROMETHEUS', value: 'gmp' },
+        {
+          name: 'CONFIG_PROMETHEUS_PIPELINES',
+          value: 'user-container security-authz',
+        },
+      ],
     });
   });
   test('It does not create a GKE collector for GMP', async () => {
@@ -129,22 +160,17 @@ describe('collector-sidecar', () => {
     });
   });
   test('It sets custom OTEL environment for user-container', () => {
-    const env = userContainerCollectorEnv(
-      'my-service',
-      'image-no-tag',
-      {
-        'open-telemetry': {
-          config: {
-            'otlp-exporter-protocol': 'http/protobuf',
-            sampler: 'traceidratio',
-            'sampler-ratio': '0.5',
-            propagators: ['tracecontext'],
-            collect: ['traces', 'metrics'],
-          },
+    const env = userContainerCollectorEnv('my-service', 'image-no-tag', {
+      'open-telemetry': {
+        config: {
+          'otlp-exporter-protocol': 'http/protobuf',
+          sampler: 'traceidratio',
+          'sampler-ratio': '0.5',
+          propagators: ['tracecontext'],
+          collect: ['traces', 'metrics'],
         },
       },
-      true,
-    );
+    });
     expect(env).toEqual({
       OTEL_SERVICE_NAME: 'my-service',
       OTEL_RESOURCE_ATTRIBUTES: 'service.version=v0.0.1-local',
@@ -159,34 +185,11 @@ describe('collector-sidecar', () => {
     });
   });
   test('It does not set OTEL environment if OTEL is not enabled', async () => {
-    const env = userContainerCollectorEnv(
-      'my-service',
-      image,
-      {
-        prometheus: {
-          interval: 60,
-        },
+    const env = userContainerCollectorEnv('my-service', image, {
+      prometheus: {
+        interval: 60,
       },
-      true,
-    );
-    expect(env).toEqual({});
-  });
-  test('It disabled OTEL on staging', async () => {
-    const env = userContainerCollectorEnv(
-      'my-service',
-      image,
-      {
-        'open-telemetry': {
-          config: 'auto',
-        },
-      },
-      false,
-    );
-    expect(env).toEqual({
-      OTEL_SDK_DISABLED: 'true',
-      OTEL_TRACES_EXPORTER: 'none',
-      OTEL_METRICS_EXPORTER: 'none',
-      OTEL_LOGS_EXPORTER: 'none',
     });
+    expect(env).toEqual({});
   });
 });

@@ -5,6 +5,6 @@
   "description": "Execute unit tests for Rego rules using OPA and a GCS bundle.",
   "main": "dist/index.js",
   "dependencies": {
-    "yaml": "^2.8.0"
+    "yaml": "^2.8.1"
   }
 }

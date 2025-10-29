@@ -4,6 +4,7 @@ const path = require('path');
 const mvn = require('./mvn');
 const { run } = require('../../utils');
 const versions = require('../../utils/src/versions');
+const { withGcloud } = require('../../setup-gcloud');
 const loadNexusCredentials = require('./nexus-credentials');
 
 const setVersion = async (version, workingDir = './') =>
@@ -19,6 +20,23 @@ const pomExists = (args, workingDir = './') =>
   args.includes('--file=') ||
   fs.existsSync(path.join(workingDir, 'pom.xml'));
 
+const extensionsExists = (workingDir = './') => {
+  const extensionsFile = path.join(workingDir, '.mvn', 'extensions.xml');
+  if (fs.existsSync(extensionsFile)) {
+    const fileContent = fs.readFileSync(extensionsFile, 'utf8');
+    return fileContent.includes('artifactregistry-maven-wagon');
+  }
+  return false;
+};
+
+const authExec = async (usesArtifactRegistry, serviceAccountKey, fn) => {
+  if (usesArtifactRegistry && serviceAccountKey) {
+    await withGcloud(serviceAccountKey, fn);
+  } else {
+    await fn();
+  }
+};
+
 const action = async () => {
   const args = core.getInput('args', { required: true });
   const version = core.getInput('version');
@@ -29,29 +47,42 @@ const action = async () => {
     core.getInput('nexus-password-secret-name') || '';
   const workingDir = core.getInput('working-directory');
 
-  await loadNexusCredentials(
-    serviceAccountKey,
-    nexusUsernameSecretName,
-    nexusPasswordSecretName,
-  );
-
   const hasPom = pomExists(args, workingDir);
 
+  let usesArtifactRegistry = false;
+
   if (!process.env.MAVEN_INIT) {
-    await mvn.copySettings();
+    usesArtifactRegistry = await mvn.copySettings(
+      serviceAccountKey && extensionsExists(workingDir),
+    );
+    if (usesArtifactRegistry) {
+      core.info('Use GCP Artifact Registry as repository');
+    } else {
+      core.info('Use Nexus Repository Manager as repository');
+      await loadNexusCredentials(
+        serviceAccountKey,
+        nexusUsernameSecretName,
+        nexusPasswordSecretName,
+      );
+    }
     core.exportVariable('MAVEN_INIT', 'true');
     if (!version && hasPom) {
-      await versions
-        .getBuildVersion('-SNAPSHOT')
-        .then((v) => setVersion(v, workingDir));
+      const snapshotVersion = async () =>
+        versions
+          .getBuildVersion('-SNAPSHOT')
+          .then((v) => setVersion(v, workingDir));
+
+      await authExec(usesArtifactRegistry, serviceAccountKey, snapshotVersion);
     }
   }
 
-  if (hasPom && version && version !== 'pom.xml') {
-    await setVersion(version, workingDir);
-  }
-
-  await mvn.run(args, workingDir);
+  const execMaven = async () => {
+    if (hasPom && version && version !== 'pom.xml') {
+      await setVersion(version, workingDir);
+    }
+    await mvn.run(args, workingDir);
+  };
+  await authExec(usesArtifactRegistry, serviceAccountKey, execMaven);
 };
 
 if (require.main === module) {

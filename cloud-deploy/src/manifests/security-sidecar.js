@@ -1,11 +1,12 @@
 const core = require('@actions/core');
 const getImageWithSha256 = require('./image-sha256');
 const selectSemver = require('../utils/select-semver');
+const { loadCacheKeys } = require('../utils/security-cache-keys');
 
 const IMAGE_NAME = 'eu.gcr.io/extenda/security';
 
 // The generally available and stable security sidecar version.
-const STABLE_VERSION = 'v1.5.5';
+const STABLE_VERSION = 'v1.7.4';
 
 const volumeMounts = (protocol) => {
   const volumes = [];
@@ -67,6 +68,15 @@ const securitySpec = async (
         value: customBucketName,
       });
     }
+
+    const cacheKeys = loadCacheKeys();
+    if (cacheKeys) {
+      env.push({
+        name: 'CACHE_KEYS',
+        value: JSON.stringify(cacheKeys),
+      });
+    }
+
     return {
       name: 'security-authz',
       image,

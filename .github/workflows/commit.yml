@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.actor != 'dependabot[bot]'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -37,7 +37,7 @@ jobs:
           npm test -- --ci
           echo "::`echo -n "$GITHUB_RUN_ID-$GITHUB_RUN_NUMBER" | sha256sum | head -c 64`::"
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.actor != 'dependabot[bot]'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: ./.github/actions/build-dist
 
@@ -70,12 +70,12 @@ jobs:
           fi
 
   acceptance-windows:
-    runs-on: windows-latest
+    runs-on: windows-2025
     if: github.actor != 'dependabot[bot]'
     needs:
       - verify-dist
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -141,10 +141,10 @@ jobs:
     needs:
       - verify-dist
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: adopt
           java-version: 11
@@ -231,7 +231,7 @@ jobs:
       - acceptance-windows
       - acceptance-linux
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 

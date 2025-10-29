@@ -1,3 +1,4 @@
+const semver = require('semver');
 const getImageWithSha256 = require('./image-sha256');
 const selectSemver = require('../utils/select-semver');
 const STABLE_TAG = 'v2.1.2';
@@ -71,7 +72,7 @@ const imageTag = (monitoring = {}) => {
   );
 };
 
-const cloudRunCollector = async (serviceName, monitoring) => {
+const cloudRunCollector = async (serviceName, monitoring, securityVersion) => {
   const config = getConfig(serviceName, monitoring || {});
 
   if (!config.prometheus.enabled && !config.openTelemetry.enabled) {
@@ -81,6 +82,10 @@ const cloudRunCollector = async (serviceName, monitoring) => {
   let env = {};
   if (config.prometheus.enabled) {
     env = { ...env, ...config.prometheus.collectorEnv };
+    if (semver.compare(securityVersion, 'v1.6.0') >= 0) {
+      // The security sidecar is recent enough to support Prometheus scraping.
+      env.CONFIG_PROMETHEUS_PIPELINES = 'user-container security-authz';
+    }
   }
 
   if (config.openTelemetry.enabled) {
@@ -119,8 +124,8 @@ const cloudRunCollector = async (serviceName, monitoring) => {
         port: 13133,
       },
       initialDelaySeconds: 5,
-      periodSeconds: 10,
-      timeoutSeconds: 3,
+      periodSeconds: 20,
+      timeoutSeconds: 10,
       failureThreshold: 3,
     },
   };
@@ -166,23 +171,10 @@ const kubernetesCollector = async (serviceName, monitoring) => {
   };
 };
 
-const userContainerCollectorEnv = (
-  serviceName,
-  serviceImage,
-  monitoring,
-  isProdEnv = true,
-) => {
+const userContainerCollectorEnv = (serviceName, serviceImage, monitoring) => {
   const { openTelemetry } = getConfig(serviceName, monitoring);
 
   if (openTelemetry.enabled && openTelemetry.autoEnvironmentVariables) {
-    if (!isProdEnv) {
-      return {
-        OTEL_SDK_DISABLED: 'true',
-        OTEL_TRACES_EXPORTER: 'none',
-        OTEL_METRICS_EXPORTER: 'none',
-        OTEL_LOGS_EXPORTER: 'none',
-      };
-    }
     const { otlpProtocol, sampler, collect } = openTelemetry;
     const endpoint =
       otlpProtocol === 'grpc'

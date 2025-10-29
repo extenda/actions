@@ -6,11 +6,11 @@
   "main": "dist/index.js",
   "dependencies": {
     "@actions/github": "^6.0.1",
-    "axios": "^1.10.0",
+    "axios": "^1.12.1",
     "fast-glob": "^3.3.3",
     "jsonschema": "^1.5.0",
     "multiline-str": "^1.0.4",
     "uuid": "^11.1.0",
-    "yaml": "^2.8.0"
+    "yaml": "^2.8.1"
   }
 }

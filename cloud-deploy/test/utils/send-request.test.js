@@ -244,4 +244,22 @@ describe('Send request to platform api', () => {
       },
     );
   });
+
+  it('should refresh canary status successfully', async () => {
+    getToken.mockResolvedValue('token');
+    axios.post.mockResolvedValue({ status: 200 });
+    const data = { projectID: 'proj', serviceName: 'svc' };
+    await expect(
+      require('../../src/utils/send-request').refreshCanaryStatus(data),
+    ).resolves.toBe(true);
+    expect(axios.post).toHaveBeenCalledWith(
+      '/services/revisions/canary',
+      data,
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Authorization: 'bearer token',
+        }),
+      }),
+    );
+  });
 });

@@ -184,6 +184,15 @@ const buildManifest = async (
     labels['iso-country'] = 'global';
   }
 
+  if (cloudrun) {
+    const { 'request-logs': { 'cloud-run': enableCloudRunLogs = true } = {} } =
+      cloudrun;
+    if (enableCloudRunLogs === false) {
+      // Add label used by exclude-filter that removes cloud-run request logs.
+      labels['exclude-logs'] = 'cloud-run';
+    }
+  }
+
   const labelArray = Object.entries(labels).map(([key, value]) => ({
     name: key,
     value,
@@ -210,11 +219,11 @@ const buildManifest = async (
   }
 
   // Add open telemetry config to the user-container.
-  Object.entries(
-    userContainerCollectorEnv(name, image, monitoring, deployEnv !== 'staging'),
-  ).forEach(([key, value]) => {
-    envArray.push({ name: key, value });
-  });
+  Object.entries(userContainerCollectorEnv(name, image, monitoring)).forEach(
+    ([key, value]) => {
+      envArray.push({ name: key, value });
+    },
+  );
 
   const serviceAccount = `${name}@${projectId}.iam.gserviceaccount.com`;
 
@@ -293,17 +302,15 @@ const buildManifest = async (
       await addNamespace(http2Certificate, name),
     );
 
-    if (deployEnv !== 'staging') {
-      const podMonitor = podMonitorManifest(name, monitoring);
-      if (podMonitor) {
-        core.info('Create PodMonitoring resource');
-        generateManifest(
-          'k8s(deploy)-podmonitor.yaml',
-          convertToYaml(podMonitor),
-        );
-      } else {
-        await deletePodMonitor(name);
-      }
+    const podMonitor = podMonitorManifest(name, monitoring);
+    if (podMonitor) {
+      core.info('Create PodMonitoring resource');
+      generateManifest(
+        'k8s(deploy)-podmonitor.yaml',
+        convertToYaml(podMonitor),
+      );
+    } else {
+      await deletePodMonitor(name);
     }
   } else {
     const {

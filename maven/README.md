@@ -1,15 +1,14 @@
 # maven
 
-This GitHub Action runs Maven preconfigured for Extenda Retail's Nexus Repository Manager.
+This GitHub Action runs Maven preconfigured for Extenda Retail's Google Cloud Artifact Registry.
 
   * Use Maven Central for open-source dependencies
-  * Use [repo.extendaretail.com](https://repo.extendaretail.com) for everything else
+  * Use Artifact Registry for everything else
+  * The deprecated Nexus Registry is used as a fallback when the project does not contain `.mvn/extensions.xml`
 
 It also supports:
   * Semantic versioning from git tags. It will automatically update POM versions according to
 [conventional-version](../conventional-version#readme) before building
-  * ~~Automatic caching of the `~/.m2/repository`&nbsp;~~
-  * Loading Nexus repository credentials from GCP secret manager
   * Use of Maven Wrapper (`mvnw` or `mvnw.cmd`) when detected
 
 ## Usage
@@ -24,49 +23,11 @@ secret payloads. Once created, the JSON key should be `base64` encoded and added
 It is recommended that the service account _only_ has permissions to access secrets. Do not allow modifications or
 access to any other resources in your project.
 
-The following environment variables are used. They are optional if a service account key is used, otherwhise required.
-
-  * `NEXUS_USERNAME`: user for [repo.extendaretail.com](https://repo.extendaretail.com)
-  * `NEXUS_PASSWORD`: password for [repo.extendaretail.com](https://repo.extendaretail.com)
-
 ### Examples
-
-#### Basic Usage
-
-This example runs tests on a Maven project for every `push` event. The build version will be determined by commit history
-and conventional commit messages.
-
-```
-on: push
-
-env:
-  NEXUS_USERNAME: username
-  NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-java@v2
-        with:
-          distribution: adopt
-          java-version: 11
-          cache: maven
-
-      - name: Unit tests
-        uses: extenda/actions/maven@v0
-        with:
-          args: test
-```
 
 ### Basic Usage With Secret Manager
 
-This example shows how to load Nexus credentials automatically using the built-in support for GCP secret manager and
-the default secret names.
+This example shows how to load credentials automatically using a service account.
 
 ```
 on: push
@@ -75,48 +36,17 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v5
         with:
-          distribution: adopt
-          java-version: 11
+          java-version-file: .java-version
           cache: maven
 
       - name: Unit tests
         uses: extenda/actions/maven@v0
         with:
           service-account-key: ${{ secrets.SECRET_AUTH }}
-          args: test
-```
-
-The action can also be used with manually loaded secrets.
-
-```
-on: push
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: extenda/actions/gcp-secret-manager@v0
-        with:
-          service-account-key: ${{ secrets.SECRET_AUTH }}
-          secrets: |
-            NEXUS_PASSWORD: nexus-password
-            NEXUS_USERNAME: nexus-username
-
-      - uses: actions/setup-java@v2
-        with:
-          distribution: adopt
-          java-version: 11
-          cache: maven
-
-      - name: Unit tests
-        uses: extenda/actions/maven@v0
-        with:
           args: test
 ```
 
@@ -132,24 +62,17 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
 
-      - uses: extenda/actions/gcp-secret-manager@v0
+      - uses: actions/setup-java@v5
         with:
-          service-account-key: ${{ secrets.SECRET_AUTH }}
-          secrets: |
-            NEXUS_PASSWORD: nexus-password
-            NEXUS_USERNAME: nexus-username
-
-      - uses: actions/setup-java@v2
-        with:
-          distribution: adopt
-          java-version: 11
+          java-version-file: .java-version
           cache: maven
 
       - name: Unit tests
         uses: extenda/actions/maven@v0
         with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
           args: test
           version: pom.xml
 ```
@@ -173,21 +96,13 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/master'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - uses: extenda/actions/gcp-secret-manager@v0
+      - uses: actions/setup-java@v5
         with:
-          service-account-key: ${{ secrets.SECRET_AUTH }}
-          secrets: |
-            NEXUS_PASSWORD: nexus-password
-            NEXUS_USERNAME: nexus-username
-
-      - uses: actions/setup-java@v2
-        with:
-          distribution: adopt
-          java-version: 11
+          java-version-file: .java-version
           cache: maven
 
       - name: Create release
@@ -199,6 +114,7 @@ jobs:
       - name: Build release
         uses: extenda/actions/maven@v0
         with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
           args: deploy
           version: ${{ steps.release.outputs.version }}
 ```

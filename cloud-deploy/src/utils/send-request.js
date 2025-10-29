@@ -4,8 +4,8 @@ const getToken = require('./identity-token');
 
 axios.defaults.baseURL = 'https://platform-api.retailsvc.com';
 
-const sendRequest = async (url, data) =>
-  axios
+const sendRequest = async (url, data) => {
+  return axios
     .post(url, data, {
       headers: {
         'Content-Type': 'application/json',
@@ -21,6 +21,7 @@ const sendRequest = async (url, data) =>
       core.error(`${error}`);
       return false;
     });
+};
 
 const sendDeployRequest = async (data) => {
   const url = '/loadbalancer/deploy';
@@ -31,6 +32,11 @@ const sendDeployRequest = async (data) => {
     );
   }
   return result;
+};
+
+const refreshCanaryStatus = async (data) => {
+  const url = `/services/revisions/canary`;
+  return sendRequest(url, data);
 };
 
 const sendScaleSetup = async (
@@ -99,4 +105,5 @@ module.exports = {
   sendDeployInfo,
   sendDeployRequest,
   saveVulnerabilities,
+  refreshCanaryStatus,
 };

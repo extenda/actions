@@ -1,45 +1,9 @@
 const core = require('@actions/core');
 const YAML = require('yaml');
 const checkEnv = require('../../utils/src/check-env');
-const { setupGcloud, execGcloud } = require('../../setup-gcloud');
+const { execGcloud, withGcloud } = require('../../setup-gcloud');
 
-let previousAccount;
-let projectId;
-
-const getGcloudAccount = async () =>
-  execGcloud(['config', 'get', 'account', '--format=json'], 'gcloud', true)
-    .then(JSON.parse)
-    .then((account) => {
-      if (typeof account === 'string' && account.length > 0) {
-        return account;
-      }
-      return null;
-    })
-    .catch(() => null);
-
-const prepareGcloud = async (serviceAccountKey) => {
-  if (process.env.GCLOUD_INSTALLED_VERSION) {
-    previousAccount = await getGcloudAccount();
-  }
-  return setupGcloud(serviceAccountKey);
-};
-
-const restorePreviousGcloudAccount = async () => {
-  if (previousAccount) {
-    const current = await getGcloudAccount();
-    if (previousAccount !== current) {
-      core.info(`Restore gcloud account ${previousAccount}`);
-      await execGcloud(
-        ['config', 'set', 'account', previousAccount],
-        'gcloud',
-        true,
-      );
-    }
-  }
-  previousAccount = null;
-};
-
-const accessSecretValue = async (name) =>
+const accessSecretValue = async (projectId, name) =>
   execGcloud(
     [
       'secrets',
@@ -59,31 +23,26 @@ const accessSecretValue = async (name) =>
 
 const parseInputYaml = (secretsYaml) => YAML.parse(secretsYaml);
 
-const loadSecrets = async (serviceAccountKey, secrets = {}) => {
-  projectId = await prepareGcloud(serviceAccountKey);
-  try {
+const loadSecrets = async (serviceAccountKey, secrets = {}) =>
+  withGcloud(serviceAccountKey, async (projectId) => {
     for (const env of Object.keys(secrets)) {
       const name = secrets[env];
       core.info(`Load secret '${name}'`);
 
-      const secret = await accessSecretValue(name);
+      const secret = await accessSecretValue(projectId, name);
       core.setSecret(secret);
       core.exportVariable(env, secret);
     }
-  } finally {
-    await restorePreviousGcloudAccount();
-  }
-};
-
-const loadSecret = async (serviceAccountKey, name) => {
-  projectId = await prepareGcloud(serviceAccountKey);
-  const value = await accessSecretValue(name).then((secret) => {
-    core.setSecret(secret);
-    return secret;
   });
-  await restorePreviousGcloudAccount();
-  return value;
-};
+
+const loadSecret = async (serviceAccountKey, name) =>
+  withGcloud(serviceAccountKey, async (projectId) => {
+    const value = await accessSecretValue(projectId, name).then((secret) => {
+      core.setSecret(secret);
+      return secret;
+    });
+    return value;
+  });
 
 const loadSecretIntoEnv = async (
   serviceAccountKey,

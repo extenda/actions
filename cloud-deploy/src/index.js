@@ -14,6 +14,7 @@ const {
   sendScaleSetup,
   sendDeployInfo,
   sendDeployRequest,
+  refreshCanaryStatus,
 } = require('./utils/send-request');
 const { securityVersion } = require('./manifests/security-sidecar');
 const { imageTag: collectorVersion } = require('./manifests/collector-sidecar');
@@ -82,12 +83,14 @@ const action = async () => {
 
   const {
     timeout = 300,
+    type = 'cloud-run',
     service: serviceName,
     protocol,
     'internal-traffic': internalTraffic = true,
     scaling,
     monitoring,
     traffic = {},
+    'request-logs': { 'load-balancer': enableLoadBalancerLogs = false } = {},
   } = kubernetes || cloudrun;
 
   const { staging, production } = environments;
@@ -99,7 +102,10 @@ const action = async () => {
 
   const { 'policy-name': cloudArmorPolicy = undefined } = cloudArmor || {};
 
-  const { 'static-egress-ip': staticEgress = true } = traffic;
+  const {
+    'static-egress-ip': staticEgress = true,
+    'serve-traffic': serveTraffic = true,
+  } = traffic;
 
   if (!cloudrun && consumers) {
     throw new Error('Consumers security configuration is only for cloud-run');
@@ -206,6 +212,15 @@ const action = async () => {
         ),
       );
 
+      // make request to platform api to refresh canary status for service if serve-traffic is set to false
+      if (!serveTraffic) {
+        const serviceInfo = {
+          service: serviceName,
+          project: projectID,
+        };
+        requests.push(refreshCanaryStatus(serviceInfo));
+      }
+
       await Promise.all(requests);
     }
 
@@ -213,13 +228,14 @@ const action = async () => {
       serviceName,
       projectID,
       platform: platformGKE ? 'kubernetes' : 'cloud-run',
+      type,
       protocol,
       timeout,
       region: 'europe-west1',
       migrate,
       cloudArmorPolicy,
       internalTraffic,
-      loggingSampleRate: 0,
+      loggingSampleRate: enableLoadBalancerLogs ? 1 : 0,
       domainMappings: domainMappingsClone,
       pathMappings,
       staticEgress,

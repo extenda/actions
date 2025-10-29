@@ -42,32 +42,34 @@ will be processed independent of others.
 The YAML syntax is formally defined with [JSON Schema](src/iam-schema.js). The following table explains what
 properties are required and not.
 
-| Property                                      | Description                                                                                                          | Required |
-|:----------------------------------------------|:---------------------------------------------------------------------------------------------------------------------|:---------|
-| `name`                                        | The name of the service system                                                                                       | No       |
-| `permission-prefix`                           | The permission prefix, this will be prefixed to every permission and roles id. ([a-z][-a-z]{2})                      | Yes      |
-| `services`                                    | A list of services that need a DAS system                                                                            | Yes      |
-| `services.name`                               | The service name of the system to be created                                                                         | Yes      |
-| `services.repository`                         | The description of the service                                                                                       | Yes      |
-| `services.allowed-consumers`                  | A list of clans and services allowed to consume this service                                                         | No       |
-| `services.allowed-consumers.clan`             | Your clan name subscribing to this service                                                                           | Yes      |
-| `services.allowed-consumers.service-accounts` | A list of service accounts allowed to consume this service. (Full service account name required)                     | Yes      |
-| `permissions`                                 | An object containing the permissions for this service. (keys [a-z][-a-z]{1,15})                                      | Yes      |
-| `permissions.<resource>`                      | Array containing the verbs for the `<resource>`. (items: ids [a-z][-a-z]{1,15} or objects documented below)          | Yes      |
-| `permissions.<resource>.id`                   | Permission id [a-z][-a-z]{1,15}                                                                                      | Yes      |
-| `permissions.<resource>.alias`                | Permission alias (max 256 characters)                                                                                | No       |
-| `permissions.<resource>.description`          | Permission description                                                                                               | No       |
-| `roles`                                       | An list of roles that should exist for this service                                                                  | No       |
-| `roles.id`                                    | The role id ([a-z][-a-z]{1,19})                                                                                      | Yes      |
-| `roles.name`                                  | The role name                                                                                                        | Yes      |
-| `roles.desc`                                  | The description of the role, (max 200 characters)                                                                    | Yes      |
-| `roles.permissions`                           | An list of permissions this role should contain (items ^(?:[a-z][-a-z]{2}\\.)?[a-z][-a-z]{1,15}\.[a-z][-a-z]{1,15}$) | Yes      |
+| Property                                      | Description                                                                                                         | Required |
+| :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------ | :------- |
+| `name`                                        | The name of the service system                                                                                      | No       |
+| `permission-prefix`                           | The permission prefix, this will be prefixed to every permission and roles id. ([a-z][-a-z]{2})                     | Yes      |
+| `services`                                    | A list of services that need a DAS system                                                                           | Yes      |
+| `services.name`                               | The service name of the system to be created                                                                        | Yes      |
+| `services.repository`                         | The description of the service                                                                                      | Yes      |
+| `services.allowed-consumers`                  | A list of clans and services allowed to consume this service                                                        | No       |
+| `services.allowed-consumers.clan`             | Your clan name subscribing to this service                                                                          | Yes      |
+| `services.allowed-consumers.service-accounts` | A list of service accounts allowed to consume this service. (Full service account name required)                    | Yes      |
+| `permissions`                                 | An object containing the permissions for this service. (keys [a-z][-a-z]{1,15})                                     | Yes      |
+| `permissions.<resource>`                      | Array containing the verbs for the `<resource>`. (items: ids [a-z][-a-z]{1,15} or objects documented below)         | Yes      |
+| `permissions.<resource>.id`                   | Permission id [a-z][-a-z]{1,15}                                                                                     | Yes      |
+| `permissions.<resource>.alias`                | Permission alias (max 256 characters)                                                                               | No       |
+| `permissions.<resource>.description`          | Permission description                                                                                              | No       |
+| `roles`                                       | A list of roles that should exist for this service                                                                  | No       |
+| `roles.id`                                    | The role id ([a-z][-a-z]{1,29})                                                                                     | Yes      |
+| `roles.name`                                  | The role name                                                                                                       | Yes      |
+| `roles.desc`                                  | The description of the role, (max 200 characters)                                                                   | Yes      |
+| `roles.permissions`                           | A list of permissions this role should contain (items ^(?:[a-z][-a-z]{2}\\.)?[a-z][-a-z]{1,15}\.[a-z][-a-z]{1,15}$) | Yes      |
+| `roles.fixed-bindings`                        | A list of resource bindings that will be appended to existing bindings of the role when it gets added to the group  | No       |
 
 ### YAML Examples
 
 #### Create permissions and roles
 
 This example defines a YAML file that creates roles and permissions for the system `bhq`
+
 ```yaml
 name: Braveheart Quotes
 permission-prefix: bhq
@@ -107,13 +109,19 @@ roles:
       - favorite.list
       - quote.get
       - quote.list
-
-
+  - id: config-viewer
+    name: Braveheart Quotes Config viewer
+    desc: '!!! NOTE: please don't create roles like this, this is example is for demonstration only'
+    permissions:
+      - ccc.configuration.get
+    fixed-bindings:
+      - ccc.kind:bhq.config.v1 # will be appended to existing bindings of the role when it gets added to the group
 ```
 
 #### Create consumers for services
 
 This example defines a YAML file that creates roles and permissions for the system `bhq`
+
 ```yaml
 name: quotes service
 permission-prefix: bhq
@@ -121,20 +129,20 @@ services:
   - name: braveheart-quotes
     repository: braveheart-quotes-service
     allowed-consumers:
-    - clan: iam
-      service-accounts:
-        - iam-api@iam-staging-c2a9.iam.gserviceaccount.com
-    - clan: quotes
-      service-accounts:
-        - braveheart-quotes-webclient-be@quotes-staging-ccdf.iam.gserviceaccount.com
+      - clan: iam
+        service-accounts:
+          - iam-api@iam-staging-c2a9.iam.gserviceaccount.com
+      - clan: quotes
+        service-accounts:
+          - braveheart-quotes-webclient-be@quotes-staging-ccdf.iam.gserviceaccount.com
   - name: braveheart-quotes-webclient-be
     repository: braveheart-quotes-webclient-backend
     allowed-consumers:
-    - clan: iam
-      service-accounts:
-        - iam-api@iam-staging-c2a9.iam.gserviceaccount.com
-        - iam-das-sync-worker@iam-staging-c2a9.iam.gserviceaccount.com
-        - iam-oauth-client-managment@iam-staging-c2a9.iam.gserviceaccount.com
+      - clan: iam
+        service-accounts:
+          - iam-api@iam-staging-c2a9.iam.gserviceaccount.com
+          - iam-das-sync-worker@iam-staging-c2a9.iam.gserviceaccount.com
+          - iam-oauth-client-managment@iam-staging-c2a9.iam.gserviceaccount.com
 permissions:
   quote:
     - create
@@ -158,7 +166,6 @@ roles:
     permissions:
       - quote.get
       - quote.list
-
 ```
 
 The consumers will be available in your das system by importing data.consumers. This dataset will contain an array named services with service-accounts.

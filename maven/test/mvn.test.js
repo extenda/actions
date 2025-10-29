@@ -11,10 +11,12 @@ jest.mock('@actions/exec');
 jest.mock('@actions/core');
 jest.mock('../../utils/src/versions');
 jest.mock('../src/nexus-credentials');
+jest.mock('../../setup-gcloud');
 const exec = require('@actions/exec');
 const core = require('@actions/core');
 const versions = require('../../utils/src/versions');
 const loadNexusCredentials = require('../src/nexus-credentials');
+const { withGcloud } = require('../../setup-gcloud');
 
 const mvn = require('../src/mvn');
 const action = require('../src/index');
@@ -30,6 +32,9 @@ describe('Maven', () => {
   const getFs = (workingDir) => {
     const settingsPath = path.resolve(
       path.join(__dirname, '../src/extenda-maven-settings.xml'),
+    );
+    const gcpSettingsPath = path.resolve(
+      path.join(__dirname, '../src/extenda-maven-gcp-settings.xml'),
     );
     const abalonPath = path.resolve(
       path.join(__dirname, '../src/AbalonAb-maven-settings.xml'),
@@ -48,6 +53,7 @@ describe('Maven', () => {
     }
 
     fileSystem[settingsPath] = '<extenda />';
+    fileSystem[gcpSettingsPath] = '<extenda-gar />';
     fileSystem[abalonPath] = '<abalon />';
     return fileSystem;
   };
@@ -59,6 +65,9 @@ describe('Maven', () => {
 
     // Make sure core.group executes callbacks.
     core.group.mockImplementation((name, fn) => fn());
+
+    // Make sure withGcloud executes callbacks.
+    withGcloud.mockImplementation((name, fn) => fn(name));
   });
 
   afterEach(() => {
@@ -99,6 +108,19 @@ describe('Maven', () => {
     expect(
       fs.readFileSync(path.join(os.homedir(), '.m2', 'settings.xml'), 'utf8'),
     ).toEqual('<extenda />');
+  });
+
+  test('Copy GAR settings', async () => {
+    process.env.GITHUB_REPOSITORY = 'extenda/test-repo';
+    const result = await mvn.copySettings(true);
+    expect(result).toEqual(true);
+    const exists = fs.existsSync(
+      path.join(os.homedir(), '.m2', 'settings.xml'),
+    );
+    expect(exists).toEqual(true);
+    expect(
+      fs.readFileSync(path.join(os.homedir(), '.m2', 'settings.xml'), 'utf8'),
+    ).toEqual('<extenda-gar />');
   });
 
   test('Copy Abalon settings', async () => {
@@ -225,6 +247,25 @@ describe('Maven', () => {
       process.env.MAVEN_INIT = 'true';
       await action();
       expect(core.exportVariable).toHaveBeenCalledTimes(1);
+    });
+
+    test('It uses artifact registry when extensions present', async () => {
+      core.getInput
+        .mockReturnValueOnce('compile')
+        .mockReturnValueOnce('1.0.0')
+        .mockReturnValueOnce('service-account-key');
+
+      const fileSystem = getFs();
+      fileSystem['.mvn/extensions.xml'] =
+        '<artifactId>artifactregistry-maven-wagon</artifactId>';
+      mockFs(fileSystem);
+
+      await action();
+      expect(
+        fs.readFileSync(path.join(os.homedir(), '.m2', 'settings.xml'), 'utf8'),
+      ).toEqual('<extenda-gar />');
+      expect(withGcloud).toHaveBeenCalled();
+      expect(loadNexusCredentials).not.toHaveBeenCalled();
     });
 
     test('It skips versioning for missing POM', async () => {

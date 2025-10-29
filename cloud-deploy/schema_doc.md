@@ -37,6 +37,9 @@
             - [1.1.11.2.2.2.5. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > collect`](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_collect)
               - [1.1.11.2.2.2.5.1. CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > open-telemetry > config > oneOf > item 1 > collect > collect items](#oneOf_i0_cloud-run_monitoring_open-telemetry_config_oneOf_i1_collect_items)
       - [1.1.11.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > monitoring > preview-tag`](#oneOf_i0_cloud-run_monitoring_preview-tag)
+    - [1.1.12. Property `CloudDeploy > oneOf > CloudRun > cloud-run > request-logs`](#oneOf_i0_cloud-run_request-logs)
+      - [1.1.12.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > request-logs > cloud-run`](#oneOf_i0_cloud-run_request-logs_cloud-run)
+      - [1.1.12.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > request-logs > load-balancer`](#oneOf_i0_cloud-run_request-logs_load-balancer)
 - [2. Property `CloudDeploy > oneOf > Kubernetes`](#oneOf_i1)
   - [2.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes`](#oneOf_i1_kubernetes)
     - [2.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > service`](#oneOf_i1_kubernetes_service)
@@ -54,12 +57,15 @@
         - [2.1.8.2.3. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > scaling > vertical > max-cpu`](#oneOf_i1_kubernetes_scaling_vertical_max-cpu)
         - [2.1.8.2.4. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > scaling > vertical > max-memory`](#oneOf_i1_kubernetes_scaling_vertical_max-memory)
         - [2.1.8.2.5. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > scaling > vertical > scale-up-interval`](#oneOf_i1_kubernetes_scaling_vertical_scale-up-interval)
+        - [2.1.8.2.6. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > scaling > vertical > scale-up-threshold`](#oneOf_i1_kubernetes_scaling_vertical_scale-up-threshold)
     - [2.1.9. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > volumes`](#oneOf_i1_kubernetes_volumes)
       - [2.1.9.1. CloudDeploy > oneOf > Kubernetes > kubernetes > volumes > Volume](#oneOf_i1_kubernetes_volumes_items)
         - [2.1.9.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > volumes > Volume > disk-type`](#oneOf_i1_kubernetes_volumes_items_disk-type)
         - [2.1.9.1.2. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > volumes > Volume > size`](#oneOf_i1_kubernetes_volumes_items_size)
         - [2.1.9.1.3. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > volumes > Volume > mount-path`](#oneOf_i1_kubernetes_volumes_items_mount-path)
     - [2.1.10. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > monitoring`](#oneOf_i1_kubernetes_monitoring)
+    - [2.1.11. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > request-logs`](#oneOf_i1_kubernetes_request-logs)
+      - [2.1.11.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > request-logs > load-balancer`](#oneOf_i1_kubernetes_request-logs_load-balancer)
 - [3. Property `CloudDeploy > labels`](#labels)
   - [3.1. Property `CloudDeploy > labels > component`](#labels_component)
   - [3.2. Property `CloudDeploy > labels > product`](#labels_product)
@@ -168,6 +174,7 @@
 | - [session-affinity](#oneOf_i0_cloud-run_session-affinity )   | No      | boolean          | No         | -                                                  | Whether to enable session affinity for connections to the service.               |
 | - [internal-traffic](#oneOf_i0_cloud-run_internal-traffic )   | No      | boolean          | No         | -                                                  | Whether to setup internal traffic or not                                         |
 | - [monitoring](#oneOf_i0_cloud-run_monitoring )               | No      | object           | No         | In #/$defs/Monitoring                              | Monitoring                                                                       |
+| - [request-logs](#oneOf_i0_cloud-run_request-logs )           | No      | object           | No         | -                                                  | Configure which request logs to use (if any).                                    |
 
 #### <a name="oneOf_i0_cloud-run_service"></a>1.1.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > service`
 
@@ -648,6 +655,42 @@ Must be one of:
 | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | **Must match regular expression** | ```^v\d{1,2}\.\d{1,3}\.\d{1,2}$``` [Test](https://regex101.com/?regex=%5Ev%5Cd%7B1%2C2%7D%5C.%5Cd%7B1%2C3%7D%5C.%5Cd%7B1%2C2%7D%24) |
 
+#### <a name="oneOf_i0_cloud-run_request-logs"></a>1.1.12. Property `CloudDeploy > oneOf > CloudRun > cloud-run > request-logs`
+
+|                           |                                               |
+| ------------------------- | --------------------------------------------- |
+| **Type**                  | `object`                                      |
+| **Required**              | No                                            |
+| **Additional properties** | Not allowed                                   |
+| **Default**               | `{"cloud-run": true, "load-balancer": false}` |
+
+**Description:** Configure which request logs to use (if any).
+
+| Property                                                           | Pattern | Type    | Deprecated | Definition | Title/Description                                                                                     |
+| ------------------------------------------------------------------ | ------- | ------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------- |
+| + [cloud-run](#oneOf_i0_cloud-run_request-logs_cloud-run )         | No      | boolean | No         | -          | Enable cloud-run request logs. The logs for 429 and 5xx requests are always logged, even if disabled. |
+| - [load-balancer](#oneOf_i0_cloud-run_request-logs_load-balancer ) | No      | boolean | No         | -          | Enable load balancer request logs. The logs will be enabled with 1.0 sample rate.                     |
+
+##### <a name="oneOf_i0_cloud-run_request-logs_cloud-run"></a>1.1.12.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > request-logs > cloud-run`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | Yes       |
+| **Default**  | `true`    |
+
+**Description:** Enable cloud-run request logs. The logs for 429 and 5xx requests are always logged, even if disabled.
+
+##### <a name="oneOf_i0_cloud-run_request-logs_load-balancer"></a>1.1.12.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > request-logs > load-balancer`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Enable load balancer request logs. The logs will be enabled with 1.0 sample rate.
+
 ## <a name="oneOf_i1"></a>2. Property `CloudDeploy > oneOf > Kubernetes`
 
 **Title:** Kubernetes
@@ -675,18 +718,19 @@ Must be one of:
 
 **Description:** A kubernetes service
 
-| Property                                                                     | Pattern | Type             | Deprecated | Definition                                            | Title/Description                       |
-| ---------------------------------------------------------------------------- | ------- | ---------------- | ---------- | ----------------------------------------------------- | --------------------------------------- |
-| + [service](#oneOf_i1_kubernetes_service )                                   | No      | string           | No         | Same as [service](#oneOf_i0_cloud-run_service )       | ServiceName                             |
-| + [type](#oneOf_i1_kubernetes_type )                                         | No      | enum (of string) | No         | -                                                     | The type of service                     |
-| + [resources](#oneOf_i1_kubernetes_resources )                               | No      | object           | No         | Same as [resources](#security_oneOf_i1_resources )    | Resources                               |
-| + [protocol](#oneOf_i1_kubernetes_protocol )                                 | No      | enum (of string) | No         | Same as [protocol](#oneOf_i0_cloud-run_protocol )     | Protocol                                |
-| - [timeout](#oneOf_i1_kubernetes_timeout )                                   | No      | integer          | No         | Same as [timeout](#oneOf_i0_cloud-run_timeout )       | RequestTimeout                          |
-| - [availability](#oneOf_i1_kubernetes_availability )                         | No      | enum (of string) | No         | In #/$defs/Availability                               | Availability                            |
-| - [termination-grace-period](#oneOf_i1_kubernetes_termination-grace-period ) | No      | integer          | No         | -                                                     | The termination grace period in seconds |
-| + [scaling](#oneOf_i1_kubernetes_scaling )                                   | No      | object           | No         | -                                                     | ScalingKubernetes                       |
-| - [volumes](#oneOf_i1_kubernetes_volumes )                                   | No      | array of object  | No         | -                                                     | Volumes                                 |
-| - [monitoring](#oneOf_i1_kubernetes_monitoring )                             | No      | object           | No         | Same as [monitoring](#oneOf_i0_cloud-run_monitoring ) | Monitoring                              |
+| Property                                                                     | Pattern | Type             | Deprecated | Definition                                            | Title/Description                             |
+| ---------------------------------------------------------------------------- | ------- | ---------------- | ---------- | ----------------------------------------------------- | --------------------------------------------- |
+| + [service](#oneOf_i1_kubernetes_service )                                   | No      | string           | No         | Same as [service](#oneOf_i0_cloud-run_service )       | ServiceName                                   |
+| + [type](#oneOf_i1_kubernetes_type )                                         | No      | enum (of string) | No         | -                                                     | The type of service                           |
+| + [resources](#oneOf_i1_kubernetes_resources )                               | No      | object           | No         | Same as [resources](#security_oneOf_i1_resources )    | Resources                                     |
+| + [protocol](#oneOf_i1_kubernetes_protocol )                                 | No      | enum (of string) | No         | Same as [protocol](#oneOf_i0_cloud-run_protocol )     | Protocol                                      |
+| - [timeout](#oneOf_i1_kubernetes_timeout )                                   | No      | integer          | No         | Same as [timeout](#oneOf_i0_cloud-run_timeout )       | RequestTimeout                                |
+| - [availability](#oneOf_i1_kubernetes_availability )                         | No      | enum (of string) | No         | In #/$defs/Availability                               | Availability                                  |
+| - [termination-grace-period](#oneOf_i1_kubernetes_termination-grace-period ) | No      | integer          | No         | -                                                     | The termination grace period in seconds       |
+| + [scaling](#oneOf_i1_kubernetes_scaling )                                   | No      | object           | No         | -                                                     | ScalingKubernetes                             |
+| - [volumes](#oneOf_i1_kubernetes_volumes )                                   | No      | array of object  | No         | -                                                     | Volumes                                       |
+| - [monitoring](#oneOf_i1_kubernetes_monitoring )                             | No      | object           | No         | Same as [monitoring](#oneOf_i0_cloud-run_monitoring ) | Monitoring                                    |
+| - [request-logs](#oneOf_i1_kubernetes_request-logs )                         | No      | object           | No         | -                                                     | Configure which request logs to use (if any). |
 
 #### <a name="oneOf_i1_kubernetes_service"></a>2.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > service`
 
@@ -823,13 +867,14 @@ Must be one of:
 
 **Description:** Config for vertical scaling
 
-| Property                                                                        | Pattern | Type    | Deprecated | Definition | Title/Description                                                 |
-| ------------------------------------------------------------------------------- | ------- | ------- | ---------- | ---------- | ----------------------------------------------------------------- |
-| - [threshold](#oneOf_i1_kubernetes_scaling_vertical_threshold )                 | No      | integer | No         | -          | CPU percentage utilization for 1 pod to trigger vertical scaling. |
-| - [increments-cpu](#oneOf_i1_kubernetes_scaling_vertical_increments-cpu )       | No      | number  | No         | -          | CPU request increase on scale out trigger                         |
-| - [max-cpu](#oneOf_i1_kubernetes_scaling_vertical_max-cpu )                     | No      | number  | No         | -          | Max CPU allowed on scale out                                      |
-| - [max-memory](#oneOf_i1_kubernetes_scaling_vertical_max-memory )               | No      | string  | No         | -          | Max memory allowed on scale out in (Mi)                           |
-| - [scale-up-interval](#oneOf_i1_kubernetes_scaling_vertical_scale-up-interval ) | No      | integer | No         | -          | interval between scale ups                                        |
+| Property                                                                          | Pattern | Type    | Deprecated | Definition | Title/Description                                                                 |
+| --------------------------------------------------------------------------------- | ------- | ------- | ---------- | ---------- | --------------------------------------------------------------------------------- |
+| - [threshold](#oneOf_i1_kubernetes_scaling_vertical_threshold )                   | No      | integer | No         | -          | CPU percentage utilization for 1 pod to trigger vertical scaling.                 |
+| - [increments-cpu](#oneOf_i1_kubernetes_scaling_vertical_increments-cpu )         | No      | number  | No         | -          | CPU request increase on scale out trigger                                         |
+| - [max-cpu](#oneOf_i1_kubernetes_scaling_vertical_max-cpu )                       | No      | number  | No         | -          | Max CPU allowed on scale out                                                      |
+| - [max-memory](#oneOf_i1_kubernetes_scaling_vertical_max-memory )                 | No      | string  | No         | -          | Max memory allowed on scale out in (Mi)                                           |
+| - [scale-up-interval](#oneOf_i1_kubernetes_scaling_vertical_scale-up-interval )   | No      | integer | No         | -          | interval between scale ups                                                        |
+| - [scale-up-threshold](#oneOf_i1_kubernetes_scaling_vertical_scale-up-threshold ) | No      | integer | No         | -          | the number of successfull scale up checks(minutes) before a scale up is triggered |
 
 ###### <a name="oneOf_i1_kubernetes_scaling_vertical_threshold"></a>2.1.8.2.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > scaling > vertical > threshold`
 
@@ -899,6 +944,21 @@ Must be one of:
 | ------------ | ------- |
 | **Minimum**  | &ge; 1  |
 | **Maximum**  | &le; 15 |
+
+###### <a name="oneOf_i1_kubernetes_scaling_vertical_scale-up-threshold"></a>2.1.8.2.6. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > scaling > vertical > scale-up-threshold`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `1`       |
+
+**Description:** the number of successfull scale up checks(minutes) before a scale up is triggered
+
+| Restrictions |         |
+| ------------ | ------- |
+| **Minimum**  | &ge; 1  |
+| **Maximum**  | &le; 10 |
 
 #### <a name="oneOf_i1_kubernetes_volumes"></a>2.1.9. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > volumes`
 
@@ -987,6 +1047,31 @@ Must be one of:
 | **Required**              | No                                           |
 | **Additional properties** | Not allowed                                  |
 | **Same definition as**    | [monitoring](#oneOf_i0_cloud-run_monitoring) |
+
+#### <a name="oneOf_i1_kubernetes_request-logs"></a>2.1.11. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > request-logs`
+
+|                           |                            |
+| ------------------------- | -------------------------- |
+| **Type**                  | `object`                   |
+| **Required**              | No                         |
+| **Additional properties** | Not allowed                |
+| **Default**               | `{"load-balancer": false}` |
+
+**Description:** Configure which request logs to use (if any).
+
+| Property                                                            | Pattern | Type    | Deprecated | Definition | Title/Description                                                                 |
+| ------------------------------------------------------------------- | ------- | ------- | ---------- | ---------- | --------------------------------------------------------------------------------- |
+| + [load-balancer](#oneOf_i1_kubernetes_request-logs_load-balancer ) | No      | boolean | No         | -          | Enable load balancer request logs. The logs will be enabled with 1.0 sample rate. |
+
+##### <a name="oneOf_i1_kubernetes_request-logs_load-balancer"></a>2.1.11.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > request-logs > load-balancer`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | Yes       |
+| **Default**  | `false`   |
+
+**Description:** Enable load balancer request logs. The logs will be enabled with 1.0 sample rate.
 
 ## <a name="labels"></a>3. Property `CloudDeploy > labels`
 
@@ -1729,4 +1814,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-06-17 at 07:32:38 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-10-21 at 07:31:33 +0200

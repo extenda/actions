@@ -1,5 +1,11 @@
 const core = require('@actions/core');
 const axios = require('axios');
+const {
+  securityVersion,
+} = require('../../cloud-deploy/src/manifests/security-sidecar');
+const {
+  imageTag: collectorVersion,
+} = require('../../cloud-deploy/src/manifests/collector-sidecar');
 
 const readProperty = (object, propertyName, defaultValue) => {
   if (propertyName in object) {
@@ -16,6 +22,15 @@ const copyInfo = (platform, service, data) => {
   data.timeout = o.timeout || 300;
   data.sessionAffinity = readProperty(o, 'session-affinity', false);
   data.internalTraffic = readProperty(o, 'internal-traffic', true);
+  data.collectorVersion = o.monitoring
+    ? collectorVersion(o.monitoring)
+    : 'none';
+  const { traffic: { 'static-egress-ip': staticEgress = true } = {} } = o;
+  data.staticEgress = staticEgress;
+  const {
+    'request-logs': { 'load-balancer': enableLoadBalancerLogs = false } = {},
+  } = o;
+  data.loggingSampleRate = enableLoadBalancerLogs ? 1 : 0;
 };
 
 const pathMappings = (env) => {
@@ -40,6 +55,7 @@ const pathMappings = (env) => {
 const getDeployInfo = async (service, projectId, bearerToken) => {
   const prod = service.environments.production;
 
+  const { security } = service;
   const {
     security: { 'cloud-armor': { 'policy-name': cloudArmorPolicy } = {} } = {},
   } = service;
@@ -49,10 +65,10 @@ const getDeployInfo = async (service, projectId, bearerToken) => {
     // prod.regions
     region: 'europe-west1',
     migrate: true,
-    loggingSampleRate: 0, // Not possible to set in service definition
     domainMappings: prod['domain-mappings'] || [],
     pathMappings: pathMappings(prod),
     cloudArmorPolicy,
+    securityVersion: security === 'none' ? 'none' : securityVersion(security),
   };
 
   if ('cloud-run' in service) {
