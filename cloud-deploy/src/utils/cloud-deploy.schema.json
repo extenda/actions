@@ -280,9 +280,10 @@
                 "type": "string",
                 "enum": [
                   "hdd",
+                  "ssd-balanced",
                   "ssd"
                 ],
-                "default": "hdd"
+                "default": "ssd"
               },
               "size": {
                 "description": "The disk size",

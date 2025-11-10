@@ -158,9 +158,11 @@ const gkeManifestTemplate = async (
                 spec: {
                   accessModes: ['ReadWriteOnce'],
                   storageClassName:
-                    volumes[0]['disk-type'] === 'hdd'
-                      ? 'standard'
-                      : 'premium-rwo',
+                    volumes[0]['disk-type'] === 'ssd-balanced'
+                      ? 'standard-rwo'
+                      : volumes[0]['disk-type'] === 'hdd'
+                        ? 'standard'
+                        : 'premium-rwo',
                   resources: {
                     requests: {
                       storage: volumes[0].size,
