@@ -1007,12 +1007,13 @@ Must be one of:
 | ------------ | ------------------ |
 | **Type**     | `enum (of string)` |
 | **Required** | No                 |
-| **Default**  | `"hdd"`            |
+| **Default**  | `"ssd"`            |
 
 **Description:** The disk type
 
 Must be one of:
 * "hdd"
+* "ssd-balanced"
 * "ssd"
 
 ###### <a name="oneOf_i1_kubernetes_volumes_items_size"></a>2.1.9.1.2. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > volumes > Volume > size`
@@ -1814,4 +1815,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-10-21 at 07:31:33 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-11-10 at 08:01:44 +0100

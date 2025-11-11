@@ -31,6 +31,12 @@ const userContainerVolumeMountSetup = (opa, protocol, type, volumes, name) => {
   return volumeMounts;
 };
 
+const getStorageClassName = (diskType) => {
+  if (diskType === 'ssd-balanced') return 'standard-rwo';
+  if (diskType === 'hdd') return 'standard';
+  return 'premium-rwo';
+};
+
 const gkeManifestTemplate = async (
   name,
   type,
@@ -157,10 +163,9 @@ const gkeManifestTemplate = async (
                 },
                 spec: {
                   accessModes: ['ReadWriteOnce'],
-                  storageClassName:
-                    volumes[0]['disk-type'] === 'hdd'
-                      ? 'standard'
-                      : 'premium-rwo',
+                  storageClassName: getStorageClassName(
+                    volumes[0]['disk-type'],
+                  ),
                   resources: {
                     requests: {
                       storage: volumes[0].size,
