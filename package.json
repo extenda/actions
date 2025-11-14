@@ -44,6 +44,6 @@
     "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.1",
     "axios-retry": "^4.5.0",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.1"
   }
 }
