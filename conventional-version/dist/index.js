@@ -73325,9 +73325,6 @@ var require_concat_stream = __commonJS({
       if (this.encoding === "uint8array") return u8Concat(this.body);
       return this.body;
     };
-    var isArray = Array.isArray || function(arr) {
-      return Object.prototype.toString.call(arr) == "[object Array]";
-    };
     function isArrayish(arr) {
       return /Array\]$/.test(Object.prototype.toString.call(arr));
     }
