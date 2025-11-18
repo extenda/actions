@@ -199,7 +199,7 @@ describe('Maven', () => {
 
     await mvn.run('help:effective-pom');
     expect(exec.exec).toHaveBeenCalledWith(
-      `mvnw.cmd ${defaultArgs} help:effective-pom`,
+      `./mvnw.cmd ${defaultArgs} help:effective-pom`,
       undefined,
       { cwd: './' },
     );
