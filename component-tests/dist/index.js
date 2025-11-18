@@ -22918,6 +22918,19 @@ var require_loader = __commonJS({
       );
     }
     __name(charFromCodepoint, "charFromCodepoint");
+    function setProperty(object, key, value) {
+      if (key === "__proto__") {
+        Object.defineProperty(object, key, {
+          configurable: true,
+          enumerable: true,
+          writable: true,
+          value
+        });
+      } else {
+        object[key] = value;
+      }
+    }
+    __name(setProperty, "setProperty");
     var simpleEscapeCheck = new Array(256);
     var simpleEscapeMap = new Array(256);
     for (i = 0; i < 256; i++) {
@@ -23042,7 +23055,7 @@ var require_loader = __commonJS({
       for (index = 0, quantity = sourceKeys.length; index < quantity; index += 1) {
         key = sourceKeys[index];
         if (!_hasOwnProperty.call(destination, key)) {
-          destination[key] = source[key];
+          setProperty(destination, key, source[key]);
           overridableKeys[key] = true;
         }
       }
@@ -23083,16 +23096,7 @@ var require_loader = __commonJS({
           state.position = startPos || state.position;
           throwError(state, "duplicated mapping key");
         }
-        if (keyNode === "__proto__") {
-          Object.defineProperty(_result, keyNode, {
-            configurable: true,
-            enumerable: true,
-            writable: true,
-            value: valueNode
-          });
-        } else {
-          _result[keyNode] = valueNode;
-        }
+        setProperty(_result, keyNode, valueNode);
         delete overridableKeys[keyNode];
       }
       return _result;
