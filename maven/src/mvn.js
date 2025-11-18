@@ -9,7 +9,7 @@ const mavenHome = path.join(os.homedir(), '.m2');
 const mavenSettings = path.join(mavenHome, 'settings.xml');
 
 const run = async (args, workingDir = './') => {
-  let executable = os.platform() === 'win32' ? 'mvnw.cmd' : './mvnw';
+  let executable = os.platform() === 'win32' ? './mvnw.cmd' : './mvnw';
   if (!fs.existsSync(executable)) {
     executable = 'mvn';
   }
