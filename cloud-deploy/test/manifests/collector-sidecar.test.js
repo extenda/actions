@@ -48,6 +48,7 @@ describe('collector-sidecar', () => {
         { name: 'PROMETHEUS_SCRAPE_PATH', value: '/metrics' },
         { name: 'PROMETHEUS_SCRAPE_PORT', value: '8081' },
         { name: 'PROMETHEUS_SCRAPE_INTERVAL', value: '15' },
+        { name: 'CONFIG_PROMETHEUS_PIPELINES', value: 'user-container' },
         { name: 'CONFIG_PROMETHEUS', value: 'gmp' },
       ],
       startupProbe: {
@@ -90,11 +91,37 @@ describe('collector-sidecar', () => {
         { name: 'PROMETHEUS_SCRAPE_PATH', value: '/metrics' },
         { name: 'PROMETHEUS_SCRAPE_PORT', value: '8081' },
         { name: 'PROMETHEUS_SCRAPE_INTERVAL', value: '15' },
-        { name: 'CONFIG_PROMETHEUS', value: 'gmp' },
         {
           name: 'CONFIG_PROMETHEUS_PIPELINES',
           value: 'user-container security-authz',
         },
+        { name: 'CONFIG_PROMETHEUS', value: 'gmp' },
+      ],
+    });
+  });
+  test('It creates only a security-authz pipeline for GMP for new security-authz', async () => {
+    const container = await cloudRunCollector(
+      'test',
+      {
+        prometheus: {
+          path: '/metrics',
+          containers: 'security-authz',
+        },
+      },
+      'v1.6.0',
+    );
+    expect(container).toMatchObject({
+      name: 'collector',
+      env: [
+        { name: 'SERVICE_NAME', value: 'test' },
+        { name: 'PROMETHEUS_SCRAPE_PATH', value: '/metrics' },
+        { name: 'PROMETHEUS_SCRAPE_PORT', value: '8080' },
+        { name: 'PROMETHEUS_SCRAPE_INTERVAL', value: '-1' },
+        {
+          name: 'CONFIG_PROMETHEUS_PIPELINES',
+          value: 'security-authz',
+        },
+        { name: 'CONFIG_PROMETHEUS', value: 'gmp' },
       ],
     });
   });

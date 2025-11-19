@@ -242,6 +242,8 @@ spec:
               value: '8080'
             - name: PROMETHEUS_SCRAPE_INTERVAL
               value: '15'
+            - name: CONFIG_PROMETHEUS_PIPELINES
+              value: user-container
             - name: CONFIG_PROMETHEUS
               value: gmp
             - name: CONFIG_OTEL
@@ -516,6 +518,8 @@ spec:
               value: '8080'
             - name: PROMETHEUS_SCRAPE_INTERVAL
               value: '15'
+            - name: CONFIG_PROMETHEUS_PIPELINES
+              value: user-container
             - name: CONFIG_PROMETHEUS
               value: gmp
           startupProbe:

@@ -345,6 +345,11 @@
               "type": "integer",
               "description": "The scrape port",
               "default": 8080
+            },
+            "containers": {
+              "type": "string",
+              "description": "What containers to scrape metrics from",
+              "default": "user-container"
             }
           },
           "additionalProperties": false
