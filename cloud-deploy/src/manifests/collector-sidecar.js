@@ -15,7 +15,12 @@ const getConfig = (serviceName, monitoring) => {
 
   if ('prometheus' in monitoring) {
     const {
-      prometheus: { interval = -1, path = '/metrics', port = 8080 },
+      prometheus: {
+        interval = -1,
+        path = '/metrics',
+        port = 8080,
+        containers = 'user-container',
+      },
     } = monitoring;
     config.prometheus = {
       enabled: true,
@@ -27,6 +32,7 @@ const getConfig = (serviceName, monitoring) => {
         PROMETHEUS_SCRAPE_PATH: path,
         PROMETHEUS_SCRAPE_PORT: port,
         PROMETHEUS_SCRAPE_INTERVAL: interval,
+        CONFIG_PROMETHEUS_PIPELINES: containers,
         CONFIG_PROMETHEUS: 'gmp',
       },
     };
@@ -82,7 +88,10 @@ const cloudRunCollector = async (serviceName, monitoring, securityVersion) => {
   let env = {};
   if (config.prometheus.enabled) {
     env = { ...env, ...config.prometheus.collectorEnv };
-    if (semver.compare(securityVersion, 'v1.6.0') >= 0) {
+    if (
+      semver.compare(securityVersion, 'v1.6.0') >= 0 &&
+      !monitoring['prometheus'].containers
+    ) {
       // The security sidecar is recent enough to support Prometheus scraping.
       env.CONFIG_PROMETHEUS_PIPELINES = 'user-container security-authz';
     }
