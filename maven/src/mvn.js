@@ -13,11 +13,9 @@ const run = async (args, workingDir = './') => {
   if (!fs.existsSync(executable)) {
     executable = 'mvn';
   }
-  return exec.exec(
-    `${executable} -B -V --no-transfer-progress ${args}`,
-    undefined,
-    { cwd: workingDir },
-  );
+  return exec.exec(`${executable} -B -V ${args}`, undefined, {
+    cwd: workingDir,
+  });
 };
 
 const setVersion = async (newVersion, workingDir = './') => {
