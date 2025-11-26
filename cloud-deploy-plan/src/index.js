@@ -42,7 +42,7 @@ const action = async () => {
     );
 
     const comment = [
-      '### :mag: Cloud Deploy plan\n',
+      '## :mag: Cloud Deploy plan\n',
       'This plan outlines the infrastructure changes that would be applied if this pull request is merged. ' +
         'The plan does not include changes to the service itself unless they also impact infrastructure not ' +
         'controlled through the cloud-deploy manifests.',

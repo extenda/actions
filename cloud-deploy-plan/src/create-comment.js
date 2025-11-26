@@ -1,7 +1,7 @@
 const appendJson = (filename, deployInfo) => [
   '',
   '<details>',
-  `<summary><b>:page_facing_up: ${filename}</b></summary>`,
+  `<summary><h3>:page_facing_up: ${filename}</h3></summary>`,
   '',
   '```json',
   JSON.stringify(deployInfo, null, 2),
@@ -82,6 +82,7 @@ const paths = (paths) => {
 const createComment = (filename, deployInfo) => {
   const comment = [...appendJson(filename, deployInfo)];
   const serviceName = `\`${deployInfo.serviceName}\``;
+
   if (deployInfo.updates === false) {
     comment.push(`No changes to ${serviceName}.`);
   } else {
@@ -113,13 +114,28 @@ const createComment = (filename, deployInfo) => {
     comment.push(...paths(deployInfo.updates.pathMappings || {}));
   }
 
-  if (deployInfo.vulnerabilities !== false) {
+  if (
+    Array.isArray(deployInfo.vulnerabilities) &&
+    deployInfo.vulnerabilities.length > 0
+  ) {
     comment.push(
       '',
       '**Vulnerabilities in production**',
       markdownList(deployInfo.vulnerabilities.map(markdownVulnerability)),
     );
   }
+
+  comment.push('');
+  if (deployInfo.serveTraffic) {
+    comment.push('> [!CAUTION]');
+    comment.push('> Traffic will be served immediately to a new deployment.');
+  } else {
+    comment.push('> [!NOTE]');
+    comment.push(
+      '> Canary deployment is used for the new deployment. 0% traffic will be served initially. Use the [Operations Hub](https://operations.retailsvc.com/ui/platform/service-manager) to gradually shift traffic.',
+    );
+  }
+  comment.push('');
 
   return comment.join('\n');
 };

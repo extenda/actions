@@ -54,5 +54,6 @@ test('Get deploy info', async () => {
     serviceName: 'checkout-service-manager-api',
     updates: false,
     vulnerabilities: false,
+    serveTraffic: true,
   });
 });
