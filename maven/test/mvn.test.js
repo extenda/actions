@@ -22,7 +22,7 @@ const mvn = require('../src/mvn');
 const action = require('../src/index');
 
 const orgEnv = process.env;
-const defaultArgs = '-B -V --no-transfer-progress';
+const defaultArgs = '-B -V';
 
 describe('Maven', () => {
   afterAll(() => {
