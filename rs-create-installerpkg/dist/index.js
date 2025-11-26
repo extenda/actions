@@ -55293,6 +55293,7 @@ o " + fn
 var require_git_config = __commonJS({
   "utils/src/git-config.js"(exports2, module2) {
     var simpleGit = require_cjs();
+    var path = require("path");
     var basicAuth = /* @__PURE__ */ __name(() => {
       const buffer = Buffer.from(
         `github-actions:${process.env.GITHUB_TOKEN}`,
@@ -55301,8 +55302,19 @@ var require_git_config = __commonJS({
       const credentials = buffer.toString("base64");
       return `basic ${credentials}`;
     }, "basicAuth");
+    var removeExistingGitCredentials = /* @__PURE__ */ __name(async (git) => {
+      let gitDir = path.join(process.cwd(), ".git");
+      gitDir = gitDir.replace(/\\/g, "/");
+      await git.raw(
+        "config",
+        "--local",
+        "--unset",
+        `includeIf.gitdir:${gitDir}.path`
+      );
+    }, "removeExistingGitCredentials");
     var gitConfig = /* @__PURE__ */ __name(async () => {
       const git = simpleGit();
+      await removeExistingGitCredentials(git);
       await git.addConfig("user.email", "devops@extendaretail.com");
       await git.addConfig("user.name", "GitHub Actions");
       await git.addConfig(
