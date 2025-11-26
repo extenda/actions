@@ -103,3 +103,39 @@ test('Get deploy info with canary deployment', async () => {
     serveTraffic: false,
   });
 });
+
+test('Get deploy info with Kubernetes', async () => {
+  const scope = nock('https://platform-api.retailsvc.com')
+    .post('/info/deploy')
+    .once()
+    .reply(200, {
+      serviceName: 'checkout-service-manager-api',
+      updates: false,
+      vulnerabilities: false,
+    });
+
+  const deployInfo = await getDeployInfo(
+    {
+      kubernetes: {
+        service: 'testrunner-eu-checkout-api',
+        protocol: 'http',
+        timeout: 300,
+      },
+      security: 'none',
+      environments: {
+        production: {
+          'domain-mappings': ['checkout-service-manager.retailsvc.com'],
+        },
+      },
+    },
+    'platform-prod-2481',
+    token,
+  );
+  expect(scope.isDone()).toEqual(true);
+  expect(deployInfo).toEqual({
+    serviceName: 'checkout-service-manager-api',
+    updates: false,
+    vulnerabilities: false,
+    serveTraffic: true,
+  });
+});
