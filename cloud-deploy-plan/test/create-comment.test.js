@@ -40,7 +40,7 @@ test('It can create a comment for a new service', () => {
         ],
       },
     },
-    vulnerabilities: false,
+    vulnerabilities: [],
   });
   expect(comment).toContain('is **new**');
 });
@@ -96,4 +96,13 @@ test('It can create a comment with new and old values in changes', () => {
     vulnerabilities: false,
   });
   expect(comment).toContain('600 | 300');
+});
+
+test('It can create a comment for canary', () => {
+  const comment = createComment('cloud-deploy.yaml', {
+    serviceName: 'checkout-service-manager-api',
+    updates: false,
+    serveTraffic: false,
+  });
+  expect(comment).toContain('> [!NOTE]');
 });

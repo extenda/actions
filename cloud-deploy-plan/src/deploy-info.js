@@ -88,7 +88,15 @@ const getDeployInfo = async (service, projectId, bearerToken) => {
     .then((response) => {
       const data = response.data;
       core.info(`Deploy info returned:\n${JSON.stringify(data, null, 2)}`);
-      return data;
+      const {
+        'cloud-run': {
+          traffic: { 'serve-traffic': serveTraffic = true } = {},
+        } = {},
+      } = service;
+      return {
+        ...data,
+        serveTraffic,
+      };
     })
     .catch((err) => {
       core.error(`${err.message}:\n${err.response.data}`);
