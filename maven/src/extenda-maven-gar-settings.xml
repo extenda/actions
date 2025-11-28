@@ -12,15 +12,9 @@
       <password>${env.ARTIFACT_REGISTRY_AUTH}</password>
       <configuration>
         <httpConfiguration>
-          <put>
+          <all>
             <usePreemptive>true</usePreemptive>
-          </put>
-          <get>
-            <usePreemptive>true</usePreemptive>
-          </get>
-          <head>
-            <usePreemptive>true</usePreemptive>
-          </head>
+          </all>
         </httpConfiguration>
       </configuration>
     </server>
@@ -30,15 +24,9 @@
       <password>${env.ARTIFACT_REGISTRY_AUTH}</password>
       <configuration>
         <httpConfiguration>
-          <put>
+          <all>
             <usePreemptive>true</usePreemptive>
-          </put>
-          <get>
-            <usePreemptive>true</usePreemptive>
-          </get>
-          <head>
-            <usePreemptive>true</usePreemptive>
-          </head>
+          </all>
         </httpConfiguration>
       </configuration>
     </server>
@@ -49,7 +37,7 @@
       <id>maven-proxy</id>
       <url>https://europe-west1-maven.pkg.dev/extenda/maven</url>
       <!-- Mirror everything except central. -->
-      <mirrorOf>*,!public-central,!central</mirrorOf>
+      <mirrorOf>!public-central,!central,!artifact-registry-releases,*</mirrorOf>
     </mirror>
   </mirrors>
 
