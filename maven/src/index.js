@@ -32,9 +32,8 @@ const authExec = async (usesArtifactRegistry, serviceAccountKey, fn) => {
   if (usesArtifactRegistry && serviceAccountKey) {
     core.setSecret(serviceAccountKey);
     core.exportVariable('ARTIFACT_REGISTRY_AUTH', serviceAccountKey);
-  } else {
-    await fn();
   }
+  await fn();
 };
 
 const action = async () => {
