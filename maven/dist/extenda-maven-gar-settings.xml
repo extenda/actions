@@ -55,7 +55,7 @@
 
   <profiles>
     <profile>
-      <id>alwaysOn</id>
+      <id>public-repos</id>
       <repositories>
         <repository>
           <id>central</id>
@@ -67,6 +67,23 @@
             <enabled>false</enabled>
           </snapshots>
         </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <url>https://repo1.maven.org/maven2</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+    <profile>
+      <id>internal-repos</id>
+      <repositories>
         <repository>
           <id>artifact-registry-releases</id>
           <releases>
@@ -82,16 +99,6 @@
         </repository>
       </repositories>
       <pluginRepositories>
-        <pluginRepository>
-          <id>central</id>
-          <url>https://repo1.maven.org/maven2</url>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-        </pluginRepository>
         <pluginRepository>
           <id>artifact-registry-releases</id>
           <releases>
@@ -110,6 +117,7 @@
   </profiles>
 
   <activeProfiles>
-    <activeProfile>alwaysOn</activeProfile>
+    <activeProfile>public-repos</activeProfile>
+    <activeProfile>internal-repos</activeProfile>
   </activeProfiles>
 </settings>
