@@ -19,6 +19,18 @@
       </configuration>
     </server>
     <server>
+      <id>artifact-registry</id>
+      <username>_json_key_base64</username>
+      <password>${env.ARTIFACT_REGISTRY_AUTH}</password>
+      <configuration>
+        <httpConfiguration>
+          <all>
+            <usePreemptive>true</usePreemptive>
+          </all>
+        </httpConfiguration>
+      </configuration>
+    </server>
+    <server>
       <id>maven-proxy</id>
       <username>_json_key_base64</username>
       <password>${env.ARTIFACT_REGISTRY_AUTH}</password>
@@ -37,7 +49,7 @@
       <id>maven-proxy</id>
       <url>https://europe-west1-maven.pkg.dev/extenda/maven</url>
       <!-- Mirror everything except central and GAR -->
-      <mirrorOf>external:*,!public-central,!central,!artifact-registry-releases</mirrorOf>
+      <mirrorOf>external:*,!public-central,!central,!artifact-registry,!artifact-registry-releases</mirrorOf>
     </mirror>
   </mirrors>
 
@@ -66,7 +78,7 @@
           </snapshots>
         </repository>
         <repository>
-          <id>artifact-registry-releases</id>
+          <id>artifact-registry</id>
           <releases>
             <enabled>true</enabled>
             <updatePolicy>never</updatePolicy>
@@ -101,7 +113,7 @@
           </snapshots>
         </pluginRepository>
         <pluginRepository>
-          <id>artifact-registry-releases</id>
+          <id>artifact-registry</id>
           <releases>
             <enabled>true</enabled>
             <updatePolicy>never</updatePolicy>
