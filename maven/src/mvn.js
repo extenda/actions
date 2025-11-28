@@ -21,7 +21,7 @@ const run = async (args, workingDir = './') => {
 const setVersion = async (newVersion, workingDir = './') => {
   core.info(`Build version: ${newVersion}`);
   await run(
-    `versions:set -DnewVersion=${newVersion} -DgenerateBackupPoms=false`,
+    `versions:set -DnewVersion=${newVersion} -DgenerateBackupPoms=false -X`,
     workingDir,
   );
 };
