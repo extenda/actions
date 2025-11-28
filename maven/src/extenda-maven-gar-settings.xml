@@ -36,7 +36,7 @@
     <mirror>
       <id>maven-proxy</id>
       <url>https://europe-west1-maven.pkg.dev/extenda/maven</url>
-      <!-- Mirror everything except central and our maven-releases -->
+      <!-- Mirror everything except central and GAR -->
       <mirrorOf>external:*,!public-central,!central,!artifact-registry-releases</mirrorOf>
     </mirror>
   </mirrors>
@@ -75,7 +75,7 @@
           <snapshots>
             <enabled>false</enabled>
           </snapshots>
-          <url>https://europe-west1-maven.pkg.dev/extenda/maven-releases</url>
+          <url>https://europe-west1-maven.pkg.dev/extenda/maven</url>
           <layout>default</layout>
         </repository>
       </repositories>
@@ -110,7 +110,7 @@
           <snapshots>
             <enabled>false</enabled>
           </snapshots>
-          <url>https://europe-west1-maven.pkg.dev/extenda/maven-releases</url>
+          <url>https://europe-west1-maven.pkg.dev/extenda/maven</url>
           <layout>default</layout>
         </pluginRepository>
       </pluginRepositories>
