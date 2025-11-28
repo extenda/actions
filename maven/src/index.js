@@ -4,7 +4,6 @@ const path = require('path');
 const mvn = require('./mvn');
 const { run } = require('../../utils');
 const versions = require('../../utils/src/versions');
-const { withGcloud } = require('../../setup-gcloud');
 const loadNexusCredentials = require('./nexus-credentials');
 
 const setVersion = async (version, workingDir = './') =>
@@ -31,10 +30,10 @@ const extensionsExists = (workingDir = './') => {
 
 const authExec = async (usesArtifactRegistry, serviceAccountKey, fn) => {
   if (usesArtifactRegistry && serviceAccountKey) {
-    await withGcloud(serviceAccountKey, fn);
-  } else {
-    await fn();
+    core.setSecret(serviceAccountKey);
+    core.exportVariable('ARTIFACT_REGISTRY_AUTH', serviceAccountKey);
   }
+  await fn();
 };
 
 const action = async () => {

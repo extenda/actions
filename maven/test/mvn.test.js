@@ -11,12 +11,11 @@ jest.mock('@actions/exec');
 jest.mock('@actions/core');
 jest.mock('../../utils/src/versions');
 jest.mock('../src/nexus-credentials');
-jest.mock('../../setup-gcloud');
+
 const exec = require('@actions/exec');
 const core = require('@actions/core');
 const versions = require('../../utils/src/versions');
 const loadNexusCredentials = require('../src/nexus-credentials');
-const { withGcloud } = require('../../setup-gcloud');
 
 const mvn = require('../src/mvn');
 const action = require('../src/index');
@@ -33,8 +32,8 @@ describe('Maven', () => {
     const settingsPath = path.resolve(
       path.join(__dirname, '../src/extenda-maven-settings.xml'),
     );
-    const gcpSettingsPath = path.resolve(
-      path.join(__dirname, '../src/extenda-maven-gcp-settings.xml'),
+    const garSettingsPath = path.resolve(
+      path.join(__dirname, '../src/extenda-maven-gar-settings.xml'),
     );
     const abalonPath = path.resolve(
       path.join(__dirname, '../src/AbalonAb-maven-settings.xml'),
@@ -53,7 +52,7 @@ describe('Maven', () => {
     }
 
     fileSystem[settingsPath] = '<extenda />';
-    fileSystem[gcpSettingsPath] = '<extenda-gar />';
+    fileSystem[garSettingsPath] = '<extenda-gar />';
     fileSystem[abalonPath] = '<abalon />';
     return fileSystem;
   };
@@ -65,9 +64,6 @@ describe('Maven', () => {
 
     // Make sure core.group executes callbacks.
     core.group.mockImplementation((name, fn) => fn());
-
-    // Make sure withGcloud executes callbacks.
-    withGcloud.mockImplementation((name, fn) => fn(name));
   });
 
   afterEach(() => {
@@ -264,7 +260,10 @@ describe('Maven', () => {
       expect(
         fs.readFileSync(path.join(os.homedir(), '.m2', 'settings.xml'), 'utf8'),
       ).toEqual('<extenda-gar />');
-      expect(withGcloud).toHaveBeenCalled();
+      expect(core.exportVariable).toHaveBeenCalledWith(
+        'ARTIFACT_REGISTRY_AUTH',
+        'service-account-key',
+      );
       expect(loadNexusCredentials).not.toHaveBeenCalled();
     });
 
