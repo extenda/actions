@@ -1,12 +1,17 @@
-name: Commit
-on: push
+name: CI
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
 
 permissions: write-all
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    if: github.actor != 'dependabot[bot]'
     steps:
       - uses: actions/checkout@v6
         with:
@@ -40,7 +45,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 25
 
       - name: Analyze with SonarCloud
         uses: ./sonar-scanner
@@ -50,7 +55,6 @@ jobs:
 
   verify-dist:
     runs-on: ubuntu-latest
-    if: github.actor != 'dependabot[bot]'
     steps:
       - uses: actions/checkout@v6
 
@@ -71,7 +75,6 @@ jobs:
 
   acceptance-windows:
     runs-on: windows-2025
-    if: github.actor != 'dependabot[bot]'
     needs:
       - verify-dist
     steps:
@@ -137,7 +140,6 @@ jobs:
         os: [ubuntu-22.04, ubuntu-24.04]
         job-name: [acceptance-linux]
     runs-on: ${{ matrix.os }}
-    if: github.actor != 'dependabot[bot]'
     needs:
       - verify-dist
     steps:
