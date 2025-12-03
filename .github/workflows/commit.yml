@@ -1,12 +1,17 @@
-name: Commit
-on: push
+name: CI
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
 
 permissions: write-all
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    if: github.actor != 'dependabot[bot]'
     steps:
       - uses: actions/checkout@v6
         with:
