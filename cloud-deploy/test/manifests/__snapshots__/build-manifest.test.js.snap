@@ -244,6 +244,8 @@ spec:
               value: '15'
             - name: CONFIG_PROMETHEUS
               value: gmp
+            - name: CONFIG_PROMETHEUS_PIPELINES
+              value: user-container security-authz
             - name: CONFIG_OTEL
               value: otel
           startupProbe:
@@ -518,6 +520,8 @@ spec:
               value: '15'
             - name: CONFIG_PROMETHEUS
               value: gmp
+            - name: CONFIG_PROMETHEUS_PIPELINES
+              value: user-container security-authz
           startupProbe:
             tcpSocket:
               port: 13133
@@ -1419,6 +1423,8 @@ spec:
             timeoutSeconds: 3
           ports:
             - containerPort: 8080
+              protocol: TCP
+            - containerPort: 9001
               protocol: TCP
           resources:
             requests:
@@ -2391,6 +2397,8 @@ spec:
             timeoutSeconds: 3
           ports:
             - containerPort: 8080
+              protocol: TCP
+            - containerPort: 9001
               protocol: TCP
           resources:
             requests:
