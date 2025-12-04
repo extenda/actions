@@ -1,9 +1,12 @@
-const semver = require('semver');
 const getImageWithSha256 = require('./image-sha256');
 const selectSemver = require('../utils/select-semver');
 const STABLE_TAG = 'v2.1.2';
 
-const getConfig = (serviceName, monitoring) => {
+const getConfig = (
+  serviceName,
+  monitoring,
+  containers = 'user-container security-authz',
+) => {
   const config = {
     prometheus: {
       enabled: false,
@@ -28,6 +31,7 @@ const getConfig = (serviceName, monitoring) => {
         PROMETHEUS_SCRAPE_PORT: port,
         PROMETHEUS_SCRAPE_INTERVAL: interval,
         CONFIG_PROMETHEUS: 'gmp',
+        CONFIG_PROMETHEUS_PIPELINES: containers,
       },
     };
   }
@@ -72,9 +76,30 @@ const imageTag = (monitoring = {}) => {
   );
 };
 
-const cloudRunCollector = async (serviceName, monitoring, securityVersion) => {
-  const config = getConfig(serviceName, monitoring || {});
-
+const cloudRunCollector = async (
+  serviceName,
+  monitoringConfig,
+  monitorSecurityAuthzOnly = false,
+) => {
+  let cpu = '0.1';
+  let monitoring = monitoringConfig;
+  if (monitorSecurityAuthzOnly) {
+    cpu = '0.05';
+    monitoring = {
+      prometheus: {
+        enabled: true,
+        interval: 60,
+        port: 9001,
+      },
+    };
+  }
+  const config = getConfig(
+    serviceName,
+    monitoring || {},
+    monitorSecurityAuthzOnly
+      ? 'security-authz'
+      : 'user-container security-authz',
+  );
   if (!config.prometheus.enabled && !config.openTelemetry.enabled) {
     return null;
   }
@@ -82,10 +107,6 @@ const cloudRunCollector = async (serviceName, monitoring, securityVersion) => {
   let env = {};
   if (config.prometheus.enabled) {
     env = { ...env, ...config.prometheus.collectorEnv };
-    if (semver.compare(securityVersion, 'v1.6.0') >= 0) {
-      // The security sidecar is recent enough to support Prometheus scraping.
-      env.CONFIG_PROMETHEUS_PIPELINES = 'user-container security-authz';
-    }
   }
 
   if (config.openTelemetry.enabled) {
@@ -101,7 +122,7 @@ const cloudRunCollector = async (serviceName, monitoring, securityVersion) => {
     name: 'collector',
     resources: {
       limits: {
-        cpu: '0.1',
+        cpu: `${cpu}`,
         memory: '128Mi',
       },
     },

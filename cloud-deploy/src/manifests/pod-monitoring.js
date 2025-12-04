@@ -11,11 +11,25 @@ const deletePodMonitor = async (name) =>
     .then(() => core.info('Deleted old pod monitoring resource'))
     .catch(() => true); // succeed even if resource does not exist
 
-const podMonitorManifest = (name, monitoring) => {
+const podMonitorManifest = (name, monitoring, opa) => {
   const { prometheus: { interval = -1, path = '/metrics', port = 8080 } = {} } =
     monitoring;
-
-  if (interval < 0) {
+  const endpoints = [];
+  if (interval > 0) {
+    endpoints.push({
+      port,
+      path,
+      interval: `${interval}s`,
+    });
+  }
+  if (opa) {
+    endpoints.push({
+      port: 9001,
+      interval: '60s',
+      path: '/metrics',
+    });
+  }
+  if (endpoints.length === 0) {
     return null;
   }
 
@@ -30,13 +44,7 @@ const podMonitorManifest = (name, monitoring) => {
       selector: {
         matchLabels: { app: name },
       },
-      endpoints: [
-        {
-          port,
-          path,
-          interval: `${interval}s`,
-        },
-      ],
+      endpoints,
     },
   };
 };

@@ -23,17 +23,13 @@ describe('collector-sidecar', () => {
     expect(container).toBeNull();
   });
   test('It creates a Cloud Run collector container for GMP', async () => {
-    const container = await cloudRunCollector(
-      'test',
-      {
-        prometheus: {
-          path: '/metrics',
-          port: 8081,
-          interval: 15,
-        },
+    const container = await cloudRunCollector('test', {
+      prometheus: {
+        path: '/metrics',
+        port: 8081,
+        interval: 15,
       },
-      'v1.5.5',
-    );
+    });
     expect(container).toEqual({
       image: 'eu.gcr.io/extenda/otel-collector@sha256:123',
       name: 'collector',
@@ -49,6 +45,10 @@ describe('collector-sidecar', () => {
         { name: 'PROMETHEUS_SCRAPE_PORT', value: '8081' },
         { name: 'PROMETHEUS_SCRAPE_INTERVAL', value: '15' },
         { name: 'CONFIG_PROMETHEUS', value: 'gmp' },
+        {
+          name: 'CONFIG_PROMETHEUS_PIPELINES',
+          value: 'user-container security-authz',
+        },
       ],
       startupProbe: {
         tcpSocket: {
@@ -72,17 +72,13 @@ describe('collector-sidecar', () => {
     });
   });
   test('It creates a security-authz pipeline for GMP for new security-authz', async () => {
-    const container = await cloudRunCollector(
-      'test',
-      {
-        prometheus: {
-          path: '/metrics',
-          port: 8081,
-          interval: 15,
-        },
+    const container = await cloudRunCollector('test', {
+      prometheus: {
+        path: '/metrics',
+        port: 8081,
+        interval: 15,
       },
-      'v1.6.0',
-    );
+    });
     expect(container).toMatchObject({
       name: 'collector',
       env: [
@@ -191,5 +187,45 @@ describe('collector-sidecar', () => {
       },
     });
     expect(env).toEqual({});
+  });
+  test('It creates a Cloud Run collector container for security container only', async () => {
+    const container = await cloudRunCollector('test', {}, true);
+    expect(container).toEqual({
+      image: 'eu.gcr.io/extenda/otel-collector@sha256:123',
+      name: 'collector',
+      resources: {
+        limits: {
+          cpu: '0.05',
+          memory: '128Mi',
+        },
+      },
+      env: [
+        { name: 'SERVICE_NAME', value: 'test' },
+        { name: 'PROMETHEUS_SCRAPE_PATH', value: '/metrics' },
+        { name: 'PROMETHEUS_SCRAPE_PORT', value: '9001' },
+        { name: 'PROMETHEUS_SCRAPE_INTERVAL', value: '60' },
+        { name: 'CONFIG_PROMETHEUS', value: 'gmp' },
+        { name: 'CONFIG_PROMETHEUS_PIPELINES', value: 'security-authz' },
+      ],
+      startupProbe: {
+        tcpSocket: {
+          port: 13133,
+        },
+        initialDelaySeconds: 0,
+        periodSeconds: 240,
+        timeoutSeconds: 240,
+        failureThreshold: 1,
+      },
+      livenessProbe: {
+        httpGet: {
+          path: '/health',
+          port: 13133,
+        },
+        initialDelaySeconds: 5,
+        periodSeconds: 20,
+        timeoutSeconds: 10,
+        failureThreshold: 3,
+      },
+    });
   });
 });

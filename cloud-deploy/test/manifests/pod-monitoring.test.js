@@ -37,6 +37,32 @@ describe('manifests/pod-monitoring', () => {
     });
   });
 
+  test('It generates a manifest for security-authz', () => {
+    const manifest = podMonitorManifest('test', {}, true);
+    expect(manifest).toEqual({
+      apiVersion: 'monitoring.googleapis.com/v1',
+      kind: 'PodMonitoring',
+      metadata: {
+        name: 'test',
+        namespace: 'test',
+      },
+      spec: {
+        selector: {
+          matchLabels: {
+            app: 'test',
+          },
+        },
+        endpoints: [
+          {
+            interval: '60s',
+            path: '/metrics',
+            port: 9001,
+          },
+        ],
+      },
+    });
+  });
+
   test('It deletes existing monitors when none is defined', async () => {
     gcloudOutput.mockResolvedValueOnce(0);
     await deletePodMonitor('test');
