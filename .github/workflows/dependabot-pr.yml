@@ -1,0 +1,41 @@
+name: dependabot-pr
+on:
+  pull_request:
+    paths:
+      - '**/package.json'
+      - '**/package-lock.json'
+
+jobs:
+  rebuild-dist-files:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]' || github.actor == 'extenda-platform-bot[bot]'
+    steps:
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.EXTENDA_BOT_APP_ID }}
+          private-key: ${{ secrets.EXTENDA_BOT_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: 'Dependabot: Rebuild dist files'
+        uses: ./.github/actions/build-dist
+
+      - name: Stage dist files
+        run: git add '*/dist/**'
+
+      - name: Create signed commit
+        id: commit
+        uses: qoomon/actions--create-commit@v1
+        with:
+          message: "build: Update dist files after dependency update [skip dependabot]"
+          skip-empty: true
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Push changes
+        if: steps.commit.outputs.commit != ''
+        run: git push
