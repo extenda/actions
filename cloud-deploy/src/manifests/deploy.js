@@ -69,7 +69,7 @@ const deploy = async (projectID, name, version, platformGKE, accounts = []) => {
     const project = projectWithoutNumbers(projectID);
     const clan = project.split('-')[0];
     const env = project.split('-')[1];
-    let link = `https://console.cloud.google.com/run/detail/europe-west1/${name}/logs?project=${projectID}`;
+    let link = `https://console.cloud.google.com/run/detail/europe-west1/${name}/observability/logs?project=${projectID}`;
     if (platformGKE) {
       link = `https://console.cloud.google.com/kubernetes/deployment/europe-west1/${clan}-cluster-${env}/${name}/${name}/logs?project=${projectID}`;
     }
