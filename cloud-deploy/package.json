@@ -12,6 +12,6 @@
     "google-auth-library": "^10.5.0",
     "jsonschema": "^1.5.0",
     "semver": "^7.7.3",
-    "yaml": "^2.8.1"
+    "yaml": "^2.8.2"
   }
 }
