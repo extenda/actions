@@ -7,6 +7,7 @@ const getDeployInfo = require('./deploy-info');
 const createComment = require('./create-comment');
 const { getPullRequestNumber, postComment } = require('./pr-comment');
 const resolveServiceFiles = require('./service-files');
+const { isCodeFreeze, getFreezeEnd } = require('./code-freeze');
 
 const action = async () => {
   const serviceAccountKeyCICD = core.getInput('service-account-key', {
@@ -46,10 +47,19 @@ const action = async () => {
       'This plan outlines the infrastructure changes that would be applied if this pull request is merged. ' +
         'The plan does not include changes to the service itself unless they also impact infrastructure not ' +
         'controlled through the cloud-deploy manifests.',
-      plans.join('\n\n-----\n\n'),
-    ].join('\n');
+    ];
 
-    await postComment(githubToken, issueId, comment);
+    if (isCodeFreeze(Date.now())) {
+      comment.push(
+        '',
+        '> [!IMPORTANT]',
+        `> A code freeze is currently in effect. The freeze will end ${getFreezeEnd().toISOString()}.`,
+      );
+    }
+
+    comment.push(plans.join('\n\n-----\n\n'));
+
+    await postComment(githubToken, issueId, comment.join('\n'));
   }
 };
 
