@@ -24,10 +24,10 @@
   "license": "MIT",
   "homepage": "https://github.com/extenda/actions#readme",
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
+    "@eslint/js": "^9.39.2",
     "chalk": "^4.1.2",
     "esbuild": "^0.27.1",
-    "eslint": "^9.39.1",
+    "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-simple-import-sort": "^12.1.1",
@@ -41,8 +41,8 @@
     "run-script-os": "^1.1.6"
   },
   "dependencies": {
-    "@actions/core": "^1.11.1",
-    "@actions/exec": "^1.1.1",
+    "@actions/core": "^2.0.1",
+    "@actions/exec": "^2.0.0",
     "axios-retry": "^4.5.0",
     "js-yaml": "^4.1.1"
   }
