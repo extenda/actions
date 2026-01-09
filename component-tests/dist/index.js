@@ -26697,8 +26697,23 @@ var require_utils3 = __commonJS({
   "component-tests/node_modules/qs/lib/utils.js"(exports2, module2) {
     "use strict";
     var formats = require_formats();
+    var getSideChannel = require_side_channel();
     var has = Object.prototype.hasOwnProperty;
     var isArray = Array.isArray;
+    var overflowChannel = getSideChannel();
+    var markOverflow = /* @__PURE__ */ __name(function markOverflow2(obj, maxIndex) {
+      overflowChannel.set(obj, maxIndex);
+      return obj;
+    }, "markOverflow");
+    var isOverflow = /* @__PURE__ */ __name(function isOverflow2(obj) {
+      return overflowChannel.has(obj);
+    }, "isOverflow");
+    var getMaxIndex = /* @__PURE__ */ __name(function getMaxIndex2(obj) {
+      return overflowChannel.get(obj);
+    }, "getMaxIndex");
+    var setMaxIndex = /* @__PURE__ */ __name(function setMaxIndex2(obj, maxIndex) {
+      overflowChannel.set(obj, maxIndex);
+    }, "setMaxIndex");
     var hexTable = (function() {
       var array = [];
       for (var i = 0; i < 256; ++i) {
@@ -26738,7 +26753,11 @@ var require_utils3 = __commonJS({
         if (isArray(target)) {
           target.push(source);
         } else if (target && typeof target === "object") {
-          if (options && (options.plainObjects || options.allowPrototypes) || !has.call(Object.prototype, source)) {
+          if (isOverflow(target)) {
+            var newIndex = getMaxIndex(target) + 1;
+            target[newIndex] = source;
+            setMaxIndex(target, newIndex);
+          } else if (options && (options.plainObjects || options.allowPrototypes) || !has.call(Object.prototype, source)) {
             target[source] = true;
           }
         } else {
@@ -26747,6 +26766,15 @@ var require_utils3 = __commonJS({
         return target;
       }
       if (!target || typeof target !== "object") {
+        if (isOverflow(source)) {
+          var sourceKeys = Object.keys(source);
+          var result = options && options.plainObjects ? { __proto__: null, 0: target } : { 0: target };
+          for (var m = 0; m < sourceKeys.length; m++) {
+            var oldKey = parseInt(sourceKeys[m], 10);
+            result[oldKey + 1] = source[sourceKeys[m]];
+          }
+          return markOverflow(result, getMaxIndex(source) + 1);
+        }
         return [target].concat(source);
       }
       var mergeTarget = target;
@@ -26871,8 +26899,18 @@ var require_utils3 = __commonJS({
       }
       return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
     }, "isBuffer");
-    var combine = /* @__PURE__ */ __name(function combine2(a, b) {
-      return [].concat(a, b);
+    var combine = /* @__PURE__ */ __name(function combine2(a, b, arrayLimit, plainObjects) {
+      if (isOverflow(a)) {
+        var newIndex = getMaxIndex(a) + 1;
+        a[newIndex] = b;
+        setMaxIndex(a, newIndex);
+        return a;
+      }
+      var result = [].concat(a, b);
+      if (result.length > arrayLimit) {
+        return markOverflow(arrayToObject(result, { plainObjects }), result.length - 1);
+      }
+      return result;
     }, "combine");
     var maybeMap = /* @__PURE__ */ __name(function maybeMap2(val, fn) {
       if (isArray(val)) {
@@ -26892,6 +26930,7 @@ var require_utils3 = __commonJS({
       decode,
       encode,
       isBuffer,
+      isOverflow,
       isRegExp,
       maybeMap,
       merge
@@ -27275,16 +27314,18 @@ owed.");
           val = options.strictNullHandling ? null : "";
         } else {
           key = options.decoder(part.slice(0, pos), defaults.decoder, charset, "key");
-          val = utils.maybeMap(
-            parseArrayValue(
-              part.slice(pos + 1),
-              options,
-              isArray(obj[key]) ? obj[key].length : 0
-            ),
-            function(encodedVal) {
-              return options.decoder(encodedVal, defaults.decoder, charset, "value");
-            }
-          );
+          if (key !== null) {
+            val = utils.maybeMap(
+              parseArrayValue(
+                part.slice(pos + 1),
+                options,
+                isArray(obj[key]) ? obj[key].length : 0
+              ),
+              function(encodedVal) {
+                return options.decoder(encodedVal, defaults.decoder, charset, "value");
+              }
+            );
+          }
         }
         if (val && options.interpretNumericEntities && charset === "iso-8859-1") {
           val = interpretNumericEntities(String(val));
@@ -27292,11 +27333,18 @@ owed.");
         if (part.indexOf("[]=") > -1) {
           val = isArray(val) ? [val] : val;
         }
-        var existing = has.call(obj, key);
-        if (existing && options.duplicates === "combine") {
-          obj[key] = utils.combine(obj[key], val);
-        } else if (!existing || options.duplicates === "last") {
-          obj[key] = val;
+        if (key !== null) {
+          var existing = has.call(obj, key);
+          if (existing && options.duplicates === "combine") {
+            obj[key] = utils.combine(
+              obj[key],
+              val,
+              options.arrayLimit,
+              options.plainObjects
+            );
+          } else if (!existing || options.duplicates === "last") {
+            obj[key] = val;
+          }
         }
       }
       return obj;
@@ -27312,8 +27360,17 @@ owed.");
         var obj;
         var root = chain[i];
         if (root === "[]" && options.parseArrays) {
-          obj = options.allowEmptyArrays && (leaf === "" || options.strictNullHandling && leaf === null) ? [] : utils.combine(
-          [], leaf);
+          if (utils.isOverflow(leaf)) {
+            obj = leaf;
+          } else {
+            obj = options.allowEmptyArrays && (leaf === "" || options.strictNullHandling && leaf === null) ? [] : utils.
+            combine(
+              [],
+              leaf,
+              options.arrayLimit,
+              options.plainObjects
+            );
+          }
         } else {
           obj = options.plainObjects ? { __proto__: null } : {};
           var cleanRoot = root.charAt(0) === "[" && root.charAt(root.length - 1) === "]" ? root.slice(1, -1) : root;
@@ -27333,14 +27390,19 @@ owed.");
       }
       return leaf;
     }, "parseObject");
-    var parseKeys = /* @__PURE__ */ __name(function parseQueryStringKeys(givenKey, val, options, valuesParsed) {
-      if (!givenKey) {
-        return;
-      }
+    var splitKeyIntoSegments = /* @__PURE__ */ __name(function splitKeyIntoSegments2(givenKey, options) {
       var key = options.allowDots ? givenKey.replace(/\.([^.[]+)/g, "[$1]") : givenKey;
+      if (options.depth <= 0) {
+        if (!options.plainObjects && has.call(Object.prototype, key)) {
+          if (!options.allowPrototypes) {
+            return;
+          }
+        }
+        return [key];
+      }
       var brackets = /(\[[^[\]]*])/;
       var child = /(\[[^[\]]*])/g;
-      var segment = options.depth > 0 && brackets.exec(key);
+      var segment = brackets.exec(key);
       var parent = segment ? key.slice(0, segment.index) : key;
       var keys = [];
       if (parent) {
@@ -27352,9 +27414,10 @@ owed.");
         keys.push(parent);
       }
       var i = 0;
-      while (options.depth > 0 && (segment = child.exec(key)) !== null && i < options.depth) {
+      while ((segment = child.exec(key)) !== null && i < options.depth) {
         i += 1;
-        if (!options.plainObjects && has.call(Object.prototype, segment[1].slice(1, -1))) {
+        var segmentContent = segment[1].slice(1, -1);
+        if (!options.plainObjects && has.call(Object.prototype, segmentContent)) {
           if (!options.allowPrototypes) {
             return;
           }
@@ -27366,6 +27429,16 @@ owed.");
           throw new RangeError("Input depth exceeded depth option of " + options.depth + " and strictDepth is true");
         }
         keys.push("[" + key.slice(segment.index) + "]");
+      }
+      return keys;
+    }, "splitKeyIntoSegments");
+    var parseKeys = /* @__PURE__ */ __name(function parseQueryStringKeys(givenKey, val, options, valuesParsed) {
+      if (!givenKey) {
+        return;
+      }
+      var keys = splitKeyIntoSegments(givenKey, options);
+      if (!keys) {
+        return;
       }
       return parseObject(keys, val, options, valuesParsed);
     }, "parseQueryStringKeys");
@@ -37338,7 +37411,7 @@ var require_form_data = __commonJS({
     FormData2.prototype.toString = function() {
       return "[object FormData]";
     };
-    setToStringTag(FormData2, "FormData");
+    setToStringTag(FormData2.prototype, "FormData");
     module2.exports = FormData2;
   }
 });
@@ -43110,6 +43183,337 @@ var require_agent3 = __commonJS({
   }
 });
 
+// component-tests/node_modules/cookie-signature/index.js
+var require_cookie_signature = __commonJS({
+  "component-tests/node_modules/cookie-signature/index.js"(exports2) {
+    var crypto = require("crypto");
+    exports2.sign = function(val, secret) {
+      if ("string" != typeof val) throw new TypeError("Cookie value must be provided as a string.");
+      if (null == secret) throw new TypeError("Secret key must be provided.");
+      return val + "." + crypto.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+    };
+    exports2.unsign = function(input, secret) {
+      if ("string" != typeof input) throw new TypeError("Signed cookie string must be provided.");
+      if (null == secret) throw new TypeError("Secret key must be provided.");
+      var tentativeValue = input.slice(0, input.lastIndexOf(".")), expectedInput = exports2.sign(tentativeValue, secret),
+      expectedBuffer = Buffer.from(expectedInput), inputBuffer = Buffer.from(input);
+      return expectedBuffer.length === inputBuffer.length && crypto.timingSafeEqual(expectedBuffer, inputBuffer) ? tentativeValue :
+      false;
+    };
+  }
+});
+
+// component-tests/node_modules/supertest/lib/cookies/assertion.js
+var require_assertion = __commonJS({
+  "component-tests/node_modules/supertest/lib/cookies/assertion.js"(exports2, module2) {
+    "use strict";
+    var signature = require_cookie_signature();
+    function assertHasProperties(obj, props) {
+      if (Array.isArray(props)) {
+        props.forEach(function(key) {
+          if (!(key in obj)) {
+            throw new Error("expected object to have property " + key);
+          }
+        });
+      } else {
+        Object.keys(props).forEach(function(key) {
+          if (!(key in obj)) {
+            throw new Error("expected object to have property " + key);
+          }
+        });
+      }
+    }
+    __name(assertHasProperties, "assertHasProperties");
+    function assertNotHasProperties(obj, props) {
+      if (Array.isArray(props)) {
+        if (props.length === 0) {
+          throw new Error("expected object to not have properties (false negative fail)");
+        }
+        props.forEach(function(key) {
+          if (key in obj) {
+            throw new Error("expected object to not have property " + key);
+          }
+        });
+      } else {
+        let keys = Object.keys(props);
+        if (keys.length === 0) {
+          throw new Error("expected object to not have properties (false negative fail)");
+        }
+        keys.forEach(function(key) {
+          if (key in obj) {
+            throw new Error("expected object to not have property " + key);
+          }
+        });
+      }
+    }
+    __name(assertNotHasProperties, "assertNotHasProperties");
+    function assertEqual(actual, expected) {
+      if (actual !== expected) {
+        throw new Error(
+          "expected " + JSON.stringify(actual) + " to equal " + JSON.stringify(expected)
+        );
+      }
+    }
+    __name(assertEqual, "assertEqual");
+    function assertNotEqual(actual, expected) {
+      if (actual === expected) {
+        throw new Error(
+          "expected " + JSON.stringify(actual) + " to not equal " + JSON.stringify(expected)
+        );
+      }
+    }
+    __name(assertNotEqual, "assertNotEqual");
+    module2.exports = function(secret, asserts) {
+      let assertions = [];
+      if (typeof secret === "string") secret = [secret];
+      else if (!Array.isArray(secret)) secret = [];
+      if (Array.isArray(asserts)) assertions = asserts;
+      else if (typeof asserts === "function") assertions.push(asserts);
+      function Assertion(res) {
+        if (typeof res !== "object") throw new Error("res argument must be object");
+        let request = {
+          headers: res.req.getHeaders(),
+          cookies: []
+        };
+        let response = {
+          headers: res.headers,
+          cookies: []
+        };
+        if (request.headers.cookie) {
+          const cookies = String(request.headers.cookie);
+          cookies.split(/; */).forEach(function(cookie) {
+            request.cookies.push(Assertion.parse(cookie));
+          });
+        }
+        if (Array.isArray(response.headers["set-cookie"]) && response.headers["set-cookie"].length > 0) {
+          response.headers["set-cookie"].forEach(function(val) {
+            response.cookies.push(Assertion.parse(val));
+          });
+        }
+        let result;
+        assertions.every(function(assertion) {
+          result = assertion(request, response);
+          return typeof result !== "string";
+        });
+        return result;
+      }
+      __name(Assertion, "Assertion");
+      Assertion.find = function(name, stack) {
+        let cookie;
+        stack.every(function(val) {
+          if (name !== val.name) return true;
+          cookie = val;
+          return false;
+        });
+        return cookie;
+      };
+      Assertion.parse = function(str, options) {
+        if (typeof str !== "string") throw new TypeError("argument str must be a string");
+        if (typeof options !== "object") options = {};
+        let decode = options.decode || decodeURIComponent;
+        let parts = str.split(/; */);
+        let cookie = {};
+        parts.forEach(function(part, i) {
+          if (i === 1) cookie.options = {};
+          let equalsIndex = part.indexOf("=");
+          if (equalsIndex < 0) {
+            cookie.options[part.trim().toLowerCase()] = true;
+            return;
+          }
+          const key = part.substr(0, equalsIndex).trim().toLowerCase();
+          if (typeof cookie[key] !== "undefined") return;
+          equalsIndex += 1;
+          let val = part.substr(equalsIndex, part.length).trim();
+          if (val[0] === '"') val = val.slice(1, -1);
+          let value;
+          try {
+            value = decode(val);
+          } catch (e) {
+            value = val;
+          }
+          if (i > 0) {
+            cookie.options[key] = value;
+            return;
+          }
+          cookie.name = key;
+          cookie.value = decode(val);
+        });
+        if (typeof cookie.options === "undefined") cookie.options = {};
+        return cookie;
+      };
+      Assertion.expects = function(expects, hasValues, cb) {
+        if (!Array.isArray(expects) && typeof expects === "object") expects = [expects];
+        let resolvedCb;
+        let resolvedHasValues;
+        if (typeof cb === "undefined" && typeof hasValues === "function") {
+          resolvedCb = hasValues;
+          resolvedHasValues = false;
+        } else {
+          resolvedCb = cb;
+          resolvedHasValues = hasValues;
+        }
+        expects.forEach(function(expect) {
+          let options = expect.options;
+          if (typeof options !== "object" && !Array.isArray(options)) {
+            options = resolvedHasValues ? {} : [];
+          }
+          resolvedCb(Object.assign({}, expect, { options }));
+        });
+      };
+      Assertion.set = function(expects, assert) {
+        if (typeof assert === "undefined") assert = true;
+        Assertion.expects(expects, function(expect) {
+          assertions.push(function(req, res) {
+            const cookie = Assertion.find(expect.name, res.cookies);
+            if (assert && !cookie) throw new Error("expected: " + expect.name + " cookie to be set");
+            if (assert) assertHasProperties(cookie.options, expect.options);
+            else if (cookie) assertNotHasProperties(cookie.options, expect.options);
+          });
+        });
+        return Assertion;
+      };
+      Assertion.reset = function(expects, assert) {
+        if (typeof assert === "undefined") assert = true;
+        Assertion.expects(expects, function(expect) {
+          assertions.push(function(req, res) {
+            const cookieReq = Assertion.find(expect.name, req.cookies);
+            const cookieRes = Assertion.find(expect.name, res.cookies);
+            if (assert && (!cookieReq || !cookieRes)) {
+              throw new Error("expected: " + expect.name + " cookie to be set");
+            } else if (!assert && cookieReq && cookieRes) {
+              throw new Error("expected: " + expect.name + " cookie to be set");
+            }
+          });
+        });
+        return Assertion;
+      };
+      Assertion.new = function(expects, assert) {
+        if (typeof assert === "undefined") assert = true;
+        Assertion.expects(expects, function(expect) {
+          assertions.push(function(req, res) {
+            const cookieReq = Assertion.find(expect.name, req.cookies);
+            const cookieRes = Assertion.find(expect.name, res.cookies);
+            if (assert) {
+              if (!cookieRes) throw new Error("expected: " + expect.name + " cookie to be set");
+              if (cookieReq && cookieRes) {
+                throw new Error("expected: " + expect.name + " cookie to NOT already be set");
+              }
+            } else if (!cookieReq || !cookieRes) {
+              throw new Error("expected: " + expect.name + " cookie to be set");
+            }
+          });
+        });
+        return Assertion;
+      };
+      Assertion.renew = function(expects, assert) {
+        if (typeof assert === "undefined") assert = true;
+        Assertion.expects(expects, true, function(expect) {
+          const expectExpires = new Date(expect.options.expires);
+          const expectMaxAge = parseFloat(expect.options["max-age"]);
+          let baseMessage = "expected: " + expect.name;
+          if (!expectExpires.getTime() && !expectMaxAge) {
+            throw new Error(baseMessage + " expects to have expires or max-age option");
+          }
+          assertions.push(function(req, res) {
+            const cookieReq = Assertion.find(expect.name, req.cookies);
+            const cookieRes = Assertion.find(expect.name, res.cookies);
+            const cookieMaxAge = expectMaxAge && cookieRes ? parseFloat(cookieRes.options["max-age"]) : void 0;
+            const cookieExpires = expectExpires.getTime() && cookieRes ? new Date(cookieRes.options.expires) : void 0;
+            if (assert) {
+              if (!cookieReq || !cookieRes) {
+                throw new Error(baseMessage + " cookie to be set");
+              }
+              if (expectMaxAge && (!cookieMaxAge || cookieMaxAge <= expectMaxAge)) {
+                throw new Error(baseMessage + " cookie max-age to be greater than existing value");
+              }
+              if (expectExpires.getTime() && (!cookieExpires.getTime() || cookieExpires <= expectExpires)) {
+                throw new Error(baseMessage + " cookie expires to be greater than existing value");
+              }
+            } else if (cookieRes) {
+              if (expectMaxAge && cookieMaxAge > expectMaxAge) {
+                throw new Error(
+                  baseMessage + " cookie max-age to be less than or equal to existing value"
+                );
+              }
+              if (expectExpires.getTime() && cookieExpires > expectExpires) {
+                throw new Error(
+                  baseMessage + " cookie expires to be less than or equal to existing value"
+                );
+              }
+            }
+          });
+        });
+        return Assertion;
+      };
+      Assertion.contain = function(expects, assert) {
+        if (typeof assert === "undefined") assert = true;
+        Assertion.expects(expects, function(expect) {
+          const keys = Object.keys(expect.options);
+          assertions.push(function(req, res) {
+            const cookie = Assertion.find(expect.name, res.cookies);
+            if (!cookie) throw new Error("expected: " + expect.name + " cookie to be set");
+            if ("value" in expect) {
+              try {
+                if (assert) assertEqual(cookie.value, expect.value);
+                else assertNotEqual(cookie.value, expect.value);
+              } catch (e) {
+                if (secret.length) {
+                  let value;
+                  secret.every(function(sec) {
+                    value = signature.unsign(cookie.value.slice(2), sec);
+                    return !(value && value === expect.value);
+                  });
+                  if (assert && !value) {
+                    throw new Error("expected: " + expect.name + " value to equal " + expect.value);
+                  } else if (!assert && value) {
+                    throw new Error("expected: " + expect.name + " value to NOT equal " + expect.value);
+                  }
+                } else throw e;
+              }
+            }
+            keys.forEach(function(key) {
+              const expected = key === "max-age" ? expect.options[key].toString() : expect.options[key];
+              if (assert) assertEqual(cookie.options[key], expected);
+              else assertNotEqual(cookie.options[key], expected);
+            });
+          });
+        });
+        return Assertion;
+      };
+      Assertion.not = function(method) {
+        let args = [];
+        for (let i = 1; i < arguments.length; i += 1) args.push(arguments[i]);
+        args.push(false);
+        return Assertion[method].apply(Assertion, args);
+      };
+      return Assertion;
+    };
+  }
+});
+
+// component-tests/node_modules/supertest/lib/cookies/index.js
+var require_cookies2 = __commonJS({
+  "component-tests/node_modules/supertest/lib/cookies/index.js"(exports2, module2) {
+    "use strict";
+    var Assertion = require_assertion();
+    function ExpectCookies(secret, asserts) {
+      return Assertion(secret, asserts);
+    }
+    __name(ExpectCookies, "ExpectCookies");
+    var assertion = Assertion();
+    var methods = Object.getOwnPropertyNames(assertion);
+    methods.forEach(function(method) {
+      if (typeof assertion[method] === "function" && typeof Function[method] === "undefined") {
+        ExpectCookies[method] = function() {
+          const newAssertion = Assertion();
+          return newAssertion[method].apply(newAssertion, arguments);
+        };
+      }
+    });
+    module2.exports = ExpectCookies;
+  }
+});
+
 // component-tests/node_modules/supertest/index.js
 var require_supertest = __commonJS({
   "component-tests/node_modules/supertest/index.js"(exports2, module2) {
@@ -43122,6 +43526,7 @@ var require_supertest = __commonJS({
     }
     var Test = require_test();
     var agent = require_agent3();
+    var cookies = require_cookies2();
     module2.exports = function(app, options = {}) {
       const obj = {};
       if (typeof app === "function") {
@@ -43147,6 +43552,7 @@ var require_supertest = __commonJS({
     };
     module2.exports.Test = Test;
     module2.exports.agent = agent;
+    module2.exports.cookies = cookies;
   }
 });
 
@@ -60769,7 +61175,7 @@ var require_parse3 = __commonJS({
 });
 
 // utils/node_modules/undici/lib/cookies/index.js
-var require_cookies2 = __commonJS({
+var require_cookies3 = __commonJS({
   "utils/node_modules/undici/lib/cookies/index.js"(exports2, module2) {
     "use strict";
     var { parseSetCookie } = require_parse3();
@@ -62288,7 +62694,7 @@ var require_undici2 = __commonJS({
       module2.exports.caches = new CacheStorage(kConstruct);
     }
     if (util.nodeMajor >= 16) {
-      const { deleteCookie, getCookies, getSetCookies, setCookie } = require_cookies2();
+      const { deleteCookie, getCookies, getSetCookies, setCookie } = require_cookies3();
       module2.exports.deleteCookie = deleteCookie;
       module2.exports.getCookies = getCookies;
       module2.exports.getSetCookies = getSetCookies;
