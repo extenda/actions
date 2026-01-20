@@ -1,0 +1,97 @@
+name: Quality Gate
+description: Enforce a quality gate on your software project.
+inputs:
+  service-account-key:
+    description: |
+      The service account key which will be used to access CI/CD pipeline secrets and
+      the storage bucket if data management is enabled.
+
+      This must be set unless the `QUALITY_GATE_TOKEN` environment variable is set
+      with the access token for the service provider.
+    default: ''
+  github-token:
+    description: The GitHub Actions token.
+    default: ${{ github.token }}
+  collection:
+    description: |
+      The collection name under which the project will be sorted. This can be a
+      team name or a category. This can be used to organize projects within
+      the quality gate reporting dashboards.
+    required: true
+  storage-bucket:
+    description: |
+      The GCS bucket used to store quality gate data. Set this to a blank string to
+      disable any data management performed by this action.
+    default: quality-gate-data
+runs:
+  using: composite
+  steps:
+    - name: Resolve quality gate access token
+      if: env.QUALITY_GATE_TOKEN == ''
+      uses: extenda/actions/gcp-secret-manager@v0
+      with:
+        service-account-key: ${{ inputs.service-account-key }}
+        secrets: |
+          QUALITY_GATE_TOKEN: qodana-organization-token
+
+    - name: Setup gcloud
+      uses: extenda/actions/setup-gcloud@v0
+      if: inputs.service-account-key != ''
+      with:
+        service-account-key: ${{ inputs.service-account-key }}
+        export-default-credentials: 'true'
+
+    - name: Download quality baseline from GCS
+      if: ${{ inputs.service-account-key != '' && inputs.storage-bucket != '' && !contains(github.event.head_commit.message, '[skip quality]') }}
+      run: |
+        gcloud storage cp \
+          gs://${{ inputs.storage-bucket }}/qodana/${{ github.repository }}/qodana-sarif.json \
+          managed-qodana.sarif.json || true
+      shell: bash
+
+    - name: Setup Qodana
+      uses: extenda/actions/setup-qodana@feat/quality-gate
+      id: setup-qodana
+      with:
+        qodana-token: ${{ env.QUALITY_GATE_TOKEN }}
+        qodana-team: ${{ inputs.collection }}
+        github-token: ${{ inputs.github-token }}
+
+    - name: Scan with Qodana
+      uses: extenda/qodana-action@feat/issue-number-discovery
+      if: ${{ !contains(github.event.head_commit.message, '[skip quality]') }}
+      with:
+        args: ${{ steps.setup-qodana.outputs.args }}
+        github-token: ${{ inputs.github-token }}
+        pr-mode: ${{ steps.setup-qodana.outputs.pr-mode }}
+      env:
+        QODANA_TOKEN: ${{ steps.setup-qodana.outputs.project-token }}
+
+    - name: Init quality gate baseline
+      if: failure() && inputs.service-account-key != '' && inputs.storage-bucket != '' && contains(github.event.head_commit.message, '[init quality]')
+      run: |
+        generated_baseline="${{ runner.temp }}/qodana/results/qodana.sarif.json"
+        gcs_path="gs://${{ inputs.storage-bucket }}/qodana/${{ github.repository }}/qodana-sarif.json"
+        ${{ github.action_path }}/update-qodana-baseline.sh "$generated_baseline" "$gcs_path"
+
+        echo ""
+        echo -e "\033[01;31mQUALITY-GATE BASELINE CREATED - RERUN JOB\033[00m"
+        echo ""
+        echo "The quality-gate baseline has been created."
+        echo "A rerun of this job should now pass the quality-gate check."
+        echo ""
+      shell: bash
+
+    - name: Rebase quality gate baseline
+      if: always() && inputs.service-account-key != '' && inputs.storage-bucket != '' && contains(github.event.head_commit.message, '[rebase quality]')
+      run: |
+        generated_baseline="${{ runner.temp }}/qodana/results/qodana.sarif.json"
+        gcs_path="gs://${{ inputs.storage-bucket }}/qodana/${{ github.repository }}/qodana-sarif.json"
+        ${{ github.action_path }}/update-qodana-baseline.sh "$generated_baseline" "$gcs_path"
+
+        echo ""
+        echo -e "\033[01;31mQUALITY-GATE BASELINE REBASED\033[00m"
+        echo ""
+        echo "The quality-gate baseline has been rebased."
+        echo ""
+      shell: bash

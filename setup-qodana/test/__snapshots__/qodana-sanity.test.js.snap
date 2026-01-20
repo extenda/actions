@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`It generates qodana.yaml if missing 1`] = `
+"version: '1.0'
+ide: QDJS
+profile:
+  name: qodana.recommended
+failureConditions:
+  severityThresholds:
+    critical: 0
+    high: 0
+    moderate: 0
+  testCoverageThresholds:
+    fresh: 80
+    total: 80
+"
+`;
