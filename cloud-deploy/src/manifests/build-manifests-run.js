@@ -152,7 +152,7 @@ const cloudrunManifestTemplate = async (
   }
 
   let collectorContainer;
-  if (monitoring) {
+  if (monitoring && Object.keys(monitoring).length > 0) {
     collectorContainer = await cloudRunCollector(name, monitoring, true, opa);
   } else if (opa) {
     collectorContainer = await cloudRunCollector(name, null, false, true);

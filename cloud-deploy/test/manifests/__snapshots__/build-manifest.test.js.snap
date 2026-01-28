@@ -870,6 +870,7 @@ spec:
         run.googleapis.com/sessionAffinity: 'true'
         run.googleapis.com/network-interfaces: '[{"network":"clan-network","subnetwork":"cloudrun-subnet"}]'
         run.googleapis.com/vpc-access-egress: private-ranges-only
+        run.googleapis.com/container-dependencies: '{"user-container":["collector"]}'
       labels:
         app: example-service
         product: actions
@@ -925,6 +926,40 @@ spec:
             limits:
               cpu: 0.5
               memory: 512Mi
+        - image: eu.gcr.io/extenda/otel-collector@sha256:123
+          name: collector
+          resources:
+            limits:
+              cpu: '0.05'
+              memory: 128Mi
+          env:
+            - name: SERVICE_NAME
+              value: example-service
+            - name: PROMETHEUS_SCRAPE_PATH
+              value: /metrics
+            - name: PROMETHEUS_SCRAPE_PORT
+              value: '9001'
+            - name: PROMETHEUS_SCRAPE_INTERVAL
+              value: '60'
+            - name: CONFIG_PROMETHEUS
+              value: gmp
+            - name: CONFIG_PROMETHEUS_PIPELINES
+              value: security-authz
+          startupProbe:
+            tcpSocket:
+              port: 13133
+            initialDelaySeconds: 0
+            periodSeconds: 240
+            failureThreshold: 1
+            timeoutSeconds: 240
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 13133
+            initialDelaySeconds: 5
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 3
   traffic:
     - percent: 100
       latestRevision: true

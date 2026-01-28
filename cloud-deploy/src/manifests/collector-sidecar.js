@@ -1,4 +1,3 @@
-const core = require('@actions/core');
 const getImageWithSha256 = require('./image-sha256');
 const selectSemver = require('../utils/select-semver');
 const STABLE_TAG = 'v2.2.3';
@@ -79,12 +78,6 @@ const cloudRunCollector = async (
   monitorUserContainer = true,
   monitorSecurityAuthz = false,
 ) => {
-  core.info(
-    `cloudRunCollector called with monitorUserContainer=${monitorUserContainer}, monitorSecurityAuthz=${monitorSecurityAuthz}`,
-  );
-  core.info(
-    `cloudRunCollector monitoringConfig: ${JSON.stringify(monitoringConfig)}`,
-  );
   let cpu = '0.1';
   let monitoring = monitoringConfig || {};
   if (!monitorUserContainer && monitorSecurityAuthz) {
@@ -103,12 +96,7 @@ const cloudRunCollector = async (
   if (monitorSecurityAuthz) {
     pipelines.push('security-authz');
   }
-
-  core.info(
-    `cloudRunCollector monitoring config: ${JSON.stringify(monitoring)}`,
-  );
   const config = getConfig(serviceName, monitoring, pipelines.join(' '));
-  core.info(`Collector config for ${serviceName}: ${JSON.stringify(config)}`);
 
   if (!config.prometheus.enabled && !config.openTelemetry.enabled) {
     return null;
