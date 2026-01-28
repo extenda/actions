@@ -5,8 +5,8 @@
   "private": true,
   "main": "dist/index.js",
   "dependencies": {
-    "@actions/github": "^6.0.1",
+    "@actions/github": "^7.0.0",
     "js-yaml": "^4.1.1",
-    "supertest": "^7.1.4"
+    "supertest": "^7.2.2"
   }
 }

@@ -6,6 +6,7 @@ const getDeployInfo = require('../src/deploy-info');
 const loadServiceDefinition = require('../../cloud-deploy/src/utils/service-definition');
 const { getPullRequestNumber, postComment } = require('../src/pr-comment');
 const resolveServiceFiles = require('../src/service-files');
+const { isCodeFreeze, getFreezeEnd } = require('../src/code-freeze');
 
 jest.mock('@actions/core');
 jest.mock('../src/deploy-info');
@@ -14,6 +15,7 @@ jest.mock('../../cloud-deploy/src/utils/identity-token');
 jest.mock('../../setup-gcloud');
 jest.mock('../../cloud-deploy/src/utils/service-definition');
 jest.mock('../src/service-files');
+jest.mock('../src/code-freeze');
 
 describe('cloud-deploy-plan', () => {
   beforeEach(() => {
@@ -79,5 +81,41 @@ describe('cloud-deploy-plan', () => {
     await action();
 
     expect(getDeployInfo).not.toHaveBeenCalled();
+  });
+
+  test('It includes code freeze notice', async () => {
+    core.getInput
+      .mockReturnValueOnce('service-account-key')
+      .mockReturnValueOnce('gh-token');
+    core.getMultilineInput.mockReturnValueOnce(['cloud-deploy.yaml']);
+    resolveServiceFiles.mockReturnValueOnce(['cloud-deploy1.yaml']);
+    loadServiceDefinition
+      .mockReturnValueOnce({
+        'cloud-run': {
+          name: 'service1',
+        },
+      })
+      .mockReturnValueOnce({ 'cloud-run': { name: 'service2' } });
+    getDeployInfo.mockResolvedValueOnce({
+      serviceName: 'service1',
+      updates: false,
+      vulnerabilities: false,
+    });
+    getPullRequestNumber.mockResolvedValueOnce(1);
+    isCodeFreeze.mockReturnValueOnce(true);
+
+    const freezeEnd = new Date();
+    getFreezeEnd.mockReturnValueOnce(freezeEnd);
+
+    await action();
+
+    expect(getDeployInfo).toHaveBeenCalledTimes(1);
+    expect(postComment).toHaveBeenCalledWith(
+      'gh-token',
+      1,
+      expect.stringContaining(
+        `The freeze will end ${freezeEnd.toISOString()}.`,
+      ),
+    );
   });
 });
