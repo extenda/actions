@@ -1,6 +1,6 @@
 const getImageWithSha256 = require('./image-sha256');
 const selectSemver = require('../utils/select-semver');
-const STABLE_TAG = 'v2.1.2';
+const STABLE_TAG = 'v2.2.3';
 
 const getConfig = (
   serviceName,
