@@ -79,6 +79,12 @@ const cloudRunCollector = async (
   monitorUserContainer = true,
   monitorSecurityAuthz = false,
 ) => {
+  core.info(
+    `cloudRunCollector called with monitorUserContainer=${monitorUserContainer}, monitorSecurityAuthz=${monitorSecurityAuthz}`,
+  );
+  core.info(
+    `cloudRunCollector monitoringConfig: ${JSON.stringify(monitoringConfig)}`,
+  );
   let cpu = '0.1';
   let monitoring = monitoringConfig || {};
   if (!monitorUserContainer && monitorSecurityAuthz) {
@@ -97,6 +103,10 @@ const cloudRunCollector = async (
   if (monitorSecurityAuthz) {
     pipelines.push('security-authz');
   }
+
+  core.info(
+    `cloudRunCollector monitoring config: ${JSON.stringify(monitoring)}`,
+  );
   const config = getConfig(serviceName, monitoring, pipelines.join(' '));
   core.info(`Collector config for ${serviceName}: ${JSON.stringify(config)}`);
 
