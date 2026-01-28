@@ -2,11 +2,7 @@ const getImageWithSha256 = require('./image-sha256');
 const selectSemver = require('../utils/select-semver');
 const STABLE_TAG = 'v2.2.3';
 
-const getConfig = (
-  serviceName,
-  monitoring,
-  containers = 'user-container',
-) => {
+const getConfig = (serviceName, monitoring, containers = 'user-container') => {
   const config = {
     prometheus: {
       enabled: false,
@@ -101,11 +97,7 @@ const cloudRunCollector = async (
   if (monitorSecurityAuthz) {
     pipelines.push('security-authz');
   }
-  const config = getConfig(
-    serviceName,
-    monitoring || {},
-    pipelines.join(' '),
-  );
+  const config = getConfig(serviceName, monitoring || {}, pipelines.join(' '));
   if (!config.prometheus.enabled && !config.openTelemetry.enabled) {
     return null;
   }

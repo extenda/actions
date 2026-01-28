@@ -23,13 +23,18 @@ describe('collector-sidecar', () => {
     expect(container).toBeNull();
   });
   test('It creates a Cloud Run collector container for GMP', async () => {
-    const container = await cloudRunCollector('test', {
-      prometheus: {
-        path: '/metrics',
-        port: 8081,
-        interval: 15,
+    const container = await cloudRunCollector(
+      'test',
+      {
+        prometheus: {
+          path: '/metrics',
+          port: 8081,
+          interval: 15,
+        },
       },
-    }, true, true);
+      true,
+      true,
+    );
     expect(container).toEqual({
       image: 'eu.gcr.io/extenda/otel-collector@sha256:123',
       name: 'collector',
@@ -72,13 +77,18 @@ describe('collector-sidecar', () => {
     });
   });
   test('It creates a security-authz pipeline for GMP for new security-authz', async () => {
-    const container = await cloudRunCollector('test', {
-      prometheus: {
-        path: '/metrics',
-        port: 8081,
-        interval: 15,
+    const container = await cloudRunCollector(
+      'test',
+      {
+        prometheus: {
+          path: '/metrics',
+          port: 8081,
+          interval: 15,
+        },
       },
-    }, true, true);
+      true,
+      true,
+    );
     expect(container).toMatchObject({
       name: 'collector',
       env: [
