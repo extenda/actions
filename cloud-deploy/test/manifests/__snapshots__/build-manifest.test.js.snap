@@ -245,7 +245,7 @@ spec:
             - name: CONFIG_PROMETHEUS
               value: gmp
             - name: CONFIG_PROMETHEUS_PIPELINES
-              value: user-container security-authz
+              value: user-container
             - name: CONFIG_OTEL
               value: otel
           startupProbe:
@@ -521,7 +521,7 @@ spec:
             - name: CONFIG_PROMETHEUS
               value: gmp
             - name: CONFIG_PROMETHEUS_PIPELINES
-              value: user-container security-authz
+              value: user-container
           startupProbe:
             tcpSocket:
               port: 13133

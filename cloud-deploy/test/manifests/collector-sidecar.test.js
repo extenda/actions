@@ -29,7 +29,7 @@ describe('collector-sidecar', () => {
         port: 8081,
         interval: 15,
       },
-    });
+    }, true, true);
     expect(container).toEqual({
       image: 'eu.gcr.io/extenda/otel-collector@sha256:123',
       name: 'collector',
@@ -78,7 +78,7 @@ describe('collector-sidecar', () => {
         port: 8081,
         interval: 15,
       },
-    });
+    }, true, true);
     expect(container).toMatchObject({
       name: 'collector',
       env: [
@@ -189,7 +189,7 @@ describe('collector-sidecar', () => {
     expect(env).toEqual({});
   });
   test('It creates a Cloud Run collector container for security container only', async () => {
-    const container = await cloudRunCollector('test', {}, true);
+    const container = await cloudRunCollector('test', {}, false, true);
     expect(container).toEqual({
       image: 'eu.gcr.io/extenda/otel-collector@sha256:123',
       name: 'collector',

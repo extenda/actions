@@ -5,7 +5,7 @@ const STABLE_TAG = 'v2.2.3';
 const getConfig = (
   serviceName,
   monitoring,
-  containers = 'user-container security-authz',
+  containers = 'user-container',
 ) => {
   const config = {
     prometheus: {
@@ -79,11 +79,12 @@ const imageTag = (monitoring = {}) => {
 const cloudRunCollector = async (
   serviceName,
   monitoringConfig,
-  monitorSecurityAuthzOnly = false,
+  monitorUserContainer = true,
+  monitorSecurityAuthz = false,
 ) => {
   let cpu = '0.1';
   let monitoring = monitoringConfig;
-  if (monitorSecurityAuthzOnly) {
+  if (!monitorUserContainer && monitorSecurityAuthz) {
     cpu = '0.05';
     monitoring = {
       prometheus: {
@@ -93,12 +94,17 @@ const cloudRunCollector = async (
       },
     };
   }
+  const pipelines = [];
+  if (monitorUserContainer) {
+    pipelines.push('user-container');
+  }
+  if (monitorSecurityAuthz) {
+    pipelines.push('security-authz');
+  }
   const config = getConfig(
     serviceName,
     monitoring || {},
-    monitorSecurityAuthzOnly
-      ? 'security-authz'
-      : 'user-container security-authz',
+    pipelines.join(' '),
   );
   if (!config.prometheus.enabled && !config.openTelemetry.enabled) {
     return null;
