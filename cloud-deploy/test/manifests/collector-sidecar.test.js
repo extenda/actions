@@ -32,7 +32,8 @@ describe('collector-sidecar', () => {
           interval: 15,
         },
       },
-      'v1.5.5',
+      true,
+      true,
     );
     expect(container).toEqual({
       image: 'eu.gcr.io/extenda/otel-collector@sha256:123',
@@ -49,6 +50,10 @@ describe('collector-sidecar', () => {
         { name: 'PROMETHEUS_SCRAPE_PORT', value: '8081' },
         { name: 'PROMETHEUS_SCRAPE_INTERVAL', value: '15' },
         { name: 'CONFIG_PROMETHEUS', value: 'gmp' },
+        {
+          name: 'CONFIG_PROMETHEUS_PIPELINES',
+          value: 'user-container security-authz',
+        },
       ],
       startupProbe: {
         tcpSocket: {
@@ -81,7 +86,8 @@ describe('collector-sidecar', () => {
           interval: 15,
         },
       },
-      'v1.6.0',
+      true,
+      true,
     );
     expect(container).toMatchObject({
       name: 'collector',
@@ -191,5 +197,45 @@ describe('collector-sidecar', () => {
       },
     });
     expect(env).toEqual({});
+  });
+  test('It creates a Cloud Run collector container for security container only', async () => {
+    const container = await cloudRunCollector('test', {}, false, true);
+    expect(container).toEqual({
+      image: 'eu.gcr.io/extenda/otel-collector@sha256:123',
+      name: 'collector',
+      resources: {
+        limits: {
+          cpu: '0.08',
+          memory: '128Mi',
+        },
+      },
+      env: [
+        { name: 'SERVICE_NAME', value: 'test' },
+        { name: 'PROMETHEUS_SCRAPE_PATH', value: '/metrics' },
+        { name: 'PROMETHEUS_SCRAPE_PORT', value: '9001' },
+        { name: 'PROMETHEUS_SCRAPE_INTERVAL', value: '60' },
+        { name: 'CONFIG_PROMETHEUS', value: 'gmp' },
+        { name: 'CONFIG_PROMETHEUS_PIPELINES', value: 'security-authz' },
+      ],
+      startupProbe: {
+        tcpSocket: {
+          port: 13133,
+        },
+        initialDelaySeconds: 0,
+        periodSeconds: 240,
+        timeoutSeconds: 240,
+        failureThreshold: 1,
+      },
+      livenessProbe: {
+        httpGet: {
+          path: '/health',
+          port: 13133,
+        },
+        initialDelaySeconds: 5,
+        periodSeconds: 20,
+        timeoutSeconds: 10,
+        failureThreshold: 3,
+      },
+    });
   });
 });

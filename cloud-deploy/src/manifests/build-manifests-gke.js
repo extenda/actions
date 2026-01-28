@@ -136,6 +136,20 @@ const gkeManifestTemplate = async (
     },
   };
 
+  const ports = [
+    {
+      containerPort: 8080,
+      protocol: 'TCP',
+    },
+  ];
+  if (opa) {
+    ports.push({
+      // security-sidecar metrics port
+      containerPort: 9001,
+      protocol: 'TCP',
+    });
+  }
+
   const deployment = {
     apiVersion: 'apps/v1',
     kind: type,
@@ -201,12 +215,7 @@ const gkeManifestTemplate = async (
                 failureThreshold: 10,
                 timeoutSeconds: 3,
               },
-              ports: [
-                {
-                  containerPort: 8080,
-                  protocol: 'TCP',
-                },
-              ],
+              ports,
               resources: {
                 requests: {
                   cpu: cpuRequest,

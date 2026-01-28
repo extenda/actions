@@ -302,7 +302,7 @@ const buildManifest = async (
       await addNamespace(http2Certificate, name),
     );
 
-    const podMonitor = podMonitorManifest(name, monitoring);
+    const podMonitor = podMonitorManifest(name, monitoring, opa);
     if (podMonitor) {
       core.info('Create PodMonitoring resource');
       generateManifest(
