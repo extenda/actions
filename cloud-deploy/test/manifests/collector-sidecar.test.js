@@ -205,7 +205,7 @@ describe('collector-sidecar', () => {
       name: 'collector',
       resources: {
         limits: {
-          cpu: '0.05',
+          cpu: '0.08',
           memory: '128Mi',
         },
       },

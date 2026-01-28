@@ -81,7 +81,7 @@ const cloudRunCollector = async (
   let cpu = '0.1';
   let monitoring = monitoringConfig || {};
   if (!monitorUserContainer && monitorSecurityAuthz) {
-    cpu = '0.05';
+    cpu = '0.08';
     monitoring = {
       prometheus: {
         interval: 60,
