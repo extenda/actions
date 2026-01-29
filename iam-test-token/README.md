@@ -26,7 +26,7 @@ jobs:
   acceptance:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - uses: extenda/actions/gcp-secret-manager@v0
         with:
@@ -55,7 +55,7 @@ jobs:
   acceptance:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
      - uses: extenda/actions/gcp-secret-manager@v0
       with:

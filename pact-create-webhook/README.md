@@ -49,7 +49,7 @@ jobs:
   pact-create-webhook:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Create Pact Broker provider webhook
         uses: extenda/actions/pact-create-webhook@v0
