@@ -78,10 +78,8 @@ const cloudRunCollector = async (
   monitorUserContainer = true,
   monitorSecurityAuthz = false,
 ) => {
-  let cpu = '0.1';
   let monitoring = monitoringConfig || {};
   if (!monitorUserContainer && monitorSecurityAuthz) {
-    cpu = '0.08';
     monitoring = {
       prometheus: {
         interval: 60,
@@ -96,11 +94,16 @@ const cloudRunCollector = async (
   if (monitorSecurityAuthz) {
     pipelines.push('security-authz');
   }
+
   const config = getConfig(serviceName, monitoring, pipelines.join(' '));
 
   if (!config.prometheus.enabled && !config.openTelemetry.enabled) {
     return null;
   }
+
+  // Default cpu and memory allocation if a single monitoring solution is enabled.
+  let cpu = '0.1';
+  let memory = '128Mi';
 
   let env = {};
   if (config.prometheus.enabled) {
@@ -109,6 +112,12 @@ const cloudRunCollector = async (
 
   if (config.openTelemetry.enabled) {
     env = { ...env, ...config.openTelemetry.collectorEnv };
+  }
+
+  if (config.prometheus.enabled && config.openTelemetry.enabled) {
+    // If both Prometheus and OpenTelemetry are enabled, we allocate more resources.
+    cpu = '0.25';
+    memory = '256Mi';
   }
 
   const image = await getImageWithSha256(
@@ -120,8 +129,8 @@ const cloudRunCollector = async (
     name: 'collector',
     resources: {
       limits: {
-        cpu: `${cpu}`,
-        memory: '128Mi',
+        cpu,
+        memory,
       },
     },
     env: Object.entries(env).map(([name, value]) => ({
