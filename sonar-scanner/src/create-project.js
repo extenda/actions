@@ -22,8 +22,10 @@ const projectExists = async (hostUrl, organization, project) =>
 const createSonarCloudProject = async (hostUrl, workingDir) => {
   const repo = process.env.GITHUB_REPOSITORY.split('/');
   let project = repo.join('_');
+  let name = repo[1] || '';
   if (workingDir && workingDir !== '.') {
-    const suffix = path.basename(workingDir);
+    const suffix = path.basename(workingDir).replace(/^\.\/?/g, '') || '';
+    name = `${name} | ${suffix}`;
     project = `${project}_${suffix}`;
   }
 
@@ -36,7 +38,7 @@ const createSonarCloudProject = async (hostUrl, workingDir) => {
     .post(
       `${hostUrl}/api/projects/create`,
       qs.stringify({
-        name: repo[1],
+        name,
         organization: repo[0],
         project,
       }),
