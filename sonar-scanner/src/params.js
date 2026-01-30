@@ -24,14 +24,15 @@ const createParams = async (
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
   const pullRequest = await getPullRequestInfo(githubToken);
   let projectKey = repo;
-  let projectName = `\\"${repo}\\"`;
+  let projectName = `${repo}`;
 
   const suffix = path.basename(workingDir).replace(/^\.\/?/g, '') || '';
   console.log('suffix: ', suffix);
   if (suffix) {
-    projectName = `\\"${repo} | ${suffix}\\"`;
+    projectName = `${repo} | ${suffix}`;
     projectKey = `${repo}_${suffix}`;
   }
+  projectName = `\\"${projectName}\\"`;
 
   if (process.env.SONAR_VERBOSE === 'true') {
     props['sonar.verbose'] = 'true';
