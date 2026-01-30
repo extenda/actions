@@ -176,12 +176,12 @@ describe('Sonar Parameters', () => {
       expect(result).toContain(expected['sonar.projectName']);
       expect(result).toContain(expected['sonar.projectKey']);
 
-      expect(result).toContain('-Dsonar.pullrequest.base=master');
-      expect(result).toContain('-Dsonar.pullrequest.branch=feature/test');
-      expect(result).toContain('-Dsonar.pullrequest.key=1');
-      expect(result).toContain('-Dsonar.pullrequest.provider=github');
+      expect(result).toContain('-Dsonar.pullrequest.base="master"');
+      expect(result).toContain('-Dsonar.pullrequest.branch="feature/test"');
+      expect(result).toContain('-Dsonar.pullrequest.key="1"');
+      expect(result).toContain('-Dsonar.pullrequest.provider="github"');
       expect(result).toContain(
-        '-Dsonar.pullrequest.github.repository=extenda/actions',
+        '-Dsonar.pullrequest.github.repository="extenda/actions"',
       );
     });
 
@@ -192,9 +192,9 @@ describe('Sonar Parameters', () => {
       expect(result).toContain(expected['sonar.host.url.extenda']);
       expect(result).toContain(expected['sonar.projectName']);
       expect(result).toContain('-Dsonar.github.oauth=');
-      expect(result).toContain('-Dsonar.analysis.mode=preview');
-      expect(result).toContain('-Dsonar.github.repository=extenda/actions');
-      expect(result).toContain('-Dsonar.github.pullRequest=1');
+      expect(result).toContain('-Dsonar.analysis.mode="preview"');
+      expect(result).toContain('-Dsonar.github.repository="extenda/actions"');
+      expect(result).toContain('-Dsonar.github.pullRequest="1"');
     });
 
     test('Any SonarQube', async () => {
@@ -202,13 +202,13 @@ describe('Sonar Parameters', () => {
       expect(result).toContain(expected['sonar.login']);
       expect(result).toContain(expected['sonar.host.url.sonarqube']);
       expect(result).toContain(expected['sonar.projectName']);
-      expect(result).not.toContain('-Dsonar.analysis.mode=preview');
+      expect(result).not.toContain('-Dsonar.analysis.mode="preview"');
     });
   });
 
   test('It sets verbose flag', async () => {
     process.env.SONAR_VERBOSE = 'true';
     const result = await createParams('https://sonar.extenda.io', 'master');
-    expect(result).toContain('-Dsonar.verbose=true');
+    expect(result).toContain('-Dsonar.verbose="true"');
   });
 });

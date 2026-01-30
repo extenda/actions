@@ -24,7 +24,7 @@ const createParams = async (
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
   const pullRequest = await getPullRequestInfo(githubToken);
   let suffix = path.basename(workingDir).replace(/^\.\/?/g, '');
-  suffix = suffix ? ` \\| ${suffix}` : '';
+  suffix = suffix ? ` | ${suffix}` : '';
   const suffixedRepo = `${repo}${suffix}`;
 
   if (process.env.SONAR_VERBOSE === 'true') {
@@ -80,7 +80,7 @@ const createParams = async (
     if (name.charAt(0) === prefix.charAt(0)) {
       params.push(`${name}${value}`);
     } else {
-      params.push(`${prefix}${name}=${value}`);
+      params.push(`${prefix}${name}="${value}"`);
     }
   });
   return params.join(' ');
