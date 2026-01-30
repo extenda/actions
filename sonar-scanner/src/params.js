@@ -27,12 +27,11 @@ const createParams = async (
   let projectName = `${repo}`;
 
   const suffix = path.basename(workingDir).replace(/^\.\/?/g, '') || '';
-  console.log('suffix: ', suffix);
   if (suffix) {
     projectName = `${repo} | ${suffix}`;
     projectKey = `${repo}_${suffix}`;
   }
-  projectName = `\\"${projectName}\\"`;
+  projectName = `"${projectName}"`;
 
   if (process.env.SONAR_VERBOSE === 'true') {
     props['sonar.verbose'] = 'true';

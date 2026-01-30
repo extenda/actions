@@ -15,7 +15,7 @@ const expected = {
   'sonar.host.url.sonarcloud': '-Dsonar.host.url=https://sonarcloud.io',
   'sonar.host.url.sonarqube': '-Dsonar.host.url=https://sonarqube.io',
   'sonar.organization': '-Dsonar.organization=extenda',
-  'sonar.projectName': '-Dsonar.projectName=\\"actions\\"',
+  'sonar.projectName': '-Dsonar.projectName="actions"',
   'sonar.projectKey': '-Dsonar.projectKey=extenda_actions',
   'sonar.pullrequest': '-Dsonar.pullrequest',
   'sonar.branch.name': '-Dsonar.branch.name',
@@ -78,7 +78,7 @@ describe('Sonar Parameters', () => {
       expect(result).toContain('/d:sonar.token=sonar');
       expect(result).toContain('/d:sonar.host.url=https://sonarcloud.io');
       expect(result).toContain('/o:extenda');
-      expect(result).toContain('/n:\\"actions\\"');
+      expect(result).toContain('/n:"actions"');
       expect(result).toContain('/k:extenda_actions');
       expect(result).not.toContain('/d:sonar.pullrequest=');
       expect(result).not.toContain('/d:sonar.branch.name=');
@@ -112,8 +112,8 @@ describe('Sonar Parameters', () => {
       expect(result).toContain(expected['sonar.host.url.sonarcloud']);
       expect(result).toContain(expected['sonar.organization']);
 
-      const localExpected = expected['sonar.projectName'].replace(/\\"$/, '');
-      expect(result).toContain(`${localExpected} | test\\"`);
+      const localExpected = expected['sonar.projectName'].replace(/"$/, '');
+      expect(result).toContain(`${localExpected} | test"`);
       expect(result).toContain(`${expected['sonar.projectKey']}_test`);
       expect(result).not.toContain(expected['sonar.pullrequest']);
       expect(result).not.toContain(expected['sonar.branch.name']);
@@ -128,8 +128,8 @@ describe('Sonar Parameters', () => {
       expect(result).toContain(expected['sonar.login']);
       expect(result).toContain(expected['sonar.host.url.extenda']);
 
-      const localExpected = expected['sonar.projectName'].replace(/\\"$/, '');
-      expect(result).toContain(`${localExpected} | test\\"`);
+      const localExpected = expected['sonar.projectName'].replace(/"$/, '');
+      expect(result).toContain(`${localExpected} | test"`);
       expect(result).not.toContain(expected['sonar.branch.name']);
     });
 
@@ -143,7 +143,7 @@ describe('Sonar Parameters', () => {
       expect(result).toContain('/d:sonar.token=sonar');
       expect(result).toContain('/d:sonar.host.url=https://sonarcloud.io');
       expect(result).toContain('/o:extenda');
-      expect(result).toContain('/n:\\"actions | test\\"');
+      expect(result).toContain('/n:"actions | test"');
       expect(result).toContain('/k:extenda_actions_test');
       expect(result).not.toContain('/d:sonar.pullrequest=');
       expect(result).not.toContain('/d:sonar.branch.name=');
