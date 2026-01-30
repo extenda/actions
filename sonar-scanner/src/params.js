@@ -23,24 +23,29 @@ const createParams = async (
 
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
   const pullRequest = await getPullRequestInfo(githubToken);
-  let suffix = path.basename(workingDir).replace(/^\.\/?/g, '');
-  suffix = suffix ? ` | ${suffix}` : '';
-  const suffixedRepo = `${repo}${suffix}`;
+  let projectKey = repo;
+  let projectName = repo;
+
+  const suffix = path.basename(workingDir).replace(/^\.\/?/g, '') || '';
+  if (suffix) {
+    projectName = `${repo} | ${suffix}`;
+    projectKey = `${repo}_${suffix}`;
+  }
 
   if (process.env.SONAR_VERBOSE === 'true') {
     props['sonar.verbose'] = 'true';
   }
 
   if (msParams) {
-    props['/n:'] = suffixedRepo;
+    props['/n:'] = projectName;
   } else {
-    props['sonar.projectName'] = suffixedRepo;
+    props['sonar.projectName'] = projectName;
   }
 
   if (msParams) {
     // Note: For other build tools, we assume legacy sonar project key is
     // provided by Maven/Gradle or sonar props file.
-    props['/k:'] = `${owner}_${suffixedRepo}`;
+    props['/k:'] = `${owner}_${projectKey}`;
   }
 
   if (sonarCloud) {
@@ -49,7 +54,7 @@ const createParams = async (
       props['/o:'] = owner;
     } else {
       props['sonar.organization'] = owner;
-      props['sonar.projectKey'] = `${owner}_${suffixedRepo}`;
+      props['sonar.projectKey'] = `${owner}_${projectKey}`;
     }
   }
 
