@@ -25,8 +25,8 @@ const createSonarCloudProject = async (hostUrl, workingDir) => {
   let name = repo[1] || '';
   if (workingDir && workingDir !== '.') {
     const suffix = path.basename(workingDir);
-    project = `${project}_${suffix}`;
-    name = `${name}|${suffix}`;
+    name = `${name} | ${suffix}`;
+    project = `${repo[1]}`;
   }
 
   if (await projectExists(hostUrl, repo[0], project)) {
