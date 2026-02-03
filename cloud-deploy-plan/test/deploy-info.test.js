@@ -1,6 +1,6 @@
 import nock from 'nock';
 
-import { execGcloud } from '../../setup-gcloud/src/index.js';
+import { execGcloud } from '../../setup-gcloud';
 import getDeployInfo from '../src/deploy-info.js';
 
 jest.mock('../../setup-gcloud');

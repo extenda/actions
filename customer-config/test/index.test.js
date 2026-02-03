@@ -1,6 +1,6 @@
 jest.mock('@actions/core');
 jest.mock('fast-glob');
-jest.mock('../src/secrets-manager/load-secrets');
+jest.mock('../src/secrets-manager/load-secrets.js');
 
 import * as core from '@actions/core';
 import camelcaseKeys from 'camelcase-keys';

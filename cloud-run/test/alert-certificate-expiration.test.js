@@ -1,5 +1,5 @@
 jest.mock('@actions/exec');
-jest.mock('../../gcp-secret-manager/src/secrets');
+jest.mock('../../gcp-secret-manager/src/secrets.js');
 
 import * as exec from '@actions/exec';
 

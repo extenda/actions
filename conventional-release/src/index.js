@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 
-import { checkEnv } from '../../utils/src/index.js';
+import { checkEnv } from '../../utils';
 import * as versions from '../../utils/src/versions.js';
 
 const createGitHubRelease = async (release, name) => {

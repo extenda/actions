@@ -3,7 +3,7 @@ import path from 'path';
 
 import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
 import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth.js';
-import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { setupGcloud } from '../../setup-gcloud';
 import { getImageDigest } from '../../utils';
 import applyKubectl from './apply-kubectl.js';
 import applyAutoscale from './autoscale.js';

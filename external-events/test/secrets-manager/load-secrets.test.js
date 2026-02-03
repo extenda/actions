@@ -1,4 +1,4 @@
-jest.mock('../../../gcp-secret-manager/src/secrets');
+jest.mock('../../../gcp-secret-manager/src/secrets.js');
 
 import { loadSecret } from '../../../gcp-secret-manager/src/secrets.js';
 import { loadSecrets } from '../../src/secrets-manager/load-secrets.js';

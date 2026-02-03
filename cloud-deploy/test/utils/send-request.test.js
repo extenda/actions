@@ -11,7 +11,7 @@ import {
 jest.mock('@actions/core');
 jest.mock('axios');
 jest.mock('google-auth-library');
-jest.mock('../../src/utils/identity-token');
+jest.mock('../../src/utils/identity-token.js');
 
 const service = 'service-name';
 const projectid = 'projectid';

@@ -82853,6 +82853,17 @@ __export(index_exports, {
 module.exports = __toCommonJS(index_exports);
 var core5 = __toESM(require_core());
 
+// utils/src/check-env.js
+var checkEnv = /* @__PURE__ */ __name((variables) => {
+  variables.every((name) => {
+    if (!process.env[name]) {
+      throw new Error(`Missing env var: ${name}`);
+    }
+    return true;
+  });
+}, "checkEnv");
+var check_env_default = checkEnv;
+
 // utils/node_modules/simple-git/dist/esm/index.js
 var import_node_buffer = require("node:buffer");
 var import_file_exists = __toESM(require_dist(), 1);
@@ -87699,6 +87710,20 @@ __name(gitInstanceFactory, "gitInstanceFactory");
 init_git_response_error();
 var esm_default = gitInstanceFactory;
 
+// utils/src/image-digest.js
+var exec = __toESM(require_exec2());
+
+// utils/src/load-binary.js
+var core = __toESM(require_core2());
+var io = __toESM(require_io2());
+var import_tool_cache = __toESM(require_tool_cache());
+
+// utils/src/load-github-token.js
+var core2 = __toESM(require_core2());
+
+// utils/src/run.js
+var core3 = __toESM(require_core2());
+
 // utils/src/branch-info.js
 var isPreRelease = /* @__PURE__ */ __name((branchName) => branchName !== "master", "isPreRelease");
 var getBranchType = /* @__PURE__ */ __name((branchName) => {
@@ -87783,31 +87808,6 @@ var getComposedVersionString = /* @__PURE__ */ __name((version, branchNameFriend
   }
   return `${version}-${branchNameFriendly.toLowerCase()}-${shortSha}`;
 }, "getComposedVersionString");
-
-// utils/src/check-env.js
-var checkEnv = /* @__PURE__ */ __name((variables) => {
-  variables.every((name) => {
-    if (!process.env[name]) {
-      throw new Error(`Missing env var: ${name}`);
-    }
-    return true;
-  });
-}, "checkEnv");
-var check_env_default = checkEnv;
-
-// utils/src/image-digest.js
-var exec = __toESM(require_exec2());
-
-// utils/src/load-binary.js
-var core = __toESM(require_core2());
-var io = __toESM(require_io2());
-var import_tool_cache = __toESM(require_tool_cache());
-
-// utils/src/load-github-token.js
-var core2 = __toESM(require_core2());
-
-// utils/src/run.js
-var core3 = __toESM(require_core2());
 
 // utils/src/versions.js
 var core4 = __toESM(require_core2());

@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 
 import getToken from '../../cloud-deploy/src/utils/identity-token.js';
 import loadServiceDefinition from '../../cloud-deploy/src/utils/service-definition.js';
-import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { setupGcloud } from '../../setup-gcloud';
 import { getFreezeEnd, isCodeFreeze } from './code-freeze.js';
 import createComment from './create-comment.js';
 import getDeployInfo from './deploy-info.js';

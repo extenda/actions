@@ -5,7 +5,7 @@ import {
 } from '../../src/manifests/collector-sidecar.js';
 import getImageWithSha256 from '../../src/manifests/image-sha256.js';
 
-jest.mock('../../src/manifests/image-sha256');
+jest.mock('../../src/manifests/image-sha256.js');
 
 const image = 'eu.gcr.io/extenda/my-service:v1.0.0';
 

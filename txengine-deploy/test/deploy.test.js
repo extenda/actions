@@ -1,5 +1,5 @@
-jest.mock('../src/kubectl');
-jest.mock('../src/rollback');
+jest.mock('../src/kubectl.js');
+jest.mock('../src/rollback.js');
 jest.mock('@actions/exec');
 
 import * as exec from '@actions/exec';

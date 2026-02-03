@@ -1,4 +1,4 @@
-jest.mock('../../gcp-secret-manager/src/secrets');
+jest.mock('../../gcp-secret-manager/src/secrets.js');
 import secrets from '../../gcp-secret-manager/src/secrets.js';
 import creds from '../src/sonar-credentials.js';
 

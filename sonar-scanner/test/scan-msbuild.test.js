@@ -5,8 +5,8 @@ import path from 'path';
 
 jest.mock('@actions/exec');
 
-jest.mock('../src/sonar-credentials');
-jest.mock('../../utils/src/pull-request-info');
+jest.mock('../src/sonar-credentials.js');
+jest.mock('../../utils/src/pull-request-info.js');
 
 import { markerFile, scanMsBuild } from '../src/scan-msbuild.js';
 

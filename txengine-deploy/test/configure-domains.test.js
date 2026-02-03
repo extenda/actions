@@ -5,8 +5,8 @@ import configureDomains from '../src/configure-domains.js';
 import handleCertificates from '../src/handle-certificate.js';
 
 jest.mock('@actions/exec');
-jest.mock('../src/handle-certificate');
-jest.mock('../../cloud-run/src/dns-record');
+jest.mock('../src/handle-certificate.js');
+jest.mock('../../cloud-run/src/dns-record.js');
 jest.mock('@actions/core');
 
 const DNSListJSON = [

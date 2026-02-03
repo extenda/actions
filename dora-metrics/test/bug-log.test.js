@@ -5,7 +5,7 @@ import { generateFolders } from '../src/deploy-log.js';
 
 const mockSearchJira = jest.fn();
 
-jest.mock('../src/deploy-log');
+jest.mock('../src/deploy-log.js');
 jest.mock('@actions/exec');
 jest.mock('@actions/core');
 jest.mock(

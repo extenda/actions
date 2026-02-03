@@ -2,7 +2,7 @@ import axios from 'axios';
 import path from 'path';
 
 jest.mock('axios');
-jest.mock('../src/sonar-credentials');
+jest.mock('../src/sonar-credentials.js');
 
 import { checkQualityGate } from '../src/check-quality-gate.js';
 

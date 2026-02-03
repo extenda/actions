@@ -1,7 +1,7 @@
 import { execGcloud } from '../../../setup-gcloud';
 import getToken from '../../src/utils/identity-token.js';
 
-jest.mock('../../../setup-gcloud');
+jest.mock('../../../setup-gcloud.js');
 
 describe('getToken function', () => {
   beforeEach(() => {

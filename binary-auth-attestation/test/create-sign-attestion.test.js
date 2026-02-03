@@ -1,5 +1,5 @@
 jest.mock('../../setup-gcloud');
-import { execGcloud } from '../../setup-gcloud/src/index.js';
+import { execGcloud } from '../../setup-gcloud';
 import {
   createAttestation,
   getArtifactUrl,

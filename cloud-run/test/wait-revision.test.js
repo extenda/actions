@@ -1,5 +1,5 @@
-jest.mock('../src/get-revision');
-jest.mock('../src/gcloud-output');
+jest.mock('../src/get-revision.js');
+jest.mock('../src/gcloud-output.js');
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 

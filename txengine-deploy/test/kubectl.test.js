@@ -4,12 +4,12 @@ const mockClusterInfo = jest.fn();
 jest.mock('../../cloud-run/src/cluster-info', () => ({
   getClusterInfo: mockClusterInfo,
 }));
-jest.mock('../../cloud-run/src/kubectl-auth');
+jest.mock('../../cloud-run/src/kubectl-auth.js');
 
 import * as exec from '@actions/exec';
 
 import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth.js';
-import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { setupGcloud } from '../../setup-gcloud';
 import kubectl from '../src/kubectl.js';
 
 describe('kubectl', () => {

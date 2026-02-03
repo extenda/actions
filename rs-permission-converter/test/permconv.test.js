@@ -8,7 +8,7 @@ jest.mock('../../utils', () => ({
 jest.mock('@actions/exec');
 import * as exec from '@actions/exec';
 
-import { loadTool } from '../../utils/src/index.js';
+import { loadTool } from '../../utils';
 import { convertPermissions } from '../src/permconv.js';
 
 describe('RS Permission Converter Tests', () => {

@@ -1,4 +1,4 @@
-jest.mock('../../gcp-secret-manager/src/secrets');
+jest.mock('../../gcp-secret-manager/src/secrets.js');
 
 import mockedEnv from 'mocked-env';
 

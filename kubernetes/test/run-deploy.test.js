@@ -1,16 +1,16 @@
 jest.mock('@actions/exec');
 jest.mock('../../setup-gcloud');
-jest.mock('../../cloud-run/src/cluster-info');
-jest.mock('../../cloud-run/src/project-info');
-jest.mock('../../cloud-run/src/kubectl-auth');
-jest.mock('../src/check-namespace-exists');
-jest.mock('../src/check-number-of-pods-running');
-jest.mock('../src/patch-deployment-yaml');
-jest.mock('../src/patch-service-yaml');
-jest.mock('../src/patch-statefulset-yaml');
-jest.mock('../src/kustomize');
-jest.mock('../src/apply-kubectl');
-jest.mock('../src/autoscale');
+jest.mock('../../cloud-run/src/cluster-info.js');
+jest.mock('../../cloud-run/src/project-info.js');
+jest.mock('../../cloud-run/src/kubectl-auth.js');
+jest.mock('../src/check-namespace-exists.js');
+jest.mock('../src/check-number-of-pods-running.js');
+jest.mock('../src/patch-deployment-yaml.js');
+jest.mock('../src/patch-service-yaml.js');
+jest.mock('../src/patch-statefulset-yaml.js');
+jest.mock('../src/kustomize.js');
+jest.mock('../src/apply-kubectl.js');
+jest.mock('../src/autoscale.js');
 jest.mock('../../utils', () => ({
   loadTool: jest.fn(),
   getImageDigest: jest.fn(),
@@ -20,7 +20,7 @@ import * as exec from '@actions/exec';
 import mockFs from 'mock-fs';
 
 import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
-import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { setupGcloud } from '../../setup-gcloud';
 import { getImageDigest } from '../../utils';
 import applyKubectl from '../src/apply-kubectl.js';
 import applyAutoscale from '../src/autoscale.js';

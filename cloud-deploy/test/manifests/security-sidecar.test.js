@@ -4,7 +4,7 @@ import {
   STABLE_VERSION,
 } from '../../src/manifests/security-sidecar.js';
 
-jest.mock('../../src/manifests/image-sha256');
+jest.mock('../../src/manifests/image-sha256.js');
 
 const originalEnv = process.env;
 

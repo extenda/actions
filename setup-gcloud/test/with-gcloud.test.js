@@ -2,8 +2,8 @@ import { execGcloud } from '../src/exec-gcloud.js';
 import setupGcloud from '../src/setup-gcloud.js';
 import withGcloud from '../src/with-gcloud.js';
 
-jest.mock('../src/setup-gcloud');
-jest.mock('../src/exec-gcloud');
+jest.mock('../src/setup-gcloud.js');
+jest.mock('../src/exec-gcloud.js');
 
 describe('With Gcloud', () => {
   let orgEnv;

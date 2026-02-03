@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 
+import { checkEnv } from '../../utils';
 import * as branchinfo from '../../utils/src/branch-info.js';
-import { checkEnv } from '../../utils/src/index.js';
 import * as versions from '../../utils/src/versions.js';
 
 const action = async () => {

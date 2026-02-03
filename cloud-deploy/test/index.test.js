@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 
 import projectInfo from '../../cloud-run/src/project-info.js';
-import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { setupGcloud } from '../../setup-gcloud';
 import action from '../src/index.js';
 import buildManifest from '../src/manifests/build-manifest.js';
 import deploy from '../src/manifests/deploy.js';
@@ -12,19 +12,19 @@ import { sendDeployInfo, sendScaleSetup } from '../src/utils/send-request.js';
 import loadServiceDefinition from '../src/utils/service-definition.js';
 import runScan from '../src/utils/vulnerability-scanning.js';
 
-jest.mock('../src/utils/load-credentials');
+jest.mock('../src/utils/load-credentials.js');
 jest.mock('@actions/core');
-jest.mock('../src/utils/service-definition');
-jest.mock('../src/manifests/deploy');
-jest.mock('../src/manifests/build-manifest');
-jest.mock('../../cloud-run/src/project-info');
-jest.mock('../../utils');
+jest.mock('../src/utils/service-definition.js');
+jest.mock('../src/manifests/deploy.js');
+jest.mock('../src/manifests/build-manifest.js');
+jest.mock('../../cloud-run/src/project-info.js');
+jest.mock('../../utils/src');
 jest.mock('../../setup-gcloud');
-jest.mock('../src/manifests/image-sha256');
-jest.mock('../src/policies/publish-policies');
-jest.mock('../src/utils/send-request');
-jest.mock('../src/utils/vulnerability-scanning');
-jest.mock('../src/utils/cloud-armor');
+jest.mock('../src/manifests/image-sha256.js');
+jest.mock('../src/policies/publish-policies.js');
+jest.mock('../src/utils/send-request.js');
+jest.mock('../src/utils/vulnerability-scanning.js');
+jest.mock('../src/utils/cloud-armor.js');
 
 const serviceDef = {
   kubernetes: {

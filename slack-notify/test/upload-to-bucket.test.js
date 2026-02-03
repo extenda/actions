@@ -1,7 +1,7 @@
 import { execGcloud } from '../../setup-gcloud/src.js';
 import uploadToBucket from '../src/upload-to-bucket.js';
 
-jest.mock('../../setup-gcloud/src');
+jest.mock('../../setup-gcloud/src.js');
 
 describe('uploadToBucket', () => {
   beforeEach(() => {

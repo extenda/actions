@@ -10,14 +10,14 @@ import handleStatefulset from '../../src/manifests/statefulset-workaround.js';
 import { addNamespace } from '../../src/utils/add-namespace.js';
 import readSecret from '../../src/utils/load-credentials.js';
 
-jest.mock('../../src/manifests/check-system');
-jest.mock('../../src/utils/add-namespace');
-jest.mock('../../src/manifests/security-sidecar');
-jest.mock('../../src/utils/load-credentials');
-jest.mock('../../src/manifests/statefulset-workaround');
-jest.mock('../../src/cloudrun/get-revisions');
-jest.mock('../../src/utils/cluster-connection');
-jest.mock('../../src/manifests/image-sha256');
+jest.mock('../../src/manifests/check-system.js');
+jest.mock('../../src/utils/add-namespace.js');
+jest.mock('../../src/manifests/security-sidecar.js');
+jest.mock('../../src/utils/load-credentials.js');
+jest.mock('../../src/manifests/statefulset-workaround.js');
+jest.mock('../../src/cloudrun/get-revisions.js');
+jest.mock('../../src/utils/cluster-connection.js');
+jest.mock('../../src/manifests/image-sha256.js');
 
 const readFileSync = (file) => fs.readFileSync(file, { encoding: 'utf-8' });
 const originalEnv = process.env;

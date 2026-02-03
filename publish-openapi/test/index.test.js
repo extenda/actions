@@ -1,5 +1,5 @@
 jest.mock('@actions/core');
-jest.mock('../src/redoc');
+jest.mock('../src/redoc.js');
 
 import * as core from '@actions/core';
 

@@ -1,21 +1,21 @@
 jest.mock('@actions/core');
-jest.mock('../src/configure-iam');
-jest.mock('../src/configure-bundle-sync');
-jest.mock('../src/iam-definition');
-jest.mock('../../iam-test-token/src/iam-auth');
-jest.mock('../src/load-credentials');
+jest.mock('../src/configure-iam.js');
+jest.mock('../src/configure-bundle-sync.js');
+jest.mock('../src/iam-definition.js');
+jest.mock('../../iam-test-token/src/iam-auth.js');
+jest.mock('../src/load-credentials.js');
 jest.mock('../../setup-gcloud');
 jest.mock('fast-glob');
 jest.mock('@actions/github');
-jest.mock('../../cloud-run/src/cluster-info');
-jest.mock('../../gcp-secret-manager/src/secrets');
+jest.mock('../../cloud-run/src/cluster-info.js');
+jest.mock('../../gcp-secret-manager/src/secrets.js');
 
 import * as core from '@actions/core';
 import fg from 'fast-glob';
 
 import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
 import fetchIamToken from '../../iam-test-token/src/iam-auth.js';
-import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { setupGcloud } from '../../setup-gcloud';
 import configureBundleSync from '../src/configure-bundle-sync.js';
 import { configureIAM } from '../src/configure-iam.js';
 import loadIamDefinition from '../src/iam-definition.js';

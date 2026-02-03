@@ -1,10 +1,10 @@
 jest.mock('@actions/core');
 jest.mock('@actions/exec');
-jest.mock('../src/deploy');
-jest.mock('../src/kubectl');
-jest.mock('../src/manifests');
-jest.mock('../src/env-config');
-jest.mock('../src/configure-domains');
+jest.mock('../src/deploy.js');
+jest.mock('../src/kubectl.js');
+jest.mock('../src/manifests.js');
+jest.mock('../src/env-config.js');
+jest.mock('../src/configure-domains.js');
 jest.mock('../../setup-gcloud');
 
 import * as core from '@actions/core';

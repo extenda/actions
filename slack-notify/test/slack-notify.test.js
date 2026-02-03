@@ -7,7 +7,7 @@ import uploadToBucket from '../src/upload-to-bucket.js';
 
 jest.mock('axios');
 jest.mock('@actions/core');
-jest.mock('../../gcp-secret-manager/src/secrets');
+jest.mock('../../gcp-secret-manager/src/secrets.js');
 jest.mock('../src/upload-to-bucket', () => jest.fn());
 
 describe('send Message to slack', () => {

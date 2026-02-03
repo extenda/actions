@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 
 import getToken from '../../cloud-deploy/src/utils/identity-token.js';
 import loadServiceDefinition from '../../cloud-deploy/src/utils/service-definition.js';
-import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { setupGcloud } from '../../setup-gcloud';
 import { getFreezeEnd, isCodeFreeze } from '../src/code-freeze.js';
 import getDeployInfo from '../src/deploy-info.js';
 import action from '../src/index.js';
@@ -10,13 +10,13 @@ import { getPullRequestNumber, postComment } from '../src/pr-comment.js';
 import resolveServiceFiles from '../src/service-files.js';
 
 jest.mock('@actions/core');
-jest.mock('../src/deploy-info');
-jest.mock('../src/pr-comment');
-jest.mock('../../cloud-deploy/src/utils/identity-token');
+jest.mock('../src/deploy-info.js');
+jest.mock('../src/pr-comment.js');
+jest.mock('../../cloud-deploy/src/utils/identity-token.js');
 jest.mock('../../setup-gcloud');
-jest.mock('../../cloud-deploy/src/utils/service-definition');
-jest.mock('../src/service-files');
-jest.mock('../src/code-freeze');
+jest.mock('../../cloud-deploy/src/utils/service-definition.js');
+jest.mock('../src/service-files.js');
+jest.mock('../src/code-freeze.js');
 
 describe('cloud-deploy-plan', () => {
   beforeEach(() => {

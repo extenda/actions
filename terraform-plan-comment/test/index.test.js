@@ -1,6 +1,6 @@
-jest.mock('../../utils/src/pull-request-info');
+jest.mock('../../utils/src/pull-request-info.js');
 jest.mock('@actions/core');
-jest.mock('../src/generate-outputs');
+jest.mock('../src/generate-outputs.js');
 
 const mockComment = jest.fn();
 const mockListComments = jest.fn(() => ({ data: [] }));

@@ -3,7 +3,7 @@ import * as core from '@actions/core';
 import { action } from '../src/index.js';
 import setupGcloud from '../src/setup-gcloud.js';
 
-jest.mock('../src/setup-gcloud');
+jest.mock('../src/setup-gcloud.js');
 jest.mock('@actions/core');
 
 describe('setup-gcloud action', () => {

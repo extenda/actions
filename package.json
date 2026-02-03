@@ -10,7 +10,7 @@
     "build:docker:win32": "docker pull node:20-alpine && docker run --rm -t -v \"%cd%\":/work -w /work node:20-alpine sh -c \"npm run build\"",
     "build:docker:default": "docker pull node:20-alpine && docker run --rm -t -v $(pwd):/work -w /work node:20-alpine sh -c 'npm ci && npm run build'",
     "install": "node .scripts/install-modules.js",
-    "test": "jest --silent",
+    "test": "NODE_OPTIONS=\"--experimental-vm-modules\" jest",
     "posttest": "node .scripts/create-sonar-properties.js",
     "lint:js": "run-script-os",
     "lint:js:win32": "docker run --rm -t -v \"%cd%\":/work -w /work node:20-alpine sh -c \"npm run lint:js\"",

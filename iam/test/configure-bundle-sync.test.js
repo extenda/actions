@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { execGcloud } from '../../setup-gcloud/src/index.js';
+import { execGcloud } from '../../setup-gcloud';
 import configureBundleSync from '../src/configure-bundle-sync.js';
 
 jest.mock('../../setup-gcloud');

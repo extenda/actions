@@ -5,7 +5,7 @@ import * as exec from '@actions/exec';
 import mockFs from 'mock-fs';
 import os from 'os';
 
-import { loadTool } from '../../utils/src/index.js';
+import { loadTool } from '../../utils';
 import { getBinaryName } from '../src/pkgbuilder.js';
 import { buildPackage } from '../src/pkgbuilder.js';
 import { publishPackageCommand } from '../src/pkgbuilder.js';

@@ -1,14 +1,14 @@
-jest.mock('../src/create-project');
-jest.mock('../src/scan');
-jest.mock('../src/scan-msbuild');
-jest.mock('../src/check-quality-gate');
+jest.mock('../src/create-project.js');
+jest.mock('../src/scan.js');
+jest.mock('../src/scan-msbuild.js');
+jest.mock('../src/check-quality-gate.js');
 jest.mock('../src/sonar-credentials', () => ({
   credentials: () => ({
     githubToken: 'GITHUB_TOKEN',
     sonarToken: 'SONAR_TOKEN',
   }),
 }));
-jest.mock('../../utils/src/pull-request-info');
+jest.mock('../../utils/src/pull-request-info.js');
 
 import * as core from '@actions/core';
 

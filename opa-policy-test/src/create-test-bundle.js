@@ -3,7 +3,7 @@ import { exec } from '@actions/exec';
 import fs from 'fs';
 import path from 'path';
 
-import { execGcloud } from '../../setup-gcloud/src/index.js';
+import { execGcloud } from '../../setup-gcloud';
 import copyPolicies from './copy-policies.js';
 
 const createTestBundle = async (bundleName, bucketName) => {

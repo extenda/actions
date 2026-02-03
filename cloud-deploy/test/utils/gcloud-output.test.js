@@ -4,7 +4,7 @@ import handleError from '../../src/utils/error-handler.js';
 import execGcloud from '../../src/utils/gcloud-output.js';
 
 jest.mock('@actions/exec');
-jest.mock('../../src/utils/error-handler');
+jest.mock('../../src/utils/error-handler.js');
 
 const gcloudArgs = ['compute', 'create', 'url-maps', 'name'];
 

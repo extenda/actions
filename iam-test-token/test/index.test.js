@@ -1,6 +1,6 @@
 jest.mock('@actions/core');
-jest.mock('../src/iam-auth');
-jest.mock('../../gcp-secret-manager/src/secrets');
+jest.mock('../src/iam-auth.js');
+jest.mock('../../gcp-secret-manager/src/secrets.js');
 
 import * as core from '@actions/core';
 

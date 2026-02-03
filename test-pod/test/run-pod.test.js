@@ -1,5 +1,5 @@
 jest.mock('@actions/exec');
-jest.mock('../src/extract-output');
+jest.mock('../src/extract-output.js');
 jest.mock('../../utils', () => ({
   getImageDigest: jest.fn(),
 }));

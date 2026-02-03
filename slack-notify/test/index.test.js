@@ -1,5 +1,5 @@
 jest.mock('@actions/core');
-jest.mock('../src/slack-notify');
+jest.mock('../src/slack-notify.js');
 
 import * as core from '@actions/core';
 

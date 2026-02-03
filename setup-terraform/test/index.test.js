@@ -1,13 +1,13 @@
 import mockFs from 'mock-fs';
 
 // Mock out tools download
-jest.mock('../../utils');
+jest.mock('../../utils/src');
 jest.mock('@actions/core');
 
 import * as core from '@actions/core';
 import os from 'os';
 
-import { loadTool } from '../../utils/src/index.js';
+import { loadTool } from '../../utils';
 import { action, platform } from '../src/index.js';
 
 describe('Setup Terraform', () => {

@@ -1,7 +1,7 @@
 import getLatestRevision from '../src/get-revision.js';
 import getRevisions from '../src/get-revisions.js';
 
-jest.mock('../src/get-revisions');
+jest.mock('../src/get-revisions.js');
 
 const cluster = {
   project: 'project-id',

@@ -1,6 +1,6 @@
 import secrets from '../../gcp-secret-manager/src/secrets.js';
 
-jest.mock('../../gcp-secret-manager/src/secrets');
+jest.mock('../../gcp-secret-manager/src/secrets.js');
 
 import loadCredentials from '../src/load-credentials.js';
 

@@ -1,19 +1,19 @@
 import mockFs from 'mock-fs';
 
-jest.mock('../src/vulnerability-scanning');
+jest.mock('../src/vulnerability-scanning.js');
 jest.mock('@actions/exec');
 jest.mock('../../setup-gcloud');
-jest.mock('../src/cluster-info');
-jest.mock('../src/create-namespace');
-jest.mock('../src/check-sa');
-jest.mock('../src/kubectl-auth');
-jest.mock('../src/get-revision');
-jest.mock('../src/get-revisions');
+jest.mock('../src/cluster-info.js');
+jest.mock('../src/create-namespace.js');
+jest.mock('../src/check-sa.js');
+jest.mock('../src/kubectl-auth.js');
+jest.mock('../src/get-revision.js');
+jest.mock('../src/get-revisions.js');
 
 jest.setTimeout(30000);
 import * as exec from '@actions/exec';
 
-import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { setupGcloud } from '../../setup-gcloud';
 import { getClusterInfo } from '../src/cluster-info.js';
 import getRevisions from '../src/get-revisions.js';
 import runDeploy from '../src/run-deploy.js';

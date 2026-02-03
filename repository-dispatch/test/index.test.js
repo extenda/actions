@@ -1,5 +1,5 @@
 jest.mock('@actions/core');
-jest.mock('../../utils');
+jest.mock('../../utils/src');
 
 const mockDispatch = jest.fn();
 
@@ -24,7 +24,7 @@ jest.mock('@actions/github', () => ({
 
 import * as core from '@actions/core';
 
-import { loadGitHubToken } from '../../utils/src/index.js';
+import { loadGitHubToken } from '../../utils';
 import action from '../src/index.js';
 
 describe('repository-dispatch', () => {

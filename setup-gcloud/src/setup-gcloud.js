@@ -6,8 +6,8 @@ import fs from 'fs';
 import path from 'path';
 import { v4 as uuid } from 'uuid';
 
+import { loadTool } from '../../utils';
 import createKeyFile from '../../utils/src/create-key-file.js';
-import { loadTool } from '../../utils/src/index.js';
 import getDownloadUrl from './download-url.js';
 import { execGcloud } from './exec-gcloud.js';
 import getLatestVersion from './latest-version.js';

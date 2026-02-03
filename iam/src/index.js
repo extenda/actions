@@ -3,7 +3,7 @@ import fg from 'fast-glob';
 
 import projectInfo from '../../cloud-run/src/project-info.js';
 import fetchIamToken from '../../iam-test-token/src/iam-auth.js';
-import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { setupGcloud } from '../../setup-gcloud';
 import configureBundleSync from './configure-bundle-sync.js';
 import { configureIAM } from './configure-iam.js';
 import loadIamDefinition from './iam-definition.js';

@@ -1,7 +1,7 @@
 import path from 'path';
 
-jest.mock('../src/sonar-credentials');
-jest.mock('../../utils/src/pull-request-info');
+jest.mock('../src/sonar-credentials.js');
+jest.mock('../../utils/src/pull-request-info.js');
 
 import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
 import { createParams } from '../src/params.js';

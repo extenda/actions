@@ -6,9 +6,9 @@ import action from '../src/index.js';
 import runPod from '../src/run-pod.js';
 
 jest.mock('@actions/core');
-jest.mock('../src/configure-kubectl');
-jest.mock('../src/configmap');
-jest.mock('../src/run-pod');
+jest.mock('../src/configure-kubectl.js');
+jest.mock('../src/configmap.js');
+jest.mock('../src/run-pod.js');
 
 describe('test-pod Action', () => {
   afterEach(() => {

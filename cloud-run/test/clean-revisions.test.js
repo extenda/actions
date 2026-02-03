@@ -4,7 +4,7 @@ import cleanRevisions from '../src/clean-revisions.js';
 import getRevisions from '../src/get-revisions.js';
 
 jest.mock('@actions/exec');
-jest.mock('../src/get-revisions');
+jest.mock('../src/get-revisions.js');
 
 describe('clean revisions', () => {
   afterEach(() => {

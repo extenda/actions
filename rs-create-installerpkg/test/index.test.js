@@ -1,5 +1,5 @@
 jest.mock('@actions/core');
-jest.mock('../src/pkgbuilder');
+jest.mock('../src/pkgbuilder.js');
 
 import * as core from '@actions/core';
 

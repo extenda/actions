@@ -1,10 +1,10 @@
 jest.mock('@actions/core');
-jest.mock('../src/dataflow-build');
+jest.mock('../src/dataflow-build.js');
 jest.mock('../../setup-gcloud');
 
 import * as core from '@actions/core';
 
-import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { setupGcloud } from '../../setup-gcloud';
 import dataflowBuild from '../src/dataflow-build.js';
 import action from '../src/index.js';
 

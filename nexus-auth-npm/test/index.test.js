@@ -1,6 +1,6 @@
 jest.mock('@actions/core');
-jest.mock('../src/nexus-credentials');
-jest.mock('../src/npmrc');
+jest.mock('../src/nexus-credentials.js');
+jest.mock('../src/npmrc.js');
 
 import { getInput } from '@actions/core';
 import mockedEnv from 'mocked-env';

@@ -1,5 +1,5 @@
 jest.mock('@actions/core');
-jest.mock('../../utils');
+jest.mock('../../utils/src');
 
 const mockTag = jest.fn();
 

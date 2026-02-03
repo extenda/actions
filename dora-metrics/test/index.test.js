@@ -1,6 +1,6 @@
 jest.mock('@actions/core');
-jest.mock('../src/bug-log');
-jest.mock('../src/deploy-log');
+jest.mock('../src/bug-log.js');
+jest.mock('../src/deploy-log.js');
 
 import * as core from '@actions/core';
 

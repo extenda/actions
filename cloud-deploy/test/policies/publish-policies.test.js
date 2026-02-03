@@ -5,7 +5,7 @@ import { execGcloud } from '../../../setup-gcloud';
 import publishPolicies from '../../src/policies/publish-policies.js';
 
 jest.mock('axios');
-jest.mock('../../../setup-gcloud');
+jest.mock('../../../setup-gcloud.js');
 
 describe('Publish policies', () => {
   beforeEach(() => {

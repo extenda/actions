@@ -1,5 +1,5 @@
 jest.mock('@actions/core');
-jest.mock('../src/jira-release');
+jest.mock('../src/jira-release.js');
 
 import * as core from '@actions/core';
 

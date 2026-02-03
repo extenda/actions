@@ -1,7 +1,7 @@
 import setupAuthorization from '../../src/cloudrun/iam-bindings.js';
 import execGcloud from '../../src/utils/gcloud-output.js';
 
-jest.mock('../../src/utils/gcloud-output');
+jest.mock('../../src/utils/gcloud-output.js');
 
 describe('Setup iam bindings', () => {
   afterEach(() => {

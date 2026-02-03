@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 
 import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
-import { loadGitHubToken } from '../../utils/src/index.js';
+import { loadGitHubToken } from '../../utils';
 
 const validateState = (state) => {
   switch (state) {

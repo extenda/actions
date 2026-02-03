@@ -3,9 +3,9 @@ import deploy from '../../src/manifests/deploy.js';
 import gcloudOutput from '../../src/utils/gcloud-output.js';
 import { setRetryDelay } from '../../src/utils/retry-until.js';
 
-jest.mock('../../src/utils/gcloud-output');
-jest.mock('../../src/cloudrun/clean-revisions');
-jest.mock('../../src/cloudrun/iam-bindings');
+jest.mock('../../src/utils/gcloud-output.js');
+jest.mock('../../src/cloudrun/clean-revisions.js');
+jest.mock('../../src/cloudrun/iam-bindings.js');
 
 const progressCommand = expect.arrayContaining(['deploy', 'rollouts', 'list']);
 

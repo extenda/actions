@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 
-import { failIfNotTrunkBased } from '../../utils/src/index.js';
+import { failIfNotTrunkBased } from '../../utils';
 import configureDomains from './configure-domains.js';
 import deploy from './deploy.js';
 import prepareEnvConfig from './env-config.js';

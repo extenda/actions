@@ -1,6 +1,6 @@
 jest.mock('@actions/core');
-jest.mock('../src/roles');
-jest.mock('../src/permissions');
+jest.mock('../src/roles.js');
+jest.mock('../src/permissions.js');
 
 import * as core from '@actions/core';
 

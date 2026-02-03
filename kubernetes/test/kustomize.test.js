@@ -1,6 +1,6 @@
 import * as exec from '@actions/exec';
 
-import { loadTool } from '../../utils/src/index.js';
+import { loadTool } from '../../utils';
 import kustomize from '../src/kustomize.js';
 
 jest.mock('@actions/exec');

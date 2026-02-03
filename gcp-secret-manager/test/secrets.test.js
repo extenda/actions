@@ -9,8 +9,8 @@ import {
   parseInputYaml,
 } from '../src/secrets.js';
 
-jest.mock('../../setup-gcloud/src/exec-gcloud');
-jest.mock('../../setup-gcloud/src/setup-gcloud');
+jest.mock('../../setup-gcloud/src/exec-gcloud.js');
+jest.mock('../../setup-gcloud/src/setup-gcloud.js');
 
 const SECRET_JSON = JSON.stringify(
   {

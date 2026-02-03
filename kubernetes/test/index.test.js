@@ -5,8 +5,8 @@ import action from '../src/index.js';
 import runDeploy from '../src/run-deploy.js';
 
 jest.mock('@actions/core');
-jest.mock('../src/run-deploy');
-jest.mock('../../cloud-run/src/service-definition');
+jest.mock('../src/run-deploy.js');
+jest.mock('../../cloud-run/src/service-definition.js');
 
 const orgEnv = process.env;
 

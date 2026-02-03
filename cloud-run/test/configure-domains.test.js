@@ -1,6 +1,6 @@
 jest.mock('@actions/exec');
-jest.mock('../src/dns-record');
-jest.mock('../src/alert-certificate-expiration');
+jest.mock('../src/dns-record.js');
+jest.mock('../src/alert-certificate-expiration.js');
 
 import * as exec from '@actions/exec';
 

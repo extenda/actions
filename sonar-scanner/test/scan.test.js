@@ -1,4 +1,4 @@
-jest.mock('../src/sonar-credentials');
+jest.mock('../src/sonar-credentials.js');
 jest.mock('@actions/exec');
 jest.mock('../src/params.js', () => ({
   createParams: async () => '-Dsonar.verbose=false',

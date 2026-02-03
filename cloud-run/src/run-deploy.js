@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 
-import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { setupGcloud } from '../../setup-gcloud';
 import checkServiceAccount from './check-sa.js';
 import cleanRevisions from './clean-revisions.js';
 import { getClusterInfo } from './cluster-info.js';

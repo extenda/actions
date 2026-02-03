@@ -6,8 +6,8 @@ import path from 'path';
 
 jest.mock('@actions/exec');
 jest.mock('@actions/core');
-jest.mock('../../utils/src/versions');
-jest.mock('../src/nexus-credentials');
+jest.mock('../../utils/src/versions.js');
+jest.mock('../src/nexus-credentials.js');
 
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';

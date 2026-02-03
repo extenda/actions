@@ -1,4 +1,4 @@
-jest.mock('../../src/utils/gcloud-output');
+jest.mock('../../src/utils/gcloud-output.js');
 import checkVpcConnector from '../../src/utils/check-vpc-connector.js';
 import gcloudOuput from '../../src/utils/gcloud-output.js';
 

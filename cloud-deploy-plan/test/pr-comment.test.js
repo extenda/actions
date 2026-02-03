@@ -5,7 +5,7 @@ const mockCreateComment = jest.fn();
 const mockListComments = jest.fn();
 const mockUpdateComment = jest.fn();
 
-jest.mock('../../utils/src/pull-request-info');
+jest.mock('../../utils/src/pull-request-info.js');
 jest.mock('@actions/github', () => ({
   getOctokit: () => ({
     rest: {

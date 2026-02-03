@@ -1,7 +1,7 @@
 jest.mock('@actions/core');
-jest.mock('../src/run-deploy');
-jest.mock('../src/service-definition');
-jest.mock('../src/configure-domains');
+jest.mock('../src/run-deploy.js');
+jest.mock('../src/service-definition.js');
+jest.mock('../src/configure-domains.js');
 
 import * as core from '@actions/core';
 

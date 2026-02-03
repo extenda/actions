@@ -1,4 +1,4 @@
-import { execGcloud } from '../../setup-gcloud/src/index.js';
+import { execGcloud } from '../../setup-gcloud';
 
 // Binauthz attestations gcloud cmd
 const createAttestation = async (

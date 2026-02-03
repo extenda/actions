@@ -2,13 +2,8 @@ export default {
   automock: false,
   collectCoverage: true,
   coverageDirectory: 'coverage',
-  coverageReporters: [
-    'lcov',
-    'text',
-  ],
-  coveragePathIgnorePatterns: [
-    '/node_modules/',
-  ],
+  coverageReporters: ['lcov', 'text'],
+  coveragePathIgnorePatterns: ['/node_modules/'],
   reporters: [
     'default',
     [

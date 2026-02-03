@@ -5,8 +5,8 @@ import { checkEnv } from '../../../utils.js';
 import readSecret from '../../src/utils/load-credentials.js';
 
 jest.mock('@actions/core');
-jest.mock('../../../gcp-secret-manager/src/secrets');
-jest.mock('../../../utils');
+jest.mock('../../../gcp-secret-manager/src/secrets.js');
+jest.mock('../../../utils.js');
 
 describe('readSecret', () => {
   afterEach(() => {

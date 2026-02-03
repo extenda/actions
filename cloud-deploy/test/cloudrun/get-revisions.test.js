@@ -2,7 +2,7 @@ jest.mock('@actions/exec');
 import getRevisions from '../../src/cloudrun/get-revisions.js';
 import execGcloud from '../../src/utils/gcloud-output.js';
 
-jest.mock('../../src/utils/gcloud-output');
+jest.mock('../../src/utils/gcloud-output.js');
 
 const GCLOUD_JSON_OUTPUT = `[
   {

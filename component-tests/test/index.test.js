@@ -1,5 +1,5 @@
 jest.mock('@actions/core');
-jest.mock('../src/create-api-test');
+jest.mock('../src/create-api-test.js');
 
 import * as core from '@actions/core';
 import { resolve } from 'path';

@@ -2,11 +2,11 @@ import mockFs from 'mock-fs';
 
 import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
 import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth.js';
-import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { setupGcloud } from '../../setup-gcloud';
 
 jest.mock('../../setup-gcloud');
-jest.mock('../../cloud-run/src/cluster-info');
-jest.mock('../../cloud-run/src/kubectl-auth');
+jest.mock('../../cloud-run/src/cluster-info.js');
+jest.mock('../../cloud-run/src/kubectl-auth.js');
 
 import configureKubeCtl from '../src/configure-kubectl.js';
 

@@ -1,5 +1,5 @@
 jest.mock('@actions/core');
-jest.mock('../../utils/src/branch-info');
+jest.mock('../../utils/src/branch-info.js');
 import { getBranchNameSemver } from '../../utils/src/branch-info.js';
 import action from '../src/index.js';
 

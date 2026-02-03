@@ -1,5 +1,5 @@
 jest.mock('@actions/exec');
-jest.mock('../../src/utils/gcloud-output');
+jest.mock('../../src/utils/gcloud-output.js');
 
 import { getClusterInfo } from '../../src/utils/cluster-info.js';
 import execGcloud from '../../src/utils/gcloud-output.js';

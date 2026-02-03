@@ -1,7 +1,7 @@
 import { execGcloud } from '../../../setup-gcloud';
 import getImageWithSha256 from '../../src/manifests/image-sha256.js';
 
-jest.mock('../../../setup-gcloud');
+jest.mock('../../../setup-gcloud.js');
 
 afterEach(() => {
   jest.resetAllMocks();

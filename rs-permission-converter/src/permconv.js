@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import os from 'os';
 
-import { loadTool } from '../../utils/src/index.js';
+import { loadTool } from '../../utils';
 
 const BINARY_NAME =
   os.platform() !== 'win32' ? 'PermissionConverter' : 'PermissionConverter.exe';
