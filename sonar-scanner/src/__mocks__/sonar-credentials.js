@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   credentials: async () => ({
     githubToken: 'github',
     sonarToken: 'sonar',

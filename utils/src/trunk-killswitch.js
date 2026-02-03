@@ -15,4 +15,4 @@ const failIfNotTrunkBased = () => {
   }
 };
 
-module.exports = failIfNotTrunkBased;
+export default failIfNotTrunkBased;

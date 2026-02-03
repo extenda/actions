@@ -1,16 +1,16 @@
 import { restoreCache, saveCache } from '@actions/cache';
-import core from '@actions/core';
-import io from '@actions/io';
+import * as core from '@actions/core';
+import * as io from '@actions/io';
 import glob from 'fast-glob';
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuid } from 'uuid';
 
-import { loadTool } from '../../utils';
-import createKeyFile from '../../utils/src/create-key-file';
-import getDownloadUrl from './download-url';
-import { execGcloud } from './exec-gcloud';
-import getLatestVersion from './latest-version';
+import createKeyFile from '../../utils/src/create-key-file.js';
+import { loadTool } from '../../utils/src/index.js';
+import getDownloadUrl from './download-url.js';
+import { execGcloud } from './exec-gcloud.js';
+import getLatestVersion from './latest-version.js';
 
 // Increment this version if the list of installed components are modified.
 const CACHE_VERSION = '2';
@@ -186,4 +186,4 @@ const setupGcloud = async (
   );
 };
 
-module.exports = setupGcloud;
+export default setupGcloud;

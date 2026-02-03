@@ -1,4 +1,4 @@
-import execGcloud from '../utils/gcloud-output';
+import execGcloud from '../utils/gcloud-output.js';
 
 const convertCPU = (cpu) => `${cpu * 1000}m`;
 const convertMemory = (memory) => {
@@ -51,7 +51,4 @@ const configMapManifest = async (service, type, CPU, Memory, scaling) => {
   return execGcloud(args, 'kubectl', true);
 };
 
-module.exports = {
-  configMapManifest,
-  removeScalerConfiguration,
-};
+export { configMapManifest, removeScalerConfiguration };

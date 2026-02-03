@@ -1,4 +1,4 @@
-import { retryUntil, setRetryDelay } from '../../src/utils/retry-until';
+import { retryUntil, setRetryDelay } from '../../src/utils/retry-until.js';
 
 describe('utils/retry-until', () => {
   beforeEach(() => {

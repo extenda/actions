@@ -1,8 +1,8 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { checkEnv, run } from '../../utils';
-import branchinfo from '../../utils/src/branch-info';
-import versions from '../../utils/src/versions';
+import branchinfo from '../../utils/src/branch-info.js';
+import { checkEnv, run } from '../../utils/src/index.js';
+import versions from '../../utils/src/versions.js';
 
 const action = async () => {
   try {
@@ -82,8 +82,6 @@ const action = async () => {
   }
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

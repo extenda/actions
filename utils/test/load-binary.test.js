@@ -35,7 +35,7 @@ jest.mock('axios');
 import tc from '@actions/tool-cache';
 import axios from 'axios';
 
-import { loadTool } from '../src/load-binary';
+import { loadTool } from '../src/load-binary.js';
 
 const orgEnv = process.env;
 

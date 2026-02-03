@@ -1,7 +1,7 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
-import { findExecutable } from '../../../setup-gcloud/src/exec-gcloud';
-import handleError from './error-handler';
+import { findExecutable } from '../../../setup-gcloud/src/exec-gcloud.js';
+import handleError from './error-handler.js';
 
 /**
  * Execute gcloud and return the standard output.
@@ -41,4 +41,4 @@ const execGcloud = async (
   return output.trim();
 };
 
-module.exports = execGcloud;
+export default execGcloud;

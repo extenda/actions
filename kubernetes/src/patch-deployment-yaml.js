@@ -28,4 +28,4 @@ const patchDeploymentYaml = (service, deploymentYaml) => {
   return yaml.stringify(deployment);
 };
 
-module.exports = patchDeploymentYaml;
+export default patchDeploymentYaml;

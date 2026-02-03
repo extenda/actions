@@ -19,4 +19,4 @@ const selectSemver = (previewVersion, stableVersion) => {
   return stableVersion;
 };
 
-module.exports = selectSemver;
+export default selectSemver;

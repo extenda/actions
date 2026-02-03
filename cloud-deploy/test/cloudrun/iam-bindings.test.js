@@ -1,5 +1,5 @@
-import setupAuthorization from '../../src/cloudrun/iam-bindings';
-import execGcloud from '../../src/utils/gcloud-output';
+import setupAuthorization from '../../src/cloudrun/iam-bindings.js';
+import execGcloud from '../../src/utils/gcloud-output.js';
 
 jest.mock('../../src/utils/gcloud-output');
 

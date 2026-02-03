@@ -1,7 +1,7 @@
 jest.mock('../../../gcp-secret-manager/src/secrets');
 
-import { loadSecret } from '../../../gcp-secret-manager/src/secrets';
-import { loadSecrets } from '../../src/secrets-manager/load-secrets';
+import { loadSecret } from '../../../gcp-secret-manager/src/secrets.js';
+import { loadSecrets } from '../../src/secrets-manager/load-secrets.js';
 
 describe('loadSecrets', () => {
   it('loads correct secrets', async () => {

@@ -1,8 +1,8 @@
 jest.mock('@actions/exec');
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 import mockFs from 'mock-fs';
 
-import createNamespace from '../src/create-namespace';
+import createNamespace from '../src/create-namespace.js';
 
 const mockOutput = (data, opts) => {
   opts.listeners.stderr(Buffer.from(`${data}\n`, 'utf8'));

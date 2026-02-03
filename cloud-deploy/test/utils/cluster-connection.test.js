@@ -1,5 +1,5 @@
-import connectToCluster from '../../src/utils/cluster-connection';
-import gcloudOutput from '../../src/utils/gcloud-output';
+import connectToCluster from '../../src/utils/cluster-connection.js';
+import gcloudOutput from '../../src/utils/gcloud-output.js';
 
 jest.mock('../../src/utils/gcloud-output', () =>
   jest.fn().mockImplementation(() => Promise.resolve()),

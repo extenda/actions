@@ -1,8 +1,8 @@
-import core from '@actions/core';
-import github from '@actions/github';
+import * as core from '@actions/core';
+import * as github from '@actions/github';
 
-import { loadSecret } from '../../gcp-secret-manager/src/secrets';
-import { loadGitHubToken, run } from '../../utils';
+import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
+import { loadGitHubToken, run } from '../../utils/src/index.js';
 
 const createPayload = (payloadString) => {
   if (payloadString) {
@@ -39,8 +39,6 @@ const action = async () => {
     });
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

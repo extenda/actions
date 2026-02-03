@@ -1,5 +1,5 @@
-import checkPolicyExists from '../../src/utils/cloud-armor';
-import gcloudOutput from '../../src/utils/gcloud-output';
+import checkPolicyExists from '../../src/utils/cloud-armor.js';
+import gcloudOutput from '../../src/utils/gcloud-output.js';
 
 jest.mock('@actions/core');
 jest.mock('../../src/utils/gcloud-output', () =>

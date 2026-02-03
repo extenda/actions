@@ -5,9 +5,9 @@ jest.mock('../src/npmrc');
 import { getInput } from '@actions/core';
 import mockedEnv from 'mocked-env';
 
-import action from '../src/index';
-import { validateOrFetchNexusCredentials } from '../src/nexus-credentials';
-import { createNpmrcFile } from '../src/npmrc';
+import action from '../src/index.js';
+import { validateOrFetchNexusCredentials } from '../src/nexus-credentials.js';
+import { createNpmrcFile } from '../src/npmrc.js';
 
 describe('Auth to Nexus npm registry action', () => {
   let envRestore;

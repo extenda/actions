@@ -1,12 +1,12 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import glob from 'fast-glob';
 import fs from 'fs';
 import path from 'path';
 
-import getDasWorkerBaseUrl from '../../../iam/src/das-worker-base-url';
-import { execGcloud } from '../../../setup-gcloud';
+import getDasWorkerBaseUrl from '../../../iam/src/das-worker-base-url.js';
+import { execGcloud } from '../../../setup-gcloud.js';
 
 axiosRetry(axios, {
   retries: 4,
@@ -72,4 +72,4 @@ const publishPolicies = async (serviceName, env, version, deployYaml) => {
   }
 };
 
-module.exports = publishPolicies;
+export default publishPolicies;

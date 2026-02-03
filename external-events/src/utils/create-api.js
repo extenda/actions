@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import axios from 'axios';
 
 /**
@@ -64,4 +64,4 @@ function createApi({ name, url, auth }) {
   return instance;
 }
 
-module.exports = { createApi };
+export { createApi };

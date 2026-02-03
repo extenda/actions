@@ -7,13 +7,13 @@ jest.mock('../src/env-config');
 jest.mock('../src/configure-domains');
 jest.mock('../../setup-gcloud');
 
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import deploy from '../src/deploy';
-import prepareEnvConfig from '../src/env-config';
-import action from '../src/index';
-import kubectl from '../src/kubectl';
-import createManifests from '../src/manifests';
+import deploy from '../src/deploy.js';
+import prepareEnvConfig from '../src/env-config.js';
+import action from '../src/index.js';
+import kubectl from '../src/kubectl.js';
+import createManifests from '../src/manifests.js';
 
 const orgEnv = process.env;
 

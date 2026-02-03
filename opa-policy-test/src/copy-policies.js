@@ -9,4 +9,4 @@ const copyPolicies = (testBundlePath) => {
   );
 };
 
-module.exports = copyPolicies;
+export default copyPolicies;

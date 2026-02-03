@@ -1,4 +1,4 @@
-import execGcloud from './gcloud-output';
+import execGcloud from './gcloud-output.js';
 
 const connectToCluster = async (clanName, env, projectID) =>
   execGcloud([
@@ -10,4 +10,4 @@ const connectToCluster = async (clanName, env, projectID) =>
     `--project=${projectID}`,
   ]);
 
-module.exports = connectToCluster;
+export default connectToCluster;

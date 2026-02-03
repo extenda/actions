@@ -1,8 +1,8 @@
 import {
   deletePodMonitor,
   podMonitorManifest,
-} from '../../src/manifests/pod-monitoring';
-import gcloudOutput from '../../src/utils/gcloud-output';
+} from '../../src/manifests/pod-monitoring.js';
+import gcloudOutput from '../../src/utils/gcloud-output.js';
 
 jest.mock('../../src/utils/gcloud-output');
 

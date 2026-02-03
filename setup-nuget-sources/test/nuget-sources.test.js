@@ -4,7 +4,7 @@ import {
   commentOutSourceUrl,
   generateRegexPattern,
   parseNugetSourceJson,
-} from '../src/nuget-sources';
+} from '../src/nuget-sources.js';
 
 const nugetSorce = `[{
   "name": "nuget.org",

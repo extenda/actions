@@ -1,7 +1,7 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import JiraClient from 'jira-client';
 
-import { generateFolders } from './deploy-log';
+import { generateFolders } from './deploy-log.js';
 
 const handleIssues = async (issue, productName) => {
   const promises = [];
@@ -42,4 +42,4 @@ const generateBugLog = async (
   await handleIssues(serviceIssues, productName);
 };
 
-module.exports = generateBugLog;
+export default generateBugLog;

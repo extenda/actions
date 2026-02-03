@@ -1,4 +1,4 @@
-import urlhelper from '../src/url-helper';
+import urlhelper from '../src/url-helper.js';
 
 describe('Registry URL is sane', () => {
   test('Input URL is correct', () => {

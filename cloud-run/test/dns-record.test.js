@@ -1,9 +1,9 @@
 jest.mock('@actions/exec');
 
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
-import { addDnsRecord, clearCache } from '../src/dns-record';
-import { mockOutput } from './utils';
+import { addDnsRecord, clearCache } from '../src/dns-record.js';
+import { mockOutput } from './utils.js';
 
 describe('DNS record sets', () => {
   afterEach(() => {

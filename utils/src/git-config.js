@@ -47,4 +47,4 @@ const gitConfig = async () => {
   );
 };
 
-module.exports = gitConfig;
+export default gitConfig;

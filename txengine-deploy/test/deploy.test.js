@@ -2,10 +2,10 @@ jest.mock('../src/kubectl');
 jest.mock('../src/rollback');
 jest.mock('@actions/exec');
 
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
-import deploy from '../src/deploy';
-import kubectl from '../src/kubectl';
+import deploy from '../src/deploy.js';
+import kubectl from '../src/kubectl.js';
 
 describe('deploy', () => {
   afterEach(() => {

@@ -2,11 +2,11 @@ jest.mock('@actions/core');
 jest.mock('../src/iam-auth');
 jest.mock('../../gcp-secret-manager/src/secrets');
 
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { loadSecret } from '../../gcp-secret-manager/src/secrets';
-import getIamToken from '../src/iam-auth';
-import action from '../src/index';
+import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
+import getIamToken from '../src/iam-auth.js';
+import action from '../src/index.js';
 
 describe('iam-test-token', () => {
   afterEach(() => {

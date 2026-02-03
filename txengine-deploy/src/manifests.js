@@ -1,10 +1,10 @@
-import github from '@actions/github';
+import * as github from '@actions/github';
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import yaml from 'yaml';
 
-import { loadSecret } from '../../gcp-secret-manager/src/secrets';
+import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
 
 const getContent = async (url) =>
   axios({
@@ -99,4 +99,4 @@ const createManifests = async (
       };
     });
 
-module.exports = createManifests;
+export default createManifests;

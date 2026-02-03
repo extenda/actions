@@ -12,4 +12,4 @@ const createEnvironmentArgs = (environment, projectId, containerImage) => {
   return args.join(',');
 };
 
-module.exports = createEnvironmentArgs;
+export default createEnvironmentArgs;

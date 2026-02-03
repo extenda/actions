@@ -1,6 +1,6 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { loadSecretIntoEnv } from '../../gcp-secret-manager/src/secrets';
+import { loadSecretIntoEnv } from '../../gcp-secret-manager/src/secrets.js';
 
 const defaultSonarToken = (hostUrl) =>
   hostUrl.startsWith('https://sonarcloud.io')
@@ -47,7 +47,4 @@ const sonarAuth = async (hostUrl) =>
     password: '',
   }));
 
-module.exports = {
-  credentials,
-  sonarAuth,
-};
+export { credentials, sonarAuth };

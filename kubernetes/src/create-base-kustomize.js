@@ -112,4 +112,4 @@ resources:
   });
 };
 
-module.exports = createBaseKustomizeFiles;
+export default createBaseKustomizeFiles;

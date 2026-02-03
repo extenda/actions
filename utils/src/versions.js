@@ -1,9 +1,9 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import semver from 'semver';
 import simpleGit from 'simple-git';
 
-import changes from './conventionalchanges';
-import gitConfig from './git-config';
+import changes from './conventionalchanges.js';
+import gitConfig from './git-config.js';
 
 const DEFAULT_VERSION = '0.0.0';
 
@@ -79,7 +79,7 @@ const setTagPrefix = (prefix) => {
   changes.setTagPrefix(prefix);
 };
 
-module.exports = {
+export default {
   ...changes,
   setTagPrefix,
   getBuildVersion,

@@ -17,4 +17,4 @@ function iamApiErrorToString(e, description = 'IAM API Error') {
   return `${description}. Unexpected error for iam api: ${e.message}`;
 }
 
-module.exports = { iamApiErrorToString };
+export { iamApiErrorToString };

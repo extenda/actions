@@ -6,11 +6,11 @@ jest.mock('../../cloud-run/src/cluster-info', () => ({
 }));
 jest.mock('../../cloud-run/src/kubectl-auth');
 
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
-import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth';
-import { setupGcloud } from '../../setup-gcloud';
-import kubectl from '../src/kubectl';
+import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import kubectl from '../src/kubectl.js';
 
 describe('kubectl', () => {
   afterEach(() => {

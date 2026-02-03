@@ -20,4 +20,4 @@ const fetchIamToken = async (apiKey, apiEmail, apiPassword, apiTenantId) =>
       );
     });
 
-module.exports = fetchIamToken;
+export default fetchIamToken;

@@ -3,7 +3,7 @@ jest.mock('axios');
 
 import axios from 'axios';
 
-import fetchIamToken from '../src/iam-auth';
+import fetchIamToken from '../src/iam-auth.js';
 
 describe('fetch iam-api token', () => {
   afterEach(() => {

@@ -1,4 +1,4 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -8,7 +8,7 @@ jest.mock('@actions/exec');
 jest.mock('../src/sonar-credentials');
 jest.mock('../../utils/src/pull-request-info');
 
-import { markerFile, scanMsBuild } from '../src/scan-msbuild';
+import { markerFile, scanMsBuild } from '../src/scan-msbuild.js';
 
 const orgEnv = process.env;
 

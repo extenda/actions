@@ -2,8 +2,8 @@ jest.mock('../../gcp-secret-manager/src/secrets');
 
 import mockedEnv from 'mocked-env';
 
-import { loadSecrets } from '../../gcp-secret-manager/src/secrets';
-import { validateOrFetchNexusCredentials } from '../src/nexus-credentials';
+import { loadSecrets } from '../../gcp-secret-manager/src/secrets.js';
+import { validateOrFetchNexusCredentials } from '../src/nexus-credentials.js';
 
 describe('nexus-credentials', () => {
   let envRestore;

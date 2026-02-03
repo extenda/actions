@@ -1,5 +1,5 @@
-import { cloudRunCollector } from './collector-sidecar';
-import { securitySpec } from './security-sidecar';
+import { cloudRunCollector } from './collector-sidecar.js';
+import { securitySpec } from './security-sidecar.js';
 
 const configureNetworking = async (
   annotations,
@@ -201,6 +201,4 @@ const cloudrunManifestTemplate = async (
   };
 };
 
-module.exports = {
-  cloudrunManifestTemplate,
-};
+export { cloudrunManifestTemplate };

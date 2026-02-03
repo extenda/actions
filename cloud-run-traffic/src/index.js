@@ -1,7 +1,7 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { setupGcloud } from '../../setup-gcloud';
-import { run } from '../../utils/src';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { run } from '../../utils/src.js';
 
 async function action() {
   const serviceAccountKey = core.getInput('service-account-key', {
@@ -19,8 +19,6 @@ async function action() {
   throw new Error(deprecationMsg);
 }
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

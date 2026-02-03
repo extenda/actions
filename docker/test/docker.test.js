@@ -1,11 +1,11 @@
 jest.mock('@actions/core');
 jest.mock('child_process');
 
-import core from '@actions/core';
+import * as core from '@actions/core';
 import cp from 'child_process';
 import mockFs from 'mock-fs';
 
-import docker from '../src/docker';
+import docker from '../src/docker.js';
 
 describe('core and cp methods', () => {
   afterEach(() => {

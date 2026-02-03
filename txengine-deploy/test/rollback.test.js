@@ -1,8 +1,8 @@
 jest.mock('@actions/exec');
 
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
-import checkStatusAndKillFailingPods from '../src/rollback';
+import checkStatusAndKillFailingPods from '../src/rollback.js';
 
 describe('rollback', () => {
   afterEach(() => {

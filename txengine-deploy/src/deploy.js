@@ -1,8 +1,8 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import gcloudOutput from './gcloud-output';
-import kubectl from './kubectl';
-import checkStatusAndKillFailingPods from './rollback';
+import gcloudOutput from './gcloud-output.js';
+import kubectl from './kubectl.js';
+import checkStatusAndKillFailingPods from './rollback.js';
 
 const getLatestRevision = async (revisionsList) => {
   const revisions = revisionsList.split(/[\r\n]+/);
@@ -85,4 +85,4 @@ const deploy = async ({ file, namespace, tenantName }) => {
   }
 };
 
-module.exports = deploy;
+export default deploy;

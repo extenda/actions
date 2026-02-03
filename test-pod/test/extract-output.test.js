@@ -1,8 +1,8 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 import fs from 'fs';
 import { resolve } from 'path';
 
-import { extractOutput, LogFilter } from '../src/extract-output';
+import { extractOutput, LogFilter } from '../src/extract-output.js';
 
 const outputCommand = (patterns) => [
   '/bin/sh',

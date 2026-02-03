@@ -7,11 +7,11 @@ jest.mock('../../maven/src/mvn', () => ({
   run: jest.fn(),
 }));
 
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 import fs from 'mock-fs';
 
-import mvn from '../../maven/src/mvn';
-import { scan } from '../src/scan';
+import mvn from '../../maven/src/mvn.js';
+import { scan } from '../src/scan.js';
 
 const ALL_FILE_TYPES = {
   'pom.xml': '<project />',

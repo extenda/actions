@@ -1,6 +1,6 @@
 import yaml from 'yaml';
 
-import patchConfigMapYaml from '../src/patch-configmap-yaml';
+import patchConfigMapYaml from '../src/patch-configmap-yaml.js';
 
 describe('Patches ConfigMap.yml', () => {
   test('It adds environment variables', () => {

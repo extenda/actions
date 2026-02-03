@@ -1,7 +1,7 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { loadSecret } from '../../../gcp-secret-manager/src/secrets';
-import { checkEnv } from '../../../utils';
+import { loadSecret } from '../../../gcp-secret-manager/src/secrets.js';
+import { checkEnv } from '../../../utils.js';
 
 const getSecret = async (serviceAccountKey, secretName, envVar) => {
   let secret;
@@ -23,4 +23,4 @@ const readSecret = async (serviceAccountKey, env, secretName, envName) => {
   return getSecret(serviceAccountKey, secretName, envName);
 };
 
-module.exports = readSecret;
+export default readSecret;

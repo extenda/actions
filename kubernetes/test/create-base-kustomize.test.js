@@ -1,7 +1,7 @@
 import fs from 'fs';
 import mockFs from 'mock-fs';
 
-import createBaseKustomize from '../src/create-base-kustomize';
+import createBaseKustomize from '../src/create-base-kustomize.js';
 
 describe('Creates base kustomize yaml files', () => {
   beforeEach(() => {

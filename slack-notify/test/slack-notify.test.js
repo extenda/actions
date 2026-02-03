@@ -1,9 +1,9 @@
 import axios from 'axios';
 import path from 'path';
 
-import { loadSecret } from '../../gcp-secret-manager/src/secrets';
-import notifySlack from '../src/slack-notify';
-import uploadToBucket from '../src/upload-to-bucket';
+import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
+import notifySlack from '../src/slack-notify.js';
+import uploadToBucket from '../src/upload-to-bucket.js';
 
 jest.mock('axios');
 jest.mock('@actions/core');

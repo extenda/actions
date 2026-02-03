@@ -1,6 +1,6 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import gcloudOutput from './gcloud-output';
+import gcloudOutput from './gcloud-output.js';
 
 const MAX_DOMAINS = 100;
 const MAX_CERTIFICATES = 13;
@@ -116,4 +116,4 @@ const handleCertificates = async (domainName, project) => {
   return certificateListNames.join(',');
 };
 
-module.exports = handleCertificates;
+export default handleCertificates;

@@ -1,7 +1,7 @@
 import path from 'path';
 
-import { getPullRequestInfo } from '../../utils/src/pull-request-info';
-import { credentials } from './sonar-credentials';
+import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
+import { credentials } from './sonar-credentials.js';
 
 const createParams = async (
   hostUrl,
@@ -93,6 +93,4 @@ const createParams = async (
   return params.join(' ');
 };
 
-module.exports = {
-  createParams,
-};
+export { createParams };

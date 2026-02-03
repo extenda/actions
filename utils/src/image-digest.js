@@ -1,4 +1,4 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
 const getImageDigest = async (image) => {
   const imageName = image.split(':')[0];
@@ -24,4 +24,4 @@ const getImageDigest = async (image) => {
   return `${imageName}@${digest}`;
 };
 
-module.exports = getImageDigest;
+export default getImageDigest;

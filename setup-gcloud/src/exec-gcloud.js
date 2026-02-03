@@ -1,4 +1,4 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 import os from 'os';
 
 const findExecutable = (executable) => {
@@ -28,7 +28,4 @@ const execGcloud = async (args, executable = 'gcloud', silent = false) => {
   return output.trim();
 };
 
-module.exports = {
-  execGcloud,
-  findExecutable,
-};
+export { execGcloud, findExecutable };

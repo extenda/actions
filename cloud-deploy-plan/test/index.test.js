@@ -1,13 +1,13 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import getToken from '../../cloud-deploy/src/utils/identity-token';
-import loadServiceDefinition from '../../cloud-deploy/src/utils/service-definition';
-import { setupGcloud } from '../../setup-gcloud';
-import { getFreezeEnd, isCodeFreeze } from '../src/code-freeze';
-import getDeployInfo from '../src/deploy-info';
-import action from '../src/index';
-import { getPullRequestNumber, postComment } from '../src/pr-comment';
-import resolveServiceFiles from '../src/service-files';
+import getToken from '../../cloud-deploy/src/utils/identity-token.js';
+import loadServiceDefinition from '../../cloud-deploy/src/utils/service-definition.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { getFreezeEnd, isCodeFreeze } from '../src/code-freeze.js';
+import getDeployInfo from '../src/deploy-info.js';
+import action from '../src/index.js';
+import { getPullRequestNumber, postComment } from '../src/pr-comment.js';
+import resolveServiceFiles from '../src/service-files.js';
 
 jest.mock('@actions/core');
 jest.mock('../src/deploy-info');

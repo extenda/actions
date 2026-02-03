@@ -1,4 +1,4 @@
-import getRuntimeAccount from '../src/runtime-account';
+import getRuntimeAccount from '../src/runtime-account.js';
 
 describe('Runtime Email Account', () => {
   test('It appends fully-qualified email for prefix', () => {

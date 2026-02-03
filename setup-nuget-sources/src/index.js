@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
 import {
   commentOutSourceUrl,
@@ -6,7 +6,7 @@ import {
   parseNugetSourceJson,
   setNuGetApiKey,
   setNuGetSource,
-} from './nuget-sources';
+} from './nuget-sources.js';
 
 const run = async () => {
   try {

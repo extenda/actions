@@ -11,13 +11,13 @@ jest.mock('../src/get-revision');
 jest.mock('../src/get-revisions');
 
 jest.setTimeout(30000);
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
-import { setupGcloud } from '../../setup-gcloud';
-import { getClusterInfo } from '../src/cluster-info';
-import getRevisions from '../src/get-revisions';
-import runDeploy from '../src/run-deploy';
-import scan from '../src/vulnerability-scanning';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { getClusterInfo } from '../src/cluster-info.js';
+import getRevisions from '../src/get-revisions.js';
+import runDeploy from '../src/run-deploy.js';
+import scan from '../src/vulnerability-scanning.js';
 
 const serviceAccountKey = Buffer.from('test', 'utf8').toString('base64');
 

@@ -1,8 +1,8 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import JiraClient from 'jira-client';
 import semver from 'semver';
 
-import { findJiraChanges } from '../../jira-releasenotes/src/jira-releasenotes';
+import { findJiraChanges } from '../../jira-releasenotes/src/jira-releasenotes.js';
 
 const releaseName = (projectKey, component, version) => {
   const release = [projectKey];
@@ -110,6 +110,4 @@ const createJiraRelease = async ({
   return name;
 };
 
-module.exports = {
-  createJiraRelease,
-};
+export { createJiraRelease };

@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import fg from 'fast-glob';
 import { readFileSync } from 'fs';
 import yaml from 'js-yaml';
@@ -72,4 +72,4 @@ async function loadDefinitions(glob, validateFn) {
   return defs;
 }
 
-module.exports = { loadDefinitions };
+export { loadDefinitions };

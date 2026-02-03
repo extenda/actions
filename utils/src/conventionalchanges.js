@@ -13,7 +13,7 @@ import gitRawCommits from 'git-raw-commits';
 import streamToString from 'stream-to-string';
 import through2 from 'through2';
 
-import { getTagAtCommit } from './branch-info';
+import { getTagAtCommit } from './branch-info.js';
 
 let tagPrefix = process.env.TAG_PREFIX || 'v';
 
@@ -154,10 +154,10 @@ const setTagPrefix = (prefix) => {
 
 const getTagPrefix = () => tagPrefix;
 
-module.exports = {
-  getRecommendedBump,
+export {
   getChangelog,
   getConventionalCommits,
-  setTagPrefix,
+  getRecommendedBump,
   getTagPrefix,
+  setTagPrefix,
 };

@@ -1,7 +1,7 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import axios from 'axios';
 
-import getToken from './identity-token';
+import getToken from './identity-token.js';
 
 axios.defaults.baseURL = 'https://platform-api.retailsvc.com';
 
@@ -101,10 +101,10 @@ const saveVulnerabilities = async (
   return sendRequest(url, data);
 };
 
-module.exports = {
-  sendScaleSetup,
+export {
+  refreshCanaryStatus,
+  saveVulnerabilities,
   sendDeployInfo,
   sendDeployRequest,
-  saveVulnerabilities,
-  refreshCanaryStatus,
+  sendScaleSetup,
 };

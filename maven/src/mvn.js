@@ -1,6 +1,6 @@
-import core from '@actions/core';
-import exec from '@actions/exec';
-import io from '@actions/io';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import * as io from '@actions/io';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -47,8 +47,4 @@ const copySettings = async (hasExtensions) => {
   return owner === 'extenda' && hasExtensions;
 };
 
-module.exports = {
-  run,
-  copySettings,
-  setVersion,
-};
+export { copySettings, run, setVersion };

@@ -7,4 +7,4 @@ const getDasWorkerBaseUrl = (systemId) => {
   return 'https://iam-das-worker.retailsvc.com/api/v1';
 };
 
-module.exports = getDasWorkerBaseUrl;
+export default getDasWorkerBaseUrl;

@@ -1,8 +1,8 @@
 jest.mock('@actions/exec');
 import { exec } from '@actions/exec';
 
-import getRevisions from '../src/get-revisions';
-import { mockOutput } from './utils';
+import getRevisions from '../src/get-revisions.js';
+import { mockOutput } from './utils.js';
 
 const GCLOUD_JSON_OUTPUT = `[
   {

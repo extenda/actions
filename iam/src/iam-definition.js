@@ -1,9 +1,9 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import fs from 'fs';
 import { validate } from 'jsonschema';
 import yaml from 'yaml';
 
-import jsonSchema from './iam-schema';
+import jsonSchema from './iam-schema.js';
 
 const loadFile = (iamFile) => {
   if (!fs.existsSync(iamFile)) {
@@ -80,4 +80,4 @@ const loadIamDefinition = (iamFile) => {
   return spec;
 };
 
-module.exports = loadIamDefinition;
+export default loadIamDefinition;

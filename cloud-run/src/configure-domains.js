@@ -1,11 +1,11 @@
-import core from '@actions/core';
-import exec from '@actions/exec';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 import pLimit from 'p-limit';
 
-import certificateExpiration from './alert-certificate-expiration';
-import { addDnsRecord } from './dns-record';
-import gcloud from './gcloud-output';
-import authenticateKubeCtl from './kubectl-auth';
+import certificateExpiration from './alert-certificate-expiration.js';
+import { addDnsRecord } from './dns-record.js';
+import gcloud from './gcloud-output.js';
+import authenticateKubeCtl from './kubectl-auth.js';
 
 const listDomains = async ({ cluster, clusterLocation, project }, namespace) =>
   gcloud([
@@ -140,4 +140,4 @@ const configureDomains = async (
   return [];
 };
 
-module.exports = configureDomains;
+export default configureDomains;

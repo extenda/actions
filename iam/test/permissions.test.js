@@ -3,7 +3,7 @@ jest.mock('axios');
 
 import axios from 'axios';
 
-import { handlePermissions, setupPermissions } from '../src/permissions';
+import { handlePermissions, setupPermissions } from '../src/permissions.js';
 
 describe('Setup permissions and handle', () => {
   afterEach(() => {

@@ -1,12 +1,12 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { run } from '../../utils';
-import { getPullRequestInfo } from '../../utils/src/pull-request-info';
-import { checkQualityGate } from './check-quality-gate';
-import { createProject } from './create-project';
-import { scan } from './scan';
-import { scanMsBuild } from './scan-msbuild';
-import { credentials } from './sonar-credentials';
+import { run } from '../../utils/src/index.js';
+import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
+import { checkQualityGate } from './check-quality-gate.js';
+import { createProject } from './create-project.js';
+import { scan } from './scan.js';
+import { scanMsBuild } from './scan-msbuild.js';
+import { credentials } from './sonar-credentials.js';
 
 const isPullRequest = async (hostUrl) => {
   const { githubToken } = await credentials(hostUrl);
@@ -92,8 +92,6 @@ const action = async () => {
   }
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

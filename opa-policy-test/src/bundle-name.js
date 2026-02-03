@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import fs from 'fs';
 import yaml from 'yaml';
 
@@ -59,4 +59,4 @@ const getBundleName = () => {
   return bundleName;
 };
 
-module.exports = getBundleName;
+export default getBundleName;

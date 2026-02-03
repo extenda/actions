@@ -2,11 +2,11 @@ jest.mock('@actions/core');
 jest.mock('../src/bug-log');
 jest.mock('../src/deploy-log');
 
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import generateBugLog from '../src/bug-log';
-import { generateFolders } from '../src/deploy-log';
-import action from '../src/index';
+import generateBugLog from '../src/bug-log.js';
+import { generateFolders } from '../src/deploy-log.js';
+import action from '../src/index.js';
 
 describe('DORA metrics action', () => {
   afterEach(() => {

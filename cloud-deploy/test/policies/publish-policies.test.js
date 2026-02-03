@@ -1,8 +1,8 @@
 import axios from 'axios';
 import mockFs from 'mock-fs';
 
-import { execGcloud } from '../../../setup-gcloud';
-import publishPolicies from '../../src/policies/publish-policies';
+import { execGcloud } from '../../../setup-gcloud.js';
+import publishPolicies from '../../src/policies/publish-policies.js';
 
 jest.mock('axios');
 jest.mock('../../../setup-gcloud');

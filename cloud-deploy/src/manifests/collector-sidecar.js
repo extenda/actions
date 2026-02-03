@@ -1,5 +1,5 @@
-import selectSemver from '../utils/select-semver';
-import getImageWithSha256 from './image-sha256';
+import selectSemver from '../utils/select-semver.js';
+import getImageWithSha256 from './image-sha256.js';
 const STABLE_TAG = 'v2.2.3';
 
 const getConfig = (serviceName, monitoring, containers = 'user-container') => {
@@ -218,9 +218,9 @@ const userContainerCollectorEnv = (serviceName, serviceImage, monitoring) => {
   return {};
 };
 
-module.exports = {
-  imageTag,
+export {
   cloudRunCollector,
+  imageTag,
   kubernetesCollector,
   userContainerCollectorEnv,
 };

@@ -1,7 +1,7 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
-import generateBugLog from '../src/bug-log';
-import { generateFolders } from '../src/deploy-log';
+import generateBugLog from '../src/bug-log.js';
+import { generateFolders } from '../src/deploy-log.js';
 
 const mockSearchJira = jest.fn();
 

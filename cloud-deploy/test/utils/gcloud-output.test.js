@@ -1,7 +1,7 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
-import handleError from '../../src/utils/error-handler';
-import execGcloud from '../../src/utils/gcloud-output';
+import handleError from '../../src/utils/error-handler.js';
+import execGcloud from '../../src/utils/gcloud-output.js';
 
 jest.mock('@actions/exec');
 jest.mock('../../src/utils/error-handler');

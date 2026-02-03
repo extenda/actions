@@ -1,7 +1,7 @@
 jest.mock('@actions/exec');
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
-import dataflowBuild from '../src/dataflow-build';
+import dataflowBuild from '../src/dataflow-build.js';
 
 describe('Build Dataflow template', () => {
   afterEach(() => {

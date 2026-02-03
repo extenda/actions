@@ -1,4 +1,4 @@
-import getDasWorkerBaseUrl from '../src/das-worker-base-url';
+import getDasWorkerBaseUrl from '../src/das-worker-base-url.js';
 
 describe('getDasWorkerBaseUrl', () => {
   it('points to `.com` for normal systems', () => {

@@ -1,8 +1,8 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import axios from 'axios';
 
-import { imageTag as collectorVersion } from '../../cloud-deploy/src/manifests/collector-sidecar';
-import { securityVersion } from '../../cloud-deploy/src/manifests/security-sidecar';
+import { imageTag as collectorVersion } from '../../cloud-deploy/src/manifests/collector-sidecar.js';
+import { securityVersion } from '../../cloud-deploy/src/manifests/security-sidecar.js';
 
 const readProperty = (object, propertyName, defaultValue) => {
   if (propertyName in object) {
@@ -101,4 +101,4 @@ const getDeployInfo = async (service, projectId, bearerToken) => {
     });
 };
 
-module.exports = getDeployInfo;
+export default getDeployInfo;

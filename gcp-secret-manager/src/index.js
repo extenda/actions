@@ -1,7 +1,7 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { run } from '../../utils';
-import { loadSecrets, parseInputYaml } from './secrets';
+import { run } from '../../utils/src/index.js';
+import { loadSecrets, parseInputYaml } from './secrets.js';
 
 run(async () => {
   const serviceAccountKey = core.getInput('service-account-key', {

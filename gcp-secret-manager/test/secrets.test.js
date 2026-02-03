@@ -1,13 +1,13 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { execGcloud as mockExecGcloud } from '../../setup-gcloud/src/exec-gcloud';
-import mockSetupGcloud from '../../setup-gcloud/src/setup-gcloud';
+import { execGcloud as mockExecGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
+import mockSetupGcloud from '../../setup-gcloud/src/setup-gcloud.js';
 import {
   loadSecret,
   loadSecretIntoEnv,
   loadSecrets,
   parseInputYaml,
-} from '../src/secrets';
+} from '../src/secrets.js';
 
 jest.mock('../../setup-gcloud/src/exec-gcloud');
 jest.mock('../../setup-gcloud/src/setup-gcloud');

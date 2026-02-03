@@ -10,4 +10,4 @@ const createKeyFile = (serviceAccountKey) => {
   return tmpFile.name;
 };
 
-module.exports = createKeyFile;
+export default createKeyFile;

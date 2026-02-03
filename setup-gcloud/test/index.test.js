@@ -1,7 +1,7 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { action } from '../src/index';
-import setupGcloud from '../src/setup-gcloud';
+import { action } from '../src/index.js';
+import setupGcloud from '../src/setup-gcloud.js';
 
 jest.mock('../src/setup-gcloud');
 jest.mock('@actions/core');

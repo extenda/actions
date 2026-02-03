@@ -9,7 +9,7 @@ import {
   getRole,
   setupRoles,
   updateRole,
-} from '../src/roles';
+} from '../src/roles.js';
 
 describe('Setup roles and handle', () => {
   afterEach(() => {

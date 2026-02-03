@@ -1,6 +1,6 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { checkEnv, gitConfig } from '../../utils';
+import { checkEnv, gitConfig } from '../../utils/src/index.js';
 
 const run = async () => {
   try {

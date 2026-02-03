@@ -1,6 +1,6 @@
 jest.mock('../../gcp-secret-manager/src/secrets');
-import secrets from '../../gcp-secret-manager/src/secrets';
-import creds from '../src/sonar-credentials';
+import secrets from '../../gcp-secret-manager/src/secrets.js';
+import creds from '../src/sonar-credentials.js';
 
 const orgEnv = process.env;
 

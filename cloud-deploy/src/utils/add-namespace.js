@@ -6,4 +6,4 @@ const addNamespace = async (content, namespace) => {
   return yaml.dump(json);
 };
 
-module.exports = { addNamespace };
+export { addNamespace };

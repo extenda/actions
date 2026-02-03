@@ -1,8 +1,8 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import axios from 'axios';
 
-import { execGcloud } from '../../setup-gcloud';
-import getDasWorkerBaseUrl from './das-worker-base-url';
+import { execGcloud } from '../../setup-gcloud/src/index.js';
+import getDasWorkerBaseUrl from './das-worker-base-url.js';
 
 const getToken = async () =>
   execGcloud(['auth', 'print-identity-token', '--audiences=iam-das-worker']);
@@ -37,4 +37,4 @@ const configureBundleSync = async (iam, env) => {
   }
 };
 
-module.exports = configureBundleSync;
+export default configureBundleSync;

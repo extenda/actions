@@ -1,14 +1,14 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import getToken from '../../cloud-deploy/src/utils/identity-token';
-import loadServiceDefinition from '../../cloud-deploy/src/utils/service-definition';
-import { setupGcloud } from '../../setup-gcloud';
-import { run } from '../../utils';
-import { getFreezeEnd, isCodeFreeze } from './code-freeze';
-import createComment from './create-comment';
-import getDeployInfo from './deploy-info';
-import { getPullRequestNumber, postComment } from './pr-comment';
-import resolveServiceFiles from './service-files';
+import getToken from '../../cloud-deploy/src/utils/identity-token.js';
+import loadServiceDefinition from '../../cloud-deploy/src/utils/service-definition.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { run } from '../../utils/src/index.js';
+import { getFreezeEnd, isCodeFreeze } from './code-freeze.js';
+import createComment from './create-comment.js';
+import getDeployInfo from './deploy-info.js';
+import { getPullRequestNumber, postComment } from './pr-comment.js';
+import resolveServiceFiles from './service-files.js';
 
 const action = async () => {
   const serviceAccountKeyCICD = core.getInput('service-account-key', {
@@ -64,8 +64,6 @@ const action = async () => {
   }
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

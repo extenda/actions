@@ -1,4 +1,4 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
 const authenticateKubeCtl = async ({ cluster, clusterLocation, project }) =>
   exec.exec('gcloud', [
@@ -10,4 +10,4 @@ const authenticateKubeCtl = async ({ cluster, clusterLocation, project }) =>
     `--project=${project}`,
   ]);
 
-module.exports = authenticateKubeCtl;
+export default authenticateKubeCtl;

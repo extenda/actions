@@ -1,7 +1,7 @@
 import fs from 'fs';
 import mockFs from 'mock-fs';
 
-import createKeyFile from '../src/create-key-file';
+import createKeyFile from '../src/create-key-file.js';
 
 describe('Create JSON key file', () => {
   afterAll(() => {

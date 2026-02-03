@@ -1,10 +1,10 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { failIfNotTrunkBased, run } from '../../utils';
-import jsonSchema from './cloud-run-schema';
-import configureDomains from './configure-domains';
-import runDeploy from './run-deploy';
-import loadServiceDefinition from './service-definition';
+import { failIfNotTrunkBased, run } from '../../utils/src/index.js';
+import jsonSchema from './cloud-run-schema.js';
+import configureDomains from './configure-domains.js';
+import runDeploy from './run-deploy.js';
+import loadServiceDefinition from './service-definition.js';
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {
@@ -32,8 +32,6 @@ const action = async () => {
   );
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

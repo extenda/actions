@@ -1,5 +1,5 @@
-import core from '@actions/core';
-import exec from '@actions/exec';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 import fg from 'fast-glob';
 import fs from 'fs';
 import pLimit from 'p-limit';
@@ -153,4 +153,4 @@ const generateOutputs = async (
     });
 };
 
-module.exports = generateOutputs;
+export default generateOutputs;

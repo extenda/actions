@@ -1,11 +1,11 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import fs from 'fs';
 import path from 'path';
 
-import { run } from '../../utils';
-import versions from '../../utils/src/versions';
-import mvn from './mvn';
-import loadNexusCredentials from './nexus-credentials';
+import { run } from '../../utils/src/index.js';
+import versions from '../../utils/src/versions.js';
+import mvn from './mvn.js';
+import loadNexusCredentials from './nexus-credentials.js';
 
 const setVersion = async (version, workingDir = './') =>
   core.group(
@@ -85,8 +85,6 @@ const action = async () => {
   await authExec(usesArtifactRegistry, serviceAccountKey, execMaven);
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

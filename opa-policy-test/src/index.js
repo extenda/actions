@@ -1,12 +1,12 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import fs from 'fs';
 import path from 'path';
 
-import { setupGcloud } from '../../setup-gcloud';
-import { run } from '../../utils';
-import getBundleName from './bundle-name';
-import createTestBundle from './create-test-bundle';
-import opaTest from './opa-test';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { run } from '../../utils/src/index.js';
+import getBundleName from './bundle-name.js';
+import createTestBundle from './create-test-bundle.js';
+import opaTest from './opa-test.js';
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {
@@ -32,8 +32,6 @@ const action = async () => {
   return opaTest(testBundle);
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

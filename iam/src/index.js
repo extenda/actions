@@ -1,14 +1,14 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import fg from 'fast-glob';
 
-import projectInfo from '../../cloud-run/src/project-info';
-import fetchIamToken from '../../iam-test-token/src/iam-auth';
-import { setupGcloud } from '../../setup-gcloud';
-import { run } from '../../utils';
-import configureBundleSync from './configure-bundle-sync';
-import { configureIAM } from './configure-iam';
-import loadIamDefinition from './iam-definition';
-import loadCredentials from './load-credentials';
+import projectInfo from '../../cloud-run/src/project-info.js';
+import fetchIamToken from '../../iam-test-token/src/iam-auth.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { run } from '../../utils/src/index.js';
+import configureBundleSync from './configure-bundle-sync.js';
+import { configureIAM } from './configure-iam.js';
+import loadIamDefinition from './iam-definition.js';
+import loadCredentials from './load-credentials.js';
 
 const setupEnvironment = async (
   serviceAccountKey,
@@ -105,8 +105,6 @@ const action = async () => {
   }
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

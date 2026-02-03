@@ -1,9 +1,9 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import axios from 'axios';
 import fs from 'fs';
 
-import { loadSecret } from '../../gcp-secret-manager/src/secrets';
-import uploadToBucket from './upload-to-bucket';
+import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
+import uploadToBucket from './upload-to-bucket.js';
 
 const filePreview = (file, maxLines = 26) => {
   if (!fs.existsSync(file)) {
@@ -85,4 +85,4 @@ const notifySlack = async (serviceAccount, message, channelName, file) => {
   return notifySlackMessage(serviceAccount, message, channelName);
 };
 
-module.exports = notifySlack;
+export default notifySlack;

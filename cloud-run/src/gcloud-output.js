@@ -1,4 +1,4 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
 /**
  * Execute a gcloud function and return the standard output.
@@ -17,4 +17,4 @@ const gcloudOutput = async (args) => {
   return output.trim();
 };
 
-module.exports = gcloudOutput;
+export default gcloudOutput;

@@ -1,6 +1,6 @@
 import yaml from 'yaml';
 
-import patchStatefulSetYaml from '../src/patch-statefulset-yaml';
+import patchStatefulSetYaml from '../src/patch-statefulset-yaml.js';
 
 describe('Patches statefulSet.yml', () => {
   const service = {

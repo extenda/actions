@@ -1,17 +1,17 @@
-import core from '@actions/core';
-import exec from '@actions/exec';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 
-import { setupGcloud } from '../../setup-gcloud';
-import checkServiceAccount from './check-sa';
-import cleanRevisions from './clean-revisions';
-import { getClusterInfo } from './cluster-info';
-import createNamespace from './create-namespace';
-import createEnvironmentArgs from './environment-args';
-import authenticateKubeCtl from './kubectl-auth';
-import projectInfo from './project-info';
-import getRuntimeAccount from './runtime-account';
-import runScan from './vulnerability-scanning';
-import waitForRevision from './wait-revision';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import checkServiceAccount from './check-sa.js';
+import cleanRevisions from './clean-revisions.js';
+import { getClusterInfo } from './cluster-info.js';
+import createNamespace from './create-namespace.js';
+import createEnvironmentArgs from './environment-args.js';
+import authenticateKubeCtl from './kubectl-auth.js';
+import projectInfo from './project-info.js';
+import getRuntimeAccount from './runtime-account.js';
+import runScan from './vulnerability-scanning.js';
+import waitForRevision from './wait-revision.js';
 
 const numericOrDefault = (value) => (value >= 0 ? value : 'default');
 
@@ -310,4 +310,4 @@ const runDeploy = async (
   }
 };
 
-module.exports = runDeploy;
+export default runDeploy;

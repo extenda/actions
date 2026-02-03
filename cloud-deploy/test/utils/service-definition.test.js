@@ -1,6 +1,6 @@
 import mockFs from 'mock-fs';
 
-import loadServiceDefinition from '../../src/utils/service-definition';
+import loadServiceDefinition from '../../src/utils/service-definition.js';
 
 describe('Service Definition', () => {
   afterEach(() => {

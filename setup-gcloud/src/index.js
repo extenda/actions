@@ -1,9 +1,9 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { run } from '../../utils/src';
-import { execGcloud } from './exec-gcloud';
-import setupGcloud from './setup-gcloud';
-import withGcloud from './with-gcloud';
+import { run } from '../../utils/src.js';
+import { execGcloud } from './exec-gcloud.js';
+import setupGcloud from './setup-gcloud.js';
+import withGcloud from './with-gcloud.js';
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {
@@ -15,13 +15,6 @@ const action = async () => {
   await setupGcloud(serviceAccountKey, version, exportCredentials === 'true');
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = {
-  action,
-  setupGcloud,
-  execGcloud,
-  withGcloud,
-};
+export { action, execGcloud, setupGcloud, withGcloud };

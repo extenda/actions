@@ -4,7 +4,7 @@ import path from 'path';
 jest.mock('axios');
 jest.mock('../src/sonar-credentials');
 
-import { checkQualityGate } from '../src/check-quality-gate';
+import { checkQualityGate } from '../src/check-quality-gate.js';
 
 describe('Check Quality Gate', () => {
   test('Wait for OK', async () => {

@@ -1,13 +1,13 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { loadCacheKeys } from '../utils/security-cache-keys';
-import selectSemver from '../utils/select-semver';
-import getImageWithSha256 from './image-sha256';
+import { loadCacheKeys } from '../utils/security-cache-keys.js';
+import selectSemver from '../utils/select-semver.js';
+import getImageWithSha256 from './image-sha256.js';
 
 const IMAGE_NAME = 'eu.gcr.io/extenda/security';
 
 // The generally available and stable security sidecar version.
-const STABLE_VERSION = 'v1.7.4';
+export const STABLE_VERSION = 'v1.7.4';
 
 const volumeMounts = (protocol) => {
   const volumes = [];
@@ -27,7 +27,7 @@ const getImageTag = ({ 'preview-tag': previewTag = null } = {}) =>
     STABLE_VERSION,
   );
 
-const securitySpec = async (
+export const securitySpec = async (
   protocol,
   platformGKE = true,
   corsEnabled = false,
@@ -103,4 +103,4 @@ const securitySpec = async (
   });
 };
 
-module.exports = { STABLE_VERSION, securityVersion: getImageTag, securitySpec };
+export const securityVersion = getImageTag;

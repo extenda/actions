@@ -11,7 +11,7 @@ jest.mock('@actions/github', () => ({
   }),
 }));
 
-import pullInfo from '../src/pull-request-info';
+import pullInfo from '../src/pull-request-info.js';
 
 describe('Pull Request Info', () => {
   afterEach(() => {

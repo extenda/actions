@@ -1,7 +1,7 @@
-import cleanRevisions from '../../src/cloudrun/clean-revisions';
-import deploy from '../../src/manifests/deploy';
-import gcloudOutput from '../../src/utils/gcloud-output';
-import { setRetryDelay } from '../../src/utils/retry-until';
+import cleanRevisions from '../../src/cloudrun/clean-revisions.js';
+import deploy from '../../src/manifests/deploy.js';
+import gcloudOutput from '../../src/utils/gcloud-output.js';
+import { setRetryDelay } from '../../src/utils/retry-until.js';
 
 jest.mock('../../src/utils/gcloud-output');
 jest.mock('../../src/cloudrun/clean-revisions');

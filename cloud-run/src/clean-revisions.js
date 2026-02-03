@@ -1,7 +1,7 @@
-import core from '@actions/core';
-import exec from '@actions/exec';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 
-import getRevisions from './get-revisions';
+import getRevisions from './get-revisions.js';
 
 const deleteRevision = async (
   namespace,
@@ -51,4 +51,4 @@ const cleanRevisions = async (
   return Promise.all(promises);
 };
 
-module.exports = cleanRevisions;
+export default cleanRevisions;

@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import fs from 'fs';
 import { validate } from 'jsonschema';
 import yaml from 'yaml';
@@ -26,4 +26,4 @@ const loadServiceDefinition = (serviceFile) => {
   return spec;
 };
 
-module.exports = loadServiceDefinition;
+export default loadServiceDefinition;

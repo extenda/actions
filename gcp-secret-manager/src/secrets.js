@@ -1,8 +1,8 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import YAML from 'yaml';
 
-import { execGcloud, withGcloud } from '../../setup-gcloud';
-import checkEnv from '../../utils/src/check-env';
+import { execGcloud, withGcloud } from '../../setup-gcloud/src/index.js';
+import checkEnv from '../../utils/src/check-env.js';
 
 const accessSecretValue = async (projectId, name) =>
   execGcloud(
@@ -68,9 +68,4 @@ const loadSecretIntoEnv = async (
   return secret;
 };
 
-module.exports = {
-  loadSecret,
-  loadSecretIntoEnv,
-  loadSecrets,
-  parseInputYaml,
-};
+export { loadSecret, loadSecretIntoEnv, loadSecrets, parseInputYaml };

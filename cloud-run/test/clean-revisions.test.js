@@ -1,7 +1,7 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
-import cleanRevisions from '../src/clean-revisions';
-import getRevisions from '../src/get-revisions';
+import cleanRevisions from '../src/clean-revisions.js';
+import getRevisions from '../src/get-revisions.js';
 
 jest.mock('@actions/exec');
 jest.mock('../src/get-revisions');

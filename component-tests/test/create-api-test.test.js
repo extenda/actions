@@ -2,7 +2,7 @@ import { readFile } from 'fs';
 import { load as parseYaml } from 'js-yaml';
 import { resolve } from 'path';
 
-import { createApiTest } from '../src/create-api-test';
+import { createApiTest } from '../src/create-api-test.js';
 
 const spy = jest.fn();
 const mockCall = (method, url) => ({

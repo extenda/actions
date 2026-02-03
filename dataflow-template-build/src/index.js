@@ -1,8 +1,8 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { setupGcloud } from '../../setup-gcloud';
-import { run } from '../../utils';
-import dataflowBuild from './dataflow-build';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { run } from '../../utils/src/index.js';
+import dataflowBuild from './dataflow-build.js';
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {
@@ -26,8 +26,6 @@ const action = async () => {
   );
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

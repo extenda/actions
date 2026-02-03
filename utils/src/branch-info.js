@@ -119,14 +119,14 @@ const getComposedVersionString = (
   return `${version}-${branchNameFriendly.toLowerCase()}-${shortSha}`;
 };
 
-module.exports = {
+export {
   getBranchName,
-  isPreRelease,
   getBranchNameFriendly,
-  getBranchNameShort,
   getBranchNameSemver,
-  getShortSha,
-  getComposedVersionString,
+  getBranchNameShort,
   getBranchType,
+  getComposedVersionString,
+  getShortSha,
   getTagAtCommit,
+  isPreRelease,
 };

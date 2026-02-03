@@ -1,6 +1,6 @@
 import semver from 'semver';
 
-import versions from '../src/versions';
+import versions from '../src/versions.js';
 
 describe('Versions', () => {
   test('It can find the latest release tag for a prefix', async () => {

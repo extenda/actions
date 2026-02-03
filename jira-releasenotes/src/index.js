@@ -1,7 +1,7 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { checkEnv, run } from '../../utils';
-import { createReleaseNotes } from './jira-releasenotes';
+import { checkEnv, run } from '../../utils/src/index.js';
+import { createReleaseNotes } from './jira-releasenotes.js';
 
 run(async () => {
   checkEnv(['JIRA_USERNAME', 'JIRA_PASSWORD']);

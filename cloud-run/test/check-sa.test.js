@@ -1,6 +1,6 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
-import checkServiceAccount from '../src/check-sa';
+import checkServiceAccount from '../src/check-sa.js';
 
 jest.mock('@actions/exec');
 

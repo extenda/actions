@@ -1,4 +1,4 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
 const getRevisions = async (namespace, project, cluster, location) => {
   let output = '';
@@ -37,4 +37,4 @@ const getRevisions = async (namespace, project, cluster, location) => {
     );
 };
 
-module.exports = getRevisions;
+export default getRevisions;

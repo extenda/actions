@@ -1,7 +1,7 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { checkEnv, run } from '../../utils';
-import { createJiraRelease } from './jira-release';
+import { checkEnv, run } from '../../utils/src/index.js';
+import { createJiraRelease } from './jira-release.js';
 
 const action = async () => {
   checkEnv(['JIRA_USERNAME', 'JIRA_PASSWORD']);
@@ -23,8 +23,6 @@ const action = async () => {
   );
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

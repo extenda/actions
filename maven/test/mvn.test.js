@@ -9,13 +9,13 @@ jest.mock('@actions/core');
 jest.mock('../../utils/src/versions');
 jest.mock('../src/nexus-credentials');
 
-import core from '@actions/core';
-import exec from '@actions/exec';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 
-import versions from '../../utils/src/versions';
-import action from '../src/index';
-import mvn from '../src/mvn';
-import loadNexusCredentials from '../src/nexus-credentials';
+import versions from '../../utils/src/versions.js';
+import action from '../src/index.js';
+import mvn from '../src/mvn.js';
+import loadNexusCredentials from '../src/nexus-credentials.js';
 
 const orgEnv = process.env;
 const defaultArgs = '-B -V';

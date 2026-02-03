@@ -1,6 +1,6 @@
 jest.mock('../../src/utils/gcloud-output');
-import checkVpcConnector from '../../src/utils/check-vpc-connector';
-import gcloudOuput from '../../src/utils/gcloud-output';
+import checkVpcConnector from '../../src/utils/check-vpc-connector.js';
+import gcloudOuput from '../../src/utils/gcloud-output.js';
 
 const listVpcConnectorsWithoutMatchingName = [
   {

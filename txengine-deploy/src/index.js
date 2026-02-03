@@ -1,11 +1,11 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { failIfNotTrunkBased, run } from '../../utils';
-import configureDomains from './configure-domains';
-import deploy from './deploy';
-import prepareEnvConfig from './env-config';
-import kubectl from './kubectl';
-import createManifests from './manifests';
+import { failIfNotTrunkBased, run } from '../../utils/src/index.js';
+import configureDomains from './configure-domains.js';
+import deploy from './deploy.js';
+import prepareEnvConfig from './env-config.js';
+import kubectl from './kubectl.js';
+import createManifests from './manifests.js';
 
 const action = async () => {
   const deployServiceAccountKey = core.getInput('deploy-service-account-key', {
@@ -41,8 +41,6 @@ const action = async () => {
   );
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

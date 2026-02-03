@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import { extractTar } from '@actions/tool-cache';
 import fs from 'fs';
 import os from 'os';
@@ -46,7 +46,4 @@ LogFilter.prototype.log = function log(data, stream) {
   }
 };
 
-module.exports = {
-  extractOutput,
-  LogFilter,
-};
+export { extractOutput, LogFilter };

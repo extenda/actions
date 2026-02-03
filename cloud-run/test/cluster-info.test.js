@@ -1,9 +1,9 @@
 jest.mock('@actions/exec');
 
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
-import { getClusterInfo } from '../src/cluster-info';
-import { mockOutput } from './utils';
+import { getClusterInfo } from '../src/cluster-info.js';
+import { mockOutput } from './utils.js';
 
 describe('getClusterInfo', () => {
   afterEach(() => {

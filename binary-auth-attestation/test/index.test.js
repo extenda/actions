@@ -2,14 +2,14 @@ jest.mock('@actions/core');
 jest.mock('../src/create-sign-attestion');
 jest.mock('../../setup-gcloud');
 
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { setupGcloud } from '../../setup-gcloud';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
 import {
   createAttestation,
   getArtifactUrl,
-} from '../src/create-sign-attestion';
-import action from '../src/index';
+} from '../src/create-sign-attestion.js';
+import action from '../src/index.js';
 
 describe('Binary Auth Action', () => {
   afterEach(() => {

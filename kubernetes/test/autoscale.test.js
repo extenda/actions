@@ -1,8 +1,8 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 import fs from 'fs';
 import mockFs from 'mock-fs';
 
-import applyAutoscale from '../src/autoscale';
+import applyAutoscale from '../src/autoscale.js';
 
 jest.mock('@actions/exec');
 

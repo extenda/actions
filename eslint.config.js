@@ -24,6 +24,7 @@ export default [
       'import/prefer-default-export': 'off',
       'import/no-extraneous-dependencies': 'off',
       'no-restricted-syntax': 'off',
+      'no-unused-vars': 'off', // Temporary off during migration to ESM
     },
   },
   eslintPluginPrettier,

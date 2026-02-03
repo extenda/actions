@@ -1,5 +1,5 @@
-import handleStatefulset from '../../src/manifests/statefulset-workaround';
-import gcloudOutput from '../../src/utils/gcloud-output';
+import handleStatefulset from '../../src/manifests/statefulset-workaround.js';
+import gcloudOutput from '../../src/utils/gcloud-output.js';
 
 jest.mock('../../src/utils/gcloud-output', () =>
   jest.fn().mockImplementation(() => Promise.resolve()),

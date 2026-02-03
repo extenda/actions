@@ -1,7 +1,7 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import docker from './docker';
-import urlhelper from './url-helper';
+import docker from './docker.js';
+import urlhelper from './url-helper.js';
 
 const processBuildArgsInput = (buildArgsInput) => {
   let buildArgs = null;
@@ -46,4 +46,4 @@ const run = () => {
   }
 };
 
-module.exports = run;
+export default run;

@@ -1,12 +1,12 @@
-import core from '@actions/core';
-import exec from '@actions/exec';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
-import { getBuildVersion } from '../../utils/src/versions';
-import { createParams } from './params';
-import { credentials } from './sonar-credentials';
+import { getBuildVersion } from '../../utils/src/versions.js';
+import { createParams } from './params.js';
+import { credentials } from './sonar-credentials.js';
 
 const markerFile = path.join(os.homedir(), '.github_action_sonar.txt');
 
@@ -103,7 +103,4 @@ const scanMsBuild = async (
   return true;
 };
 
-module.exports = {
-  markerFile,
-  scanMsBuild,
-};
+export { markerFile, scanMsBuild };

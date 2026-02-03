@@ -7,4 +7,4 @@ const projectWithoutNumbers = (projectID, env) => {
   return `${clan}-${env}`;
 };
 
-module.exports = { projectWithoutNumbers };
+export { projectWithoutNumbers };

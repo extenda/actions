@@ -1,11 +1,11 @@
-import core from '@actions/core';
-import exec from '@actions/exec';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 import fs from 'fs';
 import fetch from 'node-fetch';
 import os from 'os';
 import path from 'path';
 
-import { loadTool } from '../../utils';
+import { loadTool } from '../../utils/src/index.js';
 
 const getBinaryName = () =>
   os.platform() === 'win32'
@@ -158,10 +158,10 @@ const buildPackage = async (args) => {
   return true;
 };
 
-module.exports = {
+export {
   buildPackage,
   downloadBuildTool,
-  publishPackageCommand,
-  packageBuilderCommand,
   getBinaryName,
+  packageBuilderCommand,
+  publishPackageCommand,
 };

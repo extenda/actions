@@ -1,12 +1,12 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import axios from 'axios';
 
-import getToken from '../../src/utils/identity-token';
+import getToken from '../../src/utils/identity-token.js';
 import {
   sendDeployInfo,
   sendDeployRequest,
   sendScaleSetup,
-} from '../../src/utils/send-request';
+} from '../../src/utils/send-request.js';
 
 jest.mock('@actions/core');
 jest.mock('axios');

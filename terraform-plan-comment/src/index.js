@@ -1,9 +1,9 @@
-import core from '@actions/core';
-import github from '@actions/github';
+import * as core from '@actions/core';
+import * as github from '@actions/github';
 
-import { run } from '../../utils';
-import { getPullRequestInfo } from '../../utils/src/pull-request-info';
-import generateOutputs from './generate-outputs';
+import { run } from '../../utils/src/index.js';
+import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
+import generateOutputs from './generate-outputs.js';
 
 const moduleEmoji = (summary) => {
   if (!summary.includes(', 0 to destroy')) {
@@ -173,8 +173,6 @@ const action = async () => {
   return comment;
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

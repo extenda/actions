@@ -1,21 +1,21 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import fs from 'fs';
 import yaml from 'js-yaml';
 
-import getRevisions from '../cloudrun/get-revisions';
-import { addNamespace } from '../utils/add-namespace';
-import connectToCluster from '../utils/cluster-connection';
-import readSecret from '../utils/load-credentials';
-import { gkeManifestTemplate } from './build-manifests-gke';
-import { cloudrunManifestTemplate } from './build-manifests-run';
-import checkIamSystem from './check-system';
-import { userContainerCollectorEnv } from './collector-sidecar';
-import { deletePodMonitor, podMonitorManifest } from './pod-monitoring';
-import handleStatefulset from './statefulset-workaround';
+import getRevisions from '../cloudrun/get-revisions.js';
+import { addNamespace } from '../utils/add-namespace.js';
+import connectToCluster from '../utils/cluster-connection.js';
+import readSecret from '../utils/load-credentials.js';
+import { gkeManifestTemplate } from './build-manifests-gke.js';
+import { cloudrunManifestTemplate } from './build-manifests-run.js';
+import checkIamSystem from './check-system.js';
+import { userContainerCollectorEnv } from './collector-sidecar.js';
+import { deletePodMonitor, podMonitorManifest } from './pod-monitoring.js';
+import handleStatefulset from './statefulset-workaround.js';
 import {
   configMapManifest,
   removeScalerConfiguration,
-} from './vpa-scaler-configmap';
+} from './vpa-scaler-configmap.js';
 
 const convertToYaml = (json) => yaml.dump(json);
 
@@ -406,4 +406,4 @@ const buildManifest = async (
   }
 };
 
-module.exports = buildManifest;
+export default buildManifest;

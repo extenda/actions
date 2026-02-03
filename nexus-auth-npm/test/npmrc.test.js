@@ -2,7 +2,7 @@ import { readFile } from 'fs';
 import mockFs from 'mock-fs';
 import { join } from 'path';
 
-import { createNpmrcFile } from '../src/npmrc';
+import { createNpmrcFile } from '../src/npmrc.js';
 
 const expectedNpmrcForInstall = `
 @hiiretail:registry = https://repo.extendaretail.com/repository/npm-group/

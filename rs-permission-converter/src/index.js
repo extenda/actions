@@ -1,7 +1,7 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { checkEnv } from '../../utils';
-import { convertPermissions } from './permconv';
+import { checkEnv } from '../../utils/src/index.js';
+import { convertPermissions } from './permconv.js';
 
 const run = async () => {
   try {

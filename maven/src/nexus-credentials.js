@@ -1,4 +1,4 @@
-import { loadSecretIntoEnv } from '../../gcp-secret-manager/src/secrets';
+import { loadSecretIntoEnv } from '../../gcp-secret-manager/src/secrets.js';
 
 const setupCredentials = async (
   serviceAccountKey,
@@ -19,4 +19,4 @@ const setupCredentials = async (
   );
 };
 
-module.exports = setupCredentials;
+export default setupCredentials;

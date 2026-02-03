@@ -1,10 +1,10 @@
 jest.mock('../src/get-revision');
 jest.mock('../src/gcloud-output');
-import core from '@actions/core';
-import exec from '@actions/exec';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 
-import getLatestRevision from '../src/get-revision';
-import waitForRevision from '../src/wait-revision';
+import getLatestRevision from '../src/get-revision.js';
+import waitForRevision from '../src/wait-revision.js';
 
 jest.mock('@actions/exec');
 

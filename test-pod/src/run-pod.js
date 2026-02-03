@@ -1,9 +1,9 @@
-import core from '@actions/core';
-import exec from '@actions/exec';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 
-import { getImageDigest } from '../../utils/src';
-import { getShortSha } from '../../utils/src/branch-info';
-import { extractOutput, LogFilter } from './extract-output';
+import { getImageDigest } from '../../utils/src.js';
+import { getShortSha } from '../../utils/src/branch-info.js';
+import { extractOutput, LogFilter } from './extract-output.js';
 
 const podName = async () => {
   const repo = process.env.GITHUB_REPOSITORY.split('/')[1];
@@ -163,4 +163,4 @@ const runPod = async ({ name, namespace }, image, configMap, trimPrefix) => {
     );
 };
 
-module.exports = runPod;
+export default runPod;

@@ -1,24 +1,24 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import projectInfo from '../../cloud-run/src/project-info';
-import { setupGcloud } from '../../setup-gcloud';
-import { failIfNotTrunkBased, run } from '../../utils';
-import buildManifest from './manifests/build-manifest';
-import { imageTag as collectorVersion } from './manifests/collector-sidecar';
-import deploy from './manifests/deploy';
-import getImageWithSha256 from './manifests/image-sha256';
-import { securityVersion } from './manifests/security-sidecar';
-import publishPolicies from './policies/publish-policies';
-import checkPolicyExists from './utils/cloud-armor';
-import readSecret from './utils/load-credentials';
+import projectInfo from '../../cloud-run/src/project-info.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { failIfNotTrunkBased, run } from '../../utils/src/index.js';
+import buildManifest from './manifests/build-manifest.js';
+import { imageTag as collectorVersion } from './manifests/collector-sidecar.js';
+import deploy from './manifests/deploy.js';
+import getImageWithSha256 from './manifests/image-sha256.js';
+import { securityVersion } from './manifests/security-sidecar.js';
+import publishPolicies from './policies/publish-policies.js';
+import checkPolicyExists from './utils/cloud-armor.js';
+import readSecret from './utils/load-credentials.js';
 import {
   refreshCanaryStatus,
   sendDeployInfo,
   sendDeployRequest,
   sendScaleSetup,
-} from './utils/send-request';
-import loadServiceDefinition from './utils/service-definition';
-import runScan from './utils/vulnerability-scanning';
+} from './utils/send-request.js';
+import loadServiceDefinition from './utils/service-definition.js';
+import runScan from './utils/vulnerability-scanning.js';
 
 const action = async () => {
   const serviceAccountKeyPipeline = core.getInput('secrets-account-key', {
@@ -271,8 +271,6 @@ const action = async () => {
   }
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

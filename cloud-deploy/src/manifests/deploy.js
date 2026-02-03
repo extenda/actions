@@ -1,10 +1,10 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import cleanRevisions from '../cloudrun/clean-revisions';
-import setupAuthorization from '../cloudrun/iam-bindings';
-import { projectWithoutNumbers } from '../utils/clan-project-name';
-import gcloudOutput from '../utils/gcloud-output';
-import { retryUntil } from '../utils/retry-until';
+import cleanRevisions from '../cloudrun/clean-revisions.js';
+import setupAuthorization from '../cloudrun/iam-bindings.js';
+import { projectWithoutNumbers } from '../utils/clan-project-name.js';
+import gcloudOutput from '../utils/gcloud-output.js';
+import { retryUntil } from '../utils/retry-until.js';
 
 const deployRelease = async (projectID, name, version) =>
   gcloudOutput([
@@ -84,4 +84,4 @@ const deploy = async (projectID, name, version, platformGKE, accounts = []) => {
   return success;
 };
 
-module.exports = deploy;
+export default deploy;

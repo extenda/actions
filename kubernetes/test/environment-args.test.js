@@ -1,4 +1,4 @@
-import parseEnvironmentArgs from '../src/environment-args';
+import parseEnvironmentArgs from '../src/environment-args.js';
 
 describe('Environment args', () => {
   test('It can build a list of arguments', () => {

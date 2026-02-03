@@ -1,8 +1,8 @@
 jest.mock('@actions/core');
 
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import action from '../src/index';
+import action from '../src/index.js';
 
 describe('run push policy', () => {
   afterEach(() => {

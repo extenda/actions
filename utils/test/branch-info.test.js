@@ -8,7 +8,7 @@ import {
   getShortSha,
   getTagAtCommit,
   isPreRelease,
-} from '../src/branch-info';
+} from '../src/branch-info.js';
 
 describe('Branch info test suite', () => {
   test('getBranchName() returns branch name or null', () => {

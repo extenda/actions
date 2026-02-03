@@ -1,7 +1,7 @@
-import core from '@actions/core';
-import exec from '@actions/exec';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 
-import handleCertificates from '../src/handle-certificate';
+import handleCertificates from '../src/handle-certificate.js';
 
 jest.mock('@actions/exec');
 jest.mock('@actions/core');

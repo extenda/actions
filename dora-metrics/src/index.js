@@ -1,8 +1,8 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { run } from '../../utils';
-import generateBugLog from './bug-log';
-import { generateFolders, uploadToBucket } from './deploy-log';
+import { run } from '../../utils/src/index.js';
+import generateBugLog from './bug-log.js';
+import { generateFolders, uploadToBucket } from './deploy-log.js';
 
 const action = async () => {
   const productName = core.getInput('product-name', { required: true });
@@ -22,8 +22,6 @@ const action = async () => {
   await uploadToBucket(productName);
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

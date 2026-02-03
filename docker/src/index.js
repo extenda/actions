@@ -1,5 +1,3 @@
-import run from './docker-build-push';
+import run from './docker-build-push.js';
 
-if (require.main === module) {
-  run();
-}
+// Entry point check removed for ESM compatibility

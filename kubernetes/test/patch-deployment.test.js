@@ -1,6 +1,6 @@
 import yaml from 'yaml';
 
-import patchDeploymentYaml from '../src/patch-deployment-yaml';
+import patchDeploymentYaml from '../src/patch-deployment-yaml.js';
 
 describe('Patches Deployment.yml', () => {
   test('It patches replicas count', () => {

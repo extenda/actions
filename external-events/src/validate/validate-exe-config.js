@@ -58,4 +58,4 @@ function validateExeConfig(data) {
   return error.details.map(({ message }) => message);
 }
 
-module.exports = { validateExeConfig };
+export { validateExeConfig };

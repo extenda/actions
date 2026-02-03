@@ -2,8 +2,8 @@ import { getInput, setFailed } from '@actions/core';
 import { readFile } from 'fs';
 import { load as parseYaml } from 'js-yaml';
 
-import { run } from '../../utils';
-import { createApiTest } from './create-api-test';
+import { run } from '../../utils/src/index.js';
+import { createApiTest } from './create-api-test.js';
 
 async function main() {
   try {
@@ -24,8 +24,6 @@ async function main() {
   }
 }
 
-if (require.main === module) {
-  run(main);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = main;
+export default main;

@@ -1,10 +1,10 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import semver from 'semver';
 
-import { loadTool, run } from '../../utils';
+import { loadTool, run } from '../../utils/src/index.js';
 
 const fromFile = (file) => {
   if (fs.existsSync(file)) {
@@ -69,11 +69,6 @@ const action = async () => {
   }
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = {
-  action,
-  platform,
-};
+export { action, platform };

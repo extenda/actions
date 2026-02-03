@@ -53,4 +53,4 @@ const patchStatefulSetYaml = (serviceDefinition, statefulsetYaml) => {
   return yaml.stringify(statefulSet);
 };
 
-module.exports = patchStatefulSetYaml;
+export default patchStatefulSetYaml;

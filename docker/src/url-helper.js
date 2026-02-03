@@ -8,7 +8,4 @@ const getRegistryUrl = (registry) => {
   return registry;
 };
 
-module.exports = {
-  getRegistryUrl,
-  defaultRegistry,
-};
+export { defaultRegistry, getRegistryUrl };

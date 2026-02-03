@@ -1,5 +1,5 @@
-import core from '@actions/core';
-import io from '@actions/io';
+import * as core from '@actions/core';
+import * as io from '@actions/io';
 import tc from '@actions/tool-cache';
 import axios from 'axios';
 import fs from 'fs';
@@ -79,4 +79,4 @@ const loadTool = async ({ tool, binary, version, downloadUrl, auth }) => {
   );
 };
 
-module.exports = { find, loadTool };
+export { find, loadTool };

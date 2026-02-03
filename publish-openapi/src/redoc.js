@@ -1,5 +1,5 @@
-import core from '@actions/core';
-import exec from '@actions/exec';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 import fs from 'fs';
 
 const wait = (ms) =>
@@ -153,4 +153,4 @@ const deployDocumentation = async (
   await Promise.all(promises);
 };
 
-module.exports = deployDocumentation;
+export default deployDocumentation;

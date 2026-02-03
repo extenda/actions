@@ -1,9 +1,9 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import loadServiceDefinition from '../../cloud-run/src/service-definition';
-import { failIfNotTrunkBased, run } from '../../utils';
-import kubernetesSchema from './kubernetes-schema';
-import runDeploy from './run-deploy';
+import loadServiceDefinition from '../../cloud-run/src/service-definition.js';
+import { failIfNotTrunkBased, run } from '../../utils/src/index.js';
+import kubernetesSchema from './kubernetes-schema.js';
+import runDeploy from './run-deploy.js';
 
 const action = async () => {
   // Get params from action input
@@ -23,8 +23,6 @@ const action = async () => {
   await runDeploy(serviceAccountKey, service, image, dryRun);
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

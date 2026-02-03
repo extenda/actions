@@ -1,7 +1,7 @@
 jest.mock('@actions/exec');
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
-import drainJob from '../src/drain-job';
+import drainJob from '../src/drain-job.js';
 
 describe('drain dataflow job', () => {
   afterEach(() => {

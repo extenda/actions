@@ -1,4 +1,4 @@
-import { loadSecret } from '../../../gcp-secret-manager/src/secrets';
+import { loadSecret } from '../../../gcp-secret-manager/src/secrets.js';
 
 /**
  * @param serviceAccountKey
@@ -16,4 +16,4 @@ async function loadSecrets(serviceAccountKey) {
   };
 }
 
-module.exports = { loadSecrets };
+export { loadSecrets };

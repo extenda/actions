@@ -1,4 +1,4 @@
-import createEnvArgs from '../src/environment-args';
+import createEnvArgs from '../src/environment-args.js';
 
 describe('Environment args', () => {
   test('It can build a list of arguments', () => {

@@ -1,5 +1,5 @@
-import { execGcloud } from '../../setup-gcloud/src';
-import uploadToBucket from '../src/upload-to-bucket';
+import { execGcloud } from '../../setup-gcloud/src.js';
+import uploadToBucket from '../src/upload-to-bucket.js';
 
 jest.mock('../../setup-gcloud/src');
 

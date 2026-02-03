@@ -2,16 +2,16 @@ jest.mock('@actions/core');
 jest.mock('fast-glob');
 jest.mock('../src/secrets-manager/load-secrets');
 
-import core from '@actions/core';
+import * as core from '@actions/core';
 import camelcaseKeys from 'camelcase-keys';
 import fg from 'fast-glob';
 import mockFs from 'mock-fs';
 import nock from 'nock';
 
-import action from '../src/index';
-import { loadSecrets } from '../src/secrets-manager/load-secrets';
-import configFixtures from './fixtures/configs';
-import { secrets } from './fixtures/secrets';
+import action from '../src/index.js';
+import { loadSecrets } from '../src/secrets-manager/load-secrets.js';
+import configFixtures from './fixtures/configs.js';
+import { secrets } from './fixtures/secrets.js';
 
 function mockIdpTokenCall() {
   nock('https://identitytoolkit.googleapis.com')
@@ -27,7 +27,7 @@ function mockIdpTokenCall() {
 
 function mockExeSyncCall(id, response, dryRun = false) {
   // ignore version
-  // eslint-disable-next-line no-unused-vars
+
   const { version, ...payload } = camelcaseKeys(configFixtures.validParsed, {
     deep: true,
   });

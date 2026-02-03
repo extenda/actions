@@ -3,8 +3,8 @@ jest.mock('../../src/utils/gcloud-output', () =>
   jest.fn().mockImplementation(() => Promise.resolve()),
 );
 
-import checkIamSystem from '../../src/manifests/check-system';
-import execGcloud from '../../src/utils/gcloud-output';
+import checkIamSystem from '../../src/manifests/check-system.js';
+import execGcloud from '../../src/utils/gcloud-output.js';
 
 describe('Check iam bundles system', () => {
   afterEach(() => {

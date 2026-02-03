@@ -1,7 +1,7 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { handlePermissions, setupPermissions } from './permissions';
-import { setupRoles } from './roles';
+import { handlePermissions, setupPermissions } from './permissions.js';
+import { setupRoles } from './roles.js';
 
 const configureIAM = async (iam, iamUrl, iamToken, skipIAM) => {
   const { 'permission-prefix': permissionPrefix, permissions, roles } = iam;
@@ -38,6 +38,4 @@ const configureIAM = async (iam, iamUrl, iamToken, skipIAM) => {
   return null;
 };
 
-module.exports = {
-  configureIAM,
-};
+export { configureIAM };

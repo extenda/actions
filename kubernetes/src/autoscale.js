@@ -1,4 +1,4 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 import fs from 'fs';
 
 const getAutoscaleType = (autoscale) => {
@@ -163,4 +163,4 @@ spec:
   await exec.exec('kubectl', ['apply', '-f', 'hpa.yml', ...dryRunArg]);
 };
 
-module.exports = applyAutoscale;
+export default applyAutoscale;

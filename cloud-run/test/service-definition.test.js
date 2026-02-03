@@ -1,7 +1,7 @@
 import mockFs from 'mock-fs';
 
-import cloudRunSchema from '../src/cloud-run-schema';
-import loadServiceDefinition from '../src/service-definition';
+import cloudRunSchema from '../src/cloud-run-schema.js';
+import loadServiceDefinition from '../src/service-definition.js';
 
 describe('Service Definition', () => {
   afterEach(() => {

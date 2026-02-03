@@ -1,7 +1,7 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { execGcloud } from './exec-gcloud';
-import setupGcloud from './setup-gcloud';
+import { execGcloud } from './exec-gcloud.js';
+import setupGcloud from './setup-gcloud.js';
 
 const getGcloudAccount = async () =>
   execGcloud(['config', 'get', 'account', '--format=json'], 'gcloud', true)
@@ -52,4 +52,4 @@ const withGcloud = async (serviceAccountKey, fn) => {
   return result;
 };
 
-module.exports = withGcloud;
+export default withGcloud;

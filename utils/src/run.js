@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
 /**
  * Run an async action and catch any exception.
@@ -13,4 +13,4 @@ const run = async (action) => {
   }
 };
 
-module.exports = run;
+export default run;

@@ -1,8 +1,8 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import serviceDefinition from '../../cloud-run/src/service-definition';
-import action from '../src/index';
-import runDeploy from '../src/run-deploy';
+import serviceDefinition from '../../cloud-run/src/service-definition.js';
+import action from '../src/index.js';
+import runDeploy from '../src/run-deploy.js';
 
 jest.mock('@actions/core');
 jest.mock('../src/run-deploy');

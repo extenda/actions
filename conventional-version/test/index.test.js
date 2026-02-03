@@ -1,7 +1,7 @@
 jest.mock('@actions/core');
 jest.mock('../../utils/src/branch-info');
-import { getBranchNameSemver } from '../../utils/src/branch-info';
-import action from '../src/index';
+import { getBranchNameSemver } from '../../utils/src/branch-info.js';
+import action from '../src/index.js';
 
 const orgEnv = process.env;
 

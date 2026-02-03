@@ -1,4 +1,4 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
 const getJobs = async (region, jobName, newJobId, projectId) => {
   let output = '';
@@ -46,4 +46,4 @@ const drainJob = async (newJobId, jobName, region, projectId) => {
   return Promise.all(drainJobs);
 };
 
-module.exports = drainJob;
+export default drainJob;

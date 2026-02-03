@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
 const handleError = async (errorMessage, action) => {
   let message = `${action} resulted in: ${errorMessage}`;
@@ -33,4 +33,4 @@ const handleError = async (errorMessage, action) => {
   core.info(message);
 };
 
-module.exports = handleError;
+export default handleError;

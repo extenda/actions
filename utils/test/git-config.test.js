@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import simpleGit from 'simple-git';
 
-import gitConfig from '../src/git-config';
+import gitConfig from '../src/git-config.js';
 
 beforeAll(() => {
   fs.cpSync('.git/config', '.git/config.backup');

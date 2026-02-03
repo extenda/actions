@@ -1,7 +1,7 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import mockFs from 'mock-fs';
 
-import getBundleName from '../src/bundle-name';
+import getBundleName from '../src/bundle-name.js';
 
 jest.mock('@actions/core');
 

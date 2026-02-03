@@ -43,4 +43,4 @@ function validateCccConfig(data) {
   return error.details.map(({ message }) => message);
 }
 
-module.exports = { validateCccConfig };
+export { validateCccConfig };

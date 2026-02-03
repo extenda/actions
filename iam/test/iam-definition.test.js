@@ -1,7 +1,7 @@
 import mockFs from 'mock-fs';
 import { m } from 'multiline-str';
 
-import loadIamDefinition from '../src/iam-definition';
+import loadIamDefinition from '../src/iam-definition.js';
 
 describe('IAM Definition', () => {
   afterEach(() => {

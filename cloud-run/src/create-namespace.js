@@ -1,6 +1,6 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
-import { setOpaInjectionLabels } from './set-namespace-label';
+import { setOpaInjectionLabels } from './set-namespace-label.js';
 
 const getNamespace = async (namespace) => {
   let output = '';
@@ -42,4 +42,4 @@ Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md
   }
 };
 
-module.exports = createNamespace;
+export default createNamespace;

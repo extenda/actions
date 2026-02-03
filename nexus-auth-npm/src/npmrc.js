@@ -27,4 +27,4 @@ const createNpmrcFile = async ({
   await writeFile(join(outputDir, '.npmrc'), contents);
 };
 
-module.exports = { createNpmrcFile };
+export { createNpmrcFile };

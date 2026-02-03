@@ -1,4 +1,4 @@
-import { loadSecrets } from '../../gcp-secret-manager/src/secrets';
+import { loadSecrets } from '../../gcp-secret-manager/src/secrets.js';
 
 /**
  * @param {string} serviceAccountKey
@@ -35,4 +35,4 @@ const validateOrFetchNexusCredentials = async ({
   return fetchNexusCredentials(serviceAccountKey);
 };
 
-module.exports = { validateOrFetchNexusCredentials };
+export { validateOrFetchNexusCredentials };

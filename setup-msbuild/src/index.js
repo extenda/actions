@@ -1,9 +1,9 @@
-import core from '@actions/core';
-import exec from '@actions/exec';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 import os from 'os';
 import path from 'path';
 
-import { loadTool } from '../../utils';
+import { loadTool } from '../../utils/src/index.js';
 
 const VSWHERE_VERSION = '2.7.1';
 

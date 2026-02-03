@@ -1,4 +1,4 @@
-import { findExecutable } from '../src/exec-gcloud';
+import { findExecutable } from '../src/exec-gcloud.js';
 
 test('It picks gcloud', () => {
   expect(findExecutable('gcloud')).toEqual('gcloud');

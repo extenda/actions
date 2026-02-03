@@ -1,7 +1,7 @@
-import core from '@actions/core';
-import github from '@actions/github';
+import * as core from '@actions/core';
+import * as github from '@actions/github';
 
-import { getPullRequestInfo } from '../../utils/src/pull-request-info';
+import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
 
 const getPullRequestNumber = async (githubToken) => {
   const pr = await getPullRequestInfo(githubToken);
@@ -43,7 +43,4 @@ const postComment = async (githubToken, issueId, comment) => {
   }
 };
 
-module.exports = {
-  getPullRequestNumber,
-  postComment,
-};
+export { getPullRequestNumber, postComment };

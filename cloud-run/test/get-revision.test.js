@@ -1,5 +1,5 @@
-import getLatestRevision from '../src/get-revision';
-import getRevisions from '../src/get-revisions';
+import getLatestRevision from '../src/get-revision.js';
+import getRevisions from '../src/get-revisions.js';
 
 jest.mock('../src/get-revisions');
 

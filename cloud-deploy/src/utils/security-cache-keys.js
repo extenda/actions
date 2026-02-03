@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import fs from 'fs';
 import { validate } from 'jsonschema';
 import yaml from 'yaml';
@@ -58,6 +58,4 @@ const loadCacheKeys = (cacheKeysYamlFile = DEFAULT_CACHE_KEYS_FILE) => {
   return undefined;
 };
 
-module.exports = {
-  loadCacheKeys,
-};
+export { loadCacheKeys };

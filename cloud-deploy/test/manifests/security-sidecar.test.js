@@ -1,8 +1,8 @@
-import getImageWithSha256 from '../../src/manifests/image-sha256';
+import getImageWithSha256 from '../../src/manifests/image-sha256.js';
 import {
   securitySpec,
   STABLE_VERSION,
-} from '../../src/manifests/security-sidecar';
+} from '../../src/manifests/security-sidecar.js';
 
 jest.mock('../../src/manifests/image-sha256');
 

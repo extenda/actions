@@ -1,5 +1,5 @@
-import { getPullRequestInfo } from '../../utils/src/pull-request-info';
-import { getPullRequestNumber, postComment } from '../src/pr-comment';
+import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
+import { getPullRequestNumber, postComment } from '../src/pr-comment.js';
 
 const mockCreateComment = jest.fn();
 const mockListComments = jest.fn();

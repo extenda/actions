@@ -1,8 +1,8 @@
 import {
   configMapManifest,
   removeScalerConfiguration,
-} from '../../src/manifests/vpa-scaler-configmap';
-import gcloudOutput from '../../src/utils/gcloud-output';
+} from '../../src/manifests/vpa-scaler-configmap.js';
+import gcloudOutput from '../../src/utils/gcloud-output.js';
 
 jest.mock('../../src/utils/gcloud-output', () =>
   jest.fn().mockImplementation(() => Promise.resolve()),

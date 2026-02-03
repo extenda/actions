@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import axios from 'axios';
 
 jest.mock('axios');
@@ -7,8 +7,8 @@ jest.mock('../src/sonar-credentials', () => ({
   sonarAuth: jest.fn(),
 }));
 
-import { createProject } from '../src/create-project';
-import { sonarAuth } from '../src/sonar-credentials';
+import { createProject } from '../src/create-project.js';
+import { sonarAuth } from '../src/sonar-credentials.js';
 
 const orgEnv = process.env;
 

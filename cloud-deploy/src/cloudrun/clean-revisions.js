@@ -1,7 +1,7 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import execGcloud from '../utils/gcloud-output';
-import getRevisions from './get-revisions';
+import execGcloud from '../utils/gcloud-output.js';
+import getRevisions from './get-revisions.js';
 
 const deleteRevision = async (revisionName, project, region) =>
   execGcloud(
@@ -38,4 +38,4 @@ const cleanRevisions = async (service, project, region, maxRevisions) => {
   return Promise.all(promises);
 };
 
-module.exports = cleanRevisions;
+export default cleanRevisions;

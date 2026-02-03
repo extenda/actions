@@ -1,4 +1,4 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
 /**
  * @param namespace Namespace name to be searched for.
@@ -37,4 +37,4 @@ Visit https://github.com/extenda/tf-infra-gcp/blob/master/docs/project-config.md
   }
 };
 
-module.exports = checkNamespaceExists;
+export default checkNamespaceExists;

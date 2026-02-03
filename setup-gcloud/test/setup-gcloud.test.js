@@ -13,10 +13,10 @@ jest.mock('@actions/exec');
 jest.mock('@actions/core');
 
 import { restoreCache } from '@actions/cache';
-import core from '@actions/core';
-import exec from '@actions/exec';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 
-import setupGcloud from '../src/setup-gcloud';
+import setupGcloud from '../src/setup-gcloud.js';
 
 const jsonKey = {
   project_id: 'test-project',

@@ -1,5 +1,5 @@
-import { execGcloud } from '../../../setup-gcloud';
-import getToken from '../../src/utils/identity-token';
+import { execGcloud } from '../../../setup-gcloud.js';
+import getToken from '../../src/utils/identity-token.js';
 
 jest.mock('../../../setup-gcloud');
 

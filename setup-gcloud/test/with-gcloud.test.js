@@ -1,6 +1,6 @@
-import { execGcloud } from '../src/exec-gcloud';
-import setupGcloud from '../src/setup-gcloud';
-import withGcloud from '../src/with-gcloud';
+import { execGcloud } from '../src/exec-gcloud.js';
+import setupGcloud from '../src/setup-gcloud.js';
+import withGcloud from '../src/with-gcloud.js';
 
 jest.mock('../src/setup-gcloud');
 jest.mock('../src/exec-gcloud');

@@ -1,5 +1,5 @@
-import { kubernetesCollector } from './collector-sidecar';
-import { securitySpec } from './security-sidecar';
+import { kubernetesCollector } from './collector-sidecar.js';
+import { securitySpec } from './security-sidecar.js';
 
 const volumeSetup = (opa, protocol, type = 'none') => {
   const volumes = [];
@@ -317,6 +317,4 @@ const gkeManifestTemplate = async (
   return [namespace, service, deployment, hpa];
 };
 
-module.exports = {
-  gkeManifestTemplate,
-};
+export { gkeManifestTemplate };

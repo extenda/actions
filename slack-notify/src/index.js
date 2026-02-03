@@ -1,7 +1,7 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { run } from '../../utils/src';
-import notifySlack from './slack-notify';
+import { run } from '../../utils/src.js';
+import notifySlack from './slack-notify.js';
 
 const action = async () => {
   const serviceAccount = core.getInput('service-account-key', {
@@ -13,8 +13,6 @@ const action = async () => {
   await notifySlack(serviceAccount, text, channel, file);
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

@@ -1,6 +1,6 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import execGcloud from './gcloud-output';
+import execGcloud from './gcloud-output.js';
 
 const checkPolicyExists = async (policy, projectID) => {
   const args = [
@@ -17,4 +17,4 @@ const checkPolicyExists = async (policy, projectID) => {
     });
 };
 
-module.exports = checkPolicyExists;
+export default checkPolicyExists;

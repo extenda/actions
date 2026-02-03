@@ -17,4 +17,4 @@ const patchServiceYaml = (serviceDefinition, serviceYaml) => {
   return yaml.stringify(patchedService);
 };
 
-module.exports = patchServiceYaml;
+export default patchServiceYaml;

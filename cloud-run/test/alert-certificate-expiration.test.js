@@ -1,10 +1,10 @@
 jest.mock('@actions/exec');
 jest.mock('../../gcp-secret-manager/src/secrets');
 
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
-import { loadSecrets } from '../../gcp-secret-manager/src/secrets';
-import certificateExpiration from '../src/alert-certificate-expiration';
+import { loadSecrets } from '../../gcp-secret-manager/src/secrets.js';
+import certificateExpiration from '../src/alert-certificate-expiration.js';
 
 const today = new Date();
 const monthBack = new Date(

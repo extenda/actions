@@ -1,11 +1,11 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import camelcaseKeys from 'camelcase-keys';
 
-import { run } from '../../utils';
-import { loadSecrets } from './secrets-manager/load-secrets';
-import { createApi } from './utils/create-api';
-import { loadDefinitions } from './utils/load-sync-definitions';
-import { validateExeConfig } from './validate/validate-exe-config';
+import { run } from '../../utils/src/index.js';
+import { loadSecrets } from './secrets-manager/load-secrets.js';
+import { createApi } from './utils/create-api.js';
+import { loadDefinitions } from './utils/load-sync-definitions.js';
+import { validateExeConfig } from './validate/validate-exe-config.js';
 
 function printSyncResult(report) {
   for (const { id, success, performedAction, error } of report) {
@@ -59,8 +59,6 @@ async function action() {
   }
 }
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

@@ -1,6 +1,6 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
-import { generateFolders, uploadToBucket } from '../src/deploy-log';
+import { generateFolders, uploadToBucket } from '../src/deploy-log.js';
 
 jest.mock('@actions/exec');
 jest.mock('@actions/core');

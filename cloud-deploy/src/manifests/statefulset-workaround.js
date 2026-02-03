@@ -1,4 +1,4 @@
-import gcloudOutput from '../utils/gcloud-output';
+import gcloudOutput from '../utils/gcloud-output.js';
 
 const handleStatefulset = async (name, volumeSize) => {
   // 2. Fetch currently deployed statefulset
@@ -61,4 +61,4 @@ const handleStatefulset = async (name, volumeSize) => {
   return promises;
 };
 
-module.exports = handleStatefulset;
+export default handleStatefulset;

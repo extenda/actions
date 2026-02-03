@@ -1,8 +1,8 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 import fs from 'fs';
 import mockFs from 'mock-fs';
 
-import generateOutputs from '../src/generate-outputs';
+import generateOutputs from '../src/generate-outputs.js';
 
 const terragruntFs = {
   '/work': {

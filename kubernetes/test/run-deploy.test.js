@@ -16,21 +16,21 @@ jest.mock('../../utils', () => ({
   getImageDigest: jest.fn(),
 }));
 
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 import mockFs from 'mock-fs';
 
-import { getClusterInfo } from '../../cloud-run/src/cluster-info';
-import { setupGcloud } from '../../setup-gcloud';
-import { getImageDigest } from '../../utils/src';
-import applyKubectl from '../src/apply-kubectl';
-import applyAutoscale from '../src/autoscale';
-import checkNamespaceExists from '../src/check-namespace-exists';
-import checkRequiredNumberOfPodsIsRunning from '../src/check-number-of-pods-running';
-import kustomize from '../src/kustomize';
-import patchDeployment from '../src/patch-deployment-yaml';
-import patchServiceYaml from '../src/patch-service-yaml';
-import patchStatefulSetYaml from '../src/patch-statefulset-yaml';
-import runDeploy from '../src/run-deploy';
+import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { getImageDigest } from '../../utils/src.js';
+import applyKubectl from '../src/apply-kubectl.js';
+import applyAutoscale from '../src/autoscale.js';
+import checkNamespaceExists from '../src/check-namespace-exists.js';
+import checkRequiredNumberOfPodsIsRunning from '../src/check-number-of-pods-running.js';
+import kustomize from '../src/kustomize.js';
+import patchDeployment from '../src/patch-deployment-yaml.js';
+import patchServiceYaml from '../src/patch-service-yaml.js';
+import patchStatefulSetYaml from '../src/patch-statefulset-yaml.js';
+import runDeploy from '../src/run-deploy.js';
 
 const orgEnv = process.env;
 

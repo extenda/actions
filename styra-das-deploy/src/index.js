@@ -1,6 +1,6 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { run } from '../../utils/src';
+import { run } from '../../utils/src.js';
 
 const action = async () => {
   core.warning(`
@@ -9,8 +9,6 @@ const action = async () => {
   `);
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

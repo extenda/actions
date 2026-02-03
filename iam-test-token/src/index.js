@@ -1,8 +1,8 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { loadSecret } from '../../gcp-secret-manager/src/secrets';
-import { run } from '../../utils';
-import getIamToken from './iam-auth';
+import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
+import { run } from '../../utils/src/index.js';
+import getIamToken from './iam-auth.js';
 
 const loadCredentials = async (
   serviceAccountKey,
@@ -41,8 +41,6 @@ const action = async () => {
   core.setOutput('iam-token', token);
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

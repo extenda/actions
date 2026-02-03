@@ -1,8 +1,8 @@
-import core from '@actions/core';
-import github from '@actions/github';
+import * as core from '@actions/core';
+import * as github from '@actions/github';
 
-import { checkEnv, run } from '../../utils';
-import versions from '../../utils/src/versions';
+import { checkEnv, run } from '../../utils/src/index.js';
+import versions from '../../utils/src/versions.js';
 
 const createGitHubRelease = async (release, name) => {
   const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
@@ -45,8 +45,6 @@ const action = async () => {
   }
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

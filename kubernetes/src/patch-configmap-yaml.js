@@ -14,4 +14,4 @@ const patchConfigMapYaml = (environmentArgs, configMapYaml) => {
   return yaml.stringify(configMap);
 };
 
-module.exports = patchConfigMapYaml;
+export default patchConfigMapYaml;

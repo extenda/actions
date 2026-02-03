@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import cp from 'child_process';
 import fs from 'fs';
 
@@ -92,8 +92,4 @@ const push = (imageName, tags) => {
   });
 };
 
-module.exports = {
-  build,
-  login,
-  push,
-};
+export { build, login, push };

@@ -1,10 +1,10 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
 
-import { sonarAuth } from './sonar-credentials';
+import { sonarAuth } from './sonar-credentials.js';
 
 const REPORT_TASK_FILE = 'report-task.txt';
 const PROP_TASK_URL = 'ceTaskUrl';
@@ -131,6 +131,4 @@ const checkQualityGate = async (
   return result(0, report, qgStatus);
 };
 
-module.exports = {
-  checkQualityGate,
-};
+export { checkQualityGate };

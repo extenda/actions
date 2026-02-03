@@ -1,8 +1,8 @@
 import { getBooleanInput, getInput } from '@actions/core';
 
-import { run } from '../../utils/src';
-import { validateOrFetchNexusCredentials } from './nexus-credentials';
-import { createNpmrcFile } from './npmrc';
+import { run } from '../../utils/src.js';
+import { validateOrFetchNexusCredentials } from './nexus-credentials.js';
+import { createNpmrcFile } from './npmrc.js';
 
 const action = async () => {
   const username = getInput('nexus-username') || process.env.NEXUS_USERNAME;
@@ -24,8 +24,6 @@ const action = async () => {
   });
 };
 
-if (require.main === module) {
-  run(action);
-}
+// Entry point check removed for ESM compatibility
 
-module.exports = action;
+export default action;

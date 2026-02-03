@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import { agent } from 'supertest';
 
 /**
@@ -45,4 +45,4 @@ const createApiTest = (baseUrl, apiToken) => {
   );
 };
 
-module.exports = { createApiTest };
+export { createApiTest };

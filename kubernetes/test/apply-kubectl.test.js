@@ -1,7 +1,7 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 import mockFs from 'mock-fs';
 
-import applyKubectl from '../src/apply-kubectl';
+import applyKubectl from '../src/apply-kubectl.js';
 
 jest.mock('@actions/exec');
 

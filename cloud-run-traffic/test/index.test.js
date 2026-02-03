@@ -1,10 +1,10 @@
 jest.mock('@actions/core');
 jest.mock('../../setup-gcloud');
 
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { execGcloud, setupGcloud } from '../../setup-gcloud';
-import action from '../src/index';
+import { execGcloud, setupGcloud } from '../../setup-gcloud/src/index.js';
+import action from '../src/index.js';
 
 describe('action', () => {
   beforeEach(() => {

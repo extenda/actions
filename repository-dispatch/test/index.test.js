@@ -22,10 +22,10 @@ jest.mock('@actions/github', () => ({
   },
 }));
 
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import { loadGitHubToken } from '../../utils';
-import action from '../src/index';
+import { loadGitHubToken } from '../../utils/src/index.js';
+import action from '../src/index.js';
 
 describe('repository-dispatch', () => {
   afterEach(() => {

@@ -1,10 +1,10 @@
 jest.mock('@actions/core');
 jest.mock('../src/pkgbuilder');
 
-import core from '@actions/core';
+import * as core from '@actions/core';
 
-import action from '../src/index';
-import { buildPackage } from '../src/pkgbuilder';
+import action from '../src/index.js';
+import { buildPackage } from '../src/pkgbuilder.js';
 
 const orgEnv = process.env;
 

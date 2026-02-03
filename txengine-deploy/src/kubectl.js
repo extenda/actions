@@ -1,8 +1,8 @@
-import exec from '@actions/exec';
+import * as exec from '@actions/exec';
 
-import { getClusterInfo } from '../../cloud-run/src/cluster-info';
-import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth';
-import { setupGcloud } from '../../setup-gcloud';
+import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
+import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
 
 const configure = async (serviceAccountKey) => {
   // Authenticate GCloud
@@ -19,7 +19,4 @@ const configure = async (serviceAccountKey) => {
 
 const kubectl = async (args) => exec.exec('kubectl', args);
 
-module.exports = {
-  configure,
-  exec: kubectl,
-};
+export default { configure, exec: kubectl };

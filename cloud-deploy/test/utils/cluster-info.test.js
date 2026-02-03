@@ -1,8 +1,8 @@
 jest.mock('@actions/exec');
 jest.mock('../../src/utils/gcloud-output');
 
-import { getClusterInfo } from '../../src/utils/cluster-info';
-import execGcloud from '../../src/utils/gcloud-output';
+import { getClusterInfo } from '../../src/utils/cluster-info.js';
+import execGcloud from '../../src/utils/gcloud-output.js';
 
 describe('getClusterInfo', () => {
   afterEach(() => {

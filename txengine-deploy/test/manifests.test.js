@@ -22,7 +22,7 @@ jest.mock('@actions/github', () => ({
   }),
 }));
 
-import createManifests from '../src/manifests';
+import createManifests from '../src/manifests.js';
 
 describe('manifests', () => {
   afterEach(() => {

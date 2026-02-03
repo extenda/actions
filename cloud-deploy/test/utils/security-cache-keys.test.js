@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import yaml from 'yaml';
 
-import { loadCacheKeys } from '../../src/utils/security-cache-keys';
+import { loadCacheKeys } from '../../src/utils/security-cache-keys.js';
 
 const testFile = path.resolve(__dirname, 'cache-keys.test.yaml');
 

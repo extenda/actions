@@ -1,4 +1,4 @@
-import { execGcloud } from '../../setup-gcloud';
+import { execGcloud } from '../../setup-gcloud/src/index.js';
 
 // Binauthz attestations gcloud cmd
 const createAttestation = async (
@@ -44,7 +44,4 @@ const getArtifactUrl = async (tag, imagePath) => {
   return `${imageName}@${digest}`;
 };
 
-module.exports = {
-  createAttestation,
-  getArtifactUrl,
-};
+export { createAttestation, getArtifactUrl };
