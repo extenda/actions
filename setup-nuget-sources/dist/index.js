@@ -1,9 +1,29 @@
+var __create = Object.create;
 var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
 
 // node_modules/@actions/core/lib/utils.js
 var require_utils = __commonJS({
@@ -416,7 +436,7 @@ var require_tunnel = __commonJS({
         connectOptions.headers = connectOptions.headers || {};
         connectOptions.headers["Proxy-Authorization"] = "Basic " + new Buffer(connectOptions.proxyAuth).toString("base64");
       }
-      debug("making CONNECT request");
+      debug2("making CONNECT request");
       var connectReq = self.request(connectOptions);
       connectReq.useChunkedEncodingByDefault = false;
       connectReq.once("response", onResponse);
@@ -438,7 +458,7 @@ var require_tunnel = __commonJS({
         connectReq.removeAllListeners();
         socket.removeAllListeners();
         if (res.statusCode !== 200) {
-          debug(
+          debug2(
             "tunneling socket could not be established, statusCode=%d",
             res.statusCode
           );
@@ -450,7 +470,7 @@ var require_tunnel = __commonJS({
           return;
         }
         if (head.length > 0) {
-          debug("got illegal response body from proxy");
+          debug2("got illegal response body from proxy");
           socket.destroy();
           var error = new Error("got illegal response body from proxy");
           error.code = "ECONNRESET";
@@ -458,14 +478,14 @@ var require_tunnel = __commonJS({
           self.removeSocket(placeholder);
           return;
         }
-        debug("tunneling connection has established");
+        debug2("tunneling connection has established");
         self.sockets[self.sockets.indexOf(placeholder)] = socket;
         return cb(socket);
       }
       __name(onConnect, "onConnect");
       function onError(cause) {
         connectReq.removeAllListeners();
-        debug(
+        debug2(
           "tunneling socket could not be established, cause=%s\n",
           cause.message,
           cause.stack
@@ -531,9 +551,9 @@ var require_tunnel = __commonJS({
       return target;
     }
     __name(mergeOptions, "mergeOptions");
-    var debug;
+    var debug2;
     if (process.env.NODE_DEBUG && /\btunnel\b/.test(process.env.NODE_DEBUG)) {
-      debug = /* @__PURE__ */ __name(function() {
+      debug2 = /* @__PURE__ */ __name(function() {
         var args = Array.prototype.slice.call(arguments);
         if (typeof args[0] === "string") {
           args[0] = "TUNNEL: " + args[0];
@@ -543,10 +563,10 @@ var require_tunnel = __commonJS({
         console.error.apply(console, args);
       }, "debug");
     } else {
-      debug = /* @__PURE__ */ __name(function() {
+      debug2 = /* @__PURE__ */ __name(function() {
       }, "debug");
     }
-    exports2.debug = debug;
+    exports2.debug = debug2;
   }
 });
 
@@ -20921,12 +20941,12 @@ var require_lib = __commonJS({
             throw new Error("Client has already been disposed.");
           }
           const parsedUrl = new URL(requestUrl);
-          let info = this._prepareRequest(verb, parsedUrl, headers);
+          let info3 = this._prepareRequest(verb, parsedUrl, headers);
           const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb) ? this._maxRetries + 1 : 1;
           let numTries = 0;
           let response;
           do {
-            response = yield this.requestRaw(info, data);
+            response = yield this.requestRaw(info3, data);
             if (response && response.message && response.message.statusCode === HttpCodes.Unauthorized) {
               let authenticationHandler;
               for (const handler of this.handlers) {
@@ -20936,7 +20956,7 @@ var require_lib = __commonJS({
                 }
               }
               if (authenticationHandler) {
-                return authenticationHandler.handleAuthentication(this, info, data);
+                return authenticationHandler.handleAuthentication(this, info3, data);
               } else {
                 return response;
               }
@@ -20961,8 +20981,8 @@ s. If you want to allow this behavior, set the allowRedirectDowngrade option to 
                   }
                 }
               }
-              info = this._prepareRequest(verb, parsedRedirectUrl, headers);
-              response = yield this.requestRaw(info, data);
+              info3 = this._prepareRequest(verb, parsedRedirectUrl, headers);
+              response = yield this.requestRaw(info3, data);
               redirectsRemaining--;
             }
             if (!response.message.statusCode || !HttpResponseRetryCodes.includes(response.message.statusCode)) {
@@ -20991,7 +21011,7 @@ s. If you want to allow this behavior, set the allowRedirectDowngrade option to 
        * @param info
        * @param data
        */
-      requestRaw(info, data) {
+      requestRaw(info3, data) {
         return __awaiter(this, void 0, void 0, function* () {
           return new Promise((resolve, reject) => {
             function callbackForResult(err, res) {
@@ -21004,7 +21024,7 @@ s. If you want to allow this behavior, set the allowRedirectDowngrade option to 
               }
             }
             __name(callbackForResult, "callbackForResult");
-            this.requestRawWithCallback(info, data, callbackForResult);
+            this.requestRawWithCallback(info3, data, callbackForResult);
           });
         });
       }
@@ -21014,12 +21034,12 @@ s. If you want to allow this behavior, set the allowRedirectDowngrade option to 
        * @param data
        * @param onResult
        */
-      requestRawWithCallback(info, data, onResult) {
+      requestRawWithCallback(info3, data, onResult) {
         if (typeof data === "string") {
-          if (!info.options.headers) {
-            info.options.headers = {};
+          if (!info3.options.headers) {
+            info3.options.headers = {};
           }
-          info.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
+          info3.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
         }
         let callbackCalled = false;
         function handleResult(err, res) {
@@ -21029,7 +21049,7 @@ s. If you want to allow this behavior, set the allowRedirectDowngrade option to 
           }
         }
         __name(handleResult, "handleResult");
-        const req = info.httpModule.request(info.options, (msg) => {
+        const req = info3.httpModule.request(info3.options, (msg) => {
           const res = new HttpClientResponse(msg);
           handleResult(void 0, res);
         });
@@ -21041,7 +21061,7 @@ s. If you want to allow this behavior, set the allowRedirectDowngrade option to 
           if (socket) {
             socket.end();
           }
-          handleResult(new Error(`Request timeout: ${info.options.path}`));
+          handleResult(new Error(`Request timeout: ${info3.options.path}`));
         });
         req.on("error", function(err) {
           handleResult(err);
@@ -21077,27 +21097,27 @@ s. If you want to allow this behavior, set the allowRedirectDowngrade option to 
         return this._getProxyAgentDispatcher(parsedUrl, proxyUrl);
       }
       _prepareRequest(method, requestUrl, headers) {
-        const info = {};
-        info.parsedUrl = requestUrl;
-        const usingSsl = info.parsedUrl.protocol === "https:";
-        info.httpModule = usingSsl ? https : http;
+        const info3 = {};
+        info3.parsedUrl = requestUrl;
+        const usingSsl = info3.parsedUrl.protocol === "https:";
+        info3.httpModule = usingSsl ? https : http;
         const defaultPort = usingSsl ? 443 : 80;
-        info.options = {};
-        info.options.host = info.parsedUrl.hostname;
-        info.options.port = info.parsedUrl.port ? parseInt(info.parsedUrl.port) : defaultPort;
-        info.options.path = (info.parsedUrl.pathname || "") + (info.parsedUrl.search || "");
-        info.options.method = method;
-        info.options.headers = this._mergeHeaders(headers);
+        info3.options = {};
+        info3.options.host = info3.parsedUrl.hostname;
+        info3.options.port = info3.parsedUrl.port ? parseInt(info3.parsedUrl.port) : defaultPort;
+        info3.options.path = (info3.parsedUrl.pathname || "") + (info3.parsedUrl.search || "");
+        info3.options.method = method;
+        info3.options.headers = this._mergeHeaders(headers);
         if (this.userAgent != null) {
-          info.options.headers["user-agent"] = this.userAgent;
+          info3.options.headers["user-agent"] = this.userAgent;
         }
-        info.options.agent = this._getAgent(info.parsedUrl);
+        info3.options.agent = this._getAgent(info3.parsedUrl);
         if (this.handlers) {
           for (const handler of this.handlers) {
-            handler.prepareRequest(info.options);
+            handler.prepareRequest(info3.options);
           }
         }
-        return info;
+        return info3;
       }
       _mergeHeaders(headers) {
         if (this.requestOptions && this.requestOptions.headers) {
@@ -22980,11 +23000,11 @@ var require_exec = __commonJS({
       });
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.exec = exec;
+    exports2.exec = exec3;
     exports2.getExecOutput = getExecOutput;
     var string_decoder_1 = require("string_decoder");
     var tr = __importStar(require_toolrunner());
-    function exec(commandLine, args, options) {
+    function exec3(commandLine, args, options) {
       return __awaiter(this, void 0, void 0, function* () {
         const commandArgs = tr.argStringToArray(commandLine);
         if (commandArgs.length === 0) {
@@ -22996,7 +23016,7 @@ var require_exec = __commonJS({
         return runner.exec();
       });
     }
-    __name(exec, "exec");
+    __name(exec3, "exec");
     function getExecOutput(commandLine, args, options) {
       return __awaiter(this, void 0, void 0, function* () {
         var _a, _b;
@@ -23022,7 +23042,7 @@ var require_exec = __commonJS({
         }, "stdOutListener");
         const listeners = Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.listeners),
         { stdout: stdOutListener, stderr: stdErrListener });
-        const exitCode = yield exec(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
+        const exitCode = yield exec3(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
         stdout += stdoutDecoder.end();
         stderr += stderrDecoder.end();
         return {
@@ -23115,14 +23135,14 @@ var require_platform = __commonJS({
     exports2.isLinux = exports2.isMacOS = exports2.isWindows = exports2.arch = exports2.platform = void 0;
     exports2.getDetails = getDetails;
     var os_1 = __importDefault(require("os"));
-    var exec = __importStar(require_exec());
+    var exec3 = __importStar(require_exec());
     var getWindowsInfo = /* @__PURE__ */ __name(() => __awaiter(void 0, void 0, void 0, function* () {
-      const { stdout: version } = yield exec.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_Opera\
-tingSystem).Version"', void 0, {
+      const { stdout: version } = yield exec3.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_Oper\
+atingSystem).Version"', void 0, {
         silent: true
       });
-      const { stdout: name } = yield exec.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_Operatin\
-gSystem).Caption"', void 0, {
+      const { stdout: name } = yield exec3.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_Operati\
+ngSystem).Caption"', void 0, {
         silent: true
       });
       return {
@@ -23132,7 +23152,7 @@ gSystem).Caption"', void 0, {
     }), "getWindowsInfo");
     var getMacOsInfo = /* @__PURE__ */ __name(() => __awaiter(void 0, void 0, void 0, function* () {
       var _a, _b, _c, _d;
-      const { stdout } = yield exec.getExecOutput("sw_vers", void 0, {
+      const { stdout } = yield exec3.getExecOutput("sw_vers", void 0, {
         silent: true
       });
       const version = (_b = (_a = stdout.match(/ProductVersion:\s*(.+)/)) === null || _a === void 0 ? void 0 : _a[1]) !==
@@ -23145,7 +23165,7 @@ gSystem).Caption"', void 0, {
       };
     }), "getMacOsInfo");
     var getLinuxInfo = /* @__PURE__ */ __name(() => __awaiter(void 0, void 0, void 0, function* () {
-      const { stdout } = yield exec.getExecOutput("lsb_release", ["-i", "-r", "-s"], {
+      const { stdout } = yield exec3.getExecOutput("lsb_release", ["-i", "-r", "-s"], {
         silent: true
       });
       const [name, version] = stdout.trim().split("\n");
@@ -23253,18 +23273,18 @@ var require_core = __commonJS({
     exports2.exportVariable = exportVariable;
     exports2.setSecret = setSecret;
     exports2.addPath = addPath;
-    exports2.getInput = getInput;
+    exports2.getInput = getInput2;
     exports2.getMultilineInput = getMultilineInput;
     exports2.getBooleanInput = getBooleanInput;
     exports2.setOutput = setOutput;
     exports2.setCommandEcho = setCommandEcho;
-    exports2.setFailed = setFailed;
+    exports2.setFailed = setFailed2;
     exports2.isDebug = isDebug;
-    exports2.debug = debug;
+    exports2.debug = debug2;
     exports2.error = error;
     exports2.warning = warning;
     exports2.notice = notice;
-    exports2.info = info;
+    exports2.info = info3;
     exports2.startGroup = startGroup;
     exports2.endGroup = endGroup;
     exports2.group = group;
@@ -23306,7 +23326,7 @@ var require_core = __commonJS({
       process.env["PATH"] = `${inputPath}${path.delimiter}${process.env["PATH"]}`;
     }
     __name(addPath, "addPath");
-    function getInput(name, options) {
+    function getInput2(name, options) {
       const val = process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] || "";
       if (options && options.required && !val) {
         throw new Error(`Input required and not supplied: ${name}`);
@@ -23316,9 +23336,9 @@ var require_core = __commonJS({
       }
       return val.trim();
     }
-    __name(getInput, "getInput");
+    __name(getInput2, "getInput");
     function getMultilineInput(name, options) {
-      const inputs = getInput(name, options).split("\n").filter((x) => x !== "");
+      const inputs = getInput2(name, options).split("\n").filter((x) => x !== "");
       if (options && options.trimWhitespace === false) {
         return inputs;
       }
@@ -23328,7 +23348,7 @@ var require_core = __commonJS({
     function getBooleanInput(name, options) {
       const trueValue = ["true", "True", "TRUE"];
       const falseValue = ["false", "False", "FALSE"];
-      const val = getInput(name, options);
+      const val = getInput2(name, options);
       if (trueValue.includes(val))
         return true;
       if (falseValue.includes(val))
@@ -23350,19 +23370,19 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       (0, command_1.issue)("echo", enabled ? "on" : "off");
     }
     __name(setCommandEcho, "setCommandEcho");
-    function setFailed(message) {
+    function setFailed2(message) {
       process.exitCode = ExitCode.Failure;
       error(message);
     }
-    __name(setFailed, "setFailed");
+    __name(setFailed2, "setFailed");
     function isDebug() {
       return process.env["RUNNER_DEBUG"] === "1";
     }
     __name(isDebug, "isDebug");
-    function debug(message) {
+    function debug2(message) {
       (0, command_1.issueCommand)("debug", {}, message);
     }
-    __name(debug, "debug");
+    __name(debug2, "debug");
     function error(message, properties = {}) {
       (0, command_1.issueCommand)("error", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.
       toString() : message);
@@ -23378,10 +23398,10 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       toString() : message);
     }
     __name(notice, "notice");
-    function info(message) {
+    function info3(message) {
       process.stdout.write(message + os.EOL);
     }
-    __name(info, "info");
+    __name(info3, "info");
     function startGroup(name) {
       (0, command_1.issue)("group", name);
     }
@@ -25715,7 +25735,7 @@ var require_minimatch = __commonJS({
       }
       this.parseNegate();
       var set = this.globSet = this.braceExpand();
-      if (options.debug) this.debug = /* @__PURE__ */ __name(function debug() {
+      if (options.debug) this.debug = /* @__PURE__ */ __name(function debug2() {
         console.error.apply(console, arguments);
       }, "debug");
       this.debug(this.pattern, set);
@@ -27556,14 +27576,14 @@ var require_get_paths_async = __commonJS({
 var require_make_replacements = __commonJS({
   "setup-nuget-sources/node_modules/replace-in-file/lib/helpers/make-replacements.js"(exports2, module2) {
     "use strict";
-    function getReplacement(replace, isArray, i) {
-      if (isArray && typeof replace[i] === "undefined") {
+    function getReplacement(replace2, isArray, i) {
+      if (isArray && typeof replace2[i] === "undefined") {
         return null;
       }
       if (isArray) {
-        return replace[i];
+        return replace2[i];
       }
-      return replace;
+      return replace2;
     }
     __name(getReplacement, "getReplacement");
     module2.exports = /* @__PURE__ */ __name(function makeReplacements(contents, from, to, file, count) {
@@ -27722,122 +27742,106 @@ var require_replace_in_file2 = __commonJS({
   }
 });
 
+// setup-nuget-sources/src/index.js
+var core2 = __toESM(require_core());
+
 // setup-nuget-sources/src/nuget-sources.js
-var require_nuget_sources = __commonJS({
-  "setup-nuget-sources/src/nuget-sources.js"(exports2, module2) {
-    var core2 = require_core();
-    var exec = require_exec();
-    var replace = require_replace_in_file2();
-    var setNuGetSource2 = /* @__PURE__ */ __name(async (configFile, { name, source }, { username, password }) => {
-      const args = ["sources", "add", "-Name", name, "-Source", source];
-      if (username && password) {
-        core2.info("Username and Password is being used when setting source");
-        args.push(
-          "-Username",
-          username,
-          "-Password",
-          password,
-          "-StorePasswordInClearText"
-        );
-      }
-      args.push("-ConfigFile", configFile);
-      return exec.exec("nuget", args);
-    }, "setNuGetSource");
-    var setNuGetApiKey2 = /* @__PURE__ */ __name(async (configFile, { apikey, source }) => {
-      const args = [
-        "setapikey",
-        apikey,
-        "-source",
-        source,
-        "-ConfigFile",
-        configFile,
-        "-NonInteractive"
-      ];
-      return exec.exec("nuget", args);
-    }, "setNuGetApiKey");
-    var parseNugetSourceJson2 = /* @__PURE__ */ __name((sourcesJson) => {
-      const sources = JSON.parse(sourcesJson || "[]");
-      return sources;
-    }, "parseNugetSourceJson");
-    var commentOutSourceUrl2 = /* @__PURE__ */ __name(async (nugetFileFullPath, regex) => {
-      core2.debug(`Trying to comment out existing urls with regex: ${regex}`);
-      const options = {
-        files: `${nugetFileFullPath}`,
-        from: regex,
-        to: /* @__PURE__ */ __name((match) => `<!--${match}-->`, "to")
-      };
-      return replace(options);
-    }, "commentOutSourceUrl");
-    var generateRegexPattern2 = /* @__PURE__ */ __name((url) => {
-      try {
-        core2.debug(`Generating regex for ${url}`);
-        let escapedUrl = url;
-        escapedUrl = escapedUrl.replace(/\//g, "\\/");
-        const regex = new RegExp(`^\\s*(.*"${escapedUrl}/?"\\s*\\/>)$`, "gm");
-        core2.debug(`Regex created ${regex}`);
-        return regex;
-      } catch (error) {
-        core2.debug(error.message);
-        return null;
-      }
-    }, "generateRegexPattern");
-    module2.exports = {
-      setNuGetSource: setNuGetSource2,
-      setNuGetApiKey: setNuGetApiKey2,
-      parseNugetSourceJson: parseNugetSourceJson2,
-      commentOutSourceUrl: commentOutSourceUrl2,
-      generateRegexPattern: generateRegexPattern2
-    };
+var core = __toESM(require_core());
+var exec = __toESM(require_exec());
+var import_replace_in_file = __toESM(require_replace_in_file2());
+var setNuGetSource = /* @__PURE__ */ __name(async (configFile, { name, source }, { username, password }) => {
+  const args = ["sources", "add", "-Name", name, "-Source", source];
+  if (username && password) {
+    core.info("Username and Password is being used when setting source");
+    args.push(
+      "-Username",
+      username,
+      "-Password",
+      password,
+      "-StorePasswordInClearText"
+    );
   }
-});
+  args.push("-ConfigFile", configFile);
+  return exec.exec("nuget", args);
+}, "setNuGetSource");
+var setNuGetApiKey = /* @__PURE__ */ __name(async (configFile, { apikey, source }) => {
+  const args = [
+    "setapikey",
+    apikey,
+    "-source",
+    source,
+    "-ConfigFile",
+    configFile,
+    "-NonInteractive"
+  ];
+  return exec.exec("nuget", args);
+}, "setNuGetApiKey");
+var parseNugetSourceJson = /* @__PURE__ */ __name((sourcesJson) => {
+  const sources = JSON.parse(sourcesJson || "[]");
+  return sources;
+}, "parseNugetSourceJson");
+var commentOutSourceUrl = /* @__PURE__ */ __name(async (nugetFileFullPath, regex) => {
+  core.debug(`Trying to comment out existing urls with regex: ${regex}`);
+  const options = {
+    files: `${nugetFileFullPath}`,
+    from: regex,
+    to: /* @__PURE__ */ __name((match) => `<!--${match}-->`, "to")
+  };
+  return (0, import_replace_in_file.default)(options);
+}, "commentOutSourceUrl");
+var generateRegexPattern = /* @__PURE__ */ __name((url) => {
+  try {
+    core.debug(`Generating regex for ${url}`);
+    let escapedUrl = url;
+    escapedUrl = escapedUrl.replace(/\//g, "\\/");
+    const regex = new RegExp(`^\\s*(.*"${escapedUrl}/?"\\s*\\/>)$`, "gm");
+    core.debug(`Regex created ${regex}`);
+    return regex;
+  } catch (error) {
+    core.debug(error.message);
+    return null;
+  }
+}, "generateRegexPattern");
 
 // setup-nuget-sources/src/index.js
-var core = require_core();
-var {
-  parseNugetSourceJson,
-  setNuGetApiKey,
-  setNuGetSource,
-  generateRegexPattern,
-  commentOutSourceUrl
-} = require_nuget_sources();
 var run = /* @__PURE__ */ __name(async () => {
   try {
-    const configFile = core.getInput("config-file", { required: true });
-    core.info("Parsing nuget source JSON - PENDING");
-    const sources = parseNugetSourceJson(core.getInput("sources"));
-    core.info("Parsing nuget source JSON - SUCCESS");
-    core.info(`sources JSON: ${JSON.stringify(sources)}`);
+    const configFile = core2.getInput("config-file", { required: true });
+    core2.info("Parsing nuget source JSON - PENDING");
+    const sources = parseNugetSourceJson(core2.getInput("sources"));
+    core2.info("Parsing nuget source JSON - SUCCESS");
+    core2.info(`sources JSON: ${JSON.stringify(sources)}`);
     for (const { name, source, username, password, apikey } of sources) {
-      core.info(
+      core2.info(
         `Add NuGet source to ${configFile}. Name: ${name}. Path: ${source}. Username: ${username}. Password ${password}.\
  ApiKey: ${apikey}`
       );
-      core.info("Generating regex pattern - PENDING");
+      core2.info("Generating regex pattern - PENDING");
       const pattern = generateRegexPattern(source);
       if (!pattern) {
         throw new Error(`Could not generate regex pattern for ${source}`);
       }
-      core.info("Generating regex pattern - SUCCESS");
-      core.info("Commenting out existing nuget source - PENDING");
+      core2.info("Generating regex pattern - SUCCESS");
+      core2.info("Commenting out existing nuget source - PENDING");
       const commentedResult = await commentOutSourceUrl(configFile, pattern);
-      core.info(
+      core2.info(
         `Commenting out existing nuget source result: ${JSON.stringify(commentedResult)}`
       );
-      core.info("Set nuget source - PENDING");
+      core2.info("Set nuget source - PENDING");
       await setNuGetSource(
         configFile,
         { name, source },
         { username, password }
       );
-      core.info("Set nuget source - SUCCESS");
+      core2.info("Set nuget source - SUCCESS");
       if (apikey) {
-        core.info("Set nuget source api-key - PENDING");
+        core2.info("Set nuget source api-key - PENDING");
         await setNuGetApiKey(configFile, { apikey, source });
-        core.info("Set nuget source api-key - SUCCESS");
+        core2.info("Set nuget source api-key - SUCCESS");
       }
     }
   } catch (error) {
-    core.setFailed(error.message);
+    core2.setFailed(error.message);
   }
 }, "run");
 run();
