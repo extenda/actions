@@ -1,6 +1,6 @@
 import { exec } from '@actions/exec';
 
-import { loadTool } from '../../utils';
+import { loadTool } from '../../utils/src/index.js';
 
 const opaTest = async (bundleDir) => {
   const version = '0.58.0';

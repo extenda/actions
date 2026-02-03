@@ -1,10 +1,10 @@
 jest.mock('@actions/core');
 jest.mock('../src/fetch-token.js');
-jest.mock('../../setup-gcloud');
+jest.mock('../../setup-gcloud/src/index.js');
 
 import * as core from '@actions/core';
 
-import { setupGcloud } from '../../setup-gcloud';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
 import fetchToken from '../src/fetch-token.js';
 import action from '../src/index.js';
 

@@ -1,14 +1,14 @@
 import mockFs from 'mock-fs';
 
 // Mock out tools download
-jest.mock('../../utils', () => ({
+jest.mock('../../utils/src/index.js', () => ({
   loadTool: jest.fn(),
 }));
 
 jest.mock('@actions/exec');
 import * as exec from '@actions/exec';
 
-import { loadTool } from '../../utils';
+import { loadTool } from '../../utils/src/index.js';
 import { convertPermissions } from '../src/permconv.js';
 
 describe('RS Permission Converter Tests', () => {

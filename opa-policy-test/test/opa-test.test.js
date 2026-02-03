@@ -1,6 +1,6 @@
 import { exec } from '@actions/exec';
 
-import { loadTool } from '../../utils';
+import { loadTool } from '../../utils/src/index.js';
 import opaTest from '../src/opa-test.js';
 
 jest.mock('@actions/exec');

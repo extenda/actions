@@ -27743,12 +27743,12 @@ var require_replace_in_file2 = __commonJS({
 });
 
 // setup-nuget-sources/src/index.js
-var core2 = __toESM(require_core());
+var core2 = __toESM(require_core(), 1);
 
 // setup-nuget-sources/src/nuget-sources.js
-var core = __toESM(require_core());
-var exec = __toESM(require_exec());
-var import_replace_in_file = __toESM(require_replace_in_file2());
+var core = __toESM(require_core(), 1);
+var exec = __toESM(require_exec(), 1);
+var import_replace_in_file = __toESM(require_replace_in_file2(), 1);
 var setNuGetSource = /* @__PURE__ */ __name(async (configFile, { name, source }, { username, password }) => {
   const args = ["sources", "add", "-Name", name, "-Source", source];
   if (username && password) {

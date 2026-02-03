@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import axios from 'axios';
 
-import { execGcloud } from '../../setup-gcloud';
+import { execGcloud } from '../../setup-gcloud/src/index.js';
 import getDasWorkerBaseUrl from './das-worker-base-url.js';
 
 const getToken = async () =>

@@ -1,5 +1,5 @@
 jest.mock('@actions/exec');
-jest.mock('../../setup-gcloud');
+jest.mock('../../setup-gcloud/src/index.js');
 jest.mock('../../cloud-run/src/cluster-info.js');
 jest.mock('../../cloud-run/src/project-info.js');
 jest.mock('../../cloud-run/src/kubectl-auth.js');
@@ -11,7 +11,7 @@ jest.mock('../src/patch-statefulset-yaml.js');
 jest.mock('../src/kustomize.js');
 jest.mock('../src/apply-kubectl.js');
 jest.mock('../src/autoscale.js');
-jest.mock('../../utils', () => ({
+jest.mock('../../utils/src/index.js', () => ({
   loadTool: jest.fn(),
   getImageDigest: jest.fn(),
 }));
@@ -20,8 +20,8 @@ import * as exec from '@actions/exec';
 import mockFs from 'mock-fs';
 
 import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
-import { setupGcloud } from '../../setup-gcloud';
-import { getImageDigest } from '../../utils';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { getImageDigest } from '../../utils/src/index.js';
 import applyKubectl from '../src/apply-kubectl.js';
 import applyAutoscale from '../src/autoscale.js';
 import checkNamespaceExists from '../src/check-namespace-exists.js';

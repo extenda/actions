@@ -42087,7 +42087,7 @@ __export(index_exports, {
   default: () => index_default
 });
 module.exports = __toCommonJS(index_exports);
-var import_core = __toESM(require_core());
+var import_core = __toESM(require_core(), 1);
 var import_fs = require("fs");
 
 // component-tests/node_modules/js-yaml/dist/js-yaml.mjs
@@ -44833,8 +44833,8 @@ var safeLoadAll = renamed("safeLoadAll", "loadAll");
 var safeDump = renamed("safeDump", "dump");
 
 // component-tests/src/create-api-test.js
-var core2 = __toESM(require_core());
-var import_supertest = __toESM(require_supertest());
+var core2 = __toESM(require_core(), 1);
+var import_supertest = __toESM(require_supertest(), 1);
 var createApiTest = /* @__PURE__ */ __name((baseUrl, apiToken) => {
   let failed = 0;
   let passed = 0;

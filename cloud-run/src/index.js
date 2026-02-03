@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 
-import { failIfNotTrunkBased } from '../../utils';
+import { failIfNotTrunkBased, run } from '../../utils/src/index.js';
 import jsonSchema from './cloud-run-schema.js';
 import configureDomains from './configure-domains.js';
 import runDeploy from './run-deploy.js';
@@ -32,6 +32,10 @@ const action = async () => {
   );
 };
 
-// Entry point check removed for ESM compatibility
+// Run the action only when executed as main (not when imported in tests)
+// Check if we're running as a GitHub Action (not in test mode)
+if (process.env.GITHUB_ACTIONS && !process.env.JEST_WORKER_ID) {
+  run(action);
+}
 
 export default action;

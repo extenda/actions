@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 
-import { checkEnv } from '../../utils';
+import { checkEnv, run } from '../../utils/src/index.js';
 import * as versions from '../../utils/src/versions.js';
 
 const createGitHubRelease = async (release, name) => {
@@ -45,6 +45,10 @@ const action = async () => {
   }
 };
 
-// Entry point check removed for ESM compatibility
+// Run the action only when executed as main (not when imported in tests)
+// Check if we're running as a GitHub Action (not in test mode)
+if (process.env.GITHUB_ACTIONS && !process.env.JEST_WORKER_ID) {
+  run(action);
+}
 
 export default action;

@@ -3,5 +3,6 @@
   "version": "0.0.1-local",
   "private": true,
   "description": "Wrap permission converter cmd line utility",
-  "main": "dist/index.js"
+  "main": "dist/index.js",
+  "type": "module"
 }

@@ -10,5 +10,6 @@
   },
   "devDependencies": {
     "nock": "^14.0.10"
-  }
+  },
+  "type": "module"
 }

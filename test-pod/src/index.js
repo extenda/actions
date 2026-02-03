@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 
+import { run } from '../../utils/src/index.js';
 import { createConfigMap, deleteConfigMap } from './configmap.js';
 import configureKubeCtl from './configure-kubectl.js';
 import runPod from './run-pod.js';
@@ -32,6 +33,10 @@ const action = async () => {
   );
 };
 
-// Entry point check removed for ESM compatibility
+// Run the action only when executed as main (not when imported in tests)
+// Check if we're running as a GitHub Action (not in test mode)
+if (process.env.GITHUB_ACTIONS && !process.env.JEST_WORKER_ID) {
+  run(action);
+}
 
 export default action;

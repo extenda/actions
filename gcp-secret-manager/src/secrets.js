@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import YAML from 'yaml';
 
-import { execGcloud, withGcloud } from '../../setup-gcloud';
+import { execGcloud, withGcloud } from '../../setup-gcloud/src/index.js';
 import checkEnv from '../../utils/src/check-env.js';
 
 const accessSecretValue = async (projectId, name) =>

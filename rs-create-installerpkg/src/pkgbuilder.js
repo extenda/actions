@@ -5,7 +5,7 @@ import fetch from 'node-fetch';
 import os from 'os';
 import path from 'path';
 
-import { loadTool } from '../../utils';
+import { loadTool } from '../../utils/src/index.js';
 
 const getBinaryName = () =>
   os.platform() === 'win32'

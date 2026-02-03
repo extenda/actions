@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 
-import { checkEnv, run } from '../../utils';
+import { checkEnv, run } from '../../utils/src/index.js';
 import { createReleaseNotes } from './jira-releasenotes.js';
 
 run(async () => {

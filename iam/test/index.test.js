@@ -4,7 +4,7 @@ jest.mock('../src/configure-bundle-sync.js');
 jest.mock('../src/iam-definition.js');
 jest.mock('../../iam-test-token/src/iam-auth.js');
 jest.mock('../src/load-credentials.js');
-jest.mock('../../setup-gcloud');
+jest.mock('../../setup-gcloud/src/index.js');
 jest.mock('fast-glob');
 jest.mock('@actions/github');
 jest.mock('../../cloud-run/src/cluster-info.js');
@@ -15,7 +15,7 @@ import fg from 'fast-glob';
 
 import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
 import fetchIamToken from '../../iam-test-token/src/iam-auth.js';
-import { setupGcloud } from '../../setup-gcloud';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
 import configureBundleSync from '../src/configure-bundle-sync.js';
 import { configureIAM } from '../src/configure-iam.js';
 import loadIamDefinition from '../src/iam-definition.js';

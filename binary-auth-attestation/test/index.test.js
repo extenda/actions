@@ -1,10 +1,10 @@
 jest.mock('@actions/core');
 jest.mock('../src/create-sign-attestion.js');
-jest.mock('../../setup-gcloud');
+jest.mock('../../setup-gcloud/src/index.js');
 
 import * as core from '@actions/core';
 
-import { setupGcloud } from '../../setup-gcloud';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
 import {
   createAttestation,
   getArtifactUrl,

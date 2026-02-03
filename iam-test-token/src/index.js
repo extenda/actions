@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 
 import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
+import { run } from '../../utils/src/index.js';
 import getIamToken from './iam-auth.js';
 
 const loadCredentials = async (
@@ -40,6 +41,10 @@ const action = async () => {
   core.setOutput('iam-token', token);
 };
 
-// Entry point check removed for ESM compatibility
+// Run the action only when executed as main (not when imported in tests)
+// Check if we're running as a GitHub Action (not in test mode)
+if (process.env.GITHUB_ACTIONS && !process.env.JEST_WORKER_ID) {
+  run(action);
+}
 
 export default action;

@@ -12,5 +12,6 @@
     "multiline-str": "^1.0.4",
     "uuid": "^11.1.0",
     "yaml": "^2.8.2"
-  }
+  },
+  "type": "module"
 }

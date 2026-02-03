@@ -1,4 +1,4 @@
-jest.mock('../../setup-gcloud');
+jest.mock('../../setup-gcloud/src/index.js');
 jest.mock('@actions/exec');
 const mockClusterInfo = jest.fn();
 jest.mock('../../cloud-run/src/cluster-info', () => ({
@@ -9,7 +9,7 @@ jest.mock('../../cloud-run/src/kubectl-auth.js');
 import * as exec from '@actions/exec';
 
 import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth.js';
-import { setupGcloud } from '../../setup-gcloud';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
 import kubectl from '../src/kubectl.js';
 
 describe('kubectl', () => {

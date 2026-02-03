@@ -1,12 +1,12 @@
 import { exec } from '@actions/exec';
 import mockFs from 'mock-fs';
 
-import { execGcloud } from '../../setup-gcloud';
+import { execGcloud } from '../../setup-gcloud/src/index.js';
 import copyPolicies from '../src/copy-policies.js';
 import createTestBundle from '../src/create-test-bundle.js';
 
 jest.mock('@actions/exec');
-jest.mock('../../setup-gcloud');
+jest.mock('../../setup-gcloud/src/index.js');
 jest.mock('../src/copy-policies.js');
 
 afterAll(() => {

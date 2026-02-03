@@ -4,7 +4,7 @@ import os from 'os';
 import path from 'path';
 import semver from 'semver';
 
-import { loadTool } from '../../utils';
+import { loadTool, run } from '../../utils/src/index.js';
 
 const fromFile = (file) => {
   if (fs.existsSync(file)) {
@@ -69,6 +69,8 @@ const action = async () => {
   }
 };
 
-// Entry point check removed for ESM compatibility
+if (process.env.GITHUB_ACTIONS && !process.env.JEST_WORKER_ID) {
+  run(action);
+}
 
 export { action, platform };

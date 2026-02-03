@@ -2,7 +2,8 @@ import * as core from '@actions/core';
 import fs from 'fs';
 import path from 'path';
 
-import { setupGcloud } from '../../setup-gcloud';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { run } from '../../utils/src/index.js';
 import getBundleName from './bundle-name.js';
 import createTestBundle from './create-test-bundle.js';
 import opaTest from './opa-test.js';
@@ -31,6 +32,10 @@ const action = async () => {
   return opaTest(testBundle);
 };
 
-// Entry point check removed for ESM compatibility
+// Run the action only when executed as main (not when imported in tests)
+// Check if we're running as a GitHub Action (not in test mode)
+if (process.env.GITHUB_ACTIONS && !process.env.JEST_WORKER_ID) {
+  run(action);
+}
 
 export default action;

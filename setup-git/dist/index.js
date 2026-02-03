@@ -48449,7 +48449,7 @@ rchive -LiteralPath '${escapedFile}' -DestinationPath '${escapedDest}' -Force }`
 });
 
 // setup-git/src/index.js
-var core4 = __toESM(require_core());
+var core4 = __toESM(require_core(), 1);
 
 // utils/src/check-env.js
 var checkEnv = /* @__PURE__ */ __name((variables) => {
@@ -48463,7 +48463,7 @@ var checkEnv = /* @__PURE__ */ __name((variables) => {
 var check_env_default = checkEnv;
 
 // utils/src/git-config.js
-var import_path = __toESM(require("path"));
+var import_path = __toESM(require("path"), 1);
 
 // utils/node_modules/simple-git/dist/esm/index.js
 var import_node_buffer = require("node:buffer");
@@ -53343,18 +53343,18 @@ var gitConfig = /* @__PURE__ */ __name(async () => {
 var git_config_default = gitConfig;
 
 // utils/src/image-digest.js
-var exec = __toESM(require_exec2());
+var exec = __toESM(require_exec2(), 1);
 
 // utils/src/load-binary.js
-var core = __toESM(require_core2());
-var io = __toESM(require_io2());
-var import_tool_cache = __toESM(require_tool_cache());
+var core = __toESM(require_core2(), 1);
+var io = __toESM(require_io2(), 1);
+var import_tool_cache = __toESM(require_tool_cache(), 1);
 
 // utils/src/load-github-token.js
-var core2 = __toESM(require_core2());
+var core2 = __toESM(require_core2(), 1);
 
 // utils/src/run.js
-var core3 = __toESM(require_core2());
+var core3 = __toESM(require_core2(), 1);
 
 // setup-git/src/index.js
 var run = /* @__PURE__ */ __name(async () => {

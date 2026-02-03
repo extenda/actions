@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 
+import { run } from '../../utils/src/index.js';
 import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
 import generateOutputs from './generate-outputs.js';
 
@@ -172,6 +173,10 @@ const action = async () => {
   return comment;
 };
 
-// Entry point check removed for ESM compatibility
+// Run the action only when executed as main (not when imported in tests)
+// Check if we're running as a GitHub Action (not in test mode)
+if (process.env.GITHUB_ACTIONS && !process.env.JEST_WORKER_ID) {
+  run(action);
+}
 
 export default action;

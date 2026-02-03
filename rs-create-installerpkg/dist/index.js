@@ -64943,7 +64943,7 @@ __export(index_exports, {
   default: () => index_default
 });
 module.exports = __toCommonJS(index_exports);
-var core5 = __toESM(require_core());
+var core5 = __toESM(require_core(), 1);
 
 // utils/src/check-env.js
 var checkEnv = /* @__PURE__ */ __name((variables) => {
@@ -69360,12 +69360,12 @@ var Git = require_git();
 init_git_response_error();
 
 // utils/src/image-digest.js
-var exec = __toESM(require_exec2());
+var exec = __toESM(require_exec2(), 1);
 
 // utils/src/load-binary.js
-var core = __toESM(require_core2());
-var io = __toESM(require_io2());
-var import_tool_cache = __toESM(require_tool_cache());
+var core = __toESM(require_core2(), 1);
+var io = __toESM(require_io2(), 1);
+var import_tool_cache = __toESM(require_tool_cache(), 1);
 
 // utils/node_modules/axios/lib/helpers/bind.js
 function bind(fn, thisArg) {
@@ -73100,9 +73100,9 @@ var {
 } = axios_default;
 
 // utils/src/load-binary.js
-var import_fs = __toESM(require("fs"));
-var import_os = __toESM(require("os"));
-var import_path = __toESM(require("path"));
+var import_fs = __toESM(require("fs"), 1);
+var import_os = __toESM(require("os"), 1);
+var import_path = __toESM(require("path"), 1);
 
 // utils/node_modules/uuid/dist/esm/stringify.js
 var byteToHex = [];
@@ -73229,18 +73229,26 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary, version, downloadUr
 }, "loadTool");
 
 // utils/src/load-github-token.js
-var core2 = __toESM(require_core2());
+var core2 = __toESM(require_core2(), 1);
 
 // utils/src/run.js
-var core3 = __toESM(require_core2());
+var core3 = __toESM(require_core2(), 1);
+var run = /* @__PURE__ */ __name(async (action2) => {
+  try {
+    await action2();
+  } catch (err) {
+    core3.setFailed(err.message);
+  }
+}, "run");
+var run_default = run;
 
 // rs-create-installerpkg/src/pkgbuilder.js
-var core4 = __toESM(require_core());
-var exec3 = __toESM(require_exec());
-var import_fs2 = __toESM(require("fs"));
-var import_node_fetch = __toESM(require_lib4());
-var import_os2 = __toESM(require("os"));
-var import_path2 = __toESM(require("path"));
+var core4 = __toESM(require_core(), 1);
+var exec3 = __toESM(require_exec(), 1);
+var import_fs2 = __toESM(require("fs"), 1);
+var import_node_fetch = __toESM(require_lib4(), 1);
+var import_os2 = __toESM(require("os"), 1);
+var import_path2 = __toESM(require("path"), 1);
 var getBinaryName = /* @__PURE__ */ __name(() => import_os2.default.platform() === "win32" ? "InstallerPackageBuilder.Co\
 re.Console.exe" : "InstallerPackageBuilder.Core.Console", "getBinaryName");
 var packageBuilderCommand = /* @__PURE__ */ __name(async (builder, args) => {
@@ -73419,6 +73427,9 @@ var action = /* @__PURE__ */ __name(async () => {
     core5.setFailed(error2.message);
   }
 }, "action");
+if (process.env.GITHUB_ACTIONS && !process.env.JEST_WORKER_ID) {
+  run_default(action);
+}
 var index_default = action;
 /*! Bundled license information:
 

@@ -35943,7 +35943,7 @@ var checkEnv = /* @__PURE__ */ __name((variables) => {
 var check_env_default = checkEnv;
 
 // utils/src/git-config.js
-var import_path = __toESM(require("path"));
+var import_path = __toESM(require("path"), 1);
 
 // utils/node_modules/simple-git/dist/esm/index.js
 var import_node_buffer = require("node:buffer");
@@ -40823,7 +40823,7 @@ var gitConfig = /* @__PURE__ */ __name(async () => {
 var git_config_default = gitConfig;
 
 // utils/src/image-digest.js
-var exec = __toESM(require_exec());
+var exec = __toESM(require_exec(), 1);
 var getImageDigest = /* @__PURE__ */ __name(async (image) => {
   const imageName = image.split(":")[0];
   const args = [
@@ -40848,9 +40848,9 @@ var getImageDigest = /* @__PURE__ */ __name(async (image) => {
 var image_digest_default = getImageDigest;
 
 // utils/src/load-binary.js
-var core = __toESM(require_core());
-var io = __toESM(require_io());
-var import_tool_cache = __toESM(require_tool_cache());
+var core = __toESM(require_core(), 1);
+var io = __toESM(require_io(), 1);
+var import_tool_cache = __toESM(require_tool_cache(), 1);
 
 // utils/node_modules/axios/lib/helpers/bind.js
 function bind(fn, thisArg) {
@@ -44585,9 +44585,9 @@ var {
 } = axios_default;
 
 // utils/src/load-binary.js
-var import_fs = __toESM(require("fs"));
-var import_os = __toESM(require("os"));
-var import_path2 = __toESM(require("path"));
+var import_fs = __toESM(require("fs"), 1);
+var import_os = __toESM(require("os"), 1);
+var import_path2 = __toESM(require("path"), 1);
 
 // utils/node_modules/uuid/dist/esm/stringify.js
 var byteToHex = [];
@@ -44714,7 +44714,7 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary, version, downloadUr
 }, "loadTool");
 
 // utils/src/load-github-token.js
-var core2 = __toESM(require_core());
+var core2 = __toESM(require_core(), 1);
 var loadGitHubToken = /* @__PURE__ */ __name(async (loadSecret) => {
   const token = core2.getInput("github-token");
   const secretName = core2.getInput("github-token-secret-name");
@@ -44738,7 +44738,7 @@ var loadGitHubToken = /* @__PURE__ */ __name(async (loadSecret) => {
 var load_github_token_default = loadGitHubToken;
 
 // utils/src/run.js
-var core3 = __toESM(require_core());
+var core3 = __toESM(require_core(), 1);
 var run = /* @__PURE__ */ __name(async (action) => {
   try {
     await action();

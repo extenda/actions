@@ -8,5 +8,6 @@
     "@actions/github": "^7.0.0",
     "fast-glob": "^3.3.3",
     "p-limit": "^3.1.0"
-  }
+  },
+  "type": "module"
 }

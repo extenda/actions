@@ -3,11 +3,11 @@ jest.mock('../../gcp-secret-manager/src/secrets', () => ({
   loadSecret: mockLoadSecret,
 }));
 
-jest.mock('../../utils', () => ({
+jest.mock('../../utils/src/index.js', () => ({
   getImageDigest: jest.fn(),
 }));
 
-import { getImageDigest } from '../../utils';
+import { getImageDigest } from '../../utils/src/index.js';
 import prepareEnvConfig from '../src/env-config.js';
 
 describe('env-config', () => {

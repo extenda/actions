@@ -2,7 +2,7 @@ import cloudRunSchema from '../../cloud-run/src/cloud-run-schema.js';
 import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
 import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth.js';
 import loadServiceDefinition from '../../cloud-run/src/service-definition.js';
-import { setupGcloud } from '../../setup-gcloud';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
 
 const resolveClusterAndNamespace = (clusterInput, namespaceInput) => {
   if (clusterInput && namespaceInput) {

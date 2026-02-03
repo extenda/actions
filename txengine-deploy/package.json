@@ -8,5 +8,6 @@
     "@actions/github": "^6.0.0",
     "axios": "^1.12.1",
     "yaml": "^2.5.0"
-  }
+  },
+  "type": "module"
 }

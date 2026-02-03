@@ -5,7 +5,7 @@ jest.mock('../src/kubectl.js');
 jest.mock('../src/manifests.js');
 jest.mock('../src/env-config.js');
 jest.mock('../src/configure-domains.js');
-jest.mock('../../setup-gcloud');
+jest.mock('../../setup-gcloud/src/index.js');
 
 import * as core from '@actions/core';
 

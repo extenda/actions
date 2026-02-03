@@ -5,7 +5,7 @@ import * as exec from '@actions/exec';
 import mockFs from 'mock-fs';
 import os from 'os';
 
-import { loadTool } from '../../utils';
+import { loadTool } from '../../utils/src/index.js';
 import { getBinaryName } from '../src/pkgbuilder.js';
 import { buildPackage } from '../src/pkgbuilder.js';
 import { publishPackageCommand } from '../src/pkgbuilder.js';
@@ -13,7 +13,7 @@ import { packageBuilderCommand } from '../src/pkgbuilder.js';
 
 jest.mock('@actions/exec');
 jest.mock('@actions/core');
-jest.mock('../../utils', () => ({
+jest.mock('../../utils/src/index.js', () => ({
   loadTool: jest.fn(),
 }));
 

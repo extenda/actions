@@ -81149,7 +81149,7 @@ var require_p_limit = __commonJS({
         }
       }, "next");
       return (fn) => new Promise((resolve, reject) => {
-        const run = /* @__PURE__ */ __name(() => {
+        const run2 = /* @__PURE__ */ __name(() => {
           activeCount++;
           pTry(fn).then(
             (val) => {
@@ -81163,9 +81163,9 @@ var require_p_limit = __commonJS({
           );
         }, "run");
         if (activeCount < concurrency) {
-          run();
+          run2();
         } else {
-          queue.push(run);
+          queue.push(run2);
         }
       });
     };
@@ -82851,18 +82851,7 @@ __export(index_exports, {
   default: () => index_default
 });
 module.exports = __toCommonJS(index_exports);
-var core5 = __toESM(require_core());
-
-// utils/src/check-env.js
-var checkEnv = /* @__PURE__ */ __name((variables) => {
-  variables.every((name) => {
-    if (!process.env[name]) {
-      throw new Error(`Missing env var: ${name}`);
-    }
-    return true;
-  });
-}, "checkEnv");
-var check_env_default = checkEnv;
+var core5 = __toESM(require_core(), 1);
 
 // utils/node_modules/simple-git/dist/esm/index.js
 var import_node_buffer = require("node:buffer");
@@ -87710,20 +87699,6 @@ __name(gitInstanceFactory, "gitInstanceFactory");
 init_git_response_error();
 var esm_default = gitInstanceFactory;
 
-// utils/src/image-digest.js
-var exec = __toESM(require_exec2());
-
-// utils/src/load-binary.js
-var core = __toESM(require_core2());
-var io = __toESM(require_io2());
-var import_tool_cache = __toESM(require_tool_cache());
-
-// utils/src/load-github-token.js
-var core2 = __toESM(require_core2());
-
-// utils/src/run.js
-var core3 = __toESM(require_core2());
-
 // utils/src/branch-info.js
 var isPreRelease = /* @__PURE__ */ __name((branchName) => branchName !== "master", "isPreRelease");
 var getBranchType = /* @__PURE__ */ __name((branchName) => {
@@ -87809,19 +87784,52 @@ var getComposedVersionString = /* @__PURE__ */ __name((version, branchNameFriend
   return `${version}-${branchNameFriendly.toLowerCase()}-${shortSha}`;
 }, "getComposedVersionString");
 
+// utils/src/check-env.js
+var checkEnv = /* @__PURE__ */ __name((variables) => {
+  variables.every((name) => {
+    if (!process.env[name]) {
+      throw new Error(`Missing env var: ${name}`);
+    }
+    return true;
+  });
+}, "checkEnv");
+var check_env_default = checkEnv;
+
+// utils/src/image-digest.js
+var exec = __toESM(require_exec2(), 1);
+
+// utils/src/load-binary.js
+var core = __toESM(require_core2(), 1);
+var io = __toESM(require_io2(), 1);
+var import_tool_cache = __toESM(require_tool_cache(), 1);
+
+// utils/src/load-github-token.js
+var core2 = __toESM(require_core2(), 1);
+
+// utils/src/run.js
+var core3 = __toESM(require_core2(), 1);
+var run = /* @__PURE__ */ __name(async (action2) => {
+  try {
+    await action2();
+  } catch (err) {
+    core3.setFailed(err.message);
+  }
+}, "run");
+var run_default = run;
+
 // utils/src/versions.js
-var core4 = __toESM(require_core2());
-var import_semver = __toESM(require_semver3());
+var core4 = __toESM(require_core2(), 1);
+var import_semver = __toESM(require_semver3(), 1);
 
 // utils/src/conventionalchanges.js
-var import_util = __toESM(require("util"));
-var import_conventional_changelog_conventionalcommits = __toESM(require_conventional_changelog_conventionalcommits());
-var import_conventional_changelog_core = __toESM(require_conventional_changelog_core());
-var import_merge_config = __toESM(require_merge_config());
-var import_conventional_commits_parser = __toESM(require_conventional_commits_parser());
-var import_git_raw_commits = __toESM(require_git_raw_commits());
-var import_stream_to_string = __toESM(require_stream_to_string());
-var import_through2 = __toESM(require_through2());
+var import_util = __toESM(require("util"), 1);
+var import_conventional_changelog_conventionalcommits = __toESM(require_conventional_changelog_conventionalcommits(), 1);
+var import_conventional_changelog_core = __toESM(require_conventional_changelog_core(), 1);
+var import_merge_config = __toESM(require_merge_config(), 1);
+var import_conventional_commits_parser = __toESM(require_conventional_commits_parser(), 1);
+var import_git_raw_commits = __toESM(require_git_raw_commits(), 1);
+var import_stream_to_string = __toESM(require_stream_to_string(), 1);
+var import_through2 = __toESM(require_through2(), 1);
 var recommendedVersionBump = import_util.default.promisify(
   require_conventional_recommended_bump2()
 );
@@ -87928,6 +87936,9 @@ var action = /* @__PURE__ */ __name(async () => {
     core5.setFailed(err.message);
   }
 }, "action");
+if (process.env.GITHUB_ACTIONS && !process.env.JEST_WORKER_ID) {
+  run_default(action);
+}
 var index_default = action;
 /*! Bundled license information:
 

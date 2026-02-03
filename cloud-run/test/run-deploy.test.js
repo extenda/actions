@@ -2,7 +2,7 @@ import mockFs from 'mock-fs';
 
 jest.mock('../src/vulnerability-scanning.js');
 jest.mock('@actions/exec');
-jest.mock('../../setup-gcloud');
+jest.mock('../../setup-gcloud/src/index.js');
 jest.mock('../src/cluster-info.js');
 jest.mock('../src/create-namespace.js');
 jest.mock('../src/check-sa.js');
@@ -13,7 +13,7 @@ jest.mock('../src/get-revisions.js');
 jest.setTimeout(30000);
 import * as exec from '@actions/exec';
 
-import { setupGcloud } from '../../setup-gcloud';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
 import { getClusterInfo } from '../src/cluster-info.js';
 import getRevisions from '../src/get-revisions.js';
 import runDeploy from '../src/run-deploy.js';

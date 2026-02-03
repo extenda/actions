@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import fs from 'fs';
 import path from 'path';
 
+import { run } from '../../utils/src/index.js';
 import * as versions from '../../utils/src/versions.js';
 import * as mvn from './mvn.js';
 import loadNexusCredentials from './nexus-credentials.js';
@@ -84,6 +85,10 @@ const action = async () => {
   await authExec(usesArtifactRegistry, serviceAccountKey, execMaven);
 };
 
-// Entry point check removed for ESM compatibility
+// Run the action only when executed as main (not when imported in tests)
+// Check if we're running as a GitHub Action (not in test mode)
+if (process.env.GITHUB_ACTIONS && !process.env.JEST_WORKER_ID) {
+  run(action);
+}
 
 export default action;

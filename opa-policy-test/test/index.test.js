@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import mockFs from 'mock-fs';
 
-import { setupGcloud } from '../../setup-gcloud';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
 import getBundleName from '../src/bundle-name.js';
 import createTestBundle from '../src/create-test-bundle.js';
 import action from '../src/index.js';
@@ -11,7 +11,7 @@ jest.mock('@actions/core');
 jest.mock('../src/bundle-name.js');
 jest.mock('../src/create-test-bundle.js');
 jest.mock('../src/opa-test.js');
-jest.mock('../../setup-gcloud');
+jest.mock('../../setup-gcloud/src/index.js');
 
 describe('opa-policy-test', () => {
   afterAll(() => {

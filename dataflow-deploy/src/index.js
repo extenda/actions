@@ -1,8 +1,8 @@
 import * as core from '@actions/core';
 
 import { getTribeProject } from '../../cloud-run/src/cluster-info.js';
-import { setupGcloud } from '../../setup-gcloud';
-import { failIfNotTrunkBased } from '../../utils';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { failIfNotTrunkBased, run } from '../../utils/src/index.js';
 import deployJob from './deploy-job.js';
 import drainJob from './drain-job.js';
 
@@ -48,6 +48,10 @@ const action = async () => {
   ).then((jobId) => drainJob(jobId, jobName, region, projectId));
 };
 
-// Entry point check removed for ESM compatibility
+// Run the action only when executed as main (not when imported in tests)
+// Check if we're running as a GitHub Action (not in test mode)
+if (process.env.GITHUB_ACTIONS && !process.env.JEST_WORKER_ID) {
+  run(action);
+}
 
 export default action;

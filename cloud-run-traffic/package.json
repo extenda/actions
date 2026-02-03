@@ -4,5 +4,6 @@
   "private": true,
   "description": "This github action routes traffic for cloud run service.",
   "main": "dist/index.js",
-  "license": "ISC"
+  "license": "ISC",
+  "type": "module"
 }

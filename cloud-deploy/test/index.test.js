@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 
 import projectInfo from '../../cloud-run/src/project-info.js';
-import { setupGcloud } from '../../setup-gcloud';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
 import action from '../src/index.js';
 import buildManifest from '../src/manifests/build-manifest.js';
 import deploy from '../src/manifests/deploy.js';
@@ -19,7 +19,7 @@ jest.mock('../src/manifests/deploy.js');
 jest.mock('../src/manifests/build-manifest.js');
 jest.mock('../../cloud-run/src/project-info.js');
 jest.mock('../../utils/src');
-jest.mock('../../setup-gcloud');
+jest.mock('../../setup-gcloud/src/index.js');
 jest.mock('../src/manifests/image-sha256.js');
 jest.mock('../src/policies/publish-policies.js');
 jest.mock('../src/utils/send-request.js');

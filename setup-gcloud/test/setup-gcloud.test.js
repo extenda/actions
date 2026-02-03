@@ -3,7 +3,7 @@ import mockFs from 'mock-fs';
 import path from 'path';
 
 // Mock out tools download
-jest.mock('../../utils', () => ({
+jest.mock('../../utils/src/index.js', () => ({
   loadTool: async () => Promise.resolve('/gcloud'),
   findTool: jest.fn(),
 }));
