@@ -480,14 +480,14 @@ environments:
       - my-service.retailsvc.com
 ```
 
-#### Cloud Run as internal-only service
+#### Cloud Run with internal load balancer access
 
-Deploy a service that is only accessible from within your VPC, without any external domain mappings
-or load balancer. Useful for backend services that should not be exposed to the internet.
+Configure whether your service should be accessible via the internal load balancer at `service-name.internal`.
+This is enabled by default and is required for service-to-service communication within your VPC.
 
 ```yaml
 cloud-run:
-  service: my-internal-service
+  service: my-service
   resources:
     cpu: 1
     memory: 512Mi
@@ -506,14 +506,23 @@ labels:
 environments:
   production:
     min-instances: 1
+    domain-mappings:
+      - my-service.retailsvc.com
     env:
-      SERVICE_MODE: internal
+      SERVICE_MODE: production
 ```
 
-**Note:** When `internal-traffic: true`, the service will only be accessible via its internal
-Cloud Run URL and won't have external domain mappings configured.
+**Configuration:**
+- `internal-traffic: true` (default): Service is accessible via internal load balancer at `my-service.internal` for VPC-internal communication
+- `internal-traffic: false`: Disables internal load balancer access; service is only reachable via external domain mappings
+- Both internal and external access can be enabled simultaneously by keeping `internal-traffic: true` and configuring `domain-mappings`
+
+**Note:** Most services should keep `internal-traffic: true` to enable service-to-service communication within your infrastructure.
 
 #### Cloud Run with multi-region deployment
+
+> [!WARNING]
+> Multi-region deployments are currently in preview and may be subject to change without notice.
 
 Deploy your service to multiple Google Cloud regions for high availability and reduced latency.
 Each region can have its own configuration.
@@ -976,7 +985,7 @@ Start with conservative resource allocations and monitor usage:
 - Always use the `permission-prefix` for IAM-based authentication
 - Use Cloud Armor for DDoS protection on public-facing services
 - Enable CORS only when needed for browser-based clients
-- Set `internal-traffic: true` for services that don't need external access
+- Keep `internal-traffic: true` (default) to enable service-to-service communication within your VPC
 - Use IAM bindings (`consumers.service-accounts`) for service-to-service authentication
 
 ### Multi-Region Deployments
