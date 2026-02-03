@@ -1,12 +1,13 @@
-jest.mock('../../utils/src/pull-request-info.js');
-jest.mock('@actions/core');
-jest.mock('../src/generate-outputs.js');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('../../utils/src/pull-request-info.js');
+vi.mock('@actions/core');
+vi.mock('../src/generate-outputs.js');
 
-const mockComment = jest.fn();
-const mockListComments = jest.fn(() => ({ data: [] }));
-const mockDeleteComment = jest.fn();
+const mockComment = vi.fn();
+const mockListComments = vi.fn(() => ({ data: [] }));
+const mockDeleteComment = vi.fn();
 
-jest.mock('@actions/github', () => ({
+vi.mock('@actions/github', () => ({
   getOctokit: () => ({
     rest: {
       issues: {
@@ -34,7 +35,7 @@ const orgEnv = process.env;
 
 describe('Terraform plan comment', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     process.env = orgEnv;
   });
 

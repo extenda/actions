@@ -1,4 +1,5 @@
-jest.mock('@actions/exec');
+import { expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
 import * as exec from '@actions/exec';
 
 import getImageDigest from '../src/image-digest.js';

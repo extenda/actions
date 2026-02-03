@@ -1,11 +1,12 @@
-jest.mock('@actions/exec');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
 import * as exec from '@actions/exec';
 
 import projectLabels from '../src/project-labels.js';
 
 describe('Get projects labels', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('Labels added', async () => {

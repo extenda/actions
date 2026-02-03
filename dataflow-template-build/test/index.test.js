@@ -1,6 +1,7 @@
-jest.mock('@actions/core');
-jest.mock('../src/dataflow-build.js');
-jest.mock('../../setup-gcloud/src/index.js');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/dataflow-build.js');
+vi.mock('../../setup-gcloud/src/index.js');
 
 import * as core from '@actions/core';
 
@@ -10,7 +11,7 @@ import action from '../src/index.js';
 
 describe('Dataflow Build Action', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can run the action', async () => {

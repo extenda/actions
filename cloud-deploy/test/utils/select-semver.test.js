@@ -1,3 +1,5 @@
+import { expect, test } from 'vitest';
+
 import selectSemver from '../../src/utils/select-semver.js';
 
 test('It should select preview if greater than stable', () => {

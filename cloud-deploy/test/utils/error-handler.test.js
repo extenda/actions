@@ -1,4 +1,5 @@
-jest.mock('@actions/core');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
 
 import * as core from '@actions/core';
 
@@ -6,7 +7,7 @@ import handleError from '../../src/utils/error-handler.js';
 
 describe('handle errors', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('It can identify permission error and throw error', async () => {

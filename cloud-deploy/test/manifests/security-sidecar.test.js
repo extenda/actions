@@ -1,10 +1,12 @@
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+
 import getImageWithSha256 from '../../src/manifests/image-sha256.js';
 import {
   securitySpec,
   STABLE_VERSION,
 } from '../../src/manifests/security-sidecar.js';
 
-jest.mock('../../src/manifests/image-sha256.js');
+vi.mock('../../src/manifests/image-sha256.js');
 
 const originalEnv = process.env;
 
@@ -20,7 +22,7 @@ describe('manifests/security-sidecar', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It invokes gcloud list-images with correct args', async () => {

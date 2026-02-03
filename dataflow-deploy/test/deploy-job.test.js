@@ -1,4 +1,5 @@
-jest.mock('@actions/exec');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
 import * as exec from '@actions/exec';
 
 import deployJob from '../src/deploy-job.js';
@@ -10,7 +11,7 @@ const mockExecListeners = (output) => (cmd, args, opts) => {
 
 describe('deploy dataflow job', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('deploy flex-template job', async () => {

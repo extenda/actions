@@ -1,7 +1,16 @@
 import path from 'path';
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 
-jest.mock('../src/sonar-credentials.js');
-jest.mock('../../utils/src/pull-request-info.js');
+vi.mock('../src/sonar-credentials.js');
+vi.mock('../../utils/src/pull-request-info.js');
 
 import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
 import { createParams } from '../src/params.js';

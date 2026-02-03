@@ -1,10 +1,11 @@
 import * as core from '@actions/core';
+import { describe, expect, test, vi } from 'vitest';
 
 import { action } from '../src/index.js';
 import setupGcloud from '../src/setup-gcloud.js';
 
-jest.mock('../src/setup-gcloud.js');
-jest.mock('@actions/core');
+vi.mock('../src/setup-gcloud.js');
+vi.mock('@actions/core');
 
 describe('setup-gcloud action', () => {
   test('It can install latest', async () => {

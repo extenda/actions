@@ -1,12 +1,13 @@
 import * as core from '@actions/core';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import serviceDefinition from '../../cloud-run/src/service-definition.js';
 import action from '../src/index.js';
 import runDeploy from '../src/run-deploy.js';
 
-jest.mock('@actions/core');
-jest.mock('../src/run-deploy.js');
-jest.mock('../../cloud-run/src/service-definition.js');
+vi.mock('@actions/core');
+vi.mock('../src/run-deploy.js');
+vi.mock('../../cloud-run/src/service-definition.js');
 
 const orgEnv = process.env;
 
@@ -19,7 +20,7 @@ describe('Kubernetes Action', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
 

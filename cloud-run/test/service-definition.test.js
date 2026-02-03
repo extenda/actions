@@ -1,4 +1,5 @@
 import mockFs from 'mock-fs';
+import { afterEach, describe, expect, test } from 'vitest';
 
 import cloudRunSchema from '../src/cloud-run-schema.js';
 import loadServiceDefinition from '../src/service-definition.js';

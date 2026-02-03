@@ -1,6 +1,7 @@
-jest.mock('@actions/exec');
-jest.mock('../src/dns-record.js');
-jest.mock('../src/alert-certificate-expiration.js');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
+vi.mock('../src/dns-record.js');
+vi.mock('../src/alert-certificate-expiration.js');
 
 import * as exec from '@actions/exec';
 
@@ -16,7 +17,7 @@ const mockCluster = {
 
 describe('Configure domains', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It configures only new domains', async () => {

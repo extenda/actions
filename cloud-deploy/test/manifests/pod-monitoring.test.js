@@ -1,10 +1,12 @@
+import { describe, expect, test, vi } from 'vitest';
+
 import {
   deletePodMonitor,
   podMonitorManifest,
 } from '../../src/manifests/pod-monitoring.js';
 import gcloudOutput from '../../src/utils/gcloud-output.js';
 
-jest.mock('../../src/utils/gcloud-output.js');
+vi.mock('../../src/utils/gcloud-output.js');
 
 describe('manifests/pod-monitoring', () => {
   test('It generates a manifest', () => {

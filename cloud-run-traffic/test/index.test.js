@@ -1,5 +1,6 @@
-jest.mock('@actions/core');
-jest.mock('../../setup-gcloud/src/index.js');
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../../setup-gcloud/src/index.js');
 
 import * as core from '@actions/core';
 
@@ -12,7 +13,7 @@ describe('action', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('routes traffic to new revision', async () => {

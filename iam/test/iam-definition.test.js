@@ -1,5 +1,6 @@
 import mockFs from 'mock-fs';
 import { m } from 'multiline-str';
+import { afterEach, describe, expect, test } from 'vitest';
 
 import loadIamDefinition from '../src/iam-definition.js';
 

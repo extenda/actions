@@ -1,6 +1,7 @@
 import fs from 'fs';
 import mockFs from 'mock-fs';
 import path from 'path';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 const mockUnpack = async (file, dest) => {
   const sdk = path.join(dest, 'google-cloud-sdk');
@@ -19,18 +20,18 @@ const mockUnpack = async (file, dest) => {
   return dest;
 };
 
-jest.mock('@actions/tool-cache', () => {
-  const realTc = jest.requireActual('@actions/tool-cache');
+vi.mock('@actions/tool-cache', () => {
+  const realTc = vi.requireActual('@actions/tool-cache');
   return {
     ...realTc,
-    downloadTool: jest.fn(),
+    downloadTool: vi.fn(),
     extractTar: mockUnpack,
     extractZip: mockUnpack,
     extract7z: mockUnpack,
   };
 });
 
-jest.mock('axios');
+vi.mock('axios');
 
 import tc from '@actions/tool-cache';
 import axios from 'axios';
@@ -70,7 +71,7 @@ describe('Load tool', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockFs.restore();
     process.env = orgEnv;
   });

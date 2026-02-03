@@ -1,14 +1,15 @@
-jest.mock('../src/create-project.js');
-jest.mock('../src/scan.js');
-jest.mock('../src/scan-msbuild.js');
-jest.mock('../src/check-quality-gate.js');
-jest.mock('../src/sonar-credentials', () => ({
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('../src/create-project.js');
+vi.mock('../src/scan.js');
+vi.mock('../src/scan-msbuild.js');
+vi.mock('../src/check-quality-gate.js');
+vi.mock('../src/sonar-credentials', () => ({
   credentials: () => ({
     githubToken: 'GITHUB_TOKEN',
     sonarToken: 'SONAR_TOKEN',
   }),
 }));
-jest.mock('../../utils/src/pull-request-info.js');
+vi.mock('../../utils/src/pull-request-info.js');
 
 import * as core from '@actions/core';
 
@@ -20,7 +21,7 @@ import { scan } from '../src/scan.js';
 import { scanMsBuild } from '../src/scan-msbuild.js';
 
 const orgEnv = process.env;
-const getInput = jest.spyOn(core, 'getInput');
+const getInput = vi.spyOn(core, 'getInput');
 
 const mockInputs = (
   hostUrl,
@@ -67,7 +68,7 @@ describe('Sonar-Scanner Action', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
 

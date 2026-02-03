@@ -1,14 +1,15 @@
-jest.mock('@actions/core');
-jest.mock('../src/configure-iam.js');
-jest.mock('../src/configure-bundle-sync.js');
-jest.mock('../src/iam-definition.js');
-jest.mock('../../iam-test-token/src/iam-auth.js');
-jest.mock('../src/load-credentials.js');
-jest.mock('../../setup-gcloud/src/index.js');
-jest.mock('fast-glob');
-jest.mock('@actions/github');
-jest.mock('../../cloud-run/src/cluster-info.js');
-jest.mock('../../gcp-secret-manager/src/secrets.js');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/configure-iam.js');
+vi.mock('../src/configure-bundle-sync.js');
+vi.mock('../src/iam-definition.js');
+vi.mock('../../iam-test-token/src/iam-auth.js');
+vi.mock('../src/load-credentials.js');
+vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('fast-glob');
+vi.mock('@actions/github');
+vi.mock('../../cloud-run/src/cluster-info.js');
+vi.mock('../../gcp-secret-manager/src/secrets.js');
 
 import * as core from '@actions/core';
 import fg from 'fast-glob';
@@ -32,7 +33,7 @@ const credentials = {
 
 describe('run action', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can run the action', async () => {

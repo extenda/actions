@@ -1,18 +1,19 @@
 import axios from 'axios';
 import path from 'path';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
 import notifySlack from '../src/slack-notify.js';
 import uploadToBucket from '../src/upload-to-bucket.js';
 
-jest.mock('axios');
-jest.mock('@actions/core');
-jest.mock('../../gcp-secret-manager/src/secrets.js');
-jest.mock('../src/upload-to-bucket', () => jest.fn());
+vi.mock('axios');
+vi.mock('@actions/core');
+vi.mock('../../gcp-secret-manager/src/secrets.js');
+vi.mock('../src/upload-to-bucket', () => vi.fn());
 
 describe('send Message to slack', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   beforeEach(() => {

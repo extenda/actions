@@ -1,4 +1,5 @@
-jest.mock('fast-glob');
+import { afterEach, describe, expect, it, vi } from 'vitest';
+vi.mock('fast-glob');
 
 import fg from 'fast-glob';
 import mockFs from 'mock-fs';

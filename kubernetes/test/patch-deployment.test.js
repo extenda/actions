@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest';
 import yaml from 'yaml';
 
 import patchDeploymentYaml from '../src/patch-deployment-yaml.js';

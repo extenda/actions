@@ -1,3 +1,5 @@
+import { describe, expect, test } from 'vitest';
+
 import urlhelper from '../src/url-helper.js';
 
 describe('Registry URL is sane', () => {

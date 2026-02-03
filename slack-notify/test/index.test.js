@@ -1,5 +1,6 @@
-jest.mock('@actions/core');
-jest.mock('../src/slack-notify.js');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/slack-notify.js');
 
 import * as core from '@actions/core';
 
@@ -8,7 +9,7 @@ import notifySlack from '../src/slack-notify.js';
 
 describe('slack notification', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('Can run the action', async () => {

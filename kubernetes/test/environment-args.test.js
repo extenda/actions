@@ -1,3 +1,5 @@
+import { describe, expect, test } from 'vitest';
+
 import parseEnvironmentArgs from '../src/environment-args.js';
 
 describe('Environment args', () => {

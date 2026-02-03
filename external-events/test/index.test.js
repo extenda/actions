@@ -1,6 +1,16 @@
-jest.mock('@actions/core');
-jest.mock('fast-glob');
-jest.mock('../src/secrets-manager/load-secrets.js');
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
+vi.mock('@actions/core');
+vi.mock('fast-glob');
+vi.mock('../src/secrets-manager/load-secrets.js');
 
 import * as core from '@actions/core';
 import camelcaseKeys from 'camelcase-keys';
@@ -26,8 +36,7 @@ function mockIdpTokenCall() {
 }
 
 function mockExeSyncCall(id, response, dryRun = false) {
-  // eslint-disable-next-line no-unused-vars
-  const { version, ...payload } = camelcaseKeys(configFixtures.validParsed, {
+  const { _version, ...payload } = camelcaseKeys(configFixtures.validParsed, {
     deep: true,
   });
   const exeNock = nock('https://exe-management.retailsvc.com')

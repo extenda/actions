@@ -1,5 +1,14 @@
 import * as core from '@actions/core';
 import mockFs from 'mock-fs';
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
 import getBundleName from '../src/bundle-name.js';
@@ -7,11 +16,11 @@ import createTestBundle from '../src/create-test-bundle.js';
 import action from '../src/index.js';
 import opaTest from '../src/opa-test.js';
 
-jest.mock('@actions/core');
-jest.mock('../src/bundle-name.js');
-jest.mock('../src/create-test-bundle.js');
-jest.mock('../src/opa-test.js');
-jest.mock('../../setup-gcloud/src/index.js');
+vi.mock('@actions/core');
+vi.mock('../src/bundle-name.js');
+vi.mock('../src/create-test-bundle.js');
+vi.mock('../src/opa-test.js');
+vi.mock('../../setup-gcloud/src/index.js');
 
 describe('opa-policy-test', () => {
   afterAll(() => {
@@ -26,7 +35,7 @@ describe('opa-policy-test', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('It can test an opa bundle', async () => {

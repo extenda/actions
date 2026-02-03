@@ -1,16 +1,17 @@
 import fs from 'fs';
 import mockFs from 'mock-fs';
 import path from 'path';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 // Mock out tools download
-jest.mock('../../utils/src/index.js', () => ({
+vi.mock('../../utils/src/index.js', () => ({
   loadTool: async () => Promise.resolve('/gcloud'),
-  findTool: jest.fn(),
+  findTool: vi.fn(),
 }));
 
-jest.mock('@actions/cache');
-jest.mock('@actions/exec');
-jest.mock('@actions/core');
+vi.mock('@actions/cache');
+vi.mock('@actions/exec');
+vi.mock('@actions/core');
 
 import { restoreCache } from '@actions/cache';
 import * as core from '@actions/core';
@@ -30,7 +31,7 @@ const orgEnv = process.env;
 
 describe('Setup Gcloud', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
     mockFs.restore();
   });

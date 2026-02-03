@@ -1,8 +1,9 @@
 import * as exec from '@actions/exec';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import checkServiceAccount from '../src/check-sa.js';
 
-jest.mock('@actions/exec');
+vi.mock('@actions/exec');
 
 const revisionsListString = [
   `service-name1@test-staging-t3st.iam.gserviceaccount.com
@@ -12,7 +13,7 @@ service-name2@test-staging-t3st.iam.gserviceaccount.com`,
 
 describe('check service account', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('it checks service account exists', async () => {

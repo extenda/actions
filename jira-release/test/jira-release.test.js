@@ -1,10 +1,11 @@
-const mockGetProject = jest.fn();
-const mockGetVersions = jest.fn();
-const mockCreateVersion = jest.fn();
-const mockUpdateVersion = jest.fn();
-const mockUpdateIssue = jest.fn();
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+const mockGetProject = vi.fn();
+const mockGetVersions = vi.fn();
+const mockCreateVersion = vi.fn();
+const mockUpdateVersion = vi.fn();
+const mockUpdateIssue = vi.fn();
 
-jest.mock(
+vi.mock(
   'jira-client',
   () =>
     function JiraClient() {
@@ -18,7 +19,7 @@ jest.mock(
     },
 );
 
-jest.mock('../../jira-releasenotes/src/jira-releasenotes', () => ({
+vi.mock('../../jira-releasenotes/src/jira-releasenotes', () => ({
   findJiraChanges: () => ({
     'TEST-1': {},
     'TEST-2': {},
@@ -72,7 +73,7 @@ describe('JIRA release', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It fails for illegal project', async () => {

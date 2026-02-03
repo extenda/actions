@@ -1,16 +1,25 @@
-jest.mock('@actions/core');
-jest.mock('../../utils/src');
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../../utils/src');
 
-const mockTag = jest.fn();
+const mockTag = vi.fn();
 
-jest.mock('../../utils/src/versions', () => ({
+vi.mock('../../utils/src/versions', () => ({
   tagReleaseVersion: mockTag,
-  setTagPrefix: jest.fn(),
+  setTagPrefix: vi.fn(),
 }));
 
-const mockRelease = jest.fn();
+const mockRelease = vi.fn();
 
-jest.mock('@actions/github', () => ({
+vi.mock('@actions/github', () => ({
   getOctokit: () => ({
     rest: {
       repos: {
@@ -39,7 +48,7 @@ describe('conventional-release', () => {
   beforeEach(() => {
     process.env.GITHUB_TOKEN = 'github-token';
     core.getInput.mockReturnValueOnce('extenda/test-repo');
-    core.getBooleanInput = jest.fn().mockImplementation((name) => {
+    core.getBooleanInput = vi.fn().mockImplementation((name) => {
       if (name === 'pre-release') return false;
       if (name === 'make-latest') return true;
       return false;
@@ -54,7 +63,7 @@ describe('conventional-release', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
 
@@ -109,7 +118,7 @@ describe('conventional-release', () => {
   });
 
   test('It can create a non-latest release', async () => {
-    core.getBooleanInput = jest.fn((name) => {
+    core.getBooleanInput = vi.fn((name) => {
       if (name === 'make-latest') return false;
     });
 
@@ -121,7 +130,7 @@ describe('conventional-release', () => {
   });
 
   test('It can create a pre-release', async () => {
-    core.getBooleanInput = jest.fn((name) => {
+    core.getBooleanInput = vi.fn((name) => {
       if (name === 'pre-release') return true;
     });
 

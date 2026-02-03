@@ -1,4 +1,5 @@
-jest.mock('@actions/exec');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
 import * as exec from '@actions/exec';
 import mockFs from 'mock-fs';
 
@@ -19,7 +20,7 @@ describe('Create namespace', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockFs.restore();
   });
 

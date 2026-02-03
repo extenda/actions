@@ -1,5 +1,6 @@
 import fs from 'fs';
 import mockFs from 'mock-fs';
+import { afterAll, describe, expect, test } from 'vitest';
 
 import createKeyFile from '../src/create-key-file.js';
 

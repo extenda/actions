@@ -1,3 +1,5 @@
+import { describe, expect, test } from 'vitest';
+
 import getLatestVersion from '../src/latest-version.js';
 
 describe('Latest gcloud version', () => {

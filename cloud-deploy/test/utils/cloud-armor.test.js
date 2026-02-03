@@ -1,9 +1,11 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import checkPolicyExists from '../../src/utils/cloud-armor.js';
 import gcloudOutput from '../../src/utils/gcloud-output.js';
 
-jest.mock('@actions/core');
-jest.mock('../../src/utils/gcloud-output', () =>
-  jest.fn().mockImplementation(() => Promise.resolve()),
+vi.mock('@actions/core');
+vi.mock('../../src/utils/gcloud-output', () =>
+  vi.fn().mockImplementation(() => Promise.resolve()),
 );
 
 describe('check cloud armor policy', () => {
@@ -11,7 +13,7 @@ describe('check cloud armor policy', () => {
   const mockPolicyName = 'cloud-armor-policy';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Should check the cloud armor policy exists', async () => {

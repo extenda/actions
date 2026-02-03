@@ -1,6 +1,7 @@
-const mockPulls = jest.fn();
+import { afterEach, describe, expect, test, vi } from 'vitest';
+const mockPulls = vi.fn();
 
-jest.mock('@actions/github', () => ({
+vi.mock('@actions/github', () => ({
   getOctokit: () => ({
     rest: {
       pulls: {
@@ -15,7 +16,7 @@ import pullInfo from '../src/pull-request-info.js';
 
 describe('Pull Request Info', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     pullInfo.setContext({});
   });
 

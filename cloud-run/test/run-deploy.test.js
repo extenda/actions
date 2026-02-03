@@ -1,16 +1,17 @@
 import mockFs from 'mock-fs';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('../src/vulnerability-scanning.js');
-jest.mock('@actions/exec');
-jest.mock('../../setup-gcloud/src/index.js');
-jest.mock('../src/cluster-info.js');
-jest.mock('../src/create-namespace.js');
-jest.mock('../src/check-sa.js');
-jest.mock('../src/kubectl-auth.js');
-jest.mock('../src/get-revision.js');
-jest.mock('../src/get-revisions.js');
+vi.mock('../src/vulnerability-scanning.js');
+vi.mock('@actions/exec');
+vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('../src/cluster-info.js');
+vi.mock('../src/create-namespace.js');
+vi.mock('../src/check-sa.js');
+vi.mock('../src/kubectl-auth.js');
+vi.mock('../src/get-revision.js');
+vi.mock('../src/get-revisions.js');
 
-jest.setTimeout(30000);
+vi.setConfig({ testTimeout: 30000 });
 import * as exec from '@actions/exec';
 
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
@@ -35,7 +36,7 @@ describe('Run Deploy', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockFs.restore();
     process.env = orgEnv;
   });

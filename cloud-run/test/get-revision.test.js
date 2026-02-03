@@ -1,7 +1,9 @@
+import { afterEach, describe, expect, test, vi } from 'vitest';
+
 import getLatestRevision from '../src/get-revision.js';
 import getRevisions from '../src/get-revisions.js';
 
-jest.mock('../src/get-revisions.js');
+vi.mock('../src/get-revisions.js');
 
 const cluster = {
   project: 'project-id',
@@ -11,7 +13,7 @@ const cluster = {
 
 describe('get latest revision', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('get latest revision', async () => {

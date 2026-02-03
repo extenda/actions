@@ -1,12 +1,13 @@
 import mockFs from 'mock-fs';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
 import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth.js';
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
 
-jest.mock('../../setup-gcloud/src/index.js');
-jest.mock('../../cloud-run/src/cluster-info.js');
-jest.mock('../../cloud-run/src/kubectl-auth.js');
+vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('../../cloud-run/src/cluster-info.js');
+vi.mock('../../cloud-run/src/kubectl-auth.js');
 
 import configureKubeCtl from '../src/configure-kubectl.js';
 

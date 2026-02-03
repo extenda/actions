@@ -1,4 +1,5 @@
-jest.mock('@actions/exec');
+import { expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
 import { exec } from '@actions/exec';
 
 import getRevisions from '../src/get-revisions.js';

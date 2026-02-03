@@ -1,6 +1,7 @@
-jest.mock('@actions/core');
-jest.mock('../src/bug-log.js');
-jest.mock('../src/deploy-log.js');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/bug-log.js');
+vi.mock('../src/deploy-log.js');
 
 import * as core from '@actions/core';
 
@@ -10,7 +11,7 @@ import action from '../src/index.js';
 
 describe('DORA metrics action', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can run the action', async () => {

@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import getToken from '../../cloud-deploy/src/utils/identity-token.js';
 import loadServiceDefinition from '../../cloud-deploy/src/utils/service-definition.js';
@@ -9,14 +10,14 @@ import action from '../src/index.js';
 import { getPullRequestNumber, postComment } from '../src/pr-comment.js';
 import resolveServiceFiles from '../src/service-files.js';
 
-jest.mock('@actions/core');
-jest.mock('../src/deploy-info.js');
-jest.mock('../src/pr-comment.js');
-jest.mock('../../cloud-deploy/src/utils/identity-token.js');
-jest.mock('../../setup-gcloud/src/index.js');
-jest.mock('../../cloud-deploy/src/utils/service-definition.js');
-jest.mock('../src/service-files.js');
-jest.mock('../src/code-freeze.js');
+vi.mock('@actions/core');
+vi.mock('../src/deploy-info.js');
+vi.mock('../src/pr-comment.js');
+vi.mock('../../cloud-deploy/src/utils/identity-token.js');
+vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('../../cloud-deploy/src/utils/service-definition.js');
+vi.mock('../src/service-files.js');
+vi.mock('../src/code-freeze.js');
 
 describe('cloud-deploy-plan', () => {
   beforeEach(() => {
@@ -24,7 +25,7 @@ describe('cloud-deploy-plan', () => {
     getToken.mockResolvedValueOnce('token');
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('It can plan multiple files in a PRs', async () => {

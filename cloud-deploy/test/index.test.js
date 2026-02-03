@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import projectInfo from '../../cloud-run/src/project-info.js';
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
@@ -12,19 +13,19 @@ import { sendDeployInfo, sendScaleSetup } from '../src/utils/send-request.js';
 import loadServiceDefinition from '../src/utils/service-definition.js';
 import runScan from '../src/utils/vulnerability-scanning.js';
 
-jest.mock('../src/utils/load-credentials.js');
-jest.mock('@actions/core');
-jest.mock('../src/utils/service-definition.js');
-jest.mock('../src/manifests/deploy.js');
-jest.mock('../src/manifests/build-manifest.js');
-jest.mock('../../cloud-run/src/project-info.js');
-jest.mock('../../utils/src');
-jest.mock('../../setup-gcloud/src/index.js');
-jest.mock('../src/manifests/image-sha256.js');
-jest.mock('../src/policies/publish-policies.js');
-jest.mock('../src/utils/send-request.js');
-jest.mock('../src/utils/vulnerability-scanning.js');
-jest.mock('../src/utils/cloud-armor.js');
+vi.mock('../src/utils/load-credentials.js');
+vi.mock('@actions/core');
+vi.mock('../src/utils/service-definition.js');
+vi.mock('../src/manifests/deploy.js');
+vi.mock('../src/manifests/build-manifest.js');
+vi.mock('../../cloud-run/src/project-info.js');
+vi.mock('../../utils/src');
+vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('../src/manifests/image-sha256.js');
+vi.mock('../src/policies/publish-policies.js');
+vi.mock('../src/utils/send-request.js');
+vi.mock('../src/utils/vulnerability-scanning.js');
+vi.mock('../src/utils/cloud-armor.js');
 
 const serviceDef = {
   kubernetes: {
@@ -64,7 +65,7 @@ const serviceDef = {
 
 describe('Action', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can run the action', async () => {

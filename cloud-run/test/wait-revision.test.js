@@ -1,12 +1,13 @@
-jest.mock('../src/get-revision.js');
-jest.mock('../src/gcloud-output.js');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('../src/get-revision.js');
+vi.mock('../src/gcloud-output.js');
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 
 import getLatestRevision from '../src/get-revision.js';
 import waitForRevision from '../src/wait-revision.js';
 
-jest.mock('@actions/exec');
+vi.mock('@actions/exec');
 
 const GCLOUD_ERROR_MSG_NODE_SCALING = `
 Deploying container to Cloud Run for Anthos service [xxxxxxx] in namespace [default] of cluster [k8s-cluster]
@@ -71,11 +72,11 @@ let debugSpy;
 describe('Wait for revision', () => {
   beforeEach(() => {
     // Reduce noise in the tests.
-    debugSpy = jest.spyOn(core, 'debug').mockImplementation(() => {});
+    debugSpy = vi.spyOn(core, 'debug').mockImplementation(() => {});
   });
   afterEach(() => {
     debugSpy.mockRestore();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('Wait for revision success', async () => {

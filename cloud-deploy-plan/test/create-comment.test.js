@@ -1,3 +1,5 @@
+import { expect, test } from 'vitest';
+
 import createComment from '../src/create-comment.js';
 
 test('It can create a comment for no changes', () => {

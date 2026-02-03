@@ -1,11 +1,13 @@
+import { afterEach, describe, expect, test, vi } from 'vitest';
+
 import setupAuthorization from '../../src/cloudrun/iam-bindings.js';
 import execGcloud from '../../src/utils/gcloud-output.js';
 
-jest.mock('../../src/utils/gcloud-output.js');
+vi.mock('../../src/utils/gcloud-output.js');
 
 describe('Setup iam bindings', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('allow accounts if referenced', async () => {

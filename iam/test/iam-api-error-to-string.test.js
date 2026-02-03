@@ -1,3 +1,5 @@
+import { describe, expect, test } from 'vitest';
+
 import { iamApiErrorToString } from '../src/utils/iam-api-error-to-string.js';
 
 describe('iamApiErrorToString', () => {

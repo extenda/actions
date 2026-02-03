@@ -1,10 +1,11 @@
 import * as exec from '@actions/exec';
 import fs from 'fs';
 import mockFs from 'mock-fs';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import applyAutoscale from '../src/autoscale.js';
 
-jest.mock('@actions/exec');
+vi.mock('@actions/exec');
 
 describe('Kubectl applies autoscaler', () => {
   beforeEach(() => {
@@ -13,7 +14,7 @@ describe('Kubectl applies autoscaler', () => {
 
   afterEach(() => {
     mockFs.restore();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It will remove autoscaler when configuration is not defined', async () => {

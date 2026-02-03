@@ -1,16 +1,17 @@
 import * as core from '@actions/core';
 import mockFs from 'mock-fs';
+import { afterAll, afterEach, expect, test, vi } from 'vitest';
 
 import getBundleName from '../src/bundle-name.js';
 
-jest.mock('@actions/core');
+vi.mock('@actions/core');
 
 afterAll(() => {
   mockFs.restore();
 });
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 test('It can use provided input', () => {

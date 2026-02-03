@@ -3,11 +3,20 @@ import fs from 'fs';
 import mockFs from 'mock-fs';
 import os from 'os';
 import path from 'path';
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 
-jest.mock('@actions/exec');
-jest.mock('@actions/core');
-jest.mock('../../utils/src/versions.js');
-jest.mock('../src/nexus-credentials.js');
+vi.mock('@actions/exec');
+vi.mock('@actions/core');
+vi.mock('../../utils/src/versions.js');
+vi.mock('../src/nexus-credentials.js');
 
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
@@ -64,7 +73,7 @@ describe('Maven', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
 
@@ -167,7 +176,7 @@ describe('Maven', () => {
       mvnw: '',
       'mvnw.cmd': '',
     });
-    const spy = jest.spyOn(os, 'platform');
+    const spy = vi.spyOn(os, 'platform');
     spy.mockReturnValueOnce('linux');
     exec.exec.mockResolvedValueOnce(0);
 
@@ -186,7 +195,7 @@ describe('Maven', () => {
       mvnw: '',
       'mvnw.cmd': '',
     });
-    const spy = jest.spyOn(os, 'platform');
+    const spy = vi.spyOn(os, 'platform');
     spy.mockReturnValueOnce('win32');
     exec.exec.mockResolvedValueOnce(0);
 
@@ -208,7 +217,7 @@ describe('Maven', () => {
     });
 
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     test('It resolves nexus-credentials', async () => {

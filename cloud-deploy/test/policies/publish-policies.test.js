@@ -1,11 +1,12 @@
 import axios from 'axios';
 import mockFs from 'mock-fs';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { execGcloud } from '../../../setup-gcloud';
 import publishPolicies from '../../src/policies/publish-policies.js';
 
-jest.mock('axios');
-jest.mock('../../../setup-gcloud.js');
+vi.mock('axios');
+vi.mock('../../../setup-gcloud.js');
 
 describe('Publish policies', () => {
   beforeEach(() => {
@@ -13,7 +14,7 @@ describe('Publish policies', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockFs.restore();
   });
 

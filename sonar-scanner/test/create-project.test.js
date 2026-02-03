@@ -1,10 +1,19 @@
 import * as core from '@actions/core';
 import axios from 'axios';
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 
-jest.mock('axios');
-jest.mock('@actions/core');
-jest.mock('../src/sonar-credentials', () => ({
-  sonarAuth: jest.fn(),
+vi.mock('axios');
+vi.mock('@actions/core');
+vi.mock('../src/sonar-credentials', () => ({
+  sonarAuth: vi.fn(),
 }));
 
 import { createProject } from '../src/create-project.js';
@@ -23,7 +32,7 @@ describe('Create Project', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     sonarAuth.mockResolvedValue({ username: 'token', password: '' });
   });
 

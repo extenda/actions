@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { execGcloud as mockExecGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 import mockSetupGcloud from '../../setup-gcloud/src/setup-gcloud.js';
@@ -9,8 +10,8 @@ import {
   parseInputYaml,
 } from '../src/secrets.js';
 
-jest.mock('../../setup-gcloud/src/exec-gcloud.js');
-jest.mock('../../setup-gcloud/src/setup-gcloud.js');
+vi.mock('../../setup-gcloud/src/exec-gcloud.js');
+vi.mock('../../setup-gcloud/src/setup-gcloud.js');
 
 const SECRET_JSON = JSON.stringify(
   {
@@ -31,7 +32,7 @@ describe('Secrets Manager', () => {
 
   afterEach(() => {
     process.env = orgEnv;
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can parse input YAML', () => {
@@ -160,7 +161,7 @@ EXPORT_AS: my-secret
           ),
         );
 
-      const exportVariable = jest.spyOn(core, 'exportVariable');
+      const exportVariable = vi.spyOn(core, 'exportVariable');
       const secret = await loadSecretIntoEnv(
         'service-account-key',
         'my-secret',

@@ -1,4 +1,5 @@
-jest.mock('../../setup-gcloud/src/index.js');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('../../setup-gcloud/src/index.js');
 import { execGcloud } from '../../setup-gcloud/src/index.js';
 import {
   createAttestation,
@@ -7,7 +8,7 @@ import {
 
 describe('Create attestation', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('Create attestation', async () => {

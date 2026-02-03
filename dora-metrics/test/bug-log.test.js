@@ -1,14 +1,15 @@
 import * as exec from '@actions/exec';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import generateBugLog from '../src/bug-log.js';
 import { generateFolders } from '../src/deploy-log.js';
 
-const mockSearchJira = jest.fn();
+const mockSearchJira = vi.fn();
 
-jest.mock('../src/deploy-log.js');
-jest.mock('@actions/exec');
-jest.mock('@actions/core');
-jest.mock(
+vi.mock('../src/deploy-log.js');
+vi.mock('@actions/exec');
+vi.mock('@actions/core');
+vi.mock(
   'jira-client',
   () =>
     function JiraClient() {
@@ -35,7 +36,7 @@ const issue = {
 
 describe('Generate bug log', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It executes all parts', async () => {

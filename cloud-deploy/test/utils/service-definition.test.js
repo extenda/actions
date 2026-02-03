@@ -1,4 +1,5 @@
 import mockFs from 'mock-fs';
+import { afterEach, describe, expect, test } from 'vitest';
 
 import loadServiceDefinition from '../../src/utils/service-definition.js';
 

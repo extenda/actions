@@ -1,6 +1,7 @@
-jest.mock('../src/kubectl.js');
-jest.mock('../src/rollback.js');
-jest.mock('@actions/exec');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('../src/kubectl.js');
+vi.mock('../src/rollback.js');
+vi.mock('@actions/exec');
 
 import * as exec from '@actions/exec';
 
@@ -9,7 +10,7 @@ import kubectl from '../src/kubectl.js';
 
 describe('deploy', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can deploy and rollout a manifest', async () => {

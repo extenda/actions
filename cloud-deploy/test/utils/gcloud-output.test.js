@@ -1,16 +1,17 @@
 import * as exec from '@actions/exec';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import handleError from '../../src/utils/error-handler.js';
 import execGcloud from '../../src/utils/gcloud-output.js';
 
-jest.mock('@actions/exec');
-jest.mock('../../src/utils/error-handler.js');
+vi.mock('@actions/exec');
+vi.mock('../../src/utils/error-handler.js');
 
 const gcloudArgs = ['compute', 'create', 'url-maps', 'name'];
 
 describe('execGcloud', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it executes gcloud and returns trimmed standard output', async () => {

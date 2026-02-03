@@ -1,4 +1,5 @@
-jest.mock('@actions/exec');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
 
 import * as exec from '@actions/exec';
 
@@ -7,7 +8,7 @@ import { mockOutput } from './utils.js';
 
 describe('DNS record sets', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     clearCache();
   });
 

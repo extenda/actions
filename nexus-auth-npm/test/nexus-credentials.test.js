@@ -1,4 +1,5 @@
-jest.mock('../../gcp-secret-manager/src/secrets.js');
+import { afterEach, describe, expect, it, vi } from 'vitest';
+vi.mock('../../gcp-secret-manager/src/secrets.js');
 
 import mockedEnv from 'mocked-env';
 
@@ -9,7 +10,7 @@ describe('nexus-credentials', () => {
   let envRestore;
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     if (envRestore) envRestore();
   });
 

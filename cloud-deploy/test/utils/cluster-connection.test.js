@@ -1,8 +1,10 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import connectToCluster from '../../src/utils/cluster-connection.js';
 import gcloudOutput from '../../src/utils/gcloud-output.js';
 
-jest.mock('../../src/utils/gcloud-output', () =>
-  jest.fn().mockImplementation(() => Promise.resolve()),
+vi.mock('../../src/utils/gcloud-output', () =>
+  vi.fn().mockImplementation(() => Promise.resolve()),
 );
 
 describe('cluster connection', () => {
@@ -10,7 +12,7 @@ describe('cluster connection', () => {
   const mockEnv = 'staging';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should connect to the cluster', async () => {

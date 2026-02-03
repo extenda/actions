@@ -1,7 +1,8 @@
 import * as exec from '@actions/exec';
 import mockFs from 'mock-fs';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('@actions/exec');
+vi.mock('@actions/exec');
 
 import checkNamespaceExists from '../src/check-namespace-exists.js';
 
@@ -17,7 +18,7 @@ describe('Check the namespace exists', () => {
 
   afterEach(() => {
     mockFs.restore();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It throws error if namespace does not exist', async () => {

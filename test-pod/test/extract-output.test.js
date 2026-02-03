@@ -1,6 +1,15 @@
 import * as exec from '@actions/exec';
 import fs from 'fs';
 import { resolve } from 'path';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 
 import { extractOutput, LogFilter } from '../src/extract-output.js';
 
@@ -54,7 +63,7 @@ describe('Extract output', () => {
 
   test('It filters output with LogFilter', () => {
     const filter = new LogFilter();
-    const write = jest.fn();
+    const write = vi.fn();
     const stream = {
       write,
     };

@@ -1,3 +1,5 @@
+import { describe, expect, test } from 'vitest';
+
 import getRuntimeAccount from '../src/runtime-account.js';
 
 describe('Runtime Email Account', () => {

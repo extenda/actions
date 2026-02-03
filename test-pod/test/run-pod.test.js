@@ -1,7 +1,8 @@
-jest.mock('@actions/exec');
-jest.mock('../src/extract-output.js');
-jest.mock('../../utils/src/index.js', () => ({
-  getImageDigest: jest.fn(),
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
+vi.mock('../src/extract-output.js');
+vi.mock('../../utils/src/index.js', () => ({
+  getImageDigest: vi.fn(),
 }));
 
 import * as exec from '@actions/exec';
@@ -24,7 +25,7 @@ describe('Pod run', () => {
   });
   afterEach(() => {
     process.env = orgEnv;
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It will run test without config map', async () => {

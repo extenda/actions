@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import axios from 'axios';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import getToken from '../../src/utils/identity-token.js';
 import {
@@ -8,10 +9,10 @@ import {
   sendScaleSetup,
 } from '../../src/utils/send-request.js';
 
-jest.mock('@actions/core');
-jest.mock('axios');
-jest.mock('google-auth-library');
-jest.mock('../../src/utils/identity-token.js');
+vi.mock('@actions/core');
+vi.mock('axios');
+vi.mock('google-auth-library');
+vi.mock('../../src/utils/identity-token.js');
 
 const service = 'service-name';
 const projectid = 'projectid';
@@ -64,7 +65,7 @@ const serviceDef = {
 
 describe('Send request to platform api', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should send scale setup request successfully', async () => {
     getToken.mockResolvedValue('token');

@@ -1,3 +1,5 @@
+import { expect, test } from 'vitest';
+
 import resolveServiceFiles from '../src/service-files.js';
 
 test('It resolves a relative path', () => {

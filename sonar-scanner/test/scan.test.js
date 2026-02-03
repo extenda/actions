@@ -1,10 +1,11 @@
-jest.mock('../src/sonar-credentials.js');
-jest.mock('@actions/exec');
-jest.mock('../src/params.js', () => ({
+import { afterAll, afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('../src/sonar-credentials.js');
+vi.mock('@actions/exec');
+vi.mock('../src/params.js', () => ({
   createParams: async () => '-Dsonar.verbose=false',
 }));
-jest.mock('../../maven/src/mvn', () => ({
-  run: jest.fn(),
+vi.mock('../../maven/src/mvn', () => ({
+  run: vi.fn(),
 }));
 
 import * as exec from '@actions/exec';
@@ -21,7 +22,7 @@ const ALL_FILE_TYPES = {
 
 describe('Scan', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
   afterAll(() => {
     fs.restore();

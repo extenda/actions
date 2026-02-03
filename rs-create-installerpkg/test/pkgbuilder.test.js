@@ -1,3 +1,4 @@
+import { afterEach, describe, expect, test, vi } from 'vitest';
 require('jest-fetch-mock').enableMocks();
 
 import * as core from '@actions/core';
@@ -11,15 +12,15 @@ import { buildPackage } from '../src/pkgbuilder.js';
 import { publishPackageCommand } from '../src/pkgbuilder.js';
 import { packageBuilderCommand } from '../src/pkgbuilder.js';
 
-jest.mock('@actions/exec');
-jest.mock('@actions/core');
-jest.mock('../../utils/src/index.js', () => ({
-  loadTool: jest.fn(),
+vi.mock('@actions/exec');
+vi.mock('@actions/core');
+vi.mock('../../utils/src/index.js', () => ({
+  loadTool: vi.fn(),
 }));
 
 describe('RS installer package tests', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockFs.restore();
 
     fetch.resetMocks();
@@ -320,7 +321,7 @@ describe('RS installer package tests', () => {
   });
 
   test('getBinaryName() returns correct binary name', () => {
-    jest.spyOn(os, 'platform');
+    vi.spyOn(os, 'platform');
     os.platform.mockReturnValue('win32');
     expect(getBinaryName()).toBe('InstallerPackageBuilder.Core.Console.exe');
 
@@ -328,7 +329,7 @@ describe('RS installer package tests', () => {
     expect(getBinaryName()).toBe('InstallerPackageBuilder.Core.Console');
 
     expect(os.platform).toHaveBeenCalledTimes(2);
-    jest.unmock('os');
+    vi.unmock('os');
   });
 
   test('It can run the builder', async () => {

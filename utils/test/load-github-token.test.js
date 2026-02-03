@@ -1,13 +1,14 @@
 import * as core from '@actions/core';
+import { describe, expect, test, vi } from 'vitest';
 
 import loadGitHubToken from '../src/load-github-token.js';
 
-jest.mock('@actions/core');
+vi.mock('@actions/core');
 
 describe('Load GitHub Token', () => {
   test('It will use provided token', async () => {
     core.getInput.mockReturnValueOnce('my-token');
-    const loadSecret = jest.fn();
+    const loadSecret = vi.fn();
     const result = await loadGitHubToken(loadSecret);
     expect(result).toEqual('my-token');
     expect(loadSecret).not.toHaveBeenCalled();
@@ -19,7 +20,7 @@ describe('Load GitHub Token', () => {
       .mockReturnValueOnce('')
       .mockReturnValueOnce('sa');
 
-    await expect(loadGitHubToken(jest.fn())).rejects.toEqual(
+    await expect(loadGitHubToken(vi.fn())).rejects.toEqual(
       new Error(
         'Missing input. The secret-name must be set with service-account-key',
       ),
@@ -32,7 +33,7 @@ describe('Load GitHub Token', () => {
       .mockReturnValueOnce('github-token')
       .mockReturnValueOnce('');
 
-    await expect(loadGitHubToken(jest.fn())).rejects.toEqual(
+    await expect(loadGitHubToken(vi.fn())).rejects.toEqual(
       new Error(
         'Missing input. Either provide github-token or service-account-key',
       ),
@@ -44,7 +45,7 @@ describe('Load GitHub Token', () => {
       .mockReturnValueOnce('')
       .mockReturnValueOnce('github-token')
       .mockReturnValueOnce('sa');
-    const loadSecret = jest.fn();
+    const loadSecret = vi.fn();
     loadSecret.mockResolvedValueOnce('token-value');
     const result = await loadGitHubToken(loadSecret);
     expect(result).toEqual('token-value');

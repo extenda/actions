@@ -1,11 +1,20 @@
 import mockFs from 'mock-fs';
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 
 // Mock out tools download
-jest.mock('../../utils/src/index.js', () => ({
-  loadTool: jest.fn(),
+vi.mock('../../utils/src/index.js', () => ({
+  loadTool: vi.fn(),
 }));
 
-jest.mock('@actions/exec');
+vi.mock('@actions/exec');
 import * as exec from '@actions/exec';
 
 import { loadTool } from '../../utils/src/index.js';
@@ -17,7 +26,7 @@ describe('RS Permission Converter Tests', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   beforeEach(() => {

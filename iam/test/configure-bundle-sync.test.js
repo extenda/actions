@@ -1,14 +1,15 @@
 import axios from 'axios';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import { execGcloud } from '../../setup-gcloud/src/index.js';
 import configureBundleSync from '../src/configure-bundle-sync.js';
 
-jest.mock('../../setup-gcloud/src/index.js');
-jest.mock('axios');
+vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('axios');
 
 describe('Configure bundle sync', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const iam = {
@@ -30,7 +31,7 @@ describe('Configure bundle sync', () => {
 
   test('It configures systems and consumers', async () => {
     execGcloud.mockResolvedValueOnce('idToken');
-    const mockPut = jest.fn().mockResolvedValueOnce({});
+    const mockPut = vi.fn().mockResolvedValueOnce({});
     axios.create.mockReturnValue({ put: mockPut });
 
     await configureBundleSync(iam, 'prod');
@@ -56,7 +57,7 @@ describe('Configure bundle sync', () => {
 
   test('It throws on error', async () => {
     execGcloud.mockResolvedValueOnce('idToken');
-    const mockPut = jest.fn().mockRejectedValueOnce(new Error('TEST'));
+    const mockPut = vi.fn().mockRejectedValueOnce(new Error('TEST'));
     axios.create.mockReturnValue({ put: mockPut });
 
     await expect(configureBundleSync(iam, 'staging')).rejects.toEqual(

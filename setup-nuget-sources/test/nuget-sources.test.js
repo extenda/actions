@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { beforeAll, describe, expect, test } from 'vitest';
 
 import {
   commentOutSourceUrl,

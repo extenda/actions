@@ -1,6 +1,7 @@
 import { readFile } from 'fs';
 import mockFs from 'mock-fs';
 import { join } from 'path';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { createNpmrcFile } from '../src/npmrc.js';
 
@@ -20,7 +21,7 @@ const expectedNpmrcForPublish = `
 
 describe('npmrc', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockFs.restore();
   });
 

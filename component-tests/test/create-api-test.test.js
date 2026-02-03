@@ -1,10 +1,11 @@
 import { readFile } from 'fs';
 import { load as parseYaml } from 'js-yaml';
 import { resolve } from 'path';
+import { describe, expect, test, vi } from 'vitest';
 
 import { createApiTest } from '../src/create-api-test.js';
 
-const spy = jest.fn();
+const spy = vi.fn();
 const mockCall = (method, url) => ({
   set: () => ({
     expect(res) {
@@ -13,7 +14,7 @@ const mockCall = (method, url) => ({
     },
   }),
 });
-jest.mock('supertest', () => ({
+vi.mock('supertest', () => ({
   agent: () => ({
     post: (url) => mockCall('POST', url),
     get: (url) => mockCall('GET', url),

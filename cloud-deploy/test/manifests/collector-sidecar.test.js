@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+
 import {
   cloudRunCollector,
   kubernetesCollector,
@@ -5,7 +7,7 @@ import {
 } from '../../src/manifests/collector-sidecar.js';
 import getImageWithSha256 from '../../src/manifests/image-sha256.js';
 
-jest.mock('../../src/manifests/image-sha256.js');
+vi.mock('../../src/manifests/image-sha256.js');
 
 const image = 'eu.gcr.io/extenda/my-service:v1.0.0';
 
@@ -16,7 +18,7 @@ describe('collector-sidecar', () => {
     );
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   test('It returns null if interval is missing', async () => {
     const container = await cloudRunCollector('test', undefined);

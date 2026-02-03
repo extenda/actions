@@ -1,5 +1,6 @@
-jest.mock('@actions/core');
-jest.mock('../src/create-api-test.js');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/create-api-test.js');
 
 import * as core from '@actions/core';
 import { resolve } from 'path';
@@ -9,12 +10,12 @@ import action from '../src/index.js';
 
 describe('run action', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('runs the action', async () => {
-    const spy = jest.fn();
-    spy.status = jest.fn();
+    const spy = vi.fn();
+    spy.status = vi.fn();
 
     core.getInput
       .mockReturnValueOnce('token')
@@ -35,8 +36,8 @@ describe('run action', () => {
   });
 
   test('runs the action with fail', async () => {
-    const spy = jest.fn();
-    spy.status = jest.fn().mockRejectedValue(new Error('message'));
+    const spy = vi.fn();
+    spy.status = vi.fn().mockRejectedValue(new Error('message'));
 
     core.getInput
       .mockReturnValueOnce('token')

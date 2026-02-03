@@ -1,9 +1,10 @@
 import nock from 'nock';
+import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
 import { execGcloud } from '../../setup-gcloud/src/index.js';
 import getDeployInfo from '../src/deploy-info.js';
 
-jest.mock('../../setup-gcloud/src/index.js');
+vi.mock('../../setup-gcloud/src/index.js');
 
 let token;
 

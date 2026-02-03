@@ -1,13 +1,15 @@
+import { afterEach, describe, expect, test, vi } from 'vitest';
+
 import cleanRevisions from '../../src/cloudrun/clean-revisions.js';
 import getRevisions from '../../src/cloudrun/get-revisions.js';
 import execGcloud from '../../src/utils/gcloud-output.js';
 
-jest.mock('../../src/cloudrun/get-revisions.js');
-jest.mock('../../src/utils/gcloud-output.js');
+vi.mock('../../src/cloudrun/get-revisions.js');
+vi.mock('../../src/utils/gcloud-output.js');
 
 describe('clean revisions', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('clean revisions', async () => {

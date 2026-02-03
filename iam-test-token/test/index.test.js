@@ -1,6 +1,7 @@
-jest.mock('@actions/core');
-jest.mock('../src/iam-auth.js');
-jest.mock('../../gcp-secret-manager/src/secrets.js');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/iam-auth.js');
+vi.mock('../../gcp-secret-manager/src/secrets.js');
 
 import * as core from '@actions/core';
 
@@ -10,7 +11,7 @@ import action from '../src/index.js';
 
 describe('iam-test-token', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
   test('It will fetch a token', async () => {
     core.getInput

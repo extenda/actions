@@ -1,5 +1,6 @@
-jest.mock('@actions/core');
-jest.mock('child_process');
+import { afterAll, afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('child_process');
 
 import * as core from '@actions/core';
 import cp from 'child_process';

@@ -1,6 +1,7 @@
-jest.mock('@actions/core');
-jest.mock('../src/roles.js');
-jest.mock('../src/permissions.js');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/roles.js');
+vi.mock('../src/permissions.js');
 
 import * as core from '@actions/core';
 
@@ -30,7 +31,7 @@ const iam = {
 
 describe('Configure IAM', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It updates permissions and roles', async () => {

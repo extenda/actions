@@ -1,6 +1,7 @@
-jest.mock('@actions/core');
-jest.mock('../src/create-sign-attestion.js');
-jest.mock('../../setup-gcloud/src/index.js');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/create-sign-attestion.js');
+vi.mock('../../setup-gcloud/src/index.js');
 
 import * as core from '@actions/core';
 
@@ -13,7 +14,7 @@ import action from '../src/index.js';
 
 describe('Binary Auth Action', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can run the action', async () => {

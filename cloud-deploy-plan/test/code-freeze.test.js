@@ -1,3 +1,5 @@
+import { expect, test } from 'vitest';
+
 import { isCodeFreeze } from '../src/code-freeze.js';
 
 test('Code freeze in effect', () => {

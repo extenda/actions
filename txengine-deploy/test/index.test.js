@@ -1,11 +1,12 @@
-jest.mock('@actions/core');
-jest.mock('@actions/exec');
-jest.mock('../src/deploy.js');
-jest.mock('../src/kubectl.js');
-jest.mock('../src/manifests.js');
-jest.mock('../src/env-config.js');
-jest.mock('../src/configure-domains.js');
-jest.mock('../../setup-gcloud/src/index.js');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('@actions/exec');
+vi.mock('../src/deploy.js');
+vi.mock('../src/kubectl.js');
+vi.mock('../src/manifests.js');
+vi.mock('../src/env-config.js');
+vi.mock('../src/configure-domains.js');
+vi.mock('../../setup-gcloud/src/index.js');
 
 import * as core from '@actions/core';
 
@@ -25,7 +26,7 @@ describe('txengine-deploy', () => {
     };
   });
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
 

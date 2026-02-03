@@ -1,4 +1,5 @@
-jest.mock('../../src/utils/gcloud-output.js');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('../../src/utils/gcloud-output.js');
 import checkVpcConnector from '../../src/utils/check-vpc-connector.js';
 import gcloudOuput from '../../src/utils/gcloud-output.js';
 
@@ -35,7 +36,7 @@ const listVpcConnectorsWithoutMatchingName = [
 
 describe('check vpc connector', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('It can return name if listed connectors match', async () => {

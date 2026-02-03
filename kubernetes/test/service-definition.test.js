@@ -1,4 +1,5 @@
 import mockFs from 'mock-fs';
+import { afterEach, describe, expect, test } from 'vitest';
 
 import loadServiceDefinition from '../../cloud-run/src/service-definition.js';
 import kubernetesSchema from '../src/kubernetes-schema.js';

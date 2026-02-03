@@ -1,8 +1,9 @@
-jest.mock('@actions/core');
-jest.mock('../src/deploy-job.js');
-jest.mock('../src/drain-job.js');
-jest.mock('../../setup-gcloud/src/index.js');
-jest.mock('../../cloud-run/src/cluster-info.js');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/deploy-job.js');
+vi.mock('../src/drain-job.js');
+vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('../../cloud-run/src/cluster-info.js');
 
 import * as core from '@actions/core';
 
@@ -21,7 +22,7 @@ describe('deploy dataflow Action', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
 

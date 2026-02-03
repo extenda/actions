@@ -1,6 +1,7 @@
-jest.mock('@actions/core');
-jest.mock('../src/nexus-credentials.js');
-jest.mock('../src/npmrc.js');
+import { afterEach, describe, expect, it, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/nexus-credentials.js');
+vi.mock('../src/npmrc.js');
 
 import { getInput } from '@actions/core';
 import mockedEnv from 'mocked-env';
@@ -13,7 +14,7 @@ describe('Auth to Nexus npm registry action', () => {
   let envRestore;
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     if (envRestore) envRestore();
   });
 

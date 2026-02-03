@@ -1,7 +1,8 @@
-jest.mock('@actions/core');
-jest.mock('../src/run-deploy.js');
-jest.mock('../src/service-definition.js');
-jest.mock('../src/configure-domains.js');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/run-deploy.js');
+vi.mock('../src/service-definition.js');
+vi.mock('../src/configure-domains.js');
 
 import * as core from '@actions/core';
 
@@ -13,7 +14,7 @@ const orgEnv = process.env;
 
 describe('Cloud Run Action', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
 

@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest';
 import yaml from 'yaml';
 
 import patchConfigMapYaml from '../src/patch-configmap-yaml.js';

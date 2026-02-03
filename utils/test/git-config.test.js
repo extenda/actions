@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import simpleGit from 'simple-git';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 
 import gitConfig from '../src/git-config.js';
 

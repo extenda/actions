@@ -2,11 +2,12 @@ import * as exec from '@actions/exec';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('@actions/exec');
+vi.mock('@actions/exec');
 
-jest.mock('../src/sonar-credentials.js');
-jest.mock('../../utils/src/pull-request-info.js');
+vi.mock('../src/sonar-credentials.js');
+vi.mock('../../utils/src/pull-request-info.js');
 
 import { markerFile, scanMsBuild } from '../src/scan-msbuild.js';
 
@@ -27,7 +28,7 @@ describe('Scan MSBuild', () => {
       fs.unlinkSync(markerFile);
     }
     process.env = orgEnv;
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It begins to scan when marker file is missing', async () => {
@@ -58,7 +59,7 @@ describe('Scan MSBuild', () => {
     // Create marker file
     fs.closeSync(fs.openSync(markerFile, 'w'));
 
-    const platformSpy = jest.spyOn(os, 'platform').mockReturnValue('win32');
+    const platformSpy = vi.spyOn(os, 'platform').mockReturnValue('win32');
     await scanMsBuild('https://sonar.extenda.io', 'master');
     expect(Object.keys(exec.exec.mock.calls[0][2].env)).not.toContain(
       'JAVA_HOME',
@@ -71,7 +72,7 @@ describe('Scan MSBuild', () => {
     fs.closeSync(fs.openSync(markerFile, 'w'));
     process.env.JDK_BASEDIR = '/tmp/missing';
 
-    const platformSpy = jest.spyOn(os, 'platform').mockReturnValue('linux');
+    const platformSpy = vi.spyOn(os, 'platform').mockReturnValue('linux');
     await scanMsBuild('https://sonar.extenda.io', 'master');
     expect(Object.keys(exec.exec.mock.calls[0][2].env)).not.toContain(
       'JAVA_HOME',

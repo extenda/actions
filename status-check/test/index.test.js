@@ -1,9 +1,10 @@
-jest.mock('@actions/core');
-jest.mock('../../utils/src');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../../utils/src');
 
-const mockCreate = jest.fn();
+const mockCreate = vi.fn();
 
-jest.mock('@actions/github', () => ({
+vi.mock('@actions/github', () => ({
   getOctokit: () => ({
     rest: {
       repos: {
@@ -22,7 +23,7 @@ const orgEnv = process.env;
 
 describe('status-check', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
   beforeEach(() => {

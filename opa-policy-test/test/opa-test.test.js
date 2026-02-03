@@ -1,10 +1,11 @@
 import { exec } from '@actions/exec';
+import { expect, test, vi } from 'vitest';
 
 import { loadTool } from '../../utils/src/index.js';
 import opaTest from '../src/opa-test.js';
 
-jest.mock('@actions/exec');
-jest.mock('../../utils/src');
+vi.mock('@actions/exec');
+vi.mock('../../utils/src');
 
 test('It can run an OPA test', async () => {
   exec.mockResolvedValueOnce(0);

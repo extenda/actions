@@ -1,13 +1,14 @@
 import * as exec from '@actions/exec';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import { generateFolders, uploadToBucket } from '../src/deploy-log.js';
 
-jest.mock('@actions/exec');
-jest.mock('@actions/core');
+vi.mock('@actions/exec');
+vi.mock('@actions/core');
 
 describe('Generate and upload deploy log', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It executes all parts', async () => {

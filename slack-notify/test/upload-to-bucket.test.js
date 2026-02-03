@@ -1,11 +1,13 @@
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+
 import { execGcloud } from '../../setup-gcloud/src.js';
 import uploadToBucket from '../src/upload-to-bucket.js';
 
-jest.mock('../../setup-gcloud/src.js');
+vi.mock('../../setup-gcloud/src.js');
 
 describe('uploadToBucket', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should call execGcloud with the correct storage cp arguments', async () => {

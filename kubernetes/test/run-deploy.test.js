@@ -1,19 +1,29 @@
-jest.mock('@actions/exec');
-jest.mock('../../setup-gcloud/src/index.js');
-jest.mock('../../cloud-run/src/cluster-info.js');
-jest.mock('../../cloud-run/src/project-info.js');
-jest.mock('../../cloud-run/src/kubectl-auth.js');
-jest.mock('../src/check-namespace-exists.js');
-jest.mock('../src/check-number-of-pods-running.js');
-jest.mock('../src/patch-deployment-yaml.js');
-jest.mock('../src/patch-service-yaml.js');
-jest.mock('../src/patch-statefulset-yaml.js');
-jest.mock('../src/kustomize.js');
-jest.mock('../src/apply-kubectl.js');
-jest.mock('../src/autoscale.js');
-jest.mock('../../utils/src/index.js', () => ({
-  loadTool: jest.fn(),
-  getImageDigest: jest.fn(),
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
+vi.mock('@actions/exec');
+vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('../../cloud-run/src/cluster-info.js');
+vi.mock('../../cloud-run/src/project-info.js');
+vi.mock('../../cloud-run/src/kubectl-auth.js');
+vi.mock('../src/check-namespace-exists.js');
+vi.mock('../src/check-number-of-pods-running.js');
+vi.mock('../src/patch-deployment-yaml.js');
+vi.mock('../src/patch-service-yaml.js');
+vi.mock('../src/patch-statefulset-yaml.js');
+vi.mock('../src/kustomize.js');
+vi.mock('../src/apply-kubectl.js');
+vi.mock('../src/autoscale.js');
+vi.mock('../../utils/src/index.js', () => ({
+  loadTool: vi.fn(),
+  getImageDigest: vi.fn(),
 }));
 
 import * as exec from '@actions/exec';
@@ -50,7 +60,7 @@ describe('Run Deploy', () => {
 
   afterEach(() => {
     mockFs.restore();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It calls check namespace exists', async () => {

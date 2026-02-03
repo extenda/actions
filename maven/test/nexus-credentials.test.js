@@ -1,4 +1,5 @@
-jest.mock('../../gcp-secret-manager/src/secrets.js');
+import { expect, test, vi } from 'vitest';
+vi.mock('../../gcp-secret-manager/src/secrets.js');
 import { loadSecretIntoEnv } from '../../gcp-secret-manager/src/secrets.js';
 import setupCredentials from '../src/nexus-credentials.js';
 

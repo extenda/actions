@@ -1,6 +1,7 @@
 import * as exec from '@actions/exec';
 import fs from 'fs';
 import mockFs from 'mock-fs';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import generateOutputs from '../src/generate-outputs.js';
 
@@ -26,7 +27,7 @@ const terragruntFs = {
   },
 };
 
-jest.mock('@actions/exec');
+vi.mock('@actions/exec');
 
 const mockOutput = async (data, opts, success = true) => {
   if (opts && opts.listeners) {
@@ -44,7 +45,7 @@ const mockOutput = async (data, opts, success = true) => {
 describe('Generate Terraform plan output', () => {
   afterEach(() => {
     mockFs.restore();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can process nested terragrunt plans', async () => {

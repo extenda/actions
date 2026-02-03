@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { afterEach, describe, expect, test } from 'vitest';
 import yaml from 'yaml';
 
 import { loadCacheKeys } from '../../src/utils/security-cache-keys.js';

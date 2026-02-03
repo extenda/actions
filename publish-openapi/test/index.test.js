@@ -1,14 +1,15 @@
-jest.mock('@actions/core');
-jest.mock('../src/redoc.js');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/redoc.js');
 
 import * as core from '@actions/core';
 
 import action from '../src/index.js';
-// const deployDocumentation = require('../src/redoc');
+// import deployDocumentation  from '../src/redoc';
 
 describe('Api documentation action', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can run the action', async () => {

@@ -1,8 +1,9 @@
 import axios from 'axios';
 import path from 'path';
+import { describe, expect, test, vi } from 'vitest';
 
-jest.mock('axios');
-jest.mock('../src/sonar-credentials.js');
+vi.mock('axios');
+vi.mock('../src/sonar-credentials.js');
 
 import { checkQualityGate } from '../src/check-quality-gate.js';
 

@@ -1,13 +1,14 @@
 import { exec } from '@actions/exec';
 import mockFs from 'mock-fs';
+import { afterAll, afterEach, beforeEach, expect, test, vi } from 'vitest';
 
 import { execGcloud } from '../../setup-gcloud/src/index.js';
 import copyPolicies from '../src/copy-policies.js';
 import createTestBundle from '../src/create-test-bundle.js';
 
-jest.mock('@actions/exec');
-jest.mock('../../setup-gcloud/src/index.js');
-jest.mock('../src/copy-policies.js');
+vi.mock('@actions/exec');
+vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('../src/copy-policies.js');
 
 afterAll(() => {
   mockFs.restore();
@@ -30,7 +31,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 test('It can create a test bundle', async () => {

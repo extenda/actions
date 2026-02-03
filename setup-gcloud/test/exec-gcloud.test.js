@@ -1,3 +1,5 @@
+import { expect, test } from 'vitest';
+
 import { findExecutable } from '../src/exec-gcloud.js';
 
 test('It picks gcloud', () => {

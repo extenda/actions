@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest';
 import yaml from 'yaml';
 
 import patchStatefulSetYaml from '../src/patch-statefulset-yaml.js';

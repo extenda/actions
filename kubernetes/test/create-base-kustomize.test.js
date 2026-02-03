@@ -1,5 +1,6 @@
 import fs from 'fs';
 import mockFs from 'mock-fs';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 import createBaseKustomize from '../src/create-base-kustomize.js';
 

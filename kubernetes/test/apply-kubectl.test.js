@@ -1,9 +1,10 @@
 import * as exec from '@actions/exec';
 import mockFs from 'mock-fs';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import applyKubectl from '../src/apply-kubectl.js';
 
-jest.mock('@actions/exec');
+vi.mock('@actions/exec');
 
 describe('Kubectl applies manifest', () => {
   beforeEach(() => {
@@ -12,7 +13,7 @@ describe('Kubectl applies manifest', () => {
 
   afterEach(() => {
     mockFs.restore();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It will apply manifest and call rollout status', async () => {
