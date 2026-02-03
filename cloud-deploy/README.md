@@ -54,6 +54,9 @@ The action will read a `cloud-deploy.yaml` file for its configuration.
 
 ## YAML Configuration Examples
 
+The following examples demonstrate common deployment configurations for different use cases.
+Each example includes inline explanations and can be adapted to your specific requirements.
+
 ### Managed Cloud Run
 
 #### Basic Cloud Run service with IAM security
@@ -155,10 +158,9 @@ security:
 
 ```
 
-```
-service-accounts: ## service accounts allowed access to the service for user or group accounts add prefix
-audiences: ## the audience allowed on the generated tokens
-```
+**Configuration:**
+- `service-accounts`: List of service accounts, users (prefix with `user:`), or groups (prefix with `group:`) allowed to invoke the service
+- `audiences`: List of allowed audiences in JWT tokens for authentication
 
 #### Cloud Run service with Cloud Armor
 
@@ -318,10 +320,13 @@ environments:
 - `paths`: URL path patterns to match for this target
 - `path-rewrite`: Optional path prefix to rewrite on the downstream service
 
-#### Cloud Run with direct VPC connection
+#### Cloud Run with static egress IP
 
-Connect your Cloud Run service directly to your VPC without using a VPC connector.
-This provides better performance and eliminates the need for a NAT router for static egress IPs.
+Configure your Cloud Run service to route all outgoing traffic through a NAT router with a static public IP address.
+This is useful when your service needs to communicate with external APIs or services that require IP whitelisting.
+
+**Note:** While IP whitelisting is generally discouraged in favor of more secure authentication methods,
+it may be required when integrating with legacy systems or third-party services.
 
 ```yaml
 cloud-run:
@@ -333,8 +338,7 @@ cloud-run:
   scaling:
     concurrency: 80
   traffic:
-    static-egress-ip: false
-    direct-vpc-connection: true
+    static-egress-ip: true
 
 security:
   permission-prefix: mye
@@ -346,11 +350,15 @@ labels:
 environments:
   production:
     min-instances: 1
+    env:
+      EXTERNAL_API_URL: https://api.example.com
 ```
 
 **Configuration:**
-- `static-egress-ip`: Set to `false` to disable NAT router (service won't have a static egress IP)
-- `direct-vpc-connection`: Set to `true` to connect directly to VPC instead of using a VPC connector
+- `static-egress-ip`: Set to `true` (default) to route egress traffic through a NAT router with a static public IP
+- When enabled, all outbound requests from the service will appear to originate from the same static IP address
+- The static IP address is managed by the platform and shared across services in the same region
+- Set to `false` to use direct VPC egress without a static IP (better performance, no IP whitelisting capability)
 
 #### Cloud Run with Prometheus and Open Telemetry monitoring
 
