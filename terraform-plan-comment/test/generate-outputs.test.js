@@ -1,7 +1,8 @@
-const mockFs = require('mock-fs');
-const fs = require('fs');
-const exec = require('@actions/exec');
-const generateOutputs = require('../src/generate-outputs');
+import exec from '@actions/exec';
+import fs from 'fs';
+import mockFs from 'mock-fs';
+
+import generateOutputs from '../src/generate-outputs';
 
 const terragruntFs = {
   '/work': {

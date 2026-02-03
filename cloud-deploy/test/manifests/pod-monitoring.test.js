@@ -1,8 +1,8 @@
-const gcloudOutput = require('../../src/utils/gcloud-output');
-const {
-  podMonitorManifest,
+import {
   deletePodMonitor,
-} = require('../../src/manifests/pod-monitoring');
+  podMonitorManifest,
+} from '../../src/manifests/pod-monitoring';
+import gcloudOutput from '../../src/utils/gcloud-output';
 
 jest.mock('../../src/utils/gcloud-output');
 

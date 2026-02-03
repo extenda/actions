@@ -1,7 +1,8 @@
-const core = require('@actions/core');
-const YAML = require('yaml');
-const checkEnv = require('../../utils/src/check-env');
-const { execGcloud, withGcloud } = require('../../setup-gcloud');
+import core from '@actions/core';
+import YAML from 'yaml';
+
+import { execGcloud, withGcloud } from '../../setup-gcloud';
+import checkEnv from '../../utils/src/check-env';
 
 const accessSecretValue = async (projectId, name) =>
   execGcloud(

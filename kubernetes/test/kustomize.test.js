@@ -1,6 +1,7 @@
-const exec = require('@actions/exec');
-const { loadTool } = require('../../utils');
-const kustomize = require('../src/kustomize');
+import exec from '@actions/exec';
+
+import { loadTool } from '../../utils';
+import kustomize from '../src/kustomize';
 
 jest.mock('@actions/exec');
 jest.mock('../../utils', () => ({

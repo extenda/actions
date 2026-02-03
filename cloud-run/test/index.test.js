@@ -3,10 +3,11 @@ jest.mock('../src/run-deploy');
 jest.mock('../src/service-definition');
 jest.mock('../src/configure-domains');
 
-const core = require('@actions/core');
-const action = require('../src/index');
-const runDeploy = require('../src/run-deploy');
-const serviceDef = require('../src/service-definition');
+import core from '@actions/core';
+
+import action from '../src/index';
+import runDeploy from '../src/run-deploy';
+import serviceDef from '../src/service-definition';
 
 const orgEnv = process.env;
 

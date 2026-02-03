@@ -1,7 +1,8 @@
 jest.mock('os');
 
-const os = require('os');
-const getDownloadUrl = require('../src/download-url');
+import os from 'os';
+
+import getDownloadUrl from '../src/download-url';
 
 describe('Get gcloud download URL', () => {
   afterEach(() => {

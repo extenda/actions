@@ -1,7 +1,8 @@
-const mockFs = require('mock-fs');
-const axios = require('axios');
-const { execGcloud } = require('../../../setup-gcloud');
-const publishPolicies = require('../../src/policies/publish-policies');
+import axios from 'axios';
+import mockFs from 'mock-fs';
+
+import { execGcloud } from '../../../setup-gcloud';
+import publishPolicies from '../../src/policies/publish-policies';
 
 jest.mock('axios');
 jest.mock('../../../setup-gcloud');

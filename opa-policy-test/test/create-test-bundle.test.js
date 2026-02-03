@@ -1,8 +1,9 @@
-const mockFs = require('mock-fs');
-const { exec } = require('@actions/exec');
-const { execGcloud } = require('../../setup-gcloud');
-const createTestBundle = require('../src/create-test-bundle');
-const copyPolicies = require('../src/copy-policies');
+import { exec } from '@actions/exec';
+import mockFs from 'mock-fs';
+
+import { execGcloud } from '../../setup-gcloud';
+import copyPolicies from '../src/copy-policies';
+import createTestBundle from '../src/create-test-bundle';
 
 jest.mock('@actions/exec');
 jest.mock('../../setup-gcloud');

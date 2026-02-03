@@ -2,11 +2,11 @@ jest.mock('@actions/core');
 jest.mock('../src/roles');
 jest.mock('../src/permissions');
 
-const core = require('@actions/core');
+import core from '@actions/core';
 
-const { configureIAM } = require('../src/configure-iam');
-const { setupPermissions, handlePermissions } = require('../src/permissions');
-const { setupRoles } = require('../src/roles');
+import { configureIAM } from '../src/configure-iam';
+import { handlePermissions, setupPermissions } from '../src/permissions';
+import { setupRoles } from '../src/roles';
 
 const iam = {
   'permission-prefix': 'test',

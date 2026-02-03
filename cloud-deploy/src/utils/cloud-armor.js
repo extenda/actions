@@ -1,5 +1,6 @@
-const core = require('@actions/core');
-const execGcloud = require('./gcloud-output');
+import core from '@actions/core';
+
+import execGcloud from './gcloud-output';
 
 const checkPolicyExists = async (policy, projectID) => {
   const args = [

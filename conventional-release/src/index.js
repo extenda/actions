@@ -1,7 +1,8 @@
-const core = require('@actions/core');
-const github = require('@actions/github');
-const { checkEnv, run } = require('../../utils');
-const versions = require('../../utils/src/versions');
+import core from '@actions/core';
+import github from '@actions/github';
+
+import { checkEnv, run } from '../../utils';
+import versions from '../../utils/src/versions';
 
 const createGitHubRelease = async (release, name) => {
   const octokit = github.getOctokit(process.env.GITHUB_TOKEN);

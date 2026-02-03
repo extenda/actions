@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const setupGcloud = require('./setup-gcloud');
-const { execGcloud } = require('./exec-gcloud');
+import core from '@actions/core';
+
+import { execGcloud } from './exec-gcloud';
+import setupGcloud from './setup-gcloud';
 
 const getGcloudAccount = async () =>
   execGcloud(['config', 'get', 'account', '--format=json'], 'gcloud', true)

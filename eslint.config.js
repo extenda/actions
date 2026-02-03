@@ -1,9 +1,9 @@
-const js = require('@eslint/js');
-const eslintPluginPrettier = require('eslint-plugin-prettier/recommended');
-const simpleImportSort = require('eslint-plugin-simple-import-sort');
-const globals = require('globals');
+import js from '@eslint/js';
+import eslintPluginPrettier from 'eslint-plugin-prettier/recommended';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
+import globals from 'globals';
 
-module.exports = [
+export default [
   js.configs.recommended,
   {
     name: 'project-config',

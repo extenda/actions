@@ -1,11 +1,12 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const os = require('os');
-const path = require('path');
-const fs = require('fs');
-const { createParams } = require('./params');
-const { getBuildVersion } = require('../../utils/src/versions');
-const { credentials } = require('./sonar-credentials');
+import core from '@actions/core';
+import exec from '@actions/exec';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+
+import { getBuildVersion } from '../../utils/src/versions';
+import { createParams } from './params';
+import { credentials } from './sonar-credentials';
 
 const markerFile = path.join(os.homedir(), '.github_action_sonar.txt');
 

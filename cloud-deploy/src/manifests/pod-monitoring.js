@@ -1,5 +1,6 @@
-const core = require('@actions/core');
-const execGcloud = require('../utils/gcloud-output');
+import core from '@actions/core';
+
+import execGcloud from '../utils/gcloud-output';
 
 const deletePodMonitor = async (name) =>
   execGcloud(

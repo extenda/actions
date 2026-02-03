@@ -1,10 +1,8 @@
-const core = require('@actions/core');
-const {
-  createAttestation,
-  getArtifactUrl,
-} = require('./create-sign-attestion');
-const { run } = require('../../utils');
-const { setupGcloud } = require('../../setup-gcloud');
+import core from '@actions/core';
+
+import { setupGcloud } from '../../setup-gcloud';
+import { run } from '../../utils';
+import { createAttestation, getArtifactUrl } from './create-sign-attestion';
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {

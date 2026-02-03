@@ -1,4 +1,4 @@
-const gcloudOutput = require('../utils/gcloud-output');
+import gcloudOutput from '../utils/gcloud-output';
 
 const handleStatefulset = async (name, volumeSize) => {
   // 2. Fetch currently deployed statefulset

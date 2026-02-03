@@ -1,6 +1,6 @@
-const execGcloud = require('../../src/utils/gcloud-output');
-const cleanRevisions = require('../../src/cloudrun/clean-revisions');
-const getRevisions = require('../../src/cloudrun/get-revisions');
+import cleanRevisions from '../../src/cloudrun/clean-revisions';
+import getRevisions from '../../src/cloudrun/get-revisions';
+import execGcloud from '../../src/utils/gcloud-output';
 
 jest.mock('../../src/cloudrun/get-revisions');
 jest.mock('../../src/utils/gcloud-output');

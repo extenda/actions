@@ -1,13 +1,14 @@
-const mockFs = require('mock-fs');
-const fs = require('fs');
-const buildManifest = require('../../src/manifests/build-manifest');
-const checkSystem = require('../../src/manifests/check-system');
-const { securitySpec } = require('../../src/manifests/security-sidecar');
-const handleStatefulset = require('../../src/manifests/statefulset-workaround');
-const { addNamespace } = require('../../src/utils/add-namespace');
-const readSecret = require('../../src/utils/load-credentials');
-const getRevisions = require('../../src/cloudrun/get-revisions');
-const getImageWithSha256 = require('../../src/manifests/image-sha256');
+import fs from 'fs';
+import mockFs from 'mock-fs';
+
+import getRevisions from '../../src/cloudrun/get-revisions';
+import buildManifest from '../../src/manifests/build-manifest';
+import checkSystem from '../../src/manifests/check-system';
+import getImageWithSha256 from '../../src/manifests/image-sha256';
+import { securitySpec } from '../../src/manifests/security-sidecar';
+import handleStatefulset from '../../src/manifests/statefulset-workaround';
+import { addNamespace } from '../../src/utils/add-namespace';
+import readSecret from '../../src/utils/load-credentials';
 
 jest.mock('../../src/manifests/check-system');
 jest.mock('../../src/utils/add-namespace');

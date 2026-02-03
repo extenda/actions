@@ -1,4 +1,4 @@
-const mockFs = require('mock-fs');
+import mockFs from 'mock-fs';
 
 jest.mock('../src/vulnerability-scanning');
 jest.mock('@actions/exec');
@@ -11,12 +11,13 @@ jest.mock('../src/get-revision');
 jest.mock('../src/get-revisions');
 
 jest.setTimeout(30000);
-const exec = require('@actions/exec');
-const { setupGcloud } = require('../../setup-gcloud');
-const runDeploy = require('../src/run-deploy');
-const { getClusterInfo } = require('../src/cluster-info');
-const scan = require('../src/vulnerability-scanning');
-const getRevisions = require('../src/get-revisions');
+import exec from '@actions/exec';
+
+import { setupGcloud } from '../../setup-gcloud';
+import { getClusterInfo } from '../src/cluster-info';
+import getRevisions from '../src/get-revisions';
+import runDeploy from '../src/run-deploy';
+import scan from '../src/vulnerability-scanning';
 
 const serviceAccountKey = Buffer.from('test', 'utf8').toString('base64');
 

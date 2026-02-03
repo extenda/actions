@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const axios = require('axios');
-const { iamApiErrorToString } = require('./utils/iam-api-error-to-string');
+import core from '@actions/core';
+import axios from 'axios';
+
+import { iamApiErrorToString } from './utils/iam-api-error-to-string';
 
 const createRole = async (
   iamToken,

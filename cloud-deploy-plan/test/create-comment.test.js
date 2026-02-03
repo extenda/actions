@@ -1,4 +1,4 @@
-const createComment = require('../src/create-comment');
+import createComment from '../src/create-comment';
 
 test('It can create a comment for no changes', () => {
   const comment = createComment('cloud-deploy.yaml', {

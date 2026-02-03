@@ -1,5 +1,5 @@
-const connectToCluster = require('../../src/utils/cluster-connection');
-const gcloudOutput = require('../../src/utils/gcloud-output');
+import connectToCluster from '../../src/utils/cluster-connection';
+import gcloudOutput from '../../src/utils/gcloud-output';
 
 jest.mock('../../src/utils/gcloud-output', () =>
   jest.fn().mockImplementation(() => Promise.resolve()),

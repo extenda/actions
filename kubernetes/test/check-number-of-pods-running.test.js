@@ -1,9 +1,9 @@
-const mockFs = require('mock-fs');
-const exec = require('@actions/exec');
+import exec from '@actions/exec';
+import mockFs from 'mock-fs';
 
 jest.mock('@actions/exec');
 
-const checkRequiredNumberOfPodsIsRunning = require('../src/check-number-of-pods-running');
+import checkRequiredNumberOfPodsIsRunning from '../src/check-number-of-pods-running';
 
 const mockErrorOutput = (data, opts) => {
   opts.listeners.stdout(Buffer.from(`${data}\n`, 'utf8'));

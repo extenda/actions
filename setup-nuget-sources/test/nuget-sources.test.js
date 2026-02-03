@@ -1,10 +1,10 @@
-const fs = require('fs');
+import fs from 'fs';
 
-const {
-  generateRegexPattern,
+import {
   commentOutSourceUrl,
+  generateRegexPattern,
   parseNugetSourceJson,
-} = require('../src/nuget-sources');
+} from '../src/nuget-sources';
 
 const nugetSorce = `[{
   "name": "nuget.org",

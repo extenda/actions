@@ -2,10 +2,11 @@ jest.mock('@actions/core');
 jest.mock('../src/dataflow-build');
 jest.mock('../../setup-gcloud');
 
-const core = require('@actions/core');
-const action = require('../src/index');
-const { setupGcloud } = require('../../setup-gcloud');
-const dataflowBuild = require('../src/dataflow-build');
+import core from '@actions/core';
+
+import { setupGcloud } from '../../setup-gcloud';
+import dataflowBuild from '../src/dataflow-build';
+import action from '../src/index';
 
 describe('Dataflow Build Action', () => {
   afterEach(() => {

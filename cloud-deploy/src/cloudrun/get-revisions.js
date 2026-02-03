@@ -1,4 +1,4 @@
-const execGcloud = require('../utils/gcloud-output');
+import execGcloud from '../utils/gcloud-output';
 
 const isActive = (conditions) => {
   const activeStatus = conditions.find(

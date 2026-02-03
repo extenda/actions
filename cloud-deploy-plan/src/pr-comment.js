@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const github = require('@actions/github');
-const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
+import core from '@actions/core';
+import github from '@actions/github';
+
+import { getPullRequestInfo } from '../../utils/src/pull-request-info';
 
 const getPullRequestNumber = async (githubToken) => {
   const pr = await getPullRequestInfo(githubToken);

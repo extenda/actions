@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+import exec from '@actions/exec';
 
 const setLabel = async (namespace, label, value) =>
   exec.exec('kubectl', [

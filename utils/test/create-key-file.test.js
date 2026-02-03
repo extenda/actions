@@ -1,6 +1,7 @@
-const mockFs = require('mock-fs');
-const fs = require('fs');
-const createKeyFile = require('../src/create-key-file');
+import fs from 'fs';
+import mockFs from 'mock-fs';
+
+import createKeyFile from '../src/create-key-file';
 
 describe('Create JSON key file', () => {
   afterAll(() => {

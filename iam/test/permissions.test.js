@@ -1,8 +1,9 @@
 jest.mock('@actions/core');
 jest.mock('axios');
 
-const axios = require('axios');
-const { setupPermissions, handlePermissions } = require('../src/permissions');
+import axios from 'axios';
+
+import { handlePermissions, setupPermissions } from '../src/permissions';
 
 describe('Setup permissions and handle', () => {
   afterEach(() => {

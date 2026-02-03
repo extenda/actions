@@ -1,11 +1,8 @@
-const core = require('@actions/core');
-const axios = require('axios');
-const {
-  securityVersion,
-} = require('../../cloud-deploy/src/manifests/security-sidecar');
-const {
-  imageTag: collectorVersion,
-} = require('../../cloud-deploy/src/manifests/collector-sidecar');
+import core from '@actions/core';
+import axios from 'axios';
+
+import { imageTag as collectorVersion } from '../../cloud-deploy/src/manifests/collector-sidecar';
+import { securityVersion } from '../../cloud-deploy/src/manifests/security-sidecar';
 
 const readProperty = (object, propertyName, defaultValue) => {
   if (propertyName in object) {

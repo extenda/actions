@@ -1,5 +1,6 @@
-const exec = require('@actions/exec');
-const { setOpaInjectionLabels } = require('./set-namespace-label');
+import exec from '@actions/exec';
+
+import { setOpaInjectionLabels } from './set-namespace-label';
 
 const getNamespace = async (namespace) => {
   let output = '';

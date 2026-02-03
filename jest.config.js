@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   automock: false,
   collectCoverage: true,
   coverageDirectory: 'coverage',

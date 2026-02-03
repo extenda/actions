@@ -1,4 +1,4 @@
-const mockFs = require('mock-fs');
+import mockFs from 'mock-fs';
 
 // Mock out tools download
 jest.mock('../../utils', () => ({
@@ -6,10 +6,10 @@ jest.mock('../../utils', () => ({
 }));
 
 jest.mock('@actions/exec');
-const exec = require('@actions/exec');
+import exec from '@actions/exec';
 
-const { convertPermissions } = require('../src/permconv');
-const { loadTool } = require('../../utils');
+import { loadTool } from '../../utils';
+import { convertPermissions } from '../src/permconv';
 
 describe('RS Permission Converter Tests', () => {
   afterAll(() => {

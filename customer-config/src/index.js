@@ -1,12 +1,11 @@
-const core = require('@actions/core');
-const camelcaseKeys = require('camelcase-keys');
-const { run } = require('../../utils');
-const {
-  loadDefinitions,
-} = require('../../external-events/src/utils/load-sync-definitions');
-const { createApi } = require('../../external-events/src/utils/create-api');
-const { loadSecrets } = require('./secrets-manager/load-secrets');
-const { validateCccConfig } = require('./validate/validate-ccc-config');
+import core from '@actions/core';
+import camelcaseKeys from 'camelcase-keys';
+
+import { createApi } from '../../external-events/src/utils/create-api';
+import { loadDefinitions } from '../../external-events/src/utils/load-sync-definitions';
+import { run } from '../../utils';
+import { loadSecrets } from './secrets-manager/load-secrets';
+import { validateCccConfig } from './validate/validate-ccc-config';
 
 function printSyncResult(report) {
   for (const { id, success, performedAction, error } of report) {

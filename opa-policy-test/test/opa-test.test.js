@@ -1,6 +1,7 @@
-const { exec } = require('@actions/exec');
-const { loadTool } = require('../../utils');
-const opaTest = require('../src/opa-test');
+import { exec } from '@actions/exec';
+
+import { loadTool } from '../../utils';
+import opaTest from '../src/opa-test';
 
 jest.mock('@actions/exec');
 jest.mock('../../utils');

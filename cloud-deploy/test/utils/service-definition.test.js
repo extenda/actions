@@ -1,5 +1,6 @@
-const mockFs = require('mock-fs');
-const loadServiceDefinition = require('../../src/utils/service-definition');
+import mockFs from 'mock-fs';
+
+import loadServiceDefinition from '../../src/utils/service-definition';
 
 describe('Service Definition', () => {
   afterEach(() => {

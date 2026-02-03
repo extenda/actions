@@ -1,6 +1,6 @@
-const mockFs = require('mock-fs');
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import mockFs from 'mock-fs';
+import path from 'path';
 
 // Mock out tools download
 jest.mock('../../utils', () => ({
@@ -12,10 +12,11 @@ jest.mock('@actions/cache');
 jest.mock('@actions/exec');
 jest.mock('@actions/core');
 
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const { restoreCache } = require('@actions/cache');
-const setupGcloud = require('../src/setup-gcloud');
+import { restoreCache } from '@actions/cache';
+import core from '@actions/core';
+import exec from '@actions/exec';
+
+import setupGcloud from '../src/setup-gcloud';
 
 const jsonKey = {
   project_id: 'test-project',

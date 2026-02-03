@@ -1,10 +1,11 @@
 jest.mock('@actions/core');
 jest.mock('../src/create-api-test');
 
-const core = require('@actions/core');
-const { resolve } = require('path');
-const action = require('../src/index');
-const { createApiTest } = require('../src/create-api-test');
+import core from '@actions/core';
+import { resolve } from 'path';
+
+import { createApiTest } from '../src/create-api-test';
+import action from '../src/index';
 
 describe('run action', () => {
   afterEach(() => {

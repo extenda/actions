@@ -1,6 +1,6 @@
 jest.mock('../../gcp-secret-manager/src/secrets');
-const { loadSecretIntoEnv } = require('../../gcp-secret-manager/src/secrets');
-const setupCredentials = require('../src/nexus-credentials');
+import { loadSecretIntoEnv } from '../../gcp-secret-manager/src/secrets';
+import setupCredentials from '../src/nexus-credentials';
 
 test('It loads credentials for Nexus', async () => {
   loadSecretIntoEnv

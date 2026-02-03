@@ -1,5 +1,6 @@
-const yaml = require('yaml');
-const patchStatefulSetYaml = require('../src/patch-statefulset-yaml');
+import yaml from 'yaml';
+
+import patchStatefulSetYaml from '../src/patch-statefulset-yaml';
 
 describe('Patches statefulSet.yml', () => {
   const service = {

@@ -26,8 +26,9 @@ jest.mock('@actions/github', () => ({
   },
 }));
 
-const core = require('@actions/core');
-const action = require('../src/index');
+import core from '@actions/core';
+
+import action from '../src/index';
 
 let orgEnv;
 

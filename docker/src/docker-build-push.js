@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const docker = require('./docker');
-const urlhelper = require('./url-helper');
+import core from '@actions/core';
+
+import docker from './docker';
+import urlhelper from './url-helper';
 
 const processBuildArgsInput = (buildArgsInput) => {
   let buildArgs = null;

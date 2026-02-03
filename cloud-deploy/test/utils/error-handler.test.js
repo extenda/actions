@@ -1,7 +1,8 @@
 jest.mock('@actions/core');
 
-const core = require('@actions/core');
-const handleError = require('../../src/utils/error-handler');
+import core from '@actions/core';
+
+import handleError from '../../src/utils/error-handler';
 
 describe('handle errors', () => {
   afterEach(() => {

@@ -1,9 +1,9 @@
-const {
+import {
   cloudRunCollector,
   kubernetesCollector,
   userContainerCollectorEnv,
-} = require('../../src/manifests/collector-sidecar');
-const getImageWithSha256 = require('../../src/manifests/image-sha256');
+} from '../../src/manifests/collector-sidecar';
+import getImageWithSha256 from '../../src/manifests/image-sha256';
 
 jest.mock('../../src/manifests/image-sha256');
 

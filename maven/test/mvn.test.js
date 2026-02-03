@@ -1,24 +1,21 @@
-const mockFs = require('mock-fs');
-const path = require('path');
-let fs = require('fs');
-
-const os = require('os');
-
 // Make sure we get a mocked FS.
-fs = require('fs');
+import fs from 'fs';
+import mockFs from 'mock-fs';
+import os from 'os';
+import path from 'path';
 
 jest.mock('@actions/exec');
 jest.mock('@actions/core');
 jest.mock('../../utils/src/versions');
 jest.mock('../src/nexus-credentials');
 
-const exec = require('@actions/exec');
-const core = require('@actions/core');
-const versions = require('../../utils/src/versions');
-const loadNexusCredentials = require('../src/nexus-credentials');
+import core from '@actions/core';
+import exec from '@actions/exec';
 
-const mvn = require('../src/mvn');
-const action = require('../src/index');
+import versions from '../../utils/src/versions';
+import action from '../src/index';
+import mvn from '../src/mvn';
+import loadNexusCredentials from '../src/nexus-credentials';
 
 const orgEnv = process.env;
 const defaultArgs = '-B -V';

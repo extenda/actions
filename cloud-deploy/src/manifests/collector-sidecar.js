@@ -1,5 +1,5 @@
-const getImageWithSha256 = require('./image-sha256');
-const selectSemver = require('../utils/select-semver');
+import selectSemver from '../utils/select-semver';
+import getImageWithSha256 from './image-sha256';
 const STABLE_TAG = 'v2.2.3';
 
 const getConfig = (serviceName, monitoring, containers = 'user-container') => {

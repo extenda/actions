@@ -1,12 +1,12 @@
-const core = require('@actions/core');
+import core from '@actions/core';
 
-const {
+import {
+  commentOutSourceUrl,
+  generateRegexPattern,
   parseNugetSourceJson,
   setNuGetApiKey,
   setNuGetSource,
-  generateRegexPattern,
-  commentOutSourceUrl,
-} = require('./nuget-sources');
+} from './nuget-sources';
 
 const run = async () => {
   try {

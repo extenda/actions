@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+import exec from '@actions/exec';
 
 const getRevisions = async (namespace, project, cluster, location) => {
   let output = '';

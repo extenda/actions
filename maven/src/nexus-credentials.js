@@ -1,4 +1,4 @@
-const { loadSecretIntoEnv } = require('../../gcp-secret-manager/src/secrets');
+import { loadSecretIntoEnv } from '../../gcp-secret-manager/src/secrets';
 
 const setupCredentials = async (
   serviceAccountKey,

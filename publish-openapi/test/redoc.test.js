@@ -1,13 +1,12 @@
-const mockFs = require('mock-fs');
+import mockFs from 'mock-fs';
 
 jest.mock('@actions/core');
 jest.mock('@actions/exec');
-let fs = require('fs');
-const exec = require('@actions/exec');
-const deployDocumentation = require('../src/redoc');
-
+import exec from '@actions/exec';
 // Make sure we get a mocked FS.
-fs = require('fs');
+import fs from 'fs';
+
+import deployDocumentation from '../src/redoc';
 
 describe('Run redoc deploy', () => {
   afterEach(() => {

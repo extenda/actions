@@ -1,4 +1,4 @@
-const core = require('@actions/core');
+import core from '@actions/core';
 
 /**
  * Load a GitHub token from either a provided `github-token` input or

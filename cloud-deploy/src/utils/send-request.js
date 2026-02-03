@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const axios = require('axios');
-const getToken = require('./identity-token');
+import core from '@actions/core';
+import axios from 'axios';
+
+import getToken from './identity-token';
 
 axios.defaults.baseURL = 'https://platform-api.retailsvc.com';
 

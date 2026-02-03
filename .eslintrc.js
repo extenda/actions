@@ -1,4 +1,4 @@
-const os = require('os');
+import os from 'os';
 const endLineStyle = os.platform() === 'win32'
   ? 'windows'
   : 'unix';

@@ -1,5 +1,6 @@
-const core = require('@actions/core');
-const { run } = require('../../utils/src');
+import core from '@actions/core';
+
+import { run } from '../../utils/src';
 
 const action = async () => {
   core.info('THIS ACTION HAS BEEN DEPRECATED');

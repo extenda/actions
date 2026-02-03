@@ -1,10 +1,11 @@
-const core = require('@actions/core');
-const { run, failIfNotTrunkBased } = require('../../utils');
-const kubectl = require('./kubectl');
-const deploy = require('./deploy');
-const prepareEnvConfig = require('./env-config');
-const createManifests = require('./manifests');
-const configureDomains = require('./configure-domains');
+import core from '@actions/core';
+
+import { failIfNotTrunkBased, run } from '../../utils';
+import configureDomains from './configure-domains';
+import deploy from './deploy';
+import prepareEnvConfig from './env-config';
+import kubectl from './kubectl';
+import createManifests from './manifests';
 
 const action = async () => {
   const deployServiceAccountKey = core.getInput('deploy-service-account-key', {

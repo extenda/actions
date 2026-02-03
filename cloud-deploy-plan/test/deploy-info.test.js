@@ -1,6 +1,7 @@
-const nock = require('nock');
-const getDeployInfo = require('../src/deploy-info');
-const { execGcloud } = require('../../setup-gcloud');
+import nock from 'nock';
+
+import { execGcloud } from '../../setup-gcloud';
+import getDeployInfo from '../src/deploy-info';
 
 jest.mock('../../setup-gcloud');
 

@@ -1,4 +1,4 @@
-const core = require('@actions/core');
+import core from '@actions/core';
 
 /**
  * Run an async action and catch any exception.

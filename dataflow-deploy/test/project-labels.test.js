@@ -1,6 +1,7 @@
 jest.mock('@actions/exec');
-const exec = require('@actions/exec');
-const projectLabels = require('../src/project-labels');
+import exec from '@actions/exec';
+
+import projectLabels from '../src/project-labels';
 
 describe('Get projects labels', () => {
   afterEach(() => {

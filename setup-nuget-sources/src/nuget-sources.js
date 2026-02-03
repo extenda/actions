@@ -1,6 +1,6 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const replace = require('replace-in-file');
+import core from '@actions/core';
+import exec from '@actions/exec';
+import replace from 'replace-in-file';
 
 const setNuGetSource = async (
   configFile,

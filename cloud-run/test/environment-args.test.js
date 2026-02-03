@@ -1,4 +1,4 @@
-const createEnvArgs = require('../src/environment-args');
+import createEnvArgs from '../src/environment-args';
 
 describe('Environment args', () => {
   test('It can build a list of arguments', () => {

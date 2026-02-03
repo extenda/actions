@@ -1,8 +1,9 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const gcloudOutput = require('./gcloud-output');
-const getLatestRevision = require('./get-revision');
-const projectInfo = require('./project-info');
+import core from '@actions/core';
+import exec from '@actions/exec';
+
+import gcloudOutput from './gcloud-output';
+import getLatestRevision from './get-revision';
+import projectInfo from './project-info';
 
 const FIVE_MINUTES = 300000;
 

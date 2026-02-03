@@ -1,8 +1,9 @@
-const core = require('@actions/core');
-const simpleGit = require('simple-git');
-const semver = require('semver');
-const gitConfig = require('./git-config');
-const changes = require('./conventionalchanges');
+import core from '@actions/core';
+import semver from 'semver';
+import simpleGit from 'simple-git';
+
+import changes from './conventionalchanges';
+import gitConfig from './git-config';
 
 const DEFAULT_VERSION = '0.0.0';
 

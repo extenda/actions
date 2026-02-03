@@ -1,6 +1,7 @@
-const exec = require('@actions/exec');
-const core = require('@actions/core');
-const handleCertificates = require('../src/handle-certificate');
+import core from '@actions/core';
+import exec from '@actions/exec';
+
+import handleCertificates from '../src/handle-certificate';
 
 jest.mock('@actions/exec');
 jest.mock('@actions/core');

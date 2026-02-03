@@ -1,11 +1,12 @@
-const core = require('@actions/core');
-const axios = require('axios');
-const {
-  sendScaleSetup,
+import core from '@actions/core';
+import axios from 'axios';
+
+import getToken from '../../src/utils/identity-token';
+import {
   sendDeployInfo,
   sendDeployRequest,
-} = require('../../src/utils/send-request');
-const getToken = require('../../src/utils/identity-token');
+  sendScaleSetup,
+} from '../../src/utils/send-request';
 
 jest.mock('@actions/core');
 jest.mock('axios');

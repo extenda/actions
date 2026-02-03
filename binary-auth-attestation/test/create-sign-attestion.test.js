@@ -1,9 +1,9 @@
 jest.mock('../../setup-gcloud');
-const { execGcloud } = require('../../setup-gcloud');
-const {
+import { execGcloud } from '../../setup-gcloud';
+import {
   createAttestation,
   getArtifactUrl,
-} = require('../src/create-sign-attestion');
+} from '../src/create-sign-attestion';
 
 describe('Create attestation', () => {
   afterEach(() => {

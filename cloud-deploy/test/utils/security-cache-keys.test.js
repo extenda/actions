@@ -1,7 +1,8 @@
-const fs = require('fs');
-const path = require('path');
-const yaml = require('yaml');
-const { loadCacheKeys } = require('../../src/utils/security-cache-keys');
+import fs from 'fs';
+import path from 'path';
+import yaml from 'yaml';
+
+import { loadCacheKeys } from '../../src/utils/security-cache-keys';
 
 const testFile = path.resolve(__dirname, 'cache-keys.test.yaml');
 

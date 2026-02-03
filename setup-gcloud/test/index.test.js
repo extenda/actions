@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const { action } = require('../src/index');
-const setupGcloud = require('../src/setup-gcloud');
+import core from '@actions/core';
+
+import { action } from '../src/index';
+import setupGcloud from '../src/setup-gcloud';
 
 jest.mock('../src/setup-gcloud');
 jest.mock('@actions/core');

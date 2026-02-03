@@ -1,7 +1,8 @@
 // Script that inlines handlebar templates in conventional commits. This helps NCC handle the
 // external files which otherwise are loaded numerous times and causing non-reproducible builds.
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+
+import path from 'path';
 
 const inlineTemplate = (source, moduleDir, template, replaceTextFn) => {
   const value = fs.readFileSync(path.resolve(moduleDir, 'templates', template), 'utf-8');

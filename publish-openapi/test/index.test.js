@@ -1,8 +1,9 @@
 jest.mock('@actions/core');
 jest.mock('../src/redoc');
 
-const core = require('@actions/core');
-const action = require('../src/index');
+import core from '@actions/core';
+
+import action from '../src/index';
 // const deployDocumentation = require('../src/redoc');
 
 describe('Api documentation action', () => {

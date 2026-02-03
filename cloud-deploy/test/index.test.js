@@ -1,15 +1,16 @@
-const core = require('@actions/core');
-const buildManifest = require('../src/manifests/build-manifest');
-const loadServiceDefinition = require('../src/utils/service-definition');
-const deploy = require('../src/manifests/deploy');
-const projectInfo = require('../../cloud-run/src/project-info');
-const { setupGcloud } = require('../../setup-gcloud');
-const action = require('../src/index');
-const loadCredentials = require('../src/utils/load-credentials');
-const getImageWithSha256 = require('../src/manifests/image-sha256');
-const publishPolicies = require('../src/policies/publish-policies');
-const { sendScaleSetup, sendDeployInfo } = require('../src/utils/send-request');
-const runScan = require('../src/utils/vulnerability-scanning');
+import core from '@actions/core';
+
+import projectInfo from '../../cloud-run/src/project-info';
+import { setupGcloud } from '../../setup-gcloud';
+import action from '../src/index';
+import buildManifest from '../src/manifests/build-manifest';
+import deploy from '../src/manifests/deploy';
+import getImageWithSha256 from '../src/manifests/image-sha256';
+import publishPolicies from '../src/policies/publish-policies';
+import loadCredentials from '../src/utils/load-credentials';
+import { sendDeployInfo, sendScaleSetup } from '../src/utils/send-request';
+import loadServiceDefinition from '../src/utils/service-definition';
+import runScan from '../src/utils/vulnerability-scanning';
 
 jest.mock('../src/utils/load-credentials');
 jest.mock('@actions/core');

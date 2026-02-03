@@ -1,4 +1,4 @@
-const { SemVer, valid } = require('semver');
+import { SemVer, valid } from 'semver';
 
 /**
  * Ensure that a preview semantic version only gets used if it is semantically greater than the stable version.

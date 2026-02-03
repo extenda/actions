@@ -1,5 +1,5 @@
-const fs = require('fs');
-const tmp = require('tmp');
+import fs from 'fs';
+import tmp from 'tmp';
 
 tmp.setGracefulCleanup();
 

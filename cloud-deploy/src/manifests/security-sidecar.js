@@ -1,7 +1,8 @@
-const core = require('@actions/core');
-const getImageWithSha256 = require('./image-sha256');
-const selectSemver = require('../utils/select-semver');
-const { loadCacheKeys } = require('../utils/security-cache-keys');
+import core from '@actions/core';
+
+import { loadCacheKeys } from '../utils/security-cache-keys';
+import selectSemver from '../utils/select-semver';
+import getImageWithSha256 from './image-sha256';
 
 const IMAGE_NAME = 'eu.gcr.io/extenda/security';
 

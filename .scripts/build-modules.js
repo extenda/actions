@@ -1,8 +1,9 @@
-const fs = require('fs-extra');
-const path = require('path');
-const esbuild = require('esbuild');
-const { modules } = require('./modules');
-const generateDependabot = require('./generate-dependabot-yml');
+import esbuild from 'esbuild';
+import fs from 'fs-extra';
+import path from 'path';
+
+import generateDependabot from './generate-dependabot-yml.js';
+import { modules } from './modules.js';
 
 const copyStaticAssetsPlugin = ({ sourceDir, destDir, filesToCopy }) => ({
   name: 'copy-static-assets',

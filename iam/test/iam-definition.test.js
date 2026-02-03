@@ -1,6 +1,7 @@
-const mockFs = require('mock-fs');
-const { m } = require('multiline-str');
-const loadIamDefinition = require('../src/iam-definition');
+import mockFs from 'mock-fs';
+import { m } from 'multiline-str';
+
+import loadIamDefinition from '../src/iam-definition';
 
 describe('IAM Definition', () => {
   afterEach(() => {

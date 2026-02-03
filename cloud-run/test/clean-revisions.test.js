@@ -1,6 +1,7 @@
-const exec = require('@actions/exec');
-const cleanRevisions = require('../src/clean-revisions');
-const getRevisions = require('../src/get-revisions');
+import exec from '@actions/exec';
+
+import cleanRevisions from '../src/clean-revisions';
+import getRevisions from '../src/get-revisions';
 
 jest.mock('@actions/exec');
 jest.mock('../src/get-revisions');

@@ -25,7 +25,7 @@ jest.mock('../../jira-releasenotes/src/jira-releasenotes', () => ({
   }),
 }));
 
-const { createJiraRelease } = require('../src/jira-release');
+import { createJiraRelease } from '../src/jira-release';
 
 const mockVersion = {
   self: 'https://jiratest.extendaretail.com/rest/api/2/version/19202',

@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+import exec from '@actions/exec';
 
 const gcloudOutput = async (args, bin = 'gcloud') => {
   let output = '';

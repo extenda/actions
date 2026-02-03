@@ -1,13 +1,14 @@
-const mockFs = require('mock-fs');
+import mockFs from 'mock-fs';
 
 // Mock out tools download
 jest.mock('../../utils');
 jest.mock('@actions/core');
 
-const core = require('@actions/core');
-const os = require('os');
-const { action, platform } = require('../src/index');
-const { loadTool } = require('../../utils');
+import core from '@actions/core';
+import os from 'os';
+
+import { loadTool } from '../../utils';
+import { action, platform } from '../src/index';
 
 describe('Setup Terraform', () => {
   afterEach(() => {

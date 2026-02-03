@@ -1,14 +1,13 @@
-const mockSetupGcloud = require('../../setup-gcloud/src/setup-gcloud');
-const {
-  execGcloud: mockExecGcloud,
-} = require('../../setup-gcloud/src/exec-gcloud');
-const core = require('@actions/core');
-const {
-  parseInputYaml,
-  loadSecrets,
+import core from '@actions/core';
+
+import { execGcloud as mockExecGcloud } from '../../setup-gcloud/src/exec-gcloud';
+import mockSetupGcloud from '../../setup-gcloud/src/setup-gcloud';
+import {
   loadSecret,
   loadSecretIntoEnv,
-} = require('../src/secrets');
+  loadSecrets,
+  parseInputYaml,
+} from '../src/secrets';
 
 jest.mock('../../setup-gcloud/src/exec-gcloud');
 jest.mock('../../setup-gcloud/src/setup-gcloud');

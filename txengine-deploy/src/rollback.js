@@ -1,5 +1,6 @@
-const core = require('@actions/core');
-const gcloudOutput = require('./gcloud-output');
+import core from '@actions/core';
+
+import gcloudOutput from './gcloud-output';
 
 const parseStatus = async (statuses) => {
   for (const status of statuses) {

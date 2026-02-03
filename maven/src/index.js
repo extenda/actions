@@ -1,10 +1,11 @@
-const core = require('@actions/core');
-const fs = require('fs');
-const path = require('path');
-const mvn = require('./mvn');
-const { run } = require('../../utils');
-const versions = require('../../utils/src/versions');
-const loadNexusCredentials = require('./nexus-credentials');
+import core from '@actions/core';
+import fs from 'fs';
+import path from 'path';
+
+import { run } from '../../utils';
+import versions from '../../utils/src/versions';
+import mvn from './mvn';
+import loadNexusCredentials from './nexus-credentials';
 
 const setVersion = async (version, workingDir = './') =>
   core.group(

@@ -1,8 +1,9 @@
-const core = require('@actions/core');
-const action = require('../src/index');
-const configureKubeCtl = require('../src/configure-kubectl');
-const { createConfigMap, deleteConfigMap } = require('../src/configmap');
-const runPod = require('../src/run-pod');
+import core from '@actions/core';
+
+import { createConfigMap, deleteConfigMap } from '../src/configmap';
+import configureKubeCtl from '../src/configure-kubectl';
+import action from '../src/index';
+import runPod from '../src/run-pod';
 
 jest.mock('@actions/core');
 jest.mock('../src/configure-kubectl');

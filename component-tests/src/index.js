@@ -1,8 +1,9 @@
-const { getInput, setFailed } = require('@actions/core');
-const { load: parseYaml } = require('js-yaml');
-const { readFile } = require('fs').promises;
-const { createApiTest } = require('./create-api-test');
-const { run } = require('../../utils');
+import { getInput, setFailed } from '@actions/core';
+import { readFile } from 'fs';
+import { load as parseYaml } from 'js-yaml';
+
+import { run } from '../../utils';
+import { createApiTest } from './create-api-test';
 
 async function main() {
   try {

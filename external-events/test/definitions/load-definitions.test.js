@@ -1,10 +1,11 @@
 jest.mock('fast-glob');
 
-const fg = require('fast-glob');
-const mockFs = require('mock-fs');
-const configsFixtures = require('../fixtures/configs');
-const { loadDefinitions } = require('../../src/utils/load-sync-definitions');
-const { validateExeConfig } = require('../../src/validate/validate-exe-config');
+import fg from 'fast-glob';
+import mockFs from 'mock-fs';
+
+import { loadDefinitions } from '../../src/utils/load-sync-definitions';
+import { validateExeConfig } from '../../src/validate/validate-exe-config';
+import configsFixtures from '../fixtures/configs';
 
 describe('loadDefinitions', () => {
   afterEach(() => {

@@ -1,9 +1,10 @@
-const core = require('@actions/core');
-const path = require('path');
-const fs = require('fs');
-const readline = require('readline');
-const axios = require('axios');
-const { sonarAuth } = require('./sonar-credentials');
+import core from '@actions/core';
+import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
+import readline from 'readline';
+
+import { sonarAuth } from './sonar-credentials';
 
 const REPORT_TASK_FILE = 'report-task.txt';
 const PROP_TASK_URL = 'ceTaskUrl';

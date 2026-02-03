@@ -1,4 +1,4 @@
-const yaml = require('yaml');
+import yaml from 'yaml';
 
 /**
  * Patches statefulset specification with values provided in service definition.

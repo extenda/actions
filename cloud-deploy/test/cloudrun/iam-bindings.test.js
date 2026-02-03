@@ -1,5 +1,5 @@
-const setupAuthorization = require('../../src/cloudrun/iam-bindings');
-const execGcloud = require('../../src/utils/gcloud-output');
+import setupAuthorization from '../../src/cloudrun/iam-bindings';
+import execGcloud from '../../src/utils/gcloud-output';
 
 jest.mock('../../src/utils/gcloud-output');
 

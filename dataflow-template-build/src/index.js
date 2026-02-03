@@ -1,7 +1,8 @@
-const core = require('@actions/core');
-const dataflowBuild = require('./dataflow-build');
-const { run } = require('../../utils');
-const { setupGcloud } = require('../../setup-gcloud');
+import core from '@actions/core';
+
+import { setupGcloud } from '../../setup-gcloud';
+import { run } from '../../utils';
+import dataflowBuild from './dataflow-build';
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {

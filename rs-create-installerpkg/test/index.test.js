@@ -1,9 +1,10 @@
 jest.mock('@actions/core');
 jest.mock('../src/pkgbuilder');
 
-const core = require('@actions/core');
-const { buildPackage } = require('../src/pkgbuilder');
-const action = require('../src/index');
+import core from '@actions/core';
+
+import action from '../src/index';
+import { buildPackage } from '../src/pkgbuilder';
 
 const orgEnv = process.env;
 

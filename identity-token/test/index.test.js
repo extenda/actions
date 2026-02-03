@@ -2,10 +2,11 @@ jest.mock('@actions/core');
 jest.mock('../src/fetch-token');
 jest.mock('../../setup-gcloud');
 
-const core = require('@actions/core');
-const action = require('../src/index');
-const { setupGcloud } = require('../../setup-gcloud');
-const fetchToken = require('../src/fetch-token');
+import core from '@actions/core';
+
+import { setupGcloud } from '../../setup-gcloud';
+import fetchToken from '../src/fetch-token';
+import action from '../src/index';
 
 describe('Fetch identity token action', () => {
   afterEach(() => {

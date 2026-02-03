@@ -1,15 +1,15 @@
 require('jest-fetch-mock').enableMocks();
 
-const mockFs = require('mock-fs');
-const exec = require('@actions/exec');
-const core = require('@actions/core');
-const os = require('os');
+import core from '@actions/core';
+import exec from '@actions/exec';
+import mockFs from 'mock-fs';
+import os from 'os';
 
-const { loadTool } = require('../../utils');
-const { getBinaryName } = require('../src/pkgbuilder');
-const { buildPackage } = require('../src/pkgbuilder');
-const { publishPackageCommand } = require('../src/pkgbuilder');
-const { packageBuilderCommand } = require('../src/pkgbuilder');
+import { loadTool } from '../../utils';
+import { getBinaryName } from '../src/pkgbuilder';
+import { buildPackage } from '../src/pkgbuilder';
+import { publishPackageCommand } from '../src/pkgbuilder';
+import { packageBuilderCommand } from '../src/pkgbuilder';
 
 jest.mock('@actions/exec');
 jest.mock('@actions/core');

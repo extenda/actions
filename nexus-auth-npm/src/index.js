@@ -1,7 +1,8 @@
-const { getInput, getBooleanInput } = require('@actions/core');
-const { run } = require('../../utils/src');
-const { validateOrFetchNexusCredentials } = require('./nexus-credentials');
-const { createNpmrcFile } = require('./npmrc');
+import { getBooleanInput, getInput } from '@actions/core';
+
+import { run } from '../../utils/src';
+import { validateOrFetchNexusCredentials } from './nexus-credentials';
+import { createNpmrcFile } from './npmrc';
 
 const action = async () => {
   const username = getInput('nexus-username') || process.env.NEXUS_USERNAME;

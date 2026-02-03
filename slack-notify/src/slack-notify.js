@@ -1,8 +1,9 @@
-const core = require('@actions/core');
-const axios = require('axios');
-const fs = require('fs');
-const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
-const uploadToBucket = require('./upload-to-bucket');
+import core from '@actions/core';
+import axios from 'axios';
+import fs from 'fs';
+
+import { loadSecret } from '../../gcp-secret-manager/src/secrets';
+import uploadToBucket from './upload-to-bucket';
 
 const filePreview = (file, maxLines = 26) => {
   if (!fs.existsSync(file)) {

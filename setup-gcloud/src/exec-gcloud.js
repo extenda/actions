@@ -1,5 +1,5 @@
-const exec = require('@actions/exec');
-const os = require('os');
+import exec from '@actions/exec';
+import os from 'os';
 
 const findExecutable = (executable) => {
   if (executable === 'gcloud' || !executable) {

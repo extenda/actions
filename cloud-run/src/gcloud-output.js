@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+import exec from '@actions/exec';
 
 /**
  * Execute a gcloud function and return the standard output.

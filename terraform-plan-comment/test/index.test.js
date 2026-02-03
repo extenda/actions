@@ -24,10 +24,11 @@ jest.mock('@actions/github', () => ({
   },
 }));
 
-const core = require('@actions/core');
-const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
-const action = require('../src/index');
-const generateOutputs = require('../src/generate-outputs');
+import core from '@actions/core';
+
+import { getPullRequestInfo } from '../../utils/src/pull-request-info';
+import generateOutputs from '../src/generate-outputs';
+import action from '../src/index';
 
 const orgEnv = process.env;
 

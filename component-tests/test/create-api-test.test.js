@@ -1,7 +1,8 @@
-const { load: parseYaml } = require('js-yaml');
-const { readFile } = require('fs').promises;
-const { resolve } = require('path');
-const { createApiTest } = require('../src/create-api-test');
+import { readFile } from 'fs';
+import { load as parseYaml } from 'js-yaml';
+import { resolve } from 'path';
+
+import { createApiTest } from '../src/create-api-test';
 
 const spy = jest.fn();
 const mockCall = (method, url) => ({

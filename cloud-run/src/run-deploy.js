@@ -1,16 +1,17 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const { setupGcloud } = require('../../setup-gcloud');
-const getRuntimeAccount = require('./runtime-account');
-const createEnvironmentArgs = require('./environment-args');
-const { getClusterInfo } = require('./cluster-info');
-const createNamespace = require('./create-namespace');
-const projectInfo = require('./project-info');
-const waitForRevision = require('./wait-revision');
-const authenticateKubeCtl = require('./kubectl-auth');
-const cleanRevisions = require('./clean-revisions');
-const checkServiceAccount = require('./check-sa');
-const runScan = require('./vulnerability-scanning');
+import core from '@actions/core';
+import exec from '@actions/exec';
+
+import { setupGcloud } from '../../setup-gcloud';
+import checkServiceAccount from './check-sa';
+import cleanRevisions from './clean-revisions';
+import { getClusterInfo } from './cluster-info';
+import createNamespace from './create-namespace';
+import createEnvironmentArgs from './environment-args';
+import authenticateKubeCtl from './kubectl-auth';
+import projectInfo from './project-info';
+import getRuntimeAccount from './runtime-account';
+import runScan from './vulnerability-scanning';
+import waitForRevision from './wait-revision';
 
 const numericOrDefault = (value) => (value >= 0 ? value : 'default');
 

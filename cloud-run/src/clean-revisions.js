@@ -1,6 +1,7 @@
-const exec = require('@actions/exec');
-const core = require('@actions/core');
-const getRevisions = require('./get-revisions');
+import core from '@actions/core';
+import exec from '@actions/exec';
+
+import getRevisions from './get-revisions';
 
 const deleteRevision = async (
   namespace,

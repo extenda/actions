@@ -1,7 +1,6 @@
-const mockFs = require('mock-fs');
-
-const path = require('path');
-const fs = require('fs');
+import fs from 'fs';
+import mockFs from 'mock-fs';
+import path from 'path';
 
 const mockUnpack = async (file, dest) => {
   const sdk = path.join(dest, 'google-cloud-sdk');
@@ -33,9 +32,10 @@ jest.mock('@actions/tool-cache', () => {
 
 jest.mock('axios');
 
-const tc = require('@actions/tool-cache');
-const axios = require('axios');
-const { loadTool } = require('../src/load-binary');
+import tc from '@actions/tool-cache';
+import axios from 'axios';
+
+import { loadTool } from '../src/load-binary';
 
 const orgEnv = process.env;
 

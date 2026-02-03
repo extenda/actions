@@ -1,8 +1,9 @@
-const core = require('@actions/core');
-const { run, failIfNotTrunkBased } = require('../../utils');
-const runDeploy = require('./run-deploy');
-const kubernetesSchema = require('./kubernetes-schema');
-const loadServiceDefinition = require('../../cloud-run/src/service-definition');
+import core from '@actions/core';
+
+import loadServiceDefinition from '../../cloud-run/src/service-definition';
+import { failIfNotTrunkBased, run } from '../../utils';
+import kubernetesSchema from './kubernetes-schema';
+import runDeploy from './run-deploy';
 
 const action = async () => {
   // Get params from action input

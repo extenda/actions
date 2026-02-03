@@ -16,20 +16,21 @@ jest.mock('../../utils', () => ({
   getImageDigest: jest.fn(),
 }));
 
-const mockFs = require('mock-fs');
-const exec = require('@actions/exec');
-const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
-const { setupGcloud } = require('../../setup-gcloud');
-const patchDeployment = require('../src/patch-deployment-yaml');
-const patchServiceYaml = require('../src/patch-service-yaml');
-const patchStatefulSetYaml = require('../src/patch-statefulset-yaml');
-const runDeploy = require('../src/run-deploy');
-const kustomize = require('../src/kustomize');
-const checkNamespaceExists = require('../src/check-namespace-exists');
-const checkRequiredNumberOfPodsIsRunning = require('../src/check-number-of-pods-running');
-const applyKubectl = require('../src/apply-kubectl');
-const applyAutoscale = require('../src/autoscale');
-const { getImageDigest } = require('../../utils/src');
+import exec from '@actions/exec';
+import mockFs from 'mock-fs';
+
+import { getClusterInfo } from '../../cloud-run/src/cluster-info';
+import { setupGcloud } from '../../setup-gcloud';
+import { getImageDigest } from '../../utils/src';
+import applyKubectl from '../src/apply-kubectl';
+import applyAutoscale from '../src/autoscale';
+import checkNamespaceExists from '../src/check-namespace-exists';
+import checkRequiredNumberOfPodsIsRunning from '../src/check-number-of-pods-running';
+import kustomize from '../src/kustomize';
+import patchDeployment from '../src/patch-deployment-yaml';
+import patchServiceYaml from '../src/patch-service-yaml';
+import patchStatefulSetYaml from '../src/patch-statefulset-yaml';
+import runDeploy from '../src/run-deploy';
 
 const orgEnv = process.env;
 

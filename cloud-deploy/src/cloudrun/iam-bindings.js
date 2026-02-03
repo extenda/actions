@@ -1,5 +1,6 @@
-const core = require('@actions/core');
-const gcloudOutput = require('../utils/gcloud-output');
+import core from '@actions/core';
+
+import gcloudOutput from '../utils/gcloud-output';
 
 const addPrefix = (account) => {
   const accountType = account.split(':')[0];

@@ -1,10 +1,11 @@
-const mockFs = require('mock-fs');
-const core = require('@actions/core');
-const action = require('../src/index');
-const getBundleName = require('../src/bundle-name');
-const createTestBundle = require('../src/create-test-bundle');
-const opaTest = require('../src/opa-test');
-const { setupGcloud } = require('../../setup-gcloud');
+import core from '@actions/core';
+import mockFs from 'mock-fs';
+
+import { setupGcloud } from '../../setup-gcloud';
+import getBundleName from '../src/bundle-name';
+import createTestBundle from '../src/create-test-bundle';
+import action from '../src/index';
+import opaTest from '../src/opa-test';
 
 jest.mock('@actions/core');
 jest.mock('../src/bundle-name');

@@ -2,10 +2,11 @@ jest.mock('@actions/exec');
 jest.mock('../src/dns-record');
 jest.mock('../src/alert-certificate-expiration');
 
-const exec = require('@actions/exec');
-const configureDomains = require('../src/configure-domains');
-const { addDnsRecord } = require('../src/dns-record');
-const { mockOutput } = require('./utils');
+import exec from '@actions/exec';
+
+import configureDomains from '../src/configure-domains';
+import { addDnsRecord } from '../src/dns-record';
+import { mockOutput } from './utils';
 
 const mockCluster = {
   project: 'test-project-staging-1234',

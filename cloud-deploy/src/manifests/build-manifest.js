@@ -1,20 +1,21 @@
-const fs = require('fs');
-const yaml = require('js-yaml');
-const core = require('@actions/core');
-const { addNamespace } = require('../utils/add-namespace');
-const readSecret = require('../utils/load-credentials');
-const handleStatefulset = require('./statefulset-workaround');
-const checkIamSystem = require('./check-system');
-const getRevisions = require('../cloudrun/get-revisions');
-const {
+import core from '@actions/core';
+import fs from 'fs';
+import yaml from 'js-yaml';
+
+import getRevisions from '../cloudrun/get-revisions';
+import { addNamespace } from '../utils/add-namespace';
+import connectToCluster from '../utils/cluster-connection';
+import readSecret from '../utils/load-credentials';
+import { gkeManifestTemplate } from './build-manifests-gke';
+import { cloudrunManifestTemplate } from './build-manifests-run';
+import checkIamSystem from './check-system';
+import { userContainerCollectorEnv } from './collector-sidecar';
+import { deletePodMonitor, podMonitorManifest } from './pod-monitoring';
+import handleStatefulset from './statefulset-workaround';
+import {
   configMapManifest,
   removeScalerConfiguration,
-} = require('./vpa-scaler-configmap');
-const connectToCluster = require('../utils/cluster-connection');
-const { deletePodMonitor, podMonitorManifest } = require('./pod-monitoring');
-const { gkeManifestTemplate } = require('./build-manifests-gke');
-const { cloudrunManifestTemplate } = require('./build-manifests-run');
-const { userContainerCollectorEnv } = require('./collector-sidecar');
+} from './vpa-scaler-configmap';
 
 const convertToYaml = (json) => yaml.dump(json);
 

@@ -1,8 +1,9 @@
-const core = require('@actions/core');
-const { run } = require('../../utils/src');
-const setupGcloud = require('./setup-gcloud');
-const { execGcloud } = require('./exec-gcloud');
-const withGcloud = require('./with-gcloud');
+import core from '@actions/core';
+
+import { run } from '../../utils/src';
+import { execGcloud } from './exec-gcloud';
+import setupGcloud from './setup-gcloud';
+import withGcloud from './with-gcloud';
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {

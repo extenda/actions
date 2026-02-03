@@ -1,14 +1,15 @@
 jest.mock('@actions/core');
 jest.mock('axios');
 
-const axios = require('axios');
-const {
-  setupRoles,
-  getRole,
-  createRole,
-  updateRole,
+import axios from 'axios';
+
+import {
   arraysEqual,
-} = require('../src/roles');
+  createRole,
+  getRole,
+  setupRoles,
+  updateRole,
+} from '../src/roles';
 
 describe('Setup roles and handle', () => {
   afterEach(() => {

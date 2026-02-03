@@ -1,7 +1,8 @@
-const core = require('@actions/core');
-const action = require('../src/index');
-const runDeploy = require('../src/run-deploy');
-const serviceDefinition = require('../../cloud-run/src/service-definition');
+import core from '@actions/core';
+
+import serviceDefinition from '../../cloud-run/src/service-definition';
+import action from '../src/index';
+import runDeploy from '../src/run-deploy';
 
 jest.mock('@actions/core');
 jest.mock('../src/run-deploy');

@@ -1,8 +1,8 @@
-const fs = require('fs');
-const yaml = require('yaml');
-const core = require('@actions/core');
-const { validate } = require('jsonschema');
-const merge = require('deepmerge');
+import core from '@actions/core';
+import merge from 'deepmerge';
+import fs from 'fs';
+import { validate } from 'jsonschema';
+import yaml from 'yaml';
 
 const loadFile = (serviceFile) => {
   if (!fs.existsSync(serviceFile)) {

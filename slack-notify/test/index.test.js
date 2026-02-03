@@ -1,9 +1,10 @@
 jest.mock('@actions/core');
 jest.mock('../src/slack-notify');
 
-const core = require('@actions/core');
-const action = require('../src');
-const notifySlack = require('../src/slack-notify');
+import core from '@actions/core';
+
+import action from '../src';
+import notifySlack from '../src/slack-notify';
 
 describe('slack notification', () => {
   afterEach(() => {

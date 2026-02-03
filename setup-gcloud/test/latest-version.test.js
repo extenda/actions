@@ -1,4 +1,4 @@
-const getLatestVersion = require('../src/latest-version');
+import getLatestVersion from '../src/latest-version';
 
 describe('Latest gcloud version', () => {
   test('It can find the latest gcloud CLI version', async () => {

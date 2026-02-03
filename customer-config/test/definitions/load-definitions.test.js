@@ -1,12 +1,11 @@
 jest.mock('fast-glob');
 
-const fg = require('fast-glob');
-const mockFs = require('mock-fs');
-const configsFixtures = require('../fixtures/configs');
-const {
-  loadDefinitions,
-} = require('../../../external-events/src/utils/load-sync-definitions');
-const { validateCccConfig } = require('../../src/validate/validate-ccc-config');
+import fg from 'fast-glob';
+import mockFs from 'mock-fs';
+
+import { loadDefinitions } from '../../../external-events/src/utils/load-sync-definitions';
+import { validateCccConfig } from '../../src/validate/validate-ccc-config';
+import configsFixtures from '../fixtures/configs';
 
 describe('loadDefinitions', () => {
   afterEach(() => {

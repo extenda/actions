@@ -1,8 +1,9 @@
-const core = require('@actions/core');
-const github = require('@actions/github');
-const { run } = require('../../utils');
-const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
-const generateOutputs = require('./generate-outputs');
+import core from '@actions/core';
+import github from '@actions/github';
+
+import { run } from '../../utils';
+import { getPullRequestInfo } from '../../utils/src/pull-request-info';
+import generateOutputs from './generate-outputs';
 
 const moduleEmoji = (summary) => {
   if (!summary.includes(', 0 to destroy')) {

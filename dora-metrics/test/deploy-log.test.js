@@ -1,5 +1,6 @@
-const exec = require('@actions/exec');
-const { generateFolders, uploadToBucket } = require('../src/deploy-log');
+import exec from '@actions/exec';
+
+import { generateFolders, uploadToBucket } from '../src/deploy-log';
 
 jest.mock('@actions/exec');
 jest.mock('@actions/core');

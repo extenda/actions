@@ -1,4 +1,4 @@
-const failIfNotTrunkBased = require('../src/trunk-killswitch');
+import failIfNotTrunkBased from '../src/trunk-killswitch';
 
 const orgEnv = process.env;
 

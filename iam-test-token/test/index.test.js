@@ -2,10 +2,11 @@ jest.mock('@actions/core');
 jest.mock('../src/iam-auth');
 jest.mock('../../gcp-secret-manager/src/secrets');
 
-const core = require('@actions/core');
-const getIamToken = require('../src/iam-auth');
-const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
-const action = require('../src/index');
+import core from '@actions/core';
+
+import { loadSecret } from '../../gcp-secret-manager/src/secrets';
+import getIamToken from '../src/iam-auth';
+import action from '../src/index';
 
 describe('iam-test-token', () => {
   afterEach(() => {

@@ -1,4 +1,4 @@
-const execGcloud = require('../utils/gcloud-output');
+import execGcloud from '../utils/gcloud-output';
 
 const checkIamSystem = async (systemName) => {
   const bucketPointer = `gs://authz-bundles/systems/${systemName}.tar.gz`;

@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const { setupPermissions, handlePermissions } = require('./permissions');
-const { setupRoles } = require('./roles');
+import core from '@actions/core';
+
+import { handlePermissions, setupPermissions } from './permissions';
+import { setupRoles } from './roles';
 
 const configureIAM = async (iam, iamUrl, iamToken, skipIAM) => {
   const { 'permission-prefix': permissionPrefix, permissions, roles } = iam;

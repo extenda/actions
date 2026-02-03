@@ -1,10 +1,10 @@
-const path = require('path');
-const axios = require('axios');
+import axios from 'axios';
+import path from 'path';
 
 jest.mock('axios');
 jest.mock('../src/sonar-credentials');
 
-const { checkQualityGate } = require('../src/check-quality-gate');
+import { checkQualityGate } from '../src/check-quality-gate';
 
 describe('Check Quality Gate', () => {
   test('Wait for OK', async () => {

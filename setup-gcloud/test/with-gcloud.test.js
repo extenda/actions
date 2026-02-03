@@ -1,6 +1,6 @@
-const setupGcloud = require('../src/setup-gcloud');
-const { execGcloud } = require('../src/exec-gcloud');
-const withGcloud = require('../src/with-gcloud');
+import { execGcloud } from '../src/exec-gcloud';
+import setupGcloud from '../src/setup-gcloud';
+import withGcloud from '../src/with-gcloud';
 
 jest.mock('../src/setup-gcloud');
 jest.mock('../src/exec-gcloud');

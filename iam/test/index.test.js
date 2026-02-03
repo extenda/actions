@@ -10,16 +10,17 @@ jest.mock('@actions/github');
 jest.mock('../../cloud-run/src/cluster-info');
 jest.mock('../../gcp-secret-manager/src/secrets');
 
-const core = require('@actions/core');
-const fg = require('fast-glob');
-const action = require('../src/index');
-const { configureIAM } = require('../src/configure-iam');
-const configureBundleSync = require('../src/configure-bundle-sync');
-const fetchIamToken = require('../../iam-test-token/src/iam-auth');
-const loadIamDefinition = require('../src/iam-definition');
-const { setupGcloud } = require('../../setup-gcloud');
-const loadCredentials = require('../src/load-credentials');
-const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
+import core from '@actions/core';
+import fg from 'fast-glob';
+
+import { getClusterInfo } from '../../cloud-run/src/cluster-info';
+import fetchIamToken from '../../iam-test-token/src/iam-auth';
+import { setupGcloud } from '../../setup-gcloud';
+import configureBundleSync from '../src/configure-bundle-sync';
+import { configureIAM } from '../src/configure-iam';
+import loadIamDefinition from '../src/iam-definition';
+import action from '../src/index';
+import loadCredentials from '../src/load-credentials';
 
 const credentials = {
   styraToken: 'styra-token',

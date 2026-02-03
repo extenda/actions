@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+import exec from '@actions/exec';
 
 /**
  * @param namespace Namespace name to be searched for.

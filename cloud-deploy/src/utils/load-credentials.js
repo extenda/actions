@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const { loadSecret } = require('../../../gcp-secret-manager/src/secrets');
-const { checkEnv } = require('../../../utils');
+import core from '@actions/core';
+
+import { loadSecret } from '../../../gcp-secret-manager/src/secrets';
+import { checkEnv } from '../../../utils';
 
 const getSecret = async (serviceAccountKey, secretName, envVar) => {
   let secret;

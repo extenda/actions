@@ -1,5 +1,5 @@
-const { execGcloud } = require('../../setup-gcloud/src');
-const uploadToBucket = require('../src/upload-to-bucket');
+import { execGcloud } from '../../setup-gcloud/src';
+import uploadToBucket from '../src/upload-to-bucket';
 
 jest.mock('../../setup-gcloud/src');
 

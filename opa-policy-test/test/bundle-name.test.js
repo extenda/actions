@@ -1,6 +1,7 @@
-const mockFs = require('mock-fs');
-const core = require('@actions/core');
-const getBundleName = require('../src/bundle-name');
+import core from '@actions/core';
+import mockFs from 'mock-fs';
+
+import getBundleName from '../src/bundle-name';
 
 jest.mock('@actions/core');
 

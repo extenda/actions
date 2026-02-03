@@ -1,6 +1,7 @@
-const path = require('path');
-const { credentials } = require('./sonar-credentials');
-const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
+import path from 'path';
+
+import { getPullRequestInfo } from '../../utils/src/pull-request-info';
+import { credentials } from './sonar-credentials';
 
 const createParams = async (
   hostUrl,

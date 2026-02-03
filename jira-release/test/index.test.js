@@ -1,9 +1,10 @@
 jest.mock('@actions/core');
 jest.mock('../src/jira-release');
 
-const core = require('@actions/core');
-const { createJiraRelease } = require('../src/jira-release');
-const action = require('../src/index');
+import core from '@actions/core';
+
+import action from '../src/index';
+import { createJiraRelease } from '../src/jira-release';
 
 const orgEnv = process.env;
 

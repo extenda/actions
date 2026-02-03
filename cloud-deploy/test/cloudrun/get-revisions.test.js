@@ -1,6 +1,6 @@
 jest.mock('@actions/exec');
-const execGcloud = require('../../src/utils/gcloud-output');
-const getRevisions = require('../../src/cloudrun/get-revisions');
+import getRevisions from '../../src/cloudrun/get-revisions';
+import execGcloud from '../../src/utils/gcloud-output';
 
 jest.mock('../../src/utils/gcloud-output');
 

@@ -1,7 +1,7 @@
-const fs = require('fs');
-const core = require('@actions/core');
-const yaml = require('yaml');
-const { validate } = require('jsonschema');
+import core from '@actions/core';
+import fs from 'fs';
+import { validate } from 'jsonschema';
+import yaml from 'yaml';
 
 const DEFAULT_CACHE_KEYS_FILE =
   'policies/policy/com.styra.envoy.ingress/rules/rules/cache-keys.yaml';

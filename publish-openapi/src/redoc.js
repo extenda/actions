@@ -1,6 +1,6 @@
-const exec = require('@actions/exec');
-const core = require('@actions/core');
-const fs = require('fs');
+import core from '@actions/core';
+import exec from '@actions/exec';
+import fs from 'fs';
 
 const wait = (ms) =>
   new Promise((resolve) => {

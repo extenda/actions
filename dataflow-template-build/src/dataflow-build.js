@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+import exec from '@actions/exec';
 
 // Dataflow build gcloud cmd
 const dataflowBuild = async (

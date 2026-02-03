@@ -1,4 +1,4 @@
-const execGcloud = require('../utils/gcloud-output');
+import execGcloud from '../utils/gcloud-output';
 
 const convertCPU = (cpu) => `${cpu * 1000}m`;
 const convertMemory = (memory) => {

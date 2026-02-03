@@ -1,5 +1,6 @@
-const exec = require('@actions/exec');
-const projectLabels = require('./project-labels');
+import exec from '@actions/exec';
+
+import projectLabels from './project-labels';
 
 const deployJob = async (
   newJobName,

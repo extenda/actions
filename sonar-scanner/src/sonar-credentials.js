@@ -1,5 +1,6 @@
-const core = require('@actions/core');
-const { loadSecretIntoEnv } = require('../../gcp-secret-manager/src/secrets');
+import core from '@actions/core';
+
+import { loadSecretIntoEnv } from '../../gcp-secret-manager/src/secrets';
 
 const defaultSonarToken = (hostUrl) =>
   hostUrl.startsWith('https://sonarcloud.io')

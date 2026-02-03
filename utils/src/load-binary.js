@@ -1,11 +1,11 @@
-const core = require('@actions/core');
-const tc = require('@actions/tool-cache');
-const io = require('@actions/io');
-const path = require('path');
-const axios = require('axios');
-const { v4: uuid } = require('uuid');
-const fs = require('fs');
-const os = require('os');
+import core from '@actions/core';
+import io from '@actions/io';
+import tc from '@actions/tool-cache';
+import axios from 'axios';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import { v4 as uuid } from 'uuid';
 
 const find = async ({ tool, binary, version }) =>
   Promise.resolve(tc.find(tool, version) /* process.arch), */).then((dir) =>

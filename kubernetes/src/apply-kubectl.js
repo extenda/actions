@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+import exec from '@actions/exec';
 
 /**
 Applies the existing kustomize from ./kustomize folder.

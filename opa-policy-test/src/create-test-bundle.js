@@ -1,9 +1,10 @@
-const path = require('path');
-const core = require('@actions/core');
-const { exec } = require('@actions/exec');
-const fs = require('fs');
-const { execGcloud } = require('../../setup-gcloud');
-const copyPolicies = require('./copy-policies');
+import core from '@actions/core';
+import { exec } from '@actions/exec';
+import fs from 'fs';
+import path from 'path';
+
+import { execGcloud } from '../../setup-gcloud';
+import copyPolicies from './copy-policies';
 
 const createTestBundle = async (bundleName, bucketName) => {
   const testBundlePath = 'test-bundle';

@@ -1,7 +1,8 @@
-const core = require('@actions/core');
-const { loadSecret } = require('../../../gcp-secret-manager/src/secrets');
-const { checkEnv } = require('../../../utils');
-const readSecret = require('../../src/utils/load-credentials');
+import core from '@actions/core';
+
+import { loadSecret } from '../../../gcp-secret-manager/src/secrets';
+import { checkEnv } from '../../../utils';
+import readSecret from '../../src/utils/load-credentials';
 
 jest.mock('@actions/core');
 jest.mock('../../../gcp-secret-manager/src/secrets');

@@ -1,10 +1,11 @@
 jest.mock('@actions/core');
 jest.mock('child_process');
 
-const mockFs = require('mock-fs');
-const core = require('@actions/core');
-const cp = require('child_process');
-const docker = require('../src/docker');
+import core from '@actions/core';
+import cp from 'child_process';
+import mockFs from 'mock-fs';
+
+import docker from '../src/docker';
 
 describe('core and cp methods', () => {
   afterEach(() => {

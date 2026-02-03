@@ -1,18 +1,19 @@
-const fs = require('fs');
-const path = require('path');
-const util = require('util');
+import fs from 'fs';
+import path from 'path';
+import util from 'util';
 
 const recommendedVersionBump = util.promisify(
   require('conventional-recommended-bump'),
 );
-const gitRawCommits = require('git-raw-commits');
-const conventionalCommitsParser = require('conventional-commits-parser');
-const conventionalChangelog = require('conventional-changelog-core');
-const conventionalCommits = require('conventional-changelog-conventionalcommits');
-const streamToString = require('stream-to-string');
-const through2 = require('through2');
-const mergeConfig = require('conventional-changelog-core/lib/merge-config');
-const { getTagAtCommit } = require('./branch-info');
+import conventionalCommits from 'conventional-changelog-conventionalcommits';
+import conventionalChangelog from 'conventional-changelog-core';
+import mergeConfig from 'conventional-changelog-core/lib/merge-config';
+import conventionalCommitsParser from 'conventional-commits-parser';
+import gitRawCommits from 'git-raw-commits';
+import streamToString from 'stream-to-string';
+import through2 from 'through2';
+
+import { getTagAtCommit } from './branch-info';
 
 let tagPrefix = process.env.TAG_PREFIX || 'v';
 

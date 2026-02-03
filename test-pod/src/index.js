@@ -1,8 +1,9 @@
-const core = require('@actions/core');
-const { run } = require('../../utils');
-const configureKubeCtl = require('./configure-kubectl');
-const { createConfigMap, deleteConfigMap } = require('./configmap');
-const runPod = require('./run-pod');
+import core from '@actions/core';
+
+import { run } from '../../utils';
+import { createConfigMap, deleteConfigMap } from './configmap';
+import configureKubeCtl from './configure-kubectl';
+import runPod from './run-pod';
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {

@@ -10,13 +10,14 @@ jest.mock('../src/sonar-credentials', () => ({
 }));
 jest.mock('../../utils/src/pull-request-info');
 
-const core = require('@actions/core');
-const { createProject } = require('../src/create-project');
-const { scan } = require('../src/scan');
-const { scanMsBuild } = require('../src/scan-msbuild');
-const { checkQualityGate } = require('../src/check-quality-gate');
-const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
-const action = require('../src/index');
+import core from '@actions/core';
+
+import { getPullRequestInfo } from '../../utils/src/pull-request-info';
+import { checkQualityGate } from '../src/check-quality-gate';
+import { createProject } from '../src/create-project';
+import action from '../src/index';
+import { scan } from '../src/scan';
+import { scanMsBuild } from '../src/scan-msbuild';
 
 const orgEnv = process.env;
 const getInput = jest.spyOn(core, 'getInput');

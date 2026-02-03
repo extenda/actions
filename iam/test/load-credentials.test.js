@@ -1,8 +1,8 @@
-const secrets = require('../../gcp-secret-manager/src/secrets');
+import secrets from '../../gcp-secret-manager/src/secrets';
 
 jest.mock('../../gcp-secret-manager/src/secrets');
 
-const loadCredentials = require('../src/load-credentials');
+import loadCredentials from '../src/load-credentials';
 
 const orgEnv = process.env;
 

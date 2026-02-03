@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const gcloud = require('./gcloud-output');
+import core from '@actions/core';
+import exec from '@actions/exec';
+
+import gcloud from './gcloud-output';
 
 let dnsProjectId;
 

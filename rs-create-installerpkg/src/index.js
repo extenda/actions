@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const { buildPackage } = require('./pkgbuilder');
-const { checkEnv, run } = require('../../utils');
+import core from '@actions/core';
+
+import { checkEnv, run } from '../../utils';
+import { buildPackage } from './pkgbuilder';
 
 const action = async () => {
   try {

@@ -1,5 +1,5 @@
-const getToken = require('../../src/utils/identity-token');
-const { execGcloud } = require('../../../setup-gcloud');
+import { execGcloud } from '../../../setup-gcloud';
+import getToken from '../../src/utils/identity-token';
 
 jest.mock('../../../setup-gcloud');
 

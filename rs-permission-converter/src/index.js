@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const { convertPermissions } = require('./permconv');
-const { checkEnv } = require('../../utils');
+import core from '@actions/core';
+
+import { checkEnv } from '../../utils';
+import { convertPermissions } from './permconv';
 
 const run = async () => {
   try {

@@ -1,5 +1,5 @@
-const exec = require('@actions/exec');
-const core = require('@actions/core');
+import core from '@actions/core';
+import exec from '@actions/exec';
 
 const generateFolders = async (
   productName,

@@ -1,5 +1,5 @@
-const { securitySpec } = require('./security-sidecar');
-const { cloudRunCollector } = require('./collector-sidecar');
+import { cloudRunCollector } from './collector-sidecar';
+import { securitySpec } from './security-sidecar';
 
 const configureNetworking = async (
   annotations,

@@ -4,12 +4,13 @@ jest.mock('../src/drain-job');
 jest.mock('../../setup-gcloud');
 jest.mock('../../cloud-run/src/cluster-info');
 
-const core = require('@actions/core');
-const action = require('../src/index');
-const { setupGcloud } = require('../../setup-gcloud');
-const drainJob = require('../src/drain-job');
-const deployJob = require('../src/deploy-job');
-const { getTribeProject } = require('../../cloud-run/src/cluster-info');
+import core from '@actions/core';
+
+import { getTribeProject } from '../../cloud-run/src/cluster-info';
+import { setupGcloud } from '../../setup-gcloud';
+import deployJob from '../src/deploy-job';
+import drainJob from '../src/drain-job';
+import action from '../src/index';
 
 const orgEnv = process.env;
 

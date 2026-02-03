@@ -1,6 +1,6 @@
-const cp = require('child_process');
-const core = require('@actions/core');
-const fs = require('fs');
+import core from '@actions/core';
+import cp from 'child_process';
+import fs from 'fs';
 
 const createBuildCommand = (
   dockerfile,

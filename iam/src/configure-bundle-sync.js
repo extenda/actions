@@ -1,7 +1,8 @@
-const axios = require('axios');
-const core = require('@actions/core');
-const { execGcloud } = require('../../setup-gcloud');
-const getDasWorkerBaseUrl = require('./das-worker-base-url');
+import core from '@actions/core';
+import axios from 'axios';
+
+import { execGcloud } from '../../setup-gcloud';
+import getDasWorkerBaseUrl from './das-worker-base-url';
 
 const getToken = async () =>
   execGcloud(['auth', 'print-identity-token', '--audiences=iam-das-worker']);

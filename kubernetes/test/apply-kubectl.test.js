@@ -1,6 +1,7 @@
-const mockFs = require('mock-fs');
-const exec = require('@actions/exec');
-const applyKubectl = require('../src/apply-kubectl');
+import exec from '@actions/exec';
+import mockFs from 'mock-fs';
+
+import applyKubectl from '../src/apply-kubectl';
 
 jest.mock('@actions/exec');
 

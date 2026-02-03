@@ -1,4 +1,4 @@
-const execGcloud = require('./gcloud-output');
+import execGcloud from './gcloud-output';
 
 const matchName = (connectorName, nameConvention) =>
   connectorName === nameConvention;

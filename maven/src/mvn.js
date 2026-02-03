@@ -1,9 +1,9 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const io = require('@actions/io');
-const path = require('path');
-const fs = require('fs');
-const os = require('os');
+import core from '@actions/core';
+import exec from '@actions/exec';
+import io from '@actions/io';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 
 const mavenHome = path.join(os.homedir(), '.m2');
 const mavenSettings = path.join(mavenHome, 'settings.xml');

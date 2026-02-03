@@ -1,23 +1,24 @@
-const core = require('@actions/core');
-const buildManifest = require('./manifests/build-manifest');
-const loadServiceDefinition = require('./utils/service-definition');
-const deploy = require('./manifests/deploy');
-const projectInfo = require('../../cloud-run/src/project-info');
-const { run, failIfNotTrunkBased } = require('../../utils');
-const { setupGcloud } = require('../../setup-gcloud');
-const readSecret = require('./utils/load-credentials');
-const runScan = require('./utils/vulnerability-scanning');
-const getImageWithSha256 = require('./manifests/image-sha256');
-const publishPolicies = require('./policies/publish-policies');
-const checkPolicyExists = require('./utils/cloud-armor');
-const {
-  sendScaleSetup,
+import core from '@actions/core';
+
+import projectInfo from '../../cloud-run/src/project-info';
+import { setupGcloud } from '../../setup-gcloud';
+import { failIfNotTrunkBased, run } from '../../utils';
+import buildManifest from './manifests/build-manifest';
+import { imageTag as collectorVersion } from './manifests/collector-sidecar';
+import deploy from './manifests/deploy';
+import getImageWithSha256 from './manifests/image-sha256';
+import { securityVersion } from './manifests/security-sidecar';
+import publishPolicies from './policies/publish-policies';
+import checkPolicyExists from './utils/cloud-armor';
+import readSecret from './utils/load-credentials';
+import {
+  refreshCanaryStatus,
   sendDeployInfo,
   sendDeployRequest,
-  refreshCanaryStatus,
-} = require('./utils/send-request');
-const { securityVersion } = require('./manifests/security-sidecar');
-const { imageTag: collectorVersion } = require('./manifests/collector-sidecar');
+  sendScaleSetup,
+} from './utils/send-request';
+import loadServiceDefinition from './utils/service-definition';
+import runScan from './utils/vulnerability-scanning';
 
 const action = async () => {
   const serviceAccountKeyPipeline = core.getInput('secrets-account-key', {

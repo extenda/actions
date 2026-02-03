@@ -1,8 +1,9 @@
-const fs = require('fs');
-const yaml = require('yaml');
-const core = require('@actions/core');
-const { validate } = require('jsonschema');
-const jsonSchema = require('./iam-schema');
+import core from '@actions/core';
+import fs from 'fs';
+import { validate } from 'jsonschema';
+import yaml from 'yaml';
+
+import jsonSchema from './iam-schema';
 
 const loadFile = (iamFile) => {
   if (!fs.existsSync(iamFile)) {

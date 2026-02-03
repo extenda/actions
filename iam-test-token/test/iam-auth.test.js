@@ -1,8 +1,9 @@
 jest.mock('@actions/core');
 jest.mock('axios');
 
-const axios = require('axios');
-const fetchIamToken = require('../src/iam-auth');
+import axios from 'axios';
+
+import fetchIamToken from '../src/iam-auth';
 
 describe('fetch iam-api token', () => {
   afterEach(() => {

@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const { checkEnv, run } = require('../../utils');
-const { createJiraRelease } = require('./jira-release');
+import core from '@actions/core';
+
+import { checkEnv, run } from '../../utils';
+import { createJiraRelease } from './jira-release';
 
 const action = async () => {
   checkEnv(['JIRA_USERNAME', 'JIRA_PASSWORD']);

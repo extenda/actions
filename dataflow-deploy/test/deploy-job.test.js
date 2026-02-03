@@ -1,6 +1,7 @@
 jest.mock('@actions/exec');
-const exec = require('@actions/exec');
-const deployJob = require('../src/deploy-job');
+import exec from '@actions/exec';
+
+import deployJob from '../src/deploy-job';
 
 const mockExecListeners = (output) => (cmd, args, opts) => {
   opts.listeners.stdout(Buffer.from(output, 'utf8'));

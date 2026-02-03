@@ -1,4 +1,4 @@
-const joi = require('joi');
+import joi from 'joi';
 
 const schema = joi.object({
   version: joi.number().equal(1),

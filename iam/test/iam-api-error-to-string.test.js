@@ -1,4 +1,4 @@
-const { iamApiErrorToString } = require('../src/utils/iam-api-error-to-string');
+import { iamApiErrorToString } from '../src/utils/iam-api-error-to-string';
 
 describe('iamApiErrorToString', () => {
   test('http 400 error', () => {

@@ -1,5 +1,6 @@
-const core = require('@actions/core');
-const loadGitHubToken = require('../src/load-github-token');
+import core from '@actions/core';
+
+import loadGitHubToken from '../src/load-github-token';
 
 jest.mock('@actions/core');
 

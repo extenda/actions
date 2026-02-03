@@ -1,20 +1,21 @@
-const path = require('path');
-const fs = require('fs');
-const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
-const { setupGcloud } = require('../../setup-gcloud');
-const checkNamespaceExists = require('./check-namespace-exists');
-const execKustomize = require('./kustomize');
-const patchStatefulSetYaml = require('./patch-statefulset-yaml');
-const patchDeploymentYaml = require('./patch-deployment-yaml');
-const patchServiceYaml = require('./patch-service-yaml');
-const patchConfigMapYaml = require('./patch-configmap-yaml');
-const parseEnvironmentArgs = require('./environment-args');
-const createBaseKustomizeFiles = require('./create-base-kustomize');
-const applyKubectl = require('./apply-kubectl');
-const checkRequiredNumberOfPodsIsRunning = require('./check-number-of-pods-running');
-const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
-const applyAutoscale = require('./autoscale');
-const { getImageDigest } = require('../../utils/src');
+import fs from 'fs';
+import path from 'path';
+
+import { getClusterInfo } from '../../cloud-run/src/cluster-info';
+import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth';
+import { setupGcloud } from '../../setup-gcloud';
+import { getImageDigest } from '../../utils/src';
+import applyKubectl from './apply-kubectl';
+import applyAutoscale from './autoscale';
+import checkNamespaceExists from './check-namespace-exists';
+import checkRequiredNumberOfPodsIsRunning from './check-number-of-pods-running';
+import createBaseKustomizeFiles from './create-base-kustomize';
+import parseEnvironmentArgs from './environment-args';
+import execKustomize from './kustomize';
+import patchConfigMapYaml from './patch-configmap-yaml';
+import patchDeploymentYaml from './patch-deployment-yaml';
+import patchServiceYaml from './patch-service-yaml';
+import patchStatefulSetYaml from './patch-statefulset-yaml';
 
 /**
  * Applies patch function to the kubernetes manifest file.

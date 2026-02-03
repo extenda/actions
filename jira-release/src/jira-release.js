@@ -1,9 +1,8 @@
-const core = require('@actions/core');
-const JiraClient = require('jira-client');
-const semver = require('semver');
-const {
-  findJiraChanges,
-} = require('../../jira-releasenotes/src/jira-releasenotes');
+import core from '@actions/core';
+import JiraClient from 'jira-client';
+import semver from 'semver';
+
+import { findJiraChanges } from '../../jira-releasenotes/src/jira-releasenotes';
 
 const releaseName = (projectKey, component, version) => {
   const release = [projectKey];

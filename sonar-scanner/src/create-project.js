@@ -1,8 +1,9 @@
-const core = require('@actions/core');
-const axios = require('axios');
-const path = require('path');
-const qs = require('qs');
-const { sonarAuth } = require('./sonar-credentials');
+import core from '@actions/core';
+import axios from 'axios';
+import path from 'path';
+import qs from 'qs';
+
+import { sonarAuth } from './sonar-credentials';
 
 const projectExists = async (hostUrl, organization, project) =>
   axios

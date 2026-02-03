@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+import exec from '@actions/exec';
 
 const authenticateKubeCtl = async ({ cluster, clusterLocation, project }) =>
   exec.exec('gcloud', [

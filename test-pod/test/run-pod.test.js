@@ -4,10 +4,11 @@ jest.mock('../../utils', () => ({
   getImageDigest: jest.fn(),
 }));
 
-const exec = require('@actions/exec');
-const podRun = require('../src/run-pod');
-const extract = require('../src/extract-output');
-const { getImageDigest } = require('../../utils/src');
+import exec from '@actions/exec';
+
+import { getImageDigest } from '../../utils/src';
+import extract from '../src/extract-output';
+import podRun from '../src/run-pod';
 
 const orgEnv = process.env;
 

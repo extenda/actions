@@ -1,7 +1,8 @@
-const mockFs = require('mock-fs');
-const exec = require('@actions/exec');
-const fs = require('fs');
-const applyAutoscale = require('../src/autoscale');
+import exec from '@actions/exec';
+import fs from 'fs';
+import mockFs from 'mock-fs';
+
+import applyAutoscale from '../src/autoscale';
 
 jest.mock('@actions/exec');
 

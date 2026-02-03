@@ -1,7 +1,8 @@
-const mockFs = require('mock-fs');
-const { readFile } = require('fs').promises;
-const { join } = require('path');
-const { createNpmrcFile } = require('../src/npmrc');
+import { readFile } from 'fs';
+import mockFs from 'mock-fs';
+import { join } from 'path';
+
+import { createNpmrcFile } from '../src/npmrc';
 
 const expectedNpmrcForInstall = `
 @hiiretail:registry = https://repo.extendaretail.com/repository/npm-group/

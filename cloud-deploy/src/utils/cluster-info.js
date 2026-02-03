@@ -1,5 +1,6 @@
-const core = require('@actions/core');
-const gcloud = require('./gcloud-output');
+import core from '@actions/core';
+
+import gcloud from './gcloud-output';
 
 const getTribeProject = async (projectId) => {
   const projectChunks = projectId.split('-');

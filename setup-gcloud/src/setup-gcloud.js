@@ -1,15 +1,16 @@
-const path = require('path');
-const fs = require('fs');
-const core = require('@actions/core');
-const io = require('@actions/io');
-const { restoreCache, saveCache } = require('@actions/cache');
-const glob = require('fast-glob');
-const { v4: uuid } = require('uuid');
-const { loadTool } = require('../../utils');
-const createKeyFile = require('../../utils/src/create-key-file');
-const getDownloadUrl = require('./download-url');
-const getLatestVersion = require('./latest-version');
-const { execGcloud } = require('./exec-gcloud');
+import { restoreCache, saveCache } from '@actions/cache';
+import core from '@actions/core';
+import io from '@actions/io';
+import glob from 'fast-glob';
+import fs from 'fs';
+import path from 'path';
+import { v4 as uuid } from 'uuid';
+
+import { loadTool } from '../../utils';
+import createKeyFile from '../../utils/src/create-key-file';
+import getDownloadUrl from './download-url';
+import { execGcloud } from './exec-gcloud';
+import getLatestVersion from './latest-version';
 
 // Increment this version if the list of installed components are modified.
 const CACHE_VERSION = '2';

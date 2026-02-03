@@ -1,4 +1,4 @@
-const { execGcloud } = require('../../../setup-gcloud');
+import { execGcloud } from '../../../setup-gcloud';
 
 const getToken = async (audience = 'cloud-deploy') =>
   execGcloud(

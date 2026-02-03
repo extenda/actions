@@ -1,8 +1,8 @@
-const { setupGcloud } = require('../../setup-gcloud');
-const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
-const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
-const loadServiceDefinition = require('../../cloud-run/src/service-definition');
-const cloudRunSchema = require('../../cloud-run/src/cloud-run-schema');
+import cloudRunSchema from '../../cloud-run/src/cloud-run-schema';
+import { getClusterInfo } from '../../cloud-run/src/cluster-info';
+import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth';
+import loadServiceDefinition from '../../cloud-run/src/service-definition';
+import { setupGcloud } from '../../setup-gcloud';
 
 const resolveClusterAndNamespace = (clusterInput, namespaceInput) => {
   if (clusterInput && namespaceInput) {

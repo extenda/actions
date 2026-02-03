@@ -1,7 +1,8 @@
-const core = require('@actions/core');
-const gcloudOutput = require('./gcloud-output');
-const kubectl = require('./kubectl');
-const checkStatusAndKillFailingPods = require('./rollback');
+import core from '@actions/core';
+
+import gcloudOutput from './gcloud-output';
+import kubectl from './kubectl';
+import checkStatusAndKillFailingPods from './rollback';
 
 const getLatestRevision = async (revisionsList) => {
   const revisions = revisionsList.split(/[\r\n]+/);

@@ -1,5 +1,5 @@
-const axios = require('axios');
-const core = require('@actions/core');
+import core from '@actions/core';
+import axios from 'axios';
 
 /**
  * @param auth {{key: string, email: string, pass: string, gipTenantId}}

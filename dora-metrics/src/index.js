@@ -1,7 +1,8 @@
-const core = require('@actions/core');
-const { run } = require('../../utils');
-const generateBugLog = require('./bug-log');
-const { generateFolders, uploadToBucket } = require('./deploy-log');
+import core from '@actions/core';
+
+import { run } from '../../utils';
+import generateBugLog from './bug-log';
+import { generateFolders, uploadToBucket } from './deploy-log';
 
 const action = async () => {
   const productName = core.getInput('product-name', { required: true });

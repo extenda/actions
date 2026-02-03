@@ -1,6 +1,6 @@
-const core = require('@actions/core');
-const yaml = require('yaml');
-const fs = require('fs');
+import core from '@actions/core';
+import fs from 'fs';
+import yaml from 'yaml';
 
 const readFromCloudDeploy = () => {
   const fileName = 'cloud-deploy.yaml';

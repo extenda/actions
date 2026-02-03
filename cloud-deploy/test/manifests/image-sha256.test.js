@@ -1,5 +1,5 @@
-const { execGcloud } = require('../../../setup-gcloud');
-const getImageWithSha256 = require('../../src/manifests/image-sha256');
+import { execGcloud } from '../../../setup-gcloud';
+import getImageWithSha256 from '../../src/manifests/image-sha256';
 
 jest.mock('../../../setup-gcloud');
 

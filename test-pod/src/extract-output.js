@@ -1,8 +1,8 @@
-const os = require('os');
-const fs = require('fs');
-const path = require('path');
-const core = require('@actions/core');
-const { extractTar } = require('@actions/tool-cache');
+import core from '@actions/core';
+import { extractTar } from '@actions/tool-cache';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 
 const OUT_BEGIN_MARKER = 'test-pod-output BEGIN';
 const OUT_END_MARKER = 'test-pod-output END';

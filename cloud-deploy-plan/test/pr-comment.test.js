@@ -1,5 +1,5 @@
-const { getPullRequestNumber, postComment } = require('../src/pr-comment');
-const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
+import { getPullRequestInfo } from '../../utils/src/pull-request-info';
+import { getPullRequestNumber, postComment } from '../src/pr-comment';
 
 const mockCreateComment = jest.fn();
 const mockListComments = jest.fn();

@@ -1,6 +1,7 @@
-const axios = require('axios');
-const configureBundleSync = require('../src/configure-bundle-sync');
-const { execGcloud } = require('../../setup-gcloud');
+import axios from 'axios';
+
+import { execGcloud } from '../../setup-gcloud';
+import configureBundleSync from '../src/configure-bundle-sync';
 
 jest.mock('../../setup-gcloud');
 jest.mock('axios');

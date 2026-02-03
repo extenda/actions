@@ -1,4 +1,4 @@
-const getRevisions = require('./get-revisions');
+import getRevisions from './get-revisions';
 
 const getLatestRevision = async (
   namespace,

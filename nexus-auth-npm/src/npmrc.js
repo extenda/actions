@@ -1,5 +1,5 @@
-const { writeFile } = require('fs').promises;
-const { join } = require('path');
+import { writeFile } from 'fs';
+import { join } from 'path';
 
 /**
  * @param {{

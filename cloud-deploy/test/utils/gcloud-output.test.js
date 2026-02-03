@@ -1,6 +1,7 @@
-const exec = require('@actions/exec');
-const execGcloud = require('../../src/utils/gcloud-output');
-const handleError = require('../../src/utils/error-handler');
+import exec from '@actions/exec';
+
+import handleError from '../../src/utils/error-handler';
+import execGcloud from '../../src/utils/gcloud-output';
 
 jest.mock('@actions/exec');
 jest.mock('../../src/utils/error-handler');

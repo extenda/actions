@@ -1,7 +1,7 @@
-const yaml = require('js-yaml');
-const fg = require('fast-glob');
-const { readFileSync } = require('fs');
-const core = require('@actions/core');
+import core from '@actions/core';
+import fg from 'fast-glob';
+import { readFileSync } from 'fs';
+import yaml from 'js-yaml';
 
 function loadDefinition(path) {
   core.info(`Loading ${path} config file`);

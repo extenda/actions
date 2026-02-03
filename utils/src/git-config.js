@@ -1,5 +1,5 @@
-const simpleGit = require('simple-git');
-const path = require('path');
+import path from 'path';
+import simpleGit from 'simple-git';
 
 const basicAuth = () => {
   const buffer = Buffer.from(

@@ -1,5 +1,5 @@
-const getRevisions = require('../src/get-revisions');
-const getLatestRevision = require('../src/get-revision');
+import getLatestRevision from '../src/get-revision';
+import getRevisions from '../src/get-revisions';
 
 jest.mock('../src/get-revisions');
 

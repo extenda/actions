@@ -1,4 +1,4 @@
-const simpleGit = require('simple-git');
+import simpleGit from 'simple-git';
 
 const isPreRelease = (branchName) => branchName !== 'master';
 

@@ -1,14 +1,14 @@
-const exec = require('@actions/exec');
-const path = require('path');
-const fs = require('fs');
-const os = require('os');
+import exec from '@actions/exec';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 
 jest.mock('@actions/exec');
 
 jest.mock('../src/sonar-credentials');
 jest.mock('../../utils/src/pull-request-info');
 
-const { scanMsBuild, markerFile } = require('../src/scan-msbuild');
+import { markerFile, scanMsBuild } from '../src/scan-msbuild';
 
 const orgEnv = process.env;
 

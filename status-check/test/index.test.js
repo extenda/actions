@@ -13,9 +13,10 @@ jest.mock('@actions/github', () => ({
   }),
 }));
 
-const core = require('@actions/core');
-const action = require('../src/index');
-const { loadGitHubToken } = require('../../utils');
+import core from '@actions/core';
+
+import { loadGitHubToken } from '../../utils';
+import action from '../src/index';
 
 const orgEnv = process.env;
 

@@ -1,6 +1,7 @@
-const exec = require('@actions/exec');
-const core = require('@actions/core');
-const { getShortSha } = require('../../utils/src/branch-info');
+import core from '@actions/core';
+import exec from '@actions/exec';
+
+import { getShortSha } from '../../utils/src/branch-info';
 
 const mapName = async () => {
   const repo = process.env.GITHUB_REPOSITORY.split('/')[1];

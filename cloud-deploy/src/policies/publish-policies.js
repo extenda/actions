@@ -1,11 +1,12 @@
-const core = require('@actions/core');
-const axios = require('axios');
-const axiosRetry = require('axios-retry').default;
-const fs = require('fs');
-const glob = require('fast-glob');
-const path = require('path');
-const { execGcloud } = require('../../../setup-gcloud');
-const getDasWorkerBaseUrl = require('../../../iam/src/das-worker-base-url');
+import core from '@actions/core';
+import axios from 'axios';
+import axiosRetry from 'axios-retry';
+import glob from 'fast-glob';
+import fs from 'fs';
+import path from 'path';
+
+import getDasWorkerBaseUrl from '../../../iam/src/das-worker-base-url';
+import { execGcloud } from '../../../setup-gcloud';
 
 axiosRetry(axios, {
   retries: 4,

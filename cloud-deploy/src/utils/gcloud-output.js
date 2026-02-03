@@ -1,6 +1,7 @@
-const exec = require('@actions/exec');
-const handleError = require('./error-handler');
-const { findExecutable } = require('../../../setup-gcloud/src/exec-gcloud');
+import exec from '@actions/exec';
+
+import { findExecutable } from '../../../setup-gcloud/src/exec-gcloud';
+import handleError from './error-handler';
 
 /**
  * Execute gcloud and return the standard output.

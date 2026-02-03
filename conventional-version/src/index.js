@@ -1,8 +1,8 @@
-const core = require('@actions/core');
+import core from '@actions/core';
 
-const { checkEnv, run } = require('../../utils');
-const versions = require('../../utils/src/versions');
-const branchinfo = require('../../utils/src/branch-info');
+import { checkEnv, run } from '../../utils';
+import branchinfo from '../../utils/src/branch-info';
+import versions from '../../utils/src/versions';
 
 const action = async () => {
   try {

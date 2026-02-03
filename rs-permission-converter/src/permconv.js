@@ -1,7 +1,8 @@
-const os = require('os');
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const { loadTool } = require('../../utils');
+import core from '@actions/core';
+import exec from '@actions/exec';
+import os from 'os';
+
+import { loadTool } from '../../utils';
 
 const BINARY_NAME =
   os.platform() !== 'win32' ? 'PermissionConverter' : 'PermissionConverter.exe';

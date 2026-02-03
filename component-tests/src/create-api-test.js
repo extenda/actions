@@ -1,5 +1,5 @@
-const { agent } = require('supertest');
-const core = require('@actions/core');
+import core from '@actions/core';
+import { agent } from 'supertest';
 
 /**
  * @param {string} baseUrl

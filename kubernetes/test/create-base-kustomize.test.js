@@ -1,7 +1,7 @@
-const mockFs = require('mock-fs');
-const fs = require('fs');
+import fs from 'fs';
+import mockFs from 'mock-fs';
 
-const createBaseKustomize = require('../src/create-base-kustomize');
+import createBaseKustomize from '../src/create-base-kustomize';
 
 describe('Creates base kustomize yaml files', () => {
   beforeEach(() => {

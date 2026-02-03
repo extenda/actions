@@ -1,10 +1,10 @@
-const path = require('path');
+import path from 'path';
 
 jest.mock('../src/sonar-credentials');
 jest.mock('../../utils/src/pull-request-info');
 
-const { createParams } = require('../src/params');
-const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
+import { getPullRequestInfo } from '../../utils/src/pull-request-info';
+import { createParams } from '../src/params';
 
 const orgEnv = process.env;
 

@@ -1,4 +1,4 @@
-const getDasWorkerBaseUrl = require('../src/das-worker-base-url');
+import getDasWorkerBaseUrl from '../src/das-worker-base-url';
 
 describe('getDasWorkerBaseUrl', () => {
   it('points to `.com` for normal systems', () => {

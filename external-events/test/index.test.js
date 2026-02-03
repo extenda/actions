@@ -2,15 +2,16 @@ jest.mock('@actions/core');
 jest.mock('fast-glob');
 jest.mock('../src/secrets-manager/load-secrets');
 
-const core = require('@actions/core');
-const mockFs = require('mock-fs');
-const fg = require('fast-glob');
-const nock = require('nock');
-const camelcaseKeys = require('camelcase-keys');
-const { loadSecrets } = require('../src/secrets-manager/load-secrets');
-const configFixtures = require('./fixtures/configs');
-const { secrets } = require('./fixtures/secrets');
-const action = require('../src/index');
+import core from '@actions/core';
+import camelcaseKeys from 'camelcase-keys';
+import fg from 'fast-glob';
+import mockFs from 'mock-fs';
+import nock from 'nock';
+
+import action from '../src/index';
+import { loadSecrets } from '../src/secrets-manager/load-secrets';
+import configFixtures from './fixtures/configs';
+import { secrets } from './fixtures/secrets';
 
 function mockIdpTokenCall() {
   nock('https://identitytoolkit.googleapis.com')

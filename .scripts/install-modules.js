@@ -1,4 +1,4 @@
-const { npmArgument, modules } = require('./modules');
+import { modules, npmArgument } from './modules.js';
 
 (async () => {
   if (!/-D|--save/.test(npmArgument)) {

@@ -2,6 +2,7 @@
   "name": "actions",
   "version": "0.0.1-local",
   "description": "Extenda Retail GitHub Actions",
+  "type": "module",
   "private": true,
   "scripts": {
     "build": "node .scripts/build-modules.js",

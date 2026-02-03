@@ -1,9 +1,9 @@
-const exec = require('@actions/exec');
-const core = require('@actions/core');
-const path = require('path');
-const fg = require('fast-glob');
-const fs = require('fs');
-const pLimit = require('p-limit');
+import core from '@actions/core';
+import exec from '@actions/exec';
+import fg from 'fast-glob';
+import fs from 'fs';
+import pLimit from 'p-limit';
+import path from 'path';
 
 const terraformShow = async (plan) => {
   let stdout = '';

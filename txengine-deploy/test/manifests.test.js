@@ -1,10 +1,10 @@
 jest.mock('@actions/core');
 jest.mock('axios');
 
-const mockFs = require('mock-fs');
-const fs = require('fs');
-const yaml = require('yaml');
-const axios = require('axios');
+import axios from 'axios';
+import fs from 'fs';
+import mockFs from 'mock-fs';
+import yaml from 'yaml';
 
 const mockLoadSecret = jest.fn();
 jest.mock('../../gcp-secret-manager/src/secrets', () => ({
@@ -22,7 +22,7 @@ jest.mock('@actions/github', () => ({
   }),
 }));
 
-const createManifests = require('../src/manifests');
+import createManifests from '../src/manifests';
 
 describe('manifests', () => {
   afterEach(() => {

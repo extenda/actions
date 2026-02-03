@@ -1,6 +1,7 @@
-const exec = require('@actions/exec');
-const generateBugLog = require('../src/bug-log');
-const { generateFolders } = require('../src/deploy-log');
+import exec from '@actions/exec';
+
+import generateBugLog from '../src/bug-log';
+import { generateFolders } from '../src/deploy-log';
 
 const mockSearchJira = jest.fn();
 

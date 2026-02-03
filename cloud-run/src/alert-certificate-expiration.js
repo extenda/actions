@@ -1,5 +1,6 @@
-const exec = require('@actions/exec');
-const notifySlack = require('../../slack-notify/src/slack-notify');
+import exec from '@actions/exec';
+
+import notifySlack from '../../slack-notify/src/slack-notify';
 
 const alertOnExpiration = async (
   expirationDate,

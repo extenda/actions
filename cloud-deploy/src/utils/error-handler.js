@@ -1,4 +1,4 @@
-const core = require('@actions/core');
+import core from '@actions/core';
 
 const handleError = async (errorMessage, action) => {
   let message = `${action} resulted in: ${errorMessage}`;

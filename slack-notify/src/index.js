@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const { run } = require('../../utils/src');
-const notifySlack = require('./slack-notify');
+import core from '@actions/core';
+
+import { run } from '../../utils/src';
+import notifySlack from './slack-notify';
 
 const action = async () => {
   const serviceAccount = core.getInput('service-account-key', {

@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+import exec from '@actions/exec';
 
 const getJobs = async (region, jobName, newJobId, projectId) => {
   let output = '';

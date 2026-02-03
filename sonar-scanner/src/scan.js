@@ -1,9 +1,10 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const fs = require('fs');
-const path = require('path');
-const { createParams } = require('./params');
-const mvn = require('../../maven/src/mvn');
+import core from '@actions/core';
+import exec from '@actions/exec';
+import fs from 'fs';
+import path from 'path';
+
+import mvn from '../../maven/src/mvn';
+import { createParams } from './params';
 
 const isAutoDiscovered = (sonarScanner, workingDir, file) =>
   sonarScanner === 'auto' && fs.existsSync(path.join(workingDir, file));

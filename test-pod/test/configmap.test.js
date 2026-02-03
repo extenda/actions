@@ -1,6 +1,7 @@
 jest.mock('@actions/exec');
-const exec = require('@actions/exec');
-const { createConfigMap, deleteConfigMap } = require('../src/configmap');
+import exec from '@actions/exec';
+
+import { createConfigMap, deleteConfigMap } from '../src/configmap';
 
 const orgEnv = process.env;
 

@@ -1,9 +1,10 @@
-const core = require('@actions/core');
-const path = require('path');
-const semver = require('semver');
-const os = require('os');
-const fs = require('fs');
-const { run, loadTool } = require('../../utils');
+import core from '@actions/core';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import semver from 'semver';
+
+import { loadTool, run } from '../../utils';
 
 const fromFile = (file) => {
   if (fs.existsSync(file)) {

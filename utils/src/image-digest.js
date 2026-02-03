@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+import exec from '@actions/exec';
 
 const getImageDigest = async (image) => {
   const imageName = image.split(':')[0];

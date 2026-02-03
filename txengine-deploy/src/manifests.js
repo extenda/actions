@@ -1,9 +1,10 @@
-const github = require('@actions/github');
-const fs = require('fs');
-const path = require('path');
-const yaml = require('yaml');
-const axios = require('axios');
-const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
+import github from '@actions/github';
+import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
+import yaml from 'yaml';
+
+import { loadSecret } from '../../gcp-secret-manager/src/secrets';
 
 const getContent = async (url) =>
   axios({

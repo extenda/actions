@@ -1,5 +1,5 @@
-const exec = require('@actions/exec');
-const fs = require('fs');
+import exec from '@actions/exec';
+import fs from 'fs';
 
 const getAutoscaleType = (autoscale) => {
   if (!autoscale) {

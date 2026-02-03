@@ -1,5 +1,5 @@
-const { securitySpec } = require('./security-sidecar');
-const { kubernetesCollector } = require('./collector-sidecar');
+import { kubernetesCollector } from './collector-sidecar';
+import { securitySpec } from './security-sidecar';
 
 const volumeSetup = (opa, protocol, type = 'none') => {
   const volumes = [];

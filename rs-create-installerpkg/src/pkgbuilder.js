@@ -1,10 +1,11 @@
-const os = require('os');
-const exec = require('@actions/exec');
-const core = require('@actions/core');
-const fs = require('fs');
-const fetch = require('node-fetch');
-const path = require('path');
-const { loadTool } = require('../../utils');
+import core from '@actions/core';
+import exec from '@actions/exec';
+import fs from 'fs';
+import fetch from 'node-fetch';
+import os from 'os';
+import path from 'path';
+
+import { loadTool } from '../../utils';
 
 const getBinaryName = () =>
   os.platform() === 'win32'

@@ -1,4 +1,4 @@
-const resolveServiceFiles = require('../src/service-files');
+import resolveServiceFiles from '../src/service-files';
 
 test('It resolves a relative path', () => {
   const files = resolveServiceFiles([

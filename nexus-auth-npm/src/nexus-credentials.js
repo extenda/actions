@@ -1,4 +1,4 @@
-const { loadSecrets } = require('../../gcp-secret-manager/src/secrets');
+import { loadSecrets } from '../../gcp-secret-manager/src/secrets';
 
 /**
  * @param {string} serviceAccountKey

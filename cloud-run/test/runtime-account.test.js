@@ -1,4 +1,4 @@
-const getRuntimeAccount = require('../src/runtime-account');
+import getRuntimeAccount from '../src/runtime-account';
 
 describe('Runtime Email Account', () => {
   test('It appends fully-qualified email for prefix', () => {

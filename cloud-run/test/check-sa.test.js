@@ -1,5 +1,6 @@
-const exec = require('@actions/exec');
-const checkServiceAccount = require('../src/check-sa');
+import exec from '@actions/exec';
+
+import checkServiceAccount from '../src/check-sa';
 
 jest.mock('@actions/exec');
 

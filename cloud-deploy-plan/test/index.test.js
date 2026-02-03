@@ -1,12 +1,13 @@
-const core = require('@actions/core');
-const action = require('../src/index');
-const { setupGcloud } = require('../../setup-gcloud');
-const getToken = require('../../cloud-deploy/src/utils/identity-token');
-const getDeployInfo = require('../src/deploy-info');
-const loadServiceDefinition = require('../../cloud-deploy/src/utils/service-definition');
-const { getPullRequestNumber, postComment } = require('../src/pr-comment');
-const resolveServiceFiles = require('../src/service-files');
-const { isCodeFreeze, getFreezeEnd } = require('../src/code-freeze');
+import core from '@actions/core';
+
+import getToken from '../../cloud-deploy/src/utils/identity-token';
+import loadServiceDefinition from '../../cloud-deploy/src/utils/service-definition';
+import { setupGcloud } from '../../setup-gcloud';
+import { getFreezeEnd, isCodeFreeze } from '../src/code-freeze';
+import getDeployInfo from '../src/deploy-info';
+import action from '../src/index';
+import { getPullRequestNumber, postComment } from '../src/pr-comment';
+import resolveServiceFiles from '../src/service-files';
 
 jest.mock('@actions/core');
 jest.mock('../src/deploy-info');

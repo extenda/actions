@@ -1,6 +1,7 @@
 jest.mock('@actions/exec');
-const exec = require('@actions/exec');
-const drainJob = require('../src/drain-job');
+import exec from '@actions/exec';
+
+import drainJob from '../src/drain-job';
 
 describe('drain dataflow job', () => {
   afterEach(() => {

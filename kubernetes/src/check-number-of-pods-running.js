@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+import exec from '@actions/exec';
 
 /**
  * Simple timer to wait for a specified amount of time.

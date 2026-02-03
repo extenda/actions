@@ -1,7 +1,8 @@
-const core = require('@actions/core');
-const github = require('@actions/github');
-const { run, loadGitHubToken } = require('../../utils');
-const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
+import core from '@actions/core';
+import github from '@actions/github';
+
+import { loadSecret } from '../../gcp-secret-manager/src/secrets';
+import { loadGitHubToken, run } from '../../utils';
 
 const createPayload = (payloadString) => {
   if (payloadString) {
