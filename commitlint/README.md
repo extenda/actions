@@ -48,7 +48,7 @@ jobs:
   commitlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -79,7 +79,7 @@ jobs:
   commitlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -90,39 +90,6 @@ jobs:
 
       - name: Lint commit messages
         uses: extenda/actions/commitlint@v0
-```
-
-### Usage with `actions/checkout@v2`
-
-To use this with the `checkout/v2` action, one must take care to checkout all commits and the pull request HEAD and
-not the merge reference. If the merge reference is checked out, it will confuse the relaxed check.
-
-```yaml
-on:
-  pull_request:
-    types:
-      - edited
-      - opened
-      - reopened
-      - synchronize
-
-jobs:
-  commitlint:
-    - uses: actions/checkout@v2
-      with:
-        ref: ${{ github.event.pull_request.head.sha }}
-        fetch-depth: 0
-
-    - name: Lint pull request title
-      uses: extenda/actions/commitlint@v0
-      with:
-        message: ${{ github.event.pull_request.title }}
-
-    - name: Lint commit messages
-      if: always()
-      uses: extenda/actions/commitlint@v0
-      with:
-        relaxed: ${{ contains(job.status, 'success') }}
 ```
 
 ### Validate with a stricter custom plugin
@@ -140,7 +107,7 @@ jobs:
   commitlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 

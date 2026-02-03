@@ -37,7 +37,7 @@ jobs:
   pact-broker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Publish pacts
         uses: extenda/actions/pact-broker@v0
@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Can I deploy?
         uses: extenda/actions/pact-can-i-deploy@v0

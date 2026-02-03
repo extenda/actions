@@ -15,7 +15,7 @@ jobs:
   dataflow-template-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Dataflow template build
         uses: extenda/actions/dataflow-template-build@v0
         with:
@@ -35,7 +35,7 @@ jobs:
   dataflow-template-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Dataflow template build
         uses: extenda/actions/dataflow-template-build@v0
         with:

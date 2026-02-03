@@ -2,7 +2,7 @@
 
 This is a GitHub Action to obtain a valid identity token for the specified account.
 
-The action outputs the token as `identity-token` as well as an `IDENTITY_TOKEN` environment variable. 
+The action outputs the token as `identity-token` as well as an `IDENTITY_TOKEN` environment variable.
 
 Note: This action can be executed only in the staging environment.
 
@@ -22,7 +22,7 @@ jobs:
   acceptance:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Identity token
         uses: extenda/actions/identity-token@v0

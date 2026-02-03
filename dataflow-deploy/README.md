@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
 
       - uses: extenda/actions/gcp-secret-manager@v0
         with:
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
 
       - uses: extenda/actions/gcp-secret-manager@v0
         with:
@@ -85,7 +85,7 @@ jobs:
   dataflow-template-build:
     runs-on: ubuntu-latest
     steps:
-          
+
       - name: Determine version
         uses: extenda/actions/conventional-version@v0
         id: semver
@@ -101,7 +101,7 @@ jobs:
           docker build . -f Dockerfile -t eu.gcr.io/extenda/project-id/work-work:${{ github.sha }}
           docker push eu.gcr.io/extenda/project-id/work-work:${{ github.sha }}
 
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Dataflow template build
         uses: extenda/actions/dataflow-template-build@v0
         with:
@@ -116,7 +116,7 @@ jobs:
     needs: dataflow-template-build
     if: github.ref == 'refs/heads/master'
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
 
       - uses: extenda/actions/gcp-secret-manager@v0
         with:

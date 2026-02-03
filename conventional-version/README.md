@@ -28,13 +28,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v4
         with:
-          java-version: 11
+          distribution: temurin
+          java-version: 17
 
       - name: Determine version
         uses: extenda/actions/conventional-version@v0
@@ -58,13 +59,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v4
         with:
-          java-version: 11
+          distribution: temurin
+          java-version: 17
 
       - name: generate build number
         uses: einaregilsson/build-number@v2
