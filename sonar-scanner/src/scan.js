@@ -3,7 +3,7 @@ import * as exec from '@actions/exec';
 import fs from 'fs';
 import path from 'path';
 
-import mvn from '../../maven/src/mvn.js';
+import * as mvn from '../../maven/src/mvn.js';
 import { createParams } from './params.js';
 
 const isAutoDiscovered = (sonarScanner, workingDir, file) =>

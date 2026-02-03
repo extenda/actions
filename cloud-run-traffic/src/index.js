@@ -1,7 +1,6 @@
 import * as core from '@actions/core';
 
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
-import { run } from '../../utils/src.js';
 
 async function action() {
   const serviceAccountKey = core.getInput('service-account-key', {

@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 
-import { getImageDigest } from '../../utils/src.js';
+import { getImageDigest } from '../../utils';
 import { getShortSha } from '../../utils/src/branch-info.js';
 import { extractOutput, LogFilter } from './extract-output.js';
 

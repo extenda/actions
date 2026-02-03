@@ -4,7 +4,7 @@ import os from 'os';
 import path from 'path';
 import semver from 'semver';
 
-import { loadTool, run } from '../../utils/src/index.js';
+import { loadTool } from '../../utils/src/index.js';
 
 const fromFile = (file) => {
   if (fs.existsSync(file)) {

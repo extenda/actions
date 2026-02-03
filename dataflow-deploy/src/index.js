@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 
 import { getTribeProject } from '../../cloud-run/src/cluster-info.js';
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
-import { failIfNotTrunkBased, run } from '../../utils/src/index.js';
+import { failIfNotTrunkBased } from '../../utils/src/index.js';
 import deployJob from './deploy-job.js';
 import drainJob from './drain-job.js';
 

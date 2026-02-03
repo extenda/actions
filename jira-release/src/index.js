@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 
-import { checkEnv, run } from '../../utils/src/index.js';
+import { checkEnv } from '../../utils/src/index.js';
 import { createJiraRelease } from './jira-release.js';
 
 const action = async () => {

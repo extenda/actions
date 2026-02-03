@@ -2,9 +2,8 @@ import * as core from '@actions/core';
 import fs from 'fs';
 import path from 'path';
 
-import { run } from '../../utils/src/index.js';
-import versions from '../../utils/src/versions.js';
-import mvn from './mvn.js';
+import * as versions from '../../utils/src/versions.js';
+import * as mvn from './mvn.js';
 import loadNexusCredentials from './nexus-credentials.js';
 
 const setVersion = async (version, workingDir = './') =>

@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
 
-import { run } from '../../utils/src/index.js';
 import { createConfigMap, deleteConfigMap } from './configmap.js';
 import configureKubeCtl from './configure-kubectl.js';
 import runPod from './run-pod.js';

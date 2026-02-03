@@ -6,7 +6,7 @@ import fs from 'fs';
 import path from 'path';
 
 import getDasWorkerBaseUrl from '../../../iam/src/das-worker-base-url.js';
-import { execGcloud } from '../../../setup-gcloud.js';
+import { execGcloud } from '../../../setup-gcloud';
 
 axiosRetry(axios, {
   retries: 4,

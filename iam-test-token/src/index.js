@@ -1,7 +1,6 @@
 import * as core from '@actions/core';
 
 import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
-import { run } from '../../utils/src/index.js';
 import getIamToken from './iam-auth.js';
 
 const loadCredentials = async (

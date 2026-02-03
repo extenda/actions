@@ -6,7 +6,7 @@ jest.mock('../../utils', () => ({
 
 import * as exec from '@actions/exec';
 
-import { getImageDigest } from '../../utils/src.js';
+import { getImageDigest } from '../../utils';
 import extract from '../src/extract-output.js';
 import podRun from '../src/run-pod.js';
 

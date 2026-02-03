@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 
 import projectInfo from '../../cloud-run/src/project-info.js';
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
-import { failIfNotTrunkBased, run } from '../../utils/src/index.js';
+import { failIfNotTrunkBased } from '../../utils/src/index.js';
 import buildManifest from './manifests/build-manifest.js';
 import { imageTag as collectorVersion } from './manifests/collector-sidecar.js';
 import deploy from './manifests/deploy.js';

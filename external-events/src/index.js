@@ -1,7 +1,6 @@
 import * as core from '@actions/core';
 import camelcaseKeys from 'camelcase-keys';
 
-import { run } from '../../utils/src/index.js';
 import { loadSecrets } from './secrets-manager/load-secrets.js';
 import { createApi } from './utils/create-api.js';
 import { loadDefinitions } from './utils/load-sync-definitions.js';

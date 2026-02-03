@@ -1,7 +1,5 @@
 import * as core from '@actions/core';
 
-import { run } from '../../utils/src.js';
-
 const action = async () => {
   core.info('THIS ACTION HAS BEEN DEPRECATED');
   core.info('Information for the developer portal:');

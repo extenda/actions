@@ -7,7 +7,7 @@ jest.mock('../../utils', () => ({
   getImageDigest: jest.fn(),
 }));
 
-import { getImageDigest } from '../../utils/src.js';
+import { getImageDigest } from '../../utils';
 import prepareEnvConfig from '../src/env-config.js';
 
 describe('env-config', () => {

@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
 
-import { run } from '../../utils/src/index.js';
 import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
 import { checkQualityGate } from './check-quality-gate.js';
 import { createProject } from './create-project.js';

@@ -26,8 +26,7 @@ function mockIdpTokenCall() {
 }
 
 function mockExeSyncCall(id, response, dryRun = false) {
-  // ignore version
-
+  // eslint-disable-next-line no-unused-vars
   const { version, ...payload } = camelcaseKeys(configFixtures.validParsed, {
     deep: true,
   });

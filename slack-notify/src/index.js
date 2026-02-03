@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
 
-import { run } from '../../utils/src.js';
 import notifySlack from './slack-notify.js';
 
 const action = async () => {

@@ -1,4 +1,4 @@
-import { execGcloud } from '../../setup-gcloud/src.js';
+import { execGcloud } from '../../setup-gcloud';
 
 const uploadToBucket = async (file, bucket) => {
   const gcloudArgs = ['storage', 'cp', file, bucket];

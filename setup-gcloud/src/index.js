@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
 
-import { run } from '../../utils/src.js';
 import { execGcloud } from './exec-gcloud.js';
 import setupGcloud from './setup-gcloud.js';
 import withGcloud from './with-gcloud.js';

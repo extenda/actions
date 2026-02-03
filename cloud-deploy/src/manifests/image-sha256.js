@@ -1,4 +1,4 @@
-import { execGcloud } from '../../../setup-gcloud.js';
+import { execGcloud } from '../../../setup-gcloud';
 
 const getImageWithSha256 = async (semanticImage) =>
   execGcloud([

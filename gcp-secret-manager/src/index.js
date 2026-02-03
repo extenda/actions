@@ -1,9 +1,8 @@
 import * as core from '@actions/core';
 
-import { run } from '../../utils/src/index.js';
 import { loadSecrets, parseInputYaml } from './secrets.js';
 
-run(async () => {
+const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {
     required: true,
   });
@@ -11,4 +10,6 @@ run(async () => {
   const secrets = parseInputYaml(secretsInput);
 
   await loadSecrets(serviceAccountKey, secrets);
-});
+};
+
+export default action;

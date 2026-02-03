@@ -1,7 +1,7 @@
 import yaml from 'yaml';
 
 import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
-import { getImageDigest } from '../../utils/src.js';
+import { getImageDigest } from '../../utils';
 
 const createReplaceTokens = (projectId, image, tenantName, countryCode) => {
   let tenantLowerCase = tenantName.toLowerCase();

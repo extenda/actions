@@ -4,7 +4,7 @@ import path from 'path';
 import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
 import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth.js';
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
-import { getImageDigest } from '../../utils/src.js';
+import { getImageDigest } from '../../utils';
 import applyKubectl from './apply-kubectl.js';
 import applyAutoscale from './autoscale.js';
 import checkNamespaceExists from './check-namespace-exists.js';

@@ -2,7 +2,6 @@ import { getInput, setFailed } from '@actions/core';
 import { readFile } from 'fs';
 import { load as parseYaml } from 'js-yaml';
 
-import { run } from '../../utils/src/index.js';
 import { createApiTest } from './create-api-test.js';
 
 async function main() {

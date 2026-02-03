@@ -3,7 +3,6 @@ import fs from 'fs';
 import path from 'path';
 
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
-import { run } from '../../utils/src/index.js';
 import getBundleName from './bundle-name.js';
 import createTestBundle from './create-test-bundle.js';
 import opaTest from './opa-test.js';

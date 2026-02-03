@@ -21,7 +21,7 @@ import mockFs from 'mock-fs';
 
 import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
-import { getImageDigest } from '../../utils/src.js';
+import { getImageDigest } from '../../utils';
 import applyKubectl from '../src/apply-kubectl.js';
 import applyAutoscale from '../src/autoscale.js';
 import checkNamespaceExists from '../src/check-namespace-exists.js';

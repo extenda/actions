@@ -21,7 +21,7 @@ let tagPrefix = process.env.TAG_PREFIX || 'v';
  * Returns the recommended version bump based on conventional commits since last tag.
  * @returns {Promise<string>}
  */
-const getRecommendedBump = async () => {
+export const getRecommendedBump = async () => {
   const config = await conventionalCommits();
   return recommendedVersionBump({
     config,
@@ -105,7 +105,7 @@ const getCommitStream = async (version) =>
  * Return all conventional commits from the previous version.
  * @returns {Promise<[*]>}
  */
-const getConventionalCommits = async () => {
+export const getConventionalCommits = async () => {
   const commitStream = await getCommitStream();
   return new Promise((resolve, reject) => {
     const commits = [];
@@ -133,7 +133,7 @@ const getConventionalCommits = async () => {
  * @param version the name of the version built now
  * @returns {Promise<string>}
  */
-const getChangelog = async (version) =>
+export const getChangelog = async (version) =>
   withConventionalConfig(
     version,
     (options, context, gitRawCommitsOpts, parserOpts, writerOpts) => {
@@ -148,16 +148,8 @@ const getChangelog = async (version) =>
     },
   );
 
-const setTagPrefix = (prefix) => {
+export const setTagPrefix = (prefix) => {
   tagPrefix = prefix;
 };
 
-const getTagPrefix = () => tagPrefix;
-
-export {
-  getChangelog,
-  getConventionalCommits,
-  getRecommendedBump,
-  getTagPrefix,
-  setTagPrefix,
-};
+export const getTagPrefix = () => tagPrefix;
