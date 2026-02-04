@@ -42088,7 +42088,7 @@ __export(index_exports, {
 });
 module.exports = __toCommonJS(index_exports);
 var import_core = __toESM(require_core(), 1);
-var import_fs = require("fs");
+var import_promises = require("fs/promises");
 
 // component-tests/node_modules/js-yaml/dist/js-yaml.mjs
 function isNothing(subject) {
@@ -44873,7 +44873,7 @@ async function main() {
     const url = (0, import_core.getInput)("base-url", { required: true });
     const test = createApiTest(url, iamToken);
     const testsFile = (0, import_core.getInput)("tests", { required: true });
-    const tests = load(await (0, import_fs.readFile)(testsFile));
+    const tests = load(await (0, import_promises.readFile)(testsFile, "utf8"));
     for (const [request, expected] of Object.entries(tests)) {
       await test(request, expected);
     }

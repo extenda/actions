@@ -47942,14 +47942,14 @@ var require_tool_cache = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.HTTPError = void 0;
-    exports2.downloadTool = downloadTool;
-    exports2.extract7z = extract7z;
-    exports2.extractTar = extractTar;
+    exports2.downloadTool = downloadTool2;
+    exports2.extract7z = extract7z2;
+    exports2.extractTar = extractTar2;
     exports2.extractXar = extractXar;
-    exports2.extractZip = extractZip;
-    exports2.cacheDir = cacheDir;
+    exports2.extractZip = extractZip2;
+    exports2.cacheDir = cacheDir2;
     exports2.cacheFile = cacheFile;
-    exports2.find = find2;
+    exports2.find = find3;
     exports2.findAllVersions = findAllVersions;
     exports2.getManifestFromRepo = getManifestFromRepo;
     exports2.findFromManifest = findFromManifest;
@@ -47983,7 +47983,7 @@ var require_tool_cache = __commonJS({
     var IS_WINDOWS = process.platform === "win32";
     var IS_MAC = process.platform === "darwin";
     var userAgent = "actions/tool-cache";
-    function downloadTool(url, dest, auth, headers) {
+    function downloadTool2(url, dest, auth, headers) {
       return __awaiter(this, void 0, void 0, function* () {
         dest = dest || path.join(_getTempDirectory(), crypto.randomUUID());
         yield io2.mkdirP(path.dirname(dest));
@@ -48005,7 +48005,7 @@ var require_tool_cache = __commonJS({
         });
       });
     }
-    __name(downloadTool, "downloadTool");
+    __name(downloadTool2, "downloadTool");
     function downloadToolAttempt(url, dest, auth, headers) {
       return __awaiter(this, void 0, void 0, function* () {
         if (fs.existsSync(dest)) {
@@ -48050,7 +48050,7 @@ var require_tool_cache = __commonJS({
       });
     }
     __name(downloadToolAttempt, "downloadToolAttempt");
-    function extract7z(file, dest, _7zPath) {
+    function extract7z2(file, dest, _7zPath) {
       return __awaiter(this, void 0, void 0, function* () {
         (0, assert_1.ok)(IS_WINDOWS, "extract7z() not supported on current OS");
         (0, assert_1.ok)(file, 'parameter "file" is required');
@@ -48107,8 +48107,8 @@ var require_tool_cache = __commonJS({
         return dest;
       });
     }
-    __name(extract7z, "extract7z");
-    function extractTar(file_1, dest_1) {
+    __name(extract7z2, "extract7z");
+    function extractTar2(file_1, dest_1) {
       return __awaiter(this, arguments, void 0, function* (file, dest, flags = "xz") {
         if (!file) {
           throw new Error("parameter 'file' is required");
@@ -48151,7 +48151,7 @@ var require_tool_cache = __commonJS({
         return dest;
       });
     }
-    __name(extractTar, "extractTar");
+    __name(extractTar2, "extractTar");
     function extractXar(file_1, dest_1) {
       return __awaiter(this, arguments, void 0, function* (file, dest, flags = []) {
         (0, assert_1.ok)(IS_MAC, "extractXar() not supported on current OS");
@@ -48173,7 +48173,7 @@ var require_tool_cache = __commonJS({
       });
     }
     __name(extractXar, "extractXar");
-    function extractZip(file, dest) {
+    function extractZip2(file, dest) {
       return __awaiter(this, void 0, void 0, function* () {
         if (!file) {
           throw new Error("parameter 'file' is required");
@@ -48187,7 +48187,7 @@ var require_tool_cache = __commonJS({
         return dest;
       });
     }
-    __name(extractZip, "extractZip");
+    __name(extractZip2, "extractZip");
     function extractZipWin(file, dest) {
       return __awaiter(this, void 0, void 0, function* () {
         const escapedFile = file.replace(/'/g, "''").replace(/"|\n|\r/g, "");
@@ -48250,7 +48250,7 @@ rchive -LiteralPath '${escapedFile}' -DestinationPath '${escapedDest}' -Force }`
       });
     }
     __name(extractZipNix, "extractZipNix");
-    function cacheDir(sourceDir, tool, version, arch) {
+    function cacheDir2(sourceDir, tool, version, arch) {
       return __awaiter(this, void 0, void 0, function* () {
         version = semver2.clean(version) || version;
         arch = arch || os.arch();
@@ -48268,7 +48268,7 @@ rchive -LiteralPath '${escapedFile}' -DestinationPath '${escapedDest}' -Force }`
         return destPath;
       });
     }
-    __name(cacheDir, "cacheDir");
+    __name(cacheDir2, "cacheDir");
     function cacheFile(sourceFile, targetFile, tool, version, arch) {
       return __awaiter(this, void 0, void 0, function* () {
         version = semver2.clean(version) || version;
@@ -48287,7 +48287,7 @@ rchive -LiteralPath '${escapedFile}' -DestinationPath '${escapedDest}' -Force }`
       });
     }
     __name(cacheFile, "cacheFile");
-    function find2(toolName, versionSpec, arch) {
+    function find3(toolName, versionSpec, arch) {
       if (!toolName) {
         throw new Error("toolName parameter is required");
       }
@@ -48314,7 +48314,7 @@ rchive -LiteralPath '${escapedFile}' -DestinationPath '${escapedDest}' -Force }`
       }
       return toolPath;
     }
-    __name(find2, "find");
+    __name(find3, "find");
     function findAllVersions(toolName, arch) {
       const versions = [];
       arch = arch || os.arch();
@@ -55777,7 +55777,7 @@ on" && objCtor instanceof objCtor && typeof othCtor == "function" && othCtor ins
           return func(collection, getIteratee(predicate, 3));
         }
         __name(filter, "filter");
-        var find2 = createFind(findIndex);
+        var find3 = createFind(findIndex);
         var findLast = createFind(findLastIndex);
         function flatMap(collection, iteratee2) {
           return baseFlatten(map(collection, iteratee2), 1);
@@ -57496,7 +57496,7 @@ p = ''" + (isEscaping ? ", __e = _.escape" : "") + (isEvaluating ? ", __j = Arra
         lodash.escape = escape;
         lodash.escapeRegExp = escapeRegExp;
         lodash.every = every;
-        lodash.find = find2;
+        lodash.find = find3;
         lodash.findIndex = findIndex;
         lodash.findKey = findKey;
         lodash.findLast = findLast;
@@ -81240,14 +81240,14 @@ var require_find_up = __commonJS({
       const root = path.parse(startDir).root;
       const filenames = [].concat(filename);
       return new Promise((resolve) => {
-        (/* @__PURE__ */ __name((function find2(dir) {
+        (/* @__PURE__ */ __name((function find3(dir) {
           locatePath(filenames, { cwd: dir }).then((file) => {
             if (file) {
               resolve(path.join(dir, file));
             } else if (dir === root) {
               resolve(null);
             } else {
-              find2(path.dirname(dir));
+              find3(path.dirname(dir));
             }
           });
         }), "find"))(startDir);
@@ -87801,7 +87801,7 @@ var exec = __toESM(require_exec2(), 1);
 // utils/src/load-binary.js
 var core = __toESM(require_core2(), 1);
 var io = __toESM(require_io2(), 1);
-var import_tool_cache = __toESM(require_tool_cache(), 1);
+var tc = __toESM(require_tool_cache(), 1);
 
 // utils/src/load-github-token.js
 var core2 = __toESM(require_core2(), 1);
@@ -87936,7 +87936,7 @@ var action = /* @__PURE__ */ __name(async () => {
     core5.setFailed(err.message);
   }
 }, "action");
-if (process.env.GITHUB_ACTIONS && !process.env.JEST_WORKER_ID) {
+if (!process.env.VITEST && !process.env.JEST_WORKER_ID) {
   run_default(action);
 }
 var index_default = action;
