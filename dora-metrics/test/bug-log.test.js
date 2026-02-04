@@ -9,15 +9,13 @@ const mockSearchJira = vi.fn();
 vi.mock('../src/deploy-log.js');
 vi.mock('@actions/exec');
 vi.mock('@actions/core');
-vi.mock(
-  'jira-client',
-  () =>
-    function JiraClient() {
-      return {
-        searchJira: mockSearchJira,
-      };
-    },
-);
+vi.mock('jira-client', () => ({
+  default: function JiraClient() {
+    return {
+      searchJira: mockSearchJira,
+    };
+  },
+}));
 
 const issue = {
   issues: [

@@ -49,3 +49,4 @@ const fastGlobMock = {
 
 export default fastGlobMock;
 export const sync = fastGlobMock.sync;
+export const globSync = fastGlobMock.sync;

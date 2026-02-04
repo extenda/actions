@@ -1,7 +1,11 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
+
+const { mockClusterInfo } = vi.hoisted(() => ({
+  mockClusterInfo: vi.fn(),
+}));
+
 vi.mock('../../setup-gcloud/src/index.js');
 vi.mock('@actions/exec');
-const mockClusterInfo = vi.fn();
 vi.mock('../../cloud-run/src/cluster-info', () => ({
   getClusterInfo: mockClusterInfo,
 }));

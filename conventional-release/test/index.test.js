@@ -7,17 +7,20 @@ import {
   test,
   vi,
 } from 'vitest';
+
+// Hoist mock functions before vi.mock() calls
+const { mockTag, mockRelease } = vi.hoisted(() => ({
+  mockTag: vi.fn(),
+  mockRelease: vi.fn(),
+}));
+
 vi.mock('@actions/core');
 vi.mock('../../utils/src');
-
-const mockTag = vi.fn();
 
 vi.mock('../../utils/src/versions', () => ({
   tagReleaseVersion: mockTag,
   setTagPrefix: vi.fn(),
 }));
-
-const mockRelease = vi.fn();
 
 vi.mock('@actions/github', () => ({
   getOctokit: () => ({

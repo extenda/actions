@@ -5,19 +5,17 @@ const mockCreateVersion = vi.fn();
 const mockUpdateVersion = vi.fn();
 const mockUpdateIssue = vi.fn();
 
-vi.mock(
-  'jira-client',
-  () =>
-    function JiraClient() {
-      return {
-        getProject: mockGetProject,
-        getVersions: mockGetVersions,
-        createVersion: mockCreateVersion,
-        updateVersion: mockUpdateVersion,
-        updateIssue: mockUpdateIssue,
-      };
-    },
-);
+vi.mock('jira-client', () => ({
+  default: function JiraClient() {
+    return {
+      getProject: mockGetProject,
+      getVersions: mockGetVersions,
+      createVersion: mockCreateVersion,
+      updateVersion: mockUpdateVersion,
+      updateIssue: mockUpdateIssue,
+    };
+  },
+}));
 
 vi.mock('../../jira-releasenotes/src/jira-releasenotes', () => ({
   findJiraChanges: () => ({

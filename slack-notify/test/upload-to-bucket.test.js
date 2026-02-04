@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { execGcloud } from '../../setup-gcloud/src.js';
+import { execGcloud } from '../../setup-gcloud/src/index.js';
 import uploadToBucket from '../src/upload-to-bucket.js';
 
-vi.mock('../../setup-gcloud/src.js');
+vi.mock('../../setup-gcloud/src/index.js');
 
 describe('uploadToBucket', () => {
   beforeEach(() => {

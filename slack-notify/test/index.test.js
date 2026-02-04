@@ -4,7 +4,7 @@ vi.mock('../src/slack-notify.js');
 
 import * as core from '@actions/core';
 
-import action from '../src.js';
+import action from '../src/index.js';
 import notifySlack from '../src/slack-notify.js';
 
 describe('slack notification', () => {
