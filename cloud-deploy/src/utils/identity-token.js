@@ -1,4 +1,4 @@
-import { execGcloud } from '../../../setup-gcloud';
+import { execGcloud } from '../../../setup-gcloud/src/index.js';
 
 const getToken = async (audience = 'cloud-deploy') =>
   execGcloud(

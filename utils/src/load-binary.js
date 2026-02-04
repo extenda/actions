@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import * as io from '@actions/io';
-import tc from '@actions/tool-cache';
+import * as tc from '@actions/tool-cache';
 import axios from 'axios';
 import fs from 'fs';
 import os from 'os';
