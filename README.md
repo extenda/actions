@@ -427,7 +427,7 @@ Runs `eslint` on all Javascript files everywhere.
 ```bash
 $ npm test
 ```
-Runs Jest everywhere.
+Runs Vitest on all test files.
 
 If tests fails due to short-sha being unexpected length, consider configuring the default on your repository
 
@@ -445,7 +445,7 @@ builds in a Docker container to ensure strictly identical output across platform
 
   * Remember to always run `npm run build` before committing changes to packages. Failing to do so will not pass CI/CD checks
   * If you've run `npm run build` and your build still fails, try `npm ci && npm run build`
-  * While developing, run `npm test -- -o` to only run tests on changed files
+  * While developing, run `npm test -- --changed` to only run tests on changed files
   * Do not add dependencies to the root package unless you are making global changes, for example to the build process
 
 ### CI/CD Pipeline
