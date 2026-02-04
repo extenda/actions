@@ -9,7 +9,12 @@ import {
   vi,
 } from 'vitest';
 
-vi.mock('../src/sonar-credentials.js');
+vi.mock('../src/sonar-credentials.js', () => ({
+  credentials: vi.fn().mockResolvedValue({
+    githubToken: 'github-token',
+    sonarToken: 'sonar',
+  }),
+}));
 vi.mock('../../utils/src/pull-request-info.js');
 
 import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';

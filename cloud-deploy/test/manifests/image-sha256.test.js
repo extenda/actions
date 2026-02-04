@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
-import { execGcloud } from '../../../setup-gcloud';
+import { execGcloud } from '../../../setup-gcloud/src/index.js';
 import getImageWithSha256 from '../../src/manifests/image-sha256.js';
 
-vi.mock('../../../setup-gcloud.js');
+vi.mock('../../../setup-gcloud/src/index.js');
 
 afterEach(() => {
   vi.resetAllMocks();

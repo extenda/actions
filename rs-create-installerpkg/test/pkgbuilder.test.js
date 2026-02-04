@@ -1,10 +1,8 @@
-import { afterEach, describe, expect, test, vi } from 'vitest';
-require('jest-fetch-mock').enableMocks();
-
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import mockFs from 'mock-fs';
 import os from 'os';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { loadTool } from '../../utils/src/index.js';
 import { getBinaryName } from '../src/pkgbuilder.js';
@@ -18,12 +16,29 @@ vi.mock('../../utils/src/index.js', () => ({
   loadTool: vi.fn(),
 }));
 
+// Use vi.hoisted to define mockFetch before vi.mock is hoisted
+const { mockFetch } = vi.hoisted(() => ({
+  mockFetch: vi.fn(),
+}));
+
+// Mock node-fetch
+vi.mock('node-fetch', () => ({
+  default: mockFetch,
+}));
+
 describe('RS installer package tests', () => {
+  beforeEach(() => {
+    // Set up default successful response for fetch
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+    });
+  });
+
   afterEach(() => {
     vi.resetAllMocks();
     mockFs.restore();
-
-    fetch.resetMocks();
   });
 
   test('packageBuilderCommand() executed with correct args', async () => {
@@ -268,12 +283,11 @@ describe('RS installer package tests', () => {
       {},
     );
 
-    fetch.mockResponse(
-      JSON.stringify({
-        status: '200',
-        statusText: 'OK',
-      }),
-    );
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+    });
 
     await publishPackageCommand({
       packageName: 'RS_TestPackage',
@@ -284,7 +298,7 @@ describe('RS installer package tests', () => {
       publishPackage: true,
     });
 
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(core.info).toHaveBeenCalledTimes(3);
     expect(core.error).not.toHaveBeenCalled();
   });
@@ -299,8 +313,8 @@ describe('RS installer package tests', () => {
       {},
     );
 
-    fetch.mockReject({
-      status: '503',
+    mockFetch.mockRejectedValueOnce({
+      status: 503,
       statusText: 'Test',
     });
 
@@ -313,7 +327,7 @@ describe('RS installer package tests', () => {
       publishPackage: true,
     });
 
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(core.error).toHaveBeenCalledTimes(1);
     expect(core.error).toHaveBeenCalledWith(
       'Failed to publish package, server responded with 503 Test',
@@ -451,7 +465,9 @@ describe('RS installer package tests', () => {
         'test1_1.0.1-testversion.pkg.zip': Buffer.from('test content'),
       },
       sourcePathsTest: {
-        test1: {},
+        test1: {
+          '.keep': '', // Add dummy file so directory is created
+        },
       },
     });
 

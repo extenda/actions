@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import getToken from '../../src/utils/identity-token.js';
 import {
+  refreshCanaryStatus,
   sendDeployInfo,
   sendDeployRequest,
   sendScaleSetup,
@@ -251,9 +252,7 @@ describe('Send request to platform api', () => {
     getToken.mockResolvedValue('token');
     axios.post.mockResolvedValue({ status: 200 });
     const data = { projectID: 'proj', serviceName: 'svc' };
-    await expect(
-      require('../../src/utils/send-request').refreshCanaryStatus(data),
-    ).resolves.toBe(true);
+    await expect(refreshCanaryStatus(data)).resolves.toBe(true);
     expect(axios.post).toHaveBeenCalledWith(
       '/services/revisions/canary',
       data,

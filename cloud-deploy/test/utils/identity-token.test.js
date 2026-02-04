@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { execGcloud } from '../../../setup-gcloud';
+import { execGcloud } from '../../../setup-gcloud/src/index.js';
 import getToken from '../../src/utils/identity-token.js';
 
-vi.mock('../../../setup-gcloud.js');
+vi.mock('../../../setup-gcloud/src/index.js');
 
 describe('getToken function', () => {
   beforeEach(() => {

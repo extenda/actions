@@ -4,9 +4,9 @@ import checkPolicyExists from '../../src/utils/cloud-armor.js';
 import gcloudOutput from '../../src/utils/gcloud-output.js';
 
 vi.mock('@actions/core');
-vi.mock('../../src/utils/gcloud-output', () =>
-  vi.fn().mockImplementation(() => Promise.resolve()),
-);
+vi.mock('../../src/utils/gcloud-output', () => ({
+  default: vi.fn().mockImplementation(() => Promise.resolve()),
+}));
 
 describe('check cloud armor policy', () => {
   const mockProjectID = 'project-staging';

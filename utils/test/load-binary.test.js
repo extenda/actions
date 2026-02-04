@@ -33,7 +33,7 @@ vi.mock('@actions/tool-cache', () => {
 
 vi.mock('axios');
 
-import tc from '@actions/tool-cache';
+import * as tc from '@actions/tool-cache';
 import axios from 'axios';
 
 import { loadTool } from '../src/load-binary.js';

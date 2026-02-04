@@ -2,12 +2,12 @@ import * as core from '@actions/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { loadSecret } from '../../../gcp-secret-manager/src/secrets.js';
-import { checkEnv } from '../../../utils.js';
+import { checkEnv } from '../../../utils/src/index.js';
 import readSecret from '../../src/utils/load-credentials.js';
 
 vi.mock('@actions/core');
 vi.mock('../../../gcp-secret-manager/src/secrets.js');
-vi.mock('../../../utils.js');
+vi.mock('../../../utils/src/index.js');
 
 describe('readSecret', () => {
   afterEach(() => {

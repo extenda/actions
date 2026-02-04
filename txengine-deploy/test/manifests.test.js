@@ -7,12 +7,15 @@ import fs from 'fs';
 import mockFs from 'mock-fs';
 import yaml from 'yaml';
 
-const mockLoadSecret = vi.fn();
+const { mockLoadSecret, mockContent } = vi.hoisted(() => ({
+  mockLoadSecret: vi.fn(),
+  mockContent: vi.fn(),
+}));
+
 vi.mock('../../gcp-secret-manager/src/secrets', () => ({
   loadSecret: mockLoadSecret,
 }));
 
-const mockContent = vi.fn();
 vi.mock('@actions/github', () => ({
   getOctokit: () => ({
     rest: {

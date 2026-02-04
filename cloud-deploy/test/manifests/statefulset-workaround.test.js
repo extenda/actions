@@ -3,9 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import handleStatefulset from '../../src/manifests/statefulset-workaround.js';
 import gcloudOutput from '../../src/utils/gcloud-output.js';
 
-vi.mock('../../src/utils/gcloud-output', () =>
-  vi.fn().mockImplementation(() => Promise.resolve()),
-);
+vi.mock('../../src/utils/gcloud-output', () => ({
+  default: vi.fn().mockImplementation(() => Promise.resolve()),
+}));
 
 describe('statefulset-workaround', () => {
   const mockServiceName = 'service-name';

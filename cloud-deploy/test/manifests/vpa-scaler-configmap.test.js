@@ -6,9 +6,9 @@ import {
 } from '../../src/manifests/vpa-scaler-configmap.js';
 import gcloudOutput from '../../src/utils/gcloud-output.js';
 
-vi.mock('../../src/utils/gcloud-output', () =>
-  vi.fn().mockImplementation(() => Promise.resolve()),
-);
+vi.mock('../../src/utils/gcloud-output', () => ({
+  default: vi.fn().mockImplementation(() => Promise.resolve()),
+}));
 
 describe('VPA scaler configuration', () => {
   const mockServiceName = 'service-name';

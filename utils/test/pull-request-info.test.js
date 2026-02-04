@@ -1,27 +1,30 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
-const mockPulls = vi.fn();
+
+const { mockPulls } = vi.hoisted(() => ({
+  mockPulls: vi.fn(),
+}));
 
 vi.mock('@actions/github', () => ({
+  context: {},
   getOctokit: () => ({
     rest: {
       pulls: {
         list: mockPulls,
       },
     },
-    context: {},
   }),
 }));
 
-import pullInfo from '../src/pull-request-info.js';
+import { getPullRequestInfo, setContext } from '../src/pull-request-info.js';
 
 describe('Pull Request Info', () => {
   afterEach(() => {
     vi.resetAllMocks();
-    pullInfo.setContext({});
+    setContext({});
   });
 
   test('It uses event data for pull_request event', async () => {
-    pullInfo.setContext({
+    setContext({
       eventName: 'pull_request',
       repo: {
         owner: 'extenda',
@@ -36,7 +39,7 @@ describe('Pull Request Info', () => {
       },
     });
 
-    const info = await pullInfo.getPullRequestInfo('TOKEN');
+    const info = await getPullRequestInfo('TOKEN');
     expect(info).toMatchObject({
       base: { ref: 'base-ref' },
       head: { ref: 'head-ref' },
@@ -46,7 +49,7 @@ describe('Pull Request Info', () => {
   });
 
   test('It can find an open pull request with Octokit', async () => {
-    pullInfo.setContext({
+    setContext({
       eventName: 'push',
       repo: {
         owner: 'extenda',
@@ -67,7 +70,7 @@ describe('Pull Request Info', () => {
         },
       ],
     });
-    const info = await pullInfo.getPullRequestInfo('TOKEN');
+    const info = await getPullRequestInfo('TOKEN');
     expect(info).toMatchObject({
       base: { ref: 'base-ref' },
       head: { ref: 'head-ref' },
@@ -82,7 +85,7 @@ describe('Pull Request Info', () => {
   });
 
   test('It can handle missing pull request', async () => {
-    pullInfo.setContext({
+    setContext({
       eventName: 'push',
       repo: {
         owner: 'extenda',
@@ -97,13 +100,13 @@ describe('Pull Request Info', () => {
     mockPulls.mockResolvedValueOnce({
       data: [],
     });
-    const info = await pullInfo.getPullRequestInfo('TOKEN');
+    const info = await getPullRequestInfo('TOKEN');
     expect(info).toBeFalsy();
     expect(mockPulls).toHaveBeenCalled();
   });
 
   test('It will swallow Octokit errors', async () => {
-    pullInfo.setContext({
+    setContext({
       eventName: 'push',
       repo: {
         owner: 'extenda',
@@ -116,7 +119,7 @@ describe('Pull Request Info', () => {
       ref: 'refs/heads/feature/test',
     });
     mockPulls.mockRejectedValueOnce(new Error('Any error'));
-    const info = await pullInfo.getPullRequestInfo('TOKEN');
+    const info = await getPullRequestInfo('TOKEN');
     expect(info).toBeFalsy();
     expect(mockPulls).toHaveBeenCalled();
   });

@@ -106,6 +106,18 @@ vi.mock('./lib', () => ({
 1. Ensure mockFs({}) is called in beforeEach or at the start of the test.
 2. Ensure mockFs.restore() is called in afterEach (or finally block).
 
+## 7. CJS Import Issues ("x.method is not a function")
+**Problem:** Importing a CommonJS package (like @actions/core) using default import fails.
+**Fix:** Switch to namespace import (import * as ...).
+
+```javascript
+// ❌ Bad (for CJS packages)
+import tc from '@actions/tool-cache';
+
+// ✅ Good
+import * as tc from '@actions/tool-cache';
+```
+
 # Instruction for the Agent
 I will provide you with failing test file path from where you can read and update the test code.
 
