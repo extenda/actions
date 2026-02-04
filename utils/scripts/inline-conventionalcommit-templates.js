@@ -1,11 +1,17 @@
 // Script that inlines handlebar templates in conventional commits. This helps NCC handle the
 // external files which otherwise are loaded numerous times and causing non-reproducible builds.
-import fs from 'fs';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-import path from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const inlineTemplate = (source, moduleDir, template, replaceTextFn) => {
-  const value = fs.readFileSync(path.resolve(moduleDir, 'templates', template), 'utf-8');
+  const value = fs.readFileSync(
+    path.resolve(moduleDir, 'templates', template),
+    'utf-8',
+  );
   return source.replace(replaceTextFn(template), JSON.stringify(value));
 };
 
@@ -23,11 +29,13 @@ const inlineTemplates = (module, sourceFileName, replaceTextFn) => {
 inlineTemplates(
   'conventional-changelog-conventionalcommits',
   'writer-opts.js',
-  (template) => `readFile(resolve(__dirname, './templates/${template}'), 'utf-8')`,
+  (template) =>
+    `readFile(resolve(__dirname, './templates/${template}'), 'utf-8')`,
 );
 
 inlineTemplates(
   'conventional-changelog-writer',
   'index.js',
-  (template) => `readFileSync(join(__dirname, 'templates/${template}'), 'utf-8')`,
+  (template) =>
+    `readFileSync(join(__dirname, 'templates/${template}'), 'utf-8')`,
 );
