@@ -9,7 +9,7 @@ import uploadToBucket from '../src/upload-to-bucket.js';
 vi.mock('axios');
 vi.mock('@actions/core');
 vi.mock('../../gcp-secret-manager/src/secrets.js');
-vi.mock('../src/upload-to-bucket', () => vi.fn());
+vi.mock('../src/upload-to-bucket.js');
 
 describe('send Message to slack', () => {
   afterEach(() => {

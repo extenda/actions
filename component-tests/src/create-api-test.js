@@ -8,7 +8,7 @@ import { agent } from 'supertest';
  * (request: string, { code, body }: { code: number, body?: any }) => import('supertest').Test
  * }
  */
-const createApiTest = (baseUrl, apiToken) => {
+export const createApiTest = (baseUrl, apiToken) => {
   let failed = 0;
   let passed = 0;
 
@@ -44,5 +44,3 @@ const createApiTest = (baseUrl, apiToken) => {
     },
   );
 };
-
-export { createApiTest };
