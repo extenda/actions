@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url';
+
 import * as core from '@actions/core';
 
 import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';

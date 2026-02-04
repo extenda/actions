@@ -51,7 +51,7 @@ describe('conventional-release', () => {
   beforeEach(() => {
     process.env.GITHUB_TOKEN = 'github-token';
     core.getInput.mockReturnValueOnce('extenda/test-repo');
-    core.getBooleanInput = vi.fn().mockImplementation((name) => {
+    core.getBooleanInput.mockImplementation((name) => {
       if (name === 'pre-release') return false;
       if (name === 'make-latest') return true;
       return false;
@@ -121,8 +121,9 @@ describe('conventional-release', () => {
   });
 
   test('It can create a non-latest release', async () => {
-    core.getBooleanInput = vi.fn((name) => {
+    core.getBooleanInput.mockImplementation((name) => {
       if (name === 'make-latest') return false;
+      return false;
     });
 
     await action();
@@ -133,8 +134,9 @@ describe('conventional-release', () => {
   });
 
   test('It can create a pre-release', async () => {
-    core.getBooleanInput = vi.fn((name) => {
+    core.getBooleanInput.mockImplementation((name) => {
       if (name === 'pre-release') return true;
+      return false;
     });
 
     await action();

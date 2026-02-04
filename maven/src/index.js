@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url';
+
 import * as core from '@actions/core';
 import fs from 'fs';
 import path from 'path';

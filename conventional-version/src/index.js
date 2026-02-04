@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url';
+
 import * as core from '@actions/core';
 
 import * as branchinfo from '../../utils/src/branch-info.js';

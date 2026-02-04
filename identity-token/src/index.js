@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url';
+
 import * as core from '@actions/core';
 
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
