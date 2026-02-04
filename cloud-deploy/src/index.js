@@ -1,4 +1,3 @@
-
 import * as core from '@actions/core';
 
 import projectInfo from '../../cloud-run/src/project-info.js';

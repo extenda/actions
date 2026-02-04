@@ -1,4 +1,3 @@
-
 import { getBooleanInput, getInput } from '@actions/core';
 
 import { run } from '../../utils/src/index.js';

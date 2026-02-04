@@ -1,4 +1,3 @@
-
 import * as core from '@actions/core';
 
 import { failIfNotTrunkBased, run } from '../../utils/src/index.js';

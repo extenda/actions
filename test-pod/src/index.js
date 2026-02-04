@@ -1,4 +1,3 @@
-
 import * as core from '@actions/core';
 
 import { run } from '../../utils/src/index.js';

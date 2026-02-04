@@ -1,4 +1,3 @@
-
 import * as core from '@actions/core';
 import fg from 'fast-glob';
 

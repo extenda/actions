@@ -1,4 +1,3 @@
-
 import * as core from '@actions/core';
 
 import getToken from '../../cloud-deploy/src/utils/identity-token.js';

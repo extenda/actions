@@ -1,4 +1,3 @@
-
 import * as core from '@actions/core';
 
 import { checkEnv, run } from '../../utils/src/index.js';
