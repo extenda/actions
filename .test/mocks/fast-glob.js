@@ -10,6 +10,7 @@ const fastGlobMock = {
     // Default fast-glob behavior: onlyFiles is true unless onlyDirectories is true
     const onlyDirectories = options.onlyDirectories || false;
     const onlyFiles = !onlyDirectories && options.onlyFiles !== false;
+    const returnAbsolute = options.absolute || false;
 
     const walk = (dir) => {
       if (!memfs.existsSync(dir)) {
@@ -43,7 +44,7 @@ const fastGlobMock = {
         // 3. If type matches, check the glob pattern
         if (typeMatch) {
           if (micromatch.isMatch(relativePath, patterns, { dot: true })) {
-            results.push(relativePath);
+            results.push(returnAbsolute ? fullPath : relativePath);
           }
         }
 
