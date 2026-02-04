@@ -20,7 +20,7 @@ import nock from 'nock';
 
 import action from '../src/index.js';
 import { loadSecrets } from '../src/secrets-manager/load-secrets.js';
-import configFixtures from './fixtures/configs.js';
+import * as configFixtures from './fixtures/configs.js';
 import { secrets } from './fixtures/secrets.js';
 
 function mockIdpTokenCall() {
@@ -36,9 +36,12 @@ function mockIdpTokenCall() {
 }
 
 function mockExeSyncCall(id, response, dryRun = false) {
-  const { _version, ...payload } = camelcaseKeys(configFixtures.validParsed, {
-    deep: true,
-  });
+  const { version: _version, ...payload } = camelcaseKeys(
+    configFixtures.validParsed,
+    {
+      deep: true,
+    },
+  );
   const exeNock = nock('https://exe-management.retailsvc.com')
     .post('/api/v1/internal/event-sources:sync', payload)
     .query({ dryRun })
@@ -71,7 +74,7 @@ describe('action', () => {
     'calls exe api with correct definitions dryRun=%s',
     async (dryRun) => {
       const file = 'external-events/*.yaml';
-      core.getInput.mockReturnValue('serviceAcc').mockReturnValue(file);
+      core.getInput.mockReturnValueOnce('serviceAcc').mockReturnValueOnce(file);
 
       core.getBooleanInput.mockReturnValue(dryRun);
 
@@ -104,7 +107,7 @@ describe('action', () => {
 
   it('fails, if sync process was not successful', async () => {
     const file = 'external-events/*.yaml';
-    core.getInput.mockReturnValue('serviceAcc').mockReturnValue(file);
+    core.getInput.mockReturnValueOnce('serviceAcc').mockReturnValueOnce(file);
 
     core.getBooleanInput.mockReturnValue(false);
 
