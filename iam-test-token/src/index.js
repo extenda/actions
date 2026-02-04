@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import * as core from '@actions/core';
 
 import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
@@ -41,9 +42,7 @@ const action = async () => {
   core.setOutput('iam-token', token);
 };
 
-// Run the action only when executed as main (not when imported in tests)
-// Check if we're running as a GitHub Action (not in test mode)
-if (process.env.GITHUB_ACTIONS && !process.env.JEST_WORKER_ID) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   run(action);
 }
 

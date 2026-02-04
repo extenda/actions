@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 
@@ -173,9 +174,7 @@ const action = async () => {
   return comment;
 };
 
-// Run the action only when executed as main (not when imported in tests)
-// Check if we're running as a GitHub Action (not in test mode)
-if (process.env.GITHUB_ACTIONS && !process.env.JEST_WORKER_ID) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   run(action);
 }
 

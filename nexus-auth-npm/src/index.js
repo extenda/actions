@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { getBooleanInput, getInput } from '@actions/core';
 
 import { run } from '../../utils/src/index.js';
@@ -24,9 +25,7 @@ const action = async () => {
   });
 };
 
-// Run the action only when executed as main (not when imported in tests)
-// Check if we're running as a GitHub Action (not in test mode)
-if (process.env.GITHUB_ACTIONS && !process.env.JEST_WORKER_ID) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   run(action);
 }
 
