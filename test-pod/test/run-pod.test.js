@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+
 vi.mock('@actions/exec');
-vi.mock('../src/extract-output.js');
+vi.mock('../src/extract-output.js', () => ({
+  extractOutput: vi.fn(),
+  LogFilter: vi.fn(),
+}));
 vi.mock('../../utils/src/index.js', () => ({
   getImageDigest: vi.fn(),
 }));
@@ -8,7 +12,7 @@ vi.mock('../../utils/src/index.js', () => ({
 import * as exec from '@actions/exec';
 
 import { getImageDigest } from '../../utils/src/index.js';
-import extract from '../src/extract-output.js';
+import { extractOutput } from '../src/extract-output.js';
 import podRun from '../src/run-pod.js';
 
 const orgEnv = process.env;
@@ -21,7 +25,7 @@ describe('Pod run', () => {
       GITHUB_SHA: '15b1e9856fc56aaf79ddece96c0d931bf67227f0',
     };
     exec.exec.mockResolvedValue(0);
-    extract.extractOutput.mockResolvedValueOnce(null);
+    extractOutput.mockResolvedValueOnce(null);
   });
   afterEach(() => {
     process.env = orgEnv;
@@ -305,13 +309,13 @@ describe('Pod run', () => {
       },
     };
 
-    extract.extractOutput.mockReset();
-    extract.extractOutput.mockResolvedValueOnce('test-pod-output');
+    extractOutput.mockReset();
+    extractOutput.mockResolvedValueOnce('test-pod-output');
 
     await podRun({ name: '', namespace: 'test' }, 'myimage', null, false);
     expect(exec.exec.mock.calls[0][1]).toEqual(
       expect.arrayContaining([`--overrides=${JSON.stringify(override)}`]),
     );
-    expect(extract.extractOutput).toHaveBeenCalled();
+    expect(extractOutput).toHaveBeenCalled();
   });
 });

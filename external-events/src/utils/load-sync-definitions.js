@@ -53,7 +53,7 @@ function validateDefs(defs, validateFn) {
   }
 }
 
-async function loadDefinitions(glob, validateFn) {
+export async function loadDefinitions(glob, validateFn) {
   core.startGroup('Definitions load');
   core.info(`Loading files by glob - ${glob}`);
   const files = fg.sync([glob], { onlyFiles: true });
@@ -71,5 +71,3 @@ async function loadDefinitions(glob, validateFn) {
   core.endGroup();
   return defs;
 }
-
-export { loadDefinitions };

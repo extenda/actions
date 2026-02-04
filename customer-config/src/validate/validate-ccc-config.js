@@ -35,12 +35,10 @@ const schema = joi.object({
  * @return {string[]}
  */
 
-function validateCccConfig(data) {
+export function validateCccConfig(data) {
   const { error } = schema.validate(data, { abortEarly: false });
   if (!error) {
     return [];
   }
   return error.details.map(({ message }) => message);
 }
-
-export { validateCccConfig };

@@ -1,3 +1,5 @@
+console.log('✅ vitest.setup.js LOADED');
+
 import path from 'path';
 import { vi } from 'vitest';
 
@@ -114,37 +116,4 @@ vi.mock('fs/promises', async () => {
       return Reflect.get(target, prop);
     },
   });
-});
-
-// 6. Global Mock for fast-glob
-vi.mock('fast-glob', async () => {
-  const { fs: memfs } = await import('memfs');
-
-  return {
-    default: {
-      sync: (patterns) => {
-        if (!proxyState.useMemfs) return []; // Should likely not happen in tests
-
-        // Simple recursive scanner that hits memfs
-        const results = [];
-        const walk = (dir) => {
-          if (!memfs.existsSync(dir)) return;
-          const entries = memfs.readdirSync(dir, { withFileTypes: true });
-
-          for (const entry of entries) {
-            const fullPath = path.join(dir, entry.name);
-            if (entry.isDirectory()) {
-              walk(fullPath);
-            } else {
-              // Very basic extension matching (add logic if you need complex globs)
-              results.push(path.relative(process.cwd(), fullPath));
-            }
-          }
-        };
-
-        walk(process.cwd());
-        return results;
-      },
-    },
-  };
 });

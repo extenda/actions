@@ -1,6 +1,6 @@
 import jsYaml from 'js-yaml';
 
-const valid = `
+export const valid = `
 version: 1
 system-prefix: iam
 event-sources:
@@ -17,9 +17,9 @@ event-sources:
       replaced-with: iam.group-created.v2
 `;
 
-const validParsed = jsYaml.load(valid);
+export const validParsed = jsYaml.load(valid);
 
-const valid2 = `
+export const valid2 = `
 version: 1
 system-prefix: tst
 event-sources:
@@ -34,9 +34,9 @@ event-sources:
         exposed-as: businessday
 `;
 
-const valid2Parsed = jsYaml.load(valid2);
+export const valid2Parsed = jsYaml.load(valid2);
 
-const invalid = `
+export const invalid = `
 version: 1
 system-prefix: iam-invalid
 event-sources:
@@ -51,13 +51,4 @@ event-sources:
       replaced-with: invalid.group-created.v2
 `;
 
-const invalidParsed = jsYaml.load(invalid);
-
-module.exports = {
-  valid,
-  valid2,
-  validParsed,
-  valid2Parsed,
-  invalid,
-  invalidParsed,
-};
+export const invalidParsed = jsYaml.load(invalid);

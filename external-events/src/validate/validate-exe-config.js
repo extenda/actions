@@ -50,12 +50,10 @@ const schema = joi.object({
  * @return {string[]}
  */
 
-function validateExeConfig(data) {
+export function validateExeConfig(data) {
   const { error } = schema.validate(data, { abortEarly: false });
   if (!error) {
     return [];
   }
   return error.details.map(({ message }) => message);
 }
-
-export { validateExeConfig };

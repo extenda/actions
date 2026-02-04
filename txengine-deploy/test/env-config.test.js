@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-const mockLoadSecret = vi.fn();
+
+// Use vi.hoisted to define mockLoadSecret before vi.mock is hoisted
+const { mockLoadSecret } = vi.hoisted(() => ({
+  mockLoadSecret: vi.fn(),
+}));
+
 vi.mock('../../gcp-secret-manager/src/secrets', () => ({
   loadSecret: mockLoadSecret,
 }));

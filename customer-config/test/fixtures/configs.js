@@ -1,6 +1,6 @@
 import jsYaml from 'js-yaml';
 
-const valid = `
+export const valid = `
 version: 1
 system-prefix: che
 definitions:
@@ -13,9 +13,9 @@ definitions:
       layout: default
 `;
 
-const validParsed = jsYaml.load(valid);
+export const validParsed = jsYaml.load(valid);
 
-const valid2 = `
+export const valid2 = `
 version: 1
 system-prefix: tst
 definitions:
@@ -27,9 +27,9 @@ definitions:
     default-value: abc
 `;
 
-const valid2Parsed = jsYaml.load(valid2);
+export const valid2Parsed = jsYaml.load(valid2);
 
-const invalid = `
+export const invalid = `
 version: 1
 system-prefix: tst-invalid
 definitions:
@@ -38,13 +38,4 @@ definitions:
     display-name: 1337
 `;
 
-const invalidParsed = jsYaml.load(invalid);
-
-module.exports = {
-  valid,
-  valid2,
-  validParsed,
-  valid2Parsed,
-  invalid,
-  invalidParsed,
-};
+export const invalidParsed = jsYaml.load(invalid);
