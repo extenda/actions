@@ -140,13 +140,13 @@ const generateOutputs = async (
     .then(sortModulePaths)
     .then((changed) => {
       changed.forEach(({ plan }) => {
-        const planwWithChanges = path.join(
+        const planWithChanges = path.join(
           modulePath(plan),
           `${planFile}.changes`,
         );
-        fs.copyFileSync(plan, planwWithChanges);
+        fs.copyFileSync(plan, planWithChanges);
 
-        core.info(`Save plan with changes to ${planwWithChanges}`);
+        core.info(`Save plan with changes to ${planWithChanges}`);
       });
       core.info(`Found ${changed.length} plan(s) with changes`);
       return changed;

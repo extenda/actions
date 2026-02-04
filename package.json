@@ -42,6 +42,7 @@
     "glob": "^13.0.1",
     "globals": "^17.2.0",
     "memfs": "^4.56.10",
+    "micromatch": "^4.0.8",
     "mock-fs": "^5.5.0",
     "prettier": "^3.8.1",
     "run-script-os": "^1.1.6",

@@ -3,12 +3,12 @@ console.log('✅ vitest.setup.js LOADED');
 import path from 'path';
 import { vi } from 'vitest';
 
-// 1. Shared State
+// Shared State
 const { proxyState } = vi.hoisted(() => ({
   proxyState: { useMemfs: false },
 }));
 
-// 2. Flatten helper (No changes)
+// Flatten helper
 function flatten(input, base = process.cwd()) {
   const output = {};
   for (const [key, value] of Object.entries(input)) {
@@ -22,7 +22,7 @@ function flatten(input, base = process.cwd()) {
   return output;
 }
 
-// 3. Mock 'mock-fs'
+// Mock 'mock-fs'
 vi.mock('mock-fs', async () => {
   const { vol } = await import('memfs');
   const nodeFs = await import('node:fs');
@@ -63,7 +63,7 @@ vi.mock('mock-fs', async () => {
   return { default: mock };
 });
 
-// 4. Proxy Factory
+// Proxy Factory
 async function createFsProxy(moduleName) {
   const actual = await vi.importActual(moduleName);
   const { fs: memfs } = await import('memfs');
@@ -102,7 +102,7 @@ async function createFsProxy(moduleName) {
   return exports;
 }
 
-// 5. Apply Mocks
+// Apply Mocks
 vi.mock('node:fs', () => createFsProxy('node:fs'));
 vi.mock('fs', () => createFsProxy('fs'));
 vi.mock('fs/promises', async () => {
