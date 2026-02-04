@@ -36,7 +36,7 @@ const build = async (baseDir) => {
     lineLimit: 120,
     keepNames: true,
     treeShaking: true,
-    outfile: `${destDir}/index.js`,
+    outfile: `${destDir}/index.cjs`,
     plugins: [
       copyStaticAssetsPlugin({
         sourceDir: srcDir,

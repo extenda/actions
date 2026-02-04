@@ -31,4 +31,4 @@ outputs:
     description: The test user's ID token.
 runs:
   using: node20
-  main: dist/index.js
+  main: dist/index.cjs

@@ -3,6 +3,6 @@
   "version": "0.0.1-local",
   "private": true,
   "description": "Setup the Git CLI with credentials.",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "type": "module"
 }

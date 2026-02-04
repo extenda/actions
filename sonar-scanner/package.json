@@ -3,7 +3,7 @@
   "version": "0.0.1-local",
   "description": "Perform a Sonar analysis on a project",
   "private": true,
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "@actions/io": "^2.0.0",
     "axios": "^1.13.2",

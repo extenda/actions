@@ -3,7 +3,7 @@
   "version": "0.0.1-local",
   "description": "Send a message to Slack through the GitHub Slack Integration",
   "private": true,
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "node-fetch": "^2.7.0"
   },

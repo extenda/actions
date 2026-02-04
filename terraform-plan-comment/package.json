@@ -3,7 +3,7 @@
   "version": "0.0.1-local",
   "description": "Post a Terragrunt plan as a pull request comment",
   "private": true,
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "@actions/github": "^7.0.0",
     "fast-glob": "^3.3.3",

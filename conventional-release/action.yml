@@ -32,4 +32,4 @@ outputs:
     description: The ID of the created GitHub release
 runs:
   using: node20
-  main: dist/index.js
+  main: dist/index.cjs

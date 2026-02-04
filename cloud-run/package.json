@@ -3,7 +3,7 @@
   "version": "0.0.1-local",
   "private": true,
   "description": "Deploy to Cloud Run",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "deepmerge": "^4.3.1",
     "jsonschema": "^1.4.1",

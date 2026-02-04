@@ -22,4 +22,4 @@ outputs:
     description: The default project ID associated with the service account.
 runs:
   using: node20
-  main: dist/index.js
+  main: dist/index.cjs

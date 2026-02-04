@@ -3,6 +3,6 @@
   "version": "0.0.1-local",
   "private": true,
   "description": "Sign and create a Binary Auth attestation",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "type": "module"
 }

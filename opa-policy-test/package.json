@@ -3,7 +3,7 @@
   "version": "0.0.1-local",
   "private": true,
   "description": "Execute unit tests for Rego rules using OPA and a GCS bundle.",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "yaml": "^2.8.2"
   },
