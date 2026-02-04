@@ -6,7 +6,7 @@ import { execGcloud } from '../../../setup-gcloud';
 import publishPolicies from '../../src/policies/publish-policies.js';
 
 vi.mock('axios');
-vi.mock('../../../setup-gcloud.js');
+vi.mock('../../../setup-gcloud');
 
 describe('Publish policies', () => {
   beforeEach(() => {

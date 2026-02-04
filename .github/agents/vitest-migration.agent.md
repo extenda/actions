@@ -134,6 +134,24 @@ mockFs({ 'output': {} });
 mockFs({ 'output/.keep': '' });
 ```
 
+## 10. Mock Path Matching (CRITICAL)
+**Problem:** `vi.mock('./file.js')` is ignored if the source code imports `import ... from './file'`.
+**Fix:** The string passed to `vi.mock()` MUST match the import path used in the source code exactly.
+- If source has: `import { x } from '../utils';`
+- Test must have: `vi.mock('../utils');` (NOT `../utils.js`)
+
+```javascript
+// source.js
+import { run } from './runner';
+
+// test.js
+// ❌ Bad (Mismatch - Mock ignored)
+vi.mock('./runner.js');
+
+// ✅ Good (Matches source import)
+vi.mock('./runner');
+```
+
 # Instruction for the Agent
 I will provide you with failing test file path from where you can read and update the test code.
 

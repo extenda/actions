@@ -11,7 +11,9 @@ const terragruntFs = {
       'plan.out': 'moduleA',
       '.terragrunt-cache': {
         UUID1: {
-          UUID2: {},
+          UUID2: {
+            '.keep': '',
+          },
         },
       },
     },
