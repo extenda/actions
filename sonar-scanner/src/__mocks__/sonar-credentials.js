@@ -1,10 +1,9 @@
-export default {
-  credentials: async () => ({
-    githubToken: 'github',
-    sonarToken: 'sonar',
-  }),
-  sonarAuth: async () => ({
-    username: 'sonar',
-    password: '',
-  }),
-};
+export const credentials = async () => ({
+  githubToken: 'github',
+  sonarToken: 'sonar',
+});
+
+export const sonarAuth = async () => ({
+  username: 'sonar',
+  password: '',
+});

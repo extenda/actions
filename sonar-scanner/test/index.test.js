@@ -3,7 +3,7 @@ vi.mock('../src/create-project.js');
 vi.mock('../src/scan.js');
 vi.mock('../src/scan-msbuild.js');
 vi.mock('../src/check-quality-gate.js');
-vi.mock('../src/sonar-credentials', () => ({
+vi.mock('../src/sonar-credentials.js', () => ({
   credentials: () => ({
     githubToken: 'GITHUB_TOKEN',
     sonarToken: 'SONAR_TOKEN',
@@ -36,7 +36,12 @@ const mockInputs = (
     .mockReturnValueOnce(scanner)
     .mockReturnValueOnce(verbose ? 'true' : 'false')
     .mockReturnValueOnce(reportPath)
-    .mockReturnValueOnce(cwd);
+    .mockReturnValueOnce(cwd)
+    .mockReturnValueOnce('') // dotnet-args
+    .mockReturnValueOnce('') // gradle-args
+    .mockReturnValueOnce('') // maven-args
+    .mockReturnValueOnce('') // npm-args
+    .mockReturnValueOnce(''); // yarn-args
 };
 
 const mockPullRequest = (isPullRequest) => {
@@ -52,11 +57,11 @@ const mockPullRequest = (isPullRequest) => {
 };
 
 const defaultCommands = {
-  dotnet: undefined,
-  gradle: undefined,
-  maven: undefined,
-  npm: undefined,
-  yarn: undefined,
+  dotnet: '',
+  gradle: '',
+  maven: '',
+  npm: '',
+  yarn: '',
 };
 
 describe('Sonar-Scanner Action', () => {

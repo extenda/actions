@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 vi.mock('../../gcp-secret-manager/src/secrets.js');
-import secrets from '../../gcp-secret-manager/src/secrets.js';
-import creds from '../src/sonar-credentials.js';
+import * as secrets from '../../gcp-secret-manager/src/secrets.js';
+import * as creds from '../src/sonar-credentials.js';
 
 const orgEnv = process.env;
 

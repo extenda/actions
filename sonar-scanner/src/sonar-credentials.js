@@ -34,17 +34,15 @@ const loadCredentials = async (hostUrl) => {
   };
 };
 
-const credentials = async (hostUrl, cache = true) => {
+export const credentials = async (hostUrl, cache = true) => {
   if (!credentialsCache || !cache) {
     credentialsCache = await loadCredentials(hostUrl);
   }
   return credentialsCache;
 };
 
-const sonarAuth = async (hostUrl) =>
+export const sonarAuth = async (hostUrl) =>
   credentials(hostUrl).then(({ sonarToken }) => ({
     username: sonarToken,
     password: '',
   }));
-
-export { credentials, sonarAuth };

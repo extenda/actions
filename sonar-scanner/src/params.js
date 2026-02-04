@@ -3,7 +3,7 @@ import path from 'path';
 import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
 import { credentials } from './sonar-credentials.js';
 
-const createParams = async (
+export const createParams = async (
   hostUrl,
   mainBranch,
   workingDir = '.',
@@ -92,5 +92,3 @@ const createParams = async (
   });
   return params.join(' ');
 };
-
-export { createParams };

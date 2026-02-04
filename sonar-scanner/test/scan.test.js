@@ -4,14 +4,12 @@ vi.mock('@actions/exec');
 vi.mock('../src/params.js', () => ({
   createParams: async () => '-Dsonar.verbose=false',
 }));
-vi.mock('../../maven/src/mvn', () => ({
-  run: vi.fn(),
-}));
+vi.mock('../../maven/src/mvn.js');
 
 import * as exec from '@actions/exec';
 import fs from 'mock-fs';
 
-import mvn from '../../maven/src/mvn.js';
+import * as mvn from '../../maven/src/mvn.js';
 import { scan } from '../src/scan.js';
 
 const ALL_FILE_TYPES = {
