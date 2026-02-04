@@ -1,4 +1,3 @@
-import { fileURLToPath } from 'node:url';
 
 import * as core from '@actions/core';
 
@@ -50,7 +49,8 @@ const action = async () => {
   ).then((jobId) => drainJob(jobId, jobName, region, projectId));
 };
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+// Run the action if we are not running in a test environment
+if (!process.env.VITEST && !process.env.JEST_WORKER_ID) {
   run(action);
 }
 
