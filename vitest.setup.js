@@ -1,5 +1,3 @@
-console.log('✅ vitest.setup.js LOADED');
-
 import path from 'path';
 import { vi } from 'vitest';
 
