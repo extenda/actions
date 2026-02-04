@@ -1,5 +1,5 @@
 import { getInput, setFailed } from '@actions/core';
-import { readFile } from 'fs';
+import { readFile } from 'fs/promises';
 import { load as parseYaml } from 'js-yaml';
 
 import { createApiTest } from './create-api-test.js';
@@ -11,7 +11,7 @@ async function main() {
     const test = createApiTest(url, iamToken);
 
     const testsFile = getInput('tests', { required: true });
-    const tests = parseYaml(await readFile(testsFile));
+    const tests = parseYaml(await readFile(testsFile, 'utf8'));
 
     for (const [request, expected] of Object.entries(tests)) {
       await test(request, expected);
