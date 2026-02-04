@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import secrets from '../../gcp-secret-manager/src/secrets.js';
+import * as secrets from '../../gcp-secret-manager/src/secrets.js';
 
 vi.mock('../../gcp-secret-manager/src/secrets.js');
 

@@ -1,17 +1,14 @@
 import * as exec from '@actions/exec';
 import fs from 'fs';
-import { resolve } from 'path';
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  describe,
-  expect,
-  test,
-  vi,
-} from 'vitest';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import { extractOutput, LogFilter } from '../src/extract-output.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const testPodDir = resolve(__dirname, '..');
 
 const outputCommand = (patterns) => [
   '/bin/sh',
@@ -25,6 +22,7 @@ const execTarCommand = async () => {
   return exec
     .exec(tarCommand.shift(), tarCommand, {
       silent: true,
+      cwd: testPodDir,
       listeners: {
         stdout: (data) => {
           output += data.toString('utf8');
@@ -43,19 +41,9 @@ const getFiles = (dir) => {
   return files.flat();
 };
 
-const orgCwd = process.cwd();
-
 describe('Extract output', () => {
-  beforeAll(() => {
-    process.chdir(resolve(__dirname, '..'));
-  });
-
-  afterAll(() => {
-    process.chdir(orgCwd);
-  });
-
   afterEach(() => {
-    const dir = resolve('test-pod-output');
+    const dir = resolve(process.cwd(), 'test-pod-output');
     if (fs.existsSync(dir)) {
       fs.rmdirSync(dir, { recursive: true });
     }
@@ -120,7 +108,7 @@ describe('Extract output', () => {
     test('It can extract archived files from output', async () => {
       const output = await execTarCommand();
       await extractOutput(output);
-      const outputDir = resolve('test-pod-output');
+      const outputDir = resolve(process.cwd(), 'test-pod-output');
       const files = getFiles(outputDir);
       expect(files).toEqual(
         expect.arrayContaining([

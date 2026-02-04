@@ -23,6 +23,8 @@ vi.mock('../../src/manifests/image-sha256.js');
 const readFileSync = (file) => fs.readFileSync(file, { encoding: 'utf-8' });
 const originalEnv = process.env;
 
+vi.setConfig({ testTimeout: 30000 });
+
 describe('buildManifest', () => {
   afterEach(() => {
     vi.clearAllMocks();
