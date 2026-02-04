@@ -17,7 +17,7 @@ const action = async () => {
     serviceAccountKey,
   });
 
-  await createNpmrcFile({
+  createNpmrcFile({
     credentials,
     outputDir,
     authForPublishing,

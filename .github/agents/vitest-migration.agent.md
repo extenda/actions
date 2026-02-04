@@ -118,12 +118,45 @@ import tc from '@actions/tool-cache';
 import * as tc from '@actions/tool-cache';
 ```
 
+## 8. Do not mock fast-glob in tests
+**Problem:** Mocking fast-glob causes issues with Vitest's ESM resolution.
+**Fix:** Remove any vi.mock('fast-glob') calls from the test files and rely on the global fast-glob mock from `.test/mocks/fast-glob.js`. It supports `mockFs` file systems.
+
+## 9. Mocking Empty Directories
+**Problem:** `mockFs({ dir: {} })` does NOT create the directory because the shim ignores empty objects.
+**Fix:** Add a dummy file to force directory creation.
+
+```javascript
+// ❌ Bad (Directory won't exist)
+mockFs({ 'output': {} });
+
+// ✅ Good
+mockFs({ 'output/.keep': '' });
+```
+
 # Instruction for the Agent
 I will provide you with failing test file path from where you can read and update the test code.
 
 ## Your Task:
-* Run `npm test -- <test-file-path> 2>&1` to get the error output.
+* Run `npm test -- <test-file-path> --run --no-color 2>&1` to get the error output.
 * Analyze the error code.
 * Apply the specific fix from the patterns above.
 * Update the test file with the corrected code.
-* Verify that the test passes after your fix by running `npm test -- <test-file-path> 2>&1`.
+* Use verification protocol below to confirm the fix.
+
+## Verification Protocol (CRITICAL)
+
+When you believe you have fixed the code, perform this SINGLE verification step:
+
+1. **Run:** `npm test -- <test-file-path> --run --no-color 2>&1`
+2. **Analyze Output:**
+   - Look for **ANY** of these success indicators:
+     - `Test Files  1 passed`
+     - `Tests  X passed` (where X > 0)
+     - `WAITING FOR CHANGES` (means it finished and went into watch mode unexpectedly, but passed)
+   - **ACTION:** STOP IMMEDIATELY. Do not run the test again. Just output: "✅ FIXED".
+3. **If Fails:**
+  - If you see: `FAIL` or `failed`.
+  - **ACTION:** Analyze the specific error, apply a fix, and loop back to step 1.
+
+**CONSTRAINT:** Do NOT run the test more than once if it passes. Trust the output.

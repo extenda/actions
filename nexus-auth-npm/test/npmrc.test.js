@@ -1,7 +1,8 @@
-import { readFile } from 'fs';
+import { readFileSync } from 'node:fs';
+
 import mockFs from 'mock-fs';
 import { join } from 'path';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { createNpmrcFile } from '../src/npmrc.js';
 
@@ -20,35 +21,36 @@ const expectedNpmrcForPublish = `
 `;
 
 describe('npmrc', () => {
+  beforeEach(() => {
+    mockFs({
+      'output/.keep': '',
+    });
+  });
+
   afterEach(() => {
-    vi.resetAllMocks();
     mockFs.restore();
   });
 
   it('saves file to specified folder (for install)', async () => {
-    mockFs({ '~/output': {} });
-
-    await createNpmrcFile({
+    createNpmrcFile({
       credentials: { username: 'username', password: 'password' },
-      outputDir: '~/output',
+      outputDir: 'output',
     });
 
-    const contents = await readFile(join('~/output', '.npmrc'), {
+    const contents = readFileSync(join('output', '.npmrc'), {
       encoding: 'utf-8',
     });
     expect(contents).toEqual(expectedNpmrcForInstall);
   });
 
   it('saves file to specified folder (for publish)', async () => {
-    mockFs({ '~/output': {} });
-
-    await createNpmrcFile({
+    createNpmrcFile({
       credentials: { username: 'username', password: 'password' },
       authForPublishing: true,
-      outputDir: '~/output',
+      outputDir: 'output',
     });
 
-    const contents = await readFile(join('~/output', '.npmrc'), {
+    const contents = readFileSync(join('output', '.npmrc'), {
       encoding: 'utf-8',
     });
     expect(contents).toEqual(expectedNpmrcForPublish);
