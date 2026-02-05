@@ -11,10 +11,8 @@ const run = async (action) => {
     process.env.JEST_WORKER_ID ||
     process.env.ER_ACTION_RUNNING === 'true'
   ) {
-    // Don't run the action in a test environment and only run it once.
-    // If an action imports another action, it will cause the action to
-    // run multiple times, the ER_ACTION_RUNNING env ensures an action
-    // can run at most once per invocation.
+    // Don't run the action in a test environment and only run one at a time.
+    // This means we don't risk running actions twice if import loops occur.
     return Promise.resolve();
   }
   try {
@@ -22,6 +20,8 @@ const run = async (action) => {
     await action();
   } catch (err) {
     core.setFailed(err.message);
+  } finally {
+    process.env.ER_ACTION_RUNNING = 'false';
   }
 };
 

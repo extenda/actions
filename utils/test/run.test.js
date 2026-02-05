@@ -40,16 +40,16 @@ describe('Action Runner Wrapper', () => {
     expect(core.setFailed).not.toHaveBeenCalled();
   });
 
-  it('executes the action once', async () => {
+  it('does not execute the action if already running', async () => {
     delete process.env.VITEST;
     delete process.env.JEST_WORKER_ID;
+    process.env.ER_ACTION_RUNNING = 'true';
 
     const mockAction = vi.fn().mockResolvedValue('success');
 
     await run(mockAction);
-    await run(mockAction);
 
-    expect(mockAction).toHaveBeenCalledTimes(1);
+    expect(mockAction).not.toHaveBeenCalled();
   });
 
   it('catches exceptions and sets failure status', async () => {

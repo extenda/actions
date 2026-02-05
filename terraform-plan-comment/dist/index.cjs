@@ -86609,6 +86609,8 @@ var run = /* @__PURE__ */ __name(async (action2) => {
     await action2();
   } catch (err) {
     import_core.default.setFailed(err.message);
+  } finally {
+    process.env.ER_ACTION_RUNNING = "false";
   }
 }, "run");
 var run_default = run;
