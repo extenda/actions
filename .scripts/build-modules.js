@@ -27,9 +27,28 @@ const build = async (baseDir) => {
   const srcDir = path.join(baseDir, 'src');
   const destDir = path.join(baseDir, 'dist');
 
+  if (path.basename(baseDir) === 'utils') {
+    // Skip building utils module
+    return;
+  }
+
+  const virtualEntrypoint = `
+import { run } from '../../utils/src/index.js';
+import action from './index.js';
+
+if (action !== undefined) {
+  run(entryPoint);
+}
+`;
+
   console.time(`build ${baseDir}`);
   await esbuild.build({
-    entryPoints: [`${srcDir}/index.js`],
+    stdin: {
+      contents: virtualEntrypoint,
+      resolveDir: srcDir,
+      loader: 'js',
+      sourcefile: 'generated-entrypoint.js',
+    },
     platform: 'node',
     format: 'cjs',
     bundle: true,

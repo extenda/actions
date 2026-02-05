@@ -5,7 +5,7 @@ import * as core from '@actions/core';
 import os from 'os';
 import semver from 'semver';
 
-import { loadTool, run } from '../../utils/src/index.js';
+import { loadTool } from '../../utils/src/index.js';
 
 const fromFile = (file) => {
   if (fs.existsSync(file)) {
@@ -70,6 +70,6 @@ const action = async () => {
   }
 };
 
-run(action);
+export default action;
 
 export { action, platform };

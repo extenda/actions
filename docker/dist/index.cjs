@@ -52865,16 +52865,10 @@ var core2 = __toESM(require_core(), 1);
 // utils/src/run.js
 var import_core = __toESM(require_core(), 1);
 var run = /* @__PURE__ */ __name(async (action2) => {
-  if (process.env.VITEST || process.env.JEST_WORKER_ID || process.env.ER_ACTION_RUNNING === "true") {
-    return Promise.resolve();
-  }
   try {
-    process.env.ER_ACTION_RUNNING = "true";
     await action2();
   } catch (err) {
     import_core.default.setFailed(err.message);
-  } finally {
-    process.env.ER_ACTION_RUNNING = "false";
   }
 }, "run");
 var run_default = run;
@@ -53000,7 +52994,12 @@ var action = /* @__PURE__ */ __name(() => {
 var docker_build_push_default = action;
 
 // docker/src/index.js
-run_default(docker_build_push_default);
+var src_default = docker_build_push_default;
+
+// docker/src/generated-entrypoint.js
+if (src_default !== void 0) {
+  run_default(entryPoint);
+}
 /*! Bundled license information:
 
 undici/lib/fetch/body.js:

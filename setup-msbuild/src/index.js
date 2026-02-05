@@ -36,26 +36,22 @@ const findMSBuild = async (vswhere) => {
   return path.dirname(msbuild);
 };
 
-const run = async () => {
+const action = async () => {
   if (os.platform() !== 'win32') {
     core.setFailed('MSBuild only works on Windows!');
     return;
   }
-  try {
-    await loadTool({
-      tool: 'vswhere',
-      binary: 'vswhere.exe',
-      version: VSWHERE_VERSION,
-      downloadUrl: `https://github.com/microsoft/vswhere/releases/download/${VSWHERE_VERSION}/vswhere.exe`,
-    })
-      .then(findMSBuild)
-      .then((msbuild) => {
-        core.info(`MSBuild directory '${msbuild}' added to PATH.`);
-        return core.addPath(msbuild);
-      });
-  } catch (error) {
-    core.setFailed(error.message);
-  }
+  await loadTool({
+    tool: 'vswhere',
+    binary: 'vswhere.exe',
+    version: VSWHERE_VERSION,
+    downloadUrl: `https://github.com/microsoft/vswhere/releases/download/${VSWHERE_VERSION}/vswhere.exe`,
+  })
+    .then(findMSBuild)
+    .then((msbuild) => {
+      core.info(`MSBuild directory '${msbuild}' added to PATH.`);
+      return core.addPath(msbuild);
+    });
 };
 
-run();
+export default action;

@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import fetch from 'node-fetch';
 
 import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
-import { loadGitHubToken, run } from '../../utils/src/index.js';
+import { loadGitHubToken } from '../../utils/src/index.js';
 
 const createMessage = (title, text, fallback) => {
   const message = { text };
@@ -15,7 +15,7 @@ const createMessage = (title, text, fallback) => {
   return [message];
 };
 
-run(async () => {
+const action = async () => {
   const title = core.getInput('title');
   const text = core.getInput('text', { required: true });
   const fallback = core.getInput('fallback');
@@ -35,4 +35,6 @@ run(async () => {
 
   const body = await response.json();
   core.info(`API status: ${response.status}, body: ${JSON.stringify(body)}`);
-});
+};
+
+export default action;
