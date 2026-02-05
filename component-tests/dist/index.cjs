@@ -7053,7 +7053,7 @@ var require_body = __commonJS({
         });
       }
       assert(isReadableStreamLike(stream));
-      let action2 = null;
+      let action = null;
       let source = null;
       let length = null;
       let type2 = null;
@@ -7109,7 +7109,7 @@ Content-Type: ${value.type || "application/octet-stream"}\r
           length = null;
         }
         source = object;
-        action2 = /* @__PURE__ */ __name(async function* () {
+        action = /* @__PURE__ */ __name(async function* () {
           for (const part of blobParts) {
             if (part.stream) {
               yield* part.stream();
@@ -7139,11 +7139,11 @@ Content-Type: ${value.type || "application/octet-stream"}\r
       if (typeof source === "string" || util.isBuffer(source)) {
         length = Buffer.byteLength(source);
       }
-      if (action2 != null) {
+      if (action != null) {
         let iterator;
         stream = new ReadableStream({
           async start() {
-            iterator = action2(object)[Symbol.asyncIterator]();
+            iterator = action(object)[Symbol.asyncIterator]();
           },
           async pull(controller) {
             const { value, done } = await iterator.next();
@@ -31038,7 +31038,7 @@ var require_body2 = __commonJS({
         });
       }
       assert(isReadableStreamLike(stream));
-      let action2 = null;
+      let action = null;
       let source = null;
       let length = null;
       let type2 = null;
@@ -31093,7 +31093,7 @@ Content-Type: ${value.type || "application/octet-stream"}\r
           length = null;
         }
         source = object;
-        action2 = /* @__PURE__ */ __name(async function* () {
+        action = /* @__PURE__ */ __name(async function* () {
           for (const part of blobParts) {
             if (part.stream) {
               yield* part.stream();
@@ -31123,11 +31123,11 @@ Content-Type: ${value.type || "application/octet-stream"}\r
       if (typeof source === "string" || util.isBuffer(source)) {
         length = Buffer.byteLength(source);
       }
-      if (action2 != null) {
+      if (action != null) {
         let iterator;
         stream = new ReadableStream2({
           async start() {
-            iterator = action2(object)[Symbol.asyncIterator]();
+            iterator = action(object)[Symbol.asyncIterator]();
           },
           async pull(controller) {
             const { value, done } = await iterator.next();
@@ -47827,12 +47827,12 @@ var require_retry_helper = __commonJS({
           throw new Error("min seconds should be less than or equal to max seconds");
         }
       }
-      execute(action2, isRetryable) {
+      execute(action, isRetryable) {
         return __awaiter(this, void 0, void 0, function* () {
           let attempt = 1;
           while (attempt < this.maxAttempts) {
             try {
-              return yield action2();
+              return yield action();
             } catch (err) {
               if (isRetryable && !isRetryable(err)) {
                 throw err;
@@ -47844,7 +47844,7 @@ var require_retry_helper = __commonJS({
             yield this.sleep(seconds);
             attempt++;
           }
-          return yield action2();
+          return yield action();
         });
       }
       getSleepAmount() {
@@ -70380,8 +70380,8 @@ __export2(check_is_repo_exports, {
   checkIsRepoRootTask: /* @__PURE__ */ __name(() => checkIsRepoRootTask, "checkIsRepoRootTask"),
   checkIsRepoTask: /* @__PURE__ */ __name(() => checkIsRepoTask, "checkIsRepoTask")
 });
-function checkIsRepoTask(action2) {
-  switch (action2) {
+function checkIsRepoTask(action) {
+  switch (action) {
     case "bare":
       return checkIsBareRepoTask();
     case "root":
@@ -72246,16 +72246,16 @@ var init_parse_remote_objects = __esm({
     remoteMessagesObjectParsers = [
       new RemoteLineParser(
         /^remote:\s*(enumerating|counting|compressing) objects: (\d+),/i,
-        (result, [action2, count]) => {
-          const key = action2.toLowerCase();
+        (result, [action, count]) => {
+          const key = action.toLowerCase();
           const enumeration = objectEnumerationResult(result.remoteMessages);
           Object.assign(enumeration, { [key]: asNumber(count) });
         }
       ),
       new RemoteLineParser(
         /^remote:\s*(enumerating|counting|compressing) objects: \d+% \(\d+\/(\d+)\),/i,
-        (result, [action2, count]) => {
-          const key = action2.toLowerCase();
+        (result, [action, count]) => {
+          const key = action.toLowerCase();
           const enumeration = objectEnumerationResult(result.remoteMessages);
           Object.assign(enumeration, { [key]: asNumber(count) });
         }
@@ -72356,9 +72356,9 @@ var init_parse_pull = __esm({
         }
         return false;
       }),
-      new LineParser(ACTION_REGEX, (result, [action2, file]) => {
+      new LineParser(ACTION_REGEX, (result, [action, file]) => {
         append(result.files, file);
-        append(action2 === "create" ? result.created : result.deleted, file);
+        append(action === "create" ? result.created : result.deleted, file);
       })
     ];
     errorParsers = [
@@ -74233,12 +74233,12 @@ var core3 = __toESM(require_core2(), 1);
 
 // utils/src/run.js
 var core4 = __toESM(require_core2(), 1);
-var run = /* @__PURE__ */ __name(async (action2) => {
+var run = /* @__PURE__ */ __name(async (action) => {
   if (process.env.VITEST || process.env.JEST_WORKER_ID) {
     return Promise.resolve();
   }
   try {
-    await action2();
+    await action();
   } catch (err) {
     core4.setFailed(err.message);
   }
@@ -74296,7 +74296,7 @@ async function main() {
   }
 }
 __name(main, "main");
-run_default(action);
+run_default(main);
 var index_default = main;
 /*! Bundled license information:
 

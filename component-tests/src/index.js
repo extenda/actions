@@ -24,6 +24,6 @@ async function main() {
   }
 }
 
-run(action);
+run(main);
 
 export default main;
