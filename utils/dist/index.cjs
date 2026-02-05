@@ -44740,6 +44740,9 @@ var load_github_token_default = loadGitHubToken;
 // utils/src/run.js
 var core3 = __toESM(require_core(), 1);
 var run = /* @__PURE__ */ __name(async (action) => {
+  if (process.env.VITEST || process.env.JEST_WORKER_ID) {
+    return Promise.resolve();
+  }
   try {
     await action();
   } catch (err) {

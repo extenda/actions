@@ -73234,6 +73234,9 @@ var core2 = __toESM(require_core2(), 1);
 // utils/src/run.js
 var core3 = __toESM(require_core2(), 1);
 var run = /* @__PURE__ */ __name(async (action2) => {
+  if (process.env.VITEST || process.env.JEST_WORKER_ID) {
+    return Promise.resolve();
+  }
   try {
     await action2();
   } catch (err) {
@@ -73427,9 +73430,7 @@ var action = /* @__PURE__ */ __name(async () => {
     core5.setFailed(error2.message);
   }
 }, "action");
-if (!process.env.VITEST && !process.env.JEST_WORKER_ID) {
-  run_default(action);
-}
+run_default(action);
 var index_default = action;
 /*! Bundled license information:
 
