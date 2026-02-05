@@ -157,7 +157,7 @@ jobs:
           args: --version
           service-account-key: ${{ secrets.SECRET_AUTH }}
 
-      - name: Run Maven with POM
+      - name: Run Maven action dependency:get from Nexus
         uses: ./maven
         with:
           args: dependency:get -Dartifact=se.extenda.maven:commonpom:2.5.1:pom
