@@ -23293,7 +23293,7 @@ var require_core = __commonJS({
     exports2.getBooleanInput = getBooleanInput;
     exports2.setOutput = setOutput2;
     exports2.setCommandEcho = setCommandEcho;
-    exports2.setFailed = setFailed3;
+    exports2.setFailed = setFailed2;
     exports2.isDebug = isDebug;
     exports2.debug = debug2;
     exports2.error = error;
@@ -23385,11 +23385,11 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       (0, command_1.issue)("echo", enabled ? "on" : "off");
     }
     __name(setCommandEcho, "setCommandEcho");
-    function setFailed3(message) {
+    function setFailed2(message) {
       process.exitCode = ExitCode.Failure;
       error(message);
     }
-    __name(setFailed3, "setFailed");
+    __name(setFailed2, "setFailed");
     function isDebug() {
       return process.env["RUNNER_DEBUG"] === "1";
     }
@@ -46183,7 +46183,7 @@ var require_core2 = __commonJS({
     exports2.getBooleanInput = getBooleanInput;
     exports2.setOutput = setOutput2;
     exports2.setCommandEcho = setCommandEcho;
-    exports2.setFailed = setFailed3;
+    exports2.setFailed = setFailed2;
     exports2.isDebug = isDebug;
     exports2.debug = debug2;
     exports2.error = error;
@@ -46275,11 +46275,11 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       (0, command_1.issue)("echo", enabled ? "on" : "off");
     }
     __name(setCommandEcho, "setCommandEcho");
-    function setFailed3(message) {
+    function setFailed2(message) {
       process.exitCode = ExitCode.Failure;
       error(message);
     }
-    __name(setFailed3, "setFailed");
+    __name(setFailed2, "setFailed");
     function isDebug() {
       return process.env["RUNNER_DEBUG"] === "1";
     }
@@ -87807,15 +87807,16 @@ var tc = __toESM(require_tool_cache(), 1);
 var core2 = __toESM(require_core2(), 1);
 
 // utils/src/run.js
-var core3 = __toESM(require_core2(), 1);
+var import_core = __toESM(require_core2(), 1);
 var run = /* @__PURE__ */ __name(async (action2) => {
-  if (process.env.VITEST || process.env.JEST_WORKER_ID) {
+  if (process.env.VITEST || process.env.JEST_WORKER_ID || process.env.ER_ACTION_RUNNING === "true") {
     return Promise.resolve();
   }
   try {
+    process.env.ER_ACTION_RUNNING = "true";
     await action2();
   } catch (err) {
-    core3.setFailed(err.message);
+    import_core.default.setFailed(err.message);
   }
 }, "run");
 var run_default = run;

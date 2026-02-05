@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 vi.mock('@actions/core');
-vi.mock('../../utils/src');
+vi.mock('../../utils/src/index.js');
 
 const mockCreate = vi.fn();
 

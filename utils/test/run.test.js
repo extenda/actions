@@ -10,7 +10,9 @@ describe('Action Runner Wrapper', () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
-    process.env = { ...originalEnv };
+    process.env = {
+      ...originalEnv,
+    };
   });
 
   afterEach(() => {
@@ -36,6 +38,18 @@ describe('Action Runner Wrapper', () => {
 
     expect(mockAction).toHaveBeenCalled();
     expect(core.setFailed).not.toHaveBeenCalled();
+  });
+
+  it('executes the action once', async () => {
+    delete process.env.VITEST;
+    delete process.env.JEST_WORKER_ID;
+
+    const mockAction = vi.fn().mockResolvedValue('success');
+
+    await run(mockAction);
+    await run(mockAction);
+
+    expect(mockAction).toHaveBeenCalledTimes(1);
   });
 
   it('catches exceptions and sets failure status', async () => {

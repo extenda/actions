@@ -25,7 +25,7 @@ inputs:
   sha:
     description: The commit SHA to update.
     required: false
-    default: ${{ github.sha }}
+    default: ${{ github.sha }}
   context:
     description: A context for the status check.
     required: true
@@ -38,7 +38,7 @@ inputs:
   target-url:
     description: A URL pointing to the detailed check build outputs.
     required: false
-    default: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    default: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 runs:
   using: node20
   main: dist/index.cjs
