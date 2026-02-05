@@ -36,9 +36,11 @@ const build = async (baseDir) => {
 import { run } from '../../utils/src/index.js';
 import action from './index.js';
 
-if (action !== undefined) {
-  run(entryPoint);
+if (action === undefined) {
+  throw new Error('Missing entrypoint in GitHub Action! Add "export default action;" to your index.js');
 }
+
+run(action);
 `;
 
   console.time(`build ${baseDir}`);

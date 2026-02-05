@@ -67722,9 +67722,10 @@ var action = /* @__PURE__ */ __name(async () => {
 var src_default = action;
 
 // rs-permission-converter/src/generated-entrypoint.js
-if (src_default !== void 0) {
-  run_default(entryPoint);
+if (src_default === void 0) {
+  throw new Error('Missing entrypoint in GitHub Action! Add "export default action;" to your index.js');
 }
+run_default(src_default);
 /*! Bundled license information:
 
 undici/lib/fetch/body.js:

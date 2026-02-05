@@ -57249,9 +57249,10 @@ piKey: ${apikey}`
 var src_default = action;
 
 // setup-nuget-sources/src/generated-entrypoint.js
-if (src_default !== void 0) {
-  run_default(entryPoint);
+if (src_default === void 0) {
+  throw new Error('Missing entrypoint in GitHub Action! Add "export default action;" to your index.js');
 }
+run_default(src_default);
 /*! Bundled license information:
 
 undici/lib/fetch/body.js:

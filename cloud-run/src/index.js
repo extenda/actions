@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 
-import { failIfNotTrunkBased, run } from '../../utils/src/index.js';
+import { failIfNotTrunkBased } from '../../utils/src/index.js';
 import jsonSchema from './cloud-run-schema.js';
 import configureDomains from './configure-domains.js';
 import runDeploy from './run-deploy.js';
@@ -31,7 +31,5 @@ const action = async () => {
       ),
   );
 };
-
-run(action);
 
 export default action;

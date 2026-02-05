@@ -3,10 +3,9 @@ import { readFile } from 'node:fs/promises';
 import { getInput, setFailed } from '@actions/core';
 import { load as parseYaml } from 'js-yaml';
 
-import { run } from '../../utils/src/index.js';
 import { createApiTest } from './create-api-test.js';
 
-async function main() {
+async function action() {
   try {
     const iamToken = getInput('auth-token', { required: true });
     const url = getInput('base-url', { required: true });
@@ -25,6 +24,4 @@ async function main() {
   }
 }
 
-run(main);
-
-export default main;
+export default action;

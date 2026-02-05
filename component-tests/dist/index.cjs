@@ -7593,7 +7593,7 @@ var require_body = __commonJS({
         });
       }
       assert(isReadableStreamLike(stream));
-      let action = null;
+      let action2 = null;
       let source = null;
       let length = null;
       let type2 = null;
@@ -7648,7 +7648,7 @@ Content-Type: ${value.type || "application/octet-stream"}\r
           length = null;
         }
         source = object;
-        action = /* @__PURE__ */ __name(async function* () {
+        action2 = /* @__PURE__ */ __name(async function* () {
           for (const part of blobParts) {
             if (part.stream) {
               yield* part.stream();
@@ -7678,11 +7678,11 @@ Content-Type: ${value.type || "application/octet-stream"}\r
       if (typeof source === "string" || util.isBuffer(source)) {
         length = Buffer.byteLength(source);
       }
-      if (action != null) {
+      if (action2 != null) {
         let iterator;
         stream = new ReadableStream2({
           async start() {
-            iterator = action(object)[Symbol.asyncIterator]();
+            iterator = action2(object)[Symbol.asyncIterator]();
           },
           async pull(controller) {
             const { value, done } = await iterator.next();
@@ -24382,12 +24382,12 @@ var require_retry_helper = __commonJS({
           throw new Error("min seconds should be less than or equal to max seconds");
         }
       }
-      execute(action, isRetryable) {
+      execute(action2, isRetryable) {
         return __awaiter(this, void 0, void 0, function* () {
           let attempt = 1;
           while (attempt < this.maxAttempts) {
             try {
-              return yield action();
+              return yield action2();
             } catch (err) {
               if (isRetryable && !isRetryable(err)) {
                 throw err;
@@ -24399,7 +24399,7 @@ var require_retry_helper = __commonJS({
             yield this.sleep(seconds);
             attempt++;
           }
-          return yield action();
+          return yield action2();
         });
       }
       getSleepAmount() {
@@ -32031,7 +32031,7 @@ var require_body2 = __commonJS({
         });
       }
       assert(isReadableStreamLike(stream));
-      let action = null;
+      let action2 = null;
       let source = null;
       let length = null;
       let type2 = null;
@@ -32087,7 +32087,7 @@ Content-Type: ${value.type || "application/octet-stream"}\r
           length = null;
         }
         source = object;
-        action = /* @__PURE__ */ __name(async function* () {
+        action2 = /* @__PURE__ */ __name(async function* () {
           for (const part of blobParts) {
             if (part.stream) {
               yield* part.stream();
@@ -32117,11 +32117,11 @@ Content-Type: ${value.type || "application/octet-stream"}\r
       if (typeof source === "string" || util.isBuffer(source)) {
         length = Buffer.byteLength(source);
       }
-      if (action != null) {
+      if (action2 != null) {
         let iterator;
         stream = new ReadableStream({
           async start() {
-            iterator = action(object)[Symbol.asyncIterator]();
+            iterator = action2(object)[Symbol.asyncIterator]();
           },
           async pull(controller) {
             const { value, done } = await iterator.next();
@@ -67624,8 +67624,8 @@ __export(check_is_repo_exports, {
   checkIsRepoRootTask: /* @__PURE__ */ __name(() => checkIsRepoRootTask, "checkIsRepoRootTask"),
   checkIsRepoTask: /* @__PURE__ */ __name(() => checkIsRepoTask, "checkIsRepoTask")
 });
-function checkIsRepoTask(action) {
-  switch (action) {
+function checkIsRepoTask(action2) {
+  switch (action2) {
     case "bare":
       return checkIsBareRepoTask();
     case "root":
@@ -69490,16 +69490,16 @@ var init_parse_remote_objects = __esm({
     remoteMessagesObjectParsers = [
       new RemoteLineParser(
         /^remote:\s*(enumerating|counting|compressing) objects: (\d+),/i,
-        (result, [action, count]) => {
-          const key = action.toLowerCase();
+        (result, [action2, count]) => {
+          const key = action2.toLowerCase();
           const enumeration = objectEnumerationResult(result.remoteMessages);
           Object.assign(enumeration, { [key]: asNumber(count) });
         }
       ),
       new RemoteLineParser(
         /^remote:\s*(enumerating|counting|compressing) objects: \d+% \(\d+\/(\d+)\),/i,
-        (result, [action, count]) => {
-          const key = action.toLowerCase();
+        (result, [action2, count]) => {
+          const key = action2.toLowerCase();
           const enumeration = objectEnumerationResult(result.remoteMessages);
           Object.assign(enumeration, { [key]: asNumber(count) });
         }
@@ -69600,9 +69600,9 @@ var init_parse_pull = __esm({
         }
         return false;
       }),
-      new LineParser(ACTION_REGEX, (result, [action, file]) => {
+      new LineParser(ACTION_REGEX, (result, [action2, file]) => {
         append(result.files, file);
-        append(action === "create" ? result.created : result.deleted, file);
+        append(action2 === "create" ? result.created : result.deleted, file);
       })
     ];
     errorParsers = [
@@ -71477,9 +71477,9 @@ var core2 = __toESM(require_core(), 1);
 
 // utils/src/run.js
 var import_core = __toESM(require_core(), 1);
-var run = /* @__PURE__ */ __name(async (action) => {
+var run = /* @__PURE__ */ __name(async (action2) => {
   try {
-    await action();
+    await action2();
   } catch (err) {
     import_core.default.setFailed(err.message);
   }
@@ -74267,7 +74267,7 @@ var createApiTest = /* @__PURE__ */ __name((baseUrl, apiToken) => {
 }, "createApiTest");
 
 // component-tests/src/index.js
-async function main() {
+async function action() {
   try {
     const iamToken = (0, import_core2.getInput)("auth-token", { required: true });
     const url = (0, import_core2.getInput)("base-url", { required: true });
@@ -74282,14 +74282,14 @@ async function main() {
     (0, import_core2.setFailed)(error.message);
   }
 }
-__name(main, "main");
-run_default(main);
-var src_default = main;
+__name(action, "action");
+var src_default = action;
 
 // component-tests/src/generated-entrypoint.js
-if (src_default !== void 0) {
-  run_default(entryPoint);
+if (src_default === void 0) {
+  throw new Error('Missing entrypoint in GitHub Action! Add "export default action;" to your index.js');
 }
+run_default(src_default);
 /*! Bundled license information:
 
 undici/lib/fetch/body.js:

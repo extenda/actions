@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 
 import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
-import { loadGitHubToken, run } from '../../utils/src/index.js';
+import { loadGitHubToken } from '../../utils/src/index.js';
 
 const createPayload = (payloadString) => {
   if (payloadString) {
@@ -38,7 +38,5 @@ const action = async () => {
       core.info(`Dispatched ${eventType} to ${repository}.`);
     });
 };
-
-run(action);
 
 export default action;

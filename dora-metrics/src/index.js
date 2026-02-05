@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
 
-import { run } from '../../utils/src/index.js';
 import generateBugLog from './bug-log.js';
 import { generateFolders, uploadToBucket } from './deploy-log.js';
 
@@ -21,7 +20,5 @@ const action = async () => {
   );
   await uploadToBucket(productName);
 };
-
-run(action);
 
 export default action;

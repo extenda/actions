@@ -1,7 +1,6 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 
-import { run } from '../../utils/src/index.js';
 import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
 import generateOutputs from './generate-outputs.js';
 
@@ -172,7 +171,5 @@ const action = async () => {
 
   return comment;
 };
-
-run(action);
 
 export default action;

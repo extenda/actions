@@ -3,7 +3,6 @@ import path from 'node:path';
 
 import * as core from '@actions/core';
 
-import { run } from '../../utils/src/index.js';
 import * as versions from '../../utils/src/versions.js';
 import * as mvn from './mvn.js';
 import loadNexusCredentials from './nexus-credentials.js';
@@ -85,7 +84,5 @@ const action = async () => {
   };
   await authExec(usesArtifactRegistry, serviceAccountKey, execMaven);
 };
-
-run(action);
 
 export default action;

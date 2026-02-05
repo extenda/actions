@@ -3,7 +3,6 @@ import camelcaseKeys from 'camelcase-keys';
 
 import { createApi } from '../../external-events/src/utils/create-api.js';
 import { loadDefinitions } from '../../external-events/src/utils/load-sync-definitions.js';
-import { run } from '../../utils/src/index.js';
 import { loadSecrets } from './secrets-manager/load-secrets.js';
 import { validateCccConfig } from './validate/validate-ccc-config.js';
 
@@ -56,7 +55,5 @@ async function action() {
     throw new Error('Sync process had some errors (see details above).');
   }
 }
-
-run(action);
 
 export default action;

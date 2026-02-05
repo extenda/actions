@@ -4,7 +4,6 @@ import path from 'node:path';
 import * as core from '@actions/core';
 
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
-import { run } from '../../utils/src/index.js';
 import getBundleName from './bundle-name.js';
 import createTestBundle from './create-test-bundle.js';
 import opaTest from './opa-test.js';
@@ -32,7 +31,5 @@ const action = async () => {
 
   return opaTest(testBundle);
 };
-
-run(action);
 
 export default action;

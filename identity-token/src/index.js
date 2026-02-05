@@ -1,7 +1,6 @@
 import * as core from '@actions/core';
 
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
-import { run } from '../../utils/src/index.js';
 import fetchToken from './fetch-token.js';
 
 const action = async () => {
@@ -17,7 +16,5 @@ const action = async () => {
   core.exportVariable('IDENTITY_TOKEN', token);
   core.setOutput('identity-token', token);
 };
-
-run(action);
 
 export default action;

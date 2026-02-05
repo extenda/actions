@@ -1,6 +1,5 @@
 import { getBooleanInput, getInput } from '@actions/core';
 
-import { run } from '../../utils/src/index.js';
 import { validateOrFetchNexusCredentials } from './nexus-credentials.js';
 import { createNpmrcFile } from './npmrc.js';
 
@@ -23,7 +22,5 @@ const action = async () => {
     authForPublishing,
   });
 };
-
-run(action);
 
 export default action;
