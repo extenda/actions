@@ -6,6 +6,10 @@ import * as core from '@actions/core';
  * @returns {Promise<void>}
  */
 const run = async (action) => {
+  if (process.env.VITEST || process.env.JEST_WORKER_ID) {
+    // Don't run the action in a test environment
+    return Promise.resolve();
+  }
   try {
     await action();
   } catch (err) {
