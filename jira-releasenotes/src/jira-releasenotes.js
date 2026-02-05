@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const JiraClient = require('jira-client');
-const { getConventionalCommits } = require('../../utils/src/versions');
+import * as core from '@actions/core';
+import JiraClient from 'jira-client';
+
+import { getConventionalCommits } from '../../utils/src/versions.js';
 
 const findJiraChanges = async (projectKey) => {
   const issueIdRegEx = new RegExp(`${projectKey}-([0-9]+)`, 'g');
@@ -87,7 +88,4 @@ const createReleaseNotes = async ({
   return Promise.all(requests);
 };
 
-module.exports = {
-  createReleaseNotes,
-  findJiraChanges,
-};
+export { createReleaseNotes, findJiraChanges };

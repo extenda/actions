@@ -1,7 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const yaml = require('yaml');
-const { loadCacheKeys } = require('../../src/utils/security-cache-keys');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import { afterEach, describe, expect, test } from 'vitest';
+import yaml from 'yaml';
+
+import { loadCacheKeys } from '../../src/utils/security-cache-keys.js';
 
 const testFile = path.resolve(__dirname, 'cache-keys.test.yaml');
 

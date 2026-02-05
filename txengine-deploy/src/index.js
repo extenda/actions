@@ -1,10 +1,11 @@
-const core = require('@actions/core');
-const { run, failIfNotTrunkBased } = require('../../utils');
-const kubectl = require('./kubectl');
-const deploy = require('./deploy');
-const prepareEnvConfig = require('./env-config');
-const createManifests = require('./manifests');
-const configureDomains = require('./configure-domains');
+import * as core from '@actions/core';
+
+import { failIfNotTrunkBased, run } from '../../utils/src/index.js';
+import configureDomains from './configure-domains.js';
+import deploy from './deploy.js';
+import prepareEnvConfig from './env-config.js';
+import kubectl from './kubectl.js';
+import createManifests from './manifests.js';
 
 const action = async () => {
   const deployServiceAccountKey = core.getInput('deploy-service-account-key', {
@@ -40,8 +41,6 @@ const action = async () => {
   );
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

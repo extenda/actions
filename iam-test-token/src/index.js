@@ -1,7 +1,8 @@
-const core = require('@actions/core');
-const { run } = require('../../utils');
-const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
-const getIamToken = require('./iam-auth');
+import * as core from '@actions/core';
+
+import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
+import { run } from '../../utils/src/index.js';
+import getIamToken from './iam-auth.js';
 
 const loadCredentials = async (
   serviceAccountKey,
@@ -40,8 +41,6 @@ const action = async () => {
   core.setOutput('iam-token', token);
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

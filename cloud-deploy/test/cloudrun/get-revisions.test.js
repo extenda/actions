@@ -1,8 +1,9 @@
-jest.mock('@actions/exec');
-const execGcloud = require('../../src/utils/gcloud-output');
-const getRevisions = require('../../src/cloudrun/get-revisions');
+import { expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
+import getRevisions from '../../src/cloudrun/get-revisions.js';
+import execGcloud from '../../src/utils/gcloud-output.js';
 
-jest.mock('../../src/utils/gcloud-output');
+vi.mock('../../src/utils/gcloud-output.js');
 
 const GCLOUD_JSON_OUTPUT = `[
   {

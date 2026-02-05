@@ -1,8 +1,9 @@
-const core = require('@actions/core');
-const { run } = require('../../utils');
-const { loadSecrets, parseInputYaml } = require('./secrets');
+import * as core from '@actions/core';
 
-run(async () => {
+import { run } from '../../utils/src/index.js';
+import { loadSecrets, parseInputYaml } from './secrets.js';
+
+const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {
     required: true,
   });
@@ -10,4 +11,8 @@ run(async () => {
   const secrets = parseInputYaml(secretsInput);
 
   await loadSecrets(serviceAccountKey, secrets);
-});
+};
+
+run(action);
+
+export default action;

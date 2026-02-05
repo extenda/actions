@@ -3,10 +3,11 @@
   "version": "0.0.1-local",
   "description": "Deploy a tenant-specific Transaction Engine",
   "private": true,
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "@actions/github": "^6.0.0",
     "axios": "^1.12.1",
     "yaml": "^2.5.0"
-  }
+  },
+  "type": "module"
 }

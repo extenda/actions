@@ -1,9 +1,10 @@
-const mockFs = require('mock-fs');
-const exec = require('@actions/exec');
+import * as exec from '@actions/exec';
+import mockFs from 'mock-fs';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('@actions/exec');
+vi.mock('@actions/exec');
 
-const checkNamespaceExists = require('../src/check-namespace-exists');
+import checkNamespaceExists from '../src/check-namespace-exists.js';
 
 const mockOutput = (data, opts) => {
   opts.listeners.stderr(Buffer.from(`${data}\n`, 'utf8'));
@@ -17,7 +18,7 @@ describe('Check the namespace exists', () => {
 
   afterEach(() => {
     mockFs.restore();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It throws error if namespace does not exist', async () => {

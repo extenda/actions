@@ -3,8 +3,9 @@
   "version": "0.0.1-local",
   "description": "Forward the original GitHub Action event using repository dispatch",
   "private": true,
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "@actions/github": "^7.0.0"
-  }
+  },
+  "type": "module"
 }

@@ -1,5 +1,6 @@
-const exec = require('@actions/exec');
-const notifySlack = require('../../slack-notify/src/slack-notify');
+import * as exec from '@actions/exec';
+
+import notifySlack from '../../slack-notify/src/slack-notify.js';
 
 const alertOnExpiration = async (
   expirationDate,
@@ -45,4 +46,4 @@ const certificateExpiration = async (serviceAccount, clusterProject) => {
   return Promise.all(promises);
 };
 
-module.exports = certificateExpiration;
+export default certificateExpiration;

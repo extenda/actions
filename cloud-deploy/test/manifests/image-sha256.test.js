@@ -1,10 +1,12 @@
-const { execGcloud } = require('../../../setup-gcloud');
-const getImageWithSha256 = require('../../src/manifests/image-sha256');
+import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
-jest.mock('../../../setup-gcloud');
+import { execGcloud } from '../../../setup-gcloud/src/index.js';
+import getImageWithSha256 from '../../src/manifests/image-sha256.js';
+
+vi.mock('../../../setup-gcloud/src/index.js');
 
 afterEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 const SHA_VALUE =

@@ -1,15 +1,17 @@
-jest.mock('@actions/core');
-jest.mock('../src/deploy-job');
-jest.mock('../src/drain-job');
-jest.mock('../../setup-gcloud');
-jest.mock('../../cloud-run/src/cluster-info');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/deploy-job.js');
+vi.mock('../src/drain-job.js');
+vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('../../cloud-run/src/cluster-info.js');
 
-const core = require('@actions/core');
-const action = require('../src/index');
-const { setupGcloud } = require('../../setup-gcloud');
-const drainJob = require('../src/drain-job');
-const deployJob = require('../src/deploy-job');
-const { getTribeProject } = require('../../cloud-run/src/cluster-info');
+import * as core from '@actions/core';
+
+import { getTribeProject } from '../../cloud-run/src/cluster-info.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import deployJob from '../src/deploy-job.js';
+import drainJob from '../src/drain-job.js';
+import action from '../src/index.js';
 
 const orgEnv = process.env;
 
@@ -20,7 +22,7 @@ describe('deploy dataflow Action', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
 

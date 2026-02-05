@@ -1,5 +1,6 @@
-const core = require('@actions/core');
-const gcloud = require('./gcloud-output');
+import * as core from '@actions/core';
+
+import gcloud from './gcloud-output.js';
 
 const getTribeProject = async (projectId) => {
   const projectChunks = projectId.split('-');
@@ -82,8 +83,4 @@ const getClusterInfo = async (projectId, cluster = '') => {
   return getClusterDetails(tribeProject, cluster);
 };
 
-module.exports = {
-  getClusterInfo,
-  getTribeProject,
-  getClusterDetails,
-};
+export { getClusterDetails, getClusterInfo, getTribeProject };

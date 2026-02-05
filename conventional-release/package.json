@@ -3,8 +3,9 @@
   "version": "0.0.1-local",
   "description": "Create a release based on conventional commit conventions and historic releases",
   "private": true,
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "@actions/github": "^7.0.0"
-  }
+  },
+  "type": "module"
 }

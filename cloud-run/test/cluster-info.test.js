@@ -1,12 +1,14 @@
-jest.mock('@actions/exec');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
 
-const exec = require('@actions/exec');
-const { getClusterInfo } = require('../src/cluster-info');
-const { mockOutput } = require('./utils');
+import * as exec from '@actions/exec';
+
+import { getClusterInfo } from '../src/cluster-info.js';
+import { mockOutput } from './utils.js';
 
 describe('getClusterInfo', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('It can find cluster and zone from tribe', async () => {

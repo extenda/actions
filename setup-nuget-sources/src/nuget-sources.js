@@ -1,6 +1,6 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const replace = require('replace-in-file');
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import replace from 'replace-in-file';
 
 const setNuGetSource = async (
   configFile,
@@ -67,10 +67,10 @@ const generateRegexPattern = (url) => {
   }
 };
 
-module.exports = {
-  setNuGetSource,
-  setNuGetApiKey,
-  parseNugetSourceJson,
+export {
   commentOutSourceUrl,
   generateRegexPattern,
+  parseNugetSourceJson,
+  setNuGetApiKey,
+  setNuGetSource,
 };

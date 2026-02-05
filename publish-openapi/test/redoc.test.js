@@ -1,17 +1,18 @@
-const mockFs = require('mock-fs');
+import mockFs from 'mock-fs';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('@actions/core');
-jest.mock('@actions/exec');
-let fs = require('fs');
-const exec = require('@actions/exec');
-const deployDocumentation = require('../src/redoc');
-
+vi.mock('@actions/core');
+vi.mock('@actions/exec');
 // Make sure we get a mocked FS.
-fs = require('fs');
+import fs from 'node:fs';
+
+import * as exec from '@actions/exec';
+
+import deployDocumentation from '../src/redoc.js';
 
 describe('Run redoc deploy', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockFs.restore();
   });
 

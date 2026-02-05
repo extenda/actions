@@ -1,23 +1,24 @@
-const core = require('@actions/core');
-const buildManifest = require('./manifests/build-manifest');
-const loadServiceDefinition = require('./utils/service-definition');
-const deploy = require('./manifests/deploy');
-const projectInfo = require('../../cloud-run/src/project-info');
-const { run, failIfNotTrunkBased } = require('../../utils');
-const { setupGcloud } = require('../../setup-gcloud');
-const readSecret = require('./utils/load-credentials');
-const runScan = require('./utils/vulnerability-scanning');
-const getImageWithSha256 = require('./manifests/image-sha256');
-const publishPolicies = require('./policies/publish-policies');
-const checkPolicyExists = require('./utils/cloud-armor');
-const {
-  sendScaleSetup,
+import * as core from '@actions/core';
+
+import projectInfo from '../../cloud-run/src/project-info.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { failIfNotTrunkBased, run } from '../../utils/src/index.js';
+import buildManifest from './manifests/build-manifest.js';
+import { imageTag as collectorVersion } from './manifests/collector-sidecar.js';
+import deploy from './manifests/deploy.js';
+import getImageWithSha256 from './manifests/image-sha256.js';
+import { securityVersion } from './manifests/security-sidecar.js';
+import publishPolicies from './policies/publish-policies.js';
+import checkPolicyExists from './utils/cloud-armor.js';
+import readSecret from './utils/load-credentials.js';
+import {
+  refreshCanaryStatus,
   sendDeployInfo,
   sendDeployRequest,
-  refreshCanaryStatus,
-} = require('./utils/send-request');
-const { securityVersion } = require('./manifests/security-sidecar');
-const { imageTag: collectorVersion } = require('./manifests/collector-sidecar');
+  sendScaleSetup,
+} from './utils/send-request.js';
+import loadServiceDefinition from './utils/service-definition.js';
+import runScan from './utils/vulnerability-scanning.js';
 
 const action = async () => {
   const serviceAccountKeyPipeline = core.getInput('secrets-account-key', {
@@ -270,8 +271,6 @@ const action = async () => {
   }
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

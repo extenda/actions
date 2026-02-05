@@ -1,13 +1,15 @@
-const exec = require('@actions/exec');
-const cleanRevisions = require('../src/clean-revisions');
-const getRevisions = require('../src/get-revisions');
+import * as exec from '@actions/exec';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('@actions/exec');
-jest.mock('../src/get-revisions');
+import cleanRevisions from '../src/clean-revisions.js';
+import getRevisions from '../src/get-revisions.js';
+
+vi.mock('@actions/exec');
+vi.mock('../src/get-revisions.js');
 
 describe('clean revisions', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('clean revisions', async () => {

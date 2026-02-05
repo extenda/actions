@@ -139,4 +139,4 @@ const createComment = (filename, deployInfo) => {
 
   return comment.join('\n');
 };
-module.exports = createComment;
+export default createComment;

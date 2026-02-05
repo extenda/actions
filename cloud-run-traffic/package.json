@@ -3,6 +3,7 @@
   "version": "1.0.0-local",
   "private": true,
   "description": "This github action routes traffic for cloud run service.",
-  "main": "dist/index.js",
-  "license": "ISC"
+  "main": "dist/index.cjs",
+  "license": "ISC",
+  "type": "module"
 }

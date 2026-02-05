@@ -1,14 +1,11 @@
-jest.mock('fast-glob');
+import mockFs from 'mock-fs';
+import { afterEach, describe, expect, it } from 'vitest';
 
-const fg = require('fast-glob');
-const mockFs = require('mock-fs');
-const configsFixtures = require('../fixtures/configs');
-const {
-  loadDefinitions,
-} = require('../../../external-events/src/utils/load-sync-definitions');
-const { validateCccConfig } = require('../../src/validate/validate-ccc-config');
+import { loadDefinitions } from '../../../external-events/src/utils/load-sync-definitions.js';
+import { validateCccConfig } from '../../src/validate/validate-ccc-config.js';
+import * as configsFixtures from '../fixtures/configs.js';
 
-describe('loadDefinitions', () => {
+describe('loadDefinitions (CCC)', () => {
   afterEach(() => {
     mockFs.restore();
   });
@@ -17,7 +14,6 @@ describe('loadDefinitions', () => {
     const glob = 'customer-config/*.yaml';
     const file1 = 'customer-config/ccc.yaml';
     const file2 = 'customer-config/tst.yaml';
-    fg.sync.mockReturnValue([file1, file2]);
 
     mockFs({
       [file1]: configsFixtures.valid,
@@ -33,7 +29,7 @@ describe('loadDefinitions', () => {
   it('fails, if definition is invalid', async () => {
     const glob = 'customer-config/*.yaml';
     const file = 'customer-config/ccc.yaml';
-    fg.sync.mockReturnValue([file]);
+
     mockFs({ [file]: configsFixtures.invalid });
 
     await expect(loadDefinitions(glob, validateCccConfig)).rejects.toThrow(
@@ -45,7 +41,6 @@ describe('loadDefinitions', () => {
     const glob = 'customer-config/*.yaml';
     const file1 = 'customer-config/ccc1.yaml';
     const file2 = 'customer-config/ccc2.yaml';
-    fg.sync.mockReturnValue([file1, file2]);
 
     mockFs({
       [file1]: configsFixtures.valid,

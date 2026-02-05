@@ -1,5 +1,5 @@
-const { agent } = require('supertest');
-const core = require('@actions/core');
+import * as core from '@actions/core';
+import { agent } from 'supertest';
 
 /**
  * @param {string} baseUrl
@@ -8,7 +8,7 @@ const core = require('@actions/core');
  * (request: string, { code, body }: { code: number, body?: any }) => import('supertest').Test
  * }
  */
-const createApiTest = (baseUrl, apiToken) => {
+export const createApiTest = (baseUrl, apiToken) => {
   let failed = 0;
   let passed = 0;
 
@@ -44,5 +44,3 @@ const createApiTest = (baseUrl, apiToken) => {
     },
   );
 };
-
-module.exports = { createApiTest };

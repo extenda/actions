@@ -1,4 +1,4 @@
-const yaml = require('yaml');
+import yaml from 'yaml';
 
 /**
  * Patches deployment specification with values provided in service definition.
@@ -28,4 +28,4 @@ const patchDeploymentYaml = (service, deploymentYaml) => {
   return yaml.stringify(deployment);
 };
 
-module.exports = patchDeploymentYaml;
+export default patchDeploymentYaml;

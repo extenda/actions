@@ -1,31 +1,30 @@
-const mockGetProject = jest.fn();
-const mockGetVersions = jest.fn();
-const mockCreateVersion = jest.fn();
-const mockUpdateVersion = jest.fn();
-const mockUpdateIssue = jest.fn();
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+const mockGetProject = vi.fn();
+const mockGetVersions = vi.fn();
+const mockCreateVersion = vi.fn();
+const mockUpdateVersion = vi.fn();
+const mockUpdateIssue = vi.fn();
 
-jest.mock(
-  'jira-client',
-  () =>
-    function JiraClient() {
-      return {
-        getProject: mockGetProject,
-        getVersions: mockGetVersions,
-        createVersion: mockCreateVersion,
-        updateVersion: mockUpdateVersion,
-        updateIssue: mockUpdateIssue,
-      };
-    },
-);
+vi.mock('jira-client', () => ({
+  default: function JiraClient() {
+    return {
+      getProject: mockGetProject,
+      getVersions: mockGetVersions,
+      createVersion: mockCreateVersion,
+      updateVersion: mockUpdateVersion,
+      updateIssue: mockUpdateIssue,
+    };
+  },
+}));
 
-jest.mock('../../jira-releasenotes/src/jira-releasenotes', () => ({
+vi.mock('../../jira-releasenotes/src/jira-releasenotes', () => ({
   findJiraChanges: () => ({
     'TEST-1': {},
     'TEST-2': {},
   }),
 }));
 
-const { createJiraRelease } = require('../src/jira-release');
+import { createJiraRelease } from '../src/jira-release.js';
 
 const mockVersion = {
   self: 'https://jiratest.extendaretail.com/rest/api/2/version/19202',
@@ -72,7 +71,7 @@ describe('JIRA release', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It fails for illegal project', async () => {

@@ -1,8 +1,9 @@
-const core = require('@actions/core');
-const simpleGit = require('simple-git');
-const semver = require('semver');
-const gitConfig = require('./git-config');
-const changes = require('./conventionalchanges');
+import * as core from '@actions/core';
+import semver from 'semver';
+import simpleGit from 'simple-git';
+
+import * as changes from './conventionalchanges.js';
+import gitConfig from './git-config.js';
 
 const DEFAULT_VERSION = '0.0.0';
 
@@ -10,7 +11,7 @@ const DEFAULT_VERSION = '0.0.0';
  * Returns the latest tagged release matching the tag prefix.
  * @returns {Promise<string>}
  */
-const getLatestReleaseTag = async () => {
+export const getLatestReleaseTag = async () => {
   const git = simpleGit();
 
   const tags = await git.tags([
@@ -32,7 +33,7 @@ const getLatestReleaseTag = async () => {
  * Returns the latest semantic release matching the tag prefix.
  * @returns {Promise<string>}
  */
-const getLatestRelease = async () =>
+export const getLatestRelease = async () =>
   getLatestReleaseTag().then((tag) => tag.replace(changes.getTagPrefix(), ''));
 
 /**
@@ -41,7 +42,7 @@ const getLatestRelease = async () =>
  * @param versionSuffix optional version suffix, for example '-SNAPSHOT'
  * @returns {Promise<string>}
  */
-const getBuildVersion = async (versionSuffix = '') => {
+export const getBuildVersion = async (versionSuffix = '') => {
   const latestRelease = await getLatestRelease();
 
   const releaseType = await changes.getRecommendedBump();
@@ -57,7 +58,7 @@ const getBuildVersion = async (versionSuffix = '') => {
  * @returns {Promise<{changelog: *, tagName: *, version: *}>}
  */
 /* istanbul ignore next */
-const tagReleaseVersion = async () => {
+export const tagReleaseVersion = async () => {
   const version = await getBuildVersion();
   const changelog = await changes.getChangelog(version);
   const tagName = `${changes.getTagPrefix()}${version}`;
@@ -74,15 +75,8 @@ const tagReleaseVersion = async () => {
   };
 };
 
-const setTagPrefix = (prefix) => {
+export const setTagPrefix = (prefix) => {
   changes.setTagPrefix(prefix);
 };
 
-module.exports = {
-  ...changes,
-  setTagPrefix,
-  getBuildVersion,
-  getLatestRelease,
-  getLatestReleaseTag,
-  tagReleaseVersion,
-};
+export const getConventionalCommits = changes.getConventionalCommits;

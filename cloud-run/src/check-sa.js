@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+import * as exec from '@actions/exec';
 
 const getServiceAccounts = async (project) => {
   let output = '';
@@ -35,4 +35,4 @@ const checkServiceAccount = async (serviceName, projectID) => {
   }
 };
 
-module.exports = checkServiceAccount;
+export default checkServiceAccount;

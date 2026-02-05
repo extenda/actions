@@ -1,11 +1,13 @@
-const getToken = require('../../src/utils/identity-token');
-const { execGcloud } = require('../../../setup-gcloud');
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('../../../setup-gcloud');
+import { execGcloud } from '../../../setup-gcloud/src/index.js';
+import getToken from '../../src/utils/identity-token.js';
+
+vi.mock('../../../setup-gcloud/src/index.js');
 
 describe('getToken function', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should fetch and return the id token', async () => {

@@ -1,6 +1,7 @@
-const exec = require('@actions/exec');
-const core = require('@actions/core');
-const fs = require('fs');
+import fs from 'node:fs';
+
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 
 const wait = (ms) =>
   new Promise((resolve) => {
@@ -153,4 +154,4 @@ const deployDocumentation = async (
   await Promise.all(promises);
 };
 
-module.exports = deployDocumentation;
+export default deployDocumentation;

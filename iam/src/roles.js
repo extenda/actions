@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const axios = require('axios');
-const { iamApiErrorToString } = require('./utils/iam-api-error-to-string');
+import * as core from '@actions/core';
+import axios from 'axios';
+
+import { iamApiErrorToString } from './utils/iam-api-error-to-string.js';
 
 const createRole = async (
   iamToken,
@@ -165,10 +166,4 @@ function isFullyQualifiedPermissionId(permissionId) {
   return permissionId.split('.').length === 3;
 }
 
-module.exports = {
-  setupRoles,
-  getRole,
-  createRole,
-  updateRole,
-  arraysEqual,
-};
+export { arraysEqual, createRole, getRole, setupRoles, updateRole };

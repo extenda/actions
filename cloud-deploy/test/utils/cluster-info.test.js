@@ -1,12 +1,13 @@
-jest.mock('@actions/exec');
-jest.mock('../../src/utils/gcloud-output');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
+vi.mock('../../src/utils/gcloud-output.js');
 
-const { getClusterInfo } = require('../../src/utils/cluster-info');
-const execGcloud = require('../../src/utils/gcloud-output');
+import { getClusterInfo } from '../../src/utils/cluster-info.js';
+import execGcloud from '../../src/utils/gcloud-output.js';
 
 describe('getClusterInfo', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('It can find cluster and zone from tribe', async () => {

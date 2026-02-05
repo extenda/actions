@@ -1,16 +1,26 @@
-const mockFs = require('mock-fs');
-const core = require('@actions/core');
-const action = require('../src/index');
-const getBundleName = require('../src/bundle-name');
-const createTestBundle = require('../src/create-test-bundle');
-const opaTest = require('../src/opa-test');
-const { setupGcloud } = require('../../setup-gcloud');
+import * as core from '@actions/core';
+import mockFs from 'mock-fs';
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 
-jest.mock('@actions/core');
-jest.mock('../src/bundle-name');
-jest.mock('../src/create-test-bundle');
-jest.mock('../src/opa-test');
-jest.mock('../../setup-gcloud');
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import getBundleName from '../src/bundle-name.js';
+import createTestBundle from '../src/create-test-bundle.js';
+import action from '../src/index.js';
+import opaTest from '../src/opa-test.js';
+
+vi.mock('@actions/core');
+vi.mock('../src/bundle-name.js');
+vi.mock('../src/create-test-bundle.js');
+vi.mock('../src/opa-test.js');
+vi.mock('../../setup-gcloud/src/index.js');
 
 describe('opa-policy-test', () => {
   afterAll(() => {
@@ -25,7 +35,7 @@ describe('opa-policy-test', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('It can test an opa bundle', async () => {

@@ -1,8 +1,9 @@
-const os = require('os');
-const fs = require('fs');
-const path = require('path');
-const core = require('@actions/core');
-const { extractTar } = require('@actions/tool-cache');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import * as core from '@actions/core';
+import { extractTar } from '@actions/tool-cache';
+import os from 'os';
 
 const OUT_BEGIN_MARKER = 'test-pod-output BEGIN';
 const OUT_END_MARKER = 'test-pod-output END';
@@ -46,7 +47,4 @@ LogFilter.prototype.log = function log(data, stream) {
   }
 };
 
-module.exports = {
-  extractOutput,
-  LogFilter,
-};
+export { extractOutput, LogFilter };

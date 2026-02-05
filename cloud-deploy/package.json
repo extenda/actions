@@ -3,7 +3,7 @@
   "version": "0.0.1-local",
   "private": true,
   "description": "Deploy to GKE Autopilot",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "axios": "^1.13.2",
     "axios-retry": "^4.5.0",
@@ -13,5 +13,6 @@
     "jsonschema": "^1.5.0",
     "semver": "^7.7.3",
     "yaml": "^2.8.2"
-  }
+  },
+  "type": "module"
 }

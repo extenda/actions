@@ -1,6 +1,7 @@
-const cp = require('child_process');
-const core = require('@actions/core');
-const fs = require('fs');
+import fs from 'node:fs';
+
+import * as core from '@actions/core';
+import cp from 'child_process';
 
 const createBuildCommand = (
   dockerfile,
@@ -92,8 +93,4 @@ const push = (imageName, tags) => {
   });
 };
 
-module.exports = {
-  build,
-  login,
-  push,
-};
+export { build, login, push };

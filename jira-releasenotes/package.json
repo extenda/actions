@@ -3,8 +3,9 @@
   "version": "0.0.1-local",
   "description": "Populate JIRA release notes from conventional commit conventions",
   "private": true,
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "jira-client": "^8.2.2"
-  }
+  },
+  "type": "module"
 }

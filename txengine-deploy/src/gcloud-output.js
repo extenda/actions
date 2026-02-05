@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+import * as exec from '@actions/exec';
 
 const gcloudOutput = async (args, bin = 'gcloud') => {
   let output = '';
@@ -13,4 +13,4 @@ const gcloudOutput = async (args, bin = 'gcloud') => {
   return output.trim();
 };
 
-module.exports = gcloudOutput;
+export default gcloudOutput;

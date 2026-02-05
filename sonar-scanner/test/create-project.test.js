@@ -1,14 +1,23 @@
-const axios = require('axios');
-const core = require('@actions/core');
+import * as core from '@actions/core';
+import axios from 'axios';
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 
-jest.mock('axios');
-jest.mock('@actions/core');
-jest.mock('../src/sonar-credentials', () => ({
-  sonarAuth: jest.fn(),
+vi.mock('axios');
+vi.mock('@actions/core');
+vi.mock('../src/sonar-credentials', () => ({
+  sonarAuth: vi.fn(),
 }));
 
-const { createProject } = require('../src/create-project');
-const { sonarAuth } = require('../src/sonar-credentials');
+import { createProject } from '../src/create-project.js';
+import { sonarAuth } from '../src/sonar-credentials.js';
 
 const orgEnv = process.env;
 
@@ -23,7 +32,7 @@ describe('Create Project', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     sonarAuth.mockResolvedValue({ username: 'token', password: '' });
   });
 

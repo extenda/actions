@@ -1,4 +1,4 @@
-const core = require('@actions/core');
+import * as core from '@actions/core';
 
 /**
  * Load a GitHub token from either a provided `github-token` input or
@@ -27,4 +27,4 @@ const loadGitHubToken = async (loadSecret) => {
   return token;
 };
 
-module.exports = loadGitHubToken;
+export default loadGitHubToken;

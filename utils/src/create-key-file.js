@@ -1,5 +1,6 @@
-const fs = require('fs');
-const tmp = require('tmp');
+import fs from 'node:fs';
+
+import tmp from 'tmp';
 
 tmp.setGracefulCleanup();
 
@@ -10,4 +11,4 @@ const createKeyFile = (serviceAccountKey) => {
   return tmpFile.name;
 };
 
-module.exports = createKeyFile;
+export default createKeyFile;

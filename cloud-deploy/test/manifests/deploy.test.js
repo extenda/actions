@@ -1,11 +1,13 @@
-const gcloudOutput = require('../../src/utils/gcloud-output');
-const deploy = require('../../src/manifests/deploy');
-const { setRetryDelay } = require('../../src/utils/retry-until');
-const cleanRevisions = require('../../src/cloudrun/clean-revisions');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('../../src/utils/gcloud-output');
-jest.mock('../../src/cloudrun/clean-revisions');
-jest.mock('../../src/cloudrun/iam-bindings');
+import cleanRevisions from '../../src/cloudrun/clean-revisions.js';
+import deploy from '../../src/manifests/deploy.js';
+import gcloudOutput from '../../src/utils/gcloud-output.js';
+import { setRetryDelay } from '../../src/utils/retry-until.js';
+
+vi.mock('../../src/utils/gcloud-output.js');
+vi.mock('../../src/cloudrun/clean-revisions.js');
+vi.mock('../../src/cloudrun/iam-bindings.js');
 
 const progressCommand = expect.arrayContaining(['deploy', 'rollouts', 'list']);
 
@@ -15,7 +17,7 @@ describe('manifests/deploy', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It will wait for deploy to succeed', async () => {

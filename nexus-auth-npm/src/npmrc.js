@@ -1,5 +1,5 @@
-const { writeFile } = require('fs').promises;
-const { join } = require('path');
+import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 /**
  * @param {{
@@ -11,7 +11,7 @@ const { join } = require('path');
  *   authForPublishing?: boolean,
  * }}
  */
-const createNpmrcFile = async ({
+export const createNpmrcFile = ({
   credentials: { username, password },
   authForPublishing,
   outputDir,
@@ -24,7 +24,5 @@ const createNpmrcFile = async ({
 //repo.extendaretail.com/repository/${repo}/:always-auth = true
 //repo.extendaretail.com/repository/${repo}/:_auth = ${nexusToken}
 `;
-  await writeFile(join(outputDir, '.npmrc'), contents);
+  writeFileSync(join(outputDir, '.npmrc'), contents);
 };
-
-module.exports = { createNpmrcFile };

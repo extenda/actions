@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`buildManifest It allows for deploying on new vpc subnet without NAT 1`] = `
+exports[`buildManifest > It allows for deploying on new vpc subnet without NAT 1`] = `
 "apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
@@ -72,7 +72,7 @@ spec:
 "
 `;
 
-exports[`buildManifest It allows for deploying on without VPC connection 1`] = `
+exports[`buildManifest > It allows for deploying on without VPC connection 1`] = `
 "apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
@@ -142,7 +142,7 @@ spec:
 "
 `;
 
-exports[`buildManifest It generates a OTEL collector sidecar if OTEL is configured on Cloud Run 1`] = `
+exports[`buildManifest > It generates a OTEL collector sidecar if OTEL is configured on Cloud Run 1`] = `
 "apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
@@ -269,7 +269,7 @@ spec:
 "
 `;
 
-exports[`buildManifest It generates a collector if OTEL configured 1`] = `
+exports[`buildManifest > It generates a collector if OTEL configured 1`] = `
 "apiVersion: v1
 kind: Namespace
 metadata:
@@ -436,7 +436,7 @@ spec:
 "
 `;
 
-exports[`buildManifest It generates a collector sidecar if monitoring is configured on Cloud Run 1`] = `
+exports[`buildManifest > It generates a collector sidecar if monitoring is configured on Cloud Run 1`] = `
 "apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
@@ -543,7 +543,7 @@ spec:
 "
 `;
 
-exports[`buildManifest It generates a podmonitor if configured 1`] = `
+exports[`buildManifest > It generates a podmonitor if configured 1`] = `
 "apiVersion: v1
 kind: Namespace
 metadata:
@@ -672,7 +672,7 @@ spec:
 "
 `;
 
-exports[`buildManifest It generates a podmonitor if configured 2`] = `
+exports[`buildManifest > It generates a podmonitor if configured 2`] = `
 "apiVersion: monitoring.googleapis.com/v1
 kind: PodMonitoring
 metadata:
@@ -689,7 +689,7 @@ spec:
 "
 `;
 
-exports[`buildManifest It should deploy with iam bindings and audiences 1`] = `
+exports[`buildManifest > It should deploy with iam bindings and audiences 1`] = `
 "apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
@@ -766,7 +766,7 @@ spec:
 "
 `;
 
-exports[`buildManifest It should generate cloud run service with annotations 1`] = `
+exports[`buildManifest > It should generate cloud run service with annotations 1`] = `
 "apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
@@ -842,7 +842,7 @@ spec:
 "
 `;
 
-exports[`buildManifest It should generate cloud run service with security 1`] = `
+exports[`buildManifest > It should generate cloud run service with security 1`] = `
 "apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
@@ -966,7 +966,7 @@ spec:
 "
 `;
 
-exports[`buildManifest It should generate manifest with service-level-min-instances 1`] = `
+exports[`buildManifest > It should generate manifest with service-level-min-instances 1`] = `
 "apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
@@ -1045,7 +1045,7 @@ spec:
 "
 `;
 
-exports[`buildManifest It should generate manifest with volume for StatefulSet 1`] = `
+exports[`buildManifest > It should generate manifest with volume for StatefulSet 1`] = `
 "apiVersion: v1
 kind: Namespace
 metadata:
@@ -1178,7 +1178,7 @@ spec:
 "
 `;
 
-exports[`buildManifest It should generate manifest with volumes for StatefulSet 1`] = `
+exports[`buildManifest > It should generate manifest with volumes for StatefulSet 1`] = `
 "apiVersion: v1
 kind: Namespace
 metadata:
@@ -1315,7 +1315,7 @@ spec:
 "
 `;
 
-exports[`buildManifest It should set traffic to 0 of new revision if serve traffic is false 1`] = `
+exports[`buildManifest > It should set traffic to 0 of new revision if serve traffic is false 1`] = `
 "apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
@@ -1393,7 +1393,7 @@ spec:
 "
 `;
 
-exports[`buildManifest deploys with envoy auth proxy if set to envoy-opa 1`] = `
+exports[`buildManifest > deploys with envoy auth proxy if set to envoy-opa 1`] = `
 "apiVersion: v1
 kind: Namespace
 metadata:
@@ -1549,7 +1549,7 @@ spec:
 "
 `;
 
-exports[`buildManifest deploys without envoy auth proxy if set to none 1`] = `
+exports[`buildManifest > deploys without envoy auth proxy if set to none 1`] = `
 "apiVersion: v1
 kind: Namespace
 metadata:
@@ -1680,7 +1680,7 @@ spec:
 "
 `;
 
-exports[`buildManifest should generate exclude-logs label 1`] = `
+exports[`buildManifest > should generate exclude-logs label 1`] = `
 "apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
@@ -1754,7 +1754,7 @@ spec:
 "
 `;
 
-exports[`buildManifest should generate manifest cloudrun file with correct content 1`] = `
+exports[`buildManifest > should generate manifest cloudrun file with correct content 1`] = `
 "apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
@@ -1843,7 +1843,7 @@ spec:
 "
 `;
 
-exports[`buildManifest should generate manifest file with correct content 1`] = `
+exports[`buildManifest > should generate manifest file with correct content 1`] = `
 "apiVersion: v1
 kind: Namespace
 metadata:
@@ -1974,7 +1974,7 @@ spec:
 "
 `;
 
-exports[`buildManifest should generate manifest file with correct content for availability high 1`] = `
+exports[`buildManifest > should generate manifest file with correct content for availability high 1`] = `
 "apiVersion: v1
 kind: Namespace
 metadata:
@@ -2107,7 +2107,7 @@ spec:
 "
 `;
 
-exports[`buildManifest should generate manifest file with correct content for availability low 1`] = `
+exports[`buildManifest > should generate manifest file with correct content for availability low 1`] = `
 "apiVersion: v1
 kind: Namespace
 metadata:
@@ -2240,7 +2240,7 @@ spec:
 "
 `;
 
-exports[`buildManifest should generate manifest file with correct content for staging 1`] = `
+exports[`buildManifest > should generate manifest file with correct content for staging 1`] = `
 "apiVersion: v1
 kind: Namespace
 metadata:
@@ -2367,7 +2367,7 @@ spec:
 "
 `;
 
-exports[`buildManifest should set OPA env vars 1`] = `
+exports[`buildManifest > should set OPA env vars 1`] = `
 "apiVersion: v1
 kind: Namespace
 metadata:

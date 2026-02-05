@@ -1,15 +1,17 @@
-jest.mock('@actions/core');
-jest.mock('../src/bug-log');
-jest.mock('../src/deploy-log');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/bug-log.js');
+vi.mock('../src/deploy-log.js');
 
-const core = require('@actions/core');
-const action = require('../src/index');
-const generateBugLog = require('../src/bug-log');
-const { generateFolders } = require('../src/deploy-log');
+import * as core from '@actions/core';
+
+import generateBugLog from '../src/bug-log.js';
+import { generateFolders } from '../src/deploy-log.js';
+import action from '../src/index.js';
 
 describe('DORA metrics action', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can run the action', async () => {

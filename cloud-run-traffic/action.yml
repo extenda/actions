@@ -24,4 +24,4 @@ inputs:
     default: '100'
 runs:
   using: node20
-  main: dist/index.js
+  main: dist/index.cjs

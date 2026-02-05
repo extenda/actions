@@ -1,21 +1,21 @@
-const exec = require('@actions/exec');
-const generateBugLog = require('../src/bug-log');
-const { generateFolders } = require('../src/deploy-log');
+import * as exec from '@actions/exec';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
-const mockSearchJira = jest.fn();
+import generateBugLog from '../src/bug-log.js';
+import { generateFolders } from '../src/deploy-log.js';
 
-jest.mock('../src/deploy-log');
-jest.mock('@actions/exec');
-jest.mock('@actions/core');
-jest.mock(
-  'jira-client',
-  () =>
-    function JiraClient() {
-      return {
-        searchJira: mockSearchJira,
-      };
-    },
-);
+const mockSearchJira = vi.fn();
+
+vi.mock('../src/deploy-log.js');
+vi.mock('@actions/exec');
+vi.mock('@actions/core');
+vi.mock('jira-client', () => ({
+  default: function JiraClient() {
+    return {
+      searchJira: mockSearchJira,
+    };
+  },
+}));
 
 const issue = {
   issues: [
@@ -34,7 +34,7 @@ const issue = {
 
 describe('Generate bug log', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It executes all parts', async () => {

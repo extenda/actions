@@ -1,28 +1,44 @@
-require('jest-fetch-mock').enableMocks();
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import mockFs from 'mock-fs';
+import os from 'os';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-const mockFs = require('mock-fs');
-const exec = require('@actions/exec');
-const core = require('@actions/core');
-const os = require('os');
+import { loadTool } from '../../utils/src/index.js';
+import { getBinaryName } from '../src/pkgbuilder.js';
+import { buildPackage } from '../src/pkgbuilder.js';
+import { publishPackageCommand } from '../src/pkgbuilder.js';
+import { packageBuilderCommand } from '../src/pkgbuilder.js';
 
-const { loadTool } = require('../../utils');
-const { getBinaryName } = require('../src/pkgbuilder');
-const { buildPackage } = require('../src/pkgbuilder');
-const { publishPackageCommand } = require('../src/pkgbuilder');
-const { packageBuilderCommand } = require('../src/pkgbuilder');
+vi.mock('@actions/exec');
+vi.mock('@actions/core');
+vi.mock('../../utils/src/index.js', () => ({
+  loadTool: vi.fn(),
+}));
 
-jest.mock('@actions/exec');
-jest.mock('@actions/core');
-jest.mock('../../utils', () => ({
-  loadTool: jest.fn(),
+// Use vi.hoisted to define mockFetch before vi.mock is hoisted
+const { mockFetch } = vi.hoisted(() => ({
+  mockFetch: vi.fn(),
+}));
+
+// Mock node-fetch
+vi.mock('node-fetch', () => ({
+  default: mockFetch,
 }));
 
 describe('RS installer package tests', () => {
-  afterEach(() => {
-    jest.resetAllMocks();
-    mockFs.restore();
+  beforeEach(() => {
+    // Set up default successful response for fetch
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+    });
+  });
 
-    fetch.resetMocks();
+  afterEach(() => {
+    vi.resetAllMocks();
+    mockFs.restore();
   });
 
   test('packageBuilderCommand() executed with correct args', async () => {
@@ -267,12 +283,11 @@ describe('RS installer package tests', () => {
       {},
     );
 
-    fetch.mockResponse(
-      JSON.stringify({
-        status: '200',
-        statusText: 'OK',
-      }),
-    );
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+    });
 
     await publishPackageCommand({
       packageName: 'RS_TestPackage',
@@ -283,7 +298,7 @@ describe('RS installer package tests', () => {
       publishPackage: true,
     });
 
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(core.info).toHaveBeenCalledTimes(3);
     expect(core.error).not.toHaveBeenCalled();
   });
@@ -298,8 +313,8 @@ describe('RS installer package tests', () => {
       {},
     );
 
-    fetch.mockReject({
-      status: '503',
+    mockFetch.mockRejectedValueOnce({
+      status: 503,
       statusText: 'Test',
     });
 
@@ -312,7 +327,7 @@ describe('RS installer package tests', () => {
       publishPackage: true,
     });
 
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(core.error).toHaveBeenCalledTimes(1);
     expect(core.error).toHaveBeenCalledWith(
       'Failed to publish package, server responded with 503 Test',
@@ -320,7 +335,7 @@ describe('RS installer package tests', () => {
   });
 
   test('getBinaryName() returns correct binary name', () => {
-    jest.spyOn(os, 'platform');
+    vi.spyOn(os, 'platform');
     os.platform.mockReturnValue('win32');
     expect(getBinaryName()).toBe('InstallerPackageBuilder.Core.Console.exe');
 
@@ -328,7 +343,7 @@ describe('RS installer package tests', () => {
     expect(getBinaryName()).toBe('InstallerPackageBuilder.Core.Console');
 
     expect(os.platform).toHaveBeenCalledTimes(2);
-    jest.unmock('os');
+    vi.unmock('os');
   });
 
   test('It can run the builder', async () => {
@@ -450,7 +465,9 @@ describe('RS installer package tests', () => {
         'test1_1.0.1-testversion.pkg.zip': Buffer.from('test content'),
       },
       sourcePathsTest: {
-        test1: {},
+        test1: {
+          '.keep': '', // Add dummy file so directory is created
+        },
       },
     });
 

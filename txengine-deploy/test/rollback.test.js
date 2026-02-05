@@ -1,11 +1,13 @@
-jest.mock('@actions/exec');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
 
-const exec = require('@actions/exec');
-const checkStatusAndKillFailingPods = require('../src/rollback');
+import * as exec from '@actions/exec';
+
+import checkStatusAndKillFailingPods from '../src/rollback.js';
 
 describe('rollback', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can delete failing pods', async () => {

@@ -1,8 +1,10 @@
-const core = require('@actions/core');
-const axios = require('axios');
-const fs = require('fs');
-const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
-const uploadToBucket = require('./upload-to-bucket');
+import fs from 'node:fs';
+
+import * as core from '@actions/core';
+import axios from 'axios';
+
+import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
+import uploadToBucket from './upload-to-bucket.js';
 
 const filePreview = (file, maxLines = 26) => {
   if (!fs.existsSync(file)) {
@@ -84,4 +86,4 @@ const notifySlack = async (serviceAccount, message, channelName, file) => {
   return notifySlackMessage(serviceAccount, message, channelName);
 };
 
-module.exports = notifySlack;
+export default notifySlack;

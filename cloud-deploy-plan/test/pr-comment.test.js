@@ -1,12 +1,14 @@
-const { getPullRequestNumber, postComment } = require('../src/pr-comment');
-const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
+import { afterEach, expect, test, vi } from 'vitest';
 
-const mockCreateComment = jest.fn();
-const mockListComments = jest.fn();
-const mockUpdateComment = jest.fn();
+import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
+import { getPullRequestNumber, postComment } from '../src/pr-comment.js';
 
-jest.mock('../../utils/src/pull-request-info');
-jest.mock('@actions/github', () => ({
+const mockCreateComment = vi.fn();
+const mockListComments = vi.fn();
+const mockUpdateComment = vi.fn();
+
+vi.mock('../../utils/src/pull-request-info.js');
+vi.mock('@actions/github', () => ({
   getOctokit: () => ({
     rest: {
       issues: {
@@ -25,7 +27,7 @@ jest.mock('@actions/github', () => ({
 }));
 
 afterEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 test('It can fetch pull request number', async () => {

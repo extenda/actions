@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+import * as exec from '@actions/exec';
 
 /**
  * Simple timer to wait for a specified amount of time.
@@ -133,4 +133,4 @@ const checkRequiredNumberOfPodsIsRunning = async (
   }
 };
 
-module.exports = checkRequiredNumberOfPodsIsRunning;
+export default checkRequiredNumberOfPodsIsRunning;

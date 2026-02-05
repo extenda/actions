@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const gcloud = require('./gcloud-output');
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+
+import gcloud from './gcloud-output.js';
 
 let dnsProjectId;
 
@@ -59,7 +60,4 @@ const clearCache = () => {
   dnsProjectId = undefined;
 };
 
-module.exports = {
-  addDnsRecord,
-  clearCache,
-};
+export { addDnsRecord, clearCache };

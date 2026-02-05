@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
 
 /**
  * Creates files on the file system:
@@ -112,4 +112,4 @@ resources:
   });
 };
 
-module.exports = createBaseKustomizeFiles;
+export default createBaseKustomizeFiles;

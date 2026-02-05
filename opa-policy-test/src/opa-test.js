@@ -1,5 +1,6 @@
-const { exec } = require('@actions/exec');
-const { loadTool } = require('../../utils');
+import { exec } from '@actions/exec';
+
+import { loadTool } from '../../utils/src/index.js';
 
 const opaTest = async (bundleDir) => {
   const version = '0.58.0';
@@ -11,4 +12,4 @@ const opaTest = async (bundleDir) => {
   }).then((opa) => exec(opa, ['test', '--verbose', '--bundle', bundleDir]));
 };
 
-module.exports = opaTest;
+export default opaTest;

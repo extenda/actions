@@ -1,8 +1,9 @@
-const path = require('path');
-const { credentials } = require('./sonar-credentials');
-const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
+import path from 'node:path';
 
-const createParams = async (
+import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
+import { credentials } from './sonar-credentials.js';
+
+export const createParams = async (
   hostUrl,
   mainBranch,
   workingDir = '.',
@@ -90,8 +91,4 @@ const createParams = async (
     }
   });
   return params.join(' ');
-};
-
-module.exports = {
-  createParams,
 };

@@ -1,15 +1,17 @@
-const core = require('@actions/core');
-const { loadSecret } = require('../../../gcp-secret-manager/src/secrets');
-const { checkEnv } = require('../../../utils');
-const readSecret = require('../../src/utils/load-credentials');
+import * as core from '@actions/core';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('@actions/core');
-jest.mock('../../../gcp-secret-manager/src/secrets');
-jest.mock('../../../utils');
+import { loadSecret } from '../../../gcp-secret-manager/src/secrets.js';
+import { checkEnv } from '../../../utils/src/index.js';
+import readSecret from '../../src/utils/load-credentials.js';
+
+vi.mock('@actions/core');
+vi.mock('../../../gcp-secret-manager/src/secrets.js');
+vi.mock('../../../utils/src/index.js');
 
 describe('readSecret', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should load secret from environment variable when available', async () => {

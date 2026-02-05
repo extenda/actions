@@ -1,9 +1,11 @@
-jest.mock('@actions/core');
-jest.mock('../src/jira-release');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/jira-release.js');
 
-const core = require('@actions/core');
-const { createJiraRelease } = require('../src/jira-release');
-const action = require('../src/index');
+import * as core from '@actions/core';
+
+import action from '../src/index.js';
+import { createJiraRelease } from '../src/jira-release.js';
 
 const orgEnv = process.env;
 
@@ -17,7 +19,7 @@ describe('Jira Release Action', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
 

@@ -1,8 +1,8 @@
-const core = require('@actions/core');
-const github = require('@actions/github');
-let { context } = require('@actions/github');
+import * as core from '@actions/core';
+import * as github from '@actions/github';
 
 let pullRequestCache;
+let context = github.context;
 
 const fetchPullRequestInfo = async (githubToken) => {
   const octokit = github.getOctokit(githubToken);
@@ -35,11 +35,10 @@ const getPullRequestInfo = async (githubToken) => {
   return pullRequestCache;
 };
 
-module.exports = {
-  setContext: (ctx) => {
-    // Used to mock the context in tests.
-    context = ctx;
-    pullRequestCache = undefined;
-  },
-  getPullRequestInfo,
+export const setContext = (ctx) => {
+  // Used to mock the context in tests.
+  context = ctx;
+  pullRequestCache = undefined;
 };
+
+export { getPullRequestInfo };

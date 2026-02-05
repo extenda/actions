@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const JiraClient = require('jira-client');
-const { generateFolders } = require('./deploy-log');
+import * as core from '@actions/core';
+import JiraClient from 'jira-client';
+
+import { generateFolders } from './deploy-log.js';
 
 const handleIssues = async (issue, productName) => {
   const promises = [];
@@ -41,4 +42,4 @@ const generateBugLog = async (
   await handleIssues(serviceIssues, productName);
 };
 
-module.exports = generateBugLog;
+export default generateBugLog;

@@ -1,10 +1,12 @@
-const gcloudOutput = require('../../src/utils/gcloud-output');
-const {
-  podMonitorManifest,
-  deletePodMonitor,
-} = require('../../src/manifests/pod-monitoring');
+import { describe, expect, test, vi } from 'vitest';
 
-jest.mock('../../src/utils/gcloud-output');
+import {
+  deletePodMonitor,
+  podMonitorManifest,
+} from '../../src/manifests/pod-monitoring.js';
+import gcloudOutput from '../../src/utils/gcloud-output.js';
+
+vi.mock('../../src/utils/gcloud-output.js');
 
 describe('manifests/pod-monitoring', () => {
   test('It generates a manifest', () => {

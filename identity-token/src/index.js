@@ -1,7 +1,8 @@
-const core = require('@actions/core');
-const fetchToken = require('./fetch-token');
-const { run } = require('../../utils/src');
-const { setupGcloud } = require('../../setup-gcloud');
+import * as core from '@actions/core';
+
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { run } from '../../utils/src/index.js';
+import fetchToken from './fetch-token.js';
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {
@@ -17,8 +18,6 @@ const action = async () => {
   core.setOutput('identity-token', token);
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

@@ -1,5 +1,6 @@
-const core = require('@actions/core');
-const execGcloud = require('../utils/gcloud-output');
+import * as core from '@actions/core';
+
+import execGcloud from '../utils/gcloud-output.js';
 
 const deletePodMonitor = async (name) =>
   execGcloud(
@@ -49,7 +50,4 @@ const podMonitorManifest = (name, monitoring, opa) => {
   };
 };
 
-module.exports = {
-  deletePodMonitor,
-  podMonitorManifest,
-};
+export { deletePodMonitor, podMonitorManifest };

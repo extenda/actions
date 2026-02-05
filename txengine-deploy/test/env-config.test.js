@@ -1,18 +1,24 @@
-const mockLoadSecret = jest.fn();
-jest.mock('../../gcp-secret-manager/src/secrets', () => ({
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+
+// Use vi.hoisted to define mockLoadSecret before vi.mock is hoisted
+const { mockLoadSecret } = vi.hoisted(() => ({
+  mockLoadSecret: vi.fn(),
+}));
+
+vi.mock('../../gcp-secret-manager/src/secrets', () => ({
   loadSecret: mockLoadSecret,
 }));
 
-jest.mock('../../utils', () => ({
-  getImageDigest: jest.fn(),
+vi.mock('../../utils/src/index.js', () => ({
+  getImageDigest: vi.fn(),
 }));
 
-const prepareEnvConfig = require('../src/env-config');
-const { getImageDigest } = require('../../utils/src');
+import { getImageDigest } from '../../utils/src/index.js';
+import prepareEnvConfig from '../src/env-config.js';
 
 describe('env-config', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   beforeEach(() => {

@@ -1,16 +1,17 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const { setupGcloud } = require('../../setup-gcloud');
-const getRuntimeAccount = require('./runtime-account');
-const createEnvironmentArgs = require('./environment-args');
-const { getClusterInfo } = require('./cluster-info');
-const createNamespace = require('./create-namespace');
-const projectInfo = require('./project-info');
-const waitForRevision = require('./wait-revision');
-const authenticateKubeCtl = require('./kubectl-auth');
-const cleanRevisions = require('./clean-revisions');
-const checkServiceAccount = require('./check-sa');
-const runScan = require('./vulnerability-scanning');
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import checkServiceAccount from './check-sa.js';
+import cleanRevisions from './clean-revisions.js';
+import { getClusterInfo } from './cluster-info.js';
+import createNamespace from './create-namespace.js';
+import createEnvironmentArgs from './environment-args.js';
+import authenticateKubeCtl from './kubectl-auth.js';
+import projectInfo from './project-info.js';
+import getRuntimeAccount from './runtime-account.js';
+import runScan from './vulnerability-scanning.js';
+import waitForRevision from './wait-revision.js';
 
 const numericOrDefault = (value) => (value >= 0 ? value : 'default');
 
@@ -309,4 +310,4 @@ const runDeploy = async (
   }
 };
 
-module.exports = runDeploy;
+export default runDeploy;

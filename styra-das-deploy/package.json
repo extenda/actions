@@ -3,5 +3,6 @@
   "version": "0.0.1-local",
   "private": true,
   "description": "publish staging policy into production DAS system",
-  "main": "dist/index.js"
+  "main": "dist/index.cjs",
+  "type": "module"
 }

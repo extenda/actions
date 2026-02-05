@@ -3,11 +3,9 @@
   "version": "0.0.1-local",
   "private": true,
   "description": "Build RS installer package",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "node-fetch": "^2.7.0"
   },
-  "devDependencies": {
-    "jest-fetch-mock": "^3.0.3"
-  }
+  "type": "module"
 }

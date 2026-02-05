@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
 
 const copyPolicies = (testBundlePath) => {
   fs.cpSync(
@@ -9,4 +9,4 @@ const copyPolicies = (testBundlePath) => {
   );
 };
 
-module.exports = copyPolicies;
+export default copyPolicies;

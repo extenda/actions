@@ -1,21 +1,25 @@
-const mockFs = require('mock-fs');
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import mockFs from 'mock-fs';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 // Mock out tools download
-jest.mock('../../utils', () => ({
+vi.mock('../../utils/src/index.js', () => ({
   loadTool: async () => Promise.resolve('/gcloud'),
-  findTool: jest.fn(),
+  findTool: vi.fn(),
 }));
 
-jest.mock('@actions/cache');
-jest.mock('@actions/exec');
-jest.mock('@actions/core');
+vi.mock('@actions/cache');
+vi.mock('@actions/exec');
+vi.mock('@actions/core');
 
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const { restoreCache } = require('@actions/cache');
-const setupGcloud = require('../src/setup-gcloud');
+import { restoreCache } from '@actions/cache';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import os from 'os';
+
+import setupGcloud from '../src/setup-gcloud.js';
 
 const jsonKey = {
   project_id: 'test-project',
@@ -29,7 +33,7 @@ const orgEnv = process.env;
 
 describe('Setup Gcloud', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
     mockFs.restore();
   });
@@ -44,12 +48,20 @@ describe('Setup Gcloud', () => {
 
     delete process.env['GCLOUD_REQUESTED_VERSION'];
 
+    // Create temp directory structure with a dummy file to ensure it exists
+    // On macOS, /var is a symlink to /private/var, so we need both
+    const tmpDir = os.tmpdir();
+    const privateTmpDir = `/private${tmpDir}`;
+
     const filesystem = {
-      '/gcloud/innerdir/__pycache__': {},
-      '/gcloud/.install/.backup': {},
-      '/testdir/__pycache__': {},
+      '/gcloud/innerdir/__pycache__': { '.keep': '' },
+      '/gcloud/.install/.backup': { '.keep': '' },
+      '/testdir/__pycache__': { '.keep': '' },
+      [process.env.RUNNER_TEMP]: { '.keep': '' },
+      [tmpDir]: { '.keep': '' },
+      [privateTmpDir]: { '.keep': '' },
     };
-    filesystem[process.env.RUNNER_TEMP] = {};
+
     mockFs(filesystem);
     expect(fs.existsSync('/gcloud/innerdir/__pycache__')).toEqual(true);
     expect(fs.existsSync('/gcloud/.install/.backup')).toEqual(true);

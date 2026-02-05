@@ -1,4 +1,6 @@
-const createEnvArgs = require('../src/environment-args');
+import { describe, expect, test } from 'vitest';
+
+import createEnvArgs from '../src/environment-args.js';
 
 describe('Environment args', () => {
   test('It can build a list of arguments', () => {

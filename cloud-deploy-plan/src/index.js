@@ -1,13 +1,14 @@
-const core = require('@actions/core');
-const { run } = require('../../utils');
-const { setupGcloud } = require('../../setup-gcloud');
-const loadServiceDefinition = require('../../cloud-deploy/src/utils/service-definition');
-const getToken = require('../../cloud-deploy/src/utils/identity-token');
-const getDeployInfo = require('./deploy-info');
-const createComment = require('./create-comment');
-const { getPullRequestNumber, postComment } = require('./pr-comment');
-const resolveServiceFiles = require('./service-files');
-const { isCodeFreeze, getFreezeEnd } = require('./code-freeze');
+import * as core from '@actions/core';
+
+import getToken from '../../cloud-deploy/src/utils/identity-token.js';
+import loadServiceDefinition from '../../cloud-deploy/src/utils/service-definition.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { run } from '../../utils/src/index.js';
+import { getFreezeEnd, isCodeFreeze } from './code-freeze.js';
+import createComment from './create-comment.js';
+import getDeployInfo from './deploy-info.js';
+import { getPullRequestNumber, postComment } from './pr-comment.js';
+import resolveServiceFiles from './service-files.js';
 
 const action = async () => {
   const serviceAccountKeyCICD = core.getInput('service-account-key', {
@@ -63,8 +64,6 @@ const action = async () => {
   }
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

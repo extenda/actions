@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const { buildPackage } = require('./pkgbuilder');
-const { checkEnv, run } = require('../../utils');
+import * as core from '@actions/core';
+
+import { checkEnv, run } from '../../utils/src/index.js';
+import { buildPackage } from './pkgbuilder.js';
 
 const action = async () => {
   try {
@@ -55,8 +56,6 @@ const action = async () => {
   }
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

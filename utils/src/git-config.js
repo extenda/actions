@@ -1,5 +1,6 @@
-const simpleGit = require('simple-git');
-const path = require('path');
+import path from 'node:path';
+
+import simpleGit from 'simple-git';
 
 const basicAuth = () => {
   const buffer = Buffer.from(
@@ -47,4 +48,4 @@ const gitConfig = async () => {
   );
 };
 
-module.exports = gitConfig;
+export default gitConfig;

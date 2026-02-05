@@ -1,9 +1,10 @@
-jest.mock('@actions/core');
-jest.mock('../../utils');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../../utils/src');
 
-const mockDispatch = jest.fn();
+const mockDispatch = vi.fn();
 
-jest.mock('@actions/github', () => ({
+vi.mock('@actions/github', () => ({
   getOctokit: () => ({
     rest: {
       repos: {
@@ -22,13 +23,14 @@ jest.mock('@actions/github', () => ({
   },
 }));
 
-const core = require('@actions/core');
-const action = require('../src/index');
-const { loadGitHubToken } = require('../../utils');
+import * as core from '@actions/core';
+
+import { loadGitHubToken } from '../../utils/src/index.js';
+import action from '../src/index.js';
 
 describe('repository-dispatch', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   beforeEach(() => {

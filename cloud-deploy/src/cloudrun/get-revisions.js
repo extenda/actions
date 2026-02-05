@@ -1,4 +1,4 @@
-const execGcloud = require('../utils/gcloud-output');
+import execGcloud from '../utils/gcloud-output.js';
 
 const isActive = (conditions) => {
   const activeStatus = conditions.find(
@@ -36,4 +36,4 @@ const getRevisions = async (service, project, region) => {
     );
 };
 
-module.exports = getRevisions;
+export default getRevisions;

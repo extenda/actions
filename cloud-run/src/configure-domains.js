@@ -1,10 +1,11 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const pLimit = require('p-limit');
-const gcloud = require('./gcloud-output');
-const authenticateKubeCtl = require('./kubectl-auth');
-const { addDnsRecord } = require('./dns-record');
-const certificateExpiration = require('./alert-certificate-expiration');
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import pLimit from 'p-limit';
+
+import certificateExpiration from './alert-certificate-expiration.js';
+import { addDnsRecord } from './dns-record.js';
+import gcloud from './gcloud-output.js';
+import authenticateKubeCtl from './kubectl-auth.js';
 
 const listDomains = async ({ cluster, clusterLocation, project }, namespace) =>
   gcloud([
@@ -139,4 +140,4 @@ const configureDomains = async (
   return [];
 };
 
-module.exports = configureDomains;
+export default configureDomains;

@@ -1,15 +1,24 @@
-const mockFs = require('mock-fs');
+import mockFs from 'mock-fs';
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 
 // Mock out tools download
-jest.mock('../../utils', () => ({
-  loadTool: jest.fn(),
+vi.mock('../../utils/src/index.js', () => ({
+  loadTool: vi.fn(),
 }));
 
-jest.mock('@actions/exec');
-const exec = require('@actions/exec');
+vi.mock('@actions/exec');
+import * as exec from '@actions/exec';
 
-const { convertPermissions } = require('../src/permconv');
-const { loadTool } = require('../../utils');
+import { loadTool } from '../../utils/src/index.js';
+import { convertPermissions } from '../src/permconv.js';
 
 describe('RS Permission Converter Tests', () => {
   afterAll(() => {
@@ -17,7 +26,7 @@ describe('RS Permission Converter Tests', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   beforeEach(() => {

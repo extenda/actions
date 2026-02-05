@@ -1,9 +1,11 @@
-jest.mock('@actions/exec');
-jest.mock('../../gcp-secret-manager/src/secrets');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
+vi.mock('../../gcp-secret-manager/src/secrets.js');
 
-const exec = require('@actions/exec');
-const certificateExpiration = require('../src/alert-certificate-expiration');
-const { loadSecrets } = require('../../gcp-secret-manager/src/secrets');
+import * as exec from '@actions/exec';
+
+import { loadSecrets } from '../../gcp-secret-manager/src/secrets.js';
+import certificateExpiration from '../src/alert-certificate-expiration.js';
 
 const today = new Date();
 const monthBack = new Date(
@@ -26,7 +28,7 @@ const certificatesList = {
 
 describe('Alert platform team on slack', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('it does not alert if certificate expires in over 30 days', async () => {

@@ -1,4 +1,4 @@
-const getRevisions = require('./get-revisions');
+import getRevisions from './get-revisions.js';
 
 const getLatestRevision = async (
   namespace,
@@ -13,4 +13,4 @@ const getLatestRevision = async (
     },
   );
 
-module.exports = getLatestRevision;
+export default getLatestRevision;

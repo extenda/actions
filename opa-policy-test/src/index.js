@@ -1,11 +1,13 @@
-const core = require('@actions/core');
-const fs = require('fs');
-const path = require('path');
-const { run } = require('../../utils');
-const { setupGcloud } = require('../../setup-gcloud');
-const getBundleName = require('./bundle-name');
-const createTestBundle = require('./create-test-bundle');
-const opaTest = require('./opa-test');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import * as core from '@actions/core';
+
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { run } from '../../utils/src/index.js';
+import getBundleName from './bundle-name.js';
+import createTestBundle from './create-test-bundle.js';
+import opaTest from './opa-test.js';
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {
@@ -31,8 +33,6 @@ const action = async () => {
   return opaTest(testBundle);
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

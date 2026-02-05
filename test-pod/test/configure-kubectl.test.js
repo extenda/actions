@@ -1,13 +1,15 @@
-const mockFs = require('mock-fs');
-const { setupGcloud } = require('../../setup-gcloud');
-const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
-const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
+import mockFs from 'mock-fs';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('../../setup-gcloud');
-jest.mock('../../cloud-run/src/cluster-info');
-jest.mock('../../cloud-run/src/kubectl-auth');
+import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
+import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
 
-const configureKubeCtl = require('../src/configure-kubectl');
+vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('../../cloud-run/src/cluster-info.js');
+vi.mock('../../cloud-run/src/kubectl-auth.js');
+
+import configureKubeCtl from '../src/configure-kubectl.js';
 
 const noClusterYaml = `
 name: my-test

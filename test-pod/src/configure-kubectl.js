@@ -1,8 +1,8 @@
-const { setupGcloud } = require('../../setup-gcloud');
-const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
-const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
-const loadServiceDefinition = require('../../cloud-run/src/service-definition');
-const cloudRunSchema = require('../../cloud-run/src/cloud-run-schema');
+import cloudRunSchema from '../../cloud-run/src/cloud-run-schema.js';
+import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
+import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth.js';
+import loadServiceDefinition from '../../cloud-run/src/service-definition.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
 
 const resolveClusterAndNamespace = (clusterInput, namespaceInput) => {
   if (clusterInput && namespaceInput) {
@@ -58,4 +58,4 @@ const configureKubeCtl = async (
   };
 };
 
-module.exports = configureKubeCtl;
+export default configureKubeCtl;

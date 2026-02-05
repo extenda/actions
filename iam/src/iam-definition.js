@@ -1,8 +1,10 @@
-const fs = require('fs');
-const yaml = require('yaml');
-const core = require('@actions/core');
-const { validate } = require('jsonschema');
-const jsonSchema = require('./iam-schema');
+import fs from 'node:fs';
+
+import * as core from '@actions/core';
+import { validate } from 'jsonschema';
+import yaml from 'yaml';
+
+import jsonSchema from './iam-schema.js';
 
 const loadFile = (iamFile) => {
   if (!fs.existsSync(iamFile)) {
@@ -79,4 +81,4 @@ const loadIamDefinition = (iamFile) => {
   return spec;
 };
 
-module.exports = loadIamDefinition;
+export default loadIamDefinition;

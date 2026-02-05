@@ -1,12 +1,14 @@
-const gcloudOutput = require('../../src/utils/gcloud-output');
-const {
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import {
   configMapManifest,
   removeScalerConfiguration,
-} = require('../../src/manifests/vpa-scaler-configmap');
+} from '../../src/manifests/vpa-scaler-configmap.js';
+import gcloudOutput from '../../src/utils/gcloud-output.js';
 
-jest.mock('../../src/utils/gcloud-output', () =>
-  jest.fn().mockImplementation(() => Promise.resolve()),
-);
+vi.mock('../../src/utils/gcloud-output', () => ({
+  default: vi.fn().mockImplementation(() => Promise.resolve()),
+}));
 
 describe('VPA scaler configuration', () => {
   const mockServiceName = 'service-name';
@@ -41,7 +43,7 @@ describe('VPA scaler configuration', () => {
   `;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Should generate a scaler configuarion configmap', async () => {

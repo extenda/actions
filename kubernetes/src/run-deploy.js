@@ -1,20 +1,21 @@
-const path = require('path');
-const fs = require('fs');
-const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
-const { setupGcloud } = require('../../setup-gcloud');
-const checkNamespaceExists = require('./check-namespace-exists');
-const execKustomize = require('./kustomize');
-const patchStatefulSetYaml = require('./patch-statefulset-yaml');
-const patchDeploymentYaml = require('./patch-deployment-yaml');
-const patchServiceYaml = require('./patch-service-yaml');
-const patchConfigMapYaml = require('./patch-configmap-yaml');
-const parseEnvironmentArgs = require('./environment-args');
-const createBaseKustomizeFiles = require('./create-base-kustomize');
-const applyKubectl = require('./apply-kubectl');
-const checkRequiredNumberOfPodsIsRunning = require('./check-number-of-pods-running');
-const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
-const applyAutoscale = require('./autoscale');
-const { getImageDigest } = require('../../utils/src');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
+import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { getImageDigest } from '../../utils/src/index.js';
+import applyKubectl from './apply-kubectl.js';
+import applyAutoscale from './autoscale.js';
+import checkNamespaceExists from './check-namespace-exists.js';
+import checkRequiredNumberOfPodsIsRunning from './check-number-of-pods-running.js';
+import createBaseKustomizeFiles from './create-base-kustomize.js';
+import parseEnvironmentArgs from './environment-args.js';
+import execKustomize from './kustomize.js';
+import patchConfigMapYaml from './patch-configmap-yaml.js';
+import patchDeploymentYaml from './patch-deployment-yaml.js';
+import patchServiceYaml from './patch-service-yaml.js';
+import patchStatefulSetYaml from './patch-statefulset-yaml.js';
 
 /**
  * Applies patch function to the kubernetes manifest file.
@@ -163,4 +164,4 @@ const runDeploy = async (
   );
 };
 
-module.exports = runDeploy;
+export default runDeploy;

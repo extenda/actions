@@ -1,7 +1,8 @@
-jest.mock('../../../gcp-secret-manager/src/secrets');
+import { describe, expect, it, vi } from 'vitest';
+vi.mock('../../../gcp-secret-manager/src/secrets.js');
 
-const { loadSecret } = require('../../../gcp-secret-manager/src/secrets');
-const { loadSecrets } = require('../../src/secrets-manager/load-secrets');
+import { loadSecret } from '../../../gcp-secret-manager/src/secrets.js';
+import { loadSecrets } from '../../src/secrets-manager/load-secrets.js';
 
 describe('loadSecrets', () => {
   it('loads correct secrets', async () => {

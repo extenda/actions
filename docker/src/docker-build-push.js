@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const docker = require('./docker');
-const urlhelper = require('./url-helper');
+import * as core from '@actions/core';
+
+import docker from './docker.js';
+import urlhelper from './url-helper.js';
 
 const processBuildArgsInput = (buildArgsInput) => {
   let buildArgs = null;
@@ -45,4 +46,4 @@ const run = () => {
   }
 };
 
-module.exports = run;
+export default run;

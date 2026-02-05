@@ -1,6 +1,12 @@
-const path = require('path');
-const fs = require('fs');
-const { modules } = require('./modules');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import { fileURLToPath } from 'url';
+
+import { modules } from './modules.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const relative = (dir) => {
   const baseDir = path.join(__dirname, '..');

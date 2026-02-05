@@ -1,8 +1,9 @@
-const core = require('@actions/core');
-const { run } = require('../../utils/src');
-const setupGcloud = require('./setup-gcloud');
-const { execGcloud } = require('./exec-gcloud');
-const withGcloud = require('./with-gcloud');
+import * as core from '@actions/core';
+
+import { run } from '../../utils/src/index.js';
+import { execGcloud } from './exec-gcloud.js';
+import setupGcloud from './setup-gcloud.js';
+import withGcloud from './with-gcloud.js';
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {
@@ -14,13 +15,6 @@ const action = async () => {
   await setupGcloud(serviceAccountKey, version, exportCredentials === 'true');
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = {
-  action,
-  setupGcloud,
-  execGcloud,
-  withGcloud,
-};
+export { action, execGcloud, setupGcloud, withGcloud };

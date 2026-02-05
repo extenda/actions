@@ -1,13 +1,14 @@
-const core = require('@actions/core');
-const fg = require('fast-glob');
-const { run } = require('../../utils');
-const loadIamDefinition = require('./iam-definition');
-const { configureIAM } = require('./configure-iam');
-const configureBundleSync = require('./configure-bundle-sync');
-const loadCredentials = require('./load-credentials');
-const fetchIamToken = require('../../iam-test-token/src/iam-auth');
-const { setupGcloud } = require('../../setup-gcloud');
-const projectInfo = require('../../cloud-run/src/project-info');
+import * as core from '@actions/core';
+import fg from 'fast-glob';
+
+import projectInfo from '../../cloud-run/src/project-info.js';
+import fetchIamToken from '../../iam-test-token/src/iam-auth.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { run } from '../../utils/src/index.js';
+import configureBundleSync from './configure-bundle-sync.js';
+import { configureIAM } from './configure-iam.js';
+import loadIamDefinition from './iam-definition.js';
+import loadCredentials from './load-credentials.js';
 
 const setupEnvironment = async (
   serviceAccountKey,
@@ -104,8 +105,6 @@ const action = async () => {
   }
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

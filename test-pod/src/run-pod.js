@@ -1,8 +1,9 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const { getShortSha } = require('../../utils/src/branch-info');
-const { extractOutput, LogFilter } = require('./extract-output');
-const { getImageDigest } = require('../../utils/src');
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+
+import { getShortSha } from '../../utils/src/branch-info.js';
+import { getImageDigest } from '../../utils/src/index.js';
+import { extractOutput, LogFilter } from './extract-output.js';
 
 const podName = async () => {
   const repo = process.env.GITHUB_REPOSITORY.split('/')[1];
@@ -162,4 +163,4 @@ const runPod = async ({ name, namespace }, image, configMap, trimPrefix) => {
     );
 };
 
-module.exports = runPod;
+export default runPod;

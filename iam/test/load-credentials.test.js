@@ -1,8 +1,10 @@
-const secrets = require('../../gcp-secret-manager/src/secrets');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('../../gcp-secret-manager/src/secrets');
+import * as secrets from '../../gcp-secret-manager/src/secrets.js';
 
-const loadCredentials = require('../src/load-credentials');
+vi.mock('../../gcp-secret-manager/src/secrets.js');
+
+import loadCredentials from '../src/load-credentials.js';
 
 const orgEnv = process.env;
 
@@ -17,7 +19,7 @@ describe('iam Credentials', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
 

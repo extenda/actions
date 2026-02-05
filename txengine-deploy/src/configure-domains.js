@@ -1,7 +1,8 @@
-const core = require('@actions/core');
-const { addDnsRecord } = require('../../cloud-run/src/dns-record');
-const handleCertificates = require('./handle-certificate');
-const gcloudOutput = require('./gcloud-output');
+import * as core from '@actions/core';
+
+import { addDnsRecord } from '../../cloud-run/src/dns-record.js';
+import gcloudOutput from './gcloud-output.js';
+import handleCertificates from './handle-certificate.js';
 
 const staticIPName = 'txengine-https-ip';
 const loadBalancerName = 'txengine-lb';
@@ -301,4 +302,4 @@ const configureDomains = async (
   return setupBackendURLMapping(fullDNS, tenantName, clusterProject);
 };
 
-module.exports = configureDomains;
+export default configureDomains;

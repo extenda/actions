@@ -1,5 +1,6 @@
-const core = require('@actions/core');
-const gcloudOutput = require('./gcloud-output');
+import * as core from '@actions/core';
+
+import gcloudOutput from './gcloud-output.js';
 
 const parseStatus = async (statuses) => {
   for (const status of statuses) {
@@ -38,4 +39,4 @@ const checkStatusAndKillFailingPods = async (namespace) => {
   return Promise.resolve(promises);
 };
 
-module.exports = checkStatusAndKillFailingPods;
+export default checkStatusAndKillFailingPods;

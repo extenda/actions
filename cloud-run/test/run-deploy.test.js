@@ -1,22 +1,24 @@
-const mockFs = require('mock-fs');
+import mockFs from 'mock-fs';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('../src/vulnerability-scanning');
-jest.mock('@actions/exec');
-jest.mock('../../setup-gcloud');
-jest.mock('../src/cluster-info');
-jest.mock('../src/create-namespace');
-jest.mock('../src/check-sa');
-jest.mock('../src/kubectl-auth');
-jest.mock('../src/get-revision');
-jest.mock('../src/get-revisions');
+vi.mock('../src/vulnerability-scanning.js');
+vi.mock('@actions/exec');
+vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('../src/cluster-info.js');
+vi.mock('../src/create-namespace.js');
+vi.mock('../src/check-sa.js');
+vi.mock('../src/kubectl-auth.js');
+vi.mock('../src/get-revision.js');
+vi.mock('../src/get-revisions.js');
 
-jest.setTimeout(30000);
-const exec = require('@actions/exec');
-const { setupGcloud } = require('../../setup-gcloud');
-const runDeploy = require('../src/run-deploy');
-const { getClusterInfo } = require('../src/cluster-info');
-const scan = require('../src/vulnerability-scanning');
-const getRevisions = require('../src/get-revisions');
+vi.setConfig({ testTimeout: 30000 });
+import * as exec from '@actions/exec';
+
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { getClusterInfo } from '../src/cluster-info.js';
+import getRevisions from '../src/get-revisions.js';
+import runDeploy from '../src/run-deploy.js';
+import scan from '../src/vulnerability-scanning.js';
 
 const serviceAccountKey = Buffer.from('test', 'utf8').toString('base64');
 
@@ -34,7 +36,7 @@ describe('Run Deploy', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockFs.restore();
     process.env = orgEnv;
   });

@@ -1,7 +1,8 @@
-const exec = require('@actions/exec');
-const { setupGcloud } = require('../../setup-gcloud');
-const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
-const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
+import * as exec from '@actions/exec';
+
+import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
+import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
 
 const configure = async (serviceAccountKey) => {
   // Authenticate GCloud
@@ -18,7 +19,4 @@ const configure = async (serviceAccountKey) => {
 
 const kubectl = async (args) => exec.exec('kubectl', args);
 
-module.exports = {
-  configure,
-  exec: kubectl,
-};
+export default { configure, exec: kubectl };

@@ -1,5 +1,6 @@
-const core = require('@actions/core');
-const { run } = require('../../utils/src');
+import * as core from '@actions/core';
+
+import { run } from '../../utils/src/index.js';
 
 const action = async () => {
   core.warning(`
@@ -8,8 +9,6 @@ const action = async () => {
   `);
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

@@ -1,5 +1,7 @@
-const yaml = require('yaml');
-const patchDeploymentYaml = require('../src/patch-deployment-yaml');
+import { describe, expect, test } from 'vitest';
+import yaml from 'yaml';
+
+import patchDeploymentYaml from '../src/patch-deployment-yaml.js';
 
 describe('Patches Deployment.yml', () => {
   test('It patches replicas count', () => {

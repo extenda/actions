@@ -1,4 +1,6 @@
-const getDasWorkerBaseUrl = require('../src/das-worker-base-url');
+import { describe, expect, it } from 'vitest';
+
+import getDasWorkerBaseUrl from '../src/das-worker-base-url.js';
 
 describe('getDasWorkerBaseUrl', () => {
   it('points to `.com` for normal systems', () => {

@@ -1,18 +1,20 @@
-const fs = require('fs');
-const path = require('path');
-const util = require('util');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import util from 'util';
 
 const recommendedVersionBump = util.promisify(
   require('conventional-recommended-bump'),
 );
-const gitRawCommits = require('git-raw-commits');
-const conventionalCommitsParser = require('conventional-commits-parser');
-const conventionalChangelog = require('conventional-changelog-core');
-const conventionalCommits = require('conventional-changelog-conventionalcommits');
-const streamToString = require('stream-to-string');
-const through2 = require('through2');
-const mergeConfig = require('conventional-changelog-core/lib/merge-config');
-const { getTagAtCommit } = require('./branch-info');
+import conventionalCommits from 'conventional-changelog-conventionalcommits';
+import conventionalChangelog from 'conventional-changelog-core';
+import mergeConfig from 'conventional-changelog-core/lib/merge-config';
+import conventionalCommitsParser from 'conventional-commits-parser';
+import gitRawCommits from 'git-raw-commits';
+import streamToString from 'stream-to-string';
+import through2 from 'through2';
+
+import { getTagAtCommit } from './branch-info.js';
 
 let tagPrefix = process.env.TAG_PREFIX || 'v';
 
@@ -20,7 +22,7 @@ let tagPrefix = process.env.TAG_PREFIX || 'v';
  * Returns the recommended version bump based on conventional commits since last tag.
  * @returns {Promise<string>}
  */
-const getRecommendedBump = async () => {
+export const getRecommendedBump = async () => {
   const config = await conventionalCommits();
   return recommendedVersionBump({
     config,
@@ -104,7 +106,7 @@ const getCommitStream = async (version) =>
  * Return all conventional commits from the previous version.
  * @returns {Promise<[*]>}
  */
-const getConventionalCommits = async () => {
+export const getConventionalCommits = async () => {
   const commitStream = await getCommitStream();
   return new Promise((resolve, reject) => {
     const commits = [];
@@ -132,7 +134,7 @@ const getConventionalCommits = async () => {
  * @param version the name of the version built now
  * @returns {Promise<string>}
  */
-const getChangelog = async (version) =>
+export const getChangelog = async (version) =>
   withConventionalConfig(
     version,
     (options, context, gitRawCommitsOpts, parserOpts, writerOpts) => {
@@ -147,16 +149,8 @@ const getChangelog = async (version) =>
     },
   );
 
-const setTagPrefix = (prefix) => {
+export const setTagPrefix = (prefix) => {
   tagPrefix = prefix;
 };
 
-const getTagPrefix = () => tagPrefix;
-
-module.exports = {
-  getRecommendedBump,
-  getChangelog,
-  getConventionalCommits,
-  setTagPrefix,
-  getTagPrefix,
-};
+export const getTagPrefix = () => tagPrefix;

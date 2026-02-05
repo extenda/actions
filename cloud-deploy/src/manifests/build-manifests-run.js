@@ -1,5 +1,5 @@
-const { securitySpec } = require('./security-sidecar');
-const { cloudRunCollector } = require('./collector-sidecar');
+import { cloudRunCollector } from './collector-sidecar.js';
+import { securitySpec } from './security-sidecar.js';
 
 const configureNetworking = async (
   annotations,
@@ -201,6 +201,4 @@ const cloudrunManifestTemplate = async (
   };
 };
 
-module.exports = {
-  cloudrunManifestTemplate,
-};
+export { cloudrunManifestTemplate };

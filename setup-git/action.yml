@@ -2,4 +2,4 @@ name: Setup Git
 description: Configure Git CLI with credentials to allow push to GitHub
 runs:
   using: node20
-  main: dist/index.js
+  main: dist/index.cjs

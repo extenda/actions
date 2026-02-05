@@ -1,7 +1,7 @@
-jest.mock('../../gcp-secret-manager/src/secrets');
-const secrets = require('../../gcp-secret-manager/src/secrets');
-
-const creds = require('../src/sonar-credentials');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('../../gcp-secret-manager/src/secrets.js');
+import * as secrets from '../../gcp-secret-manager/src/secrets.js';
+import * as creds from '../src/sonar-credentials.js';
 
 const orgEnv = process.env;
 
@@ -16,7 +16,7 @@ describe('Sonar Credentials', () => {
 
   afterEach(() => {
     process.env = orgEnv;
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It uses existing env vars', async () => {

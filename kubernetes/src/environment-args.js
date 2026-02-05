@@ -19,4 +19,4 @@ const parseEnvironmentArgs = (environment, projectId) => {
   return args;
 };
 
-module.exports = parseEnvironmentArgs;
+export default parseEnvironmentArgs;

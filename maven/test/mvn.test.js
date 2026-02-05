@@ -1,24 +1,71 @@
-const mockFs = require('mock-fs');
-const path = require('path');
-let fs = require('fs');
+import fs from 'node:fs';
+import path from 'node:path';
 
-const os = require('os');
+import mockFs from 'mock-fs';
+import os from 'os';
+import { fileURLToPath } from 'url';
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 
-// Make sure we get a mocked FS.
-fs = require('fs');
+// Setup __dirname for ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-jest.mock('@actions/exec');
-jest.mock('@actions/core');
-jest.mock('../../utils/src/versions');
-jest.mock('../src/nexus-credentials');
+vi.mock('@actions/exec');
+vi.mock('@actions/core');
 
-const exec = require('@actions/exec');
-const core = require('@actions/core');
-const versions = require('../../utils/src/versions');
-const loadNexusCredentials = require('../src/nexus-credentials');
+// Robust Mock for @actions/io
+// We map these calls directly to the proxied 'fs' module to ensure they hit memfs.
+vi.mock('@actions/io', () => {
+  return {
+    mkdirP: vi.fn(async (dir) => {
+      // Use standard fs, which is proxied to memfs
+      const { mkdirSync } = await import('fs');
+      mkdirSync(dir, { recursive: true });
+    }),
+    cp: vi.fn(async (src, dest) => {
+      const { copyFileSync, existsSync, mkdirSync } = await import('fs');
+      const { dirname } = await import('path');
 
-const mvn = require('../src/mvn');
-const action = require('../src/index');
+      // Ensure parent exists (imitating io.cp behavior)
+      const parent = dirname(dest);
+      if (!existsSync(parent)) {
+        mkdirSync(parent, { recursive: true });
+      }
+      copyFileSync(src, dest);
+    }),
+    // Add other methods if your code uses them (e.g., rmRF)
+    rmRF: vi.fn(),
+  };
+});
+
+vi.mock('../../utils/src/versions.js', () => ({
+  getBuildVersion: vi.fn(),
+  getLatestRelease: vi.fn(),
+  getLatestReleaseTag: vi.fn(),
+  tagReleaseVersion: vi.fn(),
+  setTagPrefix: vi.fn(),
+  getConventionalCommits: vi.fn(),
+}));
+
+vi.mock('../src/nexus-credentials.js', () => ({
+  default: vi.fn(),
+}));
+
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+
+import * as versions from '../../utils/src/versions.js';
+import action from '../src/index.js';
+import * as mvn from '../src/mvn.js';
+import loadNexusCredentials from '../src/nexus-credentials.js';
 
 const orgEnv = process.env;
 const defaultArgs = '-B -V';
@@ -38,28 +85,27 @@ describe('Maven', () => {
     const abalonPath = path.resolve(
       path.join(__dirname, '../src/AbalonAb-maven-settings.xml'),
     );
+    const homeDir = os.homedir();
 
-    let fileSystem = {
-      test: {
-        'pom.xml': '<project />',
-      },
+    const fileSystem = {
+      'test/pom.xml': '<project />',
+      [settingsPath]: '<extenda />',
+      [garSettingsPath]: '<extenda-gar />',
+      [abalonPath]: '<abalon />',
+      // Explicitly create the .m2 folder to be safe
+      [path.join(homeDir, '.m2', '.keep')]: '',
     };
 
+    // Add working dir if needed
     if (workingDir) {
-      fileSystem = {
-        [workingDir]: fileSystem,
-      };
+      fileSystem[path.join(workingDir, 'test/pom.xml')] = '<project />';
     }
 
-    fileSystem[settingsPath] = '<extenda />';
-    fileSystem[garSettingsPath] = '<extenda-gar />';
-    fileSystem[abalonPath] = '<abalon />';
     return fileSystem;
   };
 
   beforeEach(() => {
     process.env = { ...orgEnv };
-
     mockFs(getFs());
 
     // Make sure core.group executes callbacks.
@@ -67,68 +113,55 @@ describe('Maven', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    mockFs.restore();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
 
   test('Copy settings', async () => {
     await mvn.copySettings();
-    const exists = fs.existsSync(
-      path.join(os.homedir(), '.m2', 'settings.xml'),
-    );
+    const dest = path.join(os.homedir(), '.m2', 'settings.xml');
+
+    const exists = fs.existsSync(dest);
     expect(exists).toEqual(true);
-    expect(
-      fs.readFileSync(path.join(os.homedir(), '.m2', 'settings.xml'), 'utf8'),
-    ).toEqual('<extenda />');
+    expect(fs.readFileSync(dest, 'utf8')).toEqual('<extenda />');
   });
 
   test('Copy extenda settings', async () => {
     process.env.GITHUB_REPOSITORY = 'extenda/test-repo';
     await mvn.copySettings();
-    const exists = fs.existsSync(
-      path.join(os.homedir(), '.m2', 'settings.xml'),
-    );
-    expect(exists).toEqual(true);
-    expect(
-      fs.readFileSync(path.join(os.homedir(), '.m2', 'settings.xml'), 'utf8'),
-    ).toEqual('<extenda />');
+    const dest = path.join(os.homedir(), '.m2', 'settings.xml');
+
+    expect(fs.existsSync(dest)).toEqual(true);
+    expect(fs.readFileSync(dest, 'utf8')).toEqual('<extenda />');
   });
 
   test('Copy default settings', async () => {
     process.env.GITHUB_REPOSITORY = 'github/test-repo';
     await mvn.copySettings();
-    const exists = fs.existsSync(
-      path.join(os.homedir(), '.m2', 'settings.xml'),
-    );
-    expect(exists).toEqual(true);
-    expect(
-      fs.readFileSync(path.join(os.homedir(), '.m2', 'settings.xml'), 'utf8'),
-    ).toEqual('<extenda />');
+    const dest = path.join(os.homedir(), '.m2', 'settings.xml');
+
+    expect(fs.existsSync(dest)).toEqual(true);
+    expect(fs.readFileSync(dest, 'utf8')).toEqual('<extenda />');
   });
 
   test('Copy GAR settings', async () => {
     process.env.GITHUB_REPOSITORY = 'extenda/test-repo';
     const result = await mvn.copySettings(true);
     expect(result).toEqual(true);
-    const exists = fs.existsSync(
-      path.join(os.homedir(), '.m2', 'settings.xml'),
-    );
-    expect(exists).toEqual(true);
-    expect(
-      fs.readFileSync(path.join(os.homedir(), '.m2', 'settings.xml'), 'utf8'),
-    ).toEqual('<extenda-gar />');
+    const dest = path.join(os.homedir(), '.m2', 'settings.xml');
+
+    expect(fs.existsSync(dest)).toEqual(true);
+    expect(fs.readFileSync(dest, 'utf8')).toEqual('<extenda-gar />');
   });
 
   test('Copy Abalon settings', async () => {
     process.env.GITHUB_REPOSITORY = 'AbalonAb/test-repo';
     await mvn.copySettings();
-    const exists = fs.existsSync(
-      path.join(os.homedir(), '.m2', 'settings.xml'),
-    );
-    expect(exists).toEqual(true);
-    expect(
-      fs.readFileSync(path.join(os.homedir(), '.m2', 'settings.xml'), 'utf8'),
-    ).toEqual('<abalon />');
+    const dest = path.join(os.homedir(), '.m2', 'settings.xml');
+
+    expect(fs.existsSync(dest)).toEqual(true);
+    expect(fs.readFileSync(dest, 'utf8')).toEqual('<abalon />');
   });
 
   test('Build success', async () => {
@@ -170,7 +203,7 @@ describe('Maven', () => {
       mvnw: '',
       'mvnw.cmd': '',
     });
-    const spy = jest.spyOn(os, 'platform');
+    const spy = vi.spyOn(os, 'platform');
     spy.mockReturnValueOnce('linux');
     exec.exec.mockResolvedValueOnce(0);
 
@@ -189,7 +222,7 @@ describe('Maven', () => {
       mvnw: '',
       'mvnw.cmd': '',
     });
-    const spy = jest.spyOn(os, 'platform');
+    const spy = vi.spyOn(os, 'platform');
     spy.mockReturnValueOnce('win32');
     exec.exec.mockResolvedValueOnce(0);
 
@@ -211,7 +244,10 @@ describe('Maven', () => {
     });
 
     afterEach(() => {
-      jest.resetAllMocks();
+      core.getInput.mockReset();
+      versions.getBuildVersion.mockReset();
+      loadNexusCredentials.mockReset();
+      exec.exec.mockReset();
     });
 
     test('It resolves nexus-credentials', async () => {

@@ -1,5 +1,5 @@
-const axios = require('axios');
-const core = require('@actions/core');
+import * as core from '@actions/core';
+import axios from 'axios';
 
 /**
  * @param auth {{key: string, email: string, pass: string, gipTenantId}}
@@ -64,4 +64,4 @@ function createApi({ name, url, auth }) {
   return instance;
 }
 
-module.exports = { createApi };
+export { createApi };

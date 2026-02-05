@@ -1,12 +1,11 @@
-jest.mock('fast-glob');
+import mockFs from 'mock-fs';
+import { afterEach, describe, expect, it } from 'vitest';
 
-const fg = require('fast-glob');
-const mockFs = require('mock-fs');
-const configsFixtures = require('../fixtures/configs');
-const { loadDefinitions } = require('../../src/utils/load-sync-definitions');
-const { validateExeConfig } = require('../../src/validate/validate-exe-config');
+import { loadDefinitions } from '../../src/utils/load-sync-definitions.js';
+import { validateExeConfig } from '../../src/validate/validate-exe-config.js';
+import * as configsFixtures from '../fixtures/configs.js';
 
-describe('loadDefinitions', () => {
+describe('loadDefinitions (EXE)', () => {
   afterEach(() => {
     mockFs.restore();
   });
@@ -15,7 +14,6 @@ describe('loadDefinitions', () => {
     const glob = 'external-events/*.yaml';
     const file1 = 'external-events/exe.yaml';
     const file2 = 'external-events/tst.yaml';
-    fg.sync.mockReturnValue([file1, file2]);
 
     mockFs({
       [file1]: configsFixtures.valid,
@@ -31,7 +29,7 @@ describe('loadDefinitions', () => {
   it('fails, if definition is invalid', async () => {
     const glob = 'external-events/*.yaml';
     const file = 'external-events/exe.yaml';
-    fg.sync.mockReturnValue([file]);
+
     mockFs({ [file]: configsFixtures.invalid });
 
     await expect(loadDefinitions(glob, validateExeConfig)).rejects.toThrow(
@@ -43,7 +41,6 @@ describe('loadDefinitions', () => {
     const glob = 'external-events/*.yaml';
     const file1 = 'external-events/exe1.yaml';
     const file2 = 'external-events/exe2.yaml';
-    fg.sync.mockReturnValue([file1, file2]);
 
     mockFs({
       [file1]: configsFixtures.valid,

@@ -3,12 +3,13 @@
   "version": "0.0.1-local",
   "private": true,
   "description": "Post a deploy comment to pull requests",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "@actions/github": "^7.0.0",
     "fast-glob": "^3.3.3"
   },
   "devDependencies": {
     "nock": "^14.0.10"
-  }
+  },
+  "type": "module"
 }

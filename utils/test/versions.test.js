@@ -1,5 +1,7 @@
-const semver = require('semver');
-const versions = require('../src/versions');
+import semver from 'semver';
+import { describe, expect, test } from 'vitest';
+
+import * as versions from '../src/versions.js';
 
 describe('Versions', () => {
   test('It can find the latest release tag for a prefix', async () => {

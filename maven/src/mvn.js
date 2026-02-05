@@ -1,9 +1,10 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const io = require('@actions/io');
-const path = require('path');
-const fs = require('fs');
-const os = require('os');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import * as io from '@actions/io';
+import os from 'os';
 
 const mavenHome = path.join(os.homedir(), '.m2');
 const mavenSettings = path.join(mavenHome, 'settings.xml');
@@ -47,8 +48,4 @@ const copySettings = async (hasExtensions) => {
   return owner === 'extenda' && hasExtensions;
 };
 
-module.exports = {
-  run,
-  copySettings,
-  setVersion,
-};
+export { copySettings, run, setVersion };

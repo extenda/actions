@@ -1,8 +1,10 @@
-const nock = require('nock');
-const getDeployInfo = require('../src/deploy-info');
-const { execGcloud } = require('../../setup-gcloud');
+import nock from 'nock';
+import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
-jest.mock('../../setup-gcloud');
+import { execGcloud } from '../../setup-gcloud/src/index.js';
+import getDeployInfo from '../src/deploy-info.js';
+
+vi.mock('../../setup-gcloud/src/index.js');
 
 let token;
 

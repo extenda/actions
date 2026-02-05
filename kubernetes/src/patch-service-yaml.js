@@ -1,4 +1,4 @@
-const yaml = require('yaml');
+import yaml from 'yaml';
 
 /**
  * Patches service specification with properties from provided service definition.
@@ -17,4 +17,4 @@ const patchServiceYaml = (serviceDefinition, serviceYaml) => {
   return yaml.stringify(patchedService);
 };
 
-module.exports = patchServiceYaml;
+export default patchServiceYaml;

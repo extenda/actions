@@ -1,10 +1,12 @@
-jest.mock('@actions/exec');
-const exec = require('@actions/exec');
-const dataflowBuild = require('../src/dataflow-build');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
+import * as exec from '@actions/exec';
+
+import dataflowBuild from '../src/dataflow-build.js';
 
 describe('Build Dataflow template', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('Build template', async () => {

@@ -1,9 +1,11 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const fs = require('fs');
-const path = require('path');
-const { createParams } = require('./params');
-const mvn = require('../../maven/src/mvn');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+
+import * as mvn from '../../maven/src/mvn.js';
+import { createParams } from './params.js';
 
 const isAutoDiscovered = (sonarScanner, workingDir, file) =>
   sonarScanner === 'auto' && fs.existsSync(path.join(workingDir, file));
@@ -88,6 +90,4 @@ const scan = async (
   throw new Error('No supported sonar-scanner detected.');
 };
 
-module.exports = {
-  scan,
-};
+export { scan };

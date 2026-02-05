@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+import * as exec from '@actions/exec';
 
 const setLabel = async (namespace, label, value) =>
   exec.exec('kubectl', [
@@ -15,7 +15,4 @@ const setOpaInjectionLabels = async (namespace, opaEnabled) => {
   await setLabel(namespace, 'istio-injection', opaInjection);
 };
 
-module.exports = {
-  setLabel,
-  setOpaInjectionLabels,
-};
+export { setLabel, setOpaInjectionLabels };

@@ -1,9 +1,11 @@
-const core = require('@actions/core');
-const { action } = require('../src/index');
-const setupGcloud = require('../src/setup-gcloud');
+import * as core from '@actions/core';
+import { describe, expect, test, vi } from 'vitest';
 
-jest.mock('../src/setup-gcloud');
-jest.mock('@actions/core');
+import { action } from '../src/index.js';
+import setupGcloud from '../src/setup-gcloud.js';
+
+vi.mock('../src/setup-gcloud.js');
+vi.mock('@actions/core');
 
 describe('setup-gcloud action', () => {
   test('It can install latest', async () => {

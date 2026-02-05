@@ -1,29 +1,31 @@
-const core = require('@actions/core');
-const buildManifest = require('../src/manifests/build-manifest');
-const loadServiceDefinition = require('../src/utils/service-definition');
-const deploy = require('../src/manifests/deploy');
-const projectInfo = require('../../cloud-run/src/project-info');
-const { setupGcloud } = require('../../setup-gcloud');
-const action = require('../src/index');
-const loadCredentials = require('../src/utils/load-credentials');
-const getImageWithSha256 = require('../src/manifests/image-sha256');
-const publishPolicies = require('../src/policies/publish-policies');
-const { sendScaleSetup, sendDeployInfo } = require('../src/utils/send-request');
-const runScan = require('../src/utils/vulnerability-scanning');
+import * as core from '@actions/core';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('../src/utils/load-credentials');
-jest.mock('@actions/core');
-jest.mock('../src/utils/service-definition');
-jest.mock('../src/manifests/deploy');
-jest.mock('../src/manifests/build-manifest');
-jest.mock('../../cloud-run/src/project-info');
-jest.mock('../../utils');
-jest.mock('../../setup-gcloud');
-jest.mock('../src/manifests/image-sha256');
-jest.mock('../src/policies/publish-policies');
-jest.mock('../src/utils/send-request');
-jest.mock('../src/utils/vulnerability-scanning');
-jest.mock('../src/utils/cloud-armor');
+import projectInfo from '../../cloud-run/src/project-info.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import action from '../src/index.js';
+import buildManifest from '../src/manifests/build-manifest.js';
+import deploy from '../src/manifests/deploy.js';
+import getImageWithSha256 from '../src/manifests/image-sha256.js';
+import publishPolicies from '../src/policies/publish-policies.js';
+import loadCredentials from '../src/utils/load-credentials.js';
+import { sendDeployInfo, sendScaleSetup } from '../src/utils/send-request.js';
+import loadServiceDefinition from '../src/utils/service-definition.js';
+import runScan from '../src/utils/vulnerability-scanning.js';
+
+vi.mock('../src/utils/load-credentials.js');
+vi.mock('@actions/core');
+vi.mock('../src/utils/service-definition.js');
+vi.mock('../src/manifests/deploy.js');
+vi.mock('../src/manifests/build-manifest.js');
+vi.mock('../../cloud-run/src/project-info.js');
+vi.mock('../../utils/src');
+vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('../src/manifests/image-sha256.js');
+vi.mock('../src/policies/publish-policies.js');
+vi.mock('../src/utils/send-request.js');
+vi.mock('../src/utils/vulnerability-scanning.js');
+vi.mock('../src/utils/cloud-armor.js');
 
 const serviceDef = {
   kubernetes: {
@@ -63,7 +65,7 @@ const serviceDef = {
 
 describe('Action', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can run the action', async () => {

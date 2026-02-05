@@ -1,7 +1,8 @@
-const { getInput, getBooleanInput } = require('@actions/core');
-const { run } = require('../../utils/src');
-const { validateOrFetchNexusCredentials } = require('./nexus-credentials');
-const { createNpmrcFile } = require('./npmrc');
+import { getBooleanInput, getInput } from '@actions/core';
+
+import { run } from '../../utils/src/index.js';
+import { validateOrFetchNexusCredentials } from './nexus-credentials.js';
+import { createNpmrcFile } from './npmrc.js';
 
 const action = async () => {
   const username = getInput('nexus-username') || process.env.NEXUS_USERNAME;
@@ -16,15 +17,13 @@ const action = async () => {
     serviceAccountKey,
   });
 
-  await createNpmrcFile({
+  createNpmrcFile({
     credentials,
     outputDir,
     authForPublishing,
   });
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

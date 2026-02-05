@@ -1,5 +1,6 @@
-const exec = require('@actions/exec');
-const fs = require('fs');
+import fs from 'node:fs';
+
+import * as exec from '@actions/exec';
 
 const getAutoscaleType = (autoscale) => {
   if (!autoscale) {
@@ -163,4 +164,4 @@ spec:
   await exec.exec('kubectl', ['apply', '-f', 'hpa.yml', ...dryRunArg]);
 };
 
-module.exports = applyAutoscale;
+export default applyAutoscale;

@@ -1,12 +1,14 @@
-jest.mock('@actions/core');
-jest.mock('axios');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('axios');
 
-const axios = require('axios');
-const { setupPermissions, handlePermissions } = require('../src/permissions');
+import axios from 'axios';
+
+import { handlePermissions, setupPermissions } from '../src/permissions.js';
 
 describe('Setup permissions and handle', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('it can create a map with permissions from the iam', async () => {

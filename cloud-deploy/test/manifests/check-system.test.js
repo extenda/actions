@@ -1,14 +1,15 @@
-jest.mock('@actions/core');
-jest.mock('../../src/utils/gcloud-output', () =>
-  jest.fn().mockImplementation(() => Promise.resolve()),
-);
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../../src/utils/gcloud-output', () => ({
+  default: vi.fn().mockImplementation(() => Promise.resolve()),
+}));
 
-const checkIamSystem = require('../../src/manifests/check-system');
-const execGcloud = require('../../src/utils/gcloud-output');
+import checkIamSystem from '../../src/manifests/check-system.js';
+import execGcloud from '../../src/utils/gcloud-output.js';
 
 describe('Check iam bundles system', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can check bundle exists', async () => {

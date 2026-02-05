@@ -1,17 +1,19 @@
-const mockFs = require('mock-fs');
+import mockFs from 'mock-fs';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 // Mock out tools download
-jest.mock('../../utils');
-jest.mock('@actions/core');
+vi.mock('../../utils/src');
+vi.mock('@actions/core');
 
-const core = require('@actions/core');
-const os = require('os');
-const { action, platform } = require('../src/index');
-const { loadTool } = require('../../utils');
+import * as core from '@actions/core';
+import os from 'os';
+
+import { loadTool } from '../../utils/src/index.js';
+import { action, platform } from '../src/index.js';
 
 describe('Setup Terraform', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockFs.restore();
   });
 
@@ -22,7 +24,7 @@ describe('Setup Terraform', () => {
   });
 
   test('It can download tool versions from dot version files', async () => {
-    jest.spyOn(os, 'platform');
+    vi.spyOn(os, 'platform');
     os.platform.mockReturnValue('linux');
 
     mockFs({

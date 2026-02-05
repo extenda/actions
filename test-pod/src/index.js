@@ -1,8 +1,9 @@
-const core = require('@actions/core');
-const { run } = require('../../utils');
-const configureKubeCtl = require('./configure-kubectl');
-const { createConfigMap, deleteConfigMap } = require('./configmap');
-const runPod = require('./run-pod');
+import * as core from '@actions/core';
+
+import { run } from '../../utils/src/index.js';
+import { createConfigMap, deleteConfigMap } from './configmap.js';
+import configureKubeCtl from './configure-kubectl.js';
+import runPod from './run-pod.js';
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {
@@ -32,8 +33,6 @@ const action = async () => {
   );
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

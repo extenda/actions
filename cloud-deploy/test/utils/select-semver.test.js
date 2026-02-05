@@ -1,4 +1,6 @@
-const selectSemver = require('../../src/utils/select-semver');
+import { expect, test } from 'vitest';
+
+import selectSemver from '../../src/utils/select-semver.js';
 
 test('It should select preview if greater than stable', () => {
   expect(selectSemver('v1.0.1', 'v1.0.0')).toEqual('v1.0.1');

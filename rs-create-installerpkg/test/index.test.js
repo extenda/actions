@@ -1,9 +1,11 @@
-jest.mock('@actions/core');
-jest.mock('../src/pkgbuilder');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/pkgbuilder.js');
 
-const core = require('@actions/core');
-const { buildPackage } = require('../src/pkgbuilder');
-const action = require('../src/index');
+import * as core from '@actions/core';
+
+import action from '../src/index.js';
+import { buildPackage } from '../src/pkgbuilder.js';
 
 const orgEnv = process.env;
 
@@ -17,7 +19,7 @@ describe('create packaage Action', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
 

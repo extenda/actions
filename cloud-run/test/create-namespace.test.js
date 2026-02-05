@@ -1,8 +1,9 @@
-jest.mock('@actions/exec');
-const mockFs = require('mock-fs');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
+import * as exec from '@actions/exec';
+import mockFs from 'mock-fs';
 
-const exec = require('@actions/exec');
-const createNamespace = require('../src/create-namespace');
+import createNamespace from '../src/create-namespace.js';
 
 const mockOutput = (data, opts) => {
   opts.listeners.stderr(Buffer.from(`${data}\n`, 'utf8'));
@@ -19,7 +20,7 @@ describe('Create namespace', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockFs.restore();
   });
 

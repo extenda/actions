@@ -1,5 +1,6 @@
-const exec = require('@actions/exec');
-const projectLabels = require('./project-labels');
+import * as exec from '@actions/exec';
+
+import projectLabels from './project-labels.js';
 
 const deployJob = async (
   newJobName,
@@ -63,4 +64,4 @@ const deployJob = async (
     .substr(4);
 };
 
-module.exports = deployJob;
+export default deployJob;

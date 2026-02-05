@@ -1,10 +1,12 @@
-const core = require('@actions/core');
-const fs = require('fs');
-const path = require('path');
-const mvn = require('./mvn');
-const { run } = require('../../utils');
-const versions = require('../../utils/src/versions');
-const loadNexusCredentials = require('./nexus-credentials');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import * as core from '@actions/core';
+
+import { run } from '../../utils/src/index.js';
+import * as versions from '../../utils/src/versions.js';
+import * as mvn from './mvn.js';
+import loadNexusCredentials from './nexus-credentials.js';
 
 const setVersion = async (version, workingDir = './') =>
   core.group(
@@ -84,8 +86,6 @@ const action = async () => {
   await authExec(usesArtifactRegistry, serviceAccountKey, execMaven);
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

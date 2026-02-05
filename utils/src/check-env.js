@@ -7,4 +7,4 @@ const checkEnv = (variables) => {
   });
 };
 
-module.exports = checkEnv;
+export default checkEnv;

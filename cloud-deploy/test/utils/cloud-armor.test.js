@@ -1,17 +1,19 @@
-const checkPolicyExists = require('../../src/utils/cloud-armor');
-const gcloudOutput = require('../../src/utils/gcloud-output');
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('@actions/core');
-jest.mock('../../src/utils/gcloud-output', () =>
-  jest.fn().mockImplementation(() => Promise.resolve()),
-);
+import checkPolicyExists from '../../src/utils/cloud-armor.js';
+import gcloudOutput from '../../src/utils/gcloud-output.js';
+
+vi.mock('@actions/core');
+vi.mock('../../src/utils/gcloud-output', () => ({
+  default: vi.fn().mockImplementation(() => Promise.resolve()),
+}));
 
 describe('check cloud armor policy', () => {
   const mockProjectID = 'project-staging';
   const mockPolicyName = 'cloud-armor-policy';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Should check the cloud armor policy exists', async () => {

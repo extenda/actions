@@ -37,4 +37,4 @@ outputs:
     description: 'Full name of the Docker image'
 runs:
   using: node20
-  main: 'dist/index.js'
+  main: 'dist/index.cjs'

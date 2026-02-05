@@ -1,19 +1,20 @@
-jest.mock('@actions/core');
-jest.mock('@actions/exec');
-jest.mock('../src/deploy');
-jest.mock('../src/kubectl');
-jest.mock('../src/manifests');
-jest.mock('../src/env-config');
-jest.mock('../src/configure-domains');
-jest.mock('../../setup-gcloud');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('@actions/exec');
+vi.mock('../src/deploy.js');
+vi.mock('../src/kubectl.js');
+vi.mock('../src/manifests.js');
+vi.mock('../src/env-config.js');
+vi.mock('../src/configure-domains.js');
+vi.mock('../../setup-gcloud/src/index.js');
 
-const core = require('@actions/core');
-const kubectl = require('../src/kubectl');
-const createManifests = require('../src/manifests');
-const prepareEnvConfig = require('../src/env-config');
-const deploy = require('../src/deploy');
+import * as core from '@actions/core';
 
-const action = require('../src/index');
+import deploy from '../src/deploy.js';
+import prepareEnvConfig from '../src/env-config.js';
+import action from '../src/index.js';
+import kubectl from '../src/kubectl.js';
+import createManifests from '../src/manifests.js';
 
 const orgEnv = process.env;
 
@@ -25,7 +26,7 @@ describe('txengine-deploy', () => {
     };
   });
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
 

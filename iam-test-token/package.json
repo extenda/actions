@@ -3,8 +3,9 @@
   "version": "0.0.1-local",
   "private": true,
   "description": "Obtain a valid ID token from the Hii Retail IAM",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "axios": "^1.13.2"
-  }
+  },
+  "type": "module"
 }

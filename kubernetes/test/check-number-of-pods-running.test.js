@@ -1,9 +1,10 @@
-const mockFs = require('mock-fs');
-const exec = require('@actions/exec');
+import * as exec from '@actions/exec';
+import mockFs from 'mock-fs';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('@actions/exec');
+vi.mock('@actions/exec');
 
-const checkRequiredNumberOfPodsIsRunning = require('../src/check-number-of-pods-running');
+import checkRequiredNumberOfPodsIsRunning from '../src/check-number-of-pods-running.js';
 
 const mockErrorOutput = (data, opts) => {
   opts.listeners.stdout(Buffer.from(`${data}\n`, 'utf8'));
@@ -55,7 +56,7 @@ describe('Check number of pods running', () => {
 
   afterEach(() => {
     mockFs.restore();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It throws error if namespace does not exist', async () => {
@@ -82,7 +83,7 @@ describe('Check number of pods running', () => {
   });
 
   test('It fails on unknown error', async () => {
-    console.log = jest.fn();
+    console.log = vi.fn();
     // Call before the retry.
     exec.exec.mockImplementationOnce().mockResolvedValue(0);
     // Calls inside of the retry.

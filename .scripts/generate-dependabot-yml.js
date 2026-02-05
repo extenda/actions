@@ -1,7 +1,13 @@
-const fs = require('fs');
-const path = require('path');
-const yaml = require('js-yaml');
-const { modules } = require('./modules');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import yaml from 'js-yaml';
+import { fileURLToPath } from 'url';
+
+import { modules } from './modules.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // List of deprecated actions that we don't want to waste time bumping dependencies in.
 const DEPRECATED_ACTIONS = [
@@ -115,4 +121,4 @@ ${yaml.dump(dependabot).toString('utf8')}`,
   );
 };
 
-module.exports = generateDependabot;
+export default generateDependabot;

@@ -1,4 +1,4 @@
-const yaml = require('yaml');
+import yaml from 'yaml';
 
 /**
  * Adds environment variables to configmap specification.
@@ -14,4 +14,4 @@ const patchConfigMapYaml = (environmentArgs, configMapYaml) => {
   return yaml.stringify(configMap);
 };
 
-module.exports = patchConfigMapYaml;
+export default patchConfigMapYaml;

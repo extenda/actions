@@ -1,8 +1,8 @@
-const core = require('@actions/core');
+import * as core from '@actions/core';
 
-const { checkEnv, run } = require('../../utils');
-const versions = require('../../utils/src/versions');
-const branchinfo = require('../../utils/src/branch-info');
+import * as branchinfo from '../../utils/src/branch-info.js';
+import { checkEnv, run } from '../../utils/src/index.js';
+import * as versions from '../../utils/src/versions.js';
 
 const action = async () => {
   try {
@@ -82,8 +82,6 @@ const action = async () => {
   }
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

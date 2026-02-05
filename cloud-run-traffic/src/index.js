@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const { run } = require('../../utils/src');
-const { setupGcloud } = require('../../setup-gcloud');
+import * as core from '@actions/core';
+
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { run } from '../../utils/src/index.js';
 
 async function action() {
   const serviceAccountKey = core.getInput('service-account-key', {
@@ -18,8 +19,6 @@ async function action() {
   throw new Error(deprecationMsg);
 }
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

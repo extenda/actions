@@ -1,13 +1,15 @@
-const execGcloud = require('../../src/utils/gcloud-output');
-const cleanRevisions = require('../../src/cloudrun/clean-revisions');
-const getRevisions = require('../../src/cloudrun/get-revisions');
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('../../src/cloudrun/get-revisions');
-jest.mock('../../src/utils/gcloud-output');
+import cleanRevisions from '../../src/cloudrun/clean-revisions.js';
+import getRevisions from '../../src/cloudrun/get-revisions.js';
+import execGcloud from '../../src/utils/gcloud-output.js';
+
+vi.mock('../../src/cloudrun/get-revisions.js');
+vi.mock('../../src/utils/gcloud-output.js');
 
 describe('clean revisions', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('clean revisions', async () => {

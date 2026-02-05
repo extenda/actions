@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+import * as exec from '@actions/exec';
 
 const projectLabels = async (projectId) => {
   let output = '';
@@ -17,4 +17,4 @@ const projectLabels = async (projectId) => {
   return output.substring(9, 12);
 };
 
-module.exports = projectLabels;
+export default projectLabels;

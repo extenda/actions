@@ -1,6 +1,8 @@
-jest.mock('@actions/exec');
-const exec = require('@actions/exec');
-const getImageDigest = require('../src/image-digest');
+import { expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
+import * as exec from '@actions/exec';
+
+import getImageDigest from '../src/image-digest.js';
 
 const mockExecListeners = (output) => (cmd, args, opts) => {
   opts.listeners.stdout(Buffer.from(output, 'utf8'));

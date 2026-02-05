@@ -1,4 +1,4 @@
-const execGcloud = require('./gcloud-output');
+import execGcloud from './gcloud-output.js';
 
 const matchName = (connectorName, nameConvention) =>
   connectorName === nameConvention;
@@ -31,4 +31,4 @@ const checkVpcConnector = async (project, region, name) => {
   throw new Error(`No connector found for this project ${project}`);
 };
 
-module.exports = checkVpcConnector;
+export default checkVpcConnector;

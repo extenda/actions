@@ -1,8 +1,10 @@
-const fs = require('fs-extra');
-const path = require('path');
-const esbuild = require('esbuild');
-const { modules } = require('./modules');
-const generateDependabot = require('./generate-dependabot-yml');
+import path from 'node:path';
+
+import esbuild from 'esbuild';
+import fs from 'fs-extra';
+
+import generateDependabot from './generate-dependabot-yml.js';
+import { modules } from './modules.js';
 
 const copyStaticAssetsPlugin = ({ sourceDir, destDir, filesToCopy }) => ({
   name: 'copy-static-assets',
@@ -35,7 +37,7 @@ const build = async (baseDir) => {
     lineLimit: 120,
     keepNames: true,
     treeShaking: true,
-    outfile: `${destDir}/index.js`,
+    outfile: `${destDir}/index.cjs`,
     plugins: [
       copyStaticAssetsPlugin({
         sourceDir: srcDir,

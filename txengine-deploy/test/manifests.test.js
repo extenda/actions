@@ -1,18 +1,23 @@
-jest.mock('@actions/core');
-jest.mock('axios');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('axios');
 
-const mockFs = require('mock-fs');
-const fs = require('fs');
-const yaml = require('yaml');
-const axios = require('axios');
+import fs from 'node:fs';
 
-const mockLoadSecret = jest.fn();
-jest.mock('../../gcp-secret-manager/src/secrets', () => ({
+import axios from 'axios';
+import mockFs from 'mock-fs';
+import yaml from 'yaml';
+
+const { mockLoadSecret, mockContent } = vi.hoisted(() => ({
+  mockLoadSecret: vi.fn(),
+  mockContent: vi.fn(),
+}));
+
+vi.mock('../../gcp-secret-manager/src/secrets', () => ({
   loadSecret: mockLoadSecret,
 }));
 
-const mockContent = jest.fn();
-jest.mock('@actions/github', () => ({
+vi.mock('@actions/github', () => ({
   getOctokit: () => ({
     rest: {
       repos: {
@@ -22,12 +27,12 @@ jest.mock('@actions/github', () => ({
   }),
 }));
 
-const createManifests = require('../src/manifests');
+import createManifests from '../src/manifests.js';
 
 describe('manifests', () => {
   afterEach(() => {
     mockFs.restore();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   beforeEach(() => {

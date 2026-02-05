@@ -3,7 +3,7 @@
   "version": "0.0.1-local",
   "private": true,
   "description": "Publish permissions to Hii Retail IAM",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "@actions/github": "^7.0.0",
     "axios": "^1.13.2",
@@ -12,5 +12,6 @@
     "multiline-str": "^1.0.4",
     "uuid": "^11.1.0",
     "yaml": "^2.8.2"
-  }
+  },
+  "type": "module"
 }

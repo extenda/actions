@@ -3,8 +3,9 @@
   "version": "0.0.1-local",
   "description": "Download Terraform and Terragrunt",
   "private": true,
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "semver": "^7.7.3"
-  }
+  },
+  "type": "module"
 }

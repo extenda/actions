@@ -1,7 +1,8 @@
-const fs = require('fs');
-const core = require('@actions/core');
-const yaml = require('yaml');
-const { validate } = require('jsonschema');
+import fs from 'node:fs';
+
+import * as core from '@actions/core';
+import { validate } from 'jsonschema';
+import yaml from 'yaml';
 
 const DEFAULT_CACHE_KEYS_FILE =
   'policies/policy/com.styra.envoy.ingress/rules/rules/cache-keys.yaml';
@@ -58,6 +59,4 @@ const loadCacheKeys = (cacheKeysYamlFile = DEFAULT_CACHE_KEYS_FILE) => {
   return undefined;
 };
 
-module.exports = {
-  loadCacheKeys,
-};
+export { loadCacheKeys };

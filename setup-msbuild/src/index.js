@@ -1,8 +1,10 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const os = require('os');
-const path = require('path');
-const { loadTool } = require('../../utils');
+import path from 'node:path';
+
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import os from 'os';
+
+import { loadTool } from '../../utils/src/index.js';
 
 const VSWHERE_VERSION = '2.7.1';
 

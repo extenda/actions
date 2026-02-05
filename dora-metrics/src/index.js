@@ -1,7 +1,8 @@
-const core = require('@actions/core');
-const { run } = require('../../utils');
-const generateBugLog = require('./bug-log');
-const { generateFolders, uploadToBucket } = require('./deploy-log');
+import * as core from '@actions/core';
+
+import { run } from '../../utils/src/index.js';
+import generateBugLog from './bug-log.js';
+import { generateFolders, uploadToBucket } from './deploy-log.js';
 
 const action = async () => {
   const productName = core.getInput('product-name', { required: true });
@@ -21,8 +22,6 @@ const action = async () => {
   await uploadToBucket(productName);
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

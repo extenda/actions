@@ -1,4 +1,4 @@
-const yaml = require('yaml');
+import yaml from 'yaml';
 
 /**
  * Patches statefulset specification with values provided in service definition.
@@ -53,4 +53,4 @@ const patchStatefulSetYaml = (serviceDefinition, statefulsetYaml) => {
   return yaml.stringify(statefulSet);
 };
 
-module.exports = patchStatefulSetYaml;
+export default patchStatefulSetYaml;

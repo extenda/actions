@@ -1,9 +1,11 @@
-const { exec } = require('@actions/exec');
-const { loadTool } = require('../../utils');
-const opaTest = require('../src/opa-test');
+import { exec } from '@actions/exec';
+import { expect, test, vi } from 'vitest';
 
-jest.mock('@actions/exec');
-jest.mock('../../utils');
+import { loadTool } from '../../utils/src/index.js';
+import opaTest from '../src/opa-test.js';
+
+vi.mock('@actions/exec');
+vi.mock('../../utils/src');
 
 test('It can run an OPA test', async () => {
   exec.mockResolvedValueOnce(0);

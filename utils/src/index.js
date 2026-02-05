@@ -1,21 +1,21 @@
-const checkEnv = require('./check-env');
-const run = require('./run');
-const gitConfig = require('./git-config');
-const { loadTool, find: findTool } = require('./load-binary');
-const loadGitHubToken = require('./load-github-token');
-const failIfNotTrunkBased = require('./trunk-killswitch');
-const getImageDigest = require('./image-digest');
+import checkEnv from './check-env.js';
+import gitConfig from './git-config.js';
+import getImageDigest from './image-digest.js';
+import { find as findTool, loadTool } from './load-binary.js';
+import loadGitHubToken from './load-github-token.js';
+import run from './run.js';
+import failIfNotTrunkBased from './trunk-killswitch.js';
 
 // Note that src/versions are NOT included here because it adds 2.2MBs to every package
 // that uses the utils module. If versions are to be used, include the file explicitly.
 
-module.exports = {
+export {
   checkEnv,
   failIfNotTrunkBased,
-  gitConfig,
   findTool,
-  loadTool,
-  loadGitHubToken,
-  run,
   getImageDigest,
+  gitConfig,
+  loadGitHubToken,
+  loadTool,
+  run,
 };

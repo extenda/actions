@@ -3,8 +3,9 @@
   "version": "0.0.1-local",
   "description": "Run acceptance tests in a Kubernetes Pod",
   "private": true,
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "@actions/tool-cache": "^2.0.1"
-  }
+  },
+  "type": "module"
 }

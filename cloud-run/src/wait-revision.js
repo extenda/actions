@@ -1,8 +1,9 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const gcloudOutput = require('./gcloud-output');
-const getLatestRevision = require('./get-revision');
-const projectInfo = require('./project-info');
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+
+import gcloudOutput from './gcloud-output.js';
+import getLatestRevision from './get-revision.js';
+import projectInfo from './project-info.js';
 
 const FIVE_MINUTES = 300000;
 
@@ -210,4 +211,4 @@ const waitForRevision = async (
   return 0;
 };
 
-module.exports = waitForRevision;
+export default waitForRevision;

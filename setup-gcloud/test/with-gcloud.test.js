@@ -1,9 +1,11 @@
-const setupGcloud = require('../src/setup-gcloud');
-const { execGcloud } = require('../src/exec-gcloud');
-const withGcloud = require('../src/with-gcloud');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('../src/setup-gcloud');
-jest.mock('../src/exec-gcloud');
+import { execGcloud } from '../src/exec-gcloud.js';
+import setupGcloud from '../src/setup-gcloud.js';
+import withGcloud from '../src/with-gcloud.js';
+
+vi.mock('../src/setup-gcloud.js');
+vi.mock('../src/exec-gcloud.js');
 
 describe('With Gcloud', () => {
   let orgEnv;
@@ -16,12 +18,12 @@ describe('With Gcloud', () => {
 
   afterEach(() => {
     process.env = orgEnv;
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can run without existing gcloud installation', async () => {
     delete process.env.GCLOUD_INSTALLED_VERSION;
-    const callback = jest.fn();
+    const callback = vi.fn();
 
     await withGcloud('json-key', callback);
 
@@ -38,7 +40,7 @@ describe('With Gcloud', () => {
       .mockResolvedValueOnce(JSON.stringify('json-key-account')) // Current account
       .mockResolvedValueOnce(''); // Restore response
 
-    const callback = jest.fn();
+    const callback = vi.fn();
 
     const result = await withGcloud('json-key', callback);
     expect(result).toBeUndefined();
@@ -66,7 +68,7 @@ describe('With Gcloud', () => {
       .mockResolvedValueOnce(JSON.stringify('same-account'))
       .mockResolvedValueOnce('');
 
-    const callback = jest.fn();
+    const callback = vi.fn();
     callback.mockResolvedValueOnce('callback-result');
     const result = await withGcloud('json-key', callback);
     expect(result).toEqual('callback-result');

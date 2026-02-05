@@ -1,9 +1,11 @@
-const core = require('@actions/core');
-const path = require('path');
-const semver = require('semver');
-const os = require('os');
-const fs = require('fs');
-const { run, loadTool } = require('../../utils');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import * as core from '@actions/core';
+import os from 'os';
+import semver from 'semver';
+
+import { loadTool, run } from '../../utils/src/index.js';
 
 const fromFile = (file) => {
   if (fs.existsSync(file)) {
@@ -68,11 +70,6 @@ const action = async () => {
   }
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = {
-  action,
-  platform,
-};
+export { action, platform };

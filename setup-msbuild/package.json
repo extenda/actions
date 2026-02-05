@@ -3,5 +3,6 @@
   "version": "0.0.1-local",
   "private": true,
   "description": "Prepare MSBuild for use in GitHub Actions",
-  "main": "dist/index.js"
+  "main": "dist/index.cjs",
+  "type": "module"
 }

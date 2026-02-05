@@ -1,12 +1,13 @@
-jest.mock('../../utils/src/pull-request-info');
-jest.mock('@actions/core');
-jest.mock('../src/generate-outputs');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('../../utils/src/pull-request-info.js');
+vi.mock('@actions/core');
+vi.mock('../src/generate-outputs.js');
 
-const mockComment = jest.fn();
-const mockListComments = jest.fn(() => ({ data: [] }));
-const mockDeleteComment = jest.fn();
+const mockComment = vi.fn();
+const mockListComments = vi.fn(() => ({ data: [] }));
+const mockDeleteComment = vi.fn();
 
-jest.mock('@actions/github', () => ({
+vi.mock('@actions/github', () => ({
   getOctokit: () => ({
     rest: {
       issues: {
@@ -24,16 +25,17 @@ jest.mock('@actions/github', () => ({
   },
 }));
 
-const core = require('@actions/core');
-const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
-const action = require('../src/index');
-const generateOutputs = require('../src/generate-outputs');
+import * as core from '@actions/core';
+
+import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
+import generateOutputs from '../src/generate-outputs.js';
+import action from '../src/index.js';
 
 const orgEnv = process.env;
 
 describe('Terraform plan comment', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     process.env = orgEnv;
   });
 

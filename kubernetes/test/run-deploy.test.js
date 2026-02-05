@@ -1,35 +1,47 @@
-jest.mock('@actions/exec');
-jest.mock('../../setup-gcloud');
-jest.mock('../../cloud-run/src/cluster-info');
-jest.mock('../../cloud-run/src/project-info');
-jest.mock('../../cloud-run/src/kubectl-auth');
-jest.mock('../src/check-namespace-exists');
-jest.mock('../src/check-number-of-pods-running');
-jest.mock('../src/patch-deployment-yaml');
-jest.mock('../src/patch-service-yaml');
-jest.mock('../src/patch-statefulset-yaml');
-jest.mock('../src/kustomize');
-jest.mock('../src/apply-kubectl');
-jest.mock('../src/autoscale');
-jest.mock('../../utils', () => ({
-  loadTool: jest.fn(),
-  getImageDigest: jest.fn(),
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
+vi.mock('@actions/exec');
+vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('../../cloud-run/src/cluster-info.js');
+vi.mock('../../cloud-run/src/project-info.js');
+vi.mock('../../cloud-run/src/kubectl-auth.js');
+vi.mock('../src/check-namespace-exists.js');
+vi.mock('../src/check-number-of-pods-running.js');
+vi.mock('../src/patch-deployment-yaml.js');
+vi.mock('../src/patch-service-yaml.js');
+vi.mock('../src/patch-statefulset-yaml.js');
+vi.mock('../src/kustomize.js');
+vi.mock('../src/apply-kubectl.js');
+vi.mock('../src/autoscale.js');
+vi.mock('../../utils/src/index.js', () => ({
+  loadTool: vi.fn(),
+  getImageDigest: vi.fn(),
+  run: vi.fn(),
 }));
 
-const mockFs = require('mock-fs');
-const exec = require('@actions/exec');
-const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
-const { setupGcloud } = require('../../setup-gcloud');
-const patchDeployment = require('../src/patch-deployment-yaml');
-const patchServiceYaml = require('../src/patch-service-yaml');
-const patchStatefulSetYaml = require('../src/patch-statefulset-yaml');
-const runDeploy = require('../src/run-deploy');
-const kustomize = require('../src/kustomize');
-const checkNamespaceExists = require('../src/check-namespace-exists');
-const checkRequiredNumberOfPodsIsRunning = require('../src/check-number-of-pods-running');
-const applyKubectl = require('../src/apply-kubectl');
-const applyAutoscale = require('../src/autoscale');
-const { getImageDigest } = require('../../utils/src');
+import * as exec from '@actions/exec';
+import mockFs from 'mock-fs';
+
+import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { getImageDigest } from '../../utils/src/index.js';
+import applyKubectl from '../src/apply-kubectl.js';
+import applyAutoscale from '../src/autoscale.js';
+import checkNamespaceExists from '../src/check-namespace-exists.js';
+import checkRequiredNumberOfPodsIsRunning from '../src/check-number-of-pods-running.js';
+import kustomize from '../src/kustomize.js';
+import patchDeployment from '../src/patch-deployment-yaml.js';
+import patchServiceYaml from '../src/patch-service-yaml.js';
+import patchStatefulSetYaml from '../src/patch-statefulset-yaml.js';
+import runDeploy from '../src/run-deploy.js';
 
 const orgEnv = process.env;
 
@@ -49,7 +61,7 @@ describe('Run Deploy', () => {
 
   afterEach(() => {
     mockFs.restore();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It calls check namespace exists', async () => {

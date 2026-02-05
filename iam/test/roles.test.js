@@ -1,18 +1,20 @@
-jest.mock('@actions/core');
-jest.mock('axios');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('axios');
 
-const axios = require('axios');
-const {
-  setupRoles,
-  getRole,
-  createRole,
-  updateRole,
+import axios from 'axios';
+
+import {
   arraysEqual,
-} = require('../src/roles');
+  createRole,
+  getRole,
+  setupRoles,
+  updateRole,
+} from '../src/roles.js';
 
 describe('Setup roles and handle', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const roles = [

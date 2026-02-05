@@ -1,4 +1,4 @@
-const { SemVer, valid } = require('semver');
+import { SemVer, valid } from 'semver';
 
 /**
  * Ensure that a preview semantic version only gets used if it is semantically greater than the stable version.
@@ -19,4 +19,4 @@ const selectSemver = (previewVersion, stableVersion) => {
   return stableVersion;
 };
 
-module.exports = selectSemver;
+export default selectSemver;

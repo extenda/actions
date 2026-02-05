@@ -1,9 +1,11 @@
-const core = require('@actions/core');
-const path = require('path');
-const fs = require('fs');
-const readline = require('readline');
-const axios = require('axios');
-const { sonarAuth } = require('./sonar-credentials');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import * as core from '@actions/core';
+import axios from 'axios';
+import readline from 'readline';
+
+import { sonarAuth } from './sonar-credentials.js';
 
 const REPORT_TASK_FILE = 'report-task.txt';
 const PROP_TASK_URL = 'ceTaskUrl';
@@ -130,6 +132,4 @@ const checkQualityGate = async (
   return result(0, report, qgStatus);
 };
 
-module.exports = {
-  checkQualityGate,
-};
+export { checkQualityGate };

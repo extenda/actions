@@ -1,10 +1,12 @@
-const os = require('os');
-const exec = require('@actions/exec');
-const core = require('@actions/core');
-const fs = require('fs');
-const fetch = require('node-fetch');
-const path = require('path');
-const { loadTool } = require('../../utils');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import fetch from 'node-fetch';
+import os from 'os';
+
+import { loadTool } from '../../utils/src/index.js';
 
 const getBinaryName = () =>
   os.platform() === 'win32'
@@ -157,10 +159,10 @@ const buildPackage = async (args) => {
   return true;
 };
 
-module.exports = {
+export {
   buildPackage,
   downloadBuildTool,
-  publishPackageCommand,
-  packageBuilderCommand,
   getBinaryName,
+  packageBuilderCommand,
+  publishPackageCommand,
 };

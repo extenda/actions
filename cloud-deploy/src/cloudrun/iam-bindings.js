@@ -1,5 +1,6 @@
-const core = require('@actions/core');
-const gcloudOutput = require('../utils/gcloud-output');
+import * as core from '@actions/core';
+
+import gcloudOutput from '../utils/gcloud-output.js';
 
 const addPrefix = (account) => {
   const accountType = account.split(':')[0];
@@ -105,4 +106,4 @@ const setupAuthorization = async (projectID, name, accounts) => {
   }
 };
 
-module.exports = setupAuthorization;
+export default setupAuthorization;

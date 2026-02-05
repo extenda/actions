@@ -1,14 +1,16 @@
-const {
+import { describe, expect, test } from 'vitest';
+
+import {
   getBranchName,
-  isPreRelease,
   getBranchNameFriendly,
-  getBranchNameShort,
   getBranchNameSemver,
-  getShortSha,
+  getBranchNameShort,
   getBranchType,
   getComposedVersionString,
+  getShortSha,
   getTagAtCommit,
-} = require('../src/branch-info');
+  isPreRelease,
+} from '../src/branch-info.js';
 
 describe('Branch info test suite', () => {
   test('getBranchName() returns branch name or null', () => {

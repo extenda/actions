@@ -1,16 +1,27 @@
-jest.mock('@actions/core');
-jest.mock('fast-glob');
-jest.mock('../src/secrets-manager/load-secrets');
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
+vi.mock('@actions/core');
+vi.mock('fast-glob');
+vi.mock('../src/secrets-manager/load-secrets.js');
 
-const core = require('@actions/core');
-const mockFs = require('mock-fs');
-const fg = require('fast-glob');
-const nock = require('nock');
-const camelcaseKeys = require('camelcase-keys');
-const { loadSecrets } = require('../src/secrets-manager/load-secrets');
-const configFixtures = require('./fixtures/configs');
-const { secrets } = require('./fixtures/secrets');
-const action = require('../src/index');
+import * as core from '@actions/core';
+import camelcaseKeys from 'camelcase-keys';
+import fg from 'fast-glob';
+import mockFs from 'mock-fs';
+import nock from 'nock';
+
+import action from '../src/index.js';
+import { loadSecrets } from '../src/secrets-manager/load-secrets.js';
+import * as configFixtures from './fixtures/configs.js';
+import { secrets } from './fixtures/secrets.js';
 
 function mockIdpTokenCall() {
   nock('https://identitytoolkit.googleapis.com')
@@ -25,11 +36,12 @@ function mockIdpTokenCall() {
 }
 
 function mockExeSyncCall(id, response, dryRun = false) {
-  // ignore version
-  // eslint-disable-next-line no-unused-vars
-  const { version, ...payload } = camelcaseKeys(configFixtures.validParsed, {
-    deep: true,
-  });
+  const { version: _version, ...payload } = camelcaseKeys(
+    configFixtures.validParsed,
+    {
+      deep: true,
+    },
+  );
   const exeNock = nock('https://exe-management.retailsvc.com')
     .post('/api/v1/internal/event-sources:sync', payload)
     .query({ dryRun })
@@ -62,7 +74,7 @@ describe('action', () => {
     'calls exe api with correct definitions dryRun=%s',
     async (dryRun) => {
       const file = 'external-events/*.yaml';
-      core.getInput.mockReturnValue('serviceAcc').mockReturnValue(file);
+      core.getInput.mockReturnValueOnce('serviceAcc').mockReturnValueOnce(file);
 
       core.getBooleanInput.mockReturnValue(dryRun);
 
@@ -95,7 +107,7 @@ describe('action', () => {
 
   it('fails, if sync process was not successful', async () => {
     const file = 'external-events/*.yaml';
-    core.getInput.mockReturnValue('serviceAcc').mockReturnValue(file);
+    core.getInput.mockReturnValueOnce('serviceAcc').mockReturnValueOnce(file);
 
     core.getBooleanInput.mockReturnValue(false);
 

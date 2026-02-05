@@ -1,6 +1,8 @@
-const mockFs = require('mock-fs');
-const loadServiceDefinition = require('../../cloud-run/src/service-definition');
-const kubernetesSchema = require('../src/kubernetes-schema');
+import mockFs from 'mock-fs';
+import { afterEach, describe, expect, test } from 'vitest';
+
+import loadServiceDefinition from '../../cloud-run/src/service-definition.js';
+import kubernetesSchema from '../src/kubernetes-schema.js';
 
 describe('Service Definition', () => {
   afterEach(() => {

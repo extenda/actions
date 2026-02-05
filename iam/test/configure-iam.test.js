@@ -1,12 +1,13 @@
-jest.mock('@actions/core');
-jest.mock('../src/roles');
-jest.mock('../src/permissions');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/roles.js');
+vi.mock('../src/permissions.js');
 
-const core = require('@actions/core');
+import * as core from '@actions/core';
 
-const { configureIAM } = require('../src/configure-iam');
-const { setupPermissions, handlePermissions } = require('../src/permissions');
-const { setupRoles } = require('../src/roles');
+import { configureIAM } from '../src/configure-iam.js';
+import { handlePermissions, setupPermissions } from '../src/permissions.js';
+import { setupRoles } from '../src/roles.js';
 
 const iam = {
   'permission-prefix': 'test',
@@ -30,7 +31,7 @@ const iam = {
 
 describe('Configure IAM', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It updates permissions and roles', async () => {

@@ -1,4 +1,4 @@
-const { execGcloud } = require('../../setup-gcloud');
+import { execGcloud } from '../../setup-gcloud/src/index.js';
 
 // Fetch an identity token for the specified account
 const fetchToken = async (serviceAccount, audiences) =>
@@ -10,4 +10,4 @@ const fetchToken = async (serviceAccount, audiences) =>
     `--audiences=${audiences}`,
   ]);
 
-module.exports = fetchToken;
+export default fetchToken;

@@ -1,7 +1,10 @@
-const fs = require('fs');
-const gitConfig = require('../src/git-config');
-const simpleGit = require('simple-git');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import simpleGit from 'simple-git';
+import { afterAll, beforeAll, expect, test } from 'vitest';
+
+import gitConfig from '../src/git-config.js';
 
 beforeAll(() => {
   fs.cpSync('.git/config', '.git/config.backup');

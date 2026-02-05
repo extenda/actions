@@ -1,15 +1,17 @@
-const path = require('path');
-const fs = require('fs');
-const core = require('@actions/core');
-const io = require('@actions/io');
-const { restoreCache, saveCache } = require('@actions/cache');
-const glob = require('fast-glob');
-const { v4: uuid } = require('uuid');
-const { loadTool } = require('../../utils');
-const createKeyFile = require('../../utils/src/create-key-file');
-const getDownloadUrl = require('./download-url');
-const getLatestVersion = require('./latest-version');
-const { execGcloud } = require('./exec-gcloud');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import { restoreCache, saveCache } from '@actions/cache';
+import * as core from '@actions/core';
+import * as io from '@actions/io';
+import glob from 'fast-glob';
+import { v4 as uuid } from 'uuid';
+
+import createKeyFile from '../../utils/src/create-key-file.js';
+import { loadTool } from '../../utils/src/index.js';
+import getDownloadUrl from './download-url.js';
+import { execGcloud } from './exec-gcloud.js';
+import getLatestVersion from './latest-version.js';
 
 // Increment this version if the list of installed components are modified.
 const CACHE_VERSION = '2';
@@ -48,6 +50,30 @@ const updatePath = async (toolPath) => {
   const binPath = path.join(toolPath, 'bin');
   core.info(`Add ${binPath} to PATH`);
   core.addPath(binPath);
+  return toolPath;
+};
+
+/**
+ * Explicitly set CLOUDSDK_PYTHON to the bundled python for Windows. This prevents gcloud from
+ * trying to use the Windows "App Execution Alias" for python, which fails in GitHub Actions.
+ * @param toolPath the gcloud tool path
+ * @returns {Promise<string>} the tool path directory
+ */
+const configureCloudSdkPython = async (toolPath) => {
+  if (process.platform === 'win32') {
+    const pythonPath = path.join(
+      toolPath,
+      'platform',
+      'bundledpython',
+      'python.exe',
+    );
+    if (fs.existsSync(pythonPath)) {
+      const envVar = 'CLOUDSDK_PYTHON';
+      core.info(`Set ${envVar}=${pythonPath} (Windows fix)`);
+      core.exportVariable(envVar, pythonPath);
+      process.env[envVar] = pythonPath;
+    }
+  }
   return toolPath;
 };
 
@@ -157,6 +183,7 @@ const setupGcloud = async (
         downloadUrl,
       })
         .then(updatePath)
+        .then(configureCloudSdkPython)
         .then(installComponents)
         .then(() => saveCache([cachePath], primaryCacheKey))
         .then((n) => {
@@ -169,7 +196,7 @@ const setupGcloud = async (
         });
     } else {
       core.info(`Use cached gcloud ${gcloudVersion}`);
-      await updatePath(cachePath);
+      await updatePath(cachePath).then(configureCloudSdkPython);
     }
 
     core.exportVariable('GCLOUD_REQUESTED_VERSION', version);
@@ -185,4 +212,4 @@ const setupGcloud = async (
   );
 };
 
-module.exports = setupGcloud;
+export default setupGcloud;

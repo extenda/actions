@@ -1,11 +1,13 @@
-jest.mock('@actions/exec');
-jest.mock('../src/dns-record');
-jest.mock('../src/alert-certificate-expiration');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
+vi.mock('../src/dns-record.js');
+vi.mock('../src/alert-certificate-expiration.js');
 
-const exec = require('@actions/exec');
-const configureDomains = require('../src/configure-domains');
-const { addDnsRecord } = require('../src/dns-record');
-const { mockOutput } = require('./utils');
+import * as exec from '@actions/exec';
+
+import configureDomains from '../src/configure-domains.js';
+import { addDnsRecord } from '../src/dns-record.js';
+import { mockOutput } from './utils.js';
 
 const mockCluster = {
   project: 'test-project-staging-1234',
@@ -15,7 +17,7 @@ const mockCluster = {
 
 describe('Configure domains', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It configures only new domains', async () => {

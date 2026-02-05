@@ -1,11 +1,13 @@
-jest.mock('os');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('os');
 
-const os = require('os');
-const getDownloadUrl = require('../src/download-url');
+import os from 'os';
+
+import getDownloadUrl from '../src/download-url.js';
 
 describe('Get gcloud download URL', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('It can create a Windows URL', async () => {

@@ -1,12 +1,14 @@
-jest.mock('@actions/exec');
-const exec = require('@actions/exec');
-const { createConfigMap, deleteConfigMap } = require('../src/configmap');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
+import * as exec from '@actions/exec';
+
+import { createConfigMap, deleteConfigMap } from '../src/configmap.js';
 
 const orgEnv = process.env;
 
 describe('ConfigMap', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
   beforeEach(() => {

@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const { checkEnv, run } = require('../../utils');
-const { createJiraRelease } = require('./jira-release');
+import * as core from '@actions/core';
+
+import { checkEnv, run } from '../../utils/src/index.js';
+import { createJiraRelease } from './jira-release.js';
 
 const action = async () => {
   checkEnv(['JIRA_USERNAME', 'JIRA_PASSWORD']);
@@ -22,8 +23,6 @@ const action = async () => {
   );
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

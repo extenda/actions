@@ -1,11 +1,12 @@
-const core = require('@actions/core');
-const { run } = require('../../utils');
-const { createProject } = require('./create-project');
-const { scan } = require('./scan');
-const { scanMsBuild } = require('./scan-msbuild');
-const { checkQualityGate } = require('./check-quality-gate');
-const { credentials } = require('./sonar-credentials');
-const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
+import * as core from '@actions/core';
+
+import { run } from '../../utils/src/index.js';
+import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
+import { checkQualityGate } from './check-quality-gate.js';
+import { createProject } from './create-project.js';
+import { scan } from './scan.js';
+import { scanMsBuild } from './scan-msbuild.js';
+import { credentials } from './sonar-credentials.js';
 
 const isPullRequest = async (hostUrl) => {
   const { githubToken } = await credentials(hostUrl);
@@ -91,8 +92,6 @@ const action = async () => {
   }
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

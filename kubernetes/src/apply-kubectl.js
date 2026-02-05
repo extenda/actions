@@ -1,4 +1,4 @@
-const exec = require('@actions/exec');
+import * as exec from '@actions/exec';
 
 /**
 Applies the existing kustomize from ./kustomize folder.
@@ -27,4 +27,4 @@ const applyKubectl = async (deploymentName, deploymentType, dryRun = false) => {
   }
 };
 
-module.exports = applyKubectl;
+export default applyKubectl;

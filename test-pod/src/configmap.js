@@ -1,6 +1,7 @@
-const exec = require('@actions/exec');
-const core = require('@actions/core');
-const { getShortSha } = require('../../utils/src/branch-info');
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+
+import { getShortSha } from '../../utils/src/branch-info.js';
 
 const mapName = async () => {
   const repo = process.env.GITHUB_REPOSITORY.split('/')[1];
@@ -40,7 +41,4 @@ const deleteConfigMap = async ({ namespace }) => {
   return exec.exec('kubectl', ['delete', 'configmap', name, '-n', namespace]);
 };
 
-module.exports = {
-  createConfigMap,
-  deleteConfigMap,
-};
+export { createConfigMap, deleteConfigMap };

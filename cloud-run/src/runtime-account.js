@@ -5,4 +5,4 @@ const getRuntimeAccount = (runtimeAccountEmail, projectId) => {
   return `${runtimeAccountEmail}@${projectId}.iam.gserviceaccount.com`;
 };
 
-module.exports = getRuntimeAccount;
+export default getRuntimeAccount;

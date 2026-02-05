@@ -1,12 +1,14 @@
-jest.mock('@actions/core');
-jest.mock('axios');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('axios');
 
-const axios = require('axios');
-const fetchIamToken = require('../src/iam-auth');
+import axios from 'axios';
+
+import fetchIamToken from '../src/iam-auth.js';
 
 describe('fetch iam-api token', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('it can fetch api token', async () => {

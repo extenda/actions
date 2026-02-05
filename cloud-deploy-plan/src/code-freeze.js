@@ -9,7 +9,4 @@ const isCodeFreeze = (epochMillis) => {
 
 const getFreezeEnd = () => new Date(codeFreeze.end);
 
-module.exports = {
-  isCodeFreeze,
-  getFreezeEnd,
-};
+export { getFreezeEnd, isCodeFreeze };

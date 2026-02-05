@@ -1,10 +1,25 @@
-const path = require('path');
+import path from 'node:path';
 
-jest.mock('../src/sonar-credentials');
-jest.mock('../../utils/src/pull-request-info');
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 
-const { createParams } = require('../src/params');
-const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
+vi.mock('../src/sonar-credentials.js', () => ({
+  credentials: vi.fn().mockResolvedValue({
+    githubToken: 'github-token',
+    sonarToken: 'sonar',
+  }),
+}));
+vi.mock('../../utils/src/pull-request-info.js');
+
+import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
+import { createParams } from '../src/params.js';
 
 const orgEnv = process.env;
 

@@ -1,9 +1,11 @@
-const exec = require('@actions/exec');
-const core = require('@actions/core');
-const handleCertificates = require('../src/handle-certificate');
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('@actions/exec');
-jest.mock('@actions/core');
+import handleCertificates from '../src/handle-certificate.js';
+
+vi.mock('@actions/exec');
+vi.mock('@actions/core');
 
 const certificateListJson = [
   {
@@ -20,7 +22,7 @@ const certificateListJson = [
 
 describe('handle certificates', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can handle certificates when domain exists', async () => {

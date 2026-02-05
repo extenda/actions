@@ -3,5 +3,6 @@
   "version": "0.0.1-local",
   "description": "Determine the project version based on conventional commit conventions",
   "private": true,
-  "main": "dist/index.js"
+  "main": "dist/index.cjs",
+  "type": "module"
 }

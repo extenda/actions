@@ -1,17 +1,19 @@
-const core = require('@actions/core');
-const action = require('../src/index');
-const configureKubeCtl = require('../src/configure-kubectl');
-const { createConfigMap, deleteConfigMap } = require('../src/configmap');
-const runPod = require('../src/run-pod');
+import * as core from '@actions/core';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('@actions/core');
-jest.mock('../src/configure-kubectl');
-jest.mock('../src/configmap');
-jest.mock('../src/run-pod');
+import { createConfigMap, deleteConfigMap } from '../src/configmap.js';
+import configureKubeCtl from '../src/configure-kubectl.js';
+import action from '../src/index.js';
+import runPod from '../src/run-pod.js';
+
+vi.mock('@actions/core');
+vi.mock('../src/configure-kubectl.js');
+vi.mock('../src/configmap.js');
+vi.mock('../src/run-pod.js');
 
 describe('test-pod Action', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   beforeEach(() => {

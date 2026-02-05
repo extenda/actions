@@ -1,4 +1,4 @@
-const os = require('os');
+import os from 'os';
 
 const platforms = {
   linux: {
@@ -26,4 +26,4 @@ const getDownloadUrl = (version) => {
   return `https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${version}-${platform}-${arch}.${extension}`;
 };
 
-module.exports = getDownloadUrl;
+export default getDownloadUrl;

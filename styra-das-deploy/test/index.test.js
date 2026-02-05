@@ -1,11 +1,13 @@
-jest.mock('@actions/core');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
 
-const core = require('@actions/core');
-const action = require('../src/index');
+import * as core from '@actions/core';
+
+import action from '../src/index.js';
 
 describe('run push policy', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can run the action', async () => {

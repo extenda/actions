@@ -1,4 +1,6 @@
-const failIfNotTrunkBased = require('../src/trunk-killswitch');
+import { afterEach, beforeEach, expect, test } from 'vitest';
+
+import failIfNotTrunkBased from '../src/trunk-killswitch.js';
 
 const orgEnv = process.env;
 

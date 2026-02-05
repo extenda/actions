@@ -1,5 +1,7 @@
-const yaml = require('yaml');
-const patchConfigMapYaml = require('../src/patch-configmap-yaml');
+import { describe, expect, test } from 'vitest';
+import yaml from 'yaml';
+
+import patchConfigMapYaml from '../src/patch-configmap-yaml.js';
 
 describe('Patches ConfigMap.yml', () => {
   test('It adds environment variables', () => {

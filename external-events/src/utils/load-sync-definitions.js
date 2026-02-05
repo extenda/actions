@@ -1,7 +1,7 @@
-const yaml = require('js-yaml');
-const fg = require('fast-glob');
-const { readFileSync } = require('fs');
-const core = require('@actions/core');
+import * as core from '@actions/core';
+import fg from 'fast-glob';
+import { readFileSync } from 'fs';
+import yaml from 'js-yaml';
 
 function loadDefinition(path) {
   core.info(`Loading ${path} config file`);
@@ -53,7 +53,7 @@ function validateDefs(defs, validateFn) {
   }
 }
 
-async function loadDefinitions(glob, validateFn) {
+export async function loadDefinitions(glob, validateFn) {
   core.startGroup('Definitions load');
   core.info(`Loading files by glob - ${glob}`);
   const files = fg.sync([glob], { onlyFiles: true });
@@ -71,5 +71,3 @@ async function loadDefinitions(glob, validateFn) {
   core.endGroup();
   return defs;
 }
-
-module.exports = { loadDefinitions };

@@ -1,20 +1,25 @@
-jest.mock('../../setup-gcloud');
-jest.mock('@actions/exec');
-const mockClusterInfo = jest.fn();
-jest.mock('../../cloud-run/src/cluster-info', () => ({
+import { afterEach, describe, expect, test, vi } from 'vitest';
+
+const { mockClusterInfo } = vi.hoisted(() => ({
+  mockClusterInfo: vi.fn(),
+}));
+
+vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('@actions/exec');
+vi.mock('../../cloud-run/src/cluster-info', () => ({
   getClusterInfo: mockClusterInfo,
 }));
-jest.mock('../../cloud-run/src/kubectl-auth');
+vi.mock('../../cloud-run/src/kubectl-auth.js');
 
-const exec = require('@actions/exec');
-const { setupGcloud } = require('../../setup-gcloud');
-const authenticateKubeCtl = require('../../cloud-run/src/kubectl-auth');
+import * as exec from '@actions/exec';
 
-const kubectl = require('../src/kubectl');
+import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import kubectl from '../src/kubectl.js';
 
 describe('kubectl', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can configure kubectl', async () => {

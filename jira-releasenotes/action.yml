@@ -19,4 +19,4 @@ inputs:
     default: Release note
 runs:
   using: node20
-  main: dist/index.js
+  main: dist/index.cjs

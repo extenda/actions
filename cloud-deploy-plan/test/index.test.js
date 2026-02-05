@@ -1,21 +1,23 @@
-const core = require('@actions/core');
-const action = require('../src/index');
-const { setupGcloud } = require('../../setup-gcloud');
-const getToken = require('../../cloud-deploy/src/utils/identity-token');
-const getDeployInfo = require('../src/deploy-info');
-const loadServiceDefinition = require('../../cloud-deploy/src/utils/service-definition');
-const { getPullRequestNumber, postComment } = require('../src/pr-comment');
-const resolveServiceFiles = require('../src/service-files');
-const { isCodeFreeze, getFreezeEnd } = require('../src/code-freeze');
+import * as core from '@actions/core';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('@actions/core');
-jest.mock('../src/deploy-info');
-jest.mock('../src/pr-comment');
-jest.mock('../../cloud-deploy/src/utils/identity-token');
-jest.mock('../../setup-gcloud');
-jest.mock('../../cloud-deploy/src/utils/service-definition');
-jest.mock('../src/service-files');
-jest.mock('../src/code-freeze');
+import getToken from '../../cloud-deploy/src/utils/identity-token.js';
+import loadServiceDefinition from '../../cloud-deploy/src/utils/service-definition.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { getFreezeEnd, isCodeFreeze } from '../src/code-freeze.js';
+import getDeployInfo from '../src/deploy-info.js';
+import action from '../src/index.js';
+import { getPullRequestNumber, postComment } from '../src/pr-comment.js';
+import resolveServiceFiles from '../src/service-files.js';
+
+vi.mock('@actions/core');
+vi.mock('../src/deploy-info.js');
+vi.mock('../src/pr-comment.js');
+vi.mock('../../cloud-deploy/src/utils/identity-token.js');
+vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('../../cloud-deploy/src/utils/service-definition.js');
+vi.mock('../src/service-files.js');
+vi.mock('../src/code-freeze.js');
 
 describe('cloud-deploy-plan', () => {
   beforeEach(() => {
@@ -23,7 +25,7 @@ describe('cloud-deploy-plan', () => {
     getToken.mockResolvedValueOnce('token');
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('It can plan multiple files in a PRs', async () => {

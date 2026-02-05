@@ -1,9 +1,10 @@
-const core = require('@actions/core');
-const { run, failIfNotTrunkBased } = require('../../utils');
-const loadServiceDefinition = require('./service-definition');
-const runDeploy = require('./run-deploy');
-const configureDomains = require('./configure-domains');
-const jsonSchema = require('./cloud-run-schema');
+import * as core from '@actions/core';
+
+import { failIfNotTrunkBased, run } from '../../utils/src/index.js';
+import jsonSchema from './cloud-run-schema.js';
+import configureDomains from './configure-domains.js';
+import runDeploy from './run-deploy.js';
+import loadServiceDefinition from './service-definition.js';
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {
@@ -31,8 +32,6 @@ const action = async () => {
   );
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

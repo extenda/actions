@@ -1,25 +1,27 @@
-jest.mock('@actions/core');
-jest.mock('../src/configure-iam');
-jest.mock('../src/configure-bundle-sync');
-jest.mock('../src/iam-definition');
-jest.mock('../../iam-test-token/src/iam-auth');
-jest.mock('../src/load-credentials');
-jest.mock('../../setup-gcloud');
-jest.mock('fast-glob');
-jest.mock('@actions/github');
-jest.mock('../../cloud-run/src/cluster-info');
-jest.mock('../../gcp-secret-manager/src/secrets');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/configure-iam.js');
+vi.mock('../src/configure-bundle-sync.js');
+vi.mock('../src/iam-definition.js');
+vi.mock('../../iam-test-token/src/iam-auth.js');
+vi.mock('../src/load-credentials.js');
+vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('fast-glob');
+vi.mock('@actions/github');
+vi.mock('../../cloud-run/src/cluster-info.js');
+vi.mock('../../gcp-secret-manager/src/secrets.js');
 
-const core = require('@actions/core');
-const fg = require('fast-glob');
-const action = require('../src/index');
-const { configureIAM } = require('../src/configure-iam');
-const configureBundleSync = require('../src/configure-bundle-sync');
-const fetchIamToken = require('../../iam-test-token/src/iam-auth');
-const loadIamDefinition = require('../src/iam-definition');
-const { setupGcloud } = require('../../setup-gcloud');
-const loadCredentials = require('../src/load-credentials');
-const { getClusterInfo } = require('../../cloud-run/src/cluster-info');
+import * as core from '@actions/core';
+import fg from 'fast-glob';
+
+import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
+import fetchIamToken from '../../iam-test-token/src/iam-auth.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import configureBundleSync from '../src/configure-bundle-sync.js';
+import { configureIAM } from '../src/configure-iam.js';
+import loadIamDefinition from '../src/iam-definition.js';
+import action from '../src/index.js';
+import loadCredentials from '../src/load-credentials.js';
 
 const credentials = {
   styraToken: 'styra-token',
@@ -31,7 +33,7 @@ const credentials = {
 
 describe('run action', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can run the action', async () => {

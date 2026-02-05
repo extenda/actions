@@ -1,11 +1,13 @@
-const { execGcloud } = require('../../setup-gcloud/src');
-const uploadToBucket = require('../src/upload-to-bucket');
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('../../setup-gcloud/src');
+import { execGcloud } from '../../setup-gcloud/src/index.js';
+import uploadToBucket from '../src/upload-to-bucket.js';
+
+vi.mock('../../setup-gcloud/src/index.js');
 
 describe('uploadToBucket', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should call execGcloud with the correct storage cp arguments', async () => {

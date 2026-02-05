@@ -1,5 +1,7 @@
-const yaml = require('yaml');
-const patchServiceYaml = require('../src/patch-service-yaml');
+import { describe, expect, test } from 'vitest';
+import yaml from 'yaml';
+
+import patchServiceYaml from '../src/patch-service-yaml.js';
 
 describe('Patches service.yml', () => {
   test('It patches ports and removes clusterIp:NONE', () => {

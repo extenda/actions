@@ -1,16 +1,19 @@
-const core = require('@actions/core');
-const axios = require('axios');
-const {
-  sendScaleSetup,
+import * as core from '@actions/core';
+import axios from 'axios';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import getToken from '../../src/utils/identity-token.js';
+import {
+  refreshCanaryStatus,
   sendDeployInfo,
   sendDeployRequest,
-} = require('../../src/utils/send-request');
-const getToken = require('../../src/utils/identity-token');
+  sendScaleSetup,
+} from '../../src/utils/send-request.js';
 
-jest.mock('@actions/core');
-jest.mock('axios');
-jest.mock('google-auth-library');
-jest.mock('../../src/utils/identity-token');
+vi.mock('@actions/core');
+vi.mock('axios');
+vi.mock('google-auth-library');
+vi.mock('../../src/utils/identity-token.js');
 
 const service = 'service-name';
 const projectid = 'projectid';
@@ -63,7 +66,7 @@ const serviceDef = {
 
 describe('Send request to platform api', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should send scale setup request successfully', async () => {
     getToken.mockResolvedValue('token');
@@ -249,9 +252,7 @@ describe('Send request to platform api', () => {
     getToken.mockResolvedValue('token');
     axios.post.mockResolvedValue({ status: 200 });
     const data = { projectID: 'proj', serviceName: 'svc' };
-    await expect(
-      require('../../src/utils/send-request').refreshCanaryStatus(data),
-    ).resolves.toBe(true);
+    await expect(refreshCanaryStatus(data)).resolves.toBe(true);
     expect(axios.post).toHaveBeenCalledWith(
       '/services/revisions/canary',
       data,

@@ -1,10 +1,12 @@
-jest.mock('@actions/core');
-jest.mock('child_process');
+import { afterAll, afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('child_process');
 
-const mockFs = require('mock-fs');
-const core = require('@actions/core');
-const cp = require('child_process');
-const docker = require('../src/docker');
+import * as core from '@actions/core';
+import cp from 'child_process';
+import mockFs from 'mock-fs';
+
+import * as docker from '../src/docker.js';
 
 describe('core and cp methods', () => {
   afterEach(() => {

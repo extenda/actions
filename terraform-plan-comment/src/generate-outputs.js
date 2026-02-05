@@ -1,9 +1,10 @@
-const exec = require('@actions/exec');
-const core = require('@actions/core');
-const path = require('path');
-const fg = require('fast-glob');
-const fs = require('fs');
-const pLimit = require('p-limit');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import fg from 'fast-glob';
+import pLimit from 'p-limit';
 
 const terraformShow = async (plan) => {
   let stdout = '';
@@ -140,17 +141,17 @@ const generateOutputs = async (
     .then(sortModulePaths)
     .then((changed) => {
       changed.forEach(({ plan }) => {
-        const planwWithChanges = path.join(
+        const planWithChanges = path.join(
           modulePath(plan),
           `${planFile}.changes`,
         );
-        fs.copyFileSync(plan, planwWithChanges);
+        fs.copyFileSync(plan, planWithChanges);
 
-        core.info(`Save plan with changes to ${planwWithChanges}`);
+        core.info(`Save plan with changes to ${planWithChanges}`);
       });
       core.info(`Found ${changed.length} plan(s) with changes`);
       return changed;
     });
 };
 
-module.exports = generateOutputs;
+export default generateOutputs;

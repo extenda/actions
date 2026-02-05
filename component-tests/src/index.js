@@ -1,8 +1,10 @@
-const { getInput, setFailed } = require('@actions/core');
-const { load: parseYaml } = require('js-yaml');
-const { readFile } = require('fs').promises;
-const { createApiTest } = require('./create-api-test');
-const { run } = require('../../utils');
+import { readFile } from 'node:fs/promises';
+
+import { getInput, setFailed } from '@actions/core';
+import { load as parseYaml } from 'js-yaml';
+
+import { run } from '../../utils/src/index.js';
+import { createApiTest } from './create-api-test.js';
 
 async function main() {
   try {
@@ -11,7 +13,7 @@ async function main() {
     const test = createApiTest(url, iamToken);
 
     const testsFile = getInput('tests', { required: true });
-    const tests = parseYaml(await readFile(testsFile));
+    const tests = parseYaml(await readFile(testsFile, 'utf8'));
 
     for (const [request, expected] of Object.entries(tests)) {
       await test(request, expected);
@@ -23,8 +25,6 @@ async function main() {
   }
 }
 
-if (require.main === module) {
-  run(main);
-}
+run(main);
 
-module.exports = main;
+export default main;

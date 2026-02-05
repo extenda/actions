@@ -1,8 +1,8 @@
-const simpleGit = require('simple-git');
+import simpleGit from 'simple-git';
 
-const isPreRelease = (branchName) => branchName !== 'master';
+export const isPreRelease = (branchName) => branchName !== 'master';
 
-const getBranchType = (branchName) => {
+export const getBranchType = (branchName) => {
   const devPattern = /(^dev$|^develop$)/gim;
   const masterPattern = /^master$/gim;
 
@@ -17,7 +17,7 @@ const getBranchType = (branchName) => {
   return 'feature';
 };
 
-const getBranchName = (currentRef) => {
+export const getBranchName = (currentRef) => {
   if (!currentRef) {
     throw new Error('Can not return a branchname for null');
   }
@@ -32,7 +32,7 @@ const getBranchName = (currentRef) => {
   return groups[1];
 };
 
-const getBranchNameFriendly = (branchName) => {
+export const getBranchNameFriendly = (branchName) => {
   if (!branchName) {
     throw new Error('You have no branch for some reason');
   }
@@ -46,7 +46,7 @@ const getBranchNameFriendly = (branchName) => {
   return branchName.replace(/\//g, '-').replace(/_/g, '-').toLowerCase();
 };
 
-const getBranchNameShort = (currentRef) => {
+export const getBranchNameShort = (currentRef) => {
   if (!currentRef) {
     throw new Error('Can not return a branchname for null');
   }
@@ -64,7 +64,7 @@ const getBranchNameShort = (currentRef) => {
   return groups[1];
 };
 
-const getBranchNameSemver = (currentRef) => {
+export const getBranchNameSemver = (currentRef) => {
   if (!currentRef) {
     throw new Error(`Failed to parse branch name from ${currentRef}`);
   }
@@ -86,17 +86,17 @@ const getBranchNameSemver = (currentRef) => {
   return branchName;
 };
 
-const getShortSha = async (sha, shaSize = null) => {
+export const getShortSha = async (sha, shaSize = null) => {
   const args = [shaSize ? `--short=${shaSize}` : '--short', sha];
   return simpleGit().revparse(args);
 };
 
-const getTagAtCommit = async (sha) =>
+export const getTagAtCommit = async (sha) =>
   simpleGit()
     .tag(['--points-at', sha])
     .then((output) => output.trim());
 
-const getComposedVersionString = (
+export const getComposedVersionString = (
   version,
   branchNameFriendly,
   buildNumber,
@@ -117,16 +117,4 @@ const getComposedVersionString = (
   }
 
   return `${version}-${branchNameFriendly.toLowerCase()}-${shortSha}`;
-};
-
-module.exports = {
-  getBranchName,
-  isPreRelease,
-  getBranchNameFriendly,
-  getBranchNameShort,
-  getBranchNameSemver,
-  getShortSha,
-  getComposedVersionString,
-  getBranchType,
-  getTagAtCommit,
 };

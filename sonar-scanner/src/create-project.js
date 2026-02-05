@@ -1,8 +1,10 @@
-const core = require('@actions/core');
-const axios = require('axios');
-const path = require('path');
-const qs = require('qs');
-const { sonarAuth } = require('./sonar-credentials');
+import path from 'node:path';
+
+import * as core from '@actions/core';
+import axios from 'axios';
+import qs from 'qs';
+
+import { sonarAuth } from './sonar-credentials.js';
 
 const projectExists = async (hostUrl, organization, project) =>
   axios
@@ -64,6 +66,4 @@ const createProject = async (hostUrl, workingDir = '.') => {
   return Promise.resolve();
 };
 
-module.exports = {
-  createProject,
-};
+export { createProject };

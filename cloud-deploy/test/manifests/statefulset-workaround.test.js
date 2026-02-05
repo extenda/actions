@@ -1,15 +1,17 @@
-const gcloudOutput = require('../../src/utils/gcloud-output');
-const handleStatefulset = require('../../src/manifests/statefulset-workaround');
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('../../src/utils/gcloud-output', () =>
-  jest.fn().mockImplementation(() => Promise.resolve()),
-);
+import handleStatefulset from '../../src/manifests/statefulset-workaround.js';
+import gcloudOutput from '../../src/utils/gcloud-output.js';
+
+vi.mock('../../src/utils/gcloud-output', () => ({
+  default: vi.fn().mockImplementation(() => Promise.resolve()),
+}));
 
 describe('statefulset-workaround', () => {
   const mockServiceName = 'service-name';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should not update PVCs', async () => {

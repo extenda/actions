@@ -1,7 +1,8 @@
-jest.mock('@actions/core');
-jest.mock('../../utils/src/branch-info');
-const action = require('../src/index');
-const { getBranchNameSemver } = require('../../utils/src/branch-info');
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../../utils/src/branch-info.js');
+import { getBranchNameSemver } from '../../utils/src/branch-info.js';
+import action from '../src/index.js';
 
 const orgEnv = process.env;
 
@@ -16,7 +17,7 @@ describe('Get latest version', () => {
     getBranchNameSemver.mockResolvedValueOnce('refsheadsfeaturebranch1');
   });
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
 

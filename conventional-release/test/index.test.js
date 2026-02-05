@@ -1,16 +1,28 @@
-jest.mock('@actions/core');
-jest.mock('../../utils');
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 
-const mockTag = jest.fn();
-
-jest.mock('../../utils/src/versions', () => ({
-  tagReleaseVersion: mockTag,
-  setTagPrefix: jest.fn(),
+// Hoist mock functions before vi.mock() calls
+const { mockTag, mockRelease } = vi.hoisted(() => ({
+  mockTag: vi.fn(),
+  mockRelease: vi.fn(),
 }));
 
-const mockRelease = jest.fn();
+vi.mock('@actions/core');
+vi.mock('../../utils/src');
 
-jest.mock('@actions/github', () => ({
+vi.mock('../../utils/src/versions', () => ({
+  tagReleaseVersion: mockTag,
+  setTagPrefix: vi.fn(),
+}));
+
+vi.mock('@actions/github', () => ({
   getOctokit: () => ({
     rest: {
       repos: {
@@ -26,8 +38,9 @@ jest.mock('@actions/github', () => ({
   },
 }));
 
-const core = require('@actions/core');
-const action = require('../src/index');
+import * as core from '@actions/core';
+
+import action from '../src/index.js';
 
 let orgEnv;
 
@@ -38,7 +51,7 @@ describe('conventional-release', () => {
   beforeEach(() => {
     process.env.GITHUB_TOKEN = 'github-token';
     core.getInput.mockReturnValueOnce('extenda/test-repo');
-    core.getBooleanInput = jest.fn().mockImplementation((name) => {
+    core.getBooleanInput.mockImplementation((name) => {
       if (name === 'pre-release') return false;
       if (name === 'make-latest') return true;
       return false;
@@ -53,7 +66,7 @@ describe('conventional-release', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
 
@@ -108,8 +121,9 @@ describe('conventional-release', () => {
   });
 
   test('It can create a non-latest release', async () => {
-    core.getBooleanInput = jest.fn((name) => {
+    core.getBooleanInput.mockImplementation((name) => {
       if (name === 'make-latest') return false;
+      return false;
     });
 
     await action();
@@ -120,8 +134,9 @@ describe('conventional-release', () => {
   });
 
   test('It can create a pre-release', async () => {
-    core.getBooleanInput = jest.fn((name) => {
+    core.getBooleanInput.mockImplementation((name) => {
       if (name === 'pre-release') return true;
+      return false;
     });
 
     await action();

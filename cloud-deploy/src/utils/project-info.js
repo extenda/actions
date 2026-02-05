@@ -7,4 +7,4 @@ const projectInfo = (projectId) => {
   };
 };
 
-module.exports = projectInfo;
+export default projectInfo;

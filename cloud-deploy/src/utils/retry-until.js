@@ -34,7 +34,4 @@ const retryUntil = async (queryFn, checkFn, timeoutMillis = -1) => {
   return output;
 };
 
-module.exports = {
-  retryUntil,
-  setRetryDelay,
-};
+export { retryUntil, setRetryDelay };

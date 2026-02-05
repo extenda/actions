@@ -1,15 +1,17 @@
-jest.mock('@actions/core');
-jest.mock('../src/fetch-token');
-jest.mock('../../setup-gcloud');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/core');
+vi.mock('../src/fetch-token.js');
+vi.mock('../../setup-gcloud/src/index.js');
 
-const core = require('@actions/core');
-const action = require('../src/index');
-const { setupGcloud } = require('../../setup-gcloud');
-const fetchToken = require('../src/fetch-token');
+import * as core from '@actions/core';
+
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import fetchToken from '../src/fetch-token.js';
+import action from '../src/index.js';
 
 describe('Fetch identity token action', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can run the action', async () => {

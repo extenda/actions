@@ -1,12 +1,14 @@
-const exec = require('@actions/exec');
-const core = require('@actions/core');
-const configureDomains = require('../src/configure-domains');
-const handleCertificates = require('../src/handle-certificate');
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('@actions/exec');
-jest.mock('../src/handle-certificate');
-jest.mock('../../cloud-run/src/dns-record');
-jest.mock('@actions/core');
+import configureDomains from '../src/configure-domains.js';
+import handleCertificates from '../src/handle-certificate.js';
+
+vi.mock('@actions/exec');
+vi.mock('../src/handle-certificate.js');
+vi.mock('../../cloud-run/src/dns-record.js');
+vi.mock('@actions/core');
 
 const DNSListJSON = [
   {
@@ -44,7 +46,7 @@ const DNSListJSONProd = [
 
 describe('configure domains', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can configure dns for tenant', async () => {

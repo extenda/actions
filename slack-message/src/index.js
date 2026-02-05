@@ -1,7 +1,8 @@
-const core = require('@actions/core');
-const fetch = require('node-fetch');
-const { run, loadGitHubToken } = require('../../utils');
-const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
+import * as core from '@actions/core';
+import fetch from 'node-fetch';
+
+import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
+import { loadGitHubToken, run } from '../../utils/src/index.js';
 
 const createMessage = (title, text, fallback) => {
   const message = { text };

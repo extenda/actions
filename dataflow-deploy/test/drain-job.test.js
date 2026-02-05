@@ -1,10 +1,12 @@
-jest.mock('@actions/exec');
-const exec = require('@actions/exec');
-const drainJob = require('../src/drain-job');
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('@actions/exec');
+import * as exec from '@actions/exec';
+
+import drainJob from '../src/drain-job.js';
 
 describe('drain dataflow job', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('it drains job', async () => {

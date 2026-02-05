@@ -1,7 +1,8 @@
-const core = require('@actions/core');
-const github = require('@actions/github');
-const { run, loadGitHubToken } = require('../../utils');
-const { loadSecret } = require('../../gcp-secret-manager/src/secrets');
+import * as core from '@actions/core';
+import * as github from '@actions/github';
+
+import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
+import { loadGitHubToken, run } from '../../utils/src/index.js';
 
 const createPayload = (payloadString) => {
   if (payloadString) {
@@ -38,8 +39,6 @@ const action = async () => {
     });
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

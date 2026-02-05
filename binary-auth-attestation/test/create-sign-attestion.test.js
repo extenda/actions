@@ -1,13 +1,14 @@
-jest.mock('../../setup-gcloud');
-const { execGcloud } = require('../../setup-gcloud');
-const {
+import { afterEach, describe, expect, test, vi } from 'vitest';
+vi.mock('../../setup-gcloud/src/index.js');
+import { execGcloud } from '../../setup-gcloud/src/index.js';
+import {
   createAttestation,
   getArtifactUrl,
-} = require('../src/create-sign-attestion');
+} from '../src/create-sign-attestion.js';
 
 describe('Create attestation', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('Create attestation', async () => {

@@ -1,10 +1,12 @@
-const exec = require('@actions/exec');
-const { loadTool } = require('../../utils');
-const kustomize = require('../src/kustomize');
+import * as exec from '@actions/exec';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-jest.mock('@actions/exec');
-jest.mock('../../utils', () => ({
-  loadTool: jest.fn(),
+import { loadTool } from '../../utils/src/index.js';
+import kustomize from '../src/kustomize.js';
+
+vi.mock('@actions/exec');
+vi.mock('../../utils/src/index.js', () => ({
+  loadTool: vi.fn(),
 }));
 
 describe('Run Kustomize', () => {
@@ -13,7 +15,7 @@ describe('Run Kustomize', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('It can run Kustomize with args', async () => {

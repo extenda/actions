@@ -1,5 +1,5 @@
-const exec = require('@actions/exec');
-const core = require('@actions/core');
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 
 const generateFolders = async (
   productName,
@@ -29,4 +29,4 @@ const uploadToBucket = async (productName) =>
       throw err;
     });
 
-module.exports = { generateFolders, uploadToBucket };
+export { generateFolders, uploadToBucket };

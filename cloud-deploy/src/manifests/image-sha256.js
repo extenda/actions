@@ -1,4 +1,4 @@
-const { execGcloud } = require('../../../setup-gcloud');
+import { execGcloud } from '../../../setup-gcloud/src/index.js';
 
 const getImageWithSha256 = async (semanticImage) =>
   execGcloud([
@@ -9,4 +9,4 @@ const getImageWithSha256 = async (semanticImage) =>
     '--format=get(image_summary.digest)',
   ]).then((digest) => `${semanticImage.split(':')[0]}@${digest}`);
 
-module.exports = getImageWithSha256;
+export default getImageWithSha256;

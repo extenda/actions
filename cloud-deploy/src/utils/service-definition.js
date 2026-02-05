@@ -1,8 +1,10 @@
-const fs = require('fs');
-const yaml = require('yaml');
-const core = require('@actions/core');
-const { validate } = require('jsonschema');
-const jsonSchema = require('./cloud-deploy.schema.json');
+import fs from 'node:fs';
+
+import * as core from '@actions/core';
+import { validate } from 'jsonschema';
+import yaml from 'yaml';
+
+import jsonSchema from './cloud-deploy.schema.json';
 
 const validateSchema = (serviceFile, spec) => {
   const result = validate(spec, jsonSchema, { nestedErrors: true });
@@ -25,4 +27,4 @@ const loadServiceDefinition = (serviceFile) => {
   return spec;
 };
 
-module.exports = loadServiceDefinition;
+export default loadServiceDefinition;

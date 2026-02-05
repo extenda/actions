@@ -1,29 +1,34 @@
-const mockFs = require('mock-fs');
-const fs = require('fs');
-const buildManifest = require('../../src/manifests/build-manifest');
-const checkSystem = require('../../src/manifests/check-system');
-const { securitySpec } = require('../../src/manifests/security-sidecar');
-const handleStatefulset = require('../../src/manifests/statefulset-workaround');
-const { addNamespace } = require('../../src/utils/add-namespace');
-const readSecret = require('../../src/utils/load-credentials');
-const getRevisions = require('../../src/cloudrun/get-revisions');
-const getImageWithSha256 = require('../../src/manifests/image-sha256');
+import fs from 'node:fs';
 
-jest.mock('../../src/manifests/check-system');
-jest.mock('../../src/utils/add-namespace');
-jest.mock('../../src/manifests/security-sidecar');
-jest.mock('../../src/utils/load-credentials');
-jest.mock('../../src/manifests/statefulset-workaround');
-jest.mock('../../src/cloudrun/get-revisions');
-jest.mock('../../src/utils/cluster-connection');
-jest.mock('../../src/manifests/image-sha256');
+import mockFs from 'mock-fs';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+
+import getRevisions from '../../src/cloudrun/get-revisions.js';
+import buildManifest from '../../src/manifests/build-manifest.js';
+import checkSystem from '../../src/manifests/check-system.js';
+import getImageWithSha256 from '../../src/manifests/image-sha256.js';
+import { securitySpec } from '../../src/manifests/security-sidecar.js';
+import handleStatefulset from '../../src/manifests/statefulset-workaround.js';
+import { addNamespace } from '../../src/utils/add-namespace.js';
+import readSecret from '../../src/utils/load-credentials.js';
+
+vi.mock('../../src/manifests/check-system.js');
+vi.mock('../../src/utils/add-namespace.js');
+vi.mock('../../src/manifests/security-sidecar.js');
+vi.mock('../../src/utils/load-credentials.js');
+vi.mock('../../src/manifests/statefulset-workaround.js');
+vi.mock('../../src/cloudrun/get-revisions.js');
+vi.mock('../../src/utils/cluster-connection.js');
+vi.mock('../../src/manifests/image-sha256.js');
 
 const readFileSync = (file) => fs.readFileSync(file, { encoding: 'utf-8' });
 const originalEnv = process.env;
 
+vi.setConfig({ testTimeout: 30000 });
+
 describe('buildManifest', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFs.restore();
     process.env = originalEnv;
   });
@@ -44,7 +49,7 @@ describe('buildManifest', () => {
   });
 
   test('should generate manifest file with correct content', async () => {
-    // const mockWriteFile = jest.spyOn(fs, 'writeFileSync').mockImplementation();'
+    // const mockWriteFile = vi.spyOn(fs, 'writeFileSync').mockImplementation();'
     const image = 'example-image:latest';
     const service = {
       kubernetes: {
@@ -310,7 +315,7 @@ metadata:
   });
 
   test('should set OPA env vars', async () => {
-    // const mockWriteFile = jest.spyOn(fs, 'writeFileSync').mockImplementation();
+    // const mockWriteFile = vi.spyOn(fs, 'writeFileSync').mockImplementation();
     checkSystem.mockResolvedValueOnce(true);
     securitySpec.mockResolvedValueOnce({
       name: 'security-authz',

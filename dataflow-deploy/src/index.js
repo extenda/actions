@@ -1,9 +1,10 @@
-const core = require('@actions/core');
-const { run, failIfNotTrunkBased } = require('../../utils');
-const { setupGcloud } = require('../../setup-gcloud');
-const deployJob = require('./deploy-job');
-const drainJob = require('./drain-job');
-const { getTribeProject } = require('../../cloud-run/src/cluster-info');
+import * as core from '@actions/core';
+
+import { getTribeProject } from '../../cloud-run/src/cluster-info.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { failIfNotTrunkBased, run } from '../../utils/src/index.js';
+import deployJob from './deploy-job.js';
+import drainJob from './drain-job.js';
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {
@@ -47,8 +48,6 @@ const action = async () => {
   ).then((jobId) => drainJob(jobId, jobName, region, projectId));
 };
 
-if (require.main === module) {
-  run(action);
-}
+run(action);
 
-module.exports = action;
+export default action;

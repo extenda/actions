@@ -3,10 +3,11 @@
   "version": "0.0.1-local",
   "description": "Run API ping tests",
   "private": true,
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "@actions/github": "^7.0.0",
     "js-yaml": "^4.1.1",
     "supertest": "^7.2.2"
-  }
+  },
+  "type": "module"
 }

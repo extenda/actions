@@ -1,4 +1,6 @@
-const parseEnvironmentArgs = require('../src/environment-args');
+import { describe, expect, test } from 'vitest';
+
+import parseEnvironmentArgs from '../src/environment-args.js';
 
 describe('Environment args', () => {
   test('It can build a list of arguments', () => {

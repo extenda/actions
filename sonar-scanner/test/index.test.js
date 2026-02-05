@@ -1,25 +1,27 @@
-jest.mock('../src/create-project');
-jest.mock('../src/scan');
-jest.mock('../src/scan-msbuild');
-jest.mock('../src/check-quality-gate');
-jest.mock('../src/sonar-credentials', () => ({
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('../src/create-project.js');
+vi.mock('../src/scan.js');
+vi.mock('../src/scan-msbuild.js');
+vi.mock('../src/check-quality-gate.js');
+vi.mock('../src/sonar-credentials.js', () => ({
   credentials: () => ({
     githubToken: 'GITHUB_TOKEN',
     sonarToken: 'SONAR_TOKEN',
   }),
 }));
-jest.mock('../../utils/src/pull-request-info');
+vi.mock('../../utils/src/pull-request-info.js');
 
-const core = require('@actions/core');
-const { createProject } = require('../src/create-project');
-const { scan } = require('../src/scan');
-const { scanMsBuild } = require('../src/scan-msbuild');
-const { checkQualityGate } = require('../src/check-quality-gate');
-const { getPullRequestInfo } = require('../../utils/src/pull-request-info');
-const action = require('../src/index');
+import * as core from '@actions/core';
+
+import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
+import { checkQualityGate } from '../src/check-quality-gate.js';
+import { createProject } from '../src/create-project.js';
+import action from '../src/index.js';
+import { scan } from '../src/scan.js';
+import { scanMsBuild } from '../src/scan-msbuild.js';
 
 const orgEnv = process.env;
-const getInput = jest.spyOn(core, 'getInput');
+const getInput = vi.spyOn(core, 'getInput');
 
 const mockInputs = (
   hostUrl,
@@ -34,7 +36,12 @@ const mockInputs = (
     .mockReturnValueOnce(scanner)
     .mockReturnValueOnce(verbose ? 'true' : 'false')
     .mockReturnValueOnce(reportPath)
-    .mockReturnValueOnce(cwd);
+    .mockReturnValueOnce(cwd)
+    .mockReturnValueOnce('') // dotnet-args
+    .mockReturnValueOnce('') // gradle-args
+    .mockReturnValueOnce('') // maven-args
+    .mockReturnValueOnce('') // npm-args
+    .mockReturnValueOnce(''); // yarn-args
 };
 
 const mockPullRequest = (isPullRequest) => {
@@ -50,11 +57,11 @@ const mockPullRequest = (isPullRequest) => {
 };
 
 const defaultCommands = {
-  dotnet: undefined,
-  gradle: undefined,
-  maven: undefined,
-  npm: undefined,
-  yarn: undefined,
+  dotnet: '',
+  gradle: '',
+  maven: '',
+  npm: '',
+  yarn: '',
 };
 
 describe('Sonar-Scanner Action', () => {
@@ -66,7 +73,7 @@ describe('Sonar-Scanner Action', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     process.env = orgEnv;
   });
 
