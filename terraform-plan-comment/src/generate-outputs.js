@@ -1,9 +1,10 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import fg from 'fast-glob';
-import fs from 'fs';
 import pLimit from 'p-limit';
-import path from 'path';
 
 const terraformShow = async (plan) => {
   let stdout = '';

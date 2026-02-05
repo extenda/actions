@@ -1,4 +1,5 @@
-import { readFile } from 'fs/promises';
+import { readFile } from 'node:fs/promises';
+
 import { load as parseYaml } from 'js-yaml';
 import { resolve } from 'path';
 import { describe, expect, test, vi } from 'vitest';

@@ -1,5 +1,6 @@
+import { readFile } from 'node:fs/promises';
+
 import { getInput, setFailed } from '@actions/core';
-import { readFile } from 'fs/promises';
 import { load as parseYaml } from 'js-yaml';
 
 import { run } from '../../utils/src/index.js';

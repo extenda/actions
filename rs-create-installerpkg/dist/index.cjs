@@ -69363,6 +69363,8 @@ init_git_response_error();
 var exec = __toESM(require_exec2(), 1);
 
 // utils/src/load-binary.js
+var import_node_fs = __toESM(require("node:fs"), 1);
+var import_node_path2 = __toESM(require("node:path"), 1);
 var core = __toESM(require_core2(), 1);
 var io = __toESM(require_io2(), 1);
 var tc = __toESM(require_tool_cache(), 1);
@@ -73100,9 +73102,7 @@ var {
 } = axios_default;
 
 // utils/src/load-binary.js
-var import_fs = __toESM(require("fs"), 1);
 var import_os = __toESM(require("os"), 1);
-var import_path = __toESM(require("path"), 1);
 
 // utils/node_modules/uuid/dist/esm/stringify.js
 var byteToHex = [];
@@ -73167,12 +73167,12 @@ var find2 = /* @__PURE__ */ __name(async ({ tool, binary, version }) => Promise.
   tc.find(tool, version)
   /* process.arch), */
 ).then(
-  (dir) => dir ? import_path.default.join(dir, binary) : ""
+  (dir) => dir ? import_node_path2.default.join(dir, binary) : ""
 ), "find");
 var downloadToolWithAuth = /* @__PURE__ */ __name(async (url2, auth) => {
-  const targetFile = import_path.default.join(import_os.default.tmpdir(), v4_default(), v4_default());
-  import_fs.default.mkdirSync(import_path.default.dirname(targetFile));
-  const stream4 = import_fs.default.createWriteStream(targetFile);
+  const targetFile = import_node_path2.default.join(import_os.default.tmpdir(), v4_default(), v4_default());
+  import_node_fs.default.mkdirSync(import_node_path2.default.dirname(targetFile));
+  const stream4 = import_node_fs.default.createWriteStream(targetFile);
   await axios_default({
     url: url2,
     method: "get",
@@ -73187,7 +73187,7 @@ var downloadToolWithAuth = /* @__PURE__ */ __name(async (url2, auth) => {
     });
   }).then(() => {
     core.info(`Binary saved to ${targetFile}`);
-    import_fs.default.chmodSync(targetFile, "0777");
+    import_node_fs.default.chmodSync(targetFile, "0777");
   });
   return targetFile;
 }, "downloadToolWithAuth");
@@ -73198,7 +73198,7 @@ var downloadIfMissing = /* @__PURE__ */ __name(async (options, cachedTool) => {
     const { tool, binary, version, downloadUrl, auth } = options;
     core.info(`Downloading ${tool} from ${downloadUrl}`);
     const downloadUuid = await internalDownload(downloadUrl, auth);
-    const tmpDir = import_path.default.dirname(downloadUuid);
+    const tmpDir = import_node_path2.default.dirname(downloadUuid);
     if (downloadUrl.endsWith(".tar.gz")) {
       await tc.extractTar(downloadUuid, tmpDir);
     } else if (downloadUrl.endsWith(".zip")) {
@@ -73206,9 +73206,9 @@ var downloadIfMissing = /* @__PURE__ */ __name(async (options, cachedTool) => {
     } else if (downloadUrl.endsWith(".7z")) {
       await tc.extract7z(downloadUuid, tmpDir);
     } else {
-      const tmpFile = import_path.default.join(tmpDir, binary);
+      const tmpFile = import_node_path2.default.join(tmpDir, binary);
       await io.cp(downloadUuid, tmpFile);
-      import_fs.default.chmodSync(tmpFile, "0777");
+      import_node_fs.default.chmodSync(tmpFile, "0777");
     }
     await tc.cacheDir(tmpDir, tool, version);
     return find2(options);
@@ -73246,12 +73246,12 @@ var run = /* @__PURE__ */ __name(async (action2) => {
 var run_default = run;
 
 // rs-create-installerpkg/src/pkgbuilder.js
+var import_node_fs2 = __toESM(require("node:fs"), 1);
+var import_node_path3 = __toESM(require("node:path"), 1);
 var core4 = __toESM(require_core(), 1);
 var exec3 = __toESM(require_exec(), 1);
-var import_fs2 = __toESM(require("fs"), 1);
 var import_node_fetch = __toESM(require_lib4(), 1);
 var import_os2 = __toESM(require("os"), 1);
-var import_path2 = __toESM(require("path"), 1);
 var getBinaryName = /* @__PURE__ */ __name(() => import_os2.default.platform() === "win32" ? "InstallerPackageBuilder.Co\
 re.Console.exe" : "InstallerPackageBuilder.Core.Console", "getBinaryName");
 var packageBuilderCommand = /* @__PURE__ */ __name(async (builder, args) => {
@@ -73314,10 +73314,10 @@ var publishPackageCommand = /* @__PURE__ */ __name(async (args) => {
   const { packageName, packageVersion, outputDir, publishUrl, branch } = args;
   const packageUrl = `${packageName}.pkg/${branch}/${packageName}.pkg.${packageVersion}.zip`;
   const fullpublishUrl = `${publishUrl}${packageUrl}`;
-  const filePath = `${outputDir}${import_path2.default.sep}${packageName}_${packageVersion}.pkg.zip`;
-  const stats = import_fs2.default.statSync(filePath);
+  const filePath = `${outputDir}${import_node_path3.default.sep}${packageName}_${packageVersion}.pkg.zip`;
+  const stats = import_node_fs2.default.statSync(filePath);
   const fileSizeInBytes = stats.size;
-  const data = import_fs2.default.readFileSync(filePath);
+  const data = import_node_fs2.default.readFileSync(filePath);
   core4.info(`PublishUrl: ${fullpublishUrl}`);
   core4.info(
     `user: ${process.env.NEXUS_USERNAME}, pass ${process.env.NEXUS_PASSWORD}`
@@ -73362,7 +73362,7 @@ var buildPackage = /* @__PURE__ */ __name(async (args) => {
     if (builderType === "multiple") {
       const fullPath = sourcePaths;
       core4.info(`Sourcepath fullname: ${fullPath}`);
-      const dirs = import_fs2.default.readdirSync(fullPath).filter((f) => import_fs2.default.statSync(import_path2.default.
+      const dirs = import_node_fs2.default.readdirSync(fullPath).filter((f) => import_node_fs2.default.statSync(import_node_path3.default.
       join(fullPath, f)).isDirectory());
       dirs.forEach((dir) => {
         core4.info(`DirectoryName: ${dir}`);

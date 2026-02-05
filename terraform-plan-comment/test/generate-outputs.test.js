@@ -1,5 +1,6 @@
+import fs from 'node:fs';
+
 import * as exec from '@actions/exec';
-import fs from 'fs';
 import mockFs from 'mock-fs';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 

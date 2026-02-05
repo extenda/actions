@@ -1,6 +1,7 @@
-import fs from 'fs';
+import fs from 'node:fs';
+import path from 'node:path';
+
 import yaml from 'js-yaml';
-import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { modules } from './modules.js';

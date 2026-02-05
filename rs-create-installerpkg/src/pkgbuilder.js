@@ -1,9 +1,10 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import fs from 'fs';
 import fetch from 'node-fetch';
 import os from 'os';
-import path from 'path';
 
 import { loadTool } from '../../utils/src/index.js';
 

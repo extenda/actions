@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 import { getClusterInfo } from '../../cloud-run/src/cluster-info.js';
 import authenticateKubeCtl from '../../cloud-run/src/kubectl-auth.js';

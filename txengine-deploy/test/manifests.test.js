@@ -2,8 +2,9 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 vi.mock('@actions/core');
 vi.mock('axios');
 
+import fs from 'node:fs';
+
 import axios from 'axios';
-import fs from 'fs';
 import mockFs from 'mock-fs';
 import yaml from 'yaml';
 

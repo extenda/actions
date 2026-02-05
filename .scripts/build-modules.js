@@ -1,6 +1,7 @@
+import path from 'node:path';
+
 import esbuild from 'esbuild';
 import fs from 'fs-extra';
-import path from 'path';
 
 import generateDependabot from './generate-dependabot-yml.js';
 import { modules } from './modules.js';

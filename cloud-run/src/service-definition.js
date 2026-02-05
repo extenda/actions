@@ -1,6 +1,7 @@
+import fs from 'node:fs';
+
 import * as core from '@actions/core';
 import merge from 'deepmerge';
-import fs from 'fs';
 import { validate } from 'jsonschema';
 import yaml from 'yaml';
 

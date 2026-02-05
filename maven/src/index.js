@@ -1,6 +1,7 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import * as core from '@actions/core';
-import fs from 'fs';
-import path from 'path';
 
 import { run } from '../../utils/src/index.js';
 import * as versions from '../../utils/src/versions.js';

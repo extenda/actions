@@ -1,6 +1,7 @@
+import path from 'node:path';
+
 import { fs as memfs } from 'memfs';
 import micromatch from 'micromatch';
-import path from 'path';
 
 const fastGlobMock = {
   sync: (patterns, options = {}) => {

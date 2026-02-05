@@ -1,10 +1,11 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import * as core from '@actions/core';
 import * as io from '@actions/io';
 import * as tc from '@actions/tool-cache';
 import axios from 'axios';
-import fs from 'fs';
 import os from 'os';
-import path from 'path';
 import { v4 as uuid } from 'uuid';
 
 const find = async ({ tool, binary, version }) =>

@@ -1,4 +1,5 @@
-import fs from 'fs';
+import fs from 'node:fs';
+
 import mockFs from 'mock-fs';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 

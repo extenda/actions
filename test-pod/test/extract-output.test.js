@@ -1,5 +1,6 @@
+import fs from 'node:fs';
+
 import * as exec from '@actions/exec';
-import fs from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { afterEach, describe, expect, test, vi } from 'vitest';

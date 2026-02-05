@@ -1,7 +1,8 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import * as core from '@actions/core';
 import { exec } from '@actions/exec';
-import fs from 'fs';
-import path from 'path';
 
 import { execGcloud } from '../../setup-gcloud/src/index.js';
 import copyPolicies from './copy-policies.js';

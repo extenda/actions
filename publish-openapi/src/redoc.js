@@ -1,6 +1,7 @@
+import fs from 'node:fs';
+
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import fs from 'fs';
 
 const wait = (ms) =>
   new Promise((resolve) => {

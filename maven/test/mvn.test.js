@@ -1,7 +1,8 @@
-import fs from 'fs';
+import fs from 'node:fs';
+import path from 'node:path';
+
 import mockFs from 'mock-fs';
 import os from 'os';
-import path from 'path';
 import { fileURLToPath } from 'url';
 import {
   afterAll,

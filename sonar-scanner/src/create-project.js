@@ -1,6 +1,7 @@
+import path from 'node:path';
+
 import * as core from '@actions/core';
 import axios from 'axios';
-import path from 'path';
 import qs from 'qs';
 
 import { sonarAuth } from './sonar-credentials.js';

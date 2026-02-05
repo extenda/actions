@@ -1,7 +1,8 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import * as core from '@actions/core';
 import axios from 'axios';
-import fs from 'fs';
-import path from 'path';
 import readline from 'readline';
 
 import { sonarAuth } from './sonar-credentials.js';

@@ -67072,8 +67072,8 @@ __export(index_exports, {
   default: () => index_default
 });
 module.exports = __toCommonJS(index_exports);
+var import_promises = require("node:fs/promises");
 var import_core = __toESM(require_core(), 1);
-var import_promises = require("fs/promises");
 
 // component-tests/node_modules/js-yaml/dist/js-yaml.mjs
 function isNothing(subject) {

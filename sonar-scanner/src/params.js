@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 
 import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
 import { credentials } from './sonar-credentials.js';

@@ -35943,7 +35943,7 @@ var checkEnv = /* @__PURE__ */ __name((variables) => {
 var check_env_default = checkEnv;
 
 // utils/src/git-config.js
-var import_path = __toESM(require("path"), 1);
+var import_node_path2 = __toESM(require("node:path"), 1);
 
 // utils/node_modules/simple-git/dist/esm/index.js
 var import_node_buffer = require("node:buffer");
@@ -40801,7 +40801,7 @@ var basicAuth = /* @__PURE__ */ __name(() => {
   return `basic ${credentials}`;
 }, "basicAuth");
 var removeExistingGitCredentials = /* @__PURE__ */ __name(async (git) => {
-  let gitDir = import_path.default.join(process.cwd(), ".git");
+  let gitDir = import_node_path2.default.join(process.cwd(), ".git");
   gitDir = gitDir.replace(/\\/g, "/");
   await git.raw(
     "config",
@@ -40848,6 +40848,8 @@ var getImageDigest = /* @__PURE__ */ __name(async (image) => {
 var image_digest_default = getImageDigest;
 
 // utils/src/load-binary.js
+var import_node_fs = __toESM(require("node:fs"), 1);
+var import_node_path3 = __toESM(require("node:path"), 1);
 var core = __toESM(require_core(), 1);
 var io = __toESM(require_io(), 1);
 var tc = __toESM(require_tool_cache(), 1);
@@ -44585,9 +44587,7 @@ var {
 } = axios_default;
 
 // utils/src/load-binary.js
-var import_fs = __toESM(require("fs"), 1);
 var import_os = __toESM(require("os"), 1);
-var import_path2 = __toESM(require("path"), 1);
 
 // utils/node_modules/uuid/dist/esm/stringify.js
 var byteToHex = [];
@@ -44652,12 +44652,12 @@ var find2 = /* @__PURE__ */ __name(async ({ tool, binary, version }) => Promise.
   tc.find(tool, version)
   /* process.arch), */
 ).then(
-  (dir) => dir ? import_path2.default.join(dir, binary) : ""
+  (dir) => dir ? import_node_path3.default.join(dir, binary) : ""
 ), "find");
 var downloadToolWithAuth = /* @__PURE__ */ __name(async (url2, auth) => {
-  const targetFile = import_path2.default.join(import_os.default.tmpdir(), v4_default(), v4_default());
-  import_fs.default.mkdirSync(import_path2.default.dirname(targetFile));
-  const stream4 = import_fs.default.createWriteStream(targetFile);
+  const targetFile = import_node_path3.default.join(import_os.default.tmpdir(), v4_default(), v4_default());
+  import_node_fs.default.mkdirSync(import_node_path3.default.dirname(targetFile));
+  const stream4 = import_node_fs.default.createWriteStream(targetFile);
   await axios_default({
     url: url2,
     method: "get",
@@ -44672,7 +44672,7 @@ var downloadToolWithAuth = /* @__PURE__ */ __name(async (url2, auth) => {
     });
   }).then(() => {
     core.info(`Binary saved to ${targetFile}`);
-    import_fs.default.chmodSync(targetFile, "0777");
+    import_node_fs.default.chmodSync(targetFile, "0777");
   });
   return targetFile;
 }, "downloadToolWithAuth");
@@ -44683,7 +44683,7 @@ var downloadIfMissing = /* @__PURE__ */ __name(async (options, cachedTool) => {
     const { tool, binary, version, downloadUrl, auth } = options;
     core.info(`Downloading ${tool} from ${downloadUrl}`);
     const downloadUuid = await internalDownload(downloadUrl, auth);
-    const tmpDir = import_path2.default.dirname(downloadUuid);
+    const tmpDir = import_node_path3.default.dirname(downloadUuid);
     if (downloadUrl.endsWith(".tar.gz")) {
       await tc.extractTar(downloadUuid, tmpDir);
     } else if (downloadUrl.endsWith(".zip")) {
@@ -44691,9 +44691,9 @@ var downloadIfMissing = /* @__PURE__ */ __name(async (options, cachedTool) => {
     } else if (downloadUrl.endsWith(".7z")) {
       await tc.extract7z(downloadUuid, tmpDir);
     } else {
-      const tmpFile = import_path2.default.join(tmpDir, binary);
+      const tmpFile = import_node_path3.default.join(tmpDir, binary);
       await io.cp(downloadUuid, tmpFile);
-      import_fs.default.chmodSync(tmpFile, "0777");
+      import_node_fs.default.chmodSync(tmpFile, "0777");
     }
     await tc.cacheDir(tmpDir, tool, version);
     return find2(options);

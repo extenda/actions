@@ -3,9 +3,10 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 
 vi.mock('@actions/core');
 vi.mock('@actions/exec');
-import * as exec from '@actions/exec';
 // Make sure we get a mocked FS.
-import fs from 'fs';
+import fs from 'node:fs';
+
+import * as exec from '@actions/exec';
 
 import deployDocumentation from '../src/redoc.js';
 

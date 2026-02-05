@@ -1,7 +1,8 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import chalk from 'chalk';
 import { spawn } from 'child_process';
-import fs from 'fs';
-import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);

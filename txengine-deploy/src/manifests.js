@@ -1,7 +1,8 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import * as github from '@actions/github';
 import axios from 'axios';
-import fs from 'fs';
-import path from 'path';
 import yaml from 'yaml';
 
 import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';

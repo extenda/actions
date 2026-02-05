@@ -1,9 +1,10 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as io from '@actions/io';
-import fs from 'fs';
 import os from 'os';
-import path from 'path';
 
 const mavenHome = path.join(os.homedir(), '.m2');
 const mavenSettings = path.join(mavenHome, 'settings.xml');

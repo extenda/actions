@@ -48463,7 +48463,7 @@ var checkEnv = /* @__PURE__ */ __name((variables) => {
 var check_env_default = checkEnv;
 
 // utils/src/git-config.js
-var import_path = __toESM(require("path"), 1);
+var import_node_path2 = __toESM(require("node:path"), 1);
 
 // utils/node_modules/simple-git/dist/esm/index.js
 var import_node_buffer = require("node:buffer");
@@ -53321,7 +53321,7 @@ var basicAuth = /* @__PURE__ */ __name(() => {
   return `basic ${credentials}`;
 }, "basicAuth");
 var removeExistingGitCredentials = /* @__PURE__ */ __name(async (git) => {
-  let gitDir = import_path.default.join(process.cwd(), ".git");
+  let gitDir = import_node_path2.default.join(process.cwd(), ".git");
   gitDir = gitDir.replace(/\\/g, "/");
   await git.raw(
     "config",

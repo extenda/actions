@@ -1,8 +1,9 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import fs from 'fs';
 import os from 'os';
-import path from 'path';
 
 import { getBuildVersion } from '../../utils/src/versions.js';
 import { createParams } from './params.js';

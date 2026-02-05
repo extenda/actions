@@ -1,5 +1,6 @@
+import path from 'node:path';
+
 import axios from 'axios';
-import path from 'path';
 import { describe, expect, test, vi } from 'vitest';
 
 vi.mock('axios');

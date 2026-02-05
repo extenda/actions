@@ -1,7 +1,8 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import fs from 'fs';
-import path from 'path';
 
 import * as mvn from '../../maven/src/mvn.js';
 import { createParams } from './params.js';

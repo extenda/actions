@@ -1,5 +1,6 @@
+import path from 'node:path';
+
 import axios from 'axios';
-import path from 'path';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';

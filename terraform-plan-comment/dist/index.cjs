@@ -86644,24 +86644,24 @@ var getPullRequestInfo = /* @__PURE__ */ __name(async (githubToken) => {
 }, "getPullRequestInfo");
 
 // terraform-plan-comment/src/generate-outputs.js
+var import_node_fs = __toESM(require("node:fs"), 1);
+var import_node_path2 = __toESM(require("node:path"), 1);
 var core5 = __toESM(require_core(), 1);
 var exec3 = __toESM(require_exec(), 1);
 var import_fast_glob = __toESM(require_out4(), 1);
-var import_fs = __toESM(require("fs"), 1);
 var import_p_limit = __toESM(require_p_limit(), 1);
-var import_path = __toESM(require("path"), 1);
 var terraformShow = /* @__PURE__ */ __name(async (plan) => {
   let stdout = "";
   let stderr = "";
-  let cwd = import_path.default.dirname(plan);
+  let cwd = import_node_path2.default.dirname(plan);
   const terragruntCache = import_fast_glob.default.sync(
-    `${import_path.default.dirname(plan)}/**/.terragrunt-cache/*/*`,
+    `${import_node_path2.default.dirname(plan)}/**/.terragrunt-cache/*/*`,
     { dot: true, onlyDirectories: true }
   );
   if (terragruntCache.length > 0) {
     [cwd] = terragruntCache;
   }
-  const status = await exec3.exec("terraform", ["show", "-no-color", import_path.default.relative(cwd, plan)], {
+  const status = await exec3.exec("terraform", ["show", "-no-color", import_node_path2.default.relative(cwd, plan)], {
     cwd,
     silent: true,
     listeners: {
@@ -86710,34 +86710,34 @@ tModulePaths");
 var modulePath = /* @__PURE__ */ __name((plan) => {
   let planDir = plan;
   const terragruntCache = import_fast_glob.default.sync(
-    `${import_path.default.dirname(plan)}/**/.terragrunt-cache`,
+    `${import_node_path2.default.dirname(plan)}/**/.terragrunt-cache`,
     { dot: true, onlyDirectories: true }
   );
   if (terragruntCache.length > 0) {
     [planDir] = terragruntCache;
   }
-  const paths = planDir.split(import_path.default.sep);
+  const paths = planDir.split(import_node_path2.default.sep);
   const index = paths.findIndex((e) => e === ".terragrunt-cache");
   if (index > 0) {
-    return paths.slice(0, index).join(import_path.default.sep);
+    return paths.slice(0, index).join(import_node_path2.default.sep);
   }
-  return import_path.default.dirname(plan);
+  return import_node_path2.default.dirname(plan);
 }, "modulePath");
 var moduleName = /* @__PURE__ */ __name((plan, workingDirectory) => {
   let planDir = plan;
   const terragruntCache = import_fast_glob.default.sync(
-    `${import_path.default.dirname(plan)}/**/.terragrunt-cache`,
+    `${import_node_path2.default.dirname(plan)}/**/.terragrunt-cache`,
     { dot: true, onlyDirectories: true }
   );
   if (terragruntCache.length > 0) {
     [planDir] = terragruntCache;
   }
-  const paths = import_path.default.relative(workingDirectory, planDir).split(import_path.default.sep);
+  const paths = import_node_path2.default.relative(workingDirectory, planDir).split(import_node_path2.default.sep);
   const index = paths.findIndex((e) => e === ".terragrunt-cache");
   if (index > 0) {
-    return paths.slice(0, index).join(import_path.default.sep);
+    return paths.slice(0, index).join(import_node_path2.default.sep);
   }
-  return import_path.default.basename(import_path.default.dirname(plan));
+  return import_node_path2.default.basename(import_node_path2.default.dirname(plan));
 }, "moduleName");
 var generateOutputs = /* @__PURE__ */ __name(async (workingDirectory, planFile, maxThreads, ignoredResourcesRegexp) => {
   const source = `${workingDirectory}/**/${planFile}`;
@@ -86759,11 +86759,11 @@ var generateOutputs = /* @__PURE__ */ __name(async (workingDirectory, planFile, 
   return Promise.all(promises).then(filterUnchanged).then((output) => filterIgnored(output, ignoredResourcesRegexp)).then(
   sortModulePaths).then((changed) => {
     changed.forEach(({ plan }) => {
-      const planWithChanges = import_path.default.join(
+      const planWithChanges = import_node_path2.default.join(
         modulePath(plan),
         `${planFile}.changes`
       );
-      import_fs.default.copyFileSync(plan, planWithChanges);
+      import_node_fs.default.copyFileSync(plan, planWithChanges);
       core5.info(`Save plan with changes to ${planWithChanges}`);
     });
     core5.info(`Found ${changed.length} plan(s) with changes`);

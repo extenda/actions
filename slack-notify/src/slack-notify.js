@@ -1,6 +1,7 @@
+import fs from 'node:fs';
+
 import * as core from '@actions/core';
 import axios from 'axios';
-import fs from 'fs';
 
 import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
 import uploadToBucket from './upload-to-bucket.js';

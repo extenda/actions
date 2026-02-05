@@ -1,7 +1,8 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import * as core from '@actions/core';
-import fs from 'fs';
 import os from 'os';
-import path from 'path';
 import semver from 'semver';
 
 import { loadTool, run } from '../../utils/src/index.js';

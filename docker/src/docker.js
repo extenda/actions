@@ -1,6 +1,7 @@
+import fs from 'node:fs';
+
 import * as core from '@actions/core';
 import cp from 'child_process';
-import fs from 'fs';
 
 const createBuildCommand = (
   dockerfile,

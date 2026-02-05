@@ -1,9 +1,10 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import * as core from '@actions/core';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import glob from 'fast-glob';
-import fs from 'fs';
-import path from 'path';
 
 import getDasWorkerBaseUrl from '../../../iam/src/das-worker-base-url.js';
 import { execGcloud } from '../../../setup-gcloud/src/index.js';

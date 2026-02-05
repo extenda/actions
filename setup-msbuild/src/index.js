@@ -1,7 +1,8 @@
+import path from 'node:path';
+
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import os from 'os';
-import path from 'path';
 
 import { loadTool } from '../../utils/src/index.js';
 

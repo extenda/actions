@@ -1,6 +1,7 @@
-import fs from 'fs';
+import fs from 'node:fs';
+import path from 'node:path';
+
 import mockFs from 'mock-fs';
-import path from 'path';
 import stream from 'stream';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
