@@ -157,6 +157,12 @@ jobs:
           args: --version
           service-account-key: ${{ secrets.SECRET_AUTH }}
 
+      - name: Run Maven with POM
+        uses: ./maven
+        with:
+          args: dependency:get -Dartifact=se.extenda.maven:commonpom:2.5.1:pom
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+
       - name: Run Maven CLI
         run: mvn dependency:get -Dartifact=se.extenda.maven:commonpom:2.5.1:pom
 
