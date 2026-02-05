@@ -1,9 +1,9 @@
 import * as core from '@actions/core';
 
-import { checkEnv, run } from '../../utils/src/index.js';
+import { checkEnv } from '../../utils/src/index.js';
 import { createReleaseNotes } from './jira-releasenotes.js';
 
-run(async () => {
+const action = async () => {
   checkEnv(['JIRA_USERNAME', 'JIRA_PASSWORD']);
 
   const protocol = core.getInput('jira-protocol', { required: true });
@@ -21,4 +21,6 @@ run(async () => {
   }).catch((err) =>
     core.error(`Failed to create release notes. Reason: ${err.message}`),
   );
-});
+};
+
+export default action;

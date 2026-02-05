@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 
 import { loadSecret } from '../../gcp-secret-manager/src/secrets.js';
-import { loadGitHubToken, run } from '../../utils/src/index.js';
+import { loadGitHubToken } from '../../utils/src/index.js';
 
 const validateState = (state) => {
   switch (state) {
@@ -59,7 +59,5 @@ const action = async () => {
 
   return checkRun(repository, sha, context, state, description, targetUrl);
 };
-
-run(action);
 
 export default action;

@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 
-import { checkEnv, run } from '../../utils/src/index.js';
+import { checkEnv } from '../../utils/src/index.js';
 import * as versions from '../../utils/src/versions.js';
 
 const createGitHubRelease = async (release, name) => {
@@ -44,7 +44,5 @@ const action = async () => {
     core.setFailed(err.message);
   }
 };
-
-run(action);
 
 export default action;

@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 
-import docker from './docker.js';
-import urlhelper from './url-helper.js';
+import * as docker from './docker.js';
+import * as urlhelper from './url-helper.js';
 
 const processBuildArgsInput = (buildArgsInput) => {
   let buildArgs = null;
@@ -21,7 +21,7 @@ const processTags = (tagsInput) => {
   return tags;
 };
 
-const run = () => {
+const action = () => {
   try {
     const image = core.getInput('image', { required: true });
     const registryInput = core.getInput('registry', { required: false });
@@ -46,4 +46,4 @@ const run = () => {
   }
 };
 
-export default run;
+export default action;

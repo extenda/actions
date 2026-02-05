@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 
 import loadServiceDefinition from '../../cloud-run/src/service-definition.js';
-import { failIfNotTrunkBased, run } from '../../utils/src/index.js';
+import { failIfNotTrunkBased } from '../../utils/src/index.js';
 import kubernetesSchema from './kubernetes-schema.js';
 import runDeploy from './run-deploy.js';
 
@@ -22,7 +22,5 @@ const action = async () => {
   // Execute functions needed to deploy the application
   await runDeploy(serviceAccountKey, service, image, dryRun);
 };
-
-run(action);
 
 export default action;

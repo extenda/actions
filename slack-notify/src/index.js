@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
 
-import { run } from '../../utils/src/index.js';
 import notifySlack from './slack-notify.js';
 
 const action = async () => {
@@ -12,7 +11,5 @@ const action = async () => {
   const file = core.getInput('file') || '';
   await notifySlack(serviceAccount, text, channel, file);
 };
-
-run(action);
 
 export default action;

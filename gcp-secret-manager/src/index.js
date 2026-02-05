@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
 
-import { run } from '../../utils/src/index.js';
 import { loadSecrets, parseInputYaml } from './secrets.js';
 
 const action = async () => {
@@ -12,7 +11,5 @@ const action = async () => {
 
   await loadSecrets(serviceAccountKey, secrets);
 };
-
-run(action);
 
 export default action;

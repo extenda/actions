@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 
-import { checkEnv, run } from '../../utils/src/index.js';
+import { checkEnv } from '../../utils/src/index.js';
 import { createJiraRelease } from './jira-release.js';
 
 const action = async () => {
@@ -22,7 +22,5 @@ const action = async () => {
     core.error(`Failed to create release in Jira. Reason: ${err.message}`),
   );
 };
-
-run(action);
 
 export default action;

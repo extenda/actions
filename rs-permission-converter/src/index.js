@@ -3,7 +3,7 @@ import * as core from '@actions/core';
 import { checkEnv } from '../../utils/src/index.js';
 import { convertPermissions } from './permconv.js';
 
-const run = async () => {
+const action = async () => {
   try {
     checkEnv(['NEXUS_USERNAME', 'NEXUS_PASSWORD']);
 
@@ -28,4 +28,4 @@ const run = async () => {
   }
 };
 
-run();
+export default action;
