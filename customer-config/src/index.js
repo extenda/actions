@@ -3,6 +3,7 @@ import camelcaseKeys from 'camelcase-keys';
 
 import { createApi } from '../../external-events/src/utils/create-api.js';
 import { loadDefinitions } from '../../external-events/src/utils/load-sync-definitions.js';
+import { run } from '../../utils/src/index.js';
 import { loadSecrets } from './secrets-manager/load-secrets.js';
 import { validateCccConfig } from './validate/validate-ccc-config.js';
 
@@ -56,6 +57,9 @@ async function action() {
   }
 }
 
-// Entry point check removed for ESM compatibility
+// Run the action if we are not running in a test environment
+if (!process.env.VITEST && !process.env.JEST_WORKER_ID) {
+  run(action);
+}
 
 export default action;

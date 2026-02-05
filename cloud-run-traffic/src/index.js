@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { run } from '../../utils/src/index.js';
 
 async function action() {
   const serviceAccountKey = core.getInput('service-account-key', {
@@ -18,6 +19,9 @@ async function action() {
   throw new Error(deprecationMsg);
 }
 
-// Entry point check removed for ESM compatibility
+// Run the action if we are not running in a test environment
+if (!process.env.VITEST && !process.env.JEST_WORKER_ID) {
+  run(action);
+}
 
 export default action;

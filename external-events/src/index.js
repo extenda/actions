@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import camelcaseKeys from 'camelcase-keys';
 
+import { run } from '../../utils/src/index.js';
 import { loadSecrets } from './secrets-manager/load-secrets.js';
 import { createApi } from './utils/create-api.js';
 import { loadDefinitions } from './utils/load-sync-definitions.js';
@@ -58,6 +59,9 @@ async function action() {
   }
 }
 
-// Entry point check removed for ESM compatibility
+// Run the action if we are not running in a test environment
+if (!process.env.VITEST && !process.env.JEST_WORKER_ID) {
+  run(action);
+}
 
 export default action;
