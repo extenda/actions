@@ -24,6 +24,7 @@ vi.mock('../src/autoscale.js');
 vi.mock('../../utils/src/index.js', () => ({
   loadTool: vi.fn(),
   getImageDigest: vi.fn(),
+  run: vi.fn(),
 }));
 
 import * as exec from '@actions/exec';
