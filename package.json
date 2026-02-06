@@ -28,7 +28,7 @@
   "homepage": "https://github.com/extenda/actions#readme",
   "devDependencies": {
     "@eslint/js": "^9.39.2",
-    "@types/node": "^25.2.0",
+    "@types/node": "^25.2.1",
     "@vitest/coverage-v8": "^4.0.18",
     "chalk": "^4.1.2",
     "esbuild": "^0.27.2",
@@ -40,7 +40,7 @@
     "fast-glob": "^3.3.3",
     "fs-extra": "^11.3.3",
     "glob": "^13.0.1",
-    "globals": "^17.2.0",
+    "globals": "^17.3.0",
     "memfs": "^4.56.10",
     "micromatch": "^4.0.8",
     "mock-fs": "^5.5.0",
@@ -50,8 +50,8 @@
     "vitest-sonar-reporter": "^3.0.0"
   },
   "dependencies": {
-    "@actions/core": "^2.0.3",
-    "@actions/exec": "^2.0.0",
+    "@actions/core": "^3.0.0",
+    "@actions/exec": "^3.0.0",
     "axios-retry": "^4.5.0",
     "js-yaml": "^4.1.1"
   }

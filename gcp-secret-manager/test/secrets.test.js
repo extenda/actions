@@ -12,6 +12,7 @@ import {
 
 vi.mock('../../setup-gcloud/src/exec-gcloud.js');
 vi.mock('../../setup-gcloud/src/setup-gcloud.js');
+vi.mock('@actions/core');
 
 const SECRET_JSON = JSON.stringify(
   {
@@ -55,7 +56,10 @@ EXPORT_AS: my-secret
       .mockResolvedValueOnce(SECRET_JSON)
       .mockResolvedValueOnce('"test@test"');
     await loadSecrets('test', { TEST_TOKEN: 'test-token' });
-    expect(process.env.TEST_TOKEN).toEqual('test-value');
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'TEST_TOKEN',
+      'test-value',
+    );
     expect(mockExecGcloud).not.toHaveBeenCalledWith(
       expect.arrayContaining(['config', 'set', 'account']),
       'gcloud',
@@ -161,7 +165,6 @@ EXPORT_AS: my-secret
           ),
         );
 
-      const exportVariable = vi.spyOn(core, 'exportVariable');
       const secret = await loadSecretIntoEnv(
         'service-account-key',
         'my-secret',
@@ -169,8 +172,7 @@ EXPORT_AS: my-secret
         true,
       );
       expect(secret).toEqual('test-value');
-      expect(exportVariable).toHaveBeenCalledWith('MY_SECRET', secret);
-      exportVariable.mockReset();
+      expect(core.exportVariable).toHaveBeenCalledWith('MY_SECRET', secret);
     });
 
     test('It preserves set env.vars', async () => {
