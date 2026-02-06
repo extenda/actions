@@ -1,7 +1,6 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 vi.mock('../src/get-revision.js');
 vi.mock('../src/gcloud-output.js');
-import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 
 import getLatestRevision from '../src/get-revision.js';
@@ -67,15 +66,8 @@ const canarySpec = {
   },
 };
 
-let debugSpy;
-
 describe('Wait for revision', () => {
-  beforeEach(() => {
-    // Reduce noise in the tests.
-    debugSpy = vi.spyOn(core, 'debug').mockImplementation(() => {});
-  });
   afterEach(() => {
-    debugSpy.mockRestore();
     vi.resetAllMocks();
   });
 

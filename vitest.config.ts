@@ -4,7 +4,7 @@ import {  resolve } from 'path';
 export default defineConfig({
   resolve: {
     alias: {
-      // 🚨 Force 'fast-glob' to point to our generic mock that supports mock-fs
+      // Force 'fast-glob' to point to our generic mock that supports mock-fs
       'fast-glob': resolve(__dirname, '.test/mocks/fast-glob.js'),
     },
   },
@@ -12,18 +12,18 @@ export default defineConfig({
     // --- Architecture & Setup ---
     include: ['**/test/**/*.test.js'],
     setupFiles: ['./vitest.setup.js'],
-    pool: 'threads', // or 'forks' if mock-fs acts up, but we solved that!
+    pool: 'threads',
 
-    // --- Coverage (Matches Jest) ---
+    // --- Coverage  ---
     coverage: {
-      provider: 'v8', // Recommended over istanbul
+      provider: 'v8',
       enabled: true,
-      reporter: ['lcov', 'text'], // Matches your coverageReporters
+      reporter: ['lcov', 'text'],
       reportsDirectory: 'coverage',
       exclude: ['**/node_modules/**', '**/*.json'],
     },
 
-    // --- Reporters (Matches Jest + Sonar) ---
+    // --- Reporters ---
     reporters: [
       'default', // Console output
       [
@@ -31,9 +31,5 @@ export default defineConfig({
         { outputFile: 'test-results/sonar-report.xml' },
       ],
     ],
-
-    // --- Performance ---
-    // Jest's 'maxWorkers: 50%' is roughly handled by poolOptions in Vitest,
-    // but usually, Vitest defaults are smarter. Start with defaults.
   },
 });

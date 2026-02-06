@@ -10,8 +10,9 @@ vi.mock('../src/sonar-credentials.js', () => ({
   }),
 }));
 vi.mock('../../utils/src/pull-request-info.js');
+vi.mock('@actions/core');
 
-import * as core from '@actions/core';
+import { getInput, group } from '@actions/core';
 
 import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
 import { checkQualityGate } from '../src/check-quality-gate.js';
@@ -21,7 +22,6 @@ import { scan } from '../src/scan.js';
 import { scanMsBuild } from '../src/scan-msbuild.js';
 
 const orgEnv = process.env;
-const getInput = vi.spyOn(core, 'getInput');
 
 const mockInputs = (
   hostUrl,
@@ -70,6 +70,8 @@ describe('Sonar-Scanner Action', () => {
       ...orgEnv,
       GITHUB_REF: 'refs/heads/master',
     };
+    // Ensure group executes callback.
+    group.mockImplementation((name, fn) => fn());
   });
 
   afterEach(() => {
