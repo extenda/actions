@@ -54,6 +54,10 @@ inputs:
   working-directory:
     description: The working directory. Defaults to the current working directory.
     required: false
+  create-sonar-project:
+    description: Whether to create the Sonar project if it does not exist. Defaults to true.
+    required: false
+    default: 'true'
 runs:
   using: node20
   main: dist/index.cjs

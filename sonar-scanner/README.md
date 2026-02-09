@@ -17,7 +17,18 @@ This actions supports the following features:
 
 ## Usage
 
-See [action.yml](action.yml).
+See [action.yml](action.yml) for the complete list of inputs and outputs.
+
+### Inputs
+
+Key inputs include:
+
+* `sonar-host` (required): The Sonar server URL (e.g., `https://sonarcloud.io` or `https://sonar.example.com`)
+* `sonar-scanner`: The scanner to use (`auto`, `maven`, `gradle`, `node`, or `dotnet`). Defaults to `auto`
+* `create-sonar-project`: Whether to create the Sonar project if it does not exist. Defaults to `true`
+  - Set to `false` if the project already exists in SonarQube and you want to avoid creating a duplicate
+* `main-branch`: The main branch name. Defaults to `master`
+* `service-account-key`: Base64-encoded GCP service account key for Secret Manager access (optional)
 
 ### Secrets
 
@@ -45,14 +56,14 @@ It will load a `github-token` and `sonarcloud-token` named secret from the GCP S
 using the provided `service-account-key`. The default secret names can be modified with the
 `github-token-secret-name` and `sonar-token-secret-name` input variables.
 
-```
+```yaml
 on: push
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v4
 
       - name: Unit tests
         run: |
@@ -66,18 +77,18 @@ jobs:
           service-account-key: ${{ secrets.SECRET_AUTH }}
 ```
 
-### Usage with GitHub Secrets
+#### Usage with GitHub Secrets
 
 This example runs tests on a Node project and then performs an analysis on [SonarCloud](https://sonarcloud.io).
 
-```
+```yaml
 on: push
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v4
 
       - name: Unit tests
         run: |
@@ -93,20 +104,49 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 ```
 
-### Usage with MSBuild
+#### Usage with Existing SonarQube Project
 
-This example first enables the MSBuild scanner, then runs the tests and finalizes the analysis afterwards.
-The MSBuild Sonar Scanner behaves differently compared to other build systems as it must be initialized prior to the
-regular build cycle.
+If your SonarQube project already exists, or if your token does not have permissions to create projects, you can disable
+automatic project creation by setting `create-sonar-project` to `false`.
 
-```
+```yaml
 on: push
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v4
+
+      - name: Unit tests
+        run: |
+          npm ci
+          npm test -- --ci --coverage
+
+      - name: Scan with SonarQube (existing project)
+        uses: extenda/actions/sonar-scanner@v0
+        with:
+          sonar-host: https://sonar.example.com
+          create-sonar-project: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+```
+
+#### Usage with MSBuild
+
+This example first enables the MSBuild scanner, then runs the tests and finalizes the analysis afterwards.
+The MSBuild Sonar Scanner behaves differently compared to other build systems as it must be initialized prior to the
+regular build cycle.
+
+```yaml
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Begin Sonar Scanner
         uses: extenda/actions/sonar-scanner@v0
