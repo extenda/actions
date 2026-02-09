@@ -18,13 +18,13 @@ const scanner = path.join(
   'dotnet-sonarscanner',
 );
 
-// JDK 11 will soon be deprecated. Need atleast JDK 17.
-const findJava17 = async () => {
+// JDK 11 will soon be deprecated. Need at least JDK 21.
+const findJava21OrGreater = async () => {
   try {
     const basedir = process.env.JDK_BASEDIR || '/usr/lib/jvm';
     const jdks = fs.readdirSync(basedir);
     core.info(`Available JDKs: ${jdks.join(', ')}`);
-    const jdk = jdks.find((f) => f.startsWith('temurin-17'));
+    const jdk = jdks.find((f) => f.startsWith('temurin-2'));
     return jdk ? path.join(basedir, jdk) : null;
   } catch {
     core.error('/usr/lib/jvm not found');
@@ -35,7 +35,7 @@ const findJava17 = async () => {
 const scanWithJavaHome = async (args, workingDir = '.') => {
   const env = { ...process.env };
   if (os.platform() !== 'win32') {
-    const javaHome = await findJava17();
+    const javaHome = await findJava21OrGreater();
     if (javaHome) {
       core.info(`Set JAVA_HOME=${javaHome}`);
       env.JAVA_HOME = javaHome;
