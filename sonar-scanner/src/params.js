@@ -26,6 +26,8 @@ export const createParams = async (
   const pullRequest = await getPullRequestInfo(githubToken);
   let projectKey = repo;
   let projectName = `${repo}`;
+  // SonarCloud organizations are lowercase only
+  const sonarOrg = owner.toLowerCase();
 
   const suffix = path.basename(workingDir).replace(/^\.\/?/g, '') || '';
   if (suffix) {
@@ -53,9 +55,9 @@ export const createParams = async (
   if (sonarCloud) {
     if (msParams) {
       // MSBuild uses other prefixes for these variables.
-      props['/o:'] = owner;
+      props['/o:'] = sonarOrg;
     } else {
-      props['sonar.organization'] = owner;
+      props['sonar.organization'] = sonarOrg;
       props['sonar.projectKey'] = `${owner}_${projectKey}`;
     }
   }

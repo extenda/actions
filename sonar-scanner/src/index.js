@@ -29,6 +29,7 @@ const action = async () => {
   const verbose = core.getInput('verbose') === 'true';
   const reportPath = core.getInput('report-path');
   const workingDir = core.getInput('working-directory') || '.';
+  const shouldCreateProject = core.getBooleanInput('create-sonar-project');
 
   if (verbose) {
     process.env.SONAR_VERBOSE = 'true';
@@ -52,7 +53,9 @@ const action = async () => {
   }
 
   // Auto-create SonarCloud projects
-  await createProject(hostUrl, workingDir);
+  if (shouldCreateProject) {
+    await createProject(hostUrl, workingDir);
+  }
 
   let waitForQualityGate;
 

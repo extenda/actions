@@ -41,7 +41,8 @@ const createSonarCloudProject = async (hostUrl, workingDir) => {
       `${hostUrl}/api/projects/create`,
       qs.stringify({
         name,
-        organization: repo[0],
+        // SonarCloud organizations are lowercase only
+        organization: repo[0].toLowerCase(),
         project,
       }),
       {
