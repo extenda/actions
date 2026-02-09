@@ -5,9 +5,9 @@
   "description": "Setup GCloud CLI",
   "main": "src/index.js",
   "dependencies": {
-    "@actions/cache": "^5.0.2",
-    "@actions/io": "^2.0.0",
-    "axios": "^1.13.2",
+    "@actions/cache": "^6.0.0",
+    "@actions/io": "^3.0.2",
+    "axios": "^1.13.4",
     "fast-glob": "^3.3.3",
     "uuid": "^11.1.0"
   },
