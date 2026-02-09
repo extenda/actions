@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import replace from 'replace-in-file';
+import * as replace from 'replace-in-file';
 
 const setNuGetSource = async (
   configFile,
