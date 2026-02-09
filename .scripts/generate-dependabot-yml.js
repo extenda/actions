@@ -61,40 +61,6 @@ const generateDependabot = () => {
           { 'dependency-name': 'conventional-commits-parser' },
           { 'dependency-name': 'conventional-recommended-bump' },
           { 'dependency-name': 'git-raw-commits' },
-
-          // camelcase-keys is an ESM from v7
-          {
-            'dependency-name': 'camelcase-keys',
-            versions: ['>= 8'],
-          },
-
-          // replace-in-file is an ESM from v6
-          {
-            'dependency-name': 'replace-in-file',
-            versions: ['>= 6'],
-          },
-
-          // node-fetch is an ESM from v3
-          {
-            'dependency-name': 'node-fetch',
-            versions: ['>= 3'],
-          },
-
-          // chalk is an ESM from v5
-          {
-            'dependency-name': 'chalk',
-            versions: ['>= 5'],
-          },
-          // p-limit is an ESM from v4
-          {
-            'dependency-name': 'p-limit',
-            versions: ['>= 4'],
-          },
-          // uuid is an ESM from v12
-          {
-            'dependency-name': 'uuid',
-            versions: ['>= 12'],
-          },
         ],
       },
       {

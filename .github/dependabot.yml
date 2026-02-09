@@ -59,24 +59,6 @@ updates:
       - dependency-name: conventional-commits-parser
       - dependency-name: conventional-recommended-bump
       - dependency-name: git-raw-commits
-      - dependency-name: camelcase-keys
-        versions:
-          - '>= 8'
-      - dependency-name: replace-in-file
-        versions:
-          - '>= 6'
-      - dependency-name: node-fetch
-        versions:
-          - '>= 3'
-      - dependency-name: chalk
-        versions:
-          - '>= 5'
-      - dependency-name: p-limit
-        versions:
-          - '>= 4'
-      - dependency-name: uuid
-        versions:
-          - '>= 12'
   - package-ecosystem: github-actions
     directory: /
     schedule:
