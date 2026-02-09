@@ -21,7 +21,7 @@ const setRetryDelay = (delayMillis, timeoutMillis) => {
  */
 const retryUntil = async (queryFn, checkFn, timeoutMillis = -1) => {
   const t0 = Date.now();
-  let output = '';
+  let output;
 
   const timeout = timeoutMillis > 0 ? timeoutMillis : defaultTimeoutMillis;
   do {
