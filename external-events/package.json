@@ -6,8 +6,8 @@
   "main": "dist/index.cjs",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.13.2",
-    "camelcase-keys": "^7.0.1",
+    "axios": "^1.13.5",
+    "camelcase-keys": "^10.0.2",
     "fast-glob": "^3.3.3",
     "joi": "^18.0.2",
     "js-yaml": "^4.1.1"

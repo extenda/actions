@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import replace from 'replace-in-file';
+import { replaceInFile } from 'replace-in-file';
 
 const setNuGetSource = async (
   configFile,
@@ -36,8 +36,7 @@ const setNuGetApiKey = async (configFile, { apikey, source }) => {
 };
 
 const parseNugetSourceJson = (sourcesJson) => {
-  const sources = JSON.parse(sourcesJson || '[]');
-  return sources;
+  return JSON.parse(sourcesJson || '[]');
 };
 
 const commentOutSourceUrl = async (nugetFileFullPath, regex) => {
@@ -49,7 +48,7 @@ const commentOutSourceUrl = async (nugetFileFullPath, regex) => {
     to: (match) => `<!--${match}-->`,
   };
 
-  return replace(options);
+  return replaceInFile(options);
 };
 
 const generateRegexPattern = (url) => {
