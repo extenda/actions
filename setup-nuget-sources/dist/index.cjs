@@ -57170,8 +57170,7 @@ var setNuGetApiKey = /* @__PURE__ */ __name(async (configFile, { apikey, source 
   return exec2("nuget", args);
 }, "setNuGetApiKey");
 var parseNugetSourceJson = /* @__PURE__ */ __name((sourcesJson) => {
-  const sources = JSON.parse(sourcesJson || "[]");
-  return sources;
+  return JSON.parse(sourcesJson || "[]");
 }, "parseNugetSourceJson");
 var commentOutSourceUrl = /* @__PURE__ */ __name(async (nugetFileFullPath, regex) => {
   debug3(`Trying to comment out existing urls with regex: ${regex}`);
