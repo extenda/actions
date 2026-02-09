@@ -12,7 +12,7 @@ vi.mock('../src/sonar-credentials.js', () => ({
 vi.mock('../../utils/src/pull-request-info.js');
 vi.mock('@actions/core');
 
-import { getInput, group } from '@actions/core';
+import { getBooleanInput, getInput, group } from '@actions/core';
 
 import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
 import { checkQualityGate } from '../src/check-quality-gate.js';
@@ -29,6 +29,7 @@ const mockInputs = (
   verbose = false,
   reportPath = '',
   cwd = '.',
+  createProjectFlag = true,
 ) => {
   getInput
     .mockReturnValueOnce(hostUrl)
@@ -42,6 +43,7 @@ const mockInputs = (
     .mockReturnValueOnce('') // maven-args
     .mockReturnValueOnce('') // npm-args
     .mockReturnValueOnce(''); // yarn-args
+  getBooleanInput.mockReturnValueOnce(createProjectFlag);
 };
 
 const mockPullRequest = (isPullRequest) => {
@@ -192,6 +194,32 @@ describe('Sonar-Scanner Action', () => {
       defaultCommands,
       './build/test',
     );
+    expect(createProject).toHaveBeenCalled();
+    expect(checkQualityGate).toHaveBeenCalled();
+  });
+
+  test('It will skip create-sonar-project if flag set to false', async () => {
+    mockInputs(
+      'https://sonarcloud.io',
+      'auto',
+      false,
+      '',
+      './build/test',
+      false,
+    );
+
+    checkQualityGate.mockResolvedValueOnce(0);
+    await action();
+
+    expect(scan).toHaveBeenCalledWith(
+      'https://sonarcloud.io',
+      'master',
+      'auto',
+      defaultCommands,
+      './build/test',
+    );
+
+    expect(createProject).not.toHaveBeenCalled();
     expect(checkQualityGate).toHaveBeenCalled();
   });
 });

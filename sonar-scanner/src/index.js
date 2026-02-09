@@ -29,8 +29,7 @@ const action = async () => {
   const verbose = core.getInput('verbose') === 'true';
   const reportPath = core.getInput('report-path');
   const workingDir = core.getInput('working-directory') || '.';
-  const shouldCreateProject =
-    core.getBooleanInput('create-sonar-project') || true;
+  const shouldCreateProject = core.getBooleanInput('create-sonar-project');
 
   if (verbose) {
     process.env.SONAR_VERBOSE = 'true';
