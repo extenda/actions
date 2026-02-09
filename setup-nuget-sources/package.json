@@ -5,7 +5,7 @@
   "description": "Setting nuget sources in NuGet.Config file",
   "main": "dist/index.cjs",
   "dependencies": {
-    "replace-in-file": "^5.0.2"
+    "replace-in-file": "^8.4.0"
   },
   "type": "module"
 }
