@@ -27,7 +27,7 @@ const setDefaultConcurrency = (cpu) => {
   const cloudDefaultCPU = 1000;
   const maxConcurrency = 100;
   const minConcurrency = 10;
-  let miliCPU = 0;
+  let miliCPU;
   if (isManagedCloudRun(cpu)) {
     miliCPU = cpu * 1000;
   } else {

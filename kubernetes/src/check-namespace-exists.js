@@ -20,6 +20,7 @@ const getNamespace = async (namespace) => {
     }
     throw new Error(
       `Could not get namespace information! reason: ${err.message || 'unknown'}`,
+      { cause: err },
     );
   }
   return true;

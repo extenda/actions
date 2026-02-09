@@ -28,7 +28,9 @@ async function fetchToken({ key, email, pass, gipTenantId }) {
     const err = e.response
       ? `code - ${e.response.status}, data - ${JSON.stringify(e.response.data)}`
       : e.message;
-    throw new Error(`Could not get auth token from GIP. ${err}`);
+    throw new Error(`Could not get auth token from GIP. ${err}`, {
+      cause: e,
+    });
   }
 }
 

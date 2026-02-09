@@ -98,6 +98,7 @@ const getRevisionStatus = async (revision, args) => {
   } catch (err) {
     throw new Error(
       `Invalid JSON: Failed to load status for revision "${revision}". Reason: ${err.message}`,
+      { cause: err },
     );
   }
 };
@@ -180,7 +181,7 @@ const waitForRevision = async (
       throw new Error('Wait is not supported for managed cloud run');
     }
 
-    let revision = '';
+    let revision;
     if (canary && canary.enabled) {
       revision = await getLatestRevision(namespace, cluster);
     } else {
@@ -192,7 +193,7 @@ const waitForRevision = async (
     });
 
     core.info(`Waiting for revision "${revision}" to become active...`);
-    let revisionStatus = {};
+    let revisionStatus;
 
     const t0 = Date.now();
     do {

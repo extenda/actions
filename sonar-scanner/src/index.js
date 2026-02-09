@@ -54,7 +54,7 @@ const action = async () => {
   // Auto-create SonarCloud projects
   await createProject(hostUrl, workingDir);
 
-  let waitForQualityGate = false;
+  let waitForQualityGate;
 
   if (sonarScanner === 'dotnet') {
     // MSBuild scanning

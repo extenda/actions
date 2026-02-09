@@ -104,7 +104,7 @@ describe('handle certificates', () => {
       maxDomainList.push(`testrunner-se${i}.txengine.retailsvc.dev`);
     }
     for (let i = 0; i < 13; i += 1) {
-      let certificateJson = {};
+      let certificateJson;
       if (i === 0) {
         certificateJson = {
           creationTimestamp: `2021-03-${i + 10}T06:32:08.781-08:00`,
@@ -152,7 +152,7 @@ describe('handle certificates', () => {
       maxDomainList.push(`testrunner-se${i}.txengine.retailsvc.dev`);
     }
     for (let i = 0; i < 13; i += 1) {
-      let certificateJson = {};
+      let certificateJson;
       if (i === 5) {
         certificateJson = {
           creationTimestamp: '2021-03-29T06:32:08.781-08:00',
@@ -214,7 +214,7 @@ describe('handle certificates', () => {
       maxDomainList.push(`testrunner-se${i}.txengine.retailsvc.dev`);
     }
     for (let i = 0; i < 13; i += 1) {
-      let certificateJson = {};
+      let certificateJson;
       if (i === 5) {
         certificateJson = {
           creationTimestamp: '2021-03-29T06:32:08.781-08:00',
