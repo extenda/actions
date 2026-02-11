@@ -248,6 +248,8 @@ spec:
               value: user-container
             - name: CONFIG_OTEL
               value: otel
+            - name: CONFIG_OTEL_PIPELINES
+              value: traces
           startupProbe:
             tcpSocket:
               port: 13133
@@ -403,6 +405,8 @@ spec:
               value: example-service
             - name: CONFIG_OTEL
               value: otel
+            - name: CONFIG_OTEL_PIPELINES
+              value: traces
           readinessProbe:
             httpGet:
               path: /health

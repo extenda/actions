@@ -57,6 +57,7 @@ const getConfig = (serviceName, monitoring, containers = 'user-container') => {
       collectorEnv: {
         SERVICE_NAME: serviceName,
         CONFIG_OTEL: 'otel',
+        CONFIG_OTEL_PIPELINES: collect.join(' '),
       },
     };
   }
