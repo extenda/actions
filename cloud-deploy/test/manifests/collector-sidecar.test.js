@@ -136,6 +136,7 @@ describe('collector-sidecar', () => {
       env: [
         { name: 'SERVICE_NAME', value: 'test' },
         { name: 'CONFIG_OTEL', value: 'otel' },
+        { name: 'CONFIG_OTEL_PIPELINES', value: 'traces' },
       ],
       readinessProbe: {
         httpGet: {
@@ -207,7 +208,7 @@ describe('collector-sidecar', () => {
       name: 'collector',
       resources: {
         limits: {
-          cpu: '0.08',
+          cpu: '0.1',
           memory: '128Mi',
         },
       },
