@@ -1,6 +1,6 @@
 import selectSemver from '../utils/select-semver.js';
 import getImageWithSha256 from './image-sha256.js';
-const STABLE_TAG = 'v2.2.3';
+const STABLE_TAG = 'v2.3.5';
 
 const getConfig = (serviceName, monitoring, containers = 'user-container') => {
   const config = {
