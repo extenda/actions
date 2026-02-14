@@ -80001,7 +80001,7 @@ var require_utils5 = __commonJS({
     var hexTable = (function() {
       var array = [];
       for (var i = 0; i < 256; ++i) {
-        array.push("%" + ((i < 16 ? "0" : "") + i.toString(16)).toUpperCase());
+        array[array.length] = "%" + ((i < 16 ? "0" : "") + i.toString(16)).toUpperCase();
       }
       return array;
     })();
@@ -80013,7 +80013,7 @@ var require_utils5 = __commonJS({
           var compacted = [];
           for (var j = 0; j < obj2.length; ++j) {
             if (typeof obj2[j] !== "undefined") {
-              compacted.push(obj2[j]);
+              compacted[compacted.length] = obj2[j];
             }
           }
           item.obj[item.prop] = compacted;
@@ -80035,7 +80035,11 @@ var require_utils5 = __commonJS({
       }
       if (typeof source !== "object" && typeof source !== "function") {
         if (isArray(target)) {
-          target.push(source);
+          var nextIndex = target.length;
+          if (options && typeof options.arrayLimit === "number" && nextIndex > options.arrayLimit) {
+            return markOverflow(arrayToObject(target.concat(source), options), nextIndex);
+          }
+          target[nextIndex] = source;
         } else if (target && typeof target === "object") {
           if (isOverflow(target)) {
             var newIndex = getMaxIndex(target) + 1;
@@ -80059,7 +80063,11 @@ var require_utils5 = __commonJS({
           }
           return markOverflow(result, getMaxIndex(source) + 1);
         }
-        return [target].concat(source);
+        var combined = [target].concat(source);
+        if (options && typeof options.arrayLimit === "number" && combined.length > options.arrayLimit) {
+          return markOverflow(arrayToObject(combined, options), combined.length - 1);
+        }
+        return combined;
       }
       var mergeTarget = target;
       if (isArray(target) && !isArray(source)) {
@@ -80072,7 +80080,7 @@ var require_utils5 = __commonJS({
             if (targetItem && typeof targetItem === "object" && item && typeof item === "object") {
               target[i] = merge2(targetItem, item, options);
             } else {
-              target.push(item);
+              target[target.length] = item;
             }
           } else {
             target[i] = item;
@@ -80086,6 +80094,15 @@ var require_utils5 = __commonJS({
           acc[key] = merge2(acc[key], value, options);
         } else {
           acc[key] = value;
+        }
+        if (isOverflow(source) && !isOverflow(acc)) {
+          markOverflow(acc, getMaxIndex(source));
+        }
+        if (isOverflow(acc)) {
+          var keyNum = parseInt(key, 10);
+          if (String(keyNum) === key && keyNum >= 0 && keyNum > getMaxIndex(acc)) {
+            setMaxIndex(acc, keyNum);
+          }
         }
         return acc;
       }, mergeTarget);
@@ -80166,8 +80183,8 @@ var require_utils5 = __commonJS({
           var key = keys[j];
           var val = obj2[key];
           if (typeof val === "object" && val !== null && refs.indexOf(val) === -1) {
-            queue.push({ obj: obj2, prop: key });
-            refs.push(val);
+            queue[queue.length] = { obj: obj2, prop: key };
+            refs[refs.length] = val;
           }
         }
       }
@@ -80200,7 +80217,7 @@ var require_utils5 = __commonJS({
       if (isArray(val)) {
         var mapped = [];
         for (var i = 0; i < val.length; i += 1) {
-          mapped.push(fn(val[i]));
+          mapped[mapped.length] = fn(val[i]);
         }
         return mapped;
       }
@@ -80216,6 +80233,7 @@ var require_utils5 = __commonJS({
       isBuffer,
       isOverflow,
       isRegExp,
+      markOverflow,
       maybeMap,
       merge
     };
@@ -80617,6 +80635,13 @@ owed.");
         if (part.indexOf("[]=") > -1) {
           val = isArray(val) ? [val] : val;
         }
+        if (options.comma && isArray(val) && val.length > options.arrayLimit) {
+          if (options.throwOnLimitExceeded) {
+            throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit ===
+            1 ? "" : "s") + " allowed in an array.");
+          }
+          val = utils.combine([], val, options.arrayLimit, options.plainObjects);
+        }
         if (key !== null) {
           var existing = has.call(obj2, key);
           if (existing && options.duplicates === "combine") {
@@ -80660,12 +80685,19 @@ owed.");
           var cleanRoot = root.charAt(0) === "[" && root.charAt(root.length - 1) === "]" ? root.slice(1, -1) : root;
           var decodedRoot = options.decodeDotInKeys ? cleanRoot.replace(/%2E/g, ".") : cleanRoot;
           var index = parseInt(decodedRoot, 10);
+          var isValidArrayIndex = !isNaN(index) && root !== decodedRoot && String(index) === decodedRoot && index >= 0 &&
+          options.parseArrays;
           if (!options.parseArrays && decodedRoot === "") {
             obj2 = { 0: leaf };
-          } else if (!isNaN(index) && root !== decodedRoot && String(index) === decodedRoot && index >= 0 && (options.parseArrays &&
-          index <= options.arrayLimit)) {
+          } else if (isValidArrayIndex && index < options.arrayLimit) {
             obj2 = [];
             obj2[index] = leaf;
+          } else if (isValidArrayIndex && options.throwOnLimitExceeded) {
+            throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit ===
+            1 ? "" : "s") + " allowed in an array.");
+          } else if (isValidArrayIndex) {
+            obj2[index] = leaf;
+            utils.markOverflow(obj2, index);
           } else if (decodedRoot !== "__proto__") {
             obj2[decodedRoot] = leaf;
           }
@@ -80695,7 +80727,7 @@ owed.");
             return;
           }
         }
-        keys.push(parent);
+        keys[keys.length] = parent;
       }
       var i = 0;
       while ((segment = child2.exec(key)) !== null && i < options.depth) {
@@ -80706,13 +80738,13 @@ owed.");
             return;
           }
         }
-        keys.push(segment[1]);
+        keys[keys.length] = segment[1];
       }
       if (segment) {
         if (options.strictDepth === true) {
           throw new RangeError("Input depth exceeded depth option of " + options.depth + " and strictDepth is true");
         }
-        keys.push("[" + key.slice(segment.index) + "]");
+        keys[keys.length] = "[" + key.slice(segment.index) + "]";
       }
       return keys;
     }, "splitKeyIntoSegments");
@@ -94122,16 +94154,16 @@ function parser3(indexX, indexY, handler) {
 }
 __name(parser3, "parser3");
 function conflicts(indexX, ...indexY) {
-  return indexY.map((y) => parser3(indexX, y, (result, file) => append(result.conflicted, file)));
+  return indexY.map((y) => parser3(indexX, y, (result, file) => result.conflicted.push(file)));
 }
 __name(conflicts, "conflicts");
 function splitLine(result, lineStr) {
   const trimmed2 = lineStr.trim();
   switch (" ") {
     case trimmed2.charAt(2):
-      return data(trimmed2.charAt(0), trimmed2.charAt(1), trimmed2.substr(3));
+      return data(trimmed2.charAt(0), trimmed2.charAt(1), trimmed2.slice(3));
     case trimmed2.charAt(1):
-      return data(" ", trimmed2.charAt(0), trimmed2.substr(2));
+      return data(" ", trimmed2.charAt(0), trimmed2.slice(2));
     default:
       return;
   }
@@ -94184,58 +94216,54 @@ var init_StatusSummary = __esm2({
       parser3(
         " ",
         "A",
-        (result, file) => append(result.created, file)
+        (result, file) => result.created.push(file)
       ),
       parser3(
         " ",
         "D",
-        (result, file) => append(result.deleted, file)
+        (result, file) => result.deleted.push(file)
       ),
       parser3(
         " ",
         "M",
-        (result, file) => append(result.modified, file)
+        (result, file) => result.modified.push(file)
       ),
-      parser3(
-        "A",
-        " ",
-        (result, file) => append(result.created, file) && append(result.staged, file)
-      ),
-      parser3(
-        "A",
-        "M",
-        (result, file) => append(result.created, file) && append(result.staged, file) && append(result.modified, file)
-      ),
-      parser3(
-        "D",
-        " ",
-        (result, file) => append(result.deleted, file) && append(result.staged, file)
-      ),
-      parser3(
-        "M",
-        " ",
-        (result, file) => append(result.modified, file) && append(result.staged, file)
-      ),
-      parser3(
-        "M",
-        "M",
-        (result, file) => append(result.modified, file) && append(result.staged, file)
-      ),
+      parser3("A", " ", (result, file) => {
+        result.created.push(file);
+        result.staged.push(file);
+      }),
+      parser3("A", "M", (result, file) => {
+        result.created.push(file);
+        result.staged.push(file);
+        result.modified.push(file);
+      }),
+      parser3("D", " ", (result, file) => {
+        result.deleted.push(file);
+        result.staged.push(file);
+      }),
+      parser3("M", " ", (result, file) => {
+        result.modified.push(file);
+        result.staged.push(file);
+      }),
+      parser3("M", "M", (result, file) => {
+        result.modified.push(file);
+        result.staged.push(file);
+      }),
       parser3("R", " ", (result, file) => {
-        append(result.renamed, renamedFile(file));
+        result.renamed.push(renamedFile(file));
       }),
       parser3("R", "M", (result, file) => {
         const renamed = renamedFile(file);
-        append(result.renamed, renamed);
-        append(result.modified, renamed.to);
+        result.renamed.push(renamed);
+        result.modified.push(renamed.to);
       }),
       parser3("!", "!", (_result, _file) => {
-        append(_result.ignored = _result.ignored || [], _file);
+        (_result.ignored = _result.ignored || []).push(_file);
       }),
       parser3(
         "?",
         "?",
-        (result, file) => append(result.not_added, file)
+        (result, file) => result.not_added.push(file)
       ),
       ...conflicts(
         "A",

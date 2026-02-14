@@ -57175,16 +57175,16 @@ function parser3(indexX, indexY, handler) {
 }
 __name(parser3, "parser3");
 function conflicts(indexX, ...indexY) {
-  return indexY.map((y) => parser3(indexX, y, (result, file) => append(result.conflicted, file)));
+  return indexY.map((y) => parser3(indexX, y, (result, file) => result.conflicted.push(file)));
 }
 __name(conflicts, "conflicts");
 function splitLine(result, lineStr) {
   const trimmed2 = lineStr.trim();
   switch (" ") {
     case trimmed2.charAt(2):
-      return data(trimmed2.charAt(0), trimmed2.charAt(1), trimmed2.substr(3));
+      return data(trimmed2.charAt(0), trimmed2.charAt(1), trimmed2.slice(3));
     case trimmed2.charAt(1):
-      return data(" ", trimmed2.charAt(0), trimmed2.substr(2));
+      return data(" ", trimmed2.charAt(0), trimmed2.slice(2));
     default:
       return;
   }
@@ -57237,58 +57237,54 @@ var init_StatusSummary = __esm({
       parser3(
         " ",
         "A",
-        (result, file) => append(result.created, file)
+        (result, file) => result.created.push(file)
       ),
       parser3(
         " ",
         "D",
-        (result, file) => append(result.deleted, file)
+        (result, file) => result.deleted.push(file)
       ),
       parser3(
         " ",
         "M",
-        (result, file) => append(result.modified, file)
+        (result, file) => result.modified.push(file)
       ),
-      parser3(
-        "A",
-        " ",
-        (result, file) => append(result.created, file) && append(result.staged, file)
-      ),
-      parser3(
-        "A",
-        "M",
-        (result, file) => append(result.created, file) && append(result.staged, file) && append(result.modified, file)
-      ),
-      parser3(
-        "D",
-        " ",
-        (result, file) => append(result.deleted, file) && append(result.staged, file)
-      ),
-      parser3(
-        "M",
-        " ",
-        (result, file) => append(result.modified, file) && append(result.staged, file)
-      ),
-      parser3(
-        "M",
-        "M",
-        (result, file) => append(result.modified, file) && append(result.staged, file)
-      ),
+      parser3("A", " ", (result, file) => {
+        result.created.push(file);
+        result.staged.push(file);
+      }),
+      parser3("A", "M", (result, file) => {
+        result.created.push(file);
+        result.staged.push(file);
+        result.modified.push(file);
+      }),
+      parser3("D", " ", (result, file) => {
+        result.deleted.push(file);
+        result.staged.push(file);
+      }),
+      parser3("M", " ", (result, file) => {
+        result.modified.push(file);
+        result.staged.push(file);
+      }),
+      parser3("M", "M", (result, file) => {
+        result.modified.push(file);
+        result.staged.push(file);
+      }),
       parser3("R", " ", (result, file) => {
-        append(result.renamed, renamedFile(file));
+        result.renamed.push(renamedFile(file));
       }),
       parser3("R", "M", (result, file) => {
         const renamed = renamedFile(file);
-        append(result.renamed, renamed);
-        append(result.modified, renamed.to);
+        result.renamed.push(renamed);
+        result.modified.push(renamed.to);
       }),
       parser3("!", "!", (_result, _file) => {
-        append(_result.ignored = _result.ignored || [], _file);
+        (_result.ignored = _result.ignored || []).push(_file);
       }),
       parser3(
         "?",
         "?",
-        (result, file) => append(result.not_added, file)
+        (result, file) => result.not_added.push(file)
       ),
       ...conflicts(
         "A",
