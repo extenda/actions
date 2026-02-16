@@ -47,10 +47,9 @@ describe('Create attestation', () => {
   });
 
   test('Get artifact URL with default tag', async () => {
-    getExecOutput.mockResolvedValueOnce(JSON.stringify({}));
     const imagePath = 'eu.gcr.io/my-image';
     const digest = 'djdq1787';
-    getExecOutput.mockResolvedValueOnce(JSON.stringify({}));
+    getExecOutput.mockResolvedValueOnce({ stdout: JSON.stringify({}) });
     execGcloud.mockResolvedValueOnce('').mockResolvedValueOnce(digest);
 
     expect(await getArtifactUrl('tag', imagePath)).toEqual(
@@ -67,7 +66,7 @@ describe('Create attestation', () => {
   test('Get artifact URL provided a tag in the imagePath', async () => {
     const imagePath = 'eu.gcr.io/my-image:tag1';
     const digest = 'dut6h1787';
-    getExecOutput.mockResolvedValueOnce(JSON.stringify({}));
+    getExecOutput.mockResolvedValueOnce({ stdout: JSON.stringify({}) });
     execGcloud.mockResolvedValueOnce('').mockResolvedValueOnce(digest);
 
     expect(await getArtifactUrl('tag1', imagePath)).toEqual(
@@ -79,8 +78,8 @@ describe('Create attestation', () => {
 
   test('Get artifact URL with provenance true', async () => {
     const imagePath = 'eu.gcr.io/my-image:tag1';
-    getExecOutput.mockResolvedValueOnce(
-      JSON.stringify({
+    getExecOutput.mockResolvedValueOnce({
+      stdout: JSON.stringify({
         manifests: [
           {
             platform: { architecture: 'amd64', os: 'linux' },
@@ -92,7 +91,7 @@ describe('Create attestation', () => {
           },
         ],
       }),
-    );
+    });
     execGcloud.mockResolvedValueOnce('');
 
     expect(await getArtifactUrl('tag1', imagePath)).toEqual(
@@ -104,15 +103,15 @@ describe('Create attestation', () => {
 
   test('Get artifact URL with no digest', async () => {
     const imagePath = 'eu.gcr.io/my-image:tag1';
-    getExecOutput.mockResolvedValueOnce(
-      JSON.stringify({
+    getExecOutput.mockResolvedValueOnce({
+      stdout: JSON.stringify({
         manifests: [
           {
             platform: { architecture: 'amd64', os: 'linux' },
           },
         ],
       }),
-    );
+    });
     execGcloud.mockResolvedValueOnce('').mockResolvedValueOnce('');
 
     await expect(getArtifactUrl('tag1', imagePath)).rejects.toThrow(

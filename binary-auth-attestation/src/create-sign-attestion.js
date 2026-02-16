@@ -39,11 +39,12 @@ const getArtifactUrl = async (tag, imagePath) => {
 
   await execGcloud(['auth', 'configure-docker', '--quiet']);
 
-  const output = await getExecOutput('docker', [
+  const { stdout: output } = await getExecOutput('docker', [
     'manifest',
     'inspect',
     container,
   ]);
+
   const data = JSON.parse(output);
 
   let digest;
