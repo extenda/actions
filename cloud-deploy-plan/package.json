@@ -9,7 +9,7 @@
     "fast-glob": "^3.3.3"
   },
   "devDependencies": {
-    "nock": "^14.0.10"
+    "nock": "^14.0.11"
   },
   "type": "module"
 }
