@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import { getExecOutput } from '@actions/exec';
 
 import { execGcloud } from '../../setup-gcloud/src/index.js';
 
@@ -36,9 +37,13 @@ const getArtifactUrl = async (tag, imagePath) => {
   const imageName = imagePath.split(':')[0] || imagePath;
   const container = `${imageName}:${tag}`;
 
-  const args = ['container', 'images', 'describe', container, '--format=json'];
+  await execGcloud(['auth', 'configure-docker', '--quiet']);
 
-  const output = await execGcloud(args);
+  const output = await getExecOutput('docker', [
+    'manifest',
+    'inspect',
+    container,
+  ]);
   const data = JSON.parse(output);
 
   let digest;
@@ -55,14 +60,22 @@ const getArtifactUrl = async (tag, imagePath) => {
 
     if (target) {
       digest = target.digest;
-      core.debug(`Resolved OCI Index to linux/amd64 digest: ${digest}`);
+      core.info(`Resolved OCI Index to linux/amd64 digest: ${digest}`);
     }
   }
 
   if (!digest) {
     // Standard Image (Legacy or Provenance disabled)
-    digest = data.image_summary.digest;
-    core.debug(`Detected standard manifest. Using digest: ${digest}`);
+    const args = [
+      'container',
+      'images',
+      'describe',
+      container,
+      '--format=get(image_summary.digest)',
+    ];
+
+    digest = await execGcloud(args);
+    core.info(`Detected standard manifest. Using digest: ${digest}`);
   }
 
   if (!digest) {
