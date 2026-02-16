@@ -45,7 +45,9 @@ describe('Create attestation', () => {
   test('Get artifact URL with default tag', async () => {
     const imagePath = 'eu.gcr.io/my-image';
     const digest = 'djdq1787';
-    execGcloud.mockResolvedValueOnce(digest);
+    execGcloud.mockResolvedValueOnce(
+      JSON.stringify({ image_summary: { digest } }),
+    );
 
     expect(await getArtifactUrl('tag', imagePath)).toEqual(
       'eu.gcr.io/my-image@djdq1787',
@@ -56,11 +58,54 @@ describe('Create attestation', () => {
   test('Get artifact URL provided a tag in the imagePath', async () => {
     const imagePath = 'eu.gcr.io/my-image:tag1';
     const digest = 'dut6h1787';
-    execGcloud.mockResolvedValueOnce(digest);
+    execGcloud.mockResolvedValueOnce(
+      JSON.stringify({ image_summary: { digest } }),
+    );
 
     expect(await getArtifactUrl('tag1', imagePath)).toEqual(
       'eu.gcr.io/my-image@dut6h1787',
     );
     expect(execGcloud).toHaveBeenCalledTimes(1);
+  });
+
+  test('Get artifact URL with provenance true', async () => {
+    const imagePath = 'eu.gcr.io/my-image:tag1';
+    execGcloud.mockResolvedValueOnce(
+      JSON.stringify({
+        manifests: [
+          {
+            platform: { architecture: 'amd64', os: 'linux' },
+            digest: 'dut6h1787',
+          },
+          {
+            platform: { architecture: 'unknown', os: 'unknown' },
+            digest: 'wrong',
+          },
+        ],
+      }),
+    );
+
+    expect(await getArtifactUrl('tag1', imagePath)).toEqual(
+      'eu.gcr.io/my-image@dut6h1787',
+    );
+    expect(execGcloud).toHaveBeenCalledTimes(1);
+  });
+
+  test('Get artifact URL with no digest', async () => {
+    const imagePath = 'eu.gcr.io/my-image:tag1';
+    execGcloud.mockResolvedValueOnce(
+      JSON.stringify({
+        manifests: [
+          {
+            platform: { architecture: 'amd64', os: 'linux' },
+          },
+        ],
+        image_summary: {},
+      }),
+    );
+
+    await expect(getArtifactUrl('tag1', imagePath)).rejects.toThrow(
+      'Failed to retrieve digest for image eu.gcr.io/my-image:tag1',
+    );
   });
 });
