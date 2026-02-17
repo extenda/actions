@@ -22,9 +22,11 @@ const action = async () => {
   const imagePath = core.getInput('image-path', { required: true });
 
   const tag = imagePath.split(':')[1] || process.env.GITHUB_SHA;
-  const artifactUrl = await getArtifactUrl(tag, imagePath);
 
   await setupGcloud(serviceAccountKey);
+
+  const artifactUrl = await getArtifactUrl(tag, imagePath);
+
   await createAttestation(
     artifactUrl,
     attestor,
