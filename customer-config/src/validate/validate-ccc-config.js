@@ -26,6 +26,15 @@ const schema = joi.object({
           .boolean()
           .default(false)
           .optional(),
+        connectors: joi
+          .object({
+            socketio: joi
+              .object({
+                enabled: joi.boolean().required(),
+              })
+              .required(),
+          })
+          .optional(),
       }),
     )
     .required(),
