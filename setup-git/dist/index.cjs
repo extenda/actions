@@ -47462,7 +47462,8 @@ var require_git = __commonJS2({
     var { GitExecutor: GitExecutor2 } = (init_git_executor(), __toCommonJS(git_executor_exports));
     var { SimpleGitApi: SimpleGitApi2 } = (init_simple_git_api(), __toCommonJS(simple_git_api_exports));
     var { Scheduler: Scheduler2 } = (init_scheduler(), __toCommonJS(scheduler_exports));
-    var { configurationErrorTask: configurationErrorTask2 } = (init_task(), __toCommonJS(task_exports));
+    var { adhocExecTask: adhocExecTask2, configurationErrorTask: configurationErrorTask2 } = (init_task(), __toCommonJS(
+    task_exports));
     var {
       asArray: asArray2,
       filterArray: filterArray2,
@@ -47593,11 +47594,14 @@ var require_git = __commonJS2({
       );
     };
     Git2.prototype.silent = function(silence) {
-      console.warn(
-        "simple-git deprecation notice: git.silent: logging should be configured using the `debug` library / `DEBUG` env\
-ironment variable, this will be an error in version 3"
+      return this._runTask(
+        adhocExecTask2(
+          () => console.warn(
+            "simple-git deprecation notice: git.silent: logging should be configured using the `debug` library / `DEBUG`\
+ environment variable, this method will be removed."
+          )
+        )
       );
-      return this;
     };
     Git2.prototype.tags = function(options, then) {
       return this._runTask(
@@ -47824,7 +47828,14 @@ e");
       return this._runTask(task);
     };
     Git2.prototype.clearQueue = function() {
-      return this;
+      return this._runTask(
+        adhocExecTask2(
+          () => console.warn(
+            "simple-git deprecation notice: clearQueue() is deprecated and will be removed, switch to using the abortPlu\
+gin instead."
+          )
+        )
+      );
     };
     Git2.prototype.checkIgnore = function(pathnames, then) {
       return this._runTask(
@@ -47899,10 +47910,15 @@ function abortPlugin(signal) {
   return [onSpawnBefore, onSpawnAfter];
 }
 __name(abortPlugin, "abortPlugin");
+var CLONE_OPTIONS = /^\0*(-|--|--no-)[\0\dlsqvnobucj]+\b/;
 function isConfigSwitch(arg) {
   return typeof arg === "string" && arg.trim().toLowerCase() === "-c";
 }
 __name(isConfigSwitch, "isConfigSwitch");
+function isCloneSwitch(char, arg) {
+  return Boolean(typeof arg === "string" && CLONE_OPTIONS.test(arg) && arg.includes(char));
+}
+__name(isCloneSwitch, "isCloneSwitch");
 function preventProtocolOverride(arg, next) {
   if (!isConfigSwitch(arg)) {
     return;
@@ -47925,7 +47941,7 @@ function preventUploadPack(arg, method) {
       `Use of --upload-pack or --receive-pack is not permitted without enabling allowUnsafePack`
     );
   }
-  if (method === "clone" && /^\s*-u\b/.test(arg)) {
+  if (method === "clone" && isCloneSwitch("u", arg)) {
     throw new GitPluginError(
       void 0,
       "unsafe",
