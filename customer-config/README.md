@@ -26,6 +26,12 @@ definitions: # list of config definitions for your system
     # if true,
     # * all items in array will be checked for uniqueness by id
     enforce-array-item-uniqueness-by-id: true
+    # (optional) connectors config
+    connectors:
+      socketio:
+        # if true, changes to this definition are forwarded to socketio
+        # through ccc-socketio-connector
+        enabled: true
 ```
 
 # Action setup example
