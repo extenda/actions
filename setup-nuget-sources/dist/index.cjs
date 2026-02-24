@@ -50190,7 +50190,7 @@ function logDryRun(log) {
 }
 __name(logDryRun, "logDryRun");
 
-// setup-nuget-sources/node_modules/@isaacs/balanced-match/dist/esm/index.js
+// setup-nuget-sources/node_modules/balanced-match/dist/esm/index.js
 var balanced = /* @__PURE__ */ __name((a, b, str) => {
   const ma = a instanceof RegExp ? maybeMatch(a, str) : a;
   const mb = b instanceof RegExp ? maybeMatch(b, str) : b;
@@ -50243,7 +50243,7 @@ var range = /* @__PURE__ */ __name((a, b, str) => {
   return result;
 }, "range");
 
-// setup-nuget-sources/node_modules/@isaacs/brace-expansion/dist/esm/index.js
+// setup-nuget-sources/node_modules/brace-expansion/dist/esm/index.js
 var escSlash = "\0SLASH" + Math.random() + "\0";
 var escOpen = "\0OPEN" + Math.random() + "\0";
 var escClose = "\0CLOSE" + Math.random() + "\0";
@@ -50987,12 +50987,23 @@ var AST = class _AST {
     let escaping = false;
     let re = "";
     let uflag = false;
+    let inStar = false;
     for (let i = 0; i < glob2.length; i++) {
       const c = glob2.charAt(i);
       if (escaping) {
         escaping = false;
         re += (reSpecials.has(c) ? "\\" : "") + c;
         continue;
+      }
+      if (c === "*") {
+        if (inStar)
+          continue;
+        inStar = true;
+        re += noEmpty && /^[*]+$/.test(glob2) ? starNoEmpty : star;
+        hasMagic2 = true;
+        continue;
+      } else {
+        inStar = false;
       }
       if (c === "\\") {
         if (i === glob2.length - 1) {
@@ -51011,11 +51022,6 @@ var AST = class _AST {
           hasMagic2 = hasMagic2 || magic;
           continue;
         }
-      }
-      if (c === "*") {
-        re += noEmpty && glob2 === "*" ? starNoEmpty : star;
-        hasMagic2 = true;
-        continue;
       }
       if (c === "?") {
         re += qmark;
@@ -51160,7 +51166,7 @@ var braceExpand = /* @__PURE__ */ __name((pattern, options = {}) => {
   if (options.nobrace || !/\{(?:(?!\{).)*\}/.test(pattern)) {
     return [pattern];
   }
-  return expand(pattern);
+  return expand(pattern, { max: options.braceExpandMax });
 }, "braceExpand");
 minimatch.braceExpand = braceExpand;
 var makeRe = /* @__PURE__ */ __name((pattern, options = {}) => new Minimatch(pattern, options).makeRe(), "makeRe");
@@ -51204,7 +51210,8 @@ var Minimatch = class {
     this.pattern = pattern;
     this.platform = options.platform || defaultPlatform;
     this.isWindows = this.platform === "win32";
-    this.windowsPathsNoEscape = !!options.windowsPathsNoEscape || options.allowWindowsEscape === false;
+    const awe = "allowWindowsEscape";
+    this.windowsPathsNoEscape = !!options.windowsPathsNoEscape || options[awe] === false;
     if (this.windowsPathsNoEscape) {
       this.pattern = this.pattern.replace(/\\/g, "/");
     }
@@ -51262,7 +51269,10 @@ var Minimatch = class {
         const isUNC = s[0] === "" && s[1] === "" && (s[2] === "?" || !globMagic.test(s[2])) && !globMagic.test(s[3]);
         const isDrive = /^[a-z]:/i.test(s[0]);
         if (isUNC) {
-          return [...s.slice(0, 4), ...s.slice(4).map((ss) => this.parse(ss))];
+          return [
+            ...s.slice(0, 4),
+            ...s.slice(4).map((ss) => this.parse(ss))
+          ];
         } else if (isDrive) {
           return [s[0], ...s.slice(1).map((ss) => this.parse(ss))];
         }
@@ -51544,7 +51554,10 @@ var Minimatch = class {
       const fdi = fileUNC ? 3 : fileDrive ? 0 : void 0;
       const pdi = patternUNC ? 3 : patternDrive ? 0 : void 0;
       if (typeof fdi === "number" && typeof pdi === "number") {
-        const [fd, pd] = [file[fdi], pattern[pdi]];
+        const [fd, pd] = [
+          file[fdi],
+          pattern[pdi]
+        ];
         if (fd.toLowerCase() === pd.toLowerCase()) {
           pattern[pdi] = fd;
           if (pdi > fdi) {
