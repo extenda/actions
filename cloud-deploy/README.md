@@ -73,6 +73,8 @@ cloud-run:
   protocol: http
   scaling:
     concurrency: 80
+  traffic:
+    static-egress-ip: false
 
 security:
   permission-prefix: mye
@@ -109,6 +111,8 @@ cloud-run:
   protocol: http
   scaling:
     concurrency: 80
+  traffic:
+    static-egress-ip: false
 
 security:
   permission-prefix: mye
@@ -145,6 +149,8 @@ cloud-run:
   protocol: http
   scaling:
     concurrency: 80
+  traffic:
+    static-egress-ip: false
 
 security:
   consumers:
@@ -176,6 +182,8 @@ cloud-run:
   protocol: http
   scaling:
     concurrency: 80
+  traffic:
+    static-egress-ip: false
 
 security:
   cloud-armor:
@@ -209,6 +217,8 @@ cloud-run:
   protocol: http
   scaling:
     concurrency: 100
+  traffic:
+    static-egress-ip: false
   startup-cpu-boost: true
   cpu-throttling: false
   session-affinity: true
@@ -257,6 +267,8 @@ cloud-run:
     schedule:
       - scale-hours: 07:00-22:00
         region: europe-west1
+  traffic:
+    static-egress-ip: false
 
 security:
   permission-prefix: mye
@@ -286,6 +298,8 @@ cloud-run:
   protocol: http
   scaling:
     concurrency: 80
+  traffic:
+    static-egress-ip: false
 
 security:
   permission-prefix: mye
@@ -386,6 +400,8 @@ cloud-run:
   protocol: http
   scaling:
     concurrency: 80
+  traffic:
+    static-egress-ip: false
   monitoring:
     prometheus:
       interval: 60
@@ -419,6 +435,8 @@ cloud-run:
   protocol: http
   scaling:
     concurrency: 80
+  traffic:
+    static-egress-ip: false
   monitoring:
     open-telemetry:
       config:
@@ -463,6 +481,8 @@ cloud-run:
   protocol: http
   scaling:
     concurrency: 80
+  traffic:
+    static-egress-ip: false
 
 security:
   permission-prefix: mye
@@ -494,6 +514,8 @@ cloud-run:
   protocol: http
   scaling:
     concurrency: 80
+  traffic:
+    static-egress-ip: false
   internal-traffic: true
 
 security:
@@ -536,6 +558,8 @@ cloud-run:
   protocol: http
   scaling:
     concurrency: 100
+  traffic:
+    static-egress-ip: false
 
 security:
   permission-prefix: mye
