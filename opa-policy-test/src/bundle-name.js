@@ -49,7 +49,7 @@ const getBundleName = () => {
     );
   } catch {
     const serviceFilePath =
-      core.getInput('service-file-path') || 'cloud-deploy.yaml';
+      core.getInput('service-definition') || 'cloud-deploy.yaml';
     core.info(`Read service definition from ${serviceFilePath}`);
     const { permissionPrefix, serviceName } =
       readFromServiceFile(serviceFilePath);

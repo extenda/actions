@@ -27,7 +27,7 @@ inputs:
       For use in `iam.*` systems only.
     required: false
     default: staging
-  service-file-path:
+  service-definition:
     description: |
       Path to the service definition file.
     required: false
