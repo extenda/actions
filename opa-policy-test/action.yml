@@ -29,7 +29,8 @@ inputs:
     default: staging
   service-definition:
     description: |
-      Path to the service definition file.
+      Path to the service definition file. Used to read `permission-prefix` and `service-name`
+      when those values are not provided as inputs. Defaults to `cloud-deploy.yaml`.
     required: false
     default: cloud-deploy.yaml
 runs:

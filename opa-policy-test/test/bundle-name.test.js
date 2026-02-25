@@ -87,3 +87,19 @@ security:
     .mockReturnValueOnce('');
   expect(getBundleName()).toEqual('yml.yaml-service-staging.tar.gz');
 });
+
+test('It fails if a custom service file path does not exist', () => {
+  // No files are present, so the custom service file path should not be found.
+  mockFs({});
+
+  core.getInput
+    .mockReturnValueOnce('')
+    .mockReturnValueOnce('')
+    .mockReturnValueOnce('')
+    .mockReturnValueOnce('config/missing-service.yaml')
+    .mockReturnValueOnce('');
+
+  expect(() => getBundleName()).toThrow(
+    new Error('Not found: config/missing-service.yaml'),
+  );
+});
