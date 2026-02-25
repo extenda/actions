@@ -46,7 +46,7 @@ test('It can read values from cloud-deploy.yaml', () => {
     'cloud-deploy.yaml': `
 cloud-run:
   service: yaml-service
-  security:
+security:
   permission-prefix: yml
 `,
   });
@@ -60,7 +60,7 @@ test('It can read values from kubernetes cloud-deploy.yaml', () => {
     'cloud-deploy.yaml': `
 kubernetes:
   service: yaml-service
-  security:
+security:
   permission-prefix: yml
 `,
   });
