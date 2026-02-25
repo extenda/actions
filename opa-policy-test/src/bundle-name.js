@@ -3,8 +3,7 @@ import fs from 'node:fs';
 import * as core from '@actions/core';
 import yaml from 'yaml';
 
-const readFromCloudDeploy = () => {
-  const fileName = 'cloud-deploy.yaml';
+const readFromServiceFile = (fileName) => {
   if (!fs.existsSync(fileName)) {
     throw new Error(`Not found: ${fileName}`);
   }
@@ -49,8 +48,11 @@ const getBundleName = () => {
       core.getInput('service-environment'),
     );
   } catch {
-    core.info('Read service definition from cloud-deploy.yaml');
-    const { permissionPrefix, serviceName } = readFromCloudDeploy();
+    const serviceFilePath =
+      core.getInput('service-file-path') || 'cloud-deploy.yaml';
+    core.info(`Read service definition from ${serviceFilePath}`);
+    const { permissionPrefix, serviceName } =
+      readFromServiceFile(serviceFilePath);
     bundleName = createBundleName(
       permissionPrefix,
       serviceName,

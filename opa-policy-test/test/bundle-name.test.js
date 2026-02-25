@@ -46,7 +46,7 @@ test('It can read values from cloud-deploy.yaml', () => {
     'cloud-deploy.yaml': `
 cloud-run:
   service: yaml-service
-security:
+  security:
   permission-prefix: yml
 `,
   });
@@ -60,11 +60,30 @@ test('It can read values from kubernetes cloud-deploy.yaml', () => {
     'cloud-deploy.yaml': `
 kubernetes:
   service: yaml-service
-security:
+  security:
   permission-prefix: yml
 `,
   });
 
   core.getInput.mockReturnValue('');
+  expect(getBundleName()).toEqual('yml.yaml-service-staging.tar.gz');
+});
+
+test('It can read values from a custom service file path', () => {
+  mockFs({
+    'config/service.yaml': `
+cloud-run:
+  service: yaml-service
+security:
+  permission-prefix: yml
+`,
+  });
+
+  core.getInput
+    .mockReturnValueOnce('')
+    .mockReturnValueOnce('')
+    .mockReturnValueOnce('')
+    .mockReturnValueOnce('config/service.yaml')
+    .mockReturnValueOnce('');
   expect(getBundleName()).toEqual('yml.yaml-service-staging.tar.gz');
 });
