@@ -68,3 +68,38 @@ security:
   core.getInput.mockReturnValue('');
   expect(getBundleName()).toEqual('yml.yaml-service-staging.tar.gz');
 });
+
+test('It can read values from a custom service file path', () => {
+  mockFs({
+    'config/service.yaml': `
+cloud-run:
+  service: yaml-service
+security:
+  permission-prefix: yml
+`,
+  });
+
+  core.getInput
+    .mockReturnValueOnce('')
+    .mockReturnValueOnce('')
+    .mockReturnValueOnce('')
+    .mockReturnValueOnce('config/service.yaml')
+    .mockReturnValueOnce('');
+  expect(getBundleName()).toEqual('yml.yaml-service-staging.tar.gz');
+});
+
+test('It fails if a custom service file path does not exist', () => {
+  // No files are present, so the custom service file path should not be found.
+  mockFs({});
+
+  core.getInput
+    .mockReturnValueOnce('')
+    .mockReturnValueOnce('')
+    .mockReturnValueOnce('')
+    .mockReturnValueOnce('config/missing-service.yaml')
+    .mockReturnValueOnce('');
+
+  expect(() => getBundleName()).toThrow(
+    new Error('Not found: config/missing-service.yaml'),
+  );
+});
