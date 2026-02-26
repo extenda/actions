@@ -1439,9 +1439,9 @@ Must be one of:
 | **Type**     | `string` |
 | **Required** | No       |
 
-| Restrictions                      |                                                                                                                                             |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Must match regular expression** | ```^(?!(?i:tenant-id)$)[a-zA-Z0-9-]+$``` [Test](https://regex101.com/?regex=%5E%28%3F%21%28%3Fi%3Atenant-id%29%24%29%5Ba-zA-Z0-9-%5D%2B%24) |
+| Restrictions                      |                                                                                                                                                                                                                |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Must match regular expression** | ```^(?!(?:tenant-id\|Tenant-Id\|Tenant-ID\|TENANT-ID)$)[a-zA-Z0-9-]+$``` [Test](https://regex101.com/?regex=%5E%28%3F%21%28%3F%3Atenant-id%7CTenant-Id%7CTenant-ID%7CTENANT-ID%29%24%29%5Ba-zA-Z0-9-%5D%2B%24) |
 
 ##### <a name="security_oneOf_i1_cors_additional-expose-headers"></a>4.2.7.4. Property `CloudDeploy > security > oneOf > IAMSettings > cors > additional-expose-headers`
 
@@ -1471,9 +1471,9 @@ Must be one of:
 | **Type**     | `string` |
 | **Required** | No       |
 
-| Restrictions                      |                                                                                                                                             |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Must match regular expression** | ```^(?!(?i:tenant-id)$)[a-zA-Z0-9-]+$``` [Test](https://regex101.com/?regex=%5E%28%3F%21%28%3Fi%3Atenant-id%29%24%29%5Ba-zA-Z0-9-%5D%2B%24) |
+| Restrictions                      |                                                                                                                                                                                                                |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Must match regular expression** | ```^(?!(?:tenant-id\|Tenant-Id\|Tenant-ID\|TENANT-ID)$)[a-zA-Z0-9-]+$``` [Test](https://regex101.com/?regex=%5E%28%3F%21%28%3F%3Atenant-id%7CTenant-Id%7CTenant-ID%7CTENANT-ID%29%24%29%5Ba-zA-Z0-9-%5D%2B%24) |
 
 ### <a name="security_oneOf_i2"></a>4.3. Property `CloudDeploy > security > oneOf > IAMBindingSettings`
 
@@ -1916,4 +1916,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-02-26 at 22:00:17 +0100
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-02-26 at 22:47:48 +0100

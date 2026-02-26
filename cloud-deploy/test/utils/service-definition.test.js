@@ -592,4 +592,59 @@ environments:
       security: 'none',
     });
   });
+
+  test('It can parse additional CORS configuration', async () => {
+    mockFs({
+      'cloud-deploy.yaml': `
+cloud-run:
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    concurrency: 80
+  traffic:
+    static-egress-ip: false
+
+labels:
+  component: jest
+  product: my-product
+  foo: bar
+
+security:
+  permission-prefix: mye
+  cors:
+    enabled: true
+    additional-allow-headers:
+      - Business-Unit-Id
+
+environments:
+  production:
+    min-instances: 1
+    env: {}
+  staging:
+    min-instances: 0
+    env: {}
+      `,
+    });
+
+    const spec = loadServiceDefinition('cloud-deploy.yaml');
+    expect(spec).toMatchObject({
+      'cloud-run': {
+        service: 'my-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+      },
+      security: {
+        'permission-prefix': 'mye',
+        cors: {
+          enabled: true,
+          'additional-allow-headers': ['Business-Unit-Id'],
+        },
+      },
+    });
+  });
 });

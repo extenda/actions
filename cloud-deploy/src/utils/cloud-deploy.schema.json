@@ -704,7 +704,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^(?!(?i:tenant-id)$)[a-zA-Z0-9-]+$"
+            "pattern": "^(?!(?:tenant-id|Tenant-Id|Tenant-ID|TENANT-ID)$)[a-zA-Z0-9-]+$"
           }
         },
         "additional-expose-headers": {
@@ -712,7 +712,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^(?!(?i:tenant-id)$)[a-zA-Z0-9-]+$"
+            "pattern": "^(?!(?:tenant-id|Tenant-Id|Tenant-ID|TENANT-ID)$)[a-zA-Z0-9-]+$"
           }
         }
       }
