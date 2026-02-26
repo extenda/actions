@@ -161,7 +161,7 @@ const buildManifest = async (
     resources: opaResources = { cpu: 0.5, memory: '512Mi' },
     'system-name': systemName = name,
     consumers = {},
-    cors: { enabled: corsEnabled = false } = {},
+    cors = { enabled: false },
     'preview-tag': securityPreviewTag = null,
   } = security === 'none' ? {} : security || {};
 
@@ -271,7 +271,7 @@ const buildManifest = async (
       deployEnv,
       availability,
       baseAnnotations,
-      corsEnabled,
+      cors,
       terminationGracePeriod,
       securityPreviewTag,
     );
@@ -385,7 +385,7 @@ const buildManifest = async (
       baseAnnotations,
       enableCloudNAT,
       enableDirectVPC,
-      corsEnabled,
+      cors,
       securityPreviewTag,
     );
     generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));

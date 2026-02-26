@@ -691,6 +691,29 @@
           "description": "Enables CORS preflight requests in the auth proxy",
           "type": "boolean",
           "default": false
+        },
+        "additional-allow-origins": {
+          "description": "Additional allowed origins for CORS requests. Use full URI (e.g. `https://example.com`) for exact match or a leading `.` (e.g., `.example.com`) for suffix match.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "additional-allow-headers": {
+          "description": "Additional allowed headers for CORS requests. These are request headers the browser is allowed to send. It's not possible to allow the `Tenant-Id` header.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(?!(?i:tenant-id)$)[a-zA-Z0-9-]+$"
+          }
+        },
+        "additional-expose-headers": {
+          "description": "Additional exposed headers for CORS requests. These are response headers accessible to the browser. It's not possible to expose the `Tenant-Id` header.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(?!(?i:tenant-id)$)[a-zA-Z0-9-]+$"
+          }
         }
       }
     },
