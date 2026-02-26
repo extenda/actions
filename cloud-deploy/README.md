@@ -468,9 +468,12 @@ environments:
 #### Cloud Run with CORS enabled
 
 Enable CORS (Cross-Origin Resource Sharing) support in the security proxy for services that need
-to handle preflight requests from web browsers.
+to handle preflight requests from web browsers. By default, CORS preflight requests are denied.
 
-**Note:** CORS settings only work when using an auth-proxy (default: `envoy-opa`).
+**Important:** CORS settings only work when using an auth-proxy (default: `envoy-opa`). They are ignored
+when `security: none` is configured.
+
+**Basic CORS configuration** - Enable CORS with default allowed origins (only domain-mapped origins):
 
 ```yaml
 cloud-run:
@@ -498,6 +501,79 @@ environments:
     min-instances: 1
     domain-mappings:
       - my-service.retailsvc.com
+      - my-service.retailsvc-test.com
+```
+
+**Advanced CORS configuration** - Allow additional origins and custom headers:
+
+```yaml
+cloud-run:
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    concurrency: 80
+  traffic:
+    static-egress-ip: false
+
+security:
+  permission-prefix: mye
+  cors:
+    enabled: true
+    additional-allow-origins:
+      - https://external-app.example.com
+      - .trusted-partners.com  # Matches any subdomain of trusted-partners.com
+    additional-allow-headers:
+      - X-Custom-Header
+      - X-API-Key
+    additional-expose-headers:
+      - X-Request-Id
+      - X-RateLimit-Remaining
+
+labels:
+  product: my-product
+  component: my-component
+
+environments:
+  production:
+    min-instances: 1
+    domain-mappings:
+      - my-service.retailsvc.com
+      - my-service.retailsvc-test.com
+```
+
+**CORS Configuration Reference:**
+
+- `enabled`: Set to `true` to enable CORS preflight request handling (default: `false`)
+- `additional-allow-origins`: List of allowed origins for CORS requests
+  - Use full URI (e.g., `https://example.com`) for exact match
+  - Use leading dot (e.g., `.example.com`) for suffix match (matches any subdomain)
+  - Domain-mapped origins are automatically allowed when `enabled: true`
+- `additional-allow-headers`: List of allowed request headers from browsers
+  - Cannot include `Tenant-Id` (reserved header)
+  - Standard headers like `Content-Type`, `Authorization` are always allowed
+- `additional-expose-headers`: List of response headers accessible to browsers
+  - Cannot include `Tenant-Id` (reserved header)
+  - Useful for custom headers clients need to read (e.g., pagination, rate limit info)
+
+**Example request headers and responses:**
+
+A browser making a CORS request might send:
+```
+Origin: https://external-app.example.com
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: X-Custom-Header
+```
+
+The service will respond with:
+```
+Access-Control-Allow-Origin: https://external-app.example.com
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Custom-Header, X-API-Key
+Access-Control-Expose-Headers: X-Request-Id, X-RateLimit-Remaining
+Access-Control-Allow-Credentials: true
 ```
 
 #### Cloud Run with internal load balancer access
@@ -1032,7 +1108,7 @@ The `cloud-deploy` JSON schema documentation is generated with [json-schema-for-
 Install it with pip
 
 ```bash
-pip install json-schema-for-humans
+pip3 install json-schema-for-humans
 ```
 
 And use the command below to update the generated documentation.

@@ -86,6 +86,12 @@
       - [4.2.6.1. Property `CloudDeploy > security > oneOf > IAMSettings > cloud-armor > policy-name`](#security_oneOf_i1_cloud-armor_policy-name)
     - [4.2.7. Property `CloudDeploy > security > oneOf > IAMSettings > cors`](#security_oneOf_i1_cors)
       - [4.2.7.1. Property `CloudDeploy > security > oneOf > IAMSettings > cors > enabled`](#security_oneOf_i1_cors_enabled)
+      - [4.2.7.2. Property `CloudDeploy > security > oneOf > IAMSettings > cors > additional-allow-origins`](#security_oneOf_i1_cors_additional-allow-origins)
+        - [4.2.7.2.1. CloudDeploy > security > oneOf > IAMSettings > cors > additional-allow-origins > additional-allow-origins items](#security_oneOf_i1_cors_additional-allow-origins_items)
+      - [4.2.7.3. Property `CloudDeploy > security > oneOf > IAMSettings > cors > additional-allow-headers`](#security_oneOf_i1_cors_additional-allow-headers)
+        - [4.2.7.3.1. CloudDeploy > security > oneOf > IAMSettings > cors > additional-allow-headers > additional-allow-headers items](#security_oneOf_i1_cors_additional-allow-headers_items)
+      - [4.2.7.4. Property `CloudDeploy > security > oneOf > IAMSettings > cors > additional-expose-headers`](#security_oneOf_i1_cors_additional-expose-headers)
+        - [4.2.7.4.1. CloudDeploy > security > oneOf > IAMSettings > cors > additional-expose-headers > additional-expose-headers items](#security_oneOf_i1_cors_additional-expose-headers_items)
   - [4.3. Property `CloudDeploy > security > oneOf > IAMBindingSettings`](#security_oneOf_i2)
     - [4.3.1. Property `CloudDeploy > security > oneOf > IAMBindingSettings > cloud-armor`](#security_oneOf_i2_cloud-armor)
     - [4.3.2. Property `CloudDeploy > security > oneOf > IAMBindingSettings > consumers`](#security_oneOf_i2_consumers)
@@ -1360,9 +1366,12 @@ Must be one of:
 
 **Description:** CORS settings to apply on the security proxy. This settings only work with an auth-proxy
 
-| Property                                      | Pattern | Type    | Deprecated | Definition | Title/Description                                 |
-| --------------------------------------------- | ------- | ------- | ---------- | ---------- | ------------------------------------------------- |
-| + [enabled](#security_oneOf_i1_cors_enabled ) | No      | boolean | No         | -          | Enables CORS preflight requests in the auth proxy |
+| Property                                                                          | Pattern | Type            | Deprecated | Definition | Title/Description                                                                                                                                                       |
+| --------------------------------------------------------------------------------- | ------- | --------------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| + [enabled](#security_oneOf_i1_cors_enabled )                                     | No      | boolean         | No         | -          | Enables CORS preflight requests in the auth proxy                                                                                                                       |
+| - [additional-allow-origins](#security_oneOf_i1_cors_additional-allow-origins )   | No      | array of string | No         | -          | Additional allowed origins for CORS requests. Use full URI (e.g. \`https://example.com\`) for exact match or a leading \`.\` (e.g., \`.example.com\`) for suffix match. |
+| - [additional-allow-headers](#security_oneOf_i1_cors_additional-allow-headers )   | No      | array of string | No         | -          | Additional allowed headers for CORS requests. These are request headers the browser is allowed to send. It's not possible to allow the \`Tenant-Id\` header.            |
+| - [additional-expose-headers](#security_oneOf_i1_cors_additional-expose-headers ) | No      | array of string | No         | -          | Additional exposed headers for CORS requests. These are response headers accessible to the browser. It's not possible to expose the \`Tenant-Id\` header.               |
 
 ##### <a name="security_oneOf_i1_cors_enabled"></a>4.2.7.1. Property `CloudDeploy > security > oneOf > IAMSettings > cors > enabled`
 
@@ -1373,6 +1382,98 @@ Must be one of:
 | **Default**  | `false`   |
 
 **Description:** Enables CORS preflight requests in the auth proxy
+
+##### <a name="security_oneOf_i1_cors_additional-allow-origins"></a>4.2.7.2. Property `CloudDeploy > security > oneOf > IAMSettings > cors > additional-allow-origins`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+**Description:** Additional allowed origins for CORS requests. Use full URI (e.g. `https://example.com`) for exact match or a leading `.` (e.g., `.example.com`) for suffix match.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                                                          | Description |
+| ---------------------------------------------------------------------------------------- | ----------- |
+| [additional-allow-origins items](#security_oneOf_i1_cors_additional-allow-origins_items) | -           |
+
+###### <a name="security_oneOf_i1_cors_additional-allow-origins_items"></a>4.2.7.2.1. CloudDeploy > security > oneOf > IAMSettings > cors > additional-allow-origins > additional-allow-origins items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+##### <a name="security_oneOf_i1_cors_additional-allow-headers"></a>4.2.7.3. Property `CloudDeploy > security > oneOf > IAMSettings > cors > additional-allow-headers`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+**Description:** Additional allowed headers for CORS requests. These are request headers the browser is allowed to send. It's not possible to allow the `Tenant-Id` header.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                                                          | Description |
+| ---------------------------------------------------------------------------------------- | ----------- |
+| [additional-allow-headers items](#security_oneOf_i1_cors_additional-allow-headers_items) | -           |
+
+###### <a name="security_oneOf_i1_cors_additional-allow-headers_items"></a>4.2.7.3.1. CloudDeploy > security > oneOf > IAMSettings > cors > additional-allow-headers > additional-allow-headers items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+| Restrictions                      |                                                                                                                                             |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Must match regular expression** | ```^(?!(?i:tenant-id)$)[a-zA-Z0-9-]+$``` [Test](https://regex101.com/?regex=%5E%28%3F%21%28%3Fi%3Atenant-id%29%24%29%5Ba-zA-Z0-9-%5D%2B%24) |
+
+##### <a name="security_oneOf_i1_cors_additional-expose-headers"></a>4.2.7.4. Property `CloudDeploy > security > oneOf > IAMSettings > cors > additional-expose-headers`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+**Description:** Additional exposed headers for CORS requests. These are response headers accessible to the browser. It's not possible to expose the `Tenant-Id` header.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                                                            | Description |
+| ------------------------------------------------------------------------------------------ | ----------- |
+| [additional-expose-headers items](#security_oneOf_i1_cors_additional-expose-headers_items) | -           |
+
+###### <a name="security_oneOf_i1_cors_additional-expose-headers_items"></a>4.2.7.4.1. CloudDeploy > security > oneOf > IAMSettings > cors > additional-expose-headers > additional-expose-headers items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+| Restrictions                      |                                                                                                                                             |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Must match regular expression** | ```^(?!(?i:tenant-id)$)[a-zA-Z0-9-]+$``` [Test](https://regex101.com/?regex=%5E%28%3F%21%28%3Fi%3Atenant-id%29%24%29%5Ba-zA-Z0-9-%5D%2B%24) |
 
 ### <a name="security_oneOf_i2"></a>4.3. Property `CloudDeploy > security > oneOf > IAMBindingSettings`
 
@@ -1815,4 +1916,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2025-11-10 at 08:01:44 +0100
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-02-26 at 22:00:17 +0100
