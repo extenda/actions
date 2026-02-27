@@ -71,6 +71,18 @@ describe('manifests/security-sidecar', () => {
           value: 'false',
         },
         {
+          name: 'ENVOY_CORS_ADDITIONAL_ORIGINS',
+          value: '',
+        },
+        {
+          name: 'ENVOY_CORS_ADDITIONAL_ALLOW_HEADERS',
+          value: '',
+        },
+        {
+          name: 'ENVOY_CORS_ADDITIONAL_EXPOSE_HEADERS',
+          value: '',
+        },
+        {
           name: 'ENVOY_PROTOCOL',
           value: 'http',
         },
@@ -107,6 +119,18 @@ describe('manifests/security-sidecar', () => {
           value: 'false',
         },
         {
+          name: 'ENVOY_CORS_ADDITIONAL_ORIGINS',
+          value: '',
+        },
+        {
+          name: 'ENVOY_CORS_ADDITIONAL_ALLOW_HEADERS',
+          value: '',
+        },
+        {
+          name: 'ENVOY_CORS_ADDITIONAL_EXPOSE_HEADERS',
+          value: '',
+        },
+        {
           name: 'ENVOY_PROTOCOL',
           value: 'http2',
         },
@@ -123,7 +147,7 @@ describe('manifests/security-sidecar', () => {
   });
 
   test('It sets h2c on ENVOY_PROTOCOL for cloudrun', async () => {
-    const security = await securitySpec('http2', false, true);
+    const security = await securitySpec('http2', false, { enabled: true });
     expect(security).toMatchObject({
       env: [
         {
@@ -139,6 +163,18 @@ describe('manifests/security-sidecar', () => {
           value: 'true',
         },
         {
+          name: 'ENVOY_CORS_ADDITIONAL_ORIGINS',
+          value: '',
+        },
+        {
+          name: 'ENVOY_CORS_ADDITIONAL_ALLOW_HEADERS',
+          value: '',
+        },
+        {
+          name: 'ENVOY_CORS_ADDITIONAL_EXPOSE_HEADERS',
+          value: '',
+        },
+        {
           name: 'ENVOY_PROTOCOL',
           value: 'h2c',
         },
@@ -149,7 +185,7 @@ describe('manifests/security-sidecar', () => {
 
   test('It supports custom bucket name', async () => {
     process.env.SECURITY_BUCKET_NAME = 'my-bucket';
-    const security = await securitySpec('http', false, false);
+    const security = await securitySpec('http', false, { enabled: false });
     expect(security).toMatchObject({
       env: [
         {
@@ -165,6 +201,18 @@ describe('manifests/security-sidecar', () => {
           value: 'false',
         },
         {
+          name: 'ENVOY_CORS_ADDITIONAL_ORIGINS',
+          value: '',
+        },
+        {
+          name: 'ENVOY_CORS_ADDITIONAL_ALLOW_HEADERS',
+          value: '',
+        },
+        {
+          name: 'ENVOY_CORS_ADDITIONAL_EXPOSE_HEADERS',
+          value: '',
+        },
+        {
           name: 'ENVOY_PROTOCOL',
           value: 'http',
         },
@@ -173,6 +221,34 @@ describe('manifests/security-sidecar', () => {
           value: 'my-bucket',
         },
       ],
+    });
+  });
+
+  test('It supports additional CORS settings', async () => {
+    const security = await securitySpec('http', false, {
+      enabled: true,
+      'additional-allow-origins': [
+        'https://example.com',
+        'http://localhost:8080',
+      ],
+      'additional-allow-headers': ['X-Custom-Header'],
+      'additional-expose-headers': ['X-Exposed-Header'],
+    });
+    expect(security).toMatchObject({
+      env: expect.arrayContaining([
+        {
+          name: 'ENVOY_CORS_ADDITIONAL_ORIGINS',
+          value: 'https://example.com,http://localhost:8080',
+        },
+        {
+          name: 'ENVOY_CORS_ADDITIONAL_ALLOW_HEADERS',
+          value: 'X-Custom-Header',
+        },
+        {
+          name: 'ENVOY_CORS_ADDITIONAL_EXPOSE_HEADERS',
+          value: 'X-Exposed-Header',
+        },
+      ]),
     });
   });
 });

@@ -27,10 +27,14 @@ const getImageTag = ({ 'preview-tag': previewTag = null } = {}) =>
     STABLE_VERSION,
   );
 
+const arrayToString = (arr) => {
+  return Array.isArray(arr) ? arr.join(',') : '';
+};
+
 export const securitySpec = async (
   protocol,
   platformGKE = true,
-  corsEnabled = false,
+  cors = { enabled: false },
   previewTag = null,
 ) => {
   const imageTag = getImageTag({ 'preview-tag': previewTag });
@@ -47,7 +51,19 @@ export const securitySpec = async (
       },
       {
         name: 'ENVOY_CORS',
-        value: corsEnabled ? 'true' : 'false',
+        value: cors.enabled ? 'true' : 'false',
+      },
+      {
+        name: 'ENVOY_CORS_ADDITIONAL_ORIGINS',
+        value: arrayToString(cors['additional-allow-origins']),
+      },
+      {
+        name: 'ENVOY_CORS_ADDITIONAL_ALLOW_HEADERS',
+        value: arrayToString(cors['additional-allow-headers']),
+      },
+      {
+        name: 'ENVOY_CORS_ADDITIONAL_EXPOSE_HEADERS',
+        value: arrayToString(cors['additional-expose-headers']),
       },
     ];
     if (platformGKE) {

@@ -47,7 +47,7 @@ const cloudrunManifestTemplate = async (
   baseAnnotations,
   enableCloudNAT,
   enableDirectVPC,
-  corsEnabled,
+  cors,
   securityPreviewTag,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
@@ -142,7 +142,7 @@ const cloudrunManifestTemplate = async (
     const securityContainer = await securitySpec(
       protocol,
       false,
-      corsEnabled,
+      cors,
       securityPreviewTag,
     );
     securityContainer.env.push({ name: 'CPU_LIMIT', value: `${opaCpu}` });

@@ -57,7 +57,7 @@ const gkeManifestTemplate = async (
   deployEnv,
   availability,
   baseAnnotations,
-  corsEnabled,
+  cors,
   terminationGracePeriod,
   securityPreviewTag,
 ) => {
@@ -73,7 +73,7 @@ const gkeManifestTemplate = async (
     name,
   );
   const securityContainer = opa
-    ? await securitySpec(protocol, true, corsEnabled, securityPreviewTag)
+    ? await securitySpec(protocol, true, cors, securityPreviewTag)
     : {};
   if (opa) {
     securityContainer.env.push({ name: 'CPU_LIMIT', value: `${opaCpu}` });
