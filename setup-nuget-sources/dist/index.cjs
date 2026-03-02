@@ -48063,7 +48063,7 @@ supports job summaries.`);
       }
       try {
         yield access(pathFromEnv, import_fs.constants.R_OK | import_fs.constants.W_OK);
-      } catch (_a2) {
+      } catch (_a3) {
         throw new Error(`Unable to access summary file: '${pathFromEnv}'. Check if the file has correct read/write permi\
 ssions.`);
       }
@@ -48574,7 +48574,7 @@ var Summary2 = class {
       }
       try {
         yield access2(pathFromEnv, import_fs2.constants.R_OK | import_fs2.constants.W_OK);
-      } catch (_a2) {
+      } catch (_a3) {
         throw new Error(`Unable to access summary file: '${pathFromEnv}'. Check if the file has correct read/write permi\
 ssions.`);
       }
@@ -50546,8 +50546,56 @@ var unescape = /* @__PURE__ */ __name((s, { windowsPathsNoEscape = false, magica
 }, "unescape");
 
 // setup-nuget-sources/node_modules/minimatch/dist/esm/ast.js
+var _a2;
 var types = /* @__PURE__ */ new Set(["!", "?", "+", "*", "@"]);
 var isExtglobType = /* @__PURE__ */ __name((c) => types.has(c), "isExtglobType");
+var isExtglobAST = /* @__PURE__ */ __name((c) => isExtglobType(c.type), "isExtglobAST");
+var adoptionMap = /* @__PURE__ */ new Map([
+  ["!", ["@"]],
+  ["?", ["?", "@"]],
+  ["@", ["@"]],
+  ["*", ["*", "+", "?", "@"]],
+  ["+", ["+", "@"]]
+]);
+var adoptionWithSpaceMap = /* @__PURE__ */ new Map([
+  ["!", ["?"]],
+  ["@", ["?"]],
+  ["+", ["?", "*"]]
+]);
+var adoptionAnyMap = /* @__PURE__ */ new Map([
+  ["!", ["?", "@"]],
+  ["?", ["?", "@"]],
+  ["@", ["?", "@"]],
+  ["*", ["*", "+", "?", "@"]],
+  ["+", ["+", "@", "?", "*"]]
+]);
+var usurpMap = /* @__PURE__ */ new Map([
+  ["!", /* @__PURE__ */ new Map([["!", "@"]])],
+  [
+    "?",
+    /* @__PURE__ */ new Map([
+      ["*", "*"],
+      ["+", "*"]
+    ])
+  ],
+  [
+    "@",
+    /* @__PURE__ */ new Map([
+      ["!", "!"],
+      ["?", "?"],
+      ["@", "@"],
+      ["*", "*"],
+      ["+", "+"]
+    ])
+  ],
+  [
+    "+",
+    /* @__PURE__ */ new Map([
+      ["?", "*"],
+      ["*", "*"]
+    ])
+  ]
+]);
 var startNoTraversal = "(?!(?:^|/)\\.\\.?(?:$|/))";
 var startNoDot = "(?!\\.)";
 var addPatternStart = /* @__PURE__ */ new Set(["[", "."]);
@@ -50557,7 +50605,8 @@ var regExpEscape = /* @__PURE__ */ __name((s) => s.replace(/[-[\]{}()*+?.,\\^$|#
 var qmark = "[^/]";
 var star = qmark + "*?";
 var starNoEmpty = qmark + "+?";
-var AST = class _AST {
+var ID = 0;
+var AST = class {
   static {
     __name(this, "AST");
   }
@@ -50575,6 +50624,22 @@ var AST = class _AST {
   // set to true if it's an extglob with no children
   // (which really means one child of '')
   #emptyExt = false;
+  id = ++ID;
+  get depth() {
+    return (this.#parent?.depth ?? -1) + 1;
+  }
+  [/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")]() {
+    return {
+      "@@type": "AST",
+      id: this.id,
+      type: this.type,
+      root: this.#root.id,
+      parent: this.#parent?.id,
+      depth: this.depth,
+      partsLength: this.#parts.length,
+      parts: this.#parts
+    };
+  }
   constructor(type, parent, options = {}) {
     this.type = type;
     if (type)
@@ -50640,7 +50705,7 @@ var AST = class _AST {
     for (const p of parts) {
       if (p === "")
         continue;
-      if (typeof p !== "string" && !(p instanceof _AST && p.#parent === this)) {
+      if (typeof p !== "string" && !(p instanceof _a2 && p.#parent === this)) {
         throw new Error("invalid part: " + p);
       }
       this.#parts.push(p);
@@ -50666,7 +50731,7 @@ var AST = class _AST {
     const p = this.#parent;
     for (let i = 0; i < this.#parentIndex; i++) {
       const pp = p.#parts[i];
-      if (!(pp instanceof _AST && pp.type === "!")) {
+      if (!(pp instanceof _a2 && pp.type === "!")) {
         return false;
       }
     }
@@ -50691,13 +50756,14 @@ var AST = class _AST {
       this.push(part.clone(this));
   }
   clone(parent) {
-    const c = new _AST(this.type, parent);
+    const c = new _a2(this.type, parent);
     for (const p of this.#parts) {
       c.copyIn(p);
     }
     return c;
   }
-  static #parseAST(str, ast, pos, opt) {
+  static #parseAST(str, ast, pos, opt, extDepth) {
+    const maxDepth = opt.maxExtglobRecursion ?? 2;
     let escaping = false;
     let inBrace = false;
     let braceStart = -1;
@@ -50729,11 +50795,12 @@ var AST = class _AST {
           acc2 += c;
           continue;
         }
-        if (!opt.noext && isExtglobType(c) && str.charAt(i2) === "(") {
+        const doRecurse = !opt.noext && isExtglobType(c) && str.charAt(i2) === "(" && extDepth <= maxDepth;
+        if (doRecurse) {
           ast.push(acc2);
           acc2 = "";
-          const ext2 = new _AST(c, ast);
-          i2 = _AST.#parseAST(str, ext2, i2, opt);
+          const ext2 = new _a2(c, ast);
+          i2 = _a2.#parseAST(str, ext2, i2, opt, extDepth + 1);
           ast.push(ext2);
           continue;
         }
@@ -50743,7 +50810,7 @@ var AST = class _AST {
       return i2;
     }
     let i = pos + 1;
-    let part = new _AST(null, ast);
+    let part = new _a2(null, ast);
     const parts = [];
     let acc = "";
     while (i < str.length) {
@@ -50770,19 +50837,22 @@ var AST = class _AST {
         acc += c;
         continue;
       }
-      if (isExtglobType(c) && str.charAt(i) === "(") {
+      const doRecurse = !opt.noext && isExtglobType(c) && str.charAt(i) === "(" && /* c8 ignore start - the maxDepth is sufficient here */
+      (extDepth <= maxDepth || ast && ast.#canAdoptType(c));
+      if (doRecurse) {
+        const depthAdd = ast && ast.#canAdoptType(c) ? 0 : 1;
         part.push(acc);
         acc = "";
-        const ext2 = new _AST(c, part);
+        const ext2 = new _a2(c, part);
         part.push(ext2);
-        i = _AST.#parseAST(str, ext2, i, opt);
+        i = _a2.#parseAST(str, ext2, i, opt, extDepth + depthAdd);
         continue;
       }
       if (c === "|") {
         part.push(acc);
         acc = "";
         parts.push(part);
-        part = new _AST(null, ast);
+        part = new _a2(null, ast);
         continue;
       }
       if (c === ")") {
@@ -50801,9 +50871,72 @@ var AST = class _AST {
     ast.#parts = [str.substring(pos - 1)];
     return i;
   }
+  #canAdoptWithSpace(child2) {
+    return this.#canAdopt(child2, adoptionWithSpaceMap);
+  }
+  #canAdopt(child2, map = adoptionMap) {
+    if (!child2 || typeof child2 !== "object" || child2.type !== null || child2.#parts.length !== 1 || this.type === null) {
+      return false;
+    }
+    const gc = child2.#parts[0];
+    if (!gc || typeof gc !== "object" || gc.type === null) {
+      return false;
+    }
+    return this.#canAdoptType(gc.type, map);
+  }
+  #canAdoptType(c, map = adoptionAnyMap) {
+    return !!map.get(this.type)?.includes(c);
+  }
+  #adoptWithSpace(child2, index) {
+    const gc = child2.#parts[0];
+    const blank = new _a2(null, gc, this.options);
+    blank.#parts.push("");
+    gc.push(blank);
+    this.#adopt(child2, index);
+  }
+  #adopt(child2, index) {
+    const gc = child2.#parts[0];
+    this.#parts.splice(index, 1, ...gc.#parts);
+    for (const p of gc.#parts) {
+      if (typeof p === "object")
+        p.#parent = this;
+    }
+    this.#toString = void 0;
+  }
+  #canUsurpType(c) {
+    const m = usurpMap.get(this.type);
+    return !!m?.has(c);
+  }
+  #canUsurp(child2) {
+    if (!child2 || typeof child2 !== "object" || child2.type !== null || child2.#parts.length !== 1 || this.type === null ||
+    this.#parts.length !== 1) {
+      return false;
+    }
+    const gc = child2.#parts[0];
+    if (!gc || typeof gc !== "object" || gc.type === null) {
+      return false;
+    }
+    return this.#canUsurpType(gc.type);
+  }
+  #usurp(child2) {
+    const m = usurpMap.get(this.type);
+    const gc = child2.#parts[0];
+    const nt = m?.get(gc.type);
+    if (!nt)
+      return false;
+    this.#parts = gc.#parts;
+    for (const p of this.#parts) {
+      if (typeof p === "object") {
+        p.#parent = this;
+      }
+    }
+    this.type = nt;
+    this.#toString = void 0;
+    this.#emptyExt = false;
+  }
   static fromGlob(pattern, options = {}) {
-    const ast = new _AST(null, void 0, options);
-    _AST.#parseAST(pattern, ast, 0, options);
+    const ast = new _a2(null, void 0, options);
+    _a2.#parseAST(pattern, ast, 0, options, 0);
     return ast;
   }
   // returns the regular expression if there's magic, or the unescaped
@@ -50898,12 +51031,14 @@ var AST = class _AST {
   // or start or whatever) and prepend ^ or / at the Regexp construction.
   toRegExpSource(allowDot) {
     const dot = allowDot ?? !!this.#options.dot;
-    if (this.#root === this)
+    if (this.#root === this) {
+      this.#flatten();
       this.#fillNegs();
-    if (!this.type) {
+    }
+    if (!isExtglobAST(this)) {
       const noEmpty = this.isStart() && this.isEnd() && !this.#parts.some((s) => typeof s !== "string");
       const src = this.#parts.map((p) => {
-        const [re, _, hasMagic2, uflag] = typeof p === "string" ? _AST.#parseGlob(p, this.#hasMagic, noEmpty) : p.toRegExpSource(
+        const [re, _, hasMagic2, uflag] = typeof p === "string" ? _a2.#parseGlob(p, this.#hasMagic, noEmpty) : p.toRegExpSource(
         allowDot);
         this.#hasMagic = this.#hasMagic || hasMagic2;
         this.#uflag = this.#uflag || uflag;
@@ -50943,9 +51078,10 @@ var AST = class _AST {
     let body = this.#partsToRegExp(dot);
     if (this.isStart() && this.isEnd() && !body && this.type !== "!") {
       const s = this.toString();
-      this.#parts = [s];
-      this.type = null;
-      this.#hasMagic = void 0;
+      const me = this;
+      me.#parts = [s];
+      me.type = null;
+      me.#hasMagic = void 0;
       return [s, unescape(this.toString()), false, false];
     }
     let bodyDotAllowed = !repeated || allowDot || dot || !startNoDot ? "" : this.#partsToRegExp(true);
@@ -50972,6 +51108,38 @@ var AST = class _AST {
       this.#hasMagic = !!this.#hasMagic,
       this.#uflag
     ];
+  }
+  #flatten() {
+    if (!isExtglobAST(this)) {
+      for (const p of this.#parts) {
+        if (typeof p === "object") {
+          p.#flatten();
+        }
+      }
+    } else {
+      let iterations = 0;
+      let done = false;
+      do {
+        done = true;
+        for (let i = 0; i < this.#parts.length; i++) {
+          const c = this.#parts[i];
+          if (typeof c === "object") {
+            c.#flatten();
+            if (this.#canAdopt(c)) {
+              done = false;
+              this.#adopt(c, i);
+            } else if (this.#canAdoptWithSpace(c)) {
+              done = false;
+              this.#adoptWithSpace(c, i);
+            } else if (this.#canUsurp(c)) {
+              done = false;
+              this.#usurp(c);
+            }
+          }
+        }
+      } while (!done && ++iterations < 10);
+    }
+    this.#toString = void 0;
   }
   #partsToRegExp(dot) {
     return this.#parts.map((p) => {
@@ -51033,6 +51201,7 @@ var AST = class _AST {
     return [re, unescape(glob2), !!hasMagic2, uflag];
   }
 };
+_a2 = AST;
 
 // setup-nuget-sources/node_modules/minimatch/dist/esm/escape.js
 var escape = /* @__PURE__ */ __name((s, { windowsPathsNoEscape = false, magicalBraces = false } = {}) => {
@@ -51202,11 +51371,13 @@ var Minimatch = class {
   isWindows;
   platform;
   windowsNoMagicRoot;
+  maxGlobstarRecursion;
   regexp;
   constructor(pattern, options = {}) {
     assertValidPattern(pattern);
     options = options || {};
     this.options = options;
+    this.maxGlobstarRecursion = options.maxGlobstarRecursion ?? 200;
     this.pattern = pattern;
     this.platform = options.platform || defaultPlatform;
     this.isWindows = this.platform === "win32";
@@ -51544,7 +51715,8 @@ var Minimatch = class {
   // out of pattern, then that's fine, as long as all
   // the parts match.
   matchOne(file, pattern, partial = false) {
-    const options = this.options;
+    let fileStartIndex = 0;
+    let patternStartIndex = 0;
     if (this.isWindows) {
       const fileDrive = typeof file[0] === "string" && /^[a-z]:$/i.test(file[0]);
       const fileUNC = !fileDrive && file[0] === "" && file[1] === "" && file[2] === "?" && /^[a-z]:$/i.test(file[3]);
@@ -51560,11 +51732,8 @@ var Minimatch = class {
         ];
         if (fd.toLowerCase() === pd.toLowerCase()) {
           pattern[pdi] = fd;
-          if (pdi > fdi) {
-            pattern = pattern.slice(pdi);
-          } else if (fdi > pdi) {
-            file = file.slice(fdi);
-          }
+          patternStartIndex = pdi;
+          fileStartIndex = fdi;
         }
       }
     }
@@ -51572,49 +51741,124 @@ var Minimatch = class {
     if (optimizationLevel >= 2) {
       file = this.levelTwoFileOptimize(file);
     }
-    this.debug("matchOne", this, { file, pattern });
-    this.debug("matchOne", file.length, pattern.length);
-    for (var fi = 0, pi = 0, fl = file.length, pl = pattern.length; fi < fl && pi < pl; fi++, pi++) {
-      this.debug("matchOne loop");
-      var p = pattern[pi];
-      var f = file[fi];
-      this.debug(pattern, p, f);
-      if (p === false) {
+    if (pattern.includes(GLOBSTAR)) {
+      return this.#matchGlobstar(file, pattern, partial, fileStartIndex, patternStartIndex);
+    }
+    return this.#matchOne(file, pattern, partial, fileStartIndex, patternStartIndex);
+  }
+  #matchGlobstar(file, pattern, partial, fileIndex, patternIndex) {
+    const firstgs = pattern.indexOf(GLOBSTAR, patternIndex);
+    const lastgs = pattern.lastIndexOf(GLOBSTAR);
+    const [head, body, tail] = partial ? [
+      pattern.slice(patternIndex, firstgs),
+      pattern.slice(firstgs + 1),
+      []
+    ] : [
+      pattern.slice(patternIndex, firstgs),
+      pattern.slice(firstgs + 1, lastgs),
+      pattern.slice(lastgs + 1)
+    ];
+    if (head.length) {
+      const fileHead = file.slice(fileIndex, fileIndex + head.length);
+      if (!this.#matchOne(fileHead, head, partial, 0, 0)) {
         return false;
       }
-      if (p === GLOBSTAR) {
-        this.debug("GLOBSTAR", [pattern, p, f]);
-        var fr = fi;
-        var pr = pi + 1;
-        if (pr === pl) {
-          this.debug("** at the end");
-          for (; fi < fl; fi++) {
-            if (file[fi] === "." || file[fi] === ".." || !options.dot && file[fi].charAt(0) === ".")
-              return false;
-          }
-          return true;
+      fileIndex += head.length;
+      patternIndex += head.length;
+    }
+    let fileTailMatch = 0;
+    if (tail.length) {
+      if (tail.length + fileIndex > file.length)
+        return false;
+      let tailStart = file.length - tail.length;
+      if (this.#matchOne(file, tail, partial, tailStart, 0)) {
+        fileTailMatch = tail.length;
+      } else {
+        if (file[file.length - 1] !== "" || fileIndex + tail.length === file.length) {
+          return false;
         }
-        while (fr < fl) {
-          var swallowee = file[fr];
-          this.debug("\nglobstar while", file, fr, pattern, pr, swallowee);
-          if (this.matchOne(file.slice(fr), pattern.slice(pr), partial)) {
-            this.debug("globstar found match!", fr, fl, swallowee);
-            return true;
-          } else {
-            if (swallowee === "." || swallowee === ".." || !options.dot && swallowee.charAt(0) === ".") {
-              this.debug("dot detected!", file, fr, pattern, pr);
-              break;
-            }
-            this.debug("globstar swallow a segment, and continue");
-            fr++;
-          }
+        tailStart--;
+        if (!this.#matchOne(file, tail, partial, tailStart, 0)) {
+          return false;
         }
-        if (partial) {
-          this.debug("\n>>> no match, partial?", file, fr, pattern, pr);
-          if (fr === fl) {
-            return true;
-          }
+        fileTailMatch = tail.length + 1;
+      }
+    }
+    if (!body.length) {
+      let sawSome = !!fileTailMatch;
+      for (let i2 = fileIndex; i2 < file.length - fileTailMatch; i2++) {
+        const f = String(file[i2]);
+        sawSome = true;
+        if (f === "." || f === ".." || !this.options.dot && f.startsWith(".")) {
+          return false;
         }
+      }
+      return partial || sawSome;
+    }
+    const bodySegments = [[[], 0]];
+    let currentBody = bodySegments[0];
+    let nonGsParts = 0;
+    const nonGsPartsSums = [0];
+    for (const b of body) {
+      if (b === GLOBSTAR) {
+        nonGsPartsSums.push(nonGsParts);
+        currentBody = [[], 0];
+        bodySegments.push(currentBody);
+      } else {
+        currentBody[0].push(b);
+        nonGsParts++;
+      }
+    }
+    let i = bodySegments.length - 1;
+    const fileLength = file.length - fileTailMatch;
+    for (const b of bodySegments) {
+      b[1] = fileLength - (nonGsPartsSums[i--] + b[0].length);
+    }
+    return !!this.#matchGlobStarBodySections(file, bodySegments, fileIndex, 0, partial, 0, !!fileTailMatch);
+  }
+  // return false for "nope, not matching"
+  // return null for "not matching, cannot keep trying"
+  #matchGlobStarBodySections(file, bodySegments, fileIndex, bodyIndex, partial, globStarDepth, sawTail) {
+    const bs = bodySegments[bodyIndex];
+    if (!bs) {
+      for (let i = fileIndex; i < file.length; i++) {
+        sawTail = true;
+        const f = file[i];
+        if (f === "." || f === ".." || !this.options.dot && f.startsWith(".")) {
+          return false;
+        }
+      }
+      return sawTail;
+    }
+    const [body, after] = bs;
+    while (fileIndex <= after) {
+      const m = this.#matchOne(file.slice(0, fileIndex + body.length), body, partial, fileIndex, 0);
+      if (m && globStarDepth < this.maxGlobstarRecursion) {
+        const sub = this.#matchGlobStarBodySections(file, bodySegments, fileIndex + body.length, bodyIndex + 1, partial,
+        globStarDepth + 1, sawTail);
+        if (sub !== false) {
+          return sub;
+        }
+      }
+      const f = file[fileIndex];
+      if (f === "." || f === ".." || !this.options.dot && f.startsWith(".")) {
+        return false;
+      }
+      fileIndex++;
+    }
+    return partial || null;
+  }
+  #matchOne(file, pattern, partial, fileIndex, patternIndex) {
+    let fi;
+    let pi;
+    let pl;
+    let fl;
+    for (fi = fileIndex, pi = patternIndex, fl = file.length, pl = pattern.length; fi < fl && pi < pl; fi++, pi++) {
+      this.debug("matchOne loop");
+      let p = pattern[pi];
+      let f = file[fi];
+      this.debug(pattern, p, f);
+      if (p === false || p === GLOBSTAR) {
         return false;
       }
       let hit;
