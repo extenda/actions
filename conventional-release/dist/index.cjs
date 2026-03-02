@@ -101562,7 +101562,7 @@ function preventProtocolOverride(arg, next) {
   if (!isConfigSwitch(arg)) {
     return;
   }
-  if (!/^\s*protocol(.[a-z]+)?.allow/.test(next)) {
+  if (!/^\s*protocol(.[a-z]+)?.allow/i.test(next)) {
     return;
   }
   throw new GitPluginError(
