@@ -7,7 +7,7 @@
   "dependencies": {
     "@actions/cache": "^6.0.0",
     "@actions/io": "^3.0.2",
-    "axios": "^1.13.5",
+    "axios": "^1.13.6",
     "fast-glob": "^3.3.3",
     "uuid": "^13.0.0"
   },
