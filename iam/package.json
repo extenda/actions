@@ -6,7 +6,7 @@
   "main": "dist/index.cjs",
   "dependencies": {
     "@actions/github": "^9.0.0",
-    "axios": "^1.13.5",
+    "axios": "^1.13.6",
     "fast-glob": "^3.3.3",
     "jsonschema": "^1.5.0",
     "multiline-str": "^1.0.4",

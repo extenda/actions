@@ -6,7 +6,7 @@
   "main": "dist/index.cjs",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.13.5",
+    "axios": "^1.13.6",
     "camelcase-keys": "^10.0.2",
     "fast-glob": "^3.3.3",
     "joi": "^18.0.2",
