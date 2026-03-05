@@ -64,7 +64,7 @@ const gkeManifestTemplate = async (
   // initialize manifest components
 
   let annotations = {};
-  const deploymentVolumes = volumeSetup(opa, protocol, type);
+  const deploymentVolumes = volumeSetup(opa, protocol);
   const userVolumeMounts = userContainerVolumeMountSetup(
     opa,
     protocol,
