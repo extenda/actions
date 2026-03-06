@@ -8,7 +8,6 @@ import * as core from '@actions/core';
 
 import action from '../src/index.js';
 import runDeploy from '../src/run-deploy.js';
-import serviceDef from '../src/service-definition.js';
 
 const orgEnv = process.env;
 
@@ -22,9 +21,11 @@ describe('Cloud Run Action', () => {
     process.env = { ...orgEnv };
   });
 
-  test('It can run the action', async () => {
-    process.env.GITHUB_REF = 'refs/heads/master';
-    serviceDef.mockReturnValueOnce({});
+  test('It fails to run the action due to deprecation', async () => {
+    const mockExit = vi.spyOn(process, 'exit').mockImplementation((code) => {
+      throw new Error(`Process exited with code ${code}`);
+    });
+
     core.getInput
       .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('cloud-run.yaml')
@@ -33,79 +34,18 @@ describe('Cloud Run Action', () => {
       .mockReturnValueOnce('')
       .mockReturnValueOnce('dns')
       .mockReturnValueOnce('false');
-    runDeploy.mockResolvedValueOnce({});
-    await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(7);
-    expect(runDeploy).toHaveBeenCalledWith(
-      'service-account',
-      {},
-      'gcr.io/project/image:tag',
-      false,
+    await expect(action()).rejects.toThrow('Process exited with code 0');
+
+    expect(core.warning).toHaveBeenCalledWith(
+      'This action is deprecated and has been disabled!',
     );
-  });
-
-  test('It can run without optional args', async () => {
-    process.env.GITHUB_REF = 'refs/heads/master';
-    serviceDef.mockReturnValueOnce({});
-    core.getInput
-      .mockReturnValueOnce('service-account')
-      .mockReturnValueOnce('')
-      .mockReturnValueOnce('')
-      .mockReturnValueOnce('gcr.io/project/image:tag')
-      .mockReturnValueOnce('')
-      .mockReturnValueOnce('dns')
-      .mockReturnValueOnce('false');
-    runDeploy.mockResolvedValueOnce({});
-
-    await action();
-
-    expect(core.getInput).toHaveBeenCalledTimes(7);
-    expect(runDeploy).toHaveBeenCalledWith(
-      'service-account',
-      {},
-      'gcr.io/project/image:tag',
-      false,
+    expect(core.warning).toHaveBeenCalledWith(
+      'Please migrate to the new cloud-deploy Action for continued support and new features.',
     );
-  });
+    expect(mockExit).toHaveBeenCalledWith(0);
+    expect(runDeploy).not.toHaveBeenCalled();
 
-  test('It can run with verbose flag set', async () => {
-    process.env.GITHUB_REF = 'refs/heads/main';
-    serviceDef.mockReturnValueOnce({});
-    core.getInput
-      .mockReturnValueOnce('service-account')
-      .mockReturnValueOnce('')
-      .mockReturnValueOnce('')
-      .mockReturnValueOnce('gcr.io/project/image:tag')
-      .mockReturnValueOnce('')
-      .mockReturnValueOnce('dns')
-      .mockReturnValueOnce('true');
-    runDeploy.mockResolvedValueOnce({});
-
-    await action();
-
-    expect(core.getInput).toHaveBeenCalledTimes(7);
-    expect(runDeploy).toHaveBeenCalledWith(
-      'service-account',
-      {},
-      'gcr.io/project/image:tag',
-      true,
-    );
-  });
-
-  test('It cannot run the action if branch is not master or main', async () => {
-    process.env.GITHUB_REF = 'refs/heads/develop';
-    serviceDef.mockReturnValueOnce({});
-    core.getInput
-      .mockReturnValueOnce('service-account')
-      .mockReturnValueOnce('cloud-run.yaml')
-      .mockReturnValueOnce('')
-      .mockReturnValueOnce('gcr.io/project/image:tag')
-      .mockReturnValueOnce('')
-      .mockReturnValueOnce('dns')
-      .mockReturnValueOnce('false');
-    await expect(action()).rejects.toThrow(
-      /^Action not allowed on ref refs\/heads\/develop/,
-    );
+    mockExit.mockRestore();
   });
 });
