@@ -1,9 +1,9 @@
 import { kubernetesCollector } from './collector-sidecar.js';
 import { securitySpec } from './security-sidecar.js';
 
-const volumeSetup = (opa, protocol, type = 'none') => {
+const volumeSetup = (opa, protocol) => {
   const volumes = [];
-  if (opa && type.toLowerCase() !== 'statefulset') {
+  if (opa) {
     if (protocol === 'http2') {
       volumes.push({
         name: 'extenda-certs',
@@ -19,7 +19,7 @@ const userContainerVolumeMountSetup = (opa, protocol, type, volumes, name) => {
   if (volumes && type.toLowerCase() === 'statefulset') {
     volumeMounts.push({ mountPath: volumes[0]['mount-path'], name });
   }
-  if (opa && type === 'Deployment') {
+  if (opa) {
     if (protocol === 'http2') {
       volumeMounts.push({
         mountPath: '/etc/extenda/certs',
@@ -64,7 +64,7 @@ const gkeManifestTemplate = async (
   // initialize manifest components
 
   let annotations = {};
-  const deploymentVolumes = volumeSetup(opa, protocol, type);
+  const deploymentVolumes = volumeSetup(opa, protocol);
   const userVolumeMounts = userContainerVolumeMountSetup(
     opa,
     protocol,
@@ -251,7 +251,7 @@ const gkeManifestTemplate = async (
                 })),
               ],
             },
-            ...(opa && type === 'Deployment'
+            ...(opa
               ? [
                   {
                     ...securityContainer,

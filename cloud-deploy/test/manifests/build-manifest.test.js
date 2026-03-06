@@ -507,6 +507,82 @@ metadata:
     expect(manifest).toMatchSnapshot();
   });
 
+  test('It should generate StatefulSet manifest with OPA security container', async () => {
+    handleStatefulset.mockResolvedValueOnce();
+    checkSystem.mockResolvedValueOnce(true);
+    securitySpec.mockResolvedValueOnce({
+      name: 'security-authz',
+      image: 'eu.gcr.io/extenda/security:authz',
+      ports: [{ containerPort: 9001 }],
+      env: [{ name: 'ENVOY_PROTOCOL', value: 'http' }],
+      volumeMounts: [{ mountPath: '/config', name: 'opa', readOnly: true }],
+    });
+
+    const image = 'example-image:latest';
+    const service = {
+      kubernetes: {
+        type: 'StatefulSet',
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          cpu: 40,
+        },
+        volumes: [
+          {
+            'disk-type': 'ssd',
+            size: '10Gi',
+            'mount-path': '/mnt/data',
+          },
+        ],
+      },
+      security: {
+        'permission-prefix': 'tst',
+      },
+      labels: {
+        product: 'actions',
+        component: 'jest',
+        'iso-country': 'se',
+        'tenant-alias': 'testrunner',
+      },
+      environments: {
+        production: {
+          'min-instances': 3,
+          'max-instances': 3,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+          },
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'dev';
+
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
+
+    // Snapshot test for k8s-manifest.yaml.
+    const manifest = readFileSync('k8s(deploy)-manifest.yaml');
+    mockFs.restore();
+    expect(manifest).toMatchSnapshot();
+  });
+
   test('It should generate cloud run service with annotations', async () => {
     const image = 'example-image:latest';
     const service = {
