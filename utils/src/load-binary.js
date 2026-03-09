@@ -67,6 +67,15 @@ const downloadIfMissing = async (options, cachedTool) => {
   return cachedTool;
 };
 
+/**
+ * Load a tool binary, downloading and caching it if necessary.
+ * @param tool the tool to install
+ * @param binary the binary to add to PATH (e.g. terraform.exe on Windows)
+ * @param version the tool version
+ * @param downloadUrl the download URL
+ * @param auth optional authentication for downloading the tool (e.g. { username, password } for basic auth)
+ * @return {Promise<string>} Path to the binary
+ */
 const loadTool = async ({ tool, binary, version, downloadUrl, auth }) => {
   const options = {
     tool,

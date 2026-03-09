@@ -1,0 +1,60 @@
+name: Trivy Scan
+description: >
+  Scan an image with Trivy and generate SBOM files and reports.
+  The action can optionally upload SBOM files to Google Artifact Registry.
+author: Extenda Retail
+inputs:
+  service-account-key:
+    description: >
+      The service account key which will be used to access the image repository.
+    required: true
+  image:
+    description: The Docker image to scan.
+    required: true
+  upload-sbom:
+    description: Whether to upload the generated SBOM files to Google Artifact Registry.
+    required: false
+    default: 'false'
+  fail-on-vulnerabilities:
+    description: >
+      Set to `true` to fail the action if vulnerabilities are found. If set to `false`, the action will not fail even
+      if vulnerabilities are found, but the vulnerabilities will still be included in the generated reports.
+    required: false
+    default: 'false'
+  severity:
+    description: >
+      The severity levels to include in the scan report. Comma-separated values of
+      `UNKNOWN`, `LOW`, `MEDIUM`, `HIGH`, and `CRITICAL`. For example, `HIGH,CRITICAL`
+      will only include vulnerabilities with HIGH and CRITICAL severity levels in the report.
+    required: false
+    default: 'HIGH,CRITICAL'
+  ignore-unfixed:
+    description: Whether to ignore vulnerabilities that do not have a fix available.
+    required: false
+    default: 'true'
+  trivy-version:
+    description: The version of Trivy to use for scanning.
+    required: false
+    default: 'latest'
+  timeout:
+    description: The maximum time to allow for the scan to complete.
+    required: false
+    default: '5m0s'
+  notify-slack-on-vulnerabilities:
+    description: >
+      Whether to send a notification to Slack if vulnerabilities are found.
+      The channel to use is found from the provided `service-account-key`.
+    required: false
+    default: 'true'
+outputs:
+  spdx-sbom:
+    description: The generated SPDX SBOM file.
+  cyclonedx-sbom:
+    description: The generated CycloneDX SBOM file.
+  json-report:
+    description: The generated Trivy scan report file in JSON format.
+  text-report:
+    description: The generated Trivy scan report file in compact text format.
+runs:
+  using: node20
+  main: dist/index.cjs
