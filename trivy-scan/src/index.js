@@ -10,6 +10,9 @@ import uploadSbom from './upload-sbom.js';
  * Scan an image with Trivy and handle the results according to the specified options. This includes uploading
  * SBOM artifacts, sending Slack notifications, and failing the action if vulnerabilities are found.
  *
+ * This method can be used from other actions that want to leverage the Trivy scanning functionality without
+ * running a separate step in the CI/CD pipeline.
+ *
  * @param serviceAccountKey - The Google Cloud service account key with permissions to upload to Artifact Registry and send Slack notifications
  * @param image - The image to scan, either a semantic image or a sha256 digest
  * @param version - The Trivy version to use
@@ -84,7 +87,7 @@ const action = async () => {
   );
 };
 
-export { setupTrivy, trivy, trivyJobSummary, trivyScan, uploadSbom };
+export { setupTrivy, trivy, trivyScan, uploadSbom };
 
 /** Default export used by action entrypoint. */
 export default action;
