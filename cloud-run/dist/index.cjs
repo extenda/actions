@@ -47858,15 +47858,6 @@ init_utils();
 var Git = require_git();
 init_git_response_error();
 
-// utils/node_modules/@actions/io/lib/io-util.js
-var fs = __toESM(require("fs"), 1);
-var { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs.promises;
-var IS_WINDOWS = process.platform === "win32";
-var READONLY = fs.constants.O_RDONLY;
-
-// utils/node_modules/@actions/exec/lib/toolrunner.js
-var IS_WINDOWS2 = process.platform === "win32";
-
 // utils/node_modules/@actions/core/lib/command.js
 var os = __toESM(require("os"), 1);
 
@@ -48297,6 +48288,17 @@ var _summary = new Summary();
 
 // utils/node_modules/@actions/core/lib/platform.js
 var import_os2 = __toESM(require("os"), 1);
+
+// utils/node_modules/@actions/io/lib/io-util.js
+var fs = __toESM(require("fs"), 1);
+var { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs.promises;
+var IS_WINDOWS = process.platform === "win32";
+var READONLY = fs.constants.O_RDONLY;
+
+// utils/node_modules/@actions/exec/lib/toolrunner.js
+var IS_WINDOWS2 = process.platform === "win32";
+
+// utils/node_modules/@actions/core/lib/platform.js
 var platform = import_os2.default.platform();
 var arch = import_os2.default.arch();
 
@@ -48840,15 +48842,15 @@ var ExitCode2;
   ExitCode3[ExitCode3["Success"] = 0] = "Success";
   ExitCode3[ExitCode3["Failure"] = 1] = "Failure";
 })(ExitCode2 || (ExitCode2 = {}));
-function warning(message, properties = {}) {
+function warning2(message, properties = {}) {
   issueCommand2("warning", toCommandProperties2(properties), message instanceof Error ? message.toString() : message);
 }
-__name(warning, "warning");
+__name(warning2, "warning");
 
 // cloud-run/src/index.js
 var action = /* @__PURE__ */ __name(async () => {
-  warning("This action is deprecated and has been disabled!");
-  warning(
+  warning2("This action is deprecated and has been disabled!");
+  warning2(
     "Please migrate to the new cloud-deploy Action for continued support and new features."
   );
   process.exit(0);

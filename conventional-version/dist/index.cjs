@@ -80759,15 +80759,6 @@ __name(gitInstanceFactory, "gitInstanceFactory");
 init_git_response_error();
 var esm_default = gitInstanceFactory;
 
-// utils/node_modules/@actions/io/lib/io-util.js
-var fs = __toESM(require("fs"), 1);
-var { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs.promises;
-var IS_WINDOWS = process.platform === "win32";
-var READONLY = fs.constants.O_RDONLY;
-
-// utils/node_modules/@actions/exec/lib/toolrunner.js
-var IS_WINDOWS2 = process.platform === "win32";
-
 // utils/node_modules/@actions/core/lib/command.js
 var os = __toESM(require("os"), 1);
 
@@ -81201,6 +81192,17 @@ var _summary = new Summary();
 
 // utils/node_modules/@actions/core/lib/platform.js
 var import_os2 = __toESM(require("os"), 1);
+
+// utils/node_modules/@actions/io/lib/io-util.js
+var fs = __toESM(require("fs"), 1);
+var { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs.promises;
+var IS_WINDOWS = process.platform === "win32";
+var READONLY = fs.constants.O_RDONLY;
+
+// utils/node_modules/@actions/exec/lib/toolrunner.js
+var IS_WINDOWS2 = process.platform === "win32";
+
+// utils/node_modules/@actions/core/lib/platform.js
 var platform = import_os2.default.platform();
 var arch = import_os2.default.arch();
 

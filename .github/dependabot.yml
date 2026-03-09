@@ -46,6 +46,7 @@ updates:
       - /status-check
       - /styra-das-deploy
       - /terraform-plan-comment
+      - /trivy-scan
       - /utils
     schedule:
       interval: weekly
