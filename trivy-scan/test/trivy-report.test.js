@@ -1,9 +1,16 @@
 import fs from 'node:fs';
 
+import * as core from '@actions/core';
 import mockFs from 'mock-fs';
 import { afterEach, expect, test, vi } from 'vitest';
 
-import { generateSummary, generateTextReport } from '../src/text-report.js';
+import {
+  generateSummary,
+  generateTextReport,
+  writeTrivyJobSummary,
+} from '../src/trivy-report.js';
+
+vi.mock('@actions/core');
 
 const JSON_REPORT = {
   Results: [
@@ -54,6 +61,24 @@ afterEach(() => {
   mockFs.restore();
   vi.resetAllMocks();
 });
+
+const createSummaryMock = () => {
+  const summary = {
+    addHeading: vi.fn(),
+    addRaw: vi.fn(),
+    addEOL: vi.fn(),
+    addTable: vi.fn(),
+    write: vi.fn(),
+  };
+
+  summary.addHeading.mockReturnValue(summary);
+  summary.addRaw.mockReturnValue(summary);
+  summary.addEOL.mockReturnValue(summary);
+  summary.addTable.mockReturnValue(summary);
+  summary.write.mockResolvedValue(undefined);
+
+  vi.spyOn(core, 'summary', 'get').mockReturnValue(summary);
+};
 
 test('It creates text report from JSON', async () => {
   mockFs({
@@ -194,4 +219,51 @@ test('It skips summary if json report is missing', () => {
     high: 0,
     critical: 0,
   });
+});
+
+test('It writes trivy results to the GitHub job summary', async () => {
+  mockFs({
+    '.trivy/report.json': JSON.stringify(JSON_REPORT),
+  });
+  createSummaryMock();
+
+  const success = await writeTrivyJobSummary({
+    image: 'ubuntu@sha256:manifest',
+    report: { json: '.trivy/report.json' },
+  });
+
+  expect(success).toEqual(true);
+  expect(core.summary.addHeading).toHaveBeenCalledWith('Trivy Scan Report');
+  expect(core.summary.addRaw).toHaveBeenCalledWith(
+    'Total vulnerabilities found on ubuntu@sha256:manifest: 5 (UNKNOWN: 1, LOW: 1, MEDIUM: 1, HIGH: 1, CRITICAL: 1)',
+  );
+
+  const tableRows = core.summary.addTable.mock.calls[0][0];
+  expect(tableRows[0]).toEqual([
+    { data: 'Severity', header: true },
+    { data: 'Vulnerability', header: true },
+    { data: 'Package', header: true },
+    { data: 'Title', header: true },
+  ]);
+  expect(tableRows[1][0]).toEqual('CRITICAL');
+  expect(tableRows[2][0]).toEqual('HIGH');
+  expect(tableRows[3][0]).toEqual('MEDIUM');
+  expect(tableRows[4][0]).toEqual('LOW');
+  expect(tableRows[5][0]).toEqual('UNKNOWN');
+  expect(core.summary.write).toHaveBeenCalledTimes(1);
+});
+
+test('It skips summary when the trivy json report is missing', async () => {
+  createSummaryMock();
+
+  const success = await writeTrivyJobSummary({
+    image: 'ubuntu@sha256:manifest',
+    report: { json: '.trivy/report.json' },
+  });
+
+  expect(success).toEqual(false);
+  expect(core.info).toHaveBeenCalledWith(
+    'Trivy JSON report not found, skipping job summary.',
+  );
+  expect(core.summary.write).not.toHaveBeenCalled();
 });

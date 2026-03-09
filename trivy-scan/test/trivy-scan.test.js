@@ -3,12 +3,12 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
 import resolveDigest from '../src/resolve-digest.js';
 import setupTrivy from '../src/setup-trivy.js';
-import { generateSummary, generateTextReport } from '../src/text-report.js';
+import { generateSummary, generateTextReport } from '../src/trivy-report.js';
 import trivyScan from '../src/trivy-scan.js';
 
 vi.mock('../../utils/src/index.js');
 vi.mock('@actions/exec');
-vi.mock('../src/text-report.js');
+vi.mock('../src/trivy-report.js');
 vi.mock('../src/setup-trivy.js');
 vi.mock('../src/resolve-digest.js');
 

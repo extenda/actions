@@ -2,7 +2,7 @@ import { exec } from '@actions/exec';
 
 import resolveDigest from './resolve-digest.js';
 import setupTrivy from './setup-trivy.js';
-import { generateSummary, generateTextReport } from './text-report.js';
+import { generateSummary, generateTextReport } from './trivy-report.js';
 
 const outputs = {
   sbom: {

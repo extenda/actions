@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 
 import notifySlack from '../../slack-notify/src/slack-notify.js';
 import setupTrivy from './setup-trivy.js';
-import trivyJobSummary from './trivy-job-summary.js';
+import { writeTrivyJobSummary } from './trivy-report.js';
 import trivyScan from './trivy-scan.js';
 import uploadSbom from './upload-sbom.js';
 
@@ -34,7 +34,7 @@ const trivy = async (
     ignoreUnfixed,
   });
 
-  await trivyJobSummary(scanResult);
+  await writeTrivyJobSummary(scanResult);
 
   if (uploadSbomArtifacts) {
     await uploadSbom(image, scanResult.sbom, serviceAccountKey);

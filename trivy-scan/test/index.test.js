@@ -3,13 +3,13 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
 import notifySlack from '../../slack-notify/src/slack-notify.js';
 import action from '../src/index.js';
-import trivyJobSummary from '../src/trivy-job-summary.js';
+import { writeTrivyJobSummary as trivyJobSummary } from '../src/trivy-report.js';
 import trivyScan from '../src/trivy-scan.js';
 import uploadSbom from '../src/upload-sbom.js';
 
 vi.mock('@actions/core');
 vi.mock('../src/upload-sbom.js');
-vi.mock('../src/trivy-job-summary.js');
+vi.mock('../src/trivy-report.js');
 vi.mock('../src/trivy-scan.js');
 vi.mock('../../slack-notify/src/slack-notify.js');
 
