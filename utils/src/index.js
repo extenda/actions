@@ -1,6 +1,9 @@
 import checkEnv from './check-env.js';
 import gitConfig from './git-config.js';
-import getImageDigest from './image-digest.js';
+import {
+  default as getImageDigest,
+  resolveImageDigests,
+} from './image-digest.js';
 import { find as findTool, loadTool } from './load-binary.js';
 import loadGitHubToken from './load-github-token.js';
 import run from './run.js';
@@ -17,5 +20,6 @@ export {
   gitConfig,
   loadGitHubToken,
   loadTool,
+  resolveImageDigests,
   run,
 };
