@@ -1,5 +1,7 @@
+import fs from 'node:fs';
+
 import { exec } from '@actions/exec';
-import { afterEach, beforeEach, expect, test, vi } from 'vitest';
+import { afterAll, afterEach, beforeEach, expect, test, vi } from 'vitest';
 
 import resolveDigest from '../src/resolve-digest.js';
 import setupTrivy from '../src/setup-trivy.js';
@@ -11,10 +13,6 @@ vi.mock('@actions/exec');
 vi.mock('../src/trivy-report.js');
 vi.mock('../src/setup-trivy.js');
 vi.mock('../src/resolve-digest.js');
-
-afterEach(() => {
-  vi.resetAllMocks();
-});
 
 beforeEach(() => {
   setupTrivy.mockResolvedValueOnce('/tmp/trivy');
@@ -29,6 +27,14 @@ beforeEach(() => {
     indexSha: 'ubuntu@sha256:index',
     manifestSha: 'ubuntu@sha256:manifest',
   });
+});
+
+afterEach(() => {
+  vi.resetAllMocks();
+});
+
+afterAll(() => {
+  fs.rmSync('.trivy', { recursive: true, force: true });
 });
 
 test('It can scan with Trivy defaults', async () => {
@@ -51,25 +57,46 @@ test('It can scan with Trivy defaults', async () => {
     },
   });
 
-  expect(exec).toHaveBeenCalledWith('/tmp/trivy', [
-    '--format spdx-json',
+  expect(exec).toHaveBeenNthCalledWith(1, '/tmp/trivy', [
+    'image',
+    '--format',
+    'spdx-json',
     '--license-full',
     '--pkg-relationships',
-    '--output .trivy/sbom.spdx.json',
+    '--db-repository',
+    'ghcr.io/aquasecurity/trivy-db:2,public.ecr.aws/aquasecurity/trivy-db',
+    '--timeout',
+    '5m0s',
+    '--output',
+    '.trivy/sbom.spdx.json',
     'ubuntu@sha256:manifest',
   ]);
-  expect(exec).toHaveBeenCalledWith('/tmp/trivy', [
-    '--format cyclonedx',
-    '--output .trivy/sbom.cdx.json',
-    'ubuntu@sha256:manifest',
-  ]);
-  expect(exec).toHaveBeenCalledWith('/tmp/trivy', [
-    'sbom',
+  expect(exec).toHaveBeenNthCalledWith(2, '/tmp/trivy', [
+    'image',
+    '--format',
+    'cyclonedx',
+    '--db-repository',
+    'ghcr.io/aquasecurity/trivy-db:2,public.ecr.aws/aquasecurity/trivy-db',
+    '--timeout',
+    '5m0s',
+    '--output',
     '.trivy/sbom.cdx.json',
-    '--severity CRITICAL,HIGH',
-    '--exit-code 0',
-    '--output .trivy/report.json',
+    'ubuntu@sha256:manifest',
+  ]);
+  expect(exec).toHaveBeenNthCalledWith(3, '/tmp/trivy', [
+    'sbom',
+    '--severity',
+    'CRITICAL,HIGH',
+    '--exit-code',
+    '0',
+    '--db-repository',
+    'ghcr.io/aquasecurity/trivy-db:2,public.ecr.aws/aquasecurity/trivy-db',
+    '--timeout',
+    '5m0s',
+    '--output',
+    '.trivy/report.json',
     '--ignore-unfixed',
+    '.trivy/sbom.cdx.json',
   ]);
 
   expect(generateTextReport).toHaveBeenCalledWith(
@@ -107,10 +134,17 @@ test('It can scan with custom options', async () => {
   // Custom options applies to the final scan command, but not SBOM generation
   expect(exec).toHaveBeenCalledWith('/tmp/trivy', [
     'sbom',
+    '--severity',
+    'CRITICAL,HIGH,MEDIUM',
+    '--exit-code',
+    '0',
+    '--db-repository',
+    'ghcr.io/aquasecurity/trivy-db:2,public.ecr.aws/aquasecurity/trivy-db',
+    '--timeout',
+    '5m0s',
+    '--output',
+    '.trivy/report.json',
     '.trivy/sbom.cdx.json',
-    '--severity CRITICAL,HIGH,MEDIUM',
-    '--exit-code 0',
-    '--output .trivy/report.json',
   ]);
 });
 

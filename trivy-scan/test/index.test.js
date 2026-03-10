@@ -28,7 +28,8 @@ const setInput = (
     .mockReturnValueOnce('ubuntu') // image
     .mockReturnValueOnce('sa') // service-account-key
     .mockReturnValueOnce('latest') // trivy-version
-    .mockReturnValueOnce('CRITICAL,HIGH'); // severity
+    .mockReturnValueOnce('CRITICAL,HIGH') // severity
+    .mockReturnValueOnce('5m0s'); // timeout
   core.getBooleanInput
     .mockReturnValueOnce(false) // ignore-unfixed
     .mockReturnValueOnce(failOnVulnerabilities) // fail-on-vulnerabilities

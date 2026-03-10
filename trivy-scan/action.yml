@@ -37,7 +37,10 @@ inputs:
     required: false
     default: 'latest'
   timeout:
-    description: The maximum time to allow for the scan to complete.
+    description: >
+      The maximum time spent on each Trivy invocation, e.g. `5m0s`. Note that Trivy is invoked multiple times by
+      the action. For strict timeout control, consider using the `timeout` option of the GitHub Actions workflow
+      step that uses this action.
     required: false
     default: '5m0s'
   notify-slack-on-vulnerabilities:

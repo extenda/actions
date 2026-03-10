@@ -18,6 +18,7 @@ import uploadSbom from './upload-sbom.js';
  * @param version - The Trivy version to use
  * @param severity - The severity levels to report on, e.g. "CRITICAL,HIGH"
  * @param ignoreUnfixed - Whether to ignore unfixed vulnerabilities
+ * @param timeout - The maximum time spent on each trivy invocation, e.g. `5m0s`
  * @param failOnVulnerabilities - Whether to fail the action if any vulnerabilities are found
  * @param notifySlackOnVulnerabilities - Whether to send a Slack notification if vulnerabilities are found
  * @param uploadSbomArtifacts - Whether to upload SBOM artifacts to Artifact Registry
@@ -26,7 +27,7 @@ import uploadSbom from './upload-sbom.js';
 const trivy = async (
   serviceAccountKey,
   image,
-  { version, severity, ignoreUnfixed } = {},
+  { version, severity, ignoreUnfixed, timeout } = {},
   failOnVulnerabilities = false,
   notifySlackOnVulnerabilities = false,
   uploadSbomArtifacts = false,
@@ -35,6 +36,7 @@ const trivy = async (
     version,
     severity,
     ignoreUnfixed,
+    timeout,
   });
 
   await writeTrivyJobSummary(scanResult);
@@ -72,6 +74,7 @@ const action = async () => {
   const version = core.getInput('trivy-version');
   const severity = core.getInput('severity');
   const ignoreUnfixed = core.getBooleanInput('ignore-unfixed');
+  const timeout = core.getInput('timeout');
   const failOnVulnerabilities = core.getBooleanInput('fail-on-vulnerabilities');
   const notifySlackOnVulnerabilities = core.getBooleanInput(
     'notify-slack-on-vulnerabilities',
@@ -80,7 +83,7 @@ const action = async () => {
   await trivy(
     serviceAccountKey,
     image,
-    { version, severity, ignoreUnfixed },
+    { version, severity, ignoreUnfixed, timeout },
     failOnVulnerabilities,
     notifySlackOnVulnerabilities,
     uploadSbomArtifacts,
