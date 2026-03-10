@@ -53,6 +53,7 @@ The following actions are available
   * [terraform-plan-comment](terraform-plan-comment#readme)
   * ~~[test-pod](test-pod#readme)~~
   * [trivy-report](trivy-report#readme)
+  * [trivy-scan](trivy-scan#readme)
   * ~~[txengine-deploy](txengine-deploy#readme)~~
 
 ## :rocket: Workflow Examples

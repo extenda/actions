@@ -6,6 +6,9 @@ import { writeTrivyJobSummary } from './trivy-report.js';
 import trivyScan from './trivy-scan.js';
 import uploadSbom from './upload-sbom.js';
 
+const DEFAULT_ATTESTATION_KEY_URI =
+  'gcpkms://projects/platform-prod-2481/locations/europe-west1/keyRings/global-keyring-binary/cryptoKeys/quality-assurance-attestor-key/cryptoKeyVersions/1';
+
 /**
  * Scan an image with Trivy and handle the results according to the specified options. This includes uploading
  * SBOM artifacts, sending Slack notifications, and failing the action if vulnerabilities are found.
@@ -22,6 +25,7 @@ import uploadSbom from './upload-sbom.js';
  * @param failOnVulnerabilities - Whether to fail the action if any vulnerabilities are found
  * @param notifySlackOnVulnerabilities - Whether to send a Slack notification if vulnerabilities are found
  * @param uploadSbomArtifacts - Whether to upload SBOM artifacts to Artifact Registry
+ * @param attestationKeyUri - The KMS key URI to use for signing the SBOM attestations. If omitted, the default binary authz key is used. Pass `null` to upload SBOMs without attestation.
  * @return {Promise<{success: boolean, image: string, summary: {message: string, critical: int, high: int}, sbom: {spdx: string, cdx: string}, report: {json: string, text: string}}>}
  */
 const trivy = async (
@@ -31,7 +35,10 @@ const trivy = async (
   failOnVulnerabilities = false,
   notifySlackOnVulnerabilities = false,
   uploadSbomArtifacts = false,
+  attestationKeyUri = DEFAULT_ATTESTATION_KEY_URI,
 ) => {
+  const normalizedAttestationKeyUri =
+    attestationKeyUri === null ? undefined : attestationKeyUri;
   const scanResult = await trivyScan(image, {
     version,
     severity,
@@ -42,7 +49,12 @@ const trivy = async (
   await writeTrivyJobSummary(scanResult);
 
   if (uploadSbomArtifacts) {
-    await uploadSbom(image, scanResult.sbom, serviceAccountKey);
+    await uploadSbom(
+      image,
+      scanResult.sbom,
+      serviceAccountKey,
+      normalizedAttestationKeyUri,
+    );
   }
 
   if (!scanResult.success) {
@@ -80,6 +92,10 @@ const action = async () => {
     'notify-slack-on-vulnerabilities',
   );
   const uploadSbomArtifacts = core.getBooleanInput('upload-sbom');
+  const attestationKeyUri = core.getInput('sbom-attestation-key-uri');
+  const resolvedAttestationKeyUri =
+    attestationKeyUri === 'none' ? null : attestationKeyUri || undefined;
+
   await trivy(
     serviceAccountKey,
     image,
@@ -87,6 +103,7 @@ const action = async () => {
     failOnVulnerabilities,
     notifySlackOnVulnerabilities,
     uploadSbomArtifacts,
+    resolvedAttestationKeyUri,
   );
 };
 

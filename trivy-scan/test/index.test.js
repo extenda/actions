@@ -23,13 +23,15 @@ const setInput = (
   failOnVulnerabilities,
   notifySlackOnVulnerabilities,
   uploadSbomArtifact = false,
+  attestationKeyUri = '',
 ) => {
   core.getInput
     .mockReturnValueOnce('ubuntu') // image
     .mockReturnValueOnce('sa') // service-account-key
     .mockReturnValueOnce('latest') // trivy-version
     .mockReturnValueOnce('CRITICAL,HIGH') // severity
-    .mockReturnValueOnce('5m0s'); // timeout
+    .mockReturnValueOnce('5m0s') // timeout
+    .mockReturnValueOnce(attestationKeyUri); // sbom-attestation-key-uri
   core.getBooleanInput
     .mockReturnValueOnce(false) // ignore-unfixed
     .mockReturnValueOnce(failOnVulnerabilities) // fail-on-vulnerabilities
@@ -50,6 +52,7 @@ test('Action runs with successful scan', async () => {
     version: 'latest',
     severity: 'CRITICAL,HIGH',
     ignoreUnfixed: false,
+    timeout: '5m0s',
   });
 
   expect(notifySlack).not.toHaveBeenCalled();
@@ -74,6 +77,7 @@ test('Action runs with vulnerabilities found and no notifications', async () => 
     version: 'latest',
     severity: 'CRITICAL,HIGH',
     ignoreUnfixed: false,
+    timeout: '5m0s',
   });
 
   expect(notifySlack).not.toHaveBeenCalled();
@@ -101,6 +105,7 @@ test('Action runs with vulnerabilities found and notifications enabled', async (
     version: 'latest',
     severity: 'CRITICAL,HIGH',
     ignoreUnfixed: false,
+    timeout: '5m0s',
   });
 
   expect(notifySlack).toHaveBeenCalledWith('sa', 'Summary', '', 'Report');
@@ -112,4 +117,56 @@ test('Action runs with vulnerabilities found and notifications enabled', async (
     summary: { message: 'Summary' },
     report: { text: 'Report' },
   });
+});
+
+test('Action maps sbom attestation key input before uploading SBOMs', async () => {
+  const scanResult = {
+    success: true,
+    summary: { message: 'Summary' },
+    sbom: { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
+  };
+  const defaultAttestationKeyUri =
+    'gcpkms://projects/platform-prod-2481/locations/europe-west1/keyRings/global-keyring-binary/cryptoKeys/quality-assurance-attestor-key/cryptoKeyVersions/1';
+
+  setInput(false, false, true);
+  trivyScan.mockResolvedValueOnce(scanResult);
+  uploadSbom.mockResolvedValueOnce(undefined);
+  await action();
+
+  expect(uploadSbom).toHaveBeenNthCalledWith(
+    1,
+    'ubuntu',
+    scanResult.sbom,
+    'sa',
+    defaultAttestationKeyUri,
+  );
+
+  setInput(false, false, true, 'none');
+  trivyScan.mockResolvedValueOnce(scanResult);
+  uploadSbom.mockResolvedValueOnce(undefined);
+  await action();
+
+  expect(uploadSbom).toHaveBeenNthCalledWith(
+    2,
+    'ubuntu',
+    scanResult.sbom,
+    'sa',
+    undefined,
+  );
+
+  const attestationKeyUri =
+    'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom';
+
+  setInput(false, false, true, attestationKeyUri);
+  trivyScan.mockResolvedValueOnce(scanResult);
+  uploadSbom.mockResolvedValueOnce(undefined);
+  await action();
+
+  expect(uploadSbom).toHaveBeenNthCalledWith(
+    3,
+    'ubuntu',
+    scanResult.sbom,
+    'sa',
+    attestationKeyUri,
+  );
 });

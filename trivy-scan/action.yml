@@ -11,16 +11,6 @@ inputs:
   image:
     description: The Docker image to scan.
     required: true
-  upload-sbom:
-    description: Whether to upload the generated SBOM files to Google Artifact Registry.
-    required: false
-    default: 'false'
-  fail-on-vulnerabilities:
-    description: >
-      Set to `true` to fail the action if vulnerabilities are found. If set to `false`, the action will not fail even
-      if vulnerabilities are found, but the vulnerabilities will still be included in the generated reports.
-    required: false
-    default: 'false'
   severity:
     description: >
       The severity levels to include in the scan report. Comma-separated values of
@@ -43,6 +33,25 @@ inputs:
       step that uses this action.
     required: false
     default: '5m0s'
+  upload-sbom:
+    description: Whether to upload the generated SBOM files to Google Artifact Registry.
+    required: false
+    default: 'false'
+  sbom-attestation-key-uri:
+    description: >
+      The URI of the key to use for signing the SBOM attestation. Set this to attest the generated SBOM files with
+      cosign and upload the attestation to Artifact Registry. The key should be a Google Cloud KMS key in the format:
+      `gcpkms://projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey}/cryptoKeyVersions/{cryptoKeyVersion}`.
+
+      The default behavior is to use the default binary authz signing key. Set to `none` to disable attestation
+      of SBOM files.
+    required: false
+  fail-on-vulnerabilities:
+    description: >
+      Set to `true` to fail the action if vulnerabilities are found. If set to `false`, the action will not fail even
+      if vulnerabilities are found, but the vulnerabilities will still be included in the generated reports.
+    required: false
+    default: 'false'
   notify-slack-on-vulnerabilities:
     description: >
       Whether to send a notification to Slack if vulnerabilities are found.

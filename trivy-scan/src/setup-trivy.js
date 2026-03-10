@@ -2,11 +2,6 @@ import os from 'node:os';
 
 import { loadTool } from '../../utils/src/index.js';
 
-const platform = () => {
-  const p = os.platform();
-  return p === 'win32' ? 'windows' : p;
-};
-
 const determineVersion = async (providedVersion) => {
   const gitTag =
     providedVersion !== 'latest' && !providedVersion.startsWith('v')
@@ -31,7 +26,7 @@ const determineVersion = async (providedVersion) => {
  */
 export default async function setupTrivy(version = 'latest') {
   const trivyVersion = await determineVersion(version);
-  const windows = platform() === 'windows';
+  const windows = os.platform() === 'win32';
 
   return loadTool({
     tool: 'trivy',
