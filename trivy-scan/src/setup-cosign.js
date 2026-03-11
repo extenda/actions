@@ -23,6 +23,6 @@ export default async function setupCosign() {
     tool: 'cosign',
     binary: windows ? 'cosign.exe' : 'cosign',
     version: version,
-    downloadUrl: `https://github.com/sigstore/cosign/releases/download/v${version}/cosign-${version}.${windows ? 'windows-amd64.exe' : 'linux-amd64'}`,
+    downloadUrl: `https://github.com/sigstore/cosign/releases/download/v${version}/cosign-${windows ? 'windows-amd64.exe' : 'linux-amd64'}`,
   });
 }

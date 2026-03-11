@@ -33,7 +33,7 @@ test('It can setup latest Cosign', async () => {
     binary: 'cosign',
     version: '2.4.0',
     downloadUrl:
-      'https://github.com/sigstore/cosign/releases/download/v2.4.0/cosign-2.4.0.linux-amd64',
+      'https://github.com/sigstore/cosign/releases/download/v2.4.0/cosign-linux-amd64',
   });
 });
 
@@ -56,7 +56,7 @@ test('It can setup Cosign on Windows', async () => {
     binary: 'cosign.exe',
     version: '2.4.0',
     downloadUrl:
-      'https://github.com/sigstore/cosign/releases/download/v2.4.0/cosign-2.4.0.windows-amd64.exe',
+      'https://github.com/sigstore/cosign/releases/download/v2.4.0/cosign-windows-amd64.exe',
   });
 });
 
