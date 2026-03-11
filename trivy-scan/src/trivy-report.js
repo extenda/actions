@@ -95,10 +95,11 @@ const countSeverities = (vulnerabilities) => {
 };
 
 const buildSummaryFromCounts = (image, counts) => ({
-  message: `Found ${counts.total} vulnerabilities on ${image}.
+  message: `**Found ${counts.total} vulnerabilities.**
+Image: ${image}
 
-  - \`CRITICAL\`: ${counts.CRITICAL}
-  - \`HIGH\`: ${counts.HIGH}
+* \`HIGH\` - ${counts.HIGH}
+* \`CRITICAL\` - ${counts.CRITICAL}
   `,
   high: counts.HIGH,
   critical: counts.CRITICAL,
@@ -212,14 +213,13 @@ export async function writeTrivyJobSummary(scanResult) {
   const { vulnerabilities, counts } = getReportData(jsonReport);
 
   core.summary
-    .addHeading('Trivy Scan Report')
-    .addRaw(
-      `Found ${counts.total} vulnerabilities on \`${scanResult.image}\`.`,
-      true,
-    )
+    .addHeading('Trivy report')
+    .addRaw(`Image: <code>${scanResult.image}</code>`, true)
+    .addRaw(`Found ${counts.total} vulnerabilities.`, true)
+    .addEOL()
     .addList(
       SEVERITY_TOTAL_ORDER.map(
-        (severity) => `\`${severity}\`: ${counts[severity]}`,
+        (severity) => `<code>${severity}</code> - ${counts[severity]}`,
       ),
       false,
     )

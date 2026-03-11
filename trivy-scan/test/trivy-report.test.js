@@ -196,10 +196,11 @@ test('It creates summary from json report', () => {
   });
 
   expect(summary).toEqual({
-    message: `Found 5 vulnerabilities on ubuntu.
+    message: `**Found 5 vulnerabilities.**
+Image: ubuntu
 
-  - \`CRITICAL\`: 1
-  - \`HIGH\`: 1
+* \`HIGH\` - 1
+* \`CRITICAL\` - 1
   `,
     high: 1,
     critical: 1,
@@ -215,10 +216,11 @@ test('It skips summary if json report is missing', () => {
   });
 
   expect(summary).toEqual({
-    message: `Found 0 vulnerabilities on ubuntu.
+    message: `**Found 0 vulnerabilities.**
+Image: ubuntu
 
-  - \`CRITICAL\`: 0
-  - \`HIGH\`: 0
+* \`HIGH\` - 0
+* \`CRITICAL\` - 0
   `,
     high: 0,
     critical: 0,
@@ -237,13 +239,23 @@ test('It writes trivy results to the GitHub job summary', async () => {
   });
 
   expect(summaryLink).toEqual(expect.any(String));
-  expect(core.summary.addHeading).toHaveBeenCalledWith('Trivy Scan Report');
+  expect(core.summary.addHeading).toHaveBeenCalledWith('Trivy report');
   expect(core.summary.addRaw).toHaveBeenCalledWith(
-    'Found 5 vulnerabilities on `ubuntu@sha256:manifest`.',
+    'Found 5 vulnerabilities.',
+    true,
+  );
+  expect(core.summary.addRaw).toHaveBeenCalledWith(
+    'Image: <code>ubuntu@sha256:manifest</code>',
     true,
   );
   expect(core.summary.addList).toHaveBeenCalledWith(
-    ['`UNKNOWN`: 1', '`LOW`: 1', '`MEDIUM`: 1', '`HIGH`: 1', '`CRITICAL`: 1'],
+    [
+      '<code>UNKNOWN</code> - 1',
+      '<code>LOW</code> - 1',
+      '<code>MEDIUM</code> - 1',
+      '<code>HIGH</code> - 1',
+      '<code>CRITICAL</code> - 1',
+    ],
     false,
   );
 
