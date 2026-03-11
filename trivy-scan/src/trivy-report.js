@@ -206,7 +206,7 @@ export async function writeTrivyJobSummary(scanResult) {
   const jsonReport = readJsonReport(scanResult?.report?.json);
   if (!jsonReport) {
     core.info('Trivy JSON report not found, skipping job summary.');
-    return false;
+    return null;
   }
 
   const { vulnerabilities, counts } = getReportData(jsonReport);
@@ -228,5 +228,11 @@ export async function writeTrivyJobSummary(scanResult) {
     .addTable(buildMarkdownTableRows(vulnerabilities));
 
   await core.summary.write();
-  return true;
+
+  const serverUrl = process.env.GITHUB_SERVER_URL;
+  const repository = process.env.GITHUB_REPOSITORY;
+  const runId = process.env.GITHUB_RUN_ID;
+
+  // This is strictly not the summary URL, but hopefully good enough.
+  return `${serverUrl}/${repository}/actions/runs/${runId}`;
 }

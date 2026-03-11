@@ -50,15 +50,20 @@ export default async function trivyScan(
     'public.ecr.aws/aquasecurity/trivy-db:2',
   ].join(',');
 
+  const commonOpts = [
+    '--no-progress',
+    '--db-repository',
+    repos,
+    '--timeout',
+    timeout,
+  ];
+
   await exec(trivy, [
     'image',
     '--format',
     'spdx-json',
     '--license-full',
-    '--db-repository',
-    repos,
-    '--timeout',
-    timeout,
+    ...commonOpts,
     '--output',
     outputs.sbom.spdx,
     manifestSha,
@@ -68,10 +73,7 @@ export default async function trivyScan(
     'image',
     '--format',
     'cyclonedx',
-    '--db-repository',
-    repos,
-    '--timeout',
-    timeout,
+    ...commonOpts,
     '--output',
     outputs.sbom.cdx,
     manifestSha,
@@ -84,10 +86,7 @@ export default async function trivyScan(
     severity,
     '--exit-code',
     '0',
-    '--db-repository',
-    repos,
-    '--timeout',
-    timeout,
+    ...commonOpts,
     '--output',
     outputs.report.json,
   ];

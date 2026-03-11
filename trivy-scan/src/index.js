@@ -49,7 +49,10 @@ const trivy = async (
       timeout,
     });
 
-    await writeTrivyJobSummary(scanResult);
+    const summaryUrl = await writeTrivyJobSummary(scanResult);
+    if (summaryUrl) {
+      core.notice(`Trivy summary is available on the run page: ${summaryUrl}`);
+    }
 
     if (uploadSbomArtifacts) {
       await uploadSbom(
@@ -78,12 +81,6 @@ const trivy = async (
         core.warning(vulnerableMessage);
       }
     }
-
-    const serverUrl = process.env.GITHUB_SERVER_URL;
-    const repository = process.env.GITHUB_REPOSITORY;
-    const runId = process.env.GITHUB_RUN_ID;
-    const runUrl = `${serverUrl}/${repository}/actions/runs/${runId}`;
-    core.notice(`Trivy summary is available on the run page: ${runUrl}`);
 
     return scanResult;
   });
