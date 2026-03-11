@@ -1,6 +1,8 @@
 import * as core from '@actions/core';
 
+import { withGcloud } from '../../setup-gcloud/src/index.js';
 import notifySlack from '../../slack-notify/src/slack-notify.js';
+import authenticateDocker from './docker-auth.js';
 import setupTrivy from './setup-trivy.js';
 import { writeTrivyJobSummary } from './trivy-report.js';
 import trivyScan from './trivy-scan.js';
@@ -36,47 +38,47 @@ const trivy = async (
   notifySlackOnVulnerabilities = false,
   uploadSbomArtifacts = false,
   attestationKeyUri = DEFAULT_ATTESTATION_KEY_URI,
-) => {
-  const normalizedAttestationKeyUri =
-    attestationKeyUri === null ? undefined : attestationKeyUri;
-  const scanResult = await trivyScan(image, {
-    version,
-    severity,
-    ignoreUnfixed,
-    timeout,
+) =>
+  withGcloud(serviceAccountKey, async () => {
+    await authenticateDocker(image);
+
+    const scanResult = await trivyScan(image, {
+      version,
+      severity,
+      ignoreUnfixed,
+      timeout,
+    });
+
+    await writeTrivyJobSummary(scanResult);
+
+    if (uploadSbomArtifacts) {
+      await uploadSbom(
+        image,
+        scanResult.sbom,
+        typeof attestationKeyUri == 'string' ? attestationKeyUri : undefined,
+      );
+    }
+
+    if (!scanResult.success) {
+      if (notifySlackOnVulnerabilities) {
+        core.info('Sending slack notification...');
+        await notifySlack(
+          serviceAccountKey,
+          scanResult.summary.message,
+          '',
+          scanResult.report.text,
+        );
+      }
+
+      if (failOnVulnerabilities) {
+        core.setFailed(
+          'Vulnerabilities found in image scan. Please check the report for details.',
+        );
+      }
+    }
+
+    return scanResult;
   });
-
-  await writeTrivyJobSummary(scanResult);
-
-  if (uploadSbomArtifacts) {
-    await uploadSbom(
-      image,
-      scanResult.sbom,
-      serviceAccountKey,
-      normalizedAttestationKeyUri,
-    );
-  }
-
-  if (!scanResult.success) {
-    if (notifySlackOnVulnerabilities) {
-      core.info('Sending slack notification...');
-      await notifySlack(
-        serviceAccountKey,
-        scanResult.summary.message,
-        '',
-        scanResult.report.text,
-      );
-    }
-
-    if (failOnVulnerabilities) {
-      core.setFailed(
-        'Vulnerabilities found in image scan. Please check the report for details.',
-      );
-    }
-  }
-
-  return scanResult;
-};
 
 const action = async () => {
   const image = core.getInput('image', { required: true });

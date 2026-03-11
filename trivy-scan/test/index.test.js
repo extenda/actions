@@ -1,19 +1,28 @@
 import * as core from '@actions/core';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
+import { withGcloud } from '../../setup-gcloud/src/index.js';
 import notifySlack from '../../slack-notify/src/slack-notify.js';
+import authenticateDocker from '../src/docker-auth.js';
 import action from '../src/index.js';
 import { writeTrivyJobSummary as trivyJobSummary } from '../src/trivy-report.js';
 import trivyScan from '../src/trivy-scan.js';
 import uploadSbom from '../src/upload-sbom.js';
 
 vi.mock('@actions/core');
+vi.mock('../src/docker-auth.js');
 vi.mock('../src/upload-sbom.js');
 vi.mock('../src/trivy-report.js');
 vi.mock('../src/trivy-scan.js');
 vi.mock('../../slack-notify/src/slack-notify.js');
+vi.mock('../../setup-gcloud/src/index.js');
 
-beforeEach(() => {});
+beforeEach(() => {
+  withGcloud.mockImplementation(async (serviceAccountKey, fn) =>
+    fn('test-project'),
+  );
+  authenticateDocker.mockResolvedValueOnce(0);
+});
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -55,6 +64,7 @@ test('Action runs with successful scan', async () => {
     timeout: '5m0s',
   });
 
+  expect(authenticateDocker).toHaveBeenCalledWith('ubuntu');
   expect(notifySlack).not.toHaveBeenCalled();
   expect(uploadSbom).not.toHaveBeenCalled();
   expect(trivyJobSummary).toHaveBeenCalledWith({
@@ -72,6 +82,7 @@ test('Action runs with vulnerabilities found and no notifications', async () => 
   });
 
   await action();
+  expect(authenticateDocker).toHaveBeenCalledWith('ubuntu');
 
   expect(trivyScan).toHaveBeenCalledWith('ubuntu', {
     version: 'latest',
@@ -80,6 +91,7 @@ test('Action runs with vulnerabilities found and no notifications', async () => 
     timeout: '5m0s',
   });
 
+  expect(authenticateDocker).toHaveBeenCalledWith('ubuntu');
   expect(notifySlack).not.toHaveBeenCalled();
   expect(core.setFailed).toHaveBeenCalledWith(
     'Vulnerabilities found in image scan. Please check the report for details.',
@@ -101,6 +113,7 @@ test('Action runs with vulnerabilities found and notifications enabled', async (
 
   await action();
 
+  expect(authenticateDocker).toHaveBeenCalledWith('ubuntu');
   expect(trivyScan).toHaveBeenCalledWith('ubuntu', {
     version: 'latest',
     severity: 'CRITICAL,HIGH',
@@ -133,11 +146,11 @@ test('Action maps sbom attestation key input before uploading SBOMs', async () =
   uploadSbom.mockResolvedValueOnce(undefined);
   await action();
 
+  expect(authenticateDocker).toHaveBeenCalledWith('ubuntu');
   expect(uploadSbom).toHaveBeenNthCalledWith(
     1,
     'ubuntu',
     scanResult.sbom,
-    'sa',
     defaultAttestationKeyUri,
   );
 
@@ -150,7 +163,6 @@ test('Action maps sbom attestation key input before uploading SBOMs', async () =
     2,
     'ubuntu',
     scanResult.sbom,
-    'sa',
     undefined,
   );
 
@@ -166,7 +178,6 @@ test('Action maps sbom attestation key input before uploading SBOMs', async () =
     3,
     'ubuntu',
     scanResult.sbom,
-    'sa',
     attestationKeyUri,
   );
 });

@@ -1,8 +1,8 @@
 import * as core from '@actions/core';
 import { exec } from '@actions/exec';
 
-import { execGcloud, withGcloud } from '../../setup-gcloud/src/index.js';
-import resolveDigest from './resolve-digest.js';
+import { execGcloud } from '../../setup-gcloud/src/index.js';
+import { resolveImageDigests } from '../../utils/src/index.js';
 import setupCosign from './setup-cosign.js';
 
 const attestSbom = async (cosign, attestationKeyUri, uri, sbom) => {
@@ -68,14 +68,12 @@ const uploadForDigest = (digests, sbom, cosignFn) => {
  * @param image the image that was scanned
  * @param spdx the SPDX SBOM file path
  * @param cdx the CycloneDX SBOM file path
- * @param serviceAccountKey the Google Cloud service account key with permissions to upload to Artifact Registry
  * @param attestationKeyUri the KMS key URI to use for signing the SBOM attestations. If not provided, SBOMs will be uploaded without attestation.
  * @return {Promise<void>} a promise that resolves when the uploads are complete
  */
 export default async function uploadSbom(
   image,
   { spdx, cdx },
-  serviceAccountKey,
   attestationKeyUri,
 ) {
   let cosignFn;
@@ -87,15 +85,13 @@ export default async function uploadSbom(
     cosignFn = async () => {};
   }
 
-  return withGcloud(serviceAccountKey, async () => {
-    core.startGroup(`Uploading SBOMs for ${image}`);
-    const digests = await resolveDigest(image);
-    await Promise.all([
-      // Upload SPDX for legal compliance use cases
-      ...uploadForDigest(digests, spdx, cosignFn),
-      // Upload CycloneDX for vulnerability management use cases
-      ...uploadForDigest(digests, cdx, cosignFn),
-    ]);
-    core.endGroup();
-  });
+  core.startGroup(`Uploading SBOMs for ${image}`);
+  const digests = await resolveImageDigests(image);
+  await Promise.all([
+    // Upload SPDX for legal compliance use cases
+    ...uploadForDigest(digests, spdx, cosignFn),
+    // Upload CycloneDX for vulnerability management use cases
+    ...uploadForDigest(digests, cdx, cosignFn),
+  ]);
+  core.endGroup();
 }

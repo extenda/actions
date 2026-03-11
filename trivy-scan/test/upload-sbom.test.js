@@ -2,8 +2,8 @@ import * as core from '@actions/core';
 import { exec } from '@actions/exec';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
-import { execGcloud, withGcloud } from '../../setup-gcloud/src/index.js';
-import resolveDigest from '../src/resolve-digest.js';
+import { execGcloud } from '../../setup-gcloud/src/index.js';
+import { resolveImageDigests } from '../../utils/src/index.js';
 import setupCosign from '../src/setup-cosign.js';
 import uploadSbom from '../src/upload-sbom.js';
 
@@ -12,16 +12,16 @@ vi.mock('@actions/exec');
 vi.mock('../../setup-gcloud/src/index.js');
 vi.mock('../src/resolve-digest.js');
 vi.mock('../src/setup-cosign.js');
+vi.mock('../../utils/src/index.js');
 
 afterEach(() => {
   vi.resetAllMocks();
 });
 
 beforeEach(() => {
-  withGcloud.mockImplementation(async (_serviceAccountKey, fn) => fn());
   execGcloud.mockResolvedValue(undefined);
   exec.mockResolvedValue(0);
-  resolveDigest.mockResolvedValue({
+  resolveImageDigests.mockResolvedValue({
     indexSha: 'eu.gcr.io/extenda/test@sha256:index',
     manifestSha: 'eu.gcr.io/extenda/test@sha256:manifest',
     isMultiArch: false,
@@ -33,17 +33,13 @@ test('It uploads SPDX and CycloneDX for single-arch image manifest digest withou
   await uploadSbom(
     'eu.gcr.io/extenda/test:1.0.0',
     { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
-    'service-account-json',
     undefined,
   );
 
-  expect(withGcloud).toHaveBeenCalledTimes(1);
-  expect(withGcloud).toHaveBeenCalledWith(
-    'service-account-json',
-    expect.any(Function),
+  expect(resolveImageDigests).toHaveBeenCalledTimes(1);
+  expect(resolveImageDigests).toHaveBeenCalledWith(
+    'eu.gcr.io/extenda/test:1.0.0',
   );
-  expect(resolveDigest).toHaveBeenCalledTimes(1);
-  expect(resolveDigest).toHaveBeenCalledWith('eu.gcr.io/extenda/test:1.0.0');
 
   expect(execGcloud).toHaveBeenCalledTimes(2);
   expect(execGcloud).toHaveBeenCalledWith([
@@ -73,7 +69,6 @@ test('It uploads and attests SPDX and CycloneDX for single-arch image manifest d
   await uploadSbom(
     'eu.gcr.io/extenda/test:1.1.0',
     { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
-    'service-account-json',
     'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
   );
 
@@ -107,7 +102,7 @@ test('It uploads and attests SPDX and CycloneDX for single-arch image manifest d
 });
 
 test('It uploads for both manifest and index when image is multi-arch without attestation', async () => {
-  resolveDigest.mockResolvedValueOnce({
+  resolveImageDigests.mockResolvedValueOnce({
     indexSha: 'eu.gcr.io/extenda/test@sha256:index',
     manifestSha: 'eu.gcr.io/extenda/test@sha256:manifest',
     isMultiArch: true,
@@ -116,7 +111,6 @@ test('It uploads for both manifest and index when image is multi-arch without at
   await uploadSbom(
     'eu.gcr.io/extenda/test:2.0.0',
     { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
-    'service-account-json',
     undefined,
   );
 
@@ -161,7 +155,7 @@ test('It uploads for both manifest and index when image is multi-arch without at
 });
 
 test('It uploads and attests for both manifest and index when image is multi-arch', async () => {
-  resolveDigest.mockResolvedValueOnce({
+  resolveImageDigests.mockResolvedValueOnce({
     indexSha: 'eu.gcr.io/extenda/test@sha256:index',
     manifestSha: 'eu.gcr.io/extenda/test@sha256:manifest',
     isMultiArch: true,
@@ -170,7 +164,6 @@ test('It uploads and attests for both manifest and index when image is multi-arc
   await uploadSbom(
     'eu.gcr.io/extenda/test:2.1.0',
     { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
-    'service-account-json',
     'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
   );
 
@@ -234,7 +227,6 @@ test('It rethrows attestation errors', async () => {
     uploadSbom(
       'eu.gcr.io/extenda/test:2.2.0',
       { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
-      'service-account-json',
       'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
     ),
   ).rejects.toThrow('attestation failed');
@@ -250,7 +242,6 @@ test('It rethrows upload errors', async () => {
     uploadSbom(
       'eu.gcr.io/extenda/test:3.0.0',
       { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
-      'service-account-json',
       undefined,
     ),
   ).rejects.toThrow('upload failed');

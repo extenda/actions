@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { exec } from '@actions/exec';
 import { afterAll, afterEach, beforeEach, expect, test, vi } from 'vitest';
 
-import resolveDigest from '../src/resolve-digest.js';
+import { resolveImageDigests } from '../../utils/src/index.js';
 import setupTrivy from '../src/setup-trivy.js';
 import { generateSummary, generateTextReport } from '../src/trivy-report.js';
 import trivyScan from '../src/trivy-scan.js';
@@ -13,6 +13,7 @@ vi.mock('@actions/exec');
 vi.mock('../src/trivy-report.js');
 vi.mock('../src/setup-trivy.js');
 vi.mock('../src/resolve-digest.js');
+vi.mock('../../utils/src/index.js');
 
 beforeEach(() => {
   setupTrivy.mockResolvedValueOnce('/tmp/trivy');
@@ -23,7 +24,7 @@ beforeEach(() => {
     high: 0,
     critical: 0,
   });
-  resolveDigest.mockResolvedValue({
+  resolveImageDigests.mockResolvedValue({
     indexSha: 'ubuntu@sha256:index',
     manifestSha: 'ubuntu@sha256:manifest',
   });
@@ -62,7 +63,6 @@ test('It can scan with Trivy defaults', async () => {
     '--format',
     'spdx-json',
     '--license-full',
-    '--pkg-relationships',
     '--db-repository',
     'ghcr.io/aquasecurity/trivy-db:2,public.ecr.aws/aquasecurity/trivy-db',
     '--timeout',

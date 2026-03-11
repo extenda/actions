@@ -2,7 +2,7 @@ import fs from 'node:fs';
 
 import { exec } from '@actions/exec';
 
-import resolveDigest from './resolve-digest.js';
+import { resolveImageDigests } from '../../utils/src/index.js';
 import setupTrivy from './setup-trivy.js';
 import { generateSummary, generateTextReport } from './trivy-report.js';
 
@@ -43,7 +43,7 @@ export default async function trivyScan(
     fs.mkdirSync('.trivy', { recursive: true });
   }
 
-  const { manifestSha } = await resolveDigest(image);
+  const { manifestSha } = await resolveImageDigests(image);
 
   const repos =
     'ghcr.io/aquasecurity/trivy-db:2,public.ecr.aws/aquasecurity/trivy-db';
@@ -53,7 +53,6 @@ export default async function trivyScan(
     '--format',
     'spdx-json',
     '--license-full',
-    '--pkg-relationships',
     '--db-repository',
     repos,
     '--timeout',
