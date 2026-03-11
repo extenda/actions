@@ -69,12 +69,14 @@ const createSummaryMock = () => {
     addEOL: vi.fn(),
     addTable: vi.fn(),
     write: vi.fn(),
+    addList: vi.fn(),
   };
 
-  summary.addHeading.mockReturnValue(summary);
-  summary.addRaw.mockReturnValue(summary);
-  summary.addEOL.mockReturnValue(summary);
-  summary.addTable.mockReturnValue(summary);
+  summary.addHeading.mockReturnThis();
+  summary.addRaw.mockReturnThis();
+  summary.addEOL.mockReturnThis();
+  summary.addTable.mockReturnThis();
+  summary.addList.mockReturnThis();
   summary.write.mockResolvedValue(undefined);
 
   vi.spyOn(core, 'summary', 'get').mockReturnValue(summary);
@@ -194,9 +196,10 @@ test('It creates summary from json report', () => {
   });
 
   expect(summary).toEqual({
-    message: `Total vulnerabilities found on ubuntu: 5
-  High: 1
-  Critical: 1
+    message: `Found 5 vulnerabilities on ubuntu.
+
+  - \`CRITICAL\`: 1
+  - \`HIGH\`: 1
   `,
     high: 1,
     critical: 1,
@@ -212,9 +215,10 @@ test('It skips summary if json report is missing', () => {
   });
 
   expect(summary).toEqual({
-    message: `Total vulnerabilities found on ubuntu: 0
-  High: 0
-  Critical: 0
+    message: `Found 0 vulnerabilities on ubuntu.
+
+  - \`CRITICAL\`: 0
+  - \`HIGH\`: 0
   `,
     high: 0,
     critical: 0,
@@ -235,7 +239,12 @@ test('It writes trivy results to the GitHub job summary', async () => {
   expect(success).toEqual(true);
   expect(core.summary.addHeading).toHaveBeenCalledWith('Trivy Scan Report');
   expect(core.summary.addRaw).toHaveBeenCalledWith(
-    'Total vulnerabilities found on ubuntu@sha256:manifest: 5 (UNKNOWN: 1, LOW: 1, MEDIUM: 1, HIGH: 1, CRITICAL: 1)',
+    'Found 5 vulnerabilities on `ubuntu@sha256:manifest`.',
+    true,
+  );
+  expect(core.summary.addList).toHaveBeenCalledWith(
+    ['`UNKNOWN`: 1', '`LOW`: 1', '`MEDIUM`: 1', '`HIGH`: 1', '`CRITICAL`: 1'],
+    false,
   );
 
   const tableRows = core.summary.addTable.mock.calls[0][0];

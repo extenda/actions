@@ -70,12 +70,20 @@ const trivy = async (
         );
       }
 
+      const vulnerableMessage =
+        'Vulnerabilities found in image scan. Please check the report for details.';
       if (failOnVulnerabilities) {
-        core.setFailed(
-          'Vulnerabilities found in image scan. Please check the report for details.',
-        );
+        core.setFailed(vulnerableMessage);
+      } else {
+        core.warning(vulnerableMessage);
       }
     }
+
+    const serverUrl = process.env.GITHUB_SERVER_URL;
+    const repository = process.env.GITHUB_REPOSITORY;
+    const runId = process.env.GITHUB_RUN_ID;
+    const runUrl = `${serverUrl}/${repository}/actions/runs/${runId}`;
+    core.notice(`Trivy summary is available on the run page: ${runUrl}`);
 
     return scanResult;
   });

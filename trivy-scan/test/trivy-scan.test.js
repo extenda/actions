@@ -42,7 +42,7 @@ test('It can scan with Trivy defaults', async () => {
   const scanResult = await trivyScan('ubuntu');
   expect(scanResult).toEqual({
     success: true,
-    image: 'ubuntu',
+    image: 'ubuntu@sha256:manifest',
     summary: {
       message: 'Summary',
       high: 0,

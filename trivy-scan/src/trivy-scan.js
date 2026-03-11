@@ -103,7 +103,7 @@ export default async function trivyScan(
   return {
     success: summary.critical === 0,
     summary,
-    image,
+    image: manifestSha,
     ...outputs,
   };
 }
