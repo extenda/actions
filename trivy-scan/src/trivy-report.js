@@ -60,7 +60,7 @@ const getUniqueVulnerabilities = (jsonReport) => {
         id,
         pkg: vulnerability.PkgName || '',
         title: vulnerability.Title
-          ? vulnerability.Title.replace(/\n/g, ' ')
+          ? vulnerability.Title.replaceAll(/\n/g, ' ')
           : '',
       });
     }
