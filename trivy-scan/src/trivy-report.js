@@ -223,6 +223,8 @@ export async function writeTrivyJobSummary(scanResult) {
   }
   core.summary
     .addEOL()
+    .addBreak()
+    .addBreak()
     .addEOL()
     .addTable(buildMarkdownTableRows(vulnerabilities));
 
