@@ -94,7 +94,7 @@ test('Action runs with vulnerabilities found and no notifications', async () => 
   expect(authenticateDocker).toHaveBeenCalledWith('ubuntu');
   expect(notifySlack).not.toHaveBeenCalled();
   expect(core.setFailed).toHaveBeenCalledWith(
-    'Vulnerabilities found in image scan. Please check the report for details.',
+    'Vulnerabilities found in image scan. Check the report for details: undefined',
   );
   expect(trivyJobSummary).toHaveBeenCalledWith({
     success: false,
@@ -123,7 +123,7 @@ test('Action runs with vulnerabilities found and notifications enabled', async (
 
   expect(notifySlack).toHaveBeenCalledWith('sa', 'Summary', '', 'Report');
   expect(core.setFailed).toHaveBeenCalledWith(
-    'Vulnerabilities found in image scan. Please check the report for details.',
+    'Vulnerabilities found in image scan. Check the report for details: undefined',
   );
   expect(trivyJobSummary).toHaveBeenCalledWith({
     success: false,

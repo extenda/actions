@@ -70,6 +70,8 @@ const createSummaryMock = () => {
     addTable: vi.fn(),
     write: vi.fn(),
     addList: vi.fn(),
+    addBreak: vi.fn(),
+    addLink: vi.fn(),
   };
 
   summary.addHeading.mockReturnThis();
@@ -77,6 +79,8 @@ const createSummaryMock = () => {
   summary.addEOL.mockReturnThis();
   summary.addTable.mockReturnThis();
   summary.addList.mockReturnThis();
+  summary.addBreak.mockReturnThis();
+  summary.addLink.mockReturnThis();
   summary.write.mockResolvedValue(undefined);
 
   vi.spyOn(core, 'summary', 'get').mockReturnValue(summary);
@@ -196,12 +200,8 @@ test('It creates summary from json report', () => {
   });
 
   expect(summary).toEqual({
-    message: `**Found 5 vulnerabilities.**
-Image: ubuntu
-
-* \`HIGH\` - 1
-* \`CRITICAL\` - 1
-  `,
+    message: `Found 5 vulnerabilities (1 CRITICAL, 1 HIGH).
+Image: ubuntu`,
     high: 1,
     critical: 1,
   });
@@ -216,12 +216,8 @@ test('It skips summary if json report is missing', () => {
   });
 
   expect(summary).toEqual({
-    message: `**Found 0 vulnerabilities.**
-Image: ubuntu
-
-* \`HIGH\` - 0
-* \`CRITICAL\` - 0
-  `,
+    message: `Found 0 vulnerabilities (0 CRITICAL, 0 HIGH).
+Image: ubuntu`,
     high: 0,
     critical: 0,
   });
@@ -244,17 +240,18 @@ test('It writes trivy results to the GitHub job summary', async () => {
     'Found 5 vulnerabilities.',
     true,
   );
+  expect(core.summary.addRaw).toHaveBeenCalledWith('Image: ', false);
   expect(core.summary.addRaw).toHaveBeenCalledWith(
-    'Image: <code>ubuntu@sha256:manifest</code>',
+    '<code>ubuntu@sha256:manifest</code>',
     true,
   );
   expect(core.summary.addList).toHaveBeenCalledWith(
     [
-      '<code>UNKNOWN</code> - 1',
-      '<code>LOW</code> - 1',
-      '<code>MEDIUM</code> - 1',
-      '<code>HIGH</code> - 1',
-      '<code>CRITICAL</code> - 1',
+      '1 <code>UNKNOWN</code>',
+      '1 <code>LOW</code>',
+      '1 <code>MEDIUM</code>',
+      '1 <code>HIGH</code>',
+      '1 <code>CRITICAL</code>',
     ],
     false,
   );
@@ -272,6 +269,23 @@ test('It writes trivy results to the GitHub job summary', async () => {
   expect(tableRows[4][0]).toEqual('LOW');
   expect(tableRows[5][0]).toEqual('UNKNOWN');
   expect(core.summary.write).toHaveBeenCalledTimes(1);
+});
+
+test('It writes summary with image link for GCR images', async () => {
+  mockFs({
+    '.trivy/report.json': JSON.stringify(JSON_REPORT),
+  });
+  createSummaryMock();
+
+  await writeTrivyJobSummary({
+    image: 'eu.gcr.io/ubuntu@sha256:manifest',
+    report: { json: '.trivy/report.json' },
+  });
+
+  expect(core.summary.addLink).toHaveBeenCalledWith(
+    'eu.gcr.io/ubuntu@sha256:manifest',
+    'https://eu.gcr.io/ubuntu@sha256:manifest',
+  );
 });
 
 test('It skips summary when the trivy json report is missing', async () => {

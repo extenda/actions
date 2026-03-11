@@ -73,8 +73,7 @@ const trivy = async (
         );
       }
 
-      const vulnerableMessage =
-        'Vulnerabilities found in image scan. Please check the report for details.';
+      const vulnerableMessage = `Vulnerabilities found in image scan. Check the report for details: ${summaryUrl}`;
       if (failOnVulnerabilities) {
         core.setFailed(vulnerableMessage);
       } else {
