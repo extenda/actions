@@ -45,8 +45,10 @@ export default async function trivyScan(
 
   const { manifestSha } = await resolveImageDigests(image);
 
-  const repos =
-    'ghcr.io/aquasecurity/trivy-db:2,public.ecr.aws/aquasecurity/trivy-db';
+  const repos = [
+    'ghcr.io/aquasecurity/trivy-db:2',
+    'public.ecr.aws/aquasecurity/trivy-db:2',
+  ].join(',');
 
   await exec(trivy, [
     'image',
@@ -76,6 +78,8 @@ export default async function trivyScan(
   ]);
 
   const scanOpts = [
+    '--format',
+    'json',
     '--severity',
     severity,
     '--exit-code',
