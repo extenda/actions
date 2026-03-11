@@ -114,7 +114,7 @@ const action = async () => {
   );
 };
 
-export { setupTrivy, trivy, trivyScan, uploadSbom };
+export { setupTrivy, trivy };
 
 /** Default export used by action entrypoint. */
 export default action;

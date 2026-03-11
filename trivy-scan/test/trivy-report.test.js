@@ -231,12 +231,12 @@ test('It writes trivy results to the GitHub job summary', async () => {
   });
   createSummaryMock();
 
-  const success = await writeTrivyJobSummary({
+  const summaryLink = await writeTrivyJobSummary({
     image: 'ubuntu@sha256:manifest',
     report: { json: '.trivy/report.json' },
   });
 
-  expect(success).toEqual(true);
+  expect(summaryLink).toEqual(expect.any(String));
   expect(core.summary.addHeading).toHaveBeenCalledWith('Trivy Scan Report');
   expect(core.summary.addRaw).toHaveBeenCalledWith(
     'Found 5 vulnerabilities on `ubuntu@sha256:manifest`.',
@@ -265,12 +265,12 @@ test('It writes trivy results to the GitHub job summary', async () => {
 test('It skips summary when the trivy json report is missing', async () => {
   createSummaryMock();
 
-  const success = await writeTrivyJobSummary({
+  const summaryUrl = await writeTrivyJobSummary({
     image: 'ubuntu@sha256:manifest',
     report: { json: '.trivy/report.json' },
   });
 
-  expect(success).toEqual(false);
+  expect(summaryUrl).toBeNull();
   expect(core.info).toHaveBeenCalledWith(
     'Trivy JSON report not found, skipping job summary.',
   );
