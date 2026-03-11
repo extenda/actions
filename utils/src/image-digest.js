@@ -8,24 +8,26 @@ import { getExecOutput } from '@actions/exec';
  */
 export async function resolveImageDigests(image) {
   // 1. Get the Raw Manifest/Index to check for multi-arch structure
-  const { stdout: rawOutput } = await getExecOutput('docker', [
-    'buildx',
-    'imagetools',
-    'inspect',
-    image,
-    '--raw',
-  ]);
+  const { stdout: rawOutput } = await getExecOutput(
+    'docker',
+    ['buildx', 'imagetools', 'inspect', image, '--raw'],
+    { silent: true },
+  );
   const data = JSON.parse(rawOutput);
 
   // 2. Resolve the Top-Level Digest (The "Parent" or "Index")
-  const { stdout: indexData } = await getExecOutput('docker', [
-    'buildx',
-    'imagetools',
-    'inspect',
-    image,
-    '--format',
-    '{{json .Manifest.Digest}}',
-  ]);
+  const { stdout: indexData } = await getExecOutput(
+    'docker',
+    [
+      'buildx',
+      'imagetools',
+      'inspect',
+      image,
+      '--format',
+      '{{json .Manifest.Digest}}',
+    ],
+    { silent: true },
+  );
   const indexSha = JSON.parse(indexData);
 
   let manifestSha = indexSha;

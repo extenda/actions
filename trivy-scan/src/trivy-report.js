@@ -221,7 +221,10 @@ export async function writeTrivyJobSummary(scanResult) {
   } else {
     core.summary.addRaw(`<code>${scanResult.image}</code>`, true);
   }
-  core.summary.addTable(buildMarkdownTableRows(vulnerabilities));
+  core.summary
+    .addEOL()
+    .addEOL()
+    .addTable(buildMarkdownTableRows(vulnerabilities));
 
   await core.summary.write();
 
