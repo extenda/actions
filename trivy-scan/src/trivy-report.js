@@ -209,25 +209,19 @@ export async function writeTrivyJobSummary(scanResult) {
   const { vulnerabilities, counts } = getReportData(jsonReport);
 
   core.summary.addHeading('Trivy report');
-  core.summary.addRaw('Image: ', false);
+  core.summary
+    .addRaw(
+      `Found ${counts.total} vulnerabilities (${counts.CRITICAL} CRITICAL, ${counts.HIGH} HIGH).`,
+      true,
+    )
+    .addBreak()
+    .addRaw('Image: ', false);
   if (scanResult.image.includes('gcr.io')) {
     core.summary.addLink(scanResult.image, `https://${scanResult.image}`);
   } else {
     core.summary.addRaw(`<code>${scanResult.image}</code>`, true);
   }
-  core.summary
-    .addEOL()
-    .addBreak()
-    .addRaw(`Found ${counts.total} vulnerabilities.`, true)
-    .addList(
-      SEVERITY_TOTAL_ORDER.map(
-        (severity) => `${counts[severity]} <code>${severity}</code>`,
-      ),
-      false,
-    )
-    .addEOL()
-    .addEOL()
-    .addTable(buildMarkdownTableRows(vulnerabilities));
+  core.summary.addTable(buildMarkdownTableRows(vulnerabilities));
 
   await core.summary.write();
 

@@ -237,23 +237,13 @@ test('It writes trivy results to the GitHub job summary', async () => {
   expect(summaryLink).toEqual(expect.any(String));
   expect(core.summary.addHeading).toHaveBeenCalledWith('Trivy report');
   expect(core.summary.addRaw).toHaveBeenCalledWith(
-    'Found 5 vulnerabilities.',
+    'Found 5 vulnerabilities (1 CRITICAL, 1 HIGH).',
     true,
   );
   expect(core.summary.addRaw).toHaveBeenCalledWith('Image: ', false);
   expect(core.summary.addRaw).toHaveBeenCalledWith(
     '<code>ubuntu@sha256:manifest</code>',
     true,
-  );
-  expect(core.summary.addList).toHaveBeenCalledWith(
-    [
-      '1 <code>UNKNOWN</code>',
-      '1 <code>LOW</code>',
-      '1 <code>MEDIUM</code>',
-      '1 <code>HIGH</code>',
-      '1 <code>CRITICAL</code>',
-    ],
-    false,
   );
 
   const tableRows = core.summary.addTable.mock.calls[0][0];
