@@ -1,0 +1,11 @@
+{
+  "name": "trivy-scan",
+  "version": "0.0.1-local",
+  "private": true,
+  "description": "Scan an image with Trivy and generate SBOM files and reports",
+  "main": "dist/index.cjs",
+  "type": "module",
+  "devDependencies": {
+    "nock": "^14.0.11"
+  }
+}
