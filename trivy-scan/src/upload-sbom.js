@@ -1,7 +1,8 @@
 import * as core from '@actions/core';
 import { exec } from '@actions/exec';
 
-import { copyCredentials, execGcloud } from '../../setup-gcloud/src/index.js';
+import { execGcloud } from '../../setup-gcloud/src/index.js';
+import createKeyFile from '../../utils/src/create-key-file.js';
 import { resolveImageDigests } from '../../utils/src/index.js';
 import setupCosign from './setup-cosign.js';
 
@@ -96,7 +97,7 @@ export default async function uploadSbom(
   let cosignFn;
   if (attestationKeyUri && serviceAccountKey) {
     const cosign = await setupCosign();
-    const credentialsPath = await copyCredentials(serviceAccountKey);
+    const credentialsPath = createKeyFile(serviceAccountKey);
     cosignFn = async (uri, sbom) =>
       attestSbom(cosign, credentialsPath, attestationKeyUri, uri, sbom);
   } else {

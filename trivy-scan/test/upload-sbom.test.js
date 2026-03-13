@@ -2,7 +2,8 @@ import * as core from '@actions/core';
 import { exec } from '@actions/exec';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
-import { copyCredentials, execGcloud } from '../../setup-gcloud/src/index.js';
+import { execGcloud } from '../../setup-gcloud/src/index.js';
+import createKeyFile from '../../utils/src/create-key-file.js';
 import { resolveImageDigests } from '../../utils/src/index.js';
 import setupCosign from '../src/setup-cosign.js';
 import uploadSbom from '../src/upload-sbom.js';
@@ -13,6 +14,7 @@ vi.mock('../../setup-gcloud/src/index.js');
 vi.mock('../src/resolve-digest.js');
 vi.mock('../src/setup-cosign.js');
 vi.mock('../../utils/src/index.js');
+vi.mock('../../utils/src/create-key-file.js');
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -20,7 +22,7 @@ afterEach(() => {
 
 beforeEach(() => {
   execGcloud.mockResolvedValue(undefined);
-  copyCredentials.mockResolvedValue('google-key.json');
+  createKeyFile.mockReturnValue('google-key.json');
   exec.mockResolvedValue(0);
   resolveImageDigests.mockResolvedValue({
     indexSha: 'eu.gcr.io/extenda/test@sha256:index',
