@@ -9,7 +9,7 @@ import trivyScan from './trivy-scan.js';
 import uploadSbom from './upload-sbom.js';
 
 const DEFAULT_ATTESTATION_KEY_URI =
-  'gcpkms://projects/platform-prod-2481/locations/europe-west1/keyRings/global-keyring-binary/cryptoKeys/quality-assurance-attestor-key/cryptoKeyVersions/1';
+  'gcpkms://projects/platform-prod-2481/locations/europe-west1/keyRings/sbom-keyring/cryptoKeys/sbom-attestor-key/cryptoKeyVersions/1';
 
 /**
  * Scan an image with Trivy and handle the results according to the specified options. This includes uploading

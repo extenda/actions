@@ -43,7 +43,7 @@ inputs:
       cosign and upload the attestation to Artifact Registry. The key should be a Google Cloud KMS key in the format:
       `gcpkms://projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey}/cryptoKeyVersions/{cryptoKeyVersion}`.
 
-      The default behavior is to use the default binary authz signing key. Set to `none` to disable attestation
+      The default behavior is to use an SBOM attestation key in platform-prod. Set to `none` to disable attestation
       of SBOM files.
     required: false
   fail-on-vulnerabilities:
