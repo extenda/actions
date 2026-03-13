@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import { exec } from '@actions/exec';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
-import { execGcloud } from '../../setup-gcloud/src/index.js';
+import { copyCredentials, execGcloud } from '../../setup-gcloud/src/index.js';
 import { resolveImageDigests } from '../../utils/src/index.js';
 import setupCosign from '../src/setup-cosign.js';
 import uploadSbom from '../src/upload-sbom.js';
@@ -20,6 +20,7 @@ afterEach(() => {
 
 beforeEach(() => {
   execGcloud.mockResolvedValue(undefined);
+  copyCredentials.mockResolvedValue('google-key.json');
   exec.mockResolvedValue(0);
   resolveImageDigests.mockResolvedValue({
     indexSha: 'eu.gcr.io/extenda/test@sha256:index',
@@ -34,6 +35,7 @@ test('It uploads SPDX and CycloneDX for single-arch image manifest digest withou
     'eu.gcr.io/extenda/test:1.0.0',
     { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
     undefined,
+    'sa',
   );
 
   expect(resolveImageDigests).toHaveBeenCalledTimes(1);
@@ -70,32 +72,49 @@ test('It uploads and attests SPDX and CycloneDX for single-arch image manifest d
     'eu.gcr.io/extenda/test:1.1.0',
     { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
     'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
+    'sa',
   );
 
   expect(setupCosign).toHaveBeenCalledTimes(1);
   expect(exec).toHaveBeenCalledTimes(2);
-  expect(exec).toHaveBeenCalledWith('/tmp/cosign', [
-    'attest',
-    '--key',
-    'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
-    '--type',
-    'spdxjson',
-    '--predicate',
-    '.trivy/sbom.spdx.json',
-    '--yes',
-    'eu.gcr.io/extenda/test@sha256:manifest',
-  ]);
-  expect(exec).toHaveBeenCalledWith('/tmp/cosign', [
-    'attest',
-    '--key',
-    'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
-    '--type',
-    'cyclonedx',
-    '--predicate',
-    '.trivy/sbom.cdx.json',
-    '--yes',
-    'eu.gcr.io/extenda/test@sha256:manifest',
-  ]);
+  expect(exec).toHaveBeenCalledWith(
+    '/tmp/cosign',
+    [
+      'attest',
+      '--key',
+      'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
+      '--type',
+      'spdxjson',
+      '--predicate',
+      '.trivy/sbom.spdx.json',
+      '--yes',
+      'eu.gcr.io/extenda/test@sha256:manifest',
+    ],
+    {
+      env: expect.objectContaining({
+        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
+      }),
+    },
+  );
+  expect(exec).toHaveBeenCalledWith(
+    '/tmp/cosign',
+    [
+      'attest',
+      '--key',
+      'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
+      '--type',
+      'cyclonedx',
+      '--predicate',
+      '.trivy/sbom.cdx.json',
+      '--yes',
+      'eu.gcr.io/extenda/test@sha256:manifest',
+    ],
+    {
+      env: expect.objectContaining({
+        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
+      }),
+    },
+  );
   expect(core.info).toHaveBeenCalledWith(
     'Attesting SBOM for [eu.gcr.io/extenda/test@sha256:manifest] using [gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom]...',
   );
@@ -111,6 +130,7 @@ test('It uploads for both manifest and index when image is multi-arch without at
   await uploadSbom(
     'eu.gcr.io/extenda/test:2.0.0',
     { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
+    'not-used-if-no-sa',
     undefined,
   );
 
@@ -165,54 +185,87 @@ test('It uploads and attests for both manifest and index when image is multi-arc
     'eu.gcr.io/extenda/test:2.1.0',
     { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
     'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
+    'sa',
   );
 
   expect(setupCosign).toHaveBeenCalledTimes(1);
   expect(exec).toHaveBeenCalledTimes(4);
-  expect(exec).toHaveBeenCalledWith('/tmp/cosign', [
-    'attest',
-    '--key',
-    'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
-    '--type',
-    'spdxjson',
-    '--predicate',
-    '.trivy/sbom.spdx.json',
-    '--yes',
-    'eu.gcr.io/extenda/test@sha256:manifest',
-  ]);
-  expect(exec).toHaveBeenCalledWith('/tmp/cosign', [
-    'attest',
-    '--key',
-    'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
-    '--type',
-    'spdxjson',
-    '--predicate',
-    '.trivy/sbom.spdx.json',
-    '--yes',
-    'eu.gcr.io/extenda/test@sha256:index',
-  ]);
-  expect(exec).toHaveBeenCalledWith('/tmp/cosign', [
-    'attest',
-    '--key',
-    'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
-    '--type',
-    'cyclonedx',
-    '--predicate',
-    '.trivy/sbom.cdx.json',
-    '--yes',
-    'eu.gcr.io/extenda/test@sha256:manifest',
-  ]);
-  expect(exec).toHaveBeenCalledWith('/tmp/cosign', [
-    'attest',
-    '--key',
-    'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
-    '--type',
-    'cyclonedx',
-    '--predicate',
-    '.trivy/sbom.cdx.json',
-    '--yes',
-    'eu.gcr.io/extenda/test@sha256:index',
-  ]);
+  expect(exec).toHaveBeenCalledWith(
+    '/tmp/cosign',
+    [
+      'attest',
+      '--key',
+      'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
+      '--type',
+      'spdxjson',
+      '--predicate',
+      '.trivy/sbom.spdx.json',
+      '--yes',
+      'eu.gcr.io/extenda/test@sha256:manifest',
+    ],
+    {
+      env: expect.objectContaining({
+        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
+      }),
+    },
+  );
+  expect(exec).toHaveBeenCalledWith(
+    '/tmp/cosign',
+    [
+      'attest',
+      '--key',
+      'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
+      '--type',
+      'spdxjson',
+      '--predicate',
+      '.trivy/sbom.spdx.json',
+      '--yes',
+      'eu.gcr.io/extenda/test@sha256:index',
+    ],
+    {
+      env: expect.objectContaining({
+        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
+      }),
+    },
+  );
+  expect(exec).toHaveBeenCalledWith(
+    '/tmp/cosign',
+    [
+      'attest',
+      '--key',
+      'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
+      '--type',
+      'cyclonedx',
+      '--predicate',
+      '.trivy/sbom.cdx.json',
+      '--yes',
+      'eu.gcr.io/extenda/test@sha256:manifest',
+    ],
+    {
+      env: expect.objectContaining({
+        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
+      }),
+    },
+  );
+  expect(exec).toHaveBeenCalledWith(
+    '/tmp/cosign',
+    [
+      'attest',
+      '--key',
+      'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
+      '--type',
+      'cyclonedx',
+      '--predicate',
+      '.trivy/sbom.cdx.json',
+      '--yes',
+      'eu.gcr.io/extenda/test@sha256:index',
+    ],
+    {
+      env: expect.objectContaining({
+        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
+      }),
+    },
+  );
 });
 
 test('It rethrows attestation errors', async () => {
@@ -228,6 +281,7 @@ test('It rethrows attestation errors', async () => {
       'eu.gcr.io/extenda/test:2.2.0',
       { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
       'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
+      'sa',
     ),
   ).rejects.toThrow('attestation failed');
 
@@ -243,6 +297,7 @@ test('It rethrows upload errors', async () => {
       'eu.gcr.io/extenda/test:3.0.0',
       { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
       undefined,
+      'sa',
     ),
   ).rejects.toThrow('upload failed');
 

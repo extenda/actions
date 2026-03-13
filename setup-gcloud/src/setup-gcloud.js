@@ -24,7 +24,7 @@ const CACHE_VERSION = '2';
  * @param tmpKeyFile the temporary credentials key file
  * @returns {Promise<string|*>} the path to the created credentials file
  */
-const copyCredentials = async (tmpKeyFile) => {
+export const copyCredentials = async (tmpKeyFile) => {
   if (!process.env.RUNNER_TEMP) {
     return tmpKeyFile;
   }

@@ -59,6 +59,7 @@ const trivy = async (
         image,
         scanResult.sbom,
         typeof attestationKeyUri == 'string' ? attestationKeyUri : undefined,
+        serviceAccountKey,
       );
     }
 

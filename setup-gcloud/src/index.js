@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
 
-import { execGcloud } from './exec-gcloud.js';
 import setupGcloud from './setup-gcloud.js';
 import withGcloud from './with-gcloud.js';
 
@@ -16,4 +15,7 @@ const action = async () => {
 
 export default action;
 
-export { action, execGcloud, setupGcloud, withGcloud };
+export { execGcloud } from './exec-gcloud.js';
+export { copyCredentials } from './setup-gcloud.js';
+
+export { action, setupGcloud, withGcloud };
