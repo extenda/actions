@@ -139,7 +139,7 @@ test('Action maps sbom attestation key input before uploading SBOMs', async () =
     sbom: { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
   };
   const defaultAttestationKeyUri =
-    'gcpkms://projects/platform-prod-2481/locations/europe-west1/keyRings/global-keyring-binary/cryptoKeys/quality-assurance-attestor-key/cryptoKeyVersions/1';
+    'gcpkms://projects/platform-prod-2481/locations/europe-west1/keyRings/sbom-keyring/cryptoKeys/sbom-attestor-key/cryptoKeyVersions/1';
 
   setInput(false, false, true);
   trivyScan.mockResolvedValueOnce(scanResult);
