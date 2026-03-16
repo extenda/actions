@@ -1,5 +1,7 @@
 import os from 'node:os';
 
+import * as core from '@actions/core';
+
 import { loadTool } from '../../utils/src/index.js';
 
 const determineVersion = async (providedVersion) => {
@@ -27,6 +29,8 @@ const determineVersion = async (providedVersion) => {
 export default async function setupTrivy(version = 'latest') {
   const trivyVersion = await determineVersion(version);
   const windows = os.platform() === 'win32';
+
+  core.info(`Install trivy ${trivyVersion}...`);
 
   return loadTool({
     tool: 'trivy',

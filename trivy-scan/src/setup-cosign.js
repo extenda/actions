@@ -1,5 +1,7 @@
 import os from 'node:os';
 
+import * as core from '@actions/core';
+
 import { loadTool } from '../../utils/src/index.js';
 
 const determineVersion = async () => {
@@ -18,6 +20,8 @@ const determineVersion = async () => {
 export default async function setupCosign() {
   const version = await determineVersion();
   const windows = os.platform() === 'win32';
+
+  core.info(`Install cosign ${version}...`);
 
   return loadTool({
     tool: 'cosign',

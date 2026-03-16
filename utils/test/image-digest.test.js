@@ -23,21 +23,31 @@ test('It resolves digest for single-arch images', async () => {
 
   const result = await resolveImageDigests('eu.gcr.io/extenda/test:1.0.0');
 
-  expect(getExecOutput).toHaveBeenNthCalledWith(1, 'docker', [
-    'buildx',
-    'imagetools',
-    'inspect',
-    'eu.gcr.io/extenda/test:1.0.0',
-    '--raw',
-  ]);
-  expect(getExecOutput).toHaveBeenNthCalledWith(2, 'docker', [
-    'buildx',
-    'imagetools',
-    'inspect',
-    'eu.gcr.io/extenda/test:1.0.0',
-    '--format',
-    '{{json .Manifest.Digest}}',
-  ]);
+  expect(getExecOutput).toHaveBeenNthCalledWith(
+    1,
+    'docker',
+    [
+      'buildx',
+      'imagetools',
+      'inspect',
+      'eu.gcr.io/extenda/test:1.0.0',
+      '--raw',
+    ],
+    { silent: true },
+  );
+  expect(getExecOutput).toHaveBeenNthCalledWith(
+    2,
+    'docker',
+    [
+      'buildx',
+      'imagetools',
+      'inspect',
+      'eu.gcr.io/extenda/test:1.0.0',
+      '--format',
+      '{{json .Manifest.Digest}}',
+    ],
+    { silent: true },
+  );
 
   expect(result).toEqual({
     indexSha: 'eu.gcr.io/extenda/test@sha256:index123',
@@ -92,21 +102,31 @@ test('It falls back to index digest when linux/amd64 is not found', async () => 
     'eu.gcr.io/extenda/test@sha256:already-pinned',
   );
 
-  expect(getExecOutput).toHaveBeenNthCalledWith(1, 'docker', [
-    'buildx',
-    'imagetools',
-    'inspect',
-    'eu.gcr.io/extenda/test@sha256:already-pinned',
-    '--raw',
-  ]);
-  expect(getExecOutput).toHaveBeenNthCalledWith(2, 'docker', [
-    'buildx',
-    'imagetools',
-    'inspect',
-    'eu.gcr.io/extenda/test@sha256:already-pinned',
-    '--format',
-    '{{json .Manifest.Digest}}',
-  ]);
+  expect(getExecOutput).toHaveBeenNthCalledWith(
+    1,
+    'docker',
+    [
+      'buildx',
+      'imagetools',
+      'inspect',
+      'eu.gcr.io/extenda/test@sha256:already-pinned',
+      '--raw',
+    ],
+    { silent: true },
+  );
+  expect(getExecOutput).toHaveBeenNthCalledWith(
+    2,
+    'docker',
+    [
+      'buildx',
+      'imagetools',
+      'inspect',
+      'eu.gcr.io/extenda/test@sha256:already-pinned',
+      '--format',
+      '{{json .Manifest.Digest}}',
+    ],
+    { silent: true },
+  );
   expect(result).toEqual({
     indexSha: 'eu.gcr.io/extenda/test@sha256:index789',
     manifestSha: 'eu.gcr.io/extenda/test@sha256:index789',
@@ -134,20 +154,30 @@ test('It returns manifest digest with getImageWithSha256', async () => {
 
   const result = await getImageDigest('eu.gcr.io/extenda/test:3.0.0');
 
-  expect(getExecOutput).toHaveBeenNthCalledWith(1, 'docker', [
-    'buildx',
-    'imagetools',
-    'inspect',
-    'eu.gcr.io/extenda/test:3.0.0',
-    '--raw',
-  ]);
-  expect(getExecOutput).toHaveBeenNthCalledWith(2, 'docker', [
-    'buildx',
-    'imagetools',
-    'inspect',
-    'eu.gcr.io/extenda/test:3.0.0',
-    '--format',
-    '{{json .Manifest.Digest}}',
-  ]);
+  expect(getExecOutput).toHaveBeenNthCalledWith(
+    1,
+    'docker',
+    [
+      'buildx',
+      'imagetools',
+      'inspect',
+      'eu.gcr.io/extenda/test:3.0.0',
+      '--raw',
+    ],
+    { silent: true },
+  );
+  expect(getExecOutput).toHaveBeenNthCalledWith(
+    2,
+    'docker',
+    [
+      'buildx',
+      'imagetools',
+      'inspect',
+      'eu.gcr.io/extenda/test:3.0.0',
+      '--format',
+      '{{json .Manifest.Digest}}',
+    ],
+    { silent: true },
+  );
   expect(result).toEqual('eu.gcr.io/extenda/test@sha256:amd64digest');
 });
