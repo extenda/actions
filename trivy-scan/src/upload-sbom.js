@@ -36,15 +36,24 @@ const attestSbom = async (
   );
 };
 
-const upload = async (uri, sbom) => {
+const upload = async (uri, sbom, sbomBucket) => {
   core.info(`Uploading SBOM [${sbom}] to URI [${uri}]...`);
-  return execGcloud([
+
+  const args = [
     'artifacts',
     'sbom',
     'load',
     `--source=${sbom}`,
     `--uri=${uri}`,
-  ])
+  ];
+
+  if (sbomBucket) {
+    // Google uses a specific encoding for the 'folder' part of the path
+    const folderName = encodeURIComponent(uri).replaceAll('%', '%25');
+    args.push(`--destination=gs://${sbomBucket}/${folderName}/sbom/${sbom}`);
+  }
+
+  return execGcloud(args)
     .then(() => {
       core.info(`Uploaded SBOM [${sbom}] to URI [${uri}]`);
     })
@@ -57,12 +66,12 @@ const upload = async (uri, sbom) => {
     });
 };
 
-const uploadForDigest = (digests, sbom, cosignFn) => {
+const uploadForDigest = (digests, sbom, sbomBucket, cosignFn) => {
   const uploads = [];
 
   // Always upload the specific platform manifest (the artifact)
   uploads.push(
-    upload(digests.manifestSha, sbom).then(() =>
+    upload(digests.manifestSha, sbom, sbomBucket).then(() =>
       cosignFn(digests.manifestSha, sbom),
     ),
   );
@@ -71,7 +80,7 @@ const uploadForDigest = (digests, sbom, cosignFn) => {
     // For multi-arch images, also link the SBOM to the index list (the product).
     core.info(`Multi-arch detected: linking [${sbom}] to Index SHA as well.`);
     uploads.push(
-      upload(digests.indexSha, sbom).then(() =>
+      upload(digests.indexSha, sbom, sbomBucket).then(() =>
         cosignFn(digests.indexSha, sbom),
       ),
     );
@@ -81,11 +90,12 @@ const uploadForDigest = (digests, sbom, cosignFn) => {
 
 /**
  * Upload SBOM artifacts to Google Artifact Registry.
- * @param image the image that was scanned
- * @param spdx the SPDX SBOM file path
- * @param cdx the CycloneDX SBOM file path
- * @param attestationKeyUri the KMS key URI to use for signing the SBOM attestations. If not provided, SBOMs will be uploaded without attestation.
- * @param serviceAccountKey the gcloud service account key
+ * @param image - The image that was scanned
+ * @param spdx - The SPDX SBOM file path
+ * @param cdx - The CycloneDX SBOM file path
+ * @param attestationKeyUri - The KMS key URI to use for signing the SBOM attestations. If not provided, SBOMs will be uploaded without attestation.
+ * @param serviceAccountKey - The gcloud service account key
+ * @param sbomBucket - The google cloud bucket to upload SBOMs to
  * @return {Promise<void>} a promise that resolves when the uploads are complete
  */
 export default async function uploadSbom(
@@ -93,6 +103,7 @@ export default async function uploadSbom(
   { spdx, cdx },
   attestationKeyUri,
   serviceAccountKey,
+  sbomBucket = undefined,
 ) {
   let cosignFn;
   if (attestationKeyUri && serviceAccountKey) {
@@ -108,9 +119,9 @@ export default async function uploadSbom(
   const digests = await resolveImageDigests(image);
   await Promise.all([
     // Upload SPDX for legal compliance use cases
-    ...uploadForDigest(digests, spdx, cosignFn),
+    ...uploadForDigest(digests, spdx, sbomBucket, cosignFn),
     // Upload CycloneDX for vulnerability management use cases
-    ...uploadForDigest(digests, cdx, cosignFn),
+    ...uploadForDigest(digests, cdx, sbomBucket, cosignFn),
   ]);
   core.endGroup();
 }

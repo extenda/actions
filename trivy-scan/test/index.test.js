@@ -33,6 +33,7 @@ const setInput = (
   notifySlackOnVulnerabilities,
   uploadSbomArtifact = false,
   attestationKeyUri = '',
+  attestationBucket = '',
 ) => {
   core.getInput
     .mockReturnValueOnce('ubuntu') // image
@@ -40,7 +41,8 @@ const setInput = (
     .mockReturnValueOnce('latest') // trivy-version
     .mockReturnValueOnce('CRITICAL,HIGH') // severity
     .mockReturnValueOnce('5m0s') // timeout
-    .mockReturnValueOnce(attestationKeyUri); // sbom-attestation-key-uri
+    .mockReturnValueOnce(attestationKeyUri) // sbom-attestation-key-uri
+    .mockReturnValueOnce(attestationBucket); // sbom-attestation-bucket
   core.getBooleanInput
     .mockReturnValueOnce(false) // ignore-unfixed
     .mockReturnValueOnce(failOnVulnerabilities) // fail-on-vulnerabilities
@@ -153,6 +155,7 @@ test('Action maps sbom attestation key input before uploading SBOMs', async () =
     scanResult.sbom,
     defaultAttestationKeyUri,
     'sa',
+    'artifactanalysis-eu-377710398576',
   );
 
   setInput(false, false, true, 'none');
@@ -166,12 +169,13 @@ test('Action maps sbom attestation key input before uploading SBOMs', async () =
     scanResult.sbom,
     undefined,
     'sa',
+    'artifactanalysis-eu-377710398576',
   );
 
   const attestationKeyUri =
     'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom';
 
-  setInput(false, false, true, attestationKeyUri);
+  setInput(false, false, true, attestationKeyUri, 'alt-bucket');
   trivyScan.mockResolvedValueOnce(scanResult);
   uploadSbom.mockResolvedValueOnce(undefined);
   await action();
@@ -182,5 +186,6 @@ test('Action maps sbom attestation key input before uploading SBOMs', async () =
     scanResult.sbom,
     attestationKeyUri,
     'sa',
+    'alt-bucket',
   );
 });
