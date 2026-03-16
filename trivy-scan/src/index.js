@@ -33,11 +33,16 @@ const DEFAULT_ATTESTATION_KEY_URI =
 const trivy = async (
   serviceAccountKey,
   image,
-  { version, severity, ignoreUnfixed, timeout } = {},
-  failOnVulnerabilities = false,
-  notifySlackOnVulnerabilities = false,
-  uploadSbomArtifacts = false,
-  attestationKeyUri = DEFAULT_ATTESTATION_KEY_URI,
+  {
+    version,
+    severity,
+    ignoreUnfixed,
+    timeout,
+    failOnVulnerabilities = false,
+    notifySlackOnVulnerabilities = false,
+    uploadSbomArtifacts = false,
+    attestationKeyUri = DEFAULT_ATTESTATION_KEY_URI,
+  } = {},
 ) =>
   withGcloud(serviceAccountKey, async () => {
     await authenticateDocker(image);
@@ -103,15 +108,16 @@ const action = async () => {
   const resolvedAttestationKeyUri =
     attestationKeyUri === 'none' ? null : attestationKeyUri || undefined;
 
-  await trivy(
-    serviceAccountKey,
-    image,
-    { version, severity, ignoreUnfixed, timeout },
+  await trivy(serviceAccountKey, image, {
+    version,
+    severity,
+    ignoreUnfixed,
+    timeout,
     failOnVulnerabilities,
     notifySlackOnVulnerabilities,
     uploadSbomArtifacts,
-    resolvedAttestationKeyUri,
-  );
+    attestationKeyUri: resolvedAttestationKeyUri,
+  });
 };
 
 export { setupTrivy, trivy };
