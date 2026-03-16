@@ -11,8 +11,6 @@ import uploadSbom from './upload-sbom.js';
 const DEFAULT_ATTESTATION_KEY_URI =
   'gcpkms://projects/platform-prod-2481/locations/europe-west1/keyRings/sbom-keyring/cryptoKeys/sbom-attestor-key/cryptoKeyVersions/1';
 
-const DEFAULT_SBOM_BUCKET = 'artifactanalysis-eu-377710398576';
-
 /**
  * Scan an image with Trivy and handle the results according to the specified options. This includes uploading
  * SBOM artifacts, sending Slack notifications, and failing the action if vulnerabilities are found.
@@ -30,23 +28,16 @@ const DEFAULT_SBOM_BUCKET = 'artifactanalysis-eu-377710398576';
  * @param notifySlackOnVulnerabilities - Whether to send a Slack notification if vulnerabilities are found
  * @param uploadSbomArtifacts - Whether to upload SBOM artifacts to Artifact Registry
  * @param attestationKeyUri - The KMS key URI to use for signing the SBOM attestations. If omitted, the default binary authz key is used. Pass `null` to upload SBOMs without attestation.
- * @param sbomBucket - The cloud storage bucket in which to store SBOM files.
  * @return {Promise<{success: boolean, image: string, summary: {message: string, critical: int, high: int}, sbom: {spdx: string, cdx: string}, report: {json: string, text: string}}>}
  */
 const trivy = async (
   serviceAccountKey,
   image,
-  {
-    version,
-    severity,
-    ignoreUnfixed,
-    timeout,
-    failOnVulnerabilities = false,
-    notifySlackOnVulnerabilities = false,
-    uploadSbomArtifacts = false,
-    attestationKeyUri = DEFAULT_ATTESTATION_KEY_URI,
-    sbomBucket = DEFAULT_SBOM_BUCKET,
-  } = {},
+  { version, severity, ignoreUnfixed, timeout } = {},
+  failOnVulnerabilities = false,
+  notifySlackOnVulnerabilities = false,
+  uploadSbomArtifacts = false,
+  attestationKeyUri = DEFAULT_ATTESTATION_KEY_URI,
 ) =>
   withGcloud(serviceAccountKey, async () => {
     await authenticateDocker(image);
@@ -69,7 +60,6 @@ const trivy = async (
         scanResult.sbom,
         typeof attestationKeyUri == 'string' ? attestationKeyUri : undefined,
         serviceAccountKey,
-        sbomBucket,
       );
     }
 
@@ -110,22 +100,18 @@ const action = async () => {
   );
   const uploadSbomArtifacts = core.getBooleanInput('upload-sbom');
   const attestationKeyUri = core.getInput('sbom-attestation-key-uri');
-  const sbomBucket = core.getInput('sbom-bucket') || undefined;
-
   const resolvedAttestationKeyUri =
     attestationKeyUri === 'none' ? null : attestationKeyUri || undefined;
 
-  await trivy(serviceAccountKey, image, {
-    version,
-    severity,
-    ignoreUnfixed,
-    timeout,
+  await trivy(
+    serviceAccountKey,
+    image,
+    { version, severity, ignoreUnfixed, timeout },
     failOnVulnerabilities,
     notifySlackOnVulnerabilities,
     uploadSbomArtifacts,
-    attestationKeyUri: resolvedAttestationKeyUri,
-    sbomBucket,
-  });
+    resolvedAttestationKeyUri,
+  );
 };
 
 export { setupTrivy, trivy };

@@ -69,46 +69,6 @@ test('It uploads SPDX and CycloneDX for single-arch image manifest digest withou
   expect(core.endGroup).toHaveBeenCalledTimes(1);
 });
 
-test('It uploads SPDX and CycloneDX to custom bucket and uses predictable names', async () => {
-  await uploadSbom(
-    'eu.gcr.io/extenda/test:1.0.0',
-    { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
-    undefined,
-    'sa',
-    'my-bucket',
-  );
-
-  expect(resolveImageDigests).toHaveBeenCalledTimes(1);
-  expect(resolveImageDigests).toHaveBeenCalledWith(
-    'eu.gcr.io/extenda/test:1.0.0',
-  );
-
-  expect(execGcloud).toHaveBeenCalledTimes(2);
-  expect(execGcloud).toHaveBeenCalledWith([
-    'artifacts',
-    'sbom',
-    'load',
-    '--source=.trivy/sbom.spdx.json',
-    '--uri=eu.gcr.io/extenda/test@sha256:manifest',
-    '--destination=gs://my-bucket/eu.gcr.io%252Fextenda%252Ftest%2540sha256%253Amanifest/sbom/.trivy/sbom.spdx.json',
-  ]);
-  expect(execGcloud).toHaveBeenCalledWith([
-    'artifacts',
-    'sbom',
-    'load',
-    '--source=.trivy/sbom.cdx.json',
-    '--uri=eu.gcr.io/extenda/test@sha256:manifest',
-    '--destination=gs://my-bucket/eu.gcr.io%252Fextenda%252Ftest%2540sha256%253Amanifest/sbom/.trivy/sbom.cdx.json',
-  ]);
-  expect(setupCosign).not.toHaveBeenCalled();
-  expect(exec).not.toHaveBeenCalled();
-
-  expect(core.startGroup).toHaveBeenCalledWith(
-    'Uploading SBOMs for eu.gcr.io/extenda/test:1.0.0',
-  );
-  expect(core.endGroup).toHaveBeenCalledTimes(1);
-});
-
 test('It uploads and attests SPDX and CycloneDX for single-arch image manifest digest', async () => {
   await uploadSbom(
     'eu.gcr.io/extenda/test:1.1.0',

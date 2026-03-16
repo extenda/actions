@@ -37,11 +37,6 @@ inputs:
     description: Whether to upload the generated SBOM files to Google Artifact Registry.
     required: false
     default: 'false'
-  sbom-bucket:
-    description: >
-      The Google Cloud Storage bucket to upload the SBOM files to. The bucket should be in the same project as
-      the image being scanned.
-    required: false
   sbom-attestation-key-uri:
     description: >
       The URI of the key to use for signing the SBOM attestation. Set this to attest the generated SBOM files with
