@@ -76262,7 +76262,7 @@ var init_argument_filters = __esm2({
       return typeof input === "number";
     }, "filterNumber");
     filterString = /* @__PURE__ */ __name((input) => {
-      return typeof input === "string";
+      return typeof input === "string" || isPathSpec(input);
     }, "filterString");
     filterStringOrStringArray = /* @__PURE__ */ __name((input) => {
       return filterString(input) || Array.isArray(input) && input.every(filterString);
@@ -79056,6 +79056,50 @@ var init_version = __esm2({
     ];
   }
 });
+function createCloneTask(api, task, repoPath, ...args) {
+  if (!filterString(repoPath)) {
+    return configurationErrorTask(`git.${api}() requires a string 'repoPath'`);
+  }
+  return task(repoPath, filterType(args[0], filterString), getTrailingOptions(arguments));
+}
+__name(createCloneTask, "createCloneTask");
+function clone_default() {
+  return {
+    clone(repo, ...rest) {
+      return this._runTask(
+        createCloneTask("clone", cloneTask, filterType(repo, filterString), ...rest),
+        trailingFunctionArgument(arguments)
+      );
+    },
+    mirror(repo, ...rest) {
+      return this._runTask(
+        createCloneTask("mirror", cloneMirrorTask, filterType(repo, filterString), ...rest),
+        trailingFunctionArgument(arguments)
+      );
+    }
+  };
+}
+__name(clone_default, "clone_default");
+var cloneTask;
+var cloneMirrorTask;
+var init_clone = __esm2({
+  "src/lib/tasks/clone.ts"() {
+    "use strict";
+    init_task();
+    init_utils();
+    init_pathspec();
+    cloneTask = /* @__PURE__ */ __name((repo, directory, customArgs) => {
+      const commands = ["clone", ...customArgs];
+      filterString(repo) && commands.push(pathspec(repo));
+      filterString(directory) && commands.push(pathspec(directory));
+      return straightThroughStringTask(commands);
+    }, "cloneTask");
+    cloneMirrorTask = /* @__PURE__ */ __name((repo, directory, customArgs) => {
+      append(customArgs, "--mirror");
+      return cloneTask(repo, directory, customArgs);
+    }, "cloneMirrorTask");
+  }
+});
 var simple_git_api_exports = {};
 __export(simple_git_api_exports, {
   SimpleGitApi: /* @__PURE__ */ __name(() => SimpleGitApi, "SimpleGitApi")
@@ -79082,6 +79126,7 @@ var init_simple_git_api = __esm2({
     init_task();
     init_version();
     init_utils();
+    init_clone();
     SimpleGitApi = class {
       static {
         __name(this, "SimpleGitApi");
@@ -79187,6 +79232,7 @@ var init_simple_git_api = __esm2({
     Object.assign(
       SimpleGitApi.prototype,
       checkout_default(),
+      clone_default(),
       commit_default(),
       config_default(),
       count_objects_default(),
@@ -79532,38 +79578,6 @@ var init_check_ignore = __esm2({
     init_CheckIgnore();
   }
 });
-var clone_exports = {};
-__export(clone_exports, {
-  cloneMirrorTask: /* @__PURE__ */ __name(() => cloneMirrorTask, "cloneMirrorTask"),
-  cloneTask: /* @__PURE__ */ __name(() => cloneTask, "cloneTask")
-});
-function disallowedCommand(command) {
-  return /^--upload-pack(=|$)/.test(command);
-}
-__name(disallowedCommand, "disallowedCommand");
-function cloneTask(repo, directory, customArgs) {
-  const commands = ["clone", ...customArgs];
-  filterString(repo) && commands.push(repo);
-  filterString(directory) && commands.push(directory);
-  const banned = commands.find(disallowedCommand);
-  if (banned) {
-    return configurationErrorTask(`git.fetch: potential exploit argument blocked.`);
-  }
-  return straightThroughStringTask(commands);
-}
-__name(cloneTask, "cloneTask");
-function cloneMirrorTask(repo, directory, customArgs) {
-  append(customArgs, "--mirror");
-  return cloneTask(repo, directory, customArgs);
-}
-__name(cloneMirrorTask, "cloneMirrorTask");
-var init_clone = __esm2({
-  "src/lib/tasks/clone.ts"() {
-    "use strict";
-    init_task();
-    init_utils();
-  }
-});
 function parseFetchResult(stdOut, stdErr) {
   const result = {
     raw: stdOut,
@@ -79620,16 +79634,16 @@ var fetch_exports = {};
 __export(fetch_exports, {
   fetchTask: /* @__PURE__ */ __name(() => fetchTask, "fetchTask")
 });
-function disallowedCommand2(command) {
+function disallowedCommand(command) {
   return /^--upload-pack(=|$)/.test(command);
 }
-__name(disallowedCommand2, "disallowedCommand2");
+__name(disallowedCommand, "disallowedCommand");
 function fetchTask(remote, branch, customArgs) {
   const commands = ["fetch", ...customArgs];
   if (remote && branch) {
     commands.push(remote, branch);
   }
-  const banned = commands.find(disallowedCommand2);
+  const banned = commands.find(disallowedCommand);
   if (banned) {
     return configurationErrorTask(`git.fetch: potential exploit argument blocked.`);
   }
@@ -79994,7 +80008,6 @@ var require_git = __commonJS2({
     } = (init_branch(), __toCommonJS(branch_exports));
     var { checkIgnoreTask: checkIgnoreTask2 } = (init_check_ignore(), __toCommonJS(check_ignore_exports));
     var { checkIsRepoTask: checkIsRepoTask2 } = (init_check_is_repo(), __toCommonJS(check_is_repo_exports));
-    var { cloneTask: cloneTask2, cloneMirrorTask: cloneMirrorTask2 } = (init_clone(), __toCommonJS(clone_exports));
     var { cleanWithOptionsTask: cleanWithOptionsTask2, isCleanOptionsArray: isCleanOptionsArray2 } = (init_clean(), __toCommonJS(
     clean_exports));
     var { diffSummaryTask: diffSummaryTask2 } = (init_diff(), __toCommonJS(diff_exports));
@@ -80050,25 +80063,6 @@ var require_git = __commonJS2({
           trailingOptionsArgument2(arguments) || {},
           filterArray2(options) && options || []
         ),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    function createCloneTask(api, task, repoPath, localPath) {
-      if (typeof repoPath !== "string") {
-        return configurationErrorTask2(`git.${api}() requires a string 'repoPath'`);
-      }
-      return task(repoPath, filterType2(localPath, filterString2), getTrailingOptions2(arguments));
-    }
-    __name(createCloneTask, "createCloneTask");
-    Git2.prototype.clone = function() {
-      return this._runTask(
-        createCloneTask("clone", cloneTask2, ...arguments),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.mirror = function() {
-      return this._runTask(
-        createCloneTask("mirror", cloneMirrorTask2, ...arguments),
         trailingFunctionArgument2(arguments)
       );
     };
@@ -80424,28 +80418,38 @@ function isConfigSwitch(arg) {
   return typeof arg === "string" && arg.trim().toLowerCase() === "-c";
 }
 __name(isConfigSwitch, "isConfigSwitch");
-function isCloneSwitch(char, arg) {
+function isCloneUploadPackSwitch(char, arg) {
   if (typeof arg !== "string" || !arg.includes(char)) {
     return false;
   }
-  const token = arg.replace(/\0g/, "").replace(/^(--no)?-{1,2}/, "");
-  return /^[\dlsqvnobucj]+\b/.test(token);
+  const cleaned = arg.trim().replace(/\0/g, "");
+  return /^(--no)?-{1,2}[\dlsqvnobucj]+(\s|$)/.test(cleaned);
 }
-__name(isCloneSwitch, "isCloneSwitch");
-function preventProtocolOverride(arg, next) {
-  if (!isConfigSwitch(arg)) {
-    return;
-  }
-  if (!/^\s*protocol(.[a-z]+)?.allow/i.test(next)) {
-    return;
-  }
-  throw new GitPluginError(
-    void 0,
-    "unsafe",
-    "Configuring protocol.allow is not permitted without enabling allowUnsafeExtProtocol"
-  );
+__name(isCloneUploadPackSwitch, "isCloneUploadPackSwitch");
+function preventConfigBuilder(config, setting, message = String(config)) {
+  const regex = typeof config === "string" ? new RegExp(`\\s*${config}`, "i") : config;
+  return /* @__PURE__ */ __name(function preventCommand(options, arg, next) {
+    if (options[setting] !== true && isConfigSwitch(arg) && regex.test(next)) {
+      throw new GitPluginError(
+        void 0,
+        "unsafe",
+        `Configuring ${message} is not permitted without enabling ${setting}`
+      );
+    }
+  }, "preventCommand");
 }
-__name(preventProtocolOverride, "preventProtocolOverride");
+__name(preventConfigBuilder, "preventConfigBuilder");
+var preventUnsafeConfig = [
+  preventConfigBuilder(
+    /^\s*protocol(.[a-z]+)?.allow/i,
+    "allowUnsafeProtocolOverride",
+    "protocol.allow"
+  ),
+  preventConfigBuilder("core.sshCommand", "allowUnsafeSshCommand"),
+  preventConfigBuilder("core.gitProxy", "allowUnsafeGitProxy"),
+  preventConfigBuilder("core.hooksPath", "allowUnsafeHooksPath"),
+  preventConfigBuilder("diff.external", "allowUnsafeDiffExternal")
+];
 function preventUploadPack(arg, method) {
   if (/^\s*--(upload|receive)-pack/.test(arg)) {
     throw new GitPluginError(
@@ -80454,7 +80458,7 @@ function preventUploadPack(arg, method) {
       `Use of --upload-pack or --receive-pack is not permitted without enabling allowUnsafePack`
     );
   }
-  if (method === "clone" && isCloneSwitch("u", arg)) {
+  if (method === "clone" && isCloneUploadPackSwitch("u", arg)) {
     throw new GitPluginError(
       void 0,
       "unsafe",
@@ -80471,16 +80475,16 @@ function preventUploadPack(arg, method) {
 }
 __name(preventUploadPack, "preventUploadPack");
 function blockUnsafeOperationsPlugin({
-  allowUnsafeProtocolOverride = false,
-  allowUnsafePack = false
+  allowUnsafePack = false,
+  ...options
 } = {}) {
   return {
     type: "spawn.args",
     action(args, context) {
       args.forEach((current, index) => {
         const next = index < args.length ? args[index + 1] : "";
-        allowUnsafeProtocolOverride || preventProtocolOverride(current, next);
         allowUnsafePack || preventUploadPack(current, context.method);
+        preventUnsafeConfig.forEach((helper) => helper(options, current, next));
       });
       return args;
     }
@@ -80818,12 +80822,12 @@ function gitInstanceFactory(baseDir, options) {
     plugins.add(commandConfigPrefixingPlugin(config.config));
   }
   plugins.add(blockUnsafeOperationsPlugin(config.unsafe));
-  plugins.add(suffixPathsPlugin());
   plugins.add(completionDetectionPlugin(config.completion));
   config.abort && plugins.add(abortPlugin(config.abort));
   config.progress && plugins.add(progressMonitorPlugin(config.progress));
   config.timeout && plugins.add(timeoutPlugin(config.timeout));
   config.spawnOptions && plugins.add(spawnOptionsPlugin(config.spawnOptions));
+  plugins.add(suffixPathsPlugin());
   plugins.add(errorDetectionPlugin(errorDetectionHandler(true)));
   config.errors && plugins.add(errorDetectionPlugin(config.errors));
   customBinaryPlugin(plugins, config.binary, config.unsafe?.allowUnsafeCustomBinary);
