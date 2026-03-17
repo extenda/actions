@@ -74893,15 +74893,15 @@ var require_debuggability = __commonJS({
         }
       };
       Promise2.prototype._warn = function(message) {
-        var warning = new Warning(message);
+        var warning2 = new Warning(message);
         var ctx = this._peekContext();
         if (ctx) {
-          ctx.attachExtraTrace(warning);
+          ctx.attachExtraTrace(warning2);
         } else {
-          var parsed = CapturedTrace.parseStackAndMessage(warning);
-          warning.stack = parsed.message + "\n" + parsed.stack.join("\n");
+          var parsed = CapturedTrace.parseStackAndMessage(warning2);
+          warning2.stack = parsed.message + "\n" + parsed.stack.join("\n");
         }
-        CapturedTrace.formatAndLogError(warning, "");
+        CapturedTrace.formatAndLogError(warning2, "");
       };
       Promise2.onPossiblyUnhandledRejection = function(fn) {
         var domain = getDomain();
@@ -95757,15 +95757,6 @@ init_utils();
 var Git = require_git();
 init_git_response_error();
 
-// utils/node_modules/@actions/io/lib/io-util.js
-var fs = __toESM(require("fs"), 1);
-var { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs.promises;
-var IS_WINDOWS = process.platform === "win32";
-var READONLY = fs.constants.O_RDONLY;
-
-// utils/node_modules/@actions/exec/lib/toolrunner.js
-var IS_WINDOWS2 = process.platform === "win32";
-
 // utils/node_modules/@actions/core/lib/command.js
 var os = __toESM(require("os"), 1);
 
@@ -96196,6 +96187,17 @@ var _summary = new Summary();
 
 // utils/node_modules/@actions/core/lib/platform.js
 var import_os2 = __toESM(require("os"), 1);
+
+// utils/node_modules/@actions/io/lib/io-util.js
+var fs = __toESM(require("fs"), 1);
+var { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs.promises;
+var IS_WINDOWS = process.platform === "win32";
+var READONLY = fs.constants.O_RDONLY;
+
+// utils/node_modules/@actions/exec/lib/toolrunner.js
+var IS_WINDOWS2 = process.platform === "win32";
+
+// utils/node_modules/@actions/core/lib/platform.js
 var platform = import_os2.default.platform();
 var arch = import_os2.default.arch();
 

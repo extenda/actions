@@ -7,47 +7,27 @@ inputs:
     required: true
   application-name:
     description: The name of the application
-    required: true
+    required: false
+    default: ''
+    deprecationMessage: Not in use.
   service-account-key:
     description: The service account key to use for authentication for the Slack API
     required: true
   channel:
     description: The Slack channel to send the notification to
-    required: true
+    required: false
+    default: ''
+    deprecationMessage: Not in use. The default alert channel for the clan will be used.
   level:
     description: The level of vulnerability to check for (CRITICAL, HIGH, MEDIUM, LOW) ex. CRITICAL\|HIGH
     required: false
     default: CRITICAL\|HIGH
+    deprecationMessage: Not in use.
 runs:
   using: composite
   steps:
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
+    - name: Run Trivy scanner
+      uses: extenda/actions/trivy-scan@v0
       with:
-        image-ref: '${{ inputs.image-ref }}'
-        format: table
-        severity: CRITICAL,HIGH
-        ignore-unfixed: true
-        exit-code: '0'
-        output: trivy-report.txt
-
-    - name: Check Trivy scan results
-      id: trivy
-      shell: bash
-      run: |
-        if grep -q "${{ inputs.level }}" trivy-report.txt; then
-          echo "vulnerable=true" >> $GITHUB_OUTPUT
-        else
-          echo "vulnerable=false" >> $GITHUB_OUTPUT
-        fi
-
-    - name: Send Slack notification if vulnerable
-      if: steps.trivy.outputs.vulnerable == 'true'
-      uses: extenda/actions/slack-notify@v0
-      with:
-        text: |
-          The service's ${{ inputs.application-name}} image  ${{ inputs.image-ref }} has vulnerabilities :warning:
-          Please check the report for details.
-        file: trivy-report.txt
-        channel: ${{ inputs.channel }}
+        image: '${{ inputs.image-ref }}'
         service-account-key: ${{ inputs.service-account-key }}

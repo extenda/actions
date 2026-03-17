@@ -1,5 +1,9 @@
 # Trivy-report
 
+**:warning: This action is deprecated and will be removed in v1.**
+
+Prefer using the [`trivy-scan`](../trivy-scan#readme) action to create a report and notify on Slack.
+
 ## Description
 
 This action generates a report from Trivy scan results. It takes the output of a Trivy scan in TXT format. The report includes information about vulnerabilities, misconfigurations, and secrets found in the scanned image.
