@@ -1,7 +1,7 @@
+import fs from 'node:fs';
 import path from 'node:path';
 
 import esbuild from 'esbuild';
-import fs from 'fs-extra';
 
 const shouldCopyFile = (fileName, filesToCopy) =>
   filesToCopy.some((regex) => regex.test(fileName));
@@ -49,7 +49,7 @@ if (action === undefined) {
 run(action);
 `;
 
-  fs.removeSync(destDir);
+  fs.rmSync(destDir, { recursive: true, force: true });
 
   console.time(`build ${workspaceDir}`);
   await esbuild.build({
