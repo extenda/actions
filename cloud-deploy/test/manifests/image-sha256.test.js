@@ -1,105 +1,34 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
-vi.mock('../../../setup-gcloud/src/index.js');
-vi.mock('@actions/exec');
+import { authenticateDocker } from '../../../trivy-scan/src/index.js';
+import { getImageDigest } from '../../../utils/src/index.js';
 
-import { getExecOutput } from '@actions/exec';
+vi.mock('../../../trivy-scan/src/index.js');
+vi.mock('../../../utils/src/index.js');
 
-import { execGcloud } from '../../../setup-gcloud/src/index.js';
 import getImageWithSha256 from '../../src/manifests/image-sha256.js';
+
+const SHA_VALUE =
+  'sha256:043112bde49f2244cf9e4c44d059603a7c056d13ad61ef3492f04374ac9a0396';
 
 describe('Get image with SHA256', () => {
   afterEach(() => {
     vi.resetAllMocks();
   });
 
-  const SHA_VALUE =
-    'sha256:043112bde49f2244cf9e4c44d059603a7c056d13ad61ef3492f04374ac9a0396';
+  test('It resolves SHA256 tag from semver image', async () => {
+    const semanticImage = 'eu.gcr.io/extenda/actions-test:v1.0.0';
+    const shaImage = `eu.gcr.io/extenda/actions-test@${SHA_VALUE}`;
 
-  test('It resolves SHA256 tag from semver image using standard manifest', async () => {
-    getExecOutput.mockResolvedValueOnce({ stdout: JSON.stringify({}) });
-    execGcloud.mockResolvedValueOnce('').mockResolvedValueOnce(SHA_VALUE);
+    authenticateDocker.mockResolvedValueOnce(0);
+    getImageDigest.mockResolvedValueOnce(shaImage);
 
-    const sha256Image = await getImageWithSha256(
-      'eu.gcr.io/extenda/actions-test:v1.0.0',
-    );
+    const sha256Image = await getImageWithSha256(semanticImage);
 
-    expect(sha256Image).toEqual(`eu.gcr.io/extenda/actions-test@${SHA_VALUE}`);
-    expect(getExecOutput).toHaveBeenCalledWith('docker', [
-      'manifest',
-      'inspect',
-      'eu.gcr.io/extenda/actions-test:v1.0.0',
-    ]);
-    expect(execGcloud).toHaveBeenCalledWith([
-      'auth',
-      'configure-docker',
-      '--quiet',
-    ]);
-    expect(execGcloud).toHaveBeenCalledWith([
-      'container',
-      'images',
-      'describe',
-      'eu.gcr.io/extenda/actions-test:v1.0.0',
-      '--format=get(image_summary.digest)',
-    ]);
-  });
+    expect(sha256Image).toEqual(shaImage);
 
-  test('It can handle image without semver tag using standard manifest', async () => {
-    getExecOutput.mockResolvedValueOnce({ stdout: JSON.stringify({}) });
-    execGcloud.mockResolvedValueOnce('').mockResolvedValueOnce(SHA_VALUE);
+    expect(authenticateDocker).toHaveBeenCalledWith(semanticImage);
 
-    const sha256Image = await getImageWithSha256(
-      'eu.gcr.io/extenda/actions-test',
-    );
-
-    expect(sha256Image).toEqual(`eu.gcr.io/extenda/actions-test@${SHA_VALUE}`);
-    expect(getExecOutput).toHaveBeenCalledTimes(1);
-    expect(execGcloud).toHaveBeenCalledTimes(2);
-  });
-
-  test('It resolves SHA256 from OCI Image Index (multi-arch)', async () => {
-    const digest = 'sha256:amd64digest123456';
-    getExecOutput.mockResolvedValueOnce({
-      stdout: JSON.stringify({
-        manifests: [
-          {
-            platform: { architecture: 'amd64', os: 'linux' },
-            digest,
-          },
-          {
-            platform: { architecture: 'arm64', os: 'linux' },
-            digest: 'sha256:arm64digest123456',
-          },
-        ],
-      }),
-    });
-    execGcloud.mockResolvedValueOnce('');
-
-    const sha256Image = await getImageWithSha256(
-      'eu.gcr.io/extenda/actions-test:v1.0.0',
-    );
-
-    expect(sha256Image).toEqual(`eu.gcr.io/extenda/actions-test@${digest}`);
-    expect(getExecOutput).toHaveBeenCalledTimes(1);
-    expect(execGcloud).toHaveBeenCalledTimes(1);
-  });
-
-  test('It throws error when digest cannot be retrieved', async () => {
-    getExecOutput.mockResolvedValueOnce({
-      stdout: JSON.stringify({
-        manifests: [
-          {
-            platform: { architecture: 'amd64', os: 'linux' },
-          },
-        ],
-      }),
-    });
-    execGcloud.mockResolvedValueOnce('').mockResolvedValueOnce('');
-
-    await expect(
-      getImageWithSha256('eu.gcr.io/extenda/actions-test:v1.0.0'),
-    ).rejects.toThrow(
-      'Failed to retrieve digest for image eu.gcr.io/extenda/actions-test:v1.0.0',
-    );
+    expect(getImageDigest).toHaveBeenCalledWith(semanticImage);
   });
 });
