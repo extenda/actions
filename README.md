@@ -390,7 +390,7 @@ The repository is a monorepo consisting of multiple packages. There are some dep
   * All actions depend on common functions from [`utils`](utils)
   * Cross-cutting actions like [`sonar-scanner`](sonar-scanner) depends on other actions
 
-Javascript actions are compiled into a single javascript files using [`@zeit/ncc`](https://www.npmjs.com/package/@zeit/ncc)
+Javascript actions are compiled into a single javascript files using [`esbuild`](https://esbuild.github.io/)
 to avoid committing `node_modules` into source control. This is required because GitHub Actions does not run `npm install`
 before running actions.
 
@@ -437,9 +437,9 @@ $ git config core.abbrev 7
 ```
 
 ```bash
-$ npm run build:docker
+$ npm run build
 ```
-Runs `npm run build` on all modules. This recompiles the package into its `dist` directory. The project
+Runs `npm run build` on all workspaces. This recompiles the package into its `dist` directory. The project
 builds in a Docker container to ensure strictly identical output across platforms.
 
 #### Tips
