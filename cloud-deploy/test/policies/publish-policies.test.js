@@ -2,11 +2,11 @@ import axios from 'axios';
 import mockFs from 'mock-fs';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { execGcloud } from '../../../setup-gcloud';
+import { execGcloud } from '../../../setup-gcloud/src/index.js';
 import publishPolicies from '../../src/policies/publish-policies.js';
 
 vi.mock('axios');
-vi.mock('../../../setup-gcloud');
+vi.mock('../../../setup-gcloud/src/index.js');
 
 describe('Publish policies', () => {
   beforeEach(() => {

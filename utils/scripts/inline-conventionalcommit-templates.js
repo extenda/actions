@@ -17,6 +17,7 @@ const inlineTemplates = (module, sourceFileName, replaceTextFn) => {
   const sourceFile = require.resolve(`${module}/${sourceFileName}`);
   const moduleDir = path.dirname(sourceFile);
   let source = fs.readFileSync(sourceFile, 'utf-8');
+  console.log('Inline handlebars in', sourceFile);
   source = inlineTemplate(source, moduleDir, 'template.hbs', replaceTextFn);
   source = inlineTemplate(source, moduleDir, 'header.hbs', replaceTextFn);
   source = inlineTemplate(source, moduleDir, 'commit.hbs', replaceTextFn);
