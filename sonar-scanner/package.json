@@ -5,7 +5,6 @@
   "private": true,
   "main": "dist/index.cjs",
   "dependencies": {
-    "@actions/io": "^3.0.2",
     "qs": "^6.15.0"
   },
   "type": "module",

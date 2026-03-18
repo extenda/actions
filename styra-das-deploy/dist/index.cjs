@@ -28150,10 +28150,10 @@ function warning(message, properties = {}) {
 }
 __name(warning, "warning");
 
-// utils/node_modules/@actions/tool-cache/lib/manifest.js
+// node_modules/@actions/tool-cache/lib/manifest.js
 var semver = __toESM(require_semver2(), 1);
 
-// utils/node_modules/@actions/tool-cache/lib/tool-cache.js
+// node_modules/@actions/tool-cache/lib/tool-cache.js
 var semver2 = __toESM(require_semver2(), 1);
 var IS_WINDOWS3 = process.platform === "win32";
 var IS_MAC = process.platform === "darwin";

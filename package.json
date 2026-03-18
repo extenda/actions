@@ -85,9 +85,12 @@
     "vitest-sonar-reporter": "^3.0.0"
   },
   "dependencies": {
+    "@actions/cache": "^6.0.0",
     "@actions/core": "^3.0.0",
     "@actions/exec": "^3.0.0",
     "@actions/github": "^9.0.0",
+    "@actions/io": "^3.0.2",
+    "@actions/tool-cache": "4.0.0",
     "axios": "^1.13.6",
     "axios-retry": "^4.5.0",
     "fast-glob": "^3.3.3",

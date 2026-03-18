@@ -9,8 +9,6 @@
     "postinstall": "node scripts/inline-conventionalcommit-templates.js"
   },
   "dependencies": {
-    "@actions/io": "^3.0.2",
-    "@actions/tool-cache": "4.0.0",
     "conventional-changelog-conventionalcommits": "^5.0.0",
     "conventional-changelog-core": "^4.2.4",
     "conventional-commits-parser": "^3.2.4",
