@@ -46,6 +46,8 @@ const attestSbom = async (
         ...(projectId && {
           GOOGLE_CLOUD_QUOTA_PROJECT: projectId,
           CLOUDSDK_CORE_PROJECT: projectId,
+          GOOGLE_CLOUD_PROJECT: projectId,
+          GCP_PROJECT: projectId,
         }),
       },
     },
