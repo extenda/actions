@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import esbuild from 'esbuild';
 
@@ -78,4 +79,6 @@ run(action);
   console.timeEnd(`build ${workspaceDir}`);
 };
 
-await buildWorkspace();
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  await buildWorkspace();
+}

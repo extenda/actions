@@ -50,7 +50,7 @@
     "utils"
   ],
   "scripts": {
-    "build": "npm run build --workspaces",
+    "build": "node .scripts/build-all-workspaces.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
