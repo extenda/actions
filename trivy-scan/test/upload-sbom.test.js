@@ -95,6 +95,8 @@ test('It uploads and attests SPDX and CycloneDX for single-arch image manifest d
     {
       env: expect.objectContaining({
         GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
+        GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
+        CLOUDSDK_CORE_PROJECT: 'test',
       }),
     },
   );
@@ -114,6 +116,8 @@ test('It uploads and attests SPDX and CycloneDX for single-arch image manifest d
     {
       env: expect.objectContaining({
         GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
+        GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
+        CLOUDSDK_CORE_PROJECT: 'test',
       }),
     },
   );
@@ -208,6 +212,8 @@ test('It uploads and attests for both manifest and index when image is multi-arc
     {
       env: expect.objectContaining({
         GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
+        GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
+        CLOUDSDK_CORE_PROJECT: 'test',
       }),
     },
   );
@@ -227,6 +233,8 @@ test('It uploads and attests for both manifest and index when image is multi-arc
     {
       env: expect.objectContaining({
         GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
+        GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
+        CLOUDSDK_CORE_PROJECT: 'test',
       }),
     },
   );
@@ -246,6 +254,8 @@ test('It uploads and attests for both manifest and index when image is multi-arc
     {
       env: expect.objectContaining({
         GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
+        GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
+        CLOUDSDK_CORE_PROJECT: 'test',
       }),
     },
   );
@@ -265,6 +275,8 @@ test('It uploads and attests for both manifest and index when image is multi-arc
     {
       env: expect.objectContaining({
         GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
+        GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
+        CLOUDSDK_CORE_PROJECT: 'test',
       }),
     },
   );
