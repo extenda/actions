@@ -4,6 +4,11 @@ import { fileURLToPath } from 'node:url';
 
 import esbuild from 'esbuild';
 
+const rootDir = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+);
+
 const shouldCopyFile = (fileName, filesToCopy) =>
   filesToCopy.some((regex) => regex.test(fileName));
 
@@ -68,6 +73,7 @@ run(action);
     keepNames: true,
     treeShaking: true,
     outfile: `${destDir}/index.cjs`,
+    absWorkingDir: rootDir,
     plugins: [
       copyStaticAssetsPlugin({
         sourceDir: srcDir,
