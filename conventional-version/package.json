@@ -4,5 +4,8 @@
   "description": "Determine the project version based on conventional commit conventions",
   "private": true,
   "main": "dist/index.cjs",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

@@ -4,8 +4,8 @@
   "description": "Download Terraform and Terragrunt",
   "private": true,
   "main": "dist/index.cjs",
-  "dependencies": {
-    "semver": "^7.7.4"
-  },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

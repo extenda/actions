@@ -1,5 +1,5 @@
 {
-  "name": "cloud-run",
+  "name": "dora-metrics",
   "version": "0.0.1-local",
   "private": true,
   "description": "Deploy to Cloud Run",
@@ -7,5 +7,8 @@
   "dependencies": {
     "jira-client": "^8.2.2"
   },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

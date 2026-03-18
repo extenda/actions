@@ -4,5 +4,8 @@
   "private": true,
   "description": "publish open api documentation",
   "main": "dist/index.cjs",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

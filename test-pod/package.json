@@ -7,5 +7,8 @@
   "dependencies": {
     "@actions/tool-cache": "^2.0.1"
   },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

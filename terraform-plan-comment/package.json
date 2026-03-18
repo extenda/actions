@@ -1,13 +1,14 @@
 {
-  "name": "terragrunt-plan-comment",
+  "name": "terraform-plan-comment",
   "version": "0.0.1-local",
   "description": "Post a Terragrunt plan as a pull request comment",
   "private": true,
   "main": "dist/index.cjs",
   "dependencies": {
-    "@actions/github": "^9.0.0",
-    "fast-glob": "^3.3.3",
     "p-limit": "^7.3.0"
   },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

@@ -4,8 +4,8 @@
   "description": "Create and update status checks on GitHub commits",
   "private": true,
   "main": "dist/index.cjs",
-  "dependencies": {
-    "@actions/github": "^9.0.0"
-  },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

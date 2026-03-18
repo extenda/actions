@@ -3,13 +3,13 @@
   "version": "0.0.1-local",
   "private": true,
   "description": "Setup GCloud CLI",
-  "main": "src/index.js",
+  "main": "dist/index.cjs",
   "dependencies": {
     "@actions/cache": "^6.0.0",
-    "@actions/io": "^3.0.2",
-    "axios": "^1.13.6",
-    "fast-glob": "^3.3.3",
-    "uuid": "^13.0.0"
+    "@actions/io": "^3.0.2"
   },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

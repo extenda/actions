@@ -4,5 +4,8 @@
   "private": true,
   "description": "Wrap permission converter cmd line utility",
   "main": "dist/index.cjs",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

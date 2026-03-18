@@ -5,7 +5,7 @@
   "description": "Scan an image with Trivy and generate SBOM files and reports",
   "main": "dist/index.cjs",
   "type": "module",
-  "devDependencies": {
-    "nock": "^14.0.11"
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
   }
 }

@@ -4,5 +4,8 @@
   "private": true,
   "description": "Prepare MSBuild for use in GitHub Actions",
   "main": "dist/index.cjs",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

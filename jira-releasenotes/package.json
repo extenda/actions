@@ -7,5 +7,8 @@
   "dependencies": {
     "jira-client": "^8.2.2"
   },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

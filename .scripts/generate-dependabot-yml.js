@@ -1,33 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import yaml from 'js-yaml';
-import { fileURLToPath } from 'url';
-
-import { modules } from './modules.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// List of deprecated actions that we don't want to waste time bumping dependencies in.
-const DEPRECATED_ACTIONS = [
-  'cloud-run',
-  'docker',
-  'kubernetes',
-  'test-pod',
-  'rs-create-installerpkg',
-  'rs-permission-converter',
-  'slack-message',
-  'txengine-deploy',
-];
-
 const generateDependabot = () => {
-  const actions = modules
-    .list()
-    .map((dir) => path.relative(path.join(__dirname, '..'), dir))
-    .filter((action) => !DEPRECATED_ACTIONS.includes(action))
-    .map((dir) => `/${dir}`);
-
   const dependabot = {
     version: 2,
     updates: [
@@ -39,18 +19,6 @@ const generateDependabot = () => {
         },
         groups: {
           root: {
-            patterns: ['*'],
-          },
-        },
-      },
-      {
-        'package-ecosystem': 'npm',
-        directories: actions,
-        schedule: {
-          interval: 'weekly',
-        },
-        groups: {
-          actions: {
             patterns: ['*'],
           },
         },
@@ -88,3 +56,7 @@ ${yaml.dump(dependabot).toString('utf8')}`,
 };
 
 export default generateDependabot;
+
+if (process.argv[1] === __filename) {
+  generateDependabot();
+}

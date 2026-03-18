@@ -1,9 +1,12 @@
 {
-  "name": "customer-config",
+  "name": "cloud-run-traffic",
   "version": "1.0.0-local",
   "private": true,
   "description": "This github action routes traffic for cloud run service.",
   "main": "dist/index.cjs",
   "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }
