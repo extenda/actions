@@ -7,5 +7,8 @@
   "dependencies": {
     "replace-in-file": "^8.4.0"
   },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

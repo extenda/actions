@@ -4,5 +4,8 @@
   "private": true,
   "description": "Setup the Git CLI with credentials.",
   "main": "dist/index.cjs",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

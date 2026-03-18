@@ -4,5 +4,8 @@
   "private": true,
   "description": "Docker build, tag, and push with default registry URL",
   "main": "dist/index.cjs",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

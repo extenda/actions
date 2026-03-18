@@ -5,9 +5,10 @@
   "private": true,
   "main": "dist/index.cjs",
   "dependencies": {
-    "@actions/io": "^3.0.2",
-    "axios": "^1.13.6",
     "qs": "^6.15.0"
   },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

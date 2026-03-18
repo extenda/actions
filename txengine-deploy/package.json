@@ -4,10 +4,8 @@
   "description": "Deploy a tenant-specific Transaction Engine",
   "private": true,
   "main": "dist/index.cjs",
-  "dependencies": {
-    "@actions/github": "^9.0.0",
-    "axios": "^1.13.5",
-    "yaml": "^2.5.0"
-  },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

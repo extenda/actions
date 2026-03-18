@@ -5,9 +5,10 @@
   "private": true,
   "main": "dist/index.cjs",
   "dependencies": {
-    "@actions/github": "^9.0.0",
-    "js-yaml": "^4.1.1",
     "supertest": "^7.2.2"
   },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

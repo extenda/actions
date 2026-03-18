@@ -4,9 +4,8 @@
   "description": "Maven with Extenda Retail Settings",
   "private": true,
   "main": "dist/index.cjs",
-  "dependencies": {
-    "@actions/io": "^3.0.2",
-    "uuid": "^13.0.0"
-  },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

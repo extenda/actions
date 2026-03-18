@@ -5,8 +5,10 @@
   "private": true,
   "main": "dist/index.cjs",
   "dependencies": {
-    "jira-client": "^8.2.2",
-    "semver": "^7.7.4"
+    "jira-client": "^8.2.2"
   },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

@@ -1,11 +1,9 @@
 // Script that inlines handlebar templates in conventional commits. This helps NCC handle the
 // external files which otherwise are loaded numerous times and causing non-reproducible builds.
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const require = createRequire(import.meta.url);
 
 const inlineTemplate = (source, moduleDir, template, replaceTextFn) => {
   const value = fs.readFileSync(
@@ -16,9 +14,10 @@ const inlineTemplate = (source, moduleDir, template, replaceTextFn) => {
 };
 
 const inlineTemplates = (module, sourceFileName, replaceTextFn) => {
-  const moduleDir = path.resolve(__dirname, '..', 'node_modules', module);
-  const sourceFile = path.resolve(moduleDir, sourceFileName);
+  const sourceFile = require.resolve(`${module}/${sourceFileName}`);
+  const moduleDir = path.dirname(sourceFile);
   let source = fs.readFileSync(sourceFile, 'utf-8');
+  console.log('Inline handlebars in', sourceFile);
   source = inlineTemplate(source, moduleDir, 'template.hbs', replaceTextFn);
   source = inlineTemplate(source, moduleDir, 'header.hbs', replaceTextFn);
   source = inlineTemplate(source, moduleDir, 'commit.hbs', replaceTextFn);

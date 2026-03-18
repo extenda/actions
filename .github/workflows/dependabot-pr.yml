@@ -3,7 +3,7 @@ on:
   pull_request:
     paths:
       - '**/package.json'
-      - '**/package-lock.json'
+      - package-lock.json
 
 jobs:
   rebuild-dist-files:

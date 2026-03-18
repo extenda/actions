@@ -6,8 +6,10 @@
   "main": "dist/index.cjs",
   "dependencies": {
     "deepmerge": "^4.3.1",
-    "jsonschema": "^1.4.1",
-    "yaml": "^2.5.0"
+    "jsonschema": "^1.4.1"
   },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

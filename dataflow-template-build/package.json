@@ -4,5 +4,8 @@
   "private": true,
   "description": "Build a dataflow flex template",
   "main": "dist/index.cjs",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

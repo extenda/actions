@@ -4,8 +4,8 @@
   "description": "Run acceptance tests in a Kubernetes Pod",
   "private": true,
   "main": "dist/index.cjs",
-  "dependencies": {
-    "@actions/tool-cache": "^2.0.1"
-  },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

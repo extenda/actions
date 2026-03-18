@@ -1,18 +1,16 @@
 {
-  "name": "cloudrun-v2-deploy",
+  "name": "cloud-deploy",
   "version": "0.0.1-local",
   "private": true,
   "description": "Deploy to GKE Autopilot",
   "main": "dist/index.cjs",
   "dependencies": {
-    "axios": "^1.13.6",
-    "axios-retry": "^4.5.0",
     "deepmerge": "^4.3.1",
-    "fast-glob": "^3.3.3",
     "google-auth-library": "^10.6.1",
-    "jsonschema": "^1.5.0",
-    "semver": "^7.7.4",
-    "yaml": "^2.8.2"
+    "jsonschema": "^1.5.0"
   },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

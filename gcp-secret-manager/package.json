@@ -4,8 +4,8 @@
   "private": true,
   "description": "GCP Secret Manager",
   "main": "dist/index.cjs",
-  "dependencies": {
-    "yaml": "^2.8.2"
-  },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

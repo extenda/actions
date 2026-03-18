@@ -4,8 +4,8 @@
   "private": true,
   "description": "Execute unit tests for Rego rules using OPA and a GCS bundle.",
   "main": "dist/index.cjs",
-  "dependencies": {
-    "yaml": "^2.8.2"
-  },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }

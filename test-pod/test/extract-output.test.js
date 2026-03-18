@@ -115,7 +115,6 @@ describe('Extract output', () => {
         expect.arrayContaining([
           resolve(outputDir, 'src/extract-output.js'),
           resolve(outputDir, 'package.json'),
-          resolve(outputDir, 'package-lock.json'),
         ]),
       );
     });

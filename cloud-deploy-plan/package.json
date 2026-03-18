@@ -4,12 +4,8 @@
   "private": true,
   "description": "Post a deploy comment to pull requests",
   "main": "dist/index.cjs",
-  "dependencies": {
-    "@actions/github": "^9.0.0",
-    "fast-glob": "^3.3.3"
-  },
-  "devDependencies": {
-    "nock": "^14.0.11"
-  },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
 }
