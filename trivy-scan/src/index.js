@@ -120,7 +120,7 @@ const action = async () => {
   });
 };
 
-export { setupTrivy, trivy };
+export { authenticateDocker, setupTrivy, trivy };
 
 /** Default export used by action entrypoint. */
 export default action;
