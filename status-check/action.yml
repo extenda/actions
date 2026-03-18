@@ -40,5 +40,5 @@ inputs:
     required: false
     default: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 runs:
-  using: node20
+  using: node24
   main: dist/index.cjs
