@@ -68,5 +68,5 @@ outputs:
   text-report:
     description: The generated Trivy scan report file in compact text format.
 runs:
-  using: node20
+  using: node24
   main: dist/index.cjs
