@@ -54,9 +54,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "lint:js": "run-script-os",
-    "lint:js:win32": "docker run --rm -t -v \"%cd%\":/work -w /work node:20-alpine sh -c \"npm run lint:js\"",
-    "lint:js:default": "eslint \".scripts/*.js\" \"*/src/**/*.js\" \"*/test/**/*.js\""
+    "lint:js": "eslint .scripts/*.js */src/**/*.js */test/**/*.js"
   },
   "repository": "github:extenda/actions",
   "author": {
@@ -77,15 +75,12 @@
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-unused-imports": "^4.4.1",
-    "fast-glob": "^3.3.3",
-    "glob": "^13.0.6",
     "globals": "^17.3.0",
     "memfs": "^4.56.10",
     "micromatch": "^4.0.8",
     "mock-fs": "^5.5.0",
     "nock": "^14.0.11",
     "prettier": "^3.8.1",
-    "run-script-os": "^1.1.6",
     "vitest": "^4.0.18",
     "vitest-sonar-reporter": "^3.0.0"
   },
