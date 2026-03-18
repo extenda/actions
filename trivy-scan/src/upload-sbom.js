@@ -6,6 +6,15 @@ import createKeyFile from '../../utils/src/create-key-file.js';
 import { resolveImageDigests } from '../../utils/src/index.js';
 import setupCosign from './setup-cosign.js';
 
+export const extractProjectFromAttestationKeyUri = (attestationKeyUri) => {
+  if (!attestationKeyUri) return null;
+
+  // Matches 'projects/' followed by anything that isn't a forward slash
+  const match = attestationKeyUri.match(/projects\/([^/]+)/);
+
+  return match ? match[1] : null;
+};
+
 const attestSbom = async (
   cosign,
   credentialsPath,
@@ -14,6 +23,9 @@ const attestSbom = async (
   sbom,
 ) => {
   core.info(`Attesting SBOM for [${uri}] using [${attestationKeyUri}]...`);
+
+  const projectId = extractProjectFromAttestationKeyUri(attestationKeyUri);
+
   return exec(
     cosign,
     [
@@ -31,6 +43,10 @@ const attestSbom = async (
       env: {
         ...process.env,
         GOOGLE_APPLICATION_CREDENTIALS: credentialsPath,
+        ...(projectId && {
+          GOOGLE_CLOUD_QUOTA_PROJECT: projectId,
+          CLOUDSDK_CORE_PROJECT: projectId,
+        }),
       },
     },
   );
