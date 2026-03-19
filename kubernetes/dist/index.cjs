@@ -62024,7 +62024,7 @@ function info(message) {
 __name(info, "info");
 
 // utils/src/image-digest.js
-async function resolveImageDigests(image) {
+var resolveFromRegistry = /* @__PURE__ */ __name(async (image) => {
   const { stdout: rawOutput } = await getExecOutput(
     "docker",
     ["buildx", "imagetools", "inspect", image, "--raw"],
@@ -62069,6 +62069,37 @@ async function resolveImageDigests(image) {
     manifestSha: `${baseName}@${manifestSha}`,
     isMultiArch
   };
+}, "resolveFromRegistry");
+var ensurePrefix = /* @__PURE__ */ __name((sha) => {
+  const trimmed2 = sha.trim();
+  return trimmed2.startsWith("sha256:") ? trimmed2 : `sha256:${trimmed2}`;
+}, "ensurePrefix");
+var resolveLocalImage = /* @__PURE__ */ __name(async (image) => {
+  const { stdout: localData } = await getExecOutput(
+    "docker",
+    ["inspect", "--format", "{{.Id}}", image],
+    { silent: true }
+  );
+  if (!localData) {
+    throw new Error(`Image ${image} not found locally or in registry.`);
+  }
+  const localSha = ensurePrefix(localData);
+  info(`Detected local-only image. Using Image ID: ${localSha}`);
+  const baseName = image.split(/[:@]/)[0];
+  return {
+    indexSha: `${baseName}@${localSha}`,
+    manifestSha: `${baseName}@${localSha}`,
+    isMultiArch: false
+    // Local daemon images are almost always single-platform
+  };
+}, "resolveLocalImage");
+async function resolveImageDigests(image) {
+  return resolveFromRegistry(image).catch(() => {
+    info(
+      `Image [${image}] not found in registry. Checking local Docker daemon...`
+    );
+    return resolveLocalImage(image);
+  });
 }
 __name(resolveImageDigests, "resolveImageDigests");
 var getImageDigest = /* @__PURE__ */ __name(async (image) => {
