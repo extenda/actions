@@ -172,8 +172,8 @@ test('It falls back to the local Docker image id when registry lookup fails', as
     { silent: true },
   );
   expect(result).toEqual({
-    indexSha: 'local/test-image@sha256:local123',
-    manifestSha: 'local/test-image@sha256:local123',
+    indexSha: 'sha256:local123',
+    manifestSha: 'sha256:local123',
     isMultiArch: false,
   });
   expect(core.info).toHaveBeenNthCalledWith(
@@ -220,8 +220,8 @@ test('It falls back to the local Docker image id when index digest lookup fails'
     { silent: true },
   );
   expect(result).toEqual({
-    indexSha: 'local/test-image@sha256:local456',
-    manifestSha: 'local/test-image@sha256:local456',
+    indexSha: 'sha256:local456',
+    manifestSha: 'sha256:local456',
     isMultiArch: false,
   });
   expect(core.info).toHaveBeenNthCalledWith(
@@ -240,7 +240,7 @@ test('It throws when the image is unavailable in both registry and local Docker'
     .mockResolvedValueOnce({ stdout: '' });
 
   await expect(resolveImageDigests('missing-image:latest')).rejects.toThrow(
-    'Image missing-image:latest not found locally or in registry.',
+    'Image missing-image:latest not found locally.',
   );
 
   expect(getExecOutput).toHaveBeenNthCalledWith(
@@ -353,5 +353,5 @@ test('It returns the local manifest digest with getImageDigest when registry loo
     ['inspect', '--format', '{{.Id}}', 'local/test-image:prod'],
     { silent: true },
   );
-  expect(result).toEqual('local/test-image@sha256:local999');
+  expect(result).toEqual('sha256:local999');
 });

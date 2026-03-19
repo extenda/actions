@@ -60626,27 +60626,21 @@ var resolveFromRegistry = /* @__PURE__ */ __name(async (image) => {
     isMultiArch
   };
 }, "resolveFromRegistry");
-var ensurePrefix = /* @__PURE__ */ __name((sha) => {
-  const trimmed2 = sha.trim();
-  return trimmed2.startsWith("sha256:") ? trimmed2 : `sha256:${trimmed2}`;
-}, "ensurePrefix");
 var resolveLocalImage = /* @__PURE__ */ __name(async (image) => {
   const { stdout: localData } = await getExecOutput(
     "docker",
     ["inspect", "--format", "{{.Id}}", image],
     { silent: true }
   );
-  if (!localData) {
-    throw new Error(`Image ${image} not found locally or in registry.`);
+  if (!localData || localData.trim() === "") {
+    throw new Error(`Image ${image} not found locally.`);
   }
-  const localSha = ensurePrefix(localData);
+  const localSha = localData.trim();
   info(`Detected local-only image. Using Image ID: ${localSha}`);
-  const baseName = image.split(/[:@]/)[0];
   return {
-    indexSha: `${baseName}@${localSha}`,
-    manifestSha: `${baseName}@${localSha}`,
+    indexSha: localSha,
+    manifestSha: localSha,
     isMultiArch: false
-    // Local daemon images are almost always single-platform
   };
 }, "resolveLocalImage");
 async function resolveImageDigests(image) {

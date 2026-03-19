@@ -59,11 +59,6 @@ const resolveFromRegistry = async (image) => {
   };
 };
 
-const ensurePrefix = (sha) => {
-  const trimmed = sha.trim();
-  return trimmed.startsWith('sha256:') ? trimmed : `sha256:${trimmed}`;
-};
-
 const resolveLocalImage = async (image) => {
   const { stdout: localData } = await getExecOutput(
     'docker',
@@ -71,18 +66,20 @@ const resolveLocalImage = async (image) => {
     { silent: true },
   );
 
-  if (!localData) {
-    throw new Error(`Image ${image} not found locally or in registry.`);
+  if (!localData || localData.trim() === '') {
+    throw new Error(`Image ${image} not found locally.`);
   }
 
-  const localSha = ensurePrefix(localData);
+  const localSha = localData.trim();
+
   core.info(`Detected local-only image. Using Image ID: ${localSha}`);
 
-  const baseName = image.split(/[:@]/)[0];
+  // For local images, we return a raw image ID instead of a qualified image. This allows the local docker daemon
+  // to locate it. A local image is also always single-platform.
   return {
-    indexSha: `${baseName}@${localSha}`,
-    manifestSha: `${baseName}@${localSha}`,
-    isMultiArch: false, // Local daemon images are almost always single-platform
+    indexSha: localSha,
+    manifestSha: localSha,
+    isMultiArch: false,
   };
 };
 
