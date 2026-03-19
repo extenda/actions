@@ -1,12 +1,7 @@
 import * as core from '@actions/core';
 import { getExecOutput } from '@actions/exec';
 
-/**
- * Resolve the image digest(s) for a given image reference.
- * @param {string} image - An image reference (tag or digest).
- * @returns {Promise<{indexSha: string, manifestSha: string, isMultiArch: boolean}>}
- */
-export async function resolveImageDigests(image) {
+const resolveFromRegistry = async (image) => {
   // 1. Get the Raw Manifest/Index to check for multi-arch structure
   const { stdout: rawOutput } = await getExecOutput(
     'docker',
@@ -62,6 +57,48 @@ export async function resolveImageDigests(image) {
     manifestSha: `${baseName}@${manifestSha}`,
     isMultiArch,
   };
+};
+
+const ensurePrefix = (sha) => {
+  const trimmed = sha.trim();
+  return trimmed.startsWith('sha256:') ? trimmed : `sha256:${trimmed}`;
+};
+
+const resolveLocalImage = async (image) => {
+  const { stdout: localData } = await getExecOutput(
+    'docker',
+    ['inspect', '--format', '{{.Id}}', image],
+    { silent: true },
+  );
+
+  if (!localData) {
+    throw new Error(`Image ${image} not found locally or in registry.`);
+  }
+
+  const localSha = ensurePrefix(localData);
+  core.info(`Detected local-only image. Using Image ID: ${localSha}`);
+
+  const baseName = image.split(/[:@]/)[0];
+  return {
+    indexSha: `${baseName}@${localSha}`,
+    manifestSha: `${baseName}@${localSha}`,
+    isMultiArch: false, // Local daemon images are almost always single-platform
+  };
+};
+
+/**
+ * Resolve the image digest(s) for a given image reference.
+ * @param {string} image - An image reference (tag or digest).
+ * @returns {Promise<{indexSha: string, manifestSha: string, isMultiArch: boolean}>}
+ */
+export async function resolveImageDigests(image) {
+  return resolveFromRegistry(image).catch(() => {
+    // Fallback to Local Inspection
+    core.info(
+      `Image [${image}] not found in registry. Checking local Docker daemon...`,
+    );
+    return resolveLocalImage(image);
+  });
 }
 
 /**
