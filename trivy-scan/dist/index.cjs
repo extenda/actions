@@ -100414,7 +100414,7 @@ __name(uploadSbom, "uploadSbom");
 var DEFAULT_ATTESTATION_KEY_URI = "gcpkms://projects/platform-prod-2481/locations/europe-west1/keyRings/sbom-keyring/cry\
 ptoKeys/sbom-attestor-key/cryptoKeyVersions/1";
 var trivy = /* @__PURE__ */ __name(async (serviceAccountKey, image, {
-  version: version3,
+  version: version3 = "v0.69.3",
   severity,
   ignoreUnfixed,
   timeout,
@@ -100466,7 +100466,7 @@ var action5 = /* @__PURE__ */ __name(async () => {
   const serviceAccountKey = getInput("service-account-key", {
     required: true
   });
-  const version3 = getInput("trivy-version");
+  const version3 = getInput("trivy-version") || "v0.69.3";
   const severity = getInput("severity");
   const ignoreUnfixed = getBooleanInput("ignore-unfixed");
   const timeout = getInput("timeout");

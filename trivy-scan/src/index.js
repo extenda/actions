@@ -34,7 +34,7 @@ const trivy = async (
   serviceAccountKey,
   image,
   {
-    version,
+    version = 'v0.69.3',
     severity,
     ignoreUnfixed,
     timeout,
@@ -95,7 +95,7 @@ const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {
     required: true,
   });
-  const version = core.getInput('trivy-version');
+  const version = core.getInput('trivy-version') || 'v0.69.3';
   const severity = core.getInput('severity');
   const ignoreUnfixed = core.getBooleanInput('ignore-unfixed');
   const timeout = core.getInput('timeout');
