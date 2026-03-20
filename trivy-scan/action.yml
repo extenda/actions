@@ -25,7 +25,7 @@ inputs:
   trivy-version:
     description: The version of Trivy to use for scanning.
     required: false
-    default: 'latest'
+    default: 'v0.69.3'
   timeout:
     description: >
       The maximum time spent on each Trivy invocation, e.g. `5m0s`. Note that Trivy is invoked multiple times by
