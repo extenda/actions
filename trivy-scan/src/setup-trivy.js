@@ -10,7 +10,7 @@ const determineVersion = async (providedVersion) => {
       ? `v${providedVersion}`
       : providedVersion;
   const response = await fetch(
-    `https://api.github.com/repos/aquasecurity/trivy/releases/${gitTag}`,
+    `https://api.github.com/repos/aquasecurity/trivy/releases/tags/${gitTag}`,
   );
   if (!response.ok) {
     throw new Error(

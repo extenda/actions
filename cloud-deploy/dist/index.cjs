@@ -104319,7 +104319,7 @@ var import_node_os3 = __toESM(require("node:os"), 1);
 var determineVersion = /* @__PURE__ */ __name(async (providedVersion) => {
   const gitTag = providedVersion !== "latest" && !providedVersion.startsWith("v") ? `v${providedVersion}` : providedVersion;
   const response = await fetch(
-    `https://api.github.com/repos/aquasecurity/trivy/releases/${gitTag}`
+    `https://api.github.com/repos/aquasecurity/trivy/releases/tags/${gitTag}`
   );
   if (!response.ok) {
     throw new Error(
