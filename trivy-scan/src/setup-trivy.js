@@ -5,10 +5,9 @@ import * as core from '@actions/core';
 import { loadTool } from '../../utils/src/index.js';
 
 const determineVersion = async (providedVersion) => {
-  const gitTag =
-    providedVersion !== 'latest' && !providedVersion.startsWith('v')
-      ? `v${providedVersion}`
-      : providedVersion;
+  const gitTag = providedVersion.startsWith('v')
+    ? providedVersion
+    : `v${providedVersion}`;
   const response = await fetch(
     `https://api.github.com/repos/aquasecurity/trivy/releases/tags/${gitTag}`,
   );
@@ -23,10 +22,10 @@ const determineVersion = async (providedVersion) => {
 
 /**
  * Setup Trivy by downloading the specified version and returning the path to the binary.
- * @param version - The semantic version of Trivy to install or 'latest' to discover the latest release
+ * @param version - The semantic version of Trivy to install (e.g., '0.50.0' or 'v0.50.0')
  * @return {Promise<string>} the path to the Trivy binary
  */
-export default async function setupTrivy(version = 'latest') {
+export default async function setupTrivy(version) {
   const trivyVersion = await determineVersion(version);
   const windows = os.platform() === 'win32';
 

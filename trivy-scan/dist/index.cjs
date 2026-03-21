@@ -100003,7 +100003,7 @@ __name(authenticateDocker, "authenticateDocker");
 // trivy-scan/src/setup-trivy.js
 var import_node_os3 = __toESM(require("node:os"), 1);
 var determineVersion = /* @__PURE__ */ __name(async (providedVersion) => {
-  const gitTag = providedVersion !== "latest" && !providedVersion.startsWith("v") ? `v${providedVersion}` : providedVersion;
+  const gitTag = providedVersion.startsWith("v") ? providedVersion : `v${providedVersion}`;
   const response = await fetch(
     `https://api.github.com/repos/aquasecurity/trivy/releases/tags/${gitTag}`
   );
@@ -100015,7 +100015,7 @@ var determineVersion = /* @__PURE__ */ __name(async (providedVersion) => {
   const data = await response.json();
   return data.tag_name.replace(/^v/, "");
 }, "determineVersion");
-async function setupTrivy(version3 = "latest") {
+async function setupTrivy(version3) {
   const trivyVersion = await determineVersion(version3);
   const windows = import_node_os3.default.platform() === "win32";
   info(`Install trivy ${trivyVersion}...`);
