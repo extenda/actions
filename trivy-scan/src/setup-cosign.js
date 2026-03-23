@@ -1,24 +1,10 @@
 import os from 'node:os';
 
 import * as core from '@actions/core';
-
-import { loadTool } from '../../utils/src/index.js';
-
-const determineVersion = async () => {
-  const response = await fetch(
-    'https://api.github.com/repos/sigstore/cosign/releases/latest',
-  );
-  if (!response.ok) {
-    throw new Error(
-      `Failed to resolve latest cosign version. Response: ${response.status} ${response.statusText}`,
-    );
-  }
-  const data = await response.json();
-  return data.tag_name.replace(/^v/, '');
-};
+import { loadTool } from 'action-utils';
 
 export default async function setupCosign() {
-  const version = await determineVersion();
+  const version = '3.0.5';
   const windows = os.platform() === 'win32';
 
   core.info(`Install cosign ${version}...`);
