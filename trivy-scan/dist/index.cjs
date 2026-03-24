@@ -100370,20 +100370,8 @@ __name(trivyScan, "trivyScan");
 
 // trivy-scan/src/setup-cosign.js
 var import_node_os4 = __toESM(require("node:os"), 1);
-var determineVersion2 = /* @__PURE__ */ __name(async () => {
-  const response = await fetch(
-    "https://api.github.com/repos/sigstore/cosign/releases/latest"
-  );
-  if (!response.ok) {
-    throw new Error(
-      `Failed to resolve latest cosign version. Response: ${response.status} ${response.statusText}`
-    );
-  }
-  const data = await response.json();
-  return data.tag_name.replace(/^v/, "");
-}, "determineVersion");
 async function setupCosign() {
-  const version3 = await determineVersion2();
+  const version3 = "3.0.5";
   const windows = import_node_os4.default.platform() === "win32";
   info(`Install cosign ${version3}...`);
   return loadTool({
