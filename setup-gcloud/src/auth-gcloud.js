@@ -126,6 +126,19 @@ export function getCurrentAccount() {
 }
 
 /**
+ * Reset all tracked gcloud authentications and clear auth-related environment variables.
+ */
+export function resetAuthStack() {
+  authStack.length = 0;
+  populateEnvironment({
+    type: authType.jsonKey,
+    projectId: '',
+    credentialsFilePath: '',
+    exportCredentials: true,
+  });
+}
+
+/**
  * Restore the previously authenticated account.
  * @param previousAccount the previously authenticated account as returned by {@link getCurrentAccount}.
  */
