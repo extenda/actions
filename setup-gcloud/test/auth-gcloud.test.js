@@ -47,7 +47,7 @@ describe('auth-gcloud', () => {
     const projectId = await authenticateGcloud(
       encodeCredentials({
         private_key: 'private-key',
-        email: 'json-sa@example.iam.gserviceaccount.com',
+        client_email: 'json-sa@example.iam.gserviceaccount.com',
         project_id: 'project-a',
       }),
       false,
@@ -219,6 +219,169 @@ describe('auth-gcloud', () => {
     expect(core.exportVariable).toHaveBeenCalledWith(
       'CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE',
       '',
+    );
+  });
+
+  test('rejects when decoded credentials are not valid JSON', async () => {
+    await expect(
+      authenticateGcloud(Buffer.from('not-json', 'utf8').toString('base64')),
+    ).rejects.toThrow();
+
+    expect(createKeyFile).not.toHaveBeenCalled();
+    expect(authenticateJsonKey).not.toHaveBeenCalled();
+    expect(workloadIdentityFederation).not.toHaveBeenCalled();
+    expect(copyCredentials).not.toHaveBeenCalled();
+    expect(getCurrentAccount()).toBeUndefined();
+  });
+
+  test('rejects when credentials are not base64 encoded JSON payload', async () => {
+    await expect(authenticateGcloud('%%%')).rejects.toThrow();
+
+    expect(createKeyFile).not.toHaveBeenCalled();
+    expect(authenticateJsonKey).not.toHaveBeenCalled();
+    expect(workloadIdentityFederation).not.toHaveBeenCalled();
+    expect(copyCredentials).not.toHaveBeenCalled();
+    expect(getCurrentAccount()).toBeUndefined();
+  });
+
+  test('rejects when required project_id is missing', async () => {
+    await expect(
+      authenticateGcloud(
+        encodeCredentials({
+          private_key: 'private-key',
+          client_email: 'json-sa@example.iam.gserviceaccount.com',
+        }),
+        false,
+      ),
+    ).rejects.toThrow('missing required field "project_id"');
+
+    expect(createKeyFile).not.toHaveBeenCalled();
+    expect(authenticateJsonKey).not.toHaveBeenCalled();
+    expect(workloadIdentityFederation).not.toHaveBeenCalled();
+    expect(getCurrentAccount()).toBeUndefined();
+  });
+
+  test('rejects json key credentials when client_email is missing', async () => {
+    await expect(
+      authenticateGcloud(
+        encodeCredentials({
+          private_key: 'private-key',
+          project_id: 'project-a',
+        }),
+        false,
+      ),
+    ).rejects.toThrow('missing required field "client_email"');
+
+    expect(createKeyFile).not.toHaveBeenCalled();
+    expect(authenticateJsonKey).not.toHaveBeenCalled();
+    expect(workloadIdentityFederation).not.toHaveBeenCalled();
+    expect(getCurrentAccount()).toBeUndefined();
+  });
+
+  test('rejects wid credentials when email is missing', async () => {
+    await expect(
+      authenticateGcloud(
+        encodeCredentials({
+          identity_pool:
+            'projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
+          project_id: 'project-a',
+        }),
+        false,
+      ),
+    ).rejects.toThrow('missing required field "email"');
+
+    expect(createKeyFile).not.toHaveBeenCalled();
+    expect(authenticateJsonKey).not.toHaveBeenCalled();
+    expect(workloadIdentityFederation).not.toHaveBeenCalled();
+    expect(getCurrentAccount()).toBeUndefined();
+  });
+
+  test('rejects when neither private_key nor identity_pool are present', async () => {
+    await expect(
+      authenticateGcloud(
+        encodeCredentials({
+          email: 'service-account@example.iam.gserviceaccount.com',
+          project_id: 'project-a',
+        }),
+        false,
+      ),
+    ).rejects.toThrow('expected either "private_key"');
+
+    expect(createKeyFile).not.toHaveBeenCalled();
+    expect(authenticateJsonKey).not.toHaveBeenCalled();
+    expect(workloadIdentityFederation).not.toHaveBeenCalled();
+    expect(getCurrentAccount()).toBeUndefined();
+  });
+
+  test('does not mutate auth stack or environment when wid flow fails', async () => {
+    createKeyFile.mockReturnValueOnce('/tmp/wid.json');
+    workloadIdentityFederation.mockRejectedValueOnce(
+      new Error('gcloud wid auth failed'),
+    );
+
+    await expect(
+      authenticateGcloud(
+        encodeCredentials({
+          identity_pool:
+            'projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
+          email: 'wid-sa@example.iam.gserviceaccount.com',
+          project_id: 'project-wid',
+        }),
+        true,
+      ),
+    ).rejects.toThrow('gcloud wid auth failed');
+
+    expect(getCurrentAccount()).toBeUndefined();
+    expect(process.env.CLOUDSDK_CORE_PROJECT).toBeUndefined();
+    expect(process.env.GOOGLE_APPLICATION_CREDENTIALS).toBeUndefined();
+    expect(process.env.CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE).toBeUndefined();
+    expect(copyCredentials).not.toHaveBeenCalled();
+  });
+
+  test('restorePreviousAccount is no-op when no previous account exists', async () => {
+    process.env.CLOUDSDK_CORE_PROJECT = 'keep-project';
+    await restorePreviousAccount(undefined);
+
+    expect(configureServiceAccount).not.toHaveBeenCalled();
+    expect(process.env.CLOUDSDK_CORE_PROJECT).toBe('keep-project');
+  });
+
+  test('restorePreviousAccount restores wid environment without configuring account', async () => {
+    createKeyFile
+      .mockReturnValueOnce('/tmp/wid-first.json')
+      .mockReturnValueOnce('/tmp/json-second.json');
+    workloadIdentityFederation.mockResolvedValueOnce(undefined);
+    authenticateJsonKey.mockResolvedValueOnce(undefined);
+
+    await authenticateGcloud(
+      encodeCredentials({
+        identity_pool:
+          'projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
+        email: 'wid-sa@example.iam.gserviceaccount.com',
+        project_id: 'project-wid',
+      }),
+      false,
+    );
+    const previousAccount = getCurrentAccount();
+
+    await authenticateGcloud(
+      encodeCredentials({
+        private_key: 'private-key',
+        email: 'json-sa@example.iam.gserviceaccount.com',
+        project_id: 'project-json',
+      }),
+      false,
+    );
+
+    await restorePreviousAccount(previousAccount);
+
+    expect(configureServiceAccount).not.toHaveBeenCalled();
+    expect(process.env.CLOUDSDK_CORE_PROJECT).toBe('project-wid');
+    expect(process.env.GOOGLE_APPLICATION_CREDENTIALS).toBe(
+      '/tmp/wid-first.json',
+    );
+    expect(process.env.CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE).toBe(
+      '/tmp/wid-first.json',
     );
   });
 });

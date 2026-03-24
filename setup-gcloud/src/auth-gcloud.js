@@ -23,6 +23,65 @@ const env = {
   projectId: 'CLOUDSDK_CORE_PROJECT',
 };
 
+const isNonEmptyString = (value) =>
+  typeof value === 'string' && value.trim().length > 0;
+
+function parseCredentials(credentials) {
+  let parsed;
+  try {
+    parsed = JSON.parse(Buffer.from(credentials, 'base64').toString('utf8'));
+  } catch {
+    throw new Error(
+      'Invalid service-account-key: expected base64-encoded JSON credentials',
+    );
+  }
+
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error(
+      'Invalid service-account-key: expected base64-encoded JSON credentials',
+    );
+  }
+
+  return parsed;
+}
+
+function validateCredentialsShape(jsonCredentials) {
+  if (!isNonEmptyString(jsonCredentials.project_id)) {
+    throw new Error(
+      'Invalid service-account-key: missing required field "project_id"',
+    );
+  }
+
+  if (isNonEmptyString(jsonCredentials.private_key)) {
+    const email =
+      jsonCredentials.client_email ?? jsonCredentials.email ?? undefined;
+    if (!isNonEmptyString(email)) {
+      throw new Error(
+        'Invalid service-account-key: missing required field "client_email"',
+      );
+    }
+    return {
+      type: authType.jsonKey,
+      email,
+    };
+  }
+  if (isNonEmptyString(jsonCredentials.identity_pool)) {
+    if (!isNonEmptyString(jsonCredentials.email)) {
+      throw new Error(
+        'Invalid service-account-key: missing required field "email"',
+      );
+    }
+    return {
+      type: authType.widFederation,
+      email: jsonCredentials.email,
+    };
+  }
+
+  throw new Error(
+    'Invalid service-account-key: expected either "private_key" (json key) or "identity_pool" (wid federation)',
+  );
+}
+
 function isCurrentAccount(auth) {
   const current = getCurrentAccount();
   if (current) {
@@ -36,7 +95,7 @@ function isCurrentAccount(auth) {
 }
 
 const setEnvironmentVariable = (key, value, exportVariable) => {
-  if (typeof value === 'string' && value.length > 0) {
+  if (isNonEmptyString(value)) {
     if (exportVariable) {
       core.info(`Export ${key}`);
       core.exportVariable(key, value);
@@ -83,17 +142,13 @@ const populateEnvironment = ({
  * @param exportCredentials flag indicating if credentials should be exported to environment
  */
 export async function authenticateGcloud(credentials, exportCredentials) {
-  const jsonCredentials = JSON.parse(
-    Buffer.from(credentials, 'base64').toString('utf8'),
-  );
+  const jsonCredentials = parseCredentials(credentials);
+  const { type, email } = validateCredentialsShape(jsonCredentials);
 
-  const { email, project_id: projectId } = jsonCredentials;
+  const { project_id: projectId } = jsonCredentials;
 
   const authEntry = {
-    type:
-      'private_key' in jsonCredentials
-        ? authType.jsonKey
-        : authType.widFederation,
+    type,
     email,
     projectId,
     exportCredentials,
