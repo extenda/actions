@@ -3,34 +3,16 @@ import path from 'node:path';
 
 import { restoreCache, saveCache } from '@actions/cache';
 import * as core from '@actions/core';
-import * as io from '@actions/io';
+import { loadTool } from 'action-utils';
 import glob from 'fast-glob';
-import { v4 as uuid } from 'uuid';
 
-import createKeyFile from '../../utils/src/create-key-file.js';
-import { loadTool } from '../../utils/src/index.js';
+import { authenticateGcloud } from './auth-gcloud.js';
 import getDownloadUrl from './download-url.js';
 import { execGcloud } from './exec-gcloud.js';
 import getLatestVersion from './latest-version.js';
 
 // Increment this version if the list of installed components are modified.
 const CACHE_VERSION = '2';
-
-/**
- * Copy the credentials file outside the working directory. We want to store
- * in a directory that is hard to accidentally include in docker contexts or
- * gcloud tarballs.
- *
- * @param tmpKeyFile the temporary credentials key file
- * @returns {Promise<string|*>} the path to the created credentials file
- */
-export const copyCredentials = async (tmpKeyFile) => {
-  if (!process.env.RUNNER_TEMP) {
-    return tmpKeyFile;
-  }
-  const dest = path.join(process.env.RUNNER_TEMP, uuid());
-  return io.cp(tmpKeyFile, dest).then(() => dest);
-};
 
 const getGcloudVersion = async (providedVersion) => {
   let semver = providedVersion;
@@ -112,38 +94,6 @@ const installComponents = async (toolPath) => {
       fs.rmSync(pycache, { recursive: true });
     });
   return null;
-};
-
-/**
- * Authenticate gcloud with provided service account.
- * @param serviceAccountKey the service account key
- * @param exportCredentials flag indicating if credentials env var should be exported
- * @returns {Promise<string>} a promise that completes with the project ID
- */
-const authenticateGcloud = async (serviceAccountKey, exportCredentials) => {
-  const tmpKeyFile = createKeyFile(serviceAccountKey);
-
-  await execGcloud([
-    '--quiet',
-    'auth',
-    'activate-service-account',
-    '--key-file',
-    tmpKeyFile,
-  ]);
-
-  if (exportCredentials) {
-    await copyCredentials(tmpKeyFile).then((keyFile) => {
-      core.info('Export GOOGLE_APPLICATION_CREDENTIALS');
-      core.exportVariable('GOOGLE_APPLICATION_CREDENTIALS', keyFile);
-    });
-  }
-
-  const { project_id: projectId = '' } = JSON.parse(
-    fs.readFileSync(tmpKeyFile, 'utf8'),
-  );
-
-  core.exportVariable('CLOUDSDK_CORE_PROJECT', projectId);
-  return projectId;
 };
 
 const setupGcloud = async (
