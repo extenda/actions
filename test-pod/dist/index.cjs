@@ -55006,395 +55006,6 @@ var require_out4 = __commonJS({
   }
 });
 
-// node_modules/tmp/lib/tmp.js
-var require_tmp = __commonJS({
-  "node_modules/tmp/lib/tmp.js"(exports2, module2) {
-    var fs14 = require("fs");
-    var os13 = require("os");
-    var path17 = require("path");
-    var crypto6 = require("crypto");
-    var _c = { fs: fs14.constants, os: os13.constants };
-    var RANDOM_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    var TEMPLATE_PATTERN = /XXXXXX/;
-    var DEFAULT_TRIES = 3;
-    var CREATE_FLAGS = (_c.O_CREAT || _c.fs.O_CREAT) | (_c.O_EXCL || _c.fs.O_EXCL) | (_c.O_RDWR || _c.fs.O_RDWR);
-    var IS_WIN32 = os13.platform() === "win32";
-    var EBADF = _c.EBADF || _c.os.errno.EBADF;
-    var ENOENT = _c.ENOENT || _c.os.errno.ENOENT;
-    var DIR_MODE = 448;
-    var FILE_MODE = 384;
-    var EXIT = "exit";
-    var _removeObjects = [];
-    var FN_RMDIR_SYNC = fs14.rmdirSync.bind(fs14);
-    var _gracefulCleanup = false;
-    function rimraf(dirPath, callback) {
-      return fs14.rm(dirPath, { recursive: true }, callback);
-    }
-    __name(rimraf, "rimraf");
-    function FN_RIMRAF_SYNC(dirPath) {
-      return fs14.rmSync(dirPath, { recursive: true });
-    }
-    __name(FN_RIMRAF_SYNC, "FN_RIMRAF_SYNC");
-    function tmpName(options, callback) {
-      const args = _parseArguments(options, callback), opts = args[0], cb = args[1];
-      _assertAndSanitizeOptions(opts, function(err, sanitizedOptions) {
-        if (err) return cb(err);
-        let tries = sanitizedOptions.tries;
-        (/* @__PURE__ */ __name((function _getUniqueName() {
-          try {
-            const name = _generateTmpName(sanitizedOptions);
-            fs14.stat(name, function(err2) {
-              if (!err2) {
-                if (tries-- > 0) return _getUniqueName();
-                return cb(new Error("Could not get a unique tmp filename, max tries reached " + name));
-              }
-              cb(null, name);
-            });
-          } catch (err2) {
-            cb(err2);
-          }
-        }), "_getUniqueName"))();
-      });
-    }
-    __name(tmpName, "tmpName");
-    function tmpNameSync(options) {
-      const args = _parseArguments(options), opts = args[0];
-      const sanitizedOptions = _assertAndSanitizeOptionsSync(opts);
-      let tries = sanitizedOptions.tries;
-      do {
-        const name = _generateTmpName(sanitizedOptions);
-        try {
-          fs14.statSync(name);
-        } catch (e) {
-          return name;
-        }
-      } while (tries-- > 0);
-      throw new Error("Could not get a unique tmp filename, max tries reached");
-    }
-    __name(tmpNameSync, "tmpNameSync");
-    function file(options, callback) {
-      const args = _parseArguments(options, callback), opts = args[0], cb = args[1];
-      tmpName(opts, /* @__PURE__ */ __name(function _tmpNameCreated(err, name) {
-        if (err) return cb(err);
-        fs14.open(name, CREATE_FLAGS, opts.mode || FILE_MODE, /* @__PURE__ */ __name(function _fileCreated(err2, fd) {
-          if (err2) return cb(err2);
-          if (opts.discardDescriptor) {
-            return fs14.close(fd, /* @__PURE__ */ __name(function _discardCallback(possibleErr) {
-              return cb(possibleErr, name, void 0, _prepareTmpFileRemoveCallback(name, -1, opts, false));
-            }, "_discardCallback"));
-          } else {
-            const discardOrDetachDescriptor = opts.discardDescriptor || opts.detachDescriptor;
-            cb(null, name, fd, _prepareTmpFileRemoveCallback(name, discardOrDetachDescriptor ? -1 : fd, opts, false));
-          }
-        }, "_fileCreated"));
-      }, "_tmpNameCreated"));
-    }
-    __name(file, "file");
-    function fileSync(options) {
-      const args = _parseArguments(options), opts = args[0];
-      const discardOrDetachDescriptor = opts.discardDescriptor || opts.detachDescriptor;
-      const name = tmpNameSync(opts);
-      let fd = fs14.openSync(name, CREATE_FLAGS, opts.mode || FILE_MODE);
-      if (opts.discardDescriptor) {
-        fs14.closeSync(fd);
-        fd = void 0;
-      }
-      return {
-        name,
-        fd,
-        removeCallback: _prepareTmpFileRemoveCallback(name, discardOrDetachDescriptor ? -1 : fd, opts, true)
-      };
-    }
-    __name(fileSync, "fileSync");
-    function dir(options, callback) {
-      const args = _parseArguments(options, callback), opts = args[0], cb = args[1];
-      tmpName(opts, /* @__PURE__ */ __name(function _tmpNameCreated(err, name) {
-        if (err) return cb(err);
-        fs14.mkdir(name, opts.mode || DIR_MODE, /* @__PURE__ */ __name(function _dirCreated(err2) {
-          if (err2) return cb(err2);
-          cb(null, name, _prepareTmpDirRemoveCallback(name, opts, false));
-        }, "_dirCreated"));
-      }, "_tmpNameCreated"));
-    }
-    __name(dir, "dir");
-    function dirSync(options) {
-      const args = _parseArguments(options), opts = args[0];
-      const name = tmpNameSync(opts);
-      fs14.mkdirSync(name, opts.mode || DIR_MODE);
-      return {
-        name,
-        removeCallback: _prepareTmpDirRemoveCallback(name, opts, true)
-      };
-    }
-    __name(dirSync, "dirSync");
-    function _removeFileAsync(fdPath, next) {
-      const _handler = /* @__PURE__ */ __name(function(err) {
-        if (err && !_isENOENT(err)) {
-          return next(err);
-        }
-        next();
-      }, "_handler");
-      if (0 <= fdPath[0])
-        fs14.close(fdPath[0], function() {
-          fs14.unlink(fdPath[1], _handler);
-        });
-      else fs14.unlink(fdPath[1], _handler);
-    }
-    __name(_removeFileAsync, "_removeFileAsync");
-    function _removeFileSync(fdPath) {
-      let rethrownException = null;
-      try {
-        if (0 <= fdPath[0]) fs14.closeSync(fdPath[0]);
-      } catch (e) {
-        if (!_isEBADF(e) && !_isENOENT(e)) throw e;
-      } finally {
-        try {
-          fs14.unlinkSync(fdPath[1]);
-        } catch (e) {
-          if (!_isENOENT(e)) rethrownException = e;
-        }
-      }
-      if (rethrownException !== null) {
-        throw rethrownException;
-      }
-    }
-    __name(_removeFileSync, "_removeFileSync");
-    function _prepareTmpFileRemoveCallback(name, fd, opts, sync) {
-      const removeCallbackSync = _prepareRemoveCallback(_removeFileSync, [fd, name], sync);
-      const removeCallback = _prepareRemoveCallback(_removeFileAsync, [fd, name], sync, removeCallbackSync);
-      if (!opts.keep) _removeObjects.unshift(removeCallbackSync);
-      return sync ? removeCallbackSync : removeCallback;
-    }
-    __name(_prepareTmpFileRemoveCallback, "_prepareTmpFileRemoveCallback");
-    function _prepareTmpDirRemoveCallback(name, opts, sync) {
-      const removeFunction = opts.unsafeCleanup ? rimraf : fs14.rmdir.bind(fs14);
-      const removeFunctionSync = opts.unsafeCleanup ? FN_RIMRAF_SYNC : FN_RMDIR_SYNC;
-      const removeCallbackSync = _prepareRemoveCallback(removeFunctionSync, name, sync);
-      const removeCallback = _prepareRemoveCallback(removeFunction, name, sync, removeCallbackSync);
-      if (!opts.keep) _removeObjects.unshift(removeCallbackSync);
-      return sync ? removeCallbackSync : removeCallback;
-    }
-    __name(_prepareTmpDirRemoveCallback, "_prepareTmpDirRemoveCallback");
-    function _prepareRemoveCallback(removeFunction, fileOrDirName, sync, cleanupCallbackSync) {
-      let called = false;
-      return /* @__PURE__ */ __name(function _cleanupCallback(next) {
-        if (!called) {
-          const toRemove = cleanupCallbackSync || _cleanupCallback;
-          const index = _removeObjects.indexOf(toRemove);
-          if (index >= 0) _removeObjects.splice(index, 1);
-          called = true;
-          if (sync || removeFunction === FN_RMDIR_SYNC || removeFunction === FN_RIMRAF_SYNC) {
-            return removeFunction(fileOrDirName);
-          } else {
-            return removeFunction(fileOrDirName, next || function() {
-            });
-          }
-        }
-      }, "_cleanupCallback");
-    }
-    __name(_prepareRemoveCallback, "_prepareRemoveCallback");
-    function _garbageCollector() {
-      if (!_gracefulCleanup) return;
-      while (_removeObjects.length) {
-        try {
-          _removeObjects[0]();
-        } catch (e) {
-        }
-      }
-    }
-    __name(_garbageCollector, "_garbageCollector");
-    function _randomChars(howMany) {
-      let value = [], rnd = null;
-      try {
-        rnd = crypto6.randomBytes(howMany);
-      } catch (e) {
-        rnd = crypto6.pseudoRandomBytes(howMany);
-      }
-      for (let i = 0; i < howMany; i++) {
-        value.push(RANDOM_CHARS[rnd[i] % RANDOM_CHARS.length]);
-      }
-      return value.join("");
-    }
-    __name(_randomChars, "_randomChars");
-    function _isUndefined(obj) {
-      return typeof obj === "undefined";
-    }
-    __name(_isUndefined, "_isUndefined");
-    function _parseArguments(options, callback) {
-      if (typeof options === "function") {
-        return [{}, options];
-      }
-      if (_isUndefined(options)) {
-        return [{}, callback];
-      }
-      const actualOptions = {};
-      for (const key of Object.getOwnPropertyNames(options)) {
-        actualOptions[key] = options[key];
-      }
-      return [actualOptions, callback];
-    }
-    __name(_parseArguments, "_parseArguments");
-    function _resolvePath(name, tmpDir, cb) {
-      const pathToResolve = path17.isAbsolute(name) ? name : path17.join(tmpDir, name);
-      fs14.stat(pathToResolve, function(err) {
-        if (err) {
-          fs14.realpath(path17.dirname(pathToResolve), function(err2, parentDir) {
-            if (err2) return cb(err2);
-            cb(null, path17.join(parentDir, path17.basename(pathToResolve)));
-          });
-        } else {
-          fs14.realpath(pathToResolve, cb);
-        }
-      });
-    }
-    __name(_resolvePath, "_resolvePath");
-    function _resolvePathSync(name, tmpDir) {
-      const pathToResolve = path17.isAbsolute(name) ? name : path17.join(tmpDir, name);
-      try {
-        fs14.statSync(pathToResolve);
-        return fs14.realpathSync(pathToResolve);
-      } catch (_err) {
-        const parentDir = fs14.realpathSync(path17.dirname(pathToResolve));
-        return path17.join(parentDir, path17.basename(pathToResolve));
-      }
-    }
-    __name(_resolvePathSync, "_resolvePathSync");
-    function _generateTmpName(opts) {
-      const tmpDir = opts.tmpdir;
-      if (!_isUndefined(opts.name)) {
-        return path17.join(tmpDir, opts.dir, opts.name);
-      }
-      if (!_isUndefined(opts.template)) {
-        return path17.join(tmpDir, opts.dir, opts.template).replace(TEMPLATE_PATTERN, _randomChars(6));
-      }
-      const name = [
-        opts.prefix ? opts.prefix : "tmp",
-        "-",
-        process.pid,
-        "-",
-        _randomChars(12),
-        opts.postfix ? "-" + opts.postfix : ""
-      ].join("");
-      return path17.join(tmpDir, opts.dir, name);
-    }
-    __name(_generateTmpName, "_generateTmpName");
-    function _assertOptionsBase(options) {
-      if (!_isUndefined(options.name)) {
-        const name = options.name;
-        if (path17.isAbsolute(name)) throw new Error(`name option must not contain an absolute path, found "${name}".`);
-        const basename5 = path17.basename(name);
-        if (basename5 === ".." || basename5 === "." || basename5 !== name)
-          throw new Error(`name option must not contain a path, found "${name}".`);
-      }
-      if (!_isUndefined(options.template) && !options.template.match(TEMPLATE_PATTERN)) {
-        throw new Error(`Invalid template, found "${options.template}".`);
-      }
-      if (!_isUndefined(options.tries) && isNaN(options.tries) || options.tries < 0) {
-        throw new Error(`Invalid tries, found "${options.tries}".`);
-      }
-      options.tries = _isUndefined(options.name) ? options.tries || DEFAULT_TRIES : 1;
-      options.keep = !!options.keep;
-      options.detachDescriptor = !!options.detachDescriptor;
-      options.discardDescriptor = !!options.discardDescriptor;
-      options.unsafeCleanup = !!options.unsafeCleanup;
-      options.prefix = _isUndefined(options.prefix) ? "" : options.prefix;
-      options.postfix = _isUndefined(options.postfix) ? "" : options.postfix;
-    }
-    __name(_assertOptionsBase, "_assertOptionsBase");
-    function _getRelativePath(option, name, tmpDir, cb) {
-      if (_isUndefined(name)) return cb(null);
-      _resolvePath(name, tmpDir, function(err, resolvedPath) {
-        if (err) return cb(err);
-        const relativePath = path17.relative(tmpDir, resolvedPath);
-        if (!resolvedPath.startsWith(tmpDir)) {
-          return cb(new Error(`${option} option must be relative to "${tmpDir}", found "${relativePath}".`));
-        }
-        cb(null, relativePath);
-      });
-    }
-    __name(_getRelativePath, "_getRelativePath");
-    function _getRelativePathSync(option, name, tmpDir) {
-      if (_isUndefined(name)) return;
-      const resolvedPath = _resolvePathSync(name, tmpDir);
-      const relativePath = path17.relative(tmpDir, resolvedPath);
-      if (!resolvedPath.startsWith(tmpDir)) {
-        throw new Error(`${option} option must be relative to "${tmpDir}", found "${relativePath}".`);
-      }
-      return relativePath;
-    }
-    __name(_getRelativePathSync, "_getRelativePathSync");
-    function _assertAndSanitizeOptions(options, cb) {
-      _getTmpDir(options, function(err, tmpDir) {
-        if (err) return cb(err);
-        options.tmpdir = tmpDir;
-        try {
-          _assertOptionsBase(options, tmpDir);
-        } catch (err2) {
-          return cb(err2);
-        }
-        _getRelativePath("dir", options.dir, tmpDir, function(err2, dir2) {
-          if (err2) return cb(err2);
-          options.dir = _isUndefined(dir2) ? "" : dir2;
-          _getRelativePath("template", options.template, tmpDir, function(err3, template) {
-            if (err3) return cb(err3);
-            options.template = template;
-            cb(null, options);
-          });
-        });
-      });
-    }
-    __name(_assertAndSanitizeOptions, "_assertAndSanitizeOptions");
-    function _assertAndSanitizeOptionsSync(options) {
-      const tmpDir = options.tmpdir = _getTmpDirSync(options);
-      _assertOptionsBase(options, tmpDir);
-      const dir2 = _getRelativePathSync("dir", options.dir, tmpDir);
-      options.dir = _isUndefined(dir2) ? "" : dir2;
-      options.template = _getRelativePathSync("template", options.template, tmpDir);
-      return options;
-    }
-    __name(_assertAndSanitizeOptionsSync, "_assertAndSanitizeOptionsSync");
-    function _isEBADF(error2) {
-      return _isExpectedError(error2, -EBADF, "EBADF");
-    }
-    __name(_isEBADF, "_isEBADF");
-    function _isENOENT(error2) {
-      return _isExpectedError(error2, -ENOENT, "ENOENT");
-    }
-    __name(_isENOENT, "_isENOENT");
-    function _isExpectedError(error2, errno, code) {
-      return IS_WIN32 ? error2.code === code : error2.code === code && error2.errno === errno;
-    }
-    __name(_isExpectedError, "_isExpectedError");
-    function setGracefulCleanup() {
-      _gracefulCleanup = true;
-    }
-    __name(setGracefulCleanup, "setGracefulCleanup");
-    function _getTmpDir(options, cb) {
-      return fs14.realpath(options && options.tmpdir || os13.tmpdir(), cb);
-    }
-    __name(_getTmpDir, "_getTmpDir");
-    function _getTmpDirSync(options) {
-      return fs14.realpathSync(options && options.tmpdir || os13.tmpdir());
-    }
-    __name(_getTmpDirSync, "_getTmpDirSync");
-    process.addListener(EXIT, _garbageCollector);
-    Object.defineProperty(module2.exports, "tmpdir", {
-      enumerable: true,
-      configurable: false,
-      get: /* @__PURE__ */ __name(function() {
-        return _getTmpDirSync();
-      }, "get")
-    });
-    module2.exports.dir = dir;
-    module2.exports.dirSync = dirSync;
-    module2.exports.file = file;
-    module2.exports.fileSync = fileSync;
-    module2.exports.tmpName = tmpName;
-    module2.exports.tmpNameSync = tmpNameSync;
-    module2.exports.setGracefulCleanup = setGracefulCleanup;
-  }
-});
-
 // node_modules/simple-git/dist/esm/index.js
 var import_node_buffer = require("node:buffer");
 var import_file_exists = __toESM(require_dist(), 1);
@@ -62583,6 +62194,14 @@ function info(message) {
   process.stdout.write(message + os5.EOL);
 }
 __name(info, "info");
+function saveState(name, value) {
+  const filePath = process.env["GITHUB_STATE"] || "";
+  if (filePath) {
+    return issueFileCommand("STATE", prepareKeyValueMessage(name, value));
+  }
+  issueCommand("save-state", { name }, toCommandValue(value));
+}
+__name(saveState, "saveState");
 function getIDToken(aud) {
   return __awaiter9(this, void 0, void 0, function* () {
     return yield OidcClient.getIDToken(aud);
@@ -102091,36 +101710,67 @@ __name(saveCacheV2, "saveCacheV2");
 // setup-gcloud/src/setup-gcloud.js
 var import_fast_glob = __toESM(require_out4(), 1);
 
-// utils/src/create-key-file.js
-var import_node_fs4 = __toESM(require("node:fs"), 1);
-var import_tmp = __toESM(require_tmp(), 1);
-import_tmp.default.setGracefulCleanup();
-var createKeyFile = /* @__PURE__ */ __name((serviceAccountKey, { encoding = "base64" } = {}) => {
-  const tmpFile = import_tmp.default.fileSync({ postfix: ".json" });
-  const jsonKey = Buffer.from(serviceAccountKey, encoding).toString("utf8");
-  import_node_fs4.default.writeFileSync(tmpFile.name, jsonKey);
-  return tmpFile.name;
-}, "createKeyFile");
-var create_key_file_default = createKeyFile;
-
 // setup-gcloud/src/auth-json-key.js
-var authenticateJsonKey = /* @__PURE__ */ __name(async (tmpKeyFile) => {
-  await execGcloud([
-    "--quiet",
-    "auth",
-    "activate-service-account",
-    "--key-file",
-    tmpKeyFile
-  ]);
-  return {
-    googleCredentials: tmpKeyFile
-  };
+var authenticateJsonKey = /* @__PURE__ */ __name(async (credentialsFilePath) => {
+  await execGcloud(
+    [
+      "--quiet",
+      "auth",
+      "activate-service-account",
+      "--key-file",
+      credentialsFilePath
+    ],
+    "gcloud",
+    true
+  );
 }, "authenticateJsonKey");
 
+// setup-gcloud/src/create-job-scoped-credential.js
+var import_node_fs4 = __toESM(require("node:fs"), 1);
+var import_node_path3 = __toESM(require("node:path"), 1);
+
+// setup-gcloud/src/job-scope.js
+function getJobScope({ prefix: prefix2 = "setup-gcloud" } = {}) {
+  const { RUNNER_TEMP, GITHUB_RUN_ID, GITHUB_RUN_ATTEMPT } = process.env;
+  if (!RUNNER_TEMP || !GITHUB_RUN_ID) {
+    throw new Error(
+      "RUNNER_TEMP and GITHUB_RUN_ID environment variables are required"
+    );
+  }
+  return `${RUNNER_TEMP}/${prefix2}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT || "1"}`;
+}
+__name(getJobScope, "getJobScope");
+
+// setup-gcloud/src/create-job-scoped-credential.js
+var trackedCredentialFiles = [];
+function createJobScopedCredential(credentialData, { encoding = "base64", suffix = ".json" } = {}) {
+  const jobScopedDir = getJobScope();
+  if (!import_node_fs4.default.existsSync(jobScopedDir)) {
+    import_node_fs4.default.mkdirSync(jobScopedDir, { recursive: true });
+  }
+  const credentialFilePath = import_node_path3.default.join(
+    jobScopedDir,
+    `credential-${v4_default()}${suffix}`
+  );
+  const decodedData = encoding === "base64" ? Buffer.from(credentialData, "base64").toString("utf8") : credentialData;
+  import_node_fs4.default.writeFileSync(credentialFilePath, decodedData, {
+    mode: 384
+    // rw-------
+  });
+  setSecret(credentialFilePath);
+  trackedCredentialFiles.push(credentialFilePath);
+  saveState(
+    "gcloud-credential-files",
+    JSON.stringify(trackedCredentialFiles)
+  );
+  return credentialFilePath;
+}
+__name(createJobScopedCredential, "createJobScopedCredential");
+
 // setup-gcloud/src/auth-wid-federation.js
-async function workloadIdentityFederation(tmpKeyFile, { identity_pool: workloadIdentityPool, email }) {
+async function workloadIdentityFederation(credentialsFilePath, { identity_pool: workloadIdentityPool, email }) {
   const idToken = await getIDToken("https://iam.googleapis.com/");
-  const idTokenPath = create_key_file_default(idToken, { encoding: "utf8" });
+  const idTokenPath = createJobScopedCredential(idToken, { encoding: "utf8" });
   await execGcloud(
     [
       "iam",
@@ -102128,25 +101778,14 @@ async function workloadIdentityFederation(tmpKeyFile, { identity_pool: workloadI
       "create-cred-config",
       workloadIdentityPool,
       `--service-account=${email}`,
-      `--output-file=${tmpKeyFile}`,
+      `--output-file=${credentialsFilePath}`,
       `--credential-source-file=${idTokenPath}`
     ],
     "gcloud",
-    false
+    true
   );
 }
 __name(workloadIdentityFederation, "workloadIdentityFederation");
-
-// setup-gcloud/src/copy-credentials.js
-var import_node_path3 = __toESM(require("node:path"), 1);
-async function copyCredentials(tmpKeyFile) {
-  if (!process.env.RUNNER_TEMP) {
-    return tmpKeyFile;
-  }
-  const dest = import_node_path3.default.join(process.env.RUNNER_TEMP, v4_default());
-  return cp(tmpKeyFile, dest).then(() => dest);
-}
-__name(copyCredentials, "copyCredentials");
 
 // setup-gcloud/src/auth-gcloud.js
 var authStack = [];
@@ -102185,6 +101824,7 @@ function validateCredentialsShape(jsonCredentials) {
     );
   }
   if (isNonEmptyString(jsonCredentials.private_key)) {
+    setSecret(jsonCredentials.private_key);
     const email = jsonCredentials.client_email ?? jsonCredentials.email ?? void 0;
     if (!isNonEmptyString(email)) {
       throw new Error(
@@ -102258,6 +101898,7 @@ var populateEnvironment = /* @__PURE__ */ __name(({
   }
 }, "populateEnvironment");
 async function authenticateGcloud(credentials, exportCredentials) {
+  setSecret(credentials);
   const jsonCredentials = parseCredentials(credentials);
   const { type, email } = validateCredentialsShape(jsonCredentials);
   const { project_id: projectId } = jsonCredentials;
@@ -102269,15 +101910,15 @@ async function authenticateGcloud(credentials, exportCredentials) {
     credentialsFilePath: ""
   };
   if (!isCurrentAccount(authEntry)) {
-    const tmpKeyFile = create_key_file_default(credentials);
-    authEntry.credentialsFilePath = tmpKeyFile;
+    authEntry.credentialsFilePath = createJobScopedCredential(credentials);
+    info(`Authenticate gcloud with ${authEntry.type}`);
     if (authEntry.type === authType.jsonKey) {
-      await authenticateJsonKey(tmpKeyFile);
+      await authenticateJsonKey(authEntry.credentialsFilePath);
     } else {
-      await workloadIdentityFederation(tmpKeyFile, jsonCredentials);
-    }
-    if (exportCredentials) {
-      authEntry.credentialsFilePath = await copyCredentials(tmpKeyFile);
+      await workloadIdentityFederation(
+        authEntry.credentialsFilePath,
+        jsonCredentials
+      );
     }
     authStack.push(authEntry);
     populateEnvironment(authEntry);
@@ -102355,6 +101996,11 @@ var configureCloudSdkPython = /* @__PURE__ */ __name(async (toolPath) => {
   }
   return toolPath;
 }, "configureCloudSdkPython");
+var isolateConfigDir = /* @__PURE__ */ __name(async (toolPath) => {
+  const configDirPath = getJobScope({ prefix: "gcloud-config" });
+  exportVariable("CLOUDSDK_CONFIG", configDirPath);
+  return toolPath;
+}, "isolateConfigDir");
 var installComponents = /* @__PURE__ */ __name(async (toolPath) => {
   await execGcloud([
     "components",
@@ -102410,8 +102056,8 @@ var setupGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, version3 = "l
       await loadTool({
         ...toolInfo,
         downloadUrl
-      }).then(updatePath).then(configureCloudSdkPython).then(installComponents).then(() => saveCache2([cachePath], primaryCacheKey)).
-      then((n) => {
+      }).then(updatePath).then(isolateConfigDir).then(configureCloudSdkPython).then(installComponents).then(() => saveCache2(
+      [cachePath], primaryCacheKey)).then((n) => {
         debug2(`Saved cache with cacheId=${n}`);
       }).catch((err) => {
         error(
@@ -102420,7 +102066,7 @@ var setupGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, version3 = "l
       });
     } else {
       info(`Use cached gcloud ${gcloudVersion}`);
-      await updatePath(cachePath).then(configureCloudSdkPython);
+      await updatePath(cachePath).then(isolateConfigDir).then(configureCloudSdkPython);
     }
     exportVariable("GCLOUD_REQUESTED_VERSION", version3);
     exportVariable("GCLOUD_INSTALLED_VERSION", gcloudVersion);
@@ -102750,13 +102396,4 @@ queue-microtask/index.js:
 
 run-parallel/index.js:
   (*! run-parallel. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> *)
-
-tmp/lib/tmp.js:
-  (*!
-   * Tmp
-   *
-   * Copyright (c) 2011-2017 KARASZI Istvan <github@spam.raszi.hu>
-   *
-   * MIT Licensed
-   *)
 */
