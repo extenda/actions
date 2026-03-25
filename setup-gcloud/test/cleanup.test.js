@@ -35,7 +35,9 @@ describe('cleanup utilities', () => {
 
   describe('getCredentialFilesFromState', () => {
     test('returns parsed credential files when state exists', () => {
-      core.getState.mockReturnValueOnce(JSON.stringify(['/tmp/a.json', '/tmp/b.json']));
+      core.getState.mockReturnValueOnce(
+        JSON.stringify(['/tmp/a.json', '/tmp/b.json']),
+      );
 
       const files = getCredentialFilesFromState();
 
@@ -68,7 +70,7 @@ describe('cleanup utilities', () => {
 
       deleteCredentialFiles(files);
 
-      expect(core.info).toHaveBeenCalledWith(
+      expect(core.debug).toHaveBeenCalledWith(
         expect.stringContaining('Deleted credential file'),
       );
     });
@@ -106,7 +108,7 @@ describe('cleanup utilities', () => {
 
       deleteJobScopedDirectory();
 
-      expect(core.info).toHaveBeenCalledWith(
+      expect(core.debug).toHaveBeenCalledWith(
         expect.stringContaining('Deleted job-scoped credential directory'),
       );
     });
@@ -132,7 +134,7 @@ describe('cleanup utilities', () => {
 
       deleteGcloudConfigDirectory();
 
-      expect(core.info).toHaveBeenCalledWith(
+      expect(core.debug).toHaveBeenCalledWith(
         expect.stringContaining('Deleted CLOUDSDK_CONFIG directory'),
       );
     });
@@ -167,13 +169,13 @@ describe('cleanup utilities', () => {
 
       cleanupCredentials(credFiles);
 
-      expect(core.info).toHaveBeenCalledWith(
+      expect(core.debug).toHaveBeenCalledWith(
         expect.stringContaining('Deleted credential file'),
       );
-      expect(core.info).toHaveBeenCalledWith(
+      expect(core.debug).toHaveBeenCalledWith(
         expect.stringContaining('Deleted job-scoped credential directory'),
       );
-      expect(core.info).toHaveBeenCalledWith(
+      expect(core.debug).toHaveBeenCalledWith(
         expect.stringContaining('Deleted CLOUDSDK_CONFIG directory'),
       );
     });

@@ -99,13 +99,13 @@ function isCurrentAccount(auth) {
 const setEnvironmentVariable = (key, value, exportVariable) => {
   if (isNonEmptyString(value)) {
     if (exportVariable) {
-      core.info(`Export ${key}`);
+      core.debug(`Export ${key}`);
       core.exportVariable(key, value);
     }
     process.env[key] = value;
   } else {
     if (exportVariable) {
-      core.info(`Unset ${key}`);
+      core.debug(`Unset ${key}`);
       core.exportVariable(key, '');
     }
     delete process.env[key];
@@ -169,6 +169,8 @@ export async function authenticateGcloud(credentials, exportCredentials) {
     if (authEntry.type === authType.jsonKey) {
       await authenticateJsonKey(authEntry.credentialsFilePath);
     } else {
+      // Credentials must always be exported to env in wid_federation mode
+      authEntry.exportCredentials = true;
       await workloadIdentityFederation(
         authEntry.credentialsFilePath,
         jsonCredentials,

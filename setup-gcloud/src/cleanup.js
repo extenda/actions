@@ -14,7 +14,7 @@ export function deleteCredentialFiles(credentialFiles) {
     try {
       if (fs.existsSync(filePath)) {
         fs.rmSync(filePath);
-        core.info(`Deleted credential file: ${filePath}`);
+        core.debug(`Deleted credential file: ${filePath}`);
       }
     } catch (err) {
       core.warning(
@@ -32,7 +32,7 @@ export function deleteJobScopedDirectory() {
     const jobScopedDir = getJobScope();
     if (fs.existsSync(jobScopedDir)) {
       fs.rmSync(jobScopedDir, { recursive: true });
-      core.info(`Deleted job-scoped credential directory: ${jobScopedDir}`);
+      core.debug(`Deleted job-scoped credential directory: ${jobScopedDir}`);
     }
   } catch (err) {
     core.warning(`Failed to delete job-scoped directory: ${err.message}`);
@@ -47,7 +47,7 @@ export function deleteGcloudConfigDirectory() {
     const cloudsdk_configPath = process.env.CLOUDSDK_CONFIG;
     if (cloudsdk_configPath && fs.existsSync(cloudsdk_configPath)) {
       fs.rmSync(cloudsdk_configPath, { recursive: true });
-      core.info(`Deleted CLOUDSDK_CONFIG directory: ${cloudsdk_configPath}`);
+      core.debug(`Deleted CLOUDSDK_CONFIG directory: ${cloudsdk_configPath}`);
     }
   } catch (err) {
     core.warning(`Failed to delete CLOUDSDK_CONFIG directory: ${err.message}`);
@@ -68,6 +68,8 @@ export function getCredentialFilesFromState() {
  * @param {string[]} credentialFiles the credential files
  */
 export function cleanupCredentials(credentialFiles) {
+  core.info('Clean up gcloud credentials');
+
   deleteCredentialFiles(credentialFiles || []);
 
   // Clean up job-scoped directory

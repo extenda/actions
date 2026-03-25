@@ -101046,13 +101046,13 @@ __name(isCurrentAccount, "isCurrentAccount");
 var setEnvironmentVariable = /* @__PURE__ */ __name((key, value, exportVariable2) => {
   if (isNonEmptyString(value)) {
     if (exportVariable2) {
-      info(`Export ${key}`);
+      debug2(`Export ${key}`);
       exportVariable(key, value);
     }
     process.env[key] = value;
   } else {
     if (exportVariable2) {
-      info(`Unset ${key}`);
+      debug2(`Unset ${key}`);
       exportVariable(key, "");
     }
     delete process.env[key];
@@ -101098,6 +101098,7 @@ async function authenticateGcloud(credentials, exportCredentials) {
     if (authEntry.type === authType.jsonKey) {
       await authenticateJsonKey(authEntry.credentialsFilePath);
     } else {
+      authEntry.exportCredentials = true;
       await workloadIdentityFederation(
         authEntry.credentialsFilePath,
         jsonCredentials
@@ -101297,7 +101298,7 @@ function deleteCredentialFiles(credentialFiles) {
     try {
       if (import_node_fs5.default.existsSync(filePath)) {
         import_node_fs5.default.rmSync(filePath);
-        info(`Deleted credential file: ${filePath}`);
+        debug2(`Deleted credential file: ${filePath}`);
       }
     } catch (err) {
       warning(
@@ -101312,7 +101313,7 @@ function deleteJobScopedDirectory() {
     const jobScopedDir = getJobScope();
     if (import_node_fs5.default.existsSync(jobScopedDir)) {
       import_node_fs5.default.rmSync(jobScopedDir, { recursive: true });
-      info(`Deleted job-scoped credential directory: ${jobScopedDir}`);
+      debug2(`Deleted job-scoped credential directory: ${jobScopedDir}`);
     }
   } catch (err) {
     warning(`Failed to delete job-scoped directory: ${err.message}`);
@@ -101324,7 +101325,7 @@ function deleteGcloudConfigDirectory() {
     const cloudsdk_configPath = process.env.CLOUDSDK_CONFIG;
     if (cloudsdk_configPath && import_node_fs5.default.existsSync(cloudsdk_configPath)) {
       import_node_fs5.default.rmSync(cloudsdk_configPath, { recursive: true });
-      info(`Deleted CLOUDSDK_CONFIG directory: ${cloudsdk_configPath}`);
+      debug2(`Deleted CLOUDSDK_CONFIG directory: ${cloudsdk_configPath}`);
     }
   } catch (err) {
     warning(`Failed to delete CLOUDSDK_CONFIG directory: ${err.message}`);
@@ -101332,6 +101333,7 @@ function deleteGcloudConfigDirectory() {
 }
 __name(deleteGcloudConfigDirectory, "deleteGcloudConfigDirectory");
 function cleanupCredentials(credentialFiles) {
+  info("Clean up gcloud credentials");
   deleteCredentialFiles(credentialFiles || []);
   deleteJobScopedDirectory();
   deleteGcloudConfigDirectory();

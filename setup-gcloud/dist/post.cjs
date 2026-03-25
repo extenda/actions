@@ -20840,6 +20840,10 @@ var ExitCode;
   ExitCode2[ExitCode2["Success"] = 0] = "Success";
   ExitCode2[ExitCode2["Failure"] = 1] = "Failure";
 })(ExitCode || (ExitCode = {}));
+function debug(message) {
+  issueCommand("debug", {}, message);
+}
+__name(debug, "debug");
 function warning(message, properties = {}) {
   issueCommand("warning", toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
@@ -20871,7 +20875,7 @@ function deleteCredentialFiles(credentialFiles) {
     try {
       if (import_node_fs.default.existsSync(filePath)) {
         import_node_fs.default.rmSync(filePath);
-        info(`Deleted credential file: ${filePath}`);
+        debug(`Deleted credential file: ${filePath}`);
       }
     } catch (err) {
       warning(
@@ -20886,7 +20890,7 @@ function deleteJobScopedDirectory() {
     const jobScopedDir = getJobScope();
     if (import_node_fs.default.existsSync(jobScopedDir)) {
       import_node_fs.default.rmSync(jobScopedDir, { recursive: true });
-      info(`Deleted job-scoped credential directory: ${jobScopedDir}`);
+      debug(`Deleted job-scoped credential directory: ${jobScopedDir}`);
     }
   } catch (err) {
     warning(`Failed to delete job-scoped directory: ${err.message}`);
@@ -20898,7 +20902,7 @@ function deleteGcloudConfigDirectory() {
     const cloudsdk_configPath = process.env.CLOUDSDK_CONFIG;
     if (cloudsdk_configPath && import_node_fs.default.existsSync(cloudsdk_configPath)) {
       import_node_fs.default.rmSync(cloudsdk_configPath, { recursive: true });
-      info(`Deleted CLOUDSDK_CONFIG directory: ${cloudsdk_configPath}`);
+      debug(`Deleted CLOUDSDK_CONFIG directory: ${cloudsdk_configPath}`);
     }
   } catch (err) {
     warning(`Failed to delete CLOUDSDK_CONFIG directory: ${err.message}`);
@@ -20914,6 +20918,7 @@ function getCredentialFilesFromState() {
 }
 __name(getCredentialFilesFromState, "getCredentialFilesFromState");
 function cleanupCredentials(credentialFiles) {
+  info("Clean up gcloud credentials");
   deleteCredentialFiles(credentialFiles || []);
   deleteJobScopedDirectory();
   deleteGcloudConfigDirectory();

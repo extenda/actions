@@ -91952,13 +91952,13 @@ __name(isCurrentAccount, "isCurrentAccount");
 var setEnvironmentVariable = /* @__PURE__ */ __name((key, value, exportVariable2) => {
   if (isNonEmptyString(value)) {
     if (exportVariable2) {
-      info(`Export ${key}`);
+      debug2(`Export ${key}`);
       exportVariable(key, value);
     }
     process.env[key] = value;
   } else {
     if (exportVariable2) {
-      info(`Unset ${key}`);
+      debug2(`Unset ${key}`);
       exportVariable(key, "");
     }
     delete process.env[key];
@@ -92004,6 +92004,7 @@ async function authenticateGcloud(credentials, exportCredentials) {
     if (authEntry.type === authType.jsonKey) {
       await authenticateJsonKey(authEntry.credentialsFilePath);
     } else {
+      authEntry.exportCredentials = true;
       await workloadIdentityFederation(
         authEntry.credentialsFilePath,
         jsonCredentials
