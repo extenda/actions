@@ -101216,8 +101216,11 @@ var configureCloudSdkPython = /* @__PURE__ */ __name(async (toolPath) => {
   }
   return toolPath;
 }, "configureCloudSdkPython");
-var isolateConfigDir = /* @__PURE__ */ __name(async (toolPath) => {
+var isolateConfigDir = /* @__PURE__ */ __name(async (toolPath = void 0) => {
   const configDirPath = getJobScope({ prefix: "gcloud-config" });
+  if (import_node_fs4.default.existsSync(configDirPath)) {
+    import_node_fs4.default.mkdirSync(configDirPath, { recursive: true });
+  }
   exportVariable("CLOUDSDK_CONFIG", configDirPath);
   return toolPath;
 }, "isolateConfigDir");
@@ -101253,6 +101256,7 @@ var setupGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, version3 = "l
     info(
       `Reuse already installed gcloud (requested=${version3}, actual=${process.env.GCLOUD_INSTALLED_VERSION})`
     );
+    await isolateConfigDir();
   } else {
     const gcloudVersion = await getGcloudVersion(version3);
     const toolInfo = {

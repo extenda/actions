@@ -60,8 +60,11 @@ const configureCloudSdkPython = async (toolPath) => {
   return toolPath;
 };
 
-const isolateConfigDir = async (toolPath) => {
+const isolateConfigDir = async (toolPath = undefined) => {
   const configDirPath = getJobScope({ prefix: 'gcloud-config' });
+  if (fs.existsSync(configDirPath)) {
+    fs.mkdirSync(configDirPath, { recursive: true });
+  }
   core.exportVariable('CLOUDSDK_CONFIG', configDirPath);
   return toolPath;
 };
@@ -113,6 +116,8 @@ const setupGcloud = async (
     core.info(
       `Reuse already installed gcloud (requested=${version}, actual=${process.env.GCLOUD_INSTALLED_VERSION})`,
     );
+    // Ensure CLOUDSDK_CONFIG directory exists for reused gcloud.
+    await isolateConfigDir();
   } else {
     // Restore from cache or install on cache-miss.
     const gcloudVersion = await getGcloudVersion(version);
