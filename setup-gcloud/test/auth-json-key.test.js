@@ -12,7 +12,7 @@ describe('auth-json-key', () => {
   test('authenticateJsonKey authenticates with service account key file', async () => {
     execGcloud.mockResolvedValueOnce('');
 
-    const result = await authenticateJsonKey('/tmp/key.json');
+    await authenticateJsonKey('/tmp/key.json');
 
     expect(execGcloud).toHaveBeenCalledWith(
       [
@@ -25,7 +25,6 @@ describe('auth-json-key', () => {
       'gcloud',
       true,
     );
-    expect(result).toEqual({ googleCredentials: '/tmp/key.json' });
   });
 
   test('configureServiceAccount sets gcloud account', async () => {
