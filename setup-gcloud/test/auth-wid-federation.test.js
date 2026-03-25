@@ -36,7 +36,7 @@ describe('auth-wid-federation', () => {
         '--credential-source-file=/tmp/id-token.json',
       ],
       'gcloud',
-      false,
+      true,
     );
   });
 });

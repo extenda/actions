@@ -21,6 +21,6 @@ export async function workloadIdentityFederation(
       `--credential-source-file=${idTokenPath}`,
     ],
     'gcloud',
-    false,
+    true,
   );
 }

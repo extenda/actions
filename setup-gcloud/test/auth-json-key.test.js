@@ -14,13 +14,17 @@ describe('auth-json-key', () => {
 
     const result = await authenticateJsonKey('/tmp/key.json');
 
-    expect(execGcloud).toHaveBeenCalledWith([
-      '--quiet',
-      'auth',
-      'activate-service-account',
-      '--key-file',
-      '/tmp/key.json',
-    ]);
+    expect(execGcloud).toHaveBeenCalledWith(
+      [
+        '--quiet',
+        'auth',
+        'activate-service-account',
+        '--key-file',
+        '/tmp/key.json',
+      ],
+      'gcloud',
+      true,
+    );
     expect(result).toEqual({ googleCredentials: '/tmp/key.json' });
   });
 

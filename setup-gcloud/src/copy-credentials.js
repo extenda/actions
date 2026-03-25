@@ -1,5 +1,6 @@
 import path from 'node:path';
 
+import * as core from '@actions/core';
 import * as io from '@actions/io';
 import { v4 as uuid } from 'uuid';
 
@@ -16,5 +17,9 @@ export default async function copyCredentials(tmpKeyFile) {
     return tmpKeyFile;
   }
   const dest = path.join(process.env.RUNNER_TEMP, uuid());
+
+  // Prevent logging of the sensitive path.
+  core.setSecret(dest);
+
   return io.cp(tmpKeyFile, dest).then(() => dest);
 }

@@ -53,6 +53,9 @@ function validateCredentialsShape(jsonCredentials) {
   }
 
   if (isNonEmptyString(jsonCredentials.private_key)) {
+    // Ensure this value can never be logged.
+    core.setSecret(jsonCredentials.private_key);
+
     const email =
       jsonCredentials.client_email ?? jsonCredentials.email ?? undefined;
     if (!isNonEmptyString(email)) {
@@ -142,6 +145,9 @@ const populateEnvironment = ({
  * @param exportCredentials flag indicating if credentials should be exported to environment
  */
 export async function authenticateGcloud(credentials, exportCredentials) {
+  // Ensure this never logs.
+  core.setSecret(credentials);
+
   const jsonCredentials = parseCredentials(credentials);
   const { type, email } = validateCredentialsShape(jsonCredentials);
 
@@ -157,7 +163,10 @@ export async function authenticateGcloud(credentials, exportCredentials) {
 
   if (!isCurrentAccount(authEntry)) {
     const tmpKeyFile = createKeyFile(credentials);
+
     authEntry.credentialsFilePath = tmpKeyFile;
+
+    core.info(`Authenticate gcloud with ${authEntry.type}`);
 
     if (authEntry.type === authType.jsonKey) {
       await authenticateJsonKey(tmpKeyFile);

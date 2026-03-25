@@ -59,6 +59,21 @@ const configureCloudSdkPython = async (toolPath) => {
   return toolPath;
 };
 
+const isolateConfigDir = async (toolPath) => {
+  const { RUNNER_TEMP, GITHUB_RUN_ID, GITHUB_RUN_ATTEMPT, GITHUB_JOB } =
+    process.env;
+
+  core.exportVariable(
+    'CLOUDSDK_CONFIG',
+    path.join(
+      RUNNER_TEMP,
+      `gcloud-config-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${GITHUB_JOB}`,
+    ),
+  );
+
+  return toolPath;
+};
+
 /**
  * Install additional gcloud components. This method only runs if gcloud isn't cached.
  * Remember to bump the CACHE_VERSION constant if you modify this method.
@@ -133,6 +148,7 @@ const setupGcloud = async (
         downloadUrl,
       })
         .then(updatePath)
+        .then(isolateConfigDir)
         .then(configureCloudSdkPython)
         .then(installComponents)
         .then(() => saveCache([cachePath], primaryCacheKey))
@@ -146,7 +162,9 @@ const setupGcloud = async (
         });
     } else {
       core.info(`Use cached gcloud ${gcloudVersion}`);
-      await updatePath(cachePath).then(configureCloudSdkPython);
+      await updatePath(cachePath)
+        .then(isolateConfigDir)
+        .then(configureCloudSdkPython);
     }
 
     core.exportVariable('GCLOUD_REQUESTED_VERSION', version);

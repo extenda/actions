@@ -6,13 +6,11 @@ import { execGcloud } from './exec-gcloud.js';
  * @returns {Promise<{googleCredentials: string}>} a promise that completes with the google credentials key file
  */
 export const authenticateJsonKey = async (tmpKeyFile) => {
-  await execGcloud([
-    '--quiet',
-    'auth',
-    'activate-service-account',
-    '--key-file',
-    tmpKeyFile,
-  ]);
+  await execGcloud(
+    ['--quiet', 'auth', 'activate-service-account', '--key-file', tmpKeyFile],
+    'gcloud',
+    true,
+  );
 
   return {
     googleCredentials: tmpKeyFile,
