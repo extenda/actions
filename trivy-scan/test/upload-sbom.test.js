@@ -37,7 +37,6 @@ test('It uploads SPDX and CycloneDX for single-arch image manifest digest withou
     'eu.gcr.io/extenda/test:1.0.0',
     { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
     undefined,
-    'sa',
   );
 
   expect(resolveImageDigests).toHaveBeenCalledTimes(1);
@@ -74,7 +73,6 @@ test('It uploads and attests SPDX and CycloneDX for single-arch image manifest d
     'eu.gcr.io/extenda/test:1.1.0',
     { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
     'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
-    'sa',
   );
 
   expect(setupCosign).toHaveBeenCalledTimes(1);
@@ -94,7 +92,6 @@ test('It uploads and attests SPDX and CycloneDX for single-arch image manifest d
     ],
     {
       env: expect.objectContaining({
-        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
         GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
         CLOUDSDK_CORE_PROJECT: 'test',
       }),
@@ -115,7 +112,6 @@ test('It uploads and attests SPDX and CycloneDX for single-arch image manifest d
     ],
     {
       env: expect.objectContaining({
-        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
         GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
         CLOUDSDK_CORE_PROJECT: 'test',
       }),
@@ -136,8 +132,7 @@ test('It uploads for both manifest and index when image is multi-arch without at
   await uploadSbom(
     'eu.gcr.io/extenda/test:2.0.0',
     { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
-    'not-used-if-no-sa',
-    undefined,
+    'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
   );
 
   expect(execGcloud).toHaveBeenCalledTimes(4);
@@ -169,8 +164,6 @@ test('It uploads for both manifest and index when image is multi-arch without at
     '--source=.trivy/sbom.cdx.json',
     '--uri=eu.gcr.io/extenda/test@sha256:index',
   ]);
-  expect(setupCosign).not.toHaveBeenCalled();
-  expect(exec).not.toHaveBeenCalled();
 
   expect(core.info).toHaveBeenCalledWith(
     'Multi-arch detected: linking [.trivy/sbom.spdx.json] to Index SHA as well.',
@@ -191,7 +184,6 @@ test('It uploads and attests for both manifest and index when image is multi-arc
     'eu.gcr.io/extenda/test:2.1.0',
     { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
     'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
-    'sa',
   );
 
   expect(setupCosign).toHaveBeenCalledTimes(1);
@@ -211,7 +203,6 @@ test('It uploads and attests for both manifest and index when image is multi-arc
     ],
     {
       env: expect.objectContaining({
-        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
         GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
         CLOUDSDK_CORE_PROJECT: 'test',
       }),
@@ -232,7 +223,6 @@ test('It uploads and attests for both manifest and index when image is multi-arc
     ],
     {
       env: expect.objectContaining({
-        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
         GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
         CLOUDSDK_CORE_PROJECT: 'test',
       }),
@@ -253,7 +243,6 @@ test('It uploads and attests for both manifest and index when image is multi-arc
     ],
     {
       env: expect.objectContaining({
-        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
         GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
         CLOUDSDK_CORE_PROJECT: 'test',
       }),
@@ -274,7 +263,6 @@ test('It uploads and attests for both manifest and index when image is multi-arc
     ],
     {
       env: expect.objectContaining({
-        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
         GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
         CLOUDSDK_CORE_PROJECT: 'test',
       }),
@@ -295,7 +283,6 @@ test('It rethrows attestation errors', async () => {
       'eu.gcr.io/extenda/test:2.2.0',
       { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
       'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
-      'sa',
     ),
   ).rejects.toThrow('attestation failed');
 
@@ -311,7 +298,6 @@ test('It rethrows upload errors', async () => {
       'eu.gcr.io/extenda/test:3.0.0',
       { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
       undefined,
-      'sa',
     ),
   ).rejects.toThrow('upload failed');
 

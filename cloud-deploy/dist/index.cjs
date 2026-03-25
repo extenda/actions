@@ -33243,7 +33243,7 @@ var require_form_data = __commonJS({
     var http4 = require("http");
     var https4 = require("https");
     var parseUrl = require("url").parse;
-    var fs22 = require("fs");
+    var fs21 = require("fs");
     var Stream = require("stream").Stream;
     var crypto6 = require("crypto");
     var mime = require_mime_types();
@@ -33311,7 +33311,7 @@ var require_form_data = __commonJS({
         if (value.end != void 0 && value.end != Infinity && value.start != void 0) {
           callback(null, value.end + 1 - (value.start ? value.start : 0));
         } else {
-          fs22.stat(value.path, function(err, stat2) {
+          fs21.stat(value.path, function(err, stat2) {
             if (err) {
               callback(err);
               return;
@@ -43713,8 +43713,8 @@ var require_utils4 = __commonJS({
     exports2.array = array;
     var errno = require_errno();
     exports2.errno = errno;
-    var fs22 = require_fs();
-    exports2.fs = fs22;
+    var fs21 = require_fs();
+    exports2.fs = fs21;
     var path17 = require_path();
     exports2.path = path17;
     var pattern = require_pattern();
@@ -43912,12 +43912,12 @@ var require_fs2 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.createFileSystemAdapter = exports2.FILE_SYSTEM_ADAPTER = void 0;
-    var fs22 = require("fs");
+    var fs21 = require("fs");
     exports2.FILE_SYSTEM_ADAPTER = {
-      lstat: fs22.lstat,
-      stat: fs22.stat,
-      lstatSync: fs22.lstatSync,
-      statSync: fs22.statSync
+      lstat: fs21.lstat,
+      stat: fs21.stat,
+      lstatSync: fs21.lstatSync,
+      statSync: fs21.statSync
     };
     function createFileSystemAdapter(fsMethods) {
       if (fsMethods === void 0) {
@@ -43935,7 +43935,7 @@ var require_settings = __commonJS({
   "node_modules/@nodelib/fs.stat/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var fs22 = require_fs2();
+    var fs21 = require_fs2();
     var Settings = class {
       static {
         __name(this, "Settings");
@@ -43943,7 +43943,7 @@ var require_settings = __commonJS({
       constructor(_options = {}) {
         this._options = _options;
         this.followSymbolicLink = this._getValue(this._options.followSymbolicLink, true);
-        this.fs = fs22.createFileSystemAdapter(this._options.fs);
+        this.fs = fs21.createFileSystemAdapter(this._options.fs);
         this.markSymbolicLink = this._getValue(this._options.markSymbolicLink, false);
         this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
       }
@@ -44110,8 +44110,8 @@ var require_utils5 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.fs = void 0;
-    var fs22 = require_fs3();
-    exports2.fs = fs22;
+    var fs21 = require_fs3();
+    exports2.fs = fs21;
   }
 });
 
@@ -44316,14 +44316,14 @@ var require_fs4 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.createFileSystemAdapter = exports2.FILE_SYSTEM_ADAPTER = void 0;
-    var fs22 = require("fs");
+    var fs21 = require("fs");
     exports2.FILE_SYSTEM_ADAPTER = {
-      lstat: fs22.lstat,
-      stat: fs22.stat,
-      lstatSync: fs22.lstatSync,
-      statSync: fs22.statSync,
-      readdir: fs22.readdir,
-      readdirSync: fs22.readdirSync
+      lstat: fs21.lstat,
+      stat: fs21.stat,
+      lstatSync: fs21.lstatSync,
+      statSync: fs21.statSync,
+      readdir: fs21.readdir,
+      readdirSync: fs21.readdirSync
     };
     function createFileSystemAdapter(fsMethods) {
       if (fsMethods === void 0) {
@@ -44343,7 +44343,7 @@ var require_settings2 = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     var path17 = require("path");
     var fsStat2 = require_out();
-    var fs22 = require_fs4();
+    var fs21 = require_fs4();
     var Settings = class {
       static {
         __name(this, "Settings");
@@ -44351,7 +44351,7 @@ var require_settings2 = __commonJS({
       constructor(_options = {}) {
         this._options = _options;
         this.followSymbolicLinks = this._getValue(this._options.followSymbolicLinks, false);
-        this.fs = fs22.createFileSystemAdapter(this._options.fs);
+        this.fs = fs21.createFileSystemAdapter(this._options.fs);
         this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path17.sep);
         this.stats = this._getValue(this._options.stats, false);
         this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
@@ -45836,16 +45836,16 @@ var require_settings4 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DEFAULT_FILE_SYSTEM_ADAPTER = void 0;
-    var fs22 = require("fs");
+    var fs21 = require("fs");
     var os14 = require("os");
     var CPU_COUNT = Math.max(os14.cpus().length, 1);
     exports2.DEFAULT_FILE_SYSTEM_ADAPTER = {
-      lstat: fs22.lstat,
-      lstatSync: fs22.lstatSync,
-      stat: fs22.stat,
-      statSync: fs22.statSync,
-      readdir: fs22.readdir,
-      readdirSync: fs22.readdirSync
+      lstat: fs21.lstat,
+      lstatSync: fs21.lstatSync,
+      stat: fs21.stat,
+      statSync: fs21.statSync,
+      readdir: fs21.readdir,
+      readdirSync: fs21.readdirSync
     };
     var Settings = class {
       static {
@@ -53107,14 +53107,14 @@ k-map" || token.type === "block-seq")) {
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs22 = this.flowScalar(this.type);
+              const fs21 = this.flowScalar(this.type);
               if (atNextItem || it.value) {
-                map2.items.push({ start, key: fs22, sep: [] });
+                map2.items.push({ start, key: fs21, sep: [] });
                 this.onKeyLine = true;
               } else if (it.sep) {
-                this.stack.push(fs22);
+                this.stack.push(fs21);
               } else {
-                Object.assign(it, { key: fs22, sep: [] });
+                Object.assign(it, { key: fs21, sep: [] });
                 this.onKeyLine = true;
               }
               return;
@@ -53242,13 +53242,13 @@ k-map" || token.type === "block-seq")) {
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs22 = this.flowScalar(this.type);
+              const fs21 = this.flowScalar(this.type);
               if (!it || it.value)
-                fc.items.push({ start: [], key: fs22, sep: [] });
+                fc.items.push({ start: [], key: fs21, sep: [] });
               else if (it.sep)
-                this.stack.push(fs22);
+                this.stack.push(fs21);
               else
-                Object.assign(it, { key: fs22, sep: [] });
+                Object.assign(it, { key: fs21, sep: [] });
               return;
             }
             case "flow-map-end":
@@ -53560,395 +53560,6 @@ var require_dist6 = __commonJS({
     exports2.stringify = publicApi.stringify;
     exports2.visit = visit.visit;
     exports2.visitAsync = visit.visitAsync;
-  }
-});
-
-// node_modules/tmp/lib/tmp.js
-var require_tmp = __commonJS({
-  "node_modules/tmp/lib/tmp.js"(exports2, module2) {
-    var fs22 = require("fs");
-    var os14 = require("os");
-    var path17 = require("path");
-    var crypto6 = require("crypto");
-    var _c = { fs: fs22.constants, os: os14.constants };
-    var RANDOM_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    var TEMPLATE_PATTERN = /XXXXXX/;
-    var DEFAULT_TRIES = 3;
-    var CREATE_FLAGS = (_c.O_CREAT || _c.fs.O_CREAT) | (_c.O_EXCL || _c.fs.O_EXCL) | (_c.O_RDWR || _c.fs.O_RDWR);
-    var IS_WIN32 = os14.platform() === "win32";
-    var EBADF = _c.EBADF || _c.os.errno.EBADF;
-    var ENOENT = _c.ENOENT || _c.os.errno.ENOENT;
-    var DIR_MODE = 448;
-    var FILE_MODE = 384;
-    var EXIT = "exit";
-    var _removeObjects = [];
-    var FN_RMDIR_SYNC = fs22.rmdirSync.bind(fs22);
-    var _gracefulCleanup = false;
-    function rimraf(dirPath, callback) {
-      return fs22.rm(dirPath, { recursive: true }, callback);
-    }
-    __name(rimraf, "rimraf");
-    function FN_RIMRAF_SYNC(dirPath) {
-      return fs22.rmSync(dirPath, { recursive: true });
-    }
-    __name(FN_RIMRAF_SYNC, "FN_RIMRAF_SYNC");
-    function tmpName(options, callback) {
-      const args = _parseArguments(options, callback), opts = args[0], cb = args[1];
-      _assertAndSanitizeOptions(opts, function(err, sanitizedOptions) {
-        if (err) return cb(err);
-        let tries = sanitizedOptions.tries;
-        (/* @__PURE__ */ __name((function _getUniqueName() {
-          try {
-            const name = _generateTmpName(sanitizedOptions);
-            fs22.stat(name, function(err2) {
-              if (!err2) {
-                if (tries-- > 0) return _getUniqueName();
-                return cb(new Error("Could not get a unique tmp filename, max tries reached " + name));
-              }
-              cb(null, name);
-            });
-          } catch (err2) {
-            cb(err2);
-          }
-        }), "_getUniqueName"))();
-      });
-    }
-    __name(tmpName, "tmpName");
-    function tmpNameSync(options) {
-      const args = _parseArguments(options), opts = args[0];
-      const sanitizedOptions = _assertAndSanitizeOptionsSync(opts);
-      let tries = sanitizedOptions.tries;
-      do {
-        const name = _generateTmpName(sanitizedOptions);
-        try {
-          fs22.statSync(name);
-        } catch (e) {
-          return name;
-        }
-      } while (tries-- > 0);
-      throw new Error("Could not get a unique tmp filename, max tries reached");
-    }
-    __name(tmpNameSync, "tmpNameSync");
-    function file(options, callback) {
-      const args = _parseArguments(options, callback), opts = args[0], cb = args[1];
-      tmpName(opts, /* @__PURE__ */ __name(function _tmpNameCreated(err, name) {
-        if (err) return cb(err);
-        fs22.open(name, CREATE_FLAGS, opts.mode || FILE_MODE, /* @__PURE__ */ __name(function _fileCreated(err2, fd) {
-          if (err2) return cb(err2);
-          if (opts.discardDescriptor) {
-            return fs22.close(fd, /* @__PURE__ */ __name(function _discardCallback(possibleErr) {
-              return cb(possibleErr, name, void 0, _prepareTmpFileRemoveCallback(name, -1, opts, false));
-            }, "_discardCallback"));
-          } else {
-            const discardOrDetachDescriptor = opts.discardDescriptor || opts.detachDescriptor;
-            cb(null, name, fd, _prepareTmpFileRemoveCallback(name, discardOrDetachDescriptor ? -1 : fd, opts, false));
-          }
-        }, "_fileCreated"));
-      }, "_tmpNameCreated"));
-    }
-    __name(file, "file");
-    function fileSync(options) {
-      const args = _parseArguments(options), opts = args[0];
-      const discardOrDetachDescriptor = opts.discardDescriptor || opts.detachDescriptor;
-      const name = tmpNameSync(opts);
-      let fd = fs22.openSync(name, CREATE_FLAGS, opts.mode || FILE_MODE);
-      if (opts.discardDescriptor) {
-        fs22.closeSync(fd);
-        fd = void 0;
-      }
-      return {
-        name,
-        fd,
-        removeCallback: _prepareTmpFileRemoveCallback(name, discardOrDetachDescriptor ? -1 : fd, opts, true)
-      };
-    }
-    __name(fileSync, "fileSync");
-    function dir(options, callback) {
-      const args = _parseArguments(options, callback), opts = args[0], cb = args[1];
-      tmpName(opts, /* @__PURE__ */ __name(function _tmpNameCreated(err, name) {
-        if (err) return cb(err);
-        fs22.mkdir(name, opts.mode || DIR_MODE, /* @__PURE__ */ __name(function _dirCreated(err2) {
-          if (err2) return cb(err2);
-          cb(null, name, _prepareTmpDirRemoveCallback(name, opts, false));
-        }, "_dirCreated"));
-      }, "_tmpNameCreated"));
-    }
-    __name(dir, "dir");
-    function dirSync(options) {
-      const args = _parseArguments(options), opts = args[0];
-      const name = tmpNameSync(opts);
-      fs22.mkdirSync(name, opts.mode || DIR_MODE);
-      return {
-        name,
-        removeCallback: _prepareTmpDirRemoveCallback(name, opts, true)
-      };
-    }
-    __name(dirSync, "dirSync");
-    function _removeFileAsync(fdPath, next) {
-      const _handler = /* @__PURE__ */ __name(function(err) {
-        if (err && !_isENOENT(err)) {
-          return next(err);
-        }
-        next();
-      }, "_handler");
-      if (0 <= fdPath[0])
-        fs22.close(fdPath[0], function() {
-          fs22.unlink(fdPath[1], _handler);
-        });
-      else fs22.unlink(fdPath[1], _handler);
-    }
-    __name(_removeFileAsync, "_removeFileAsync");
-    function _removeFileSync(fdPath) {
-      let rethrownException = null;
-      try {
-        if (0 <= fdPath[0]) fs22.closeSync(fdPath[0]);
-      } catch (e) {
-        if (!_isEBADF(e) && !_isENOENT(e)) throw e;
-      } finally {
-        try {
-          fs22.unlinkSync(fdPath[1]);
-        } catch (e) {
-          if (!_isENOENT(e)) rethrownException = e;
-        }
-      }
-      if (rethrownException !== null) {
-        throw rethrownException;
-      }
-    }
-    __name(_removeFileSync, "_removeFileSync");
-    function _prepareTmpFileRemoveCallback(name, fd, opts, sync) {
-      const removeCallbackSync = _prepareRemoveCallback(_removeFileSync, [fd, name], sync);
-      const removeCallback = _prepareRemoveCallback(_removeFileAsync, [fd, name], sync, removeCallbackSync);
-      if (!opts.keep) _removeObjects.unshift(removeCallbackSync);
-      return sync ? removeCallbackSync : removeCallback;
-    }
-    __name(_prepareTmpFileRemoveCallback, "_prepareTmpFileRemoveCallback");
-    function _prepareTmpDirRemoveCallback(name, opts, sync) {
-      const removeFunction = opts.unsafeCleanup ? rimraf : fs22.rmdir.bind(fs22);
-      const removeFunctionSync = opts.unsafeCleanup ? FN_RIMRAF_SYNC : FN_RMDIR_SYNC;
-      const removeCallbackSync = _prepareRemoveCallback(removeFunctionSync, name, sync);
-      const removeCallback = _prepareRemoveCallback(removeFunction, name, sync, removeCallbackSync);
-      if (!opts.keep) _removeObjects.unshift(removeCallbackSync);
-      return sync ? removeCallbackSync : removeCallback;
-    }
-    __name(_prepareTmpDirRemoveCallback, "_prepareTmpDirRemoveCallback");
-    function _prepareRemoveCallback(removeFunction, fileOrDirName, sync, cleanupCallbackSync) {
-      let called = false;
-      return /* @__PURE__ */ __name(function _cleanupCallback(next) {
-        if (!called) {
-          const toRemove = cleanupCallbackSync || _cleanupCallback;
-          const index = _removeObjects.indexOf(toRemove);
-          if (index >= 0) _removeObjects.splice(index, 1);
-          called = true;
-          if (sync || removeFunction === FN_RMDIR_SYNC || removeFunction === FN_RIMRAF_SYNC) {
-            return removeFunction(fileOrDirName);
-          } else {
-            return removeFunction(fileOrDirName, next || function() {
-            });
-          }
-        }
-      }, "_cleanupCallback");
-    }
-    __name(_prepareRemoveCallback, "_prepareRemoveCallback");
-    function _garbageCollector() {
-      if (!_gracefulCleanup) return;
-      while (_removeObjects.length) {
-        try {
-          _removeObjects[0]();
-        } catch (e) {
-        }
-      }
-    }
-    __name(_garbageCollector, "_garbageCollector");
-    function _randomChars(howMany) {
-      let value = [], rnd = null;
-      try {
-        rnd = crypto6.randomBytes(howMany);
-      } catch (e) {
-        rnd = crypto6.pseudoRandomBytes(howMany);
-      }
-      for (let i = 0; i < howMany; i++) {
-        value.push(RANDOM_CHARS[rnd[i] % RANDOM_CHARS.length]);
-      }
-      return value.join("");
-    }
-    __name(_randomChars, "_randomChars");
-    function _isUndefined(obj) {
-      return typeof obj === "undefined";
-    }
-    __name(_isUndefined, "_isUndefined");
-    function _parseArguments(options, callback) {
-      if (typeof options === "function") {
-        return [{}, options];
-      }
-      if (_isUndefined(options)) {
-        return [{}, callback];
-      }
-      const actualOptions = {};
-      for (const key of Object.getOwnPropertyNames(options)) {
-        actualOptions[key] = options[key];
-      }
-      return [actualOptions, callback];
-    }
-    __name(_parseArguments, "_parseArguments");
-    function _resolvePath(name, tmpDir, cb) {
-      const pathToResolve = path17.isAbsolute(name) ? name : path17.join(tmpDir, name);
-      fs22.stat(pathToResolve, function(err) {
-        if (err) {
-          fs22.realpath(path17.dirname(pathToResolve), function(err2, parentDir) {
-            if (err2) return cb(err2);
-            cb(null, path17.join(parentDir, path17.basename(pathToResolve)));
-          });
-        } else {
-          fs22.realpath(pathToResolve, cb);
-        }
-      });
-    }
-    __name(_resolvePath, "_resolvePath");
-    function _resolvePathSync(name, tmpDir) {
-      const pathToResolve = path17.isAbsolute(name) ? name : path17.join(tmpDir, name);
-      try {
-        fs22.statSync(pathToResolve);
-        return fs22.realpathSync(pathToResolve);
-      } catch (_err) {
-        const parentDir = fs22.realpathSync(path17.dirname(pathToResolve));
-        return path17.join(parentDir, path17.basename(pathToResolve));
-      }
-    }
-    __name(_resolvePathSync, "_resolvePathSync");
-    function _generateTmpName(opts) {
-      const tmpDir = opts.tmpdir;
-      if (!_isUndefined(opts.name)) {
-        return path17.join(tmpDir, opts.dir, opts.name);
-      }
-      if (!_isUndefined(opts.template)) {
-        return path17.join(tmpDir, opts.dir, opts.template).replace(TEMPLATE_PATTERN, _randomChars(6));
-      }
-      const name = [
-        opts.prefix ? opts.prefix : "tmp",
-        "-",
-        process.pid,
-        "-",
-        _randomChars(12),
-        opts.postfix ? "-" + opts.postfix : ""
-      ].join("");
-      return path17.join(tmpDir, opts.dir, name);
-    }
-    __name(_generateTmpName, "_generateTmpName");
-    function _assertOptionsBase(options) {
-      if (!_isUndefined(options.name)) {
-        const name = options.name;
-        if (path17.isAbsolute(name)) throw new Error(`name option must not contain an absolute path, found "${name}".`);
-        const basename5 = path17.basename(name);
-        if (basename5 === ".." || basename5 === "." || basename5 !== name)
-          throw new Error(`name option must not contain a path, found "${name}".`);
-      }
-      if (!_isUndefined(options.template) && !options.template.match(TEMPLATE_PATTERN)) {
-        throw new Error(`Invalid template, found "${options.template}".`);
-      }
-      if (!_isUndefined(options.tries) && isNaN(options.tries) || options.tries < 0) {
-        throw new Error(`Invalid tries, found "${options.tries}".`);
-      }
-      options.tries = _isUndefined(options.name) ? options.tries || DEFAULT_TRIES : 1;
-      options.keep = !!options.keep;
-      options.detachDescriptor = !!options.detachDescriptor;
-      options.discardDescriptor = !!options.discardDescriptor;
-      options.unsafeCleanup = !!options.unsafeCleanup;
-      options.prefix = _isUndefined(options.prefix) ? "" : options.prefix;
-      options.postfix = _isUndefined(options.postfix) ? "" : options.postfix;
-    }
-    __name(_assertOptionsBase, "_assertOptionsBase");
-    function _getRelativePath(option, name, tmpDir, cb) {
-      if (_isUndefined(name)) return cb(null);
-      _resolvePath(name, tmpDir, function(err, resolvedPath) {
-        if (err) return cb(err);
-        const relativePath = path17.relative(tmpDir, resolvedPath);
-        if (!resolvedPath.startsWith(tmpDir)) {
-          return cb(new Error(`${option} option must be relative to "${tmpDir}", found "${relativePath}".`));
-        }
-        cb(null, relativePath);
-      });
-    }
-    __name(_getRelativePath, "_getRelativePath");
-    function _getRelativePathSync(option, name, tmpDir) {
-      if (_isUndefined(name)) return;
-      const resolvedPath = _resolvePathSync(name, tmpDir);
-      const relativePath = path17.relative(tmpDir, resolvedPath);
-      if (!resolvedPath.startsWith(tmpDir)) {
-        throw new Error(`${option} option must be relative to "${tmpDir}", found "${relativePath}".`);
-      }
-      return relativePath;
-    }
-    __name(_getRelativePathSync, "_getRelativePathSync");
-    function _assertAndSanitizeOptions(options, cb) {
-      _getTmpDir(options, function(err, tmpDir) {
-        if (err) return cb(err);
-        options.tmpdir = tmpDir;
-        try {
-          _assertOptionsBase(options, tmpDir);
-        } catch (err2) {
-          return cb(err2);
-        }
-        _getRelativePath("dir", options.dir, tmpDir, function(err2, dir2) {
-          if (err2) return cb(err2);
-          options.dir = _isUndefined(dir2) ? "" : dir2;
-          _getRelativePath("template", options.template, tmpDir, function(err3, template) {
-            if (err3) return cb(err3);
-            options.template = template;
-            cb(null, options);
-          });
-        });
-      });
-    }
-    __name(_assertAndSanitizeOptions, "_assertAndSanitizeOptions");
-    function _assertAndSanitizeOptionsSync(options) {
-      const tmpDir = options.tmpdir = _getTmpDirSync(options);
-      _assertOptionsBase(options, tmpDir);
-      const dir2 = _getRelativePathSync("dir", options.dir, tmpDir);
-      options.dir = _isUndefined(dir2) ? "" : dir2;
-      options.template = _getRelativePathSync("template", options.template, tmpDir);
-      return options;
-    }
-    __name(_assertAndSanitizeOptionsSync, "_assertAndSanitizeOptionsSync");
-    function _isEBADF(error2) {
-      return _isExpectedError(error2, -EBADF, "EBADF");
-    }
-    __name(_isEBADF, "_isEBADF");
-    function _isENOENT(error2) {
-      return _isExpectedError(error2, -ENOENT, "ENOENT");
-    }
-    __name(_isENOENT, "_isENOENT");
-    function _isExpectedError(error2, errno, code) {
-      return IS_WIN32 ? error2.code === code : error2.code === code && error2.errno === errno;
-    }
-    __name(_isExpectedError, "_isExpectedError");
-    function setGracefulCleanup() {
-      _gracefulCleanup = true;
-    }
-    __name(setGracefulCleanup, "setGracefulCleanup");
-    function _getTmpDir(options, cb) {
-      return fs22.realpath(options && options.tmpdir || os14.tmpdir(), cb);
-    }
-    __name(_getTmpDir, "_getTmpDir");
-    function _getTmpDirSync(options) {
-      return fs22.realpathSync(options && options.tmpdir || os14.tmpdir());
-    }
-    __name(_getTmpDirSync, "_getTmpDirSync");
-    process.addListener(EXIT, _garbageCollector);
-    Object.defineProperty(module2.exports, "tmpdir", {
-      enumerable: true,
-      configurable: false,
-      get: /* @__PURE__ */ __name(function() {
-        return _getTmpDirSync();
-      }, "get")
-    });
-    module2.exports.dir = dir;
-    module2.exports.dirSync = dirSync;
-    module2.exports.file = file;
-    module2.exports.fileSync = fileSync;
-    module2.exports.tmpName = tmpName;
-    module2.exports.tmpNameSync = tmpNameSync;
-    module2.exports.setGracefulCleanup = setGracefulCleanup;
   }
 });
 
@@ -101739,7 +101350,7 @@ var withGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, fn) => {
 var with_gcloud_default = withGcloud;
 
 // cloud-deploy/src/manifests/build-manifest.js
-var import_node_fs11 = __toESM(require("node:fs"), 1);
+var import_node_fs10 = __toESM(require("node:fs"), 1);
 
 // node_modules/js-yaml/dist/js-yaml.mjs
 function isNothing(subject) {
@@ -103036,7 +102647,7 @@ function readSingleQuotedScalar(state3, nodeIndent) {
 }
 __name(readSingleQuotedScalar, "readSingleQuotedScalar");
 function readDoubleQuotedScalar(state3, nodeIndent) {
-  var captureStart, captureEnd, hexLength, hexResult, tmp2, ch;
+  var captureStart, captureEnd, hexLength, hexResult, tmp, ch;
   ch = state3.input.charCodeAt(state3.position);
   if (ch !== 34) {
     return false;
@@ -103058,13 +102669,13 @@ function readDoubleQuotedScalar(state3, nodeIndent) {
       } else if (ch < 256 && simpleEscapeCheck[ch]) {
         state3.result += simpleEscapeMap[ch];
         state3.position++;
-      } else if ((tmp2 = escapedHexLen(ch)) > 0) {
-        hexLength = tmp2;
+      } else if ((tmp = escapedHexLen(ch)) > 0) {
+        hexLength = tmp;
         hexResult = 0;
         for (; hexLength > 0; hexLength--) {
           ch = state3.input.charCodeAt(++state3.position);
-          if ((tmp2 = fromHexCode(ch)) >= 0) {
-            hexResult = (hexResult << 4) + tmp2;
+          if ((tmp = fromHexCode(ch)) >= 0) {
+            hexResult = (hexResult << 4) + tmp;
           } else {
             throwError(state3, "expected hexadecimal character");
           }
@@ -103169,7 +102780,7 @@ function readFlowCollection(state3, nodeIndent) {
 __name(readFlowCollection, "readFlowCollection");
 function readBlockScalar(state3, nodeIndent) {
   var captureStart, folding, chomping = CHOMPING_CLIP, didReadContent = false, detectedIndent = false, textIndent = nodeIndent,
-  emptyLines = 0, atMoreIndented = false, tmp2, ch;
+  emptyLines = 0, atMoreIndented = false, tmp, ch;
   ch = state3.input.charCodeAt(state3.position);
   if (ch === 124) {
     folding = false;
@@ -103188,11 +102799,11 @@ function readBlockScalar(state3, nodeIndent) {
       } else {
         throwError(state3, "repeat of a chomping mode identifier");
       }
-    } else if ((tmp2 = fromDecimalCode(ch)) >= 0) {
-      if (tmp2 === 0) {
+    } else if ((tmp = fromDecimalCode(ch)) >= 0) {
+      if (tmp === 0) {
         throwError(state3, "bad explicit indentation width of a block scalar; it cannot be less than one");
       } else if (!detectedIndent) {
-        textIndent = nodeIndent + tmp2 - 1;
+        textIndent = nodeIndent + tmp - 1;
         detectedIndent = true;
       } else {
         throwError(state3, "repeat of an indentation width identifier");
@@ -105058,19 +104669,6 @@ async function trivyScan(image, {
 }
 __name(trivyScan, "trivyScan");
 
-// utils/src/create-key-file.js
-var import_node_fs9 = __toESM(require("node:fs"), 1);
-var import_tmp = __toESM(require_tmp(), 1);
-import_tmp.default.setGracefulCleanup();
-var createKeyFile = /* @__PURE__ */ __name((serviceAccountKey, { encoding = "base64" } = {}) => {
-  const tmpFile = import_tmp.default.fileSync({ postfix: ".json" });
-  const jsonKey = Buffer.from(serviceAccountKey, encoding).toString("utf8");
-  import_node_fs9.default.writeFileSync(tmpFile.name, jsonKey);
-  setSecret(tmpFile.name);
-  return tmpFile.name;
-}, "createKeyFile");
-var create_key_file_default = createKeyFile;
-
 // trivy-scan/src/setup-cosign.js
 var import_node_os4 = __toESM(require("node:os"), 1);
 async function setupCosign() {
@@ -105093,7 +104691,7 @@ var extractProjectFromAttestationKeyUri = /* @__PURE__ */ __name((attestationKey
   const match2 = attestationKeyUri.match(/projects\/([^/]+)/);
   return match2 ? match2[1] : null;
 }, "extractProjectFromAttestationKeyUri");
-var attestSbom = /* @__PURE__ */ __name(async (cosign, credentialsPath, attestationKeyUri, uri, sbom) => {
+var attestSbom = /* @__PURE__ */ __name(async (cosign, attestationKeyUri, uri, sbom) => {
   info(`Attesting SBOM for [${uri}] using [${attestationKeyUri}]...`);
   const projectId = extractProjectFromAttestationKeyUri(attestationKeyUri);
   return exec(
@@ -105112,7 +104710,6 @@ var attestSbom = /* @__PURE__ */ __name(async (cosign, credentialsPath, attestat
     {
       env: {
         ...process.env,
-        GOOGLE_APPLICATION_CREDENTIALS: credentialsPath,
         ...projectId && {
           GOOGLE_CLOUD_QUOTA_PROJECT: projectId,
           CLOUDSDK_CORE_PROJECT: projectId,
@@ -105157,13 +104754,11 @@ var uploadForDigest = /* @__PURE__ */ __name((digests, sbom, cosignFn) => {
   }
   return uploads;
 }, "uploadForDigest");
-async function uploadSbom(image, { spdx, cdx }, attestationKeyUri, serviceAccountKey) {
+async function uploadSbom(image, { spdx, cdx }, attestationKeyUri) {
   let cosignFn;
-  if (attestationKeyUri && serviceAccountKey) {
+  if (attestationKeyUri) {
     const cosign = await setupCosign();
-    const credentialsPath = create_key_file_default(serviceAccountKey);
-    cosignFn = /* @__PURE__ */ __name(async (uri, sbom) => attestSbom(cosign, credentialsPath, attestationKeyUri, uri, sbom),
-    "cosignFn");
+    cosignFn = /* @__PURE__ */ __name(async (uri, sbom) => attestSbom(cosign, attestationKeyUri, uri, sbom), "cosignFn");
   } else {
     cosignFn = /* @__PURE__ */ __name(async () => {
     }, "cosignFn");
@@ -105208,8 +104803,7 @@ var trivy = /* @__PURE__ */ __name(async (serviceAccountKey, image, {
     await uploadSbom(
       image,
       scanResult.sbom,
-      typeof attestationKeyUri == "string" ? attestationKeyUri : void 0,
-      serviceAccountKey
+      typeof attestationKeyUri == "string" ? attestationKeyUri : void 0
     );
   }
   if (!scanResult.success) {
@@ -105437,7 +105031,7 @@ var userContainerCollectorEnv = /* @__PURE__ */ __name((serviceName, serviceImag
 }, "userContainerCollectorEnv");
 
 // cloud-deploy/src/utils/security-cache-keys.js
-var import_node_fs10 = __toESM(require("node:fs"), 1);
+var import_node_fs9 = __toESM(require("node:fs"), 1);
 var import_jsonschema = __toESM(require_lib(), 1);
 var import_yaml2 = __toESM(require_dist6(), 1);
 var DEFAULT_CACHE_KEYS_FILE = "policies/policy/com.styra.envoy.ingress/rules/rules/cache-keys.yaml";
@@ -105475,8 +105069,8 @@ ers.",
   }
 };
 var loadCacheKeys = /* @__PURE__ */ __name((cacheKeysYamlFile = DEFAULT_CACHE_KEYS_FILE) => {
-  if (import_node_fs10.default.existsSync(cacheKeysYamlFile)) {
-    const cacheKeys = import_yaml2.default.parse(import_node_fs10.default.readFileSync(cacheKeysYamlFile, "utf8"));
+  if (import_node_fs9.default.existsSync(cacheKeysYamlFile)) {
+    const cacheKeys = import_yaml2.default.parse(import_node_fs9.default.readFileSync(cacheKeysYamlFile, "utf8"));
     info(
       `Found security-authz cache keys:
 ${JSON.stringify(cacheKeys, null, 2)}`
@@ -106230,7 +105824,7 @@ var generateManifest = /* @__PURE__ */ __name((fileName, content) => {
   if (!content) {
     error(`content is undefined for ${fileName}`);
   }
-  import_node_fs11.default.writeFileSync(fileName, content, { encoding: "utf-8" });
+  import_node_fs10.default.writeFileSync(fileName, content, { encoding: "utf-8" });
 }, "generateManifest");
 var prepareGcloudDeploy = /* @__PURE__ */ __name(async (name, projectID, clanName, env2, target) => {
   generateManifest(
@@ -106487,8 +106081,8 @@ var buildManifest = /* @__PURE__ */ __name(async (image, deployYaml, projectId, 
   }
   generateManifest("cert.cert", internalCert);
   generateManifest("key.key", internalCertKey);
-  if (!import_node_fs11.default.existsSync(".gcloudignore")) {
-    import_node_fs11.default.writeFileSync(
+  if (!import_node_fs10.default.existsSync(".gcloudignore")) {
+    import_node_fs10.default.writeFileSync(
       ".gcloudignore",
       `*
 !k8s(deploy)-*
@@ -106729,7 +106323,7 @@ var deploy = /* @__PURE__ */ __name(async (projectID, name, version3, platformGK
 var deploy_default = deploy;
 
 // cloud-deploy/src/policies/publish-policies.js
-var import_node_fs12 = __toESM(require("node:fs"), 1);
+var import_node_fs11 = __toESM(require("node:fs"), 1);
 var import_node_path5 = __toESM(require("node:path"), 1);
 
 // node_modules/axios-retry/dist/esm/index.js
@@ -106959,14 +106553,14 @@ mask["/nd_builtin_cache"]
 `;
 var loadRego = /* @__PURE__ */ __name((regoFile) => ({
   path: import_node_path5.default.relative("policies", regoFile),
-  content: import_node_fs12.default.readFileSync(regoFile, "utf-8")
+  content: import_node_fs11.default.readFileSync(regoFile, "utf-8")
 }), "loadRego");
 var createPayload = /* @__PURE__ */ __name((version3) => {
   const logFile = import_node_path5.default.join("policies", "system", "log", "mask.rego");
-  if (!import_node_fs12.default.existsSync(logFile)) {
+  if (!import_node_fs11.default.existsSync(logFile)) {
     info("Use default log mask");
-    import_node_fs12.default.mkdirSync(import_node_path5.default.dirname(logFile), { recursive: true });
-    import_node_fs12.default.writeFileSync(logFile, DEFAULT_LOG_MASK, "utf-8");
+    import_node_fs11.default.mkdirSync(import_node_path5.default.dirname(logFile), { recursive: true });
+    import_node_fs11.default.writeFileSync(logFile, DEFAULT_LOG_MASK, "utf-8");
   }
   const files = import_fast_glob2.default.sync("policies/**/*.rego").map(loadRego);
   return {
@@ -106981,7 +106575,7 @@ var publishPolicies = /* @__PURE__ */ __name(async (serviceName, env2, version3,
       "system-name": systemName
     }
   } = deployYaml;
-  if (permissionPrefix && import_node_fs12.default.existsSync(import_node_path5.default.join("policies", "policy"))) {
+  if (permissionPrefix && import_node_fs11.default.existsSync(import_node_path5.default.join("policies", "policy"))) {
     const systemId = `${permissionPrefix}.${systemName || serviceName}-${env2}`;
     info(`Publish security policies for ${systemId}`);
     const dasWorkerBaseUrl = das_worker_base_url_default(systemId);
@@ -107097,7 +106691,7 @@ var saveVulnerabilities = /* @__PURE__ */ __name(async (service, reportJson, lab
 }, "saveVulnerabilities");
 
 // cloud-deploy/src/utils/service-definition.js
-var import_node_fs13 = __toESM(require("node:fs"), 1);
+var import_node_fs12 = __toESM(require("node:fs"), 1);
 var import_jsonschema2 = __toESM(require_lib(), 1);
 var import_yaml3 = __toESM(require_dist6(), 1);
 
@@ -107981,11 +107575,11 @@ ${result.toString()}`;
   }
 }, "validateSchema");
 var loadServiceDefinition = /* @__PURE__ */ __name((serviceFile) => {
-  if (!import_node_fs13.default.existsSync(serviceFile)) {
+  if (!import_node_fs12.default.existsSync(serviceFile)) {
     throw Error(`Service specification file not found: ${serviceFile}`);
   }
   info(`Load service specification from ${serviceFile}`);
-  const spec = import_yaml3.default.parse(import_node_fs13.default.readFileSync(serviceFile, "utf8"), {
+  const spec = import_yaml3.default.parse(import_node_fs12.default.readFileSync(serviceFile, "utf8"), {
     merge: true
   });
   validateSchema(serviceFile, spec);
@@ -107994,17 +107588,17 @@ var loadServiceDefinition = /* @__PURE__ */ __name((serviceFile) => {
 var service_definition_default = loadServiceDefinition;
 
 // cloud-deploy/src/utils/vulnerability-scanning.js
-var import_node_fs14 = __toESM(require("node:fs"), 1);
+var import_node_fs13 = __toESM(require("node:fs"), 1);
 var runScan = /* @__PURE__ */ __name(async (serviceAccount, image, serviceName, labels) => {
   const scanResult = await trivy(serviceAccount, image, {
     failOnVulnerabilities: false,
     notifySlackOnVulnerabilities: true,
     uploadSbomArtifacts: true
   });
-  if (import_node_fs14.default.existsSync(scanResult.report.json)) {
+  if (import_node_fs13.default.existsSync(scanResult.report.json)) {
     await saveVulnerabilities(
       serviceName,
-      import_node_fs14.default.readFileSync(scanResult.report.json, "utf-8"),
+      import_node_fs13.default.readFileSync(scanResult.report.json, "utf-8"),
       labels,
       `https://github.com/${process.env.GITHUB_REPOSITORY}`
     ).catch(
@@ -108303,15 +107897,6 @@ queue-microtask/index.js:
 
 run-parallel/index.js:
   (*! run-parallel. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> *)
-
-tmp/lib/tmp.js:
-  (*!
-   * Tmp
-   *
-   * Copyright (c) 2011-2017 KARASZI Istvan <github@spam.raszi.hu>
-   *
-   * MIT Licensed
-   *)
 
 js-yaml/dist/js-yaml.mjs:
   (*! js-yaml 4.1.1 https://github.com/nodeca/js-yaml @license MIT *)
