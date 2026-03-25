@@ -61214,6 +61214,39 @@ function getIDToken(aud) {
 }
 __name(getIDToken, "getIDToken");
 
+// utils/src/load-github-token.js
+var loadGitHubToken = /* @__PURE__ */ __name(async (loadSecret2) => {
+  const token = getInput("github-token");
+  const secretName = getInput("github-token-secret-name");
+  const serviceAccountKey = getInput("service-account-key");
+  if (!token && !serviceAccountKey) {
+    throw new Error(
+      "Missing input. Either provide github-token or service-account-key"
+    );
+  }
+  if (serviceAccountKey && !secretName) {
+    throw new Error(
+      "Missing input. The secret-name must be set with service-account-key"
+    );
+  }
+  if (!token && serviceAccountKey && secretName) {
+    info("Load github-token from Secret Manager");
+    return loadSecret2(serviceAccountKey, secretName);
+  }
+  return token;
+}, "loadGitHubToken");
+var load_github_token_default = loadGitHubToken;
+
+// utils/src/run.js
+var run = /* @__PURE__ */ __name(async (action6) => {
+  try {
+    await action6();
+  } catch (err) {
+    setFailed(err.message);
+  }
+}, "run");
+var run_default = run;
+
 // utils/src/load-binary.js
 var import_node_fs = __toESM(require("node:fs"), 1);
 var import_node_path2 = __toESM(require("node:path"), 1);
@@ -65778,39 +65811,6 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary, version: version3, 
     (cachedTool) => downloadIfMissing(options, cachedTool)
   );
 }, "loadTool");
-
-// utils/src/load-github-token.js
-var loadGitHubToken = /* @__PURE__ */ __name(async (loadSecret2) => {
-  const token = getInput("github-token");
-  const secretName = getInput("github-token-secret-name");
-  const serviceAccountKey = getInput("service-account-key");
-  if (!token && !serviceAccountKey) {
-    throw new Error(
-      "Missing input. Either provide github-token or service-account-key"
-    );
-  }
-  if (serviceAccountKey && !secretName) {
-    throw new Error(
-      "Missing input. The secret-name must be set with service-account-key"
-    );
-  }
-  if (!token && serviceAccountKey && secretName) {
-    info("Load github-token from Secret Manager");
-    return loadSecret2(serviceAccountKey, secretName);
-  }
-  return token;
-}, "loadGitHubToken");
-var load_github_token_default = loadGitHubToken;
-
-// utils/src/run.js
-var run = /* @__PURE__ */ __name(async (action6) => {
-  try {
-    await action6();
-  } catch (err) {
-    setFailed(err.message);
-  }
-}, "run");
-var run_default = run;
 
 // node_modules/@actions/github/lib/context.js
 var import_fs2 = require("fs");

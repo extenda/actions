@@ -61818,6 +61818,30 @@ var getImageDigest = /* @__PURE__ */ __name(async (image) => {
 }, "getImageDigest");
 var image_digest_default = getImageDigest;
 
+// utils/src/run.js
+var run = /* @__PURE__ */ __name(async (action6) => {
+  try {
+    await action6();
+  } catch (err) {
+    setFailed(err.message);
+  }
+}, "run");
+var run_default = run;
+
+// utils/src/trunk-killswitch.js
+var isAllowedBranch = /* @__PURE__ */ __name((ref) => ref === "refs/heads/master" || ref === "refs/heads/main", "isAllow\
+edBranch");
+var failIfNotTrunkBased = /* @__PURE__ */ __name(() => {
+  const ref = process.env.GITHUB_REF;
+  if (!isAllowedBranch(ref) && !ref.startsWith("refs/tags/")) {
+    throw new Error(
+      `Action not allowed on ref ${ref}. You must follow trunk-based development and invoke this action from master, mai\
+n or a release tag`
+    );
+  }
+}, "failIfNotTrunkBased");
+var trunk_killswitch_default = failIfNotTrunkBased;
+
 // utils/src/load-binary.js
 var import_node_fs = __toESM(require("node:fs"), 1);
 var import_node_path2 = __toESM(require("node:path"), 1);
@@ -66382,30 +66406,6 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary: binary2, version: v
     (cachedTool) => downloadIfMissing(options, cachedTool)
   );
 }, "loadTool");
-
-// utils/src/run.js
-var run = /* @__PURE__ */ __name(async (action6) => {
-  try {
-    await action6();
-  } catch (err) {
-    setFailed(err.message);
-  }
-}, "run");
-var run_default = run;
-
-// utils/src/trunk-killswitch.js
-var isAllowedBranch = /* @__PURE__ */ __name((ref) => ref === "refs/heads/master" || ref === "refs/heads/main", "isAllow\
-edBranch");
-var failIfNotTrunkBased = /* @__PURE__ */ __name(() => {
-  const ref = process.env.GITHUB_REF;
-  if (!isAllowedBranch(ref) && !ref.startsWith("refs/tags/")) {
-    throw new Error(
-      `Action not allowed on ref ${ref}. You must follow trunk-based development and invoke this action from master, mai\
-n or a release tag`
-    );
-  }
-}, "failIfNotTrunkBased");
-var trunk_killswitch_default = failIfNotTrunkBased;
 
 // cloud-run/src/project-info.js
 var projectInfo = /* @__PURE__ */ __name((projectId) => {

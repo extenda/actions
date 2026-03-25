@@ -72295,6 +72295,16 @@ function getIDToken(aud) {
 }
 __name(getIDToken, "getIDToken");
 
+// utils/src/run.js
+var run = /* @__PURE__ */ __name(async (action6) => {
+  try {
+    await action6();
+  } catch (err) {
+    setFailed(err.message);
+  }
+}, "run");
+var run_default = run;
+
 // utils/src/load-binary.js
 var import_node_fs = __toESM(require("node:fs"), 1);
 var import_node_path2 = __toESM(require("node:path"), 1);
@@ -76859,16 +76869,6 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary: binary2, version: v
     (cachedTool) => downloadIfMissing(options, cachedTool)
   );
 }, "loadTool");
-
-// utils/src/run.js
-var run = /* @__PURE__ */ __name(async (action6) => {
-  try {
-    await action6();
-  } catch (err) {
-    setFailed(err.message);
-  }
-}, "run");
-var run_default = run;
 
 // node_modules/map-obj/index.js
 var isObject2 = /* @__PURE__ */ __name((value) => typeof value === "object" && value !== null, "isObject");
