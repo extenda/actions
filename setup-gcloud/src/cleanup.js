@@ -44,10 +44,10 @@ export function deleteJobScopedDirectory() {
  */
 export function deleteGcloudConfigDirectory() {
   try {
-    const cloudsdk_configPath = process.env.CLOUDSDK_CONFIG;
-    if (cloudsdk_configPath && fs.existsSync(cloudsdk_configPath)) {
-      fs.rmSync(cloudsdk_configPath, { recursive: true });
-      core.debug(`Deleted CLOUDSDK_CONFIG directory: ${cloudsdk_configPath}`);
+    const cloudSdkConfigPath = process.env.CLOUDSDK_CONFIG;
+    if (cloudSdkConfigPath && fs.existsSync(cloudSdkConfigPath)) {
+      fs.rmSync(cloudSdkConfigPath, { recursive: true });
+      core.debug(`Deleted CLOUDSDK_CONFIG directory: ${cloudSdkConfigPath}`);
     }
   } catch (err) {
     core.warning(`Failed to delete CLOUDSDK_CONFIG directory: ${err.message}`);

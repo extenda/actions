@@ -66712,32 +66712,6 @@ var authenticateKubeCtl = /* @__PURE__ */ __name(async ({ cluster, clusterLocati
 ]), "authenticateKubeCtl");
 var kubectl_auth_default = authenticateKubeCtl;
 
-// setup-gcloud/src/exec-gcloud.js
-var import_node_os = __toESM(require("node:os"), 1);
-var findExecutable = /* @__PURE__ */ __name((executable) => {
-  if (executable === "gcloud" || !executable) {
-    return import_node_os.default.platform() === "win32" ? "gcloud.cmd" : "gcloud";
-  }
-  return executable;
-}, "findExecutable");
-var execGcloud = /* @__PURE__ */ __name(async (args, executable = "gcloud", silent = false) => {
-  const process4 = findExecutable(executable);
-  const result = await getExecOutput(process4, args, {
-    silent,
-    ignoreReturnCode: true
-  });
-  if (result.exitCode !== 0) {
-    let message = `The process '${process4}' failed with exit code ${result.exitCode}`;
-    if (result.stderr) {
-      message = `${message}
-
-${result.stderr}`;
-    }
-    throw new Error(message);
-  }
-  return result.stdout.trim();
-}, "execGcloud");
-
 // setup-gcloud/src/setup-gcloud.js
 var import_node_fs5 = __toESM(require("node:fs"), 1);
 var import_node_path4 = __toESM(require("node:path"), 1);
@@ -66947,7 +66921,7 @@ function partialMatch(patterns, itemPath) {
 __name(partialMatch, "partialMatch");
 
 // node_modules/@actions/glob/lib/internal-pattern.js
-var os9 = __toESM(require("os"), 1);
+var os8 = __toESM(require("os"), 1);
 var path9 = __toESM(require("path"), 1);
 var import_assert5 = __toESM(require("assert"), 1);
 var import_minimatch = __toESM(require_minimatch(), 1);
@@ -67114,7 +67088,7 @@ t not contain globs.`);
     if (pattern === "." || pattern.startsWith(`.${path9.sep}`)) {
       pattern = _Pattern.globEscape(process.cwd()) + pattern.substr(1);
     } else if (pattern === "~" || pattern.startsWith(`~${path9.sep}`)) {
-      homedir2 = homedir2 || os9.homedir();
+      homedir2 = homedir2 || os8.homedir();
       (0, import_assert5.default)(homedir2, "Unable to determine HOME directory");
       (0, import_assert5.default)(hasAbsoluteRoot(homedir2), `Expected HOME directory to be a rooted path. Actual '${homedir2}\
 '`);
@@ -67747,11 +67721,11 @@ var AbortError = class extends Error {
 };
 
 // node_modules/@typespec/ts-http-runtime/dist/esm/logger/log.js
-var import_node_os2 = require("node:os");
+var import_node_os = require("node:os");
 var import_node_util = __toESM(require("node:util"), 1);
 var import_node_process = __toESM(require("node:process"), 1);
 function log(message, ...args) {
-  import_node_process.default.stderr.write(`${import_node_util.default.format(message, ...args)}${import_node_os2.EOL}`);
+  import_node_process.default.stderr.write(`${import_node_util.default.format(message, ...args)}${import_node_os.EOL}`);
 }
 __name(log, "log");
 
@@ -69747,7 +69721,7 @@ function redirectPolicy2(options = {}) {
 __name(redirectPolicy2, "redirectPolicy");
 
 // node_modules/@azure/core-rest-pipeline/dist/esm/util/userAgentPlatform.js
-var import_node_os3 = __toESM(require("node:os"), 1);
+var import_node_os2 = __toESM(require("node:os"), 1);
 var import_node_process2 = __toESM(require("node:process"), 1);
 function getHeaderName2() {
   return "User-Agent";
@@ -69755,7 +69729,7 @@ function getHeaderName2() {
 __name(getHeaderName2, "getHeaderName");
 async function setPlatformSpecificData2(map) {
   if (import_node_process2.default && import_node_process2.default.versions) {
-    const osInfo = `${import_node_os3.default.type()} ${import_node_os3.default.release()}; ${import_node_os3.default.arch()}`;
+    const osInfo = `${import_node_os2.default.type()} ${import_node_os2.default.release()}; ${import_node_os2.default.arch()}`;
     const versions = import_node_process2.default.versions;
     if (versions.bun) {
       map.set("Bun", `${versions.bun} (${osInfo})`);
@@ -99667,26 +99641,26 @@ __name(saveCache, "saveCache");
 
 // node_modules/@actions/cache/lib/generated/results/api/v1/cache.js
 var import_runtime_rpc = __toESM(require_commonjs2(), 1);
+var import_runtime320 = __toESM(require_commonjs(), 1);
 var import_runtime321 = __toESM(require_commonjs(), 1);
 var import_runtime322 = __toESM(require_commonjs(), 1);
 var import_runtime323 = __toESM(require_commonjs(), 1);
 var import_runtime324 = __toESM(require_commonjs(), 1);
-var import_runtime325 = __toESM(require_commonjs(), 1);
 
 // node_modules/@actions/cache/lib/generated/results/entities/v1/cachemetadata.js
+var import_runtime314 = __toESM(require_commonjs(), 1);
 var import_runtime315 = __toESM(require_commonjs(), 1);
 var import_runtime316 = __toESM(require_commonjs(), 1);
 var import_runtime317 = __toESM(require_commonjs(), 1);
 var import_runtime318 = __toESM(require_commonjs(), 1);
-var import_runtime319 = __toESM(require_commonjs(), 1);
 
 // node_modules/@actions/cache/lib/generated/results/entities/v1/cachescope.js
+var import_runtime308 = __toESM(require_commonjs(), 1);
 var import_runtime309 = __toESM(require_commonjs(), 1);
 var import_runtime310 = __toESM(require_commonjs(), 1);
 var import_runtime311 = __toESM(require_commonjs(), 1);
 var import_runtime312 = __toESM(require_commonjs(), 1);
-var import_runtime313 = __toESM(require_commonjs(), 1);
-var CacheScope$Type = class extends import_runtime313.MessageType {
+var CacheScope$Type = class extends import_runtime312.MessageType {
   static {
     __name(this, "CacheScope$Type");
   }
@@ -99710,9 +99684,9 @@ var CacheScope$Type = class extends import_runtime313.MessageType {
   }
   create(value) {
     const message = { scope: "", permission: "0" };
-    globalThis.Object.defineProperty(message, import_runtime312.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime311.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime311.reflectionMergePartial)(this, message, value);
+      (0, import_runtime310.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -99734,26 +99708,26 @@ var CacheScope$Type = class extends import_runtime313.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime310.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime309.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.scope !== "")
-      writer.tag(1, import_runtime309.WireType.LengthDelimited).string(message.scope);
+      writer.tag(1, import_runtime308.WireType.LengthDelimited).string(message.scope);
     if (message.permission !== "0")
-      writer.tag(2, import_runtime309.WireType.Varint).int64(message.permission);
+      writer.tag(2, import_runtime308.WireType.Varint).int64(message.permission);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime310.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime309.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CacheScope = new CacheScope$Type();
 
 // node_modules/@actions/cache/lib/generated/results/entities/v1/cachemetadata.js
-var CacheMetadata$Type = class extends import_runtime319.MessageType {
+var CacheMetadata$Type = class extends import_runtime318.MessageType {
   static {
     __name(this, "CacheMetadata$Type");
   }
@@ -99771,9 +99745,9 @@ var CacheMetadata$Type = class extends import_runtime319.MessageType {
   }
   create(value) {
     const message = { repositoryId: "0", scope: [] };
-    globalThis.Object.defineProperty(message, import_runtime318.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime317.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime317.reflectionMergePartial)(this, message, value);
+      (0, import_runtime316.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -99795,27 +99769,27 @@ var CacheMetadata$Type = class extends import_runtime319.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime316.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime315.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.repositoryId !== "0")
-      writer.tag(1, import_runtime315.WireType.Varint).int64(message.repositoryId);
+      writer.tag(1, import_runtime314.WireType.Varint).int64(message.repositoryId);
     for (let i = 0; i < message.scope.length; i++)
-      CacheScope.internalBinaryWrite(message.scope[i], writer.tag(2, import_runtime315.WireType.LengthDelimited).fork(),
+      CacheScope.internalBinaryWrite(message.scope[i], writer.tag(2, import_runtime314.WireType.LengthDelimited).fork(),
       options).join();
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime316.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime315.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CacheMetadata = new CacheMetadata$Type();
 
 // node_modules/@actions/cache/lib/generated/results/api/v1/cache.js
-var CreateCacheEntryRequest$Type = class extends import_runtime325.MessageType {
+var CreateCacheEntryRequest$Type = class extends import_runtime324.MessageType {
   static {
     __name(this, "CreateCacheEntryRequest$Type");
   }
@@ -99840,9 +99814,9 @@ var CreateCacheEntryRequest$Type = class extends import_runtime325.MessageType {
   }
   create(value) {
     const message = { key: "", version: "" };
-    globalThis.Object.defineProperty(message, import_runtime324.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime323.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime323.reflectionMergePartial)(this, message, value);
+      (0, import_runtime322.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -99868,27 +99842,27 @@ var CreateCacheEntryRequest$Type = class extends import_runtime325.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime322.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime321.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime321.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime320.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime321.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime320.WireType.LengthDelimited).string(message.key);
     if (message.version !== "")
-      writer.tag(3, import_runtime321.WireType.LengthDelimited).string(message.version);
+      writer.tag(3, import_runtime320.WireType.LengthDelimited).string(message.version);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime322.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime321.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CreateCacheEntryRequest = new CreateCacheEntryRequest$Type();
-var CreateCacheEntryResponse$Type = class extends import_runtime325.MessageType {
+var CreateCacheEntryResponse$Type = class extends import_runtime324.MessageType {
   static {
     __name(this, "CreateCacheEntryResponse$Type");
   }
@@ -99919,9 +99893,9 @@ var CreateCacheEntryResponse$Type = class extends import_runtime325.MessageType 
   }
   create(value) {
     const message = { ok: false, signedUploadUrl: "", message: "" };
-    globalThis.Object.defineProperty(message, import_runtime324.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime323.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime323.reflectionMergePartial)(this, message, value);
+      (0, import_runtime322.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -99947,26 +99921,26 @@ var CreateCacheEntryResponse$Type = class extends import_runtime325.MessageType 
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime322.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime321.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime321.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime320.WireType.Varint).bool(message.ok);
     if (message.signedUploadUrl !== "")
-      writer.tag(2, import_runtime321.WireType.LengthDelimited).string(message.signedUploadUrl);
+      writer.tag(2, import_runtime320.WireType.LengthDelimited).string(message.signedUploadUrl);
     if (message.message !== "")
-      writer.tag(3, import_runtime321.WireType.LengthDelimited).string(message.message);
+      writer.tag(3, import_runtime320.WireType.LengthDelimited).string(message.message);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime322.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime321.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CreateCacheEntryResponse = new CreateCacheEntryResponse$Type();
-var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime325.MessageType {
+var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime324.MessageType {
   static {
     __name(this, "FinalizeCacheEntryUploadRequest$Type");
   }
@@ -99998,9 +99972,9 @@ var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime325.Messa
   }
   create(value) {
     const message = { key: "", sizeBytes: "0", version: "" };
-    globalThis.Object.defineProperty(message, import_runtime324.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime323.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime323.reflectionMergePartial)(this, message, value);
+      (0, import_runtime322.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -100030,29 +100004,29 @@ var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime325.Messa
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime322.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime321.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime321.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime320.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime321.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime320.WireType.LengthDelimited).string(message.key);
     if (message.sizeBytes !== "0")
-      writer.tag(3, import_runtime321.WireType.Varint).int64(message.sizeBytes);
+      writer.tag(3, import_runtime320.WireType.Varint).int64(message.sizeBytes);
     if (message.version !== "")
-      writer.tag(4, import_runtime321.WireType.LengthDelimited).string(message.version);
+      writer.tag(4, import_runtime320.WireType.LengthDelimited).string(message.version);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime322.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime321.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var FinalizeCacheEntryUploadRequest = new FinalizeCacheEntryUploadRequest$Type();
-var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime325.MessageType {
+var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime324.MessageType {
   static {
     __name(this, "FinalizeCacheEntryUploadResponse$Type");
   }
@@ -100083,9 +100057,9 @@ var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime325.Mess
   }
   create(value) {
     const message = { ok: false, entryId: "0", message: "" };
-    globalThis.Object.defineProperty(message, import_runtime324.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime323.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime323.reflectionMergePartial)(this, message, value);
+      (0, import_runtime322.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -100111,26 +100085,26 @@ var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime325.Mess
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime322.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime321.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime321.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime320.WireType.Varint).bool(message.ok);
     if (message.entryId !== "0")
-      writer.tag(2, import_runtime321.WireType.Varint).int64(message.entryId);
+      writer.tag(2, import_runtime320.WireType.Varint).int64(message.entryId);
     if (message.message !== "")
-      writer.tag(3, import_runtime321.WireType.LengthDelimited).string(message.message);
+      writer.tag(3, import_runtime320.WireType.LengthDelimited).string(message.message);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime322.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime321.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var FinalizeCacheEntryUploadResponse = new FinalizeCacheEntryUploadResponse$Type();
-var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime325.MessageType {
+var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime324.MessageType {
   static {
     __name(this, "GetCacheEntryDownloadURLRequest$Type");
   }
@@ -100163,9 +100137,9 @@ var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime325.Messa
   }
   create(value) {
     const message = { key: "", restoreKeys: [], version: "" };
-    globalThis.Object.defineProperty(message, import_runtime324.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime323.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime323.reflectionMergePartial)(this, message, value);
+      (0, import_runtime322.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -100195,29 +100169,29 @@ var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime325.Messa
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime322.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime321.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime321.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime320.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime321.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime320.WireType.LengthDelimited).string(message.key);
     for (let i = 0; i < message.restoreKeys.length; i++)
-      writer.tag(3, import_runtime321.WireType.LengthDelimited).string(message.restoreKeys[i]);
+      writer.tag(3, import_runtime320.WireType.LengthDelimited).string(message.restoreKeys[i]);
     if (message.version !== "")
-      writer.tag(4, import_runtime321.WireType.LengthDelimited).string(message.version);
+      writer.tag(4, import_runtime320.WireType.LengthDelimited).string(message.version);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime322.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime321.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var GetCacheEntryDownloadURLRequest = new GetCacheEntryDownloadURLRequest$Type();
-var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime325.MessageType {
+var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime324.MessageType {
   static {
     __name(this, "GetCacheEntryDownloadURLResponse$Type");
   }
@@ -100248,9 +100222,9 @@ var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime325.Mess
   }
   create(value) {
     const message = { ok: false, signedDownloadUrl: "", matchedKey: "" };
-    globalThis.Object.defineProperty(message, import_runtime324.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime323.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime323.reflectionMergePartial)(this, message, value);
+      (0, import_runtime322.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -100276,21 +100250,21 @@ var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime325.Mess
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime322.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime321.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime321.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime320.WireType.Varint).bool(message.ok);
     if (message.signedDownloadUrl !== "")
-      writer.tag(2, import_runtime321.WireType.LengthDelimited).string(message.signedDownloadUrl);
+      writer.tag(2, import_runtime320.WireType.LengthDelimited).string(message.signedDownloadUrl);
     if (message.matchedKey !== "")
-      writer.tag(3, import_runtime321.WireType.LengthDelimited).string(message.matchedKey);
+      writer.tag(3, import_runtime320.WireType.LengthDelimited).string(message.matchedKey);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime322.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime321.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
@@ -101188,6 +101162,32 @@ __name(saveCacheV2, "saveCacheV2");
 
 // setup-gcloud/src/setup-gcloud.js
 var import_fast_glob = __toESM(require_out4(), 1);
+
+// setup-gcloud/src/exec-gcloud.js
+var import_node_os3 = __toESM(require("node:os"), 1);
+var findExecutable = /* @__PURE__ */ __name((executable) => {
+  if (executable === "gcloud" || !executable) {
+    return import_node_os3.default.platform() === "win32" ? "gcloud.cmd" : "gcloud";
+  }
+  return executable;
+}, "findExecutable");
+var execGcloud = /* @__PURE__ */ __name(async (args, executable = "gcloud", silent = false) => {
+  const process4 = findExecutable(executable);
+  const result = await getExecOutput(process4, args, {
+    silent,
+    ignoreReturnCode: true
+  });
+  if (result.exitCode !== 0) {
+    let message = `The process '${process4}' failed with exit code ${result.exitCode}`;
+    if (result.stderr) {
+      message = `${message}
+
+${result.stderr}`;
+    }
+    throw new Error(message);
+  }
+  return result.stdout.trim();
+}, "execGcloud");
 
 // setup-gcloud/src/auth-json-key.js
 var authenticateJsonKey = /* @__PURE__ */ __name(async (credentialsFilePath) => {
