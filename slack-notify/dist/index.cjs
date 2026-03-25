@@ -99822,8 +99822,11 @@ __name(cleanupCredentials, "cleanupCredentials");
 // setup-gcloud/src/with-gcloud.js
 var withGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, fn) => {
   const previousAccount = getCurrentAccount();
+  info(`Previous account: ${JSON.stringify(previousAccount)}`);
   try {
+    info("Before setup gcloud");
     const projectId = await setup_gcloud_default(serviceAccountKey);
+    info("Before fn callback");
     return await fn(projectId);
   } finally {
     const didRestoreAccount = await restorePreviousAccount(previousAccount);
@@ -99847,7 +99850,7 @@ var accessSecretValue = /* @__PURE__ */ __name(async (projectId, name) => execGc
     "--format=json"
   ],
   "gcloud",
-  true
+  false
 ).then(JSON.parse).then((json) => json.payload.data).then((secret) => Buffer.from(secret, "base64").toString("utf8")), "\
 accessSecretValue");
 var loadSecret = /* @__PURE__ */ __name(async (serviceAccountKey, name) => with_gcloud_default(serviceAccountKey, async (projectId) => {

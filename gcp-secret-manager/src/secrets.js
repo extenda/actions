@@ -16,7 +16,7 @@ const accessSecretValue = async (projectId, name) =>
       '--format=json',
     ],
     'gcloud',
-    true,
+    false,
   )
     .then(JSON.parse)
     .then((json) => json.payload.data)
