@@ -114843,13 +114843,13 @@ var findExecutable = /* @__PURE__ */ __name((executable) => {
   return executable;
 }, "findExecutable");
 var execGcloud = /* @__PURE__ */ __name(async (args, executable = "gcloud", silent = false) => {
-  const process4 = findExecutable(executable);
-  const result = await getExecOutput(process4, args, {
+  const command = findExecutable(executable);
+  const result = await getExecOutput(command, args, {
     silent,
     ignoreReturnCode: true
   });
   if (result.exitCode !== 0) {
-    let message = `The process '${process4}' failed with exit code ${result.exitCode}`;
+    let message = `The process '${command}' failed with exit code ${result.exitCode}`;
     if (result.stderr) {
       message = `${message}
 
@@ -114988,7 +114988,7 @@ function validateCredentialsShape(jsonCredentials) {
     const email = jsonCredentials.client_email ?? jsonCredentials.email ?? void 0;
     if (!isNonEmptyString(email)) {
       throw new Error(
-        'Invalid service-account-key: missing required field "client_email"'
+        'Invalid service-account-key: missing required field "client_email" or "email"'
       );
     }
     return {
@@ -115192,9 +115192,7 @@ var configureCloudSdkPython = /* @__PURE__ */ __name(async (toolPath) => {
 }, "configureCloudSdkPython");
 var isolateConfigDir = /* @__PURE__ */ __name(async (toolPath = void 0) => {
   const configDirPath = getJobScope({ prefix: "gcloud-config" });
-  if (import_node_fs4.default.existsSync(configDirPath)) {
-    import_node_fs4.default.mkdirSync(configDirPath, { recursive: true });
-  }
+  import_node_fs4.default.mkdirSync(configDirPath, { recursive: true });
   exportVariable("CLOUDSDK_CONFIG", configDirPath);
   return toolPath;
 }, "isolateConfigDir");

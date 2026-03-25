@@ -17,14 +17,14 @@ const findExecutable = (executable) => {
  * @returns {Promise<string>} the trimmed standard output string
  */
 const execGcloud = async (args, executable = 'gcloud', silent = false) => {
-  const process = findExecutable(executable);
-  const result = await exec.getExecOutput(process, args, {
+  const command = findExecutable(executable);
+  const result = await exec.getExecOutput(command, args, {
     silent,
     ignoreReturnCode: true,
   });
 
   if (result.exitCode !== 0) {
-    let message = `The process '${process}' failed with exit code ${result.exitCode}`;
+    let message = `The process '${command}' failed with exit code ${result.exitCode}`;
     if (result.stderr) {
       message = `${message}\n\n${result.stderr}`;
     }

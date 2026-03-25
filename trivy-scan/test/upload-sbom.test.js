@@ -129,7 +129,7 @@ test('It uploads for both manifest and index when image is multi-arch without at
   await uploadSbom(
     'eu.gcr.io/extenda/test:2.0.0',
     { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
-    'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
+    undefined,
   );
 
   expect(execGcloud).toHaveBeenCalledTimes(4);

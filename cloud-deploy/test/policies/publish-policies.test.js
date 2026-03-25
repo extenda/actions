@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import publishPolicies from '../../src/policies/publish-policies.js';
 
 vi.mock('axios');
-vi.mock('../../../setup-gcloud/src/index.js');
+vi.mock('setup-gcloud/src/index.js');
 
 describe('Publish policies', () => {
   beforeEach(() => {

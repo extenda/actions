@@ -286,7 +286,7 @@ describe('auth-gcloud', () => {
         }),
         false,
       ),
-    ).rejects.toThrow('missing required field "client_email"');
+    ).rejects.toThrow('missing required field "client_email" or "email"');
 
     expect(createJobScopedCredential).not.toHaveBeenCalled();
     expect(authenticateJsonKey).not.toHaveBeenCalled();

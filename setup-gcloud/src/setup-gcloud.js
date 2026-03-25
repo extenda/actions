@@ -62,9 +62,7 @@ const configureCloudSdkPython = async (toolPath) => {
 
 const isolateConfigDir = async (toolPath = undefined) => {
   const configDirPath = getJobScope({ prefix: 'gcloud-config' });
-  if (fs.existsSync(configDirPath)) {
-    fs.mkdirSync(configDirPath, { recursive: true });
-  }
+  fs.mkdirSync(configDirPath, { recursive: true });
   core.exportVariable('CLOUDSDK_CONFIG', configDirPath);
   return toolPath;
 };

@@ -14,7 +14,7 @@ import getLatestVersion from '../src/latest-version.js';
 import setupGcloud from '../src/setup-gcloud.js';
 
 // Mock out tools download.
-vi.mock('../../utils/src/index.js');
+vi.mock('action-utils');
 
 vi.mock('@actions/cache');
 vi.mock('@actions/core');

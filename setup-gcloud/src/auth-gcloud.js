@@ -59,7 +59,7 @@ function validateCredentialsShape(jsonCredentials) {
       jsonCredentials.client_email ?? jsonCredentials.email ?? undefined;
     if (!isNonEmptyString(email)) {
       throw new Error(
-        'Invalid service-account-key: missing required field "client_email"',
+        'Invalid service-account-key: missing required field "client_email" or "email"',
       );
     }
     return {
