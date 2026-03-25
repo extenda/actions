@@ -48,6 +48,8 @@ describe('Setup Gcloud', () => {
       RUNNER_TOOL_CACHE: '/opt/toolcache',
       RUNNER_ARCH: 'X64',
       RUNNER_OS: 'Linux',
+      GITHUB_RUN_ID: '12345',
+      GITHUB_RUN_ATTEMPT: '1',
       ...orgEnv,
     };
 
@@ -69,6 +71,8 @@ describe('Setup Gcloud', () => {
       '/gcloud/.install/.backup': { '.keep': '' },
       '/testdir/__pycache__': { '.keep': '' },
       [process.env.RUNNER_TEMP]: { '.keep': '' },
+      '/tmp/setup-gcloud-12345-1': { '.keep': '' },
+      '/tmp/gcloud-config-12345-1': { '.keep': '' },
       [tmpDir]: { '.keep': '' },
       [privateTmpDir]: { '.keep': '' },
     };

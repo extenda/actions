@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 
-import createKeyFile from '../../utils/src/create-key-file.js';
+import createJobScopedCredential from './create-job-scoped-credential.js';
 import { execGcloud } from './exec-gcloud.js';
 
 export async function workloadIdentityFederation(
@@ -8,7 +8,8 @@ export async function workloadIdentityFederation(
   { identity_pool: workloadIdentityPool, email },
 ) {
   const idToken = await core.getIDToken('https://iam.googleapis.com/');
-  const idTokenPath = createKeyFile(idToken, { encoding: 'utf8' });
+  // Create a job-scoped file for the OIDC token
+  const idTokenPath = createJobScopedCredential(idToken, { encoding: 'utf8' });
 
   await execGcloud(
     [

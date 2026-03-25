@@ -23,3 +23,4 @@ outputs:
 runs:
   using: node24
   main: dist/index.cjs
+  post: dist/post.cjs

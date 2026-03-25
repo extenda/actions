@@ -9,6 +9,7 @@ import glob from 'fast-glob';
 import { authenticateGcloud } from './auth-gcloud.js';
 import getDownloadUrl from './download-url.js';
 import { execGcloud } from './exec-gcloud.js';
+import { getJobScope } from './job-scope.js';
 import getLatestVersion from './latest-version.js';
 
 // Increment this version if the list of installed components are modified.
@@ -60,17 +61,8 @@ const configureCloudSdkPython = async (toolPath) => {
 };
 
 const isolateConfigDir = async (toolPath) => {
-  const { RUNNER_TEMP, GITHUB_RUN_ID, GITHUB_RUN_ATTEMPT, GITHUB_JOB } =
-    process.env;
-
-  core.exportVariable(
-    'CLOUDSDK_CONFIG',
-    path.join(
-      RUNNER_TEMP,
-      `gcloud-config-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${GITHUB_JOB}`,
-    ),
-  );
-
+  const configDirPath = getJobScope({ prefix: 'gcloud-config' });
+  core.exportVariable('CLOUDSDK_CONFIG', configDirPath);
   return toolPath;
 };
 

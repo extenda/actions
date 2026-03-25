@@ -1,12 +1,11 @@
 import * as core from '@actions/core';
-import createKeyFile from 'action-utils/src/create-key-file.js';
 
 import {
   authenticateJsonKey,
   configureServiceAccount,
 } from './auth-json-key.js';
 import { workloadIdentityFederation } from './auth-wid-federation.js';
-import copyCredentials from './copy-credentials.js';
+import createJobScopedCredential from './create-job-scoped-credential.js';
 
 // A stack with authorizations that has occurred throughout the action's lifetime.
 // This allows us to push and pop authorizations from different sources.
@@ -162,20 +161,18 @@ export async function authenticateGcloud(credentials, exportCredentials) {
   };
 
   if (!isCurrentAccount(authEntry)) {
-    const tmpKeyFile = createKeyFile(credentials);
-
-    authEntry.credentialsFilePath = tmpKeyFile;
+    // Create a job-scoped credential file (handles base64 decoding and cleanup tracking)
+    authEntry.credentialsFilePath = createJobScopedCredential(credentials);
 
     core.info(`Authenticate gcloud with ${authEntry.type}`);
 
     if (authEntry.type === authType.jsonKey) {
-      await authenticateJsonKey(tmpKeyFile);
+      await authenticateJsonKey(authEntry.credentialsFilePath);
     } else {
-      await workloadIdentityFederation(tmpKeyFile, jsonCredentials);
-    }
-
-    if (exportCredentials) {
-      authEntry.credentialsFilePath = await copyCredentials(tmpKeyFile);
+      await workloadIdentityFederation(
+        authEntry.credentialsFilePath,
+        jsonCredentials,
+      );
     }
 
     authStack.push(authEntry);
@@ -205,18 +202,19 @@ export function resetAuthStack() {
 /**
  * Restore the previously authenticated account.
  * @param previousAccount the previously authenticated account as returned by {@link getCurrentAccount}.
+ * @return {Promise<boolean>} a promise that completes with true if credentials was restored, false otherwise
  */
 export async function restorePreviousAccount(previousAccount) {
   if (!previousAccount) {
-    // No previous account. Should we forget the current account? For now, we will leave it as is for backwards compatibility.
-    return;
+    // No previous account.
+    return false;
   }
 
   const current = authStack.pop();
   if (current === previousAccount) {
     // Same account, push it and return. State is already matching.
     authStack.push(previousAccount);
-    return;
+    return true;
   }
 
   core.info(`Restore gcloud account ${previousAccount.email}`);
@@ -227,4 +225,5 @@ export async function restorePreviousAccount(previousAccount) {
 
   // Restore the environment variables.
   populateEnvironment(previousAccount);
+  return true;
 }
