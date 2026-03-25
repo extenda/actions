@@ -99711,14 +99711,19 @@ async function authenticateGcloud(credentials, exportCredentials) {
   if (!isCurrentAccount(authEntry)) {
     authEntry.credentialsFilePath = createJobScopedCredential(credentials);
     info(`Authenticate gcloud with ${authEntry.type}`);
-    if (authEntry.type === authType.jsonKey) {
-      await authenticateJsonKey(authEntry.credentialsFilePath);
-    } else {
-      authEntry.exportCredentials = true;
-      await workloadIdentityFederation(
-        authEntry.credentialsFilePath,
-        jsonCredentials
-      );
+    try {
+      process.env[env.projectId] = projectId;
+      if (authEntry.type === authType.jsonKey) {
+        await authenticateJsonKey(authEntry.credentialsFilePath);
+      } else {
+        authEntry.exportCredentials = true;
+        await workloadIdentityFederation(
+          authEntry.credentialsFilePath,
+          jsonCredentials
+        );
+      }
+    } finally {
+      delete process.env[env.projectId];
     }
     authStack.push(authEntry);
     populateEnvironment(authEntry);

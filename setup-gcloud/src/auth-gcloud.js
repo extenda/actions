@@ -16,7 +16,7 @@ const authType = {
   widFederation: 'wid_federation',
 };
 
-const env = {
+export const env = {
   applicationCredentials: 'GOOGLE_APPLICATION_CREDENTIALS',
   credentialsOverride: 'CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE',
   projectId: 'CLOUDSDK_CORE_PROJECT',
@@ -166,15 +166,22 @@ export async function authenticateGcloud(credentials, exportCredentials) {
 
     core.info(`Authenticate gcloud with ${authEntry.type}`);
 
-    if (authEntry.type === authType.jsonKey) {
-      await authenticateJsonKey(authEntry.credentialsFilePath);
-    } else {
-      // Credentials must always be exported to env in wid_federation mode
-      authEntry.exportCredentials = true;
-      await workloadIdentityFederation(
-        authEntry.credentialsFilePath,
-        jsonCredentials,
-      );
+    try {
+      // Ensure projectId is set before executing any gcloud command
+      process.env[env.projectId] = projectId;
+
+      if (authEntry.type === authType.jsonKey) {
+        await authenticateJsonKey(authEntry.credentialsFilePath);
+      } else {
+        // Credentials must always be exported to env in wid_federation mode
+        authEntry.exportCredentials = true;
+        await workloadIdentityFederation(
+          authEntry.credentialsFilePath,
+          jsonCredentials,
+        );
+      }
+    } finally {
+      delete process.env[env.projectId];
     }
 
     authStack.push(authEntry);
