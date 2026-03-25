@@ -4,7 +4,7 @@ import createJobScopedCredential from './create-job-scoped-credential.js';
 import { execGcloud } from './exec-gcloud.js';
 
 export async function workloadIdentityFederation(
-  tmpKeyFile,
+  credentialsFilePath,
   { identity_pool: workloadIdentityPool, email },
 ) {
   const idToken = await core.getIDToken('https://iam.googleapis.com/');
@@ -18,7 +18,7 @@ export async function workloadIdentityFederation(
       'create-cred-config',
       workloadIdentityPool,
       `--service-account=${email}`,
-      `--output-file=${tmpKeyFile}`,
+      `--output-file=${credentialsFilePath}`,
       `--credential-source-file=${idTokenPath}`,
     ],
     'gcloud',
