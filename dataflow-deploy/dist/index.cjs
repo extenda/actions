@@ -91980,7 +91980,7 @@ function validateCredentialsShape(jsonCredentials) {
       email
     };
   }
-  if (isNonEmptyString(jsonCredentials.identity_pool)) {
+  if (isNonEmptyString(jsonCredentials.workload_identity_provider)) {
     if (!isNonEmptyString(jsonCredentials.email)) {
       throw new Error(
         'Invalid service-account-key: missing required field "email"'
@@ -91992,7 +91992,8 @@ function validateCredentialsShape(jsonCredentials) {
     };
   }
   throw new Error(
-    'Invalid service-account-key: expected either "private_key" (json key) or "identity_pool" (wid federation)'
+    'Invalid service-account-key: expected either "private_key" (json key) or "workload_identity_provider" (wid federati\
+on)'
   );
 }
 __name(validateCredentialsShape, "validateCredentialsShape");

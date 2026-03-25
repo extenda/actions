@@ -80,7 +80,7 @@ describe('auth-gcloud', () => {
     workloadIdentityFederation.mockResolvedValueOnce(undefined);
 
     const credentials = {
-      identity_pool:
+      workload_identity_provider:
         'projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
       email: 'wid-sa@example.iam.gserviceaccount.com',
       project_id: 'project-wid',
@@ -298,7 +298,7 @@ describe('auth-gcloud', () => {
     await expect(
       authenticateGcloud(
         encodeCredentials({
-          identity_pool:
+          workload_identity_provider:
             'projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
           project_id: 'project-a',
         }),
@@ -312,7 +312,7 @@ describe('auth-gcloud', () => {
     expect(getCurrentAccount()).toBeUndefined();
   });
 
-  test('rejects when neither private_key nor identity_pool are present', async () => {
+  test('rejects when neither private_key nor workload_identity_provider are present', async () => {
     await expect(
       authenticateGcloud(
         encodeCredentials({
@@ -340,7 +340,7 @@ describe('auth-gcloud', () => {
     await expect(
       authenticateGcloud(
         encodeCredentials({
-          identity_pool:
+          workload_identity_provider:
             'projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
           email: 'wid-sa@example.iam.gserviceaccount.com',
           project_id: 'project-wid',
@@ -377,7 +377,7 @@ describe('auth-gcloud', () => {
 
     await authenticateGcloud(
       encodeCredentials({
-        identity_pool:
+        workload_identity_provider:
           'projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
         email: 'wid-sa@example.iam.gserviceaccount.com',
         project_id: 'project-wid',
