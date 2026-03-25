@@ -17286,7 +17286,7 @@ var require_util4 = __commonJS({
     var { getEncoding } = require_encoding();
     var { serializeAMimeType, parseMIMEType } = require_data_url();
     var { types } = require("node:util");
-    var { StringDecoder } = require("string_decoder");
+    var { StringDecoder: StringDecoder2 } = require("string_decoder");
     var { btoa: btoa2 } = require("node:buffer");
     var staticPropertyDescriptors = {
       enumerable: true,
@@ -17379,7 +17379,7 @@ var require_util4 = __commonJS({
             dataURL += serializeAMimeType(parsed);
           }
           dataURL += ";base64,";
-          const decoder = new StringDecoder("latin1");
+          const decoder = new StringDecoder2("latin1");
           for (const chunk of bytes) {
             dataURL += btoa2(decoder.write(chunk));
           }
@@ -17408,7 +17408,7 @@ var require_util4 = __commonJS({
         }
         case "BinaryString": {
           let binaryString = "";
-          const decoder = new StringDecoder("latin1");
+          const decoder = new StringDecoder2("latin1");
           for (const chunk of bytes) {
             binaryString += decoder.write(chunk);
           }
@@ -51755,6 +51755,9 @@ var _summary = new Summary();
 // node_modules/@actions/core/lib/platform.js
 var import_os2 = __toESM(require("os"), 1);
 
+// node_modules/@actions/exec/lib/exec.js
+var import_string_decoder = require("string_decoder");
+
 // node_modules/@actions/exec/lib/toolrunner.js
 var os3 = __toESM(require("os"), 1);
 var events = __toESM(require("events"), 1);
@@ -52623,6 +52626,42 @@ function exec(commandLine, args, options) {
   });
 }
 __name(exec, "exec");
+function getExecOutput(commandLine, args, options) {
+  return __awaiter8(this, void 0, void 0, function* () {
+    var _a2, _b;
+    let stdout = "";
+    let stderr = "";
+    const stdoutDecoder = new import_string_decoder.StringDecoder("utf8");
+    const stderrDecoder = new import_string_decoder.StringDecoder("utf8");
+    const originalStdoutListener = (_a2 = options === null || options === void 0 ? void 0 : options.listeners) === null ||
+    _a2 === void 0 ? void 0 : _a2.stdout;
+    const originalStdErrListener = (_b = options === null || options === void 0 ? void 0 : options.listeners) === null ||
+    _b === void 0 ? void 0 : _b.stderr;
+    const stdErrListener = /* @__PURE__ */ __name((data) => {
+      stderr += stderrDecoder.write(data);
+      if (originalStdErrListener) {
+        originalStdErrListener(data);
+      }
+    }, "stdErrListener");
+    const stdOutListener = /* @__PURE__ */ __name((data) => {
+      stdout += stdoutDecoder.write(data);
+      if (originalStdoutListener) {
+        originalStdoutListener(data);
+      }
+    }, "stdOutListener");
+    const listeners = Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.listeners),
+    { stdout: stdOutListener, stderr: stdErrListener });
+    const exitCode = yield exec(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
+    stdout += stdoutDecoder.end();
+    stderr += stderrDecoder.end();
+    return {
+      exitCode,
+      stdout,
+      stderr
+    };
+  });
+}
+__name(getExecOutput, "getExecOutput");
 
 // node_modules/@actions/core/lib/platform.js
 var platform = import_os2.default.platform();
@@ -57381,24 +57420,29 @@ var getTribeProject = /* @__PURE__ */ __name(async (projectId) => {
 }, "getTribeProject");
 
 // setup-gcloud/src/exec-gcloud.js
-var import_os4 = __toESM(require("os"), 1);
+var import_node_os = __toESM(require("node:os"), 1);
 var findExecutable = /* @__PURE__ */ __name((executable) => {
   if (executable === "gcloud" || !executable) {
-    return import_os4.default.platform() === "win32" ? "gcloud.cmd" : "gcloud";
+    return import_node_os.default.platform() === "win32" ? "gcloud.cmd" : "gcloud";
   }
   return executable;
 }, "findExecutable");
 var execGcloud = /* @__PURE__ */ __name(async (args, executable = "gcloud", silent = false) => {
-  let output = "";
-  await exec(findExecutable(executable), args, {
+  const process4 = findExecutable(executable);
+  const result = await getExecOutput(process4, args, {
     silent,
-    listeners: {
-      stdout: /* @__PURE__ */ __name((data) => {
-        output += data.toString("utf8");
-      }, "stdout")
-    }
+    ignoreReturnCode: true
   });
-  return output.trim();
+  if (result.exitCode !== 0) {
+    let message = `The process '${process4}' failed with exit code ${result.exitCode}`;
+    if (result.stderr) {
+      message = `${message}
+
+${result.stderr}`;
+    }
+    throw new Error(message);
+  }
+  return result.stdout;
 }, "execGcloud");
 
 // setup-gcloud/src/setup-gcloud.js
@@ -58410,11 +58454,11 @@ var AbortError = class extends Error {
 };
 
 // node_modules/@typespec/ts-http-runtime/dist/esm/logger/log.js
-var import_node_os = require("node:os");
+var import_node_os2 = require("node:os");
 var import_node_util = __toESM(require("node:util"), 1);
 var import_node_process = __toESM(require("node:process"), 1);
 function log(message, ...args) {
-  import_node_process.default.stderr.write(`${import_node_util.default.format(message, ...args)}${import_node_os.EOL}`);
+  import_node_process.default.stderr.write(`${import_node_util.default.format(message, ...args)}${import_node_os2.EOL}`);
 }
 __name(log, "log");
 
@@ -60410,7 +60454,7 @@ function redirectPolicy2(options = {}) {
 __name(redirectPolicy2, "redirectPolicy");
 
 // node_modules/@azure/core-rest-pipeline/dist/esm/util/userAgentPlatform.js
-var import_node_os2 = __toESM(require("node:os"), 1);
+var import_node_os3 = __toESM(require("node:os"), 1);
 var import_node_process2 = __toESM(require("node:process"), 1);
 function getHeaderName2() {
   return "User-Agent";
@@ -60418,7 +60462,7 @@ function getHeaderName2() {
 __name(getHeaderName2, "getHeaderName");
 async function setPlatformSpecificData2(map) {
   if (import_node_process2.default && import_node_process2.default.versions) {
-    const osInfo = `${import_node_os2.default.type()} ${import_node_os2.default.release()}; ${import_node_os2.default.arch()}`;
+    const osInfo = `${import_node_os3.default.type()} ${import_node_os3.default.release()}; ${import_node_os3.default.arch()}`;
     const versions = import_node_process2.default.versions;
     if (versions.bun) {
       map.set("Bun", `${versions.bun} (${osInfo})`);
@@ -92078,7 +92122,7 @@ function getCurrentAccount() {
 __name(getCurrentAccount, "getCurrentAccount");
 
 // setup-gcloud/src/download-url.js
-var import_os5 = __toESM(require("os"), 1);
+var import_os4 = __toESM(require("os"), 1);
 var platforms = {
   linux: {
     platform: "linux",
@@ -92094,12 +92138,12 @@ var platforms = {
   }
 };
 var getDownloadUrl = /* @__PURE__ */ __name((version3) => {
-  let arch3 = import_os5.default.arch() === "x64" ? "x86_64" : import_os5.default.arch();
+  let arch3 = import_os4.default.arch() === "x64" ? "x86_64" : import_os4.default.arch();
   arch3 = arch3 === "arm64" ? "arm" : arch3;
-  if (!platforms[import_os5.default.platform()]) {
-    throw new Error(`Unsupported platform ${import_os5.default.platform()}`);
+  if (!platforms[import_os4.default.platform()]) {
+    throw new Error(`Unsupported platform ${import_os4.default.platform()}`);
   }
-  const { platform: platform2, extension } = platforms[import_os5.default.platform()];
+  const { platform: platform2, extension } = platforms[import_os4.default.platform()];
   return `https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${version3}-${platform2}-${arch3}.${extension}`;
 }, "getDownloadUrl");
 var download_url_default = getDownloadUrl;

@@ -67239,24 +67239,29 @@ var loadServiceDefinition = /* @__PURE__ */ __name((serviceFile, schema, patch) 
 var service_definition_default = loadServiceDefinition;
 
 // setup-gcloud/src/exec-gcloud.js
-var import_os4 = __toESM(require("os"), 1);
+var import_node_os = __toESM(require("node:os"), 1);
 var findExecutable = /* @__PURE__ */ __name((executable) => {
   if (executable === "gcloud" || !executable) {
-    return import_os4.default.platform() === "win32" ? "gcloud.cmd" : "gcloud";
+    return import_node_os.default.platform() === "win32" ? "gcloud.cmd" : "gcloud";
   }
   return executable;
 }, "findExecutable");
 var execGcloud = /* @__PURE__ */ __name(async (args, executable = "gcloud", silent = false) => {
-  let output = "";
-  await exec(findExecutable(executable), args, {
+  const process4 = findExecutable(executable);
+  const result = await getExecOutput(process4, args, {
     silent,
-    listeners: {
-      stdout: /* @__PURE__ */ __name((data) => {
-        output += data.toString("utf8");
-      }, "stdout")
-    }
+    ignoreReturnCode: true
   });
-  return output.trim();
+  if (result.exitCode !== 0) {
+    let message = `The process '${process4}' failed with exit code ${result.exitCode}`;
+    if (result.stderr) {
+      message = `${message}
+
+${result.stderr}`;
+    }
+    throw new Error(message);
+  }
+  return result.stdout;
 }, "execGcloud");
 
 // setup-gcloud/src/setup-gcloud.js
@@ -68268,11 +68273,11 @@ var AbortError = class extends Error {
 };
 
 // node_modules/@typespec/ts-http-runtime/dist/esm/logger/log.js
-var import_node_os = require("node:os");
+var import_node_os2 = require("node:os");
 var import_node_util = __toESM(require("node:util"), 1);
 var import_node_process = __toESM(require("node:process"), 1);
 function log(message, ...args) {
-  import_node_process.default.stderr.write(`${import_node_util.default.format(message, ...args)}${import_node_os.EOL}`);
+  import_node_process.default.stderr.write(`${import_node_util.default.format(message, ...args)}${import_node_os2.EOL}`);
 }
 __name(log, "log");
 
@@ -70268,7 +70273,7 @@ function redirectPolicy2(options = {}) {
 __name(redirectPolicy2, "redirectPolicy");
 
 // node_modules/@azure/core-rest-pipeline/dist/esm/util/userAgentPlatform.js
-var import_node_os2 = __toESM(require("node:os"), 1);
+var import_node_os3 = __toESM(require("node:os"), 1);
 var import_node_process2 = __toESM(require("node:process"), 1);
 function getHeaderName2() {
   return "User-Agent";
@@ -70276,7 +70281,7 @@ function getHeaderName2() {
 __name(getHeaderName2, "getHeaderName");
 async function setPlatformSpecificData2(map) {
   if (import_node_process2.default && import_node_process2.default.versions) {
-    const osInfo = `${import_node_os2.default.type()} ${import_node_os2.default.release()}; ${import_node_os2.default.arch()}`;
+    const osInfo = `${import_node_os3.default.type()} ${import_node_os3.default.release()}; ${import_node_os3.default.arch()}`;
     const versions = import_node_process2.default.versions;
     if (versions.bun) {
       map.set("Bun", `${versions.bun} (${osInfo})`);
@@ -101936,7 +101941,7 @@ function getCurrentAccount() {
 __name(getCurrentAccount, "getCurrentAccount");
 
 // setup-gcloud/src/download-url.js
-var import_os5 = __toESM(require("os"), 1);
+var import_os4 = __toESM(require("os"), 1);
 var platforms = {
   linux: {
     platform: "linux",
@@ -101952,12 +101957,12 @@ var platforms = {
   }
 };
 var getDownloadUrl = /* @__PURE__ */ __name((version3) => {
-  let arch3 = import_os5.default.arch() === "x64" ? "x86_64" : import_os5.default.arch();
+  let arch3 = import_os4.default.arch() === "x64" ? "x86_64" : import_os4.default.arch();
   arch3 = arch3 === "arm64" ? "arm" : arch3;
-  if (!platforms[import_os5.default.platform()]) {
-    throw new Error(`Unsupported platform ${import_os5.default.platform()}`);
+  if (!platforms[import_os4.default.platform()]) {
+    throw new Error(`Unsupported platform ${import_os4.default.platform()}`);
   }
-  const { platform: platform2, extension } = platforms[import_os5.default.platform()];
+  const { platform: platform2, extension } = platforms[import_os4.default.platform()];
   return `https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${version3}-${platform2}-${arch3}.${extension}`;
 }, "getDownloadUrl");
 var download_url_default = getDownloadUrl;
@@ -102132,7 +102137,7 @@ var configure_kubectl_default = configureKubeCtl;
 // test-pod/src/extract-output.js
 var import_node_fs6 = __toESM(require("node:fs"), 1);
 var import_node_path5 = __toESM(require("node:path"), 1);
-var import_os6 = __toESM(require("os"), 1);
+var import_os5 = __toESM(require("os"), 1);
 var OUT_BEGIN_MARKER = "test-pod-output BEGIN";
 var OUT_END_MARKER = "test-pod-output END";
 var getBinaryData = /* @__PURE__ */ __name((rawOutput) => {
@@ -102153,7 +102158,7 @@ var extractOutput = /* @__PURE__ */ __name(async (rawOutput) => {
   info(
     `Unpack test-pod output. Buffer size: ${Buffer.byteLength(data, "binary")} bytes`
   );
-  const tarFile = import_node_path5.default.join(import_os6.default.tmpdir(), `test-pod-output-${Date.now()}.tar`);
+  const tarFile = import_node_path5.default.join(import_os5.default.tmpdir(), `test-pod-output-${Date.now()}.tar`);
   import_node_fs6.default.writeFileSync(tarFile, data, "binary");
   return extractTar(tarFile, "test-pod-output");
 }, "extractOutput");
