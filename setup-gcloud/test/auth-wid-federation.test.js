@@ -20,13 +20,15 @@ describe('auth-wid-federation', () => {
     await workloadIdentityFederation(
       '/runner/temp/setup-gcloud-xxx/wid-config.json',
       {
-        identity_pool:
+        workload_identity_provider:
           'projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
         email: 'service-account@example.iam.gserviceaccount.com',
       },
     );
 
-    expect(core.getIDToken).toHaveBeenCalledWith('https://iam.googleapis.com/');
+    expect(core.getIDToken).toHaveBeenCalledWith(
+      'https://iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
+    );
     expect(createJobScopedCredential).toHaveBeenCalledWith('oidc-token', {
       encoding: 'utf8',
     });

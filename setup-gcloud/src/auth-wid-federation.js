@@ -5,9 +5,11 @@ import { execGcloud } from './exec-gcloud.js';
 
 export async function workloadIdentityFederation(
   credentialsFilePath,
-  { identity_pool: workloadIdentityPool, email },
+  { workload_identity_provider: workloadIdentityProvider, email },
 ) {
-  const idToken = await core.getIDToken('https://iam.googleapis.com/');
+  const idToken = await core.getIDToken(
+    `https://iam.googleapis.com/${workloadIdentityProvider}`,
+  );
   // Create a job-scoped file for the OIDC token
   const idTokenPath = createJobScopedCredential(idToken, { encoding: 'utf8' });
 
@@ -16,7 +18,7 @@ export async function workloadIdentityFederation(
       'iam',
       'workload-identity-pools',
       'create-cred-config',
-      workloadIdentityPool,
+      workloadIdentityProvider,
       `--service-account=${email}`,
       `--output-file=${credentialsFilePath}`,
       `--credential-source-file=${idTokenPath}`,

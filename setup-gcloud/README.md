@@ -39,7 +39,7 @@ For a **service account JSON key**, the secret contains the base64-encoded servi
 
 ```json
 {
-  "identity_pool": "projects/123456789/locations/global/workloadIdentityPools/github/providers/github",
+  "workload_identity_provider": "projects/123456789/locations/global/workloadIdentityPools/github/providers/github",
   "email": "deployer@example.iam.gserviceaccount.com",
   "project_id": "my-gcp-project"
 }
@@ -47,7 +47,7 @@ For a **service account JSON key**, the secret contains the base64-encoded servi
 
 Required fields:
 
-- `identity_pool` - full Workload Identity Provider resource name passed to `gcloud iam workload-identity-pools create-cred-config`
+- `workload_identity_provider` - full Workload Identity Provider resource name passed to `gcloud iam workload-identity-pools create-cred-config`
 - `email` - service account email to impersonate
 - `project_id` - default Google Cloud project for the action output and `gcloud` config
 

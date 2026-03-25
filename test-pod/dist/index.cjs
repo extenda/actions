@@ -101768,15 +101768,17 @@ function createJobScopedCredential(credentialData, { encoding = "base64", suffix
 __name(createJobScopedCredential, "createJobScopedCredential");
 
 // setup-gcloud/src/auth-wid-federation.js
-async function workloadIdentityFederation(credentialsFilePath, { identity_pool: workloadIdentityPool, email }) {
-  const idToken = await getIDToken("https://iam.googleapis.com/");
+async function workloadIdentityFederation(credentialsFilePath, { workload_identity_provider: workloadIdentityProvider, email }) {
+  const idToken = await getIDToken(
+    `https://iam.googleapis.com/${workloadIdentityProvider}`
+  );
   const idTokenPath = createJobScopedCredential(idToken, { encoding: "utf8" });
   await execGcloud(
     [
       "iam",
       "workload-identity-pools",
       "create-cred-config",
-      workloadIdentityPool,
+      workloadIdentityProvider,
       `--service-account=${email}`,
       `--output-file=${credentialsFilePath}`,
       `--credential-source-file=${idTokenPath}`
