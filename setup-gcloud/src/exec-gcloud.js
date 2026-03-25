@@ -31,7 +31,7 @@ const execGcloud = async (args, executable = 'gcloud', silent = false) => {
     throw new Error(message);
   }
 
-  return result.stdout;
+  return result.stdout.trim();
 };
 
 export { execGcloud, findExecutable };

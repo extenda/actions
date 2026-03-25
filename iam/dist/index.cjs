@@ -66322,7 +66322,7 @@ ${result.stderr}`;
     }
     throw new Error(message);
   }
-  return result.stdout;
+  return result.stdout.trim();
 }, "execGcloud");
 
 // setup-gcloud/src/setup-gcloud.js
@@ -101270,7 +101270,7 @@ function getServiceAccountEmail() {
 __name(getServiceAccountEmail, "getServiceAccountEmail");
 async function getIdToken(audience) {
   const serviceAccountEmail = getServiceAccountEmail();
-  return execGcloud(
+  const idToken = await execGcloud(
     [
       "auth",
       "print-identity-token",
@@ -101281,6 +101281,8 @@ async function getIdToken(audience) {
     "gcloud",
     true
   );
+  setSecret(idToken);
+  return idToken;
 }
 __name(getIdToken, "getIdToken");
 

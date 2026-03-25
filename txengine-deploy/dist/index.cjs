@@ -66430,7 +66430,7 @@ ${result.stderr}`;
     }
     throw new Error(message);
   }
-  return result.stdout;
+  return result.stdout.trim();
 }, "execGcloud");
 
 // setup-gcloud/src/setup-gcloud.js

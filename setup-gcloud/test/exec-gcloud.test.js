@@ -22,7 +22,7 @@ describe('execGcloud', () => {
     vi.resetAllMocks();
   });
 
-  test('returns stdout on success', async () => {
+  test('returns trimmed stdout on success', async () => {
     exec.getExecOutput.mockResolvedValue({
       exitCode: 0,
       stdout: 'some output\n',
@@ -31,7 +31,7 @@ describe('execGcloud', () => {
 
     const result = await execGcloud(['version'], 'gcloud', true);
 
-    expect(result).toEqual('some output\n');
+    expect(result).toEqual('some output');
     expect(exec.getExecOutput).toHaveBeenCalledWith('gcloud', ['version'], {
       silent: true,
       ignoreReturnCode: true,

@@ -1,3 +1,5 @@
+import * as core from '@actions/core';
+
 import { getCurrentAccount } from './auth-gcloud.js';
 import { execGcloud } from './exec-gcloud.js';
 
@@ -22,7 +24,7 @@ function getServiceAccountEmail() {
  */
 export async function getIdToken(audience) {
   const serviceAccountEmail = getServiceAccountEmail();
-  return execGcloud(
+  const idToken = await execGcloud(
     [
       'auth',
       'print-identity-token',
@@ -33,4 +35,6 @@ export async function getIdToken(audience) {
     'gcloud',
     true,
   );
+  core.setSecret(idToken);
+  return idToken;
 }
