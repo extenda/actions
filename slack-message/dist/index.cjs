@@ -106419,6 +106419,16 @@ function getCurrentAccount() {
   return authStack.at(authStack.length - 1);
 }
 __name(getCurrentAccount, "getCurrentAccount");
+function resetAuthStack() {
+  authStack.length = 0;
+  populateEnvironment({
+    type: authType.jsonKey,
+    projectId: "",
+    credentialsFilePath: "",
+    exportCredentials: true
+  });
+}
+__name(resetAuthStack, "resetAuthStack");
 async function restorePreviousAccount(previousAccount) {
   if (!previousAccount) {
     return false;
@@ -106644,6 +106654,7 @@ var withGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, fn) => {
     const didRestoreAccount = await restorePreviousAccount(previousAccount);
     if (!didRestoreAccount) {
       cleanupCredentials(getTrackedCredentials());
+      resetAuthStack();
     }
   }
 }, "withGcloud");

@@ -1,4 +1,8 @@
-import { getCurrentAccount, restorePreviousAccount } from './auth-gcloud.js';
+import {
+  getCurrentAccount,
+  resetAuthStack,
+  restorePreviousAccount,
+} from './auth-gcloud.js';
 import { cleanupCredentials } from './cleanup.js';
 import { getTrackedCredentials } from './create-job-scoped-credential.js';
 import setupGcloud from './setup-gcloud.js';
@@ -20,6 +24,7 @@ const withGcloud = async (serviceAccountKey, fn) => {
     const didRestoreAccount = await restorePreviousAccount(previousAccount);
     if (!didRestoreAccount) {
       cleanupCredentials(getTrackedCredentials());
+      resetAuthStack();
     }
   }
 };
