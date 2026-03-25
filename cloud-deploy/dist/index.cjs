@@ -101379,6 +101379,31 @@ var withGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, fn) => {
 }, "withGcloud");
 var with_gcloud_default = withGcloud;
 
+// setup-gcloud/src/get-id-token.js
+function getServiceAccountEmail() {
+  const account = getCurrentAccount();
+  if (!account) {
+    throw new Error("No authenticated service account");
+  }
+  return account.email;
+}
+__name(getServiceAccountEmail, "getServiceAccountEmail");
+async function getIdToken(audience) {
+  const serviceAccountEmail = getServiceAccountEmail();
+  return execGcloud(
+    [
+      "auth",
+      "print-identity-token",
+      `--audiences=${audience}`,
+      `--impersonate-service-account=${serviceAccountEmail}`,
+      "--include-email"
+    ],
+    "gcloud",
+    true
+  );
+}
+__name(getIdToken, "getIdToken");
+
 // cloud-deploy/src/manifests/build-manifest.js
 var import_node_fs10 = __toESM(require("node:fs"), 1);
 
@@ -106609,11 +106634,7 @@ var publishPolicies = /* @__PURE__ */ __name(async (serviceName, env2, version3,
     const systemId = `${permissionPrefix}.${systemName || serviceName}-${env2}`;
     info(`Publish security policies for ${systemId}`);
     const dasWorkerBaseUrl = das_worker_base_url_default(systemId);
-    const idToken = await execGcloud([
-      "auth",
-      "print-identity-token",
-      "--audiences=iam-das-worker"
-    ]);
+    const idToken = await getIdToken("iam-das-worker");
     await axios_default.put(
       `${dasWorkerBaseUrl}/systems/${systemId}/policies`,
       createPayload(version3),
@@ -106644,11 +106665,7 @@ var checkPolicyExists = /* @__PURE__ */ __name(async (policy, projectID) => {
 var cloud_armor_default = checkPolicyExists;
 
 // cloud-deploy/src/utils/identity-token.js
-var getToken = /* @__PURE__ */ __name(async (audience = "cloud-deploy") => execGcloud(
-  ["auth", "print-identity-token", `--audiences=${audience}`],
-  "gcloud",
-  true
-), "getToken");
+var getToken = /* @__PURE__ */ __name(async (audience = "cloud-deploy") => getIdToken(audience), "getToken");
 var identity_token_default = getToken;
 
 // cloud-deploy/src/utils/send-request.js

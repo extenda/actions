@@ -1,8 +1,8 @@
 import axios from 'axios';
 import mockFs from 'mock-fs';
+import { getIdToken } from 'setup-gcloud/src/index.js';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { execGcloud } from '../../../setup-gcloud/src/index.js';
 import publishPolicies from '../../src/policies/publish-policies.js';
 
 vi.mock('axios');
@@ -10,7 +10,7 @@ vi.mock('../../../setup-gcloud/src/index.js');
 
 describe('Publish policies', () => {
   beforeEach(() => {
-    execGcloud.mockResolvedValueOnce('idToken');
+    getIdToken.mockResolvedValueOnce('idToken');
   });
 
   afterEach(() => {
@@ -33,11 +33,7 @@ describe('Publish policies', () => {
       },
     });
 
-    expect(execGcloud).toHaveBeenCalledWith([
-      'auth',
-      'print-identity-token',
-      '--audiences=iam-das-worker',
-    ]);
+    expect(getIdToken).toHaveBeenCalledWith('iam-das-worker');
     expect(axios.put).toHaveBeenCalledWith(
       'https://iam-das-worker.retailsvc.com/api/v1/systems/tst.my-service-prod/policies',
       {
@@ -78,11 +74,7 @@ describe('Publish policies', () => {
       },
     });
 
-    expect(execGcloud).toHaveBeenCalledWith([
-      'auth',
-      'print-identity-token',
-      '--audiences=iam-das-worker',
-    ]);
+    expect(getIdToken).toHaveBeenCalledWith('iam-das-worker');
     expect(axios.put).toHaveBeenCalledWith(
       'https://iam-das-worker.retailsvc.com/api/v1/systems/tst.service123-prod/policies',
       {
@@ -115,7 +107,7 @@ describe('Publish policies', () => {
     await publishPolicies('my-service', 'prod', '0.0.1-local', {
       security: 'none',
     });
-    expect(execGcloud).not.toHaveBeenCalled();
+    expect(getIdToken).not.toHaveBeenCalled();
     expect(axios.put).not.toHaveBeenCalled();
   });
 
@@ -126,7 +118,7 @@ describe('Publish policies', () => {
         'permission-prefix': 'tst',
       },
     });
-    expect(execGcloud).not.toHaveBeenCalled();
+    expect(getIdToken).not.toHaveBeenCalled();
     expect(axios.put).not.toHaveBeenCalled();
   });
 
@@ -144,7 +136,7 @@ describe('Publish policies', () => {
       },
     });
 
-    expect(execGcloud).toHaveBeenCalled();
+    expect(getIdToken).toHaveBeenCalledWith('iam-das-worker');
     expect(axios.put).toHaveBeenCalledWith(
       'https://iam-das-worker.retailsvc.com/api/v1/systems/tst.my-service-prod/policies',
       {
@@ -190,7 +182,7 @@ describe('Publish policies', () => {
       }),
     ).rejects.toThrow(new Error('TEST'));
 
-    expect(execGcloud).toHaveBeenCalled();
+    expect(getIdToken).toHaveBeenCalledWith('iam-das-worker');
     expect(axios.put).toHaveBeenCalledWith(
       'https://iam-das-worker.retailsvc.com/api/v1/systems/tst.my-service-prod/policies',
       {

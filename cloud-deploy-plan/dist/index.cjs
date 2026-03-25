@@ -102025,12 +102025,33 @@ var setupGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, version3 = "l
 }, "setupGcloud");
 var setup_gcloud_default = setupGcloud;
 
+// setup-gcloud/src/get-id-token.js
+function getServiceAccountEmail() {
+  const account = getCurrentAccount();
+  if (!account) {
+    throw new Error("No authenticated service account");
+  }
+  return account.email;
+}
+__name(getServiceAccountEmail, "getServiceAccountEmail");
+async function getIdToken(audience) {
+  const serviceAccountEmail = getServiceAccountEmail();
+  return execGcloud(
+    [
+      "auth",
+      "print-identity-token",
+      `--audiences=${audience}`,
+      `--impersonate-service-account=${serviceAccountEmail}`,
+      "--include-email"
+    ],
+    "gcloud",
+    true
+  );
+}
+__name(getIdToken, "getIdToken");
+
 // cloud-deploy/src/utils/identity-token.js
-var getToken = /* @__PURE__ */ __name(async (audience = "cloud-deploy") => execGcloud(
-  ["auth", "print-identity-token", `--audiences=${audience}`],
-  "gcloud",
-  true
-), "getToken");
+var getToken = /* @__PURE__ */ __name(async (audience = "cloud-deploy") => getIdToken(audience), "getToken");
 var identity_token_default = getToken;
 
 // cloud-deploy/src/utils/service-definition.js

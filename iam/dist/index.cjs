@@ -101259,6 +101259,31 @@ var withGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, fn) => {
 }, "withGcloud");
 var with_gcloud_default = withGcloud;
 
+// setup-gcloud/src/get-id-token.js
+function getServiceAccountEmail() {
+  const account = getCurrentAccount();
+  if (!account) {
+    throw new Error("No authenticated service account");
+  }
+  return account.email;
+}
+__name(getServiceAccountEmail, "getServiceAccountEmail");
+async function getIdToken(audience) {
+  const serviceAccountEmail = getServiceAccountEmail();
+  return execGcloud(
+    [
+      "auth",
+      "print-identity-token",
+      `--audiences=${audience}`,
+      `--impersonate-service-account=${serviceAccountEmail}`,
+      "--include-email"
+    ],
+    "gcloud",
+    true
+  );
+}
+__name(getIdToken, "getIdToken");
+
 // iam/src/das-worker-base-url.js
 var getDasWorkerBaseUrl = /* @__PURE__ */ __name((systemId) => {
   if (systemId.startsWith("iam.") && systemId.endsWith("-staging")) {
@@ -101269,8 +101294,7 @@ var getDasWorkerBaseUrl = /* @__PURE__ */ __name((systemId) => {
 var das_worker_base_url_default = getDasWorkerBaseUrl;
 
 // iam/src/configure-bundle-sync.js
-var getToken = /* @__PURE__ */ __name(async () => execGcloud(["auth", "print-identity-token", "--audiences=iam-das-worke\
-r"]), "getToken");
+var getToken = /* @__PURE__ */ __name(async () => getIdToken("iam-das-worker"), "getToken");
 var configureBundleSync = /* @__PURE__ */ __name(async (iam, env2) => {
   const { "permission-prefix": permissionPrefix, services = [] } = iam;
   const token = await getToken();

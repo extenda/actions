@@ -16,4 +16,6 @@ const action = async () => {
 
 export default action;
 
+export { getIdToken } from './get-id-token.js';
+
 export { action, execGcloud, setupGcloud, withGcloud };
