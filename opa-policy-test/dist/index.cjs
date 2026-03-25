@@ -99576,7 +99576,7 @@ async function authenticateGcloud(credentials, exportCredentials) {
 }
 __name(authenticateGcloud, "authenticateGcloud");
 function getCurrentAccount() {
-  return authStack.at(authStack.length - 1);
+  return authStack.at(-1);
 }
 __name(getCurrentAccount, "getCurrentAccount");
 

@@ -185,7 +185,7 @@ export async function authenticateGcloud(credentials, exportCredentials) {
 }
 
 export function getCurrentAccount() {
-  return authStack.at(authStack.length - 1);
+  return authStack.at(-1);
 }
 
 /**
