@@ -1,5 +1,3 @@
-import * as core from '@actions/core';
-
 import {
   getCurrentAccount,
   resetAuthStack,
@@ -19,11 +17,8 @@ import setupGcloud from './setup-gcloud.js';
  */
 const withGcloud = async (serviceAccountKey, fn) => {
   const previousAccount = getCurrentAccount();
-  core.info(`Previous account: ${JSON.stringify(previousAccount)}`);
   try {
-    core.info('Before setup gcloud');
     const projectId = await setupGcloud(serviceAccountKey);
-    core.info('Before fn callback');
     return await fn(projectId);
   } finally {
     const didRestoreAccount = await restorePreviousAccount(previousAccount);
