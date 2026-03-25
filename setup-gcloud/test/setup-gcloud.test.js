@@ -1,9 +1,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+import { restoreCache, saveCache } from '@actions/cache';
+import * as core from '@actions/core';
+import { loadTool } from 'action-utils';
 import mockFs from 'mock-fs';
 import os from 'os';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+
+import { authenticateGcloud } from '../src/auth-gcloud.js';
+import { execGcloud } from '../src/exec-gcloud.js';
+import getLatestVersion from '../src/latest-version.js';
+import setupGcloud from '../src/setup-gcloud.js';
 
 // Mock out tools download.
 vi.mock('../../utils/src/index.js');
@@ -13,15 +21,6 @@ vi.mock('@actions/core');
 vi.mock('../src/auth-gcloud.js');
 vi.mock('../src/exec-gcloud.js');
 vi.mock('../src/latest-version.js');
-
-import { restoreCache, saveCache } from '@actions/cache';
-import * as core from '@actions/core';
-import { loadTool } from 'action-utils';
-
-import { authenticateGcloud } from '../src/auth-gcloud.js';
-import { execGcloud } from '../src/exec-gcloud.js';
-import getLatestVersion from '../src/latest-version.js';
-import setupGcloud from '../src/setup-gcloud.js';
 
 const jsonKey = {
   private_key: 'test-private-key',
@@ -44,13 +43,13 @@ describe('Setup Gcloud', () => {
 
   beforeEach(() => {
     process.env = {
+      ...orgEnv,
       RUNNER_TEMP: '/tmp',
       RUNNER_TOOL_CACHE: '/opt/toolcache',
       RUNNER_ARCH: 'X64',
       RUNNER_OS: 'Linux',
       GITHUB_RUN_ID: '12345',
       GITHUB_RUN_ATTEMPT: '1',
-      ...orgEnv,
     };
 
     delete process.env['GCLOUD_REQUESTED_VERSION'];
