@@ -24,6 +24,7 @@ const configMapManifest = async (service, type, CPU, Memory, scaling) => {
   const {
     'increments-cpu': incrementsCPU,
     threshold,
+    'kafka-lag-threshold': kafkaThreshold = 0,
     'max-cpu': maxCPU,
     'max-memory': maxMemory,
     'scale-up-interval': scaleUpInterval,
@@ -37,6 +38,7 @@ const configMapManifest = async (service, type, CPU, Memory, scaling) => {
     `--from-literal=type=${type}`,
     `--from-literal=incrementsCPU=${convertCPU(incrementsCPU)}`,
     `--from-literal=thresholdCPU=${threshold}%`,
+    `--from-literal=thresholdKafkaLag=${kafkaThreshold}`,
     `--from-literal=currentCPU=${convertCPU(CPU)}`,
     `--from-literal=currentMemory=${convertMemory(Memory)}`,
     `--from-literal=maxCPU=${convertCPU(maxCPU)}`,
