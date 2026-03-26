@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   authenticateGcloud,
   getCurrentAccount,
+  getServiceAccountEmailAndProject,
   resetAuthStack,
   restorePreviousAccount,
 } from '../src/auth-gcloud.js';
@@ -405,5 +406,64 @@ describe('auth-gcloud', () => {
     expect(process.env.CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE).toBe(
       '/runner/temp/setup-gcloud-xxx/credential-wid-first.json',
     );
+  });
+
+  describe('getServiceAccountEmailAndProject', () => {
+    test('returns email and projectId for json key credentials', () => {
+      const credentials = encodeCredentials({
+        private_key: 'private-key',
+        client_email: 'json-sa@example.iam.gserviceaccount.com',
+        project_id: 'project-a',
+      });
+
+      expect(getServiceAccountEmailAndProject(credentials)).toEqual({
+        email: 'json-sa@example.iam.gserviceaccount.com',
+        projectId: 'project-a',
+      });
+      expect(core.setSecret).toHaveBeenCalledWith(credentials);
+    });
+
+    test('returns email and projectId for workload identity federation credentials', () => {
+      const credentials = encodeCredentials({
+        workload_identity_provider:
+          'projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
+        email: 'wid-sa@example.iam.gserviceaccount.com',
+        project_id: 'project-wid',
+      });
+
+      expect(getServiceAccountEmailAndProject(credentials)).toEqual({
+        email: 'wid-sa@example.iam.gserviceaccount.com',
+        projectId: 'project-wid',
+      });
+      expect(core.setSecret).toHaveBeenCalledWith(credentials);
+    });
+
+    test('throws when credentials are not base64 encoded json payload', () => {
+      expect(() => getServiceAccountEmailAndProject('%%%')).toThrow(
+        'expected base64-encoded JSON credentials',
+      );
+    });
+
+    test('throws when project_id is missing', () => {
+      expect(() =>
+        getServiceAccountEmailAndProject(
+          encodeCredentials({
+            private_key: 'private-key',
+            client_email: 'json-sa@example.iam.gserviceaccount.com',
+          }),
+        ),
+      ).toThrow('missing required field "project_id"');
+    });
+
+    test('throws when json key credentials are missing email fields', () => {
+      expect(() =>
+        getServiceAccountEmailAndProject(
+          encodeCredentials({
+            private_key: 'private-key',
+            project_id: 'project-a',
+          }),
+        ),
+      ).toThrow('missing required field "client_email" or "email"');
+    });
   });
 });

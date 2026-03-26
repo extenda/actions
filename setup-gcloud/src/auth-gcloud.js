@@ -135,6 +135,17 @@ const populateEnvironment = ({
   }
 };
 
+export function getServiceAccountEmailAndProject(credentials) {
+  // Ensure this never logs.
+  core.setSecret(credentials);
+
+  const jsonCredentials = parseCredentials(credentials);
+  const { project_id: projectId } = jsonCredentials;
+  const { email } = validateCredentialsShape(jsonCredentials);
+
+  return { email, projectId };
+}
+
 /**
  * Authenticate gcloud with provided credentials. Two types of credentials are supported:
  * 1) A service account in JSON format (legacy)

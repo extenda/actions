@@ -1,5 +1,6 @@
 import {
   getCurrentAccount,
+  getServiceAccountEmailAndProject,
   resetAuthStack,
   restorePreviousAccount,
 } from './auth-gcloud.js';
@@ -17,6 +18,19 @@ import setupGcloud from './setup-gcloud.js';
  */
 const withGcloud = async (serviceAccountKey, fn) => {
   const previousAccount = getCurrentAccount();
+
+  const { email: saEmail = null, projectId: saProjectId = null } =
+    getServiceAccountEmailAndProject(serviceAccountKey);
+
+  if (
+    previousAccount &&
+    previousAccount.email === saEmail &&
+    typeof saProjectId === 'string'
+  ) {
+    // Already authenticated as the user. Just run the callback.
+    return await fn(saProjectId);
+  }
+
   try {
     const projectId = await setupGcloud(serviceAccountKey);
     return await fn(projectId);

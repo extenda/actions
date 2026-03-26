@@ -106433,6 +106433,14 @@ var populateEnvironment = /* @__PURE__ */ __name(({
     setEnvironmentVariable(env.credentialsOverride, "", exportCredentials);
   }
 }, "populateEnvironment");
+function getServiceAccountEmailAndProject(credentials) {
+  setSecret(credentials);
+  const jsonCredentials = parseCredentials(credentials);
+  const { project_id: projectId } = jsonCredentials;
+  const { email } = validateCredentialsShape(jsonCredentials);
+  return { email, projectId };
+}
+__name(getServiceAccountEmailAndProject, "getServiceAccountEmailAndProject");
 async function authenticateGcloud(credentials, exportCredentials) {
   setSecret(credentials);
   const jsonCredentials = parseCredentials(credentials);
@@ -106703,6 +106711,10 @@ __name(cleanupCredentials, "cleanupCredentials");
 // setup-gcloud/src/with-gcloud.js
 var withGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, fn) => {
   const previousAccount = getCurrentAccount();
+  const { email: saEmail = null, projectId: saProjectId = null } = getServiceAccountEmailAndProject(serviceAccountKey);
+  if (previousAccount && previousAccount.email === saEmail && typeof saProjectId === "string") {
+    return await fn(saProjectId);
+  }
   try {
     const projectId = await setup_gcloud_default(serviceAccountKey);
     return await fn(projectId);
