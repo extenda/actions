@@ -105750,6 +105750,7 @@ var configMapManifest = /* @__PURE__ */ __name(async (service, type2, CPU, Memor
   const {
     "increments-cpu": incrementsCPU,
     threshold,
+    "kafka-lag-threshold": kafkaThreshold = 0,
     "max-cpu": maxCPU,
     "max-memory": maxMemory,
     "scale-up-interval": scaleUpInterval,
@@ -105763,6 +105764,7 @@ var configMapManifest = /* @__PURE__ */ __name(async (service, type2, CPU, Memor
     `--from-literal=type=${type2}`,
     `--from-literal=incrementsCPU=${convertCPU(incrementsCPU)}`,
     `--from-literal=thresholdCPU=${threshold}%`,
+    `--from-literal=thresholdKafkaLag=${kafkaThreshold}`,
     `--from-literal=currentCPU=${convertCPU(CPU)}`,
     `--from-literal=currentMemory=${convertMemory(Memory)}`,
     `--from-literal=maxCPU=${convertCPU(maxCPU)}`,
@@ -106940,6 +106942,11 @@ disabled.",
                   type: "integer",
                   minimum: 10,
                   maximum: 100
+                },
+                "kafka-lag-threshold": {
+                  description: "Kafka lag threshold for vertical scaling.",
+                  type: "integer",
+                  minimum: 0
                 },
                 "increments-cpu": {
                   description: "CPU request increase on scale out trigger",

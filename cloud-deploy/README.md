@@ -813,6 +813,7 @@ kubernetes:
     cpu: 50
     vertical:
       threshold: 50
+      kafka-lag-threshold: 1000
       increments-cpu: 1
       max-cpu: 5
       max-memory: 8Gi
@@ -835,7 +836,7 @@ environments:
 ```
 
 **Vertical scaling behavior:**
-- Every minute, the autoscaler checks pod CPU usage
+- Every minute, the autoscaler checks pod CPU usage and the kafka lag metrics
 - If any pod uses CPU above the threshold (50%), a scale-up is triggered
 - Scale-up increases CPU by `increments-cpu` (1 core) up to `max-cpu` (5 cores)
 - Scale-up can only occur 8 minutes after the previous scale-up
@@ -844,6 +845,7 @@ environments:
 
 **Configuration:**
 - `threshold`: CPU percentage utilization to trigger vertical scaling (10-100%)
+- `kafka-lag-threshold`: (Optional) Kafka consumer lag threshold to trigger vertical scaling ( amount of records )
 - `increments-cpu`: CPU increase per scale-up event
 - `max-cpu`: Maximum CPU cores allowed
 - `max-memory`: Maximum memory allowed (scales proportionally with CPU)

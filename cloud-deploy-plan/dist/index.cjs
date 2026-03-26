@@ -102276,6 +102276,11 @@ disabled.",
                   minimum: 10,
                   maximum: 100
                 },
+                "kafka-lag-threshold": {
+                  description: "Kafka lag threshold for vertical scaling.",
+                  type: "integer",
+                  minimum: 0
+                },
                 "increments-cpu": {
                   description: "CPU request increase on scale out trigger",
                   type: "number",
