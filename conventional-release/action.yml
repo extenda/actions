@@ -21,6 +21,10 @@ inputs:
     description: Mark as latest release
     required: false
     default: true
+  path:
+    description: Only consider commits touching this path (monorepos)
+    required: false
+    default: ''
 outputs:
   release-tag:
     description: The created release tag

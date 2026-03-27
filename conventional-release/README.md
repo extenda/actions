@@ -50,6 +50,34 @@ jobs:
           npm publish
 ```
 
+### Path-scoped release
+
+Use the `path` input to scope the release to a specific directory. Only commits touching that path
+will be considered when determining the version bump and generating the changelog. This is useful
+for releasing a sub-project or library within a monorepo.
+
+```yaml
+on: push
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create release for testing framework
+        uses: extenda/actions/conventional-release@v0
+        with:
+          tag-prefix: test-framework-
+          name: Testing Framework
+          path: src/test-framework
+        id: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
 ### Custom tag prefix and name
 
 ```yaml

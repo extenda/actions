@@ -79,4 +79,8 @@ export const setTagPrefix = (prefix) => {
   changes.setTagPrefix(prefix);
 };
 
+export const setCommitPath = (path) => {
+  changes.setCommitPath(path);
+};
+
 export const getConventionalCommits = changes.getConventionalCommits;

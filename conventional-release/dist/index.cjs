@@ -66409,12 +66409,16 @@ var recommendedVersionBump = import_util.default.promisify(
   require_conventional_recommended_bump2()
 );
 var tagPrefix = process.env.TAG_PREFIX || "v";
+var commitPath = "";
 var getRecommendedBump = /* @__PURE__ */ __name(async () => {
   const config = await (0, import_conventional_changelog_conventionalcommits.default)();
-  return recommendedVersionBump({
-    config,
-    tagPrefix
-  }).then((recommendation) => recommendation.releaseType);
+  const options = { config, tagPrefix };
+  if (commitPath) {
+    options.path = commitPath;
+  }
+  return recommendedVersionBump(options).then(
+    (recommendation) => recommendation.releaseType
+  );
 }, "getRecommendedBump");
 var withConventionalConfig = /* @__PURE__ */ __name(async (version, fn) => {
   const config = await (0, import_conventional_changelog_conventionalcommits.default)();
@@ -66445,7 +66449,7 @@ var withConventionalConfig = /* @__PURE__ */ __name(async (version, fn) => {
         issue: "issues",
         commit: "commit"
       },
-      {},
+      commitPath ? { path: commitPath } : {},
       {
         referenceActions: [
           "close",
@@ -66482,6 +66486,9 @@ var setTagPrefix = /* @__PURE__ */ __name((prefix) => {
   tagPrefix = prefix;
 }, "setTagPrefix");
 var getTagPrefix = /* @__PURE__ */ __name(() => tagPrefix, "getTagPrefix");
+var setCommitPath = /* @__PURE__ */ __name((newPath) => {
+  commitPath = newPath;
+}, "setCommitPath");
 
 // utils/src/versions.js
 var DEFAULT_VERSION = "0.0.0";
@@ -66525,6 +66532,9 @@ var tagReleaseVersion = /* @__PURE__ */ __name(async () => {
 var setTagPrefix2 = /* @__PURE__ */ __name((prefix) => {
   setTagPrefix(prefix);
 }, "setTagPrefix");
+var setCommitPath2 = /* @__PURE__ */ __name((path3) => {
+  setCommitPath(path3);
+}, "setCommitPath");
 
 // conventional-release/src/index.js
 var createGitHubRelease = /* @__PURE__ */ __name(async (release, name) => {
@@ -66547,8 +66557,12 @@ var action = /* @__PURE__ */ __name(async () => {
   try {
     const tagPrefix2 = getInput("tag-prefix", { required: true });
     const name = getInput("name") || "Release";
+    const path3 = getInput("path");
     check_env_default(["GITHUB_TOKEN"]);
     setTagPrefix2(tagPrefix2);
+    if (path3) {
+      setCommitPath2(path3);
+    }
     const release = await tagReleaseVersion();
     const data = await createGitHubRelease(release, name);
     info(`Created release tag ${release.tagName}`);

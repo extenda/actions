@@ -17,6 +17,7 @@ import through2 from 'through2';
 import { getTagAtCommit } from './branch-info.js';
 
 let tagPrefix = process.env.TAG_PREFIX || 'v';
+let commitPath = '';
 
 /**
  * Returns the recommended version bump based on conventional commits since last tag.
@@ -24,10 +25,13 @@ let tagPrefix = process.env.TAG_PREFIX || 'v';
  */
 export const getRecommendedBump = async () => {
   const config = await conventionalCommits();
-  return recommendedVersionBump({
-    config,
-    tagPrefix,
-  }).then((recommendation) => recommendation.releaseType);
+  const options = { config, tagPrefix };
+  if (commitPath) {
+    options.path = commitPath;
+  }
+  return recommendedVersionBump(options).then(
+    (recommendation) => recommendation.releaseType,
+  );
 };
 
 const withConventionalConfig = async (version, fn) => {
@@ -64,7 +68,7 @@ const withConventionalConfig = async (version, fn) => {
         issue: 'issues',
         commit: 'commit',
       },
-      {},
+      commitPath ? { path: commitPath } : {},
       {
         referenceActions: [
           'close',
@@ -154,3 +158,9 @@ export const setTagPrefix = (prefix) => {
 };
 
 export const getTagPrefix = () => tagPrefix;
+
+export const setCommitPath = (newPath) => {
+  commitPath = newPath;
+};
+
+export const getCommitPath = () => commitPath;

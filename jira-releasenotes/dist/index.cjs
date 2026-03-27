@@ -108520,12 +108520,16 @@ var recommendedVersionBump = import_util.default.promisify(
   require_conventional_recommended_bump2()
 );
 var tagPrefix = process.env.TAG_PREFIX || "v";
+var commitPath = "";
 var getRecommendedBump = /* @__PURE__ */ __name(async () => {
   const config = await (0, import_conventional_changelog_conventionalcommits.default)();
-  return recommendedVersionBump({
-    config,
-    tagPrefix
-  }).then((recommendation) => recommendation.releaseType);
+  const options = { config, tagPrefix };
+  if (commitPath) {
+    options.path = commitPath;
+  }
+  return recommendedVersionBump(options).then(
+    (recommendation) => recommendation.releaseType
+  );
 }, "getRecommendedBump");
 var withConventionalConfig = /* @__PURE__ */ __name(async (version2, fn) => {
   const config = await (0, import_conventional_changelog_conventionalcommits.default)();
@@ -108556,7 +108560,7 @@ var withConventionalConfig = /* @__PURE__ */ __name(async (version2, fn) => {
         issue: "issues",
         commit: "commit"
       },
-      {},
+      commitPath ? { path: commitPath } : {},
       {
         referenceActions: [
           "close",

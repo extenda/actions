@@ -9,9 +9,10 @@ import {
 } from 'vitest';
 
 // Hoist mock functions before vi.mock() calls
-const { mockTag, mockRelease } = vi.hoisted(() => ({
+const { mockTag, mockRelease, mockSetCommitPath } = vi.hoisted(() => ({
   mockTag: vi.fn(),
   mockRelease: vi.fn(),
+  mockSetCommitPath: vi.fn(),
 }));
 
 vi.mock('@actions/core');
@@ -20,6 +21,7 @@ vi.mock('../../utils/src');
 vi.mock('../../utils/src/versions', () => ({
   tagReleaseVersion: mockTag,
   setTagPrefix: vi.fn(),
+  setCommitPath: mockSetCommitPath,
 }));
 
 vi.mock('@actions/github', () => ({
@@ -144,5 +146,24 @@ describe('conventional-release', () => {
     expect(mockRelease).toHaveBeenCalledWith(
       expect.objectContaining({ prerelease: true }),
     );
+  });
+
+  test('It sets commit path when path input is provided', async () => {
+    core.getInput.mockImplementation((name) => {
+      if (name === 'path') return 'src/test';
+      return '';
+    });
+
+    await action();
+
+    expect(mockSetCommitPath).toHaveBeenCalledWith('src/test');
+  });
+
+  test('It does not set commit path when path input is empty', async () => {
+    core.getInput.mockImplementation(() => '');
+
+    await action();
+
+    expect(mockSetCommitPath).not.toHaveBeenCalled();
   });
 });

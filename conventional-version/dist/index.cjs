@@ -61722,12 +61722,16 @@ var recommendedVersionBump = import_util.default.promisify(
   require_conventional_recommended_bump2()
 );
 var tagPrefix = process.env.TAG_PREFIX || "v";
+var commitPath = "";
 var getRecommendedBump = /* @__PURE__ */ __name(async () => {
   const config = await (0, import_conventional_changelog_conventionalcommits.default)();
-  return recommendedVersionBump({
-    config,
-    tagPrefix
-  }).then((recommendation) => recommendation.releaseType);
+  const options = { config, tagPrefix };
+  if (commitPath) {
+    options.path = commitPath;
+  }
+  return recommendedVersionBump(options).then(
+    (recommendation) => recommendation.releaseType
+  );
 }, "getRecommendedBump");
 var setTagPrefix = /* @__PURE__ */ __name((prefix) => {
   tagPrefix = prefix;
