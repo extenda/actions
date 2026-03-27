@@ -26,10 +26,14 @@ const action = async () => {
   try {
     const tagPrefix = core.getInput('tag-prefix', { required: true });
     const name = core.getInput('name') || 'Release';
+    const path = core.getInput('path');
 
     checkEnv(['GITHUB_TOKEN']);
 
     versions.setTagPrefix(tagPrefix);
+    if (path) {
+      versions.setCommitPath(path);
+    }
     const release = await versions.tagReleaseVersion();
 
     const data = await createGitHubRelease(release, name);
