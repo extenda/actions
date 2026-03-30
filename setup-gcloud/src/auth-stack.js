@@ -21,9 +21,7 @@ export function clearAuthStack() {
   }
 }
 
-export function updateAuthStack(authEntry) {
-  const authStack = loadAuthStack();
-  authStack.push(authEntry);
+export function saveAuthStack(authStack) {
   fs.mkdirSync(path.dirname(authStackFilePath()), { recursive: true });
   fs.writeFileSync(authStackFilePath(), JSON.stringify(authStack), 'utf8');
 }

@@ -56,7 +56,7 @@ const loadSecretIntoEnv = async (
     core.debug(`Using explicit ${envVar} env var`);
     secret = process.env[envVar];
   } else if (serviceAccountKey && secretName) {
-    core.debug(`Load '${secretName}' from secret manager`);
+    core.info(`Load '${secretName}' from secret manager`);
     secret = await loadSecret(serviceAccountKey, secretName);
     process.env[envVar] = secret;
     if (exportVariable) {
