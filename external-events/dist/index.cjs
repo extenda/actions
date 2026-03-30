@@ -112179,51 +112179,6 @@ __name(saveCacheV2, "saveCacheV2");
 // setup-gcloud/src/setup-gcloud.js
 var import_fast_glob = __toESM(require_out4(), 1);
 
-// setup-gcloud/src/exec-gcloud.js
-var import_node_os3 = __toESM(require("node:os"), 1);
-var findExecutable = /* @__PURE__ */ __name((executable) => {
-  if (executable === "gcloud" || !executable) {
-    return import_node_os3.default.platform() === "win32" ? "gcloud.cmd" : "gcloud";
-  }
-  return executable;
-}, "findExecutable");
-var execGcloud = /* @__PURE__ */ __name(async (args, executable = "gcloud", silent = false) => {
-  const command = findExecutable(executable);
-  const result = await getExecOutput(command, args, {
-    silent,
-    ignoreReturnCode: true
-  });
-  if (result.exitCode !== 0) {
-    let message = `The process '${command}' failed with exit code ${result.exitCode}`;
-    if (result.stderr) {
-      message = `${message}
-
-${result.stderr}`;
-    }
-    throw new Error(message);
-  }
-  return result.stdout.trim();
-}, "execGcloud");
-
-// setup-gcloud/src/auth-json-key.js
-var authenticateJsonKey = /* @__PURE__ */ __name(async (credentialsFilePath) => {
-  await execGcloud(
-    [
-      "--quiet",
-      "auth",
-      "activate-service-account",
-      "--key-file",
-      credentialsFilePath
-    ],
-    "gcloud",
-    true
-  );
-}, "authenticateJsonKey");
-async function configureServiceAccount(email) {
-  await execGcloud(["config", "set", "account", email], "gcloud", true);
-}
-__name(configureServiceAccount, "configureServiceAccount");
-
 // setup-gcloud/src/auth-stack.js
 var import_node_fs3 = __toESM(require("node:fs"), 1);
 var import_node_path3 = __toESM(require("node:path"), 1);
@@ -112298,6 +112253,32 @@ function getTrackedCredentials() {
   return trackedCredentialFiles;
 }
 __name(getTrackedCredentials, "getTrackedCredentials");
+
+// setup-gcloud/src/exec-gcloud.js
+var import_node_os3 = __toESM(require("node:os"), 1);
+var findExecutable = /* @__PURE__ */ __name((executable) => {
+  if (executable === "gcloud" || !executable) {
+    return import_node_os3.default.platform() === "win32" ? "gcloud.cmd" : "gcloud";
+  }
+  return executable;
+}, "findExecutable");
+var execGcloud = /* @__PURE__ */ __name(async (args, executable = "gcloud", silent = false) => {
+  const command = findExecutable(executable);
+  const result = await getExecOutput(command, args, {
+    silent,
+    ignoreReturnCode: true
+  });
+  if (result.exitCode !== 0) {
+    let message = `The process '${command}' failed with exit code ${result.exitCode}`;
+    if (result.stderr) {
+      message = `${message}
+
+${result.stderr}`;
+    }
+    throw new Error(message);
+  }
+  return result.stdout.trim();
+}, "execGcloud");
 
 // setup-gcloud/src/auth-wid-federation.js
 async function workloadIdentityFederation(credentialsFilePath, { workload_identity_provider: workloadIdentityProvider, email }) {
@@ -112410,7 +112391,6 @@ var setEnvironmentVariable = /* @__PURE__ */ __name((key, value, exportVariable2
   }
 }, "setEnvironmentVariable");
 var populateEnvironment = /* @__PURE__ */ __name(({
-  type: type2,
   projectId,
   credentialsFilePath,
   exportCredentials
@@ -112421,15 +112401,11 @@ var populateEnvironment = /* @__PURE__ */ __name(({
     credentialsFilePath,
     exportCredentials
   );
-  if (type2 === authType.widFederation) {
-    setEnvironmentVariable(
-      env.credentialsOverride,
-      credentialsFilePath,
-      exportCredentials
-    );
-  } else {
-    setEnvironmentVariable(env.credentialsOverride, "", exportCredentials);
-  }
+  setEnvironmentVariable(
+    env.credentialsOverride,
+    credentialsFilePath,
+    exportCredentials
+  );
 }, "populateEnvironment");
 function getServiceAccountEmailAndProject(credentials) {
   setSecret(credentials);
@@ -112456,10 +112432,8 @@ async function authenticateGcloud(credentials, exportCredentials) {
     info(`Authenticate gcloud with ${authEntry.type}`);
     try {
       process.env[env.projectId] = projectId;
-      if (authEntry.type === authType.jsonKey) {
-        await authenticateJsonKey(authEntry.credentialsFilePath);
-      } else {
-        authEntry.exportCredentials = true;
+      authEntry.exportCredentials = true;
+      if (authEntry.type === authType.widFederation) {
         await workloadIdentityFederation(
           authEntry.credentialsFilePath,
           jsonCredentials
@@ -112499,9 +112473,6 @@ async function restorePreviousAccount(previousAccount) {
     return true;
   }
   info(`Restore gcloud account ${previousAccount.email}`);
-  if (previousAccount.type === authType.jsonKey) {
-    await configureServiceAccount(previousAccount.email);
-  }
   populateEnvironment(previousAccount);
   return true;
 }
