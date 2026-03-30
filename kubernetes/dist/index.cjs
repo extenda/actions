@@ -101429,13 +101429,11 @@ function loadAuthStack() {
   return [];
 }
 __name(loadAuthStack, "loadAuthStack");
-function updateAuthStack(authEntry) {
-  const authStack = loadAuthStack();
-  authStack.push(authEntry);
+function saveAuthStack(authStack) {
   import_node_fs4.default.mkdirSync(import_node_path3.default.dirname(authStackFilePath()), { recursive: true });
   import_node_fs4.default.writeFileSync(authStackFilePath(), JSON.stringify(authStack), "utf8");
 }
-__name(updateAuthStack, "updateAuthStack");
+__name(saveAuthStack, "saveAuthStack");
 
 // setup-gcloud/src/create-job-scoped-credential.js
 var import_node_fs5 = __toESM(require("node:fs"), 1);
@@ -101647,14 +101645,17 @@ async function authenticateGcloud(credentials, exportCredentials) {
     } finally {
       delete process.env[env.projectId];
     }
-    updateAuthStack(authEntry);
+    const authStack = loadAuthStack();
+    authStack.push(authEntry);
+    saveAuthStack(authStack);
     populateEnvironment(authEntry);
   }
   return projectId;
 }
 __name(authenticateGcloud, "authenticateGcloud");
 function getCurrentAccount() {
-  return loadAuthStack().at(-1);
+  const authStack = loadAuthStack();
+  return authStack.at(-1);
 }
 __name(getCurrentAccount, "getCurrentAccount");
 

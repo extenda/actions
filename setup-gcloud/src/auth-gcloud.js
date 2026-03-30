@@ -1,10 +1,6 @@
 import * as core from '@actions/core';
 
-import {
-  clearAuthStack,
-  loadAuthStack,
-  updateAuthStack,
-} from './auth-stack.js';
+import { clearAuthStack, loadAuthStack, saveAuthStack } from './auth-stack.js';
 import { workloadIdentityFederation } from './auth-wid-federation.js';
 import createJobScopedCredential from './create-job-scoped-credential.js';
 
@@ -188,7 +184,9 @@ export async function authenticateGcloud(credentials, exportCredentials) {
       delete process.env[env.projectId];
     }
 
-    updateAuthStack(authEntry);
+    const authStack = loadAuthStack();
+    authStack.push(authEntry);
+    saveAuthStack(authStack);
     populateEnvironment(authEntry);
   }
 
@@ -196,7 +194,8 @@ export async function authenticateGcloud(credentials, exportCredentials) {
 }
 
 export function getCurrentAccount() {
-  return loadAuthStack().at(-1);
+  const authStack = loadAuthStack();
+  return authStack.at(-1);
 }
 
 /**
@@ -226,15 +225,19 @@ export async function restorePreviousAccount(previousAccount) {
     return false;
   }
 
-  // If the previous account is current, it means we reused credentials and there's
-  // nothing to restore because we never pushed a new auth state to the stack.
-  if (isCurrentAccount(previousAccount)) {
-    return true;
-  }
+  const authStack = loadAuthStack();
+
+  // Pop the current account from the stack
+  authStack.pop();
 
   core.info(`Restore gcloud account ${previousAccount.email}`);
 
+  // Push the previous account to top of stack.
+  authStack.push(previousAccount);
+  saveAuthStack(authStack);
+
   // Restore the environment variables.
   populateEnvironment(previousAccount);
+
   return true;
 }
