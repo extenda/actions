@@ -12,12 +12,6 @@ inputs:
     required: false
     default: latest
   export-default-credentials:
-    deprecationMessage: |
-      This input is deprecated. The future default behavior is to always export credentials. This is
-      required for gcloud interoperability with workload identity federation.
-
-      The post step ensures that exported credentials are cleaned up after the job completes, so there
-      are no security implications to always exporting credentials.
     description: |
       Export the path to the credentials as `GOOGLE_APPLICATION_CREDENTIALS` to be used in subsequent steps.
       Google Cloud CLIs and APIs will automatically use this environment variable to find credentials.
@@ -29,4 +23,3 @@ outputs:
 runs:
   using: node24
   main: dist/index.cjs
-  post: dist/post.cjs

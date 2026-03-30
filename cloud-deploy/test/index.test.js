@@ -1,8 +1,8 @@
 import * as core from '@actions/core';
-import { setupGcloud, withGcloud } from 'setup-gcloud/src/index.js';
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import projectInfo from '../../cloud-run/src/project-info.js';
+import { setupGcloud } from '../../setup-gcloud/src/index.js';
 import action from '../src/index.js';
 import buildManifest from '../src/manifests/build-manifest.js';
 import deploy from '../src/manifests/deploy.js';
@@ -20,7 +20,7 @@ vi.mock('../src/manifests/deploy.js');
 vi.mock('../src/manifests/build-manifest.js');
 vi.mock('../../cloud-run/src/project-info.js');
 vi.mock('../../utils/src');
-vi.mock('setup-gcloud/src/index.js');
+vi.mock('../../setup-gcloud/src/index.js');
 vi.mock('../src/manifests/image-sha256.js');
 vi.mock('../src/policies/publish-policies.js');
 vi.mock('../src/utils/send-request.js');
@@ -64,9 +64,6 @@ const serviceDef = {
 };
 
 describe('Action', () => {
-  beforeEach(() => {
-    withGcloud.mockImplementationOnce((sa, fn) => fn('project-id'));
-  });
   afterEach(() => {
     vi.resetAllMocks();
   });
@@ -94,7 +91,6 @@ describe('Action', () => {
     publishPolicies.mockResolvedValueOnce();
     await action();
 
-    expect(withGcloud).toHaveBeenCalled();
     expect(core.getInput).toHaveBeenCalledTimes(5);
     expect(publishPolicies).toHaveBeenCalledWith(
       'service-name',

@@ -46135,16 +46135,6 @@ function info(message) {
 }
 __name(info, "info");
 
-// utils/src/run.js
-var run = /* @__PURE__ */ __name(async (action2) => {
-  try {
-    await action2();
-  } catch (err) {
-    setFailed(err.message);
-  }
-}, "run");
-var run_default = run;
-
 // utils/src/load-binary.js
 var import_node_fs = __toESM(require("node:fs"), 1);
 var import_node_path2 = __toESM(require("node:path"), 1);
@@ -50709,6 +50699,16 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary, version, downloadUr
     (cachedTool) => downloadIfMissing(options, cachedTool)
   );
 }, "loadTool");
+
+// utils/src/run.js
+var run = /* @__PURE__ */ __name(async (action2) => {
+  try {
+    await action2();
+  } catch (err) {
+    setFailed(err.message);
+  }
+}, "run");
+var run_default = run;
 
 // rs-create-installerpkg/src/pkgbuilder.js
 var import_node_fs3 = __toESM(require("node:fs"), 1);

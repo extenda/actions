@@ -1,146 +1,86 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import {
-  getCurrentAccount,
-  getServiceAccountEmailAndProject,
-  restorePreviousAccount,
-} from '../src/auth-gcloud.js';
-import { cleanupCredentials } from '../src/cleanup.js';
-import { getTrackedCredentials } from '../src/create-job-scoped-credential.js';
+import { execGcloud } from '../src/exec-gcloud.js';
 import setupGcloud from '../src/setup-gcloud.js';
 import withGcloud from '../src/with-gcloud.js';
 
 vi.mock('../src/setup-gcloud.js');
-vi.mock('../src/auth-gcloud.js');
-vi.mock('../src/cleanup.js');
-vi.mock('../src/create-job-scoped-credential.js');
+vi.mock('../src/exec-gcloud.js');
 
 describe('With Gcloud', () => {
-  const previousAccount = {
-    type: 'json_key',
-    email: 'previous@example.iam.gserviceaccount.com',
-    projectId: 'project-a',
-    credentialsFilePath: '/tmp/previous.json',
-  };
+  let orgEnv;
 
   beforeEach(() => {
-    getCurrentAccount.mockReturnValue(previousAccount);
-    getServiceAccountEmailAndProject.mockReturnValue({
-      email: 'new@example.iam.gserviceaccount.com',
-      projectId: 'new-project',
-    });
-    setupGcloud.mockResolvedValue('test-project');
-    restorePreviousAccount.mockResolvedValue(true);
-    getTrackedCredentials.mockReturnValue(['/tmp/new-cred.json']);
+    orgEnv = process.env;
+    process.env = { ...orgEnv };
+    setupGcloud.mockResolvedValueOnce('test-project');
   });
 
   afterEach(() => {
+    process.env = orgEnv;
     vi.resetAllMocks();
   });
 
-  test('runs callback and restores previous account', async () => {
-    const callback = vi.fn().mockResolvedValue('callback-result');
-
-    const result = await withGcloud('json-key', callback);
-
-    expect(result).toEqual('callback-result');
-    expect(getServiceAccountEmailAndProject).toHaveBeenCalledWith('json-key');
-    expect(setupGcloud).toHaveBeenCalledWith('json-key');
-    expect(callback).toHaveBeenCalledWith('test-project');
-    expect(restorePreviousAccount).toHaveBeenCalledWith(previousAccount);
-    expect(cleanupCredentials).not.toHaveBeenCalled();
-    expect(getTrackedCredentials).not.toHaveBeenCalled();
-  });
-
-  test('restores previous account even when callback throws', async () => {
-    const callback = vi.fn().mockRejectedValue(new Error('boom'));
-
-    await expect(withGcloud('json-key', callback)).rejects.toThrow('boom');
-
-    expect(getServiceAccountEmailAndProject).toHaveBeenCalledWith('json-key');
-    expect(setupGcloud).toHaveBeenCalledWith('json-key');
-    expect(callback).toHaveBeenCalledWith('test-project');
-    expect(restorePreviousAccount).toHaveBeenCalledWith(previousAccount);
-  });
-
-  test('reuses existing auth when parsed account matches current account', async () => {
-    getServiceAccountEmailAndProject.mockReturnValue({
-      email: previousAccount.email,
-      projectId: 'project-a',
-    });
-    const callback = vi.fn().mockResolvedValue('callback-result');
-
-    const result = await withGcloud('json-key', callback);
-
-    expect(result).toEqual('callback-result');
-    expect(getServiceAccountEmailAndProject).toHaveBeenCalledWith('json-key');
-    expect(setupGcloud).not.toHaveBeenCalled();
-    expect(callback).toHaveBeenCalledWith('project-a');
-    expect(restorePreviousAccount).not.toHaveBeenCalled();
-    expect(cleanupCredentials).not.toHaveBeenCalled();
-  });
-
-  test('falls back to setup when parsed projectId is null', async () => {
-    getServiceAccountEmailAndProject.mockReturnValue({
-      email: previousAccount.email,
-      projectId: null,
-    });
-    const callback = vi.fn().mockResolvedValue('callback-result');
-
-    await withGcloud('json-key', callback);
-
-    expect(setupGcloud).toHaveBeenCalledWith('json-key');
-    expect(callback).toHaveBeenCalledWith('test-project');
-    expect(restorePreviousAccount).toHaveBeenCalledWith(previousAccount);
-  });
-
-  test('throws when credential parsing fails and does not restore', async () => {
-    getServiceAccountEmailAndProject.mockImplementation(() => {
-      throw new Error('invalid credentials');
-    });
+  test('It can run without existing gcloud installation', async () => {
+    delete process.env.GCLOUD_INSTALLED_VERSION;
     const callback = vi.fn();
 
-    await expect(withGcloud('json-key', callback)).rejects.toThrow(
-      'invalid credentials',
-    );
+    await withGcloud('json-key', callback);
 
-    expect(setupGcloud).not.toHaveBeenCalled();
-    expect(callback).not.toHaveBeenCalled();
-    expect(restorePreviousAccount).not.toHaveBeenCalled();
-  });
-
-  test('falls back to setup when there is no previous account', async () => {
-    getCurrentAccount.mockReturnValue(undefined);
-    const callback = vi.fn().mockResolvedValue('callback-result');
-
-    const result = await withGcloud('json-key', callback);
-
-    expect(result).toEqual('callback-result');
-    expect(getServiceAccountEmailAndProject).toHaveBeenCalledWith('json-key');
+    expect(execGcloud).not.toHaveBeenCalled();
     expect(setupGcloud).toHaveBeenCalledWith('json-key');
     expect(callback).toHaveBeenCalledWith('test-project');
-    expect(restorePreviousAccount).toHaveBeenCalledWith(undefined);
   });
 
-  test('cleans up tracked credentials when restorePreviousAccount returns false', async () => {
-    restorePreviousAccount.mockResolvedValue(false);
-    const callback = vi.fn().mockResolvedValue('callback-result');
+  test('It can restore previous account', async () => {
+    process.env.GCLOUD_INSTALLED_VERSION = '400.0.0';
 
-    await withGcloud('json-key', callback);
+    execGcloud
+      .mockResolvedValueOnce(JSON.stringify('previous-account')) // Previous account
+      .mockResolvedValueOnce(JSON.stringify('json-key-account')) // Current account
+      .mockResolvedValueOnce(''); // Restore response
 
-    expect(getTrackedCredentials).toHaveBeenCalledTimes(1);
-    expect(cleanupCredentials).toHaveBeenCalledWith(['/tmp/new-cred.json']);
+    const callback = vi.fn();
+
+    const result = await withGcloud('json-key', callback);
+    expect(result).toBeUndefined();
+
+    expect(execGcloud).toHaveBeenNthCalledWith(
+      1,
+      ['config', 'get', 'account', '--format=json'],
+      'gcloud',
+      true,
+    );
+    expect(setupGcloud).toHaveBeenCalledWith('json-key');
+    expect(callback).toHaveBeenCalledWith('test-project');
+    expect(execGcloud).toHaveBeenNthCalledWith(
+      3,
+      ['config', 'set', 'account', 'previous-account'],
+      'gcloud',
+      true,
+    );
   });
 
-  test('cleans up tracked credentials when there is no previous account', async () => {
-    getCurrentAccount.mockReturnValue(undefined);
-    restorePreviousAccount.mockResolvedValue(false);
-    const callback = vi.fn().mockResolvedValue('callback-result');
+  test('It does not restore account if unchanged', async () => {
+    process.env.GCLOUD_INSTALLED_VERSION = '400.0.0';
+    execGcloud
+      .mockResolvedValueOnce(JSON.stringify('same-account'))
+      .mockResolvedValueOnce(JSON.stringify('same-account'))
+      .mockResolvedValueOnce('');
 
-    await withGcloud('json-key', callback);
+    const callback = vi.fn();
+    callback.mockResolvedValueOnce('callback-result');
+    const result = await withGcloud('json-key', callback);
+    expect(result).toEqual('callback-result');
 
-    expect(restorePreviousAccount).toHaveBeenCalledWith(undefined);
-    expect(getTrackedCredentials).toHaveBeenCalledTimes(1);
-    expect(cleanupCredentials).toHaveBeenCalledWith(['/tmp/new-cred.json']);
+    expect(execGcloud).toHaveBeenNthCalledWith(
+      1,
+      ['config', 'get', 'account', '--format=json'],
+      'gcloud',
+      true,
+    );
+    expect(setupGcloud).toHaveBeenCalledWith('json-key');
+    expect(callback).toHaveBeenCalledWith('test-project');
+    expect(execGcloud).toHaveBeenCalledTimes(2); // No restore call
   });
 });
