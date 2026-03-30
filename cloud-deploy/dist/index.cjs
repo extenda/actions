@@ -101295,13 +101295,13 @@ __name(isCurrentAccount, "isCurrentAccount");
 var setEnvironmentVariable = /* @__PURE__ */ __name((key, value, exportVariable2) => {
   if (isNonEmptyString(value)) {
     if (exportVariable2) {
-      debug2(`Export ${key}`);
+      info(`Export ${key}`);
       exportVariable(key, value);
     }
     process.env[key] = value;
   } else {
     if (exportVariable2) {
-      debug2(`Unset ${key}`);
+      info(`Unset ${key}`);
       exportVariable(key, "");
     }
     delete process.env[key];
@@ -101346,7 +101346,9 @@ async function authenticateGcloud(credentials, exportCredentials) {
   };
   if (!isCurrentAccount(authEntry)) {
     authEntry.credentialsFilePath = createJobScopedCredential(credentials);
-    info(`Authenticate gcloud with ${authEntry.type}`);
+    info(
+      `Authenticate gcloud account ${authEntry.email} with ${authEntry.type}`
+    );
     try {
       process.env[env.projectId] = projectId;
       authEntry.exportCredentials = true;

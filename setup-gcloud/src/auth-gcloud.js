@@ -96,13 +96,13 @@ function isCurrentAccount(auth) {
 const setEnvironmentVariable = (key, value, exportVariable) => {
   if (isNonEmptyString(value)) {
     if (exportVariable) {
-      core.debug(`Export ${key}`);
+      core.info(`Export ${key}`);
       core.exportVariable(key, value);
     }
     process.env[key] = value;
   } else {
     if (exportVariable) {
-      core.debug(`Unset ${key}`);
+      core.info(`Unset ${key}`);
       core.exportVariable(key, '');
     }
     delete process.env[key];
@@ -167,7 +167,9 @@ export async function authenticateGcloud(credentials, exportCredentials) {
     // Create a job-scoped credential file (handles base64 decoding and cleanup tracking)
     authEntry.credentialsFilePath = createJobScopedCredential(credentials);
 
-    core.info(`Authenticate gcloud with ${authEntry.type}`);
+    core.info(
+      `Authenticate gcloud account ${authEntry.email} with ${authEntry.type}`,
+    );
 
     try {
       // Ensure projectId is set before executing any gcloud command
