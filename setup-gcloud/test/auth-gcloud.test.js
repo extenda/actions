@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import mockFs from 'mock-fs';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
@@ -27,16 +28,24 @@ describe('auth-gcloud', () => {
   let orgEnv;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockFs({
+      '/runner/temp': {},
+    });
     orgEnv = process.env;
-    process.env = { ...orgEnv };
+    process.env = {
+      ...orgEnv,
+      RUNNER_TEMP: '/runner/temp',
+      GITHUB_RUN_ID: '12345',
+      GITHUB_RUN_ATTEMPT: '2',
+    };
     resetAuthStack();
-    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    process.env = orgEnv;
     resetAuthStack();
+    process.env = orgEnv;
+    mockFs.restore();
+    vi.clearAllMocks();
   });
 
   test('authenticates JSON service account credentials', async () => {

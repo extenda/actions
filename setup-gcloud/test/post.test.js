@@ -19,12 +19,18 @@ describe('post cleanup', () => {
   });
 
   test('reads credential files from state and passes them to cleanup', async () => {
-    getCredentialFilesFromState.mockReturnValueOnce(['/tmp/a.json', '/tmp/b.json']);
+    getCredentialFilesFromState.mockReturnValueOnce([
+      '/tmp/a.json',
+      '/tmp/b.json',
+    ]);
 
     await import('../src/post.js');
 
     expect(getCredentialFilesFromState).toHaveBeenCalledTimes(1);
-    expect(cleanupCredentials).toHaveBeenCalledWith(['/tmp/a.json', '/tmp/b.json']);
+    expect(cleanupCredentials).toHaveBeenCalledWith([
+      '/tmp/a.json',
+      '/tmp/b.json',
+    ]);
   });
 
   test('passes empty list to cleanup when no state exists', async () => {

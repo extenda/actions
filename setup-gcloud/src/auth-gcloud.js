@@ -4,12 +4,13 @@ import {
   authenticateJsonKey,
   configureServiceAccount,
 } from './auth-json-key.js';
+import {
+  clearAuthStack,
+  loadAuthStack,
+  updateAuthStack,
+} from './auth-stack.js';
 import { workloadIdentityFederation } from './auth-wid-federation.js';
 import createJobScopedCredential from './create-job-scoped-credential.js';
-
-// A stack with authorizations that has occurred throughout the action's lifetime.
-// This allows us to push and pop authorizations from different sources.
-const authStack = [];
 
 const authType = {
   jsonKey: 'json_key',
@@ -195,7 +196,7 @@ export async function authenticateGcloud(credentials, exportCredentials) {
       delete process.env[env.projectId];
     }
 
-    authStack.push(authEntry);
+    updateAuthStack(authEntry);
     populateEnvironment(authEntry);
   }
 
@@ -203,20 +204,23 @@ export async function authenticateGcloud(credentials, exportCredentials) {
 }
 
 export function getCurrentAccount() {
-  return authStack.at(-1);
+  return loadAuthStack().at(-1);
 }
 
 /**
  * Reset all tracked gcloud authentications and clear auth-related environment variables.
  */
 export function resetAuthStack() {
-  authStack.length = 0;
-  populateEnvironment({
-    type: authType.jsonKey,
-    projectId: '',
-    credentialsFilePath: '',
-    exportCredentials: true,
-  });
+  const wasNonEmpty = loadAuthStack().length > 0;
+  clearAuthStack();
+  if (wasNonEmpty) {
+    populateEnvironment({
+      type: authType.jsonKey,
+      projectId: '',
+      credentialsFilePath: '',
+      exportCredentials: true,
+    });
+  }
 }
 
 /**
@@ -230,10 +234,8 @@ export async function restorePreviousAccount(previousAccount) {
     return false;
   }
 
-  const current = authStack.pop();
-  if (current === previousAccount) {
-    // Same account, push it and return. State is already matching.
-    authStack.push(previousAccount);
+  if (isCurrentAccount(previousAccount)) {
+    // Same account, state is already matching and we want to preserve it.
     return true;
   }
 

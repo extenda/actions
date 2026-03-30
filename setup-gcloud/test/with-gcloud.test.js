@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   getCurrentAccount,
   getServiceAccountEmailAndProject,
+  resetAuthStack,
   restorePreviousAccount,
 } from '../src/auth-gcloud.js';
 import { cleanupCredentials } from '../src/cleanup.js';
@@ -78,6 +79,32 @@ describe('With Gcloud', () => {
     expect(callback).toHaveBeenCalledWith('project-a');
     expect(restorePreviousAccount).not.toHaveBeenCalled();
     expect(cleanupCredentials).not.toHaveBeenCalled();
+    expect(resetAuthStack).not.toHaveBeenCalled();
+  });
+
+  test('reuses persisted auth-stack entry when current account matches service account', async () => {
+    getCurrentAccount.mockReturnValue({
+      type: 'wid_federation',
+      email: 'persisted@example.iam.gserviceaccount.com',
+      projectId: 'persisted-project',
+      exportCredentials: true,
+      credentialsFilePath: '/tmp/setup-gcloud-123/auth_wid_1.json',
+    });
+    getServiceAccountEmailAndProject.mockReturnValue({
+      email: 'persisted@example.iam.gserviceaccount.com',
+      projectId: 'persisted-project',
+    });
+    const callback = vi.fn().mockResolvedValue('callback-result');
+
+    const result = await withGcloud('json-key', callback);
+
+    expect(result).toEqual('callback-result');
+    expect(setupGcloud).not.toHaveBeenCalled();
+    expect(callback).toHaveBeenCalledWith('persisted-project');
+    expect(restorePreviousAccount).not.toHaveBeenCalled();
+    expect(getTrackedCredentials).not.toHaveBeenCalled();
+    expect(cleanupCredentials).not.toHaveBeenCalled();
+    expect(resetAuthStack).not.toHaveBeenCalled();
   });
 
   test('falls back to setup when parsed projectId is null', async () => {
@@ -111,11 +138,11 @@ describe('With Gcloud', () => {
 
   test('falls back to setup when there is no previous account', async () => {
     getCurrentAccount.mockReturnValue(undefined);
-    const callback = vi.fn().mockResolvedValue('callback-result');
+    const callback = vi.fn().mockResolvedValue('cb');
 
     const result = await withGcloud('json-key', callback);
 
-    expect(result).toEqual('callback-result');
+    expect(result).toEqual('cb');
     expect(getServiceAccountEmailAndProject).toHaveBeenCalledWith('json-key');
     expect(setupGcloud).toHaveBeenCalledWith('json-key');
     expect(callback).toHaveBeenCalledWith('test-project');
