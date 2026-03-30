@@ -37,6 +37,9 @@ describe('auth-gcloud', () => {
       RUNNER_TEMP: '/runner/temp',
       GITHUB_RUN_ID: '12345',
       GITHUB_RUN_ATTEMPT: '2',
+      CLOUDSDK_CORE_PROJECT: undefined,
+      GOOGLE_APPLICATION_CREDENTIALS: undefined,
+      CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE: undefined,
     };
     resetAuthStack();
   });
