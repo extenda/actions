@@ -100152,8 +100152,8 @@ var withGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, fn) => {
   } finally {
     const didRestoreAccount = await restorePreviousAccount(previousAccount);
     if (!didRestoreAccount) {
-      cleanupCredentials(getTrackedCredentials());
       resetAuthStack();
+      cleanupCredentials(getTrackedCredentials());
     }
   }
 }, "withGcloud");

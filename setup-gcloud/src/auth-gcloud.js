@@ -234,8 +234,9 @@ export async function restorePreviousAccount(previousAccount) {
     return false;
   }
 
+  // If the previous account is current, it means we reused credentials and there's
+  // nothing to restore because we never pushed a new auth state to the stack.
   if (isCurrentAccount(previousAccount)) {
-    // Same account, state is already matching and we want to preserve it.
     return true;
   }
 

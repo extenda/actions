@@ -37,9 +37,9 @@ const withGcloud = async (serviceAccountKey, fn) => {
   } finally {
     const didRestoreAccount = await restorePreviousAccount(previousAccount);
     if (!didRestoreAccount) {
-      // Remove persistent files and exported env vars
-      cleanupCredentials(getTrackedCredentials());
+      // Unset exported env vars and remove persistent files.
       resetAuthStack();
+      cleanupCredentials(getTrackedCredentials());
     }
   }
 };
