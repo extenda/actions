@@ -2,7 +2,6 @@ import * as core from '@actions/core';
 import { exec } from '@actions/exec';
 
 import { execGcloud } from '../../setup-gcloud/src/index.js';
-import createKeyFile from '../../utils/src/create-key-file.js';
 import { resolveImageDigests } from '../../utils/src/index.js';
 import setupCosign from './setup-cosign.js';
 
@@ -15,13 +14,7 @@ export const extractProjectFromAttestationKeyUri = (attestationKeyUri) => {
   return match ? match[1] : null;
 };
 
-const attestSbom = async (
-  cosign,
-  credentialsPath,
-  attestationKeyUri,
-  uri,
-  sbom,
-) => {
+const attestSbom = async (cosign, attestationKeyUri, uri, sbom) => {
   core.info(`Attesting SBOM for [${uri}] using [${attestationKeyUri}]...`);
 
   const projectId = extractProjectFromAttestationKeyUri(attestationKeyUri);
@@ -42,7 +35,6 @@ const attestSbom = async (
     {
       env: {
         ...process.env,
-        GOOGLE_APPLICATION_CREDENTIALS: credentialsPath,
         ...(projectId && {
           GOOGLE_CLOUD_QUOTA_PROJECT: projectId,
           CLOUDSDK_CORE_PROJECT: projectId,
@@ -103,21 +95,18 @@ const uploadForDigest = (digests, sbom, cosignFn) => {
  * @param spdx the SPDX SBOM file path
  * @param cdx the CycloneDX SBOM file path
  * @param attestationKeyUri the KMS key URI to use for signing the SBOM attestations. If not provided, SBOMs will be uploaded without attestation.
- * @param serviceAccountKey the gcloud service account key
  * @return {Promise<void>} a promise that resolves when the uploads are complete
  */
 export default async function uploadSbom(
   image,
   { spdx, cdx },
   attestationKeyUri,
-  serviceAccountKey,
 ) {
   let cosignFn;
-  if (attestationKeyUri && serviceAccountKey) {
+  if (attestationKeyUri) {
     const cosign = await setupCosign();
-    const credentialsPath = createKeyFile(serviceAccountKey);
     cosignFn = async (uri, sbom) =>
-      attestSbom(cosign, credentialsPath, attestationKeyUri, uri, sbom);
+      attestSbom(cosign, attestationKeyUri, uri, sbom);
   } else {
     cosignFn = async () => {};
   }

@@ -152,7 +152,6 @@ test('Action maps sbom attestation key input before uploading SBOMs', async () =
     'ubuntu',
     scanResult.sbom,
     defaultAttestationKeyUri,
-    'sa',
   );
 
   setInput(false, false, true, 'none');
@@ -165,7 +164,6 @@ test('Action maps sbom attestation key input before uploading SBOMs', async () =
     'ubuntu',
     scanResult.sbom,
     undefined,
-    'sa',
   );
 
   const attestationKeyUri =
@@ -181,6 +179,5 @@ test('Action maps sbom attestation key input before uploading SBOMs', async () =
     'ubuntu',
     scanResult.sbom,
     attestationKeyUri,
-    'sa',
   );
 });
