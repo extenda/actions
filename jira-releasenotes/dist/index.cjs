@@ -75707,7 +75707,7 @@ on" && objCtor instanceof objCtor && typeof othCtor == "function" && othCtor ins
           return func(collection, getIteratee(predicate, 3));
         }
         __name(filter, "filter");
-        var find3 = createFind(findIndex);
+        var find2 = createFind(findIndex);
         var findLast = createFind(findLastIndex);
         function flatMap(collection, iteratee2) {
           return baseFlatten(map(collection, iteratee2), 1);
@@ -77426,7 +77426,7 @@ p = ''" + (isEscaping ? ", __e = _.escape" : "") + (isEvaluating ? ", __j = Arra
         lodash.escape = escape2;
         lodash.escapeRegExp = escapeRegExp;
         lodash.every = every;
-        lodash.find = find3;
+        lodash.find = find2;
         lodash.findIndex = findIndex;
         lodash.findKey = findKey;
         lodash.findLast = findLast;
@@ -85875,7 +85875,7 @@ var require_helpers5 = __commonJS({
       if (instance.helpers[helperName]) {
         instance.hooks[helperName] = instance.helpers[helperName];
         if (!keepHelper) {
-          delete instance.helpers[helperName];
+          instance.helpers[helperName] = void 0;
         }
       }
     }
@@ -85970,23 +85970,6 @@ var require_logger = __commonJS({
   }
 });
 
-// node_modules/handlebars/dist/cjs/handlebars/internal/create-new-lookup-object.js
-var require_create_new_lookup_object = __commonJS({
-  "node_modules/handlebars/dist/cjs/handlebars/internal/create-new-lookup-object.js"(exports2) {
-    "use strict";
-    exports2.__esModule = true;
-    exports2.createNewLookupObject = createNewLookupObject;
-    var _utils = require_utils6();
-    function createNewLookupObject() {
-      for (var _len = arguments.length, sources = Array(_len), _key = 0; _key < _len; _key++) {
-        sources[_key] = arguments[_key];
-      }
-      return _utils.extend.apply(void 0, [/* @__PURE__ */ Object.create(null)].concat(sources));
-    }
-    __name(createNewLookupObject, "createNewLookupObject");
-  }
-});
-
 // node_modules/handlebars/dist/cjs/handlebars/internal/proto-access.js
 var require_proto_access = __commonJS({
   "node_modules/handlebars/dist/cjs/handlebars/internal/proto-access.js"(exports2) {
@@ -85999,25 +85982,28 @@ var require_proto_access = __commonJS({
       return obj2 && obj2.__esModule ? obj2 : { "default": obj2 };
     }
     __name(_interopRequireDefault, "_interopRequireDefault");
-    var _createNewLookupObject = require_create_new_lookup_object();
+    var _utils = require_utils6();
     var _logger = require_logger();
     var _logger2 = _interopRequireDefault(_logger);
     var loggedProperties = /* @__PURE__ */ Object.create(null);
     function createProtoAccessControl(runtimeOptions) {
-      var defaultMethodWhiteList = /* @__PURE__ */ Object.create(null);
-      defaultMethodWhiteList["constructor"] = false;
-      defaultMethodWhiteList["__defineGetter__"] = false;
-      defaultMethodWhiteList["__defineSetter__"] = false;
-      defaultMethodWhiteList["__lookupGetter__"] = false;
-      var defaultPropertyWhiteList = /* @__PURE__ */ Object.create(null);
-      defaultPropertyWhiteList["__proto__"] = false;
+      var propertyWhiteList = /* @__PURE__ */ Object.create(null);
+      propertyWhiteList["__proto__"] = false;
+      _utils.extend(propertyWhiteList, runtimeOptions.allowedProtoProperties);
+      var methodWhiteList = /* @__PURE__ */ Object.create(null);
+      methodWhiteList["constructor"] = false;
+      methodWhiteList["__defineGetter__"] = false;
+      methodWhiteList["__defineSetter__"] = false;
+      methodWhiteList["__lookupGetter__"] = false;
+      methodWhiteList["__lookupSetter__"] = false;
+      _utils.extend(methodWhiteList, runtimeOptions.allowedProtoMethods);
       return {
         properties: {
-          whitelist: _createNewLookupObject.createNewLookupObject(defaultPropertyWhiteList, runtimeOptions.allowedProtoProperties),
+          whitelist: propertyWhiteList,
           defaultValue: runtimeOptions.allowProtoPropertiesByDefault
         },
         methods: {
-          whitelist: _createNewLookupObject.createNewLookupObject(defaultMethodWhiteList, runtimeOptions.allowedProtoMethods),
+          whitelist: methodWhiteList,
           defaultValue: runtimeOptions.allowProtoMethodsByDefault
         }
       };
@@ -86078,7 +86064,7 @@ var require_base = __commonJS({
     var _logger = require_logger();
     var _logger2 = _interopRequireDefault(_logger);
     var _internalProtoAccess = require_proto_access();
-    var VERSION = "4.7.8";
+    var VERSION = "4.7.9";
     exports2.VERSION = VERSION;
     var COMPILER_REVISION = 8;
     exports2.COMPILER_REVISION = COMPILER_REVISION;
@@ -86273,14 +86259,12 @@ untime. Please update your runtime to a newer version (" + compilerInfo[1] + ").
           }
         }
         partial = env.VM.resolvePartial.call(this, partial, context, options);
-        var extendedOptions = Utils.extend({}, options, {
-          hooks: this.hooks,
-          protoAccessControl: this.protoAccessControl
-        });
-        var result = env.VM.invokePartial.call(this, partial, context, extendedOptions);
+        options.hooks = this.hooks;
+        options.protoAccessControl = this.protoAccessControl;
+        var result = env.VM.invokePartial.call(this, partial, context, options);
         if (result == null && env.compile) {
           options.partials[options.name] = env.compile(partial, templateSpec.compilerOptions, env);
-          result = options.partials[options.name](context, extendedOptions);
+          result = options.partials[options.name](context, options);
         }
         if (result != null) {
           if (options.indent) {
@@ -86327,7 +86311,7 @@ me-only mode");
           for (var i = 0; i < len; i++) {
             var result = depths[i] && container.lookupProperty(depths[i], name);
             if (result != null) {
-              return depths[i][name];
+              return result;
             }
           }
         }, "lookup"),
@@ -86395,8 +86379,9 @@ me-only mode");
       ret2.isTop = true;
       ret2._setup = function(options) {
         if (!options.partial) {
-          var mergedHelpers = Utils.extend({}, env.helpers, options.helpers);
-          wrapHelpersToPassLookupProperty(mergedHelpers, container);
+          var mergedHelpers = {};
+          addHelpers(mergedHelpers, env.helpers, container);
+          addHelpers(mergedHelpers, options.helpers, container);
           container.helpers = mergedHelpers;
           if (templateSpec.usePartial) {
             container.partials = container.mergeIfNeeded(options.partials, env.partials);
@@ -86450,19 +86435,19 @@ me-only mode");
     function resolvePartial(partial, context, options) {
       if (!partial) {
         if (options.name === "@partial-block") {
-          partial = options.data["partial-block"];
+          partial = lookupOwnProperty(options.data, "partial-block");
         } else {
-          partial = options.partials[options.name];
+          partial = lookupOwnProperty(options.partials, options.name);
         }
       } else if (!partial.call && !options.name) {
         options.name = partial;
-        partial = options.partials[partial];
+        partial = lookupOwnProperty(options.partials, partial);
       }
       return partial;
     }
     __name(resolvePartial, "resolvePartial");
     function invokePartial(partial, context, options) {
-      var currentPartialBlock = options.data && options.data["partial-block"];
+      var currentPartialBlock = lookupOwnProperty(options.data, "partial-block");
       options.partial = true;
       if (options.ids) {
         options.data.contextPath = options.ids[0] || options.data.contextPath;
@@ -86497,6 +86482,12 @@ me-only mode");
       return "";
     }
     __name(noop, "noop");
+    function lookupOwnProperty(obj2, name) {
+      if (obj2 && Object.prototype.hasOwnProperty.call(obj2, name)) {
+        return obj2[name];
+      }
+    }
+    __name(lookupOwnProperty, "lookupOwnProperty");
     function initData(context, data) {
       if (!data || !("root" in data)) {
         data = data ? _base.createFrame(data) : {};
@@ -86514,17 +86505,19 @@ me-only mode");
       return prog;
     }
     __name(executeDecorators, "executeDecorators");
-    function wrapHelpersToPassLookupProperty(mergedHelpers, container) {
-      Object.keys(mergedHelpers).forEach(function(helperName) {
-        var helper = mergedHelpers[helperName];
+    function addHelpers(mergedHelpers, helpers, container) {
+      if (!helpers) return;
+      Object.keys(helpers).forEach(function(helperName) {
+        var helper = helpers[helperName];
         mergedHelpers[helperName] = passLookupPropertyOption(helper, container);
       });
     }
-    __name(wrapHelpersToPassLookupProperty, "wrapHelpersToPassLookupProperty");
+    __name(addHelpers, "addHelpers");
     function passLookupPropertyOption(helper, container) {
       var lookupProperty = container.lookupProperty;
       return _internalWrapHelper.wrapHelper(helper, function(options) {
-        return Utils.extend({ lookupProperty }, options);
+        options.lookupProperty = lookupProperty;
+        return options;
       });
     }
     __name(passLookupPropertyOption, "passLookupPropertyOption");
@@ -87517,7 +87510,7 @@ NUMBER", 82: "BOOLEAN", 83: "UNDEFINED", 84: "NULL", 85: "DATA", 87: "SEP" },
               break;
           }
         }, "anonymous");
-        lexer2.rules = [/^(?:[^\x00]*?(?=(\{\{)))/, /^(?:[^\x00]+)/, /^(?:[^\x00]{2,}?(?=(\{\{|\\\{\{|\\\\\{\{|$)))/, /^(?:\{\{\{\{(?=[^/]))/,
+        lexer2.rules = [/^(?:[^\x00]*?(?=(\{\{)))/, /^(?:[^\x00]+)/, /^(?:[^\x00]{2,}?(?=(\{\{|\\\{\{|\\\\\{\{|$)))/, /^(?:\{\{\{\{(?=[^\/]))/,
         /^(?:\{\{\{\{\/[^\s!"#%-,\.\/;->@\[-\^`\{-~]+(?=[=}\s\/.])\}\}\}\})/, /^(?:[^\x00]+?(?=(\{\{\{\{)))/, /^(?:[\s\S]*?--(~)?\}\})/,
         /^(?:\()/, /^(?:\))/, /^(?:\{\{\{\{)/, /^(?:\}\}\}\})/, /^(?:\{\{(~)?>)/, /^(?:\{\{(~)?#>)/, /^(?:\{\{(~)?#\*?)/,
         /^(?:\{\{(~)?\/)/, /^(?:\{\{(~)?\^\s*(~)?\}\})/, /^(?:\{\{(~)?\s*else\s*(~)?\}\})/, /^(?:\{\{(~)?\^)/, /^(?:\{\{(~)?\s*else\b)/,
@@ -88065,12 +88058,15 @@ var require_base2 = __commonJS({
     var _whitespaceControl2 = _interopRequireDefault(_whitespaceControl);
     var _helpers = require_helpers6();
     var Helpers = _interopRequireWildcard(_helpers);
+    var _exception = require_exception();
+    var _exception2 = _interopRequireDefault(_exception);
     var _utils = require_utils6();
     exports2.parser = _parser2["default"];
     var yy = {};
     _utils.extend(yy, Helpers);
     function parseWithoutProcessing(input, options) {
       if (input.type === "Program") {
+        validateInputAst(input);
         return input;
       }
       _parser2["default"].yy = yy;
@@ -88087,6 +88083,54 @@ var require_base2 = __commonJS({
       return strip.accept(ast);
     }
     __name(parse2, "parse");
+    function validateInputAst(ast) {
+      validateAstNode(ast);
+    }
+    __name(validateInputAst, "validateInputAst");
+    function validateAstNode(node) {
+      if (node == null) {
+        return;
+      }
+      if (Array.isArray(node)) {
+        node.forEach(validateAstNode);
+        return;
+      }
+      if (typeof node !== "object") {
+        return;
+      }
+      if (node.type === "PathExpression") {
+        if (!isValidDepth(node.depth)) {
+          throw new _exception2["default"]("Invalid AST: PathExpression.depth must be an integer");
+        }
+        if (!Array.isArray(node.parts)) {
+          throw new _exception2["default"]("Invalid AST: PathExpression.parts must be an array");
+        }
+        for (var i = 0; i < node.parts.length; i++) {
+          if (typeof node.parts[i] !== "string") {
+            throw new _exception2["default"]("Invalid AST: PathExpression.parts must only contain strings");
+          }
+        }
+      } else if (node.type === "NumberLiteral") {
+        if (typeof node.value !== "number" || !isFinite(node.value)) {
+          throw new _exception2["default"]("Invalid AST: NumberLiteral.value must be a number");
+        }
+      } else if (node.type === "BooleanLiteral") {
+        if (typeof node.value !== "boolean") {
+          throw new _exception2["default"]("Invalid AST: BooleanLiteral.value must be a boolean");
+        }
+      }
+      Object.keys(node).forEach(function(propertyName) {
+        if (propertyName === "loc") {
+          return;
+        }
+        validateAstNode(node[propertyName]);
+      });
+    }
+    __name(validateAstNode, "validateAstNode");
+    function isValidDepth(depth) {
+      return typeof depth === "number" && isFinite(depth) && Math.floor(depth) === depth && depth >= 0;
+    }
+    __name(isValidDepth, "isValidDepth");
   }
 });
 
@@ -90582,12 +90626,10 @@ var require_javascript_compiler = __commonJS({
           var programs = _context.programs;
           var decorators = _context.decorators;
           for (i = 0, l2 = programs.length; i < l2; i++) {
-            if (programs[i]) {
-              ret2[i] = programs[i];
-              if (decorators[i]) {
-                ret2[i + "_d"] = decorators[i];
-                ret2.useDecorators = true;
-              }
+            ret2[i] = programs[i];
+            if (decorators[i]) {
+              ret2[i + "_d"] = decorators[i];
+              ret2.useDecorators = true;
             }
           }
           if (this.environment.usePartial) {
@@ -90852,22 +90894,25 @@ call", params), "}"]);
         }
         this.resolvePath("data", parts, 0, true, strict);
       }, "lookupData"),
-      resolvePath: /* @__PURE__ */ __name(function resolvePath(type, parts, i, falsy, strict) {
+      resolvePath: /* @__PURE__ */ __name(function resolvePath(type, parts, startPartIndex, falsy, strict) {
         var _this2 = this;
         if (this.options.strict || this.options.assumeObjects) {
-          this.push(strictLookup(this.options.strict && strict, this, parts, i, type));
+          this.push(strictLookup(this.options.strict && strict, this, parts, startPartIndex, type));
           return;
         }
         var len = parts.length;
-        for (; i < len; i++) {
-          this.replaceStack(function(current) {
-            var lookup = _this2.nameLookup(current, parts[i], type);
+        var _loop = /* @__PURE__ */ __name(function(i2) {
+          _this2.replaceStack(function(current) {
+            var lookup = _this2.nameLookup(current, parts[i2], type);
             if (!falsy) {
               return [" != null ? ", lookup, " : ", current];
             } else {
               return [" && ", lookup];
             }
           });
+        }, "_loop");
+        for (var i = startPartIndex; i < len; i++) {
+          _loop(i);
         }
       }, "resolvePath"),
       // [resolvePossibleLambda]
@@ -90971,7 +91016,10 @@ call", params), "}"]);
       // and inserts the decorator into the decorators list.
       registerDecorator: /* @__PURE__ */ __name(function registerDecorator(paramSize, name) {
         var foundDecorator = this.nameLookup("decorators", name, "decorator"), options = this.setupHelperArgs(name, paramSize);
-        this.decorators.push(["fn = ", this.decorators.functionCall(foundDecorator, "", ["fn", "props", "container", options]),
+        this.decorators.push(["var decorator = ", foundDecorator, ";"]);
+        this.decorators.push(['if (typeof decorator !== "function") { throw new Error(', this.quotedString('Missing deco\
+rator: "' + name + '"'), "); }"]);
+        this.decorators.push(["fn = ", this.decorators.functionCall("decorator", "", ["fn", "props", "container", options]),
         " || fn;"]);
       }, "registerDecorator"),
       // [invokeHelper]
@@ -91121,8 +91169,7 @@ call", params), "}"]);
           compiler = new this.compiler();
           var existing = this.matchExistingProgram(child);
           if (existing == null) {
-            this.context.programs.push("");
-            var index = this.context.programs.length;
+            var index = this.context.programs.push("") - 1;
             child.index = index;
             child.name = "program" + index;
             this.context.programs[index] = compiler.compile(child, options, this.context, !this.precompile);
@@ -91370,17 +91417,17 @@ ds long super char final native synchronized class float package throws const go
     JavaScriptCompiler.isValidJavaScriptVariableName = function(name) {
       return !JavaScriptCompiler.RESERVED_WORDS[name] && /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(name);
     };
-    function strictLookup(requireTerminal, compiler, parts, i, type) {
+    function strictLookup(requireTerminal, compiler, parts, startPartIndex, type) {
       var stack = compiler.popStack(), len = parts.length;
       if (requireTerminal) {
         len--;
       }
-      for (; i < len; i++) {
+      for (var i = startPartIndex; i < len; i++) {
         stack = compiler.nameLookup(stack, parts[i], type);
       }
       if (requireTerminal) {
-        return [compiler.aliasable("container.strict"), "(", stack, ", ", compiler.quotedString(parts[i]), ", ", JSON.stringify(
-        compiler.source.currentLocation), " )"];
+        return [compiler.aliasable("container.strict"), "(", stack, ", ", compiler.quotedString(parts[len]), ", ", JSON.
+        stringify(compiler.source.currentLocation), " )"];
       } else {
         return stack;
       }
@@ -101512,14 +101559,14 @@ var require_find_up = __commonJS({
       const root = path2.parse(startDir).root;
       const filenames = [].concat(filename);
       return new Promise((resolve) => {
-        (/* @__PURE__ */ __name((function find3(dir) {
+        (/* @__PURE__ */ __name((function find2(dir) {
           locatePath(filenames, { cwd: dir }).then((file) => {
             if (file) {
               resolve(path2.join(dir, file));
             } else if (dir === root) {
               resolve(null);
             } else {
-              find3(path2.dirname(dir));
+              find2(path2.dirname(dir));
             }
           });
         }), "find"))(startDir);
@@ -108475,14 +108522,6 @@ function info(message) {
 }
 __name(info, "info");
 
-// node_modules/@actions/tool-cache/lib/manifest.js
-var semver = __toESM(require_semver2(), 1);
-
-// node_modules/@actions/tool-cache/lib/tool-cache.js
-var semver2 = __toESM(require_semver2(), 1);
-var IS_WINDOWS3 = process.platform === "win32";
-var IS_MAC = process.platform === "darwin";
-
 // utils/src/run.js
 var run = /* @__PURE__ */ __name(async (action2) => {
   try {
@@ -108492,6 +108531,14 @@ var run = /* @__PURE__ */ __name(async (action2) => {
   }
 }, "run");
 var run_default = run;
+
+// node_modules/@actions/tool-cache/lib/manifest.js
+var semver = __toESM(require_semver2(), 1);
+
+// node_modules/@actions/tool-cache/lib/tool-cache.js
+var semver2 = __toESM(require_semver2(), 1);
+var IS_WINDOWS3 = process.platform === "win32";
+var IS_MAC = process.platform === "darwin";
 
 // jira-releasenotes/src/jira-releasenotes.js
 var import_jira_client = __toESM(require_jira(), 1);

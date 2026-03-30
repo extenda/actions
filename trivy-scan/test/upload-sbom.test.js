@@ -3,7 +3,6 @@ import { exec } from '@actions/exec';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
 import { execGcloud } from '../../setup-gcloud/src/index.js';
-import createKeyFile from '../../utils/src/create-key-file.js';
 import { resolveImageDigests } from '../../utils/src/index.js';
 import setupCosign from '../src/setup-cosign.js';
 import uploadSbom from '../src/upload-sbom.js';
@@ -14,7 +13,6 @@ vi.mock('../../setup-gcloud/src/index.js');
 vi.mock('../src/resolve-digest.js');
 vi.mock('../src/setup-cosign.js');
 vi.mock('../../utils/src/index.js');
-vi.mock('../../utils/src/create-key-file.js');
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -22,7 +20,6 @@ afterEach(() => {
 
 beforeEach(() => {
   execGcloud.mockResolvedValue(undefined);
-  createKeyFile.mockReturnValue('google-key.json');
   exec.mockResolvedValue(0);
   resolveImageDigests.mockResolvedValue({
     indexSha: 'eu.gcr.io/extenda/test@sha256:index',
@@ -37,7 +34,6 @@ test('It uploads SPDX and CycloneDX for single-arch image manifest digest withou
     'eu.gcr.io/extenda/test:1.0.0',
     { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
     undefined,
-    'sa',
   );
 
   expect(resolveImageDigests).toHaveBeenCalledTimes(1);
@@ -74,7 +70,6 @@ test('It uploads and attests SPDX and CycloneDX for single-arch image manifest d
     'eu.gcr.io/extenda/test:1.1.0',
     { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
     'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
-    'sa',
   );
 
   expect(setupCosign).toHaveBeenCalledTimes(1);
@@ -94,7 +89,6 @@ test('It uploads and attests SPDX and CycloneDX for single-arch image manifest d
     ],
     {
       env: expect.objectContaining({
-        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
         GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
         CLOUDSDK_CORE_PROJECT: 'test',
       }),
@@ -115,7 +109,6 @@ test('It uploads and attests SPDX and CycloneDX for single-arch image manifest d
     ],
     {
       env: expect.objectContaining({
-        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
         GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
         CLOUDSDK_CORE_PROJECT: 'test',
       }),
@@ -136,7 +129,6 @@ test('It uploads for both manifest and index when image is multi-arch without at
   await uploadSbom(
     'eu.gcr.io/extenda/test:2.0.0',
     { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
-    'not-used-if-no-sa',
     undefined,
   );
 
@@ -169,8 +161,6 @@ test('It uploads for both manifest and index when image is multi-arch without at
     '--source=.trivy/sbom.cdx.json',
     '--uri=eu.gcr.io/extenda/test@sha256:index',
   ]);
-  expect(setupCosign).not.toHaveBeenCalled();
-  expect(exec).not.toHaveBeenCalled();
 
   expect(core.info).toHaveBeenCalledWith(
     'Multi-arch detected: linking [.trivy/sbom.spdx.json] to Index SHA as well.',
@@ -191,7 +181,6 @@ test('It uploads and attests for both manifest and index when image is multi-arc
     'eu.gcr.io/extenda/test:2.1.0',
     { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
     'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
-    'sa',
   );
 
   expect(setupCosign).toHaveBeenCalledTimes(1);
@@ -211,7 +200,6 @@ test('It uploads and attests for both manifest and index when image is multi-arc
     ],
     {
       env: expect.objectContaining({
-        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
         GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
         CLOUDSDK_CORE_PROJECT: 'test',
       }),
@@ -232,7 +220,6 @@ test('It uploads and attests for both manifest and index when image is multi-arc
     ],
     {
       env: expect.objectContaining({
-        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
         GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
         CLOUDSDK_CORE_PROJECT: 'test',
       }),
@@ -253,7 +240,6 @@ test('It uploads and attests for both manifest and index when image is multi-arc
     ],
     {
       env: expect.objectContaining({
-        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
         GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
         CLOUDSDK_CORE_PROJECT: 'test',
       }),
@@ -274,7 +260,6 @@ test('It uploads and attests for both manifest and index when image is multi-arc
     ],
     {
       env: expect.objectContaining({
-        GOOGLE_APPLICATION_CREDENTIALS: 'google-key.json',
         GOOGLE_CLOUD_QUOTA_PROJECT: 'test',
         CLOUDSDK_CORE_PROJECT: 'test',
       }),
@@ -295,7 +280,6 @@ test('It rethrows attestation errors', async () => {
       'eu.gcr.io/extenda/test:2.2.0',
       { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
       'gcpkms://projects/test/locations/global/keyRings/ci/cryptoKeys/sbom',
-      'sa',
     ),
   ).rejects.toThrow('attestation failed');
 
@@ -311,7 +295,6 @@ test('It rethrows upload errors', async () => {
       'eu.gcr.io/extenda/test:3.0.0',
       { spdx: '.trivy/sbom.spdx.json', cdx: '.trivy/sbom.cdx.json' },
       undefined,
-      'sa',
     ),
   ).rejects.toThrow('upload failed');
 

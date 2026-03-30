@@ -11107,7 +11107,7 @@ var require_env_http_proxy_agent = __commonJS({
     var { kClose, kDestroy, kClosed, kDestroyed, kDispatch, kNoProxyAgent, kHttpProxyAgent, kHttpsProxyAgent } = require_symbols();
     var ProxyAgent2 = require_proxy_agent();
     var Agent3 = require_agent();
-    var DEFAULT_PORTS = {
+    var DEFAULT_PORTS2 = {
       "http:": 80,
       "https:": 443
     };
@@ -11170,7 +11170,7 @@ var require_env_http_proxy_agent = __commonJS({
       #getProxyAgentForUrl(url2) {
         let { protocol, host: hostname, port } = url2;
         hostname = hostname.replace(/:\d*$/, "").toLowerCase();
-        port = Number.parseInt(port, 10) || DEFAULT_PORTS[protocol] || 0;
+        port = Number.parseInt(port, 10) || DEFAULT_PORTS2[protocol] || 0;
         if (!this.#shouldProxy(hostname, port)) {
           return this[kNoProxyAgent];
         }
@@ -33239,7 +33239,7 @@ var require_form_data = __commonJS({
     var path6 = require("path");
     var http3 = require("http");
     var https3 = require("https");
-    var parseUrl = require("url").parse;
+    var parseUrl2 = require("url").parse;
     var fs4 = require("fs");
     var Stream = require("stream").Stream;
     var crypto3 = require("crypto");
@@ -33493,7 +33493,7 @@ var require_form_data = __commonJS({
       var options;
       var defaults2 = { method: "post" };
       if (typeof params === "string") {
-        params = parseUrl(params);
+        params = parseUrl2(params);
         options = populate({
           port: params.port,
           path: params.pathname,
@@ -33547,80 +33547,6 @@ var require_form_data = __commonJS({
     };
     setToStringTag(FormData3.prototype, "FormData");
     module2.exports = FormData3;
-  }
-});
-
-// node_modules/proxy-from-env/index.js
-var require_proxy_from_env = __commonJS({
-  "node_modules/proxy-from-env/index.js"(exports2) {
-    "use strict";
-    var parseUrl = require("url").parse;
-    var DEFAULT_PORTS = {
-      ftp: 21,
-      gopher: 70,
-      http: 80,
-      https: 443,
-      ws: 80,
-      wss: 443
-    };
-    var stringEndsWith = String.prototype.endsWith || function(s) {
-      return s.length <= this.length && this.indexOf(s, this.length - s.length) !== -1;
-    };
-    function getProxyForUrl(url2) {
-      var parsedUrl = typeof url2 === "string" ? parseUrl(url2) : url2 || {};
-      var proto = parsedUrl.protocol;
-      var hostname = parsedUrl.host;
-      var port = parsedUrl.port;
-      if (typeof hostname !== "string" || !hostname || typeof proto !== "string") {
-        return "";
-      }
-      proto = proto.split(":", 1)[0];
-      hostname = hostname.replace(/:\d*$/, "");
-      port = parseInt(port) || DEFAULT_PORTS[proto] || 0;
-      if (!shouldProxy(hostname, port)) {
-        return "";
-      }
-      var proxy = getEnv("npm_config_" + proto + "_proxy") || getEnv(proto + "_proxy") || getEnv("npm_config_proxy") || getEnv(
-      "all_proxy");
-      if (proxy && proxy.indexOf("://") === -1) {
-        proxy = proto + "://" + proxy;
-      }
-      return proxy;
-    }
-    __name(getProxyForUrl, "getProxyForUrl");
-    function shouldProxy(hostname, port) {
-      var NO_PROXY = (getEnv("npm_config_no_proxy") || getEnv("no_proxy")).toLowerCase();
-      if (!NO_PROXY) {
-        return true;
-      }
-      if (NO_PROXY === "*") {
-        return false;
-      }
-      return NO_PROXY.split(/[,\s]/).every(function(proxy) {
-        if (!proxy) {
-          return true;
-        }
-        var parsedProxy = proxy.match(/^(.+):(\d+)$/);
-        var parsedProxyHostname = parsedProxy ? parsedProxy[1] : proxy;
-        var parsedProxyPort = parsedProxy ? parseInt(parsedProxy[2]) : 0;
-        if (parsedProxyPort && parsedProxyPort !== port) {
-          return true;
-        }
-        if (!/^[.*]/.test(parsedProxyHostname)) {
-          return hostname !== parsedProxyHostname;
-        }
-        if (parsedProxyHostname.charAt(0) === "*") {
-          parsedProxyHostname = parsedProxyHostname.slice(1);
-        }
-        return !stringEndsWith.call(hostname, parsedProxyHostname);
-      });
-    }
-    __name(shouldProxy, "shouldProxy");
-    function getEnv(key) {
-      return process.env[key.toLowerCase()] || process.env[key.toUpperCase()] || "";
-    }
-    __name(getEnv, "getEnv");
-    exports2.getProxyForUrl = getProxyForUrl;
   }
 });
 
@@ -33970,7 +33896,7 @@ var require_follow_redirects = __commonJS({
         removeMatchingHeaders(/^content-/i, this._options.headers);
       }
       var currentHostHeader = removeMatchingHeaders(/^host$/i, this._options.headers);
-      var currentUrlParts = parseUrl(this._currentUrl);
+      var currentUrlParts = parseUrl2(this._currentUrl);
       var currentHost = currentHostHeader || currentUrlParts.host;
       var currentUrl = /^\w+:/.test(location) ? this._currentUrl : url2.format(Object.assign(currentUrlParts, { host: currentHost }));
       var redirectUrl = resolveUrl(location, currentUrl);
@@ -34010,7 +33936,7 @@ var require_follow_redirects = __commonJS({
           if (isURL(input)) {
             input = spreadUrlObject(input);
           } else if (isString2(input)) {
-            input = spreadUrlObject(parseUrl(input));
+            input = spreadUrlObject(parseUrl2(input));
           } else {
             callback = options;
             options = validateUrl(input);
@@ -34050,7 +33976,7 @@ var require_follow_redirects = __commonJS({
     function noop2() {
     }
     __name(noop2, "noop");
-    function parseUrl(input) {
+    function parseUrl2(input) {
       var parsed;
       if (useNativeURL) {
         parsed = new URL2(input);
@@ -34062,9 +33988,9 @@ var require_follow_redirects = __commonJS({
       }
       return parsed;
     }
-    __name(parseUrl, "parseUrl");
+    __name(parseUrl2, "parseUrl");
     function resolveUrl(relative2, base) {
-      return useNativeURL ? new URL2(relative2, base) : parseUrl(url2.resolve(base, relative2));
+      return useNativeURL ? new URL2(relative2, base) : parseUrl2(url2.resolve(base, relative2));
     }
     __name(resolveUrl, "resolveUrl");
     function validateUrl(input) {
@@ -40650,6 +40576,16 @@ function info(message) {
 }
 __name(info, "info");
 
+// utils/src/run.js
+var run = /* @__PURE__ */ __name(async (action2) => {
+  try {
+    await action2();
+  } catch (err) {
+    setFailed(err.message);
+  }
+}, "run");
+var run_default = run;
+
 // utils/src/load-binary.js
 var import_node_fs = __toESM(require("node:fs"), 1);
 var import_node_path2 = __toESM(require("node:path"), 1);
@@ -42288,7 +42224,7 @@ function normalizeValue(value) {
   if (value === false || value == null) {
     return value;
   }
-  return utils_default.isArray(value) ? value.map(normalizeValue) : String(value);
+  return utils_default.isArray(value) ? value.map(normalizeValue) : String(value).replace(/[\r\n]+$/, "");
 }
 __name(normalizeValue, "normalizeValue");
 function parseTokens(str) {
@@ -42615,8 +42551,78 @@ function buildFullPath(baseURL, requestedURL, allowAbsoluteUrls) {
 }
 __name(buildFullPath, "buildFullPath");
 
+// node_modules/proxy-from-env/index.js
+var DEFAULT_PORTS = {
+  ftp: 21,
+  gopher: 70,
+  http: 80,
+  https: 443,
+  ws: 80,
+  wss: 443
+};
+function parseUrl(urlString) {
+  try {
+    return new URL(urlString);
+  } catch {
+    return null;
+  }
+}
+__name(parseUrl, "parseUrl");
+function getProxyForUrl(url2) {
+  var parsedUrl = (typeof url2 === "string" ? parseUrl(url2) : url2) || {};
+  var proto = parsedUrl.protocol;
+  var hostname = parsedUrl.host;
+  var port = parsedUrl.port;
+  if (typeof hostname !== "string" || !hostname || typeof proto !== "string") {
+    return "";
+  }
+  proto = proto.split(":", 1)[0];
+  hostname = hostname.replace(/:\d*$/, "");
+  port = parseInt(port) || DEFAULT_PORTS[proto] || 0;
+  if (!shouldProxy(hostname, port)) {
+    return "";
+  }
+  var proxy = getEnv(proto + "_proxy") || getEnv("all_proxy");
+  if (proxy && proxy.indexOf("://") === -1) {
+    proxy = proto + "://" + proxy;
+  }
+  return proxy;
+}
+__name(getProxyForUrl, "getProxyForUrl");
+function shouldProxy(hostname, port) {
+  var NO_PROXY = getEnv("no_proxy").toLowerCase();
+  if (!NO_PROXY) {
+    return true;
+  }
+  if (NO_PROXY === "*") {
+    return false;
+  }
+  return NO_PROXY.split(/[,\s]/).every(function(proxy) {
+    if (!proxy) {
+      return true;
+    }
+    var parsedProxy = proxy.match(/^(.+):(\d+)$/);
+    var parsedProxyHostname = parsedProxy ? parsedProxy[1] : proxy;
+    var parsedProxyPort = parsedProxy ? parseInt(parsedProxy[2]) : 0;
+    if (parsedProxyPort && parsedProxyPort !== port) {
+      return true;
+    }
+    if (!/^[.*]/.test(parsedProxyHostname)) {
+      return hostname !== parsedProxyHostname;
+    }
+    if (parsedProxyHostname.charAt(0) === "*") {
+      parsedProxyHostname = parsedProxyHostname.slice(1);
+    }
+    return !hostname.endsWith(parsedProxyHostname);
+  });
+}
+__name(shouldProxy, "shouldProxy");
+function getEnv(key) {
+  return process.env[key.toLowerCase()] || process.env[key.toUpperCase()] || "";
+}
+__name(getEnv, "getEnv");
+
 // node_modules/axios/lib/adapters/http.js
-var import_proxy_from_env = __toESM(require_proxy_from_env(), 1);
 var import_http = __toESM(require("http"), 1);
 var import_https = __toESM(require("https"), 1);
 var import_http2 = __toESM(require("http2"), 1);
@@ -42625,7 +42631,7 @@ var import_follow_redirects = __toESM(require_follow_redirects(), 1);
 var import_zlib = __toESM(require("zlib"), 1);
 
 // node_modules/axios/lib/env/data.js
-var VERSION = "1.13.6";
+var VERSION = "1.14.0";
 
 // node_modules/axios/lib/helpers/parseProtocol.js
 function parseProtocol(url2) {
@@ -43165,6 +43171,9 @@ var Http2Sessions = class {
           } else {
             entries.splice(i, 1);
           }
+          if (!session.closed) {
+            session.close();
+          }
           return;
         }
       }
@@ -43211,7 +43220,7 @@ __name(dispatchBeforeRedirect, "dispatchBeforeRedirect");
 function setProxy(options, configProxy, location) {
   let proxy = configProxy;
   if (!proxy && proxy !== false) {
-    const proxyUrl = import_proxy_from_env.default.getProxyForUrl(location);
+    const proxyUrl = getProxyForUrl(location);
     if (proxyUrl) {
       proxy = new URL(proxyUrl);
     }
@@ -44274,14 +44283,16 @@ var factory = /* @__PURE__ */ __name((env) => {
   encode(str))(new TextEncoder2()) : async (str) => new Uint8Array(await new Request(str).arrayBuffer()));
   const supportsRequestStream = isRequestSupported && isReadableStreamSupported && test(() => {
     let duplexAccessed = false;
+    const body = new ReadableStream2();
     const hasContentType = new Request(platform_default.origin, {
-      body: new ReadableStream2(),
+      body,
       method: "POST",
       get duplex() {
         duplexAccessed = true;
         return "half";
       }
     }).headers.has("Content-Type");
+    body.cancel();
     return duplexAccessed && !hasContentType;
   });
   const supportsResponseStream = isResponseSupported && isReadableStreamSupported && test(() => utils_default.isReadableStream(
@@ -45214,16 +45225,6 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary, version, downloadUr
     (cachedTool) => downloadIfMissing(options, cachedTool)
   );
 }, "loadTool");
-
-// utils/src/run.js
-var run = /* @__PURE__ */ __name(async (action2) => {
-  try {
-    await action2();
-  } catch (err) {
-    setFailed(err.message);
-  }
-}, "run");
-var run_default = run;
 
 // rs-permission-converter/src/permconv.js
 var import_os4 = __toESM(require("os"), 1);

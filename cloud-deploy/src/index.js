@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
+import { setupGcloud, withGcloud } from 'setup-gcloud/src/index.js';
 
 import projectInfo from '../../cloud-run/src/project-info.js';
-import { setupGcloud } from '../../setup-gcloud/src/index.js';
 import { failIfNotTrunkBased } from '../../utils/src/index.js';
 import buildManifest from './manifests/build-manifest.js';
 import { imageTag as collectorVersion } from './manifests/collector-sidecar.js';
@@ -36,8 +36,6 @@ const action = async () => {
   const migrate = `${updateDns}`.trim().toLowerCase() === 'always';
   core.info(`update-dns set to '${updateDns}' results in migrate=${migrate}`);
 
-  // const verbose = (core.getInput('verbose') || 'false');
-
   failIfNotTrunkBased();
 
   // Ensure our gcloud is available and installed.
@@ -45,30 +43,36 @@ const action = async () => {
 
   const { project: clanName, env } = projectInfo(projectID);
 
-  const http2Certificate = await readSecret(
-    serviceAccountKeyPipeline,
-    env,
-    'envoy-http2-certs',
-    'HTTPS_CERTIFICATES',
-  );
-  const internalHttpsCertificateKey = await readSecret(
-    serviceAccountKeyPipeline,
-    env,
-    'internal-https-certs-key',
-    'INTERNAL_HTTPS_CERTIFICATES_KEY',
-  );
-  const internalHttpsCertificateCrt = await readSecret(
-    serviceAccountKeyPipeline,
-    env,
-    'internal-https-certs-crt',
-    'INTERNAL_HTTPS_CERTIFICATES_CRT',
-  );
-  await readSecret(
-    serviceAccountKeyPipeline,
-    env,
-    'sec-launchdarkly-sdk-key',
-    'SEC_LAUNCHDARKLY_SDK_KEY',
-  );
+  const [
+    http2Certificate,
+    internalHttpsCertificateKey,
+    internalHttpsCertificateCrt,
+  ] = await withGcloud(serviceAccountKeyPipeline, async () => [
+    await readSecret(
+      serviceAccountKeyPipeline,
+      env,
+      'envoy-http2-certs',
+      'HTTPS_CERTIFICATES',
+    ),
+    await readSecret(
+      serviceAccountKeyPipeline,
+      env,
+      'internal-https-certs-key',
+      'INTERNAL_HTTPS_CERTIFICATES_KEY',
+    ),
+    await readSecret(
+      serviceAccountKeyPipeline,
+      env,
+      'internal-https-certs-crt',
+      'INTERNAL_HTTPS_CERTIFICATES_CRT',
+    ),
+    await readSecret(
+      serviceAccountKeyPipeline,
+      env,
+      'sec-launchdarkly-sdk-key',
+      'SEC_LAUNCHDARKLY_SDK_KEY',
+    ),
+  ]);
 
   const deployYaml = loadServiceDefinition(serviceFile);
   const {

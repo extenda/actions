@@ -3,34 +3,17 @@ import path from 'node:path';
 
 import { restoreCache, saveCache } from '@actions/cache';
 import * as core from '@actions/core';
-import * as io from '@actions/io';
+import { loadTool } from 'action-utils';
 import glob from 'fast-glob';
-import { v4 as uuid } from 'uuid';
 
-import createKeyFile from '../../utils/src/create-key-file.js';
-import { loadTool } from '../../utils/src/index.js';
+import { authenticateGcloud } from './auth-gcloud.js';
 import getDownloadUrl from './download-url.js';
 import { execGcloud } from './exec-gcloud.js';
+import { getJobScope } from './job-scope.js';
 import getLatestVersion from './latest-version.js';
 
 // Increment this version if the list of installed components are modified.
 const CACHE_VERSION = '2';
-
-/**
- * Copy the credentials file outside the working directory. We want to store
- * in a directory that is hard to accidentally include in docker contexts or
- * gcloud tarballs.
- *
- * @param tmpKeyFile the temporary credentials key file
- * @returns {Promise<string|*>} the path to the created credentials file
- */
-export const copyCredentials = async (tmpKeyFile) => {
-  if (!process.env.RUNNER_TEMP) {
-    return tmpKeyFile;
-  }
-  const dest = path.join(process.env.RUNNER_TEMP, uuid());
-  return io.cp(tmpKeyFile, dest).then(() => dest);
-};
 
 const getGcloudVersion = async (providedVersion) => {
   let semver = providedVersion;
@@ -77,6 +60,13 @@ const configureCloudSdkPython = async (toolPath) => {
   return toolPath;
 };
 
+const isolateConfigDir = async (toolPath = undefined) => {
+  const configDirPath = getJobScope({ prefix: 'gcloud-config' });
+  fs.mkdirSync(configDirPath, { recursive: true });
+  core.exportVariable('CLOUDSDK_CONFIG', configDirPath);
+  return toolPath;
+};
+
 /**
  * Install additional gcloud components. This method only runs if gcloud isn't cached.
  * Remember to bump the CACHE_VERSION constant if you modify this method.
@@ -114,38 +104,6 @@ const installComponents = async (toolPath) => {
   return null;
 };
 
-/**
- * Authenticate gcloud with provided service account.
- * @param serviceAccountKey the service account key
- * @param exportCredentials flag indicating if credentials env var should be exported
- * @returns {Promise<string>} a promise that completes with the project ID
- */
-const authenticateGcloud = async (serviceAccountKey, exportCredentials) => {
-  const tmpKeyFile = createKeyFile(serviceAccountKey);
-
-  await execGcloud([
-    '--quiet',
-    'auth',
-    'activate-service-account',
-    '--key-file',
-    tmpKeyFile,
-  ]);
-
-  if (exportCredentials) {
-    await copyCredentials(tmpKeyFile).then((keyFile) => {
-      core.info('Export GOOGLE_APPLICATION_CREDENTIALS');
-      core.exportVariable('GOOGLE_APPLICATION_CREDENTIALS', keyFile);
-    });
-  }
-
-  const { project_id: projectId = '' } = JSON.parse(
-    fs.readFileSync(tmpKeyFile, 'utf8'),
-  );
-
-  core.exportVariable('CLOUDSDK_CORE_PROJECT', projectId);
-  return projectId;
-};
-
 const setupGcloud = async (
   serviceAccountKey,
   version = 'latest',
@@ -156,6 +114,8 @@ const setupGcloud = async (
     core.info(
       `Reuse already installed gcloud (requested=${version}, actual=${process.env.GCLOUD_INSTALLED_VERSION})`,
     );
+    // Ensure CLOUDSDK_CONFIG directory exists for reused gcloud.
+    await isolateConfigDir();
   } else {
     // Restore from cache or install on cache-miss.
     const gcloudVersion = await getGcloudVersion(version);
@@ -183,6 +143,7 @@ const setupGcloud = async (
         downloadUrl,
       })
         .then(updatePath)
+        .then(isolateConfigDir)
         .then(configureCloudSdkPython)
         .then(installComponents)
         .then(() => saveCache([cachePath], primaryCacheKey))
@@ -196,7 +157,9 @@ const setupGcloud = async (
         });
     } else {
       core.info(`Use cached gcloud ${gcloudVersion}`);
-      await updatePath(cachePath).then(configureCloudSdkPython);
+      await updatePath(cachePath)
+        .then(isolateConfigDir)
+        .then(configureCloudSdkPython);
     }
 
     core.exportVariable('GCLOUD_REQUESTED_VERSION', version);
