@@ -11107,7 +11107,7 @@ var require_env_http_proxy_agent = __commonJS({
     var { kClose, kDestroy, kClosed, kDestroyed, kDispatch, kNoProxyAgent, kHttpProxyAgent, kHttpsProxyAgent } = require_symbols();
     var ProxyAgent2 = require_proxy_agent();
     var Agent3 = require_agent();
-    var DEFAULT_PORTS = {
+    var DEFAULT_PORTS2 = {
       "http:": 80,
       "https:": 443
     };
@@ -11170,7 +11170,7 @@ var require_env_http_proxy_agent = __commonJS({
       #getProxyAgentForUrl(url3) {
         let { protocol, host: hostname, port } = url3;
         hostname = hostname.replace(/:\d*$/, "").toLowerCase();
-        port = Number.parseInt(port, 10) || DEFAULT_PORTS[protocol] || 0;
+        port = Number.parseInt(port, 10) || DEFAULT_PORTS2[protocol] || 0;
         if (!this.#shouldProxy(hostname, port)) {
           return this[kNoProxyAgent];
         }
@@ -33242,7 +33242,7 @@ var require_form_data = __commonJS({
     var path15 = require("path");
     var http4 = require("http");
     var https4 = require("https");
-    var parseUrl = require("url").parse;
+    var parseUrl2 = require("url").parse;
     var fs12 = require("fs");
     var Stream = require("stream").Stream;
     var crypto6 = require("crypto");
@@ -33496,7 +33496,7 @@ var require_form_data = __commonJS({
       var options;
       var defaults2 = { method: "post" };
       if (typeof params === "string") {
-        params = parseUrl(params);
+        params = parseUrl2(params);
         options = populate({
           port: params.port,
           path: params.pathname,
@@ -33550,80 +33550,6 @@ var require_form_data = __commonJS({
     };
     setToStringTag(FormData3.prototype, "FormData");
     module2.exports = FormData3;
-  }
-});
-
-// node_modules/proxy-from-env/index.js
-var require_proxy_from_env = __commonJS({
-  "node_modules/proxy-from-env/index.js"(exports2) {
-    "use strict";
-    var parseUrl = require("url").parse;
-    var DEFAULT_PORTS = {
-      ftp: 21,
-      gopher: 70,
-      http: 80,
-      https: 443,
-      ws: 80,
-      wss: 443
-    };
-    var stringEndsWith = String.prototype.endsWith || function(s) {
-      return s.length <= this.length && this.indexOf(s, this.length - s.length) !== -1;
-    };
-    function getProxyForUrl(url3) {
-      var parsedUrl = typeof url3 === "string" ? parseUrl(url3) : url3 || {};
-      var proto = parsedUrl.protocol;
-      var hostname = parsedUrl.host;
-      var port = parsedUrl.port;
-      if (typeof hostname !== "string" || !hostname || typeof proto !== "string") {
-        return "";
-      }
-      proto = proto.split(":", 1)[0];
-      hostname = hostname.replace(/:\d*$/, "");
-      port = parseInt(port) || DEFAULT_PORTS[proto] || 0;
-      if (!shouldProxy(hostname, port)) {
-        return "";
-      }
-      var proxy = getEnv("npm_config_" + proto + "_proxy") || getEnv(proto + "_proxy") || getEnv("npm_config_proxy") || getEnv(
-      "all_proxy");
-      if (proxy && proxy.indexOf("://") === -1) {
-        proxy = proto + "://" + proxy;
-      }
-      return proxy;
-    }
-    __name(getProxyForUrl, "getProxyForUrl");
-    function shouldProxy(hostname, port) {
-      var NO_PROXY2 = (getEnv("npm_config_no_proxy") || getEnv("no_proxy")).toLowerCase();
-      if (!NO_PROXY2) {
-        return true;
-      }
-      if (NO_PROXY2 === "*") {
-        return false;
-      }
-      return NO_PROXY2.split(/[,\s]/).every(function(proxy) {
-        if (!proxy) {
-          return true;
-        }
-        var parsedProxy = proxy.match(/^(.+):(\d+)$/);
-        var parsedProxyHostname = parsedProxy ? parsedProxy[1] : proxy;
-        var parsedProxyPort = parsedProxy ? parseInt(parsedProxy[2]) : 0;
-        if (parsedProxyPort && parsedProxyPort !== port) {
-          return true;
-        }
-        if (!/^[.*]/.test(parsedProxyHostname)) {
-          return hostname !== parsedProxyHostname;
-        }
-        if (parsedProxyHostname.charAt(0) === "*") {
-          parsedProxyHostname = parsedProxyHostname.slice(1);
-        }
-        return !stringEndsWith.call(hostname, parsedProxyHostname);
-      });
-    }
-    __name(shouldProxy, "shouldProxy");
-    function getEnv(key) {
-      return process.env[key.toLowerCase()] || process.env[key.toUpperCase()] || "";
-    }
-    __name(getEnv, "getEnv");
-    exports2.getProxyForUrl = getProxyForUrl;
   }
 });
 
@@ -33973,7 +33899,7 @@ var require_follow_redirects = __commonJS({
         removeMatchingHeaders(/^content-/i, this._options.headers);
       }
       var currentHostHeader = removeMatchingHeaders(/^host$/i, this._options.headers);
-      var currentUrlParts = parseUrl(this._currentUrl);
+      var currentUrlParts = parseUrl2(this._currentUrl);
       var currentHost = currentHostHeader || currentUrlParts.host;
       var currentUrl = /^\w+:/.test(location) ? this._currentUrl : url3.format(Object.assign(currentUrlParts, { host: currentHost }));
       var redirectUrl = resolveUrl(location, currentUrl);
@@ -34013,7 +33939,7 @@ var require_follow_redirects = __commonJS({
           if (isURL(input)) {
             input = spreadUrlObject(input);
           } else if (isString2(input)) {
-            input = spreadUrlObject(parseUrl(input));
+            input = spreadUrlObject(parseUrl2(input));
           } else {
             callback = options;
             options = validateUrl(input);
@@ -34053,7 +33979,7 @@ var require_follow_redirects = __commonJS({
     function noop2() {
     }
     __name(noop2, "noop");
-    function parseUrl(input) {
+    function parseUrl2(input) {
       var parsed;
       if (useNativeURL) {
         parsed = new URL3(input);
@@ -34065,9 +33991,9 @@ var require_follow_redirects = __commonJS({
       }
       return parsed;
     }
-    __name(parseUrl, "parseUrl");
+    __name(parseUrl2, "parseUrl");
     function resolveUrl(relative3, base) {
-      return useNativeURL ? new URL3(relative3, base) : parseUrl(url3.resolve(base, relative3));
+      return useNativeURL ? new URL3(relative3, base) : parseUrl2(url3.resolve(base, relative3));
     }
     __name(resolveUrl, "resolveUrl");
     function validateUrl(input) {
@@ -55363,9 +55289,9 @@ var require_package2 = __commonJS({
     module2.exports = {
       name: "joi",
       description: "Object schema validation",
-      version: "18.0.2",
+      version: "18.1.1",
       repository: {
-        url: "git://github.com/hapijs/joi",
+        url: "git://github.com/hapijs/joi.git",
         type: "git"
       },
       engines: {
@@ -55389,7 +55315,7 @@ var require_package2 = __commonJS({
         "@hapi/pinpoint": "^2.0.1",
         "@hapi/tlds": "^1.1.1",
         "@hapi/topo": "^6.0.2",
-        "@standard-schema/spec": "^1.0.0"
+        "@standard-schema/spec": "^1.1.0"
       },
       devDependencies: {
         "@hapi/bourne": "^3.0.0",
@@ -55398,6 +55324,7 @@ var require_package2 = __commonJS({
         "@hapi/joi-legacy-test": "npm:@hapi/joi@15.x.x",
         "@hapi/lab": "^26.0.0",
         "@types/node": "^20.17.47",
+        ajv: "^8.18.0",
         typescript: "^5.8.3"
       },
       scripts: {
@@ -55473,7 +55400,8 @@ var require_schemas = __commonJS({
       manifest: Joi.boolean(),
       method: Joi.function().allow(false),
       multi: Joi.boolean(),
-      validate: Joi.function()
+      validate: Joi.function(),
+      jsonSchema: Joi.function()
     });
     exports2.extension = Joi.object({
       type: Joi.alternatives([
@@ -55503,6 +55431,7 @@ var require_schemas = __commonJS({
       prepare: Joi.function().maxArity(3),
       rebuild: Joi.function().arity(1),
       rules: Joi.object().pattern(internals.nameRx, internals.rule),
+      jsonSchema: Joi.function(),
       terms: Joi.object().pattern(internals.nameRx, Joi.object({
         init: Joi.array().allow(null).required(),
         manifest: Joi.object().pattern(/.+/, [
@@ -55577,7 +55506,7 @@ var require_schemas = __commonJS({
       null,
       Joi.boolean(),
       Joi.function(),
-      Joi.number().allow(Infinity, -Infinity),
+      Joi.number().allow(Infinity, -Infinity, NaN),
       Joi.string().allow(""),
       Joi.symbol(),
       internals.desc.buffer,
@@ -56638,7 +56567,7 @@ functions");
         const processed = [];
         const head = parts.shift();
         if (head) {
-          processed.push(head);
+          processed.push(internals.decode(head));
         }
         for (const part of parts) {
           const raw = part[0] !== "{";
@@ -57116,6 +57045,18 @@ var require_common4 = __commonJS({
     exports2.default = function(value, defaultValue) {
       return value === void 0 ? defaultValue : value;
     };
+    exports2.intersect = function(set2, other) {
+      if (typeof set2.intersection === "function") {
+        return set2.intersection(other);
+      }
+      const result = /* @__PURE__ */ new Set();
+      for (const item of set2) {
+        if (other.has(item)) {
+          result.add(item);
+        }
+      }
+      return result;
+    };
     exports2.isIsoDate = function(date) {
       return internals.isoDate.test(date);
     };
@@ -57569,6 +57510,9 @@ var require_extend = __commonJS({
         }
       }
       def.rules = rules;
+      if (!def.jsonSchema) {
+        def.jsonSchema = parent.jsonSchema;
+      }
       const modifiers = Object.assign({}, parent.modifiers);
       if (def.modifiers) {
         for (const name in def.modifiers) {
@@ -58722,11 +58666,12 @@ var require_validator = __commonJS({
       }
       return outcome;
     };
-    exports2.standard = function(value, schema3) {
+    exports2.standard = function(value, schema3, options) {
+      const prefs = options?.libraryOptions;
       if (schema3.isAsync()) {
-        return exports2.entryAsync(value, schema3);
+        return exports2.entryAsync(value, schema3, prefs);
       }
-      return exports2.entry(value, schema3);
+      return exports2.entry(value, schema3, prefs);
     };
     internals.Mainstay = class {
       constructor(tracer, debug3, links) {
@@ -59284,7 +59229,12 @@ var require_base = __commonJS({
     var Trace = require_trace();
     var Validator = require_validator();
     var Values = require_values();
-    var internals = {};
+    var internals = {
+      standardTypes: /* @__PURE__ */ new Set(["string", "number", "integer", "boolean", "object", "array", "null"]),
+      jsonSchemaTarget: "draft-2020-12",
+      primitiveTypes: /* @__PURE__ */ new Set(["string", "number", "boolean"]),
+      nullSchema: /* @__PURE__ */ __name(() => ({ type: "null" }), "nullSchema")
+    };
     internals.Base = class {
       constructor(type2) {
         this.type = type2;
@@ -59315,6 +59265,116 @@ var require_base = __commonJS({
       describe() {
         assert4(typeof Manifest.describe === "function", "Manifest functionality disabled");
         return Manifest.describe(this);
+      }
+      $_jsonSchema(mode, options = {}) {
+        if (options.target !== void 0 && options.target !== internals.jsonSchemaTarget) {
+          throw new Error(`Unsupported JSON Schema target: ${options.target}`);
+        }
+        const rootCall = !options.$defs;
+        const defs = options.$defs ?? {};
+        let schema3 = {};
+        const isTypeAny = this.type === "any";
+        const isOnly = this._flags.only;
+        const valids = this._valids && Array.from(this._valids._values).filter((v) => v !== null);
+        let typesOverlap = true;
+        if (valids && valids.length && isOnly && !isTypeAny) {
+          const types2 = new Set(valids.map((v) => typeof v));
+          typesOverlap = types2.has(this.type) || this.type === "date" && types2.has("object");
+        }
+        if (!isTypeAny && typesOverlap && internals.standardTypes.has(this.type)) {
+          schema3.type = this.type;
+        }
+        if (this._flags.description) {
+          schema3.description = this._flags.description;
+        }
+        if (this._flags.default !== void 0 && typeof this._flags.default !== "function") {
+          schema3.default = this._flags.default;
+        }
+        const subOptions = { ...options, $defs: defs };
+        if (this._definition.jsonSchema && typesOverlap) {
+          schema3 = this._definition.jsonSchema(this, schema3, mode, subOptions);
+        }
+        for (const rule of this._rules) {
+          const definition = this._definition.rules[rule.name];
+          if (definition.jsonSchema && typesOverlap) {
+            schema3 = definition.jsonSchema(rule, schema3, isOnly, mode, subOptions);
+          }
+        }
+        if (this.$_terms.shared) {
+          for (const shared of this.$_terms.shared) {
+            defs[shared._flags.id] = shared.$_jsonSchema(mode, subOptions);
+          }
+        }
+        if (rootCall && Object.keys(defs).length) {
+          schema3.$defs = defs;
+        }
+        if (this._valids) {
+          const values = valids.filter((v) => typeof v !== "symbol");
+          if (values.length) {
+            if (this._flags.only) {
+              schema3.enum = values;
+              const list = Common.intersect(new Set(values.map((v) => typeof v)), internals.primitiveTypes);
+              if (list.size) {
+                const types2 = [...list];
+                schema3.type = types2.length === 1 ? types2[0] : types2;
+              }
+            } else {
+              const otherTypes = values.filter((v) => typeof v !== this.type || isTypeAny);
+              if (otherTypes.length && !(isTypeAny && !isOnly)) {
+                if (!schema3.anyOf) {
+                  schema3 = {
+                    anyOf: [schema3]
+                  };
+                }
+                schema3.anyOf.push({ enum: otherTypes });
+              }
+            }
+          }
+        }
+        if (this._valids && this._valids.has(null) && !(isTypeAny && !isOnly)) {
+          if (this._valids.length === 1 && (isTypeAny || isOnly)) {
+            schema3.type = "null";
+          } else if (schema3.type) {
+            schema3.type = [schema3.type, "null"];
+          } else if (schema3.anyOf) {
+            schema3.anyOf.unshift(internals.nullSchema());
+          } else {
+            schema3 = {
+              anyOf: [
+                internals.nullSchema(),
+                schema3
+              ]
+            };
+          }
+        }
+        if (this.$_terms.whens) {
+          const base = this.clone();
+          base.$_terms.whens = null;
+          const matches = [];
+          for (const when of this.$_terms.whens) {
+            const tests = when.is ? [when] : when.switch;
+            for (let i = 0; i < tests.length; ++i) {
+              const test2 = tests[i];
+              if (test2.then) {
+                matches.push(base.concat(test2.then).$_jsonSchema(mode, subOptions));
+              }
+              if (test2.otherwise) {
+                matches.push(base.concat(test2.otherwise).$_jsonSchema(mode, subOptions));
+              }
+              if (!test2.then || i === tests.length - 1 && !test2.otherwise) {
+                matches.push(base.$_jsonSchema(mode, subOptions));
+              }
+            }
+          }
+          const results = [];
+          for (const match2 of matches) {
+            if (!results.some((r) => deepEqual(r, match2))) {
+              results.push(match2);
+            }
+          }
+          return { anyOf: results };
+        }
+        return schema3;
       }
       // Rules
       allow(...values) {
@@ -60017,8 +60077,8 @@ l values due to previous valid rule");
         return {
           version: 1,
           vendor: "joi",
-          validate: /* @__PURE__ */ __name((value) => {
-            const result = Validator.standard(value, this);
+          validate: /* @__PURE__ */ __name((value, options) => {
+            const result = Validator.standard(value, this, options);
             if (result instanceof Promise) {
               return result.then(mapToStandardValue, mapToStandardError);
             }
@@ -60026,7 +60086,11 @@ l values due to previous valid rule");
               return mapToStandardValue(result.value);
             }
             return mapToStandardError(result.error);
-          }, "validate")
+          }, "validate"),
+          jsonSchema: {
+            input: /* @__PURE__ */ __name((options) => this.$_jsonSchema("input", options), "input"),
+            output: /* @__PURE__ */ __name((options) => this.$_jsonSchema("output", options), "output")
+          }
         };
       }
     };
@@ -60281,6 +60345,34 @@ var require_alternatives = __commonJS({
         }
         return internals.errors(errors, helpers);
       },
+      jsonSchema(schema3, res, mode, options) {
+        const matches = [];
+        for (const match2 of schema3.$_terms.matches) {
+          if (match2.schema) {
+            matches.push(match2.schema.$_jsonSchema(mode, options));
+          } else {
+            const tests = match2.is ? [match2] : match2.switch;
+            for (const test2 of tests) {
+              if (test2.then) {
+                matches.push(test2.then.$_jsonSchema(mode, options));
+              }
+              if (test2.otherwise) {
+                matches.push(test2.otherwise.$_jsonSchema(mode, options));
+              }
+            }
+          }
+        }
+        if (matches.length) {
+          delete res.type;
+          const matchMode = schema3._flags.match ?? "any";
+          if (matchMode === "one") {
+            res.oneOf = matches;
+          } else {
+            res.anyOf = matches;
+          }
+        }
+        return res;
+      },
       rules: {
         conditional: {
           method(condition, options) {
@@ -60485,6 +60577,62 @@ var require_array2 = __commonJS({
           return;
         }
         return { value: value.slice() };
+      },
+      jsonSchema(schema3, res, mode, options) {
+        const ordered = schema3.$_terms.ordered;
+        if (ordered.length) {
+          res.prefixItems = ordered.map((item) => item.$_jsonSchema(mode, options));
+        }
+        if (schema3.$_terms.items.length) {
+          let items;
+          if (schema3.$_terms.items.length === 1) {
+            items = schema3.$_terms.items[0].$_jsonSchema(mode, options);
+          } else {
+            items = {
+              anyOf: schema3.$_terms.items.map((item) => item.$_jsonSchema(mode, options))
+            };
+          }
+          if (ordered.length) {
+            res.unevaluatedItems = items;
+            res.minItems = ordered.length;
+          } else {
+            res.items = items;
+          }
+        } else if (ordered.length) {
+          res.unevaluatedItems = false;
+          res.minItems = ordered.length;
+          res.maxItems = ordered.length;
+        }
+        const contains = [];
+        for (const rule of schema3._rules) {
+          if (rule.name === "has") {
+            contains.push(rule.args.schema.$_jsonSchema(mode, options));
+          }
+        }
+        if (contains.length) {
+          if (contains.length === 1) {
+            res.contains = contains[0];
+          } else {
+            res.allOf = contains.map((item) => ({ contains: item }));
+          }
+        }
+        if (schema3._flags.single && schema3.$_terms.items.length) {
+          let items;
+          if (schema3.$_terms.items.length === 1) {
+            items = schema3.$_terms.items[0].$_jsonSchema(mode, options);
+          } else {
+            items = {
+              anyOf: schema3.$_terms.items.map((item) => item.$_jsonSchema(mode, options))
+            };
+          }
+          res = {
+            anyOf: [
+              res,
+              items
+            ]
+          };
+        }
+        return res;
       },
       rules: {
         has: {
@@ -60702,6 +60850,11 @@ var require_array2 = __commonJS({
             }
             return helpers.error("array." + name, { limit: args.limit, value });
           },
+          jsonSchema(rule, res) {
+            res.minItems = rule.args.limit;
+            res.maxItems = rule.args.limit;
+            return res;
+          },
           args: [
             {
               name: "limit",
@@ -60714,11 +60867,19 @@ var require_array2 = __commonJS({
         max: {
           method(limit) {
             return this.$_addRule({ name: "max", method: "length", args: { limit }, operator: "<=" });
+          },
+          jsonSchema(rule, res) {
+            res.maxItems = rule.args.limit;
+            return res;
           }
         },
         min: {
           method(limit) {
             return this.$_addRule({ name: "min", method: "length", args: { limit }, operator: ">=" });
+          },
+          jsonSchema(rule, res) {
+            res.minItems = rule.args.limit;
+            return res;
           }
         },
         ordered: {
@@ -60848,6 +61009,10 @@ be a function or a string");
               }
             }
             return value;
+          },
+          jsonSchema(rule, res) {
+            res.uniqueItems = true;
+            return res;
           },
           args: ["comparator", "options"],
           multi: true
@@ -61170,7 +61335,9 @@ var require_date = __commonJS({
     var Any = require_any();
     var Common = require_common4();
     var Template = require_template();
-    var internals = {};
+    var internals = {
+      formats: ["iso", "javascript", "unix"]
+    };
     internals.isDate = function(value) {
       return value instanceof Date;
     };
@@ -61191,6 +61358,11 @@ var require_date = __commonJS({
           return { value, errors: error2("date.base") };
         }
         return { value, errors: error2("date.format", { format }) };
+      },
+      jsonSchema(schema3, res, mode, options) {
+        res.type = "string";
+        res.format = "date-time";
+        return res;
       },
       rules: {
         compare: {
@@ -61216,13 +61388,20 @@ var require_date = __commonJS({
         },
         format: {
           method(format) {
-            assert4(["iso", "javascript", "unix"].includes(format), "Unknown date format", format);
+            assert4(internals.formats.includes(format), "Unknown date format", format);
             return this.$_setFlag("format", format);
           }
         },
         greater: {
           method(date) {
             return this.$_addRule({ name: "greater", method: "compare", args: { date }, operator: ">" });
+          },
+          jsonSchema(rule, res) {
+            const date = rule.args.date;
+            if (date instanceof Date) {
+              res["x-constraint"] = { ...res["x-constraint"], greater: date.toISOString() };
+            }
+            return res;
           }
         },
         iso: {
@@ -61233,16 +61412,37 @@ var require_date = __commonJS({
         less: {
           method(date) {
             return this.$_addRule({ name: "less", method: "compare", args: { date }, operator: "<" });
+          },
+          jsonSchema(rule, res) {
+            const date = rule.args.date;
+            if (date instanceof Date) {
+              res["x-constraint"] = { ...res["x-constraint"], less: date.toISOString() };
+            }
+            return res;
           }
         },
         max: {
           method(date) {
             return this.$_addRule({ name: "max", method: "compare", args: { date }, operator: "<=" });
+          },
+          jsonSchema(rule, res) {
+            const date = rule.args.date;
+            if (date instanceof Date) {
+              res["x-constraint"] = { ...res["x-constraint"], max: date.toISOString() };
+            }
+            return res;
           }
         },
         min: {
           method(date) {
             return this.$_addRule({ name: "min", method: "compare", args: { date }, operator: ">=" });
+          },
+          jsonSchema(rule, res) {
+            const date = rule.args.date;
+            if (date instanceof Date) {
+              res["x-constraint"] = { ...res["x-constraint"], min: date.toISOString() };
+            }
+            return res;
           }
         },
         timestamp: {
@@ -61519,6 +61719,49 @@ var require_keys = __commonJS({
       args(schema3, keys) {
         return schema3.keys(keys);
       },
+      jsonSchema(schema3, res, mode, options) {
+        res.type = "object";
+        if (schema3.$_terms.keys) {
+          res.properties = {};
+          const required = [];
+          for (const child2 of schema3.$_terms.keys) {
+            const jsonSchema = child2.schema.$_jsonSchema(mode, options);
+            res.properties[child2.key] = jsonSchema;
+            if (child2.schema._flags.presence === "required" || mode === "output" && child2.schema._flags.default !== void 0) {
+              required.push(child2.key);
+            }
+          }
+          if (required.length) {
+            res.required = required.sort();
+          }
+        }
+        if (schema3.$_terms.patterns) {
+          const patternProperties = {};
+          for (const pattern of schema3.$_terms.patterns) {
+            if (pattern.regex) {
+              patternProperties[pattern.regex.source] = pattern.rule.$_jsonSchema(mode, options);
+            } else {
+              const isAny = pattern.schema.type === "any";
+              if (isAny) {
+                res.additionalProperties = pattern.rule.$_jsonSchema(mode, options);
+              } else {
+                patternProperties[".*"] = pattern.rule.$_jsonSchema(mode, options);
+              }
+            }
+          }
+          if (Object.keys(patternProperties).length) {
+            res.patternProperties = patternProperties;
+          }
+        }
+        if (res.additionalProperties === void 0) {
+          const additionalProperties = schema3._flags.unknown === true || schema3._flags.unknown === void 0 && !schema3.
+          $_terms.keys && !schema3.$_terms.patterns && !schema3._flags.only;
+          if (additionalProperties === false) {
+            res.additionalProperties = false;
+          }
+        }
+        return res;
+      },
       validate(value, { schema: schema3, error: error2, state: state3, prefs }) {
         if (!value || typeof value !== schema3.$_property("typeof") || Array.isArray(value)) {
           return { value, errors: error2("object.base", { type: schema3.$_property("typeof") }) };
@@ -61665,6 +61908,11 @@ var require_keys = __commonJS({
             }
             return helpers.error("object." + name, { limit: args.limit, value });
           },
+          jsonSchema(rule, res) {
+            res.minProperties = rule.args.limit;
+            res.maxProperties = rule.args.limit;
+            return res;
+          },
           args: [
             {
               name: "limit",
@@ -61677,11 +61925,19 @@ var require_keys = __commonJS({
         max: {
           method(limit) {
             return this.$_addRule({ name: "max", method: "length", args: { limit }, operator: "<=" });
+          },
+          jsonSchema(rule, res) {
+            res.maxProperties = rule.args.limit;
+            return res;
           }
         },
         min: {
           method(limit) {
             return this.$_addRule({ name: "min", method: "length", args: { limit }, operator: ">=" });
+          },
+          jsonSchema(rule, res) {
+            res.minProperties = rule.args.limit;
+            return res;
           }
         },
         nand: {
@@ -62365,6 +62621,22 @@ var require_link = __commonJS({
       args(schema3, ref) {
         return schema3.ref(ref);
       },
+      jsonSchema(schema3, res, mode, options) {
+        if (!schema3.$_terms.link) {
+          return res;
+        }
+        const { ref } = schema3.$_terms.link[0];
+        if (ref.ancestor === "root" || ref.ancestor > 0) {
+          res.$ref = `#/${ref.path.map((p) => `properties/${p}`).join("/")}`;
+          return res;
+        }
+        if (ref.path.length === 1) {
+          res.$ref = `#/$defs/${ref.path[0]}`;
+        } else {
+          res.$ref = `#/${ref.path.slice(1).map((p) => `properties/${p}`).join("/")}`;
+        }
+        return res;
+      },
       validate(value, { schema: schema3, state: state3, prefs }) {
         assert4(schema3.$_terms.link, "Uninitialized link schema");
         const linked = internals.generate(schema3, value, state3, prefs);
@@ -62565,6 +62837,10 @@ var require_number = __commonJS({
         greater: {
           method(limit) {
             return this.$_addRule({ name: "greater", method: "compare", args: { limit }, operator: ">" });
+          },
+          jsonSchema(rule, res) {
+            res.exclusiveMinimum = rule.args.limit;
+            return res;
           }
         },
         integer: {
@@ -62576,21 +62852,37 @@ var require_number = __commonJS({
               return value;
             }
             return helpers.error("number.integer");
+          },
+          jsonSchema(rule, res) {
+            res.type = "integer";
+            return res;
           }
         },
         less: {
           method(limit) {
             return this.$_addRule({ name: "less", method: "compare", args: { limit }, operator: "<" });
+          },
+          jsonSchema(rule, res) {
+            res.exclusiveMaximum = rule.args.limit;
+            return res;
           }
         },
         max: {
           method(limit) {
             return this.$_addRule({ name: "max", method: "compare", args: { limit }, operator: "<=" });
+          },
+          jsonSchema(rule, res) {
+            res.maximum = rule.args.limit;
+            return res;
           }
         },
         min: {
           method(limit) {
             return this.$_addRule({ name: "min", method: "compare", args: { limit }, operator: ">=" });
+          },
+          jsonSchema(rule, res) {
+            res.minimum = rule.args.limit;
+            return res;
           }
         },
         multiple: {
@@ -62613,6 +62905,10 @@ var require_number = __commonJS({
             }
             return Math.round(pfactor * value) % Math.round(pfactor * base) === 0 ? value : helpers.error("number.multip\
 le", { multiple: options.args.base, value });
+          },
+          jsonSchema(rule, res) {
+            res.multipleOf = rule.args.base;
+            return res;
           },
           args: [
             {
@@ -62673,6 +62969,10 @@ rt"),
               return value;
             }
             return helpers.error(`number.${sign}`);
+          },
+          jsonSchema(rule, res) {
+            res["x-constraint"] = { ...res["x-constraint"], sign: rule.args.sign };
+            return res;
           }
         },
         unsafe: {
@@ -65265,6 +65565,17 @@ must be a positive integer" }, state3, prefs) };
           return { value, errors: error2("string.empty") };
         }
       },
+      jsonSchema(schema3, res, mode, options) {
+        const noEmpty = !schema3._valids?.has("") && !schema3._flags.only;
+        if (noEmpty) {
+          const min = schema3.$_getRule("min");
+          const length = schema3.$_getRule("length");
+          if ((!min || min.args.limit > 0) && (!length || length.args.limit > 0)) {
+            res.minLength = 1;
+          }
+        }
+        return res;
+      },
       rules: {
         alphanum: {
           method() {
@@ -65291,6 +65602,10 @@ must be a positive integer" }, state3, prefs) };
               return value;
             }
             return helpers.error("string.base64");
+          },
+          jsonSchema(rule, res) {
+            res.format = "base64";
+            return res;
           }
         },
         case: {
@@ -65348,6 +65663,10 @@ must be a positive integer" }, state3, prefs) };
               }
             }
             return helpers.error("string.dataUri");
+          },
+          jsonSchema(rule, res) {
+            res.format = "data-uri";
+            return res;
           }
         },
         domain: {
@@ -65388,6 +65707,10 @@ olean");
               return value;
             }
             return helpers.error("string.email", { value, invalids });
+          },
+          jsonSchema(rule, res) {
+            res.format = "email";
+            return res;
           }
         },
         guid: {
@@ -65452,6 +65775,10 @@ olean");
               return helpers.error("string.guid");
             }
             return value;
+          },
+          jsonSchema(rule, res) {
+            res.format = "uuid";
+            return res;
           }
         },
         hex: {
@@ -65473,6 +65800,10 @@ tional"');
               return helpers.error("string.hexAlign");
             }
             return value;
+          },
+          jsonSchema(rule, res) {
+            res.format = "hex";
+            return res;
           }
         },
         hostname: {
@@ -65484,6 +65815,10 @@ tional"');
               return value;
             }
             return helpers.error("string.hostname");
+          },
+          jsonSchema(rule, res) {
+            res.format = "hostname";
+            return res;
           }
         },
         insensitive: {
@@ -65506,6 +65841,15 @@ tional"');
               return helpers.error("string.ipVersion", { value, cidr: options.cidr, version: options.version });
             }
             return helpers.error("string.ip", { value, cidr: options.cidr });
+          },
+          jsonSchema(rule, res) {
+            const version3 = rule.args.options.version;
+            if (version3 && version3.length === 1) {
+              res.format = version3[0];
+            } else {
+              res.format = "ip";
+            }
+            return res;
           }
         },
         isoDate: {
@@ -65517,6 +65861,10 @@ tional"');
               return value;
             }
             return error2("string.isoDate");
+          },
+          jsonSchema(rule, res) {
+            res.format = "date-time";
+            return res;
           }
         },
         isoDuration: {
@@ -65528,6 +65876,10 @@ tional"');
               return value;
             }
             return helpers.error("string.isoDuration");
+          },
+          jsonSchema(rule, res) {
+            res.format = "duration";
+            return res;
           }
         },
         length: {
@@ -65540,6 +65892,11 @@ tional"');
               return value;
             }
             return helpers.error("string." + name, { limit: args.limit, value, encoding });
+          },
+          jsonSchema(rule, res) {
+            res.minLength = rule.args.limit;
+            res.maxLength = rule.args.limit;
+            return res;
           },
           args: [
             {
@@ -65560,11 +65917,21 @@ tional"');
           method(limit, encoding) {
             return internals.length(this, "max", limit, "<=", encoding);
           },
+          jsonSchema(rule, res) {
+            res.maxLength = rule.args.limit;
+            return res;
+          },
           args: ["limit", "encoding"]
         },
         min: {
           method(limit, encoding) {
             return internals.length(this, "min", limit, ">=", encoding);
+          },
+          jsonSchema(rule, res) {
+            if (rule.args.limit > 0) {
+              res.minLength = rule.args.limit;
+            }
+            return res;
           },
           args: ["limit", "encoding"]
         },
@@ -65603,6 +65970,10 @@ e");
             }
             return helpers.error(errorCode, { name: options.name, regex, value });
           },
+          jsonSchema(rule, res) {
+            res.pattern = rule.args.regex.source;
+            return res;
+          },
           args: ["regex", "options"],
           multi: true
         },
@@ -65630,6 +66001,10 @@ e");
               return value;
             }
             return helpers.error("string.token");
+          },
+          jsonSchema(rule, res) {
+            res.format = "token";
+            return res;
           }
         },
         trim: {
@@ -65694,6 +66069,10 @@ inSegments", "tlds"]);
               return helpers.error("string.uriCustomScheme", { scheme, value });
             }
             return helpers.error("string.uri");
+          },
+          jsonSchema(rule, res) {
+            res.format = "uri";
+            return res;
           }
         }
       },
@@ -65873,6 +66252,15 @@ of type object, function, or Symbol");
           return obj;
         }
       },
+      jsonSchema(schema3, json2, mode, options) {
+        const map2 = schema3.$_terms.map;
+        if (!map2.size) {
+          return {};
+        }
+        return {
+          anyOf: Array.from(map2.keys()).map((key) => ({ const: key }))
+        };
+      },
       messages: {
         "symbol.base": "{{#label}} must be a symbol",
         "symbol.map": "{{#label}} must be one of {{#map}}"
@@ -65906,6 +66294,11 @@ var require_binary2 = __commonJS({
           return { value, errors: error2("binary.base") };
         }
       },
+      jsonSchema(schema3, res, mode, options) {
+        res.type = "string";
+        res.format = "binary";
+        return res;
+      },
       rules: {
         encoding: {
           method(encoding) {
@@ -65923,6 +66316,11 @@ var require_binary2 = __commonJS({
             }
             return helpers.error("binary." + name, { limit: args.limit, value });
           },
+          jsonSchema(rule, res) {
+            res.minLength = rule.args.limit;
+            res.maxLength = rule.args.limit;
+            return res;
+          },
           args: [
             {
               name: "limit",
@@ -65935,11 +66333,19 @@ var require_binary2 = __commonJS({
         max: {
           method(limit) {
             return this.$_addRule({ name: "max", method: "length", args: { limit }, operator: "<=" });
+          },
+          jsonSchema(rule, res) {
+            res.maxLength = rule.args.limit;
+            return res;
           }
         },
         min: {
           method(limit) {
             return this.$_addRule({ name: "min", method: "length", args: { limit }, operator: ">=" });
+          },
+          jsonSchema(rule, res) {
+            res.minLength = rule.args.limit;
+            return res;
           }
         }
       },
@@ -74419,7 +74825,7 @@ function normalizeValue(value) {
   if (value === false || value == null) {
     return value;
   }
-  return utils_default.isArray(value) ? value.map(normalizeValue) : String(value);
+  return utils_default.isArray(value) ? value.map(normalizeValue) : String(value).replace(/[\r\n]+$/, "");
 }
 __name(normalizeValue, "normalizeValue");
 function parseTokens(str2) {
@@ -74746,8 +75152,78 @@ function buildFullPath(baseURL, requestedURL, allowAbsoluteUrls) {
 }
 __name(buildFullPath, "buildFullPath");
 
+// node_modules/proxy-from-env/index.js
+var DEFAULT_PORTS = {
+  ftp: 21,
+  gopher: 70,
+  http: 80,
+  https: 443,
+  ws: 80,
+  wss: 443
+};
+function parseUrl(urlString) {
+  try {
+    return new URL(urlString);
+  } catch {
+    return null;
+  }
+}
+__name(parseUrl, "parseUrl");
+function getProxyForUrl(url3) {
+  var parsedUrl = (typeof url3 === "string" ? parseUrl(url3) : url3) || {};
+  var proto = parsedUrl.protocol;
+  var hostname = parsedUrl.host;
+  var port = parsedUrl.port;
+  if (typeof hostname !== "string" || !hostname || typeof proto !== "string") {
+    return "";
+  }
+  proto = proto.split(":", 1)[0];
+  hostname = hostname.replace(/:\d*$/, "");
+  port = parseInt(port) || DEFAULT_PORTS[proto] || 0;
+  if (!shouldProxy(hostname, port)) {
+    return "";
+  }
+  var proxy = getEnv(proto + "_proxy") || getEnv("all_proxy");
+  if (proxy && proxy.indexOf("://") === -1) {
+    proxy = proto + "://" + proxy;
+  }
+  return proxy;
+}
+__name(getProxyForUrl, "getProxyForUrl");
+function shouldProxy(hostname, port) {
+  var NO_PROXY2 = getEnv("no_proxy").toLowerCase();
+  if (!NO_PROXY2) {
+    return true;
+  }
+  if (NO_PROXY2 === "*") {
+    return false;
+  }
+  return NO_PROXY2.split(/[,\s]/).every(function(proxy) {
+    if (!proxy) {
+      return true;
+    }
+    var parsedProxy = proxy.match(/^(.+):(\d+)$/);
+    var parsedProxyHostname = parsedProxy ? parsedProxy[1] : proxy;
+    var parsedProxyPort = parsedProxy ? parseInt(parsedProxy[2]) : 0;
+    if (parsedProxyPort && parsedProxyPort !== port) {
+      return true;
+    }
+    if (!/^[.*]/.test(parsedProxyHostname)) {
+      return hostname !== parsedProxyHostname;
+    }
+    if (parsedProxyHostname.charAt(0) === "*") {
+      parsedProxyHostname = parsedProxyHostname.slice(1);
+    }
+    return !hostname.endsWith(parsedProxyHostname);
+  });
+}
+__name(shouldProxy, "shouldProxy");
+function getEnv(key) {
+  return process.env[key.toLowerCase()] || process.env[key.toUpperCase()] || "";
+}
+__name(getEnv, "getEnv");
+
 // node_modules/axios/lib/adapters/http.js
-var import_proxy_from_env = __toESM(require_proxy_from_env(), 1);
 var import_http = __toESM(require("http"), 1);
 var import_https = __toESM(require("https"), 1);
 var import_http2 = __toESM(require("http2"), 1);
@@ -74756,7 +75232,7 @@ var import_follow_redirects = __toESM(require_follow_redirects(), 1);
 var import_zlib = __toESM(require("zlib"), 1);
 
 // node_modules/axios/lib/env/data.js
-var VERSION = "1.13.6";
+var VERSION = "1.14.0";
 
 // node_modules/axios/lib/helpers/parseProtocol.js
 function parseProtocol(url3) {
@@ -75296,6 +75772,9 @@ var Http2Sessions = class {
           } else {
             entries.splice(i, 1);
           }
+          if (!session.closed) {
+            session.close();
+          }
           return;
         }
       }
@@ -75342,7 +75821,7 @@ __name(dispatchBeforeRedirect, "dispatchBeforeRedirect");
 function setProxy(options, configProxy, location) {
   let proxy = configProxy;
   if (!proxy && proxy !== false) {
-    const proxyUrl = import_proxy_from_env.default.getProxyForUrl(location);
+    const proxyUrl = getProxyForUrl(location);
     if (proxyUrl) {
       proxy = new URL(proxyUrl);
     }
@@ -76405,14 +76884,16 @@ var factory = /* @__PURE__ */ __name((env) => {
   encode(str2))(new TextEncoder2()) : async (str2) => new Uint8Array(await new Request(str2).arrayBuffer()));
   const supportsRequestStream = isRequestSupported && isReadableStreamSupported && test(() => {
     let duplexAccessed = false;
+    const body2 = new ReadableStream2();
     const hasContentType = new Request(platform_default.origin, {
-      body: new ReadableStream2(),
+      body: body2,
       method: "POST",
       get duplex() {
         duplexAccessed = true;
         return "half";
       }
     }).headers.has("Content-Type");
+    body2.cancel();
     return duplexAccessed && !hasContentType;
   });
   const supportsResponseStream = isResponseSupported && isReadableStreamSupported && test(() => utils_default.isReadableStream(
@@ -110888,26 +111369,26 @@ __name(saveCache, "saveCache");
 
 // node_modules/@actions/cache/lib/generated/results/api/v1/cache.js
 var import_runtime_rpc = __toESM(require_commonjs2(), 1);
-var import_runtime321 = __toESM(require_commonjs(), 1);
 var import_runtime322 = __toESM(require_commonjs(), 1);
 var import_runtime323 = __toESM(require_commonjs(), 1);
 var import_runtime324 = __toESM(require_commonjs(), 1);
 var import_runtime325 = __toESM(require_commonjs(), 1);
+var import_runtime326 = __toESM(require_commonjs(), 1);
 
 // node_modules/@actions/cache/lib/generated/results/entities/v1/cachemetadata.js
-var import_runtime315 = __toESM(require_commonjs(), 1);
 var import_runtime316 = __toESM(require_commonjs(), 1);
 var import_runtime317 = __toESM(require_commonjs(), 1);
 var import_runtime318 = __toESM(require_commonjs(), 1);
 var import_runtime319 = __toESM(require_commonjs(), 1);
+var import_runtime320 = __toESM(require_commonjs(), 1);
 
 // node_modules/@actions/cache/lib/generated/results/entities/v1/cachescope.js
-var import_runtime309 = __toESM(require_commonjs(), 1);
 var import_runtime310 = __toESM(require_commonjs(), 1);
 var import_runtime311 = __toESM(require_commonjs(), 1);
 var import_runtime312 = __toESM(require_commonjs(), 1);
 var import_runtime313 = __toESM(require_commonjs(), 1);
-var CacheScope$Type = class extends import_runtime313.MessageType {
+var import_runtime314 = __toESM(require_commonjs(), 1);
+var CacheScope$Type = class extends import_runtime314.MessageType {
   static {
     __name(this, "CacheScope$Type");
   }
@@ -110931,9 +111412,9 @@ var CacheScope$Type = class extends import_runtime313.MessageType {
   }
   create(value) {
     const message = { scope: "", permission: "0" };
-    globalThis.Object.defineProperty(message, import_runtime312.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime313.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime311.reflectionMergePartial)(this, message, value);
+      (0, import_runtime312.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -110955,26 +111436,26 @@ var CacheScope$Type = class extends import_runtime313.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime310.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime311.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.scope !== "")
-      writer.tag(1, import_runtime309.WireType.LengthDelimited).string(message.scope);
+      writer.tag(1, import_runtime310.WireType.LengthDelimited).string(message.scope);
     if (message.permission !== "0")
-      writer.tag(2, import_runtime309.WireType.Varint).int64(message.permission);
+      writer.tag(2, import_runtime310.WireType.Varint).int64(message.permission);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime310.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime311.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CacheScope = new CacheScope$Type();
 
 // node_modules/@actions/cache/lib/generated/results/entities/v1/cachemetadata.js
-var CacheMetadata$Type = class extends import_runtime319.MessageType {
+var CacheMetadata$Type = class extends import_runtime320.MessageType {
   static {
     __name(this, "CacheMetadata$Type");
   }
@@ -110992,9 +111473,9 @@ var CacheMetadata$Type = class extends import_runtime319.MessageType {
   }
   create(value) {
     const message = { repositoryId: "0", scope: [] };
-    globalThis.Object.defineProperty(message, import_runtime318.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime319.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime317.reflectionMergePartial)(this, message, value);
+      (0, import_runtime318.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -111016,27 +111497,27 @@ var CacheMetadata$Type = class extends import_runtime319.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime316.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime317.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.repositoryId !== "0")
-      writer.tag(1, import_runtime315.WireType.Varint).int64(message.repositoryId);
+      writer.tag(1, import_runtime316.WireType.Varint).int64(message.repositoryId);
     for (let i = 0; i < message.scope.length; i++)
-      CacheScope.internalBinaryWrite(message.scope[i], writer.tag(2, import_runtime315.WireType.LengthDelimited).fork(),
+      CacheScope.internalBinaryWrite(message.scope[i], writer.tag(2, import_runtime316.WireType.LengthDelimited).fork(),
       options).join();
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime316.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime317.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CacheMetadata = new CacheMetadata$Type();
 
 // node_modules/@actions/cache/lib/generated/results/api/v1/cache.js
-var CreateCacheEntryRequest$Type = class extends import_runtime325.MessageType {
+var CreateCacheEntryRequest$Type = class extends import_runtime326.MessageType {
   static {
     __name(this, "CreateCacheEntryRequest$Type");
   }
@@ -111061,9 +111542,9 @@ var CreateCacheEntryRequest$Type = class extends import_runtime325.MessageType {
   }
   create(value) {
     const message = { key: "", version: "" };
-    globalThis.Object.defineProperty(message, import_runtime324.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime325.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime323.reflectionMergePartial)(this, message, value);
+      (0, import_runtime324.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -111089,27 +111570,27 @@ var CreateCacheEntryRequest$Type = class extends import_runtime325.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime322.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime323.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime321.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime322.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime321.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime322.WireType.LengthDelimited).string(message.key);
     if (message.version !== "")
-      writer.tag(3, import_runtime321.WireType.LengthDelimited).string(message.version);
+      writer.tag(3, import_runtime322.WireType.LengthDelimited).string(message.version);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime322.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime323.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CreateCacheEntryRequest = new CreateCacheEntryRequest$Type();
-var CreateCacheEntryResponse$Type = class extends import_runtime325.MessageType {
+var CreateCacheEntryResponse$Type = class extends import_runtime326.MessageType {
   static {
     __name(this, "CreateCacheEntryResponse$Type");
   }
@@ -111140,9 +111621,9 @@ var CreateCacheEntryResponse$Type = class extends import_runtime325.MessageType 
   }
   create(value) {
     const message = { ok: false, signedUploadUrl: "", message: "" };
-    globalThis.Object.defineProperty(message, import_runtime324.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime325.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime323.reflectionMergePartial)(this, message, value);
+      (0, import_runtime324.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -111168,26 +111649,26 @@ var CreateCacheEntryResponse$Type = class extends import_runtime325.MessageType 
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime322.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime323.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime321.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime322.WireType.Varint).bool(message.ok);
     if (message.signedUploadUrl !== "")
-      writer.tag(2, import_runtime321.WireType.LengthDelimited).string(message.signedUploadUrl);
+      writer.tag(2, import_runtime322.WireType.LengthDelimited).string(message.signedUploadUrl);
     if (message.message !== "")
-      writer.tag(3, import_runtime321.WireType.LengthDelimited).string(message.message);
+      writer.tag(3, import_runtime322.WireType.LengthDelimited).string(message.message);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime322.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime323.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CreateCacheEntryResponse = new CreateCacheEntryResponse$Type();
-var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime325.MessageType {
+var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime326.MessageType {
   static {
     __name(this, "FinalizeCacheEntryUploadRequest$Type");
   }
@@ -111219,9 +111700,9 @@ var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime325.Messa
   }
   create(value) {
     const message = { key: "", sizeBytes: "0", version: "" };
-    globalThis.Object.defineProperty(message, import_runtime324.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime325.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime323.reflectionMergePartial)(this, message, value);
+      (0, import_runtime324.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -111251,29 +111732,29 @@ var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime325.Messa
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime322.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime323.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime321.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime322.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime321.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime322.WireType.LengthDelimited).string(message.key);
     if (message.sizeBytes !== "0")
-      writer.tag(3, import_runtime321.WireType.Varint).int64(message.sizeBytes);
+      writer.tag(3, import_runtime322.WireType.Varint).int64(message.sizeBytes);
     if (message.version !== "")
-      writer.tag(4, import_runtime321.WireType.LengthDelimited).string(message.version);
+      writer.tag(4, import_runtime322.WireType.LengthDelimited).string(message.version);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime322.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime323.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var FinalizeCacheEntryUploadRequest = new FinalizeCacheEntryUploadRequest$Type();
-var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime325.MessageType {
+var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime326.MessageType {
   static {
     __name(this, "FinalizeCacheEntryUploadResponse$Type");
   }
@@ -111304,9 +111785,9 @@ var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime325.Mess
   }
   create(value) {
     const message = { ok: false, entryId: "0", message: "" };
-    globalThis.Object.defineProperty(message, import_runtime324.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime325.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime323.reflectionMergePartial)(this, message, value);
+      (0, import_runtime324.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -111332,26 +111813,26 @@ var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime325.Mess
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime322.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime323.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime321.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime322.WireType.Varint).bool(message.ok);
     if (message.entryId !== "0")
-      writer.tag(2, import_runtime321.WireType.Varint).int64(message.entryId);
+      writer.tag(2, import_runtime322.WireType.Varint).int64(message.entryId);
     if (message.message !== "")
-      writer.tag(3, import_runtime321.WireType.LengthDelimited).string(message.message);
+      writer.tag(3, import_runtime322.WireType.LengthDelimited).string(message.message);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime322.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime323.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var FinalizeCacheEntryUploadResponse = new FinalizeCacheEntryUploadResponse$Type();
-var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime325.MessageType {
+var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime326.MessageType {
   static {
     __name(this, "GetCacheEntryDownloadURLRequest$Type");
   }
@@ -111384,9 +111865,9 @@ var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime325.Messa
   }
   create(value) {
     const message = { key: "", restoreKeys: [], version: "" };
-    globalThis.Object.defineProperty(message, import_runtime324.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime325.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime323.reflectionMergePartial)(this, message, value);
+      (0, import_runtime324.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -111416,29 +111897,29 @@ var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime325.Messa
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime322.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime323.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime321.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime322.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime321.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime322.WireType.LengthDelimited).string(message.key);
     for (let i = 0; i < message.restoreKeys.length; i++)
-      writer.tag(3, import_runtime321.WireType.LengthDelimited).string(message.restoreKeys[i]);
+      writer.tag(3, import_runtime322.WireType.LengthDelimited).string(message.restoreKeys[i]);
     if (message.version !== "")
-      writer.tag(4, import_runtime321.WireType.LengthDelimited).string(message.version);
+      writer.tag(4, import_runtime322.WireType.LengthDelimited).string(message.version);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime322.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime323.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var GetCacheEntryDownloadURLRequest = new GetCacheEntryDownloadURLRequest$Type();
-var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime325.MessageType {
+var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime326.MessageType {
   static {
     __name(this, "GetCacheEntryDownloadURLResponse$Type");
   }
@@ -111469,9 +111950,9 @@ var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime325.Mess
   }
   create(value) {
     const message = { ok: false, signedDownloadUrl: "", matchedKey: "" };
-    globalThis.Object.defineProperty(message, import_runtime324.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime325.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime323.reflectionMergePartial)(this, message, value);
+      (0, import_runtime324.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -111497,21 +111978,21 @@ var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime325.Mess
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime322.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime323.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime321.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime322.WireType.Varint).bool(message.ok);
     if (message.signedDownloadUrl !== "")
-      writer.tag(2, import_runtime321.WireType.LengthDelimited).string(message.signedDownloadUrl);
+      writer.tag(2, import_runtime322.WireType.LengthDelimited).string(message.signedDownloadUrl);
     if (message.matchedKey !== "")
-      writer.tag(3, import_runtime321.WireType.LengthDelimited).string(message.matchedKey);
+      writer.tag(3, import_runtime322.WireType.LengthDelimited).string(message.matchedKey);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime322.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime323.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
