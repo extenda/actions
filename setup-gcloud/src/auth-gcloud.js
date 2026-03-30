@@ -1,10 +1,6 @@
 import * as core from '@actions/core';
 
 import {
-  authenticateJsonKey,
-  configureServiceAccount,
-} from './auth-json-key.js';
-import {
   clearAuthStack,
   loadAuthStack,
   updateAuthStack,
@@ -114,7 +110,6 @@ const setEnvironmentVariable = (key, value, exportVariable) => {
 };
 
 const populateEnvironment = ({
-  type,
   projectId,
   credentialsFilePath,
   exportCredentials,
@@ -125,15 +120,11 @@ const populateEnvironment = ({
     credentialsFilePath,
     exportCredentials,
   );
-  if (type === authType.widFederation) {
-    setEnvironmentVariable(
-      env.credentialsOverride,
-      credentialsFilePath,
-      exportCredentials,
-    );
-  } else {
-    setEnvironmentVariable(env.credentialsOverride, '', exportCredentials);
-  }
+  setEnvironmentVariable(
+    env.credentialsOverride,
+    credentialsFilePath,
+    exportCredentials,
+  );
 };
 
 export function getServiceAccountEmailAndProject(credentials) {
@@ -182,11 +173,10 @@ export async function authenticateGcloud(credentials, exportCredentials) {
       // Ensure projectId is set before executing any gcloud command
       process.env[env.projectId] = projectId;
 
-      if (authEntry.type === authType.jsonKey) {
-        await authenticateJsonKey(authEntry.credentialsFilePath);
-      } else {
-        // Credentials must always be exported to env in wid_federation mode
-        authEntry.exportCredentials = true;
+      // Credentials must always be exported to env for overrides.
+      authEntry.exportCredentials = true;
+
+      if (authEntry.type === authType.widFederation) {
         await workloadIdentityFederation(
           authEntry.credentialsFilePath,
           jsonCredentials,
@@ -241,10 +231,6 @@ export async function restorePreviousAccount(previousAccount) {
   }
 
   core.info(`Restore gcloud account ${previousAccount.email}`);
-
-  if (previousAccount.type === authType.jsonKey) {
-    await configureServiceAccount(previousAccount.email);
-  }
 
   // Restore the environment variables.
   populateEnvironment(previousAccount);

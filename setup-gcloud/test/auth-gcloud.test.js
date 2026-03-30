@@ -9,16 +9,11 @@ import {
   resetAuthStack,
   restorePreviousAccount,
 } from '../src/auth-gcloud.js';
-import {
-  authenticateJsonKey,
-  configureServiceAccount,
-} from '../src/auth-json-key.js';
 import { workloadIdentityFederation } from '../src/auth-wid-federation.js';
 import createJobScopedCredential from '../src/create-job-scoped-credential.js';
 
 vi.mock('@actions/core');
 vi.mock('../src/create-job-scoped-credential.js');
-vi.mock('../src/auth-json-key.js');
 vi.mock('../src/auth-wid-federation.js');
 
 const encodeCredentials = (credentials) =>
@@ -55,7 +50,6 @@ describe('auth-gcloud', () => {
     createJobScopedCredential.mockReturnValueOnce(
       '/runner/temp/setup-gcloud-xxx/credential-key.json',
     );
-    authenticateJsonKey.mockResolvedValueOnce(undefined);
 
     const projectId = await authenticateGcloud(
       encodeCredentials({
@@ -68,16 +62,15 @@ describe('auth-gcloud', () => {
 
     expect(projectId).toBe('project-a');
     expect(createJobScopedCredential).toHaveBeenCalledTimes(1);
-    expect(authenticateJsonKey).toHaveBeenCalledWith(
-      '/runner/temp/setup-gcloud-xxx/credential-key.json',
-    );
     expect(workloadIdentityFederation).not.toHaveBeenCalled();
-    expect(core.exportVariable).not.toHaveBeenCalled();
+    expect(core.exportVariable).toHaveBeenCalled();
     expect(process.env.CLOUDSDK_CORE_PROJECT).toBe('project-a');
     expect(process.env.GOOGLE_APPLICATION_CREDENTIALS).toBe(
       '/runner/temp/setup-gcloud-xxx/credential-key.json',
     );
-    expect(process.env.CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE).toBeUndefined();
+    expect(process.env.CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE).toBe(
+      '/runner/temp/setup-gcloud-xxx/credential-key.json',
+    );
     expect(getCurrentAccount()).toMatchObject({
       type: 'json_key',
       email: 'json-sa@example.iam.gserviceaccount.com',
@@ -105,7 +98,6 @@ describe('auth-gcloud', () => {
     );
 
     expect(projectId).toBe('project-wid');
-    expect(authenticateJsonKey).not.toHaveBeenCalled();
     expect(workloadIdentityFederation).toHaveBeenCalledWith(
       '/runner/temp/setup-gcloud-xxx/credential-wid.json',
       credentials,
@@ -135,7 +127,6 @@ describe('auth-gcloud', () => {
     createJobScopedCredential.mockReturnValue(
       '/runner/temp/setup-gcloud-xxx/credential-key.json',
     );
-    authenticateJsonKey.mockResolvedValue(undefined);
 
     const credentials = encodeCredentials({
       private_key: 'private-key',
@@ -147,7 +138,6 @@ describe('auth-gcloud', () => {
     await authenticateGcloud(credentials, false);
 
     expect(createJobScopedCredential).toHaveBeenCalledTimes(1);
-    expect(authenticateJsonKey).toHaveBeenCalledTimes(1);
     expect(workloadIdentityFederation).not.toHaveBeenCalled();
   });
 
@@ -159,7 +149,6 @@ describe('auth-gcloud', () => {
       .mockReturnValueOnce(
         '/runner/temp/setup-gcloud-xxx/credential-second.json',
       );
-    authenticateJsonKey.mockResolvedValue(undefined);
 
     await authenticateGcloud(
       encodeCredentials({
@@ -183,9 +172,6 @@ describe('auth-gcloud', () => {
     const result = await restorePreviousAccount(previousAccount);
     expect(result).toEqual(true);
 
-    expect(configureServiceAccount).toHaveBeenCalledWith(
-      'first@example.iam.gserviceaccount.com',
-    );
     expect(process.env.CLOUDSDK_CORE_PROJECT).toBe('project-first');
     expect(process.env.GOOGLE_APPLICATION_CREDENTIALS).toBe(
       '/runner/temp/setup-gcloud-xxx/credential-first.json',
@@ -196,7 +182,6 @@ describe('auth-gcloud', () => {
     createJobScopedCredential.mockReturnValueOnce(
       '/runner/temp/setup-gcloud-xxx/credential-current.json',
     );
-    authenticateJsonKey.mockResolvedValueOnce(undefined);
 
     await authenticateGcloud(
       encodeCredentials({
@@ -211,7 +196,6 @@ describe('auth-gcloud', () => {
     const result = await restorePreviousAccount(currentAccount);
     expect(result).toEqual(true);
 
-    expect(configureServiceAccount).not.toHaveBeenCalled();
     expect(process.env.CLOUDSDK_CORE_PROJECT).toBe('project-current');
   });
 
@@ -219,7 +203,6 @@ describe('auth-gcloud', () => {
     createJobScopedCredential.mockReturnValueOnce(
       '/runner/temp/setup-gcloud-xxx/credential-key.json',
     );
-    authenticateJsonKey.mockResolvedValueOnce(undefined);
 
     await authenticateGcloud(
       encodeCredentials({
@@ -259,7 +242,6 @@ describe('auth-gcloud', () => {
     ).rejects.toThrow();
 
     expect(createJobScopedCredential).not.toHaveBeenCalled();
-    expect(authenticateJsonKey).not.toHaveBeenCalled();
     expect(workloadIdentityFederation).not.toHaveBeenCalled();
     expect(getCurrentAccount()).toBeUndefined();
   });
@@ -268,7 +250,6 @@ describe('auth-gcloud', () => {
     await expect(authenticateGcloud('%%%')).rejects.toThrow();
 
     expect(createJobScopedCredential).not.toHaveBeenCalled();
-    expect(authenticateJsonKey).not.toHaveBeenCalled();
     expect(workloadIdentityFederation).not.toHaveBeenCalled();
     expect(getCurrentAccount()).toBeUndefined();
   });
@@ -285,7 +266,6 @@ describe('auth-gcloud', () => {
     ).rejects.toThrow('missing required field "project_id"');
 
     expect(createJobScopedCredential).not.toHaveBeenCalled();
-    expect(authenticateJsonKey).not.toHaveBeenCalled();
     expect(workloadIdentityFederation).not.toHaveBeenCalled();
     expect(getCurrentAccount()).toBeUndefined();
   });
@@ -302,7 +282,6 @@ describe('auth-gcloud', () => {
     ).rejects.toThrow('missing required field "client_email" or "email"');
 
     expect(createJobScopedCredential).not.toHaveBeenCalled();
-    expect(authenticateJsonKey).not.toHaveBeenCalled();
     expect(workloadIdentityFederation).not.toHaveBeenCalled();
     expect(getCurrentAccount()).toBeUndefined();
   });
@@ -320,7 +299,6 @@ describe('auth-gcloud', () => {
     ).rejects.toThrow('missing required field "email"');
 
     expect(createJobScopedCredential).not.toHaveBeenCalled();
-    expect(authenticateJsonKey).not.toHaveBeenCalled();
     expect(workloadIdentityFederation).not.toHaveBeenCalled();
     expect(getCurrentAccount()).toBeUndefined();
   });
@@ -337,7 +315,6 @@ describe('auth-gcloud', () => {
     ).rejects.toThrow('expected either "private_key"');
 
     expect(createJobScopedCredential).not.toHaveBeenCalled();
-    expect(authenticateJsonKey).not.toHaveBeenCalled();
     expect(workloadIdentityFederation).not.toHaveBeenCalled();
     expect(getCurrentAccount()).toBeUndefined();
   });
@@ -373,7 +350,6 @@ describe('auth-gcloud', () => {
     const result = await restorePreviousAccount(undefined);
     expect(result).toEqual(false);
 
-    expect(configureServiceAccount).not.toHaveBeenCalled();
     expect(process.env.CLOUDSDK_CORE_PROJECT).toBe('keep-project');
   });
 
@@ -386,7 +362,6 @@ describe('auth-gcloud', () => {
         '/runner/temp/setup-gcloud-xxx/credential-json-second.json',
       );
     workloadIdentityFederation.mockResolvedValueOnce(undefined);
-    authenticateJsonKey.mockResolvedValueOnce(undefined);
 
     await authenticateGcloud(
       encodeCredentials({
@@ -410,7 +385,6 @@ describe('auth-gcloud', () => {
 
     await restorePreviousAccount(previousAccount);
 
-    expect(configureServiceAccount).not.toHaveBeenCalled();
     expect(process.env.CLOUDSDK_CORE_PROJECT).toBe('project-wid');
     expect(process.env.GOOGLE_APPLICATION_CREDENTIALS).toBe(
       '/runner/temp/setup-gcloud-xxx/credential-wid-first.json',
