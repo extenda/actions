@@ -32,6 +32,9 @@ definitions: # list of config definitions for your system
         # if true, changes to this definition are forwarded to socketio
         # through ccc-socketio-connector
         enabled: true
+        # (optional) controls fanout: one Socket.IO message per tenant, per store, or per workstation
+        # matches max-tree-depth by default
+        # level: tenants/self | business-units/* | business-units/*/workstations/*
 ```
 
 # Action setup example

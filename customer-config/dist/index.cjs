@@ -116136,7 +116136,12 @@ var schema2 = import_joi.default.object({
       "enforce-array-item-uniqueness-by-id": import_joi.default.boolean().default(false).optional(),
       connectors: import_joi.default.object({
         socketio: import_joi.default.object({
-          enabled: import_joi.default.boolean().required()
+          enabled: import_joi.default.boolean().required(),
+          level: import_joi.default.string().valid(
+            "tenants/self",
+            "business-units/*",
+            "business-units/*/workstations/*"
+          ).optional()
         }).required()
       }).optional()
     })
