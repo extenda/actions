@@ -1,5 +1,6 @@
+import os from 'node:os';
+
 import * as exec from '@actions/exec';
-import os from 'os';
 
 const findExecutable = (executable) => {
   if (executable === 'gcloud' || !executable) {
@@ -16,16 +17,21 @@ const findExecutable = (executable) => {
  * @returns {Promise<string>} the trimmed standard output string
  */
 const execGcloud = async (args, executable = 'gcloud', silent = false) => {
-  let output = '';
-  await exec.exec(findExecutable(executable), args, {
+  const command = findExecutable(executable);
+  const result = await exec.getExecOutput(command, args, {
     silent,
-    listeners: {
-      stdout: (data) => {
-        output += data.toString('utf8');
-      },
-    },
+    ignoreReturnCode: true,
   });
-  return output.trim();
+
+  if (result.exitCode !== 0) {
+    let message = `The process '${command}' failed with exit code ${result.exitCode}`;
+    if (result.stderr) {
+      message = `${message}\n\n${result.stderr}`;
+    }
+    throw new Error(message);
+  }
+
+  return result.stdout.trim();
 };
 
 export { execGcloud, findExecutable };

@@ -5,9 +5,9 @@ import * as core from '@actions/core';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import glob from 'fast-glob';
+import { getIdToken } from 'setup-gcloud/src/index.js';
 
 import getDasWorkerBaseUrl from '../../../iam/src/das-worker-base-url.js';
-import { execGcloud } from '../../../setup-gcloud/src/index.js';
 
 axiosRetry(axios, {
   retries: 4,
@@ -56,11 +56,8 @@ const publishPolicies = async (serviceName, env, version, deployYaml) => {
     const systemId = `${permissionPrefix}.${systemName || serviceName}-${env}`;
     core.info(`Publish security policies for ${systemId}`);
     const dasWorkerBaseUrl = getDasWorkerBaseUrl(systemId);
-    const idToken = await execGcloud([
-      'auth',
-      'print-identity-token',
-      '--audiences=iam-das-worker',
-    ]);
+    const idToken = await getIdToken('iam-das-worker');
+
     await axios.put(
       `${dasWorkerBaseUrl}/systems/${systemId}/policies`,
       createPayload(version),

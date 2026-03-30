@@ -1,27 +1,30 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+import { restoreCache, saveCache } from '@actions/cache';
+import * as core from '@actions/core';
+import { loadTool } from 'action-utils';
 import mockFs from 'mock-fs';
+import os from 'os';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-// Mock out tools download
-vi.mock('../../utils/src/index.js', () => ({
-  loadTool: async () => Promise.resolve('/gcloud'),
-  findTool: vi.fn(),
-}));
-
-vi.mock('@actions/cache');
-vi.mock('@actions/exec');
-vi.mock('@actions/core');
-
-import { restoreCache } from '@actions/cache';
-import * as core from '@actions/core';
-import * as exec from '@actions/exec';
-import os from 'os';
-
+import { authenticateGcloud } from '../src/auth-gcloud.js';
+import { execGcloud } from '../src/exec-gcloud.js';
+import getLatestVersion from '../src/latest-version.js';
 import setupGcloud from '../src/setup-gcloud.js';
 
+// Mock out tools download.
+vi.mock('action-utils');
+
+vi.mock('@actions/cache');
+vi.mock('@actions/core');
+vi.mock('../src/auth-gcloud.js');
+vi.mock('../src/exec-gcloud.js');
+vi.mock('../src/latest-version.js');
+
 const jsonKey = {
+  private_key: 'test-private-key',
+  email: 'service-account@example.iam.gserviceaccount.com',
   project_id: 'test-project',
 };
 
@@ -40,16 +43,25 @@ describe('Setup Gcloud', () => {
 
   beforeEach(() => {
     process.env = {
+      ...orgEnv,
       RUNNER_TEMP: '/tmp',
       RUNNER_TOOL_CACHE: '/opt/toolcache',
       RUNNER_ARCH: 'X64',
-      ...orgEnv,
+      RUNNER_OS: 'Linux',
+      GITHUB_RUN_ID: '12345',
+      GITHUB_RUN_ATTEMPT: '1',
     };
 
     delete process.env['GCLOUD_REQUESTED_VERSION'];
+    delete process.env['GCLOUD_INSTALLED_VERSION'];
 
-    // Create temp directory structure with a dummy file to ensure it exists
-    // On macOS, /var is a symlink to /private/var, so we need both
+    loadTool.mockResolvedValue('/gcloud');
+    saveCache.mockResolvedValue(1);
+    authenticateGcloud.mockResolvedValue('test-project');
+    execGcloud.mockResolvedValue('');
+    getLatestVersion.mockResolvedValue('470.0.0');
+
+    // On macOS, /var is a symlink to /private/var, so we need both.
     const tmpDir = os.tmpdir();
     const privateTmpDir = `/private${tmpDir}`;
 
@@ -58,6 +70,8 @@ describe('Setup Gcloud', () => {
       '/gcloud/.install/.backup': { '.keep': '' },
       '/testdir/__pycache__': { '.keep': '' },
       [process.env.RUNNER_TEMP]: { '.keep': '' },
+      '/tmp/setup-gcloud-12345-1': { '.keep': '' },
+      '/tmp/gcloud-config-12345-1': { '.keep': '' },
       [tmpDir]: { '.keep': '' },
       [privateTmpDir]: { '.keep': '' },
     };
@@ -69,26 +83,29 @@ describe('Setup Gcloud', () => {
   });
 
   test('It can configure gcloud latest', async () => {
-    exec.exec.mockResolvedValueOnce(0);
-    restoreCache.mockResolvedValueOnce(undefined); // No cache entry.
+    restoreCache.mockResolvedValueOnce(undefined);
+
     await setupGcloud(base64Key);
-    expect(exec.exec).toHaveBeenCalledTimes(2);
-    expect(exec.exec).toHaveBeenNthCalledWith(
-      1,
-      'gcloud',
-      expect.arrayContaining(['install', 'gke-gcloud-auth-plugin']),
-      expect.anything(),
-    );
-    expect(exec.exec).toHaveBeenNthCalledWith(
-      2,
-      'gcloud',
-      expect.arrayContaining(['auth', 'activate-service-account']),
-      expect.anything(),
-    );
+
+    expect(getLatestVersion).toHaveBeenCalled();
+    expect(loadTool).toHaveBeenCalled();
+    expect(execGcloud).toHaveBeenCalledWith([
+      'components',
+      'install',
+      'gke-gcloud-auth-plugin',
+      'beta',
+      '--quiet',
+      '--no-user-output-enabled',
+    ]);
+    expect(authenticateGcloud).toHaveBeenCalledWith(base64Key, false);
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
     expect(core.exportVariable).toHaveBeenCalledWith(
-      'CLOUDSDK_CORE_PROJECT',
-      'test-project',
+      'GCLOUD_REQUESTED_VERSION',
+      'latest',
+    );
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'GCLOUD_INSTALLED_VERSION',
+      '470.0.0',
     );
     expect(fs.existsSync('/gcloud/innerdir/__pycache__')).toEqual(false);
     expect(fs.existsSync('/gcloud/.install/.backup')).toEqual(true);
@@ -96,55 +113,36 @@ describe('Setup Gcloud', () => {
   });
 
   test('It can configure gcloud 280.0.0 from cache', async () => {
-    exec.exec.mockResolvedValueOnce(0);
     restoreCache.mockResolvedValueOnce('found');
+
     await setupGcloud(base64Key, '280.0.0');
-    expect(exec.exec).toHaveBeenCalledTimes(1);
-    expect(exec.exec).toHaveBeenCalledWith(
+
+    const cachePath = path.join(
+      '/opt/toolcache',
       'gcloud',
-      expect.arrayContaining(['auth', 'activate-service-account']),
-      expect.anything(),
+      '280.0.0',
+      'x64',
+      'google-cloud-sdk',
     );
+    expect(core.addPath).toHaveBeenCalledWith(path.join(cachePath, 'bin'));
+    expect(execGcloud).not.toHaveBeenCalled();
+    expect(authenticateGcloud).toHaveBeenCalledWith(base64Key, false);
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
-    expect(core.exportVariable).toHaveBeenCalledWith(
-      'CLOUDSDK_CORE_PROJECT',
-      'test-project',
-    );
     expect(core.exportVariable).toHaveBeenCalledWith(
       'GCLOUD_INSTALLED_VERSION',
       '280.0.0',
     );
   });
 
-  test('It can export GOOGLE_APPLICATION_CREDENTIALS', async () => {
-    process.env.GCLOUD_REQUESTED_VERSION = 'diff';
-    exec.exec.mockResolvedValueOnce(0);
-    restoreCache.mockResolvedValueOnce(undefined);
-    await setupGcloud(base64Key, 'latest', true);
-    expect(core.exportVariable).toHaveBeenCalledWith(
-      'GOOGLE_APPLICATION_CREDENTIALS',
-      expect.any(String),
-    );
-  });
-
-  test('It can export GOOGLE_APPLICATION_CREDENTIALS and copy tmp file', async () => {
-    exec.exec.mockResolvedValueOnce(0);
-    restoreCache.mockResolvedValueOnce('found');
-    await setupGcloud(base64Key, 'latest', true);
-    expect(core.exportVariable).toHaveBeenNthCalledWith(
-      3,
-      'GOOGLE_APPLICATION_CREDENTIALS',
-      expect.any(String),
-    );
-    const keyFile = path.parse(core.exportVariable.mock.calls[2][1]);
-    expect(keyFile.dir).toEqual(path.normalize(process.env.RUNNER_TEMP));
-  });
-
   test('setup-gcloud installs once for multiple setups on same version', async () => {
-    exec.exec.mockResolvedValueOnce(0);
     process.env.GCLOUD_REQUESTED_VERSION = 'latest';
+    process.env.GCLOUD_INSTALLED_VERSION = '470.0.0';
+
     await setupGcloud(base64Key, 'latest', true);
+
     expect(restoreCache).not.toHaveBeenCalled();
+    expect(execGcloud).not.toHaveBeenCalled();
+    expect(authenticateGcloud).toHaveBeenCalledWith(base64Key, true);
 
     // Authenticate is still invoked.
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');

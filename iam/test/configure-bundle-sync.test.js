@@ -1,7 +1,7 @@
 import axios from 'axios';
+import { getIdToken } from 'setup-gcloud/src/index.js';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
-import { execGcloud } from '../../setup-gcloud/src/index.js';
 import configureBundleSync from '../src/configure-bundle-sync.js';
 
 vi.mock('../../setup-gcloud/src/index.js');
@@ -30,7 +30,7 @@ describe('Configure bundle sync', () => {
   };
 
   test('It configures systems and consumers', async () => {
-    execGcloud.mockResolvedValueOnce('idToken');
+    getIdToken.mockResolvedValueOnce('idToken');
     const mockPut = vi.fn().mockResolvedValueOnce({});
     axios.create.mockReturnValue({ put: mockPut });
 
@@ -40,11 +40,6 @@ describe('Configure bundle sync', () => {
       headers: { authorization: 'Bearer idToken' },
     });
 
-    expect(execGcloud).toHaveBeenCalledWith([
-      'auth',
-      'print-identity-token',
-      '--audiences=iam-das-worker',
-    ]);
     expect(mockPut).toHaveBeenCalledWith('/systems/tst.service1-prod');
     expect(mockPut).toHaveBeenCalledWith('/systems/tst.service2-prod');
     expect(mockPut).toHaveBeenCalledWith(
@@ -56,7 +51,7 @@ describe('Configure bundle sync', () => {
   });
 
   test('It throws on error', async () => {
-    execGcloud.mockResolvedValueOnce('idToken');
+    getIdToken.mockResolvedValueOnce('idToken');
     const mockPut = vi.fn().mockRejectedValueOnce(new Error('TEST'));
     axios.create.mockReturnValue({ put: mockPut });
 

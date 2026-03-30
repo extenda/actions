@@ -1,11 +1,10 @@
 import * as core from '@actions/core';
 import axios from 'axios';
+import { getIdToken } from 'setup-gcloud/src/index.js';
 
-import { execGcloud } from '../../setup-gcloud/src/index.js';
 import getDasWorkerBaseUrl from './das-worker-base-url.js';
 
-const getToken = async () =>
-  execGcloud(['auth', 'print-identity-token', '--audiences=iam-das-worker']);
+const getToken = async () => getIdToken('iam-das-worker');
 
 const configureBundleSync = async (iam, env) => {
   const { 'permission-prefix': permissionPrefix, services = [] } = iam;
