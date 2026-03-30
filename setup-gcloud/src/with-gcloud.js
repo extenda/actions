@@ -30,7 +30,7 @@ const withGcloud = async (serviceAccountKey, fn) => {
     typeof saProjectId === 'string'
   ) {
     // Already authenticated as the user. Just run the callback.
-    core.info(`Already running as ${saEmail}`);
+    core.debug(`Already running as ${saEmail}`);
     return await fn(saProjectId);
   }
 

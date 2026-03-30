@@ -101295,13 +101295,13 @@ __name(isCurrentAccount, "isCurrentAccount");
 var setEnvironmentVariable = /* @__PURE__ */ __name((key, value, exportVariable2) => {
   if (isNonEmptyString(value)) {
     if (exportVariable2) {
-      info(`Export ${key}`);
+      debug2(`Export ${key}`);
       exportVariable(key, value);
     }
     process.env[key] = value;
   } else {
     if (exportVariable2) {
-      info(`Unset ${key}`);
+      debug2(`Unset ${key}`);
       exportVariable(key, "");
     }
     delete process.env[key];
@@ -101347,7 +101347,7 @@ async function authenticateGcloud(credentials, exportCredentials) {
   if (!isCurrentAccount(authEntry)) {
     authEntry.credentialsFilePath = createJobScopedCredential(credentials);
     info(
-      `Authenticate gcloud account ${authEntry.email} with ${authEntry.type}`
+      `Authenticate gcloud account '${authEntry.email}' with ${authEntry.type}`
     );
     try {
       process.env[env.projectId] = projectId;
@@ -101393,7 +101393,7 @@ async function restorePreviousAccount(previousAccount) {
   }
   const authStack = loadAuthStack();
   authStack.pop();
-  info(`Restore gcloud account ${previousAccount.email}`);
+  info(`Restore gcloud account '${previousAccount.email}'`);
   authStack.push(previousAccount);
   saveAuthStack(authStack);
   populateEnvironment(previousAccount);
@@ -101606,7 +101606,7 @@ var withGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, fn) => {
   const previousAccount = getCurrentAccount();
   const { email: saEmail = null, projectId: saProjectId = null } = getServiceAccountEmailAndProject(serviceAccountKey);
   if (previousAccount && previousAccount.email === saEmail && typeof saProjectId === "string") {
-    info(`Already running as ${saEmail}`);
+    debug2(`Already running as ${saEmail}`);
     return await fn(saProjectId);
   }
   try {

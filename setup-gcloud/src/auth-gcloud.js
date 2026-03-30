@@ -92,13 +92,13 @@ function isCurrentAccount(auth) {
 const setEnvironmentVariable = (key, value, exportVariable) => {
   if (isNonEmptyString(value)) {
     if (exportVariable) {
-      core.info(`Export ${key}`);
+      core.debug(`Export ${key}`);
       core.exportVariable(key, value);
     }
     process.env[key] = value;
   } else {
     if (exportVariable) {
-      core.info(`Unset ${key}`);
+      core.debug(`Unset ${key}`);
       core.exportVariable(key, '');
     }
     delete process.env[key];
@@ -164,7 +164,7 @@ export async function authenticateGcloud(credentials, exportCredentials) {
     authEntry.credentialsFilePath = createJobScopedCredential(credentials);
 
     core.info(
-      `Authenticate gcloud account ${authEntry.email} with ${authEntry.type}`,
+      `Authenticate gcloud account '${authEntry.email}' with ${authEntry.type}`,
     );
 
     try {
@@ -230,7 +230,7 @@ export async function restorePreviousAccount(previousAccount) {
   // Pop the current account from the stack
   authStack.pop();
 
-  core.info(`Restore gcloud account ${previousAccount.email}`);
+  core.info(`Restore gcloud account '${previousAccount.email}'`);
 
   // Push the previous account to top of stack.
   authStack.push(previousAccount);
