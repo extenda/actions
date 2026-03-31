@@ -11,9 +11,12 @@ beforeEach(() => {
   vi.resetAllMocks();
 });
 
-test('It should return the id token', async () => {
+test('It should return the id token for WIF', async () => {
   execGcloud.mockResolvedValue('token');
-  getCurrentAccount.mockReturnValueOnce({ email: 'sa' });
+  getCurrentAccount.mockReturnValueOnce({
+    type: 'wid_federation',
+    email: 'sa',
+  });
 
   const token = await getIdToken('audience');
 
@@ -26,6 +29,23 @@ test('It should return the id token', async () => {
       '--impersonate-service-account=sa',
       '--include-email',
     ],
+    'gcloud',
+    true,
+  );
+});
+
+test('It should return the id token for JSON key', async () => {
+  execGcloud.mockResolvedValue('token');
+  getCurrentAccount.mockReturnValueOnce({
+    type: 'json_key',
+    email: 'sa',
+  });
+
+  const token = await getIdToken('audience');
+
+  expect(token).toBe('token');
+  expect(execGcloud).toHaveBeenCalledWith(
+    ['auth', 'print-identity-token', '--audiences=audience'],
     'gcloud',
     true,
   );
