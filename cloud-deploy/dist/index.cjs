@@ -105908,7 +105908,12 @@ var cloudrunManifestTemplate = /* @__PURE__ */ __name(async (name, image, opa, l
 // cloud-deploy/src/manifests/check-system.js
 var checkIamSystem = /* @__PURE__ */ __name(async (systemName) => {
   const bucketPointer = `gs://authz-bundles/systems/${systemName}.tar.gz`;
-  const result = await gcloud_output_default(["ls", bucketPointer], "gsutil", true, true).then(() => true).catch(() => false);
+  const result = await gcloud_output_default(
+    ["storage", "ls", bucketPointer],
+    "gcloud",
+    true,
+    true
+  ).then(() => true).catch(() => false);
   return result;
 }, "checkIamSystem");
 var check_system_default = checkIamSystem;

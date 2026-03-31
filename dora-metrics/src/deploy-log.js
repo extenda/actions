@@ -23,7 +23,7 @@ const generateFolders = async (
 
 const uploadToBucket = async (productName) =>
   exec
-    .exec('gsutil', ['cp', '-r', productName, 'gs://dora-metrics'])
+    .exec('gcloud', ['storage', 'cp', '-r', productName, 'gs://dora-metrics'])
     .catch((err) => {
       core.info(`upload to bucket failed reason: ${err}`);
       throw err;
