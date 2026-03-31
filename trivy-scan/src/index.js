@@ -47,12 +47,14 @@ const trivy = async (
   withGcloud(serviceAccountKey, async () => {
     await authenticateDocker(image);
 
+    core.startGroup(`Scanning image ${image} with Trivy...`);
     const scanResult = await trivyScan(image, {
       version,
       severity,
       ignoreUnfixed,
       timeout,
     });
+    core.endGroup();
 
     const summaryUrl = await writeTrivyJobSummary(scanResult);
     if (summaryUrl) {

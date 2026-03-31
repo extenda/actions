@@ -1,13 +1,17 @@
-import { execGcloud } from '../../setup-gcloud/src/index.js';
+import { execGcloud } from 'setup-gcloud/src/index.js';
 
 // Fetch an identity token for the specified account
 const fetchToken = async (serviceAccount, audiences) =>
-  execGcloud([
-    'auth',
-    'print-identity-token',
-    `--impersonate-service-account=${serviceAccount}`,
-    '--include-email',
-    `--audiences=${audiences}`,
-  ]);
+  execGcloud(
+    [
+      'auth',
+      'print-identity-token',
+      `--impersonate-service-account=${serviceAccount}`,
+      '--include-email',
+      `--audiences=${audiences}`,
+    ],
+    'gcloud',
+    true,
+  );
 
 export default fetchToken;

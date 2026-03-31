@@ -104677,7 +104677,11 @@ async function authenticateDocker(image) {
   if (!isGoogleRegistry(registry)) {
     return null;
   }
-  return execGcloud(["auth", "configure-docker", registry, "--quiet"]);
+  return execGcloud(
+    ["auth", "configure-docker", registry, "--quiet"],
+    "gcloud",
+    true
+  );
 }
 __name(authenticateDocker, "authenticateDocker");
 
@@ -105056,6 +105060,7 @@ var uploadForDigest = /* @__PURE__ */ __name((digests, sbom, cosignFn) => {
   return uploads;
 }, "uploadForDigest");
 async function uploadSbom(image, { spdx, cdx }, attestationKeyUri) {
+  startGroup(`Uploading SBOMs for ${image}`);
   let cosignFn;
   if (attestationKeyUri) {
     const cosign = await setupCosign();
@@ -105064,7 +105069,6 @@ async function uploadSbom(image, { spdx, cdx }, attestationKeyUri) {
     cosignFn = /* @__PURE__ */ __name(async () => {
     }, "cosignFn");
   }
-  startGroup(`Uploading SBOMs for ${image}`);
   const digests = await resolveImageDigests(image);
   await Promise.all([
     // Upload SPDX for legal compliance use cases
@@ -105090,12 +105094,14 @@ var trivy = /* @__PURE__ */ __name(async (serviceAccountKey, image, {
   attestationKeyUri = DEFAULT_ATTESTATION_KEY_URI
 } = {}) => with_gcloud_default(serviceAccountKey, async () => {
   await authenticateDocker(image);
+  startGroup(`Scanning image ${image} with Trivy...`);
   const scanResult = await trivyScan(image, {
     version: version3,
     severity,
     ignoreUnfixed,
     timeout
   });
+  endGroup();
   const summaryUrl = await writeTrivyJobSummary(scanResult);
   if (summaryUrl) {
     notice(`Trivy summary is available on the run page: ${summaryUrl}`);
@@ -107999,8 +108005,9 @@ var action5 = /* @__PURE__ */ __name(async () => {
   const platformGKE = !cloudrun;
   if (process.platform !== "win32") {
     if (env2 !== "staging" || projectID === "quotes-staging-ccdf") {
-      info("Run Trivy scanning");
+      startGroup("Run Trivy scanning");
       await vulnerability_scanning_default(serviceAccountKeyCICD, image, serviceName, labels);
+      endGroup();
     }
   }
   const version3 = (/* @__PURE__ */ new Date()).getTime();

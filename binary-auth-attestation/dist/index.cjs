@@ -100106,7 +100106,11 @@ async function authenticateDocker(image) {
   if (!isGoogleRegistry(registry)) {
     return null;
   }
-  return execGcloud(["auth", "configure-docker", registry, "--quiet"]);
+  return execGcloud(
+    ["auth", "configure-docker", registry, "--quiet"],
+    "gcloud",
+    true
+  );
 }
 __name(authenticateDocker, "authenticateDocker");
 
