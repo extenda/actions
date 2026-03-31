@@ -102264,27 +102264,19 @@ var setupGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, version3 = "l
 var setup_gcloud_default = setupGcloud;
 
 // setup-gcloud/src/get-id-token.js
-function getServiceAccountEmail() {
+async function getIdToken(audience) {
   const account = getCurrentAccount();
   if (!account) {
     throw new Error("No authenticated service account");
   }
-  return account.email;
-}
-__name(getServiceAccountEmail, "getServiceAccountEmail");
-async function getIdToken(audience) {
-  const serviceAccountEmail = getServiceAccountEmail();
-  const idToken = await execGcloud(
-    [
-      "auth",
-      "print-identity-token",
-      `--audiences=${audience}`,
-      `--impersonate-service-account=${serviceAccountEmail}`,
+  const args = ["auth", "print-identity-token", `--audiences=${audience}`];
+  if (account.type === "wid_federation") {
+    args.push(
+      `--impersonate-service-account=${account.email}`,
       "--include-email"
-    ],
-    "gcloud",
-    true
-  );
+    );
+  }
+  const idToken = await execGcloud(args, "gcloud", true);
   setSecret(idToken);
   return idToken;
 }
