@@ -76041,8 +76041,8 @@ var generateFolders = /* @__PURE__ */ __name(async (productName, type = "deploym
     ])
   );
 }, "generateFolders");
-var uploadToBucket = /* @__PURE__ */ __name(async (productName) => exec("gsutil", ["cp", "-r", productName, "gs://dora-m\
-etrics"]).catch((err) => {
+var uploadToBucket = /* @__PURE__ */ __name(async (productName) => exec("gcloud", ["storage", "cp", "-r", productName, "\
+gs://dora-metrics"]).catch((err) => {
   info(`upload to bucket failed reason: ${err}`);
   throw err;
 }), "uploadToBucket");

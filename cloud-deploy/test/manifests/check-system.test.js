@@ -17,8 +17,8 @@ describe('Check iam bundles system', () => {
     await checkIamSystem('systemName');
     expect(execGcloud).toHaveBeenNthCalledWith(
       1,
-      ['ls', 'gs://authz-bundles/systems/systemName.tar.gz'],
-      'gsutil',
+      ['storage', 'ls', 'gs://authz-bundles/systems/systemName.tar.gz'],
+      'gcloud',
       expect.anything(),
       expect.anything(),
     );
