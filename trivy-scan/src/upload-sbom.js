@@ -102,6 +102,8 @@ export default async function uploadSbom(
   { spdx, cdx },
   attestationKeyUri,
 ) {
+  core.startGroup(`Uploading SBOMs for ${image}`);
+
   let cosignFn;
   if (attestationKeyUri) {
     const cosign = await setupCosign();
@@ -111,7 +113,6 @@ export default async function uploadSbom(
     cosignFn = async () => {};
   }
 
-  core.startGroup(`Uploading SBOMs for ${image}`);
   const digests = await resolveImageDigests(image);
   await Promise.all([
     // Upload SPDX for legal compliance use cases

@@ -92462,13 +92462,17 @@ var setupGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, version3 = "l
 var setup_gcloud_default = setupGcloud;
 
 // identity-token/src/fetch-token.js
-var fetchToken = /* @__PURE__ */ __name(async (serviceAccount, audiences) => execGcloud([
-  "auth",
-  "print-identity-token",
-  `--impersonate-service-account=${serviceAccount}`,
-  "--include-email",
-  `--audiences=${audiences}`
-]), "fetchToken");
+var fetchToken = /* @__PURE__ */ __name(async (serviceAccount, audiences) => execGcloud(
+  [
+    "auth",
+    "print-identity-token",
+    `--impersonate-service-account=${serviceAccount}`,
+    "--include-email",
+    `--audiences=${audiences}`
+  ],
+  "gcloud",
+  true
+), "fetchToken");
 var fetch_token_default = fetchToken;
 
 // identity-token/src/index.js

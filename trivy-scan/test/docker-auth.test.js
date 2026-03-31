@@ -1,9 +1,9 @@
+import { execGcloud } from 'setup-gcloud/src/index.js';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
-import { execGcloud } from '../../setup-gcloud/src/index.js';
 import authenticateDocker from '../src/docker-auth.js';
 
-vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('setup-gcloud/src/index.js');
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -24,12 +24,11 @@ test('It authenticates for gcr.io registries', async () => {
 
   await authenticateDocker('eu.gcr.io/my-project/my-image:1.0.0');
 
-  expect(execGcloud).toHaveBeenCalledWith([
-    'auth',
-    'configure-docker',
-    'eu.gcr.io',
-    '--quiet',
-  ]);
+  expect(execGcloud).toHaveBeenCalledWith(
+    ['auth', 'configure-docker', 'eu.gcr.io', '--quiet'],
+    'gcloud',
+    true,
+  );
 });
 
 test('It authenticates for Artifact Registry docker registries', async () => {
@@ -39,10 +38,9 @@ test('It authenticates for Artifact Registry docker registries', async () => {
     'europe-west1-docker.pkg.dev/my-project/my-repo/my-image:1.0.0',
   );
 
-  expect(execGcloud).toHaveBeenCalledWith([
-    'auth',
-    'configure-docker',
-    'europe-west1-docker.pkg.dev',
-    '--quiet',
-  ]);
+  expect(execGcloud).toHaveBeenCalledWith(
+    ['auth', 'configure-docker', 'europe-west1-docker.pkg.dev', '--quiet'],
+    'gcloud',
+    true,
+  );
 });

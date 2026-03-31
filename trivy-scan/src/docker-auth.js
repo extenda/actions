@@ -1,4 +1,4 @@
-import { execGcloud } from '../../setup-gcloud/src/index.js';
+import { execGcloud } from 'setup-gcloud/src/index.js';
 
 const isGoogleRegistry = (registry) =>
   registry.endsWith('.gcr.io') || registry.endsWith('-docker.pkg.dev');
@@ -8,5 +8,9 @@ export default async function authenticateDocker(image) {
   if (!isGoogleRegistry(registry)) {
     return null;
   }
-  return execGcloud(['auth', 'configure-docker', registry, '--quiet']);
+  return execGcloud(
+    ['auth', 'configure-docker', registry, '--quiet'],
+    'gcloud',
+    true,
+  );
 }
