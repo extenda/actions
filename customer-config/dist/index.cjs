@@ -54900,9 +54900,9 @@ var require_package2 = __commonJS({
     module2.exports = {
       name: "joi",
       description: "Object schema validation",
-      version: "18.0.2",
+      version: "18.1.2",
       repository: {
-        url: "git://github.com/hapijs/joi",
+        url: "git://github.com/hapijs/joi.git",
         type: "git"
       },
       engines: {
@@ -54926,7 +54926,7 @@ var require_package2 = __commonJS({
         "@hapi/pinpoint": "^2.0.1",
         "@hapi/tlds": "^1.1.1",
         "@hapi/topo": "^6.0.2",
-        "@standard-schema/spec": "^1.0.0"
+        "@standard-schema/spec": "^1.1.0"
       },
       devDependencies: {
         "@hapi/bourne": "^3.0.0",
@@ -54935,6 +54935,7 @@ var require_package2 = __commonJS({
         "@hapi/joi-legacy-test": "npm:@hapi/joi@15.x.x",
         "@hapi/lab": "^26.0.0",
         "@types/node": "^20.17.47",
+        ajv: "^8.18.0",
         typescript: "^5.8.3"
       },
       scripts: {
@@ -55010,7 +55011,8 @@ var require_schemas = __commonJS({
       manifest: Joi.boolean(),
       method: Joi.function().allow(false),
       multi: Joi.boolean(),
-      validate: Joi.function()
+      validate: Joi.function(),
+      jsonSchema: Joi.function()
     });
     exports2.extension = Joi.object({
       type: Joi.alternatives([
@@ -55040,6 +55042,7 @@ var require_schemas = __commonJS({
       prepare: Joi.function().maxArity(3),
       rebuild: Joi.function().arity(1),
       rules: Joi.object().pattern(internals.nameRx, internals.rule),
+      jsonSchema: Joi.function(),
       terms: Joi.object().pattern(internals.nameRx, Joi.object({
         init: Joi.array().allow(null).required(),
         manifest: Joi.object().pattern(/.+/, [
@@ -55114,7 +55117,7 @@ var require_schemas = __commonJS({
       null,
       Joi.boolean(),
       Joi.function(),
-      Joi.number().allow(Infinity, -Infinity),
+      Joi.number().allow(Infinity, -Infinity, NaN),
       Joi.string().allow(""),
       Joi.symbol(),
       internals.desc.buffer,
@@ -56175,7 +56178,7 @@ functions");
         const processed = [];
         const head = parts.shift();
         if (head) {
-          processed.push(head);
+          processed.push(internals.decode(head));
         }
         for (const part of parts) {
           const raw = part[0] !== "{";
@@ -56653,6 +56656,18 @@ var require_common4 = __commonJS({
     exports2.default = function(value, defaultValue) {
       return value === void 0 ? defaultValue : value;
     };
+    exports2.intersect = function(set2, other) {
+      if (typeof set2.intersection === "function") {
+        return set2.intersection(other);
+      }
+      const result = /* @__PURE__ */ new Set();
+      for (const item of set2) {
+        if (other.has(item)) {
+          result.add(item);
+        }
+      }
+      return result;
+    };
     exports2.isIsoDate = function(date) {
       return internals.isoDate.test(date);
     };
@@ -57106,6 +57121,9 @@ var require_extend = __commonJS({
         }
       }
       def.rules = rules;
+      if (!def.jsonSchema) {
+        def.jsonSchema = parent.jsonSchema;
+      }
       const modifiers = Object.assign({}, parent.modifiers);
       if (def.modifiers) {
         for (const name in def.modifiers) {
@@ -58259,11 +58277,12 @@ var require_validator = __commonJS({
       }
       return outcome;
     };
-    exports2.standard = function(value, schema3) {
+    exports2.standard = function(value, schema3, options) {
+      const prefs = options?.libraryOptions;
       if (schema3.isAsync()) {
-        return exports2.entryAsync(value, schema3);
+        return exports2.entryAsync(value, schema3, prefs);
       }
-      return exports2.entry(value, schema3);
+      return exports2.entry(value, schema3, prefs);
     };
     internals.Mainstay = class {
       constructor(tracer, debug3, links) {
@@ -58821,7 +58840,12 @@ var require_base = __commonJS({
     var Trace = require_trace();
     var Validator = require_validator();
     var Values = require_values();
-    var internals = {};
+    var internals = {
+      standardTypes: /* @__PURE__ */ new Set(["string", "number", "integer", "boolean", "object", "array", "null"]),
+      jsonSchemaTarget: "draft-2020-12",
+      primitiveTypes: /* @__PURE__ */ new Set(["string", "number", "boolean"]),
+      nullSchema: /* @__PURE__ */ __name(() => ({ type: "null" }), "nullSchema")
+    };
     internals.Base = class {
       constructor(type2) {
         this.type = type2;
@@ -58852,6 +58876,116 @@ var require_base = __commonJS({
       describe() {
         assert4(typeof Manifest.describe === "function", "Manifest functionality disabled");
         return Manifest.describe(this);
+      }
+      $_jsonSchema(mode, options = {}) {
+        if (options.target !== void 0 && options.target !== internals.jsonSchemaTarget) {
+          throw new Error(`Unsupported JSON Schema target: ${options.target}`);
+        }
+        const rootCall = !options.$defs;
+        const defs = options.$defs ?? {};
+        let schema3 = {};
+        const isTypeAny = this.type === "any";
+        const isOnly = this._flags.only;
+        const valids = this._valids && Array.from(this._valids._values).filter((v) => v !== null);
+        let typesOverlap = true;
+        if (valids && valids.length && isOnly && !isTypeAny) {
+          const types2 = new Set(valids.map((v) => typeof v));
+          typesOverlap = types2.has(this.type) || this.type === "date" && types2.has("object");
+        }
+        if (!isTypeAny && typesOverlap && internals.standardTypes.has(this.type)) {
+          schema3.type = this.type;
+        }
+        if (this._flags.description) {
+          schema3.description = this._flags.description;
+        }
+        if (this._flags.default !== void 0 && typeof this._flags.default !== "function") {
+          schema3.default = this._flags.default;
+        }
+        const subOptions = { ...options, $defs: defs };
+        if (this._definition.jsonSchema && typesOverlap) {
+          schema3 = this._definition.jsonSchema(this, schema3, mode, subOptions);
+        }
+        for (const rule of this._rules) {
+          const definition = this._definition.rules[rule.name];
+          if (definition.jsonSchema && typesOverlap) {
+            schema3 = definition.jsonSchema(rule, schema3, isOnly, mode, subOptions);
+          }
+        }
+        if (this.$_terms.shared) {
+          for (const shared of this.$_terms.shared) {
+            defs[shared._flags.id] = shared.$_jsonSchema(mode, subOptions);
+          }
+        }
+        if (rootCall && Object.keys(defs).length) {
+          schema3.$defs = defs;
+        }
+        if (this._valids) {
+          const values = valids.filter((v) => typeof v !== "symbol");
+          if (values.length) {
+            if (this._flags.only) {
+              schema3.enum = values;
+              const list = Common.intersect(new Set(values.map((v) => typeof v)), internals.primitiveTypes);
+              if (list.size) {
+                const types2 = [...list];
+                schema3.type = types2.length === 1 ? types2[0] : types2;
+              }
+            } else {
+              const otherTypes = values.filter((v) => typeof v !== this.type || isTypeAny);
+              if (otherTypes.length && !(isTypeAny && !isOnly)) {
+                if (!schema3.anyOf) {
+                  schema3 = {
+                    anyOf: [schema3]
+                  };
+                }
+                schema3.anyOf.push({ enum: otherTypes });
+              }
+            }
+          }
+        }
+        if (this._valids && this._valids.has(null) && !(isTypeAny && !isOnly)) {
+          if (this._valids.length === 1 && (isTypeAny || isOnly)) {
+            schema3.type = "null";
+          } else if (schema3.type) {
+            schema3.type = [schema3.type, "null"];
+          } else if (schema3.anyOf) {
+            schema3.anyOf.unshift(internals.nullSchema());
+          } else {
+            schema3 = {
+              anyOf: [
+                internals.nullSchema(),
+                schema3
+              ]
+            };
+          }
+        }
+        if (this.$_terms.whens) {
+          const base = this.clone();
+          base.$_terms.whens = null;
+          const matches = [];
+          for (const when of this.$_terms.whens) {
+            const tests = when.is ? [when] : when.switch;
+            for (let i = 0; i < tests.length; ++i) {
+              const test2 = tests[i];
+              if (test2.then) {
+                matches.push(base.concat(test2.then).$_jsonSchema(mode, subOptions));
+              }
+              if (test2.otherwise) {
+                matches.push(base.concat(test2.otherwise).$_jsonSchema(mode, subOptions));
+              }
+              if (!test2.then || i === tests.length - 1 && !test2.otherwise) {
+                matches.push(base.$_jsonSchema(mode, subOptions));
+              }
+            }
+          }
+          const results = [];
+          for (const match2 of matches) {
+            if (!results.some((r) => deepEqual(r, match2))) {
+              results.push(match2);
+            }
+          }
+          return { anyOf: results };
+        }
+        return schema3;
       }
       // Rules
       allow(...values) {
@@ -59554,8 +59688,8 @@ l values due to previous valid rule");
         return {
           version: 1,
           vendor: "joi",
-          validate: /* @__PURE__ */ __name((value) => {
-            const result = Validator.standard(value, this);
+          validate: /* @__PURE__ */ __name((value, options) => {
+            const result = Validator.standard(value, this, options);
             if (result instanceof Promise) {
               return result.then(mapToStandardValue, mapToStandardError);
             }
@@ -59563,7 +59697,11 @@ l values due to previous valid rule");
               return mapToStandardValue(result.value);
             }
             return mapToStandardError(result.error);
-          }, "validate")
+          }, "validate"),
+          jsonSchema: {
+            input: /* @__PURE__ */ __name((options) => this.$_jsonSchema("input", options), "input"),
+            output: /* @__PURE__ */ __name((options) => this.$_jsonSchema("output", options), "output")
+          }
         };
       }
     };
@@ -59818,6 +59956,34 @@ var require_alternatives = __commonJS({
         }
         return internals.errors(errors, helpers);
       },
+      jsonSchema(schema3, res, mode, options) {
+        const matches = [];
+        for (const match2 of schema3.$_terms.matches) {
+          if (match2.schema) {
+            matches.push(match2.schema.$_jsonSchema(mode, options));
+          } else {
+            const tests = match2.is ? [match2] : match2.switch;
+            for (const test2 of tests) {
+              if (test2.then) {
+                matches.push(test2.then.$_jsonSchema(mode, options));
+              }
+              if (test2.otherwise) {
+                matches.push(test2.otherwise.$_jsonSchema(mode, options));
+              }
+            }
+          }
+        }
+        if (matches.length) {
+          delete res.type;
+          const matchMode = schema3._flags.match ?? "any";
+          if (matchMode === "one") {
+            res.oneOf = matches;
+          } else {
+            res.anyOf = matches;
+          }
+        }
+        return res;
+      },
       rules: {
         conditional: {
           method(condition, options) {
@@ -60022,6 +60188,62 @@ var require_array2 = __commonJS({
           return;
         }
         return { value: value.slice() };
+      },
+      jsonSchema(schema3, res, mode, options) {
+        const ordered = schema3.$_terms.ordered;
+        if (ordered.length) {
+          res.prefixItems = ordered.map((item) => item.$_jsonSchema(mode, options));
+        }
+        if (schema3.$_terms.items.length) {
+          let items;
+          if (schema3.$_terms.items.length === 1) {
+            items = schema3.$_terms.items[0].$_jsonSchema(mode, options);
+          } else {
+            items = {
+              anyOf: schema3.$_terms.items.map((item) => item.$_jsonSchema(mode, options))
+            };
+          }
+          if (ordered.length) {
+            res.unevaluatedItems = items;
+            res.minItems = ordered.length;
+          } else {
+            res.items = items;
+          }
+        } else if (ordered.length) {
+          res.unevaluatedItems = false;
+          res.minItems = ordered.length;
+          res.maxItems = ordered.length;
+        }
+        const contains = [];
+        for (const rule of schema3._rules) {
+          if (rule.name === "has") {
+            contains.push(rule.args.schema.$_jsonSchema(mode, options));
+          }
+        }
+        if (contains.length) {
+          if (contains.length === 1) {
+            res.contains = contains[0];
+          } else {
+            res.allOf = contains.map((item) => ({ contains: item }));
+          }
+        }
+        if (schema3._flags.single && schema3.$_terms.items.length) {
+          let items;
+          if (schema3.$_terms.items.length === 1) {
+            items = schema3.$_terms.items[0].$_jsonSchema(mode, options);
+          } else {
+            items = {
+              anyOf: schema3.$_terms.items.map((item) => item.$_jsonSchema(mode, options))
+            };
+          }
+          res = {
+            anyOf: [
+              res,
+              items
+            ]
+          };
+        }
+        return res;
       },
       rules: {
         has: {
@@ -60239,6 +60461,11 @@ var require_array2 = __commonJS({
             }
             return helpers.error("array." + name, { limit: args.limit, value });
           },
+          jsonSchema(rule, res) {
+            res.minItems = rule.args.limit;
+            res.maxItems = rule.args.limit;
+            return res;
+          },
           args: [
             {
               name: "limit",
@@ -60251,11 +60478,19 @@ var require_array2 = __commonJS({
         max: {
           method(limit) {
             return this.$_addRule({ name: "max", method: "length", args: { limit }, operator: "<=" });
+          },
+          jsonSchema(rule, res) {
+            res.maxItems = rule.args.limit;
+            return res;
           }
         },
         min: {
           method(limit) {
             return this.$_addRule({ name: "min", method: "length", args: { limit }, operator: ">=" });
+          },
+          jsonSchema(rule, res) {
+            res.minItems = rule.args.limit;
+            return res;
           }
         },
         ordered: {
@@ -60385,6 +60620,10 @@ be a function or a string");
               }
             }
             return value;
+          },
+          jsonSchema(rule, res) {
+            res.uniqueItems = true;
+            return res;
           },
           args: ["comparator", "options"],
           multi: true
@@ -60707,7 +60946,9 @@ var require_date = __commonJS({
     var Any = require_any();
     var Common = require_common4();
     var Template = require_template();
-    var internals = {};
+    var internals = {
+      formats: ["iso", "javascript", "unix"]
+    };
     internals.isDate = function(value) {
       return value instanceof Date;
     };
@@ -60728,6 +60969,11 @@ var require_date = __commonJS({
           return { value, errors: error2("date.base") };
         }
         return { value, errors: error2("date.format", { format }) };
+      },
+      jsonSchema(schema3, res, mode, options) {
+        res.type = "string";
+        res.format = "date-time";
+        return res;
       },
       rules: {
         compare: {
@@ -60753,13 +60999,20 @@ var require_date = __commonJS({
         },
         format: {
           method(format) {
-            assert4(["iso", "javascript", "unix"].includes(format), "Unknown date format", format);
+            assert4(internals.formats.includes(format), "Unknown date format", format);
             return this.$_setFlag("format", format);
           }
         },
         greater: {
           method(date) {
             return this.$_addRule({ name: "greater", method: "compare", args: { date }, operator: ">" });
+          },
+          jsonSchema(rule, res) {
+            const date = rule.args.date;
+            if (date instanceof Date) {
+              res["x-constraint"] = { ...res["x-constraint"], greater: date.toISOString() };
+            }
+            return res;
           }
         },
         iso: {
@@ -60770,16 +61023,37 @@ var require_date = __commonJS({
         less: {
           method(date) {
             return this.$_addRule({ name: "less", method: "compare", args: { date }, operator: "<" });
+          },
+          jsonSchema(rule, res) {
+            const date = rule.args.date;
+            if (date instanceof Date) {
+              res["x-constraint"] = { ...res["x-constraint"], less: date.toISOString() };
+            }
+            return res;
           }
         },
         max: {
           method(date) {
             return this.$_addRule({ name: "max", method: "compare", args: { date }, operator: "<=" });
+          },
+          jsonSchema(rule, res) {
+            const date = rule.args.date;
+            if (date instanceof Date) {
+              res["x-constraint"] = { ...res["x-constraint"], max: date.toISOString() };
+            }
+            return res;
           }
         },
         min: {
           method(date) {
             return this.$_addRule({ name: "min", method: "compare", args: { date }, operator: ">=" });
+          },
+          jsonSchema(rule, res) {
+            const date = rule.args.date;
+            if (date instanceof Date) {
+              res["x-constraint"] = { ...res["x-constraint"], min: date.toISOString() };
+            }
+            return res;
           }
         },
         timestamp: {
@@ -61056,6 +61330,49 @@ var require_keys = __commonJS({
       args(schema3, keys) {
         return schema3.keys(keys);
       },
+      jsonSchema(schema3, res, mode, options) {
+        res.type = "object";
+        if (schema3.$_terms.keys) {
+          res.properties = {};
+          const required = [];
+          for (const child2 of schema3.$_terms.keys) {
+            const jsonSchema = child2.schema.$_jsonSchema(mode, options);
+            res.properties[child2.key] = jsonSchema;
+            if (child2.schema._flags.presence === "required" || mode === "output" && child2.schema._flags.default !== void 0) {
+              required.push(child2.key);
+            }
+          }
+          if (required.length) {
+            res.required = required.sort();
+          }
+        }
+        if (schema3.$_terms.patterns) {
+          const patternProperties = {};
+          for (const pattern of schema3.$_terms.patterns) {
+            if (pattern.regex) {
+              patternProperties[pattern.regex.source] = pattern.rule.$_jsonSchema(mode, options);
+            } else {
+              const isAny = pattern.schema.type === "any";
+              if (isAny) {
+                res.additionalProperties = pattern.rule.$_jsonSchema(mode, options);
+              } else {
+                patternProperties[".*"] = pattern.rule.$_jsonSchema(mode, options);
+              }
+            }
+          }
+          if (Object.keys(patternProperties).length) {
+            res.patternProperties = patternProperties;
+          }
+        }
+        if (res.additionalProperties === void 0) {
+          const additionalProperties = schema3._flags.unknown === true || schema3._flags.unknown === void 0 && !schema3.
+          $_terms.keys && !schema3.$_terms.patterns && !schema3._flags.only;
+          if (additionalProperties === false) {
+            res.additionalProperties = false;
+          }
+        }
+        return res;
+      },
       validate(value, { schema: schema3, error: error2, state: state3, prefs }) {
         if (!value || typeof value !== schema3.$_property("typeof") || Array.isArray(value)) {
           return { value, errors: error2("object.base", { type: schema3.$_property("typeof") }) };
@@ -61202,6 +61519,11 @@ var require_keys = __commonJS({
             }
             return helpers.error("object." + name, { limit: args.limit, value });
           },
+          jsonSchema(rule, res) {
+            res.minProperties = rule.args.limit;
+            res.maxProperties = rule.args.limit;
+            return res;
+          },
           args: [
             {
               name: "limit",
@@ -61214,11 +61536,19 @@ var require_keys = __commonJS({
         max: {
           method(limit) {
             return this.$_addRule({ name: "max", method: "length", args: { limit }, operator: "<=" });
+          },
+          jsonSchema(rule, res) {
+            res.maxProperties = rule.args.limit;
+            return res;
           }
         },
         min: {
           method(limit) {
             return this.$_addRule({ name: "min", method: "length", args: { limit }, operator: ">=" });
+          },
+          jsonSchema(rule, res) {
+            res.minProperties = rule.args.limit;
+            return res;
           }
         },
         nand: {
@@ -61902,6 +62232,22 @@ var require_link = __commonJS({
       args(schema3, ref) {
         return schema3.ref(ref);
       },
+      jsonSchema(schema3, res, mode, options) {
+        if (!schema3.$_terms.link) {
+          return res;
+        }
+        const { ref } = schema3.$_terms.link[0];
+        if (ref.ancestor === "root" || ref.ancestor > 0) {
+          res.$ref = `#/${ref.path.map((p) => `properties/${p}`).join("/")}`;
+          return res;
+        }
+        if (ref.path.length === 1) {
+          res.$ref = `#/$defs/${ref.path[0]}`;
+        } else {
+          res.$ref = `#/${ref.path.slice(1).map((p) => `properties/${p}`).join("/")}`;
+        }
+        return res;
+      },
       validate(value, { schema: schema3, state: state3, prefs }) {
         assert4(schema3.$_terms.link, "Uninitialized link schema");
         const linked = internals.generate(schema3, value, state3, prefs);
@@ -62102,6 +62448,10 @@ var require_number = __commonJS({
         greater: {
           method(limit) {
             return this.$_addRule({ name: "greater", method: "compare", args: { limit }, operator: ">" });
+          },
+          jsonSchema(rule, res) {
+            res.exclusiveMinimum = rule.args.limit;
+            return res;
           }
         },
         integer: {
@@ -62113,21 +62463,37 @@ var require_number = __commonJS({
               return value;
             }
             return helpers.error("number.integer");
+          },
+          jsonSchema(rule, res) {
+            res.type = "integer";
+            return res;
           }
         },
         less: {
           method(limit) {
             return this.$_addRule({ name: "less", method: "compare", args: { limit }, operator: "<" });
+          },
+          jsonSchema(rule, res) {
+            res.exclusiveMaximum = rule.args.limit;
+            return res;
           }
         },
         max: {
           method(limit) {
             return this.$_addRule({ name: "max", method: "compare", args: { limit }, operator: "<=" });
+          },
+          jsonSchema(rule, res) {
+            res.maximum = rule.args.limit;
+            return res;
           }
         },
         min: {
           method(limit) {
             return this.$_addRule({ name: "min", method: "compare", args: { limit }, operator: ">=" });
+          },
+          jsonSchema(rule, res) {
+            res.minimum = rule.args.limit;
+            return res;
           }
         },
         multiple: {
@@ -62150,6 +62516,10 @@ var require_number = __commonJS({
             }
             return Math.round(pfactor * value) % Math.round(pfactor * base) === 0 ? value : helpers.error("number.multip\
 le", { multiple: options.args.base, value });
+          },
+          jsonSchema(rule, res) {
+            res.multipleOf = rule.args.base;
+            return res;
           },
           args: [
             {
@@ -62178,6 +62548,12 @@ rt"),
               return value;
             }
             return helpers.error("number.port");
+          },
+          jsonSchema(rule, res) {
+            res.type = "integer";
+            res.minimum = 0;
+            res.maximum = 65535;
+            return res;
           }
         },
         positive: {
@@ -62210,6 +62586,14 @@ rt"),
               return value;
             }
             return helpers.error(`number.${sign}`);
+          },
+          jsonSchema(rule, res) {
+            if (rule.args.sign === "positive") {
+              res.exclusiveMinimum = 0;
+            } else {
+              res.exclusiveMaximum = 0;
+            }
+            return res;
           }
         },
         unsafe: {
@@ -64802,6 +65186,17 @@ must be a positive integer" }, state3, prefs) };
           return { value, errors: error2("string.empty") };
         }
       },
+      jsonSchema(schema3, res, mode, options) {
+        const noEmpty = !schema3._valids?.has("") && !schema3._flags.only;
+        if (noEmpty) {
+          const min = schema3.$_getRule("min");
+          const length = schema3.$_getRule("length");
+          if ((!min || min.args.limit > 0) && (!length || length.args.limit > 0)) {
+            res.minLength = 1;
+          }
+        }
+        return res;
+      },
       rules: {
         alphanum: {
           method() {
@@ -64828,6 +65223,10 @@ must be a positive integer" }, state3, prefs) };
               return value;
             }
             return helpers.error("string.base64");
+          },
+          jsonSchema(rule, res) {
+            res.format = "base64";
+            return res;
           }
         },
         case: {
@@ -64885,6 +65284,10 @@ must be a positive integer" }, state3, prefs) };
               }
             }
             return helpers.error("string.dataUri");
+          },
+          jsonSchema(rule, res) {
+            res.format = "data-uri";
+            return res;
           }
         },
         domain: {
@@ -64925,6 +65328,10 @@ olean");
               return value;
             }
             return helpers.error("string.email", { value, invalids });
+          },
+          jsonSchema(rule, res) {
+            res.format = "email";
+            return res;
           }
         },
         guid: {
@@ -64989,6 +65396,10 @@ olean");
               return helpers.error("string.guid");
             }
             return value;
+          },
+          jsonSchema(rule, res) {
+            res.format = "uuid";
+            return res;
           }
         },
         hex: {
@@ -65010,6 +65421,10 @@ tional"');
               return helpers.error("string.hexAlign");
             }
             return value;
+          },
+          jsonSchema(rule, res) {
+            res.format = "hex";
+            return res;
           }
         },
         hostname: {
@@ -65021,6 +65436,10 @@ tional"');
               return value;
             }
             return helpers.error("string.hostname");
+          },
+          jsonSchema(rule, res) {
+            res.format = "hostname";
+            return res;
           }
         },
         insensitive: {
@@ -65043,6 +65462,15 @@ tional"');
               return helpers.error("string.ipVersion", { value, cidr: options.cidr, version: options.version });
             }
             return helpers.error("string.ip", { value, cidr: options.cidr });
+          },
+          jsonSchema(rule, res) {
+            const version3 = rule.args.options.version;
+            if (version3 && version3.length === 1) {
+              res.format = version3[0];
+            } else {
+              res.format = "ip";
+            }
+            return res;
           }
         },
         isoDate: {
@@ -65054,6 +65482,10 @@ tional"');
               return value;
             }
             return error2("string.isoDate");
+          },
+          jsonSchema(rule, res) {
+            res.format = "date-time";
+            return res;
           }
         },
         isoDuration: {
@@ -65065,6 +65497,10 @@ tional"');
               return value;
             }
             return helpers.error("string.isoDuration");
+          },
+          jsonSchema(rule, res) {
+            res.format = "duration";
+            return res;
           }
         },
         length: {
@@ -65077,6 +65513,11 @@ tional"');
               return value;
             }
             return helpers.error("string." + name, { limit: args.limit, value, encoding });
+          },
+          jsonSchema(rule, res) {
+            res.minLength = rule.args.limit;
+            res.maxLength = rule.args.limit;
+            return res;
           },
           args: [
             {
@@ -65097,11 +65538,21 @@ tional"');
           method(limit, encoding) {
             return internals.length(this, "max", limit, "<=", encoding);
           },
+          jsonSchema(rule, res) {
+            res.maxLength = rule.args.limit;
+            return res;
+          },
           args: ["limit", "encoding"]
         },
         min: {
           method(limit, encoding) {
             return internals.length(this, "min", limit, ">=", encoding);
+          },
+          jsonSchema(rule, res) {
+            if (rule.args.limit > 0) {
+              res.minLength = rule.args.limit;
+            }
+            return res;
           },
           args: ["limit", "encoding"]
         },
@@ -65140,6 +65591,10 @@ e");
             }
             return helpers.error(errorCode, { name: options.name, regex, value });
           },
+          jsonSchema(rule, res) {
+            res.pattern = rule.args.regex.source;
+            return res;
+          },
           args: ["regex", "options"],
           multi: true
         },
@@ -65167,6 +65622,10 @@ e");
               return value;
             }
             return helpers.error("string.token");
+          },
+          jsonSchema(rule, res) {
+            res.format = "token";
+            return res;
           }
         },
         trim: {
@@ -65231,6 +65690,10 @@ inSegments", "tlds"]);
               return helpers.error("string.uriCustomScheme", { scheme, value });
             }
             return helpers.error("string.uri");
+          },
+          jsonSchema(rule, res) {
+            res.format = "uri";
+            return res;
           }
         }
       },
@@ -65410,6 +65873,15 @@ of type object, function, or Symbol");
           return obj;
         }
       },
+      jsonSchema(schema3, json2, mode, options) {
+        const map2 = schema3.$_terms.map;
+        if (!map2.size) {
+          return {};
+        }
+        return {
+          anyOf: Array.from(map2.keys()).map((key) => ({ const: key }))
+        };
+      },
       messages: {
         "symbol.base": "{{#label}} must be a symbol",
         "symbol.map": "{{#label}} must be one of {{#map}}"
@@ -65443,6 +65915,11 @@ var require_binary2 = __commonJS({
           return { value, errors: error2("binary.base") };
         }
       },
+      jsonSchema(schema3, res, mode, options) {
+        res.type = "string";
+        res.format = "binary";
+        return res;
+      },
       rules: {
         encoding: {
           method(encoding) {
@@ -65460,6 +65937,11 @@ var require_binary2 = __commonJS({
             }
             return helpers.error("binary." + name, { limit: args.limit, value });
           },
+          jsonSchema(rule, res) {
+            res.minLength = rule.args.limit;
+            res.maxLength = rule.args.limit;
+            return res;
+          },
           args: [
             {
               name: "limit",
@@ -65472,11 +65954,19 @@ var require_binary2 = __commonJS({
         max: {
           method(limit) {
             return this.$_addRule({ name: "max", method: "length", args: { limit }, operator: "<=" });
+          },
+          jsonSchema(rule, res) {
+            res.maxLength = rule.args.limit;
+            return res;
           }
         },
         min: {
           method(limit) {
             return this.$_addRule({ name: "min", method: "length", args: { limit }, operator: ">=" });
+          },
+          jsonSchema(rule, res) {
+            res.minLength = rule.args.limit;
+            return res;
           }
         }
       },
