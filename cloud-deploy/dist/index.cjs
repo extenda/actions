@@ -108005,9 +108005,7 @@ var action5 = /* @__PURE__ */ __name(async () => {
   const platformGKE = !cloudrun;
   if (process.platform !== "win32") {
     if (env2 !== "staging" || projectID === "quotes-staging-ccdf") {
-      startGroup("Run Trivy scanning");
       await vulnerability_scanning_default(serviceAccountKeyCICD, image, serviceName, labels);
-      endGroup();
     }
   }
   const version3 = (/* @__PURE__ */ new Date()).getTime();
