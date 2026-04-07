@@ -31,6 +31,14 @@ const schema = joi.object({
             socketio: joi
               .object({
                 enabled: joi.boolean().required(),
+                level: joi
+                  .string()
+                  .valid(
+                    'tenants/self',
+                    'business-units/*',
+                    'business-units/*/workstations/*',
+                  )
+                  .optional(),
               })
               .required(),
           })
@@ -43,7 +51,6 @@ const schema = joi.object({
 /**
  * @return {string[]}
  */
-
 export function validateCccConfig(data) {
   const { error } = schema.validate(data, { abortEarly: false });
   if (!error) {
