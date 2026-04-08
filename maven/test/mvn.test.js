@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-
+import {withGcloud} from 'setup-gcloud/src/index.js'
 import mockFs from 'mock-fs';
 import os from 'os';
 import { fileURLToPath } from 'url';
@@ -20,6 +20,7 @@ const __dirname = path.dirname(__filename);
 
 vi.mock('@actions/exec');
 vi.mock('@actions/core');
+vi.mock('setup-gcloud/src/index.js');
 
 // Robust Mock for @actions/io
 // We map these calls directly to the proxied 'fs' module to ensure they hit memfs.
@@ -110,6 +111,7 @@ describe('Maven', () => {
 
     // Make sure core.group executes callbacks.
     core.group.mockImplementation((name, fn) => fn());
+    withGcloud.mockImplementation((sa, fn) => fn('test-project'));
   });
 
   afterEach(() => {
@@ -296,11 +298,8 @@ describe('Maven', () => {
       expect(
         fs.readFileSync(path.join(os.homedir(), '.m2', 'settings.xml'), 'utf8'),
       ).toEqual('<extenda-gar />');
-      expect(core.exportVariable).toHaveBeenCalledWith(
-        'ARTIFACT_REGISTRY_AUTH',
-        'service-account-key',
-      );
       expect(loadNexusCredentials).not.toHaveBeenCalled();
+      expect(withGcloud).toHaveBeenCalled();
     });
 
     test('It skips versioning for missing POM', async () => {

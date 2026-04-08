@@ -6,6 +6,7 @@ import * as core from '@actions/core';
 import * as versions from '../../utils/src/versions.js';
 import * as mvn from './mvn.js';
 import loadNexusCredentials from './nexus-credentials.js';
+import { withGcloud } from 'setup-gcloud/src/index.js'
 
 const setVersion = async (version, workingDir = './') =>
   core.group(
@@ -31,10 +32,10 @@ const extensionsExists = (workingDir = './') => {
 
 const authExec = async (usesArtifactRegistry, serviceAccountKey, fn) => {
   if (usesArtifactRegistry && serviceAccountKey) {
-    core.setSecret(serviceAccountKey);
-    core.exportVariable('ARTIFACT_REGISTRY_AUTH', serviceAccountKey);
+    await withGcloud(serviceAccountKey, fn);
+  } else {
+    await fn();
   }
-  await fn();
 };
 
 const action = async () => {
