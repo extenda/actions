@@ -35,7 +35,7 @@ const copySettings = async (hasExtensions) => {
     extenda: path.join(
       __dirname,
       hasExtensions
-        ? 'extenda-maven-gar-settings.xml'
+        ? 'extenda-maven-gcp-settings.xml'
         : 'extenda-maven-settings.xml',
     ),
     AbalonAb: path.join(__dirname, 'AbalonAb-maven-settings.xml'),
