@@ -53,19 +53,38 @@ runs:
           exit 1
         fi
 
-        docker run --rm \
-          -v "$(pwd)":/liquibase/user \
-          -v "$RUNNER_TEMP":"$RUNNER_TEMP":ro \
-          -e GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_APPLICATION_CREDENTIALS" \
-          -e LIQUIBASE_COMMAND_URL="${{ inputs.url }}" \
-          liquibase-spanner:local \
-          "${{ inputs.operation }}" \
-          "${{ inputs.classpath }}" \
-          "${{ inputs.changeLogFile }}" \
-          "" \
-          "${{ inputs.spannerExtensionUrl }}" \
-          "${{ inputs.url }}" \
-          "${{ inputs.count }}" \
-          "${{ inputs.tag }}" \
-          "${{ inputs.date }}" \
-          "${{ inputs.referenceUrl }}"
+        DOCKER_ARGS=(
+          docker run --rm
+          -v "$(pwd)":/liquibase/user
+          -v "$RUNNER_TEMP":"$RUNNER_TEMP":ro
+          -e GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_APPLICATION_CREDENTIALS"
+          -e LIQUIBASE_COMMAND_URL="${{ inputs.url }}"
+        )
+
+        if [[ -n "${{ inputs.classpath }}" ]]; then
+          DOCKER_ARGS+=(-e "LIQUIBASE_SEARCH_PATH=/liquibase/user/${{ inputs.classpath }}")
+        fi
+
+        if [[ -n "${{ inputs.changeLogFile }}" ]]; then
+          DOCKER_ARGS+=(-e "LIQUIBASE_COMMAND_CHANGELOG_FILE=${{ inputs.changeLogFile }}")
+        fi
+
+        if [[ -n "${{ inputs.count }}" ]]; then
+          DOCKER_ARGS+=(-e "LIQUIBASE_COMMAND_COUNT=${{ inputs.count }}")
+        fi
+
+        if [[ -n "${{ inputs.tag }}" ]]; then
+          DOCKER_ARGS+=(-e "LIQUIBASE_COMMAND_TAG=${{ inputs.tag }}")
+        fi
+
+        if [[ -n "${{ inputs.date }}" ]]; then
+          DOCKER_ARGS+=(-e "LIQUIBASE_COMMAND_DATE=${{ inputs.date }}")
+        fi
+
+        if [[ -n "${{ inputs.referenceUrl }}" ]]; then
+          DOCKER_ARGS+=(-e "LIQUIBASE_COMMAND_REFERENCE_URL=${{ inputs.referenceUrl }}")
+        fi
+
+        DOCKER_ARGS+=(liquibase-spanner:local "${{ inputs.operation }}")
+
+        "${DOCKER_ARGS[@]}"
