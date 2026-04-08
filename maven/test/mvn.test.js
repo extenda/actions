@@ -80,7 +80,7 @@ describe('Maven', () => {
       path.join(__dirname, '../src/extenda-maven-settings.xml'),
     );
     const garSettingsPath = path.resolve(
-      path.join(__dirname, '../src/extenda-maven-gar-settings.xml'),
+      path.join(__dirname, '../src/extenda-maven-gcp-settings.xml'),
     );
     const abalonPath = path.resolve(
       path.join(__dirname, '../src/AbalonAb-maven-settings.xml'),
