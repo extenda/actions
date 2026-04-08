@@ -14,7 +14,7 @@ ENV LIQUIBASE_COMMAND_CHANGELOG_FILE=changelog-master.yaml
 USER liquibase
 
 # Install postgres driver needed for community edition of Liquibase
-RUN lpm add postgresql --global
+# RUN lpm add postgresql --global
 
 # Download and install the Spanner extension jar
 ADD --chown=liquibase:liquibase ${SPANNER_JAR_PATH} /liquibase/lib/liquibase-spanner.jar
