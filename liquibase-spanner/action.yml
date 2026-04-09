@@ -41,14 +41,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Check for credentials
-      shell: bash
-      run: |
-        if [[ -z "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]]; then
-          echo "Error: GOOGLE_APPLICATION_CREDENTIALS is not set. Please run a setup-gcloud action with Workload Identity Federation first."
-          exit 1
-        fi
-
     - uses: extenda/actions/setup-gcloud@v0
       id: gcloud
       with:
