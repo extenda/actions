@@ -38,20 +38,25 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Check for credentials
+      shell: bash
+      run: |
+        if [[ -z "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]]; then
+          echo "Error: GOOGLE_APPLICATION_CREDENTIALS is not set. Please run a setup-gcloud action with Workload Identity Federation first."
+          exit 1
+        fi
+
     - name: Build liquibase-spanner image
       shell: bash
       run: |
-        docker build -t liquibase-spanner:local "${{ github.action_path }}"
+        docker build \
+          --build-arg SPANNER_EXTENSION_URL="${{ inputs.spannerExtensionUrl }}" \
+          -t liquibase-spanner:local "${{ github.action_path }}"
 
     - name: Run liquibase-spanner
       shell: bash
       run: |
         set -euo pipefail
-
-        if [[ -z "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]]; then
-          echo "Error: GOOGLE_APPLICATION_CREDENTIALS is not set. Please run a setup-gcloud action with Workload Identity Federation first."
-          exit 1
-        fi
 
         DOCKER_ARGS=(
           docker run --rm
