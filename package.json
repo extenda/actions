@@ -91,7 +91,7 @@
     "@actions/github": "^9.0.0",
     "@actions/io": "^3.0.2",
     "@actions/tool-cache": "4.0.0",
-    "axios": "^1.14.0",
+    "axios": "^1.15.0",
     "axios-retry": "^4.5.0",
     "fast-glob": "^3.3.3",
     "js-yaml": "^4.1.1",
