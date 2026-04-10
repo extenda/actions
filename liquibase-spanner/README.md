@@ -14,8 +14,9 @@ steps:
   - uses: extenda/actions/liquibase-spanner@v0
     with:
       operation: 'update'
-      classpath: 'example/changelogs'
+      classpath: 'liquibase'
       changeLogFile: 'changelog-master.yaml'
+      serviceAccountKey: ${{ secrets.GCLOUD_AUTH_[STAGING, PROD] }}
       url: jdbc:cloudspanner:/projects/<project>/instances/<instance>/databases/<database>
 ```
 
@@ -64,9 +65,8 @@ If you need to use a different version, you can provide the download URL of the 
 ```yaml
   - uses: extenda/actions/liquibase-spanner@v0
     with:
-      operation: 'update'
-      url: jdbc:cloudspanner:/projects/<project>/instances/<instance>/databases/<database>
-      spannerExtensionUrl: 'https://github.com/cloudspannerecosystem/liquibase-spanner/releases/download/4.33.0/liquibase-spanner-4.33.0-all.jar'
+      ...
+      spannerExtensionUrl: 'https://github.com/cloudspannerecosystem/liquibase-spanner/releases/download/4.33.0.3/liquibase-spanner-4.33.0.3-all.jar'
 ```
 
 #### updateCount
