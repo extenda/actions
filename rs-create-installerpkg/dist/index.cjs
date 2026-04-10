@@ -2403,10 +2403,10 @@ nction" && typeof object.get === "function" && typeof object.getAll === "functio
     }
     __name(isValidHTTPToken, "isValidHTTPToken");
     var headerCharRegex = /[^\t\x20-\x7e\x80-\xff]/;
-    function isValidHeaderValue(characters) {
+    function isValidHeaderValue2(characters) {
       return !headerCharRegex.test(characters);
     }
-    __name(isValidHeaderValue, "isValidHeaderValue");
+    __name(isValidHeaderValue2, "isValidHeaderValue");
     function parseRangeHeader(range) {
       if (range == null || range === "") return { start: 0, end: null, size: null };
       const m2 = range ? range.match(/^bytes (\d+)-(\d+)\/(\d+)?$/) : null;
@@ -2498,7 +2498,7 @@ nction" && typeof object.get === "function" && typeof object.getAll === "functio
       buildURL: buildURL2,
       addAbortListener,
       isValidHTTPToken,
-      isValidHeaderValue,
+      isValidHeaderValue: isValidHeaderValue2,
       isTokenCharCode,
       parseRangeHeader,
       normalizedMethodRecordsBase,
@@ -2709,7 +2709,7 @@ var require_request = __commonJS({
     var assert = require("node:assert");
     var {
       isValidHTTPToken,
-      isValidHeaderValue,
+      isValidHeaderValue: isValidHeaderValue2,
       isStream: isStream2,
       destroy,
       isBuffer: isBuffer2,
@@ -2761,7 +2761,7 @@ NECT") {
         if (upgrade && typeof upgrade !== "string") {
           throw new InvalidArgumentError("upgrade must be a string");
         }
-        if (upgrade && !isValidHeaderValue(upgrade)) {
+        if (upgrade && !isValidHeaderValue2(upgrade)) {
           throw new InvalidArgumentError("invalid upgrade header");
         }
         if (headersTimeout != null && (!Number.isFinite(headersTimeout) || headersTimeout < 0)) {
@@ -2975,7 +2975,7 @@ terable");
         const arr = [];
         for (let i2 = 0; i2 < val.length; i2++) {
           if (typeof val[i2] === "string") {
-            if (!isValidHeaderValue(val[i2])) {
+            if (!isValidHeaderValue2(val[i2])) {
               throw new InvalidArgumentError(`invalid ${key} header`);
             }
             arr.push(val[i2]);
@@ -2989,7 +2989,7 @@ terable");
         }
         val = arr;
       } else if (typeof val === "string") {
-        if (!isValidHeaderValue(val)) {
+        if (!isValidHeaderValue2(val)) {
           throw new InvalidArgumentError(`invalid ${key} header`);
         }
       } else if (val === null) {
@@ -6213,7 +6213,7 @@ var require_util2 = __commonJS({
         return null;
       }
       let location = response.headersList.get("location", true);
-      if (location !== null && isValidHeaderValue(location)) {
+      if (location !== null && isValidHeaderValue2(location)) {
         if (!isValidEncodedURL(location)) {
           location = normalizeBinaryStringToUtf8(location);
         }
@@ -6270,12 +6270,12 @@ ption");
     }
     __name(isValidReasonPhrase, "isValidReasonPhrase");
     var isValidHeaderName2 = isValidHTTPToken;
-    function isValidHeaderValue(potentialValue) {
+    function isValidHeaderValue2(potentialValue) {
       return (potentialValue[0] === "	" || potentialValue[0] === " " || potentialValue[potentialValue.length - 1] === "	" ||
       potentialValue[potentialValue.length - 1] === " " || potentialValue.includes("\n") || potentialValue.includes("\r") ||
       potentialValue.includes("\0")) === false;
     }
-    __name(isValidHeaderValue, "isValidHeaderValue");
+    __name(isValidHeaderValue2, "isValidHeaderValue");
     function setRequestReferrerPolicyOnRedirect(request, actualResponse) {
       const { headersList } = actualResponse;
       const policyHeader = (headersList.get("referrer-policy", true) ?? "").split(",");
@@ -7103,7 +7103,7 @@ osed")) {
       iteratorMixin,
       createIterator,
       isValidHeaderName: isValidHeaderName2,
-      isValidHeaderValue,
+      isValidHeaderValue: isValidHeaderValue2,
       isErrorLike,
       fullyReadBody,
       bytesMatch,
@@ -11111,7 +11111,7 @@ var require_env_http_proxy_agent = __commonJS({
     var { kClose, kDestroy, kClosed, kDestroyed, kDispatch, kNoProxyAgent, kHttpProxyAgent, kHttpsProxyAgent } = require_symbols();
     var ProxyAgent2 = require_proxy_agent();
     var Agent3 = require_agent();
-    var DEFAULT_PORTS2 = {
+    var DEFAULT_PORTS3 = {
       "http:": 80,
       "https:": 443
     };
@@ -11174,7 +11174,7 @@ var require_env_http_proxy_agent = __commonJS({
       #getProxyAgentForUrl(url2) {
         let { protocol, host: hostname, port } = url2;
         hostname = hostname.replace(/:\d*$/, "").toLowerCase();
-        port = Number.parseInt(port, 10) || DEFAULT_PORTS2[protocol] || 0;
+        port = Number.parseInt(port, 10) || DEFAULT_PORTS3[protocol] || 0;
         if (!this.#shouldProxy(hostname, port)) {
           return this[kNoProxyAgent];
         }
@@ -14194,7 +14194,7 @@ var require_headers = __commonJS({
     var {
       iteratorMixin,
       isValidHeaderName: isValidHeaderName2,
-      isValidHeaderValue
+      isValidHeaderValue: isValidHeaderValue2
     } = require_util2();
     var { webidl } = require_webidl();
     var assert = require("node:assert");
@@ -14247,7 +14247,7 @@ var require_headers = __commonJS({
           value: name,
           type: "header name"
         });
-      } else if (!isValidHeaderValue(value)) {
+      } else if (!isValidHeaderValue2(value)) {
         throw webidl.errors.invalidArgument({
           prefix: "Headers.append",
           value,
@@ -14524,7 +14524,7 @@ var require_headers = __commonJS({
             value: name,
             type: "header name"
           });
-        } else if (!isValidHeaderValue(value)) {
+        } else if (!isValidHeaderValue2(value)) {
           throw webidl.errors.invalidArgument({
             prefix,
             value,
@@ -47701,15 +47701,41 @@ var parseHeaders_default = /* @__PURE__ */ __name((rawHeaders) => {
 
 // node_modules/axios/lib/core/AxiosHeaders.js
 var $internals = /* @__PURE__ */ Symbol("internals");
+var isValidHeaderValue = /* @__PURE__ */ __name((value) => !/[\r\n]/.test(value), "isValidHeaderValue");
+function assertValidHeaderValue(value, header) {
+  if (value === false || value == null) {
+    return;
+  }
+  if (utils_default.isArray(value)) {
+    value.forEach((v) => assertValidHeaderValue(v, header));
+    return;
+  }
+  if (!isValidHeaderValue(String(value))) {
+    throw new Error(`Invalid character in header content ["${header}"]`);
+  }
+}
+__name(assertValidHeaderValue, "assertValidHeaderValue");
 function normalizeHeader(header) {
   return header && String(header).trim().toLowerCase();
 }
 __name(normalizeHeader, "normalizeHeader");
+function stripTrailingCRLF(str) {
+  let end = str.length;
+  while (end > 0) {
+    const charCode = str.charCodeAt(end - 1);
+    if (charCode !== 10 && charCode !== 13) {
+      break;
+    }
+    end -= 1;
+  }
+  return end === str.length ? str : str.slice(0, end);
+}
+__name(stripTrailingCRLF, "stripTrailingCRLF");
 function normalizeValue(value) {
   if (value === false || value == null) {
     return value;
   }
-  return utils_default.isArray(value) ? value.map(normalizeValue) : String(value).replace(/[\r\n]+$/, "");
+  return utils_default.isArray(value) ? value.map(normalizeValue) : stripTrailingCRLF(String(value));
 }
 __name(normalizeValue, "normalizeValue");
 function parseTokens(str) {
@@ -47774,6 +47800,7 @@ var AxiosHeaders = class {
       }
       const key = utils_default.findKey(self2, lHeader);
       if (!key || self2[key] === void 0 || _rewrite === true || _rewrite === void 0 && self2[key] !== false) {
+        assertValidHeaderValue(_value, _header);
         self2[key || _header] = normalizeValue(_value);
       }
     }
@@ -48116,7 +48143,7 @@ var import_follow_redirects = __toESM(require_follow_redirects(), 1);
 var import_zlib = __toESM(require("zlib"), 1);
 
 // node_modules/axios/lib/env/data.js
-var VERSION = "1.14.0";
+var VERSION = "1.15.0";
 
 // node_modules/axios/lib/helpers/parseProtocol.js
 function parseProtocol(url2) {
@@ -48434,6 +48461,84 @@ var callbackify = /* @__PURE__ */ __name((fn, reducer) => {
 }, "callbackify");
 var callbackify_default = callbackify;
 
+// node_modules/axios/lib/helpers/shouldBypassProxy.js
+var DEFAULT_PORTS2 = {
+  http: 80,
+  https: 443,
+  ws: 80,
+  wss: 443,
+  ftp: 21
+};
+var parseNoProxyEntry = /* @__PURE__ */ __name((entry) => {
+  let entryHost = entry;
+  let entryPort = 0;
+  if (entryHost.charAt(0) === "[") {
+    const bracketIndex = entryHost.indexOf("]");
+    if (bracketIndex !== -1) {
+      const host = entryHost.slice(1, bracketIndex);
+      const rest = entryHost.slice(bracketIndex + 1);
+      if (rest.charAt(0) === ":" && /^\d+$/.test(rest.slice(1))) {
+        entryPort = Number.parseInt(rest.slice(1), 10);
+      }
+      return [host, entryPort];
+    }
+  }
+  const firstColon = entryHost.indexOf(":");
+  const lastColon = entryHost.lastIndexOf(":");
+  if (firstColon !== -1 && firstColon === lastColon && /^\d+$/.test(entryHost.slice(lastColon + 1))) {
+    entryPort = Number.parseInt(entryHost.slice(lastColon + 1), 10);
+    entryHost = entryHost.slice(0, lastColon);
+  }
+  return [entryHost, entryPort];
+}, "parseNoProxyEntry");
+var normalizeNoProxyHost = /* @__PURE__ */ __name((hostname) => {
+  if (!hostname) {
+    return hostname;
+  }
+  if (hostname.charAt(0) === "[" && hostname.charAt(hostname.length - 1) === "]") {
+    hostname = hostname.slice(1, -1);
+  }
+  return hostname.replace(/\.+$/, "");
+}, "normalizeNoProxyHost");
+function shouldBypassProxy(location) {
+  let parsed;
+  try {
+    parsed = new URL(location);
+  } catch (_err) {
+    return false;
+  }
+  const noProxy = (process.env.no_proxy || process.env.NO_PROXY || "").toLowerCase();
+  if (!noProxy) {
+    return false;
+  }
+  if (noProxy === "*") {
+    return true;
+  }
+  const port = Number.parseInt(parsed.port, 10) || DEFAULT_PORTS2[parsed.protocol.split(":", 1)[0]] || 0;
+  const hostname = normalizeNoProxyHost(parsed.hostname.toLowerCase());
+  return noProxy.split(/[\s,]+/).some((entry) => {
+    if (!entry) {
+      return false;
+    }
+    let [entryHost, entryPort] = parseNoProxyEntry(entry);
+    entryHost = normalizeNoProxyHost(entryHost);
+    if (!entryHost) {
+      return false;
+    }
+    if (entryPort && entryPort !== port) {
+      return false;
+    }
+    if (entryHost.charAt(0) === "*") {
+      entryHost = entryHost.slice(1);
+    }
+    if (entryHost.charAt(0) === ".") {
+      return hostname.endsWith(entryHost);
+    }
+    return hostname === entryHost;
+  });
+}
+__name(shouldBypassProxy, "shouldBypassProxy");
+
 // node_modules/axios/lib/helpers/speedometer.js
 function speedometer(samplesCount, min) {
   samplesCount = samplesCount || 10;
@@ -48707,7 +48812,9 @@ function setProxy(options, configProxy, location) {
   if (!proxy && proxy !== false) {
     const proxyUrl = getProxyForUrl(location);
     if (proxyUrl) {
-      proxy = new URL(proxyUrl);
+      if (!shouldBypassProxy(location)) {
+        proxy = new URL(proxyUrl);
+      }
     }
   }
   if (proxy) {
@@ -50169,12 +50276,23 @@ var Axios = class {
       if (err instanceof Error) {
         let dummy = {};
         Error.captureStackTrace ? Error.captureStackTrace(dummy) : dummy = new Error();
-        const stack = dummy.stack ? dummy.stack.replace(/^.+\n/, "") : "";
+        const stack = (() => {
+          if (!dummy.stack) {
+            return "";
+          }
+          const firstNewlineIndex = dummy.stack.indexOf("\n");
+          return firstNewlineIndex === -1 ? "" : dummy.stack.slice(firstNewlineIndex + 1);
+        })();
         try {
           if (!err.stack) {
             err.stack = stack;
-          } else if (stack && !String(err.stack).endsWith(stack.replace(/^.+\n.+\n/, ""))) {
-            err.stack += "\n" + stack;
+          } else if (stack) {
+            const firstNewlineIndex = stack.indexOf("\n");
+            const secondNewlineIndex = firstNewlineIndex === -1 ? -1 : stack.indexOf("\n", firstNewlineIndex + 1);
+            const stackWithoutTwoTopLines = secondNewlineIndex === -1 ? "" : stack.slice(secondNewlineIndex + 1);
+            if (!String(err.stack).endsWith(stackWithoutTwoTopLines)) {
+              err.stack += "\n" + stack;
+            }
           }
         } catch (e2) {
         }
