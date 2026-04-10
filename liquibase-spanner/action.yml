@@ -1,4 +1,3 @@
-# action.yml
 name: 'liquibase-spanner'
 description: 'Validate, Prepare and Execute Liquibase CLI'
 inputs:
@@ -17,7 +16,7 @@ inputs:
   spannerExtensionUrl: # string
     description: 'Url of a spanner extension jar file'
     required: false
-    default: 'https://github.com/cloudspannerecosystem/liquibase-spanner/releases/download/4.31.1/liquibase-spanner-4.31.1-all.jar'
+    default: 'https://github.com/cloudspannerecosystem/liquibase-spanner/releases/download/4.33.0.3/liquibase-spanner-4.33.0.3-all.jar'
   url: # string
     description: 'Database URL'
     required: true
@@ -33,20 +32,60 @@ inputs:
   referenceUrl: # string
     description: 'Reference URL for diff'
     required: false
+
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - ${{ inputs.operation }}
-    - ${{ inputs.classpath }}
-    - ${{ inputs.changeLogFile }}
-    - ${{ inputs.serviceAccountKey }}
-    - ${{ inputs.spannerExtensionUrl }}
-    - ${{ inputs.url }}
-    - ${{ inputs.count }}
-    - ${{ inputs.tag }}
-    - ${{ inputs.date }}
-    - ${{ inputs.referenceUrl }}
-branding:
-  icon: database
-  color: red
+  using: composite
+  steps:
+    - uses: extenda/actions/setup-gcloud@v0
+      id: gcloud
+      with:
+        service-account-key: ${{ inputs.serviceAccountKey }}
+        export-default-credentials: true
+
+    - name: Build liquibase-spanner image
+      shell: bash
+      run: |
+        docker build \
+          --build-arg SPANNER_EXTENSION_URL="${{ inputs.spannerExtensionUrl }}" \
+          -t liquibase-spanner:local "${{ github.action_path }}"
+
+    - name: Run liquibase-spanner
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        DOCKER_ARGS=(
+          docker run --rm
+          -v "$(pwd)":/liquibase/user
+          -v "$RUNNER_TEMP":"$RUNNER_TEMP":ro
+          -e GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_APPLICATION_CREDENTIALS"
+          -e LIQUIBASE_COMMAND_URL="${{ inputs.url }}"
+        )
+
+        if [[ -n "${{ inputs.classpath }}" ]]; then
+          DOCKER_ARGS+=(-e "LIQUIBASE_SEARCH_PATH=/liquibase/user/${{ inputs.classpath }}")
+        fi
+
+        if [[ -n "${{ inputs.changeLogFile }}" ]]; then
+          DOCKER_ARGS+=(-e "LIQUIBASE_COMMAND_CHANGELOG_FILE=${{ inputs.changeLogFile }}")
+        fi
+
+        if [[ -n "${{ inputs.count }}" ]]; then
+          DOCKER_ARGS+=(-e "LIQUIBASE_COMMAND_COUNT=${{ inputs.count }}")
+        fi
+
+        if [[ -n "${{ inputs.tag }}" ]]; then
+          DOCKER_ARGS+=(-e "LIQUIBASE_COMMAND_TAG=${{ inputs.tag }}")
+        fi
+
+        if [[ -n "${{ inputs.date }}" ]]; then
+          DOCKER_ARGS+=(-e "LIQUIBASE_COMMAND_DATE=${{ inputs.date }}")
+        fi
+
+        if [[ -n "${{ inputs.referenceUrl }}" ]]; then
+          DOCKER_ARGS+=(-e "LIQUIBASE_COMMAND_REFERENCE_URL=${{ inputs.referenceUrl }}")
+        fi
+
+        DOCKER_ARGS+=(liquibase-spanner:local "${{ inputs.operation }}")
+
+        "${DOCKER_ARGS[@]}"
