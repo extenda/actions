@@ -22,6 +22,7 @@ describe('With Gcloud', () => {
     email: 'previous@example.iam.gserviceaccount.com',
     projectId: 'project-a',
     credentialsFilePath: '/tmp/previous.json',
+    refreshToken: vi.fn().mockResolvedValue(),
   };
 
   beforeEach(() => {
@@ -76,6 +77,7 @@ describe('With Gcloud', () => {
     expect(result).toEqual('callback-result');
     expect(getServiceAccountEmailAndProject).toHaveBeenCalledWith('json-key');
     expect(setupGcloud).not.toHaveBeenCalled();
+    expect(previousAccount.refreshToken).toHaveBeenCalledTimes(1);
     expect(callback).toHaveBeenCalledWith('project-a');
     expect(restorePreviousAccount).not.toHaveBeenCalled();
     expect(cleanupCredentials).not.toHaveBeenCalled();
@@ -83,12 +85,14 @@ describe('With Gcloud', () => {
   });
 
   test('reuses persisted auth-stack entry when current account matches service account', async () => {
+    const persistedRefreshToken = vi.fn().mockResolvedValue();
     getCurrentAccount.mockReturnValue({
       type: 'wid_federation',
       email: 'persisted@example.iam.gserviceaccount.com',
       projectId: 'persisted-project',
       exportCredentials: true,
       credentialsFilePath: '/tmp/setup-gcloud-123/auth_wid_1.json',
+      refreshToken: persistedRefreshToken,
     });
     getServiceAccountEmailAndProject.mockReturnValue({
       email: 'persisted@example.iam.gserviceaccount.com',
@@ -100,7 +104,34 @@ describe('With Gcloud', () => {
 
     expect(result).toEqual('callback-result');
     expect(setupGcloud).not.toHaveBeenCalled();
+    expect(persistedRefreshToken).toHaveBeenCalledTimes(1);
+    expect(persistedRefreshToken.mock.invocationCallOrder[0]).toBeLessThan(
+      callback.mock.invocationCallOrder[0],
+    );
     expect(callback).toHaveBeenCalledWith('persisted-project');
+    expect(restorePreviousAccount).not.toHaveBeenCalled();
+    expect(getTrackedCredentials).not.toHaveBeenCalled();
+    expect(cleanupCredentials).not.toHaveBeenCalled();
+    expect(resetAuthStack).not.toHaveBeenCalled();
+  });
+
+  test('throws when refreshToken fails in reused-auth path', async () => {
+    previousAccount.refreshToken.mockRejectedValueOnce(
+      new Error('refresh boom'),
+    );
+    getServiceAccountEmailAndProject.mockReturnValue({
+      email: previousAccount.email,
+      projectId: previousAccount.projectId,
+    });
+    const callback = vi.fn();
+
+    await expect(withGcloud('json-key', callback)).rejects.toThrow(
+      'refresh boom',
+    );
+
+    expect(previousAccount.refreshToken).toHaveBeenCalledTimes(1);
+    expect(callback).not.toHaveBeenCalled();
+    expect(setupGcloud).not.toHaveBeenCalled();
     expect(restorePreviousAccount).not.toHaveBeenCalled();
     expect(getTrackedCredentials).not.toHaveBeenCalled();
     expect(cleanupCredentials).not.toHaveBeenCalled();

@@ -1,13 +1,23 @@
+import fs from 'node:fs';
+
 import * as core from '@actions/core';
 import { describe, expect, test, vi } from 'vitest';
 
-import { workloadIdentityFederation } from '../src/auth-wid-federation.js';
+import {
+  refreshIdToken,
+  workloadIdentityFederation,
+} from '../src/auth-wid-federation.js';
 import createJobScopedCredential from '../src/create-job-scoped-credential.js';
 import { execGcloud } from '../src/exec-gcloud.js';
 
 vi.mock('@actions/core');
 vi.mock('../src/exec-gcloud.js');
 vi.mock('../src/create-job-scoped-credential.js');
+vi.mock('node:fs', () => ({
+  default: {
+    writeFileSync: vi.fn(),
+  },
+}));
 
 describe('auth-wid-federation', () => {
   test('creates federation credential config from GitHub OIDC token', async () => {
@@ -44,6 +54,44 @@ describe('auth-wid-federation', () => {
       ],
       'gcloud',
       true,
+    );
+  });
+
+  test('returns refresh metadata used to refresh OIDC token', async () => {
+    core.getIDToken
+      .mockResolvedValueOnce('oidc-token-initial')
+      .mockResolvedValueOnce('oidc-token-refreshed');
+    createJobScopedCredential.mockReturnValueOnce('/runner/temp/id-token.txt');
+    execGcloud.mockResolvedValueOnce('');
+
+    const refreshTokenMetadata = await workloadIdentityFederation(
+      '/runner/temp/wid-config.json',
+      {
+        workload_identity_provider:
+          'projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
+        email: 'service-account@example.iam.gserviceaccount.com',
+      },
+    );
+
+    expect(refreshTokenMetadata).toEqual({
+      workloadIdentityProvider:
+        'projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
+      idTokenPath: '/runner/temp/id-token.txt',
+    });
+
+    await refreshIdToken(refreshTokenMetadata);
+
+    expect(core.getIDToken).toHaveBeenNthCalledWith(
+      2,
+      'https://iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
+    );
+    expect(fs.writeFileSync).toHaveBeenCalledWith(
+      '/runner/temp/id-token.txt',
+      'oidc-token-refreshed',
+      {
+        encoding: 'utf8',
+        mode: 0o600,
+      },
     );
   });
 });

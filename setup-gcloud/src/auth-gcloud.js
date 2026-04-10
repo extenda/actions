@@ -1,7 +1,10 @@
 import * as core from '@actions/core';
 
 import { clearAuthStack, loadAuthStack, saveAuthStack } from './auth-stack.js';
-import { workloadIdentityFederation } from './auth-wid-federation.js';
+import {
+  refreshIdToken,
+  workloadIdentityFederation,
+} from './auth-wid-federation.js';
 import createJobScopedCredential from './create-job-scoped-credential.js';
 
 const authType = {
@@ -10,6 +13,7 @@ const authType = {
 };
 
 export const env = {
+  accessToken: 'CLOUDSDK_AUTH_ACCESS_TOKEN',
   applicationCredentials: 'GOOGLE_APPLICATION_CREDENTIALS',
   credentialsOverride: 'CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE',
   projectId: 'CLOUDSDK_CORE_PROJECT',
@@ -157,6 +161,7 @@ export async function authenticateGcloud(credentials, exportCredentials) {
     projectId,
     exportCredentials,
     credentialsFilePath: '',
+    refreshTokenMetadata: undefined,
   };
 
   if (!isCurrentAccount(authEntry)) {
@@ -175,7 +180,7 @@ export async function authenticateGcloud(credentials, exportCredentials) {
       authEntry.exportCredentials = true;
 
       if (authEntry.type === authType.widFederation) {
-        await workloadIdentityFederation(
+        authEntry.refreshTokenMetadata = await workloadIdentityFederation(
           authEntry.credentialsFilePath,
           jsonCredentials,
         );
@@ -188,6 +193,9 @@ export async function authenticateGcloud(credentials, exportCredentials) {
     authStack.push(authEntry);
     saveAuthStack(authStack);
     populateEnvironment(authEntry);
+  } else {
+    // Refresh the GitHub ID token used by WIF.
+    await getCurrentAccount().refreshToken();
   }
 
   return projectId;
@@ -195,7 +203,27 @@ export async function authenticateGcloud(credentials, exportCredentials) {
 
 export function getCurrentAccount() {
   const authStack = loadAuthStack();
-  return authStack.at(-1);
+  const account = authStack.at(-1);
+  if (!account) {
+    return undefined;
+  }
+
+  const refreshToken = async () => {};
+  if (
+    account.type === authType.widFederation &&
+    account.refreshTokenMetadata &&
+    typeof account.refreshTokenMetadata === 'object'
+  ) {
+    return {
+      ...account,
+      refreshToken: async () => refreshIdToken(account.refreshTokenMetadata),
+    };
+  }
+
+  return {
+    ...account,
+    refreshToken,
+  };
 }
 
 /**

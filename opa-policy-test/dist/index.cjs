@@ -33243,7 +33243,7 @@ var require_form_data = __commonJS({
     var http4 = require("http");
     var https4 = require("https");
     var parseUrl2 = require("url").parse;
-    var fs17 = require("fs");
+    var fs18 = require("fs");
     var Stream = require("stream").Stream;
     var crypto6 = require("crypto");
     var mime = require_mime_types();
@@ -33311,7 +33311,7 @@ var require_form_data = __commonJS({
         if (value.end != void 0 && value.end != Infinity && value.start != void 0) {
           callback(null, value.end + 1 - (value.start ? value.start : 0));
         } else {
-          fs17.stat(value.path, function(err, stat2) {
+          fs18.stat(value.path, function(err, stat2) {
             if (err) {
               callback(err);
               return;
@@ -43875,8 +43875,8 @@ var require_utils4 = __commonJS({
     exports2.array = array;
     var errno = require_errno();
     exports2.errno = errno;
-    var fs17 = require_fs();
-    exports2.fs = fs17;
+    var fs18 = require_fs();
+    exports2.fs = fs18;
     var path20 = require_path();
     exports2.path = path20;
     var pattern = require_pattern();
@@ -44074,12 +44074,12 @@ var require_fs2 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.createFileSystemAdapter = exports2.FILE_SYSTEM_ADAPTER = void 0;
-    var fs17 = require("fs");
+    var fs18 = require("fs");
     exports2.FILE_SYSTEM_ADAPTER = {
-      lstat: fs17.lstat,
-      stat: fs17.stat,
-      lstatSync: fs17.lstatSync,
-      statSync: fs17.statSync
+      lstat: fs18.lstat,
+      stat: fs18.stat,
+      lstatSync: fs18.lstatSync,
+      statSync: fs18.statSync
     };
     function createFileSystemAdapter(fsMethods) {
       if (fsMethods === void 0) {
@@ -44097,7 +44097,7 @@ var require_settings = __commonJS({
   "node_modules/@nodelib/fs.stat/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var fs17 = require_fs2();
+    var fs18 = require_fs2();
     var Settings = class {
       static {
         __name(this, "Settings");
@@ -44105,7 +44105,7 @@ var require_settings = __commonJS({
       constructor(_options = {}) {
         this._options = _options;
         this.followSymbolicLink = this._getValue(this._options.followSymbolicLink, true);
-        this.fs = fs17.createFileSystemAdapter(this._options.fs);
+        this.fs = fs18.createFileSystemAdapter(this._options.fs);
         this.markSymbolicLink = this._getValue(this._options.markSymbolicLink, false);
         this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
       }
@@ -44272,8 +44272,8 @@ var require_utils5 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.fs = void 0;
-    var fs17 = require_fs3();
-    exports2.fs = fs17;
+    var fs18 = require_fs3();
+    exports2.fs = fs18;
   }
 });
 
@@ -44478,14 +44478,14 @@ var require_fs4 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.createFileSystemAdapter = exports2.FILE_SYSTEM_ADAPTER = void 0;
-    var fs17 = require("fs");
+    var fs18 = require("fs");
     exports2.FILE_SYSTEM_ADAPTER = {
-      lstat: fs17.lstat,
-      stat: fs17.stat,
-      lstatSync: fs17.lstatSync,
-      statSync: fs17.statSync,
-      readdir: fs17.readdir,
-      readdirSync: fs17.readdirSync
+      lstat: fs18.lstat,
+      stat: fs18.stat,
+      lstatSync: fs18.lstatSync,
+      statSync: fs18.statSync,
+      readdir: fs18.readdir,
+      readdirSync: fs18.readdirSync
     };
     function createFileSystemAdapter(fsMethods) {
       if (fsMethods === void 0) {
@@ -44505,7 +44505,7 @@ var require_settings2 = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     var path20 = require("path");
     var fsStat2 = require_out();
-    var fs17 = require_fs4();
+    var fs18 = require_fs4();
     var Settings = class {
       static {
         __name(this, "Settings");
@@ -44513,7 +44513,7 @@ var require_settings2 = __commonJS({
       constructor(_options = {}) {
         this._options = _options;
         this.followSymbolicLinks = this._getValue(this._options.followSymbolicLinks, false);
-        this.fs = fs17.createFileSystemAdapter(this._options.fs);
+        this.fs = fs18.createFileSystemAdapter(this._options.fs);
         this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path20.sep);
         this.stats = this._getValue(this._options.stats, false);
         this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
@@ -45998,16 +45998,16 @@ var require_settings4 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DEFAULT_FILE_SYSTEM_ADAPTER = void 0;
-    var fs17 = require("fs");
+    var fs18 = require("fs");
     var os12 = require("os");
     var CPU_COUNT = Math.max(os12.cpus().length, 1);
     exports2.DEFAULT_FILE_SYSTEM_ADAPTER = {
-      lstat: fs17.lstat,
-      lstatSync: fs17.lstatSync,
-      stat: fs17.stat,
-      statSync: fs17.statSync,
-      readdir: fs17.readdir,
-      readdirSync: fs17.readdirSync
+      lstat: fs18.lstat,
+      lstatSync: fs18.lstatSync,
+      stat: fs18.stat,
+      statSync: fs18.statSync,
+      readdir: fs18.readdir,
+      readdirSync: fs18.readdirSync
     };
     var Settings = class {
       static {
@@ -53268,14 +53268,14 @@ k-map" || token.type === "block-seq")) {
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs17 = this.flowScalar(this.type);
+              const fs18 = this.flowScalar(this.type);
               if (atNextItem || it.value) {
-                map.items.push({ start, key: fs17, sep: [] });
+                map.items.push({ start, key: fs18, sep: [] });
                 this.onKeyLine = true;
               } else if (it.sep) {
-                this.stack.push(fs17);
+                this.stack.push(fs18);
               } else {
-                Object.assign(it, { key: fs17, sep: [] });
+                Object.assign(it, { key: fs18, sep: [] });
                 this.onKeyLine = true;
               }
               return;
@@ -53403,13 +53403,13 @@ k-map" || token.type === "block-seq")) {
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs17 = this.flowScalar(this.type);
+              const fs18 = this.flowScalar(this.type);
               if (!it || it.value)
-                fc.items.push({ start: [], key: fs17, sep: [] });
+                fc.items.push({ start: [], key: fs18, sep: [] });
               else if (it.sep)
-                this.stack.push(fs17);
+                this.stack.push(fs18);
               else
-                Object.assign(it, { key: fs17, sep: [] });
+                Object.assign(it, { key: fs18, sep: [] });
               return;
             }
             case "flow-map-end":
@@ -65156,11 +65156,11 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary, version: version3, 
 }, "loadTool");
 
 // opa-policy-test/src/index.js
-var import_node_fs9 = __toESM(require("node:fs"), 1);
+var import_node_fs10 = __toESM(require("node:fs"), 1);
 var import_node_path8 = __toESM(require("node:path"), 1);
 
 // setup-gcloud/src/setup-gcloud.js
-var import_node_fs5 = __toESM(require("node:fs"), 1);
+var import_node_fs6 = __toESM(require("node:fs"), 1);
 var import_node_path5 = __toESM(require("node:path"), 1);
 
 // node_modules/@actions/cache/lib/cache.js
@@ -99645,6 +99645,9 @@ function saveAuthStack(authStack) {
 }
 __name(saveAuthStack, "saveAuthStack");
 
+// setup-gcloud/src/auth-wid-federation.js
+var import_node_fs5 = __toESM(require("node:fs"), 1);
+
 // setup-gcloud/src/create-job-scoped-credential.js
 var import_node_fs4 = __toESM(require("node:fs"), 1);
 var import_node_path4 = __toESM(require("node:path"), 1);
@@ -99700,6 +99703,20 @@ ${result.stderr}`;
 }, "execGcloud");
 
 // setup-gcloud/src/auth-wid-federation.js
+async function refreshIdToken({
+  workloadIdentityProvider,
+  idTokenPath
+}) {
+  const newToken = await getIDToken(
+    `https://iam.googleapis.com/${workloadIdentityProvider}`
+  );
+  import_node_fs5.default.writeFileSync(idTokenPath, newToken, {
+    encoding: "utf8",
+    mode: 384
+    // rw-------
+  });
+}
+__name(refreshIdToken, "refreshIdToken");
 async function workloadIdentityFederation(credentialsFilePath, { workload_identity_provider: workloadIdentityProvider, email }) {
   const idToken = await getIDToken(
     `https://iam.googleapis.com/${workloadIdentityProvider}`
@@ -99718,6 +99735,10 @@ async function workloadIdentityFederation(credentialsFilePath, { workload_identi
     "gcloud",
     true
   );
+  return {
+    workloadIdentityProvider,
+    idTokenPath
+  };
 }
 __name(workloadIdentityFederation, "workloadIdentityFederation");
 
@@ -99727,6 +99748,7 @@ var authType = {
   widFederation: "wid_federation"
 };
 var env = {
+  accessToken: "CLOUDSDK_AUTH_ACCESS_TOKEN",
   applicationCredentials: "GOOGLE_APPLICATION_CREDENTIALS",
   credentialsOverride: "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE",
   projectId: "CLOUDSDK_CORE_PROJECT"
@@ -99836,7 +99858,8 @@ async function authenticateGcloud(credentials, exportCredentials) {
     email,
     projectId,
     exportCredentials,
-    credentialsFilePath: ""
+    credentialsFilePath: "",
+    refreshTokenMetadata: void 0
   };
   if (!isCurrentAccount(authEntry)) {
     authEntry.credentialsFilePath = createJobScopedCredential(credentials);
@@ -99847,7 +99870,7 @@ async function authenticateGcloud(credentials, exportCredentials) {
       process.env[env.projectId] = projectId;
       authEntry.exportCredentials = true;
       if (authEntry.type === authType.widFederation) {
-        await workloadIdentityFederation(
+        authEntry.refreshTokenMetadata = await workloadIdentityFederation(
           authEntry.credentialsFilePath,
           jsonCredentials
         );
@@ -99859,13 +99882,31 @@ async function authenticateGcloud(credentials, exportCredentials) {
     authStack.push(authEntry);
     saveAuthStack(authStack);
     populateEnvironment(authEntry);
+  } else {
+    await getCurrentAccount().refreshToken();
   }
   return projectId;
 }
 __name(authenticateGcloud, "authenticateGcloud");
 function getCurrentAccount() {
   const authStack = loadAuthStack();
-  return authStack.at(-1);
+  const account = authStack.at(-1);
+  if (!account) {
+    return void 0;
+  }
+  const refreshToken = /* @__PURE__ */ __name(async () => {
+  }, "refreshToken");
+  if (account.type === authType.widFederation && account.refreshTokenMetadata && typeof account.refreshTokenMetadata ===
+  "object") {
+    return {
+      ...account,
+      refreshToken: /* @__PURE__ */ __name(async () => refreshIdToken(account.refreshTokenMetadata), "refreshToken")
+    };
+  }
+  return {
+    ...account,
+    refreshToken
+  };
 }
 __name(getCurrentAccount, "getCurrentAccount");
 
@@ -99925,7 +99966,7 @@ var configureCloudSdkPython = /* @__PURE__ */ __name(async (toolPath) => {
       "bundledpython",
       "python.exe"
     );
-    if (import_node_fs5.default.existsSync(pythonPath)) {
+    if (import_node_fs6.default.existsSync(pythonPath)) {
       const envVar = "CLOUDSDK_PYTHON";
       info(`Set ${envVar}=${pythonPath} (Windows fix)`);
       exportVariable(envVar, pythonPath);
@@ -99936,7 +99977,7 @@ var configureCloudSdkPython = /* @__PURE__ */ __name(async (toolPath) => {
 }, "configureCloudSdkPython");
 var isolateConfigDir = /* @__PURE__ */ __name(async (toolPath = void 0) => {
   const configDirPath = getJobScope({ prefix: "gcloud-config" });
-  import_node_fs5.default.mkdirSync(configDirPath, { recursive: true });
+  import_node_fs6.default.mkdirSync(configDirPath, { recursive: true });
   exportVariable("CLOUDSDK_CONFIG", configDirPath);
   return toolPath;
 }, "isolateConfigDir");
@@ -99953,9 +99994,9 @@ var installComponents = /* @__PURE__ */ __name(async (toolPath) => {
     return null;
   });
   const installBackup = import_node_path5.default.join(toolPath, ".install", ".backup");
-  if (import_node_fs5.default.existsSync(installBackup)) {
-    import_node_fs5.default.rmSync(installBackup, { recursive: true });
-    import_node_fs5.default.mkdirSync(installBackup, { recursive: true });
+  if (import_node_fs6.default.existsSync(installBackup)) {
+    import_node_fs6.default.rmSync(installBackup, { recursive: true });
+    import_node_fs6.default.mkdirSync(installBackup, { recursive: true });
   }
   import_fast_glob.default.sync("**/__pycache__", {
     cwd: toolPath,
@@ -99963,7 +100004,7 @@ var installComponents = /* @__PURE__ */ __name(async (toolPath) => {
     onlyDirectories: true,
     absolute: true
   }).forEach((pycache) => {
-    import_node_fs5.default.rmSync(pycache, { recursive: true });
+    import_node_fs6.default.rmSync(pycache, { recursive: true });
   });
   return null;
 }, "installComponents");
@@ -100021,13 +100062,13 @@ var setupGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, version3 = "l
 var setup_gcloud_default = setupGcloud;
 
 // opa-policy-test/src/bundle-name.js
-var import_node_fs6 = __toESM(require("node:fs"), 1);
+var import_node_fs7 = __toESM(require("node:fs"), 1);
 var import_yaml = __toESM(require_dist6(), 1);
 var readFromServiceFile = /* @__PURE__ */ __name((fileName) => {
-  if (!import_node_fs6.default.existsSync(fileName)) {
+  if (!import_node_fs7.default.existsSync(fileName)) {
     throw new Error(`Not found: ${fileName}`);
   }
-  const def = import_yaml.default.parse(import_node_fs6.default.readFileSync(fileName, "utf-8"));
+  const def = import_yaml.default.parse(import_node_fs7.default.readFileSync(fileName, "utf-8"));
   const {
     "cloud-run": { service: cloudRunService } = {},
     kubernetes: { service: gkeService } = {},
@@ -100071,14 +100112,14 @@ var getBundleName = /* @__PURE__ */ __name(() => {
 var bundle_name_default = getBundleName;
 
 // opa-policy-test/src/create-test-bundle.js
-var import_node_fs8 = __toESM(require("node:fs"), 1);
+var import_node_fs9 = __toESM(require("node:fs"), 1);
 var import_node_path7 = __toESM(require("node:path"), 1);
 
 // opa-policy-test/src/copy-policies.js
-var import_node_fs7 = __toESM(require("node:fs"), 1);
+var import_node_fs8 = __toESM(require("node:fs"), 1);
 var import_node_path6 = __toESM(require("node:path"), 1);
 var copyPolicies = /* @__PURE__ */ __name((testBundlePath) => {
-  import_node_fs7.default.cpSync(
+  import_node_fs8.default.cpSync(
     import_node_path6.default.join("policies", "policy"),
     import_node_path6.default.join(testBundlePath, "policy"),
     { recursive: true }
@@ -100094,7 +100135,7 @@ var createTestBundle = /* @__PURE__ */ __name(async (bundleName, bucketName) => 
   info(`Download ${bucketPath}`);
   await execGcloud(["storage", "cp", bucketPath, outputPath]);
   await exec("tar", ["-xf", outputPath, "-C", testBundlePath]);
-  import_node_fs8.default.rmSync(outputPath);
+  import_node_fs9.default.rmSync(outputPath);
   copy_policies_default(testBundlePath);
   return testBundlePath;
 }, "createTestBundle");
@@ -100118,7 +100159,7 @@ var action5 = /* @__PURE__ */ __name(async () => {
     required: true
   });
   const bucketName = getInput("gcs-bucket");
-  if (!import_node_fs9.default.existsSync(import_node_path8.default.join("policies", "policy"))) {
+  if (!import_node_fs10.default.existsSync(import_node_path8.default.join("policies", "policy"))) {
     throw new Error(
       "No policies found. Exit. Expected folder: policies/policy"
     );
