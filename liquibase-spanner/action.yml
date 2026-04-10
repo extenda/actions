@@ -1,10 +1,5 @@
 name: 'liquibase-spanner'
 description: 'Validate, Prepare and Execute Liquibase CLI'
-
-branding:
-  icon: database
-  color: red
-
 inputs:
   operation: # [update, updateCount, tag, updateToTag, rollback, rollbackCount, rollbackToDate, updateSQL, futureRollbackSQL, status, history, diff]
     description: 'Operation to run'
