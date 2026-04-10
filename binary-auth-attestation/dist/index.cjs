@@ -99883,8 +99883,7 @@ on)'
   );
 }
 __name(validateCredentialsShape, "validateCredentialsShape");
-function isCurrentAccount(auth) {
-  const current = getCurrentAccount();
+function isCurrentAccount(auth, current) {
   if (current) {
     return current.type === auth.type && current.email === auth.email && current.projectId === auth.projectId;
   }
@@ -99936,7 +99935,10 @@ async function authenticateGcloud(credentials, exportCredentials) {
     credentialsFilePath: "",
     refreshTokenMetadata: void 0
   };
-  if (!isCurrentAccount(authEntry)) {
+  const current = getCurrentAccount();
+  if (isCurrentAccount(authEntry, current)) {
+    await current.refreshToken();
+  } else {
     authEntry.credentialsFilePath = createJobScopedCredential(credentials);
     info(
       `Authenticate gcloud account '${authEntry.email}' with ${authEntry.type}`
@@ -99957,8 +99959,6 @@ async function authenticateGcloud(credentials, exportCredentials) {
     authStack.push(authEntry);
     saveAuthStack(authStack);
     populateEnvironment(authEntry);
-  } else {
-    await getCurrentAccount().refreshToken();
   }
   return projectId;
 }
