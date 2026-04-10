@@ -165,7 +165,10 @@ export async function authenticateGcloud(credentials, exportCredentials) {
 
   const current = getCurrentAccount();
 
-  if (!isCurrentAccount(authEntry, current)) {
+  if (isCurrentAccount(authEntry, current)) {
+    // Already logged in. Refresh the GitHub ID token used by WIF.
+    await current.refreshToken();
+  } else {
     // Create a job-scoped credential file (handles base64 decoding and cleanup tracking)
     authEntry.credentialsFilePath = createJobScopedCredential(credentials);
 
@@ -194,11 +197,6 @@ export async function authenticateGcloud(credentials, exportCredentials) {
     authStack.push(authEntry);
     saveAuthStack(authStack);
     populateEnvironment(authEntry);
-  } else {
-    // Refresh the GitHub ID token used by WIF.
-    if (current) {
-      await current.refreshToken();
-    }
   }
 
   return projectId;
