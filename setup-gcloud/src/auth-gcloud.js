@@ -81,8 +81,7 @@ function validateCredentialsShape(jsonCredentials) {
   );
 }
 
-function isCurrentAccount(auth) {
-  const current = getCurrentAccount();
+function isCurrentAccount(auth, current) {
   if (current) {
     return (
       current.type === auth.type &&
@@ -164,7 +163,9 @@ export async function authenticateGcloud(credentials, exportCredentials) {
     refreshTokenMetadata: undefined,
   };
 
-  if (!isCurrentAccount(authEntry)) {
+  const current = getCurrentAccount();
+
+  if (!isCurrentAccount(authEntry, current)) {
     // Create a job-scoped credential file (handles base64 decoding and cleanup tracking)
     authEntry.credentialsFilePath = createJobScopedCredential(credentials);
 
@@ -195,7 +196,9 @@ export async function authenticateGcloud(credentials, exportCredentials) {
     populateEnvironment(authEntry);
   } else {
     // Refresh the GitHub ID token used by WIF.
-    await getCurrentAccount().refreshToken();
+    if (current) {
+      await current.refreshToken();
+    }
   }
 
   return projectId;
