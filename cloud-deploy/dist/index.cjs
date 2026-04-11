@@ -236,8 +236,8 @@ var require_common = __commonJS({
             }
             return enabledCache;
           }, "get"),
-          set: /* @__PURE__ */ __name((v) => {
-            enableOverride = v;
+          set: /* @__PURE__ */ __name((v2) => {
+            enableOverride = v2;
           }, "set")
         });
         if (typeof createDebug.init === "function") {
@@ -460,8 +460,8 @@ in the next major version of `debug`.");
       if (!this.useColors) {
         return;
       }
-      const c = "color: " + this.color;
-      args.splice(1, 0, c, "color: inherit");
+      const c2 = "color: " + this.color;
+      args.splice(1, 0, c2, "color: inherit");
       let index = 0;
       let lastC = 0;
       args[0].replace(/%[a-zA-Z%]/g, (match2) => {
@@ -473,7 +473,7 @@ in the next major version of `debug`.");
           lastC = index;
         }
       });
-      args.splice(lastC, 0, c);
+      args.splice(lastC, 0, c2);
     }
     __name(formatArgs, "formatArgs");
     exports2.log = console.debug || console.log || (() => {
@@ -490,15 +490,15 @@ in the next major version of `debug`.");
     }
     __name(save, "save");
     function load2() {
-      let r;
+      let r2;
       try {
-        r = exports2.storage.getItem("debug") || exports2.storage.getItem("DEBUG");
+        r2 = exports2.storage.getItem("debug") || exports2.storage.getItem("DEBUG");
       } catch (error2) {
       }
-      if (!r && typeof process !== "undefined" && "env" in process) {
-        r = process.env.DEBUG;
+      if (!r2 && typeof process !== "undefined" && "env" in process) {
+        r2 = process.env.DEBUG;
       }
-      return r;
+      return r2;
     }
     __name(load2, "load");
     function localstorage() {
@@ -510,9 +510,9 @@ in the next major version of `debug`.");
     __name(localstorage, "localstorage");
     module2.exports = require_common()(exports2);
     var { formatters } = module2.exports;
-    formatters.j = function(v) {
+    formatters.j = function(v2) {
       try {
-        return JSON.stringify(v);
+        return JSON.stringify(v2);
       } catch (error2) {
         return "[UnexpectedJSONParseError]: " + error2.message;
       }
@@ -767,8 +767,8 @@ var require_node = __commonJS({
     function formatArgs(args) {
       const { namespace: name, useColors: useColors2 } = this;
       if (useColors2) {
-        const c = this.color;
-        const colorCode = "\x1B[3" + (c < 8 ? c : "8;5;" + c);
+        const c2 = this.color;
+        const colorCode = "\x1B[3" + (c2 < 8 ? c2 : "8;5;" + c2);
         const prefix2 = `  ${colorCode};1m${name} \x1B[0m`;
         args[0] = prefix2 + args[0].split("\n").join("\n" + prefix2);
         args.push(colorCode + "m+" + module2.exports.humanize(this.diff) + "\x1B[0m");
@@ -810,13 +810,13 @@ var require_node = __commonJS({
     __name(init, "init");
     module2.exports = require_common()(exports2);
     var { formatters } = module2.exports;
-    formatters.o = function(v) {
+    formatters.o = function(v2) {
       this.inspectOpts.colors = this.useColors;
-      return util8.inspect(v, this.inspectOpts).split("\n").map((str2) => str2.trim()).join(" ");
+      return util8.inspect(v2, this.inspectOpts).split("\n").map((str2) => str2.trim()).join(" ");
     };
-    formatters.O = function(v) {
+    formatters.O = function(v2) {
       this.inspectOpts.colors = this.useColors;
-      return util8.inspect(v, this.inspectOpts);
+      return util8.inspect(v2, this.inspectOpts);
     };
   }
 });
@@ -1967,7 +1967,7 @@ var require_util = __commonJS({
     var { InvalidArgumentError } = require_errors();
     var { headerNameLowerCasedRecord } = require_constants();
     var { tree } = require_tree();
-    var [nodeMajor, nodeMinor] = process.versions.node.split(".").map((v) => Number(v));
+    var [nodeMajor, nodeMinor] = process.versions.node.split(".").map((v2) => Number(v2));
     var BodyAsyncIterable = class {
       static {
         __name(this, "BodyAsyncIterable");
@@ -2362,8 +2362,8 @@ nction" && typeof object.get === "function" && typeof object.getAll === "functio
       return hasIsWellFormed ? `${val}`.isWellFormed() : toUSVString(val) === `${val}`;
     }
     __name(isUSVString, "isUSVString");
-    function isTokenCharCode(c) {
-      switch (c) {
+    function isTokenCharCode(c2) {
+      switch (c2) {
         case 34:
         case 40:
         case 41:
@@ -2383,7 +2383,7 @@ nction" && typeof object.get === "function" && typeof object.getAll === "functio
         case 125:
           return false;
         default:
-          return c >= 33 && c <= 126;
+          return c2 >= 33 && c2 <= 126;
       }
     }
     __name(isTokenCharCode, "isTokenCharCode");
@@ -2400,10 +2400,10 @@ nction" && typeof object.get === "function" && typeof object.getAll === "functio
     }
     __name(isValidHTTPToken, "isValidHTTPToken");
     var headerCharRegex = /[^\t\x20-\x7e\x80-\xff]/;
-    function isValidHeaderValue(characters) {
+    function isValidHeaderValue2(characters) {
       return !headerCharRegex.test(characters);
     }
-    __name(isValidHeaderValue, "isValidHeaderValue");
+    __name(isValidHeaderValue2, "isValidHeaderValue");
     function parseRangeHeader(range2) {
       if (range2 == null || range2 === "") return { start: 0, end: null, size: null };
       const m = range2 ? range2.match(/^bytes (\d+)-(\d+)\/(\d+)?$/) : null;
@@ -2495,7 +2495,7 @@ nction" && typeof object.get === "function" && typeof object.getAll === "functio
       buildURL: buildURL2,
       addAbortListener,
       isValidHTTPToken,
-      isValidHeaderValue,
+      isValidHeaderValue: isValidHeaderValue2,
       isTokenCharCode,
       parseRangeHeader,
       normalizedMethodRecordsBase,
@@ -2706,7 +2706,7 @@ var require_request = __commonJS({
     var assert4 = require("node:assert");
     var {
       isValidHTTPToken,
-      isValidHeaderValue,
+      isValidHeaderValue: isValidHeaderValue2,
       isStream: isStream2,
       destroy: destroy2,
       isBuffer: isBuffer2,
@@ -2758,7 +2758,7 @@ CONNECT") {
         if (upgrade && typeof upgrade !== "string") {
           throw new InvalidArgumentError("upgrade must be a string");
         }
-        if (upgrade && !isValidHeaderValue(upgrade)) {
+        if (upgrade && !isValidHeaderValue2(upgrade)) {
           throw new InvalidArgumentError("invalid upgrade header");
         }
         if (headersTimeout != null && (!Number.isFinite(headersTimeout) || headersTimeout < 0)) {
@@ -2972,7 +2972,7 @@ terable");
         const arr = [];
         for (let i = 0; i < val.length; i++) {
           if (typeof val[i] === "string") {
-            if (!isValidHeaderValue(val[i])) {
+            if (!isValidHeaderValue2(val[i])) {
               throw new InvalidArgumentError(`invalid ${key} header`);
             }
             arr.push(val[i]);
@@ -2986,7 +2986,7 @@ terable");
         }
         val = arr;
       } else if (typeof val === "string") {
-        if (!isValidHeaderValue(val)) {
+        if (!isValidHeaderValue2(val)) {
           throw new InvalidArgumentError(`invalid ${key} header`);
         }
       } else if (val === null) {
@@ -4006,7 +4006,7 @@ var require_constants2 = __commonJS({
         exports2.HEADER_CHARS.push(i);
       }
     }
-    exports2.CONNECTION_TOKEN_CHARS = exports2.HEADER_CHARS.filter((c) => c !== 44);
+    exports2.CONNECTION_TOKEN_CHARS = exports2.HEADER_CHARS.filter((c2) => c2 !== 44);
     exports2.MAJOR = exports2.NUM_MAP;
     exports2.MINOR = exports2.MAJOR;
     var HEADER_STATE;
@@ -5785,15 +5785,15 @@ var require_webidl = __commonJS({
         message: `"${context3.value}" is an invalid ${context3.type}.`
       });
     };
-    webidl.brandCheck = function(V, I, opts) {
+    webidl.brandCheck = function(V2, I, opts) {
       if (opts?.strict !== false) {
-        if (!(V instanceof I)) {
+        if (!(V2 instanceof I)) {
           const err = new TypeError("Illegal invocation");
           err.code = "ERR_INVALID_THIS";
           throw err;
         }
       } else {
-        if (V?.[Symbol.toStringTag] !== I.prototype[Symbol.toStringTag]) {
+        if (V2?.[Symbol.toStringTag] !== I.prototype[Symbol.toStringTag]) {
           const err = new TypeError("Illegal invocation");
           err.code = "ERR_INVALID_THIS";
           throw err;
@@ -5814,8 +5814,8 @@ var require_webidl = __commonJS({
         message: "Illegal constructor"
       });
     };
-    webidl.util.Type = function(V) {
-      switch (typeof V) {
+    webidl.util.Type = function(V2) {
+      switch (typeof V2) {
         case "undefined":
           return "Undefined";
         case "boolean":
@@ -5830,7 +5830,7 @@ var require_webidl = __commonJS({
           return "BigInt";
         case "function":
         case "object": {
-          if (V === null) {
+          if (V2 === null) {
             return "Null";
           }
           return "Object";
@@ -5839,7 +5839,7 @@ var require_webidl = __commonJS({
     };
     webidl.util.markAsUncloneable = markAsUncloneable || (() => {
     });
-    webidl.util.ConvertToInt = function(V, bitLength, signedness, opts) {
+    webidl.util.ConvertToInt = function(V2, bitLength, signedness, opts) {
       let upperBound;
       let lowerBound;
       if (bitLength === 64) {
@@ -5856,7 +5856,7 @@ var require_webidl = __commonJS({
         lowerBound = Math.pow(-2, bitLength) - 1;
         upperBound = Math.pow(2, bitLength - 1) - 1;
       }
-      let x = Number(V);
+      let x = Number(V2);
       if (x === 0) {
         x = 0;
       }
@@ -5864,7 +5864,7 @@ var require_webidl = __commonJS({
         if (Number.isNaN(x) || x === Number.POSITIVE_INFINITY || x === Number.NEGATIVE_INFINITY) {
           throw webidl.errors.exception({
             header: "Integer conversion",
-            message: `Could not convert ${webidl.util.Stringify(V)} to an integer.`
+            message: `Could not convert ${webidl.util.Stringify(V2)} to an integer.`
           });
         }
         x = webidl.util.IntegerPart(x);
@@ -5896,34 +5896,34 @@ var require_webidl = __commonJS({
       return x;
     };
     webidl.util.IntegerPart = function(n) {
-      const r = Math.floor(Math.abs(n));
+      const r2 = Math.floor(Math.abs(n));
       if (n < 0) {
-        return -1 * r;
+        return -1 * r2;
       }
-      return r;
+      return r2;
     };
-    webidl.util.Stringify = function(V) {
-      const type2 = webidl.util.Type(V);
+    webidl.util.Stringify = function(V2) {
+      const type2 = webidl.util.Type(V2);
       switch (type2) {
         case "Symbol":
-          return `Symbol(${V.description})`;
+          return `Symbol(${V2.description})`;
         case "Object":
-          return inspect2(V);
+          return inspect2(V2);
         case "String":
-          return `"${V}"`;
+          return `"${V2}"`;
         default:
-          return `${V}`;
+          return `${V2}`;
       }
     };
     webidl.sequenceConverter = function(converter) {
-      return (V, prefix2, argument, Iterable) => {
-        if (webidl.util.Type(V) !== "Object") {
+      return (V2, prefix2, argument, Iterable) => {
+        if (webidl.util.Type(V2) !== "Object") {
           throw webidl.errors.exception({
             header: prefix2,
-            message: `${argument} (${webidl.util.Stringify(V)}) is not iterable.`
+            message: `${argument} (${webidl.util.Stringify(V2)}) is not iterable.`
           });
         }
-        const method = typeof Iterable === "function" ? Iterable() : V?.[Symbol.iterator]?.();
+        const method = typeof Iterable === "function" ? Iterable() : V2?.[Symbol.iterator]?.();
         const seq2 = [];
         let index = 0;
         if (method === void 0 || typeof method.next !== "function") {
@@ -5943,29 +5943,29 @@ var require_webidl = __commonJS({
       };
     };
     webidl.recordConverter = function(keyConverter, valueConverter) {
-      return (O, prefix2, argument) => {
-        if (webidl.util.Type(O) !== "Object") {
+      return (O2, prefix2, argument) => {
+        if (webidl.util.Type(O2) !== "Object") {
           throw webidl.errors.exception({
             header: prefix2,
-            message: `${argument} ("${webidl.util.Type(O)}") is not an Object.`
+            message: `${argument} ("${webidl.util.Type(O2)}") is not an Object.`
           });
         }
         const result = {};
-        if (!types2.isProxy(O)) {
-          const keys2 = [...Object.getOwnPropertyNames(O), ...Object.getOwnPropertySymbols(O)];
+        if (!types2.isProxy(O2)) {
+          const keys2 = [...Object.getOwnPropertyNames(O2), ...Object.getOwnPropertySymbols(O2)];
           for (const key of keys2) {
             const typedKey = keyConverter(key, prefix2, argument);
-            const typedValue = valueConverter(O[key], prefix2, argument);
+            const typedValue = valueConverter(O2[key], prefix2, argument);
             result[typedKey] = typedValue;
           }
           return result;
         }
-        const keys = Reflect.ownKeys(O);
+        const keys = Reflect.ownKeys(O2);
         for (const key of keys) {
-          const desc = Reflect.getOwnPropertyDescriptor(O, key);
+          const desc = Reflect.getOwnPropertyDescriptor(O2, key);
           if (desc?.enumerable) {
             const typedKey = keyConverter(key, prefix2, argument);
-            const typedValue = valueConverter(O[key], prefix2, argument);
+            const typedValue = valueConverter(O2[key], prefix2, argument);
             result[typedKey] = typedValue;
           }
         }
@@ -5973,14 +5973,14 @@ var require_webidl = __commonJS({
       };
     };
     webidl.interfaceConverter = function(i) {
-      return (V, prefix2, argument, opts) => {
-        if (opts?.strict !== false && !(V instanceof i)) {
+      return (V2, prefix2, argument, opts) => {
+        if (opts?.strict !== false && !(V2 instanceof i)) {
           throw webidl.errors.exception({
             header: prefix2,
-            message: `Expected ${argument} ("${webidl.util.Stringify(V)}") to be an instance of ${i.name}.`
+            message: `Expected ${argument} ("${webidl.util.Stringify(V2)}") to be an instance of ${i.name}.`
           });
         }
-        return V;
+        return V2;
       };
     };
     webidl.dictionaryConverter = function(converters) {
@@ -6025,27 +6025,27 @@ var require_webidl = __commonJS({
       };
     };
     webidl.nullableConverter = function(converter) {
-      return (V, prefix2, argument) => {
-        if (V === null) {
-          return V;
+      return (V2, prefix2, argument) => {
+        if (V2 === null) {
+          return V2;
         }
-        return converter(V, prefix2, argument);
+        return converter(V2, prefix2, argument);
       };
     };
-    webidl.converters.DOMString = function(V, prefix2, argument, opts) {
-      if (V === null && opts?.legacyNullToEmptyString) {
+    webidl.converters.DOMString = function(V2, prefix2, argument, opts) {
+      if (V2 === null && opts?.legacyNullToEmptyString) {
         return "";
       }
-      if (typeof V === "symbol") {
+      if (typeof V2 === "symbol") {
         throw webidl.errors.exception({
           header: prefix2,
           message: `${argument} is a symbol, which cannot be converted to a DOMString.`
         });
       }
-      return String(V);
+      return String(V2);
     };
-    webidl.converters.ByteString = function(V, prefix2, argument) {
-      const x = webidl.converters.DOMString(V, prefix2, argument);
+    webidl.converters.ByteString = function(V2, prefix2, argument) {
+      const x = webidl.converters.DOMString(V2, prefix2, argument);
       for (let index = 0; index < x.length; index++) {
         if (x.charCodeAt(index) > 255) {
           throw new TypeError(
@@ -6057,107 +6057,107 @@ var require_webidl = __commonJS({
       return x;
     };
     webidl.converters.USVString = toUSVString;
-    webidl.converters.boolean = function(V) {
-      const x = Boolean(V);
+    webidl.converters.boolean = function(V2) {
+      const x = Boolean(V2);
       return x;
     };
-    webidl.converters.any = function(V) {
-      return V;
+    webidl.converters.any = function(V2) {
+      return V2;
     };
-    webidl.converters["long long"] = function(V, prefix2, argument) {
-      const x = webidl.util.ConvertToInt(V, 64, "signed", void 0, prefix2, argument);
+    webidl.converters["long long"] = function(V2, prefix2, argument) {
+      const x = webidl.util.ConvertToInt(V2, 64, "signed", void 0, prefix2, argument);
       return x;
     };
-    webidl.converters["unsigned long long"] = function(V, prefix2, argument) {
-      const x = webidl.util.ConvertToInt(V, 64, "unsigned", void 0, prefix2, argument);
+    webidl.converters["unsigned long long"] = function(V2, prefix2, argument) {
+      const x = webidl.util.ConvertToInt(V2, 64, "unsigned", void 0, prefix2, argument);
       return x;
     };
-    webidl.converters["unsigned long"] = function(V, prefix2, argument) {
-      const x = webidl.util.ConvertToInt(V, 32, "unsigned", void 0, prefix2, argument);
+    webidl.converters["unsigned long"] = function(V2, prefix2, argument) {
+      const x = webidl.util.ConvertToInt(V2, 32, "unsigned", void 0, prefix2, argument);
       return x;
     };
-    webidl.converters["unsigned short"] = function(V, prefix2, argument, opts) {
-      const x = webidl.util.ConvertToInt(V, 16, "unsigned", opts, prefix2, argument);
+    webidl.converters["unsigned short"] = function(V2, prefix2, argument, opts) {
+      const x = webidl.util.ConvertToInt(V2, 16, "unsigned", opts, prefix2, argument);
       return x;
     };
-    webidl.converters.ArrayBuffer = function(V, prefix2, argument, opts) {
-      if (webidl.util.Type(V) !== "Object" || !types2.isAnyArrayBuffer(V)) {
+    webidl.converters.ArrayBuffer = function(V2, prefix2, argument, opts) {
+      if (webidl.util.Type(V2) !== "Object" || !types2.isAnyArrayBuffer(V2)) {
         throw webidl.errors.conversionFailed({
           prefix: prefix2,
-          argument: `${argument} ("${webidl.util.Stringify(V)}")`,
+          argument: `${argument} ("${webidl.util.Stringify(V2)}")`,
           types: ["ArrayBuffer"]
         });
       }
-      if (opts?.allowShared === false && types2.isSharedArrayBuffer(V)) {
+      if (opts?.allowShared === false && types2.isSharedArrayBuffer(V2)) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "SharedArrayBuffer is not allowed."
         });
       }
-      if (V.resizable || V.growable) {
+      if (V2.resizable || V2.growable) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "Received a resizable ArrayBuffer."
         });
       }
-      return V;
+      return V2;
     };
-    webidl.converters.TypedArray = function(V, T, prefix2, name, opts) {
-      if (webidl.util.Type(V) !== "Object" || !types2.isTypedArray(V) || V.constructor.name !== T.name) {
+    webidl.converters.TypedArray = function(V2, T, prefix2, name, opts) {
+      if (webidl.util.Type(V2) !== "Object" || !types2.isTypedArray(V2) || V2.constructor.name !== T.name) {
         throw webidl.errors.conversionFailed({
           prefix: prefix2,
-          argument: `${name} ("${webidl.util.Stringify(V)}")`,
+          argument: `${name} ("${webidl.util.Stringify(V2)}")`,
           types: [T.name]
         });
       }
-      if (opts?.allowShared === false && types2.isSharedArrayBuffer(V.buffer)) {
+      if (opts?.allowShared === false && types2.isSharedArrayBuffer(V2.buffer)) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "SharedArrayBuffer is not allowed."
         });
       }
-      if (V.buffer.resizable || V.buffer.growable) {
+      if (V2.buffer.resizable || V2.buffer.growable) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "Received a resizable ArrayBuffer."
         });
       }
-      return V;
+      return V2;
     };
-    webidl.converters.DataView = function(V, prefix2, name, opts) {
-      if (webidl.util.Type(V) !== "Object" || !types2.isDataView(V)) {
+    webidl.converters.DataView = function(V2, prefix2, name, opts) {
+      if (webidl.util.Type(V2) !== "Object" || !types2.isDataView(V2)) {
         throw webidl.errors.exception({
           header: prefix2,
           message: `${name} is not a DataView.`
         });
       }
-      if (opts?.allowShared === false && types2.isSharedArrayBuffer(V.buffer)) {
+      if (opts?.allowShared === false && types2.isSharedArrayBuffer(V2.buffer)) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "SharedArrayBuffer is not allowed."
         });
       }
-      if (V.buffer.resizable || V.buffer.growable) {
+      if (V2.buffer.resizable || V2.buffer.growable) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "Received a resizable ArrayBuffer."
         });
       }
-      return V;
+      return V2;
     };
-    webidl.converters.BufferSource = function(V, prefix2, name, opts) {
-      if (types2.isAnyArrayBuffer(V)) {
-        return webidl.converters.ArrayBuffer(V, prefix2, name, { ...opts, allowShared: false });
+    webidl.converters.BufferSource = function(V2, prefix2, name, opts) {
+      if (types2.isAnyArrayBuffer(V2)) {
+        return webidl.converters.ArrayBuffer(V2, prefix2, name, { ...opts, allowShared: false });
       }
-      if (types2.isTypedArray(V)) {
-        return webidl.converters.TypedArray(V, V.constructor, prefix2, name, { ...opts, allowShared: false });
+      if (types2.isTypedArray(V2)) {
+        return webidl.converters.TypedArray(V2, V2.constructor, prefix2, name, { ...opts, allowShared: false });
       }
-      if (types2.isDataView(V)) {
-        return webidl.converters.DataView(V, prefix2, name, { ...opts, allowShared: false });
+      if (types2.isDataView(V2)) {
+        return webidl.converters.DataView(V2, prefix2, name, { ...opts, allowShared: false });
       }
       throw webidl.errors.conversionFailed({
         prefix: prefix2,
-        argument: `${name} ("${webidl.util.Stringify(V)}")`,
+        argument: `${name} ("${webidl.util.Stringify(V2)}")`,
         types: ["BufferSource"]
       });
     };
@@ -6210,7 +6210,7 @@ var require_util2 = __commonJS({
         return null;
       }
       let location = response.headersList.get("location", true);
-      if (location !== null && isValidHeaderValue(location)) {
+      if (location !== null && isValidHeaderValue2(location)) {
         if (!isValidEncodedURL(location)) {
           location = normalizeBinaryStringToUtf8(location);
         }
@@ -6256,10 +6256,10 @@ ption");
     __name(isErrorLike, "isErrorLike");
     function isValidReasonPhrase(statusText) {
       for (let i = 0; i < statusText.length; ++i) {
-        const c = statusText.charCodeAt(i);
-        if (!(c === 9 || // HTAB
-        c >= 32 && c <= 126 || // SP / VCHAR
-        c >= 128 && c <= 255)) {
+        const c2 = statusText.charCodeAt(i);
+        if (!(c2 === 9 || // HTAB
+        c2 >= 32 && c2 <= 126 || // SP / VCHAR
+        c2 >= 128 && c2 <= 255)) {
           return false;
         }
       }
@@ -6267,12 +6267,12 @@ ption");
     }
     __name(isValidReasonPhrase, "isValidReasonPhrase");
     var isValidHeaderName2 = isValidHTTPToken;
-    function isValidHeaderValue(potentialValue) {
+    function isValidHeaderValue2(potentialValue) {
       return (potentialValue[0] === "	" || potentialValue[0] === " " || potentialValue[potentialValue.length - 1] === "	" ||
       potentialValue[potentialValue.length - 1] === " " || potentialValue.includes("\n") || potentialValue.includes("\r") ||
       potentialValue.includes("\0")) === false;
     }
-    __name(isValidHeaderValue, "isValidHeaderValue");
+    __name(isValidHeaderValue2, "isValidHeaderValue");
     function setRequestReferrerPolicyOnRedirect(request, actualResponse) {
       const { headersList } = actualResponse;
       const policyHeader = (headersList.get("referrer-policy", true) ?? "").split(",");
@@ -7099,7 +7099,7 @@ osed")) {
       iteratorMixin,
       createIterator,
       isValidHeaderName: isValidHeaderName2,
-      isValidHeaderValue,
+      isValidHeaderValue: isValidHeaderValue2,
       isErrorLike,
       fullyReadBody,
       bytesMatch,
@@ -7149,12 +7149,12 @@ var require_file = __commonJS({
       }
       constructor(blobLike, fileName, options = {}) {
         const n = fileName;
-        const t = options.type;
+        const t2 = options.type;
         const d = options.lastModified ?? Date.now();
         this[kState] = {
           blobLike,
           name: n,
-          type: t,
+          type: t2,
           lastModified: d
         };
       }
@@ -10397,7 +10397,7 @@ var require_pool_base = __commonJS({
             pool.emit("drain", origin2, [pool, ...targets]);
           }
           if (pool[kClosedResolve] && queue.isEmpty()) {
-            Promise.all(pool[kClients].map((c) => c.close())).then(pool[kClosedResolve]);
+            Promise.all(pool[kClients].map((c2) => c2.close())).then(pool[kClosedResolve]);
           }
         }, "onDrain");
         this[kOnConnect] = (origin2, targets) => {
@@ -10446,7 +10446,7 @@ var require_pool_base = __commonJS({
       }
       async [kClose]() {
         if (this[kQueue].isEmpty()) {
-          await Promise.all(this[kClients].map((c) => c.close()));
+          await Promise.all(this[kClients].map((c2) => c2.close()));
         } else {
           await new Promise((resolve2) => {
             this[kClosedResolve] = resolve2;
@@ -10461,7 +10461,7 @@ var require_pool_base = __commonJS({
           }
           item.handler.onError(err);
         }
-        await Promise.all(this[kClients].map((c) => c.destroy(err)));
+        await Promise.all(this[kClients].map((c2) => c2.destroy(err)));
       }
       [kDispatch](opts, handler) {
         const dispatcher = this[kGetDispatcher]();
@@ -10636,9 +10636,9 @@ var require_balanced_pool = __commonJS({
     function getGreatestCommonDivisor(a, b) {
       if (a === 0) return b;
       while (b !== 0) {
-        const t = b;
+        const t2 = b;
         b = a % b;
-        a = t;
+        a = t2;
       }
       return a;
     }
@@ -11107,7 +11107,7 @@ var require_env_http_proxy_agent = __commonJS({
     var { kClose, kDestroy, kClosed, kDestroyed, kDispatch, kNoProxyAgent, kHttpProxyAgent, kHttpsProxyAgent } = require_symbols();
     var ProxyAgent2 = require_proxy_agent();
     var Agent3 = require_agent();
-    var DEFAULT_PORTS2 = {
+    var DEFAULT_PORTS3 = {
       "http:": 80,
       "https:": 443
     };
@@ -11170,7 +11170,7 @@ var require_env_http_proxy_agent = __commonJS({
       #getProxyAgentForUrl(url3) {
         let { protocol, host: hostname, port } = url3;
         hostname = hostname.replace(/:\d*$/, "").toLowerCase();
-        port = Number.parseInt(port, 10) || DEFAULT_PORTS2[protocol] || 0;
+        port = Number.parseInt(port, 10) || DEFAULT_PORTS3[protocol] || 0;
         if (!this.#shouldProxy(hostname, port)) {
           return this[kNoProxyAgent];
         }
@@ -14191,7 +14191,7 @@ var require_headers = __commonJS({
     var {
       iteratorMixin,
       isValidHeaderName: isValidHeaderName2,
-      isValidHeaderValue
+      isValidHeaderValue: isValidHeaderValue2
     } = require_util2();
     var { webidl } = require_webidl();
     var assert4 = require("node:assert");
@@ -14244,7 +14244,7 @@ var require_headers = __commonJS({
           value: name,
           type: "header name"
         });
-      } else if (!isValidHeaderValue(value)) {
+      } else if (!isValidHeaderValue2(value)) {
         throw webidl.errors.invalidArgument({
           prefix: "Headers.append",
           value,
@@ -14521,7 +14521,7 @@ var require_headers = __commonJS({
             value: name,
             type: "header name"
           });
-        } else if (!isValidHeaderValue(value)) {
+        } else if (!isValidHeaderValue2(value)) {
           throw webidl.errors.invalidArgument({
             prefix: prefix2,
             value,
@@ -14569,17 +14569,17 @@ var require_headers = __commonJS({
         options.depth ??= depth;
         return `Headers ${util8.formatWithOptions(options, this.#headersList.entries)}`;
       }
-      static getHeadersGuard(o) {
-        return o.#guard;
+      static getHeadersGuard(o2) {
+        return o2.#guard;
       }
-      static setHeadersGuard(o, guard) {
-        o.#guard = guard;
+      static setHeadersGuard(o2, guard) {
+        o2.#guard = guard;
       }
-      static getHeadersList(o) {
-        return o.#headersList;
+      static getHeadersList(o2) {
+        return o2.#headersList;
       }
-      static setHeadersList(o, list) {
-        o.#headersList = list;
+      static setHeadersList(o2, list) {
+        o2.#headersList = list;
       }
     };
     var { getHeadersGuard, setHeadersGuard, getHeadersList, setHeadersList } = Headers2;
@@ -14603,19 +14603,19 @@ var require_headers = __commonJS({
         enumerable: false
       }
     });
-    webidl.converters.HeadersInit = function(V, prefix2, argument) {
-      if (webidl.util.Type(V) === "Object") {
-        const iterator2 = Reflect.get(V, Symbol.iterator);
-        if (!util8.types.isProxy(V) && iterator2 === Headers2.prototype.entries) {
+    webidl.converters.HeadersInit = function(V2, prefix2, argument) {
+      if (webidl.util.Type(V2) === "Object") {
+        const iterator2 = Reflect.get(V2, Symbol.iterator);
+        if (!util8.types.isProxy(V2) && iterator2 === Headers2.prototype.entries) {
           try {
-            return getHeadersList(V).entriesList;
+            return getHeadersList(V2).entriesList;
           } catch {
           }
         }
         if (typeof iterator2 === "function") {
-          return webidl.converters["sequence<sequence<ByteString>>"](V, prefix2, argument, iterator2.bind(V));
+          return webidl.converters["sequence<sequence<ByteString>>"](V2, prefix2, argument, iterator2.bind(V2));
         }
-        return webidl.converters["record<ByteString, ByteString>"](V, prefix2, argument);
+        return webidl.converters["record<ByteString, ByteString>"](V2, prefix2, argument);
       }
       throw webidl.errors.conversionFailed({
         prefix: "Headers constructor",
@@ -14993,32 +14993,32 @@ rtError"), { cause: err })) : makeNetworkError(Object.assign(new DOMException("R
     webidl.converters.URLSearchParams = webidl.interfaceConverter(
       URLSearchParams
     );
-    webidl.converters.XMLHttpRequestBodyInit = function(V, prefix2, name) {
-      if (typeof V === "string") {
-        return webidl.converters.USVString(V, prefix2, name);
+    webidl.converters.XMLHttpRequestBodyInit = function(V2, prefix2, name) {
+      if (typeof V2 === "string") {
+        return webidl.converters.USVString(V2, prefix2, name);
       }
-      if (isBlobLike(V)) {
-        return webidl.converters.Blob(V, prefix2, name, { strict: false });
+      if (isBlobLike(V2)) {
+        return webidl.converters.Blob(V2, prefix2, name, { strict: false });
       }
-      if (ArrayBuffer.isView(V) || types2.isArrayBuffer(V)) {
-        return webidl.converters.BufferSource(V, prefix2, name);
+      if (ArrayBuffer.isView(V2) || types2.isArrayBuffer(V2)) {
+        return webidl.converters.BufferSource(V2, prefix2, name);
       }
-      if (util8.isFormDataLike(V)) {
-        return webidl.converters.FormData(V, prefix2, name, { strict: false });
+      if (util8.isFormDataLike(V2)) {
+        return webidl.converters.FormData(V2, prefix2, name, { strict: false });
       }
-      if (V instanceof URLSearchParams) {
-        return webidl.converters.URLSearchParams(V, prefix2, name);
+      if (V2 instanceof URLSearchParams) {
+        return webidl.converters.URLSearchParams(V2, prefix2, name);
       }
-      return webidl.converters.DOMString(V, prefix2, name);
+      return webidl.converters.DOMString(V2, prefix2, name);
     };
-    webidl.converters.BodyInit = function(V, prefix2, argument) {
-      if (V instanceof ReadableStream) {
-        return webidl.converters.ReadableStream(V, prefix2, argument);
+    webidl.converters.BodyInit = function(V2, prefix2, argument) {
+      if (V2 instanceof ReadableStream) {
+        return webidl.converters.ReadableStream(V2, prefix2, argument);
       }
-      if (V?.[Symbol.asyncIterator]) {
-        return V;
+      if (V2?.[Symbol.asyncIterator]) {
+        return V2;
       }
-      return webidl.converters.XMLHttpRequestBodyInit(V, prefix2, argument);
+      return webidl.converters.XMLHttpRequestBodyInit(V2, prefix2, argument);
     };
     webidl.converters.ResponseInit = webidl.dictionaryConverter([
       {
@@ -15703,14 +15703,14 @@ var require_request2 = __commonJS({
     webidl.converters.Request = webidl.interfaceConverter(
       Request
     );
-    webidl.converters.RequestInfo = function(V, prefix2, argument) {
-      if (typeof V === "string") {
-        return webidl.converters.USVString(V, prefix2, argument);
+    webidl.converters.RequestInfo = function(V2, prefix2, argument) {
+      if (typeof V2 === "string") {
+        return webidl.converters.USVString(V2, prefix2, argument);
       }
-      if (V instanceof Request) {
-        return webidl.converters.Request(V, prefix2, argument);
+      if (V2 instanceof Request) {
+        return webidl.converters.Request(V2, prefix2, argument);
       }
-      return webidl.converters.USVString(V, prefix2, argument);
+      return webidl.converters.USVString(V2, prefix2, argument);
     };
     webidl.converters.AbortSignal = webidl.interfaceConverter(
       AbortSignal
@@ -17431,8 +17431,8 @@ var require_util4 = __commonJS({
     }
     __name(decode, "decode");
     function BOMSniffing(ioQueue) {
-      const [a, b, c] = ioQueue;
-      if (a === 239 && b === 187 && c === 191) {
+      const [a, b, c2] = ioQueue;
+      if (a === 239 && b === 187 && c2 === 191) {
         return "UTF-8";
       } else if (a === 254 && b === 255) {
         return "UTF-16BE";
@@ -17842,8 +17842,8 @@ var require_cache = __commonJS({
           if (typeof request === "string") {
             continue;
           }
-          const r = request[kState];
-          if (!urlIsHttpHttpsScheme(r.url) || r.method !== "GET") {
+          const r2 = request[kState];
+          if (!urlIsHttpHttpsScheme(r2.url) || r2.method !== "GET") {
             throw webidl.errors.exception({
               header: prefix2,
               message: "Expected http/s scheme when method is not GET."
@@ -17852,19 +17852,19 @@ var require_cache = __commonJS({
         }
         const fetchControllers = [];
         for (const request of requests) {
-          const r = new Request(request)[kState];
-          if (!urlIsHttpHttpsScheme(r.url)) {
+          const r2 = new Request(request)[kState];
+          if (!urlIsHttpHttpsScheme(r2.url)) {
             throw webidl.errors.exception({
               header: prefix2,
               message: "Expected http/s scheme."
             });
           }
-          r.initiator = "fetch";
-          r.destination = "subresource";
-          requestList.push(r);
+          r2.initiator = "fetch";
+          r2.destination = "subresource";
+          requestList.push(r2);
           const responsePromise = createDeferredPromise();
           fetchControllers.push(fetching({
-            request: r,
+            request: r2,
             processResponse(response) {
               if (response.type === "error" || response.status === 206 || response.status < 200 || response.status > 299) {
                 responsePromise.reject(webidl.errors.exception({
@@ -18016,20 +18016,20 @@ var require_cache = __commonJS({
         webidl.argumentLengthCheck(arguments, 1, prefix2);
         request = webidl.converters.RequestInfo(request, prefix2, "request");
         options = webidl.converters.CacheQueryOptions(options, prefix2, "options");
-        let r = null;
+        let r2 = null;
         if (request instanceof Request) {
-          r = request[kState];
-          if (r.method !== "GET" && !options.ignoreMethod) {
+          r2 = request[kState];
+          if (r2.method !== "GET" && !options.ignoreMethod) {
             return false;
           }
         } else {
           assert4(typeof request === "string");
-          r = new Request(request)[kState];
+          r2 = new Request(request)[kState];
         }
         const operations = [];
         const operation = {
           type: "delete",
-          request: r,
+          request: r2,
           options
         };
         operations.push(operation);
@@ -18061,15 +18061,15 @@ var require_cache = __commonJS({
         const prefix2 = "Cache.keys";
         if (request !== void 0) request = webidl.converters.RequestInfo(request, prefix2, "request");
         options = webidl.converters.CacheQueryOptions(options, prefix2, "options");
-        let r = null;
+        let r2 = null;
         if (request !== void 0) {
           if (request instanceof Request) {
-            r = request[kState];
-            if (r.method !== "GET" && !options.ignoreMethod) {
+            r2 = request[kState];
+            if (r2.method !== "GET" && !options.ignoreMethod) {
               return [];
             }
           } else if (typeof request === "string") {
-            r = new Request(request)[kState];
+            r2 = new Request(request)[kState];
           }
         }
         const promise = createDeferredPromise();
@@ -18079,7 +18079,7 @@ var require_cache = __commonJS({
             requests.push(requestResponse[0]);
           }
         } else {
-          const requestResponses = this.#queryCache(r, options);
+          const requestResponses = this.#queryCache(r2, options);
           for (const requestResponse of requestResponses) {
             requests.push(requestResponse[0]);
           }
@@ -18104,8 +18104,8 @@ var require_cache = __commonJS({
        * @returns {requestResponseList}
        */
       #batchCacheOperations(operations) {
-        const cache2 = this.#relevantRequestResponseList;
-        const backupCache = [...cache2];
+        const cache = this.#relevantRequestResponseList;
+        const backupCache = [...cache];
         const addedItems = [];
         const resultList = [];
         try {
@@ -18132,9 +18132,9 @@ var require_cache = __commonJS({
                 return [];
               }
               for (const requestResponse of requestResponses) {
-                const idx = cache2.indexOf(requestResponse);
+                const idx = cache.indexOf(requestResponse);
                 assert4(idx !== -1);
-                cache2.splice(idx, 1);
+                cache.splice(idx, 1);
               }
             } else if (operation.type === "put") {
               if (operation.response == null) {
@@ -18143,14 +18143,14 @@ var require_cache = __commonJS({
                   message: "put operation should have an associated response"
                 });
               }
-              const r = operation.request;
-              if (!urlIsHttpHttpsScheme(r.url)) {
+              const r2 = operation.request;
+              if (!urlIsHttpHttpsScheme(r2.url)) {
                 throw webidl.errors.exception({
                   header: "Cache.#batchCacheOperations",
                   message: "expected http or https scheme"
                 });
               }
-              if (r.method !== "GET") {
+              if (r2.method !== "GET") {
                 throw webidl.errors.exception({
                   header: "Cache.#batchCacheOperations",
                   message: "not get method"
@@ -18164,11 +18164,11 @@ var require_cache = __commonJS({
               }
               requestResponses = this.#queryCache(operation.request);
               for (const requestResponse of requestResponses) {
-                const idx = cache2.indexOf(requestResponse);
+                const idx = cache.indexOf(requestResponse);
                 assert4(idx !== -1);
-                cache2.splice(idx, 1);
+                cache.splice(idx, 1);
               }
-              cache2.push([operation.request, operation.response]);
+              cache.push([operation.request, operation.response]);
               addedItems.push([operation.request, operation.response]);
             }
             resultList.push([operation.request, operation.response]);
@@ -18233,15 +18233,15 @@ var require_cache = __commonJS({
         return true;
       }
       #internalMatchAll(request, options, maxResponses = Infinity) {
-        let r = null;
+        let r2 = null;
         if (request !== void 0) {
           if (request instanceof Request) {
-            r = request[kState];
-            if (r.method !== "GET" && !options.ignoreMethod) {
+            r2 = request[kState];
+            if (r2.method !== "GET" && !options.ignoreMethod) {
               return [];
             }
           } else if (typeof request === "string") {
-            r = new Request(request)[kState];
+            r2 = new Request(request)[kState];
           }
         }
         const responses = [];
@@ -18250,7 +18250,7 @@ var require_cache = __commonJS({
             responses.push(requestResponse[1]);
           }
         } else {
-          const requestResponses = this.#queryCache(r, options);
+          const requestResponses = this.#queryCache(r2, options);
           for (const requestResponse of requestResponses) {
             responses.push(requestResponse[1]);
           }
@@ -18345,13 +18345,13 @@ var require_cachestorage = __commonJS({
         if (options.cacheName != null) {
           if (this.#caches.has(options.cacheName)) {
             const cacheList = this.#caches.get(options.cacheName);
-            const cache2 = new Cache(kConstruct, cacheList);
-            return await cache2.match(request, options);
+            const cache = new Cache(kConstruct, cacheList);
+            return await cache.match(request, options);
           }
         } else {
           for (const cacheList of this.#caches.values()) {
-            const cache2 = new Cache(kConstruct, cacheList);
-            const response = await cache2.match(request, options);
+            const cache = new Cache(kConstruct, cacheList);
+            const response = await cache.match(request, options);
             if (response !== void 0) {
               return response;
             }
@@ -18381,12 +18381,12 @@ var require_cachestorage = __commonJS({
         webidl.argumentLengthCheck(arguments, 1, prefix2);
         cacheName = webidl.converters.DOMString(cacheName, prefix2, "cacheName");
         if (this.#caches.has(cacheName)) {
-          const cache3 = this.#caches.get(cacheName);
-          return new Cache(kConstruct, cache3);
+          const cache2 = this.#caches.get(cacheName);
+          return new Cache(kConstruct, cache2);
         }
-        const cache2 = [];
-        this.#caches.set(cacheName, cache2);
-        return new Cache(kConstruct, cache2);
+        const cache = [];
+        this.#caches.set(cacheName, cache);
+        return new Cache(kConstruct, cache);
       }
       /**
        * @see https://w3c.github.io/ServiceWorker/#cache-storage-delete
@@ -20528,11 +20528,11 @@ ons");
     webidl.converters["sequence<DOMString>"] = webidl.sequenceConverter(
       webidl.converters.DOMString
     );
-    webidl.converters["DOMString or sequence<DOMString>"] = function(V, prefix2, argument) {
-      if (webidl.util.Type(V) === "Object" && Symbol.iterator in V) {
-        return webidl.converters["sequence<DOMString>"](V);
+    webidl.converters["DOMString or sequence<DOMString>"] = function(V2, prefix2, argument) {
+      if (webidl.util.Type(V2) === "Object" && Symbol.iterator in V2) {
+        return webidl.converters["sequence<DOMString>"](V2);
       }
-      return webidl.converters.DOMString(V, prefix2, argument);
+      return webidl.converters.DOMString(V2, prefix2, argument);
     };
     webidl.converters.WebSocketInit = webidl.dictionaryConverter([
       {
@@ -20550,22 +20550,22 @@ ons");
         converter: webidl.nullableConverter(webidl.converters.HeadersInit)
       }
     ]);
-    webidl.converters["DOMString or sequence<DOMString> or WebSocketInit"] = function(V) {
-      if (webidl.util.Type(V) === "Object" && !(Symbol.iterator in V)) {
-        return webidl.converters.WebSocketInit(V);
+    webidl.converters["DOMString or sequence<DOMString> or WebSocketInit"] = function(V2) {
+      if (webidl.util.Type(V2) === "Object" && !(Symbol.iterator in V2)) {
+        return webidl.converters.WebSocketInit(V2);
       }
-      return { protocols: webidl.converters["DOMString or sequence<DOMString>"](V) };
+      return { protocols: webidl.converters["DOMString or sequence<DOMString>"](V2) };
     };
-    webidl.converters.WebSocketSendData = function(V) {
-      if (webidl.util.Type(V) === "Object") {
-        if (isBlobLike(V)) {
-          return webidl.converters.Blob(V, { strict: false });
+    webidl.converters.WebSocketSendData = function(V2) {
+      if (webidl.util.Type(V2) === "Object") {
+        if (isBlobLike(V2)) {
+          return webidl.converters.Blob(V2, { strict: false });
         }
-        if (ArrayBuffer.isView(V) || types2.isArrayBuffer(V)) {
-          return webidl.converters.BufferSource(V);
+        if (ArrayBuffer.isView(V2) || types2.isArrayBuffer(V2)) {
+          return webidl.converters.BufferSource(V2);
         }
       }
-      return webidl.converters.USVString(V);
+      return webidl.converters.USVString(V2);
     };
     function onParserDrain() {
       this.ws[kResponse].socket.resume();
@@ -21354,7 +21354,7 @@ var require_re = __commonJS({
     var safeRe = exports2.safeRe = [];
     var src = exports2.src = [];
     var safeSrc = exports2.safeSrc = [];
-    var t = exports2.t = {};
+    var t2 = exports2.t = {};
     var R = 0;
     var LETTERDASHNUMBER = "[a-zA-Z0-9-]";
     var safeRegexReplacements = [
@@ -21372,7 +21372,7 @@ var require_re = __commonJS({
       const safe = makeSafeRegex(value);
       const index = R++;
       debug3(name, index, value);
-      t[name] = index;
+      t2[name] = index;
       src[index] = value;
       safeSrc[index] = safe;
       re[index] = new RegExp(value, isGlobal ? "g" : void 0);
@@ -21381,52 +21381,52 @@ var require_re = __commonJS({
     createToken("NUMERICIDENTIFIER", "0|[1-9]\\d*");
     createToken("NUMERICIDENTIFIERLOOSE", "\\d+");
     createToken("NONNUMERICIDENTIFIER", `\\d*[a-zA-Z-]${LETTERDASHNUMBER}*`);
-    createToken("MAINVERSION", `(${src[t.NUMERICIDENTIFIER]})\\.(${src[t.NUMERICIDENTIFIER]})\\.(${src[t.NUMERICIDENTIFIER]}\
+    createToken("MAINVERSION", `(${src[t2.NUMERICIDENTIFIER]})\\.(${src[t2.NUMERICIDENTIFIER]})\\.(${src[t2.NUMERICIDENTIFIER]}\
 )`);
-    createToken("MAINVERSIONLOOSE", `(${src[t.NUMERICIDENTIFIERLOOSE]})\\.(${src[t.NUMERICIDENTIFIERLOOSE]})\\.(${src[t.
+    createToken("MAINVERSIONLOOSE", `(${src[t2.NUMERICIDENTIFIERLOOSE]})\\.(${src[t2.NUMERICIDENTIFIERLOOSE]})\\.(${src[t2.
     NUMERICIDENTIFIERLOOSE]})`);
-    createToken("PRERELEASEIDENTIFIER", `(?:${src[t.NONNUMERICIDENTIFIER]}|${src[t.NUMERICIDENTIFIER]})`);
-    createToken("PRERELEASEIDENTIFIERLOOSE", `(?:${src[t.NONNUMERICIDENTIFIER]}|${src[t.NUMERICIDENTIFIERLOOSE]})`);
-    createToken("PRERELEASE", `(?:-(${src[t.PRERELEASEIDENTIFIER]}(?:\\.${src[t.PRERELEASEIDENTIFIER]})*))`);
-    createToken("PRERELEASELOOSE", `(?:-?(${src[t.PRERELEASEIDENTIFIERLOOSE]}(?:\\.${src[t.PRERELEASEIDENTIFIERLOOSE]})*\
-))`);
+    createToken("PRERELEASEIDENTIFIER", `(?:${src[t2.NONNUMERICIDENTIFIER]}|${src[t2.NUMERICIDENTIFIER]})`);
+    createToken("PRERELEASEIDENTIFIERLOOSE", `(?:${src[t2.NONNUMERICIDENTIFIER]}|${src[t2.NUMERICIDENTIFIERLOOSE]})`);
+    createToken("PRERELEASE", `(?:-(${src[t2.PRERELEASEIDENTIFIER]}(?:\\.${src[t2.PRERELEASEIDENTIFIER]})*))`);
+    createToken("PRERELEASELOOSE", `(?:-?(${src[t2.PRERELEASEIDENTIFIERLOOSE]}(?:\\.${src[t2.PRERELEASEIDENTIFIERLOOSE]}\
+)*))`);
     createToken("BUILDIDENTIFIER", `${LETTERDASHNUMBER}+`);
-    createToken("BUILD", `(?:\\+(${src[t.BUILDIDENTIFIER]}(?:\\.${src[t.BUILDIDENTIFIER]})*))`);
-    createToken("FULLPLAIN", `v?${src[t.MAINVERSION]}${src[t.PRERELEASE]}?${src[t.BUILD]}?`);
-    createToken("FULL", `^${src[t.FULLPLAIN]}$`);
-    createToken("LOOSEPLAIN", `[v=\\s]*${src[t.MAINVERSIONLOOSE]}${src[t.PRERELEASELOOSE]}?${src[t.BUILD]}?`);
-    createToken("LOOSE", `^${src[t.LOOSEPLAIN]}$`);
+    createToken("BUILD", `(?:\\+(${src[t2.BUILDIDENTIFIER]}(?:\\.${src[t2.BUILDIDENTIFIER]})*))`);
+    createToken("FULLPLAIN", `v?${src[t2.MAINVERSION]}${src[t2.PRERELEASE]}?${src[t2.BUILD]}?`);
+    createToken("FULL", `^${src[t2.FULLPLAIN]}$`);
+    createToken("LOOSEPLAIN", `[v=\\s]*${src[t2.MAINVERSIONLOOSE]}${src[t2.PRERELEASELOOSE]}?${src[t2.BUILD]}?`);
+    createToken("LOOSE", `^${src[t2.LOOSEPLAIN]}$`);
     createToken("GTLT", "((?:<|>)?=?)");
-    createToken("XRANGEIDENTIFIERLOOSE", `${src[t.NUMERICIDENTIFIERLOOSE]}|x|X|\\*`);
-    createToken("XRANGEIDENTIFIER", `${src[t.NUMERICIDENTIFIER]}|x|X|\\*`);
-    createToken("XRANGEPLAIN", `[v=\\s]*(${src[t.XRANGEIDENTIFIER]})(?:\\.(${src[t.XRANGEIDENTIFIER]})(?:\\.(${src[t.XRANGEIDENTIFIER]}\
-)(?:${src[t.PRERELEASE]})?${src[t.BUILD]}?)?)?`);
-    createToken("XRANGEPLAINLOOSE", `[v=\\s]*(${src[t.XRANGEIDENTIFIERLOOSE]})(?:\\.(${src[t.XRANGEIDENTIFIERLOOSE]})(?:\
-\\.(${src[t.XRANGEIDENTIFIERLOOSE]})(?:${src[t.PRERELEASELOOSE]})?${src[t.BUILD]}?)?)?`);
-    createToken("XRANGE", `^${src[t.GTLT]}\\s*${src[t.XRANGEPLAIN]}$`);
-    createToken("XRANGELOOSE", `^${src[t.GTLT]}\\s*${src[t.XRANGEPLAINLOOSE]}$`);
+    createToken("XRANGEIDENTIFIERLOOSE", `${src[t2.NUMERICIDENTIFIERLOOSE]}|x|X|\\*`);
+    createToken("XRANGEIDENTIFIER", `${src[t2.NUMERICIDENTIFIER]}|x|X|\\*`);
+    createToken("XRANGEPLAIN", `[v=\\s]*(${src[t2.XRANGEIDENTIFIER]})(?:\\.(${src[t2.XRANGEIDENTIFIER]})(?:\\.(${src[t2.
+    XRANGEIDENTIFIER]})(?:${src[t2.PRERELEASE]})?${src[t2.BUILD]}?)?)?`);
+    createToken("XRANGEPLAINLOOSE", `[v=\\s]*(${src[t2.XRANGEIDENTIFIERLOOSE]})(?:\\.(${src[t2.XRANGEIDENTIFIERLOOSE]})(\
+?:\\.(${src[t2.XRANGEIDENTIFIERLOOSE]})(?:${src[t2.PRERELEASELOOSE]})?${src[t2.BUILD]}?)?)?`);
+    createToken("XRANGE", `^${src[t2.GTLT]}\\s*${src[t2.XRANGEPLAIN]}$`);
+    createToken("XRANGELOOSE", `^${src[t2.GTLT]}\\s*${src[t2.XRANGEPLAINLOOSE]}$`);
     createToken("COERCEPLAIN", `${"(^|[^\\d])(\\d{1,"}${MAX_SAFE_COMPONENT_LENGTH}})(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}\
 }))?(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?`);
-    createToken("COERCE", `${src[t.COERCEPLAIN]}(?:$|[^\\d])`);
-    createToken("COERCEFULL", src[t.COERCEPLAIN] + `(?:${src[t.PRERELEASE]})?(?:${src[t.BUILD]})?(?:$|[^\\d])`);
-    createToken("COERCERTL", src[t.COERCE], true);
-    createToken("COERCERTLFULL", src[t.COERCEFULL], true);
+    createToken("COERCE", `${src[t2.COERCEPLAIN]}(?:$|[^\\d])`);
+    createToken("COERCEFULL", src[t2.COERCEPLAIN] + `(?:${src[t2.PRERELEASE]})?(?:${src[t2.BUILD]})?(?:$|[^\\d])`);
+    createToken("COERCERTL", src[t2.COERCE], true);
+    createToken("COERCERTLFULL", src[t2.COERCEFULL], true);
     createToken("LONETILDE", "(?:~>?)");
-    createToken("TILDETRIM", `(\\s*)${src[t.LONETILDE]}\\s+`, true);
+    createToken("TILDETRIM", `(\\s*)${src[t2.LONETILDE]}\\s+`, true);
     exports2.tildeTrimReplace = "$1~";
-    createToken("TILDE", `^${src[t.LONETILDE]}${src[t.XRANGEPLAIN]}$`);
-    createToken("TILDELOOSE", `^${src[t.LONETILDE]}${src[t.XRANGEPLAINLOOSE]}$`);
+    createToken("TILDE", `^${src[t2.LONETILDE]}${src[t2.XRANGEPLAIN]}$`);
+    createToken("TILDELOOSE", `^${src[t2.LONETILDE]}${src[t2.XRANGEPLAINLOOSE]}$`);
     createToken("LONECARET", "(?:\\^)");
-    createToken("CARETTRIM", `(\\s*)${src[t.LONECARET]}\\s+`, true);
+    createToken("CARETTRIM", `(\\s*)${src[t2.LONECARET]}\\s+`, true);
     exports2.caretTrimReplace = "$1^";
-    createToken("CARET", `^${src[t.LONECARET]}${src[t.XRANGEPLAIN]}$`);
-    createToken("CARETLOOSE", `^${src[t.LONECARET]}${src[t.XRANGEPLAINLOOSE]}$`);
-    createToken("COMPARATORLOOSE", `^${src[t.GTLT]}\\s*(${src[t.LOOSEPLAIN]})$|^$`);
-    createToken("COMPARATOR", `^${src[t.GTLT]}\\s*(${src[t.FULLPLAIN]})$|^$`);
-    createToken("COMPARATORTRIM", `(\\s*)${src[t.GTLT]}\\s*(${src[t.LOOSEPLAIN]}|${src[t.XRANGEPLAIN]})`, true);
+    createToken("CARET", `^${src[t2.LONECARET]}${src[t2.XRANGEPLAIN]}$`);
+    createToken("CARETLOOSE", `^${src[t2.LONECARET]}${src[t2.XRANGEPLAINLOOSE]}$`);
+    createToken("COMPARATORLOOSE", `^${src[t2.GTLT]}\\s*(${src[t2.LOOSEPLAIN]})$|^$`);
+    createToken("COMPARATOR", `^${src[t2.GTLT]}\\s*(${src[t2.FULLPLAIN]})$|^$`);
+    createToken("COMPARATORTRIM", `(\\s*)${src[t2.GTLT]}\\s*(${src[t2.LOOSEPLAIN]}|${src[t2.XRANGEPLAIN]})`, true);
     exports2.comparatorTrimReplace = "$1$2$3";
-    createToken("HYPHENRANGE", `^\\s*(${src[t.XRANGEPLAIN]})\\s+-\\s+(${src[t.XRANGEPLAIN]})\\s*$`);
-    createToken("HYPHENRANGELOOSE", `^\\s*(${src[t.XRANGEPLAINLOOSE]})\\s+-\\s+(${src[t.XRANGEPLAINLOOSE]})\\s*$`);
+    createToken("HYPHENRANGE", `^\\s*(${src[t2.XRANGEPLAIN]})\\s+-\\s+(${src[t2.XRANGEPLAIN]})\\s*$`);
+    createToken("HYPHENRANGELOOSE", `^\\s*(${src[t2.XRANGEPLAINLOOSE]})\\s+-\\s+(${src[t2.XRANGEPLAINLOOSE]})\\s*$`);
     createToken("STAR", "(<|>)?=?\\s*\\*");
     createToken("GTE0", "^\\s*>=\\s*0\\.0\\.0\\s*$");
     createToken("GTE0PRE", "^\\s*>=\\s*0\\.0\\.0-0\\s*$");
@@ -21483,7 +21483,7 @@ var require_semver = __commonJS({
     "use strict";
     var debug3 = require_debug();
     var { MAX_LENGTH, MAX_SAFE_INTEGER } = require_constants6();
-    var { safeRe: re, t } = require_re();
+    var { safeRe: re, t: t2 } = require_re();
     var parseOptions = require_parse_options();
     var { compareIdentifiers } = require_identifiers();
     var SemVer2 = class _SemVer {
@@ -21510,7 +21510,7 @@ var require_semver = __commonJS({
         this.options = options;
         this.loose = !!options.loose;
         this.includePrerelease = !!options.includePrerelease;
-        const m = version3.trim().match(options.loose ? re[t.LOOSE] : re[t.FULL]);
+        const m = version3.trim().match(options.loose ? re[t2.LOOSE] : re[t2.FULL]);
         if (!m) {
           throw new TypeError(`Invalid Version: ${version3}`);
         }
@@ -21649,7 +21649,7 @@ var require_semver = __commonJS({
             throw new Error("invalid increment argument: identifier is empty");
           }
           if (identifier) {
-            const match2 = `-${identifier}`.match(this.options.loose ? re[t.PRERELEASELOOSE] : re[t.PRERELEASE]);
+            const match2 = `-${identifier}`.match(this.options.loose ? re[t2.PRERELEASELOOSE] : re[t2.PRERELEASE]);
             if (!match2 || match2[1] !== identifier) {
               throw new Error(`invalid identifier: ${identifier}`);
             }
@@ -21787,8 +21787,8 @@ var require_valid = __commonJS({
     "use strict";
     var parse2 = require_parse2();
     var valid3 = /* @__PURE__ */ __name((version3, options) => {
-      const v = parse2(version3, options);
-      return v ? v.version : null;
+      const v2 = parse2(version3, options);
+      return v2 ? v2.version : null;
     }, "valid");
     module2.exports = valid3;
   }
@@ -22098,7 +22098,7 @@ var require_coerce = __commonJS({
     "use strict";
     var SemVer2 = require_semver();
     var parse2 = require_parse2();
-    var { safeRe: re, t } = require_re();
+    var { safeRe: re, t: t2 } = require_re();
     var coerce = /* @__PURE__ */ __name((version3, options) => {
       if (version3 instanceof SemVer2) {
         return version3;
@@ -22112,9 +22112,9 @@ var require_coerce = __commonJS({
       options = options || {};
       let match2 = null;
       if (!options.rtl) {
-        match2 = version3.match(options.includePrerelease ? re[t.COERCEFULL] : re[t.COERCE]);
+        match2 = version3.match(options.includePrerelease ? re[t2.COERCEFULL] : re[t2.COERCE]);
       } else {
-        const coerceRtlRegex = options.includePrerelease ? re[t.COERCERTLFULL] : re[t.COERCERTL];
+        const coerceRtlRegex = options.includePrerelease ? re[t2.COERCERTLFULL] : re[t2.COERCERTL];
         let next;
         while ((next = coerceRtlRegex.exec(version3)) && (!match2 || match2.index + match2[0].length !== version3.length)) {
           if (!match2 || next.index + next[0].length !== match2.index + match2[0].length) {
@@ -22207,19 +22207,19 @@ var require_range = __commonJS({
         this.loose = !!options.loose;
         this.includePrerelease = !!options.includePrerelease;
         this.raw = range2.trim().replace(SPACE_CHARACTERS, " ");
-        this.set = this.raw.split("||").map((r) => this.parseRange(r.trim())).filter((c) => c.length);
+        this.set = this.raw.split("||").map((r2) => this.parseRange(r2.trim())).filter((c2) => c2.length);
         if (!this.set.length) {
           throw new TypeError(`Invalid SemVer Range: ${this.raw}`);
         }
         if (this.set.length > 1) {
           const first2 = this.set[0];
-          this.set = this.set.filter((c) => !isNullSet(c[0]));
+          this.set = this.set.filter((c2) => !isNullSet(c2[0]));
           if (this.set.length === 0) {
             this.set = [first2];
           } else if (this.set.length > 1) {
-            for (const c of this.set) {
-              if (c.length === 1 && isAny(c[0])) {
-                this.set = [c];
+            for (const c2 of this.set) {
+              if (c2.length === 1 && isAny(c2[0])) {
+                this.set = [c2];
                 break;
               }
             }
@@ -22254,26 +22254,26 @@ var require_range = __commonJS({
       parseRange(range2) {
         const memoOpts = (this.options.includePrerelease && FLAG_INCLUDE_PRERELEASE) | (this.options.loose && FLAG_LOOSE);
         const memoKey = memoOpts + ":" + range2;
-        const cached = cache2.get(memoKey);
+        const cached = cache.get(memoKey);
         if (cached) {
           return cached;
         }
         const loose = this.options.loose;
-        const hr = loose ? re[t.HYPHENRANGELOOSE] : re[t.HYPHENRANGE];
+        const hr = loose ? re[t2.HYPHENRANGELOOSE] : re[t2.HYPHENRANGE];
         range2 = range2.replace(hr, hyphenReplace(this.options.includePrerelease));
         debug3("hyphen replace", range2);
-        range2 = range2.replace(re[t.COMPARATORTRIM], comparatorTrimReplace);
+        range2 = range2.replace(re[t2.COMPARATORTRIM], comparatorTrimReplace);
         debug3("comparator trim", range2);
-        range2 = range2.replace(re[t.TILDETRIM], tildeTrimReplace);
+        range2 = range2.replace(re[t2.TILDETRIM], tildeTrimReplace);
         debug3("tilde trim", range2);
-        range2 = range2.replace(re[t.CARETTRIM], caretTrimReplace);
+        range2 = range2.replace(re[t2.CARETTRIM], caretTrimReplace);
         debug3("caret trim", range2);
         let rangeList = range2.split(" ").map((comp26) => parseComparator(comp26, this.options)).join(" ").split(/\s+/).
         map((comp26) => replaceGTE0(comp26, this.options));
         if (loose) {
           rangeList = rangeList.filter((comp26) => {
             debug3("loose invalid filter", comp26, this.options);
-            return !!comp26.match(re[t.COMPARATORLOOSE]);
+            return !!comp26.match(re[t2.COMPARATORLOOSE]);
           });
         }
         debug3("range list", rangeList);
@@ -22289,7 +22289,7 @@ var require_range = __commonJS({
           rangeMap.delete("");
         }
         const result = [...rangeMap.values()];
-        cache2.set(memoKey, result);
+        cache.set(memoKey, result);
         return result;
       }
       intersects(range2, options) {
@@ -22328,21 +22328,21 @@ var require_range = __commonJS({
     };
     module2.exports = Range;
     var LRU = require_lrucache();
-    var cache2 = new LRU();
+    var cache = new LRU();
     var parseOptions = require_parse_options();
     var Comparator = require_comparator();
     var debug3 = require_debug();
     var SemVer2 = require_semver();
     var {
       safeRe: re,
-      t,
+      t: t2,
       comparatorTrimReplace,
       tildeTrimReplace,
       caretTrimReplace
     } = require_re();
     var { FLAG_INCLUDE_PRERELEASE, FLAG_LOOSE } = require_constants6();
-    var isNullSet = /* @__PURE__ */ __name((c) => c.value === "<0.0.0-0", "isNullSet");
-    var isAny = /* @__PURE__ */ __name((c) => c.value === "", "isAny");
+    var isNullSet = /* @__PURE__ */ __name((c2) => c2.value === "<0.0.0-0", "isNullSet");
+    var isAny = /* @__PURE__ */ __name((c2) => c2.value === "", "isAny");
     var isSatisfiable = /* @__PURE__ */ __name((comparators, options) => {
       let result = true;
       const remainingComparators = comparators.slice();
@@ -22356,7 +22356,7 @@ var require_range = __commonJS({
       return result;
     }, "isSatisfiable");
     var parseComparator = /* @__PURE__ */ __name((comp26, options) => {
-      comp26 = comp26.replace(re[t.BUILD], "");
+      comp26 = comp26.replace(re[t2.BUILD], "");
       debug3("comp", comp26, options);
       comp26 = replaceCarets(comp26, options);
       debug3("caret", comp26);
@@ -22370,11 +22370,11 @@ var require_range = __commonJS({
     }, "parseComparator");
     var isX = /* @__PURE__ */ __name((id) => !id || id.toLowerCase() === "x" || id === "*", "isX");
     var replaceTildes = /* @__PURE__ */ __name((comp26, options) => {
-      return comp26.trim().split(/\s+/).map((c) => replaceTilde(c, options)).join(" ");
+      return comp26.trim().split(/\s+/).map((c2) => replaceTilde(c2, options)).join(" ");
     }, "replaceTildes");
     var replaceTilde = /* @__PURE__ */ __name((comp26, options) => {
-      const r = options.loose ? re[t.TILDELOOSE] : re[t.TILDE];
-      return comp26.replace(r, (_, M, m, p, pr) => {
+      const r2 = options.loose ? re[t2.TILDELOOSE] : re[t2.TILDE];
+      return comp26.replace(r2, (_, M, m, p, pr) => {
         debug3("tilde", comp26, _, M, m, p, pr);
         let ret;
         if (isX(M)) {
@@ -22394,13 +22394,13 @@ var require_range = __commonJS({
       });
     }, "replaceTilde");
     var replaceCarets = /* @__PURE__ */ __name((comp26, options) => {
-      return comp26.trim().split(/\s+/).map((c) => replaceCaret(c, options)).join(" ");
+      return comp26.trim().split(/\s+/).map((c2) => replaceCaret(c2, options)).join(" ");
     }, "replaceCarets");
     var replaceCaret = /* @__PURE__ */ __name((comp26, options) => {
       debug3("caret", comp26, options);
-      const r = options.loose ? re[t.CARETLOOSE] : re[t.CARET];
+      const r2 = options.loose ? re[t2.CARETLOOSE] : re[t2.CARET];
       const z = options.includePrerelease ? "-0" : "";
-      return comp26.replace(r, (_, M, m, p, pr) => {
+      return comp26.replace(r2, (_, M, m, p, pr) => {
         debug3("caret", comp26, _, M, m, p, pr);
         let ret;
         if (isX(M)) {
@@ -22442,12 +22442,12 @@ var require_range = __commonJS({
     }, "replaceCaret");
     var replaceXRanges = /* @__PURE__ */ __name((comp26, options) => {
       debug3("replaceXRanges", comp26, options);
-      return comp26.split(/\s+/).map((c) => replaceXRange(c, options)).join(" ");
+      return comp26.split(/\s+/).map((c2) => replaceXRange(c2, options)).join(" ");
     }, "replaceXRanges");
     var replaceXRange = /* @__PURE__ */ __name((comp26, options) => {
       comp26 = comp26.trim();
-      const r = options.loose ? re[t.XRANGELOOSE] : re[t.XRANGE];
-      return comp26.replace(r, (ret, gtlt, M, m, p, pr) => {
+      const r2 = options.loose ? re[t2.XRANGELOOSE] : re[t2.XRANGE];
+      return comp26.replace(r2, (ret, gtlt, M, m, p, pr) => {
         debug3("xRange", comp26, ret, gtlt, M, m, p, pr);
         const xM = isX(M);
         const xm = xM || isX(m);
@@ -22501,11 +22501,11 @@ var require_range = __commonJS({
     }, "replaceXRange");
     var replaceStars = /* @__PURE__ */ __name((comp26, options) => {
       debug3("replaceStars", comp26, options);
-      return comp26.trim().replace(re[t.STAR], "");
+      return comp26.trim().replace(re[t2.STAR], "");
     }, "replaceStars");
     var replaceGTE0 = /* @__PURE__ */ __name((comp26, options) => {
       debug3("replaceGTE0", comp26, options);
-      return comp26.trim().replace(re[options.includePrerelease ? t.GTE0PRE : t.GTE0], "");
+      return comp26.trim().replace(re[options.includePrerelease ? t2.GTE0PRE : t2.GTE0], "");
     }, "replaceGTE0");
     var hyphenReplace = /* @__PURE__ */ __name((incPr) => ($0, from, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr) => {
       if (isX(fM)) {
@@ -22594,8 +22594,8 @@ var require_comparator = __commonJS({
         debug3("comp", this);
       }
       parse(comp26) {
-        const r = this.options.loose ? re[t.COMPARATORLOOSE] : re[t.COMPARATOR];
-        const m = comp26.match(r);
+        const r2 = this.options.loose ? re[t2.COMPARATORLOOSE] : re[t2.COMPARATOR];
+        const m = comp26.match(r2);
         if (!m) {
           throw new TypeError(`Invalid comparator: ${comp26}`);
         }
@@ -22670,7 +22670,7 @@ var require_comparator = __commonJS({
     };
     module2.exports = Comparator;
     var parseOptions = require_parse_options();
-    var { safeRe: re, t } = require_re();
+    var { safeRe: re, t: t2 } = require_re();
     var cmp = require_cmp();
     var debug3 = require_debug();
     var SemVer2 = require_semver();
@@ -22701,7 +22701,7 @@ var require_to_comparators = __commonJS({
     "use strict";
     var Range = require_range();
     var toComparators = /* @__PURE__ */ __name((range2, options) => new Range(range2, options).set.map((comp26) => comp26.
-    map((c) => c.value).join(" ").trim().split(" ")), "toComparators");
+    map((c2) => c2.value).join(" ").trim().split(" ")), "toComparators");
     module2.exports = toComparators;
   }
 });
@@ -22721,10 +22721,10 @@ var require_max_satisfying = __commonJS({
       } catch (er) {
         return null;
       }
-      versions.forEach((v) => {
-        if (rangeObj.test(v)) {
-          if (!max || maxSV.compare(v) === -1) {
-            max = v;
+      versions.forEach((v2) => {
+        if (rangeObj.test(v2)) {
+          if (!max || maxSV.compare(v2) === -1) {
+            max = v2;
             maxSV = new SemVer2(max, options);
           }
         }
@@ -22750,10 +22750,10 @@ var require_min_satisfying = __commonJS({
       } catch (er) {
         return null;
       }
-      versions.forEach((v) => {
-        if (rangeObj.test(v)) {
-          if (!min || minSV.compare(v) === 1) {
-            min = v;
+      versions.forEach((v2) => {
+        if (rangeObj.test(v2)) {
+          if (!min || minSV.compare(v2) === 1) {
+            min = v2;
             minSV = new SemVer2(min, options);
           }
         }
@@ -22952,8 +22952,8 @@ var require_simplify = __commonJS({
       const set2 = [];
       let first2 = null;
       let prev = null;
-      const v = versions.sort((a, b) => compare(a, b, options));
-      for (const version3 of v) {
+      const v2 = versions.sort((a, b) => compare(a, b, options));
+      for (const version3 of v2) {
         const included = satisfies3(version3, range2, options);
         if (included) {
           prev = version3;
@@ -22975,11 +22975,11 @@ var require_simplify = __commonJS({
       for (const [min, max] of set2) {
         if (min === max) {
           ranges.push(min);
-        } else if (!max && min === v[0]) {
+        } else if (!max && min === v2[0]) {
           ranges.push("*");
         } else if (!max) {
           ranges.push(`>=${min}`);
-        } else if (min === v[0]) {
+        } else if (min === v2[0]) {
           ranges.push(`<=${max}`);
         } else {
           ranges.push(`${min} - ${max}`);
@@ -23046,13 +23046,13 @@ var require_subset = __commonJS({
       }
       const eqSet = /* @__PURE__ */ new Set();
       let gt2, lt;
-      for (const c of sub) {
-        if (c.operator === ">" || c.operator === ">=") {
-          gt2 = higherGT(gt2, c, options);
-        } else if (c.operator === "<" || c.operator === "<=") {
-          lt = lowerLT(lt, c, options);
+      for (const c2 of sub) {
+        if (c2.operator === ">" || c2.operator === ">=") {
+          gt2 = higherGT(gt2, c2, options);
+        } else if (c2.operator === "<" || c2.operator === "<=") {
+          lt = lowerLT(lt, c2, options);
         } else {
-          eqSet.add(c.semver);
+          eqSet.add(c2.semver);
         }
       }
       if (eqSet.size > 1) {
@@ -23074,8 +23074,8 @@ var require_subset = __commonJS({
         if (lt && !satisfies3(eq, String(lt), options)) {
           return null;
         }
-        for (const c of dom) {
-          if (!satisfies3(eq, String(c), options)) {
+        for (const c2 of dom) {
+          if (!satisfies3(eq, String(c2), options)) {
             return false;
           }
         }
@@ -23088,42 +23088,42 @@ var require_subset = __commonJS({
       if (needDomLTPre && needDomLTPre.prerelease.length === 1 && lt.operator === "<" && needDomLTPre.prerelease[0] === 0) {
         needDomLTPre = false;
       }
-      for (const c of dom) {
-        hasDomGT = hasDomGT || c.operator === ">" || c.operator === ">=";
-        hasDomLT = hasDomLT || c.operator === "<" || c.operator === "<=";
+      for (const c2 of dom) {
+        hasDomGT = hasDomGT || c2.operator === ">" || c2.operator === ">=";
+        hasDomLT = hasDomLT || c2.operator === "<" || c2.operator === "<=";
         if (gt2) {
           if (needDomGTPre) {
-            if (c.semver.prerelease && c.semver.prerelease.length && c.semver.major === needDomGTPre.major && c.semver.minor ===
-            needDomGTPre.minor && c.semver.patch === needDomGTPre.patch) {
+            if (c2.semver.prerelease && c2.semver.prerelease.length && c2.semver.major === needDomGTPre.major && c2.semver.
+            minor === needDomGTPre.minor && c2.semver.patch === needDomGTPre.patch) {
               needDomGTPre = false;
             }
           }
-          if (c.operator === ">" || c.operator === ">=") {
-            higher = higherGT(gt2, c, options);
-            if (higher === c && higher !== gt2) {
+          if (c2.operator === ">" || c2.operator === ">=") {
+            higher = higherGT(gt2, c2, options);
+            if (higher === c2 && higher !== gt2) {
               return false;
             }
-          } else if (gt2.operator === ">=" && !satisfies3(gt2.semver, String(c), options)) {
+          } else if (gt2.operator === ">=" && !satisfies3(gt2.semver, String(c2), options)) {
             return false;
           }
         }
         if (lt) {
           if (needDomLTPre) {
-            if (c.semver.prerelease && c.semver.prerelease.length && c.semver.major === needDomLTPre.major && c.semver.minor ===
-            needDomLTPre.minor && c.semver.patch === needDomLTPre.patch) {
+            if (c2.semver.prerelease && c2.semver.prerelease.length && c2.semver.major === needDomLTPre.major && c2.semver.
+            minor === needDomLTPre.minor && c2.semver.patch === needDomLTPre.patch) {
               needDomLTPre = false;
             }
           }
-          if (c.operator === "<" || c.operator === "<=") {
-            lower = lowerLT(lt, c, options);
-            if (lower === c && lower !== lt) {
+          if (c2.operator === "<" || c2.operator === "<=") {
+            lower = lowerLT(lt, c2, options);
+            if (lower === c2 && lower !== lt) {
               return false;
             }
-          } else if (lt.operator === "<=" && !satisfies3(lt.semver, String(c), options)) {
+          } else if (lt.operator === "<=" && !satisfies3(lt.semver, String(c2), options)) {
             return false;
           }
         }
-        if (!c.operator && (lt || gt2) && gtltComp !== 0) {
+        if (!c2.operator && (lt || gt2) && gtltComp !== 0) {
           return false;
         }
       }
@@ -23314,9 +23314,9 @@ var require_delayed_stream = __commonJS({
       this._bufferedEvents = [];
     };
     DelayedStream.prototype.pipe = function() {
-      var r = Stream.prototype.pipe.apply(this, arguments);
+      var r2 = Stream.prototype.pipe.apply(this, arguments);
       this.resume();
-      return r;
+      return r2;
     };
     DelayedStream.prototype._handleEmit = function(args) {
       if (this._released) {
@@ -32818,15 +32818,15 @@ var require_get_proto = __commonJS({
     var reflectGetProto = require_Reflect_getPrototypeOf();
     var originalGetProto = require_Object_getPrototypeOf();
     var getDunderProto = require_get();
-    module2.exports = reflectGetProto ? /* @__PURE__ */ __name(function getProto(O) {
-      return reflectGetProto(O);
-    }, "getProto") : originalGetProto ? /* @__PURE__ */ __name(function getProto(O) {
-      if (!O || typeof O !== "object" && typeof O !== "function") {
+    module2.exports = reflectGetProto ? /* @__PURE__ */ __name(function getProto(O2) {
+      return reflectGetProto(O2);
+    }, "getProto") : originalGetProto ? /* @__PURE__ */ __name(function getProto(O2) {
+      if (!O2 || typeof O2 !== "object" && typeof O2 !== "function") {
         throw new TypeError("getProto: not an object");
       }
-      return originalGetProto(O);
-    }, "getProto") : getDunderProto ? /* @__PURE__ */ __name(function getProto(O) {
-      return getDunderProto(O);
+      return originalGetProto(O2);
+    }, "getProto") : getDunderProto ? /* @__PURE__ */ __name(function getProto(O2) {
+      return getDunderProto(O2);
     }, "getProto") : null;
   }
 });
@@ -34117,13 +34117,13 @@ var require_balanced_match = __commonJS({
     function balanced(a, b, str2) {
       if (a instanceof RegExp) a = maybeMatch(a, str2);
       if (b instanceof RegExp) b = maybeMatch(b, str2);
-      var r = range2(a, b, str2);
-      return r && {
-        start: r[0],
-        end: r[1],
-        pre: str2.slice(0, r[0]),
-        body: str2.slice(r[0] + a.length, r[1]),
-        post: str2.slice(r[1] + b.length)
+      var r2 = range2(a, b, str2);
+      return r2 && {
+        start: r2[0],
+        end: r2[1],
+        pre: str2.slice(0, r2[0]),
+        body: str2.slice(r2[0] + a.length, r2[1]),
+        post: str2.slice(r2[1] + b.length)
       };
     }
     __name(balanced, "balanced");
@@ -34288,25 +34288,25 @@ var require_brace_expansion = __commonJS({
         var pad2 = n.some(isPadded);
         N = [];
         for (var i = x; test2(i, y); i += incr) {
-          var c;
+          var c2;
           if (isAlphaSequence) {
-            c = String.fromCharCode(i);
-            if (c === "\\")
-              c = "";
+            c2 = String.fromCharCode(i);
+            if (c2 === "\\")
+              c2 = "";
           } else {
-            c = String(i);
+            c2 = String(i);
             if (pad2) {
-              var need = width - c.length;
+              var need = width - c2.length;
               if (need > 0) {
                 var z = new Array(need + 1).join("0");
                 if (i < 0)
-                  c = "-" + z + c.slice(1);
+                  c2 = "-" + z + c2.slice(1);
                 else
-                  c = z + c;
+                  c2 = z + c2;
               }
             }
           }
-          N.push(c);
+          N.push(c2);
         }
       } else {
         N = concatMap(n, function(el) {
@@ -34355,8 +34355,8 @@ var require_minimatch = __commonJS({
     var twoStarNoDot = "(?:(?!(?:\\/|^)\\.).)*?";
     var reSpecials = charSet("().*{}+?[]^$\\!");
     function charSet(s) {
-      return s.split("").reduce(function(set2, c) {
-        set2[c] = true;
+      return s.split("").reduce(function(set2, c2) {
+        set2[c2] = true;
         return set2;
       }, {});
     }
@@ -34372,14 +34372,14 @@ var require_minimatch = __commonJS({
     __name(filter2, "filter");
     function ext(a, b) {
       b = b || {};
-      var t = {};
+      var t2 = {};
       Object.keys(a).forEach(function(k) {
-        t[k] = a[k];
+        t2[k] = a[k];
       });
       Object.keys(b).forEach(function(k) {
-        t[k] = b[k];
+        t2[k] = b[k];
       });
-      return t;
+      return t2;
     }
     __name(ext, "ext");
     minimatch2.defaults = function(def) {
@@ -34569,14 +34569,14 @@ var require_minimatch = __commonJS({
         }
       }
       __name(clearStateChar, "clearStateChar");
-      for (var i = 0, len = pattern.length, c; i < len && (c = pattern.charAt(i)); i++) {
-        this.debug("%s	%s %s %j", pattern, i, re, c);
-        if (escaping && reSpecials[c]) {
-          re += "\\" + c;
+      for (var i = 0, len = pattern.length, c2; i < len && (c2 = pattern.charAt(i)); i++) {
+        this.debug("%s	%s %s %j", pattern, i, re, c2);
+        if (escaping && reSpecials[c2]) {
+          re += "\\" + c2;
           escaping = false;
           continue;
         }
-        switch (c) {
+        switch (c2) {
           /* istanbul ignore next */
           case "/": {
             return false;
@@ -34592,17 +34592,17 @@ var require_minimatch = __commonJS({
           case "+":
           case "@":
           case "!":
-            this.debug("%s	%s %s %j <-- stateChar", pattern, i, re, c);
+            this.debug("%s	%s %s %j <-- stateChar", pattern, i, re, c2);
             if (inClass) {
               this.debug("  in class");
-              if (c === "!" && i === classStart + 1) c = "^";
-              re += c;
+              if (c2 === "!" && i === classStart + 1) c2 = "^";
+              re += c2;
               continue;
             }
-            if (c === "*" && stateChar === "*") continue;
+            if (c2 === "*" && stateChar === "*") continue;
             self2.debug("call clearStateChar %j", stateChar);
             clearStateChar();
-            stateChar = c;
+            stateChar = c2;
             if (options.noext) clearStateChar();
             continue;
           case "(":
@@ -34652,17 +34652,17 @@ var require_minimatch = __commonJS({
           case "[":
             clearStateChar();
             if (inClass) {
-              re += "\\" + c;
+              re += "\\" + c2;
               continue;
             }
             inClass = true;
             classStart = i;
             reClassStart = re.length;
-            re += c;
+            re += c2;
             continue;
           case "]":
             if (i === classStart + 1 || !inClass) {
-              re += "\\" + c;
+              re += "\\" + c2;
               escaping = false;
               continue;
             }
@@ -34678,16 +34678,16 @@ var require_minimatch = __commonJS({
             }
             hasMagic = true;
             inClass = false;
-            re += c;
+            re += c2;
             continue;
           default:
             clearStateChar();
             if (escaping) {
               escaping = false;
-            } else if (reSpecials[c] && !(c === "^" && inClass)) {
+            } else if (reSpecials[c2] && !(c2 === "^" && inClass)) {
               re += "\\";
             }
-            re += c;
+            re += c2;
         }
       }
       if (inClass) {
@@ -34706,9 +34706,9 @@ var require_minimatch = __commonJS({
           return $1 + $1 + $2 + "|";
         });
         this.debug("tail=%j\n   %s", tail, tail, pl, re);
-        var t = pl.type === "*" ? star : pl.type === "?" ? qmark : "\\" + pl.type;
+        var t2 = pl.type === "*" ? star : pl.type === "?" ? qmark : "\\" + pl.type;
         hasMagic = true;
-        re = re.slice(0, pl.reStart) + t + "\\(" + tail;
+        re = re.slice(0, pl.reStart) + t2 + "\\(" + tail;
       }
       clearStateChar();
       if (escaping) {
@@ -35015,7 +35015,7 @@ var require_minimatch = __commonJS({
 var require_helpers = __commonJS({
   "node_modules/agent-base/dist/helpers.js"(exports2) {
     "use strict";
-    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o2, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -35023,15 +35023,15 @@ var require_helpers = __commonJS({
           return m[k];
         }, "get") };
       }
-      Object.defineProperty(o, k2, desc);
-    }) : (function(o, m, k, k2) {
+      Object.defineProperty(o2, k2, desc);
+    }) : (function(o2, m, k, k2) {
       if (k2 === void 0) k2 = k;
-      o[k2] = m[k];
+      o2[k2] = m[k];
     }));
-    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
-      Object.defineProperty(o, "default", { enumerable: true, value: v });
-    }) : function(o, v) {
-      o["default"] = v;
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o2, v2) {
+      Object.defineProperty(o2, "default", { enumerable: true, value: v2 });
+    }) : function(o2, v2) {
+      o2["default"] = v2;
     });
     var __importStar = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule) return mod;
@@ -35089,7 +35089,7 @@ var require_helpers = __commonJS({
 var require_dist3 = __commonJS({
   "node_modules/agent-base/dist/index.js"(exports2) {
     "use strict";
-    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o2, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -35097,15 +35097,15 @@ var require_dist3 = __commonJS({
           return m[k];
         }, "get") };
       }
-      Object.defineProperty(o, k2, desc);
-    }) : (function(o, m, k, k2) {
+      Object.defineProperty(o2, k2, desc);
+    }) : (function(o2, m, k, k2) {
       if (k2 === void 0) k2 = k;
-      o[k2] = m[k];
+      o2[k2] = m[k];
     }));
-    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
-      Object.defineProperty(o, "default", { enumerable: true, value: v });
-    }) : function(o, v) {
-      o["default"] = v;
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o2, v2) {
+      Object.defineProperty(o2, "default", { enumerable: true, value: v2 });
+    }) : function(o2, v2) {
+      o2["default"] = v2;
     });
     var __importStar = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule) return mod;
@@ -35228,17 +35228,17 @@ var require_dist3 = __commonJS({
       get defaultPort() {
         return this[INTERNAL].defaultPort ?? (this.protocol === "https:" ? 443 : 80);
       }
-      set defaultPort(v) {
+      set defaultPort(v2) {
         if (this[INTERNAL]) {
-          this[INTERNAL].defaultPort = v;
+          this[INTERNAL].defaultPort = v2;
         }
       }
       get protocol() {
         return this[INTERNAL].protocol ?? (this.isSecureEndpoint() ? "https:" : "http:");
       }
-      set protocol(v) {
+      set protocol(v2) {
         if (this[INTERNAL]) {
-          this[INTERNAL].protocol = v;
+          this[INTERNAL].protocol = v2;
         }
       }
     };
@@ -35352,7 +35352,7 @@ var require_parse_proxy_response = __commonJS({
 var require_dist4 = __commonJS({
   "node_modules/https-proxy-agent/dist/index.js"(exports2) {
     "use strict";
-    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o2, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -35360,15 +35360,15 @@ var require_dist4 = __commonJS({
           return m[k];
         }, "get") };
       }
-      Object.defineProperty(o, k2, desc);
-    }) : (function(o, m, k, k2) {
+      Object.defineProperty(o2, k2, desc);
+    }) : (function(o2, m, k, k2) {
       if (k2 === void 0) k2 = k;
-      o[k2] = m[k];
+      o2[k2] = m[k];
     }));
-    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
-      Object.defineProperty(o, "default", { enumerable: true, value: v });
-    }) : function(o, v) {
-      o["default"] = v;
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o2, v2) {
+      Object.defineProperty(o2, "default", { enumerable: true, value: v2 });
+    }) : function(o2, v2) {
+      o2["default"] = v2;
     });
     var __importStar = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule) return mod;
@@ -35508,7 +35508,7 @@ var require_dist4 = __commonJS({
 var require_dist5 = __commonJS({
   "node_modules/http-proxy-agent/dist/index.js"(exports2) {
     "use strict";
-    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o2, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -35516,15 +35516,15 @@ var require_dist5 = __commonJS({
           return m[k];
         }, "get") };
       }
-      Object.defineProperty(o, k2, desc);
-    }) : (function(o, m, k, k2) {
+      Object.defineProperty(o2, k2, desc);
+    }) : (function(o2, m, k, k2) {
       if (k2 === void 0) k2 = k;
-      o[k2] = m[k];
+      o2[k2] = m[k];
     }));
-    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
-      Object.defineProperty(o, "default", { enumerable: true, value: v });
-    }) : function(o, v) {
-      o["default"] = v;
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o2, v2) {
+      Object.defineProperty(o2, "default", { enumerable: true, value: v2 });
+    }) : function(o2, v2) {
+      o2["default"] = v2;
     });
     var __importStar = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule) return mod;
@@ -35750,14 +35750,14 @@ var require_json_typings = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.isJsonObject = exports2.typeofJsonValue = void 0;
     function typeofJsonValue(value) {
-      let t = typeof value;
-      if (t == "object") {
+      let t2 = typeof value;
+      if (t2 == "object") {
         if (Array.isArray(value))
           return "array";
         if (value === null)
           return "null";
       }
-      return t;
+      return t2;
     }
     __name(typeofJsonValue, "typeofJsonValue");
     exports2.typeofJsonValue = typeofJsonValue;
@@ -35877,20 +35877,20 @@ var require_protobufjs_utf8 = __commonJS({
     function utf8read(bytes) {
       if (bytes.length < 1)
         return "";
-      let pos = 0, parts = [], chunk = [], i = 0, t;
+      let pos = 0, parts = [], chunk = [], i = 0, t2;
       let len = bytes.length;
       while (pos < len) {
-        t = bytes[pos++];
-        if (t < 128)
-          chunk[i++] = t;
-        else if (t > 191 && t < 224)
-          chunk[i++] = (t & 31) << 6 | bytes[pos++] & 63;
-        else if (t > 239 && t < 365) {
-          t = ((t & 7) << 18 | (bytes[pos++] & 63) << 12 | (bytes[pos++] & 63) << 6 | bytes[pos++] & 63) - 65536;
-          chunk[i++] = 55296 + (t >> 10);
-          chunk[i++] = 56320 + (t & 1023);
+        t2 = bytes[pos++];
+        if (t2 < 128)
+          chunk[i++] = t2;
+        else if (t2 > 191 && t2 < 224)
+          chunk[i++] = (t2 & 31) << 6 | bytes[pos++] & 63;
+        else if (t2 > 239 && t2 < 365) {
+          t2 = ((t2 & 7) << 18 | (bytes[pos++] & 63) << 12 | (bytes[pos++] & 63) << 6 | bytes[pos++] & 63) - 65536;
+          chunk[i++] = 55296 + (t2 >> 10);
+          chunk[i++] = 56320 + (t2 & 1023);
         } else
-          chunk[i++] = (t & 15) << 12 | (bytes[pos++] & 63) << 6 | bytes[pos++] & 63;
+          chunk[i++] = (t2 & 15) << 12 | (bytes[pos++] & 63) << 6 | bytes[pos++] & 63;
         if (i > 8191) {
           parts.push(fromCharCodes(chunk));
           i = 0;
@@ -36441,9 +36441,9 @@ var require_binary_reader = __commonJS({
             this.pos += len;
             break;
           case binary_format_contract_1.WireType.StartGroup:
-            let t;
-            while ((t = this.tag()[1]) !== binary_format_contract_1.WireType.EndGroup) {
-              this.skip(t);
+            let t2;
+            while ((t2 = this.tag()[1]) !== binary_format_contract_1.WireType.EndGroup) {
+              this.skip(t2);
             }
             break;
           default:
@@ -36867,10 +36867,10 @@ var require_json_format_contract = __commonJS({
     exports2.jsonWriteOptions = jsonWriteOptions;
     function mergeJsonOptions(a, b) {
       var _a2, _b;
-      let c = Object.assign(Object.assign({}, a), b);
-      c.typeRegistry = [...(_a2 = a === null || a === void 0 ? void 0 : a.typeRegistry) !== null && _a2 !== void 0 ? _a2 :
+      let c2 = Object.assign(Object.assign({}, a), b);
+      c2.typeRegistry = [...(_a2 = a === null || a === void 0 ? void 0 : a.typeRegistry) !== null && _a2 !== void 0 ? _a2 :
       [], ...(_b = b === null || b === void 0 ? void 0 : b.typeRegistry) !== null && _b !== void 0 ? _b : []];
-      return c;
+      return c2;
     }
     __name(mergeJsonOptions, "mergeJsonOptions");
     exports2.mergeJsonOptions = mergeJsonOptions;
@@ -38219,7 +38219,7 @@ var require_reflection_binary_writer = __commonJS({
        * If argument `value` is omitted, [2] is always false.
        */
       scalarInfo(type2, value) {
-        let t = binary_format_contract_1.WireType.Varint;
+        let t2 = binary_format_contract_1.WireType.Varint;
         let m;
         let i = value === void 0;
         let d = value === 0;
@@ -38229,7 +38229,7 @@ var require_reflection_binary_writer = __commonJS({
             break;
           case reflection_info_1.ScalarType.STRING:
             d = i || !value.length;
-            t = binary_format_contract_1.WireType.LengthDelimited;
+            t2 = binary_format_contract_1.WireType.LengthDelimited;
             m = "string";
             break;
           case reflection_info_1.ScalarType.BOOL:
@@ -38240,11 +38240,11 @@ var require_reflection_binary_writer = __commonJS({
             m = "uint32";
             break;
           case reflection_info_1.ScalarType.DOUBLE:
-            t = binary_format_contract_1.WireType.Bit64;
+            t2 = binary_format_contract_1.WireType.Bit64;
             m = "double";
             break;
           case reflection_info_1.ScalarType.FLOAT:
-            t = binary_format_contract_1.WireType.Bit32;
+            t2 = binary_format_contract_1.WireType.Bit32;
             m = "float";
             break;
           case reflection_info_1.ScalarType.INT64:
@@ -38257,25 +38257,25 @@ var require_reflection_binary_writer = __commonJS({
             break;
           case reflection_info_1.ScalarType.FIXED64:
             d = i || pb_long_1.PbULong.from(value).isZero();
-            t = binary_format_contract_1.WireType.Bit64;
+            t2 = binary_format_contract_1.WireType.Bit64;
             m = "fixed64";
             break;
           case reflection_info_1.ScalarType.BYTES:
             d = i || !value.byteLength;
-            t = binary_format_contract_1.WireType.LengthDelimited;
+            t2 = binary_format_contract_1.WireType.LengthDelimited;
             m = "bytes";
             break;
           case reflection_info_1.ScalarType.FIXED32:
-            t = binary_format_contract_1.WireType.Bit32;
+            t2 = binary_format_contract_1.WireType.Bit32;
             m = "fixed32";
             break;
           case reflection_info_1.ScalarType.SFIXED32:
-            t = binary_format_contract_1.WireType.Bit32;
+            t2 = binary_format_contract_1.WireType.Bit32;
             m = "sfixed32";
             break;
           case reflection_info_1.ScalarType.SFIXED64:
             d = i || pb_long_1.PbLong.from(value).isZero();
-            t = binary_format_contract_1.WireType.Bit64;
+            t2 = binary_format_contract_1.WireType.Bit64;
             m = "sfixed64";
             break;
           case reflection_info_1.ScalarType.SINT32:
@@ -38286,7 +38286,7 @@ var require_reflection_binary_writer = __commonJS({
             m = "sint64";
             break;
         }
-        return [t, m, i || d];
+        return [t2, m, i || d];
       }
     };
     exports2.ReflectionBinaryWriter = ReflectionBinaryWriter;
@@ -38422,8 +38422,8 @@ var require_reflection_equals = __commonJS({
         switch (field.kind) {
           case "enum":
           case "scalar":
-            let t = field.kind == "enum" ? reflection_info_1.ScalarType.INT32 : field.T;
-            if (!(field.repeat ? repeatedPrimitiveEq(t, val_a, val_b) : primitiveEq(t, val_a, val_b)))
+            let t2 = field.kind == "enum" ? reflection_info_1.ScalarType.INT32 : field.T;
+            if (!(field.repeat ? repeatedPrimitiveEq(t2, val_a, val_b) : primitiveEq(t2, val_a, val_b)))
               return false;
             break;
           case "map":
@@ -39033,8 +39033,8 @@ var require_rpc_error = __commonJS({
         if (m.length) {
           l.push("");
           l.push("Meta:");
-          for (let [k, v] of m) {
-            l.push(`  ${k}: ${v}`);
+          for (let [k, v2] of m) {
+            l.push(`  ${k}: ${v2}`);
           }
         }
         return l.join("\n");
@@ -39054,43 +39054,43 @@ var require_rpc_options = __commonJS({
     function mergeRpcOptions(defaults2, options) {
       if (!options)
         return defaults2;
-      let o = {};
-      copy(defaults2, o);
-      copy(options, o);
+      let o2 = {};
+      copy(defaults2, o2);
+      copy(options, o2);
       for (let key of Object.keys(options)) {
         let val = options[key];
         switch (key) {
           case "jsonOptions":
-            o.jsonOptions = runtime_1.mergeJsonOptions(defaults2.jsonOptions, o.jsonOptions);
+            o2.jsonOptions = runtime_1.mergeJsonOptions(defaults2.jsonOptions, o2.jsonOptions);
             break;
           case "binaryOptions":
-            o.binaryOptions = runtime_1.mergeBinaryOptions(defaults2.binaryOptions, o.binaryOptions);
+            o2.binaryOptions = runtime_1.mergeBinaryOptions(defaults2.binaryOptions, o2.binaryOptions);
             break;
           case "meta":
-            o.meta = {};
-            copy(defaults2.meta, o.meta);
-            copy(options.meta, o.meta);
+            o2.meta = {};
+            copy(defaults2.meta, o2.meta);
+            copy(options.meta, o2.meta);
             break;
           case "interceptors":
-            o.interceptors = defaults2.interceptors ? defaults2.interceptors.concat(val) : val.concat();
+            o2.interceptors = defaults2.interceptors ? defaults2.interceptors.concat(val) : val.concat();
             break;
         }
       }
-      return o;
+      return o2;
     }
     __name(mergeRpcOptions, "mergeRpcOptions");
     exports2.mergeRpcOptions = mergeRpcOptions;
     function copy(a, into) {
       if (!a)
         return;
-      let c = into;
-      for (let [k, v] of Object.entries(a)) {
-        if (v instanceof Date)
-          c[k] = new Date(v.getTime());
-        else if (Array.isArray(v))
-          c[k] = v.concat();
+      let c2 = into;
+      for (let [k, v2] of Object.entries(a)) {
+        if (v2 instanceof Date)
+          c2[k] = new Date(v2.getTime());
+        else if (Array.isArray(v2))
+          c2[k] = v2.concat();
         else
-          c[k] = v;
+          c2[k] = v2;
       }
     }
     __name(copy, "copy");
@@ -39743,17 +39743,17 @@ var require_test_transport = __commonJS({
         if (this.data.response instanceof rpc_error_1.RpcError) {
           return Promise.reject(this.data.response);
         }
-        let r;
+        let r2;
         if (Array.isArray(this.data.response)) {
           runtime_1.assert(this.data.response.length > 0);
-          r = this.data.response[0];
+          r2 = this.data.response[0];
         } else if (this.data.response !== void 0) {
-          r = this.data.response;
+          r2 = this.data.response;
         } else {
-          r = method.O.create();
+          r2 = method.O.create();
         }
-        runtime_1.assert(method.O.is(r));
-        return Promise.resolve(r);
+        runtime_1.assert(method.O.is(r2));
+        return Promise.resolve(r2);
       }
       /**
        * Pushes response messages from the mock data to the output stream.
@@ -39898,11 +39898,11 @@ var require_test_transport = __commonJS({
       responseTrailer: "test"
     };
     function delay5(ms, abort) {
-      return (v) => new Promise((resolve2, reject) => {
+      return (v2) => new Promise((resolve2, reject) => {
         if (abort === null || abort === void 0 ? void 0 : abort.aborted) {
           reject(new rpc_error_1.RpcError("user cancel", "CANCELLED"));
         } else {
-          const id = setTimeout(() => resolve2(v), ms);
+          const id = setTimeout(() => resolve2(v2), ms);
           if (abort) {
             abort.addEventListener("abort", (ev) => {
               clearTimeout(id);
@@ -40900,10 +40900,10 @@ bject");
       let negatives = "";
       let result;
       if (parts.positives.length) {
-        positives = parts.positives.map((v) => toMaxLen(String(v), maxLen)).join("|");
+        positives = parts.positives.map((v2) => toMaxLen(String(v2), maxLen)).join("|");
       }
       if (parts.negatives.length) {
-        negatives = `-(${prefix2}${parts.negatives.map((v) => toMaxLen(String(v), maxLen)).join("|")})`;
+        negatives = `-(${prefix2}${parts.negatives.map((v2) => toMaxLen(String(v2), maxLen)).join("|")})`;
       }
       if (positives && negatives) {
         result = `${positives}|${negatives}`;
@@ -42202,7 +42202,7 @@ var require_parse4 = __commonJS({
       try {
         new RegExp(value);
       } catch (ex) {
-        return args.map((v) => utils.escapeRegex(v)).join("..");
+        return args.map((v2) => utils.escapeRegex(v2)).join("..");
       }
       return value;
     }, "expandRange");
@@ -42832,8 +42832,8 @@ var require_parse4 = __commonJS({
             brace.value = brace.output = "\\{";
             value = output = "\\}";
             state3.output = out;
-            for (const t of toks) {
-              state3.output += t.output || t.value;
+            for (const t2 of toks) {
+              state3.output += t2.output || t2.value;
             }
           }
           push({ type: "brace", value, output });
@@ -43342,10 +43342,10 @@ var require_micromatch = __commonJS({
     var braces = require_braces();
     var picomatch = require_picomatch2();
     var utils = require_utils3();
-    var isEmptyString = /* @__PURE__ */ __name((v) => v === "" || v === "./", "isEmptyString");
-    var hasBraces = /* @__PURE__ */ __name((v) => {
-      const index = v.indexOf("{");
-      return index > -1 && v.indexOf("}", index) > -1;
+    var isEmptyString = /* @__PURE__ */ __name((v2) => v2 === "" || v2 === "./", "isEmptyString");
+    var hasBraces = /* @__PURE__ */ __name((v2) => {
+      const index = v2.indexOf("{");
+      return index > -1 && v2.indexOf("}", index) > -1;
     }, "hasBraces");
     var micromatch = /* @__PURE__ */ __name((list, patterns, options) => {
       patterns = [].concat(patterns);
@@ -43465,7 +43465,7 @@ var require_micromatch = __commonJS({
       let regex = picomatch.makeRe(String(glob3), { ...options, capture: true });
       let match2 = regex.exec(posix ? utils.toPosixSlashes(input) : input);
       if (match2) {
-        return match2.slice(1).map((v) => v === void 0 ? "" : v);
+        return match2.slice(1).map((v2) => v2 === void 0 ? "" : v2);
       }
     };
     micromatch.makeRe = (...args) => picomatch.makeRe(...args);
@@ -44614,7 +44614,7 @@ var require_queue = __commonJS({
       if (!(_concurrency >= 1)) {
         throw new Error("fastqueue concurrency must be equal to or greater than 1");
       }
-      var cache2 = reusify(Task);
+      var cache = reusify(Task);
       var queueHead = null;
       var queueTail = null;
       var _running = 0;
@@ -44699,7 +44699,7 @@ var require_queue = __commonJS({
       }
       __name(idle, "idle");
       function push(value, done) {
-        var current = cache2.get();
+        var current = cache.get();
         current.context = context3;
         current.release = release;
         current.value = value;
@@ -44721,7 +44721,7 @@ var require_queue = __commonJS({
       }
       __name(push, "push");
       function unshift(value, done) {
-        var current = cache2.get();
+        var current = cache.get();
         current.context = context3;
         current.release = release;
         current.value = value;
@@ -44744,7 +44744,7 @@ var require_queue = __commonJS({
       __name(unshift, "unshift");
       function release(holder) {
         if (holder) {
-          cache2.release(holder);
+          cache.release(holder);
         }
         var next = queueHead;
         if (next && _running <= _concurrency) {
@@ -46703,7 +46703,7 @@ var require_toJS = __commonJS({
     var identity = require_identity();
     function toJS(value, arg, ctx) {
       if (Array.isArray(value))
-        return value.map((v, i) => toJS(v, String(i), ctx));
+        return value.map((v2, i) => toJS(v2, String(i), ctx));
       if (value && typeof value.toJSON === "function") {
         if (!ctx || !identity.hasAnchor(value))
           return value.toJSON(arg, ctx);
@@ -46872,9 +46872,9 @@ var require_Alias = __commonJS({
       } else if (identity.isCollection(node)) {
         let count = 0;
         for (const item of node.items) {
-          const c = getAliasCount(doc, item, anchors2);
-          if (c > count)
-            count = c;
+          const c2 = getAliasCount(doc, item, anchors2);
+          if (c2 > count)
+            count = c2;
         }
         return count;
       } else if (identity.isPair(node)) {
@@ -46933,13 +46933,13 @@ var require_createNode = __commonJS({
     var defaultTagPrefix = "tag:yaml.org,2002:";
     function findTagObject(value, tagName, tags2) {
       if (tagName) {
-        const match2 = tags2.filter((t) => t.tag === tagName);
-        const tagObj = match2.find((t) => !t.format) ?? match2[0];
+        const match2 = tags2.filter((t2) => t2.tag === tagName);
+        const tagObj = match2.find((t2) => !t2.format) ?? match2[0];
         if (!tagObj)
           throw new Error(`Tag ${tagName} not found`);
         return tagObj;
       }
-      return tags2.find((t) => t.identify?.(value) && !t.format);
+      return tags2.find((t2) => t2.identify?.(value) && !t2.format);
     }
     __name(findTagObject, "findTagObject");
     function createNode(value, tagName, ctx) {
@@ -47011,18 +47011,18 @@ var require_Collection = __commonJS({
     var identity = require_identity();
     var Node = require_Node();
     function collectionFromPath(schema2, path18, value) {
-      let v = value;
+      let v2 = value;
       for (let i = path18.length - 1; i >= 0; --i) {
         const k = path18[i];
         if (typeof k === "number" && Number.isInteger(k) && k >= 0) {
           const a = [];
-          a[k] = v;
-          v = a;
+          a[k] = v2;
+          v2 = a;
         } else {
-          v = /* @__PURE__ */ new Map([[k, v]]);
+          v2 = /* @__PURE__ */ new Map([[k, v2]]);
         }
       }
-      return createNode.createNode(v, void 0, {
+      return createNode.createNode(v2, void 0, {
         aliasDuplicateObjects: false,
         keepUndefined: false,
         onAnchor: /* @__PURE__ */ __name(() => {
@@ -47595,10 +47595,10 @@ ${indent}`);
       let res = _stringify(type2);
       if (res === null) {
         const { defaultKeyType, defaultStringType } = ctx.options;
-        const t = implicitKey && defaultKeyType || defaultStringType;
-        res = _stringify(t);
+        const t2 = implicitKey && defaultKeyType || defaultStringType;
+        res = _stringify(t2);
         if (res === null)
-          throw new Error(`Unsupported default string type ${t}`);
+          throw new Error(`Unsupported default string type ${t2}`);
       }
       return res;
     }
@@ -47660,24 +47660,24 @@ var require_stringify2 = __commonJS({
     __name(createStringifyContext, "createStringifyContext");
     function getTagObject(tags2, item) {
       if (item.tag) {
-        const match2 = tags2.filter((t) => t.tag === item.tag);
+        const match2 = tags2.filter((t2) => t2.tag === item.tag);
         if (match2.length > 0)
-          return match2.find((t) => t.format === item.format) ?? match2[0];
+          return match2.find((t2) => t2.format === item.format) ?? match2[0];
       }
       let tagObj = void 0;
       let obj;
       if (identity.isScalar(item)) {
         obj = item.value;
-        let match2 = tags2.filter((t) => t.identify?.(obj));
+        let match2 = tags2.filter((t2) => t2.identify?.(obj));
         if (match2.length > 1) {
-          const testMatch = match2.filter((t) => t.test);
+          const testMatch = match2.filter((t2) => t2.test);
           if (testMatch.length > 0)
             match2 = testMatch;
         }
-        tagObj = match2.find((t) => t.format === item.format) ?? match2.find((t) => !t.format);
+        tagObj = match2.find((t2) => t2.format === item.format) ?? match2.find((t2) => !t2.format);
       } else {
         obj = item;
-        tagObj = tags2.find((t) => t.nodeClass && obj instanceof t.nodeClass);
+        tagObj = tags2.find((t2) => t2.nodeClass && obj instanceof t2.nodeClass);
       }
       if (!tagObj) {
         const name = obj?.constructor?.name ?? (obj === null ? "null" : typeof obj);
@@ -47718,8 +47718,8 @@ var require_stringify2 = __commonJS({
         }
       }
       let tagObj = void 0;
-      const node = identity.isNode(item) ? item : ctx.doc.createNode(item, { onTagObj: /* @__PURE__ */ __name((o) => tagObj =
-      o, "onTagObj") });
+      const node = identity.isNode(item) ? item : ctx.doc.createNode(item, { onTagObj: /* @__PURE__ */ __name((o2) => tagObj =
+      o2, "onTagObj") });
       tagObj ?? (tagObj = getTagObject(ctx.doc.schema.tags, node));
       const props = stringifyProps(node, tagObj, ctx);
       if (props.length > 0)
@@ -48038,8 +48038,8 @@ var require_Pair = __commonJS({
     var identity = require_identity();
     function createPair(key, value, ctx) {
       const k = createNode.createNode(key, void 0, ctx);
-      const v = createNode.createNode(value, void 0, ctx);
-      return new Pair(k, v);
+      const v2 = createNode.createNode(value, void 0, ctx);
+      return new Pair(k, v2);
     }
     __name(createPair, "createPair");
     var Pair = class _Pair {
@@ -48878,8 +48878,8 @@ var require_binary = __commonJS({
           const lineWidth = Math.max(ctx.options.lineWidth - ctx.indent.length, ctx.options.minContentWidth);
           const n = Math.ceil(str2.length / lineWidth);
           const lines = new Array(n);
-          for (let i = 0, o = 0; i < n; ++i, o += lineWidth) {
-            lines[i] = str2.substr(o, lineWidth);
+          for (let i = 0, o2 = 0; i < n; ++i, o2 += lineWidth) {
+            lines[i] = str2.substr(o2, lineWidth);
           }
           str2 = lines.join(type2 === Scalar.Scalar.BLOCK_LITERAL ? "\n" : " ");
         }
@@ -49766,8 +49766,8 @@ var require_Document = __commonJS({
           value = replacer.call({ "": value }, "", value);
           _replacer = replacer;
         } else if (Array.isArray(replacer)) {
-          const keyToStr = /* @__PURE__ */ __name((v) => typeof v === "number" || v instanceof String || v instanceof Number,
-          "keyToStr");
+          const keyToStr = /* @__PURE__ */ __name((v2) => typeof v2 === "number" || v2 instanceof String || v2 instanceof
+          Number, "keyToStr");
           const asStr = replacer.filter(keyToStr).map(String);
           if (asStr.length > 0)
             replacer = replacer.concat(asStr);
@@ -49803,8 +49803,8 @@ var require_Document = __commonJS({
        */
       createPair(key, value, options = {}) {
         const k = this.createNode(key, null, options);
-        const v = this.createNode(value, null, options);
-        return new Pair.Pair(k, v);
+        const v2 = this.createNode(value, null, options);
+        return new Pair.Pair(k, v2);
       }
       /**
        * Removes a value from the document.
@@ -50718,7 +50718,7 @@ E_FAILED", msg));
       YAMLSeq.YAMLSeq.tagName && expType === "seq") {
         return resolveCollection(CN, ctx, token, onError2, tagName);
       }
-      let tag = ctx.schema.tags.find((t) => t.tag === tagName && t.collection === expType);
+      let tag = ctx.schema.tags.find((t2) => t2.tag === tagName && t2.collection === expType);
       if (!tag) {
         const kt = ctx.schema.knownTags[tagName];
         if (kt?.collection === expType) {
@@ -53792,8 +53792,8 @@ var require_helpers2 = __commonJS({
         this.errors = this.errors.concat(res.errors);
       }
     }, "importErrors");
-    function stringizer(v, i) {
-      return i + ": " + v.toString() + "\n";
+    function stringizer(v2, i) {
+      return i + ": " + v2.toString() + "\n";
     }
     __name(stringizer, "stringizer");
     ValidatorResult.prototype.toString = /* @__PURE__ */ __name(function toString6(res) {
@@ -53948,7 +53948,7 @@ var require_helpers2 = __commonJS({
         if (a.length !== b.length) {
           return false;
         }
-        return a.every(function(v, i) {
+        return a.every(function(v2, i) {
           return deepCompareStrict(a[i], b[i]);
         });
       }
@@ -53961,8 +53961,8 @@ var require_helpers2 = __commonJS({
         if (aKeys.length !== bKeys.length) {
           return false;
         }
-        return aKeys.every(function(v) {
-          return deepCompareStrict(a[v], b[v]);
+        return aKeys.every(function(v2) {
+          return deepCompareStrict(a[v2], b[v2]);
         });
       }
       return a === b;
@@ -54010,18 +54010,18 @@ var require_helpers2 = __commonJS({
     }
     __name(deepMerge, "deepMerge");
     module2.exports.deepMerge = deepMerge;
-    exports2.objectGetPath = /* @__PURE__ */ __name(function objectGetPath(o, s) {
+    exports2.objectGetPath = /* @__PURE__ */ __name(function objectGetPath(o2, s) {
       var parts = s.split("/").slice(1);
       var k;
       while (typeof (k = parts.shift()) == "string") {
         var n = decodeURIComponent(k.replace(/~0/, "~").replace(/~1/g, "/"));
-        if (!(n in o)) return;
-        o = o[n];
+        if (!(n in o2)) return;
+        o2 = o2[n];
       }
-      return o;
+      return o2;
     }, "objectGetPath");
-    function pathEncoder(v) {
-      return "/" + encodeURIComponent(v).replace(/~/g, "%7E");
+    function pathEncoder(v2) {
+      return "/" + encodeURIComponent(v2).replace(/~/g, "%7E");
     }
     __name(pathEncoder, "pathEncoder");
     exports2.encodePath = /* @__PURE__ */ __name(function encodePointer(a) {
@@ -54092,10 +54092,10 @@ var require_attribute = __commonJS({
       var result = new ValidatorResult(instance, schema2, options, ctx);
       var types2 = Array.isArray(schema2.type) ? schema2.type : [schema2.type];
       if (!types2.some(this.testType.bind(this, instance, schema2, options, ctx))) {
-        var list = types2.map(function(v) {
-          if (!v) return;
-          var id = v.$id || v.id;
-          return id ? "<" + id + ">" : v + "";
+        var list = types2.map(function(v2) {
+          if (!v2) return;
+          var id = v2.$id || v2.id;
+          return id ? "<" + id + ">" : v2 + "";
         });
         result.addError({
           name: "type",
@@ -54139,10 +54139,10 @@ var require_attribute = __commonJS({
           }
         )
       )) {
-        var list = schema2.anyOf.map(function(v, i) {
-          var id = v.$id || v.id;
+        var list = schema2.anyOf.map(function(v2, i) {
+          var id = v2.$id || v2.id;
           if (id) return "<" + id + ">";
-          return v.title && JSON.stringify(v.title) || v["$ref"] && "<" + v["$ref"] + ">" || "[subschema " + i + "]";
+          return v2.title && JSON.stringify(v2.title) || v2["$ref"] && "<" + v2["$ref"] + ">" || "[subschema " + i + "]";
         });
         if (options.nestedErrors) {
           result.importErrors(inner);
@@ -54164,12 +54164,12 @@ var require_attribute = __commonJS({
       }
       var result = new ValidatorResult(instance, schema2, options, ctx);
       var self2 = this;
-      schema2.allOf.forEach(function(v, i) {
-        var valid3 = self2.validateSchema(instance, v, options, ctx);
+      schema2.allOf.forEach(function(v2, i) {
+        var valid3 = self2.validateSchema(instance, v2, options, ctx);
         if (!valid3.valid) {
-          var id = v.$id || v.id;
-          var msg = id || v.title && JSON.stringify(v.title) || v["$ref"] && "<" + v["$ref"] + ">" || "[subschema " + i +
-          "]";
+          var id = v2.$id || v2.id;
+          var msg = id || v2.title && JSON.stringify(v2.title) || v2["$ref"] && "<" + v2["$ref"] + ">" || "[subschema " +
+          i + "]";
           result.addError({
             name: "allOf",
             argument: { id: msg, length: valid3.errors.length, valid: valid3 },
@@ -54200,9 +54200,10 @@ var require_attribute = __commonJS({
           }
         )
       ).length;
-      var list = schema2.oneOf.map(function(v, i) {
-        var id = v.$id || v.id;
-        return id || v.title && JSON.stringify(v.title) || v["$ref"] && "<" + v["$ref"] + ">" || "[subschema " + i + "]";
+      var list = schema2.oneOf.map(function(v2, i) {
+        var id = v2.$id || v2.id;
+        return id || v2.title && JSON.stringify(v2.title) || v2["$ref"] && "<" + v2["$ref"] + ">" || "[subschema " + i +
+        "]";
       });
       if (count !== 1) {
         if (options.nestedErrors) {
@@ -54622,10 +54623,10 @@ n)');
       }
       return result;
     }, "validateMaxItems");
-    function testArrays(v, i, a) {
+    function testArrays(v2, i, a) {
       var j, len = a.length;
       for (j = i + 1, len; j < len; j++) {
-        if (helpers.deepCompareStrict(v, a[j])) {
+        if (helpers.deepCompareStrict(v2, a[j])) {
           return false;
         }
       }
@@ -55045,8 +55046,8 @@ var require_lib = __commonJS({
     module2.exports.SchemaScanResult = require_scan2().SchemaScanResult;
     module2.exports.scan = require_scan2().scan;
     module2.exports.validate = function(instance, schema2, options) {
-      var v = new Validator();
-      return v.validate(instance, schema2, options);
+      var v2 = new Validator();
+      return v2.validate(instance, schema2, options);
     };
   }
 });
@@ -55106,10 +55107,82 @@ var check_env_default = checkEnv;
 // node_modules/simple-git/dist/esm/index.js
 var import_node_buffer = require("node:buffer");
 var import_file_exists = __toESM(require_dist(), 1);
+
+// node_modules/@simple-git/args-pathspec/dist/index.mjs
+var t = /* @__PURE__ */ new WeakMap();
+function c(...n) {
+  const e = new String(n);
+  return t.set(e, n), e;
+}
+__name(c, "c");
+function r(n) {
+  return n instanceof String && t.has(n);
+}
+__name(r, "r");
+
+// node_modules/simple-git/dist/esm/index.js
 var import_debug = __toESM(require_src(), 1);
 var import_child_process = require("child_process");
 var import_promise_deferred = __toESM(require_dist2(), 1);
 var import_node_path = require("node:path");
+
+// node_modules/@simple-git/argv-parser/dist/index.mjs
+var v = {
+  short: /* @__PURE__ */ new Map([
+    ["c", true]
+    //  -c <k=v>    set config key for this invocation
+  ])
+};
+var O = {
+  short: new Map([
+    ["C", true],
+    //  -C <path>   change working directory
+    ["P", false],
+    // -P          no pager (alias for --no-pager)
+    ["h", false],
+    // -h          help
+    ["p", false],
+    // -p          paginate
+    ["v", false],
+    // -v          version
+    ...v.short.entries()
+  ]),
+  long: /* @__PURE__ */ new Set([
+    "attr-source",
+    "config-env",
+    "exec-path",
+    "git-dir",
+    "list-cmds",
+    "namespace",
+    "super-prefix",
+    "work-tree"
+  ])
+};
+function g(e, t2, n = String(e)) {
+  const o2 = typeof e == "string" ? new RegExp(`\\s*${e}`, "i") : e;
+  return function(s) {
+    if (o2.test(s))
+      return {
+        category: t2,
+        message: `Configuring ${n} is not permitted without enabling ${t2}`
+      };
+  };
+}
+__name(g, "g");
+var $ = [
+  g(
+    /^\s*protocol(.[a-z]+)?.allow/i,
+    "allowUnsafeProtocolOverride",
+    "protocol.allow"
+  ),
+  g("core.sshCommand", "allowUnsafeSshCommand"),
+  g("core.fsmonitor", "allowUnsafeFsMonitor"),
+  g("core.gitProxy", "allowUnsafeGitProxy"),
+  g("core.hooksPath", "allowUnsafeHooksPath"),
+  g("diff.external", "allowUnsafeDiffExternal")
+];
+
+// node_modules/simple-git/dist/esm/index.js
 var import_promise_deferred2 = __toESM(require_dist2(), 1);
 var __defProp2 = Object.defineProperty;
 var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
@@ -55136,23 +55209,6 @@ var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
 }, "__copyProps");
 var __toCommonJS = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__\
 toCommonJS");
-function pathspec(...paths) {
-  const key = new String(paths);
-  cache.set(key, paths);
-  return key;
-}
-__name(pathspec, "pathspec");
-function isPathSpec(path18) {
-  return path18 instanceof String && cache.has(path18);
-}
-__name(isPathSpec, "isPathSpec");
-var cache;
-var init_pathspec = __esm({
-  "src/lib/args/pathspec.ts"() {
-    "use strict";
-    cache = /* @__PURE__ */ new WeakMap();
-  }
-});
 var GitError;
 var init_git_error = __esm({
   "src/lib/errors/git-error.ts"() {
@@ -55359,7 +55415,7 @@ function filterType(input, filter2, def) {
 }
 __name(filterType, "filterType");
 function filterPrimitives(input, omit) {
-  const type2 = isPathSpec(input) ? "string" : typeof input;
+  const type2 = r(input) ? "string" : typeof input;
   return /number|string|boolean/.test(type2) && (!omit || !omit.includes(type2));
 }
 __name(filterPrimitives, "filterPrimitives");
@@ -55379,7 +55435,6 @@ var filterHasLength;
 var init_argument_filters = __esm({
   "src/lib/utils/argument-filters.ts"() {
     "use strict";
-    init_pathspec();
     init_util();
     filterArray = /* @__PURE__ */ __name((input) => {
       return Array.isArray(input);
@@ -55388,7 +55443,7 @@ var init_argument_filters = __esm({
       return typeof input === "number";
     }, "filterNumber");
     filterString = /* @__PURE__ */ __name((input) => {
-      return typeof input === "string" || isPathSpec(input);
+      return typeof input === "string" || r(input);
     }, "filterString");
     filterStringOrStringArray = /* @__PURE__ */ __name((input) => {
       return filterString(input) || Array.isArray(input) && input.every(filterString);
@@ -55496,7 +55551,7 @@ function createInstanceConfig(...options) {
   const baseDir = process.cwd();
   const config = Object.assign(
     { baseDir, ...defaultOptions },
-    ...options.filter((o) => typeof o === "object" && o)
+    ...options.filter((o2) => typeof o2 === "object" && o2)
   );
   config.baseDir = config.baseDir || baseDir;
   config.trimmed = config.trimmed === true;
@@ -55521,14 +55576,14 @@ function appendTaskOptions(options, commands = []) {
   }
   return Object.keys(options).reduce((commands2, key) => {
     const value = options[key];
-    if (isPathSpec(value)) {
+    if (r(value)) {
       commands2.push(value);
     } else if (filterPrimitives(value, ["boolean"])) {
       commands2.push(key + "=" + value);
     } else if (Array.isArray(value)) {
-      for (const v of value) {
-        if (!filterPrimitives(v, ["string", "number"])) {
-          commands2.push(key + "=" + v);
+      for (const v2 of value) {
+        if (!filterPrimitives(v2, ["string", "number"])) {
+          commands2.push(key + "=" + v2);
         }
       }
     } else {
@@ -55572,7 +55627,6 @@ var init_task_options = __esm({
     "use strict";
     init_argument_filters();
     init_util();
-    init_pathspec();
   }
 });
 function callTaskParser(parser4, streams) {
@@ -57344,7 +57398,7 @@ function parseLogOptions(opt = {}, customArgs = []) {
     suffix.push(`${opt.from || ""}${rangeOperator}${opt.to || ""}`);
   }
   if (filterString(opt.file)) {
-    command.push("--follow", pathspec(opt.file));
+    command.push("--follow", c(opt.file));
   }
   appendTaskOptions(userOptions(opt), command);
   return {
@@ -57392,7 +57446,6 @@ var init_log = __esm({
   "src/lib/tasks/log.ts"() {
     "use strict";
     init_log_format();
-    init_pathspec();
     init_parse_list_log_summary();
     init_utils();
     init_task();
@@ -58213,11 +58266,10 @@ var init_clone = __esm({
     "use strict";
     init_task();
     init_utils();
-    init_pathspec();
     cloneTask = /* @__PURE__ */ __name((repo, directory, customArgs) => {
       const commands = ["clone", ...customArgs];
-      filterString(repo) && commands.push(pathspec(repo));
-      filterString(directory) && commands.push(pathspec(directory));
+      filterString(repo) && commands.push(c(repo));
+      filterString(directory) && commands.push(c(directory));
       return straightThroughStringTask(commands);
     }, "cloneTask");
     cloneMirrorTask = /* @__PURE__ */ __name((repo, directory, customArgs) => {
@@ -59482,21 +59534,9 @@ gin instead."
     module2.exports = Git2;
   }
 });
-init_pathspec();
 init_git_error();
 init_git_error();
 init_git_error();
-var GitPluginError = class extends GitError {
-  static {
-    __name(this, "GitPluginError");
-  }
-  constructor(task, plugin, message) {
-    super(task, message);
-    this.task = task;
-    this.plugin = plugin;
-    Object.setPrototypeOf(this, new.target.prototype);
-  }
-};
 init_git_response_error();
 init_task_configuration_error();
 init_check_is_repo();
@@ -59505,34 +59545,6 @@ init_config();
 init_diff_name_status();
 init_grep();
 init_reset();
-function isConfigSwitch(arg) {
-  return typeof arg === "string" && arg.trim().toLowerCase() === "-c";
-}
-__name(isConfigSwitch, "isConfigSwitch");
-function preventConfigBuilder(config, setting, message = String(config)) {
-  const regex = typeof config === "string" ? new RegExp(`\\s*${config}`, "i") : config;
-  return /* @__PURE__ */ __name(function preventCommand(options, arg, next) {
-    if (options[setting] !== true && isConfigSwitch(arg) && regex.test(next)) {
-      throw new GitPluginError(
-        void 0,
-        "unsafe",
-        `Configuring ${message} is not permitted without enabling ${setting}`
-      );
-    }
-  }, "preventCommand");
-}
-__name(preventConfigBuilder, "preventConfigBuilder");
-var preventUnsafeConfig = [
-  preventConfigBuilder(
-    /^\s*protocol(.[a-z]+)?.allow/i,
-    "allowUnsafeProtocolOverride",
-    "protocol.allow"
-  ),
-  preventConfigBuilder("core.sshCommand", "allowUnsafeSshCommand"),
-  preventConfigBuilder("core.gitProxy", "allowUnsafeGitProxy"),
-  preventConfigBuilder("core.hooksPath", "allowUnsafeHooksPath"),
-  preventConfigBuilder("diff.external", "allowUnsafeDiffExternal")
-];
 init_utils();
 init_utils();
 var never = (0, import_promise_deferred2.deferred)().promise;
@@ -59541,7 +59553,6 @@ init_git_error();
 init_utils();
 init_utils();
 init_utils();
-init_pathspec();
 init_utils();
 var Git = require_git();
 init_git_response_error();
@@ -60404,8 +60415,8 @@ f you want to allow this behavior, set the allowRedirectDowngrade option to true
     });
   }
 };
-var lowercaseKeys = /* @__PURE__ */ __name((obj) => Object.keys(obj).reduce((c, k) => (c[k.toLowerCase()] = obj[k], c), {}),
-"lowercaseKeys");
+var lowercaseKeys = /* @__PURE__ */ __name((obj) => Object.keys(obj).reduce((c2, k) => (c2[k.toLowerCase()] = obj[k], c2),
+{}), "lowercaseKeys");
 
 // node_modules/@actions/http-client/lib/auth.js
 var __awaiter2 = function(thisArg, _arguments, P, generator) {
@@ -61572,40 +61583,40 @@ function argStringToArray(argString) {
   let inQuotes = false;
   let escaped = false;
   let arg = "";
-  function append3(c) {
-    if (escaped && c !== '"') {
+  function append3(c2) {
+    if (escaped && c2 !== '"') {
       arg += "\\";
     }
-    arg += c;
+    arg += c2;
     escaped = false;
   }
   __name(append3, "append");
   for (let i = 0; i < argString.length; i++) {
-    const c = argString.charAt(i);
-    if (c === '"') {
+    const c2 = argString.charAt(i);
+    if (c2 === '"') {
       if (!escaped) {
         inQuotes = !inQuotes;
       } else {
-        append3(c);
+        append3(c2);
       }
       continue;
     }
-    if (c === "\\" && escaped) {
-      append3(c);
+    if (c2 === "\\" && escaped) {
+      append3(c2);
       continue;
     }
-    if (c === "\\" && inQuotes) {
+    if (c2 === "\\" && inQuotes) {
       escaped = true;
       continue;
     }
-    if (c === " " && !inQuotes) {
+    if (c2 === " " && !inQuotes) {
       if (arg.length > 0) {
         args.push(arg);
         arg = "";
       }
       continue;
     }
-    append3(c);
+    append3(c2);
   }
   if (arg.length > 0) {
     args.push(arg.trim());
@@ -62486,9 +62497,9 @@ function _completeToolPath(tool, version3, arch3) {
 }
 __name(_completeToolPath, "_completeToolPath");
 function isExplicitVersion(versionSpec) {
-  const c = semver2.clean(versionSpec) || "";
-  debug2(`isExplicit: ${c}`);
-  const valid3 = semver2.valid(c) != null;
+  const c2 = semver2.clean(versionSpec) || "";
+  debug2(`isExplicit: ${c2}`);
+  const valid3 = semver2.valid(c2) != null;
   debug2(`explicit? ${valid3}`);
   return valid3;
 }
@@ -62548,9 +62559,9 @@ __name(bind, "bind");
 var { toString } = Object.prototype;
 var { getPrototypeOf } = Object;
 var { iterator, toStringTag } = Symbol;
-var kindOf = /* @__PURE__ */ ((cache2) => (thing) => {
+var kindOf = /* @__PURE__ */ ((cache) => (thing) => {
   const str2 = toString.call(thing);
-  return cache2[str2] || (cache2[str2] = str2.slice(8, -1).toLowerCase());
+  return cache[str2] || (cache[str2] = str2.slice(8, -1).toLowerCase());
 })(/* @__PURE__ */ Object.create(null));
 var kindOfTest = /* @__PURE__ */ __name((type2) => {
   type2 = type2.toLowerCase();
@@ -63634,15 +63645,41 @@ var parseHeaders_default = /* @__PURE__ */ __name((rawHeaders) => {
 
 // node_modules/axios/lib/core/AxiosHeaders.js
 var $internals = /* @__PURE__ */ Symbol("internals");
+var isValidHeaderValue = /* @__PURE__ */ __name((value) => !/[\r\n]/.test(value), "isValidHeaderValue");
+function assertValidHeaderValue(value, header) {
+  if (value === false || value == null) {
+    return;
+  }
+  if (utils_default.isArray(value)) {
+    value.forEach((v2) => assertValidHeaderValue(v2, header));
+    return;
+  }
+  if (!isValidHeaderValue(String(value))) {
+    throw new Error(`Invalid character in header content ["${header}"]`);
+  }
+}
+__name(assertValidHeaderValue, "assertValidHeaderValue");
 function normalizeHeader(header) {
   return header && String(header).trim().toLowerCase();
 }
 __name(normalizeHeader, "normalizeHeader");
+function stripTrailingCRLF(str2) {
+  let end = str2.length;
+  while (end > 0) {
+    const charCode = str2.charCodeAt(end - 1);
+    if (charCode !== 10 && charCode !== 13) {
+      break;
+    }
+    end -= 1;
+  }
+  return end === str2.length ? str2 : str2.slice(0, end);
+}
+__name(stripTrailingCRLF, "stripTrailingCRLF");
 function normalizeValue(value) {
   if (value === false || value == null) {
     return value;
   }
-  return utils_default.isArray(value) ? value.map(normalizeValue) : String(value).replace(/[\r\n]+$/, "");
+  return utils_default.isArray(value) ? value.map(normalizeValue) : stripTrailingCRLF(String(value));
 }
 __name(normalizeValue, "normalizeValue");
 function parseTokens(str2) {
@@ -63707,6 +63744,7 @@ var AxiosHeaders = class {
       }
       const key = utils_default.findKey(self2, lHeader);
       if (!key || self2[key] === void 0 || _rewrite === true || _rewrite === void 0 && self2[key] !== false) {
+        assertValidHeaderValue(_value, _header);
         self2[key || _header] = normalizeValue(_value);
       }
     }
@@ -64049,7 +64087,7 @@ var import_follow_redirects = __toESM(require_follow_redirects(), 1);
 var import_zlib = __toESM(require("zlib"), 1);
 
 // node_modules/axios/lib/env/data.js
-var VERSION = "1.14.0";
+var VERSION = "1.15.0";
 
 // node_modules/axios/lib/helpers/parseProtocol.js
 function parseProtocol(url3) {
@@ -64367,6 +64405,84 @@ var callbackify = /* @__PURE__ */ __name((fn, reducer) => {
 }, "callbackify");
 var callbackify_default = callbackify;
 
+// node_modules/axios/lib/helpers/shouldBypassProxy.js
+var DEFAULT_PORTS2 = {
+  http: 80,
+  https: 443,
+  ws: 80,
+  wss: 443,
+  ftp: 21
+};
+var parseNoProxyEntry = /* @__PURE__ */ __name((entry) => {
+  let entryHost = entry;
+  let entryPort = 0;
+  if (entryHost.charAt(0) === "[") {
+    const bracketIndex = entryHost.indexOf("]");
+    if (bracketIndex !== -1) {
+      const host = entryHost.slice(1, bracketIndex);
+      const rest = entryHost.slice(bracketIndex + 1);
+      if (rest.charAt(0) === ":" && /^\d+$/.test(rest.slice(1))) {
+        entryPort = Number.parseInt(rest.slice(1), 10);
+      }
+      return [host, entryPort];
+    }
+  }
+  const firstColon = entryHost.indexOf(":");
+  const lastColon = entryHost.lastIndexOf(":");
+  if (firstColon !== -1 && firstColon === lastColon && /^\d+$/.test(entryHost.slice(lastColon + 1))) {
+    entryPort = Number.parseInt(entryHost.slice(lastColon + 1), 10);
+    entryHost = entryHost.slice(0, lastColon);
+  }
+  return [entryHost, entryPort];
+}, "parseNoProxyEntry");
+var normalizeNoProxyHost = /* @__PURE__ */ __name((hostname) => {
+  if (!hostname) {
+    return hostname;
+  }
+  if (hostname.charAt(0) === "[" && hostname.charAt(hostname.length - 1) === "]") {
+    hostname = hostname.slice(1, -1);
+  }
+  return hostname.replace(/\.+$/, "");
+}, "normalizeNoProxyHost");
+function shouldBypassProxy(location) {
+  let parsed;
+  try {
+    parsed = new URL(location);
+  } catch (_err) {
+    return false;
+  }
+  const noProxy = (process.env.no_proxy || process.env.NO_PROXY || "").toLowerCase();
+  if (!noProxy) {
+    return false;
+  }
+  if (noProxy === "*") {
+    return true;
+  }
+  const port = Number.parseInt(parsed.port, 10) || DEFAULT_PORTS2[parsed.protocol.split(":", 1)[0]] || 0;
+  const hostname = normalizeNoProxyHost(parsed.hostname.toLowerCase());
+  return noProxy.split(/[\s,]+/).some((entry) => {
+    if (!entry) {
+      return false;
+    }
+    let [entryHost, entryPort] = parseNoProxyEntry(entry);
+    entryHost = normalizeNoProxyHost(entryHost);
+    if (!entryHost) {
+      return false;
+    }
+    if (entryPort && entryPort !== port) {
+      return false;
+    }
+    if (entryHost.charAt(0) === "*") {
+      entryHost = entryHost.slice(1);
+    }
+    if (entryHost.charAt(0) === ".") {
+      return hostname.endsWith(entryHost);
+    }
+    return hostname === entryHost;
+  });
+}
+__name(shouldBypassProxy, "shouldBypassProxy");
+
 // node_modules/axios/lib/helpers/speedometer.js
 function speedometer(samplesCount, min) {
   samplesCount = samplesCount || 10;
@@ -64640,7 +64756,9 @@ function setProxy(options, configProxy, location) {
   if (!proxy && proxy !== false) {
     const proxyUrl = getProxyForUrl(location);
     if (proxyUrl) {
-      proxy = new URL(proxyUrl);
+      if (!shouldBypassProxy(location)) {
+        proxy = new URL(proxyUrl);
+      }
     }
   }
   if (proxy) {
@@ -66102,12 +66220,23 @@ var Axios = class {
       if (err instanceof Error) {
         let dummy = {};
         Error.captureStackTrace ? Error.captureStackTrace(dummy) : dummy = new Error();
-        const stack = dummy.stack ? dummy.stack.replace(/^.+\n/, "") : "";
+        const stack = (() => {
+          if (!dummy.stack) {
+            return "";
+          }
+          const firstNewlineIndex = dummy.stack.indexOf("\n");
+          return firstNewlineIndex === -1 ? "" : dummy.stack.slice(firstNewlineIndex + 1);
+        })();
         try {
           if (!err.stack) {
             err.stack = stack;
-          } else if (stack && !String(err.stack).endsWith(stack.replace(/^.+\n.+\n/, ""))) {
-            err.stack += "\n" + stack;
+          } else if (stack) {
+            const firstNewlineIndex = stack.indexOf("\n");
+            const secondNewlineIndex = firstNewlineIndex === -1 ? -1 : stack.indexOf("\n", firstNewlineIndex + 1);
+            const stackWithoutTwoTopLines = secondNewlineIndex === -1 ? "" : stack.slice(secondNewlineIndex + 1);
+            if (!String(err.stack).endsWith(stackWithoutTwoTopLines)) {
+              err.stack += "\n" + stack;
+            }
           }
         } catch (e) {
         }
@@ -66357,8 +66486,8 @@ var CancelToken = class _CancelToken {
    */
   static source() {
     let cancel3;
-    const token = new _CancelToken(/* @__PURE__ */ __name(function executor(c) {
-      cancel3 = c;
+    const token = new _CancelToken(/* @__PURE__ */ __name(function executor(c2) {
+      cancel3 = c2;
     }, "executor"));
     return {
       token,
@@ -67049,25 +67178,25 @@ t not contain globs.`);
   static getLiteral(segment) {
     let literal = "";
     for (let i = 0; i < segment.length; i++) {
-      const c = segment[i];
-      if (c === "\\" && !IS_WINDOWS7 && i + 1 < segment.length) {
+      const c2 = segment[i];
+      if (c2 === "\\" && !IS_WINDOWS7 && i + 1 < segment.length) {
         literal += segment[++i];
         continue;
-      } else if (c === "*" || c === "?") {
+      } else if (c2 === "*" || c2 === "?") {
         return "";
-      } else if (c === "[" && i + 1 < segment.length) {
+      } else if (c2 === "[" && i + 1 < segment.length) {
         let set2 = "";
         let closed = -1;
         for (let i2 = i + 1; i2 < segment.length; i2++) {
-          const c2 = segment[i2];
-          if (c2 === "\\" && !IS_WINDOWS7 && i2 + 1 < segment.length) {
+          const c22 = segment[i2];
+          if (c22 === "\\" && !IS_WINDOWS7 && i2 + 1 < segment.length) {
             set2 += segment[++i2];
             continue;
-          } else if (c2 === "]") {
+          } else if (c22 === "]") {
             closed = i2;
             break;
           } else {
-            set2 += c2;
+            set2 += c22;
           }
         }
         if (closed >= 0) {
@@ -67081,7 +67210,7 @@ t not contain globs.`);
           }
         }
       }
-      literal += c;
+      literal += c2;
     }
     return literal;
   }
@@ -67137,65 +67266,65 @@ var __awaiter12 = function(thisArg, _arguments, P, generator) {
     step((generator = generator.apply(thisArg, _arguments || [])).next());
   });
 };
-var __asyncValues = function(o) {
+var __asyncValues = function(o2) {
   if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-  var m = o[Symbol.asyncIterator], i;
-  return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"),
-  verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
+  var m = o2[Symbol.asyncIterator], i;
+  return m ? m.call(o2) : (o2 = typeof __values === "function" ? __values(o2) : o2[Symbol.iterator](), i = {}, verb("nex\
+t"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
     return this;
   }, i);
   function verb(n) {
-    i[n] = o[n] && function(v) {
+    i[n] = o2[n] && function(v2) {
       return new Promise(function(resolve2, reject) {
-        v = o[n](v), settle2(resolve2, reject, v.done, v.value);
+        v2 = o2[n](v2), settle2(resolve2, reject, v2.done, v2.value);
       });
     };
   }
   __name(verb, "verb");
-  function settle2(resolve2, reject, d, v) {
-    Promise.resolve(v).then(function(v2) {
-      resolve2({ value: v2, done: d });
+  function settle2(resolve2, reject, d, v2) {
+    Promise.resolve(v2).then(function(v3) {
+      resolve2({ value: v3, done: d });
     }, reject);
   }
   __name(settle2, "settle");
 };
-var __await = function(v) {
-  return this instanceof __await ? (this.v = v, this) : new __await(v);
+var __await = function(v2) {
+  return this instanceof __await ? (this.v = v2, this) : new __await(v2);
 };
 var __asyncGenerator = function(thisArg, _arguments, generator) {
   if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-  var g = generator.apply(thisArg, _arguments || []), i, q = [];
+  var g2 = generator.apply(thisArg, _arguments || []), i, q = [];
   return i = Object.create((typeof AsyncIterator === "function" ? AsyncIterator : Object).prototype), verb("next"), verb(
   "throw"), verb("return", awaitReturn), i[Symbol.asyncIterator] = function() {
     return this;
   }, i;
   function awaitReturn(f) {
-    return function(v) {
-      return Promise.resolve(v).then(f, reject);
+    return function(v2) {
+      return Promise.resolve(v2).then(f, reject);
     };
   }
   __name(awaitReturn, "awaitReturn");
   function verb(n, f) {
-    if (g[n]) {
-      i[n] = function(v) {
+    if (g2[n]) {
+      i[n] = function(v2) {
         return new Promise(function(a, b) {
-          q.push([n, v, a, b]) > 1 || resume(n, v);
+          q.push([n, v2, a, b]) > 1 || resume(n, v2);
         });
       };
       if (f) i[n] = f(i[n]);
     }
   }
   __name(verb, "verb");
-  function resume(n, v) {
+  function resume(n, v2) {
     try {
-      step(g[n](v));
+      step(g2[n](v2));
     } catch (e) {
       settle2(q[0][3], e);
     }
   }
   __name(resume, "resume");
-  function step(r) {
-    r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle2(q[0][2], r);
+  function step(r2) {
+    r2.value instanceof __await ? Promise.resolve(r2.value.v).then(fulfill, reject) : settle2(q[0][2], r2);
   }
   __name(step, "step");
   function fulfill(value) {
@@ -67206,8 +67335,8 @@ var __asyncGenerator = function(thisArg, _arguments, generator) {
     resume("throw", value);
   }
   __name(reject, "reject");
-  function settle2(f, v) {
-    if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]);
+  function settle2(f, v2) {
+    if (f(v2), q.shift(), q.length) resume(q[0][0], q[0][1]);
   }
   __name(settle2, "settle");
 };
@@ -67467,24 +67596,24 @@ var __awaiter14 = function(thisArg, _arguments, P, generator) {
     step((generator = generator.apply(thisArg, _arguments || [])).next());
   });
 };
-var __asyncValues2 = function(o) {
+var __asyncValues2 = function(o2) {
   if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-  var m = o[Symbol.asyncIterator], i;
-  return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"),
-  verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
+  var m = o2[Symbol.asyncIterator], i;
+  return m ? m.call(o2) : (o2 = typeof __values === "function" ? __values(o2) : o2[Symbol.iterator](), i = {}, verb("nex\
+t"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
     return this;
   }, i);
   function verb(n) {
-    i[n] = o[n] && function(v) {
+    i[n] = o2[n] && function(v2) {
       return new Promise(function(resolve2, reject) {
-        v = o[n](v), settle2(resolve2, reject, v.done, v.value);
+        v2 = o2[n](v2), settle2(resolve2, reject, v2.done, v2.value);
       });
     };
   }
   __name(verb, "verb");
-  function settle2(resolve2, reject, d, v) {
-    Promise.resolve(v).then(function(v2) {
-      resolve2({ value: v2, done: d });
+  function settle2(resolve2, reject, d, v2) {
+    Promise.resolve(v2).then(function(v3) {
+      resolve2({ value: v3, done: d });
     }, reject);
   }
   __name(settle2, "settle");
@@ -71328,9 +71457,9 @@ function deserializeCompositeType(serializer, mapper, responseBody, objectName, 
       if (Array.isArray(responseBody[key]) && modelProps[key].serializedName === "") {
         propertyInstance = responseBody[key];
         const arrayInstance = serializer.deserialize(propertyMapper, propertyInstance, propertyObjectName, options);
-        for (const [k, v] of Object.entries(instance)) {
+        for (const [k, v2] of Object.entries(instance)) {
           if (!Object.prototype.hasOwnProperty.call(arrayInstance, k)) {
-            arrayInstance[k] = v;
+            arrayInstance[k] = v2;
           }
         }
         instance = arrayInstance;
@@ -72811,8 +72940,8 @@ var isName = /* @__PURE__ */ __name(function(string) {
   const match2 = regexName.exec(string);
   return !(match2 === null || typeof match2 === "undefined");
 }, "isName");
-function isExist(v) {
-  return typeof v !== "undefined";
+function isExist(v2) {
+  return typeof v2 !== "undefined";
 }
 __name(isExist, "isExist");
 var DANGEROUS_PROPERTY_NAMES = [
@@ -72977,7 +73106,7 @@ function validate(xmlData, options) {
     return getErrorObject("InvalidTag", "Unclosed tag '" + tags2[0].tagName + "'.", getLineNumberForPosition(xmlData, tags2[0].
     tagStartPos));
   } else if (tags2.length > 0) {
-    return getErrorObject("InvalidXml", "Invalid '" + JSON.stringify(tags2.map((t) => t.tagName), null, 4).replace(/\r?\n/g,
+    return getErrorObject("InvalidXml", "Invalid '" + JSON.stringify(tags2.map((t2) => t2.tagName), null, 4).replace(/\r?\n/g,
     "") + "' found.", { line: 1, col: 1 });
   }
   return true;
@@ -95434,7 +95563,7 @@ var Poller = class {
   onProgress(callback) {
     this.pollProgressCallbacks.push(callback);
     return () => {
-      this.pollProgressCallbacks = this.pollProgressCallbacks.filter((c) => c !== callback);
+      this.pollProgressCallbacks = this.pollProgressCallbacks.filter((c2) => c2 !== callback);
     };
   }
   /**
@@ -99574,26 +99703,26 @@ __name(saveCache, "saveCache");
 
 // node_modules/@actions/cache/lib/generated/results/api/v1/cache.js
 var import_runtime_rpc = __toESM(require_commonjs2(), 1);
-var import_runtime317 = __toESM(require_commonjs(), 1);
-var import_runtime318 = __toESM(require_commonjs(), 1);
-var import_runtime319 = __toESM(require_commonjs(), 1);
 var import_runtime320 = __toESM(require_commonjs(), 1);
 var import_runtime321 = __toESM(require_commonjs(), 1);
+var import_runtime322 = __toESM(require_commonjs(), 1);
+var import_runtime323 = __toESM(require_commonjs(), 1);
+var import_runtime324 = __toESM(require_commonjs(), 1);
 
 // node_modules/@actions/cache/lib/generated/results/entities/v1/cachemetadata.js
-var import_runtime311 = __toESM(require_commonjs(), 1);
-var import_runtime312 = __toESM(require_commonjs(), 1);
-var import_runtime313 = __toESM(require_commonjs(), 1);
 var import_runtime314 = __toESM(require_commonjs(), 1);
 var import_runtime315 = __toESM(require_commonjs(), 1);
+var import_runtime316 = __toESM(require_commonjs(), 1);
+var import_runtime317 = __toESM(require_commonjs(), 1);
+var import_runtime318 = __toESM(require_commonjs(), 1);
 
 // node_modules/@actions/cache/lib/generated/results/entities/v1/cachescope.js
-var import_runtime305 = __toESM(require_commonjs(), 1);
-var import_runtime306 = __toESM(require_commonjs(), 1);
-var import_runtime307 = __toESM(require_commonjs(), 1);
 var import_runtime308 = __toESM(require_commonjs(), 1);
 var import_runtime309 = __toESM(require_commonjs(), 1);
-var CacheScope$Type = class extends import_runtime309.MessageType {
+var import_runtime310 = __toESM(require_commonjs(), 1);
+var import_runtime311 = __toESM(require_commonjs(), 1);
+var import_runtime312 = __toESM(require_commonjs(), 1);
+var CacheScope$Type = class extends import_runtime312.MessageType {
   static {
     __name(this, "CacheScope$Type");
   }
@@ -99617,9 +99746,9 @@ var CacheScope$Type = class extends import_runtime309.MessageType {
   }
   create(value) {
     const message = { scope: "", permission: "0" };
-    globalThis.Object.defineProperty(message, import_runtime308.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime311.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime307.reflectionMergePartial)(this, message, value);
+      (0, import_runtime310.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -99641,26 +99770,26 @@ var CacheScope$Type = class extends import_runtime309.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime306.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime309.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.scope !== "")
-      writer.tag(1, import_runtime305.WireType.LengthDelimited).string(message.scope);
+      writer.tag(1, import_runtime308.WireType.LengthDelimited).string(message.scope);
     if (message.permission !== "0")
-      writer.tag(2, import_runtime305.WireType.Varint).int64(message.permission);
+      writer.tag(2, import_runtime308.WireType.Varint).int64(message.permission);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime306.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime309.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CacheScope = new CacheScope$Type();
 
 // node_modules/@actions/cache/lib/generated/results/entities/v1/cachemetadata.js
-var CacheMetadata$Type = class extends import_runtime315.MessageType {
+var CacheMetadata$Type = class extends import_runtime318.MessageType {
   static {
     __name(this, "CacheMetadata$Type");
   }
@@ -99678,9 +99807,9 @@ var CacheMetadata$Type = class extends import_runtime315.MessageType {
   }
   create(value) {
     const message = { repositoryId: "0", scope: [] };
-    globalThis.Object.defineProperty(message, import_runtime314.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime317.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime313.reflectionMergePartial)(this, message, value);
+      (0, import_runtime316.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -99702,27 +99831,27 @@ var CacheMetadata$Type = class extends import_runtime315.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime312.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime315.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.repositoryId !== "0")
-      writer.tag(1, import_runtime311.WireType.Varint).int64(message.repositoryId);
+      writer.tag(1, import_runtime314.WireType.Varint).int64(message.repositoryId);
     for (let i = 0; i < message.scope.length; i++)
-      CacheScope.internalBinaryWrite(message.scope[i], writer.tag(2, import_runtime311.WireType.LengthDelimited).fork(),
+      CacheScope.internalBinaryWrite(message.scope[i], writer.tag(2, import_runtime314.WireType.LengthDelimited).fork(),
       options).join();
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime312.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime315.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CacheMetadata = new CacheMetadata$Type();
 
 // node_modules/@actions/cache/lib/generated/results/api/v1/cache.js
-var CreateCacheEntryRequest$Type = class extends import_runtime321.MessageType {
+var CreateCacheEntryRequest$Type = class extends import_runtime324.MessageType {
   static {
     __name(this, "CreateCacheEntryRequest$Type");
   }
@@ -99747,9 +99876,9 @@ var CreateCacheEntryRequest$Type = class extends import_runtime321.MessageType {
   }
   create(value) {
     const message = { key: "", version: "" };
-    globalThis.Object.defineProperty(message, import_runtime320.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime323.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime319.reflectionMergePartial)(this, message, value);
+      (0, import_runtime322.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -99775,27 +99904,27 @@ var CreateCacheEntryRequest$Type = class extends import_runtime321.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime318.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime321.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime317.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime320.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime317.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime320.WireType.LengthDelimited).string(message.key);
     if (message.version !== "")
-      writer.tag(3, import_runtime317.WireType.LengthDelimited).string(message.version);
+      writer.tag(3, import_runtime320.WireType.LengthDelimited).string(message.version);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime318.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime321.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CreateCacheEntryRequest = new CreateCacheEntryRequest$Type();
-var CreateCacheEntryResponse$Type = class extends import_runtime321.MessageType {
+var CreateCacheEntryResponse$Type = class extends import_runtime324.MessageType {
   static {
     __name(this, "CreateCacheEntryResponse$Type");
   }
@@ -99826,9 +99955,9 @@ var CreateCacheEntryResponse$Type = class extends import_runtime321.MessageType 
   }
   create(value) {
     const message = { ok: false, signedUploadUrl: "", message: "" };
-    globalThis.Object.defineProperty(message, import_runtime320.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime323.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime319.reflectionMergePartial)(this, message, value);
+      (0, import_runtime322.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -99854,26 +99983,26 @@ var CreateCacheEntryResponse$Type = class extends import_runtime321.MessageType 
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime318.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime321.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime317.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime320.WireType.Varint).bool(message.ok);
     if (message.signedUploadUrl !== "")
-      writer.tag(2, import_runtime317.WireType.LengthDelimited).string(message.signedUploadUrl);
+      writer.tag(2, import_runtime320.WireType.LengthDelimited).string(message.signedUploadUrl);
     if (message.message !== "")
-      writer.tag(3, import_runtime317.WireType.LengthDelimited).string(message.message);
+      writer.tag(3, import_runtime320.WireType.LengthDelimited).string(message.message);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime318.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime321.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CreateCacheEntryResponse = new CreateCacheEntryResponse$Type();
-var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime321.MessageType {
+var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime324.MessageType {
   static {
     __name(this, "FinalizeCacheEntryUploadRequest$Type");
   }
@@ -99905,9 +100034,9 @@ var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime321.Messa
   }
   create(value) {
     const message = { key: "", sizeBytes: "0", version: "" };
-    globalThis.Object.defineProperty(message, import_runtime320.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime323.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime319.reflectionMergePartial)(this, message, value);
+      (0, import_runtime322.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -99937,29 +100066,29 @@ var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime321.Messa
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime318.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime321.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime317.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime320.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime317.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime320.WireType.LengthDelimited).string(message.key);
     if (message.sizeBytes !== "0")
-      writer.tag(3, import_runtime317.WireType.Varint).int64(message.sizeBytes);
+      writer.tag(3, import_runtime320.WireType.Varint).int64(message.sizeBytes);
     if (message.version !== "")
-      writer.tag(4, import_runtime317.WireType.LengthDelimited).string(message.version);
+      writer.tag(4, import_runtime320.WireType.LengthDelimited).string(message.version);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime318.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime321.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var FinalizeCacheEntryUploadRequest = new FinalizeCacheEntryUploadRequest$Type();
-var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime321.MessageType {
+var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime324.MessageType {
   static {
     __name(this, "FinalizeCacheEntryUploadResponse$Type");
   }
@@ -99990,9 +100119,9 @@ var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime321.Mess
   }
   create(value) {
     const message = { ok: false, entryId: "0", message: "" };
-    globalThis.Object.defineProperty(message, import_runtime320.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime323.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime319.reflectionMergePartial)(this, message, value);
+      (0, import_runtime322.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -100018,26 +100147,26 @@ var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime321.Mess
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime318.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime321.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime317.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime320.WireType.Varint).bool(message.ok);
     if (message.entryId !== "0")
-      writer.tag(2, import_runtime317.WireType.Varint).int64(message.entryId);
+      writer.tag(2, import_runtime320.WireType.Varint).int64(message.entryId);
     if (message.message !== "")
-      writer.tag(3, import_runtime317.WireType.LengthDelimited).string(message.message);
+      writer.tag(3, import_runtime320.WireType.LengthDelimited).string(message.message);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime318.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime321.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var FinalizeCacheEntryUploadResponse = new FinalizeCacheEntryUploadResponse$Type();
-var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime321.MessageType {
+var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime324.MessageType {
   static {
     __name(this, "GetCacheEntryDownloadURLRequest$Type");
   }
@@ -100070,9 +100199,9 @@ var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime321.Messa
   }
   create(value) {
     const message = { key: "", restoreKeys: [], version: "" };
-    globalThis.Object.defineProperty(message, import_runtime320.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime323.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime319.reflectionMergePartial)(this, message, value);
+      (0, import_runtime322.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -100102,29 +100231,29 @@ var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime321.Messa
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime318.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime321.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime317.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime320.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime317.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime320.WireType.LengthDelimited).string(message.key);
     for (let i = 0; i < message.restoreKeys.length; i++)
-      writer.tag(3, import_runtime317.WireType.LengthDelimited).string(message.restoreKeys[i]);
+      writer.tag(3, import_runtime320.WireType.LengthDelimited).string(message.restoreKeys[i]);
     if (message.version !== "")
-      writer.tag(4, import_runtime317.WireType.LengthDelimited).string(message.version);
+      writer.tag(4, import_runtime320.WireType.LengthDelimited).string(message.version);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime318.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime321.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var GetCacheEntryDownloadURLRequest = new GetCacheEntryDownloadURLRequest$Type();
-var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime321.MessageType {
+var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime324.MessageType {
   static {
     __name(this, "GetCacheEntryDownloadURLResponse$Type");
   }
@@ -100155,9 +100284,9 @@ var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime321.Mess
   }
   create(value) {
     const message = { ok: false, signedDownloadUrl: "", matchedKey: "" };
-    globalThis.Object.defineProperty(message, import_runtime320.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime323.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime319.reflectionMergePartial)(this, message, value);
+      (0, import_runtime322.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -100183,21 +100312,21 @@ var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime321.Mess
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime318.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime321.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime317.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime320.WireType.Varint).bool(message.ok);
     if (message.signedDownloadUrl !== "")
-      writer.tag(2, import_runtime317.WireType.LengthDelimited).string(message.signedDownloadUrl);
+      writer.tag(2, import_runtime320.WireType.LengthDelimited).string(message.signedDownloadUrl);
     if (message.matchedKey !== "")
-      writer.tag(3, import_runtime317.WireType.LengthDelimited).string(message.matchedKey);
+      writer.tag(3, import_runtime320.WireType.LengthDelimited).string(message.matchedKey);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime318.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime321.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
@@ -102058,16 +102187,16 @@ var bool = new type("tag:yaml.org,2002:bool", {
   },
   defaultStyle: "lowercase"
 });
-function isHexCode(c) {
-  return 48 <= c && c <= 57 || 65 <= c && c <= 70 || 97 <= c && c <= 102;
+function isHexCode(c2) {
+  return 48 <= c2 && c2 <= 57 || 65 <= c2 && c2 <= 70 || 97 <= c2 && c2 <= 102;
 }
 __name(isHexCode, "isHexCode");
-function isOctCode(c) {
-  return 48 <= c && c <= 55;
+function isOctCode(c2) {
+  return 48 <= c2 && c2 <= 55;
 }
 __name(isOctCode, "isOctCode");
-function isDecCode(c) {
-  return 48 <= c && c <= 57;
+function isDecCode(c2) {
+  return 48 <= c2 && c2 <= 57;
 }
 __name(isDecCode, "isDecCode");
 function resolveYamlInteger(data) {
@@ -102522,67 +102651,67 @@ function _class(obj) {
   return Object.prototype.toString.call(obj);
 }
 __name(_class, "_class");
-function is_EOL(c) {
-  return c === 10 || c === 13;
+function is_EOL(c2) {
+  return c2 === 10 || c2 === 13;
 }
 __name(is_EOL, "is_EOL");
-function is_WHITE_SPACE(c) {
-  return c === 9 || c === 32;
+function is_WHITE_SPACE(c2) {
+  return c2 === 9 || c2 === 32;
 }
 __name(is_WHITE_SPACE, "is_WHITE_SPACE");
-function is_WS_OR_EOL(c) {
-  return c === 9 || c === 32 || c === 10 || c === 13;
+function is_WS_OR_EOL(c2) {
+  return c2 === 9 || c2 === 32 || c2 === 10 || c2 === 13;
 }
 __name(is_WS_OR_EOL, "is_WS_OR_EOL");
-function is_FLOW_INDICATOR(c) {
-  return c === 44 || c === 91 || c === 93 || c === 123 || c === 125;
+function is_FLOW_INDICATOR(c2) {
+  return c2 === 44 || c2 === 91 || c2 === 93 || c2 === 123 || c2 === 125;
 }
 __name(is_FLOW_INDICATOR, "is_FLOW_INDICATOR");
-function fromHexCode(c) {
+function fromHexCode(c2) {
   var lc;
-  if (48 <= c && c <= 57) {
-    return c - 48;
+  if (48 <= c2 && c2 <= 57) {
+    return c2 - 48;
   }
-  lc = c | 32;
+  lc = c2 | 32;
   if (97 <= lc && lc <= 102) {
     return lc - 97 + 10;
   }
   return -1;
 }
 __name(fromHexCode, "fromHexCode");
-function escapedHexLen(c) {
-  if (c === 120) {
+function escapedHexLen(c2) {
+  if (c2 === 120) {
     return 2;
   }
-  if (c === 117) {
+  if (c2 === 117) {
     return 4;
   }
-  if (c === 85) {
+  if (c2 === 85) {
     return 8;
   }
   return 0;
 }
 __name(escapedHexLen, "escapedHexLen");
-function fromDecimalCode(c) {
-  if (48 <= c && c <= 57) {
-    return c - 48;
+function fromDecimalCode(c2) {
+  if (48 <= c2 && c2 <= 57) {
+    return c2 - 48;
   }
   return -1;
 }
 __name(fromDecimalCode, "fromDecimalCode");
-function simpleEscapeSequence(c) {
-  return c === 48 ? "\0" : c === 97 ? "\x07" : c === 98 ? "\b" : c === 116 ? "	" : c === 9 ? "	" : c === 110 ? "\n" : c ===
-  118 ? "\v" : c === 102 ? "\f" : c === 114 ? "\r" : c === 101 ? "\x1B" : c === 32 ? " " : c === 34 ? '"' : c === 47 ? "\
-/" : c === 92 ? "\\" : c === 78 ? "\x85" : c === 95 ? "\xA0" : c === 76 ? "\u2028" : c === 80 ? "\u2029" : "";
+function simpleEscapeSequence(c2) {
+  return c2 === 48 ? "\0" : c2 === 97 ? "\x07" : c2 === 98 ? "\b" : c2 === 116 ? "	" : c2 === 9 ? "	" : c2 === 110 ? "\n" :
+  c2 === 118 ? "\v" : c2 === 102 ? "\f" : c2 === 114 ? "\r" : c2 === 101 ? "\x1B" : c2 === 32 ? " " : c2 === 34 ? '"' : c2 ===
+  47 ? "/" : c2 === 92 ? "\\" : c2 === 78 ? "\x85" : c2 === 95 ? "\xA0" : c2 === 76 ? "\u2028" : c2 === 80 ? "\u2029" : "";
 }
 __name(simpleEscapeSequence, "simpleEscapeSequence");
-function charFromCodepoint(c) {
-  if (c <= 65535) {
-    return String.fromCharCode(c);
+function charFromCodepoint(c2) {
+  if (c2 <= 65535) {
+    return String.fromCharCode(c2);
   }
   return String.fromCharCode(
-    (c - 65536 >> 10) + 55296,
-    (c - 65536 & 1023) + 56320
+    (c2 - 65536 >> 10) + 55296,
+    (c2 - 65536 & 1023) + 56320
   );
 }
 __name(charFromCodepoint, "charFromCodepoint");
@@ -103873,43 +104002,43 @@ function testImplicitResolving(state3, str2) {
   return false;
 }
 __name(testImplicitResolving, "testImplicitResolving");
-function isWhitespace(c) {
-  return c === CHAR_SPACE || c === CHAR_TAB;
+function isWhitespace(c2) {
+  return c2 === CHAR_SPACE || c2 === CHAR_TAB;
 }
 __name(isWhitespace, "isWhitespace");
-function isPrintable(c) {
-  return 32 <= c && c <= 126 || 161 <= c && c <= 55295 && c !== 8232 && c !== 8233 || 57344 <= c && c <= 65533 && c !== CHAR_BOM ||
-  65536 <= c && c <= 1114111;
+function isPrintable(c2) {
+  return 32 <= c2 && c2 <= 126 || 161 <= c2 && c2 <= 55295 && c2 !== 8232 && c2 !== 8233 || 57344 <= c2 && c2 <= 65533 &&
+  c2 !== CHAR_BOM || 65536 <= c2 && c2 <= 1114111;
 }
 __name(isPrintable, "isPrintable");
-function isNsCharOrWhitespace(c) {
-  return isPrintable(c) && c !== CHAR_BOM && c !== CHAR_CARRIAGE_RETURN && c !== CHAR_LINE_FEED;
+function isNsCharOrWhitespace(c2) {
+  return isPrintable(c2) && c2 !== CHAR_BOM && c2 !== CHAR_CARRIAGE_RETURN && c2 !== CHAR_LINE_FEED;
 }
 __name(isNsCharOrWhitespace, "isNsCharOrWhitespace");
-function isPlainSafe(c, prev, inblock) {
-  var cIsNsCharOrWhitespace = isNsCharOrWhitespace(c);
-  var cIsNsChar = cIsNsCharOrWhitespace && !isWhitespace(c);
+function isPlainSafe(c2, prev, inblock) {
+  var cIsNsCharOrWhitespace = isNsCharOrWhitespace(c2);
+  var cIsNsChar = cIsNsCharOrWhitespace && !isWhitespace(c2);
   return (
     // ns-plain-safe
     (inblock ? (
       // c = flow-in
       cIsNsCharOrWhitespace
-    ) : cIsNsCharOrWhitespace && c !== CHAR_COMMA && c !== CHAR_LEFT_SQUARE_BRACKET && c !== CHAR_RIGHT_SQUARE_BRACKET &&
-    c !== CHAR_LEFT_CURLY_BRACKET && c !== CHAR_RIGHT_CURLY_BRACKET) && c !== CHAR_SHARP && !(prev === CHAR_COLON && !cIsNsChar) ||
-    isNsCharOrWhitespace(prev) && !isWhitespace(prev) && c === CHAR_SHARP || prev === CHAR_COLON && cIsNsChar
+    ) : cIsNsCharOrWhitespace && c2 !== CHAR_COMMA && c2 !== CHAR_LEFT_SQUARE_BRACKET && c2 !== CHAR_RIGHT_SQUARE_BRACKET &&
+    c2 !== CHAR_LEFT_CURLY_BRACKET && c2 !== CHAR_RIGHT_CURLY_BRACKET) && c2 !== CHAR_SHARP && !(prev === CHAR_COLON && !cIsNsChar) ||
+    isNsCharOrWhitespace(prev) && !isWhitespace(prev) && c2 === CHAR_SHARP || prev === CHAR_COLON && cIsNsChar
   );
 }
 __name(isPlainSafe, "isPlainSafe");
-function isPlainSafeFirst(c) {
-  return isPrintable(c) && c !== CHAR_BOM && !isWhitespace(c) && c !== CHAR_MINUS && c !== CHAR_QUESTION && c !== CHAR_COLON &&
-  c !== CHAR_COMMA && c !== CHAR_LEFT_SQUARE_BRACKET && c !== CHAR_RIGHT_SQUARE_BRACKET && c !== CHAR_LEFT_CURLY_BRACKET &&
-  c !== CHAR_RIGHT_CURLY_BRACKET && c !== CHAR_SHARP && c !== CHAR_AMPERSAND && c !== CHAR_ASTERISK && c !== CHAR_EXCLAMATION &&
-  c !== CHAR_VERTICAL_LINE && c !== CHAR_EQUALS && c !== CHAR_GREATER_THAN && c !== CHAR_SINGLE_QUOTE && c !== CHAR_DOUBLE_QUOTE &&
-  c !== CHAR_PERCENT && c !== CHAR_COMMERCIAL_AT && c !== CHAR_GRAVE_ACCENT;
+function isPlainSafeFirst(c2) {
+  return isPrintable(c2) && c2 !== CHAR_BOM && !isWhitespace(c2) && c2 !== CHAR_MINUS && c2 !== CHAR_QUESTION && c2 !== CHAR_COLON &&
+  c2 !== CHAR_COMMA && c2 !== CHAR_LEFT_SQUARE_BRACKET && c2 !== CHAR_RIGHT_SQUARE_BRACKET && c2 !== CHAR_LEFT_CURLY_BRACKET &&
+  c2 !== CHAR_RIGHT_CURLY_BRACKET && c2 !== CHAR_SHARP && c2 !== CHAR_AMPERSAND && c2 !== CHAR_ASTERISK && c2 !== CHAR_EXCLAMATION &&
+  c2 !== CHAR_VERTICAL_LINE && c2 !== CHAR_EQUALS && c2 !== CHAR_GREATER_THAN && c2 !== CHAR_SINGLE_QUOTE && c2 !== CHAR_DOUBLE_QUOTE &&
+  c2 !== CHAR_PERCENT && c2 !== CHAR_COMMERCIAL_AT && c2 !== CHAR_GRAVE_ACCENT;
 }
 __name(isPlainSafeFirst, "isPlainSafeFirst");
-function isPlainSafeLast(c) {
-  return !isWhitespace(c) && c !== CHAR_COLON;
+function isPlainSafeLast(c2) {
+  return !isWhitespace(c2) && c2 !== CHAR_COLON;
 }
 __name(isPlainSafeLast, "isPlainSafeLast");
 function codePointAt(string, pos) {
@@ -104484,7 +104613,7 @@ var gcloud_output_default = execGcloud2;
 // cloud-deploy/src/cloudrun/get-revisions.js
 var isActive = /* @__PURE__ */ __name((conditions) => {
   const activeStatus = conditions.find(
-    (c) => c.type === "Active" && c.status === "True"
+    (c2) => c2.type === "Active" && c2.status === "True"
   );
   return activeStatus !== void 0;
 }, "isActive");

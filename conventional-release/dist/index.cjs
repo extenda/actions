@@ -40,8 +40,8 @@ var require_ms = __commonJS({
     var m = s * 60;
     var h = m * 60;
     var d = h * 24;
-    var w = d * 7;
-    var y = d * 365.25;
+    var w2 = d * 7;
+    var y2 = d * 365.25;
     module2.exports = function(val, options) {
       options = options || {};
       var type = typeof val;
@@ -74,11 +74,11 @@ var require_ms = __commonJS({
         case "yrs":
         case "yr":
         case "y":
-          return n * y;
+          return n * y2;
         case "weeks":
         case "week":
         case "w":
-          return n * w;
+          return n * w2;
         case "days":
         case "day":
         case "d":
@@ -240,8 +240,8 @@ var require_common = __commonJS({
             }
             return enabledCache;
           }, "get"),
-          set: /* @__PURE__ */ __name((v) => {
-            enableOverride = v;
+          set: /* @__PURE__ */ __name((v2) => {
+            enableOverride = v2;
           }, "set")
         });
         if (typeof createDebug.init === "function") {
@@ -464,8 +464,8 @@ in the next major version of `debug`.");
       if (!this.useColors) {
         return;
       }
-      const c = "color: " + this.color;
-      args.splice(1, 0, c, "color: inherit");
+      const c2 = "color: " + this.color;
+      args.splice(1, 0, c2, "color: inherit");
       let index = 0;
       let lastC = 0;
       args[0].replace(/%[a-zA-Z%]/g, (match) => {
@@ -477,7 +477,7 @@ in the next major version of `debug`.");
           lastC = index;
         }
       });
-      args.splice(lastC, 0, c);
+      args.splice(lastC, 0, c2);
     }
     __name(formatArgs, "formatArgs");
     exports2.log = console.debug || console.log || (() => {
@@ -494,15 +494,15 @@ in the next major version of `debug`.");
     }
     __name(save, "save");
     function load() {
-      let r;
+      let r2;
       try {
-        r = exports2.storage.getItem("debug") || exports2.storage.getItem("DEBUG");
+        r2 = exports2.storage.getItem("debug") || exports2.storage.getItem("DEBUG");
       } catch (error2) {
       }
-      if (!r && typeof process !== "undefined" && "env" in process) {
-        r = process.env.DEBUG;
+      if (!r2 && typeof process !== "undefined" && "env" in process) {
+        r2 = process.env.DEBUG;
       }
-      return r;
+      return r2;
     }
     __name(load, "load");
     function localstorage() {
@@ -514,9 +514,9 @@ in the next major version of `debug`.");
     __name(localstorage, "localstorage");
     module2.exports = require_common()(exports2);
     var { formatters } = module2.exports;
-    formatters.j = function(v) {
+    formatters.j = function(v2) {
       try {
-        return JSON.stringify(v);
+        return JSON.stringify(v2);
       } catch (error2) {
         return "[UnexpectedJSONParseError]: " + error2.message;
       }
@@ -748,8 +748,8 @@ var require_node = __commonJS({
     exports2.inspectOpts = Object.keys(process.env).filter((key) => {
       return /^debug_/i.test(key);
     }).reduce((obj, key) => {
-      const prop = key.substring(6).toLowerCase().replace(/_([a-z])/g, (_, k) => {
-        return k.toUpperCase();
+      const prop = key.substring(6).toLowerCase().replace(/_([a-z])/g, (_2, k2) => {
+        return k2.toUpperCase();
       });
       let val = process.env[key];
       if (/^(yes|on|true|enabled)$/i.test(val)) {
@@ -771,8 +771,8 @@ var require_node = __commonJS({
     function formatArgs(args) {
       const { namespace: name, useColors: useColors2 } = this;
       if (useColors2) {
-        const c = this.color;
-        const colorCode = "\x1B[3" + (c < 8 ? c : "8;5;" + c);
+        const c2 = this.color;
+        const colorCode = "\x1B[3" + (c2 < 8 ? c2 : "8;5;" + c2);
         const prefix = `  ${colorCode};1m${name} \x1B[0m`;
         args[0] = prefix + args[0].split("\n").join("\n" + prefix);
         args.push(colorCode + "m+" + module2.exports.humanize(this.diff) + "\x1B[0m");
@@ -814,13 +814,13 @@ var require_node = __commonJS({
     __name(init, "init");
     module2.exports = require_common()(exports2);
     var { formatters } = module2.exports;
-    formatters.o = function(v) {
+    formatters.o = function(v2) {
       this.inspectOpts.colors = this.useColors;
-      return util2.inspect(v, this.inspectOpts).split("\n").map((str) => str.trim()).join(" ");
+      return util2.inspect(v2, this.inspectOpts).split("\n").map((str) => str.trim()).join(" ");
     };
-    formatters.O = function(v) {
+    formatters.O = function(v2) {
       this.inspectOpts.colors = this.useColors;
-      return util2.inspect(v, this.inspectOpts);
+      return util2.inspect(v2, this.inspectOpts);
     };
   }
 });
@@ -1152,10 +1152,10 @@ var require_tunnel = __commonJS({
         var overrides = arguments[i];
         if (typeof overrides === "object") {
           var keys = Object.keys(overrides);
-          for (var j = 0, keyLen = keys.length; j < keyLen; ++j) {
-            var k = keys[j];
-            if (overrides[k] !== void 0) {
-              target[k] = overrides[k];
+          for (var j2 = 0, keyLen = keys.length; j2 < keyLen; ++j2) {
+            var k2 = keys[j2];
+            if (overrides[k2] !== void 0) {
+              target[k2] = overrides[k2];
             }
           }
         }
@@ -1971,7 +1971,7 @@ var require_util = __commonJS({
     var { InvalidArgumentError } = require_errors();
     var { headerNameLowerCasedRecord } = require_constants();
     var { tree } = require_tree();
-    var [nodeMajor, nodeMinor] = process.versions.node.split(".").map((v) => Number(v));
+    var [nodeMajor, nodeMinor] = process.versions.node.split(".").map((v2) => Number(v2));
     var BodyAsyncIterable = class {
       static {
         __name(this, "BodyAsyncIterable");
@@ -2212,7 +2212,7 @@ tion"));
           if (typeof headersValue === "string") {
             obj[key] = headersValue;
           } else {
-            obj[key] = Array.isArray(headersValue) ? headersValue.map((x) => x.toString("utf8")) : headersValue.toString(
+            obj[key] = Array.isArray(headersValue) ? headersValue.map((x2) => x2.toString("utf8")) : headersValue.toString(
             "utf8");
           }
         }
@@ -2366,8 +2366,8 @@ nction" && typeof object.get === "function" && typeof object.getAll === "functio
       return hasIsWellFormed ? `${val}`.isWellFormed() : toUSVString(val) === `${val}`;
     }
     __name(isUSVString, "isUSVString");
-    function isTokenCharCode(c) {
-      switch (c) {
+    function isTokenCharCode(c2) {
+      switch (c2) {
         case 34:
         case 40:
         case 41:
@@ -2387,7 +2387,7 @@ nction" && typeof object.get === "function" && typeof object.getAll === "functio
         case 125:
           return false;
         default:
-          return c >= 33 && c <= 126;
+          return c2 >= 33 && c2 <= 126;
       }
     }
     __name(isTokenCharCode, "isTokenCharCode");
@@ -4010,7 +4010,7 @@ var require_constants2 = __commonJS({
         exports2.HEADER_CHARS.push(i);
       }
     }
-    exports2.CONNECTION_TOKEN_CHARS = exports2.HEADER_CHARS.filter((c) => c !== 44);
+    exports2.CONNECTION_TOKEN_CHARS = exports2.HEADER_CHARS.filter((c2) => c2 !== 44);
     exports2.MAJOR = exports2.NUM_MAP;
     exports2.MINOR = exports2.MAJOR;
     var HEADER_STATE;
@@ -5489,19 +5489,19 @@ var require_data_url = __commonJS({
     function percentDecode(input) {
       const length = input.length;
       const output = new Uint8Array(length);
-      let j = 0;
+      let j2 = 0;
       for (let i = 0; i < length; ++i) {
         const byte = input[i];
         if (byte !== 37) {
-          output[j++] = byte;
+          output[j2++] = byte;
         } else if (byte === 37 && !(isHexCharByte(input[i + 1]) && isHexCharByte(input[i + 2]))) {
-          output[j++] = 37;
+          output[j2++] = 37;
         } else {
-          output[j++] = hexByteToNumber(input[i + 1]) << 4 | hexByteToNumber(input[i + 2]);
+          output[j2++] = hexByteToNumber(input[i + 1]) << 4 | hexByteToNumber(input[i + 2]);
           i += 2;
         }
       }
-      return length === j ? output : output.subarray(0, j);
+      return length === j2 ? output : output.subarray(0, j2);
     }
     __name(percentDecode, "percentDecode");
     function parseMIMEType(input) {
@@ -5789,15 +5789,15 @@ var require_webidl = __commonJS({
         message: `"${context3.value}" is an invalid ${context3.type}.`
       });
     };
-    webidl.brandCheck = function(V, I, opts) {
+    webidl.brandCheck = function(V2, I2, opts) {
       if (opts?.strict !== false) {
-        if (!(V instanceof I)) {
+        if (!(V2 instanceof I2)) {
           const err = new TypeError("Illegal invocation");
           err.code = "ERR_INVALID_THIS";
           throw err;
         }
       } else {
-        if (V?.[Symbol.toStringTag] !== I.prototype[Symbol.toStringTag]) {
+        if (V2?.[Symbol.toStringTag] !== I2.prototype[Symbol.toStringTag]) {
           const err = new TypeError("Illegal invocation");
           err.code = "ERR_INVALID_THIS";
           throw err;
@@ -5818,8 +5818,8 @@ var require_webidl = __commonJS({
         message: "Illegal constructor"
       });
     };
-    webidl.util.Type = function(V) {
-      switch (typeof V) {
+    webidl.util.Type = function(V2) {
+      switch (typeof V2) {
         case "undefined":
           return "Undefined";
         case "boolean":
@@ -5834,7 +5834,7 @@ var require_webidl = __commonJS({
           return "BigInt";
         case "function":
         case "object": {
-          if (V === null) {
+          if (V2 === null) {
             return "Null";
           }
           return "Object";
@@ -5843,7 +5843,7 @@ var require_webidl = __commonJS({
     };
     webidl.util.markAsUncloneable = markAsUncloneable || (() => {
     });
-    webidl.util.ConvertToInt = function(V, bitLength, signedness, opts) {
+    webidl.util.ConvertToInt = function(V2, bitLength, signedness, opts) {
       let upperBound;
       let lowerBound;
       if (bitLength === 64) {
@@ -5860,74 +5860,74 @@ var require_webidl = __commonJS({
         lowerBound = Math.pow(-2, bitLength) - 1;
         upperBound = Math.pow(2, bitLength - 1) - 1;
       }
-      let x = Number(V);
-      if (x === 0) {
-        x = 0;
+      let x2 = Number(V2);
+      if (x2 === 0) {
+        x2 = 0;
       }
       if (opts?.enforceRange === true) {
-        if (Number.isNaN(x) || x === Number.POSITIVE_INFINITY || x === Number.NEGATIVE_INFINITY) {
+        if (Number.isNaN(x2) || x2 === Number.POSITIVE_INFINITY || x2 === Number.NEGATIVE_INFINITY) {
           throw webidl.errors.exception({
             header: "Integer conversion",
-            message: `Could not convert ${webidl.util.Stringify(V)} to an integer.`
+            message: `Could not convert ${webidl.util.Stringify(V2)} to an integer.`
           });
         }
-        x = webidl.util.IntegerPart(x);
-        if (x < lowerBound || x > upperBound) {
+        x2 = webidl.util.IntegerPart(x2);
+        if (x2 < lowerBound || x2 > upperBound) {
           throw webidl.errors.exception({
             header: "Integer conversion",
-            message: `Value must be between ${lowerBound}-${upperBound}, got ${x}.`
+            message: `Value must be between ${lowerBound}-${upperBound}, got ${x2}.`
           });
         }
-        return x;
+        return x2;
       }
-      if (!Number.isNaN(x) && opts?.clamp === true) {
-        x = Math.min(Math.max(x, lowerBound), upperBound);
-        if (Math.floor(x) % 2 === 0) {
-          x = Math.floor(x);
+      if (!Number.isNaN(x2) && opts?.clamp === true) {
+        x2 = Math.min(Math.max(x2, lowerBound), upperBound);
+        if (Math.floor(x2) % 2 === 0) {
+          x2 = Math.floor(x2);
         } else {
-          x = Math.ceil(x);
+          x2 = Math.ceil(x2);
         }
-        return x;
+        return x2;
       }
-      if (Number.isNaN(x) || x === 0 && Object.is(0, x) || x === Number.POSITIVE_INFINITY || x === Number.NEGATIVE_INFINITY) {
+      if (Number.isNaN(x2) || x2 === 0 && Object.is(0, x2) || x2 === Number.POSITIVE_INFINITY || x2 === Number.NEGATIVE_INFINITY) {
         return 0;
       }
-      x = webidl.util.IntegerPart(x);
-      x = x % Math.pow(2, bitLength);
-      if (signedness === "signed" && x >= Math.pow(2, bitLength) - 1) {
-        return x - Math.pow(2, bitLength);
+      x2 = webidl.util.IntegerPart(x2);
+      x2 = x2 % Math.pow(2, bitLength);
+      if (signedness === "signed" && x2 >= Math.pow(2, bitLength) - 1) {
+        return x2 - Math.pow(2, bitLength);
       }
-      return x;
+      return x2;
     };
     webidl.util.IntegerPart = function(n) {
-      const r = Math.floor(Math.abs(n));
+      const r2 = Math.floor(Math.abs(n));
       if (n < 0) {
-        return -1 * r;
+        return -1 * r2;
       }
-      return r;
+      return r2;
     };
-    webidl.util.Stringify = function(V) {
-      const type = webidl.util.Type(V);
+    webidl.util.Stringify = function(V2) {
+      const type = webidl.util.Type(V2);
       switch (type) {
         case "Symbol":
-          return `Symbol(${V.description})`;
+          return `Symbol(${V2.description})`;
         case "Object":
-          return inspect(V);
+          return inspect(V2);
         case "String":
-          return `"${V}"`;
+          return `"${V2}"`;
         default:
-          return `${V}`;
+          return `${V2}`;
       }
     };
     webidl.sequenceConverter = function(converter) {
-      return (V, prefix, argument, Iterable) => {
-        if (webidl.util.Type(V) !== "Object") {
+      return (V2, prefix, argument, Iterable) => {
+        if (webidl.util.Type(V2) !== "Object") {
           throw webidl.errors.exception({
             header: prefix,
-            message: `${argument} (${webidl.util.Stringify(V)}) is not iterable.`
+            message: `${argument} (${webidl.util.Stringify(V2)}) is not iterable.`
           });
         }
-        const method = typeof Iterable === "function" ? Iterable() : V?.[Symbol.iterator]?.();
+        const method = typeof Iterable === "function" ? Iterable() : V2?.[Symbol.iterator]?.();
         const seq = [];
         let index = 0;
         if (method === void 0 || typeof method.next !== "function") {
@@ -5947,29 +5947,29 @@ var require_webidl = __commonJS({
       };
     };
     webidl.recordConverter = function(keyConverter, valueConverter) {
-      return (O, prefix, argument) => {
-        if (webidl.util.Type(O) !== "Object") {
+      return (O2, prefix, argument) => {
+        if (webidl.util.Type(O2) !== "Object") {
           throw webidl.errors.exception({
             header: prefix,
-            message: `${argument} ("${webidl.util.Type(O)}") is not an Object.`
+            message: `${argument} ("${webidl.util.Type(O2)}") is not an Object.`
           });
         }
         const result = {};
-        if (!types.isProxy(O)) {
-          const keys2 = [...Object.getOwnPropertyNames(O), ...Object.getOwnPropertySymbols(O)];
+        if (!types.isProxy(O2)) {
+          const keys2 = [...Object.getOwnPropertyNames(O2), ...Object.getOwnPropertySymbols(O2)];
           for (const key of keys2) {
             const typedKey = keyConverter(key, prefix, argument);
-            const typedValue = valueConverter(O[key], prefix, argument);
+            const typedValue = valueConverter(O2[key], prefix, argument);
             result[typedKey] = typedValue;
           }
           return result;
         }
-        const keys = Reflect.ownKeys(O);
+        const keys = Reflect.ownKeys(O2);
         for (const key of keys) {
-          const desc = Reflect.getOwnPropertyDescriptor(O, key);
+          const desc = Reflect.getOwnPropertyDescriptor(O2, key);
           if (desc?.enumerable) {
             const typedKey = keyConverter(key, prefix, argument);
-            const typedValue = valueConverter(O[key], prefix, argument);
+            const typedValue = valueConverter(O2[key], prefix, argument);
             result[typedKey] = typedValue;
           }
         }
@@ -5977,14 +5977,14 @@ var require_webidl = __commonJS({
       };
     };
     webidl.interfaceConverter = function(i) {
-      return (V, prefix, argument, opts) => {
-        if (opts?.strict !== false && !(V instanceof i)) {
+      return (V2, prefix, argument, opts) => {
+        if (opts?.strict !== false && !(V2 instanceof i)) {
           throw webidl.errors.exception({
             header: prefix,
-            message: `Expected ${argument} ("${webidl.util.Stringify(V)}") to be an instance of ${i.name}.`
+            message: `Expected ${argument} ("${webidl.util.Stringify(V2)}") to be an instance of ${i.name}.`
           });
         }
-        return V;
+        return V2;
       };
     };
     webidl.dictionaryConverter = function(converters) {
@@ -6029,139 +6029,139 @@ var require_webidl = __commonJS({
       };
     };
     webidl.nullableConverter = function(converter) {
-      return (V, prefix, argument) => {
-        if (V === null) {
-          return V;
+      return (V2, prefix, argument) => {
+        if (V2 === null) {
+          return V2;
         }
-        return converter(V, prefix, argument);
+        return converter(V2, prefix, argument);
       };
     };
-    webidl.converters.DOMString = function(V, prefix, argument, opts) {
-      if (V === null && opts?.legacyNullToEmptyString) {
+    webidl.converters.DOMString = function(V2, prefix, argument, opts) {
+      if (V2 === null && opts?.legacyNullToEmptyString) {
         return "";
       }
-      if (typeof V === "symbol") {
+      if (typeof V2 === "symbol") {
         throw webidl.errors.exception({
           header: prefix,
           message: `${argument} is a symbol, which cannot be converted to a DOMString.`
         });
       }
-      return String(V);
+      return String(V2);
     };
-    webidl.converters.ByteString = function(V, prefix, argument) {
-      const x = webidl.converters.DOMString(V, prefix, argument);
-      for (let index = 0; index < x.length; index++) {
-        if (x.charCodeAt(index) > 255) {
+    webidl.converters.ByteString = function(V2, prefix, argument) {
+      const x2 = webidl.converters.DOMString(V2, prefix, argument);
+      for (let index = 0; index < x2.length; index++) {
+        if (x2.charCodeAt(index) > 255) {
           throw new TypeError(
-            `Cannot convert argument to a ByteString because the character at index ${index} has a value of ${x.charCodeAt(
+            `Cannot convert argument to a ByteString because the character at index ${index} has a value of ${x2.charCodeAt(
             index)} which is greater than 255.`
           );
         }
       }
-      return x;
+      return x2;
     };
     webidl.converters.USVString = toUSVString;
-    webidl.converters.boolean = function(V) {
-      const x = Boolean(V);
-      return x;
+    webidl.converters.boolean = function(V2) {
+      const x2 = Boolean(V2);
+      return x2;
     };
-    webidl.converters.any = function(V) {
-      return V;
+    webidl.converters.any = function(V2) {
+      return V2;
     };
-    webidl.converters["long long"] = function(V, prefix, argument) {
-      const x = webidl.util.ConvertToInt(V, 64, "signed", void 0, prefix, argument);
-      return x;
+    webidl.converters["long long"] = function(V2, prefix, argument) {
+      const x2 = webidl.util.ConvertToInt(V2, 64, "signed", void 0, prefix, argument);
+      return x2;
     };
-    webidl.converters["unsigned long long"] = function(V, prefix, argument) {
-      const x = webidl.util.ConvertToInt(V, 64, "unsigned", void 0, prefix, argument);
-      return x;
+    webidl.converters["unsigned long long"] = function(V2, prefix, argument) {
+      const x2 = webidl.util.ConvertToInt(V2, 64, "unsigned", void 0, prefix, argument);
+      return x2;
     };
-    webidl.converters["unsigned long"] = function(V, prefix, argument) {
-      const x = webidl.util.ConvertToInt(V, 32, "unsigned", void 0, prefix, argument);
-      return x;
+    webidl.converters["unsigned long"] = function(V2, prefix, argument) {
+      const x2 = webidl.util.ConvertToInt(V2, 32, "unsigned", void 0, prefix, argument);
+      return x2;
     };
-    webidl.converters["unsigned short"] = function(V, prefix, argument, opts) {
-      const x = webidl.util.ConvertToInt(V, 16, "unsigned", opts, prefix, argument);
-      return x;
+    webidl.converters["unsigned short"] = function(V2, prefix, argument, opts) {
+      const x2 = webidl.util.ConvertToInt(V2, 16, "unsigned", opts, prefix, argument);
+      return x2;
     };
-    webidl.converters.ArrayBuffer = function(V, prefix, argument, opts) {
-      if (webidl.util.Type(V) !== "Object" || !types.isAnyArrayBuffer(V)) {
+    webidl.converters.ArrayBuffer = function(V2, prefix, argument, opts) {
+      if (webidl.util.Type(V2) !== "Object" || !types.isAnyArrayBuffer(V2)) {
         throw webidl.errors.conversionFailed({
           prefix,
-          argument: `${argument} ("${webidl.util.Stringify(V)}")`,
+          argument: `${argument} ("${webidl.util.Stringify(V2)}")`,
           types: ["ArrayBuffer"]
         });
       }
-      if (opts?.allowShared === false && types.isSharedArrayBuffer(V)) {
+      if (opts?.allowShared === false && types.isSharedArrayBuffer(V2)) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "SharedArrayBuffer is not allowed."
         });
       }
-      if (V.resizable || V.growable) {
+      if (V2.resizable || V2.growable) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "Received a resizable ArrayBuffer."
         });
       }
-      return V;
+      return V2;
     };
-    webidl.converters.TypedArray = function(V, T, prefix, name, opts) {
-      if (webidl.util.Type(V) !== "Object" || !types.isTypedArray(V) || V.constructor.name !== T.name) {
+    webidl.converters.TypedArray = function(V2, T2, prefix, name, opts) {
+      if (webidl.util.Type(V2) !== "Object" || !types.isTypedArray(V2) || V2.constructor.name !== T2.name) {
         throw webidl.errors.conversionFailed({
           prefix,
-          argument: `${name} ("${webidl.util.Stringify(V)}")`,
-          types: [T.name]
+          argument: `${name} ("${webidl.util.Stringify(V2)}")`,
+          types: [T2.name]
         });
       }
-      if (opts?.allowShared === false && types.isSharedArrayBuffer(V.buffer)) {
+      if (opts?.allowShared === false && types.isSharedArrayBuffer(V2.buffer)) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "SharedArrayBuffer is not allowed."
         });
       }
-      if (V.buffer.resizable || V.buffer.growable) {
+      if (V2.buffer.resizable || V2.buffer.growable) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "Received a resizable ArrayBuffer."
         });
       }
-      return V;
+      return V2;
     };
-    webidl.converters.DataView = function(V, prefix, name, opts) {
-      if (webidl.util.Type(V) !== "Object" || !types.isDataView(V)) {
+    webidl.converters.DataView = function(V2, prefix, name, opts) {
+      if (webidl.util.Type(V2) !== "Object" || !types.isDataView(V2)) {
         throw webidl.errors.exception({
           header: prefix,
           message: `${name} is not a DataView.`
         });
       }
-      if (opts?.allowShared === false && types.isSharedArrayBuffer(V.buffer)) {
+      if (opts?.allowShared === false && types.isSharedArrayBuffer(V2.buffer)) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "SharedArrayBuffer is not allowed."
         });
       }
-      if (V.buffer.resizable || V.buffer.growable) {
+      if (V2.buffer.resizable || V2.buffer.growable) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "Received a resizable ArrayBuffer."
         });
       }
-      return V;
+      return V2;
     };
-    webidl.converters.BufferSource = function(V, prefix, name, opts) {
-      if (types.isAnyArrayBuffer(V)) {
-        return webidl.converters.ArrayBuffer(V, prefix, name, { ...opts, allowShared: false });
+    webidl.converters.BufferSource = function(V2, prefix, name, opts) {
+      if (types.isAnyArrayBuffer(V2)) {
+        return webidl.converters.ArrayBuffer(V2, prefix, name, { ...opts, allowShared: false });
       }
-      if (types.isTypedArray(V)) {
-        return webidl.converters.TypedArray(V, V.constructor, prefix, name, { ...opts, allowShared: false });
+      if (types.isTypedArray(V2)) {
+        return webidl.converters.TypedArray(V2, V2.constructor, prefix, name, { ...opts, allowShared: false });
       }
-      if (types.isDataView(V)) {
-        return webidl.converters.DataView(V, prefix, name, { ...opts, allowShared: false });
+      if (types.isDataView(V2)) {
+        return webidl.converters.DataView(V2, prefix, name, { ...opts, allowShared: false });
       }
       throw webidl.errors.conversionFailed({
         prefix,
-        argument: `${name} ("${webidl.util.Stringify(V)}")`,
+        argument: `${name} ("${webidl.util.Stringify(V2)}")`,
         types: ["BufferSource"]
       });
     };
@@ -6260,10 +6260,10 @@ ption");
     __name(isErrorLike, "isErrorLike");
     function isValidReasonPhrase(statusText) {
       for (let i = 0; i < statusText.length; ++i) {
-        const c = statusText.charCodeAt(i);
-        if (!(c === 9 || // HTAB
-        c >= 32 && c <= 126 || // SP / VCHAR
-        c >= 128 && c <= 255)) {
+        const c2 = statusText.charCodeAt(i);
+        if (!(c2 === 9 || // HTAB
+        c2 >= 32 && c2 <= 126 || // SP / VCHAR
+        c2 >= 128 && c2 <= 255)) {
           return false;
         }
       }
@@ -6605,11 +6605,11 @@ ption");
     function tryUpgradeRequestToAPotentiallyTrustworthyURL(request2) {
     }
     __name(tryUpgradeRequestToAPotentiallyTrustworthyURL, "tryUpgradeRequestToAPotentiallyTrustworthyURL");
-    function sameOrigin(A, B) {
-      if (A.origin === B.origin && A.origin === "null") {
+    function sameOrigin(A2, B2) {
+      if (A2.origin === B2.origin && A2.origin === "null") {
         return true;
       }
-      if (A.protocol === B.protocol && A.hostname === B.hostname && A.port === B.port) {
+      if (A2.protocol === B2.protocol && A2.hostname === B2.hostname && A2.port === B2.port) {
         return true;
       }
       return false;
@@ -7152,12 +7152,12 @@ var require_file = __commonJS({
       }
       constructor(blobLike, fileName, options = {}) {
         const n = fileName;
-        const t = options.type;
+        const t2 = options.type;
         const d = options.lastModified ?? Date.now();
         this[kState] = {
           blobLike,
           name: n,
-          type: t,
+          type: t2,
           lastModified: d
         };
       }
@@ -7308,15 +7308,15 @@ var require_formdata = __commonJS({
         }
       }
       [nodeUtil.inspect.custom](depth, options) {
-        const state = this[kState].reduce((a, b) => {
-          if (a[b.name]) {
-            if (Array.isArray(a[b.name])) {
-              a[b.name].push(b.value);
+        const state = this[kState].reduce((a, b2) => {
+          if (a[b2.name]) {
+            if (Array.isArray(a[b2.name])) {
+              a[b2.name].push(b2.value);
             } else {
-              a[b.name] = [a[b.name], b.value];
+              a[b2.name] = [a[b2.name], b2.value];
             }
           } else {
-            a[b.name] = b.value;
+            a[b2.name] = b2.value;
           }
           return a;
         }, { __proto__: null });
@@ -10400,7 +10400,7 @@ var require_pool_base = __commonJS({
             pool.emit("drain", origin, [pool, ...targets]);
           }
           if (pool[kClosedResolve] && queue.isEmpty()) {
-            Promise.all(pool[kClients].map((c) => c.close())).then(pool[kClosedResolve]);
+            Promise.all(pool[kClients].map((c2) => c2.close())).then(pool[kClosedResolve]);
           }
         }, "onDrain");
         this[kOnConnect] = (origin, targets) => {
@@ -10449,7 +10449,7 @@ var require_pool_base = __commonJS({
       }
       async [kClose]() {
         if (this[kQueue].isEmpty()) {
-          await Promise.all(this[kClients].map((c) => c.close()));
+          await Promise.all(this[kClients].map((c2) => c2.close()));
         } else {
           await new Promise((resolve) => {
             this[kClosedResolve] = resolve;
@@ -10464,7 +10464,7 @@ var require_pool_base = __commonJS({
           }
           item.handler.onError(err);
         }
-        await Promise.all(this[kClients].map((c) => c.destroy(err)));
+        await Promise.all(this[kClients].map((c2) => c2.destroy(err)));
       }
       [kDispatch](opts, handler2) {
         const dispatcher = this[kGetDispatcher]();
@@ -10636,12 +10636,12 @@ var require_balanced_pool = __commonJS({
     var kWeight = /* @__PURE__ */ Symbol("kWeight");
     var kMaxWeightPerServer = /* @__PURE__ */ Symbol("kMaxWeightPerServer");
     var kErrorPenalty = /* @__PURE__ */ Symbol("kErrorPenalty");
-    function getGreatestCommonDivisor(a, b) {
-      if (a === 0) return b;
-      while (b !== 0) {
-        const t = b;
-        b = a % b;
-        a = t;
+    function getGreatestCommonDivisor(a, b2) {
+      if (a === 0) return b2;
+      while (b2 !== 0) {
+        const t2 = b2;
+        b2 = a % b2;
+        a = t2;
       }
       return a;
     }
@@ -10732,7 +10732,7 @@ var require_balanced_pool = __commonJS({
         if (!dispatcher) {
           return;
         }
-        const allClientsBusy = this[kClients].map((pool) => pool[kNeedDrain]).reduce((a, b) => a && b, true);
+        const allClientsBusy = this[kClients].map((pool) => pool[kNeedDrain]).reduce((a, b2) => a && b2, true);
         if (allClientsBusy) {
           return;
         }
@@ -13030,8 +13030,8 @@ var require_mock_utils = __commonJS({
         const value = data[key];
         const name = Buffer.from(`${key}`);
         if (Array.isArray(value)) {
-          for (let j = 0; j < value.length; ++j) {
-            result.push(name, Buffer.from(`${value[j]}`));
+          for (let j2 = 0; j2 < value.length; ++j2) {
+            result.push(name, Buffer.from(`${value[j2]}`));
           }
         } else {
           result.push(name, Buffer.from(`${value}`));
@@ -14206,10 +14206,10 @@ var require_headers = __commonJS({
     __name(isHTTPWhiteSpaceCharCode, "isHTTPWhiteSpaceCharCode");
     function headerValueNormalize(potentialValue) {
       let i = 0;
-      let j = potentialValue.length;
-      while (j > i && isHTTPWhiteSpaceCharCode(potentialValue.charCodeAt(j - 1))) --j;
-      while (j > i && isHTTPWhiteSpaceCharCode(potentialValue.charCodeAt(i))) ++i;
-      return i === 0 && j === potentialValue.length ? potentialValue : potentialValue.substring(i, j);
+      let j2 = potentialValue.length;
+      while (j2 > i && isHTTPWhiteSpaceCharCode(potentialValue.charCodeAt(j2 - 1))) --j2;
+      while (j2 > i && isHTTPWhiteSpaceCharCode(potentialValue.charCodeAt(i))) ++i;
+      return i === 0 && j2 === potentialValue.length ? potentialValue : potentialValue.substring(i, j2);
     }
     __name(headerValueNormalize, "headerValueNormalize");
     function fill(headers, object) {
@@ -14259,8 +14259,8 @@ var require_headers = __commonJS({
       return getHeadersList(headers).append(name, value, false);
     }
     __name(appendHeader, "appendHeader");
-    function compareHeaderName(a, b) {
-      return a[0] < b[0] ? -1 : 1;
+    function compareHeaderName(a, b2) {
+      return a[0] < b2[0] ? -1 : 1;
     }
     __name(compareHeaderName, "compareHeaderName");
     var HeadersList = class _HeadersList {
@@ -14395,26 +14395,26 @@ var require_headers = __commonJS({
           const firstValue = iterator2.next().value;
           array[0] = [firstValue[0], firstValue[1].value];
           assert(firstValue[1].value !== null);
-          for (let i = 1, j = 0, right = 0, left = 0, pivot = 0, x, value; i < size; ++i) {
+          for (let i = 1, j2 = 0, right = 0, left = 0, pivot = 0, x2, value; i < size; ++i) {
             value = iterator2.next().value;
-            x = array[i] = [value[0], value[1].value];
-            assert(x[1] !== null);
+            x2 = array[i] = [value[0], value[1].value];
+            assert(x2[1] !== null);
             left = 0;
             right = i;
             while (left < right) {
               pivot = left + (right - left >> 1);
-              if (array[pivot][0] <= x[0]) {
+              if (array[pivot][0] <= x2[0]) {
                 left = pivot + 1;
               } else {
                 right = pivot;
               }
             }
             if (i !== pivot) {
-              j = i;
-              while (j > left) {
-                array[j] = array[--j];
+              j2 = i;
+              while (j2 > left) {
+                array[j2] = array[--j2];
               }
-              array[left] = x;
+              array[left] = x2;
             }
           }
           if (!iterator2.next().done) {
@@ -14558,8 +14558,8 @@ var require_headers = __commonJS({
         for (let i = 0; i < names.length; ++i) {
           const { 0: name, 1: value } = names[i];
           if (name === "set-cookie") {
-            for (let j = 0; j < cookies.length; ++j) {
-              headers.push([name, cookies[j]]);
+            for (let j2 = 0; j2 < cookies.length; ++j2) {
+              headers.push([name, cookies[j2]]);
             }
           } else {
             headers.push([name, value]);
@@ -14571,17 +14571,17 @@ var require_headers = __commonJS({
         options.depth ??= depth;
         return `Headers ${util2.formatWithOptions(options, this.#headersList.entries)}`;
       }
-      static getHeadersGuard(o) {
-        return o.#guard;
+      static getHeadersGuard(o2) {
+        return o2.#guard;
       }
-      static setHeadersGuard(o, guard) {
-        o.#guard = guard;
+      static setHeadersGuard(o2, guard) {
+        o2.#guard = guard;
       }
-      static getHeadersList(o) {
-        return o.#headersList;
+      static getHeadersList(o2) {
+        return o2.#headersList;
       }
-      static setHeadersList(o, list) {
-        o.#headersList = list;
+      static setHeadersList(o2, list) {
+        o2.#headersList = list;
       }
     };
     var { getHeadersGuard, setHeadersGuard, getHeadersList, setHeadersList } = Headers2;
@@ -14605,19 +14605,19 @@ var require_headers = __commonJS({
         enumerable: false
       }
     });
-    webidl.converters.HeadersInit = function(V, prefix, argument) {
-      if (webidl.util.Type(V) === "Object") {
-        const iterator2 = Reflect.get(V, Symbol.iterator);
-        if (!util2.types.isProxy(V) && iterator2 === Headers2.prototype.entries) {
+    webidl.converters.HeadersInit = function(V2, prefix, argument) {
+      if (webidl.util.Type(V2) === "Object") {
+        const iterator2 = Reflect.get(V2, Symbol.iterator);
+        if (!util2.types.isProxy(V2) && iterator2 === Headers2.prototype.entries) {
           try {
-            return getHeadersList(V).entriesList;
+            return getHeadersList(V2).entriesList;
           } catch {
           }
         }
         if (typeof iterator2 === "function") {
-          return webidl.converters["sequence<sequence<ByteString>>"](V, prefix, argument, iterator2.bind(V));
+          return webidl.converters["sequence<sequence<ByteString>>"](V2, prefix, argument, iterator2.bind(V2));
         }
-        return webidl.converters["record<ByteString, ByteString>"](V, prefix, argument);
+        return webidl.converters["record<ByteString, ByteString>"](V2, prefix, argument);
       }
       throw webidl.errors.conversionFailed({
         prefix: "Headers constructor",
@@ -14995,32 +14995,32 @@ rtError"), { cause: err })) : makeNetworkError(Object.assign(new DOMException("R
     webidl.converters.URLSearchParams = webidl.interfaceConverter(
       URLSearchParams
     );
-    webidl.converters.XMLHttpRequestBodyInit = function(V, prefix, name) {
-      if (typeof V === "string") {
-        return webidl.converters.USVString(V, prefix, name);
+    webidl.converters.XMLHttpRequestBodyInit = function(V2, prefix, name) {
+      if (typeof V2 === "string") {
+        return webidl.converters.USVString(V2, prefix, name);
       }
-      if (isBlobLike(V)) {
-        return webidl.converters.Blob(V, prefix, name, { strict: false });
+      if (isBlobLike(V2)) {
+        return webidl.converters.Blob(V2, prefix, name, { strict: false });
       }
-      if (ArrayBuffer.isView(V) || types.isArrayBuffer(V)) {
-        return webidl.converters.BufferSource(V, prefix, name);
+      if (ArrayBuffer.isView(V2) || types.isArrayBuffer(V2)) {
+        return webidl.converters.BufferSource(V2, prefix, name);
       }
-      if (util2.isFormDataLike(V)) {
-        return webidl.converters.FormData(V, prefix, name, { strict: false });
+      if (util2.isFormDataLike(V2)) {
+        return webidl.converters.FormData(V2, prefix, name, { strict: false });
       }
-      if (V instanceof URLSearchParams) {
-        return webidl.converters.URLSearchParams(V, prefix, name);
+      if (V2 instanceof URLSearchParams) {
+        return webidl.converters.URLSearchParams(V2, prefix, name);
       }
-      return webidl.converters.DOMString(V, prefix, name);
+      return webidl.converters.DOMString(V2, prefix, name);
     };
-    webidl.converters.BodyInit = function(V, prefix, argument) {
-      if (V instanceof ReadableStream) {
-        return webidl.converters.ReadableStream(V, prefix, argument);
+    webidl.converters.BodyInit = function(V2, prefix, argument) {
+      if (V2 instanceof ReadableStream) {
+        return webidl.converters.ReadableStream(V2, prefix, argument);
       }
-      if (V?.[Symbol.asyncIterator]) {
-        return V;
+      if (V2?.[Symbol.asyncIterator]) {
+        return V2;
       }
-      return webidl.converters.XMLHttpRequestBodyInit(V, prefix, argument);
+      return webidl.converters.XMLHttpRequestBodyInit(V2, prefix, argument);
     };
     webidl.converters.ResponseInit = webidl.dictionaryConverter([
       {
@@ -15705,14 +15705,14 @@ var require_request2 = __commonJS({
     webidl.converters.Request = webidl.interfaceConverter(
       Request
     );
-    webidl.converters.RequestInfo = function(V, prefix, argument) {
-      if (typeof V === "string") {
-        return webidl.converters.USVString(V, prefix, argument);
+    webidl.converters.RequestInfo = function(V2, prefix, argument) {
+      if (typeof V2 === "string") {
+        return webidl.converters.USVString(V2, prefix, argument);
       }
-      if (V instanceof Request) {
-        return webidl.converters.Request(V, prefix, argument);
+      if (V2 instanceof Request) {
+        return webidl.converters.Request(V2, prefix, argument);
       }
-      return webidl.converters.USVString(V, prefix, argument);
+      return webidl.converters.USVString(V2, prefix, argument);
     };
     webidl.converters.AbortSignal = webidl.interfaceConverter(
       AbortSignal
@@ -17433,25 +17433,25 @@ var require_util4 = __commonJS({
     }
     __name(decode, "decode");
     function BOMSniffing(ioQueue) {
-      const [a, b, c] = ioQueue;
-      if (a === 239 && b === 187 && c === 191) {
+      const [a, b2, c2] = ioQueue;
+      if (a === 239 && b2 === 187 && c2 === 191) {
         return "UTF-8";
-      } else if (a === 254 && b === 255) {
+      } else if (a === 254 && b2 === 255) {
         return "UTF-16BE";
-      } else if (a === 255 && b === 254) {
+      } else if (a === 255 && b2 === 254) {
         return "UTF-16LE";
       }
       return null;
     }
     __name(BOMSniffing, "BOMSniffing");
     function combineByteSequences(sequences) {
-      const size = sequences.reduce((a, b) => {
-        return a + b.byteLength;
+      const size = sequences.reduce((a, b2) => {
+        return a + b2.byteLength;
       }, 0);
       let offset = 0;
-      return sequences.reduce((a, b) => {
-        a.set(b, offset);
-        offset += b.byteLength;
+      return sequences.reduce((a, b2) => {
+        a.set(b2, offset);
+        offset += b2.byteLength;
         return a;
       }, new Uint8Array(size));
     }
@@ -17743,9 +17743,9 @@ var require_util5 = __commonJS({
     var assert = require("node:assert");
     var { URLSerializer } = require_data_url();
     var { isValidHeaderName } = require_util2();
-    function urlEquals(A, B, excludeFragment = false) {
-      const serializedA = URLSerializer(A, excludeFragment);
-      const serializedB = URLSerializer(B, excludeFragment);
+    function urlEquals(A2, B2, excludeFragment = false) {
+      const serializedA = URLSerializer(A2, excludeFragment);
+      const serializedB = URLSerializer(B2, excludeFragment);
       return serializedA === serializedB;
     }
     __name(urlEquals, "urlEquals");
@@ -17844,8 +17844,8 @@ var require_cache = __commonJS({
           if (typeof request2 === "string") {
             continue;
           }
-          const r = request2[kState];
-          if (!urlIsHttpHttpsScheme(r.url) || r.method !== "GET") {
+          const r2 = request2[kState];
+          if (!urlIsHttpHttpsScheme(r2.url) || r2.method !== "GET") {
             throw webidl.errors.exception({
               header: prefix,
               message: "Expected http/s scheme when method is not GET."
@@ -17854,19 +17854,19 @@ var require_cache = __commonJS({
         }
         const fetchControllers = [];
         for (const request2 of requests) {
-          const r = new Request(request2)[kState];
-          if (!urlIsHttpHttpsScheme(r.url)) {
+          const r2 = new Request(request2)[kState];
+          if (!urlIsHttpHttpsScheme(r2.url)) {
             throw webidl.errors.exception({
               header: prefix,
               message: "Expected http/s scheme."
             });
           }
-          r.initiator = "fetch";
-          r.destination = "subresource";
-          requestList.push(r);
+          r2.initiator = "fetch";
+          r2.destination = "subresource";
+          requestList.push(r2);
           const responsePromise = createDeferredPromise();
           fetchControllers.push(fetching({
-            request: r,
+            request: r2,
             processResponse(response) {
               if (response.type === "error" || response.status === 206 || response.status < 200 || response.status > 299) {
                 responsePromise.reject(webidl.errors.exception({
@@ -18018,20 +18018,20 @@ var require_cache = __commonJS({
         webidl.argumentLengthCheck(arguments, 1, prefix);
         request2 = webidl.converters.RequestInfo(request2, prefix, "request");
         options = webidl.converters.CacheQueryOptions(options, prefix, "options");
-        let r = null;
+        let r2 = null;
         if (request2 instanceof Request) {
-          r = request2[kState];
-          if (r.method !== "GET" && !options.ignoreMethod) {
+          r2 = request2[kState];
+          if (r2.method !== "GET" && !options.ignoreMethod) {
             return false;
           }
         } else {
           assert(typeof request2 === "string");
-          r = new Request(request2)[kState];
+          r2 = new Request(request2)[kState];
         }
         const operations = [];
         const operation = {
           type: "delete",
-          request: r,
+          request: r2,
           options
         };
         operations.push(operation);
@@ -18063,15 +18063,15 @@ var require_cache = __commonJS({
         const prefix = "Cache.keys";
         if (request2 !== void 0) request2 = webidl.converters.RequestInfo(request2, prefix, "request");
         options = webidl.converters.CacheQueryOptions(options, prefix, "options");
-        let r = null;
+        let r2 = null;
         if (request2 !== void 0) {
           if (request2 instanceof Request) {
-            r = request2[kState];
-            if (r.method !== "GET" && !options.ignoreMethod) {
+            r2 = request2[kState];
+            if (r2.method !== "GET" && !options.ignoreMethod) {
               return [];
             }
           } else if (typeof request2 === "string") {
-            r = new Request(request2)[kState];
+            r2 = new Request(request2)[kState];
           }
         }
         const promise = createDeferredPromise();
@@ -18081,7 +18081,7 @@ var require_cache = __commonJS({
             requests.push(requestResponse[0]);
           }
         } else {
-          const requestResponses = this.#queryCache(r, options);
+          const requestResponses = this.#queryCache(r2, options);
           for (const requestResponse of requestResponses) {
             requests.push(requestResponse[0]);
           }
@@ -18106,8 +18106,8 @@ var require_cache = __commonJS({
        * @returns {requestResponseList}
        */
       #batchCacheOperations(operations) {
-        const cache2 = this.#relevantRequestResponseList;
-        const backupCache = [...cache2];
+        const cache = this.#relevantRequestResponseList;
+        const backupCache = [...cache];
         const addedItems = [];
         const resultList = [];
         try {
@@ -18134,9 +18134,9 @@ var require_cache = __commonJS({
                 return [];
               }
               for (const requestResponse of requestResponses) {
-                const idx = cache2.indexOf(requestResponse);
+                const idx = cache.indexOf(requestResponse);
                 assert(idx !== -1);
-                cache2.splice(idx, 1);
+                cache.splice(idx, 1);
               }
             } else if (operation.type === "put") {
               if (operation.response == null) {
@@ -18145,14 +18145,14 @@ var require_cache = __commonJS({
                   message: "put operation should have an associated response"
                 });
               }
-              const r = operation.request;
-              if (!urlIsHttpHttpsScheme(r.url)) {
+              const r2 = operation.request;
+              if (!urlIsHttpHttpsScheme(r2.url)) {
                 throw webidl.errors.exception({
                   header: "Cache.#batchCacheOperations",
                   message: "expected http or https scheme"
                 });
               }
-              if (r.method !== "GET") {
+              if (r2.method !== "GET") {
                 throw webidl.errors.exception({
                   header: "Cache.#batchCacheOperations",
                   message: "not get method"
@@ -18166,11 +18166,11 @@ var require_cache = __commonJS({
               }
               requestResponses = this.#queryCache(operation.request);
               for (const requestResponse of requestResponses) {
-                const idx = cache2.indexOf(requestResponse);
+                const idx = cache.indexOf(requestResponse);
                 assert(idx !== -1);
-                cache2.splice(idx, 1);
+                cache.splice(idx, 1);
               }
-              cache2.push([operation.request, operation.response]);
+              cache.push([operation.request, operation.response]);
               addedItems.push([operation.request, operation.response]);
             }
             resultList.push([operation.request, operation.response]);
@@ -18235,15 +18235,15 @@ var require_cache = __commonJS({
         return true;
       }
       #internalMatchAll(request2, options, maxResponses = Infinity) {
-        let r = null;
+        let r2 = null;
         if (request2 !== void 0) {
           if (request2 instanceof Request) {
-            r = request2[kState];
-            if (r.method !== "GET" && !options.ignoreMethod) {
+            r2 = request2[kState];
+            if (r2.method !== "GET" && !options.ignoreMethod) {
               return [];
             }
           } else if (typeof request2 === "string") {
-            r = new Request(request2)[kState];
+            r2 = new Request(request2)[kState];
           }
         }
         const responses = [];
@@ -18252,7 +18252,7 @@ var require_cache = __commonJS({
             responses.push(requestResponse[1]);
           }
         } else {
-          const requestResponses = this.#queryCache(r, options);
+          const requestResponses = this.#queryCache(r2, options);
           for (const requestResponse of requestResponses) {
             responses.push(requestResponse[1]);
           }
@@ -18347,13 +18347,13 @@ var require_cachestorage = __commonJS({
         if (options.cacheName != null) {
           if (this.#caches.has(options.cacheName)) {
             const cacheList = this.#caches.get(options.cacheName);
-            const cache2 = new Cache(kConstruct, cacheList);
-            return await cache2.match(request2, options);
+            const cache = new Cache(kConstruct, cacheList);
+            return await cache.match(request2, options);
           }
         } else {
           for (const cacheList of this.#caches.values()) {
-            const cache2 = new Cache(kConstruct, cacheList);
-            const response = await cache2.match(request2, options);
+            const cache = new Cache(kConstruct, cacheList);
+            const response = await cache.match(request2, options);
             if (response !== void 0) {
               return response;
             }
@@ -18383,12 +18383,12 @@ var require_cachestorage = __commonJS({
         webidl.argumentLengthCheck(arguments, 1, prefix);
         cacheName = webidl.converters.DOMString(cacheName, prefix, "cacheName");
         if (this.#caches.has(cacheName)) {
-          const cache3 = this.#caches.get(cacheName);
-          return new Cache(kConstruct, cache3);
+          const cache2 = this.#caches.get(cacheName);
+          return new Cache(kConstruct, cache2);
         }
-        const cache2 = [];
-        this.#caches.set(cacheName, cache2);
-        return new Cache(kConstruct, cache2);
+        const cache = [];
+        this.#caches.set(cacheName, cache);
+        return new Cache(kConstruct, cache);
       }
       /**
        * @see https://w3c.github.io/ServiceWorker/#cache-storage-delete
@@ -18546,7 +18546,7 @@ var require_util6 = __commonJS({
       "Nov",
       "Dec"
     ];
-    var IMFPaddedNumbers = Array(61).fill(0).map((_, i) => i.toString().padStart(2, "0"));
+    var IMFPaddedNumbers = Array(61).fill(0).map((_2, i) => i.toString().padStart(2, "0"));
     function toIMFDate(date) {
       if (typeof date === "number") {
         date = new Date(date);
@@ -19852,7 +19852,7 @@ var require_receiver = __commonJS({
        * @param {Buffer} chunk
        * @param {() => void} callback
        */
-      _write(chunk, _, callback) {
+      _write(chunk, _2, callback) {
         this.#buffers.push(chunk);
         this.#byteOffset += chunk.length;
         this.#loop = true;
@@ -20530,11 +20530,11 @@ ns");
     webidl.converters["sequence<DOMString>"] = webidl.sequenceConverter(
       webidl.converters.DOMString
     );
-    webidl.converters["DOMString or sequence<DOMString>"] = function(V, prefix, argument) {
-      if (webidl.util.Type(V) === "Object" && Symbol.iterator in V) {
-        return webidl.converters["sequence<DOMString>"](V);
+    webidl.converters["DOMString or sequence<DOMString>"] = function(V2, prefix, argument) {
+      if (webidl.util.Type(V2) === "Object" && Symbol.iterator in V2) {
+        return webidl.converters["sequence<DOMString>"](V2);
       }
-      return webidl.converters.DOMString(V, prefix, argument);
+      return webidl.converters.DOMString(V2, prefix, argument);
     };
     webidl.converters.WebSocketInit = webidl.dictionaryConverter([
       {
@@ -20552,22 +20552,22 @@ ns");
         converter: webidl.nullableConverter(webidl.converters.HeadersInit)
       }
     ]);
-    webidl.converters["DOMString or sequence<DOMString> or WebSocketInit"] = function(V) {
-      if (webidl.util.Type(V) === "Object" && !(Symbol.iterator in V)) {
-        return webidl.converters.WebSocketInit(V);
+    webidl.converters["DOMString or sequence<DOMString> or WebSocketInit"] = function(V2) {
+      if (webidl.util.Type(V2) === "Object" && !(Symbol.iterator in V2)) {
+        return webidl.converters.WebSocketInit(V2);
       }
-      return { protocols: webidl.converters["DOMString or sequence<DOMString>"](V) };
+      return { protocols: webidl.converters["DOMString or sequence<DOMString>"](V2) };
     };
-    webidl.converters.WebSocketSendData = function(V) {
-      if (webidl.util.Type(V) === "Object") {
-        if (isBlobLike(V)) {
-          return webidl.converters.Blob(V, { strict: false });
+    webidl.converters.WebSocketSendData = function(V2) {
+      if (webidl.util.Type(V2) === "Object") {
+        if (isBlobLike(V2)) {
+          return webidl.converters.Blob(V2, { strict: false });
         }
-        if (ArrayBuffer.isView(V) || types.isArrayBuffer(V)) {
-          return webidl.converters.BufferSource(V);
+        if (ArrayBuffer.isView(V2) || types.isArrayBuffer(V2)) {
+          return webidl.converters.BufferSource(V2);
         }
       }
-      return webidl.converters.USVString(V);
+      return webidl.converters.USVString(V2);
     };
     function onParserDrain() {
       this.ws[kResponse].socket.resume();
@@ -21356,8 +21356,8 @@ var require_re = __commonJS({
     var safeRe = exports2.safeRe = [];
     var src = exports2.src = [];
     var safeSrc = exports2.safeSrc = [];
-    var t = exports2.t = {};
-    var R = 0;
+    var t2 = exports2.t = {};
+    var R2 = 0;
     var LETTERDASHNUMBER = "[a-zA-Z0-9-]";
     var safeRegexReplacements = [
       ["\\s", 1],
@@ -21372,9 +21372,9 @@ var require_re = __commonJS({
     }, "makeSafeRegex");
     var createToken = /* @__PURE__ */ __name((name, value, isGlobal) => {
       const safe = makeSafeRegex(value);
-      const index = R++;
+      const index = R2++;
       debug3(name, index, value);
-      t[name] = index;
+      t2[name] = index;
       src[index] = value;
       safeSrc[index] = safe;
       re[index] = new RegExp(value, isGlobal ? "g" : void 0);
@@ -21383,52 +21383,52 @@ var require_re = __commonJS({
     createToken("NUMERICIDENTIFIER", "0|[1-9]\\d*");
     createToken("NUMERICIDENTIFIERLOOSE", "\\d+");
     createToken("NONNUMERICIDENTIFIER", `\\d*[a-zA-Z-]${LETTERDASHNUMBER}*`);
-    createToken("MAINVERSION", `(${src[t.NUMERICIDENTIFIER]})\\.(${src[t.NUMERICIDENTIFIER]})\\.(${src[t.NUMERICIDENTIFIER]}\
+    createToken("MAINVERSION", `(${src[t2.NUMERICIDENTIFIER]})\\.(${src[t2.NUMERICIDENTIFIER]})\\.(${src[t2.NUMERICIDENTIFIER]}\
 )`);
-    createToken("MAINVERSIONLOOSE", `(${src[t.NUMERICIDENTIFIERLOOSE]})\\.(${src[t.NUMERICIDENTIFIERLOOSE]})\\.(${src[t.
+    createToken("MAINVERSIONLOOSE", `(${src[t2.NUMERICIDENTIFIERLOOSE]})\\.(${src[t2.NUMERICIDENTIFIERLOOSE]})\\.(${src[t2.
     NUMERICIDENTIFIERLOOSE]})`);
-    createToken("PRERELEASEIDENTIFIER", `(?:${src[t.NONNUMERICIDENTIFIER]}|${src[t.NUMERICIDENTIFIER]})`);
-    createToken("PRERELEASEIDENTIFIERLOOSE", `(?:${src[t.NONNUMERICIDENTIFIER]}|${src[t.NUMERICIDENTIFIERLOOSE]})`);
-    createToken("PRERELEASE", `(?:-(${src[t.PRERELEASEIDENTIFIER]}(?:\\.${src[t.PRERELEASEIDENTIFIER]})*))`);
-    createToken("PRERELEASELOOSE", `(?:-?(${src[t.PRERELEASEIDENTIFIERLOOSE]}(?:\\.${src[t.PRERELEASEIDENTIFIERLOOSE]})*\
-))`);
+    createToken("PRERELEASEIDENTIFIER", `(?:${src[t2.NONNUMERICIDENTIFIER]}|${src[t2.NUMERICIDENTIFIER]})`);
+    createToken("PRERELEASEIDENTIFIERLOOSE", `(?:${src[t2.NONNUMERICIDENTIFIER]}|${src[t2.NUMERICIDENTIFIERLOOSE]})`);
+    createToken("PRERELEASE", `(?:-(${src[t2.PRERELEASEIDENTIFIER]}(?:\\.${src[t2.PRERELEASEIDENTIFIER]})*))`);
+    createToken("PRERELEASELOOSE", `(?:-?(${src[t2.PRERELEASEIDENTIFIERLOOSE]}(?:\\.${src[t2.PRERELEASEIDENTIFIERLOOSE]}\
+)*))`);
     createToken("BUILDIDENTIFIER", `${LETTERDASHNUMBER}+`);
-    createToken("BUILD", `(?:\\+(${src[t.BUILDIDENTIFIER]}(?:\\.${src[t.BUILDIDENTIFIER]})*))`);
-    createToken("FULLPLAIN", `v?${src[t.MAINVERSION]}${src[t.PRERELEASE]}?${src[t.BUILD]}?`);
-    createToken("FULL", `^${src[t.FULLPLAIN]}$`);
-    createToken("LOOSEPLAIN", `[v=\\s]*${src[t.MAINVERSIONLOOSE]}${src[t.PRERELEASELOOSE]}?${src[t.BUILD]}?`);
-    createToken("LOOSE", `^${src[t.LOOSEPLAIN]}$`);
+    createToken("BUILD", `(?:\\+(${src[t2.BUILDIDENTIFIER]}(?:\\.${src[t2.BUILDIDENTIFIER]})*))`);
+    createToken("FULLPLAIN", `v?${src[t2.MAINVERSION]}${src[t2.PRERELEASE]}?${src[t2.BUILD]}?`);
+    createToken("FULL", `^${src[t2.FULLPLAIN]}$`);
+    createToken("LOOSEPLAIN", `[v=\\s]*${src[t2.MAINVERSIONLOOSE]}${src[t2.PRERELEASELOOSE]}?${src[t2.BUILD]}?`);
+    createToken("LOOSE", `^${src[t2.LOOSEPLAIN]}$`);
     createToken("GTLT", "((?:<|>)?=?)");
-    createToken("XRANGEIDENTIFIERLOOSE", `${src[t.NUMERICIDENTIFIERLOOSE]}|x|X|\\*`);
-    createToken("XRANGEIDENTIFIER", `${src[t.NUMERICIDENTIFIER]}|x|X|\\*`);
-    createToken("XRANGEPLAIN", `[v=\\s]*(${src[t.XRANGEIDENTIFIER]})(?:\\.(${src[t.XRANGEIDENTIFIER]})(?:\\.(${src[t.XRANGEIDENTIFIER]}\
-)(?:${src[t.PRERELEASE]})?${src[t.BUILD]}?)?)?`);
-    createToken("XRANGEPLAINLOOSE", `[v=\\s]*(${src[t.XRANGEIDENTIFIERLOOSE]})(?:\\.(${src[t.XRANGEIDENTIFIERLOOSE]})(?:\
-\\.(${src[t.XRANGEIDENTIFIERLOOSE]})(?:${src[t.PRERELEASELOOSE]})?${src[t.BUILD]}?)?)?`);
-    createToken("XRANGE", `^${src[t.GTLT]}\\s*${src[t.XRANGEPLAIN]}$`);
-    createToken("XRANGELOOSE", `^${src[t.GTLT]}\\s*${src[t.XRANGEPLAINLOOSE]}$`);
+    createToken("XRANGEIDENTIFIERLOOSE", `${src[t2.NUMERICIDENTIFIERLOOSE]}|x|X|\\*`);
+    createToken("XRANGEIDENTIFIER", `${src[t2.NUMERICIDENTIFIER]}|x|X|\\*`);
+    createToken("XRANGEPLAIN", `[v=\\s]*(${src[t2.XRANGEIDENTIFIER]})(?:\\.(${src[t2.XRANGEIDENTIFIER]})(?:\\.(${src[t2.
+    XRANGEIDENTIFIER]})(?:${src[t2.PRERELEASE]})?${src[t2.BUILD]}?)?)?`);
+    createToken("XRANGEPLAINLOOSE", `[v=\\s]*(${src[t2.XRANGEIDENTIFIERLOOSE]})(?:\\.(${src[t2.XRANGEIDENTIFIERLOOSE]})(\
+?:\\.(${src[t2.XRANGEIDENTIFIERLOOSE]})(?:${src[t2.PRERELEASELOOSE]})?${src[t2.BUILD]}?)?)?`);
+    createToken("XRANGE", `^${src[t2.GTLT]}\\s*${src[t2.XRANGEPLAIN]}$`);
+    createToken("XRANGELOOSE", `^${src[t2.GTLT]}\\s*${src[t2.XRANGEPLAINLOOSE]}$`);
     createToken("COERCEPLAIN", `${"(^|[^\\d])(\\d{1,"}${MAX_SAFE_COMPONENT_LENGTH}})(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}\
 }))?(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?`);
-    createToken("COERCE", `${src[t.COERCEPLAIN]}(?:$|[^\\d])`);
-    createToken("COERCEFULL", src[t.COERCEPLAIN] + `(?:${src[t.PRERELEASE]})?(?:${src[t.BUILD]})?(?:$|[^\\d])`);
-    createToken("COERCERTL", src[t.COERCE], true);
-    createToken("COERCERTLFULL", src[t.COERCEFULL], true);
+    createToken("COERCE", `${src[t2.COERCEPLAIN]}(?:$|[^\\d])`);
+    createToken("COERCEFULL", src[t2.COERCEPLAIN] + `(?:${src[t2.PRERELEASE]})?(?:${src[t2.BUILD]})?(?:$|[^\\d])`);
+    createToken("COERCERTL", src[t2.COERCE], true);
+    createToken("COERCERTLFULL", src[t2.COERCEFULL], true);
     createToken("LONETILDE", "(?:~>?)");
-    createToken("TILDETRIM", `(\\s*)${src[t.LONETILDE]}\\s+`, true);
+    createToken("TILDETRIM", `(\\s*)${src[t2.LONETILDE]}\\s+`, true);
     exports2.tildeTrimReplace = "$1~";
-    createToken("TILDE", `^${src[t.LONETILDE]}${src[t.XRANGEPLAIN]}$`);
-    createToken("TILDELOOSE", `^${src[t.LONETILDE]}${src[t.XRANGEPLAINLOOSE]}$`);
+    createToken("TILDE", `^${src[t2.LONETILDE]}${src[t2.XRANGEPLAIN]}$`);
+    createToken("TILDELOOSE", `^${src[t2.LONETILDE]}${src[t2.XRANGEPLAINLOOSE]}$`);
     createToken("LONECARET", "(?:\\^)");
-    createToken("CARETTRIM", `(\\s*)${src[t.LONECARET]}\\s+`, true);
+    createToken("CARETTRIM", `(\\s*)${src[t2.LONECARET]}\\s+`, true);
     exports2.caretTrimReplace = "$1^";
-    createToken("CARET", `^${src[t.LONECARET]}${src[t.XRANGEPLAIN]}$`);
-    createToken("CARETLOOSE", `^${src[t.LONECARET]}${src[t.XRANGEPLAINLOOSE]}$`);
-    createToken("COMPARATORLOOSE", `^${src[t.GTLT]}\\s*(${src[t.LOOSEPLAIN]})$|^$`);
-    createToken("COMPARATOR", `^${src[t.GTLT]}\\s*(${src[t.FULLPLAIN]})$|^$`);
-    createToken("COMPARATORTRIM", `(\\s*)${src[t.GTLT]}\\s*(${src[t.LOOSEPLAIN]}|${src[t.XRANGEPLAIN]})`, true);
+    createToken("CARET", `^${src[t2.LONECARET]}${src[t2.XRANGEPLAIN]}$`);
+    createToken("CARETLOOSE", `^${src[t2.LONECARET]}${src[t2.XRANGEPLAINLOOSE]}$`);
+    createToken("COMPARATORLOOSE", `^${src[t2.GTLT]}\\s*(${src[t2.LOOSEPLAIN]})$|^$`);
+    createToken("COMPARATOR", `^${src[t2.GTLT]}\\s*(${src[t2.FULLPLAIN]})$|^$`);
+    createToken("COMPARATORTRIM", `(\\s*)${src[t2.GTLT]}\\s*(${src[t2.LOOSEPLAIN]}|${src[t2.XRANGEPLAIN]})`, true);
     exports2.comparatorTrimReplace = "$1$2$3";
-    createToken("HYPHENRANGE", `^\\s*(${src[t.XRANGEPLAIN]})\\s+-\\s+(${src[t.XRANGEPLAIN]})\\s*$`);
-    createToken("HYPHENRANGELOOSE", `^\\s*(${src[t.XRANGEPLAINLOOSE]})\\s+-\\s+(${src[t.XRANGEPLAINLOOSE]})\\s*$`);
+    createToken("HYPHENRANGE", `^\\s*(${src[t2.XRANGEPLAIN]})\\s+-\\s+(${src[t2.XRANGEPLAIN]})\\s*$`);
+    createToken("HYPHENRANGELOOSE", `^\\s*(${src[t2.XRANGEPLAINLOOSE]})\\s+-\\s+(${src[t2.XRANGEPLAINLOOSE]})\\s*$`);
     createToken("STAR", "(<|>)?=?\\s*\\*");
     createToken("GTE0", "^\\s*>=\\s*0\\.0\\.0\\s*$");
     createToken("GTE0PRE", "^\\s*>=\\s*0\\.0\\.0-0\\s*$");
@@ -21459,19 +21459,19 @@ var require_identifiers = __commonJS({
   "node_modules/semver/internal/identifiers.js"(exports2, module2) {
     "use strict";
     var numeric = /^[0-9]+$/;
-    var compareIdentifiers = /* @__PURE__ */ __name((a, b) => {
-      if (typeof a === "number" && typeof b === "number") {
-        return a === b ? 0 : a < b ? -1 : 1;
+    var compareIdentifiers = /* @__PURE__ */ __name((a, b2) => {
+      if (typeof a === "number" && typeof b2 === "number") {
+        return a === b2 ? 0 : a < b2 ? -1 : 1;
       }
       const anum = numeric.test(a);
-      const bnum = numeric.test(b);
+      const bnum = numeric.test(b2);
       if (anum && bnum) {
         a = +a;
-        b = +b;
+        b2 = +b2;
       }
-      return a === b ? 0 : anum && !bnum ? -1 : bnum && !anum ? 1 : a < b ? -1 : 1;
+      return a === b2 ? 0 : anum && !bnum ? -1 : bnum && !anum ? 1 : a < b2 ? -1 : 1;
     }, "compareIdentifiers");
-    var rcompareIdentifiers = /* @__PURE__ */ __name((a, b) => compareIdentifiers(b, a), "rcompareIdentifiers");
+    var rcompareIdentifiers = /* @__PURE__ */ __name((a, b2) => compareIdentifiers(b2, a), "rcompareIdentifiers");
     module2.exports = {
       compareIdentifiers,
       rcompareIdentifiers
@@ -21485,7 +21485,7 @@ var require_semver = __commonJS({
     "use strict";
     var debug3 = require_debug();
     var { MAX_LENGTH, MAX_SAFE_INTEGER } = require_constants6();
-    var { safeRe: re, t } = require_re();
+    var { safeRe: re, t: t2 } = require_re();
     var parseOptions = require_parse_options();
     var { compareIdentifiers } = require_identifiers();
     var SemVer = class _SemVer {
@@ -21512,7 +21512,7 @@ var require_semver = __commonJS({
         this.options = options;
         this.loose = !!options.loose;
         this.includePrerelease = !!options.includePrerelease;
-        const m = version.trim().match(options.loose ? re[t.LOOSE] : re[t.FULL]);
+        const m = version.trim().match(options.loose ? re[t2.LOOSE] : re[t2.FULL]);
         if (!m) {
           throw new TypeError(`Invalid Version: ${version}`);
         }
@@ -21606,18 +21606,18 @@ var require_semver = __commonJS({
         let i = 0;
         do {
           const a = this.prerelease[i];
-          const b = other.prerelease[i];
-          debug3("prerelease compare", i, a, b);
-          if (a === void 0 && b === void 0) {
+          const b2 = other.prerelease[i];
+          debug3("prerelease compare", i, a, b2);
+          if (a === void 0 && b2 === void 0) {
             return 0;
-          } else if (b === void 0) {
+          } else if (b2 === void 0) {
             return 1;
           } else if (a === void 0) {
             return -1;
-          } else if (a === b) {
+          } else if (a === b2) {
             continue;
           } else {
-            return compareIdentifiers(a, b);
+            return compareIdentifiers(a, b2);
           }
         } while (++i);
       }
@@ -21628,18 +21628,18 @@ var require_semver = __commonJS({
         let i = 0;
         do {
           const a = this.build[i];
-          const b = other.build[i];
-          debug3("build compare", i, a, b);
-          if (a === void 0 && b === void 0) {
+          const b2 = other.build[i];
+          debug3("build compare", i, a, b2);
+          if (a === void 0 && b2 === void 0) {
             return 0;
-          } else if (b === void 0) {
+          } else if (b2 === void 0) {
             return 1;
           } else if (a === void 0) {
             return -1;
-          } else if (a === b) {
+          } else if (a === b2) {
             continue;
           } else {
-            return compareIdentifiers(a, b);
+            return compareIdentifiers(a, b2);
           }
         } while (++i);
       }
@@ -21651,7 +21651,7 @@ var require_semver = __commonJS({
             throw new Error("invalid increment argument: identifier is empty");
           }
           if (identifier) {
-            const match = `-${identifier}`.match(this.options.loose ? re[t.PRERELEASELOOSE] : re[t.PRERELEASE]);
+            const match = `-${identifier}`.match(this.options.loose ? re[t2.PRERELEASELOOSE] : re[t2.PRERELEASE]);
             if (!match || match[1] !== identifier) {
               throw new Error(`invalid identifier: ${identifier}`);
             }
@@ -21789,8 +21789,8 @@ var require_valid = __commonJS({
     "use strict";
     var parse2 = require_parse2();
     var valid2 = /* @__PURE__ */ __name((version, options) => {
-      const v = parse2(version, options);
-      return v ? v.version : null;
+      const v2 = parse2(version, options);
+      return v2 ? v2.version : null;
     }, "valid");
     module2.exports = valid2;
   }
@@ -21925,7 +21925,7 @@ var require_compare = __commonJS({
   "node_modules/semver/functions/compare.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
-    var compare = /* @__PURE__ */ __name((a, b, loose) => new SemVer(a, loose).compare(new SemVer(b, loose)), "compare");
+    var compare = /* @__PURE__ */ __name((a, b2, loose) => new SemVer(a, loose).compare(new SemVer(b2, loose)), "compare");
     module2.exports = compare;
   }
 });
@@ -21935,7 +21935,7 @@ var require_rcompare = __commonJS({
   "node_modules/semver/functions/rcompare.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
-    var rcompare = /* @__PURE__ */ __name((a, b, loose) => compare(b, a, loose), "rcompare");
+    var rcompare = /* @__PURE__ */ __name((a, b2, loose) => compare(b2, a, loose), "rcompare");
     module2.exports = rcompare;
   }
 });
@@ -21945,7 +21945,7 @@ var require_compare_loose = __commonJS({
   "node_modules/semver/functions/compare-loose.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
-    var compareLoose = /* @__PURE__ */ __name((a, b) => compare(a, b, true), "compareLoose");
+    var compareLoose = /* @__PURE__ */ __name((a, b2) => compare(a, b2, true), "compareLoose");
     module2.exports = compareLoose;
   }
 });
@@ -21955,9 +21955,9 @@ var require_compare_build = __commonJS({
   "node_modules/semver/functions/compare-build.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
-    var compareBuild = /* @__PURE__ */ __name((a, b, loose) => {
+    var compareBuild = /* @__PURE__ */ __name((a, b2, loose) => {
       const versionA = new SemVer(a, loose);
-      const versionB = new SemVer(b, loose);
+      const versionB = new SemVer(b2, loose);
       return versionA.compare(versionB) || versionA.compareBuild(versionB);
     }, "compareBuild");
     module2.exports = compareBuild;
@@ -21969,7 +21969,7 @@ var require_sort = __commonJS({
   "node_modules/semver/functions/sort.js"(exports2, module2) {
     "use strict";
     var compareBuild = require_compare_build();
-    var sort = /* @__PURE__ */ __name((list, loose) => list.sort((a, b) => compareBuild(a, b, loose)), "sort");
+    var sort = /* @__PURE__ */ __name((list, loose) => list.sort((a, b2) => compareBuild(a, b2, loose)), "sort");
     module2.exports = sort;
   }
 });
@@ -21979,7 +21979,7 @@ var require_rsort = __commonJS({
   "node_modules/semver/functions/rsort.js"(exports2, module2) {
     "use strict";
     var compareBuild = require_compare_build();
-    var rsort = /* @__PURE__ */ __name((list, loose) => list.sort((a, b) => compareBuild(b, a, loose)), "rsort");
+    var rsort = /* @__PURE__ */ __name((list, loose) => list.sort((a, b2) => compareBuild(b2, a, loose)), "rsort");
     module2.exports = rsort;
   }
 });
@@ -21989,7 +21989,7 @@ var require_gt = __commonJS({
   "node_modules/semver/functions/gt.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
-    var gt2 = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) > 0, "gt");
+    var gt2 = /* @__PURE__ */ __name((a, b2, loose) => compare(a, b2, loose) > 0, "gt");
     module2.exports = gt2;
   }
 });
@@ -21999,7 +21999,7 @@ var require_lt = __commonJS({
   "node_modules/semver/functions/lt.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
-    var lt = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) < 0, "lt");
+    var lt = /* @__PURE__ */ __name((a, b2, loose) => compare(a, b2, loose) < 0, "lt");
     module2.exports = lt;
   }
 });
@@ -22009,7 +22009,7 @@ var require_eq = __commonJS({
   "node_modules/semver/functions/eq.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
-    var eq = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) === 0, "eq");
+    var eq = /* @__PURE__ */ __name((a, b2, loose) => compare(a, b2, loose) === 0, "eq");
     module2.exports = eq;
   }
 });
@@ -22019,7 +22019,7 @@ var require_neq = __commonJS({
   "node_modules/semver/functions/neq.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
-    var neq = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) !== 0, "neq");
+    var neq = /* @__PURE__ */ __name((a, b2, loose) => compare(a, b2, loose) !== 0, "neq");
     module2.exports = neq;
   }
 });
@@ -22029,7 +22029,7 @@ var require_gte = __commonJS({
   "node_modules/semver/functions/gte.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
-    var gte = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) >= 0, "gte");
+    var gte = /* @__PURE__ */ __name((a, b2, loose) => compare(a, b2, loose) >= 0, "gte");
     module2.exports = gte;
   }
 });
@@ -22039,7 +22039,7 @@ var require_lte = __commonJS({
   "node_modules/semver/functions/lte.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
-    var lte = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) <= 0, "lte");
+    var lte = /* @__PURE__ */ __name((a, b2, loose) => compare(a, b2, loose) <= 0, "lte");
     module2.exports = lte;
   }
 });
@@ -22054,38 +22054,38 @@ var require_cmp = __commonJS({
     var gte = require_gte();
     var lt = require_lt();
     var lte = require_lte();
-    var cmp = /* @__PURE__ */ __name((a, op, b, loose) => {
+    var cmp = /* @__PURE__ */ __name((a, op, b2, loose) => {
       switch (op) {
         case "===":
           if (typeof a === "object") {
             a = a.version;
           }
-          if (typeof b === "object") {
-            b = b.version;
+          if (typeof b2 === "object") {
+            b2 = b2.version;
           }
-          return a === b;
+          return a === b2;
         case "!==":
           if (typeof a === "object") {
             a = a.version;
           }
-          if (typeof b === "object") {
-            b = b.version;
+          if (typeof b2 === "object") {
+            b2 = b2.version;
           }
-          return a !== b;
+          return a !== b2;
         case "":
         case "=":
         case "==":
-          return eq(a, b, loose);
+          return eq(a, b2, loose);
         case "!=":
-          return neq(a, b, loose);
+          return neq(a, b2, loose);
         case ">":
-          return gt2(a, b, loose);
+          return gt2(a, b2, loose);
         case ">=":
-          return gte(a, b, loose);
+          return gte(a, b2, loose);
         case "<":
-          return lt(a, b, loose);
+          return lt(a, b2, loose);
         case "<=":
-          return lte(a, b, loose);
+          return lte(a, b2, loose);
         default:
           throw new TypeError(`Invalid operator: ${op}`);
       }
@@ -22100,7 +22100,7 @@ var require_coerce = __commonJS({
     "use strict";
     var SemVer = require_semver();
     var parse2 = require_parse2();
-    var { safeRe: re, t } = require_re();
+    var { safeRe: re, t: t2 } = require_re();
     var coerce = /* @__PURE__ */ __name((version, options) => {
       if (version instanceof SemVer) {
         return version;
@@ -22114,9 +22114,9 @@ var require_coerce = __commonJS({
       options = options || {};
       let match = null;
       if (!options.rtl) {
-        match = version.match(options.includePrerelease ? re[t.COERCEFULL] : re[t.COERCE]);
+        match = version.match(options.includePrerelease ? re[t2.COERCEFULL] : re[t2.COERCE]);
       } else {
-        const coerceRtlRegex = options.includePrerelease ? re[t.COERCERTLFULL] : re[t.COERCERTL];
+        const coerceRtlRegex = options.includePrerelease ? re[t2.COERCERTLFULL] : re[t2.COERCERTL];
         let next;
         while ((next = coerceRtlRegex.exec(version)) && (!match || match.index + match[0].length !== version.length)) {
           if (!match || next.index + next[0].length !== match.index + match[0].length) {
@@ -22209,19 +22209,19 @@ var require_range = __commonJS({
         this.loose = !!options.loose;
         this.includePrerelease = !!options.includePrerelease;
         this.raw = range.trim().replace(SPACE_CHARACTERS, " ");
-        this.set = this.raw.split("||").map((r) => this.parseRange(r.trim())).filter((c) => c.length);
+        this.set = this.raw.split("||").map((r2) => this.parseRange(r2.trim())).filter((c2) => c2.length);
         if (!this.set.length) {
           throw new TypeError(`Invalid SemVer Range: ${this.raw}`);
         }
         if (this.set.length > 1) {
           const first2 = this.set[0];
-          this.set = this.set.filter((c) => !isNullSet(c[0]));
+          this.set = this.set.filter((c2) => !isNullSet(c2[0]));
           if (this.set.length === 0) {
             this.set = [first2];
           } else if (this.set.length > 1) {
-            for (const c of this.set) {
-              if (c.length === 1 && isAny(c[0])) {
-                this.set = [c];
+            for (const c2 of this.set) {
+              if (c2.length === 1 && isAny(c2[0])) {
+                this.set = [c2];
                 break;
               }
             }
@@ -22237,11 +22237,11 @@ var require_range = __commonJS({
               this.formatted += "||";
             }
             const comps = this.set[i];
-            for (let k = 0; k < comps.length; k++) {
-              if (k > 0) {
+            for (let k2 = 0; k2 < comps.length; k2++) {
+              if (k2 > 0) {
                 this.formatted += " ";
               }
-              this.formatted += comps[k].toString().trim();
+              this.formatted += comps[k2].toString().trim();
             }
           }
         }
@@ -22256,26 +22256,26 @@ var require_range = __commonJS({
       parseRange(range) {
         const memoOpts = (this.options.includePrerelease && FLAG_INCLUDE_PRERELEASE) | (this.options.loose && FLAG_LOOSE);
         const memoKey = memoOpts + ":" + range;
-        const cached = cache2.get(memoKey);
+        const cached = cache.get(memoKey);
         if (cached) {
           return cached;
         }
         const loose = this.options.loose;
-        const hr = loose ? re[t.HYPHENRANGELOOSE] : re[t.HYPHENRANGE];
+        const hr = loose ? re[t2.HYPHENRANGELOOSE] : re[t2.HYPHENRANGE];
         range = range.replace(hr, hyphenReplace(this.options.includePrerelease));
         debug3("hyphen replace", range);
-        range = range.replace(re[t.COMPARATORTRIM], comparatorTrimReplace);
+        range = range.replace(re[t2.COMPARATORTRIM], comparatorTrimReplace);
         debug3("comparator trim", range);
-        range = range.replace(re[t.TILDETRIM], tildeTrimReplace);
+        range = range.replace(re[t2.TILDETRIM], tildeTrimReplace);
         debug3("tilde trim", range);
-        range = range.replace(re[t.CARETTRIM], caretTrimReplace);
+        range = range.replace(re[t2.CARETTRIM], caretTrimReplace);
         debug3("caret trim", range);
         let rangeList = range.split(" ").map((comp) => parseComparator(comp, this.options)).join(" ").split(/\s+/).map((comp) => replaceGTE0(
         comp, this.options));
         if (loose) {
           rangeList = rangeList.filter((comp) => {
             debug3("loose invalid filter", comp, this.options);
-            return !!comp.match(re[t.COMPARATORLOOSE]);
+            return !!comp.match(re[t2.COMPARATORLOOSE]);
           });
         }
         debug3("range list", rangeList);
@@ -22291,7 +22291,7 @@ var require_range = __commonJS({
           rangeMap.delete("");
         }
         const result = [...rangeMap.values()];
-        cache2.set(memoKey, result);
+        cache.set(memoKey, result);
         return result;
       }
       intersects(range, options) {
@@ -22330,21 +22330,21 @@ var require_range = __commonJS({
     };
     module2.exports = Range;
     var LRU = require_lrucache();
-    var cache2 = new LRU();
+    var cache = new LRU();
     var parseOptions = require_parse_options();
     var Comparator = require_comparator();
     var debug3 = require_debug();
     var SemVer = require_semver();
     var {
       safeRe: re,
-      t,
+      t: t2,
       comparatorTrimReplace,
       tildeTrimReplace,
       caretTrimReplace
     } = require_re();
     var { FLAG_INCLUDE_PRERELEASE, FLAG_LOOSE } = require_constants6();
-    var isNullSet = /* @__PURE__ */ __name((c) => c.value === "<0.0.0-0", "isNullSet");
-    var isAny = /* @__PURE__ */ __name((c) => c.value === "", "isAny");
+    var isNullSet = /* @__PURE__ */ __name((c2) => c2.value === "<0.0.0-0", "isNullSet");
+    var isAny = /* @__PURE__ */ __name((c2) => c2.value === "", "isAny");
     var isSatisfiable = /* @__PURE__ */ __name((comparators, options) => {
       let result = true;
       const remainingComparators = comparators.slice();
@@ -22358,7 +22358,7 @@ var require_range = __commonJS({
       return result;
     }, "isSatisfiable");
     var parseComparator = /* @__PURE__ */ __name((comp, options) => {
-      comp = comp.replace(re[t.BUILD], "");
+      comp = comp.replace(re[t2.BUILD], "");
       debug3("comp", comp, options);
       comp = replaceCarets(comp, options);
       debug3("caret", comp);
@@ -22372,70 +22372,70 @@ var require_range = __commonJS({
     }, "parseComparator");
     var isX = /* @__PURE__ */ __name((id) => !id || id.toLowerCase() === "x" || id === "*", "isX");
     var replaceTildes = /* @__PURE__ */ __name((comp, options) => {
-      return comp.trim().split(/\s+/).map((c) => replaceTilde(c, options)).join(" ");
+      return comp.trim().split(/\s+/).map((c2) => replaceTilde(c2, options)).join(" ");
     }, "replaceTildes");
     var replaceTilde = /* @__PURE__ */ __name((comp, options) => {
-      const r = options.loose ? re[t.TILDELOOSE] : re[t.TILDE];
-      return comp.replace(r, (_, M, m, p, pr) => {
-        debug3("tilde", comp, _, M, m, p, pr);
+      const r2 = options.loose ? re[t2.TILDELOOSE] : re[t2.TILDE];
+      return comp.replace(r2, (_2, M2, m, p, pr) => {
+        debug3("tilde", comp, _2, M2, m, p, pr);
         let ret;
-        if (isX(M)) {
+        if (isX(M2)) {
           ret = "";
         } else if (isX(m)) {
-          ret = `>=${M}.0.0 <${+M + 1}.0.0-0`;
+          ret = `>=${M2}.0.0 <${+M2 + 1}.0.0-0`;
         } else if (isX(p)) {
-          ret = `>=${M}.${m}.0 <${M}.${+m + 1}.0-0`;
+          ret = `>=${M2}.${m}.0 <${M2}.${+m + 1}.0-0`;
         } else if (pr) {
           debug3("replaceTilde pr", pr);
-          ret = `>=${M}.${m}.${p}-${pr} <${M}.${+m + 1}.0-0`;
+          ret = `>=${M2}.${m}.${p}-${pr} <${M2}.${+m + 1}.0-0`;
         } else {
-          ret = `>=${M}.${m}.${p} <${M}.${+m + 1}.0-0`;
+          ret = `>=${M2}.${m}.${p} <${M2}.${+m + 1}.0-0`;
         }
         debug3("tilde return", ret);
         return ret;
       });
     }, "replaceTilde");
     var replaceCarets = /* @__PURE__ */ __name((comp, options) => {
-      return comp.trim().split(/\s+/).map((c) => replaceCaret(c, options)).join(" ");
+      return comp.trim().split(/\s+/).map((c2) => replaceCaret(c2, options)).join(" ");
     }, "replaceCarets");
     var replaceCaret = /* @__PURE__ */ __name((comp, options) => {
       debug3("caret", comp, options);
-      const r = options.loose ? re[t.CARETLOOSE] : re[t.CARET];
+      const r2 = options.loose ? re[t2.CARETLOOSE] : re[t2.CARET];
       const z = options.includePrerelease ? "-0" : "";
-      return comp.replace(r, (_, M, m, p, pr) => {
-        debug3("caret", comp, _, M, m, p, pr);
+      return comp.replace(r2, (_2, M2, m, p, pr) => {
+        debug3("caret", comp, _2, M2, m, p, pr);
         let ret;
-        if (isX(M)) {
+        if (isX(M2)) {
           ret = "";
         } else if (isX(m)) {
-          ret = `>=${M}.0.0${z} <${+M + 1}.0.0-0`;
+          ret = `>=${M2}.0.0${z} <${+M2 + 1}.0.0-0`;
         } else if (isX(p)) {
-          if (M === "0") {
-            ret = `>=${M}.${m}.0${z} <${M}.${+m + 1}.0-0`;
+          if (M2 === "0") {
+            ret = `>=${M2}.${m}.0${z} <${M2}.${+m + 1}.0-0`;
           } else {
-            ret = `>=${M}.${m}.0${z} <${+M + 1}.0.0-0`;
+            ret = `>=${M2}.${m}.0${z} <${+M2 + 1}.0.0-0`;
           }
         } else if (pr) {
           debug3("replaceCaret pr", pr);
-          if (M === "0") {
+          if (M2 === "0") {
             if (m === "0") {
-              ret = `>=${M}.${m}.${p}-${pr} <${M}.${m}.${+p + 1}-0`;
+              ret = `>=${M2}.${m}.${p}-${pr} <${M2}.${m}.${+p + 1}-0`;
             } else {
-              ret = `>=${M}.${m}.${p}-${pr} <${M}.${+m + 1}.0-0`;
+              ret = `>=${M2}.${m}.${p}-${pr} <${M2}.${+m + 1}.0-0`;
             }
           } else {
-            ret = `>=${M}.${m}.${p}-${pr} <${+M + 1}.0.0-0`;
+            ret = `>=${M2}.${m}.${p}-${pr} <${+M2 + 1}.0.0-0`;
           }
         } else {
           debug3("no pr");
-          if (M === "0") {
+          if (M2 === "0") {
             if (m === "0") {
-              ret = `>=${M}.${m}.${p}${z} <${M}.${m}.${+p + 1}-0`;
+              ret = `>=${M2}.${m}.${p}${z} <${M2}.${m}.${+p + 1}-0`;
             } else {
-              ret = `>=${M}.${m}.${p}${z} <${M}.${+m + 1}.0-0`;
+              ret = `>=${M2}.${m}.${p}${z} <${M2}.${+m + 1}.0-0`;
             }
           } else {
-            ret = `>=${M}.${m}.${p} <${+M + 1}.0.0-0`;
+            ret = `>=${M2}.${m}.${p} <${+M2 + 1}.0.0-0`;
           }
         }
         debug3("caret return", ret);
@@ -22444,14 +22444,14 @@ var require_range = __commonJS({
     }, "replaceCaret");
     var replaceXRanges = /* @__PURE__ */ __name((comp, options) => {
       debug3("replaceXRanges", comp, options);
-      return comp.split(/\s+/).map((c) => replaceXRange(c, options)).join(" ");
+      return comp.split(/\s+/).map((c2) => replaceXRange(c2, options)).join(" ");
     }, "replaceXRanges");
     var replaceXRange = /* @__PURE__ */ __name((comp, options) => {
       comp = comp.trim();
-      const r = options.loose ? re[t.XRANGELOOSE] : re[t.XRANGE];
-      return comp.replace(r, (ret, gtlt, M, m, p, pr) => {
-        debug3("xRange", comp, ret, gtlt, M, m, p, pr);
-        const xM = isX(M);
+      const r2 = options.loose ? re[t2.XRANGELOOSE] : re[t2.XRANGE];
+      return comp.replace(r2, (ret, gtlt, M2, m, p, pr) => {
+        debug3("xRange", comp, ret, gtlt, M2, m, p, pr);
+        const xM = isX(M2);
         const xm = xM || isX(m);
         const xp = xm || isX(p);
         const anyX = xp;
@@ -22473,7 +22473,7 @@ var require_range = __commonJS({
           if (gtlt === ">") {
             gtlt = ">=";
             if (xm) {
-              M = +M + 1;
+              M2 = +M2 + 1;
               m = 0;
               p = 0;
             } else {
@@ -22483,7 +22483,7 @@ var require_range = __commonJS({
           } else if (gtlt === "<=") {
             gtlt = "<";
             if (xm) {
-              M = +M + 1;
+              M2 = +M2 + 1;
             } else {
               m = +m + 1;
             }
@@ -22491,11 +22491,11 @@ var require_range = __commonJS({
           if (gtlt === "<") {
             pr = "-0";
           }
-          ret = `${gtlt + M}.${m}.${p}${pr}`;
+          ret = `${gtlt + M2}.${m}.${p}${pr}`;
         } else if (xm) {
-          ret = `>=${M}.0.0${pr} <${+M + 1}.0.0-0`;
+          ret = `>=${M2}.0.0${pr} <${+M2 + 1}.0.0-0`;
         } else if (xp) {
-          ret = `>=${M}.${m}.0${pr} <${M}.${+m + 1}.0-0`;
+          ret = `>=${M2}.${m}.0${pr} <${M2}.${+m + 1}.0-0`;
         }
         debug3("xRange return", ret);
         return ret;
@@ -22503,11 +22503,11 @@ var require_range = __commonJS({
     }, "replaceXRange");
     var replaceStars = /* @__PURE__ */ __name((comp, options) => {
       debug3("replaceStars", comp, options);
-      return comp.trim().replace(re[t.STAR], "");
+      return comp.trim().replace(re[t2.STAR], "");
     }, "replaceStars");
     var replaceGTE0 = /* @__PURE__ */ __name((comp, options) => {
       debug3("replaceGTE0", comp, options);
-      return comp.trim().replace(re[options.includePrerelease ? t.GTE0PRE : t.GTE0], "");
+      return comp.trim().replace(re[options.includePrerelease ? t2.GTE0PRE : t2.GTE0], "");
     }, "replaceGTE0");
     var hyphenReplace = /* @__PURE__ */ __name((incPr) => ($0, from, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr) => {
       if (isX(fM)) {
@@ -22596,8 +22596,8 @@ var require_comparator = __commonJS({
         debug3("comp", this);
       }
       parse(comp) {
-        const r = this.options.loose ? re[t.COMPARATORLOOSE] : re[t.COMPARATOR];
-        const m = comp.match(r);
+        const r2 = this.options.loose ? re[t2.COMPARATORLOOSE] : re[t2.COMPARATOR];
+        const m = comp.match(r2);
         if (!m) {
           throw new TypeError(`Invalid comparator: ${comp}`);
         }
@@ -22670,7 +22670,7 @@ var require_comparator = __commonJS({
     };
     module2.exports = Comparator;
     var parseOptions = require_parse_options();
-    var { safeRe: re, t } = require_re();
+    var { safeRe: re, t: t2 } = require_re();
     var cmp = require_cmp();
     var debug3 = require_debug();
     var SemVer = require_semver();
@@ -22701,7 +22701,7 @@ var require_to_comparators = __commonJS({
     "use strict";
     var Range = require_range();
     var toComparators = /* @__PURE__ */ __name((range, options) => new Range(range, options).set.map((comp) => comp.map(
-    (c) => c.value).join(" ").trim().split(" ")), "toComparators");
+    (c2) => c2.value).join(" ").trim().split(" ")), "toComparators");
     module2.exports = toComparators;
   }
 });
@@ -22721,10 +22721,10 @@ var require_max_satisfying = __commonJS({
       } catch (er) {
         return null;
       }
-      versions.forEach((v) => {
-        if (rangeObj.test(v)) {
-          if (!max || maxSV.compare(v) === -1) {
-            max = v;
+      versions.forEach((v2) => {
+        if (rangeObj.test(v2)) {
+          if (!max || maxSV.compare(v2) === -1) {
+            max = v2;
             maxSV = new SemVer(max, options);
           }
         }
@@ -22750,10 +22750,10 @@ var require_min_satisfying = __commonJS({
       } catch (er) {
         return null;
       }
-      versions.forEach((v) => {
-        if (rangeObj.test(v)) {
-          if (!min || minSV.compare(v) === 1) {
-            min = v;
+      versions.forEach((v2) => {
+        if (rangeObj.test(v2)) {
+          if (!min || minSV.compare(v2) === 1) {
+            min = v2;
             minSV = new SemVer(min, options);
           }
         }
@@ -22952,8 +22952,8 @@ var require_simplify = __commonJS({
       const set = [];
       let first2 = null;
       let prev = null;
-      const v = versions.sort((a, b) => compare(a, b, options));
-      for (const version of v) {
+      const v2 = versions.sort((a, b2) => compare(a, b2, options));
+      for (const version of v2) {
         const included = satisfies3(version, range, options);
         if (included) {
           prev = version;
@@ -22975,11 +22975,11 @@ var require_simplify = __commonJS({
       for (const [min, max] of set) {
         if (min === max) {
           ranges.push(min);
-        } else if (!max && min === v[0]) {
+        } else if (!max && min === v2[0]) {
           ranges.push("*");
         } else if (!max) {
           ranges.push(`>=${min}`);
-        } else if (min === v[0]) {
+        } else if (min === v2[0]) {
           ranges.push(`<=${max}`);
         } else {
           ranges.push(`${min} - ${max}`);
@@ -23046,13 +23046,13 @@ var require_subset = __commonJS({
       }
       const eqSet = /* @__PURE__ */ new Set();
       let gt2, lt;
-      for (const c of sub) {
-        if (c.operator === ">" || c.operator === ">=") {
-          gt2 = higherGT(gt2, c, options);
-        } else if (c.operator === "<" || c.operator === "<=") {
-          lt = lowerLT(lt, c, options);
+      for (const c2 of sub) {
+        if (c2.operator === ">" || c2.operator === ">=") {
+          gt2 = higherGT(gt2, c2, options);
+        } else if (c2.operator === "<" || c2.operator === "<=") {
+          lt = lowerLT(lt, c2, options);
         } else {
-          eqSet.add(c.semver);
+          eqSet.add(c2.semver);
         }
       }
       if (eqSet.size > 1) {
@@ -23074,8 +23074,8 @@ var require_subset = __commonJS({
         if (lt && !satisfies3(eq, String(lt), options)) {
           return null;
         }
-        for (const c of dom) {
-          if (!satisfies3(eq, String(c), options)) {
+        for (const c2 of dom) {
+          if (!satisfies3(eq, String(c2), options)) {
             return false;
           }
         }
@@ -23088,42 +23088,42 @@ var require_subset = __commonJS({
       if (needDomLTPre && needDomLTPre.prerelease.length === 1 && lt.operator === "<" && needDomLTPre.prerelease[0] === 0) {
         needDomLTPre = false;
       }
-      for (const c of dom) {
-        hasDomGT = hasDomGT || c.operator === ">" || c.operator === ">=";
-        hasDomLT = hasDomLT || c.operator === "<" || c.operator === "<=";
+      for (const c2 of dom) {
+        hasDomGT = hasDomGT || c2.operator === ">" || c2.operator === ">=";
+        hasDomLT = hasDomLT || c2.operator === "<" || c2.operator === "<=";
         if (gt2) {
           if (needDomGTPre) {
-            if (c.semver.prerelease && c.semver.prerelease.length && c.semver.major === needDomGTPre.major && c.semver.minor ===
-            needDomGTPre.minor && c.semver.patch === needDomGTPre.patch) {
+            if (c2.semver.prerelease && c2.semver.prerelease.length && c2.semver.major === needDomGTPre.major && c2.semver.
+            minor === needDomGTPre.minor && c2.semver.patch === needDomGTPre.patch) {
               needDomGTPre = false;
             }
           }
-          if (c.operator === ">" || c.operator === ">=") {
-            higher = higherGT(gt2, c, options);
-            if (higher === c && higher !== gt2) {
+          if (c2.operator === ">" || c2.operator === ">=") {
+            higher = higherGT(gt2, c2, options);
+            if (higher === c2 && higher !== gt2) {
               return false;
             }
-          } else if (gt2.operator === ">=" && !satisfies3(gt2.semver, String(c), options)) {
+          } else if (gt2.operator === ">=" && !satisfies3(gt2.semver, String(c2), options)) {
             return false;
           }
         }
         if (lt) {
           if (needDomLTPre) {
-            if (c.semver.prerelease && c.semver.prerelease.length && c.semver.major === needDomLTPre.major && c.semver.minor ===
-            needDomLTPre.minor && c.semver.patch === needDomLTPre.patch) {
+            if (c2.semver.prerelease && c2.semver.prerelease.length && c2.semver.major === needDomLTPre.major && c2.semver.
+            minor === needDomLTPre.minor && c2.semver.patch === needDomLTPre.patch) {
               needDomLTPre = false;
             }
           }
-          if (c.operator === "<" || c.operator === "<=") {
-            lower = lowerLT(lt, c, options);
-            if (lower === c && lower !== lt) {
+          if (c2.operator === "<" || c2.operator === "<=") {
+            lower = lowerLT(lt, c2, options);
+            if (lower === c2 && lower !== lt) {
               return false;
             }
-          } else if (lt.operator === "<=" && !satisfies3(lt.semver, String(c), options)) {
+          } else if (lt.operator === "<=" && !satisfies3(lt.semver, String(c2), options)) {
             return false;
           }
         }
-        if (!c.operator && (lt || gt2) && gtltComp !== 0) {
+        if (!c2.operator && (lt || gt2) && gtltComp !== 0) {
           return false;
         }
       }
@@ -23138,19 +23138,19 @@ var require_subset = __commonJS({
       }
       return true;
     }, "simpleSubset");
-    var higherGT = /* @__PURE__ */ __name((a, b, options) => {
+    var higherGT = /* @__PURE__ */ __name((a, b2, options) => {
       if (!a) {
-        return b;
+        return b2;
       }
-      const comp = compare(a.semver, b.semver, options);
-      return comp > 0 ? a : comp < 0 ? b : b.operator === ">" && a.operator === ">=" ? b : a;
+      const comp = compare(a.semver, b2.semver, options);
+      return comp > 0 ? a : comp < 0 ? b2 : b2.operator === ">" && a.operator === ">=" ? b2 : a;
     }, "higherGT");
-    var lowerLT = /* @__PURE__ */ __name((a, b, options) => {
+    var lowerLT = /* @__PURE__ */ __name((a, b2, options) => {
       if (!a) {
-        return b;
+        return b2;
       }
-      const comp = compare(a.semver, b.semver, options);
-      return comp < 0 ? a : comp > 0 ? b : b.operator === "<" && a.operator === "<=" ? b : a;
+      const comp = compare(a.semver, b2.semver, options);
+      return comp < 0 ? a : comp > 0 ? b2 : b2.operator === "<" && a.operator === "<=" ? b2 : a;
     }, "lowerLT");
     module2.exports = subset;
   }
@@ -23306,9 +23306,9 @@ var require_proxy = __commonJS({
       if (typeof reqPort === "number") {
         upperReqHosts.push(`${upperReqHosts[0]}:${reqPort}`);
       }
-      for (const upperNoProxyItem of noProxy.split(",").map((x) => x.trim().toUpperCase()).filter((x) => x)) {
-        if (upperNoProxyItem === "*" || upperReqHosts.some((x) => x === upperNoProxyItem || x.endsWith(`.${upperNoProxyItem}`) ||
-        upperNoProxyItem.startsWith(".") && x.endsWith(`${upperNoProxyItem}`))) {
+      for (const upperNoProxyItem of noProxy.split(",").map((x2) => x2.trim().toUpperCase()).filter((x2) => x2)) {
+        if (upperNoProxyItem === "*" || upperReqHosts.some((x2) => x2 === upperNoProxyItem || x2.endsWith(`.${upperNoProxyItem}`) ||
+        upperNoProxyItem.startsWith(".") && x2.endsWith(`${upperNoProxyItem}`))) {
           return true;
         }
       }
@@ -23344,51 +23344,51 @@ var require_proxy = __commonJS({
 var require_lib = __commonJS({
   "node_modules/@actions/github/node_modules/@actions/http-client/lib/index.js"(exports2) {
     "use strict";
-    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
-      if (k2 === void 0) k2 = k;
-      var desc = Object.getOwnPropertyDescriptor(m, k);
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o2, m, k2, k22) {
+      if (k22 === void 0) k22 = k2;
+      var desc = Object.getOwnPropertyDescriptor(m, k2);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
         desc = { enumerable: true, get: /* @__PURE__ */ __name(function() {
-          return m[k];
+          return m[k2];
         }, "get") };
       }
-      Object.defineProperty(o, k2, desc);
-    }) : (function(o, m, k, k2) {
-      if (k2 === void 0) k2 = k;
-      o[k2] = m[k];
+      Object.defineProperty(o2, k22, desc);
+    }) : (function(o2, m, k2, k22) {
+      if (k22 === void 0) k22 = k2;
+      o2[k22] = m[k2];
     }));
-    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
-      Object.defineProperty(o, "default", { enumerable: true, value: v });
-    }) : function(o, v) {
-      o["default"] = v;
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o2, v2) {
+      Object.defineProperty(o2, "default", { enumerable: true, value: v2 });
+    }) : function(o2, v2) {
+      o2["default"] = v2;
     });
     var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
-      var ownKeys = /* @__PURE__ */ __name(function(o) {
-        ownKeys = Object.getOwnPropertyNames || function(o2) {
+      var ownKeys = /* @__PURE__ */ __name(function(o2) {
+        ownKeys = Object.getOwnPropertyNames || function(o3) {
           var ar = [];
-          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          for (var k2 in o3) if (Object.prototype.hasOwnProperty.call(o3, k2)) ar[ar.length] = k2;
           return ar;
         };
-        return ownKeys(o);
+        return ownKeys(o2);
       }, "ownKeys");
       return function(mod) {
         if (mod && mod.__esModule) return mod;
         var result = {};
         if (mod != null) {
-          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+          for (var k2 = ownKeys(mod), i = 0; i < k2.length; i++) if (k2[i] !== "default") __createBinding(result, mod, k2[i]);
         }
         __setModuleDefault(result, mod);
         return result;
       };
     })();
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P ? value : new P(function(resolve) {
+        return value instanceof P2 ? value : new P2(function(resolve) {
           resolve(value);
         });
       }
       __name(adopt, "adopt");
-      return new (P || (P = Promise))(function(resolve, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -24056,8 +24056,8 @@ s. If you want to allow this behavior, set the allowRedirectDowngrade option to 
       }
     };
     exports2.HttpClient = HttpClient3;
-    var lowercaseKeys2 = /* @__PURE__ */ __name((obj) => Object.keys(obj).reduce((c, k) => (c[k.toLowerCase()] = obj[k],
-    c), {}), "lowercaseKeys");
+    var lowercaseKeys2 = /* @__PURE__ */ __name((obj) => Object.keys(obj).reduce((c2, k2) => (c2[k2.toLowerCase()] = obj[k2],
+    c2), {}), "lowercaseKeys");
   }
 });
 
@@ -24303,9 +24303,9 @@ var require_q = __commonJS({
         return nextTick;
       })();
       var call = Function.call;
-      function uncurryThis(f) {
+      function uncurryThis(f2) {
         return function() {
-          return call.apply(f, arguments);
+          return call.apply(f2, arguments);
         };
       }
       __name(uncurryThis, "uncurryThis");
@@ -24618,15 +24618,15 @@ var require_q = __commonJS({
       Promise2.prototype.passByCopy = function() {
         return this;
       };
-      Q.join = function(x, y) {
-        return Q(x).join(y);
+      Q.join = function(x2, y2) {
+        return Q(x2).join(y2);
       };
       Promise2.prototype.join = function(that) {
-        return Q([this, that]).spread(function(x, y) {
-          if (x === y) {
-            return x;
+        return Q([this, that]).spread(function(x2, y2) {
+          if (x2 === y2) {
+            return x2;
           } else {
-            throw new Error("Q can't join: not the same: " + x + " " + y);
+            throw new Error("Q can't join: not the same: " + x2 + " " + y2);
           }
         });
       };
@@ -26072,8 +26072,8 @@ u205f\\u3000", rsUpperRange = "A-Z\\xc0-\\xd6\\xd8-\\xde", rsVarRange = "\\ufe0e
         });
       }
       __name(baseValues, "baseValues");
-      function cacheHas(cache2, key) {
-        return cache2.has(key);
+      function cacheHas(cache, key) {
+        return cache.has(key);
       }
       __name(cacheHas, "cacheHas");
       function charsStartIndex(strSymbols, chrSymbols) {
@@ -26221,7 +26221,7 @@ u205f\\u3000", rsUpperRange = "A-Z\\xc0-\\xd6\\xd8-\\xde", rsVarRange = "\\ufe0e
       }
       __name(unicodeWords, "unicodeWords");
       var runInContext = /* @__PURE__ */ __name((function runInContext2(context3) {
-        context3 = context3 == null ? root : _.defaults(root.Object(), context3, _.pick(root, contextProps));
+        context3 = context3 == null ? root : _2.defaults(root.Object(), context3, _2.pick(root, contextProps));
         var Array2 = context3.Array, Date2 = context3.Date, Error2 = context3.Error, Function2 = context3.Function, Math2 = context3.
         Math, Object2 = context3.Object, RegExp2 = context3.RegExp, String2 = context3.String, TypeError2 = context3.TypeError;
         var arrayProto = Array2.prototype, funcProto = Function2.prototype, objectProto = Object2.prototype;
@@ -27002,8 +27002,8 @@ u205f\\u3000", rsUpperRange = "A-Z\\xc0-\\xd6\\xd8-\\xde", rsVarRange = "\\ufe0e
               if (!(seen ? cacheHas(seen, computed) : includes2(result2, computed, comparator))) {
                 othIndex = othLength;
                 while (--othIndex) {
-                  var cache2 = caches[othIndex];
-                  if (!(cache2 ? cacheHas(cache2, computed) : includes2(arrays[othIndex], computed, comparator))) {
+                  var cache = caches[othIndex];
+                  if (!(cache ? cacheHas(cache, computed) : includes2(arrays[othIndex], computed, comparator))) {
                     continue outer;
                   }
                 }
@@ -28768,12 +28768,12 @@ on" && objCtor instanceof objCtor && typeof othCtor == "function" && othCtor ins
         __name(matchesStrictComparable, "matchesStrictComparable");
         function memoizeCapped(func) {
           var result2 = memoize(func, function(key) {
-            if (cache2.size === MAX_MEMOIZE_SIZE) {
-              cache2.clear();
+            if (cache.size === MAX_MEMOIZE_SIZE) {
+              cache.clear();
             }
             return key;
           });
-          var cache2 = result2.cache;
+          var cache = result2.cache;
           return result2;
         }
         __name(memoizeCapped, "memoizeCapped");
@@ -29847,12 +29847,12 @@ on" && objCtor instanceof objCtor && typeof othCtor == "function" && othCtor ins
             throw new TypeError2(FUNC_ERROR_TEXT);
           }
           var memoized = /* @__PURE__ */ __name(function() {
-            var args = arguments, key = resolver ? resolver.apply(this, args) : args[0], cache2 = memoized.cache;
-            if (cache2.has(key)) {
-              return cache2.get(key);
+            var args = arguments, key = resolver ? resolver.apply(this, args) : args[0], cache = memoized.cache;
+            if (cache.has(key)) {
+              return cache.get(key);
             }
             var result2 = func.apply(this, args);
-            memoized.cache = cache2.set(key, result2) || cache2;
+            memoized.cache = cache.set(key, result2) || cache;
             return result2;
           }, "memoized");
           memoized.cache = new (memoize.Cache || MapCache)();
@@ -31548,17 +31548,17 @@ p = ''" + (isEscaping ? ", __e = _.escape" : "") + (isEvaluating ? ", __j = Arra
         }
         return lodash;
       }), "runInContext");
-      var _ = runInContext();
+      var _2 = runInContext();
       if (typeof define == "function" && typeof define.amd == "object" && define.amd) {
-        root._ = _;
+        root._ = _2;
         define(function() {
-          return _;
+          return _2;
         });
       } else if (freeModule) {
-        (freeModule.exports = _)._ = _;
-        freeExports._ = _;
+        (freeModule.exports = _2)._ = _2;
+        freeExports._ = _2;
       } else {
-        root._ = _;
+        root._ = _2;
       }
     }).call(exports2);
   }
@@ -31748,30 +31748,30 @@ var require_compare_func = __commonJS({
     var arrayify = require_array_ify();
     var dotPropGet = require_dot_prop().get;
     function compareFunc(prop) {
-      return function(a, b) {
+      return function(a, b2) {
         var ret = 0;
         arrayify(prop).some(function(el) {
-          var x;
-          var y;
+          var x2;
+          var y2;
           if (typeof el === "function") {
-            x = el(a);
-            y = el(b);
+            x2 = el(a);
+            y2 = el(b2);
           } else if (typeof el === "string") {
-            x = dotPropGet(a, el);
-            y = dotPropGet(b, el);
+            x2 = dotPropGet(a, el);
+            y2 = dotPropGet(b2, el);
           } else {
-            x = a;
-            y = b;
+            x2 = a;
+            y2 = b2;
           }
-          if (x === y) {
+          if (x2 === y2) {
             ret = 0;
             return;
           }
-          if (typeof x === "string" && typeof y === "string") {
-            ret = x.localeCompare(y);
+          if (typeof x2 === "string" && typeof y2 === "string") {
+            ret = x2.localeCompare(y2);
             return ret !== 0;
           }
-          ret = x < y ? -1 : 1;
+          ret = x2 < y2 ? -1 : 1;
           return true;
         });
         return ret;
@@ -31877,7 +31877,7 @@ refix}}{{this.issue}}]({{issueUrlFormat}})\n  {{~else}}\n    {{~#if this.owner}}
             config.issuePrefixes.join("|");
             const issueRegEx = "(" + config.issuePrefixes.join("|") + ")([0-9]+)";
             const re = new RegExp(issueRegEx, "g");
-            commit.subject = commit.subject.replace(re, (_, prefix, issue2) => {
+            commit.subject = commit.subject.replace(re, (_2, prefix, issue2) => {
               issues.push(prefix + issue2);
               const url = expandTemplate(config.issueUrlFormat, {
                 host: context3.host,
@@ -31888,7 +31888,7 @@ refix}}{{this.issue}}]({{issueUrlFormat}})\n  {{~else}}\n    {{~#if this.owner}}
               });
               return `[${prefix}${issue2}](${url})`;
             });
-            commit.subject = commit.subject.replace(/\B@([a-z0-9](?:-?[a-z0-9/]){0,38})/g, (_, user) => {
+            commit.subject = commit.subject.replace(/\B@([a-z0-9](?:-?[a-z0-9/]){0,38})/g, (_2, user) => {
               if (user.includes("/")) {
                 return `@${user}`;
               }
@@ -31912,10 +31912,10 @@ refix}}{{this.issue}}]({{issueUrlFormat}})\n  {{~else}}\n    {{~#if this.owner}}
         groupBy: "type",
         // the groupings of commit messages, e.g., Features vs., Bug Fixes, are
         // sorted based on their probable importance:
-        commitGroupsSort: /* @__PURE__ */ __name((a, b) => {
+        commitGroupsSort: /* @__PURE__ */ __name((a, b2) => {
           const commitGroupOrder = ["Reverts", "Performance Improvements", "Bug Fixes", "Features"];
           const gRankA = commitGroupOrder.indexOf(a.title);
-          const gRankB = commitGroupOrder.indexOf(b.title);
+          const gRankB = commitGroupOrder.indexOf(b2.title);
           if (gRankA >= gRankB) {
             return -1;
           } else {
@@ -32023,13 +32023,13 @@ var require_conventional_changelog_conventionalcommits = __commonJS({
   "node_modules/conventional-changelog-conventionalcommits/index.js"(exports2, module2) {
     "use strict";
     var Q = require_q();
-    var _ = require_lodash();
+    var _2 = require_lodash();
     var conventionalChangelog2 = require_conventional_changelog();
     var parserOpts = require_parser_opts();
     var recommendedBumpOpts = require_conventional_recommended_bump();
     var writerOpts = require_writer_opts();
     module2.exports = function(parameter) {
-      if (_.isFunction(parameter)) {
+      if (_2.isFunction(parameter)) {
         const config = {};
         Q.all([
           conventionalChangelog2(config),
@@ -32116,8 +32116,8 @@ var require_add_stream = __commonJS({
 var require_dargs = __commonJS({
   "node_modules/dargs/index.js"(exports2, module2) {
     "use strict";
-    var match = /* @__PURE__ */ __name((array, value) => array.some((x) => x instanceof RegExp ? x.test(value) : x === value),
-    "match");
+    var match = /* @__PURE__ */ __name((array, value) => array.some((x2) => x2 instanceof RegExp ? x2.test(value) : x2 ===
+    value), "match");
     var dargs = /* @__PURE__ */ __name((object, options) => {
       const arguments_ = [];
       let extraArguments = [];
@@ -32312,9 +32312,9 @@ var require_buffer_list = __commonJS({
       __name(BufferList, "BufferList");
       _createClass(BufferList, [{
         key: "push",
-        value: /* @__PURE__ */ __name(function push(v) {
+        value: /* @__PURE__ */ __name(function push(v2) {
           var entry = {
-            data: v,
+            data: v2,
             next: null
           };
           if (this.length > 0) this.tail.next = entry;
@@ -32324,9 +32324,9 @@ var require_buffer_list = __commonJS({
         }, "push")
       }, {
         key: "unshift",
-        value: /* @__PURE__ */ __name(function unshift(v) {
+        value: /* @__PURE__ */ __name(function unshift(v2) {
           var entry = {
-            data: v,
+            data: v2,
             next: this.head
           };
           if (this.length === 0) this.tail = entry;
@@ -32397,7 +32397,7 @@ var require_buffer_list = __commonJS({
         key: "_getString",
         value: /* @__PURE__ */ __name(function _getString(n) {
           var p = this.head;
-          var c = 1;
+          var c2 = 1;
           var ret = p.data;
           n -= ret.length;
           while (p = p.next) {
@@ -32408,7 +32408,7 @@ var require_buffer_list = __commonJS({
             n -= nb;
             if (n === 0) {
               if (nb === str.length) {
-                ++c;
+                ++c2;
                 if (p.next) this.head = p.next;
                 else this.head = this.tail = null;
               } else {
@@ -32417,9 +32417,9 @@ var require_buffer_list = __commonJS({
               }
               break;
             }
-            ++c;
+            ++c2;
           }
-          this.length -= c;
+          this.length -= c2;
           return ret;
         }, "_getString")
         // Consumes a specified amount of bytes from the buffered data.
@@ -32428,7 +32428,7 @@ var require_buffer_list = __commonJS({
         value: /* @__PURE__ */ __name(function _getBuffer(n) {
           var ret = Buffer3.allocUnsafe(n);
           var p = this.head;
-          var c = 1;
+          var c2 = 1;
           p.data.copy(ret);
           n -= p.data.length;
           while (p = p.next) {
@@ -32438,7 +32438,7 @@ var require_buffer_list = __commonJS({
             n -= nb;
             if (n === 0) {
               if (nb === buf.length) {
-                ++c;
+                ++c2;
                 if (p.next) this.head = p.next;
                 else this.head = this.tail = null;
               } else {
@@ -32447,15 +32447,15 @@ var require_buffer_list = __commonJS({
               }
               break;
             }
-            ++c;
+            ++c2;
           }
-          this.length -= c;
+          this.length -= c2;
           return ret;
         }, "_getBuffer")
         // Make sure the linked list only shows the minimal necessary information.
       }, {
         key: custom,
-        value: /* @__PURE__ */ __name(function value(_, options) {
+        value: /* @__PURE__ */ __name(function value(_2, options) {
           return inspect(this, _objectSpread(_objectSpread({}, options), {}, {
             // Only inspect one level.
             depth: 0,
@@ -32856,7 +32856,7 @@ var require_stream_writable = __commonJS({
           }, "writableStateBufferGetter"), "_writableState.buffer is deprecated. Use _writableState.getBuffer instead.",
           "DEP0003")
         });
-      } catch (_) {
+      } catch (_2) {
       }
     })();
     var realHasInstance;
@@ -33266,14 +33266,14 @@ var require_stream_duplex = __commonJS({
     require_inherits()(Duplex, Readable);
     {
       keys = objectKeys(Writable.prototype);
-      for (v = 0; v < keys.length; v++) {
-        method = keys[v];
+      for (v2 = 0; v2 < keys.length; v2++) {
+        method = keys[v2];
         if (!Duplex.prototype[method]) Duplex.prototype[method] = Writable.prototype[method];
       }
     }
     var keys;
     var method;
-    var v;
+    var v2;
     function Duplex(options) {
       if (!(this instanceof Duplex)) return new Duplex(options);
       Readable.call(this, options);
@@ -33497,18 +33497,18 @@ encoding: " + enc);
     __name(StringDecoder, "StringDecoder");
     StringDecoder.prototype.write = function(buf) {
       if (buf.length === 0) return "";
-      var r;
+      var r2;
       var i;
       if (this.lastNeed) {
-        r = this.fillLast(buf);
-        if (r === void 0) return "";
+        r2 = this.fillLast(buf);
+        if (r2 === void 0) return "";
         i = this.lastNeed;
         this.lastNeed = 0;
       } else {
         i = 0;
       }
-      if (i < buf.length) return r ? r + this.text(buf, i) : this.text(buf, i);
-      return r || "";
+      if (i < buf.length) return r2 ? r2 + this.text(buf, i) : this.text(buf, i);
+      return r2 || "";
     };
     StringDecoder.prototype.end = utf8End;
     StringDecoder.prototype.text = utf8Text;
@@ -33529,21 +33529,21 @@ encoding: " + enc);
     }
     __name(utf8CheckByte, "utf8CheckByte");
     function utf8CheckIncomplete(self2, buf, i) {
-      var j = buf.length - 1;
-      if (j < i) return 0;
-      var nb = utf8CheckByte(buf[j]);
+      var j2 = buf.length - 1;
+      if (j2 < i) return 0;
+      var nb = utf8CheckByte(buf[j2]);
       if (nb >= 0) {
         if (nb > 0) self2.lastNeed = nb - 1;
         return nb;
       }
-      if (--j < i || nb === -2) return 0;
-      nb = utf8CheckByte(buf[j]);
+      if (--j2 < i || nb === -2) return 0;
+      nb = utf8CheckByte(buf[j2]);
       if (nb >= 0) {
         if (nb > 0) self2.lastNeed = nb - 2;
         return nb;
       }
-      if (--j < i || nb === -2) return 0;
-      nb = utf8CheckByte(buf[j]);
+      if (--j2 < i || nb === -2) return 0;
+      nb = utf8CheckByte(buf[j2]);
       if (nb >= 0) {
         if (nb > 0) {
           if (nb === 2) nb = 0;
@@ -33575,8 +33575,8 @@ encoding: " + enc);
     __name(utf8CheckExtraBytes, "utf8CheckExtraBytes");
     function utf8FillLast(buf) {
       var p = this.lastTotal - this.lastNeed;
-      var r = utf8CheckExtraBytes(this, buf, p);
-      if (r !== void 0) return r;
+      var r2 = utf8CheckExtraBytes(this, buf, p);
+      if (r2 !== void 0) return r2;
       if (this.lastNeed <= buf.length) {
         buf.copy(this.lastChar, p, 0, this.lastNeed);
         return this.lastChar.toString(this.encoding, 0, this.lastTotal);
@@ -33595,25 +33595,25 @@ encoding: " + enc);
     }
     __name(utf8Text, "utf8Text");
     function utf8End(buf) {
-      var r = buf && buf.length ? this.write(buf) : "";
-      if (this.lastNeed) return r + "\uFFFD";
-      return r;
+      var r2 = buf && buf.length ? this.write(buf) : "";
+      if (this.lastNeed) return r2 + "\uFFFD";
+      return r2;
     }
     __name(utf8End, "utf8End");
     function utf16Text(buf, i) {
       if ((buf.length - i) % 2 === 0) {
-        var r = buf.toString("utf16le", i);
-        if (r) {
-          var c = r.charCodeAt(r.length - 1);
-          if (c >= 55296 && c <= 56319) {
+        var r2 = buf.toString("utf16le", i);
+        if (r2) {
+          var c2 = r2.charCodeAt(r2.length - 1);
+          if (c2 >= 55296 && c2 <= 56319) {
             this.lastNeed = 2;
             this.lastTotal = 4;
             this.lastChar[0] = buf[buf.length - 2];
             this.lastChar[1] = buf[buf.length - 1];
-            return r.slice(0, -1);
+            return r2.slice(0, -1);
           }
         }
-        return r;
+        return r2;
       }
       this.lastNeed = 1;
       this.lastTotal = 2;
@@ -33622,12 +33622,12 @@ encoding: " + enc);
     }
     __name(utf16Text, "utf16Text");
     function utf16End(buf) {
-      var r = buf && buf.length ? this.write(buf) : "";
+      var r2 = buf && buf.length ? this.write(buf) : "";
       if (this.lastNeed) {
         var end = this.lastTotal - this.lastNeed;
-        return r + this.lastChar.toString("utf16le", 0, end);
+        return r2 + this.lastChar.toString("utf16le", 0, end);
       }
-      return r;
+      return r2;
     }
     __name(utf16End, "utf16End");
     function base64Text(buf, i) {
@@ -33645,9 +33645,9 @@ encoding: " + enc);
     }
     __name(base64Text, "base64Text");
     function base64End(buf) {
-      var r = buf && buf.length ? this.write(buf) : "";
-      if (this.lastNeed) return r + this.lastChar.toString("base64", 0, 3 - this.lastNeed);
-      return r;
+      var r2 = buf && buf.length ? this.write(buf) : "";
+      if (this.lastNeed) return r2 + this.lastChar.toString("base64", 0, 3 - this.lastNeed);
+      return r2;
     }
     __name(base64End, "base64End");
     function simpleWrite(buf) {
@@ -34839,9 +34839,9 @@ var require_stream_readable = __commonJS({
         return from(Readable, iterable, opts);
       };
     }
-    function indexOf(xs, x) {
+    function indexOf(xs, x2) {
       for (var i = 0, l = xs.length; i < l; i++) {
-        if (xs[i] === x) return i;
+        if (xs[i] === x2) return i;
       }
       return -1;
     }
@@ -36642,7 +36642,7 @@ var require_git_raw_commits = __commonJS({
 var require_parser = __commonJS({
   "node_modules/conventional-commits-parser/lib/parser.js"(exports2, module2) {
     "use strict";
-    var _ = require_lodash();
+    var _2 = require_lodash();
     var CATCH_ALL = /()(.+)/gi;
     var SCISSOR = "# ------------------------ >8 ------------------------";
     function trimOffNewlines(input) {
@@ -36719,10 +36719,10 @@ var require_parser = __commonJS({
       if (!raw || !raw.trim()) {
         throw new TypeError("Expected a raw commit");
       }
-      if (_.isEmpty(options)) {
+      if (_2.isEmpty(options)) {
         throw new TypeError("Expected options");
       }
-      if (_.isEmpty(regex)) {
+      if (_2.isEmpty(regex)) {
         throw new TypeError("Expected regex");
       }
       let currentProcessedField;
@@ -36734,13 +36734,13 @@ var require_parser = __commonJS({
       const lines = truncateToScissor(rawLines).filter(commentFilter).filter(gpgFilter);
       let continueNote = false;
       let isBody = true;
-      const headerCorrespondence = _.map(options.headerCorrespondence, function(part) {
+      const headerCorrespondence = _2.map(options.headerCorrespondence, function(part) {
         return part.trim();
       });
-      const revertCorrespondence = _.map(options.revertCorrespondence, function(field) {
+      const revertCorrespondence = _2.map(options.revertCorrespondence, function(field) {
         return field.trim();
       });
-      const mergeCorrespondence = _.map(options.mergeCorrespondence, function(field) {
+      const mergeCorrespondence = _2.map(options.mergeCorrespondence, function(field) {
         return field.trim();
       });
       let body = null;
@@ -36781,25 +36781,25 @@ var require_parser = __commonJS({
         if (!header) {
           header = "";
         }
-        _.forEach(mergeCorrespondence, function(partName, index) {
+        _2.forEach(mergeCorrespondence, function(partName, index) {
           const partValue = mergeMatch[index + 1] || null;
           mergeParts[partName] = partValue;
         });
       } else {
         header = merge2;
         merge2 = null;
-        _.forEach(mergeCorrespondence, function(partName) {
+        _2.forEach(mergeCorrespondence, function(partName) {
           mergeParts[partName] = null;
         });
       }
       const headerMatch = header.match(options.headerPattern);
       if (headerMatch) {
-        _.forEach(headerCorrespondence, function(partName, index) {
+        _2.forEach(headerCorrespondence, function(partName, index) {
           const partValue = headerMatch[index + 1] || null;
           headerParts[partName] = partValue;
         });
       } else {
-        _.forEach(headerCorrespondence, function(partName) {
+        _2.forEach(headerCorrespondence, function(partName) {
           headerParts[partName] = null;
         });
       }
@@ -36807,7 +36807,7 @@ var require_parser = __commonJS({
         references: regex.references,
         referenceParts: regex.referenceParts
       }));
-      _.forEach(lines, function(line) {
+      _2.forEach(lines, function(line) {
         if (options.fieldPattern) {
           const fieldMatch = options.fieldPattern.exec(line);
           if (fieldMatch) {
@@ -36873,18 +36873,18 @@ var require_parser = __commonJS({
       const revertMatch = raw.match(options.revertPattern);
       if (revertMatch) {
         revert = {};
-        _.forEach(revertCorrespondence, function(partName, index) {
+        _2.forEach(revertCorrespondence, function(partName, index) {
           const partValue = revertMatch[index + 1] || null;
           revert[partName] = partValue;
         });
       } else {
         revert = null;
       }
-      _.map(notes, function(note) {
+      _2.map(notes, function(note) {
         note.text = trimOffNewlines(note.text);
         return note;
       });
-      const msg = _.merge(headerParts, mergeParts, {
+      const msg = _2.merge(headerParts, mergeParts, {
         merge: merge2,
         header,
         body: body ? trimOffNewlines(body) : null,
@@ -36963,9 +36963,9 @@ var require_conventional_commits_parser = __commonJS({
     var parser4 = require_parser();
     var regex = require_regex();
     var through = require_through2();
-    var _ = require_lodash();
+    var _2 = require_lodash();
     function assignOpts(options) {
-      options = _.extend({
+      options = _2.extend({
         headerPattern: /^(\w*)(?:\(([\w$.\-*/ ]*)\))?: (.*)$/,
         headerCorrespondence: ["type", "scope", "subject"],
         referenceActions: [
@@ -37079,48 +37079,48 @@ var require_dateformat = __commonJS({
               gmt = true;
             }
           }
-          var _ = utc ? "getUTC" : "get";
-          var d = date[_ + "Date"]();
-          var D = date[_ + "Day"]();
-          var m = date[_ + "Month"]();
-          var y = date[_ + "FullYear"]();
-          var H = date[_ + "Hours"]();
-          var M = date[_ + "Minutes"]();
-          var s = date[_ + "Seconds"]();
-          var L = date[_ + "Milliseconds"]();
-          var o = utc ? 0 : date.getTimezoneOffset();
-          var W = getWeek(date);
-          var N = getDayOfWeek(date);
+          var _2 = utc ? "getUTC" : "get";
+          var d = date[_2 + "Date"]();
+          var D2 = date[_2 + "Day"]();
+          var m = date[_2 + "Month"]();
+          var y2 = date[_2 + "FullYear"]();
+          var H = date[_2 + "Hours"]();
+          var M2 = date[_2 + "Minutes"]();
+          var s = date[_2 + "Seconds"]();
+          var L2 = date[_2 + "Milliseconds"]();
+          var o2 = utc ? 0 : date.getTimezoneOffset();
+          var W2 = getWeek(date);
+          var N2 = getDayOfWeek(date);
           var flags = {
             d,
             dd: pad(d),
-            ddd: dateFormat.i18n.dayNames[D],
-            dddd: dateFormat.i18n.dayNames[D + 7],
+            ddd: dateFormat.i18n.dayNames[D2],
+            dddd: dateFormat.i18n.dayNames[D2 + 7],
             m: m + 1,
             mm: pad(m + 1),
             mmm: dateFormat.i18n.monthNames[m],
             mmmm: dateFormat.i18n.monthNames[m + 12],
-            yy: String(y).slice(2),
-            yyyy: y,
+            yy: String(y2).slice(2),
+            yyyy: y2,
             h: H % 12 || 12,
             hh: pad(H % 12 || 12),
             H,
             HH: pad(H),
-            M,
-            MM: pad(M),
+            M: M2,
+            MM: pad(M2),
             s,
             ss: pad(s),
-            l: pad(L, 3),
-            L: pad(Math.round(L / 10)),
+            l: pad(L2, 3),
+            L: pad(Math.round(L2 / 10)),
             t: H < 12 ? dateFormat.i18n.timeNames[0] : dateFormat.i18n.timeNames[1],
             tt: H < 12 ? dateFormat.i18n.timeNames[2] : dateFormat.i18n.timeNames[3],
             T: H < 12 ? dateFormat.i18n.timeNames[4] : dateFormat.i18n.timeNames[5],
             TT: H < 12 ? dateFormat.i18n.timeNames[6] : dateFormat.i18n.timeNames[7],
             Z: gmt ? "GMT" : utc ? "UTC" : (String(date).match(timezone) || [""]).pop().replace(timezoneClip, ""),
-            o: (o > 0 ? "-" : "+") + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
+            o: (o2 > 0 ? "-" : "+") + pad(Math.floor(Math.abs(o2) / 60) * 100 + Math.abs(o2) % 60, 4),
             S: ["th", "st", "nd", "rd"][d % 10 > 3 ? 0 : (d % 100 - d % 10 != 10) * d % 10],
-            W,
-            N
+            W: W2,
+            N: N2
           };
           return mask.replace(token, function(match) {
             if (match in flags) {
@@ -37281,10 +37281,10 @@ var require_semver3 = __commonJS({
     var re = exports2.re = [];
     var safeRe = exports2.safeRe = [];
     var src = exports2.src = [];
-    var t = exports2.tokens = {};
-    var R = 0;
+    var t2 = exports2.tokens = {};
+    var R2 = 0;
     function tok(n) {
-      t[n] = R++;
+      t2[n] = R2++;
     }
     __name(tok, "tok");
     var LETTERDASHNUMBER = "[a-zA-Z0-9-]";
@@ -37304,98 +37304,98 @@ var require_semver3 = __commonJS({
     }
     __name(makeSafeRe, "makeSafeRe");
     tok("NUMERICIDENTIFIER");
-    src[t.NUMERICIDENTIFIER] = "0|[1-9]\\d*";
+    src[t2.NUMERICIDENTIFIER] = "0|[1-9]\\d*";
     tok("NUMERICIDENTIFIERLOOSE");
-    src[t.NUMERICIDENTIFIERLOOSE] = "\\d+";
+    src[t2.NUMERICIDENTIFIERLOOSE] = "\\d+";
     tok("NONNUMERICIDENTIFIER");
-    src[t.NONNUMERICIDENTIFIER] = "\\d*[a-zA-Z-]" + LETTERDASHNUMBER + "*";
+    src[t2.NONNUMERICIDENTIFIER] = "\\d*[a-zA-Z-]" + LETTERDASHNUMBER + "*";
     tok("MAINVERSION");
-    src[t.MAINVERSION] = "(" + src[t.NUMERICIDENTIFIER] + ")\\.(" + src[t.NUMERICIDENTIFIER] + ")\\.(" + src[t.NUMERICIDENTIFIER] +
+    src[t2.MAINVERSION] = "(" + src[t2.NUMERICIDENTIFIER] + ")\\.(" + src[t2.NUMERICIDENTIFIER] + ")\\.(" + src[t2.NUMERICIDENTIFIER] +
     ")";
     tok("MAINVERSIONLOOSE");
-    src[t.MAINVERSIONLOOSE] = "(" + src[t.NUMERICIDENTIFIERLOOSE] + ")\\.(" + src[t.NUMERICIDENTIFIERLOOSE] + ")\\.(" + src[t.
-    NUMERICIDENTIFIERLOOSE] + ")";
+    src[t2.MAINVERSIONLOOSE] = "(" + src[t2.NUMERICIDENTIFIERLOOSE] + ")\\.(" + src[t2.NUMERICIDENTIFIERLOOSE] + ")\\.(" +
+    src[t2.NUMERICIDENTIFIERLOOSE] + ")";
     tok("PRERELEASEIDENTIFIER");
-    src[t.PRERELEASEIDENTIFIER] = "(?:" + src[t.NUMERICIDENTIFIER] + "|" + src[t.NONNUMERICIDENTIFIER] + ")";
+    src[t2.PRERELEASEIDENTIFIER] = "(?:" + src[t2.NUMERICIDENTIFIER] + "|" + src[t2.NONNUMERICIDENTIFIER] + ")";
     tok("PRERELEASEIDENTIFIERLOOSE");
-    src[t.PRERELEASEIDENTIFIERLOOSE] = "(?:" + src[t.NUMERICIDENTIFIERLOOSE] + "|" + src[t.NONNUMERICIDENTIFIER] + ")";
+    src[t2.PRERELEASEIDENTIFIERLOOSE] = "(?:" + src[t2.NUMERICIDENTIFIERLOOSE] + "|" + src[t2.NONNUMERICIDENTIFIER] + ")";
     tok("PRERELEASE");
-    src[t.PRERELEASE] = "(?:-(" + src[t.PRERELEASEIDENTIFIER] + "(?:\\." + src[t.PRERELEASEIDENTIFIER] + ")*))";
+    src[t2.PRERELEASE] = "(?:-(" + src[t2.PRERELEASEIDENTIFIER] + "(?:\\." + src[t2.PRERELEASEIDENTIFIER] + ")*))";
     tok("PRERELEASELOOSE");
-    src[t.PRERELEASELOOSE] = "(?:-?(" + src[t.PRERELEASEIDENTIFIERLOOSE] + "(?:\\." + src[t.PRERELEASEIDENTIFIERLOOSE] +
+    src[t2.PRERELEASELOOSE] = "(?:-?(" + src[t2.PRERELEASEIDENTIFIERLOOSE] + "(?:\\." + src[t2.PRERELEASEIDENTIFIERLOOSE] +
     ")*))";
     tok("BUILDIDENTIFIER");
-    src[t.BUILDIDENTIFIER] = LETTERDASHNUMBER + "+";
+    src[t2.BUILDIDENTIFIER] = LETTERDASHNUMBER + "+";
     tok("BUILD");
-    src[t.BUILD] = "(?:\\+(" + src[t.BUILDIDENTIFIER] + "(?:\\." + src[t.BUILDIDENTIFIER] + ")*))";
+    src[t2.BUILD] = "(?:\\+(" + src[t2.BUILDIDENTIFIER] + "(?:\\." + src[t2.BUILDIDENTIFIER] + ")*))";
     tok("FULL");
     tok("FULLPLAIN");
-    src[t.FULLPLAIN] = "v?" + src[t.MAINVERSION] + src[t.PRERELEASE] + "?" + src[t.BUILD] + "?";
-    src[t.FULL] = "^" + src[t.FULLPLAIN] + "$";
+    src[t2.FULLPLAIN] = "v?" + src[t2.MAINVERSION] + src[t2.PRERELEASE] + "?" + src[t2.BUILD] + "?";
+    src[t2.FULL] = "^" + src[t2.FULLPLAIN] + "$";
     tok("LOOSEPLAIN");
-    src[t.LOOSEPLAIN] = "[v=\\s]*" + src[t.MAINVERSIONLOOSE] + src[t.PRERELEASELOOSE] + "?" + src[t.BUILD] + "?";
+    src[t2.LOOSEPLAIN] = "[v=\\s]*" + src[t2.MAINVERSIONLOOSE] + src[t2.PRERELEASELOOSE] + "?" + src[t2.BUILD] + "?";
     tok("LOOSE");
-    src[t.LOOSE] = "^" + src[t.LOOSEPLAIN] + "$";
+    src[t2.LOOSE] = "^" + src[t2.LOOSEPLAIN] + "$";
     tok("GTLT");
-    src[t.GTLT] = "((?:<|>)?=?)";
+    src[t2.GTLT] = "((?:<|>)?=?)";
     tok("XRANGEIDENTIFIERLOOSE");
-    src[t.XRANGEIDENTIFIERLOOSE] = src[t.NUMERICIDENTIFIERLOOSE] + "|x|X|\\*";
+    src[t2.XRANGEIDENTIFIERLOOSE] = src[t2.NUMERICIDENTIFIERLOOSE] + "|x|X|\\*";
     tok("XRANGEIDENTIFIER");
-    src[t.XRANGEIDENTIFIER] = src[t.NUMERICIDENTIFIER] + "|x|X|\\*";
+    src[t2.XRANGEIDENTIFIER] = src[t2.NUMERICIDENTIFIER] + "|x|X|\\*";
     tok("XRANGEPLAIN");
-    src[t.XRANGEPLAIN] = "[v=\\s]*(" + src[t.XRANGEIDENTIFIER] + ")(?:\\.(" + src[t.XRANGEIDENTIFIER] + ")(?:\\.(" + src[t.
-    XRANGEIDENTIFIER] + ")(?:" + src[t.PRERELEASE] + ")?" + src[t.BUILD] + "?)?)?";
+    src[t2.XRANGEPLAIN] = "[v=\\s]*(" + src[t2.XRANGEIDENTIFIER] + ")(?:\\.(" + src[t2.XRANGEIDENTIFIER] + ")(?:\\.(" + src[t2.
+    XRANGEIDENTIFIER] + ")(?:" + src[t2.PRERELEASE] + ")?" + src[t2.BUILD] + "?)?)?";
     tok("XRANGEPLAINLOOSE");
-    src[t.XRANGEPLAINLOOSE] = "[v=\\s]*(" + src[t.XRANGEIDENTIFIERLOOSE] + ")(?:\\.(" + src[t.XRANGEIDENTIFIERLOOSE] + "\
-)(?:\\.(" + src[t.XRANGEIDENTIFIERLOOSE] + ")(?:" + src[t.PRERELEASELOOSE] + ")?" + src[t.BUILD] + "?)?)?";
+    src[t2.XRANGEPLAINLOOSE] = "[v=\\s]*(" + src[t2.XRANGEIDENTIFIERLOOSE] + ")(?:\\.(" + src[t2.XRANGEIDENTIFIERLOOSE] +
+    ")(?:\\.(" + src[t2.XRANGEIDENTIFIERLOOSE] + ")(?:" + src[t2.PRERELEASELOOSE] + ")?" + src[t2.BUILD] + "?)?)?";
     tok("XRANGE");
-    src[t.XRANGE] = "^" + src[t.GTLT] + "\\s*" + src[t.XRANGEPLAIN] + "$";
+    src[t2.XRANGE] = "^" + src[t2.GTLT] + "\\s*" + src[t2.XRANGEPLAIN] + "$";
     tok("XRANGELOOSE");
-    src[t.XRANGELOOSE] = "^" + src[t.GTLT] + "\\s*" + src[t.XRANGEPLAINLOOSE] + "$";
+    src[t2.XRANGELOOSE] = "^" + src[t2.GTLT] + "\\s*" + src[t2.XRANGEPLAINLOOSE] + "$";
     tok("COERCE");
-    src[t.COERCE] = "(^|[^\\d])(\\d{1," + MAX_SAFE_COMPONENT_LENGTH + "})(?:\\.(\\d{1," + MAX_SAFE_COMPONENT_LENGTH + "}\
-))?(?:\\.(\\d{1," + MAX_SAFE_COMPONENT_LENGTH + "}))?(?:$|[^\\d])";
+    src[t2.COERCE] = "(^|[^\\d])(\\d{1," + MAX_SAFE_COMPONENT_LENGTH + "})(?:\\.(\\d{1," + MAX_SAFE_COMPONENT_LENGTH + "\
+}))?(?:\\.(\\d{1," + MAX_SAFE_COMPONENT_LENGTH + "}))?(?:$|[^\\d])";
     tok("COERCERTL");
-    re[t.COERCERTL] = new RegExp(src[t.COERCE], "g");
-    safeRe[t.COERCERTL] = new RegExp(makeSafeRe(src[t.COERCE]), "g");
+    re[t2.COERCERTL] = new RegExp(src[t2.COERCE], "g");
+    safeRe[t2.COERCERTL] = new RegExp(makeSafeRe(src[t2.COERCE]), "g");
     tok("LONETILDE");
-    src[t.LONETILDE] = "(?:~>?)";
+    src[t2.LONETILDE] = "(?:~>?)";
     tok("TILDETRIM");
-    src[t.TILDETRIM] = "(\\s*)" + src[t.LONETILDE] + "\\s+";
-    re[t.TILDETRIM] = new RegExp(src[t.TILDETRIM], "g");
-    safeRe[t.TILDETRIM] = new RegExp(makeSafeRe(src[t.TILDETRIM]), "g");
+    src[t2.TILDETRIM] = "(\\s*)" + src[t2.LONETILDE] + "\\s+";
+    re[t2.TILDETRIM] = new RegExp(src[t2.TILDETRIM], "g");
+    safeRe[t2.TILDETRIM] = new RegExp(makeSafeRe(src[t2.TILDETRIM]), "g");
     var tildeTrimReplace = "$1~";
     tok("TILDE");
-    src[t.TILDE] = "^" + src[t.LONETILDE] + src[t.XRANGEPLAIN] + "$";
+    src[t2.TILDE] = "^" + src[t2.LONETILDE] + src[t2.XRANGEPLAIN] + "$";
     tok("TILDELOOSE");
-    src[t.TILDELOOSE] = "^" + src[t.LONETILDE] + src[t.XRANGEPLAINLOOSE] + "$";
+    src[t2.TILDELOOSE] = "^" + src[t2.LONETILDE] + src[t2.XRANGEPLAINLOOSE] + "$";
     tok("LONECARET");
-    src[t.LONECARET] = "(?:\\^)";
+    src[t2.LONECARET] = "(?:\\^)";
     tok("CARETTRIM");
-    src[t.CARETTRIM] = "(\\s*)" + src[t.LONECARET] + "\\s+";
-    re[t.CARETTRIM] = new RegExp(src[t.CARETTRIM], "g");
-    safeRe[t.CARETTRIM] = new RegExp(makeSafeRe(src[t.CARETTRIM]), "g");
+    src[t2.CARETTRIM] = "(\\s*)" + src[t2.LONECARET] + "\\s+";
+    re[t2.CARETTRIM] = new RegExp(src[t2.CARETTRIM], "g");
+    safeRe[t2.CARETTRIM] = new RegExp(makeSafeRe(src[t2.CARETTRIM]), "g");
     var caretTrimReplace = "$1^";
     tok("CARET");
-    src[t.CARET] = "^" + src[t.LONECARET] + src[t.XRANGEPLAIN] + "$";
+    src[t2.CARET] = "^" + src[t2.LONECARET] + src[t2.XRANGEPLAIN] + "$";
     tok("CARETLOOSE");
-    src[t.CARETLOOSE] = "^" + src[t.LONECARET] + src[t.XRANGEPLAINLOOSE] + "$";
+    src[t2.CARETLOOSE] = "^" + src[t2.LONECARET] + src[t2.XRANGEPLAINLOOSE] + "$";
     tok("COMPARATORLOOSE");
-    src[t.COMPARATORLOOSE] = "^" + src[t.GTLT] + "\\s*(" + src[t.LOOSEPLAIN] + ")$|^$";
+    src[t2.COMPARATORLOOSE] = "^" + src[t2.GTLT] + "\\s*(" + src[t2.LOOSEPLAIN] + ")$|^$";
     tok("COMPARATOR");
-    src[t.COMPARATOR] = "^" + src[t.GTLT] + "\\s*(" + src[t.FULLPLAIN] + ")$|^$";
+    src[t2.COMPARATOR] = "^" + src[t2.GTLT] + "\\s*(" + src[t2.FULLPLAIN] + ")$|^$";
     tok("COMPARATORTRIM");
-    src[t.COMPARATORTRIM] = "(\\s*)" + src[t.GTLT] + "\\s*(" + src[t.LOOSEPLAIN] + "|" + src[t.XRANGEPLAIN] + ")";
-    re[t.COMPARATORTRIM] = new RegExp(src[t.COMPARATORTRIM], "g");
-    safeRe[t.COMPARATORTRIM] = new RegExp(makeSafeRe(src[t.COMPARATORTRIM]), "g");
+    src[t2.COMPARATORTRIM] = "(\\s*)" + src[t2.GTLT] + "\\s*(" + src[t2.LOOSEPLAIN] + "|" + src[t2.XRANGEPLAIN] + ")";
+    re[t2.COMPARATORTRIM] = new RegExp(src[t2.COMPARATORTRIM], "g");
+    safeRe[t2.COMPARATORTRIM] = new RegExp(makeSafeRe(src[t2.COMPARATORTRIM]), "g");
     var comparatorTrimReplace = "$1$2$3";
     tok("HYPHENRANGE");
-    src[t.HYPHENRANGE] = "^\\s*(" + src[t.XRANGEPLAIN] + ")\\s+-\\s+(" + src[t.XRANGEPLAIN] + ")\\s*$";
+    src[t2.HYPHENRANGE] = "^\\s*(" + src[t2.XRANGEPLAIN] + ")\\s+-\\s+(" + src[t2.XRANGEPLAIN] + ")\\s*$";
     tok("HYPHENRANGELOOSE");
-    src[t.HYPHENRANGELOOSE] = "^\\s*(" + src[t.XRANGEPLAINLOOSE] + ")\\s+-\\s+(" + src[t.XRANGEPLAINLOOSE] + ")\\s*$";
+    src[t2.HYPHENRANGELOOSE] = "^\\s*(" + src[t2.XRANGEPLAINLOOSE] + ")\\s+-\\s+(" + src[t2.XRANGEPLAINLOOSE] + ")\\s*$";
     tok("STAR");
-    src[t.STAR] = "(<|>)?=?\\s*\\*";
-    for (i = 0; i < R; i++) {
+    src[t2.STAR] = "(<|>)?=?\\s*\\*";
+    for (i = 0; i < R2; i++) {
       debug3(i, src[i]);
       if (!re[i]) {
         re[i] = new RegExp(src[i]);
@@ -37420,8 +37420,8 @@ var require_semver3 = __commonJS({
       if (version.length > MAX_LENGTH) {
         return null;
       }
-      var r = options.loose ? safeRe[t.LOOSE] : safeRe[t.FULL];
-      if (!r.test(version)) {
+      var r2 = options.loose ? safeRe[t2.LOOSE] : safeRe[t2.FULL];
+      if (!r2.test(version)) {
         return null;
       }
       try {
@@ -37433,8 +37433,8 @@ var require_semver3 = __commonJS({
     __name(parse2, "parse");
     exports2.valid = valid2;
     function valid2(version, options) {
-      var v = parse2(version, options);
-      return v ? v.version : null;
+      var v2 = parse2(version, options);
+      return v2 ? v2.version : null;
     }
     __name(valid2, "valid");
     exports2.clean = clean2;
@@ -37469,7 +37469,7 @@ var require_semver3 = __commonJS({
       debug3("SemVer", version, options);
       this.options = options;
       this.loose = !!options.loose;
-      var m = version.trim().match(options.loose ? safeRe[t.LOOSE] : safeRe[t.FULL]);
+      var m = version.trim().match(options.loose ? safeRe[t2.LOOSE] : safeRe[t2.FULL]);
       if (!m) {
         throw new TypeError("Invalid Version: " + version);
       }
@@ -37541,18 +37541,18 @@ var require_semver3 = __commonJS({
       var i2 = 0;
       do {
         var a = this.prerelease[i2];
-        var b = other.prerelease[i2];
-        debug3("prerelease compare", i2, a, b);
-        if (a === void 0 && b === void 0) {
+        var b2 = other.prerelease[i2];
+        debug3("prerelease compare", i2, a, b2);
+        if (a === void 0 && b2 === void 0) {
           return 0;
-        } else if (b === void 0) {
+        } else if (b2 === void 0) {
           return 1;
         } else if (a === void 0) {
           return -1;
-        } else if (a === b) {
+        } else if (a === b2) {
           continue;
         } else {
-          return compareIdentifiers(a, b);
+          return compareIdentifiers(a, b2);
         }
       } while (++i2);
     };
@@ -37563,18 +37563,18 @@ var require_semver3 = __commonJS({
       var i2 = 0;
       do {
         var a = this.build[i2];
-        var b = other.build[i2];
-        debug3("prerelease compare", i2, a, b);
-        if (a === void 0 && b === void 0) {
+        var b2 = other.build[i2];
+        debug3("prerelease compare", i2, a, b2);
+        if (a === void 0 && b2 === void 0) {
           return 0;
-        } else if (b === void 0) {
+        } else if (b2 === void 0) {
           return 1;
         } else if (a === void 0) {
           return -1;
-        } else if (a === b) {
+        } else if (a === b2) {
           continue;
         } else {
-          return compareIdentifiers(a, b);
+          return compareIdentifiers(a, b2);
         }
       } while (++i2);
     };
@@ -37699,19 +37699,19 @@ var require_semver3 = __commonJS({
     __name(diff, "diff");
     exports2.compareIdentifiers = compareIdentifiers;
     var numeric = /^[0-9]+$/;
-    function compareIdentifiers(a, b) {
+    function compareIdentifiers(a, b2) {
       var anum = numeric.test(a);
-      var bnum = numeric.test(b);
+      var bnum = numeric.test(b2);
       if (anum && bnum) {
         a = +a;
-        b = +b;
+        b2 = +b2;
       }
-      return a === b ? 0 : anum && !bnum ? -1 : bnum && !anum ? 1 : a < b ? -1 : 1;
+      return a === b2 ? 0 : anum && !bnum ? -1 : bnum && !anum ? 1 : a < b2 ? -1 : 1;
     }
     __name(compareIdentifiers, "compareIdentifiers");
     exports2.rcompareIdentifiers = rcompareIdentifiers;
-    function rcompareIdentifiers(a, b) {
-      return compareIdentifiers(b, a);
+    function rcompareIdentifiers(a, b2) {
+      return compareIdentifiers(b2, a);
     }
     __name(rcompareIdentifiers, "rcompareIdentifiers");
     exports2.major = major;
@@ -37730,100 +37730,100 @@ var require_semver3 = __commonJS({
     }
     __name(patch, "patch");
     exports2.compare = compare;
-    function compare(a, b, loose) {
-      return new SemVer(a, loose).compare(new SemVer(b, loose));
+    function compare(a, b2, loose) {
+      return new SemVer(a, loose).compare(new SemVer(b2, loose));
     }
     __name(compare, "compare");
     exports2.compareLoose = compareLoose;
-    function compareLoose(a, b) {
-      return compare(a, b, true);
+    function compareLoose(a, b2) {
+      return compare(a, b2, true);
     }
     __name(compareLoose, "compareLoose");
     exports2.compareBuild = compareBuild;
-    function compareBuild(a, b, loose) {
+    function compareBuild(a, b2, loose) {
       var versionA = new SemVer(a, loose);
-      var versionB = new SemVer(b, loose);
+      var versionB = new SemVer(b2, loose);
       return versionA.compare(versionB) || versionA.compareBuild(versionB);
     }
     __name(compareBuild, "compareBuild");
     exports2.rcompare = rcompare;
-    function rcompare(a, b, loose) {
-      return compare(b, a, loose);
+    function rcompare(a, b2, loose) {
+      return compare(b2, a, loose);
     }
     __name(rcompare, "rcompare");
     exports2.sort = sort;
     function sort(list, loose) {
-      return list.sort(function(a, b) {
-        return exports2.compareBuild(a, b, loose);
+      return list.sort(function(a, b2) {
+        return exports2.compareBuild(a, b2, loose);
       });
     }
     __name(sort, "sort");
     exports2.rsort = rsort;
     function rsort(list, loose) {
-      return list.sort(function(a, b) {
-        return exports2.compareBuild(b, a, loose);
+      return list.sort(function(a, b2) {
+        return exports2.compareBuild(b2, a, loose);
       });
     }
     __name(rsort, "rsort");
     exports2.gt = gt2;
-    function gt2(a, b, loose) {
-      return compare(a, b, loose) > 0;
+    function gt2(a, b2, loose) {
+      return compare(a, b2, loose) > 0;
     }
     __name(gt2, "gt");
     exports2.lt = lt;
-    function lt(a, b, loose) {
-      return compare(a, b, loose) < 0;
+    function lt(a, b2, loose) {
+      return compare(a, b2, loose) < 0;
     }
     __name(lt, "lt");
     exports2.eq = eq;
-    function eq(a, b, loose) {
-      return compare(a, b, loose) === 0;
+    function eq(a, b2, loose) {
+      return compare(a, b2, loose) === 0;
     }
     __name(eq, "eq");
     exports2.neq = neq;
-    function neq(a, b, loose) {
-      return compare(a, b, loose) !== 0;
+    function neq(a, b2, loose) {
+      return compare(a, b2, loose) !== 0;
     }
     __name(neq, "neq");
     exports2.gte = gte;
-    function gte(a, b, loose) {
-      return compare(a, b, loose) >= 0;
+    function gte(a, b2, loose) {
+      return compare(a, b2, loose) >= 0;
     }
     __name(gte, "gte");
     exports2.lte = lte;
-    function lte(a, b, loose) {
-      return compare(a, b, loose) <= 0;
+    function lte(a, b2, loose) {
+      return compare(a, b2, loose) <= 0;
     }
     __name(lte, "lte");
     exports2.cmp = cmp;
-    function cmp(a, op, b, loose) {
+    function cmp(a, op, b2, loose) {
       switch (op) {
         case "===":
           if (typeof a === "object")
             a = a.version;
-          if (typeof b === "object")
-            b = b.version;
-          return a === b;
+          if (typeof b2 === "object")
+            b2 = b2.version;
+          return a === b2;
         case "!==":
           if (typeof a === "object")
             a = a.version;
-          if (typeof b === "object")
-            b = b.version;
-          return a !== b;
+          if (typeof b2 === "object")
+            b2 = b2.version;
+          return a !== b2;
         case "":
         case "=":
         case "==":
-          return eq(a, b, loose);
+          return eq(a, b2, loose);
         case "!=":
-          return neq(a, b, loose);
+          return neq(a, b2, loose);
         case ">":
-          return gt2(a, b, loose);
+          return gt2(a, b2, loose);
         case ">=":
-          return gte(a, b, loose);
+          return gte(a, b2, loose);
         case "<":
-          return lt(a, b, loose);
+          return lt(a, b2, loose);
         case "<=":
-          return lte(a, b, loose);
+          return lte(a, b2, loose);
         default:
           throw new TypeError("Invalid operator: " + op);
       }
@@ -37862,8 +37862,8 @@ var require_semver3 = __commonJS({
     __name(Comparator, "Comparator");
     var ANY = {};
     Comparator.prototype.parse = function(comp) {
-      var r = this.options.loose ? safeRe[t.COMPARATORLOOSE] : safeRe[t.COMPARATOR];
-      var m = comp.match(r);
+      var r2 = this.options.loose ? safeRe[t2.COMPARATORLOOSE] : safeRe[t2.COMPARATOR];
+      var m = comp.match(r2);
       if (!m) {
         throw new TypeError("Invalid comparator: " + comp);
       }
@@ -37959,8 +37959,8 @@ var require_semver3 = __commonJS({
       this.raw = range.trim().split(/\s+/).join(" ");
       this.set = this.raw.split("||").map(function(range2) {
         return this.parseRange(range2.trim());
-      }, this).filter(function(c) {
-        return c.length;
+      }, this).filter(function(c2) {
+        return c2.length;
       });
       if (!this.set.length) {
         throw new TypeError("Invalid SemVer Range: " + this.raw);
@@ -37979,15 +37979,15 @@ var require_semver3 = __commonJS({
     };
     Range.prototype.parseRange = function(range) {
       var loose = this.options.loose;
-      var hr = loose ? safeRe[t.HYPHENRANGELOOSE] : safeRe[t.HYPHENRANGE];
+      var hr = loose ? safeRe[t2.HYPHENRANGELOOSE] : safeRe[t2.HYPHENRANGE];
       range = range.replace(hr, hyphenReplace);
       debug3("hyphen replace", range);
-      range = range.replace(safeRe[t.COMPARATORTRIM], comparatorTrimReplace);
-      debug3("comparator trim", range, safeRe[t.COMPARATORTRIM]);
-      range = range.replace(safeRe[t.TILDETRIM], tildeTrimReplace);
-      range = range.replace(safeRe[t.CARETTRIM], caretTrimReplace);
+      range = range.replace(safeRe[t2.COMPARATORTRIM], comparatorTrimReplace);
+      debug3("comparator trim", range, safeRe[t2.COMPARATORTRIM]);
+      range = range.replace(safeRe[t2.TILDETRIM], tildeTrimReplace);
+      range = range.replace(safeRe[t2.CARETTRIM], caretTrimReplace);
       range = range.split(/\s+/).join(" ");
-      var compRe = loose ? safeRe[t.COMPARATORLOOSE] : safeRe[t.COMPARATOR];
+      var compRe = loose ? safeRe[t2.COMPARATORLOOSE] : safeRe[t2.COMPARATOR];
       var set = range.split(" ").map(function(comp) {
         return parseComparator(comp, this.options);
       }, this).join(" ").split(/\s+/);
@@ -38031,8 +38031,8 @@ var require_semver3 = __commonJS({
     exports2.toComparators = toComparators;
     function toComparators(range, options) {
       return new Range(range, options).set.map(function(comp) {
-        return comp.map(function(c) {
-          return c.value;
+        return comp.map(function(c2) {
+          return c2.value;
         }).join(" ").trim().split(" ");
       });
     }
@@ -38061,21 +38061,21 @@ var require_semver3 = __commonJS({
     }
     __name(replaceTildes, "replaceTildes");
     function replaceTilde(comp, options) {
-      var r = options.loose ? safeRe[t.TILDELOOSE] : safeRe[t.TILDE];
-      return comp.replace(r, function(_, M, m, p, pr) {
-        debug3("tilde", comp, _, M, m, p, pr);
+      var r2 = options.loose ? safeRe[t2.TILDELOOSE] : safeRe[t2.TILDE];
+      return comp.replace(r2, function(_2, M2, m, p, pr) {
+        debug3("tilde", comp, _2, M2, m, p, pr);
         var ret;
-        if (isX(M)) {
+        if (isX(M2)) {
           ret = "";
         } else if (isX(m)) {
-          ret = ">=" + M + ".0.0 <" + (+M + 1) + ".0.0";
+          ret = ">=" + M2 + ".0.0 <" + (+M2 + 1) + ".0.0";
         } else if (isX(p)) {
-          ret = ">=" + M + "." + m + ".0 <" + M + "." + (+m + 1) + ".0";
+          ret = ">=" + M2 + "." + m + ".0 <" + M2 + "." + (+m + 1) + ".0";
         } else if (pr) {
           debug3("replaceTilde pr", pr);
-          ret = ">=" + M + "." + m + "." + p + "-" + pr + " <" + M + "." + (+m + 1) + ".0";
+          ret = ">=" + M2 + "." + m + "." + p + "-" + pr + " <" + M2 + "." + (+m + 1) + ".0";
         } else {
-          ret = ">=" + M + "." + m + "." + p + " <" + M + "." + (+m + 1) + ".0";
+          ret = ">=" + M2 + "." + m + "." + p + " <" + M2 + "." + (+m + 1) + ".0";
         }
         debug3("tilde return", ret);
         return ret;
@@ -38090,41 +38090,41 @@ var require_semver3 = __commonJS({
     __name(replaceCarets, "replaceCarets");
     function replaceCaret(comp, options) {
       debug3("caret", comp, options);
-      var r = options.loose ? safeRe[t.CARETLOOSE] : safeRe[t.CARET];
-      return comp.replace(r, function(_, M, m, p, pr) {
-        debug3("caret", comp, _, M, m, p, pr);
+      var r2 = options.loose ? safeRe[t2.CARETLOOSE] : safeRe[t2.CARET];
+      return comp.replace(r2, function(_2, M2, m, p, pr) {
+        debug3("caret", comp, _2, M2, m, p, pr);
         var ret;
-        if (isX(M)) {
+        if (isX(M2)) {
           ret = "";
         } else if (isX(m)) {
-          ret = ">=" + M + ".0.0 <" + (+M + 1) + ".0.0";
+          ret = ">=" + M2 + ".0.0 <" + (+M2 + 1) + ".0.0";
         } else if (isX(p)) {
-          if (M === "0") {
-            ret = ">=" + M + "." + m + ".0 <" + M + "." + (+m + 1) + ".0";
+          if (M2 === "0") {
+            ret = ">=" + M2 + "." + m + ".0 <" + M2 + "." + (+m + 1) + ".0";
           } else {
-            ret = ">=" + M + "." + m + ".0 <" + (+M + 1) + ".0.0";
+            ret = ">=" + M2 + "." + m + ".0 <" + (+M2 + 1) + ".0.0";
           }
         } else if (pr) {
           debug3("replaceCaret pr", pr);
-          if (M === "0") {
+          if (M2 === "0") {
             if (m === "0") {
-              ret = ">=" + M + "." + m + "." + p + "-" + pr + " <" + M + "." + m + "." + (+p + 1);
+              ret = ">=" + M2 + "." + m + "." + p + "-" + pr + " <" + M2 + "." + m + "." + (+p + 1);
             } else {
-              ret = ">=" + M + "." + m + "." + p + "-" + pr + " <" + M + "." + (+m + 1) + ".0";
+              ret = ">=" + M2 + "." + m + "." + p + "-" + pr + " <" + M2 + "." + (+m + 1) + ".0";
             }
           } else {
-            ret = ">=" + M + "." + m + "." + p + "-" + pr + " <" + (+M + 1) + ".0.0";
+            ret = ">=" + M2 + "." + m + "." + p + "-" + pr + " <" + (+M2 + 1) + ".0.0";
           }
         } else {
           debug3("no pr");
-          if (M === "0") {
+          if (M2 === "0") {
             if (m === "0") {
-              ret = ">=" + M + "." + m + "." + p + " <" + M + "." + m + "." + (+p + 1);
+              ret = ">=" + M2 + "." + m + "." + p + " <" + M2 + "." + m + "." + (+p + 1);
             } else {
-              ret = ">=" + M + "." + m + "." + p + " <" + M + "." + (+m + 1) + ".0";
+              ret = ">=" + M2 + "." + m + "." + p + " <" + M2 + "." + (+m + 1) + ".0";
             }
           } else {
-            ret = ">=" + M + "." + m + "." + p + " <" + (+M + 1) + ".0.0";
+            ret = ">=" + M2 + "." + m + "." + p + " <" + (+M2 + 1) + ".0.0";
           }
         }
         debug3("caret return", ret);
@@ -38141,10 +38141,10 @@ var require_semver3 = __commonJS({
     __name(replaceXRanges, "replaceXRanges");
     function replaceXRange(comp, options) {
       comp = comp.trim();
-      var r = options.loose ? safeRe[t.XRANGELOOSE] : safeRe[t.XRANGE];
-      return comp.replace(r, function(ret, gtlt, M, m, p, pr) {
-        debug3("xRange", comp, ret, gtlt, M, m, p, pr);
-        var xM = isX(M);
+      var r2 = options.loose ? safeRe[t2.XRANGELOOSE] : safeRe[t2.XRANGE];
+      return comp.replace(r2, function(ret, gtlt, M2, m, p, pr) {
+        debug3("xRange", comp, ret, gtlt, M2, m, p, pr);
+        var xM = isX(M2);
         var xm = xM || isX(m);
         var xp = xm || isX(p);
         var anyX = xp;
@@ -38166,7 +38166,7 @@ var require_semver3 = __commonJS({
           if (gtlt === ">") {
             gtlt = ">=";
             if (xm) {
-              M = +M + 1;
+              M2 = +M2 + 1;
               m = 0;
               p = 0;
             } else {
@@ -38176,16 +38176,16 @@ var require_semver3 = __commonJS({
           } else if (gtlt === "<=") {
             gtlt = "<";
             if (xm) {
-              M = +M + 1;
+              M2 = +M2 + 1;
             } else {
               m = +m + 1;
             }
           }
-          ret = gtlt + M + "." + m + "." + p + pr;
+          ret = gtlt + M2 + "." + m + "." + p + pr;
         } else if (xm) {
-          ret = ">=" + M + ".0.0" + pr + " <" + (+M + 1) + ".0.0" + pr;
+          ret = ">=" + M2 + ".0.0" + pr + " <" + (+M2 + 1) + ".0.0" + pr;
         } else if (xp) {
-          ret = ">=" + M + "." + m + ".0" + pr + " <" + M + "." + (+m + 1) + ".0" + pr;
+          ret = ">=" + M2 + "." + m + ".0" + pr + " <" + M2 + "." + (+m + 1) + ".0" + pr;
         }
         debug3("xRange return", ret);
         return ret;
@@ -38194,7 +38194,7 @@ var require_semver3 = __commonJS({
     __name(replaceXRange, "replaceXRange");
     function replaceStars(comp, options) {
       debug3("replaceStars", comp, options);
-      return comp.trim().replace(safeRe[t.STAR], "");
+      return comp.trim().replace(safeRe[t2.STAR], "");
     }
     __name(replaceStars, "replaceStars");
     function hyphenReplace($0, from, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr, tb) {
@@ -38282,10 +38282,10 @@ var require_semver3 = __commonJS({
       } catch (er) {
         return null;
       }
-      versions.forEach(function(v) {
-        if (rangeObj.test(v)) {
-          if (!max || maxSV.compare(v) === -1) {
-            max = v;
+      versions.forEach(function(v2) {
+        if (rangeObj.test(v2)) {
+          if (!max || maxSV.compare(v2) === -1) {
+            max = v2;
             maxSV = new SemVer(max, options);
           }
         }
@@ -38302,10 +38302,10 @@ var require_semver3 = __commonJS({
       } catch (er) {
         return null;
       }
-      versions.forEach(function(v) {
-        if (rangeObj.test(v)) {
-          if (!min || minSV.compare(v) === 1) {
-            min = v;
+      versions.forEach(function(v2) {
+        if (rangeObj.test(v2)) {
+          if (!min || minSV.compare(v2) === 1) {
+            min = v2;
             minSV = new SemVer(min, options);
           }
         }
@@ -38459,16 +38459,16 @@ var require_semver3 = __commonJS({
       options = options || {};
       var match = null;
       if (!options.rtl) {
-        match = version.match(safeRe[t.COERCE]);
+        match = version.match(safeRe[t2.COERCE]);
       } else {
         var next;
-        while ((next = safeRe[t.COERCERTL].exec(version)) && (!match || match.index + match[0].length !== version.length)) {
+        while ((next = safeRe[t2.COERCERTL].exec(version)) && (!match || match.index + match[0].length !== version.length)) {
           if (!match || next.index + next[0].length !== match.index + match[0].length) {
             match = next;
           }
-          safeRe[t.COERCERTL].lastIndex = next.index + next[1].length + next[2].length;
+          safeRe[t2.COERCERTL].lastIndex = next.index + next[1].length + next[2].length;
         }
-        safeRe[t.COERCERTL].lastIndex = -1;
+        safeRe[t2.COERCERTL].lastIndex = -1;
       }
       if (match === null) {
         return null;
@@ -38805,16 +38805,16 @@ var require_lodash2 = __commonJS({
     }
     __name(stackHas, "stackHas");
     function stackSet(key, value) {
-      var cache2 = this.__data__;
-      if (cache2 instanceof ListCache) {
-        var pairs = cache2.__data__;
+      var cache = this.__data__;
+      if (cache instanceof ListCache) {
+        var pairs = cache.__data__;
         if (!Map2 || pairs.length < LARGE_ARRAY_SIZE - 1) {
           pairs.push([key, value]);
           return this;
         }
-        cache2 = this.__data__ = new MapCache(pairs);
+        cache = this.__data__ = new MapCache(pairs);
       }
-      cache2.set(key, value);
+      cache.set(key, value);
       return this;
     }
     __name(stackSet, "stackSet");
@@ -39523,7 +39523,7 @@ var require_each = __commonJS({
         __name(execIteration, "execIteration");
         if (context3 && typeof context3 === "object") {
           if (_utils.isArray(context3)) {
-            for (var j = context3.length; i < j; i++) {
+            for (var j2 = context3.length; i < j2; i++) {
               if (i in context3) {
                 execIteration(i, i, i === context3.length - 1);
               }
@@ -39535,7 +39535,7 @@ var require_each = __commonJS({
               newContext.push(it.value);
             }
             context3 = newContext;
-            for (var j = context3.length; i < j; i++) {
+            for (var j2 = context3.length; i < j2; i++) {
               execIteration(i, i, i === context3.length - 1);
             }
           } else {
@@ -40969,7 +40969,7 @@ NUMBER", 82: "BOOLEAN", 83: "UNDEFINED", 84: "NULL", 85: "DATA", 87: "SEP" },
             return token;
           }
           __name(lex, "lex");
-          var symbol, preErrorSymbol, state, action2, a, r, yyval = {}, p, len, newState, expected;
+          var symbol, preErrorSymbol, state, action2, a, r2, yyval = {}, p, len, newState, expected;
           while (true) {
             state = stack[stack.length - 1];
             if (this.defaultActions[state]) {
@@ -41028,9 +41028,9 @@ NUMBER", 82: "BOOLEAN", 83: "UNDEFINED", 84: "NULL", 85: "DATA", 87: "SEP" },
                 if (ranges) {
                   yyval._$.range = [lstack[lstack.length - (len || 1)].range[0], lstack[lstack.length - 1].range[1]];
                 }
-                r = this.performAction.call(yyval, yytext, yyleng, yylineno, this.yy, action2[1], vstack, lstack);
-                if (typeof r !== "undefined") {
-                  return r;
+                r2 = this.performAction.call(yyval, yytext, yyleng, yylineno, this.yy, action2[1], vstack, lstack);
+                if (typeof r2 !== "undefined") {
+                  return r2;
                 }
                 if (len) {
                   stack = stack.slice(0, -1 * len * 2);
@@ -41099,7 +41099,7 @@ NUMBER", 82: "BOOLEAN", 83: "UNDEFINED", 84: "NULL", 85: "DATA", 87: "SEP" },
             this.match = this.match.substr(0, this.match.length - 1);
             this.matched = this.matched.substr(0, this.matched.length - 1);
             if (lines.length - 1) this.yylineno -= lines.length - 1;
-            var r = this.yylloc.range;
+            var r2 = this.yylloc.range;
             this.yylloc = {
               first_line: this.yylloc.first_line,
               last_line: this.yylineno + 1,
@@ -41108,7 +41108,7 @@ NUMBER", 82: "BOOLEAN", 83: "UNDEFINED", 84: "NULL", 85: "DATA", 87: "SEP" },
               length - lines.length].length - lines[0].length : this.yylloc.first_column - len
             };
             if (this.options.ranges) {
-              this.yylloc.range = [r[0], r[0] + this.yyleng - len];
+              this.yylloc.range = [r2[0], r2[0] + this.yyleng - len];
             }
             return this;
           }, "unput"),
@@ -41132,8 +41132,8 @@ NUMBER", 82: "BOOLEAN", 83: "UNDEFINED", 84: "NULL", 85: "DATA", 87: "SEP" },
           }, "upcomingInput"),
           showPosition: /* @__PURE__ */ __name(function showPosition() {
             var pre = this.pastInput();
-            var c = new Array(pre.length + 1).join("-");
-            return pre + this.upcomingInput() + "\n" + c + "^";
+            var c2 = new Array(pre.length + 1).join("-");
+            return pre + this.upcomingInput() + "\n" + c2 + "^";
           }, "showPosition"),
           next: /* @__PURE__ */ __name(function next() {
             if (this.done) {
@@ -41188,9 +41188,9 @@ NUMBER", 82: "BOOLEAN", 83: "UNDEFINED", 84: "NULL", 85: "DATA", 87: "SEP" },
             }
           }, "next"),
           lex: /* @__PURE__ */ __name(function lex() {
-            var r = this.next();
-            if (typeof r !== "undefined") {
-              return r;
+            var r2 = this.next();
+            if (typeof r2 !== "undefined") {
+              return r2;
             } else {
               return this.lex();
             }
@@ -42412,13 +42412,13 @@ var require_compiler = __commonJS({
       return ret;
     }
     __name(compile, "compile");
-    function argEquals(a, b) {
-      if (a === b) {
+    function argEquals(a, b2) {
+      if (a === b2) {
         return true;
       }
-      if (_utils.isArray(a) && _utils.isArray(b) && a.length === b.length) {
+      if (_utils.isArray(a) && _utils.isArray(b2) && a.length === b2.length) {
         for (var i = 0; i < a.length; i++) {
-          if (!argEquals(a[i], b[i])) {
+          if (!argEquals(a[i], b2[i])) {
             return false;
           }
         }
@@ -43314,32 +43314,32 @@ var require_binary_search = __commonJS({
 // node_modules/source-map/lib/quick-sort.js
 var require_quick_sort = __commonJS({
   "node_modules/source-map/lib/quick-sort.js"(exports2) {
-    function swap(ary, x, y) {
-      var temp = ary[x];
-      ary[x] = ary[y];
-      ary[y] = temp;
+    function swap(ary, x2, y2) {
+      var temp = ary[x2];
+      ary[x2] = ary[y2];
+      ary[y2] = temp;
     }
     __name(swap, "swap");
     function randomIntInRange(low, high) {
       return Math.round(low + Math.random() * (high - low));
     }
     __name(randomIntInRange, "randomIntInRange");
-    function doQuickSort(ary, comparator, p, r) {
-      if (p < r) {
-        var pivotIndex = randomIntInRange(p, r);
+    function doQuickSort(ary, comparator, p, r2) {
+      if (p < r2) {
+        var pivotIndex = randomIntInRange(p, r2);
         var i = p - 1;
-        swap(ary, pivotIndex, r);
-        var pivot = ary[r];
-        for (var j = p; j < r; j++) {
-          if (comparator(ary[j], pivot) <= 0) {
+        swap(ary, pivotIndex, r2);
+        var pivot = ary[r2];
+        for (var j2 = p; j2 < r2; j2++) {
+          if (comparator(ary[j2], pivot) <= 0) {
             i += 1;
-            swap(ary, i, j);
+            swap(ary, i, j2);
           }
         }
-        swap(ary, i + 1, j);
+        swap(ary, i + 1, j2);
         var q = i + 1;
         doQuickSort(ary, comparator, p, q - 1);
-        doQuickSort(ary, comparator, q + 1, r);
+        doQuickSort(ary, comparator, q + 1, r2);
       }
     }
     __name(doQuickSort, "doQuickSort");
@@ -43393,8 +43393,8 @@ var require_source_map_consumer = __commonJS({
       }, "get")
     });
     SourceMapConsumer.prototype._charIsMappingSeparator = /* @__PURE__ */ __name(function SourceMapConsumer_charIsMappingSeparator(aStr, index) {
-      var c = aStr.charAt(index);
-      return c === ";" || c === ",";
+      var c2 = aStr.charAt(index);
+      return c2 === ";" || c2 === ",";
     }, "SourceMapConsumer_charIsMappingSeparator");
     SourceMapConsumer.prototype._parseMappings = /* @__PURE__ */ __name(function SourceMapConsumer_parseMappings(aStr, aSourceRoot) {
       throw new Error("Subclasses must implement _parseMappings");
@@ -43840,8 +43840,8 @@ var require_source_map_consumer = __commonJS({
       get: /* @__PURE__ */ __name(function() {
         var sources = [];
         for (var i = 0; i < this._sections.length; i++) {
-          for (var j = 0; j < this._sections[i].consumer.sources.length; j++) {
-            sources.push(this._sections[i].consumer.sources[j]);
+          for (var j2 = 0; j2 < this._sections[i].consumer.sources.length; j2++) {
+            sources.push(this._sections[i].consumer.sources[j2]);
           }
         }
         return sources;
@@ -43925,8 +43925,8 @@ var require_source_map_consumer = __commonJS({
       for (var i = 0; i < this._sections.length; i++) {
         var section = this._sections[i];
         var sectionMappings = section.consumer._generatedMappings;
-        for (var j = 0; j < sectionMappings.length; j++) {
-          var mapping = sectionMappings[j];
+        for (var j2 = 0; j2 < sectionMappings.length; j2++) {
+          var mapping = sectionMappings[j2];
           var source = section.consumer._sources.at(mapping.source);
           source = util2.computeSourceURL(section.consumer.sourceRoot, source, this._sourceMapURL);
           this._sources.add(source);
@@ -45568,7 +45568,7 @@ var require_util10 = __commonJS({
     var conventionalCommitsFilter = require_conventional_commits_filter();
     var Handlebars = require_lib2();
     var semver4 = require_semver3();
-    var _ = require_lodash();
+    var _2 = require_lodash();
     var stringify = require_stringify();
     function compileTemplates(templates) {
       const main = templates.mainTemplate;
@@ -45576,17 +45576,17 @@ var require_util10 = __commonJS({
       const commitPartial = templates.commitPartial;
       const footerPartial = templates.footerPartial;
       const partials = templates.partials;
-      if (_.isString(headerPartial)) {
+      if (_2.isString(headerPartial)) {
         Handlebars.registerPartial("header", headerPartial);
       }
-      if (_.isString(commitPartial)) {
+      if (_2.isString(commitPartial)) {
         Handlebars.registerPartial("commit", commitPartial);
       }
-      if (_.isString(footerPartial)) {
+      if (_2.isString(footerPartial)) {
         Handlebars.registerPartial("footer", footerPartial);
       }
-      _.forEach(partials, function(partial, name) {
-        if (_.isString(partial)) {
+      _2.forEach(partials, function(partial, name) {
+        if (_2.isString(partial)) {
           Handlebars.registerPartial(name, partial);
         }
       });
@@ -45596,18 +45596,18 @@ var require_util10 = __commonJS({
     }
     __name(compileTemplates, "compileTemplates");
     function functionify(strOrArr) {
-      if (strOrArr && !_.isFunction(strOrArr)) {
-        return (a, b) => {
+      if (strOrArr && !_2.isFunction(strOrArr)) {
+        return (a, b2) => {
           let str1 = "";
           let str2 = "";
           if (Array.isArray(strOrArr)) {
             for (const key of strOrArr) {
               str1 += a[key] || "";
-              str2 += b[key] || "";
+              str2 += b2[key] || "";
             }
           } else {
             str1 += a[strOrArr];
-            str2 += b[strOrArr];
+            str2 += b2[strOrArr];
           }
           return str1.localeCompare(str2);
         };
@@ -45618,10 +45618,10 @@ var require_util10 = __commonJS({
     __name(functionify, "functionify");
     function getCommitGroups(groupBy, commits, groupsSort, commitsSort) {
       const commitGroups = [];
-      const commitGroupsObj = _.groupBy(commits, function(commit) {
+      const commitGroupsObj = _2.groupBy(commits, function(commit) {
         return commit[groupBy] || "";
       });
-      _.forEach(commitGroupsObj, function(commits2, title) {
+      _2.forEach(commitGroupsObj, function(commits2, title) {
         if (title === "") {
           title = false;
         }
@@ -45641,10 +45641,10 @@ var require_util10 = __commonJS({
     __name(getCommitGroups, "getCommitGroups");
     function getNoteGroups(notes, noteGroupsSort, notesSort) {
       const retGroups = [];
-      _.forEach(notes, function(note) {
+      _2.forEach(notes, function(note) {
         const title = note.title;
         let titleExists = false;
-        _.forEach(retGroups, function(group) {
+        _2.forEach(retGroups, function(group) {
           if (group.title === title) {
             titleExists = true;
             group.notes.push(note);
@@ -45662,7 +45662,7 @@ var require_util10 = __commonJS({
         retGroups.sort(noteGroupsSort);
       }
       if (notesSort) {
-        _.forEach(retGroups, function(group) {
+        _2.forEach(retGroups, function(group) {
           group.notes.sort(notesSort);
         });
       }
@@ -45675,22 +45675,22 @@ var require_util10 = __commonJS({
         chunk = JSON.parse(chunk);
       } catch (e) {
       }
-      commit = _.cloneDeep(chunk);
-      if (_.isFunction(transform)) {
+      commit = _2.cloneDeep(chunk);
+      if (_2.isFunction(transform)) {
         commit = transform(commit, context3);
         if (commit) {
           commit.raw = chunk;
         }
         return commit;
       }
-      _.forEach(transform, function(el, path3) {
-        let value = _.get(commit, path3);
-        if (_.isFunction(el)) {
+      _2.forEach(transform, function(el, path3) {
+        let value = _2.get(commit, path3);
+        if (_2.isFunction(el)) {
           value = el(value, path3);
         } else {
           value = el;
         }
-        _.set(commit, path3, value);
+        _2.set(commit, path3, value);
       });
       commit.raw = chunk;
       return commit;
@@ -45710,16 +45710,16 @@ var require_util10 = __commonJS({
       if (options.ignoreReverted) {
         filteredCommits = conventionalCommitsFilter(commits);
       } else {
-        filteredCommits = _.clone(commits);
+        filteredCommits = _2.clone(commits);
       }
-      _.forEach(filteredCommits, function(commit) {
-        _.map(commit.notes, function(note) {
+      _2.forEach(filteredCommits, function(commit) {
+        _2.map(commit.notes, function(note) {
           note.commit = commit;
           return note;
         });
         notes = notes.concat(commit.notes);
       });
-      context3 = _.merge({}, context3, keyCommit, getExtraContext(filteredCommits, notes, options));
+      context3 = _2.merge({}, context3, keyCommit, getExtraContext(filteredCommits, notes, options));
       if (keyCommit && keyCommit.committerDate) {
         context3.date = keyCommit.committerDate;
       }
@@ -45753,18 +45753,18 @@ var require_conventional_changelog_writer = __commonJS({
     var semverValid = require_semver3().valid;
     var through = require_through2();
     var util2 = require_util10();
-    var _ = require_lodash();
+    var _2 = require_lodash();
     function conventionalChangelogWriterInit(context3, options) {
-      context3 = _.extend({
+      context3 = _2.extend({
         commit: "commits",
         issue: "issues",
         date: dateFormat(/* @__PURE__ */ new Date(), "yyyy-mm-dd", true)
       }, context3);
-      if (!_.isBoolean(context3.linkReferences) && (context3.repository || context3.repoUrl) && context3.commit && context3.
+      if (!_2.isBoolean(context3.linkReferences) && (context3.repository || context3.repoUrl) && context3.commit && context3.
       issue) {
         context3.linkReferences = true;
       }
-      options = _.assign({
+      options = _2.assign({
         groupBy: "type",
         commitsSort: "header",
         noteGroupsSort: "title",
@@ -45799,10 +45799,10 @@ ach}}\n{{~/if}}\n\n",
         footerPartial: "{{#if noteGroups}}\n{{#each noteGroups}}\n\n### {{title}}\n\n{{#each notes}}\n* {{text}}\n{{/each}}\n{{/\
 each}}\n{{/if}}\n"
       }, options);
-      if (!_.isFunction(options.transform) && _.isObject(options.transform) || _.isUndefined(options.transform)) {
-        options.transform = _.assign({
+      if (!_2.isFunction(options.transform) && _2.isObject(options.transform) || _2.isUndefined(options.transform)) {
+        options.transform = _2.assign({
           hash: /* @__PURE__ */ __name(function(hash) {
-            if (_.isString(hash)) {
+            if (_2.isString(hash)) {
               return hash.substring(0, 7);
             }
           }, "hash"),
@@ -45818,11 +45818,11 @@ each}}\n{{/if}}\n"
         }, options.transform);
       }
       let generateOn = options.generateOn;
-      if (_.isString(generateOn)) {
+      if (_2.isString(generateOn)) {
         generateOn = /* @__PURE__ */ __name(function(commit) {
-          return !_.isUndefined(commit[options.generateOn]);
+          return !_2.isUndefined(commit[options.generateOn]);
         }, "generateOn");
-      } else if (!_.isFunction(generateOn)) {
+      } else if (!_2.isFunction(generateOn)) {
         generateOn = /* @__PURE__ */ __name(function() {
           return false;
         }, "generateOn");
@@ -46815,10 +46815,10 @@ var require_lru_cache = __commonJS({
         }
       }
       keys() {
-        return this[LRU_LIST].toArray().map((k) => k.key);
+        return this[LRU_LIST].toArray().map((k2) => k2.key);
       }
       values() {
-        return this[LRU_LIST].toArray().map((k) => k.value);
+        return this[LRU_LIST].toArray().map((k2) => k2.value);
       }
       reset() {
         if (this[DISPOSE] && this[LRU_LIST] && this[LRU_LIST].length) {
@@ -46994,7 +46994,7 @@ var require_hosted_git_info = __commonJS({
     var gitHosts = require_git_host_info();
     var GitHost = module2.exports = require_git_host();
     var LRU = require_lru_cache();
-    var cache2 = new LRU({ max: 1e3 });
+    var cache = new LRU({ max: 1e3 });
     var protocolToRepresentationMap = {
       "git+ssh:": "sshurl",
       "git+https:": "https",
@@ -47019,10 +47019,10 @@ ssh:"]);
         return;
       }
       const key = giturl + JSON.stringify(opts || {});
-      if (!cache2.has(key)) {
-        cache2.set(key, fromUrl(giturl, opts));
+      if (!cache.has(key)) {
+        cache.set(key, fromUrl(giturl, opts));
       }
-      return cache2.get(key);
+      return cache.get(key);
     };
     function fromUrl(giturl, opts) {
       if (!giturl) {
@@ -47261,10 +47261,10 @@ var require_semver4 = __commonJS({
     var re = exports2.re = [];
     var safeRe = exports2.safeRe = [];
     var src = exports2.src = [];
-    var t = exports2.tokens = {};
-    var R = 0;
+    var t2 = exports2.tokens = {};
+    var R2 = 0;
     function tok(n) {
-      t[n] = R++;
+      t2[n] = R2++;
     }
     __name(tok, "tok");
     var LETTERDASHNUMBER = "[a-zA-Z0-9-]";
@@ -47284,98 +47284,98 @@ var require_semver4 = __commonJS({
     }
     __name(makeSafeRe, "makeSafeRe");
     tok("NUMERICIDENTIFIER");
-    src[t.NUMERICIDENTIFIER] = "0|[1-9]\\d*";
+    src[t2.NUMERICIDENTIFIER] = "0|[1-9]\\d*";
     tok("NUMERICIDENTIFIERLOOSE");
-    src[t.NUMERICIDENTIFIERLOOSE] = "\\d+";
+    src[t2.NUMERICIDENTIFIERLOOSE] = "\\d+";
     tok("NONNUMERICIDENTIFIER");
-    src[t.NONNUMERICIDENTIFIER] = "\\d*[a-zA-Z-]" + LETTERDASHNUMBER + "*";
+    src[t2.NONNUMERICIDENTIFIER] = "\\d*[a-zA-Z-]" + LETTERDASHNUMBER + "*";
     tok("MAINVERSION");
-    src[t.MAINVERSION] = "(" + src[t.NUMERICIDENTIFIER] + ")\\.(" + src[t.NUMERICIDENTIFIER] + ")\\.(" + src[t.NUMERICIDENTIFIER] +
+    src[t2.MAINVERSION] = "(" + src[t2.NUMERICIDENTIFIER] + ")\\.(" + src[t2.NUMERICIDENTIFIER] + ")\\.(" + src[t2.NUMERICIDENTIFIER] +
     ")";
     tok("MAINVERSIONLOOSE");
-    src[t.MAINVERSIONLOOSE] = "(" + src[t.NUMERICIDENTIFIERLOOSE] + ")\\.(" + src[t.NUMERICIDENTIFIERLOOSE] + ")\\.(" + src[t.
-    NUMERICIDENTIFIERLOOSE] + ")";
+    src[t2.MAINVERSIONLOOSE] = "(" + src[t2.NUMERICIDENTIFIERLOOSE] + ")\\.(" + src[t2.NUMERICIDENTIFIERLOOSE] + ")\\.(" +
+    src[t2.NUMERICIDENTIFIERLOOSE] + ")";
     tok("PRERELEASEIDENTIFIER");
-    src[t.PRERELEASEIDENTIFIER] = "(?:" + src[t.NUMERICIDENTIFIER] + "|" + src[t.NONNUMERICIDENTIFIER] + ")";
+    src[t2.PRERELEASEIDENTIFIER] = "(?:" + src[t2.NUMERICIDENTIFIER] + "|" + src[t2.NONNUMERICIDENTIFIER] + ")";
     tok("PRERELEASEIDENTIFIERLOOSE");
-    src[t.PRERELEASEIDENTIFIERLOOSE] = "(?:" + src[t.NUMERICIDENTIFIERLOOSE] + "|" + src[t.NONNUMERICIDENTIFIER] + ")";
+    src[t2.PRERELEASEIDENTIFIERLOOSE] = "(?:" + src[t2.NUMERICIDENTIFIERLOOSE] + "|" + src[t2.NONNUMERICIDENTIFIER] + ")";
     tok("PRERELEASE");
-    src[t.PRERELEASE] = "(?:-(" + src[t.PRERELEASEIDENTIFIER] + "(?:\\." + src[t.PRERELEASEIDENTIFIER] + ")*))";
+    src[t2.PRERELEASE] = "(?:-(" + src[t2.PRERELEASEIDENTIFIER] + "(?:\\." + src[t2.PRERELEASEIDENTIFIER] + ")*))";
     tok("PRERELEASELOOSE");
-    src[t.PRERELEASELOOSE] = "(?:-?(" + src[t.PRERELEASEIDENTIFIERLOOSE] + "(?:\\." + src[t.PRERELEASEIDENTIFIERLOOSE] +
+    src[t2.PRERELEASELOOSE] = "(?:-?(" + src[t2.PRERELEASEIDENTIFIERLOOSE] + "(?:\\." + src[t2.PRERELEASEIDENTIFIERLOOSE] +
     ")*))";
     tok("BUILDIDENTIFIER");
-    src[t.BUILDIDENTIFIER] = LETTERDASHNUMBER + "+";
+    src[t2.BUILDIDENTIFIER] = LETTERDASHNUMBER + "+";
     tok("BUILD");
-    src[t.BUILD] = "(?:\\+(" + src[t.BUILDIDENTIFIER] + "(?:\\." + src[t.BUILDIDENTIFIER] + ")*))";
+    src[t2.BUILD] = "(?:\\+(" + src[t2.BUILDIDENTIFIER] + "(?:\\." + src[t2.BUILDIDENTIFIER] + ")*))";
     tok("FULL");
     tok("FULLPLAIN");
-    src[t.FULLPLAIN] = "v?" + src[t.MAINVERSION] + src[t.PRERELEASE] + "?" + src[t.BUILD] + "?";
-    src[t.FULL] = "^" + src[t.FULLPLAIN] + "$";
+    src[t2.FULLPLAIN] = "v?" + src[t2.MAINVERSION] + src[t2.PRERELEASE] + "?" + src[t2.BUILD] + "?";
+    src[t2.FULL] = "^" + src[t2.FULLPLAIN] + "$";
     tok("LOOSEPLAIN");
-    src[t.LOOSEPLAIN] = "[v=\\s]*" + src[t.MAINVERSIONLOOSE] + src[t.PRERELEASELOOSE] + "?" + src[t.BUILD] + "?";
+    src[t2.LOOSEPLAIN] = "[v=\\s]*" + src[t2.MAINVERSIONLOOSE] + src[t2.PRERELEASELOOSE] + "?" + src[t2.BUILD] + "?";
     tok("LOOSE");
-    src[t.LOOSE] = "^" + src[t.LOOSEPLAIN] + "$";
+    src[t2.LOOSE] = "^" + src[t2.LOOSEPLAIN] + "$";
     tok("GTLT");
-    src[t.GTLT] = "((?:<|>)?=?)";
+    src[t2.GTLT] = "((?:<|>)?=?)";
     tok("XRANGEIDENTIFIERLOOSE");
-    src[t.XRANGEIDENTIFIERLOOSE] = src[t.NUMERICIDENTIFIERLOOSE] + "|x|X|\\*";
+    src[t2.XRANGEIDENTIFIERLOOSE] = src[t2.NUMERICIDENTIFIERLOOSE] + "|x|X|\\*";
     tok("XRANGEIDENTIFIER");
-    src[t.XRANGEIDENTIFIER] = src[t.NUMERICIDENTIFIER] + "|x|X|\\*";
+    src[t2.XRANGEIDENTIFIER] = src[t2.NUMERICIDENTIFIER] + "|x|X|\\*";
     tok("XRANGEPLAIN");
-    src[t.XRANGEPLAIN] = "[v=\\s]*(" + src[t.XRANGEIDENTIFIER] + ")(?:\\.(" + src[t.XRANGEIDENTIFIER] + ")(?:\\.(" + src[t.
-    XRANGEIDENTIFIER] + ")(?:" + src[t.PRERELEASE] + ")?" + src[t.BUILD] + "?)?)?";
+    src[t2.XRANGEPLAIN] = "[v=\\s]*(" + src[t2.XRANGEIDENTIFIER] + ")(?:\\.(" + src[t2.XRANGEIDENTIFIER] + ")(?:\\.(" + src[t2.
+    XRANGEIDENTIFIER] + ")(?:" + src[t2.PRERELEASE] + ")?" + src[t2.BUILD] + "?)?)?";
     tok("XRANGEPLAINLOOSE");
-    src[t.XRANGEPLAINLOOSE] = "[v=\\s]*(" + src[t.XRANGEIDENTIFIERLOOSE] + ")(?:\\.(" + src[t.XRANGEIDENTIFIERLOOSE] + "\
-)(?:\\.(" + src[t.XRANGEIDENTIFIERLOOSE] + ")(?:" + src[t.PRERELEASELOOSE] + ")?" + src[t.BUILD] + "?)?)?";
+    src[t2.XRANGEPLAINLOOSE] = "[v=\\s]*(" + src[t2.XRANGEIDENTIFIERLOOSE] + ")(?:\\.(" + src[t2.XRANGEIDENTIFIERLOOSE] +
+    ")(?:\\.(" + src[t2.XRANGEIDENTIFIERLOOSE] + ")(?:" + src[t2.PRERELEASELOOSE] + ")?" + src[t2.BUILD] + "?)?)?";
     tok("XRANGE");
-    src[t.XRANGE] = "^" + src[t.GTLT] + "\\s*" + src[t.XRANGEPLAIN] + "$";
+    src[t2.XRANGE] = "^" + src[t2.GTLT] + "\\s*" + src[t2.XRANGEPLAIN] + "$";
     tok("XRANGELOOSE");
-    src[t.XRANGELOOSE] = "^" + src[t.GTLT] + "\\s*" + src[t.XRANGEPLAINLOOSE] + "$";
+    src[t2.XRANGELOOSE] = "^" + src[t2.GTLT] + "\\s*" + src[t2.XRANGEPLAINLOOSE] + "$";
     tok("COERCE");
-    src[t.COERCE] = "(^|[^\\d])(\\d{1," + MAX_SAFE_COMPONENT_LENGTH + "})(?:\\.(\\d{1," + MAX_SAFE_COMPONENT_LENGTH + "}\
-))?(?:\\.(\\d{1," + MAX_SAFE_COMPONENT_LENGTH + "}))?(?:$|[^\\d])";
+    src[t2.COERCE] = "(^|[^\\d])(\\d{1," + MAX_SAFE_COMPONENT_LENGTH + "})(?:\\.(\\d{1," + MAX_SAFE_COMPONENT_LENGTH + "\
+}))?(?:\\.(\\d{1," + MAX_SAFE_COMPONENT_LENGTH + "}))?(?:$|[^\\d])";
     tok("COERCERTL");
-    re[t.COERCERTL] = new RegExp(src[t.COERCE], "g");
-    safeRe[t.COERCERTL] = new RegExp(makeSafeRe(src[t.COERCE]), "g");
+    re[t2.COERCERTL] = new RegExp(src[t2.COERCE], "g");
+    safeRe[t2.COERCERTL] = new RegExp(makeSafeRe(src[t2.COERCE]), "g");
     tok("LONETILDE");
-    src[t.LONETILDE] = "(?:~>?)";
+    src[t2.LONETILDE] = "(?:~>?)";
     tok("TILDETRIM");
-    src[t.TILDETRIM] = "(\\s*)" + src[t.LONETILDE] + "\\s+";
-    re[t.TILDETRIM] = new RegExp(src[t.TILDETRIM], "g");
-    safeRe[t.TILDETRIM] = new RegExp(makeSafeRe(src[t.TILDETRIM]), "g");
+    src[t2.TILDETRIM] = "(\\s*)" + src[t2.LONETILDE] + "\\s+";
+    re[t2.TILDETRIM] = new RegExp(src[t2.TILDETRIM], "g");
+    safeRe[t2.TILDETRIM] = new RegExp(makeSafeRe(src[t2.TILDETRIM]), "g");
     var tildeTrimReplace = "$1~";
     tok("TILDE");
-    src[t.TILDE] = "^" + src[t.LONETILDE] + src[t.XRANGEPLAIN] + "$";
+    src[t2.TILDE] = "^" + src[t2.LONETILDE] + src[t2.XRANGEPLAIN] + "$";
     tok("TILDELOOSE");
-    src[t.TILDELOOSE] = "^" + src[t.LONETILDE] + src[t.XRANGEPLAINLOOSE] + "$";
+    src[t2.TILDELOOSE] = "^" + src[t2.LONETILDE] + src[t2.XRANGEPLAINLOOSE] + "$";
     tok("LONECARET");
-    src[t.LONECARET] = "(?:\\^)";
+    src[t2.LONECARET] = "(?:\\^)";
     tok("CARETTRIM");
-    src[t.CARETTRIM] = "(\\s*)" + src[t.LONECARET] + "\\s+";
-    re[t.CARETTRIM] = new RegExp(src[t.CARETTRIM], "g");
-    safeRe[t.CARETTRIM] = new RegExp(makeSafeRe(src[t.CARETTRIM]), "g");
+    src[t2.CARETTRIM] = "(\\s*)" + src[t2.LONECARET] + "\\s+";
+    re[t2.CARETTRIM] = new RegExp(src[t2.CARETTRIM], "g");
+    safeRe[t2.CARETTRIM] = new RegExp(makeSafeRe(src[t2.CARETTRIM]), "g");
     var caretTrimReplace = "$1^";
     tok("CARET");
-    src[t.CARET] = "^" + src[t.LONECARET] + src[t.XRANGEPLAIN] + "$";
+    src[t2.CARET] = "^" + src[t2.LONECARET] + src[t2.XRANGEPLAIN] + "$";
     tok("CARETLOOSE");
-    src[t.CARETLOOSE] = "^" + src[t.LONECARET] + src[t.XRANGEPLAINLOOSE] + "$";
+    src[t2.CARETLOOSE] = "^" + src[t2.LONECARET] + src[t2.XRANGEPLAINLOOSE] + "$";
     tok("COMPARATORLOOSE");
-    src[t.COMPARATORLOOSE] = "^" + src[t.GTLT] + "\\s*(" + src[t.LOOSEPLAIN] + ")$|^$";
+    src[t2.COMPARATORLOOSE] = "^" + src[t2.GTLT] + "\\s*(" + src[t2.LOOSEPLAIN] + ")$|^$";
     tok("COMPARATOR");
-    src[t.COMPARATOR] = "^" + src[t.GTLT] + "\\s*(" + src[t.FULLPLAIN] + ")$|^$";
+    src[t2.COMPARATOR] = "^" + src[t2.GTLT] + "\\s*(" + src[t2.FULLPLAIN] + ")$|^$";
     tok("COMPARATORTRIM");
-    src[t.COMPARATORTRIM] = "(\\s*)" + src[t.GTLT] + "\\s*(" + src[t.LOOSEPLAIN] + "|" + src[t.XRANGEPLAIN] + ")";
-    re[t.COMPARATORTRIM] = new RegExp(src[t.COMPARATORTRIM], "g");
-    safeRe[t.COMPARATORTRIM] = new RegExp(makeSafeRe(src[t.COMPARATORTRIM]), "g");
+    src[t2.COMPARATORTRIM] = "(\\s*)" + src[t2.GTLT] + "\\s*(" + src[t2.LOOSEPLAIN] + "|" + src[t2.XRANGEPLAIN] + ")";
+    re[t2.COMPARATORTRIM] = new RegExp(src[t2.COMPARATORTRIM], "g");
+    safeRe[t2.COMPARATORTRIM] = new RegExp(makeSafeRe(src[t2.COMPARATORTRIM]), "g");
     var comparatorTrimReplace = "$1$2$3";
     tok("HYPHENRANGE");
-    src[t.HYPHENRANGE] = "^\\s*(" + src[t.XRANGEPLAIN] + ")\\s+-\\s+(" + src[t.XRANGEPLAIN] + ")\\s*$";
+    src[t2.HYPHENRANGE] = "^\\s*(" + src[t2.XRANGEPLAIN] + ")\\s+-\\s+(" + src[t2.XRANGEPLAIN] + ")\\s*$";
     tok("HYPHENRANGELOOSE");
-    src[t.HYPHENRANGELOOSE] = "^\\s*(" + src[t.XRANGEPLAINLOOSE] + ")\\s+-\\s+(" + src[t.XRANGEPLAINLOOSE] + ")\\s*$";
+    src[t2.HYPHENRANGELOOSE] = "^\\s*(" + src[t2.XRANGEPLAINLOOSE] + ")\\s+-\\s+(" + src[t2.XRANGEPLAINLOOSE] + ")\\s*$";
     tok("STAR");
-    src[t.STAR] = "(<|>)?=?\\s*\\*";
-    for (i = 0; i < R; i++) {
+    src[t2.STAR] = "(<|>)?=?\\s*\\*";
+    for (i = 0; i < R2; i++) {
       debug3(i, src[i]);
       if (!re[i]) {
         re[i] = new RegExp(src[i]);
@@ -47400,8 +47400,8 @@ var require_semver4 = __commonJS({
       if (version.length > MAX_LENGTH) {
         return null;
       }
-      var r = options.loose ? safeRe[t.LOOSE] : safeRe[t.FULL];
-      if (!r.test(version)) {
+      var r2 = options.loose ? safeRe[t2.LOOSE] : safeRe[t2.FULL];
+      if (!r2.test(version)) {
         return null;
       }
       try {
@@ -47413,8 +47413,8 @@ var require_semver4 = __commonJS({
     __name(parse2, "parse");
     exports2.valid = valid2;
     function valid2(version, options) {
-      var v = parse2(version, options);
-      return v ? v.version : null;
+      var v2 = parse2(version, options);
+      return v2 ? v2.version : null;
     }
     __name(valid2, "valid");
     exports2.clean = clean2;
@@ -47449,7 +47449,7 @@ var require_semver4 = __commonJS({
       debug3("SemVer", version, options);
       this.options = options;
       this.loose = !!options.loose;
-      var m = version.trim().match(options.loose ? safeRe[t.LOOSE] : safeRe[t.FULL]);
+      var m = version.trim().match(options.loose ? safeRe[t2.LOOSE] : safeRe[t2.FULL]);
       if (!m) {
         throw new TypeError("Invalid Version: " + version);
       }
@@ -47521,18 +47521,18 @@ var require_semver4 = __commonJS({
       var i2 = 0;
       do {
         var a = this.prerelease[i2];
-        var b = other.prerelease[i2];
-        debug3("prerelease compare", i2, a, b);
-        if (a === void 0 && b === void 0) {
+        var b2 = other.prerelease[i2];
+        debug3("prerelease compare", i2, a, b2);
+        if (a === void 0 && b2 === void 0) {
           return 0;
-        } else if (b === void 0) {
+        } else if (b2 === void 0) {
           return 1;
         } else if (a === void 0) {
           return -1;
-        } else if (a === b) {
+        } else if (a === b2) {
           continue;
         } else {
-          return compareIdentifiers(a, b);
+          return compareIdentifiers(a, b2);
         }
       } while (++i2);
     };
@@ -47543,18 +47543,18 @@ var require_semver4 = __commonJS({
       var i2 = 0;
       do {
         var a = this.build[i2];
-        var b = other.build[i2];
-        debug3("prerelease compare", i2, a, b);
-        if (a === void 0 && b === void 0) {
+        var b2 = other.build[i2];
+        debug3("prerelease compare", i2, a, b2);
+        if (a === void 0 && b2 === void 0) {
           return 0;
-        } else if (b === void 0) {
+        } else if (b2 === void 0) {
           return 1;
         } else if (a === void 0) {
           return -1;
-        } else if (a === b) {
+        } else if (a === b2) {
           continue;
         } else {
-          return compareIdentifiers(a, b);
+          return compareIdentifiers(a, b2);
         }
       } while (++i2);
     };
@@ -47679,19 +47679,19 @@ var require_semver4 = __commonJS({
     __name(diff, "diff");
     exports2.compareIdentifiers = compareIdentifiers;
     var numeric = /^[0-9]+$/;
-    function compareIdentifiers(a, b) {
+    function compareIdentifiers(a, b2) {
       var anum = numeric.test(a);
-      var bnum = numeric.test(b);
+      var bnum = numeric.test(b2);
       if (anum && bnum) {
         a = +a;
-        b = +b;
+        b2 = +b2;
       }
-      return a === b ? 0 : anum && !bnum ? -1 : bnum && !anum ? 1 : a < b ? -1 : 1;
+      return a === b2 ? 0 : anum && !bnum ? -1 : bnum && !anum ? 1 : a < b2 ? -1 : 1;
     }
     __name(compareIdentifiers, "compareIdentifiers");
     exports2.rcompareIdentifiers = rcompareIdentifiers;
-    function rcompareIdentifiers(a, b) {
-      return compareIdentifiers(b, a);
+    function rcompareIdentifiers(a, b2) {
+      return compareIdentifiers(b2, a);
     }
     __name(rcompareIdentifiers, "rcompareIdentifiers");
     exports2.major = major;
@@ -47710,100 +47710,100 @@ var require_semver4 = __commonJS({
     }
     __name(patch, "patch");
     exports2.compare = compare;
-    function compare(a, b, loose) {
-      return new SemVer(a, loose).compare(new SemVer(b, loose));
+    function compare(a, b2, loose) {
+      return new SemVer(a, loose).compare(new SemVer(b2, loose));
     }
     __name(compare, "compare");
     exports2.compareLoose = compareLoose;
-    function compareLoose(a, b) {
-      return compare(a, b, true);
+    function compareLoose(a, b2) {
+      return compare(a, b2, true);
     }
     __name(compareLoose, "compareLoose");
     exports2.compareBuild = compareBuild;
-    function compareBuild(a, b, loose) {
+    function compareBuild(a, b2, loose) {
       var versionA = new SemVer(a, loose);
-      var versionB = new SemVer(b, loose);
+      var versionB = new SemVer(b2, loose);
       return versionA.compare(versionB) || versionA.compareBuild(versionB);
     }
     __name(compareBuild, "compareBuild");
     exports2.rcompare = rcompare;
-    function rcompare(a, b, loose) {
-      return compare(b, a, loose);
+    function rcompare(a, b2, loose) {
+      return compare(b2, a, loose);
     }
     __name(rcompare, "rcompare");
     exports2.sort = sort;
     function sort(list, loose) {
-      return list.sort(function(a, b) {
-        return exports2.compareBuild(a, b, loose);
+      return list.sort(function(a, b2) {
+        return exports2.compareBuild(a, b2, loose);
       });
     }
     __name(sort, "sort");
     exports2.rsort = rsort;
     function rsort(list, loose) {
-      return list.sort(function(a, b) {
-        return exports2.compareBuild(b, a, loose);
+      return list.sort(function(a, b2) {
+        return exports2.compareBuild(b2, a, loose);
       });
     }
     __name(rsort, "rsort");
     exports2.gt = gt2;
-    function gt2(a, b, loose) {
-      return compare(a, b, loose) > 0;
+    function gt2(a, b2, loose) {
+      return compare(a, b2, loose) > 0;
     }
     __name(gt2, "gt");
     exports2.lt = lt;
-    function lt(a, b, loose) {
-      return compare(a, b, loose) < 0;
+    function lt(a, b2, loose) {
+      return compare(a, b2, loose) < 0;
     }
     __name(lt, "lt");
     exports2.eq = eq;
-    function eq(a, b, loose) {
-      return compare(a, b, loose) === 0;
+    function eq(a, b2, loose) {
+      return compare(a, b2, loose) === 0;
     }
     __name(eq, "eq");
     exports2.neq = neq;
-    function neq(a, b, loose) {
-      return compare(a, b, loose) !== 0;
+    function neq(a, b2, loose) {
+      return compare(a, b2, loose) !== 0;
     }
     __name(neq, "neq");
     exports2.gte = gte;
-    function gte(a, b, loose) {
-      return compare(a, b, loose) >= 0;
+    function gte(a, b2, loose) {
+      return compare(a, b2, loose) >= 0;
     }
     __name(gte, "gte");
     exports2.lte = lte;
-    function lte(a, b, loose) {
-      return compare(a, b, loose) <= 0;
+    function lte(a, b2, loose) {
+      return compare(a, b2, loose) <= 0;
     }
     __name(lte, "lte");
     exports2.cmp = cmp;
-    function cmp(a, op, b, loose) {
+    function cmp(a, op, b2, loose) {
       switch (op) {
         case "===":
           if (typeof a === "object")
             a = a.version;
-          if (typeof b === "object")
-            b = b.version;
-          return a === b;
+          if (typeof b2 === "object")
+            b2 = b2.version;
+          return a === b2;
         case "!==":
           if (typeof a === "object")
             a = a.version;
-          if (typeof b === "object")
-            b = b.version;
-          return a !== b;
+          if (typeof b2 === "object")
+            b2 = b2.version;
+          return a !== b2;
         case "":
         case "=":
         case "==":
-          return eq(a, b, loose);
+          return eq(a, b2, loose);
         case "!=":
-          return neq(a, b, loose);
+          return neq(a, b2, loose);
         case ">":
-          return gt2(a, b, loose);
+          return gt2(a, b2, loose);
         case ">=":
-          return gte(a, b, loose);
+          return gte(a, b2, loose);
         case "<":
-          return lt(a, b, loose);
+          return lt(a, b2, loose);
         case "<=":
-          return lte(a, b, loose);
+          return lte(a, b2, loose);
         default:
           throw new TypeError("Invalid operator: " + op);
       }
@@ -47842,8 +47842,8 @@ var require_semver4 = __commonJS({
     __name(Comparator, "Comparator");
     var ANY = {};
     Comparator.prototype.parse = function(comp) {
-      var r = this.options.loose ? safeRe[t.COMPARATORLOOSE] : safeRe[t.COMPARATOR];
-      var m = comp.match(r);
+      var r2 = this.options.loose ? safeRe[t2.COMPARATORLOOSE] : safeRe[t2.COMPARATOR];
+      var m = comp.match(r2);
       if (!m) {
         throw new TypeError("Invalid comparator: " + comp);
       }
@@ -47939,8 +47939,8 @@ var require_semver4 = __commonJS({
       this.raw = range.trim().split(/\s+/).join(" ");
       this.set = this.raw.split("||").map(function(range2) {
         return this.parseRange(range2.trim());
-      }, this).filter(function(c) {
-        return c.length;
+      }, this).filter(function(c2) {
+        return c2.length;
       });
       if (!this.set.length) {
         throw new TypeError("Invalid SemVer Range: " + this.raw);
@@ -47959,15 +47959,15 @@ var require_semver4 = __commonJS({
     };
     Range.prototype.parseRange = function(range) {
       var loose = this.options.loose;
-      var hr = loose ? safeRe[t.HYPHENRANGELOOSE] : safeRe[t.HYPHENRANGE];
+      var hr = loose ? safeRe[t2.HYPHENRANGELOOSE] : safeRe[t2.HYPHENRANGE];
       range = range.replace(hr, hyphenReplace);
       debug3("hyphen replace", range);
-      range = range.replace(safeRe[t.COMPARATORTRIM], comparatorTrimReplace);
-      debug3("comparator trim", range, safeRe[t.COMPARATORTRIM]);
-      range = range.replace(safeRe[t.TILDETRIM], tildeTrimReplace);
-      range = range.replace(safeRe[t.CARETTRIM], caretTrimReplace);
+      range = range.replace(safeRe[t2.COMPARATORTRIM], comparatorTrimReplace);
+      debug3("comparator trim", range, safeRe[t2.COMPARATORTRIM]);
+      range = range.replace(safeRe[t2.TILDETRIM], tildeTrimReplace);
+      range = range.replace(safeRe[t2.CARETTRIM], caretTrimReplace);
       range = range.split(/\s+/).join(" ");
-      var compRe = loose ? safeRe[t.COMPARATORLOOSE] : safeRe[t.COMPARATOR];
+      var compRe = loose ? safeRe[t2.COMPARATORLOOSE] : safeRe[t2.COMPARATOR];
       var set = range.split(" ").map(function(comp) {
         return parseComparator(comp, this.options);
       }, this).join(" ").split(/\s+/);
@@ -48011,8 +48011,8 @@ var require_semver4 = __commonJS({
     exports2.toComparators = toComparators;
     function toComparators(range, options) {
       return new Range(range, options).set.map(function(comp) {
-        return comp.map(function(c) {
-          return c.value;
+        return comp.map(function(c2) {
+          return c2.value;
         }).join(" ").trim().split(" ");
       });
     }
@@ -48041,21 +48041,21 @@ var require_semver4 = __commonJS({
     }
     __name(replaceTildes, "replaceTildes");
     function replaceTilde(comp, options) {
-      var r = options.loose ? safeRe[t.TILDELOOSE] : safeRe[t.TILDE];
-      return comp.replace(r, function(_, M, m, p, pr) {
-        debug3("tilde", comp, _, M, m, p, pr);
+      var r2 = options.loose ? safeRe[t2.TILDELOOSE] : safeRe[t2.TILDE];
+      return comp.replace(r2, function(_2, M2, m, p, pr) {
+        debug3("tilde", comp, _2, M2, m, p, pr);
         var ret;
-        if (isX(M)) {
+        if (isX(M2)) {
           ret = "";
         } else if (isX(m)) {
-          ret = ">=" + M + ".0.0 <" + (+M + 1) + ".0.0";
+          ret = ">=" + M2 + ".0.0 <" + (+M2 + 1) + ".0.0";
         } else if (isX(p)) {
-          ret = ">=" + M + "." + m + ".0 <" + M + "." + (+m + 1) + ".0";
+          ret = ">=" + M2 + "." + m + ".0 <" + M2 + "." + (+m + 1) + ".0";
         } else if (pr) {
           debug3("replaceTilde pr", pr);
-          ret = ">=" + M + "." + m + "." + p + "-" + pr + " <" + M + "." + (+m + 1) + ".0";
+          ret = ">=" + M2 + "." + m + "." + p + "-" + pr + " <" + M2 + "." + (+m + 1) + ".0";
         } else {
-          ret = ">=" + M + "." + m + "." + p + " <" + M + "." + (+m + 1) + ".0";
+          ret = ">=" + M2 + "." + m + "." + p + " <" + M2 + "." + (+m + 1) + ".0";
         }
         debug3("tilde return", ret);
         return ret;
@@ -48070,41 +48070,41 @@ var require_semver4 = __commonJS({
     __name(replaceCarets, "replaceCarets");
     function replaceCaret(comp, options) {
       debug3("caret", comp, options);
-      var r = options.loose ? safeRe[t.CARETLOOSE] : safeRe[t.CARET];
-      return comp.replace(r, function(_, M, m, p, pr) {
-        debug3("caret", comp, _, M, m, p, pr);
+      var r2 = options.loose ? safeRe[t2.CARETLOOSE] : safeRe[t2.CARET];
+      return comp.replace(r2, function(_2, M2, m, p, pr) {
+        debug3("caret", comp, _2, M2, m, p, pr);
         var ret;
-        if (isX(M)) {
+        if (isX(M2)) {
           ret = "";
         } else if (isX(m)) {
-          ret = ">=" + M + ".0.0 <" + (+M + 1) + ".0.0";
+          ret = ">=" + M2 + ".0.0 <" + (+M2 + 1) + ".0.0";
         } else if (isX(p)) {
-          if (M === "0") {
-            ret = ">=" + M + "." + m + ".0 <" + M + "." + (+m + 1) + ".0";
+          if (M2 === "0") {
+            ret = ">=" + M2 + "." + m + ".0 <" + M2 + "." + (+m + 1) + ".0";
           } else {
-            ret = ">=" + M + "." + m + ".0 <" + (+M + 1) + ".0.0";
+            ret = ">=" + M2 + "." + m + ".0 <" + (+M2 + 1) + ".0.0";
           }
         } else if (pr) {
           debug3("replaceCaret pr", pr);
-          if (M === "0") {
+          if (M2 === "0") {
             if (m === "0") {
-              ret = ">=" + M + "." + m + "." + p + "-" + pr + " <" + M + "." + m + "." + (+p + 1);
+              ret = ">=" + M2 + "." + m + "." + p + "-" + pr + " <" + M2 + "." + m + "." + (+p + 1);
             } else {
-              ret = ">=" + M + "." + m + "." + p + "-" + pr + " <" + M + "." + (+m + 1) + ".0";
+              ret = ">=" + M2 + "." + m + "." + p + "-" + pr + " <" + M2 + "." + (+m + 1) + ".0";
             }
           } else {
-            ret = ">=" + M + "." + m + "." + p + "-" + pr + " <" + (+M + 1) + ".0.0";
+            ret = ">=" + M2 + "." + m + "." + p + "-" + pr + " <" + (+M2 + 1) + ".0.0";
           }
         } else {
           debug3("no pr");
-          if (M === "0") {
+          if (M2 === "0") {
             if (m === "0") {
-              ret = ">=" + M + "." + m + "." + p + " <" + M + "." + m + "." + (+p + 1);
+              ret = ">=" + M2 + "." + m + "." + p + " <" + M2 + "." + m + "." + (+p + 1);
             } else {
-              ret = ">=" + M + "." + m + "." + p + " <" + M + "." + (+m + 1) + ".0";
+              ret = ">=" + M2 + "." + m + "." + p + " <" + M2 + "." + (+m + 1) + ".0";
             }
           } else {
-            ret = ">=" + M + "." + m + "." + p + " <" + (+M + 1) + ".0.0";
+            ret = ">=" + M2 + "." + m + "." + p + " <" + (+M2 + 1) + ".0.0";
           }
         }
         debug3("caret return", ret);
@@ -48121,10 +48121,10 @@ var require_semver4 = __commonJS({
     __name(replaceXRanges, "replaceXRanges");
     function replaceXRange(comp, options) {
       comp = comp.trim();
-      var r = options.loose ? safeRe[t.XRANGELOOSE] : safeRe[t.XRANGE];
-      return comp.replace(r, function(ret, gtlt, M, m, p, pr) {
-        debug3("xRange", comp, ret, gtlt, M, m, p, pr);
-        var xM = isX(M);
+      var r2 = options.loose ? safeRe[t2.XRANGELOOSE] : safeRe[t2.XRANGE];
+      return comp.replace(r2, function(ret, gtlt, M2, m, p, pr) {
+        debug3("xRange", comp, ret, gtlt, M2, m, p, pr);
+        var xM = isX(M2);
         var xm = xM || isX(m);
         var xp = xm || isX(p);
         var anyX = xp;
@@ -48146,7 +48146,7 @@ var require_semver4 = __commonJS({
           if (gtlt === ">") {
             gtlt = ">=";
             if (xm) {
-              M = +M + 1;
+              M2 = +M2 + 1;
               m = 0;
               p = 0;
             } else {
@@ -48156,16 +48156,16 @@ var require_semver4 = __commonJS({
           } else if (gtlt === "<=") {
             gtlt = "<";
             if (xm) {
-              M = +M + 1;
+              M2 = +M2 + 1;
             } else {
               m = +m + 1;
             }
           }
-          ret = gtlt + M + "." + m + "." + p + pr;
+          ret = gtlt + M2 + "." + m + "." + p + pr;
         } else if (xm) {
-          ret = ">=" + M + ".0.0" + pr + " <" + (+M + 1) + ".0.0" + pr;
+          ret = ">=" + M2 + ".0.0" + pr + " <" + (+M2 + 1) + ".0.0" + pr;
         } else if (xp) {
-          ret = ">=" + M + "." + m + ".0" + pr + " <" + M + "." + (+m + 1) + ".0" + pr;
+          ret = ">=" + M2 + "." + m + ".0" + pr + " <" + M2 + "." + (+m + 1) + ".0" + pr;
         }
         debug3("xRange return", ret);
         return ret;
@@ -48174,7 +48174,7 @@ var require_semver4 = __commonJS({
     __name(replaceXRange, "replaceXRange");
     function replaceStars(comp, options) {
       debug3("replaceStars", comp, options);
-      return comp.trim().replace(safeRe[t.STAR], "");
+      return comp.trim().replace(safeRe[t2.STAR], "");
     }
     __name(replaceStars, "replaceStars");
     function hyphenReplace($0, from, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr, tb) {
@@ -48262,10 +48262,10 @@ var require_semver4 = __commonJS({
       } catch (er) {
         return null;
       }
-      versions.forEach(function(v) {
-        if (rangeObj.test(v)) {
-          if (!max || maxSV.compare(v) === -1) {
-            max = v;
+      versions.forEach(function(v2) {
+        if (rangeObj.test(v2)) {
+          if (!max || maxSV.compare(v2) === -1) {
+            max = v2;
             maxSV = new SemVer(max, options);
           }
         }
@@ -48282,10 +48282,10 @@ var require_semver4 = __commonJS({
       } catch (er) {
         return null;
       }
-      versions.forEach(function(v) {
-        if (rangeObj.test(v)) {
-          if (!min || minSV.compare(v) === 1) {
-            min = v;
+      versions.forEach(function(v2) {
+        if (rangeObj.test(v2)) {
+          if (!min || minSV.compare(v2) === 1) {
+            min = v2;
             minSV = new SemVer(min, options);
           }
         }
@@ -48439,16 +48439,16 @@ var require_semver4 = __commonJS({
       options = options || {};
       var match = null;
       if (!options.rtl) {
-        match = version.match(safeRe[t.COERCE]);
+        match = version.match(safeRe[t2.COERCE]);
       } else {
         var next;
-        while ((next = safeRe[t.COERCERTL].exec(version)) && (!match || match.index + match[0].length !== version.length)) {
+        while ((next = safeRe[t2.COERCERTL].exec(version)) && (!match || match.index + match[0].length !== version.length)) {
           if (!match || next.index + next[0].length !== match.index + match[0].length) {
             match = next;
           }
-          safeRe[t.COERCERTL].lastIndex = next.index + next[1].length + next[2].length;
+          safeRe[t2.COERCERTL].lastIndex = next.index + next[1].length + next[2].length;
         }
-        safeRe[t.COERCERTL].lastIndex = -1;
+        safeRe[t2.COERCERTL].lastIndex = -1;
       }
       if (match === null) {
         return null;
@@ -49471,19 +49471,19 @@ var require_parse3 = __commonJS({
       }
       __name(next, "next");
       function parseOperator(operator) {
-        var t = token();
-        if (t && t.type === "OPERATOR" && operator === t.string) {
+        var t2 = token();
+        if (t2 && t2.type === "OPERATOR" && operator === t2.string) {
           next();
-          return t.string;
+          return t2.string;
         }
       }
       __name(parseOperator, "parseOperator");
       function parseWith() {
         if (parseOperator("WITH")) {
-          var t = token();
-          if (t && t.type === "EXCEPTION") {
+          var t2 = token();
+          if (t2 && t2.type === "EXCEPTION") {
             next();
-            return t.string;
+            return t2.string;
           }
           throw new Error("Expected exception after `WITH`");
         }
@@ -49492,28 +49492,28 @@ var require_parse3 = __commonJS({
       function parseLicenseRef() {
         var begin = index;
         var string = "";
-        var t = token();
-        if (t.type === "DOCUMENTREF") {
+        var t2 = token();
+        if (t2.type === "DOCUMENTREF") {
           next();
-          string += "DocumentRef-" + t.string + ":";
+          string += "DocumentRef-" + t2.string + ":";
           if (!parseOperator(":")) {
             throw new Error("Expected `:` after `DocumentRef-...`");
           }
         }
-        t = token();
-        if (t.type === "LICENSEREF") {
+        t2 = token();
+        if (t2.type === "LICENSEREF") {
           next();
-          string += "LicenseRef-" + t.string;
+          string += "LicenseRef-" + t2.string;
           return { license: string };
         }
         index = begin;
       }
       __name(parseLicenseRef, "parseLicenseRef");
       function parseLicense() {
-        var t = token();
-        if (t && t.type === "LICENSE") {
+        var t2 = token();
+        if (t2 && t2.type === "LICENSE") {
           next();
-          var node2 = { license: t.string };
+          var node2 = { license: t2.string };
           if (parseOperator("+")) {
             node2.plus = true;
           }
@@ -49599,10 +49599,10 @@ var require_spdx_correct = __commonJS({
       }
     }
     __name(valid2, "valid");
-    function sortTranspositions(a, b) {
-      var length = b[0].length - a[0].length;
+    function sortTranspositions(a, b2) {
+      var length = b2[0].length - a[0].length;
       if (length !== 0) return length;
-      return a[0].toUpperCase().localeCompare(b[0].toUpperCase());
+      return a[0].toUpperCase().localeCompare(b2[0].toUpperCase());
     }
     __name(sortTranspositions, "sortTranspositions");
     var transpositions = [
@@ -50006,20 +50006,20 @@ var require_implementation = __commonJS({
     var toStr = Object.prototype.toString;
     var max = Math.max;
     var funcType = "[object Function]";
-    var concatty = /* @__PURE__ */ __name(function concatty2(a, b) {
+    var concatty = /* @__PURE__ */ __name(function concatty2(a, b2) {
       var arr = [];
       for (var i = 0; i < a.length; i += 1) {
         arr[i] = a[i];
       }
-      for (var j = 0; j < b.length; j += 1) {
-        arr[j + a.length] = b[j];
+      for (var j2 = 0; j2 < b2.length; j2 += 1) {
+        arr[j2 + a.length] = b2[j2];
       }
       return arr;
     }, "concatty");
     var slicy = /* @__PURE__ */ __name(function slicy2(arrLike, offset) {
       var arr = [];
-      for (var i = offset || 0, j = 0; i < arrLike.length; i += 1, j += 1) {
-        arr[j] = arrLike[i];
+      for (var i = offset || 0, j2 = 0; i < arrLike.length; i += 1, j2 += 1) {
+        arr[j2] = arrLike[i];
       }
       return arr;
     }, "slicy");
@@ -50324,8 +50324,8 @@ ed, a valid node version is required");
     }
     __name(versionIncluded, "versionIncluded");
     var data = require_core();
-    module2.exports = /* @__PURE__ */ __name(function isCore(x, nodeVersion) {
-      return hasOwn(data, x) && versionIncluded(nodeVersion, data[x]);
+    module2.exports = /* @__PURE__ */ __name(function isCore(x2, nodeVersion) {
+      return hasOwn(data, x2) && versionIncluded(nodeVersion, data[x2]);
     }, "isCore");
   }
 });
@@ -50416,15 +50416,15 @@ var require_fixer = __commonJS({
             url: data.repository
           };
         }
-        var r = data.repository.url || "";
-        if (r) {
-          var hosted = hostedGitInfo.fromUrl(r);
+        var r2 = data.repository.url || "";
+        if (r2) {
+          var hosted = hostedGitInfo.fromUrl(r2);
           if (hosted) {
-            r = data.repository.url = hosted.getDefaultRepresentation() === "shortcut" ? hosted.https() : hosted.toString();
+            r2 = data.repository.url = hosted.getDefaultRepresentation() === "shortcut" ? hosted.https() : hosted.toString();
           }
         }
-        if (r.match(/github.com\/[^/]+\/[^/]+\.git\.git$/)) {
-          this.warn("brokenGitUrl", r);
+        if (r2.match(/github.com\/[^/]+\/[^/]+\.git\.git$/)) {
+          this.warn("brokenGitUrl", r2);
         }
       }, "fixRepositoryField"),
       fixTypos: /* @__PURE__ */ __name(function(data) {
@@ -50443,12 +50443,12 @@ var require_fixer = __commonJS({
           delete data.scripts;
           return;
         }
-        Object.keys(data.scripts).forEach(function(k) {
-          if (typeof data.scripts[k] !== "string") {
+        Object.keys(data.scripts).forEach(function(k2) {
+          if (typeof data.scripts[k2] !== "string") {
             this.warn("nonStringScript");
-            delete data.scripts[k];
-          } else if (typos.script[k] && !data.scripts[typos.script[k]]) {
-            this.warn("typo", k, typos.script[k], "scripts");
+            delete data.scripts[k2];
+          } else if (typos.script[k2] && !data.scripts[typos.script[k2]]) {
+            this.warn("typo", k2, typos.script[k2], "scripts");
           }
         }, this);
       }, "fixScriptsField"),
@@ -50473,14 +50473,14 @@ var require_fixer = __commonJS({
           return;
         }
         if (typeof data.bin === "string") {
-          var b = {};
+          var b2 = {};
           var match;
           if (match = data.name.match(/^@[^/]+[/](.*)$/)) {
-            b[match[1]] = data.bin;
+            b2[match[1]] = data.bin;
           } else {
-            b[data.name] = data.bin;
+            b2[data.name] = data.bin;
           }
-          data.bin = b;
+          data.bin = b2;
         }
       }, "fixBinField"),
       fixManField: /* @__PURE__ */ __name(function(data) {
@@ -50533,9 +50533,9 @@ var require_fixer = __commonJS({
             return;
           }
           Object.keys(data[deps]).forEach(function(d) {
-            var r = data[deps][d];
-            if (typeof r !== "string") {
-              this.warn("nonStringDependency", d, JSON.stringify(r));
+            var r2 = data[deps][d];
+            if (typeof r2 !== "string") {
+              this.warn("nonStringDependency", d, JSON.stringify(r2));
               delete data[deps][d];
             }
             var hosted = hostedGitInfo.fromUrl(data[deps][d]);
@@ -50768,13 +50768,13 @@ var require_fixer = __commonJS({
     }
     __name(parsePerson, "parsePerson");
     function addOptionalDepsToDeps(data, warn) {
-      var o = data.optionalDependencies;
-      if (!o) {
+      var o2 = data.optionalDependencies;
+      if (!o2) {
         return;
       }
       var d = data.dependencies || {};
-      Object.keys(o).forEach(function(k) {
-        d[k] = o[k];
+      Object.keys(o2).forEach(function(k2) {
+        d[k2] = o2[k2];
       });
       data.dependencies = d;
     }
@@ -50790,7 +50790,7 @@ var require_fixer = __commonJS({
         return deps;
       }
       warn("deprecatedArrayDependencies", type);
-      var o = {};
+      var o2 = {};
       deps.filter(function(d) {
         return typeof d === "string";
       }).forEach(function(d) {
@@ -50799,9 +50799,9 @@ var require_fixer = __commonJS({
         var dv = d.join("");
         dv = dv.trim();
         dv = dv.replace(/^@/, "");
-        o[dn] = dv;
+        o2[dn] = dv;
       });
-      return o;
+      return o2;
     }
     __name(depObjectify, "depObjectify");
     function objectifyDeps(data, warn) {
@@ -50817,11 +50817,11 @@ var require_fixer = __commonJS({
       if (!bugs) {
         return;
       }
-      Object.keys(bugs).forEach(function(k) {
-        if (typos.bugs[k]) {
-          warn("typo", k, typos.bugs[k], "bugs");
-          bugs[typos.bugs[k]] = bugs[k];
-          delete bugs[k];
+      Object.keys(bugs).forEach(function(k2) {
+        if (typos.bugs[k2]) {
+          warn("typo", k2, typos.bugs[k2], "bugs");
+          bugs[typos.bugs[k2]] = bugs[k2];
+          delete bugs[k2];
         }
       });
     }
@@ -50972,23 +50972,23 @@ var require_ini = __commonJS({
         opt.whitespace = opt.whitespace === true;
       }
       var separator = opt.whitespace ? " = " : "=";
-      Object.keys(obj).forEach(function(k, _, __) {
-        var val = obj[k];
+      Object.keys(obj).forEach(function(k2, _2, __) {
+        var val = obj[k2];
         if (val && Array.isArray(val)) {
           val.forEach(function(item) {
-            out += safe(k + "[]") + separator + safe(item) + "\n";
+            out += safe(k2 + "[]") + separator + safe(item) + "\n";
           });
         } else if (val && typeof val === "object")
-          children.push(k);
+          children.push(k2);
         else
-          out += safe(k) + separator + safe(val) + eol;
+          out += safe(k2) + separator + safe(val) + eol;
       });
       if (opt.section && out.length)
         out = "[" + safe(opt.section) + "]" + eol + out;
-      children.forEach(function(k, _, __) {
-        var nk = dotSplit(k).join("\\.");
+      children.forEach(function(k2, _2, __) {
+        var nk = dotSplit(k2).join("\\.");
         var section = (opt.section ? opt.section + "." : "") + nk;
-        var child = encode(obj[k], {
+        var child = encode(obj[k2], {
           section,
           whitespace: opt.whitespace
         });
@@ -51011,7 +51011,7 @@ var require_ini = __commonJS({
       var section = null;
       var re = /^\[([^\]]*)\]$|^([^=]+)(=(.*))?$/i;
       var lines = str.split(/[\r\n]+/g);
-      lines.forEach(function(line, _, __) {
+      lines.forEach(function(line, _2, __) {
         if (!line || line.match(/^\s*[;#]/))
           return;
         var match = line.match(re);
@@ -51050,14 +51050,14 @@ var require_ini = __commonJS({
         else
           p[key] = value;
       });
-      Object.keys(out).filter(function(k, _, __) {
-        if (!out[k] || typeof out[k] !== "object" || Array.isArray(out[k]))
+      Object.keys(out).filter(function(k2, _2, __) {
+        if (!out[k2] || typeof out[k2] !== "object" || Array.isArray(out[k2]))
           return false;
-        var parts = dotSplit(k);
+        var parts = dotSplit(k2);
         var p2 = out;
         var l = parts.pop();
         var nl = l.replace(/\\\./g, ".");
-        parts.forEach(function(part, _2, __2) {
+        parts.forEach(function(part, _3, __2) {
           if (part === "__proto__")
             return;
           if (!p2[part] || typeof p2[part] !== "object")
@@ -51066,9 +51066,9 @@ var require_ini = __commonJS({
         });
         if (p2 === out && nl === l)
           return false;
-        p2[nl] = out[k];
+        p2[nl] = out[k2];
         return true;
-      }).forEach(function(del, _, __) {
+      }).forEach(function(del, _2, __) {
         delete out[del];
       });
       return out;
@@ -51090,25 +51090,25 @@ var require_ini = __commonJS({
           val = val.substr(1, val.length - 2);
         try {
           val = JSON.parse(val);
-        } catch (_) {
+        } catch (_2) {
         }
       } else {
         var esc = false;
         var unesc = "";
         for (var i = 0, l = val.length; i < l; i++) {
-          var c = val.charAt(i);
+          var c2 = val.charAt(i);
           if (esc) {
-            if ("\\;#".indexOf(c) !== -1)
-              unesc += c;
+            if ("\\;#".indexOf(c2) !== -1)
+              unesc += c2;
             else
-              unesc += "\\" + c;
+              unesc += "\\" + c2;
             esc = false;
-          } else if (";#".indexOf(c) !== -1)
+          } else if (";#".indexOf(c2) !== -1)
             break;
-          else if (c === "\\")
+          else if (c2 === "\\")
             esc = true;
           else
-            unesc += c;
+            unesc += c2;
         }
         if (esc)
           unesc += "\\";
@@ -51142,15 +51142,15 @@ var require_gitconfiglocal = __commonJS({
     };
     function format(data) {
       var out = {};
-      Object.keys(data).forEach(function(k) {
-        if (k.indexOf('"') > -1) {
-          var parts = k.split('"');
+      Object.keys(data).forEach(function(k2) {
+        if (k2.indexOf('"') > -1) {
+          var parts = k2.split('"');
           var parentKey = parts.shift().trim();
           var childKey = parts.shift().trim();
           if (!out[parentKey]) out[parentKey] = {};
-          out[parentKey][childKey] = data[k];
+          out[parentKey][childKey] = data[k2];
         } else {
-          out[k] = data[k];
+          out[k2] = data[k2];
         }
       });
       return out;
@@ -51172,14 +51172,14 @@ var require_gitconfiglocal = __commonJS({
 var require_pify = __commonJS({
   "node_modules/pify/index.js"(exports2, module2) {
     "use strict";
-    var processFn = /* @__PURE__ */ __name(function(fn, P, opts) {
+    var processFn = /* @__PURE__ */ __name(function(fn, P2, opts) {
       return function() {
         var that = this;
         var args = new Array(arguments.length);
         for (var i = 0; i < arguments.length; i++) {
           args[i] = arguments[i];
         }
-        return new P(function(resolve, reject) {
+        return new P2(function(resolve, reject) {
           args.push(function(err, result) {
             if (err) {
               reject(err);
@@ -51197,10 +51197,10 @@ var require_pify = __commonJS({
         });
       };
     }, "processFn");
-    var pify = module2.exports = function(obj, P, opts) {
-      if (typeof P !== "function") {
-        opts = P;
-        P = Promise;
+    var pify = module2.exports = function(obj, P2, opts) {
+      if (typeof P2 !== "function") {
+        opts = P2;
+        P2 = Promise;
       }
       opts = opts || {};
       opts.exclude = opts.exclude || [/.+Sync$/];
@@ -51214,11 +51214,11 @@ var require_pify = __commonJS({
         if (opts.excludeMain) {
           return obj.apply(this, arguments);
         }
-        return processFn(obj, P, opts).apply(this, arguments);
+        return processFn(obj, P2, opts).apply(this, arguments);
       } : {};
       return Object.keys(obj).reduce(function(ret2, key) {
-        var x = obj[key];
-        ret2[key] = typeof x === "function" && filter(key) ? processFn(x, P, opts) : x;
+        var x2 = obj[key];
+        ret2[key] = typeof x2 === "function" && filter(key) ? processFn(x2, P2, opts) : x2;
         return ret2;
       }, ret);
     };
@@ -51341,7 +51341,7 @@ var require_polyfills = __commonJS({
           var callback;
           if (callback_ && typeof callback_ === "function") {
             var eagCounter = 0;
-            callback = /* @__PURE__ */ __name(function(er, _, __) {
+            callback = /* @__PURE__ */ __name(function(er, _2, __) {
               if (er && er.code === "EAGAIN" && eagCounter < 10) {
                 eagCounter++;
                 return fs$read.call(fs4, fd, buffer, offset, length, position, callback);
@@ -52068,14 +52068,14 @@ var require_graceful_fs = __commonJS({
 var require_strip_bom = __commonJS({
   "node_modules/strip-bom/index.js"(exports2, module2) {
     "use strict";
-    module2.exports = (x) => {
-      if (typeof x !== "string") {
-        throw new TypeError("Expected a string, got " + typeof x);
+    module2.exports = (x2) => {
+      if (typeof x2 !== "string") {
+        throw new TypeError("Expected a string, got " + typeof x2);
       }
-      if (x.charCodeAt(0) === 65279) {
-        return x.slice(1);
+      if (x2.charCodeAt(0) === 65279) {
+        return x2.slice(1);
       }
-      return x;
+      return x2;
     };
   }
 });
@@ -52131,8 +52131,8 @@ var require_error_ex = __commonJS({
             }
             return newMessage.join("\n");
           }, "get"),
-          set: /* @__PURE__ */ __name(function(v) {
-            message = v;
+          set: /* @__PURE__ */ __name(function(v2) {
+            message = v2;
           }, "set")
         });
         var overwrittenStack = null;
@@ -52179,10 +52179,10 @@ var require_error_ex = __commonJS({
     }, "errorEx");
     errorEx.append = function(str, def) {
       return {
-        message: /* @__PURE__ */ __name(function(v, message) {
-          v = v || def;
-          if (v) {
-            message[0] += " " + str.replace("%s", v.toString());
+        message: /* @__PURE__ */ __name(function(v2, message) {
+          v2 = v2 || def;
+          if (v2) {
+            message[0] += " " + str.replace("%s", v2.toString());
           }
           return message;
         }, "message")
@@ -52190,10 +52190,10 @@ var require_error_ex = __commonJS({
     };
     errorEx.line = function(str, def) {
       return {
-        line: /* @__PURE__ */ __name(function(v) {
-          v = v || def;
-          if (v) {
-            return str.replace("%s", v.toString());
+        line: /* @__PURE__ */ __name(function(v2) {
+          v2 = v2 || def;
+          if (v2) {
+            return str.replace("%s", v2.toString());
           }
           return null;
         }, "line")
@@ -52273,12 +52273,12 @@ var require_pify2 = __commonJS({
   "node_modules/load-json-file/node_modules/pify/index.js"(exports2, module2) {
     "use strict";
     var processFn = /* @__PURE__ */ __name((fn, opts) => function() {
-      const P = opts.promiseModule;
+      const P2 = opts.promiseModule;
       const args = new Array(arguments.length);
       for (let i = 0; i < arguments.length; i++) {
         args[i] = arguments[i];
       }
-      return new P((resolve, reject) => {
+      return new P2((resolve, reject) => {
         if (opts.errorFirst) {
           args.push(function(err, result) {
             if (opts.multiArgs) {
@@ -52337,8 +52337,8 @@ var require_pify2 = __commonJS({
         ret = Object.create(Object.getPrototypeOf(obj));
       }
       for (const key in obj) {
-        const x = obj[key];
-        ret[key] = typeof x === "function" && filter(key) ? processFn(x, opts) : x;
+        const x2 = obj[key];
+        ret[key] = typeof x2 === "function" && filter(key) ? processFn(x2, opts) : x2;
       }
       return ret;
     };
@@ -52365,12 +52365,12 @@ var require_pify3 = __commonJS({
   "node_modules/path-type/node_modules/pify/index.js"(exports2, module2) {
     "use strict";
     var processFn = /* @__PURE__ */ __name((fn, opts) => function() {
-      const P = opts.promiseModule;
+      const P2 = opts.promiseModule;
       const args = new Array(arguments.length);
       for (let i = 0; i < arguments.length; i++) {
         args[i] = arguments[i];
       }
-      return new P((resolve, reject) => {
+      return new P2((resolve, reject) => {
         if (opts.errorFirst) {
           args.push(function(err, result) {
             if (opts.multiArgs) {
@@ -52429,8 +52429,8 @@ var require_pify3 = __commonJS({
         ret = Object.create(Object.getPrototypeOf(obj));
       }
       for (const key in obj) {
-        const x = obj[key];
-        ret[key] = typeof x === "function" && filter(key) ? processFn(x, opts) : x;
+        const x2 = obj[key];
+        ret[key] = typeof x2 === "function" && filter(key) ? processFn(x2, opts) : x2;
       }
       return ret;
     };
@@ -52502,7 +52502,7 @@ var require_semver5 = __commonJS({
     var re = exports2.re = [];
     var safeRe = exports2.safeRe = [];
     var src = exports2.src = [];
-    var R = 0;
+    var R2 = 0;
     var LETTERDASHNUMBER = "[a-zA-Z0-9-]";
     var safeRegexReplacements = [
       ["\\s", 1],
@@ -52519,93 +52519,93 @@ var require_semver5 = __commonJS({
       return value;
     }
     __name(makeSafeRe, "makeSafeRe");
-    var NUMERICIDENTIFIER = R++;
+    var NUMERICIDENTIFIER = R2++;
     src[NUMERICIDENTIFIER] = "0|[1-9]\\d*";
-    var NUMERICIDENTIFIERLOOSE = R++;
+    var NUMERICIDENTIFIERLOOSE = R2++;
     src[NUMERICIDENTIFIERLOOSE] = "\\d+";
-    var NONNUMERICIDENTIFIER = R++;
+    var NONNUMERICIDENTIFIER = R2++;
     src[NONNUMERICIDENTIFIER] = "\\d*[a-zA-Z-]" + LETTERDASHNUMBER + "*";
-    var MAINVERSION = R++;
+    var MAINVERSION = R2++;
     src[MAINVERSION] = "(" + src[NUMERICIDENTIFIER] + ")\\.(" + src[NUMERICIDENTIFIER] + ")\\.(" + src[NUMERICIDENTIFIER] +
     ")";
-    var MAINVERSIONLOOSE = R++;
+    var MAINVERSIONLOOSE = R2++;
     src[MAINVERSIONLOOSE] = "(" + src[NUMERICIDENTIFIERLOOSE] + ")\\.(" + src[NUMERICIDENTIFIERLOOSE] + ")\\.(" + src[NUMERICIDENTIFIERLOOSE] +
     ")";
-    var PRERELEASEIDENTIFIER = R++;
+    var PRERELEASEIDENTIFIER = R2++;
     src[PRERELEASEIDENTIFIER] = "(?:" + src[NUMERICIDENTIFIER] + "|" + src[NONNUMERICIDENTIFIER] + ")";
-    var PRERELEASEIDENTIFIERLOOSE = R++;
+    var PRERELEASEIDENTIFIERLOOSE = R2++;
     src[PRERELEASEIDENTIFIERLOOSE] = "(?:" + src[NUMERICIDENTIFIERLOOSE] + "|" + src[NONNUMERICIDENTIFIER] + ")";
-    var PRERELEASE = R++;
+    var PRERELEASE = R2++;
     src[PRERELEASE] = "(?:-(" + src[PRERELEASEIDENTIFIER] + "(?:\\." + src[PRERELEASEIDENTIFIER] + ")*))";
-    var PRERELEASELOOSE = R++;
+    var PRERELEASELOOSE = R2++;
     src[PRERELEASELOOSE] = "(?:-?(" + src[PRERELEASEIDENTIFIERLOOSE] + "(?:\\." + src[PRERELEASEIDENTIFIERLOOSE] + ")*))";
-    var BUILDIDENTIFIER = R++;
+    var BUILDIDENTIFIER = R2++;
     src[BUILDIDENTIFIER] = LETTERDASHNUMBER + "+";
-    var BUILD = R++;
+    var BUILD = R2++;
     src[BUILD] = "(?:\\+(" + src[BUILDIDENTIFIER] + "(?:\\." + src[BUILDIDENTIFIER] + ")*))";
-    var FULL = R++;
+    var FULL = R2++;
     var FULLPLAIN = "v?" + src[MAINVERSION] + src[PRERELEASE] + "?" + src[BUILD] + "?";
     src[FULL] = "^" + FULLPLAIN + "$";
     var LOOSEPLAIN = "[v=\\s]*" + src[MAINVERSIONLOOSE] + src[PRERELEASELOOSE] + "?" + src[BUILD] + "?";
-    var LOOSE = R++;
+    var LOOSE = R2++;
     src[LOOSE] = "^" + LOOSEPLAIN + "$";
-    var GTLT = R++;
+    var GTLT = R2++;
     src[GTLT] = "((?:<|>)?=?)";
-    var XRANGEIDENTIFIERLOOSE = R++;
+    var XRANGEIDENTIFIERLOOSE = R2++;
     src[XRANGEIDENTIFIERLOOSE] = src[NUMERICIDENTIFIERLOOSE] + "|x|X|\\*";
-    var XRANGEIDENTIFIER = R++;
+    var XRANGEIDENTIFIER = R2++;
     src[XRANGEIDENTIFIER] = src[NUMERICIDENTIFIER] + "|x|X|\\*";
-    var XRANGEPLAIN = R++;
+    var XRANGEPLAIN = R2++;
     src[XRANGEPLAIN] = "[v=\\s]*(" + src[XRANGEIDENTIFIER] + ")(?:\\.(" + src[XRANGEIDENTIFIER] + ")(?:\\.(" + src[XRANGEIDENTIFIER] +
     ")(?:" + src[PRERELEASE] + ")?" + src[BUILD] + "?)?)?";
-    var XRANGEPLAINLOOSE = R++;
+    var XRANGEPLAINLOOSE = R2++;
     src[XRANGEPLAINLOOSE] = "[v=\\s]*(" + src[XRANGEIDENTIFIERLOOSE] + ")(?:\\.(" + src[XRANGEIDENTIFIERLOOSE] + ")(?:\\.\
 (" + src[XRANGEIDENTIFIERLOOSE] + ")(?:" + src[PRERELEASELOOSE] + ")?" + src[BUILD] + "?)?)?";
-    var XRANGE = R++;
+    var XRANGE = R2++;
     src[XRANGE] = "^" + src[GTLT] + "\\s*" + src[XRANGEPLAIN] + "$";
-    var XRANGELOOSE = R++;
+    var XRANGELOOSE = R2++;
     src[XRANGELOOSE] = "^" + src[GTLT] + "\\s*" + src[XRANGEPLAINLOOSE] + "$";
-    var COERCE = R++;
+    var COERCE = R2++;
     src[COERCE] = "(?:^|[^\\d])(\\d{1," + MAX_SAFE_COMPONENT_LENGTH + "})(?:\\.(\\d{1," + MAX_SAFE_COMPONENT_LENGTH + "}\
 ))?(?:\\.(\\d{1," + MAX_SAFE_COMPONENT_LENGTH + "}))?(?:$|[^\\d])";
-    var LONETILDE = R++;
+    var LONETILDE = R2++;
     src[LONETILDE] = "(?:~>?)";
-    var TILDETRIM = R++;
+    var TILDETRIM = R2++;
     src[TILDETRIM] = "(\\s*)" + src[LONETILDE] + "\\s+";
     re[TILDETRIM] = new RegExp(src[TILDETRIM], "g");
     safeRe[TILDETRIM] = new RegExp(makeSafeRe(src[TILDETRIM]), "g");
     var tildeTrimReplace = "$1~";
-    var TILDE = R++;
+    var TILDE = R2++;
     src[TILDE] = "^" + src[LONETILDE] + src[XRANGEPLAIN] + "$";
-    var TILDELOOSE = R++;
+    var TILDELOOSE = R2++;
     src[TILDELOOSE] = "^" + src[LONETILDE] + src[XRANGEPLAINLOOSE] + "$";
-    var LONECARET = R++;
+    var LONECARET = R2++;
     src[LONECARET] = "(?:\\^)";
-    var CARETTRIM = R++;
+    var CARETTRIM = R2++;
     src[CARETTRIM] = "(\\s*)" + src[LONECARET] + "\\s+";
     re[CARETTRIM] = new RegExp(src[CARETTRIM], "g");
     safeRe[CARETTRIM] = new RegExp(makeSafeRe(src[CARETTRIM]), "g");
     var caretTrimReplace = "$1^";
-    var CARET = R++;
+    var CARET = R2++;
     src[CARET] = "^" + src[LONECARET] + src[XRANGEPLAIN] + "$";
-    var CARETLOOSE = R++;
+    var CARETLOOSE = R2++;
     src[CARETLOOSE] = "^" + src[LONECARET] + src[XRANGEPLAINLOOSE] + "$";
-    var COMPARATORLOOSE = R++;
+    var COMPARATORLOOSE = R2++;
     src[COMPARATORLOOSE] = "^" + src[GTLT] + "\\s*(" + LOOSEPLAIN + ")$|^$";
-    var COMPARATOR = R++;
+    var COMPARATOR = R2++;
     src[COMPARATOR] = "^" + src[GTLT] + "\\s*(" + FULLPLAIN + ")$|^$";
-    var COMPARATORTRIM = R++;
+    var COMPARATORTRIM = R2++;
     src[COMPARATORTRIM] = "(\\s*)" + src[GTLT] + "\\s*(" + LOOSEPLAIN + "|" + src[XRANGEPLAIN] + ")";
     re[COMPARATORTRIM] = new RegExp(src[COMPARATORTRIM], "g");
     safeRe[COMPARATORTRIM] = new RegExp(makeSafeRe(src[COMPARATORTRIM]), "g");
     var comparatorTrimReplace = "$1$2$3";
-    var HYPHENRANGE = R++;
+    var HYPHENRANGE = R2++;
     src[HYPHENRANGE] = "^\\s*(" + src[XRANGEPLAIN] + ")\\s+-\\s+(" + src[XRANGEPLAIN] + ")\\s*$";
-    var HYPHENRANGELOOSE = R++;
+    var HYPHENRANGELOOSE = R2++;
     src[HYPHENRANGELOOSE] = "^\\s*(" + src[XRANGEPLAINLOOSE] + ")\\s+-\\s+(" + src[XRANGEPLAINLOOSE] + ")\\s*$";
-    var STAR = R++;
+    var STAR = R2++;
     src[STAR] = "(<|>)?=?\\s*\\*";
-    for (i = 0; i < R; i++) {
+    for (i = 0; i < R2; i++) {
       debug3(i, src[i]);
       if (!re[i]) {
         re[i] = new RegExp(src[i]);
@@ -52630,8 +52630,8 @@ var require_semver5 = __commonJS({
       if (version.length > MAX_LENGTH) {
         return null;
       }
-      var r = options.loose ? safeRe[LOOSE] : safeRe[FULL];
-      if (!r.test(version)) {
+      var r2 = options.loose ? safeRe[LOOSE] : safeRe[FULL];
+      if (!r2.test(version)) {
         return null;
       }
       try {
@@ -52643,8 +52643,8 @@ var require_semver5 = __commonJS({
     __name(parse2, "parse");
     exports2.valid = valid2;
     function valid2(version, options) {
-      var v = parse2(version, options);
-      return v ? v.version : null;
+      var v2 = parse2(version, options);
+      return v2 ? v2.version : null;
     }
     __name(valid2, "valid");
     exports2.clean = clean2;
@@ -52751,18 +52751,18 @@ var require_semver5 = __commonJS({
       var i2 = 0;
       do {
         var a = this.prerelease[i2];
-        var b = other.prerelease[i2];
-        debug3("prerelease compare", i2, a, b);
-        if (a === void 0 && b === void 0) {
+        var b2 = other.prerelease[i2];
+        debug3("prerelease compare", i2, a, b2);
+        if (a === void 0 && b2 === void 0) {
           return 0;
-        } else if (b === void 0) {
+        } else if (b2 === void 0) {
           return 1;
         } else if (a === void 0) {
           return -1;
-        } else if (a === b) {
+        } else if (a === b2) {
           continue;
         } else {
-          return compareIdentifiers(a, b);
+          return compareIdentifiers(a, b2);
         }
       } while (++i2);
     };
@@ -52887,19 +52887,19 @@ var require_semver5 = __commonJS({
     __name(diff, "diff");
     exports2.compareIdentifiers = compareIdentifiers;
     var numeric = /^[0-9]+$/;
-    function compareIdentifiers(a, b) {
+    function compareIdentifiers(a, b2) {
       var anum = numeric.test(a);
-      var bnum = numeric.test(b);
+      var bnum = numeric.test(b2);
       if (anum && bnum) {
         a = +a;
-        b = +b;
+        b2 = +b2;
       }
-      return a === b ? 0 : anum && !bnum ? -1 : bnum && !anum ? 1 : a < b ? -1 : 1;
+      return a === b2 ? 0 : anum && !bnum ? -1 : bnum && !anum ? 1 : a < b2 ? -1 : 1;
     }
     __name(compareIdentifiers, "compareIdentifiers");
     exports2.rcompareIdentifiers = rcompareIdentifiers;
-    function rcompareIdentifiers(a, b) {
-      return compareIdentifiers(b, a);
+    function rcompareIdentifiers(a, b2) {
+      return compareIdentifiers(b2, a);
     }
     __name(rcompareIdentifiers, "rcompareIdentifiers");
     exports2.major = major;
@@ -52918,93 +52918,93 @@ var require_semver5 = __commonJS({
     }
     __name(patch, "patch");
     exports2.compare = compare;
-    function compare(a, b, loose) {
-      return new SemVer(a, loose).compare(new SemVer(b, loose));
+    function compare(a, b2, loose) {
+      return new SemVer(a, loose).compare(new SemVer(b2, loose));
     }
     __name(compare, "compare");
     exports2.compareLoose = compareLoose;
-    function compareLoose(a, b) {
-      return compare(a, b, true);
+    function compareLoose(a, b2) {
+      return compare(a, b2, true);
     }
     __name(compareLoose, "compareLoose");
     exports2.rcompare = rcompare;
-    function rcompare(a, b, loose) {
-      return compare(b, a, loose);
+    function rcompare(a, b2, loose) {
+      return compare(b2, a, loose);
     }
     __name(rcompare, "rcompare");
     exports2.sort = sort;
     function sort(list, loose) {
-      return list.sort(function(a, b) {
-        return exports2.compare(a, b, loose);
+      return list.sort(function(a, b2) {
+        return exports2.compare(a, b2, loose);
       });
     }
     __name(sort, "sort");
     exports2.rsort = rsort;
     function rsort(list, loose) {
-      return list.sort(function(a, b) {
-        return exports2.rcompare(a, b, loose);
+      return list.sort(function(a, b2) {
+        return exports2.rcompare(a, b2, loose);
       });
     }
     __name(rsort, "rsort");
     exports2.gt = gt2;
-    function gt2(a, b, loose) {
-      return compare(a, b, loose) > 0;
+    function gt2(a, b2, loose) {
+      return compare(a, b2, loose) > 0;
     }
     __name(gt2, "gt");
     exports2.lt = lt;
-    function lt(a, b, loose) {
-      return compare(a, b, loose) < 0;
+    function lt(a, b2, loose) {
+      return compare(a, b2, loose) < 0;
     }
     __name(lt, "lt");
     exports2.eq = eq;
-    function eq(a, b, loose) {
-      return compare(a, b, loose) === 0;
+    function eq(a, b2, loose) {
+      return compare(a, b2, loose) === 0;
     }
     __name(eq, "eq");
     exports2.neq = neq;
-    function neq(a, b, loose) {
-      return compare(a, b, loose) !== 0;
+    function neq(a, b2, loose) {
+      return compare(a, b2, loose) !== 0;
     }
     __name(neq, "neq");
     exports2.gte = gte;
-    function gte(a, b, loose) {
-      return compare(a, b, loose) >= 0;
+    function gte(a, b2, loose) {
+      return compare(a, b2, loose) >= 0;
     }
     __name(gte, "gte");
     exports2.lte = lte;
-    function lte(a, b, loose) {
-      return compare(a, b, loose) <= 0;
+    function lte(a, b2, loose) {
+      return compare(a, b2, loose) <= 0;
     }
     __name(lte, "lte");
     exports2.cmp = cmp;
-    function cmp(a, op, b, loose) {
+    function cmp(a, op, b2, loose) {
       switch (op) {
         case "===":
           if (typeof a === "object")
             a = a.version;
-          if (typeof b === "object")
-            b = b.version;
-          return a === b;
+          if (typeof b2 === "object")
+            b2 = b2.version;
+          return a === b2;
         case "!==":
           if (typeof a === "object")
             a = a.version;
-          if (typeof b === "object")
-            b = b.version;
-          return a !== b;
+          if (typeof b2 === "object")
+            b2 = b2.version;
+          return a !== b2;
         case "":
         case "=":
         case "==":
-          return eq(a, b, loose);
+          return eq(a, b2, loose);
         case "!=":
-          return neq(a, b, loose);
+          return neq(a, b2, loose);
         case ">":
-          return gt2(a, b, loose);
+          return gt2(a, b2, loose);
         case ">=":
-          return gte(a, b, loose);
+          return gte(a, b2, loose);
         case "<":
-          return lt(a, b, loose);
+          return lt(a, b2, loose);
         case "<=":
-          return lte(a, b, loose);
+          return lte(a, b2, loose);
         default:
           throw new TypeError("Invalid operator: " + op);
       }
@@ -53043,8 +53043,8 @@ var require_semver5 = __commonJS({
     __name(Comparator, "Comparator");
     var ANY = {};
     Comparator.prototype.parse = function(comp) {
-      var r = this.options.loose ? safeRe[COMPARATORLOOSE] : safeRe[COMPARATOR];
-      var m = comp.match(r);
+      var r2 = this.options.loose ? safeRe[COMPARATORLOOSE] : safeRe[COMPARATOR];
+      var m = comp.match(r2);
       if (!m) {
         throw new TypeError("Invalid comparator: " + comp);
       }
@@ -53130,8 +53130,8 @@ var require_semver5 = __commonJS({
       this.raw = range.trim().split(/\s+/).join(" ");
       this.set = this.raw.split("||").map(function(range2) {
         return this.parseRange(range2.trim());
-      }, this).filter(function(c) {
-        return c.length;
+      }, this).filter(function(c2) {
+        return c2.length;
       });
       if (!this.set.length) {
         throw new TypeError("Invalid SemVer Range: " + this.raw);
@@ -53188,8 +53188,8 @@ var require_semver5 = __commonJS({
     exports2.toComparators = toComparators;
     function toComparators(range, options) {
       return new Range(range, options).set.map(function(comp) {
-        return comp.map(function(c) {
-          return c.value;
+        return comp.map(function(c2) {
+          return c2.value;
         }).join(" ").trim().split(" ");
       });
     }
@@ -53218,21 +53218,21 @@ var require_semver5 = __commonJS({
     }
     __name(replaceTildes, "replaceTildes");
     function replaceTilde(comp, options) {
-      var r = options.loose ? safeRe[TILDELOOSE] : safeRe[TILDE];
-      return comp.replace(r, function(_, M, m, p, pr) {
-        debug3("tilde", comp, _, M, m, p, pr);
+      var r2 = options.loose ? safeRe[TILDELOOSE] : safeRe[TILDE];
+      return comp.replace(r2, function(_2, M2, m, p, pr) {
+        debug3("tilde", comp, _2, M2, m, p, pr);
         var ret;
-        if (isX(M)) {
+        if (isX(M2)) {
           ret = "";
         } else if (isX(m)) {
-          ret = ">=" + M + ".0.0 <" + (+M + 1) + ".0.0";
+          ret = ">=" + M2 + ".0.0 <" + (+M2 + 1) + ".0.0";
         } else if (isX(p)) {
-          ret = ">=" + M + "." + m + ".0 <" + M + "." + (+m + 1) + ".0";
+          ret = ">=" + M2 + "." + m + ".0 <" + M2 + "." + (+m + 1) + ".0";
         } else if (pr) {
           debug3("replaceTilde pr", pr);
-          ret = ">=" + M + "." + m + "." + p + "-" + pr + " <" + M + "." + (+m + 1) + ".0";
+          ret = ">=" + M2 + "." + m + "." + p + "-" + pr + " <" + M2 + "." + (+m + 1) + ".0";
         } else {
-          ret = ">=" + M + "." + m + "." + p + " <" + M + "." + (+m + 1) + ".0";
+          ret = ">=" + M2 + "." + m + "." + p + " <" + M2 + "." + (+m + 1) + ".0";
         }
         debug3("tilde return", ret);
         return ret;
@@ -53247,41 +53247,41 @@ var require_semver5 = __commonJS({
     __name(replaceCarets, "replaceCarets");
     function replaceCaret(comp, options) {
       debug3("caret", comp, options);
-      var r = options.loose ? safeRe[CARETLOOSE] : safeRe[CARET];
-      return comp.replace(r, function(_, M, m, p, pr) {
-        debug3("caret", comp, _, M, m, p, pr);
+      var r2 = options.loose ? safeRe[CARETLOOSE] : safeRe[CARET];
+      return comp.replace(r2, function(_2, M2, m, p, pr) {
+        debug3("caret", comp, _2, M2, m, p, pr);
         var ret;
-        if (isX(M)) {
+        if (isX(M2)) {
           ret = "";
         } else if (isX(m)) {
-          ret = ">=" + M + ".0.0 <" + (+M + 1) + ".0.0";
+          ret = ">=" + M2 + ".0.0 <" + (+M2 + 1) + ".0.0";
         } else if (isX(p)) {
-          if (M === "0") {
-            ret = ">=" + M + "." + m + ".0 <" + M + "." + (+m + 1) + ".0";
+          if (M2 === "0") {
+            ret = ">=" + M2 + "." + m + ".0 <" + M2 + "." + (+m + 1) + ".0";
           } else {
-            ret = ">=" + M + "." + m + ".0 <" + (+M + 1) + ".0.0";
+            ret = ">=" + M2 + "." + m + ".0 <" + (+M2 + 1) + ".0.0";
           }
         } else if (pr) {
           debug3("replaceCaret pr", pr);
-          if (M === "0") {
+          if (M2 === "0") {
             if (m === "0") {
-              ret = ">=" + M + "." + m + "." + p + "-" + pr + " <" + M + "." + m + "." + (+p + 1);
+              ret = ">=" + M2 + "." + m + "." + p + "-" + pr + " <" + M2 + "." + m + "." + (+p + 1);
             } else {
-              ret = ">=" + M + "." + m + "." + p + "-" + pr + " <" + M + "." + (+m + 1) + ".0";
+              ret = ">=" + M2 + "." + m + "." + p + "-" + pr + " <" + M2 + "." + (+m + 1) + ".0";
             }
           } else {
-            ret = ">=" + M + "." + m + "." + p + "-" + pr + " <" + (+M + 1) + ".0.0";
+            ret = ">=" + M2 + "." + m + "." + p + "-" + pr + " <" + (+M2 + 1) + ".0.0";
           }
         } else {
           debug3("no pr");
-          if (M === "0") {
+          if (M2 === "0") {
             if (m === "0") {
-              ret = ">=" + M + "." + m + "." + p + " <" + M + "." + m + "." + (+p + 1);
+              ret = ">=" + M2 + "." + m + "." + p + " <" + M2 + "." + m + "." + (+p + 1);
             } else {
-              ret = ">=" + M + "." + m + "." + p + " <" + M + "." + (+m + 1) + ".0";
+              ret = ">=" + M2 + "." + m + "." + p + " <" + M2 + "." + (+m + 1) + ".0";
             }
           } else {
-            ret = ">=" + M + "." + m + "." + p + " <" + (+M + 1) + ".0.0";
+            ret = ">=" + M2 + "." + m + "." + p + " <" + (+M2 + 1) + ".0.0";
           }
         }
         debug3("caret return", ret);
@@ -53298,10 +53298,10 @@ var require_semver5 = __commonJS({
     __name(replaceXRanges, "replaceXRanges");
     function replaceXRange(comp, options) {
       comp = comp.trim();
-      var r = options.loose ? safeRe[XRANGELOOSE] : safeRe[XRANGE];
-      return comp.replace(r, function(ret, gtlt, M, m, p, pr) {
-        debug3("xRange", comp, ret, gtlt, M, m, p, pr);
-        var xM = isX(M);
+      var r2 = options.loose ? safeRe[XRANGELOOSE] : safeRe[XRANGE];
+      return comp.replace(r2, function(ret, gtlt, M2, m, p, pr) {
+        debug3("xRange", comp, ret, gtlt, M2, m, p, pr);
+        var xM = isX(M2);
         var xm = xM || isX(m);
         var xp = xm || isX(p);
         var anyX = xp;
@@ -53322,7 +53322,7 @@ var require_semver5 = __commonJS({
           if (gtlt === ">") {
             gtlt = ">=";
             if (xm) {
-              M = +M + 1;
+              M2 = +M2 + 1;
               m = 0;
               p = 0;
             } else {
@@ -53332,16 +53332,16 @@ var require_semver5 = __commonJS({
           } else if (gtlt === "<=") {
             gtlt = "<";
             if (xm) {
-              M = +M + 1;
+              M2 = +M2 + 1;
             } else {
               m = +m + 1;
             }
           }
-          ret = gtlt + M + "." + m + "." + p;
+          ret = gtlt + M2 + "." + m + "." + p;
         } else if (xm) {
-          ret = ">=" + M + ".0.0 <" + (+M + 1) + ".0.0";
+          ret = ">=" + M2 + ".0.0 <" + (+M2 + 1) + ".0.0";
         } else if (xp) {
-          ret = ">=" + M + "." + m + ".0 <" + M + "." + (+m + 1) + ".0";
+          ret = ">=" + M2 + "." + m + ".0 <" + M2 + "." + (+m + 1) + ".0";
         }
         debug3("xRange return", ret);
         return ret;
@@ -53434,10 +53434,10 @@ var require_semver5 = __commonJS({
       } catch (er) {
         return null;
       }
-      versions.forEach(function(v) {
-        if (rangeObj.test(v)) {
-          if (!max || maxSV.compare(v) === -1) {
-            max = v;
+      versions.forEach(function(v2) {
+        if (rangeObj.test(v2)) {
+          if (!max || maxSV.compare(v2) === -1) {
+            max = v2;
             maxSV = new SemVer(max, options);
           }
         }
@@ -53454,10 +53454,10 @@ var require_semver5 = __commonJS({
       } catch (er) {
         return null;
       }
-      versions.forEach(function(v) {
-        if (rangeObj.test(v)) {
-          if (!min || minSV.compare(v) === 1) {
-            min = v;
+      versions.forEach(function(v2) {
+        if (rangeObj.test(v2)) {
+          if (!min || minSV.compare(v2) === 1) {
+            min = v2;
             minSV = new SemVer(min, options);
           }
         }
@@ -53785,18 +53785,18 @@ var require_git_host2 = __commonJS({
     GitHost.prototype.sshurl = function(opts) {
       return this._fill(this.sshurltemplate, opts);
     };
-    GitHost.prototype.browse = function(P, F, opts) {
-      if (typeof P === "string") {
-        if (typeof F !== "string") {
-          opts = F;
-          F = null;
+    GitHost.prototype.browse = function(P2, F2, opts) {
+      if (typeof P2 === "string") {
+        if (typeof F2 !== "string") {
+          opts = F2;
+          F2 = null;
         }
         return this._fill(this.browsefiletemplate, extend({
-          fragment: F,
-          path: P
+          fragment: F2,
+          path: P2
         }, opts));
       } else {
-        return this._fill(this.browsetemplate, P);
+        return this._fill(this.browsetemplate, P2);
       }
     };
     GitHost.prototype.docs = function(opts) {
@@ -53821,8 +53821,8 @@ var require_git_host2 = __commonJS({
       var opts = extend({}, opts_, { noCommittish: false });
       return this._fill(this.tarballtemplate, opts);
     };
-    GitHost.prototype.file = function(P, opts) {
-      return this._fill(this.filetemplate, extend({ path: P }, opts));
+    GitHost.prototype.file = function(P2, opts) {
+      return this._fill(this.filetemplate, extend({ path: P2 }, opts));
     };
     GitHost.prototype.getDefaultRepresentation = function() {
       return this.default;
@@ -53858,14 +53858,14 @@ var require_hosted_git_info2 = __commonJS({
       "http:": true,
       "git+http:": true
     };
-    var cache2 = {};
+    var cache = {};
     module2.exports.fromUrl = function(giturl, opts) {
       if (typeof giturl !== "string") return;
       var key = giturl + JSON.stringify(opts || {});
-      if (!(key in cache2)) {
-        cache2[key] = fromUrl(giturl, opts);
+      if (!(key in cache)) {
+        cache[key] = fromUrl(giturl, opts);
       }
-      return cache2[key];
+      return cache[key];
     };
     function fromUrl(giturl, opts) {
       if (giturl == null || giturl === "") return;
@@ -53988,7 +53988,7 @@ var require_caller = __commonJS({
   "node_modules/resolve/lib/caller.js"(exports2, module2) {
     module2.exports = function() {
       var origPrepareStackTrace = Error.prepareStackTrace;
-      Error.prepareStackTrace = function(_, stack2) {
+      Error.prepareStackTrace = function(_2, stack2) {
         return stack2;
       };
       var stack = new Error().stack;
@@ -54107,7 +54107,7 @@ var require_node_modules_paths = __commonJS({
 // node_modules/resolve/lib/normalize-options.js
 var require_normalize_options = __commonJS({
   "node_modules/resolve/lib/normalize-options.js"(exports2, module2) {
-    module2.exports = function(x, opts) {
+    module2.exports = function(x2, opts) {
       return opts || {};
     };
   }
@@ -54153,17 +54153,17 @@ var require_async = __commonJS({
         return cb(err);
       });
     }, "isDirectory");
-    var defaultRealpath = /* @__PURE__ */ __name(function realpath(x, cb) {
-      realpathFS(x, function(realpathErr, realPath) {
+    var defaultRealpath = /* @__PURE__ */ __name(function realpath(x2, cb) {
+      realpathFS(x2, function(realpathErr, realPath) {
         if (realpathErr && realpathErr.code !== "ENOENT") cb(realpathErr);
-        else cb(null, realpathErr ? x : realPath);
+        else cb(null, realpathErr ? x2 : realPath);
       });
     }, "realpath");
-    var maybeRealpath = /* @__PURE__ */ __name(function maybeRealpath2(realpath, x, opts, cb) {
+    var maybeRealpath = /* @__PURE__ */ __name(function maybeRealpath2(realpath, x2, opts, cb) {
       if (opts && opts.preserveSymlinks === false) {
-        realpath(x, cb);
+        realpath(x2, cb);
       } else {
-        cb(null, x);
+        cb(null, x2);
       }
     }, "maybeRealpath");
     var defaultReadPackage = /* @__PURE__ */ __name(function defaultReadPackage2(readFile, pkgfile, cb) {
@@ -54179,27 +54179,27 @@ var require_async = __commonJS({
         }
       });
     }, "defaultReadPackage");
-    var getPackageCandidates = /* @__PURE__ */ __name(function getPackageCandidates2(x, start, opts) {
-      var dirs = nodeModulesPaths(start, opts, x);
+    var getPackageCandidates = /* @__PURE__ */ __name(function getPackageCandidates2(x2, start, opts) {
+      var dirs = nodeModulesPaths(start, opts, x2);
       for (var i = 0; i < dirs.length; i++) {
-        dirs[i] = path3.join(dirs[i], x);
+        dirs[i] = path3.join(dirs[i], x2);
       }
       return dirs;
     }, "getPackageCandidates");
-    module2.exports = /* @__PURE__ */ __name(function resolve(x, options, callback) {
+    module2.exports = /* @__PURE__ */ __name(function resolve(x2, options, callback) {
       var cb = callback;
       var opts = options;
       if (typeof options === "function") {
         cb = opts;
         opts = {};
       }
-      if (typeof x !== "string") {
+      if (typeof x2 !== "string") {
         var err = new TypeError("Path must be a string.");
         return process.nextTick(function() {
           cb(err);
         });
       }
-      opts = normalizeOptions(x, opts);
+      opts = normalizeOptions(x2, opts);
       var isFile = opts.isFile || defaultIsFile;
       var isDirectory2 = opts.isDirectory || defaultIsDir;
       var readFile = opts.readFile || fs4.readFile;
@@ -54229,15 +54229,15 @@ var require_async = __commonJS({
       );
       var res;
       function init(basedir2) {
-        if (relativePathRegex.test(x)) {
-          res = path3.resolve(basedir2, x);
-          if (x === "." || x === ".." || x.slice(-1) === "/") res += "/";
-          if (x.slice(-1) === "/" && res === basedir2) {
+        if (relativePathRegex.test(x2)) {
+          res = path3.resolve(basedir2, x2);
+          if (x2 === "." || x2 === ".." || x2.slice(-1) === "/") res += "/";
+          if (x2.slice(-1) === "/" && res === basedir2) {
             loadAsDirectory(res, opts.package, onfile);
           } else loadAsFile(res, opts.package, onfile);
-        } else if (includeCoreModules && isCore(x)) {
-          return cb(null, x);
-        } else loadNodeModules(x, basedir2, function(err2, n, pkg) {
+        } else if (includeCoreModules && isCore(x2)) {
+          return cb(null, x2);
+        } else loadNodeModules(x2, basedir2, function(err2, n, pkg) {
           if (err2) cb(err2);
           else if (n) {
             return maybeRealpath(realpath, n, opts, function(err3, realN) {
@@ -54248,7 +54248,7 @@ var require_async = __commonJS({
               }
             });
           } else {
-            var moduleError = new Error("Cannot find module '" + x + "' from '" + parent + "'");
+            var moduleError = new Error("Cannot find module '" + x2 + "' from '" + parent + "'");
             moduleError.code = "MODULE_NOT_FOUND";
             cb(moduleError);
           }
@@ -54269,14 +54269,14 @@ var require_async = __commonJS({
               }
             });
           } else {
-            var moduleError = new Error("Cannot find module '" + x + "' from '" + parent + "'");
+            var moduleError = new Error("Cannot find module '" + x2 + "' from '" + parent + "'");
             moduleError.code = "MODULE_NOT_FOUND";
             cb(moduleError);
           }
         });
       }
       __name(onfile, "onfile");
-      function loadAsFile(x2, thePackage, callback2) {
+      function loadAsFile(x3, thePackage, callback2) {
         var loadAsFilePackage = thePackage;
         var cb2 = callback2;
         if (typeof loadAsFilePackage === "function") {
@@ -54284,10 +54284,10 @@ var require_async = __commonJS({
           loadAsFilePackage = void 0;
         }
         var exts = [""].concat(extensions);
-        load(exts, x2, loadAsFilePackage);
-        function load(exts2, x3, loadPackage) {
+        load(exts, x3, loadAsFilePackage);
+        function load(exts2, x4, loadPackage) {
           if (exts2.length === 0) return cb2(null, void 0, loadPackage);
-          var file = x3 + exts2[0];
+          var file = x4 + exts2[0];
           var pkg = loadPackage;
           if (pkg) onpkg(null, pkg);
           else loadpkg(path3.dirname(file), onpkg);
@@ -54297,10 +54297,10 @@ var require_async = __commonJS({
             if (dir && pkg && opts.pathFilter) {
               var rfile = path3.relative(dir, file);
               var rel = rfile.slice(0, rfile.length - exts2[0].length);
-              var r = opts.pathFilter(pkg, x3, rel);
-              if (r) return load(
+              var r2 = opts.pathFilter(pkg, x4, rel);
+              if (r2) return load(
                 [""].concat(extensions.slice()),
-                path3.resolve(dir, r),
+                path3.resolve(dir, r2),
                 pkg
               );
             }
@@ -54310,7 +54310,7 @@ var require_async = __commonJS({
           function onex(err2, ex) {
             if (err2) return cb2(err2);
             if (ex) return cb2(null, file, pkg);
-            load(exts2.slice(1), x3, pkg);
+            load(exts2.slice(1), x4, pkg);
           }
           __name(onex, "onex");
         }
@@ -54340,19 +54340,19 @@ var require_async = __commonJS({
         });
       }
       __name(loadpkg, "loadpkg");
-      function loadAsDirectory(x2, loadAsDirectoryPackage, callback2) {
+      function loadAsDirectory(x3, loadAsDirectoryPackage, callback2) {
         var cb2 = callback2;
         var fpkg = loadAsDirectoryPackage;
         if (typeof fpkg === "function") {
           cb2 = fpkg;
           fpkg = opts.package;
         }
-        maybeRealpath(realpath, x2, opts, function(unwrapErr, pkgdir) {
+        maybeRealpath(realpath, x3, opts, function(unwrapErr, pkgdir) {
           if (unwrapErr) return cb2(unwrapErr);
           var pkgfile = path3.join(pkgdir, "package.json");
           isFile(pkgfile, function(err2, ex) {
             if (err2) return cb2(err2);
-            if (!ex) return loadAsFile(path3.join(x2, "index"), fpkg, cb2);
+            if (!ex) return loadAsFile(path3.join(x3, "index"), fpkg, cb2);
             readPackage(readFile, pkgfile, function(err3, pkgParam) {
               if (err3) return cb2(err3);
               var pkg = pkgParam;
@@ -54368,20 +54368,20 @@ var require_async = __commonJS({
                 if (pkg.main === "." || pkg.main === "./") {
                   pkg.main = "index";
                 }
-                loadAsFile(path3.resolve(x2, pkg.main), pkg, function(err4, m, pkg2) {
+                loadAsFile(path3.resolve(x3, pkg.main), pkg, function(err4, m, pkg2) {
                   if (err4) return cb2(err4);
                   if (m) return cb2(null, m, pkg2);
-                  if (!pkg2) return loadAsFile(path3.join(x2, "index"), pkg2, cb2);
-                  var dir = path3.resolve(x2, pkg2.main);
+                  if (!pkg2) return loadAsFile(path3.join(x3, "index"), pkg2, cb2);
+                  var dir = path3.resolve(x3, pkg2.main);
                   loadAsDirectory(dir, pkg2, function(err5, n, pkg3) {
                     if (err5) return cb2(err5);
                     if (n) return cb2(null, n, pkg3);
-                    loadAsFile(path3.join(x2, "index"), pkg3, cb2);
+                    loadAsFile(path3.join(x3, "index"), pkg3, cb2);
                   });
                 });
                 return;
               }
-              loadAsFile(path3.join(x2, "/index"), pkg, cb2);
+              loadAsFile(path3.join(x3, "/index"), pkg, cb2);
             });
           });
         });
@@ -54411,13 +54411,13 @@ var require_async = __commonJS({
         __name(ondir, "ondir");
       }
       __name(processDirs, "processDirs");
-      function loadNodeModules(x2, start, cb2) {
+      function loadNodeModules(x3, start, cb2) {
         var thunk = /* @__PURE__ */ __name(function() {
-          return getPackageCandidates(x2, start, opts);
+          return getPackageCandidates(x3, start, opts);
         }, "thunk");
         processDirs(
           cb2,
-          packageIterator ? packageIterator(x2, start, thunk, opts) : thunk()
+          packageIterator ? packageIterator(x3, start, thunk, opts) : thunk()
         );
       }
       __name(loadNodeModules, "loadNodeModules");
@@ -54614,8 +54614,8 @@ var require_core3 = __commonJS({
 var require_is_core = __commonJS({
   "node_modules/resolve/lib/is-core.js"(exports2, module2) {
     var isCoreModule = require_is_core_module();
-    module2.exports = /* @__PURE__ */ __name(function isCore(x) {
-      return isCoreModule(x);
+    module2.exports = /* @__PURE__ */ __name(function isCore(x2) {
+      return isCoreModule(x2);
     }, "isCore");
   }
 });
@@ -54660,21 +54660,21 @@ var require_sync = __commonJS({
       }
       return !!stat2 && stat2.isDirectory();
     }, "isDirectory");
-    var defaultRealpathSync = /* @__PURE__ */ __name(function realpathSync(x) {
+    var defaultRealpathSync = /* @__PURE__ */ __name(function realpathSync(x2) {
       try {
-        return realpathFS(x);
+        return realpathFS(x2);
       } catch (realpathErr) {
         if (realpathErr.code !== "ENOENT") {
           throw realpathErr;
         }
       }
-      return x;
+      return x2;
     }, "realpathSync");
-    var maybeRealpathSync = /* @__PURE__ */ __name(function maybeRealpathSync2(realpathSync, x, opts) {
+    var maybeRealpathSync = /* @__PURE__ */ __name(function maybeRealpathSync2(realpathSync, x2, opts) {
       if (opts && opts.preserveSymlinks === false) {
-        return realpathSync(x);
+        return realpathSync(x2);
       }
-      return x;
+      return x2;
     }, "maybeRealpathSync");
     var defaultReadPackageSync = /* @__PURE__ */ __name(function defaultReadPackageSync2(readFileSync2, pkgfile) {
       var body = readFileSync2(pkgfile);
@@ -54684,18 +54684,18 @@ var require_sync = __commonJS({
       } catch (jsonErr) {
       }
     }, "defaultReadPackageSync");
-    var getPackageCandidates = /* @__PURE__ */ __name(function getPackageCandidates2(x, start, opts) {
-      var dirs = nodeModulesPaths(start, opts, x);
+    var getPackageCandidates = /* @__PURE__ */ __name(function getPackageCandidates2(x2, start, opts) {
+      var dirs = nodeModulesPaths(start, opts, x2);
       for (var i = 0; i < dirs.length; i++) {
-        dirs[i] = path3.join(dirs[i], x);
+        dirs[i] = path3.join(dirs[i], x2);
       }
       return dirs;
     }, "getPackageCandidates");
-    module2.exports = /* @__PURE__ */ __name(function resolveSync(x, options) {
-      if (typeof x !== "string") {
+    module2.exports = /* @__PURE__ */ __name(function resolveSync(x2, options) {
+      if (typeof x2 !== "string") {
         throw new TypeError("Path must be a string.");
       }
-      var opts = normalizeOptions(x, options);
+      var opts = normalizeOptions(x2, options);
       var isFile = opts.isFile || defaultIsFile;
       var readFileSync2 = opts.readFileSync || fs4.readFileSync;
       var isDirectory2 = opts.isDirectory || defaultIsDir;
@@ -54711,34 +54711,34 @@ var require_sync = __commonJS({
       var parent = opts.filename || basedir;
       opts.paths = opts.paths || defaultPaths();
       var absoluteStart = maybeRealpathSync(realpathSync, path3.resolve(basedir), opts);
-      if (relativePathRegex.test(x)) {
-        var res = path3.resolve(absoluteStart, x);
-        if (x === "." || x === ".." || x.slice(-1) === "/") res += "/";
+      if (relativePathRegex.test(x2)) {
+        var res = path3.resolve(absoluteStart, x2);
+        if (x2 === "." || x2 === ".." || x2.slice(-1) === "/") res += "/";
         var m = loadAsFileSync(res) || loadAsDirectorySync(res);
         if (m) return maybeRealpathSync(realpathSync, m, opts);
-      } else if (includeCoreModules && isCore(x)) {
-        return x;
+      } else if (includeCoreModules && isCore(x2)) {
+        return x2;
       } else {
-        var n = loadNodeModulesSync(x, absoluteStart);
+        var n = loadNodeModulesSync(x2, absoluteStart);
         if (n) return maybeRealpathSync(realpathSync, n, opts);
       }
-      var err = new Error("Cannot find module '" + x + "' from '" + parent + "'");
+      var err = new Error("Cannot find module '" + x2 + "' from '" + parent + "'");
       err.code = "MODULE_NOT_FOUND";
       throw err;
-      function loadAsFileSync(x2) {
-        var pkg = loadpkg(path3.dirname(x2));
+      function loadAsFileSync(x3) {
+        var pkg = loadpkg(path3.dirname(x3));
         if (pkg && pkg.dir && pkg.pkg && opts.pathFilter) {
-          var rfile = path3.relative(pkg.dir, x2);
-          var r = opts.pathFilter(pkg.pkg, x2, rfile);
-          if (r) {
-            x2 = path3.resolve(pkg.dir, r);
+          var rfile = path3.relative(pkg.dir, x3);
+          var r2 = opts.pathFilter(pkg.pkg, x3, rfile);
+          if (r2) {
+            x3 = path3.resolve(pkg.dir, r2);
           }
         }
-        if (isFile(x2)) {
-          return x2;
+        if (isFile(x3)) {
+          return x3;
         }
         for (var i = 0; i < extensions.length; i++) {
-          var file = x2 + extensions[i];
+          var file = x3 + extensions[i];
           if (isFile(file)) {
             return file;
           }
@@ -54766,8 +54766,8 @@ var require_sync = __commonJS({
         return { pkg, dir };
       }
       __name(loadpkg, "loadpkg");
-      function loadAsDirectorySync(x2) {
-        var pkgfile = path3.join(maybeRealpathSync(realpathSync, x2, opts), "/package.json");
+      function loadAsDirectorySync(x3) {
+        var pkgfile = path3.join(maybeRealpathSync(realpathSync, x3, opts), "/package.json");
         if (isFile(pkgfile)) {
           try {
             var pkg = readPackageSync(readFileSync2, pkgfile);
@@ -54777,7 +54777,7 @@ var require_sync = __commonJS({
             pkg = opts.packageFilter(
               pkg,
               /*pkgfile,*/
-              x2
+              x3
             );
           }
           if (pkg && pkg.main) {
@@ -54790,22 +54790,22 @@ var require_sync = __commonJS({
               pkg.main = "index";
             }
             try {
-              var m2 = loadAsFileSync(path3.resolve(x2, pkg.main));
+              var m2 = loadAsFileSync(path3.resolve(x3, pkg.main));
               if (m2) return m2;
-              var n2 = loadAsDirectorySync(path3.resolve(x2, pkg.main));
+              var n2 = loadAsDirectorySync(path3.resolve(x3, pkg.main));
               if (n2) return n2;
             } catch (e) {
             }
           }
         }
-        return loadAsFileSync(path3.join(x2, "/index"));
+        return loadAsFileSync(path3.join(x3, "/index"));
       }
       __name(loadAsDirectorySync, "loadAsDirectorySync");
-      function loadNodeModulesSync(x2, start) {
+      function loadNodeModulesSync(x3, start) {
         var thunk = /* @__PURE__ */ __name(function() {
-          return getPackageCandidates(x2, start, opts);
+          return getPackageCandidates(x3, start, opts);
         }, "thunk");
-        var dirs = packageIterator ? packageIterator(x2, start, thunk, opts) : thunk();
+        var dirs = packageIterator ? packageIterator(x3, start, thunk, opts) : thunk();
         for (var i = 0; i < dirs.length; i++) {
           var dir = dirs[i];
           if (isDirectory2(path3.dirname(dir))) {
@@ -54907,15 +54907,15 @@ var require_fixer2 = __commonJS({
             url: data.repository
           };
         }
-        var r = data.repository.url || "";
-        if (r) {
-          var hosted = hostedGitInfo.fromUrl(r);
+        var r2 = data.repository.url || "";
+        if (r2) {
+          var hosted = hostedGitInfo.fromUrl(r2);
           if (hosted) {
-            r = data.repository.url = hosted.getDefaultRepresentation() == "shortcut" ? hosted.https() : hosted.toString();
+            r2 = data.repository.url = hosted.getDefaultRepresentation() == "shortcut" ? hosted.https() : hosted.toString();
           }
         }
-        if (r.match(/github.com\/[^\/]+\/[^\/]+\.git\.git$/)) {
-          this.warn("brokenGitUrl", r);
+        if (r2.match(/github.com\/[^\/]+\/[^\/]+\.git\.git$/)) {
+          this.warn("brokenGitUrl", r2);
         }
       }, "fixRepositoryField"),
       fixTypos: /* @__PURE__ */ __name(function(data) {
@@ -54932,12 +54932,12 @@ var require_fixer2 = __commonJS({
           delete data.scripts;
           return;
         }
-        Object.keys(data.scripts).forEach(function(k) {
-          if (typeof data.scripts[k] !== "string") {
+        Object.keys(data.scripts).forEach(function(k2) {
+          if (typeof data.scripts[k2] !== "string") {
             this.warn("nonStringScript");
-            delete data.scripts[k];
-          } else if (typos.script[k] && !data.scripts[typos.script[k]]) {
-            this.warn("typo", k, typos.script[k], "scripts");
+            delete data.scripts[k2];
+          } else if (typos.script[k2] && !data.scripts[typos.script[k2]]) {
+            this.warn("typo", k2, typos.script[k2], "scripts");
           }
         }, this);
       }, "fixScriptsField"),
@@ -54960,14 +54960,14 @@ var require_fixer2 = __commonJS({
       fixBinField: /* @__PURE__ */ __name(function(data) {
         if (!data.bin) return;
         if (typeof data.bin === "string") {
-          var b = {};
+          var b2 = {};
           var match;
           if (match = data.name.match(/^@[^/]+[/](.*)$/)) {
-            b[match[1]] = data.bin;
+            b2[match[1]] = data.bin;
           } else {
-            b[data.name] = data.bin;
+            b2[data.name] = data.bin;
           }
-          data.bin = b;
+          data.bin = b2;
         }
       }, "fixBinField"),
       fixManField: /* @__PURE__ */ __name(function(data) {
@@ -55017,9 +55017,9 @@ var require_fixer2 = __commonJS({
             return;
           }
           Object.keys(data[deps]).forEach(function(d) {
-            var r = data[deps][d];
-            if (typeof r !== "string") {
-              this.warn("nonStringDependency", d, JSON.stringify(r));
+            var r2 = data[deps][d];
+            if (typeof r2 !== "string") {
+              this.warn("nonStringDependency", d, JSON.stringify(r2));
               delete data[deps][d];
             }
             var hosted = hostedGitInfo.fromUrl(data[deps][d]);
@@ -55215,11 +55215,11 @@ var require_fixer2 = __commonJS({
     }
     __name(parsePerson, "parsePerson");
     function addOptionalDepsToDeps(data, warn) {
-      var o = data.optionalDependencies;
-      if (!o) return;
+      var o2 = data.optionalDependencies;
+      if (!o2) return;
       var d = data.dependencies || {};
-      Object.keys(o).forEach(function(k) {
-        d[k] = o[k];
+      Object.keys(o2).forEach(function(k2) {
+        d[k2] = o2[k2];
       });
       data.dependencies = d;
     }
@@ -55231,7 +55231,7 @@ var require_fixer2 = __commonJS({
       }
       if (!Array.isArray(deps)) return deps;
       warn("deprecatedArrayDependencies", type);
-      var o = {};
+      var o2 = {};
       deps.filter(function(d) {
         return typeof d === "string";
       }).forEach(function(d) {
@@ -55240,9 +55240,9 @@ var require_fixer2 = __commonJS({
         var dv = d.join("");
         dv = dv.trim();
         dv = dv.replace(/^@/, "");
-        o[dn] = dv;
+        o2[dn] = dv;
       });
-      return o;
+      return o2;
     }
     __name(depObjectify, "depObjectify");
     function objectifyDeps(data, warn) {
@@ -55254,11 +55254,11 @@ var require_fixer2 = __commonJS({
     __name(objectifyDeps, "objectifyDeps");
     function bugsTypos(bugs, warn) {
       if (!bugs) return;
-      Object.keys(bugs).forEach(function(k) {
-        if (typos.bugs[k]) {
-          warn("typo", k, typos.bugs[k], "bugs");
-          bugs[typos.bugs[k]] = bugs[k];
-          delete bugs[k];
+      Object.keys(bugs).forEach(function(k2) {
+        if (typos.bugs[k2]) {
+          warn("typo", k2, typos.bugs[k2], "bugs");
+          bugs[typos.bugs[k2]] = bugs[k2];
+          delete bugs[k2];
         }
       });
     }
@@ -55399,11 +55399,11 @@ var require_read_pkg = __commonJS({
           fp = path3.join(fp, "package.json");
         }
         return loadJsonFile(fp);
-      }).then((x) => {
+      }).then((x2) => {
         if (opts.normalize !== false) {
-          require_normalize2()(x);
+          require_normalize2()(x2);
         }
-        return x;
+        return x2;
       });
     };
     module2.exports.sync = (fp, opts) => {
@@ -55413,11 +55413,11 @@ var require_read_pkg = __commonJS({
       }
       opts = opts || {};
       fp = pathType.dirSync(fp) ? path3.join(fp, "package.json") : fp;
-      const x = loadJsonFile.sync(fp);
+      const x2 = loadJsonFile.sync(fp);
       if (opts.normalize !== false) {
-        require_normalize2()(x);
+        require_normalize2()(x2);
       }
-      return x;
+      return x2;
     };
   }
 });
@@ -55641,7 +55641,7 @@ var require_merge_config = __commonJS({
     var readPkg = require_read_pkg();
     var readPkgUp = require_read_pkg_up();
     var URL2 = require("url").URL;
-    var _ = require_lodash();
+    var _2 = require_lodash();
     var rhosts = /github|bitbucket|gitlab/i;
     function semverTagsPromise(options) {
       return Q.Promise(function(resolve, reject) {
@@ -55679,7 +55679,7 @@ var require_merge_config = __commonJS({
       gitRawCommitsOpts = gitRawCommitsOpts || {};
       gitRawExecOpts = gitRawExecOpts || {};
       const rtag = options && options.tagPrefix ? new RegExp(`tag:\\s*[=]?${options.tagPrefix}(.+?)[,)]`, "gi") : /tag:\s*[v=]?(.+?)[,)]/gi;
-      options = _.merge({
+      options = _2.merge({
         pkg: {
           transform: /* @__PURE__ */ __name(function(pkg) {
             return pkg;
@@ -55691,7 +55691,7 @@ var require_merge_config = __commonJS({
         debug: /* @__PURE__ */ __name(function() {
         }, "debug"),
         transform: /* @__PURE__ */ __name(function(commit, cb) {
-          if (_.isString(commit.gitTags)) {
+          if (_2.isString(commit.gitTags)) {
             const match = rtag.exec(commit.gitTags);
             rtag.lastIndex = 0;
             if (match) {
@@ -55707,7 +55707,7 @@ var require_merge_config = __commonJS({
       }, options);
       options.warn = options.warn || options.debug;
       if (options.config) {
-        if (_.isFunction(options.config)) {
+        if (_2.isFunction(options.config)) {
           configPromise = Q.nfcall(options.config);
         } else {
           configPromise = Q(options.config);
@@ -55738,7 +55738,7 @@ var require_merge_config = __commonJS({
         } else {
           config = {};
         }
-        context3 = _.assign(context3, config.context);
+        context3 = _2.assign(context3, config.context);
         if (options.pkg) {
           if (pkgObj.state === "fulfilled") {
             if (options.pkg.path) {
@@ -55801,7 +55801,7 @@ var require_merge_config = __commonJS({
             }
           }
         }
-        if (!_.isBoolean(options.outputUnreleased)) {
+        if (!_2.isBoolean(options.outputUnreleased)) {
           options.outputUnreleased = true;
         }
         if (context3.host && (!context3.issue || !context3.commit || !parserOpts || !parserOpts.referenceActions)) {
@@ -55816,7 +55816,7 @@ var require_merge_config = __commonJS({
           }
           if (type) {
             hostOpts = globRequire_hosts("../hosts/" + type);
-            context3 = _.assign({
+            context3 = _2.assign({
               issue: hostOpts.issue,
               commit: hostOpts.commit
             }, context3);
@@ -55830,7 +55830,7 @@ var require_merge_config = __commonJS({
         if (context3.resetChangelog) {
           fromTag = null;
         }
-        gitRawCommitsOpts = _.assign(
+        gitRawCommitsOpts = _2.assign(
           {
             format: "%B%n-hash-%n%H%n-gitTags-%n%d%n-committerDate-%n%ci",
             from: fromTag,
@@ -55843,7 +55843,7 @@ var require_merge_config = __commonJS({
         if (options.append) {
           gitRawCommitsOpts.reverse = gitRawCommitsOpts.reverse || true;
         }
-        parserOpts = _.assign(
+        parserOpts = _2.assign(
           {},
           config.parserOpts,
           {
@@ -55854,10 +55854,10 @@ var require_merge_config = __commonJS({
         if (hostOpts.referenceActions && parserOpts) {
           parserOpts.referenceActions = hostOpts.referenceActions;
         }
-        if (_.isEmpty(parserOpts.issuePrefixes) && hostOpts.issuePrefixes) {
+        if (_2.isEmpty(parserOpts.issuePrefixes) && hostOpts.issuePrefixes) {
           parserOpts.issuePrefixes = hostOpts.issuePrefixes;
         }
-        writerOpts = _.assign(
+        writerOpts = _2.assign(
           {
             finalizeContext: /* @__PURE__ */ __name(function(context4, writerOpts2, filteredCommits, keyCommit, originalCommits) {
               const firstCommit = originalCommits[0];
@@ -55899,7 +55899,7 @@ var require_merge_config = __commonJS({
                   }
                 }
               }
-              if (!_.isBoolean(context4.linkCompare) && context4.previousTag && context4.currentTag) {
+              if (!_2.isBoolean(context4.linkCompare) && context4.previousTag && context4.currentTag) {
                 context4.linkCompare = true;
               }
               return context4;
@@ -55936,7 +55936,7 @@ var require_conventional_changelog_core = __commonJS({
     var gitRawCommits2 = require_git_raw_commits();
     var conventionalCommitsParser2 = require_conventional_commits_parser();
     var conventionalChangelogWriter = require_conventional_changelog_writer();
-    var _ = require_lodash();
+    var _2 = require_lodash();
     var stream = require("stream");
     var through = require_through2();
     var execFileSync = require("child_process").execFileSync;
@@ -55955,7 +55955,7 @@ var require_conventional_changelog_core = __commonJS({
       commitsStream._read = function() {
       };
       function commitsRange(from, to) {
-        return gitRawCommits2(_.merge({}, gitRawCommitsOpts, {
+        return gitRawCommits2(_2.merge({}, gitRawCommitsOpts, {
           from,
           to
         })).on("error", function(err) {
@@ -56319,23 +56319,23 @@ var require_typedarray = __commonJS({
       var opts = Object.prototype.toString, ophop = Object.prototype.hasOwnProperty;
       return {
         // Class returns internal [[Class]] property, used to avoid cross-frame instanceof issues:
-        Class: /* @__PURE__ */ __name(function(v) {
-          return opts.call(v).replace(/^\[object *|\]$/g, "");
+        Class: /* @__PURE__ */ __name(function(v2) {
+          return opts.call(v2).replace(/^\[object *|\]$/g, "");
         }, "Class"),
-        HasProperty: /* @__PURE__ */ __name(function(o, p) {
-          return p in o;
+        HasProperty: /* @__PURE__ */ __name(function(o2, p) {
+          return p in o2;
         }, "HasProperty"),
-        HasOwnProperty: /* @__PURE__ */ __name(function(o, p) {
-          return ophop.call(o, p);
+        HasOwnProperty: /* @__PURE__ */ __name(function(o2, p) {
+          return ophop.call(o2, p);
         }, "HasOwnProperty"),
-        IsCallable: /* @__PURE__ */ __name(function(o) {
-          return typeof o === "function";
+        IsCallable: /* @__PURE__ */ __name(function(o2) {
+          return typeof o2 === "function";
         }, "IsCallable"),
-        ToInt32: /* @__PURE__ */ __name(function(v) {
-          return v >> 0;
+        ToInt32: /* @__PURE__ */ __name(function(v2) {
+          return v2 >> 0;
         }, "ToInt32"),
-        ToUint32: /* @__PURE__ */ __name(function(v) {
-          return v >>> 0;
+        ToUint32: /* @__PURE__ */ __name(function(v2) {
+          return v2 >>> 0;
         }, "ToUint32")
       };
     })();
@@ -56371,25 +56371,25 @@ var require_typedarray = __commonJS({
     })()) {
       defineProp = Object.defineProperty;
     } else {
-      defineProp = /* @__PURE__ */ __name(function(o, p, desc) {
-        if (!o === Object(o)) throw new TypeError("Object.defineProperty called on non-object");
+      defineProp = /* @__PURE__ */ __name(function(o2, p, desc) {
+        if (!o2 === Object(o2)) throw new TypeError("Object.defineProperty called on non-object");
         if (ECMAScript.HasProperty(desc, "get") && Object.prototype.__defineGetter__) {
-          Object.prototype.__defineGetter__.call(o, p, desc.get);
+          Object.prototype.__defineGetter__.call(o2, p, desc.get);
         }
         if (ECMAScript.HasProperty(desc, "set") && Object.prototype.__defineSetter__) {
-          Object.prototype.__defineSetter__.call(o, p, desc.set);
+          Object.prototype.__defineSetter__.call(o2, p, desc.set);
         }
         if (ECMAScript.HasProperty(desc, "value")) {
-          o[p] = desc.value;
+          o2[p] = desc.value;
         }
-        return o;
+        return o2;
       }, "defineProp");
     }
-    var getOwnPropNames = Object.getOwnPropertyNames || function(o) {
-      if (o !== Object(o)) throw new TypeError("Object.getOwnPropertyNames called on non-object");
+    var getOwnPropNames = Object.getOwnPropertyNames || function(o2) {
+      if (o2 !== Object(o2)) throw new TypeError("Object.getOwnPropertyNames called on non-object");
       var props = [], p;
-      for (p in o) {
-        if (ECMAScript.HasOwnProperty(o, p)) {
+      for (p in o2) {
+        if (ECMAScript.HasOwnProperty(o2, p)) {
           props.push(p);
         }
       }
@@ -56405,8 +56405,8 @@ var require_typedarray = __commonJS({
           "get": /* @__PURE__ */ __name(function() {
             return obj._getter(index);
           }, "get"),
-          "set": /* @__PURE__ */ __name(function(v) {
-            obj._setter(index, v);
+          "set": /* @__PURE__ */ __name(function(v2) {
+            obj._setter(index, v2);
           }, "set"),
           enumerable: true,
           configurable: false
@@ -56482,55 +56482,55 @@ var require_typedarray = __commonJS({
       return as_unsigned(bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3], 32);
     }
     __name(unpackU32, "unpackU32");
-    function packIEEE754(v, ebits, fbits) {
-      var bias = (1 << ebits - 1) - 1, s, e, f, ln, i, bits, str, bytes;
+    function packIEEE754(v2, ebits, fbits) {
+      var bias = (1 << ebits - 1) - 1, s, e, f2, ln, i, bits, str, bytes;
       function roundToEven(n) {
-        var w = floor(n), f2 = n - w;
-        if (f2 < 0.5)
-          return w;
-        if (f2 > 0.5)
-          return w + 1;
-        return w % 2 ? w + 1 : w;
+        var w2 = floor(n), f3 = n - w2;
+        if (f3 < 0.5)
+          return w2;
+        if (f3 > 0.5)
+          return w2 + 1;
+        return w2 % 2 ? w2 + 1 : w2;
       }
       __name(roundToEven, "roundToEven");
-      if (v !== v) {
+      if (v2 !== v2) {
         e = (1 << ebits) - 1;
-        f = pow(2, fbits - 1);
+        f2 = pow(2, fbits - 1);
         s = 0;
-      } else if (v === Infinity || v === -Infinity) {
+      } else if (v2 === Infinity || v2 === -Infinity) {
         e = (1 << ebits) - 1;
-        f = 0;
-        s = v < 0 ? 1 : 0;
-      } else if (v === 0) {
+        f2 = 0;
+        s = v2 < 0 ? 1 : 0;
+      } else if (v2 === 0) {
         e = 0;
-        f = 0;
-        s = 1 / v === -Infinity ? 1 : 0;
+        f2 = 0;
+        s = 1 / v2 === -Infinity ? 1 : 0;
       } else {
-        s = v < 0;
-        v = abs(v);
-        if (v >= pow(2, 1 - bias)) {
-          e = min(floor(log(v) / LN2), 1023);
-          f = roundToEven(v / pow(2, e) * pow(2, fbits));
-          if (f / pow(2, fbits) >= 2) {
+        s = v2 < 0;
+        v2 = abs(v2);
+        if (v2 >= pow(2, 1 - bias)) {
+          e = min(floor(log(v2) / LN2), 1023);
+          f2 = roundToEven(v2 / pow(2, e) * pow(2, fbits));
+          if (f2 / pow(2, fbits) >= 2) {
             e = e + 1;
-            f = 1;
+            f2 = 1;
           }
           if (e > bias) {
             e = (1 << ebits) - 1;
-            f = 0;
+            f2 = 0;
           } else {
             e = e + bias;
-            f = f - pow(2, fbits);
+            f2 = f2 - pow(2, fbits);
           }
         } else {
           e = 0;
-          f = roundToEven(v / pow(2, 1 - bias - fbits));
+          f2 = roundToEven(v2 / pow(2, 1 - bias - fbits));
         }
       }
       bits = [];
       for (i = fbits; i; i -= 1) {
-        bits.push(f % 2 ? 1 : 0);
-        f = floor(f / 2);
+        bits.push(f2 % 2 ? 1 : 0);
+        f2 = floor(f2 / 2);
       }
       for (i = ebits; i; i -= 1) {
         bits.push(e % 2 ? 1 : 0);
@@ -56548,12 +56548,12 @@ var require_typedarray = __commonJS({
     }
     __name(packIEEE754, "packIEEE754");
     function unpackIEEE754(bytes, ebits, fbits) {
-      var bits = [], i, j, b, str, bias, s, e, f;
+      var bits = [], i, j2, b2, str, bias, s, e, f2;
       for (i = bytes.length; i; i -= 1) {
-        b = bytes[i - 1];
-        for (j = 8; j; j -= 1) {
-          bits.push(b % 2 ? 1 : 0);
-          b = b >> 1;
+        b2 = bytes[i - 1];
+        for (j2 = 8; j2; j2 -= 1) {
+          bits.push(b2 % 2 ? 1 : 0);
+          b2 = b2 >> 1;
         }
       }
       bits.reverse();
@@ -56561,32 +56561,32 @@ var require_typedarray = __commonJS({
       bias = (1 << ebits - 1) - 1;
       s = parseInt(str.substring(0, 1), 2) ? -1 : 1;
       e = parseInt(str.substring(1, 1 + ebits), 2);
-      f = parseInt(str.substring(1 + ebits), 2);
+      f2 = parseInt(str.substring(1 + ebits), 2);
       if (e === (1 << ebits) - 1) {
-        return f !== 0 ? NaN : s * Infinity;
+        return f2 !== 0 ? NaN : s * Infinity;
       } else if (e > 0) {
-        return s * pow(2, e - bias) * (1 + f / pow(2, fbits));
-      } else if (f !== 0) {
-        return s * pow(2, -(bias - 1)) * (f / pow(2, fbits));
+        return s * pow(2, e - bias) * (1 + f2 / pow(2, fbits));
+      } else if (f2 !== 0) {
+        return s * pow(2, -(bias - 1)) * (f2 / pow(2, fbits));
       } else {
         return s < 0 ? -0 : 0;
       }
     }
     __name(unpackIEEE754, "unpackIEEE754");
-    function unpackF64(b) {
-      return unpackIEEE754(b, 11, 52);
+    function unpackF64(b2) {
+      return unpackIEEE754(b2, 11, 52);
     }
     __name(unpackF64, "unpackF64");
-    function packF64(v) {
-      return packIEEE754(v, 11, 52);
+    function packF64(v2) {
+      return packIEEE754(v2, 11, 52);
     }
     __name(packF64, "packF64");
-    function unpackF32(b) {
-      return unpackIEEE754(b, 8, 23);
+    function unpackF32(b2) {
+      return unpackIEEE754(b2, 8, 23);
     }
     __name(unpackF32, "unpackF32");
-    function packF32(v) {
-      return packIEEE754(v, 8, 23);
+    function packF32(v2) {
+      return packIEEE754(v2, 8, 23);
     }
     __name(packF32, "packF32");
     (function() {
@@ -56676,9 +56676,9 @@ var require_typedarray = __commonJS({
           if (index >= this.length) {
             return undefined2;
           }
-          var bytes = [], i, o;
-          for (i = 0, o = this.byteOffset + index * this.BYTES_PER_ELEMENT; i < this.BYTES_PER_ELEMENT; i += 1, o += 1) {
-            bytes.push(this.buffer._bytes[o]);
+          var bytes = [], i, o2;
+          for (i = 0, o2 = this.byteOffset + index * this.BYTES_PER_ELEMENT; i < this.BYTES_PER_ELEMENT; i += 1, o2 += 1) {
+            bytes.push(this.buffer._bytes[o2]);
           }
           return this._unpack(bytes);
         };
@@ -56689,9 +56689,9 @@ var require_typedarray = __commonJS({
           if (index >= this.length) {
             return undefined2;
           }
-          var bytes = this._pack(value), i, o;
-          for (i = 0, o = this.byteOffset + index * this.BYTES_PER_ELEMENT; i < this.BYTES_PER_ELEMENT; i += 1, o += 1) {
-            this.buffer._bytes[o] = bytes[i];
+          var bytes = this._pack(value), i, o2;
+          for (i = 0, o2 = this.byteOffset + index * this.BYTES_PER_ELEMENT; i < this.BYTES_PER_ELEMENT; i += 1, o2 += 1) {
+            this.buffer._bytes[o2] = bytes[i];
           }
         };
         ctor.prototype.set = function(index, value) {
@@ -56734,8 +56734,8 @@ var require_typedarray = __commonJS({
           }
         };
         ctor.prototype.subarray = function(start, end) {
-          function clamp(v, min2, max) {
-            return v < min2 ? min2 : v > max ? max : v;
+          function clamp(v2, min2, max) {
+            return v2 < min2 ? min2 : v2 > max ? max : v2;
           }
           __name(clamp, "clamp");
           start = ECMAScript.ToInt32(start);
@@ -56787,13 +56787,13 @@ var require_typedarray = __commonJS({
       exports2.Float64Array = exports2.Float64Array || Float64Array;
     })();
     (function() {
-      function r(array, index) {
+      function r2(array, index) {
         return ECMAScript.IsCallable(array.get) ? array.get(index) : array[index];
       }
-      __name(r, "r");
+      __name(r2, "r");
       var IS_BIG_ENDIAN = (function() {
         var u16array = new exports2.Uint16Array([4660]), u8array = new exports2.Uint8Array(u16array.buffer);
-        return r(u8array, 0) === 18;
+        return r2(u8array, 0) === 18;
       })();
       var DataView = /* @__PURE__ */ __name(function DataView2(buffer, byteOffset, byteLength) {
         if (arguments.length === 0) {
@@ -56825,12 +56825,12 @@ var require_typedarray = __commonJS({
           byteOffset += this.byteOffset;
           var uint8Array = new exports2.Uint8Array(this.buffer, byteOffset, arrayType.BYTES_PER_ELEMENT), bytes = [], i;
           for (i = 0; i < arrayType.BYTES_PER_ELEMENT; i += 1) {
-            bytes.push(r(uint8Array, i));
+            bytes.push(r2(uint8Array, i));
           }
           if (Boolean(littleEndian) === Boolean(IS_BIG_ENDIAN)) {
             bytes.reverse();
           }
-          return r(new arrayType(new exports2.Uint8Array(bytes).buffer), 0);
+          return r2(new arrayType(new exports2.Uint8Array(bytes).buffer), 0);
         };
       }
       __name(makeGetter, "makeGetter");
@@ -56850,7 +56850,7 @@ var require_typedarray = __commonJS({
           }
           var typeArray = new arrayType([value]), byteArray = new exports2.Uint8Array(typeArray.buffer), bytes = [], i, byteView;
           for (i = 0; i < arrayType.BYTES_PER_ELEMENT; i += 1) {
-            bytes.push(r(byteArray, i));
+            bytes.push(r2(byteArray, i));
           }
           if (Boolean(littleEndian) === Boolean(IS_BIG_ENDIAN)) {
             bytes.reverse();
@@ -57001,8 +57001,8 @@ var require_concat_stream = __commonJS({
       var u8 = new U8(len);
       for (var i = 0, offset = 0; i < parts.length; i++) {
         var part = parts[i];
-        for (var j = 0; j < part.length; j++) {
-          u8[offset++] = part[j];
+        for (var j2 = 0; j2 < part.length; j2++) {
+          u8[offset++] = part[j2];
         }
       }
       return u8;
@@ -57053,7 +57053,7 @@ var require_conventional_changelog_preset_loader = __commonJS({
           } else {
             return config;
           }
-        } catch (_) {
+        } catch (_2) {
           throw Error("does not exist");
         }
       };
@@ -57184,10 +57184,418 @@ var import_node_path2 = __toESM(require("node:path"), 1);
 // node_modules/simple-git/dist/esm/index.js
 var import_node_buffer = require("node:buffer");
 var import_file_exists = __toESM(require_dist(), 1);
+
+// node_modules/@simple-git/args-pathspec/dist/index.mjs
+var t = /* @__PURE__ */ new WeakMap();
+function c(...n) {
+  const e = new String(n);
+  return t.set(e, n), e;
+}
+__name(c, "c");
+function r(n) {
+  return n instanceof String && t.has(n);
+}
+__name(r, "r");
+function o(n) {
+  return t.get(n) ?? [];
+}
+__name(o, "o");
+
+// node_modules/simple-git/dist/esm/index.js
 var import_debug = __toESM(require_src(), 1);
 var import_child_process = require("child_process");
 var import_promise_deferred = __toESM(require_dist2(), 1);
 var import_node_path = require("node:path");
+
+// node_modules/@simple-git/argv-parser/dist/index.mjs
+function* w(e, t2) {
+  const n = t2 === "global";
+  for (const o2 of e)
+    o2.isGlobal === n && (yield o2);
+}
+__name(w, "w");
+var x = /* @__PURE__ */ new Set([
+  "--add",
+  "--edit",
+  "--remove-section",
+  "--rename-section",
+  "--replace-all",
+  "--unset",
+  "--unset-all",
+  "-e"
+]);
+var S = /* @__PURE__ */ new Set([
+  "--get",
+  "--get-all",
+  "--get-color",
+  "--get-colorbool",
+  "--get-regexp",
+  "--get-urlmatch",
+  "--list",
+  "-l"
+]);
+var k = /* @__PURE__ */ new Set([
+  "edit",
+  "remove-section",
+  "rename-section",
+  "set",
+  "unset"
+]);
+var y = /* @__PURE__ */ new Set(["get", "get-color", "get-colorbool", "list"]);
+function C(e, t2) {
+  for (const { name: o2 } of w(e, "task")) {
+    if (x.has(o2))
+      return f(true, t2);
+    if (S.has(o2))
+      return f(false, t2);
+  }
+  const n = t2.at(0)?.toLowerCase();
+  return n === void 0 ? null : k.has(n) ? f(true, t2.slice(1)) : y.has(n) ? f(false, t2.slice(1)) : t2.length === 1 ? f(
+  false, t2) : f(true, t2);
+}
+__name(C, "C");
+function f(e = false, t2 = []) {
+  const n = t2.at(0)?.toLowerCase();
+  return n === void 0 ? null : {
+    isWrite: e,
+    isRead: !e,
+    key: n,
+    value: t2.at(1)
+  };
+}
+__name(f, "f");
+function N(e, t2) {
+  return t2.isWrite && t2.value !== void 0 ? { key: t2.key, value: t2.value, scope: e } : { key: t2.key, scope: e };
+}
+__name(N, "N");
+function P(e) {
+  const t2 = e?.indexOf("=") || -1;
+  return !e || t2 < 0 ? null : {
+    key: e.slice(0, t2).trim().toLowerCase(),
+    value: e.slice(t2 + 1)
+  };
+}
+__name(P, "P");
+function U(e) {
+  for (const { name: t2 } of w(e, "task"))
+    switch (t2) {
+      case "--global":
+        return "global";
+      case "--system":
+        return "system";
+      case "--worktree":
+        return "worktree";
+      case "--local":
+        return "local";
+      case "--file":
+      case "-f":
+        return "file";
+    }
+  return "local";
+}
+__name(U, "U");
+function A({ name: e }) {
+  if (e === "-c" || e === "--config")
+    return "inline";
+  if (e === "--config-env")
+    return "env";
+}
+__name(A, "A");
+function* F(e) {
+  for (const t2 of e) {
+    const n = A(t2), o2 = n && P(t2.value);
+    o2 && (yield {
+      ...o2,
+      scope: n
+    });
+  }
+}
+__name(F, "F");
+function M(e, t2, n) {
+  const o2 = {
+    read: [],
+    write: [...F(t2)]
+  };
+  return e === "config" && G(
+    o2,
+    U(t2),
+    C(t2, n)
+  ), o2;
+}
+__name(M, "M");
+function G(e, t2, n) {
+  if (n === null)
+    return;
+  const o2 = N(t2, n);
+  n.isWrite ? e.write.push(o2) : e.read.push(o2);
+}
+__name(G, "G");
+var v = {
+  short: /* @__PURE__ */ new Map([
+    ["c", true]
+    //  -c <k=v>    set config key for this invocation
+  ])
+};
+var O = {
+  short: new Map([
+    ["C", true],
+    //  -C <path>   change working directory
+    ["P", false],
+    // -P          no pager (alias for --no-pager)
+    ["h", false],
+    // -h          help
+    ["p", false],
+    // -p          paginate
+    ["v", false],
+    // -v          version
+    ...v.short.entries()
+  ]),
+  long: /* @__PURE__ */ new Set([
+    "attr-source",
+    "config-env",
+    "exec-path",
+    "git-dir",
+    "list-cmds",
+    "namespace",
+    "super-prefix",
+    "work-tree"
+  ])
+};
+var E = {
+  clone: {
+    short: /* @__PURE__ */ new Map([
+      ["b", true],
+      // -b <branch>
+      ["j", true],
+      // -j <n>          parallel jobs
+      ["l", false],
+      // -l local
+      ["n", false],
+      // -n no-checkout
+      ["o", true],
+      // -o <name>       remote name
+      ["q", false],
+      // -q quiet
+      ["s", false],
+      // -s shared
+      ["u", true]
+      // -u <upload-pack>
+    ]),
+    long: /* @__PURE__ */ new Set(["branch", "config", "jobs", "origin", "upload-pack", "u"])
+  },
+  commit: {
+    short: /* @__PURE__ */ new Map([
+      ["C", true],
+      // -C <commit>  reuse message
+      ["F", true],
+      // -F <file>    read message from file
+      ["c", true],
+      // -c <commit>  reedit message
+      ["m", true],
+      // -m <msg>
+      ["t", true]
+      // -t <template>
+    ]),
+    long: /* @__PURE__ */ new Set(["file", "message", "reedit-message", "reuse-message", "template"])
+  },
+  config: {
+    short: /* @__PURE__ */ new Map([
+      ["e", false],
+      // -e  open editor
+      ["f", true],
+      //  -f <file>
+      ["l", false]
+      // -l  list
+    ]),
+    long: /* @__PURE__ */ new Set(["blob", "comment", "default", "file", "type", "value"])
+  },
+  fetch: {
+    short: /* @__PURE__ */ new Map(),
+    long: /* @__PURE__ */ new Set(["upload-pack"])
+  },
+  pull: {
+    short: /* @__PURE__ */ new Map(),
+    long: /* @__PURE__ */ new Set(["upload-pack"])
+  },
+  push: {
+    short: /* @__PURE__ */ new Map(),
+    long: /* @__PURE__ */ new Set(["exec", "receive-pack"])
+  }
+};
+var I = { short: /* @__PURE__ */ new Map(), long: /* @__PURE__ */ new Set() };
+function L(e) {
+  const t2 = E[e ?? ""] ?? I;
+  return {
+    short: new Map([...v.short.entries(), ...t2.short.entries()]),
+    long: t2.long
+  };
+}
+__name(L, "L");
+function b(e, t2 = O) {
+  if (e.startsWith("--")) {
+    const n = e.indexOf("=");
+    if (n > 2)
+      return [{ name: e.slice(0, n), value: e.slice(n + 1), needsNext: false }];
+    const o2 = e.slice(2);
+    return [{ name: e, needsNext: t2.long.has(o2) }];
+  }
+  if (e.length === 2) {
+    const n = e.charAt(1), o2 = t2.short.get(n);
+    return [{ name: e, needsNext: o2 === true }];
+  }
+  return R(e, t2.short);
+}
+__name(b, "b");
+function R(e, t2) {
+  const n = e.slice(1).split(""), o2 = [];
+  for (let a = 0; a < n.length; a++) {
+    const s = n[a], r2 = t2.get(s);
+    if (r2 === void 0)
+      return [{ name: e, needsNext: false }];
+    if (r2) {
+      const l = n.slice(a + 1).join("");
+      if (l && ![...l].every((h) => t2.has(h)))
+        return o2.push({ name: `-${s}`, value: l, needsNext: false }), o2;
+    }
+    o2.push({ name: `-${s}`, needsNext: r2 });
+  }
+  return o2;
+}
+__name(R, "R");
+function W(e, t2 = []) {
+  let n = 0;
+  for (; n < e.length; ) {
+    const o2 = String(e[n]);
+    if (!o2.startsWith("-") || o2.length < 2) break;
+    const a = b(o2);
+    let s = n + 1;
+    for (const r2 of a) {
+      const l = {
+        name: r2.name,
+        value: r2.value,
+        absorbedNext: false,
+        isGlobal: true
+      };
+      r2.needsNext && l.value === void 0 && s < e.length && (l.value = String(e[s]), l.absorbedNext = true, s++), t2.push(
+      l);
+    }
+    n = s;
+  }
+  return { flags: t2, taskIndex: n };
+}
+__name(W, "W");
+function _(e, t2, n = []) {
+  const o2 = L(t2), a = [], s = [];
+  let r2 = 0;
+  for (; r2 < e.length; ) {
+    const l = e[r2];
+    if (r(l)) {
+      s.push(...o(l)), r2++;
+      continue;
+    }
+    const u = String(l);
+    if (u === "--") {
+      for (let c2 = r2 + 1; c2 < e.length; c2++) {
+        const i = e[c2];
+        r(i) ? s.push(...o(i)) : s.push(String(i));
+      }
+      break;
+    }
+    if (!u.startsWith("-") || u.length < 2) {
+      a.push(u), r2++;
+      continue;
+    }
+    const h = b(u, o2);
+    let d = r2 + 1;
+    for (const c2 of h) {
+      const i = {
+        name: c2.name,
+        value: c2.value,
+        absorbedNext: false,
+        isGlobal: false
+      };
+      c2.needsNext && i.value === void 0 && d < e.length && !r(e[d]) && (i.value = String(e[d]), i.absorbedNext = true, d++),
+      n.push(i);
+    }
+    r2 = d;
+  }
+  return { flags: n, positionals: a, pathspecs: s };
+}
+__name(_, "_");
+function* T({ write: e }) {
+  for (const t2 of e)
+    for (const n of $) {
+      const o2 = n(t2.key);
+      o2 && (yield o2);
+    }
+}
+__name(T, "T");
+function g(e, t2, n = String(e)) {
+  const o2 = typeof e == "string" ? new RegExp(`\\s*${e}`, "i") : e;
+  return function(s) {
+    if (o2.test(s))
+      return {
+        category: t2,
+        message: `Configuring ${n} is not permitted without enabling ${t2}`
+      };
+  };
+}
+__name(g, "g");
+var $ = [
+  g(
+    /^\s*protocol(.[a-z]+)?.allow/i,
+    "allowUnsafeProtocolOverride",
+    "protocol.allow"
+  ),
+  g("core.sshCommand", "allowUnsafeSshCommand"),
+  g("core.fsmonitor", "allowUnsafeFsMonitor"),
+  g("core.gitProxy", "allowUnsafeGitProxy"),
+  g("core.hooksPath", "allowUnsafeHooksPath"),
+  g("diff.external", "allowUnsafeDiffExternal")
+];
+function* j(e, t2) {
+  for (const n of t2)
+    /^--(upload|receive)-pack/.test(n.name) && (yield {
+      category: "allowUnsafePack",
+      message: "Use of --upload-pack or --receive-pack is not permitted without enabling allowUnsafePack"
+    }), e === "clone" && (/^-\w*u/.test(n.name) || n.name === "--u") && (yield {
+      category: "allowUnsafePack",
+      message: "Use of clone with option -u is not permitted without enabling allowUnsafePack"
+    }), e === "push" && /^--exec/.test(n.name) && (yield {
+      category: "allowUnsafePack",
+      message: "Use of push with option --exec is not permitted without enabling allowUnsafePack"
+    });
+}
+__name(j, "j");
+function B(e, t2, n) {
+  const o2 = [
+    ...j(e, t2),
+    ...T(n)
+  ];
+  return {
+    categories: o2.reduce((s, r2) => s.add(r2.category), /* @__PURE__ */ new Set()),
+    vulnerabilities: o2
+  };
+}
+__name(B, "B");
+function V(...e) {
+  const { flags: t2, taskIndex: n } = W(e), o2 = n < e.length ? String(e[n]).toLowerCase() : null, a = o2 !== null ? e.slice(
+  n + 1) : [], { positionals: s, pathspecs: r2 } = _(a, o2, t2), l = M(o2, t2, s);
+  return {
+    task: o2,
+    flags: t2.map(D),
+    paths: r2,
+    config: l,
+    vulnerabilities: B(o2, t2, l)
+  };
+}
+__name(V, "V");
+function D({ value: e, name: t2 }) {
+  return e !== void 0 ? { name: t2, value: e } : { name: t2 };
+}
+__name(D, "D");
+
+// node_modules/simple-git/dist/esm/index.js
 var import_promise_deferred2 = __toESM(require_dist2(), 1);
 var import_node_events = require("node:events");
 var __defProp2 = Object.defineProperty;
@@ -57215,27 +57623,6 @@ var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
 }, "__copyProps");
 var __toCommonJS = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__\
 toCommonJS");
-function pathspec(...paths) {
-  const key = new String(paths);
-  cache.set(key, paths);
-  return key;
-}
-__name(pathspec, "pathspec");
-function isPathSpec(path3) {
-  return path3 instanceof String && cache.has(path3);
-}
-__name(isPathSpec, "isPathSpec");
-function toPaths(pathSpec) {
-  return cache.get(pathSpec) || [];
-}
-__name(toPaths, "toPaths");
-var cache;
-var init_pathspec = __esm2({
-  "src/lib/args/pathspec.ts"() {
-    "use strict";
-    cache = /* @__PURE__ */ new WeakMap();
-  }
-});
 var GitError;
 var init_git_error = __esm2({
   "src/lib/errors/git-error.ts"() {
@@ -57442,7 +57829,7 @@ function filterType(input, filter, def) {
 }
 __name(filterType, "filterType");
 function filterPrimitives(input, omit2) {
-  const type = isPathSpec(input) ? "string" : typeof input;
+  const type = r(input) ? "string" : typeof input;
   return /number|string|boolean/.test(type) && (!omit2 || !omit2.includes(type));
 }
 __name(filterPrimitives, "filterPrimitives");
@@ -57462,7 +57849,6 @@ var filterHasLength;
 var init_argument_filters = __esm2({
   "src/lib/utils/argument-filters.ts"() {
     "use strict";
-    init_pathspec();
     init_util();
     filterArray = /* @__PURE__ */ __name((input) => {
       return Array.isArray(input);
@@ -57471,7 +57857,7 @@ var init_argument_filters = __esm2({
       return typeof input === "number";
     }, "filterNumber");
     filterString = /* @__PURE__ */ __name((input) => {
-      return typeof input === "string" || isPathSpec(input);
+      return typeof input === "string" || r(input);
     }, "filterString");
     filterStringOrStringArray = /* @__PURE__ */ __name((input) => {
       return filterString(input) || Array.isArray(input) && input.every(filterString);
@@ -57579,7 +57965,7 @@ function createInstanceConfig(...options) {
   const baseDir = process.cwd();
   const config = Object.assign(
     { baseDir, ...defaultOptions },
-    ...options.filter((o) => typeof o === "object" && o)
+    ...options.filter((o2) => typeof o2 === "object" && o2)
   );
   config.baseDir = config.baseDir || baseDir;
   config.trimmed = config.trimmed === true;
@@ -57604,14 +57990,14 @@ function appendTaskOptions(options, commands = []) {
   }
   return Object.keys(options).reduce((commands2, key) => {
     const value = options[key];
-    if (isPathSpec(value)) {
+    if (r(value)) {
       commands2.push(value);
     } else if (filterPrimitives(value, ["boolean"])) {
       commands2.push(key + "=" + value);
     } else if (Array.isArray(value)) {
-      for (const v of value) {
-        if (!filterPrimitives(v, ["string", "number"])) {
-          commands2.push(key + "=" + v);
+      for (const v2 of value) {
+        if (!filterPrimitives(v2, ["string", "number"])) {
+          commands2.push(key + "=" + v2);
         }
       }
     } else {
@@ -57655,7 +58041,6 @@ var init_task_options = __esm2({
     "use strict";
     init_argument_filters();
     init_util();
-    init_pathspec();
   }
 });
 function callTaskParser(parser4, streams) {
@@ -59427,7 +59812,7 @@ function parseLogOptions(opt = {}, customArgs = []) {
     suffix.push(`${opt.from || ""}${rangeOperator}${opt.to || ""}`);
   }
   if (filterString(opt.file)) {
-    command.push("--follow", pathspec(opt.file));
+    command.push("--follow", c(opt.file));
   }
   appendTaskOptions(userOptions(opt), command);
   return {
@@ -59475,7 +59860,6 @@ var init_log = __esm2({
   "src/lib/tasks/log.ts"() {
     "use strict";
     init_log_format();
-    init_pathspec();
     init_parse_list_log_summary();
     init_utils();
     init_task();
@@ -59993,7 +60377,7 @@ function parser3(indexX, indexY, handler2) {
 }
 __name(parser3, "parser3");
 function conflicts(indexX, ...indexY) {
-  return indexY.map((y) => parser3(indexX, y, (result, file) => result.conflicted.push(file)));
+  return indexY.map((y2) => parser3(indexX, y2, (result, file) => result.conflicted.push(file)));
 }
 __name(conflicts, "conflicts");
 function splitLine(result, lineStr) {
@@ -60296,11 +60680,10 @@ var init_clone = __esm2({
     "use strict";
     init_task();
     init_utils();
-    init_pathspec();
     cloneTask = /* @__PURE__ */ __name((repo, directory, customArgs) => {
       const commands = ["clone", ...customArgs];
-      filterString(repo) && commands.push(pathspec(repo));
-      filterString(directory) && commands.push(pathspec(directory));
+      filterString(repo) && commands.push(c(repo));
+      filterString(directory) && commands.push(c(directory));
       return straightThroughStringTask(commands);
     }, "cloneTask");
     cloneMirrorTask = /* @__PURE__ */ __name((repo, directory, customArgs) => {
@@ -60733,7 +61116,7 @@ function deleteBranchTask(branch, forceDelete = false) {
     parser(stdOut, stdErr) {
       return parseBranchDeletions(stdOut, stdErr).branches[branch];
     },
-    onError({ exitCode, stdErr, stdOut }, error2, _, fail) {
+    onError({ exitCode, stdErr, stdOut }, error2, _2, fail) {
       if (!hasBranchDeletionError(String(error2), exitCode)) {
         return fail(error2);
       }
@@ -61085,17 +61468,17 @@ var init_sub_module = __esm2({
     init_task();
   }
 });
-function singleSorted(a, b) {
+function singleSorted(a, b2) {
   const aIsNum = Number.isNaN(a);
-  const bIsNum = Number.isNaN(b);
+  const bIsNum = Number.isNaN(b2);
   if (aIsNum !== bIsNum) {
     return aIsNum ? 1 : -1;
   }
-  return aIsNum ? sorted(a, b) : 0;
+  return aIsNum ? sorted(a, b2) : 0;
 }
 __name(singleSorted, "singleSorted");
-function sorted(a, b) {
-  return a === b ? 0 : a > b ? 1 : -1;
+function sorted(a, b2) {
+  return a === b2 ? 0 : a > b2 ? 1 : -1;
 }
 __name(sorted, "sorted");
 function trimmed(input) {
@@ -61565,7 +61948,6 @@ gin instead."
     module2.exports = Git2;
   }
 });
-init_pathspec();
 init_git_error();
 var GitConstructError = class extends GitError {
   static {
@@ -61623,78 +62005,16 @@ function abortPlugin(signal) {
   return [onSpawnBefore, onSpawnAfter];
 }
 __name(abortPlugin, "abortPlugin");
-function isConfigSwitch(arg) {
-  return typeof arg === "string" && arg.trim().toLowerCase() === "-c";
-}
-__name(isConfigSwitch, "isConfigSwitch");
-function isCloneUploadPackSwitch(char, arg) {
-  if (typeof arg !== "string" || !arg.includes(char)) {
-    return false;
-  }
-  const cleaned = arg.trim().replace(/\0/g, "");
-  return /^(--no)?-{1,2}[\dlsqvnobucj]+(\s|$)/.test(cleaned);
-}
-__name(isCloneUploadPackSwitch, "isCloneUploadPackSwitch");
-function preventConfigBuilder(config, setting, message = String(config)) {
-  const regex = typeof config === "string" ? new RegExp(`\\s*${config}`, "i") : config;
-  return /* @__PURE__ */ __name(function preventCommand(options, arg, next) {
-    if (options[setting] !== true && isConfigSwitch(arg) && regex.test(next)) {
-      throw new GitPluginError(
-        void 0,
-        "unsafe",
-        `Configuring ${message} is not permitted without enabling ${setting}`
-      );
-    }
-  }, "preventCommand");
-}
-__name(preventConfigBuilder, "preventConfigBuilder");
-var preventUnsafeConfig = [
-  preventConfigBuilder(
-    /^\s*protocol(.[a-z]+)?.allow/i,
-    "allowUnsafeProtocolOverride",
-    "protocol.allow"
-  ),
-  preventConfigBuilder("core.sshCommand", "allowUnsafeSshCommand"),
-  preventConfigBuilder("core.gitProxy", "allowUnsafeGitProxy"),
-  preventConfigBuilder("core.hooksPath", "allowUnsafeHooksPath"),
-  preventConfigBuilder("diff.external", "allowUnsafeDiffExternal")
-];
-function preventUploadPack(arg, method) {
-  if (/^\s*--(upload|receive)-pack/.test(arg)) {
-    throw new GitPluginError(
-      void 0,
-      "unsafe",
-      `Use of --upload-pack or --receive-pack is not permitted without enabling allowUnsafePack`
-    );
-  }
-  if (method === "clone" && isCloneUploadPackSwitch("u", arg)) {
-    throw new GitPluginError(
-      void 0,
-      "unsafe",
-      `Use of clone with option -u is not permitted without enabling allowUnsafePack`
-    );
-  }
-  if (method === "push" && /^\s*--exec\b/.test(arg)) {
-    throw new GitPluginError(
-      void 0,
-      "unsafe",
-      `Use of push with option --exec is not permitted without enabling allowUnsafePack`
-    );
-  }
-}
-__name(preventUploadPack, "preventUploadPack");
-function blockUnsafeOperationsPlugin({
-  allowUnsafePack = false,
-  ...options
-} = {}) {
+function blockUnsafeOperationsPlugin(options = {}) {
   return {
     type: "spawn.args",
-    action(args, context3) {
-      args.forEach((current, index) => {
-        const next = index < args.length ? args[index + 1] : "";
-        allowUnsafePack || preventUploadPack(current, context3.method);
-        preventUnsafeConfig.forEach((helper) => helper(options, current, next));
-      });
+    action(args) {
+      const parsed = V(...args);
+      for (const vulnerability of parsed.vulnerabilities.vulnerabilities) {
+        if (options[vulnerability.category] !== true) {
+          throw new GitPluginError(void 0, "unsafe", vulnerability.message);
+        }
+      }
       return args;
     }
   };
@@ -61983,7 +62303,6 @@ function timeoutPlugin({
   }
 }
 __name(timeoutPlugin, "timeoutPlugin");
-init_pathspec();
 function suffixPathsPlugin() {
   return {
     type: "spawn.args",
@@ -61996,13 +62315,13 @@ function suffixPathsPlugin() {
       __name(append2, "append2");
       for (let i = 0; i < data.length; i++) {
         const param = data[i];
-        if (isPathSpec(param)) {
-          append2(toPaths(param));
+        if (r(param)) {
+          append2(o(param));
           continue;
         }
         if (param === "--") {
           append2(
-            data.slice(i + 1).flatMap((item) => isPathSpec(item) && toPaths(item) || item)
+            data.slice(i + 1).flatMap((item) => r(item) && o(item) || item)
           );
           break;
         }
@@ -62248,14 +62567,14 @@ var HttpResponseRetryCodes = [
 // node_modules/@actions/core/lib/summary.js
 var import_os = require("os");
 var import_fs = require("fs");
-var __awaiter = function(thisArg, _arguments, P, generator) {
+var __awaiter = function(thisArg, _arguments, P2, generator) {
   function adopt(value) {
-    return value instanceof P ? value : new P(function(resolve) {
+    return value instanceof P2 ? value : new P2(function(resolve) {
       resolve(value);
     });
   }
   __name(adopt, "adopt");
-  return new (P || (P = Promise))(function(resolve, reject) {
+  return new (P2 || (P2 = Promise))(function(resolve, reject) {
     function fulfilled(value) {
       try {
         step(generator.next(value));
@@ -62682,14 +63001,14 @@ phql`;
 // node_modules/@actions/github/lib/internal/utils.js
 var httpClient = __toESM(require_lib(), 1);
 var import_undici2 = __toESM(require_undici(), 1);
-var __awaiter2 = function(thisArg, _arguments, P, generator) {
+var __awaiter2 = function(thisArg, _arguments, P2, generator) {
   function adopt(value) {
-    return value instanceof P ? value : new P(function(resolve) {
+    return value instanceof P2 ? value : new P2(function(resolve) {
       resolve(value);
     });
   }
   __name(adopt, "adopt");
-  return new (P || (P = Promise))(function(resolve, reject) {
+  return new (P2 || (P2 = Promise))(function(resolve, reject) {
     function fulfilled(value) {
       try {
         step(generator.next(value));
@@ -62744,6 +63063,20 @@ function getApiBaseUrl() {
   return process.env["GITHUB_API_URL"] || "https://api.github.com";
 }
 __name(getApiBaseUrl, "getApiBaseUrl");
+function getUserAgentWithOrchestrationId(baseUserAgent) {
+  var _a2;
+  const orchId = (_a2 = process.env["ACTIONS_ORCHESTRATION_ID"]) === null || _a2 === void 0 ? void 0 : _a2.trim();
+  if (orchId) {
+    const sanitizedId = orchId.replace(/[^a-z0-9_.-]/gi, "_");
+    const tag = `actions_orchestration_id/${sanitizedId}`;
+    if (baseUserAgent === null || baseUserAgent === void 0 ? void 0 : baseUserAgent.includes(tag))
+      return baseUserAgent;
+    const ua = baseUserAgent ? `${baseUserAgent} ` : "";
+    return `${ua}${tag}`;
+  }
+  return baseUserAgent;
+}
+__name(getUserAgentWithOrchestrationId, "getUserAgentWithOrchestrationId");
 
 // node_modules/universal-user-agent/index.js
 function getUserAgent() {
@@ -62972,7 +63305,7 @@ function extractUrlVariableNames(url) {
   if (!matches) {
     return [];
   }
-  return matches.map(removeNonChars).reduce((a, b) => a.concat(b), []);
+  return matches.map(removeNonChars).reduce((a, b2) => a.concat(b2), []);
 }
 __name(extractUrlVariableNames, "extractUrlVariableNames");
 function omit(object, keysToOmit) {
@@ -62995,8 +63328,8 @@ function encodeReserved(str) {
 }
 __name(encodeReserved, "encodeReserved");
 function encodeUnreserved(str) {
-  return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
-    return "%" + c.charCodeAt(0).toString(16).toUpperCase();
+  return encodeURIComponent(str).replace(/[!'()*]/g, function(c2) {
+    return "%" + c2.charCodeAt(0).toString(16).toUpperCase();
   });
 }
 __name(encodeUnreserved, "encodeUnreserved");
@@ -63037,9 +63370,9 @@ function getValues(context3, operator, key, modifier) {
             );
           });
         } else {
-          Object.keys(value).forEach(function(k) {
-            if (isDefined(value[k])) {
-              result.push(encodeValue(operator, value[k], k));
+          Object.keys(value).forEach(function(k2) {
+            if (isDefined(value[k2])) {
+              result.push(encodeValue(operator, value[k2], k2));
             }
           });
         }
@@ -63050,10 +63383,10 @@ function getValues(context3, operator, key, modifier) {
             tmp.push(encodeValue(operator, value2));
           });
         } else {
-          Object.keys(value).forEach(function(k) {
-            if (isDefined(value[k])) {
-              tmp.push(encodeUnreserved(k));
-              tmp.push(encodeValue(operator, value[k].toString()));
+          Object.keys(value).forEach(function(k2) {
+            if (isDefined(value[k2])) {
+              tmp.push(encodeUnreserved(k2));
+              tmp.push(encodeValue(operator, value[k2].toString()));
             }
           });
         }
@@ -63088,7 +63421,7 @@ function expand(template, context3) {
   var operators = ["+", "#", ".", "/", ";", "?", "&"];
   template = template.replace(
     /\{([^\{\}]+)\}|([^\{\}]+)/g,
-    function(_, expression, literal) {
+    function(_2, expression, literal) {
       if (expression) {
         let operator = "";
         const values = [];
@@ -63248,7 +63581,7 @@ var JSONStringify = /* @__PURE__ */ __name((value, replacer, space) => {
   const denoisedJSON = processedJSON.replace(noiseStringify, "$1$2$3");
   return denoisedJSON;
 }, "JSONStringify");
-var isContextSourceSupported = /* @__PURE__ */ __name(() => JSON.parse("1", (_, __, context3) => !!context3 && context3.
+var isContextSourceSupported = /* @__PURE__ */ __name(() => JSON.parse("1", (_2, __, context3) => !!context3 && context3.
 source === "1"), "isContextSourceSupported");
 var convertMarkedBigIntsReviver = /* @__PURE__ */ __name((key, value, context3, userReviver) => {
   const isCustomFormatBigInt = typeof value === "string" && value.match(customFormat);
@@ -63494,7 +63827,7 @@ function toErrorMessage(data) {
   }
   if ("message" in data) {
     const suffix = "documentation_url" in data ? ` - ${data.documentation_url}` : "";
-    return Array.isArray(data.errors) ? `${data.message}: ${data.errors.map((v) => JSON.stringify(v)).join(", ")}${suffix}` :
+    return Array.isArray(data.errors) ? `${data.message}: ${data.errors.map((v2) => JSON.stringify(v2)).join(", ")}${suffix}` :
     `${data.message}${suffix}`;
   }
   return `Unknown error: ${JSON.stringify(data)}`;
@@ -66186,9 +66519,9 @@ var handler = {
   set(target, methodName, value) {
     return target.cache[methodName] = value;
   },
-  get({ octokit, scope, cache: cache2 }, methodName) {
-    if (cache2[methodName]) {
-      return cache2[methodName];
+  get({ octokit, scope, cache }, methodName) {
+    if (cache[methodName]) {
+      return cache[methodName];
     }
     const method = endpointMethodsMap.get(scope).get(methodName);
     if (!method) {
@@ -66196,7 +66529,7 @@ var handler = {
     }
     const { endpointDefaults, decorations } = method;
     if (decorations) {
-      cache2[methodName] = decorate(
+      cache[methodName] = decorate(
         octokit,
         scope,
         methodName,
@@ -66204,9 +66537,9 @@ var handler = {
         decorations
       );
     } else {
-      cache2[methodName] = octokit.request.defaults(endpointDefaults);
+      cache[methodName] = octokit.request.defaults(endpointDefaults);
     }
-    return cache2[methodName];
+    return cache[methodName];
   }
 };
 function endpointsToMethods(octokit) {
@@ -66419,6 +66752,10 @@ function getOctokitOptions(token, options) {
   const auth2 = getAuthString(token, opts);
   if (auth2) {
     opts.auth = auth2;
+  }
+  const userAgent2 = getUserAgentWithOrchestrationId(opts.userAgent);
+  if (userAgent2) {
+    opts.userAgent = userAgent2;
   }
   return opts;
 }
