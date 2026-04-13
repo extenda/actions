@@ -239,6 +239,101 @@ describe('auth-gcloud', () => {
     );
   });
 
+  test('authenticateGcloud sets CLOUDSDK_AUTH_ACCESS_TOKEN and masks it via core.setSecret', async () => {
+    createJobScopedCredential.mockReturnValueOnce(
+      '/runner/temp/setup-gcloud-xxx/credential-key.json',
+    );
+
+    await authenticateGcloud(
+      encodeCredentials({
+        private_key: 'private-key',
+        client_email: 'json-sa@example.iam.gserviceaccount.com',
+        project_id: 'project-a',
+      }),
+      true,
+    );
+
+    expect(execGcloud).toHaveBeenCalledWith(
+      ['auth', 'print-access-token'],
+      'gcloud',
+      true,
+    );
+    expect(core.setSecret).toHaveBeenCalledWith('token-123');
+    expect(process.env.CLOUDSDK_AUTH_ACCESS_TOKEN).toBe('token-123');
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'CLOUDSDK_AUTH_ACCESS_TOKEN',
+      'token-123',
+    );
+  });
+
+  test('resetAuthStack clears CLOUDSDK_AUTH_ACCESS_TOKEN without shelling out to gcloud', async () => {
+    createJobScopedCredential.mockReturnValueOnce(
+      '/runner/temp/setup-gcloud-xxx/credential-key.json',
+    );
+
+    await authenticateGcloud(
+      encodeCredentials({
+        private_key: 'private-key',
+        client_email: 'json-sa@example.iam.gserviceaccount.com',
+        project_id: 'project-a',
+      }),
+      true,
+    );
+    expect(process.env.CLOUDSDK_AUTH_ACCESS_TOKEN).toBe('token-123');
+
+    vi.clearAllMocks();
+    await resetAuthStack();
+
+    expect(process.env.CLOUDSDK_AUTH_ACCESS_TOKEN).toBeUndefined();
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'CLOUDSDK_AUTH_ACCESS_TOKEN',
+      '',
+    );
+    // credentialsFilePath is '' during reset — must not shell out to gcloud
+    expect(execGcloud).not.toHaveBeenCalled();
+  });
+
+  test('restorePreviousAccount re-fetches and sets CLOUDSDK_AUTH_ACCESS_TOKEN', async () => {
+    createJobScopedCredential
+      .mockReturnValueOnce(
+        '/runner/temp/setup-gcloud-xxx/credential-first.json',
+      )
+      .mockReturnValueOnce(
+        '/runner/temp/setup-gcloud-xxx/credential-second.json',
+      );
+
+    execGcloud.mockResolvedValue('token-first');
+    await authenticateGcloud(
+      encodeCredentials({
+        private_key: 'private-key-a',
+        client_email: 'first@example.iam.gserviceaccount.com',
+        project_id: 'project-first',
+      }),
+      true,
+    );
+    const previousAccount = getCurrentAccount();
+
+    execGcloud.mockResolvedValue('token-second');
+    await authenticateGcloud(
+      encodeCredentials({
+        private_key: 'private-key-b',
+        client_email: 'second@example.iam.gserviceaccount.com',
+        project_id: 'project-second',
+      }),
+      true,
+    );
+
+    execGcloud.mockResolvedValue('token-restored');
+    await restorePreviousAccount(previousAccount);
+
+    expect(process.env.CLOUDSDK_AUTH_ACCESS_TOKEN).toBe('token-restored');
+    expect(core.setSecret).toHaveBeenCalledWith('token-restored');
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'CLOUDSDK_AUTH_ACCESS_TOKEN',
+      'token-restored',
+    );
+  });
+
   test('rejects when decoded credentials are not valid JSON', async () => {
     await expect(
       authenticateGcloud(Buffer.from('not-json', 'utf8').toString('base64')),
