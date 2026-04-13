@@ -11,10 +11,12 @@ import {
 } from '../src/auth-gcloud.js';
 import { workloadIdentityFederation } from '../src/auth-wid-federation.js';
 import createJobScopedCredential from '../src/create-job-scoped-credential.js';
+import { execGcloud } from '../src/exec-gcloud.js';
 
 vi.mock('@actions/core');
 vi.mock('../src/create-job-scoped-credential.js');
 vi.mock('../src/auth-wid-federation.js');
+vi.mock('../src/exec-gcloud.js');
 
 const encodeCredentials = (credentials) =>
   Buffer.from(JSON.stringify(credentials), 'utf8').toString('base64');
@@ -22,7 +24,7 @@ const encodeCredentials = (credentials) =>
 describe('auth-gcloud', () => {
   let orgEnv;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockFs({
       '/runner/temp': {},
     });
@@ -36,11 +38,12 @@ describe('auth-gcloud', () => {
       GOOGLE_APPLICATION_CREDENTIALS: undefined,
       CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE: undefined,
     };
-    resetAuthStack();
+    await resetAuthStack();
+    execGcloud.mockResolvedValue('token-123');
   });
 
-  afterEach(() => {
-    resetAuthStack();
+  afterEach(async () => {
+    await resetAuthStack();
     process.env = orgEnv;
     mockFs.restore();
     vi.clearAllMocks();
@@ -216,7 +219,7 @@ describe('auth-gcloud', () => {
     expect(getCurrentAccount()).toBeTruthy();
     expect(process.env.CLOUDSDK_CORE_PROJECT).toBe('project-a');
 
-    resetAuthStack();
+    await resetAuthStack();
 
     expect(getCurrentAccount()).toBeUndefined();
     expect(process.env.CLOUDSDK_CORE_PROJECT).toBeUndefined();
