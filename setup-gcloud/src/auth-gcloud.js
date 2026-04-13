@@ -1,7 +1,10 @@
 import * as core from '@actions/core';
 
 import { clearAuthStack, loadAuthStack, saveAuthStack } from './auth-stack.js';
-import { workloadIdentityFederation } from './auth-wid-federation.js';
+import {
+  refreshIdToken,
+  workloadIdentityFederation,
+} from './auth-wid-federation.js';
 import createJobScopedCredential from './create-job-scoped-credential.js';
 
 const authType = {
@@ -10,6 +13,7 @@ const authType = {
 };
 
 export const env = {
+  accessToken: 'CLOUDSDK_AUTH_ACCESS_TOKEN',
   applicationCredentials: 'GOOGLE_APPLICATION_CREDENTIALS',
   credentialsOverride: 'CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE',
   projectId: 'CLOUDSDK_CORE_PROJECT',
@@ -77,8 +81,7 @@ function validateCredentialsShape(jsonCredentials) {
   );
 }
 
-function isCurrentAccount(auth) {
-  const current = getCurrentAccount();
+function isCurrentAccount(auth, current) {
   if (current) {
     return (
       current.type === auth.type &&
@@ -157,9 +160,15 @@ export async function authenticateGcloud(credentials, exportCredentials) {
     projectId,
     exportCredentials,
     credentialsFilePath: '',
+    refreshTokenMetadata: undefined,
   };
 
-  if (!isCurrentAccount(authEntry)) {
+  const current = getCurrentAccount();
+
+  if (isCurrentAccount(authEntry, current)) {
+    // Already logged in. Refresh the GitHub ID token used by WIF.
+    await current.refreshToken();
+  } else {
     // Create a job-scoped credential file (handles base64 decoding and cleanup tracking)
     authEntry.credentialsFilePath = createJobScopedCredential(credentials);
 
@@ -175,7 +184,7 @@ export async function authenticateGcloud(credentials, exportCredentials) {
       authEntry.exportCredentials = true;
 
       if (authEntry.type === authType.widFederation) {
-        await workloadIdentityFederation(
+        authEntry.refreshTokenMetadata = await workloadIdentityFederation(
           authEntry.credentialsFilePath,
           jsonCredentials,
         );
@@ -195,7 +204,27 @@ export async function authenticateGcloud(credentials, exportCredentials) {
 
 export function getCurrentAccount() {
   const authStack = loadAuthStack();
-  return authStack.at(-1);
+  const account = authStack.at(-1);
+  if (!account) {
+    return undefined;
+  }
+
+  const refreshToken = async () => {};
+  if (
+    account.type === authType.widFederation &&
+    account.refreshTokenMetadata &&
+    typeof account.refreshTokenMetadata === 'object'
+  ) {
+    return {
+      ...account,
+      refreshToken: async () => refreshIdToken(account.refreshTokenMetadata),
+    };
+  }
+
+  return {
+    ...account,
+    refreshToken,
+  };
 }
 
 /**

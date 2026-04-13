@@ -1,7 +1,22 @@
+import fs from 'node:fs';
+
 import * as core from '@actions/core';
 
 import createJobScopedCredential from './create-job-scoped-credential.js';
 import { execGcloud } from './exec-gcloud.js';
+
+export async function refreshIdToken({
+  workloadIdentityProvider,
+  idTokenPath,
+}) {
+  const newToken = await core.getIDToken(
+    `https://iam.googleapis.com/${workloadIdentityProvider}`,
+  );
+  fs.writeFileSync(idTokenPath, newToken, {
+    encoding: 'utf8',
+    mode: 0o600, // rw-------
+  });
+}
 
 export async function workloadIdentityFederation(
   credentialsFilePath,
@@ -26,4 +41,9 @@ export async function workloadIdentityFederation(
     'gcloud',
     true,
   );
+
+  return {
+    workloadIdentityProvider,
+    idTokenPath,
+  };
 }

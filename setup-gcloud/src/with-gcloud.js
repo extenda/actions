@@ -31,6 +31,10 @@ const withGcloud = async (serviceAccountKey, fn) => {
   ) {
     // Already authenticated as the user. Just run the callback.
     core.debug(`Already running as ${saEmail}`);
+
+    // Refresh the GitHub ID token used by WIF.
+    await previousAccount.refreshToken();
+
     return await fn(saProjectId);
   }
 

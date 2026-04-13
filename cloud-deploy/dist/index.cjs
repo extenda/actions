@@ -33243,7 +33243,7 @@ var require_form_data = __commonJS({
     var http4 = require("http");
     var https4 = require("https");
     var parseUrl2 = require("url").parse;
-    var fs22 = require("fs");
+    var fs23 = require("fs");
     var Stream = require("stream").Stream;
     var crypto6 = require("crypto");
     var mime = require_mime_types();
@@ -33311,7 +33311,7 @@ var require_form_data = __commonJS({
         if (value.end != void 0 && value.end != Infinity && value.start != void 0) {
           callback(null, value.end + 1 - (value.start ? value.start : 0));
         } else {
-          fs22.stat(value.path, function(err, stat2) {
+          fs23.stat(value.path, function(err, stat2) {
             if (err) {
               callback(err);
               return;
@@ -43875,8 +43875,8 @@ var require_utils4 = __commonJS({
     exports2.array = array;
     var errno = require_errno();
     exports2.errno = errno;
-    var fs22 = require_fs();
-    exports2.fs = fs22;
+    var fs23 = require_fs();
+    exports2.fs = fs23;
     var path18 = require_path();
     exports2.path = path18;
     var pattern = require_pattern();
@@ -44074,12 +44074,12 @@ var require_fs2 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.createFileSystemAdapter = exports2.FILE_SYSTEM_ADAPTER = void 0;
-    var fs22 = require("fs");
+    var fs23 = require("fs");
     exports2.FILE_SYSTEM_ADAPTER = {
-      lstat: fs22.lstat,
-      stat: fs22.stat,
-      lstatSync: fs22.lstatSync,
-      statSync: fs22.statSync
+      lstat: fs23.lstat,
+      stat: fs23.stat,
+      lstatSync: fs23.lstatSync,
+      statSync: fs23.statSync
     };
     function createFileSystemAdapter(fsMethods) {
       if (fsMethods === void 0) {
@@ -44097,7 +44097,7 @@ var require_settings = __commonJS({
   "node_modules/@nodelib/fs.stat/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var fs22 = require_fs2();
+    var fs23 = require_fs2();
     var Settings = class {
       static {
         __name(this, "Settings");
@@ -44105,7 +44105,7 @@ var require_settings = __commonJS({
       constructor(_options = {}) {
         this._options = _options;
         this.followSymbolicLink = this._getValue(this._options.followSymbolicLink, true);
-        this.fs = fs22.createFileSystemAdapter(this._options.fs);
+        this.fs = fs23.createFileSystemAdapter(this._options.fs);
         this.markSymbolicLink = this._getValue(this._options.markSymbolicLink, false);
         this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
       }
@@ -44272,8 +44272,8 @@ var require_utils5 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.fs = void 0;
-    var fs22 = require_fs3();
-    exports2.fs = fs22;
+    var fs23 = require_fs3();
+    exports2.fs = fs23;
   }
 });
 
@@ -44478,14 +44478,14 @@ var require_fs4 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.createFileSystemAdapter = exports2.FILE_SYSTEM_ADAPTER = void 0;
-    var fs22 = require("fs");
+    var fs23 = require("fs");
     exports2.FILE_SYSTEM_ADAPTER = {
-      lstat: fs22.lstat,
-      stat: fs22.stat,
-      lstatSync: fs22.lstatSync,
-      statSync: fs22.statSync,
-      readdir: fs22.readdir,
-      readdirSync: fs22.readdirSync
+      lstat: fs23.lstat,
+      stat: fs23.stat,
+      lstatSync: fs23.lstatSync,
+      statSync: fs23.statSync,
+      readdir: fs23.readdir,
+      readdirSync: fs23.readdirSync
     };
     function createFileSystemAdapter(fsMethods) {
       if (fsMethods === void 0) {
@@ -44505,7 +44505,7 @@ var require_settings2 = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     var path18 = require("path");
     var fsStat2 = require_out();
-    var fs22 = require_fs4();
+    var fs23 = require_fs4();
     var Settings = class {
       static {
         __name(this, "Settings");
@@ -44513,7 +44513,7 @@ var require_settings2 = __commonJS({
       constructor(_options = {}) {
         this._options = _options;
         this.followSymbolicLinks = this._getValue(this._options.followSymbolicLinks, false);
-        this.fs = fs22.createFileSystemAdapter(this._options.fs);
+        this.fs = fs23.createFileSystemAdapter(this._options.fs);
         this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path18.sep);
         this.stats = this._getValue(this._options.stats, false);
         this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
@@ -45998,16 +45998,16 @@ var require_settings4 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DEFAULT_FILE_SYSTEM_ADAPTER = void 0;
-    var fs22 = require("fs");
+    var fs23 = require("fs");
     var os14 = require("os");
     var CPU_COUNT = Math.max(os14.cpus().length, 1);
     exports2.DEFAULT_FILE_SYSTEM_ADAPTER = {
-      lstat: fs22.lstat,
-      lstatSync: fs22.lstatSync,
-      stat: fs22.stat,
-      statSync: fs22.statSync,
-      readdir: fs22.readdir,
-      readdirSync: fs22.readdirSync
+      lstat: fs23.lstat,
+      lstatSync: fs23.lstatSync,
+      stat: fs23.stat,
+      statSync: fs23.statSync,
+      readdir: fs23.readdir,
+      readdirSync: fs23.readdirSync
     };
     var Settings = class {
       static {
@@ -53269,14 +53269,14 @@ k-map" || token.type === "block-seq")) {
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs22 = this.flowScalar(this.type);
+              const fs23 = this.flowScalar(this.type);
               if (atNextItem || it.value) {
-                map2.items.push({ start, key: fs22, sep: [] });
+                map2.items.push({ start, key: fs23, sep: [] });
                 this.onKeyLine = true;
               } else if (it.sep) {
-                this.stack.push(fs22);
+                this.stack.push(fs23);
               } else {
-                Object.assign(it, { key: fs22, sep: [] });
+                Object.assign(it, { key: fs23, sep: [] });
                 this.onKeyLine = true;
               }
               return;
@@ -53404,13 +53404,13 @@ k-map" || token.type === "block-seq")) {
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs22 = this.flowScalar(this.type);
+              const fs23 = this.flowScalar(this.type);
               if (!it || it.value)
-                fc.items.push({ start: [], key: fs22, sep: [] });
+                fc.items.push({ start: [], key: fs23, sep: [] });
               else if (it.sep)
-                this.stack.push(fs22);
+                this.stack.push(fs23);
               else
-                Object.assign(it, { key: fs22, sep: [] });
+                Object.assign(it, { key: fs23, sep: [] });
               return;
             }
             case "flow-map-end":
@@ -66645,7 +66645,7 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary: binary2, version: v
 }, "loadTool");
 
 // setup-gcloud/src/setup-gcloud.js
-var import_node_fs5 = __toESM(require("node:fs"), 1);
+var import_node_fs6 = __toESM(require("node:fs"), 1);
 var import_node_path5 = __toESM(require("node:path"), 1);
 
 // node_modules/@actions/cache/lib/cache.js
@@ -101137,6 +101137,9 @@ function saveAuthStack(authStack) {
 }
 __name(saveAuthStack, "saveAuthStack");
 
+// setup-gcloud/src/auth-wid-federation.js
+var import_node_fs5 = __toESM(require("node:fs"), 1);
+
 // setup-gcloud/src/create-job-scoped-credential.js
 var import_node_fs4 = __toESM(require("node:fs"), 1);
 var import_node_path4 = __toESM(require("node:path"), 1);
@@ -101196,6 +101199,20 @@ ${result.stderr}`;
 }, "execGcloud");
 
 // setup-gcloud/src/auth-wid-federation.js
+async function refreshIdToken({
+  workloadIdentityProvider,
+  idTokenPath
+}) {
+  const newToken = await getIDToken(
+    `https://iam.googleapis.com/${workloadIdentityProvider}`
+  );
+  import_node_fs5.default.writeFileSync(idTokenPath, newToken, {
+    encoding: "utf8",
+    mode: 384
+    // rw-------
+  });
+}
+__name(refreshIdToken, "refreshIdToken");
 async function workloadIdentityFederation(credentialsFilePath, { workload_identity_provider: workloadIdentityProvider, email }) {
   const idToken = await getIDToken(
     `https://iam.googleapis.com/${workloadIdentityProvider}`
@@ -101214,6 +101231,10 @@ async function workloadIdentityFederation(credentialsFilePath, { workload_identi
     "gcloud",
     true
   );
+  return {
+    workloadIdentityProvider,
+    idTokenPath
+  };
 }
 __name(workloadIdentityFederation, "workloadIdentityFederation");
 
@@ -101223,6 +101244,7 @@ var authType = {
   widFederation: "wid_federation"
 };
 var env = {
+  accessToken: "CLOUDSDK_AUTH_ACCESS_TOKEN",
   applicationCredentials: "GOOGLE_APPLICATION_CREDENTIALS",
   credentialsOverride: "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE",
   projectId: "CLOUDSDK_CORE_PROJECT"
@@ -101282,8 +101304,7 @@ on)'
   );
 }
 __name(validateCredentialsShape, "validateCredentialsShape");
-function isCurrentAccount(auth) {
-  const current = getCurrentAccount();
+function isCurrentAccount(auth, current) {
   if (current) {
     return current.type === auth.type && current.email === auth.email && current.projectId === auth.projectId;
   }
@@ -101340,9 +101361,13 @@ async function authenticateGcloud(credentials, exportCredentials) {
     email,
     projectId,
     exportCredentials,
-    credentialsFilePath: ""
+    credentialsFilePath: "",
+    refreshTokenMetadata: void 0
   };
-  if (!isCurrentAccount(authEntry)) {
+  const current = getCurrentAccount();
+  if (isCurrentAccount(authEntry, current)) {
+    await current.refreshToken();
+  } else {
     authEntry.credentialsFilePath = createJobScopedCredential(credentials);
     info(
       `Authenticate gcloud account '${authEntry.email}' with ${authEntry.type}`
@@ -101351,7 +101376,7 @@ async function authenticateGcloud(credentials, exportCredentials) {
       process.env[env.projectId] = projectId;
       authEntry.exportCredentials = true;
       if (authEntry.type === authType.widFederation) {
-        await workloadIdentityFederation(
+        authEntry.refreshTokenMetadata = await workloadIdentityFederation(
           authEntry.credentialsFilePath,
           jsonCredentials
         );
@@ -101369,7 +101394,23 @@ async function authenticateGcloud(credentials, exportCredentials) {
 __name(authenticateGcloud, "authenticateGcloud");
 function getCurrentAccount() {
   const authStack = loadAuthStack();
-  return authStack.at(-1);
+  const account = authStack.at(-1);
+  if (!account) {
+    return void 0;
+  }
+  const refreshToken = /* @__PURE__ */ __name(async () => {
+  }, "refreshToken");
+  if (account.type === authType.widFederation && account.refreshTokenMetadata && typeof account.refreshTokenMetadata ===
+  "object") {
+    return {
+      ...account,
+      refreshToken: /* @__PURE__ */ __name(async () => refreshIdToken(account.refreshTokenMetadata), "refreshToken")
+    };
+  }
+  return {
+    ...account,
+    refreshToken
+  };
 }
 __name(getCurrentAccount, "getCurrentAccount");
 function resetAuthStack() {
@@ -101455,7 +101496,7 @@ var configureCloudSdkPython = /* @__PURE__ */ __name(async (toolPath) => {
       "bundledpython",
       "python.exe"
     );
-    if (import_node_fs5.default.existsSync(pythonPath)) {
+    if (import_node_fs6.default.existsSync(pythonPath)) {
       const envVar = "CLOUDSDK_PYTHON";
       info(`Set ${envVar}=${pythonPath} (Windows fix)`);
       exportVariable(envVar, pythonPath);
@@ -101466,7 +101507,7 @@ var configureCloudSdkPython = /* @__PURE__ */ __name(async (toolPath) => {
 }, "configureCloudSdkPython");
 var isolateConfigDir = /* @__PURE__ */ __name(async (toolPath = void 0) => {
   const configDirPath = getJobScope({ prefix: "gcloud-config" });
-  import_node_fs5.default.mkdirSync(configDirPath, { recursive: true });
+  import_node_fs6.default.mkdirSync(configDirPath, { recursive: true });
   exportVariable("CLOUDSDK_CONFIG", configDirPath);
   return toolPath;
 }, "isolateConfigDir");
@@ -101483,9 +101524,9 @@ var installComponents = /* @__PURE__ */ __name(async (toolPath) => {
     return null;
   });
   const installBackup = import_node_path5.default.join(toolPath, ".install", ".backup");
-  if (import_node_fs5.default.existsSync(installBackup)) {
-    import_node_fs5.default.rmSync(installBackup, { recursive: true });
-    import_node_fs5.default.mkdirSync(installBackup, { recursive: true });
+  if (import_node_fs6.default.existsSync(installBackup)) {
+    import_node_fs6.default.rmSync(installBackup, { recursive: true });
+    import_node_fs6.default.mkdirSync(installBackup, { recursive: true });
   }
   import_fast_glob.default.sync("**/__pycache__", {
     cwd: toolPath,
@@ -101493,7 +101534,7 @@ var installComponents = /* @__PURE__ */ __name(async (toolPath) => {
     onlyDirectories: true,
     absolute: true
   }).forEach((pycache) => {
-    import_node_fs5.default.rmSync(pycache, { recursive: true });
+    import_node_fs6.default.rmSync(pycache, { recursive: true });
   });
   return null;
 }, "installComponents");
@@ -101551,12 +101592,12 @@ var setupGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, version3 = "l
 var setup_gcloud_default = setupGcloud;
 
 // setup-gcloud/src/cleanup.js
-var import_node_fs6 = __toESM(require("node:fs"), 1);
+var import_node_fs7 = __toESM(require("node:fs"), 1);
 function deleteCredentialFiles(credentialFiles) {
   for (const filePath of credentialFiles) {
     try {
-      if (import_node_fs6.default.existsSync(filePath)) {
-        import_node_fs6.default.rmSync(filePath);
+      if (import_node_fs7.default.existsSync(filePath)) {
+        import_node_fs7.default.rmSync(filePath);
         debug2(`Deleted credential file: ${filePath}`);
       }
     } catch (err) {
@@ -101570,8 +101611,8 @@ __name(deleteCredentialFiles, "deleteCredentialFiles");
 function deleteJobScopedDirectory() {
   try {
     const jobScopedDir = getJobScope();
-    if (import_node_fs6.default.existsSync(jobScopedDir)) {
-      import_node_fs6.default.rmSync(jobScopedDir, { recursive: true });
+    if (import_node_fs7.default.existsSync(jobScopedDir)) {
+      import_node_fs7.default.rmSync(jobScopedDir, { recursive: true });
       debug2(`Deleted job-scoped credential directory: ${jobScopedDir}`);
     }
   } catch (err) {
@@ -101582,8 +101623,8 @@ __name(deleteJobScopedDirectory, "deleteJobScopedDirectory");
 function deleteGcloudConfigDirectory() {
   try {
     const cloudSdkConfigPath = process.env.CLOUDSDK_CONFIG;
-    if (cloudSdkConfigPath && import_node_fs6.default.existsSync(cloudSdkConfigPath)) {
-      import_node_fs6.default.rmSync(cloudSdkConfigPath, { recursive: true });
+    if (cloudSdkConfigPath && import_node_fs7.default.existsSync(cloudSdkConfigPath)) {
+      import_node_fs7.default.rmSync(cloudSdkConfigPath, { recursive: true });
       debug2(`Deleted CLOUDSDK_CONFIG directory: ${cloudSdkConfigPath}`);
     }
   } catch (err) {
@@ -101605,6 +101646,7 @@ var withGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, fn) => {
   const { email: saEmail = null, projectId: saProjectId = null } = getServiceAccountEmailAndProject(serviceAccountKey);
   if (previousAccount && previousAccount.email === saEmail && typeof saProjectId === "string") {
     debug2(`Already running as ${saEmail}`);
+    await previousAccount.refreshToken();
     return await fn(saProjectId);
   }
   try {
@@ -101651,7 +101693,7 @@ var projectInfo = /* @__PURE__ */ __name((projectId) => {
 var project_info_default = projectInfo;
 
 // cloud-deploy/src/manifests/build-manifest.js
-var import_node_fs11 = __toESM(require("node:fs"), 1);
+var import_node_fs12 = __toESM(require("node:fs"), 1);
 
 // node_modules/js-yaml/dist/js-yaml.mjs
 function isNothing(subject) {
@@ -104591,7 +104633,7 @@ var selectSemver = /* @__PURE__ */ __name((previewVersion, stableVersion) => {
 var select_semver_default = selectSemver;
 
 // slack-notify/src/slack-notify.js
-var import_node_fs7 = __toESM(require("node:fs"), 1);
+var import_node_fs8 = __toESM(require("node:fs"), 1);
 
 // slack-notify/src/upload-to-bucket.js
 var uploadToBucket = /* @__PURE__ */ __name(async (file, bucket) => {
@@ -104602,10 +104644,10 @@ var upload_to_bucket_default = uploadToBucket;
 
 // slack-notify/src/slack-notify.js
 var filePreview = /* @__PURE__ */ __name((file, maxLines = 26) => {
-  if (!import_node_fs7.default.existsSync(file)) {
+  if (!import_node_fs8.default.existsSync(file)) {
     return "_File not found for preview_";
   }
-  const content = import_node_fs7.default.readFileSync(file, "utf8");
+  const content = import_node_fs8.default.readFileSync(file, "utf8");
   const allLines = content.split("\n");
   let lines = allLines.slice(0, maxLines);
   let preview = lines.join("\n");
@@ -104642,7 +104684,7 @@ ${err}`);
   return false;
 }), "postMessageToSlackChannel");
 var postFileToSlackChannel = /* @__PURE__ */ __name(async (slackData, message, file) => {
-  if (!import_node_fs7.default.existsSync(file)) {
+  if (!import_node_fs8.default.existsSync(file)) {
     throw new Error(`File not found: ${file}`);
   }
   return upload_to_bucket_default(file, "gs://extenda-slack-notify-files").then(() => {
@@ -104715,7 +104757,7 @@ async function setupTrivy(version3) {
 __name(setupTrivy, "setupTrivy");
 
 // trivy-scan/src/trivy-report.js
-var import_node_fs8 = __toESM(require("node:fs"), 1);
+var import_node_fs9 = __toESM(require("node:fs"), 1);
 var SEVERITY_ORDER = {
   CRITICAL: 1,
   HIGH: 2,
@@ -104739,10 +104781,10 @@ var pad = /* @__PURE__ */ __name((value, length) => {
   return cell.padEnd(length, " ");
 }, "pad");
 var readJsonReport = /* @__PURE__ */ __name((reportPath) => {
-  if (!reportPath || !import_node_fs8.default.existsSync(reportPath)) {
+  if (!reportPath || !import_node_fs9.default.existsSync(reportPath)) {
     return null;
   }
-  return JSON.parse(import_node_fs8.default.readFileSync(reportPath, "utf8"));
+  return JSON.parse(import_node_fs9.default.readFileSync(reportPath, "utf8"));
 }, "readJsonReport");
 var getUniqueVulnerabilities = /* @__PURE__ */ __name((jsonReport) => {
   const seenCveIds = /* @__PURE__ */ new Set();
@@ -104865,7 +104907,7 @@ function generateTextReport(image, outputs2) {
   }
   const { vulnerabilities, counts } = getReportData(jsonReport);
   const textReport = buildTextTotalsLine(image, void 0, counts) + buildTextTable(vulnerabilities);
-  import_node_fs8.default.writeFileSync(outputs2.report.text, textReport, "utf8");
+  import_node_fs9.default.writeFileSync(outputs2.report.text, textReport, "utf8");
   return true;
 }
 __name(generateTextReport, "generateTextReport");
@@ -104896,7 +104938,7 @@ async function writeTrivyJobSummary(scanResult) {
 __name(writeTrivyJobSummary, "writeTrivyJobSummary");
 
 // trivy-scan/src/trivy-scan.js
-var import_node_fs9 = __toESM(require("node:fs"), 1);
+var import_node_fs10 = __toESM(require("node:fs"), 1);
 var outputs = {
   sbom: {
     spdx: ".trivy/sbom.spdx.json",
@@ -104914,8 +104956,8 @@ async function trivyScan(image, {
   timeout = "5m0s"
 } = {}) {
   const trivy2 = await setupTrivy(version3);
-  if (!import_node_fs9.default.existsSync(".trivy")) {
-    import_node_fs9.default.mkdirSync(".trivy", { recursive: true });
+  if (!import_node_fs10.default.existsSync(".trivy")) {
+    import_node_fs10.default.mkdirSync(".trivy", { recursive: true });
   }
   const { manifestSha } = await resolveImageDigests(image);
   const repos = [
@@ -105338,7 +105380,7 @@ var userContainerCollectorEnv = /* @__PURE__ */ __name((serviceName, serviceImag
 }, "userContainerCollectorEnv");
 
 // cloud-deploy/src/utils/security-cache-keys.js
-var import_node_fs10 = __toESM(require("node:fs"), 1);
+var import_node_fs11 = __toESM(require("node:fs"), 1);
 var import_jsonschema = __toESM(require_lib(), 1);
 var import_yaml2 = __toESM(require_dist6(), 1);
 var DEFAULT_CACHE_KEYS_FILE = "policies/policy/com.styra.envoy.ingress/rules/rules/cache-keys.yaml";
@@ -105376,8 +105418,8 @@ ers.",
   }
 };
 var loadCacheKeys = /* @__PURE__ */ __name((cacheKeysYamlFile = DEFAULT_CACHE_KEYS_FILE) => {
-  if (import_node_fs10.default.existsSync(cacheKeysYamlFile)) {
-    const cacheKeys = import_yaml2.default.parse(import_node_fs10.default.readFileSync(cacheKeysYamlFile, "utf8"));
+  if (import_node_fs11.default.existsSync(cacheKeysYamlFile)) {
+    const cacheKeys = import_yaml2.default.parse(import_node_fs11.default.readFileSync(cacheKeysYamlFile, "utf8"));
     info(
       `Found security-authz cache keys:
 ${JSON.stringify(cacheKeys, null, 2)}`
@@ -106136,7 +106178,7 @@ var generateManifest = /* @__PURE__ */ __name((fileName, content) => {
   if (!content) {
     error(`content is undefined for ${fileName}`);
   }
-  import_node_fs11.default.writeFileSync(fileName, content, { encoding: "utf-8" });
+  import_node_fs12.default.writeFileSync(fileName, content, { encoding: "utf-8" });
 }, "generateManifest");
 var prepareGcloudDeploy = /* @__PURE__ */ __name(async (name, projectID, clanName, env2, target) => {
   generateManifest(
@@ -106393,8 +106435,8 @@ var buildManifest = /* @__PURE__ */ __name(async (image, deployYaml, projectId, 
   }
   generateManifest("cert.cert", internalCert);
   generateManifest("key.key", internalCertKey);
-  if (!import_node_fs11.default.existsSync(".gcloudignore")) {
-    import_node_fs11.default.writeFileSync(
+  if (!import_node_fs12.default.existsSync(".gcloudignore")) {
+    import_node_fs12.default.writeFileSync(
       ".gcloudignore",
       `*
 !k8s(deploy)-*
@@ -106635,7 +106677,7 @@ var deploy = /* @__PURE__ */ __name(async (projectID, name, version3, platformGK
 var deploy_default = deploy;
 
 // cloud-deploy/src/policies/publish-policies.js
-var import_node_fs12 = __toESM(require("node:fs"), 1);
+var import_node_fs13 = __toESM(require("node:fs"), 1);
 var import_node_path6 = __toESM(require("node:path"), 1);
 
 // node_modules/axios-retry/dist/esm/index.js
@@ -106865,14 +106907,14 @@ mask["/nd_builtin_cache"]
 `;
 var loadRego = /* @__PURE__ */ __name((regoFile) => ({
   path: import_node_path6.default.relative("policies", regoFile),
-  content: import_node_fs12.default.readFileSync(regoFile, "utf-8")
+  content: import_node_fs13.default.readFileSync(regoFile, "utf-8")
 }), "loadRego");
 var createPayload = /* @__PURE__ */ __name((version3) => {
   const logFile = import_node_path6.default.join("policies", "system", "log", "mask.rego");
-  if (!import_node_fs12.default.existsSync(logFile)) {
+  if (!import_node_fs13.default.existsSync(logFile)) {
     info("Use default log mask");
-    import_node_fs12.default.mkdirSync(import_node_path6.default.dirname(logFile), { recursive: true });
-    import_node_fs12.default.writeFileSync(logFile, DEFAULT_LOG_MASK, "utf-8");
+    import_node_fs13.default.mkdirSync(import_node_path6.default.dirname(logFile), { recursive: true });
+    import_node_fs13.default.writeFileSync(logFile, DEFAULT_LOG_MASK, "utf-8");
   }
   const files = import_fast_glob2.default.sync("policies/**/*.rego").map(loadRego);
   return {
@@ -106887,7 +106929,7 @@ var publishPolicies = /* @__PURE__ */ __name(async (serviceName, env2, version3,
       "system-name": systemName
     }
   } = deployYaml;
-  if (permissionPrefix && import_node_fs12.default.existsSync(import_node_path6.default.join("policies", "policy"))) {
+  if (permissionPrefix && import_node_fs13.default.existsSync(import_node_path6.default.join("policies", "policy"))) {
     const systemId = `${permissionPrefix}.${systemName || serviceName}-${env2}`;
     info(`Publish security policies for ${systemId}`);
     const dasWorkerBaseUrl = das_worker_base_url_default(systemId);
@@ -106995,7 +107037,7 @@ var saveVulnerabilities = /* @__PURE__ */ __name(async (service, reportJson, lab
 }, "saveVulnerabilities");
 
 // cloud-deploy/src/utils/service-definition.js
-var import_node_fs13 = __toESM(require("node:fs"), 1);
+var import_node_fs14 = __toESM(require("node:fs"), 1);
 var import_jsonschema2 = __toESM(require_lib(), 1);
 var import_yaml3 = __toESM(require_dist6(), 1);
 
@@ -107879,11 +107921,11 @@ ${result.toString()}`;
   }
 }, "validateSchema");
 var loadServiceDefinition = /* @__PURE__ */ __name((serviceFile) => {
-  if (!import_node_fs13.default.existsSync(serviceFile)) {
+  if (!import_node_fs14.default.existsSync(serviceFile)) {
     throw Error(`Service specification file not found: ${serviceFile}`);
   }
   info(`Load service specification from ${serviceFile}`);
-  const spec = import_yaml3.default.parse(import_node_fs13.default.readFileSync(serviceFile, "utf8"), {
+  const spec = import_yaml3.default.parse(import_node_fs14.default.readFileSync(serviceFile, "utf8"), {
     merge: true
   });
   validateSchema(serviceFile, spec);
@@ -107892,17 +107934,17 @@ var loadServiceDefinition = /* @__PURE__ */ __name((serviceFile) => {
 var service_definition_default = loadServiceDefinition;
 
 // cloud-deploy/src/utils/vulnerability-scanning.js
-var import_node_fs14 = __toESM(require("node:fs"), 1);
+var import_node_fs15 = __toESM(require("node:fs"), 1);
 var runScan = /* @__PURE__ */ __name(async (serviceAccount, image, serviceName, labels) => {
   const scanResult = await trivy(serviceAccount, image, {
     failOnVulnerabilities: false,
     notifySlackOnVulnerabilities: true,
     uploadSbomArtifacts: true
   });
-  if (import_node_fs14.default.existsSync(scanResult.report.json)) {
+  if (import_node_fs15.default.existsSync(scanResult.report.json)) {
     await saveVulnerabilities(
       serviceName,
-      import_node_fs14.default.readFileSync(scanResult.report.json, "utf-8"),
+      import_node_fs15.default.readFileSync(scanResult.report.json, "utf-8"),
       labels,
       `https://github.com/${process.env.GITHUB_REPOSITORY}`
     ).catch(
