@@ -35,6 +35,7 @@ describe('execGcloud', () => {
     expect(exec.getExecOutput).toHaveBeenCalledWith('gcloud', ['version'], {
       silent: true,
       ignoreReturnCode: true,
+      env: expect.any(Object),
     });
   });
 
@@ -78,6 +79,7 @@ describe('execGcloud', () => {
     expect(exec.getExecOutput).toHaveBeenCalledWith('gsutil', ['ls'], {
       silent: false,
       ignoreReturnCode: true,
+      env: expect.any(Object),
     });
   });
 });

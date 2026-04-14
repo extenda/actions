@@ -6,9 +6,8 @@ import {
   workloadIdentityFederation,
 } from './auth-wid-federation.js';
 import createJobScopedCredential from './create-job-scoped-credential.js';
-import { execGcloud } from './exec-gcloud.js';
 
-const authType = {
+export const authType = {
   jsonKey: 'json_key',
   widFederation: 'wid_federation',
 };
@@ -93,34 +92,6 @@ function isCurrentAccount(auth, current) {
   return false;
 }
 
-const getAccessToken = async (type, email) => {
-  const args = ['auth', 'print-access-token'];
-  if (type === authType.widFederation) {
-    args.push(`--impersonate-service-account=${email}`);
-  }
-  const accessToken = await execGcloud(args, 'gcloud', true);
-  core.setSecret(accessToken);
-
-  if (core.isDebug()) {
-    const params = new URLSearchParams();
-    params.append('access_token', accessToken);
-    await fetch('https://oauth2.googleapis.com/tokeninfo', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: params,
-    })
-      .then((response) => response.json())
-      .then((tokenInfo) =>
-        core.debug(`Token info: ${JSON.stringify(tokenInfo, null, 2)}`),
-      )
-      .catch((err) => core.error(`Failed to debug token info: ${err.message}`));
-  }
-
-  return accessToken;
-};
-
 const setEnvironmentVariable = (key, value, exportVariable) => {
   if (isNonEmptyString(value)) {
     if (exportVariable) {
@@ -138,9 +109,7 @@ const setEnvironmentVariable = (key, value, exportVariable) => {
 };
 
 const populateEnvironment = async ({
-  type,
   projectId,
-  email,
   credentialsFilePath,
   exportCredentials,
 }) => {
@@ -153,11 +122,6 @@ const populateEnvironment = async ({
   setEnvironmentVariable(
     env.credentialsOverride,
     credentialsFilePath,
-    exportCredentials,
-  );
-  setEnvironmentVariable(
-    env.accessToken,
-    email ? await getAccessToken(type, email) : '',
     exportCredentials,
   );
 };

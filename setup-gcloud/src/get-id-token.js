@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 
-import { getCurrentAccount } from './auth-gcloud.js';
+import { authType, getCurrentAccount } from './auth-gcloud.js';
 import { execGcloud } from './exec-gcloud.js';
 
 /**
@@ -17,7 +17,7 @@ export async function getIdToken(audience) {
 
   const args = ['auth', 'print-identity-token', `--audiences=${audience}`];
 
-  if (account.type === 'wid_federation') {
+  if (account.type === authType.widFederation) {
     args.push(
       `--impersonate-service-account=${account.email}`,
       '--include-email',
