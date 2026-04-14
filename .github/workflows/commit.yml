@@ -131,6 +131,14 @@ jobs:
             exit 1
           fi
 
+      - name: GCP Secret Manager WIF
+        uses: ./gcp-secret-manager
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH_WIF }}
+          secrets: |
+            TEST3_TOKEN: sonarqube-token
+            TEST4_TOKEN: sonarqube-token
+
   acceptance-linux:
     runs-on: ubuntu-latest
     needs:
