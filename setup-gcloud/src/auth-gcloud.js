@@ -6,7 +6,6 @@ import {
   workloadIdentityFederation,
 } from './auth-wid-federation.js';
 import createJobScopedCredential from './create-job-scoped-credential.js';
-import { execGcloud } from './exec-gcloud.js';
 
 const authType = {
   jsonKey: 'json_key',
@@ -93,16 +92,6 @@ function isCurrentAccount(auth, current) {
   return false;
 }
 
-const getAccessToken = async () => {
-  const accessToken = await execGcloud(
-    ['auth', 'print-access-token'],
-    'gcloud',
-    true,
-  );
-  core.setSecret(accessToken);
-  return accessToken;
-};
-
 const setEnvironmentVariable = (key, value, exportVariable) => {
   if (isNonEmptyString(value)) {
     if (exportVariable) {
@@ -119,7 +108,7 @@ const setEnvironmentVariable = (key, value, exportVariable) => {
   }
 };
 
-const populateEnvironment = async ({
+const populateEnvironment = ({
   projectId,
   credentialsFilePath,
   exportCredentials,
@@ -133,11 +122,6 @@ const populateEnvironment = async ({
   setEnvironmentVariable(
     env.credentialsOverride,
     credentialsFilePath,
-    exportCredentials,
-  );
-  setEnvironmentVariable(
-    env.accessToken,
-    credentialsFilePath === '' ? '' : await getAccessToken(),
     exportCredentials,
   );
 };
@@ -212,7 +196,7 @@ export async function authenticateGcloud(credentials, exportCredentials) {
     const authStack = loadAuthStack();
     authStack.push(authEntry);
     saveAuthStack(authStack);
-    await populateEnvironment(authEntry);
+    populateEnvironment(authEntry);
   }
 
   return projectId;
@@ -246,11 +230,11 @@ export function getCurrentAccount() {
 /**
  * Reset all tracked gcloud authentications and clear auth-related environment variables.
  */
-export async function resetAuthStack() {
+export function resetAuthStack() {
   const wasNonEmpty = loadAuthStack().length > 0;
   clearAuthStack();
   if (wasNonEmpty) {
-    await populateEnvironment({
+    populateEnvironment({
       type: authType.jsonKey,
       projectId: '',
       credentialsFilePath: '',
@@ -282,7 +266,7 @@ export async function restorePreviousAccount(previousAccount) {
   saveAuthStack(authStack);
 
   // Restore the environment variables.
-  await populateEnvironment(previousAccount);
+  populateEnvironment(previousAccount);
 
   return true;
 }
