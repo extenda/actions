@@ -33600,6 +33600,11 @@ var require_follow_redirects = __commonJS({
     } catch (error2) {
       useNativeURL = error2.code === "ERR_INVALID_URL";
     }
+    var sensitiveHeaders = [
+      "Authorization",
+      "Proxy-Authorization",
+      "Cookie"
+    ];
     var preservedUrlFields = [
       "auth",
       "host",
@@ -33664,6 +33669,8 @@ var require_follow_redirects = __commonJS({
           self2.emit("error", cause instanceof RedirectionError ? cause : new RedirectionError({ cause }));
         }
       };
+      this._headerFilter = new RegExp("^(?:" + sensitiveHeaders.concat(options.sensitiveHeaders).map(escapeRegex).join("\
+|") + ")$", "i");
       this._performRequest();
     }
     __name(RedirectableRequest, "RedirectableRequest");
@@ -33805,6 +33812,9 @@ var require_follow_redirects = __commonJS({
       if (!options.headers) {
         options.headers = {};
       }
+      if (!isArray2(options.sensitiveHeaders)) {
+        options.sensitiveHeaders = [];
+      }
       if (options.host) {
         if (!options.hostname) {
           options.hostname = options.host;
@@ -33911,7 +33921,7 @@ var require_follow_redirects = __commonJS({
       spreadUrlObject(redirectUrl, this._options);
       if (redirectUrl.protocol !== currentUrlParts.protocol && redirectUrl.protocol !== "https:" || redirectUrl.host !==
       currentHost && !isSubdomain(redirectUrl.host, currentHost)) {
-        removeMatchingHeaders(/^(?:(?:proxy-)?authorization|cookie)$/i, this._options.headers);
+        removeMatchingHeaders(this._headerFilter, this._options.headers);
       }
       if (isFunction3(beforeRedirect)) {
         var responseDetails = {
@@ -34073,6 +34083,10 @@ var require_follow_redirects = __commonJS({
       return dot > 0 && subdomain[dot] === "." && subdomain.endsWith(domain);
     }
     __name(isSubdomain, "isSubdomain");
+    function isArray2(value) {
+      return value instanceof Array;
+    }
+    __name(isArray2, "isArray");
     function isString2(value) {
       return typeof value === "string" || value instanceof String;
     }
@@ -34089,6 +34103,10 @@ var require_follow_redirects = __commonJS({
       return URL3 && value instanceof URL3;
     }
     __name(isURL, "isURL");
+    function escapeRegex(regex) {
+      return regex.replace(/[\]\\/()*+?.$]/g, "\\$&");
+    }
+    __name(escapeRegex, "escapeRegex");
     module2.exports = wrap({ http: http4, https: https4 });
     module2.exports.wrap = wrap;
   }
