@@ -202,6 +202,12 @@ jobs:
             exit 1
           fi
 
+      - name: Setup Gcloud
+        uses: ./setup-gcloud
+        id: gcloud
+        with:
+          service-account-key: ${{ secrets.SECRET_AUTH }}
+
       - name: GCP Secret Manager WIF
         uses: ./gcp-secret-manager
         with:
@@ -210,18 +216,18 @@ jobs:
             TEST3_TOKEN: sonarqube-token
             TEST4_TOKEN: sonarqube-token
 
-      - name: Setup Gcloud
-        uses: ./setup-gcloud
-        id: gcloud
-        with:
-          service-account-key: ${{ secrets.SECRET_AUTH }}
-
       - name: Test Gcloud
         run: |
           gcloud --version
           gsutil --version
           if [ "${{ steps.gcloud.outputs.project-id }}" == "" ]; then
             echo "Failed to set project-id"
+            exit 1
+          fi
+          projects=$(gcloud projects list)
+          echo "$projects"
+          if [ -z "$projects" ]; then
+            echo "Project list is empty"
             exit 1
           fi
 
