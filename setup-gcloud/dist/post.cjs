@@ -29142,18 +29142,24 @@ var env = {
 };
 var isNonEmptyString = /* @__PURE__ */ __name((value) => typeof value === "string" && value.trim().length > 0, "isNonEmp\
 tyString");
-var getAccessToken = /* @__PURE__ */ __name(async (email) => {
-  const accessToken = await execGcloud(
-    ["auth", "print-access-token", `--impersonate-service-account=${email}`],
-    "gcloud",
-    true
-  );
+var getAccessToken = /* @__PURE__ */ __name(async (type, email) => {
+  const args = ["auth", "print-access-token"];
+  if (type === authType.widFederation) {
+    args.push(`--impersonate-service-account=${email}`);
+  }
+  const accessToken = await execGcloud(args, "gcloud", true);
   setSecret(accessToken);
   if (isDebug()) {
-    await fetch(
-      `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${accessToken}`
-    ).then((response) => response.json()).then(
-      (tokenInfo) => debug2(`Token info: ${JSON.stringify(tokenInfo, null, 2)})`)
+    const params = new URLSearchParams();
+    params.append("access_token", accessToken);
+    await fetch("https://oauth2.googleapis.com/tokeninfo", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: params
+    }).then((response) => response.json()).then(
+      (tokenInfo) => debug2(`Token info: ${JSON.stringify(tokenInfo, null, 2)}`)
     ).catch((err) => error(`Failed to debug token info: ${err.message}`));
   }
   return accessToken;
@@ -29174,6 +29180,7 @@ var setEnvironmentVariable = /* @__PURE__ */ __name((key, value, exportVariable2
   }
 }, "setEnvironmentVariable");
 var populateEnvironment = /* @__PURE__ */ __name(async ({
+  type,
   projectId,
   email,
   credentialsFilePath,
@@ -29192,7 +29199,7 @@ var populateEnvironment = /* @__PURE__ */ __name(async ({
   );
   setEnvironmentVariable(
     env.accessToken,
-    email ? await getAccessToken(email) : "",
+    email ? await getAccessToken(type, email) : "",
     exportCredentials
   );
 }, "populateEnvironment");

@@ -254,10 +254,37 @@ describe('auth-gcloud', () => {
     );
 
     expect(execGcloud).toHaveBeenCalledWith(
+      ['auth', 'print-access-token'],
+      'gcloud',
+      true,
+    );
+    expect(core.setSecret).toHaveBeenCalledWith('token-123');
+    expect(process.env.CLOUDSDK_AUTH_ACCESS_TOKEN).toBe('token-123');
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'CLOUDSDK_AUTH_ACCESS_TOKEN',
+      'token-123',
+    );
+  });
+
+  test('authenticateGcloud sets CLOUDSDK_AUTH_ACCESS_TOKEN for WIF', async () => {
+    createJobScopedCredential.mockReturnValueOnce(
+      '/runner/temp/setup-gcloud-xxx/credential-key.json',
+    );
+
+    const credentials = {
+      workload_identity_provider:
+        'projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
+      email: 'wid-sa@example.iam.gserviceaccount.com',
+      project_id: 'project-wid',
+    };
+
+    await authenticateGcloud(encodeCredentials(credentials), true);
+
+    expect(execGcloud).toHaveBeenCalledWith(
       [
         'auth',
         'print-access-token',
-        '--impersonate-service-account=json-sa@example.iam.gserviceaccount.com',
+        '--impersonate-service-account=wid-sa@example.iam.gserviceaccount.com',
       ],
       'gcloud',
       true,
