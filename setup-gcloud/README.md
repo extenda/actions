@@ -121,13 +121,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up gcloud with Workload Identity Federation
-        id: gcloud
         uses: extenda/actions/setup-gcloud@v0
         with:
-          service-account-key: ${{ secrets.GCLOUD_AUTH_WIF }}
+          service-account-key: ${{ secrets.GCLOUD_AUTH_PROD }}
 
       - name: Show active project
         run: gcloud config get-value project
@@ -150,7 +149,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up gcloud
         id: gcloud
@@ -159,68 +158,13 @@ jobs:
           service-account-key: ${{ secrets.GCLOUD_AUTH_STAGING }}
 
       - name: Configure Docker for Artifact Registry or GCR
-        run: gcloud auth configure-docker --quiet
+        run: gcloud auth configure-docker --quiet eu.gcr.io
 
       - name: Build and push Docker image
         run: |
           IMAGE="gcr.io/${{ steps.gcloud.outputs.project-id }}/${IMAGE_NAME}:${GITHUB_SHA}"
           docker build -t "$IMAGE" .
           docker push "$IMAGE"
-```
-
-### Export default credentials for later steps
-
-Use this when later tools or SDKs should authenticate through environment variables instead of calling `gcloud` directly.
-
-```yaml
-on: push
-
-permissions:
-  contents: read
-  id-token: write
-
-jobs:
-  integration-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up gcloud and export application default credentials
-        id: gcloud
-        uses: extenda/actions/setup-gcloud@v0
-        with:
-          service-account-key: ${{ secrets.GCLOUD_AUTH_WIF }}
-          export-default-credentials: true
-
-      - name: Run tests using exported credentials
-        run: |
-          echo "Project: ${{ steps.gcloud.outputs.project-id }}"
-          test -n "$GOOGLE_APPLICATION_CREDENTIALS"
-```
-
-### Fallback example with a service account JSON key
-
-Use this only when Workload Identity Federation is not available.
-
-```yaml
-on: push
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up gcloud with service account JSON key
-        id: gcloud
-        uses: extenda/actions/setup-gcloud@v0
-        with:
-          service-account-key: ${{ secrets.GCLOUD_AUTH_JSON_KEY }}
-
-      - name: List clusters
-        run: gcloud container clusters list --project "${{ steps.gcloud.outputs.project-id }}"
 ```
 
 ## Notes
