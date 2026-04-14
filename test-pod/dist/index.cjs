@@ -71119,16 +71119,16 @@ var DEFAULT_CYCLER_OPTIONS = {
   refreshWindowInMs: 1e3 * 60 * 2
   // Start refreshing 2m before expiry
 };
-async function beginRefresh(getAccessToken, retryIntervalInMs, refreshTimeout) {
+async function beginRefresh(getAccessToken2, retryIntervalInMs, refreshTimeout) {
   async function tryGetAccessToken() {
     if (Date.now() < refreshTimeout) {
       try {
-        return await getAccessToken();
+        return await getAccessToken2();
       } catch {
         return null;
       }
     } else {
-      const finalToken = await getAccessToken();
+      const finalToken = await getAccessToken2();
       if (finalToken === null) {
         throw new Error("Failed to refresh access token.");
       }
@@ -71237,13 +71237,13 @@ async function trySendRequest(request, next) {
 }
 __name(trySendRequest, "trySendRequest");
 async function defaultAuthorizeRequest(options) {
-  const { scopes, getAccessToken, request } = options;
+  const { scopes, getAccessToken: getAccessToken2, request } = options;
   const getTokenOptions = {
     abortSignal: request.abortSignal,
     tracingOptions: request.tracingOptions,
     enableCae: true
   };
-  const accessToken = await getAccessToken(scopes, getTokenOptions);
+  const accessToken = await getAccessToken2(scopes, getTokenOptions);
   if (accessToken) {
     options.request.headers.set("Authorization", `Bearer ${accessToken.token}`);
   }
@@ -71273,7 +71273,7 @@ function bearerTokenAuthenticationPolicy(options) {
     authorizeRequest: challengeCallbacks?.authorizeRequest?.bind(challengeCallbacks) ?? defaultAuthorizeRequest,
     authorizeRequestOnChallenge: challengeCallbacks?.authorizeRequestOnChallenge?.bind(challengeCallbacks)
   };
-  const getAccessToken = credential ? createTokenCycler(
+  const getAccessToken2 = credential ? createTokenCycler(
     credential
     /* , options */
   ) : () => Promise.resolve(null);
@@ -71299,7 +71299,7 @@ function bearerTokenAuthenticationPolicy(options) {
       await callbacks.authorizeRequest({
         scopes: Array.isArray(scopes) ? scopes : [scopes],
         request,
-        getAccessToken,
+        getAccessToken: getAccessToken2,
         logger: logger7
       });
       let response;
@@ -71321,7 +71321,7 @@ Continuous Access Evaluation authentication flow. Unparsable claims: ${claims}`)
             scopes: Array.isArray(scopes) ? scopes : [scopes],
             response,
             request,
-            getAccessToken,
+            getAccessToken: getAccessToken2,
             logger: logger7
           }, parsedClaim);
           if (shouldSendRequest) {
@@ -71332,7 +71332,7 @@ Continuous Access Evaluation authentication flow. Unparsable claims: ${claims}`)
             scopes: Array.isArray(scopes) ? scopes : [scopes],
             request,
             response,
-            getAccessToken,
+            getAccessToken: getAccessToken2,
             logger: logger7
           });
           if (shouldSendRequest) {
@@ -71353,7 +71353,7 @@ the Continuous Access Evaluation authentication flow. Unparsable claims: ${claim
                 scopes: Array.isArray(scopes) ? scopes : [scopes],
                 response,
                 request,
-                getAccessToken,
+                getAccessToken: getAccessToken2,
                 logger: logger7
               }, parsedClaim);
               if (shouldSendRequest) {
@@ -102131,6 +102131,15 @@ function isCurrentAccount(auth, current) {
   return false;
 }
 __name(isCurrentAccount, "isCurrentAccount");
+var getAccessToken = /* @__PURE__ */ __name(async () => {
+  const accessToken = await execGcloud(
+    ["auth", "print-access-token"],
+    "gcloud",
+    true
+  );
+  setSecret(accessToken);
+  return accessToken;
+}, "getAccessToken");
 var setEnvironmentVariable = /* @__PURE__ */ __name((key, value, exportVariable2) => {
   if (isNonEmptyString(value)) {
     if (exportVariable2) {
@@ -102146,7 +102155,7 @@ var setEnvironmentVariable = /* @__PURE__ */ __name((key, value, exportVariable2
     delete process.env[key];
   }
 }, "setEnvironmentVariable");
-var populateEnvironment = /* @__PURE__ */ __name(({
+var populateEnvironment = /* @__PURE__ */ __name(async ({
   projectId,
   credentialsFilePath,
   exportCredentials
@@ -102160,6 +102169,11 @@ var populateEnvironment = /* @__PURE__ */ __name(({
   setEnvironmentVariable(
     env.credentialsOverride,
     credentialsFilePath,
+    exportCredentials
+  );
+  setEnvironmentVariable(
+    env.accessToken,
+    credentialsFilePath === "" ? "" : await getAccessToken(),
     exportCredentials
   );
 }, "populateEnvironment");
@@ -102199,7 +102213,7 @@ async function authenticateGcloud(credentials, exportCredentials) {
     const authStack = loadAuthStack();
     authStack.push(authEntry);
     saveAuthStack(authStack);
-    populateEnvironment(authEntry);
+    await populateEnvironment(authEntry);
   }
   return projectId;
 }
