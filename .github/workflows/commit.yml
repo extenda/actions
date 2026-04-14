@@ -208,7 +208,7 @@ jobs:
         with:
           service-account-key: ${{ secrets.SECRET_AUTH }}
 
-      - name: GCP Secret Manager WIF
+      - name: GCP Secret Manager Does Not Interfere with Gcloud
         uses: ./gcp-secret-manager
         with:
           service-account-key: ${{ secrets.SECRET_AUTH_WIF }}
@@ -224,7 +224,7 @@ jobs:
             echo "Failed to set project-id"
             exit 1
           fi
-          projects=$(gcloud projects list)
+          projects=$(gcloud projects list --format='value(projectId)')
           echo "$projects"
           if [ -z "$projects" ]; then
             echo "Project list is empty"
