@@ -30,7 +30,7 @@ jobs:
 
       - name: Create signed commit
         id: commit
-        uses: qoomon/actions--create-commit@v1
+        uses: qoomon/actions--create-commit@0f4cc87a8ad11282dfed4639db11c6e4ac09b25b
         with:
           message: "build: Update dist files after dependency update [skip dependabot]"
           skip-empty: true

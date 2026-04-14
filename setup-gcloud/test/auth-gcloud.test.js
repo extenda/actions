@@ -22,7 +22,7 @@ const encodeCredentials = (credentials) =>
 describe('auth-gcloud', () => {
   let orgEnv;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockFs({
       '/runner/temp': {},
     });
@@ -36,11 +36,11 @@ describe('auth-gcloud', () => {
       GOOGLE_APPLICATION_CREDENTIALS: undefined,
       CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE: undefined,
     };
-    resetAuthStack();
+    await resetAuthStack();
   });
 
-  afterEach(() => {
-    resetAuthStack();
+  afterEach(async () => {
+    await resetAuthStack();
     process.env = orgEnv;
     mockFs.restore();
     vi.clearAllMocks();
@@ -216,7 +216,7 @@ describe('auth-gcloud', () => {
     expect(getCurrentAccount()).toBeTruthy();
     expect(process.env.CLOUDSDK_CORE_PROJECT).toBe('project-a');
 
-    resetAuthStack();
+    await resetAuthStack();
 
     expect(getCurrentAccount()).toBeUndefined();
     expect(process.env.CLOUDSDK_CORE_PROJECT).toBeUndefined();
@@ -235,6 +235,7 @@ describe('auth-gcloud', () => {
       '',
     );
   });
+
 
   test('rejects when decoded credentials are not valid JSON', async () => {
     await expect(

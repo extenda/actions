@@ -7,7 +7,7 @@ import {
 } from './auth-wid-federation.js';
 import createJobScopedCredential from './create-job-scoped-credential.js';
 
-const authType = {
+export const authType = {
   jsonKey: 'json_key',
   widFederation: 'wid_federation',
 };
@@ -108,7 +108,7 @@ const setEnvironmentVariable = (key, value, exportVariable) => {
   }
 };
 
-const populateEnvironment = ({
+const populateEnvironment = async ({
   projectId,
   credentialsFilePath,
   exportCredentials,
@@ -196,7 +196,7 @@ export async function authenticateGcloud(credentials, exportCredentials) {
     const authStack = loadAuthStack();
     authStack.push(authEntry);
     saveAuthStack(authStack);
-    populateEnvironment(authEntry);
+    await populateEnvironment(authEntry);
   }
 
   return projectId;
@@ -230,13 +230,14 @@ export function getCurrentAccount() {
 /**
  * Reset all tracked gcloud authentications and clear auth-related environment variables.
  */
-export function resetAuthStack() {
+export async function resetAuthStack() {
   const wasNonEmpty = loadAuthStack().length > 0;
   clearAuthStack();
   if (wasNonEmpty) {
-    populateEnvironment({
+    await populateEnvironment({
       type: authType.jsonKey,
       projectId: '',
+      email: '',
       credentialsFilePath: '',
       exportCredentials: true,
     });
@@ -266,7 +267,7 @@ export async function restorePreviousAccount(previousAccount) {
   saveAuthStack(authStack);
 
   // Restore the environment variables.
-  populateEnvironment(previousAccount);
+  await populateEnvironment(previousAccount);
 
   return true;
 }

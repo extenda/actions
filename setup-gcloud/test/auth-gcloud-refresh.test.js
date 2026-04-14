@@ -29,15 +29,15 @@ const encodeCredentials = (credentials) =>
   Buffer.from(JSON.stringify(credentials), 'utf8').toString('base64');
 
 describe('auth-gcloud refresh token', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     process.env.CLOUDSDK_CORE_PROJECT = undefined;
     process.env.GOOGLE_APPLICATION_CREDENTIALS = undefined;
     process.env.CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE = undefined;
-    resetAuthStack();
+    await resetAuthStack();
   });
 
-  afterEach(() => {
-    resetAuthStack();
+  afterEach(async () => {
+    await resetAuthStack();
     vi.clearAllMocks();
   });
 

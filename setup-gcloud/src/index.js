@@ -1,5 +1,7 @@
 import * as core from '@actions/core';
 
+import { env } from './auth-gcloud.js';
+import { getAccessToken } from './get-access-token.js';
 import setupGcloud from './setup-gcloud.js';
 import withGcloud from './with-gcloud.js';
 
@@ -11,6 +13,12 @@ const action = async () => {
   const exportCredentials =
     core.getInput('export-default-credentials') || 'false';
   await setupGcloud(serviceAccountKey, version, exportCredentials === 'true');
+
+  const accessToken = await getAccessToken();
+  if (accessToken) {
+    core.info(`Export ${env.accessToken}`);
+    core.exportVariable(env.accessToken, accessToken);
+  }
 };
 
 export default action;

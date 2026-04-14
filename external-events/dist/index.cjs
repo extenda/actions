@@ -78406,15 +78406,363 @@ __name(camelcaseKeys, "camelcaseKeys");
 // gcp-secret-manager/src/secrets.js
 var import_yaml = __toESM(require_dist3(), 1);
 
+// setup-gcloud/src/auth-stack.js
+var import_node_fs2 = __toESM(require("node:fs"), 1);
+var import_node_path3 = __toESM(require("node:path"), 1);
+
+// setup-gcloud/src/job-scope.js
+function getJobScope({ prefix: prefix2 = "setup-gcloud" } = {}) {
+  const { RUNNER_TEMP, GITHUB_RUN_ID, GITHUB_RUN_ATTEMPT } = process.env;
+  if (!RUNNER_TEMP || !GITHUB_RUN_ID) {
+    throw new Error(
+      "RUNNER_TEMP and GITHUB_RUN_ID environment variables are required"
+    );
+  }
+  return `${RUNNER_TEMP}/${prefix2}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT || "1"}`;
+}
+__name(getJobScope, "getJobScope");
+
+// setup-gcloud/src/auth-stack.js
+function authStackFilePath() {
+  const jobScope = getJobScope();
+  return import_node_path3.default.join(jobScope, "auth_stack.json");
+}
+__name(authStackFilePath, "authStackFilePath");
+function loadAuthStack() {
+  if (import_node_fs2.default.existsSync(authStackFilePath())) {
+    return JSON.parse(import_node_fs2.default.readFileSync(authStackFilePath(), "utf8"));
+  }
+  return [];
+}
+__name(loadAuthStack, "loadAuthStack");
+function clearAuthStack() {
+  if (import_node_fs2.default.existsSync(authStackFilePath())) {
+    import_node_fs2.default.rmSync(authStackFilePath());
+  }
+}
+__name(clearAuthStack, "clearAuthStack");
+function saveAuthStack(authStack) {
+  import_node_fs2.default.mkdirSync(import_node_path3.default.dirname(authStackFilePath()), { recursive: true });
+  import_node_fs2.default.writeFileSync(authStackFilePath(), JSON.stringify(authStack), "utf8");
+}
+__name(saveAuthStack, "saveAuthStack");
+
+// setup-gcloud/src/auth-wid-federation.js
+var import_node_fs4 = __toESM(require("node:fs"), 1);
+
+// setup-gcloud/src/create-job-scoped-credential.js
+var import_node_fs3 = __toESM(require("node:fs"), 1);
+var import_node_path4 = __toESM(require("node:path"), 1);
+var trackedCredentialFiles = [];
+function createJobScopedCredential(credentialData, { encoding = "base64", suffix = ".json" } = {}) {
+  const jobScopedDir = getJobScope();
+  if (!import_node_fs3.default.existsSync(jobScopedDir)) {
+    import_node_fs3.default.mkdirSync(jobScopedDir, { recursive: true });
+  }
+  const credentialFilePath = import_node_path4.default.join(
+    jobScopedDir,
+    `credential-${v4_default()}${suffix}`
+  );
+  const decodedData = encoding === "base64" ? Buffer.from(credentialData, "base64").toString("utf8") : credentialData;
+  import_node_fs3.default.writeFileSync(credentialFilePath, decodedData, {
+    mode: 384
+    // rw-------
+  });
+  setSecret(credentialFilePath);
+  trackedCredentialFiles.push(credentialFilePath);
+  saveState(
+    "gcloud-credential-files",
+    JSON.stringify(trackedCredentialFiles)
+  );
+  return credentialFilePath;
+}
+__name(createJobScopedCredential, "createJobScopedCredential");
+function getTrackedCredentials() {
+  return trackedCredentialFiles;
+}
+__name(getTrackedCredentials, "getTrackedCredentials");
+
+// setup-gcloud/src/exec-gcloud.js
+var import_node_os = __toESM(require("node:os"), 1);
+var findExecutable = /* @__PURE__ */ __name((executable) => {
+  if (executable === "gcloud" || !executable) {
+    return import_node_os.default.platform() === "win32" ? "gcloud.cmd" : "gcloud";
+  }
+  return executable;
+}, "findExecutable");
+var execGcloud = /* @__PURE__ */ __name(async (args, executable = "gcloud", silent = false) => {
+  const command = findExecutable(executable);
+  const gcloudEnv = process.env;
+  delete gcloudEnv.CLOUDSDK_AUTH_ACCESS_TOKEN;
+  const result = await getExecOutput(command, args, {
+    silent,
+    ignoreReturnCode: true,
+    env: gcloudEnv
+  });
+  if (result.exitCode !== 0) {
+    let message = `The process '${command}' failed with exit code ${result.exitCode}`;
+    if (result.stderr) {
+      message = `${message}
+
+${result.stderr}`;
+    }
+    throw new Error(message);
+  }
+  return result.stdout.trim();
+}, "execGcloud");
+
+// setup-gcloud/src/auth-wid-federation.js
+async function refreshIdToken({
+  workloadIdentityProvider,
+  idTokenPath
+}) {
+  const newToken = await getIDToken(
+    `https://iam.googleapis.com/${workloadIdentityProvider}`
+  );
+  import_node_fs4.default.writeFileSync(idTokenPath, newToken, {
+    encoding: "utf8",
+    mode: 384
+    // rw-------
+  });
+}
+__name(refreshIdToken, "refreshIdToken");
+async function workloadIdentityFederation(credentialsFilePath, { workload_identity_provider: workloadIdentityProvider, email }) {
+  const idToken = await getIDToken(
+    `https://iam.googleapis.com/${workloadIdentityProvider}`
+  );
+  const idTokenPath = createJobScopedCredential(idToken, { encoding: "utf8" });
+  await execGcloud(
+    [
+      "iam",
+      "workload-identity-pools",
+      "create-cred-config",
+      workloadIdentityProvider,
+      `--service-account=${email}`,
+      `--output-file=${credentialsFilePath}`,
+      `--credential-source-file=${idTokenPath}`
+    ],
+    "gcloud",
+    true
+  );
+  return {
+    workloadIdentityProvider,
+    idTokenPath
+  };
+}
+__name(workloadIdentityFederation, "workloadIdentityFederation");
+
+// setup-gcloud/src/auth-gcloud.js
+var authType = {
+  jsonKey: "json_key",
+  widFederation: "wid_federation"
+};
+var env = {
+  accessToken: "CLOUDSDK_AUTH_ACCESS_TOKEN",
+  applicationCredentials: "GOOGLE_APPLICATION_CREDENTIALS",
+  credentialsOverride: "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE",
+  projectId: "CLOUDSDK_CORE_PROJECT"
+};
+var isNonEmptyString = /* @__PURE__ */ __name((value) => typeof value === "string" && value.trim().length > 0, "isNonEmp\
+tyString");
+function parseCredentials(credentials) {
+  let parsed;
+  try {
+    parsed = JSON.parse(Buffer.from(credentials, "base64").toString("utf8"));
+  } catch {
+    throw new Error(
+      "Invalid service-account-key: expected base64-encoded JSON credentials"
+    );
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error(
+      "Invalid service-account-key: expected base64-encoded JSON credentials"
+    );
+  }
+  return parsed;
+}
+__name(parseCredentials, "parseCredentials");
+function validateCredentialsShape(jsonCredentials) {
+  if (!isNonEmptyString(jsonCredentials.project_id)) {
+    throw new Error(
+      'Invalid service-account-key: missing required field "project_id"'
+    );
+  }
+  if (isNonEmptyString(jsonCredentials.private_key)) {
+    setSecret(jsonCredentials.private_key);
+    const email = jsonCredentials.client_email ?? jsonCredentials.email ?? void 0;
+    if (!isNonEmptyString(email)) {
+      throw new Error(
+        'Invalid service-account-key: missing required field "client_email" or "email"'
+      );
+    }
+    return {
+      type: authType.jsonKey,
+      email
+    };
+  }
+  if (isNonEmptyString(jsonCredentials.workload_identity_provider)) {
+    if (!isNonEmptyString(jsonCredentials.email)) {
+      throw new Error(
+        'Invalid service-account-key: missing required field "email"'
+      );
+    }
+    return {
+      type: authType.widFederation,
+      email: jsonCredentials.email
+    };
+  }
+  throw new Error(
+    'Invalid service-account-key: expected either "private_key" (json key) or "workload_identity_provider" (wid federati\
+on)'
+  );
+}
+__name(validateCredentialsShape, "validateCredentialsShape");
+function isCurrentAccount(auth, current) {
+  if (current) {
+    return current.type === auth.type && current.email === auth.email && current.projectId === auth.projectId;
+  }
+  return false;
+}
+__name(isCurrentAccount, "isCurrentAccount");
+var setEnvironmentVariable = /* @__PURE__ */ __name((key, value, exportVariable2) => {
+  if (isNonEmptyString(value)) {
+    if (exportVariable2) {
+      debug2(`Export ${key}`);
+      exportVariable(key, value);
+    }
+    process.env[key] = value;
+  } else {
+    if (exportVariable2) {
+      debug2(`Unset ${key}`);
+      exportVariable(key, "");
+    }
+    delete process.env[key];
+  }
+}, "setEnvironmentVariable");
+var populateEnvironment = /* @__PURE__ */ __name(async ({
+  projectId,
+  credentialsFilePath,
+  exportCredentials
+}) => {
+  setEnvironmentVariable(env.projectId, projectId, exportCredentials);
+  setEnvironmentVariable(
+    env.applicationCredentials,
+    credentialsFilePath,
+    exportCredentials
+  );
+  setEnvironmentVariable(
+    env.credentialsOverride,
+    credentialsFilePath,
+    exportCredentials
+  );
+}, "populateEnvironment");
+function getServiceAccountEmailAndProject(credentials) {
+  setSecret(credentials);
+  const jsonCredentials = parseCredentials(credentials);
+  const { project_id: projectId } = jsonCredentials;
+  const { email } = validateCredentialsShape(jsonCredentials);
+  return { email, projectId };
+}
+__name(getServiceAccountEmailAndProject, "getServiceAccountEmailAndProject");
+async function authenticateGcloud(credentials, exportCredentials) {
+  setSecret(credentials);
+  const jsonCredentials = parseCredentials(credentials);
+  const { type: type2, email } = validateCredentialsShape(jsonCredentials);
+  const { project_id: projectId } = jsonCredentials;
+  const authEntry = {
+    type: type2,
+    email,
+    projectId,
+    exportCredentials,
+    credentialsFilePath: "",
+    refreshTokenMetadata: void 0
+  };
+  const current = getCurrentAccount();
+  if (isCurrentAccount(authEntry, current)) {
+    await current.refreshToken();
+  } else {
+    authEntry.credentialsFilePath = createJobScopedCredential(credentials);
+    info(
+      `Authenticate gcloud account '${authEntry.email}' with ${authEntry.type}`
+    );
+    try {
+      process.env[env.projectId] = projectId;
+      authEntry.exportCredentials = true;
+      if (authEntry.type === authType.widFederation) {
+        authEntry.refreshTokenMetadata = await workloadIdentityFederation(
+          authEntry.credentialsFilePath,
+          jsonCredentials
+        );
+      }
+    } finally {
+      delete process.env[env.projectId];
+    }
+    const authStack = loadAuthStack();
+    authStack.push(authEntry);
+    saveAuthStack(authStack);
+    await populateEnvironment(authEntry);
+  }
+  return projectId;
+}
+__name(authenticateGcloud, "authenticateGcloud");
+function getCurrentAccount() {
+  const authStack = loadAuthStack();
+  const account = authStack.at(-1);
+  if (!account) {
+    return void 0;
+  }
+  const refreshToken = /* @__PURE__ */ __name(async () => {
+  }, "refreshToken");
+  if (account.type === authType.widFederation && account.refreshTokenMetadata && typeof account.refreshTokenMetadata ===
+  "object") {
+    return {
+      ...account,
+      refreshToken: /* @__PURE__ */ __name(async () => refreshIdToken(account.refreshTokenMetadata), "refreshToken")
+    };
+  }
+  return {
+    ...account,
+    refreshToken
+  };
+}
+__name(getCurrentAccount, "getCurrentAccount");
+async function resetAuthStack() {
+  const wasNonEmpty = loadAuthStack().length > 0;
+  clearAuthStack();
+  if (wasNonEmpty) {
+    await populateEnvironment({
+      type: authType.jsonKey,
+      projectId: "",
+      email: "",
+      credentialsFilePath: "",
+      exportCredentials: true
+    });
+  }
+}
+__name(resetAuthStack, "resetAuthStack");
+async function restorePreviousAccount(previousAccount) {
+  if (!previousAccount) {
+    return false;
+  }
+  const authStack = loadAuthStack();
+  authStack.pop();
+  info(`Restore gcloud account '${previousAccount.email}'`);
+  authStack.push(previousAccount);
+  saveAuthStack(authStack);
+  await populateEnvironment(previousAccount);
+  return true;
+}
+__name(restorePreviousAccount, "restorePreviousAccount");
+
 // setup-gcloud/src/setup-gcloud.js
 var import_node_fs6 = __toESM(require("node:fs"), 1);
 var import_node_path5 = __toESM(require("node:path"), 1);
 
 // node_modules/@actions/cache/lib/cache.js
-var path13 = __toESM(require("path"), 1);
+var path15 = __toESM(require("path"), 1);
 
 // node_modules/@actions/glob/lib/internal-globber.js
-var fs5 = __toESM(require("fs"), 1);
+var fs8 = __toESM(require("fs"), 1);
 
 // node_modules/@actions/glob/lib/internal-glob-options-helper.js
 function getOptions(copy) {
@@ -78452,10 +78800,10 @@ function getOptions(copy) {
 __name(getOptions, "getOptions");
 
 // node_modules/@actions/glob/lib/internal-globber.js
-var path10 = __toESM(require("path"), 1);
+var path12 = __toESM(require("path"), 1);
 
 // node_modules/@actions/glob/lib/internal-path-helper.js
-var path7 = __toESM(require("path"), 1);
+var path9 = __toESM(require("path"), 1);
 var import_assert3 = __toESM(require("assert"), 1);
 var IS_WINDOWS4 = process.platform === "win32";
 function dirname5(p) {
@@ -78463,7 +78811,7 @@ function dirname5(p) {
   if (IS_WINDOWS4 && /^\\\\[^\\]+(\\[^\\]+)?$/.test(p)) {
     return p;
   }
-  let result = path7.dirname(p);
+  let result = path9.dirname(p);
   if (IS_WINDOWS4 && /^\\\\[^\\]+\\[^\\]+\\$/.test(result)) {
     result = safeTrimTrailingSeparator(result);
   }
@@ -78503,7 +78851,7 @@ oot. Actual '${cwd}'`);
   (0, import_assert3.default)(hasAbsoluteRoot(root), `ensureAbsoluteRoot parameter 'root' must have an absolute root`);
   if (root.endsWith("/") || IS_WINDOWS4 && root.endsWith("\\")) {
   } else {
-    root += path7.sep;
+    root += path9.sep;
   }
   return root + itemPath;
 }
@@ -78541,10 +78889,10 @@ function safeTrimTrailingSeparator(p) {
     return "";
   }
   p = normalizeSeparators2(p);
-  if (!p.endsWith(path7.sep)) {
+  if (!p.endsWith(path9.sep)) {
     return p;
   }
-  if (p === path7.sep) {
+  if (p === path9.sep) {
     return p;
   }
   if (IS_WINDOWS4 && /^[A-Z]:\\$/i.test(p)) {
@@ -78615,13 +78963,13 @@ function partialMatch(patterns, itemPath) {
 __name(partialMatch, "partialMatch");
 
 // node_modules/@actions/glob/lib/internal-pattern.js
-var os8 = __toESM(require("os"), 1);
-var path9 = __toESM(require("path"), 1);
+var os9 = __toESM(require("os"), 1);
+var path11 = __toESM(require("path"), 1);
 var import_assert5 = __toESM(require("assert"), 1);
 var import_minimatch = __toESM(require_minimatch(), 1);
 
 // node_modules/@actions/glob/lib/internal-path.js
-var path8 = __toESM(require("path"), 1);
+var path10 = __toESM(require("path"), 1);
 var import_assert4 = __toESM(require("assert"), 1);
 var IS_WINDOWS6 = process.platform === "win32";
 var Path = class {
@@ -78638,12 +78986,12 @@ var Path = class {
       (0, import_assert4.default)(itemPath, `Parameter 'itemPath' must not be empty`);
       itemPath = safeTrimTrailingSeparator(itemPath);
       if (!hasRoot(itemPath)) {
-        this.segments = itemPath.split(path8.sep);
+        this.segments = itemPath.split(path10.sep);
       } else {
         let remaining = itemPath;
         let dir = dirname5(remaining);
         while (dir !== remaining) {
-          const basename5 = path8.basename(remaining);
+          const basename5 = path10.basename(remaining);
           this.segments.unshift(basename5);
           remaining = dir;
           dir = dirname5(remaining);
@@ -78662,8 +79010,8 @@ var Path = class {
 tion for multiple segments`);
           this.segments.push(segment);
         } else {
-          (0, import_assert4.default)(!segment.includes(path8.sep), `Parameter 'itemPath' contains unexpected path separ\
-ators`);
+          (0, import_assert4.default)(!segment.includes(path10.sep), `Parameter 'itemPath' contains unexpected path sepa\
+rators`);
           this.segments.push(segment);
         }
       }
@@ -78674,12 +79022,12 @@ ators`);
    */
   toString() {
     let result = this.segments[0];
-    let skipSlash = result.endsWith(path8.sep) || IS_WINDOWS6 && /^[A-Z]:$/i.test(result);
+    let skipSlash = result.endsWith(path10.sep) || IS_WINDOWS6 && /^[A-Z]:$/i.test(result);
     for (let i2 = 1; i2 < this.segments.length; i2++) {
       if (skipSlash) {
         skipSlash = false;
       } else {
-        result += path8.sep;
+        result += path10.sep;
       }
       result += this.segments[i2];
     }
@@ -78715,7 +79063,7 @@ var Pattern = class _Pattern {
     }
     pattern = _Pattern.fixupPattern(pattern, homedir2);
     this.segments = new Path(pattern).segments;
-    this.trailingSeparator = normalizeSeparators2(pattern).endsWith(path9.sep);
+    this.trailingSeparator = normalizeSeparators2(pattern).endsWith(path11.sep);
     pattern = safeTrimTrailingSeparator(pattern);
     let foundGlob = false;
     const searchSegments = this.segments.map((x2) => _Pattern.getLiteral(x2)).filter((x2) => !foundGlob && !(foundGlob =
@@ -78740,8 +79088,8 @@ var Pattern = class _Pattern {
   match(itemPath) {
     if (this.segments[this.segments.length - 1] === "**") {
       itemPath = normalizeSeparators2(itemPath);
-      if (!itemPath.endsWith(path9.sep) && this.isImplicitPattern === false) {
-        itemPath = `${itemPath}${path9.sep}`;
+      if (!itemPath.endsWith(path11.sep) && this.isImplicitPattern === false) {
+        itemPath = `${itemPath}${path11.sep}`;
       }
     } else {
       itemPath = safeTrimTrailingSeparator(itemPath);
@@ -78779,10 +79127,10 @@ tern '${pattern}'. Relative pathing '.' and '..' is not allowed.`);
     (0, import_assert5.default)(!hasRoot(pattern) || literalSegments[0], `Invalid pattern '${pattern}'. Root segment mus\
 t not contain globs.`);
     pattern = normalizeSeparators2(pattern);
-    if (pattern === "." || pattern.startsWith(`.${path9.sep}`)) {
+    if (pattern === "." || pattern.startsWith(`.${path11.sep}`)) {
       pattern = _Pattern.globEscape(process.cwd()) + pattern.substr(1);
-    } else if (pattern === "~" || pattern.startsWith(`~${path9.sep}`)) {
-      homedir2 = homedir2 || os8.homedir();
+    } else if (pattern === "~" || pattern.startsWith(`~${path11.sep}`)) {
+      homedir2 = homedir2 || os9.homedir();
       (0, import_assert5.default)(homedir2, "Unable to determine HOME directory");
       (0, import_assert5.default)(hasAbsoluteRoot(homedir2), `Expected HOME directory to be a rooted path. Actual '${homedir2}\
 '`);
@@ -79025,7 +79373,7 @@ var DefaultGlobber = class _DefaultGlobber {
       for (const searchPath of getSearchPaths(patterns)) {
         debug2(`Search path '${searchPath}'`);
         try {
-          yield __await(fs5.promises.lstat(searchPath));
+          yield __await(fs8.promises.lstat(searchPath));
         } catch (err) {
           if (err.code === "ENOENT") {
             continue;
@@ -79049,7 +79397,7 @@ var DefaultGlobber = class _DefaultGlobber {
         if (!stats) {
           continue;
         }
-        if (options.excludeHiddenFiles && path10.basename(item.path).match(/^\./)) {
+        if (options.excludeHiddenFiles && path12.basename(item.path).match(/^\./)) {
           continue;
         }
         if (stats.isDirectory()) {
@@ -79059,7 +79407,7 @@ var DefaultGlobber = class _DefaultGlobber {
             continue;
           }
           const childLevel = item.level + 1;
-          const childItems = (yield __await(fs5.promises.readdir(item.path))).map((x2) => new SearchState(path10.join(item.
+          const childItems = (yield __await(fs8.promises.readdir(item.path))).map((x2) => new SearchState(path12.join(item.
           path, x2), childLevel));
           stack.push(...childItems.reverse());
         } else if (match2 & MatchKind.File) {
@@ -79095,7 +79443,7 @@ var DefaultGlobber = class _DefaultGlobber {
       let stats;
       if (options.followSymbolicLinks) {
         try {
-          stats = yield fs5.promises.stat(item.path);
+          stats = yield fs8.promises.stat(item.path);
         } catch (err) {
           if (err.code === "ENOENT") {
             if (options.omitBrokenSymbolicLinks) {
@@ -79107,10 +79455,10 @@ var DefaultGlobber = class _DefaultGlobber {
           throw err;
         }
       } else {
-        stats = yield fs5.promises.lstat(item.path);
+        stats = yield fs8.promises.lstat(item.path);
       }
       if (stats.isDirectory() && options.followSymbolicLinks) {
-        const realPath = yield fs5.promises.realpath(item.path);
+        const realPath = yield fs8.promises.realpath(item.path);
         while (traversalChain.length >= item.level) {
           traversalChain.pop();
         }
@@ -79166,8 +79514,8 @@ __name(create, "create");
 
 // node_modules/@actions/cache/lib/internal/cacheUtils.js
 var crypto5 = __toESM(require("crypto"), 1);
-var fs6 = __toESM(require("fs"), 1);
-var path11 = __toESM(require("path"), 1);
+var fs9 = __toESM(require("fs"), 1);
+var path13 = __toESM(require("path"), 1);
 var semver3 = __toESM(require_semver2(), 1);
 var util4 = __toESM(require("util"), 1);
 
@@ -79267,16 +79615,16 @@ function createTempDirectory() {
           baseLocation = "/home";
         }
       }
-      tempDirectory = path11.join(baseLocation, "actions", "temp");
+      tempDirectory = path13.join(baseLocation, "actions", "temp");
     }
-    const dest = path11.join(tempDirectory, crypto5.randomUUID());
+    const dest = path13.join(tempDirectory, crypto5.randomUUID());
     yield mkdirP(dest);
     return dest;
   });
 }
 __name(createTempDirectory, "createTempDirectory");
 function getArchiveFileSizeInBytes(filePath) {
-  return fs6.statSync(filePath).size;
+  return fs9.statSync(filePath).size;
 }
 __name(getArchiveFileSizeInBytes, "getArchiveFileSizeInBytes");
 function resolvePaths(patterns) {
@@ -79294,7 +79642,7 @@ function resolvePaths(patterns) {
         _c = _g.value;
         _e = false;
         const file = _c;
-        const relativeFile = path11.relative(workspace, file).replace(new RegExp(`\\${path11.sep}`, "g"), "/");
+        const relativeFile = path13.relative(workspace, file).replace(new RegExp(`\\${path13.sep}`, "g"), "/");
         debug2(`Matched: ${relativeFile}`);
         if (relativeFile === "") {
           paths.push(".");
@@ -79317,7 +79665,7 @@ function resolvePaths(patterns) {
 __name(resolvePaths, "resolvePaths");
 function unlinkFile(filePath) {
   return __awaiter14(this, void 0, void 0, function* () {
-    return util4.promisify(fs6.unlink)(filePath);
+    return util4.promisify(fs9.unlink)(filePath);
   });
 }
 __name(unlinkFile, "unlinkFile");
@@ -79363,7 +79711,7 @@ function getCacheFileName(compressionMethod) {
 __name(getCacheFileName, "getCacheFileName");
 function getGnuTarPathOnWindows() {
   return __awaiter14(this, void 0, void 0, function* () {
-    if (fs6.existsSync(GnuTarPathOnWindows)) {
+    if (fs9.existsSync(GnuTarPathOnWindows)) {
       return GnuTarPathOnWindows;
     }
     const versionOutput = yield getVersion("tar");
@@ -79400,7 +79748,7 @@ function getRuntimeToken() {
 __name(getRuntimeToken, "getRuntimeToken");
 
 // node_modules/@actions/cache/lib/internal/cacheHttpClient.js
-var fs9 = __toESM(require("fs"), 1);
+var fs12 = __toESM(require("fs"), 1);
 var import_url2 = require("url");
 
 // node_modules/@typespec/ts-http-runtime/dist/esm/abort-controller/AbortError.js
@@ -79415,11 +79763,11 @@ var AbortError = class extends Error {
 };
 
 // node_modules/@typespec/ts-http-runtime/dist/esm/logger/log.js
-var import_node_os = require("node:os");
+var import_node_os2 = require("node:os");
 var import_node_util = __toESM(require("node:util"), 1);
 var import_node_process = __toESM(require("node:process"), 1);
 function log(message, ...args) {
-  import_node_process.default.stderr.write(`${import_node_util.default.format(message, ...args)}${import_node_os.EOL}`);
+  import_node_process.default.stderr.write(`${import_node_util.default.format(message, ...args)}${import_node_os2.EOL}`);
 }
 __name(log, "log");
 
@@ -81415,7 +81763,7 @@ function redirectPolicy2(options = {}) {
 __name(redirectPolicy2, "redirectPolicy");
 
 // node_modules/@azure/core-rest-pipeline/dist/esm/util/userAgentPlatform.js
-var import_node_os2 = __toESM(require("node:os"), 1);
+var import_node_os3 = __toESM(require("node:os"), 1);
 var import_node_process2 = __toESM(require("node:process"), 1);
 function getHeaderName2() {
   return "User-Agent";
@@ -81423,7 +81771,7 @@ function getHeaderName2() {
 __name(getHeaderName2, "getHeaderName");
 async function setPlatformSpecificData2(map2) {
   if (import_node_process2.default && import_node_process2.default.versions) {
-    const osInfo = `${import_node_os2.default.type()} ${import_node_os2.default.release()}; ${import_node_os2.default.arch()}`;
+    const osInfo = `${import_node_os3.default.type()} ${import_node_os3.default.release()}; ${import_node_os3.default.arch()}`;
     const versions = import_node_process2.default.versions;
     if (versions.bun) {
       map2.set("Bun", `${versions.bun} (${osInfo})`);
@@ -82050,16 +82398,16 @@ var DEFAULT_CYCLER_OPTIONS = {
   refreshWindowInMs: 1e3 * 60 * 2
   // Start refreshing 2m before expiry
 };
-async function beginRefresh(getAccessToken, retryIntervalInMs, refreshTimeout) {
+async function beginRefresh(getAccessToken2, retryIntervalInMs, refreshTimeout) {
   async function tryGetAccessToken() {
     if (Date.now() < refreshTimeout) {
       try {
-        return await getAccessToken();
+        return await getAccessToken2();
       } catch {
         return null;
       }
     } else {
-      const finalToken = await getAccessToken();
+      const finalToken = await getAccessToken2();
       if (finalToken === null) {
         throw new Error("Failed to refresh access token.");
       }
@@ -82168,13 +82516,13 @@ async function trySendRequest(request, next) {
 }
 __name(trySendRequest, "trySendRequest");
 async function defaultAuthorizeRequest(options) {
-  const { scopes, getAccessToken, request } = options;
+  const { scopes, getAccessToken: getAccessToken2, request } = options;
   const getTokenOptions = {
     abortSignal: request.abortSignal,
     tracingOptions: request.tracingOptions,
     enableCae: true
   };
-  const accessToken = await getAccessToken(scopes, getTokenOptions);
+  const accessToken = await getAccessToken2(scopes, getTokenOptions);
   if (accessToken) {
     options.request.headers.set("Authorization", `Bearer ${accessToken.token}`);
   }
@@ -82204,7 +82552,7 @@ function bearerTokenAuthenticationPolicy(options) {
     authorizeRequest: challengeCallbacks?.authorizeRequest?.bind(challengeCallbacks) ?? defaultAuthorizeRequest,
     authorizeRequestOnChallenge: challengeCallbacks?.authorizeRequestOnChallenge?.bind(challengeCallbacks)
   };
-  const getAccessToken = credential ? createTokenCycler(
+  const getAccessToken2 = credential ? createTokenCycler(
     credential
     /* , options */
   ) : () => Promise.resolve(null);
@@ -82230,7 +82578,7 @@ function bearerTokenAuthenticationPolicy(options) {
       await callbacks.authorizeRequest({
         scopes: Array.isArray(scopes) ? scopes : [scopes],
         request,
-        getAccessToken,
+        getAccessToken: getAccessToken2,
         logger: logger7
       });
       let response;
@@ -82252,7 +82600,7 @@ Continuous Access Evaluation authentication flow. Unparsable claims: ${claims}`)
             scopes: Array.isArray(scopes) ? scopes : [scopes],
             response,
             request,
-            getAccessToken,
+            getAccessToken: getAccessToken2,
             logger: logger7
           }, parsedClaim);
           if (shouldSendRequest) {
@@ -82263,7 +82611,7 @@ Continuous Access Evaluation authentication flow. Unparsable claims: ${claims}`)
             scopes: Array.isArray(scopes) ? scopes : [scopes],
             request,
             response,
-            getAccessToken,
+            getAccessToken: getAccessToken2,
             logger: logger7
           });
           if (shouldSendRequest) {
@@ -82284,7 +82632,7 @@ the Continuous Access Evaluation authentication flow. Unparsable claims: ${claim
                 scopes: Array.isArray(scopes) ? scopes : [scopes],
                 response,
                 request,
-                getAccessToken,
+                getAccessToken: getAccessToken2,
                 logger: logger7
               }, parsedClaim);
               if (shouldSendRequest) {
@@ -107542,7 +107890,7 @@ var Batch = class {
 };
 
 // node_modules/@azure/storage-blob/dist/esm/utils/utils.js
-var import_node_fs2 = __toESM(require("node:fs"), 1);
+var import_node_fs5 = __toESM(require("node:fs"), 1);
 var import_node_util3 = __toESM(require("node:util"), 1);
 async function streamToBuffer(stream6, buffer3, offset, end, encoding) {
   let pos = 0;
@@ -107582,7 +107930,7 @@ async function streamToBuffer(stream6, buffer3, offset, end, encoding) {
 __name(streamToBuffer, "streamToBuffer");
 async function readStreamToLocalFile(rs, file) {
   return new Promise((resolve2, reject) => {
-    const ws = import_node_fs2.default.createWriteStream(file);
+    const ws = import_node_fs5.default.createWriteStream(file);
     rs.on("error", (err) => {
       reject(err);
     });
@@ -107594,8 +107942,8 @@ async function readStreamToLocalFile(rs, file) {
   });
 }
 __name(readStreamToLocalFile, "readStreamToLocalFile");
-var fsStat = import_node_util3.default.promisify(import_node_fs2.default.stat);
-var fsCreateReadStream = import_node_fs2.default.createReadStream;
+var fsStat = import_node_util3.default.promisify(import_node_fs5.default.stat);
+var fsCreateReadStream = import_node_fs5.default.createReadStream;
 
 // node_modules/@azure/storage-blob/dist/esm/Clients.js
 var BlobClient = class _BlobClient extends StorageClient2 {
@@ -110519,7 +110867,7 @@ __name(uploadCacheArchiveSDK, "uploadCacheArchiveSDK");
 
 // node_modules/@actions/cache/lib/internal/downloadUtils.js
 var buffer2 = __toESM(require("buffer"), 1);
-var fs8 = __toESM(require("fs"), 1);
+var fs11 = __toESM(require("fs"), 1);
 var stream5 = __toESM(require("stream"), 1);
 var util7 = __toESM(require("util"), 1);
 
@@ -110798,7 +111146,7 @@ var DownloadProgress = class {
 };
 function downloadCacheHttpClient(archiveLocation, archivePath) {
   return __awaiter17(this, void 0, void 0, function* () {
-    const writeStream = fs8.createWriteStream(archivePath);
+    const writeStream = fs11.createWriteStream(archivePath);
     const httpClient = new HttpClient("actions/cache");
     const downloadResponse = yield retryHttpClientResponse("downloadCache", () => __awaiter17(this, void 0, void 0, function* () {
       return httpClient.get(archiveLocation);
@@ -110824,7 +111172,7 @@ __name(downloadCacheHttpClient, "downloadCacheHttpClient");
 function downloadCacheHttpClientConcurrent(archiveLocation, archivePath, options) {
   return __awaiter17(this, void 0, void 0, function* () {
     var _a2;
-    const archiveDescriptor = yield fs8.promises.open(archivePath, "w");
+    const archiveDescriptor = yield fs11.promises.open(archivePath, "w");
     const httpClient = new HttpClient("actions/cache", void 0, {
       socketTimeout: options.timeoutInMs,
       keepAlive: true
@@ -110943,7 +111291,7 @@ function downloadCacheStorageSDK(archiveLocation, archivePath, options) {
     } else {
       const maxSegmentSize = Math.min(134217728, buffer2.constants.MAX_LENGTH);
       const downloadProgress = new DownloadProgress(contentLength2);
-      const fd = fs8.openSync(archivePath, "w");
+      const fd = fs11.openSync(archivePath, "w");
       try {
         downloadProgress.startDisplayTimer();
         const controller = new AbortController();
@@ -110962,12 +111310,12 @@ function downloadCacheStorageSDK(archiveLocation, archivePath, options) {
             controller.abort();
             throw new Error("Aborting cache download as the download time exceeded the timeout.");
           } else if (Buffer.isBuffer(result)) {
-            fs8.writeFileSync(fd, result);
+            fs11.writeFileSync(fd, result);
           }
         }
       } finally {
         downloadProgress.stopDisplayTimer();
-        fs8.closeSync(fd);
+        fs11.closeSync(fd);
       }
     }
   });
@@ -111270,7 +111618,7 @@ function uploadFile(httpClient, cacheId, archivePath, options) {
   return __awaiter18(this, void 0, void 0, function* () {
     const fileSize = getArchiveFileSizeInBytes(archivePath);
     const resourceUrl = getCacheApiUrl(`caches/${cacheId.toString()}`);
-    const fd = fs9.openSync(archivePath, "r");
+    const fd = fs12.openSync(archivePath, "r");
     const uploadOptions = getUploadOptions(options);
     const concurrency = assertDefined("uploadConcurrency", uploadOptions.uploadConcurrency);
     const maxChunkSize = assertDefined("uploadChunkSize", uploadOptions.uploadChunkSize);
@@ -111284,7 +111632,7 @@ function uploadFile(httpClient, cacheId, archivePath, options) {
           const start = offset;
           const end = offset + chunkSize - 1;
           offset += maxChunkSize;
-          yield uploadChunk(httpClient, resourceUrl, () => fs9.createReadStream(archivePath, {
+          yield uploadChunk(httpClient, resourceUrl, () => fs12.createReadStream(archivePath, {
             fd,
             start,
             end,
@@ -111295,7 +111643,7 @@ function uploadFile(httpClient, cacheId, archivePath, options) {
         }
       })));
     } finally {
-      fs9.closeSync(fd);
+      fs12.closeSync(fd);
     }
     return;
   });
@@ -111337,26 +111685,26 @@ __name(saveCache, "saveCache");
 
 // node_modules/@actions/cache/lib/generated/results/api/v1/cache.js
 var import_runtime_rpc = __toESM(require_commonjs2(), 1);
-var import_runtime324 = __toESM(require_commonjs(), 1);
+var import_runtime331 = __toESM(require_commonjs(), 1);
+var import_runtime332 = __toESM(require_commonjs(), 1);
+var import_runtime333 = __toESM(require_commonjs(), 1);
+var import_runtime334 = __toESM(require_commonjs(), 1);
+var import_runtime335 = __toESM(require_commonjs(), 1);
+
+// node_modules/@actions/cache/lib/generated/results/entities/v1/cachemetadata.js
 var import_runtime325 = __toESM(require_commonjs(), 1);
 var import_runtime326 = __toESM(require_commonjs(), 1);
 var import_runtime327 = __toESM(require_commonjs(), 1);
 var import_runtime328 = __toESM(require_commonjs(), 1);
+var import_runtime329 = __toESM(require_commonjs(), 1);
 
-// node_modules/@actions/cache/lib/generated/results/entities/v1/cachemetadata.js
-var import_runtime318 = __toESM(require_commonjs(), 1);
+// node_modules/@actions/cache/lib/generated/results/entities/v1/cachescope.js
 var import_runtime319 = __toESM(require_commonjs(), 1);
 var import_runtime320 = __toESM(require_commonjs(), 1);
 var import_runtime321 = __toESM(require_commonjs(), 1);
 var import_runtime322 = __toESM(require_commonjs(), 1);
-
-// node_modules/@actions/cache/lib/generated/results/entities/v1/cachescope.js
-var import_runtime312 = __toESM(require_commonjs(), 1);
-var import_runtime313 = __toESM(require_commonjs(), 1);
-var import_runtime314 = __toESM(require_commonjs(), 1);
-var import_runtime315 = __toESM(require_commonjs(), 1);
-var import_runtime316 = __toESM(require_commonjs(), 1);
-var CacheScope$Type = class extends import_runtime316.MessageType {
+var import_runtime323 = __toESM(require_commonjs(), 1);
+var CacheScope$Type = class extends import_runtime323.MessageType {
   static {
     __name(this, "CacheScope$Type");
   }
@@ -111380,9 +111728,9 @@ var CacheScope$Type = class extends import_runtime316.MessageType {
   }
   create(value) {
     const message = { scope: "", permission: "0" };
-    globalThis.Object.defineProperty(message, import_runtime315.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime322.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime314.reflectionMergePartial)(this, message, value);
+      (0, import_runtime321.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -111404,26 +111752,26 @@ var CacheScope$Type = class extends import_runtime316.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime313.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime320.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.scope !== "")
-      writer.tag(1, import_runtime312.WireType.LengthDelimited).string(message.scope);
+      writer.tag(1, import_runtime319.WireType.LengthDelimited).string(message.scope);
     if (message.permission !== "0")
-      writer.tag(2, import_runtime312.WireType.Varint).int64(message.permission);
+      writer.tag(2, import_runtime319.WireType.Varint).int64(message.permission);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime313.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime320.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CacheScope = new CacheScope$Type();
 
 // node_modules/@actions/cache/lib/generated/results/entities/v1/cachemetadata.js
-var CacheMetadata$Type = class extends import_runtime322.MessageType {
+var CacheMetadata$Type = class extends import_runtime329.MessageType {
   static {
     __name(this, "CacheMetadata$Type");
   }
@@ -111441,9 +111789,9 @@ var CacheMetadata$Type = class extends import_runtime322.MessageType {
   }
   create(value) {
     const message = { repositoryId: "0", scope: [] };
-    globalThis.Object.defineProperty(message, import_runtime321.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime328.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime320.reflectionMergePartial)(this, message, value);
+      (0, import_runtime327.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -111465,27 +111813,27 @@ var CacheMetadata$Type = class extends import_runtime322.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime319.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime326.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.repositoryId !== "0")
-      writer.tag(1, import_runtime318.WireType.Varint).int64(message.repositoryId);
+      writer.tag(1, import_runtime325.WireType.Varint).int64(message.repositoryId);
     for (let i2 = 0; i2 < message.scope.length; i2++)
-      CacheScope.internalBinaryWrite(message.scope[i2], writer.tag(2, import_runtime318.WireType.LengthDelimited).fork(),
+      CacheScope.internalBinaryWrite(message.scope[i2], writer.tag(2, import_runtime325.WireType.LengthDelimited).fork(),
       options).join();
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime319.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime326.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CacheMetadata = new CacheMetadata$Type();
 
 // node_modules/@actions/cache/lib/generated/results/api/v1/cache.js
-var CreateCacheEntryRequest$Type = class extends import_runtime328.MessageType {
+var CreateCacheEntryRequest$Type = class extends import_runtime335.MessageType {
   static {
     __name(this, "CreateCacheEntryRequest$Type");
   }
@@ -111510,9 +111858,9 @@ var CreateCacheEntryRequest$Type = class extends import_runtime328.MessageType {
   }
   create(value) {
     const message = { key: "", version: "" };
-    globalThis.Object.defineProperty(message, import_runtime327.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime334.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime326.reflectionMergePartial)(this, message, value);
+      (0, import_runtime333.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -111538,27 +111886,27 @@ var CreateCacheEntryRequest$Type = class extends import_runtime328.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime325.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime332.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime324.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime331.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime324.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime331.WireType.LengthDelimited).string(message.key);
     if (message.version !== "")
-      writer.tag(3, import_runtime324.WireType.LengthDelimited).string(message.version);
+      writer.tag(3, import_runtime331.WireType.LengthDelimited).string(message.version);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime325.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime332.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CreateCacheEntryRequest = new CreateCacheEntryRequest$Type();
-var CreateCacheEntryResponse$Type = class extends import_runtime328.MessageType {
+var CreateCacheEntryResponse$Type = class extends import_runtime335.MessageType {
   static {
     __name(this, "CreateCacheEntryResponse$Type");
   }
@@ -111589,9 +111937,9 @@ var CreateCacheEntryResponse$Type = class extends import_runtime328.MessageType 
   }
   create(value) {
     const message = { ok: false, signedUploadUrl: "", message: "" };
-    globalThis.Object.defineProperty(message, import_runtime327.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime334.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime326.reflectionMergePartial)(this, message, value);
+      (0, import_runtime333.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -111617,26 +111965,26 @@ var CreateCacheEntryResponse$Type = class extends import_runtime328.MessageType 
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime325.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime332.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime324.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime331.WireType.Varint).bool(message.ok);
     if (message.signedUploadUrl !== "")
-      writer.tag(2, import_runtime324.WireType.LengthDelimited).string(message.signedUploadUrl);
+      writer.tag(2, import_runtime331.WireType.LengthDelimited).string(message.signedUploadUrl);
     if (message.message !== "")
-      writer.tag(3, import_runtime324.WireType.LengthDelimited).string(message.message);
+      writer.tag(3, import_runtime331.WireType.LengthDelimited).string(message.message);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime325.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime332.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CreateCacheEntryResponse = new CreateCacheEntryResponse$Type();
-var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime328.MessageType {
+var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime335.MessageType {
   static {
     __name(this, "FinalizeCacheEntryUploadRequest$Type");
   }
@@ -111668,9 +112016,9 @@ var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime328.Messa
   }
   create(value) {
     const message = { key: "", sizeBytes: "0", version: "" };
-    globalThis.Object.defineProperty(message, import_runtime327.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime334.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime326.reflectionMergePartial)(this, message, value);
+      (0, import_runtime333.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -111700,29 +112048,29 @@ var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime328.Messa
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime325.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime332.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime324.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime331.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime324.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime331.WireType.LengthDelimited).string(message.key);
     if (message.sizeBytes !== "0")
-      writer.tag(3, import_runtime324.WireType.Varint).int64(message.sizeBytes);
+      writer.tag(3, import_runtime331.WireType.Varint).int64(message.sizeBytes);
     if (message.version !== "")
-      writer.tag(4, import_runtime324.WireType.LengthDelimited).string(message.version);
+      writer.tag(4, import_runtime331.WireType.LengthDelimited).string(message.version);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime325.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime332.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var FinalizeCacheEntryUploadRequest = new FinalizeCacheEntryUploadRequest$Type();
-var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime328.MessageType {
+var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime335.MessageType {
   static {
     __name(this, "FinalizeCacheEntryUploadResponse$Type");
   }
@@ -111753,9 +112101,9 @@ var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime328.Mess
   }
   create(value) {
     const message = { ok: false, entryId: "0", message: "" };
-    globalThis.Object.defineProperty(message, import_runtime327.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime334.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime326.reflectionMergePartial)(this, message, value);
+      (0, import_runtime333.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -111781,26 +112129,26 @@ var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime328.Mess
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime325.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime332.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime324.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime331.WireType.Varint).bool(message.ok);
     if (message.entryId !== "0")
-      writer.tag(2, import_runtime324.WireType.Varint).int64(message.entryId);
+      writer.tag(2, import_runtime331.WireType.Varint).int64(message.entryId);
     if (message.message !== "")
-      writer.tag(3, import_runtime324.WireType.LengthDelimited).string(message.message);
+      writer.tag(3, import_runtime331.WireType.LengthDelimited).string(message.message);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime325.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime332.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var FinalizeCacheEntryUploadResponse = new FinalizeCacheEntryUploadResponse$Type();
-var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime328.MessageType {
+var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime335.MessageType {
   static {
     __name(this, "GetCacheEntryDownloadURLRequest$Type");
   }
@@ -111833,9 +112181,9 @@ var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime328.Messa
   }
   create(value) {
     const message = { key: "", restoreKeys: [], version: "" };
-    globalThis.Object.defineProperty(message, import_runtime327.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime334.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime326.reflectionMergePartial)(this, message, value);
+      (0, import_runtime333.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -111865,29 +112213,29 @@ var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime328.Messa
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime325.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime332.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime324.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime331.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime324.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime331.WireType.LengthDelimited).string(message.key);
     for (let i2 = 0; i2 < message.restoreKeys.length; i2++)
-      writer.tag(3, import_runtime324.WireType.LengthDelimited).string(message.restoreKeys[i2]);
+      writer.tag(3, import_runtime331.WireType.LengthDelimited).string(message.restoreKeys[i2]);
     if (message.version !== "")
-      writer.tag(4, import_runtime324.WireType.LengthDelimited).string(message.version);
+      writer.tag(4, import_runtime331.WireType.LengthDelimited).string(message.version);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime325.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime332.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var GetCacheEntryDownloadURLRequest = new GetCacheEntryDownloadURLRequest$Type();
-var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime328.MessageType {
+var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime335.MessageType {
   static {
     __name(this, "GetCacheEntryDownloadURLResponse$Type");
   }
@@ -111918,9 +112266,9 @@ var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime328.Mess
   }
   create(value) {
     const message = { ok: false, signedDownloadUrl: "", matchedKey: "" };
-    globalThis.Object.defineProperty(message, import_runtime327.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime334.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime326.reflectionMergePartial)(this, message, value);
+      (0, import_runtime333.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -111946,21 +112294,21 @@ var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime328.Mess
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime325.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime332.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime324.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime331.WireType.Varint).bool(message.ok);
     if (message.signedDownloadUrl !== "")
-      writer.tag(2, import_runtime324.WireType.LengthDelimited).string(message.signedDownloadUrl);
+      writer.tag(2, import_runtime331.WireType.LengthDelimited).string(message.signedDownloadUrl);
     if (message.matchedKey !== "")
-      writer.tag(3, import_runtime324.WireType.LengthDelimited).string(message.matchedKey);
+      writer.tag(3, import_runtime331.WireType.LengthDelimited).string(message.matchedKey);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime325.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime332.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
@@ -112232,7 +112580,7 @@ __name(internalCacheTwirpClient, "internalCacheTwirpClient");
 
 // node_modules/@actions/cache/lib/internal/tar.js
 var import_fs2 = require("fs");
-var path12 = __toESM(require("path"), 1);
+var path14 = __toESM(require("path"), 1);
 var __awaiter20 = function(thisArg, _arguments, P, generator) {
   function adopt(value) {
     return value instanceof P ? value : new P(function(resolve2) {
@@ -112308,16 +112656,16 @@ function getTarArgs(tarPath_1, compressionMethod_1, type_1) {
     const BSD_TAR_ZSTD = tarPath.type === ArchiveToolType.BSD && compressionMethod !== CompressionMethod.Gzip && IS_WINDOWS9;
     switch (type2) {
       case "create":
-        args.push("--posix", "-cf", BSD_TAR_ZSTD ? tarFile : cacheFileName.replace(new RegExp(`\\${path12.sep}`, "g"), "\
-/"), "--exclude", BSD_TAR_ZSTD ? tarFile : cacheFileName.replace(new RegExp(`\\${path12.sep}`, "g"), "/"), "-P", "-C", workingDirectory.
-        replace(new RegExp(`\\${path12.sep}`, "g"), "/"), "--files-from", ManifestFilename);
+        args.push("--posix", "-cf", BSD_TAR_ZSTD ? tarFile : cacheFileName.replace(new RegExp(`\\${path14.sep}`, "g"), "\
+/"), "--exclude", BSD_TAR_ZSTD ? tarFile : cacheFileName.replace(new RegExp(`\\${path14.sep}`, "g"), "/"), "-P", "-C", workingDirectory.
+        replace(new RegExp(`\\${path14.sep}`, "g"), "/"), "--files-from", ManifestFilename);
         break;
       case "extract":
-        args.push("-xf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path12.sep}`, "g"), "/"), "-P", "-\
-C", workingDirectory.replace(new RegExp(`\\${path12.sep}`, "g"), "/"));
+        args.push("-xf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path14.sep}`, "g"), "/"), "-P", "-\
+C", workingDirectory.replace(new RegExp(`\\${path14.sep}`, "g"), "/"));
         break;
       case "list":
-        args.push("-tf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path12.sep}`, "g"), "/"), "-P");
+        args.push("-tf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path14.sep}`, "g"), "/"), "-P");
         break;
     }
     if (tarPath.type === ArchiveToolType.GNU) {
@@ -112367,7 +112715,7 @@ function getDecompressionProgram(tarPath, compressionMethod, archivePath) {
         return BSD_TAR_ZSTD ? [
           "zstd -d --long=30 --force -o",
           TarFilename,
-          archivePath.replace(new RegExp(`\\${path12.sep}`, "g"), "/")
+          archivePath.replace(new RegExp(`\\${path14.sep}`, "g"), "/")
         ] : [
           "--use-compress-program",
           IS_WINDOWS9 ? '"zstd -d --long=30"' : "unzstd --long=30"
@@ -112376,7 +112724,7 @@ function getDecompressionProgram(tarPath, compressionMethod, archivePath) {
         return BSD_TAR_ZSTD ? [
           "zstd -d --force -o",
           TarFilename,
-          archivePath.replace(new RegExp(`\\${path12.sep}`, "g"), "/")
+          archivePath.replace(new RegExp(`\\${path14.sep}`, "g"), "/")
         ] : ["--use-compress-program", IS_WINDOWS9 ? '"zstd -d"' : "unzstd"];
       default:
         return ["-z"];
@@ -112392,7 +112740,7 @@ function getCompressionProgram(tarPath, compressionMethod) {
       case CompressionMethod.Zstd:
         return BSD_TAR_ZSTD ? [
           "zstd -T0 --long=30 --force -o",
-          cacheFileName.replace(new RegExp(`\\${path12.sep}`, "g"), "/"),
+          cacheFileName.replace(new RegExp(`\\${path14.sep}`, "g"), "/"),
           TarFilename
         ] : [
           "--use-compress-program",
@@ -112401,7 +112749,7 @@ function getCompressionProgram(tarPath, compressionMethod) {
       case CompressionMethod.ZstdWithoutLong:
         return BSD_TAR_ZSTD ? [
           "zstd -T0 --force -o",
-          cacheFileName.replace(new RegExp(`\\${path12.sep}`, "g"), "/"),
+          cacheFileName.replace(new RegExp(`\\${path14.sep}`, "g"), "/"),
           TarFilename
         ] : ["--use-compress-program", IS_WINDOWS9 ? '"zstd -T0"' : "zstdmt"];
       default:
@@ -112444,7 +112792,7 @@ function extractTar2(archivePath, compressionMethod) {
 __name(extractTar2, "extractTar");
 function createTar(archiveFolder, sourceDirectories, compressionMethod) {
   return __awaiter20(this, void 0, void 0, function* () {
-    (0, import_fs2.writeFileSync)(path12.join(archiveFolder, ManifestFilename), sourceDirectories.join("\n"));
+    (0, import_fs2.writeFileSync)(path14.join(archiveFolder, ManifestFilename), sourceDirectories.join("\n"));
     const commands = yield getCommands(compressionMethod, "create");
     yield execCommands(commands, archiveFolder);
   });
@@ -112570,7 +112918,7 @@ function restoreCacheV1(paths_1, primaryKey_1, restoreKeys_1, options_1) {
         info("Lookup only - skipping download");
         return cacheEntry.cacheKey;
       }
-      archivePath = path13.join(yield createTempDirectory(), getCacheFileName(compressionMethod));
+      archivePath = path15.join(yield createTempDirectory(), getCacheFileName(compressionMethod));
       debug2(`Archive Path: ${archivePath}`);
       yield downloadCache(cacheEntry.archiveLocation, archivePath, options);
       if (isDebug()) {
@@ -112641,7 +112989,7 @@ function restoreCacheV2(paths_1, primaryKey_1, restoreKeys_1, options_1) {
         info("Lookup only - skipping download");
         return response.matchedKey;
       }
-      archivePath = path13.join(yield createTempDirectory(), getCacheFileName(compressionMethod));
+      archivePath = path15.join(yield createTempDirectory(), getCacheFileName(compressionMethod));
       debug2(`Archive path: ${archivePath}`);
       debug2(`Starting download of archive to: ${archivePath}`);
       yield downloadCache(response.signedDownloadUrl, archivePath, options);
@@ -112707,7 +113055,7 @@ function saveCacheV1(paths_1, key_1, options_1) {
 he is being saved.`);
     }
     const archiveFolder = yield createTempDirectory();
-    const archivePath = path13.join(archiveFolder, getCacheFileName(compressionMethod));
+    const archivePath = path15.join(archiveFolder, getCacheFileName(compressionMethod));
     debug2(`Archive Path: ${archivePath}`);
     try {
       yield createTar(archiveFolder, cachePaths, compressionMethod);
@@ -112782,7 +113130,7 @@ function saveCacheV2(paths_1, key_1, options_1) {
 he is being saved.`);
     }
     const archiveFolder = yield createTempDirectory();
-    const archivePath = path13.join(archiveFolder, getCacheFileName(compressionMethod));
+    const archivePath = path15.join(archiveFolder, getCacheFileName(compressionMethod));
     debug2(`Archive Path: ${archivePath}`);
     try {
       yield createTar(archiveFolder, cachePaths, compressionMethod);
@@ -112858,350 +113206,6 @@ __name(saveCacheV2, "saveCacheV2");
 
 // setup-gcloud/src/setup-gcloud.js
 var import_fast_glob = __toESM(require_out4(), 1);
-
-// setup-gcloud/src/auth-stack.js
-var import_node_fs3 = __toESM(require("node:fs"), 1);
-var import_node_path3 = __toESM(require("node:path"), 1);
-
-// setup-gcloud/src/job-scope.js
-function getJobScope({ prefix: prefix2 = "setup-gcloud" } = {}) {
-  const { RUNNER_TEMP, GITHUB_RUN_ID, GITHUB_RUN_ATTEMPT } = process.env;
-  if (!RUNNER_TEMP || !GITHUB_RUN_ID) {
-    throw new Error(
-      "RUNNER_TEMP and GITHUB_RUN_ID environment variables are required"
-    );
-  }
-  return `${RUNNER_TEMP}/${prefix2}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT || "1"}`;
-}
-__name(getJobScope, "getJobScope");
-
-// setup-gcloud/src/auth-stack.js
-function authStackFilePath() {
-  const jobScope = getJobScope();
-  return import_node_path3.default.join(jobScope, "auth_stack.json");
-}
-__name(authStackFilePath, "authStackFilePath");
-function loadAuthStack() {
-  if (import_node_fs3.default.existsSync(authStackFilePath())) {
-    return JSON.parse(import_node_fs3.default.readFileSync(authStackFilePath(), "utf8"));
-  }
-  return [];
-}
-__name(loadAuthStack, "loadAuthStack");
-function clearAuthStack() {
-  if (import_node_fs3.default.existsSync(authStackFilePath())) {
-    import_node_fs3.default.rmSync(authStackFilePath());
-  }
-}
-__name(clearAuthStack, "clearAuthStack");
-function saveAuthStack(authStack) {
-  import_node_fs3.default.mkdirSync(import_node_path3.default.dirname(authStackFilePath()), { recursive: true });
-  import_node_fs3.default.writeFileSync(authStackFilePath(), JSON.stringify(authStack), "utf8");
-}
-__name(saveAuthStack, "saveAuthStack");
-
-// setup-gcloud/src/auth-wid-federation.js
-var import_node_fs5 = __toESM(require("node:fs"), 1);
-
-// setup-gcloud/src/create-job-scoped-credential.js
-var import_node_fs4 = __toESM(require("node:fs"), 1);
-var import_node_path4 = __toESM(require("node:path"), 1);
-var trackedCredentialFiles = [];
-function createJobScopedCredential(credentialData, { encoding = "base64", suffix = ".json" } = {}) {
-  const jobScopedDir = getJobScope();
-  if (!import_node_fs4.default.existsSync(jobScopedDir)) {
-    import_node_fs4.default.mkdirSync(jobScopedDir, { recursive: true });
-  }
-  const credentialFilePath = import_node_path4.default.join(
-    jobScopedDir,
-    `credential-${v4_default()}${suffix}`
-  );
-  const decodedData = encoding === "base64" ? Buffer.from(credentialData, "base64").toString("utf8") : credentialData;
-  import_node_fs4.default.writeFileSync(credentialFilePath, decodedData, {
-    mode: 384
-    // rw-------
-  });
-  setSecret(credentialFilePath);
-  trackedCredentialFiles.push(credentialFilePath);
-  saveState(
-    "gcloud-credential-files",
-    JSON.stringify(trackedCredentialFiles)
-  );
-  return credentialFilePath;
-}
-__name(createJobScopedCredential, "createJobScopedCredential");
-function getTrackedCredentials() {
-  return trackedCredentialFiles;
-}
-__name(getTrackedCredentials, "getTrackedCredentials");
-
-// setup-gcloud/src/exec-gcloud.js
-var import_node_os3 = __toESM(require("node:os"), 1);
-var findExecutable = /* @__PURE__ */ __name((executable) => {
-  if (executable === "gcloud" || !executable) {
-    return import_node_os3.default.platform() === "win32" ? "gcloud.cmd" : "gcloud";
-  }
-  return executable;
-}, "findExecutable");
-var execGcloud = /* @__PURE__ */ __name(async (args, executable = "gcloud", silent = false) => {
-  const command = findExecutable(executable);
-  const result = await getExecOutput(command, args, {
-    silent,
-    ignoreReturnCode: true
-  });
-  if (result.exitCode !== 0) {
-    let message = `The process '${command}' failed with exit code ${result.exitCode}`;
-    if (result.stderr) {
-      message = `${message}
-
-${result.stderr}`;
-    }
-    throw new Error(message);
-  }
-  return result.stdout.trim();
-}, "execGcloud");
-
-// setup-gcloud/src/auth-wid-federation.js
-async function refreshIdToken({
-  workloadIdentityProvider,
-  idTokenPath
-}) {
-  const newToken = await getIDToken(
-    `https://iam.googleapis.com/${workloadIdentityProvider}`
-  );
-  import_node_fs5.default.writeFileSync(idTokenPath, newToken, {
-    encoding: "utf8",
-    mode: 384
-    // rw-------
-  });
-}
-__name(refreshIdToken, "refreshIdToken");
-async function workloadIdentityFederation(credentialsFilePath, { workload_identity_provider: workloadIdentityProvider, email }) {
-  const idToken = await getIDToken(
-    `https://iam.googleapis.com/${workloadIdentityProvider}`
-  );
-  const idTokenPath = createJobScopedCredential(idToken, { encoding: "utf8" });
-  await execGcloud(
-    [
-      "iam",
-      "workload-identity-pools",
-      "create-cred-config",
-      workloadIdentityProvider,
-      `--service-account=${email}`,
-      `--output-file=${credentialsFilePath}`,
-      `--credential-source-file=${idTokenPath}`
-    ],
-    "gcloud",
-    true
-  );
-  return {
-    workloadIdentityProvider,
-    idTokenPath
-  };
-}
-__name(workloadIdentityFederation, "workloadIdentityFederation");
-
-// setup-gcloud/src/auth-gcloud.js
-var authType = {
-  jsonKey: "json_key",
-  widFederation: "wid_federation"
-};
-var env = {
-  accessToken: "CLOUDSDK_AUTH_ACCESS_TOKEN",
-  applicationCredentials: "GOOGLE_APPLICATION_CREDENTIALS",
-  credentialsOverride: "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE",
-  projectId: "CLOUDSDK_CORE_PROJECT"
-};
-var isNonEmptyString = /* @__PURE__ */ __name((value) => typeof value === "string" && value.trim().length > 0, "isNonEmp\
-tyString");
-function parseCredentials(credentials) {
-  let parsed;
-  try {
-    parsed = JSON.parse(Buffer.from(credentials, "base64").toString("utf8"));
-  } catch {
-    throw new Error(
-      "Invalid service-account-key: expected base64-encoded JSON credentials"
-    );
-  }
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-    throw new Error(
-      "Invalid service-account-key: expected base64-encoded JSON credentials"
-    );
-  }
-  return parsed;
-}
-__name(parseCredentials, "parseCredentials");
-function validateCredentialsShape(jsonCredentials) {
-  if (!isNonEmptyString(jsonCredentials.project_id)) {
-    throw new Error(
-      'Invalid service-account-key: missing required field "project_id"'
-    );
-  }
-  if (isNonEmptyString(jsonCredentials.private_key)) {
-    setSecret(jsonCredentials.private_key);
-    const email = jsonCredentials.client_email ?? jsonCredentials.email ?? void 0;
-    if (!isNonEmptyString(email)) {
-      throw new Error(
-        'Invalid service-account-key: missing required field "client_email" or "email"'
-      );
-    }
-    return {
-      type: authType.jsonKey,
-      email
-    };
-  }
-  if (isNonEmptyString(jsonCredentials.workload_identity_provider)) {
-    if (!isNonEmptyString(jsonCredentials.email)) {
-      throw new Error(
-        'Invalid service-account-key: missing required field "email"'
-      );
-    }
-    return {
-      type: authType.widFederation,
-      email: jsonCredentials.email
-    };
-  }
-  throw new Error(
-    'Invalid service-account-key: expected either "private_key" (json key) or "workload_identity_provider" (wid federati\
-on)'
-  );
-}
-__name(validateCredentialsShape, "validateCredentialsShape");
-function isCurrentAccount(auth, current) {
-  if (current) {
-    return current.type === auth.type && current.email === auth.email && current.projectId === auth.projectId;
-  }
-  return false;
-}
-__name(isCurrentAccount, "isCurrentAccount");
-var setEnvironmentVariable = /* @__PURE__ */ __name((key, value, exportVariable2) => {
-  if (isNonEmptyString(value)) {
-    if (exportVariable2) {
-      debug2(`Export ${key}`);
-      exportVariable(key, value);
-    }
-    process.env[key] = value;
-  } else {
-    if (exportVariable2) {
-      debug2(`Unset ${key}`);
-      exportVariable(key, "");
-    }
-    delete process.env[key];
-  }
-}, "setEnvironmentVariable");
-var populateEnvironment = /* @__PURE__ */ __name(({
-  projectId,
-  credentialsFilePath,
-  exportCredentials
-}) => {
-  setEnvironmentVariable(env.projectId, projectId, exportCredentials);
-  setEnvironmentVariable(
-    env.applicationCredentials,
-    credentialsFilePath,
-    exportCredentials
-  );
-  setEnvironmentVariable(
-    env.credentialsOverride,
-    credentialsFilePath,
-    exportCredentials
-  );
-}, "populateEnvironment");
-function getServiceAccountEmailAndProject(credentials) {
-  setSecret(credentials);
-  const jsonCredentials = parseCredentials(credentials);
-  const { project_id: projectId } = jsonCredentials;
-  const { email } = validateCredentialsShape(jsonCredentials);
-  return { email, projectId };
-}
-__name(getServiceAccountEmailAndProject, "getServiceAccountEmailAndProject");
-async function authenticateGcloud(credentials, exportCredentials) {
-  setSecret(credentials);
-  const jsonCredentials = parseCredentials(credentials);
-  const { type: type2, email } = validateCredentialsShape(jsonCredentials);
-  const { project_id: projectId } = jsonCredentials;
-  const authEntry = {
-    type: type2,
-    email,
-    projectId,
-    exportCredentials,
-    credentialsFilePath: "",
-    refreshTokenMetadata: void 0
-  };
-  const current = getCurrentAccount();
-  if (isCurrentAccount(authEntry, current)) {
-    await current.refreshToken();
-  } else {
-    authEntry.credentialsFilePath = createJobScopedCredential(credentials);
-    info(
-      `Authenticate gcloud account '${authEntry.email}' with ${authEntry.type}`
-    );
-    try {
-      process.env[env.projectId] = projectId;
-      authEntry.exportCredentials = true;
-      if (authEntry.type === authType.widFederation) {
-        authEntry.refreshTokenMetadata = await workloadIdentityFederation(
-          authEntry.credentialsFilePath,
-          jsonCredentials
-        );
-      }
-    } finally {
-      delete process.env[env.projectId];
-    }
-    const authStack = loadAuthStack();
-    authStack.push(authEntry);
-    saveAuthStack(authStack);
-    populateEnvironment(authEntry);
-  }
-  return projectId;
-}
-__name(authenticateGcloud, "authenticateGcloud");
-function getCurrentAccount() {
-  const authStack = loadAuthStack();
-  const account = authStack.at(-1);
-  if (!account) {
-    return void 0;
-  }
-  const refreshToken = /* @__PURE__ */ __name(async () => {
-  }, "refreshToken");
-  if (account.type === authType.widFederation && account.refreshTokenMetadata && typeof account.refreshTokenMetadata ===
-  "object") {
-    return {
-      ...account,
-      refreshToken: /* @__PURE__ */ __name(async () => refreshIdToken(account.refreshTokenMetadata), "refreshToken")
-    };
-  }
-  return {
-    ...account,
-    refreshToken
-  };
-}
-__name(getCurrentAccount, "getCurrentAccount");
-function resetAuthStack() {
-  const wasNonEmpty = loadAuthStack().length > 0;
-  clearAuthStack();
-  if (wasNonEmpty) {
-    populateEnvironment({
-      type: authType.jsonKey,
-      projectId: "",
-      credentialsFilePath: "",
-      exportCredentials: true
-    });
-  }
-}
-__name(resetAuthStack, "resetAuthStack");
-async function restorePreviousAccount(previousAccount) {
-  if (!previousAccount) {
-    return false;
-  }
-  const authStack = loadAuthStack();
-  authStack.pop();
-  info(`Restore gcloud account '${previousAccount.email}'`);
-  authStack.push(previousAccount);
-  saveAuthStack(authStack);
-  populateEnvironment(previousAccount);
-  return true;
-}
-__name(restorePreviousAccount, "restorePreviousAccount");
 
 // setup-gcloud/src/download-url.js
 var import_os4 = __toESM(require("os"), 1);
@@ -113418,7 +113422,7 @@ var withGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, fn) => {
   } finally {
     const didRestoreAccount = await restorePreviousAccount(previousAccount);
     if (!didRestoreAccount) {
-      resetAuthStack();
+      await resetAuthStack();
       cleanupCredentials(getTrackedCredentials());
     }
   }

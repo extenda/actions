@@ -18,9 +18,14 @@ const findExecutable = (executable) => {
  */
 const execGcloud = async (args, executable = 'gcloud', silent = false) => {
   const command = findExecutable(executable);
+
+  const gcloudEnv = process.env;
+  delete gcloudEnv.CLOUDSDK_AUTH_ACCESS_TOKEN;
+
   const result = await exec.getExecOutput(command, args, {
     silent,
     ignoreReturnCode: true,
+    env: gcloudEnv,
   });
 
   if (result.exitCode !== 0) {
