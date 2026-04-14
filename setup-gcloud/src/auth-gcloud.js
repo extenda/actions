@@ -93,13 +93,25 @@ function isCurrentAccount(auth, current) {
   return false;
 }
 
-const getAccessToken = async () => {
+const getAccessToken = async (email) => {
   const accessToken = await execGcloud(
-    ['auth', 'print-access-token'],
+    ['auth', 'print-access-token', `--impersonate-service-account=${email}`],
     'gcloud',
     true,
   );
   core.setSecret(accessToken);
+
+  if (core.isDebug()) {
+    await fetch(
+      `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${accessToken}`,
+    )
+      .then((response) => response.json())
+      .then((tokenInfo) =>
+        core.debug(`Token info: ${JSON.stringify(tokenInfo, null, 2)})`),
+      )
+      .catch((err) => core.error(`Failed to debug token info: ${err.message}`));
+  }
+
   return accessToken;
 };
 
@@ -121,6 +133,7 @@ const setEnvironmentVariable = (key, value, exportVariable) => {
 
 const populateEnvironment = async ({
   projectId,
+  email,
   credentialsFilePath,
   exportCredentials,
 }) => {
@@ -137,7 +150,7 @@ const populateEnvironment = async ({
   );
   setEnvironmentVariable(
     env.accessToken,
-    credentialsFilePath === '' ? '' : await getAccessToken(),
+    email ? await getAccessToken(email) : '',
     exportCredentials,
   );
 };
@@ -253,6 +266,7 @@ export async function resetAuthStack() {
     await populateEnvironment({
       type: authType.jsonKey,
       projectId: '',
+      email: '',
       credentialsFilePath: '',
       exportCredentials: true,
     });

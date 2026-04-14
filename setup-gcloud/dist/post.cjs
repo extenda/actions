@@ -15904,7 +15904,7 @@ var require_fetch = __commonJS({
       finalizeAndReportTiming(response, "fetch");
     }
     __name(handleFetchDone, "handleFetchDone");
-    function fetch(input, init = void 0) {
+    function fetch2(input, init = void 0) {
       webidl.argumentLengthCheck(arguments, 1, "globalThis.fetch");
       let p = createDeferredPromise();
       let requestObject;
@@ -15961,7 +15961,7 @@ var require_fetch = __commonJS({
       });
       return p.promise;
     }
-    __name(fetch, "fetch");
+    __name(fetch2, "fetch");
     function finalizeAndReportTiming(response, initiatorType = "other") {
       if (response.type === "error" && response.aborted) {
         return;
@@ -16885,7 +16885,7 @@ processBodyError");
     }
     __name(httpNetworkFetch, "httpNetworkFetch");
     module2.exports = {
-      fetch,
+      fetch: fetch2,
       Fetch,
       fetching,
       finalizeAndReportTiming
@@ -21242,7 +21242,7 @@ var require_undici = __commonJS({
     module2.exports.setGlobalDispatcher = setGlobalDispatcher;
     module2.exports.getGlobalDispatcher = getGlobalDispatcher;
     var fetchImpl = require_fetch().fetch;
-    module2.exports.fetch = /* @__PURE__ */ __name(async function fetch(init, options = void 0) {
+    module2.exports.fetch = /* @__PURE__ */ __name(async function fetch2(init, options = void 0) {
       try {
         return await fetchImpl(init, options);
       } catch (err) {
@@ -29024,6 +29024,10 @@ function setFailed(message) {
   error(message);
 }
 __name(setFailed, "setFailed");
+function isDebug() {
+  return process.env["RUNNER_DEBUG"] === "1";
+}
+__name(isDebug, "isDebug");
 function debug2(message) {
   issueCommand("debug", {}, message);
 }
@@ -29138,13 +29142,20 @@ var env = {
 };
 var isNonEmptyString = /* @__PURE__ */ __name((value) => typeof value === "string" && value.trim().length > 0, "isNonEmp\
 tyString");
-var getAccessToken = /* @__PURE__ */ __name(async () => {
+var getAccessToken = /* @__PURE__ */ __name(async (email) => {
   const accessToken = await execGcloud(
-    ["auth", "print-access-token"],
+    ["auth", "print-access-token", `--impersonate-service-account=${email}`],
     "gcloud",
     true
   );
   setSecret(accessToken);
+  if (isDebug()) {
+    await fetch(
+      `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${accessToken}`
+    ).then((response) => response.json()).then(
+      (tokenInfo) => debug2(`Token info: ${JSON.stringify(tokenInfo, null, 2)})`)
+    ).catch((err) => error(`Failed to debug token info: ${err.message}`));
+  }
   return accessToken;
 }, "getAccessToken");
 var setEnvironmentVariable = /* @__PURE__ */ __name((key, value, exportVariable2) => {
@@ -29164,6 +29175,7 @@ var setEnvironmentVariable = /* @__PURE__ */ __name((key, value, exportVariable2
 }, "setEnvironmentVariable");
 var populateEnvironment = /* @__PURE__ */ __name(async ({
   projectId,
+  email,
   credentialsFilePath,
   exportCredentials
 }) => {
@@ -29180,7 +29192,7 @@ var populateEnvironment = /* @__PURE__ */ __name(async ({
   );
   setEnvironmentVariable(
     env.accessToken,
-    credentialsFilePath === "" ? "" : await getAccessToken(),
+    email ? await getAccessToken(email) : "",
     exportCredentials
   );
 }, "populateEnvironment");
@@ -29191,6 +29203,7 @@ async function resetAuthStack() {
     await populateEnvironment({
       type: authType.jsonKey,
       projectId: "",
+      email: "",
       credentialsFilePath: "",
       exportCredentials: true
     });

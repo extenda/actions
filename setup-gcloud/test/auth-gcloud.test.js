@@ -254,7 +254,11 @@ describe('auth-gcloud', () => {
     );
 
     expect(execGcloud).toHaveBeenCalledWith(
-      ['auth', 'print-access-token'],
+      [
+        'auth',
+        'print-access-token',
+        '--impersonate-service-account=json-sa@example.iam.gserviceaccount.com',
+      ],
       'gcloud',
       true,
     );
