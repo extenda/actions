@@ -10,7 +10,7 @@ const sendRequest = async (url, data) => {
     .post(url, data, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `bearer ${await getToken()}`,
+        Authorization: `Bearer ${await getToken()}`,
       },
     })
     .then((response) => {
