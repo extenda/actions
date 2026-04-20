@@ -107165,7 +107165,7 @@ var sendRequest2 = /* @__PURE__ */ __name(async (url3, data) => {
   return axios_default.post(url3, data, {
     headers: {
       "Content-Type": "application/json",
-      Authorization: `bearer ${await identity_token_default()}`
+      Authorization: `Bearer ${await identity_token_default()}`
     }
   }).then((response) => {
     const statuscode = response.status;
