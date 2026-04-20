@@ -95,7 +95,7 @@ describe('Send request to platform api', () => {
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'bearer token',
+          Authorization: 'Bearer token',
         },
       },
     );
@@ -131,7 +131,7 @@ describe('Send request to platform api', () => {
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'bearer token',
+          Authorization: 'Bearer token',
         },
       },
     );
@@ -165,7 +165,7 @@ describe('Send request to platform api', () => {
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'bearer token',
+          Authorization: 'Bearer token',
         },
       },
     );
@@ -200,7 +200,7 @@ describe('Send request to platform api', () => {
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'bearer token',
+          Authorization: 'Bearer token',
         },
       },
     );
@@ -219,7 +219,7 @@ describe('Send request to platform api', () => {
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'bearer token',
+          Authorization: 'Bearer token',
         },
       },
     );
@@ -242,7 +242,7 @@ describe('Send request to platform api', () => {
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'bearer token',
+          Authorization: 'Bearer token',
         },
       },
     );
@@ -258,7 +258,7 @@ describe('Send request to platform api', () => {
       data,
       expect.objectContaining({
         headers: expect.objectContaining({
-          Authorization: 'bearer token',
+          Authorization: 'Bearer token',
         }),
       }),
     );
