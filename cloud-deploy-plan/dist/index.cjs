@@ -102515,7 +102515,7 @@ async function getIdToken(audience) {
 __name(getIdToken, "getIdToken");
 
 // cloud-deploy/src/utils/identity-token.js
-var getToken = /* @__PURE__ */ __name(async (audience = "cloud-deploy") => getIdToken(audience), "getToken");
+var getToken = /* @__PURE__ */ __name(async (audience = "platform") => getIdToken(audience), "getToken");
 var identity_token_default = getToken;
 
 // cloud-deploy/src/utils/service-definition.js
