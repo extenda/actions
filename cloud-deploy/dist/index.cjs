@@ -107218,7 +107218,7 @@ var sendDeployInfo = /* @__PURE__ */ __name(async (service, timestamp2, version3
   return sendRequest2(url3, data);
 }, "sendDeployInfo");
 var saveVulnerabilities = /* @__PURE__ */ __name(async (service, reportJson, labels, githubRepository) => {
-  const url3 = "/security/vulnerabilities/";
+  const url3 = "/security/vulnerabilities";
   const data = {
     service,
     labels,

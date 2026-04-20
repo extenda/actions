@@ -91,7 +91,7 @@ const saveVulnerabilities = async (
   labels,
   githubRepository,
 ) => {
-  const url = '/security/vulnerabilities/';
+  const url = '/security/vulnerabilities';
   const data = {
     service,
     labels,
