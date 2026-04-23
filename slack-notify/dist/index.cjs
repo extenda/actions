@@ -19448,7 +19448,7 @@ var require_frame = __commonJS({
     } catch {
       crypto6 = {
         // not full compatibility, but minimum.
-        randomFillSync: /* @__PURE__ */ __name(function randomFillSync2(buffer4, _offset, _size) {
+        randomFillSync: /* @__PURE__ */ __name(function randomFillSync(buffer4, _offset, _size) {
           for (let i2 = 0; i2 < buffer4.length; ++i2) {
             buffer4[i2] = Math.random() * 255 | 0;
           }
@@ -65229,23 +65229,20 @@ function unsafeStringify(arr, offset = 0) {
 __name(unsafeStringify, "unsafeStringify");
 
 // node_modules/uuid/dist-node/rng.js
-var import_node_crypto = require("node:crypto");
-var rnds8Pool = new Uint8Array(256);
-var poolPtr = rnds8Pool.length;
+var rnds8 = new Uint8Array(16);
 function rng() {
-  if (poolPtr > rnds8Pool.length - 16) {
-    (0, import_node_crypto.randomFillSync)(rnds8Pool);
-    poolPtr = 0;
-  }
-  return rnds8Pool.slice(poolPtr, poolPtr += 16);
+  return crypto.getRandomValues(rnds8);
 }
 __name(rng, "rng");
 
-// node_modules/uuid/dist-node/native.js
-var import_node_crypto2 = require("node:crypto");
-var native_default = { randomUUID: import_node_crypto2.randomUUID };
-
 // node_modules/uuid/dist-node/v4.js
+function v4(options, buf, offset) {
+  if (!buf && !options && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return _v4(options, buf, offset);
+}
+__name(v4, "v4");
 function _v4(options, buf, offset) {
   options = options || {};
   const rnds = options.random ?? options.rng?.() ?? rng();
@@ -65267,13 +65264,6 @@ function _v4(options, buf, offset) {
   return unsafeStringify(rnds);
 }
 __name(_v4, "_v4");
-function v4(options, buf, offset) {
-  if (native_default.randomUUID && !buf && !options) {
-    return native_default.randomUUID();
-  }
-  return _v4(options, buf, offset);
-}
-__name(v4, "v4");
 var v4_default = v4;
 
 // utils/src/load-binary.js
@@ -67067,10 +67057,10 @@ function createHttpHeaders(rawHeaders) {
 __name(createHttpHeaders, "createHttpHeaders");
 
 // node_modules/@typespec/ts-http-runtime/dist/esm/util/uuidUtils.js
-function randomUUID5() {
+function randomUUID4() {
   return crypto.randomUUID();
 }
-__name(randomUUID5, "randomUUID");
+__name(randomUUID4, "randomUUID");
 
 // node_modules/@typespec/ts-http-runtime/dist/esm/pipelineRequest.js
 var PipelineRequestImpl = class {
@@ -67111,7 +67101,7 @@ var PipelineRequestImpl = class {
     this.abortSignal = options.abortSignal;
     this.onUploadProgress = options.onUploadProgress;
     this.onDownloadProgress = options.onDownloadProgress;
-    this.requestId = options.requestId || randomUUID5();
+    this.requestId = options.requestId || randomUUID4();
     this.allowInsecureConnection = options.allowInsecureConnection ?? false;
     this.enableBrowserStreams = options.enableBrowserStreams ?? false;
     this.requestOverrides = options.requestOverrides;
@@ -68565,7 +68555,7 @@ __name(concat, "concat");
 
 // node_modules/@typespec/ts-http-runtime/dist/esm/policies/multipartPolicy.js
 function generateBoundary() {
-  return `----AzSDKFormBoundary${randomUUID5()}`;
+  return `----AzSDKFormBoundary${randomUUID4()}`;
 }
 __name(generateBoundary, "generateBoundary");
 function encodeHeaders(headers) {
@@ -68858,10 +68848,10 @@ function isError2(e) {
   return isError(e);
 }
 __name(isError2, "isError");
-function randomUUID6() {
-  return randomUUID5();
+function randomUUID5() {
+  return randomUUID4();
 }
-__name(randomUUID6, "randomUUID");
+__name(randomUUID5, "randomUUID");
 var isNodeLike2 = isNodeLike;
 
 // node_modules/@azure/core-rest-pipeline/dist/esm/util/file.js
@@ -75663,7 +75653,7 @@ var AnonymousCredential = class extends Credential {
 };
 
 // node_modules/@azure/storage-common/dist/esm/credentials/StorageSharedKeyCredential.js
-var import_node_crypto3 = require("node:crypto");
+var import_node_crypto = require("node:crypto");
 
 // node_modules/@azure/storage-common/dist/esm/utils/SharedKeyComparator.js
 var table_lv0 = new Uint32Array([
@@ -76257,7 +76247,7 @@ var StorageSharedKeyCredential = class extends Credential {
    * @param stringToSign -
    */
   computeHMACSHA256(stringToSign) {
-    return (0, import_node_crypto3.createHmac)("sha256", this.accountKey).update(stringToSign, "utf8").digest("base64");
+    return (0, import_node_crypto.createHmac)("sha256", this.accountKey).update(stringToSign, "utf8").digest("base64");
   }
 };
 
@@ -76655,7 +76645,7 @@ function storageRetryPolicy(options = {}) {
 __name(storageRetryPolicy, "storageRetryPolicy");
 
 // node_modules/@azure/storage-common/dist/esm/policies/StorageSharedKeyCredentialPolicyV2.js
-var import_node_crypto4 = require("node:crypto");
+var import_node_crypto2 = require("node:crypto");
 var storageSharedKeyCredentialPolicyName = "storageSharedKeyCredentialPolicy";
 function storageSharedKeyCredentialPolicy(options) {
   function signRequest(request) {
@@ -76677,7 +76667,7 @@ function storageSharedKeyCredentialPolicy(options) {
       getHeaderValueToSign(request, HeaderConstants.IF_UNMODIFIED_SINCE),
       getHeaderValueToSign(request, HeaderConstants.RANGE)
     ].join("\n") + "\n" + getCanonicalizedHeadersString(request) + getCanonicalizedResourceString(request);
-    const signature = (0, import_node_crypto4.createHmac)("sha256", options.accountKey).update(stringToSign, "utf8").digest(
+    const signature = (0, import_node_crypto2.createHmac)("sha256", options.accountKey).update(stringToSign, "utf8").digest(
     "base64");
     request.headers.set(HeaderConstants.AUTHORIZATION, `SharedKey ${options.accountName}:${signature}`);
   }
@@ -76776,7 +76766,7 @@ ion") {
 __name(storageRequestFailureDetailsParserPolicy, "storageRequestFailureDetailsParserPolicy");
 
 // node_modules/@azure/storage-common/dist/esm/credentials/UserDelegationKeyCredential.js
-var import_node_crypto5 = require("node:crypto");
+var import_node_crypto3 = require("node:crypto");
 var UserDelegationKeyCredential = class {
   static {
     __name(this, "UserDelegationKeyCredential");
@@ -76809,7 +76799,7 @@ var UserDelegationKeyCredential = class {
    * @param stringToSign -
    */
   computeHMACSHA256(stringToSign) {
-    return (0, import_node_crypto5.createHmac)("sha256", this.key).update(stringToSign, "utf8").digest("base64");
+    return (0, import_node_crypto3.createHmac)("sha256", this.key).update(stringToSign, "utf8").digest("base64");
   }
 };
 
@@ -92472,7 +92462,7 @@ var BlobLeaseClient = class {
       this._containerOrBlobOperation = clientContext.blob;
     }
     if (!leaseId2) {
-      leaseId2 = randomUUID6();
+      leaseId2 = randomUUID5();
     }
     this._leaseId = leaseId2;
   }
@@ -96725,7 +96715,7 @@ var BlockBlobClient = class _BlockBlobClient extends BlobClient {
  ${BLOCK_BLOB_MAX_BLOCKS}`);
       }
       const blockList = [];
-      const blockIDPrefix = randomUUID6();
+      const blockIDPrefix = randomUUID5();
       let transferProgress = 0;
       const batch = new Batch(options.concurrency);
       for (let i2 = 0; i2 < numBlocks; i2++) {
@@ -96806,7 +96796,7 @@ var BlockBlobClient = class _BlockBlobClient extends BlobClient {
     }
     return tracingClient.withSpan("BlockBlobClient-uploadStream", options, async (updatedOptions) => {
       let blockNum = 0;
-      const blockIDPrefix = randomUUID6();
+      const blockIDPrefix = randomUUID5();
       let transferProgress = 0;
       const blockList = [];
       const scheduler = new BufferScheduler(
