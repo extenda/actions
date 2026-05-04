@@ -65,8 +65,6 @@ const action = async () => {
   const iamFileGlob = core.getInput('iam-definition') || 'iam/*.yaml';
   const iamUrl =
     core.getInput('iam-api-url') || 'https://iam-api.retailsvc.com';
-  const styraUrl =
-    core.getInput('styra-url') || 'https://extendaretail.svc.styra.com';
   const dryRun = core.getInput('dry-run') === 'true';
   const skipProd = core.getInput('skip-prod') === 'true';
 

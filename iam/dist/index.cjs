@@ -102271,6 +102271,32 @@ var buildCurrentKeys = /* @__PURE__ */ __name((connections) => {
   }
   return keys;
 }, "buildCurrentKeys");
+var logDryRunDiff = /* @__PURE__ */ __name(async (client, projectId, mappedServices) => {
+  info(`PSC sync dry-run for ${projectId} \u2014 fetching current state from platform API:`);
+  const { data: currentConnections } = await client.get(
+    `/internal-connections/producer/${projectId}/${REGION}`
+  );
+  const currentKeys = buildCurrentKeys(currentConnections);
+  const desiredKeys = /* @__PURE__ */ new Set();
+  for (const service of mappedServices) {
+    for (const consumer of extractConsumerProjectIDs(service["allowed-consumers"], projectId)) {
+      desiredKeys.add(`${service.name}::${consumer}`);
+    }
+  }
+  const toAdd = [...desiredKeys].filter((k) => !currentKeys.has(k));
+  const toRemove = [...currentKeys].filter((k) => !desiredKeys.has(k));
+  if (toAdd.length === 0 && toRemove.length === 0) {
+    info("  No PSC changes.");
+  }
+  for (const key of toAdd) {
+    const [svc, consumer] = key.split("::");
+    info(`  Would connect:    ${consumer} \u2192 ${svc}`);
+  }
+  for (const key of toRemove) {
+    const [svc, consumer] = key.split("::");
+    info(`  Would disconnect: ${consumer} \u2192 ${svc}`);
+  }
+}, "logDryRunDiff");
 var syncPscConnections = /* @__PURE__ */ __name(async (prodServiceAccountKey, iam, dryRun = false) => {
   const services = iam.services ?? [];
   if (services.length === 0) {
@@ -102287,30 +102313,7 @@ var syncPscConnections = /* @__PURE__ */ __name(async (prodServiceAccountKey, ia
     headers: { authorization: `Bearer ${token}` }
   });
   if (dryRun) {
-    info(`PSC sync dry-run for ${projectId} \u2014 fetching current state from platform API:`);
-    const { data: currentConnections } = await client.get(
-      `/internal-connections/producer/${projectId}/${REGION}`
-    );
-    const currentKeys = buildCurrentKeys(currentConnections);
-    const desiredKeys = /* @__PURE__ */ new Set();
-    for (const service of mappedServices) {
-      for (const consumer of extractConsumerProjectIDs(service["allowed-consumers"], projectId)) {
-        desiredKeys.add(`${service.name}::${consumer}`);
-      }
-    }
-    const toAdd = [...desiredKeys].filter((k) => !currentKeys.has(k));
-    const toRemove = [...currentKeys].filter((k) => !desiredKeys.has(k));
-    if (toAdd.length === 0 && toRemove.length === 0) {
-      info("  No PSC changes.");
-    }
-    for (const key of toAdd) {
-      const [svc, consumer] = key.split("::");
-      info(`  Would connect:    ${consumer} \u2192 ${svc}`);
-    }
-    for (const key of toRemove) {
-      const [svc, consumer] = key.split("::");
-      info(`  Would disconnect: ${consumer} \u2192 ${svc}`);
-    }
+    await logDryRunDiff(client, projectId, mappedServices);
     return;
   }
   const payload = {
@@ -102645,7 +102648,6 @@ var action5 = /* @__PURE__ */ __name(async () => {
   });
   const iamFileGlob = getInput("iam-definition") || "iam/*.yaml";
   const iamUrl = getInput("iam-api-url") || "https://iam-api.retailsvc.com";
-  const styraUrl = getInput("styra-url") || "https://extendaretail.svc.styra.com";
   const dryRun = getInput("dry-run") === "true";
   const skipProd = getInput("skip-prod") === "true";
   const iamFiles = import_fast_glob2.default.sync(iamFileGlob, { onlyFiles: true });

@@ -36,6 +36,37 @@ const buildCurrentKeys = (connections) => {
   return keys;
 };
 
+const logDryRunDiff = async (client, projectId, mappedServices) => {
+  core.info(`PSC sync dry-run for ${projectId} — fetching current state from platform API:`);
+
+  const { data: currentConnections } = await client.get(
+    `/internal-connections/producer/${projectId}/${REGION}`,
+  );
+  const currentKeys = buildCurrentKeys(currentConnections);
+
+  const desiredKeys = new Set();
+  for (const service of mappedServices) {
+    for (const consumer of extractConsumerProjectIDs(service['allowed-consumers'], projectId)) {
+      desiredKeys.add(`${service.name}::${consumer}`);
+    }
+  }
+
+  const toAdd = [...desiredKeys].filter((k) => !currentKeys.has(k));
+  const toRemove = [...currentKeys].filter((k) => !desiredKeys.has(k));
+
+  if (toAdd.length === 0 && toRemove.length === 0) {
+    core.info('  No PSC changes.');
+  }
+  for (const key of toAdd) {
+    const [svc, consumer] = key.split('::');
+    core.info(`  Would connect:    ${consumer} → ${svc}`);
+  }
+  for (const key of toRemove) {
+    const [svc, consumer] = key.split('::');
+    core.info(`  Would disconnect: ${consumer} → ${svc}`);
+  }
+};
+
 const syncPscConnections = async (prodServiceAccountKey, iam, dryRun = false) => {
   const services = iam.services ?? [];
   if (services.length === 0) {
@@ -56,35 +87,7 @@ const syncPscConnections = async (prodServiceAccountKey, iam, dryRun = false) =>
   });
 
   if (dryRun) {
-    core.info(`PSC sync dry-run for ${projectId} — fetching current state from platform API:`);
-
-    const { data: currentConnections } = await client.get(
-      `/internal-connections/producer/${projectId}/${REGION}`,
-    );
-    const currentKeys = buildCurrentKeys(currentConnections);
-
-    // Build desired keys from the IAM payload
-    const desiredKeys = new Set();
-    for (const service of mappedServices) {
-      for (const consumer of extractConsumerProjectIDs(service['allowed-consumers'], projectId)) {
-        desiredKeys.add(`${service.name}::${consumer}`);
-      }
-    }
-
-    const toAdd = [...desiredKeys].filter((k) => !currentKeys.has(k));
-    const toRemove = [...currentKeys].filter((k) => !desiredKeys.has(k));
-
-    if (toAdd.length === 0 && toRemove.length === 0) {
-      core.info('  No PSC changes.');
-    }
-    for (const key of toAdd) {
-      const [svc, consumer] = key.split('::');
-      core.info(`  Would connect:    ${consumer} → ${svc}`);
-    }
-    for (const key of toRemove) {
-      const [svc, consumer] = key.split('::');
-      core.info(`  Would disconnect: ${consumer} → ${svc}`);
-    }
+    await logDryRunDiff(client, projectId, mappedServices);
     return;
   }
 
