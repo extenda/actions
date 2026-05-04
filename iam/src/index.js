@@ -97,7 +97,7 @@ const action = async () => {
       }
     }
     core.endGroup();
-    
+
     core.startGroup(`Sync PSC connections for ${iamFile}`);
     await syncPscConnections(serviceAccountKeyProd, iam, dryRun);
     core.endGroup();
