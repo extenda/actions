@@ -102243,6 +102243,103 @@ var configureIAM = /* @__PURE__ */ __name(async (iam, iamUrl, iamToken, skipIAM)
   return null;
 }, "configureIAM");
 
+// iam/src/sync-psc-connections.js
+var PLATFORM_API_PROD = "https://platform-api.retailsvc.com";
+var AUDIENCE = "platform";
+var REGION = "europe-west1";
+var PROJECT_ID_PATTERN = /^[a-z][a-z0-9]*(?:-[a-z][a-z0-9]*)*-[a-z0-9]{4}$/;
+var getClanPrefix = /* @__PURE__ */ __name((projectId) => {
+  const match2 = projectId.match(/^(.+?)-(?:prod|staging)-[a-z0-9]{4}$/);
+  return match2 ? match2[1] : null;
+}, "getClanPrefix");
+var extractConsumerProjectIDs = /* @__PURE__ */ __name((allowedConsumers, producerProjectId) => {
+  const ids = /* @__PURE__ */ new Set();
+  const producerClan = getClanPrefix(producerProjectId);
+  for (const group of allowedConsumers) {
+    if (producerClan && group.clan === producerClan) continue;
+    for (const sa of group["service-accounts"] ?? []) {
+      const match2 = sa.match(/@([a-z][a-z0-9-]+)\.iam\.gserviceaccount\.com$/);
+      if (!match2) continue;
+      const id = match2[1];
+      if (id === producerProjectId) continue;
+      if (!PROJECT_ID_PATTERN.test(id)) continue;
+      ids.add(id);
+    }
+  }
+  return ids;
+}, "extractConsumerProjectIDs");
+var buildCurrentKeys = /* @__PURE__ */ __name((connections) => {
+  const keys = /* @__PURE__ */ new Set();
+  for (const conn of connections) {
+    for (const svc of conn.services ?? []) {
+      keys.add(`${svc.service_name}::${conn.consumer_projectid}`);
+    }
+  }
+  return keys;
+}, "buildCurrentKeys");
+var logDryRunDiff = /* @__PURE__ */ __name(async (client, projectId, mappedServices) => {
+  info(`PSC sync dry-run for ${projectId} \u2014 fetching current state from platform API:`);
+  const { data: currentConnections } = await client.get(
+    `/internal-connections/producer/${projectId}/${REGION}`
+  );
+  const currentKeys = buildCurrentKeys(currentConnections);
+  const desiredKeys = /* @__PURE__ */ new Set();
+  for (const service of mappedServices) {
+    for (const consumer of extractConsumerProjectIDs(service["allowed-consumers"], projectId)) {
+      desiredKeys.add(`${service.name}::${consumer}`);
+    }
+  }
+  const toAdd = [...desiredKeys].filter((k) => !currentKeys.has(k));
+  const toRemove = [...currentKeys].filter((k) => !desiredKeys.has(k));
+  if (toAdd.length === 0 && toRemove.length === 0) {
+    info("  No PSC changes.");
+  }
+  for (const key of toAdd) {
+    const [svc, consumer] = key.split("::");
+    info(`  Would connect:    ${consumer} \u2192 ${svc}`);
+  }
+  for (const key of toRemove) {
+    const [svc, consumer] = key.split("::");
+    info(`  Would disconnect: ${consumer} \u2192 ${svc}`);
+  }
+}, "logDryRunDiff");
+var syncPscConnections = /* @__PURE__ */ __name(async (prodServiceAccountKey, iam, dryRun = false) => {
+  const services = iam.services ?? [];
+  if (services.length === 0) {
+    return;
+  }
+  const mappedServices = services.map(({ name, "allowed-consumers": allowedConsumers }) => ({
+    name,
+    "allowed-consumers": allowedConsumers ?? []
+  }));
+  const projectId = await setup_gcloud_default(prodServiceAccountKey);
+  const token = await getIdToken(AUDIENCE);
+  const client = axios_default.create({
+    baseURL: PLATFORM_API_PROD,
+    headers: { authorization: `Bearer ${token}` }
+  });
+  if (dryRun) {
+    await logDryRunDiff(client, projectId, mappedServices);
+    return;
+  }
+  const payload = {
+    "project-id": projectId,
+    services: mappedServices
+  };
+  info(`Syncing PSC connections for ${projectId}`);
+  const response = await client.post("/internal-connections/sync", payload);
+  for (const result of response.data) {
+    if (result.statusCode === 200 || result.statusCode === 409) {
+      info(`  PSC ${result.action}: ${result.serviceName} \u2192 ${result.consumerProjectID}`);
+    } else {
+      warning(
+        `  PSC ${result.action} failed: ${result.serviceName} \u2192 ${result.consumerProjectID}: ${result.message}`
+      );
+    }
+  }
+}, "syncPscConnections");
+var sync_psc_connections_default = syncPscConnections;
+
 // iam/src/iam-definition.js
 var import_node_fs8 = __toESM(require("node:fs"), 1);
 var import_jsonschema = __toESM(require_lib(), 1);
@@ -102516,7 +102613,7 @@ var loadCredentials = /* @__PURE__ */ __name(async (serviceAccountKey, env2) => 
 var load_credentials_default = loadCredentials;
 
 // iam/src/index.js
-var setupEnvironment = /* @__PURE__ */ __name(async (serviceAccountKey, gcloudAuthKey, iam, styraUrl, iamUrl) => {
+var setupEnvironment = /* @__PURE__ */ __name(async (serviceAccountKey, gcloudAuthKey, iam, iamUrl) => {
   const projectId = await setup_gcloud_default(gcloudAuthKey);
   const { env: projectEnv } = project_info_default(projectId);
   let skipIAM = projectEnv === "staging";
@@ -102557,7 +102654,6 @@ var action5 = /* @__PURE__ */ __name(async () => {
   });
   const iamFileGlob = getInput("iam-definition") || "iam/*.yaml";
   const iamUrl = getInput("iam-api-url") || "https://iam-api.retailsvc.com";
-  const styraUrl = getInput("styra-url") || "https://extendaretail.svc.styra.com";
   const dryRun = getInput("dry-run") === "true";
   const skipProd = getInput("skip-prod") === "true";
   const iamFiles = import_fast_glob2.default.sync(iamFileGlob, { onlyFiles: true });
@@ -102570,7 +102666,6 @@ var action5 = /* @__PURE__ */ __name(async () => {
         serviceAccountKey,
         serviceAccountKeyStaging,
         iam,
-        styraUrl,
         iamUrl
       );
       if (!skipProd) {
@@ -102579,11 +102674,13 @@ var action5 = /* @__PURE__ */ __name(async () => {
           serviceAccountKey,
           serviceAccountKeyProd,
           iam,
-          styraUrl,
           iamUrl
         );
       }
     }
+    endGroup();
+    startGroup(`Sync PSC connections for ${iamFile}`);
+    await sync_psc_connections_default(serviceAccountKeyProd, iam, dryRun);
     endGroup();
   }
 }, "action");

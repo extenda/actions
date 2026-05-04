@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 vi.mock('@actions/core');
 vi.mock('../src/configure-iam.js');
 vi.mock('../src/configure-bundle-sync.js');
+vi.mock('../src/sync-psc-connections.js');
 vi.mock('../src/iam-definition.js');
 vi.mock('../../iam-test-token/src/iam-auth.js');
 vi.mock('../src/load-credentials.js');
@@ -19,6 +20,7 @@ import fetchIamToken from '../../iam-test-token/src/iam-auth.js';
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
 import configureBundleSync from '../src/configure-bundle-sync.js';
 import { configureIAM } from '../src/configure-iam.js';
+import syncPscConnections from '../src/sync-psc-connections.js';
 import loadIamDefinition from '../src/iam-definition.js';
 import action from '../src/index.js';
 import loadCredentials from '../src/load-credentials.js';
@@ -51,14 +53,13 @@ describe('run action', () => {
       .mockReturnValueOnce('service-account-staging')
       .mockReturnValueOnce('service-account-prod')
       .mockReturnValueOnce('iam.yaml')
-      .mockReturnValueOnce('')
-      .mockReturnValueOnce('https://extendaretail.styra.com');
+      .mockReturnValueOnce('');
     loadIamDefinition.mockReturnValueOnce({});
     fg.sync.mockReturnValueOnce(['iam.yaml']);
     fetchIamToken.mockResolvedValueOnce('iam-token');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(8);
+    expect(core.getInput).toHaveBeenCalledTimes(7);
     expect(fetchIamToken).toHaveBeenCalledWith(
       'iam-key',
       'iam-email',
@@ -98,15 +99,14 @@ describe('run action', () => {
       .mockReturnValueOnce('service-account-staging')
       .mockReturnValueOnce('service-account-prod')
       .mockReturnValueOnce('iam.yaml')
-      .mockReturnValueOnce('https://iam-api.retailsvc.dev')
-      .mockReturnValueOnce('https://extendaretail.styra.com');
+      .mockReturnValueOnce('https://iam-api.retailsvc.dev');
     loadIamDefinition.mockReturnValueOnce({});
     fg.sync.mockReturnValueOnce(['iam.yaml']);
     fetchIamToken.mockResolvedValueOnce('iam-token');
     fetchIamToken.mockResolvedValueOnce('iam-token');
     await action();
 
-    expect(core.getInput).toHaveBeenCalledTimes(8);
+    expect(core.getInput).toHaveBeenCalledTimes(7);
     expect(fetchIamToken).toHaveBeenCalledWith(
       'iam-key',
       'iam-email',
@@ -145,14 +145,33 @@ describe('run action', () => {
       .mockReturnValueOnce('service-account-staging')
       .mockReturnValueOnce('service-account-prod')
       .mockReturnValueOnce('iam/*.yaml')
-      .mockReturnValueOnce('')
-      .mockReturnValueOnce('https://extendaretail.styra.com');
+      .mockReturnValueOnce('');
     loadIamDefinition.mockReturnValue({});
     fg.sync.mockReturnValueOnce(['iam/iam.yaml', 'iam/two.yaml']);
     fetchIamToken.mockResolvedValue('iam-token');
     await action();
 
     expect(loadIamDefinition).toHaveBeenCalledTimes(2);
+  });
+
+  test('It calls syncPscConnections with prod key and iam payload', async () => {
+    setupGcloud.mockResolvedValueOnce('test-staging-332');
+    setupGcloud.mockResolvedValueOnce('test-prod-332');
+    loadCredentials.mockResolvedValue(credentials);
+    core.getInput
+      .mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('service-account-staging')
+      .mockReturnValueOnce('service-account-prod')
+      .mockReturnValueOnce('iam.yaml')
+      .mockReturnValueOnce('');
+    const iam = { services: [{ name: 'service-name1', 'allowed-consumers': [] }] };
+    loadIamDefinition.mockReturnValueOnce(iam);
+    fg.sync.mockReturnValueOnce(['iam.yaml']);
+    fetchIamToken.mockResolvedValueOnce('iam-token');
+    await action();
+
+    expect(syncPscConnections).toHaveBeenCalledOnce();
+    expect(syncPscConnections).toHaveBeenCalledWith('service-account-prod', iam, false);
   });
 
   test('Dry-run stops after loading schema', async () => {
@@ -164,7 +183,6 @@ describe('run action', () => {
       .mockReturnValueOnce('service-account-prod')
       .mockReturnValueOnce('iam/*.yaml')
       .mockReturnValueOnce('')
-      .mockReturnValueOnce('https://extendaretail.styra.com')
       .mockReturnValueOnce('true');
     loadIamDefinition.mockReturnValue({});
     fg.sync.mockReturnValueOnce(['iam/iam.yaml', 'iam/two.yaml']);
@@ -173,5 +191,7 @@ describe('run action', () => {
     expect(loadIamDefinition).toHaveBeenCalledTimes(2);
     expect(fetchIamToken).not.toHaveBeenCalled();
     expect(configureIAM).not.toHaveBeenCalled();
+    expect(syncPscConnections).toHaveBeenCalledTimes(2);
+    expect(syncPscConnections).toHaveBeenCalledWith('service-account-prod', {}, true);
   });
 });
