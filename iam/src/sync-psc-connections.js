@@ -13,7 +13,7 @@ const extractConsumerProjectIDs = (allowedConsumers, producerProjectId) => {
   const ids = new Set();
   for (const group of allowedConsumers) {
     for (const sa of group['service-accounts'] ?? []) {
-      const match = sa.match(/@([^.]+)\.iam\.gserviceaccount\.com$/);
+      const match = sa.match(/@([a-z][a-z0-9-]+)\.iam\.gserviceaccount\.com$/);
       if (!match) continue;
       const id = match[1];
       if (id === producerProjectId) continue;          // same project
