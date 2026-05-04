@@ -6,6 +6,7 @@ import fetchIamToken from '../../iam-test-token/src/iam-auth.js';
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
 import configureBundleSync from './configure-bundle-sync.js';
 import { configureIAM } from './configure-iam.js';
+import syncPscConnections from './sync-psc-connections.js';
 import loadIamDefinition from './iam-definition.js';
 import loadCredentials from './load-credentials.js';
 
@@ -13,7 +14,6 @@ const setupEnvironment = async (
   serviceAccountKey,
   gcloudAuthKey,
   iam,
-  styraUrl,
   iamUrl,
 ) => {
   const projectId = await setupGcloud(gcloudAuthKey);
@@ -84,7 +84,6 @@ const action = async () => {
         serviceAccountKey,
         serviceAccountKeyStaging,
         iam,
-        styraUrl,
         iamUrl,
       );
 
@@ -95,11 +94,14 @@ const action = async () => {
           serviceAccountKey,
           serviceAccountKeyProd,
           iam,
-          styraUrl,
           iamUrl,
         );
       }
     }
+    core.endGroup();
+    
+    core.startGroup(`Sync PSC connections for ${iamFile}`);
+    await syncPscConnections(serviceAccountKeyProd, iam, dryRun);
     core.endGroup();
   }
 };
