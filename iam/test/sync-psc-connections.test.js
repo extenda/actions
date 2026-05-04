@@ -135,6 +135,42 @@ describe('syncPscConnections', () => {
     expect(core.info).toHaveBeenCalledWith('  Would disconnect: consumer-prod-old → service-name1');
   });
 
+  test('dry-run excludes same-clan and same-project consumers', async () => {
+    const iamSameClan = {
+      services: [
+        {
+          name: 'platform-api',
+          'allowed-consumers': [
+            {
+              clan: 'platform', // same clan as producer — entire group excluded
+              'service-accounts': [
+                'sa@platform-staging-9c83.iam.gserviceaccount.com',
+                'sa@platform-prod-2481.iam.gserviceaccount.com',
+              ],
+            },
+            {
+              clan: 'sre', // different clan — included
+              'service-accounts': [
+                'sa@sre-prod-5462.iam.gserviceaccount.com',
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    setupGcloud.mockResolvedValueOnce('platform-prod-2481');
+    getIdToken.mockResolvedValueOnce('id-token');
+    const mockGet = vi.fn().mockResolvedValueOnce({ data: [] });
+    axios.create.mockReturnValueOnce({ get: mockGet, post: vi.fn() });
+
+    await syncPscConnections('prod-key', iamSameClan, true);
+
+    // Only sre-prod-5462 should appear — same-clan and same-project are filtered
+    expect(core.info).toHaveBeenCalledWith('  Would connect:    sre-prod-5462 → platform-api');
+    expect(core.info).not.toHaveBeenCalledWith(expect.stringContaining('platform-staging-9c83'));
+    expect(core.info).not.toHaveBeenCalledWith(expect.stringContaining('Would connect:    platform-prod-2481'));
+  });
+
   test('dry-run reports no changes when current state matches IAM', async () => {
     setupGcloud.mockResolvedValueOnce('producer-prod-1234');
     getIdToken.mockResolvedValueOnce('id-token');
