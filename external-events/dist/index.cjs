@@ -116548,7 +116548,16 @@ var schema2 = import_joi.default.object({
           attribute: import_joi.default.string().required(),
           "exposed-as": import_joi.default.string().required()
         })
-      )
+      ),
+      dfo: import_joi.default.object({
+        "entity-type": import_joi.default.string().required(),
+        "field-paths": import_joi.default.object({
+          "entity-id": import_joi.default.string(),
+          "entity-ids": import_joi.default.string(),
+          "business-unit-id": import_joi.default.string(),
+          "business-unit-group-id": import_joi.default.string()
+        }).required()
+      })
     })
   ).required()
 });

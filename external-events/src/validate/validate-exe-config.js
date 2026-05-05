@@ -41,6 +41,17 @@ const schema = joi.object({
             'exposed-as': joi.string().required(),
           }),
         ),
+        dfo: joi.object({
+          'entity-type': joi.string().required(),
+          'field-paths': joi
+            .object({
+              'entity-id': joi.string(),
+              'entity-ids': joi.string(),
+              'business-unit-id': joi.string(),
+              'business-unit-group-id': joi.string(),
+            })
+            .required(),
+        }),
       }),
     )
     .required(),
