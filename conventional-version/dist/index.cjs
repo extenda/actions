@@ -24578,10 +24578,11 @@ var require_lodash = __commonJS({
   "node_modules/lodash/lodash.js"(exports2, module2) {
     (function() {
       var undefined2;
-      var VERSION = "4.17.23";
+      var VERSION = "4.18.1";
       var LARGE_ARRAY_SIZE = 200;
       var CORE_ERROR_TEXT = "Unsupported core-js use. Try https://npms.io/search?q=ponyfill.", FUNC_ERROR_TEXT = "Expect\
-ed a function", INVALID_TEMPL_VAR_ERROR_TEXT = "Invalid `variable` option passed into `_.template`";
+ed a function", INVALID_TEMPL_VAR_ERROR_TEXT = "Invalid `variable` option passed into `_.template`", INVALID_TEMPL_IMPORTS_ERROR_TEXT = "\
+Invalid `imports` option passed into `_.template`";
       var HASH_UNDEFINED = "__lodash_hash_undefined__";
       var MAX_MEMOIZE_SIZE = 500;
       var PLACEHOLDER = "__lodash_placeholder__";
@@ -26750,20 +26751,12 @@ Promise"), Set2 = getNative(context, "Set"), WeakMap2 = getNative(context, "Weak
           if (!length) {
             return true;
           }
-          var isRootPrimitive = object == null || typeof object !== "object" && typeof object !== "function";
           while (++index < length) {
-            var key = path[index];
-            if (typeof key !== "string") {
-              continue;
-            }
+            var key = toKey(path[index]);
             if (key === "__proto__" && !hasOwnProperty.call(object, "__proto__")) {
               return false;
             }
-            if (key === "constructor" && index + 1 < length && typeof path[index + 1] === "string" && path[index + 1] ===
-            "prototype") {
-              if (isRootPrimitive && index === 0) {
-                continue;
-              }
+            if ((key === "constructor" || key === "prototype") && index < length - 1) {
               return false;
             }
           }
@@ -28244,7 +28237,7 @@ on" && objCtor instanceof objCtor && typeof othCtor == "function" && othCtor ins
           var index = -1, length = pairs == null ? 0 : pairs.length, result2 = {};
           while (++index < length) {
             var pair = pairs[index];
-            result2[pair[0]] = pair[1];
+            baseAssignValue(result2, pair[0], pair[1]);
           }
           return result2;
         }
@@ -29814,9 +29807,14 @@ e");
             options = undefined2;
           }
           string = toString(string);
-          options = assignInWith({}, options, settings, customDefaultsAssignIn);
-          var imports = assignInWith({}, options.imports, settings.imports, customDefaultsAssignIn), importsKeys = keys(
-          imports), importsValues = baseValues(imports, importsKeys);
+          options = assignWith({}, options, settings, customDefaultsAssignIn);
+          var imports = assignWith({}, options.imports, settings.imports, customDefaultsAssignIn), importsKeys = keys(imports),
+          importsValues = baseValues(imports, importsKeys);
+          arrayEach(importsKeys, function(key) {
+            if (reForbiddenIdentifierChars.test(key)) {
+              throw new Error2(INVALID_TEMPL_IMPORTS_ERROR_TEXT);
+            }
+          });
           var isEscaping, isEvaluating, index = 0, interpolate = options.interpolate || reNoMatch, source = "__p += '";
           var reDelimiters = RegExp2(
             (options.escape || reNoMatch).source + "|" + interpolate.source + "|" + (interpolate === reInterpolate ? reEsTemplate :
@@ -34321,6 +34319,23 @@ var require_split2 = __commonJS({
   }
 });
 
+// node_modules/lodash/_arrayEach.js
+var require_arrayEach = __commonJS({
+  "node_modules/lodash/_arrayEach.js"(exports2, module2) {
+    function arrayEach(array, iteratee) {
+      var index = -1, length = array == null ? 0 : array.length;
+      while (++index < length) {
+        if (iteratee(array[index], index, array) === false) {
+          break;
+        }
+      }
+      return array;
+    }
+    __name(arrayEach, "arrayEach");
+    module2.exports = arrayEach;
+  }
+});
+
 // node_modules/lodash/_freeGlobal.js
 var require_freeGlobal = __commonJS({
   "node_modules/lodash/_freeGlobal.js"(exports2, module2) {
@@ -35099,75 +35114,6 @@ var require_isPrototype = __commonJS({
   }
 });
 
-// node_modules/lodash/_nativeKeysIn.js
-var require_nativeKeysIn = __commonJS({
-  "node_modules/lodash/_nativeKeysIn.js"(exports2, module2) {
-    function nativeKeysIn(object) {
-      var result = [];
-      if (object != null) {
-        for (var key in Object(object)) {
-          result.push(key);
-        }
-      }
-      return result;
-    }
-    __name(nativeKeysIn, "nativeKeysIn");
-    module2.exports = nativeKeysIn;
-  }
-});
-
-// node_modules/lodash/_baseKeysIn.js
-var require_baseKeysIn = __commonJS({
-  "node_modules/lodash/_baseKeysIn.js"(exports2, module2) {
-    var isObject = require_isObject();
-    var isPrototype = require_isPrototype();
-    var nativeKeysIn = require_nativeKeysIn();
-    var objectProto = Object.prototype;
-    var hasOwnProperty = objectProto.hasOwnProperty;
-    function baseKeysIn(object) {
-      if (!isObject(object)) {
-        return nativeKeysIn(object);
-      }
-      var isProto = isPrototype(object), result = [];
-      for (var key in object) {
-        if (!(key == "constructor" && (isProto || !hasOwnProperty.call(object, key)))) {
-          result.push(key);
-        }
-      }
-      return result;
-    }
-    __name(baseKeysIn, "baseKeysIn");
-    module2.exports = baseKeysIn;
-  }
-});
-
-// node_modules/lodash/keysIn.js
-var require_keysIn = __commonJS({
-  "node_modules/lodash/keysIn.js"(exports2, module2) {
-    var arrayLikeKeys = require_arrayLikeKeys();
-    var baseKeysIn = require_baseKeysIn();
-    var isArrayLike2 = require_isArrayLike();
-    function keysIn(object) {
-      return isArrayLike2(object) ? arrayLikeKeys(object, true) : baseKeysIn(object);
-    }
-    __name(keysIn, "keysIn");
-    module2.exports = keysIn;
-  }
-});
-
-// node_modules/lodash/assignInWith.js
-var require_assignInWith = __commonJS({
-  "node_modules/lodash/assignInWith.js"(exports2, module2) {
-    var copyObject = require_copyObject();
-    var createAssigner = require_createAssigner();
-    var keysIn = require_keysIn();
-    var assignInWith = createAssigner(function(object, source, srcIndex, customizer) {
-      copyObject(source, keysIn(source), object, customizer);
-    });
-    module2.exports = assignInWith;
-  }
-});
-
 // node_modules/lodash/_overArg.js
 var require_overArg = __commonJS({
   "node_modules/lodash/_overArg.js"(exports2, module2) {
@@ -35178,6 +35124,66 @@ var require_overArg = __commonJS({
     }
     __name(overArg, "overArg");
     module2.exports = overArg;
+  }
+});
+
+// node_modules/lodash/_nativeKeys.js
+var require_nativeKeys = __commonJS({
+  "node_modules/lodash/_nativeKeys.js"(exports2, module2) {
+    var overArg = require_overArg();
+    var nativeKeys = overArg(Object.keys, Object);
+    module2.exports = nativeKeys;
+  }
+});
+
+// node_modules/lodash/_baseKeys.js
+var require_baseKeys = __commonJS({
+  "node_modules/lodash/_baseKeys.js"(exports2, module2) {
+    var isPrototype = require_isPrototype();
+    var nativeKeys = require_nativeKeys();
+    var objectProto = Object.prototype;
+    var hasOwnProperty = objectProto.hasOwnProperty;
+    function baseKeys(object) {
+      if (!isPrototype(object)) {
+        return nativeKeys(object);
+      }
+      var result = [];
+      for (var key in Object(object)) {
+        if (hasOwnProperty.call(object, key) && key != "constructor") {
+          result.push(key);
+        }
+      }
+      return result;
+    }
+    __name(baseKeys, "baseKeys");
+    module2.exports = baseKeys;
+  }
+});
+
+// node_modules/lodash/keys.js
+var require_keys = __commonJS({
+  "node_modules/lodash/keys.js"(exports2, module2) {
+    var arrayLikeKeys = require_arrayLikeKeys();
+    var baseKeys = require_baseKeys();
+    var isArrayLike2 = require_isArrayLike();
+    function keys(object) {
+      return isArrayLike2(object) ? arrayLikeKeys(object) : baseKeys(object);
+    }
+    __name(keys, "keys");
+    module2.exports = keys;
+  }
+});
+
+// node_modules/lodash/assignWith.js
+var require_assignWith = __commonJS({
+  "node_modules/lodash/assignWith.js"(exports2, module2) {
+    var copyObject = require_copyObject();
+    var createAssigner = require_createAssigner();
+    var keys = require_keys();
+    var assignWith = createAssigner(function(object, source, srcIndex, customizer) {
+      copyObject(source, keys(source), object, customizer);
+    });
+    module2.exports = assignWith;
   }
 });
 
@@ -35318,53 +35324,6 @@ var require_escapeStringChar = __commonJS({
     }
     __name(escapeStringChar, "escapeStringChar");
     module2.exports = escapeStringChar;
-  }
-});
-
-// node_modules/lodash/_nativeKeys.js
-var require_nativeKeys = __commonJS({
-  "node_modules/lodash/_nativeKeys.js"(exports2, module2) {
-    var overArg = require_overArg();
-    var nativeKeys = overArg(Object.keys, Object);
-    module2.exports = nativeKeys;
-  }
-});
-
-// node_modules/lodash/_baseKeys.js
-var require_baseKeys = __commonJS({
-  "node_modules/lodash/_baseKeys.js"(exports2, module2) {
-    var isPrototype = require_isPrototype();
-    var nativeKeys = require_nativeKeys();
-    var objectProto = Object.prototype;
-    var hasOwnProperty = objectProto.hasOwnProperty;
-    function baseKeys(object) {
-      if (!isPrototype(object)) {
-        return nativeKeys(object);
-      }
-      var result = [];
-      for (var key in Object(object)) {
-        if (hasOwnProperty.call(object, key) && key != "constructor") {
-          result.push(key);
-        }
-      }
-      return result;
-    }
-    __name(baseKeys, "baseKeys");
-    module2.exports = baseKeys;
-  }
-});
-
-// node_modules/lodash/keys.js
-var require_keys = __commonJS({
-  "node_modules/lodash/keys.js"(exports2, module2) {
-    var arrayLikeKeys = require_arrayLikeKeys();
-    var baseKeys = require_baseKeys();
-    var isArrayLike2 = require_isArrayLike();
-    function keys(object) {
-      return isArrayLike2(object) ? arrayLikeKeys(object) : baseKeys(object);
-    }
-    __name(keys, "keys");
-    module2.exports = keys;
   }
 });
 
@@ -35550,7 +35509,8 @@ var require_templateSettings = __commonJS({
 // node_modules/lodash/template.js
 var require_template = __commonJS({
   "node_modules/lodash/template.js"(exports2, module2) {
-    var assignInWith = require_assignInWith();
+    var arrayEach = require_arrayEach();
+    var assignWith = require_assignWith();
     var attempt = require_attempt();
     var baseValues = require_baseValues();
     var customDefaultsAssignIn = require_customDefaultsAssignIn();
@@ -35562,6 +35522,7 @@ var require_template = __commonJS({
     var templateSettings = require_templateSettings();
     var toString = require_toString();
     var INVALID_TEMPL_VAR_ERROR_TEXT = "Invalid `variable` option passed into `_.template`";
+    var INVALID_TEMPL_IMPORTS_ERROR_TEXT = "Invalid `imports` option passed into `_.template`";
     var reEmptyStringLeading = /\b__p \+= '';/g;
     var reEmptyStringMiddle = /\b(__p \+=) '' \+/g;
     var reEmptyStringTrailing = /(__e\(.*?\)|\b__t\)) \+\n'';/g;
@@ -35577,9 +35538,14 @@ var require_template = __commonJS({
         options = void 0;
       }
       string = toString(string);
-      options = assignInWith({}, options, settings, customDefaultsAssignIn);
-      var imports = assignInWith({}, options.imports, settings.imports, customDefaultsAssignIn), importsKeys = keys(imports),
+      options = assignWith({}, options, settings, customDefaultsAssignIn);
+      var imports = assignWith({}, options.imports, settings.imports, customDefaultsAssignIn), importsKeys = keys(imports),
       importsValues = baseValues(imports, importsKeys);
+      arrayEach(importsKeys, function(key) {
+        if (reForbiddenIdentifierChars.test(key)) {
+          throw new Error(INVALID_TEMPL_IMPORTS_ERROR_TEXT);
+        }
+      });
       var isEscaping, isEvaluating, index = 0, interpolate = options.interpolate || reNoMatch, source = "__p += '";
       var reDelimiters = RegExp(
         (options.escape || reNoMatch).source + "|" + interpolate.source + "|" + (interpolate === reInterpolate ? reEsTemplate :
