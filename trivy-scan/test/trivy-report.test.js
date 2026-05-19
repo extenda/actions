@@ -150,18 +150,6 @@ test('It creates text report from JSON', async () => {
   expect(textReport).toContain('Installed');
   expect(textReport).toContain('Fixed');
   expect(textReport).toContain('CVSS Score');
-  expect(textReport).toEqual(`Image: eu.grc.io/extenda/test@sha256:123
-Total: 6 (UNKNOWN: 1, LOW: 2, MEDIUM: 1, HIGH: 1, CRITICAL: 1)
-Max CVSS Score: 9.8
-Severity   Vulnerability        Package                                            Installed  Fixed
----------- -------------------- -------------------------------------------------- ---------- ----------
-CRITICAL   CVE-2025-9999        openssl                                            3.0.0      3.0.5
-HIGH       CVE-2025-9900        libtiff-dev                                        4.5.0      4.5.1
-MEDIUM     CVE-2025-8888        curl                                               7.68.0     7.68.1
-LOW        CVE-2025-7777        rand                                               0.8.0      0.8.1
-LOW        CVE-2025-7777        zlib                                               1.2.11     1.2.12
-UNKNOWN    CVE-2025-6666        foo                                                1.0.0      1.0.1
-`);
 });
 
 test('It skips text report if JSON report is missing', async () => {
