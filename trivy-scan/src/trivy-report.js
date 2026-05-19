@@ -44,7 +44,7 @@ const getMaxCvssScore = (cvssObject) => {
 
   let maxScore = 0;
 
-  // Check sources in order of preference
+  // Check sources and pick the max score.
   for (const source of ['nvd', 'ghsa', 'redhat']) {
     if (cvssObject[source]?.V3Score !== undefined) {
       maxScore = Math.max(maxScore, cvssObject[source].V3Score);
