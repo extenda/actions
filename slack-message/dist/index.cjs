@@ -47823,13 +47823,15 @@ var require_brace_expansion = __commonJS({
       return parts;
     }
     __name(parseCommaParts, "parseCommaParts");
-    function expandTop(str) {
+    function expandTop(str, options) {
       if (!str)
         return [];
+      options = options || {};
+      var max = options.max == null ? Infinity : options.max;
       if (str.substr(0, 2) === "{}") {
         str = "\\{\\}" + str.substr(2);
       }
-      return expand(escapeBraces(str), true).map(unescapeBraces);
+      return expand(escapeBraces(str), max, true).map(unescapeBraces);
     }
     __name(expandTop, "expandTop");
     function embrace(str) {
@@ -47848,7 +47850,7 @@ var require_brace_expansion = __commonJS({
       return i3 >= y;
     }
     __name(gte, "gte");
-    function expand(str, isTop) {
+    function expand(str, max, isTop) {
       var expansions = [];
       var m2 = balanced("{", "}", str);
       if (!m2 || /\$$/.test(m2.pre)) return [str];
@@ -47859,7 +47861,7 @@ var require_brace_expansion = __commonJS({
       if (!isSequence && !isOptions) {
         if (m2.post.match(/,(?!,).*\}/)) {
           str = m2.pre + "{" + m2.body + escClose + m2.post;
-          return expand(str);
+          return expand(str, max, true);
         }
         return [str];
       }
@@ -47869,9 +47871,9 @@ var require_brace_expansion = __commonJS({
       } else {
         n = parseCommaParts(m2.body);
         if (n.length === 1) {
-          n = expand(n[0], false).map(embrace);
+          n = expand(n[0], max, false).map(embrace);
           if (n.length === 1) {
-            var post = m2.post.length ? expand(m2.post, false) : [""];
+            var post = m2.post.length ? expand(m2.post, max, false) : [""];
             return post.map(function(p) {
               return m2.pre + n[0] + p;
             });
@@ -47879,7 +47881,7 @@ var require_brace_expansion = __commonJS({
         }
       }
       var pre = m2.pre;
-      var post = m2.post.length ? expand(m2.post, false) : [""];
+      var post = m2.post.length ? expand(m2.post, max, false) : [""];
       var N;
       if (isSequence) {
         var x3 = numeric(n[0]);
@@ -47917,11 +47919,11 @@ var require_brace_expansion = __commonJS({
         }
       } else {
         N = concatMap(n, function(el) {
-          return expand(el, false);
+          return expand(el, max, false);
         });
       }
       for (var j = 0; j < N.length; j++) {
-        for (var k = 0; k < post.length; k++) {
+        for (var k = 0; k < post.length && expansions.length < max; k++) {
           var expansion = pre + N[j] + post[k];
           if (!isTop || isSequence || expansion)
             expansions.push(expansion);
