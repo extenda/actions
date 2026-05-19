@@ -34885,7 +34885,7 @@ var require_stringify = __commonJS({
       }
       if (obj === null) {
         if (strictNullHandling) {
-          return encoder && !encodeValuesOnly ? encoder(prefix, defaults.encoder, charset, "key", format) : prefix;
+          return formatter(encoder && !encodeValuesOnly ? encoder(prefix, defaults.encoder, charset, "key", format) : prefix);
         }
         obj = "";
       }
@@ -34903,7 +34903,9 @@ var require_stringify = __commonJS({
       var objKeys;
       if (generateArrayPrefix === "comma" && isArray(obj)) {
         if (encodeValuesOnly && encoder) {
-          obj = utils.maybeMap(obj, encoder);
+          obj = utils.maybeMap(obj, function(v) {
+            return v == null ? v : encoder(v);
+          });
         }
         objKeys = [{ value: obj.length > 0 ? obj.join(",") || null : void 0 }];
       } else if (isArray(filter)) {
@@ -35043,6 +35045,9 @@ var require_stringify = __commonJS({
       var sideChannel = getSideChannel();
       for (var i2 = 0; i2 < objKeys.length; ++i2) {
         var key = objKeys[i2];
+        if (typeof key === "undefined" || key === null) {
+          continue;
+        }
         var value = obj[key];
         if (options.skipNulls && value === null) {
           continue;
@@ -35072,9 +35077,9 @@ var require_stringify = __commonJS({
       var prefix = options.addQueryPrefix === true ? "?" : "";
       if (options.charsetSentinel) {
         if (options.charset === "iso-8859-1") {
-          prefix += "utf8=%26%2310003%3B&";
+          prefix += "utf8=%26%2310003%3B" + options.delimiter;
         } else {
-          prefix += "utf8=%E2%9C%93&";
+          prefix += "utf8=%E2%9C%93" + options.delimiter;
         }
       }
       return joined.length > 0 ? prefix + joined : "";
@@ -35263,8 +35268,8 @@ owed.");
       }
       return leaf;
     }, "parseObject");
-    var splitKeyIntoSegments = /* @__PURE__ */ __name(function splitKeyIntoSegments2(givenKey, options) {
-      var key = options.allowDots ? givenKey.replace(/\.([^.[]+)/g, "[$1]") : givenKey;
+    var splitKeyIntoSegments = /* @__PURE__ */ __name(function splitKeyIntoSegments2(originalKey, options) {
+      var key = options.allowDots ? originalKey.replace(/\.([^.[]+)/g, "[$1]") : originalKey;
       if (options.depth <= 0) {
         if (!options.plainObjects && has.call(Object.prototype, key)) {
           if (!options.allowPrototypes) {
@@ -35273,37 +35278,56 @@ owed.");
         }
         return [key];
       }
-      var brackets = /(\[[^[\]]*])/;
-      var child = /(\[[^[\]]*])/g;
-      var segment = brackets.exec(key);
-      var parent = segment ? key.slice(0, segment.index) : key;
-      var keys = [];
+      var segments = [];
+      var first2 = key.indexOf("[");
+      var parent = first2 >= 0 ? key.slice(0, first2) : key;
       if (parent) {
         if (!options.plainObjects && has.call(Object.prototype, parent)) {
           if (!options.allowPrototypes) {
             return;
           }
         }
-        keys[keys.length] = parent;
+        segments[segments.length] = parent;
       }
-      var i2 = 0;
-      while ((segment = child.exec(key)) !== null && i2 < options.depth) {
-        i2 += 1;
-        var segmentContent = segment[1].slice(1, -1);
-        if (!options.plainObjects && has.call(Object.prototype, segmentContent)) {
-          if (!options.allowPrototypes) {
-            return;
+      var n = key.length;
+      var open2 = first2;
+      var collected = 0;
+      while (open2 >= 0 && collected < options.depth) {
+        var level = 1;
+        var i2 = open2 + 1;
+        var close = -1;
+        while (i2 < n && close < 0) {
+          var cu = key.charCodeAt(i2);
+          if (cu === 91) {
+            level += 1;
+          } else if (cu === 93) {
+            level -= 1;
+            if (level === 0) {
+              close = i2;
+            }
           }
+          i2 += 1;
         }
-        keys[keys.length] = segment[1];
+        if (close < 0) {
+          segments[segments.length] = "[" + key.slice(open2) + "]";
+          return segments;
+        }
+        var seg = key.slice(open2, close + 1);
+        var content = seg.slice(1, -1);
+        if (!options.plainObjects && has.call(Object.prototype, content) && !options.allowPrototypes) {
+          return;
+        }
+        segments[segments.length] = seg;
+        collected += 1;
+        open2 = key.indexOf("[", close + 1);
       }
-      if (segment) {
+      if (open2 >= 0) {
         if (options.strictDepth === true) {
           throw new RangeError("Input depth exceeded depth option of " + options.depth + " and strictDepth is true");
         }
-        keys[keys.length] = "[" + key.slice(segment.index) + "]";
+        segments[segments.length] = "[" + key.slice(open2) + "]";
       }
-      return keys;
+      return segments;
     }, "splitKeyIntoSegments");
     var parseKeys = /* @__PURE__ */ __name(function parseQueryStringKeys(givenKey, val, options, valuesParsed) {
       if (!givenKey) {
