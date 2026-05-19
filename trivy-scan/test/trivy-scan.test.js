@@ -165,11 +165,18 @@ test('It fails if SBOM generation fails', async () => {
 });
 
 test('It returns success false if threshold is reached', async () => {
+  generateSummary.mockReturnValueOnce({
+    message: 'Summary',
+    high: 0,
+    critical: 1,
+    cvssScore: 9.8,
+  });
+
   const scanResult = await trivyScan('ubuntu', {
     version: '0.30.0',
     severity: 'CRITICAL,HIGH',
     ignoreUnfixed: false,
-    scoreThreshold: 0,
+    scoreThreshold: 9.5,
   });
   expect(scanResult.success).toEqual(false);
 });
