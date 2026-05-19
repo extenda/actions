@@ -102811,13 +102811,15 @@ var SEVERITY_ORDER = {
   UNKNOWN: 5
 };
 var SEVERITY_TOTAL_ORDER = ["UNKNOWN", "LOW", "MEDIUM", "HIGH", "CRITICAL"];
-var TABLE_HEADERS = ["Severity", "Vulnerability", "Package", "Title"];
-var COLUMN_WIDTHS = {
-  Severity: 10,
-  Vulnerability: 20,
-  Package: 30,
-  Title: 64
-};
+var TABLE_HEADERS = [
+  "Severity",
+  "Vulnerability",
+  "Package",
+  "Title",
+  "Installed",
+  "Fixed",
+  "CVSS Score"
+];
 var pad = /* @__PURE__ */ __name((value, length) => {
   let cell = value || "";
   if (cell.length > length) {
@@ -102831,8 +102833,19 @@ var readJsonReport = /* @__PURE__ */ __name((reportPath) => {
   }
   return JSON.parse(import_node_fs9.default.readFileSync(reportPath, "utf8"));
 }, "readJsonReport");
-var getUniqueVulnerabilities = /* @__PURE__ */ __name((jsonReport) => {
-  const seenCveIds = /* @__PURE__ */ new Set();
+var getMaxCvssScore = /* @__PURE__ */ __name((cvssObject) => {
+  if (!cvssObject || typeof cvssObject !== "object") {
+    return 0;
+  }
+  let maxScore = 0;
+  for (const source of ["nvd", "ghsa", "redhat"]) {
+    if (cvssObject[source]?.V3Score !== void 0) {
+      maxScore = Math.max(maxScore, cvssObject[source].V3Score);
+    }
+  }
+  return maxScore;
+}, "getMaxCvssScore");
+var getAllVulnerabilities = /* @__PURE__ */ __name((jsonReport) => {
   const vulnerabilities = [];
   if (!Array.isArray(jsonReport?.Results)) {
     return vulnerabilities;
@@ -102842,24 +102855,31 @@ var getUniqueVulnerabilities = /* @__PURE__ */ __name((jsonReport) => {
       continue;
     }
     for (const vulnerability of result.Vulnerabilities) {
-      const id = vulnerability.VulnerabilityID || "";
-      if (seenCveIds.has(id)) {
-        continue;
-      }
-      seenCveIds.add(id);
+      const cvssScore = getMaxCvssScore(vulnerability.CVSS);
       vulnerabilities.push({
         severity: vulnerability.Severity || "",
-        id,
+        id: vulnerability.VulnerabilityID || "",
         pkg: vulnerability.PkgName || "",
-        title: vulnerability.Title ? vulnerability.Title.replaceAll("\n", " ") : ""
+        title: vulnerability.Title ? vulnerability.Title.replaceAll("\n", " ") : "",
+        installedVersion: vulnerability.InstalledVersion || "",
+        fixedVersion: vulnerability.FixedVersion || "",
+        cvssScore
       });
     }
   }
   return vulnerabilities;
-}, "getUniqueVulnerabilities");
-var sortBySeverity = /* @__PURE__ */ __name((vulnerabilities) => [...vulnerabilities].sort(
-  (a, b) => (SEVERITY_ORDER[a.severity] || 6) - (SEVERITY_ORDER[b.severity] || 6)
-), "sortBySeverity");
+}, "getAllVulnerabilities");
+var sortVulnerabilities = /* @__PURE__ */ __name((vulnerabilities) => [...vulnerabilities].sort((a, b) => {
+  const severityDiff = (SEVERITY_ORDER[a.severity] || 6) - (SEVERITY_ORDER[b.severity] || 6);
+  if (severityDiff !== 0) {
+    return severityDiff;
+  }
+  const idDiff = a.id.localeCompare(b.id);
+  if (idDiff !== 0) {
+    return idDiff;
+  }
+  return a.pkg.localeCompare(b.pkg);
+}), "sortVulnerabilities");
 var countSeverities = /* @__PURE__ */ __name((vulnerabilities) => {
   const counts = {
     total: vulnerabilities.length,
@@ -102867,17 +102887,23 @@ var countSeverities = /* @__PURE__ */ __name((vulnerabilities) => {
     LOW: 0,
     MEDIUM: 0,
     HIGH: 0,
-    CRITICAL: 0
+    CRITICAL: 0,
+    maxCvssScore: 0
   };
   for (const vulnerability of vulnerabilities) {
     if (Object.hasOwn(counts, vulnerability.severity)) {
       counts[vulnerability.severity] += 1;
     }
+    counts.maxCvssScore = Math.max(
+      counts.maxCvssScore,
+      vulnerability.cvssScore || 0
+    );
   }
   return counts;
 }, "countSeverities");
 var buildSummaryFromCounts = /* @__PURE__ */ __name((image, counts) => ({
-  message: `Found ${counts.total} vulnerabilities (${counts.CRITICAL} CRITICAL, ${counts.HIGH} HIGH).
+  message: `Found ${counts.total} vulnerabilities (${counts.CRITICAL} CRITICAL, ${counts.HIGH} HIGH, ${counts.MEDIUM} ME\
+DIUM, ${counts.LOW} LOW, ${counts.UNKNOWN} UNKNOWN). Max CVSS Score: ${counts.maxCvssScore.toFixed(1)}.
 Image: ${image}`,
   high: counts.HIGH,
   critical: counts.CRITICAL
@@ -102893,27 +102919,39 @@ Total: ${counts.total} (`;
   totalsLine += SEVERITY_TOTAL_ORDER.map(
     (severity) => `${severity}: ${counts[severity]}`
   ).join(", ");
-  totalsLine += ")\n";
+  totalsLine += `)
+Max CVSS Score: ${counts.maxCvssScore.toFixed(1)}
+`;
   return totalsLine;
 }, "buildTextTotalsLine");
 var buildTextTable = /* @__PURE__ */ __name((vulnerabilities) => {
-  let table = `${pad(TABLE_HEADERS[0], COLUMN_WIDTHS.Severity)} ${pad(TABLE_HEADERS[1], COLUMN_WIDTHS.Vulnerability)} ${pad(
-  TABLE_HEADERS[2], COLUMN_WIDTHS.Package)} ${TABLE_HEADERS[3]}
+  const columnWidths = [
+    10,
+    // Severity
+    20,
+    // Vulnerability
+    50,
+    // Package
+    10,
+    // Installed
+    10
+    // Fixed
+  ];
+  let table = `${pad(TABLE_HEADERS[0], columnWidths[0])} ${pad(TABLE_HEADERS[1], columnWidths[1])} ${pad(TABLE_HEADERS[2],
+  columnWidths[2])} ${pad(TABLE_HEADERS[4], columnWidths[3])} ${pad(TABLE_HEADERS[5], columnWidths[4])}
 `;
-  table += TABLE_HEADERS.map(
-    (header) => "-".repeat(COLUMN_WIDTHS[header])
-  ).join(" ");
-  table += "\n";
+  for (const width of columnWidths) {
+    table += "-".repeat(width) + " ";
+  }
+  table = table.trimEnd() + "\n";
   for (const vulnerability of vulnerabilities) {
-    table += `${pad(vulnerability.severity, COLUMN_WIDTHS.Severity)} ${pad(vulnerability.id, COLUMN_WIDTHS.Vulnerability)}\
- ${pad(vulnerability.pkg, COLUMN_WIDTHS.Package)} ${pad(vulnerability.title, COLUMN_WIDTHS.Title).trimEnd()}
+    table += `${pad(vulnerability.severity, columnWidths[0])} ${pad(vulnerability.id, columnWidths[1])} ${pad(vulnerability.
+    pkg, columnWidths[2])} ${pad(vulnerability.installedVersion, columnWidths[3])} ${pad(vulnerability.fixedVersion, columnWidths[4])}\
+
 `;
   }
   if (vulnerabilities.length === 0) {
-    table += pad(
-      "_No vulnerabilities found_",
-      COLUMN_WIDTHS.Severity + COLUMN_WIDTHS.Vulnerability + COLUMN_WIDTHS.Package + COLUMN_WIDTHS.Title
-    ).trimEnd() + "\n";
+    table += "No vulnerabilities found\n";
   }
   return table;
 }, "buildTextTable");
@@ -102926,16 +102964,21 @@ var buildMarkdownTableRows = /* @__PURE__ */ __name((vulnerabilities) => {
       vulnerability.severity,
       vulnerability.id,
       vulnerability.pkg,
-      vulnerability.title
+      vulnerability.title,
+      vulnerability.installedVersion,
+      vulnerability.fixedVersion,
+      vulnerability.cvssScore.toFixed(1)
     ]);
   }
   if (vulnerabilities.length === 0) {
-    rows.push(["-", "-", "-", "_No vulnerabilities found_"]);
+    rows.push(["", "", "", "No vulnerabilities found", "", "", ""]);
   }
   return rows;
 }, "buildMarkdownTableRows");
 var getReportData = /* @__PURE__ */ __name((jsonReport) => {
-  const vulnerabilities = sortBySeverity(getUniqueVulnerabilities(jsonReport));
+  const vulnerabilities = sortVulnerabilities(
+    getAllVulnerabilities(jsonReport)
+  );
   const counts = countSeverities(vulnerabilities);
   return { vulnerabilities, counts };
 }, "getReportData");
@@ -102965,7 +103008,8 @@ async function writeTrivyJobSummary(scanResult) {
   const { vulnerabilities, counts } = getReportData(jsonReport);
   summary.addHeading("Trivy report");
   summary.addRaw(
-    `Found ${counts.total} vulnerabilities (${counts.CRITICAL} CRITICAL, ${counts.HIGH} HIGH).`,
+    `Found ${counts.total} vulnerabilities (${counts.CRITICAL} CRITICAL, ${counts.HIGH} HIGH, ${counts.MEDIUM} MEDIUM, ${counts.
+    LOW} LOW, ${counts.UNKNOWN} UNKNOWN). Max CVSS Score: ${counts.maxCvssScore.toFixed(1)}.`,
     true
   ).addBreak().addRaw("Image: ", false);
   if (scanResult.image.includes("gcr.io")) {

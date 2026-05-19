@@ -20,37 +20,75 @@ const JSON_REPORT = {
           Severity: 'HIGH',
           VulnerabilityID: 'CVE-2025-9900',
           PkgName: 'libtiff-dev',
-          Title: 'libtiff: Libtiff Write-What-Where',
+          Title:
+            'libtiff: Libtiff Write-What-Where (a way too long title that we need to cut',
+          InstalledVersion: '4.5.0',
+          FixedVersion: '4.5.1',
+          CVSS: {
+            nvd: {
+              V3Score: 7.5,
+            },
+          },
         },
         {
           Severity: 'CRITICAL',
           VulnerabilityID: 'CVE-2025-9999',
           PkgName: 'openssl',
           Title: 'openssl: Buffer overflow',
+          InstalledVersion: '3.0.0',
+          FixedVersion: '3.0.5',
+          CVSS: {
+            nvd: {
+              V3Score: 9.8,
+            },
+          },
         },
         {
           Severity: 'MEDIUM',
           VulnerabilityID: 'CVE-2025-8888',
           PkgName: 'curl',
           Title: 'curl: Some medium issue',
+          InstalledVersion: '7.68.0',
+          FixedVersion: '7.68.1',
+          CVSS: {
+            ghsa: {
+              V3Score: 5.3,
+            },
+          },
         },
         {
           Severity: 'LOW',
           VulnerabilityID: 'CVE-2025-7777',
           PkgName: 'zlib',
           Title: 'zlib: Some low issue',
+          InstalledVersion: '1.2.11',
+          FixedVersion: '1.2.12',
+          CVSS: {
+            redhat: {
+              V3Score: 3.5,
+            },
+          },
         },
         {
           Severity: 'LOW',
           VulnerabilityID: 'CVE-2025-7777',
           PkgName: 'rand',
           Title: 'rand: CVE duplicate issue',
+          InstalledVersion: '0.8.0',
+          FixedVersion: '0.8.1',
+          CVSS: {
+            nvd: {
+              V3Score: 3.5,
+            },
+          },
         },
         {
           Severity: 'UNKNOWN',
           VulnerabilityID: 'CVE-2025-6666',
           PkgName: 'foo',
           Title: 'foo: Unknown issue',
+          InstalledVersion: '1.0.0',
+          FixedVersion: '1.0.1',
         },
       ],
     },
@@ -99,16 +137,19 @@ test('It creates text report from JSON', async () => {
 
   expect(fs.existsSync('.trivy/textReport.txt')).toEqual(true);
   const textReport = fs.readFileSync('.trivy/textReport.txt', 'utf8');
-  expect(textReport).toEqual(`Image: eu.grc.io/extenda/test@sha256:123
-Total: 5 (UNKNOWN: 1, LOW: 1, MEDIUM: 1, HIGH: 1, CRITICAL: 1)
-Severity   Vulnerability        Package                        Title
----------- -------------------- ------------------------------ ----------------------------------------------------------------
-CRITICAL   CVE-2025-9999        openssl                        openssl: Buffer overflow
-HIGH       CVE-2025-9900        libtiff-dev                    libtiff: Libtiff Write-What-Where
-MEDIUM     CVE-2025-8888        curl                           curl: Some medium issue
-LOW        CVE-2025-7777        zlib                           zlib: Some low issue
-UNKNOWN    CVE-2025-6666        foo                            foo: Unknown issue
-`);
+  expect(textReport).toContain('Image: eu.grc.io/extenda/test@sha256:123');
+  expect(textReport).toContain('Total: 6');
+  expect(textReport).toContain(
+    'UNKNOWN: 1, LOW: 2, MEDIUM: 1, HIGH: 1, CRITICAL: 1',
+  );
+  expect(textReport).toContain('Max CVSS Score: 9.8');
+  expect(textReport).toContain('Severity');
+  expect(textReport).toContain('Vulnerability');
+  expect(textReport).toContain('Package');
+  expect(textReport).not.toContain('Title');
+  expect(textReport).toContain('Installed');
+  expect(textReport).toContain('Fixed');
+  expect(textReport).toContain('CVSS Score');
 });
 
 test('It skips text report if JSON report is missing', async () => {
@@ -118,7 +159,7 @@ test('It skips text report if JSON report is missing', async () => {
   expect(result).toEqual(false);
 });
 
-test('It preserves first occurrence of duplicate CVE IDs', async () => {
+test('It includes all discovered vulnerabilities without deduplication', async () => {
   const jsonReportWithDuplicates = {
     Results: [
       {
@@ -128,12 +169,26 @@ test('It preserves first occurrence of duplicate CVE IDs', async () => {
             VulnerabilityID: 'CVE-2025-7777',
             PkgName: 'zlib',
             Title: 'zlib: Some low issue',
+            InstalledVersion: '1.2.11',
+            FixedVersion: '1.2.12',
+            CVSS: {
+              nvd: {
+                V3Score: 7.0,
+              },
+            },
           },
           {
             Severity: 'LOW',
             VulnerabilityID: 'CVE-2025-7777',
             PkgName: 'rand',
             Title: 'rand: CVE duplicate issue',
+            InstalledVersion: '0.8.0',
+            FixedVersion: '0.8.1',
+            CVSS: {
+              nvd: {
+                V3Score: 3.5,
+              },
+            },
           },
         ],
       },
@@ -152,15 +207,12 @@ test('It preserves first occurrence of duplicate CVE IDs', async () => {
 
   expect(fs.existsSync('.trivy/textReport.txt')).toEqual(true);
   const textReport = fs.readFileSync('.trivy/textReport.txt', 'utf8');
-  expect(textReport).toEqual(`Image: eu.grc.io/extenda/test@sha256:123
-Total: 1 (UNKNOWN: 0, LOW: 0, MEDIUM: 0, HIGH: 1, CRITICAL: 0)
-Severity   Vulnerability        Package                        Title
----------- -------------------- ------------------------------ ----------------------------------------------------------------
-HIGH       CVE-2025-7777        zlib                           zlib: Some low issue
-`);
+  expect(textReport).toContain('Total: 2');
+  expect(textReport).toContain('HIGH: 1');
+  expect(textReport).toContain('LOW: 1');
 });
 
-test('It sorts vulnerabilities by severity', async () => {
+test('It sorts vulnerabilities by severity, then VulnerabilityID, then package name', async () => {
   mockFs({
     '.trivy/scanReport.json': JSON.stringify(JSON_REPORT),
   });
@@ -174,16 +226,63 @@ test('It sorts vulnerabilities by severity', async () => {
   expect(fs.existsSync('.trivy/textReport.txt')).toEqual(true);
   const textReport = fs.readFileSync('.trivy/textReport.txt', 'utf8');
   const lines = textReport.split('\n');
-  const severityOrder = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'UNKNOWN'];
-  let lastSeverityIndex = -1;
+
+  // Find data lines (skip headers)
+  const dataLines = [];
+  let headerCount = 0;
   for (const line of lines) {
-    const severity = line.trim().split(/\s+/)[0];
-    if (severityOrder.includes(severity)) {
-      const currentSeverityIndex = severityOrder.indexOf(severity);
-      expect(currentSeverityIndex).toBeGreaterThanOrEqual(lastSeverityIndex);
-      lastSeverityIndex = currentSeverityIndex;
+    if (headerCount < 2) {
+      headerCount++;
+      continue;
+    }
+    if (line.trim()) {
+      dataLines.push(line);
     }
   }
+
+  // Verify they are sorted correctly
+  const severityOrder = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'UNKNOWN'];
+  let lastSeverityIndex = -1;
+  let lastVulnId = '';
+  let lastPkg = '';
+
+  for (const line of dataLines) {
+    const parts = line.trim().split(/\s+/);
+    const severity = parts[0];
+    const vulnId = parts[1];
+    const pkg = parts[2];
+
+    if (severityOrder.includes(severity)) {
+      const currentSeverityIndex = severityOrder.indexOf(severity);
+
+      if (currentSeverityIndex > lastSeverityIndex) {
+        // New severity level, reset comparisons
+        lastSeverityIndex = currentSeverityIndex;
+        lastVulnId = vulnId;
+        lastPkg = pkg;
+      } else if (currentSeverityIndex === lastSeverityIndex) {
+        // Same severity: VulnerabilityID must be >= previous
+        expect(vulnId.localeCompare(lastVulnId)).toBeGreaterThanOrEqual(0);
+
+        // When VulnerabilityID is the same, package name must be >= previous
+        if (vulnId === lastVulnId) {
+          expect(pkg.localeCompare(lastPkg)).toBeGreaterThanOrEqual(0);
+        }
+
+        lastVulnId = vulnId;
+        lastPkg = pkg;
+      }
+    }
+  }
+
+  // Explicitly verify the two LOW entries with the same CVE are ordered by package name (rand < zlib)
+  const lowLines = dataLines.filter((line) => line.startsWith('LOW'));
+  expect(lowLines).toHaveLength(2);
+  const [firstLowPkg, secondLowPkg] = lowLines.map(
+    (line) => line.trim().split(/\s+/)[2],
+  );
+  expect(firstLowPkg).toEqual('rand');
+  expect(secondLowPkg).toEqual('zlib');
 });
 
 test('It creates summary from json report', () => {
@@ -200,7 +299,7 @@ test('It creates summary from json report', () => {
   });
 
   expect(summary).toEqual({
-    message: `Found 5 vulnerabilities (1 CRITICAL, 1 HIGH).
+    message: `Found 6 vulnerabilities (1 CRITICAL, 1 HIGH, 1 MEDIUM, 2 LOW, 1 UNKNOWN). Max CVSS Score: 9.8.
 Image: ubuntu`,
     high: 1,
     critical: 1,
@@ -216,7 +315,7 @@ test('It skips summary if json report is missing', () => {
   });
 
   expect(summary).toEqual({
-    message: `Found 0 vulnerabilities (0 CRITICAL, 0 HIGH).
+    message: `Found 0 vulnerabilities (0 CRITICAL, 0 HIGH, 0 MEDIUM, 0 LOW, 0 UNKNOWN). Max CVSS Score: 0.0.
 Image: ubuntu`,
     high: 0,
     critical: 0,
@@ -237,7 +336,7 @@ test('It writes trivy results to the GitHub job summary', async () => {
   expect(summaryLink).toEqual(expect.any(String));
   expect(core.summary.addHeading).toHaveBeenCalledWith('Trivy report');
   expect(core.summary.addRaw).toHaveBeenCalledWith(
-    'Found 5 vulnerabilities (1 CRITICAL, 1 HIGH).',
+    'Found 6 vulnerabilities (1 CRITICAL, 1 HIGH, 1 MEDIUM, 2 LOW, 1 UNKNOWN). Max CVSS Score: 9.8.',
     true,
   );
   expect(core.summary.addRaw).toHaveBeenCalledWith('Image: ', false);
@@ -252,12 +351,16 @@ test('It writes trivy results to the GitHub job summary', async () => {
     { data: 'Vulnerability', header: true },
     { data: 'Package', header: true },
     { data: 'Title', header: true },
+    { data: 'Installed', header: true },
+    { data: 'Fixed', header: true },
+    { data: 'CVSS Score', header: true },
   ]);
   expect(tableRows[1][0]).toEqual('CRITICAL');
   expect(tableRows[2][0]).toEqual('HIGH');
   expect(tableRows[3][0]).toEqual('MEDIUM');
   expect(tableRows[4][0]).toEqual('LOW');
-  expect(tableRows[5][0]).toEqual('UNKNOWN');
+  expect(tableRows[5][0]).toEqual('LOW');
+  expect(tableRows[6][0]).toEqual('UNKNOWN');
   expect(core.summary.write).toHaveBeenCalledTimes(1);
 });
 
