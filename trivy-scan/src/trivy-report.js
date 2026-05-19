@@ -44,10 +44,15 @@ const getMaxCvssScore = (cvssObject) => {
 
   let maxScore = 0;
 
-  // Check sources and pick the max score.
-  for (const source of ['nvd', 'ghsa', 'redhat']) {
-    if (cvssObject[source]?.V3Score !== undefined) {
-      maxScore = Math.max(maxScore, cvssObject[source].V3Score);
+  // Check every source entry and pick the highest V3Score.
+  for (const source of Object.values(cvssObject)) {
+    if (!source || typeof source !== 'object') {
+      continue;
+    }
+
+    const score = Number(source.V3Score);
+    if (Number.isFinite(score)) {
+      maxScore = Math.max(maxScore, score);
     }
   }
 
@@ -134,6 +139,7 @@ const buildSummaryFromCounts = (image, counts) => ({
 Image: ${image}`,
   high: counts.HIGH,
   critical: counts.CRITICAL,
+  cvssScore: counts.maxCvssScore,
 });
 
 const buildTextTotalsLine = (image, serviceName, counts) => {

@@ -26,6 +26,7 @@ const outputs = {
  * @param severity - The severity levels to report on, e.g. "CRITICAL,HIGH"
  * @param ignoreUnfixed - Whether to ignore unfixed vulnerabilities
  * @param timeout - The maximum time spent on each trivy invocation, e.g. `5m0s`
+ * @param scoreThreshold - The CVSS score threshold above which vulnerabilities should be considered critical (default: 9.5)
  * @return {Promise<{success: boolean, image: string, summary: {message: string, critical: int, high: int}, sbom: {spdx: string, cdx: string}, report: {json: string, text: string}}>} a summary object containing the scan results and paths to the generated SBOM and report files.
  */
 export default async function trivyScan(
@@ -35,6 +36,7 @@ export default async function trivyScan(
     severity = 'CRITICAL,HIGH',
     ignoreUnfixed = true,
     timeout = '5m0s',
+    scoreThreshold = 9.5,
   } = {},
 ) {
   const trivy = await setupTrivy(version);
@@ -99,8 +101,10 @@ export default async function trivyScan(
   generateTextReport(manifestSha, outputs);
   const summary = generateSummary(manifestSha, outputs);
 
+  const success = summary.cvssScore < scoreThreshold;
+
   return {
-    success: summary.critical === 0,
+    success,
     summary,
     image: manifestSha,
     ...outputs,

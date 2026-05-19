@@ -52,6 +52,13 @@ inputs:
       if vulnerabilities are found, but the vulnerabilities will still be included in the generated reports.
     required: false
     default: 'false'
+  cvss-score-threshold:
+    description: >
+      The CVSS score threshold to use for determining whether a vulnerability should cause the action to fail.
+      This option is only applicable if `fail-on-vulnerabilities` is set to `true`. If a vulnerability has a CVSS score
+      greater than or equal to this threshold, the action will fail.
+    required: false
+    default: '9.5'
   notify-slack-on-vulnerabilities:
     description: >
       Whether to send a notification to Slack if vulnerabilities are found.

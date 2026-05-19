@@ -25,6 +25,7 @@ const DEFAULT_ATTESTATION_KEY_URI =
  * @param ignoreUnfixed - Whether to ignore unfixed vulnerabilities
  * @param timeout - The maximum time spent on each trivy invocation, e.g. `5m0s`
  * @param failOnVulnerabilities - Whether to fail the action if any vulnerabilities are found
+ * @param scoreThreshold - The CVSS score threshold above which vulnerabilities should be considered critical (default: 9.5)
  * @param notifySlackOnVulnerabilities - Whether to send a Slack notification if vulnerabilities are found
  * @param uploadSbomArtifacts - Whether to upload SBOM artifacts to Artifact Registry
  * @param attestationKeyUri - The KMS key URI to use for signing the SBOM attestations. If omitted, the default binary authz key is used. Pass `null` to upload SBOMs without attestation.
@@ -40,6 +41,7 @@ const trivy = async (
     timeout,
     failOnVulnerabilities = false,
     notifySlackOnVulnerabilities = false,
+    scoreThreshold = 9.5,
     uploadSbomArtifacts = false,
     attestationKeyUri = DEFAULT_ATTESTATION_KEY_URI,
   } = {},
@@ -53,6 +55,7 @@ const trivy = async (
       severity,
       ignoreUnfixed,
       timeout,
+      scoreThreshold,
     });
     core.endGroup();
 
@@ -80,7 +83,7 @@ const trivy = async (
         );
       }
 
-      const vulnerableMessage = `Vulnerabilities found in image scan. Check the report for details: ${summaryUrl}`;
+      const vulnerableMessage = `Vulnerabilities with CVSS score >= ${scoreThreshold.toFixed(1)} found in image scan. Check the report for details: ${summaryUrl}`;
       if (failOnVulnerabilities) {
         core.setFailed(vulnerableMessage);
       } else {
@@ -108,6 +111,7 @@ const action = async () => {
   const attestationKeyUri = core.getInput('sbom-attestation-key-uri');
   const resolvedAttestationKeyUri =
     attestationKeyUri === 'none' ? null : attestationKeyUri || undefined;
+  const scoreThreshold = Number(core.getInput('cvss-score-threshold'));
 
   await trivy(serviceAccountKey, image, {
     version,
@@ -115,6 +119,9 @@ const action = async () => {
     ignoreUnfixed,
     timeout,
     failOnVulnerabilities,
+    scoreThreshold: Number.isFinite(scoreThreshold)
+      ? scoreThreshold
+      : undefined,
     notifySlackOnVulnerabilities,
     uploadSbomArtifacts,
     attestationKeyUri: resolvedAttestationKeyUri,

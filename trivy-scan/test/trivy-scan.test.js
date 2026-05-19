@@ -23,6 +23,7 @@ beforeEach(() => {
     message: 'Summary',
     high: 0,
     critical: 0,
+    cvssScore: 0,
   });
   resolveImageDigests.mockResolvedValue({
     indexSha: 'ubuntu@sha256:index',
@@ -47,6 +48,7 @@ test('It can scan with Trivy defaults', async () => {
       message: 'Summary',
       high: 0,
       critical: 0,
+      cvssScore: 0,
     },
     sbom: {
       spdx: '.trivy/sbom.spdx.json',
@@ -160,4 +162,14 @@ test('It fails if SBOM generation fails', async () => {
   exec.mockReset();
   exec.mockResolvedValue(0).mockRejectedValue(1);
   await expect(() => trivyScan('ubuntu')).rejects.toThrow();
+});
+
+test('It returns success false if threshold is reached', async () => {
+  const scanResult = await trivyScan('ubuntu', {
+    version: '0.30.0',
+    severity: 'CRITICAL,HIGH',
+    ignoreUnfixed: false,
+    scoreThreshold: 0,
+  });
+  expect(scanResult.success).toEqual(false);
 });
