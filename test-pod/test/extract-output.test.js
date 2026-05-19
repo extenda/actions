@@ -46,7 +46,7 @@ describe('Extract output', () => {
   afterEach(() => {
     const dir = resolve(process.cwd(), 'test-pod-output');
     if (fs.existsSync(dir)) {
-      fs.rmdirSync(dir, { recursive: true });
+      fs.rmSync(dir, { recursive: true });
     }
   });
 
