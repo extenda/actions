@@ -179,8 +179,8 @@ const buildTextTable = (vulnerabilities) => {
       `${pad(vulnerability.severity, columnWidths[0])} ` +
       `${pad(vulnerability.id, columnWidths[1])} ` +
       `${pad(vulnerability.pkg, columnWidths[2])} ` +
-      `${pad(vulnerability.installedVersion, columnWidths[4])} ` +
-      `${pad(vulnerability.fixedVersion, columnWidths[5])}\n`;
+      `${pad(vulnerability.installedVersion, columnWidths[3])} ` +
+      `${pad(vulnerability.fixedVersion, columnWidths[4])}\n`;
   }
 
   if (vulnerabilities.length === 0) {
