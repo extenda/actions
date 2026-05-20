@@ -303,6 +303,7 @@ test('It creates summary from json report', () => {
 Image: ubuntu`,
     high: 1,
     critical: 1,
+    cvssScore: 9.8,
   });
 });
 
@@ -319,6 +320,54 @@ test('It skips summary if json report is missing', () => {
 Image: ubuntu`,
     high: 0,
     critical: 0,
+    cvssScore: 0,
+  });
+});
+
+test('It picks max CVSS V3Score from any CVSS source key', () => {
+  const jsonReportWithCustomCvssSource = {
+    Results: [
+      {
+        Vulnerabilities: [
+          {
+            Severity: 'HIGH',
+            VulnerabilityID: 'CVE-2026-1234',
+            PkgName: 'custom-pkg',
+            Title: 'custom issue',
+            InstalledVersion: '1.0.0',
+            FixedVersion: '1.0.1',
+            CVSS: {
+              nvd: {
+                V3Score: 7.4,
+              },
+              internalSource: {
+                V3Score: 9.1,
+              },
+            },
+          },
+        ],
+      },
+    ],
+  };
+
+  mockFs({
+    '.trivy/scanReport.json': JSON.stringify(jsonReportWithCustomCvssSource),
+    '.trivy/textReport.txt': 'placeholder',
+  });
+
+  const summary = generateSummary('ubuntu', {
+    report: {
+      json: '.trivy/scanReport.json',
+      text: '.trivy/textReport.txt',
+    },
+  });
+
+  expect(summary).toEqual({
+    message:
+      'Found 1 vulnerabilities (0 CRITICAL, 1 HIGH, 0 MEDIUM, 0 LOW, 0 UNKNOWN). Max CVSS Score: 9.1.\nImage: ubuntu',
+    high: 1,
+    critical: 0,
+    cvssScore: 9.1,
   });
 });
 

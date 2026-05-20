@@ -107755,9 +107755,13 @@ var getMaxCvssScore = /* @__PURE__ */ __name((cvssObject) => {
     return 0;
   }
   let maxScore = 0;
-  for (const source of ["nvd", "ghsa", "redhat"]) {
-    if (cvssObject[source]?.V3Score !== void 0) {
-      maxScore = Math.max(maxScore, cvssObject[source].V3Score);
+  for (const source of Object.values(cvssObject)) {
+    if (!source || typeof source !== "object") {
+      continue;
+    }
+    const score = Number(source.V3Score);
+    if (Number.isFinite(score)) {
+      maxScore = Math.max(maxScore, score);
     }
   }
   return maxScore;
@@ -107823,7 +107827,8 @@ var buildSummaryFromCounts = /* @__PURE__ */ __name((image, counts) => ({
 DIUM, ${counts.LOW} LOW, ${counts.UNKNOWN} UNKNOWN). Max CVSS Score: ${counts.maxCvssScore.toFixed(1)}.
 Image: ${image}`,
   high: counts.HIGH,
-  critical: counts.CRITICAL
+  critical: counts.CRITICAL,
+  cvssScore: counts.maxCvssScore
 }), "buildSummaryFromCounts");
 var buildTextTotalsLine = /* @__PURE__ */ __name((image, serviceName, counts) => {
   let totalsLine = "";
@@ -107959,7 +107964,8 @@ async function trivyScan(image, {
   version: version3 = "latest",
   severity = "CRITICAL,HIGH",
   ignoreUnfixed = true,
-  timeout = "5m0s"
+  timeout = "5m0s",
+  scoreThreshold = 9.5
 } = {}) {
   const trivy2 = await setupTrivy(version3);
   if (!import_node_fs10.default.existsSync(".trivy")) {
@@ -108013,8 +108019,9 @@ async function trivyScan(image, {
   await exec(trivy2, ["sbom", ...scanOpts, ".trivy/sbom.cdx.json"]);
   generateTextReport(manifestSha, outputs);
   const summary2 = generateSummary(manifestSha, outputs);
+  const success = summary2.cvssScore < scoreThreshold;
   return {
-    success: summary2.critical === 0,
+    success,
     summary: summary2,
     image: manifestSha,
     ...outputs
@@ -108138,6 +108145,7 @@ var trivy = /* @__PURE__ */ __name(async (serviceAccountKey, image, {
   timeout,
   failOnVulnerabilities = false,
   notifySlackOnVulnerabilities = false,
+  scoreThreshold = 9.5,
   uploadSbomArtifacts = false,
   attestationKeyUri = DEFAULT_ATTESTATION_KEY_URI
 } = {}) => with_gcloud_default(serviceAccountKey, async () => {
@@ -108147,7 +108155,8 @@ var trivy = /* @__PURE__ */ __name(async (serviceAccountKey, image, {
     version: version3,
     severity,
     ignoreUnfixed,
-    timeout
+    timeout,
+    scoreThreshold
   });
   endGroup();
   const summaryUrl = await writeTrivyJobSummary(scanResult);
@@ -108171,7 +108180,8 @@ var trivy = /* @__PURE__ */ __name(async (serviceAccountKey, image, {
         scanResult.report.text
       );
     }
-    const vulnerableMessage = `Vulnerabilities found in image scan. Check the report for details: ${summaryUrl}`;
+    const vulnerableMessage = `Vulnerabilities with CVSS score >= ${scoreThreshold.toFixed(1)} found in image scan. Chec\
+k the report for details: ${summaryUrl}`;
     if (failOnVulnerabilities) {
       setFailed(vulnerableMessage);
     } else {
@@ -110943,7 +110953,7 @@ var service_definition_default = loadServiceDefinition;
 var import_node_fs15 = __toESM(require("node:fs"), 1);
 var runScan = /* @__PURE__ */ __name(async (serviceAccount, image, serviceName, labels) => {
   const scanResult = await trivy(serviceAccount, image, {
-    failOnVulnerabilities: false,
+    failOnVulnerabilities: true,
     notifySlackOnVulnerabilities: true,
     uploadSbomArtifacts: true
   });

@@ -9,7 +9,7 @@ This GitHub Action scans Docker images for vulnerabilities using [Trivy](https:/
 - ☁️ **Artifact Registry Integration** - Optionally uploads SBOMs to Google Artifact Registry
 - 📝 **GitHub Job Summaries** - Displays scan results directly in GitHub Actions UI
 - 💬 **Slack Notifications** - Sends vulnerability alerts to Slack channels
-- ⚙️ **Flexible Configuration** - Customizable severity levels, timeouts, and failure policies
+- ⚙️ **Flexible Configuration** - Customizable severity levels, CVSS score thresholds, timeouts, and failure policies
 
 ## Usage
 
@@ -87,6 +87,8 @@ jobs:
     severity: 'HIGH,CRITICAL'
     # Fail the build if vulnerabilities are found
     fail-on-vulnerabilities: true
+    # Only fail if vulnerability CVSS score is >= 9.0
+    cvss-score-threshold: '9.0'
     # Upload SBOMs to Google Artifact Registry
     upload-sbom: true
     # Send Slack notifications on vulnerabilities
@@ -130,17 +132,18 @@ The action provides outputs for all generated files, which can be used in subseq
 
 ## Inputs
 
-| Input                             | Description                                                                                                                              | Required | Default         |
-|:----------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------|:---------|:----------------|
+| Input                             | Description                                                                                                                                | Required | Default         |
+|:----------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------|:---------|:----------------|
 | `image`                           | The Docker image to scan. Can be a tag or digest (e.g., `eu.gcr.io/extenda/my-image:latest` or `eu.gcr.io/extenda/my-image@sha256:...`). | Yes      |                 |
-| `service-account-key`             | The GCP service account key for accessing the image repository, uploading SBOMs to Artifact Registry, and sending Slack notifications.   | Yes      |                 |
-| `upload-sbom`                     | Whether to upload the generated SBOM files to Google Artifact Registry. Recommended for production images to maintain CRA compliance.    | No       | `false`         |
-| `fail-on-vulnerabilities`         | Set to `true` to fail the action if vulnerabilities are found. If `false`, vulnerabilities are reported but the action succeeds.         | No       | `false`         |
-| `severity`                        | Comma-separated severity levels to include in the report: `UNKNOWN`, `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`. Example: `HIGH,CRITICAL`.      | No       | `HIGH,CRITICAL` |
-| `ignore-unfixed`                  | Whether to ignore vulnerabilities that do not have a fix available yet.                                                                  | No       | `true`          |
-| `trivy-version`                   | The version of Trivy to use for scanning. Use `latest` for the most recent version or specify a version like `0.50.0`.                   | No       | `latest`        |
-| `timeout`                         | Maximum time for each Trivy invocation (e.g., `5m0s`, `10m0s`). Note: Trivy is invoked multiple times, so total runtime will be longer.  | No       | `5m0s`          |
-| `notify-slack-on-vulnerabilities` | Whether to send a notification to Slack if vulnerabilities are found. The Slack channel is determined from the service account key.      | No       | `true`          |
+| `service-account-key`             | The GCP service account key for accessing the image repository, uploading SBOMs to Artifact Registry, and sending Slack notifications.     | Yes      |                 |
+| `upload-sbom`                     | Whether to upload the generated SBOM files to Google Artifact Registry. Recommended for production images to maintain CRA compliance.      | No       | `false`         |
+| `fail-on-vulnerabilities`         | Set to `true` to fail the action if vulnerabilities are found. If `false`, vulnerabilities are reported but the action succeeds.           | No       | `false`         |
+| `cvss-score-threshold`            | CVSS score threshold used when `fail-on-vulnerabilities` is `true`. The action fails only if a vulnerability score is greater than or equal to this value. | No | `9.5` |
+| `severity`                        | Comma-separated severity levels to include in the report: `UNKNOWN`, `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`. Example: `HIGH,CRITICAL`.        | No       | `HIGH,CRITICAL` |
+| `ignore-unfixed`                  | Whether to ignore vulnerabilities that do not have a fix available yet.                                                                    | No       | `true`          |
+| `trivy-version`                   | The version of Trivy to use for scanning. Use `latest` for the most recent version or specify a specific version.                         | No       | `v0.69.3`       |
+| `timeout`                         | Maximum time for each Trivy invocation (e.g., `5m0s`, `10m0s`). Note: Trivy is invoked multiple times, so total runtime will be longer.    | No       | `5m0s`          |
+| `notify-slack-on-vulnerabilities` | Whether to send a notification to Slack if vulnerabilities are found. The Slack channel is determined from the service account key.        | No       | `true`          |
 
 ## Outputs
 
@@ -165,7 +168,8 @@ The `service-account-key` input requires a GCP service account with the followin
 2. **Use minimal permissions** - Grant only the permissions required for your use case
 3. **Scan before deployment** - Run vulnerability scans before deploying images to production
 4. **Set `fail-on-vulnerabilities: true` for production** - Prevent vulnerable images from being deployed
-5. **Use image digests** - Reference images by digest (SHA256) rather than tags for immutable scans
+5. **Tune `cvss-score-threshold` to your risk appetite** - For example `9.0` for strict critical-only fail gates
+6. **Use image digests** - Reference images by digest (SHA256) rather than tags for immutable scans
 
 ## Understanding Scan Results
 

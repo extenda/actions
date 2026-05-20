@@ -62,6 +62,7 @@ test('Action runs with successful scan', async () => {
     severity: 'CRITICAL,HIGH',
     ignoreUnfixed: false,
     timeout: '5m0s',
+    scoreThreshold: 9.5,
   });
 
   expect(authenticateDocker).toHaveBeenCalledWith('ubuntu');
@@ -70,6 +71,28 @@ test('Action runs with successful scan', async () => {
   expect(trivyJobSummary).toHaveBeenCalledWith({
     success: true,
     summary: { message: 'Summary' },
+  });
+});
+
+test('Action runs with default score threshold if blank provided', async () => {
+  setInput(false, false);
+
+  // cvss-score-threshold
+  core.getInput.mockReturnValueOnce('');
+
+  trivyScan.mockResolvedValueOnce({
+    success: true,
+    summary: { message: 'Summary' },
+  });
+
+  await action();
+
+  expect(trivyScan).toHaveBeenCalledWith('ubuntu', {
+    version: 'latest',
+    severity: 'CRITICAL,HIGH',
+    ignoreUnfixed: false,
+    timeout: '5m0s',
+    scoreThreshold: 9.5,
   });
 });
 
@@ -89,12 +112,13 @@ test('Action runs with vulnerabilities found and no notifications', async () => 
     severity: 'CRITICAL,HIGH',
     ignoreUnfixed: false,
     timeout: '5m0s',
+    scoreThreshold: 9.5,
   });
 
   expect(authenticateDocker).toHaveBeenCalledWith('ubuntu');
   expect(notifySlack).not.toHaveBeenCalled();
   expect(core.setFailed).toHaveBeenCalledWith(
-    'Vulnerabilities found in image scan. Check the report for details: undefined',
+    'Vulnerabilities with CVSS score >= 9.5 found in image scan. Check the report for details: undefined',
   );
   expect(trivyJobSummary).toHaveBeenCalledWith({
     success: false,
@@ -105,6 +129,10 @@ test('Action runs with vulnerabilities found and no notifications', async () => 
 
 test('Action runs with vulnerabilities found and notifications enabled', async () => {
   setInput(true, true);
+
+  // cvss-score-threshold
+  core.getInput.mockReturnValueOnce('7.0');
+
   trivyScan.mockResolvedValueOnce({
     success: false,
     summary: { message: 'Summary' },
@@ -119,11 +147,12 @@ test('Action runs with vulnerabilities found and notifications enabled', async (
     severity: 'CRITICAL,HIGH',
     ignoreUnfixed: false,
     timeout: '5m0s',
+    scoreThreshold: 7,
   });
 
   expect(notifySlack).toHaveBeenCalledWith('sa', 'Summary', '', 'Report');
   expect(core.setFailed).toHaveBeenCalledWith(
-    'Vulnerabilities found in image scan. Check the report for details: undefined',
+    'Vulnerabilities with CVSS score >= 7.0 found in image scan. Check the report for details: undefined',
   );
   expect(trivyJobSummary).toHaveBeenCalledWith({
     success: false,
@@ -142,6 +171,7 @@ test('Action maps sbom attestation key input before uploading SBOMs', async () =
     'gcpkms://projects/platform-prod-2481/locations/europe-west1/keyRings/sbom-keyring/cryptoKeys/sbom-attestor-key/cryptoKeyVersions/1';
 
   setInput(false, false, true);
+
   trivyScan.mockResolvedValueOnce(scanResult);
   uploadSbom.mockResolvedValueOnce(undefined);
   await action();
