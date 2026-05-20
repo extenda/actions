@@ -27,7 +27,7 @@ const outputs = {
  * @param ignoreUnfixed - Whether to ignore unfixed vulnerabilities
  * @param timeout - The maximum time spent on each trivy invocation, e.g. `5m0s`
  * @param scoreThreshold - The CVSS score threshold above which vulnerabilities should be considered critical (default: 9.5)
- * @return {Promise<{success: boolean, image: string, summary: {message: string, critical: int, high: int}, sbom: {spdx: string, cdx: string}, report: {json: string, text: string}}>} a summary object containing the scan results and paths to the generated SBOM and report files.
+ * @return {Promise<{success: boolean, image: string, summary: {message: string, critical: int, high: int, cvssScore: Number}, sbom: {spdx: string, cdx: string}, report: {json: string, text: string}}>} a summary object containing the scan results and paths to the generated SBOM and report files.
  */
 export default async function trivyScan(
   image,

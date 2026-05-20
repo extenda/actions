@@ -103874,14 +103874,15 @@ var action5 = /* @__PURE__ */ __name(async () => {
   const uploadSbomArtifacts = getBooleanInput("upload-sbom");
   const attestationKeyUri = getInput("sbom-attestation-key-uri");
   const resolvedAttestationKeyUri = attestationKeyUri === "none" ? null : attestationKeyUri || void 0;
-  const scoreThreshold = Number(getInput("cvss-score-threshold"));
+  const scoreThreshold = getInput("cvss-score-threshold");
   await trivy(serviceAccountKey, image, {
     version: version3,
     severity,
     ignoreUnfixed,
     timeout,
     failOnVulnerabilities,
-    scoreThreshold: Number.isFinite(scoreThreshold) ? scoreThreshold : void 0,
+    scoreThreshold: scoreThreshold && scoreThreshold.trim() !== "" && Number.isFinite(Number(scoreThreshold)) ? Number(scoreThreshold) :
+    void 0,
     notifySlackOnVulnerabilities,
     uploadSbomArtifacts,
     attestationKeyUri: resolvedAttestationKeyUri

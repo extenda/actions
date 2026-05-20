@@ -29,7 +29,7 @@ const DEFAULT_ATTESTATION_KEY_URI =
  * @param notifySlackOnVulnerabilities - Whether to send a Slack notification if vulnerabilities are found
  * @param uploadSbomArtifacts - Whether to upload SBOM artifacts to Artifact Registry
  * @param attestationKeyUri - The KMS key URI to use for signing the SBOM attestations. If omitted, the default binary authz key is used. Pass `null` to upload SBOMs without attestation.
- * @return {Promise<{success: boolean, image: string, summary: {message: string, critical: int, high: int}, sbom: {spdx: string, cdx: string}, report: {json: string, text: string}}>}
+ * @return {Promise<{success: boolean, image: string, summary: {message: string, critical: int, high: int, cvssScore: Number}, sbom: {spdx: string, cdx: string}, report: {json: string, text: string}}>}
  */
 const trivy = async (
   serviceAccountKey,
@@ -111,7 +111,7 @@ const action = async () => {
   const attestationKeyUri = core.getInput('sbom-attestation-key-uri');
   const resolvedAttestationKeyUri =
     attestationKeyUri === 'none' ? null : attestationKeyUri || undefined;
-  const scoreThreshold = Number(core.getInput('cvss-score-threshold'));
+  const scoreThreshold = core.getInput('cvss-score-threshold');
 
   await trivy(serviceAccountKey, image, {
     version,
@@ -119,9 +119,12 @@ const action = async () => {
     ignoreUnfixed,
     timeout,
     failOnVulnerabilities,
-    scoreThreshold: Number.isFinite(scoreThreshold)
-      ? scoreThreshold
-      : undefined,
+    scoreThreshold:
+      scoreThreshold &&
+      scoreThreshold.trim() !== '' &&
+      Number.isFinite(Number(scoreThreshold))
+        ? Number(scoreThreshold)
+        : undefined,
     notifySlackOnVulnerabilities,
     uploadSbomArtifacts,
     attestationKeyUri: resolvedAttestationKeyUri,

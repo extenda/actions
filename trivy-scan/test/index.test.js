@@ -74,6 +74,28 @@ test('Action runs with successful scan', async () => {
   });
 });
 
+test('Action runs with default score threshold if blank provided', async () => {
+  setInput(false, false);
+
+  // cvss-score-threshold
+  core.getInput.mockReturnValueOnce('');
+
+  trivyScan.mockResolvedValueOnce({
+    success: true,
+    summary: { message: 'Summary' },
+  });
+
+  await action();
+
+  expect(trivyScan).toHaveBeenCalledWith('ubuntu', {
+    version: 'latest',
+    severity: 'CRITICAL,HIGH',
+    ignoreUnfixed: false,
+    timeout: '5m0s',
+    scoreThreshold: 9.5,
+  });
+});
+
 test('Action runs with vulnerabilities found and no notifications', async () => {
   setInput(true, false);
   trivyScan.mockResolvedValueOnce({
@@ -108,7 +130,7 @@ test('Action runs with vulnerabilities found and no notifications', async () => 
 test('Action runs with vulnerabilities found and notifications enabled', async () => {
   setInput(true, true);
 
-  // 'cvss-score-threshold'
+  // cvss-score-threshold
   core.getInput.mockReturnValueOnce('7.0');
 
   trivyScan.mockResolvedValueOnce({
@@ -149,6 +171,7 @@ test('Action maps sbom attestation key input before uploading SBOMs', async () =
     'gcpkms://projects/platform-prod-2481/locations/europe-west1/keyRings/sbom-keyring/cryptoKeys/sbom-attestor-key/cryptoKeyVersions/1';
 
   setInput(false, false, true);
+
   trivyScan.mockResolvedValueOnce(scanResult);
   uploadSbom.mockResolvedValueOnce(undefined);
   await action();
