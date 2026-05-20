@@ -165,6 +165,7 @@ test('It fails if SBOM generation fails', async () => {
 });
 
 test('It returns success false if threshold is reached', async () => {
+  generateSummary.mockReset();
   generateSummary.mockReturnValueOnce({
     message: 'Summary',
     high: 0,
