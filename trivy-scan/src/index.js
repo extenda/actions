@@ -85,7 +85,7 @@ const trivy = async (
 
       const vulnerableMessage = `Vulnerabilities with CVSS score >= ${scoreThreshold.toFixed(1)} found in image scan. Check the report for details: ${summaryUrl}`;
       if (failOnVulnerabilities) {
-        core.setFailed(vulnerableMessage);
+        throw new Error(vulnerableMessage);
       } else {
         core.warning(vulnerableMessage);
       }
