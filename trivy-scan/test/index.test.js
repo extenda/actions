@@ -104,8 +104,9 @@ test('Action runs with vulnerabilities found and no notifications', async () => 
     report: { text: 'Report' },
   });
 
-  await action();
-  expect(authenticateDocker).toHaveBeenCalledWith('ubuntu');
+  await expect(action()).rejects.toThrow(
+    'Vulnerabilities with CVSS score >= 9.5 found in image scan. Check the report for details: undefined',
+  );
 
   expect(trivyScan).toHaveBeenCalledWith('ubuntu', {
     version: 'latest',
@@ -117,9 +118,6 @@ test('Action runs with vulnerabilities found and no notifications', async () => 
 
   expect(authenticateDocker).toHaveBeenCalledWith('ubuntu');
   expect(notifySlack).not.toHaveBeenCalled();
-  expect(core.setFailed).toHaveBeenCalledWith(
-    'Vulnerabilities with CVSS score >= 9.5 found in image scan. Check the report for details: undefined',
-  );
   expect(trivyJobSummary).toHaveBeenCalledWith({
     success: false,
     summary: { message: 'Summary' },
@@ -139,7 +137,9 @@ test('Action runs with vulnerabilities found and notifications enabled', async (
     report: { text: 'Report' },
   });
 
-  await action();
+  await expect(action()).rejects.toThrow(
+    'Vulnerabilities with CVSS score >= 7.0 found in image scan. Check the report for details: undefined',
+  );
 
   expect(authenticateDocker).toHaveBeenCalledWith('ubuntu');
   expect(trivyScan).toHaveBeenCalledWith('ubuntu', {
@@ -151,9 +151,6 @@ test('Action runs with vulnerabilities found and notifications enabled', async (
   });
 
   expect(notifySlack).toHaveBeenCalledWith('sa', 'Summary', '', 'Report');
-  expect(core.setFailed).toHaveBeenCalledWith(
-    'Vulnerabilities with CVSS score >= 7.0 found in image scan. Check the report for details: undefined',
-  );
   expect(trivyJobSummary).toHaveBeenCalledWith({
     success: false,
     summary: { message: 'Summary' },

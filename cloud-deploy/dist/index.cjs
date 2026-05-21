@@ -108183,7 +108183,7 @@ var trivy = /* @__PURE__ */ __name(async (serviceAccountKey, image, {
     const vulnerableMessage = `Vulnerabilities with CVSS score >= ${scoreThreshold.toFixed(1)} found in image scan. Chec\
 k the report for details: ${summaryUrl}`;
     if (failOnVulnerabilities) {
-      setFailed(vulnerableMessage);
+      throw new Error(vulnerableMessage);
     } else {
       warning(vulnerableMessage);
     }
