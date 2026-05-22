@@ -133,7 +133,7 @@ const action = async () => {
   // Trivvy scanning
   if (process.platform !== 'win32') {
     if (env !== 'staging' || projectID === 'quotes-staging-ccdf') {
-      await runScan(serviceAccountKeyCICD, image, serviceName, labels);
+      await runScan(serviceAccountKeyCICD, image, serviceName, labels, projectID);
     }
   }
 
