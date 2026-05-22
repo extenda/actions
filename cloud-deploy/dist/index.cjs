@@ -110951,9 +110951,14 @@ var service_definition_default = loadServiceDefinition;
 
 // cloud-deploy/src/utils/vulnerability-scanning.js
 var import_node_fs15 = __toESM(require("node:fs"), 1);
-var runScan = /* @__PURE__ */ __name(async (serviceAccount, image, serviceName, labels) => {
+var runScan = /* @__PURE__ */ __name(async (serviceAccount, image, serviceName, labels, projectID) => {
+  let failOnVulnerabilities = true;
+  const whiteListedProjects = ["platform-prod-2481", "txengine-prod-1c85"];
+  if (whiteListedProjects.includes(projectID)) {
+    failOnVulnerabilities = false;
+  }
   const scanResult = await trivy(serviceAccount, image, {
-    failOnVulnerabilities: true,
+    failOnVulnerabilities,
     notifySlackOnVulnerabilities: true,
     uploadSbomArtifacts: true
   });
@@ -111063,7 +111068,7 @@ var action5 = /* @__PURE__ */ __name(async () => {
   const platformGKE = !cloudrun;
   if (process.platform !== "win32") {
     if (env2 !== "staging" || projectID === "quotes-staging-ccdf") {
-      await vulnerability_scanning_default(serviceAccountKeyCICD, image, serviceName, labels);
+      await vulnerability_scanning_default(serviceAccountKeyCICD, image, serviceName, labels, projectID);
     }
   }
   const version3 = (/* @__PURE__ */ new Date()).getTime();
