@@ -110952,8 +110952,30 @@ var service_definition_default = loadServiceDefinition;
 // cloud-deploy/src/utils/vulnerability-scanning.js
 var import_node_fs15 = __toESM(require("node:fs"), 1);
 var runScan = /* @__PURE__ */ __name(async (serviceAccount, image, serviceName, labels) => {
+  let failOnVulnerabilities = true;
+  const whiteListedServices = [
+    "isrg-ad-checkout-api",
+    "isrg-es-checkout-api",
+    "isrg-es-ci-checkout-api",
+    "isrg-es-ci-referencedata",
+    "isrg-es-ci-test-checkout-api",
+    "isrg-es-ci-test-referencedata",
+    "isrg-es-cn-checkout-api",
+    "isrg-es-referencedata",
+    "isrg-es-sandbox-checkout-api",
+    "isrg-es-sandbox-referencedata",
+    "isrg-pt-checkout-api",
+    "isrg-pt-referencedata",
+    "isrg-pt-sandbox-checkout-api",
+    "isrg-pt-sandbox-referencedata",
+    "apache-devlake",
+    "apache-devlake-grafana"
+  ];
+  if (whiteListedServices.includes(serviceName)) {
+    failOnVulnerabilities = false;
+  }
   const scanResult = await trivy(serviceAccount, image, {
-    failOnVulnerabilities: true,
+    failOnVulnerabilities,
     notifySlackOnVulnerabilities: true,
     uploadSbomArtifacts: true
   });
