@@ -103111,7 +103111,9 @@ var opaTest = /* @__PURE__ */ __name(async (bundleDir) => {
     binary: "opa_linux_amd64_static",
     version: version3,
     downloadUrl: `https://openpolicyagent.org/downloads/v${version3}/opa_linux_amd64_static`
-  }).then((opa) => exec(opa, ["test", "--verbose", "--bundle", bundleDir]));
+  }).then(
+    (opa) => exec(opa, ["test", "--verbose", "--v0-compatible", "--bundle", bundleDir])
+  );
 }, "opaTest");
 var opa_test_default = opaTest;
 
