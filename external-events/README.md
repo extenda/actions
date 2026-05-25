@@ -2,11 +2,11 @@
 
 This GitHub action synchronises 'external events' config with `External events` service.
 
-# Usage
+## Usage
 
 See [action.yml](action.yml)
 
-# Common repo setup
+## Common repo setup
 
 This action is used to sync `EXE` configuration from your repo with `EXE Service`.
 
@@ -44,6 +44,16 @@ event-sources: # (required) list of event sources for your system
       removal-date: "2020-02-02" # (required) YYYY-MM-DD, should be explicitly specified as a string with double quotes
       message: any string # (optional) will be displayed along with event messages
       replaced-with: iam.group-created.v2 # (optional) event source id that will replace the deprecated
+    # (optional) DFO (Data Flow Observability); omitted = no DFO for this source
+    dfo:
+      entity-type: IAM_GROUP # DFO `entityType`
+      field-paths: # jsonpath on payload or Pub/Sub attrs: $.data…, $.attributes…
+        entity-id: $.data.id # single-entity sources
+        # entity-ids: $.data.items[*].id # use this instead for batched entities
+        business-unit-id: $.attributes['Business-Unit-Id']
+        business-unit-group-id: $.data.nested.bu.id
+        # jsonpath syntax https://github.com/JSONPath-Plus/JSONPath#syntax-through-examples
+        # playground https://jsonpath.com/
   - name: group-created
     version: v2
     display-name: IAM Group was created
@@ -54,19 +64,9 @@ event-sources: # (required) list of event sources for your system
     display-name: IAM Group was updated
     subscription-name: projects/iam-prod-4aad/subscriptions/iam.public.output.events.v1+iam.group-updated
     content-type: application/json
-    # optional DFO (Data Flow Observability); omitted = no DFO for this source
-    dfo:
-      entity-type: IAM_GROUP # DFO `entityType`
-      field-paths: # jsonpath on payload or Pub/Sub attrs: $.data…, $.attributes…
-        entity-id: $.data.id # single-entity sources
-        entity-ids: $.data.items[*].id # or if event has batched entities
-        business-unit-id: $.attributes['Business-Unit-Id']
-        business-unit-group-id: $.data.nested.bu.id
-        # jsonpath syntax https://github.com/JSONPath-Plus/JSONPath#syntax-through-examples
-        # playground https://jsonpath.com/
 ```
 
-# Action setup example
+## Action setup example
 
 .github/workflows/exe.yml
 
@@ -89,3 +89,17 @@ jobs:
           definitions: external-events/*.yaml # default is `external-events/*.yaml`
           dry-run: ${{ github.ref != 'refs/heads/master' }}
 ```
+
+## DFO (Data Flow Observability)
+
+Optional per event source. Omit `dfo` entirely if you do not need observability for that source.
+
+When present, set `entity-type` to the DFO entity type for events from this source, and map
+`field-paths` with JSONPath expressions against the Pub/Sub message (payload under `$.data`,
+attributes under `$.attributes`). Use `entity-id` for single-entity events, or `entity-ids` when the
+payload carries a batch. Add `business-unit-id` and/or `business-unit-group-id` when those values
+appear in the message.
+
+See the `dfo` block in the example above. JSONPath syntax:
+[JSONPath-Plus](https://github.com/JSONPath-Plus/JSONPath#syntax-through-examples). Playground:
+[jsonpath.com](https://jsonpath.com/).
