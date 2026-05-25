@@ -49,7 +49,7 @@ event-sources: # (required) list of event sources for your system
       entity-type: IAM_GROUP # DFO `entityType`
       field-paths: # jsonpath on payload or Pub/Sub attrs: $.data…, $.attributes…
         entity-id: $.data.id # single-entity sources
-        entity-ids: $.data.items[*].id # or if event has batched entities
+        # entity-ids: $.data.items[*].id # use this instead for batched entities
         business-unit-id: $.attributes['Business-Unit-Id']
         business-unit-group-id: $.data.nested.bu.id
         # jsonpath syntax https://github.com/JSONPath-Plus/JSONPath#syntax-through-examples
