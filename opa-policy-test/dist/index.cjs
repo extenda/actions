@@ -103105,7 +103105,7 @@ var create_test_bundle_default = createTestBundle;
 
 // opa-policy-test/src/opa-test.js
 var opaTest = /* @__PURE__ */ __name(async (bundleDir) => {
-  const version3 = "0.58.0";
+  const version3 = "1.16.2";
   return loadTool({
     tool: "opa",
     binary: "opa_linux_amd64_static",

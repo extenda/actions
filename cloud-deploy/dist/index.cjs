@@ -108454,7 +108454,7 @@ ${result.toString()}`;
 
 // cloud-deploy/src/manifests/security-sidecar.js
 var IMAGE_NAME = "eu.gcr.io/extenda/security";
-var STABLE_VERSION = "v1.7.4";
+var STABLE_VERSION = "v2.0.1";
 var volumeMounts = /* @__PURE__ */ __name((protocol) => {
   const volumes = [];
   if (protocol === "http2") {
