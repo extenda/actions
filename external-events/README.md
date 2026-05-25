@@ -95,8 +95,8 @@ jobs:
 Optional per event source. Omit `dfo` entirely if you do not need observability for that source.
 
 When present, set `entity-type` to the DFO entity type for events from this source, and map
-`field-paths` with JSONPath expressions against the Pub/Sub message (payload under `$.data…`,
-attributes under `$.attributes…`). Use `entity-id` for single-entity events, or `entity-ids` when the
+`field-paths` with JSONPath expressions against the Pub/Sub message (payload under `$.data`,
+attributes under `$.attributes`). Use `entity-id` for single-entity events, or `entity-ids` when the
 payload carries a batch. Add `business-unit-id` and/or `business-unit-group-id` when those values
 appear in the message.
 
