@@ -16,6 +16,7 @@ test('It can run an OPA test', async () => {
   expect(exec).toHaveBeenCalledWith('opa_linux_amd64_static', [
     'test',
     '--verbose',
+    '--v0-compatible',
     '--bundle',
     'test-bundle',
   ]);
