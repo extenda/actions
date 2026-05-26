@@ -22294,6 +22294,7 @@ var require_range = __commonJS({
         return this.range;
       }
       parseRange(range2) {
+        range2 = range2.replace(BUILDSTRIPRE, "");
         const memoOpts = (this.options.includePrerelease && FLAG_INCLUDE_PRERELEASE) | (this.options.loose && FLAG_LOOSE);
         const memoKey = memoOpts + ":" + range2;
         const cached = cache2.get(memoKey);
@@ -22377,12 +22378,14 @@ var require_range = __commonJS({
     var SemVer = require_semver();
     var {
       safeRe: re,
+      src,
       t: t2,
       comparatorTrimReplace,
       tildeTrimReplace,
       caretTrimReplace
     } = require_re();
     var { FLAG_INCLUDE_PRERELEASE, FLAG_LOOSE } = require_constants6();
+    var BUILDSTRIPRE = new RegExp(src[t2.BUILD], "g");
     var isNullSet = /* @__PURE__ */ __name((c3) => c3.value === "<0.0.0-0", "isNullSet");
     var isAny = /* @__PURE__ */ __name((c3) => c3.value === "", "isAny");
     var isSatisfiable = /* @__PURE__ */ __name((comparators, options) => {
@@ -23145,7 +23148,7 @@ var require_subset = __commonJS({
             if (higher === c3 && higher !== gt2) {
               return false;
             }
-          } else if (gt2.operator === ">=" && !satisfies3(gt2.semver, String(c3), options)) {
+          } else if (gt2.operator === ">=" && !c3.test(gt2.semver)) {
             return false;
           }
         }
@@ -23161,7 +23164,7 @@ var require_subset = __commonJS({
             if (lower === c3 && lower !== lt) {
               return false;
             }
-          } else if (lt.operator === "<=" && !satisfies3(lt.semver, String(c3), options)) {
+          } else if (lt.operator === "<=" && !c3.test(lt.semver)) {
             return false;
           }
         }
@@ -43793,7 +43796,7 @@ var require_package = __commonJS({
   "node_modules/@actions/cache/package.json"(exports2, module2) {
     module2.exports = {
       name: "@actions/cache",
-      version: "6.0.0",
+      version: "6.0.1",
       description: "Actions cache lib",
       keywords: [
         "github",
@@ -43836,21 +43839,21 @@ var require_package = __commonJS({
         url: "https://github.com/actions/toolkit/issues"
       },
       dependencies: {
-        "@actions/core": "^3.0.0",
+        "@actions/core": "^3.0.1",
         "@actions/exec": "^3.0.0",
         "@actions/glob": "^0.6.1",
-        "@actions/http-client": "^4.0.0",
-        "@actions/io": "^3.0.0",
-        "@azure/core-rest-pipeline": "^1.22.0",
-        "@azure/storage-blob": "^12.30.0",
+        "@actions/http-client": "^4.0.1",
+        "@actions/io": "^3.0.2",
+        "@azure/core-rest-pipeline": "^1.23.0",
+        "@azure/storage-blob": "^12.31.0",
         "@protobuf-ts/runtime-rpc": "^2.11.1",
-        semver: "^7.7.3"
+        semver: "^7.7.4"
       },
       devDependencies: {
-        "@protobuf-ts/plugin": "^2.9.4",
-        "@types/node": "^25.1.0",
+        "@protobuf-ts/plugin": "^2.11.1",
+        "@types/node": "^25.6.0",
         "@types/semver": "^7.7.1",
-        typescript: "^5.2.2"
+        typescript: "^5.9.3"
       },
       overrides: {
         "uri-js": "npm:uri-js-replace@^1.0.1",
@@ -113486,8 +113489,7 @@ var UsageError = class extends Error {
     __name(this, "UsageError");
   }
   constructor() {
-    const message = `Cache storage quota has been hit. Unable to upload any new cache entries. Usage is recalculated eve\
-ry 6-12 hours.
+    const message = `Cache storage quota has been hit. Unable to upload any new cache entries.
 More info on storage limits: https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-gi\
 thub-actions#calculating-minute-and-storage-spending`;
     super(message);
