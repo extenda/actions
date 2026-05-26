@@ -22288,6 +22288,7 @@ var require_range = __commonJS({
         return this.range;
       }
       parseRange(range) {
+        range = range.replace(BUILDSTRIPRE, "");
         const memoOpts = (this.options.includePrerelease && FLAG_INCLUDE_PRERELEASE) | (this.options.loose && FLAG_LOOSE);
         const memoKey = memoOpts + ":" + range;
         const cached = cache.get(memoKey);
@@ -22371,12 +22372,14 @@ var require_range = __commonJS({
     var SemVer = require_semver();
     var {
       safeRe: re2,
+      src,
       t: t2,
       comparatorTrimReplace,
       tildeTrimReplace,
       caretTrimReplace
     } = require_re();
     var { FLAG_INCLUDE_PRERELEASE, FLAG_LOOSE } = require_constants6();
+    var BUILDSTRIPRE = new RegExp(src[t2.BUILD], "g");
     var isNullSet = /* @__PURE__ */ __name((c3) => c3.value === "<0.0.0-0", "isNullSet");
     var isAny = /* @__PURE__ */ __name((c3) => c3.value === "", "isAny");
     var isSatisfiable = /* @__PURE__ */ __name((comparators, options) => {
@@ -23138,7 +23141,7 @@ var require_subset = __commonJS({
             if (higher === c3 && higher !== gt3) {
               return false;
             }
-          } else if (gt3.operator === ">=" && !satisfies3(gt3.semver, String(c3), options)) {
+          } else if (gt3.operator === ">=" && !c3.test(gt3.semver)) {
             return false;
           }
         }
@@ -23154,7 +23157,7 @@ var require_subset = __commonJS({
             if (lower === c3 && lower !== lt2) {
               return false;
             }
-          } else if (lt2.operator === "<=" && !satisfies3(lt2.semver, String(c3), options)) {
+          } else if (lt2.operator === "<=" && !c3.test(lt2.semver)) {
             return false;
           }
         }
