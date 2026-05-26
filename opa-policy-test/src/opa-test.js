@@ -3,13 +3,15 @@ import { exec } from '@actions/exec';
 import { loadTool } from '../../utils/src/index.js';
 
 const opaTest = async (bundleDir) => {
-  const version = '0.58.0';
+  const version = '1.16.2';
   return loadTool({
     tool: 'opa',
     binary: 'opa_linux_amd64_static',
     version,
     downloadUrl: `https://openpolicyagent.org/downloads/v${version}/opa_linux_amd64_static`,
-  }).then((opa) => exec(opa, ['test', '--verbose', '--bundle', bundleDir]));
+  }).then((opa) =>
+    exec(opa, ['test', '--verbose', '--v0-compatible', '--bundle', bundleDir]),
+  );
 };
 
 export default opaTest;

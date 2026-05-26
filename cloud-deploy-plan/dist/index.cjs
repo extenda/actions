@@ -106350,7 +106350,7 @@ var import_jsonschema2 = __toESM(require_lib(), 1);
 var import_yaml3 = __toESM(require_dist7(), 1);
 
 // cloud-deploy/src/manifests/security-sidecar.js
-var STABLE_VERSION = "v1.7.4";
+var STABLE_VERSION = "v2.0.1";
 var getImageTag = /* @__PURE__ */ __name(({ "preview-tag": previewTag = null } = {}) => select_semver_default(
   process.env.SECURITY_IMAGE_TAG || previewTag || STABLE_VERSION,
   STABLE_VERSION
