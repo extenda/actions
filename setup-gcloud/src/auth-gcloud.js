@@ -14,6 +14,7 @@ export const authType = {
 
 export const env = {
   accessToken: 'CLOUDSDK_AUTH_ACCESS_TOKEN',
+  account: 'CLOUDSDK_CORE_ACCOUNT',
   applicationCredentials: 'GOOGLE_APPLICATION_CREDENTIALS',
   credentialsOverride: 'CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE',
   projectId: 'CLOUDSDK_CORE_PROJECT',
@@ -109,10 +110,12 @@ const setEnvironmentVariable = (key, value, exportVariable) => {
 };
 
 const populateEnvironment = async ({
+  email,
   projectId,
   credentialsFilePath,
   exportCredentials,
 }) => {
+  setEnvironmentVariable(env.account, email, exportCredentials);
   setEnvironmentVariable(env.projectId, projectId, exportCredentials);
   setEnvironmentVariable(
     env.applicationCredentials,

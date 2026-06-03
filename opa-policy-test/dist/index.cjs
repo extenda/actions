@@ -66591,6 +66591,7 @@ var authType = {
 };
 var env = {
   accessToken: "CLOUDSDK_AUTH_ACCESS_TOKEN",
+  account: "CLOUDSDK_CORE_ACCOUNT",
   applicationCredentials: "GOOGLE_APPLICATION_CREDENTIALS",
   credentialsOverride: "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE",
   projectId: "CLOUDSDK_CORE_PROJECT"
@@ -66673,10 +66674,12 @@ var setEnvironmentVariable = /* @__PURE__ */ __name((key, value, exportVariable2
   }
 }, "setEnvironmentVariable");
 var populateEnvironment = /* @__PURE__ */ __name(async ({
+  email,
   projectId,
   credentialsFilePath,
   exportCredentials
 }) => {
+  setEnvironmentVariable(env.account, email, exportCredentials);
   setEnvironmentVariable(env.projectId, projectId, exportCredentials);
   setEnvironmentVariable(
     env.applicationCredentials,
