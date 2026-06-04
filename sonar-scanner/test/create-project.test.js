@@ -156,6 +156,38 @@ describe('Create Project', () => {
         "Failed to create 'extenda_actions' in https://sonarcloud.io",
       );
     });
+
+    test('It logs status details when project existence check fails', async () => {
+      axios.get.mockRejectedValue({
+        response: {
+          status: 403,
+          statusText: 'Forbidden',
+          headers: {
+            'x-request-id': 'req-123',
+          },
+          data: {
+            errors: [{ msg: 'Forbidden' }],
+          },
+        },
+      });
+
+      await expect(createProject('https://sonarcloud.io')).rejects.toMatchObject(
+        {
+          response: {
+            status: 403,
+          },
+        },
+      );
+
+      expect(core.error).toHaveBeenCalledWith(
+        "Failed to check whether project 'extenda_actions' exists in https://sonarcloud.io for organization 'extenda'",
+      );
+      expect(core.error).toHaveBeenCalledWith('Status: 403 Forbidden');
+      expect(core.error).toHaveBeenCalledWith('Request ID: req-123');
+      expect(core.error).toHaveBeenCalledWith(
+        'Body: {"errors":[{"msg":"Forbidden"}]}',
+      );
+    });
   });
 
   describe('Project exists edge cases', () => {

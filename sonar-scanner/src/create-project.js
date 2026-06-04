@@ -6,6 +6,33 @@ import qs from 'qs';
 
 import { sonarAuth } from './sonar-credentials.js';
 
+const logAxiosError = (prefix, error) => {
+  const response = error?.response;
+  if (!response) {
+    core.error(prefix);
+    return;
+  }
+
+  core.error(prefix);
+  core.error(
+    `Status: ${response.status}${response.statusText ? ` ${response.statusText}` : ''}`,
+  );
+
+  const requestId =
+    response.headers?.['x-request-id'] ??
+    response.headers?.['x-amz-cf-id'] ??
+    response.headers?.['cf-ray'];
+  if (requestId) {
+    core.error(`Request ID: ${requestId}`);
+  }
+
+  if (typeof response.data === 'string') {
+    core.error(`Body: ${response.data}`);
+  } else if (response.data && typeof response.data === 'object') {
+    core.error(`Body: ${JSON.stringify(response.data)}`);
+  }
+};
+
 const projectExists = async (hostUrl, organization, project) =>
   axios
     .get(
@@ -21,6 +48,14 @@ const projectExists = async (hostUrl, organization, project) =>
       );
     });
 
+const logProjectExistsFailure = (hostUrl, organization, project, error) => {
+  logAxiosError(
+    `Failed to check whether project '${project}' exists in ${hostUrl} for organization '${organization}'`,
+    error,
+  );
+  throw error;
+};
+
 const createSonarCloudProject = async (hostUrl, workingDir) => {
   const repo = process.env.GITHUB_REPOSITORY.split('/');
   let project = repo.join('_');
@@ -31,7 +66,11 @@ const createSonarCloudProject = async (hostUrl, workingDir) => {
     project = `${project}_${suffix}`;
   }
 
-  if (await projectExists(hostUrl, repo[0], project)) {
+  if (
+    await projectExists(hostUrl, repo[0], project).catch((error) =>
+      logProjectExistsFailure(hostUrl, repo[0], project, error),
+    )
+  ) {
     core.debug(`Project '${project}' exists in ${hostUrl}`);
     return Promise.resolve();
   }
@@ -55,7 +94,11 @@ const createSonarCloudProject = async (hostUrl, workingDir) => {
     .then(() => {
       core.info(`Created project '${project}' in ${hostUrl}`);
     })
-    .catch(() => {
+    .catch((error) => {
+      logAxiosError(
+        `Failed to create project '${project}' in ${hostUrl}`,
+        error,
+      );
       core.error(`Failed to create '${project}' in ${hostUrl}`);
     });
 };
