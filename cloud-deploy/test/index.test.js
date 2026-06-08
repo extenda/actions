@@ -316,7 +316,6 @@ describe('Action', () => {
           'static-egress-ip': false,
           'serve-traffic': false,
           canary: {
-            enabled: true,
             steps: [10, 50, 100],
             'slack-channel': '#deployments',
           },

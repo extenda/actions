@@ -111129,7 +111129,7 @@ var action5 = /* @__PURE__ */ __name(async () => {
     "serve-traffic": serveTrafficFlag = true,
     canary: trafficCanary = null
   } = traffic;
-  const DEFAULT_CANARY_STEPS = [5, 10, 25, 50, 75];
+  const DEFAULT_CANARY_STEPS = [10, 25, 50, 75];
   const isNewCanary = trafficCanary !== null;
   const configuredSteps = isNewCanary && typeof trafficCanary === "object" && trafficCanary.steps ? trafficCanary.steps :
   DEFAULT_CANARY_STEPS;

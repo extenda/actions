@@ -272,7 +272,7 @@ describe('Send request to platform api', () => {
       region: 'europe-west1',
       revision: 'my-service-00002-abc',
       previousRevision: 'my-service-00001-xyz',
-      steps: [5, 10, 25, 50, 75, 100],
+      steps: [10, 25, 50, 75, 100],
     };
 
     it('posts to /canary/automatic and returns true on success', async () => {
