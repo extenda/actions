@@ -38,7 +38,7 @@ var require_ms = __commonJS({
       options = options || {};
       var type = typeof val;
       if (type === "string" && val.length > 0) {
-        return parse3(val);
+        return parse2(val);
       } else if (type === "number" && isFinite(val)) {
         return options.long ? fmtLong(val) : fmtShort(val);
       }
@@ -46,7 +46,7 @@ var require_ms = __commonJS({
         "val is not a non-empty string or a valid number. val=" + JSON.stringify(val)
       );
     };
-    function parse3(str) {
+    function parse2(str) {
       str = String(str);
       if (str.length > 100) {
         return;
@@ -103,7 +103,7 @@ var require_ms = __commonJS({
           return void 0;
       }
     }
-    __name(parse3, "parse");
+    __name(parse2, "parse");
     function fmtShort(ms) {
       var msAbs = Math.abs(ms);
       if (msAbs >= d) {
@@ -3105,23 +3105,16 @@ var require_dispatcher_base = __commonJS({
     var kOnDestroyed = /* @__PURE__ */ Symbol("onDestroyed");
     var kOnClosed = /* @__PURE__ */ Symbol("onClosed");
     var kInterceptedDispatch = /* @__PURE__ */ Symbol("Intercepted Dispatch");
-    var kWebSocketOptions = /* @__PURE__ */ Symbol("webSocketOptions");
     var DispatcherBase = class extends Dispatcher {
       static {
         __name(this, "DispatcherBase");
       }
-      constructor(opts) {
+      constructor() {
         super();
         this[kDestroyed] = false;
         this[kOnDestroyed] = null;
         this[kClosed] = false;
         this[kOnClosed] = [];
-        this[kWebSocketOptions] = opts?.webSocket ?? {};
-      }
-      get webSocketOptions() {
-        return {
-          maxPayloadSize: this[kWebSocketOptions].maxPayloadSize ?? 128 * 1024 * 1024
-        };
       }
       get destroyed() {
         return this[kDestroyed];
@@ -8174,55 +8167,24 @@ var require_client_h1 = __commonJS({
             currentBufferRef = null;
           }
           const offset = llhttp.llhttp_get_error_pos(this.ptr) - currentBufferPtr;
-          if (ret !== constants3.ERROR.OK) {
-            const body = data.subarray(offset);
-            if (ret === constants3.ERROR.PAUSED_UPGRADE) {
-              this.onUpgrade(body);
-            } else if (ret === constants3.ERROR.PAUSED) {
-              this.paused = true;
-              socket.unshift(body);
-            } else {
-              throw this.createError(ret, body);
+          if (ret === constants3.ERROR.PAUSED_UPGRADE) {
+            this.onUpgrade(data.slice(offset));
+          } else if (ret === constants3.ERROR.PAUSED) {
+            this.paused = true;
+            socket.unshift(data.slice(offset));
+          } else if (ret !== constants3.ERROR.OK) {
+            const ptr = llhttp.llhttp_get_error_reason(this.ptr);
+            let message = "";
+            if (ptr) {
+              const len = new Uint8Array(llhttp.memory.buffer, ptr).indexOf(0);
+              message = "Response does not match the HTTP/1.1 protocol (" + Buffer.from(llhttp.memory.buffer, ptr, len).
+              toString() + ")";
             }
+            throw new HTTPParserError(message, constants3.ERROR[ret], data.slice(offset));
           }
         } catch (err) {
           util.destroy(socket, err);
         }
-      }
-      finish() {
-        assert(currentParser === null);
-        assert(this.ptr != null);
-        assert(!this.paused);
-        const { llhttp } = this;
-        let ret;
-        try {
-          currentParser = this;
-          ret = llhttp.llhttp_finish(this.ptr);
-        } finally {
-          currentParser = null;
-        }
-        if (ret === constants3.ERROR.OK) {
-          return null;
-        }
-        if (ret === constants3.ERROR.PAUSED || ret === constants3.ERROR.PAUSED_UPGRADE) {
-          this.paused = true;
-          return null;
-        }
-        return this.createError(ret, EMPTY_BUF);
-      }
-      createError(ret, data) {
-        const { llhttp, contentLength, bytesRead } = this;
-        if (contentLength && bytesRead !== parseInt(contentLength, 10)) {
-          return new ResponseContentLengthMismatchError();
-        }
-        const ptr = llhttp.llhttp_get_error_reason(this.ptr);
-        let message = "";
-        if (ptr) {
-          const len = new Uint8Array(llhttp.memory.buffer, ptr).indexOf(0);
-          message = "Response does not match the HTTP/1.1 protocol (" + Buffer.from(llhttp.memory.buffer, ptr, len).toString() +
-          ")";
-        }
-        return new HTTPParserError(message, constants3.ERROR[ret], data);
       }
       destroy() {
         assert(this.ptr != null);
@@ -8496,11 +8458,7 @@ var require_client_h1 = __commonJS({
         assert(err.code !== "ERR_TLS_CERT_ALTNAME_INVALID");
         const parser4 = this[kParser];
         if (err.code === "ECONNRESET" && parser4.statusCode && !parser4.shouldKeepAlive) {
-          const parserErr = parser4.finish();
-          if (parserErr) {
-            this[kError] = parserErr;
-            this[kClient][kOnError](parserErr);
-          }
+          parser4.onMessageComplete();
           return;
         }
         this[kError] = err;
@@ -8515,10 +8473,7 @@ var require_client_h1 = __commonJS({
       addListener(socket, "end", function() {
         const parser4 = this[kParser];
         if (parser4.statusCode && !parser4.shouldKeepAlive) {
-          const parserErr = parser4.finish();
-          if (parserErr) {
-            util.destroy(this, parserErr);
-          }
+          parser4.onMessageComplete();
           return;
         }
         util.destroy(this, new SocketError("other side closed", util.getSocketInfo(this)));
@@ -8528,7 +8483,7 @@ var require_client_h1 = __commonJS({
         const parser4 = this[kParser];
         if (parser4) {
           if (!this[kError] && parser4.statusCode && !parser4.shouldKeepAlive) {
-            this[kError] = parser4.finish() || this[kError];
+            parser4.onMessageComplete();
           }
           this[kParser].destroy();
           this[kParser] = null;
@@ -9888,10 +9843,9 @@ var require_client = __commonJS({
         autoSelectFamilyAttemptTimeout,
         // h2
         maxConcurrentStreams,
-        allowH2,
-        webSocket
+        allowH2
       } = {}) {
-        super({ webSocket });
+        super();
         if (keepAlive !== void 0) {
           throw new InvalidArgumentError("unsupported keepAlive, use pipelining=0 instead");
         }
@@ -10416,8 +10370,8 @@ var require_pool_base = __commonJS({
       static {
         __name(this, "PoolBase");
       }
-      constructor(opts) {
-        super(opts);
+      constructor() {
+        super();
         this[kQueue] = new FixedQueue();
         this[kClients] = [];
         this[kQueued] = 0;
@@ -10594,6 +10548,7 @@ var require_pool = __commonJS({
         allowH2,
         ...options
       } = {}) {
+        super();
         if (connections != null && (!Number.isFinite(connections) || connections < 0)) {
           throw new InvalidArgumentError("invalid connections");
         }
@@ -10614,7 +10569,6 @@ var require_pool = __commonJS({
             ...connect
           });
         }
-        super(options);
         this[kInterceptors] = options.interceptors?.Pool && Array.isArray(options.interceptors.Pool) ? options.interceptors.
         Pool : [];
         this[kConnections] = connections || null;
@@ -10829,6 +10783,7 @@ var require_agent = __commonJS({
         __name(this, "Agent");
       }
       constructor({ factory = defaultFactory, maxRedirections = 0, connect, ...options } = {}) {
+        super();
         if (typeof factory !== "function") {
           throw new InvalidArgumentError("factory must be a function.");
         }
@@ -10838,7 +10793,6 @@ var require_agent = __commonJS({
         if (!Number.isInteger(maxRedirections) || maxRedirections < 0) {
           throw new InvalidArgumentError("maxRedirections must be a positive number");
         }
-        super(options);
         if (connect && typeof connect !== "function") {
           connect = { ...connect };
         }
@@ -19755,6 +19709,7 @@ var require_permessage_deflate = __commonJS({
     var tail = Buffer.from([0, 0, 255, 255]);
     var kBuffer = /* @__PURE__ */ Symbol("kBuffer");
     var kLength = /* @__PURE__ */ Symbol("kLength");
+    var kDefaultMaxDecompressedSize = 4 * 1024 * 1024;
     var PerMessageDeflate = class {
       static {
         __name(this, "PerMessageDeflate");
@@ -19762,22 +19717,22 @@ var require_permessage_deflate = __commonJS({
       /** @type {import('node:zlib').InflateRaw} */
       #inflate;
       #options = {};
-      #maxPayloadSize = 0;
+      /** @type {boolean} */
+      #aborted = false;
+      /** @type {Function|null} */
+      #currentCallback = null;
       /**
        * @param {Map<string, string>} extensions
        */
-      constructor(extensions, options) {
+      constructor(extensions) {
         this.#options.serverNoContextTakeover = extensions.has("server_no_context_takeover");
         this.#options.serverMaxWindowBits = extensions.get("server_max_window_bits");
-        this.#maxPayloadSize = options.maxPayloadSize;
       }
-      /**
-       * Decompress a compressed payload.
-       * @param {Buffer} chunk Compressed data
-       * @param {boolean} fin Final fragment flag
-       * @param {Function} callback Callback function
-       */
       decompress(chunk, fin, callback) {
+        if (this.#aborted) {
+          callback(new MessageSizeExceededError());
+          return;
+        }
         if (!this.#inflate) {
           let windowBits = Z_DEFAULT_WINDOWBITS;
           if (this.#options.serverMaxWindowBits) {
@@ -19796,11 +19751,20 @@ var require_permessage_deflate = __commonJS({
           this.#inflate[kBuffer] = [];
           this.#inflate[kLength] = 0;
           this.#inflate.on("data", (data) => {
+            if (this.#aborted) {
+              return;
+            }
             this.#inflate[kLength] += data.length;
-            if (this.#maxPayloadSize > 0 && this.#inflate[kLength] > this.#maxPayloadSize) {
-              callback(new MessageSizeExceededError());
+            if (this.#inflate[kLength] > kDefaultMaxDecompressedSize) {
+              this.#aborted = true;
               this.#inflate.removeAllListeners();
+              this.#inflate.destroy();
               this.#inflate = null;
+              if (this.#currentCallback) {
+                const cb = this.#currentCallback;
+                this.#currentCallback = null;
+                cb(new MessageSizeExceededError());
+              }
               return;
             }
             this.#inflate[kBuffer].push(data);
@@ -19810,17 +19774,19 @@ var require_permessage_deflate = __commonJS({
             callback(err);
           });
         }
+        this.#currentCallback = callback;
         this.#inflate.write(chunk);
         if (fin) {
           this.#inflate.write(tail);
         }
         this.#inflate.flush(() => {
-          if (!this.#inflate) {
+          if (this.#aborted || !this.#inflate) {
             return;
           }
           const full = Buffer.concat(this.#inflate[kBuffer], this.#inflate[kLength]);
           this.#inflate[kBuffer].length = 0;
           this.#inflate[kLength] = 0;
+          this.#currentCallback = null;
           callback(null, full);
         });
       }
@@ -19851,13 +19817,11 @@ var require_receiver = __commonJS({
     var { WebsocketFrameSend } = require_frame();
     var { closeWebSocketConnection } = require_connection();
     var { PerMessageDeflate } = require_permessage_deflate();
-    var { MessageSizeExceededError } = require_errors();
     var ByteParser = class extends Writable {
       static {
         __name(this, "ByteParser");
       }
       #buffers = [];
-      #fragmentsBytes = 0;
       #byteOffset = 0;
       #loop = false;
       #state = parserStates.INFO;
@@ -19865,20 +19829,16 @@ var require_receiver = __commonJS({
       #fragments = [];
       /** @type {Map<string, PerMessageDeflate>} */
       #extensions;
-      /** @type {number} */
-      #maxPayloadSize;
       /**
        * @param {import('./websocket').WebSocket} ws
        * @param {Map<string, string>|null} extensions
-       * @param {{ maxPayloadSize?: number }} [options]
        */
-      constructor(ws, extensions, options = {}) {
+      constructor(ws, extensions) {
         super();
         this.ws = ws;
         this.#extensions = extensions == null ? /* @__PURE__ */ new Map() : extensions;
-        this.#maxPayloadSize = options.maxPayloadSize ?? 0;
         if (this.#extensions.has("permessage-deflate")) {
-          this.#extensions.set("permessage-deflate", new PerMessageDeflate(extensions, options));
+          this.#extensions.set("permessage-deflate", new PerMessageDeflate(extensions));
         }
       }
       /**
@@ -19890,13 +19850,6 @@ var require_receiver = __commonJS({
         this.#byteOffset += chunk.length;
         this.#loop = true;
         this.run(callback);
-      }
-      #validatePayloadLength() {
-        if (this.#maxPayloadSize > 0 && !isControlFrame(this.#info.opcode) && this.#info.payloadLength > this.#maxPayloadSize) {
-          failWebsocketConnection(this.ws, "Payload size exceeds maximum allowed size");
-          return false;
-        }
-        return true;
       }
       /**
        * Runs whenever a new chunk is received.
@@ -19957,9 +19910,6 @@ var require_receiver = __commonJS({
             if (payloadLength <= 125) {
               this.#info.payloadLength = payloadLength;
               this.#state = parserStates.READ_DATA;
-              if (!this.#validatePayloadLength()) {
-                return;
-              }
             } else if (payloadLength === 126) {
               this.#state = parserStates.PAYLOADLENGTH_16;
             } else if (payloadLength === 127) {
@@ -19980,9 +19930,6 @@ var require_receiver = __commonJS({
             const buffer = this.consume(2);
             this.#info.payloadLength = buffer.readUInt16BE(0);
             this.#state = parserStates.READ_DATA;
-            if (!this.#validatePayloadLength()) {
-              return;
-            }
           } else if (this.#state === parserStates.PAYLOADLENGTH_64) {
             if (this.#byteOffset < 8) {
               return callback();
@@ -19996,9 +19943,6 @@ var require_receiver = __commonJS({
             }
             this.#info.payloadLength = lower;
             this.#state = parserStates.READ_DATA;
-            if (!this.#validatePayloadLength()) {
-              return;
-            }
           } else if (this.#state === parserStates.READ_DATA) {
             if (this.#byteOffset < this.#info.payloadLength) {
               return callback();
@@ -20009,41 +19953,32 @@ var require_receiver = __commonJS({
               this.#state = parserStates.INFO;
             } else {
               if (!this.#info.compressed) {
-                this.writeFragments(body);
-                if (this.#maxPayloadSize > 0 && this.#fragmentsBytes > this.#maxPayloadSize) {
-                  failWebsocketConnection(this.ws, new MessageSizeExceededError().message);
-                  return;
-                }
+                this.#fragments.push(body);
                 if (!this.#info.fragmented && this.#info.fin) {
-                  websocketMessageReceived(this.ws, this.#info.binaryType, this.consumeFragments());
+                  const fullMessage = Buffer.concat(this.#fragments);
+                  websocketMessageReceived(this.ws, this.#info.binaryType, fullMessage);
+                  this.#fragments.length = 0;
                 }
                 this.#state = parserStates.INFO;
               } else {
-                this.#extensions.get("permessage-deflate").decompress(
-                  body,
-                  this.#info.fin,
-                  (error2, data) => {
-                    if (error2) {
-                      failWebsocketConnection(this.ws, error2.message);
-                      return;
-                    }
-                    this.writeFragments(data);
-                    if (this.#maxPayloadSize > 0 && this.#fragmentsBytes > this.#maxPayloadSize) {
-                      failWebsocketConnection(this.ws, new MessageSizeExceededError().message);
-                      return;
-                    }
-                    if (!this.#info.fin) {
-                      this.#state = parserStates.INFO;
-                      this.#loop = true;
-                      this.run(callback);
-                      return;
-                    }
-                    websocketMessageReceived(this.ws, this.#info.binaryType, this.consumeFragments());
-                    this.#loop = true;
-                    this.#state = parserStates.INFO;
-                    this.run(callback);
+                this.#extensions.get("permessage-deflate").decompress(body, this.#info.fin, (error2, data) => {
+                  if (error2) {
+                    failWebsocketConnection(this.ws, error2.message);
+                    return;
                   }
-                );
+                  this.#fragments.push(data);
+                  if (!this.#info.fin) {
+                    this.#state = parserStates.INFO;
+                    this.#loop = true;
+                    this.run(callback);
+                    return;
+                  }
+                  websocketMessageReceived(this.ws, this.#info.binaryType, Buffer.concat(this.#fragments));
+                  this.#loop = true;
+                  this.#state = parserStates.INFO;
+                  this.#fragments.length = 0;
+                  this.run(callback);
+                });
                 this.#loop = false;
                 break;
               }
@@ -20085,21 +20020,6 @@ var require_receiver = __commonJS({
         }
         this.#byteOffset -= n;
         return buffer;
-      }
-      writeFragments(fragment) {
-        this.#fragmentsBytes += fragment.length;
-        this.#fragments.push(fragment);
-      }
-      consumeFragments() {
-        const fragments = this.#fragments;
-        if (fragments.length === 1) {
-          this.#fragmentsBytes = 0;
-          return fragments.shift();
-        }
-        const output = Buffer.concat(fragments, this.#fragmentsBytes);
-        this.#fragments = [];
-        this.#fragmentsBytes = 0;
-        return output;
       }
       parseCloseBody(data) {
         assert(data.length !== 1);
@@ -20548,10 +20468,7 @@ ns");
        */
       #onConnectionEstablished(response, parsedExtensions) {
         this[kResponse] = response;
-        const maxPayloadSize = this[kController]?.dispatcher?.webSocketOptions?.maxPayloadSize;
-        const parser4 = new ByteParser(this, parsedExtensions, {
-          maxPayloadSize
-        });
+        const parser4 = new ByteParser(this, parsedExtensions);
         parser4.on("drain", onParserDrain);
         parser4.on("error", onParserError.bind(this));
         response.socket.ws = this;
@@ -21564,18 +21481,6 @@ var require_semver = __commonJS({
     var { safeRe: re, t: t2 } = require_re();
     var parseOptions = require_parse_options();
     var { compareIdentifiers } = require_identifiers();
-    var isPrereleaseIdentifier = /* @__PURE__ */ __name((prerelease, identifier) => {
-      const identifiers = identifier.split(".");
-      if (identifiers.length > prerelease.length) {
-        return false;
-      }
-      for (let i2 = 0; i2 < identifiers.length; i2++) {
-        if (compareIdentifiers(prerelease[i2], identifiers[i2]) !== 0) {
-          return false;
-        }
-      }
-      return true;
-    }, "isPrereleaseIdentifier");
     var SemVer = class _SemVer {
       static {
         __name(this, "SemVer");
@@ -21825,9 +21730,8 @@ var require_semver = __commonJS({
               if (identifierBase === false) {
                 prerelease = [identifier];
               }
-              if (isPrereleaseIdentifier(this.prerelease, identifier)) {
-                const prereleaseBase = this.prerelease[identifier.split(".").length];
-                if (isNaN(prereleaseBase)) {
+              if (compareIdentifiers(this.prerelease[0], identifier) === 0) {
+                if (isNaN(this.prerelease[1])) {
                   this.prerelease = prerelease;
                 }
               } else {
@@ -21855,7 +21759,7 @@ var require_parse2 = __commonJS({
   "node_modules/semver/functions/parse.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
-    var parse3 = /* @__PURE__ */ __name((version, options, throwErrors = false) => {
+    var parse2 = /* @__PURE__ */ __name((version, options, throwErrors = false) => {
       if (version instanceof SemVer) {
         return version;
       }
@@ -21868,7 +21772,7 @@ var require_parse2 = __commonJS({
         throw er;
       }
     }, "parse");
-    module2.exports = parse3;
+    module2.exports = parse2;
   }
 });
 
@@ -21876,9 +21780,9 @@ var require_parse2 = __commonJS({
 var require_valid = __commonJS({
   "node_modules/semver/functions/valid.js"(exports2, module2) {
     "use strict";
-    var parse3 = require_parse2();
+    var parse2 = require_parse2();
     var valid2 = /* @__PURE__ */ __name((version, options) => {
-      const v = parse3(version, options);
+      const v = parse2(version, options);
       return v ? v.version : null;
     }, "valid");
     module2.exports = valid2;
@@ -21889,9 +21793,9 @@ var require_valid = __commonJS({
 var require_clean = __commonJS({
   "node_modules/semver/functions/clean.js"(exports2, module2) {
     "use strict";
-    var parse3 = require_parse2();
+    var parse2 = require_parse2();
     var clean2 = /* @__PURE__ */ __name((version, options) => {
-      const s = parse3(version.trim().replace(/^[=v]+/, ""), options);
+      const s = parse2(version.trim().replace(/^[=v]+/, ""), options);
       return s ? s.version : null;
     }, "clean");
     module2.exports = clean2;
@@ -21926,10 +21830,10 @@ var require_inc = __commonJS({
 var require_diff = __commonJS({
   "node_modules/semver/functions/diff.js"(exports2, module2) {
     "use strict";
-    var parse3 = require_parse2();
+    var parse2 = require_parse2();
     var diff = /* @__PURE__ */ __name((version1, version2) => {
-      const v1 = parse3(version1, null, true);
-      const v2 = parse3(version2, null, true);
+      const v1 = parse2(version1, null, true);
+      const v2 = parse2(version2, null, true);
       const comparison = v1.compare(v2);
       if (comparison === 0) {
         return null;
@@ -22000,9 +21904,9 @@ var require_patch = __commonJS({
 var require_prerelease = __commonJS({
   "node_modules/semver/functions/prerelease.js"(exports2, module2) {
     "use strict";
-    var parse3 = require_parse2();
+    var parse2 = require_parse2();
     var prerelease = /* @__PURE__ */ __name((version, options) => {
-      const parsed = parse3(version, options);
+      const parsed = parse2(version, options);
       return parsed && parsed.prerelease.length ? parsed.prerelease : null;
     }, "prerelease");
     module2.exports = prerelease;
@@ -22188,7 +22092,7 @@ var require_coerce = __commonJS({
   "node_modules/semver/functions/coerce.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
-    var parse3 = require_parse2();
+    var parse2 = require_parse2();
     var { safeRe: re, t: t2 } = require_re();
     var coerce = /* @__PURE__ */ __name((version, options) => {
       if (version instanceof SemVer) {
@@ -22223,7 +22127,7 @@ var require_coerce = __commonJS({
       const patch = match[4] || "0";
       const prerelease = options.includePrerelease && match[5] ? `-${match[5]}` : "";
       const build = options.includePrerelease && match[6] ? `+${match[6]}` : "";
-      return parse3(`${major}.${minor}.${patch}${prerelease}${build}`, options);
+      return parse2(`${major}.${minor}.${patch}${prerelease}${build}`, options);
     }, "coerce");
     module2.exports = coerce;
   }
@@ -22233,7 +22137,7 @@ var require_coerce = __commonJS({
 var require_truncate = __commonJS({
   "node_modules/semver/functions/truncate.js"(exports2, module2) {
     "use strict";
-    var parse3 = require_parse2();
+    var parse2 = require_parse2();
     var constants3 = require_constants6();
     var SemVer = require_semver();
     var truncate = /* @__PURE__ */ __name((version, truncation, options) => {
@@ -22245,7 +22149,7 @@ var require_truncate = __commonJS({
     }, "truncate");
     var cloneInputVersion = /* @__PURE__ */ __name((version, options) => {
       const versionStringToParse = version instanceof SemVer ? version.version : version;
-      return parse3(versionStringToParse, options);
+      return parse2(versionStringToParse, options);
     }, "cloneInputVersion");
     var doTruncation = /* @__PURE__ */ __name((version, truncation) => {
       if (isPrerelease(truncation)) {
@@ -23297,7 +23201,7 @@ var require_semver2 = __commonJS({
     var constants3 = require_constants6();
     var SemVer = require_semver();
     var identifiers = require_identifiers();
-    var parse3 = require_parse2();
+    var parse2 = require_parse2();
     var valid2 = require_valid();
     var clean2 = require_clean();
     var inc = require_inc();
@@ -23336,7 +23240,7 @@ var require_semver2 = __commonJS({
     var simplifyRange = require_simplify();
     var subset = require_subset();
     module2.exports = {
-      parse: parse3,
+      parse: parse2,
       valid: valid2,
       clean: clean2,
       inc,
@@ -24196,141 +24100,101 @@ s. If you want to allow this behavior, set the allowRedirectDowngrade option to 
   }
 });
 
-// node_modules/content-type/dist/index.js
-var require_dist3 = __commonJS({
-  "node_modules/content-type/dist/index.js"(exports2) {
+// node_modules/fast-content-type-parse/index.js
+var require_fast_content_type_parse = __commonJS({
+  "node_modules/fast-content-type-parse/index.js"(exports2, module2) {
     "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.format = format;
-    exports2.parse = parse3;
-    var TEXT_REGEXP = /^[\u0009\u0020-\u007e\u0080-\u00ff]*$/;
-    var TOKEN_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
-    var QUOTE_REGEXP = /[\\"]/g;
-    var TYPE_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+\/[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
-    var NullObject = /* @__PURE__ */ (() => {
-      const C = /* @__PURE__ */ __name(function() {
-      }, "C");
-      C.prototype = /* @__PURE__ */ Object.create(null);
-      return C;
-    })();
-    function format(obj) {
-      const { type, parameters } = obj;
-      if (!type || !TYPE_REGEXP.test(type)) {
-        throw new TypeError(`Invalid type: ${type}`);
+    var NullObject = /* @__PURE__ */ __name(function NullObject2() {
+    }, "NullObject");
+    NullObject.prototype = /* @__PURE__ */ Object.create(null);
+    var paramRE = /; *([!#$%&'*+.^\w`|~-]+)=("(?:[\v\u0020\u0021\u0023-\u005b\u005d-\u007e\u0080-\u00ff]|\\[\v\u0020-\u00ff])*"|[!#$%&'*+.^\w`|~-]+) */gu;
+    var quotedPairRE = /\\([\v\u0020-\u00ff])/gu;
+    var mediaTypeRE = /^[!#$%&'*+.^\w|~-]+\/[!#$%&'*+.^\w|~-]+$/u;
+    var defaultContentType = { type: "", parameters: new NullObject() };
+    Object.freeze(defaultContentType.parameters);
+    Object.freeze(defaultContentType);
+    function parse2(header) {
+      if (typeof header !== "string") {
+        throw new TypeError("argument header is required and must be a string");
       }
-      let result = type;
-      if (parameters) {
-        for (const param of Object.keys(parameters)) {
-          if (!TOKEN_REGEXP.test(param)) {
-            throw new TypeError(`Invalid parameter name: ${param}`);
-          }
-          result += `; ${param}=${qstring(parameters[param])}`;
+      let index = header.indexOf(";");
+      const type = index !== -1 ? header.slice(0, index).trim() : header.trim();
+      if (mediaTypeRE.test(type) === false) {
+        throw new TypeError("invalid media type");
+      }
+      const result = {
+        type: type.toLowerCase(),
+        parameters: new NullObject()
+      };
+      if (index === -1) {
+        return result;
+      }
+      let key;
+      let match;
+      let value;
+      paramRE.lastIndex = index;
+      while (match = paramRE.exec(header)) {
+        if (match.index !== index) {
+          throw new TypeError("invalid parameter format");
         }
+        index += match[0].length;
+        key = match[1].toLowerCase();
+        value = match[2];
+        if (value[0] === '"') {
+          value = value.slice(1, value.length - 1);
+          quotedPairRE.test(value) && (value = value.replace(quotedPairRE, "$1"));
+        }
+        result.parameters[key] = value;
+      }
+      if (index !== header.length) {
+        throw new TypeError("invalid parameter format");
       }
       return result;
     }
-    __name(format, "format");
-    function parse3(header, options) {
-      const len = header.length;
-      let index = skipOWS(header, 0, len);
-      const valueStart = index;
-      index = skipValue(header, index, len);
-      const valueEnd = trailingOWS(header, valueStart, index);
-      const type = header.slice(valueStart, valueEnd).toLowerCase();
-      const parameters = options?.parameters === false ? new NullObject() : parseParameters(header, index, len);
-      return { type, parameters };
-    }
-    __name(parse3, "parse");
-    var SP = 32;
-    var HTAB = 9;
-    var SEMI = 59;
-    var EQ = 61;
-    var DQUOTE = 34;
-    var BSLASH = 92;
-    function parseParameters(header, index, len) {
-      const parameters = new NullObject();
-      parameter: while (index < len) {
-        index = skipOWS(header, index + 1, len);
-        const keyStart = index;
-        while (index < len) {
-          const code = header.charCodeAt(index);
-          if (code === SEMI)
-            continue parameter;
-          if (code === EQ) {
-            const keyEnd = trailingOWS(header, keyStart, index);
-            const key = header.slice(keyStart, keyEnd).toLowerCase();
-            index = skipOWS(header, index + 1, len);
-            if (index < len && header.charCodeAt(index) === DQUOTE) {
-              index++;
-              let value = "";
-              while (index < len) {
-                const code2 = header.charCodeAt(index++);
-                if (code2 === DQUOTE) {
-                  index = skipValue(header, index, len);
-                  if (parameters[key] === void 0)
-                    parameters[key] = value;
-                  break;
-                }
-                if (code2 === BSLASH && index < len) {
-                  value += header[index++];
-                  continue;
-                }
-                value += String.fromCharCode(code2);
-              }
-              continue parameter;
-            }
-            const valueStart = index;
-            index = skipValue(header, index, len);
-            if (parameters[key] === void 0) {
-              const valueEnd = trailingOWS(header, valueStart, index);
-              parameters[key] = header.slice(valueStart, valueEnd);
-            }
-            continue parameter;
-          }
-          index++;
+    __name(parse2, "parse");
+    function safeParse2(header) {
+      if (typeof header !== "string") {
+        return defaultContentType;
+      }
+      let index = header.indexOf(";");
+      const type = index !== -1 ? header.slice(0, index).trim() : header.trim();
+      if (mediaTypeRE.test(type) === false) {
+        return defaultContentType;
+      }
+      const result = {
+        type: type.toLowerCase(),
+        parameters: new NullObject()
+      };
+      if (index === -1) {
+        return result;
+      }
+      let key;
+      let match;
+      let value;
+      paramRE.lastIndex = index;
+      while (match = paramRE.exec(header)) {
+        if (match.index !== index) {
+          return defaultContentType;
         }
+        index += match[0].length;
+        key = match[1].toLowerCase();
+        value = match[2];
+        if (value[0] === '"') {
+          value = value.slice(1, value.length - 1);
+          quotedPairRE.test(value) && (value = value.replace(quotedPairRE, "$1"));
+        }
+        result.parameters[key] = value;
       }
-      return parameters;
-    }
-    __name(parseParameters, "parseParameters");
-    function skipValue(str, index, len) {
-      while (index < len) {
-        const char = str.charCodeAt(index);
-        if (char === SEMI)
-          break;
-        index++;
+      if (index !== header.length) {
+        return defaultContentType;
       }
-      return index;
+      return result;
     }
-    __name(skipValue, "skipValue");
-    function skipOWS(header, index, len) {
-      while (index < len) {
-        const char = header.charCodeAt(index);
-        if (char !== SP && char !== HTAB)
-          break;
-        index++;
-      }
-      return index;
-    }
-    __name(skipOWS, "skipOWS");
-    function trailingOWS(header, start, end) {
-      while (end > start) {
-        const char = header.charCodeAt(end - 1);
-        if (char !== SP && char !== HTAB)
-          break;
-        end--;
-      }
-      return end;
-    }
-    __name(trailingOWS, "trailingOWS");
-    function qstring(str) {
-      if (TOKEN_REGEXP.test(str))
-        return str;
-      if (TEXT_REGEXP.test(str))
-        return `"${str.replace(QUOTE_REGEXP, "\\$&")}"`;
-      throw new TypeError(`Invalid parameter value: ${str}`);
-    }
-    __name(qstring, "qstring");
+    __name(safeParse2, "safeParse");
+    module2.exports.default = { parse: parse2, safeParse: safeParse2 };
+    module2.exports.parse = parse2;
+    module2.exports.safeParse = safeParse2;
+    module2.exports.defaultContentType = defaultContentType;
   }
 });
 
@@ -25477,7 +25341,7 @@ var require_parse3 = __commonJS({
       CHAR_NO_BREAK_SPACE,
       CHAR_ZERO_WIDTH_NOBREAK_SPACE
     } = require_constants7();
-    var parse3 = /* @__PURE__ */ __name((input, options = {}) => {
+    var parse2 = /* @__PURE__ */ __name((input, options = {}) => {
       if (typeof input !== "string") {
         throw new TypeError("Expected a string");
       }
@@ -25677,7 +25541,7 @@ var require_parse3 = __commonJS({
       push({ type: "eos" });
       return ast;
     }, "parse");
-    module2.exports = parse3;
+    module2.exports = parse2;
   }
 });
 
@@ -25688,7 +25552,7 @@ var require_braces = __commonJS({
     var stringify = require_stringify();
     var compile = require_compile();
     var expand2 = require_expand();
-    var parse3 = require_parse3();
+    var parse2 = require_parse3();
     var braces = /* @__PURE__ */ __name((input, options = {}) => {
       let output = [];
       if (Array.isArray(input)) {
@@ -25708,7 +25572,7 @@ var require_braces = __commonJS({
       }
       return output;
     }, "braces");
-    braces.parse = (input, options = {}) => parse3(input, options);
+    braces.parse = (input, options = {}) => parse2(input, options);
     braces.stringify = (input, options = {}) => {
       if (typeof input === "string") {
         return stringify(braces.parse(input, options), options);
@@ -26575,7 +26439,7 @@ var require_parse4 = __commonJS({
       }
       return { risky: false };
     }, "analyzeRepeatedExtglob");
-    var parse3 = /* @__PURE__ */ __name((input, options) => {
+    var parse2 = /* @__PURE__ */ __name((input, options) => {
       if (typeof input !== "string") {
         throw new TypeError("Expected a string");
       }
@@ -26747,7 +26611,7 @@ var require_parse4 = __commonJS({
             output = token.close = `)$))${extglobStar}`;
           }
           if (token.inner.includes("*") && (rest = remaining()) && /^\.[^\\/.]+$/.test(rest)) {
-            const expression = parse3(rest, { ...options, fastpaths: false }).output;
+            const expression = parse2(rest, { ...options, fastpaths: false }).output;
             output = token.close = `)${expression})${extglobStar})`;
           }
           if (token.prev.type === "bos") {
@@ -27272,7 +27136,7 @@ var require_parse4 = __commonJS({
       }
       return state;
     }, "parse");
-    parse3.fastpaths = (input, options) => {
+    parse2.fastpaths = (input, options) => {
       const opts = { ...options };
       const max = typeof opts.maxLength === "number" ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
       const len = input.length;
@@ -27338,7 +27202,7 @@ var require_parse4 = __commonJS({
       }
       return source;
     };
-    module2.exports = parse3;
+    module2.exports = parse2;
   }
 });
 
@@ -27348,7 +27212,7 @@ var require_picomatch = __commonJS({
     "use strict";
     var path5 = require("path");
     var scan = require_scan();
-    var parse3 = require_parse4();
+    var parse2 = require_parse4();
     var utils = require_utils3();
     var constants3 = require_constants8();
     var isObject = /* @__PURE__ */ __name((val) => val && typeof val === "object" && !Array.isArray(val), "isObject");
@@ -27436,7 +27300,7 @@ var require_picomatch = __commonJS({
     picomatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
     picomatch.parse = (pattern, options) => {
       if (Array.isArray(pattern)) return pattern.map((p) => picomatch.parse(p, options));
-      return parse3(pattern, { ...options, fastpaths: false });
+      return parse2(pattern, { ...options, fastpaths: false });
     };
     picomatch.scan = (input, options) => scan(input, options);
     picomatch.compileRe = (state, options, returnOutput = false, returnState = false) => {
@@ -27462,10 +27326,10 @@ var require_picomatch = __commonJS({
       }
       let parsed = { negated: false, fastpaths: true };
       if (options.fastpaths !== false && (input[0] === "." || input[0] === "*")) {
-        parsed.output = parse3.fastpaths(input, options);
+        parsed.output = parse2.fastpaths(input, options);
       }
       if (!parsed.output) {
-        parsed = parse3(input, options);
+        parsed = parse2(input, options);
       }
       return picomatch.compileRe(parsed, options, returnOutput, returnState);
     };
@@ -30905,7 +30769,7 @@ function parseStringResponse(result, parsers12, texts, trim = true) {
         }
         return lines[i2 + offset];
       }, "line");
-      parsers12.some(({ parse: parse3 }) => parse3(line, result));
+      parsers12.some(({ parse: parse2 }) => parse2(line, result));
     }
   });
   return result;
@@ -36660,7 +36524,7 @@ __name(withDefaults, "withDefaults");
 var endpoint = withDefaults(null, DEFAULTS);
 
 // node_modules/@octokit/request/dist-bundle/index.js
-var import_content_type = __toESM(require_dist3(), 1);
+var import_fast_content_type_parse = __toESM(require_fast_content_type_parse(), 1);
 
 // node_modules/json-with-bigint/json-with-bigint.js
 var intRegex = /^-?\d+$/;
@@ -36687,7 +36551,7 @@ var JSONStringify = /* @__PURE__ */ __name((value, replacer, space) => {
   const convertedToCustomJSON = originalStringify(
     value,
     (key, value2) => {
-      const isNoise = typeof value2 === "string" && noiseValue.test(value2);
+      const isNoise = typeof value2 === "string" && Boolean(value2.match(noiseValue));
       if (isNoise) return value2.toString() + "n";
       if (typeof value2 === "bigint") return value2.toString() + "n";
       if (typeof replacer === "function") return replacer(key, value2);
@@ -36703,28 +36567,12 @@ var JSONStringify = /* @__PURE__ */ __name((value, replacer, space) => {
   const denoisedJSON = processedJSON.replace(noiseStringify, "$1$2$3");
   return denoisedJSON;
 }, "JSONStringify");
-var featureCache = /* @__PURE__ */ new Map();
-var isContextSourceSupported = /* @__PURE__ */ __name(() => {
-  const parseFingerprint = JSON.parse.toString();
-  if (featureCache.has(parseFingerprint)) {
-    return featureCache.get(parseFingerprint);
-  }
-  try {
-    const result = JSON.parse(
-      "1",
-      (_, __, context4) => !!context4?.source && context4.source === "1"
-    );
-    featureCache.set(parseFingerprint, result);
-    return result;
-  } catch {
-    featureCache.set(parseFingerprint, false);
-    return false;
-  }
-}, "isContextSourceSupported");
+var isContextSourceSupported = /* @__PURE__ */ __name(() => JSON.parse("1", (_, __, context4) => !!context4 && context4.
+source === "1"), "isContextSourceSupported");
 var convertMarkedBigIntsReviver = /* @__PURE__ */ __name((key, value, context4, userReviver) => {
-  const isCustomFormatBigInt = typeof value === "string" && customFormat.test(value);
+  const isCustomFormatBigInt = typeof value === "string" && value.match(customFormat);
   if (isCustomFormatBigInt) return BigInt(value.slice(0, -1));
-  const isNoiseValue = typeof value === "string" && noiseValue.test(value);
+  const isNoiseValue = typeof value === "string" && value.match(noiseValue);
   if (isNoiseValue) return value.slice(0, -1);
   if (typeof userReviver !== "function") return value;
   return userReviver(key, value, context4);
@@ -36750,7 +36598,7 @@ var JSONParse = /* @__PURE__ */ __name((text, reviver) => {
     stringsOrLargeNumbers,
     (text2, digits, fractional, exponential) => {
       const isString = text2[0] === '"';
-      const isNoise = isString && noiseValueWithQuotes.test(text2);
+      const isNoise = isString && Boolean(text2.match(noiseValueWithQuotes));
       if (isNoise) return text2.substring(0, text2.length - 1) + 'n"';
       const isFractionalOrExponential = fractional || exponential;
       const isLessThanMaxSafeInt = digits && (digits.length < MAX_DIGITS || digits.length === MAX_DIGITS && digits <= MAX_INT);
@@ -36809,7 +36657,7 @@ var RequestError = class extends Error {
 };
 
 // node_modules/@octokit/request/dist-bundle/index.js
-var VERSION2 = "10.0.10";
+var VERSION2 = "10.0.8";
 var defaults_default = {
   headers: {
     "user-agent": `octokit-request.js/${VERSION2} ${getUserAgent()}`
@@ -36933,7 +36781,7 @@ async function getResponseData(response) {
   if (!contentType) {
     return response.text().catch(noop);
   }
-  const mimetype = (0, import_content_type.parse)(contentType);
+  const mimetype = (0, import_fast_content_type_parse.safeParse)(contentType);
   if (isJSONResponse(mimetype)) {
     let text = "";
     try {
@@ -40383,13 +40231,6 @@ undici/lib/web/fetch/body.js:
 
 undici/lib/web/websocket/frame.js:
   (*! ws. MIT License. Einar Otto Stangvik <einaros@gmail.com> *)
-
-content-type/dist/index.js:
-  (*!
-   * content-type
-   * Copyright(c) 2015 Douglas Christopher Wilson
-   * MIT Licensed
-   *)
 
 is-extglob/index.js:
   (*!
