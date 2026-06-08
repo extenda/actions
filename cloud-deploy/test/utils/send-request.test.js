@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import getToken from '../../src/utils/identity-token.js';
 import {
   refreshCanaryStatus,
+  registerAutomaticCanary,
   sendDeployInfo,
   sendDeployRequest,
   sendScaleSetup,
@@ -262,5 +263,51 @@ describe('Send request to platform api', () => {
         }),
       }),
     );
+  });
+
+  describe('registerAutomaticCanary', () => {
+    const canaryData = {
+      project: 'my-project',
+      service: 'my-service',
+      region: 'europe-west1',
+      revision: 'my-service-00002-abc',
+      previousRevision: 'my-service-00001-xyz',
+      steps: [5, 10, 25, 50, 75, 100],
+    };
+
+    it('posts to /services/canary/automatic and returns true on success', async () => {
+      getToken.mockResolvedValue('token');
+      axios.post.mockResolvedValue({ status: 201 });
+
+      const result = await registerAutomaticCanary(canaryData);
+
+      expect(result).toBe(true);
+      expect(axios.post).toHaveBeenCalledWith(
+        '/services/canary/automatic',
+        canaryData,
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: 'Bearer token',
+          }),
+        }),
+      );
+      expect(core.info).toHaveBeenCalledWith(
+        expect.stringContaining(
+          '/services/canary/automatic with response code 201',
+        ),
+      );
+    });
+
+    it('logs a warning and returns false on failure without throwing', async () => {
+      getToken.mockResolvedValue('token');
+      axios.post.mockRejectedValue(new Error('network error'));
+
+      const result = await registerAutomaticCanary(canaryData);
+
+      expect(result).toBe(false);
+      expect(core.warning).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to register automatic canary'),
+      );
+    });
   });
 });

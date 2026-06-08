@@ -11,8 +11,10 @@ import { securityVersion } from './manifests/security-sidecar.js';
 import publishPolicies from './policies/publish-policies.js';
 import checkPolicyExists from './utils/cloud-armor.js';
 import readSecret from './utils/load-credentials.js';
+import { getNewRevision, getPreviousRevision } from './utils/canary-revisions.js';
 import {
   refreshCanaryStatus,
+  registerAutomaticCanary,
   sendDeployInfo,
   sendDeployRequest,
   sendScaleSetup,
@@ -109,8 +111,24 @@ const action = async () => {
 
   const {
     'static-egress-ip': staticEgress = true,
-    'serve-traffic': serveTraffic = true,
+    'serve-traffic': serveTrafficFlag = true,
+    canary: trafficCanary = null,
   } = traffic;
+
+  const DEFAULT_CANARY_STEPS = [5, 10, 25, 50, 75];
+  const isNewCanary = trafficCanary !== null;
+  const configuredSteps =
+    isNewCanary && typeof trafficCanary === 'object' && trafficCanary.steps
+      ? trafficCanary.steps
+      : DEFAULT_CANARY_STEPS;
+  const canarySteps = configuredSteps[configuredSteps.length - 1] === 100
+    ? configuredSteps
+    : [...configuredSteps, 100];
+  const canarySlackChannel =
+    isNewCanary && typeof trafficCanary === 'object'
+      ? trafficCanary['slack-channel']
+      : undefined;
+  const serveTraffic = isNewCanary ? false : serveTrafficFlag;
 
   if (!cloudrun && consumers) {
     throw new Error('Consumers security configuration is only for cloud-run');
@@ -160,6 +178,12 @@ const action = async () => {
     userImage.split(':')[1] || version,
     deployYaml,
   );
+
+  let previousRevision = null;
+  if (isNewCanary && env === 'prod' && !platformGKE) {
+    previousRevision = await getPreviousRevision(serviceName, projectID, 'europe-west1');
+    core.info(`Canary: previous revision is ${previousRevision}`);
+  }
 
   core.info('Run cloud-deploy');
   const succesfulDeploy = await deploy(
@@ -216,8 +240,8 @@ const action = async () => {
         ),
       );
 
-      // make request to platform api to refresh canary status for service if serve-traffic is set to false
-      if (!serveTraffic) {
+      // legacy serve-traffic: false without traffic.canary — refresh old SRE canary status
+      if (!serveTraffic && !isNewCanary) {
         const serviceInfo = {
           service: serviceName,
           project: projectID,
@@ -226,6 +250,22 @@ const action = async () => {
       }
 
       await Promise.all(requests);
+    }
+
+    // new traffic.canary config — register automatic canary for prod only
+    if (isNewCanary && env === 'prod' && !platformGKE && previousRevision) {
+      const newRevision = await getNewRevision(serviceName, projectID, 'europe-west1');
+      if (newRevision) {
+        await registerAutomaticCanary({
+          project: projectID,
+          service: serviceName,
+          region: 'europe-west1',
+          revision: newRevision,
+          previousRevision,
+          steps: canarySteps,
+          slackChannel: canarySlackChannel,
+        });
+      }
     }
 
     const deployData = {

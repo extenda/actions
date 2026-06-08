@@ -9,7 +9,8 @@ import deploy from '../src/manifests/deploy.js';
 import getImageWithSha256 from '../src/manifests/image-sha256.js';
 import publishPolicies from '../src/policies/publish-policies.js';
 import loadCredentials from '../src/utils/load-credentials.js';
-import { sendDeployInfo, sendScaleSetup } from '../src/utils/send-request.js';
+import { sendDeployInfo, sendScaleSetup, registerAutomaticCanary } from '../src/utils/send-request.js';
+import { getPreviousRevision, getNewRevision } from '../src/utils/canary-revisions.js';
 import loadServiceDefinition from '../src/utils/service-definition.js';
 import runScan from '../src/utils/vulnerability-scanning.js';
 
@@ -26,6 +27,7 @@ vi.mock('../src/policies/publish-policies.js');
 vi.mock('../src/utils/send-request.js');
 vi.mock('../src/utils/vulnerability-scanning.js');
 vi.mock('../src/utils/cloud-armor.js');
+vi.mock('../src/utils/canary-revisions.js');
 
 const serviceDef = {
   kubernetes: {
@@ -291,6 +293,130 @@ describe('Action', () => {
     await action();
     expect(sendScaleSetup).toHaveBeenCalledTimes(1);
     expect(sendDeployInfo).toHaveBeenCalledTimes(1);
+  });
+
+  test('It will register automatic canary when serve-traffic is false and canary is enabled', async () => {
+    core.getInput
+      .mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('clan-service-account')
+      .mockReturnValueOnce('cloud-run.yaml')
+      .mockReturnValueOnce('gcr.io/project/image:tag');
+    loadCredentials
+      .mockResolvedValueOnce('envoy-certs')
+      .mockResolvedValueOnce('internal-key')
+      .mockResolvedValueOnce('internal-cert');
+
+    const serviceDefCanary = {
+      'cloud-run': {
+        service: 'service-name',
+        resources: { cpu: 1, memory: '512Mi' },
+        protocol: 'http',
+        scaling: { concurrency: 40 },
+        traffic: {
+          'static-egress-ip': false,
+          'serve-traffic': false,
+          canary: {
+            enabled: true,
+            steps: [10, 50, 100],
+            'slack-channel': '#deployments',
+          },
+        },
+      },
+      security: 'none',
+      labels: { product: 'actions', component: 'jest' },
+      environments: {
+        production: {
+          'min-instances': 0,
+          'max-instances': 10,
+          'domain-mappings': ['example.com'],
+          env: {},
+        },
+        staging: {
+          'min-instances': 0,
+          'max-instances': 1,
+          'domain-mappings': ['example.dev'],
+          env: {},
+        },
+      },
+    };
+
+    loadServiceDefinition.mockReturnValueOnce(serviceDefCanary);
+    getImageWithSha256.mockResolvedValueOnce('gcr.io/project/image@sha256:1');
+    projectInfo.mockReturnValueOnce({ project: 'clan-name', env: 'prod' });
+    buildManifest.mockResolvedValueOnce();
+    deploy.mockResolvedValueOnce(true);
+    setupGcloud.mockResolvedValueOnce('project-id');
+    publishPolicies.mockResolvedValueOnce();
+    runScan.mockResolvedValueOnce();
+    getPreviousRevision.mockResolvedValueOnce('service-name-00041-xyz');
+    getNewRevision.mockResolvedValueOnce('service-name-00042-abc');
+    registerAutomaticCanary.mockResolvedValueOnce(true);
+
+    await action();
+
+    expect(getPreviousRevision).toHaveBeenCalledWith('service-name', 'project-id', 'europe-west1');
+    expect(getNewRevision).toHaveBeenCalledWith('service-name', 'project-id', 'europe-west1');
+    expect(registerAutomaticCanary).toHaveBeenCalledWith({
+      project: 'project-id',
+      service: 'service-name',
+      region: 'europe-west1',
+      revision: 'service-name-00042-abc',
+      previousRevision: 'service-name-00041-xyz',
+      steps: [10, 50, 100],
+      slackChannel: '#deployments',
+    });
+  });
+
+  test('It will not register automatic canary when serve-traffic is true', async () => {
+    core.getInput
+      .mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('clan-service-account')
+      .mockReturnValueOnce('cloud-run.yaml')
+      .mockReturnValueOnce('gcr.io/project/image:tag');
+    loadCredentials
+      .mockResolvedValueOnce('envoy-certs')
+      .mockResolvedValueOnce('internal-key')
+      .mockResolvedValueOnce('internal-cert');
+
+    const serviceDefNoCanary = {
+      'cloud-run': {
+        service: 'service-name',
+        resources: { cpu: 1, memory: '512Mi' },
+        protocol: 'http',
+        scaling: { concurrency: 40 },
+        traffic: { 'static-egress-ip': false },
+      },
+      security: 'none',
+      labels: { product: 'actions', component: 'jest' },
+      environments: {
+        production: {
+          'min-instances': 0,
+          'max-instances': 10,
+          'domain-mappings': ['example.com'],
+          env: {},
+        },
+        staging: {
+          'min-instances': 0,
+          'max-instances': 1,
+          'domain-mappings': ['example.dev'],
+          env: {},
+        },
+      },
+    };
+
+    loadServiceDefinition.mockReturnValueOnce(serviceDefNoCanary);
+    getImageWithSha256.mockResolvedValueOnce('gcr.io/project/image@sha256:1');
+    projectInfo.mockReturnValueOnce({ project: 'clan-name', env: 'prod' });
+    buildManifest.mockResolvedValueOnce();
+    deploy.mockResolvedValueOnce(true);
+    setupGcloud.mockResolvedValueOnce('project-id');
+    publishPolicies.mockResolvedValueOnce();
+    runScan.mockResolvedValueOnce();
+
+    await action();
+
+    expect(getPreviousRevision).not.toHaveBeenCalled();
+    expect(registerAutomaticCanary).not.toHaveBeenCalled();
   });
 
   test('It will send loadbalancer deploy request', async () => {

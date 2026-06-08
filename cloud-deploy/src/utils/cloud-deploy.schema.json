@@ -103,6 +103,35 @@
               "type": "boolean",
               "default": true
             },
+            "canary": {
+              "description": "Automatic canary rollout configuration",
+              "oneOf": [
+                {
+                  "type": "string",
+                  "enum": ["enabled"]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "steps": {
+                      "description": "Ordered traffic percentages to progress through; 100 is always appended automatically",
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 100
+                      },
+                      "minItems": 1
+                    },
+                    "slack-channel": {
+                      "description": "Slack channel for canary notifications",
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
             "static-egress-ip": {
               "description": "Use the NAT router when making external requests",
               "type": "boolean",

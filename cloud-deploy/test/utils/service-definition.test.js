@@ -648,6 +648,98 @@ environments:
     });
   });
 
+  describe('traffic.canary configuration', () => {
+    const baseYaml = (trafficBlock) => `
+cloud-run:
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    concurrency: 80
+  traffic:
+    static-egress-ip: true
+    ${trafficBlock}
+
+security: none
+
+labels:
+  component: jest
+  product: my-product
+
+environments:
+  production:
+    min-instances: 1
+    domain-mappings:
+      - my-service.retailsvc.com
+    env: {}
+  staging:
+    min-instances: 0
+    domain-mappings:
+      - my-service.retailsvc.dev
+    env: {}
+    `;
+
+    test('It accepts canary: enabled (string form)', () => {
+      mockFs({ 'cloud-deploy.yaml': baseYaml('canary: enabled') });
+
+      const spec = loadServiceDefinition('cloud-deploy.yaml');
+      expect(spec['cloud-run'].traffic.canary).toBe('enabled');
+    });
+
+    test('It accepts canary as object with steps', () => {
+      mockFs({
+        'cloud-deploy.yaml': baseYaml(`canary:
+      steps:
+        - 5
+        - 10
+        - 25
+        - 50
+        - 75`),
+      });
+
+      const spec = loadServiceDefinition('cloud-deploy.yaml');
+      expect(spec['cloud-run'].traffic.canary).toEqual({
+        steps: [5, 10, 25, 50, 75],
+      });
+    });
+
+    test('It accepts canary as object with steps and slack-channel', () => {
+      mockFs({
+        'cloud-deploy.yaml': baseYaml(`canary:
+      steps:
+        - 10
+        - 50
+      slack-channel: '#deployments'`),
+      });
+
+      const spec = loadServiceDefinition('cloud-deploy.yaml');
+      expect(spec['cloud-run'].traffic.canary).toEqual({
+        steps: [10, 50],
+        'slack-channel': '#deployments',
+      });
+    });
+
+    test('It accepts canary as empty object (uses action defaults for steps)', () => {
+      mockFs({ 'cloud-deploy.yaml': baseYaml('canary: {}') });
+
+      const spec = loadServiceDefinition('cloud-deploy.yaml');
+      expect(spec['cloud-run'].traffic.canary).toEqual({});
+    });
+
+    test('It rejects canary with unknown properties', () => {
+      mockFs({
+        'cloud-deploy.yaml': baseYaml(`canary:
+      steps:
+        - 10
+      unknown-prop: foo`),
+      });
+
+      expect(() => loadServiceDefinition('cloud-deploy.yaml')).toThrow();
+    });
+  });
+
   describe('Vertical Scaling Configuration', () => {
     test('It can parse valid vertical scaling configuration with all properties', async () => {
       mockFs({
