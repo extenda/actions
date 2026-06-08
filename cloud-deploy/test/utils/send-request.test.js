@@ -292,9 +292,7 @@ describe('Send request to platform api', () => {
         }),
       );
       expect(core.info).toHaveBeenCalledWith(
-        expect.stringContaining(
-          '/canary/automatic with response code 201',
-        ),
+        expect.stringContaining('/canary/automatic with response code 201'),
       );
     });
 
