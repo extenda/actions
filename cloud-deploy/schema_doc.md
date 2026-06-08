@@ -401,10 +401,10 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                                                      | Pattern | Type             | Deprecated | Definition | Title/Description                                                                     |
-| ----------------------------------------------------------------------------- | ------- | ---------------- | ---------- | ---------- | ------------------------------------------------------------------------------------- |
-| - [steps](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps )                 | No      | array of integer | No         | -          | Ordered traffic percentages to progress through; 100 is always appended automatically |
-| - [slack-channel](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_slack-channel ) | No      | string           | No         | -          | Slack channel for canary notifications                                                |
+| Property                                                                      | Pattern | Type             | Deprecated | Definition | Title/Description                                                                                           |
+| ----------------------------------------------------------------------------- | ------- | ---------------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------- |
+| - [steps](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps )                 | No      | array of integer | No         | -          | Ordered traffic percentages to progress through; 100 is appended automatically if not already the last step |
+| - [slack-channel](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_slack-channel ) | No      | string           | No         | -          | Slack channel for canary notifications                                                                      |
 
 ###### <a name="oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps"></a>1.1.6.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > steps`
 
@@ -413,12 +413,12 @@ Must be one of:
 | **Type**     | `array of integer` |
 | **Required** | No                 |
 
-**Description:** Ordered traffic percentages to progress through; 100 is always appended automatically
+**Description:** Ordered traffic percentages to progress through; 100 is appended automatically if not already the last step
 
 |                      | Array restrictions |
 | -------------------- | ------------------ |
-| **Min items**        | 1                  |
-| **Max items**        | N/A                |
+| **Min items**        | 2                  |
+| **Max items**        | 7                  |
 | **Items unicity**    | False              |
 | **Additional items** | False              |
 | **Tuple validation** | See below          |
@@ -2018,4 +2018,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-06-08 at 11:42:44 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-06-08 at 18:30:29 +0200

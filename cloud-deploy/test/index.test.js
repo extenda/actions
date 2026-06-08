@@ -367,6 +367,44 @@ describe('Action', () => {
     });
   });
 
+  test('It throws when canary steps do not each increment by at least 5', async () => {
+    core.getInput
+      .mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('clan-service-account')
+      .mockReturnValueOnce('cloud-run.yaml')
+      .mockReturnValueOnce('gcr.io/project/image:tag');
+    loadCredentials
+      .mockResolvedValueOnce('envoy-certs')
+      .mockResolvedValueOnce('internal-key')
+      .mockResolvedValueOnce('internal-cert');
+
+    const serviceDefBadSteps = {
+      'cloud-run': {
+        service: 'service-name',
+        resources: { cpu: 1, memory: '512Mi' },
+        protocol: 'http',
+        scaling: { concurrency: 40 },
+        traffic: {
+          'static-egress-ip': false,
+          canary: { steps: [5, 5, 50, 75] },
+        },
+      },
+      security: 'none',
+      labels: { product: 'actions', component: 'jest' },
+      environments: {
+        production: { 'min-instances': 0, 'domain-mappings': ['example.com'], env: {} },
+        staging: { 'min-instances': 0, 'domain-mappings': ['example.dev'], env: {} },
+      },
+    };
+
+    loadServiceDefinition.mockReturnValueOnce(serviceDefBadSteps);
+    getImageWithSha256.mockResolvedValueOnce('gcr.io/project/image@sha256:1');
+    projectInfo.mockReturnValueOnce({ project: 'clan-name', env: 'prod' });
+    setupGcloud.mockResolvedValueOnce('project-id');
+
+    await expect(action()).rejects.toThrow('canary steps must each increase by at least 5');
+  });
+
   test('It will not register automatic canary when serve-traffic is true', async () => {
     core.getInput
       .mockReturnValueOnce('service-account')

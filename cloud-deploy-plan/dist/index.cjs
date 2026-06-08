@@ -105416,15 +105416,16 @@ var cloud_deploy_schema_default = {
                   type: "object",
                   properties: {
                     steps: {
-                      description: "Ordered traffic percentages to progress through; 100 is always appended automaticall\
-y",
+                      description: "Ordered traffic percentages to progress through; 100 is appended automatically if no\
+t already the last step",
                       type: "array",
                       items: {
                         type: "integer",
                         minimum: 1,
                         maximum: 100
                       },
-                      minItems: 1
+                      minItems: 2,
+                      maxItems: 7
                     },
                     "slack-channel": {
                       description: "Slack channel for canary notifications",

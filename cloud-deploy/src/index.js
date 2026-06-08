@@ -124,6 +124,16 @@ const action = async () => {
   const canarySteps = configuredSteps[configuredSteps.length - 1] === 100
     ? configuredSteps
     : [...configuredSteps, 100];
+
+  if (isNewCanary && typeof trafficCanary === 'object' && trafficCanary.steps) {
+    for (let i = 1; i < configuredSteps.length; i++) {
+      if (configuredSteps[i] - configuredSteps[i - 1] < 5) {
+        throw new Error(
+          `canary steps must each increase by at least 5: ${configuredSteps[i - 1]} → ${configuredSteps[i]}`,
+        );
+      }
+    }
+  }
   const canarySlackChannel =
     isNewCanary && typeof trafficCanary === 'object'
       ? trafficCanary['slack-channel']

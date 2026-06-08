@@ -110218,15 +110218,16 @@ var cloud_deploy_schema_default = {
                   type: "object",
                   properties: {
                     steps: {
-                      description: "Ordered traffic percentages to progress through; 100 is always appended automaticall\
-y",
+                      description: "Ordered traffic percentages to progress through; 100 is appended automatically if no\
+t already the last step",
                       type: "array",
                       items: {
                         type: "integer",
                         minimum: 1,
                         maximum: 100
                       },
-                      minItems: 1
+                      minItems: 2,
+                      maxItems: 7
                     },
                     "slack-channel": {
                       description: "Slack channel for canary notifications",
@@ -111133,6 +111134,15 @@ var action5 = /* @__PURE__ */ __name(async () => {
   const configuredSteps = isNewCanary && typeof trafficCanary === "object" && trafficCanary.steps ? trafficCanary.steps :
   DEFAULT_CANARY_STEPS;
   const canarySteps = configuredSteps[configuredSteps.length - 1] === 100 ? configuredSteps : [...configuredSteps, 100];
+  if (isNewCanary && typeof trafficCanary === "object" && trafficCanary.steps) {
+    for (let i2 = 1; i2 < configuredSteps.length; i2++) {
+      if (configuredSteps[i2] - configuredSteps[i2 - 1] < 5) {
+        throw new Error(
+          `canary steps must each increase by at least 5: ${configuredSteps[i2 - 1]} \u2192 ${configuredSteps[i2]}`
+        );
+      }
+    }
+  }
   const canarySlackChannel = isNewCanary && typeof trafficCanary === "object" ? trafficCanary["slack-channel"] : void 0;
   const serveTraffic = isNewCanary ? false : serveTrafficFlag;
   if (!cloudrun && consumers) {
