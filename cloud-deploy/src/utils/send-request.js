@@ -41,7 +41,7 @@ const refreshCanaryStatus = async (data) => {
 };
 
 const registerAutomaticCanary = async (data) => {
-  const url = '/services/canary/automatic';
+  const url = '/canary/automatic';
   const result = await sendRequest(url, data);
   if (!result) {
     core.warning(

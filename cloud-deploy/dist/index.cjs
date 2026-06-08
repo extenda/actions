@@ -110049,7 +110049,7 @@ var refreshCanaryStatus = /* @__PURE__ */ __name(async (data) => {
   return sendRequest2(url3, data);
 }, "refreshCanaryStatus");
 var registerAutomaticCanary = /* @__PURE__ */ __name(async (data) => {
-  const url3 = "/services/canary/automatic";
+  const url3 = "/canary/automatic";
   const result = await sendRequest2(url3, data);
   if (!result) {
     warning(

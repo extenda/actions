@@ -275,7 +275,7 @@ describe('Send request to platform api', () => {
       steps: [5, 10, 25, 50, 75, 100],
     };
 
-    it('posts to /services/canary/automatic and returns true on success', async () => {
+    it('posts to /canary/automatic and returns true on success', async () => {
       getToken.mockResolvedValue('token');
       axios.post.mockResolvedValue({ status: 201 });
 
@@ -283,7 +283,7 @@ describe('Send request to platform api', () => {
 
       expect(result).toBe(true);
       expect(axios.post).toHaveBeenCalledWith(
-        '/services/canary/automatic',
+        '/canary/automatic',
         canaryData,
         expect.objectContaining({
           headers: expect.objectContaining({
@@ -293,7 +293,7 @@ describe('Send request to platform api', () => {
       );
       expect(core.info).toHaveBeenCalledWith(
         expect.stringContaining(
-          '/services/canary/automatic with response code 201',
+          '/canary/automatic with response code 201',
         ),
       );
     });
