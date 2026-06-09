@@ -17,9 +17,10 @@
       - [1.1.6.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary`](#oneOf_i0_cloud-run_traffic_canary)
         - [1.1.6.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 0`](#oneOf_i0_cloud-run_traffic_canary_oneOf_i0)
         - [1.1.6.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1`](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1)
-          - [1.1.6.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > steps`](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps)
-            - [1.1.6.2.2.1.1. CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > steps > steps items](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps_items)
-          - [1.1.6.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > slack-channel`](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_slack-channel)
+          - [1.1.6.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > enabled`](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_enabled)
+          - [1.1.6.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > steps`](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps)
+            - [1.1.6.2.2.2.1. CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > steps > steps items](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps_items)
+          - [1.1.6.2.2.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > slack-channel`](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_slack-channel)
       - [1.1.6.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > static-egress-ip`](#oneOf_i0_cloud-run_traffic_static-egress-ip)
       - [1.1.6.4. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > direct-vpc-connection`](#oneOf_i0_cloud-run_traffic_direct-vpc-connection)
     - [1.1.7. Property `CloudDeploy > oneOf > CloudRun > cloud-run > startup-cpu-boost`](#oneOf_i0_cloud-run_startup-cpu-boost)
@@ -385,13 +386,10 @@ Must be one of:
 
 ###### <a name="oneOf_i0_cloud-run_traffic_canary_oneOf_i0"></a>1.1.6.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 0`
 
-|              |                    |
-| ------------ | ------------------ |
-| **Type**     | `enum (of string)` |
-| **Required** | No                 |
-
-Must be one of:
-* "enabled"
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
 
 ###### <a name="oneOf_i0_cloud-run_traffic_canary_oneOf_i1"></a>1.1.6.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1`
 
@@ -403,10 +401,21 @@ Must be one of:
 
 | Property                                                                      | Pattern | Type             | Deprecated | Definition | Title/Description                                                                                           |
 | ----------------------------------------------------------------------------- | ------- | ---------------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------- |
+| - [enabled](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_enabled )             | No      | boolean          | No         | -          | Enable or disable canary without removing the configuration                                                 |
 | - [steps](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps )                 | No      | array of integer | No         | -          | Ordered traffic percentages to progress through; 100 is appended automatically if not already the last step |
 | - [slack-channel](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_slack-channel ) | No      | string           | No         | -          | Slack channel for canary notifications                                                                      |
 
-###### <a name="oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps"></a>1.1.6.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > steps`
+###### <a name="oneOf_i0_cloud-run_traffic_canary_oneOf_i1_enabled"></a>1.1.6.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > enabled`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Enable or disable canary without removing the configuration
+
+###### <a name="oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps"></a>1.1.6.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > steps`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -427,7 +436,7 @@ Must be one of:
 | ---------------------------------------------------------------------- | ----------- |
 | [steps items](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps_items) | -           |
 
-###### <a name="oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps_items"></a>1.1.6.2.2.1.1. CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > steps > steps items
+###### <a name="oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps_items"></a>1.1.6.2.2.2.1. CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > steps > steps items
 
 |              |           |
 | ------------ | --------- |
@@ -439,7 +448,7 @@ Must be one of:
 | **Minimum**  | &ge; 1   |
 | **Maximum**  | &le; 100 |
 
-###### <a name="oneOf_i0_cloud-run_traffic_canary_oneOf_i1_slack-channel"></a>1.1.6.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > slack-channel`
+###### <a name="oneOf_i0_cloud-run_traffic_canary_oneOf_i1_slack-channel"></a>1.1.6.2.2.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > slack-channel`
 
 |              |          |
 | ------------ | -------- |
@@ -2018,4 +2027,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-06-08 at 18:30:29 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-06-09 at 09:48:39 +0200

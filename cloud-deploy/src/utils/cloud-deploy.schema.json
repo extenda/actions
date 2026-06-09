@@ -107,12 +107,16 @@
               "description": "Automatic canary rollout configuration",
               "oneOf": [
                 {
-                  "type": "string",
-                  "enum": ["enabled"]
+                  "type": "boolean"
                 },
                 {
                   "type": "object",
                   "properties": {
+                    "enabled": {
+                      "description": "Enable or disable canary without removing the configuration",
+                      "type": "boolean",
+                      "default": true
+                    },
                     "steps": {
                       "description": "Ordered traffic percentages to progress through; 100 is appended automatically if not already the last step",
                       "type": "array",

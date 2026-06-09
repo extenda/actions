@@ -116,7 +116,11 @@ const action = async () => {
   } = traffic;
 
   const DEFAULT_CANARY_STEPS = [10, 25, 50, 75];
-  const isNewCanary = trafficCanary !== null;
+  const isNewCanary =
+    trafficCanary === true ||
+    (typeof trafficCanary === 'object' &&
+      trafficCanary !== null &&
+      trafficCanary.enabled !== false);
   const configuredSteps =
     isNewCanary && typeof trafficCanary === 'object' && trafficCanary.steps
       ? trafficCanary.steps

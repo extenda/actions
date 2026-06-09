@@ -681,11 +681,36 @@ environments:
     env: {}
     `;
 
-    test('It accepts canary: enabled (string form)', () => {
-      mockFs({ 'cloud-deploy.yaml': baseYaml('canary: enabled') });
+    test('It accepts canary: true (boolean form)', () => {
+      mockFs({ 'cloud-deploy.yaml': baseYaml('canary: true') });
 
       const spec = loadServiceDefinition('cloud-deploy.yaml');
-      expect(spec['cloud-run'].traffic.canary).toBe('enabled');
+      expect(spec['cloud-run'].traffic.canary).toBe(true);
+    });
+
+    test('It accepts canary: false (boolean form)', () => {
+      mockFs({ 'cloud-deploy.yaml': baseYaml('canary: false') });
+
+      const spec = loadServiceDefinition('cloud-deploy.yaml');
+      expect(spec['cloud-run'].traffic.canary).toBe(false);
+    });
+
+    test('It accepts canary object with enabled: false to disable while keeping config', () => {
+      mockFs({
+        'cloud-deploy.yaml': baseYaml(`canary:
+      enabled: false
+      steps:
+        - 25
+        - 75
+      slack-channel: '#deployments'`),
+      });
+
+      const spec = loadServiceDefinition('cloud-deploy.yaml');
+      expect(spec['cloud-run'].traffic.canary).toEqual({
+        enabled: false,
+        steps: [25, 75],
+        'slack-channel': '#deployments',
+      });
     });
 
     test('It accepts canary as object with steps', () => {

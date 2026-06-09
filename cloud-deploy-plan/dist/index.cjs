@@ -105409,12 +105409,16 @@ var cloud_deploy_schema_default = {
               description: "Automatic canary rollout configuration",
               oneOf: [
                 {
-                  type: "string",
-                  enum: ["enabled"]
+                  type: "boolean"
                 },
                 {
                   type: "object",
                   properties: {
+                    enabled: {
+                      description: "Enable or disable canary without removing the configuration",
+                      type: "boolean",
+                      default: true
+                    },
                     steps: {
                       description: "Ordered traffic percentages to progress through; 100 is appended automatically if no\
 t already the last step",

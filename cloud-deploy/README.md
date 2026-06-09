@@ -388,13 +388,13 @@ between each step. If errors are detected the rollout is rolled back automatical
 
 **Important:** Automatic canary only activates in production (`env: prod`). Staging deployments are unaffected.
 
-**Simple form** — uses default steps `[5, 10, 25, 50, 75, 100]`:
+**Simple form** — uses default steps `[10, 25, 50, 75, 100]`:
 
 ```yaml
 cloud-run:
   traffic:
     static-egress-ip: false
-    canary: enabled
+    canary: true
 ```
 
 **Custom steps:**
@@ -436,11 +436,27 @@ cloud-run:
       slack-channel: '#my-deployments'
 ```
 
+**Temporarily disable canary without removing configuration:**
+
+```yaml
+cloud-run:
+  traffic:
+    static-egress-ip: false
+    canary:
+      enabled: false
+      steps:
+        - 10
+        - 25
+        - 50
+        - 75
+      slack-channel: '#my-deployments'
+```
+
 **Steps configuration rules:**
 - Provide 2–7 steps; `100` is always appended automatically as the final step (so total steps are 3–8)
 - `100` may be included explicitly as the last step if preferred
 - Each step must be at least 5 percentage points higher than the previous one
-- Omit `steps` entirely (or use `canary: enabled`) to use the default steps `[10, 25, 50, 75]`
+- Omit `steps` entirely to use the default steps `[10, 25, 50, 75]`
 
 **Slack notifications** are always sent for every canary to the clan Slack channel. Use `slack-channel`
 to override with a specific channel.

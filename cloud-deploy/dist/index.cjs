@@ -110210,12 +110210,16 @@ var cloud_deploy_schema_default = {
               description: "Automatic canary rollout configuration",
               oneOf: [
                 {
-                  type: "string",
-                  enum: ["enabled"]
+                  type: "boolean"
                 },
                 {
                   type: "object",
                   properties: {
+                    enabled: {
+                      description: "Enable or disable canary without removing the configuration",
+                      type: "boolean",
+                      default: true
+                    },
                     steps: {
                       description: "Ordered traffic percentages to progress through; 100 is appended automatically if no\
 t already the last step",
@@ -111129,7 +111133,8 @@ var action5 = /* @__PURE__ */ __name(async () => {
     canary: trafficCanary = null
   } = traffic;
   const DEFAULT_CANARY_STEPS = [10, 25, 50, 75];
-  const isNewCanary = trafficCanary !== null;
+  const isNewCanary = trafficCanary === true || typeof trafficCanary === "object" && trafficCanary !== null && trafficCanary.
+  enabled !== false;
   const configuredSteps = isNewCanary && typeof trafficCanary === "object" && trafficCanary.steps ? trafficCanary.steps :
   DEFAULT_CANARY_STEPS;
   const canarySteps = configuredSteps[configuredSteps.length - 1] === 100 ? configuredSteps : [...configuredSteps, 100];
