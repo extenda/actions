@@ -113,6 +113,7 @@ const buildManifest = async (
   internalCert,
   internalCertKey,
   cicdServiceAccount,
+  serveTraffic = true,
 ) => {
   let opa = false;
   let SQLInstanceName;
@@ -150,7 +151,6 @@ const buildManifest = async (
   const { staging, production } = environments;
 
   const {
-    'serve-traffic': serveTraffic = true,
     'static-egress-ip': enableCloudNAT = true,
     'direct-vpc-connection': enableDirectVPC = true,
   } = traffic;

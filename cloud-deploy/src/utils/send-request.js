@@ -40,6 +40,17 @@ const refreshCanaryStatus = async (data) => {
   return sendRequest(url, data);
 };
 
+const registerAutomaticCanary = async (data) => {
+  const url = '/canary/automatic';
+  const result = await sendRequest(url, data);
+  if (!result) {
+    core.warning(
+      'Failed to register automatic canary — deploy succeeded but canary tracking is unavailable',
+    );
+  }
+  return result;
+};
+
 const sendScaleSetup = async (
   service,
   projectid,
@@ -103,6 +114,7 @@ const saveVulnerabilities = async (
 
 export {
   refreshCanaryStatus,
+  registerAutomaticCanary,
   saveVulnerabilities,
   sendDeployInfo,
   sendDeployRequest,

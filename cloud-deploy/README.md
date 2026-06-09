@@ -374,6 +374,93 @@ environments:
 - The static IP address is managed by the platform and shared across services in the same region
 - Set to `false` to use direct VPC egress without a static IP (better performance, no IP whitelisting capability)
 
+#### Cloud Run with automatic canary deployment
+
+Automatic canary gradually shifts traffic to a new revision in production, checking Cloud Run error logs
+between each step. If errors are detected the rollout is rolled back automatically.
+
+**How it works:**
+1. The action automatically withholds traffic from the new revision and registers it for canary rollout
+2. The platform advances traffic at each step (~15 minute intervals)
+3. Before each advancement, Cloud Run error logs are checked for the new revision
+4. If errors are found, traffic is shifted back 100% to the previous revision
+5. If all steps pass, the new revision ends up at 100% traffic
+
+**Important:** Automatic canary only activates in production (`env: prod`). Staging deployments are unaffected.
+
+**Simple form** — uses default steps `[10, 25, 50, 75, 100]`:
+
+```yaml
+cloud-run:
+  traffic:
+    static-egress-ip: false
+    canary: true
+```
+
+**Custom steps:**
+
+```yaml
+cloud-run:
+  traffic:
+    static-egress-ip: false
+    canary:
+      steps:
+        - 10
+        - 25
+        - 50
+        - 75
+```
+
+**Default steps with a custom Slack channel:**
+
+```yaml
+cloud-run:
+  traffic:
+    static-egress-ip: false
+    canary:
+      slack-channel: '#my-deployments'
+```
+
+**Custom steps with a custom Slack channel:**
+
+```yaml
+cloud-run:
+  traffic:
+    static-egress-ip: false
+    canary:
+      steps:
+        - 10
+        - 25
+        - 50
+        - 75
+      slack-channel: '#my-deployments'
+```
+
+**Temporarily disable canary without removing configuration:**
+
+```yaml
+cloud-run:
+  traffic:
+    static-egress-ip: false
+    canary:
+      enabled: false
+      steps:
+        - 10
+        - 25
+        - 50
+        - 75
+      slack-channel: '#my-deployments'
+```
+
+**Steps configuration rules:**
+- Provide 2–7 steps; `100` is always appended automatically as the final step (so total steps are 3–8)
+- `100` may be included explicitly as the last step if preferred
+- Each step must be at least 5 percentage points higher than the previous one
+- Omit `steps` entirely to use the default steps `[10, 25, 50, 75]`
+
+**Slack notifications** are always sent for every canary to the clan Slack channel. Use `slack-channel`
+to override with a specific channel.
+
 #### Cloud Run with Prometheus and Open Telemetry monitoring
 
 A `collector` sidecar can be configured on Cloud Run to collect Prometheus and Open Telemetry metrics and traces.

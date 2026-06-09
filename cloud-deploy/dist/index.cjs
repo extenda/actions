@@ -109211,7 +109211,7 @@ var prepareGcloudDeploy = /* @__PURE__ */ __name(async (name, projectID, clanNam
     await createCloudDeployPipe(name, projectID, clanName, env2, target)
   );
 }, "prepareGcloudDeploy");
-var buildManifest = /* @__PURE__ */ __name(async (image, deployYaml, projectId, clanName, deployEnv, timeout, http2Certificate, internalCert, internalCertKey, cicdServiceAccount) => {
+var buildManifest = /* @__PURE__ */ __name(async (image, deployYaml, projectId, clanName, deployEnv, timeout, http2Certificate, internalCert, internalCertKey, cicdServiceAccount, serveTraffic = true) => {
   let opa = false;
   let SQLInstanceName;
   const {
@@ -109242,7 +109242,6 @@ var buildManifest = /* @__PURE__ */ __name(async (image, deployYaml, projectId, 
   } = kubernetes || cloudrun;
   const { staging, production } = environments;
   const {
-    "serve-traffic": serveTraffic = true,
     "static-egress-ip": enableCloudNAT = true,
     "direct-vpc-connection": enableDirectVPC = true
   } = traffic;
@@ -109984,6 +109983,35 @@ var checkPolicyExists = /* @__PURE__ */ __name(async (policy, projectID) => {
 }, "checkPolicyExists");
 var cloud_armor_default = checkPolicyExists;
 
+// cloud-deploy/src/utils/canary-revisions.js
+var getPreviousRevision = /* @__PURE__ */ __name(async (service, projectID, region = "europe-west1") => {
+  const output = await gcloud_output_default([
+    "run",
+    "services",
+    "describe",
+    service,
+    `--project=${projectID}`,
+    `--region=${region}`,
+    "--format=json(status.traffic)"
+  ]);
+  const { status } = JSON.parse(output);
+  const serving = status.traffic.find((t2) => t2.percent === 100);
+  return serving?.revisionName ?? null;
+}, "getPreviousRevision");
+var getNewRevision = /* @__PURE__ */ __name(async (service, projectID, region = "europe-west1") => {
+  return gcloud_output_default([
+    "run",
+    "revisions",
+    "list",
+    `--service=${service}`,
+    `--project=${projectID}`,
+    `--region=${region}`,
+    "--sort-by=~creationTimestamp",
+    "--limit=1",
+    "--format=value(metadata.name)"
+  ]);
+}, "getNewRevision");
+
 // cloud-deploy/src/utils/identity-token.js
 var getToken = /* @__PURE__ */ __name(async (audience = "platform") => getIdToken(audience), "getToken");
 var identity_token_default = getToken;
@@ -110019,6 +110047,16 @@ var refreshCanaryStatus = /* @__PURE__ */ __name(async (data) => {
   const url3 = `/services/revisions/canary`;
   return sendRequest2(url3, data);
 }, "refreshCanaryStatus");
+var registerAutomaticCanary = /* @__PURE__ */ __name(async (data) => {
+  const url3 = "/canary/automatic";
+  const result = await sendRequest2(url3, data);
+  if (!result) {
+    warning(
+      "Failed to register automatic canary \u2014 deploy succeeded but canary tracking is unavailable"
+    );
+  }
+  return result;
+}, "registerAutomaticCanary");
 var sendScaleSetup = /* @__PURE__ */ __name(async (service, projectid, region, platform2, mininstances, scaleup, scaledown) => {
   const url3 = "/scaling/setup";
   const data = {
@@ -110167,6 +110205,41 @@ var cloud_deploy_schema_default = {
               description: "Deploy revision with or without traffic",
               type: "boolean",
               default: true
+            },
+            canary: {
+              description: "Automatic canary rollout configuration",
+              oneOf: [
+                {
+                  type: "boolean"
+                },
+                {
+                  type: "object",
+                  properties: {
+                    enabled: {
+                      description: "Enable or disable canary without removing the configuration",
+                      type: "boolean",
+                      default: true
+                    },
+                    steps: {
+                      description: "Ordered traffic percentages to progress through; 100 is appended automatically if no\
+t already the last step",
+                      type: "array",
+                      items: {
+                        type: "integer",
+                        minimum: 1,
+                        maximum: 100
+                      },
+                      minItems: 2,
+                      maxItems: 7
+                    },
+                    "slack-channel": {
+                      description: "Slack channel for canary notifications",
+                      type: "string"
+                    }
+                  },
+                  additionalProperties: false
+                }
+              ]
             },
             "static-egress-ip": {
               description: "Use the NAT router when making external requests",
@@ -111056,8 +111129,26 @@ var action5 = /* @__PURE__ */ __name(async () => {
   const { "policy-name": cloudArmorPolicy = void 0 } = cloudArmor || {};
   const {
     "static-egress-ip": staticEgress = true,
-    "serve-traffic": serveTraffic = true
+    "serve-traffic": serveTrafficFlag = true,
+    canary: trafficCanary = null
   } = traffic;
+  const DEFAULT_CANARY_STEPS = [10, 25, 50, 75];
+  const isNewCanary = trafficCanary === true || typeof trafficCanary === "object" && trafficCanary !== null && trafficCanary.
+  enabled !== false;
+  const configuredSteps = isNewCanary && typeof trafficCanary === "object" && trafficCanary.steps ? trafficCanary.steps :
+  DEFAULT_CANARY_STEPS;
+  const canarySteps = configuredSteps[configuredSteps.length - 1] === 100 ? configuredSteps : [...configuredSteps, 100];
+  if (isNewCanary && typeof trafficCanary === "object" && trafficCanary.steps) {
+    for (let i2 = 1; i2 < configuredSteps.length; i2++) {
+      if (configuredSteps[i2] - configuredSteps[i2 - 1] < 5) {
+        throw new Error(
+          `canary steps must each increase by at least 5: ${configuredSteps[i2 - 1]} \u2192 ${configuredSteps[i2]}`
+        );
+      }
+    }
+  }
+  const canarySlackChannel = isNewCanary && typeof trafficCanary === "object" ? trafficCanary["slack-channel"] : void 0;
+  const serveTraffic = isNewCanary ? false : serveTrafficFlag;
   if (!cloudrun && consumers) {
     throw new Error("Consumers security configuration is only for cloud-run");
   }
@@ -111088,7 +111179,8 @@ var action5 = /* @__PURE__ */ __name(async () => {
     http2Certificate,
     internalHttpsCertificateCrt,
     internalHttpsCertificateKey,
-    serviceAccountKeyCICD
+    serviceAccountKeyCICD,
+    serveTraffic
   );
   await publish_policies_default(
     serviceName,
@@ -111096,6 +111188,11 @@ var action5 = /* @__PURE__ */ __name(async () => {
     userImage.split(":")[1] || version3,
     deployYaml
   );
+  let previousRevision = null;
+  if (isNewCanary && env2 === "prod" && !platformGKE) {
+    previousRevision = await getPreviousRevision(serviceName, projectID, "europe-west1");
+    info(`Canary: previous revision is ${previousRevision}`);
+  }
   info("Run cloud-deploy");
   const succesfulDeploy = await deploy_default(
     projectID,
@@ -111153,6 +111250,24 @@ var action5 = /* @__PURE__ */ __name(async () => {
         requests.push(refreshCanaryStatus(serviceInfo));
       }
       await Promise.all(requests);
+    }
+    if (isNewCanary && env2 === "prod" && !platformGKE && previousRevision) {
+      const newRevision = await getNewRevision(serviceName, projectID, "europe-west1");
+      if (newRevision) {
+        const resolvedSlackChannel = canarySlackChannel || await load_credentials_default(serviceAccountKeyCICD, env2, "\
+clan_slack_channel", "CLAN_SLACK_CHANNEL").catch(
+          () => "#platform-notifications"
+        );
+        await registerAutomaticCanary({
+          project: projectID,
+          service: serviceName,
+          region: "europe-west1",
+          revision: newRevision,
+          previousRevision,
+          steps: canarySteps,
+          slackChannel: resolvedSlackChannel
+        });
+      }
     }
     const deployData = {
       serviceName,

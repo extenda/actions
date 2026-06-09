@@ -14,8 +14,15 @@
           - [1.1.5.2.1.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > scaling > schedule > ScheduledScaling > region`](#oneOf_i0_cloud-run_scaling_schedule_items_region)
     - [1.1.6. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic`](#oneOf_i0_cloud-run_traffic)
       - [1.1.6.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > serve-traffic`](#oneOf_i0_cloud-run_traffic_serve-traffic)
-      - [1.1.6.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > static-egress-ip`](#oneOf_i0_cloud-run_traffic_static-egress-ip)
-      - [1.1.6.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > direct-vpc-connection`](#oneOf_i0_cloud-run_traffic_direct-vpc-connection)
+      - [1.1.6.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary`](#oneOf_i0_cloud-run_traffic_canary)
+        - [1.1.6.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 0`](#oneOf_i0_cloud-run_traffic_canary_oneOf_i0)
+        - [1.1.6.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1`](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1)
+          - [1.1.6.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > enabled`](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_enabled)
+          - [1.1.6.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > steps`](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps)
+            - [1.1.6.2.2.2.1. CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > steps > steps items](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps_items)
+          - [1.1.6.2.2.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > slack-channel`](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_slack-channel)
+      - [1.1.6.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > static-egress-ip`](#oneOf_i0_cloud-run_traffic_static-egress-ip)
+      - [1.1.6.4. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > direct-vpc-connection`](#oneOf_i0_cloud-run_traffic_direct-vpc-connection)
     - [1.1.7. Property `CloudDeploy > oneOf > CloudRun > cloud-run > startup-cpu-boost`](#oneOf_i0_cloud-run_startup-cpu-boost)
     - [1.1.8. Property `CloudDeploy > oneOf > CloudRun > cloud-run > cpu-throttling`](#oneOf_i0_cloud-run_cpu-throttling)
     - [1.1.9. Property `CloudDeploy > oneOf > CloudRun > cloud-run > session-affinity`](#oneOf_i0_cloud-run_session-affinity)
@@ -345,11 +352,12 @@ Must be one of:
 
 **Description:** Traffic settings for Cloud Run
 
-| Property                                                                      | Pattern | Type    | Deprecated | Definition | Title/Description                                                |
-| ----------------------------------------------------------------------------- | ------- | ------- | ---------- | ---------- | ---------------------------------------------------------------- |
-| - [serve-traffic](#oneOf_i0_cloud-run_traffic_serve-traffic )                 | No      | boolean | No         | -          | Deploy revision with or without traffic                          |
-| + [static-egress-ip](#oneOf_i0_cloud-run_traffic_static-egress-ip )           | No      | boolean | No         | -          | Use the NAT router when making external requests                 |
-| - [direct-vpc-connection](#oneOf_i0_cloud-run_traffic_direct-vpc-connection ) | No      | boolean | No         | -          | Whether to use the vpc connector or direct connection to the vpc |
+| Property                                                                      | Pattern | Type        | Deprecated | Definition | Title/Description                                                |
+| ----------------------------------------------------------------------------- | ------- | ----------- | ---------- | ---------- | ---------------------------------------------------------------- |
+| - [serve-traffic](#oneOf_i0_cloud-run_traffic_serve-traffic )                 | No      | boolean     | No         | -          | Deploy revision with or without traffic                          |
+| - [canary](#oneOf_i0_cloud-run_traffic_canary )                               | No      | Combination | No         | -          | Automatic canary rollout configuration                           |
+| + [static-egress-ip](#oneOf_i0_cloud-run_traffic_static-egress-ip )           | No      | boolean     | No         | -          | Use the NAT router when making external requests                 |
+| - [direct-vpc-connection](#oneOf_i0_cloud-run_traffic_direct-vpc-connection ) | No      | boolean     | No         | -          | Whether to use the vpc connector or direct connection to the vpc |
 
 ##### <a name="oneOf_i0_cloud-run_traffic_serve-traffic"></a>1.1.6.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > serve-traffic`
 
@@ -361,7 +369,95 @@ Must be one of:
 
 **Description:** Deploy revision with or without traffic
 
-##### <a name="oneOf_i0_cloud-run_traffic_static-egress-ip"></a>1.1.6.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > static-egress-ip`
+##### <a name="oneOf_i0_cloud-run_traffic_canary"></a>1.1.6.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary`
+
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `combining`      |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
+
+**Description:** Automatic canary rollout configuration
+
+| One of(Option)                                        |
+| ----------------------------------------------------- |
+| [item 0](#oneOf_i0_cloud-run_traffic_canary_oneOf_i0) |
+| [item 1](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1) |
+
+###### <a name="oneOf_i0_cloud-run_traffic_canary_oneOf_i0"></a>1.1.6.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 0`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+
+###### <a name="oneOf_i0_cloud-run_traffic_canary_oneOf_i1"></a>1.1.6.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                                                      | Pattern | Type             | Deprecated | Definition | Title/Description                                                                                           |
+| ----------------------------------------------------------------------------- | ------- | ---------------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------- |
+| - [enabled](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_enabled )             | No      | boolean          | No         | -          | Enable or disable canary without removing the configuration                                                 |
+| - [steps](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps )                 | No      | array of integer | No         | -          | Ordered traffic percentages to progress through; 100 is appended automatically if not already the last step |
+| - [slack-channel](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_slack-channel ) | No      | string           | No         | -          | Slack channel for canary notifications                                                                      |
+
+###### <a name="oneOf_i0_cloud-run_traffic_canary_oneOf_i1_enabled"></a>1.1.6.2.2.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > enabled`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Enable or disable canary without removing the configuration
+
+###### <a name="oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps"></a>1.1.6.2.2.2. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > steps`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `array of integer` |
+| **Required** | No                 |
+
+**Description:** Ordered traffic percentages to progress through; 100 is appended automatically if not already the last step
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | 2                  |
+| **Max items**        | 7                  |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                                        | Description |
+| ---------------------------------------------------------------------- | ----------- |
+| [steps items](#oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps_items) | -           |
+
+###### <a name="oneOf_i0_cloud-run_traffic_canary_oneOf_i1_steps_items"></a>1.1.6.2.2.2.1. CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > steps > steps items
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+
+| Restrictions |          |
+| ------------ | -------- |
+| **Minimum**  | &ge; 1   |
+| **Maximum**  | &le; 100 |
+
+###### <a name="oneOf_i0_cloud-run_traffic_canary_oneOf_i1_slack-channel"></a>1.1.6.2.2.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > canary > oneOf > item 1 > slack-channel`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** Slack channel for canary notifications
+
+##### <a name="oneOf_i0_cloud-run_traffic_static-egress-ip"></a>1.1.6.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > static-egress-ip`
 
 |              |           |
 | ------------ | --------- |
@@ -371,7 +467,7 @@ Must be one of:
 
 **Description:** Use the NAT router when making external requests
 
-##### <a name="oneOf_i0_cloud-run_traffic_direct-vpc-connection"></a>1.1.6.3. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > direct-vpc-connection`
+##### <a name="oneOf_i0_cloud-run_traffic_direct-vpc-connection"></a>1.1.6.4. Property `CloudDeploy > oneOf > CloudRun > cloud-run > traffic > direct-vpc-connection`
 
 |              |           |
 | ------------ | --------- |
@@ -1931,4 +2027,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-03-26 at 09:13:14 +0100
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-06-09 at 09:48:39 +0200
