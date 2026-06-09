@@ -115,6 +115,7 @@ describe('Action', () => {
       'internal-cert',
       'internal-key',
       'clan-service-account',
+      true,
     );
   });
   test('It can fail the action', async () => {
@@ -153,6 +154,7 @@ describe('Action', () => {
       'internal-cert',
       'internal-key',
       'clan-service-account',
+      true,
     );
   });
 

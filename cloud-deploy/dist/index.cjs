@@ -109211,7 +109211,7 @@ var prepareGcloudDeploy = /* @__PURE__ */ __name(async (name, projectID, clanNam
     await createCloudDeployPipe(name, projectID, clanName, env2, target)
   );
 }, "prepareGcloudDeploy");
-var buildManifest = /* @__PURE__ */ __name(async (image, deployYaml, projectId, clanName, deployEnv, timeout, http2Certificate, internalCert, internalCertKey, cicdServiceAccount) => {
+var buildManifest = /* @__PURE__ */ __name(async (image, deployYaml, projectId, clanName, deployEnv, timeout, http2Certificate, internalCert, internalCertKey, cicdServiceAccount, serveTraffic = true) => {
   let opa = false;
   let SQLInstanceName;
   const {
@@ -109242,7 +109242,6 @@ var buildManifest = /* @__PURE__ */ __name(async (image, deployYaml, projectId, 
   } = kubernetes || cloudrun;
   const { staging, production } = environments;
   const {
-    "serve-traffic": serveTraffic = true,
     "static-egress-ip": enableCloudNAT = true,
     "direct-vpc-connection": enableDirectVPC = true
   } = traffic;
@@ -111175,7 +111174,8 @@ var action5 = /* @__PURE__ */ __name(async () => {
     http2Certificate,
     internalHttpsCertificateCrt,
     internalHttpsCertificateKey,
-    serviceAccountKeyCICD
+    serviceAccountKeyCICD,
+    serveTraffic
   );
   await publish_policies_default(
     serviceName,
@@ -111237,7 +111237,7 @@ var action5 = /* @__PURE__ */ __name(async () => {
           slackChannel
         )
       );
-      if (!serveTraffic && !isNewCanary) {
+      if (!serveTraffic) {
         const serviceInfo = {
           service: serviceName,
           project: projectID

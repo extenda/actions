@@ -1038,6 +1038,7 @@ metadata:
       '',
       '',
       '',
+      false,
     );
 
     const manifest = readFileSync('cloudrun-service.yaml');
@@ -1115,6 +1116,7 @@ metadata:
         '',
         '',
         '',
+        false,
       ),
     ).rejects.toThrow(
       '2 active revisions found, set revision to 100% traffic before deploying',

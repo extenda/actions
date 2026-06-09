@@ -180,6 +180,7 @@ const action = async () => {
     internalHttpsCertificateCrt,
     internalHttpsCertificateKey,
     serviceAccountKeyCICD,
+    serveTraffic,
   );
 
   await publishPolicies(
@@ -250,8 +251,7 @@ const action = async () => {
         ),
       );
 
-      // legacy serve-traffic: false without traffic.canary — refresh old SRE canary status
-      if (!serveTraffic && !isNewCanary) {
+      if (!serveTraffic) {
         const serviceInfo = {
           service: serviceName,
           project: projectID,
