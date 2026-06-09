@@ -266,6 +266,11 @@ const action = async () => {
     if (isNewCanary && env === 'prod' && !platformGKE && previousRevision) {
       const newRevision = await getNewRevision(serviceName, projectID, 'europe-west1');
       if (newRevision) {
+        const resolvedSlackChannel =
+          canarySlackChannel ||
+          (await readSecret(serviceAccountKeyCICD, env, 'clan_slack_channel', 'CLAN_SLACK_CHANNEL').catch(
+            () => '#platform-notifications',
+          ));
         await registerAutomaticCanary({
           project: projectID,
           service: serviceName,
@@ -273,7 +278,7 @@ const action = async () => {
           revision: newRevision,
           previousRevision,
           steps: canarySteps,
-          slackChannel: canarySlackChannel,
+          slackChannel: resolvedSlackChannel,
         });
       }
     }
