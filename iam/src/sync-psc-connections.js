@@ -9,17 +9,9 @@ const REGION = 'europe-west1';
 // Same filter the platform API applies server-side
 const PROJECT_ID_PATTERN = /^[a-z][a-z0-9]*(?:-[a-z][a-z0-9]*)*-[a-z0-9]{4}$/;
 
-// Extract the clan prefix from a project ID, e.g. "platform" from "platform-prod-2481"
-const getClanPrefix = (projectId) => {
-  const match = projectId.match(/^(.+?)-(?:prod|staging)-[a-z0-9]{4}$/);
-  return match ? match[1] : null;
-};
-
 const extractConsumerProjectIDs = (allowedConsumers, producerProjectId) => {
   const ids = new Set();
-  const producerClan = getClanPrefix(producerProjectId);
   for (const group of allowedConsumers) {
-    if (producerClan && group.clan === producerClan) continue; // same clan
     for (const sa of group['service-accounts'] ?? []) {
       const match = sa.match(/@([a-z][a-z0-9-]+)\.iam\.gserviceaccount\.com$/);
       if (!match) continue;
