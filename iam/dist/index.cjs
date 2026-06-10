@@ -104858,15 +104858,9 @@ var PLATFORM_API_PROD = "https://platform-api.retailsvc.com";
 var AUDIENCE = "platform";
 var REGION = "europe-west1";
 var PROJECT_ID_PATTERN = /^[a-z][a-z0-9]*(?:-[a-z][a-z0-9]*)*-[a-z0-9]{4}$/;
-var getClanPrefix = /* @__PURE__ */ __name((projectId) => {
-  const match2 = projectId.match(/^(.+?)-(?:prod|staging)-[a-z0-9]{4}$/);
-  return match2 ? match2[1] : null;
-}, "getClanPrefix");
 var extractConsumerProjectIDs = /* @__PURE__ */ __name((allowedConsumers, producerProjectId) => {
   const ids = /* @__PURE__ */ new Set();
-  const producerClan = getClanPrefix(producerProjectId);
   for (const group of allowedConsumers) {
-    if (producerClan && group.clan === producerClan) continue;
     for (const sa of group["service-accounts"] ?? []) {
       const match2 = sa.match(/@([a-z][a-z0-9-]+)\.iam\.gserviceaccount\.com$/);
       if (!match2) continue;
