@@ -220,10 +220,12 @@ const gkeManifestTemplate = async (
                 requests: {
                   cpu: cpuRequest,
                   memory: memoryRequest,
+                  'ephemeral-storage': '10Gi',
                 },
                 limits: {
                   cpu: cpuRequest,
                   memory: memoryRequest,
+                  'ephemeral-storage': '10Gi',
                 },
               },
               env: [

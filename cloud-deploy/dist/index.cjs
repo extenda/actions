@@ -108732,11 +108732,13 @@ var gkeManifestTemplate = /* @__PURE__ */ __name(async (name, type2, image, minI
               resources: {
                 requests: {
                   cpu: cpuRequest,
-                  memory: memoryRequest
+                  memory: memoryRequest,
+                  "ephemeral-storage": "10Gi"
                 },
                 limits: {
                   cpu: cpuRequest,
-                  memory: memoryRequest
+                  memory: memoryRequest,
+                  "ephemeral-storage": "10Gi"
                 }
               },
               env: [
