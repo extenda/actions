@@ -10,11 +10,20 @@ var __glob = (map) => (path3) => {
   if (fn) return fn();
   throw new Error("Module not found in bundle: " + path3);
 };
-var __esm = (fn, res) => function __init() {
-  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+var __esm = (fn, res, err) => function __init() {
+  if (err) throw err[0];
+  try {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  } catch (e) {
+    throw err = [e], e;
+  }
 };
 var __commonJS = (cb, mod) => function __require() {
-  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  try {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  } catch (e) {
+    throw mod = 0, e;
+  }
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -21489,6 +21498,18 @@ var require_semver = __commonJS({
     var { safeRe: re, t: t2 } = require_re();
     var parseOptions = require_parse_options();
     var { compareIdentifiers } = require_identifiers();
+    var isPrereleaseIdentifier = /* @__PURE__ */ __name((prerelease, identifier) => {
+      const identifiers = identifier.split(".");
+      if (identifiers.length > prerelease.length) {
+        return false;
+      }
+      for (let i2 = 0; i2 < identifiers.length; i2++) {
+        if (compareIdentifiers(prerelease[i2], identifiers[i2]) !== 0) {
+          return false;
+        }
+      }
+      return true;
+    }, "isPrereleaseIdentifier");
     var SemVer = class _SemVer {
       static {
         __name(this, "SemVer");
@@ -21738,8 +21759,9 @@ var require_semver = __commonJS({
               if (identifierBase === false) {
                 prerelease = [identifier];
               }
-              if (compareIdentifiers(this.prerelease[0], identifier) === 0) {
-                if (isNaN(this.prerelease[1])) {
+              if (isPrereleaseIdentifier(this.prerelease, identifier)) {
+                const prereleaseBase = this.prerelease[identifier.split(".").length];
+                if (isNaN(prereleaseBase)) {
                   this.prerelease = prerelease;
                 }
               } else {
@@ -22416,6 +22438,8 @@ var require_range = __commonJS({
       return comp;
     }, "parseComparator");
     var isX = /* @__PURE__ */ __name((id) => !id || id.toLowerCase() === "x" || id === "*", "isX");
+    var invalidXRangeOrder = /* @__PURE__ */ __name((M2, m, p2) => isX(M2) && !isX(m) || isX(m) && p2 && !isX(p2), "inva\
+lidXRangeOrder");
     var replaceTildes = /* @__PURE__ */ __name((comp, options) => {
       return comp.trim().split(/\s+/).map((c3) => replaceTilde(c3, options)).join(" ");
     }, "replaceTildes");
@@ -22475,9 +22499,9 @@ var require_range = __commonJS({
           debug3("no pr");
           if (M2 === "0") {
             if (m === "0") {
-              ret = `>=${M2}.${m}.${p2}${z2} <${M2}.${m}.${+p2 + 1}-0`;
+              ret = `>=${M2}.${m}.${p2} <${M2}.${m}.${+p2 + 1}-0`;
             } else {
-              ret = `>=${M2}.${m}.${p2}${z2} <${M2}.${+m + 1}.0-0`;
+              ret = `>=${M2}.${m}.${p2} <${M2}.${+m + 1}.0-0`;
             }
           } else {
             ret = `>=${M2}.${m}.${p2} <${+M2 + 1}.0.0-0`;
@@ -22496,6 +22520,9 @@ var require_range = __commonJS({
       const r2 = options.loose ? re[t2.XRANGELOOSE] : re[t2.XRANGE];
       return comp.replace(r2, (ret, gtlt, M2, m, p2, pr) => {
         debug3("xRange", comp, ret, gtlt, M2, m, p2, pr);
+        if (invalidXRangeOrder(M2, m, p2)) {
+          return comp;
+        }
         const xM = isX(M2);
         const xm = xM || isX(m);
         const xp = xm || isX(p2);
