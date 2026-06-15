@@ -119186,7 +119186,13 @@ var schema2 = import_joi.default.object({
           "entity-ids": import_joi.default.string(),
           "business-unit-id": import_joi.default.string(),
           "business-unit-group-id": import_joi.default.string()
-        }).required()
+        }).required(),
+        "additional-properties": import_joi.default.object({
+          scope: import_joi.default.string().required(),
+          "entity-id": import_joi.default.string().required(),
+          properties: import_joi.default.object().pattern(import_joi.default.string(), import_joi.default.string()).min(
+          1).required()
+        })
       })
     })
   ).required()

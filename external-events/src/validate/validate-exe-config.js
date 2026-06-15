@@ -51,6 +51,15 @@ const schema = joi.object({
               'business-unit-group-id': joi.string(),
             })
             .required(),
+          'additional-properties': joi.object({
+            scope: joi.string().required(),
+            'entity-id': joi.string().required(),
+            properties: joi
+              .object()
+              .pattern(joi.string(), joi.string())
+              .min(1)
+              .required(),
+          }),
         }),
       }),
     )
