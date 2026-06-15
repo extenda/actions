@@ -54,6 +54,13 @@ event-sources: # (required) list of event sources for your system
         business-unit-group-id: $.data.nested.bu.id
         # jsonpath syntax https://github.com/JSONPath-Plus/JSONPath#syntax-through-examples
         # playground https://jsonpath.com/
+      # (optional) per-entity extra fields for DFO; see DFO section below
+      # additional-properties:
+      #   scope: $.data.items[*] # iterator; use $.data for single-entity payloads
+      #   entity-id: $.id # relative to each scope node; becomes map key
+      #   properties:
+      #     display-name: $.displayName
+      #     status: $.status
   - name: group-created
     version: v2
     display-name: IAM Group was created
@@ -99,6 +106,46 @@ When present, set `entity-type` to the DFO entity type for events from this sour
 attributes under `$.attributes`). Use `entity-id` for single-entity events, or `entity-ids` when the
 payload carries a batch. Add `business-unit-id` and/or `business-unit-group-id` when those values
 appear in the message.
+
+Optional `additional-properties` extracts extra fields per entity into the DFO payload as a map
+keyed by entity id. Set `scope` to the JSONPath that selects each entity node (for example
+`$.data.items[*]` for batched payloads, or `$.data` for a single object). Set `entity-id` to a
+JSONPath relative to each scope node that resolves to a scalar key (for example `$.id`). Under
+`properties`, map output names to JSONPath expressions relative to each scope node; kebab-case keys
+are converted to camelCase when synced to EXE (for example `display-name` → `displayName`).
+Properties that do not resolve are omitted.
+
+Batched example:
+
+```yaml
+dfo:
+  entity-type: IAM_GROUP
+  field-paths:
+    entity-ids: $.data.groups[*].id
+    business-unit-id: $.attributes['Business-Unit-Id']
+  additional-properties:
+    scope: $.data.groups[*]
+    entity-id: $.id
+    properties:
+      display-name: $.displayName
+      status: $.status
+      member-ids: $.members[*].id
+```
+
+Single-entity example (`scope: $.data`, one map entry keyed by `entity-id`):
+
+```yaml
+dfo:
+  entity-type: IAM_GROUP
+  field-paths:
+    entity-id: $.data.id
+  additional-properties:
+    scope: $.data
+    entity-id: $.id
+    properties:
+      display-name: $.displayName
+      status: $.status
+```
 
 See the `dfo` block in the example above. JSONPath syntax:
 [JSONPath-Plus](https://github.com/JSONPath-Plus/JSONPath#syntax-through-examples). Playground:
