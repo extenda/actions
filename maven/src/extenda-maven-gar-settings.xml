@@ -49,7 +49,7 @@
       <id>maven-proxy</id>
       <url>https://europe-west1-maven.pkg.dev/extenda/maven</url>
       <!-- Mirror everything except central and GAR -->
-      <mirrorOf>external:*,!public-central,!central,!artifact-registry,!artifact-registry-releases</mirrorOf>
+      <mirrorOf>external:*,!public-central,!central,!artifact-registry,!artifact-registry-releases,!confluent</mirrorOf>
     </mirror>
   </mirrors>
 
