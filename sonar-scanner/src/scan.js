@@ -36,7 +36,7 @@ const getCommands = (sonarScanner, custom, workingDir = '.') => {
     custom.npm ||
     isAutoDiscovered(sonarScanner, workingDir, 'package.json')
   ) {
-    commands.npm = custom.npm || 'node_modules/.bin/sonar-scanner';
+    commands.npm = custom.npm || 'node_modules/.bin/sonar-scanner-npm';
   }
 
   if (
@@ -44,7 +44,7 @@ const getCommands = (sonarScanner, custom, workingDir = '.') => {
     custom.yarn ||
     isAutoDiscovered(sonarScanner, workingDir, 'yarn.lock')
   ) {
-    commands.yarn = custom.yarn || 'node_modules/.bin/sonar-scanner';
+    commands.yarn = custom.yarn || 'node_modules/.bin/sonar-scanner-npm';
   }
 
   return commands;
