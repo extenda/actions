@@ -17,6 +17,9 @@ updates:
       - dependency-name: conventional-commits-parser
       - dependency-name: conventional-recommended-bump
       - dependency-name: git-raw-commits
+      - dependency-name: @types/node
+        update-types:
+          - version-update:semver-major
   - package-ecosystem: github-actions
     directory: /
     schedule:
