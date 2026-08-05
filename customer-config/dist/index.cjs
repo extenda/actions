@@ -80837,6 +80837,12 @@ fy"),
 var YAML_DATE_REGEXP = /* @__PURE__ */ new RegExp("^([0-9][0-9][0-9][0-9])-([0-9][0-9])-([0-9][0-9])$");
 var YAML_TIMESTAMP_REGEXP = /* @__PURE__ */ new RegExp("^([0-9][0-9][0-9][0-9])-([0-9][0-9]?)-([0-9][0-9]?)(?:[Tt]|[ \\t]\
 +)([0-9][0-9]?):([0-9][0-9]):([0-9][0-9])(?:\\.([0-9]*))?(?:[ \\t]*(Z|([-+])([0-9][0-9]?)(?::([0-9][0-9]))?))?$");
+function makeUtcDate(year, month, day, hour = 0, minute = 0, second = 0, fraction = 0) {
+  const date = new Date(Date.UTC(year, month, day, hour, minute, second, fraction));
+  date.setUTCFullYear(year, month, day);
+  return date;
+}
+__name(makeUtcDate, "makeUtcDate");
 function resolveYamlTimestamp(source) {
   let match2 = YAML_DATE_REGEXP.exec(source);
   if (match2 === null) match2 = YAML_TIMESTAMP_REGEXP.exec(source);
@@ -80845,7 +80851,7 @@ function resolveYamlTimestamp(source) {
   const month = +match2[2] - 1;
   const day = +match2[3];
   if (!match2[4]) {
-    const date2 = new Date(Date.UTC(year, month, day));
+    const date2 = makeUtcDate(year, month, day);
     if (date2.getUTCFullYear() !== year || date2.getUTCMonth() !== month || date2.getUTCDate() !== day) return NOT_RESOLVED;
     return date2;
   }
@@ -80859,7 +80865,7 @@ function resolveYamlTimestamp(source) {
     while (value.length < 3) value += "0";
     fraction = +value;
   }
-  const date = new Date(Date.UTC(year, month, day, hour, minute, second, fraction));
+  const date = makeUtcDate(year, month, day, hour, minute, second, fraction);
   if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month || date.getUTCDate() !== day) return NOT_RESOLVED;
   if (match2[9]) {
     const offsetHour = +match2[10];
@@ -80960,7 +80966,11 @@ var mapTag = defineMappingTag("tag:yaml.org,2002:map", {
     return Object.prototype.hasOwnProperty.call(container, String(key));
   }, "has"),
   keys: /* @__PURE__ */ __name((container) => Object.keys(container), "keys"),
-  get: /* @__PURE__ */ __name((container, key) => container[String(key)], "get")
+  get: /* @__PURE__ */ __name((container, key) => {
+    const normalizedKey = String(key);
+    if (!Object.prototype.hasOwnProperty.call(container, normalizedKey)) return null;
+    return container[normalizedKey];
+  }, "get")
 });
 var setTag = defineMappingTag("tag:yaml.org,2002:set", {
   create: /* @__PURE__ */ __name(() => /* @__PURE__ */ new Set(), "create"),
@@ -80981,9 +80991,9 @@ var setTag = defineMappingTag("tag:yaml.org,2002:set", {
 });
 function createTagDefinitionMap() {
   return {
-    scalar: {},
-    sequence: {},
-    mapping: {}
+    scalar: /* @__PURE__ */ Object.create(null),
+    sequence: /* @__PURE__ */ Object.create(null),
+    mapping: /* @__PURE__ */ Object.create(null)
   };
 }
 __name(createTagDefinitionMap, "createTagDefinitionMap");
@@ -81163,7 +81173,11 @@ var legacyMapTag = defineMappingTag("tag:yaml.org,2002:map", {
     return normalizedKey !== null && Object.prototype.hasOwnProperty.call(container, normalizedKey);
   }, "has"),
   keys: /* @__PURE__ */ __name((container) => Object.keys(container), "keys"),
-  get: /* @__PURE__ */ __name((container, key) => container[String(key)], "get")
+  get: /* @__PURE__ */ __name((container, key) => {
+    const normalizedKey = String(key);
+    if (!Object.prototype.hasOwnProperty.call(container, normalizedKey)) return null;
+    return container[normalizedKey];
+  }, "get")
 });
 var DEFAULT_SNIPPET_OPTIONS = {
   maxLength: 79,
@@ -81520,10 +81534,10 @@ function getScalarValue(input, scalar) {
   }
 }
 __name(getScalarValue, "getScalarValue");
-var DEFAULT_TAG_HANDLERS = {
+var DEFAULT_TAG_HANDLERS = Object.assign(/* @__PURE__ */ Object.create(null), {
   "!": "!",
   "!!": "tag:yaml.org,2002:"
-};
+});
 function tagNameFull(rawTag, tagHandlers) {
   if (rawTag.startsWith("!<") && rawTag.endsWith(">")) return decodeURIComponent(rawTag.slice(2, -1));
   const handleEnd = rawTag.indexOf("!", 1);
@@ -81788,6 +81802,10 @@ maxAliases (${state3.maxAliases})`);
       }
       case 6: {
         const frame = state3.frames.pop();
+        if (frame.kind === "mapping" && frame.hasKey) {
+          state3.position = frame.keyPosition;
+          throwError$1(state3, "incomplete mapping pair in event stream");
+        }
         if (frame.kind === "document") state3.documents.push(frame.value);
         else {
           const value = frame.tag.carrierIsResult ? frame.value : finalizeCollection(state3, frame.position, frame.tag, frame.
@@ -82520,10 +82538,6 @@ function parseNode(state3, parentIndent, nodeContext, allowToSeek, allowCompact,
     if (state3.lineIndent > parentIndent) indentStatus = 1;
     else if (state3.lineIndent === parentIndent) indentStatus = 0;
     else indentStatus = -1;
-  }
-  if (state3.position === state3.lineStart && testDocumentSeparator(state3)) {
-    state3.depth--;
-    return false;
   }
   if (indentStatus === 1) while (true) {
     const ch = state3.input.charCodeAt(state3.position);
@@ -119832,5 +119846,5 @@ run-parallel/index.js:
   (*! run-parallel. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> *)
 
 js-yaml/dist/js-yaml.mjs:
-  (*! js-yaml 5.2.2 https://github.com/nodeca/js-yaml @license MIT *)
+  (*! js-yaml 5.2.3 https://github.com/nodeca/js-yaml @license MIT *)
 */
