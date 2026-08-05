@@ -16,7 +16,7 @@
     "git-raw-commits": "~2.0.11",
     "simple-git": "^3.36.0",
     "stream-to-string": "^1.2.1",
-    "through2": "^5.0.10"
+    "through2": "^5.0.11"
   },
   "type": "module"
 }
