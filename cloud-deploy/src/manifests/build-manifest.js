@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 
 import * as core from '@actions/core';
-import yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
 
 import getRevisions from '../cloudrun/get-revisions.js';
 import { addNamespace } from '../utils/add-namespace.js';
