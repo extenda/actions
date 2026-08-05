@@ -6,7 +6,11 @@ var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 var __commonJS = (cb, mod) => function __require() {
-  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  try {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  } catch (e) {
+    throw mod = 0, e;
+  }
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -21481,6 +21485,18 @@ var require_semver = __commonJS({
     var { safeRe: re, t: t2 } = require_re();
     var parseOptions = require_parse_options();
     var { compareIdentifiers } = require_identifiers();
+    var isPrereleaseIdentifier = /* @__PURE__ */ __name((prerelease, identifier) => {
+      const identifiers = identifier.split(".");
+      if (identifiers.length > prerelease.length) {
+        return false;
+      }
+      for (let i2 = 0; i2 < identifiers.length; i2++) {
+        if (compareIdentifiers(prerelease[i2], identifiers[i2]) !== 0) {
+          return false;
+        }
+      }
+      return true;
+    }, "isPrereleaseIdentifier");
     var SemVer = class _SemVer {
       static {
         __name(this, "SemVer");
@@ -21730,8 +21746,9 @@ var require_semver = __commonJS({
               if (identifierBase === false) {
                 prerelease = [identifier];
               }
-              if (compareIdentifiers(this.prerelease[0], identifier) === 0) {
-                if (isNaN(this.prerelease[1])) {
+              if (isPrereleaseIdentifier(this.prerelease, identifier)) {
+                const prereleaseBase = this.prerelease[identifier.split(".").length];
+                if (isNaN(prereleaseBase)) {
                   this.prerelease = prerelease;
                 }
               } else {
@@ -22408,20 +22425,23 @@ var require_range = __commonJS({
       return comp;
     }, "parseComparator");
     var isX = /* @__PURE__ */ __name((id) => !id || id.toLowerCase() === "x" || id === "*", "isX");
+    var invalidXRangeOrder = /* @__PURE__ */ __name((M, m, p) => isX(M) && !isX(m) || isX(m) && p && !isX(p), "invalidXR\
+angeOrder");
     var replaceTildes = /* @__PURE__ */ __name((comp, options) => {
       return comp.trim().split(/\s+/).map((c3) => replaceTilde(c3, options)).join(" ");
     }, "replaceTildes");
     var replaceTilde = /* @__PURE__ */ __name((comp, options) => {
       const r2 = options.loose ? re[t2.TILDELOOSE] : re[t2.TILDE];
+      const z = options.includePrerelease ? "-0" : "";
       return comp.replace(r2, (_, M, m, p, pr) => {
         debug3("tilde", comp, _, M, m, p, pr);
         let ret;
         if (isX(M)) {
           ret = "";
         } else if (isX(m)) {
-          ret = `>=${M}.0.0 <${+M + 1}.0.0-0`;
+          ret = `>=${M}.0.0${z} <${+M + 1}.0.0-0`;
         } else if (isX(p)) {
-          ret = `>=${M}.${m}.0 <${M}.${+m + 1}.0-0`;
+          ret = `>=${M}.${m}.0${z} <${M}.${+m + 1}.0-0`;
         } else if (pr) {
           debug3("replaceTilde pr", pr);
           ret = `>=${M}.${m}.${p}-${pr} <${M}.${+m + 1}.0-0`;
@@ -22467,9 +22487,9 @@ var require_range = __commonJS({
           debug3("no pr");
           if (M === "0") {
             if (m === "0") {
-              ret = `>=${M}.${m}.${p}${z} <${M}.${m}.${+p + 1}-0`;
+              ret = `>=${M}.${m}.${p} <${M}.${m}.${+p + 1}-0`;
             } else {
-              ret = `>=${M}.${m}.${p}${z} <${M}.${+m + 1}.0-0`;
+              ret = `>=${M}.${m}.${p} <${M}.${+m + 1}.0-0`;
             }
           } else {
             ret = `>=${M}.${m}.${p} <${+M + 1}.0.0-0`;
@@ -22488,6 +22508,9 @@ var require_range = __commonJS({
       const r2 = options.loose ? re[t2.XRANGELOOSE] : re[t2.XRANGE];
       return comp.replace(r2, (ret, gtlt, M, m, p, pr) => {
         debug3("xRange", comp, ret, gtlt, M, m, p, pr);
+        if (invalidXRangeOrder(M, m, p)) {
+          return comp;
+        }
         const xM = isX(M);
         const xm = xM || isX(m);
         const xp = xm || isX(p);

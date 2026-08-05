@@ -5,7 +5,7 @@
   "private": true,
   "main": "dist/index.cjs",
   "dependencies": {
-    "p-limit": "^7.3.0"
+    "p-limit": "^7.3.1"
   },
   "type": "module",
   "scripts": {
