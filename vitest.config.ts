@@ -1,11 +1,13 @@
 import { defineConfig } from 'vitest/config';
-import {  resolve } from 'path';
+import { resolve } from 'node:path';
+
+const configDir = process.cwd();
 
 export default defineConfig({
   resolve: {
     alias: {
       // Force 'fast-glob' to point to our generic mock that supports mock-fs
-      'fast-glob': resolve(__dirname, '.test/mocks/fast-glob.js'),
+      'fast-glob': resolve(configDir, '.test/mocks/fast-glob.js'),
     },
   },
   test: {
