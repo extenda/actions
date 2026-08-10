@@ -76,7 +76,7 @@
     "eslint-plugin-simple-import-sort": "^14.0.0",
     "eslint-plugin-unused-imports": "^4.4.1",
     "globals": "^17.9.0",
-    "memfs": "^4.67.0",
+    "memfs": "^4.68.0",
     "micromatch": "^4.0.8",
     "mock-fs": "^5.5.0",
     "nock": "^14.0.17",
