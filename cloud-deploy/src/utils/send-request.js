@@ -112,7 +112,18 @@ const saveVulnerabilities = async (
   return sendRequest(url, data);
 };
 
+const isProjectWhitelisted = async (projectId) => {
+  const url = `/security/whitelist/${projectId}`;
+  const response = await axios.get(url, {
+    headers: {
+      Authorization: `Bearer ${await getToken()}`,
+    },
+  });
+  return response.data.whitelisted === true;
+};
+
 export {
+  isProjectWhitelisted,
   refreshCanaryStatus,
   registerAutomaticCanary,
   saveVulnerabilities,

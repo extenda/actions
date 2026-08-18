@@ -111700,6 +111700,15 @@ var saveVulnerabilities = /* @__PURE__ */ __name(async (service, reportJson, lab
   };
   return sendRequest2(url3, data);
 }, "saveVulnerabilities");
+var isProjectWhitelisted = /* @__PURE__ */ __name(async (projectId) => {
+  const url3 = `/security/whitelist/${projectId}`;
+  const response = await axios_default.get(url3, {
+    headers: {
+      Authorization: `Bearer ${await identity_token_default()}`
+    }
+  });
+  return response.data.whitelisted === true;
+}, "isProjectWhitelisted");
 
 // cloud-deploy/src/utils/service-definition.js
 var import_node_fs14 = __toESM(require("node:fs"), 1);
@@ -112637,9 +112646,17 @@ var service_definition_default = loadServiceDefinition;
 var import_node_fs15 = __toESM(require("node:fs"), 1);
 var runScan = /* @__PURE__ */ __name(async (serviceAccount, image, serviceName, labels, projectID) => {
   let failOnVulnerabilities = true;
-  const whiteListedProjects = ["platform-prod-2481", "txengine-prod-1c85"];
-  if (whiteListedProjects.includes(projectID)) {
-    failOnVulnerabilities = false;
+  if (projectID) {
+    try {
+      const whitelisted = await isProjectWhitelisted(projectID);
+      if (whitelisted) {
+        failOnVulnerabilities = false;
+      }
+    } catch (err) {
+      warning(
+        `Failed to check security whitelist for project ${projectID}: ${err.message}. Treating as non-whitelisted.`
+      );
+    }
   }
   const scanResult = await trivy(serviceAccount, image, {
     failOnVulnerabilities,
