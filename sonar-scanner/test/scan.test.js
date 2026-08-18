@@ -112,7 +112,7 @@ describe('Scan', () => {
         'npm install sonarqube-scanner --no-save',
       );
       expect(exec.exec.mock.calls[1][0]).toEqual(
-        'node_modules/.bin/sonar-scanner -Dsonar.verbose=false',
+        'node_modules/.bin/sonar-scanner-npm -Dsonar.verbose=false',
       );
     });
 
@@ -134,7 +134,7 @@ describe('Scan', () => {
         'yarn add -D sonarqube-scanner',
       );
       expect(exec.exec.mock.calls[1][0]).toEqual(
-        'node_modules/.bin/sonar-scanner -Dsonar.verbose=false',
+        'node_modules/.bin/sonar-scanner-npm -Dsonar.verbose=false',
       );
     });
 

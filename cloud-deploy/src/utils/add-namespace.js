@@ -1,4 +1,4 @@
-import yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
 
 const addNamespace = async (content, namespace) => {
   const json = yaml.load(content);

@@ -1,7 +1,8 @@
+import { readFileSync } from 'node:fs';
+
 import * as core from '@actions/core';
 import fg from 'fast-glob';
-import { readFileSync } from 'fs';
-import yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
 
 function loadDefinition(path) {
   core.info(`Loading ${path} config file`);
