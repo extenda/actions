@@ -1,0 +1,39 @@
+name: Translations
+description: Publish a module's default-layer UI translations to the Hii Retail Translation Service
+author: Extenda Retail
+inputs:
+  service-account-key:
+    description: |
+      The service account key or workload identity federation
+      configuration used to authenticate against the Translation Service.
+    required: true
+  module-id:
+    description: |
+      The module ID to publish translations for.
+    required: true
+  path:
+    description: |
+      Directory containing the en-US.json translation file.
+    required: false
+    default: translations/
+  environment:
+    description: |
+      Which Translation Service to publish to. Defaults to prod, which is the only
+      environment module repositories publish to; the other values exist for
+      Translation Service development.
+    required: false
+    default: prod
+  api-url:
+    description: |
+      Full base URL of the Translation Service API, overriding `environment`. Exists for
+      Translation Service development.
+    required: false
+  dry-run:
+    description: |
+      If 'true', report whether a real run would publish or skip, without a PUT.
+      The service validates on publish only, so a dry run cannot report a 422.
+    required: false
+    default: 'false'
+runs:
+  using: node24
+  main: dist/index.cjs

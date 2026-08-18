@@ -45,6 +45,7 @@
     "styra-das-deploy",
     "terraform-plan-comment",
     "test-pod",
+    "translations",
     "trivy-scan",
     "txengine-deploy",
     "utils"
