@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import getToken from '../../src/utils/identity-token.js';
 import {
+  isProjectWhitelisted,
   refreshCanaryStatus,
   registerAutomaticCanary,
   sendDeployInfo,
@@ -305,6 +306,55 @@ describe('Send request to platform api', () => {
       expect(result).toBe(false);
       expect(core.warning).toHaveBeenCalledWith(
         expect.stringContaining('Failed to register automatic canary'),
+      );
+    });
+  });
+
+  describe('isProjectWhitelisted', () => {
+    it('returns true when the platform api reports the project as whitelisted', async () => {
+      getToken.mockResolvedValue('token');
+      axios.get.mockResolvedValue({ data: { whitelisted: true } });
+
+      const result = await isProjectWhitelisted('platform-prod-2481');
+
+      expect(result).toBe(true);
+      expect(axios.get).toHaveBeenCalledWith(
+        '/security/whitelist/platform-prod-2481',
+        {
+          headers: {
+            Authorization: 'Bearer token',
+          },
+        },
+      );
+    });
+
+    it('returns false when the platform api reports the project as not whitelisted', async () => {
+      getToken.mockResolvedValue('token');
+      axios.get.mockResolvedValue({ data: { whitelisted: false } });
+
+      const result = await isProjectWhitelisted('some-other-project');
+
+      expect(result).toBe(false);
+    });
+
+    it('encodes the project id when building the request path', async () => {
+      getToken.mockResolvedValue('token');
+      axios.get.mockResolvedValue({ data: { whitelisted: false } });
+
+      await isProjectWhitelisted('some/project?with=chars');
+
+      expect(axios.get).toHaveBeenCalledWith(
+        '/security/whitelist/some%2Fproject%3Fwith%3Dchars',
+        expect.anything(),
+      );
+    });
+
+    it('propagates the error when the platform api request fails', async () => {
+      getToken.mockResolvedValue('token');
+      axios.get.mockRejectedValue(new Error('network error'));
+
+      await expect(isProjectWhitelisted('some-project')).rejects.toThrow(
+        'network error',
       );
     });
   });

@@ -111701,7 +111701,7 @@ var saveVulnerabilities = /* @__PURE__ */ __name(async (service, reportJson, lab
   return sendRequest2(url3, data);
 }, "saveVulnerabilities");
 var isProjectWhitelisted = /* @__PURE__ */ __name(async (projectId) => {
-  const url3 = `/security/whitelist/${projectId}`;
+  const url3 = `/security/whitelist/${encodeURIComponent(projectId)}`;
   const response = await axios_default.get(url3, {
     headers: {
       Authorization: `Bearer ${await identity_token_default()}`
@@ -112653,8 +112653,9 @@ var runScan = /* @__PURE__ */ __name(async (serviceAccount, image, serviceName, 
         failOnVulnerabilities = false;
       }
     } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
       warning(
-        `Failed to check security whitelist for project ${projectID}: ${err.message}. Treating as non-whitelisted.`
+        `Failed to check security whitelist for project ${projectID}: ${message}. Treating as non-whitelisted.`
       );
     }
   }

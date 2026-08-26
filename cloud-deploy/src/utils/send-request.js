@@ -113,7 +113,7 @@ const saveVulnerabilities = async (
 };
 
 const isProjectWhitelisted = async (projectId) => {
-  const url = `/security/whitelist/${projectId}`;
+  const url = `/security/whitelist/${encodeURIComponent(projectId)}`;
   const response = await axios.get(url, {
     headers: {
       Authorization: `Bearer ${await getToken()}`,
