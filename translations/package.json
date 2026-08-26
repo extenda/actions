@@ -1,0 +1,11 @@
+{
+  "name": "translations",
+  "version": "0.0.1-local",
+  "private": true,
+  "description": "Publish module UI translations to the Hii Retail Translation Service",
+  "main": "dist/index.cjs",
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
+}
