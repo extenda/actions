@@ -32,10 +32,10 @@ export function resolveBaseUrl(environment, apiUrl) {
 }
 
 export async function getResolvedEntries(baseUrl, moduleId) {
-  const response = await axios.get(
-    translationsUrl(baseUrl, moduleId),
-    ANY_STATUS,
-  );
+  const response = await axios.get(translationsUrl(baseUrl, moduleId), {
+    ...ANY_STATUS,
+    params: { format: 'raw' },
+  });
 
   if (response.status === OK) {
     return response.data.entries ?? {};
