@@ -50,7 +50,10 @@ const setInputs = (overrides = {}) => {
 };
 
 const mockResolvedGet = (status, body, baseUrl = STAGING_URL) =>
-  nock(baseUrl).get(RESOLVED_PATH).reply(status, body);
+  nock(baseUrl)
+    .get(RESOLVED_PATH)
+    .query({ format: 'raw' })
+    .reply(status, body);
 
 const mockPut = (status, body, baseUrl = STAGING_URL) =>
   nock(baseUrl)

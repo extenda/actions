@@ -96736,10 +96736,10 @@ function resolveBaseUrl(environment, apiUrl) {
 }
 __name(resolveBaseUrl, "resolveBaseUrl");
 async function getResolvedEntries(baseUrl, moduleId) {
-  const response = await axios_default.get(
-    translationsUrl(baseUrl, moduleId),
-    ANY_STATUS
-  );
+  const response = await axios_default.get(translationsUrl(baseUrl, moduleId), {
+    ...ANY_STATUS,
+    params: { format: "raw" }
+  });
   if (response.status === OK) {
     return response.data.entries ?? {};
   }
