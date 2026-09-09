@@ -1,5 +1,4 @@
 {
-  "$id": "cloud-deploy.schema.json",
   "title": "CloudDeploy",
   "type": "object",
   "properties": {

@@ -67,7 +67,7 @@ const getLatestRevision = async (registryId) => {
 
 const isMajorBranch = () => {
   const branch = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || '';
-  return /breaking|major/i.test(branch);
+  return /^(breaking|major)(\/|$)/i.test(branch);
 };
 
 const bumpVersion = (version) => {
@@ -88,6 +88,8 @@ const activate = async (registryId, revisionId) => {
 const registerSkill = async (skillId, skillFilePath, dryRun) => {
   const skillContent = readFileSync(skillFilePath, 'utf8');
   const { name: displayName, description } = parseSkillMeta(skillContent);
+  if (!displayName) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: name`);
+  if (!description) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: description`);
   const registryId = `private-${skillId}`;
 
   const exists = await skillExists(registryId);

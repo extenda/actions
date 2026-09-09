@@ -111717,7 +111717,6 @@ var import_yaml3 = __toESM(require_dist7(), 1);
 
 // cloud-deploy/src/utils/cloud-deploy.schema.json
 var cloud_deploy_schema_default = {
-  $id: "cloud-deploy.schema.json",
   title: "CloudDeploy",
   type: "object",
   properties: {

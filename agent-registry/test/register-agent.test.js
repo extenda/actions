@@ -143,6 +143,30 @@ describe('register-agent', () => {
       const spec = JSON.parse(call(2).find((a) => a.startsWith('--agent-spec-content=')).slice(21));
       expect(spec.version).toBe('3.0');
     });
+
+    test('does not bump major on branch that merely contains "major" mid-word', async () => {
+      process.env.GITHUB_HEAD_REF = 'fix/fix-major-bug';
+      mockExisting('0.3');
+      execGcloud.mockResolvedValueOnce('');
+
+      await registerAgent('my-agent', AGENT_YAML, false);
+
+      const spec = JSON.parse(call(2).find((a) => a.startsWith('--agent-spec-content=')).slice(21));
+      expect(spec.version).toBe('0.4');
+    });
+  });
+
+  describe('validation', () => {
+    test('throws when url is missing from agent.yaml', async () => {
+      const yamlNoUrl = `displayName: Test\ndescription: No URL here\n`;
+      await expect(registerAgent('my-agent', yamlNoUrl, false))
+        .rejects.toThrow("missing required field: url");
+    });
+
+    test('throws when agent.yaml is empty/invalid YAML', async () => {
+      await expect(registerAgent('my-agent', '', false))
+        .rejects.toThrow("missing required field: url");
+    });
   });
 
   describe('dry-run', () => {

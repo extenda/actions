@@ -7,7 +7,7 @@ const LOCATION = 'europe-west1';
 
 const isMajorBranch = () => {
   const branch = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || '';
-  return /breaking|major/i.test(branch);
+  return /^(breaking|major)(\/|$)/i.test(branch);
 };
 
 const bumpVersion = (version) => {
@@ -38,7 +38,8 @@ const getAgentVersion = async (agentId) => {
 };
 
 const registerAgent = async (agentId, agentYaml, dryRun) => {
-  const card = yamlLoad(agentYaml);
+  const card = yamlLoad(agentYaml) ?? {};
+  if (!card.url) throw new Error(`agent.yaml for '${agentId}' is missing required field: url`);
   const displayName = card.displayName ?? agentId;
   const description = card.description ?? '';
 

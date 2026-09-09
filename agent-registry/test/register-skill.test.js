@@ -175,6 +175,32 @@ describe('registerSkill', () => {
 
       expect(call(2)).toContain('private-my-skill-v2-0');
     });
+
+    test('does not bump major on branch that merely contains "major" mid-word', async () => {
+      process.env.GITHUB_HEAD_REF = 'fix/fix-major-bug';
+      execGcloud.mockResolvedValueOnce('');
+      execGcloud.mockResolvedValueOnce(revisionsList('v0-3'));
+      execGcloud.mockResolvedValueOnce('');
+      execGcloud.mockResolvedValueOnce('');
+
+      await registerSkill('my-skill', '/SKILL.md', false);
+
+      expect(call(2)).toContain('private-my-skill-v0-4');
+    });
+  });
+
+  describe('validation', () => {
+    test('throws when frontmatter name is missing', async () => {
+      readFileSync.mockReturnValue('---\ndescription: A description\n---\n');
+      await expect(registerSkill('my-skill', '/SKILL.md', false))
+        .rejects.toThrow("missing required frontmatter field: name");
+    });
+
+    test('throws when frontmatter description is missing', async () => {
+      readFileSync.mockReturnValue('---\nname: My Skill\n---\n');
+      await expect(registerSkill('my-skill', '/SKILL.md', false))
+        .rejects.toThrow("missing required frontmatter field: description");
+    });
   });
 
   describe('dry-run', () => {

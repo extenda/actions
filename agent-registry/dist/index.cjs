@@ -99921,7 +99921,7 @@ var PROJECT = "extenda";
 var LOCATION = "europe-west1";
 var isMajorBranch = /* @__PURE__ */ __name(() => {
   const branch = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || "";
-  return /breaking|major/i.test(branch);
+  return /^(breaking|major)(\/|$)/i.test(branch);
 }, "isMajorBranch");
 var bumpVersion = /* @__PURE__ */ __name((version3) => {
   const [major, minor] = version3.split(".").map(Number);
@@ -99960,7 +99960,8 @@ var getAgentVersion = /* @__PURE__ */ __name(async (agentId) => {
   }
 }, "getAgentVersion");
 var registerAgent = /* @__PURE__ */ __name(async (agentId, agentYaml, dryRun) => {
-  const card = load(agentYaml);
+  const card = load(agentYaml) ?? {};
+  if (!card.url) throw new Error(`agent.yaml for '${agentId}' is missing required field: url`);
   const displayName = card.displayName ?? agentId;
   const description = card.description ?? "";
   const exists3 = await serviceExists(agentId);
@@ -100853,7 +100854,7 @@ var getLatestRevision = /* @__PURE__ */ __name(async (registryId) => {
 }, "getLatestRevision");
 var isMajorBranch2 = /* @__PURE__ */ __name(() => {
   const branch = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || "";
-  return /breaking|major/i.test(branch);
+  return /^(breaking|major)(\/|$)/i.test(branch);
 }, "isMajorBranch");
 var bumpVersion2 = /* @__PURE__ */ __name((version3) => {
   const [major, minor] = version3.slice(1).split("-").map(Number);
@@ -100876,6 +100877,8 @@ var activate = /* @__PURE__ */ __name(async (registryId, revisionId) => {
 var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun) => {
   const skillContent = (0, import_fs3.readFileSync)(skillFilePath, "utf8");
   const { name: displayName, description } = parseSkillMeta(skillContent);
+  if (!displayName) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: name`);
+  if (!description) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: description`);
   const registryId = `private-${skillId}`;
   const exists3 = await skillExists(registryId);
   const currentVersion = exists3 ? await getLatestRevision(registryId) : null;
