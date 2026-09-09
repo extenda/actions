@@ -55838,7 +55838,7 @@ var require_package2 = __commonJS({
     module2.exports = {
       name: "joi",
       description: "Object schema validation",
-      version: "18.2.3",
+      version: "18.2.8",
       repository: {
         url: "git://github.com/hapijs/joi.git",
         type: "git"
@@ -56776,7 +56776,7 @@ var require_errors3 = __commonJS({
 var require_ref2 = __commonJS({
   "node_modules/joi/lib/ref.js"(exports2) {
     "use strict";
-    var { assert: assert4, clone, reach } = require_lib();
+    var { assert: assert4, reach } = require_lib();
     var Common = require_common4();
     var Template;
     var internals = {
@@ -57049,7 +57049,7 @@ var require_ref2 = __commonJS({
       }
       clone() {
         const copy = new exports2.Manager();
-        copy.refs = clone(this.refs);
+        copy.refs = this.refs.slice();
         return copy;
       }
       reset() {
@@ -57432,15 +57432,16 @@ var require_messages = __commonJS({
         }
         assert4(typeof message === "object" && !Array.isArray(message), "Invalid message for", code);
         const language = code;
-        target[language] = target[language] || {};
+        const localizedTarget = Object.hasOwn(target, language) ? target[language] : {};
+        target[language] = localizedTarget;
         for (const key of Object.keys(message)) {
           const localized = message[key];
           if (key === "root" || Template.isTemplate(localized)) {
-            target[language][key] = localized;
+            localizedTarget[key] = localized;
             continue;
           }
           assert4(typeof localized === "string", "Invalid message for", key, "in", language);
-          target[language][key] = new Template(localized);
+          localizedTarget[key] = new Template(localized);
         }
       }
       return target;
@@ -57496,15 +57497,16 @@ var require_messages = __commonJS({
         }
         assert4(typeof message === "object" && !Array.isArray(message), "Invalid message for", code);
         const language = code;
-        target[language] = target[language] || {};
+        const localizedTarget = Object.hasOwn(target, language) ? target[language] : {};
+        target[language] = localizedTarget;
         for (const key of Object.keys(message)) {
           const localized = message[key];
           if (key === "root" || Template.isTemplate(localized)) {
-            target[language][key] = localized;
+            localizedTarget[key] = localized;
             continue;
           }
           assert4(typeof localized === "string", "Invalid message for", key, "in", language);
-          target[language][key] = new Template(localized);
+          localizedTarget[key] = new Template(localized);
         }
       }
       return target;
@@ -58780,8 +58782,12 @@ var require_modify = __commonJS({
       }
       clone() {
         const clone = new internals.Ids();
-        clone._byId = new Map(this._byId);
-        clone._byKey = new Map(this._byKey);
+        if (this._byId.size) {
+          clone._byId = new Map(this._byId);
+        }
+        if (this._byKey.size) {
+          clone._byKey = new Map(this._byKey);
+        }
         clone._schemaChain = this._schemaChain;
         return clone;
       }
@@ -59236,14 +59242,14 @@ var require_validator = __commonJS({
       }
       snapshot() {
         this._snapshots.push({
-          externals: this.externals.slice(),
-          warnings: this.warnings.slice()
+          externals: this.externals.length,
+          warnings: this.warnings.length
         });
       }
       restore() {
         const snapshot2 = this._snapshots.pop();
-        this.externals = snapshot2.externals;
-        this.warnings = snapshot2.warnings;
+        this.externals.length = snapshot2.externals;
+        this.warnings.length = snapshot2.warnings;
       }
       commit() {
         this._snapshots.pop();
@@ -59286,6 +59292,9 @@ var require_validator = __commonJS({
         if (result) {
           return result;
         }
+      }
+      if (schema2._flags.failover !== void 0) {
+        state3.snapshot();
       }
       const createError = /* @__PURE__ */ __name((code, local, localState) => schema2.$_createError(code, value, local, localState ||
       state3, prefs), "createError");
@@ -59464,12 +59473,21 @@ var require_validator = __commonJS({
     internals.finalize = function(value, errors, helpers) {
       errors = errors || [];
       const { schema: schema2, state: state3, prefs } = helpers;
-      if (errors.length) {
-        const failover = internals.default("failover", void 0, errors, helpers);
-        if (failover !== void 0) {
-          state3.mainstay.tracer.value(state3, "failover", value, failover);
-          value = failover;
-          errors = [];
+      if (schema2._flags.failover !== void 0) {
+        let applied = false;
+        if (errors.length) {
+          const failover = internals.default("failover", void 0, errors, helpers);
+          if (failover !== void 0) {
+            state3.mainstay.tracer.value(state3, "failover", value, failover);
+            value = failover;
+            errors = [];
+            applied = true;
+          }
+        }
+        if (applied) {
+          state3.restore();
+        } else {
+          state3.commit();
         }
       }
       if (errors.length && schema2._flags.error) {
@@ -60295,9 +60313,10 @@ ort rule properties");
         assert4(definition, "Unknown rule", rule.method);
         const obj = this.clone();
         if (args) {
-          assert4(Object.keys(args).length === 1 || Object.keys(args).length === this._definition.rules[rule.name].args.
-          length, "Invalid rule definition for", this.type, rule.name);
-          for (const key of Object.keys(args)) {
+          const argKeys = Object.keys(args);
+          assert4(argKeys.length === 1 || argKeys.length === this._definition.rules[rule.name].args.length, "Invalid rul\
+e definition for", this.type, rule.name);
+          for (const key of argKeys) {
             let arg = args[key];
             if (definition.argsByName) {
               const resolver = definition.argsByName.get(key);
@@ -60436,7 +60455,7 @@ ort rule properties");
         target._valids = this._valids && this._valids.clone();
         target._invalids = this._invalids && this._invalids.clone();
         target._rules = this._rules.slice();
-        target._singleRules = clone(this._singleRules, { shallow: true });
+        target._singleRules = new Map(this._singleRules);
         target._refs = this._refs.clone();
         target._flags = Object.assign({}, this._flags);
         target._cache = null;
@@ -62671,12 +62690,7 @@ icky mode");
       },
       rebuild(schema2) {
         if (schema2.$_terms.keys) {
-          const topo = new Topo.Sorter();
-          for (const child2 of schema2.$_terms.keys) {
-            Common.tryWithPath(() => topo.add(child2, { after: child2.schema.$_rootReferences(), group: child2.key }), child2.
-            key);
-          }
-          schema2.$_terms.keys = new internals.Keys(...topo.nodes);
+          schema2.$_terms.keys = new internals.Keys(...internals.sortKeys(schema2.$_terms.keys));
         }
       },
       manifest: {
@@ -62721,6 +62735,7 @@ e || "pass the assertion test"), #message || "the assertion failed")}',
  key was already renamed to {{:#to}}",
         "object.rename.override": "{{#label}} cannot rename {{:#from}} because override is disabled and target {{:#to}} \
 exists",
+        "object.rename.proto": "{{#label}} cannot rename {{:#from}} because target {{:#to}} is a reserved key",
         "object.schema": "{{#label}} must be a Joi schema of {{#type}} type",
         "object.unknown": "{{#label}} is not allowed",
         "object.with": "{{:#mainWithLabel}} missing required peer {{:#peerWithLabel}}",
@@ -62902,6 +62917,18 @@ exists",
         return { code: "object.xor", context: context3 };
       }
     };
+    internals.sortKeys = function(keys, manual = true) {
+      const topo = new Topo.Sorter();
+      for (const child2 of keys) {
+        Common.tryWithPath(() => topo.add(child2, { after: child2.schema.$_rootReferences(), group: child2.key, manual }),
+        child2.key);
+      }
+      try {
+        return topo.sort();
+      } catch {
+        return internals.sortKeys(keys, false);
+      }
+    };
     internals.keysToLabels = function(schema2, keys) {
       if (Array.isArray(keys)) {
         return keys.map((key) => schema2.$_mapLabels(key));
@@ -62956,6 +62983,13 @@ exists",
             if (prefs.abortEarly) {
               return false;
             }
+          }
+          if (to === "__proto__") {
+            errors.push(schema2.$_createError("object.rename.proto", value, { from, to, pattern }, state3, prefs));
+            if (prefs.abortEarly) {
+              return false;
+            }
+            continue;
           }
           if (value[from] === void 0) {
             delete value[to];
@@ -66297,8 +66331,8 @@ s", "minDomainSegments", "tlds"]);
         },
         email: {
           method(options = {}) {
-            Common.assertOptions(options, ["allowFullyQualified", "allowUnicode", "ignoreLength", "maxDomainSegments", "\
-minDomainSegments", "multiple", "separator", "tlds"]);
+            Common.assertOptions(options, ["allowFullyQualified", "allowUnicode", "allowUnderscore", "ignoreLength", "ma\
+xDomainSegments", "minDomainSegments", "multiple", "separator", "tlds"]);
             assert4(options.multiple === void 0 || typeof options.multiple === "boolean", "multiple option must be an bo\
 olean");
             const address = internals.addressOptions(options);
@@ -66790,8 +66824,8 @@ vel domain names`);
       if (!Common.isIsoDate(value)) {
         return null;
       }
-      if (/.*T.*[+-]\d\d$/.test(value)) {
-        value += "00";
+      if (/T.*[+-]\d\d$/.test(value)) {
+        value += ":00";
       }
       const date = new Date(value);
       if (isNaN(date.getTime())) {
