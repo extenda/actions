@@ -59987,9 +59987,9 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary: binary2, version: v
 
 // agent-registry/src/index.js
 var import_fast_glob2 = __toESM(require_out4(), 1);
-var import_path3 = __toESM(require("path"), 1);
-var import_fs4 = require("fs");
-var import_child_process2 = require("child_process");
+var import_node_path7 = __toESM(require("node:path"), 1);
+var import_node_fs7 = require("node:fs");
+var import_node_child_process = require("node:child_process");
 
 // setup-gcloud/src/auth-stack.js
 var import_node_fs2 = __toESM(require("node:fs"), 1);
@@ -99968,7 +99968,8 @@ var registerAgent = /* @__PURE__ */ __name(async (agentId, agentYaml, dryRun) =>
   const currentVersion = exists3 ? await getAgentVersion(agentId) : null;
   const version3 = currentVersion ? bumpVersion(currentVersion) : "0.1";
   if (dryRun) {
-    info(`[dry-run] Would ${exists3 ? `update to ${version3}` : `create at ${version3}`} agent: ${agentId}`);
+    const versionAction = exists3 ? `update to ${version3}` : `create at ${version3}`;
+    info(`[dry-run] Would ${versionAction} agent: ${agentId}`);
     return;
   }
   const specContent = JSON.stringify({
@@ -100060,8 +100061,8 @@ var registerMcp = /* @__PURE__ */ __name(async (mcpId, mcpYaml, dryRun) => {
 
 // agent-registry/src/register-skill.js
 var import_fs3 = require("fs");
-var import_os5 = require("os");
-var import_path2 = __toESM(require("path"), 1);
+var import_node_os4 = require("node:os");
+var import_node_path6 = __toESM(require("node:path"), 1);
 
 // node_modules/fflate/esm/index.mjs
 var import_module = require("module");
@@ -100802,7 +100803,7 @@ var parseSkillMeta = /* @__PURE__ */ __name((content) => {
 var makeZipFile = /* @__PURE__ */ __name((skillFilePath) => {
   const content = (0, import_fs3.readFileSync)(skillFilePath);
   const zipped = zipSync({ "SKILL.md": [strToU8(content.toString()), { level: 6 }] });
-  const tmpPath = import_path2.default.join((0, import_os5.tmpdir)(), `skill-${process.pid}.zip`);
+  const tmpPath = import_node_path6.default.join((0, import_node_os4.tmpdir)(), `skill-${process.pid}.zip`);
   (0, import_fs3.writeFileSync)(tmpPath, Buffer.from(zipped));
   return tmpPath;
 }, "makeZipFile");
@@ -100927,19 +100928,64 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
 
 // agent-registry/src/index.js
 var AGENT_REGISTRY_PATH = "agent-registry";
-var getGitSha = /* @__PURE__ */ __name(() => (0, import_child_process2.execSync)("git rev-parse HEAD").toString().trim(),
+var getGitSha = /* @__PURE__ */ __name(() => (0, import_node_child_process.execSync)("git rev-parse HEAD").toString().trim(),
 "getGitSha");
 var getChangedPaths = /* @__PURE__ */ __name(() => {
   try {
     const base = process.env.GITHUB_BASE_REF ? `origin/${process.env.GITHUB_BASE_REF}` : "HEAD~1";
-    return (0, import_child_process2.execSync)(`git diff --name-only ${base}...HEAD`).toString().trim().split("\n").filter(
-    Boolean);
+    return (0, import_node_child_process.execSync)(`git diff --name-only ${base}...HEAD`).toString().trim().split("\n").
+    filter(Boolean);
   } catch {
     return [];
   }
 }, "getChangedPaths");
 var isAffected = /* @__PURE__ */ __name((registryRelativePath, changedPaths) => !changedPaths.length || changedPaths.some(
 (p) => p.startsWith(`${AGENT_REGISTRY_PATH}/${registryRelativePath}`)), "isAffected");
+var processAgents = /* @__PURE__ */ __name(async (registryRoot, changedPaths, gitSha, dryRun) => {
+  const agentFiles = import_fast_glob2.default.sync("agents/*/agent.yaml", { cwd: registryRoot, onlyFiles: true });
+  for (const agentFile of agentFiles) {
+    const agentId = import_node_path7.default.basename(import_node_path7.default.dirname(agentFile));
+    if (agentId.startsWith("example-")) continue;
+    if (!isAffected(`agents/${agentId}/`, changedPaths)) continue;
+    const agentYaml = (0, import_node_fs7.readFileSync)(import_node_path7.default.join(registryRoot, agentFile), "utf8");
+    startGroup(`Agent: ${agentId}`);
+    await registerAgent(agentId, agentYaml, dryRun);
+    const gcsPath = `agents/${agentId}/${gitSha}/instructions.md`;
+    try {
+      if (dryRun) {
+        info(`[dry-run] Would upload instructions to gs://extenda-agent-artifacts/${gcsPath}`);
+      } else {
+        await upload(import_node_path7.default.join(registryRoot, "agents", agentId, "instructions.md"), gcsPath);
+        info(`Instructions uploaded: gs://extenda-agent-artifacts/${gcsPath}`);
+      }
+    } catch {
+    }
+    endGroup();
+  }
+}, "processAgents");
+var processMcps = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun) => {
+  const mcpFiles = import_fast_glob2.default.sync("mcp/*/mcp.yaml", { cwd: registryRoot, onlyFiles: true });
+  for (const mcpFile of mcpFiles) {
+    const mcpId = import_node_path7.default.dirname(mcpFile).replace(/^mcp\//, "");
+    if (mcpId.startsWith("example-")) continue;
+    if (!isAffected(`mcp/${mcpId}/`, changedPaths)) continue;
+    const mcpYaml = (0, import_node_fs7.readFileSync)(import_node_path7.default.join(registryRoot, mcpFile), "utf8");
+    startGroup(`MCP: ${mcpId}`);
+    await registerMcp(mcpId, mcpYaml, dryRun);
+    endGroup();
+  }
+}, "processMcps");
+var processSkills = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun) => {
+  const skillFiles = import_fast_glob2.default.sync("skills/*/SKILL.md", { cwd: registryRoot, onlyFiles: true });
+  for (const skillFile of skillFiles) {
+    const skillId = import_node_path7.default.basename(import_node_path7.default.dirname(skillFile));
+    if (skillId.startsWith("example-")) continue;
+    if (!isAffected(`skills/${skillId}/`, changedPaths)) continue;
+    startGroup(`Skill: ${skillId}`);
+    await registerSkill(skillId, import_node_path7.default.join(registryRoot, skillFile), dryRun);
+    endGroup();
+  }
+}, "processSkills");
 var action5 = /* @__PURE__ */ __name(async () => {
   const serviceAccountKey = getInput("service-account-key", { required: true });
   const dryRun = getInput("dry-run") === "true";
@@ -100951,50 +100997,10 @@ var action5 = /* @__PURE__ */ __name(async () => {
   } else {
     info("No changed paths detected \u2014 processing all items");
   }
-  const registryRoot = import_path3.default.join(process.cwd(), AGENT_REGISTRY_PATH);
-  const agentFiles = import_fast_glob2.default.sync("agents/*/agent.yaml", { cwd: registryRoot, onlyFiles: true });
-  for (const agentFile of agentFiles) {
-    const agentId = import_path3.default.basename(import_path3.default.dirname(agentFile));
-    if (agentId.startsWith("example-")) continue;
-    if (!isAffected(`agents/${agentId}/`, changedPaths)) continue;
-    const agentFilePath = import_path3.default.join(registryRoot, agentFile);
-    const agentYaml = (0, import_fs4.readFileSync)(agentFilePath, "utf8");
-    startGroup(`Agent: ${agentId}`);
-    await registerAgent(agentId, agentYaml, dryRun);
-    const instructionsPath = import_path3.default.join(registryRoot, "agents", agentId, "instructions.md");
-    try {
-      const gcsPath = `agents/${agentId}/${gitSha}/instructions.md`;
-      if (dryRun) {
-        info(`[dry-run] Would upload instructions to gs://extenda-agent-artifacts/${gcsPath}`);
-      } else {
-        await upload(instructionsPath, gcsPath);
-        info(`Instructions uploaded: gs://extenda-agent-artifacts/${gcsPath}`);
-      }
-    } catch {
-    }
-    endGroup();
-  }
-  const mcpFiles = import_fast_glob2.default.sync("mcp/*/mcp.yaml", { cwd: registryRoot, onlyFiles: true });
-  for (const mcpFile of mcpFiles) {
-    const mcpId = import_path3.default.dirname(mcpFile).replace(/^mcp\//, "");
-    if (mcpId.startsWith("example-")) continue;
-    if (!isAffected(`mcp/${mcpId}/`, changedPaths)) continue;
-    const mcpFilePath = import_path3.default.join(registryRoot, mcpFile);
-    const mcpYaml = (0, import_fs4.readFileSync)(mcpFilePath, "utf8");
-    startGroup(`MCP: ${mcpId}`);
-    await registerMcp(mcpId, mcpYaml, dryRun);
-    endGroup();
-  }
-  const skillFiles = import_fast_glob2.default.sync("skills/*/SKILL.md", { cwd: registryRoot, onlyFiles: true });
-  for (const skillFile of skillFiles) {
-    const skillId = import_path3.default.basename(import_path3.default.dirname(skillFile));
-    if (skillId.startsWith("example-")) continue;
-    if (!isAffected(`skills/${skillId}/`, changedPaths)) continue;
-    const skillFilePath = import_path3.default.join(registryRoot, skillFile);
-    startGroup(`Skill: ${skillId}`);
-    await registerSkill(skillId, skillFilePath, dryRun);
-    endGroup();
-  }
+  const registryRoot = import_node_path7.default.join(process.cwd(), AGENT_REGISTRY_PATH);
+  await processAgents(registryRoot, changedPaths, gitSha, dryRun);
+  await processMcps(registryRoot, changedPaths, dryRun);
+  await processSkills(registryRoot, changedPaths, dryRun);
 }, "action");
 var src_default = action5;
 

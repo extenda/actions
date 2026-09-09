@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import { readFileSync, writeFileSync, unlinkSync } from 'fs';
-import { tmpdir } from 'os';
-import path from 'path';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { zipSync, strToU8 } from 'fflate';
 import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 

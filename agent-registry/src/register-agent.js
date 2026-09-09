@@ -48,7 +48,8 @@ const registerAgent = async (agentId, agentYaml, dryRun) => {
   const version = currentVersion ? bumpVersion(currentVersion) : '0.1';
 
   if (dryRun) {
-    core.info(`[dry-run] Would ${exists ? `update to ${version}` : `create at ${version}`} agent: ${agentId}`);
+    const versionAction = exists ? `update to ${version}` : `create at ${version}`;
+    core.info(`[dry-run] Would ${versionAction} agent: ${agentId}`);
     return;
   }
 
