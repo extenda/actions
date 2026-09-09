@@ -106501,17 +106501,18 @@ var import_yaml = __toESM(require_dist7(), 1);
 
 // cloud-deploy/src/utils/cloud-deploy.schema.json
 var cloud_deploy_schema_default = {
+  $id: "cloud-deploy.schema.json",
   title: "CloudDeploy",
   type: "object",
   properties: {
     labels: {
-      $ref: "#/$defs/Labels"
+      $ref: "#/definitions/Labels"
     },
     security: {
-      $ref: "#/$defs/Security"
+      $ref: "#/definitions/Security"
     },
     environments: {
-      $ref: "#/$defs/Environments"
+      $ref: "#/definitions/Environments"
     }
   },
   required: [
@@ -106527,7 +106528,7 @@ var cloud_deploy_schema_default = {
       ],
       properties: {
         "cloud-run": {
-          $ref: "#/$defs/CloudRun"
+          $ref: "#/definitions/CloudRun"
         }
       }
     },
@@ -106538,12 +106539,12 @@ var cloud_deploy_schema_default = {
       ],
       properties: {
         kubernetes: {
-          $ref: "#/$defs/Kubernetes"
+          $ref: "#/definitions/Kubernetes"
         }
       }
     }
   ],
-  $defs: {
+  definitions: {
     CloudRun: {
       title: "CloudRun",
       description: "Managed Cloud Run service",
@@ -106557,16 +106558,16 @@ var cloud_deploy_schema_default = {
       ],
       properties: {
         service: {
-          $ref: "#/$defs/ServiceName"
+          $ref: "#/definitions/ServiceName"
         },
         resources: {
-          $ref: "#/$defs/Resources"
+          $ref: "#/definitions/Resources"
         },
         protocol: {
-          $ref: "#/$defs/Protocol"
+          $ref: "#/definitions/Protocol"
         },
         timeout: {
-          $ref: "#/$defs/RequestTimeout"
+          $ref: "#/definitions/RequestTimeout"
         },
         scaling: {
           title: "ScalingCloudRun",
@@ -106585,7 +106586,7 @@ var cloud_deploy_schema_default = {
             schedule: {
               type: "array",
               items: {
-                $ref: "#/$defs/ScheduledScaling"
+                $ref: "#/definitions/ScheduledScaling"
               }
             }
           },
@@ -106673,7 +106674,7 @@ t already the last step",
           default: true
         },
         monitoring: {
-          $ref: "#/$defs/Monitoring"
+          $ref: "#/definitions/Monitoring"
         },
         "request-logs": {
           description: "Configure which request logs to use (if any).",
@@ -106714,7 +106715,7 @@ disabled.",
       ],
       properties: {
         service: {
-          $ref: "#/$defs/ServiceName"
+          $ref: "#/definitions/ServiceName"
         },
         type: {
           description: "The type of service",
@@ -106725,16 +106726,16 @@ disabled.",
           ]
         },
         resources: {
-          $ref: "#/$defs/Resources"
+          $ref: "#/definitions/Resources"
         },
         protocol: {
-          $ref: "#/$defs/Protocol"
+          $ref: "#/definitions/Protocol"
         },
         timeout: {
-          $ref: "#/$defs/RequestTimeout"
+          $ref: "#/definitions/RequestTimeout"
         },
         availability: {
-          $ref: "#/$defs/Availability"
+          $ref: "#/definitions/Availability"
         },
         "termination-grace-period": {
           description: "The termination grace period in seconds",
@@ -106841,7 +106842,7 @@ disabled.",
           }
         },
         monitoring: {
-          $ref: "#/$defs/Monitoring"
+          $ref: "#/definitions/Monitoring"
         },
         "request-logs": {
           description: "Configure which request logs to use (if any).",
@@ -107096,7 +107097,7 @@ e is used.",
               pattern: "^[a-z0-9-]+$"
             },
             resources: {
-              $ref: "#/$defs/Resources",
+              $ref: "#/definitions/Resources",
               default: {
                 cpu: 0.5,
                 memory: "512Mi"
@@ -107109,10 +107110,10 @@ elease is used.",
               pattern: "^v\\d{1,2}\\.\\d{1,3}\\.\\d{1,2}$"
             },
             "cloud-armor": {
-              $ref: "#/$defs/CloudArmor"
+              $ref: "#/definitions/CloudArmor"
             },
             cors: {
-              $ref: "#/$defs/CorsSettings",
+              $ref: "#/definitions/CorsSettings",
               default: {
                 enabled: false
               }
@@ -107129,7 +107130,7 @@ elease is used.",
           ],
           properties: {
             "cloud-armor": {
-              $ref: "#/$defs/CloudArmor"
+              $ref: "#/definitions/CloudArmor"
             },
             consumers: {
               description: "IAM service Consumers",
@@ -107171,7 +107172,7 @@ elease is used.",
           ],
           properties: {
             "cloud-armor": {
-              $ref: "#/$defs/CloudArmor"
+              $ref: "#/definitions/CloudArmor"
             }
           }
         }
@@ -107188,7 +107189,7 @@ elease is used.",
       properties: {
         production: {
           description: "Production environment",
-          $ref: "#/$defs/Environment"
+          $ref: "#/definitions/Environment"
         },
         staging: {
           description: "Staging environment",
@@ -107200,7 +107201,7 @@ elease is used.",
               constant: "none"
             },
             {
-              $ref: "#/$defs/Environment"
+              $ref: "#/definitions/Environment"
             }
           ]
         }
@@ -107372,23 +107373,23 @@ er. It's not possible to expose the `Tenant-Id` header.",
       ],
       properties: {
         component: {
-          $ref: "#/$defs/Label"
+          $ref: "#/definitions/Label"
         },
         product: {
-          $ref: "#/$defs/Label"
+          $ref: "#/definitions/Label"
         },
         "iso-country": {
-          $ref: "#/$defs/Label",
+          $ref: "#/definitions/Label",
           default: "global"
         },
         "tenant-alias": {
-          $ref: "#/$defs/Label",
+          $ref: "#/definitions/Label",
           default: "multi-tenant"
         }
       },
       patternProperties: {
         "^[a-z-]+$": {
-          $ref: "#/$defs/Label"
+          $ref: "#/definitions/Label"
         }
       },
       additionalProperties: false
