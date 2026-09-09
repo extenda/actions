@@ -1,0 +1,16 @@
+{
+  "name": "agent-registry",
+  "version": "0.0.1-local",
+  "private": true,
+  "description": "Register agents, MCP servers, skills, and upload artifacts to GCS",
+  "main": "dist/index.cjs",
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  },
+  "dependencies": {
+    "fast-glob": "^3.3.2",
+    "fflate": "^0.8.2",
+    "js-yaml": "^4.1.0"
+  }
+}
