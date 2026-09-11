@@ -100808,6 +100808,7 @@ var makeZipFile = /* @__PURE__ */ __name((skillFilePath) => {
 }, "makeZipFile");
 var skillExists = /* @__PURE__ */ __name(async (skillId) => {
   try {
+    info(`[skill] checking exists: ${skillId} @ ${LOCATION3}`);
     await execGcloud(
       [
         "alpha",
@@ -100822,13 +100823,16 @@ var skillExists = /* @__PURE__ */ __name(async (skillId) => {
       "gcloud",
       true
     );
+    info(`[skill] exists: true`);
     return true;
-  } catch {
+  } catch (e) {
+    info(`[skill] exists: false (${e.message?.split("\n")[0]})`);
     return false;
   }
 }, "skillExists");
 var getLatestRevision = /* @__PURE__ */ __name(async (registryId) => {
   try {
+    info(`[skill] fetching latest revision for: ${registryId}`);
     const output = await execGcloud([
       "alpha",
       "agent-registry",

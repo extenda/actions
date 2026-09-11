@@ -30,19 +30,25 @@ const makeZipFile = (skillFilePath) => {
 
 const skillExists = async (skillId) => {
   try {
+    core.info(`[skill] checking exists: ${skillId} @ ${LOCATION}`);
     await execGcloud(
       ['alpha', 'agent-registry', 'skills', 'describe', skillId,
         `--location=${LOCATION}`, `--project=${PROJECT}`, '--quiet'],
       'gcloud', true,
     );
+    core.info(`[skill] exists: true`);
     return true;
-  } catch { return false; }
+  } catch (e) {
+    core.info(`[skill] exists: false (${e.message?.split('\n')[0]})`);
+    return false;
+  }
 };
 
 // Revision IDs in GCP must start with the skill name: {registryId}-{version}
 // e.g. private-fix-dependabot-pr-v0-1. We extract just the version suffix for tracking.
 const getLatestRevision = async (registryId) => {
   try {
+    core.info(`[skill] fetching latest revision for: ${registryId}`);
     const output = await execGcloud([
       'alpha', 'agent-registry', 'skills', 'revisions', 'list',
       `--skill=${registryId}`, `--location=${LOCATION}`, `--project=${PROJECT}`,
