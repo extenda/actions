@@ -5,6 +5,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 import { upload } from './upload-gcs.js';
 import { registerAgent } from './register-agent.js';
 import { registerMcp } from './register-mcp.js';
@@ -86,6 +87,7 @@ const action = async () => {
   const dryRun = core.getInput('dry-run') === 'true';
 
   await setupGcloud(serviceAccountKey);
+  await execGcloud(['components', 'install', 'alpha', '--quiet', '--no-user-output-enabled']);
   const gitSha = getGitSha();
   const changedPaths = getChangedPaths();
 

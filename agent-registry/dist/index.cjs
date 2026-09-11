@@ -59989,7 +59989,7 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary: binary2, version: v
 var import_fast_glob2 = __toESM(require_out4(), 1);
 var import_node_path7 = __toESM(require("node:path"), 1);
 var import_node_fs8 = require("node:fs");
-var import_node_child_process2 = require("node:child_process");
+var import_node_child_process = require("node:child_process");
 
 // setup-gcloud/src/auth-stack.js
 var import_node_fs2 = __toESM(require("node:fs"), 1);
@@ -100060,7 +100060,6 @@ var registerMcp = /* @__PURE__ */ __name(async (mcpId, mcpYaml, dryRun) => {
 
 // agent-registry/src/register-skill.js
 var import_node_fs7 = require("node:fs");
-var import_node_child_process = require("node:child_process");
 var import_node_os4 = require("node:os");
 var import_node_path6 = __toESM(require("node:path"), 1);
 
@@ -100790,21 +100789,6 @@ __name(zipSync, "zipSync");
 // agent-registry/src/register-skill.js
 var PROJECT3 = "extenda";
 var LOCATION3 = "eu";
-var logGcloudVersion = /* @__PURE__ */ __name(() => {
-  try {
-    const version3 = (0, import_node_child_process.execSync)("gcloud version --format=value(Google Cloud SDK)", { stdio: [
-    "pipe", "pipe", "pipe"] }).toString().trim();
-    info(`[skill] gcloud version: ${version3}`);
-  } catch {
-    info("[skill] gcloud version: unknown");
-  }
-}, "logGcloudVersion");
-var withTimeout = /* @__PURE__ */ __name((promise, ms, label) => {
-  const timeout = new Promise(
-    (_, reject) => setTimeout(() => reject(new Error(`[skill] timed out after ${ms / 1e3}s: ${label}`)), ms)
-  );
-  return Promise.race([promise, timeout]);
-}, "withTimeout");
 var parseSkillMeta = /* @__PURE__ */ __name((content) => {
   const match2 = content.match(/^---\n([\s\S]*?)\n---/);
   if (!match2) return { name: "", description: "" };
@@ -100823,19 +100807,22 @@ var makeZipFile = /* @__PURE__ */ __name((skillFilePath) => {
   return tmpPath;
 }, "makeZipFile");
 var skillExists = /* @__PURE__ */ __name(async (skillId) => {
-  const args = [
-    "alpha",
-    "agent-registry",
-    "skills",
-    "describe",
-    skillId,
-    `--location=${LOCATION3}`,
-    `--project=${PROJECT3}`,
-    "--quiet"
-  ];
-  info(`[skill] running: gcloud ${args.join(" ")}`);
   try {
-    await withTimeout(execGcloud(args, "gcloud", true), 3e4, `skills describe ${skillId}`);
+    info(`[skill] checking exists: ${skillId} @ ${LOCATION3}`);
+    await execGcloud(
+      [
+        "alpha",
+        "agent-registry",
+        "skills",
+        "describe",
+        skillId,
+        `--location=${LOCATION3}`,
+        `--project=${PROJECT3}`,
+        "--quiet"
+      ],
+      "gcloud",
+      true
+    );
     info(`[skill] exists: true`);
     return true;
   } catch (e) {
@@ -100845,7 +100832,8 @@ var skillExists = /* @__PURE__ */ __name(async (skillId) => {
 }, "skillExists");
 var getLatestRevision = /* @__PURE__ */ __name(async (registryId) => {
   try {
-    const args = [
+    info(`[skill] fetching latest revision for: ${registryId}`);
+    const output = await execGcloud([
       "alpha",
       "agent-registry",
       "skills",
@@ -100856,9 +100844,7 @@ var getLatestRevision = /* @__PURE__ */ __name(async (registryId) => {
       `--project=${PROJECT3}`,
       "--format=value(name)",
       "--quiet"
-    ];
-    info(`[skill] running: gcloud ${args.join(" ")}`);
-    const output = await withTimeout(execGcloud(args, "gcloud", true), 3e4, `skills revisions list ${registryId}`);
+    ], "gcloud", true);
     const prefix2 = `${registryId}-`;
     const versions = output.split("\n").filter(Boolean).map((line) => line.split("/revisions/").pop()).filter((name) => name.
     startsWith(prefix2)).map((name) => name.slice(prefix2.length)).filter((v) => /^v\d+-\d+$/.test(v));
@@ -100882,7 +100868,7 @@ var bumpVersion2 = /* @__PURE__ */ __name((version3) => {
 }, "bumpVersion");
 var activate = /* @__PURE__ */ __name(async (registryId, revisionId) => {
   const revisionName = `projects/${PROJECT3}/locations/${LOCATION3}/skills/${registryId}/revisions/${revisionId}`;
-  const args = [
+  await execGcloud([
     "alpha",
     "agent-registry",
     "skills",
@@ -100893,9 +100879,7 @@ var activate = /* @__PURE__ */ __name(async (registryId, revisionId) => {
     `--default-revision=${revisionName}`,
     "--target-state=active",
     "--quiet"
-  ];
-  info(`[skill] running: gcloud ${args.join(" ")}`);
-  await withTimeout(execGcloud(args), 6e4, `skills update (activate) ${registryId}`);
+  ]);
 }, "activate");
 var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun) => {
   const skillContent = (0, import_node_fs7.readFileSync)(skillFilePath, "utf8");
@@ -100907,14 +100891,13 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
     info(`[dry-run] Would register skill: ${registryId}`);
     return;
   }
-  logGcloudVersion();
   const exists3 = await skillExists(registryId);
   const currentVersion = exists3 ? await getLatestRevision(registryId) : null;
   const version3 = currentVersion ? bumpVersion2(currentVersion) : "v0-1";
   const revisionId = `${registryId}-${version3}`;
   if (!exists3) {
     info(`Creating skill: ${registryId}@${version3}`);
-    const createArgs = [
+    await execGcloud([
       "alpha",
       "agent-registry",
       "skills",
@@ -100926,14 +100909,12 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
       `--description=${description}`,
       "--type=simple",
       "--quiet"
-    ];
-    info(`[skill] running: gcloud ${createArgs.join(" ")}`);
-    await withTimeout(execGcloud(createArgs), 6e4, `skills create ${skillId}`);
+    ]);
   }
   const zipPath = makeZipFile(skillFilePath);
   try {
     info(`${exists3 ? "Adding" : "Uploading"} revision ${version3} to skill: ${registryId}`);
-    const revCreateArgs = [
+    await execGcloud([
       "alpha",
       "agent-registry",
       "skills",
@@ -100945,9 +100926,7 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
       `--project=${PROJECT3}`,
       `--payload=${zipPath}`,
       "--quiet"
-    ];
-    info(`[skill] running: gcloud ${revCreateArgs.join(" ")}`);
-    await withTimeout(execGcloud(revCreateArgs), 6e4, `skills revisions create ${revisionId}`);
+    ]);
   } finally {
     (0, import_node_fs7.unlinkSync)(zipPath);
   }
@@ -100957,12 +100936,12 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
 
 // agent-registry/src/index.js
 var AGENT_REGISTRY_PATH = "agent-registry";
-var getGitSha = /* @__PURE__ */ __name(() => (0, import_node_child_process2.execSync)("git rev-parse HEAD").toString().trim(),
+var getGitSha = /* @__PURE__ */ __name(() => (0, import_node_child_process.execSync)("git rev-parse HEAD").toString().trim(),
 "getGitSha");
 var getChangedPaths = /* @__PURE__ */ __name(() => {
   try {
     const base = process.env.GITHUB_BASE_REF ? `origin/${process.env.GITHUB_BASE_REF}` : "HEAD~1";
-    return (0, import_node_child_process2.execSync)(`git diff --name-only ${base}...HEAD`).toString().trim().split("\n").
+    return (0, import_node_child_process.execSync)(`git diff --name-only ${base}...HEAD`).toString().trim().split("\n").
     filter(Boolean);
   } catch {
     return [];
@@ -101019,6 +100998,7 @@ var action5 = /* @__PURE__ */ __name(async () => {
   const serviceAccountKey = getInput("service-account-key", { required: true });
   const dryRun = getInput("dry-run") === "true";
   await setup_gcloud_default(serviceAccountKey);
+  await execGcloud(["components", "install", "alpha", "--quiet", "--no-user-output-enabled"]);
   const gitSha = getGitSha();
   const changedPaths = getChangedPaths();
   if (changedPaths.length) {

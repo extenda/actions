@@ -5,6 +5,7 @@ vi.mock('@actions/core');
 vi.mock('fast-glob');
 vi.mock('fs', () => ({ readFileSync: vi.fn(() => 'yaml: content'), existsSync: vi.fn(() => true) }));
 vi.mock('../../setup-gcloud/src/index.js');
+vi.mock('../../setup-gcloud/src/exec-gcloud.js');
 vi.mock('../src/upload-gcs.js');
 vi.mock('../src/register-agent.js');
 vi.mock('../src/register-mcp.js');
@@ -15,6 +16,7 @@ import { existsSync } from 'fs';
 import * as core from '@actions/core';
 import fg from 'fast-glob';
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
+import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 import { upload } from '../src/upload-gcs.js';
 import { registerAgent } from '../src/register-agent.js';
 import { registerMcp } from '../src/register-mcp.js';
@@ -33,6 +35,7 @@ beforeEach(() => {
   execSync.mockReturnValue('abc123\n'); // default: git rev-parse HEAD
   fg.sync.mockReturnValue([]);
   setupGcloud.mockResolvedValue(undefined);
+  execGcloud.mockResolvedValue('');
 });
 
 afterEach(() => {
