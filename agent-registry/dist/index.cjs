@@ -100845,9 +100845,8 @@ var getLatestRevision = /* @__PURE__ */ __name(async (registryId) => {
       "--format=value(name)",
       "--quiet"
     ], "gcloud", true);
-    const prefix2 = `${registryId}-`;
-    const versions = output.split("\n").filter(Boolean).map((line) => line.split("/revisions/").pop()).filter((name) => name.
-    startsWith(prefix2)).map((name) => name.slice(prefix2.length)).filter((v) => /^v\d+-\d+$/.test(v));
+    const versions = output.split("\n").filter(Boolean).map((line) => line.split("/revisions/").pop()).filter((v) => /^v\d+-\d+$/.
+    test(v));
     if (!versions.length) return null;
     return versions.sort((a, b) => {
       const [aMaj, aMin] = a.slice(1).split("-").map(Number);
@@ -100894,7 +100893,7 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
   const exists3 = await skillExists(registryId);
   const currentVersion = exists3 ? await getLatestRevision(registryId) : null;
   const version3 = currentVersion ? bumpVersion2(currentVersion) : "v0-1";
-  const revisionId = `${registryId}-${version3}`;
+  const revisionId = version3;
   if (!exists3) {
     info(`Creating skill: ${registryId}@${version3}`);
     await execGcloud([

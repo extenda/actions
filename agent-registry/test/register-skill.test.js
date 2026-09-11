@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 vi.mock('@actions/core');
-vi.mock('node:child_process', () => ({ execSync: vi.fn(() => '584.0.0') }));
 vi.mock('node:fs', () => ({
   readFileSync: vi.fn(),
   writeFileSync: vi.fn(),
@@ -11,7 +10,7 @@ vi.mock('fflate', () => ({
   zipSync: vi.fn(() => new Uint8Array([1, 2, 3])),
   strToU8: vi.fn(() => new Uint8Array([1, 2, 3])),
 }));
-vi.mock('node:os', () => ({ tmpdir: vi.fn(() => '/tmp') }));
+vi.mock('node:os', () => ({ default: { tmpdir: vi.fn(() => '/tmp') }, tmpdir: vi.fn(() => '/tmp') }));
 vi.mock('../../setup-gcloud/src/exec-gcloud.js');
 
 import * as core from '@actions/core';
@@ -28,10 +27,9 @@ description: Automatically fixes failing Dependabot PRs
 ## Skill content
 `;
 
-// Build a mock revisions list output. Revision IDs use the full {registryId}-{version} format.
 const revisionsList = (...versions) =>
   versions
-    .map((v) => `projects/extenda/locations/eu/skills/private-my-skill/revisions/private-my-skill-${v}`)
+    .map((v) => `projects/extenda/locations/eu/skills/private-my-skill/revisions/${v}`)
     .join('\n');
 
 // Index of execGcloud call by position
@@ -69,7 +67,7 @@ describe('registerSkill', () => {
   describe('new skill (does not exist)', () => {
     // New skill: skillExists(throws) → create (no payload) → revisions create → activate
     // gcloud auto-prepends "private-" so we pass skillId (not registryId) to create
-    test('creates skill then adds v0-1 revision', async () => {
+    test('creates skill then adds v0.1 revision', async () => {
       execGcloud.mockRejectedValueOnce(new Error('not found')); // skillExists
       execGcloud.mockResolvedValueOnce(''); // skills create
       execGcloud.mockResolvedValueOnce(''); // revisions create
@@ -79,7 +77,7 @@ describe('registerSkill', () => {
 
       expect(call(1)).toContain('create');
       expect(call(1)).toContain('my-skill');
-      expect(call(2)).toContain('private-my-skill-v0-1');
+      expect(call(2)).toContain('v0-1');
     });
 
     test('create call includes display-name, description, type, location, project', async () => {
@@ -108,14 +106,14 @@ describe('registerSkill', () => {
 
       const activateArgs = call(3);
       expect(activateArgs).toContain(
-        '--default-revision=projects/extenda/locations/eu/skills/private-my-skill/revisions/private-my-skill-v0-1',
+        '--default-revision=projects/extenda/locations/eu/skills/private-my-skill/revisions/v0-1',
       );
       expect(activateArgs).toContain('--target-state=active');
     });
   });
 
   describe('existing skill — minor bump (default)', () => {
-    test('bumps minor from v0-1 to v0-2', async () => {
+    test('bumps minor from v0.1 to v0.2', async () => {
       execGcloud.mockResolvedValueOnce(''); // skillExists
       execGcloud.mockResolvedValueOnce(revisionsList('v0-1')); // revisions list
       execGcloud.mockResolvedValueOnce(''); // revisions create
@@ -123,7 +121,7 @@ describe('registerSkill', () => {
 
       await registerSkill('my-skill', '/SKILL.md', false);
 
-      expect(call(2)).toContain('private-my-skill-v0-2');
+      expect(call(2)).toContain('v0-2');
     });
 
     test('picks the highest version when multiple revisions exist', async () => {
@@ -134,7 +132,7 @@ describe('registerSkill', () => {
 
       await registerSkill('my-skill', '/SKILL.md', false);
 
-      expect(call(2)).toContain('private-my-skill-v0-4');
+      expect(call(2)).toContain('v0-4');
     });
 
     test('uses skills revisions create (not skills create) for existing skill', async () => {
@@ -162,7 +160,7 @@ describe('registerSkill', () => {
 
       await registerSkill('my-skill', '/SKILL.md', false);
 
-      expect(call(2)).toContain('private-my-skill-v3-0');
+      expect(call(2)).toContain('v3-0');
     });
 
     test('bumps major on major/ branch', async () => {
@@ -174,7 +172,7 @@ describe('registerSkill', () => {
 
       await registerSkill('my-skill', '/SKILL.md', false);
 
-      expect(call(2)).toContain('private-my-skill-v2-0');
+      expect(call(2)).toContain('v2-0');
     });
 
     test('does not bump major on branch that merely contains "major" mid-word', async () => {
@@ -186,7 +184,7 @@ describe('registerSkill', () => {
 
       await registerSkill('my-skill', '/SKILL.md', false);
 
-      expect(call(2)).toContain('private-my-skill-v0-4');
+      expect(call(2)).toContain('v0-4');
     });
   });
 
