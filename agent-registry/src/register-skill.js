@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
-import { readFileSync, writeFileSync, unlinkSync } from 'fs';
+import { readFileSync, writeFileSync, unlinkSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { zipSync, strToU8 } from 'fflate';
@@ -7,6 +8,22 @@ import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 
 const PROJECT = 'extenda';
 const LOCATION = 'eu';
+
+const logGcloudVersion = () => {
+  try {
+    const version = execSync('gcloud version --format=value(Google Cloud SDK)', { stdio: ['pipe', 'pipe', 'pipe'] }).toString().trim();
+    core.info(`[skill] gcloud version: ${version}`);
+  } catch {
+    core.info('[skill] gcloud version: unknown');
+  }
+};
+
+const withTimeout = (promise, ms, label) => {
+  const timeout = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error(`[skill] timed out after ${ms / 1000}s: ${label}`)), ms),
+  );
+  return Promise.race([promise, timeout]);
+};
 
 const parseSkillMeta = (content) => {
   const match = content.match(/^---\n([\s\S]*?)\n---/);
@@ -29,13 +46,11 @@ const makeZipFile = (skillFilePath) => {
 };
 
 const skillExists = async (skillId) => {
+  const args = ['alpha', 'agent-registry', 'skills', 'describe', skillId,
+    `--location=${LOCATION}`, `--project=${PROJECT}`, '--quiet'];
+  core.info(`[skill] running: gcloud ${args.join(' ')}`);
   try {
-    core.info(`[skill] checking exists: ${skillId} @ ${LOCATION}`);
-    await execGcloud(
-      ['alpha', 'agent-registry', 'skills', 'describe', skillId,
-        `--location=${LOCATION}`, `--project=${PROJECT}`, '--quiet'],
-      'gcloud', true,
-    );
+    await withTimeout(execGcloud(args, 'gcloud', true), 30_000, `skills describe ${skillId}`);
     core.info(`[skill] exists: true`);
     return true;
   } catch (e) {
@@ -48,12 +63,11 @@ const skillExists = async (skillId) => {
 // e.g. private-fix-dependabot-pr-v0-1. We extract just the version suffix for tracking.
 const getLatestRevision = async (registryId) => {
   try {
-    core.info(`[skill] fetching latest revision for: ${registryId}`);
-    const output = await execGcloud([
-      'alpha', 'agent-registry', 'skills', 'revisions', 'list',
+    const args = ['alpha', 'agent-registry', 'skills', 'revisions', 'list',
       `--skill=${registryId}`, `--location=${LOCATION}`, `--project=${PROJECT}`,
-      '--format=value(name)', '--quiet',
-    ], 'gcloud', true);
+      '--format=value(name)', '--quiet'];
+    core.info(`[skill] running: gcloud ${args.join(' ')}`);
+    const output = await withTimeout(execGcloud(args, 'gcloud', true), 30_000, `skills revisions list ${registryId}`);
     const prefix = `${registryId}-`;
     const versions = output
       .split('\n')
@@ -83,12 +97,11 @@ const bumpVersion = (version) => {
 
 const activate = async (registryId, revisionId) => {
   const revisionName = `projects/${PROJECT}/locations/${LOCATION}/skills/${registryId}/revisions/${revisionId}`;
-  await execGcloud([
-    'alpha', 'agent-registry', 'skills', 'update', registryId,
+  const args = ['alpha', 'agent-registry', 'skills', 'update', registryId,
     `--location=${LOCATION}`, `--project=${PROJECT}`,
-    `--default-revision=${revisionName}`,
-    '--target-state=active', '--quiet',
-  ]);
+    `--default-revision=${revisionName}`, '--target-state=active', '--quiet'];
+  core.info(`[skill] running: gcloud ${args.join(' ')}`);
+  await withTimeout(execGcloud(args), 60_000, `skills update (activate) ${registryId}`);
 };
 
 const registerSkill = async (skillId, skillFilePath, dryRun) => {
@@ -103,6 +116,7 @@ const registerSkill = async (skillId, skillFilePath, dryRun) => {
     return;
   }
 
+  logGcloudVersion();
   const exists = await skillExists(registryId);
   const currentVersion = exists ? await getLatestRevision(registryId) : null;
   const version = currentVersion ? bumpVersion(currentVersion) : 'v0-1';
@@ -111,23 +125,22 @@ const registerSkill = async (skillId, skillFilePath, dryRun) => {
   if (!exists) {
     core.info(`Creating skill: ${registryId}@${version}`);
     // gcloud auto-prepends "private-" to the skill name, so we pass skillId (not registryId)
-    await execGcloud([
-      'alpha', 'agent-registry', 'skills', 'create', skillId,
+    const createArgs = ['alpha', 'agent-registry', 'skills', 'create', skillId,
       `--location=${LOCATION}`, `--project=${PROJECT}`,
       `--display-name=${displayName}`, `--description=${description}`,
-      '--type=simple', '--quiet',
-    ]);
+      '--type=simple', '--quiet'];
+    core.info(`[skill] running: gcloud ${createArgs.join(' ')}`);
+    await withTimeout(execGcloud(createArgs), 60_000, `skills create ${skillId}`);
   }
 
   const zipPath = makeZipFile(skillFilePath);
   try {
     core.info(`${exists ? 'Adding' : 'Uploading'} revision ${version} to skill: ${registryId}`);
-    await execGcloud([
-      'alpha', 'agent-registry', 'skills', 'revisions', 'create', revisionId,
-      `--skill=${registryId}`,
-      `--location=${LOCATION}`, `--project=${PROJECT}`,
-      `--payload=${zipPath}`, '--quiet',
-    ]);
+    const revCreateArgs = ['alpha', 'agent-registry', 'skills', 'revisions', 'create', revisionId,
+      `--skill=${registryId}`, `--location=${LOCATION}`, `--project=${PROJECT}`,
+      `--payload=${zipPath}`, '--quiet'];
+    core.info(`[skill] running: gcloud ${revCreateArgs.join(' ')}`);
+    await withTimeout(execGcloud(revCreateArgs), 60_000, `skills revisions create ${revisionId}`);
   } finally {
     unlinkSync(zipPath);
   }

@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 vi.mock('@actions/core');
-vi.mock('fs', () => ({
+vi.mock('node:child_process', () => ({ execSync: vi.fn(() => '584.0.0') }));
+vi.mock('node:fs', () => ({
   readFileSync: vi.fn(),
   writeFileSync: vi.fn(),
   unlinkSync: vi.fn(),
@@ -10,11 +11,11 @@ vi.mock('fflate', () => ({
   zipSync: vi.fn(() => new Uint8Array([1, 2, 3])),
   strToU8: vi.fn(() => new Uint8Array([1, 2, 3])),
 }));
-vi.mock('os', () => ({ tmpdir: vi.fn(() => '/tmp') }));
+vi.mock('node:os', () => ({ tmpdir: vi.fn(() => '/tmp') }));
 vi.mock('../../setup-gcloud/src/exec-gcloud.js');
 
 import * as core from '@actions/core';
-import { readFileSync, unlinkSync } from 'fs';
+import { readFileSync, unlinkSync } from 'node:fs';
 import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 
 import { parseSkillMeta, registerSkill } from '../src/register-skill.js';

@@ -59988,8 +59988,8 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary: binary2, version: v
 // agent-registry/src/index.js
 var import_fast_glob2 = __toESM(require_out4(), 1);
 var import_node_path7 = __toESM(require("node:path"), 1);
-var import_node_fs7 = require("node:fs");
-var import_node_child_process = require("node:child_process");
+var import_node_fs8 = require("node:fs");
+var import_node_child_process2 = require("node:child_process");
 
 // setup-gcloud/src/auth-stack.js
 var import_node_fs2 = __toESM(require("node:fs"), 1);
@@ -100059,7 +100059,8 @@ var registerMcp = /* @__PURE__ */ __name(async (mcpId, mcpYaml, dryRun) => {
 }, "registerMcp");
 
 // agent-registry/src/register-skill.js
-var import_fs3 = require("fs");
+var import_node_fs7 = require("node:fs");
+var import_node_child_process = require("node:child_process");
 var import_node_os4 = require("node:os");
 var import_node_path6 = __toESM(require("node:path"), 1);
 
@@ -100789,6 +100790,21 @@ __name(zipSync, "zipSync");
 // agent-registry/src/register-skill.js
 var PROJECT3 = "extenda";
 var LOCATION3 = "eu";
+var logGcloudVersion = /* @__PURE__ */ __name(() => {
+  try {
+    const version3 = (0, import_node_child_process.execSync)("gcloud version --format=value(Google Cloud SDK)", { stdio: [
+    "pipe", "pipe", "pipe"] }).toString().trim();
+    info(`[skill] gcloud version: ${version3}`);
+  } catch {
+    info("[skill] gcloud version: unknown");
+  }
+}, "logGcloudVersion");
+var withTimeout = /* @__PURE__ */ __name((promise, ms, label) => {
+  const timeout = new Promise(
+    (_, reject) => setTimeout(() => reject(new Error(`[skill] timed out after ${ms / 1e3}s: ${label}`)), ms)
+  );
+  return Promise.race([promise, timeout]);
+}, "withTimeout");
 var parseSkillMeta = /* @__PURE__ */ __name((content) => {
   const match2 = content.match(/^---\n([\s\S]*?)\n---/);
   if (!match2) return { name: "", description: "" };
@@ -100800,29 +100816,26 @@ var parseSkillMeta = /* @__PURE__ */ __name((content) => {
   return { name: meta["name"] ?? "", description: meta["description"] ?? "" };
 }, "parseSkillMeta");
 var makeZipFile = /* @__PURE__ */ __name((skillFilePath) => {
-  const content = (0, import_fs3.readFileSync)(skillFilePath);
+  const content = (0, import_node_fs7.readFileSync)(skillFilePath);
   const zipped = zipSync({ "SKILL.md": [strToU8(content.toString()), { level: 6 }] });
   const tmpPath = import_node_path6.default.join((0, import_node_os4.tmpdir)(), `skill-${process.pid}.zip`);
-  (0, import_fs3.writeFileSync)(tmpPath, Buffer.from(zipped));
+  (0, import_node_fs7.writeFileSync)(tmpPath, Buffer.from(zipped));
   return tmpPath;
 }, "makeZipFile");
 var skillExists = /* @__PURE__ */ __name(async (skillId) => {
+  const args = [
+    "alpha",
+    "agent-registry",
+    "skills",
+    "describe",
+    skillId,
+    `--location=${LOCATION3}`,
+    `--project=${PROJECT3}`,
+    "--quiet"
+  ];
+  info(`[skill] running: gcloud ${args.join(" ")}`);
   try {
-    info(`[skill] checking exists: ${skillId} @ ${LOCATION3}`);
-    await execGcloud(
-      [
-        "alpha",
-        "agent-registry",
-        "skills",
-        "describe",
-        skillId,
-        `--location=${LOCATION3}`,
-        `--project=${PROJECT3}`,
-        "--quiet"
-      ],
-      "gcloud",
-      true
-    );
+    await withTimeout(execGcloud(args, "gcloud", true), 3e4, `skills describe ${skillId}`);
     info(`[skill] exists: true`);
     return true;
   } catch (e) {
@@ -100832,8 +100845,7 @@ var skillExists = /* @__PURE__ */ __name(async (skillId) => {
 }, "skillExists");
 var getLatestRevision = /* @__PURE__ */ __name(async (registryId) => {
   try {
-    info(`[skill] fetching latest revision for: ${registryId}`);
-    const output = await execGcloud([
+    const args = [
       "alpha",
       "agent-registry",
       "skills",
@@ -100844,7 +100856,9 @@ var getLatestRevision = /* @__PURE__ */ __name(async (registryId) => {
       `--project=${PROJECT3}`,
       "--format=value(name)",
       "--quiet"
-    ], "gcloud", true);
+    ];
+    info(`[skill] running: gcloud ${args.join(" ")}`);
+    const output = await withTimeout(execGcloud(args, "gcloud", true), 3e4, `skills revisions list ${registryId}`);
     const prefix2 = `${registryId}-`;
     const versions = output.split("\n").filter(Boolean).map((line) => line.split("/revisions/").pop()).filter((name) => name.
     startsWith(prefix2)).map((name) => name.slice(prefix2.length)).filter((v) => /^v\d+-\d+$/.test(v));
@@ -100868,7 +100882,7 @@ var bumpVersion2 = /* @__PURE__ */ __name((version3) => {
 }, "bumpVersion");
 var activate = /* @__PURE__ */ __name(async (registryId, revisionId) => {
   const revisionName = `projects/${PROJECT3}/locations/${LOCATION3}/skills/${registryId}/revisions/${revisionId}`;
-  await execGcloud([
+  const args = [
     "alpha",
     "agent-registry",
     "skills",
@@ -100879,10 +100893,12 @@ var activate = /* @__PURE__ */ __name(async (registryId, revisionId) => {
     `--default-revision=${revisionName}`,
     "--target-state=active",
     "--quiet"
-  ]);
+  ];
+  info(`[skill] running: gcloud ${args.join(" ")}`);
+  await withTimeout(execGcloud(args), 6e4, `skills update (activate) ${registryId}`);
 }, "activate");
 var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun) => {
-  const skillContent = (0, import_fs3.readFileSync)(skillFilePath, "utf8");
+  const skillContent = (0, import_node_fs7.readFileSync)(skillFilePath, "utf8");
   const { name: displayName, description } = parseSkillMeta(skillContent);
   if (!displayName) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: name`);
   if (!description) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: description`);
@@ -100891,13 +100907,14 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
     info(`[dry-run] Would register skill: ${registryId}`);
     return;
   }
+  logGcloudVersion();
   const exists3 = await skillExists(registryId);
   const currentVersion = exists3 ? await getLatestRevision(registryId) : null;
   const version3 = currentVersion ? bumpVersion2(currentVersion) : "v0-1";
   const revisionId = `${registryId}-${version3}`;
   if (!exists3) {
     info(`Creating skill: ${registryId}@${version3}`);
-    await execGcloud([
+    const createArgs = [
       "alpha",
       "agent-registry",
       "skills",
@@ -100909,12 +100926,14 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
       `--description=${description}`,
       "--type=simple",
       "--quiet"
-    ]);
+    ];
+    info(`[skill] running: gcloud ${createArgs.join(" ")}`);
+    await withTimeout(execGcloud(createArgs), 6e4, `skills create ${skillId}`);
   }
   const zipPath = makeZipFile(skillFilePath);
   try {
     info(`${exists3 ? "Adding" : "Uploading"} revision ${version3} to skill: ${registryId}`);
-    await execGcloud([
+    const revCreateArgs = [
       "alpha",
       "agent-registry",
       "skills",
@@ -100926,9 +100945,11 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
       `--project=${PROJECT3}`,
       `--payload=${zipPath}`,
       "--quiet"
-    ]);
+    ];
+    info(`[skill] running: gcloud ${revCreateArgs.join(" ")}`);
+    await withTimeout(execGcloud(revCreateArgs), 6e4, `skills revisions create ${revisionId}`);
   } finally {
-    (0, import_fs3.unlinkSync)(zipPath);
+    (0, import_node_fs7.unlinkSync)(zipPath);
   }
   await activate(registryId, revisionId);
   info(`Skill registered: ${registryId}@${version3}`);
@@ -100936,12 +100957,12 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
 
 // agent-registry/src/index.js
 var AGENT_REGISTRY_PATH = "agent-registry";
-var getGitSha = /* @__PURE__ */ __name(() => (0, import_node_child_process.execSync)("git rev-parse HEAD").toString().trim(),
+var getGitSha = /* @__PURE__ */ __name(() => (0, import_node_child_process2.execSync)("git rev-parse HEAD").toString().trim(),
 "getGitSha");
 var getChangedPaths = /* @__PURE__ */ __name(() => {
   try {
     const base = process.env.GITHUB_BASE_REF ? `origin/${process.env.GITHUB_BASE_REF}` : "HEAD~1";
-    return (0, import_node_child_process.execSync)(`git diff --name-only ${base}...HEAD`).toString().trim().split("\n").
+    return (0, import_node_child_process2.execSync)(`git diff --name-only ${base}...HEAD`).toString().trim().split("\n").
     filter(Boolean);
   } catch {
     return [];
@@ -100955,11 +100976,11 @@ var processAgents = /* @__PURE__ */ __name(async (registryRoot, changedPaths, gi
     const agentId = import_node_path7.default.basename(import_node_path7.default.dirname(agentFile));
     if (agentId.startsWith("example-")) continue;
     if (!isAffected(`agents/${agentId}/`, changedPaths)) continue;
-    const agentYaml = (0, import_node_fs7.readFileSync)(import_node_path7.default.join(registryRoot, agentFile), "utf8");
+    const agentYaml = (0, import_node_fs8.readFileSync)(import_node_path7.default.join(registryRoot, agentFile), "utf8");
     startGroup(`Agent: ${agentId}`);
     await registerAgent(agentId, agentYaml, dryRun);
     const instructionsPath = import_node_path7.default.join(registryRoot, "agents", agentId, "instructions.md");
-    if ((0, import_node_fs7.existsSync)(instructionsPath)) {
+    if ((0, import_node_fs8.existsSync)(instructionsPath)) {
       const gcsPath = `agents/${agentId}/${gitSha}/instructions.md`;
       if (dryRun) {
         info(`[dry-run] Would upload instructions to gs://extenda-agent-artifacts/${gcsPath}`);
@@ -100977,7 +100998,7 @@ var processMcps = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryR
     const mcpId = import_node_path7.default.dirname(mcpFile).replace(/^mcp\//, "");
     if (mcpId.startsWith("example-")) continue;
     if (!isAffected(`mcp/${mcpId}/`, changedPaths)) continue;
-    const mcpYaml = (0, import_node_fs7.readFileSync)(import_node_path7.default.join(registryRoot, mcpFile), "utf8");
+    const mcpYaml = (0, import_node_fs8.readFileSync)(import_node_path7.default.join(registryRoot, mcpFile), "utf8");
     startGroup(`MCP: ${mcpId}`);
     await registerMcp(mcpId, mcpYaml, dryRun);
     endGroup();
