@@ -100954,15 +100954,15 @@ var processAgents = /* @__PURE__ */ __name(async (registryRoot, changedPaths, gi
     const agentYaml = (0, import_node_fs7.readFileSync)(import_node_path7.default.join(registryRoot, agentFile), "utf8");
     startGroup(`Agent: ${agentId}`);
     await registerAgent(agentId, agentYaml, dryRun);
-    const gcsPath = `agents/${agentId}/${gitSha}/instructions.md`;
-    try {
+    const instructionsPath = import_node_path7.default.join(registryRoot, "agents", agentId, "instructions.md");
+    if ((0, import_node_fs7.existsSync)(instructionsPath)) {
+      const gcsPath = `agents/${agentId}/${gitSha}/instructions.md`;
       if (dryRun) {
         info(`[dry-run] Would upload instructions to gs://extenda-agent-artifacts/${gcsPath}`);
       } else {
-        await upload(import_node_path7.default.join(registryRoot, "agents", agentId, "instructions.md"), gcsPath);
+        await upload(instructionsPath, gcsPath);
         info(`Instructions uploaded: gs://extenda-agent-artifacts/${gcsPath}`);
       }
-    } catch {
     }
     endGroup();
   }

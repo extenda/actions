@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 vi.mock('child_process', () => ({ execSync: vi.fn() }));
 vi.mock('@actions/core');
 vi.mock('fast-glob');
-vi.mock('fs', () => ({ readFileSync: vi.fn(() => 'yaml: content') }));
+vi.mock('fs', () => ({ readFileSync: vi.fn(() => 'yaml: content'), existsSync: vi.fn(() => true) }));
 vi.mock('../../setup-gcloud/src/index.js');
 vi.mock('../src/upload-gcs.js');
 vi.mock('../src/register-agent.js');
@@ -11,6 +11,7 @@ vi.mock('../src/register-mcp.js');
 vi.mock('../src/register-skill.js');
 
 import { execSync } from 'child_process';
+import { existsSync } from 'fs';
 import * as core from '@actions/core';
 import fg from 'fast-glob';
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
@@ -217,13 +218,14 @@ describe('action — change filtering', () => {
 
   test('silently skips missing instructions.md', async () => {
     setupDiff([]);
-    upload.mockRejectedValue(new Error('file not found'));
+    existsSync.mockReturnValue(false);
     fg.sync.mockImplementation((pattern) => {
       if (pattern === 'agents/*/agent.yaml') return ['agents/my-agent/agent.yaml'];
       return [];
     });
 
     await expect(action()).resolves.toBeUndefined();
+    expect(upload).not.toHaveBeenCalled();
     expect(registerAgent).toHaveBeenCalledTimes(1);
   });
 

@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import fg from 'fast-glob';
 import path from 'node:path';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
@@ -40,16 +40,15 @@ const processAgents = async (registryRoot, changedPaths, gitSha, dryRun) => {
     core.startGroup(`Agent: ${agentId}`);
     await registerAgent(agentId, agentYaml, dryRun);
 
-    const gcsPath = `agents/${agentId}/${gitSha}/instructions.md`;
-    try {
+    const instructionsPath = path.join(registryRoot, 'agents', agentId, 'instructions.md');
+    if (existsSync(instructionsPath)) {
+      const gcsPath = `agents/${agentId}/${gitSha}/instructions.md`;
       if (dryRun) {
         core.info(`[dry-run] Would upload instructions to gs://extenda-agent-artifacts/${gcsPath}`);
       } else {
-        await upload(path.join(registryRoot, 'agents', agentId, 'instructions.md'), gcsPath);
+        await upload(instructionsPath, gcsPath);
         core.info(`Instructions uploaded: gs://extenda-agent-artifacts/${gcsPath}`);
       }
-    } catch {
-      // instructions.md is optional
     }
     core.endGroup();
   }
