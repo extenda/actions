@@ -99964,14 +99964,13 @@ var registerAgent = /* @__PURE__ */ __name(async (agentId, agentYaml, dryRun) =>
   if (!card.url) throw new Error(`agent.yaml for '${agentId}' is missing required field: url`);
   const displayName = card.displayName ?? agentId;
   const description = card.description ?? "";
+  if (dryRun) {
+    info(`[dry-run] Would register agent: ${agentId}`);
+    return;
+  }
   const exists3 = await serviceExists(agentId);
   const currentVersion = exists3 ? await getAgentVersion(agentId) : null;
   const version3 = currentVersion ? bumpVersion(currentVersion) : "0.1";
-  if (dryRun) {
-    const versionAction = exists3 ? `update to ${version3}` : `create at ${version3}`;
-    info(`[dry-run] Would ${versionAction} agent: ${agentId}`);
-    return;
-  }
   const specContent = JSON.stringify({
     name: agentId,
     displayName,
@@ -100881,14 +100880,14 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
   if (!displayName) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: name`);
   if (!description) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: description`);
   const registryId = `private-${skillId}`;
+  if (dryRun) {
+    info(`[dry-run] Would register skill: ${registryId}`);
+    return;
+  }
   const exists3 = await skillExists(registryId);
   const currentVersion = exists3 ? await getLatestRevision(registryId) : null;
   const version3 = currentVersion ? bumpVersion2(currentVersion) : "v0-1";
   const revisionId = `${registryId}-${version3}`;
-  if (dryRun) {
-    info(`[dry-run] Would ${exists3 ? `update to ${version3}` : `create at ${version3}`}: ${registryId}`);
-    return;
-  }
   if (!exists3) {
     info(`Creating skill: ${registryId}@${version3}`);
     await execGcloud([

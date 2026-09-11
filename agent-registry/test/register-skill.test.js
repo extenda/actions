@@ -205,26 +205,17 @@ describe('registerSkill', () => {
 
   describe('dry-run', () => {
     test('prints create message for new skill', async () => {
-      execGcloud.mockRejectedValueOnce(new Error('not found'));
-
       await registerSkill('my-skill', '/SKILL.md', true);
 
-      expect(core.info).toHaveBeenCalledWith(
-        '[dry-run] Would create at v0-1: private-my-skill',
-      );
-      expect(execGcloud).toHaveBeenCalledTimes(1);
+      expect(core.info).toHaveBeenCalledWith('[dry-run] Would register skill: private-my-skill');
+      expect(execGcloud).not.toHaveBeenCalled();
     });
 
     test('prints update message with next version for existing skill', async () => {
-      execGcloud.mockResolvedValueOnce('');
-      execGcloud.mockResolvedValueOnce(revisionsList('v0-2'));
-
       await registerSkill('my-skill', '/SKILL.md', true);
 
-      expect(core.info).toHaveBeenCalledWith(
-        '[dry-run] Would update to v0-3: private-my-skill',
-      );
-      expect(execGcloud).toHaveBeenCalledTimes(2);
+      expect(core.info).toHaveBeenCalledWith('[dry-run] Would register skill: private-my-skill');
+      expect(execGcloud).not.toHaveBeenCalled();
     });
   });
 

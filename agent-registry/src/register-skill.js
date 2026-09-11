@@ -92,15 +92,15 @@ const registerSkill = async (skillId, skillFilePath, dryRun) => {
   if (!description) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: description`);
   const registryId = `private-${skillId}`;
 
+  if (dryRun) {
+    core.info(`[dry-run] Would register skill: ${registryId}`);
+    return;
+  }
+
   const exists = await skillExists(registryId);
   const currentVersion = exists ? await getLatestRevision(registryId) : null;
   const version = currentVersion ? bumpVersion(currentVersion) : 'v0-1';
   const revisionId = `${registryId}-${version}`;
-
-  if (dryRun) {
-    core.info(`[dry-run] Would ${exists ? `update to ${version}` : `create at ${version}`}: ${registryId}`);
-    return;
-  }
 
   if (!exists) {
     core.info(`Creating skill: ${registryId}@${version}`);

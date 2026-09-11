@@ -43,15 +43,14 @@ const registerAgent = async (agentId, agentYaml, dryRun) => {
   const displayName = card.displayName ?? agentId;
   const description = card.description ?? '';
 
+  if (dryRun) {
+    core.info(`[dry-run] Would register agent: ${agentId}`);
+    return;
+  }
+
   const exists = await serviceExists(agentId);
   const currentVersion = exists ? await getAgentVersion(agentId) : null;
   const version = currentVersion ? bumpVersion(currentVersion) : '0.1';
-
-  if (dryRun) {
-    const versionAction = exists ? `update to ${version}` : `create at ${version}`;
-    core.info(`[dry-run] Would ${versionAction} agent: ${agentId}`);
-    return;
-  }
 
   const specContent = JSON.stringify({
     name: agentId,

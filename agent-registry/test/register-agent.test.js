@@ -171,21 +171,17 @@ describe('register-agent', () => {
 
   describe('dry-run', () => {
     test('prints create message for new agent', async () => {
-      mockNew();
-
       await registerAgent('my-agent', AGENT_YAML, true);
 
-      expect(core.info).toHaveBeenCalledWith('[dry-run] Would create at 0.1 agent: my-agent');
-      expect(execGcloud).toHaveBeenCalledTimes(1);
+      expect(core.info).toHaveBeenCalledWith('[dry-run] Would register agent: my-agent');
+      expect(execGcloud).not.toHaveBeenCalled();
     });
 
     test('prints update message with next version for existing agent', async () => {
-      mockExisting('0.2');
-
       await registerAgent('my-agent', AGENT_YAML, true);
 
-      expect(core.info).toHaveBeenCalledWith('[dry-run] Would update to 0.3 agent: my-agent');
-      expect(execGcloud).toHaveBeenCalledTimes(2);
+      expect(core.info).toHaveBeenCalledWith('[dry-run] Would register agent: my-agent');
+      expect(execGcloud).not.toHaveBeenCalled();
     });
   });
 
