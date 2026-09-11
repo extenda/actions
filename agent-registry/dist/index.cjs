@@ -100816,7 +100816,8 @@ var skillExists = /* @__PURE__ */ __name(async (skillId) => {
         "describe",
         skillId,
         `--location=${LOCATION3}`,
-        `--project=${PROJECT3}`
+        `--project=${PROJECT3}`,
+        "--quiet"
       ],
       "gcloud",
       true
@@ -100837,7 +100838,8 @@ var getLatestRevision = /* @__PURE__ */ __name(async (registryId) => {
       `--skill=${registryId}`,
       `--location=${LOCATION3}`,
       `--project=${PROJECT3}`,
-      "--format=value(name)"
+      "--format=value(name)",
+      "--quiet"
     ], "gcloud", true);
     const prefix2 = `${registryId}-`;
     const versions = output.split("\n").filter(Boolean).map((line) => line.split("/revisions/").pop()).filter((name) => name.
@@ -100871,7 +100873,8 @@ var activate = /* @__PURE__ */ __name(async (registryId, revisionId) => {
     `--location=${LOCATION3}`,
     `--project=${PROJECT3}`,
     `--default-revision=${revisionName}`,
-    "--target-state=active"
+    "--target-state=active",
+    "--quiet"
   ]);
 }, "activate");
 var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun) => {
@@ -100900,7 +100903,8 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
       `--project=${PROJECT3}`,
       `--display-name=${displayName}`,
       `--description=${description}`,
-      "--type=simple"
+      "--type=simple",
+      "--quiet"
     ]);
   }
   const zipPath = makeZipFile(skillFilePath);
@@ -100916,7 +100920,8 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
       `--skill=${registryId}`,
       `--location=${LOCATION3}`,
       `--project=${PROJECT3}`,
-      `--payload=${zipPath}`
+      `--payload=${zipPath}`,
+      "--quiet"
     ]);
   } finally {
     (0, import_fs3.unlinkSync)(zipPath);

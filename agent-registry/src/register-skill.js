@@ -32,7 +32,7 @@ const skillExists = async (skillId) => {
   try {
     await execGcloud(
       ['alpha', 'agent-registry', 'skills', 'describe', skillId,
-        `--location=${LOCATION}`, `--project=${PROJECT}`],
+        `--location=${LOCATION}`, `--project=${PROJECT}`, '--quiet'],
       'gcloud', true,
     );
     return true;
@@ -46,7 +46,7 @@ const getLatestRevision = async (registryId) => {
     const output = await execGcloud([
       'alpha', 'agent-registry', 'skills', 'revisions', 'list',
       `--skill=${registryId}`, `--location=${LOCATION}`, `--project=${PROJECT}`,
-      '--format=value(name)',
+      '--format=value(name)', '--quiet',
     ], 'gcloud', true);
     const prefix = `${registryId}-`;
     const versions = output
@@ -81,7 +81,7 @@ const activate = async (registryId, revisionId) => {
     'alpha', 'agent-registry', 'skills', 'update', registryId,
     `--location=${LOCATION}`, `--project=${PROJECT}`,
     `--default-revision=${revisionName}`,
-    '--target-state=active',
+    '--target-state=active', '--quiet',
   ]);
 };
 
@@ -109,7 +109,7 @@ const registerSkill = async (skillId, skillFilePath, dryRun) => {
       'alpha', 'agent-registry', 'skills', 'create', skillId,
       `--location=${LOCATION}`, `--project=${PROJECT}`,
       `--display-name=${displayName}`, `--description=${description}`,
-      '--type=simple',
+      '--type=simple', '--quiet',
     ]);
   }
 
@@ -120,7 +120,7 @@ const registerSkill = async (skillId, skillFilePath, dryRun) => {
       'alpha', 'agent-registry', 'skills', 'revisions', 'create', revisionId,
       `--skill=${registryId}`,
       `--location=${LOCATION}`, `--project=${PROJECT}`,
-      `--payload=${zipPath}`,
+      `--payload=${zipPath}`, '--quiet',
     ]);
   } finally {
     unlinkSync(zipPath);
