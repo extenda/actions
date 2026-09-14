@@ -1118,6 +1118,66 @@ environments:
 **Note:** StatefulSets maintain a sticky identity for each pod. If a pod is rescheduled, it maintains
 the same name and persistent volume.
 
+### Sidecars
+
+#### Evaluation sidecar
+
+The `sidecars.evaluation` section adds the entity conditions evaluation sidecar to the service. It is
+supported on both Cloud Run and Kubernetes and applies regardless of which one is configured.
+
+```yaml
+cloud-run:
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    concurrency: 80
+  traffic:
+    static-egress-ip: false
+
+security: none
+
+sidecars:
+  evaluation:
+    enabled: true
+
+labels:
+  product: my-product
+  component: my-component
+
+environments:
+  production:
+    min-instances: 1
+```
+
+**Configuration options:**
+- `enabled`: Set to `true` to add the sidecar (required)
+- `version`: Use a specific image tag of the sidecar (e.g. a build's git commit SHA). The image is
+  not semantically versioned; if not set, the `stable` tag is used
+- `env`: Override the sidecar's default environment variables, except `OCMS_CLIENT_ID` and
+  `OCMS_CLIENT_SECRET` (see below)
+
+**Default environment variables:**
+- `OCMS_CLIENT_ID` and `OCMS_CLIENT_SECRET` always read from the `ecs-api-ocms-client-id` and
+  `ecs-api-ocms-client-secret` secrets in the shared `extenda` Secret Manager project and cannot be
+  overridden. Cloud Run resolves these natively as cross-project secret references; GKE relies on
+  Berglas to resolve them at container startup. Either way, the deploying service's runtime service
+  account needs `roles/secretmanager.secretAccessor` on both secrets in the `extenda` project
+- `REQUEST_ALL_BUNDLE` defaults to `false`
+
+Use `env` to override the defaults, for example to request the full bundle:
+
+```yaml
+sidecars:
+  evaluation:
+    enabled: true
+    version: <tag>
+    env:
+      REQUEST_ALL_BUNDLE: 'true'
+```
+
 ## Best Practices and Tips
 
 ### Environment Variables and Secrets

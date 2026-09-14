@@ -123,8 +123,14 @@ const buildManifest = async (
     kubernetes,
     labels = [],
     security,
+    sidecars = {},
     environments = [],
   } = deployYaml;
+
+  const evaluationSidecar =
+    sidecars.evaluation && sidecars.evaluation.enabled
+      ? sidecars.evaluation
+      : null;
 
   const githubServerUrl = process.env.GITHUB_SERVER_URL;
   const githubRepo = process.env.GITHUB_REPOSITORY;
@@ -274,6 +280,8 @@ const buildManifest = async (
       cors,
       terminationGracePeriod,
       securityPreviewTag,
+      evaluationSidecar,
+      projectId,
     );
 
     await connectToCluster(clanName, deployEnv, projectId);
@@ -387,6 +395,8 @@ const buildManifest = async (
       enableDirectVPC,
       cors,
       securityPreviewTag,
+      evaluationSidecar,
+      projectId,
     );
     generateManifest('cloudrun-service.yaml', convertToYaml(cloudrunManifest));
   }

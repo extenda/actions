@@ -109,25 +109,31 @@
         - [4.3.2.2.1. CloudDeploy > security > oneOf > IAMBindingSettings > consumers > audiences > ConsumerAudience](#security_oneOf_i2_consumers_audiences_items)
   - [4.4. Property `CloudDeploy > security > oneOf > CloudArmor`](#security_oneOf_i3)
     - [4.4.1. Property `CloudDeploy > security > oneOf > CloudArmor > cloud-armor`](#security_oneOf_i3_cloud-armor)
-- [5. Property `CloudDeploy > environments`](#environments)
-  - [5.1. Property `CloudDeploy > environments > production`](#environments_production)
-    - [5.1.1. Property `CloudDeploy > environments > production > min-instances`](#environments_production_min-instances)
-    - [5.1.2. Property `CloudDeploy > environments > production > max-instances`](#environments_production_max-instances)
-    - [5.1.3. Property `CloudDeploy > environments > production > domain-mappings`](#environments_production_domain-mappings)
-      - [5.1.3.1. CloudDeploy > environments > production > domain-mappings > Domain](#environments_production_domain-mappings_items)
-    - [5.1.4. Property `CloudDeploy > environments > production > path-mappings`](#environments_production_path-mappings)
-      - [5.1.4.1. CloudDeploy > environments > production > path-mappings > PathRule](#environments_production_path-mappings_items)
-        - [5.1.4.1.1. Property `CloudDeploy > environments > production > path-mappings > PathRule > oneOf`](#environments_production_path-mappings_items_oneOf)
-        - [5.1.4.1.2. Property `CloudDeploy > environments > production > path-mappings > PathRule > paths`](#environments_production_path-mappings_items_paths)
-          - [5.1.4.1.2.1. CloudDeploy > environments > production > path-mappings > PathRule > paths > path](#environments_production_path-mappings_items_paths_items)
-        - [5.1.4.1.3. Property `CloudDeploy > environments > production > path-mappings > PathRule > path-rewrite`](#environments_production_path-mappings_items_path-rewrite)
-    - [5.1.5. Property `CloudDeploy > environments > production > env`](#environments_production_env)
-      - [5.1.5.1. Pattern Property `CloudDeploy > environments > production > env > EnvVar`](#environments_production_env_pattern1)
-    - [5.1.6. Property `CloudDeploy > environments > production > regions`](#environments_production_regions)
-      - [5.1.6.1. CloudDeploy > environments > production > regions > GoogleRegion](#environments_production_regions_items)
-  - [5.2. Property `CloudDeploy > environments > staging`](#environments_staging)
-    - [5.2.1. Property `CloudDeploy > environments > staging > oneOf > StagingNone`](#environments_staging_oneOf_i0)
-    - [5.2.2. Property `CloudDeploy > environments > staging > oneOf > Environment`](#environments_staging_oneOf_i1)
+- [5. Property `CloudDeploy > sidecars`](#sidecars)
+  - [5.1. Property `CloudDeploy > sidecars > evaluation`](#sidecars_evaluation)
+    - [5.1.1. Property `CloudDeploy > sidecars > evaluation > enabled`](#sidecars_evaluation_enabled)
+    - [5.1.2. Property `CloudDeploy > sidecars > evaluation > version`](#sidecars_evaluation_version)
+    - [5.1.3. Property `CloudDeploy > sidecars > evaluation > env`](#sidecars_evaluation_env)
+      - [5.1.3.1. Pattern Property `CloudDeploy > sidecars > evaluation > env > EnvVar`](#sidecars_evaluation_env_pattern1)
+- [6. Property `CloudDeploy > environments`](#environments)
+  - [6.1. Property `CloudDeploy > environments > production`](#environments_production)
+    - [6.1.1. Property `CloudDeploy > environments > production > min-instances`](#environments_production_min-instances)
+    - [6.1.2. Property `CloudDeploy > environments > production > max-instances`](#environments_production_max-instances)
+    - [6.1.3. Property `CloudDeploy > environments > production > domain-mappings`](#environments_production_domain-mappings)
+      - [6.1.3.1. CloudDeploy > environments > production > domain-mappings > Domain](#environments_production_domain-mappings_items)
+    - [6.1.4. Property `CloudDeploy > environments > production > path-mappings`](#environments_production_path-mappings)
+      - [6.1.4.1. CloudDeploy > environments > production > path-mappings > PathRule](#environments_production_path-mappings_items)
+        - [6.1.4.1.1. Property `CloudDeploy > environments > production > path-mappings > PathRule > oneOf`](#environments_production_path-mappings_items_oneOf)
+        - [6.1.4.1.2. Property `CloudDeploy > environments > production > path-mappings > PathRule > paths`](#environments_production_path-mappings_items_paths)
+          - [6.1.4.1.2.1. CloudDeploy > environments > production > path-mappings > PathRule > paths > path](#environments_production_path-mappings_items_paths_items)
+        - [6.1.4.1.3. Property `CloudDeploy > environments > production > path-mappings > PathRule > path-rewrite`](#environments_production_path-mappings_items_path-rewrite)
+    - [6.1.5. Property `CloudDeploy > environments > production > env`](#environments_production_env)
+      - [6.1.5.1. Pattern Property `CloudDeploy > environments > production > env > EnvVar`](#environments_production_env_pattern1)
+    - [6.1.6. Property `CloudDeploy > environments > production > regions`](#environments_production_regions)
+      - [6.1.6.1. CloudDeploy > environments > production > regions > GoogleRegion](#environments_production_regions_items)
+  - [6.2. Property `CloudDeploy > environments > staging`](#environments_staging)
+    - [6.2.1. Property `CloudDeploy > environments > staging > oneOf > StagingNone`](#environments_staging_oneOf_i0)
+    - [6.2.2. Property `CloudDeploy > environments > staging > oneOf > Environment`](#environments_staging_oneOf_i1)
 
 **Title:** CloudDeploy
 
@@ -137,11 +143,12 @@
 | **Required**              | No               |
 | **Additional properties** | Any type allowed |
 
-| Property                         | Pattern | Type   | Deprecated | Definition              | Title/Description |
-| -------------------------------- | ------- | ------ | ---------- | ----------------------- | ----------------- |
-| + [labels](#labels )             | No      | object | No         | In #/$defs/Labels       | Labels            |
-| + [security](#security )         | No      | object | No         | In #/$defs/Security     | Security          |
-| + [environments](#environments ) | No      | object | No         | In #/$defs/Environments | Environments      |
+| Property                         | Pattern | Type   | Deprecated | Definition                    | Title/Description |
+| -------------------------------- | ------- | ------ | ---------- | ----------------------------- | ----------------- |
+| + [labels](#labels )             | No      | object | No         | In #/definitions/Labels       | Labels            |
+| + [security](#security )         | No      | object | No         | In #/definitions/Security     | Security          |
+| - [sidecars](#sidecars )         | No      | object | No         | In #/definitions/Sidecars     | Sidecars          |
+| + [environments](#environments ) | No      | object | No         | In #/definitions/Environments | Environments      |
 
 | One of(Option)          |
 | ----------------------- |
@@ -158,47 +165,47 @@
 | **Required**              | No               |
 | **Additional properties** | Any type allowed |
 
-| Property                            | Pattern | Type   | Deprecated | Definition          | Title/Description |
-| ----------------------------------- | ------- | ------ | ---------- | ------------------- | ----------------- |
-| + [cloud-run](#oneOf_i0_cloud-run ) | No      | object | No         | In #/$defs/CloudRun | CloudRun          |
+| Property                            | Pattern | Type   | Deprecated | Definition                | Title/Description |
+| ----------------------------------- | ------- | ------ | ---------- | ------------------------- | ----------------- |
+| + [cloud-run](#oneOf_i0_cloud-run ) | No      | object | No         | In #/definitions/CloudRun | CloudRun          |
 
 ### <a name="oneOf_i0_cloud-run"></a>1.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run`
 
 **Title:** CloudRun
 
-|                           |                  |
-| ------------------------- | ---------------- |
-| **Type**                  | `object`         |
-| **Required**              | Yes              |
-| **Additional properties** | Not allowed      |
-| **Defined in**            | #/$defs/CloudRun |
+|                           |                        |
+| ------------------------- | ---------------------- |
+| **Type**                  | `object`               |
+| **Required**              | Yes                    |
+| **Additional properties** | Not allowed            |
+| **Defined in**            | #/definitions/CloudRun |
 
 **Description:** Managed Cloud Run service
 
 | Property                                                      | Pattern | Type             | Deprecated | Definition                                         | Title/Description                                                                |
 | ------------------------------------------------------------- | ------- | ---------------- | ---------- | -------------------------------------------------- | -------------------------------------------------------------------------------- |
-| + [service](#oneOf_i0_cloud-run_service )                     | No      | string           | No         | In #/$defs/ServiceName                             | ServiceName                                                                      |
+| + [service](#oneOf_i0_cloud-run_service )                     | No      | string           | No         | In #/definitions/ServiceName                       | ServiceName                                                                      |
 | + [resources](#oneOf_i0_cloud-run_resources )                 | No      | object           | No         | Same as [resources](#security_oneOf_i1_resources ) | Resources                                                                        |
-| + [protocol](#oneOf_i0_cloud-run_protocol )                   | No      | enum (of string) | No         | In #/$defs/Protocol                                | Protocol                                                                         |
-| - [timeout](#oneOf_i0_cloud-run_timeout )                     | No      | integer          | No         | In #/$defs/RequestTimeout                          | RequestTimeout                                                                   |
+| + [protocol](#oneOf_i0_cloud-run_protocol )                   | No      | enum (of string) | No         | In #/definitions/Protocol                          | Protocol                                                                         |
+| - [timeout](#oneOf_i0_cloud-run_timeout )                     | No      | integer          | No         | In #/definitions/RequestTimeout                    | RequestTimeout                                                                   |
 | + [scaling](#oneOf_i0_cloud-run_scaling )                     | No      | object           | No         | -                                                  | ScalingCloudRun                                                                  |
 | + [traffic](#oneOf_i0_cloud-run_traffic )                     | No      | object           | No         | -                                                  | TrafficCloudRun                                                                  |
 | - [startup-cpu-boost](#oneOf_i0_cloud-run_startup-cpu-boost ) | No      | boolean          | No         | -                                                  | Whether to allocate extra CPU to containers on startup.                          |
 | - [cpu-throttling](#oneOf_i0_cloud-run_cpu-throttling )       | No      | boolean          | No         | -                                                  | Whether to throttle the CPU when the container is not actively serving requests. |
 | - [session-affinity](#oneOf_i0_cloud-run_session-affinity )   | No      | boolean          | No         | -                                                  | Whether to enable session affinity for connections to the service.               |
 | - [internal-traffic](#oneOf_i0_cloud-run_internal-traffic )   | No      | boolean          | No         | -                                                  | Whether to setup internal traffic or not                                         |
-| - [monitoring](#oneOf_i0_cloud-run_monitoring )               | No      | object           | No         | In #/$defs/Monitoring                              | Monitoring                                                                       |
+| - [monitoring](#oneOf_i0_cloud-run_monitoring )               | No      | object           | No         | In #/definitions/Monitoring                        | Monitoring                                                                       |
 | - [request-logs](#oneOf_i0_cloud-run_request-logs )           | No      | object           | No         | -                                                  | Configure which request logs to use (if any).                                    |
 
 #### <a name="oneOf_i0_cloud-run_service"></a>1.1.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > service`
 
 **Title:** ServiceName
 
-|                |                     |
-| -------------- | ------------------- |
-| **Type**       | `string`            |
-| **Required**   | Yes                 |
-| **Defined in** | #/$defs/ServiceName |
+|                |                           |
+| -------------- | ------------------------- |
+| **Type**       | `string`                  |
+| **Required**   | Yes                       |
+| **Defined in** | #/definitions/ServiceName |
 
 **Description:** Service name
 
@@ -219,11 +226,11 @@
 
 **Title:** Protocol
 
-|                |                    |
-| -------------- | ------------------ |
-| **Type**       | `enum (of string)` |
-| **Required**   | Yes                |
-| **Defined in** | #/$defs/Protocol   |
+|                |                        |
+| -------------- | ---------------------- |
+| **Type**       | `enum (of string)`     |
+| **Required**   | Yes                    |
+| **Defined in** | #/definitions/Protocol |
 
 **Description:** The type of protocol. Make sure to set http2 if this service is using gRPC or WebSockets
 
@@ -235,12 +242,12 @@ Must be one of:
 
 **Title:** RequestTimeout
 
-|                |                        |
-| -------------- | ---------------------- |
-| **Type**       | `integer`              |
-| **Required**   | No                     |
-| **Default**    | `300`                  |
-| **Defined in** | #/$defs/RequestTimeout |
+|                |                              |
+| -------------- | ---------------------------- |
+| **Type**       | `integer`                    |
+| **Required**   | No                           |
+| **Default**    | `300`                        |
+| **Defined in** | #/definitions/RequestTimeout |
 
 **Description:** The request timeout in seconds
 
@@ -303,12 +310,12 @@ Must be one of:
 
 **Title:** ScheduledScaling
 
-|                           |                          |
-| ------------------------- | ------------------------ |
-| **Type**                  | `object`                 |
-| **Required**              | No                       |
-| **Additional properties** | Not allowed              |
-| **Defined in**            | #/$defs/ScheduledScaling |
+|                           |                                |
+| ------------------------- | ------------------------------ |
+| **Type**                  | `object`                       |
+| **Required**              | No                             |
+| **Additional properties** | Not allowed                    |
+| **Defined in**            | #/definitions/ScheduledScaling |
 
 **Description:** Scale in and out on demand
 
@@ -521,12 +528,12 @@ Must be one of:
 
 **Title:** Monitoring
 
-|                           |                    |
-| ------------------------- | ------------------ |
-| **Type**                  | `object`           |
-| **Required**              | No                 |
-| **Additional properties** | Not allowed        |
-| **Defined in**            | #/$defs/Monitoring |
+|                           |                          |
+| ------------------------- | ------------------------ |
+| **Type**                  | `object`                 |
+| **Required**              | No                       |
+| **Additional properties** | Not allowed              |
+| **Defined in**            | #/definitions/Monitoring |
 
 | Property                                                           | Pattern | Type   | Deprecated | Definition | Title/Description                                                                                          |
 | ------------------------------------------------------------------ | ------- | ------ | ---------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
@@ -804,20 +811,20 @@ Must be one of:
 | **Required**              | No               |
 | **Additional properties** | Any type allowed |
 
-| Property                              | Pattern | Type   | Deprecated | Definition            | Title/Description |
-| ------------------------------------- | ------- | ------ | ---------- | --------------------- | ----------------- |
-| + [kubernetes](#oneOf_i1_kubernetes ) | No      | object | No         | In #/$defs/Kubernetes | Kubernetes        |
+| Property                              | Pattern | Type   | Deprecated | Definition                  | Title/Description |
+| ------------------------------------- | ------- | ------ | ---------- | --------------------------- | ----------------- |
+| + [kubernetes](#oneOf_i1_kubernetes ) | No      | object | No         | In #/definitions/Kubernetes | Kubernetes        |
 
 ### <a name="oneOf_i1_kubernetes"></a>2.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes`
 
 **Title:** Kubernetes
 
-|                           |                    |
-| ------------------------- | ------------------ |
-| **Type**                  | `object`           |
-| **Required**              | Yes                |
-| **Additional properties** | Not allowed        |
-| **Defined in**            | #/$defs/Kubernetes |
+|                           |                          |
+| ------------------------- | ------------------------ |
+| **Type**                  | `object`                 |
+| **Required**              | Yes                      |
+| **Additional properties** | Not allowed              |
+| **Defined in**            | #/definitions/Kubernetes |
 
 **Description:** A kubernetes service
 
@@ -828,7 +835,7 @@ Must be one of:
 | + [resources](#oneOf_i1_kubernetes_resources )                               | No      | object           | No         | Same as [resources](#security_oneOf_i1_resources )    | Resources                                     |
 | + [protocol](#oneOf_i1_kubernetes_protocol )                                 | No      | enum (of string) | No         | Same as [protocol](#oneOf_i0_cloud-run_protocol )     | Protocol                                      |
 | - [timeout](#oneOf_i1_kubernetes_timeout )                                   | No      | integer          | No         | Same as [timeout](#oneOf_i0_cloud-run_timeout )       | RequestTimeout                                |
-| - [availability](#oneOf_i1_kubernetes_availability )                         | No      | enum (of string) | No         | In #/$defs/Availability                               | Availability                                  |
+| - [availability](#oneOf_i1_kubernetes_availability )                         | No      | enum (of string) | No         | In #/definitions/Availability                         | Availability                                  |
 | - [termination-grace-period](#oneOf_i1_kubernetes_termination-grace-period ) | No      | integer          | No         | -                                                     | The termination grace period in seconds       |
 | + [scaling](#oneOf_i1_kubernetes_scaling )                                   | No      | object           | No         | -                                                     | ScalingKubernetes                             |
 | - [volumes](#oneOf_i1_kubernetes_volumes )                                   | No      | array of object  | No         | -                                                     | Volumes                                       |
@@ -902,11 +909,11 @@ Must be one of:
 
 **Title:** Availability
 
-|                |                      |
-| -------------- | -------------------- |
-| **Type**       | `enum (of string)`   |
-| **Required**   | No                   |
-| **Defined in** | #/$defs/Availability |
+|                |                            |
+| -------------- | -------------------------- |
+| **Type**       | `enum (of string)`         |
+| **Required**   | No                         |
+| **Defined in** | #/definitions/Availability |
 
 **Description:** Availability to configure priority on autoscaling
 
@@ -1195,30 +1202,30 @@ Must be one of:
 
 **Title:** Labels
 
-|                           |                |
-| ------------------------- | -------------- |
-| **Type**                  | `object`       |
-| **Required**              | Yes            |
-| **Additional properties** | Not allowed    |
-| **Defined in**            | #/$defs/Labels |
+|                           |                      |
+| ------------------------- | -------------------- |
+| **Type**                  | `object`             |
+| **Required**              | Yes                  |
+| **Additional properties** | Not allowed          |
+| **Defined in**            | #/definitions/Labels |
 
 | Property                                | Pattern | Type   | Deprecated | Definition                              | Title/Description |
 | --------------------------------------- | ------- | ------ | ---------- | --------------------------------------- | ----------------- |
-| + [component](#labels_component )       | No      | string | No         | In #/$defs/Label                        | Label             |
+| + [component](#labels_component )       | No      | string | No         | In #/definitions/Label                  | Label             |
 | + [product](#labels_product )           | No      | string | No         | Same as [component](#labels_component ) | Label             |
-| - [iso-country](#labels_iso-country )   | No      | string | No         | In #/$defs/Label                        | Label             |
-| - [tenant-alias](#labels_tenant-alias ) | No      | string | No         | In #/$defs/Label                        | Label             |
+| - [iso-country](#labels_iso-country )   | No      | string | No         | In #/definitions/Label                  | Label             |
+| - [tenant-alias](#labels_tenant-alias ) | No      | string | No         | In #/definitions/Label                  | Label             |
 | - [^[a-z-]+$](#labels_pattern1 )        | Yes     | string | No         | Same as [component](#labels_component ) | Label             |
 
 ### <a name="labels_component"></a>3.1. Property `CloudDeploy > labels > component`
 
 **Title:** Label
 
-|                |               |
-| -------------- | ------------- |
-| **Type**       | `string`      |
-| **Required**   | Yes           |
-| **Defined in** | #/$defs/Label |
+|                |                     |
+| -------------- | ------------------- |
+| **Type**       | `string`            |
+| **Required**   | Yes                 |
+| **Defined in** | #/definitions/Label |
 
 **Description:** A label value
 
@@ -1242,12 +1249,12 @@ Must be one of:
 
 **Title:** Label
 
-|                |               |
-| -------------- | ------------- |
-| **Type**       | `string`      |
-| **Required**   | No            |
-| **Default**    | `"global"`    |
-| **Defined in** | #/$defs/Label |
+|                |                     |
+| -------------- | ------------------- |
+| **Type**       | `string`            |
+| **Required**   | No                  |
+| **Default**    | `"global"`          |
+| **Defined in** | #/definitions/Label |
 
 **Description:** A label value
 
@@ -1259,12 +1266,12 @@ Must be one of:
 
 **Title:** Label
 
-|                |                  |
-| -------------- | ---------------- |
-| **Type**       | `string`         |
-| **Required**   | No               |
-| **Default**    | `"multi-tenant"` |
-| **Defined in** | #/$defs/Label    |
+|                |                     |
+| -------------- | ------------------- |
+| **Type**       | `string`            |
+| **Required**   | No                  |
+| **Default**    | `"multi-tenant"`    |
+| **Defined in** | #/definitions/Label |
 
 **Description:** A label value
 
@@ -1291,12 +1298,12 @@ must respect the following conditions
 
 **Title:** Security
 
-|                           |                  |
-| ------------------------- | ---------------- |
-| **Type**                  | `combining`      |
-| **Required**              | Yes              |
-| **Additional properties** | Any type allowed |
-| **Defined in**            | #/$defs/Security |
+|                           |                        |
+| ------------------------- | ---------------------- |
+| **Type**                  | `combining`            |
+| **Required**              | Yes                    |
+| **Additional properties** | Any type allowed       |
+| **Defined in**            | #/definitions/Security |
 
 | One of(Option)                           |
 | ---------------------------------------- |
@@ -1328,15 +1335,15 @@ must respect the following conditions
 
 **Description:** IAM Security settings
 
-| Property                                                     | Pattern | Type             | Deprecated | Definition              | Title/Description                                                                                           |
-| ------------------------------------------------------------ | ------- | ---------------- | ---------- | ----------------------- | ----------------------------------------------------------------------------------------------------------- |
-| + [permission-prefix](#security_oneOf_i1_permission-prefix ) | No      | string           | No         | -                       | IAM permission prefix                                                                                       |
-| - [auth-proxy](#security_oneOf_i1_auth-proxy )               | No      | enum (of string) | No         | -                       | Auth proxy to use                                                                                           |
-| - [system-name](#security_oneOf_i1_system-name )             | No      | string           | No         | -                       | IAM system name defaults to service name                                                                    |
-| - [resources](#security_oneOf_i1_resources )                 | No      | object           | No         | In #/$defs/Resources    | Resources                                                                                                   |
-| - [preview-tag](#security_oneOf_i1_preview-tag )             | No      | string           | No         | -                       | Use a preview build of the envoy-opa proxy. If not set, the generally available and stable release is used. |
-| - [cloud-armor](#security_oneOf_i1_cloud-armor )             | No      | object           | No         | In #/$defs/CloudArmor   | CloudArmor                                                                                                  |
-| - [cors](#security_oneOf_i1_cors )                           | No      | object           | No         | In #/$defs/CorsSettings | CorsSettings                                                                                                |
+| Property                                                     | Pattern | Type             | Deprecated | Definition                    | Title/Description                                                                                           |
+| ------------------------------------------------------------ | ------- | ---------------- | ---------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| + [permission-prefix](#security_oneOf_i1_permission-prefix ) | No      | string           | No         | -                             | IAM permission prefix                                                                                       |
+| - [auth-proxy](#security_oneOf_i1_auth-proxy )               | No      | enum (of string) | No         | -                             | Auth proxy to use                                                                                           |
+| - [system-name](#security_oneOf_i1_system-name )             | No      | string           | No         | -                             | IAM system name defaults to service name                                                                    |
+| - [resources](#security_oneOf_i1_resources )                 | No      | object           | No         | In #/definitions/Resources    | Resources                                                                                                   |
+| - [preview-tag](#security_oneOf_i1_preview-tag )             | No      | string           | No         | -                             | Use a preview build of the envoy-opa proxy. If not set, the generally available and stable release is used. |
+| - [cloud-armor](#security_oneOf_i1_cloud-armor )             | No      | object           | No         | In #/definitions/CloudArmor   | CloudArmor                                                                                                  |
+| - [cors](#security_oneOf_i1_cors )                           | No      | object           | No         | In #/definitions/CorsSettings | CorsSettings                                                                                                |
 
 #### <a name="security_oneOf_i1_permission-prefix"></a>4.2.1. Property `CloudDeploy > security > oneOf > IAMSettings > permission-prefix`
 
@@ -1388,7 +1395,7 @@ Must be one of:
 | **Required**              | No                                |
 | **Additional properties** | Any type allowed                  |
 | **Default**               | `{"cpu": 0.5, "memory": "512Mi"}` |
-| **Defined in**            | #/$defs/Resources                 |
+| **Defined in**            | #/definitions/Resources           |
 
 **Description:** The requested resources
 
@@ -1441,12 +1448,12 @@ Must be one of:
 
 **Title:** CloudArmor
 
-|                           |                    |
-| ------------------------- | ------------------ |
-| **Type**                  | `object`           |
-| **Required**              | No                 |
-| **Additional properties** | Not allowed        |
-| **Defined in**            | #/$defs/CloudArmor |
+|                           |                          |
+| ------------------------- | ------------------------ |
+| **Type**                  | `object`                 |
+| **Required**              | No                       |
+| **Additional properties** | Not allowed              |
+| **Defined in**            | #/definitions/CloudArmor |
 
 **Description:** Use cloud armor policy
 
@@ -1467,13 +1474,13 @@ Must be one of:
 
 **Title:** CorsSettings
 
-|                           |                      |
-| ------------------------- | -------------------- |
-| **Type**                  | `object`             |
-| **Required**              | No                   |
-| **Additional properties** | Not allowed          |
-| **Default**               | `{"enabled": false}` |
-| **Defined in**            | #/$defs/CorsSettings |
+|                           |                            |
+| ------------------------- | -------------------------- |
+| **Type**                  | `object`                   |
+| **Required**              | No                         |
+| **Additional properties** | Not allowed                |
+| **Default**               | `{"enabled": false}`       |
+| **Defined in**            | #/definitions/CorsSettings |
 
 **Description:** CORS settings to apply on the security proxy. This settings only work with an auth-proxy
 
@@ -1724,34 +1731,120 @@ Must be one of:
 
 **Description:** Use cloud armor policy
 
-## <a name="environments"></a>5. Property `CloudDeploy > environments`
+## <a name="sidecars"></a>5. Property `CloudDeploy > sidecars`
+
+**Title:** Sidecars
+
+|                           |                        |
+| ------------------------- | ---------------------- |
+| **Type**                  | `object`               |
+| **Required**              | No                     |
+| **Additional properties** | Not allowed            |
+| **Defined in**            | #/definitions/Sidecars |
+
+**Description:** Additional sidecar containers
+
+| Property                              | Pattern | Type   | Deprecated | Definition                         | Title/Description |
+| ------------------------------------- | ------- | ------ | ---------- | ---------------------------------- | ----------------- |
+| - [evaluation](#sidecars_evaluation ) | No      | object | No         | In #/definitions/EvaluationSidecar | EvaluationSidecar |
+
+### <a name="sidecars_evaluation"></a>5.1. Property `CloudDeploy > sidecars > evaluation`
+
+**Title:** EvaluationSidecar
+
+|                           |                                 |
+| ------------------------- | ------------------------------- |
+| **Type**                  | `object`                        |
+| **Required**              | No                              |
+| **Additional properties** | Not allowed                     |
+| **Defined in**            | #/definitions/EvaluationSidecar |
+
+**Description:** Entity conditions evaluation sidecar
+
+| Property                                   | Pattern | Type    | Deprecated | Definition | Title/Description                                                                                                                               |
+| ------------------------------------------ | ------- | ------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| + [enabled](#sidecars_evaluation_enabled ) | No      | boolean | No         | -          | Enable the evaluation sidecar                                                                                                                   |
+| - [version](#sidecars_evaluation_version ) | No      | string  | No         | -          | Use a specific image tag of the evaluation sidecar (e.g. a build's git commit SHA). If not set, the generally available \`stable\` tag is used. |
+| - [env](#sidecars_evaluation_env )         | No      | object  | No         | -          | EvaluationSidecarEnvVars                                                                                                                        |
+
+#### <a name="sidecars_evaluation_enabled"></a>5.1.1. Property `CloudDeploy > sidecars > evaluation > enabled`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | Yes       |
+
+**Description:** Enable the evaluation sidecar
+
+#### <a name="sidecars_evaluation_version"></a>5.1.2. Property `CloudDeploy > sidecars > evaluation > version`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** Use a specific image tag of the evaluation sidecar (e.g. a build's git commit SHA). If not set, the generally available `stable` tag is used.
+
+| Restrictions                      |                                                                                         |
+| --------------------------------- | --------------------------------------------------------------------------------------- |
+| **Must match regular expression** | ```^[a-zA-Z0-9._-]+$``` [Test](https://regex101.com/?regex=%5E%5Ba-zA-Z0-9._-%5D%2B%24) |
+
+#### <a name="sidecars_evaluation_env"></a>5.1.3. Property `CloudDeploy > sidecars > evaluation > env`
+
+**Title:** EvaluationSidecarEnvVars
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** Environment variables for the evaluation sidecar, e.g. REQUEST_ALL_BUNDLE. OCMS_CLIENT_ID and OCMS_CLIENT_SECRET always read from the extenda Secret Manager project and cannot be overridden here.
+
+| Property                                             | Pattern | Type   | Deprecated | Definition | Title/Description |
+| ---------------------------------------------------- | ------- | ------ | ---------- | ---------- | ----------------- |
+| - [^[A-Z0-9_]+$](#sidecars_evaluation_env_pattern1 ) | Yes     | string | No         | -          | EnvVar            |
+
+##### <a name="sidecars_evaluation_env_pattern1"></a>5.1.3.1. Pattern Property `CloudDeploy > sidecars > evaluation > env > EnvVar`
+> All properties whose name matches the regular expression
+```^[A-Z0-9_]+$``` ([Test](https://regex101.com/?regex=%5E%5BA-Z0-9_%5D%2B%24))
+must respect the following conditions
+
+**Title:** EnvVar
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+## <a name="environments"></a>6. Property `CloudDeploy > environments`
 
 **Title:** Environments
 
-|                           |                      |
-| ------------------------- | -------------------- |
-| **Type**                  | `object`             |
-| **Required**              | Yes                  |
-| **Additional properties** | Not allowed          |
-| **Defined in**            | #/$defs/Environments |
+|                           |                            |
+| ------------------------- | -------------------------- |
+| **Type**                  | `object`                   |
+| **Required**              | Yes                        |
+| **Additional properties** | Not allowed                |
+| **Defined in**            | #/definitions/Environments |
 
 **Description:** Deploy environments
 
-| Property                                  | Pattern | Type        | Deprecated | Definition             | Title/Description   |
-| ----------------------------------------- | ------- | ----------- | ---------- | ---------------------- | ------------------- |
-| - [production](#environments_production ) | No      | object      | No         | In #/$defs/Environment | Environment         |
-| - [staging](#environments_staging )       | No      | Combination | No         | -                      | Staging environment |
+| Property                                  | Pattern | Type        | Deprecated | Definition                   | Title/Description   |
+| ----------------------------------------- | ------- | ----------- | ---------- | ---------------------------- | ------------------- |
+| - [production](#environments_production ) | No      | object      | No         | In #/definitions/Environment | Environment         |
+| - [staging](#environments_staging )       | No      | Combination | No         | -                            | Staging environment |
 
-### <a name="environments_production"></a>5.1. Property `CloudDeploy > environments > production`
+### <a name="environments_production"></a>6.1. Property `CloudDeploy > environments > production`
 
 **Title:** Environment
 
-|                           |                     |
-| ------------------------- | ------------------- |
-| **Type**                  | `object`            |
-| **Required**              | No                  |
-| **Additional properties** | Not allowed         |
-| **Defined in**            | #/$defs/Environment |
+|                           |                           |
+| ------------------------- | ------------------------- |
+| **Type**                  | `object`                  |
+| **Required**              | No                        |
+| **Additional properties** | Not allowed               |
+| **Defined in**            | #/definitions/Environment |
 
 **Description:** Production environment
 
@@ -1764,7 +1857,7 @@ Must be one of:
 | - [env](#environments_production_env )                         | No      | object          | No         | -          | EnvVars                     |
 | - [regions](#environments_production_regions )                 | No      | array of string | No         | -          | Regions                     |
 
-#### <a name="environments_production_min-instances"></a>5.1.1. Property `CloudDeploy > environments > production > min-instances`
+#### <a name="environments_production_min-instances"></a>6.1.1. Property `CloudDeploy > environments > production > min-instances`
 
 |              |           |
 | ------------ | --------- |
@@ -1778,7 +1871,7 @@ Must be one of:
 | **Minimum**  | &ge; 0    |
 | **Maximum**  | &le; 1000 |
 
-#### <a name="environments_production_max-instances"></a>5.1.2. Property `CloudDeploy > environments > production > max-instances`
+#### <a name="environments_production_max-instances"></a>6.1.2. Property `CloudDeploy > environments > production > max-instances`
 
 |              |           |
 | ------------ | --------- |
@@ -1793,7 +1886,7 @@ Must be one of:
 | **Minimum**  | &ge; 0    |
 | **Maximum**  | &le; 1000 |
 
-#### <a name="environments_production_domain-mappings"></a>5.1.3. Property `CloudDeploy > environments > production > domain-mappings`
+#### <a name="environments_production_domain-mappings"></a>6.1.3. Property `CloudDeploy > environments > production > domain-mappings`
 
 **Title:** DomainMappings
 
@@ -1816,7 +1909,7 @@ Must be one of:
 | -------------------------------------------------------- | --------------------------- |
 | [Domain](#environments_production_domain-mappings_items) | Fully qualified domain name |
 
-##### <a name="environments_production_domain-mappings_items"></a>5.1.3.1. CloudDeploy > environments > production > domain-mappings > Domain
+##### <a name="environments_production_domain-mappings_items"></a>6.1.3.1. CloudDeploy > environments > production > domain-mappings > Domain
 
 **Title:** Domain
 
@@ -1827,7 +1920,7 @@ Must be one of:
 
 **Description:** Fully qualified domain name
 
-#### <a name="environments_production_path-mappings"></a>5.1.4. Property `CloudDeploy > environments > production > path-mappings`
+#### <a name="environments_production_path-mappings"></a>6.1.4. Property `CloudDeploy > environments > production > path-mappings`
 
 **Title:** PathMappings
 
@@ -1850,7 +1943,7 @@ Must be one of:
 | -------------------------------------------------------- | ----------- |
 | [PathRule](#environments_production_path-mappings_items) | PathRules   |
 
-##### <a name="environments_production_path-mappings_items"></a>5.1.4.1. CloudDeploy > environments > production > path-mappings > PathRule
+##### <a name="environments_production_path-mappings_items"></a>6.1.4.1. CloudDeploy > environments > production > path-mappings > PathRule
 
 **Title:** PathRule
 
@@ -1868,7 +1961,7 @@ Must be one of:
 | - [paths](#environments_production_path-mappings_items_paths )               | No      | array of string | No         | -          | Paths             |
 | - [path-rewrite](#environments_production_path-mappings_items_path-rewrite ) | No      | string          | No         | -          | Path rewrite      |
 
-###### <a name="environments_production_path-mappings_items_oneOf"></a>5.1.4.1.1. Property `CloudDeploy > environments > production > path-mappings > PathRule > oneOf`
+###### <a name="environments_production_path-mappings_items_oneOf"></a>6.1.4.1.1. Property `CloudDeploy > environments > production > path-mappings > PathRule > oneOf`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -1876,7 +1969,7 @@ Must be one of:
 | **Required**              | No               |
 | **Additional properties** | Any type allowed |
 
-###### <a name="environments_production_path-mappings_items_paths"></a>5.1.4.1.2. Property `CloudDeploy > environments > production > path-mappings > PathRule > paths`
+###### <a name="environments_production_path-mappings_items_paths"></a>6.1.4.1.2. Property `CloudDeploy > environments > production > path-mappings > PathRule > paths`
 
 **Title:** Paths
 
@@ -1899,7 +1992,7 @@ Must be one of:
 | ---------------------------------------------------------------- | -------------------- |
 | [path](#environments_production_path-mappings_items_paths_items) | Fully qualified path |
 
-###### <a name="environments_production_path-mappings_items_paths_items"></a>5.1.4.1.2.1. CloudDeploy > environments > production > path-mappings > PathRule > paths > path
+###### <a name="environments_production_path-mappings_items_paths_items"></a>6.1.4.1.2.1. CloudDeploy > environments > production > path-mappings > PathRule > paths > path
 
 **Title:** path
 
@@ -1914,7 +2007,7 @@ Must be one of:
 | --------------------------------- | --------------------------------------------------------------------- |
 | **Must match regular expression** | ```^/(.*)$``` [Test](https://regex101.com/?regex=%5E%2F%28.%2A%29%24) |
 
-###### <a name="environments_production_path-mappings_items_path-rewrite"></a>5.1.4.1.3. Property `CloudDeploy > environments > production > path-mappings > PathRule > path-rewrite`
+###### <a name="environments_production_path-mappings_items_path-rewrite"></a>6.1.4.1.3. Property `CloudDeploy > environments > production > path-mappings > PathRule > path-rewrite`
 
 **Title:** Path rewrite
 
@@ -1925,7 +2018,7 @@ Must be one of:
 
 **Description:** The path prefix that will be used on the target service
 
-#### <a name="environments_production_env"></a>5.1.5. Property `CloudDeploy > environments > production > env`
+#### <a name="environments_production_env"></a>6.1.5. Property `CloudDeploy > environments > production > env`
 
 **Title:** EnvVars
 
@@ -1941,7 +2034,7 @@ Must be one of:
 | -------------------------------------------------------- | ------- | ------ | ---------- | ---------- | ----------------- |
 | - [^[A-Z0-9_]+$](#environments_production_env_pattern1 ) | Yes     | string | No         | -          | EnvVar            |
 
-##### <a name="environments_production_env_pattern1"></a>5.1.5.1. Pattern Property `CloudDeploy > environments > production > env > EnvVar`
+##### <a name="environments_production_env_pattern1"></a>6.1.5.1. Pattern Property `CloudDeploy > environments > production > env > EnvVar`
 > All properties whose name matches the regular expression
 ```^[A-Z0-9_]+$``` ([Test](https://regex101.com/?regex=%5E%5BA-Z0-9_%5D%2B%24))
 must respect the following conditions
@@ -1953,7 +2046,7 @@ must respect the following conditions
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="environments_production_regions"></a>5.1.6. Property `CloudDeploy > environments > production > regions`
+#### <a name="environments_production_regions"></a>6.1.6. Property `CloudDeploy > environments > production > regions`
 
 **Title:** Regions
 
@@ -1976,7 +2069,7 @@ must respect the following conditions
 | ------------------------------------------------------ | ---------------------------------------- |
 | [GoogleRegion](#environments_production_regions_items) | A Google Cloud region, e.g. europe-west1 |
 
-##### <a name="environments_production_regions_items"></a>5.1.6.1. CloudDeploy > environments > production > regions > GoogleRegion
+##### <a name="environments_production_regions_items"></a>6.1.6.1. CloudDeploy > environments > production > regions > GoogleRegion
 
 **Title:** GoogleRegion
 
@@ -1987,7 +2080,7 @@ must respect the following conditions
 
 **Description:** A Google Cloud region, e.g. europe-west1
 
-### <a name="environments_staging"></a>5.2. Property `CloudDeploy > environments > staging`
+### <a name="environments_staging"></a>6.2. Property `CloudDeploy > environments > staging`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -2002,7 +2095,7 @@ must respect the following conditions
 | [StagingNone](#environments_staging_oneOf_i0) |
 | [Environment](#environments_staging_oneOf_i1) |
 
-#### <a name="environments_staging_oneOf_i0"></a>5.2.1. Property `CloudDeploy > environments > staging > oneOf > StagingNone`
+#### <a name="environments_staging_oneOf_i0"></a>6.2.1. Property `CloudDeploy > environments > staging > oneOf > StagingNone`
 
 **Title:** StagingNone
 
@@ -2013,7 +2106,7 @@ must respect the following conditions
 
 **Description:** Do not use a staging environment
 
-#### <a name="environments_staging_oneOf_i1"></a>5.2.2. Property `CloudDeploy > environments > staging > oneOf > Environment`
+#### <a name="environments_staging_oneOf_i1"></a>6.2.2. Property `CloudDeploy > environments > staging > oneOf > Environment`
 
 **Title:** Environment
 
@@ -2027,4 +2120,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-06-09 at 09:48:39 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-09-14 at 20:13:45 +0200
