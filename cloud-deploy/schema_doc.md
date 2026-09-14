@@ -143,12 +143,12 @@
 | **Required**              | No               |
 | **Additional properties** | Any type allowed |
 
-| Property                         | Pattern | Type   | Deprecated | Definition              | Title/Description |
-| -------------------------------- | ------- | ------ | ---------- | ----------------------- | ----------------- |
-| + [labels](#labels )             | No      | object | No         | In #/$defs/Labels       | Labels            |
-| + [security](#security )         | No      | object | No         | In #/$defs/Security     | Security          |
-| - [sidecars](#sidecars )         | No      | object | No         | In #/$defs/Sidecars     | Sidecars          |
-| + [environments](#environments ) | No      | object | No         | In #/$defs/Environments | Environments      |
+| Property                         | Pattern | Type   | Deprecated | Definition                    | Title/Description |
+| -------------------------------- | ------- | ------ | ---------- | ----------------------------- | ----------------- |
+| + [labels](#labels )             | No      | object | No         | In #/definitions/Labels       | Labels            |
+| + [security](#security )         | No      | object | No         | In #/definitions/Security     | Security          |
+| - [sidecars](#sidecars )         | No      | object | No         | In #/definitions/Sidecars     | Sidecars          |
+| + [environments](#environments ) | No      | object | No         | In #/definitions/Environments | Environments      |
 
 | One of(Option)          |
 | ----------------------- |
@@ -165,47 +165,47 @@
 | **Required**              | No               |
 | **Additional properties** | Any type allowed |
 
-| Property                            | Pattern | Type   | Deprecated | Definition          | Title/Description |
-| ----------------------------------- | ------- | ------ | ---------- | ------------------- | ----------------- |
-| + [cloud-run](#oneOf_i0_cloud-run ) | No      | object | No         | In #/$defs/CloudRun | CloudRun          |
+| Property                            | Pattern | Type   | Deprecated | Definition                | Title/Description |
+| ----------------------------------- | ------- | ------ | ---------- | ------------------------- | ----------------- |
+| + [cloud-run](#oneOf_i0_cloud-run ) | No      | object | No         | In #/definitions/CloudRun | CloudRun          |
 
 ### <a name="oneOf_i0_cloud-run"></a>1.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run`
 
 **Title:** CloudRun
 
-|                           |                  |
-| ------------------------- | ---------------- |
-| **Type**                  | `object`         |
-| **Required**              | Yes              |
-| **Additional properties** | Not allowed      |
-| **Defined in**            | #/$defs/CloudRun |
+|                           |                        |
+| ------------------------- | ---------------------- |
+| **Type**                  | `object`               |
+| **Required**              | Yes                    |
+| **Additional properties** | Not allowed            |
+| **Defined in**            | #/definitions/CloudRun |
 
 **Description:** Managed Cloud Run service
 
 | Property                                                      | Pattern | Type             | Deprecated | Definition                                         | Title/Description                                                                |
 | ------------------------------------------------------------- | ------- | ---------------- | ---------- | -------------------------------------------------- | -------------------------------------------------------------------------------- |
-| + [service](#oneOf_i0_cloud-run_service )                     | No      | string           | No         | In #/$defs/ServiceName                             | ServiceName                                                                      |
+| + [service](#oneOf_i0_cloud-run_service )                     | No      | string           | No         | In #/definitions/ServiceName                       | ServiceName                                                                      |
 | + [resources](#oneOf_i0_cloud-run_resources )                 | No      | object           | No         | Same as [resources](#security_oneOf_i1_resources ) | Resources                                                                        |
-| + [protocol](#oneOf_i0_cloud-run_protocol )                   | No      | enum (of string) | No         | In #/$defs/Protocol                                | Protocol                                                                         |
-| - [timeout](#oneOf_i0_cloud-run_timeout )                     | No      | integer          | No         | In #/$defs/RequestTimeout                          | RequestTimeout                                                                   |
+| + [protocol](#oneOf_i0_cloud-run_protocol )                   | No      | enum (of string) | No         | In #/definitions/Protocol                          | Protocol                                                                         |
+| - [timeout](#oneOf_i0_cloud-run_timeout )                     | No      | integer          | No         | In #/definitions/RequestTimeout                    | RequestTimeout                                                                   |
 | + [scaling](#oneOf_i0_cloud-run_scaling )                     | No      | object           | No         | -                                                  | ScalingCloudRun                                                                  |
 | + [traffic](#oneOf_i0_cloud-run_traffic )                     | No      | object           | No         | -                                                  | TrafficCloudRun                                                                  |
 | - [startup-cpu-boost](#oneOf_i0_cloud-run_startup-cpu-boost ) | No      | boolean          | No         | -                                                  | Whether to allocate extra CPU to containers on startup.                          |
 | - [cpu-throttling](#oneOf_i0_cloud-run_cpu-throttling )       | No      | boolean          | No         | -                                                  | Whether to throttle the CPU when the container is not actively serving requests. |
 | - [session-affinity](#oneOf_i0_cloud-run_session-affinity )   | No      | boolean          | No         | -                                                  | Whether to enable session affinity for connections to the service.               |
 | - [internal-traffic](#oneOf_i0_cloud-run_internal-traffic )   | No      | boolean          | No         | -                                                  | Whether to setup internal traffic or not                                         |
-| - [monitoring](#oneOf_i0_cloud-run_monitoring )               | No      | object           | No         | In #/$defs/Monitoring                              | Monitoring                                                                       |
+| - [monitoring](#oneOf_i0_cloud-run_monitoring )               | No      | object           | No         | In #/definitions/Monitoring                        | Monitoring                                                                       |
 | - [request-logs](#oneOf_i0_cloud-run_request-logs )           | No      | object           | No         | -                                                  | Configure which request logs to use (if any).                                    |
 
 #### <a name="oneOf_i0_cloud-run_service"></a>1.1.1. Property `CloudDeploy > oneOf > CloudRun > cloud-run > service`
 
 **Title:** ServiceName
 
-|                |                     |
-| -------------- | ------------------- |
-| **Type**       | `string`            |
-| **Required**   | Yes                 |
-| **Defined in** | #/$defs/ServiceName |
+|                |                           |
+| -------------- | ------------------------- |
+| **Type**       | `string`                  |
+| **Required**   | Yes                       |
+| **Defined in** | #/definitions/ServiceName |
 
 **Description:** Service name
 
@@ -226,11 +226,11 @@
 
 **Title:** Protocol
 
-|                |                    |
-| -------------- | ------------------ |
-| **Type**       | `enum (of string)` |
-| **Required**   | Yes                |
-| **Defined in** | #/$defs/Protocol   |
+|                |                        |
+| -------------- | ---------------------- |
+| **Type**       | `enum (of string)`     |
+| **Required**   | Yes                    |
+| **Defined in** | #/definitions/Protocol |
 
 **Description:** The type of protocol. Make sure to set http2 if this service is using gRPC or WebSockets
 
@@ -242,12 +242,12 @@ Must be one of:
 
 **Title:** RequestTimeout
 
-|                |                        |
-| -------------- | ---------------------- |
-| **Type**       | `integer`              |
-| **Required**   | No                     |
-| **Default**    | `300`                  |
-| **Defined in** | #/$defs/RequestTimeout |
+|                |                              |
+| -------------- | ---------------------------- |
+| **Type**       | `integer`                    |
+| **Required**   | No                           |
+| **Default**    | `300`                        |
+| **Defined in** | #/definitions/RequestTimeout |
 
 **Description:** The request timeout in seconds
 
@@ -310,12 +310,12 @@ Must be one of:
 
 **Title:** ScheduledScaling
 
-|                           |                          |
-| ------------------------- | ------------------------ |
-| **Type**                  | `object`                 |
-| **Required**              | No                       |
-| **Additional properties** | Not allowed              |
-| **Defined in**            | #/$defs/ScheduledScaling |
+|                           |                                |
+| ------------------------- | ------------------------------ |
+| **Type**                  | `object`                       |
+| **Required**              | No                             |
+| **Additional properties** | Not allowed                    |
+| **Defined in**            | #/definitions/ScheduledScaling |
 
 **Description:** Scale in and out on demand
 
@@ -528,12 +528,12 @@ Must be one of:
 
 **Title:** Monitoring
 
-|                           |                    |
-| ------------------------- | ------------------ |
-| **Type**                  | `object`           |
-| **Required**              | No                 |
-| **Additional properties** | Not allowed        |
-| **Defined in**            | #/$defs/Monitoring |
+|                           |                          |
+| ------------------------- | ------------------------ |
+| **Type**                  | `object`                 |
+| **Required**              | No                       |
+| **Additional properties** | Not allowed              |
+| **Defined in**            | #/definitions/Monitoring |
 
 | Property                                                           | Pattern | Type   | Deprecated | Definition | Title/Description                                                                                          |
 | ------------------------------------------------------------------ | ------- | ------ | ---------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
@@ -811,20 +811,20 @@ Must be one of:
 | **Required**              | No               |
 | **Additional properties** | Any type allowed |
 
-| Property                              | Pattern | Type   | Deprecated | Definition            | Title/Description |
-| ------------------------------------- | ------- | ------ | ---------- | --------------------- | ----------------- |
-| + [kubernetes](#oneOf_i1_kubernetes ) | No      | object | No         | In #/$defs/Kubernetes | Kubernetes        |
+| Property                              | Pattern | Type   | Deprecated | Definition                  | Title/Description |
+| ------------------------------------- | ------- | ------ | ---------- | --------------------------- | ----------------- |
+| + [kubernetes](#oneOf_i1_kubernetes ) | No      | object | No         | In #/definitions/Kubernetes | Kubernetes        |
 
 ### <a name="oneOf_i1_kubernetes"></a>2.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes`
 
 **Title:** Kubernetes
 
-|                           |                    |
-| ------------------------- | ------------------ |
-| **Type**                  | `object`           |
-| **Required**              | Yes                |
-| **Additional properties** | Not allowed        |
-| **Defined in**            | #/$defs/Kubernetes |
+|                           |                          |
+| ------------------------- | ------------------------ |
+| **Type**                  | `object`                 |
+| **Required**              | Yes                      |
+| **Additional properties** | Not allowed              |
+| **Defined in**            | #/definitions/Kubernetes |
 
 **Description:** A kubernetes service
 
@@ -835,7 +835,7 @@ Must be one of:
 | + [resources](#oneOf_i1_kubernetes_resources )                               | No      | object           | No         | Same as [resources](#security_oneOf_i1_resources )    | Resources                                     |
 | + [protocol](#oneOf_i1_kubernetes_protocol )                                 | No      | enum (of string) | No         | Same as [protocol](#oneOf_i0_cloud-run_protocol )     | Protocol                                      |
 | - [timeout](#oneOf_i1_kubernetes_timeout )                                   | No      | integer          | No         | Same as [timeout](#oneOf_i0_cloud-run_timeout )       | RequestTimeout                                |
-| - [availability](#oneOf_i1_kubernetes_availability )                         | No      | enum (of string) | No         | In #/$defs/Availability                               | Availability                                  |
+| - [availability](#oneOf_i1_kubernetes_availability )                         | No      | enum (of string) | No         | In #/definitions/Availability                         | Availability                                  |
 | - [termination-grace-period](#oneOf_i1_kubernetes_termination-grace-period ) | No      | integer          | No         | -                                                     | The termination grace period in seconds       |
 | + [scaling](#oneOf_i1_kubernetes_scaling )                                   | No      | object           | No         | -                                                     | ScalingKubernetes                             |
 | - [volumes](#oneOf_i1_kubernetes_volumes )                                   | No      | array of object  | No         | -                                                     | Volumes                                       |
@@ -909,11 +909,11 @@ Must be one of:
 
 **Title:** Availability
 
-|                |                      |
-| -------------- | -------------------- |
-| **Type**       | `enum (of string)`   |
-| **Required**   | No                   |
-| **Defined in** | #/$defs/Availability |
+|                |                            |
+| -------------- | -------------------------- |
+| **Type**       | `enum (of string)`         |
+| **Required**   | No                         |
+| **Defined in** | #/definitions/Availability |
 
 **Description:** Availability to configure priority on autoscaling
 
@@ -1202,30 +1202,30 @@ Must be one of:
 
 **Title:** Labels
 
-|                           |                |
-| ------------------------- | -------------- |
-| **Type**                  | `object`       |
-| **Required**              | Yes            |
-| **Additional properties** | Not allowed    |
-| **Defined in**            | #/$defs/Labels |
+|                           |                      |
+| ------------------------- | -------------------- |
+| **Type**                  | `object`             |
+| **Required**              | Yes                  |
+| **Additional properties** | Not allowed          |
+| **Defined in**            | #/definitions/Labels |
 
 | Property                                | Pattern | Type   | Deprecated | Definition                              | Title/Description |
 | --------------------------------------- | ------- | ------ | ---------- | --------------------------------------- | ----------------- |
-| + [component](#labels_component )       | No      | string | No         | In #/$defs/Label                        | Label             |
+| + [component](#labels_component )       | No      | string | No         | In #/definitions/Label                  | Label             |
 | + [product](#labels_product )           | No      | string | No         | Same as [component](#labels_component ) | Label             |
-| - [iso-country](#labels_iso-country )   | No      | string | No         | In #/$defs/Label                        | Label             |
-| - [tenant-alias](#labels_tenant-alias ) | No      | string | No         | In #/$defs/Label                        | Label             |
+| - [iso-country](#labels_iso-country )   | No      | string | No         | In #/definitions/Label                  | Label             |
+| - [tenant-alias](#labels_tenant-alias ) | No      | string | No         | In #/definitions/Label                  | Label             |
 | - [^[a-z-]+$](#labels_pattern1 )        | Yes     | string | No         | Same as [component](#labels_component ) | Label             |
 
 ### <a name="labels_component"></a>3.1. Property `CloudDeploy > labels > component`
 
 **Title:** Label
 
-|                |               |
-| -------------- | ------------- |
-| **Type**       | `string`      |
-| **Required**   | Yes           |
-| **Defined in** | #/$defs/Label |
+|                |                     |
+| -------------- | ------------------- |
+| **Type**       | `string`            |
+| **Required**   | Yes                 |
+| **Defined in** | #/definitions/Label |
 
 **Description:** A label value
 
@@ -1249,12 +1249,12 @@ Must be one of:
 
 **Title:** Label
 
-|                |               |
-| -------------- | ------------- |
-| **Type**       | `string`      |
-| **Required**   | No            |
-| **Default**    | `"global"`    |
-| **Defined in** | #/$defs/Label |
+|                |                     |
+| -------------- | ------------------- |
+| **Type**       | `string`            |
+| **Required**   | No                  |
+| **Default**    | `"global"`          |
+| **Defined in** | #/definitions/Label |
 
 **Description:** A label value
 
@@ -1266,12 +1266,12 @@ Must be one of:
 
 **Title:** Label
 
-|                |                  |
-| -------------- | ---------------- |
-| **Type**       | `string`         |
-| **Required**   | No               |
-| **Default**    | `"multi-tenant"` |
-| **Defined in** | #/$defs/Label    |
+|                |                     |
+| -------------- | ------------------- |
+| **Type**       | `string`            |
+| **Required**   | No                  |
+| **Default**    | `"multi-tenant"`    |
+| **Defined in** | #/definitions/Label |
 
 **Description:** A label value
 
@@ -1298,12 +1298,12 @@ must respect the following conditions
 
 **Title:** Security
 
-|                           |                  |
-| ------------------------- | ---------------- |
-| **Type**                  | `combining`      |
-| **Required**              | Yes              |
-| **Additional properties** | Any type allowed |
-| **Defined in**            | #/$defs/Security |
+|                           |                        |
+| ------------------------- | ---------------------- |
+| **Type**                  | `combining`            |
+| **Required**              | Yes                    |
+| **Additional properties** | Any type allowed       |
+| **Defined in**            | #/definitions/Security |
 
 | One of(Option)                           |
 | ---------------------------------------- |
@@ -1335,15 +1335,15 @@ must respect the following conditions
 
 **Description:** IAM Security settings
 
-| Property                                                     | Pattern | Type             | Deprecated | Definition              | Title/Description                                                                                           |
-| ------------------------------------------------------------ | ------- | ---------------- | ---------- | ----------------------- | ----------------------------------------------------------------------------------------------------------- |
-| + [permission-prefix](#security_oneOf_i1_permission-prefix ) | No      | string           | No         | -                       | IAM permission prefix                                                                                       |
-| - [auth-proxy](#security_oneOf_i1_auth-proxy )               | No      | enum (of string) | No         | -                       | Auth proxy to use                                                                                           |
-| - [system-name](#security_oneOf_i1_system-name )             | No      | string           | No         | -                       | IAM system name defaults to service name                                                                    |
-| - [resources](#security_oneOf_i1_resources )                 | No      | object           | No         | In #/$defs/Resources    | Resources                                                                                                   |
-| - [preview-tag](#security_oneOf_i1_preview-tag )             | No      | string           | No         | -                       | Use a preview build of the envoy-opa proxy. If not set, the generally available and stable release is used. |
-| - [cloud-armor](#security_oneOf_i1_cloud-armor )             | No      | object           | No         | In #/$defs/CloudArmor   | CloudArmor                                                                                                  |
-| - [cors](#security_oneOf_i1_cors )                           | No      | object           | No         | In #/$defs/CorsSettings | CorsSettings                                                                                                |
+| Property                                                     | Pattern | Type             | Deprecated | Definition                    | Title/Description                                                                                           |
+| ------------------------------------------------------------ | ------- | ---------------- | ---------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| + [permission-prefix](#security_oneOf_i1_permission-prefix ) | No      | string           | No         | -                             | IAM permission prefix                                                                                       |
+| - [auth-proxy](#security_oneOf_i1_auth-proxy )               | No      | enum (of string) | No         | -                             | Auth proxy to use                                                                                           |
+| - [system-name](#security_oneOf_i1_system-name )             | No      | string           | No         | -                             | IAM system name defaults to service name                                                                    |
+| - [resources](#security_oneOf_i1_resources )                 | No      | object           | No         | In #/definitions/Resources    | Resources                                                                                                   |
+| - [preview-tag](#security_oneOf_i1_preview-tag )             | No      | string           | No         | -                             | Use a preview build of the envoy-opa proxy. If not set, the generally available and stable release is used. |
+| - [cloud-armor](#security_oneOf_i1_cloud-armor )             | No      | object           | No         | In #/definitions/CloudArmor   | CloudArmor                                                                                                  |
+| - [cors](#security_oneOf_i1_cors )                           | No      | object           | No         | In #/definitions/CorsSettings | CorsSettings                                                                                                |
 
 #### <a name="security_oneOf_i1_permission-prefix"></a>4.2.1. Property `CloudDeploy > security > oneOf > IAMSettings > permission-prefix`
 
@@ -1395,7 +1395,7 @@ Must be one of:
 | **Required**              | No                                |
 | **Additional properties** | Any type allowed                  |
 | **Default**               | `{"cpu": 0.5, "memory": "512Mi"}` |
-| **Defined in**            | #/$defs/Resources                 |
+| **Defined in**            | #/definitions/Resources           |
 
 **Description:** The requested resources
 
@@ -1448,12 +1448,12 @@ Must be one of:
 
 **Title:** CloudArmor
 
-|                           |                    |
-| ------------------------- | ------------------ |
-| **Type**                  | `object`           |
-| **Required**              | No                 |
-| **Additional properties** | Not allowed        |
-| **Defined in**            | #/$defs/CloudArmor |
+|                           |                          |
+| ------------------------- | ------------------------ |
+| **Type**                  | `object`                 |
+| **Required**              | No                       |
+| **Additional properties** | Not allowed              |
+| **Defined in**            | #/definitions/CloudArmor |
 
 **Description:** Use cloud armor policy
 
@@ -1474,13 +1474,13 @@ Must be one of:
 
 **Title:** CorsSettings
 
-|                           |                      |
-| ------------------------- | -------------------- |
-| **Type**                  | `object`             |
-| **Required**              | No                   |
-| **Additional properties** | Not allowed          |
-| **Default**               | `{"enabled": false}` |
-| **Defined in**            | #/$defs/CorsSettings |
+|                           |                            |
+| ------------------------- | -------------------------- |
+| **Type**                  | `object`                   |
+| **Required**              | No                         |
+| **Additional properties** | Not allowed                |
+| **Default**               | `{"enabled": false}`       |
+| **Defined in**            | #/definitions/CorsSettings |
 
 **Description:** CORS settings to apply on the security proxy. This settings only work with an auth-proxy
 
@@ -1735,29 +1735,29 @@ Must be one of:
 
 **Title:** Sidecars
 
-|                           |                  |
-| ------------------------- | ---------------- |
-| **Type**                  | `object`         |
-| **Required**              | No               |
-| **Additional properties** | Not allowed      |
-| **Defined in**            | #/$defs/Sidecars |
+|                           |                        |
+| ------------------------- | ---------------------- |
+| **Type**                  | `object`               |
+| **Required**              | No                     |
+| **Additional properties** | Not allowed            |
+| **Defined in**            | #/definitions/Sidecars |
 
 **Description:** Additional sidecar containers
 
-| Property                              | Pattern | Type   | Deprecated | Definition                   | Title/Description |
-| ------------------------------------- | ------- | ------ | ---------- | ---------------------------- | ----------------- |
-| - [evaluation](#sidecars_evaluation ) | No      | object | No         | In #/$defs/EvaluationSidecar | EvaluationSidecar |
+| Property                              | Pattern | Type   | Deprecated | Definition                         | Title/Description |
+| ------------------------------------- | ------- | ------ | ---------- | ---------------------------------- | ----------------- |
+| - [evaluation](#sidecars_evaluation ) | No      | object | No         | In #/definitions/EvaluationSidecar | EvaluationSidecar |
 
 ### <a name="sidecars_evaluation"></a>5.1. Property `CloudDeploy > sidecars > evaluation`
 
 **Title:** EvaluationSidecar
 
-|                           |                           |
-| ------------------------- | ------------------------- |
-| **Type**                  | `object`                  |
-| **Required**              | No                        |
-| **Additional properties** | Not allowed               |
-| **Defined in**            | #/$defs/EvaluationSidecar |
+|                           |                                 |
+| ------------------------- | ------------------------------- |
+| **Type**                  | `object`                        |
+| **Required**              | No                              |
+| **Additional properties** | Not allowed                     |
+| **Defined in**            | #/definitions/EvaluationSidecar |
 
 **Description:** Entity conditions evaluation sidecar
 
@@ -1821,30 +1821,30 @@ must respect the following conditions
 
 **Title:** Environments
 
-|                           |                      |
-| ------------------------- | -------------------- |
-| **Type**                  | `object`             |
-| **Required**              | Yes                  |
-| **Additional properties** | Not allowed          |
-| **Defined in**            | #/$defs/Environments |
+|                           |                            |
+| ------------------------- | -------------------------- |
+| **Type**                  | `object`                   |
+| **Required**              | Yes                        |
+| **Additional properties** | Not allowed                |
+| **Defined in**            | #/definitions/Environments |
 
 **Description:** Deploy environments
 
-| Property                                  | Pattern | Type        | Deprecated | Definition             | Title/Description   |
-| ----------------------------------------- | ------- | ----------- | ---------- | ---------------------- | ------------------- |
-| - [production](#environments_production ) | No      | object      | No         | In #/$defs/Environment | Environment         |
-| - [staging](#environments_staging )       | No      | Combination | No         | -                      | Staging environment |
+| Property                                  | Pattern | Type        | Deprecated | Definition                   | Title/Description   |
+| ----------------------------------------- | ------- | ----------- | ---------- | ---------------------------- | ------------------- |
+| - [production](#environments_production ) | No      | object      | No         | In #/definitions/Environment | Environment         |
+| - [staging](#environments_staging )       | No      | Combination | No         | -                            | Staging environment |
 
 ### <a name="environments_production"></a>6.1. Property `CloudDeploy > environments > production`
 
 **Title:** Environment
 
-|                           |                     |
-| ------------------------- | ------------------- |
-| **Type**                  | `object`            |
-| **Required**              | No                  |
-| **Additional properties** | Not allowed         |
-| **Defined in**            | #/$defs/Environment |
+|                           |                           |
+| ------------------------- | ------------------------- |
+| **Type**                  | `object`                  |
+| **Required**              | No                        |
+| **Additional properties** | Not allowed               |
+| **Defined in**            | #/definitions/Environment |
 
 **Description:** Production environment
 
@@ -2120,4 +2120,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-09-14 at 15:25:40 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-09-14 at 19:33:53 +0200
