@@ -237,4 +237,63 @@ describe('action — change filtering', () => {
     await action();
     expect(setupGcloud).toHaveBeenCalledWith('fake-key');
   });
+
+  describe('references', () => {
+    test('uploads all reference files when a reference changed', async () => {
+      setupDiff(['agent-registry/references/github/actions-catalogue.md']);
+      upload.mockResolvedValue(undefined);
+      fg.sync.mockImplementation((pattern) => {
+        if (pattern === 'references/**/*') return [
+          'references/github/actions-catalogue.md',
+          'references/sre/best-practices.md',
+        ];
+        return [];
+      });
+
+      await action();
+
+      expect(upload).toHaveBeenCalledWith(
+        expect.stringContaining('actions-catalogue.md'),
+        'references/github/actions-catalogue.md',
+      );
+      expect(upload).toHaveBeenCalledWith(
+        expect.stringContaining('best-practices.md'),
+        'references/sre/best-practices.md',
+      );
+    });
+
+    test('skips reference upload when no reference changed', async () => {
+      setupDiff(['agent-registry/agents/platform-agent/agent.yaml']);
+      fg.sync.mockImplementation((pattern) => {
+        if (pattern === 'agents/*/agent.yaml') return ['agents/platform-agent/agent.yaml'];
+        if (pattern === 'references/**/*') return ['references/github/actions-catalogue.md'];
+        return [];
+      });
+
+      await action();
+
+      expect(upload).not.toHaveBeenCalledWith(
+        expect.anything(),
+        expect.stringContaining('references/'),
+      );
+    });
+
+    test('dry-run logs reference uploads without calling upload', async () => {
+      core.getInput.mockImplementation((name) => {
+        if (name === 'service-account-key') return 'fake-key';
+        if (name === 'dry-run') return 'true';
+        return '';
+      });
+      setupDiff(['agent-registry/references/github/actions-catalogue.md']);
+      fg.sync.mockImplementation((pattern) => {
+        if (pattern === 'references/**/*') return ['references/github/actions-catalogue.md'];
+        return [];
+      });
+
+      await action();
+
+      expect(upload).not.toHaveBeenCalled();
+      expect(core.info).toHaveBeenCalledWith(expect.stringContaining('[dry-run] Would upload reference'));
+    });
+  });
 });

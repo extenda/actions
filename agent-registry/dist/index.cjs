@@ -100982,6 +100982,22 @@ var processMcps = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryR
     endGroup();
   }
 }, "processMcps");
+var processReferences = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun) => {
+  const refFiles = import_fast_glob2.default.sync("references/**/*", { cwd: registryRoot, onlyFiles: true });
+  if (!refFiles.length) return;
+  if (!isAffected("references/", changedPaths)) return;
+  startGroup("References");
+  for (const refFile of refFiles) {
+    const gcsPath = refFile;
+    if (dryRun) {
+      info(`[dry-run] Would upload reference: gs://extenda-agent-artifacts/${gcsPath}`);
+    } else {
+      await upload(import_node_path7.default.join(registryRoot, refFile), gcsPath);
+      info(`Reference uploaded: gs://extenda-agent-artifacts/${gcsPath}`);
+    }
+  }
+  endGroup();
+}, "processReferences");
 var processSkills = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun) => {
   const skillFiles = import_fast_glob2.default.sync("skills/*/SKILL.md", { cwd: registryRoot, onlyFiles: true });
   for (const skillFile of skillFiles) {
@@ -101006,6 +101022,7 @@ var action5 = /* @__PURE__ */ __name(async () => {
     info("No changed paths detected \u2014 processing all items");
   }
   const registryRoot = import_node_path7.default.join(process.cwd(), AGENT_REGISTRY_PATH);
+  await processReferences(registryRoot, changedPaths, dryRun);
   await processAgents(registryRoot, changedPaths, gitSha, dryRun);
   await processMcps(registryRoot, changedPaths, dryRun);
   await processSkills(registryRoot, changedPaths, dryRun);
