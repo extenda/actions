@@ -1156,14 +1156,15 @@ environments:
 - `enabled`: Set to `true` to add the sidecar (required)
 - `version`: Use a specific image tag of the sidecar (e.g. a build's git commit SHA). The image is
   not semantically versioned; if not set, the `stable` tag is used
-- `env`: Override any of the sidecar's default environment variables
+- `env`: Override the sidecar's default environment variables, except `OCMS_CLIENT_ID` and
+  `OCMS_CLIENT_SECRET` (see below)
 
 **Default environment variables:**
-- `OCMS_CLIENT_ID` and `OCMS_CLIENT_SECRET` default to the `ecs-api-ocms-client-id` and
-  `ecs-api-ocms-client-secret` secrets in the shared `extenda` Secret Manager project. Cloud Run
-  resolves these natively as cross-project secret references; GKE relies on Berglas to resolve
-  them at container startup. Either way, the deploying service's runtime service account needs
-  `roles/secretmanager.secretAccessor` on both secrets in the `extenda` project
+- `OCMS_CLIENT_ID` and `OCMS_CLIENT_SECRET` always read from the `ecs-api-ocms-client-id` and
+  `ecs-api-ocms-client-secret` secrets in the shared `extenda` Secret Manager project and cannot be
+  overridden. Cloud Run resolves these natively as cross-project secret references; GKE relies on
+  Berglas to resolve them at container startup. Either way, the deploying service's runtime service
+  account needs `roles/secretmanager.secretAccessor` on both secrets in the `extenda` project
 - `REQUEST_ALL_BUNDLE` defaults to `false`
 
 Use `env` to override the defaults, for example to request the full bundle:

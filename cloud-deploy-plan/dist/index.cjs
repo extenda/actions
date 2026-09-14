@@ -107213,9 +107213,12 @@ the generally available `stable` tag is used.",
         },
         env: {
           title: "EvaluationSidecarEnvVars",
-          description: "Environment variables and secrets for the evaluation sidecar. Overrides the default OCMS_CLIENT_\
-ID, OCMS_CLIENT_SECRET and REQUEST_ALL_BUNDLE values.",
+          description: "Environment variables for the evaluation sidecar, e.g. REQUEST_ALL_BUNDLE. OCMS_CLIENT_ID and OC\
+MS_CLIENT_SECRET always read from the extenda Secret Manager project and cannot be overridden here.",
           type: "object",
+          propertyNames: {
+            pattern: "^(?!OCMS_CLIENT_ID$|OCMS_CLIENT_SECRET$)[A-Z0-9_]+$"
+          },
           patternProperties: {
             "^[A-Z0-9_]+$": {
               title: "EnvVar",

@@ -675,6 +675,42 @@ environments:
     expect(() => loadServiceDefinition('cloud-deploy.yaml')).toThrow();
   });
 
+  test('It rejects an evaluation sidecar env override of OCMS_CLIENT_ID', async () => {
+    mockFs({
+      'cloud-deploy.yaml': `
+cloud-run:
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+  protocol: http
+  scaling:
+    concurrency: 80
+  traffic:
+    static-egress-ip: false
+
+security: none
+
+sidecars:
+  evaluation:
+    enabled: true
+    env:
+      OCMS_CLIENT_ID: sm://*/some-other-secret
+
+labels:
+  component: jest
+  product: my-product
+
+environments:
+  production:
+    min-instances: 1
+  staging: none
+      `,
+    });
+
+    expect(() => loadServiceDefinition('cloud-deploy.yaml')).toThrow();
+  });
+
   test('It can parse additional CORS configuration', async () => {
     mockFs({
       'cloud-deploy.yaml': `

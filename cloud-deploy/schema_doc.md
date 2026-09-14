@@ -1799,7 +1799,7 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-**Description:** Environment variables and secrets for the evaluation sidecar. Overrides the default OCMS_CLIENT_ID, OCMS_CLIENT_SECRET and REQUEST_ALL_BUNDLE values.
+**Description:** Environment variables for the evaluation sidecar, e.g. REQUEST_ALL_BUNDLE. OCMS_CLIENT_ID and OCMS_CLIENT_SECRET always read from the extenda Secret Manager project and cannot be overridden here.
 
 | Property                                             | Pattern | Type   | Deprecated | Definition | Title/Description |
 | ---------------------------------------------------- | ------- | ------ | ---------- | ---------- | ----------------- |
@@ -2120,4 +2120,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-09-14 at 19:33:53 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-09-14 at 20:13:45 +0200

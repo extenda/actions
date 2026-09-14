@@ -19,6 +19,10 @@ const DEFAULT_ENV = {
   REQUEST_ALL_BUNDLE: 'false',
 };
 
+// The OCMS credentials are always sourced from the shared extenda Secret
+// Manager project and can't be redirected to a different secret.
+const RESERVED_ENV = ['OCMS_CLIENT_ID', 'OCMS_CLIENT_SECRET'];
+
 const imageTag = (version = null) =>
   process.env.EVALUATION_IMAGE_TAG || version || STABLE_TAG;
 
@@ -53,19 +57,28 @@ const resolveEnvVar = (name, rawValue, platformGKE, projectId) => {
     };
   }
 
-  const projectRef =
-    secretProject === SECRETS_PROJECT ? SECRETS_PROJECT_NUMBER : secretProject;
+  if (secretProject !== SECRETS_PROJECT) {
+    throw new Error(
+      `Cross-project secret reference '${value}' is not supported. The evaluation sidecar only reads secrets from the deploying project or the shared '${SECRETS_PROJECT}' project.`,
+    );
+  }
   return {
     env: {
       name,
       valueFrom: { secretKeyRef: { key: 'latest', name: secretName } },
     },
-    secretAlias: `${secretName}:projects/${projectRef}/secrets/${secretName}`,
+    secretAlias: `${secretName}:projects/${SECRETS_PROJECT_NUMBER}/secrets/${secretName}`,
   };
 };
 
 const evaluationSpec = async (projectId, platformGKE, config = {}) => {
   const { version = null, env = {} } = config;
+  const overriddenReserved = RESERVED_ENV.filter((key) => key in env);
+  if (overriddenReserved.length > 0) {
+    throw new Error(
+      `${overriddenReserved.join(', ')} cannot be overridden in sidecars.evaluation.env - the evaluation sidecar always reads OCMS credentials from the '${SECRETS_PROJECT}' Secret Manager project.`,
+    );
+  }
   const envConfig = { ...DEFAULT_ENV, ...env };
   const image = await resolveImage(version);
 
