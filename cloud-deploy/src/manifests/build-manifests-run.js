@@ -1,4 +1,5 @@
 import { cloudRunCollector } from './collector-sidecar.js';
+import { evaluationSpec } from './evaluation-sidecar.js';
 import { securitySpec } from './security-sidecar.js';
 
 const configureNetworking = async (
@@ -49,6 +50,8 @@ const cloudrunManifestTemplate = async (
   enableDirectVPC,
   cors,
   securityPreviewTag,
+  evaluationSidecar,
+  projectId,
 ) => {
   labels.push({ 'cloud.googleapis.com/location': 'europe-west1' });
 
@@ -165,6 +168,26 @@ const cloudrunManifestTemplate = async (
     annotations['run.googleapis.com/container-dependencies'] = JSON.stringify({
       'user-container': ['collector'],
     });
+  }
+
+  if (evaluationSidecar) {
+    const { container: evaluationContainer, secretAliases } =
+      await evaluationSpec(projectId, false, evaluationSidecar);
+    evaluationContainer.resources = {
+      limits: {
+        cpu: '0.1',
+        memory: '128Mi',
+      },
+    };
+    containers.push(evaluationContainer);
+    if (secretAliases.length > 0) {
+      annotations['run.googleapis.com/secrets'] = [
+        annotations['run.googleapis.com/secrets'],
+        ...secretAliases,
+      ]
+        .filter(Boolean)
+        .join(',');
+    }
   }
 
   return {

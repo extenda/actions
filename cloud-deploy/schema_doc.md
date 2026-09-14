@@ -109,25 +109,31 @@
         - [4.3.2.2.1. CloudDeploy > security > oneOf > IAMBindingSettings > consumers > audiences > ConsumerAudience](#security_oneOf_i2_consumers_audiences_items)
   - [4.4. Property `CloudDeploy > security > oneOf > CloudArmor`](#security_oneOf_i3)
     - [4.4.1. Property `CloudDeploy > security > oneOf > CloudArmor > cloud-armor`](#security_oneOf_i3_cloud-armor)
-- [5. Property `CloudDeploy > environments`](#environments)
-  - [5.1. Property `CloudDeploy > environments > production`](#environments_production)
-    - [5.1.1. Property `CloudDeploy > environments > production > min-instances`](#environments_production_min-instances)
-    - [5.1.2. Property `CloudDeploy > environments > production > max-instances`](#environments_production_max-instances)
-    - [5.1.3. Property `CloudDeploy > environments > production > domain-mappings`](#environments_production_domain-mappings)
-      - [5.1.3.1. CloudDeploy > environments > production > domain-mappings > Domain](#environments_production_domain-mappings_items)
-    - [5.1.4. Property `CloudDeploy > environments > production > path-mappings`](#environments_production_path-mappings)
-      - [5.1.4.1. CloudDeploy > environments > production > path-mappings > PathRule](#environments_production_path-mappings_items)
-        - [5.1.4.1.1. Property `CloudDeploy > environments > production > path-mappings > PathRule > oneOf`](#environments_production_path-mappings_items_oneOf)
-        - [5.1.4.1.2. Property `CloudDeploy > environments > production > path-mappings > PathRule > paths`](#environments_production_path-mappings_items_paths)
-          - [5.1.4.1.2.1. CloudDeploy > environments > production > path-mappings > PathRule > paths > path](#environments_production_path-mappings_items_paths_items)
-        - [5.1.4.1.3. Property `CloudDeploy > environments > production > path-mappings > PathRule > path-rewrite`](#environments_production_path-mappings_items_path-rewrite)
-    - [5.1.5. Property `CloudDeploy > environments > production > env`](#environments_production_env)
-      - [5.1.5.1. Pattern Property `CloudDeploy > environments > production > env > EnvVar`](#environments_production_env_pattern1)
-    - [5.1.6. Property `CloudDeploy > environments > production > regions`](#environments_production_regions)
-      - [5.1.6.1. CloudDeploy > environments > production > regions > GoogleRegion](#environments_production_regions_items)
-  - [5.2. Property `CloudDeploy > environments > staging`](#environments_staging)
-    - [5.2.1. Property `CloudDeploy > environments > staging > oneOf > StagingNone`](#environments_staging_oneOf_i0)
-    - [5.2.2. Property `CloudDeploy > environments > staging > oneOf > Environment`](#environments_staging_oneOf_i1)
+- [5. Property `CloudDeploy > sidecars`](#sidecars)
+  - [5.1. Property `CloudDeploy > sidecars > evaluation`](#sidecars_evaluation)
+    - [5.1.1. Property `CloudDeploy > sidecars > evaluation > enabled`](#sidecars_evaluation_enabled)
+    - [5.1.2. Property `CloudDeploy > sidecars > evaluation > version`](#sidecars_evaluation_version)
+    - [5.1.3. Property `CloudDeploy > sidecars > evaluation > env`](#sidecars_evaluation_env)
+      - [5.1.3.1. Pattern Property `CloudDeploy > sidecars > evaluation > env > EnvVar`](#sidecars_evaluation_env_pattern1)
+- [6. Property `CloudDeploy > environments`](#environments)
+  - [6.1. Property `CloudDeploy > environments > production`](#environments_production)
+    - [6.1.1. Property `CloudDeploy > environments > production > min-instances`](#environments_production_min-instances)
+    - [6.1.2. Property `CloudDeploy > environments > production > max-instances`](#environments_production_max-instances)
+    - [6.1.3. Property `CloudDeploy > environments > production > domain-mappings`](#environments_production_domain-mappings)
+      - [6.1.3.1. CloudDeploy > environments > production > domain-mappings > Domain](#environments_production_domain-mappings_items)
+    - [6.1.4. Property `CloudDeploy > environments > production > path-mappings`](#environments_production_path-mappings)
+      - [6.1.4.1. CloudDeploy > environments > production > path-mappings > PathRule](#environments_production_path-mappings_items)
+        - [6.1.4.1.1. Property `CloudDeploy > environments > production > path-mappings > PathRule > oneOf`](#environments_production_path-mappings_items_oneOf)
+        - [6.1.4.1.2. Property `CloudDeploy > environments > production > path-mappings > PathRule > paths`](#environments_production_path-mappings_items_paths)
+          - [6.1.4.1.2.1. CloudDeploy > environments > production > path-mappings > PathRule > paths > path](#environments_production_path-mappings_items_paths_items)
+        - [6.1.4.1.3. Property `CloudDeploy > environments > production > path-mappings > PathRule > path-rewrite`](#environments_production_path-mappings_items_path-rewrite)
+    - [6.1.5. Property `CloudDeploy > environments > production > env`](#environments_production_env)
+      - [6.1.5.1. Pattern Property `CloudDeploy > environments > production > env > EnvVar`](#environments_production_env_pattern1)
+    - [6.1.6. Property `CloudDeploy > environments > production > regions`](#environments_production_regions)
+      - [6.1.6.1. CloudDeploy > environments > production > regions > GoogleRegion](#environments_production_regions_items)
+  - [6.2. Property `CloudDeploy > environments > staging`](#environments_staging)
+    - [6.2.1. Property `CloudDeploy > environments > staging > oneOf > StagingNone`](#environments_staging_oneOf_i0)
+    - [6.2.2. Property `CloudDeploy > environments > staging > oneOf > Environment`](#environments_staging_oneOf_i1)
 
 **Title:** CloudDeploy
 
@@ -141,6 +147,7 @@
 | -------------------------------- | ------- | ------ | ---------- | ----------------------- | ----------------- |
 | + [labels](#labels )             | No      | object | No         | In #/$defs/Labels       | Labels            |
 | + [security](#security )         | No      | object | No         | In #/$defs/Security     | Security          |
+| - [sidecars](#sidecars )         | No      | object | No         | In #/$defs/Sidecars     | Sidecars          |
 | + [environments](#environments ) | No      | object | No         | In #/$defs/Environments | Environments      |
 
 | One of(Option)          |
@@ -1724,7 +1731,93 @@ Must be one of:
 
 **Description:** Use cloud armor policy
 
-## <a name="environments"></a>5. Property `CloudDeploy > environments`
+## <a name="sidecars"></a>5. Property `CloudDeploy > sidecars`
+
+**Title:** Sidecars
+
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `object`         |
+| **Required**              | No               |
+| **Additional properties** | Not allowed      |
+| **Defined in**            | #/$defs/Sidecars |
+
+**Description:** Additional sidecar containers
+
+| Property                              | Pattern | Type   | Deprecated | Definition                   | Title/Description |
+| ------------------------------------- | ------- | ------ | ---------- | ---------------------------- | ----------------- |
+| - [evaluation](#sidecars_evaluation ) | No      | object | No         | In #/$defs/EvaluationSidecar | EvaluationSidecar |
+
+### <a name="sidecars_evaluation"></a>5.1. Property `CloudDeploy > sidecars > evaluation`
+
+**Title:** EvaluationSidecar
+
+|                           |                           |
+| ------------------------- | ------------------------- |
+| **Type**                  | `object`                  |
+| **Required**              | No                        |
+| **Additional properties** | Not allowed               |
+| **Defined in**            | #/$defs/EvaluationSidecar |
+
+**Description:** Entity conditions evaluation sidecar
+
+| Property                                   | Pattern | Type    | Deprecated | Definition | Title/Description                                                                                                                               |
+| ------------------------------------------ | ------- | ------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| + [enabled](#sidecars_evaluation_enabled ) | No      | boolean | No         | -          | Enable the evaluation sidecar                                                                                                                   |
+| - [version](#sidecars_evaluation_version ) | No      | string  | No         | -          | Use a specific image tag of the evaluation sidecar (e.g. a build's git commit SHA). If not set, the generally available \`stable\` tag is used. |
+| - [env](#sidecars_evaluation_env )         | No      | object  | No         | -          | EvaluationSidecarEnvVars                                                                                                                        |
+
+#### <a name="sidecars_evaluation_enabled"></a>5.1.1. Property `CloudDeploy > sidecars > evaluation > enabled`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | Yes       |
+
+**Description:** Enable the evaluation sidecar
+
+#### <a name="sidecars_evaluation_version"></a>5.1.2. Property `CloudDeploy > sidecars > evaluation > version`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** Use a specific image tag of the evaluation sidecar (e.g. a build's git commit SHA). If not set, the generally available `stable` tag is used.
+
+| Restrictions                      |                                                                                         |
+| --------------------------------- | --------------------------------------------------------------------------------------- |
+| **Must match regular expression** | ```^[a-zA-Z0-9._-]+$``` [Test](https://regex101.com/?regex=%5E%5Ba-zA-Z0-9._-%5D%2B%24) |
+
+#### <a name="sidecars_evaluation_env"></a>5.1.3. Property `CloudDeploy > sidecars > evaluation > env`
+
+**Title:** EvaluationSidecarEnvVars
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** Environment variables and secrets for the evaluation sidecar. Overrides the default OCMS_CLIENT_ID, OCMS_CLIENT_SECRET and REQUEST_ALL_BUNDLE values.
+
+| Property                                             | Pattern | Type   | Deprecated | Definition | Title/Description |
+| ---------------------------------------------------- | ------- | ------ | ---------- | ---------- | ----------------- |
+| - [^[A-Z0-9_]+$](#sidecars_evaluation_env_pattern1 ) | Yes     | string | No         | -          | EnvVar            |
+
+##### <a name="sidecars_evaluation_env_pattern1"></a>5.1.3.1. Pattern Property `CloudDeploy > sidecars > evaluation > env > EnvVar`
+> All properties whose name matches the regular expression
+```^[A-Z0-9_]+$``` ([Test](https://regex101.com/?regex=%5E%5BA-Z0-9_%5D%2B%24))
+must respect the following conditions
+
+**Title:** EnvVar
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+## <a name="environments"></a>6. Property `CloudDeploy > environments`
 
 **Title:** Environments
 
@@ -1742,7 +1835,7 @@ Must be one of:
 | - [production](#environments_production ) | No      | object      | No         | In #/$defs/Environment | Environment         |
 | - [staging](#environments_staging )       | No      | Combination | No         | -                      | Staging environment |
 
-### <a name="environments_production"></a>5.1. Property `CloudDeploy > environments > production`
+### <a name="environments_production"></a>6.1. Property `CloudDeploy > environments > production`
 
 **Title:** Environment
 
@@ -1764,7 +1857,7 @@ Must be one of:
 | - [env](#environments_production_env )                         | No      | object          | No         | -          | EnvVars                     |
 | - [regions](#environments_production_regions )                 | No      | array of string | No         | -          | Regions                     |
 
-#### <a name="environments_production_min-instances"></a>5.1.1. Property `CloudDeploy > environments > production > min-instances`
+#### <a name="environments_production_min-instances"></a>6.1.1. Property `CloudDeploy > environments > production > min-instances`
 
 |              |           |
 | ------------ | --------- |
@@ -1778,7 +1871,7 @@ Must be one of:
 | **Minimum**  | &ge; 0    |
 | **Maximum**  | &le; 1000 |
 
-#### <a name="environments_production_max-instances"></a>5.1.2. Property `CloudDeploy > environments > production > max-instances`
+#### <a name="environments_production_max-instances"></a>6.1.2. Property `CloudDeploy > environments > production > max-instances`
 
 |              |           |
 | ------------ | --------- |
@@ -1793,7 +1886,7 @@ Must be one of:
 | **Minimum**  | &ge; 0    |
 | **Maximum**  | &le; 1000 |
 
-#### <a name="environments_production_domain-mappings"></a>5.1.3. Property `CloudDeploy > environments > production > domain-mappings`
+#### <a name="environments_production_domain-mappings"></a>6.1.3. Property `CloudDeploy > environments > production > domain-mappings`
 
 **Title:** DomainMappings
 
@@ -1816,7 +1909,7 @@ Must be one of:
 | -------------------------------------------------------- | --------------------------- |
 | [Domain](#environments_production_domain-mappings_items) | Fully qualified domain name |
 
-##### <a name="environments_production_domain-mappings_items"></a>5.1.3.1. CloudDeploy > environments > production > domain-mappings > Domain
+##### <a name="environments_production_domain-mappings_items"></a>6.1.3.1. CloudDeploy > environments > production > domain-mappings > Domain
 
 **Title:** Domain
 
@@ -1827,7 +1920,7 @@ Must be one of:
 
 **Description:** Fully qualified domain name
 
-#### <a name="environments_production_path-mappings"></a>5.1.4. Property `CloudDeploy > environments > production > path-mappings`
+#### <a name="environments_production_path-mappings"></a>6.1.4. Property `CloudDeploy > environments > production > path-mappings`
 
 **Title:** PathMappings
 
@@ -1850,7 +1943,7 @@ Must be one of:
 | -------------------------------------------------------- | ----------- |
 | [PathRule](#environments_production_path-mappings_items) | PathRules   |
 
-##### <a name="environments_production_path-mappings_items"></a>5.1.4.1. CloudDeploy > environments > production > path-mappings > PathRule
+##### <a name="environments_production_path-mappings_items"></a>6.1.4.1. CloudDeploy > environments > production > path-mappings > PathRule
 
 **Title:** PathRule
 
@@ -1868,7 +1961,7 @@ Must be one of:
 | - [paths](#environments_production_path-mappings_items_paths )               | No      | array of string | No         | -          | Paths             |
 | - [path-rewrite](#environments_production_path-mappings_items_path-rewrite ) | No      | string          | No         | -          | Path rewrite      |
 
-###### <a name="environments_production_path-mappings_items_oneOf"></a>5.1.4.1.1. Property `CloudDeploy > environments > production > path-mappings > PathRule > oneOf`
+###### <a name="environments_production_path-mappings_items_oneOf"></a>6.1.4.1.1. Property `CloudDeploy > environments > production > path-mappings > PathRule > oneOf`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -1876,7 +1969,7 @@ Must be one of:
 | **Required**              | No               |
 | **Additional properties** | Any type allowed |
 
-###### <a name="environments_production_path-mappings_items_paths"></a>5.1.4.1.2. Property `CloudDeploy > environments > production > path-mappings > PathRule > paths`
+###### <a name="environments_production_path-mappings_items_paths"></a>6.1.4.1.2. Property `CloudDeploy > environments > production > path-mappings > PathRule > paths`
 
 **Title:** Paths
 
@@ -1899,7 +1992,7 @@ Must be one of:
 | ---------------------------------------------------------------- | -------------------- |
 | [path](#environments_production_path-mappings_items_paths_items) | Fully qualified path |
 
-###### <a name="environments_production_path-mappings_items_paths_items"></a>5.1.4.1.2.1. CloudDeploy > environments > production > path-mappings > PathRule > paths > path
+###### <a name="environments_production_path-mappings_items_paths_items"></a>6.1.4.1.2.1. CloudDeploy > environments > production > path-mappings > PathRule > paths > path
 
 **Title:** path
 
@@ -1914,7 +2007,7 @@ Must be one of:
 | --------------------------------- | --------------------------------------------------------------------- |
 | **Must match regular expression** | ```^/(.*)$``` [Test](https://regex101.com/?regex=%5E%2F%28.%2A%29%24) |
 
-###### <a name="environments_production_path-mappings_items_path-rewrite"></a>5.1.4.1.3. Property `CloudDeploy > environments > production > path-mappings > PathRule > path-rewrite`
+###### <a name="environments_production_path-mappings_items_path-rewrite"></a>6.1.4.1.3. Property `CloudDeploy > environments > production > path-mappings > PathRule > path-rewrite`
 
 **Title:** Path rewrite
 
@@ -1925,7 +2018,7 @@ Must be one of:
 
 **Description:** The path prefix that will be used on the target service
 
-#### <a name="environments_production_env"></a>5.1.5. Property `CloudDeploy > environments > production > env`
+#### <a name="environments_production_env"></a>6.1.5. Property `CloudDeploy > environments > production > env`
 
 **Title:** EnvVars
 
@@ -1941,7 +2034,7 @@ Must be one of:
 | -------------------------------------------------------- | ------- | ------ | ---------- | ---------- | ----------------- |
 | - [^[A-Z0-9_]+$](#environments_production_env_pattern1 ) | Yes     | string | No         | -          | EnvVar            |
 
-##### <a name="environments_production_env_pattern1"></a>5.1.5.1. Pattern Property `CloudDeploy > environments > production > env > EnvVar`
+##### <a name="environments_production_env_pattern1"></a>6.1.5.1. Pattern Property `CloudDeploy > environments > production > env > EnvVar`
 > All properties whose name matches the regular expression
 ```^[A-Z0-9_]+$``` ([Test](https://regex101.com/?regex=%5E%5BA-Z0-9_%5D%2B%24))
 must respect the following conditions
@@ -1953,7 +2046,7 @@ must respect the following conditions
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="environments_production_regions"></a>5.1.6. Property `CloudDeploy > environments > production > regions`
+#### <a name="environments_production_regions"></a>6.1.6. Property `CloudDeploy > environments > production > regions`
 
 **Title:** Regions
 
@@ -1976,7 +2069,7 @@ must respect the following conditions
 | ------------------------------------------------------ | ---------------------------------------- |
 | [GoogleRegion](#environments_production_regions_items) | A Google Cloud region, e.g. europe-west1 |
 
-##### <a name="environments_production_regions_items"></a>5.1.6.1. CloudDeploy > environments > production > regions > GoogleRegion
+##### <a name="environments_production_regions_items"></a>6.1.6.1. CloudDeploy > environments > production > regions > GoogleRegion
 
 **Title:** GoogleRegion
 
@@ -1987,7 +2080,7 @@ must respect the following conditions
 
 **Description:** A Google Cloud region, e.g. europe-west1
 
-### <a name="environments_staging"></a>5.2. Property `CloudDeploy > environments > staging`
+### <a name="environments_staging"></a>6.2. Property `CloudDeploy > environments > staging`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -2002,7 +2095,7 @@ must respect the following conditions
 | [StagingNone](#environments_staging_oneOf_i0) |
 | [Environment](#environments_staging_oneOf_i1) |
 
-#### <a name="environments_staging_oneOf_i0"></a>5.2.1. Property `CloudDeploy > environments > staging > oneOf > StagingNone`
+#### <a name="environments_staging_oneOf_i0"></a>6.2.1. Property `CloudDeploy > environments > staging > oneOf > StagingNone`
 
 **Title:** StagingNone
 
@@ -2013,7 +2106,7 @@ must respect the following conditions
 
 **Description:** Do not use a staging environment
 
-#### <a name="environments_staging_oneOf_i1"></a>5.2.2. Property `CloudDeploy > environments > staging > oneOf > Environment`
+#### <a name="environments_staging_oneOf_i1"></a>6.2.2. Property `CloudDeploy > environments > staging > oneOf > Environment`
 
 **Title:** Environment
 
@@ -2027,4 +2120,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-06-09 at 09:48:39 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-09-14 at 15:25:40 +0200

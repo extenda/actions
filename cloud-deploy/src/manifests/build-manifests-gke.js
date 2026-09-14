@@ -1,4 +1,5 @@
 import { kubernetesCollector } from './collector-sidecar.js';
+import { evaluationSpec } from './evaluation-sidecar.js';
 import { securitySpec } from './security-sidecar.js';
 
 const volumeSetup = (opa, protocol) => {
@@ -60,6 +61,8 @@ const gkeManifestTemplate = async (
   cors,
   terminationGracePeriod,
   securityPreviewTag,
+  evaluationSidecar,
+  projectId,
 ) => {
   // initialize manifest components
 
@@ -97,6 +100,22 @@ const gkeManifestTemplate = async (
   let collectorContainer = null;
   if (monitoring) {
     collectorContainer = await kubernetesCollector(name, monitoring);
+  }
+
+  let evaluationContainer = null;
+  if (evaluationSidecar) {
+    ({ container: evaluationContainer } = await evaluationSpec(
+      projectId,
+      true,
+      evaluationSidecar,
+    ));
+    evaluationContainer.imagePullPolicy = 'IfNotPresent';
+    evaluationContainer.resources = {
+      requests: {
+        cpu: '0.1',
+        memory: '128Mi',
+      },
+    };
   }
 
   // setup manifest
@@ -278,6 +297,7 @@ const gkeManifestTemplate = async (
                 ]
               : []),
             ...(collectorContainer ? [collectorContainer] : []),
+            ...(evaluationContainer ? [evaluationContainer] : []),
           ],
           terminationGracePeriodSeconds: terminationGracePeriod,
           volumes: deploymentVolumes,

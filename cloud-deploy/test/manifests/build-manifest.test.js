@@ -1743,4 +1743,127 @@ metadata:
     mockFs.restore();
     expect(manifest).toMatchSnapshot();
   });
+
+  test('It generates an evaluation sidecar on GKE when configured', async () => {
+    const image = 'example-image:latest';
+    const service = {
+      kubernetes: {
+        type: 'Deployment',
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          cpu: 40,
+        },
+      },
+      security: 'none',
+      sidecars: {
+        evaluation: {
+          enabled: true,
+        },
+      },
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {},
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'production';
+
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
+
+    const manifest = readFileSync('k8s(deploy)-manifest.yaml');
+    mockFs.restore();
+    expect(manifest).toContain('name: evaluation');
+    expect(manifest).toContain('sm://extenda/ecs-api-ocms-client-id');
+    expect(manifest).toMatchSnapshot();
+  });
+
+  test('It generates an evaluation sidecar on Cloud Run when configured', async () => {
+    const image = 'example-image:latest';
+    const service = {
+      'cloud-run': {
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          concurrency: 40,
+        },
+        traffic: {
+          'static-egress-ip': false,
+        },
+      },
+      security: 'none',
+      sidecars: {
+        evaluation: {
+          enabled: true,
+          version: 'v9.9.9',
+          env: {
+            REQUEST_ALL_BUNDLE: 'true',
+          },
+        },
+      },
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {},
+        },
+        staging: 'none',
+      },
+    };
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'production';
+
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
+
+    const manifest = readFileSync('cloudrun-service.yaml');
+    mockFs.restore();
+    expect(manifest).toContain('name: evaluation');
+    expect(manifest).toContain('secretKeyRef');
+    expect(manifest).toContain('REQUEST_ALL_BUNDLE');
+    expect(manifest).toMatchSnapshot();
+  });
 });
