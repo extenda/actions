@@ -1,0 +1,14 @@
+name: Agent Registry
+description: Register agents, MCP servers, skills, and upload artifacts to GCS
+author: Extenda Retail
+inputs:
+  service-account-key:
+    description: Service account key for GCP authentication.
+    required: true
+  dry-run:
+    description: If 'true', validate and print actions without making changes.
+    required: false
+    default: 'false'
+runs:
+  using: node24
+  main: dist/index.cjs
