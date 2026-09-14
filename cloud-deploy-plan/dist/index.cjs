@@ -106511,6 +106511,9 @@ var cloud_deploy_schema_default = {
     security: {
       $ref: "#/$defs/Security"
     },
+    sidecars: {
+      $ref: "#/$defs/Sidecars"
+    },
     environments: {
       $ref: "#/$defs/Environments"
     }
@@ -107177,6 +107180,51 @@ elease is used.",
           }
         }
       ]
+    },
+    Sidecars: {
+      title: "Sidecars",
+      description: "Additional sidecar containers",
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        evaluation: {
+          $ref: "#/$defs/EvaluationSidecar"
+        }
+      }
+    },
+    EvaluationSidecar: {
+      title: "EvaluationSidecar",
+      description: "Entity conditions evaluation sidecar",
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "enabled"
+      ],
+      properties: {
+        enabled: {
+          description: "Enable the evaluation sidecar",
+          type: "boolean"
+        },
+        version: {
+          description: "Use a specific image tag of the evaluation sidecar (e.g. a build's git commit SHA). If not set, \
+the generally available `stable` tag is used.",
+          type: "string",
+          pattern: "^[a-zA-Z0-9._-]+$"
+        },
+        env: {
+          title: "EvaluationSidecarEnvVars",
+          description: "Environment variables and secrets for the evaluation sidecar. Overrides the default OCMS_CLIENT_\
+ID, OCMS_CLIENT_SECRET and REQUEST_ALL_BUNDLE values.",
+          type: "object",
+          patternProperties: {
+            "^[A-Z0-9_]+$": {
+              title: "EnvVar",
+              type: "string"
+            }
+          },
+          additionalProperties: false
+        }
+      }
     },
     Environments: {
       title: "Environments",

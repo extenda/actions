@@ -110004,6 +110004,65 @@ var userContainerCollectorEnv = /* @__PURE__ */ __name((serviceName, serviceImag
   return {};
 }, "userContainerCollectorEnv");
 
+// cloud-deploy/src/manifests/evaluation-sidecar.js
+var IMAGE_NAME = "eu.gcr.io/extenda/entity-conditions-evaluation-sidecar";
+var STABLE_TAG2 = "stable";
+var SECRETS_PROJECT = "extenda";
+var SECRETS_PROJECT_NUMBER = "377710398576";
+var DEFAULT_ENV = {
+  OCMS_CLIENT_ID: `sm://${SECRETS_PROJECT}/ecs-api-ocms-client-id`,
+  OCMS_CLIENT_SECRET: `sm://${SECRETS_PROJECT}/ecs-api-ocms-client-secret`,
+  REQUEST_ALL_BUNDLE: "false"
+};
+var imageTag2 = /* @__PURE__ */ __name((version3 = null) => process.env.EVALUATION_IMAGE_TAG || version3 || STABLE_TAG2,
+"imageTag");
+var resolveImage = /* @__PURE__ */ __name(async (version3 = null) => image_sha256_default(`${IMAGE_NAME}:${imageTag2(version3)}`),
+"resolveImage");
+var resolveEnvVar = /* @__PURE__ */ __name((name, rawValue, platformGKE, projectId) => {
+  const value = `${rawValue}`.replace("sm://*/", `sm://${projectId}/`);
+  if (!value.startsWith("sm://")) {
+    return { env: { name, value } };
+  }
+  if (platformGKE) {
+    return { env: { name, value } };
+  }
+  const [, , secretProject, secretName] = value.split("/");
+  if (secretProject === projectId) {
+    return {
+      env: {
+        name,
+        valueFrom: { secretKeyRef: { key: "latest", name: secretName } }
+      }
+    };
+  }
+  const projectRef = secretProject === SECRETS_PROJECT ? SECRETS_PROJECT_NUMBER : secretProject;
+  return {
+    env: {
+      name,
+      valueFrom: { secretKeyRef: { key: "latest", name: secretName } }
+    },
+    secretAlias: `${secretName}:projects/${projectRef}/secrets/${secretName}`
+  };
+}, "resolveEnvVar");
+var evaluationSpec = /* @__PURE__ */ __name(async (projectId, platformGKE, config = {}) => {
+  const { version: version3 = null, env: env2 = {} } = config;
+  const envConfig = { ...DEFAULT_ENV, ...env2 };
+  const image = await resolveImage(version3);
+  const resolved = Object.entries(envConfig).map(
+    ([name, value]) => resolveEnvVar(name, value, platformGKE, projectId)
+  );
+  return {
+    container: {
+      name: "evaluation",
+      image,
+      env: resolved.map(({ env: envVar }) => envVar)
+    },
+    // Cross-project secret aliases to merge into the `run.googleapis.com/secrets`
+    // annotation. Always empty on GKE.
+    secretAliases: resolved.map(({ secretAlias }) => secretAlias).filter(Boolean)
+  };
+}, "evaluationSpec");
+
 // cloud-deploy/src/utils/security-cache-keys.js
 var import_node_fs11 = __toESM(require("node:fs"), 1);
 var import_jsonschema = __toESM(require_lib(), 1);
@@ -110062,7 +110121,7 @@ ${result.toString()}`;
 }, "loadCacheKeys");
 
 // cloud-deploy/src/manifests/security-sidecar.js
-var IMAGE_NAME = "eu.gcr.io/extenda/security";
+var IMAGE_NAME2 = "eu.gcr.io/extenda/security";
 var STABLE_VERSION = "v2.0.1";
 var volumeMounts = /* @__PURE__ */ __name((protocol) => {
   const volumes = [];
@@ -110083,9 +110142,9 @@ var arrayToString = /* @__PURE__ */ __name((arr) => {
   return Array.isArray(arr) ? arr.join(",") : "";
 }, "arrayToString");
 var securitySpec = /* @__PURE__ */ __name(async (protocol, platformGKE = true, cors = { enabled: false }, previewTag = null) => {
-  const imageTag2 = getImageTag({ "preview-tag": previewTag });
-  info(`Use image tag: ${imageTag2}`);
-  return image_sha256_default(`${IMAGE_NAME}:${imageTag2}`).then((image) => {
+  const imageTag3 = getImageTag({ "preview-tag": previewTag });
+  info(`Use image tag: ${imageTag3}`);
+  return image_sha256_default(`${IMAGE_NAME2}:${imageTag3}`).then((image) => {
     const env2 = [
       {
         name: "LAUNCHDARKLY_SDK_KEY",
@@ -110197,7 +110256,7 @@ var getStorageClassName = /* @__PURE__ */ __name((diskType) => {
   if (diskType === "hdd") return "standard";
   return "premium-rwo";
 }, "getStorageClassName");
-var gkeManifestTemplate = /* @__PURE__ */ __name(async (name, type, image, minInstances, maxInstances, cpuThreshold, cpuRequest, memoryRequest, environment, labels, opa, protocol, volumes, opaCpu, opaMemory, monitoring, deployEnv, availability, baseAnnotations, cors, terminationGracePeriod, securityPreviewTag) => {
+var gkeManifestTemplate = /* @__PURE__ */ __name(async (name, type, image, minInstances, maxInstances, cpuThreshold, cpuRequest, memoryRequest, environment, labels, opa, protocol, volumes, opaCpu, opaMemory, monitoring, deployEnv, availability, baseAnnotations, cors, terminationGracePeriod, securityPreviewTag, evaluationSidecar, projectId) => {
   let annotations = {};
   const deploymentVolumes = volumeSetup(opa, protocol);
   const userVolumeMounts = userContainerVolumeMountSetup(
@@ -110222,6 +110281,21 @@ var gkeManifestTemplate = /* @__PURE__ */ __name(async (name, type, image, minIn
   let collectorContainer = null;
   if (monitoring) {
     collectorContainer = await kubernetesCollector(name, monitoring);
+  }
+  let evaluationContainer = null;
+  if (evaluationSidecar) {
+    ({ container: evaluationContainer } = await evaluationSpec(
+      projectId,
+      true,
+      evaluationSidecar
+    ));
+    evaluationContainer.imagePullPolicy = "IfNotPresent";
+    evaluationContainer.resources = {
+      requests: {
+        cpu: "0.1",
+        memory: "128Mi"
+      }
+    };
   }
   const namespace2 = {
     apiVersion: "v1",
@@ -110392,7 +110466,8 @@ var gkeManifestTemplate = /* @__PURE__ */ __name(async (name, type, image, minIn
                 }
               }
             ] : [],
-            ...collectorContainer ? [collectorContainer] : []
+            ...collectorContainer ? [collectorContainer] : [],
+            ...evaluationContainer ? [evaluationContainer] : []
           ],
           terminationGracePeriodSeconds: terminationGracePeriod,
           volumes: deploymentVolumes
@@ -110445,7 +110520,7 @@ var configureNetworking = /* @__PURE__ */ __name(async (annotations, enableDirec
     }
   }
 }, "configureNetworking");
-var cloudrunManifestTemplate = /* @__PURE__ */ __name(async (name, image, opa, labels, protocol, environment, minInstances, maxInstances, scaling, cpu, memory, opaCpu, opaMemory, timeoutSeconds, serviceAccountName, SQLInstance, cpuThrottling, cpuBoost, sessionAffinity, activeRevisionName, audiences, monitoring, deployEnv, baseAnnotations, enableCloudNAT, enableDirectVPC, cors, securityPreviewTag) => {
+var cloudrunManifestTemplate = /* @__PURE__ */ __name(async (name, image, opa, labels, protocol, environment, minInstances, maxInstances, scaling, cpu, memory, opaCpu, opaMemory, timeoutSeconds, serviceAccountName, SQLInstance, cpuThrottling, cpuBoost, sessionAffinity, activeRevisionName, audiences, monitoring, deployEnv, baseAnnotations, enableCloudNAT, enableDirectVPC, cors, securityPreviewTag, evaluationSidecar, projectId) => {
   labels.push({ "cloud.googleapis.com/location": "europe-west1" });
   const ports = opa ? void 0 : [
     {
@@ -110545,6 +110620,22 @@ var cloudrunManifestTemplate = /* @__PURE__ */ __name(async (name, image, opa, l
     annotations["run.googleapis.com/container-dependencies"] = JSON.stringify({
       "user-container": ["collector"]
     });
+  }
+  if (evaluationSidecar) {
+    const { container: evaluationContainer, secretAliases } = await evaluationSpec(projectId, false, evaluationSidecar);
+    evaluationContainer.resources = {
+      limits: {
+        cpu: "0.1",
+        memory: "128Mi"
+      }
+    };
+    containers.push(evaluationContainer);
+    if (secretAliases.length > 0) {
+      annotations["run.googleapis.com/secrets"] = [
+        annotations["run.googleapis.com/secrets"],
+        ...secretAliases
+      ].filter(Boolean).join(",");
+    }
   }
   return {
     apiVersion: "serving.knative.dev/v1",
@@ -110825,8 +110916,10 @@ var buildManifest = /* @__PURE__ */ __name(async (image, deployYaml, projectId, 
     kubernetes,
     labels = [],
     security,
+    sidecars = {},
     environments = []
   } = deployYaml;
+  const evaluationSidecar = sidecars.evaluation && sidecars.evaluation.enabled ? sidecars.evaluation : null;
   const githubServerUrl = process.env.GITHUB_SERVER_URL;
   const githubRepo = process.env.GITHUB_REPOSITORY;
   const githubRunID = process.env.GITHUB_RUN_ID;
@@ -110950,7 +111043,9 @@ var buildManifest = /* @__PURE__ */ __name(async (image, deployYaml, projectId, 
       baseAnnotations,
       cors,
       terminationGracePeriod,
-      securityPreviewTag
+      securityPreviewTag,
+      evaluationSidecar,
+      projectId
     );
     await cluster_connection_default(clanName, deployEnv, projectId);
     if (scaling.vertical) {
@@ -111055,7 +111150,9 @@ var buildManifest = /* @__PURE__ */ __name(async (image, deployYaml, projectId, 
       enableCloudNAT,
       enableDirectVPC,
       cors,
-      securityPreviewTag
+      securityPreviewTag,
+      evaluationSidecar,
+      projectId
     );
     generateManifest("cloudrun-service.yaml", convertToYaml(cloudrunManifest));
   }
@@ -111727,6 +111824,9 @@ var cloud_deploy_schema_default = {
     security: {
       $ref: "#/$defs/Security"
     },
+    sidecars: {
+      $ref: "#/$defs/Sidecars"
+    },
     environments: {
       $ref: "#/$defs/Environments"
     }
@@ -112393,6 +112493,51 @@ elease is used.",
           }
         }
       ]
+    },
+    Sidecars: {
+      title: "Sidecars",
+      description: "Additional sidecar containers",
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        evaluation: {
+          $ref: "#/$defs/EvaluationSidecar"
+        }
+      }
+    },
+    EvaluationSidecar: {
+      title: "EvaluationSidecar",
+      description: "Entity conditions evaluation sidecar",
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "enabled"
+      ],
+      properties: {
+        enabled: {
+          description: "Enable the evaluation sidecar",
+          type: "boolean"
+        },
+        version: {
+          description: "Use a specific image tag of the evaluation sidecar (e.g. a build's git commit SHA). If not set, \
+the generally available `stable` tag is used.",
+          type: "string",
+          pattern: "^[a-zA-Z0-9._-]+$"
+        },
+        env: {
+          title: "EvaluationSidecarEnvVars",
+          description: "Environment variables and secrets for the evaluation sidecar. Overrides the default OCMS_CLIENT_\
+ID, OCMS_CLIENT_SECRET and REQUEST_ALL_BUNDLE values.",
+          type: "object",
+          patternProperties: {
+            "^[A-Z0-9_]+$": {
+              title: "EnvVar",
+              type: "string"
+            }
+          },
+          additionalProperties: false
+        }
+      }
     },
     Environments: {
       title: "Environments",
