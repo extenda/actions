@@ -206,7 +206,7 @@ describe('action — change filtering', () => {
     expect(core.info).toHaveBeenCalledWith(expect.stringContaining('[dry-run] Would upload instructions'));
   });
 
-  test('uploads instructions when instructions.md exists', async () => {
+  test('uploads instructions to both versioned and latest paths', async () => {
     setupDiff([]);
     upload.mockResolvedValue(undefined);
     fg.sync.mockImplementation((pattern) => {
@@ -216,7 +216,24 @@ describe('action — change filtering', () => {
 
     await action();
 
-    expect(upload).toHaveBeenCalledWith(expect.stringContaining('instructions.md'), expect.stringContaining('my-agent'));
+    expect(upload).toHaveBeenCalledWith(expect.stringContaining('instructions.md'), expect.stringMatching(/my-agent\/[a-f0-9]+\/instructions\.md/));
+    expect(upload).toHaveBeenCalledWith(expect.stringContaining('instructions.md'), 'agents/my-agent/instructions.md');
+  });
+
+  test('registers orchestrator and uploads its instructions', async () => {
+    setupDiff(['agent-registry/agents/orchestrator/instructions.md']);
+    upload.mockResolvedValue(undefined);
+    fg.sync.mockImplementation((pattern) => {
+      if (pattern === 'agents/*/agent.yaml') return ['agents/orchestrator/agent.yaml'];
+      return [];
+    });
+    const { readFileSync } = await import('fs');
+    readFileSync.mockReturnValue('name: orchestrator\nurl: https://platform-agent.retailsvc.com/orchestrator\n');
+
+    await action();
+
+    expect(registerAgent).toHaveBeenCalledWith('orchestrator', expect.any(String), false);
+    expect(upload).toHaveBeenCalledWith(expect.stringContaining('instructions.md'), 'agents/orchestrator/instructions.md');
   });
 
   test('silently skips missing instructions.md', async () => {
@@ -238,62 +255,4 @@ describe('action — change filtering', () => {
     expect(setupGcloud).toHaveBeenCalledWith('fake-key');
   });
 
-  describe('references', () => {
-    test('uploads all reference files when a reference changed', async () => {
-      setupDiff(['agent-registry/references/github/actions-catalogue.md']);
-      upload.mockResolvedValue(undefined);
-      fg.sync.mockImplementation((pattern) => {
-        if (pattern === 'references/**/*') return [
-          'references/github/actions-catalogue.md',
-          'references/sre/best-practices.md',
-        ];
-        return [];
-      });
-
-      await action();
-
-      expect(upload).toHaveBeenCalledWith(
-        expect.stringContaining('actions-catalogue.md'),
-        'references/github/actions-catalogue.md',
-      );
-      expect(upload).toHaveBeenCalledWith(
-        expect.stringContaining('best-practices.md'),
-        'references/sre/best-practices.md',
-      );
-    });
-
-    test('skips reference upload when no reference changed', async () => {
-      setupDiff(['agent-registry/agents/platform-agent/agent.yaml']);
-      fg.sync.mockImplementation((pattern) => {
-        if (pattern === 'agents/*/agent.yaml') return ['agents/platform-agent/agent.yaml'];
-        if (pattern === 'references/**/*') return ['references/github/actions-catalogue.md'];
-        return [];
-      });
-
-      await action();
-
-      expect(upload).not.toHaveBeenCalledWith(
-        expect.anything(),
-        expect.stringContaining('references/'),
-      );
-    });
-
-    test('dry-run logs reference uploads without calling upload', async () => {
-      core.getInput.mockImplementation((name) => {
-        if (name === 'service-account-key') return 'fake-key';
-        if (name === 'dry-run') return 'true';
-        return '';
-      });
-      setupDiff(['agent-registry/references/github/actions-catalogue.md']);
-      fg.sync.mockImplementation((pattern) => {
-        if (pattern === 'references/**/*') return ['references/github/actions-catalogue.md'];
-        return [];
-      });
-
-      await action();
-
-      expect(upload).not.toHaveBeenCalled();
-      expect(core.info).toHaveBeenCalledWith(expect.stringContaining('[dry-run] Would upload reference'));
-    });
-  });
 });

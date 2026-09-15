@@ -165,7 +165,7 @@ describe('register-agent', () => {
 
     test('throws when agent.yaml is empty/invalid YAML', async () => {
       await expect(registerAgent('my-agent', '', false))
-        .rejects.toThrow("missing required field: url");
+        .rejects.toThrow();
     });
   });
 

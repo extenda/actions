@@ -7,6 +7,7 @@ import { execSync } from 'node:child_process';
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
 import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 import { upload } from './upload-gcs.js';
+
 import { registerAgent } from './register-agent.js';
 import { registerMcp } from './register-mcp.js';
 import { registerSkill } from './register-skill.js';
@@ -30,6 +31,18 @@ const isAffected = (registryRelativePath, changedPaths) =>
   !changedPaths.length ||
   changedPaths.some((p) => p.startsWith(`${AGENT_REGISTRY_PATH}/${registryRelativePath}`));
 
+const uploadInstructions = async (instructionsPath, agentId, gitSha, dryRun) => {
+  const versionedPath = `agents/${agentId}/${gitSha}/instructions.md`;
+  const latestPath = `agents/${agentId}/instructions.md`;
+  if (dryRun) {
+    core.info(`[dry-run] Would upload instructions to gs://extenda-agent-artifacts/${latestPath}`);
+  } else {
+    await upload(instructionsPath, versionedPath);
+    await upload(instructionsPath, latestPath);
+    core.info(`Instructions uploaded: gs://extenda-agent-artifacts/${latestPath}`);
+  }
+};
+
 const processAgents = async (registryRoot, changedPaths, gitSha, dryRun) => {
   const agentFiles = fg.sync('agents/*/agent.yaml', { cwd: registryRoot, onlyFiles: true });
   for (const agentFile of agentFiles) {
@@ -43,13 +56,7 @@ const processAgents = async (registryRoot, changedPaths, gitSha, dryRun) => {
 
     const instructionsPath = path.join(registryRoot, 'agents', agentId, 'instructions.md');
     if (existsSync(instructionsPath)) {
-      const gcsPath = `agents/${agentId}/${gitSha}/instructions.md`;
-      if (dryRun) {
-        core.info(`[dry-run] Would upload instructions to gs://extenda-agent-artifacts/${gcsPath}`);
-      } else {
-        await upload(instructionsPath, gcsPath);
-        core.info(`Instructions uploaded: gs://extenda-agent-artifacts/${gcsPath}`);
-      }
+      await uploadInstructions(instructionsPath, agentId, gitSha, dryRun);
     }
     core.endGroup();
   }
@@ -67,24 +74,6 @@ const processMcps = async (registryRoot, changedPaths, dryRun) => {
     await registerMcp(mcpId, mcpYaml, dryRun);
     core.endGroup();
   }
-};
-
-const processReferences = async (registryRoot, changedPaths, dryRun) => {
-  const refFiles = fg.sync('references/**/*', { cwd: registryRoot, onlyFiles: true });
-  if (!refFiles.length) return;
-  if (!isAffected('references/', changedPaths)) return;
-
-  core.startGroup('References');
-  for (const refFile of refFiles) {
-    const gcsPath = refFile; // e.g. references/github/actions-catalogue.md
-    if (dryRun) {
-      core.info(`[dry-run] Would upload reference: gs://extenda-agent-artifacts/${gcsPath}`);
-    } else {
-      await upload(path.join(registryRoot, refFile), gcsPath);
-      core.info(`Reference uploaded: gs://extenda-agent-artifacts/${gcsPath}`);
-    }
-  }
-  core.endGroup();
 };
 
 const processSkills = async (registryRoot, changedPaths, dryRun) => {
@@ -116,7 +105,6 @@ const action = async () => {
   }
 
   const registryRoot = path.join(process.cwd(), AGENT_REGISTRY_PATH);
-  await processReferences(registryRoot, changedPaths, dryRun);
   await processAgents(registryRoot, changedPaths, gitSha, dryRun);
   await processMcps(registryRoot, changedPaths, dryRun);
   await processSkills(registryRoot, changedPaths, dryRun);
