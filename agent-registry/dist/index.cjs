@@ -96664,7 +96664,7 @@ var setup_gcloud_default = setupGcloud;
 var GCS_BUCKET = "extenda-agent-artifacts";
 var upload = /* @__PURE__ */ __name(async (localPath, gcsPath) => {
   const dest = `gs://${GCS_BUCKET}/${gcsPath}`;
-  await execGcloud(["storage", "cp", localPath, dest]);
+  await execGcloud(["storage", "cp", localPath, dest], "gcloud", true);
   return dest;
 }, "upload");
 
@@ -100002,10 +100002,10 @@ var registerAgent = /* @__PURE__ */ __name(async (agentId, agentYaml, dryRun) =>
   ]);
   if (exists3) {
     info(`Updating agent: ${agentId}@${version3}`);
-    await execGcloud(["agent-registry", "services", "update", agentId, ...flags, ...interfaces]);
+    await execGcloud(["agent-registry", "services", "update", agentId, ...flags, ...interfaces], "gcloud", true);
   } else {
     info(`Creating agent: ${agentId}@${version3}`);
-    await execGcloud(["agent-registry", "services", "create", agentId, ...flags, ...interfaces]);
+    await execGcloud(["agent-registry", "services", "create", agentId, ...flags, ...interfaces], "gcloud", true);
   }
   info(`Agent registered: ${agentId}@${version3}`);
 }, "registerAgent");
@@ -100863,7 +100863,7 @@ var isMajorBranch2 = /* @__PURE__ */ __name(() => {
 }, "isMajorBranch");
 var bumpVersion2 = /* @__PURE__ */ __name((version3) => {
   const [major, minor] = version3.slice(1).split("-").map(Number);
-  return isMajorBranch2() ? `v${major + 1}-0` : `v${major}-${minor + 1}`;
+  return isMajorBranch2() ? `v${major + 1}-00` : `v${major}-${String(minor + 1).padStart(2, "0")}`;
 }, "bumpVersion");
 var activate = /* @__PURE__ */ __name(async (registryId, revisionId) => {
   const revisionName = `projects/${PROJECT3}/locations/${LOCATION3}/skills/${registryId}/revisions/${revisionId}`;
@@ -100878,7 +100878,7 @@ var activate = /* @__PURE__ */ __name(async (registryId, revisionId) => {
     `--default-revision=${revisionName}`,
     "--target-state=active",
     "--quiet"
-  ]);
+  ], "gcloud", true);
 }, "activate");
 var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun) => {
   const skillContent = (0, import_node_fs7.readFileSync)(skillFilePath, "utf8");
@@ -100892,7 +100892,7 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
   }
   const exists3 = await skillExists(registryId);
   const currentVersion = exists3 ? await getLatestRevision(registryId) : null;
-  const version3 = currentVersion ? bumpVersion2(currentVersion) : "v0-1";
+  const version3 = currentVersion ? bumpVersion2(currentVersion) : "v0-01";
   const revisionId = version3;
   if (!exists3) {
     info(`Creating skill: ${registryId}@${version3}`);
@@ -100908,7 +100908,7 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
       `--description=${description}`,
       "--type=simple",
       "--quiet"
-    ]);
+    ], "gcloud", true);
   }
   const zipPath = makeZipFile(skillFilePath);
   try {
@@ -100925,7 +100925,7 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
       `--project=${PROJECT3}`,
       `--payload=${zipPath}`,
       "--quiet"
-    ]);
+    ], "gcloud", true);
   } finally {
     (0, import_node_fs7.unlinkSync)(zipPath);
   }
@@ -100967,10 +100967,7 @@ var processAgents = /* @__PURE__ */ __name(async (registryRoot, changedPaths, gi
     if (!isAffected(`agents/${agentId}/`, changedPaths)) continue;
     const agentYaml = (0, import_node_fs8.readFileSync)(import_node_path7.default.join(registryRoot, agentFile), "utf8");
     startGroup(`Agent: ${agentId}`);
-    const isLocal = /^\s*type:\s*local\s*$/m.test(agentYaml);
-    if (!isLocal) {
-      await registerAgent(agentId, agentYaml, dryRun);
-    }
+    await registerAgent(agentId, agentYaml, dryRun);
     const instructionsPath = import_node_path7.default.join(registryRoot, "agents", agentId, "instructions.md");
     if ((0, import_node_fs8.existsSync)(instructionsPath)) {
       await uploadInstructions(instructionsPath, agentId, gitSha, dryRun);

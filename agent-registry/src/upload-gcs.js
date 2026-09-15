@@ -4,7 +4,7 @@ const GCS_BUCKET = 'extenda-agent-artifacts';
 
 const upload = async (localPath, gcsPath) => {
   const dest = `gs://${GCS_BUCKET}/${gcsPath}`;
-  await execGcloud(['storage', 'cp', localPath, dest]);
+  await execGcloud(['storage', 'cp', localPath, dest], 'gcloud', true);
   return dest;
 };
 

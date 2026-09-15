@@ -77,7 +77,7 @@ describe('registerSkill', () => {
 
       expect(call(1)).toContain('create');
       expect(call(1)).toContain('my-skill');
-      expect(call(2)).toContain('v0-1');
+      expect(call(2)).toContain('v0-01');
     });
 
     test('create call includes display-name, description, type, location, project', async () => {
@@ -106,7 +106,7 @@ describe('registerSkill', () => {
 
       const activateArgs = call(3);
       expect(activateArgs).toContain(
-        '--default-revision=projects/extenda/locations/eu/skills/private-my-skill/revisions/v0-1',
+        '--default-revision=projects/extenda/locations/eu/skills/private-my-skill/revisions/v0-01',
       );
       expect(activateArgs).toContain('--target-state=active');
     });
@@ -115,29 +115,29 @@ describe('registerSkill', () => {
   describe('existing skill — minor bump (default)', () => {
     test('bumps minor from v0.1 to v0.2', async () => {
       execGcloud.mockResolvedValueOnce(''); // skillExists
-      execGcloud.mockResolvedValueOnce(revisionsList('v0-1')); // revisions list
+      execGcloud.mockResolvedValueOnce(revisionsList('v0-01')); // revisions list
       execGcloud.mockResolvedValueOnce(''); // revisions create
       execGcloud.mockResolvedValueOnce(''); // activate
 
       await registerSkill('my-skill', '/SKILL.md', false);
 
-      expect(call(2)).toContain('v0-2');
+      expect(call(2)).toContain('v0-02');
     });
 
     test('picks the highest version when multiple revisions exist', async () => {
       execGcloud.mockResolvedValueOnce('');
-      execGcloud.mockResolvedValueOnce(revisionsList('v0-1', 'v0-3', 'v0-2'));
+      execGcloud.mockResolvedValueOnce(revisionsList('v0-01', 'v0-03', 'v0-02'));
       execGcloud.mockResolvedValueOnce('');
       execGcloud.mockResolvedValueOnce('');
 
       await registerSkill('my-skill', '/SKILL.md', false);
 
-      expect(call(2)).toContain('v0-4');
+      expect(call(2)).toContain('v0-04');
     });
 
     test('uses skills revisions create (not skills create) for existing skill', async () => {
       execGcloud.mockResolvedValueOnce('');
-      execGcloud.mockResolvedValueOnce(revisionsList('v0-1'));
+      execGcloud.mockResolvedValueOnce(revisionsList('v0-01'));
       execGcloud.mockResolvedValueOnce('');
       execGcloud.mockResolvedValueOnce('');
 
@@ -154,37 +154,37 @@ describe('registerSkill', () => {
     test('bumps major on breaking/ branch', async () => {
       process.env.GITHUB_HEAD_REF = 'breaking/redesign';
       execGcloud.mockResolvedValueOnce('');
-      execGcloud.mockResolvedValueOnce(revisionsList('v2-4'));
+      execGcloud.mockResolvedValueOnce(revisionsList('v2-04'));
       execGcloud.mockResolvedValueOnce('');
       execGcloud.mockResolvedValueOnce('');
 
       await registerSkill('my-skill', '/SKILL.md', false);
 
-      expect(call(2)).toContain('v3-0');
+      expect(call(2)).toContain('v3-00');
     });
 
     test('bumps major on major/ branch', async () => {
       process.env.GITHUB_HEAD_REF = 'major/overhaul';
       execGcloud.mockResolvedValueOnce('');
-      execGcloud.mockResolvedValueOnce(revisionsList('v1-5'));
+      execGcloud.mockResolvedValueOnce(revisionsList('v1-05'));
       execGcloud.mockResolvedValueOnce('');
       execGcloud.mockResolvedValueOnce('');
 
       await registerSkill('my-skill', '/SKILL.md', false);
 
-      expect(call(2)).toContain('v2-0');
+      expect(call(2)).toContain('v2-00');
     });
 
     test('does not bump major on branch that merely contains "major" mid-word', async () => {
       process.env.GITHUB_HEAD_REF = 'fix/fix-major-bug';
       execGcloud.mockResolvedValueOnce('');
-      execGcloud.mockResolvedValueOnce(revisionsList('v0-3'));
+      execGcloud.mockResolvedValueOnce(revisionsList('v0-03'));
       execGcloud.mockResolvedValueOnce('');
       execGcloud.mockResolvedValueOnce('');
 
       await registerSkill('my-skill', '/SKILL.md', false);
 
-      expect(call(2)).toContain('v0-4');
+      expect(call(2)).toContain('v0-04');
     });
   });
 

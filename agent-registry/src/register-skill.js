@@ -75,7 +75,9 @@ const isMajorBranch = () => {
 
 const bumpVersion = (version) => {
   const [major, minor] = version.slice(1).split('-').map(Number);
-  return isMajorBranch() ? `v${major + 1}-0` : `v${major}-${minor + 1}`;
+  return isMajorBranch()
+    ? `v${major + 1}-00`
+    : `v${major}-${String(minor + 1).padStart(2, '0')}`;
 };
 
 const activate = async (registryId, revisionId) => {
@@ -85,7 +87,7 @@ const activate = async (registryId, revisionId) => {
     `--location=${LOCATION}`, `--project=${PROJECT}`,
     `--default-revision=${revisionName}`,
     '--target-state=active', '--quiet',
-  ]);
+  ], 'gcloud', true);
 };
 
 const registerSkill = async (skillId, skillFilePath, dryRun) => {
@@ -102,7 +104,7 @@ const registerSkill = async (skillId, skillFilePath, dryRun) => {
 
   const exists = await skillExists(registryId);
   const currentVersion = exists ? await getLatestRevision(registryId) : null;
-  const version = currentVersion ? bumpVersion(currentVersion) : 'v0-1';
+  const version = currentVersion ? bumpVersion(currentVersion) : 'v0-01';
   const revisionId = version;
 
   if (!exists) {
@@ -113,7 +115,7 @@ const registerSkill = async (skillId, skillFilePath, dryRun) => {
       `--location=${LOCATION}`, `--project=${PROJECT}`,
       `--display-name=${displayName}`, `--description=${description}`,
       '--type=simple', '--quiet',
-    ]);
+    ], 'gcloud', true);
   }
 
   const zipPath = makeZipFile(skillFilePath);
@@ -124,7 +126,7 @@ const registerSkill = async (skillId, skillFilePath, dryRun) => {
       `--skill=${registryId}`,
       `--location=${LOCATION}`, `--project=${PROJECT}`,
       `--payload=${zipPath}`, '--quiet',
-    ]);
+    ], 'gcloud', true);
   } finally {
     unlinkSync(zipPath);
   }

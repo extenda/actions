@@ -86,10 +86,10 @@ const registerAgent = async (agentId, agentYaml, dryRun) => {
 
   if (exists) {
     core.info(`Updating agent: ${agentId}@${version}`);
-    await execGcloud(['agent-registry', 'services', 'update', agentId, ...flags, ...interfaces]);
+    await execGcloud(['agent-registry', 'services', 'update', agentId, ...flags, ...interfaces], 'gcloud', true);
   } else {
     core.info(`Creating agent: ${agentId}@${version}`);
-    await execGcloud(['agent-registry', 'services', 'create', agentId, ...flags, ...interfaces]);
+    await execGcloud(['agent-registry', 'services', 'create', agentId, ...flags, ...interfaces], 'gcloud', true);
   }
   core.info(`Agent registered: ${agentId}@${version}`);
 };
