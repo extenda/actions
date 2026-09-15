@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { zipSync, strToU8 } from 'fflate';
 import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
+import { upload } from './upload-gcs.js';
 
 const PROJECT = 'extenda';
 const LOCATION = 'eu';
@@ -132,7 +133,8 @@ const registerSkill = async (skillId, skillFilePath, dryRun) => {
   }
 
   await activate(registryId, revisionId);
-  core.info(`Skill registered: ${registryId}@${version}`);
+  const gcsPath = await upload(skillFilePath, `skills/${skillId}/SKILL.md`);
+  core.info(`Skill registered: ${registryId}@${version} → ${gcsPath}`);
 };
 
 export { parseSkillMeta, registerSkill };

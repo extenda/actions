@@ -100930,7 +100930,8 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
     (0, import_node_fs7.unlinkSync)(zipPath);
   }
   await activate(registryId, revisionId);
-  info(`Skill registered: ${registryId}@${version3}`);
+  const gcsPath = await upload(skillFilePath, `skills/${skillId}/SKILL.md`);
+  info(`Skill registered: ${registryId}@${version3} \u2192 ${gcsPath}`);
 }, "registerSkill");
 
 // agent-registry/src/index.js
