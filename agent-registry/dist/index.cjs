@@ -99973,8 +99973,12 @@ var getAgentVersion = /* @__PURE__ */ __name(async (agentId) => {
 var registerAgent = /* @__PURE__ */ __name(async (agentId, agentYaml, dryRun) => {
   const card = load(agentYaml) ?? {};
   if (!card.url) throw new Error(`agent.yaml for '${agentId}' is missing required field: url`);
+  if (!/^https?:\/\//i.test(card.url)) throw new Error(`agent.yaml for '${agentId}': url must be an http(s) URL`);
   const displayName = card.displayName ?? agentId;
   const description = card.description ?? "";
+  for (const iface of card.interfaces ?? []) {
+    if (!iface.url) throw new Error(`agent.yaml for '${agentId}': each interface must have a url`);
+  }
   if (dryRun) {
     info(`[dry-run] Would register agent: ${agentId}`);
     return;
@@ -100037,28 +100041,29 @@ var serviceExists2 = /* @__PURE__ */ __name(async (serviceId) => {
   }
 }, "serviceExists");
 var registerMcp = /* @__PURE__ */ __name(async (mcpId, mcpYaml, dryRun) => {
-  const spec = load(mcpYaml);
-  const location = LOCATION2;
+  const spec = load(mcpYaml) ?? {};
   const displayName = spec.displayName ?? mcpId;
   const description = spec.description ?? "";
   const specType = spec.specType ?? "tool-spec";
   const specContent = JSON.stringify(spec.spec ?? {});
+  if (!spec.interfaces?.length) throw new Error(`mcp.yaml for '${mcpId}' is missing required field: interfaces`);
+  const interfaces = spec.interfaces.flatMap((iface) => {
+    if (!iface.url) throw new Error(`mcp.yaml for '${mcpId}': each interface must have a url`);
+    return [`--interfaces=protocolBinding=${iface.protocolBinding ?? "JSONRPC"},url=${iface.url}`];
+  });
   const flags = [
-    `--location=${location}`,
+    `--location=${LOCATION2}`,
     `--project=${PROJECT2}`,
     `--display-name=${displayName}`,
     `--description=${description}`,
     `--mcp-server-spec-type=${specType}`,
     `--mcp-server-spec-content=${specContent}`
   ];
-  const interfaces = (spec.interfaces ?? []).flatMap((iface) => [
-    `--interfaces=protocolBinding=${iface.protocolBinding ?? "JSONRPC"},url=${iface.url}`
-  ]);
-  const exists3 = await serviceExists2(mcpId);
   if (dryRun) {
-    info(`[dry-run] Would ${exists3 ? "update" : "create"} MCP: ${mcpId}`);
+    info(`[dry-run] Would register MCP: ${mcpId}`);
     return;
   }
+  const exists3 = await serviceExists2(mcpId);
   if (exists3) {
     info(`Updating MCP: ${mcpId}`);
     await execGcloud(["agent-registry", "services", "update", mcpId, ...flags, ...interfaces]);
@@ -100895,6 +100900,8 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
   const { name: displayName, description } = parseSkillMeta(skillContent);
   if (!displayName) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: name`);
   if (!description) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: description`);
+  const body2 = skillContent.replace(/^---\n[\s\S]*?\n---\n?/, "").trim();
+  if (!body2) throw new Error(`SKILL.md for '${skillId}' must have instructions after the frontmatter`);
   const namespacedId = clan ? `${clan}-${skillId}` : skillId;
   const registryId = `private-${namespacedId}`;
   if (dryRun) {

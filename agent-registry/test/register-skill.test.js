@@ -197,6 +197,18 @@ describe('registerSkill', () => {
       await expect(registerSkill('my-skill', '/SKILL.md', false))
         .rejects.toThrow("missing required frontmatter field: description");
     });
+
+    test('throws when skill body is empty', async () => {
+      readFileSync.mockReturnValue('---\nname: My Skill\ndescription: A description\n---\n');
+      await expect(registerSkill('my-skill', '/SKILL.md', false))
+        .rejects.toThrow("must have instructions after the frontmatter");
+    });
+
+    test('throws on empty body even in dry-run', async () => {
+      readFileSync.mockReturnValue('---\nname: My Skill\ndescription: A description\n---\n');
+      await expect(registerSkill('my-skill', '/SKILL.md', true))
+        .rejects.toThrow("must have instructions after the frontmatter");
+    });
   });
 
   describe('dry-run', () => {

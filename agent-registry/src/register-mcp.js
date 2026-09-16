@@ -19,15 +19,20 @@ const serviceExists = async (serviceId) => {
 };
 
 const registerMcp = async (mcpId, mcpYaml, dryRun) => {
-  const spec = yamlLoad(mcpYaml);
-  const location = LOCATION;
+  const spec = yamlLoad(mcpYaml) ?? {};
   const displayName = spec.displayName ?? mcpId;
   const description = spec.description ?? '';
   const specType = spec.specType ?? 'tool-spec';
   const specContent = JSON.stringify(spec.spec ?? {});
 
+  if (!spec.interfaces?.length) throw new Error(`mcp.yaml for '${mcpId}' is missing required field: interfaces`);
+  const interfaces = spec.interfaces.flatMap((iface) => {
+    if (!iface.url) throw new Error(`mcp.yaml for '${mcpId}': each interface must have a url`);
+    return [`--interfaces=protocolBinding=${iface.protocolBinding ?? 'JSONRPC'},url=${iface.url}`];
+  });
+
   const flags = [
-    `--location=${location}`,
+    `--location=${LOCATION}`,
     `--project=${PROJECT}`,
     `--display-name=${displayName}`,
     `--description=${description}`,
@@ -35,16 +40,12 @@ const registerMcp = async (mcpId, mcpYaml, dryRun) => {
     `--mcp-server-spec-content=${specContent}`,
   ];
 
-  const interfaces = (spec.interfaces ?? []).flatMap((iface) => [
-    `--interfaces=protocolBinding=${iface.protocolBinding ?? 'JSONRPC'},url=${iface.url}`,
-  ]);
-
-  const exists = await serviceExists(mcpId);
-
   if (dryRun) {
-    core.info(`[dry-run] Would ${exists ? 'update' : 'create'} MCP: ${mcpId}`);
+    core.info(`[dry-run] Would register MCP: ${mcpId}`);
     return;
   }
+
+  const exists = await serviceExists(mcpId);
 
   if (exists) {
     core.info(`Updating MCP: ${mcpId}`);

@@ -167,6 +167,30 @@ describe('register-agent', () => {
       await expect(registerAgent('my-agent', '', false))
         .rejects.toThrow();
     });
+
+    test('throws when url is not an http(s) URL', async () => {
+      const yamlBadUrl = `url: not-a-url\n`;
+      await expect(registerAgent('my-agent', yamlBadUrl, false))
+        .rejects.toThrow("url must be an http(s) URL");
+    });
+
+    test('throws when url is not an http(s) URL even in dry-run', async () => {
+      const yamlBadUrl = `url: not-a-url\n`;
+      await expect(registerAgent('my-agent', yamlBadUrl, true))
+        .rejects.toThrow("url must be an http(s) URL");
+    });
+
+    test('throws when an interface is missing url', async () => {
+      const yaml = `url: https://agent.example.com\ninterfaces:\n  - protocolBinding: a2a\n`;
+      await expect(registerAgent('my-agent', yaml, false))
+        .rejects.toThrow("each interface must have a url");
+    });
+
+    test('throws on interface missing url even in dry-run', async () => {
+      const yaml = `url: https://agent.example.com\ninterfaces:\n  - protocolBinding: a2a\n`;
+      await expect(registerAgent('my-agent', yaml, true))
+        .rejects.toThrow("each interface must have a url");
+    });
   });
 
   describe('dry-run', () => {

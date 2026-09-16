@@ -95,6 +95,8 @@ const registerSkill = async (skillId, skillFilePath, dryRun, clan) => {
   const { name: displayName, description } = parseSkillMeta(skillContent);
   if (!displayName) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: name`);
   if (!description) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: description`);
+  const body = skillContent.replace(/^---\n[\s\S]*?\n---\n?/, '').trim();
+  if (!body) throw new Error(`SKILL.md for '${skillId}' must have instructions after the frontmatter`);
   const namespacedId = clan ? `${clan}-${skillId}` : skillId;
   const registryId = `private-${namespacedId}`;
 

@@ -24,6 +24,8 @@ interfaces:
 const MCP_YAML_MINIMAL = `
 description: Minimal MCP
 spec: {}
+interfaces:
+  - url: https://mcp.example.com
 `;
 
 describe('register-mcp', () => {
@@ -96,22 +98,22 @@ describe('register-mcp', () => {
   });
 
   describe('dry-run', () => {
-    test('prints create message when MCP does not exist', async () => {
-      execGcloud.mockRejectedValueOnce(new Error('not found'));
-
+    test('logs and skips all gcloud calls', async () => {
       await registerMcp('my-mcp', MCP_YAML, true);
 
-      expect(core.info).toHaveBeenCalledWith('[dry-run] Would create MCP: my-mcp');
-      expect(execGcloud).toHaveBeenCalledTimes(1);
+      expect(core.info).toHaveBeenCalledWith('[dry-run] Would register MCP: my-mcp');
+      expect(execGcloud).not.toHaveBeenCalled();
     });
 
-    test('prints update message when MCP already exists', async () => {
-      execGcloud.mockResolvedValueOnce(undefined);
+    test('throws on missing interfaces even in dry-run', async () => {
+      await expect(registerMcp('my-mcp', 'spec: {}', true))
+        .rejects.toThrow("mcp.yaml for 'my-mcp' is missing required field: interfaces");
+    });
 
-      await registerMcp('my-mcp', MCP_YAML, true);
-
-      expect(core.info).toHaveBeenCalledWith('[dry-run] Would update MCP: my-mcp');
-      expect(execGcloud).toHaveBeenCalledTimes(1);
+    test('throws on interface missing url even in dry-run', async () => {
+      const yaml = 'interfaces:\n  - protocolBinding: JSONRPC\n';
+      await expect(registerMcp('my-mcp', yaml, true))
+        .rejects.toThrow("each interface must have a url");
     });
   });
 

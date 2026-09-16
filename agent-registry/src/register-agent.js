@@ -40,8 +40,13 @@ const getAgentVersion = async (agentId) => {
 const registerAgent = async (agentId, agentYaml, dryRun) => {
   const card = yamlLoad(agentYaml) ?? {};
   if (!card.url) throw new Error(`agent.yaml for '${agentId}' is missing required field: url`);
+  if (!/^https?:\/\//i.test(card.url)) throw new Error(`agent.yaml for '${agentId}': url must be an http(s) URL`);
   const displayName = card.displayName ?? agentId;
   const description = card.description ?? '';
+
+  for (const iface of card.interfaces ?? []) {
+    if (!iface.url) throw new Error(`agent.yaml for '${agentId}': each interface must have a url`);
+  }
 
   if (dryRun) {
     core.info(`[dry-run] Would register agent: ${agentId}`);
