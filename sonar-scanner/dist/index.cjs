@@ -537,125 +537,6 @@ in the next major version of `debug`.");
   }
 });
 
-// node_modules/has-flag/index.js
-var require_has_flag = __commonJS({
-  "node_modules/has-flag/index.js"(exports2, module2) {
-    "use strict";
-    module2.exports = (flag, argv = process.argv) => {
-      const prefix2 = flag.startsWith("-") ? "" : flag.length === 1 ? "-" : "--";
-      const position = argv.indexOf(prefix2 + flag);
-      const terminatorPosition = argv.indexOf("--");
-      return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
-    };
-  }
-});
-
-// node_modules/supports-color/index.js
-var require_supports_color = __commonJS({
-  "node_modules/supports-color/index.js"(exports2, module2) {
-    "use strict";
-    var os14 = require("os");
-    var tty = require("tty");
-    var hasFlag = require_has_flag();
-    var { env: env2 } = process;
-    var forceColor;
-    if (hasFlag("no-color") || hasFlag("no-colors") || hasFlag("color=false") || hasFlag("color=never")) {
-      forceColor = 0;
-    } else if (hasFlag("color") || hasFlag("colors") || hasFlag("color=true") || hasFlag("color=always")) {
-      forceColor = 1;
-    }
-    if ("FORCE_COLOR" in env2) {
-      if (env2.FORCE_COLOR === "true") {
-        forceColor = 1;
-      } else if (env2.FORCE_COLOR === "false") {
-        forceColor = 0;
-      } else {
-        forceColor = env2.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env2.FORCE_COLOR, 10), 3);
-      }
-    }
-    function translateLevel(level) {
-      if (level === 0) {
-        return false;
-      }
-      return {
-        level,
-        hasBasic: true,
-        has256: level >= 2,
-        has16m: level >= 3
-      };
-    }
-    __name(translateLevel, "translateLevel");
-    function supportsColor(haveStream, streamIsTTY) {
-      if (forceColor === 0) {
-        return 0;
-      }
-      if (hasFlag("color=16m") || hasFlag("color=full") || hasFlag("color=truecolor")) {
-        return 3;
-      }
-      if (hasFlag("color=256")) {
-        return 2;
-      }
-      if (haveStream && !streamIsTTY && forceColor === void 0) {
-        return 0;
-      }
-      const min = forceColor || 0;
-      if (env2.TERM === "dumb") {
-        return min;
-      }
-      if (process.platform === "win32") {
-        const osRelease = os14.release().split(".");
-        if (Number(osRelease[0]) >= 10 && Number(osRelease[2]) >= 10586) {
-          return Number(osRelease[2]) >= 14931 ? 3 : 2;
-        }
-        return 1;
-      }
-      if ("CI" in env2) {
-        if (["TRAVIS", "CIRCLECI", "APPVEYOR", "GITLAB_CI", "GITHUB_ACTIONS", "BUILDKITE"].some((sign) => sign in env2) ||
-        env2.CI_NAME === "codeship") {
-          return 1;
-        }
-        return min;
-      }
-      if ("TEAMCITY_VERSION" in env2) {
-        return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env2.TEAMCITY_VERSION) ? 1 : 0;
-      }
-      if (env2.COLORTERM === "truecolor") {
-        return 3;
-      }
-      if ("TERM_PROGRAM" in env2) {
-        const version3 = parseInt((env2.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
-        switch (env2.TERM_PROGRAM) {
-          case "iTerm.app":
-            return version3 >= 3 ? 3 : 2;
-          case "Apple_Terminal":
-            return 2;
-        }
-      }
-      if (/-256(color)?$/i.test(env2.TERM)) {
-        return 2;
-      }
-      if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env2.TERM)) {
-        return 1;
-      }
-      if ("COLORTERM" in env2) {
-        return 1;
-      }
-      return min;
-    }
-    __name(supportsColor, "supportsColor");
-    function getSupportLevel(stream6) {
-      const level = supportsColor(stream6, stream6 && stream6.isTTY);
-      return translateLevel(level);
-    }
-    __name(getSupportLevel, "getSupportLevel");
-    module2.exports = {
-      supportsColor: getSupportLevel,
-      stdout: translateLevel(supportsColor(true, tty.isatty(1))),
-      stderr: translateLevel(supportsColor(true, tty.isatty(2)))
-    };
-  }
-});
-
 // node_modules/debug/src/node.js
 var require_node = __commonJS({
   "node_modules/debug/src/node.js"(exports2, module2) {
@@ -675,7 +556,7 @@ var require_node = __commonJS({
     );
     exports2.colors = [6, 2, 3, 4, 5, 1];
     try {
-      const supportsColor = require_supports_color();
+      const supportsColor = require("supports-color");
       if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
         exports2.colors = [
           20,
@@ -36482,36 +36363,38 @@ var require_Alias = __commonJS({
           if (node.anchor === this.source)
             found = node;
         }
+        if (found && ctx) {
+          const { anchors: anchors2, doc: doc2, maxAliasCount } = ctx;
+          let data = anchors2.get(found);
+          if (!data) {
+            toJS.toJS(found, null, ctx);
+            data = anchors2.get(found);
+          }
+          if (data?.res === void 0) {
+            const msg = "This should not happen: Alias anchor was not resolved?";
+            throw new ReferenceError(msg);
+          }
+          if (maxAliasCount >= 0) {
+            data.count += 1;
+            if (data.aliasCount === 0)
+              data.aliasCount = getAliasCount(doc2, found, anchors2);
+            if (data.count * data.aliasCount > maxAliasCount) {
+              const msg = "Excessive alias count indicates a resource exhaustion attack";
+              throw new ReferenceError(msg);
+            }
+          }
+        }
         return found;
       }
       toJSON(_arg, ctx) {
         if (!ctx)
           return { source: this.source };
-        const { anchors: anchors2, doc, maxAliasCount } = ctx;
-        const source = this.resolve(doc, ctx);
+        const source = this.resolve(ctx.doc, ctx);
         if (!source) {
           const msg = `Unresolved alias (the anchor must be set before the alias): ${this.source}`;
           throw new ReferenceError(msg);
         }
-        let data = anchors2.get(source);
-        if (!data) {
-          toJS.toJS(source, null, ctx);
-          data = anchors2.get(source);
-        }
-        if (data?.res === void 0) {
-          const msg = "This should not happen: Alias anchor was not resolved?";
-          throw new ReferenceError(msg);
-        }
-        if (maxAliasCount >= 0) {
-          data.count += 1;
-          if (data.aliasCount === 0)
-            data.aliasCount = getAliasCount(doc, source, anchors2);
-          if (data.count * data.aliasCount > maxAliasCount) {
-            const msg = "Excessive alias count indicates a resource exhaustion attack";
-            throw new ReferenceError(msg);
-          }
-        }
-        return data.res;
+        return ctx.anchors.get(source).res;
       }
       toString(ctx, _onComment, _onChompKeep) {
         const src = `*${this.source}`;
@@ -40672,39 +40555,40 @@ var require_resolve_flow_scalar = __commonJS({
       }
       if (badChar)
         onError2(0, "BAD_SCALAR_START", `Plain value cannot start with ${badChar}`);
-      return foldLines(source);
+      return unfoldLines(source);
     }
     __name(plainValue, "plainValue");
     function singleQuotedValue(source, onError2) {
       if (source[source.length - 1] !== "'" || source.length === 1)
         onError2(source.length, "MISSING_CHAR", "Missing closing 'quote");
-      return foldLines(source.slice(1, -1)).replace(/''/g, "'");
+      return unfoldLines(source.slice(1, -1)).replace(/''/g, "'");
     }
     __name(singleQuotedValue, "singleQuotedValue");
-    function foldLines(source) {
-      let first2, line;
-      try {
-        first2 = new RegExp("(.*?)(?<![ 	])[ 	]*\r?\n", "sy");
-        line = new RegExp("[ 	]*(.*?)(?:(?<![ 	])[ 	]*)?\r?\n", "sy");
-      } catch {
-        first2 = /(.*?)[ \t]*\r?\n/sy;
-        line = /[ \t]*(.*?)[ \t]*\r?\n/sy;
-      }
-      let match2 = first2.exec(source);
+    function unfoldLines(source) {
+      const line = /(.*?)\r?\n/sy;
+      let match2 = line.exec(source);
       if (!match2)
         return source;
-      let res = match2[1];
+      let trimEnd2, trimBoth;
+      try {
+        trimEnd2 = new RegExp("(?<![ 	])[ 	]+$");
+        trimBoth = new RegExp("^[ 	]+|(?<![ 	])[ 	]+$", "g");
+      } catch {
+        trimEnd2 = /[ \t]+$/;
+        trimBoth = /^[ \t]+|[ \t]+$/g;
+      }
+      let res = match2[1].replace(trimEnd2, "");
       let sep8 = " ";
-      let pos = first2.lastIndex;
-      line.lastIndex = pos;
+      let pos = line.lastIndex;
       while (match2 = line.exec(source)) {
-        if (match2[1] === "") {
+        const lm = match2[1].replace(trimBoth, "");
+        if (lm === "") {
           if (sep8 === "\n")
             res += sep8;
           else
             sep8 = "\n";
         } else {
-          res += sep8 + match2[1];
+          res += sep8 + lm;
           sep8 = " ";
         }
         pos = line.lastIndex;
@@ -40714,7 +40598,7 @@ var require_resolve_flow_scalar = __commonJS({
       match2 = last2.exec(source);
       return res + sep8 + (match2?.[1] ?? "");
     }
-    __name(foldLines, "foldLines");
+    __name(unfoldLines, "unfoldLines");
     function doubleQuotedValue(source, onError2) {
       let res = "";
       for (let i2 = 1; i2 < source.length - 1; ++i2) {
@@ -56743,7 +56627,7 @@ var require_utils6 = __commonJS({
       if (!obj || typeof obj !== "object") {
         return false;
       }
-      return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
+      return !!(obj.constructor && typeof obj.constructor.isBuffer === "function" && obj.constructor.isBuffer(obj));
     }, "isBuffer");
     var combine = /* @__PURE__ */ __name(function combine2(a, b2, arrayLimit, plainObjects, throwOnLimitExceeded) {
       if (isOverflow(a)) {
@@ -56751,8 +56635,12 @@ var require_utils6 = __commonJS({
           throw new RangeError("Array limit exceeded. Only " + arrayLimit + " element" + (arrayLimit === 1 ? "" : "s") +
           " allowed in an array.");
         }
-        var newIndex = getMaxIndex(a) + 1;
-        a[newIndex] = b2;
+        var bValues = isArray2(b2) ? b2 : [b2];
+        var newIndex = getMaxIndex(a);
+        for (var i2 = 0; i2 < bValues.length; ++i2) {
+          newIndex += 1;
+          a[newIndex] = bValues[i2];
+        }
         setMaxIndex(a, newIndex);
         return a;
       }
@@ -56829,6 +56717,7 @@ var require_stringify3 = __commonJS({
       charsetSentinel: false,
       commaRoundTrip: false,
       delimiter: "&",
+      depth: Infinity,
       encode: true,
       encodeDotInKeys: false,
       encoder: utils.encode,
@@ -56849,8 +56738,11 @@ var require_stringify3 = __commonJS({
       "bigint";
     }, "isNonNullishPrimitive");
     var sentinel = {};
-    var stringify = /* @__PURE__ */ __name(function stringify2(object, prefix2, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder, filter2, sort, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset, sideChannel) {
+    var stringify = /* @__PURE__ */ __name(function stringify2(object, prefix2, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder, filter2, sort, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset, sideChannel, depth, currentDepth) {
       var obj = object;
+      if (currentDepth > depth) {
+        throw new RangeError("Input depth exceeded depth option of " + depth);
+      }
       var tmpSc = sideChannel;
       var step = 0;
       var findFlag = false;
@@ -56868,9 +56760,8 @@ var require_stringify3 = __commonJS({
           step = 0;
         }
       }
-      if (typeof filter2 === "function") {
-        obj = filter2(prefix2, obj);
-      } else if (obj instanceof Date) {
+      obj = typeof filter2 === "function" ? filter2(prefix2, obj) : obj;
+      if (obj instanceof Date) {
         obj = serializeDate(obj);
       } else if (generateArrayPrefix === "comma" && isArray2(obj)) {
         obj = utils.maybeMap(obj, function(value2) {
@@ -56913,7 +56804,7 @@ var require_stringify3 = __commonJS({
       }
       var encodedPrefix = encodeDotInKeys ? String(prefix2).replace(/\./g, "%2E") : String(prefix2);
       var adjustedPrefix = commaRoundTrip && isArray2(obj) && obj.length === 1 ? encodedPrefix + "[]" : encodedPrefix;
-      if (allowEmptyArrays && isArray2(obj) && obj.length === 0) {
+      if (allowEmptyArrays && isArray2(obj) && obj.length === 0 && Object.keys(obj).length === 0) {
         return adjustedPrefix + "[]";
       }
       for (var j2 = 0; j2 < objKeys.length; ++j2) {
@@ -56946,7 +56837,9 @@ var require_stringify3 = __commonJS({
           formatter,
           encodeValuesOnly,
           charset,
-          valueSideChannel
+          valueSideChannel,
+          depth,
+          currentDepth + 1
         ));
       }
       return values;
@@ -57002,6 +56895,7 @@ var require_stringify3 = __commonJS({
         charsetSentinel: typeof opts.charsetSentinel === "boolean" ? opts.charsetSentinel : defaults3.charsetSentinel,
         commaRoundTrip: !!opts.commaRoundTrip,
         delimiter: typeof opts.delimiter === "undefined" ? defaults3.delimiter : opts.delimiter,
+        depth: typeof opts.depth === "number" ? opts.depth : defaults3.depth,
         encode: typeof opts.encode === "boolean" ? opts.encode : defaults3.encode,
         encodeDotInKeys: typeof opts.encodeDotInKeys === "boolean" ? opts.encodeDotInKeys : defaults3.encodeDotInKeys,
         encoder: typeof opts.encoder === "function" ? opts.encoder : defaults3.encoder,
@@ -57049,9 +56943,10 @@ var require_stringify3 = __commonJS({
         if (options.skipNulls && value === null) {
           continue;
         }
+        var encodedKey = options.encodeDotInKeys ? String(key).replace(/\./g, "%2E") : String(key);
         pushToArray(keys, stringify(
           value,
-          key,
+          encodedKey,
           generateArrayPrefix,
           commaRoundTrip,
           options.allowEmptyArrays,
@@ -57067,7 +56962,9 @@ var require_stringify3 = __commonJS({
           options.formatter,
           options.encodeValuesOnly,
           options.charset,
-          sideChannel
+          sideChannel,
+          options.depth,
+          0
         ));
       }
       var joined = keys.join(options.delimiter);
@@ -57120,9 +57017,9 @@ var require_parse5 = __commonJS({
         return String.fromCharCode(parseInt(numberStr, 10));
       });
     }, "interpretNumericEntities");
-    var parseArrayValue = /* @__PURE__ */ __name(function(val, options, currentArrayLength, isFlatArrayValue) {
+    var parseArrayValue = /* @__PURE__ */ __name(function(val, options, currentArrayLength) {
       if (val && typeof val === "string" && options.comma && val.indexOf(",") > -1) {
-        if (isFlatArrayValue && options.throwOnLimitExceeded) {
+        if (options.throwOnLimitExceeded) {
           var commaCount = 0;
           var commaIndex = val.indexOf(",");
           while (commaIndex > -1) {
@@ -57192,8 +57089,7 @@ owed.");
               parseArrayValue(
                 part.slice(pos + 1),
                 options,
-                isArray2(obj[key]) ? obj[key].length : 0,
-                part.indexOf("[]=") === -1
+                isArray2(obj[key]) ? obj[key].length : 0
               ),
               function(encodedVal) {
                 return options.decoder(encodedVal, defaults3.decoder, charset, "value");
@@ -104986,23 +104882,85 @@ var { toString } = Object.prototype;
 var { getPrototypeOf } = Object;
 var { iterator, toStringTag } = Symbol;
 var hasOwnProperty = (({ hasOwnProperty: hasOwnProperty2 }) => (obj, prop) => hasOwnProperty2.call(obj, prop))(Object.prototype);
+var isUnsafeObjectKey = /* @__PURE__ */ __name((prop) => typeof prop === "string" && (prop === "__proto__" || prop === "\
+constructor" || prop === "prototype"), "isUnsafeObjectKey");
+var isPrototypeBoundary = /* @__PURE__ */ __name((obj, prototype2, source) => obj === Object.prototype || !source && prototype2 ===
+null, "isPrototypeBoundary");
+var isSafeAndFullyMutable = /* @__PURE__ */ __name((obj) => {
+  if (!Object.isExtensible(obj)) {
+    return false;
+  }
+  const props = Object.getOwnPropertyNames(obj);
+  if (Object.getOwnPropertySymbols) {
+    props.push(...Object.getOwnPropertySymbols(obj));
+  }
+  return props.every((prop) => {
+    if (isUnsafeObjectKey(prop)) {
+      return false;
+    }
+    const descriptor = Object.getOwnPropertyDescriptor(obj, prop);
+    return !!descriptor && descriptor.configurable && descriptor.writable === true;
+  });
+}, "isSafeAndFullyMutable");
 var hasOwnInPrototypeChain = /* @__PURE__ */ __name((thing, prop) => {
   let obj = thing;
   const seen = [];
-  while (obj != null && obj !== Object.prototype) {
+  while (obj != null) {
     if (seen.indexOf(obj) !== -1) {
       return false;
     }
     seen.push(obj);
+    const prototype2 = getPrototypeOf(obj);
+    if (isPrototypeBoundary(obj, prototype2, obj === thing)) {
+      return false;
+    }
     if (hasOwnProperty(obj, prop)) {
       return true;
     }
-    obj = getPrototypeOf(obj);
+    obj = prototype2;
   }
   return false;
 }, "hasOwnInPrototypeChain");
 var getSafeProp = /* @__PURE__ */ __name((obj, prop) => obj != null && hasOwnInPrototypeChain(obj, prop) ? obj[prop] : void 0,
 "getSafeProp");
+var toSafeFlatObject = /* @__PURE__ */ __name((thing) => {
+  if (thing == null || typeof thing !== "object" && typeof thing !== "function") {
+    return thing;
+  }
+  const sourcePrototype = getPrototypeOf(thing);
+  if (sourcePrototype === null && isSafeAndFullyMutable(thing)) {
+    return thing;
+  }
+  const result2 = /* @__PURE__ */ Object.create(null);
+  const merged = /* @__PURE__ */ Object.create(null);
+  const seen = [];
+  let current = thing;
+  while (current != null) {
+    if (seen.indexOf(current) !== -1) {
+      break;
+    }
+    seen.push(current);
+    const prototype2 = current === thing ? sourcePrototype : getPrototypeOf(current);
+    if (isPrototypeBoundary(current, prototype2, current === thing)) {
+      break;
+    }
+    const props = Object.getOwnPropertyNames(current);
+    if (Object.getOwnPropertySymbols) {
+      props.push(...Object.getOwnPropertySymbols(current));
+    }
+    for (const prop of props) {
+      if (isUnsafeObjectKey(prop)) {
+        continue;
+      }
+      if (!hasOwnProperty(merged, prop)) {
+        result2[prop] = thing[prop];
+        merged[prop] = true;
+      }
+    }
+    current = prototype2;
+  }
+  return result2;
+}, "toSafeFlatObject");
 var kindOf = /* @__PURE__ */ ((cache) => (thing) => {
   const str = toString.call(thing);
   return cache[str] || (cache[str] = str.slice(8, -1).toLowerCase());
@@ -105040,9 +104998,9 @@ var isPlainObject = /* @__PURE__ */ __name((val) => {
     return false;
   }
   const prototype2 = getPrototypeOf(val);
-  return (prototype2 === null || prototype2 === Object.prototype || getPrototypeOf(prototype2) === null) && // Treat any genuine (non-Object.prototype-polluted) Symbol.toStringTag or
-  // Symbol.iterator as evidence the value is a tagged/iterable type rather
-  // than a plain object, while ignoring keys injected onto Object.prototype.
+  return (prototype2 === null || prototype2 === Object.prototype || getPrototypeOf(prototype2) === null) && // Treat safe own/inherited Symbol.toStringTag or Symbol.iterator members as
+  // evidence the value is tagged/iterable, while ignoring members reachable
+  // only through shared or terminal prototype boundaries.
   !hasOwnInPrototypeChain(val, toStringTag) && !hasOwnInPrototypeChain(val, iterator);
 }, "isPlainObject");
 var isEmptyObject = /* @__PURE__ */ __name((val) => {
@@ -105463,6 +105421,7 @@ var utils_default = {
   // an alias to avoid ESLint no-prototype-builtins detection
   hasOwnInPrototypeChain,
   getSafeProp,
+  toSafeFlatObject,
   reduceDescriptors,
   freezeMethods,
   toObjectSet,
@@ -106136,24 +106095,16 @@ function toFormData(obj, formData, options) {
     throw new TypeError("target must be an object");
   }
   formData = formData || new (FormData_default || FormData)();
-  options = utils_default.toFlatObject(
-    options,
-    {
-      metaTokens: true,
-      dots: false,
-      indexes: false
-    },
-    false,
-    /* @__PURE__ */ __name(function defined(option, source) {
-      return !utils_default.isUndefined(source[option]);
-    }, "defined")
-  );
-  const metaTokens = options.metaTokens;
-  const visitor = options.visitor || defaultVisitor;
-  const dots = options.dots;
-  const indexes = options.indexes;
-  const _Blob = options.Blob || typeof Blob !== "undefined" && Blob;
-  const maxDepth = options.maxDepth === void 0 ? DEFAULT_FORM_DATA_MAX_DEPTH : options.maxDepth;
+  const option = /* @__PURE__ */ __name((name, fallback) => {
+    const value = utils_default.getSafeProp(options, name);
+    return utils_default.isUndefined(value) ? fallback : value;
+  }, "option");
+  const metaTokens = option("metaTokens", true);
+  const visitor = option("visitor") || defaultVisitor;
+  const dots = option("dots", false);
+  const indexes = option("indexes", false);
+  const _Blob = option("Blob") || typeof Blob !== "undefined" && Blob;
+  const maxDepth = option("maxDepth", DEFAULT_FORM_DATA_MAX_DEPTH);
   const useBlob = _Blob && utils_default.isSpecCompliantForm(formData);
   const stack = [];
   if (!utils_default.isFunction(visitor)) {
@@ -106177,7 +106128,10 @@ function toFormData(obj, formData, options) {
       if (Buffer_default && Buffer_default.isBufferAvailable()) {
         return Buffer_default.from(value);
       }
-      throw new AxiosError_default("Blob is not supported. Use a Buffer instead.", AxiosError_default.ERR_NOT_SUPPORT);
+      throw new AxiosError_default(
+        "Blob is not supported. Use a Buffer instead.",
+        AxiosError_default.ERR_NOT_SUPPORT
+      );
     }
     return value;
   }
@@ -106336,12 +106290,53 @@ function buildURL(url3, params, options) {
 __name(buildURL, "buildURL");
 
 // node_modules/axios/lib/core/InterceptorManager.js
+var $internals2 = /* @__PURE__ */ Symbol("internals");
+function countHandlers(handlers) {
+  return handlers ? handlers.length : 0;
+}
+__name(countHandlers, "countHandlers");
+function trimHandlers(handlers) {
+  if (!handlers) {
+    return;
+  }
+  while (handlers.length && handlers[handlers.length - 1] === null) {
+    handlers.pop();
+  }
+}
+__name(trimHandlers, "trimHandlers");
+function syncHandlerEntries(manager, internals) {
+  const handlers = manager.handlers;
+  const length = countHandlers(handlers);
+  if (handlers !== internals.handlersRef) {
+    internals.handlersRef = handlers;
+    internals.handlerEntries.clear();
+  } else if (length !== internals.handlersLength) {
+    if (!length) {
+      internals.handlerEntries.clear();
+    } else {
+      internals.handlerEntries.forEach(/* @__PURE__ */ __name(function removeStaleEntry(entry, id) {
+        if (handlers[entry.index] !== entry.handler) {
+          internals.handlerEntries.delete(id);
+        }
+      }, "removeStaleEntry"));
+    }
+  }
+  internals.handlersLength = length;
+}
+__name(syncHandlerEntries, "syncHandlerEntries");
 var InterceptorManager = class {
   static {
     __name(this, "InterceptorManager");
   }
   constructor() {
     this.handlers = [];
+    this[$internals2] = {
+      handlersRef: this.handlers,
+      handlersLength: this.handlers.length,
+      handlerEntries: /* @__PURE__ */ new Map(),
+      iterationDepth: 0,
+      nextId: 0
+    };
   }
   /**
    * Add a new interceptor to the stack
@@ -106353,13 +106348,25 @@ var InterceptorManager = class {
    * @return {Number} An ID used to remove interceptor later
    */
   use(fulfilled, rejected, options) {
-    this.handlers.push({
+    const handler2 = {
       fulfilled,
       rejected,
       synchronous: options ? options.synchronous : false,
       runWhen: options ? options.runWhen : null
+    };
+    const internals = this[$internals2];
+    if (this.handlers == null) {
+      this.handlers = [];
+    }
+    syncHandlerEntries(this, internals);
+    const id = internals.nextId++;
+    this.handlers.push(handler2);
+    internals.handlerEntries.set(id, {
+      handler: handler2,
+      index: this.handlers.length - 1
     });
-    return this.handlers.length - 1;
+    internals.handlersLength = this.handlers.length;
+    return id;
   }
   /**
    * Remove an interceptor from the stack
@@ -106369,8 +106376,19 @@ var InterceptorManager = class {
    * @returns {void}
    */
   eject(id) {
-    if (this.handlers[id]) {
-      this.handlers[id] = null;
+    const internals = this[$internals2];
+    syncHandlerEntries(this, internals);
+    const entry = internals.handlerEntries.get(id);
+    if (entry) {
+      internals.handlerEntries.delete(id);
+      if (this.handlers[entry.index] !== entry.handler) {
+        return;
+      }
+      this.handlers[entry.index] = null;
+      if (!internals.iterationDepth) {
+        trimHandlers(this.handlers);
+        internals.handlersLength = this.handlers.length;
+      }
     }
   }
   /**
@@ -106381,6 +106399,7 @@ var InterceptorManager = class {
   clear() {
     if (this.handlers) {
       this.handlers = [];
+      syncHandlerEntries(this, this[$internals2]);
     }
   }
   /**
@@ -106394,11 +106413,22 @@ var InterceptorManager = class {
    * @returns {void}
    */
   forEach(fn) {
-    utils_default.forEach(this.handlers, /* @__PURE__ */ __name(function forEachHandler(h2) {
-      if (h2 !== null) {
-        fn(h2);
+    const internals = this[$internals2];
+    syncHandlerEntries(this, internals);
+    internals.iterationDepth++;
+    try {
+      utils_default.forEach(this.handlers, /* @__PURE__ */ __name(function forEachHandler(h2) {
+        if (h2 !== null) {
+          fn(h2);
+        }
+      }, "forEachHandler"));
+    } finally {
+      if (!--internals.iterationDepth) {
+        syncHandlerEntries(this, internals);
+        trimHandlers(this.handlers);
+        internals.handlersLength = countHandlers(this.handlers);
       }
-    }, "forEachHandler"));
+    }
   }
 };
 var InterceptorManager_default = InterceptorManager;
@@ -106563,6 +106593,22 @@ function formDataToJSON(formData) {
 __name(formDataToJSON, "formDataToJSON");
 var formDataToJSON_default = formDataToJSON;
 
+// node_modules/axios/lib/core/methodList.js
+var methodList = Object.freeze([
+  "get",
+  "delete",
+  "head",
+  "options",
+  "post",
+  "put",
+  "patch",
+  "purge",
+  "link",
+  "unlink",
+  "query"
+]);
+var methodList_default = methodList;
+
 // node_modules/axios/lib/defaults/index.js
 var own = /* @__PURE__ */ __name((obj, key) => obj != null && utils_default.hasOwnProp(obj, key) ? obj[key] : void 0, "o\
 wn");
@@ -106678,7 +106724,7 @@ var defaults = {
     }
   }
 };
-utils_default.forEach(["delete", "get", "head", "post", "put", "patch", "query"], (method) => {
+utils_default.forEach(methodList_default, (method) => {
   defaults.headers[method] = {};
 });
 var defaults_default = defaults;
@@ -106764,21 +106810,22 @@ function combineURLs(baseURL, relativeURL) {
 }
 __name(combineURLs, "combineURLs");
 
-// node_modules/axios/lib/core/buildFullPath.js
-var malformedHttpProtocol = /^https?:(?!\/\/)/i;
-var httpProtocolControlCharacters = /[\t\n\r]/g;
-function stripLeadingC0ControlOrSpace(url3) {
-  let i2 = 0;
-  while (i2 < url3.length && url3.charCodeAt(i2) <= 32) {
-    i2++;
-  }
-  return url3.slice(i2);
-}
-__name(stripLeadingC0ControlOrSpace, "stripLeadingC0ControlOrSpace");
+// node_modules/axios/lib/helpers/normalizeURLForProtocolCheck.js
+var urlParserControlCharacters = /[\t\n\r]/g;
 function normalizeURLForProtocolCheck(url3) {
-  return stripLeadingC0ControlOrSpace(url3).replace(httpProtocolControlCharacters, "");
+  if (typeof url3 !== "string") {
+    return url3;
+  }
+  let start = 0;
+  while (start < url3.length && url3.charCodeAt(start) <= 32) {
+    start++;
+  }
+  return url3.slice(start).replace(urlParserControlCharacters, "");
 }
 __name(normalizeURLForProtocolCheck, "normalizeURLForProtocolCheck");
+
+// node_modules/axios/lib/core/buildFullPath.js
+var malformedHttpProtocol = /^https?:(?!\/\/)/i;
 function redactFragment(fragment) {
   if (!fragment) {
     return fragment;
@@ -106908,7 +106955,7 @@ var import_follow_redirects = __toESM(require_follow_redirects(), 1);
 var import_zlib = __toESM(require("zlib"), 1);
 
 // node_modules/axios/lib/env/data.js
-var VERSION = "1.19.0";
+var VERSION = "1.20.0";
 
 // node_modules/axios/lib/helpers/parseProtocol.js
 function parseProtocol(url3) {
@@ -106918,7 +106965,7 @@ function parseProtocol(url3) {
 __name(parseProtocol, "parseProtocol");
 
 // node_modules/axios/lib/helpers/fromDataURI.js
-var DATA_URL_PATTERN = /^([^,;]+\/[^,;]+)?((?:;[^,;=]+=[^,;]+)*)(;base64)?,([\s\S]*)$/;
+var DATA_URL_PATTERN = /^([^,;/]+\/[^,;/]+)?((?:;[^,;=]+=[^,;]+)*)(;base64)?,([\s\S]*)$/;
 function fromDataURI(uri, asBlob, options) {
   const _Blob = options && options.Blob || platform_default.classes.Blob;
   const protocol = parseProtocol(uri);
@@ -107246,6 +107293,7 @@ var Http2Sessions = class {
   }
   getSession(authority, options) {
     options = Object.assign(
+      /* @__PURE__ */ Object.create(null),
       {
         sessionTimeout: 1e3
       },
@@ -107311,6 +107359,7 @@ var Http2Sessions = class {
       };
     }
     session.once("close", removeSession);
+    session.once("error", removeSession);
     let entry = [session, options];
     authoritySessions ? authoritySessions.push(entry) : authoritySessions = this.sessions[authority] = [entry];
     return session;
@@ -107335,6 +107384,13 @@ var callbackify_default = callbackify;
 
 // node_modules/axios/lib/helpers/shouldBypassProxy.js
 var LOOPBACK_HOSTNAMES = /* @__PURE__ */ new Set(["localhost", "0.0.0.0"]);
+var trimTrailingDots = /* @__PURE__ */ __name((value) => {
+  let end = value.length;
+  while (end && value.charCodeAt(end - 1) === 46) {
+    end--;
+  }
+  return end === value.length ? value : value.slice(0, end);
+}, "trimTrailingDots");
 var isIPv4Loopback = /* @__PURE__ */ __name((host) => {
   const parts = host.split(".");
   if (parts.length !== 4) return false;
@@ -107367,7 +107423,7 @@ var normalizeIPAddress = /* @__PURE__ */ __name((host) => {
   if (h2.charAt(0) === "[" && h2.charAt(h2.length - 1) === "]") {
     h2 = h2.slice(1, -1);
   }
-  h2 = h2.replace(/\.+$/, "");
+  h2 = trimTrailingDots(h2);
   if (!/^[0-9.xXa-fA-F]+$/.test(h2)) return host;
   const parts = h2.split(".");
   if (parts.some((p2) => p2 === "")) return host;
@@ -107479,6 +107535,41 @@ var unmapIPv4MappedIPv6 = /* @__PURE__ */ __name((host) => {
   }
   return host;
 }, "unmapIPv4MappedIPv6");
+var IPV4_OCTET_RE = /^(?:0|[1-9]\d{0,2})$/;
+var ipv4ToBytes = /* @__PURE__ */ __name((host) => {
+  const parts = host.split(".");
+  return parts.length === 4 && parts.every((part) => IPV4_OCTET_RE.test(part) && Number(part) <= 255) ? parts.map(Number) :
+  null;
+}, "ipv4ToBytes");
+var IPV6_GROUP_RE = /^[0-9a-f]{1,4}$/i;
+var ipv6ToBytes = /* @__PURE__ */ __name((host) => {
+  const halves = host.split("::");
+  if (halves.length > 2) {
+    return null;
+  }
+  const groups = halves[0] ? halves[0].split(":") : [];
+  if (halves.length === 2) {
+    const rear = halves[1] ? halves[1].split(":") : [];
+    const missing = 8 - groups.length - rear.length;
+    if (missing < 1) {
+      return null;
+    }
+    groups.push(...new Array(missing).fill("0"), ...rear);
+  }
+  if (groups.length !== 8 || groups.some((group2) => !IPV6_GROUP_RE.test(group2))) {
+    return null;
+  }
+  return groups.flatMap((group2) => {
+    const value = Number.parseInt(group2, 16);
+    return [value >> 8 & 255, value & 255];
+  });
+}, "ipv6ToBytes");
+var ipToBytes = /* @__PURE__ */ __name((host) => {
+  if (typeof host !== "string" || !host) {
+    return null;
+  }
+  return host.indexOf(":") !== -1 ? ipv6ToBytes(host) : ipv4ToBytes(host);
+}, "ipToBytes");
 var normalizeNoProxyHost = /* @__PURE__ */ __name((hostname) => {
   if (!hostname) {
     return hostname;
@@ -107486,13 +107577,90 @@ var normalizeNoProxyHost = /* @__PURE__ */ __name((hostname) => {
   if (hostname.charAt(0) === "[" && hostname.charAt(hostname.length - 1) === "]") {
     hostname = hostname.slice(1, -1);
   }
-  const trimmed2 = hostname.replace(/\.+$/, "");
+  const trimmed2 = trimTrailingDots(hostname);
   const ipv4 = normalizeIPAddress(trimmed2);
   if (ipv4 !== trimmed2) {
     return ipv4;
   }
   return unmapIPv4MappedIPv6(trimmed2);
 }, "normalizeNoProxyHost");
+var normalizeCidrBase = /* @__PURE__ */ __name((input) => {
+  let base = input;
+  const startsBracket = base.charAt(0) === "[";
+  const endsBracket = base.charAt(base.length - 1) === "]";
+  const hasBracket = base.includes("[") || base.includes("]");
+  if (startsBracket || endsBracket) {
+    if (!startsBracket || !endsBracket) {
+      return null;
+    }
+    base = base.slice(1, -1);
+    if (base.indexOf(":") === -1 || base.includes("[") || base.includes("]")) {
+      return null;
+    }
+  } else if (hasBracket) {
+    return null;
+  }
+  if (!base || base.charAt(base.length - 1) === ".") {
+    return null;
+  }
+  const wasIPv6 = base.indexOf(":") !== -1;
+  if (wasIPv6) {
+    try {
+      base = new URL(`http://[${base}]/`).hostname.slice(1, -1);
+    } catch (_err) {
+      return null;
+    }
+  } else {
+    base = normalizeIPAddress(base);
+    if (!ipv4ToBytes(base)) {
+      return null;
+    }
+  }
+  return { normalized: unmapIPv4MappedIPv6(base), wasIPv6 };
+}, "normalizeCidrBase");
+var CIDR_ENTRY_RE = /^(.+)\/(0|[1-9]\d{0,2})$/;
+var parseCidrEntry = /* @__PURE__ */ __name((entry) => {
+  if (entry.indexOf("/") === -1) {
+    return void 0;
+  }
+  const match2 = CIDR_ENTRY_RE.exec(entry);
+  if (!match2) {
+    return null;
+  }
+  let prefix2 = Number(match2[2]);
+  const parsedBase = normalizeCidrBase(match2[1]);
+  if (!parsedBase) {
+    return null;
+  }
+  const { normalized, wasIPv6 } = parsedBase;
+  if (wasIPv6 && normalized.indexOf(":") === -1) {
+    if (prefix2 < 96) {
+      return null;
+    }
+    prefix2 -= 96;
+  }
+  const bytes = ipToBytes(normalized);
+  if (!bytes || prefix2 > bytes.length * 8) {
+    return null;
+  }
+  return { bytes, prefix: prefix2 };
+}, "parseCidrEntry");
+var isInSubnet = /* @__PURE__ */ __name((addressBytes, networkBytes, prefix2) => {
+  const fullBytes = prefix2 >> 3;
+  for (let i2 = 0; i2 < fullBytes; i2++) {
+    if (addressBytes[i2] !== networkBytes[i2]) {
+      return false;
+    }
+  }
+  const remainingBits = prefix2 & 7;
+  if (remainingBits) {
+    const mask = 255 << 8 - remainingBits & 255;
+    if ((addressBytes[fullBytes] & mask) !== (networkBytes[fullBytes] & mask)) {
+      return false;
+    }
+  }
+  return true;
+}, "isInSubnet");
 function shouldBypassProxy(location) {
   let parsed;
   try {
@@ -107509,12 +107677,18 @@ function shouldBypassProxy(location) {
   }
   const port = Number.parseInt(parsed.port, 10) || DEFAULT_PORTS2[parsed.protocol.split(":", 1)[0]] || 0;
   const hostname = normalizeNoProxyHost(parsed.hostname.toLowerCase());
+  const hostnameBytes = ipToBytes(hostname);
   return noProxy.split(/[\s,]+/).some((entry) => {
     if (!entry) {
       return false;
     }
     if (entry === "*") {
       return true;
+    }
+    const cidr = parseCidrEntry(entry);
+    if (cidr !== void 0) {
+      return cidr !== null && !!hostnameBytes && hostnameBytes.length === cidr.bytes.length && isInSubnet(hostnameBytes,
+      cidr.bytes, cidr.prefix);
     }
     let [entryHost, entryPort] = parseNoProxyEntry(entry);
     entryHost = normalizeNoProxyHost(entryHost);
@@ -107603,7 +107777,8 @@ function throttle(fn, freq) {
     }
   }, "throttled");
   const flush = /* @__PURE__ */ __name(() => lastArgs && invoke(lastArgs), "flush");
-  return [throttled, flush];
+  const flushWith = /* @__PURE__ */ __name((...args) => invoke(args), "flushWith");
+  return [throttled, flush, flushWith];
 }
 __name(throttle, "throttle");
 var throttle_default = throttle;
@@ -107613,7 +107788,7 @@ var progressEventReducer = /* @__PURE__ */ __name((listener, isDownloadStream, f
   let bytesNotified = 0;
   const _speedometer = speedometer_default(50, 250);
   return throttle_default((e) => {
-    if (!e || typeof e.loaded !== "number") {
+    if (!e || !utils_default.isNumber(e.loaded)) {
       return;
     }
     const rawLoaded = e.loaded;
@@ -107781,6 +107956,13 @@ var { http: httpFollow, https: httpsFollow } = import_follow_redirects.default;
 var isHttps = /https:?/;
 var kAxiosSocketListener = /* @__PURE__ */ Symbol("axios.http.socketListener");
 var kAxiosCurrentReq = /* @__PURE__ */ Symbol("axios.http.currentReq");
+function handleSocketError(err) {
+  const current = this[kAxiosCurrentReq];
+  if (current && !current.destroyed) {
+    current.destroy(err);
+  }
+}
+__name(handleSocketError, "handleSocketError");
 var kAxiosInstalledTunnel = /* @__PURE__ */ Symbol("axios.http.installedTunnel");
 var tunnelingAgentCache = /* @__PURE__ */ new Map();
 var tunnelingAgentCacheUser = /* @__PURE__ */ new WeakMap();
@@ -107893,10 +108075,10 @@ function isSameOriginRedirect(redirectOptions, requestDetails) {
   }
 }
 __name(isSameOriginRedirect, "isSameOriginRedirect");
-function setProxy(options, configProxy, location, isRedirect, configHttpsAgent, configHttpAgent) {
+function setProxy(options, configProxy, location, isRedirect, configHttpsAgent, configHttpAgent, allowEnvProxy = true) {
   let proxy = configProxy;
   const proxyEnvAgent = getProxyEnvAgent(options, configHttpAgent, configHttpsAgent);
-  if (!proxy && proxy !== false && !isNodeEnvProxyEnabled(proxyEnvAgent)) {
+  if (!proxy && proxy !== false && allowEnvProxy && !isNodeEnvProxyEnabled(proxyEnvAgent)) {
     const proxyUrl = getProxyForUrl(location);
     if (proxyUrl) {
       if (!shouldBypassProxy(location)) {
@@ -107995,9 +108177,13 @@ function setProxy(options, configProxy, location, isRedirect, configHttpsAgent, 
       redirectOptions.href,
       true,
       configHttpsAgent,
-      configHttpAgent
+      configHttpAgent,
+      allowEnvProxy
     );
   }, "beforeRedirect");
+  return Boolean(
+    proxy || configProxy !== false && allowEnvProxy && isNodeEnvProxyEnabled(proxyEnvAgent)
+  );
 }
 __name(setProxy, "setProxy");
 var isHttpAdapterSupported = typeof process !== "undefined" && utils_default.kindOf(process) === "process";
@@ -108023,7 +108209,7 @@ var wrapAsync = /* @__PURE__ */ __name((asyncExecutor) => {
 }, "wrapAsync");
 var resolveFamily = /* @__PURE__ */ __name(({ address, family }) => {
   if (!utils_default.isString(address)) {
-    throw TypeError("address must be a string");
+    throw new AxiosError_default("address must be a string", AxiosError_default.ERR_BAD_OPTION_VALUE);
   }
   return {
     address,
@@ -108032,6 +108218,31 @@ var resolveFamily = /* @__PURE__ */ __name(({ address, family }) => {
 }, "resolveFamily");
 var buildAddressEntry = /* @__PURE__ */ __name((address, family) => resolveFamily(utils_default.isObject(address) ? address :
 { address, family }), "buildAddressEntry");
+var normalizedLookupCache = /* @__PURE__ */ new WeakMap();
+var normalizeLookup = /* @__PURE__ */ __name((lookup) => {
+  let normalized = normalizedLookupCache.get(lookup);
+  if (normalized) {
+    return normalized;
+  }
+  const callbackLookup = callbackify_default(lookup, (value) => utils_default.isArray(value) ? value : [value]);
+  normalized = /* @__PURE__ */ __name((hostname, opt, cb) => {
+    callbackLookup(hostname, opt, (err, arg0, arg1) => {
+      if (err) {
+        return cb(err);
+      }
+      let addresses;
+      try {
+        addresses = utils_default.isArray(arg0) ? arg0.map((addr) => buildAddressEntry(addr)) : [buildAddressEntry(arg0,
+        arg1)];
+      } catch (error2) {
+        return cb(error2);
+      }
+      opt.all ? cb(err, addresses) : cb(err, addresses[0].address, addresses[0].family);
+    });
+  }, "normalized");
+  normalizedLookupCache.set(lookup, normalized);
+  return normalized;
+}, "normalizeLookup");
 var http2Transport = {
   request(options, cb) {
     const authority = options.protocol + "//" + options.hostname + ":" + (options.port || (options.protocol === "https:" ?
@@ -108069,6 +108280,7 @@ var http_default = isHttpAdapterSupported && /* @__PURE__ */ __name(function htt
     let family = own2("family");
     let httpVersion = own2("httpVersion");
     if (httpVersion === void 0) httpVersion = 1;
+    const rawHttpVersion = httpVersion;
     let http2Options = own2("http2Options");
     const httpAgent = own2("httpAgent");
     const httpsAgent = own2("httpsAgent");
@@ -108085,26 +108297,32 @@ var http_default = isHttpAdapterSupported && /* @__PURE__ */ __name(function htt
     let rejected = false;
     let req;
     let connectPhaseTimer;
-    httpVersion = +httpVersion;
+    try {
+      httpVersion = +httpVersion;
+    } catch (err) {
+      throw new AxiosError_default(
+        "Invalid protocol version: value is not a number",
+        AxiosError_default.ERR_BAD_OPTION_VALUE,
+        config
+      );
+    }
     if (Number.isNaN(httpVersion)) {
-      throw TypeError(`Invalid protocol version: '${config.httpVersion}' is not a number`);
+      throw new AxiosError_default(
+        `Invalid protocol version: '${rawHttpVersion}' is not a number`,
+        AxiosError_default.ERR_BAD_OPTION_VALUE,
+        config
+      );
     }
     if (httpVersion !== 1 && httpVersion !== 2) {
-      throw TypeError(`Unsupported protocol version '${httpVersion}'`);
+      throw new AxiosError_default(
+        `Unsupported protocol version '${httpVersion}'`,
+        AxiosError_default.ERR_BAD_OPTION_VALUE,
+        config
+      );
     }
     const isHttp2 = httpVersion === 2;
     if (lookup) {
-      const _lookup = callbackify_default(lookup, (value) => utils_default.isArray(value) ? value : [value]);
-      lookup = /* @__PURE__ */ __name((hostname, opt, cb) => {
-        _lookup(hostname, opt, (err, arg0, arg1) => {
-          if (err) {
-            return cb(err);
-          }
-          const addresses = utils_default.isArray(arg0) ? arg0.map((addr) => buildAddressEntry(addr)) : [buildAddressEntry(
-          arg0, arg1)];
-          opt.all ? cb(err, addresses) : cb(err, addresses[0].address, addresses[0].family);
-        });
-      }, "lookup");
+      lookup = normalizeLookup(lookup);
     }
     const abortEmitter = new import_events.EventEmitter();
     function abort(reason) {
@@ -108352,6 +108570,9 @@ var http_default = isHttpAdapterSupported && /* @__PURE__ */ __name(function htt
       true ? ACCEPT_ENCODING_WITH_ZSTD : ACCEPT_ENCODING,
       false
     );
+    if (isHttp2 && lookup) {
+      http2Options = Object.assign(/* @__PURE__ */ Object.create(null), http2Options, { lookup });
+    }
     const options = Object.assign(/* @__PURE__ */ Object.create(null), {
       path: path23,
       method,
@@ -108362,9 +108583,11 @@ var http_default = isHttpAdapterSupported && /* @__PURE__ */ __name(function htt
       family,
       beforeRedirect: dispatchBeforeRedirect,
       beforeRedirects: /* @__PURE__ */ Object.create(null),
-      http2Options
+      http2Options,
+      createConnection: void 0
     });
     !utils_default.isUndefined(lookup) && (options.lookup = lookup);
+    let proxyApplied = false;
     if (socketPath) {
       if (typeof socketPath !== "string") {
         return reject(
@@ -108392,13 +108615,17 @@ var http_default = isHttpAdapterSupported && /* @__PURE__ */ __name(function htt
     } else {
       options.hostname = parsed.hostname.startsWith("[") ? parsed.hostname.slice(1, -1) : parsed.hostname;
       options.port = parsed.port;
-      setProxy(
+      proxyApplied = setProxy(
         options,
         configProxy,
         protocol + "//" + parsed.hostname + (parsed.port ? ":" + parsed.port : "") + options.path,
         false,
         httpsAgent,
-        httpAgent
+        httpAgent,
+        // The HTTP/2 transport connects independently of HTTP/1 agents, so it
+        // cannot apply either axios-resolved or agent-local environment proxies.
+        // Explicit proxy config is still processed and rejected below.
+        !isHttp2
       );
     }
     let transport;
@@ -108409,6 +108636,15 @@ var http_default = isHttpAdapterSupported && /* @__PURE__ */ __name(function htt
       options.agent = isHttpsRequest ? httpsAgent : httpAgent;
     }
     if (isHttp2) {
+      if (proxyApplied) {
+        return reject(
+          new AxiosError_default(
+            "HTTP/2 requests with a proxy are not supported",
+            AxiosError_default.ERR_NOT_SUPPORT,
+            config
+          )
+        );
+      }
       transport = http2Transport;
     } else {
       const configTransport = own2("transport");
@@ -108496,7 +108732,11 @@ var http_default = isHttpAdapterSupported && /* @__PURE__ */ __name(function htt
             transformStream,
             progressEventDecorator(
               responseLength,
-              progressEventReducer(asyncDecorator(onDownloadProgress, scheduleProgress), true, 3)
+              progressEventReducer(
+                asyncDecorator(onDownloadProgress, scheduleProgress),
+                true,
+                3
+              )
             )
           )
         );
@@ -108646,12 +108886,7 @@ var http_default = isHttpAdapterSupported && /* @__PURE__ */ __name(function htt
         socket.setKeepAlive(true, 1e3 * 60);
       }
       if (!socket[kAxiosSocketListener]) {
-        socket.on("error", /* @__PURE__ */ __name(function handleSocketError(err) {
-          const current = socket[kAxiosCurrentReq];
-          if (current && !current.destroyed) {
-            current.destroy(err);
-          }
-        }, "handleSocketError"));
+        socket.on("error", handleSocketError);
         socket[kAxiosSocketListener] = true;
       }
       socket[kAxiosCurrentReq] = req;
@@ -108903,7 +109138,7 @@ function mergeConfig(config1, config2) {
     transformResponse: defaultToConfig2,
     paramsSerializer: defaultToConfig2,
     timeout: defaultToConfig2,
-    timeoutMessage: defaultToConfig2,
+    timeoutErrorMessage: defaultToConfig2,
     withCredentials: defaultToConfig2,
     withXSRFToken: defaultToConfig2,
     adapter: defaultToConfig2,
@@ -108983,11 +109218,12 @@ function resolveConfig(config) {
     }
   }
   if (utils_default.isFormData(data)) {
+    const getHeaders = utils_default.getSafeProp(data, "getHeaders");
     if (platform_default.hasStandardBrowserEnv || platform_default.hasStandardBrowserWebWorkerEnv || utils_default.isReactNative(
     data)) {
       headers.setContentType(void 0);
-    } else if (utils_default.isFunction(data.getHeaders)) {
-      setFormDataHeaders(headers, data.getHeaders(), own2("formDataHeaderPolicy"));
+    } else if (utils_default.isFunction(getHeaders)) {
+      setFormDataHeaders(headers, getHeaders.call(data), own2("formDataHeaderPolicy"));
     }
   }
   if (platform_default.hasStandardBrowserEnv) {
@@ -109017,7 +109253,7 @@ var xhr_default = isXHRAdapterSupported && function(config) {
     let { responseType, onUploadProgress, onDownloadProgress } = _config;
     let onCanceled;
     let uploadThrottled, downloadThrottled;
-    let flushUpload, flushDownload;
+    let flushUpload, flushDownload, flushDownloadWithEvent;
     function done() {
       flushUpload && flushUpload();
       flushDownload && flushDownload();
@@ -109028,7 +109264,28 @@ var xhr_default = isXHRAdapterSupported && function(config) {
     let request2 = new XMLHttpRequest();
     request2.open(_config.method.toUpperCase(), _config.url, true);
     request2.timeout = _config.timeout;
-    function onloadend() {
+    function onloadend(event) {
+      if (!request2) {
+        return;
+      }
+      if (request2.status === 0 && (parseProtocol(normalizeURLForProtocolCheck(_config.url)) || parseProtocol(platform_default.
+      origin)) !== "file" && !(request2.responseURL && request2.responseURL.startsWith("file:"))) {
+        reject(new AxiosError_default("Request aborted", AxiosError_default.ECONNABORTED, config, request2));
+        done();
+        request2 = null;
+        return;
+      }
+      try {
+        if (event) {
+          flushDownloadWithEvent && flushDownloadWithEvent(event);
+        } else {
+          flushDownload && flushDownload();
+        }
+      } catch (err) {
+        setTimeout(() => {
+          throw err;
+        });
+      }
       if (!request2) {
         return;
       }
@@ -109118,7 +109375,10 @@ var xhr_default = isXHRAdapterSupported && function(config) {
       request2.responseType = _config.responseType;
     }
     if (onDownloadProgress) {
-      [downloadThrottled, flushDownload] = progressEventReducer(onDownloadProgress, true);
+      [downloadThrottled, flushDownload, flushDownloadWithEvent] = progressEventReducer(
+        onDownloadProgress,
+        true
+      );
       request2.addEventListener("progress", downloadThrottled);
     }
     if (onUploadProgress && request2.upload) {
@@ -109288,6 +109548,17 @@ var trackStream = /* @__PURE__ */ __name((stream6, chunkSize, onProgress, onFini
 
 // node_modules/axios/lib/adapters/fetch.js
 var DEFAULT_CHUNK_SIZE = 64 * 1024;
+var DEFAULT_REQUEST_OPTIONS = {
+  cache: "default",
+  redirect: "follow",
+  referrer: "about:client",
+  referrerPolicy: "",
+  mode: "cors",
+  integrity: "",
+  keepalive: false,
+  priority: "auto",
+  window: null
+};
 var { isFunction: isFunction2 } = utils_default;
 var encodeUTF82 = /* @__PURE__ */ __name((str) => encodeURIComponent(str).replace(
   /%([0-9A-F]{2})/gi,
@@ -109420,7 +109691,8 @@ var factory = /* @__PURE__ */ __name((env2) => {
       withCredentials = "same-origin",
       fetchOptions,
       maxContentLength,
-      maxBodyLength
+      maxBodyLength,
+      maxRedirects
     } = resolveConfig_default(config);
     const hasMaxContentLength = utils_default.isNumber(maxContentLength) && maxContentLength > -1;
     const hasMaxBodyLength = utils_default.isNumber(maxBodyLength) && maxBodyLength > -1;
@@ -109553,17 +109825,44 @@ var factory = /* @__PURE__ */ __name((env2) => {
         }
       }
       headers.set("User-Agent", "axios/" + VERSION, false);
-      const resolvedOptions = {
-        ...fetchOptions,
+      const safeFetchOptions = fetchOptions == null ? fetchOptions : Object.assign(/* @__PURE__ */ Object.create(null), fetchOptions);
+      if (safeFetchOptions) {
+        delete safeFetchOptions.body;
+        delete safeFetchOptions.headers;
+        delete safeFetchOptions.method;
+        delete safeFetchOptions.signal;
+        delete safeFetchOptions.duplex;
+        delete safeFetchOptions.credentials;
+      }
+      const resolvedOptions = Object.assign(/* @__PURE__ */ Object.create(null), safeFetchOptions, {
         signal: composedSignal,
         method: method.toUpperCase(),
         headers: toByteStringHeaderObject(headers.normalize()),
         body: data,
         duplex: "half",
         credentials: isCredentialsSupported ? withCredentials : void 0
-      };
+      });
+      if (isRequestSupported) {
+        utils_default.forEach(DEFAULT_REQUEST_OPTIONS, (value, key) => {
+          if (resolvedOptions[key] === void 0) {
+            resolvedOptions[key] = value;
+          }
+        });
+        if (resolvedOptions.signal === void 0) {
+          resolvedOptions.signal = null;
+        }
+        if (resolvedOptions.body === void 0) {
+          resolvedOptions.body = null;
+        }
+      }
+      if (maxRedirects === 0) {
+        resolvedOptions.redirect = "manual";
+        if (safeFetchOptions) {
+          safeFetchOptions.redirect = "manual";
+        }
+      }
       request2 = isRequestSupported && new Request(url3, resolvedOptions);
-      let response = await (isRequestSupported ? _fetch(request2, fetchOptions) : _fetch(url3, resolvedOptions));
+      let response = await (isRequestSupported ? _fetch(request2, safeFetchOptions) : _fetch(url3, resolvedOptions));
       const responseHeaders = AxiosHeaders_default.from(response.headers);
       if (hasMaxContentLength) {
         const declaredLength = utils_default.toFiniteNumber(responseHeaders.getContentLength());
@@ -109788,9 +110087,10 @@ function throwIfCancellationRequested(config) {
   }
 }
 __name(throwIfCancellationRequested, "throwIfCancellationRequested");
-function dispatchRequest(config) {
+function dispatchRequest(_config) {
+  const config = utils_default.toSafeFlatObject(_config);
   throwIfCancellationRequested(config);
-  config.headers = AxiosHeaders_default.from(config.headers);
+  config.headers = AxiosHeaders_default.from(utils_default.getSafeProp(config, "headers"));
   config.data = transformData.call(config, config.transformRequest);
   if (["post", "put", "patch"].indexOf(config.method) !== -1) {
     config.headers.setContentType("application/x-www-form-urlencoded", false);
@@ -109926,16 +110226,15 @@ var Axios = class {
       return await this._request(configOrUrl, config);
     } catch (err) {
       if (err instanceof Error) {
-        let dummy = {};
-        Error.captureStackTrace ? Error.captureStackTrace(dummy) : dummy = new Error();
-        const stack = (() => {
-          if (!dummy.stack) {
-            return "";
-          }
-          const firstNewlineIndex = dummy.stack.indexOf("\n");
-          return firstNewlineIndex === -1 ? "" : dummy.stack.slice(firstNewlineIndex + 1);
-        })();
         try {
+          let dummy = {};
+          Error.captureStackTrace ? Error.captureStackTrace(dummy) : dummy = new Error();
+          const dummyStack = dummy.stack;
+          let stack = "";
+          if (typeof dummyStack === "string") {
+            const firstNewlineIndex = dummyStack.indexOf("\n");
+            stack = firstNewlineIndex === -1 ? "" : dummyStack.slice(firstNewlineIndex + 1);
+          }
           if (!err.stack) {
             err.stack = stack;
           } else if (stack) {
@@ -110005,9 +110304,10 @@ var Axios = class {
       },
       true
     );
-    config.method = (config.method || this.defaults.method || "get").toLowerCase();
+    config.method = (utils_default.getSafeProp(config, "method") || utils_default.getSafeProp(this.defaults, "method") ||
+    "get").toLowerCase();
     let contextHeaders = headers && utils_default.merge(headers.common, headers[config.method]);
-    headers && utils_default.forEach(["delete", "get", "head", "post", "put", "patch", "query", "common"], (method) => {
+    headers && utils_default.forEach(methodList_default.concat("common"), (method) => {
       delete headers[method];
     });
     config.headers = AxiosHeaders_default.concat(contextHeaders, headers);
@@ -110276,14 +110576,22 @@ var HttpStatusCode = {
   Gone: 410,
   LengthRequired: 411,
   PreconditionFailed: 412,
+  /**
+   * @deprecated Use `ContentTooLarge` instead.
+   */
   PayloadTooLarge: 413,
+  ContentTooLarge: 413,
   UriTooLong: 414,
   UnsupportedMediaType: 415,
   RangeNotSatisfiable: 416,
   ExpectationFailed: 417,
   ImATeapot: 418,
   MisdirectedRequest: 421,
+  /**
+   * @deprecated Use `UnprocessableContent` instead.
+   */
   UnprocessableEntity: 422,
+  UnprocessableContent: 422,
   Locked: 423,
   FailedDependency: 424,
   TooEarly: 425,
@@ -110312,7 +110620,9 @@ var HttpStatusCode = {
   InvalidSslCertificate: 526
 };
 Object.entries(HttpStatusCode).forEach(([key, value]) => {
-  HttpStatusCode[value] = key;
+  if (HttpStatusCode[value] === void 0) {
+    HttpStatusCode[value] = key;
+  }
 });
 var HttpStatusCode_default = HttpStatusCode;
 
@@ -149332,26 +149642,26 @@ __name(saveCache, "saveCache");
 
 // node_modules/@actions/cache/lib/generated/results/api/v1/cache.js
 var import_runtime_rpc = __toESM(require_commonjs2(), 1);
-var import_runtime353 = __toESM(require_commonjs(), 1);
 var import_runtime354 = __toESM(require_commonjs(), 1);
 var import_runtime355 = __toESM(require_commonjs(), 1);
 var import_runtime356 = __toESM(require_commonjs(), 1);
 var import_runtime357 = __toESM(require_commonjs(), 1);
+var import_runtime358 = __toESM(require_commonjs(), 1);
 
 // node_modules/@actions/cache/lib/generated/results/entities/v1/cachemetadata.js
-var import_runtime347 = __toESM(require_commonjs(), 1);
 var import_runtime348 = __toESM(require_commonjs(), 1);
 var import_runtime349 = __toESM(require_commonjs(), 1);
 var import_runtime350 = __toESM(require_commonjs(), 1);
 var import_runtime351 = __toESM(require_commonjs(), 1);
+var import_runtime352 = __toESM(require_commonjs(), 1);
 
 // node_modules/@actions/cache/lib/generated/results/entities/v1/cachescope.js
-var import_runtime341 = __toESM(require_commonjs(), 1);
 var import_runtime342 = __toESM(require_commonjs(), 1);
 var import_runtime343 = __toESM(require_commonjs(), 1);
 var import_runtime344 = __toESM(require_commonjs(), 1);
 var import_runtime345 = __toESM(require_commonjs(), 1);
-var CacheScope$Type = class extends import_runtime345.MessageType {
+var import_runtime346 = __toESM(require_commonjs(), 1);
+var CacheScope$Type = class extends import_runtime346.MessageType {
   static {
     __name(this, "CacheScope$Type");
   }
@@ -149375,9 +149685,9 @@ var CacheScope$Type = class extends import_runtime345.MessageType {
   }
   create(value) {
     const message = { scope: "", permission: "0" };
-    globalThis.Object.defineProperty(message, import_runtime344.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime345.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime343.reflectionMergePartial)(this, message, value);
+      (0, import_runtime344.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -149399,26 +149709,26 @@ var CacheScope$Type = class extends import_runtime345.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime342.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime343.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.scope !== "")
-      writer.tag(1, import_runtime341.WireType.LengthDelimited).string(message.scope);
+      writer.tag(1, import_runtime342.WireType.LengthDelimited).string(message.scope);
     if (message.permission !== "0")
-      writer.tag(2, import_runtime341.WireType.Varint).int64(message.permission);
+      writer.tag(2, import_runtime342.WireType.Varint).int64(message.permission);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime342.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime343.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CacheScope = new CacheScope$Type();
 
 // node_modules/@actions/cache/lib/generated/results/entities/v1/cachemetadata.js
-var CacheMetadata$Type = class extends import_runtime351.MessageType {
+var CacheMetadata$Type = class extends import_runtime352.MessageType {
   static {
     __name(this, "CacheMetadata$Type");
   }
@@ -149436,9 +149746,9 @@ var CacheMetadata$Type = class extends import_runtime351.MessageType {
   }
   create(value) {
     const message = { repositoryId: "0", scope: [] };
-    globalThis.Object.defineProperty(message, import_runtime350.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime351.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime349.reflectionMergePartial)(this, message, value);
+      (0, import_runtime350.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -149460,27 +149770,27 @@ var CacheMetadata$Type = class extends import_runtime351.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime348.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime349.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.repositoryId !== "0")
-      writer.tag(1, import_runtime347.WireType.Varint).int64(message.repositoryId);
+      writer.tag(1, import_runtime348.WireType.Varint).int64(message.repositoryId);
     for (let i2 = 0; i2 < message.scope.length; i2++)
-      CacheScope.internalBinaryWrite(message.scope[i2], writer.tag(2, import_runtime347.WireType.LengthDelimited).fork(),
+      CacheScope.internalBinaryWrite(message.scope[i2], writer.tag(2, import_runtime348.WireType.LengthDelimited).fork(),
       options).join();
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime348.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime349.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CacheMetadata = new CacheMetadata$Type();
 
 // node_modules/@actions/cache/lib/generated/results/api/v1/cache.js
-var CreateCacheEntryRequest$Type = class extends import_runtime357.MessageType {
+var CreateCacheEntryRequest$Type = class extends import_runtime358.MessageType {
   static {
     __name(this, "CreateCacheEntryRequest$Type");
   }
@@ -149505,9 +149815,9 @@ var CreateCacheEntryRequest$Type = class extends import_runtime357.MessageType {
   }
   create(value) {
     const message = { key: "", version: "" };
-    globalThis.Object.defineProperty(message, import_runtime356.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime357.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime355.reflectionMergePartial)(this, message, value);
+      (0, import_runtime356.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -149533,27 +149843,27 @@ var CreateCacheEntryRequest$Type = class extends import_runtime357.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime354.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime355.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime353.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime354.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime353.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime354.WireType.LengthDelimited).string(message.key);
     if (message.version !== "")
-      writer.tag(3, import_runtime353.WireType.LengthDelimited).string(message.version);
+      writer.tag(3, import_runtime354.WireType.LengthDelimited).string(message.version);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime354.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime355.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CreateCacheEntryRequest = new CreateCacheEntryRequest$Type();
-var CreateCacheEntryResponse$Type = class extends import_runtime357.MessageType {
+var CreateCacheEntryResponse$Type = class extends import_runtime358.MessageType {
   static {
     __name(this, "CreateCacheEntryResponse$Type");
   }
@@ -149584,9 +149894,9 @@ var CreateCacheEntryResponse$Type = class extends import_runtime357.MessageType 
   }
   create(value) {
     const message = { ok: false, signedUploadUrl: "", message: "" };
-    globalThis.Object.defineProperty(message, import_runtime356.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime357.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime355.reflectionMergePartial)(this, message, value);
+      (0, import_runtime356.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -149612,26 +149922,26 @@ var CreateCacheEntryResponse$Type = class extends import_runtime357.MessageType 
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime354.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime355.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime353.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime354.WireType.Varint).bool(message.ok);
     if (message.signedUploadUrl !== "")
-      writer.tag(2, import_runtime353.WireType.LengthDelimited).string(message.signedUploadUrl);
+      writer.tag(2, import_runtime354.WireType.LengthDelimited).string(message.signedUploadUrl);
     if (message.message !== "")
-      writer.tag(3, import_runtime353.WireType.LengthDelimited).string(message.message);
+      writer.tag(3, import_runtime354.WireType.LengthDelimited).string(message.message);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime354.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime355.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var CreateCacheEntryResponse = new CreateCacheEntryResponse$Type();
-var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime357.MessageType {
+var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime358.MessageType {
   static {
     __name(this, "FinalizeCacheEntryUploadRequest$Type");
   }
@@ -149663,9 +149973,9 @@ var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime357.Messa
   }
   create(value) {
     const message = { key: "", sizeBytes: "0", version: "" };
-    globalThis.Object.defineProperty(message, import_runtime356.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime357.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime355.reflectionMergePartial)(this, message, value);
+      (0, import_runtime356.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -149695,29 +150005,29 @@ var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime357.Messa
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime354.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime355.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime353.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime354.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime353.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime354.WireType.LengthDelimited).string(message.key);
     if (message.sizeBytes !== "0")
-      writer.tag(3, import_runtime353.WireType.Varint).int64(message.sizeBytes);
+      writer.tag(3, import_runtime354.WireType.Varint).int64(message.sizeBytes);
     if (message.version !== "")
-      writer.tag(4, import_runtime353.WireType.LengthDelimited).string(message.version);
+      writer.tag(4, import_runtime354.WireType.LengthDelimited).string(message.version);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime354.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime355.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var FinalizeCacheEntryUploadRequest = new FinalizeCacheEntryUploadRequest$Type();
-var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime357.MessageType {
+var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime358.MessageType {
   static {
     __name(this, "FinalizeCacheEntryUploadResponse$Type");
   }
@@ -149748,9 +150058,9 @@ var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime357.Mess
   }
   create(value) {
     const message = { ok: false, entryId: "0", message: "" };
-    globalThis.Object.defineProperty(message, import_runtime356.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime357.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime355.reflectionMergePartial)(this, message, value);
+      (0, import_runtime356.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -149776,26 +150086,26 @@ var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime357.Mess
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime354.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime355.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime353.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime354.WireType.Varint).bool(message.ok);
     if (message.entryId !== "0")
-      writer.tag(2, import_runtime353.WireType.Varint).int64(message.entryId);
+      writer.tag(2, import_runtime354.WireType.Varint).int64(message.entryId);
     if (message.message !== "")
-      writer.tag(3, import_runtime353.WireType.LengthDelimited).string(message.message);
+      writer.tag(3, import_runtime354.WireType.LengthDelimited).string(message.message);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime354.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime355.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var FinalizeCacheEntryUploadResponse = new FinalizeCacheEntryUploadResponse$Type();
-var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime357.MessageType {
+var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime358.MessageType {
   static {
     __name(this, "GetCacheEntryDownloadURLRequest$Type");
   }
@@ -149828,9 +150138,9 @@ var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime357.Messa
   }
   create(value) {
     const message = { key: "", restoreKeys: [], version: "" };
-    globalThis.Object.defineProperty(message, import_runtime356.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime357.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime355.reflectionMergePartial)(this, message, value);
+      (0, import_runtime356.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -149860,29 +150170,29 @@ var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime357.Messa
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime354.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime355.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime353.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime354.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime353.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime354.WireType.LengthDelimited).string(message.key);
     for (let i2 = 0; i2 < message.restoreKeys.length; i2++)
-      writer.tag(3, import_runtime353.WireType.LengthDelimited).string(message.restoreKeys[i2]);
+      writer.tag(3, import_runtime354.WireType.LengthDelimited).string(message.restoreKeys[i2]);
     if (message.version !== "")
-      writer.tag(4, import_runtime353.WireType.LengthDelimited).string(message.version);
+      writer.tag(4, import_runtime354.WireType.LengthDelimited).string(message.version);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime354.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime355.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
 var GetCacheEntryDownloadURLRequest = new GetCacheEntryDownloadURLRequest$Type();
-var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime357.MessageType {
+var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime358.MessageType {
   static {
     __name(this, "GetCacheEntryDownloadURLResponse$Type");
   }
@@ -149913,9 +150223,9 @@ var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime357.Mess
   }
   create(value) {
     const message = { ok: false, signedDownloadUrl: "", matchedKey: "" };
-    globalThis.Object.defineProperty(message, import_runtime356.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime357.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime355.reflectionMergePartial)(this, message, value);
+      (0, import_runtime356.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -149941,21 +150251,21 @@ var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime357.Mess
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d = reader.skip(wireType);
           if (u !== false)
-            (u === true ? import_runtime354.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            (u === true ? import_runtime355.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
       }
     }
     return message;
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime353.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime354.WireType.Varint).bool(message.ok);
     if (message.signedDownloadUrl !== "")
-      writer.tag(2, import_runtime353.WireType.LengthDelimited).string(message.signedDownloadUrl);
+      writer.tag(2, import_runtime354.WireType.LengthDelimited).string(message.signedDownloadUrl);
     if (message.matchedKey !== "")
-      writer.tag(3, import_runtime353.WireType.LengthDelimited).string(message.matchedKey);
+      writer.tag(3, import_runtime354.WireType.LengthDelimited).string(message.matchedKey);
     let u = options.writeUnknownFields;
     if (u !== false)
-      (u == true ? import_runtime354.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+      (u == true ? import_runtime355.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
     return writer;
   }
 };
