@@ -27,10 +27,7 @@ description: Automatically fixes failing Dependabot PRs
 ## Skill content
 `;
 
-const revisionsList = (...versions) =>
-  versions
-    .map((v) => `projects/extenda/locations/eu/skills/private-my-skill/revisions/${v}`)
-    .join('\n');
+const revisionsList = (...versions) => versions.join('\n');
 
 // Index of execGcloud call by position
 const call = (n) => execGcloud.mock.calls[n][0];

@@ -9,6 +9,9 @@
     "security": {
       "$ref": "#/definitions/Security"
     },
+    "sidecars": {
+      "$ref": "#/definitions/Sidecars"
+    },
     "environments": {
       "$ref": "#/definitions/Environments"
     }
@@ -671,6 +674,52 @@
           }
         }
       ]
+    },
+    "Sidecars": {
+      "title": "Sidecars",
+      "description": "Additional sidecar containers",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "evaluation": {
+          "$ref": "#/definitions/EvaluationSidecar"
+        }
+      }
+    },
+    "EvaluationSidecar": {
+      "title": "EvaluationSidecar",
+      "description": "Entity conditions evaluation sidecar",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled"
+      ],
+      "properties": {
+        "enabled": {
+          "description": "Enable the evaluation sidecar",
+          "type": "boolean"
+        },
+        "version": {
+          "description": "Use a specific image tag of the evaluation sidecar (e.g. a build's git commit SHA). If not set, the generally available `stable` tag is used.",
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9._-]+$"
+        },
+        "env": {
+          "title": "EvaluationSidecarEnvVars",
+          "description": "Environment variables for the evaluation sidecar, e.g. REQUEST_ALL_BUNDLE. OCMS_CLIENT_ID and OCMS_CLIENT_SECRET always read from the extenda Secret Manager project and cannot be overridden here.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^(?!OCMS_CLIENT_ID$|OCMS_CLIENT_SECRET$)[A-Z0-9_]+$"
+          },
+          "patternProperties": {
+            "^[A-Z0-9_]+$": {
+              "title": "EnvVar",
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
     },
     "Environments": {
       "title": "Environments",

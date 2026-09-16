@@ -34,7 +34,7 @@ beforeEach(() => {
   });
   execSync.mockReturnValue('abc123\n'); // default: git rev-parse HEAD
   fg.sync.mockReturnValue([]);
-  setupGcloud.mockResolvedValue(undefined);
+  setupGcloud.mockResolvedValue('my-clan-prod');
   execGcloud.mockResolvedValue('');
 });
 
@@ -125,7 +125,7 @@ describe('action — change filtering', () => {
     await action();
 
     expect(registerSkill).toHaveBeenCalledTimes(1);
-    expect(registerSkill).toHaveBeenCalledWith('fix-dependabot-pr', expect.any(String), false);
+    expect(registerSkill).toHaveBeenCalledWith('fix-dependabot-pr', expect.any(String), false, 'my-clan');
   });
 
   test('registers all items when no changed paths detected (git failure)', async () => {
@@ -184,7 +184,7 @@ describe('action — change filtering', () => {
     await action();
 
     expect(registerAgent).toHaveBeenCalledWith('my-agent', expect.any(String), true);
-    expect(registerSkill).toHaveBeenCalledWith('my-skill', expect.any(String), true);
+    expect(registerSkill).toHaveBeenCalledWith('my-skill', expect.any(String), true, 'my-clan');
     expect(registerMcp).toHaveBeenCalledWith('my-mcp', expect.any(String), true);
   });
 
