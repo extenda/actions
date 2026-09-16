@@ -56743,7 +56743,7 @@ var require_utils6 = __commonJS({
       if (!obj || typeof obj !== "object") {
         return false;
       }
-      return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
+      return !!(obj.constructor && typeof obj.constructor.isBuffer === "function" && obj.constructor.isBuffer(obj));
     }, "isBuffer");
     var combine = /* @__PURE__ */ __name(function combine2(a, b2, arrayLimit, plainObjects, throwOnLimitExceeded) {
       if (isOverflow(a)) {
@@ -56751,8 +56751,12 @@ var require_utils6 = __commonJS({
           throw new RangeError("Array limit exceeded. Only " + arrayLimit + " element" + (arrayLimit === 1 ? "" : "s") +
           " allowed in an array.");
         }
-        var newIndex = getMaxIndex(a) + 1;
-        a[newIndex] = b2;
+        var bValues = isArray2(b2) ? b2 : [b2];
+        var newIndex = getMaxIndex(a);
+        for (var i2 = 0; i2 < bValues.length; ++i2) {
+          newIndex += 1;
+          a[newIndex] = bValues[i2];
+        }
         setMaxIndex(a, newIndex);
         return a;
       }
@@ -56829,6 +56833,7 @@ var require_stringify3 = __commonJS({
       charsetSentinel: false,
       commaRoundTrip: false,
       delimiter: "&",
+      depth: Infinity,
       encode: true,
       encodeDotInKeys: false,
       encoder: utils.encode,
@@ -56849,8 +56854,11 @@ var require_stringify3 = __commonJS({
       "bigint";
     }, "isNonNullishPrimitive");
     var sentinel = {};
-    var stringify = /* @__PURE__ */ __name(function stringify2(object, prefix2, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder, filter2, sort, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset, sideChannel) {
+    var stringify = /* @__PURE__ */ __name(function stringify2(object, prefix2, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder, filter2, sort, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset, sideChannel, depth, currentDepth) {
       var obj = object;
+      if (currentDepth > depth) {
+        throw new RangeError("Input depth exceeded depth option of " + depth);
+      }
       var tmpSc = sideChannel;
       var step = 0;
       var findFlag = false;
@@ -56868,9 +56876,8 @@ var require_stringify3 = __commonJS({
           step = 0;
         }
       }
-      if (typeof filter2 === "function") {
-        obj = filter2(prefix2, obj);
-      } else if (obj instanceof Date) {
+      obj = typeof filter2 === "function" ? filter2(prefix2, obj) : obj;
+      if (obj instanceof Date) {
         obj = serializeDate(obj);
       } else if (generateArrayPrefix === "comma" && isArray2(obj)) {
         obj = utils.maybeMap(obj, function(value2) {
@@ -56913,7 +56920,7 @@ var require_stringify3 = __commonJS({
       }
       var encodedPrefix = encodeDotInKeys ? String(prefix2).replace(/\./g, "%2E") : String(prefix2);
       var adjustedPrefix = commaRoundTrip && isArray2(obj) && obj.length === 1 ? encodedPrefix + "[]" : encodedPrefix;
-      if (allowEmptyArrays && isArray2(obj) && obj.length === 0) {
+      if (allowEmptyArrays && isArray2(obj) && obj.length === 0 && Object.keys(obj).length === 0) {
         return adjustedPrefix + "[]";
       }
       for (var j2 = 0; j2 < objKeys.length; ++j2) {
@@ -56946,7 +56953,9 @@ var require_stringify3 = __commonJS({
           formatter,
           encodeValuesOnly,
           charset,
-          valueSideChannel
+          valueSideChannel,
+          depth,
+          currentDepth + 1
         ));
       }
       return values;
@@ -57002,6 +57011,7 @@ var require_stringify3 = __commonJS({
         charsetSentinel: typeof opts.charsetSentinel === "boolean" ? opts.charsetSentinel : defaults3.charsetSentinel,
         commaRoundTrip: !!opts.commaRoundTrip,
         delimiter: typeof opts.delimiter === "undefined" ? defaults3.delimiter : opts.delimiter,
+        depth: typeof opts.depth === "number" ? opts.depth : defaults3.depth,
         encode: typeof opts.encode === "boolean" ? opts.encode : defaults3.encode,
         encodeDotInKeys: typeof opts.encodeDotInKeys === "boolean" ? opts.encodeDotInKeys : defaults3.encodeDotInKeys,
         encoder: typeof opts.encoder === "function" ? opts.encoder : defaults3.encoder,
@@ -57049,9 +57059,10 @@ var require_stringify3 = __commonJS({
         if (options.skipNulls && value === null) {
           continue;
         }
+        var encodedKey = options.encodeDotInKeys ? String(key).replace(/\./g, "%2E") : String(key);
         pushToArray(keys, stringify(
           value,
-          key,
+          encodedKey,
           generateArrayPrefix,
           commaRoundTrip,
           options.allowEmptyArrays,
@@ -57067,7 +57078,9 @@ var require_stringify3 = __commonJS({
           options.formatter,
           options.encodeValuesOnly,
           options.charset,
-          sideChannel
+          sideChannel,
+          options.depth,
+          0
         ));
       }
       var joined = keys.join(options.delimiter);
@@ -57120,9 +57133,9 @@ var require_parse5 = __commonJS({
         return String.fromCharCode(parseInt(numberStr, 10));
       });
     }, "interpretNumericEntities");
-    var parseArrayValue = /* @__PURE__ */ __name(function(val, options, currentArrayLength, isFlatArrayValue) {
+    var parseArrayValue = /* @__PURE__ */ __name(function(val, options, currentArrayLength) {
       if (val && typeof val === "string" && options.comma && val.indexOf(",") > -1) {
-        if (isFlatArrayValue && options.throwOnLimitExceeded) {
+        if (options.throwOnLimitExceeded) {
           var commaCount = 0;
           var commaIndex = val.indexOf(",");
           while (commaIndex > -1) {
@@ -57192,8 +57205,7 @@ owed.");
               parseArrayValue(
                 part.slice(pos + 1),
                 options,
-                isArray2(obj[key]) ? obj[key].length : 0,
-                part.indexOf("[]=") === -1
+                isArray2(obj[key]) ? obj[key].length : 0
               ),
               function(encodedVal) {
                 return options.decoder(encodedVal, defaults3.decoder, charset, "value");
