@@ -100912,7 +100912,7 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
       "agent-registry",
       "skills",
       "create",
-      skillId,
+      namespacedId,
       `--location=${LOCATION3}`,
       `--project=${PROJECT3}`,
       `--display-name=${displayName}`,

@@ -110,9 +110,9 @@ const registerSkill = async (skillId, skillFilePath, dryRun, clan) => {
 
   if (!exists) {
     core.info(`Creating skill: ${registryId}@${version}`);
-    // gcloud auto-prepends "private-" to the skill name, so we pass skillId (not registryId)
+    // gcloud auto-prepends "private-" to the skill name, so we pass namespacedId (not registryId)
     await execGcloud([
-      'alpha', 'agent-registry', 'skills', 'create', skillId,
+      'alpha', 'agent-registry', 'skills', 'create', namespacedId,
       `--location=${LOCATION}`, `--project=${PROJECT}`,
       `--display-name=${displayName}`, `--description=${description}`,
       '--type=simple', '--quiet',
