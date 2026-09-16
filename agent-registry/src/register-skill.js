@@ -53,12 +53,11 @@ const getLatestRevision = async (registryId) => {
     const output = await execGcloud([
       'alpha', 'agent-registry', 'skills', 'revisions', 'list',
       `--skill=${registryId}`, `--location=${LOCATION}`, `--project=${PROJECT}`,
-      '--format=value(name)', '--quiet',
+      '--format=value(name.basename())', '--quiet',
     ], 'gcloud', true);
     const versions = output
       .split('\n')
       .filter(Boolean)
-      .map((line) => line.split('/revisions/').pop())
       .filter((v) => /^v\d+-\d+$/.test(v));
     if (!versions.length) return null;
     return versions.sort((a, b) => {
@@ -91,12 +90,13 @@ const activate = async (registryId, revisionId) => {
   ], 'gcloud', true);
 };
 
-const registerSkill = async (skillId, skillFilePath, dryRun) => {
+const registerSkill = async (skillId, skillFilePath, dryRun, clan) => {
   const skillContent = readFileSync(skillFilePath, 'utf8');
   const { name: displayName, description } = parseSkillMeta(skillContent);
   if (!displayName) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: name`);
   if (!description) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: description`);
-  const registryId = `private-${skillId}`;
+  const namespacedId = clan ? `${clan}-${skillId}` : skillId;
+  const registryId = `private-${namespacedId}`;
 
   if (dryRun) {
     core.info(`[dry-run] Would register skill: ${registryId}`);
@@ -133,7 +133,7 @@ const registerSkill = async (skillId, skillFilePath, dryRun) => {
   }
 
   await activate(registryId, revisionId);
-  const gcsPath = await upload(skillFilePath, `skills/${skillId}/SKILL.md`);
+  const gcsPath = await upload(skillFilePath, `skills/${namespacedId}/${revisionId}/SKILL.md`);
   core.info(`Skill registered: ${registryId}@${version} → ${gcsPath}`);
 };
 

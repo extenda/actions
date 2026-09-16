@@ -7,6 +7,7 @@ import { execSync } from 'node:child_process';
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
 import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 import { upload } from './upload-gcs.js';
+import projectInfo from '../../cloud-run/src/project-info.js';
 
 import { registerAgent } from './register-agent.js';
 import { registerMcp } from './register-mcp.js';
@@ -76,7 +77,7 @@ const processMcps = async (registryRoot, changedPaths, dryRun) => {
   }
 };
 
-const processSkills = async (registryRoot, changedPaths, dryRun) => {
+const processSkills = async (registryRoot, changedPaths, dryRun, clan) => {
   const skillFiles = fg.sync('skills/*/SKILL.md', { cwd: registryRoot, onlyFiles: true });
   for (const skillFile of skillFiles) {
     const skillId = path.basename(path.dirname(skillFile));
@@ -84,7 +85,7 @@ const processSkills = async (registryRoot, changedPaths, dryRun) => {
     if (!isAffected(`skills/${skillId}/`, changedPaths)) continue;
 
     core.startGroup(`Skill: ${skillId}`);
-    await registerSkill(skillId, path.join(registryRoot, skillFile), dryRun);
+    await registerSkill(skillId, path.join(registryRoot, skillFile), dryRun, clan);
     core.endGroup();
   }
 };
@@ -93,7 +94,10 @@ const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
   const dryRun = core.getInput('dry-run') === 'true';
 
-  await setupGcloud(serviceAccountKey);
+  const projectId = await setupGcloud(serviceAccountKey);
+  const { project: clan } = projectInfo(projectId);
+  core.info(`Clan namespace: ${clan}`);
+
   await execGcloud(['components', 'install', 'alpha', '--quiet', '--no-user-output-enabled']);
   const gitSha = getGitSha();
   const changedPaths = getChangedPaths();
@@ -107,7 +111,7 @@ const action = async () => {
   const registryRoot = path.join(process.cwd(), AGENT_REGISTRY_PATH);
   await processAgents(registryRoot, changedPaths, gitSha, dryRun);
   await processMcps(registryRoot, changedPaths, dryRun);
-  await processSkills(registryRoot, changedPaths, dryRun);
+  await processSkills(registryRoot, changedPaths, dryRun, clan);
 };
 
 export { getChangedPaths, isAffected };

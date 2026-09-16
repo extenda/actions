@@ -96668,6 +96668,17 @@ var upload = /* @__PURE__ */ __name(async (localPath, gcsPath) => {
   return dest;
 }, "upload");
 
+// cloud-run/src/project-info.js
+var projectInfo = /* @__PURE__ */ __name((projectId) => {
+  const parsed = projectId.split(/^(.+)-(prod|staging)(-.*)?$/).filter(Boolean);
+  return {
+    project: parsed[0],
+    env: parsed[1],
+    suffix: parsed[2]
+  };
+}, "projectInfo");
+var project_info_default = projectInfo;
+
 // agent-registry/node_modules/js-yaml/dist/js-yaml.mjs
 function getDefaultExportFromCjs(x3) {
   return x3 && x3.__esModule && Object.prototype.hasOwnProperty.call(x3, "default") ? x3["default"] : x3;
@@ -100842,11 +100853,10 @@ var getLatestRevision = /* @__PURE__ */ __name(async (registryId) => {
       `--skill=${registryId}`,
       `--location=${LOCATION3}`,
       `--project=${PROJECT3}`,
-      "--format=value(name)",
+      "--format=value(name.basename())",
       "--quiet"
     ], "gcloud", true);
-    const versions = output.split("\n").filter(Boolean).map((line) => line.split("/revisions/").pop()).filter((v) => /^v\d+-\d+$/.
-    test(v));
+    const versions = output.split("\n").filter(Boolean).filter((v) => /^v\d+-\d+$/.test(v));
     if (!versions.length) return null;
     return versions.sort((a, b) => {
       const [aMaj, aMin] = a.slice(1).split("-").map(Number);
@@ -100880,12 +100890,13 @@ var activate = /* @__PURE__ */ __name(async (registryId, revisionId) => {
     "--quiet"
   ], "gcloud", true);
 }, "activate");
-var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun) => {
+var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun, clan) => {
   const skillContent = (0, import_node_fs7.readFileSync)(skillFilePath, "utf8");
   const { name: displayName, description } = parseSkillMeta(skillContent);
   if (!displayName) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: name`);
   if (!description) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: description`);
-  const registryId = `private-${skillId}`;
+  const namespacedId = clan ? `${clan}-${skillId}` : skillId;
+  const registryId = `private-${namespacedId}`;
   if (dryRun) {
     info(`[dry-run] Would register skill: ${registryId}`);
     return;
@@ -100930,7 +100941,7 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
     (0, import_node_fs7.unlinkSync)(zipPath);
   }
   await activate(registryId, revisionId);
-  const gcsPath = await upload(skillFilePath, `skills/${skillId}/SKILL.md`);
+  const gcsPath = await upload(skillFilePath, `skills/${namespacedId}/${revisionId}/SKILL.md`);
   info(`Skill registered: ${registryId}@${version3} \u2192 ${gcsPath}`);
 }, "registerSkill");
 
@@ -100988,21 +100999,23 @@ var processMcps = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryR
     endGroup();
   }
 }, "processMcps");
-var processSkills = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun) => {
+var processSkills = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun, clan) => {
   const skillFiles = import_fast_glob2.default.sync("skills/*/SKILL.md", { cwd: registryRoot, onlyFiles: true });
   for (const skillFile of skillFiles) {
     const skillId = import_node_path7.default.basename(import_node_path7.default.dirname(skillFile));
     if (skillId.startsWith("example-")) continue;
     if (!isAffected(`skills/${skillId}/`, changedPaths)) continue;
     startGroup(`Skill: ${skillId}`);
-    await registerSkill(skillId, import_node_path7.default.join(registryRoot, skillFile), dryRun);
+    await registerSkill(skillId, import_node_path7.default.join(registryRoot, skillFile), dryRun, clan);
     endGroup();
   }
 }, "processSkills");
 var action5 = /* @__PURE__ */ __name(async () => {
   const serviceAccountKey = getInput("service-account-key", { required: true });
   const dryRun = getInput("dry-run") === "true";
-  await setup_gcloud_default(serviceAccountKey);
+  const projectId = await setup_gcloud_default(serviceAccountKey);
+  const { project: clan } = project_info_default(projectId);
+  info(`Clan namespace: ${clan}`);
   await execGcloud(["components", "install", "alpha", "--quiet", "--no-user-output-enabled"]);
   const gitSha = getGitSha();
   const changedPaths = getChangedPaths();
@@ -101014,7 +101027,7 @@ var action5 = /* @__PURE__ */ __name(async () => {
   const registryRoot = import_node_path7.default.join(process.cwd(), AGENT_REGISTRY_PATH);
   await processAgents(registryRoot, changedPaths, gitSha, dryRun);
   await processMcps(registryRoot, changedPaths, dryRun);
-  await processSkills(registryRoot, changedPaths, dryRun);
+  await processSkills(registryRoot, changedPaths, dryRun, clan);
 }, "action");
 var src_default = action5;
 
