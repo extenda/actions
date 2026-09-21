@@ -148,7 +148,11 @@ jobs:
             TEST4_TOKEN: sonarqube-token
 
   acceptance-linux:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-26.04]
+    runs-on: ${{ matrix.os }}
     needs:
       - verify-dist
     permissions:
