@@ -13,6 +13,7 @@ vi.mock('../src/upload-gcs.js');
 vi.mock('../src/register-agent.js');
 vi.mock('../src/register-mcp.js');
 vi.mock('../src/register-skill.js');
+vi.mock('../src/register-convention.js');
 
 import * as core from '@actions/core';
 import { execSync } from 'child_process';
@@ -24,6 +25,11 @@ import { setupGcloud } from '../../setup-gcloud/src/index.js';
 import action from '../src/index.js';
 import { getChangedPaths, isAffected } from '../src/index.js';
 import { registerAgent } from '../src/register-agent.js';
+import {
+  readConvention,
+  registerConvention,
+  uploadConventionIndex,
+} from '../src/register-convention.js';
 import { registerMcp } from '../src/register-mcp.js';
 import { registerSkill } from '../src/register-skill.js';
 import { upload } from '../src/upload-gcs.js';
@@ -331,6 +337,125 @@ describe('action — change filtering', () => {
       false,
       'my-clan',
     );
+  });
+
+  describe('conventions', () => {
+    const conventionDirs = (...dirs) =>
+      fg.sync.mockImplementation((pattern, opts) => {
+        if (pattern === 'conventions/*' && opts.onlyDirectories) return dirs;
+        return [];
+      });
+
+    beforeEach(() => {
+      readConvention.mockImplementation((id) => ({
+        name: `${id} name`,
+        description: `${id} desc`,
+        files: ['CONVENTIONS.md'],
+      }));
+    });
+
+    test('uploads only the changed convention but indexes all of them', async () => {
+      setupDiff(['agent-registry/conventions/java/references/logging.md']);
+      conventionDirs(
+        'conventions/java',
+        'conventions/api',
+        'conventions/example-conv',
+      );
+
+      await action();
+
+      expect(registerConvention).toHaveBeenCalledTimes(1);
+      expect(registerConvention).toHaveBeenCalledWith(
+        'java',
+        expect.stringMatching(/agent-registry\/conventions\/java$/),
+        'abc123',
+        false,
+        'my-clan',
+      );
+      expect(uploadConventionIndex).toHaveBeenCalledWith(
+        'my-clan',
+        [
+          expect.objectContaining({ id: 'java', name: 'java name' }),
+          expect.objectContaining({ id: 'api', name: 'api name' }),
+        ],
+        false,
+      );
+    });
+
+    test('does not touch conventions when nothing under conventions/ changed', async () => {
+      setupDiff(['agent-registry/skills/my-skill/SKILL.md']);
+      conventionDirs('conventions/java');
+
+      await action();
+
+      expect(registerConvention).not.toHaveBeenCalled();
+      expect(uploadConventionIndex).not.toHaveBeenCalled();
+    });
+
+    test('rebuilds the index when a convention is deleted', async () => {
+      setupDiff(['agent-registry/conventions/old/CONVENTIONS.md']);
+      conventionDirs('conventions/java');
+
+      await action();
+
+      expect(registerConvention).not.toHaveBeenCalled();
+      expect(uploadConventionIndex).toHaveBeenCalledWith(
+        'my-clan',
+        [expect.objectContaining({ id: 'java' })],
+        false,
+      );
+    });
+
+    test('skips the index for a clan without conventions when no diff is available', async () => {
+      setupDiff([]);
+      conventionDirs();
+
+      await action();
+
+      expect(uploadConventionIndex).not.toHaveBeenCalled();
+    });
+
+    test('fails on an invalid convention even when it did not change', async () => {
+      setupDiff(['agent-registry/conventions/java/CONVENTIONS.md']);
+      conventionDirs('conventions/java', 'conventions/broken');
+      readConvention.mockImplementation((id) => {
+        if (id === 'broken')
+          throw new Error(
+            "Convention directory 'broken' is missing required file: CONVENTIONS.md",
+          );
+        return { name: 'n', description: 'd', files: ['CONVENTIONS.md'] };
+      });
+
+      await expect(action()).rejects.toThrow(
+        "'broken' is missing required file",
+      );
+      expect(uploadConventionIndex).not.toHaveBeenCalled();
+    });
+
+    test('passes dry-run through', async () => {
+      core.getInput.mockImplementation((name) => {
+        if (name === 'service-account-key') return 'fake-key';
+        if (name === 'dry-run') return 'true';
+        return '';
+      });
+      setupDiff([]);
+      conventionDirs('conventions/java');
+
+      await action();
+
+      expect(registerConvention).toHaveBeenCalledWith(
+        'java',
+        expect.any(String),
+        'abc123',
+        true,
+        'my-clan',
+      );
+      expect(uploadConventionIndex).toHaveBeenCalledWith(
+        'my-clan',
+        expect.any(Array),
+        true,
+      );
+    });
   });
 
   test('calls setupGcloud with service account key', async () => {

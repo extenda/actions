@@ -9,6 +9,11 @@ import projectInfo from '../../cloud-run/src/project-info.js';
 import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 import { setupGcloud } from '../../setup-gcloud/src/index.js';
 import { registerAgent } from './register-agent.js';
+import {
+  readConvention,
+  registerConvention,
+  uploadConventionIndex,
+} from './register-convention.js';
 import { registerMcp } from './register-mcp.js';
 import { registerSkill } from './register-skill.js';
 import { upload } from './upload-gcs.js';
@@ -124,6 +129,42 @@ const processSkills = async (registryRoot, changedPaths, dryRun, clan) => {
   }
 };
 
+const processConventions = async (
+  registryRoot,
+  changedPaths,
+  gitSha,
+  dryRun,
+  clan,
+) => {
+  const conventionDirs = fg.sync('conventions/*', {
+    cwd: registryRoot,
+    onlyDirectories: true,
+  });
+  const conventions = [];
+  for (const dir of conventionDirs) {
+    const conventionId = path.basename(dir);
+    if (conventionId.startsWith('example-')) continue;
+
+    // Every convention is read so the index is complete, but only changed ones are uploaded.
+    const conventionDir = path.join(registryRoot, dir);
+    conventions.push({
+      id: conventionId,
+      ...readConvention(conventionId, conventionDir),
+    });
+    if (!isAffected(`conventions/${conventionId}/`, changedPaths)) continue;
+
+    core.startGroup(`Convention: ${conventionId}`);
+    await registerConvention(conventionId, conventionDir, gitSha, dryRun, clan);
+    core.endGroup();
+  }
+
+  // A deleted convention only shows up as a changed path, so the index is rebuilt on any change
+  // under conventions/. With no diff available, skip clans that have no conventions at all.
+  if (!isAffected('conventions/', changedPaths)) return;
+  if (!changedPaths.length && !conventions.length) return;
+  await uploadConventionIndex(clan, conventions, dryRun);
+};
+
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', {
     required: true,
@@ -154,6 +195,7 @@ const action = async () => {
   await processAgents(registryRoot, changedPaths, gitSha, dryRun);
   await processMcps(registryRoot, changedPaths, dryRun);
   await processSkills(registryRoot, changedPaths, dryRun, clan);
+  await processConventions(registryRoot, changedPaths, gitSha, dryRun, clan);
 };
 
 export { getChangedPaths, isAffected };

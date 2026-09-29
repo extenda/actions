@@ -1,6 +1,6 @@
 # agent-registry
 
-Registers A2A agents, MCP servers, and skills into the [GCP Agent Registry](https://cloud.google.com/agent-registry) on every push to main. Only items whose files changed in the commit are processed — unchanged items are skipped.
+Registers A2A agents, MCP servers, and skills into the [GCP Agent Registry](https://cloud.google.com/agent-registry), and publishes clan conventions to GCS, on every push to main. Only items whose files changed in the commit are processed — unchanged items are skipped.
 
 ## Workflow setup
 
@@ -54,6 +54,10 @@ agent-registry/
       references/         # optional — any extra files are bundled with the skill
       scripts/
       assets/
+  conventions/
+    <convention-id>/
+      CONVENTIONS.md      # required
+      references/         # optional — any extra files are uploaded with the convention
 ```
 
 Any directory prefixed with `example-` is ignored.
@@ -152,6 +156,43 @@ Versions are tracked as revisions in the registry — **do not add a version to 
 
 - Default branch → minor bump
 - Branch named `breaking/*` or `major/*` → major bump
+
+---
+
+## Defining a clan convention
+
+Conventions are the house rules a clan's agents follow (coding standards, naming, review rules). The Agent Registry has no conventions resource, so they are published to GCS only.
+
+Create `agent-registry/conventions/<convention-id>/CONVENTIONS.md` with the same frontmatter as a skill (`name` and `description` required, content after the frontmatter required). Any other files in the directory are uploaded with it, keeping their relative paths.
+
+On merge, a changed convention directory is uploaded to:
+
+```
+gs://extenda-agent-artifacts/conventions/<clan>/<convention-id>/<git-sha>/   # versioned
+gs://extenda-agent-artifacts/conventions/<clan>/<convention-id>/             # latest
+```
+
+Whenever anything under `conventions/` changes (including a deleted convention), the clan index is rebuilt from every convention in the repo:
+
+```
+gs://extenda-agent-artifacts/conventions/<clan>/index.json
+```
+
+```json
+{
+  "clan": "<clan>",
+  "conventions": [
+    {
+      "id": "java",
+      "name": "Java conventions",
+      "description": "…",
+      "path": "conventions/<clan>/java/CONVENTIONS.md"
+    }
+  ]
+}
+```
+
+Every convention is validated on each run, so an invalid `CONVENTIONS.md` fails the run even if it did not change. The latest path is never pruned: a file removed from a convention stays in the latest copy, but `CONVENTIONS.md` no longer links to it.
 
 ---
 

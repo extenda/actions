@@ -3,10 +3,10 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import * as core from '@actions/core';
-import fg from 'fast-glob';
 import { zipSync } from 'fflate';
 
 import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
+import { listFiles } from './list-files.js';
 import { uploadDir } from './upload-gcs.js';
 
 const PROJECT = 'extenda';
@@ -22,13 +22,6 @@ const parseSkillMeta = (content) => {
   }
   return { name: meta['name'] ?? '', description: meta['description'] ?? '' };
 };
-
-// Every file under the skill directory (SKILL.md plus e.g. references/, scripts/, assets/),
-// as sorted POSIX paths relative to the directory.
-const listSkillFiles = (skillDir) =>
-  fg
-    .sync('**/*', { cwd: skillDir, onlyFiles: true, dot: true })
-    .sort((a, b) => a.localeCompare(b));
 
 // The registry requires a zip archive with SKILL.md at the root; resources keep their relative paths.
 const makeZipFile = (skillDir, files) => {
@@ -141,7 +134,7 @@ const activate = async (registryId, revisionId) => {
 };
 
 const registerSkill = async (skillId, skillDir, dryRun, clan) => {
-  const files = listSkillFiles(skillDir);
+  const files = listFiles(skillDir);
   if (!files.includes('SKILL.md'))
     throw new Error(
       `Skill directory '${skillId}' is missing required file: SKILL.md`,

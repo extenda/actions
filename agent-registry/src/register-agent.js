@@ -1,12 +1,14 @@
 import * as core from '@actions/core';
 import { load as yamlLoad } from 'js-yaml';
+
 import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 
 const PROJECT = 'extenda';
 const LOCATION = 'europe-west1';
 
 const isMajorBranch = () => {
-  const branch = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || '';
+  const branch =
+    process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || '';
   return /^(breaking|major)(\/|$)/i.test(branch);
 };
 
@@ -18,34 +20,60 @@ const bumpVersion = (version) => {
 const serviceExists = async (serviceId) => {
   try {
     await execGcloud(
-      ['agent-registry', 'services', 'describe', serviceId, `--location=${LOCATION}`, `--project=${PROJECT}`],
-      'gcloud', true,
+      [
+        'agent-registry',
+        'services',
+        'describe',
+        serviceId,
+        `--location=${LOCATION}`,
+        `--project=${PROJECT}`,
+      ],
+      'gcloud',
+      true,
     );
     return true;
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 };
 
 const getAgentVersion = async (agentId) => {
   try {
     const output = await execGcloud(
-      ['agent-registry', 'services', 'describe', agentId,
-        `--location=${LOCATION}`, `--project=${PROJECT}`,
-        '--format=value(agentSpec.content.version)'],
-      'gcloud', true,
+      [
+        'agent-registry',
+        'services',
+        'describe',
+        agentId,
+        `--location=${LOCATION}`,
+        `--project=${PROJECT}`,
+        '--format=value(agentSpec.content.version)',
+      ],
+      'gcloud',
+      true,
     );
     return output.trim() || null;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 };
 
 const registerAgent = async (agentId, agentYaml, dryRun) => {
   const card = yamlLoad(agentYaml) ?? {};
-  if (!card.url) throw new Error(`agent.yaml for '${agentId}' is missing required field: url`);
-  if (!/^https?:\/\//i.test(card.url)) throw new Error(`agent.yaml for '${agentId}': url must be an http(s) URL`);
+  if (!card.url)
+    throw new Error(
+      `agent.yaml for '${agentId}' is missing required field: url`,
+    );
+  if (!/^https?:\/\//i.test(card.url))
+    throw new Error(`agent.yaml for '${agentId}': url must be an http(s) URL`);
   const displayName = card.displayName ?? agentId;
   const description = card.description ?? '';
 
   for (const iface of card.interfaces ?? []) {
-    if (!iface.url) throw new Error(`agent.yaml for '${agentId}': each interface must have a url`);
+    if (!iface.url)
+      throw new Error(
+        `agent.yaml for '${agentId}': each interface must have a url`,
+      );
   }
 
   if (dryRun) {
@@ -91,10 +119,32 @@ const registerAgent = async (agentId, agentYaml, dryRun) => {
 
   if (exists) {
     core.info(`Updating agent: ${agentId}@${version}`);
-    await execGcloud(['agent-registry', 'services', 'update', agentId, ...flags, ...interfaces], 'gcloud', true);
+    await execGcloud(
+      [
+        'agent-registry',
+        'services',
+        'update',
+        agentId,
+        ...flags,
+        ...interfaces,
+      ],
+      'gcloud',
+      true,
+    );
   } else {
     core.info(`Creating agent: ${agentId}@${version}`);
-    await execGcloud(['agent-registry', 'services', 'create', agentId, ...flags, ...interfaces], 'gcloud', true);
+    await execGcloud(
+      [
+        'agent-registry',
+        'services',
+        'create',
+        agentId,
+        ...flags,
+        ...interfaces,
+      ],
+      'gcloud',
+      true,
+    );
   }
   core.info(`Agent registered: ${agentId}@${version}`);
 };
