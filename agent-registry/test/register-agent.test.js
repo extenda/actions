@@ -4,8 +4,8 @@ vi.mock('@actions/core');
 vi.mock('../../setup-gcloud/src/exec-gcloud.js');
 
 import * as core from '@actions/core';
-import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 
+import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 import { registerAgent } from '../src/register-agent.js';
 
 const AGENT_YAML = `
@@ -60,7 +60,11 @@ describe('register-agent', () => {
       await registerAgent('my-agent', AGENT_YAML, false);
 
       expect(call(1)[2]).toBe('create');
-      const spec = JSON.parse(call(1).find((a) => a.startsWith('--agent-spec-content=')).slice(21));
+      const spec = JSON.parse(
+        call(1)
+          .find((a) => a.startsWith('--agent-spec-content='))
+          .slice(21),
+      );
       expect(spec.version).toBe('0.1');
     });
 
@@ -70,12 +74,19 @@ describe('register-agent', () => {
 
       await registerAgent('my-agent', AGENT_YAML, false);
 
-      const spec = JSON.parse(call(1).find((a) => a.startsWith('--agent-spec-content=')).slice(21));
+      const spec = JSON.parse(
+        call(1)
+          .find((a) => a.startsWith('--agent-spec-content='))
+          .slice(21),
+      );
       expect(spec.protocolVersion).toBe('0.3');
       expect(spec.url).toBe('https://agent.example.com');
       expect(spec.displayName).toBe('Test Agent');
       expect(spec.skills).toHaveLength(1);
-      expect(spec.skills[0]).toMatchObject({ id: 'my-skill', tags: ['tag1', 'tag2'] });
+      expect(spec.skills[0]).toMatchObject({
+        id: 'my-skill',
+        tags: ['tag1', 'tag2'],
+      });
     });
 
     test('includes interface flags', async () => {
@@ -84,7 +95,9 @@ describe('register-agent', () => {
 
       await registerAgent('my-agent', AGENT_YAML, false);
 
-      expect(call(1)).toContain('--interfaces=protocolBinding=a2a,url=https://agent.example.com/a2a');
+      expect(call(1)).toContain(
+        '--interfaces=protocolBinding=a2a,url=https://agent.example.com/a2a',
+      );
     });
   });
 
@@ -95,7 +108,11 @@ describe('register-agent', () => {
 
       await registerAgent('my-agent', AGENT_YAML, false);
 
-      const spec = JSON.parse(call(2).find((a) => a.startsWith('--agent-spec-content=')).slice(21));
+      const spec = JSON.parse(
+        call(2)
+          .find((a) => a.startsWith('--agent-spec-content='))
+          .slice(21),
+      );
       expect(spec.version).toBe('0.2');
       expect(call(2)[2]).toBe('update');
     });
@@ -106,7 +123,11 @@ describe('register-agent', () => {
 
       await registerAgent('my-agent', AGENT_YAML, false);
 
-      const spec = JSON.parse(call(2).find((a) => a.startsWith('--agent-spec-content=')).slice(21));
+      const spec = JSON.parse(
+        call(2)
+          .find((a) => a.startsWith('--agent-spec-content='))
+          .slice(21),
+      );
       expect(spec.version).toBe('0.2');
     });
 
@@ -116,7 +137,11 @@ describe('register-agent', () => {
 
       await registerAgent('my-agent', AGENT_YAML, false);
 
-      const spec = JSON.parse(call(2).find((a) => a.startsWith('--agent-spec-content=')).slice(21));
+      const spec = JSON.parse(
+        call(2)
+          .find((a) => a.startsWith('--agent-spec-content='))
+          .slice(21),
+      );
       expect(spec.version).toBe('0.6');
     });
   });
@@ -129,7 +154,11 @@ describe('register-agent', () => {
 
       await registerAgent('my-agent', AGENT_YAML, false);
 
-      const spec = JSON.parse(call(2).find((a) => a.startsWith('--agent-spec-content=')).slice(21));
+      const spec = JSON.parse(
+        call(2)
+          .find((a) => a.startsWith('--agent-spec-content='))
+          .slice(21),
+      );
       expect(spec.version).toBe('1.0');
     });
 
@@ -140,7 +169,11 @@ describe('register-agent', () => {
 
       await registerAgent('my-agent', AGENT_YAML, false);
 
-      const spec = JSON.parse(call(2).find((a) => a.startsWith('--agent-spec-content=')).slice(21));
+      const spec = JSON.parse(
+        call(2)
+          .find((a) => a.startsWith('--agent-spec-content='))
+          .slice(21),
+      );
       expect(spec.version).toBe('3.0');
     });
 
@@ -151,7 +184,11 @@ describe('register-agent', () => {
 
       await registerAgent('my-agent', AGENT_YAML, false);
 
-      const spec = JSON.parse(call(2).find((a) => a.startsWith('--agent-spec-content=')).slice(21));
+      const spec = JSON.parse(
+        call(2)
+          .find((a) => a.startsWith('--agent-spec-content='))
+          .slice(21),
+      );
       expect(spec.version).toBe('0.4');
     });
   });
@@ -159,37 +196,41 @@ describe('register-agent', () => {
   describe('validation', () => {
     test('throws when url is missing from agent.yaml', async () => {
       const yamlNoUrl = `displayName: Test\ndescription: No URL here\n`;
-      await expect(registerAgent('my-agent', yamlNoUrl, false))
-        .rejects.toThrow("missing required field: url");
+      await expect(registerAgent('my-agent', yamlNoUrl, false)).rejects.toThrow(
+        'missing required field: url',
+      );
     });
 
     test('throws when agent.yaml is empty/invalid YAML', async () => {
-      await expect(registerAgent('my-agent', '', false))
-        .rejects.toThrow();
+      await expect(registerAgent('my-agent', '', false)).rejects.toThrow();
     });
 
     test('throws when url is not an http(s) URL', async () => {
       const yamlBadUrl = `url: not-a-url\n`;
-      await expect(registerAgent('my-agent', yamlBadUrl, false))
-        .rejects.toThrow("url must be an http(s) URL");
+      await expect(
+        registerAgent('my-agent', yamlBadUrl, false),
+      ).rejects.toThrow('url must be an http(s) URL');
     });
 
     test('throws when url is not an http(s) URL even in dry-run', async () => {
       const yamlBadUrl = `url: not-a-url\n`;
-      await expect(registerAgent('my-agent', yamlBadUrl, true))
-        .rejects.toThrow("url must be an http(s) URL");
+      await expect(registerAgent('my-agent', yamlBadUrl, true)).rejects.toThrow(
+        'url must be an http(s) URL',
+      );
     });
 
     test('throws when an interface is missing url', async () => {
       const yaml = `url: https://agent.example.com\ninterfaces:\n  - protocolBinding: a2a\n`;
-      await expect(registerAgent('my-agent', yaml, false))
-        .rejects.toThrow("each interface must have a url");
+      await expect(registerAgent('my-agent', yaml, false)).rejects.toThrow(
+        'each interface must have a url',
+      );
     });
 
     test('throws on interface missing url even in dry-run', async () => {
       const yaml = `url: https://agent.example.com\ninterfaces:\n  - protocolBinding: a2a\n`;
-      await expect(registerAgent('my-agent', yaml, true))
-        .rejects.toThrow("each interface must have a url");
+      await expect(registerAgent('my-agent', yaml, true)).rejects.toThrow(
+        'each interface must have a url',
+      );
     });
   });
 
@@ -197,14 +238,18 @@ describe('register-agent', () => {
     test('prints create message for new agent', async () => {
       await registerAgent('my-agent', AGENT_YAML, true);
 
-      expect(core.info).toHaveBeenCalledWith('[dry-run] Would register agent: my-agent');
+      expect(core.info).toHaveBeenCalledWith(
+        '[dry-run] Would register agent: my-agent',
+      );
       expect(execGcloud).not.toHaveBeenCalled();
     });
 
     test('prints update message with next version for existing agent', async () => {
       await registerAgent('my-agent', AGENT_YAML, true);
 
-      expect(core.info).toHaveBeenCalledWith('[dry-run] Would register agent: my-agent');
+      expect(core.info).toHaveBeenCalledWith(
+        '[dry-run] Would register agent: my-agent',
+      );
       expect(execGcloud).not.toHaveBeenCalled();
     });
   });
@@ -240,7 +285,9 @@ describe('register-agent', () => {
 
       await registerAgent('my-agent', yaml, false);
 
-      expect(call(1)).toContain('--interfaces=protocolBinding=a2a,url=https://a.example.com/a2a');
+      expect(call(1)).toContain(
+        '--interfaces=protocolBinding=a2a,url=https://a.example.com/a2a',
+      );
     });
 
     test('normalises plain-string skill to object with defaults', async () => {
@@ -250,8 +297,17 @@ describe('register-agent', () => {
 
       await registerAgent('my-agent', yaml, false);
 
-      const spec = JSON.parse(call(1).find((a) => a.startsWith('--agent-spec-content=')).slice(21));
-      expect(spec.skills[0]).toMatchObject({ id: 'plain-skill', name: 'plain-skill', tags: [], examples: [] });
+      const spec = JSON.parse(
+        call(1)
+          .find((a) => a.startsWith('--agent-spec-content='))
+          .slice(21),
+      );
+      expect(spec.skills[0]).toMatchObject({
+        id: 'plain-skill',
+        name: 'plain-skill',
+        tags: [],
+        examples: [],
+      });
     });
   });
 });

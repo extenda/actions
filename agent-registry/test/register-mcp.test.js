@@ -4,8 +4,8 @@ vi.mock('@actions/core');
 vi.mock('../../setup-gcloud/src/exec-gcloud.js');
 
 import * as core from '@actions/core';
-import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 
+import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 import { registerMcp } from '../src/register-mcp.js';
 
 const MCP_YAML = `
@@ -66,8 +66,12 @@ describe('register-mcp', () => {
       await registerMcp('my-mcp', MCP_YAML, false);
 
       const createArgs = execGcloud.mock.calls[1][0];
-      const specArg = createArgs.find((a) => a.startsWith('--mcp-server-spec-content='));
-      const spec = JSON.parse(specArg.replace('--mcp-server-spec-content=', ''));
+      const specArg = createArgs.find((a) =>
+        a.startsWith('--mcp-server-spec-content='),
+      );
+      const spec = JSON.parse(
+        specArg.replace('--mcp-server-spec-content=', ''),
+      );
       expect(spec.tools[0].name).toBe('my-tool');
     });
 
@@ -101,19 +105,23 @@ describe('register-mcp', () => {
     test('logs and skips all gcloud calls', async () => {
       await registerMcp('my-mcp', MCP_YAML, true);
 
-      expect(core.info).toHaveBeenCalledWith('[dry-run] Would register MCP: my-mcp');
+      expect(core.info).toHaveBeenCalledWith(
+        '[dry-run] Would register MCP: my-mcp',
+      );
       expect(execGcloud).not.toHaveBeenCalled();
     });
 
     test('throws on missing interfaces even in dry-run', async () => {
-      await expect(registerMcp('my-mcp', 'spec: {}', true))
-        .rejects.toThrow("mcp.yaml for 'my-mcp' is missing required field: interfaces");
+      await expect(registerMcp('my-mcp', 'spec: {}', true)).rejects.toThrow(
+        "mcp.yaml for 'my-mcp' is missing required field: interfaces",
+      );
     });
 
     test('throws on interface missing url even in dry-run', async () => {
       const yaml = 'interfaces:\n  - protocolBinding: JSONRPC\n';
-      await expect(registerMcp('my-mcp', yaml, true))
-        .rejects.toThrow("each interface must have a url");
+      await expect(registerMcp('my-mcp', yaml, true)).rejects.toThrow(
+        'each interface must have a url',
+      );
     });
   });
 
