@@ -118,14 +118,14 @@ describe('action — change filtering', () => {
   test('registers only the skill whose directory changed', async () => {
     setupDiff(['agent-registry/skills/fix-dependabot-pr/SKILL.md']);
     fg.sync.mockImplementation((pattern) => {
-      if (pattern === 'skills/*/SKILL.md') return ['skills/fix-dependabot-pr/SKILL.md', 'skills/other-skill/SKILL.md'];
+      if (pattern === 'skills/*') return ['skills/fix-dependabot-pr', 'skills/other-skill'];
       return [];
     });
 
     await action();
 
     expect(registerSkill).toHaveBeenCalledTimes(1);
-    expect(registerSkill).toHaveBeenCalledWith('fix-dependabot-pr', expect.any(String), false, 'my-clan');
+    expect(registerSkill).toHaveBeenCalledWith('fix-dependabot-pr', expect.stringMatching(/agent-registry\/skills\/fix-dependabot-pr$/), false, 'my-clan');
   });
 
   test('registers all items when no changed paths detected (git failure)', async () => {
@@ -176,7 +176,7 @@ describe('action — change filtering', () => {
     setupDiff([]);
     fg.sync.mockImplementation((pattern) => {
       if (pattern === 'agents/*/agent.yaml') return ['agents/my-agent/agent.yaml'];
-      if (pattern === 'skills/*/SKILL.md') return ['skills/my-skill/SKILL.md'];
+      if (pattern === 'skills/*') return ['skills/my-skill'];
       if (pattern === 'mcp/*/mcp.yaml') return ['mcp/my-mcp/mcp.yaml'];
       return [];
     });
@@ -247,6 +247,19 @@ describe('action — change filtering', () => {
     await expect(action()).resolves.toBeUndefined();
     expect(upload).not.toHaveBeenCalled();
     expect(registerAgent).toHaveBeenCalledTimes(1);
+  });
+
+  test('discovers skills as directories and treats resource changes as affecting the skill', async () => {
+    setupDiff(['agent-registry/skills/my-skill/references/api.md']);
+    fg.sync.mockImplementation((pattern, opts) => {
+      if (pattern === 'skills/*' && opts.onlyDirectories) return ['skills/my-skill', 'skills/example-skill'];
+      return [];
+    });
+
+    await action();
+
+    expect(registerSkill).toHaveBeenCalledTimes(1);
+    expect(registerSkill).toHaveBeenCalledWith('my-skill', expect.stringMatching(/agent-registry\/skills\/my-skill$/), false, 'my-clan');
   });
 
   test('calls setupGcloud with service account key', async () => {

@@ -51,6 +51,9 @@ agent-registry/
   skills/
     <skill-id>/
       SKILL.md            # required
+      references/         # optional — any extra files are bundled with the skill
+      scripts/
+      assets/
 ```
 
 Any directory prefixed with `example-` is ignored.
@@ -139,7 +142,9 @@ You are a dependency upgrade specialist...
 | `description` | yes | Short description of what the skill does. |
 | `metadata` | no | Arbitrary key/value pairs (e.g. `category`). |
 
-The skill is registered as `private-<skill-id>` in the `eu` location. The entire `SKILL.md` file is zipped and uploaded as the skill payload.
+The skill is registered as `private-<clan>-<skill-id>` in the `eu` location. The whole `skills/<skill-id>/` directory is the skill: every file in it (e.g. `references/`, `scripts/`, `assets/`) is zipped with its relative path and uploaded as the skill payload, with `SKILL.md` at the root. A skill directory without `SKILL.md` fails the run.
+
+The same directory is mirrored to `gs://extenda-agent-artifacts/skills/<clan>-<skill-id>/<revision>/`, so `SKILL.md` stays at `.../<revision>/SKILL.md` and relative links from it resolve against the copied files.
 
 ### Skill versioning
 

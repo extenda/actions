@@ -59986,7 +59986,7 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary: binary2, version: v
 }, "loadTool");
 
 // agent-registry/src/index.js
-var import_fast_glob2 = __toESM(require_out4(), 1);
+var import_fast_glob3 = __toESM(require_out4(), 1);
 var import_node_path7 = __toESM(require("node:path"), 1);
 var import_node_fs8 = require("node:fs");
 var import_node_child_process = require("node:child_process");
@@ -96667,6 +96667,11 @@ var upload = /* @__PURE__ */ __name(async (localPath, gcsPath) => {
   await execGcloud(["storage", "cp", localPath, dest], "gcloud", true);
   return dest;
 }, "upload");
+var uploadDir = /* @__PURE__ */ __name(async (localDir, gcsPrefix) => {
+  const dest = `gs://${GCS_BUCKET}/${gcsPrefix}/`;
+  await execGcloud(["storage", "rsync", localDir, dest, "--recursive"], "gcloud", true);
+  return dest;
+}, "uploadDir");
 
 // cloud-run/src/project-info.js
 var projectInfo = /* @__PURE__ */ __name((projectId) => {
@@ -100078,6 +100083,7 @@ var registerMcp = /* @__PURE__ */ __name(async (mcpId, mcpYaml, dryRun) => {
 var import_node_fs7 = require("node:fs");
 var import_node_os4 = require("node:os");
 var import_node_path6 = __toESM(require("node:path"), 1);
+var import_fast_glob2 = __toESM(require_out4(), 1);
 
 // node_modules/fflate/esm/index.mjs
 var import_module = require("module");
@@ -100815,9 +100821,13 @@ var parseSkillMeta = /* @__PURE__ */ __name((content) => {
   }
   return { name: meta["name"] ?? "", description: meta["description"] ?? "" };
 }, "parseSkillMeta");
-var makeZipFile = /* @__PURE__ */ __name((skillFilePath) => {
-  const content = (0, import_node_fs7.readFileSync)(skillFilePath);
-  const zipped = zipSync({ "SKILL.md": [strToU8(content.toString()), { level: 6 }] });
+var listSkillFiles = /* @__PURE__ */ __name((skillDir) => import_fast_glob2.default.sync("**/*", { cwd: skillDir, onlyFiles: true,
+dot: true }).sort(), "listSkillFiles");
+var makeZipFile = /* @__PURE__ */ __name((skillDir, files) => {
+  const entries = Object.fromEntries(
+    files.map((file) => [file, [(0, import_node_fs7.readFileSync)(import_node_path6.default.join(skillDir, file)), { level: 6 }]])
+  );
+  const zipped = zipSync(entries);
   const tmpPath = import_node_path6.default.join((0, import_node_os4.tmpdir)(), `skill-${process.pid}.zip`);
   (0, import_node_fs7.writeFileSync)(tmpPath, Buffer.from(zipped));
   return tmpPath;
@@ -100895,8 +100905,10 @@ var activate = /* @__PURE__ */ __name(async (registryId, revisionId) => {
     "--quiet"
   ], "gcloud", true);
 }, "activate");
-var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun, clan) => {
-  const skillContent = (0, import_node_fs7.readFileSync)(skillFilePath, "utf8");
+var registerSkill = /* @__PURE__ */ __name(async (skillId, skillDir, dryRun, clan) => {
+  const files = listSkillFiles(skillDir);
+  if (!files.includes("SKILL.md")) throw new Error(`Skill directory '${skillId}' is missing required file: SKILL.md`);
+  const skillContent = (0, import_node_fs7.readFileSync)(import_node_path6.default.join(skillDir, "SKILL.md"), "utf8");
   const { name: displayName, description } = parseSkillMeta(skillContent);
   if (!displayName) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: name`);
   if (!description) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: description`);
@@ -100904,6 +100916,7 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
   if (!body2) throw new Error(`SKILL.md for '${skillId}' must have instructions after the frontmatter`);
   const namespacedId = clan ? `${clan}-${skillId}` : skillId;
   const registryId = `private-${namespacedId}`;
+  info(`[skill] files (${files.length}): ${files.join(", ")}`);
   if (dryRun) {
     info(`[dry-run] Would register skill: ${registryId}`);
     return;
@@ -100928,7 +100941,7 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
       "--quiet"
     ], "gcloud", true);
   }
-  const zipPath = makeZipFile(skillFilePath);
+  const zipPath = makeZipFile(skillDir, files);
   try {
     info(`${exists3 ? "Adding" : "Uploading"} revision ${version3} to skill: ${registryId}`);
     await execGcloud([
@@ -100948,7 +100961,7 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
     (0, import_node_fs7.unlinkSync)(zipPath);
   }
   await activate(registryId, revisionId);
-  const gcsPath = await upload(skillFilePath, `skills/${namespacedId}/${revisionId}/SKILL.md`);
+  const gcsPath = await uploadDir(skillDir, `skills/${namespacedId}/${revisionId}`);
   info(`Skill registered: ${registryId}@${version3} \u2192 ${gcsPath}`);
 }, "registerSkill");
 
@@ -100979,7 +100992,7 @@ var uploadInstructions = /* @__PURE__ */ __name(async (instructionsPath, agentId
   }
 }, "uploadInstructions");
 var processAgents = /* @__PURE__ */ __name(async (registryRoot, changedPaths, gitSha, dryRun) => {
-  const agentFiles = import_fast_glob2.default.sync("agents/*/agent.yaml", { cwd: registryRoot, onlyFiles: true });
+  const agentFiles = import_fast_glob3.default.sync("agents/*/agent.yaml", { cwd: registryRoot, onlyFiles: true });
   for (const agentFile of agentFiles) {
     const agentId = import_node_path7.default.basename(import_node_path7.default.dirname(agentFile));
     if (agentId.startsWith("example-")) continue;
@@ -100995,7 +101008,7 @@ var processAgents = /* @__PURE__ */ __name(async (registryRoot, changedPaths, gi
   }
 }, "processAgents");
 var processMcps = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun) => {
-  const mcpFiles = import_fast_glob2.default.sync("mcp/*/mcp.yaml", { cwd: registryRoot, onlyFiles: true });
+  const mcpFiles = import_fast_glob3.default.sync("mcp/*/mcp.yaml", { cwd: registryRoot, onlyFiles: true });
   for (const mcpFile of mcpFiles) {
     const mcpId = import_node_path7.default.dirname(mcpFile).replace(/^mcp\//, "");
     if (mcpId.startsWith("example-")) continue;
@@ -101007,13 +101020,13 @@ var processMcps = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryR
   }
 }, "processMcps");
 var processSkills = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun, clan) => {
-  const skillFiles = import_fast_glob2.default.sync("skills/*/SKILL.md", { cwd: registryRoot, onlyFiles: true });
-  for (const skillFile of skillFiles) {
-    const skillId = import_node_path7.default.basename(import_node_path7.default.dirname(skillFile));
+  const skillDirs = import_fast_glob3.default.sync("skills/*", { cwd: registryRoot, onlyDirectories: true });
+  for (const skillDir of skillDirs) {
+    const skillId = import_node_path7.default.basename(skillDir);
     if (skillId.startsWith("example-")) continue;
     if (!isAffected(`skills/${skillId}/`, changedPaths)) continue;
     startGroup(`Skill: ${skillId}`);
-    await registerSkill(skillId, import_node_path7.default.join(registryRoot, skillFile), dryRun, clan);
+    await registerSkill(skillId, import_node_path7.default.join(registryRoot, skillDir), dryRun, clan);
     endGroup();
   }
 }, "processSkills");

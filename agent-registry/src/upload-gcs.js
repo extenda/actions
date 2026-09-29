@@ -8,4 +8,11 @@ const upload = async (localPath, gcsPath) => {
   return dest;
 };
 
-export { upload };
+// Mirrors a local directory to gs://<bucket>/<gcsPrefix>/, keeping relative paths.
+const uploadDir = async (localDir, gcsPrefix) => {
+  const dest = `gs://${GCS_BUCKET}/${gcsPrefix}/`;
+  await execGcloud(['storage', 'rsync', localDir, dest, '--recursive'], 'gcloud', true);
+  return dest;
+};
+
+export { upload, uploadDir };

@@ -2,9 +2,10 @@ import * as core from '@actions/core';
 import { readFileSync, writeFileSync, unlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { zipSync, strToU8 } from 'fflate';
+import fg from 'fast-glob';
+import { zipSync } from 'fflate';
 import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
-import { upload } from './upload-gcs.js';
+import { uploadDir } from './upload-gcs.js';
 
 const PROJECT = 'extenda';
 const LOCATION = 'eu';
@@ -20,10 +21,17 @@ const parseSkillMeta = (content) => {
   return { name: meta['name'] ?? '', description: meta['description'] ?? '' };
 };
 
-// The registry requires a zip archive containing SKILL.md.
-const makeZipFile = (skillFilePath) => {
-  const content = readFileSync(skillFilePath);
-  const zipped = zipSync({ 'SKILL.md': [strToU8(content.toString()), { level: 6 }] });
+// Every file under the skill directory (SKILL.md plus e.g. references/, scripts/, assets/),
+// as sorted POSIX paths relative to the directory.
+const listSkillFiles = (skillDir) =>
+  fg.sync('**/*', { cwd: skillDir, onlyFiles: true, dot: true }).sort();
+
+// The registry requires a zip archive with SKILL.md at the root; resources keep their relative paths.
+const makeZipFile = (skillDir, files) => {
+  const entries = Object.fromEntries(
+    files.map((file) => [file, [readFileSync(path.join(skillDir, file)), { level: 6 }]]),
+  );
+  const zipped = zipSync(entries);
   const tmpPath = path.join(tmpdir(), `skill-${process.pid}.zip`);
   writeFileSync(tmpPath, Buffer.from(zipped));
   return tmpPath;
@@ -90,8 +98,10 @@ const activate = async (registryId, revisionId) => {
   ], 'gcloud', true);
 };
 
-const registerSkill = async (skillId, skillFilePath, dryRun, clan) => {
-  const skillContent = readFileSync(skillFilePath, 'utf8');
+const registerSkill = async (skillId, skillDir, dryRun, clan) => {
+  const files = listSkillFiles(skillDir);
+  if (!files.includes('SKILL.md')) throw new Error(`Skill directory '${skillId}' is missing required file: SKILL.md`);
+  const skillContent = readFileSync(path.join(skillDir, 'SKILL.md'), 'utf8');
   const { name: displayName, description } = parseSkillMeta(skillContent);
   if (!displayName) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: name`);
   if (!description) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: description`);
@@ -99,6 +109,7 @@ const registerSkill = async (skillId, skillFilePath, dryRun, clan) => {
   if (!body) throw new Error(`SKILL.md for '${skillId}' must have instructions after the frontmatter`);
   const namespacedId = clan ? `${clan}-${skillId}` : skillId;
   const registryId = `private-${namespacedId}`;
+  core.info(`[skill] files (${files.length}): ${files.join(', ')}`);
 
   if (dryRun) {
     core.info(`[dry-run] Would register skill: ${registryId}`);
@@ -121,7 +132,7 @@ const registerSkill = async (skillId, skillFilePath, dryRun, clan) => {
     ], 'gcloud', true);
   }
 
-  const zipPath = makeZipFile(skillFilePath);
+  const zipPath = makeZipFile(skillDir, files);
   try {
     core.info(`${exists ? 'Adding' : 'Uploading'} revision ${version} to skill: ${registryId}`);
     await execGcloud([
@@ -135,7 +146,7 @@ const registerSkill = async (skillId, skillFilePath, dryRun, clan) => {
   }
 
   await activate(registryId, revisionId);
-  const gcsPath = await upload(skillFilePath, `skills/${namespacedId}/${revisionId}/SKILL.md`);
+  const gcsPath = await uploadDir(skillDir, `skills/${namespacedId}/${revisionId}`);
   core.info(`Skill registered: ${registryId}@${version} → ${gcsPath}`);
 };
 

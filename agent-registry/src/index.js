@@ -78,14 +78,14 @@ const processMcps = async (registryRoot, changedPaths, dryRun) => {
 };
 
 const processSkills = async (registryRoot, changedPaths, dryRun, clan) => {
-  const skillFiles = fg.sync('skills/*/SKILL.md', { cwd: registryRoot, onlyFiles: true });
-  for (const skillFile of skillFiles) {
-    const skillId = path.basename(path.dirname(skillFile));
+  const skillDirs = fg.sync('skills/*', { cwd: registryRoot, onlyDirectories: true });
+  for (const skillDir of skillDirs) {
+    const skillId = path.basename(skillDir);
     if (skillId.startsWith('example-')) continue;
     if (!isAffected(`skills/${skillId}/`, changedPaths)) continue;
 
     core.startGroup(`Skill: ${skillId}`);
-    await registerSkill(skillId, path.join(registryRoot, skillFile), dryRun, clan);
+    await registerSkill(skillId, path.join(registryRoot, skillDir), dryRun, clan);
     core.endGroup();
   }
 };
