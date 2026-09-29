@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # required for changed-file detection
+          fetch-depth: 2 # required for changed-file detection
 
       - uses: extenda/actions/agent-registry@v0
         with:
@@ -88,16 +88,16 @@ defaultInputModes: [text/plain]
 defaultOutputModes: [text/plain]
 ```
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `displayName` | no | Human-readable name. Defaults to the agent directory name. |
-| `description` | no | Short description of what the agent does. |
-| `url` | yes | Base URL where the agent is reachable. |
-| `skills` | no | Skills this agent advertises. Each entry can be a plain string ID or an object with `id`, `name`, `description`, `tags`, `examples`. |
-| `capabilities` | no | A2A capabilities object (e.g. `streaming: true`). |
-| `interfaces` | no | Protocol bindings. Defaults `protocolBinding` to `a2a` if omitted. |
-| `defaultInputModes` | no | Defaults to `[text/plain]`. |
-| `defaultOutputModes` | no | Defaults to `[text/plain]`. |
+| Field                | Required | Description                                                                                                                          |
+| -------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `displayName`        | no       | Human-readable name. Defaults to the agent directory name.                                                                           |
+| `description`        | no       | Short description of what the agent does.                                                                                            |
+| `url`                | yes      | Base URL where the agent is reachable.                                                                                               |
+| `skills`             | no       | Skills this agent advertises. Each entry can be a plain string ID or an object with `id`, `name`, `description`, `tags`, `examples`. |
+| `capabilities`       | no       | A2A capabilities object (e.g. `streaming: true`).                                                                                    |
+| `interfaces`         | no       | Protocol bindings. Defaults `protocolBinding` to `a2a` if omitted.                                                                   |
+| `defaultInputModes`  | no       | Defaults to `[text/plain]`.                                                                                                          |
+| `defaultOutputModes` | no       | Defaults to `[text/plain]`.                                                                                                          |
 
 ### Agent versioning
 
@@ -136,11 +136,11 @@ You are a dependency upgrade specialist...
 (skill instructions follow)
 ```
 
-| Frontmatter field | Required | Description |
-|-------------------|----------|-------------|
-| `name` | yes | Display name shown in the registry. |
-| `description` | yes | Short description of what the skill does. |
-| `metadata` | no | Arbitrary key/value pairs (e.g. `category`). |
+| Frontmatter field | Required | Description                                  |
+| ----------------- | -------- | -------------------------------------------- |
+| `name`            | yes      | Display name shown in the registry.          |
+| `description`     | yes      | Short description of what the skill does.    |
+| `metadata`        | no       | Arbitrary key/value pairs (e.g. `category`). |
 
 The skill is registered as `private-<clan>-<skill-id>` in the `eu` location. The whole `skills/<skill-id>/` directory is the skill: every file in it (e.g. `references/`, `scripts/`, `assets/`) is zipped with its relative path and uploaded as the skill payload, with `SKILL.md` at the root. A skill directory without `SKILL.md` fails the run.
 
@@ -174,17 +174,17 @@ interfaces:
     url: https://my-mcp-server.retailsvc.com/mcp
 ```
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `displayName` | no | Human-readable name. Defaults to the MCP directory name. |
-| `description` | no | Short description. |
-| `specType` | no | MCP spec type. Defaults to `tool-spec`. |
-| `spec` | no | The MCP server spec content (tools, resources, etc.). |
-| `interfaces` | no | Protocol bindings. Defaults `protocolBinding` to `JSONRPC`. |
+| Field         | Required | Description                                                 |
+| ------------- | -------- | ----------------------------------------------------------- |
+| `displayName` | no       | Human-readable name. Defaults to the MCP directory name.    |
+| `description` | no       | Short description.                                          |
+| `specType`    | no       | MCP spec type. Defaults to `tool-spec`.                     |
+| `spec`        | no       | The MCP server spec content (tools, resources, etc.).       |
+| `interfaces`  | no       | Protocol bindings. Defaults `protocolBinding` to `JSONRPC`. |
 
 ## Inputs
 
-| Input | Required | Default | Description |
-|-------|----------|---------|-------------|
-| `service-account-key` | yes | — | GCP service account key for authentication. |
-| `dry-run` | no | `false` | If `true`, print planned changes without modifying the registry. |
+| Input                 | Required | Default | Description                                                      |
+| --------------------- | -------- | ------- | ---------------------------------------------------------------- |
+| `service-account-key` | yes      | —       | GCP service account key for authentication.                      |
+| `dry-run`             | no       | `false` | If `true`, print planned changes without modifying the registry. |

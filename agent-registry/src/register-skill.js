@@ -1,9 +1,11 @@
-import * as core from '@actions/core';
-import { readFileSync, writeFileSync, unlinkSync } from 'node:fs';
+import { readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+
+import * as core from '@actions/core';
 import fg from 'fast-glob';
 import { zipSync } from 'fflate';
+
 import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 import { uploadDir } from './upload-gcs.js';
 
@@ -24,12 +26,17 @@ const parseSkillMeta = (content) => {
 // Every file under the skill directory (SKILL.md plus e.g. references/, scripts/, assets/),
 // as sorted POSIX paths relative to the directory.
 const listSkillFiles = (skillDir) =>
-  fg.sync('**/*', { cwd: skillDir, onlyFiles: true, dot: true }).sort();
+  fg
+    .sync('**/*', { cwd: skillDir, onlyFiles: true, dot: true })
+    .sort((a, b) => a.localeCompare(b));
 
 // The registry requires a zip archive with SKILL.md at the root; resources keep their relative paths.
 const makeZipFile = (skillDir, files) => {
   const entries = Object.fromEntries(
-    files.map((file) => [file, [readFileSync(path.join(skillDir, file)), { level: 6 }]]),
+    files.map((file) => [
+      file,
+      [readFileSync(path.join(skillDir, file)), { level: 6 }],
+    ]),
   );
   const zipped = zipSync(entries);
   const tmpPath = path.join(tmpdir(), `skill-${process.pid}.zip`);
@@ -41,9 +48,18 @@ const skillExists = async (skillId) => {
   try {
     core.info(`[skill] checking exists: ${skillId} @ ${LOCATION}`);
     await execGcloud(
-      ['alpha', 'agent-registry', 'skills', 'describe', skillId,
-        `--location=${LOCATION}`, `--project=${PROJECT}`, '--quiet'],
-      'gcloud', true,
+      [
+        'alpha',
+        'agent-registry',
+        'skills',
+        'describe',
+        skillId,
+        `--location=${LOCATION}`,
+        `--project=${PROJECT}`,
+        '--quiet',
+      ],
+      'gcloud',
+      true,
     );
     core.info(`[skill] exists: true`);
     return true;
@@ -58,26 +74,42 @@ const skillExists = async (skillId) => {
 const getLatestRevision = async (registryId) => {
   try {
     core.info(`[skill] fetching latest revision for: ${registryId}`);
-    const output = await execGcloud([
-      'alpha', 'agent-registry', 'skills', 'revisions', 'list',
-      `--skill=${registryId}`, `--location=${LOCATION}`, `--project=${PROJECT}`,
-      '--format=value(name.basename())', '--quiet',
-    ], 'gcloud', true);
+    const output = await execGcloud(
+      [
+        'alpha',
+        'agent-registry',
+        'skills',
+        'revisions',
+        'list',
+        `--skill=${registryId}`,
+        `--location=${LOCATION}`,
+        `--project=${PROJECT}`,
+        '--format=value(name.basename())',
+        '--quiet',
+      ],
+      'gcloud',
+      true,
+    );
     const versions = output
       .split('\n')
       .filter(Boolean)
       .filter((v) => /^v\d+-\d+$/.test(v));
     if (!versions.length) return null;
-    return versions.sort((a, b) => {
-      const [aMaj, aMin] = a.slice(1).split('-').map(Number);
-      const [bMaj, bMin] = b.slice(1).split('-').map(Number);
-      return aMaj - bMaj || aMin - bMin;
-    }).at(-1);
-  } catch { return null; }
+    return versions
+      .sort((a, b) => {
+        const [aMaj, aMin] = a.slice(1).split('-').map(Number);
+        const [bMaj, bMin] = b.slice(1).split('-').map(Number);
+        return aMaj - bMaj || aMin - bMin;
+      })
+      .at(-1);
+  } catch {
+    return null;
+  }
 };
 
 const isMajorBranch = () => {
-  const branch = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || '';
+  const branch =
+    process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || '';
   return /^(breaking|major)(\/|$)/i.test(branch);
 };
 
@@ -90,23 +122,45 @@ const bumpVersion = (version) => {
 
 const activate = async (registryId, revisionId) => {
   const revisionName = `projects/${PROJECT}/locations/${LOCATION}/skills/${registryId}/revisions/${revisionId}`;
-  await execGcloud([
-    'alpha', 'agent-registry', 'skills', 'update', registryId,
-    `--location=${LOCATION}`, `--project=${PROJECT}`,
-    `--default-revision=${revisionName}`,
-    '--target-state=active', '--quiet',
-  ], 'gcloud', true);
+  await execGcloud(
+    [
+      'alpha',
+      'agent-registry',
+      'skills',
+      'update',
+      registryId,
+      `--location=${LOCATION}`,
+      `--project=${PROJECT}`,
+      `--default-revision=${revisionName}`,
+      '--target-state=active',
+      '--quiet',
+    ],
+    'gcloud',
+    true,
+  );
 };
 
 const registerSkill = async (skillId, skillDir, dryRun, clan) => {
   const files = listSkillFiles(skillDir);
-  if (!files.includes('SKILL.md')) throw new Error(`Skill directory '${skillId}' is missing required file: SKILL.md`);
+  if (!files.includes('SKILL.md'))
+    throw new Error(
+      `Skill directory '${skillId}' is missing required file: SKILL.md`,
+    );
   const skillContent = readFileSync(path.join(skillDir, 'SKILL.md'), 'utf8');
   const { name: displayName, description } = parseSkillMeta(skillContent);
-  if (!displayName) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: name`);
-  if (!description) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: description`);
+  if (!displayName)
+    throw new Error(
+      `SKILL.md for '${skillId}' is missing required frontmatter field: name`,
+    );
+  if (!description)
+    throw new Error(
+      `SKILL.md for '${skillId}' is missing required frontmatter field: description`,
+    );
   const body = skillContent.replace(/^---\n[\s\S]*?\n---\n?/, '').trim();
-  if (!body) throw new Error(`SKILL.md for '${skillId}' must have instructions after the frontmatter`);
+  if (!body)
+    throw new Error(
+      `SKILL.md for '${skillId}' must have instructions after the frontmatter`,
+    );
   const namespacedId = clan ? `${clan}-${skillId}` : skillId;
   const registryId = `private-${namespacedId}`;
   core.info(`[skill] files (${files.length}): ${files.join(', ')}`);
@@ -124,29 +178,56 @@ const registerSkill = async (skillId, skillDir, dryRun, clan) => {
   if (!exists) {
     core.info(`Creating skill: ${registryId}@${version}`);
     // gcloud auto-prepends "private-" to the skill name, so we pass namespacedId (not registryId)
-    await execGcloud([
-      'alpha', 'agent-registry', 'skills', 'create', namespacedId,
-      `--location=${LOCATION}`, `--project=${PROJECT}`,
-      `--display-name=${displayName}`, `--description=${description}`,
-      '--type=simple', '--quiet',
-    ], 'gcloud', true);
+    await execGcloud(
+      [
+        'alpha',
+        'agent-registry',
+        'skills',
+        'create',
+        namespacedId,
+        `--location=${LOCATION}`,
+        `--project=${PROJECT}`,
+        `--display-name=${displayName}`,
+        `--description=${description}`,
+        '--type=simple',
+        '--quiet',
+      ],
+      'gcloud',
+      true,
+    );
   }
 
   const zipPath = makeZipFile(skillDir, files);
   try {
-    core.info(`${exists ? 'Adding' : 'Uploading'} revision ${version} to skill: ${registryId}`);
-    await execGcloud([
-      'alpha', 'agent-registry', 'skills', 'revisions', 'create', revisionId,
-      `--skill=${registryId}`,
-      `--location=${LOCATION}`, `--project=${PROJECT}`,
-      `--payload=${zipPath}`, '--quiet',
-    ], 'gcloud', true);
+    core.info(
+      `${exists ? 'Adding' : 'Uploading'} revision ${version} to skill: ${registryId}`,
+    );
+    await execGcloud(
+      [
+        'alpha',
+        'agent-registry',
+        'skills',
+        'revisions',
+        'create',
+        revisionId,
+        `--skill=${registryId}`,
+        `--location=${LOCATION}`,
+        `--project=${PROJECT}`,
+        `--payload=${zipPath}`,
+        '--quiet',
+      ],
+      'gcloud',
+      true,
+    );
   } finally {
     unlinkSync(zipPath);
   }
 
   await activate(registryId, revisionId);
-  const gcsPath = await uploadDir(skillDir, `skills/${namespacedId}/${revisionId}`);
+  const gcsPath = await uploadDir(
+    skillDir,
+    `skills/${namespacedId}/${revisionId}`,
+  );
   core.info(`Skill registered: ${registryId}@${version} → ${gcsPath}`);
 };
 

@@ -6,9 +6,9 @@
 //   node run-local.js /Users/alex/projects/extenda/common/engineering-platform-common --dry-run
 
 import { execSync } from 'child_process';
+import fg from 'fast-glob';
 import { readFileSync } from 'fs';
 import path from 'path';
-import fg from 'fast-glob';
 
 import { registerAgent } from './src/register-agent.js';
 import { registerMcp } from './src/register-mcp.js';
@@ -26,7 +26,9 @@ if (!repoRoot) {
 
 process.chdir(repoRoot);
 
-const gitSha = execSync('git rev-parse HEAD', { cwd: repoRoot }).toString().trim();
+const gitSha = execSync('git rev-parse HEAD', { cwd: repoRoot })
+  .toString()
+  .trim();
 const registryRoot = path.join(repoRoot, 'agent-registry');
 
 console.log(`Repo:     ${repoRoot}`);
@@ -35,7 +37,10 @@ console.log(`Dry-run:  ${dryRun}`);
 console.log(`Registry: ${registryRoot}`);
 
 // --- Agents ---
-const agentFiles = fg.sync('agents/*/agent.yaml', { cwd: registryRoot, onlyFiles: true });
+const agentFiles = fg.sync('agents/*/agent.yaml', {
+  cwd: registryRoot,
+  onlyFiles: true,
+});
 for (const agentFile of agentFiles) {
   const agentId = path.basename(path.dirname(agentFile));
   if (agentId.startsWith('example-')) continue;
@@ -44,12 +49,19 @@ for (const agentFile of agentFiles) {
   const agentYaml = readFileSync(path.join(registryRoot, agentFile), 'utf8');
   await registerAgent(agentId, agentYaml, dryRun);
 
-  const instructionsPath = path.join(registryRoot, 'agents', agentId, 'instructions.md');
+  const instructionsPath = path.join(
+    registryRoot,
+    'agents',
+    agentId,
+    'instructions.md',
+  );
   try {
     readFileSync(instructionsPath);
     const gcsPath = `agents/${agentId}/${gitSha}/instructions.md`;
     if (dryRun) {
-      console.log(`  [dry-run] Would upload to gs://extenda-agent-artifacts/${gcsPath}`);
+      console.log(
+        `  [dry-run] Would upload to gs://extenda-agent-artifacts/${gcsPath}`,
+      );
     } else {
       await upload(instructionsPath, gcsPath);
     }
@@ -59,7 +71,10 @@ for (const agentFile of agentFiles) {
 }
 
 // --- MCPs ---
-const mcpFiles = fg.sync('mcp/*/mcp.yaml', { cwd: registryRoot, onlyFiles: true });
+const mcpFiles = fg.sync('mcp/*/mcp.yaml', {
+  cwd: registryRoot,
+  onlyFiles: true,
+});
 for (const mcpFile of mcpFiles) {
   const mcpId = path.dirname(mcpFile).replace(/^mcp\//, '');
   if (mcpId.startsWith('example-')) continue;
@@ -70,7 +85,10 @@ for (const mcpFile of mcpFiles) {
 }
 
 // --- Skills ---
-const skillDirs = fg.sync('skills/*', { cwd: registryRoot, onlyDirectories: true });
+const skillDirs = fg.sync('skills/*', {
+  cwd: registryRoot,
+  onlyDirectories: true,
+});
 for (const skillDir of skillDirs) {
   const skillId = path.basename(skillDir);
   if (skillId.startsWith('example-')) continue;

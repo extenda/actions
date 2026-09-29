@@ -10,15 +10,19 @@ vi.mock('fflate', () => ({
   zipSync: vi.fn(() => new Uint8Array([1, 2, 3])),
 }));
 vi.mock('fast-glob');
-vi.mock('node:os', () => ({ default: { tmpdir: vi.fn(() => '/tmp') }, tmpdir: vi.fn(() => '/tmp') }));
+vi.mock('node:os', () => ({
+  default: { tmpdir: vi.fn(() => '/tmp') },
+  tmpdir: vi.fn(() => '/tmp'),
+}));
 vi.mock('../../setup-gcloud/src/exec-gcloud.js');
 
-import * as core from '@actions/core';
 import { readFileSync, unlinkSync } from 'node:fs';
+
+import * as core from '@actions/core';
 import fg from 'fast-glob';
 import { zipSync } from 'fflate';
-import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 
+import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 import { parseSkillMeta, registerSkill } from '../src/register-skill.js';
 
 const SKILL_MD = `---
@@ -43,7 +47,10 @@ describe('parseSkillMeta', () => {
   });
 
   test('returns empty strings when no frontmatter present', () => {
-    expect(parseSkillMeta('# No frontmatter')).toEqual({ name: '', description: '' });
+    expect(parseSkillMeta('# No frontmatter')).toEqual({
+      name: '',
+      description: '',
+    });
   });
 
   test('handles description with colons', () => {
@@ -90,7 +97,9 @@ describe('registerSkill', () => {
 
       const createArgs = call(1);
       expect(createArgs).toContain('--display-name=Fix Dependabot PR');
-      expect(createArgs).toContain('--description=Automatically fixes failing Dependabot PRs');
+      expect(createArgs).toContain(
+        '--description=Automatically fixes failing Dependabot PRs',
+      );
       expect(createArgs).toContain('--type=simple');
       expect(createArgs).toContain('--location=eu');
       expect(createArgs).toContain('--project=extenda');
@@ -126,7 +135,9 @@ describe('registerSkill', () => {
 
     test('picks the highest version when multiple revisions exist', async () => {
       execGcloud.mockResolvedValueOnce('');
-      execGcloud.mockResolvedValueOnce(revisionsList('v0-01', 'v0-03', 'v0-02'));
+      execGcloud.mockResolvedValueOnce(
+        revisionsList('v0-01', 'v0-03', 'v0-02'),
+      );
       execGcloud.mockResolvedValueOnce('');
       execGcloud.mockResolvedValueOnce('');
 
@@ -191,26 +202,34 @@ describe('registerSkill', () => {
   describe('validation', () => {
     test('throws when frontmatter name is missing', async () => {
       readFileSync.mockReturnValue('---\ndescription: A description\n---\n');
-      await expect(registerSkill('my-skill', '/skill', false))
-        .rejects.toThrow("missing required frontmatter field: name");
+      await expect(registerSkill('my-skill', '/skill', false)).rejects.toThrow(
+        'missing required frontmatter field: name',
+      );
     });
 
     test('throws when frontmatter description is missing', async () => {
       readFileSync.mockReturnValue('---\nname: My Skill\n---\n');
-      await expect(registerSkill('my-skill', '/skill', false))
-        .rejects.toThrow("missing required frontmatter field: description");
+      await expect(registerSkill('my-skill', '/skill', false)).rejects.toThrow(
+        'missing required frontmatter field: description',
+      );
     });
 
     test('throws when skill body is empty', async () => {
-      readFileSync.mockReturnValue('---\nname: My Skill\ndescription: A description\n---\n');
-      await expect(registerSkill('my-skill', '/skill', false))
-        .rejects.toThrow("must have instructions after the frontmatter");
+      readFileSync.mockReturnValue(
+        '---\nname: My Skill\ndescription: A description\n---\n',
+      );
+      await expect(registerSkill('my-skill', '/skill', false)).rejects.toThrow(
+        'must have instructions after the frontmatter',
+      );
     });
 
     test('throws on empty body even in dry-run', async () => {
-      readFileSync.mockReturnValue('---\nname: My Skill\ndescription: A description\n---\n');
-      await expect(registerSkill('my-skill', '/skill', true))
-        .rejects.toThrow("must have instructions after the frontmatter");
+      readFileSync.mockReturnValue(
+        '---\nname: My Skill\ndescription: A description\n---\n',
+      );
+      await expect(registerSkill('my-skill', '/skill', true)).rejects.toThrow(
+        'must have instructions after the frontmatter',
+      );
     });
   });
 
@@ -218,14 +237,18 @@ describe('registerSkill', () => {
     test('prints create message for new skill', async () => {
       await registerSkill('my-skill', '/skill', true);
 
-      expect(core.info).toHaveBeenCalledWith('[dry-run] Would register skill: private-my-skill');
+      expect(core.info).toHaveBeenCalledWith(
+        '[dry-run] Would register skill: private-my-skill',
+      );
       expect(execGcloud).not.toHaveBeenCalled();
     });
 
     test('prints update message with next version for existing skill', async () => {
       await registerSkill('my-skill', '/skill', true);
 
-      expect(core.info).toHaveBeenCalledWith('[dry-run] Would register skill: private-my-skill');
+      expect(core.info).toHaveBeenCalledWith(
+        '[dry-run] Would register skill: private-my-skill',
+      );
       expect(execGcloud).not.toHaveBeenCalled();
     });
   });
@@ -236,7 +259,9 @@ describe('registerSkill', () => {
       execGcloud.mockResolvedValueOnce(''); // skills create
       execGcloud.mockRejectedValueOnce(new Error('gcloud error')); // revisions create fails
 
-      await expect(registerSkill('my-skill', '/skill', false)).rejects.toThrow('gcloud error');
+      await expect(registerSkill('my-skill', '/skill', false)).rejects.toThrow(
+        'gcloud error',
+      );
 
       expect(unlinkSync).toHaveBeenCalledOnce();
     });
@@ -271,39 +296,69 @@ describe('registerSkill', () => {
     test('lists every file under the skill directory, including dotfiles', async () => {
       await registerNew();
 
-      expect(fg.sync).toHaveBeenCalledWith('**/*', { cwd: '/skill', onlyFiles: true, dot: true });
+      expect(fg.sync).toHaveBeenCalledWith('**/*', {
+        cwd: '/skill',
+        onlyFiles: true,
+        dot: true,
+      });
     });
 
     test('SKILL.md-only skill zips a single SKILL.md entry and uploads to the same GCS path', async () => {
       await registerNew();
 
-      expect(zipSync).toHaveBeenCalledWith({ 'SKILL.md': [SKILL_MD, { level: 6 }] });
+      expect(zipSync).toHaveBeenCalledWith({
+        'SKILL.md': [SKILL_MD, { level: 6 }],
+      });
       expect(readFileSync).toHaveBeenCalledWith('/skill/SKILL.md', 'utf8');
       expect(call(4)).toEqual([
-        'storage', 'rsync', '/skill', 'gs://extenda-agent-artifacts/skills/clan-my-skill/v0-01/', '--recursive',
+        'storage',
+        'rsync',
+        '/skill',
+        'gs://extenda-agent-artifacts/skills/clan-my-skill/v0-01/',
+        '--recursive',
       ]);
     });
 
     test('zips nested references/ and scripts/ with their relative paths', async () => {
-      fg.sync.mockReturnValue(['scripts/run.sh', 'SKILL.md', 'references/api.md', 'references/deep/notes.md']);
+      fg.sync.mockReturnValue([
+        'scripts/run.sh',
+        'SKILL.md',
+        'references/api.md',
+        'references/deep/notes.md',
+      ]);
 
       await registerNew();
 
       const entries = zipSync.mock.calls[0][0];
       expect(Object.keys(entries).sort()).toEqual(
-        ['SKILL.md', 'references/api.md', 'references/deep/notes.md', 'scripts/run.sh'].sort(),
+        [
+          'SKILL.md',
+          'references/api.md',
+          'references/deep/notes.md',
+          'scripts/run.sh',
+        ].sort(),
       );
-      expect(readFileSync).toHaveBeenCalledWith('/skill/references/deep/notes.md');
+      expect(readFileSync).toHaveBeenCalledWith(
+        '/skill/references/deep/notes.md',
+      );
       expect(readFileSync).toHaveBeenCalledWith('/skill/scripts/run.sh');
-      expect(call(4)).toContain('gs://extenda-agent-artifacts/skills/clan-my-skill/v0-01/');
+      expect(call(4)).toContain(
+        'gs://extenda-agent-artifacts/skills/clan-my-skill/v0-01/',
+      );
     });
 
     test('logs the full file list', async () => {
-      fg.sync.mockReturnValue(['SKILL.md', 'references/api.md', 'scripts/run.sh']);
+      fg.sync.mockReturnValue([
+        'SKILL.md',
+        'references/api.md',
+        'scripts/run.sh',
+      ]);
 
       await registerNew();
 
-      expect(core.info).toHaveBeenCalledWith('[skill] files (3): SKILL.md, references/api.md, scripts/run.sh');
+      expect(core.info).toHaveBeenCalledWith(
+        '[skill] files (3): references/api.md, scripts/run.sh, SKILL.md',
+      );
     });
 
     test('logs the full file list in dry-run', async () => {
@@ -311,23 +366,27 @@ describe('registerSkill', () => {
 
       await registerSkill('my-skill', '/skill', true);
 
-      expect(core.info).toHaveBeenCalledWith('[skill] files (2): SKILL.md, references/api.md');
+      expect(core.info).toHaveBeenCalledWith(
+        '[skill] files (2): references/api.md, SKILL.md',
+      );
       expect(execGcloud).not.toHaveBeenCalled();
     });
 
     test('throws a clear error when the directory has no SKILL.md', async () => {
       fg.sync.mockReturnValue(['references/api.md']);
 
-      await expect(registerSkill('my-skill', '/skill', false))
-        .rejects.toThrow("Skill directory 'my-skill' is missing required file: SKILL.md");
+      await expect(registerSkill('my-skill', '/skill', false)).rejects.toThrow(
+        "Skill directory 'my-skill' is missing required file: SKILL.md",
+      );
       expect(execGcloud).not.toHaveBeenCalled();
     });
 
     test('throws when the directory has no SKILL.md even in dry-run', async () => {
       fg.sync.mockReturnValue([]);
 
-      await expect(registerSkill('my-skill', '/skill', true))
-        .rejects.toThrow('missing required file: SKILL.md');
+      await expect(registerSkill('my-skill', '/skill', true)).rejects.toThrow(
+        'missing required file: SKILL.md',
+      );
     });
   });
 });
