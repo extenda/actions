@@ -276,11 +276,15 @@ describe('Maven', () => {
         undefined,
         { cwd: 'package' },
       );
-      expect(core.exportVariable).toHaveBeenCalledTimes(1);
+      expect(core.exportVariable).toHaveBeenCalledTimes(2);
       expect(core.exportVariable).toHaveBeenCalledWith('MAVEN_INIT', 'true');
+      expect(core.exportVariable).toHaveBeenCalledWith(
+        'MAVEN_USES_ARTIFACT_REGISTRY',
+        'false',
+      );
       process.env.MAVEN_INIT = 'true';
       await action();
-      expect(core.exportVariable).toHaveBeenCalledTimes(1);
+      expect(core.exportVariable).toHaveBeenCalledTimes(2);
     });
 
     test('It uses artifact registry when extensions present', async () => {
@@ -300,6 +304,30 @@ describe('Maven', () => {
       ).toEqual('<extenda-gar />');
       expect(loadNexusCredentials).not.toHaveBeenCalled();
       expect(withGcloud).toHaveBeenCalled();
+    });
+
+    test('It uses artifact registry in a later step of the same job', async () => {
+      const inputs = {
+        args: 'compile',
+        version: '1.0.0',
+        'service-account-key': 'service-account-key',
+      };
+      core.getInput.mockImplementation((name) => inputs[name] || '');
+      core.exportVariable.mockImplementation((name, value) => {
+        process.env[name] = value;
+      });
+
+      const fileSystem = getFs();
+      fileSystem['.mvn/extensions.xml'] =
+        '<artifactId>artifactregistry-maven-wagon</artifactId>';
+      mockFs(fileSystem);
+
+      await action();
+      expect(withGcloud).toHaveBeenCalledTimes(1);
+
+      await action();
+      expect(withGcloud).toHaveBeenCalledTimes(2);
+      expect(loadNexusCredentials).not.toHaveBeenCalled();
     });
 
     test('It skips versioning for missing POM', async () => {

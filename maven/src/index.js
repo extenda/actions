@@ -50,7 +50,9 @@ const action = async () => {
 
   const hasPom = pomExists(args, workingDir);
 
-  let usesArtifactRegistry = false;
+  // Later steps in the same job reuse the settings chosen by the first step.
+  let usesArtifactRegistry =
+    process.env.MAVEN_USES_ARTIFACT_REGISTRY === 'true';
 
   if (!process.env.MAVEN_INIT) {
     usesArtifactRegistry = await mvn.copySettings(
@@ -67,6 +69,10 @@ const action = async () => {
       );
     }
     core.exportVariable('MAVEN_INIT', 'true');
+    core.exportVariable(
+      'MAVEN_USES_ARTIFACT_REGISTRY',
+      String(usesArtifactRegistry),
+    );
     if (!version && hasPom) {
       const snapshotVersion = async () =>
         versions
