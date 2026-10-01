@@ -147,7 +147,8 @@ jobs:
             TEST3_TOKEN: sonarqube-token
             TEST4_TOKEN: sonarqube-token
 
-  acceptance-linux:
+  acceptance-linux-os:
+    name: acceptance-linux (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
@@ -259,6 +260,24 @@ jobs:
         run: |
           echo VERSION=${{ steps.version.outputs.version }}
           echo RELEASE_TAG=${{ steps.version.outputs.release-tag }}
+
+  # Branch protection requires a single acceptance-linux check, so this reports the result of the whole matrix.
+  # It always runs: a skipped required check counts as passed.
+  acceptance-linux:
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - acceptance-linux-os
+    permissions: {}
+    steps:
+      - name: Check Linux acceptance tests
+        run: |
+          if [ "$RESULT" != success ]; then
+            echo "::error::Linux acceptance tests ended with result: $RESULT"
+            exit 1
+          fi
+        env:
+          RESULT: ${{ needs.acceptance-linux-os.result }}
 
   release:
     runs-on: ubuntu-latest
