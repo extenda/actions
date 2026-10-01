@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import semver from 'semver';
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 
 import * as changes from './conventionalchanges.js';
 import gitConfig from './git-config.js';

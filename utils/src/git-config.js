@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 
 const basicAuth = () => {
   const buffer = Buffer.from(
@@ -35,7 +35,8 @@ const removeExistingGitCredentials = async (git) => {
  */
 /* istanbul ignore next */
 const gitConfig = async () => {
-  const git = simpleGit();
+  // simple-git blocks includeIf keys unless enabled. The key is built from our own .git path.
+  const git = simpleGit({ unsafe: { allowUnsafeInclude: true } });
 
   await removeExistingGitCredentials(git);
 

@@ -21,7 +21,7 @@ describe('drain dataflow job', () => {
     exec.exec.mockImplementationOnce((cmd, args, opts) =>
       opts.listeners.stdout(''),
     );
-    expect(
+    await expect(
       drainJob('jobId-123', 'job-name-10', 'europe-west1', 'test-staging-323'),
     ).resolves.toEqual(true);
     expect(exec.exec).toHaveBeenCalledTimes(1);
