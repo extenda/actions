@@ -1,7 +1,8 @@
 import path from 'node:path';
 
-import { fs as memfs } from 'memfs';
 import micromatch from 'micromatch';
+
+import { fs as memfs } from './memfs-volume.js';
 
 const fastGlobMock = {
   sync: (patterns, options = {}) => {

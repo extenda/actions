@@ -23,7 +23,7 @@ function flatten(input, base = process.cwd()) {
 
 // Mock 'mock-fs'
 vi.mock('mock-fs', async () => {
-  const { vol } = await import('memfs');
+  const { vol } = await import('./.test/mocks/memfs-volume.js');
   const nodeFs = await import('node:fs');
   const os = await import('node:os'); // Import os
 
@@ -65,7 +65,7 @@ vi.mock('mock-fs', async () => {
 // Proxy Factory
 async function createFsProxy(moduleName) {
   const actual = await vi.importActual(moduleName);
-  const { fs: memfs } = await import('memfs');
+  const { fs: memfs } = await import('./.test/mocks/memfs-volume.js');
   const exports = { ...actual };
 
   // Helper to determine implementation
@@ -106,7 +106,7 @@ vi.mock('node:fs', () => createFsProxy('node:fs'));
 vi.mock('fs', () => createFsProxy('fs'));
 vi.mock('fs/promises', async () => {
   const actual = await vi.importActual('node:fs/promises');
-  const { fs: memfs } = await import('memfs');
+  const { fs: memfs } = await import('./.test/mocks/memfs-volume.js');
   return new Proxy(actual, {
     get(target, prop) {
       if (proxyState.useMemfs && memfs.promises[prop]) {
