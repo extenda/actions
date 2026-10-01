@@ -6,7 +6,7 @@
   "main": "dist/index.cjs",
   "license": "ISC",
   "dependencies": {
-    "camelcase-keys": "^10.0.2",
+    "camelcase-keys": "^10.0.3",
     "joi": "^18.2.9"
   },
   "type": "module",

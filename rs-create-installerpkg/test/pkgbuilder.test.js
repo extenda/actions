@@ -343,7 +343,7 @@ describe('RS installer package tests', () => {
     expect(getBinaryName()).toBe('InstallerPackageBuilder.Core.Console');
 
     expect(os.platform).toHaveBeenCalledTimes(2);
-    vi.unmock('os');
+    os.platform.mockRestore();
   });
 
   test('It can run the builder', async () => {

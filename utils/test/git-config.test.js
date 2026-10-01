@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 import { afterAll, beforeAll, expect, test } from 'vitest';
 
 import gitConfig from '../src/git-config.js';
@@ -27,7 +27,7 @@ test('It can setup git', async () => {
 });
 
 test('It can clear action/v6 credentials reference', async () => {
-  const git = simpleGit();
+  const git = simpleGit({ unsafe: { allowUnsafeInclude: true } });
   let gitDir = path.join(process.cwd(), '.git');
   gitDir = gitDir.replace(/\\/g, '/');
   await git.addConfig(

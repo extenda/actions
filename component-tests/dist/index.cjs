@@ -33,11 +33,11 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var require_ms = __commonJS({
   "node_modules/ms/index.js"(exports2, module2) {
     var s = 1e3;
-    var m = s * 60;
-    var h2 = m * 60;
-    var d = h2 * 24;
-    var w = d * 7;
-    var y = d * 365.25;
+    var m2 = s * 60;
+    var h3 = m2 * 60;
+    var d2 = h3 * 24;
+    var w = d2 * 7;
+    var y = d2 * 365.25;
     module2.exports = function(val, options) {
       options = options || {};
       var type = typeof val;
@@ -78,19 +78,19 @@ var require_ms = __commonJS({
         case "days":
         case "day":
         case "d":
-          return n * d;
+          return n * d2;
         case "hours":
         case "hour":
         case "hrs":
         case "hr":
         case "h":
-          return n * h2;
+          return n * h3;
         case "minutes":
         case "minute":
         case "mins":
         case "min":
         case "m":
-          return n * m;
+          return n * m2;
         case "seconds":
         case "second":
         case "secs":
@@ -108,43 +108,43 @@ var require_ms = __commonJS({
       }
     }
     __name(parse, "parse");
-    function fmtShort(ms) {
-      var msAbs = Math.abs(ms);
-      if (msAbs >= d) {
-        return Math.round(ms / d) + "d";
+    function fmtShort(ms2) {
+      var msAbs = Math.abs(ms2);
+      if (msAbs >= d2) {
+        return Math.round(ms2 / d2) + "d";
       }
-      if (msAbs >= h2) {
-        return Math.round(ms / h2) + "h";
+      if (msAbs >= h3) {
+        return Math.round(ms2 / h3) + "h";
       }
-      if (msAbs >= m) {
-        return Math.round(ms / m) + "m";
+      if (msAbs >= m2) {
+        return Math.round(ms2 / m2) + "m";
       }
       if (msAbs >= s) {
-        return Math.round(ms / s) + "s";
+        return Math.round(ms2 / s) + "s";
       }
-      return ms + "ms";
+      return ms2 + "ms";
     }
     __name(fmtShort, "fmtShort");
-    function fmtLong(ms) {
-      var msAbs = Math.abs(ms);
-      if (msAbs >= d) {
-        return plural(ms, msAbs, d, "day");
+    function fmtLong(ms2) {
+      var msAbs = Math.abs(ms2);
+      if (msAbs >= d2) {
+        return plural(ms2, msAbs, d2, "day");
       }
-      if (msAbs >= h2) {
-        return plural(ms, msAbs, h2, "hour");
+      if (msAbs >= h3) {
+        return plural(ms2, msAbs, h3, "hour");
       }
-      if (msAbs >= m) {
-        return plural(ms, msAbs, m, "minute");
+      if (msAbs >= m2) {
+        return plural(ms2, msAbs, m2, "minute");
       }
       if (msAbs >= s) {
-        return plural(ms, msAbs, s, "second");
+        return plural(ms2, msAbs, s, "second");
       }
-      return ms + " ms";
+      return ms2 + " ms";
     }
     __name(fmtLong, "fmtLong");
-    function plural(ms, msAbs, n, name) {
+    function plural(ms2, msAbs, n, name) {
       var isPlural = msAbs >= n * 1.5;
-      return Math.round(ms / n) + " " + name + (isPlural ? "s" : "");
+      return Math.round(ms2 / n) + " " + name + (isPlural ? "s" : "");
     }
     __name(plural, "plural");
   }
@@ -170,8 +170,8 @@ var require_common = __commonJS({
       createDebug.formatters = {};
       function selectColor(namespace) {
         let hash = 0;
-        for (let i2 = 0; i2 < namespace.length; i2++) {
-          hash = (hash << 5) - hash + namespace.charCodeAt(i2);
+        for (let i = 0; i < namespace.length; i++) {
+          hash = (hash << 5) - hash + namespace.charCodeAt(i);
           hash |= 0;
         }
         return createDebug.colors[Math.abs(hash) % createDebug.colors.length];
@@ -183,14 +183,14 @@ var require_common = __commonJS({
         let enableOverride = null;
         let namespacesCache;
         let enabledCache;
-        function debug3(...args) {
-          if (!debug3.enabled) {
+        function debug2(...args) {
+          if (!debug2.enabled) {
             return;
           }
-          const self = debug3;
+          const self = debug2;
           const curr = Number(/* @__PURE__ */ new Date());
-          const ms = curr - (prevTime || curr);
-          self.diff = ms;
+          const ms2 = curr - (prevTime || curr);
+          self.diff = ms2;
           self.prev = prevTime;
           self.curr = curr;
           prevTime = curr;
@@ -217,13 +217,13 @@ var require_common = __commonJS({
           const logFn = self.log || createDebug.log;
           logFn.apply(self, args);
         }
-        __name(debug3, "debug");
-        debug3.namespace = namespace;
-        debug3.useColors = createDebug.useColors();
-        debug3.color = createDebug.selectColor(namespace);
-        debug3.extend = extend;
-        debug3.destroy = createDebug.destroy;
-        Object.defineProperty(debug3, "enabled", {
+        __name(debug2, "debug");
+        debug2.namespace = namespace;
+        debug2.useColors = createDebug.useColors();
+        debug2.color = createDebug.selectColor(namespace);
+        debug2.extend = extend;
+        debug2.destroy = createDebug.destroy;
+        Object.defineProperty(debug2, "enabled", {
           enumerable: true,
           configurable: false,
           get: /* @__PURE__ */ __name(() => {
@@ -236,14 +236,14 @@ var require_common = __commonJS({
             }
             return enabledCache;
           }, "get"),
-          set: /* @__PURE__ */ __name((v) => {
-            enableOverride = v;
+          set: /* @__PURE__ */ __name((v2) => {
+            enableOverride = v2;
           }, "set")
         });
         if (typeof createDebug.init === "function") {
-          createDebug.init(debug3);
+          createDebug.init(debug2);
         }
-        return debug3;
+        return debug2;
       }
       __name(createDebug, "createDebug");
       function extend(namespace, delimiter) {
@@ -258,11 +258,11 @@ var require_common = __commonJS({
         createDebug.names = [];
         createDebug.skips = [];
         const split = (typeof namespaces === "string" ? namespaces : "").trim().replace(/\s+/g, ",").split(",").filter(Boolean);
-        for (const ns of split) {
-          if (ns[0] === "-") {
-            createDebug.skips.push(ns.slice(1));
+        for (const ns2 of split) {
+          if (ns2[0] === "-") {
+            createDebug.skips.push(ns2.slice(1));
           } else {
-            createDebug.names.push(ns);
+            createDebug.names.push(ns2);
           }
         }
       }
@@ -312,8 +312,8 @@ var require_common = __commonJS({
             return false;
           }
         }
-        for (const ns of createDebug.names) {
-          if (matchesTemplate(name, ns)) {
+        for (const ns2 of createDebug.names) {
+          if (matchesTemplate(name, ns2)) {
             return true;
           }
         }
@@ -443,14 +443,14 @@ in the next major version of `debug`.");
       if (typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
         return false;
       }
-      let m;
+      let m2;
       return typeof document !== "undefined" && document.documentElement && document.documentElement.style && document.documentElement.
       style.WebkitAppearance || // Is firebug? http://stackoverflow.com/a/398120/376773
       typeof window !== "undefined" && window.console && (window.console.firebug || window.console.exception && window.console.
       table) || // Is firefox >= v31?
       // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-      typeof navigator !== "undefined" && navigator.userAgent && (m = navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/)) &&
-      parseInt(m[1], 10) >= 31 || // Double check webkit in userAgent just in case we are in a worker
+      typeof navigator !== "undefined" && navigator.userAgent && (m2 = navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/)) &&
+      parseInt(m2[1], 10) >= 31 || // Double check webkit in userAgent just in case we are in a worker
       typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
     }
     __name(useColors, "useColors");
@@ -510,131 +510,12 @@ in the next major version of `debug`.");
     __name(localstorage, "localstorage");
     module2.exports = require_common()(exports2);
     var { formatters } = module2.exports;
-    formatters.j = function(v) {
+    formatters.j = function(v2) {
       try {
-        return JSON.stringify(v);
+        return JSON.stringify(v2);
       } catch (error2) {
         return "[UnexpectedJSONParseError]: " + error2.message;
       }
-    };
-  }
-});
-
-// node_modules/has-flag/index.js
-var require_has_flag = __commonJS({
-  "node_modules/has-flag/index.js"(exports2, module2) {
-    "use strict";
-    module2.exports = (flag, argv = process.argv) => {
-      const prefix = flag.startsWith("-") ? "" : flag.length === 1 ? "-" : "--";
-      const position = argv.indexOf(prefix + flag);
-      const terminatorPosition = argv.indexOf("--");
-      return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
-    };
-  }
-});
-
-// node_modules/supports-color/index.js
-var require_supports_color = __commonJS({
-  "node_modules/supports-color/index.js"(exports2, module2) {
-    "use strict";
-    var os4 = require("os");
-    var tty = require("tty");
-    var hasFlag = require_has_flag();
-    var { env } = process;
-    var forceColor;
-    if (hasFlag("no-color") || hasFlag("no-colors") || hasFlag("color=false") || hasFlag("color=never")) {
-      forceColor = 0;
-    } else if (hasFlag("color") || hasFlag("colors") || hasFlag("color=true") || hasFlag("color=always")) {
-      forceColor = 1;
-    }
-    if ("FORCE_COLOR" in env) {
-      if (env.FORCE_COLOR === "true") {
-        forceColor = 1;
-      } else if (env.FORCE_COLOR === "false") {
-        forceColor = 0;
-      } else {
-        forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
-      }
-    }
-    function translateLevel(level) {
-      if (level === 0) {
-        return false;
-      }
-      return {
-        level,
-        hasBasic: true,
-        has256: level >= 2,
-        has16m: level >= 3
-      };
-    }
-    __name(translateLevel, "translateLevel");
-    function supportsColor(haveStream, streamIsTTY) {
-      if (forceColor === 0) {
-        return 0;
-      }
-      if (hasFlag("color=16m") || hasFlag("color=full") || hasFlag("color=truecolor")) {
-        return 3;
-      }
-      if (hasFlag("color=256")) {
-        return 2;
-      }
-      if (haveStream && !streamIsTTY && forceColor === void 0) {
-        return 0;
-      }
-      const min = forceColor || 0;
-      if (env.TERM === "dumb") {
-        return min;
-      }
-      if (process.platform === "win32") {
-        const osRelease = os4.release().split(".");
-        if (Number(osRelease[0]) >= 10 && Number(osRelease[2]) >= 10586) {
-          return Number(osRelease[2]) >= 14931 ? 3 : 2;
-        }
-        return 1;
-      }
-      if ("CI" in env) {
-        if (["TRAVIS", "CIRCLECI", "APPVEYOR", "GITLAB_CI", "GITHUB_ACTIONS", "BUILDKITE"].some((sign) => sign in env) ||
-        env.CI_NAME === "codeship") {
-          return 1;
-        }
-        return min;
-      }
-      if ("TEAMCITY_VERSION" in env) {
-        return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
-      }
-      if (env.COLORTERM === "truecolor") {
-        return 3;
-      }
-      if ("TERM_PROGRAM" in env) {
-        const version = parseInt((env.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
-        switch (env.TERM_PROGRAM) {
-          case "iTerm.app":
-            return version >= 3 ? 3 : 2;
-          case "Apple_Terminal":
-            return 2;
-        }
-      }
-      if (/-256(color)?$/i.test(env.TERM)) {
-        return 2;
-      }
-      if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
-        return 1;
-      }
-      if ("COLORTERM" in env) {
-        return 1;
-      }
-      return min;
-    }
-    __name(supportsColor, "supportsColor");
-    function getSupportLevel(stream) {
-      const level = supportsColor(stream, stream && stream.isTTY);
-      return translateLevel(level);
-    }
-    __name(getSupportLevel, "getSupportLevel");
-    module2.exports = {
-      supportsColor: getSupportLevel,
-      stdout: translateLevel(supportsColor(true, tty.isatty(1))),
-      stderr: translateLevel(supportsColor(true, tty.isatty(2)))
     };
   }
 });
@@ -658,7 +539,7 @@ var require_node = __commonJS({
     );
     exports2.colors = [6, 2, 3, 4, 5, 1];
     try {
-      const supportsColor = require_supports_color();
+      const supportsColor = require("supports-color");
       if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
         exports2.colors = [
           20,
@@ -744,7 +625,7 @@ var require_node = __commonJS({
     exports2.inspectOpts = Object.keys(process.env).filter((key) => {
       return /^debug_/i.test(key);
     }).reduce((obj, key) => {
-      const prop = key.substring(6).toLowerCase().replace(/_([a-z])/g, (_, k) => {
+      const prop = key.substring(6).toLowerCase().replace(/_([a-z])/g, (_3, k) => {
         return k.toUpperCase();
       });
       let val = process.env[key];
@@ -800,23 +681,23 @@ var require_node = __commonJS({
       return process.env.DEBUG;
     }
     __name(load2, "load");
-    function init(debug3) {
-      debug3.inspectOpts = {};
+    function init(debug2) {
+      debug2.inspectOpts = {};
       const keys = Object.keys(exports2.inspectOpts);
-      for (let i2 = 0; i2 < keys.length; i2++) {
-        debug3.inspectOpts[keys[i2]] = exports2.inspectOpts[keys[i2]];
+      for (let i = 0; i < keys.length; i++) {
+        debug2.inspectOpts[keys[i]] = exports2.inspectOpts[keys[i]];
       }
     }
     __name(init, "init");
     module2.exports = require_common()(exports2);
     var { formatters } = module2.exports;
-    formatters.o = function(v) {
+    formatters.o = function(v2) {
       this.inspectOpts.colors = this.useColors;
-      return util.inspect(v, this.inspectOpts).split("\n").map((str) => str.trim()).join(" ");
+      return util.inspect(v2, this.inspectOpts).split("\n").map((str) => str.trim()).join(" ");
     };
-    formatters.O = function(v) {
+    formatters.O = function(v2) {
       this.inspectOpts.colors = this.useColors;
-      return util.inspect(v, this.inspectOpts);
+      return util.inspect(v2, this.inspectOpts);
     };
   }
 });
@@ -867,11 +748,11 @@ var require_src2 = __commonJS({
       }
     }
     __name(check, "check");
-    function exists3(path, type = exports2.READABLE) {
+    function exists2(path, type = exports2.READABLE) {
       return check(path, (type & exports2.FILE) > 0, (type & exports2.FOLDER) > 0);
     }
-    __name(exists3, "exists");
-    exports2.exists = exists3;
+    __name(exists2, "exists");
+    exports2.exists = exists2;
     exports2.FILE = 1;
     exports2.FOLDER = 2;
     exports2.READABLE = exports2.FILE + exports2.FOLDER;
@@ -882,12 +763,12 @@ var require_src2 = __commonJS({
 var require_dist = __commonJS({
   "node_modules/@kwsites/file-exists/dist/index.js"(exports2) {
     "use strict";
-    function __export2(m) {
-      for (var p in m) if (!exports2.hasOwnProperty(p)) exports2[p] = m[p];
+    function __export(m2) {
+      for (var p2 in m2) if (!exports2.hasOwnProperty(p2)) exports2[p2] = m2[p2];
     }
-    __name(__export2, "__export");
+    __name(__export, "__export");
     Object.defineProperty(exports2, "__esModule", { value: true });
-    __export2(require_src2());
+    __export(require_src2());
   }
 });
 
@@ -897,7 +778,7 @@ var require_dist2 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.createDeferred = exports2.deferred = void 0;
-    function deferred2() {
+    function deferred() {
       let done;
       let fail;
       let status = "pending";
@@ -927,10 +808,10 @@ var require_dist2 = __commonJS({
         }
       };
     }
-    __name(deferred2, "deferred");
-    exports2.deferred = deferred2;
-    exports2.createDeferred = deferred2;
-    exports2.default = deferred2;
+    __name(deferred, "deferred");
+    exports2.deferred = deferred;
+    exports2.createDeferred = deferred;
+    exports2.default = deferred;
   }
 });
 
@@ -986,10 +867,10 @@ var require_tunnel = __commonJS({
       self.sockets = [];
       self.on("free", /* @__PURE__ */ __name(function onFree(socket, host, port, localAddress) {
         var options2 = toOptions(host, port, localAddress);
-        for (var i2 = 0, len = self.requests.length; i2 < len; ++i2) {
-          var pending = self.requests[i2];
+        for (var i = 0, len = self.requests.length; i < len; ++i) {
+          var pending = self.requests[i];
           if (pending.host === options2.host && pending.port === options2.port) {
-            self.requests.splice(i2, 1);
+            self.requests.splice(i, 1);
             pending.request.onSocket(socket);
             return;
           }
@@ -1044,13 +925,13 @@ var require_tunnel = __commonJS({
         connectOptions.headers = connectOptions.headers || {};
         connectOptions.headers["Proxy-Authorization"] = "Basic " + new Buffer(connectOptions.proxyAuth).toString("base64");
       }
-      debug3("making CONNECT request");
+      debug2("making CONNECT request");
       var connectReq = self.request(connectOptions);
       connectReq.useChunkedEncodingByDefault = false;
       connectReq.once("response", onResponse);
       connectReq.once("upgrade", onUpgrade);
       connectReq.once("connect", onConnect);
-      connectReq.once("error", onError2);
+      connectReq.once("error", onError);
       connectReq.end();
       function onResponse(res) {
         res.upgrade = true;
@@ -1066,7 +947,7 @@ var require_tunnel = __commonJS({
         connectReq.removeAllListeners();
         socket.removeAllListeners();
         if (res.statusCode !== 200) {
-          debug3(
+          debug2(
             "tunneling socket could not be established, statusCode=%d",
             res.statusCode
           );
@@ -1078,7 +959,7 @@ var require_tunnel = __commonJS({
           return;
         }
         if (head.length > 0) {
-          debug3("got illegal response body from proxy");
+          debug2("got illegal response body from proxy");
           socket.destroy();
           var error2 = new Error("got illegal response body from proxy");
           error2.code = "ECONNRESET";
@@ -1086,14 +967,14 @@ var require_tunnel = __commonJS({
           self.removeSocket(placeholder);
           return;
         }
-        debug3("tunneling connection has established");
+        debug2("tunneling connection has established");
         self.sockets[self.sockets.indexOf(placeholder)] = socket;
         return cb(socket);
       }
       __name(onConnect, "onConnect");
-      function onError2(cause) {
+      function onError(cause) {
         connectReq.removeAllListeners();
-        debug3(
+        debug2(
           "tunneling socket could not be established, cause=%s\n",
           cause.message,
           cause.stack
@@ -1103,7 +984,7 @@ var require_tunnel = __commonJS({
         options.request.emit("error", error2);
         self.removeSocket(placeholder);
       }
-      __name(onError2, "onError");
+      __name(onError, "onError");
     }, "createSocket");
     TunnelingAgent.prototype.removeSocket = /* @__PURE__ */ __name(function removeSocket(socket) {
       var pos = this.sockets.indexOf(socket);
@@ -1144,12 +1025,12 @@ var require_tunnel = __commonJS({
     }
     __name(toOptions, "toOptions");
     function mergeOptions(target) {
-      for (var i2 = 1, len = arguments.length; i2 < len; ++i2) {
-        var overrides = arguments[i2];
+      for (var i = 1, len = arguments.length; i < len; ++i) {
+        var overrides = arguments[i];
         if (typeof overrides === "object") {
           var keys = Object.keys(overrides);
-          for (var j = 0, keyLen = keys.length; j < keyLen; ++j) {
-            var k = keys[j];
+          for (var j2 = 0, keyLen = keys.length; j2 < keyLen; ++j2) {
+            var k = keys[j2];
             if (overrides[k] !== void 0) {
               target[k] = overrides[k];
             }
@@ -1159,9 +1040,9 @@ var require_tunnel = __commonJS({
       return target;
     }
     __name(mergeOptions, "mergeOptions");
-    var debug3;
+    var debug2;
     if (process.env.NODE_DEBUG && /\btunnel\b/.test(process.env.NODE_DEBUG)) {
-      debug3 = /* @__PURE__ */ __name(function() {
+      debug2 = /* @__PURE__ */ __name(function() {
         var args = Array.prototype.slice.call(arguments);
         if (typeof args[0] === "string") {
           args[0] = "TUNNEL: " + args[0];
@@ -1171,10 +1052,10 @@ var require_tunnel = __commonJS({
         console.error.apply(console, args);
       }, "debug");
     } else {
-      debug3 = /* @__PURE__ */ __name(function() {
+      debug2 = /* @__PURE__ */ __name(function() {
       }, "debug");
     }
-    exports2.debug = debug3;
+    exports2.debug = debug2;
   }
 });
 
@@ -1792,8 +1673,8 @@ var require_constants = __commonJS({
       "X-Requested-With",
       "X-XSS-Protection"
     ];
-    for (let i2 = 0; i2 < wellknownHeaderNames.length; ++i2) {
-      const key = wellknownHeaderNames[i2];
+    for (let i = 0; i < wellknownHeaderNames.length; ++i) {
+      const key = wellknownHeaderNames[i];
       const lowerCasedKey = key.toLowerCase();
       headerNameLowerCasedRecord[key] = headerNameLowerCasedRecord[lowerCasedKey] = lowerCasedKey;
     }
@@ -1940,8 +1821,8 @@ var require_tree = __commonJS({
       }
     };
     var tree = new TernarySearchTree();
-    for (let i2 = 0; i2 < wellknownHeaderNames.length; ++i2) {
-      const key = headerNameLowerCasedRecord[wellknownHeaderNames[i2]];
+    for (let i = 0; i < wellknownHeaderNames.length; ++i) {
+      const key = headerNameLowerCasedRecord[wellknownHeaderNames[i]];
       tree.insert(key, key);
     }
     module2.exports = {
@@ -1967,7 +1848,7 @@ var require_util = __commonJS({
     var { InvalidArgumentError } = require_errors();
     var { headerNameLowerCasedRecord } = require_constants();
     var { tree } = require_tree();
-    var [nodeMajor, nodeMinor] = process.versions.node.split(".").map((v) => Number(v));
+    var [nodeMajor, nodeMinor] = process.versions.node.split(".").map((v2) => Number(v2));
     var BodyAsyncIterable = class {
       static {
         __name(this, "BodyAsyncIterable");
@@ -2179,8 +2060,8 @@ tion"));
     __name(destroy, "destroy");
     var KEEPALIVE_TIMEOUT_EXPR = /timeout=(\d+)/;
     function parseKeepAliveTimeout(val) {
-      const m = val.toString().match(KEEPALIVE_TIMEOUT_EXPR);
-      return m ? parseInt(m[1], 10) * 1e3 : null;
+      const m2 = val.toString().match(KEEPALIVE_TIMEOUT_EXPR);
+      return m2 ? parseInt(m2[1], 10) * 1e3 : null;
     }
     __name(parseKeepAliveTimeout, "parseKeepAliveTimeout");
     function headerNameToString(value) {
@@ -2194,17 +2075,17 @@ tion"));
     __name(bufferToLowerCasedHeaderName, "bufferToLowerCasedHeaderName");
     function parseHeaders(headers, obj) {
       if (obj === void 0) obj = {};
-      for (let i2 = 0; i2 < headers.length; i2 += 2) {
-        const key = headerNameToString(headers[i2]);
+      for (let i = 0; i < headers.length; i += 2) {
+        const key = headerNameToString(headers[i]);
         let val = obj[key];
         if (val) {
           if (typeof val === "string") {
             val = [val];
             obj[key] = val;
           }
-          val.push(headers[i2 + 1].toString("utf8"));
+          val.push(headers[i + 1].toString("utf8"));
         } else {
-          const headersValue = headers[i2 + 1];
+          const headersValue = headers[i + 1];
           if (typeof headersValue === "string") {
             obj[key] = headersValue;
           } else {
@@ -2391,8 +2272,8 @@ nction" && typeof object.get === "function" && typeof object.getAll === "functio
       if (characters.length === 0) {
         return false;
       }
-      for (let i2 = 0; i2 < characters.length; ++i2) {
-        if (!isTokenCharCode(characters.charCodeAt(i2))) {
+      for (let i = 0; i < characters.length; ++i) {
+        if (!isTokenCharCode(characters.charCodeAt(i))) {
           return false;
         }
       }
@@ -2406,11 +2287,11 @@ nction" && typeof object.get === "function" && typeof object.getAll === "functio
     __name(isValidHeaderValue, "isValidHeaderValue");
     function parseRangeHeader(range) {
       if (range == null || range === "") return { start: 0, end: null, size: null };
-      const m = range ? range.match(/^bytes (\d+)-(\d+)\/(\d+)?$/) : null;
-      return m ? {
-        start: parseInt(m[1]),
-        end: m[2] ? parseInt(m[2]) : null,
-        size: m[3] ? parseInt(m[3]) : null
+      const m2 = range ? range.match(/^bytes (\d+)-(\d+)\/(\d+)?$/) : null;
+      return m2 ? {
+        start: parseInt(m2[1]),
+        end: m2[2] ? parseInt(m2[2]) : null,
+        size: m2[3] ? parseInt(m2[3]) : null
       } : null;
     }
     __name(parseRangeHeader, "parseRangeHeader");
@@ -2828,8 +2709,8 @@ terable");
           if (headers.length % 2 !== 0) {
             throw new InvalidArgumentError("headers array must be even");
           }
-          for (let i2 = 0; i2 < headers.length; i2 += 2) {
-            processHeader(this, headers[i2], headers[i2 + 1]);
+          for (let i = 0; i < headers.length; i += 2) {
+            processHeader(this, headers[i], headers[i + 1]);
           }
         } else if (headers && typeof headers === "object") {
           if (headers[Symbol.iterator]) {
@@ -2841,8 +2722,8 @@ terable");
             }
           } else {
             const keys = Object.keys(headers);
-            for (let i2 = 0; i2 < keys.length; ++i2) {
-              processHeader(this, keys[i2], headers[keys[i2]]);
+            for (let i = 0; i < keys.length; ++i) {
+              processHeader(this, keys[i], headers[keys[i]]);
             }
           }
         } else if (headers != null) {
@@ -2970,18 +2851,18 @@ terable");
       }
       if (Array.isArray(val)) {
         const arr = [];
-        for (let i2 = 0; i2 < val.length; i2++) {
-          if (typeof val[i2] === "string") {
-            if (!isValidHeaderValue(val[i2])) {
+        for (let i = 0; i < val.length; i++) {
+          if (typeof val[i] === "string") {
+            if (!isValidHeaderValue(val[i])) {
               throw new InvalidArgumentError(`invalid ${key} header`);
             }
-            arr.push(val[i2]);
-          } else if (val[i2] === null) {
+            arr.push(val[i]);
+          } else if (val[i] === null) {
             arr.push("");
-          } else if (typeof val[i2] === "object") {
+          } else if (typeof val[i] === "object") {
             throw new InvalidArgumentError(`invalid ${key} header`);
           } else {
-            const str = `${val[i2]}`;
+            const str = `${val[i]}`;
             if (!isValidHeaderValue(str)) {
               throw new InvalidArgumentError(`invalid ${key} header`);
             }
@@ -3146,8 +3027,8 @@ var require_dispatcher_base = __commonJS({
       }
       set interceptors(newInterceptors) {
         if (newInterceptors) {
-          for (let i2 = newInterceptors.length - 1; i2 >= 0; i2--) {
-            const interceptor = this[kInterceptors][i2];
+          for (let i = newInterceptors.length - 1; i >= 0; i--) {
+            const interceptor = this[kInterceptors][i];
             if (typeof interceptor !== "function") {
               throw new InvalidArgumentError("interceptor must be an function");
             }
@@ -3183,8 +3064,8 @@ var require_dispatcher_base = __commonJS({
         const onClosed = /* @__PURE__ */ __name(() => {
           const callbacks = this[kOnClosed];
           this[kOnClosed] = null;
-          for (let i2 = 0; i2 < callbacks.length; i2++) {
-            callbacks[i2](null, null);
+          for (let i = 0; i < callbacks.length; i++) {
+            callbacks[i](null, null);
           }
         }, "onClosed");
         this[kClose]().then(() => this.destroy()).then(() => {
@@ -3226,8 +3107,8 @@ var require_dispatcher_base = __commonJS({
         const onDestroyed = /* @__PURE__ */ __name(() => {
           const callbacks = this[kOnDestroyed];
           this[kOnDestroyed] = null;
-          for (let i2 = 0; i2 < callbacks.length; i2++) {
-            callbacks[i2](null, null);
+          for (let i = 0; i < callbacks.length; i++) {
+            callbacks[i](null, null);
           }
         }, "onDestroyed");
         this[kDestroy](err).then(() => {
@@ -3240,8 +3121,8 @@ var require_dispatcher_base = __commonJS({
           return this[kDispatch](opts, handler);
         }
         let dispatch = this[kDispatch].bind(this);
-        for (let i2 = this[kInterceptors].length - 1; i2 >= 0; i2--) {
-          dispatch = this[kInterceptors][i2](dispatch);
+        for (let i = this[kInterceptors].length - 1; i >= 0; i--) {
+          dispatch = this[kInterceptors][i](dispatch);
         }
         this[kInterceptedDispatch] = dispatch;
         return dispatch(opts, handler);
@@ -3382,9 +3263,9 @@ var require_timers = __commonJS({
        * before the specified function or code is executed.
        * @param {*} arg
        */
-      constructor(callback, delay2, arg) {
+      constructor(callback, delay, arg) {
         this._onTimeout = callback;
-        this._idleTimeout = delay2;
+        this._idleTimeout = delay;
         this._timerArg = arg;
         this.refresh();
       }
@@ -3429,8 +3310,8 @@ var require_timers = __commonJS({
        * when the timer expires.
        * @returns {NodeJS.Timeout|FastTimer}
        */
-      setTimeout(callback, delay2, arg) {
-        return delay2 <= RESOLUTION_MS ? setTimeout(callback, delay2, arg) : new FastTimer(callback, delay2, arg);
+      setTimeout(callback, delay, arg) {
+        return delay <= RESOLUTION_MS ? setTimeout(callback, delay, arg) : new FastTimer(callback, delay, arg);
       },
       /**
        * The clearTimeout method cancels an instantiated Timer previously created
@@ -3456,8 +3337,8 @@ var require_timers = __commonJS({
        * when the timer expires.
        * @returns {FastTimer}
        */
-      setFastTimeout(callback, delay2, arg) {
-        return new FastTimer(callback, delay2, arg);
+      setFastTimeout(callback, delay, arg) {
+        return new FastTimer(callback, delay, arg);
       },
       /**
        * The clearTimeout method cancels an instantiated FastTimer previously
@@ -3483,8 +3364,8 @@ var require_timers = __commonJS({
        * @deprecated
        * @param {number} [delay=0] The delay in milliseconds to add to the now value.
        */
-      tick(delay2 = 0) {
-        fastNow += delay2 - RESOLUTION_MS + 1;
+      tick(delay = 0) {
+        fastNow += delay - RESOLUTION_MS + 1;
         onTick();
         onTick();
       },
@@ -3905,9 +3786,9 @@ var require_constants2 = __commonJS({
       FINISH2[FINISH2["UNSAFE"] = 2] = "UNSAFE";
     })(FINISH = exports2.FINISH || (exports2.FINISH = {}));
     exports2.ALPHA = [];
-    for (let i2 = "A".charCodeAt(0); i2 <= "Z".charCodeAt(0); i2++) {
-      exports2.ALPHA.push(String.fromCharCode(i2));
-      exports2.ALPHA.push(String.fromCharCode(i2 + 32));
+    for (let i = "A".charCodeAt(0); i <= "Z".charCodeAt(0); i++) {
+      exports2.ALPHA.push(String.fromCharCode(i));
+      exports2.ALPHA.push(String.fromCharCode(i + 32));
     }
     exports2.NUM_MAP = {
       0: 0,
@@ -3993,8 +3874,8 @@ var require_constants2 = __commonJS({
       "~"
     ].concat(exports2.ALPHANUM);
     exports2.URL_CHAR = exports2.STRICT_URL_CHAR.concat(["	", "\f"]);
-    for (let i2 = 128; i2 <= 255; i2++) {
-      exports2.URL_CHAR.push(i2);
+    for (let i = 128; i <= 255; i++) {
+      exports2.URL_CHAR.push(i);
     }
     exports2.HEX = exports2.NUM.concat(["a", "b", "c", "d", "e", "f", "A", "B", "C", "D", "E", "F"]);
     exports2.STRICT_TOKEN = [
@@ -4016,9 +3897,9 @@ var require_constants2 = __commonJS({
     ].concat(exports2.ALPHANUM);
     exports2.TOKEN = exports2.STRICT_TOKEN.concat([" "]);
     exports2.HEADER_CHARS = ["	"];
-    for (let i2 = 32; i2 <= 255; i2++) {
-      if (i2 !== 127) {
-        exports2.HEADER_CHARS.push(i2);
+    for (let i = 32; i <= 255; i++) {
+      if (i !== 127) {
+        exports2.HEADER_CHARS.push(i);
       }
     }
     exports2.CONNECTION_TOKEN_CHARS = exports2.HEADER_CHARS.filter((c3) => c3 !== 44);
@@ -5500,19 +5381,19 @@ var require_data_url = __commonJS({
     function percentDecode(input) {
       const length = input.length;
       const output = new Uint8Array(length);
-      let j = 0;
-      for (let i2 = 0; i2 < length; ++i2) {
-        const byte = input[i2];
+      let j2 = 0;
+      for (let i = 0; i < length; ++i) {
+        const byte = input[i];
         if (byte !== 37) {
-          output[j++] = byte;
-        } else if (byte === 37 && !(isHexCharByte(input[i2 + 1]) && isHexCharByte(input[i2 + 2]))) {
-          output[j++] = 37;
+          output[j2++] = byte;
+        } else if (byte === 37 && !(isHexCharByte(input[i + 1]) && isHexCharByte(input[i + 2]))) {
+          output[j2++] = 37;
         } else {
-          output[j++] = hexByteToNumber(input[i2 + 1]) << 4 | hexByteToNumber(input[i2 + 2]);
-          i2 += 2;
+          output[j2++] = hexByteToNumber(input[i + 1]) << 4 | hexByteToNumber(input[i + 2]);
+          i += 2;
         }
       }
-      return length === j ? output : output.subarray(0, j);
+      return length === j2 ? output : output.subarray(0, j2);
     }
     __name(percentDecode, "percentDecode");
     function parseMIMEType(input) {
@@ -5706,13 +5587,13 @@ var require_data_url = __commonJS({
         return String.fromCharCode.apply(null, input);
       }
       let result = "";
-      let i2 = 0;
+      let i = 0;
       let addition = (2 << 15) - 1;
-      while (i2 < length) {
-        if (i2 + addition > length) {
-          addition = length - i2;
+      while (i < length) {
+        if (i + addition > length) {
+          addition = length - i;
         }
-        result += String.fromCharCode.apply(null, input.subarray(i2, i2 += addition));
+        result += String.fromCharCode.apply(null, input.subarray(i, i += addition));
       }
       return result;
     }
@@ -5800,15 +5681,15 @@ var require_webidl = __commonJS({
         message: `"${context.value}" is an invalid ${context.type}.`
       });
     };
-    webidl.brandCheck = function(V, I, opts) {
+    webidl.brandCheck = function(V2, I3, opts) {
       if (opts?.strict !== false) {
-        if (!(V instanceof I)) {
+        if (!(V2 instanceof I3)) {
           const err = new TypeError("Illegal invocation");
           err.code = "ERR_INVALID_THIS";
           throw err;
         }
       } else {
-        if (V?.[Symbol.toStringTag] !== I.prototype[Symbol.toStringTag]) {
+        if (V2?.[Symbol.toStringTag] !== I3.prototype[Symbol.toStringTag]) {
           const err = new TypeError("Illegal invocation");
           err.code = "ERR_INVALID_THIS";
           throw err;
@@ -5829,8 +5710,8 @@ var require_webidl = __commonJS({
         message: "Illegal constructor"
       });
     };
-    webidl.util.Type = function(V) {
-      switch (typeof V) {
+    webidl.util.Type = function(V2) {
+      switch (typeof V2) {
         case "undefined":
           return "Undefined";
         case "boolean":
@@ -5845,7 +5726,7 @@ var require_webidl = __commonJS({
           return "BigInt";
         case "function":
         case "object": {
-          if (V === null) {
+          if (V2 === null) {
             return "Null";
           }
           return "Object";
@@ -5854,7 +5735,7 @@ var require_webidl = __commonJS({
     };
     webidl.util.markAsUncloneable = markAsUncloneable || (() => {
     });
-    webidl.util.ConvertToInt = function(V, bitLength, signedness, opts) {
+    webidl.util.ConvertToInt = function(V2, bitLength, signedness, opts) {
       let upperBound;
       let lowerBound;
       if (bitLength === 64) {
@@ -5871,7 +5752,7 @@ var require_webidl = __commonJS({
         lowerBound = Math.pow(-2, bitLength) - 1;
         upperBound = Math.pow(2, bitLength - 1) - 1;
       }
-      let x2 = Number(V);
+      let x2 = Number(V2);
       if (x2 === 0) {
         x2 = 0;
       }
@@ -5879,7 +5760,7 @@ var require_webidl = __commonJS({
         if (Number.isNaN(x2) || x2 === Number.POSITIVE_INFINITY || x2 === Number.NEGATIVE_INFINITY) {
           throw webidl.errors.exception({
             header: "Integer conversion",
-            message: `Could not convert ${webidl.util.Stringify(V)} to an integer.`
+            message: `Could not convert ${webidl.util.Stringify(V2)} to an integer.`
           });
         }
         x2 = webidl.util.IntegerPart(x2);
@@ -5917,28 +5798,28 @@ var require_webidl = __commonJS({
       }
       return r2;
     };
-    webidl.util.Stringify = function(V) {
-      const type = webidl.util.Type(V);
+    webidl.util.Stringify = function(V2) {
+      const type = webidl.util.Type(V2);
       switch (type) {
         case "Symbol":
-          return `Symbol(${V.description})`;
+          return `Symbol(${V2.description})`;
         case "Object":
-          return inspect(V);
+          return inspect(V2);
         case "String":
-          return `"${V}"`;
+          return `"${V2}"`;
         default:
-          return `${V}`;
+          return `${V2}`;
       }
     };
     webidl.sequenceConverter = function(converter) {
-      return (V, prefix, argument, Iterable) => {
-        if (webidl.util.Type(V) !== "Object") {
+      return (V2, prefix, argument, Iterable) => {
+        if (webidl.util.Type(V2) !== "Object") {
           throw webidl.errors.exception({
             header: prefix,
-            message: `${argument} (${webidl.util.Stringify(V)}) is not iterable.`
+            message: `${argument} (${webidl.util.Stringify(V2)}) is not iterable.`
           });
         }
-        const method = typeof Iterable === "function" ? Iterable() : V?.[Symbol.iterator]?.();
+        const method = typeof Iterable === "function" ? Iterable() : V2?.[Symbol.iterator]?.();
         const seq = [];
         let index = 0;
         if (method === void 0 || typeof method.next !== "function") {
@@ -5958,44 +5839,44 @@ var require_webidl = __commonJS({
       };
     };
     webidl.recordConverter = function(keyConverter, valueConverter) {
-      return (O, prefix, argument) => {
-        if (webidl.util.Type(O) !== "Object") {
+      return (O2, prefix, argument) => {
+        if (webidl.util.Type(O2) !== "Object") {
           throw webidl.errors.exception({
             header: prefix,
-            message: `${argument} ("${webidl.util.Type(O)}") is not an Object.`
+            message: `${argument} ("${webidl.util.Type(O2)}") is not an Object.`
           });
         }
         const result = {};
-        if (!types.isProxy(O)) {
-          const keys2 = [...Object.getOwnPropertyNames(O), ...Object.getOwnPropertySymbols(O)];
+        if (!types.isProxy(O2)) {
+          const keys2 = [...Object.getOwnPropertyNames(O2), ...Object.getOwnPropertySymbols(O2)];
           for (const key of keys2) {
             const typedKey = keyConverter(key, prefix, argument);
-            const typedValue = valueConverter(O[key], prefix, argument);
+            const typedValue = valueConverter(O2[key], prefix, argument);
             result[typedKey] = typedValue;
           }
           return result;
         }
-        const keys = Reflect.ownKeys(O);
+        const keys = Reflect.ownKeys(O2);
         for (const key of keys) {
-          const desc = Reflect.getOwnPropertyDescriptor(O, key);
+          const desc = Reflect.getOwnPropertyDescriptor(O2, key);
           if (desc?.enumerable) {
             const typedKey = keyConverter(key, prefix, argument);
-            const typedValue = valueConverter(O[key], prefix, argument);
+            const typedValue = valueConverter(O2[key], prefix, argument);
             result[typedKey] = typedValue;
           }
         }
         return result;
       };
     };
-    webidl.interfaceConverter = function(i2) {
-      return (V, prefix, argument, opts) => {
-        if (opts?.strict !== false && !(V instanceof i2)) {
+    webidl.interfaceConverter = function(i) {
+      return (V2, prefix, argument, opts) => {
+        if (opts?.strict !== false && !(V2 instanceof i)) {
           throw webidl.errors.exception({
             header: prefix,
-            message: `Expected ${argument} ("${webidl.util.Stringify(V)}") to be an instance of ${i2.name}.`
+            message: `Expected ${argument} ("${webidl.util.Stringify(V2)}") to be an instance of ${i.name}.`
           });
         }
-        return V;
+        return V2;
       };
     };
     webidl.dictionaryConverter = function(converters) {
@@ -6040,27 +5921,27 @@ var require_webidl = __commonJS({
       };
     };
     webidl.nullableConverter = function(converter) {
-      return (V, prefix, argument) => {
-        if (V === null) {
-          return V;
+      return (V2, prefix, argument) => {
+        if (V2 === null) {
+          return V2;
         }
-        return converter(V, prefix, argument);
+        return converter(V2, prefix, argument);
       };
     };
-    webidl.converters.DOMString = function(V, prefix, argument, opts) {
-      if (V === null && opts?.legacyNullToEmptyString) {
+    webidl.converters.DOMString = function(V2, prefix, argument, opts) {
+      if (V2 === null && opts?.legacyNullToEmptyString) {
         return "";
       }
-      if (typeof V === "symbol") {
+      if (typeof V2 === "symbol") {
         throw webidl.errors.exception({
           header: prefix,
           message: `${argument} is a symbol, which cannot be converted to a DOMString.`
         });
       }
-      return String(V);
+      return String(V2);
     };
-    webidl.converters.ByteString = function(V, prefix, argument) {
-      const x2 = webidl.converters.DOMString(V, prefix, argument);
+    webidl.converters.ByteString = function(V2, prefix, argument) {
+      const x2 = webidl.converters.DOMString(V2, prefix, argument);
       for (let index = 0; index < x2.length; index++) {
         if (x2.charCodeAt(index) > 255) {
           throw new TypeError(
@@ -6072,107 +5953,107 @@ var require_webidl = __commonJS({
       return x2;
     };
     webidl.converters.USVString = toUSVString;
-    webidl.converters.boolean = function(V) {
-      const x2 = Boolean(V);
+    webidl.converters.boolean = function(V2) {
+      const x2 = Boolean(V2);
       return x2;
     };
-    webidl.converters.any = function(V) {
-      return V;
+    webidl.converters.any = function(V2) {
+      return V2;
     };
-    webidl.converters["long long"] = function(V, prefix, argument) {
-      const x2 = webidl.util.ConvertToInt(V, 64, "signed", void 0, prefix, argument);
+    webidl.converters["long long"] = function(V2, prefix, argument) {
+      const x2 = webidl.util.ConvertToInt(V2, 64, "signed", void 0, prefix, argument);
       return x2;
     };
-    webidl.converters["unsigned long long"] = function(V, prefix, argument) {
-      const x2 = webidl.util.ConvertToInt(V, 64, "unsigned", void 0, prefix, argument);
+    webidl.converters["unsigned long long"] = function(V2, prefix, argument) {
+      const x2 = webidl.util.ConvertToInt(V2, 64, "unsigned", void 0, prefix, argument);
       return x2;
     };
-    webidl.converters["unsigned long"] = function(V, prefix, argument) {
-      const x2 = webidl.util.ConvertToInt(V, 32, "unsigned", void 0, prefix, argument);
+    webidl.converters["unsigned long"] = function(V2, prefix, argument) {
+      const x2 = webidl.util.ConvertToInt(V2, 32, "unsigned", void 0, prefix, argument);
       return x2;
     };
-    webidl.converters["unsigned short"] = function(V, prefix, argument, opts) {
-      const x2 = webidl.util.ConvertToInt(V, 16, "unsigned", opts, prefix, argument);
+    webidl.converters["unsigned short"] = function(V2, prefix, argument, opts) {
+      const x2 = webidl.util.ConvertToInt(V2, 16, "unsigned", opts, prefix, argument);
       return x2;
     };
-    webidl.converters.ArrayBuffer = function(V, prefix, argument, opts) {
-      if (webidl.util.Type(V) !== "Object" || !types.isAnyArrayBuffer(V)) {
+    webidl.converters.ArrayBuffer = function(V2, prefix, argument, opts) {
+      if (webidl.util.Type(V2) !== "Object" || !types.isAnyArrayBuffer(V2)) {
         throw webidl.errors.conversionFailed({
           prefix,
-          argument: `${argument} ("${webidl.util.Stringify(V)}")`,
+          argument: `${argument} ("${webidl.util.Stringify(V2)}")`,
           types: ["ArrayBuffer"]
         });
       }
-      if (opts?.allowShared === false && types.isSharedArrayBuffer(V)) {
+      if (opts?.allowShared === false && types.isSharedArrayBuffer(V2)) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "SharedArrayBuffer is not allowed."
         });
       }
-      if (V.resizable || V.growable) {
+      if (V2.resizable || V2.growable) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "Received a resizable ArrayBuffer."
         });
       }
-      return V;
+      return V2;
     };
-    webidl.converters.TypedArray = function(V, T, prefix, name, opts) {
-      if (webidl.util.Type(V) !== "Object" || !types.isTypedArray(V) || V.constructor.name !== T.name) {
+    webidl.converters.TypedArray = function(V2, T, prefix, name, opts) {
+      if (webidl.util.Type(V2) !== "Object" || !types.isTypedArray(V2) || V2.constructor.name !== T.name) {
         throw webidl.errors.conversionFailed({
           prefix,
-          argument: `${name} ("${webidl.util.Stringify(V)}")`,
+          argument: `${name} ("${webidl.util.Stringify(V2)}")`,
           types: [T.name]
         });
       }
-      if (opts?.allowShared === false && types.isSharedArrayBuffer(V.buffer)) {
+      if (opts?.allowShared === false && types.isSharedArrayBuffer(V2.buffer)) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "SharedArrayBuffer is not allowed."
         });
       }
-      if (V.buffer.resizable || V.buffer.growable) {
+      if (V2.buffer.resizable || V2.buffer.growable) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "Received a resizable ArrayBuffer."
         });
       }
-      return V;
+      return V2;
     };
-    webidl.converters.DataView = function(V, prefix, name, opts) {
-      if (webidl.util.Type(V) !== "Object" || !types.isDataView(V)) {
+    webidl.converters.DataView = function(V2, prefix, name, opts) {
+      if (webidl.util.Type(V2) !== "Object" || !types.isDataView(V2)) {
         throw webidl.errors.exception({
           header: prefix,
           message: `${name} is not a DataView.`
         });
       }
-      if (opts?.allowShared === false && types.isSharedArrayBuffer(V.buffer)) {
+      if (opts?.allowShared === false && types.isSharedArrayBuffer(V2.buffer)) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "SharedArrayBuffer is not allowed."
         });
       }
-      if (V.buffer.resizable || V.buffer.growable) {
+      if (V2.buffer.resizable || V2.buffer.growable) {
         throw webidl.errors.exception({
           header: "ArrayBuffer",
           message: "Received a resizable ArrayBuffer."
         });
       }
-      return V;
+      return V2;
     };
-    webidl.converters.BufferSource = function(V, prefix, name, opts) {
-      if (types.isAnyArrayBuffer(V)) {
-        return webidl.converters.ArrayBuffer(V, prefix, name, { ...opts, allowShared: false });
+    webidl.converters.BufferSource = function(V2, prefix, name, opts) {
+      if (types.isAnyArrayBuffer(V2)) {
+        return webidl.converters.ArrayBuffer(V2, prefix, name, { ...opts, allowShared: false });
       }
-      if (types.isTypedArray(V)) {
-        return webidl.converters.TypedArray(V, V.constructor, prefix, name, { ...opts, allowShared: false });
+      if (types.isTypedArray(V2)) {
+        return webidl.converters.TypedArray(V2, V2.constructor, prefix, name, { ...opts, allowShared: false });
       }
-      if (types.isDataView(V)) {
-        return webidl.converters.DataView(V, prefix, name, { ...opts, allowShared: false });
+      if (types.isDataView(V2)) {
+        return webidl.converters.DataView(V2, prefix, name, { ...opts, allowShared: false });
       }
       throw webidl.errors.conversionFailed({
         prefix,
-        argument: `${name} ("${webidl.util.Stringify(V)}")`,
+        argument: `${name} ("${webidl.util.Stringify(V2)}")`,
         types: ["BufferSource"]
       });
     };
@@ -6238,8 +6119,8 @@ var require_util2 = __commonJS({
     }
     __name(responseLocationURL, "responseLocationURL");
     function isValidEncodedURL(url) {
-      for (let i2 = 0; i2 < url.length; ++i2) {
-        const code = url.charCodeAt(i2);
+      for (let i = 0; i < url.length; ++i) {
+        const code = url.charCodeAt(i);
         if (code > 126 || // Non-US-ASCII + DEL
         code < 32) {
           return false;
@@ -6270,8 +6151,8 @@ ption");
     }
     __name(isErrorLike, "isErrorLike");
     function isValidReasonPhrase(statusText) {
-      for (let i2 = 0; i2 < statusText.length; ++i2) {
-        const c3 = statusText.charCodeAt(i2);
+      for (let i = 0; i < statusText.length; ++i) {
+        const c3 = statusText.charCodeAt(i);
         if (!(c3 === 9 || // HTAB
         c3 >= 32 && c3 <= 126 || // SP / VCHAR
         c3 >= 128 && c3 <= 255)) {
@@ -6293,8 +6174,8 @@ ption");
       const policyHeader = (headersList.get("referrer-policy", true) ?? "").split(",");
       let policy = "";
       if (policyHeader.length > 0) {
-        for (let i2 = policyHeader.length; i2 !== 0; i2--) {
-          const token = policyHeader[i2 - 1].trim();
+        for (let i = policyHeader.length; i !== 0; i--) {
+          const token = policyHeader[i - 1].trim();
           if (referrerPolicyTokens.has(token)) {
             policy = token;
             break;
@@ -6570,8 +6451,8 @@ ption");
       if (algorithm[3] === "5") {
         return algorithm;
       }
-      for (let i2 = 1; i2 < metadataList.length; ++i2) {
-        const metadata = metadataList[i2];
+      for (let i = 1; i < metadataList.length; ++i) {
+        const metadata = metadataList[i];
         if (metadata.algo[3] === "5") {
           algorithm = "sha512";
           break;
@@ -6589,9 +6470,9 @@ ption");
         return metadataList;
       }
       let pos = 0;
-      for (let i2 = 0; i2 < metadataList.length; ++i2) {
-        if (metadataList[i2].algo === algorithm) {
-          metadataList[pos++] = metadataList[i2];
+      for (let i = 0; i < metadataList.length; ++i) {
+        if (metadataList[i].algo === algorithm) {
+          metadataList[pos++] = metadataList[i];
         }
       }
       metadataList.length = pos;
@@ -6602,10 +6483,9 @@ ption");
       if (actualValue.length !== expectedValue.length) {
         return false;
       }
-      for (let i2 = 0; i2 < actualValue.length; ++i2) {
-        if (actualValue[i2] !== expectedValue[i2]) {
-          if (actualValue[i2] === "+" && expectedValue[i2] === "-" || actualValue[i2] === "/" && expectedValue[i2] === "\
-_") {
+      for (let i = 0; i < actualValue.length; ++i) {
+        if (actualValue[i] !== expectedValue[i]) {
+          if (actualValue[i] === "+" && expectedValue[i] === "-" || actualValue[i] === "/" && expectedValue[i] === "_") {
             continue;
           }
           return false;
@@ -6617,11 +6497,11 @@ _") {
     function tryUpgradeRequestToAPotentiallyTrustworthyURL(request) {
     }
     __name(tryUpgradeRequestToAPotentiallyTrustworthyURL, "tryUpgradeRequestToAPotentiallyTrustworthyURL");
-    function sameOrigin(A, B) {
-      if (A.origin === B.origin && A.origin === "null") {
+    function sameOrigin(A, B2) {
+      if (A.origin === B2.origin && A.origin === "null") {
         return true;
       }
-      if (A.protocol === B.protocol && A.hostname === B.hostname && A.port === B.port) {
+      if (A.protocol === B2.protocol && A.hostname === B2.hostname && A.port === B2.port) {
         return true;
       }
       return false;
@@ -6765,7 +6645,7 @@ _") {
           writable: true,
           enumerable: true,
           configurable: true,
-          value: /* @__PURE__ */ __name(function forEach2(callbackfn, thisArg = globalThis) {
+          value: /* @__PURE__ */ __name(function forEach(callbackfn, thisArg = globalThis) {
             webidl.brandCheck(this, object);
             webidl.argumentLengthCheck(arguments, 1, `${name}.forEach`);
             if (typeof callbackfn !== "function") {
@@ -7165,12 +7045,12 @@ var require_file = __commonJS({
       constructor(blobLike, fileName, options = {}) {
         const n = fileName;
         const t2 = options.type;
-        const d = options.lastModified ?? Date.now();
+        const d2 = options.lastModified ?? Date.now();
         this[kState] = {
           blobLike,
           name: n,
           type: t2,
-          lastModified: d
+          lastModified: d2
         };
       }
       stream(...args) {
@@ -7320,15 +7200,15 @@ var require_formdata = __commonJS({
         }
       }
       [nodeUtil.inspect.custom](depth, options) {
-        const state = this[kState].reduce((a, b) => {
-          if (a[b.name]) {
-            if (Array.isArray(a[b.name])) {
-              a[b.name].push(b.value);
+        const state = this[kState].reduce((a, b2) => {
+          if (a[b2.name]) {
+            if (Array.isArray(a[b2.name])) {
+              a[b2.name].push(b2.value);
             } else {
-              a[b.name] = [a[b.name], b.value];
+              a[b2.name] = [a[b2.name], b2.value];
             }
           } else {
-            a[b.name] = b.value;
+            a[b2.name] = b2.value;
           }
           return a;
         }, { __proto__: null });
@@ -7390,8 +7270,8 @@ var require_formdata_parser = __commonJS({
     var dd = Buffer.from("--");
     var ddcrlf = Buffer.from("--\r\n");
     function isAsciiString(chars) {
-      for (let i2 = 0; i2 < chars.length; ++i2) {
-        if ((chars.charCodeAt(i2) & ~127) !== 0) {
+      for (let i = 0; i < chars.length; ++i) {
+        if ((chars.charCodeAt(i) & ~127) !== 0) {
           return false;
         }
       }
@@ -7403,8 +7283,8 @@ var require_formdata_parser = __commonJS({
       if (length < 27 || length > 70) {
         return false;
       }
-      for (let i2 = 0; i2 < length; ++i2) {
-        const cp2 = boundary.charCodeAt(i2);
+      for (let i = 0; i < length; ++i) {
+        const cp2 = boundary.charCodeAt(i);
         if (!(cp2 >= 48 && cp2 <= 57 || cp2 >= 65 && cp2 <= 90 || cp2 >= 97 && cp2 <= 122 || cp2 === 39 || cp2 === 45 ||
         cp2 === 95)) {
           return false;
@@ -7619,8 +7499,8 @@ var require_formdata_parser = __commonJS({
       if (buffer.length < start.length) {
         return false;
       }
-      for (let i2 = 0; i2 < start.length; i2++) {
-        if (start[i2] !== buffer[position.position + i2]) {
+      for (let i = 0; i < start.length; i++) {
+        if (start[i] !== buffer[position.position + i]) {
           return false;
         }
       }
@@ -7723,7 +7603,7 @@ Content-Disposition: form-data`;
         const normalizeLinefeeds = /* @__PURE__ */ __name((value) => value.replace(/\r?\n|\r/g, "\r\n"), "normalizeLinef\
 eeds");
         const blobParts = [];
-        const rn = new Uint8Array([13, 10]);
+        const rn2 = new Uint8Array([13, 10]);
         length = 0;
         let hasUnknownSizeValue = false;
         for (const [name, value] of object) {
@@ -7740,9 +7620,9 @@ ${normalizeLinefeeds(value)}\r
 Content-Type: ${value.type || "application/octet-stream"}\r
 \r
 `);
-            blobParts.push(chunk2, value, rn);
+            blobParts.push(chunk2, value, rn2);
             if (typeof value.size === "number") {
-              length += chunk2.byteLength + value.size + rn.byteLength;
+              length += chunk2.byteLength + value.size + rn2.byteLength;
             } else {
               hasUnknownSizeValue = true;
             }
@@ -8036,39 +7916,39 @@ var require_client_h1 = __commonJS({
       return await WebAssembly.instantiate(mod, {
         env: {
           /* eslint-disable camelcase */
-          wasm_on_url: /* @__PURE__ */ __name((p, at, len) => {
+          wasm_on_url: /* @__PURE__ */ __name((p2, at2, len) => {
             return 0;
           }, "wasm_on_url"),
-          wasm_on_status: /* @__PURE__ */ __name((p, at, len) => {
-            assert(currentParser.ptr === p);
-            const start = at - currentBufferPtr + currentBufferRef.byteOffset;
+          wasm_on_status: /* @__PURE__ */ __name((p2, at2, len) => {
+            assert(currentParser.ptr === p2);
+            const start = at2 - currentBufferPtr + currentBufferRef.byteOffset;
             return currentParser.onStatus(new FastBuffer(currentBufferRef.buffer, start, len)) || 0;
           }, "wasm_on_status"),
-          wasm_on_message_begin: /* @__PURE__ */ __name((p) => {
-            assert(currentParser.ptr === p);
+          wasm_on_message_begin: /* @__PURE__ */ __name((p2) => {
+            assert(currentParser.ptr === p2);
             return currentParser.onMessageBegin() || 0;
           }, "wasm_on_message_begin"),
-          wasm_on_header_field: /* @__PURE__ */ __name((p, at, len) => {
-            assert(currentParser.ptr === p);
-            const start = at - currentBufferPtr + currentBufferRef.byteOffset;
+          wasm_on_header_field: /* @__PURE__ */ __name((p2, at2, len) => {
+            assert(currentParser.ptr === p2);
+            const start = at2 - currentBufferPtr + currentBufferRef.byteOffset;
             return currentParser.onHeaderField(new FastBuffer(currentBufferRef.buffer, start, len)) || 0;
           }, "wasm_on_header_field"),
-          wasm_on_header_value: /* @__PURE__ */ __name((p, at, len) => {
-            assert(currentParser.ptr === p);
-            const start = at - currentBufferPtr + currentBufferRef.byteOffset;
+          wasm_on_header_value: /* @__PURE__ */ __name((p2, at2, len) => {
+            assert(currentParser.ptr === p2);
+            const start = at2 - currentBufferPtr + currentBufferRef.byteOffset;
             return currentParser.onHeaderValue(new FastBuffer(currentBufferRef.buffer, start, len)) || 0;
           }, "wasm_on_header_value"),
-          wasm_on_headers_complete: /* @__PURE__ */ __name((p, statusCode, upgrade, shouldKeepAlive) => {
-            assert(currentParser.ptr === p);
+          wasm_on_headers_complete: /* @__PURE__ */ __name((p2, statusCode, upgrade, shouldKeepAlive) => {
+            assert(currentParser.ptr === p2);
             return currentParser.onHeadersComplete(statusCode, Boolean(upgrade), Boolean(shouldKeepAlive)) || 0;
           }, "wasm_on_headers_complete"),
-          wasm_on_body: /* @__PURE__ */ __name((p, at, len) => {
-            assert(currentParser.ptr === p);
-            const start = at - currentBufferPtr + currentBufferRef.byteOffset;
+          wasm_on_body: /* @__PURE__ */ __name((p2, at2, len) => {
+            assert(currentParser.ptr === p2);
+            const start = at2 - currentBufferPtr + currentBufferRef.byteOffset;
             return currentParser.onBody(new FastBuffer(currentBufferRef.buffer, start, len)) || 0;
           }, "wasm_on_body"),
-          wasm_on_message_complete: /* @__PURE__ */ __name((p) => {
-            assert(currentParser.ptr === p);
+          wasm_on_message_complete: /* @__PURE__ */ __name((p2) => {
+            assert(currentParser.ptr === p2);
             return currentParser.onMessageComplete() || 0;
           }, "wasm_on_message_complete")
           /* eslint-enable camelcase */
@@ -8116,21 +7996,21 @@ var require_client_h1 = __commonJS({
         this.connection = "";
         this.maxResponseSize = client[kMaxResponseSize];
       }
-      setTimeout(delay2, type) {
-        if (delay2 !== this.timeoutValue || type & USE_FAST_TIMER ^ this.timeoutType & USE_FAST_TIMER) {
+      setTimeout(delay, type) {
+        if (delay !== this.timeoutValue || type & USE_FAST_TIMER ^ this.timeoutType & USE_FAST_TIMER) {
           if (this.timeout) {
             timers.clearTimeout(this.timeout);
             this.timeout = null;
           }
-          if (delay2) {
+          if (delay) {
             if (type & USE_FAST_TIMER) {
-              this.timeout = timers.setFastTimeout(onParserTimeout, delay2, new WeakRef(this));
+              this.timeout = timers.setFastTimeout(onParserTimeout, delay, new WeakRef(this));
             } else {
-              this.timeout = setTimeout(onParserTimeout, delay2, new WeakRef(this));
+              this.timeout = setTimeout(onParserTimeout, delay, new WeakRef(this));
               this.timeout.unref();
             }
           }
-          this.timeoutValue = delay2;
+          this.timeoutValue = delay;
         } else if (this.timeout) {
           if (this.timeout.refresh) {
             this.timeout.refresh();
@@ -8489,8 +8369,8 @@ var require_client_h1 = __commonJS({
         }
       }
     };
-    function onParserTimeout(parser4) {
-      const { socket, timeoutType, client, paused } = parser4.deref();
+    function onParserTimeout(parser) {
+      const { socket, timeoutType, client, paused } = parser.deref();
       if (timeoutType === TIMEOUT_HEADERS) {
         if (!socket[kWriting] || socket.writableNeedDrain || client[kRunning] > 1) {
           assert(!paused, "cannot be paused while waiting for headers");
@@ -8522,9 +8402,9 @@ var require_client_h1 = __commonJS({
       socket[kParser] = new Parser(client, socket, llhttpInstance);
       addListener(socket, "error", function(err) {
         assert(err.code !== "ERR_TLS_CERT_ALTNAME_INVALID");
-        const parser4 = this[kParser];
-        if (err.code === "ECONNRESET" && parser4.statusCode && !parser4.shouldKeepAlive) {
-          const parserErr = parser4.finish();
+        const parser = this[kParser];
+        if (err.code === "ECONNRESET" && parser.statusCode && !parser.shouldKeepAlive) {
+          const parserErr = parser.finish();
           if (parserErr) {
             this[kError] = parserErr;
             this[kClient][kOnError](parserErr);
@@ -8535,15 +8415,15 @@ var require_client_h1 = __commonJS({
         this[kClient][kOnError](err);
       });
       addListener(socket, "readable", function() {
-        const parser4 = this[kParser];
-        if (parser4) {
-          parser4.readMore();
+        const parser = this[kParser];
+        if (parser) {
+          parser.readMore();
         }
       });
       addListener(socket, "end", function() {
-        const parser4 = this[kParser];
-        if (parser4.statusCode && !parser4.shouldKeepAlive) {
-          const parserErr = parser4.finish();
+        const parser = this[kParser];
+        if (parser.statusCode && !parser.shouldKeepAlive) {
+          const parserErr = parser.finish();
           if (parserErr) {
             util.destroy(this, parserErr);
           }
@@ -8553,11 +8433,11 @@ var require_client_h1 = __commonJS({
       });
       addListener(socket, "close", function() {
         const client2 = this[kClient];
-        const parser4 = this[kParser];
+        const parser = this[kParser];
         clearIdleSocketValidation(this);
-        if (parser4) {
-          if (!this[kError] && parser4.statusCode && !parser4.shouldKeepAlive) {
-            this[kError] = parser4.finish() || this[kError];
+        if (parser) {
+          if (!this[kError] && parser.statusCode && !parser.shouldKeepAlive) {
+            this[kError] = parser.finish() || this[kError];
           }
           this[kParser].destroy();
           this[kParser] = null;
@@ -8568,8 +8448,8 @@ var require_client_h1 = __commonJS({
         if (client2.destroyed) {
           assert(client2[kPending] === 0);
           const requests = client2[kQueue].splice(client2[kRunningIdx]);
-          for (let i2 = 0; i2 < requests.length; i2++) {
-            const request = requests[i2];
+          for (let i = 0; i < requests.length; i++) {
+            const request = requests[i];
             util.errorRequest(client2, request, err);
           }
         } else if (client2[kRunning] > 0 && err.code !== "UND_ERR_INFO") {
@@ -8799,8 +8679,8 @@ upgrade: ${upgrade}\r
           const key = headers[n + 0];
           const val = headers[n + 1];
           if (Array.isArray(val)) {
-            for (let i2 = 0; i2 < val.length; i2++) {
-              header += `${key}: ${val[i2]}\r
+            for (let i = 0; i < val.length; i++) {
+              header += `${key}: ${val[i]}\r
 `;
             }
           } else {
@@ -8876,8 +8756,8 @@ upgrade: ${upgrade}\r
         if (!err) {
           try {
             writer.end();
-          } catch (er) {
-            err = er;
+          } catch (er2) {
+            err = er2;
           }
         }
         writer.destroy(err);
@@ -9203,8 +9083,8 @@ var require_client_h2 = __commonJS({
         if (client2.destroyed) {
           assert(client2[kPending] === 0);
           const requests = client2[kQueue].splice(client2[kRunningIdx]);
-          for (let i2 = 0; i2 < requests.length; i2++) {
-            const request = requests[i2];
+          for (let i = 0; i < requests.length; i++) {
+            const request = requests[i];
             util.errorRequest(client2, request, err);
           }
         }
@@ -9332,11 +9212,11 @@ var require_client_h2 = __commonJS({
         const key = reqHeaders[n + 0];
         const val = reqHeaders[n + 1];
         if (Array.isArray(val)) {
-          for (let i2 = 0; i2 < val.length; i2++) {
+          for (let i = 0; i < val.length; i++) {
             if (headers[key]) {
-              headers[key] += `,${val[i2]}`;
+              headers[key] += `,${val[i]}`;
             } else {
-              headers[key] = val[i2];
+              headers[key] = val[i];
             }
           }
         } else {
@@ -9795,9 +9675,9 @@ var require_redirect_handler = __commonJS({
       if (redirectableStatusCodes.indexOf(statusCode) === -1) {
         return null;
       }
-      for (let i2 = 0; i2 < headers.length; i2 += 2) {
-        if (headers[i2].length === 8 && util.headerNameToString(headers[i2]) === "location") {
-          return headers[i2 + 1];
+      for (let i = 0; i < headers.length; i += 2) {
+        if (headers[i].length === 8 && util.headerNameToString(headers[i]) === "location") {
+          return headers[i + 1];
         }
       }
     }
@@ -9819,9 +9699,9 @@ var require_redirect_handler = __commonJS({
     function cleanRequestHeaders(headers, removeContent, unknownOrigin) {
       const ret = [];
       if (Array.isArray(headers)) {
-        for (let i2 = 0; i2 < headers.length; i2 += 2) {
-          if (!shouldRemoveHeader(headers[i2], removeContent, unknownOrigin)) {
-            ret.push(headers[i2], headers[i2 + 1]);
+        for (let i = 0; i < headers.length; i += 2) {
+          if (!shouldRemoveHeader(headers[i], removeContent, unknownOrigin)) {
+            ret.push(headers[i], headers[i + 1]);
           }
         }
       } else if (headers && typeof headers === "object") {
@@ -10086,7 +9966,7 @@ var require_client = __commonJS({
         this[kRunningIdx] = 0;
         this[kPendingIdx] = 0;
         this[kResume] = (sync) => resume(this, sync);
-        this[kOnError] = (err) => onError2(this, err);
+        this[kOnError] = (err) => onError(this, err);
       }
       get pipelining() {
         return this[kPipelining];
@@ -10145,8 +10025,8 @@ var require_client = __commonJS({
       async [kDestroy](err) {
         return new Promise((resolve) => {
           const requests = this[kQueue].splice(this[kPendingIdx]);
-          for (let i2 = 0; i2 < requests.length; i2++) {
-            const request = requests[i2];
+          for (let i = 0; i < requests.length; i++) {
+            const request = requests[i];
             util.errorRequest(this, request, err);
           }
           const callback = /* @__PURE__ */ __name(() => {
@@ -10167,18 +10047,18 @@ var require_client = __commonJS({
       }
     };
     var createRedirectInterceptor = require_redirect_interceptor();
-    function onError2(client, err) {
+    function onError(client, err) {
       if (client[kRunning] === 0 && err.code !== "UND_ERR_INFO" && err.code !== "UND_ERR_SOCKET") {
         assert(client[kPendingIdx] === client[kRunningIdx]);
         const requests = client[kQueue].splice(client[kRunningIdx]);
-        for (let i2 = 0; i2 < requests.length; i2++) {
-          const request = requests[i2];
+        for (let i = 0; i < requests.length; i++) {
+          const request = requests[i];
           util.errorRequest(client, request, err);
         }
         assert(client[kSize] === 0);
       }
     }
-    __name(onError2, "onError");
+    __name(onError, "onError");
     async function connect(client) {
       assert(!client[kConnecting]);
       assert(!client[kHTTPContext]);
@@ -10282,7 +10162,7 @@ var require_client = __commonJS({
             util.errorRequest(client, request, err);
           }
         } else {
-          onError2(client, err);
+          onError(client, err);
         }
         client.emit("connectionError", client[kUrl], [client], err);
       }
@@ -10756,11 +10636,11 @@ var require_balanced_pool = __commonJS({
     var kWeight = /* @__PURE__ */ Symbol("kWeight");
     var kMaxWeightPerServer = /* @__PURE__ */ Symbol("kMaxWeightPerServer");
     var kErrorPenalty = /* @__PURE__ */ Symbol("kErrorPenalty");
-    function getGreatestCommonDivisor(a, b) {
-      if (a === 0) return b;
-      while (b !== 0) {
-        const t2 = b;
-        b = a % b;
+    function getGreatestCommonDivisor(a, b2) {
+      if (a === 0) return b2;
+      while (b2 !== 0) {
+        const t2 = b2;
+        b2 = a % b2;
         a = t2;
       }
       return a;
@@ -10825,8 +10705,8 @@ var require_balanced_pool = __commonJS({
       }
       _updateBalancedPoolStats() {
         let result = 0;
-        for (let i2 = 0; i2 < this[kClients].length; i2++) {
-          result = getGreatestCommonDivisor(this[kClients][i2][kWeight], result);
+        for (let i = 0; i < this[kClients].length; i++) {
+          result = getGreatestCommonDivisor(this[kClients][i][kWeight], result);
         }
         this[kGreatestCommonDivisor] = result;
       }
@@ -10840,7 +10720,7 @@ var require_balanced_pool = __commonJS({
         return this;
       }
       get upstreams() {
-        return this[kClients].filter((dispatcher) => dispatcher.closed !== true && dispatcher.destroyed !== true).map((p) => p[kUrl].
+        return this[kClients].filter((dispatcher) => dispatcher.closed !== true && dispatcher.destroyed !== true).map((p2) => p2[kUrl].
         origin);
       }
       [kGetDispatcher]() {
@@ -10852,7 +10732,7 @@ var require_balanced_pool = __commonJS({
         if (!dispatcher) {
           return;
         }
-        const allClientsBusy = this[kClients].map((pool) => pool[kNeedDrain]).reduce((a, b) => a && b, true);
+        const allClientsBusy = this[kClients].map((pool) => pool[kNeedDrain]).reduce((a, b2) => a && b2, true);
         if (allClientsBusy) {
           return;
         }
@@ -11203,8 +11083,8 @@ var require_proxy_agent = __commonJS({
     function buildHeaders(headers) {
       if (Array.isArray(headers)) {
         const headersPair = {};
-        for (let i2 = 0; i2 < headers.length; i2 += 2) {
-          headersPair[headers[i2]] = headers[i2 + 1];
+        for (let i = 0; i < headers.length; i += 2) {
+          headersPair[headers[i]] = headers[i + 1];
         }
         return headersPair;
       }
@@ -11312,8 +11192,8 @@ var require_env_http_proxy_agent = __commonJS({
         if (this.#noProxyValue === "*") {
           return false;
         }
-        for (let i2 = 0; i2 < this.#noProxyEntries.length; i2++) {
-          const entry = this.#noProxyEntries[i2];
+        for (let i = 0; i < this.#noProxyEntries.length; i++) {
+          const entry = this.#noProxyEntries[i];
           if (entry.port && entry.port !== port) {
             continue;
           }
@@ -11333,8 +11213,8 @@ var require_env_http_proxy_agent = __commonJS({
         const noProxyValue = this.#opts.noProxy ?? this.#noProxyEnv;
         const noProxySplit = noProxyValue.split(/[,\s]/);
         const noProxyEntries = [];
-        for (let i2 = 0; i2 < noProxySplit.length; i2++) {
-          const entry = noProxySplit[i2];
+        for (let i = 0; i < noProxySplit.length; i++) {
+          const entry = noProxySplit[i];
           if (!entry) {
             continue;
           }
@@ -11985,8 +11865,8 @@ var require_readable = __commonJS({
       }
       const buffer = new Uint8Array(Buffer.allocUnsafeSlow(length).buffer);
       let offset = 0;
-      for (let i2 = 0; i2 < chunks.length; ++i2) {
-        const chunk = chunks[i2];
+      for (let i = 0; i < chunks.length; ++i) {
+        const chunk = chunks[i];
         buffer.set(chunk, offset);
         offset += chunk.length;
       }
@@ -13036,9 +12916,9 @@ var require_mock_utils = __commonJS({
     __name(lowerCaseEntries, "lowerCaseEntries");
     function getHeaderByName(headers, key) {
       if (Array.isArray(headers)) {
-        for (let i2 = 0; i2 < headers.length; i2 += 2) {
-          if (headers[i2].toLocaleLowerCase() === key.toLocaleLowerCase()) {
-            return headers[i2 + 1];
+        for (let i = 0; i < headers.length; i += 2) {
+          if (headers[i].toLocaleLowerCase() === key.toLocaleLowerCase()) {
+            return headers[i + 1];
           }
         }
         return void 0;
@@ -13174,13 +13054,13 @@ var require_mock_utils = __commonJS({
     function generateKeyValues(data) {
       const keys = Object.keys(data);
       const result = [];
-      for (let i2 = 0; i2 < keys.length; ++i2) {
-        const key = keys[i2];
+      for (let i = 0; i < keys.length; ++i) {
+        const key = keys[i];
         const value = data[key];
         const name = Buffer.from(`${key}`);
         if (Array.isArray(value)) {
-          for (let j = 0; j < value.length; ++j) {
-            result.push(name, Buffer.from(`${value[j]}`));
+          for (let j2 = 0; j2 < value.length; ++j2) {
+            result.push(name, Buffer.from(`${value[j2]}`));
           }
         } else {
           result.push(name, Buffer.from(`${value}`));
@@ -13208,7 +13088,7 @@ var require_mock_utils = __commonJS({
       if (mockDispatch2.data.callback) {
         mockDispatch2.data = { ...mockDispatch2.data, ...mockDispatch2.data.callback(opts) };
       }
-      const { data: { statusCode, data, headers, trailers, error: error2 }, delay: delay2, persist } = mockDispatch2;
+      const { data: { statusCode, data, headers, trailers, error: error2 }, delay, persist } = mockDispatch2;
       const { timesInvoked, times } = mockDispatch2;
       mockDispatch2.consumed = !persist && timesInvoked >= times;
       mockDispatch2.pending = timesInvoked < times;
@@ -13217,10 +13097,10 @@ var require_mock_utils = __commonJS({
         handler.onError(error2);
         return true;
       }
-      if (typeof delay2 === "number" && delay2 > 0) {
+      if (typeof delay === "number" && delay > 0) {
         setTimeout(() => {
           handleReply(this[kDispatches]);
-        }, delay2);
+        }, delay);
       } else {
         handleReply(this[kDispatches]);
       }
@@ -14354,17 +14234,17 @@ var require_headers = __commonJS({
     }
     __name(isHTTPWhiteSpaceCharCode, "isHTTPWhiteSpaceCharCode");
     function headerValueNormalize(potentialValue) {
-      let i2 = 0;
-      let j = potentialValue.length;
-      while (j > i2 && isHTTPWhiteSpaceCharCode(potentialValue.charCodeAt(j - 1))) --j;
-      while (j > i2 && isHTTPWhiteSpaceCharCode(potentialValue.charCodeAt(i2))) ++i2;
-      return i2 === 0 && j === potentialValue.length ? potentialValue : potentialValue.substring(i2, j);
+      let i = 0;
+      let j2 = potentialValue.length;
+      while (j2 > i && isHTTPWhiteSpaceCharCode(potentialValue.charCodeAt(j2 - 1))) --j2;
+      while (j2 > i && isHTTPWhiteSpaceCharCode(potentialValue.charCodeAt(i))) ++i;
+      return i === 0 && j2 === potentialValue.length ? potentialValue : potentialValue.substring(i, j2);
     }
     __name(headerValueNormalize, "headerValueNormalize");
     function fill(headers, object) {
       if (Array.isArray(object)) {
-        for (let i2 = 0; i2 < object.length; ++i2) {
-          const header = object[i2];
+        for (let i = 0; i < object.length; ++i) {
+          const header = object[i];
           if (header.length !== 2) {
             throw webidl.errors.exception({
               header: "Headers constructor",
@@ -14375,8 +14255,8 @@ var require_headers = __commonJS({
         }
       } else if (typeof object === "object" && object !== null) {
         const keys = Object.keys(object);
-        for (let i2 = 0; i2 < keys.length; ++i2) {
-          appendHeader(headers, keys[i2], object[keys[i2]]);
+        for (let i = 0; i < keys.length; ++i) {
+          appendHeader(headers, keys[i], object[keys[i]]);
         }
       } else {
         throw webidl.errors.conversionFailed({
@@ -14408,8 +14288,8 @@ var require_headers = __commonJS({
       return getHeadersList(headers).append(name, value, false);
     }
     __name(appendHeader, "appendHeader");
-    function compareHeaderName(a, b) {
-      return a[0] < b[0] ? -1 : 1;
+    function compareHeaderName(a, b2) {
+      return a[0] < b2[0] ? -1 : 1;
     }
     __name(compareHeaderName, "compareHeaderName");
     var HeadersList = class _HeadersList {
@@ -14450,12 +14330,12 @@ var require_headers = __commonJS({
       append(name, value, isLowerCase) {
         this[kHeadersSortedMap] = null;
         const lowercaseName = isLowerCase ? name : name.toLowerCase();
-        const exists3 = this[kHeadersMap].get(lowercaseName);
-        if (exists3) {
+        const exists2 = this[kHeadersMap].get(lowercaseName);
+        if (exists2) {
           const delimiter = lowercaseName === "cookie" ? "; " : ", ";
           this[kHeadersMap].set(lowercaseName, {
-            name: exists3.name,
-            value: `${exists3.value}${delimiter}${value}`
+            name: exists2.name,
+            value: `${exists2.value}${delimiter}${value}`
           });
         } else {
           this[kHeadersMap].set(lowercaseName, { name, value });
@@ -14544,12 +14424,12 @@ var require_headers = __commonJS({
           const firstValue = iterator.next().value;
           array[0] = [firstValue[0], firstValue[1].value];
           assert(firstValue[1].value !== null);
-          for (let i2 = 1, j = 0, right = 0, left = 0, pivot = 0, x2, value; i2 < size; ++i2) {
+          for (let i = 1, j2 = 0, right = 0, left = 0, pivot = 0, x2, value; i < size; ++i) {
             value = iterator.next().value;
-            x2 = array[i2] = [value[0], value[1].value];
+            x2 = array[i] = [value[0], value[1].value];
             assert(x2[1] !== null);
             left = 0;
-            right = i2;
+            right = i;
             while (left < right) {
               pivot = left + (right - left >> 1);
               if (array[pivot][0] <= x2[0]) {
@@ -14558,10 +14438,10 @@ var require_headers = __commonJS({
                 right = pivot;
               }
             }
-            if (i2 !== pivot) {
-              j = i2;
-              while (j > left) {
-                array[j] = array[--j];
+            if (i !== pivot) {
+              j2 = i;
+              while (j2 > left) {
+                array[j2] = array[--j2];
               }
               array[left] = x2;
             }
@@ -14571,9 +14451,9 @@ var require_headers = __commonJS({
           }
           return array;
         } else {
-          let i2 = 0;
+          let i = 0;
           for (const { 0: name, 1: { value } } of this[kHeadersMap]) {
-            array[i2++] = [name, value];
+            array[i++] = [name, value];
             assert(value !== null);
           }
           return array.sort(compareHeaderName);
@@ -14704,11 +14584,11 @@ var require_headers = __commonJS({
         if (cookies === null || cookies.length === 1) {
           return this.#headersList[kHeadersSortedMap] = names;
         }
-        for (let i2 = 0; i2 < names.length; ++i2) {
-          const { 0: name, 1: value } = names[i2];
+        for (let i = 0; i < names.length; ++i) {
+          const { 0: name, 1: value } = names[i];
           if (name === "set-cookie") {
-            for (let j = 0; j < cookies.length; ++j) {
-              headers.push([name, cookies[j]]);
+            for (let j2 = 0; j2 < cookies.length; ++j2) {
+              headers.push([name, cookies[j2]]);
             }
           } else {
             headers.push([name, value]);
@@ -14754,19 +14634,19 @@ var require_headers = __commonJS({
         enumerable: false
       }
     });
-    webidl.converters.HeadersInit = function(V, prefix, argument) {
-      if (webidl.util.Type(V) === "Object") {
-        const iterator = Reflect.get(V, Symbol.iterator);
-        if (!util.types.isProxy(V) && iterator === Headers2.prototype.entries) {
+    webidl.converters.HeadersInit = function(V2, prefix, argument) {
+      if (webidl.util.Type(V2) === "Object") {
+        const iterator = Reflect.get(V2, Symbol.iterator);
+        if (!util.types.isProxy(V2) && iterator === Headers2.prototype.entries) {
           try {
-            return getHeadersList(V).entriesList;
+            return getHeadersList(V2).entriesList;
           } catch {
           }
         }
         if (typeof iterator === "function") {
-          return webidl.converters["sequence<sequence<ByteString>>"](V, prefix, argument, iterator.bind(V));
+          return webidl.converters["sequence<sequence<ByteString>>"](V2, prefix, argument, iterator.bind(V2));
         }
-        return webidl.converters["record<ByteString, ByteString>"](V, prefix, argument);
+        return webidl.converters["record<ByteString, ByteString>"](V2, prefix, argument);
       }
       throw webidl.errors.conversionFailed({
         prefix: "Headers constructor",
@@ -15042,12 +14922,12 @@ var require_response = __commonJS({
         ...state
       };
       return new Proxy(response, {
-        get(target, p) {
-          return p in state ? state[p] : target[p];
+        get(target, p2) {
+          return p2 in state ? state[p2] : target[p2];
         },
-        set(target, p, value) {
-          assert(!(p in state));
-          target[p] = value;
+        set(target, p2, value) {
+          assert(!(p2 in state));
+          target[p2] = value;
           return true;
         }
       });
@@ -15144,32 +15024,32 @@ rtError"), { cause: err })) : makeNetworkError(Object.assign(new DOMException("R
     webidl.converters.URLSearchParams = webidl.interfaceConverter(
       URLSearchParams
     );
-    webidl.converters.XMLHttpRequestBodyInit = function(V, prefix, name) {
-      if (typeof V === "string") {
-        return webidl.converters.USVString(V, prefix, name);
+    webidl.converters.XMLHttpRequestBodyInit = function(V2, prefix, name) {
+      if (typeof V2 === "string") {
+        return webidl.converters.USVString(V2, prefix, name);
       }
-      if (isBlobLike(V)) {
-        return webidl.converters.Blob(V, prefix, name, { strict: false });
+      if (isBlobLike(V2)) {
+        return webidl.converters.Blob(V2, prefix, name, { strict: false });
       }
-      if (ArrayBuffer.isView(V) || types.isArrayBuffer(V)) {
-        return webidl.converters.BufferSource(V, prefix, name);
+      if (ArrayBuffer.isView(V2) || types.isArrayBuffer(V2)) {
+        return webidl.converters.BufferSource(V2, prefix, name);
       }
-      if (util.isFormDataLike(V)) {
-        return webidl.converters.FormData(V, prefix, name, { strict: false });
+      if (util.isFormDataLike(V2)) {
+        return webidl.converters.FormData(V2, prefix, name, { strict: false });
       }
-      if (V instanceof URLSearchParams) {
-        return webidl.converters.URLSearchParams(V, prefix, name);
+      if (V2 instanceof URLSearchParams) {
+        return webidl.converters.URLSearchParams(V2, prefix, name);
       }
-      return webidl.converters.DOMString(V, prefix, name);
+      return webidl.converters.DOMString(V2, prefix, name);
     };
-    webidl.converters.BodyInit = function(V, prefix, argument) {
-      if (V instanceof ReadableStream) {
-        return webidl.converters.ReadableStream(V, prefix, argument);
+    webidl.converters.BodyInit = function(V2, prefix, argument) {
+      if (V2 instanceof ReadableStream) {
+        return webidl.converters.ReadableStream(V2, prefix, argument);
       }
-      if (V?.[Symbol.asyncIterator]) {
-        return V;
+      if (V2?.[Symbol.asyncIterator]) {
+        return V2;
       }
-      return webidl.converters.XMLHttpRequestBodyInit(V, prefix, argument);
+      return webidl.converters.XMLHttpRequestBodyInit(V2, prefix, argument);
     };
     webidl.converters.ResponseInit = webidl.dictionaryConverter([
       {
@@ -15854,14 +15734,14 @@ var require_request2 = __commonJS({
     webidl.converters.Request = webidl.interfaceConverter(
       Request
     );
-    webidl.converters.RequestInfo = function(V, prefix, argument) {
-      if (typeof V === "string") {
-        return webidl.converters.USVString(V, prefix, argument);
+    webidl.converters.RequestInfo = function(V2, prefix, argument) {
+      if (typeof V2 === "string") {
+        return webidl.converters.USVString(V2, prefix, argument);
       }
-      if (V instanceof Request) {
-        return webidl.converters.Request(V, prefix, argument);
+      if (V2 instanceof Request) {
+        return webidl.converters.Request(V2, prefix, argument);
       }
-      return webidl.converters.USVString(V, prefix, argument);
+      return webidl.converters.USVString(V2, prefix, argument);
     };
     webidl.converters.AbortSignal = webidl.interfaceConverter(
       AbortSignal
@@ -16062,18 +15942,18 @@ var require_fetch = __commonJS({
     __name(handleFetchDone, "handleFetchDone");
     function fetch(input, init = void 0) {
       webidl.argumentLengthCheck(arguments, 1, "globalThis.fetch");
-      let p = createDeferredPromise();
+      let p2 = createDeferredPromise();
       let requestObject;
       try {
         requestObject = new Request(input, init);
       } catch (e) {
-        p.reject(e);
-        return p.promise;
+        p2.reject(e);
+        return p2.promise;
       }
       const request = requestObject[kState];
       if (requestObject.signal.aborted) {
-        abortFetch(p, request, null, requestObject.signal.reason);
-        return p.promise;
+        abortFetch(p2, request, null, requestObject.signal.reason);
+        return p2.promise;
       }
       const globalObject = request.client.globalObject;
       if (globalObject?.constructor?.name === "ServiceWorkerGlobalScope") {
@@ -16089,7 +15969,7 @@ var require_fetch = __commonJS({
           assert(controller != null);
           controller.abort(requestObject.signal.reason);
           const realResponse = responseObject?.deref();
-          abortFetch(p, request, realResponse, requestObject.signal.reason);
+          abortFetch(p2, request, realResponse, requestObject.signal.reason);
         }
       );
       const processResponse = /* @__PURE__ */ __name((response) => {
@@ -16097,16 +15977,16 @@ var require_fetch = __commonJS({
           return;
         }
         if (response.aborted) {
-          abortFetch(p, request, responseObject, controller.serializedAbortReason);
+          abortFetch(p2, request, responseObject, controller.serializedAbortReason);
           return;
         }
         if (response.type === "error") {
-          p.reject(new TypeError("fetch failed", { cause: response.error }));
+          p2.reject(new TypeError("fetch failed", { cause: response.error }));
           return;
         }
         responseObject = new WeakRef(fromInnerResponse(response, "immutable"));
-        p.resolve(responseObject.deref());
-        p = null;
+        p2.resolve(responseObject.deref());
+        p2 = null;
       }, "processResponse");
       controller = fetching({
         request,
@@ -16115,7 +15995,7 @@ var require_fetch = __commonJS({
         dispatcher: requestObject[kDispatcher]
         // undici
       });
-      return p.promise;
+      return p2.promise;
     }
     __name(fetch, "fetch");
     function finalizeAndReportTiming(response, initiatorType = "other") {
@@ -16152,9 +16032,9 @@ var require_fetch = __commonJS({
     }
     __name(finalizeAndReportTiming, "finalizeAndReportTiming");
     var markResourceTiming = performance.markResourceTiming;
-    function abortFetch(p, request, responseObject, error2) {
-      if (p) {
-        p.reject(error2);
+    function abortFetch(p2, request, responseObject, error2) {
+      if (p2) {
+        p2.reject(error2);
       }
       if (request.body != null && isReadable(request.body?.stream)) {
         request.body.stream.cancel(error2).catch((err) => {
@@ -16937,8 +16817,8 @@ processBodyError");
               }
               let location = "";
               const headersList = new HeadersList();
-              for (let i2 = 0; i2 < rawHeaders.length; i2 += 2) {
-                headersList.append(bufferToLowerCasedHeaderName(rawHeaders[i2]), rawHeaders[i2 + 1].toString("latin1"), true);
+              for (let i = 0; i < rawHeaders.length; i += 2) {
+                headersList.append(bufferToLowerCasedHeaderName(rawHeaders[i]), rawHeaders[i + 1].toString("latin1"), true);
               }
               location = headersList.get("location", true);
               this.body = new Readable({ read: resume });
@@ -16952,8 +16832,8 @@ processBodyError");
                   reject(new Error(`too many content-encodings in response: ${codings.length}, maximum allowed is ${maxContentEncodings}`));
                   return true;
                 }
-                for (let i2 = codings.length - 1; i2 >= 0; --i2) {
-                  const coding = codings[i2].trim();
+                for (let i = codings.length - 1; i >= 0; --i) {
+                  const coding = codings[i].trim();
                   if (coding === "x-gzip" || coding === "gzip") {
                     decoders.push(zlib.createGunzip({
                       // Be less strict when decoding compressed responses, since sometimes
@@ -16979,7 +16859,7 @@ processBodyError");
                   }
                 }
               }
-              const onError2 = this.onError.bind(this);
+              const onError = this.onError.bind(this);
               resolve({
                 status,
                 statusText,
@@ -16988,7 +16868,7 @@ processBodyError");
                   if (err) {
                     this.onError(err);
                   }
-                }).on("error", onError2) : this.body.on("error", onError2)
+                }).on("error", onError) : this.body.on("error", onError)
               });
               return true;
             },
@@ -17023,8 +16903,8 @@ processBodyError");
                 return;
               }
               const headersList = new HeadersList();
-              for (let i2 = 0; i2 < rawHeaders.length; i2 += 2) {
-                headersList.append(bufferToLowerCasedHeaderName(rawHeaders[i2]), rawHeaders[i2 + 1].toString("latin1"), true);
+              for (let i = 0; i < rawHeaders.length; i += 2) {
+                headersList.append(bufferToLowerCasedHeaderName(rawHeaders[i]), rawHeaders[i + 1].toString("latin1"), true);
               }
               resolve({
                 status,
@@ -17444,67 +17324,67 @@ var require_util4 = __commonJS({
       writable: false,
       configurable: false
     };
-    function readOperation(fr, blob, type, encodingName) {
-      if (fr[kState] === "loading") {
+    function readOperation(fr2, blob, type, encodingName) {
+      if (fr2[kState] === "loading") {
         throw new DOMException("Invalid state", "InvalidStateError");
       }
-      fr[kState] = "loading";
-      fr[kResult] = null;
-      fr[kError] = null;
+      fr2[kState] = "loading";
+      fr2[kResult] = null;
+      fr2[kError] = null;
       const stream = blob.stream();
       const reader = stream.getReader();
       const bytes = [];
       let chunkPromise = reader.read();
       let isFirstChunk = true;
       (async () => {
-        while (!fr[kAborted]) {
+        while (!fr2[kAborted]) {
           try {
             const { done, value } = await chunkPromise;
-            if (isFirstChunk && !fr[kAborted]) {
+            if (isFirstChunk && !fr2[kAborted]) {
               queueMicrotask(() => {
-                fireAProgressEvent("loadstart", fr);
+                fireAProgressEvent("loadstart", fr2);
               });
             }
             isFirstChunk = false;
             if (!done && types.isUint8Array(value)) {
               bytes.push(value);
-              if ((fr[kLastProgressEventFired] === void 0 || Date.now() - fr[kLastProgressEventFired] >= 50) && !fr[kAborted]) {
-                fr[kLastProgressEventFired] = Date.now();
+              if ((fr2[kLastProgressEventFired] === void 0 || Date.now() - fr2[kLastProgressEventFired] >= 50) && !fr2[kAborted]) {
+                fr2[kLastProgressEventFired] = Date.now();
                 queueMicrotask(() => {
-                  fireAProgressEvent("progress", fr);
+                  fireAProgressEvent("progress", fr2);
                 });
               }
               chunkPromise = reader.read();
             } else if (done) {
               queueMicrotask(() => {
-                fr[kState] = "done";
+                fr2[kState] = "done";
                 try {
                   const result = packageData(bytes, type, blob.type, encodingName);
-                  if (fr[kAborted]) {
+                  if (fr2[kAborted]) {
                     return;
                   }
-                  fr[kResult] = result;
-                  fireAProgressEvent("load", fr);
+                  fr2[kResult] = result;
+                  fireAProgressEvent("load", fr2);
                 } catch (error2) {
-                  fr[kError] = error2;
-                  fireAProgressEvent("error", fr);
+                  fr2[kError] = error2;
+                  fireAProgressEvent("error", fr2);
                 }
-                if (fr[kState] !== "loading") {
-                  fireAProgressEvent("loadend", fr);
+                if (fr2[kState] !== "loading") {
+                  fireAProgressEvent("loadend", fr2);
                 }
               });
               break;
             }
           } catch (error2) {
-            if (fr[kAborted]) {
+            if (fr2[kAborted]) {
               return;
             }
             queueMicrotask(() => {
-              fr[kState] = "done";
-              fr[kError] = error2;
-              fireAProgressEvent("error", fr);
-              if (fr[kState] !== "loading") {
-                fireAProgressEvent("loadend", fr);
+              fr2[kState] = "done";
+              fr2[kError] = error2;
+              fireAProgressEvent("error", fr2);
+              if (fr2[kState] !== "loading") {
+                fireAProgressEvent("loadend", fr2);
               }
             });
             break;
@@ -17582,25 +17462,25 @@ var require_util4 = __commonJS({
     }
     __name(decode, "decode");
     function BOMSniffing(ioQueue) {
-      const [a, b, c3] = ioQueue;
-      if (a === 239 && b === 187 && c3 === 191) {
+      const [a, b2, c3] = ioQueue;
+      if (a === 239 && b2 === 187 && c3 === 191) {
         return "UTF-8";
-      } else if (a === 254 && b === 255) {
+      } else if (a === 254 && b2 === 255) {
         return "UTF-16BE";
-      } else if (a === 255 && b === 254) {
+      } else if (a === 255 && b2 === 254) {
         return "UTF-16LE";
       }
       return null;
     }
     __name(BOMSniffing, "BOMSniffing");
     function combineByteSequences(sequences) {
-      const size = sequences.reduce((a, b) => {
-        return a + b.byteLength;
+      const size = sequences.reduce((a, b2) => {
+        return a + b2.byteLength;
       }, 0);
       let offset = 0;
-      return sequences.reduce((a, b) => {
-        a.set(b, offset);
-        offset += b.byteLength;
+      return sequences.reduce((a, b2) => {
+        a.set(b2, offset);
+        offset += b2.byteLength;
         return a;
       }, new Uint8Array(size));
     }
@@ -17743,14 +17623,14 @@ var require_filereader = __commonJS({
         webidl.brandCheck(this, _FileReader);
         return this[kEvents].loadend;
       }
-      set onloadend(fn) {
+      set onloadend(fn2) {
         webidl.brandCheck(this, _FileReader);
         if (this[kEvents].loadend) {
           this.removeEventListener("loadend", this[kEvents].loadend);
         }
-        if (typeof fn === "function") {
-          this[kEvents].loadend = fn;
-          this.addEventListener("loadend", fn);
+        if (typeof fn2 === "function") {
+          this[kEvents].loadend = fn2;
+          this.addEventListener("loadend", fn2);
         } else {
           this[kEvents].loadend = null;
         }
@@ -17759,14 +17639,14 @@ var require_filereader = __commonJS({
         webidl.brandCheck(this, _FileReader);
         return this[kEvents].error;
       }
-      set onerror(fn) {
+      set onerror(fn2) {
         webidl.brandCheck(this, _FileReader);
         if (this[kEvents].error) {
           this.removeEventListener("error", this[kEvents].error);
         }
-        if (typeof fn === "function") {
-          this[kEvents].error = fn;
-          this.addEventListener("error", fn);
+        if (typeof fn2 === "function") {
+          this[kEvents].error = fn2;
+          this.addEventListener("error", fn2);
         } else {
           this[kEvents].error = null;
         }
@@ -17775,14 +17655,14 @@ var require_filereader = __commonJS({
         webidl.brandCheck(this, _FileReader);
         return this[kEvents].loadstart;
       }
-      set onloadstart(fn) {
+      set onloadstart(fn2) {
         webidl.brandCheck(this, _FileReader);
         if (this[kEvents].loadstart) {
           this.removeEventListener("loadstart", this[kEvents].loadstart);
         }
-        if (typeof fn === "function") {
-          this[kEvents].loadstart = fn;
-          this.addEventListener("loadstart", fn);
+        if (typeof fn2 === "function") {
+          this[kEvents].loadstart = fn2;
+          this.addEventListener("loadstart", fn2);
         } else {
           this[kEvents].loadstart = null;
         }
@@ -17791,14 +17671,14 @@ var require_filereader = __commonJS({
         webidl.brandCheck(this, _FileReader);
         return this[kEvents].progress;
       }
-      set onprogress(fn) {
+      set onprogress(fn2) {
         webidl.brandCheck(this, _FileReader);
         if (this[kEvents].progress) {
           this.removeEventListener("progress", this[kEvents].progress);
         }
-        if (typeof fn === "function") {
-          this[kEvents].progress = fn;
-          this.addEventListener("progress", fn);
+        if (typeof fn2 === "function") {
+          this[kEvents].progress = fn2;
+          this.addEventListener("progress", fn2);
         } else {
           this[kEvents].progress = null;
         }
@@ -17807,14 +17687,14 @@ var require_filereader = __commonJS({
         webidl.brandCheck(this, _FileReader);
         return this[kEvents].load;
       }
-      set onload(fn) {
+      set onload(fn2) {
         webidl.brandCheck(this, _FileReader);
         if (this[kEvents].load) {
           this.removeEventListener("load", this[kEvents].load);
         }
-        if (typeof fn === "function") {
-          this[kEvents].load = fn;
-          this.addEventListener("load", fn);
+        if (typeof fn2 === "function") {
+          this[kEvents].load = fn2;
+          this.addEventListener("load", fn2);
         } else {
           this[kEvents].load = null;
         }
@@ -17823,14 +17703,14 @@ var require_filereader = __commonJS({
         webidl.brandCheck(this, _FileReader);
         return this[kEvents].abort;
       }
-      set onabort(fn) {
+      set onabort(fn2) {
         webidl.brandCheck(this, _FileReader);
         if (this[kEvents].abort) {
           this.removeEventListener("abort", this[kEvents].abort);
         }
-        if (typeof fn === "function") {
-          this[kEvents].abort = fn;
-          this.addEventListener("abort", fn);
+        if (typeof fn2 === "function") {
+          this[kEvents].abort = fn2;
+          this.addEventListener("abort", fn2);
         } else {
           this[kEvents].abort = null;
         }
@@ -17892,9 +17772,9 @@ var require_util5 = __commonJS({
     var assert = require("node:assert");
     var { URLSerializer } = require_data_url();
     var { isValidHeaderName } = require_util2();
-    function urlEquals(A, B, excludeFragment = false) {
+    function urlEquals(A, B2, excludeFragment = false) {
       const serializedA = URLSerializer(A, excludeFragment);
-      const serializedB = URLSerializer(B, excludeFragment);
+      const serializedB = URLSerializer(B2, excludeFragment);
       return serializedA === serializedB;
     }
     __name(urlEquals, "urlEquals");
@@ -17953,11 +17833,11 @@ var require_cache = __commonJS({
         webidl.argumentLengthCheck(arguments, 1, prefix);
         request = webidl.converters.RequestInfo(request, prefix, "request");
         options = webidl.converters.CacheQueryOptions(options, prefix, "options");
-        const p = this.#internalMatchAll(request, options, 1);
-        if (p.length === 0) {
+        const p2 = this.#internalMatchAll(request, options, 1);
+        if (p2.length === 0) {
           return;
         }
-        return p[0];
+        return p2[0];
       }
       async matchAll(request = void 0, options = {}) {
         webidl.brandCheck(this, _Cache);
@@ -18048,8 +17928,8 @@ var require_cache = __commonJS({
           }));
           responsePromises.push(responsePromise.promise);
         }
-        const p = Promise.all(responsePromises);
-        const responses = await p;
+        const p2 = Promise.all(responsePromises);
+        const responses = await p2;
         const operations = [];
         let index = 0;
         for (const response of responses) {
@@ -18596,8 +18476,8 @@ var require_util6 = __commonJS({
   "node_modules/undici/lib/web/cookies/util.js"(exports2, module2) {
     "use strict";
     function isCTLExcludingHtab(value) {
-      for (let i2 = 0; i2 < value.length; ++i2) {
-        const code = value.charCodeAt(i2);
+      for (let i = 0; i < value.length; ++i) {
+        const code = value.charCodeAt(i);
         if (code >= 0 && code <= 8 || code >= 10 && code <= 31 || code === 127) {
           return true;
         }
@@ -18606,8 +18486,8 @@ var require_util6 = __commonJS({
     }
     __name(isCTLExcludingHtab, "isCTLExcludingHtab");
     function validateCookieName(name) {
-      for (let i2 = 0; i2 < name.length; ++i2) {
-        const code = name.charCodeAt(i2);
+      for (let i = 0; i < name.length; ++i) {
+        const code = name.charCodeAt(i);
         if (code < 33 || // exclude CTLs (0-31), SP and HT
         code > 126 || // exclude non-ascii and DEL
         code === 34 || // "
@@ -18634,16 +18514,16 @@ var require_util6 = __commonJS({
     __name(validateCookieName, "validateCookieName");
     function validateCookieValue(value) {
       let len = value.length;
-      let i2 = 0;
+      let i = 0;
       if (value[0] === '"') {
         if (len === 1 || value[len - 1] !== '"') {
           throw new Error("Invalid cookie value");
         }
         --len;
-        ++i2;
+        ++i;
       }
-      while (i2 < len) {
-        const code = value.charCodeAt(i2++);
+      while (i < len) {
+        const code = value.charCodeAt(i++);
         if (code < 33 || // exclude CTLs (0-31)
         code > 126 || // non-ascii and DEL (127)
         code === 34 || // "
@@ -18656,8 +18536,8 @@ var require_util6 = __commonJS({
     }
     __name(validateCookieValue, "validateCookieValue");
     function validateCookiePath(path) {
-      for (let i2 = 0; i2 < path.length; ++i2) {
-        const code = path.charCodeAt(i2);
+      for (let i = 0; i < path.length; ++i) {
+        const code = path.charCodeAt(i);
         if (code < 32 || // exclude CTLs (0-31)
         code > 126 || // exclude DEL and non-ascii
         code === 59) {
@@ -18680,13 +18560,13 @@ var require_util6 = __commonJS({
         throw new Error("Invalid cookie domain");
       }
       let labelLength = 0;
-      for (let i2 = 0; i2 < domain.length; ++i2) {
-        const code = domain.charCodeAt(i2);
+      for (let i = 0; i < domain.length; ++i) {
+        const code = domain.charCodeAt(i);
         if (code === 46) {
           if (labelLength === 0) {
             throw new Error("Invalid cookie domain");
           }
-          if (domain.charCodeAt(i2 - 1) === 45) {
+          if (domain.charCodeAt(i - 1) === 45) {
             throw new Error("Invalid cookie domain");
           }
           labelLength = 0;
@@ -18730,7 +18610,7 @@ var require_util6 = __commonJS({
       "Nov",
       "Dec"
     ];
-    var IMFPaddedNumbers = Array(61).fill(0).map((_, i2) => i2.toString().padStart(2, "0"));
+    var IMFPaddedNumbers = Array(61).fill(0).map((_3, i) => i.toString().padStart(2, "0"));
     function toIMFDate(date) {
       if (typeof date === "number") {
         date = new Date(date);
@@ -19439,20 +19319,20 @@ var require_util7 = __commonJS({
     var { ErrorEvent, createFastMessageEvent } = require_events();
     var { isUtf8 } = require("node:buffer");
     var { collectASequenceOfCodePointsFast, removeHTTPWhitespace } = require_data_url();
-    function isConnecting(ws) {
-      return ws[kReadyState] === states.CONNECTING;
+    function isConnecting(ws2) {
+      return ws2[kReadyState] === states.CONNECTING;
     }
     __name(isConnecting, "isConnecting");
-    function isEstablished(ws) {
-      return ws[kReadyState] === states.OPEN;
+    function isEstablished(ws2) {
+      return ws2[kReadyState] === states.OPEN;
     }
     __name(isEstablished, "isEstablished");
-    function isClosing(ws) {
-      return ws[kReadyState] === states.CLOSING;
+    function isClosing(ws2) {
+      return ws2[kReadyState] === states.CLOSING;
     }
     __name(isClosing, "isClosing");
-    function isClosed(ws) {
-      return ws[kReadyState] === states.CLOSED;
+    function isClosed(ws2) {
+      return ws2[kReadyState] === states.CLOSED;
     }
     __name(isClosed, "isClosed");
     function fireEvent(e, target, eventFactory = (type, init) => new Event(type, init), eventInitDict = {}) {
@@ -19460,8 +19340,8 @@ var require_util7 = __commonJS({
       target.dispatchEvent(event);
     }
     __name(fireEvent, "fireEvent");
-    function websocketMessageReceived(ws, type, data) {
-      if (ws[kReadyState] !== states.OPEN) {
+    function websocketMessageReceived(ws2, type, data) {
+      if (ws2[kReadyState] !== states.OPEN) {
         return;
       }
       let dataForEvent;
@@ -19469,18 +19349,18 @@ var require_util7 = __commonJS({
         try {
           dataForEvent = utf8Decode(data);
         } catch {
-          failWebsocketConnection(ws, "Received invalid UTF-8 in text frame.");
+          failWebsocketConnection(ws2, "Received invalid UTF-8 in text frame.");
           return;
         }
       } else if (type === opcodes.BINARY) {
-        if (ws[kBinaryType] === "blob") {
+        if (ws2[kBinaryType] === "blob") {
           dataForEvent = new Blob([data]);
         } else {
           dataForEvent = toArrayBuffer(data);
         }
       }
-      fireEvent("message", ws, createFastMessageEvent, {
-        origin: ws[kWebSocketURL].origin,
+      fireEvent("message", ws2, createFastMessageEvent, {
+        origin: ws2[kWebSocketURL].origin,
         data: dataForEvent
       });
     }
@@ -19496,8 +19376,8 @@ var require_util7 = __commonJS({
       if (protocol.length === 0) {
         return false;
       }
-      for (let i2 = 0; i2 < protocol.length; ++i2) {
-        const code = protocol.charCodeAt(i2);
+      for (let i = 0; i < protocol.length; ++i) {
+        const code = protocol.charCodeAt(i);
         if (code < 33 || // CTL, contains SP (0x20) and HT (0x09)
         code > 126 || code === 34 || // "
         code === 40 || // (
@@ -19531,14 +19411,14 @@ var require_util7 = __commonJS({
       return code >= 3e3 && code <= 4999;
     }
     __name(isValidStatusCode, "isValidStatusCode");
-    function failWebsocketConnection(ws, reason) {
-      const { [kController]: controller, [kResponse]: response } = ws;
+    function failWebsocketConnection(ws2, reason) {
+      const { [kController]: controller, [kResponse]: response } = ws2;
       controller.abort();
       if (response?.socket && !response.socket.destroyed) {
         response.socket.destroy();
       }
       if (reason) {
-        fireEvent("error", ws, (type, init) => new ErrorEvent(type, init), {
+        fireEvent("error", ws2, (type, init) => new ErrorEvent(type, init), {
           error: new Error(reason),
           message: reason
         });
@@ -19580,8 +19460,8 @@ var require_util7 = __commonJS({
       if (value.length === 0) {
         return false;
       }
-      for (let i2 = 0; i2 < value.length; i2++) {
-        const byte = value.charCodeAt(i2);
+      for (let i = 0; i < value.length; i++) {
+        const byte = value.charCodeAt(i);
         if (byte < 48 || byte > 57) {
           return false;
         }
@@ -19634,8 +19514,8 @@ var require_frame = __commonJS({
       crypto = {
         // not full compatibility, but minimum.
         randomFillSync: /* @__PURE__ */ __name(function randomFillSync(buffer2, _offset, _size) {
-          for (let i2 = 0; i2 < buffer2.length; ++i2) {
-            buffer2[i2] = Math.random() * 255 | 0;
+          for (let i = 0; i < buffer2.length; ++i) {
+            buffer2[i] = Math.random() * 255 | 0;
           }
           return buffer2;
         }, "randomFillSync")
@@ -19688,8 +19568,8 @@ var require_frame = __commonJS({
           buffer2.writeUIntBE(bodyLength, 4, 6);
         }
         buffer2[1] |= 128;
-        for (let i2 = 0; i2 < bodyLength; ++i2) {
-          buffer2[offset + i2] = frameData[i2] ^ maskKey[i2 & 3];
+        for (let i = 0; i < bodyLength; ++i) {
+          buffer2[offset + i] = frameData[i] ^ maskKey[i & 3];
         }
         return buffer2;
       }
@@ -19725,7 +19605,7 @@ var require_connection = __commonJS({
       crypto = require("node:crypto");
     } catch {
     }
-    function establishWebSocketConnection(url, protocols, client, ws, onEstablish, options) {
+    function establishWebSocketConnection(url, protocols, client, ws2, onEstablish, options) {
       const requestURL = url;
       requestURL.protocol = url.protocol === "ws:" ? "http:" : "https:";
       const request = makeRequest({
@@ -19756,25 +19636,25 @@ var require_connection = __commonJS({
         dispatcher: options.dispatcher,
         processResponse(response) {
           if (response.type === "error" || response.status !== 101) {
-            failWebsocketConnection(ws, "Received network error or non-101 status code.");
+            failWebsocketConnection(ws2, "Received network error or non-101 status code.");
             return;
           }
           if (protocols.length !== 0 && !response.headersList.get("Sec-WebSocket-Protocol")) {
-            failWebsocketConnection(ws, "Server did not respond with sent protocols.");
+            failWebsocketConnection(ws2, "Server did not respond with sent protocols.");
             return;
           }
           if (response.headersList.get("Upgrade")?.toLowerCase() !== "websocket") {
-            failWebsocketConnection(ws, 'Server did not set Upgrade header to "websocket".');
+            failWebsocketConnection(ws2, 'Server did not set Upgrade header to "websocket".');
             return;
           }
           if (response.headersList.get("Connection")?.toLowerCase() !== "upgrade") {
-            failWebsocketConnection(ws, 'Server did not set Connection header to "upgrade".');
+            failWebsocketConnection(ws2, 'Server did not set Connection header to "upgrade".');
             return;
           }
           const secWSAccept = response.headersList.get("Sec-WebSocket-Accept");
           const digest = crypto.createHash("sha1").update(keyValue + uid).digest("base64");
           if (secWSAccept !== digest) {
-            failWebsocketConnection(ws, "Incorrect hash received in Sec-WebSocket-Accept header.");
+            failWebsocketConnection(ws2, "Incorrect hash received in Sec-WebSocket-Accept header.");
             return;
           }
           const secExtension = response.headersList.get("Sec-WebSocket-Extensions");
@@ -19782,7 +19662,7 @@ var require_connection = __commonJS({
           if (secExtension !== null) {
             extensions = parseExtensions(secExtension);
             if (!extensions.has("permessage-deflate")) {
-              failWebsocketConnection(ws, "Sec-WebSocket-Extensions header does not match.");
+              failWebsocketConnection(ws2, "Sec-WebSocket-Extensions header does not match.");
               return;
             }
           }
@@ -19790,7 +19670,7 @@ var require_connection = __commonJS({
           if (secProtocol !== null) {
             const requestProtocols = getDecodeSplit("sec-websocket-protocol", request.headersList);
             if (!requestProtocols.includes(secProtocol)) {
-              failWebsocketConnection(ws, "Protocol was not set in the opening handshake.");
+              failWebsocketConnection(ws2, "Protocol was not set in the opening handshake.");
               return;
             }
           }
@@ -19810,13 +19690,13 @@ var require_connection = __commonJS({
       return controller;
     }
     __name(establishWebSocketConnection, "establishWebSocketConnection");
-    function closeWebSocketConnection(ws, code, reason, reasonByteLength) {
-      if (isClosing(ws) || isClosed(ws)) {
-      } else if (!isEstablished(ws)) {
-        failWebsocketConnection(ws, "Connection was closed before it was established.");
-        ws[kReadyState] = states.CLOSING;
-      } else if (ws[kSentClose] === sentCloseFrameState.NOT_SENT) {
-        ws[kSentClose] = sentCloseFrameState.PROCESSING;
+    function closeWebSocketConnection(ws2, code, reason, reasonByteLength) {
+      if (isClosing(ws2) || isClosed(ws2)) {
+      } else if (!isEstablished(ws2)) {
+        failWebsocketConnection(ws2, "Connection was closed before it was established.");
+        ws2[kReadyState] = states.CLOSING;
+      } else if (ws2[kSentClose] === sentCloseFrameState.NOT_SENT) {
+        ws2[kSentClose] = sentCloseFrameState.PROCESSING;
         const frame = new WebsocketFrameSend();
         if (code !== void 0 && reason === void 0) {
           frame.frameData = Buffer.allocUnsafe(2);
@@ -19828,12 +19708,12 @@ var require_connection = __commonJS({
         } else {
           frame.frameData = emptyBuffer;
         }
-        const socket = ws[kResponse].socket;
+        const socket = ws2[kResponse].socket;
         socket.write(frame.createFrame(opcodes.CLOSE));
-        ws[kSentClose] = sentCloseFrameState.SENT;
-        ws[kReadyState] = states.CLOSING;
+        ws2[kSentClose] = sentCloseFrameState.SENT;
+        ws2[kReadyState] = states.CLOSING;
       } else {
-        ws[kReadyState] = states.CLOSING;
+        ws2[kReadyState] = states.CLOSING;
       }
     }
     __name(closeWebSocketConnection, "closeWebSocketConnection");
@@ -19844,30 +19724,30 @@ var require_connection = __commonJS({
     }
     __name(onSocketData, "onSocketData");
     function onSocketClose() {
-      const { ws } = this;
-      const { [kResponse]: response } = ws;
+      const { ws: ws2 } = this;
+      const { [kResponse]: response } = ws2;
       response.socket.off("data", onSocketData);
       response.socket.off("close", onSocketClose);
       response.socket.off("error", onSocketError);
-      const wasClean = ws[kSentClose] === sentCloseFrameState.SENT && ws[kReceivedClose];
+      const wasClean = ws2[kSentClose] === sentCloseFrameState.SENT && ws2[kReceivedClose];
       let code = 1005;
       let reason = "";
-      const result = ws[kByteParser].closingInfo;
+      const result = ws2[kByteParser].closingInfo;
       if (result && !result.error) {
         code = result.code ?? 1005;
         reason = result.reason;
-      } else if (!ws[kReceivedClose]) {
+      } else if (!ws2[kReceivedClose]) {
         code = 1006;
       }
-      ws[kReadyState] = states.CLOSED;
-      fireEvent("close", ws, (type, init) => new CloseEvent(type, init), {
+      ws2[kReadyState] = states.CLOSED;
+      fireEvent("close", ws2, (type, init) => new CloseEvent(type, init), {
         wasClean,
         code,
         reason
       });
       if (channels.close.hasSubscribers) {
         channels.close.publish({
-          websocket: ws,
+          websocket: ws2,
           code,
           reason
         });
@@ -19875,8 +19755,8 @@ var require_connection = __commonJS({
     }
     __name(onSocketClose, "onSocketClose");
     function onSocketError(error2) {
-      const { ws } = this;
-      ws[kReadyState] = states.CLOSING;
+      const { ws: ws2 } = this;
+      ws2[kReadyState] = states.CLOSING;
       if (channels.socketError.hasSubscribers) {
         channels.socketError.publish(error2);
       }
@@ -19997,9 +19877,9 @@ var require_receiver = __commonJS({
     var { closeWebSocketConnection } = require_connection();
     var { PerMessageDeflate } = require_permessage_deflate();
     var { MessageSizeExceededError } = require_errors();
-    function failWebsocketConnectionWithCode(ws, code, reason) {
-      closeWebSocketConnection(ws, code, reason, Buffer.byteLength(reason));
-      failWebsocketConnection(ws, reason);
+    function failWebsocketConnectionWithCode(ws2, code, reason) {
+      closeWebSocketConnection(ws2, code, reason, Buffer.byteLength(reason));
+      failWebsocketConnection(ws2, reason);
     }
     __name(failWebsocketConnectionWithCode, "failWebsocketConnectionWithCode");
     var ByteParser = class extends Writable {
@@ -20024,9 +19904,9 @@ var require_receiver = __commonJS({
        * @param {Map<string, string>|null} extensions
        * @param {{ maxFragments?: number, maxPayloadSize?: number }} [options]
        */
-      constructor(ws, extensions, options = {}) {
+      constructor(ws2, extensions, options = {}) {
         super();
-        this.ws = ws;
+        this.ws = ws2;
         this.#extensions = extensions == null ? /* @__PURE__ */ new Map() : extensions;
         this.#maxFragments = options.maxFragments ?? 0;
         this.#maxPayloadSize = options.maxPayloadSize ?? 0;
@@ -20038,7 +19918,7 @@ var require_receiver = __commonJS({
        * @param {Buffer} chunk
        * @param {() => void} callback
        */
-      _write(chunk, _, callback) {
+      _write(chunk, _3, callback) {
         this.#buffers.push(chunk);
         this.#byteOffset += chunk.length;
         this.#loop = true;
@@ -20522,10 +20402,10 @@ ns");
         if (typeof protocols === "string") {
           protocols = [protocols];
         }
-        if (protocols.length !== new Set(protocols.map((p) => p.toLowerCase())).size) {
+        if (protocols.length !== new Set(protocols.map((p2) => p2.toLowerCase())).size) {
           throw new DOMException("Invalid Sec-WebSocket-Protocol value", "SyntaxError");
         }
-        if (protocols.length > 0 && !protocols.every((p) => isValidSubprotocol(p))) {
+        if (protocols.length > 0 && !protocols.every((p2) => isValidSubprotocol(p2))) {
           throw new DOMException("Invalid Sec-WebSocket-Protocol value", "SyntaxError");
         }
         this[kWebSocketURL] = new URL(urlRecord.href);
@@ -20635,14 +20515,14 @@ ns");
         webidl.brandCheck(this, _WebSocket);
         return this.#events.open;
       }
-      set onopen(fn) {
+      set onopen(fn2) {
         webidl.brandCheck(this, _WebSocket);
         if (this.#events.open) {
           this.removeEventListener("open", this.#events.open);
         }
-        if (typeof fn === "function") {
-          this.#events.open = fn;
-          this.addEventListener("open", fn);
+        if (typeof fn2 === "function") {
+          this.#events.open = fn2;
+          this.addEventListener("open", fn2);
         } else {
           this.#events.open = null;
         }
@@ -20651,14 +20531,14 @@ ns");
         webidl.brandCheck(this, _WebSocket);
         return this.#events.error;
       }
-      set onerror(fn) {
+      set onerror(fn2) {
         webidl.brandCheck(this, _WebSocket);
         if (this.#events.error) {
           this.removeEventListener("error", this.#events.error);
         }
-        if (typeof fn === "function") {
-          this.#events.error = fn;
-          this.addEventListener("error", fn);
+        if (typeof fn2 === "function") {
+          this.#events.error = fn2;
+          this.addEventListener("error", fn2);
         } else {
           this.#events.error = null;
         }
@@ -20667,14 +20547,14 @@ ns");
         webidl.brandCheck(this, _WebSocket);
         return this.#events.close;
       }
-      set onclose(fn) {
+      set onclose(fn2) {
         webidl.brandCheck(this, _WebSocket);
         if (this.#events.close) {
           this.removeEventListener("close", this.#events.close);
         }
-        if (typeof fn === "function") {
-          this.#events.close = fn;
-          this.addEventListener("close", fn);
+        if (typeof fn2 === "function") {
+          this.#events.close = fn2;
+          this.addEventListener("close", fn2);
         } else {
           this.#events.close = null;
         }
@@ -20683,14 +20563,14 @@ ns");
         webidl.brandCheck(this, _WebSocket);
         return this.#events.message;
       }
-      set onmessage(fn) {
+      set onmessage(fn2) {
         webidl.brandCheck(this, _WebSocket);
         if (this.#events.message) {
           this.removeEventListener("message", this.#events.message);
         }
-        if (typeof fn === "function") {
-          this.#events.message = fn;
-          this.addEventListener("message", fn);
+        if (typeof fn2 === "function") {
+          this.#events.message = fn2;
+          this.addEventListener("message", fn2);
         } else {
           this.#events.message = null;
         }
@@ -20715,14 +20595,14 @@ ns");
         const webSocketOptions = this[kController]?.dispatcher?.webSocketOptions;
         const maxFragments = webSocketOptions?.maxFragments;
         const maxPayloadSize = webSocketOptions?.maxPayloadSize;
-        const parser4 = new ByteParser(this, parsedExtensions, {
+        const parser = new ByteParser(this, parsedExtensions, {
           maxFragments,
           maxPayloadSize
         });
-        parser4.on("drain", onParserDrain);
-        parser4.on("error", onParserError.bind(this));
+        parser.on("drain", onParserDrain);
+        parser.on("error", onParserError.bind(this));
         response.socket.ws = this;
-        this[kByteParser] = parser4;
+        this[kByteParser] = parser;
         this.#sendQueue = new SendQueue(response.socket);
         this[kReadyState] = states.OPEN;
         const extensions = response.headersList.get("sec-websocket-extensions");
@@ -20773,11 +20653,11 @@ ns");
     webidl.converters["sequence<DOMString>"] = webidl.sequenceConverter(
       webidl.converters.DOMString
     );
-    webidl.converters["DOMString or sequence<DOMString>"] = function(V, prefix, argument) {
-      if (webidl.util.Type(V) === "Object" && Symbol.iterator in V) {
-        return webidl.converters["sequence<DOMString>"](V);
+    webidl.converters["DOMString or sequence<DOMString>"] = function(V2, prefix, argument) {
+      if (webidl.util.Type(V2) === "Object" && Symbol.iterator in V2) {
+        return webidl.converters["sequence<DOMString>"](V2);
       }
-      return webidl.converters.DOMString(V, prefix, argument);
+      return webidl.converters.DOMString(V2, prefix, argument);
     };
     webidl.converters.WebSocketInit = webidl.dictionaryConverter([
       {
@@ -20795,22 +20675,22 @@ ns");
         converter: webidl.nullableConverter(webidl.converters.HeadersInit)
       }
     ]);
-    webidl.converters["DOMString or sequence<DOMString> or WebSocketInit"] = function(V) {
-      if (webidl.util.Type(V) === "Object" && !(Symbol.iterator in V)) {
-        return webidl.converters.WebSocketInit(V);
+    webidl.converters["DOMString or sequence<DOMString> or WebSocketInit"] = function(V2) {
+      if (webidl.util.Type(V2) === "Object" && !(Symbol.iterator in V2)) {
+        return webidl.converters.WebSocketInit(V2);
       }
-      return { protocols: webidl.converters["DOMString or sequence<DOMString>"](V) };
+      return { protocols: webidl.converters["DOMString or sequence<DOMString>"](V2) };
     };
-    webidl.converters.WebSocketSendData = function(V) {
-      if (webidl.util.Type(V) === "Object") {
-        if (isBlobLike(V)) {
-          return webidl.converters.Blob(V, { strict: false });
+    webidl.converters.WebSocketSendData = function(V2) {
+      if (webidl.util.Type(V2) === "Object") {
+        if (isBlobLike(V2)) {
+          return webidl.converters.Blob(V2, { strict: false });
         }
-        if (ArrayBuffer.isView(V) || types.isArrayBuffer(V)) {
-          return webidl.converters.BufferSource(V);
+        if (ArrayBuffer.isView(V2) || types.isArrayBuffer(V2)) {
+          return webidl.converters.BufferSource(V2);
         }
       }
-      return webidl.converters.USVString(V);
+      return webidl.converters.USVString(V2);
     };
     function onParserDrain() {
       this.ws[kResponse].socket.resume();
@@ -20845,22 +20725,22 @@ var require_util8 = __commonJS({
     __name(isValidLastEventId, "isValidLastEventId");
     function isASCIINumber(value) {
       if (value.length === 0) return false;
-      for (let i2 = 0; i2 < value.length; i2++) {
-        if (value.charCodeAt(i2) < 48 || value.charCodeAt(i2) > 57) return false;
+      for (let i = 0; i < value.length; i++) {
+        if (value.charCodeAt(i) < 48 || value.charCodeAt(i) > 57) return false;
       }
       return true;
     }
     __name(isASCIINumber, "isASCIINumber");
-    function delay2(ms) {
+    function delay(ms2) {
       return new Promise((resolve) => {
-        setTimeout(resolve, ms).unref();
+        setTimeout(resolve, ms2).unref();
       });
     }
-    __name(delay2, "delay");
+    __name(delay, "delay");
     module2.exports = {
       isValidLastEventId,
       isASCIINumber,
-      delay: delay2
+      delay
     };
   }
 });
@@ -21110,7 +20990,7 @@ var require_eventsource = __commonJS({
     var { parseMIMEType } = require_data_url();
     var { createFastMessageEvent } = require_events();
     var { isNetworkError } = require_response();
-    var { delay: delay2 } = require_util8();
+    var { delay } = require_util8();
     var { kEnumerableProperty } = require_util();
     var { environmentSettingsObject } = require_util2();
     var experimentalWarned = false;
@@ -21284,7 +21164,7 @@ var require_eventsource = __commonJS({
         if (this.#readyState === CLOSED) return;
         this.#readyState = CONNECTING;
         this.dispatchEvent(new Event("error"));
-        await delay2(this.#state.reconnectionTime);
+        await delay(this.#state.reconnectionTime);
         if (this.#readyState !== CONNECTING) return;
         if (this.#state.lastEventId.length) {
           this.#request.headersList.set("last-event-id", this.#state.lastEventId, true);
@@ -21305,13 +21185,13 @@ var require_eventsource = __commonJS({
       get onopen() {
         return this.#events.open;
       }
-      set onopen(fn) {
+      set onopen(fn2) {
         if (this.#events.open) {
           this.removeEventListener("open", this.#events.open);
         }
-        if (typeof fn === "function") {
-          this.#events.open = fn;
-          this.addEventListener("open", fn);
+        if (typeof fn2 === "function") {
+          this.#events.open = fn2;
+          this.addEventListener("open", fn2);
         } else {
           this.#events.open = null;
         }
@@ -21319,13 +21199,13 @@ var require_eventsource = __commonJS({
       get onmessage() {
         return this.#events.message;
       }
-      set onmessage(fn) {
+      set onmessage(fn2) {
         if (this.#events.message) {
           this.removeEventListener("message", this.#events.message);
         }
-        if (typeof fn === "function") {
-          this.#events.message = fn;
-          this.addEventListener("message", fn);
+        if (typeof fn2 === "function") {
+          this.#events.message = fn2;
+          this.addEventListener("message", fn2);
         } else {
           this.#events.message = null;
         }
@@ -21333,13 +21213,13 @@ var require_eventsource = __commonJS({
       get onerror() {
         return this.#events.error;
       }
-      set onerror(fn) {
+      set onerror(fn2) {
         if (this.#events.error) {
           this.removeEventListener("error", this.#events.error);
         }
-        if (typeof fn === "function") {
-          this.#events.error = fn;
-          this.addEventListener("error", fn);
+        if (typeof fn2 === "function") {
+          this.#events.error = fn2;
+          this.addEventListener("error", fn2);
         } else {
           this.#events.error = null;
         }
@@ -21449,7 +21329,7 @@ var require_undici = __commonJS({
       parseHeaders: util.parseHeaders,
       headerNameToString: util.headerNameToString
     };
-    function makeDispatcher(fn) {
+    function makeDispatcher(fn2) {
       return (url, opts, handler) => {
         if (typeof opts === "function") {
           handler = opts;
@@ -21480,7 +21360,7 @@ var require_undici = __commonJS({
         if (agent2) {
           throw new InvalidArgumentError("unsupported opts.agent. Did you mean opts.client?");
         }
-        return fn.call(dispatcher, {
+        return fn2.call(dispatcher, {
           ...opts,
           origin: url.origin,
           path: url.search ? `${url.pathname}${url.search}` : url.pathname,
@@ -21577,10 +21457,10 @@ var require_constants6 = __commonJS({
 var require_debug = __commonJS({
   "node_modules/semver/internal/debug.js"(exports2, module2) {
     "use strict";
-    var debug3 = typeof process === "object" && process.env && process.env.NODE_DEBUG && /\bsemver\b/i.test(process.env.
+    var debug2 = typeof process === "object" && process.env && process.env.NODE_DEBUG && /\bsemver\b/i.test(process.env.
     NODE_DEBUG) ? (...args) => console.error("SEMVER", ...args) : () => {
     };
-    module2.exports = debug3;
+    module2.exports = debug2;
   }
 });
 
@@ -21593,14 +21473,14 @@ var require_re = __commonJS({
       MAX_SAFE_BUILD_LENGTH,
       MAX_LENGTH
     } = require_constants6();
-    var debug3 = require_debug();
+    var debug2 = require_debug();
     exports2 = module2.exports = {};
-    var re = exports2.re = [];
+    var re2 = exports2.re = [];
     var safeRe = exports2.safeRe = [];
     var src = exports2.src = [];
     var safeSrc = exports2.safeSrc = [];
     var t2 = exports2.t = {};
-    var R = 0;
+    var R2 = 0;
     var LETTERDASHNUMBER = "[a-zA-Z0-9-]";
     var safeRegexReplacements = [
       ["\\s", 1],
@@ -21615,12 +21495,12 @@ var require_re = __commonJS({
     }, "makeSafeRegex");
     var createToken = /* @__PURE__ */ __name((name, value, isGlobal) => {
       const safe = makeSafeRegex(value);
-      const index = R++;
-      debug3(name, index, value);
+      const index = R2++;
+      debug2(name, index, value);
       t2[name] = index;
       src[index] = value;
       safeSrc[index] = safe;
-      re[index] = new RegExp(value, isGlobal ? "g" : void 0);
+      re2[index] = new RegExp(value, isGlobal ? "g" : void 0);
       safeRe[index] = new RegExp(safe, isGlobal ? "g" : void 0);
     }, "createToken");
     createToken("NUMERICIDENTIFIER", "0|[1-9]\\d*");
@@ -21702,19 +21582,19 @@ var require_identifiers = __commonJS({
   "node_modules/semver/internal/identifiers.js"(exports2, module2) {
     "use strict";
     var numeric = /^[0-9]+$/;
-    var compareIdentifiers = /* @__PURE__ */ __name((a, b) => {
-      if (typeof a === "number" && typeof b === "number") {
-        return a === b ? 0 : a < b ? -1 : 1;
+    var compareIdentifiers = /* @__PURE__ */ __name((a, b2) => {
+      if (typeof a === "number" && typeof b2 === "number") {
+        return a === b2 ? 0 : a < b2 ? -1 : 1;
       }
       const anum = numeric.test(a);
-      const bnum = numeric.test(b);
+      const bnum = numeric.test(b2);
       if (anum && bnum) {
         a = +a;
-        b = +b;
+        b2 = +b2;
       }
-      return a === b ? 0 : anum && !bnum ? -1 : bnum && !anum ? 1 : a < b ? -1 : 1;
+      return a === b2 ? 0 : anum && !bnum ? -1 : bnum && !anum ? 1 : a < b2 ? -1 : 1;
     }, "compareIdentifiers");
-    var rcompareIdentifiers = /* @__PURE__ */ __name((a, b) => compareIdentifiers(b, a), "rcompareIdentifiers");
+    var rcompareIdentifiers = /* @__PURE__ */ __name((a, b2) => compareIdentifiers(b2, a), "rcompareIdentifiers");
     module2.exports = {
       compareIdentifiers,
       rcompareIdentifiers
@@ -21726,9 +21606,9 @@ var require_identifiers = __commonJS({
 var require_semver = __commonJS({
   "node_modules/semver/classes/semver.js"(exports2, module2) {
     "use strict";
-    var debug3 = require_debug();
+    var debug2 = require_debug();
     var { MAX_LENGTH, MAX_SAFE_INTEGER } = require_constants6();
-    var { safeRe: re, t: t2 } = require_re();
+    var { safeRe: re2, t: t2 } = require_re();
     var parseOptions = require_parse_options();
     var { compareIdentifiers } = require_identifiers();
     var isPrereleaseIdentifier = /* @__PURE__ */ __name((prerelease, identifier) => {
@@ -21736,8 +21616,8 @@ var require_semver = __commonJS({
       if (identifiers.length > prerelease.length) {
         return false;
       }
-      for (let i2 = 0; i2 < identifiers.length; i2++) {
-        if (compareIdentifiers(prerelease[i2], identifiers[i2]) !== 0) {
+      for (let i = 0; i < identifiers.length; i++) {
+        if (compareIdentifiers(prerelease[i], identifiers[i]) !== 0) {
           return false;
         }
       }
@@ -21763,18 +21643,18 @@ var require_semver = __commonJS({
             `version is longer than ${MAX_LENGTH} characters`
           );
         }
-        debug3("SemVer", version, options);
+        debug2("SemVer", version, options);
         this.options = options;
         this.loose = !!options.loose;
         this.includePrerelease = !!options.includePrerelease;
-        const m = version.trim().match(options.loose ? re[t2.LOOSE] : re[t2.FULL]);
-        if (!m) {
+        const m2 = version.trim().match(options.loose ? re2[t2.LOOSE] : re2[t2.FULL]);
+        if (!m2) {
           throw new TypeError(`Invalid Version: ${version}`);
         }
         this.raw = version;
-        this.major = +m[1];
-        this.minor = +m[2];
-        this.patch = +m[3];
+        this.major = +m2[1];
+        this.minor = +m2[2];
+        this.patch = +m2[3];
         if (this.major > MAX_SAFE_INTEGER || this.major < 0) {
           throw new TypeError("Invalid major version");
         }
@@ -21784,10 +21664,10 @@ var require_semver = __commonJS({
         if (this.patch > MAX_SAFE_INTEGER || this.patch < 0) {
           throw new TypeError("Invalid patch version");
         }
-        if (!m[4]) {
+        if (!m2[4]) {
           this.prerelease = [];
         } else {
-          this.prerelease = m[4].split(".").map((id) => {
+          this.prerelease = m2[4].split(".").map((id) => {
             if (/^[0-9]+$/.test(id)) {
               const num = +id;
               if (num >= 0 && num < MAX_SAFE_INTEGER) {
@@ -21797,7 +21677,7 @@ var require_semver = __commonJS({
             return id;
           });
         }
-        this.build = m[5] ? m[5].split(".") : [];
+        this.build = m2[5] ? m2[5].split(".") : [];
         this.format();
       }
       format() {
@@ -21811,7 +21691,7 @@ var require_semver = __commonJS({
         return this.version;
       }
       compare(other) {
-        debug3("SemVer.compare", this.version, this.options, other);
+        debug2("SemVer.compare", this.version, this.options, other);
         if (!(other instanceof _SemVer)) {
           if (typeof other === "string" && other === this.version) {
             return 0;
@@ -21858,45 +21738,45 @@ var require_semver = __commonJS({
         } else if (!this.prerelease.length && !other.prerelease.length) {
           return 0;
         }
-        let i2 = 0;
+        let i = 0;
         do {
-          const a = this.prerelease[i2];
-          const b = other.prerelease[i2];
-          debug3("prerelease compare", i2, a, b);
-          if (a === void 0 && b === void 0) {
+          const a = this.prerelease[i];
+          const b2 = other.prerelease[i];
+          debug2("prerelease compare", i, a, b2);
+          if (a === void 0 && b2 === void 0) {
             return 0;
-          } else if (b === void 0) {
+          } else if (b2 === void 0) {
             return 1;
           } else if (a === void 0) {
             return -1;
-          } else if (a === b) {
+          } else if (a === b2) {
             continue;
           } else {
-            return compareIdentifiers(a, b);
+            return compareIdentifiers(a, b2);
           }
-        } while (++i2);
+        } while (++i);
       }
       compareBuild(other) {
         if (!(other instanceof _SemVer)) {
           other = new _SemVer(other, this.options);
         }
-        let i2 = 0;
+        let i = 0;
         do {
-          const a = this.build[i2];
-          const b = other.build[i2];
-          debug3("build compare", i2, a, b);
-          if (a === void 0 && b === void 0) {
+          const a = this.build[i];
+          const b2 = other.build[i];
+          debug2("build compare", i, a, b2);
+          if (a === void 0 && b2 === void 0) {
             return 0;
-          } else if (b === void 0) {
+          } else if (b2 === void 0) {
             return 1;
           } else if (a === void 0) {
             return -1;
-          } else if (a === b) {
+          } else if (a === b2) {
             continue;
           } else {
-            return compareIdentifiers(a, b);
+            return compareIdentifiers(a, b2);
           }
-        } while (++i2);
+        } while (++i);
       }
       // preminor will bump the version up to the next minor release, and immediately
       // down to pre-release. premajor and prepatch work the same way.
@@ -21906,7 +21786,7 @@ var require_semver = __commonJS({
             throw new Error("invalid increment argument: identifier is empty");
           }
           if (identifier) {
-            const match = `-${identifier}`.match(this.options.loose ? re[t2.PRERELEASELOOSE] : re[t2.PRERELEASE]);
+            const match = `-${identifier}`.match(this.options.loose ? re2[t2.PRERELEASELOOSE] : re2[t2.PRERELEASE]);
             if (!match || match[1] !== identifier) {
               throw new Error(`invalid identifier: ${identifier}`);
             }
@@ -21973,14 +21853,14 @@ var require_semver = __commonJS({
             if (this.prerelease.length === 0) {
               this.prerelease = [base];
             } else {
-              let i2 = this.prerelease.length;
-              while (--i2 >= 0) {
-                if (typeof this.prerelease[i2] === "number") {
-                  this.prerelease[i2]++;
-                  i2 = -2;
+              let i = this.prerelease.length;
+              while (--i >= 0) {
+                if (typeof this.prerelease[i] === "number") {
+                  this.prerelease[i]++;
+                  i = -2;
                 }
               }
-              if (i2 === -1) {
+              if (i === -1) {
                 if (identifier === this.prerelease.join(".") && identifierBase === false) {
                   throw new Error("invalid increment argument: identifier already exists");
                 }
@@ -22028,11 +21908,11 @@ var require_parse2 = __commonJS({
       }
       try {
         return new SemVer(version, options);
-      } catch (er) {
+      } catch (er2) {
         if (!throwErrors) {
           return null;
         }
-        throw er;
+        throw er2;
       }
     }, "parse");
     module2.exports = parse;
@@ -22045,8 +21925,8 @@ var require_valid = __commonJS({
     "use strict";
     var parse = require_parse2();
     var valid2 = /* @__PURE__ */ __name((version, options) => {
-      const v = parse(version, options);
-      return v ? v.version : null;
+      const v2 = parse(version, options);
+      return v2 ? v2.version : null;
     }, "valid");
     module2.exports = valid2;
   }
@@ -22081,7 +21961,7 @@ var require_inc = __commonJS({
           version instanceof SemVer ? version.version : version,
           options
         ).inc(release, identifier, identifierBase).version;
-      } catch (er) {
+      } catch (er2) {
         return null;
       }
     }, "inc");
@@ -22181,7 +22061,7 @@ var require_compare = __commonJS({
   "node_modules/semver/functions/compare.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
-    var compare = /* @__PURE__ */ __name((a, b, loose) => new SemVer(a, loose).compare(new SemVer(b, loose)), "compare");
+    var compare = /* @__PURE__ */ __name((a, b2, loose) => new SemVer(a, loose).compare(new SemVer(b2, loose)), "compare");
     module2.exports = compare;
   }
 });
@@ -22191,7 +22071,7 @@ var require_rcompare = __commonJS({
   "node_modules/semver/functions/rcompare.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
-    var rcompare = /* @__PURE__ */ __name((a, b, loose) => compare(b, a, loose), "rcompare");
+    var rcompare = /* @__PURE__ */ __name((a, b2, loose) => compare(b2, a, loose), "rcompare");
     module2.exports = rcompare;
   }
 });
@@ -22201,7 +22081,7 @@ var require_compare_loose = __commonJS({
   "node_modules/semver/functions/compare-loose.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
-    var compareLoose = /* @__PURE__ */ __name((a, b) => compare(a, b, true), "compareLoose");
+    var compareLoose = /* @__PURE__ */ __name((a, b2) => compare(a, b2, true), "compareLoose");
     module2.exports = compareLoose;
   }
 });
@@ -22211,9 +22091,9 @@ var require_compare_build = __commonJS({
   "node_modules/semver/functions/compare-build.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
-    var compareBuild = /* @__PURE__ */ __name((a, b, loose) => {
+    var compareBuild = /* @__PURE__ */ __name((a, b2, loose) => {
       const versionA = new SemVer(a, loose);
-      const versionB = new SemVer(b, loose);
+      const versionB = new SemVer(b2, loose);
       return versionA.compare(versionB) || versionA.compareBuild(versionB);
     }, "compareBuild");
     module2.exports = compareBuild;
@@ -22225,7 +22105,7 @@ var require_sort = __commonJS({
   "node_modules/semver/functions/sort.js"(exports2, module2) {
     "use strict";
     var compareBuild = require_compare_build();
-    var sort = /* @__PURE__ */ __name((list, loose) => list.sort((a, b) => compareBuild(a, b, loose)), "sort");
+    var sort = /* @__PURE__ */ __name((list, loose) => list.sort((a, b2) => compareBuild(a, b2, loose)), "sort");
     module2.exports = sort;
   }
 });
@@ -22235,7 +22115,7 @@ var require_rsort = __commonJS({
   "node_modules/semver/functions/rsort.js"(exports2, module2) {
     "use strict";
     var compareBuild = require_compare_build();
-    var rsort = /* @__PURE__ */ __name((list, loose) => list.sort((a, b) => compareBuild(b, a, loose)), "rsort");
+    var rsort = /* @__PURE__ */ __name((list, loose) => list.sort((a, b2) => compareBuild(b2, a, loose)), "rsort");
     module2.exports = rsort;
   }
 });
@@ -22245,8 +22125,8 @@ var require_gt = __commonJS({
   "node_modules/semver/functions/gt.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
-    var gt2 = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) > 0, "gt");
-    module2.exports = gt2;
+    var gt3 = /* @__PURE__ */ __name((a, b2, loose) => compare(a, b2, loose) > 0, "gt");
+    module2.exports = gt3;
   }
 });
 
@@ -22255,8 +22135,8 @@ var require_lt = __commonJS({
   "node_modules/semver/functions/lt.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
-    var lt = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) < 0, "lt");
-    module2.exports = lt;
+    var lt2 = /* @__PURE__ */ __name((a, b2, loose) => compare(a, b2, loose) < 0, "lt");
+    module2.exports = lt2;
   }
 });
 
@@ -22265,7 +22145,7 @@ var require_eq = __commonJS({
   "node_modules/semver/functions/eq.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
-    var eq = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) === 0, "eq");
+    var eq = /* @__PURE__ */ __name((a, b2, loose) => compare(a, b2, loose) === 0, "eq");
     module2.exports = eq;
   }
 });
@@ -22275,7 +22155,7 @@ var require_neq = __commonJS({
   "node_modules/semver/functions/neq.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
-    var neq = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) !== 0, "neq");
+    var neq = /* @__PURE__ */ __name((a, b2, loose) => compare(a, b2, loose) !== 0, "neq");
     module2.exports = neq;
   }
 });
@@ -22285,7 +22165,7 @@ var require_gte = __commonJS({
   "node_modules/semver/functions/gte.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
-    var gte = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) >= 0, "gte");
+    var gte = /* @__PURE__ */ __name((a, b2, loose) => compare(a, b2, loose) >= 0, "gte");
     module2.exports = gte;
   }
 });
@@ -22295,7 +22175,7 @@ var require_lte = __commonJS({
   "node_modules/semver/functions/lte.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
-    var lte = /* @__PURE__ */ __name((a, b, loose) => compare(a, b, loose) <= 0, "lte");
+    var lte = /* @__PURE__ */ __name((a, b2, loose) => compare(a, b2, loose) <= 0, "lte");
     module2.exports = lte;
   }
 });
@@ -22306,42 +22186,42 @@ var require_cmp = __commonJS({
     "use strict";
     var eq = require_eq();
     var neq = require_neq();
-    var gt2 = require_gt();
+    var gt3 = require_gt();
     var gte = require_gte();
-    var lt = require_lt();
+    var lt2 = require_lt();
     var lte = require_lte();
-    var cmp = /* @__PURE__ */ __name((a, op, b, loose) => {
+    var cmp = /* @__PURE__ */ __name((a, op, b2, loose) => {
       switch (op) {
         case "===":
           if (typeof a === "object") {
             a = a.version;
           }
-          if (typeof b === "object") {
-            b = b.version;
+          if (typeof b2 === "object") {
+            b2 = b2.version;
           }
-          return a === b;
+          return a === b2;
         case "!==":
           if (typeof a === "object") {
             a = a.version;
           }
-          if (typeof b === "object") {
-            b = b.version;
+          if (typeof b2 === "object") {
+            b2 = b2.version;
           }
-          return a !== b;
+          return a !== b2;
         case "":
         case "=":
         case "==":
-          return eq(a, b, loose);
+          return eq(a, b2, loose);
         case "!=":
-          return neq(a, b, loose);
+          return neq(a, b2, loose);
         case ">":
-          return gt2(a, b, loose);
+          return gt3(a, b2, loose);
         case ">=":
-          return gte(a, b, loose);
+          return gte(a, b2, loose);
         case "<":
-          return lt(a, b, loose);
+          return lt2(a, b2, loose);
         case "<=":
-          return lte(a, b, loose);
+          return lte(a, b2, loose);
         default:
           throw new TypeError(`Invalid operator: ${op}`);
       }
@@ -22356,7 +22236,7 @@ var require_coerce = __commonJS({
     "use strict";
     var SemVer = require_semver();
     var parse = require_parse2();
-    var { safeRe: re, t: t2 } = require_re();
+    var { safeRe: re2, t: t2 } = require_re();
     var coerce = /* @__PURE__ */ __name((version, options) => {
       if (version instanceof SemVer) {
         return version;
@@ -22370,9 +22250,9 @@ var require_coerce = __commonJS({
       options = options || {};
       let match = null;
       if (!options.rtl) {
-        match = version.match(options.includePrerelease ? re[t2.COERCEFULL] : re[t2.COERCE]);
+        match = version.match(options.includePrerelease ? re2[t2.COERCEFULL] : re2[t2.COERCE]);
       } else {
-        const coerceRtlRegex = options.includePrerelease ? re[t2.COERCERTLFULL] : re[t2.COERCERTL];
+        const coerceRtlRegex = options.includePrerelease ? re2[t2.COERCERTLFULL] : re2[t2.COERCERTL];
         let next;
         while ((next = coerceRtlRegex.exec(version)) && (!match || match.index + match[0].length !== version.length)) {
           if (!match || next.index + next[0].length !== match.index + match[0].length) {
@@ -22511,10 +22391,10 @@ var require_range = __commonJS({
           throw new TypeError(`Invalid SemVer Range: ${this.raw}`);
         }
         if (this.set.length > 1) {
-          const first2 = this.set[0];
+          const first = this.set[0];
           this.set = this.set.filter((c3) => !isNullSet(c3[0]));
           if (this.set.length === 0) {
-            this.set = [first2];
+            this.set = [first];
           } else if (this.set.length > 1) {
             for (const c3 of this.set) {
               if (c3.length === 1 && isAny(c3[0])) {
@@ -22529,11 +22409,11 @@ var require_range = __commonJS({
       get range() {
         if (this.formatted === void 0) {
           this.formatted = "";
-          for (let i2 = 0; i2 < this.set.length; i2++) {
-            if (i2 > 0) {
+          for (let i = 0; i < this.set.length; i++) {
+            if (i > 0) {
               this.formatted += "||";
             }
-            const comps = this.set[i2];
+            const comps = this.set[i];
             for (let k = 0; k < comps.length; k++) {
               if (k > 0) {
                 this.formatted += " ";
@@ -22559,24 +22439,24 @@ var require_range = __commonJS({
           return cached;
         }
         const loose = this.options.loose;
-        const hr = loose ? re[t2.HYPHENRANGELOOSE] : re[t2.HYPHENRANGE];
-        range = range.replace(hr, hyphenReplace(this.options.includePrerelease));
-        debug3("hyphen replace", range);
-        range = range.replace(re[t2.COMPARATORTRIM], comparatorTrimReplace);
-        debug3("comparator trim", range);
-        range = range.replace(re[t2.TILDETRIM], tildeTrimReplace);
-        debug3("tilde trim", range);
-        range = range.replace(re[t2.CARETTRIM], caretTrimReplace);
-        debug3("caret trim", range);
+        const hr2 = loose ? re2[t2.HYPHENRANGELOOSE] : re2[t2.HYPHENRANGE];
+        range = range.replace(hr2, hyphenReplace(this.options.includePrerelease));
+        debug2("hyphen replace", range);
+        range = range.replace(re2[t2.COMPARATORTRIM], comparatorTrimReplace);
+        debug2("comparator trim", range);
+        range = range.replace(re2[t2.TILDETRIM], tildeTrimReplace);
+        debug2("tilde trim", range);
+        range = range.replace(re2[t2.CARETTRIM], caretTrimReplace);
+        debug2("caret trim", range);
         let rangeList = range.split(" ").map((comp) => parseComparator(comp, this.options)).join(" ").split(/\s+/).map((comp) => replaceGTE0(
         comp, this.options));
         if (loose) {
           rangeList = rangeList.filter((comp) => {
-            debug3("loose invalid filter", comp, this.options);
-            return !!comp.match(re[t2.COMPARATORLOOSE]);
+            debug2("loose invalid filter", comp, this.options);
+            return !!comp.match(re2[t2.COMPARATORLOOSE]);
           });
         }
-        debug3("range list", rangeList);
+        debug2("range list", rangeList);
         const rangeMap = /* @__PURE__ */ new Map();
         const comparators = rangeList.map((comp) => new Comparator(comp, this.options));
         for (const comp of comparators) {
@@ -22614,12 +22494,12 @@ var require_range = __commonJS({
         if (typeof version === "string") {
           try {
             version = new SemVer(version, this.options);
-          } catch (er) {
+          } catch (er2) {
             return false;
           }
         }
-        for (let i2 = 0; i2 < this.set.length; i2++) {
-          if (testSet(this.set[i2], version, this.options)) {
+        for (let i = 0; i < this.set.length; i++) {
+          if (testSet(this.set[i], version, this.options)) {
             return true;
           }
         }
@@ -22631,10 +22511,10 @@ var require_range = __commonJS({
     var cache = new LRU();
     var parseOptions = require_parse_options();
     var Comparator = require_comparator();
-    var debug3 = require_debug();
+    var debug2 = require_debug();
     var SemVer = require_semver();
     var {
-      safeRe: re,
+      safeRe: re2,
       src,
       t: t2,
       comparatorTrimReplace,
@@ -22658,43 +22538,43 @@ var require_range = __commonJS({
       return result;
     }, "isSatisfiable");
     var parseComparator = /* @__PURE__ */ __name((comp, options) => {
-      comp = comp.replace(re[t2.BUILD], "");
-      debug3("comp", comp, options);
+      comp = comp.replace(re2[t2.BUILD], "");
+      debug2("comp", comp, options);
       comp = replaceCarets(comp, options);
-      debug3("caret", comp);
+      debug2("caret", comp);
       comp = replaceTildes(comp, options);
-      debug3("tildes", comp);
+      debug2("tildes", comp);
       comp = replaceXRanges(comp, options);
-      debug3("xrange", comp);
+      debug2("xrange", comp);
       comp = replaceStars(comp, options);
-      debug3("stars", comp);
+      debug2("stars", comp);
       return comp;
     }, "parseComparator");
     var isX = /* @__PURE__ */ __name((id) => !id || id.toLowerCase() === "x" || id === "*", "isX");
-    var invalidXRangeOrder = /* @__PURE__ */ __name((M, m, p) => isX(M) && !isX(m) || isX(m) && p && !isX(p), "invalidXR\
-angeOrder");
+    var invalidXRangeOrder = /* @__PURE__ */ __name((M3, m2, p2) => isX(M3) && !isX(m2) || isX(m2) && p2 && !isX(p2), "i\
+nvalidXRangeOrder");
     var replaceTildes = /* @__PURE__ */ __name((comp, options) => {
       return comp.trim().split(/\s+/).map((c3) => replaceTilde(c3, options)).join(" ");
     }, "replaceTildes");
     var replaceTilde = /* @__PURE__ */ __name((comp, options) => {
-      const r2 = options.loose ? re[t2.TILDELOOSE] : re[t2.TILDE];
-      const z = options.includePrerelease ? "-0" : "";
-      return comp.replace(r2, (_, M, m, p, pr) => {
-        debug3("tilde", comp, _, M, m, p, pr);
+      const r2 = options.loose ? re2[t2.TILDELOOSE] : re2[t2.TILDE];
+      const z2 = options.includePrerelease ? "-0" : "";
+      return comp.replace(r2, (_3, M3, m2, p2, pr2) => {
+        debug2("tilde", comp, _3, M3, m2, p2, pr2);
         let ret;
-        if (isX(M)) {
+        if (isX(M3)) {
           ret = "";
-        } else if (isX(m)) {
-          ret = `>=${M}.0.0${z} <${+M + 1}.0.0-0`;
-        } else if (isX(p)) {
-          ret = `>=${M}.${m}.0${z} <${M}.${+m + 1}.0-0`;
-        } else if (pr) {
-          debug3("replaceTilde pr", pr);
-          ret = `>=${M}.${m}.${p}-${pr} <${M}.${+m + 1}.0-0`;
+        } else if (isX(m2)) {
+          ret = `>=${M3}.0.0${z2} <${+M3 + 1}.0.0-0`;
+        } else if (isX(p2)) {
+          ret = `>=${M3}.${m2}.0${z2} <${M3}.${+m2 + 1}.0-0`;
+        } else if (pr2) {
+          debug2("replaceTilde pr", pr2);
+          ret = `>=${M3}.${m2}.${p2}-${pr2} <${M3}.${+m2 + 1}.0-0`;
         } else {
-          ret = `>=${M}.${m}.${p} <${M}.${+m + 1}.0-0`;
+          ret = `>=${M3}.${m2}.${p2} <${M3}.${+m2 + 1}.0-0`;
         }
-        debug3("tilde return", ret);
+        debug2("tilde return", ret);
         return ret;
       });
     }, "replaceTilde");
@@ -22702,69 +22582,69 @@ angeOrder");
       return comp.trim().split(/\s+/).map((c3) => replaceCaret(c3, options)).join(" ");
     }, "replaceCarets");
     var replaceCaret = /* @__PURE__ */ __name((comp, options) => {
-      debug3("caret", comp, options);
-      const r2 = options.loose ? re[t2.CARETLOOSE] : re[t2.CARET];
-      const z = options.includePrerelease ? "-0" : "";
-      return comp.replace(r2, (_, M, m, p, pr) => {
-        debug3("caret", comp, _, M, m, p, pr);
+      debug2("caret", comp, options);
+      const r2 = options.loose ? re2[t2.CARETLOOSE] : re2[t2.CARET];
+      const z2 = options.includePrerelease ? "-0" : "";
+      return comp.replace(r2, (_3, M3, m2, p2, pr2) => {
+        debug2("caret", comp, _3, M3, m2, p2, pr2);
         let ret;
-        if (isX(M)) {
+        if (isX(M3)) {
           ret = "";
-        } else if (isX(m)) {
-          ret = `>=${M}.0.0${z} <${+M + 1}.0.0-0`;
-        } else if (isX(p)) {
-          if (M === "0") {
-            ret = `>=${M}.${m}.0${z} <${M}.${+m + 1}.0-0`;
+        } else if (isX(m2)) {
+          ret = `>=${M3}.0.0${z2} <${+M3 + 1}.0.0-0`;
+        } else if (isX(p2)) {
+          if (M3 === "0") {
+            ret = `>=${M3}.${m2}.0${z2} <${M3}.${+m2 + 1}.0-0`;
           } else {
-            ret = `>=${M}.${m}.0${z} <${+M + 1}.0.0-0`;
+            ret = `>=${M3}.${m2}.0${z2} <${+M3 + 1}.0.0-0`;
           }
-        } else if (pr) {
-          debug3("replaceCaret pr", pr);
-          if (M === "0") {
-            if (m === "0") {
-              ret = `>=${M}.${m}.${p}-${pr} <${M}.${m}.${+p + 1}-0`;
+        } else if (pr2) {
+          debug2("replaceCaret pr", pr2);
+          if (M3 === "0") {
+            if (m2 === "0") {
+              ret = `>=${M3}.${m2}.${p2}-${pr2} <${M3}.${m2}.${+p2 + 1}-0`;
             } else {
-              ret = `>=${M}.${m}.${p}-${pr} <${M}.${+m + 1}.0-0`;
+              ret = `>=${M3}.${m2}.${p2}-${pr2} <${M3}.${+m2 + 1}.0-0`;
             }
           } else {
-            ret = `>=${M}.${m}.${p}-${pr} <${+M + 1}.0.0-0`;
+            ret = `>=${M3}.${m2}.${p2}-${pr2} <${+M3 + 1}.0.0-0`;
           }
         } else {
-          debug3("no pr");
-          if (M === "0") {
-            if (m === "0") {
-              ret = `>=${M}.${m}.${p} <${M}.${m}.${+p + 1}-0`;
+          debug2("no pr");
+          if (M3 === "0") {
+            if (m2 === "0") {
+              ret = `>=${M3}.${m2}.${p2} <${M3}.${m2}.${+p2 + 1}-0`;
             } else {
-              ret = `>=${M}.${m}.${p} <${M}.${+m + 1}.0-0`;
+              ret = `>=${M3}.${m2}.${p2} <${M3}.${+m2 + 1}.0-0`;
             }
           } else {
-            ret = `>=${M}.${m}.${p} <${+M + 1}.0.0-0`;
+            ret = `>=${M3}.${m2}.${p2} <${+M3 + 1}.0.0-0`;
           }
         }
-        debug3("caret return", ret);
+        debug2("caret return", ret);
         return ret;
       });
     }, "replaceCaret");
     var replaceXRanges = /* @__PURE__ */ __name((comp, options) => {
-      debug3("replaceXRanges", comp, options);
+      debug2("replaceXRanges", comp, options);
       return comp.split(/\s+/).map((c3) => replaceXRange(c3, options)).join(" ");
     }, "replaceXRanges");
     var replaceXRange = /* @__PURE__ */ __name((comp, options) => {
       comp = comp.trim();
-      const r2 = options.loose ? re[t2.XRANGELOOSE] : re[t2.XRANGE];
-      return comp.replace(r2, (ret, gtlt, M, m, p, pr) => {
-        debug3("xRange", comp, ret, gtlt, M, m, p, pr);
-        if (invalidXRangeOrder(M, m, p)) {
+      const r2 = options.loose ? re2[t2.XRANGELOOSE] : re2[t2.XRANGE];
+      return comp.replace(r2, (ret, gtlt, M3, m2, p2, pr2) => {
+        debug2("xRange", comp, ret, gtlt, M3, m2, p2, pr2);
+        if (invalidXRangeOrder(M3, m2, p2)) {
           return comp;
         }
-        const xM = isX(M);
-        const xm = xM || isX(m);
-        const xp = xm || isX(p);
+        const xM = isX(M3);
+        const xm = xM || isX(m2);
+        const xp = xm || isX(p2);
         const anyX = xp;
         if (gtlt === "=" && anyX) {
           gtlt = "";
         }
-        pr = options.includePrerelease ? "-0" : "";
+        pr2 = options.includePrerelease ? "-0" : "";
         if (xM) {
           if (gtlt === ">" || gtlt === "<") {
             ret = "<0.0.0-0";
@@ -22773,47 +22653,47 @@ angeOrder");
           }
         } else if (gtlt && anyX) {
           if (xm) {
-            m = 0;
+            m2 = 0;
           }
-          p = 0;
+          p2 = 0;
           if (gtlt === ">") {
             gtlt = ">=";
             if (xm) {
-              M = +M + 1;
-              m = 0;
-              p = 0;
+              M3 = +M3 + 1;
+              m2 = 0;
+              p2 = 0;
             } else {
-              m = +m + 1;
-              p = 0;
+              m2 = +m2 + 1;
+              p2 = 0;
             }
           } else if (gtlt === "<=") {
             gtlt = "<";
             if (xm) {
-              M = +M + 1;
+              M3 = +M3 + 1;
             } else {
-              m = +m + 1;
+              m2 = +m2 + 1;
             }
           }
           if (gtlt === "<") {
-            pr = "-0";
+            pr2 = "-0";
           }
-          ret = `${gtlt + M}.${m}.${p}${pr}`;
+          ret = `${gtlt + M3}.${m2}.${p2}${pr2}`;
         } else if (xm) {
-          ret = `>=${M}.0.0${pr} <${+M + 1}.0.0-0`;
+          ret = `>=${M3}.0.0${pr2} <${+M3 + 1}.0.0-0`;
         } else if (xp) {
-          ret = `>=${M}.${m}.0${pr} <${M}.${+m + 1}.0-0`;
+          ret = `>=${M3}.${m2}.0${pr2} <${M3}.${+m2 + 1}.0-0`;
         }
-        debug3("xRange return", ret);
+        debug2("xRange return", ret);
         return ret;
       });
     }, "replaceXRange");
     var replaceStars = /* @__PURE__ */ __name((comp, options) => {
-      debug3("replaceStars", comp, options);
-      return comp.trim().replace(re[t2.STAR], "");
+      debug2("replaceStars", comp, options);
+      return comp.trim().replace(re2[t2.STAR], "");
     }, "replaceStars");
     var replaceGTE0 = /* @__PURE__ */ __name((comp, options) => {
-      debug3("replaceGTE0", comp, options);
-      return comp.trim().replace(re[options.includePrerelease ? t2.GTE0PRE : t2.GTE0], "");
+      debug2("replaceGTE0", comp, options);
+      return comp.trim().replace(re2[options.includePrerelease ? t2.GTE0PRE : t2.GTE0], "");
     }, "replaceGTE0");
     var hyphenReplace = /* @__PURE__ */ __name((incPr) => ($0, from, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr) => {
       if (isX(fM)) {
@@ -22843,19 +22723,19 @@ angeOrder");
       return `${from} ${to}`.trim();
     }, "hyphenReplace");
     var testSet = /* @__PURE__ */ __name((set, version, options) => {
-      for (let i2 = 0; i2 < set.length; i2++) {
-        if (!set[i2].test(version)) {
+      for (let i = 0; i < set.length; i++) {
+        if (!set[i].test(version)) {
           return false;
         }
       }
       if (version.prerelease.length && !options.includePrerelease) {
-        for (let i2 = 0; i2 < set.length; i2++) {
-          debug3(set[i2].semver);
-          if (set[i2].semver === Comparator.ANY) {
+        for (let i = 0; i < set.length; i++) {
+          debug2(set[i].semver);
+          if (set[i].semver === Comparator.ANY) {
             continue;
           }
-          if (set[i2].semver.prerelease.length > 0) {
-            const allowed = set[i2].semver;
+          if (set[i].semver.prerelease.length > 0) {
+            const allowed = set[i].semver;
             if (allowed.major === version.major && allowed.minor === version.minor && allowed.patch === version.patch) {
               return true;
             }
@@ -22890,7 +22770,7 @@ var require_comparator = __commonJS({
           }
         }
         comp = comp.trim().split(/\s+/).join(" ");
-        debug3("comparator", comp, options);
+        debug2("comparator", comp, options);
         this.options = options;
         this.loose = !!options.loose;
         this.parse(comp);
@@ -22899,36 +22779,36 @@ var require_comparator = __commonJS({
         } else {
           this.value = this.operator + this.semver.version;
         }
-        debug3("comp", this);
+        debug2("comp", this);
       }
       parse(comp) {
-        const r2 = this.options.loose ? re[t2.COMPARATORLOOSE] : re[t2.COMPARATOR];
-        const m = comp.match(r2);
-        if (!m) {
+        const r2 = this.options.loose ? re2[t2.COMPARATORLOOSE] : re2[t2.COMPARATOR];
+        const m2 = comp.match(r2);
+        if (!m2) {
           throw new TypeError(`Invalid comparator: ${comp}`);
         }
-        this.operator = m[1] !== void 0 ? m[1] : "";
+        this.operator = m2[1] !== void 0 ? m2[1] : "";
         if (this.operator === "=") {
           this.operator = "";
         }
-        if (!m[2]) {
+        if (!m2[2]) {
           this.semver = ANY;
         } else {
-          this.semver = new SemVer(m[2], this.options.loose);
+          this.semver = new SemVer(m2[2], this.options.loose);
         }
       }
       toString() {
         return this.value;
       }
       test(version) {
-        debug3("Comparator.test", version, this.options.loose);
+        debug2("Comparator.test", version, this.options.loose);
         if (this.semver === ANY || version === ANY) {
           return true;
         }
         if (typeof version === "string") {
           try {
             version = new SemVer(version, this.options);
-          } catch (er) {
+          } catch (er2) {
             return false;
           }
         }
@@ -22976,9 +22856,9 @@ var require_comparator = __commonJS({
     };
     module2.exports = Comparator;
     var parseOptions = require_parse_options();
-    var { safeRe: re, t: t2 } = require_re();
+    var { safeRe: re2, t: t2 } = require_re();
     var cmp = require_cmp();
-    var debug3 = require_debug();
+    var debug2 = require_debug();
     var SemVer = require_semver();
     var Range = require_range();
   }
@@ -22992,7 +22872,7 @@ var require_satisfies = __commonJS({
     var satisfies3 = /* @__PURE__ */ __name((version, range, options) => {
       try {
         range = new Range(range, options);
-      } catch (er) {
+      } catch (er2) {
         return false;
       }
       return range.test(version);
@@ -23024,13 +22904,13 @@ var require_max_satisfying = __commonJS({
       let rangeObj = null;
       try {
         rangeObj = new Range(range, options);
-      } catch (er) {
+      } catch (er2) {
         return null;
       }
-      versions.forEach((v) => {
-        if (rangeObj.test(v)) {
-          if (!max || maxSV.compare(v) === -1) {
-            max = v;
+      versions.forEach((v2) => {
+        if (rangeObj.test(v2)) {
+          if (!max || maxSV.compare(v2) === -1) {
+            max = v2;
             maxSV = new SemVer(max, options);
           }
         }
@@ -23053,13 +22933,13 @@ var require_min_satisfying = __commonJS({
       let rangeObj = null;
       try {
         rangeObj = new Range(range, options);
-      } catch (er) {
+      } catch (er2) {
         return null;
       }
-      versions.forEach((v) => {
-        if (rangeObj.test(v)) {
-          if (!min || minSV.compare(v) === 1) {
-            min = v;
+      versions.forEach((v2) => {
+        if (rangeObj.test(v2)) {
+          if (!min || minSV.compare(v2) === 1) {
+            min = v2;
             minSV = new SemVer(min, options);
           }
         }
@@ -23076,7 +22956,7 @@ var require_min_version = __commonJS({
     "use strict";
     var SemVer = require_semver();
     var Range = require_range();
-    var gt2 = require_gt();
+    var gt3 = require_gt();
     var minVersion = /* @__PURE__ */ __name((range, loose) => {
       range = new Range(range, loose);
       let minver = new SemVer("0.0.0");
@@ -23088,8 +22968,8 @@ var require_min_version = __commonJS({
         return minver;
       }
       minver = null;
-      for (let i2 = 0; i2 < range.set.length; ++i2) {
-        const comparators = range.set[i2];
+      for (let i = 0; i < range.set.length; ++i) {
+        const comparators = range.set[i];
         let setMin = null;
         comparators.forEach((comparator) => {
           const compver = new SemVer(comparator.semver.version);
@@ -23104,7 +22984,7 @@ var require_min_version = __commonJS({
             /* fallthrough */
             case "":
             case ">=":
-              if (!setMin || gt2(compver, setMin)) {
+              if (!setMin || gt3(compver, setMin)) {
                 setMin = compver;
               }
               break;
@@ -23116,7 +22996,7 @@ var require_min_version = __commonJS({
               throw new Error(`Unexpected operation: ${comparator.operator}`);
           }
         });
-        if (setMin && (!minver || gt2(minver, setMin))) {
+        if (setMin && (!minver || gt3(minver, setMin))) {
           minver = setMin;
         }
       }
@@ -23137,7 +23017,7 @@ var require_valid2 = __commonJS({
     var validRange = /* @__PURE__ */ __name((range, options) => {
       try {
         return new Range(range, options).range || "*";
-      } catch (er) {
+      } catch (er2) {
         return null;
       }
     }, "validRange");
@@ -23154,8 +23034,8 @@ var require_outside = __commonJS({
     var { ANY } = Comparator;
     var Range = require_range();
     var satisfies3 = require_satisfies();
-    var gt2 = require_gt();
-    var lt = require_lt();
+    var gt3 = require_gt();
+    var lt2 = require_lt();
     var lte = require_lte();
     var gte = require_gte();
     var outside = /* @__PURE__ */ __name((version, range, hilo, options) => {
@@ -23164,16 +23044,16 @@ var require_outside = __commonJS({
       let gtfn, ltefn, ltfn, comp, ecomp;
       switch (hilo) {
         case ">":
-          gtfn = gt2;
+          gtfn = gt3;
           ltefn = lte;
-          ltfn = lt;
+          ltfn = lt2;
           comp = ">";
           ecomp = ">=";
           break;
         case "<":
-          gtfn = lt;
+          gtfn = lt2;
           ltefn = gte;
-          ltfn = gt2;
+          ltfn = gt3;
           comp = "<";
           ecomp = "<=";
           break;
@@ -23183,8 +23063,8 @@ var require_outside = __commonJS({
       if (satisfies3(version, range, options)) {
         return false;
       }
-      for (let i2 = 0; i2 < range.set.length; ++i2) {
-        const comparators = range.set[i2];
+      for (let i = 0; i < range.set.length; ++i) {
+        const comparators = range.set[i];
         let high = null;
         let low = null;
         comparators.forEach((comparator) => {
@@ -23256,36 +23136,36 @@ var require_simplify = __commonJS({
     var compare = require_compare();
     module2.exports = (versions, range, options) => {
       const set = [];
-      let first2 = null;
+      let first = null;
       let prev = null;
-      const v = versions.sort((a, b) => compare(a, b, options));
-      for (const version of v) {
+      const v2 = versions.sort((a, b2) => compare(a, b2, options));
+      for (const version of v2) {
         const included = satisfies3(version, range, options);
         if (included) {
           prev = version;
-          if (!first2) {
-            first2 = version;
+          if (!first) {
+            first = version;
           }
         } else {
           if (prev) {
-            set.push([first2, prev]);
+            set.push([first, prev]);
           }
           prev = null;
-          first2 = null;
+          first = null;
         }
       }
-      if (first2) {
-        set.push([first2, null]);
+      if (first) {
+        set.push([first, null]);
       }
       const ranges = [];
       for (const [min, max] of set) {
         if (min === max) {
           ranges.push(min);
-        } else if (!max && min === v[0]) {
+        } else if (!max && min === v2[0]) {
           ranges.push("*");
         } else if (!max) {
           ranges.push(`>=${min}`);
-        } else if (min === v[0]) {
+        } else if (min === v2[0]) {
           ranges.push(`<=${max}`);
         } else {
           ranges.push(`${min} - ${max}`);
@@ -23351,12 +23231,12 @@ var require_subset = __commonJS({
         }
       }
       const eqSet = /* @__PURE__ */ new Set();
-      let gt2, lt;
+      let gt3, lt2;
       for (const c3 of sub) {
         if (c3.operator === ">" || c3.operator === ">=") {
-          gt2 = higherGT(gt2, c3, options);
+          gt3 = higherGT(gt3, c3, options);
         } else if (c3.operator === "<" || c3.operator === "<=") {
-          lt = lowerLT(lt, c3, options);
+          lt2 = lowerLT(lt2, c3, options);
         } else {
           eqSet.add(c3.semver);
         }
@@ -23365,19 +23245,19 @@ var require_subset = __commonJS({
         return null;
       }
       let gtltComp;
-      if (gt2 && lt) {
-        gtltComp = compare(gt2.semver, lt.semver, options);
+      if (gt3 && lt2) {
+        gtltComp = compare(gt3.semver, lt2.semver, options);
         if (gtltComp > 0) {
           return null;
-        } else if (gtltComp === 0 && (gt2.operator !== ">=" || lt.operator !== "<=")) {
+        } else if (gtltComp === 0 && (gt3.operator !== ">=" || lt2.operator !== "<=")) {
           return null;
         }
       }
       for (const eq of eqSet) {
-        if (gt2 && !satisfies3(eq, String(gt2), options)) {
+        if (gt3 && !satisfies3(eq, String(gt3), options)) {
           return null;
         }
-        if (lt && !satisfies3(eq, String(lt), options)) {
+        if (lt2 && !satisfies3(eq, String(lt2), options)) {
           return null;
         }
         for (const c3 of dom) {
@@ -23389,15 +23269,16 @@ var require_subset = __commonJS({
       }
       let higher, lower;
       let hasDomLT, hasDomGT;
-      let needDomLTPre = lt && !options.includePrerelease && lt.semver.prerelease.length ? lt.semver : false;
-      let needDomGTPre = gt2 && !options.includePrerelease && gt2.semver.prerelease.length ? gt2.semver : false;
-      if (needDomLTPre && needDomLTPre.prerelease.length === 1 && lt.operator === "<" && needDomLTPre.prerelease[0] === 0) {
+      let needDomLTPre = lt2 && !options.includePrerelease && lt2.semver.prerelease.length ? lt2.semver : false;
+      let needDomGTPre = gt3 && !options.includePrerelease && gt3.semver.prerelease.length ? gt3.semver : false;
+      if (needDomLTPre && needDomLTPre.prerelease.length === 1 && lt2.operator === "<" && needDomLTPre.prerelease[0] ===
+      0) {
         needDomLTPre = false;
       }
       for (const c3 of dom) {
         hasDomGT = hasDomGT || c3.operator === ">" || c3.operator === ">=";
         hasDomLT = hasDomLT || c3.operator === "<" || c3.operator === "<=";
-        if (gt2) {
+        if (gt3) {
           if (needDomGTPre) {
             if (c3.semver.prerelease && c3.semver.prerelease.length && c3.semver.major === needDomGTPre.major && c3.semver.
             minor === needDomGTPre.minor && c3.semver.patch === needDomGTPre.patch) {
@@ -23405,15 +23286,15 @@ var require_subset = __commonJS({
             }
           }
           if (c3.operator === ">" || c3.operator === ">=") {
-            higher = higherGT(gt2, c3, options);
-            if (higher === c3 && higher !== gt2) {
+            higher = higherGT(gt3, c3, options);
+            if (higher === c3 && higher !== gt3) {
               return false;
             }
-          } else if (gt2.operator === ">=" && !c3.test(gt2.semver)) {
+          } else if (gt3.operator === ">=" && !c3.test(gt3.semver)) {
             return false;
           }
         }
-        if (lt) {
+        if (lt2) {
           if (needDomLTPre) {
             if (c3.semver.prerelease && c3.semver.prerelease.length && c3.semver.major === needDomLTPre.major && c3.semver.
             minor === needDomLTPre.minor && c3.semver.patch === needDomLTPre.patch) {
@@ -23421,22 +23302,22 @@ var require_subset = __commonJS({
             }
           }
           if (c3.operator === "<" || c3.operator === "<=") {
-            lower = lowerLT(lt, c3, options);
-            if (lower === c3 && lower !== lt) {
+            lower = lowerLT(lt2, c3, options);
+            if (lower === c3 && lower !== lt2) {
               return false;
             }
-          } else if (lt.operator === "<=" && !c3.test(lt.semver)) {
+          } else if (lt2.operator === "<=" && !c3.test(lt2.semver)) {
             return false;
           }
         }
-        if (!c3.operator && (lt || gt2) && gtltComp !== 0) {
+        if (!c3.operator && (lt2 || gt3) && gtltComp !== 0) {
           return false;
         }
       }
-      if (gt2 && hasDomLT && !lt && gtltComp !== 0) {
+      if (gt3 && hasDomLT && !lt2 && gtltComp !== 0) {
         return false;
       }
-      if (lt && hasDomGT && !gt2 && gtltComp !== 0) {
+      if (lt2 && hasDomGT && !gt3 && gtltComp !== 0) {
         return false;
       }
       if (needDomGTPre || needDomLTPre) {
@@ -23444,19 +23325,19 @@ var require_subset = __commonJS({
       }
       return true;
     }, "simpleSubset");
-    var higherGT = /* @__PURE__ */ __name((a, b, options) => {
+    var higherGT = /* @__PURE__ */ __name((a, b2, options) => {
       if (!a) {
-        return b;
+        return b2;
       }
-      const comp = compare(a.semver, b.semver, options);
-      return comp > 0 ? a : comp < 0 ? b : b.operator === ">" && a.operator === ">=" ? b : a;
+      const comp = compare(a.semver, b2.semver, options);
+      return comp > 0 ? a : comp < 0 ? b2 : b2.operator === ">" && a.operator === ">=" ? b2 : a;
     }, "higherGT");
-    var lowerLT = /* @__PURE__ */ __name((a, b, options) => {
+    var lowerLT = /* @__PURE__ */ __name((a, b2, options) => {
       if (!a) {
-        return b;
+        return b2;
       }
-      const comp = compare(a.semver, b.semver, options);
-      return comp < 0 ? a : comp > 0 ? b : b.operator === "<" && a.operator === "<=" ? b : a;
+      const comp = compare(a.semver, b2.semver, options);
+      return comp < 0 ? a : comp > 0 ? b2 : b2.operator === "<" && a.operator === "<=" ? b2 : a;
     }, "lowerLT");
     module2.exports = subset;
   }
@@ -23485,8 +23366,8 @@ var require_semver2 = __commonJS({
     var compareBuild = require_compare_build();
     var sort = require_sort();
     var rsort = require_rsort();
-    var gt2 = require_gt();
-    var lt = require_lt();
+    var gt3 = require_gt();
+    var lt2 = require_lt();
     var eq = require_eq();
     var neq = require_neq();
     var gte = require_gte();
@@ -23524,8 +23405,8 @@ var require_semver2 = __commonJS({
       compareBuild,
       sort,
       rsort,
-      gt: gt2,
-      lt,
+      gt: gt3,
+      lt: lt2,
       eq,
       neq,
       gte,
@@ -32435,8 +32316,8 @@ var require_mime_types = __commonJS({
           return;
         }
         extensions[type] = exts;
-        for (var i2 = 0; i2 < exts.length; i2++) {
-          var extension2 = exts[i2];
+        for (var i = 0; i < exts.length; i++) {
+          var extension2 = exts[i];
           if (types[extension2]) {
             var from = preference.indexOf(db[types[extension2]].source);
             var to = preference.indexOf(mime.source);
@@ -32457,13 +32338,13 @@ var require_mime_types = __commonJS({
 var require_defer = __commonJS({
   "node_modules/asynckit/lib/defer.js"(exports2, module2) {
     module2.exports = defer;
-    function defer(fn) {
+    function defer(fn2) {
       var nextTick = typeof setImmediate == "function" ? setImmediate : typeof process == "object" && typeof process.nextTick ==
       "function" ? process.nextTick : null;
       if (nextTick) {
-        nextTick(fn);
+        nextTick(fn2);
       } else {
-        setTimeout(fn, 0);
+        setTimeout(fn2, 0);
       }
     }
     __name(defer, "defer");
@@ -32560,8 +32441,8 @@ var require_state = __commonJS({
         size: isNamedList ? Object.keys(list).length : list.length
       };
       if (sortMethod) {
-        initState.keyedList.sort(isNamedList ? sortMethod : function(a, b) {
-          return sortMethod(list[a], list[b]);
+        initState.keyedList.sort(isNamedList ? sortMethod : function(a, b2) {
+          return sortMethod(list[a], list[b2]);
         });
       }
       return initState;
@@ -32642,12 +32523,12 @@ var require_serialOrdered = __commonJS({
       return terminator.bind(state, callback);
     }
     __name(serialOrdered, "serialOrdered");
-    function ascending(a, b) {
-      return a < b ? -1 : a > b ? 1 : 0;
+    function ascending(a, b2) {
+      return a < b2 ? -1 : a > b2 ? 1 : 0;
     }
     __name(ascending, "ascending");
-    function descending(a, b) {
-      return -1 * ascending(a, b);
+    function descending(a, b2) {
+      return -1 * ascending(a, b2);
     }
     __name(descending, "descending");
   }
@@ -32877,7 +32758,7 @@ var require_shams = __commonJS({
       }
       var symVal = 42;
       obj[sym] = symVal;
-      for (var _ in obj) {
+      for (var _3 in obj) {
         return false;
       }
       if (typeof Object.keys === "function" && Object.keys(obj).length !== 0) {
@@ -32956,28 +32837,28 @@ var require_implementation = __commonJS({
     var toStr = Object.prototype.toString;
     var max = Math.max;
     var funcType = "[object Function]";
-    var concatty = /* @__PURE__ */ __name(function concatty2(a, b) {
+    var concatty = /* @__PURE__ */ __name(function concatty2(a, b2) {
       var arr = [];
-      for (var i2 = 0; i2 < a.length; i2 += 1) {
-        arr[i2] = a[i2];
+      for (var i = 0; i < a.length; i += 1) {
+        arr[i] = a[i];
       }
-      for (var j = 0; j < b.length; j += 1) {
-        arr[j + a.length] = b[j];
+      for (var j2 = 0; j2 < b2.length; j2 += 1) {
+        arr[j2 + a.length] = b2[j2];
       }
       return arr;
     }, "concatty");
     var slicy = /* @__PURE__ */ __name(function slicy2(arrLike, offset) {
       var arr = [];
-      for (var i2 = offset || 0, j = 0; i2 < arrLike.length; i2 += 1, j += 1) {
-        arr[j] = arrLike[i2];
+      for (var i = offset || 0, j2 = 0; i < arrLike.length; i += 1, j2 += 1) {
+        arr[j2] = arrLike[i];
       }
       return arr;
     }, "slicy");
     var joiny = /* @__PURE__ */ __name(function(arr, joiner) {
       var str = "";
-      for (var i2 = 0; i2 < arr.length; i2 += 1) {
-        str += arr[i2];
-        if (i2 + 1 < arr.length) {
+      for (var i = 0; i < arr.length; i += 1) {
+        str += arr[i];
+        if (i + 1 < arr.length) {
           str += joiner;
         }
       }
@@ -33008,8 +32889,8 @@ var require_implementation = __commonJS({
       }, "binder");
       var boundLength = max(0, target.length - args.length);
       var boundArgs = [];
-      for (var i2 = 0; i2 < boundLength; i2++) {
-        boundArgs[i2] = "$" + i2;
+      for (var i = 0; i < boundLength; i++) {
+        boundArgs[i] = "$" + i;
       }
       bound = Function("binder", "return function (" + joiny(boundArgs, ",") + "){ return binder.apply(this,arguments); \
 }")(binder);
@@ -33126,15 +33007,15 @@ var require_get_proto = __commonJS({
     var reflectGetProto = require_Reflect_getPrototypeOf();
     var originalGetProto = require_Object_getPrototypeOf();
     var getDunderProto = require_get();
-    module2.exports = reflectGetProto ? /* @__PURE__ */ __name(function getProto(O) {
-      return reflectGetProto(O);
-    }, "getProto") : originalGetProto ? /* @__PURE__ */ __name(function getProto(O) {
-      if (!O || typeof O !== "object" && typeof O !== "function") {
+    module2.exports = reflectGetProto ? /* @__PURE__ */ __name(function getProto(O2) {
+      return reflectGetProto(O2);
+    }, "getProto") : originalGetProto ? /* @__PURE__ */ __name(function getProto(O2) {
+      if (!O2 || typeof O2 !== "object" && typeof O2 !== "function") {
         throw new TypeError("getProto: not an object");
       }
-      return originalGetProto(O);
-    }, "getProto") : getDunderProto ? /* @__PURE__ */ __name(function getProto(O) {
-      return getDunderProto(O);
+      return originalGetProto(O2);
+    }, "getProto") : getDunderProto ? /* @__PURE__ */ __name(function getProto(O2) {
+      return getDunderProto(O2);
     }, "getProto") : null;
   }
 });
@@ -33306,9 +33187,9 @@ var require_get_intrinsic = __commonJS({
       } else if (name === "%AsyncGeneratorFunction%") {
         value = getEvalledConstructor("async function* () {}");
       } else if (name === "%AsyncGenerator%") {
-        var fn = doEval2("%AsyncGeneratorFunction%");
-        if (fn) {
-          value = fn.prototype;
+        var fn2 = doEval2("%AsyncGeneratorFunction%");
+        if (fn2) {
+          value = fn2.prototype;
         }
       } else if (name === "%AsyncIteratorPrototype%") {
         var gen = doEval2("%AsyncGenerator%");
@@ -33383,11 +33264,11 @@ var require_get_intrinsic = __commonJS({
     var rePropName = /[^%.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|%$))/g;
     var reEscapeChar = /\\(\\)?/g;
     var stringToPath = /* @__PURE__ */ __name(function stringToPath2(string) {
-      var first2 = $strSlice(string, 0, 1);
-      var last2 = $strSlice(string, -1);
-      if (first2 === "%" && last2 !== "%") {
+      var first = $strSlice(string, 0, 1);
+      var last = $strSlice(string, -1);
+      if (first === "%" && last !== "%") {
         throw new $SyntaxError("invalid intrinsic syntax, expected closing `%`");
-      } else if (last2 === "%" && first2 !== "%") {
+      } else if (last === "%" && first !== "%") {
         throw new $SyntaxError("invalid intrinsic syntax, expected opening `%`");
       }
       var result = [];
@@ -33440,12 +33321,12 @@ var require_get_intrinsic = __commonJS({
         intrinsicBaseName = alias[0];
         $spliceApply(parts, $concat([0, 1], alias));
       }
-      for (var i2 = 1, isOwn = true; i2 < parts.length; i2 += 1) {
-        var part = parts[i2];
-        var first2 = $strSlice(part, 0, 1);
-        var last2 = $strSlice(part, -1);
-        if ((first2 === '"' || first2 === "'" || first2 === "`" || (last2 === '"' || last2 === "'" || last2 === "`")) &&
-        first2 !== last2) {
+      for (var i = 1, isOwn = true; i < parts.length; i += 1) {
+        var part = parts[i];
+        var first = $strSlice(part, 0, 1);
+        var last = $strSlice(part, -1);
+        if ((first === '"' || first === "'" || first === "`" || (last === '"' || last === "'" || last === "`")) && first !==
+        last) {
           throw new $SyntaxError("property names with quotes must have matching quotes");
         }
         if (part === "constructor" || !isOwn) {
@@ -33462,7 +33343,7 @@ var require_get_intrinsic = __commonJS({
             }
             return void undefined2;
           }
-          if ($gOPD && i2 + 1 >= parts.length) {
+          if ($gOPD && i + 1 >= parts.length) {
             var desc = $gOPD(value, part);
             isOwn = !!desc;
             if (isOwn && "get" in desc && !("originalValue" in desc.get)) {
@@ -33551,7 +33432,7 @@ var require_form_data = __commonJS({
     var http = require("http");
     var https = require("https");
     var parseUrl = require("url").parse;
-    var fs2 = require("fs");
+    var fs3 = require("fs");
     var Stream = require("stream").Stream;
     var crypto = require("crypto");
     var mime = require_mime_types();
@@ -33585,7 +33466,7 @@ var require_form_data = __commonJS({
       if (typeof options === "string") {
         options = { filename: options };
       }
-      var append2 = CombinedStream.prototype.append.bind(this);
+      var append = CombinedStream.prototype.append.bind(this);
       if (typeof value === "number" || value == null) {
         value = String(value);
       }
@@ -33595,9 +33476,9 @@ var require_form_data = __commonJS({
       }
       var header = this._multiPartHeader(field, value, options);
       var footer = this._multiPartFooter();
-      append2(header);
-      append2(value);
-      append2(footer);
+      append(header);
+      append(value);
+      append(footer);
       this._trackLength(header, value, options);
     };
     FormData.prototype._trackLength = function(header, value, options) {
@@ -33623,7 +33504,7 @@ var require_form_data = __commonJS({
         if (value.end != void 0 && value.end != Infinity && value.start != void 0) {
           callback(null, value.end + 1 - (value.start ? value.start : 0));
         } else {
-          fs2.stat(value.path, function(err, stat2) {
+          fs3.stat(value.path, function(err, stat2) {
             if (err) {
               callback(err);
               return;
@@ -33749,14 +33630,14 @@ var require_form_data = __commonJS({
     FormData.prototype.getBuffer = function() {
       var dataBuffer = new Buffer.alloc(0);
       var boundary = this.getBoundary();
-      for (var i2 = 0, len = this._streams.length; i2 < len; i2++) {
-        if (typeof this._streams[i2] !== "function") {
-          if (Buffer.isBuffer(this._streams[i2])) {
-            dataBuffer = Buffer.concat([dataBuffer, this._streams[i2]]);
+      for (var i = 0, len = this._streams.length; i < len; i++) {
+        if (typeof this._streams[i] !== "function") {
+          if (Buffer.isBuffer(this._streams[i])) {
+            dataBuffer = Buffer.concat([dataBuffer, this._streams[i]]);
           } else {
-            dataBuffer = Buffer.concat([dataBuffer, Buffer.from(this._streams[i2])]);
+            dataBuffer = Buffer.concat([dataBuffer, Buffer.from(this._streams[i])]);
           }
-          if (typeof this._streams[i2] !== "string" || this._streams[i2].substring(2, boundary.length + 2) !== boundary) {
+          if (typeof this._streams[i] !== "string" || this._streams[i].substring(2, boundary.length + 2) !== boundary) {
             dataBuffer = Buffer.concat([dataBuffer, Buffer.from(FormData.LINE_BREAK)]);
           }
         }
@@ -33938,7 +33819,7 @@ size") : null;
     var hasWeakRef = typeof WeakRef === "function" && WeakRef.prototype;
     var weakRefDeref = hasWeakRef ? WeakRef.prototype.deref : null;
     var booleanValueOf = Boolean.prototype.valueOf;
-    var objectToString2 = Object.prototype.toString;
+    var objectToString = Object.prototype.toString;
     var functionToString = Function.prototype.toString;
     var $match = String.prototype.match;
     var $slice = String.prototype.slice;
@@ -33958,8 +33839,8 @@ size") : null;
     "object" : "symbol") ? Symbol.toStringTag : null;
     var isEnumerable = Object.prototype.propertyIsEnumerable;
     var gPO = (typeof Reflect === "function" ? Reflect.getPrototypeOf : Object.getPrototypeOf) || ([].__proto__ === Array.
-    prototype ? function(O) {
-      return O.__proto__;
+    prototype ? function(O2) {
+      return O2.__proto__;
     } : null);
     function addNumericSeparator(num, str) {
       if (num === Infinity || num === -Infinity || num !== num || num && num > -1e3 && num < 1e3 || $test.call(/e/, str)) {
@@ -34079,8 +33960,8 @@ size") : null;
       if (isElement(obj)) {
         var s = "<" + $toLowerCase.call(String(obj.nodeName));
         var attrs = obj.attributes || [];
-        for (var i2 = 0; i2 < attrs.length; i2++) {
-          s += " " + attrs[i2].name + "=" + wrapQuotes(quote(attrs[i2].value), "double", opts);
+        for (var i = 0; i < attrs.length; i++) {
+          s += " " + attrs[i].name + "=" + wrapQuotes(quote(attrs[i].value), "double", opts);
         }
         s += ">";
         if (obj.childNodes && obj.childNodes.length) {
@@ -34093,11 +33974,11 @@ size") : null;
         if (obj.length === 0) {
           return "[]";
         }
-        var xs = arrObjKeys(obj, inspect);
-        if (indent && !singleLineValues(xs)) {
-          return "[" + indentedJoin(xs, indent) + "]";
+        var xs2 = arrObjKeys(obj, inspect);
+        if (indent && !singleLineValues(xs2)) {
+          return "[" + indentedJoin(xs2, indent) + "]";
         }
-        return "[ " + $join.call(xs, ", ") + " ]";
+        return "[ " + $join.call(xs2, ", ") + " ]";
       }
       if (isError(obj)) {
         var parts = arrObjKeys(obj, inspect);
@@ -34163,7 +34044,7 @@ size") : null;
         return "{ [object globalThis] }";
       }
       if (!isDate(obj) && !isRegExp(obj)) {
-        var ys = arrObjKeys(obj, inspect);
+        var ys2 = arrObjKeys(obj, inspect);
         var isPlainObject2 = gPO ? gPO(obj) === Object.prototype : obj instanceof Object || obj.constructor === Object;
         var protoTag = obj instanceof Object ? "" : "null prototype";
         var stringTag = !isPlainObject2 && toStringTag && Object(obj) === obj && toStringTag in obj ? $slice.call(toStr(
@@ -34172,13 +34053,13 @@ size") : null;
         name + " " : "";
         var tag = constructorTag + (stringTag || protoTag ? "[" + $join.call($concat.call([], stringTag || [], protoTag ||
         []), ": ") + "] " : "");
-        if (ys.length === 0) {
+        if (ys2.length === 0) {
           return tag + "{}";
         }
         if (indent) {
-          return tag + "{" + indentedJoin(ys, indent) + "}";
+          return tag + "{" + indentedJoin(ys2, indent) + "}";
         }
-        return tag + "{ " + $join.call(ys, ", ") + " }";
+        return tag + "{ " + $join.call(ys2, ", ") + " }";
       }
       return String(obj);
     }, "inspect_");
@@ -34262,27 +34143,27 @@ size") : null;
     }
     __name(has, "has");
     function toStr(obj) {
-      return objectToString2.call(obj);
+      return objectToString.call(obj);
     }
     __name(toStr, "toStr");
-    function nameOf(f) {
-      if (f.name) {
-        return f.name;
+    function nameOf(f3) {
+      if (f3.name) {
+        return f3.name;
       }
-      var m = $match.call(functionToString.call(f), /^function\s*([\w$]+)/);
-      if (m) {
-        return m[1];
+      var m2 = $match.call(functionToString.call(f3), /^function\s*([\w$]+)/);
+      if (m2) {
+        return m2[1];
       }
       return null;
     }
     __name(nameOf, "nameOf");
-    function indexOf(xs, x2) {
-      if (xs.indexOf) {
-        return xs.indexOf(x2);
+    function indexOf(xs2, x2) {
+      if (xs2.indexOf) {
+        return xs2.indexOf(x2);
       }
-      for (var i2 = 0, l = xs.length; i2 < l; i2++) {
-        if (xs[i2] === x2) {
-          return i2;
+      for (var i = 0, l3 = xs2.length; i < l3; i++) {
+        if (xs2[i] === x2) {
+          return i;
         }
       }
       return -1;
@@ -34342,7 +34223,7 @@ size") : null;
         setSize.call(x2);
         try {
           mapSize.call(x2);
-        } catch (m) {
+        } catch (m2) {
           return true;
         }
         return x2 instanceof Set;
@@ -34418,9 +34299,9 @@ size") : null;
       return type + " (" + size + ") {" + joinedEntries + "}";
     }
     __name(collectionOf, "collectionOf");
-    function singleLineValues(xs) {
-      for (var i2 = 0; i2 < xs.length; i2++) {
-        if (indexOf(xs[i2], "\n") >= 0) {
+    function singleLineValues(xs2) {
+      for (var i = 0; i < xs2.length; i++) {
+        if (indexOf(xs2[i], "\n") >= 0) {
           return false;
         }
       }
@@ -34442,21 +34323,21 @@ size") : null;
       };
     }
     __name(getIndent, "getIndent");
-    function indentedJoin(xs, indent) {
-      if (xs.length === 0) {
+    function indentedJoin(xs2, indent) {
+      if (xs2.length === 0) {
         return "";
       }
       var lineJoiner = "\n" + indent.prev + indent.base;
-      return lineJoiner + $join.call(xs, "," + lineJoiner) + "\n" + indent.prev;
+      return lineJoiner + $join.call(xs2, "," + lineJoiner) + "\n" + indent.prev;
     }
     __name(indentedJoin, "indentedJoin");
     function arrObjKeys(obj, inspect) {
       var isArr = isArray(obj);
-      var xs = [];
+      var xs2 = [];
       if (isArr) {
-        xs.length = obj.length;
-        for (var i2 = 0; i2 < obj.length; i2++) {
-          xs[i2] = has(obj, i2) ? inspect(obj[i2], obj) : "";
+        xs2.length = obj.length;
+        for (var i = 0; i < obj.length; i++) {
+          xs2[i] = has(obj, i) ? inspect(obj[i], obj) : "";
         }
       }
       var syms = typeof gOPS === "function" ? gOPS(obj) : [];
@@ -34477,19 +34358,19 @@ size") : null;
         if (hasShammedSymbols && symMap["$" + key] instanceof Symbol) {
           continue;
         } else if ($test.call(/[^\w$]/, key)) {
-          xs.push(inspect(key, obj) + ": " + inspect(obj[key], obj));
+          xs2.push(inspect(key, obj) + ": " + inspect(obj[key], obj));
         } else {
-          xs.push(key + ": " + inspect(obj[key], obj));
+          xs2.push(key + ": " + inspect(obj[key], obj));
         }
       }
       if (typeof gOPS === "function") {
-        for (var j = 0; j < syms.length; j++) {
-          if (isEnumerable.call(obj, syms[j])) {
-            xs.push("[" + inspect(syms[j]) + "]: " + inspect(obj[syms[j]], obj));
+        for (var j2 = 0; j2 < syms.length; j2++) {
+          if (isEnumerable.call(obj, syms[j2])) {
+            xs2.push("[" + inspect(syms[j2]) + "]: " + inspect(obj[syms[j2]], obj));
           }
         }
       }
-      return xs;
+      return xs2;
     }
     __name(arrObjKeys, "arrObjKeys");
   }
@@ -34831,8 +34712,8 @@ var require_utils2 = __commonJS({
     }, "setMaxIndex");
     var hexTable = (function() {
       var array = [];
-      for (var i2 = 0; i2 < 256; ++i2) {
-        array[array.length] = "%" + ((i2 < 16 ? "0" : "") + i2.toString(16)).toUpperCase();
+      for (var i = 0; i < 256; ++i) {
+        array[array.length] = "%" + ((i < 16 ? "0" : "") + i.toString(16)).toUpperCase();
       }
       return array;
     })();
@@ -34842,9 +34723,9 @@ var require_utils2 = __commonJS({
         var obj = item.obj[item.prop];
         if (isArray(obj)) {
           var compacted = [];
-          for (var j = 0; j < obj.length; ++j) {
-            if (typeof obj[j] !== "undefined") {
-              compacted[compacted.length] = obj[j];
+          for (var j2 = 0; j2 < obj.length; ++j2) {
+            if (typeof obj[j2] !== "undefined") {
+              compacted[compacted.length] = obj[j2];
             }
           }
           item.obj[item.prop] = compacted;
@@ -34853,9 +34734,9 @@ var require_utils2 = __commonJS({
     }, "compactQueue");
     var arrayToObject = /* @__PURE__ */ __name(function arrayToObject2(source, options) {
       var obj = options && options.plainObjects ? { __proto__: null } : {};
-      for (var i2 = 0; i2 < source.length; ++i2) {
-        if (typeof source[i2] !== "undefined") {
-          obj[i2] = source[i2];
+      for (var i = 0; i < source.length; ++i) {
+        if (typeof source[i] !== "undefined") {
+          obj[i] = source[i];
         }
       }
       return obj;
@@ -34906,9 +34787,9 @@ var require_utils2 = __commonJS({
         if (isOverflow(source)) {
           var sourceKeys = Object.keys(source);
           var result = options && options.plainObjects ? { __proto__: null, 0: target } : { 0: target };
-          for (var m = 0; m < sourceKeys.length; m++) {
-            var oldKey = parseInt(sourceKeys[m], 10);
-            result[oldKey + 1] = source[sourceKeys[m]];
+          for (var m2 = 0; m2 < sourceKeys.length; m2++) {
+            var oldKey = parseInt(sourceKeys[m2], 10);
+            result[oldKey + 1] = source[sourceKeys[m2]];
           }
           return markOverflow(result, getMaxIndex(source) + 1);
         }
@@ -34927,16 +34808,16 @@ var require_utils2 = __commonJS({
         mergeTarget = arrayToObject(target, options);
       }
       if (isArray(target) && isArray(source)) {
-        source.forEach(function(item, i2) {
-          if (has.call(target, i2)) {
-            var targetItem = target[i2];
+        source.forEach(function(item, i) {
+          if (has.call(target, i)) {
+            var targetItem = target[i];
             if (targetItem && typeof targetItem === "object" && item && typeof item === "object") {
-              target[i2] = merge2(targetItem, item, options);
+              target[i] = merge2(targetItem, item, options);
             } else {
               target[target.length] = item;
             }
           } else {
-            target[i2] = item;
+            target[i] = item;
           }
         });
         if (options && typeof options.arrayLimit === "number" && target.length > options.arrayLimit) {
@@ -35001,21 +34882,21 @@ var require_utils2 = __commonJS({
         });
       }
       var out = "";
-      for (var j = 0; j < string.length; j += limit) {
-        var segment = string.length >= limit ? string.slice(j, j + limit) : string;
-        if (j + limit < string.length) {
-          var last2 = segment.charCodeAt(segment.length - 1);
-          if (last2 >= 55296 && last2 <= 56319) {
+      for (var j2 = 0; j2 < string.length; j2 += limit) {
+        var segment = string.length >= limit ? string.slice(j2, j2 + limit) : string;
+        if (j2 + limit < string.length) {
+          var last = segment.charCodeAt(segment.length - 1);
+          if (last >= 55296 && last <= 56319) {
             segment = segment.slice(0, -1);
-            j -= 1;
+            j2 -= 1;
           }
         }
         var arr = [];
-        for (var i2 = 0; i2 < segment.length; ++i2) {
-          var c3 = segment.charCodeAt(i2);
+        for (var i = 0; i < segment.length; ++i) {
+          var c3 = segment.charCodeAt(i);
           if (c3 === 45 || c3 === 46 || c3 === 95 || c3 === 126 || c3 >= 48 && c3 <= 57 || c3 >= 65 && c3 <= 90 || c3 >=
           97 && c3 <= 122 || format === formats.RFC1738 && (c3 === 40 || c3 === 41)) {
-            arr[arr.length] = segment.charAt(i2);
+            arr[arr.length] = segment.charAt(i);
             continue;
           }
           if (c3 < 128) {
@@ -35030,8 +34911,8 @@ var require_utils2 = __commonJS({
             arr[arr.length] = hexTable[224 | c3 >> 12] + hexTable[128 | c3 >> 6 & 63] + hexTable[128 | c3 & 63];
             continue;
           }
-          i2 += 1;
-          c3 = 65536 + ((c3 & 1023) << 10 | segment.charCodeAt(i2) & 1023);
+          i += 1;
+          c3 = 65536 + ((c3 & 1023) << 10 | segment.charCodeAt(i) & 1023);
           arr[arr.length] = hexTable[240 | c3 >> 18] + hexTable[128 | c3 >> 12 & 63] + hexTable[128 | c3 >> 6 & 63] + hexTable[128 |
           c3 & 63];
         }
@@ -35042,12 +34923,12 @@ var require_utils2 = __commonJS({
     var compact = /* @__PURE__ */ __name(function compact2(value) {
       var queue = [{ obj: { o: value }, prop: "o" }];
       var refs = getSideChannel();
-      for (var i2 = 0; i2 < queue.length; ++i2) {
-        var item = queue[i2];
+      for (var i = 0; i < queue.length; ++i) {
+        var item = queue[i];
         var obj = item.obj[item.prop];
         var keys = Object.keys(obj);
-        for (var j = 0; j < keys.length; ++j) {
-          var key = keys[j];
+        for (var j2 = 0; j2 < keys.length; ++j2) {
+          var key = keys[j2];
           var val = obj[key];
           if (typeof val === "object" && val !== null && !refs.has(val)) {
             queue[queue.length] = { obj, prop: key };
@@ -35067,22 +34948,22 @@ var require_utils2 = __commonJS({
       }
       return !!(obj.constructor && typeof obj.constructor.isBuffer === "function" && obj.constructor.isBuffer(obj));
     }, "isBuffer");
-    var combine = /* @__PURE__ */ __name(function combine2(a, b, arrayLimit, plainObjects, throwOnLimitExceeded) {
+    var combine = /* @__PURE__ */ __name(function combine2(a, b2, arrayLimit, plainObjects, throwOnLimitExceeded) {
       if (isOverflow(a)) {
         if (throwOnLimitExceeded) {
           throw new RangeError("Array limit exceeded. Only " + arrayLimit + " element" + (arrayLimit === 1 ? "" : "s") +
           " allowed in an array.");
         }
-        var bValues = isArray(b) ? b : [b];
+        var bValues = isArray(b2) ? b2 : [b2];
         var newIndex = getMaxIndex(a);
-        for (var i2 = 0; i2 < bValues.length; ++i2) {
+        for (var i = 0; i < bValues.length; ++i) {
           newIndex += 1;
-          a[newIndex] = bValues[i2];
+          a[newIndex] = bValues[i];
         }
         setMaxIndex(a, newIndex);
         return a;
       }
-      var result = [].concat(a, b);
+      var result = [].concat(a, b2);
       if (result.length > arrayLimit) {
         if (throwOnLimitExceeded) {
           throw new RangeError("Array limit exceeded. Only " + arrayLimit + " element" + (arrayLimit === 1 ? "" : "s") +
@@ -35092,15 +34973,15 @@ var require_utils2 = __commonJS({
       }
       return result;
     }, "combine");
-    var maybeMap = /* @__PURE__ */ __name(function maybeMap2(val, fn) {
+    var maybeMap = /* @__PURE__ */ __name(function maybeMap2(val, fn2) {
       if (isArray(val)) {
         var mapped = [];
-        for (var i2 = 0; i2 < val.length; i2 += 1) {
-          mapped[mapped.length] = fn(val[i2]);
+        for (var i = 0; i < val.length; i += 1) {
+          mapped[mapped.length] = fn2(val[i]);
         }
         return mapped;
       }
-      return fn(val);
+      return fn2(val);
     }, "maybeMap");
     module2.exports = {
       arrayToObject,
@@ -35171,8 +35052,8 @@ var require_stringify = __commonJS({
       skipNulls: false,
       strictNullHandling: false
     };
-    var isNonNullishPrimitive = /* @__PURE__ */ __name(function isNonNullishPrimitive2(v) {
-      return typeof v === "string" || typeof v === "number" || typeof v === "boolean" || typeof v === "symbol" || typeof v ===
+    var isNonNullishPrimitive = /* @__PURE__ */ __name(function isNonNullishPrimitive2(v2) {
+      return typeof v2 === "string" || typeof v2 === "number" || typeof v2 === "boolean" || typeof v2 === "symbol" || typeof v2 ===
       "bigint";
     }, "isNonNullishPrimitive");
     var sentinel = {};
@@ -35229,8 +35110,8 @@ var require_stringify = __commonJS({
       var objKeys;
       if (generateArrayPrefix === "comma" && isArray(obj)) {
         if (encodeValuesOnly && encoder) {
-          obj = utils.maybeMap(obj, function(v) {
-            return v == null ? v : encoder(v);
+          obj = utils.maybeMap(obj, function(v2) {
+            return v2 == null ? v2 : encoder(v2);
           });
         }
         objKeys = [{ value: obj.length > 0 ? obj.join(",") || null : void 0 }];
@@ -35245,8 +35126,8 @@ var require_stringify = __commonJS({
       if (allowEmptyArrays && isArray(obj) && obj.length === 0 && Object.keys(obj).length === 0) {
         return adjustedPrefix + "[]";
       }
-      for (var j = 0; j < objKeys.length; ++j) {
-        var key = objKeys[j];
+      for (var j2 = 0; j2 < objKeys.length; ++j2) {
+        var key = objKeys[j2];
         var value = typeof key === "object" && key && typeof key.value !== "undefined" ? key.value : obj[key];
         if (skipNulls && value === null) {
           continue;
@@ -35372,8 +35253,8 @@ var require_stringify = __commonJS({
         objKeys.sort(options.sort);
       }
       var sideChannel = getSideChannel();
-      for (var i2 = 0; i2 < objKeys.length; ++i2) {
-        var key = objKeys[i2];
+      for (var i = 0; i < objKeys.length; ++i) {
+        var key = objKeys[i];
         if (typeof key === "undefined" || key === null) {
           continue;
         }
@@ -35493,26 +35374,26 @@ var require_parse3 = __commonJS({
 owed.");
       }
       var skipIndex = -1;
-      var i2;
+      var i;
       var charset = options.charset;
       if (options.charsetSentinel) {
-        for (i2 = 0; i2 < parts.length; ++i2) {
-          if (parts[i2].indexOf("utf8=") === 0) {
-            if (parts[i2] === charsetSentinel) {
+        for (i = 0; i < parts.length; ++i) {
+          if (parts[i].indexOf("utf8=") === 0) {
+            if (parts[i] === charsetSentinel) {
               charset = "utf-8";
-            } else if (parts[i2] === isoSentinel) {
+            } else if (parts[i] === isoSentinel) {
               charset = "iso-8859-1";
             }
-            skipIndex = i2;
-            i2 = parts.length;
+            skipIndex = i;
+            i = parts.length;
           }
         }
       }
-      for (i2 = 0; i2 < parts.length; ++i2) {
-        if (i2 === skipIndex) {
+      for (i = 0; i < parts.length; ++i) {
+        if (i === skipIndex) {
           continue;
         }
-        var part = parts[i2];
+        var part = parts[i];
         var bracketEqualsPos = part.indexOf("]=");
         var pos = bracketEqualsPos === -1 ? part.indexOf("=") : bracketEqualsPos + 1;
         var key;
@@ -35568,9 +35449,9 @@ owed.");
         currentArrayLength = Array.isArray(val) && val[parentKey] ? val[parentKey].length : 0;
       }
       var leaf = valuesParsed ? val : parseArrayValue(val, options, currentArrayLength);
-      for (var i2 = chain.length - 1; i2 >= 0; --i2) {
+      for (var i = chain.length - 1; i >= 0; --i) {
         var obj;
-        var root = chain[i2];
+        var root = chain[i];
         if (root === "[]" && options.parseArrays) {
           if (utils.isOverflow(leaf)) {
             obj = leaf;
@@ -35621,8 +35502,8 @@ owed.");
         return [key];
       }
       var segments = [];
-      var first2 = key.indexOf("[");
-      var parent = first2 >= 0 ? key.slice(0, first2) : key;
+      var first = key.indexOf("[");
+      var parent = first >= 0 ? key.slice(0, first) : key;
       if (parent) {
         if (!options.plainObjects && has.call(Object.prototype, parent)) {
           if (!options.allowPrototypes) {
@@ -35632,23 +35513,23 @@ owed.");
         segments[segments.length] = parent;
       }
       var n = key.length;
-      var open2 = first2;
+      var open2 = first;
       var collected = 0;
       while (open2 >= 0 && collected < options.depth) {
         var level = 1;
-        var i2 = open2 + 1;
+        var i = open2 + 1;
         var close = -1;
-        while (i2 < n && close < 0) {
-          var cu = key.charCodeAt(i2);
+        while (i < n && close < 0) {
+          var cu = key.charCodeAt(i);
           if (cu === 91) {
             level += 1;
           } else if (cu === 93) {
             level -= 1;
             if (level === 0) {
-              close = i2;
+              close = i;
             }
           }
-          i2 += 1;
+          i += 1;
         }
         if (close < 0) {
           segments[segments.length] = "[" + key.slice(open2) + "]";
@@ -35742,8 +35623,8 @@ owed.");
       var tempObj = typeof str === "string" ? parseValues(str, options) : str;
       var obj = options.plainObjects ? { __proto__: null } : {};
       var keys = Object.keys(tempObj);
-      for (var i2 = 0; i2 < keys.length; ++i2) {
-        var key = keys[i2];
+      for (var i = 0; i < keys.length; ++i) {
+        var key = keys[i];
         var newObj = parseKeys(key, tempObj[key], options, typeof str === "string");
         obj = utils.merge(obj, newObj, options);
       }
@@ -35777,8 +35658,8 @@ var require_Mime = __commonJS({
     function Mime() {
       this._types = /* @__PURE__ */ Object.create(null);
       this._extensions = /* @__PURE__ */ Object.create(null);
-      for (let i2 = 0; i2 < arguments.length; i2++) {
-        this.define(arguments[i2]);
+      for (let i = 0; i < arguments.length; i++) {
+        this.define(arguments[i]);
       }
       this.define = this.define.bind(this);
       this.getType = this.getType.bind(this);
@@ -35791,8 +35672,8 @@ var require_Mime = __commonJS({
           return t2.toLowerCase();
         });
         type = type.toLowerCase();
-        for (let i2 = 0; i2 < extensions.length; i2++) {
-          const ext = extensions[i2];
+        for (let i = 0; i < extensions.length; i++) {
+          const ext = extensions[i];
           if (ext[0] === "*") {
             continue;
           }
@@ -35812,10 +35693,10 @@ Pass `force=true` to allow this, otherwise remove "' + ext + '" from the list of
     };
     Mime.prototype.getType = function(path) {
       path = String(path);
-      let last2 = path.replace(/^.*[/\\]/, "").toLowerCase();
-      let ext = last2.replace(/^.*\./, "").toLowerCase();
-      let hasPath = last2.length < path.length;
-      let hasDot = ext.length < last2.length - 1;
+      let last = path.replace(/^.*[/\\]/, "").toLowerCase();
+      let ext = last.replace(/^.*\./, "").toLowerCase();
+      let hasPath = last.length < path.length;
+      let hasDot = ext.length < last.length - 1;
       return (hasDot || !hasPath) && this._types[ext] || null;
     };
     Mime.prototype.getExtension = function(type) {
@@ -36175,52 +36056,52 @@ var require_u64 = __commonJS({
     exports2.split = split;
     var U32_MASK64 = /* @__PURE__ */ BigInt(2 ** 32 - 1);
     var _32n = /* @__PURE__ */ BigInt(32);
-    function fromBig(n, le = false) {
-      if (le)
+    function fromBig(n, le2 = false) {
+      if (le2)
         return { h: Number(n & U32_MASK64), l: Number(n >> _32n & U32_MASK64) };
       return { h: Number(n >> _32n & U32_MASK64) | 0, l: Number(n & U32_MASK64) | 0 };
     }
     __name(fromBig, "fromBig");
-    function split(lst, le = false) {
+    function split(lst, le2 = false) {
       const len = lst.length;
       let Ah = new Uint32Array(len);
       let Al = new Uint32Array(len);
-      for (let i2 = 0; i2 < len; i2++) {
-        const { h: h2, l } = fromBig(lst[i2], le);
-        [Ah[i2], Al[i2]] = [h2, l];
+      for (let i = 0; i < len; i++) {
+        const { h: h3, l: l3 } = fromBig(lst[i], le2);
+        [Ah[i], Al[i]] = [h3, l3];
       }
       return [Ah, Al];
     }
     __name(split, "split");
-    var toBig = /* @__PURE__ */ __name((h2, l) => BigInt(h2 >>> 0) << _32n | BigInt(l >>> 0), "toBig");
+    var toBig = /* @__PURE__ */ __name((h3, l3) => BigInt(h3 >>> 0) << _32n | BigInt(l3 >>> 0), "toBig");
     exports2.toBig = toBig;
-    var shrSH = /* @__PURE__ */ __name((h2, _l, s) => h2 >>> s, "shrSH");
+    var shrSH = /* @__PURE__ */ __name((h3, _l, s) => h3 >>> s, "shrSH");
     exports2.shrSH = shrSH;
-    var shrSL = /* @__PURE__ */ __name((h2, l, s) => h2 << 32 - s | l >>> s, "shrSL");
+    var shrSL = /* @__PURE__ */ __name((h3, l3, s) => h3 << 32 - s | l3 >>> s, "shrSL");
     exports2.shrSL = shrSL;
-    var rotrSH = /* @__PURE__ */ __name((h2, l, s) => h2 >>> s | l << 32 - s, "rotrSH");
+    var rotrSH = /* @__PURE__ */ __name((h3, l3, s) => h3 >>> s | l3 << 32 - s, "rotrSH");
     exports2.rotrSH = rotrSH;
-    var rotrSL = /* @__PURE__ */ __name((h2, l, s) => h2 << 32 - s | l >>> s, "rotrSL");
+    var rotrSL = /* @__PURE__ */ __name((h3, l3, s) => h3 << 32 - s | l3 >>> s, "rotrSL");
     exports2.rotrSL = rotrSL;
-    var rotrBH = /* @__PURE__ */ __name((h2, l, s) => h2 << 64 - s | l >>> s - 32, "rotrBH");
+    var rotrBH = /* @__PURE__ */ __name((h3, l3, s) => h3 << 64 - s | l3 >>> s - 32, "rotrBH");
     exports2.rotrBH = rotrBH;
-    var rotrBL = /* @__PURE__ */ __name((h2, l, s) => h2 >>> s - 32 | l << 64 - s, "rotrBL");
+    var rotrBL = /* @__PURE__ */ __name((h3, l3, s) => h3 >>> s - 32 | l3 << 64 - s, "rotrBL");
     exports2.rotrBL = rotrBL;
-    var rotr32H = /* @__PURE__ */ __name((_h, l) => l, "rotr32H");
+    var rotr32H = /* @__PURE__ */ __name((_h, l3) => l3, "rotr32H");
     exports2.rotr32H = rotr32H;
-    var rotr32L = /* @__PURE__ */ __name((h2, _l) => h2, "rotr32L");
+    var rotr32L = /* @__PURE__ */ __name((h3, _l) => h3, "rotr32L");
     exports2.rotr32L = rotr32L;
-    var rotlSH = /* @__PURE__ */ __name((h2, l, s) => h2 << s | l >>> 32 - s, "rotlSH");
+    var rotlSH = /* @__PURE__ */ __name((h3, l3, s) => h3 << s | l3 >>> 32 - s, "rotlSH");
     exports2.rotlSH = rotlSH;
-    var rotlSL = /* @__PURE__ */ __name((h2, l, s) => l << s | h2 >>> 32 - s, "rotlSL");
+    var rotlSL = /* @__PURE__ */ __name((h3, l3, s) => l3 << s | h3 >>> 32 - s, "rotlSL");
     exports2.rotlSL = rotlSL;
-    var rotlBH = /* @__PURE__ */ __name((h2, l, s) => l << s - 32 | h2 >>> 64 - s, "rotlBH");
+    var rotlBH = /* @__PURE__ */ __name((h3, l3, s) => l3 << s - 32 | h3 >>> 64 - s, "rotlBH");
     exports2.rotlBH = rotlBH;
-    var rotlBL = /* @__PURE__ */ __name((h2, l, s) => h2 << s - 32 | l >>> 64 - s, "rotlBL");
+    var rotlBL = /* @__PURE__ */ __name((h3, l3, s) => h3 << s - 32 | l3 >>> 64 - s, "rotlBL");
     exports2.rotlBL = rotlBL;
     function add(Ah, Al, Bh, Bl) {
-      const l = (Al >>> 0) + (Bl >>> 0);
-      return { h: Ah + Bh + (l / 2 ** 32 | 0) | 0, l: l | 0 };
+      const l3 = (Al >>> 0) + (Bl >>> 0);
+      return { h: Ah + Bh + (l3 / 2 ** 32 | 0) | 0, l: l3 | 0 };
     }
     __name(add, "add");
     var add3L = /* @__PURE__ */ __name((Al, Bl, Cl) => (Al >>> 0) + (Bl >>> 0) + (Cl >>> 0), "add3L");
@@ -36321,18 +36202,18 @@ var require_utils3 = __commonJS({
         throw new Error("positive integer expected, got " + n);
     }
     __name(anumber, "anumber");
-    function abytes(b, ...lengths) {
-      if (!isBytes(b))
+    function abytes(b2, ...lengths) {
+      if (!isBytes(b2))
         throw new Error("Uint8Array expected");
-      if (lengths.length > 0 && !lengths.includes(b.length))
-        throw new Error("Uint8Array expected of length " + lengths + ", got length=" + b.length);
+      if (lengths.length > 0 && !lengths.includes(b2.length))
+        throw new Error("Uint8Array expected of length " + lengths + ", got length=" + b2.length);
     }
     __name(abytes, "abytes");
-    function ahash(h2) {
-      if (typeof h2 !== "function" || typeof h2.create !== "function")
+    function ahash(h3) {
+      if (typeof h3 !== "function" || typeof h3.create !== "function")
         throw new Error("Hash should be wrapped by utils.createHasher");
-      anumber(h2.outputLen);
-      anumber(h2.blockLen);
+      anumber(h3.outputLen);
+      anumber(h3.blockLen);
     }
     __name(ahash, "ahash");
     function aexists(instance, checkFinished = true) {
@@ -36359,8 +36240,8 @@ var require_utils3 = __commonJS({
     }
     __name(u32, "u32");
     function clean2(...arrays) {
-      for (let i2 = 0; i2 < arrays.length; i2++) {
-        arrays[i2].fill(0);
+      for (let i = 0; i < arrays.length; i++) {
+        arrays[i].fill(0);
       }
     }
     __name(clean2, "clean");
@@ -36384,25 +36265,25 @@ var require_utils3 = __commonJS({
     exports2.swap8IfBE = exports2.isLE ? (n) => n : (n) => byteSwap(n);
     exports2.byteSwapIfBE = exports2.swap8IfBE;
     function byteSwap32(arr) {
-      for (let i2 = 0; i2 < arr.length; i2++) {
-        arr[i2] = byteSwap(arr[i2]);
+      for (let i = 0; i < arr.length; i++) {
+        arr[i] = byteSwap(arr[i]);
       }
       return arr;
     }
     __name(byteSwap32, "byteSwap32");
-    exports2.swap32IfBE = exports2.isLE ? (u) => u : byteSwap32;
+    exports2.swap32IfBE = exports2.isLE ? (u2) => u2 : byteSwap32;
     var hasHexBuiltin = /* @__PURE__ */ (() => (
       // @ts-ignore
       typeof Uint8Array.from([]).toHex === "function" && typeof Uint8Array.fromHex === "function"
     ))();
-    var hexes = /* @__PURE__ */ Array.from({ length: 256 }, (_, i2) => i2.toString(16).padStart(2, "0"));
+    var hexes = /* @__PURE__ */ Array.from({ length: 256 }, (_3, i) => i.toString(16).padStart(2, "0"));
     function bytesToHex(bytes) {
       abytes(bytes);
       if (hasHexBuiltin)
         return bytes.toHex();
       let hex = "";
-      for (let i2 = 0; i2 < bytes.length; i2++) {
-        hex += hexes[bytes[i2]];
+      for (let i = 0; i < bytes.length; i++) {
+        hex += hexes[bytes[i]];
       }
       return hex;
     }
@@ -36444,14 +36325,14 @@ var require_utils3 = __commonJS({
     }, "nextTick");
     exports2.nextTick = nextTick;
     async function asyncLoop(iters, tick, cb) {
-      let ts = Date.now();
-      for (let i2 = 0; i2 < iters; i2++) {
-        cb(i2);
-        const diff = Date.now() - ts;
+      let ts2 = Date.now();
+      for (let i = 0; i < iters; i++) {
+        cb(i);
+        const diff = Date.now() - ts2;
         if (diff >= 0 && diff < tick)
           continue;
         await (0, exports2.nextTick)();
-        ts += diff;
+        ts2 += diff;
       }
     }
     __name(asyncLoop, "asyncLoop");
@@ -36481,14 +36362,14 @@ var require_utils3 = __commonJS({
     __name(kdfInputToBytes, "kdfInputToBytes");
     function concatBytes(...arrays) {
       let sum = 0;
-      for (let i2 = 0; i2 < arrays.length; i2++) {
-        const a = arrays[i2];
+      for (let i = 0; i < arrays.length; i++) {
+        const a = arrays[i];
         abytes(a);
         sum += a.length;
       }
       const res = new Uint8Array(sum);
-      for (let i2 = 0, pad = 0; i2 < arrays.length; i2++) {
-        const a = arrays[i2];
+      for (let i = 0, pad = 0; i < arrays.length; i++) {
+        const a = arrays[i];
         res.set(a, pad);
         pad += a.length;
       }
@@ -36570,37 +36451,37 @@ var require_sha3 = __commonJS({
     var SHA3_PI = [];
     var SHA3_ROTL = [];
     var _SHA3_IOTA = [];
-    for (let round = 0, R = _1n, x2 = 1, y = 0; round < 24; round++) {
+    for (let round = 0, R2 = _1n, x2 = 1, y = 0; round < 24; round++) {
       [x2, y] = [y, (2 * x2 + 3 * y) % 5];
       SHA3_PI.push(2 * (5 * y + x2));
       SHA3_ROTL.push((round + 1) * (round + 2) / 2 % 64);
       let t2 = _0n;
-      for (let j = 0; j < 7; j++) {
-        R = (R << _1n ^ (R >> _7n) * _0x71n) % _256n;
-        if (R & _2n)
-          t2 ^= _1n << (_1n << /* @__PURE__ */ BigInt(j)) - _1n;
+      for (let j2 = 0; j2 < 7; j2++) {
+        R2 = (R2 << _1n ^ (R2 >> _7n) * _0x71n) % _256n;
+        if (R2 & _2n)
+          t2 ^= _1n << (_1n << /* @__PURE__ */ BigInt(j2)) - _1n;
       }
       _SHA3_IOTA.push(t2);
     }
     var IOTAS = (0, _u64_ts_1.split)(_SHA3_IOTA, true);
     var SHA3_IOTA_H = IOTAS[0];
     var SHA3_IOTA_L = IOTAS[1];
-    var rotlH = /* @__PURE__ */ __name((h2, l, s) => s > 32 ? (0, _u64_ts_1.rotlBH)(h2, l, s) : (0, _u64_ts_1.rotlSH)(h2,
-    l, s), "rotlH");
-    var rotlL = /* @__PURE__ */ __name((h2, l, s) => s > 32 ? (0, _u64_ts_1.rotlBL)(h2, l, s) : (0, _u64_ts_1.rotlSL)(h2,
-    l, s), "rotlL");
+    var rotlH = /* @__PURE__ */ __name((h3, l3, s) => s > 32 ? (0, _u64_ts_1.rotlBH)(h3, l3, s) : (0, _u64_ts_1.rotlSH)(
+    h3, l3, s), "rotlH");
+    var rotlL = /* @__PURE__ */ __name((h3, l3, s) => s > 32 ? (0, _u64_ts_1.rotlBL)(h3, l3, s) : (0, _u64_ts_1.rotlSL)(
+    h3, l3, s), "rotlL");
     function keccakP(s, rounds = 24) {
-      const B = new Uint32Array(5 * 2);
+      const B2 = new Uint32Array(5 * 2);
       for (let round = 24 - rounds; round < 24; round++) {
         for (let x2 = 0; x2 < 10; x2++)
-          B[x2] = s[x2] ^ s[x2 + 10] ^ s[x2 + 20] ^ s[x2 + 30] ^ s[x2 + 40];
+          B2[x2] = s[x2] ^ s[x2 + 10] ^ s[x2 + 20] ^ s[x2 + 30] ^ s[x2 + 40];
         for (let x2 = 0; x2 < 10; x2 += 2) {
           const idx1 = (x2 + 8) % 10;
           const idx0 = (x2 + 2) % 10;
-          const B0 = B[idx0];
-          const B1 = B[idx0 + 1];
-          const Th = rotlH(B0, B1, 1) ^ B[idx1];
-          const Tl = rotlL(B0, B1, 1) ^ B[idx1 + 1];
+          const B0 = B2[idx0];
+          const B1 = B2[idx0 + 1];
+          const Th = rotlH(B0, B1, 1) ^ B2[idx1];
+          const Tl = rotlL(B0, B1, 1) ^ B2[idx1 + 1];
           for (let y = 0; y < 50; y += 10) {
             s[x2 + y] ^= Th;
             s[x2 + y + 1] ^= Tl;
@@ -36620,14 +36501,14 @@ var require_sha3 = __commonJS({
         }
         for (let y = 0; y < 50; y += 10) {
           for (let x2 = 0; x2 < 10; x2++)
-            B[x2] = s[y + x2];
+            B2[x2] = s[y + x2];
           for (let x2 = 0; x2 < 10; x2++)
-            s[y + x2] ^= ~B[(x2 + 2) % 10] & B[(x2 + 4) % 10];
+            s[y + x2] ^= ~B2[(x2 + 2) % 10] & B2[(x2 + 4) % 10];
         }
         s[0] ^= SHA3_IOTA_H[round];
         s[1] ^= SHA3_IOTA_L[round];
       }
-      (0, utils_ts_1.clean)(B);
+      (0, utils_ts_1.clean)(B2);
     }
     __name(keccakP, "keccakP");
     var Keccak = class _Keccak extends utils_ts_1.Hash {
@@ -36671,7 +36552,7 @@ var require_sha3 = __commonJS({
         const len = data.length;
         for (let pos = 0; pos < len; ) {
           const take = Math.min(blockLen - this.pos, len - pos);
-          for (let i2 = 0; i2 < take; i2++)
+          for (let i = 0; i < take; i++)
             state[this.pos++] ^= data[pos++];
           if (this.pos === blockLen)
             this.keccak();
@@ -36778,8 +36659,8 @@ var require_src3 = __commonJS({
     function bufToBigInt(buf) {
       let bits = 8n;
       let value = 0n;
-      for (const i2 of buf.values()) {
-        const bi = BigInt(i2);
+      for (const i of buf.values()) {
+        const bi = BigInt(i);
         value = (value << bits) + bi;
       }
       return value;
@@ -36790,7 +36671,7 @@ var require_src3 = __commonJS({
     }, "hash");
     var alphabet = Array.from(
       { length: 26 },
-      (x2, i2) => String.fromCharCode(i2 + 97)
+      (x2, i) => String.fromCharCode(i + 97)
     );
     var randomLetter = /* @__PURE__ */ __name((random) => alphabet[Math.floor(random() * alphabet.length)], "randomLette\
 r");
@@ -36860,20 +36741,20 @@ var require_cuid2 = __commonJS({
 var require_wrappy = __commonJS({
   "node_modules/wrappy/wrappy.js"(exports2, module2) {
     module2.exports = wrappy;
-    function wrappy(fn, cb) {
-      if (fn && cb) return wrappy(fn)(cb);
-      if (typeof fn !== "function")
+    function wrappy(fn2, cb) {
+      if (fn2 && cb) return wrappy(fn2)(cb);
+      if (typeof fn2 !== "function")
         throw new TypeError("need wrapper function");
-      Object.keys(fn).forEach(function(k) {
-        wrapper[k] = fn[k];
+      Object.keys(fn2).forEach(function(k) {
+        wrapper[k] = fn2[k];
       });
       return wrapper;
       function wrapper() {
         var args = new Array(arguments.length);
-        for (var i2 = 0; i2 < args.length; i2++) {
-          args[i2] = arguments[i2];
+        for (var i = 0; i < args.length; i++) {
+          args[i] = arguments[i];
         }
-        var ret = fn.apply(this, args);
+        var ret = fn2.apply(this, args);
         var cb2 = args[args.length - 1];
         if (typeof ret === "function" && ret !== cb2) {
           Object.keys(cb2).forEach(function(k) {
@@ -37007,13 +36888,13 @@ var require_dezalgo = __commonJS({
       });
       return /* @__PURE__ */ __name(function zalgoSafe() {
         var args = arguments;
-        var me = this;
+        var me2 = this;
         if (sync)
           asap(function() {
-            cb.apply(me, args);
+            cb.apply(me2, args);
           });
         else
-          cb.apply(me, args);
+          cb.apply(me2, args);
       }, "zalgoSafe");
     }
     __name(dezalgo, "dezalgo");
@@ -37040,27 +36921,27 @@ var require_once = __commonJS({
         configurable: true
       });
     });
-    function once(fn) {
-      var f = /* @__PURE__ */ __name(function() {
-        if (f.called) return f.value;
-        f.called = true;
-        return f.value = fn.apply(this, arguments);
+    function once(fn2) {
+      var f3 = /* @__PURE__ */ __name(function() {
+        if (f3.called) return f3.value;
+        f3.called = true;
+        return f3.value = fn2.apply(this, arguments);
       }, "f");
-      f.called = false;
-      return f;
+      f3.called = false;
+      return f3;
     }
     __name(once, "once");
-    function onceStrict(fn) {
-      var f = /* @__PURE__ */ __name(function() {
-        if (f.called)
-          throw new Error(f.onceError);
-        f.called = true;
-        return f.value = fn.apply(this, arguments);
+    function onceStrict(fn2) {
+      var f3 = /* @__PURE__ */ __name(function() {
+        if (f3.called)
+          throw new Error(f3.onceError);
+        f3.called = true;
+        return f3.value = fn2.apply(this, arguments);
       }, "f");
-      var name = fn.name || "Function wrapped with `once`";
-      f.onceError = name + " shouldn't be called more than once";
-      f.called = false;
-      return f;
+      var name = fn2.name || "Function wrapped with `once`";
+      f3.onceError = name + " shouldn't be called more than once";
+      f3.called = false;
+      return f3;
     }
     __name(onceStrict, "onceStrict");
   }
@@ -37071,13 +36952,13 @@ var require_dist3 = __commonJS({
   "node_modules/formidable/dist/index.cjs"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var fs2 = require("node:fs");
+    var fs3 = require("node:fs");
     var crypto = require("node:crypto");
     var node_events = require("node:events");
     var cuid2 = require_cuid2();
     var dezalgo = require_dezalgo();
     var fsPromises = require("node:fs/promises");
-    var os4 = require("node:os");
+    var os5 = require("node:os");
     var path = require("node:path");
     var node_string_decoder = require("node:string_decoder");
     var once = require_once();
@@ -37099,7 +36980,7 @@ var require_dist3 = __commonJS({
         }
       }
       open() {
-        this._writeStream = fs2.createWriteStream(this.filepath);
+        this._writeStream = fs3.createWriteStream(this.filepath);
         this._writeStream.on("error", (err) => {
           this.emit("error", err);
         });
@@ -37150,7 +37031,7 @@ var require_dist3 = __commonJS({
         this._writeStream.destroy();
         const filepath = this.filepath;
         setTimeout(function() {
-          fs2.unlink(filepath, () => {
+          fs3.unlink(filepath, () => {
           });
         }, 1);
       }
@@ -37303,15 +37184,15 @@ var require_dist3 = __commonJS({
       PART_END: s++,
       END: s++
     };
-    var f = 1;
-    var FBOUNDARY = { PART_BOUNDARY: f, LAST_BOUNDARY: f *= 2 };
+    var f3 = 1;
+    var FBOUNDARY = { PART_BOUNDARY: f3, LAST_BOUNDARY: f3 *= 2 };
     var LF = 10;
     var CR = 13;
     var SPACE = 32;
     var HYPHEN = 45;
     var COLON = 58;
     var A = 97;
-    var Z = 122;
+    var Z2 = 122;
     function lower(c3) {
       return c3 | 32;
     }
@@ -37360,8 +37241,8 @@ var require_dist3 = __commonJS({
         this.lookbehind = Buffer.alloc(this.boundary.length + 8);
         this.state = STATE.START;
         this.boundaryChars = {};
-        for (let i2 = 0; i2 < this.boundary.length; i2++) {
-          this.boundaryChars[this.boundary[i2]] = true;
+        for (let i = 0; i < this.boundary.length; i++) {
+          this.boundaryChars[this.boundary[i]] = true;
         }
       }
       // eslint-disable-next-line max-params
@@ -37372,8 +37253,8 @@ var require_dist3 = __commonJS({
         this.push({ name, buffer: buf, start, end });
       }
       // eslint-disable-next-line max-statements
-      _transform(buffer, _, done) {
-        let i2 = 0;
+      _transform(buffer, _3, done) {
+        let i = 0;
         let prevIndex = this.index;
         let { index, state, flags } = this;
         const { lookbehind, boundary, boundaryChars } = this;
@@ -37383,7 +37264,7 @@ var require_dist3 = __commonJS({
         let c3 = null;
         let cl = null;
         const setMark = /* @__PURE__ */ __name((name, idx) => {
-          this[`${name}Mark`] = typeof idx === "number" ? idx : i2;
+          this[`${name}Mark`] = typeof idx === "number" ? idx : i;
         }, "setMark");
         const clearMarkSymbol = /* @__PURE__ */ __name((name) => {
           delete this[`${name}Mark`];
@@ -37397,12 +37278,12 @@ var require_dist3 = __commonJS({
             this._handleCallback(name, buffer, this[markSymbol], buffer.length);
             setMark(name, 0);
           } else {
-            this._handleCallback(name, buffer, this[markSymbol], i2);
+            this._handleCallback(name, buffer, this[markSymbol], i);
             clearMarkSymbol(name);
           }
         }, "dataCallback");
-        for (i2 = 0; i2 < this.bufferLength; i2++) {
-          c3 = buffer[i2];
+        for (i = 0; i < this.bufferLength; i++) {
+          c3 = buffer[i];
           switch (state) {
             case STATE.PARSER_UNINITIALIZED:
               done(this._endUnexpected());
@@ -37466,7 +37347,7 @@ var require_dist3 = __commonJS({
                 break;
               }
               cl = lower(c3);
-              if (cl < A || cl > Z) {
+              if (cl < A || cl > Z2) {
                 done(this._endUnexpected());
                 return;
               }
@@ -37505,12 +37386,12 @@ var require_dist3 = __commonJS({
             case STATE.PART_DATA:
               prevIndex = index;
               if (index === 0) {
-                i2 += boundaryEnd;
-                while (i2 < this.bufferLength && !(buffer[i2] in boundaryChars)) {
-                  i2 += boundaryLength;
+                i += boundaryEnd;
+                while (i < this.bufferLength && !(buffer[i] in boundaryChars)) {
+                  i += boundaryLength;
                 }
-                i2 -= boundaryEnd;
-                c3 = buffer[i2];
+                i -= boundaryEnd;
+                c3 = buffer[i];
               }
               if (index < boundary.length) {
                 if (boundary[index] === c3) {
@@ -37559,7 +37440,7 @@ var require_dist3 = __commonJS({
                 this._handleCallback("partData", lookbehind, 0, prevIndex);
                 prevIndex = 0;
                 setMark("partData");
-                i2--;
+                i--;
               }
               break;
             case STATE.END:
@@ -37696,15 +37577,15 @@ var require_dist3 = __commonJS({
     __name(plugin$2, "plugin$2");
     function init$1(_self, _opts) {
       this.type = querystringType;
-      const parser4 = new QuerystringParser(this.options);
-      parser4.on("data", ({ key, value }) => {
+      const parser = new QuerystringParser(this.options);
+      parser.on("data", ({ key, value }) => {
         this.emit("field", key, value);
       });
-      parser4.once("end", () => {
+      parser.once("end", () => {
         this.ended = true;
         this._maybeEnd();
       });
-      this._parser = parser4;
+      this._parser = parser;
       return this;
     }
     __name(init$1, "init$1");
@@ -37713,11 +37594,11 @@ var require_dist3 = __commonJS({
       const self = this || formidable2;
       const multipart = /multipart/i.test(self.headers["content-type"]);
       if (multipart) {
-        const m = self.headers["content-type"].match(
+        const m2 = self.headers["content-type"].match(
           /boundary=(?:"([^"]+)"|([^;]+))/i
         );
-        if (m) {
-          const initMultipart = createInitMultipart(m[1] || m[2]);
+        if (m2) {
+          const initMultipart = createInitMultipart(m2[1] || m2[2]);
           initMultipart.call(self, self, options);
         } else {
           const err = new FormidableError(
@@ -37734,12 +37615,12 @@ var require_dist3 = __commonJS({
     function createInitMultipart(boundary) {
       return /* @__PURE__ */ __name(function initMultipart() {
         this.type = multipartType;
-        const parser4 = new MultipartParser$1(this.options);
+        const parser = new MultipartParser$1(this.options);
         let headerField;
         let headerValue;
         let part;
-        parser4.initWithBoundary(boundary);
-        parser4.on("data", async ({ name, buffer, start, end }) => {
+        parser.initWithBoundary(boundary);
+        parser.on("data", async ({ name, buffer, start, end }) => {
           if (name === "partBegin") {
             part = new node_stream.Stream();
             part.readable = true;
@@ -37758,13 +37639,13 @@ var require_dist3 = __commonJS({
           } else if (name === "headerEnd") {
             headerField = headerField.toLowerCase();
             part.headers[headerField] = headerValue;
-            const m = headerValue.match(
+            const m2 = headerValue.match(
               // eslint-disable-next-line no-useless-escape
               /\bname=("([^"]*)"|([^\(\)<>@,;:\\"\/\[\]\?=\{\}\s\t/]+))/i
             );
             if (headerField === "content-disposition") {
-              if (m) {
-                part.name = m[2] || m[3] || "";
+              if (m2) {
+                part.name = m2[2] || m2[3] || "";
               }
               part.originalFilename = this._getFileName(headerValue);
             } else if (headerField === "content-type") {
@@ -37788,12 +37669,12 @@ var require_dist3 = __commonJS({
                 const dataStopPropagation = /* @__PURE__ */ __name((ctx) => {
                   if (ctx.name === "partEnd") {
                     part.emit("end");
-                    parser4.off("data", dataPropagation);
-                    parser4.off("data", dataStopPropagation);
+                    parser.off("data", dataPropagation);
+                    parser.off("data", dataStopPropagation);
                   }
                 }, "dataStopPropagation");
-                parser4.on("data", dataPropagation);
-                parser4.on("data", dataStopPropagation);
+                parser.on("data", dataPropagation);
+                parser.on("data", dataStopPropagation);
                 break;
               }
               case "base64": {
@@ -37815,12 +37696,12 @@ var require_dist3 = __commonJS({
                   if (ctx.name === "partEnd") {
                     part.emit("data", Buffer.from(part.transferBuffer, "base64"));
                     part.emit("end");
-                    parser4.off("data", dataPropagation);
-                    parser4.off("data", dataStopPropagation);
+                    parser.off("data", dataPropagation);
+                    parser.off("data", dataStopPropagation);
                   }
                 }, "dataStopPropagation");
-                parser4.on("data", dataPropagation);
-                parser4.on("data", dataStopPropagation);
+                parser.on("data", dataPropagation);
+                parser.on("data", dataStopPropagation);
                 break;
               }
               default:
@@ -37840,7 +37721,7 @@ var require_dist3 = __commonJS({
             this._maybeEnd();
           }
         });
-        this._parser = parser4;
+        this._parser = parser;
       }, "initMultipart");
     }
     __name(createInitMultipart, "createInitMultipart");
@@ -37880,18 +37761,18 @@ var require_dist3 = __commonJS({
     __name(plugin, "plugin");
     function init(_self, _opts) {
       this.type = jsonType;
-      const parser4 = new JSONParser(this.options);
-      parser4.on("data", (fields) => {
+      const parser = new JSONParser(this.options);
+      parser.on("data", (fields) => {
         this.fields = fields;
       });
-      parser4.once("end", () => {
+      parser.once("end", () => {
         this.ended = true;
         this._maybeEnd();
       });
-      this._parser = parser4;
+      this._parser = parser;
     }
     __name(init, "init");
-    var CUID2_FINGERPRINT = `${process.env.NODE_ENV}-${os4.platform()}-${os4.hostname()}`;
+    var CUID2_FINGERPRINT = `${process.env.NODE_ENV}-${os5.platform()}-${os5.hostname()}`;
     var createId = cuid2.init({ length: 25, fingerprint: CUID2_FINGERPRINT.toLowerCase() });
     var DEFAULT_OPTIONS = {
       maxFields: 1e3,
@@ -37905,7 +37786,7 @@ var require_dist3 = __commonJS({
       keepExtensions: false,
       encoding: "utf-8",
       hashAlgorithm: false,
-      uploadDir: os4.tmpdir(),
+      uploadDir: os5.tmpdir(),
       enabledPlugins: [plugin$3, plugin$2, plugin$1, plugin],
       fileWriteStreamHandler: null,
       defaultInvalidName: "invalid-name",
@@ -37953,7 +37834,7 @@ var require_dist3 = __commonJS({
           this.options.maxTotalFileSize = this.options.maxFileSize;
         }
         const dir = path.resolve(
-          this.options.uploadDir || this.options.uploaddir || os4.tmpdir()
+          this.options.uploadDir || this.options.uploaddir || os5.tmpdir()
         );
         this.uploaddir = dir;
         this.uploadDir = dir;
@@ -38337,16 +38218,16 @@ ta`,
         });
       }
       _getFileName(headerValue) {
-        const m = headerValue.match(
+        const m2 = headerValue.match(
           /\bfilename=("(.*?)"|([^()<>{}[\]@,;:"?=\s/\t]+))($|;\s)/i
         );
-        if (!m) return null;
-        const match = m[2] || m[3] || "";
+        if (!m2) return null;
+        const match = m2[2] || m2[3] || "";
         let originalFilename = match.substr(match.lastIndexOf("\\") + 1);
         originalFilename = originalFilename.replace(/%22/g, '"');
         originalFilename = originalFilename.replace(
           /&#([\d]{4});/g,
-          (_, code) => String.fromCharCode(code)
+          (_3, code) => String.fromCharCode(code)
         );
         return originalFilename;
       }
@@ -38549,7 +38430,7 @@ var require_cookiejar = __commonJS({
           var parts = str.split(";").filter(function(value2) {
             return !!value2;
           });
-          var i2;
+          var i;
           var pair = parts[0].match(/([^=]+)=([\s\S]*)/);
           if (!pair) {
             console.warn("Invalid cookie header encountered. Header: '" + str + "'");
@@ -38563,8 +38444,8 @@ var require_cookiejar = __commonJS({
           }
           this.name = key;
           this.value = value;
-          for (i2 = 1; i2 < parts.length; i2 += 1) {
-            pair = parts[i2].match(/([^=]+)(?:=([\s\S]*))?/);
+          for (i = 1; i < parts.length; i += 1) {
+            pair = parts[i].match(/([^=]+)(?:=([\s\S]*))?/);
             key = pair[1].trim().toLowerCase();
             value = pair[2];
             switch (key) {
@@ -38638,45 +38519,45 @@ var require_cookiejar = __commonJS({
         if (this instanceof CookieJar) {
           cookies = /* @__PURE__ */ Object.create(null);
           this.setCookie = /* @__PURE__ */ __name(function setCookie(cookie, request_domain, request_path) {
-            var remove2, i2;
+            var remove, i;
             cookie = new Cookie(cookie, request_domain, request_path);
-            remove2 = cookie.expiration_date <= Date.now();
+            remove = cookie.expiration_date <= Date.now();
             if (cookies[cookie.name] !== void 0) {
               cookies_list = cookies[cookie.name];
-              for (i2 = 0; i2 < cookies_list.length; i2 += 1) {
-                collidable_cookie = cookies_list[i2];
+              for (i = 0; i < cookies_list.length; i += 1) {
+                collidable_cookie = cookies_list[i];
                 if (collidable_cookie.collidesWith(cookie)) {
-                  if (remove2) {
-                    cookies_list.splice(i2, 1);
+                  if (remove) {
+                    cookies_list.splice(i, 1);
                     if (cookies_list.length === 0) {
                       delete cookies[cookie.name];
                     }
                     return false;
                   }
-                  cookies_list[i2] = cookie;
+                  cookies_list[i] = cookie;
                   return cookie;
                 }
               }
-              if (remove2) {
+              if (remove) {
                 return false;
               }
               cookies_list.push(cookie);
               return cookie;
             }
-            if (remove2) {
+            if (remove) {
               return false;
             }
             cookies[cookie.name] = [cookie];
             return cookies[cookie.name];
           }, "setCookie");
           this.getCookie = /* @__PURE__ */ __name(function getCookie(cookie_name, access_info) {
-            var cookie, i2;
+            var cookie, i;
             cookies_list = cookies[cookie_name];
             if (!cookies_list) {
               return;
             }
-            for (i2 = 0; i2 < cookies_list.length; i2 += 1) {
-              cookie = cookies_list[i2];
+            for (i = 0; i < cookies_list.length; i += 1) {
+              cookie = cookies_list[i];
               if (cookie.expiration_date <= Date.now()) {
                 if (cookies_list.length === 0) {
                   delete cookies[cookie.name];
@@ -38714,12 +38595,12 @@ var require_cookiejar = __commonJS({
       exports2.CookieJar = CookieJar;
       CookieJar.prototype.setCookies = /* @__PURE__ */ __name(function setCookies(cookies, request_domain, request_path) {
         cookies = Array.isArray(cookies) ? cookies : cookies.split(cookie_str_splitter);
-        var successful = [], i2, cookie;
+        var successful = [], i, cookie;
         cookies = cookies.map(function(item) {
           return new Cookie(item, request_domain, request_path);
         });
-        for (i2 = 0; i2 < cookies.length; i2 += 1) {
-          cookie = cookies[i2];
+        for (i = 0; i < cookies.length; i += 1) {
+          cookie = cookies[i];
           if (this.setCookie(cookie, request_domain, request_path)) {
             successful.push(cookie);
           }
@@ -38741,16 +38622,16 @@ var require_fast_safe_stringify = __commonJS({
     var CIRCULAR_REPLACE_NODE = "[Circular]";
     var arr = [];
     var replacerStack = [];
-    function defaultOptions2() {
+    function defaultOptions() {
       return {
         depthLimit: Number.MAX_SAFE_INTEGER,
         edgesLimit: Number.MAX_SAFE_INTEGER
       };
     }
-    __name(defaultOptions2, "defaultOptions");
+    __name(defaultOptions, "defaultOptions");
     function stringify(obj, replacer, spacer, options) {
       if (typeof options === "undefined") {
-        options = defaultOptions2();
+        options = defaultOptions();
       }
       decirc(obj, "", 0, [], void 0, 0, options);
       var res;
@@ -38760,7 +38641,7 @@ var require_fast_safe_stringify = __commonJS({
         } else {
           res = JSON.stringify(obj, replaceGetterValues(replacer), spacer);
         }
-      } catch (_) {
+      } catch (_3) {
         return JSON.stringify("[unable to serialize, circular reference is too complex to analyze]");
       } finally {
         while (arr.length !== 0) {
@@ -38792,10 +38673,10 @@ var require_fast_safe_stringify = __commonJS({
     __name(setReplace, "setReplace");
     function decirc(val, k, edgeIndex, stack, parent, depth, options) {
       depth += 1;
-      var i2;
+      var i;
       if (typeof val === "object" && val !== null) {
-        for (i2 = 0; i2 < stack.length; i2++) {
-          if (stack[i2] === val) {
+        for (i = 0; i < stack.length; i++) {
+          if (stack[i] === val) {
             setReplace(CIRCULAR_REPLACE_NODE, val, k, parent);
             return;
           }
@@ -38810,25 +38691,25 @@ var require_fast_safe_stringify = __commonJS({
         }
         stack.push(val);
         if (Array.isArray(val)) {
-          for (i2 = 0; i2 < val.length; i2++) {
-            decirc(val[i2], i2, i2, stack, val, depth, options);
+          for (i = 0; i < val.length; i++) {
+            decirc(val[i], i, i, stack, val, depth, options);
           }
         } else {
           var keys = Object.keys(val);
-          for (i2 = 0; i2 < keys.length; i2++) {
-            var key = keys[i2];
-            decirc(val[key], key, i2, stack, val, depth, options);
+          for (i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            decirc(val[key], key, i, stack, val, depth, options);
           }
         }
         stack.pop();
       }
     }
     __name(decirc, "decirc");
-    function compareFunction(a, b) {
-      if (a < b) {
+    function compareFunction(a, b2) {
+      if (a < b2) {
         return -1;
       }
-      if (a > b) {
+      if (a > b2) {
         return 1;
       }
       return 0;
@@ -38836,7 +38717,7 @@ var require_fast_safe_stringify = __commonJS({
     __name(compareFunction, "compareFunction");
     function deterministicStringify(obj, replacer, spacer, options) {
       if (typeof options === "undefined") {
-        options = defaultOptions2();
+        options = defaultOptions();
       }
       var tmp = deterministicDecirc(obj, "", 0, [], void 0, 0, options) || obj;
       var res;
@@ -38846,7 +38727,7 @@ var require_fast_safe_stringify = __commonJS({
         } else {
           res = JSON.stringify(tmp, replaceGetterValues(replacer), spacer);
         }
-      } catch (_) {
+      } catch (_3) {
         return JSON.stringify("[unable to serialize, circular reference is too complex to analyze]");
       } finally {
         while (arr.length !== 0) {
@@ -38863,10 +38744,10 @@ var require_fast_safe_stringify = __commonJS({
     __name(deterministicStringify, "deterministicStringify");
     function deterministicDecirc(val, k, edgeIndex, stack, parent, depth, options) {
       depth += 1;
-      var i2;
+      var i;
       if (typeof val === "object" && val !== null) {
-        for (i2 = 0; i2 < stack.length; i2++) {
-          if (stack[i2] === val) {
+        for (i = 0; i < stack.length; i++) {
+          if (stack[i] === val) {
             setReplace(CIRCULAR_REPLACE_NODE, val, k, parent);
             return;
           }
@@ -38875,7 +38756,7 @@ var require_fast_safe_stringify = __commonJS({
           if (typeof val.toJSON === "function") {
             return;
           }
-        } catch (_) {
+        } catch (_3) {
           return;
         }
         if (typeof options.depthLimit !== "undefined" && depth > options.depthLimit) {
@@ -38888,15 +38769,15 @@ var require_fast_safe_stringify = __commonJS({
         }
         stack.push(val);
         if (Array.isArray(val)) {
-          for (i2 = 0; i2 < val.length; i2++) {
-            deterministicDecirc(val[i2], i2, i2, stack, val, depth, options);
+          for (i = 0; i < val.length; i++) {
+            deterministicDecirc(val[i], i, i, stack, val, depth, options);
           }
         } else {
           var tmp = {};
           var keys = Object.keys(val).sort(compareFunction);
-          for (i2 = 0; i2 < keys.length; i2++) {
-            var key = keys[i2];
-            deterministicDecirc(val[key], key, i2, stack, val, depth, options);
+          for (i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            deterministicDecirc(val[key], key, i, stack, val, depth, options);
             tmp[key] = val[key];
           }
           if (typeof parent !== "undefined") {
@@ -38911,16 +38792,16 @@ var require_fast_safe_stringify = __commonJS({
     }
     __name(deterministicDecirc, "deterministicDecirc");
     function replaceGetterValues(replacer) {
-      replacer = typeof replacer !== "undefined" ? replacer : function(k, v) {
-        return v;
+      replacer = typeof replacer !== "undefined" ? replacer : function(k, v2) {
+        return v2;
       };
       return function(key, val) {
         if (replacerStack.length > 0) {
-          for (var i2 = 0; i2 < replacerStack.length; i2++) {
-            var part = replacerStack[i2];
+          for (var i = 0; i < replacerStack.length; i++) {
+            var part = replacerStack[i];
             if (part[1] === key && part[0] === val) {
               val = part[2];
-              replacerStack.splice(i2, 1);
+              replacerStack.splice(i, 1);
               break;
             }
           }
@@ -39018,16 +38899,16 @@ var require_request_base = __commonJS({
       delete this._uploadTimeoutTimer;
       return this;
     };
-    RequestBase.prototype.parse = function(fn) {
-      this._parser = fn;
+    RequestBase.prototype.parse = function(fn2) {
+      this._parser = fn2;
       return this;
     };
     RequestBase.prototype.responseType = function(value) {
       this._responseType = value;
       return this;
     };
-    RequestBase.prototype.serialize = function(fn) {
-      this._serializer = fn;
+    RequestBase.prototype.serialize = function(fn2) {
+      this._serializer = fn2;
       return this;
     };
     RequestBase.prototype.timeout = function(options) {
@@ -39056,12 +38937,12 @@ var require_request_base = __commonJS({
       }
       return this;
     };
-    RequestBase.prototype.retry = function(count, fn) {
+    RequestBase.prototype.retry = function(count, fn2) {
       if (arguments.length === 0 || count === true) count = 1;
       if (count <= 0) count = 0;
       this._maxRetries = count;
       this._retries = 0;
-      this._retryCallback = fn;
+      this._retryCallback = fn2;
       return this;
     };
     var ERROR_CODES = /* @__PURE__ */ new Set(["ETIMEDOUT", "ECONNRESET", "EADDRINUSE", "ECONNREFUSED", "EPIPE", "ENOTFO\
@@ -39133,8 +39014,8 @@ all .end() if you use promises");
     RequestBase.prototype.catch = function(callback) {
       return this.then(void 0, callback);
     };
-    RequestBase.prototype.use = function(fn) {
-      fn(this);
+    RequestBase.prototype.use = function(fn2) {
+      fn2(this);
       return this;
     };
     RequestBase.prototype.ok = function(callback) {
@@ -39185,8 +39066,8 @@ all .end() if you use promises");
         return this;
       }
       if (Array.isArray(value)) {
-        for (const i2 in value) {
-          if (hasOwn(value, i2)) this.field(name, value[i2]);
+        for (const i in value) {
+          if (hasOwn(value, i)) this.field(name, value[i]);
         }
         return this;
       }
@@ -39230,9 +39111,9 @@ all .end() if you use promises");
       }
       return this;
     };
-    RequestBase.prototype.withCredentials = function(on) {
-      if (on === void 0) on = true;
-      this._withCredentials = on;
+    RequestBase.prototype.withCredentials = function(on2) {
+      if (on2 === void 0) on2 = true;
+      this._withCredentials = on2;
       return this;
     };
     RequestBase.prototype.redirects = function(n) {
@@ -39576,14 +39457,14 @@ var require_unzip = __commonJS({
         stream.emit("end");
       });
       const _on = res.on;
-      res.on = function(type, fn) {
+      res.on = function(type, fn2) {
         if (type === "data" || type === "end") {
-          stream.on(type, fn.bind(res));
+          stream.on(type, fn2.bind(res));
         } else if (type === "error") {
-          stream.on(type, fn.bind(res));
-          _on.call(res, type, fn);
+          stream.on(type, fn2.bind(res));
+          _on.call(res, type, fn2);
         } else {
-          _on.call(res, type, fn);
+          _on.call(res, type, fn2);
         }
         return this;
       };
@@ -39604,9 +39485,9 @@ var require_response_base = __commonJS({
       return this.header[field.toLowerCase()];
     };
     ResponseBase.prototype._setHeaderProperties = function(header) {
-      const ct = header["content-type"] || "";
-      this.type = utils.type(ct);
-      const parameters = utils.params(ct);
+      const ct2 = header["content-type"] || "";
+      this.type = utils.type(ct2);
+      const parameters = utils.params(ct2);
       for (const key in parameters) {
         if (Object.prototype.hasOwnProperty.call(parameters, key)) this[key] = parameters[key];
       }
@@ -39746,10 +39627,10 @@ y", "ok", "redirects", "timeout", "buffer", "serialize", "parse", "ca", "key", "
         }
       }
     };
-    for (const fn of defaults) {
-      Agent.prototype[fn] = function(...args) {
+    for (const fn2 of defaults) {
+      Agent.prototype[fn2] = function(...args) {
         this._defaults.push({
-          fn,
+          fn: fn2,
           args
         });
         return this;
@@ -39829,15 +39710,15 @@ var require_agent2 = __commonJS({
     for (const name of methods) {
       const method = name.toUpperCase();
       if (method === "QUERY") continue;
-      Agent.prototype[name] = function(url, fn) {
+      Agent.prototype[name] = function(url, fn2) {
         const request_ = new request.Request(method, url);
         request_.on("response", this._saveCookies.bind(this));
         request_.on("redirect", this._saveCookies.bind(this));
         request_.on("redirect", this._attachCookies.bind(this, request_));
         this._setDefaults(request_);
         this._attachCookies(request_);
-        if (fn) {
-          request_.end(fn);
+        if (fn2) {
+          request_.end(fn2);
         }
         return request_;
       };
@@ -39857,7 +39738,7 @@ var require_urlencoded = __commonJS({
   "node_modules/superagent/lib/node/parsers/urlencoded.js"(exports2, module2) {
     "use strict";
     var qs = require_lib();
-    module2.exports = (res, fn) => {
+    module2.exports = (res, fn2) => {
       res.text = "";
       res.setEncoding("ascii");
       res.on("data", (chunk) => {
@@ -39865,9 +39746,9 @@ var require_urlencoded = __commonJS({
       });
       res.on("end", () => {
         try {
-          fn(null, qs.parse(res.text));
+          fn2(null, qs.parse(res.text));
         } catch (err) {
-          fn(err);
+          fn2(err);
         }
       });
     };
@@ -39878,7 +39759,7 @@ var require_urlencoded = __commonJS({
 var require_json = __commonJS({
   "node_modules/superagent/lib/node/parsers/json.js"(exports2, module2) {
     "use strict";
-    module2.exports = function(res, fn) {
+    module2.exports = function(res, fn2) {
       res.text = "";
       res.setEncoding("utf8");
       res.on("data", (chunk) => {
@@ -39894,7 +39775,7 @@ var require_json = __commonJS({
           error2.rawResponse = res.text || null;
           error2.statusCode = res.statusCode;
         } finally {
-          fn(error2, body);
+          fn2(error2, body);
         }
       });
     };
@@ -39905,13 +39786,13 @@ var require_json = __commonJS({
 var require_text = __commonJS({
   "node_modules/superagent/lib/node/parsers/text.js"(exports2, module2) {
     "use strict";
-    module2.exports = (res, fn) => {
+    module2.exports = (res, fn2) => {
       res.text = "";
       res.setEncoding("utf8");
       res.on("data", (chunk) => {
         res.text += chunk;
       });
-      res.on("end", fn);
+      res.on("end", fn2);
     };
   }
 });
@@ -39920,13 +39801,13 @@ var require_text = __commonJS({
 var require_image = __commonJS({
   "node_modules/superagent/lib/node/parsers/image.js"(exports2, module2) {
     "use strict";
-    module2.exports = (res, fn) => {
+    module2.exports = (res, fn2) => {
       const data = [];
       res.on("data", (chunk) => {
         data.push(chunk);
       });
       res.on("end", () => {
-        fn(null, Buffer.concat(data));
+        fn2(null, Buffer.concat(data));
       });
     };
   }
@@ -39957,7 +39838,7 @@ var require_node2 = __commonJS({
     var Stream = require("stream");
     var https = require("https");
     var http = require("http");
-    var fs2 = require("fs");
+    var fs3 = require("fs");
     var zlib = require("zlib");
     var util = require("util");
     var qs = require_lib();
@@ -39965,7 +39846,7 @@ var require_node2 = __commonJS({
     var methods = require_methods();
     var FormData = require_form_data();
     var formidable = require_dist3();
-    var debug3 = require_src()("superagent");
+    var debug2 = require_src()("superagent");
     var CookieJar = require_cookiejar();
     var safeStringify = require_fast_safe_stringify();
     var utils = require_utils4();
@@ -40074,8 +39955,8 @@ var require_node2 = __commonJS({
         }
         if (typeof file === "string") {
           if (!o2.filename) o2.filename = file;
-          debug3("creating `fs.ReadStream` instance for file: %s", file);
-          file = fs2.createReadStream(file);
+          debug2("creating `fs.ReadStream` instance for file: %s", file);
+          file = fs3.createReadStream(file);
           file.on("error", (error2) => {
             const formData = this._getFormData();
             formData.emit("error", error2);
@@ -40091,7 +39972,7 @@ var require_node2 = __commonJS({
       if (!this._formData) {
         this._formData = new FormData();
         this._formData.on("error", (error2) => {
-          debug3("FormData error", error2);
+          debug2("FormData error", error2);
           if (this.called) {
             return;
           }
@@ -40173,7 +40054,7 @@ var require_node2 = __commonJS({
       if (!url) {
         return this.callback(new Error("No location header for redirect"), res);
       }
-      debug3("redirect %s -> %s", this.url, url);
+      debug2("redirect %s -> %s", this.url, url);
       url = new URL(url, this.url).href;
       res.resume();
       let headers = this.req.getHeaders ? this.req.getHeaders() : this.req._headers;
@@ -40364,7 +40245,7 @@ var require_node2 = __commonJS({
       if (this._shouldRetry(error2, res)) {
         return this._retry();
       }
-      const fn = this._callback || noop;
+      const fn2 = this._callback || noop;
       this.clearTimeout();
       if (this.called) return console.warn("superagent: double callback bug");
       this.called = true;
@@ -40384,14 +40265,14 @@ var require_node2 = __commonJS({
         }
       }
       if (!error2) {
-        return fn(null, res);
+        return fn2(null, res);
       }
       error2.response = res;
       if (this._maxRetries) error2.retries = this._retries - 1;
       if (error2 && this.listeners("error").length > 0) {
         this.emit("error", error2);
       }
-      fn(error2, res);
+      fn2(error2, res);
     };
     Request.prototype._isHost = function(object) {
       return Buffer.isBuffer(object) || object instanceof Stream || object instanceof FormData;
@@ -40417,14 +40298,14 @@ var require_node2 = __commonJS({
       response.redirects = this._redirectList;
       this.emit("redirect", response);
     };
-    Request.prototype.end = function(fn) {
+    Request.prototype.end = function(fn2) {
       this.request();
-      debug3("%s %s", this.method, this.url);
+      debug2("%s %s", this.method, this.url);
       if (this._endCalled) {
         throw new Error(".end() was called twice. This is not supported in superagent");
       }
       this._endCalled = true;
-      this._callback = fn || noop;
+      this._callback = fn2 || noop;
       this._end();
     };
     Request.prototype._end = function() {
@@ -40452,7 +40333,7 @@ var require_node2 = __commonJS({
         }
       }
       req.once("response", (res) => {
-        debug3("%s %s -> %s", this.method, this.url, res.statusCode);
+        debug2("%s %s -> %s", this.method, this.url, res.statusCode);
         if (this._responseTimeoutTimer) {
           clearTimeout(this._responseTimeoutTimer);
         }
@@ -40482,19 +40363,19 @@ var require_node2 = __commonJS({
         if (buffer === void 0 && mime2 in exports2.buffer) {
           buffer = Boolean(exports2.buffer[mime2]);
         }
-        let parser4 = this._parser;
-        if (void 0 === buffer && parser4) {
+        let parser = this._parser;
+        if (void 0 === buffer && parser) {
           console.warn("A custom superagent parser has been set, but buffering strategy for the parser hasn't been confi\
 gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true or false`");
           buffer = true;
         }
-        if (!parser4) {
+        if (!parser) {
           if (responseType) {
-            parser4 = exports2.parse.image;
+            parser = exports2.parse.image;
             buffer = true;
           } else if (multipart) {
             const form = formidable.formidable();
-            parser4 = /* @__PURE__ */ __name((res2, callback) => {
+            parser = /* @__PURE__ */ __name((res2, callback) => {
               const bridgeStream = new Stream.PassThrough();
               bridgeStream.method = this.method || "POST";
               bridgeStream.url = this.url || "/";
@@ -40525,20 +40406,20 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
             }, "parser");
             buffer = true;
           } else if (isBinary(mime2)) {
-            parser4 = exports2.parse.image;
+            parser = exports2.parse.image;
             buffer = true;
           } else if (exports2.parse[mime2]) {
-            parser4 = exports2.parse[mime2];
+            parser = exports2.parse[mime2];
           } else if (type === "text") {
-            parser4 = exports2.parse.text;
+            parser = exports2.parse.text;
             buffer = buffer !== false;
           } else if (isJSON(mime2)) {
-            parser4 = exports2.parse["application/json"];
+            parser = exports2.parse["application/json"];
             buffer = buffer !== false;
           } else if (buffer) {
-            parser4 = exports2.parse.text;
+            parser = exports2.parse.text;
           } else if (void 0 === buffer) {
-            parser4 = exports2.parse.image;
+            parser = exports2.parse.image;
             buffer = true;
           }
         }
@@ -40560,10 +40441,10 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
             }
           });
         }
-        if (parser4) {
+        if (parser) {
           try {
             parserHandlesEnd = buffer;
-            parser4(res, (error2, object, files) => {
+            parser(res, (error2, object, files) => {
               if (this.timedout) {
                 return;
               }
@@ -40582,11 +40463,11 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
         }
         this.res = res;
         if (!buffer) {
-          debug3("unbuffered %s %s", this.method, this.url);
+          debug2("unbuffered %s %s", this.method, this.url);
           this.callback(null, this._emitResponse());
           if (multipart) return;
           res.once("end", () => {
-            debug3("end %s %s", this.method, this.url);
+            debug2("end %s %s", this.method, this.url);
             this.emit("end");
           });
           return;
@@ -40596,7 +40477,7 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
           this.callback(error2, null);
         });
         if (!parserHandlesEnd) res.once("end", () => {
-          debug3("end %s %s", this.method, this.url);
+          debug2("end %s %s", this.method, this.url);
           this.emit("end");
           this.callback(null, this._emitResponse());
         });
@@ -40625,8 +40506,8 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
         const totalLength = buffer.length;
         const remainder = totalLength % chunkSize;
         const cutoff = totalLength - remainder;
-        for (let i2 = 0; i2 < cutoff; i2 += chunkSize) {
-          const chunk = buffer.slice(i2, i2 + chunkSize);
+        for (let i = 0; i < cutoff; i += chunkSize) {
+          const chunk = buffer.slice(i, i + chunkSize);
           chunking.push(chunk);
         }
         if (remainder > 0) {
@@ -40639,15 +40520,15 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
       const formData = this._formData;
       if (formData) {
         const headers = formData.getHeaders();
-        for (const i2 in headers) {
-          if (hasOwn(headers, i2)) {
-            debug3('setting FormData header: "%s: %s"', i2, headers[i2]);
-            req.setHeader(i2, headers[i2]);
+        for (const i in headers) {
+          if (hasOwn(headers, i)) {
+            debug2('setting FormData header: "%s: %s"', i, headers[i]);
+            req.setHeader(i, headers[i]);
           }
         }
         formData.getLength((error2, length) => {
-          if (error2) debug3("formData.getLength had error", error2, length);
-          debug3("got FormData Content-Length: %s", length);
+          if (error2) debug2("formData.getLength had error", error2, length);
+          debug2("got FormData Content-Length: %s", length);
           if (typeof length === "number") {
             req.setHeader("Content-Length", length);
           }
@@ -40686,10 +40567,10 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
       const name = method;
       method = method === "del" ? "delete" : method;
       method = method.toUpperCase();
-      request[name] = (url, data, fn) => {
+      request[name] = (url, data, fn2) => {
         const request_ = request(method, url);
         if (typeof data === "function") {
-          fn = data;
+          fn2 = data;
           data = null;
         }
         if (data) {
@@ -40699,7 +40580,7 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
             request_.send(data);
           }
         }
-        if (fn) request_.end(fn);
+        if (fn2) request_.end(fn2);
         return request_;
       };
     }
@@ -40753,8 +40634,9 @@ var require_test = __commonJS({
     var http2;
     try {
       http2 = require("http2");
-    } catch (_) {
+    } catch (_3) {
     }
+    var serverStates = /* @__PURE__ */ new WeakMap();
     var Test = class extends Request {
       static {
         __name(this, "Test");
@@ -40792,11 +40674,42 @@ var require_test = __commonJS({
        * @api private
        */
       serverAddress(app, path) {
-        const addr = app.address();
-        if (!addr) this._server = app.listen(0);
-        const port = app.address().port;
+        let addr = app.address();
+        let state = serverStates.get(app);
+        if (!addr) {
+          if (!state) {
+            state = {
+              pending: 0,
+              starting: true,
+              closing: false,
+              startError: null
+            };
+            serverStates.set(app, state);
+            const onListening = /* @__PURE__ */ __name(function() {
+              state.starting = false;
+              app.removeListener("error", onError);
+            }, "onListening");
+            const onError = /* @__PURE__ */ __name(function(err) {
+              state.starting = false;
+              state.startError = err;
+              app.removeListener("listening", onListening);
+            }, "onError");
+            app.once("listening", onListening);
+            app.once("error", onError);
+            app.listen(0);
+          }
+          addr = app.address();
+        }
+        if (state) {
+          this._server = app;
+        }
+        let host = addr.address;
+        if (host === "::") host = "127.0.0.1";
+        else if (host === "0.0.0.0") host = "127.0.0.1";
+        if (host.includes(":")) host = `[${host}]`;
+        const port = addr.port;
         const protocol = app instanceof Server ? "https" : "http";
-        return protocol + "://127.0.0.1:" + port + path;
+        return protocol + "://" + host + ":" + port + path;
       }
       /**
        * Expectations:
@@ -40815,17 +40728,17 @@ var require_test = __commonJS({
        * @return {Test}
        * @api public
        */
-      expect(a, b, c3) {
+      expect(a, b2, c3) {
         if (typeof a === "function") {
           this._asserts.push(wrapAssertFn(a));
           return this;
         }
-        if (typeof b === "function") this.end(b);
+        if (typeof b2 === "function") this.end(b2);
         if (typeof c3 === "function") this.end(c3);
         if (typeof a === "number") {
           this._asserts.push(wrapAssertFn(this._assertStatus.bind(this, a)));
-          if (typeof b !== "function" && arguments.length > 1) {
-            this._asserts.push(wrapAssertFn(this._assertBody.bind(this, b)));
+          if (typeof b2 !== "function" && arguments.length > 1) {
+            this._asserts.push(wrapAssertFn(this._assertBody.bind(this, b2)));
           }
           return this;
         }
@@ -40833,8 +40746,8 @@ var require_test = __commonJS({
           this._asserts.push(wrapAssertFn(this._assertStatusArray.bind(this, a)));
           return this;
         }
-        if (typeof b === "string" || typeof b === "number" || b instanceof RegExp) {
-          this._asserts.push(wrapAssertFn(this._assertHeader.bind(this, { name: "" + a, value: b })));
+        if (typeof b2 === "string" || typeof b2 === "number" || b2 instanceof RegExp) {
+          this._asserts.push(wrapAssertFn(this._assertHeader.bind(this, { name: "" + a, value: b2 })));
           return this;
         }
         this._asserts.push(wrapAssertFn(this._assertBody.bind(this, a)));
@@ -40847,25 +40760,61 @@ var require_test = __commonJS({
        * @param {?Function} fn
        * @api public
        */
-      end(fn) {
+      end(fn2) {
         const server = this._server;
-        super.end((err, res) => {
-          const localAssert = /* @__PURE__ */ __name(() => {
-            this.assert(err, res, fn);
-          }, "localAssert");
-          if (server && server._handle) {
-            return server.close((closeError) => {
-              if (closeError && closeError.code === "ERR_SERVER_NOT_RUNNING") {
-                return localAssert();
-              }
-              if (closeError) {
-                return localAssert();
-              }
-              localAssert();
-            });
+        const state = server && serverStates.get(server);
+        let complete = false;
+        let dispatch;
+        let onListening;
+        let onStartError;
+        let onClose;
+        const removeStartListeners = /* @__PURE__ */ __name(() => {
+          if (!server) return;
+          if (onListening) server.removeListener("listening", onListening);
+          if (onStartError) server.removeListener("error", onStartError);
+          if (onClose) server.removeListener("close", onClose);
+        }, "removeStartListeners");
+        const finish = /* @__PURE__ */ __name((err, res) => {
+          if (complete) return;
+          complete = true;
+          removeStartListeners();
+          const localAssert = /* @__PURE__ */ __name(() => this.assert(err, res, fn2), "localAssert");
+          if (state) {
+            state.pending -= 1;
+            if (state.pending === 0 && !state.closing && server._handle) {
+              state.closing = true;
+              return server.close(function() {
+                serverStates.delete(server);
+                localAssert();
+              });
+            }
+            if (state.pending === 0 && !server._handle) serverStates.delete(server);
           }
           localAssert();
-        });
+        }, "finish");
+        dispatch = /* @__PURE__ */ __name(() => {
+          removeStartListeners();
+          try {
+            super.end(finish);
+          } catch (err) {
+            finish(err);
+          }
+        }, "dispatch");
+        if (state) state.pending += 1;
+        if (state && state.startError) {
+          finish(state.startError);
+        } else if (state && state.starting) {
+          onListening = dispatch;
+          onStartError = finish;
+          onClose = /* @__PURE__ */ __name(function() {
+            finish(new Error("SuperTest server closed before listening"));
+          }, "onClose");
+          server.once("listening", onListening);
+          server.once("error", onStartError);
+          server.once("close", onClose);
+        } else {
+          dispatch();
+        }
         return this;
       }
       /**
@@ -40876,7 +40825,7 @@ var require_test = __commonJS({
        * @param {Function} fn
        * @api private
        */
-      assert(resError, res, fn) {
+      assert(resError, res, fn2) {
         let errorObj;
         const sysErrors = {
           ECONNREFUSED: "Connection refused",
@@ -40892,25 +40841,15 @@ var require_test = __commonJS({
             errorObj = resError;
           }
         }
-        for (let i2 = 0; i2 < this._asserts.length && !errorObj; i2 += 1) {
-          errorObj = this._assertFunction(this._asserts[i2], res);
+        for (let i = 0; i < this._asserts.length && !errorObj; i += 1) {
+          errorObj = this._assertFunction(this._asserts[i], res);
         }
         if (!errorObj && resError instanceof Error && (!res || resError.status !== res.status)) {
           errorObj = resError;
         }
-        if (fn) {
-          fn.call(this, errorObj || null, res);
+        if (fn2) {
+          fn2.call(this, errorObj || null, res);
         }
-      }
-      /*
-        * Adds a set Authorization Bearer
-        *
-        * @param {Bearer} Bearer Token
-        * Shortcut for .set('Authorization', `Bearer ${token}`)
-        */
-      bearer(token) {
-        this.set("Authorization", `Bearer ${token}`);
-        return this;
       }
       /*
         * Adds a set Authorization Bearer
@@ -40938,18 +40877,18 @@ var require_test = __commonJS({
             deepStrictEqual(body, res.body);
           } catch (err) {
             const a = inspect(body);
-            const b = inspect(res.body);
-            return error2("expected " + a + " response body, got " + b, body, res.body);
+            const b2 = inspect(res.body);
+            return error2("expected " + a + " response body, got " + b2, body, res.body);
           }
         } else if (body !== res.text) {
           const a = inspect(body);
-          const b = inspect(res.text);
+          const b2 = inspect(res.text);
           if (isRegexp) {
             if (!body.test(res.text)) {
-              return error2("expected body " + b + " to match " + body, body, res.body);
+              return error2("expected body " + b2 + " to match " + body, body, res.body);
             }
           } else {
-            return error2("expected " + a + " response body, got " + b, body, res.body);
+            return error2("expected " + a + " response body, got " + b2, body, res.body);
           }
         }
       }
@@ -40964,7 +40903,7 @@ var require_test = __commonJS({
       // eslint-disable-next-line class-methods-use-this
       _assertHeader(header, res) {
         const field = header.name;
-        const actual = res.header[field.toLowerCase()];
+        const actual = res.headers[field.toLowerCase()];
         const fieldExpected = header.value;
         if (typeof actual === "undefined") return new Error('expected "' + field + '" header field');
         if (Array.isArray(actual) && actual.toString() === fieldExpected || fieldExpected === actual) {
@@ -40990,8 +40929,8 @@ var require_test = __commonJS({
       _assertStatus(status, res) {
         if (res.status !== status) {
           const a = STATUS_CODES[status];
-          const b = STATUS_CODES[res.status];
-          return new Error("expected " + status + ' "' + a + '", got ' + res.status + ' "' + b + '"');
+          const b2 = STATUS_CODES[res.status];
+          return new Error("expected " + status + ' "' + a + '", got ' + res.status + ' "' + b2 + '"');
         }
       }
       /**
@@ -41005,10 +40944,10 @@ var require_test = __commonJS({
       // eslint-disable-next-line class-methods-use-this
       _assertStatusArray(statusArray, res) {
         if (!statusArray.includes(res.status)) {
-          const b = STATUS_CODES[res.status];
+          const b2 = STATUS_CODES[res.status];
           const expectedList = statusArray.join(", ");
           return new Error(
-            'expected one of "' + expectedList + '", got ' + res.status + ' "' + b + '"'
+            'expected one of "' + expectedList + '", got ' + res.status + ' "' + b2 + '"'
           );
         }
       }
@@ -41021,10 +40960,10 @@ var require_test = __commonJS({
        * @api private
        */
       // eslint-disable-next-line class-methods-use-this
-      _assertFunction(fn, res) {
+      _assertFunction(fn2, res) {
         let err;
         try {
-          err = fn(res);
+          err = fn2(res);
         } catch (e) {
           err = e;
         }
@@ -41071,7 +41010,7 @@ var require_agent3 = __commonJS({
     var http2;
     try {
       http2 = require("http2");
-    } catch (_) {
+    } catch (_3) {
     }
     var Test = require_test();
     function TestAgent(app, options = {}) {
@@ -41104,7 +41043,7 @@ var require_agent3 = __commonJS({
       if (method === "query") {
         return;
       }
-      TestAgent.prototype[method] = function(url, fn) {
+      TestAgent.prototype[method] = function(url, fn2) {
         const req = new Test(this.app, method.toUpperCase(), url);
         if (this._options.http2) {
           req.http2();
@@ -41256,14 +41195,15 @@ var require_assertion = __commonJS({
         let decode = options.decode || decodeURIComponent;
         let parts = str.split(/; */);
         let cookie = {};
-        parts.forEach(function(part, i2) {
-          if (i2 === 1) cookie.options = {};
+        parts.forEach(function(part, i) {
+          if (i === 1) cookie.options = {};
           let equalsIndex = part.indexOf("=");
           if (equalsIndex < 0) {
             cookie.options[part.trim().toLowerCase()] = true;
             return;
           }
-          const key = part.substr(0, equalsIndex).trim().toLowerCase();
+          const rawKey = part.substr(0, equalsIndex).trim();
+          const key = i === 0 ? rawKey : rawKey.toLowerCase();
           if (typeof cookie[key] !== "undefined") return;
           equalsIndex += 1;
           let val = part.substr(equalsIndex, part.length).trim();
@@ -41274,7 +41214,7 @@ var require_assertion = __commonJS({
           } catch (e) {
             value = val;
           }
-          if (i2 > 0) {
+          if (i > 0) {
             cookie.options[key] = value;
             return;
           }
@@ -41425,7 +41365,7 @@ var require_assertion = __commonJS({
       };
       Assertion.not = function(method) {
         let args = [];
-        for (let i2 = 1; i2 < arguments.length; i2 += 1) args.push(arguments[i2]);
+        for (let i = 1; i < arguments.length; i += 1) args.push(arguments[i]);
         args.push(false);
         return Assertion[method].apply(Assertion, args);
       };
@@ -41462,16 +41402,18 @@ var require_supertest = __commonJS({
   "node_modules/supertest/index.js"(exports2, module2) {
     "use strict";
     var methods = require_methods();
+    var http = require("http");
     var http2;
     try {
       http2 = require("http2");
-    } catch (_) {
+    } catch (_3) {
     }
     var Test = require_test();
     var agent2 = require_agent3();
     var cookies = require_cookies2();
     module2.exports = function(app, options = {}) {
       const obj = {};
+      let target = app;
       if (typeof app === "function") {
         if (options.http2) {
           if (!http2) {
@@ -41479,11 +41421,14 @@ var require_supertest = __commonJS({
               "supertest: this version of Node.js does not support http2"
             );
           }
+          target = http2.createServer(app);
+        } else {
+          target = http.createServer(app);
         }
       }
       methods.forEach(function(method) {
         obj[method] = function(url) {
-          var test = new Test(app, method, url, options.http2);
+          var test = new Test(target, method, url, options.http2);
           if (options.http2) {
             test.http2();
           }
@@ -41499,9 +41444,6 @@ var require_supertest = __commonJS({
   }
 });
 
-// node_modules/simple-git/dist/esm/index.js
-var import_file_exists = __toESM(require_dist(), 1);
-
 // node_modules/@simple-git/args-pathspec/dist/index.mjs
 var t = /* @__PURE__ */ new WeakMap();
 function c(...n) {
@@ -41514,20 +41456,21 @@ function r(n) {
 }
 __name(r, "r");
 
-// node_modules/simple-git/dist/esm/index.js
+// node_modules/simple-git/dist/index.mjs
+var import_file_exists = __toESM(require_dist(), 1);
+var import_node_child_process = require("node:child_process");
 var import_debug = __toESM(require_src(), 1);
-var import_child_process = require("child_process");
 var import_promise_deferred = __toESM(require_dist2(), 1);
 var import_node_path = require("node:path");
 
 // node_modules/@simple-git/argv-parser/dist/index.mjs
-var x = {
+var C = {
   short: /* @__PURE__ */ new Map([
     ["c", true]
     //  -c <k=v>    set config key for this invocation
   ])
 };
-var D = {
+var I = {
   short: new Map([
     ["C", true],
     //  -C <path>   change working directory
@@ -41539,7 +41482,7 @@ var D = {
     // -p          paginate
     ["v", false],
     // -v          version
-    ...x.short.entries()
+    ...C.short.entries()
   ]),
   long: /* @__PURE__ */ new Set([
     "attr-source",
@@ -41552,1730 +41495,1156 @@ var D = {
     "work-tree"
   ])
 };
-function c2(e, t2, n = String(e)) {
+function f(e, n, t2 = String(e)) {
   const o2 = typeof e == "string" ? new RegExp(`\\s*${e.toLowerCase()}`) : e;
-  return function(r2) {
-    if (o2.test(r2))
+  return function(s) {
+    if (o2.test(s))
+      return {
+        category: n,
+        message: `Configuring ${t2} is not permitted without enabling ${n}`
+      };
+  };
+}
+__name(f, "f");
+function l(e, n) {
+  const t2 = new RegExp(`\\s*${e.toLowerCase().replace(/\./g, "(..+)?.")}`);
+  return f(t2, n, e);
+}
+__name(l, "l");
+var K = [
+  f("alias", "allowUnsafeAlias"),
+  f("core.askPass", "allowUnsafeAskPass"),
+  f("core.editor", "allowUnsafeEditor"),
+  f("core.fsmonitor", "allowUnsafeFsMonitor"),
+  f("core.gitProxy", "allowUnsafeGitProxy"),
+  f("core.hooksPath", "allowUnsafeHooksPath"),
+  f("core.pager", "allowUnsafePager"),
+  f("core.sshCommand", "allowUnsafeSshCommand"),
+  l("credential.helper", "allowUnsafeCredentialHelper"),
+  l("diff.command", "allowUnsafeDiffExternal"),
+  f("diff.external", "allowUnsafeDiffExternal"),
+  l("difftool.cmd", "allowUnsafeDiffExternal"),
+  l("diff.textconv", "allowUnsafeDiffTextConv"),
+  l("filter.clean", "allowUnsafeFilter"),
+  l("filter.process", "allowUnsafeFilter"),
+  l("filter.smudge", "allowUnsafeFilter"),
+  l("gpg.program", "allowUnsafeGpgProgram"),
+  f("include.path", "allowUnsafeInclude"),
+  l("includeIf", "allowUnsafeInclude"),
+  f("init.templateDir", "allowUnsafeTemplateDir"),
+  l("pager.", "allowUnsafePager"),
+  l("merge.driver", "allowUnsafeMergeDriver"),
+  l("mergetool.path", "allowUnsafeMergeDriver"),
+  l("mergetool.cmd", "allowUnsafeMergeDriver"),
+  l("protocol.allow", "allowUnsafeProtocolOverride"),
+  l("remote.receivepack", "allowUnsafePack"),
+  l("remote.uploadpack", "allowUnsafePack"),
+  f("uploadpack.packObjectsHook", "allowUnsafePack"),
+  f("sequence.editor", "allowUnsafeEditor"),
+  l("submodule.update", "allowUnsafeSubmodule"),
+  l("tar.command", "allowUnsafeCommandBinaries"),
+  l("trailer.cmd", "allowUnsafeCommandBinaries"),
+  l("trailer.command", "allowUnsafeCommandBinaries"),
+  l("url.insteadOf", "allowUnsafeUrlRewrite")
+];
+function c2(e, n, t2, { name: o2 = String(n), globalOnly: a = false, withValue: s = false } = {}) {
+  const r2 = typeof n == "string" ? new RegExp(`\\s*${n.toLowerCase()}`) : n, i = `Use of ${e ? `${e} with option ` : ""}${o2}\
+ is not permitted without enabling ${t2}`;
+  return function(m2, u2) {
+    if (!(e && m2 !== e) && !(a && !u2.isGlobal) && !(s && u2.value === void 0) && r2.test(u2.name))
       return {
         category: t2,
-        message: `Configuring ${n} is not permitted without enabling ${t2}`
+        message: i
       };
   };
 }
 __name(c2, "c");
-function i(e, t2) {
-  const n = new RegExp(`\\s*${e.toLowerCase().replace(/\./g, "(..+)?.")}`);
-  return c2(n, t2, e);
-}
-__name(i, "i");
-var q = [
-  c2("alias", "allowUnsafeAlias"),
-  c2("core.askPass", "allowUnsafeAskPass"),
-  c2("core.editor", "allowUnsafeEditor"),
-  c2("core.fsmonitor", "allowUnsafeFsMonitor"),
-  c2("core.gitProxy", "allowUnsafeGitProxy"),
-  c2("core.hooksPath", "allowUnsafeHooksPath"),
-  c2("core.pager", "allowUnsafePager"),
-  c2("core.sshCommand", "allowUnsafeSshCommand"),
-  i("credential.helper", "allowUnsafeCredentialHelper"),
-  i("diff.command", "allowUnsafeDiffExternal"),
-  c2("diff.external", "allowUnsafeDiffExternal"),
-  i("diff.textconv", "allowUnsafeDiffTextConv"),
-  i("filter.clean", "allowUnsafeFilter"),
-  i("filter.smudge", "allowUnsafeFilter"),
-  i("gpg.program", "allowUnsafeGpgProgram"),
-  c2("init.templateDir", "allowUnsafeTemplateDir"),
-  i("merge.driver", "allowUnsafeMergeDriver"),
-  i("mergetool.path", "allowUnsafeMergeDriver"),
-  i("mergetool.cmd", "allowUnsafeMergeDriver"),
-  i("protocol.allow", "allowUnsafeProtocolOverride"),
-  i("remote.receivepack", "allowUnsafePack"),
-  i("remote.uploadpack", "allowUnsafePack"),
-  c2("sequence.editor", "allowUnsafeEditor")
-];
-function h(e, t2, n, o2 = String(t2)) {
-  const s = typeof t2 == "string" ? new RegExp(`\\s*${t2.toLowerCase()}`) : t2, r2 = `Use of ${e ? `${e} with option ` :
-  ""}${o2} is not permitted without enabling ${n}`;
-  return function(a, f) {
-    if ((!e || a === e) && s.test(f))
-      return {
-        category: n,
-        message: r2
-      };
-  };
-}
-__name(h, "h");
-var H = [
-  h(
-    null,
-    /--(upload|receive)-pack/,
-    "allowUnsafePack",
-    "--upload-pack or --receive-pack"
-  ),
-  h("clone", /^-\w*u/, "allowUnsafePack"),
-  h("clone", "--u", "allowUnsafePack"),
-  h("push", "--exec", "allowUnsafePack"),
-  h(null, "--template", "allowUnsafeTemplateDir")
+var h = { globalOnly: true, withValue: true };
+var X = [
+  c2(null, /--(upload|receive)-pack/, "allowUnsafePack", {
+    name: "--upload-pack or --receive-pack"
+  }),
+  c2("clone", /^-\w*u/, "allowUnsafePack"),
+  c2("clone", "--u", "allowUnsafePack"),
+  c2("push", /^--exec$/, "allowUnsafePack", { name: "--exec" }),
+  // `git` accepts unambiguous abbreviations of long options, so `--ex` and `--exe` are `--exec`
+  c2("rebase", /^(-x|--ex(ec?)?)$/, "allowUnsafeExec", { name: "-x or --exec" }),
+  c2(null, "--template", "allowUnsafeTemplateDir"),
+  c2(null, "--exec-path", "allowUnsafeExec", h),
+  // `git` reads the configuration of whichever repository these name, so the
+  // directory alone is enough to deliver config the argv guards never see
+  c2(null, "--git-dir", "allowUnsafeConfigPaths", h),
+  c2(null, "--work-tree", "allowUnsafeConfigPaths", h),
+  c2(null, /^-C$/, "allowUnsafeConfigPaths", { ...h, name: "-C" })
 ];
 
-// node_modules/simple-git/dist/esm/index.js
-var import_promise_deferred2 = __toESM(require_dist2(), 1);
-var __defProp2 = Object.defineProperty;
-var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames2 = Object.getOwnPropertyNames;
-var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-var __esm = /* @__PURE__ */ __name((fn, res) => /* @__PURE__ */ __name(function __init() {
-  return fn && (res = (0, fn[__getOwnPropNames2(fn)[0]])(fn = 0)), res;
-}, "__init"), "__esm");
-var __commonJS2 = /* @__PURE__ */ __name((cb, mod) => /* @__PURE__ */ __name(function __require() {
-  return mod || (0, cb[__getOwnPropNames2(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
-}, "__require"), "__commonJS");
-var __export = /* @__PURE__ */ __name((target, all) => {
-  for (var name in all)
-    __defProp2(target, name, { get: all[name], enumerable: true });
-}, "__export");
-var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames2(from))
-      if (!__hasOwnProp2.call(to, key) && key !== except)
-        __defProp2(to, key, { get: /* @__PURE__ */ __name(() => from[key], "get"), enumerable: !(desc = __getOwnPropDesc2(
-        from, key)) || desc.enumerable });
+// node_modules/simple-git/dist/index.mjs
+var O = class extends Error {
+  static {
+    __name(this, "O");
   }
-  return to;
-}, "__copyProps");
-var __toCommonJS = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__\
-toCommonJS");
-var GitError;
-var init_git_error = __esm({
-  "src/lib/errors/git-error.ts"() {
-    "use strict";
-    GitError = class extends Error {
-      static {
-        __name(this, "GitError");
-      }
-      constructor(task, message) {
-        super(message);
-        this.task = task;
-        Object.setPrototypeOf(this, new.target.prototype);
-      }
-    };
+  constructor(e, n) {
+    super(n), this.task = e, Object.setPrototypeOf(this, new.target.prototype);
   }
-});
-var GitResponseError;
-var init_git_response_error = __esm({
-  "src/lib/errors/git-response-error.ts"() {
-    "use strict";
-    init_git_error();
-    GitResponseError = class extends GitError {
-      static {
-        __name(this, "GitResponseError");
-      }
-      constructor(git, message) {
-        super(void 0, message || String(git));
-        this.git = git;
-      }
-    };
+};
+var at = class extends O {
+  static {
+    __name(this, "at");
   }
-});
-var TaskConfigurationError;
-var init_task_configuration_error = __esm({
-  "src/lib/errors/task-configuration-error.ts"() {
-    "use strict";
-    init_git_error();
-    TaskConfigurationError = class extends GitError {
-      static {
-        __name(this, "TaskConfigurationError");
-      }
-      constructor(message) {
-        super(void 0, message);
-      }
-    };
+  constructor(e, n) {
+    super(void 0, n || String(e)), this.git = e;
   }
-});
-function asFunction(source) {
-  if (typeof source !== "function") {
-    return NOOP;
+};
+var xe = class extends O {
+  static {
+    __name(this, "xe");
   }
-  return source;
+  constructor(e) {
+    super(void 0, e);
+  }
+};
+var I2 = "\0";
+var W = /* @__PURE__ */ __name(() => {
+}, "W");
+function Ne(t2) {
+  return typeof t2 != "function" ? W : t2;
 }
-__name(asFunction, "asFunction");
-function isUserFunction(source) {
-  return typeof source === "function" && source !== NOOP;
+__name(Ne, "Ne");
+function $e(t2) {
+  return typeof t2 == "function" && t2 !== W;
 }
-__name(isUserFunction, "isUserFunction");
-function splitOn(input, char) {
-  const index = input.indexOf(char);
-  if (index <= 0) {
-    return [input, ""];
-  }
-  return [input.substr(0, index), input.substr(index + 1)];
+__name($e, "$e");
+function Pe(t2, e) {
+  const n = t2.indexOf(e);
+  return n <= 0 ? [t2, ""] : [t2.substr(0, n), t2.substr(n + 1)];
 }
-__name(splitOn, "splitOn");
-function first(input, offset = 0) {
-  return isArrayLike(input) && input.length > offset ? input[offset] : void 0;
+__name(Pe, "Pe");
+function Me(t2, e = 0) {
+  return Dt(t2) && t2.length > e ? t2[e] : void 0;
 }
-__name(first, "first");
-function last(input, offset = 0) {
-  if (isArrayLike(input) && input.length > offset) {
-    return input[input.length - 1 - offset];
-  }
+__name(Me, "Me");
+function N(t2, e = 0) {
+  if (Dt(t2) && t2.length > e)
+    return t2[t2.length - 1 - e];
 }
-__name(last, "last");
-function isArrayLike(input) {
-  return filterHasLength(input);
+__name(N, "N");
+function Dt(t2) {
+  return Bt(t2);
 }
-__name(isArrayLike, "isArrayLike");
-function toLinesWithContent(input = "", trimmed2 = true, separator = "\n") {
-  return input.split(separator).reduce((output, line) => {
-    const lineContent = trimmed2 ? line.trim() : line;
-    if (lineContent) {
-      output.push(lineContent);
-    }
-    return output;
+__name(Dt, "Dt");
+function H(t2 = "", e = true, n = `
+`) {
+  return t2.split(n).reduce((r2, s) => {
+    const o2 = e ? s.trim() : s;
+    return o2 && r2.push(o2), r2;
   }, []);
 }
-__name(toLinesWithContent, "toLinesWithContent");
-function forEachLineWithContent(input, callback) {
-  return toLinesWithContent(input, true).map((line) => callback(line));
+__name(H, "H");
+function ut(t2, e) {
+  return H(t2, true).map((n) => e(n));
 }
-__name(forEachLineWithContent, "forEachLineWithContent");
-function folderExists(path) {
-  return (0, import_file_exists.exists)(path, import_file_exists.FOLDER);
+__name(ut, "ut");
+function Lt(t2) {
+  return (0, import_file_exists.exists)(t2, import_file_exists.FOLDER);
 }
-__name(folderExists, "folderExists");
-function append(target, item) {
-  if (Array.isArray(target)) {
-    if (!target.includes(item)) {
-      target.push(item);
+__name(Lt, "Lt");
+function S(t2, e) {
+  return Array.isArray(t2) ? t2.includes(e) || t2.push(e) : t2.add(e), e;
+}
+__name(S, "S");
+function ct(t2, e) {
+  if (Array.isArray(t2)) {
+    const n = t2.indexOf(e);
+    n >= 0 && t2.splice(n, 1);
+  } else
+    t2.delete(e);
+  return e;
+}
+__name(ct, "ct");
+var ft = Object.prototype.toString.call.bind(Object.prototype.toString);
+function v(t2) {
+  return Array.isArray(t2) ? t2 : [t2];
+}
+__name(v, "v");
+function jt(t2) {
+  return t2.replace(/[\s-]+(.)/g, (e, n) => n.toUpperCase());
+}
+__name(jt, "jt");
+function L(t2) {
+  return v(t2).map((e) => e instanceof String ? e : String(e));
+}
+__name(L, "L");
+function p(t2, e = 0) {
+  if (t2 == null)
+    return e;
+  const n = parseInt(t2, 10);
+  return Number.isNaN(n) ? e : n;
+}
+__name(p, "p");
+function U(t2, e) {
+  const n = [];
+  for (let r2 = 0, s = t2.length; r2 < s; r2++)
+    n.push(e, t2[r2]);
+  return n;
+}
+__name(U, "U");
+function F(t2) {
+  return (Array.isArray(t2) ? Buffer.concat(t2) : t2).toString("utf-8");
+}
+__name(F, "F");
+function bt(t2) {
+  if (t2 !== false)
+    return t2;
+}
+__name(bt, "bt");
+function d(t2, e, n) {
+  return e(t2) ? t2 : arguments.length > 2 ? n : void 0;
+}
+__name(d, "d");
+var K2 = /* @__PURE__ */ __name((t2) => Array.isArray(t2), "K");
+function st(t2, e) {
+  const n = r(t2) ? "string" : typeof t2;
+  return /number|string|boolean/.test(n) && (!e || !e.includes(n));
+}
+__name(st, "st");
+var m = /* @__PURE__ */ __name((t2) => typeof t2 == "string" || r(t2), "m");
+var Be = /* @__PURE__ */ __name((t2) => m(t2) || Buffer.isBuffer(t2), "Be");
+var G = /* @__PURE__ */ __name((t2) => m(t2) || Array.isArray(t2) && t2.every(m), "G");
+function lt(t2) {
+  return !!t2 && ft(t2) === "[object Object]";
+}
+__name(lt, "lt");
+function Ie(t2) {
+  return typeof t2 == "function";
+}
+__name(Ie, "Ie");
+var Bt = /* @__PURE__ */ __name((t2) => t2 == null || "number|boolean|function".includes(typeof t2) ? false : typeof t2.
+length == "number", "Bt");
+var V = /* @__PURE__ */ ((t2) => (t2[t2.SUCCESS = 0] = "SUCCESS", t2[t2.ERROR = 1] = "ERROR", t2[t2.NOT_FOUND = -2] = "N\
+OT_FOUND", t2[t2.UNCLEAN = 128] = "UNCLEAN", t2))(V || {});
+var z = class _z {
+  static {
+    __name(this, "z");
+  }
+  constructor(e, n) {
+    this.stdOut = e, this.stdErr = n;
+  }
+  asStrings() {
+    return new _z(this.stdOut.toString("utf8"), this.stdErr.toString("utf8"));
+  }
+};
+function Ue() {
+  throw new Error("LineParser:useMatches not implemented");
+}
+__name(Ue, "Ue");
+var l2 = class {
+  static {
+    __name(this, "l");
+  }
+  constructor(e, n) {
+    this.matches = [], this.useMatches = Ue, this.parse = (r2, s) => (this.resetMatches(), this._regExp.every((o2, i) => this.
+    addMatch(o2, i, r2(i))) ? this.useMatches(s, this.prepareMatches()) !== false : false), this._regExp = Array.isArray(
+    e) ? e : [e], n && (this.useMatches = n);
+  }
+  resetMatches() {
+    this.matches.length = 0;
+  }
+  prepareMatches() {
+    return this.matches;
+  }
+  addMatch(e, n, r2) {
+    const s = r2 && e.exec(r2);
+    return s && this.pushMatch(n, s), !!s;
+  }
+  pushMatch(e, n) {
+    this.matches.push(...n.slice(1));
+  }
+};
+var x = class extends l2 {
+  static {
+    __name(this, "x");
+  }
+  addMatch(e, n, r2) {
+    return /^remote:\s/.test(String(r2)) && super.addMatch(e, n, r2);
+  }
+  pushMatch(e, n) {
+    (e > 0 || n.length > 1) && super.pushMatch(e, n);
+  }
+};
+function It(t2, e = []) {
+  return lt(t2) ? Object.keys(t2).reduce((n, r2) => {
+    const s = t2[r2];
+    if (r(s))
+      n.push(s);
+    else if (st(s, ["boolean"]))
+      n.push(r2 + "=" + s);
+    else if (Array.isArray(s))
+      for (const o2 of s)
+        st(o2, ["string", "number"]) || n.push(r2 + "=" + o2);
+    else
+      n.push(r2);
+    return n;
+  }, e) : e;
+}
+__name(It, "It");
+function h2(t2, e = 0, n = false) {
+  const r2 = [];
+  for (let s = 0, o2 = e < 0 ? t2.length : e; s < o2; s++)
+    "string|number".includes(typeof t2[s]) && r2.push(String(t2[s]));
+  return It(ht(t2), r2), n || r2.push(...ze(t2)), r2;
+}
+__name(h2, "h");
+function ze(t2) {
+  const e = typeof N(t2) == "function";
+  return L(d(N(t2, e ? 1 : 0), K2, []));
+}
+__name(ze, "ze");
+function ht(t2) {
+  const e = Ie(N(t2));
+  return d(N(t2, e ? 1 : 0), lt);
+}
+__name(ht, "ht");
+function u(t2, e = true) {
+  const n = Ne(N(t2));
+  return e || $e(n) ? n : void 0;
+}
+__name(u, "u");
+function Tt(t2, e) {
+  return t2(e.stdOut, e.stdErr);
+}
+__name(Tt, "Tt");
+function E(t2, e, n, r2 = true) {
+  return v(n).forEach((s) => {
+    for (let o2 = H(s, r2), i = 0, a = o2.length; i < a; i++) {
+      const c3 = /* @__PURE__ */ __name((y = 0) => {
+        if (!(i + y >= a))
+          return o2[i + y];
+      }, "c");
+      e.some(({ parse: y }) => y(c3, t2));
     }
-  } else {
-    target.add(item);
-  }
-  return item;
+  }), t2;
 }
-__name(append, "append");
-function including(target, item) {
-  if (Array.isArray(target) && !target.includes(item)) {
-    target.push(item);
-  }
-  return target;
-}
-__name(including, "including");
-function remove(target, item) {
-  if (Array.isArray(target)) {
-    const index = target.indexOf(item);
-    if (index >= 0) {
-      target.splice(index, 1);
-    }
-  } else {
-    target.delete(item);
-  }
-  return item;
-}
-__name(remove, "remove");
-function asArray(source) {
-  return Array.isArray(source) ? source : [source];
-}
-__name(asArray, "asArray");
-function asCamelCase(str) {
-  return str.replace(/[\s-]+(.)/g, (_all, chr) => {
-    return chr.toUpperCase();
-  });
-}
-__name(asCamelCase, "asCamelCase");
-function asStringArray(source) {
-  return asArray(source).map((item) => {
-    return item instanceof String ? item : String(item);
-  });
-}
-__name(asStringArray, "asStringArray");
-function asNumber(source, onNaN = 0) {
-  if (source == null) {
-    return onNaN;
-  }
-  const num = parseInt(source, 10);
-  return Number.isNaN(num) ? onNaN : num;
-}
-__name(asNumber, "asNumber");
-function prefixedArray(input, prefix) {
-  const output = [];
-  for (let i2 = 0, max = input.length; i2 < max; i2++) {
-    output.push(prefix, input[i2]);
-  }
-  return output;
-}
-__name(prefixedArray, "prefixedArray");
-function bufferToString(input) {
-  return (Array.isArray(input) ? Buffer.concat(input) : input).toString("utf-8");
-}
-__name(bufferToString, "bufferToString");
-function pick(source, properties) {
-  const out = {};
-  properties.forEach((key) => {
-    if (source[key] !== void 0) {
-      out[key] = source[key];
-    }
-  });
-  return out;
-}
-__name(pick, "pick");
-function delay(duration = 0) {
-  return new Promise((done) => setTimeout(done, duration));
-}
-__name(delay, "delay");
-function orVoid(input) {
-  if (input === false) {
-    return void 0;
-  }
-  return input;
-}
-__name(orVoid, "orVoid");
-var NULL;
-var NOOP;
-var objectToString;
-var init_util = __esm({
-  "src/lib/utils/util.ts"() {
-    "use strict";
-    init_argument_filters();
-    NULL = "\0";
-    NOOP = /* @__PURE__ */ __name(() => {
-    }, "NOOP");
-    objectToString = Object.prototype.toString.call.bind(Object.prototype.toString);
-  }
-});
-function filterType(input, filter, def) {
-  if (filter(input)) {
-    return input;
-  }
-  return arguments.length > 2 ? def : void 0;
-}
-__name(filterType, "filterType");
-function filterPrimitives(input, omit) {
-  const type = r(input) ? "string" : typeof input;
-  return /number|string|boolean/.test(type) && (!omit || !omit.includes(type));
-}
-__name(filterPrimitives, "filterPrimitives");
-function filterPlainObject(input) {
-  return !!input && objectToString(input) === "[object Object]";
-}
-__name(filterPlainObject, "filterPlainObject");
-function filterFunction(input) {
-  return typeof input === "function";
-}
-__name(filterFunction, "filterFunction");
-var filterArray;
-var filterNumber;
-var filterString;
-var filterStringOrStringArray;
-var filterHasLength;
-var init_argument_filters = __esm({
-  "src/lib/utils/argument-filters.ts"() {
-    "use strict";
-    init_util();
-    filterArray = /* @__PURE__ */ __name((input) => {
-      return Array.isArray(input);
-    }, "filterArray");
-    filterNumber = /* @__PURE__ */ __name((input) => {
-      return typeof input === "number";
-    }, "filterNumber");
-    filterString = /* @__PURE__ */ __name((input) => {
-      return typeof input === "string" || r(input);
-    }, "filterString");
-    filterStringOrStringArray = /* @__PURE__ */ __name((input) => {
-      return filterString(input) || Array.isArray(input) && input.every(filterString);
-    }, "filterStringOrStringArray");
-    filterHasLength = /* @__PURE__ */ __name((input) => {
-      if (input == null || "number|boolean|function".includes(typeof input)) {
-        return false;
-      }
-      return typeof input.length === "number";
-    }, "filterHasLength");
-  }
-});
-var ExitCodes;
-var init_exit_codes = __esm({
-  "src/lib/utils/exit-codes.ts"() {
-    "use strict";
-    ExitCodes = /* @__PURE__ */ ((ExitCodes2) => {
-      ExitCodes2[ExitCodes2["SUCCESS"] = 0] = "SUCCESS";
-      ExitCodes2[ExitCodes2["ERROR"] = 1] = "ERROR";
-      ExitCodes2[ExitCodes2["NOT_FOUND"] = -2] = "NOT_FOUND";
-      ExitCodes2[ExitCodes2["UNCLEAN"] = 128] = "UNCLEAN";
-      return ExitCodes2;
-    })(ExitCodes || {});
-  }
-});
-var GitOutputStreams;
-var init_git_output_streams = __esm({
-  "src/lib/utils/git-output-streams.ts"() {
-    "use strict";
-    GitOutputStreams = class _GitOutputStreams {
-      static {
-        __name(this, "_GitOutputStreams");
-      }
-      constructor(stdOut, stdErr) {
-        this.stdOut = stdOut;
-        this.stdErr = stdErr;
-      }
-      asStrings() {
-        return new _GitOutputStreams(this.stdOut.toString("utf8"), this.stdErr.toString("utf8"));
-      }
-    };
-  }
-});
-function useMatchesDefault() {
-  throw new Error(`LineParser:useMatches not implemented`);
-}
-__name(useMatchesDefault, "useMatchesDefault");
-var LineParser;
-var RemoteLineParser;
-var init_line_parser = __esm({
-  "src/lib/utils/line-parser.ts"() {
-    "use strict";
-    LineParser = class {
-      static {
-        __name(this, "LineParser");
-      }
-      constructor(regExp, useMatches) {
-        this.matches = [];
-        this.useMatches = useMatchesDefault;
-        this.parse = (line, target) => {
-          this.resetMatches();
-          if (!this._regExp.every((reg, index) => this.addMatch(reg, index, line(index)))) {
-            return false;
-          }
-          return this.useMatches(target, this.prepareMatches()) !== false;
-        };
-        this._regExp = Array.isArray(regExp) ? regExp : [regExp];
-        if (useMatches) {
-          this.useMatches = useMatches;
-        }
-      }
-      resetMatches() {
-        this.matches.length = 0;
-      }
-      prepareMatches() {
-        return this.matches;
-      }
-      addMatch(reg, index, line) {
-        const matched = line && reg.exec(line);
-        if (matched) {
-          this.pushMatch(index, matched);
-        }
-        return !!matched;
-      }
-      pushMatch(_index, matched) {
-        this.matches.push(...matched.slice(1));
-      }
-    };
-    RemoteLineParser = class extends LineParser {
-      static {
-        __name(this, "RemoteLineParser");
-      }
-      addMatch(reg, index, line) {
-        return /^remote:\s/.test(String(line)) && super.addMatch(reg, index, line);
-      }
-      pushMatch(index, matched) {
-        if (index > 0 || matched.length > 1) {
-          super.pushMatch(index, matched);
-        }
-      }
-    };
-  }
-});
-function createInstanceConfig(...options) {
-  const baseDir = process.cwd();
-  const config = Object.assign(
-    { baseDir, ...defaultOptions },
-    ...options.filter((o2) => typeof o2 === "object" && o2)
-  );
-  config.baseDir = config.baseDir || baseDir;
-  config.trimmed = config.trimmed === true;
-  return config;
-}
-__name(createInstanceConfig, "createInstanceConfig");
-var defaultOptions;
-var init_simple_git_options = __esm({
-  "src/lib/utils/simple-git-options.ts"() {
-    "use strict";
-    defaultOptions = {
-      binary: "git",
-      maxConcurrentProcesses: 5,
-      config: [],
-      trimmed: false
-    };
-  }
-});
-function appendTaskOptions(options, commands = []) {
-  if (!filterPlainObject(options)) {
-    return commands;
-  }
-  return Object.keys(options).reduce((commands2, key) => {
-    const value = options[key];
-    if (r(value)) {
-      commands2.push(value);
-    } else if (filterPrimitives(value, ["boolean"])) {
-      commands2.push(key + "=" + value);
-    } else if (Array.isArray(value)) {
-      for (const v of value) {
-        if (!filterPrimitives(v, ["string", "number"])) {
-          commands2.push(key + "=" + v);
-        }
-      }
-    } else {
-      commands2.push(key);
-    }
-    return commands2;
-  }, commands);
-}
-__name(appendTaskOptions, "appendTaskOptions");
-function getTrailingOptions(args, initialPrimitive = 0, objectOnly = false) {
-  const command = [];
-  for (let i2 = 0, max = initialPrimitive < 0 ? args.length : initialPrimitive; i2 < max; i2++) {
-    if ("string|number".includes(typeof args[i2])) {
-      command.push(String(args[i2]));
-    }
-  }
-  appendTaskOptions(trailingOptionsArgument(args), command);
-  if (!objectOnly) {
-    command.push(...trailingArrayArgument(args));
-  }
-  return command;
-}
-__name(getTrailingOptions, "getTrailingOptions");
-function trailingArrayArgument(args) {
-  const hasTrailingCallback = typeof last(args) === "function";
-  return asStringArray(filterType(last(args, hasTrailingCallback ? 1 : 0), filterArray, []));
-}
-__name(trailingArrayArgument, "trailingArrayArgument");
-function trailingOptionsArgument(args) {
-  const hasTrailingCallback = filterFunction(last(args));
-  return filterType(last(args, hasTrailingCallback ? 1 : 0), filterPlainObject);
-}
-__name(trailingOptionsArgument, "trailingOptionsArgument");
-function trailingFunctionArgument(args, includeNoop = true) {
-  const callback = asFunction(last(args));
-  return includeNoop || isUserFunction(callback) ? callback : void 0;
-}
-__name(trailingFunctionArgument, "trailingFunctionArgument");
-var init_task_options = __esm({
-  "src/lib/utils/task-options.ts"() {
-    "use strict";
-    init_argument_filters();
-    init_util();
-  }
-});
-function callTaskParser(parser4, streams) {
-  return parser4(streams.stdOut, streams.stdErr);
-}
-__name(callTaskParser, "callTaskParser");
-function parseStringResponse(result, parsers12, texts, trim = true) {
-  asArray(texts).forEach((text) => {
-    for (let lines = toLinesWithContent(text, trim), i2 = 0, max = lines.length; i2 < max; i2++) {
-      const line = /* @__PURE__ */ __name((offset = 0) => {
-        if (i2 + offset >= max) {
-          return;
-        }
-        return lines[i2 + offset];
-      }, "line");
-      parsers12.some(({ parse }) => parse(line, result));
-    }
-  });
-  return result;
-}
-__name(parseStringResponse, "parseStringResponse");
-var init_task_parser = __esm({
-  "src/lib/utils/task-parser.ts"() {
-    "use strict";
-    init_util();
-  }
-});
-var utils_exports = {};
-__export(utils_exports, {
-  ExitCodes: /* @__PURE__ */ __name(() => ExitCodes, "ExitCodes"),
-  GitOutputStreams: /* @__PURE__ */ __name(() => GitOutputStreams, "GitOutputStreams"),
-  LineParser: /* @__PURE__ */ __name(() => LineParser, "LineParser"),
-  NOOP: /* @__PURE__ */ __name(() => NOOP, "NOOP"),
-  NULL: /* @__PURE__ */ __name(() => NULL, "NULL"),
-  RemoteLineParser: /* @__PURE__ */ __name(() => RemoteLineParser, "RemoteLineParser"),
-  append: /* @__PURE__ */ __name(() => append, "append"),
-  appendTaskOptions: /* @__PURE__ */ __name(() => appendTaskOptions, "appendTaskOptions"),
-  asArray: /* @__PURE__ */ __name(() => asArray, "asArray"),
-  asCamelCase: /* @__PURE__ */ __name(() => asCamelCase, "asCamelCase"),
-  asFunction: /* @__PURE__ */ __name(() => asFunction, "asFunction"),
-  asNumber: /* @__PURE__ */ __name(() => asNumber, "asNumber"),
-  asStringArray: /* @__PURE__ */ __name(() => asStringArray, "asStringArray"),
-  bufferToString: /* @__PURE__ */ __name(() => bufferToString, "bufferToString"),
-  callTaskParser: /* @__PURE__ */ __name(() => callTaskParser, "callTaskParser"),
-  createInstanceConfig: /* @__PURE__ */ __name(() => createInstanceConfig, "createInstanceConfig"),
-  delay: /* @__PURE__ */ __name(() => delay, "delay"),
-  filterArray: /* @__PURE__ */ __name(() => filterArray, "filterArray"),
-  filterFunction: /* @__PURE__ */ __name(() => filterFunction, "filterFunction"),
-  filterHasLength: /* @__PURE__ */ __name(() => filterHasLength, "filterHasLength"),
-  filterNumber: /* @__PURE__ */ __name(() => filterNumber, "filterNumber"),
-  filterPlainObject: /* @__PURE__ */ __name(() => filterPlainObject, "filterPlainObject"),
-  filterPrimitives: /* @__PURE__ */ __name(() => filterPrimitives, "filterPrimitives"),
-  filterString: /* @__PURE__ */ __name(() => filterString, "filterString"),
-  filterStringOrStringArray: /* @__PURE__ */ __name(() => filterStringOrStringArray, "filterStringOrStringArray"),
-  filterType: /* @__PURE__ */ __name(() => filterType, "filterType"),
-  first: /* @__PURE__ */ __name(() => first, "first"),
-  folderExists: /* @__PURE__ */ __name(() => folderExists, "folderExists"),
-  forEachLineWithContent: /* @__PURE__ */ __name(() => forEachLineWithContent, "forEachLineWithContent"),
-  getTrailingOptions: /* @__PURE__ */ __name(() => getTrailingOptions, "getTrailingOptions"),
-  including: /* @__PURE__ */ __name(() => including, "including"),
-  isUserFunction: /* @__PURE__ */ __name(() => isUserFunction, "isUserFunction"),
-  last: /* @__PURE__ */ __name(() => last, "last"),
-  objectToString: /* @__PURE__ */ __name(() => objectToString, "objectToString"),
-  orVoid: /* @__PURE__ */ __name(() => orVoid, "orVoid"),
-  parseStringResponse: /* @__PURE__ */ __name(() => parseStringResponse, "parseStringResponse"),
-  pick: /* @__PURE__ */ __name(() => pick, "pick"),
-  prefixedArray: /* @__PURE__ */ __name(() => prefixedArray, "prefixedArray"),
-  remove: /* @__PURE__ */ __name(() => remove, "remove"),
-  splitOn: /* @__PURE__ */ __name(() => splitOn, "splitOn"),
-  toLinesWithContent: /* @__PURE__ */ __name(() => toLinesWithContent, "toLinesWithContent"),
-  trailingFunctionArgument: /* @__PURE__ */ __name(() => trailingFunctionArgument, "trailingFunctionArgument"),
-  trailingOptionsArgument: /* @__PURE__ */ __name(() => trailingOptionsArgument, "trailingOptionsArgument")
-});
-var init_utils = __esm({
-  "src/lib/utils/index.ts"() {
-    "use strict";
-    init_argument_filters();
-    init_exit_codes();
-    init_git_output_streams();
-    init_line_parser();
-    init_simple_git_options();
-    init_task_options();
-    init_task_parser();
-    init_util();
-  }
-});
-var check_is_repo_exports = {};
-__export(check_is_repo_exports, {
-  CheckRepoActions: /* @__PURE__ */ __name(() => CheckRepoActions, "CheckRepoActions"),
-  checkIsBareRepoTask: /* @__PURE__ */ __name(() => checkIsBareRepoTask, "checkIsBareRepoTask"),
-  checkIsRepoRootTask: /* @__PURE__ */ __name(() => checkIsRepoRootTask, "checkIsRepoRootTask"),
-  checkIsRepoTask: /* @__PURE__ */ __name(() => checkIsRepoTask, "checkIsRepoTask")
-});
-function checkIsRepoTask(action2) {
-  switch (action2) {
+__name(E, "E");
+var mt = /* @__PURE__ */ __name(({ exitCode: t2 }, e, n, r2) => {
+  if (t2 === V.UNCLEAN && Ve(e))
+    return n(Buffer.from("false"));
+  r2(e);
+}, "mt");
+var Ut = /* @__PURE__ */ __name((t2) => t2.trim() === "true", "Ut");
+function We(t2) {
+  switch (t2) {
     case "bare":
-      return checkIsBareRepoTask();
+      return Ke();
     case "root":
-      return checkIsRepoRootTask();
+      return He();
   }
-  const commands = ["rev-parse", "--is-inside-work-tree"];
   return {
-    commands,
+    commands: ["rev-parse", "--is-inside-work-tree"],
     format: "utf-8",
-    onError,
-    parser
+    onError: mt,
+    parser: Ut
   };
 }
-__name(checkIsRepoTask, "checkIsRepoTask");
-function checkIsRepoRootTask() {
-  const commands = ["rev-parse", "--git-dir"];
+__name(We, "We");
+function He() {
   return {
-    commands,
+    commands: ["rev-parse", "--git-dir"],
     format: "utf-8",
-    onError,
-    parser(path) {
-      return /^\.(git)?$/.test(path.trim());
+    onError: mt,
+    parser(e) {
+      return /^\.(git)?$/.test(e.trim());
     }
   };
 }
-__name(checkIsRepoRootTask, "checkIsRepoRootTask");
-function checkIsBareRepoTask() {
-  const commands = ["rev-parse", "--is-bare-repository"];
+__name(He, "He");
+function Ke() {
   return {
-    commands,
+    commands: ["rev-parse", "--is-bare-repository"],
     format: "utf-8",
-    onError,
-    parser
+    onError: mt,
+    parser: Ut
   };
 }
-__name(checkIsBareRepoTask, "checkIsBareRepoTask");
-function isNotRepoMessage(error2) {
-  return /(Not a git repository|Kein Git-Repository)/i.test(String(error2));
+__name(Ke, "Ke");
+function Ve(t2) {
+  return /(Not a git repository|Kein Git-Repository)/i.test(String(t2));
 }
-__name(isNotRepoMessage, "isNotRepoMessage");
-var CheckRepoActions;
-var onError;
-var parser;
-var init_check_is_repo = __esm({
-  "src/lib/tasks/check-is-repo.ts"() {
-    "use strict";
-    init_utils();
-    CheckRepoActions = /* @__PURE__ */ ((CheckRepoActions2) => {
-      CheckRepoActions2["BARE"] = "bare";
-      CheckRepoActions2["IN_TREE"] = "tree";
-      CheckRepoActions2["IS_REPO_ROOT"] = "root";
-      return CheckRepoActions2;
-    })(CheckRepoActions || {});
-    onError = /* @__PURE__ */ __name(({ exitCode }, error2, done, fail) => {
-      if (exitCode === 128 && isNotRepoMessage(error2)) {
-        return done(Buffer.from("false"));
-      }
-      fail(error2);
-    }, "onError");
-    parser = /* @__PURE__ */ __name((text) => {
-      return text.trim() === "true";
-    }, "parser");
+__name(Ve, "Ve");
+var Xe = class {
+  static {
+    __name(this, "Xe");
   }
-});
-function cleanSummaryParser(dryRun, text) {
-  const summary2 = new CleanResponse(dryRun);
-  const regexp = dryRun ? dryRunRemovalRegexp : removalRegexp;
-  toLinesWithContent(text).forEach((line) => {
-    const removed = line.replace(regexp, "");
-    summary2.paths.push(removed);
-    (isFolderRegexp.test(removed) ? summary2.folders : summary2.files).push(removed);
-  });
-  return summary2;
+  constructor(e) {
+    this.paths = [], this.files = [], this.folders = [], this.dryRun = e;
+  }
+};
+var Ye = /^[a-z]+\s*/i;
+var Qe = /^[a-z]+\s+[a-z]+\s*/i;
+var Je = /\/$/;
+function Ze(t2, e) {
+  const n = new Xe(t2), r2 = t2 ? Qe : Ye;
+  return H(e).forEach((s) => {
+    const o2 = s.replace(r2, "");
+    n.paths.push(o2), (Je.test(o2) ? n.folders : n.files).push(o2);
+  }), n;
 }
-__name(cleanSummaryParser, "cleanSummaryParser");
-var CleanResponse;
-var removalRegexp;
-var dryRunRemovalRegexp;
-var isFolderRegexp;
-var init_CleanSummary = __esm({
-  "src/lib/responses/CleanSummary.ts"() {
-    "use strict";
-    init_utils();
-    CleanResponse = class {
-      static {
-        __name(this, "CleanResponse");
-      }
-      constructor(dryRun) {
-        this.dryRun = dryRun;
-        this.paths = [];
-        this.files = [];
-        this.folders = [];
-      }
-    };
-    removalRegexp = /^[a-z]+\s*/i;
-    dryRunRemovalRegexp = /^[a-z]+\s+[a-z]+\s*/i;
-    isFolderRegexp = /\/$/;
-  }
-});
-var task_exports = {};
-__export(task_exports, {
-  EMPTY_COMMANDS: /* @__PURE__ */ __name(() => EMPTY_COMMANDS, "EMPTY_COMMANDS"),
-  adhocExecTask: /* @__PURE__ */ __name(() => adhocExecTask, "adhocExecTask"),
-  configurationErrorTask: /* @__PURE__ */ __name(() => configurationErrorTask, "configurationErrorTask"),
-  isBufferTask: /* @__PURE__ */ __name(() => isBufferTask, "isBufferTask"),
-  isEmptyTask: /* @__PURE__ */ __name(() => isEmptyTask, "isEmptyTask"),
-  straightThroughBufferTask: /* @__PURE__ */ __name(() => straightThroughBufferTask, "straightThroughBufferTask"),
-  straightThroughStringTask: /* @__PURE__ */ __name(() => straightThroughStringTask, "straightThroughStringTask")
-});
-function adhocExecTask(parser4) {
+__name(Ze, "Ze");
+var Ft = [];
+function tn(t2) {
   return {
-    commands: EMPTY_COMMANDS,
+    commands: Ft,
     format: "empty",
-    parser: parser4
+    parser: t2
   };
 }
-__name(adhocExecTask, "adhocExecTask");
-function configurationErrorTask(error2) {
+__name(tn, "tn");
+function b(t2) {
   return {
-    commands: EMPTY_COMMANDS,
+    commands: Ft,
     format: "empty",
     parser() {
-      throw typeof error2 === "string" ? new TaskConfigurationError(error2) : error2;
+      throw typeof t2 == "string" ? new xe(t2) : t2;
     }
   };
 }
-__name(configurationErrorTask, "configurationErrorTask");
-function straightThroughStringTask(commands, trimmed2 = false) {
+__name(b, "b");
+function g(t2, e = false) {
   return {
-    commands,
+    commands: t2,
     format: "utf-8",
-    parser(text) {
-      return trimmed2 ? String(text).trim() : text;
+    parser(n) {
+      return e ? String(n).trim() : n;
     }
   };
 }
-__name(straightThroughStringTask, "straightThroughStringTask");
-function straightThroughBufferTask(commands) {
+__name(g, "g");
+function Gt(t2) {
   return {
-    commands,
+    commands: t2,
     format: "buffer",
-    parser(buffer) {
-      return buffer;
+    parser(e) {
+      return e;
     }
   };
 }
-__name(straightThroughBufferTask, "straightThroughBufferTask");
-function isBufferTask(task) {
-  return task.format === "buffer";
+__name(Gt, "Gt");
+function en(t2) {
+  return t2.format === "buffer";
 }
-__name(isBufferTask, "isBufferTask");
-function isEmptyTask(task) {
-  return task.format === "empty" || !task.commands.length;
+__name(en, "en");
+function kt(t2) {
+  return t2.format === "empty" || !t2.commands.length;
 }
-__name(isEmptyTask, "isEmptyTask");
-var EMPTY_COMMANDS;
-var init_task = __esm({
-  "src/lib/tasks/task.ts"() {
-    "use strict";
-    init_task_configuration_error();
-    EMPTY_COMMANDS = [];
-  }
-});
-var clean_exports = {};
-__export(clean_exports, {
-  CONFIG_ERROR_INTERACTIVE_MODE: /* @__PURE__ */ __name(() => CONFIG_ERROR_INTERACTIVE_MODE, "CONFIG_ERROR_INTERACTIVE_M\
-ODE"),
-  CONFIG_ERROR_MODE_REQUIRED: /* @__PURE__ */ __name(() => CONFIG_ERROR_MODE_REQUIRED, "CONFIG_ERROR_MODE_REQUIRED"),
-  CONFIG_ERROR_UNKNOWN_OPTION: /* @__PURE__ */ __name(() => CONFIG_ERROR_UNKNOWN_OPTION, "CONFIG_ERROR_UNKNOWN_OPTION"),
-  CleanOptions: /* @__PURE__ */ __name(() => CleanOptions, "CleanOptions"),
-  cleanTask: /* @__PURE__ */ __name(() => cleanTask, "cleanTask"),
-  cleanWithOptionsTask: /* @__PURE__ */ __name(() => cleanWithOptionsTask, "cleanWithOptionsTask"),
-  isCleanOptionsArray: /* @__PURE__ */ __name(() => isCleanOptionsArray, "isCleanOptionsArray")
-});
-function cleanWithOptionsTask(mode, customArgs) {
-  const { cleanMode, options, valid: valid2 } = getCleanOptions(mode);
-  if (!cleanMode) {
-    return configurationErrorTask(CONFIG_ERROR_MODE_REQUIRED);
-  }
-  if (!valid2.options) {
-    return configurationErrorTask(CONFIG_ERROR_UNKNOWN_OPTION + JSON.stringify(mode));
-  }
-  options.push(...customArgs);
-  if (options.some(isInteractiveMode)) {
-    return configurationErrorTask(CONFIG_ERROR_INTERACTIVE_MODE);
-  }
-  return cleanTask(cleanMode, options);
+__name(kt, "kt");
+var nn = "Git clean interactive mode is not supported";
+var rn = 'Git clean mode parameter ("n" or "f") is required';
+var sn = "Git clean unknown option found in: ";
+var zt = /* @__PURE__ */ ((t2) => (t2.DRY_RUN = "n", t2.FORCE = "f", t2.IGNORED_INCLUDED = "x", t2.IGNORED_ONLY = "X", t2.
+EXCLUDING = "e", t2.QUIET = "q", t2.RECURSIVE = "d", t2))(zt || {});
+var qt = /* @__PURE__ */ new Set([
+  "i",
+  ...L(Object.values(zt))
+]);
+function on(t2, e) {
+  const { cleanMode: n, options: r2, valid: s } = cn(t2);
+  return n ? s.options ? (r2.push(...e), r2.some(hn) ? b(nn) : an(n, r2)) : b(sn + JSON.stringify(t2)) : b(rn);
 }
-__name(cleanWithOptionsTask, "cleanWithOptionsTask");
-function cleanTask(mode, customArgs) {
-  const commands = ["clean", `-${mode}`, ...customArgs];
+__name(on, "on");
+function an(t2, e) {
   return {
-    commands,
+    commands: ["clean", `-${t2}`, ...e],
     format: "utf-8",
-    parser(text) {
-      return cleanSummaryParser(mode === "n", text);
+    parser(r2) {
+      return Ze(t2 === "n", r2);
     }
   };
 }
-__name(cleanTask, "cleanTask");
-function isCleanOptionsArray(input) {
-  return Array.isArray(input) && input.every((test) => CleanOptionValues.has(test));
+__name(an, "an");
+function un(t2) {
+  return Array.isArray(t2) && t2.every((e) => qt.has(e));
 }
-__name(isCleanOptionsArray, "isCleanOptionsArray");
-function getCleanOptions(input) {
-  let cleanMode;
-  let options = [];
-  let valid2 = { cleanMode: false, options: true };
-  input.replace(/[^a-z]i/g, "").split("").forEach((char) => {
-    if (isCleanMode(char)) {
-      cleanMode = char;
-      valid2.cleanMode = true;
-    } else {
-      valid2.options = valid2.options && isKnownOption(options[options.length] = `-${char}`);
-    }
-  });
-  return {
-    cleanMode,
-    options,
-    valid: valid2
+__name(un, "un");
+function cn(t2) {
+  let e, n = [], r2 = { cleanMode: false, options: true };
+  return t2.replace(/[^a-z]i/g, "").split("").forEach((s) => {
+    fn(s) ? (e = s, r2.cleanMode = true) : r2.options = r2.options && ln(n[n.length] = `-${s}`);
+  }), {
+    cleanMode: e,
+    options: n,
+    valid: r2
   };
 }
-__name(getCleanOptions, "getCleanOptions");
-function isCleanMode(cleanMode) {
-  return cleanMode === "f" || cleanMode === "n";
+__name(cn, "cn");
+function fn(t2) {
+  return t2 === "f" || t2 === "n";
 }
-__name(isCleanMode, "isCleanMode");
-function isKnownOption(option) {
-  return /^-[a-z]$/i.test(option) && CleanOptionValues.has(option.charAt(1));
+__name(fn, "fn");
+function ln(t2) {
+  return /^-[a-z]$/i.test(t2) && qt.has(t2.charAt(1));
 }
-__name(isKnownOption, "isKnownOption");
-function isInteractiveMode(option) {
-  if (/^-[^\-]/.test(option)) {
-    return option.indexOf("i") > 0;
+__name(ln, "ln");
+function hn(t2) {
+  return /^-[^\-]/.test(t2) ? t2.indexOf("i") > 0 : t2 === "--interactive";
+}
+__name(hn, "hn");
+var mn = class {
+  static {
+    __name(this, "mn");
   }
-  return option === "--interactive";
-}
-__name(isInteractiveMode, "isInteractiveMode");
-var CONFIG_ERROR_INTERACTIVE_MODE;
-var CONFIG_ERROR_MODE_REQUIRED;
-var CONFIG_ERROR_UNKNOWN_OPTION;
-var CleanOptions;
-var CleanOptionValues;
-var init_clean = __esm({
-  "src/lib/tasks/clean.ts"() {
-    "use strict";
-    init_CleanSummary();
-    init_utils();
-    init_task();
-    CONFIG_ERROR_INTERACTIVE_MODE = "Git clean interactive mode is not supported";
-    CONFIG_ERROR_MODE_REQUIRED = 'Git clean mode parameter ("n" or "f") is required';
-    CONFIG_ERROR_UNKNOWN_OPTION = "Git clean unknown option found in: ";
-    CleanOptions = /* @__PURE__ */ ((CleanOptions2) => {
-      CleanOptions2["DRY_RUN"] = "n";
-      CleanOptions2["FORCE"] = "f";
-      CleanOptions2["IGNORED_INCLUDED"] = "x";
-      CleanOptions2["IGNORED_ONLY"] = "X";
-      CleanOptions2["EXCLUDING"] = "e";
-      CleanOptions2["QUIET"] = "q";
-      CleanOptions2["RECURSIVE"] = "d";
-      return CleanOptions2;
-    })(CleanOptions || {});
-    CleanOptionValues = /* @__PURE__ */ new Set([
-      "i",
-      ...asStringArray(Object.values(CleanOptions))
-    ]);
+  constructor() {
+    this.files = [], this.values = /* @__PURE__ */ Object.create(null);
   }
-});
-function configListParser(text) {
-  const config = new ConfigList();
-  for (const item of configParser(text)) {
-    config.addValue(item.file, String(item.key), item.value);
+  get all() {
+    return this._all || (this._all = this.files.reduce((e, n) => Object.assign(e, this.values[n]), {})), this._all;
   }
-  return config;
-}
-__name(configListParser, "configListParser");
-function configGetParser(text, key) {
-  let value = null;
-  const values = [];
-  const scopes = /* @__PURE__ */ new Map();
-  for (const item of configParser(text, key)) {
-    if (item.key !== key) {
-      continue;
+  addFile(e) {
+    if (!(e in this.values)) {
+      const n = N(this.files);
+      this.values[e] = n ? Object.create(this.values[n]) : {}, this.files.push(e);
     }
-    values.push(value = item.value);
-    if (!scopes.has(item.file)) {
-      scopes.set(item.file, []);
-    }
-    scopes.get(item.file).push(value);
+    return this.values[e];
   }
+  addValue(e, n, r2) {
+    const s = this.addFile(e);
+    Object.hasOwn(s, n) ? Array.isArray(s[n]) ? s[n].push(r2) : s[n] = [s[n], r2] : s[n] = r2, this._all = void 0;
+  }
+};
+function pn(t2) {
+  const e = new mn();
+  for (const n of Wt(t2))
+    e.addValue(n.file, String(n.key), n.value);
+  return e;
+}
+__name(pn, "pn");
+function dn(t2, e) {
+  let n = null;
+  const r2 = [], s = /* @__PURE__ */ new Map();
+  for (const o2 of Wt(t2, e))
+    o2.key === e && (r2.push(n = o2.value), s.has(o2.file) || s.set(o2.file, []), s.get(o2.file).push(n));
   return {
-    key,
-    paths: Array.from(scopes.keys()),
-    scopes,
-    value,
-    values
+    key: e,
+    paths: Array.from(s.keys()),
+    scopes: s,
+    value: n,
+    values: r2
   };
 }
-__name(configGetParser, "configGetParser");
-function configFilePath(filePath) {
-  return filePath.replace(/^(file):/, "");
+__name(dn, "dn");
+function gn(t2) {
+  return t2.replace(/^(file):/, "");
 }
-__name(configFilePath, "configFilePath");
-function* configParser(text, requestedKey = null) {
-  const lines = text.split("\0");
-  for (let i2 = 0, max = lines.length - 1; i2 < max; ) {
-    const file = configFilePath(lines[i2++]);
-    let value = lines[i2++];
-    let key = requestedKey;
-    if (value.includes("\n")) {
-      const line = splitOn(value, "\n");
-      key = line[0];
-      value = line[1];
+__name(gn, "gn");
+function* Wt(t2, e = null) {
+  const n = t2.split("\0");
+  for (let r2 = 0, s = n.length - 1; r2 < s; ) {
+    const o2 = gn(n[r2++]);
+    let i = n[r2++], a = e;
+    if (i.includes(`
+`)) {
+      const c3 = Pe(i, `
+`);
+      a = c3[0], i = c3[1];
     }
-    yield { file, key, value };
+    yield { file: o2, key: a, value: i };
   }
 }
-__name(configParser, "configParser");
-var ConfigList;
-var init_ConfigList = __esm({
-  "src/lib/responses/ConfigList.ts"() {
-    "use strict";
-    init_utils();
-    ConfigList = class {
-      static {
-        __name(this, "ConfigList");
-      }
-      constructor() {
-        this.files = [];
-        this.values = /* @__PURE__ */ Object.create(null);
-      }
-      get all() {
-        if (!this._all) {
-          this._all = this.files.reduce((all, file) => {
-            return Object.assign(all, this.values[file]);
-          }, {});
-        }
-        return this._all;
-      }
-      addFile(file) {
-        if (!(file in this.values)) {
-          const latest = last(this.files);
-          this.values[file] = latest ? Object.create(this.values[latest]) : {};
-          this.files.push(file);
-        }
-        return this.values[file];
-      }
-      addValue(file, key, value) {
-        const values = this.addFile(file);
-        if (!Object.hasOwn(values, key)) {
-          values[key] = value;
-        } else if (Array.isArray(values[key])) {
-          values[key].push(value);
-        } else {
-          values[key] = [values[key], value];
-        }
-        this._all = void 0;
-      }
-    };
-  }
-});
-function asConfigScope(scope, fallback) {
-  if (typeof scope === "string" && Object.hasOwn(GitConfigScope, scope)) {
-    return scope;
-  }
-  return fallback;
+__name(Wt, "Wt");
+var Ht = /* @__PURE__ */ ((t2) => (t2.system = "system", t2.global = "global", t2.local = "local", t2.worktree = "worktr\
+ee", t2))(Ht || {});
+function Y(t2, e) {
+  return typeof t2 == "string" && Object.hasOwn(Ht, t2) ? t2 : e;
 }
-__name(asConfigScope, "asConfigScope");
-function addConfigTask(key, value, append2, scope) {
-  const commands = ["config", `--${scope}`];
-  if (append2) {
-    commands.push("--add");
-  }
-  commands.push(key, value);
-  return {
-    commands,
+__name(Y, "Y");
+function yn(t2, e, n, r2) {
+  const s = ["config", `--${r2}`];
+  return n && s.push("--add"), s.push(t2, e), {
+    commands: s,
     format: "utf-8",
-    parser(text) {
-      return text;
+    parser(o2) {
+      return o2;
     }
   };
 }
-__name(addConfigTask, "addConfigTask");
-function getConfigTask(key, scope) {
-  const commands = ["config", "--null", "--show-origin", "--get-all", key];
-  if (scope) {
-    commands.splice(1, 0, `--${scope}`);
-  }
-  return {
-    commands,
+__name(yn, "yn");
+function wn(t2, e) {
+  const n = ["config", "--null", "--show-origin", "--get-all", t2];
+  return e && n.splice(1, 0, `--${e}`), {
+    commands: n,
     format: "utf-8",
-    parser(text) {
-      return configGetParser(text, key);
+    parser(r2) {
+      return dn(r2, t2);
     }
   };
 }
-__name(getConfigTask, "getConfigTask");
-function listConfigTask(scope) {
-  const commands = ["config", "--list", "--show-origin", "--null"];
-  if (scope) {
-    commands.push(`--${scope}`);
-  }
-  return {
-    commands,
+__name(wn, "wn");
+function bn(t2) {
+  const e = ["config", "--list", "--show-origin", "--null"];
+  return t2 && e.push(`--${t2}`), {
+    commands: e,
     format: "utf-8",
-    parser(text) {
-      return configListParser(text);
+    parser(n) {
+      return pn(n);
     }
   };
 }
-__name(listConfigTask, "listConfigTask");
-function config_default() {
+__name(bn, "bn");
+function Tn() {
   return {
-    addConfig(key, value, ...rest) {
+    addConfig(t2, e, ...n) {
       return this._runTask(
-        addConfigTask(
-          key,
-          value,
-          rest[0] === true,
-          asConfigScope(
-            rest[1],
+        yn(
+          t2,
+          e,
+          n[0] === true,
+          Y(
+            n[1],
             "local"
             /* local */
           )
         ),
-        trailingFunctionArgument(arguments)
+        u(arguments)
       );
     },
-    getConfig(key, scope) {
+    getConfig(t2, e) {
       return this._runTask(
-        getConfigTask(key, asConfigScope(scope, void 0)),
-        trailingFunctionArgument(arguments)
+        wn(t2, Y(e, void 0)),
+        u(arguments)
       );
     },
-    listConfig(...rest) {
+    listConfig(...t2) {
       return this._runTask(
-        listConfigTask(asConfigScope(rest[0], void 0)),
-        trailingFunctionArgument(arguments)
+        bn(Y(t2[0], void 0)),
+        u(arguments)
       );
     }
   };
 }
-__name(config_default, "config_default");
-var GitConfigScope;
-var init_config = __esm({
-  "src/lib/tasks/config.ts"() {
-    "use strict";
-    init_ConfigList();
-    init_utils();
-    GitConfigScope = /* @__PURE__ */ ((GitConfigScope2) => {
-      GitConfigScope2["system"] = "system";
-      GitConfigScope2["global"] = "global";
-      GitConfigScope2["local"] = "local";
-      GitConfigScope2["worktree"] = "worktree";
-      return GitConfigScope2;
-    })(GitConfigScope || {});
-  }
-});
-function isDiffNameStatus(input) {
-  return diffNameStatus.has(input);
+__name(Tn, "Tn");
+var Kt = /* @__PURE__ */ ((t2) => (t2.ADDED = "A", t2.COPIED = "C", t2.DELETED = "D", t2.MODIFIED = "M", t2.RENAMED = "R",
+t2.CHANGED = "T", t2.UNMERGED = "U", t2.UNKNOWN = "X", t2.BROKEN = "B", t2))(Kt || {});
+var kn = new Set(Object.values(Kt));
+function _n(t2) {
+  return kn.has(t2);
 }
-__name(isDiffNameStatus, "isDiffNameStatus");
-var DiffNameStatus;
-var diffNameStatus;
-var init_diff_name_status = __esm({
-  "src/lib/tasks/diff-name-status.ts"() {
-    "use strict";
-    DiffNameStatus = /* @__PURE__ */ ((DiffNameStatus2) => {
-      DiffNameStatus2["ADDED"] = "A";
-      DiffNameStatus2["COPIED"] = "C";
-      DiffNameStatus2["DELETED"] = "D";
-      DiffNameStatus2["MODIFIED"] = "M";
-      DiffNameStatus2["RENAMED"] = "R";
-      DiffNameStatus2["CHANGED"] = "T";
-      DiffNameStatus2["UNMERGED"] = "U";
-      DiffNameStatus2["UNKNOWN"] = "X";
-      DiffNameStatus2["BROKEN"] = "B";
-      return DiffNameStatus2;
-    })(DiffNameStatus || {});
-    diffNameStatus = new Set(Object.values(DiffNameStatus));
+__name(_n, "_n");
+var _t;
+var vn = ["-h"];
+var j = /* @__PURE__ */ Symbol("grepQuery");
+var En = class {
+  static {
+    __name(this, "En");
   }
-});
-function grepQueryBuilder(...params) {
-  return new GrepQuery().param(...params);
+  constructor() {
+    this[_t] = [];
+  }
+  *[(_t = j, Symbol.iterator)]() {
+    for (const e of this[j])
+      yield e;
+  }
+  and(...e) {
+    return e.length && this[j].push("--and", "(", ...U(e, "-e"), ")"), this;
+  }
+  param(...e) {
+    return this[j].push(...U(e, "-e")), this;
+  }
+};
+function Sn(...t2) {
+  return new En().param(...t2);
 }
-__name(grepQueryBuilder, "grepQueryBuilder");
-function parseGrep(grep) {
-  const paths = /* @__PURE__ */ new Set();
-  const results = {};
-  forEachLineWithContent(grep, (input) => {
-    const [path, line, preview] = input.split(NULL);
-    paths.add(path);
-    (results[path] = results[path] || []).push({
-      line: asNumber(line),
-      path,
-      preview
+__name(Sn, "Sn");
+function Rn(t2) {
+  const e = /* @__PURE__ */ new Set(), n = {};
+  return ut(t2, (r2) => {
+    const [s, o2, i] = r2.split(I2);
+    e.add(s), (n[s] = n[s] || []).push({
+      line: p(o2),
+      path: s,
+      preview: i
     });
-  });
-  return {
-    paths,
-    results
+  }), {
+    paths: e,
+    results: n
   };
 }
-__name(parseGrep, "parseGrep");
-function grep_default() {
+__name(Rn, "Rn");
+function On() {
   return {
-    grep(searchTerm) {
-      const then = trailingFunctionArgument(arguments);
-      const options = getTrailingOptions(arguments);
-      for (const option of disallowedOptions) {
-        if (options.includes(option)) {
+    grep(t2) {
+      const e = u(arguments), n = h2(arguments);
+      for (const s of vn)
+        if (n.includes(s))
           return this._runTask(
-            configurationErrorTask(`git.grep: use of "${option}" is not supported.`),
-            then
+            b(`git.grep: use of "${s}" is not supported.`),
+            e
           );
-        }
-      }
-      if (typeof searchTerm === "string") {
-        searchTerm = grepQueryBuilder().param(searchTerm);
-      }
-      const commands = ["grep", "--null", "-n", "--full-name", ...options, ...searchTerm];
+      typeof t2 == "string" && (t2 = Sn().param(t2));
+      const r2 = ["grep", "--null", "-n", "--full-name", ...n, ...t2];
       return this._runTask(
         {
-          commands,
+          commands: r2,
           format: "utf-8",
-          parser(stdOut) {
-            return parseGrep(stdOut);
+          parser(s) {
+            return Rn(s);
           }
         },
-        then
+        e
       );
     }
   };
 }
-__name(grep_default, "grep_default");
-var disallowedOptions;
-var Query;
-var _a;
-var GrepQuery;
-var init_grep = __esm({
-  "src/lib/tasks/grep.ts"() {
-    "use strict";
-    init_utils();
-    init_task();
-    disallowedOptions = ["-h"];
-    Query = /* @__PURE__ */ Symbol("grepQuery");
-    GrepQuery = class {
-      static {
-        __name(this, "GrepQuery");
-      }
-      constructor() {
-        this[_a] = [];
-      }
-      *[(_a = Query, Symbol.iterator)]() {
-        for (const query of this[Query]) {
-          yield query;
-        }
-      }
-      and(...and) {
-        and.length && this[Query].push("--and", "(", ...prefixedArray(and, "-e"), ")");
-        return this;
-      }
-      param(...param) {
-        this[Query].push(...prefixedArray(param, "-e"));
-        return this;
-      }
-    };
-  }
-});
-var reset_exports = {};
-__export(reset_exports, {
-  ResetMode: /* @__PURE__ */ __name(() => ResetMode, "ResetMode"),
-  getResetMode: /* @__PURE__ */ __name(() => getResetMode, "getResetMode"),
-  resetTask: /* @__PURE__ */ __name(() => resetTask, "resetTask")
-});
-function resetTask(mode, customArgs) {
-  const commands = ["reset"];
-  if (isValidResetMode(mode)) {
-    commands.push(`--${mode}`);
-  }
-  commands.push(...customArgs);
-  return straightThroughStringTask(commands);
+__name(On, "On");
+var Vt = /* @__PURE__ */ ((t2) => (t2.MIXED = "mixed", t2.SOFT = "soft", t2.HARD = "hard", t2.MERGE = "merge", t2.KEEP =
+"keep", t2))(Vt || {});
+var Cn = L(Object.values(Vt));
+function An(t2, e) {
+  const n = ["reset"];
+  return Xt(t2) && n.push(`--${t2}`), n.push(...e), g(n);
 }
-__name(resetTask, "resetTask");
-function getResetMode(mode) {
-  if (isValidResetMode(mode)) {
-    return mode;
-  }
-  switch (typeof mode) {
+__name(An, "An");
+function xn(t2) {
+  if (Xt(t2))
+    return t2;
+  switch (typeof t2) {
     case "string":
     case "undefined":
       return "soft";
   }
-  return;
 }
-__name(getResetMode, "getResetMode");
-function isValidResetMode(mode) {
-  return typeof mode === "string" && validResetModes.includes(mode);
+__name(xn, "xn");
+function Xt(t2) {
+  return typeof t2 == "string" && Cn.includes(t2);
 }
-__name(isValidResetMode, "isValidResetMode");
-var ResetMode;
-var validResetModes;
-var init_reset = __esm({
-  "src/lib/tasks/reset.ts"() {
-    "use strict";
-    init_utils();
-    init_task();
-    ResetMode = /* @__PURE__ */ ((ResetMode2) => {
-      ResetMode2["MIXED"] = "mixed";
-      ResetMode2["SOFT"] = "soft";
-      ResetMode2["HARD"] = "hard";
-      ResetMode2["MERGE"] = "merge";
-      ResetMode2["KEEP"] = "keep";
-      return ResetMode2;
-    })(ResetMode || {});
-    validResetModes = asStringArray(Object.values(ResetMode));
-  }
-});
-function createLog() {
+__name(Xt, "Xt");
+import_debug.default.formatters.L = (t2) => String(Bt(t2) ? t2.length : "-");
+import_debug.default.formatters.B = (t2) => Buffer.isBuffer(t2) ? t2.toString("utf8") : ft(t2);
+function Nn() {
   return (0, import_debug.default)("simple-git");
 }
-__name(createLog, "createLog");
-function prefixedLogger(to, prefix, forward) {
-  if (!prefix || !String(prefix).replace(/\s*/, "")) {
-    return !forward ? to : (message, ...args) => {
-      to(message, ...args);
-      forward(message, ...args);
-    };
-  }
-  return (message, ...args) => {
-    to(`%s ${message}`, prefix, ...args);
-    if (forward) {
-      forward(message, ...args);
-    }
+__name(Nn, "Nn");
+function vt(t2, e, n) {
+  return !e || !String(e).replace(/\s*/, "") ? n ? (r2, ...s) => {
+    t2(r2, ...s), n(r2, ...s);
+  } : t2 : (r2, ...s) => {
+    t2(`%s ${r2}`, e, ...s), n && n(r2, ...s);
   };
 }
-__name(prefixedLogger, "prefixedLogger");
-function childLoggerName(name, childDebugger, { namespace: parentNamespace }) {
-  if (typeof name === "string") {
-    return name;
-  }
-  const childNamespace = childDebugger && childDebugger.namespace || "";
-  if (childNamespace.startsWith(parentNamespace)) {
-    return childNamespace.substr(parentNamespace.length + 1);
-  }
-  return childNamespace || parentNamespace;
+__name(vt, "vt");
+function $n(t2, e, { namespace: n }) {
+  if (typeof t2 == "string")
+    return t2;
+  const r2 = e && e.namespace || "";
+  return r2.startsWith(n) ? r2.substr(n.length + 1) : r2 || n;
 }
-__name(childLoggerName, "childLoggerName");
-function createLogger(label, verbose, initialStep, infoDebugger = createLog()) {
-  const labelPrefix = label && `[${label}]` || "";
-  const spawned = [];
-  const debugDebugger = typeof verbose === "string" ? infoDebugger.extend(verbose) : verbose;
-  const key = childLoggerName(filterType(verbose, filterString), debugDebugger, infoDebugger);
-  return step(initialStep);
-  function sibling(name, initial) {
-    return append(
-      spawned,
-      createLogger(label, key.replace(/^[^:]+/, name), initial, infoDebugger)
+__name($n, "$n");
+function $(t2, e, n, r2 = Nn()) {
+  const s = t2 && `[${t2}]` || "", o2 = [], i = typeof e == "string" ? r2.extend(e) : e, a = $n(d(e, m), i, r2);
+  return y(n);
+  function c3(w, T) {
+    return S(
+      o2,
+      $(t2, a.replace(/^[^:]+/, w), T, r2)
     );
   }
-  __name(sibling, "sibling");
-  function step(phase) {
-    const stepPrefix = phase && `[${phase}]` || "";
-    const debug22 = debugDebugger && prefixedLogger(debugDebugger, stepPrefix) || NOOP;
-    const info2 = prefixedLogger(infoDebugger, `${labelPrefix} ${stepPrefix}`, debug22);
-    return Object.assign(debugDebugger ? debug22 : info2, {
-      label,
-      sibling,
-      info: info2,
-      step
+  __name(c3, "c");
+  function y(w) {
+    const T = w && `[${w}]` || "", k = i && vt(i, T) || W, C2 = vt(r2, `${s} ${T}`, k);
+    return Object.assign(i ? k : C2, {
+      label: t2,
+      sibling: c3,
+      info: C2,
+      step: y
     });
   }
-  __name(step, "step");
+  __name(y, "y");
 }
-__name(createLogger, "createLogger");
-var init_git_logger = __esm({
-  "src/lib/git-logger.ts"() {
-    "use strict";
-    init_utils();
-    import_debug.default.formatters.L = (value) => String(filterHasLength(value) ? value.length : "-");
-    import_debug.default.formatters.B = (value) => {
-      if (Buffer.isBuffer(value)) {
-        return value.toString("utf8");
-      }
-      return objectToString(value);
+__name($, "$");
+var M = class M2 {
+  static {
+    __name(this, "M");
+  }
+  constructor(e = "GitExecutor") {
+    this.logLabel = e, this._queue = /* @__PURE__ */ new Map();
+  }
+  withProgress(e) {
+    return this._queue.get(e);
+  }
+  createProgress(e) {
+    const n = M2.getName(e.commands[0]), r2 = $(this.logLabel, n);
+    return {
+      task: e,
+      logger: r2,
+      name: n
     };
   }
-});
-var TasksPendingQueue;
-var init_tasks_pending_queue = __esm({
-  "src/lib/runners/tasks-pending-queue.ts"() {
-    "use strict";
-    init_git_error();
-    init_git_logger();
-    TasksPendingQueue = class _TasksPendingQueue {
-      static {
-        __name(this, "_TasksPendingQueue");
-      }
-      constructor(logLabel = "GitExecutor") {
-        this.logLabel = logLabel;
-        this._queue = /* @__PURE__ */ new Map();
-      }
-      withProgress(task) {
-        return this._queue.get(task);
-      }
-      createProgress(task) {
-        const name = _TasksPendingQueue.getName(task.commands[0]);
-        const logger = createLogger(this.logLabel, name);
-        return {
-          task,
-          logger,
-          name
-        };
-      }
-      push(task) {
-        const progress = this.createProgress(task);
-        progress.logger("Adding task to the queue, commands = %o", task.commands);
-        this._queue.set(task, progress);
-        return progress;
-      }
-      fatal(err) {
-        for (const [task, { logger }] of Array.from(this._queue.entries())) {
-          if (task === err.task) {
-            logger.info(`Failed %o`, err);
-            logger(
-              `Fatal exception, any as-yet un-started tasks run through this executor will not be attempted`
-            );
-          } else {
-            logger.info(
-              `A fatal exception occurred in a previous task, the queue has been purged: %o`,
-              err.message
-            );
-          }
-          this.complete(task);
-        }
-        if (this._queue.size !== 0) {
-          throw new Error(`Queue size should be zero after fatal: ${this._queue.size}`);
-        }
-      }
-      complete(task) {
-        const progress = this.withProgress(task);
-        if (progress) {
-          this._queue.delete(task);
-        }
-      }
-      attempt(task) {
-        const progress = this.withProgress(task);
-        if (!progress) {
-          throw new GitError(void 0, "TasksPendingQueue: attempt called for an unknown task");
-        }
-        progress.logger("Starting task");
-        return progress;
-      }
-      static getName(name = "empty") {
-        return `task:${name}:${++_TasksPendingQueue.counter}`;
-      }
-      static {
-        this.counter = 0;
-      }
-    };
+  push(e) {
+    const n = this.createProgress(e);
+    return n.logger("Adding task to the queue, commands = %o", e.commands), this._queue.set(e, n), n;
   }
-});
-function pluginContext(task, commands) {
-  return {
-    method: first(task.commands) || "",
-    commands
-  };
-}
-__name(pluginContext, "pluginContext");
-function onErrorReceived(target, logger) {
-  return (err) => {
-    logger(`[ERROR] child process exception %o`, err);
-    target.push(Buffer.from(String(err.stack), "ascii"));
-  };
-}
-__name(onErrorReceived, "onErrorReceived");
-function onDataReceived(target, name, logger, output) {
-  return (buffer) => {
-    logger(`%s received %L bytes`, name, buffer);
-    output(`%B`, buffer);
-    target.push(buffer);
-  };
-}
-__name(onDataReceived, "onDataReceived");
-var GitExecutorChain;
-var init_git_executor_chain = __esm({
-  "src/lib/runners/git-executor-chain.ts"() {
-    "use strict";
-    init_git_error();
-    init_task();
-    init_utils();
-    init_tasks_pending_queue();
-    GitExecutorChain = class {
-      static {
-        __name(this, "GitExecutorChain");
-      }
-      constructor(_executor, _scheduler, _plugins) {
-        this._executor = _executor;
-        this._scheduler = _scheduler;
-        this._plugins = _plugins;
-        this._chain = Promise.resolve();
-        this._queue = new TasksPendingQueue();
-      }
-      get cwd() {
-        return this._cwd || this._executor.cwd;
-      }
-      set cwd(cwd) {
-        this._cwd = cwd;
-      }
-      get env() {
-        return this._executor.env;
-      }
-      get outputHandler() {
-        return this._executor.outputHandler;
-      }
-      chain() {
-        return this;
-      }
-      push(task) {
-        this._queue.push(task);
-        return this._chain = this._chain.then(() => this.attemptTask(task));
-      }
-      async attemptTask(task) {
-        const onScheduleComplete = await this._scheduler.next();
-        const onQueueComplete = /* @__PURE__ */ __name(() => this._queue.complete(task), "onQueueComplete");
-        try {
-          const { logger } = this._queue.attempt(task);
-          return await (isEmptyTask(task) ? this.attemptEmptyTask(task, logger) : this.attemptRemoteTask(task, logger));
-        } catch (e) {
-          throw this.onFatalException(task, e);
-        } finally {
-          onQueueComplete();
-          onScheduleComplete();
-        }
-      }
-      onFatalException(task, e) {
-        const gitError = e instanceof GitError ? Object.assign(e, { task }) : new GitError(task, e && String(e));
-        this._chain = Promise.resolve();
-        this._queue.fatal(gitError);
-        return gitError;
-      }
-      async attemptRemoteTask(task, logger) {
-        const binary = this._plugins.exec("spawn.binary", "", pluginContext(task, task.commands));
-        const args = this._plugins.exec("spawn.args", [...task.commands], {
-          ...pluginContext(task, task.commands),
-          env: { ...this.env }
-        });
-        const raw = await this.gitResponse(
-          task,
-          binary,
-          args,
-          this.outputHandler,
-          logger.step("SPAWN")
-        );
-        const outputStreams = await this.handleTaskData(task, args, raw, logger.step("HANDLE"));
-        logger(`passing response to task's parser as a %s`, task.format);
-        if (isBufferTask(task)) {
-          return callTaskParser(task.parser, outputStreams);
-        }
-        return callTaskParser(task.parser, outputStreams.asStrings());
-      }
-      async attemptEmptyTask(task, logger) {
-        logger(`empty task bypassing child process to call to task's parser`);
-        return task.parser(this);
-      }
-      handleTaskData(task, args, result, logger) {
-        const { exitCode, rejection, stdOut, stdErr } = result;
-        return new Promise((done, fail) => {
-          logger(`Preparing to handle process response exitCode=%d stdOut=`, exitCode);
-          const { error: error2 } = this._plugins.exec(
-            "task.error",
-            { error: rejection },
-            {
-              ...pluginContext(task, args),
-              ...result
-            }
-          );
-          if (error2 && task.onError) {
-            logger.info(`exitCode=%s handling with custom error handler`);
-            return task.onError(
-              result,
-              error2,
-              (newStdOut) => {
-                logger.info(`custom error handler treated as success`);
-                logger(`custom error returned a %s`, objectToString(newStdOut));
-                done(
-                  new GitOutputStreams(
-                    Array.isArray(newStdOut) ? Buffer.concat(newStdOut) : newStdOut,
-                    Buffer.concat(stdErr)
-                  )
-                );
-              },
-              fail
-            );
-          }
-          if (error2) {
-            logger.info(
-              `handling as error: exitCode=%s stdErr=%s rejection=%o`,
-              exitCode,
-              stdErr.length,
-              rejection
-            );
-            return fail(error2);
-          }
-          logger.info(`retrieving task output complete`);
-          done(new GitOutputStreams(Buffer.concat(stdOut), Buffer.concat(stdErr)));
-        });
-      }
-      async gitResponse(task, command, args, outputHandler, logger) {
-        const outputLogger = logger.sibling("output");
-        const spawnOptions = this._plugins.exec(
-          "spawn.options",
-          {
-            cwd: this.cwd,
-            env: this.env,
-            windowsHide: true
-          },
-          pluginContext(task, task.commands)
-        );
-        return new Promise((done) => {
-          const stdOut = [];
-          const stdErr = [];
-          logger.info(`%s %o`, command, args);
-          logger("%O", spawnOptions);
-          let rejection = this._beforeSpawn(task, args);
-          if (rejection) {
-            return done({
-              stdOut,
-              stdErr,
-              exitCode: 9901,
-              rejection
-            });
-          }
-          this._plugins.exec("spawn.before", void 0, {
-            ...pluginContext(task, args),
-            kill(reason) {
-              rejection = reason || rejection;
-            }
-          });
-          const spawned = (0, import_child_process.spawn)(command, args, spawnOptions);
-          spawned.stdout.on(
-            "data",
-            onDataReceived(stdOut, "stdOut", logger, outputLogger.step("stdOut"))
-          );
-          spawned.stderr.on(
-            "data",
-            onDataReceived(stdErr, "stdErr", logger, outputLogger.step("stdErr"))
-          );
-          spawned.on("error", onErrorReceived(stdErr, logger));
-          if (outputHandler) {
-            logger(`Passing child process stdOut/stdErr to custom outputHandler`);
-            outputHandler(command, spawned.stdout, spawned.stderr, [...args]);
-          }
-          this._plugins.exec("spawn.after", void 0, {
-            ...pluginContext(task, args),
-            spawned,
-            close(exitCode, reason) {
-              done({
-                stdOut,
-                stdErr,
-                exitCode,
-                rejection: rejection || reason
-              });
-            },
-            kill(reason) {
-              if (spawned.killed) {
-                return;
-              }
-              rejection = reason;
-              spawned.kill("SIGINT");
-            }
-          });
-        });
-      }
-      _beforeSpawn(task, args) {
-        let rejection;
-        this._plugins.exec("spawn.before", void 0, {
-          ...pluginContext(task, args),
-          kill(reason) {
-            rejection = reason || rejection;
-          }
-        });
-        return rejection;
-      }
-    };
+  fatal(e) {
+    for (const [n, { logger: r2 }] of Array.from(this._queue.entries()))
+      n === e.task ? (r2.info("Failed %o", e), r2(
+        "Fatal exception, any as-yet un-started tasks run through this executor will not be attempted"
+      )) : r2.info(
+        "A fatal exception occurred in a previous task, the queue has been purged: %o",
+        e.message
+      ), this.complete(n);
+    if (this._queue.size !== 0)
+      throw new Error(`Queue size should be zero after fatal: ${this._queue.size}`);
   }
-});
-var git_executor_exports = {};
-__export(git_executor_exports, {
-  GitExecutor: /* @__PURE__ */ __name(() => GitExecutor, "GitExecutor")
-});
-var GitExecutor;
-var init_git_executor = __esm({
-  "src/lib/runners/git-executor.ts"() {
-    "use strict";
-    init_git_executor_chain();
-    GitExecutor = class {
-      static {
-        __name(this, "GitExecutor");
-      }
-      constructor(cwd, _scheduler, _plugins) {
-        this.cwd = cwd;
-        this._scheduler = _scheduler;
-        this._plugins = _plugins;
-        this._chain = new GitExecutorChain(this, this._scheduler, this._plugins);
-      }
-      chain() {
-        return new GitExecutorChain(this, this._scheduler, this._plugins);
-      }
-      push(task) {
-        return this._chain.push(task);
-      }
-    };
+  complete(e) {
+    this.withProgress(e) && this._queue.delete(e);
   }
-});
-function taskCallback(task, response, callback = NOOP) {
-  const onSuccess = /* @__PURE__ */ __name((data) => {
-    callback(null, data);
-  }, "onSuccess");
-  const onError2 = /* @__PURE__ */ __name((err) => {
-    if (err?.task === task) {
-      callback(
-        err instanceof GitResponseError ? addDeprecationNoticeToError(err) : err,
-        void 0
+  attempt(e) {
+    const n = this.withProgress(e);
+    if (!n)
+      throw new O(void 0, "TasksPendingQueue: attempt called for an unknown task");
+    return n.logger("Starting task"), n;
+  }
+  static getName(e = "empty") {
+    return `task:${e}:${++M2.counter}`;
+  }
+};
+M.counter = 0;
+var ot = M;
+var Pn = class {
+  static {
+    __name(this, "Pn");
+  }
+  constructor(e, n, r2) {
+    this._executor = e, this._scheduler = n, this._plugins = r2, this._chain = Promise.resolve(), this._queue = new ot();
+  }
+  get cwd() {
+    return this._cwd || this._executor.cwd;
+  }
+  set cwd(e) {
+    this._cwd = e;
+  }
+  get env() {
+    return this._executor.env;
+  }
+  get outputHandler() {
+    return this._executor.outputHandler;
+  }
+  chain() {
+    return this;
+  }
+  push(e) {
+    return this._queue.push(e), this._chain = this._chain.then(() => this.attemptTask(e));
+  }
+  async attemptTask(e) {
+    const n = await this._scheduler.next(), r2 = /* @__PURE__ */ __name(() => this._queue.complete(e), "r");
+    try {
+      const { logger: s } = this._queue.attempt(e);
+      return await (kt(e) ? this.attemptEmptyTask(e, s) : this.attemptRemoteTask(e, s));
+    } catch (s) {
+      throw this.onFatalException(e, s);
+    } finally {
+      r2(), n();
+    }
+  }
+  onFatalException(e, n) {
+    const r2 = n instanceof O ? Object.assign(n, { task: e }) : new O(e, n && String(n));
+    return this._chain = Promise.resolve(), this._queue.fatal(r2), r2;
+  }
+  async attemptRemoteTask(e, n) {
+    const r2 = this._plugins.exec("spawn.binary", "", this.taskContext(e, e.commands)), s = this._plugins.exec(
+      "spawn.args",
+      [...e.commands],
+      this.taskContext(e, e.commands)
+    ), o2 = await this.gitResponse(
+      e,
+      r2,
+      s,
+      this.outputHandler,
+      n.step("SPAWN")
+    ), i = await this.handleTaskData(e, s, o2, n.step("HANDLE"));
+    return n("passing response to task's parser as a %s", e.format), en(e) ? Tt(e.parser, i) : Tt(e.parser, i.asStrings());
+  }
+  async attemptEmptyTask(e, n) {
+    return n("empty task bypassing child process to call to task's parser"), e.parser(this);
+  }
+  handleTaskData(e, n, r2, s) {
+    const { exitCode: o2, rejection: i, stdOut: a, stdErr: c3 } = r2;
+    return new Promise((y, w) => {
+      s("Preparing to handle process response exitCode=%d stdOut=", o2);
+      const { error: T } = this._plugins.exec(
+        "task.error",
+        { error: i },
+        {
+          ...this.taskContext(e, n),
+          ...r2
+        }
       );
-    }
-  }, "onError2");
-  response.then(onSuccess, onError2);
-}
-__name(taskCallback, "taskCallback");
-function addDeprecationNoticeToError(err) {
-  let log = /* @__PURE__ */ __name((name) => {
-    console.warn(
-      `simple-git deprecation notice: accessing GitResponseError.${name} should be GitResponseError.git.${name}, this wi\
-ll no longer be available in version 3`
+      if (T && e.onError)
+        return s.info("exitCode=%s handling with custom error handler"), e.onError(
+          r2,
+          T,
+          (k) => {
+            s.info("custom error handler treated as success"), s("custom error returned a %s", ft(k)), y(
+              new z(
+                Array.isArray(k) ? Buffer.concat(k) : k,
+                Buffer.concat(c3)
+              )
+            );
+          },
+          w
+        );
+      if (T)
+        return s.info(
+          "handling as error: exitCode=%s stdErr=%s rejection=%o",
+          o2,
+          c3.length,
+          i
+        ), w(T);
+      s.info("retrieving task output complete"), y(new z(Buffer.concat(a), Buffer.concat(c3)));
+    });
+  }
+  async gitResponse(e, n, r2, s, o2) {
+    const i = o2.sibling("output"), a = this._plugins.exec(
+      "spawn.options",
+      {
+        cwd: this.cwd,
+        env: this.env,
+        windowsHide: true
+      },
+      this.taskContext(e, e.commands)
     );
-    log = NOOP;
-  }, "log");
-  return Object.create(err, Object.getOwnPropertyNames(err.git).reduce(descriptorReducer, {}));
-  function descriptorReducer(all, name) {
-    if (name in err) {
-      return all;
-    }
-    all[name] = {
-      enumerable: false,
-      configurable: false,
-      get() {
-        log(name);
-        return err.git[name];
+    return new Promise((c3) => {
+      const y = [], w = [];
+      o2.info("%s %o", n, r2), o2("%O", a);
+      let T = this._beforeSpawn(e, r2);
+      if (T)
+        return c3({
+          stdOut: y,
+          stdErr: w,
+          exitCode: 9901,
+          rejection: T
+        });
+      this._plugins.exec("spawn.before", void 0, {
+        ...this.taskContext(e, r2),
+        kill(C2) {
+          T = C2 || T;
+        }
+      });
+      const k = (0, import_node_child_process.spawn)(n, r2, a);
+      k.stdout.on(
+        "data",
+        Et(y, "stdOut", o2, i.step("stdOut"))
+      ), k.stderr.on(
+        "data",
+        Et(w, "stdErr", o2, i.step("stdErr"))
+      ), k.on("error", Mn(w, o2)), s && (o2("Passing child process stdOut/stdErr to custom outputHandler"), s(n, k.stdout,
+      k.stderr, [...r2])), this._plugins.exec("spawn.after", void 0, {
+        ...this.taskContext(e, r2),
+        spawned: k,
+        close(C2, Te) {
+          c3({
+            stdOut: y,
+            stdErr: w,
+            exitCode: C2,
+            rejection: T || Te
+          });
+        },
+        kill(C2) {
+          k.killed || (T = C2, k.kill("SIGINT"));
+        }
+      });
+    });
+  }
+  _beforeSpawn(e, n) {
+    let r2;
+    return this._plugins.exec("spawn.before", void 0, {
+      ...this.taskContext(e, n),
+      kill(s) {
+        r2 = s || r2;
       }
+    }), r2;
+  }
+  taskContext(e, n) {
+    return {
+      method: String(Me(e.commands) || ""),
+      commands: n,
+      env: { ...this.env },
+      input: kt(e) ? void 0 : e.input
     };
-    return all;
   }
-  __name(descriptorReducer, "descriptorReducer");
+};
+function Mn(t2, e) {
+  return (n) => {
+    e("[ERROR] child process exception %o", n), t2.push(Buffer.from(String(n.stack), "ascii"));
+  };
 }
-__name(addDeprecationNoticeToError, "addDeprecationNoticeToError");
-var init_task_callback = __esm({
-  "src/lib/task-callback.ts"() {
-    "use strict";
-    init_git_response_error();
-    init_utils();
+__name(Mn, "Mn");
+function Et(t2, e, n, r2) {
+  return (s) => {
+    n("%s received %L bytes", e, s), r2("%B", s), t2.push(s);
+  };
+}
+__name(Et, "Et");
+var Dn = class {
+  static {
+    __name(this, "Dn");
   }
-});
-function changeWorkingDirectoryTask(directory, root) {
-  return adhocExecTask((instance) => {
-    if (!folderExists(directory)) {
-      throw new Error(`Git.cwd: cannot change to non-directory "${directory}"`);
-    }
-    return (root || instance).cwd = directory;
+  constructor(e, n, r2) {
+    this.cwd = e, this._scheduler = n, this._plugins = r2, this._chain = this.chain();
+  }
+  chain() {
+    return new Pn(this, this._scheduler, this._plugins);
+  }
+  push(e) {
+    return this._chain.push(e);
+  }
+};
+function Ln(t2, e, n = W) {
+  const r2 = /* @__PURE__ */ __name((o2) => {
+    n(null, o2);
+  }, "r"), s = /* @__PURE__ */ __name((o2) => {
+    o2?.task === t2 && n(o2, void 0);
+  }, "s");
+  e.then(r2, s);
+}
+__name(Ln, "Ln");
+function St(t2, e) {
+  return tn((n) => {
+    if (!Lt(t2))
+      throw new Error(`Git.cwd: cannot change to non-directory "${t2}"`);
+    return (e || n).cwd = t2;
   });
 }
-__name(changeWorkingDirectoryTask, "changeWorkingDirectoryTask");
-var init_change_working_directory = __esm({
-  "src/lib/tasks/change-working-directory.ts"() {
-    "use strict";
-    init_utils();
-    init_task();
-  }
-});
-function checkoutTask(args) {
-  const commands = ["checkout", ...args];
-  if (commands[1] === "-b" && commands.includes("-B")) {
-    commands[1] = remove(commands, "-B");
-  }
-  return straightThroughStringTask(commands);
+__name(St, "St");
+function Q(t2) {
+  const e = ["checkout", ...t2];
+  return e[1] === "-b" && e.includes("-B") && (e[1] = ct(e, "-B")), g(e);
 }
-__name(checkoutTask, "checkoutTask");
-function checkout_default() {
+__name(Q, "Q");
+function jn() {
   return {
     checkout() {
       return this._runTask(
-        checkoutTask(getTrailingOptions(arguments, 1)),
-        trailingFunctionArgument(arguments)
+        Q(h2(arguments, 1)),
+        u(arguments)
       );
     },
-    checkoutBranch(branchName, startPoint) {
+    checkoutBranch(t2, e) {
       return this._runTask(
-        checkoutTask(["-b", branchName, startPoint, ...getTrailingOptions(arguments)]),
-        trailingFunctionArgument(arguments)
+        Q(["-b", t2, e, ...h2(arguments)]),
+        u(arguments)
       );
     },
-    checkoutLocalBranch(branchName) {
+    checkoutLocalBranch(t2) {
       return this._runTask(
-        checkoutTask(["-b", branchName, ...getTrailingOptions(arguments)]),
-        trailingFunctionArgument(arguments)
+        Q(["-b", t2, ...h2(arguments)]),
+        u(arguments)
       );
     }
   };
 }
-__name(checkout_default, "checkout_default");
-var init_checkout = __esm({
-  "src/lib/tasks/checkout.ts"() {
-    "use strict";
-    init_utils();
-    init_task();
+__name(jn, "jn");
+var Yt = /* @__PURE__ */ __name((t2, e, n) => {
+  const r2 = ["clone", ...n];
+  return m(t2) && r2.push(c(t2)), m(e) && r2.push(c(e)), g(r2);
+}, "Yt");
+var Bn = /* @__PURE__ */ __name((t2, e, n) => (S(n, "--mirror"), Yt(t2, e, n)), "Bn");
+function Rt(t2, e, n, ...r2) {
+  return m(n) ? e(n, d(r2[0], m), h2(arguments)) : b(`git.${t2}() requires a string 'repoPath'`);
+}
+__name(Rt, "Rt");
+function In() {
+  return {
+    clone(t2, ...e) {
+      return this._runTask(
+        Rt("clone", Yt, d(t2, m), ...e),
+        u(arguments)
+      );
+    },
+    mirror(t2, ...e) {
+      return this._runTask(
+        Rt("mirror", Bn, d(t2, m), ...e),
+        u(arguments)
+      );
+    }
+  };
+}
+__name(In, "In");
+var Un = [
+  new l2(/^\[([^\s]+)( \([^)]+\))? ([^\]]+)/, (t2, [e, n, r2]) => {
+    t2.branch = e, t2.commit = r2, t2.root = !!n;
+  }),
+  new l2(/\s*Author:\s(.+)/i, (t2, [e]) => {
+    const n = e.split("<"), r2 = n.pop();
+    !r2 || !r2.includes("@") || (t2.author = {
+      email: r2.substr(0, r2.length - 1),
+      name: n.join("<").trim()
+    });
+  }),
+  new l2(
+    /(\d+)[^,]*(?:,\s*(\d+)[^,]*)(?:,\s*(\d+))/g,
+    (t2, [e, n, r2]) => {
+      t2.summary.changes = parseInt(e, 10) || 0, t2.summary.insertions = parseInt(n, 10) || 0, t2.summary.deletions = parseInt(
+      r2, 10) || 0;
+    }
+  ),
+  new l2(
+    /^(\d+)[^,]*(?:,\s*(\d+)[^(]+\(([+-]))?/,
+    (t2, [e, n, r2]) => {
+      t2.summary.changes = parseInt(e, 10) || 0;
+      const s = parseInt(n, 10) || 0;
+      r2 === "-" ? t2.summary.deletions = s : r2 === "+" && (t2.summary.insertions = s);
+    }
+  )
+];
+function Fn(t2) {
+  return E({
+    author: null,
+    branch: "",
+    commit: "",
+    root: false,
+    summary: {
+      changes: 0,
+      insertions: 0,
+      deletions: 0
+    }
+  }, Un, t2);
+}
+__name(Fn, "Fn");
+function Gn(t2, e, n) {
+  return {
+    commands: [
+      "-c",
+      "core.abbrev=40",
+      "commit",
+      ...U(t2, "-m"),
+      ...e,
+      ...n
+    ],
+    format: "utf-8",
+    parser: Fn
+  };
+}
+__name(Gn, "Gn");
+function zn() {
+  return {
+    commit(e, ...n) {
+      const r2 = u(arguments), s = t2(e) || Gn(
+        v(e),
+        v(d(n[0], G, [])),
+        [
+          ...L(d(n[1], K2, [])),
+          ...h2(arguments, 0, true)
+        ]
+      );
+      return this._runTask(s, r2);
+    }
+  };
+  function t2(e) {
+    return !G(e) && b(
+      "git.commit: requires the commit message to be supplied as a string/string[]"
+    );
   }
-});
-function countObjectsResponse() {
+  __name(t2, "t");
+}
+__name(zn, "zn");
+function qn() {
   return {
     count: 0,
     garbage: 0,
@@ -43287,713 +42656,427 @@ function countObjectsResponse() {
     sizePack: 0
   };
 }
-__name(countObjectsResponse, "countObjectsResponse");
-function count_objects_default() {
+__name(qn, "qn");
+var Wn = new l2(
+  /([a-z-]+): (\d+)$/,
+  (t2, [e, n]) => {
+    const r2 = jt(e);
+    Object.hasOwn(t2, r2) && (t2[r2] = p(n));
+  }
+);
+function Hn() {
   return {
     countObjects() {
       return this._runTask({
         commands: ["count-objects", "--verbose"],
         format: "utf-8",
-        parser(stdOut) {
-          return parseStringResponse(countObjectsResponse(), [parser2], stdOut);
+        parser(t2) {
+          return E(qn(), [Wn], t2);
         }
       });
     }
   };
 }
-__name(count_objects_default, "count_objects_default");
-var parser2;
-var init_count_objects = __esm({
-  "src/lib/tasks/count-objects.ts"() {
-    "use strict";
-    init_utils();
-    parser2 = new LineParser(
-      /([a-z-]+): (\d+)$/,
-      (result, [key, value]) => {
-        const property = asCamelCase(key);
-        if (Object.hasOwn(result, property)) {
-          result[property] = asNumber(value);
-        }
-      }
-    );
-  }
-});
-function parseCommitResult(stdOut) {
-  const result = {
-    author: null,
-    branch: "",
-    commit: "",
-    root: false,
-    summary: {
-      changes: 0,
-      insertions: 0,
-      deletions: 0
-    }
-  };
-  return parseStringResponse(result, parsers, stdOut);
-}
-__name(parseCommitResult, "parseCommitResult");
-var parsers;
-var init_parse_commit = __esm({
-  "src/lib/parsers/parse-commit.ts"() {
-    "use strict";
-    init_utils();
-    parsers = [
-      new LineParser(/^\[([^\s]+)( \([^)]+\))? ([^\]]+)/, (result, [branch, root, commit]) => {
-        result.branch = branch;
-        result.commit = commit;
-        result.root = !!root;
-      }),
-      new LineParser(/\s*Author:\s(.+)/i, (result, [author]) => {
-        const parts = author.split("<");
-        const email = parts.pop();
-        if (!email || !email.includes("@")) {
-          return;
-        }
-        result.author = {
-          email: email.substr(0, email.length - 1),
-          name: parts.join("<").trim()
-        };
-      }),
-      new LineParser(
-        /(\d+)[^,]*(?:,\s*(\d+)[^,]*)(?:,\s*(\d+))/g,
-        (result, [changes, insertions, deletions]) => {
-          result.summary.changes = parseInt(changes, 10) || 0;
-          result.summary.insertions = parseInt(insertions, 10) || 0;
-          result.summary.deletions = parseInt(deletions, 10) || 0;
-        }
-      ),
-      new LineParser(
-        /^(\d+)[^,]*(?:,\s*(\d+)[^(]+\(([+-]))?/,
-        (result, [changes, lines, direction]) => {
-          result.summary.changes = parseInt(changes, 10) || 0;
-          const count = parseInt(lines, 10) || 0;
-          if (direction === "-") {
-            result.summary.deletions = count;
-          } else if (direction === "+") {
-            result.summary.insertions = count;
-          }
-        }
-      )
-    ];
-  }
-});
-function commitTask(message, files, customArgs) {
-  const commands = [
-    "-c",
-    "core.abbrev=40",
-    "commit",
-    ...prefixedArray(message, "-m"),
-    ...files,
-    ...customArgs
-  ];
-  return {
-    commands,
-    format: "utf-8",
-    parser: parseCommitResult
-  };
-}
-__name(commitTask, "commitTask");
-function commit_default() {
-  return {
-    commit(message, ...rest) {
-      const next = trailingFunctionArgument(arguments);
-      const task = rejectDeprecatedSignatures(message) || commitTask(
-        asArray(message),
-        asArray(filterType(rest[0], filterStringOrStringArray, [])),
-        [
-          ...asStringArray(filterType(rest[1], filterArray, [])),
-          ...getTrailingOptions(arguments, 0, true)
-        ]
-      );
-      return this._runTask(task, next);
-    }
-  };
-  function rejectDeprecatedSignatures(message) {
-    return !filterStringOrStringArray(message) && configurationErrorTask(
-      `git.commit: requires the commit message to be supplied as a string/string[]`
-    );
-  }
-  __name(rejectDeprecatedSignatures, "rejectDeprecatedSignatures");
-}
-__name(commit_default, "commit_default");
-var init_commit = __esm({
-  "src/lib/tasks/commit.ts"() {
-    "use strict";
-    init_parse_commit();
-    init_utils();
-    init_task();
-  }
-});
-function first_commit_default() {
+__name(Hn, "Hn");
+function Kn() {
   return {
     firstCommit() {
       return this._runTask(
-        straightThroughStringTask(["rev-list", "--max-parents=0", "HEAD"], true),
-        trailingFunctionArgument(arguments)
+        g(["rev-list", "--max-parents=0", "HEAD"], true),
+        u(arguments)
       );
     }
   };
 }
-__name(first_commit_default, "first_commit_default");
-var init_first_commit = __esm({
-  "src/lib/tasks/first-commit.ts"() {
-    "use strict";
-    init_utils();
-    init_task();
-  }
-});
-function hashObjectTask(filePath, write) {
-  const commands = ["hash-object", filePath];
-  if (write) {
-    commands.push("-w");
-  }
-  return straightThroughStringTask(commands, true);
+__name(Kn, "Kn");
+function Vn(t2, e) {
+  const n = ["hash-object", t2];
+  return e && n.push("-w"), g(n, true);
 }
-__name(hashObjectTask, "hashObjectTask");
-var init_hash_object = __esm({
-  "src/lib/tasks/hash-object.ts"() {
-    "use strict";
-    init_task();
+__name(Vn, "Vn");
+var J = class {
+  static {
+    __name(this, "J");
   }
-});
-function parseInit(bare, path, text) {
-  const response = String(text).trim();
-  let result;
-  if (result = initResponseRegex.exec(response)) {
-    return new InitSummary(bare, path, false, result[1]);
+  constructor(e, n, r2, s) {
+    this.bare = e, this.path = n, this.existing = r2, this.gitDir = s;
   }
-  if (result = reInitResponseRegex.exec(response)) {
-    return new InitSummary(bare, path, true, result[1]);
-  }
-  let gitDir = "";
-  const tokens = response.split(" ");
-  while (tokens.length) {
-    const token = tokens.shift();
-    if (token === "in") {
-      gitDir = tokens.join(" ");
+};
+var Xn = /^Init.+ repository in (.+)$/;
+var Yn = /^Rein.+ in (.+)$/;
+function Qn(t2, e, n) {
+  const r2 = String(n).trim();
+  let s;
+  if (s = Xn.exec(r2))
+    return new J(t2, e, false, s[1]);
+  if (s = Yn.exec(r2))
+    return new J(t2, e, true, s[1]);
+  let o2 = "";
+  const i = r2.split(" ");
+  for (; i.length; )
+    if (i.shift() === "in") {
+      o2 = i.join(" ");
       break;
     }
-  }
-  return new InitSummary(bare, path, /^re/i.test(response), gitDir);
+  return new J(t2, e, /^re/i.test(r2), o2);
 }
-__name(parseInit, "parseInit");
-var InitSummary;
-var initResponseRegex;
-var reInitResponseRegex;
-var init_InitSummary = __esm({
-  "src/lib/responses/InitSummary.ts"() {
-    "use strict";
-    InitSummary = class {
-      static {
-        __name(this, "InitSummary");
-      }
-      constructor(bare, path, existing, gitDir) {
-        this.bare = bare;
-        this.path = path;
-        this.existing = existing;
-        this.gitDir = gitDir;
-      }
-    };
-    initResponseRegex = /^Init.+ repository in (.+)$/;
-    reInitResponseRegex = /^Rein.+ in (.+)$/;
-  }
-});
-function hasBareCommand(command) {
-  return command.includes(bareCommand);
+__name(Qn, "Qn");
+var Qt = "--bare";
+function Jn(t2) {
+  return t2.includes(Qt);
 }
-__name(hasBareCommand, "hasBareCommand");
-function initTask(bare = false, path, customArgs) {
-  const commands = ["init", ...customArgs];
-  if (bare && !hasBareCommand(commands)) {
-    commands.splice(1, 0, bareCommand);
-  }
-  return {
-    commands,
+__name(Jn, "Jn");
+function Zn(t2 = false, e, n) {
+  const r2 = ["init", ...n];
+  return t2 && !Jn(r2) && r2.splice(1, 0, Qt), {
+    commands: r2,
     format: "utf-8",
-    parser(text) {
-      return parseInit(commands.includes("--bare"), path, text);
+    parser(s) {
+      return Qn(r2.includes("--bare"), e, s);
     }
   };
 }
-__name(initTask, "initTask");
-var bareCommand;
-var init_init = __esm({
-  "src/lib/tasks/init.ts"() {
-    "use strict";
-    init_InitSummary();
-    bareCommand = "--bare";
-  }
-});
-function logFormatFromCommand(customArgs) {
-  for (let i2 = 0; i2 < customArgs.length; i2++) {
-    const format = logFormatRegex.exec(customArgs[i2]);
-    if (format) {
-      return `--${format[1]}`;
+__name(Zn, "Zn");
+function tr(t2) {
+  return t2 === void 0 ? b("interpretTrailers called without input content") : {
+    format: "utf-8",
+    parser(e) {
+      return Object.fromEntries(
+        ut(e, (n) => {
+          const r2 = n.indexOf(":");
+          return [
+            jt(n.substring(0, r2).toLowerCase()),
+            n.substring(r2 + 2).trim()
+          ];
+        })
+      );
+    },
+    commands: ["interpret-trailers", "--parse"],
+    input: t2
+  };
+}
+__name(tr, "tr");
+function er() {
+  return {
+    interpretTrailers(t2) {
+      return this._runTask(
+        tr(d(t2, Be)),
+        u(arguments)
+      );
     }
+  };
+}
+__name(er, "er");
+var R = /* @__PURE__ */ ((t2) => (t2.NONE = "", t2.STAT = "--stat", t2.NUM_STAT = "--numstat", t2.NAME_ONLY = "--name-on\
+ly", t2.NAME_STATUS = "--name-status", t2))(R || {});
+var Jt = /^--(stat|numstat|name-only|name-status)(=|$)/;
+function pt(t2) {
+  for (let e = 0; e < t2.length; e++) {
+    const n = Jt.exec(t2[e]);
+    if (n)
+      return `--${n[1]}`;
   }
   return "";
 }
-__name(logFormatFromCommand, "logFormatFromCommand");
-function isLogFormat(customArg) {
-  return logFormatRegex.test(customArg);
+__name(pt, "pt");
+function nr(t2) {
+  return Jt.test(t2);
 }
-__name(isLogFormat, "isLogFormat");
-var logFormatRegex;
-var init_log_format = __esm({
-  "src/lib/args/log-format.ts"() {
-    "use strict";
-    logFormatRegex = /^--(stat|numstat|name-only|name-status)(=|$)/;
+__name(nr, "nr");
+var rr = class {
+  static {
+    __name(this, "rr");
   }
-});
-var DiffSummary;
-var init_DiffSummary = __esm({
-  "src/lib/responses/DiffSummary.ts"() {
-    "use strict";
-    DiffSummary = class {
-      static {
-        __name(this, "DiffSummary");
-      }
-      constructor() {
-        this.changed = 0;
-        this.deletions = 0;
-        this.insertions = 0;
-        this.files = [];
-      }
-    };
+  constructor() {
+    this.changed = 0, this.deletions = 0, this.insertions = 0, this.files = [];
   }
-});
-function getDiffParser(format = "") {
-  const parser4 = diffSummaryParsers[format];
-  return (stdOut) => parseStringResponse(new DiffSummary(), parser4, stdOut, false);
+};
+var Ot = [
+  new l2(
+    /^(.+)\s+\|\s+(\d+)(\s+[+\-]+)?$/,
+    (t2, [e, n, r2 = ""]) => {
+      t2.files.push({
+        file: e.trim(),
+        changes: p(n),
+        insertions: r2.replace(/[^+]/g, "").length,
+        deletions: r2.replace(/[^-]/g, "").length,
+        binary: false
+      });
+    }
+  ),
+  new l2(
+    /^(.+) \|\s+Bin ([0-9.]+) -> ([0-9.]+) ([a-z]+)/,
+    (t2, [e, n, r2]) => {
+      t2.files.push({
+        file: e.trim(),
+        before: p(n),
+        after: p(r2),
+        binary: true
+      });
+    }
+  ),
+  new l2(/^(.+)\s+\|\s+Bin\s*$/, (t2, [e]) => {
+    t2.files.push({
+      file: e.trim(),
+      before: 0,
+      after: 0,
+      binary: true
+    });
+  }),
+  new l2(
+    /(\d+) files? changed\s*((?:, \d+ [^,]+){0,2})/,
+    (t2, [e, n]) => {
+      const r2 = /(\d+) i/.exec(n), s = /(\d+) d/.exec(n);
+      t2.changed = p(e), t2.insertions = p(r2?.[1]), t2.deletions = p(s?.[1]);
+    }
+  )
+];
+var sr = [
+  new l2(
+    /(\d+)\t(\d+)\t(.+)$/,
+    (t2, [e, n, r2]) => {
+      const s = p(e), o2 = p(n);
+      t2.changed++, t2.insertions += s, t2.deletions += o2, t2.files.push({
+        file: r2,
+        changes: s + o2,
+        insertions: s,
+        deletions: o2,
+        binary: false
+      });
+    }
+  ),
+  new l2(/-\t-\t(.+)$/, (t2, [e]) => {
+    t2.changed++, t2.files.push({
+      file: e,
+      after: 0,
+      before: 0,
+      binary: true
+    });
+  })
+];
+var or = [
+  new l2(/(.+)$/, (t2, [e]) => {
+    t2.changed++, t2.files.push({
+      file: e,
+      changes: 0,
+      insertions: 0,
+      deletions: 0,
+      binary: false
+    });
+  })
+];
+var ir = [
+  new l2(
+    /([ACDMRTUXB])([0-9]{0,3})\t(.[^\t]*)(\t(.[^\t]*))?$/,
+    (t2, [e, n, r2, s, o2]) => {
+      t2.changed++, t2.files.push({
+        file: o2 ?? r2,
+        changes: 0,
+        insertions: 0,
+        deletions: 0,
+        binary: false,
+        status: bt(_n(e) && e),
+        from: bt(!!o2 && r2 !== o2 && r2),
+        similarity: p(n)
+      });
+    }
+  )
+];
+var ar = {
+  [R.NONE]: Ot,
+  [R.STAT]: Ot,
+  [R.NUM_STAT]: sr,
+  [R.NAME_STATUS]: ir,
+  [R.NAME_ONLY]: or
+};
+function Zt(t2 = R.NONE) {
+  const e = ar[t2];
+  return (n) => E(new rr(), e, n, false);
 }
-__name(getDiffParser, "getDiffParser");
-var statParser;
-var numStatParser;
-var nameOnlyParser;
-var nameStatusParser;
-var diffSummaryParsers;
-var init_parse_diff_summary = __esm({
-  "src/lib/parsers/parse-diff-summary.ts"() {
-    "use strict";
-    init_log_format();
-    init_DiffSummary();
-    init_diff_name_status();
-    init_utils();
-    statParser = [
-      new LineParser(
-        /^(.+)\s+\|\s+(\d+)(\s+[+\-]+)?$/,
-        (result, [file, changes, alterations = ""]) => {
-          result.files.push({
-            file: file.trim(),
-            changes: asNumber(changes),
-            insertions: alterations.replace(/[^+]/g, "").length,
-            deletions: alterations.replace(/[^-]/g, "").length,
-            binary: false
-          });
-        }
-      ),
-      new LineParser(
-        /^(.+) \|\s+Bin ([0-9.]+) -> ([0-9.]+) ([a-z]+)/,
-        (result, [file, before, after]) => {
-          result.files.push({
-            file: file.trim(),
-            before: asNumber(before),
-            after: asNumber(after),
-            binary: true
-          });
-        }
-      ),
-      new LineParser(
-        /(\d+) files? changed\s*((?:, \d+ [^,]+){0,2})/,
-        (result, [changed, summary2]) => {
-          const inserted = /(\d+) i/.exec(summary2);
-          const deleted = /(\d+) d/.exec(summary2);
-          result.changed = asNumber(changed);
-          result.insertions = asNumber(inserted?.[1]);
-          result.deletions = asNumber(deleted?.[1]);
-        }
-      )
-    ];
-    numStatParser = [
-      new LineParser(
-        /(\d+)\t(\d+)\t(.+)$/,
-        (result, [changesInsert, changesDelete, file]) => {
-          const insertions = asNumber(changesInsert);
-          const deletions = asNumber(changesDelete);
-          result.changed++;
-          result.insertions += insertions;
-          result.deletions += deletions;
-          result.files.push({
-            file,
-            changes: insertions + deletions,
-            insertions,
-            deletions,
-            binary: false
-          });
-        }
-      ),
-      new LineParser(/-\t-\t(.+)$/, (result, [file]) => {
-        result.changed++;
-        result.files.push({
-          file,
-          after: 0,
-          before: 0,
-          binary: true
-        });
-      })
-    ];
-    nameOnlyParser = [
-      new LineParser(/(.+)$/, (result, [file]) => {
-        result.changed++;
-        result.files.push({
-          file,
-          changes: 0,
-          insertions: 0,
-          deletions: 0,
-          binary: false
-        });
-      })
-    ];
-    nameStatusParser = [
-      new LineParser(
-        /([ACDMRTUXB])([0-9]{0,3})\t(.[^\t]*)(\t(.[^\t]*))?$/,
-        (result, [status, similarity, from, _to, to]) => {
-          result.changed++;
-          result.files.push({
-            file: to ?? from,
-            changes: 0,
-            insertions: 0,
-            deletions: 0,
-            binary: false,
-            status: orVoid(isDiffNameStatus(status) && status),
-            from: orVoid(!!to && from !== to && from),
-            similarity: asNumber(similarity)
-          });
-        }
-      )
-    ];
-    diffSummaryParsers = {
-      [
-        ""
-        /* NONE */
-      ]: statParser,
-      [
-        "--stat"
-        /* STAT */
-      ]: statParser,
-      [
-        "--numstat"
-        /* NUM_STAT */
-      ]: numStatParser,
-      [
-        "--name-status"
-        /* NAME_STATUS */
-      ]: nameStatusParser,
-      [
-        "--name-only"
-        /* NAME_ONLY */
-      ]: nameOnlyParser
-    };
-  }
-});
-function lineBuilder(tokens, fields) {
-  return fields.reduce(
-    (line, field, index) => {
-      line[field] = tokens[index] || "";
-      return line;
-    },
+__name(Zt, "Zt");
+var te = "\xF2\xF2\xF2\xF2\xF2\xF2 ";
+var ee = " \xF2\xF2";
+var ne = " \xF2 ";
+var ur = ["hash", "date", "message", "refs", "author_name", "author_email"];
+function cr(t2, e) {
+  return e.reduce(
+    (n, r2, s) => (n[r2] = t2[s] || "", n),
     /* @__PURE__ */ Object.create({ diff: null })
   );
 }
-__name(lineBuilder, "lineBuilder");
-function createListLogSummaryParser(splitter = SPLITTER, fields = defaultFieldNames, logFormat = "") {
-  const parseDiffResult = getDiffParser(logFormat);
-  return function(stdOut) {
-    const all = toLinesWithContent(
-      stdOut.trim(),
+__name(cr, "cr");
+function re(t2 = ne, e = ur, n = R.NONE) {
+  const r2 = Zt(n);
+  return function(s) {
+    const o2 = H(
+      s.trim(),
       false,
-      START_BOUNDARY
-    ).map(function(item) {
-      const lineDetail = item.split(COMMIT_BOUNDARY);
-      const listLogLine = lineBuilder(lineDetail[0].split(splitter), fields);
-      if (lineDetail.length > 1 && !!lineDetail[1].trim()) {
-        listLogLine.diff = parseDiffResult(lineDetail[1]);
-      }
-      return listLogLine;
+      te
+    ).map(function(i) {
+      const a = i.split(ee), c3 = cr(a[0].split(t2), e);
+      return a.length > 1 && a[1].trim() && (c3.diff = r2(a[1])), c3;
     });
     return {
-      all,
-      latest: all.length && all[0] || null,
-      total: all.length
+      all: o2,
+      latest: o2.length && o2[0] || null,
+      total: o2.length
     };
   };
 }
-__name(createListLogSummaryParser, "createListLogSummaryParser");
-var START_BOUNDARY;
-var COMMIT_BOUNDARY;
-var SPLITTER;
-var defaultFieldNames;
-var init_parse_list_log_summary = __esm({
-  "src/lib/parsers/parse-list-log-summary.ts"() {
-    "use strict";
-    init_utils();
-    init_parse_diff_summary();
-    init_log_format();
-    START_BOUNDARY = "\xF2\xF2\xF2\xF2\xF2\xF2 ";
-    COMMIT_BOUNDARY = " \xF2\xF2";
-    SPLITTER = " \xF2 ";
-    defaultFieldNames = ["hash", "date", "message", "refs", "author_name", "author_email"];
-  }
-});
-var diff_exports = {};
-__export(diff_exports, {
-  diffSummaryTask: /* @__PURE__ */ __name(() => diffSummaryTask, "diffSummaryTask"),
-  validateLogFormatConfig: /* @__PURE__ */ __name(() => validateLogFormatConfig, "validateLogFormatConfig")
-});
-function diffSummaryTask(customArgs) {
-  let logFormat = logFormatFromCommand(customArgs);
-  const commands = ["diff"];
-  if (logFormat === "") {
-    logFormat = "--stat";
-    commands.push("--stat=4096");
-  }
-  commands.push(...customArgs);
-  return validateLogFormatConfig(commands) || {
-    commands,
+__name(re, "re");
+function fr(t2) {
+  let e = pt(t2);
+  const n = ["diff"];
+  return e === R.NONE && (e = R.STAT, n.push("--stat=4096")), n.push(...t2), dt(n) || {
+    commands: n,
     format: "utf-8",
-    parser: getDiffParser(logFormat)
+    parser: Zt(e)
   };
 }
-__name(diffSummaryTask, "diffSummaryTask");
-function validateLogFormatConfig(customArgs) {
-  const flags = customArgs.filter(isLogFormat);
-  if (flags.length > 1) {
-    return configurationErrorTask(
-      `Summary flags are mutually exclusive - pick one of ${flags.join(",")}`
+__name(fr, "fr");
+function dt(t2) {
+  const e = t2.filter(nr);
+  if (e.length > 1)
+    return b(
+      `Summary flags are mutually exclusive - pick one of ${e.join(",")}`
     );
-  }
-  if (flags.length && customArgs.includes("-z")) {
-    return configurationErrorTask(
-      `Summary flag ${flags} parsing is not compatible with null termination option '-z'`
+  if (e.length && t2.includes("-z"))
+    return b(
+      `Summary flag ${e} parsing is not compatible with null termination option '-z'`
     );
-  }
 }
-__name(validateLogFormatConfig, "validateLogFormatConfig");
-var init_diff = __esm({
-  "src/lib/tasks/diff.ts"() {
-    "use strict";
-    init_log_format();
-    init_parse_diff_summary();
-    init_task();
-  }
-});
-function prettyFormat(format, splitter) {
-  const fields = [];
-  const formatStr = [];
-  Object.keys(format).forEach((field) => {
-    fields.push(field);
-    formatStr.push(String(format[field]));
-  });
-  return [fields, formatStr.join(splitter)];
+__name(dt, "dt");
+var se = /* @__PURE__ */ ((t2) => (t2[t2["--pretty"] = 0] = "--pretty", t2[t2["max-count"] = 1] = "max-count", t2[t2.maxCount =
+2] = "maxCount", t2[t2.n = 3] = "n", t2[t2.file = 4] = "file", t2[t2.format = 5] = "format", t2[t2.from = 6] = "from", t2[t2.
+to = 7] = "to", t2[t2.splitter = 8] = "splitter", t2[t2.symmetric = 9] = "symmetric", t2[t2.mailMap = 10] = "mailMap", t2[t2.
+multiLine = 11] = "multiLine", t2[t2.strictDate = 12] = "strictDate", t2))(se || {});
+function lr(t2, e) {
+  const n = [], r2 = [];
+  return Object.keys(t2).forEach((s) => {
+    n.push(s), r2.push(String(t2[s]));
+  }), [n, r2.join(e)];
 }
-__name(prettyFormat, "prettyFormat");
-function userOptions(input) {
-  return Object.keys(input).reduce((out, key) => {
-    if (!(key in excludeOptions)) {
-      out[key] = input[key];
-    }
-    return out;
-  }, {});
+__name(lr, "lr");
+function hr(t2) {
+  return Object.keys(t2).reduce((e, n) => (n in se || (e[n] = t2[n]), e), {});
 }
-__name(userOptions, "userOptions");
-function parseLogOptions(opt = {}, customArgs = []) {
-  const splitter = filterType(opt.splitter, filterString, SPLITTER);
-  const format = filterPlainObject(opt.format) ? opt.format : {
+__name(hr, "hr");
+function oe2(t2 = {}, e = []) {
+  const n = d(t2.splitter, m, ne), r2 = lt(t2.format) ? t2.format : {
     hash: "%H",
-    date: opt.strictDate === false ? "%ai" : "%aI",
+    date: t2.strictDate === false ? "%ai" : "%aI",
     message: "%s",
     refs: "%D",
-    body: opt.multiLine ? "%B" : "%b",
-    author_name: opt.mailMap !== false ? "%aN" : "%an",
-    author_email: opt.mailMap !== false ? "%aE" : "%ae"
-  };
-  const [fields, formatStr] = prettyFormat(format, splitter);
-  const suffix = [];
-  const command = [
-    `--pretty=format:${START_BOUNDARY}${formatStr}${COMMIT_BOUNDARY}`,
-    ...customArgs
-  ];
-  const maxCount = opt.n || opt["max-count"] || opt.maxCount;
-  if (maxCount) {
-    command.push(`--max-count=${maxCount}`);
+    body: t2.multiLine ? "%B" : "%b",
+    author_name: t2.mailMap !== false ? "%aN" : "%an",
+    author_email: t2.mailMap !== false ? "%aE" : "%ae"
+  }, [s, o2] = lr(r2, n), i = [], a = [
+    `--pretty=format:${te}${o2}${ee}`,
+    ...e
+  ], c3 = t2.n || t2["max-count"] || t2.maxCount;
+  if (c3 && a.push(`--max-count=${c3}`), t2.from || t2.to) {
+    const y = t2.symmetric !== false ? "..." : "..";
+    i.push(`${t2.from || ""}${y}${t2.to || ""}`);
   }
-  if (opt.from || opt.to) {
-    const rangeOperator = opt.symmetric !== false ? "..." : "..";
-    suffix.push(`${opt.from || ""}${rangeOperator}${opt.to || ""}`);
-  }
-  if (filterString(opt.file)) {
-    command.push("--follow", c(opt.file));
-  }
-  appendTaskOptions(userOptions(opt), command);
-  return {
-    fields,
-    splitter,
-    commands: [...command, ...suffix]
+  return m(t2.file) && a.push("--follow", c(t2.file)), It(hr(t2), a), {
+    fields: s,
+    splitter: n,
+    commands: [...a, ...i]
   };
 }
-__name(parseLogOptions, "parseLogOptions");
-function logTask(splitter, fields, customArgs) {
-  const parser4 = createListLogSummaryParser(splitter, fields, logFormatFromCommand(customArgs));
+__name(oe2, "oe");
+function mr(t2, e, n) {
+  const r2 = re(t2, e, pt(n));
   return {
-    commands: ["log", ...customArgs],
+    commands: ["log", ...n],
     format: "utf-8",
-    parser: parser4
+    parser: r2
   };
 }
-__name(logTask, "logTask");
-function log_default() {
+__name(mr, "mr");
+function pr() {
   return {
-    log(...rest) {
-      const next = trailingFunctionArgument(arguments);
-      const options = parseLogOptions(
-        trailingOptionsArgument(arguments),
-        asStringArray(filterType(arguments[0], filterArray, []))
-      );
-      const task = rejectDeprecatedSignatures(...rest) || validateLogFormatConfig(options.commands) || createLogTask(options);
-      return this._runTask(task, next);
+    log(...n) {
+      const r2 = u(arguments), s = oe2(
+        ht(arguments),
+        L(d(arguments[0], K2, []))
+      ), o2 = e(...n) || dt(s.commands) || t2(s);
+      return this._runTask(o2, r2);
     }
   };
-  function createLogTask(options) {
-    return logTask(options.splitter, options.fields, options.commands);
+  function t2(n) {
+    return mr(n.splitter, n.fields, n.commands);
   }
-  __name(createLogTask, "createLogTask");
-  function rejectDeprecatedSignatures(from, to) {
-    return filterString(from) && filterString(to) && configurationErrorTask(
-      `git.log(string, string) should be replaced with git.log({ from: string, to: string })`
+  __name(t2, "t");
+  function e(n, r2) {
+    return m(n) && m(r2) && b(
+      "git.log(string, string) should be replaced with git.log({ from: string, to: string })"
     );
   }
-  __name(rejectDeprecatedSignatures, "rejectDeprecatedSignatures");
+  __name(e, "e");
 }
-__name(log_default, "log_default");
-var excludeOptions;
-var init_log = __esm({
-  "src/lib/tasks/log.ts"() {
-    "use strict";
-    init_log_format();
-    init_parse_list_log_summary();
-    init_utils();
-    init_task();
-    init_diff();
-    excludeOptions = /* @__PURE__ */ ((excludeOptions2) => {
-      excludeOptions2[excludeOptions2["--pretty"] = 0] = "--pretty";
-      excludeOptions2[excludeOptions2["max-count"] = 1] = "max-count";
-      excludeOptions2[excludeOptions2["maxCount"] = 2] = "maxCount";
-      excludeOptions2[excludeOptions2["n"] = 3] = "n";
-      excludeOptions2[excludeOptions2["file"] = 4] = "file";
-      excludeOptions2[excludeOptions2["format"] = 5] = "format";
-      excludeOptions2[excludeOptions2["from"] = 6] = "from";
-      excludeOptions2[excludeOptions2["to"] = 7] = "to";
-      excludeOptions2[excludeOptions2["splitter"] = 8] = "splitter";
-      excludeOptions2[excludeOptions2["symmetric"] = 9] = "symmetric";
-      excludeOptions2[excludeOptions2["mailMap"] = 10] = "mailMap";
-      excludeOptions2[excludeOptions2["multiLine"] = 11] = "multiLine";
-      excludeOptions2[excludeOptions2["strictDate"] = 12] = "strictDate";
-      return excludeOptions2;
-    })(excludeOptions || {});
+__name(pr, "pr");
+var Z = class {
+  static {
+    __name(this, "Z");
   }
-});
-var MergeSummaryConflict;
-var MergeSummaryDetail;
-var init_MergeSummary = __esm({
-  "src/lib/responses/MergeSummary.ts"() {
-    "use strict";
-    MergeSummaryConflict = class {
-      static {
-        __name(this, "MergeSummaryConflict");
-      }
-      constructor(reason, file = null, meta) {
-        this.reason = reason;
-        this.file = file;
-        this.meta = meta;
-      }
-      toString() {
-        return `${this.file}:${this.reason}`;
-      }
-    };
-    MergeSummaryDetail = class {
-      static {
-        __name(this, "MergeSummaryDetail");
-      }
-      constructor() {
-        this.conflicts = [];
-        this.merges = [];
-        this.result = "success";
-      }
-      get failed() {
-        return this.conflicts.length > 0;
-      }
-      get reason() {
-        return this.result;
-      }
-      toString() {
-        if (this.conflicts.length) {
-          return `CONFLICTS: ${this.conflicts.join(", ")}`;
-        }
-        return "OK";
-      }
+  constructor(e, n = null, r2) {
+    this.reason = e, this.file = n, this.meta = r2;
+  }
+  toString() {
+    return `${this.file}:${this.reason}`;
+  }
+};
+var dr = class {
+  static {
+    __name(this, "dr");
+  }
+  constructor() {
+    this.conflicts = [], this.merges = [], this.result = "success";
+  }
+  get failed() {
+    return this.conflicts.length > 0;
+  }
+  get reason() {
+    return this.result;
+  }
+  toString() {
+    return this.conflicts.length ? `CONFLICTS: ${this.conflicts.join(", ")}` : "OK";
+  }
+};
+var ie = class {
+  static {
+    __name(this, "ie");
+  }
+  constructor() {
+    this.remoteMessages = {
+      all: []
+    }, this.created = [], this.deleted = [], this.files = [], this.deletions = {}, this.insertions = {}, this.summary = {
+      changes: 0,
+      deletions: 0,
+      insertions: 0
     };
   }
-});
-var PullSummary;
-var PullFailedSummary;
-var init_PullSummary = __esm({
-  "src/lib/responses/PullSummary.ts"() {
-    "use strict";
-    PullSummary = class {
-      static {
-        __name(this, "PullSummary");
-      }
-      constructor() {
-        this.remoteMessages = {
-          all: []
-        };
-        this.created = [];
-        this.deleted = [];
-        this.files = [];
-        this.deletions = {};
-        this.insertions = {};
-        this.summary = {
-          changes: 0,
-          deletions: 0,
-          insertions: 0
-        };
-      }
-    };
-    PullFailedSummary = class {
-      static {
-        __name(this, "PullFailedSummary");
-      }
-      constructor() {
-        this.remote = "";
-        this.hash = {
-          local: "",
-          remote: ""
-        };
-        this.branch = {
-          local: "",
-          remote: ""
-        };
-        this.message = "";
-      }
-      toString() {
-        return this.message;
-      }
-    };
+};
+var gr = class {
+  static {
+    __name(this, "gr");
   }
-});
-function objectEnumerationResult(remoteMessages) {
-  return remoteMessages.objects = remoteMessages.objects || {
+  constructor() {
+    this.remote = "", this.hash = {
+      local: "",
+      remote: ""
+    }, this.branch = {
+      local: "",
+      remote: ""
+    }, this.message = "";
+  }
+  toString() {
+    return this.message;
+  }
+};
+function tt(t2) {
+  return t2.objects = t2.objects || {
     compressing: 0,
     counting: 0,
     enumerating: 0,
@@ -44002,607 +43085,403 @@ function objectEnumerationResult(remoteMessages) {
     total: { count: 0, delta: 0 }
   };
 }
-__name(objectEnumerationResult, "objectEnumerationResult");
-function asObjectCount(source) {
-  const count = /^\s*(\d+)/.exec(source);
-  const delta = /delta (\d+)/i.exec(source);
+__name(tt, "tt");
+function Ct(t2) {
+  const e = /^\s*(\d+)/.exec(t2), n = /delta (\d+)/i.exec(t2);
   return {
-    count: asNumber(count && count[1] || "0"),
-    delta: asNumber(delta && delta[1] || "0")
+    count: p(e && e[1] || "0"),
+    delta: p(n && n[1] || "0")
   };
 }
-__name(asObjectCount, "asObjectCount");
-var remoteMessagesObjectParsers;
-var init_parse_remote_objects = __esm({
-  "src/lib/parsers/parse-remote-objects.ts"() {
-    "use strict";
-    init_utils();
-    remoteMessagesObjectParsers = [
-      new RemoteLineParser(
-        /^remote:\s*(enumerating|counting|compressing) objects: (\d+),/i,
-        (result, [action2, count]) => {
-          const key = action2.toLowerCase();
-          const enumeration = objectEnumerationResult(result.remoteMessages);
-          Object.assign(enumeration, { [key]: asNumber(count) });
-        }
-      ),
-      new RemoteLineParser(
-        /^remote:\s*(enumerating|counting|compressing) objects: \d+% \(\d+\/(\d+)\),/i,
-        (result, [action2, count]) => {
-          const key = action2.toLowerCase();
-          const enumeration = objectEnumerationResult(result.remoteMessages);
-          Object.assign(enumeration, { [key]: asNumber(count) });
-        }
-      ),
-      new RemoteLineParser(
-        /total ([^,]+), reused ([^,]+), pack-reused (\d+)/i,
-        (result, [total, reused, packReused]) => {
-          const objects = objectEnumerationResult(result.remoteMessages);
-          objects.total = asObjectCount(total);
-          objects.reused = asObjectCount(reused);
-          objects.packReused = asNumber(packReused);
-        }
-      )
-    ];
-  }
-});
-function parseRemoteMessages(_stdOut, stdErr) {
-  return parseStringResponse({ remoteMessages: new RemoteMessageSummary() }, parsers2, stdErr);
-}
-__name(parseRemoteMessages, "parseRemoteMessages");
-var parsers2;
-var RemoteMessageSummary;
-var init_parse_remote_messages = __esm({
-  "src/lib/parsers/parse-remote-messages.ts"() {
-    "use strict";
-    init_utils();
-    init_parse_remote_objects();
-    parsers2 = [
-      new RemoteLineParser(/^remote:\s*(.+)$/, (result, [text]) => {
-        result.remoteMessages.all.push(text.trim());
-        return false;
-      }),
-      ...remoteMessagesObjectParsers,
-      new RemoteLineParser(
-        [/create a (?:pull|merge) request/i, /\s(https?:\/\/\S+)$/],
-        (result, [pullRequestUrl]) => {
-          result.remoteMessages.pullRequestUrl = pullRequestUrl;
-        }
-      ),
-      new RemoteLineParser(
-        [/found (\d+) vulnerabilities.+\(([^)]+)\)/i, /\s(https?:\/\/\S+)$/],
-        (result, [count, summary2, url]) => {
-          result.remoteMessages.vulnerabilities = {
-            count: asNumber(count),
-            summary: summary2,
-            url
-          };
-        }
-      )
-    ];
-    RemoteMessageSummary = class {
-      static {
-        __name(this, "RemoteMessageSummary");
-      }
-      constructor() {
-        this.all = [];
-      }
-    };
-  }
-});
-function parsePullErrorResult(stdOut, stdErr) {
-  const pullError = parseStringResponse(new PullFailedSummary(), errorParsers, [stdOut, stdErr]);
-  return pullError.message && pullError;
-}
-__name(parsePullErrorResult, "parsePullErrorResult");
-var FILE_UPDATE_REGEX;
-var SUMMARY_REGEX;
-var ACTION_REGEX;
-var parsers3;
-var errorParsers;
-var parsePullDetail;
-var parsePullResult;
-var init_parse_pull = __esm({
-  "src/lib/parsers/parse-pull.ts"() {
-    "use strict";
-    init_PullSummary();
-    init_utils();
-    init_parse_remote_messages();
-    FILE_UPDATE_REGEX = /^\s*(.+?)\s+\|\s+\d+\s*(\+*)(-*)/;
-    SUMMARY_REGEX = /(\d+)\D+((\d+)\D+\(\+\))?(\D+(\d+)\D+\(-\))?/;
-    ACTION_REGEX = /^(create|delete) mode \d+ (.+)/;
-    parsers3 = [
-      new LineParser(FILE_UPDATE_REGEX, (result, [file, insertions, deletions]) => {
-        result.files.push(file);
-        if (insertions) {
-          result.insertions[file] = insertions.length;
-        }
-        if (deletions) {
-          result.deletions[file] = deletions.length;
-        }
-      }),
-      new LineParser(SUMMARY_REGEX, (result, [changes, , insertions, , deletions]) => {
-        if (insertions !== void 0 || deletions !== void 0) {
-          result.summary.changes = +changes || 0;
-          result.summary.insertions = +insertions || 0;
-          result.summary.deletions = +deletions || 0;
-          return true;
-        }
-        return false;
-      }),
-      new LineParser(ACTION_REGEX, (result, [action2, file]) => {
-        append(result.files, file);
-        append(action2 === "create" ? result.created : result.deleted, file);
-      })
-    ];
-    errorParsers = [
-      new LineParser(/^from\s(.+)$/i, (result, [remote]) => void (result.remote = remote)),
-      new LineParser(/^fatal:\s(.+)$/, (result, [message]) => void (result.message = message)),
-      new LineParser(
-        /([a-z0-9]+)\.\.([a-z0-9]+)\s+(\S+)\s+->\s+(\S+)$/,
-        (result, [hashLocal, hashRemote, branchLocal, branchRemote]) => {
-          result.branch.local = branchLocal;
-          result.hash.local = hashLocal;
-          result.branch.remote = branchRemote;
-          result.hash.remote = hashRemote;
-        }
-      )
-    ];
-    parsePullDetail = /* @__PURE__ */ __name((stdOut, stdErr) => {
-      return parseStringResponse(new PullSummary(), parsers3, [stdOut, stdErr]);
-    }, "parsePullDetail");
-    parsePullResult = /* @__PURE__ */ __name((stdOut, stdErr) => {
-      return Object.assign(
-        new PullSummary(),
-        parsePullDetail(stdOut, stdErr),
-        parseRemoteMessages(stdOut, stdErr)
-      );
-    }, "parsePullResult");
-  }
-});
-var parsers4;
-var parseMergeResult;
-var parseMergeDetail;
-var init_parse_merge = __esm({
-  "src/lib/parsers/parse-merge.ts"() {
-    "use strict";
-    init_MergeSummary();
-    init_utils();
-    init_parse_pull();
-    parsers4 = [
-      new LineParser(/^Auto-merging\s+(.+)$/, (summary2, [autoMerge]) => {
-        summary2.merges.push(autoMerge);
-      }),
-      new LineParser(/^CONFLICT\s+\((.+)\): Merge conflict in (.+)$/, (summary2, [reason, file]) => {
-        summary2.conflicts.push(new MergeSummaryConflict(reason, file));
-      }),
-      new LineParser(
-        /^CONFLICT\s+\((.+\/delete)\): (.+) deleted in (.+) and/,
-        (summary2, [reason, file, deleteRef]) => {
-          summary2.conflicts.push(new MergeSummaryConflict(reason, file, { deleteRef }));
-        }
-      ),
-      new LineParser(/^CONFLICT\s+\((.+)\):/, (summary2, [reason]) => {
-        summary2.conflicts.push(new MergeSummaryConflict(reason, null));
-      }),
-      new LineParser(/^Automatic merge failed;\s+(.+)$/, (summary2, [result]) => {
-        summary2.result = result;
-      })
-    ];
-    parseMergeResult = /* @__PURE__ */ __name((stdOut, stdErr) => {
-      return Object.assign(parseMergeDetail(stdOut, stdErr), parsePullResult(stdOut, stdErr));
-    }, "parseMergeResult");
-    parseMergeDetail = /* @__PURE__ */ __name((stdOut) => {
-      return parseStringResponse(new MergeSummaryDetail(), parsers4, stdOut);
-    }, "parseMergeDetail");
-  }
-});
-function mergeTask(customArgs) {
-  if (!customArgs.length) {
-    return configurationErrorTask("Git.merge requires at least one option");
-  }
-  return {
-    commands: ["merge", ...customArgs],
-    format: "utf-8",
-    parser(stdOut, stdErr) {
-      const merge = parseMergeResult(stdOut, stdErr);
-      if (merge.failed) {
-        throw new GitResponseError(merge);
-      }
-      return merge;
+__name(Ct, "Ct");
+var yr = [
+  new x(
+    /^remote:\s*(enumerating|counting|compressing) objects: (\d+),/i,
+    (t2, [e, n]) => {
+      const r2 = e.toLowerCase(), s = tt(t2.remoteMessages);
+      Object.assign(s, { [r2]: p(n) });
     }
-  };
-}
-__name(mergeTask, "mergeTask");
-var init_merge = __esm({
-  "src/lib/tasks/merge.ts"() {
-    "use strict";
-    init_git_response_error();
-    init_parse_merge();
-    init_task();
-  }
-});
-function pushResultPushedItem(local, remote, status) {
-  const deleted = status.includes("deleted");
-  const tag = status.includes("tag") || /^refs\/tags/.test(local);
-  const alreadyUpdated = !status.includes("new");
-  return {
-    deleted,
-    tag,
-    branch: !tag,
-    new: !alreadyUpdated,
-    alreadyUpdated,
-    local,
-    remote
-  };
-}
-__name(pushResultPushedItem, "pushResultPushedItem");
-var parsers5;
-var parsePushResult;
-var parsePushDetail;
-var init_parse_push = __esm({
-  "src/lib/parsers/parse-push.ts"() {
-    "use strict";
-    init_utils();
-    init_parse_remote_messages();
-    parsers5 = [
-      new LineParser(/^Pushing to (.+)$/, (result, [repo]) => {
-        result.repo = repo;
-      }),
-      new LineParser(/^updating local tracking ref '(.+)'/, (result, [local]) => {
-        result.ref = {
-          ...result.ref || {},
-          local
-        };
-      }),
-      new LineParser(/^[=*-]\s+([^:]+):(\S+)\s+\[(.+)]$/, (result, [local, remote, type]) => {
-        result.pushed.push(pushResultPushedItem(local, remote, type));
-      }),
-      new LineParser(
-        /^Branch '([^']+)' set up to track remote branch '([^']+)' from '([^']+)'/,
-        (result, [local, remote, remoteName]) => {
-          result.branch = {
-            ...result.branch || {},
-            local,
-            remote,
-            remoteName
-          };
-        }
-      ),
-      new LineParser(
-        /^([^:]+):(\S+)\s+([a-z0-9]+)\.\.([a-z0-9]+)$/,
-        (result, [local, remote, from, to]) => {
-          result.update = {
-            head: {
-              local,
-              remote
-            },
-            hash: {
-              from,
-              to
-            }
-          };
-        }
-      )
-    ];
-    parsePushResult = /* @__PURE__ */ __name((stdOut, stdErr) => {
-      const pushDetail = parsePushDetail(stdOut, stdErr);
-      const responseDetail = parseRemoteMessages(stdOut, stdErr);
-      return {
-        ...pushDetail,
-        ...responseDetail
+  ),
+  new x(
+    /^remote:\s*(enumerating|counting|compressing) objects: \d+% \(\d+\/(\d+)\),/i,
+    (t2, [e, n]) => {
+      const r2 = e.toLowerCase(), s = tt(t2.remoteMessages);
+      Object.assign(s, { [r2]: p(n) });
+    }
+  ),
+  new x(
+    /total ([^,]+), reused ([^,]+), pack-reused (\d+)/i,
+    (t2, [e, n, r2]) => {
+      const s = tt(t2.remoteMessages);
+      s.total = Ct(e), s.reused = Ct(n), s.packReused = p(r2);
+    }
+  )
+];
+var wr = [
+  new x(/^remote:\s*(.+)$/, (t2, [e]) => (t2.remoteMessages.all.push(e.trim()), false)),
+  ...yr,
+  new x(
+    [/create a (?:pull|merge) request/i, /\s(https?:\/\/\S+)$/],
+    (t2, [e]) => {
+      t2.remoteMessages.pullRequestUrl = e;
+    }
+  ),
+  new x(
+    [/found (\d+) vulnerabilities.+\(([^)]+)\)/i, /\s(https?:\/\/\S+)$/],
+    (t2, [e, n, r2]) => {
+      t2.remoteMessages.vulnerabilities = {
+        count: p(e),
+        summary: n,
+        url: r2
       };
-    }, "parsePushResult");
-    parsePushDetail = /* @__PURE__ */ __name((stdOut, stdErr) => {
-      return parseStringResponse({ pushed: [] }, parsers5, [stdOut, stdErr]);
-    }, "parsePushDetail");
-  }
-});
-var push_exports = {};
-__export(push_exports, {
-  pushTagsTask: /* @__PURE__ */ __name(() => pushTagsTask, "pushTagsTask"),
-  pushTask: /* @__PURE__ */ __name(() => pushTask, "pushTask")
-});
-function pushTagsTask(ref = {}, customArgs) {
-  append(customArgs, "--tags");
-  return pushTask(ref, customArgs);
+    }
+  )
+];
+function ae(t2, e) {
+  return E({ remoteMessages: new br() }, wr, e);
 }
-__name(pushTagsTask, "pushTagsTask");
-function pushTask(ref = {}, customArgs) {
-  const commands = ["push", ...customArgs];
-  if (ref.branch) {
-    commands.splice(1, 0, ref.branch);
+__name(ae, "ae");
+var br = class {
+  static {
+    __name(this, "br");
   }
-  if (ref.remote) {
-    commands.splice(1, 0, ref.remote);
+  constructor() {
+    this.all = [];
   }
-  remove(commands, "-v");
-  append(commands, "--verbose");
-  append(commands, "--porcelain");
-  return {
-    commands,
+};
+var Tr = /^\s*(.+?)\s+\|\s+\d+\s*(\+*)(-*)/;
+var kr = /(\d+)\D+((\d+)\D+\(\+\))?(\D+(\d+)\D+\(-\))?/;
+var _r = /^(create|delete) mode \d+ (.+)/;
+var vr = [
+  new l2(Tr, (t2, [e, n, r2]) => {
+    t2.files.push(e), n && (t2.insertions[e] = n.length), r2 && (t2.deletions[e] = r2.length);
+  }),
+  new l2(kr, (t2, [e, , n, , r2]) => n !== void 0 || r2 !== void 0 ? (t2.summary.changes = +e || 0, t2.summary.insertions =
+  +n || 0, t2.summary.deletions = +r2 || 0, true) : false),
+  new l2(_r, (t2, [e, n]) => {
+    S(t2.files, n), S(e === "create" ? t2.created : t2.deleted, n);
+  })
+];
+var Er = [
+  new l2(/^from\s(.+)$/i, (t2, [e]) => {
+    t2.remote = e;
+  }),
+  new l2(/^fatal:\s(.+)$/, (t2, [e]) => {
+    t2.message = e;
+  }),
+  new l2(
+    /([a-z0-9]+)\.\.([a-z0-9]+)\s+(\S+)\s+->\s+(\S+)$/,
+    (t2, [e, n, r2, s]) => {
+      t2.branch.local = r2, t2.hash.local = e, t2.branch.remote = s, t2.hash.remote = n;
+    }
+  )
+];
+var Sr = /* @__PURE__ */ __name((t2, e) => E(new ie(), vr, [t2, e]), "Sr");
+var ue = /* @__PURE__ */ __name((t2, e) => Object.assign(
+  new ie(),
+  Sr(t2, e),
+  ae(t2, e)
+), "ue");
+function Rr(t2, e) {
+  const n = E(new gr(), Er, [t2, e]);
+  return n.message && n;
+}
+__name(Rr, "Rr");
+var Or = [
+  new l2(/^Auto-merging\s+(.+)$/, (t2, [e]) => {
+    t2.merges.push(e);
+  }),
+  new l2(/^CONFLICT\s+\((.+)\): Merge conflict in (.+)$/, (t2, [e, n]) => {
+    t2.conflicts.push(new Z(e, n));
+  }),
+  new l2(
+    /^CONFLICT\s+\((.+\/delete)\): (.+) deleted in (.+) and/,
+    (t2, [e, n, r2]) => {
+      t2.conflicts.push(new Z(e, n, { deleteRef: r2 }));
+    }
+  ),
+  new l2(/^CONFLICT\s+\((.+)\):/, (t2, [e]) => {
+    t2.conflicts.push(new Z(e, null));
+  }),
+  new l2(/^Automatic merge failed;\s+(.+)$/, (t2, [e]) => {
+    t2.result = e;
+  })
+];
+var Cr = /* @__PURE__ */ __name((t2, e) => Object.assign(Ar(t2), ue(t2, e)), "Cr");
+var Ar = /* @__PURE__ */ __name((t2) => E(new dr(), Or, t2), "Ar");
+function At(t2) {
+  return t2.length ? {
+    commands: ["merge", ...t2],
     format: "utf-8",
-    parser: parsePushResult
+    parser(e, n) {
+      const r2 = Cr(e, n);
+      if (r2.failed)
+        throw new at(r2);
+      return r2;
+    }
+  } : b("Git.merge requires at least one option");
+}
+__name(At, "At");
+function xr(t2, e, n) {
+  const r2 = n.includes("deleted"), s = n.includes("tag") || /^refs\/tags/.test(t2), o2 = !n.includes("new");
+  return {
+    deleted: r2,
+    tag: s,
+    branch: !s,
+    new: !o2,
+    alreadyUpdated: o2,
+    local: t2,
+    remote: e
   };
 }
-__name(pushTask, "pushTask");
-var init_push = __esm({
-  "src/lib/tasks/push.ts"() {
-    "use strict";
-    init_parse_push();
-    init_utils();
-  }
-});
-function show_default() {
+__name(xr, "xr");
+var Nr = [
+  new l2(/^Pushing to (.+)$/, (t2, [e]) => {
+    t2.repo = e;
+  }),
+  new l2(/^updating local tracking ref '(.+)'/, (t2, [e]) => {
+    t2.ref = {
+      ...t2.ref || {},
+      local: e
+    };
+  }),
+  new l2(/^[=*-]\s+([^:]+):(\S+)\s+\[(.+)]$/, (t2, [e, n, r2]) => {
+    t2.pushed.push(xr(e, n, r2));
+  }),
+  new l2(
+    /^Branch '([^']+)' set up to track remote branch '([^']+)' from '([^']+)'/,
+    (t2, [e, n, r2]) => {
+      t2.branch = {
+        ...t2.branch || {},
+        local: e,
+        remote: n,
+        remoteName: r2
+      };
+    }
+  ),
+  new l2(
+    /^([^:]+):(\S+)\s+([a-z0-9]+)\.\.([a-z0-9]+)$/,
+    (t2, [e, n, r2, s]) => {
+      t2.update = {
+        head: {
+          local: e,
+          remote: n
+        },
+        hash: {
+          from: r2,
+          to: s
+        }
+      };
+    }
+  )
+];
+var $r = /* @__PURE__ */ __name((t2, e) => {
+  const n = Pr(t2, e), r2 = ae(t2, e);
+  return {
+    ...n,
+    ...r2
+  };
+}, "$r");
+var Pr = /* @__PURE__ */ __name((t2, e) => E({ pushed: [] }, Nr, [t2, e]), "Pr");
+function Mr(t2 = {}, e) {
+  return S(e, "--tags"), ce(t2, e);
+}
+__name(Mr, "Mr");
+function ce(t2 = {}, e) {
+  const n = ["push", ...e];
+  return t2.branch && n.splice(1, 0, t2.branch), t2.remote && n.splice(1, 0, t2.remote), ct(n, "-v"), S(n, "--verbose"),
+  S(n, "--porcelain"), {
+    commands: n,
+    format: "utf-8",
+    parser: $r
+  };
+}
+__name(ce, "ce");
+function Dr() {
   return {
     showBuffer() {
-      const commands = ["show", ...getTrailingOptions(arguments, 1)];
-      if (!commands.includes("--binary")) {
-        commands.splice(1, 0, "--binary");
-      }
-      return this._runTask(
-        straightThroughBufferTask(commands),
-        trailingFunctionArgument(arguments)
+      const t2 = ["show", ...h2(arguments, 1)];
+      return t2.includes("--binary") || t2.splice(1, 0, "--binary"), this._runTask(
+        Gt(t2),
+        u(arguments)
       );
     },
     show() {
-      const commands = ["show", ...getTrailingOptions(arguments, 1)];
+      const t2 = ["show", ...h2(arguments, 1)];
       return this._runTask(
-        straightThroughStringTask(commands),
-        trailingFunctionArgument(arguments)
+        g(t2),
+        u(arguments)
       );
     }
   };
 }
-__name(show_default, "show_default");
-var init_show = __esm({
-  "src/lib/tasks/show.ts"() {
-    "use strict";
-    init_utils();
-    init_task();
+__name(Dr, "Dr");
+var Lr = /^(.+)\0(.+)$/;
+var jr = class {
+  static {
+    __name(this, "jr");
   }
-});
-var fromPathRegex;
-var FileStatusSummary;
-var init_FileStatusSummary = __esm({
-  "src/lib/responses/FileStatusSummary.ts"() {
-    "use strict";
-    fromPathRegex = /^(.+)\0(.+)$/;
-    FileStatusSummary = class {
-      static {
-        __name(this, "FileStatusSummary");
-      }
-      constructor(path, index, working_dir) {
-        this.path = path;
-        this.index = index;
-        this.working_dir = working_dir;
-        if (index === "R" || working_dir === "R") {
-          const detail = fromPathRegex.exec(path) || [null, path, path];
-          this.from = detail[2] || "";
-          this.path = detail[1] || "";
-        }
-      }
-    };
+  constructor(e, n, r2) {
+    if (this.path = e, this.index = n, this.working_dir = r2, n === "R" || r2 === "R") {
+      const s = Lr.exec(e) || [null, e, e];
+      this.from = s[2] || "", this.path = s[1] || "";
+    }
   }
-});
-function renamedFile(line) {
-  const [to, from] = line.split(NULL);
+};
+var Br = class {
+  static {
+    __name(this, "Br");
+  }
+  constructor() {
+    this.not_added = [], this.conflicted = [], this.created = [], this.deleted = [], this.ignored = void 0, this.modified =
+    [], this.renamed = [], this.files = [], this.staged = [], this.ahead = 0, this.behind = 0, this.current = null, this.
+    tracking = null, this.detached = false, this.isClean = () => !this.files.length;
+  }
+};
+function xt(t2) {
+  const [e, n] = t2.split(I2);
   return {
-    from: from || to,
-    to
+    from: n || e,
+    to: e
   };
 }
-__name(renamedFile, "renamedFile");
-function parser3(indexX, indexY, handler) {
-  return [`${indexX}${indexY}`, handler];
+__name(xt, "xt");
+function _2(t2, e, n) {
+  return [`${t2}${e}`, n];
 }
-__name(parser3, "parser3");
-function conflicts(indexX, ...indexY) {
-  return indexY.map((y) => parser3(indexX, y, (result, file) => result.conflicted.push(file)));
+__name(_2, "_");
+function et(t2, ...e) {
+  return e.map((n) => _2(t2, n, (r2, s) => r2.conflicted.push(s)));
 }
-__name(conflicts, "conflicts");
-function splitLine(result, lineStr) {
-  const trimmed2 = lineStr.trim();
+__name(et, "et");
+var Ir = new Map([
+  _2(
+    " ",
+    "A",
+    (t2, e) => t2.created.push(e)
+  ),
+  _2(
+    " ",
+    "D",
+    (t2, e) => t2.deleted.push(e)
+  ),
+  _2(
+    " ",
+    "M",
+    (t2, e) => t2.modified.push(e)
+  ),
+  _2("A", " ", (t2, e) => {
+    t2.created.push(e), t2.staged.push(e);
+  }),
+  _2("A", "M", (t2, e) => {
+    t2.created.push(e), t2.staged.push(e), t2.modified.push(e);
+  }),
+  _2("D", " ", (t2, e) => {
+    t2.deleted.push(e), t2.staged.push(e);
+  }),
+  _2("M", " ", (t2, e) => {
+    t2.modified.push(e), t2.staged.push(e);
+  }),
+  _2("M", "M", (t2, e) => {
+    t2.modified.push(e), t2.staged.push(e);
+  }),
+  _2("R", " ", (t2, e) => {
+    t2.renamed.push(xt(e));
+  }),
+  _2("R", "M", (t2, e) => {
+    const n = xt(e);
+    t2.renamed.push(n), t2.modified.push(n.to);
+  }),
+  _2("!", "!", (t2, e) => {
+    (t2.ignored = t2.ignored || []).push(e);
+  }),
+  _2(
+    "?",
+    "?",
+    (t2, e) => t2.not_added.push(e)
+  ),
+  ...et(
+    "A",
+    "A",
+    "U"
+    /* UNMERGED */
+  ),
+  ...et(
+    "D",
+    "D",
+    "U"
+    /* UNMERGED */
+  ),
+  ...et(
+    "U",
+    "A",
+    "D",
+    "U"
+    /* UNMERGED */
+  ),
+  [
+    "##",
+    (t2, e) => {
+      const n = /ahead (\d+)/, r2 = /behind (\d+)/, s = /^(.+?(?=(?:\.{3}|\s|$)))/, o2 = /\.{3}(\S*)/, i = /\son\s(\S+?)(?=\.{3}|$)/;
+      let a = n.exec(e);
+      t2.ahead = a && +a[1] || 0, a = r2.exec(e), t2.behind = a && +a[1] || 0, a = s.exec(e), t2.current = d(a?.[1], m, null),
+      a = o2.exec(e), t2.tracking = d(a?.[1], m, null), a = i.exec(e), a && (t2.current = d(a?.[1], m, t2.current)), t2.
+      detached = /\(no branch\)/.test(e);
+    }
+  ]
+]);
+var Ur = /* @__PURE__ */ __name(function(t2) {
+  const e = t2.split(I2), n = new Br();
+  for (let r2 = 0, s = e.length; r2 < s; ) {
+    let o2 = e[r2++].trim();
+    o2 && (o2.charAt(0) === "R" && (o2 += I2 + (e[r2++] || "")), Fr(n, o2));
+  }
+  return n;
+}, "Ur");
+function Fr(t2, e) {
+  const n = e.trim();
   switch (" ") {
-    case trimmed2.charAt(2):
-      return data(trimmed2.charAt(0), trimmed2.charAt(1), trimmed2.slice(3));
-    case trimmed2.charAt(1):
-      return data(" ", trimmed2.charAt(0), trimmed2.slice(2));
+    case n.charAt(2):
+      return r2(n.charAt(0), n.charAt(1), n.slice(3));
+    case n.charAt(1):
+      return r2(" ", n.charAt(0), n.slice(2));
     default:
       return;
   }
-  function data(index, workingDir, path) {
-    const raw = `${index}${workingDir}`;
-    const handler = parsers6.get(raw);
-    if (handler) {
-      handler(result, path);
-    }
-    if (raw !== "##" && raw !== "!!") {
-      result.files.push(new FileStatusSummary(path, index, workingDir));
-    }
+  function r2(s, o2, i) {
+    const a = `${s}${o2}`, c3 = Ir.get(a);
+    c3 && c3(t2, i), a !== "##" && a !== "!!" && t2.files.push(new jr(i, s, o2));
   }
-  __name(data, "data");
+  __name(r2, "r");
 }
-__name(splitLine, "splitLine");
-var StatusSummary;
-var parsers6;
-var parseStatusSummary;
-var init_StatusSummary = __esm({
-  "src/lib/responses/StatusSummary.ts"() {
-    "use strict";
-    init_utils();
-    init_FileStatusSummary();
-    StatusSummary = class {
-      static {
-        __name(this, "StatusSummary");
-      }
-      constructor() {
-        this.not_added = [];
-        this.conflicted = [];
-        this.created = [];
-        this.deleted = [];
-        this.ignored = void 0;
-        this.modified = [];
-        this.renamed = [];
-        this.files = [];
-        this.staged = [];
-        this.ahead = 0;
-        this.behind = 0;
-        this.current = null;
-        this.tracking = null;
-        this.detached = false;
-        this.isClean = () => {
-          return !this.files.length;
-        };
-      }
-    };
-    parsers6 = new Map([
-      parser3(
-        " ",
-        "A",
-        (result, file) => result.created.push(file)
-      ),
-      parser3(
-        " ",
-        "D",
-        (result, file) => result.deleted.push(file)
-      ),
-      parser3(
-        " ",
-        "M",
-        (result, file) => result.modified.push(file)
-      ),
-      parser3("A", " ", (result, file) => {
-        result.created.push(file);
-        result.staged.push(file);
-      }),
-      parser3("A", "M", (result, file) => {
-        result.created.push(file);
-        result.staged.push(file);
-        result.modified.push(file);
-      }),
-      parser3("D", " ", (result, file) => {
-        result.deleted.push(file);
-        result.staged.push(file);
-      }),
-      parser3("M", " ", (result, file) => {
-        result.modified.push(file);
-        result.staged.push(file);
-      }),
-      parser3("M", "M", (result, file) => {
-        result.modified.push(file);
-        result.staged.push(file);
-      }),
-      parser3("R", " ", (result, file) => {
-        result.renamed.push(renamedFile(file));
-      }),
-      parser3("R", "M", (result, file) => {
-        const renamed = renamedFile(file);
-        result.renamed.push(renamed);
-        result.modified.push(renamed.to);
-      }),
-      parser3("!", "!", (_result, _file) => {
-        (_result.ignored = _result.ignored || []).push(_file);
-      }),
-      parser3(
-        "?",
-        "?",
-        (result, file) => result.not_added.push(file)
-      ),
-      ...conflicts(
-        "A",
-        "A",
-        "U"
-        /* UNMERGED */
-      ),
-      ...conflicts(
-        "D",
-        "D",
-        "U"
-        /* UNMERGED */
-      ),
-      ...conflicts(
-        "U",
-        "A",
-        "D",
-        "U"
-        /* UNMERGED */
-      ),
-      [
-        "##",
-        (result, line) => {
-          const aheadReg = /ahead (\d+)/;
-          const behindReg = /behind (\d+)/;
-          const currentReg = /^(.+?(?=(?:\.{3}|\s|$)))/;
-          const trackingReg = /\.{3}(\S*)/;
-          const onEmptyBranchReg = /\son\s(\S+?)(?=\.{3}|$)/;
-          let regexResult = aheadReg.exec(line);
-          result.ahead = regexResult && +regexResult[1] || 0;
-          regexResult = behindReg.exec(line);
-          result.behind = regexResult && +regexResult[1] || 0;
-          regexResult = currentReg.exec(line);
-          result.current = filterType(regexResult?.[1], filterString, null);
-          regexResult = trackingReg.exec(line);
-          result.tracking = filterType(regexResult?.[1], filterString, null);
-          regexResult = onEmptyBranchReg.exec(line);
-          if (regexResult) {
-            result.current = filterType(regexResult?.[1], filterString, result.current);
-          }
-          result.detached = /\(no branch\)/.test(line);
-        }
-      ]
-    ]);
-    parseStatusSummary = /* @__PURE__ */ __name(function(text) {
-      const lines = text.split(NULL);
-      const status = new StatusSummary();
-      for (let i2 = 0, l = lines.length; i2 < l; ) {
-        let line = lines[i2++].trim();
-        if (!line) {
-          continue;
-        }
-        if (line.charAt(0) === "R") {
-          line += NULL + (lines[i2++] || "");
-        }
-        splitLine(status, line);
-      }
-      return status;
-    }, "parseStatusSummary");
-  }
-});
-function statusTask(customArgs) {
-  const commands = [
-    "status",
-    "--porcelain",
-    "-b",
-    "-u",
-    "--null",
-    ...customArgs.filter((arg) => !ignoredOptions.includes(arg))
-  ];
+__name(Fr, "Fr");
+var Gr = ["--null", "-z"];
+function zr(t2) {
   return {
     format: "utf-8",
-    commands,
-    parser(text) {
-      return parseStatusSummary(text);
+    commands: [
+      "status",
+      "--porcelain",
+      "-b",
+      "-u",
+      "--null",
+      ...t2.filter((n) => !Gr.includes(n))
+    ],
+    parser(n) {
+      return Ur(n);
     }
   };
 }
-__name(statusTask, "statusTask");
-var ignoredOptions;
-var init_status = __esm({
-  "src/lib/tasks/status.ts"() {
-    "use strict";
-    init_StatusSummary();
-    ignoredOptions = ["--null", "-z"];
-  }
-});
-function versionResponse(major = 0, minor = 0, patch = 0, agent2 = "", installed = true) {
+__name(zr, "zr");
+var fe = "installed=false";
+function q(t2 = 0, e = 0, n = 0, r2 = "", s = true) {
   return Object.defineProperty(
     {
-      major,
-      minor,
-      patch,
-      agent: agent2,
-      installed
+      major: t2,
+      minor: e,
+      patch: n,
+      agent: r2,
+      installed: s
     },
     "toString",
     {
@@ -44614,1386 +43493,884 @@ function versionResponse(major = 0, minor = 0, patch = 0, agent2 = "", installed
     }
   );
 }
-__name(versionResponse, "versionResponse");
-function notInstalledResponse() {
-  return versionResponse(0, 0, 0, "", false);
+__name(q, "q");
+function qr() {
+  return q(0, 0, 0, "", false);
 }
-__name(notInstalledResponse, "notInstalledResponse");
-function version_default() {
+__name(qr, "qr");
+function Wr() {
   return {
     version() {
       return this._runTask({
         commands: ["--version"],
         format: "utf-8",
-        parser: versionParser,
-        onError(result, error2, done, fail) {
-          if (result.exitCode === -2) {
-            return done(Buffer.from(NOT_INSTALLED));
-          }
-          fail(error2);
+        parser: Kr,
+        onError(t2, e, n, r2) {
+          if (t2.exitCode === V.NOT_FOUND)
+            return n(Buffer.from(fe));
+          r2(e);
         }
       });
     }
   };
 }
-__name(version_default, "version_default");
-function versionParser(stdOut) {
-  if (stdOut === NOT_INSTALLED) {
-    return notInstalledResponse();
-  }
-  return parseStringResponse(versionResponse(0, 0, 0, stdOut), parsers7, stdOut);
-}
-__name(versionParser, "versionParser");
-var NOT_INSTALLED;
-var parsers7;
-var init_version = __esm({
-  "src/lib/tasks/version.ts"() {
-    "use strict";
-    init_utils();
-    NOT_INSTALLED = "installed=false";
-    parsers7 = [
-      new LineParser(
-        /version (\d+)\.(\d+)\.(\d+)(?:\s*\((.+)\))?/,
-        (result, [major, minor, patch, agent2 = ""]) => {
-          Object.assign(
-            result,
-            versionResponse(asNumber(major), asNumber(minor), asNumber(patch), agent2)
-          );
-        }
-      ),
-      new LineParser(
-        /version (\d+)\.(\d+)\.(\D+)(.+)?$/,
-        (result, [major, minor, patch, agent2 = ""]) => {
-          Object.assign(result, versionResponse(asNumber(major), asNumber(minor), patch, agent2));
-        }
-      )
-    ];
-  }
-});
-function createCloneTask(api, task, repoPath, ...args) {
-  if (!filterString(repoPath)) {
-    return configurationErrorTask(`git.${api}() requires a string 'repoPath'`);
-  }
-  return task(repoPath, filterType(args[0], filterString), getTrailingOptions(arguments));
-}
-__name(createCloneTask, "createCloneTask");
-function clone_default() {
-  return {
-    clone(repo, ...rest) {
-      return this._runTask(
-        createCloneTask("clone", cloneTask, filterType(repo, filterString), ...rest),
-        trailingFunctionArgument(arguments)
-      );
-    },
-    mirror(repo, ...rest) {
-      return this._runTask(
-        createCloneTask("mirror", cloneMirrorTask, filterType(repo, filterString), ...rest),
-        trailingFunctionArgument(arguments)
+__name(Wr, "Wr");
+var Hr = [
+  new l2(
+    /version (\d+)\.(\d+)\.(\d+)(?:\s*\((.+)\))?/,
+    (t2, [e, n, r2, s = ""]) => {
+      Object.assign(
+        t2,
+        q(p(e), p(n), p(r2), s)
       );
     }
-  };
+  ),
+  new l2(
+    /version (\d+)\.(\d+)\.(\D+)(.+)?$/,
+    (t2, [e, n, r2, s = ""]) => {
+      Object.assign(t2, q(p(e), p(n), r2, s));
+    }
+  )
+];
+function Kr(t2) {
+  return t2 === fe ? qr() : E(q(0, 0, 0, t2), Hr, t2);
 }
-__name(clone_default, "clone_default");
-var cloneTask;
-var cloneMirrorTask;
-var init_clone = __esm({
-  "src/lib/tasks/clone.ts"() {
-    "use strict";
-    init_task();
-    init_utils();
-    cloneTask = /* @__PURE__ */ __name((repo, directory, customArgs) => {
-      const commands = ["clone", ...customArgs];
-      filterString(repo) && commands.push(c(repo));
-      filterString(directory) && commands.push(c(directory));
-      return straightThroughStringTask(commands);
-    }, "cloneTask");
-    cloneMirrorTask = /* @__PURE__ */ __name((repo, directory, customArgs) => {
-      append(customArgs, "--mirror");
-      return cloneTask(repo, directory, customArgs);
-    }, "cloneMirrorTask");
+__name(Kr, "Kr");
+var le = class {
+  static {
+    __name(this, "le");
   }
-});
-var simple_git_api_exports = {};
-__export(simple_git_api_exports, {
-  SimpleGitApi: /* @__PURE__ */ __name(() => SimpleGitApi, "SimpleGitApi")
-});
-var SimpleGitApi;
-var init_simple_git_api = __esm({
-  "src/lib/simple-git-api.ts"() {
-    "use strict";
-    init_task_callback();
-    init_change_working_directory();
-    init_checkout();
-    init_count_objects();
-    init_commit();
-    init_config();
-    init_first_commit();
-    init_grep();
-    init_hash_object();
-    init_init();
-    init_log();
-    init_merge();
-    init_push();
-    init_show();
-    init_status();
-    init_task();
-    init_version();
-    init_utils();
-    init_clone();
-    SimpleGitApi = class {
-      static {
-        __name(this, "SimpleGitApi");
-      }
-      constructor(_executor) {
-        this._executor = _executor;
-      }
-      _runTask(task, then) {
-        const chain = this._executor.chain();
-        const promise = chain.push(task);
-        if (then) {
-          taskCallback(task, promise, then);
-        }
-        return Object.create(this, {
-          then: { value: promise.then.bind(promise) },
-          catch: { value: promise.catch.bind(promise) },
-          _executor: { value: chain }
-        });
-      }
-      add(files) {
-        return this._runTask(
-          straightThroughStringTask(["add", ...asArray(files)]),
-          trailingFunctionArgument(arguments)
-        );
-      }
-      cwd(directory) {
-        const next = trailingFunctionArgument(arguments);
-        if (typeof directory === "string") {
-          return this._runTask(changeWorkingDirectoryTask(directory, this._executor), next);
-        }
-        if (typeof directory?.path === "string") {
-          return this._runTask(
-            changeWorkingDirectoryTask(
-              directory.path,
-              directory.root && this._executor || void 0
-            ),
-            next
-          );
-        }
-        return this._runTask(
-          configurationErrorTask("Git.cwd: workingDirectory must be supplied as a string"),
-          next
-        );
-      }
-      hashObject(path, write) {
-        return this._runTask(
-          hashObjectTask(path, write === true),
-          trailingFunctionArgument(arguments)
-        );
-      }
-      init(bare) {
-        return this._runTask(
-          initTask(bare === true, this._executor.cwd, getTrailingOptions(arguments)),
-          trailingFunctionArgument(arguments)
-        );
-      }
-      merge() {
-        return this._runTask(
-          mergeTask(getTrailingOptions(arguments)),
-          trailingFunctionArgument(arguments)
-        );
-      }
-      mergeFromTo(remote, branch) {
-        if (!(filterString(remote) && filterString(branch))) {
-          return this._runTask(
-            configurationErrorTask(
-              `Git.mergeFromTo requires that the 'remote' and 'branch' arguments are supplied as strings`
-            )
-          );
-        }
-        return this._runTask(
-          mergeTask([remote, branch, ...getTrailingOptions(arguments)]),
-          trailingFunctionArgument(arguments, false)
-        );
-      }
-      outputHandler(handler) {
-        this._executor.outputHandler = handler;
-        return this;
-      }
-      push() {
-        const task = pushTask(
-          {
-            remote: filterType(arguments[0], filterString),
-            branch: filterType(arguments[1], filterString)
-          },
-          getTrailingOptions(arguments)
-        );
-        return this._runTask(task, trailingFunctionArgument(arguments));
-      }
-      stash() {
-        return this._runTask(
-          straightThroughStringTask(["stash", ...getTrailingOptions(arguments)]),
-          trailingFunctionArgument(arguments)
-        );
-      }
-      status() {
-        return this._runTask(
-          statusTask(getTrailingOptions(arguments)),
-          trailingFunctionArgument(arguments)
-        );
-      }
-    };
-    Object.assign(
-      SimpleGitApi.prototype,
-      checkout_default(),
-      clone_default(),
-      commit_default(),
-      config_default(),
-      count_objects_default(),
-      first_commit_default(),
-      grep_default(),
-      log_default(),
-      show_default(),
-      version_default()
+  constructor(e) {
+    this._executor = e;
+  }
+  _runTask(e, n) {
+    const r2 = this._executor.chain(), s = r2.push(e);
+    return n && Ln(e, s, n), Object.create(this, {
+      then: { value: s.then.bind(s) },
+      catch: { value: s.catch.bind(s) },
+      _executor: { value: r2 }
+    });
+  }
+  add(e) {
+    return this._runTask(
+      g(["add", ...v(e)]),
+      u(arguments)
     );
   }
-});
-var scheduler_exports = {};
-__export(scheduler_exports, {
-  Scheduler: /* @__PURE__ */ __name(() => Scheduler, "Scheduler")
-});
-var createScheduledTask;
-var Scheduler;
-var init_scheduler = __esm({
-  "src/lib/runners/scheduler.ts"() {
-    "use strict";
-    init_utils();
-    init_git_logger();
-    createScheduledTask = /* @__PURE__ */ (() => {
-      let id = 0;
-      return () => {
-        id++;
-        const { promise, done } = (0, import_promise_deferred.createDeferred)();
-        return {
-          promise,
-          done,
-          id
-        };
-      };
-    })();
-    Scheduler = class {
-      static {
-        __name(this, "Scheduler");
-      }
-      constructor(concurrency = 2) {
-        this.concurrency = concurrency;
-        this.logger = createLogger("", "scheduler");
-        this.pending = [];
-        this.running = [];
-        this.logger(`Constructed, concurrency=%s`, concurrency);
-      }
-      schedule() {
-        if (!this.pending.length || this.running.length >= this.concurrency) {
-          this.logger(
-            `Schedule attempt ignored, pending=%s running=%s concurrency=%s`,
-            this.pending.length,
-            this.running.length,
-            this.concurrency
-          );
-          return;
-        }
-        const task = append(this.running, this.pending.shift());
-        this.logger(`Attempting id=%s`, task.id);
-        task.done(() => {
-          this.logger(`Completing id=`, task.id);
-          remove(this.running, task);
-          this.schedule();
-        });
-      }
-      next() {
-        const { promise, id } = append(this.pending, createScheduledTask());
-        this.logger(`Scheduling id=%s`, id);
-        this.schedule();
-        return promise;
-      }
+  cwd(e) {
+    const n = u(arguments);
+    return typeof e == "string" ? this._runTask(St(e, this._executor), n) : typeof e?.path == "string" ? this._runTask(
+      St(
+        e.path,
+        e.root && this._executor || void 0
+      ),
+      n
+    ) : this._runTask(
+      b("Git.cwd: workingDirectory must be supplied as a string"),
+      n
+    );
+  }
+  hashObject(e, n) {
+    return this._runTask(
+      Vn(e, n === true),
+      u(arguments)
+    );
+  }
+  init(e) {
+    return this._runTask(
+      Zn(e === true, this._executor.cwd, h2(arguments)),
+      u(arguments)
+    );
+  }
+  merge() {
+    return this._runTask(
+      At(h2(arguments)),
+      u(arguments)
+    );
+  }
+  mergeFromTo(e, n) {
+    return m(e) && m(n) ? this._runTask(
+      At([e, n, ...h2(arguments)]),
+      u(arguments, false)
+    ) : this._runTask(
+      b(
+        "Git.mergeFromTo requires that the 'remote' and 'branch' arguments are supplied as strings"
+      )
+    );
+  }
+  outputHandler(e) {
+    return this._executor.outputHandler = e, this;
+  }
+  push() {
+    const e = ce(
+      {
+        remote: d(arguments[0], m),
+        branch: d(arguments[1], m)
+      },
+      h2(arguments)
+    );
+    return this._runTask(e, u(arguments));
+  }
+  stash() {
+    return this._runTask(
+      g(["stash", ...h2(arguments)]),
+      u(arguments)
+    );
+  }
+  status() {
+    return this._runTask(
+      zr(h2(arguments)),
+      u(arguments)
+    );
+  }
+};
+Object.assign(
+  le.prototype,
+  jn(),
+  In(),
+  zn(),
+  Tn(),
+  Hn(),
+  Kn(),
+  On(),
+  er(),
+  pr(),
+  Dr(),
+  Wr()
+);
+var Vr = /* @__PURE__ */ (() => {
+  let t2 = 0;
+  return () => {
+    t2++;
+    const { promise: e, done: n } = (0, import_promise_deferred.createDeferred)();
+    return {
+      promise: e,
+      done: n,
+      id: t2
+    };
+  };
+})();
+var Xr = class {
+  static {
+    __name(this, "Xr");
+  }
+  constructor(e = 2) {
+    this.concurrency = e, this.logger = $("", "scheduler"), this.pending = [], this.running = [], this.logger("Construct\
+ed, concurrency=%s", e);
+  }
+  schedule() {
+    if (!this.pending.length || this.running.length >= this.concurrency) {
+      this.logger(
+        "Schedule attempt ignored, pending=%s running=%s concurrency=%s",
+        this.pending.length,
+        this.running.length,
+        this.concurrency
+      );
+      return;
+    }
+    const e = S(this.running, this.pending.shift());
+    this.logger("Attempting id=%s", e.id), e.done(() => {
+      this.logger("Completing id=", e.id), ct(this.running, e), this.schedule();
+    });
+  }
+  next() {
+    const { promise: e, id: n } = S(this.pending, Vr());
+    return this.logger("Scheduling id=%s", n), this.schedule(), e;
+  }
+};
+function Yr(t2, e) {
+  return g(["apply", ...e, ...t2]);
+}
+__name(Yr, "Yr");
+var he = /* @__PURE__ */ ((t2) => (t2.CURRENT = "*", t2.LINKED = "+", t2))(he || {});
+var Qr = class {
+  static {
+    __name(this, "Qr");
+  }
+  constructor() {
+    this.all = [], this.branches = {}, this.current = "", this.detached = false;
+  }
+  push(e, n, r2, s, o2) {
+    e === "*" && (this.detached = n, this.current = r2), this.all.push(r2), this.branches[r2] = {
+      current: e === "*",
+      linkedWorkTree: e === "+",
+      name: r2,
+      commit: s,
+      label: o2
     };
   }
+};
+var Jr = [
+  new l2(
+    /^([*+]\s)?\((?:HEAD )?detached (?:from|at) (\S+)\)\s+([a-z0-9]+)\s(.*)$/,
+    (t2, [e, n, r2, s]) => {
+      t2.push(Nt(e), true, n, r2, s);
+    }
+  ),
+  new l2(
+    /^([*+]\s)?(\S+)\s+([a-z0-9]+)\s?(.*)$/s,
+    (t2, [e, n, r2, s]) => {
+      t2.push(Nt(e), false, n, r2, s);
+    }
+  )
+];
+var Zr = new l2(/^(\S+)$/s, (t2, [e]) => {
+  t2.push(he.CURRENT, false, e, "", "");
 });
-var apply_patch_exports = {};
-__export(apply_patch_exports, {
-  applyPatchTask: /* @__PURE__ */ __name(() => applyPatchTask, "applyPatchTask")
-});
-function applyPatchTask(patches, customArgs) {
-  return straightThroughStringTask(["apply", ...customArgs, ...patches]);
+function Nt(t2) {
+  return t2 ? t2.charAt(0) : "";
 }
-__name(applyPatchTask, "applyPatchTask");
-var init_apply_patch = __esm({
-  "src/lib/tasks/apply-patch.ts"() {
-    "use strict";
-    init_task();
+__name(Nt, "Nt");
+function me(t2, e = false) {
+  return E(
+    new Qr(),
+    e ? [Zr] : Jr,
+    t2
+  );
+}
+__name(me, "me");
+var ts = class {
+  static {
+    __name(this, "ts");
   }
-});
-function branchDeletionSuccess(branch, hash) {
+  constructor() {
+    this.all = [], this.branches = {}, this.errors = [];
+  }
+  get success() {
+    return !this.errors.length;
+  }
+};
+function es(t2, e) {
   return {
-    branch,
-    hash,
+    branch: t2,
+    hash: e,
     success: true
   };
 }
-__name(branchDeletionSuccess, "branchDeletionSuccess");
-function branchDeletionFailure(branch) {
+__name(es, "es");
+function ns(t2) {
   return {
-    branch,
+    branch: t2,
     hash: null,
     success: false
   };
 }
-__name(branchDeletionFailure, "branchDeletionFailure");
-var BranchDeletionBatch;
-var init_BranchDeleteSummary = __esm({
-  "src/lib/responses/BranchDeleteSummary.ts"() {
-    "use strict";
-    BranchDeletionBatch = class {
-      static {
-        __name(this, "BranchDeletionBatch");
-      }
-      constructor() {
-        this.all = [];
-        this.branches = {};
-        this.errors = [];
-      }
-      get success() {
-        return !this.errors.length;
-      }
-    };
-  }
-});
-function hasBranchDeletionError(data, processExitCode) {
-  return processExitCode === 1 && deleteErrorRegex.test(data);
+__name(ns, "ns");
+var rs = /(\S+)\s+\(\S+\s([^)]+)\)/;
+var pe = /^error[^']+'([^']+)'/m;
+var ss = [
+  new l2(rs, (t2, [e, n]) => {
+    const r2 = es(e, n);
+    t2.all.push(r2), t2.branches[e] = r2;
+  }),
+  new l2(pe, (t2, [e]) => {
+    const n = ns(e);
+    t2.errors.push(n), t2.all.push(n), t2.branches[e] = n;
+  })
+];
+var gt = /* @__PURE__ */ __name((t2, e) => E(new ts(), ss, [t2, e]), "gt");
+function de(t2, e) {
+  return e === V.ERROR && pe.test(t2);
 }
-__name(hasBranchDeletionError, "hasBranchDeletionError");
-var deleteSuccessRegex;
-var deleteErrorRegex;
-var parsers8;
-var parseBranchDeletions;
-var init_parse_branch_delete = __esm({
-  "src/lib/parsers/parse-branch-delete.ts"() {
-    "use strict";
-    init_BranchDeleteSummary();
-    init_utils();
-    deleteSuccessRegex = /(\S+)\s+\(\S+\s([^)]+)\)/;
-    deleteErrorRegex = /^error[^']+'([^']+)'/m;
-    parsers8 = [
-      new LineParser(deleteSuccessRegex, (result, [branch, hash]) => {
-        const deletion = branchDeletionSuccess(branch, hash);
-        result.all.push(deletion);
-        result.branches[branch] = deletion;
-      }),
-      new LineParser(deleteErrorRegex, (result, [branch]) => {
-        const deletion = branchDeletionFailure(branch);
-        result.errors.push(deletion);
-        result.all.push(deletion);
-        result.branches[branch] = deletion;
-      })
-    ];
-    parseBranchDeletions = /* @__PURE__ */ __name((stdOut, stdErr) => {
-      return parseStringResponse(new BranchDeletionBatch(), parsers8, [stdOut, stdErr]);
-    }, "parseBranchDeletions");
-  }
-});
-var BranchSummaryResult;
-var init_BranchSummary = __esm({
-  "src/lib/responses/BranchSummary.ts"() {
-    "use strict";
-    BranchSummaryResult = class {
-      static {
-        __name(this, "BranchSummaryResult");
-      }
-      constructor() {
-        this.all = [];
-        this.branches = {};
-        this.current = "";
-        this.detached = false;
-      }
-      push(status, detached, name, commit, label) {
-        if (status === "*") {
-          this.detached = detached;
-          this.current = name;
-        }
-        this.all.push(name);
-        this.branches[name] = {
-          current: status === "*",
-          linkedWorkTree: status === "+",
-          name,
-          commit,
-          label
-        };
-      }
-    };
-  }
-});
-function branchStatus(input) {
-  return input ? input.charAt(0) : "";
+__name(de, "de");
+function os(t2) {
+  const e = ["-d", "-D", "--delete"];
+  return t2.some((n) => e.includes(n));
 }
-__name(branchStatus, "branchStatus");
-function parseBranchSummary(stdOut, currentOnly = false) {
-  return parseStringResponse(
-    new BranchSummaryResult(),
-    currentOnly ? [currentBranchParser] : parsers9,
-    stdOut
-  );
-}
-__name(parseBranchSummary, "parseBranchSummary");
-var parsers9;
-var currentBranchParser;
-var init_parse_branch = __esm({
-  "src/lib/parsers/parse-branch.ts"() {
-    "use strict";
-    init_BranchSummary();
-    init_utils();
-    parsers9 = [
-      new LineParser(
-        /^([*+]\s)?\((?:HEAD )?detached (?:from|at) (\S+)\)\s+([a-z0-9]+)\s(.*)$/,
-        (result, [current, name, commit, label]) => {
-          result.push(branchStatus(current), true, name, commit, label);
-        }
-      ),
-      new LineParser(
-        /^([*+]\s)?(\S+)\s+([a-z0-9]+)\s?(.*)$/s,
-        (result, [current, name, commit, label]) => {
-          result.push(branchStatus(current), false, name, commit, label);
-        }
-      )
-    ];
-    currentBranchParser = new LineParser(/^(\S+)$/s, (result, [name]) => {
-      result.push("*", false, name, "", "");
-    });
-  }
-});
-var branch_exports = {};
-__export(branch_exports, {
-  branchLocalTask: /* @__PURE__ */ __name(() => branchLocalTask, "branchLocalTask"),
-  branchTask: /* @__PURE__ */ __name(() => branchTask, "branchTask"),
-  containsDeleteBranchCommand: /* @__PURE__ */ __name(() => containsDeleteBranchCommand, "containsDeleteBranchCommand"),
-  deleteBranchTask: /* @__PURE__ */ __name(() => deleteBranchTask, "deleteBranchTask"),
-  deleteBranchesTask: /* @__PURE__ */ __name(() => deleteBranchesTask, "deleteBranchesTask")
-});
-function containsDeleteBranchCommand(commands) {
-  const deleteCommands = ["-d", "-D", "--delete"];
-  return commands.some((command) => deleteCommands.includes(command));
-}
-__name(containsDeleteBranchCommand, "containsDeleteBranchCommand");
-function branchTask(customArgs) {
-  const isDelete = containsDeleteBranchCommand(customArgs);
-  const isCurrentOnly = customArgs.includes("--show-current");
-  const commands = ["branch", ...customArgs];
-  if (commands.length === 1) {
-    commands.push("-a");
-  }
-  if (!commands.includes("-v")) {
-    commands.splice(1, 0, "-v");
-  }
-  return {
+__name(os, "os");
+function is(t2) {
+  const e = os(t2), n = t2.includes("--show-current"), r2 = ["branch", ...t2];
+  return r2.length === 1 && r2.push("-a"), r2.includes("-v") || r2.splice(1, 0, "-v"), {
     format: "utf-8",
-    commands,
-    parser(stdOut, stdErr) {
-      if (isDelete) {
-        return parseBranchDeletions(stdOut, stdErr).all[0];
-      }
-      return parseBranchSummary(stdOut, isCurrentOnly);
+    commands: r2,
+    parser(s, o2) {
+      return e ? gt(s, o2).all[0] : me(s, n);
     }
   };
 }
-__name(branchTask, "branchTask");
-function branchLocalTask() {
+__name(is, "is");
+function as() {
   return {
     format: "utf-8",
     commands: ["branch", "-v"],
-    parser(stdOut) {
-      return parseBranchSummary(stdOut);
+    parser(t2) {
+      return me(t2);
     }
   };
 }
-__name(branchLocalTask, "branchLocalTask");
-function deleteBranchesTask(branches, forceDelete = false) {
+__name(as, "as");
+function us(t2, e = false) {
   return {
     format: "utf-8",
-    commands: ["branch", "-v", forceDelete ? "-D" : "-d", ...branches],
-    parser(stdOut, stdErr) {
-      return parseBranchDeletions(stdOut, stdErr);
+    commands: ["branch", "-v", e ? "-D" : "-d", ...t2],
+    parser(n, r2) {
+      return gt(n, r2);
     },
-    onError({ exitCode, stdOut }, error2, done, fail) {
-      if (!hasBranchDeletionError(String(error2), exitCode)) {
-        return fail(error2);
-      }
-      done(stdOut);
+    onError({ exitCode: n, stdOut: r2 }, s, o2, i) {
+      if (!de(String(s), n))
+        return i(s);
+      o2(r2);
     }
   };
 }
-__name(deleteBranchesTask, "deleteBranchesTask");
-function deleteBranchTask(branch, forceDelete = false) {
-  const task = {
+__name(us, "us");
+function cs(t2, e = false) {
+  const n = {
     format: "utf-8",
-    commands: ["branch", "-v", forceDelete ? "-D" : "-d", branch],
-    parser(stdOut, stdErr) {
-      return parseBranchDeletions(stdOut, stdErr).branches[branch];
+    commands: ["branch", "-v", e ? "-D" : "-d", t2],
+    parser(r2, s) {
+      return gt(r2, s).branches[t2];
     },
-    onError({ exitCode, stdErr, stdOut }, error2, _, fail) {
-      if (!hasBranchDeletionError(String(error2), exitCode)) {
-        return fail(error2);
-      }
-      throw new GitResponseError(
-        task.parser(bufferToString(stdOut), bufferToString(stdErr)),
-        String(error2)
+    onError({ exitCode: r2, stdErr: s, stdOut: o2 }, i, a, c3) {
+      if (!de(String(i), r2))
+        return c3(i);
+      throw new at(
+        n.parser(F(o2), F(s)),
+        String(i)
       );
     }
   };
-  return task;
+  return n;
 }
-__name(deleteBranchTask, "deleteBranchTask");
-var init_branch = __esm({
-  "src/lib/tasks/branch.ts"() {
-    "use strict";
-    init_git_response_error();
-    init_parse_branch_delete();
-    init_parse_branch();
-    init_utils();
-  }
-});
-function toPath(input) {
-  const path = input.trim().replace(/^["']|["']$/g, "");
-  return path && (0, import_node_path.normalize)(path);
-}
-__name(toPath, "toPath");
-var parseCheckIgnore;
-var init_CheckIgnore = __esm({
-  "src/lib/responses/CheckIgnore.ts"() {
-    "use strict";
-    parseCheckIgnore = /* @__PURE__ */ __name((text) => {
-      return text.split(/\n/g).map(toPath).filter(Boolean);
-    }, "parseCheckIgnore");
-  }
-});
-var check_ignore_exports = {};
-__export(check_ignore_exports, {
-  checkIgnoreTask: /* @__PURE__ */ __name(() => checkIgnoreTask, "checkIgnoreTask")
-});
-function checkIgnoreTask(paths) {
+__name(cs, "cs");
+function fs(t2) {
   return {
-    commands: ["check-ignore", ...paths],
+    commands: ["check-ignore", ...t2],
     format: "utf-8",
-    parser: parseCheckIgnore
+    parser: ls
   };
 }
-__name(checkIgnoreTask, "checkIgnoreTask");
-var init_check_ignore = __esm({
-  "src/lib/tasks/check-ignore.ts"() {
-    "use strict";
-    init_CheckIgnore();
-  }
-});
-function parseFetchResult(stdOut, stdErr) {
-  const result = {
-    raw: stdOut,
+__name(fs, "fs");
+function ls(t2) {
+  return t2.split(/\n/g).map(hs).filter(Boolean);
+}
+__name(ls, "ls");
+function hs(t2) {
+  const e = t2.trim().replace(/^["']|["']$/g, "");
+  return e && (0, import_node_path.normalize)(e);
+}
+__name(hs, "hs");
+var ms = [
+  new l2(/From (.+)$/, (t2, [e]) => {
+    t2.remote = e;
+  }),
+  new l2(/\* \[new branch]\s+(\S+)\s*-> (.+)$/, (t2, [e, n]) => {
+    t2.branches.push({
+      name: e,
+      tracking: n
+    });
+  }),
+  new l2(/\* \[new tag]\s+(\S+)\s*-> (.+)$/, (t2, [e, n]) => {
+    t2.tags.push({
+      name: e,
+      tracking: n
+    });
+  }),
+  new l2(/- \[deleted]\s+\S+\s*-> (.+)$/, (t2, [e]) => {
+    t2.deleted.push({
+      tracking: e
+    });
+  }),
+  new l2(
+    /\s*([^.]+)\.\.(\S+)\s+(\S+)\s*-> (.+)$/,
+    (t2, [e, n, r2, s]) => {
+      t2.updated.push({
+        name: r2,
+        tracking: s,
+        to: n,
+        from: e
+      });
+    }
+  )
+];
+function ps(t2, e) {
+  return E({
+    raw: t2,
     remote: null,
     branches: [],
     tags: [],
     updated: [],
     deleted: []
-  };
-  return parseStringResponse(result, parsers10, [stdOut, stdErr]);
+  }, ms, [t2, e]);
 }
-__name(parseFetchResult, "parseFetchResult");
-var parsers10;
-var init_parse_fetch = __esm({
-  "src/lib/parsers/parse-fetch.ts"() {
-    "use strict";
-    init_utils();
-    parsers10 = [
-      new LineParser(/From (.+)$/, (result, [remote]) => {
-        result.remote = remote;
-      }),
-      new LineParser(/\* \[new branch]\s+(\S+)\s*-> (.+)$/, (result, [name, tracking]) => {
-        result.branches.push({
-          name,
-          tracking
-        });
-      }),
-      new LineParser(/\* \[new tag]\s+(\S+)\s*-> (.+)$/, (result, [name, tracking]) => {
-        result.tags.push({
-          name,
-          tracking
-        });
-      }),
-      new LineParser(/- \[deleted]\s+\S+\s*-> (.+)$/, (result, [tracking]) => {
-        result.deleted.push({
-          tracking
-        });
-      }),
-      new LineParser(
-        /\s*([^.]+)\.\.(\S+)\s+(\S+)\s*-> (.+)$/,
-        (result, [from, to, name, tracking]) => {
-          result.updated.push({
-            name,
-            tracking,
-            to,
-            from
-          });
-        }
-      )
-    ];
-  }
-});
-var fetch_exports = {};
-__export(fetch_exports, {
-  fetchTask: /* @__PURE__ */ __name(() => fetchTask, "fetchTask")
-});
-function disallowedCommand(command) {
-  return /^--upload-pack(=|$)/.test(command);
+__name(ps, "ps");
+function ds(t2) {
+  return /^--upload-pack(=|$)/.test(t2);
 }
-__name(disallowedCommand, "disallowedCommand");
-function fetchTask(remote, branch, customArgs) {
-  const commands = ["fetch", ...customArgs];
-  if (remote && branch) {
-    commands.push(remote, branch);
-  }
-  const banned = commands.find(disallowedCommand);
-  if (banned) {
-    return configurationErrorTask(`git.fetch: potential exploit argument blocked.`);
-  }
-  return {
-    commands,
+__name(ds, "ds");
+function gs(t2, e, n) {
+  const r2 = ["fetch", ...n];
+  return t2 && e && r2.push(t2, e), r2.find(ds) ? b("git.fetch: potential exploit argument blocked.") : {
+    commands: r2,
     format: "utf-8",
-    parser: parseFetchResult
+    parser: ps
   };
 }
-__name(fetchTask, "fetchTask");
-var init_fetch = __esm({
-  "src/lib/tasks/fetch.ts"() {
-    "use strict";
-    init_parse_fetch();
-    init_task();
-  }
-});
-function parseMoveResult(stdOut) {
-  return parseStringResponse({ moves: [] }, parsers11, stdOut);
+__name(gs, "gs");
+var ys = [
+  new l2(/^Renaming (.+) to (.+)$/, (t2, [e, n]) => {
+    t2.moves.push({ from: e, to: n });
+  })
+];
+function ws(t2) {
+  return E({ moves: [] }, ys, t2);
 }
-__name(parseMoveResult, "parseMoveResult");
-var parsers11;
-var init_parse_move = __esm({
-  "src/lib/parsers/parse-move.ts"() {
-    "use strict";
-    init_utils();
-    parsers11 = [
-      new LineParser(/^Renaming (.+) to (.+)$/, (result, [from, to]) => {
-        result.moves.push({ from, to });
-      })
-    ];
-  }
-});
-var move_exports = {};
-__export(move_exports, {
-  moveTask: /* @__PURE__ */ __name(() => moveTask, "moveTask")
-});
-function moveTask(from, to) {
+__name(ws, "ws");
+function bs(t2, e) {
   return {
-    commands: ["mv", "-v", ...asArray(from), to],
+    commands: ["mv", "-v", ...v(t2), e],
     format: "utf-8",
-    parser: parseMoveResult
+    parser: ws
   };
 }
-__name(moveTask, "moveTask");
-var init_move = __esm({
-  "src/lib/tasks/move.ts"() {
-    "use strict";
-    init_parse_move();
-    init_utils();
-  }
-});
-var pull_exports = {};
-__export(pull_exports, {
-  pullTask: /* @__PURE__ */ __name(() => pullTask, "pullTask")
-});
-function pullTask(remote, branch, customArgs) {
-  const commands = ["pull", ...customArgs];
-  if (remote && branch) {
-    commands.splice(1, 0, remote, branch);
-  }
-  return {
-    commands,
+__name(bs, "bs");
+function Ts(t2, e, n) {
+  const r2 = ["pull", ...n];
+  return t2 && e && r2.splice(1, 0, t2, e), {
+    commands: r2,
     format: "utf-8",
-    parser(stdOut, stdErr) {
-      return parsePullResult(stdOut, stdErr);
+    parser(s, o2) {
+      return ue(s, o2);
     },
-    onError(result, _error, _done, fail) {
-      const pullError = parsePullErrorResult(
-        bufferToString(result.stdOut),
-        bufferToString(result.stdErr)
+    onError(s, o2, i, a) {
+      const c3 = Rr(
+        F(s.stdOut),
+        F(s.stdErr)
       );
-      if (pullError) {
-        return fail(new GitResponseError(pullError));
-      }
-      fail(_error);
+      if (c3)
+        return a(new at(c3));
+      a(o2);
     }
   };
 }
-__name(pullTask, "pullTask");
-var init_pull = __esm({
-  "src/lib/tasks/pull.ts"() {
-    "use strict";
-    init_git_response_error();
-    init_parse_pull();
-    init_utils();
-  }
-});
-function parseGetRemotes(text) {
-  const remotes = {};
-  forEach(text, ([name]) => remotes[name] = { name });
-  return Object.values(remotes);
+__name(Ts, "Ts");
+function ks(t2) {
+  const e = {};
+  return ge(t2, ([n]) => e[n] = { name: n }), Object.values(e);
 }
-__name(parseGetRemotes, "parseGetRemotes");
-function parseGetRemotesVerbose(text) {
-  const remotes = {};
-  forEach(text, ([name, url, purpose]) => {
-    if (!Object.hasOwn(remotes, name)) {
-      remotes[name] = {
-        name,
-        refs: { fetch: "", push: "" }
-      };
-    }
-    if (purpose && url) {
-      remotes[name].refs[purpose.replace(/[^a-z]/g, "")] = url;
-    }
-  });
-  return Object.values(remotes);
+__name(ks, "ks");
+function _s(t2) {
+  const e = {};
+  return ge(t2, ([n, r2, s]) => {
+    Object.hasOwn(e, n) || (e[n] = {
+      name: n,
+      refs: { fetch: "", push: "" }
+    }), s && r2 && (e[n].refs[s.replace(/[^a-z]/g, "")] = r2);
+  }), Object.values(e);
 }
-__name(parseGetRemotesVerbose, "parseGetRemotesVerbose");
-function forEach(text, handler) {
-  forEachLineWithContent(text, (line) => handler(line.split(/\s+/)));
+__name(_s, "_s");
+function ge(t2, e) {
+  ut(t2, (n) => e(n.split(/\s+/)));
 }
-__name(forEach, "forEach");
-var init_GetRemoteSummary = __esm({
-  "src/lib/responses/GetRemoteSummary.ts"() {
-    "use strict";
-    init_utils();
-  }
-});
-var remote_exports = {};
-__export(remote_exports, {
-  addRemoteTask: /* @__PURE__ */ __name(() => addRemoteTask, "addRemoteTask"),
-  getRemotesTask: /* @__PURE__ */ __name(() => getRemotesTask, "getRemotesTask"),
-  listRemotesTask: /* @__PURE__ */ __name(() => listRemotesTask, "listRemotesTask"),
-  remoteTask: /* @__PURE__ */ __name(() => remoteTask, "remoteTask"),
-  removeRemoteTask: /* @__PURE__ */ __name(() => removeRemoteTask, "removeRemoteTask")
-});
-function addRemoteTask(remoteName, remoteRepo, customArgs) {
-  return straightThroughStringTask(["remote", "add", ...customArgs, remoteName, remoteRepo]);
+__name(ge, "ge");
+function vs(t2, e, n) {
+  return g(["remote", "add", ...n, t2, e]);
 }
-__name(addRemoteTask, "addRemoteTask");
-function getRemotesTask(verbose) {
-  const commands = ["remote"];
-  if (verbose) {
-    commands.push("-v");
-  }
-  return {
-    commands,
+__name(vs, "vs");
+function Es(t2) {
+  const e = ["remote"];
+  return t2 && e.push("-v"), {
+    commands: e,
     format: "utf-8",
-    parser: verbose ? parseGetRemotesVerbose : parseGetRemotes
+    parser: t2 ? _s : ks
   };
 }
-__name(getRemotesTask, "getRemotesTask");
-function listRemotesTask(customArgs) {
-  const commands = [...customArgs];
-  if (commands[0] !== "ls-remote") {
-    commands.unshift("ls-remote");
-  }
-  return straightThroughStringTask(commands);
+__name(Es, "Es");
+function Ss(t2) {
+  const e = [...t2];
+  return e[0] !== "ls-remote" && e.unshift("ls-remote"), g(e);
 }
-__name(listRemotesTask, "listRemotesTask");
-function remoteTask(customArgs) {
-  const commands = [...customArgs];
-  if (commands[0] !== "remote") {
-    commands.unshift("remote");
-  }
-  return straightThroughStringTask(commands);
+__name(Ss, "Ss");
+function Rs(t2) {
+  const e = [...t2];
+  return e[0] !== "remote" && e.unshift("remote"), g(e);
 }
-__name(remoteTask, "remoteTask");
-function removeRemoteTask(remoteName) {
-  return straightThroughStringTask(["remote", "remove", remoteName]);
+__name(Rs, "Rs");
+function Os(t2) {
+  return g(["remote", "remove", t2]);
 }
-__name(removeRemoteTask, "removeRemoteTask");
-var init_remote = __esm({
-  "src/lib/tasks/remote.ts"() {
-    "use strict";
-    init_GetRemoteSummary();
-    init_task();
-  }
-});
-var stash_list_exports = {};
-__export(stash_list_exports, {
-  stashListTask: /* @__PURE__ */ __name(() => stashListTask, "stashListTask")
-});
-function stashListTask(opt = {}, customArgs) {
-  const options = parseLogOptions(opt);
-  const commands = ["stash", "list", ...options.commands, ...customArgs];
-  const parser4 = createListLogSummaryParser(
-    options.splitter,
-    options.fields,
-    logFormatFromCommand(commands)
+__name(Os, "Os");
+function Cs(t2 = {}, e) {
+  const n = oe2(t2), r2 = ["stash", "list", ...n.commands, ...e], s = re(
+    n.splitter,
+    n.fields,
+    pt(r2)
   );
-  return validateLogFormatConfig(commands) || {
-    commands,
+  return dt(r2) || {
+    commands: r2,
     format: "utf-8",
-    parser: parser4
+    parser: s
   };
 }
-__name(stashListTask, "stashListTask");
-var init_stash_list = __esm({
-  "src/lib/tasks/stash-list.ts"() {
-    "use strict";
-    init_log_format();
-    init_parse_list_log_summary();
-    init_diff();
-    init_log();
+__name(Cs, "Cs");
+function As(t2, e) {
+  return X2(["add", t2, e]);
+}
+__name(As, "As");
+function xs(t2) {
+  return X2(["init", ...t2]);
+}
+__name(xs, "xs");
+function X2(t2) {
+  const e = [...t2];
+  return e[0] !== "submodule" && e.unshift("submodule"), g(e);
+}
+__name(X2, "X");
+function Ns(t2) {
+  return X2(["update", ...t2]);
+}
+__name(Ns, "Ns");
+var $s = class {
+  static {
+    __name(this, "$s");
   }
-});
-var sub_module_exports = {};
-__export(sub_module_exports, {
-  addSubModuleTask: /* @__PURE__ */ __name(() => addSubModuleTask, "addSubModuleTask"),
-  initSubModuleTask: /* @__PURE__ */ __name(() => initSubModuleTask, "initSubModuleTask"),
-  subModuleTask: /* @__PURE__ */ __name(() => subModuleTask, "subModuleTask"),
-  updateSubModuleTask: /* @__PURE__ */ __name(() => updateSubModuleTask, "updateSubModuleTask")
-});
-function addSubModuleTask(repo, path) {
-  return subModuleTask(["add", repo, path]);
-}
-__name(addSubModuleTask, "addSubModuleTask");
-function initSubModuleTask(customArgs) {
-  return subModuleTask(["init", ...customArgs]);
-}
-__name(initSubModuleTask, "initSubModuleTask");
-function subModuleTask(customArgs) {
-  const commands = [...customArgs];
-  if (commands[0] !== "submodule") {
-    commands.unshift("submodule");
+  constructor(e, n) {
+    this.all = e, this.latest = n;
   }
-  return straightThroughStringTask(commands);
+};
+var Ps = /* @__PURE__ */ __name(function(t2, e = false) {
+  const n = t2.split(`
+`).map(Ds).filter(Boolean);
+  e || n.sort(function(s, o2) {
+    const i = s.split("."), a = o2.split(".");
+    if (i.length === 1 || a.length === 1)
+      return Ms(B(i[0]), B(a[0]));
+    for (let c3 = 0, y = Math.max(i.length, a.length); c3 < y; c3++) {
+      const w = ye(B(i[c3]), B(a[c3]));
+      if (w)
+        return w;
+    }
+    return 0;
+  });
+  const r2 = e ? n[0] : [...n].reverse().find((s) => s.indexOf(".") >= 0);
+  return new $s(n, r2);
+}, "Ps");
+function Ms(t2, e) {
+  const n = Number.isNaN(t2), r2 = Number.isNaN(e);
+  return n !== r2 ? n ? 1 : -1 : n ? ye(t2, e) : 0;
 }
-__name(subModuleTask, "subModuleTask");
-function updateSubModuleTask(customArgs) {
-  return subModuleTask(["update", ...customArgs]);
+__name(Ms, "Ms");
+function ye(t2, e) {
+  return t2 === e ? 0 : t2 > e ? 1 : -1;
 }
-__name(updateSubModuleTask, "updateSubModuleTask");
-var init_sub_module = __esm({
-  "src/lib/tasks/sub-module.ts"() {
-    "use strict";
-    init_task();
-  }
-});
-function singleSorted(a, b) {
-  const aIsNum = Number.isNaN(a);
-  const bIsNum = Number.isNaN(b);
-  if (aIsNum !== bIsNum) {
-    return aIsNum ? 1 : -1;
-  }
-  return aIsNum ? sorted(a, b) : 0;
+__name(ye, "ye");
+function Ds(t2) {
+  return t2.trim();
 }
-__name(singleSorted, "singleSorted");
-function sorted(a, b) {
-  return a === b ? 0 : a > b ? 1 : -1;
+__name(Ds, "Ds");
+function B(t2) {
+  return typeof t2 == "string" && parseInt(t2.replace(/^\D+/g, ""), 10) || 0;
 }
-__name(sorted, "sorted");
-function trimmed(input) {
-  return input.trim();
-}
-__name(trimmed, "trimmed");
-function toNumber(input) {
-  if (typeof input === "string") {
-    return parseInt(input.replace(/^\D+/g, ""), 10) || 0;
-  }
-  return 0;
-}
-__name(toNumber, "toNumber");
-var TagList;
-var parseTagList;
-var init_TagList = __esm({
-  "src/lib/responses/TagList.ts"() {
-    "use strict";
-    TagList = class {
-      static {
-        __name(this, "TagList");
-      }
-      constructor(all, latest) {
-        this.all = all;
-        this.latest = latest;
-      }
-    };
-    parseTagList = /* @__PURE__ */ __name(function(data, customSort = false) {
-      const tags = data.split("\n").map(trimmed).filter(Boolean);
-      if (!customSort) {
-        tags.sort(function(tagA, tagB) {
-          const partsA = tagA.split(".");
-          const partsB = tagB.split(".");
-          if (partsA.length === 1 || partsB.length === 1) {
-            return singleSorted(toNumber(partsA[0]), toNumber(partsB[0]));
-          }
-          for (let i2 = 0, l = Math.max(partsA.length, partsB.length); i2 < l; i2++) {
-            const diff = sorted(toNumber(partsA[i2]), toNumber(partsB[i2]));
-            if (diff) {
-              return diff;
-            }
-          }
-          return 0;
-        });
-      }
-      const latest = customSort ? tags[0] : [...tags].reverse().find((tag) => tag.indexOf(".") >= 0);
-      return new TagList(tags, latest);
-    }, "parseTagList");
-  }
-});
-var tag_exports = {};
-__export(tag_exports, {
-  addAnnotatedTagTask: /* @__PURE__ */ __name(() => addAnnotatedTagTask, "addAnnotatedTagTask"),
-  addTagTask: /* @__PURE__ */ __name(() => addTagTask, "addTagTask"),
-  tagListTask: /* @__PURE__ */ __name(() => tagListTask, "tagListTask")
-});
-function tagListTask(customArgs = []) {
-  const hasCustomSort = customArgs.some((option) => /^--sort=/.test(option));
+__name(B, "B");
+function Ls(t2 = []) {
+  const e = t2.some((n) => /^--sort=/.test(n));
   return {
     format: "utf-8",
-    commands: ["tag", "-l", ...customArgs],
-    parser(text) {
-      return parseTagList(text, hasCustomSort);
+    commands: ["tag", "-l", ...t2],
+    parser(n) {
+      return Ps(n, e);
     }
   };
 }
-__name(tagListTask, "tagListTask");
-function addTagTask(name) {
+__name(Ls, "Ls");
+function js(t2) {
   return {
     format: "utf-8",
-    commands: ["tag", name],
+    commands: ["tag", t2],
     parser() {
-      return { name };
+      return { name: t2 };
     }
   };
 }
-__name(addTagTask, "addTagTask");
-function addAnnotatedTagTask(name, tagMessage) {
+__name(js, "js");
+function Bs(t2, e) {
   return {
     format: "utf-8",
-    commands: ["tag", "-a", "-m", tagMessage, name],
+    commands: ["tag", "-a", "-m", e, t2],
     parser() {
-      return { name };
+      return { name: t2 };
     }
   };
 }
-__name(addAnnotatedTagTask, "addAnnotatedTagTask");
-var init_tag = __esm({
-  "src/lib/tasks/tag.ts"() {
-    "use strict";
-    init_TagList();
-  }
-});
-var require_git = __commonJS2({
-  "src/git.js"(exports2, module2) {
-    "use strict";
-    var { GitExecutor: GitExecutor2 } = (init_git_executor(), __toCommonJS(git_executor_exports));
-    var { SimpleGitApi: SimpleGitApi2 } = (init_simple_git_api(), __toCommonJS(simple_git_api_exports));
-    var { Scheduler: Scheduler2 } = (init_scheduler(), __toCommonJS(scheduler_exports));
-    var { adhocExecTask: adhocExecTask2, configurationErrorTask: configurationErrorTask2 } = (init_task(), __toCommonJS(
-    task_exports));
-    var {
-      asArray: asArray2,
-      filterArray: filterArray2,
-      filterPrimitives: filterPrimitives2,
-      filterString: filterString2,
-      filterStringOrStringArray: filterStringOrStringArray2,
-      filterType: filterType2,
-      getTrailingOptions: getTrailingOptions2,
-      trailingFunctionArgument: trailingFunctionArgument2,
-      trailingOptionsArgument: trailingOptionsArgument2
-    } = (init_utils(), __toCommonJS(utils_exports));
-    var { applyPatchTask: applyPatchTask2 } = (init_apply_patch(), __toCommonJS(apply_patch_exports));
-    var {
-      branchTask: branchTask2,
-      branchLocalTask: branchLocalTask2,
-      deleteBranchesTask: deleteBranchesTask2,
-      deleteBranchTask: deleteBranchTask2
-    } = (init_branch(), __toCommonJS(branch_exports));
-    var { checkIgnoreTask: checkIgnoreTask2 } = (init_check_ignore(), __toCommonJS(check_ignore_exports));
-    var { checkIsRepoTask: checkIsRepoTask2 } = (init_check_is_repo(), __toCommonJS(check_is_repo_exports));
-    var { cleanWithOptionsTask: cleanWithOptionsTask2, isCleanOptionsArray: isCleanOptionsArray2 } = (init_clean(), __toCommonJS(
-    clean_exports));
-    var { diffSummaryTask: diffSummaryTask2 } = (init_diff(), __toCommonJS(diff_exports));
-    var { fetchTask: fetchTask2 } = (init_fetch(), __toCommonJS(fetch_exports));
-    var { moveTask: moveTask2 } = (init_move(), __toCommonJS(move_exports));
-    var { pullTask: pullTask2 } = (init_pull(), __toCommonJS(pull_exports));
-    var { pushTagsTask: pushTagsTask2 } = (init_push(), __toCommonJS(push_exports));
-    var {
-      addRemoteTask: addRemoteTask2,
-      getRemotesTask: getRemotesTask2,
-      listRemotesTask: listRemotesTask2,
-      remoteTask: remoteTask2,
-      removeRemoteTask: removeRemoteTask2
-    } = (init_remote(), __toCommonJS(remote_exports));
-    var { getResetMode: getResetMode2, resetTask: resetTask2 } = (init_reset(), __toCommonJS(reset_exports));
-    var { stashListTask: stashListTask2 } = (init_stash_list(), __toCommonJS(stash_list_exports));
-    var {
-      addSubModuleTask: addSubModuleTask2,
-      initSubModuleTask: initSubModuleTask2,
-      subModuleTask: subModuleTask2,
-      updateSubModuleTask: updateSubModuleTask2
-    } = (init_sub_module(), __toCommonJS(sub_module_exports));
-    var { addAnnotatedTagTask: addAnnotatedTagTask2, addTagTask: addTagTask2, tagListTask: tagListTask2 } = (init_tag(),
-    __toCommonJS(tag_exports));
-    var { straightThroughBufferTask: straightThroughBufferTask2, straightThroughStringTask: straightThroughStringTask2 } = (init_task(),
-    __toCommonJS(task_exports));
-    function Git2(options, plugins) {
-      this._plugins = plugins;
-      this._executor = new GitExecutor2(
-        options.baseDir,
-        new Scheduler2(options.maxConcurrentProcesses),
-        plugins
-      );
-      this._trimmed = options.trimmed;
+__name(Bs, "Bs");
+function f2(t2, e) {
+  this._plugins = e, this._executor = new Dn(
+    t2.baseDir,
+    new Xr(t2.maxConcurrentProcesses),
+    e
+  ), this._trimmed = t2.trimmed;
+}
+__name(f2, "f");
+(f2.prototype = Object.create(le.prototype)).constructor = f2;
+f2.prototype.customBinary = function(t2) {
+  return this._plugins.reconfigure("binary", t2), this;
+};
+f2.prototype.env = function(t2, e) {
+  return arguments.length === 1 && typeof t2 == "object" ? this._executor.env = t2 : (this._executor.env = this._executor.
+  env || {})[t2] = e, this;
+};
+f2.prototype.stashList = function(t2) {
+  return this._runTask(
+    Cs(
+      ht(arguments) || {},
+      K2(t2) && t2 || []
+    ),
+    u(arguments)
+  );
+};
+f2.prototype.mv = function(t2, e) {
+  return this._runTask(bs(t2, e), u(arguments));
+};
+f2.prototype.checkoutLatestTag = function(t2) {
+  var e = this;
+  return this.pull(function() {
+    e.tags(function(n, r2) {
+      e.checkout(r2.latest, t2);
+    });
+  });
+};
+f2.prototype.pull = function(t2, e, n, r2) {
+  return this._runTask(
+    Ts(
+      d(t2, m),
+      d(e, m),
+      h2(arguments)
+    ),
+    u(arguments)
+  );
+};
+f2.prototype.fetch = function(t2, e) {
+  return this._runTask(
+    gs(
+      d(t2, m),
+      d(e, m),
+      h2(arguments)
+    ),
+    u(arguments)
+  );
+};
+f2.prototype.tags = function(t2, e) {
+  return this._runTask(
+    Ls(h2(arguments)),
+    u(arguments)
+  );
+};
+f2.prototype.rebase = function() {
+  return this._runTask(
+    g(["rebase", ...h2(arguments)]),
+    u(arguments)
+  );
+};
+f2.prototype.reset = function(t2) {
+  return this._runTask(
+    An(xn(t2), h2(arguments)),
+    u(arguments)
+  );
+};
+f2.prototype.revert = function(t2) {
+  const e = u(arguments);
+  return typeof t2 != "string" ? this._runTask(b("Commit must be a string"), e) : this._runTask(
+    g(["revert", ...h2(arguments, 0, true), t2]),
+    e
+  );
+};
+f2.prototype.addTag = function(t2) {
+  const e = typeof t2 == "string" ? js(t2) : b("Git.addTag requires a tag name");
+  return this._runTask(e, u(arguments));
+};
+f2.prototype.addAnnotatedTag = function(t2, e) {
+  return this._runTask(
+    Bs(t2, e),
+    u(arguments)
+  );
+};
+f2.prototype.deleteLocalBranch = function(t2, e, n) {
+  return this._runTask(
+    cs(t2, typeof e == "boolean" ? e : false),
+    u(arguments)
+  );
+};
+f2.prototype.deleteLocalBranches = function(t2, e, n) {
+  return this._runTask(
+    us(t2, typeof e == "boolean" ? e : false),
+    u(arguments)
+  );
+};
+f2.prototype.branch = function(t2, e) {
+  return this._runTask(
+    is(h2(arguments)),
+    u(arguments)
+  );
+};
+f2.prototype.branchLocal = function(t2) {
+  return this._runTask(as(), u(arguments));
+};
+f2.prototype.raw = function(t2) {
+  const e = !Array.isArray(t2), n = [].slice.call(e ? arguments : t2, 0);
+  for (let s = 0; s < n.length && e; s++)
+    if (!st(n[s])) {
+      n.splice(s, n.length - s);
+      break;
     }
-    __name(Git2, "Git2");
-    (Git2.prototype = Object.create(SimpleGitApi2.prototype)).constructor = Git2;
-    Git2.prototype.customBinary = function(command) {
-      this._plugins.reconfigure("binary", command);
-      return this;
-    };
-    Git2.prototype.env = function(name, value) {
-      if (arguments.length === 1 && typeof name === "object") {
-        this._executor.env = name;
-      } else {
-        (this._executor.env = this._executor.env || {})[name] = value;
-      }
-      return this;
-    };
-    Git2.prototype.stashList = function(options) {
-      return this._runTask(
-        stashListTask2(
-          trailingOptionsArgument2(arguments) || {},
-          filterArray2(options) && options || []
-        ),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.mv = function(from, to) {
-      return this._runTask(moveTask2(from, to), trailingFunctionArgument2(arguments));
-    };
-    Git2.prototype.checkoutLatestTag = function(then) {
-      var git = this;
-      return this.pull(function() {
-        git.tags(function(err, tags) {
-          git.checkout(tags.latest, then);
-        });
-      });
-    };
-    Git2.prototype.pull = function(remote, branch, options, then) {
-      return this._runTask(
-        pullTask2(
-          filterType2(remote, filterString2),
-          filterType2(branch, filterString2),
-          getTrailingOptions2(arguments)
-        ),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.fetch = function(remote, branch) {
-      return this._runTask(
-        fetchTask2(
-          filterType2(remote, filterString2),
-          filterType2(branch, filterString2),
-          getTrailingOptions2(arguments)
-        ),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.silent = function(silence) {
-      return this._runTask(
-        adhocExecTask2(
-          () => console.warn(
-            "simple-git deprecation notice: git.silent: logging should be configured using the `debug` library / `DEBUG`\
- environment variable, this method will be removed."
-          )
-        )
-      );
-    };
-    Git2.prototype.tags = function(options, then) {
-      return this._runTask(
-        tagListTask2(getTrailingOptions2(arguments)),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.rebase = function() {
-      return this._runTask(
-        straightThroughStringTask2(["rebase", ...getTrailingOptions2(arguments)]),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.reset = function(mode) {
-      return this._runTask(
-        resetTask2(getResetMode2(mode), getTrailingOptions2(arguments)),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.revert = function(commit) {
-      const next = trailingFunctionArgument2(arguments);
-      if (typeof commit !== "string") {
-        return this._runTask(configurationErrorTask2("Commit must be a string"), next);
-      }
-      return this._runTask(
-        straightThroughStringTask2(["revert", ...getTrailingOptions2(arguments, 0, true), commit]),
-        next
-      );
-    };
-    Git2.prototype.addTag = function(name) {
-      const task = typeof name === "string" ? addTagTask2(name) : configurationErrorTask2("Git.addTag requires a tag nam\
-e");
-      return this._runTask(task, trailingFunctionArgument2(arguments));
-    };
-    Git2.prototype.addAnnotatedTag = function(tagName, tagMessage) {
-      return this._runTask(
-        addAnnotatedTagTask2(tagName, tagMessage),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.deleteLocalBranch = function(branchName, forceDelete, then) {
-      return this._runTask(
-        deleteBranchTask2(branchName, typeof forceDelete === "boolean" ? forceDelete : false),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.deleteLocalBranches = function(branchNames, forceDelete, then) {
-      return this._runTask(
-        deleteBranchesTask2(branchNames, typeof forceDelete === "boolean" ? forceDelete : false),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.branch = function(options, then) {
-      return this._runTask(
-        branchTask2(getTrailingOptions2(arguments)),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.branchLocal = function(then) {
-      return this._runTask(branchLocalTask2(), trailingFunctionArgument2(arguments));
-    };
-    Git2.prototype.raw = function(commands) {
-      const createRestCommands = !Array.isArray(commands);
-      const command = [].slice.call(createRestCommands ? arguments : commands, 0);
-      for (let i2 = 0; i2 < command.length && createRestCommands; i2++) {
-        if (!filterPrimitives2(command[i2])) {
-          command.splice(i2, command.length - i2);
-          break;
-        }
-      }
-      command.push(...getTrailingOptions2(arguments, 0, true));
-      var next = trailingFunctionArgument2(arguments);
-      if (!command.length) {
-        return this._runTask(
-          configurationErrorTask2("Raw: must supply one or more command to execute"),
-          next
-        );
-      }
-      return this._runTask(straightThroughStringTask2(command, this._trimmed), next);
-    };
-    Git2.prototype.submoduleAdd = function(repo, path, then) {
-      return this._runTask(addSubModuleTask2(repo, path), trailingFunctionArgument2(arguments));
-    };
-    Git2.prototype.submoduleUpdate = function(args, then) {
-      return this._runTask(
-        updateSubModuleTask2(getTrailingOptions2(arguments, true)),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.submoduleInit = function(args, then) {
-      return this._runTask(
-        initSubModuleTask2(getTrailingOptions2(arguments, true)),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.subModule = function(options, then) {
-      return this._runTask(
-        subModuleTask2(getTrailingOptions2(arguments)),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.listRemote = function() {
-      return this._runTask(
-        listRemotesTask2(getTrailingOptions2(arguments)),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.addRemote = function(remoteName, remoteRepo, then) {
-      return this._runTask(
-        addRemoteTask2(remoteName, remoteRepo, getTrailingOptions2(arguments)),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.removeRemote = function(remoteName, then) {
-      return this._runTask(removeRemoteTask2(remoteName), trailingFunctionArgument2(arguments));
-    };
-    Git2.prototype.getRemotes = function(verbose, then) {
-      return this._runTask(getRemotesTask2(verbose === true), trailingFunctionArgument2(arguments));
-    };
-    Git2.prototype.remote = function(options, then) {
-      return this._runTask(
-        remoteTask2(getTrailingOptions2(arguments)),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.tag = function(options, then) {
-      const command = getTrailingOptions2(arguments);
-      if (command[0] !== "tag") {
-        command.unshift("tag");
-      }
-      return this._runTask(straightThroughStringTask2(command), trailingFunctionArgument2(arguments));
-    };
-    Git2.prototype.updateServerInfo = function(then) {
-      return this._runTask(
-        straightThroughStringTask2(["update-server-info"]),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.pushTags = function(remote, then) {
-      const task = pushTagsTask2(
-        { remote: filterType2(remote, filterString2) },
-        getTrailingOptions2(arguments)
-      );
-      return this._runTask(task, trailingFunctionArgument2(arguments));
-    };
-    Git2.prototype.rm = function(files) {
-      return this._runTask(
-        straightThroughStringTask2(["rm", "-f", ...asArray2(files)]),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.rmKeepLocal = function(files) {
-      return this._runTask(
-        straightThroughStringTask2(["rm", "--cached", ...asArray2(files)]),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.catFile = function(options, then) {
-      return this._catFile("utf-8", arguments);
-    };
-    Git2.prototype.binaryCatFile = function() {
-      return this._catFile("buffer", arguments);
-    };
-    Git2.prototype._catFile = function(format, args) {
-      var handler = trailingFunctionArgument2(args);
-      var command = ["cat-file"];
-      var options = args[0];
-      if (typeof options === "string") {
-        return this._runTask(
-          configurationErrorTask2("Git.catFile: options must be supplied as an array of strings"),
-          handler
-        );
-      }
-      if (Array.isArray(options)) {
-        command.push.apply(command, options);
-      }
-      const task = format === "buffer" ? straightThroughBufferTask2(command) : straightThroughStringTask2(command);
-      return this._runTask(task, handler);
-    };
-    Git2.prototype.diff = function(options, then) {
-      const task = filterString2(options) ? configurationErrorTask2(
-        "git.diff: supplying options as a single string is no longer supported, switch to an array of strings"
-      ) : straightThroughStringTask2(["diff", ...getTrailingOptions2(arguments)]);
-      return this._runTask(task, trailingFunctionArgument2(arguments));
-    };
-    Git2.prototype.diffSummary = function() {
-      return this._runTask(
-        diffSummaryTask2(getTrailingOptions2(arguments, 1)),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.applyPatch = function(patches) {
-      const task = !filterStringOrStringArray2(patches) ? configurationErrorTask2(
-        `git.applyPatch requires one or more string patches as the first argument`
-      ) : applyPatchTask2(asArray2(patches), getTrailingOptions2([].slice.call(arguments, 1)));
-      return this._runTask(task, trailingFunctionArgument2(arguments));
-    };
-    Git2.prototype.revparse = function() {
-      const commands = ["rev-parse", ...getTrailingOptions2(arguments, true)];
-      return this._runTask(
-        straightThroughStringTask2(commands, true),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.clean = function(mode, options, then) {
-      const usingCleanOptionsArray = isCleanOptionsArray2(mode);
-      const cleanMode = usingCleanOptionsArray && mode.join("") || filterType2(mode, filterString2) || "";
-      const customArgs = getTrailingOptions2([].slice.call(arguments, usingCleanOptionsArray ? 1 : 0));
-      return this._runTask(
-        cleanWithOptionsTask2(cleanMode, customArgs),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.exec = function(then) {
-      const task = {
-        commands: [],
-        format: "utf-8",
-        parser() {
-          if (typeof then === "function") {
-            then();
-          }
-        }
-      };
-      return this._runTask(task);
-    };
-    Git2.prototype.clearQueue = function() {
-      return this._runTask(
-        adhocExecTask2(
-          () => console.warn(
-            "simple-git deprecation notice: clearQueue() is deprecated and will be removed, switch to using the abortPlu\
-gin instead."
-          )
-        )
-      );
-    };
-    Git2.prototype.checkIgnore = function(pathnames, then) {
-      return this._runTask(
-        checkIgnoreTask2(asArray2(filterType2(pathnames, filterStringOrStringArray2, []))),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    Git2.prototype.checkIsRepo = function(checkType, then) {
-      return this._runTask(
-        checkIsRepoTask2(filterType2(checkType, filterString2)),
-        trailingFunctionArgument2(arguments)
-      );
-    };
-    module2.exports = Git2;
-  }
-});
-init_git_error();
-init_git_error();
-init_git_error();
-init_git_response_error();
-init_task_configuration_error();
-init_check_is_repo();
-init_clean();
-init_config();
-init_diff_name_status();
-init_grep();
-init_reset();
-init_utils();
-init_utils();
-var never = (0, import_promise_deferred2.deferred)().promise;
-init_utils();
-init_git_error();
-init_utils();
-init_utils();
-init_utils();
-init_utils();
-var Git = require_git();
-init_git_response_error();
+  n.push(...h2(arguments, 0, true));
+  var r2 = u(arguments);
+  return n.length ? this._runTask(g(n, this._trimmed), r2) : this._runTask(
+    b("Raw: must supply one or more command to execute"),
+    r2
+  );
+};
+f2.prototype.submoduleAdd = function(t2, e, n) {
+  return this._runTask(As(t2, e), u(arguments));
+};
+f2.prototype.submoduleUpdate = function(t2, e) {
+  return this._runTask(
+    Ns(h2(arguments, true)),
+    u(arguments)
+  );
+};
+f2.prototype.submoduleInit = function(t2, e) {
+  return this._runTask(
+    xs(h2(arguments, true)),
+    u(arguments)
+  );
+};
+f2.prototype.subModule = function(t2, e) {
+  return this._runTask(
+    X2(h2(arguments)),
+    u(arguments)
+  );
+};
+f2.prototype.listRemote = function() {
+  return this._runTask(
+    Ss(h2(arguments)),
+    u(arguments)
+  );
+};
+f2.prototype.addRemote = function(t2, e, n) {
+  return this._runTask(
+    vs(t2, e, h2(arguments)),
+    u(arguments)
+  );
+};
+f2.prototype.removeRemote = function(t2, e) {
+  return this._runTask(Os(t2), u(arguments));
+};
+f2.prototype.getRemotes = function(t2, e) {
+  return this._runTask(Es(t2 === true), u(arguments));
+};
+f2.prototype.remote = function(t2, e) {
+  return this._runTask(
+    Rs(h2(arguments)),
+    u(arguments)
+  );
+};
+f2.prototype.tag = function(t2, e) {
+  const n = h2(arguments);
+  return n[0] !== "tag" && n.unshift("tag"), this._runTask(g(n), u(arguments));
+};
+f2.prototype.updateServerInfo = function(t2) {
+  return this._runTask(
+    g(["update-server-info"]),
+    u(arguments)
+  );
+};
+f2.prototype.pushTags = function(t2, e) {
+  const n = Mr(
+    { remote: d(t2, m) },
+    h2(arguments)
+  );
+  return this._runTask(n, u(arguments));
+};
+f2.prototype.rm = function(t2) {
+  return this._runTask(
+    g(["rm", "-f", ...v(t2)]),
+    u(arguments)
+  );
+};
+f2.prototype.rmKeepLocal = function(t2) {
+  return this._runTask(
+    g(["rm", "--cached", ...v(t2)]),
+    u(arguments)
+  );
+};
+f2.prototype.catFile = function(t2, e) {
+  return this._catFile("utf-8", arguments);
+};
+f2.prototype.binaryCatFile = function() {
+  return this._catFile("buffer", arguments);
+};
+f2.prototype._catFile = function(t2, e) {
+  var n = u(e), r2 = ["cat-file"], s = e[0];
+  if (typeof s == "string")
+    return this._runTask(
+      b("Git.catFile: options must be supplied as an array of strings"),
+      n
+    );
+  Array.isArray(s) && r2.push.apply(r2, s);
+  const o2 = t2 === "buffer" ? Gt(r2) : g(r2);
+  return this._runTask(o2, n);
+};
+f2.prototype.diff = function(t2, e) {
+  const n = m(t2) ? b(
+    "git.diff: supplying options as a single string is no longer supported, switch to an array of strings"
+  ) : g(["diff", ...h2(arguments)]);
+  return this._runTask(n, u(arguments));
+};
+f2.prototype.diffSummary = function() {
+  return this._runTask(
+    fr(h2(arguments, 1)),
+    u(arguments)
+  );
+};
+f2.prototype.applyPatch = function(t2) {
+  const e = G(t2) ? Yr(v(t2), h2([].slice.call(arguments, 1))) : b(
+    "git.applyPatch requires one or more string patches as the first argument"
+  );
+  return this._runTask(e, u(arguments));
+};
+f2.prototype.revparse = function() {
+  const t2 = ["rev-parse", ...h2(arguments, true)];
+  return this._runTask(
+    g(t2, true),
+    u(arguments)
+  );
+};
+f2.prototype.clean = function(t2, e, n) {
+  const r2 = un(t2), s = r2 && t2.join("") || d(t2, m) || "", o2 = h2([].slice.call(arguments, r2 ? 1 : 0));
+  return this._runTask(
+    on(s, o2),
+    u(arguments)
+  );
+};
+f2.prototype.exec = function(t2) {
+  const e = {
+    commands: [],
+    format: "utf-8",
+    parser() {
+      typeof t2 == "function" && t2();
+    }
+  };
+  return this._runTask(e);
+};
+f2.prototype.checkIgnore = function(t2, e) {
+  return this._runTask(
+    fs(v(d(t2, G, []))),
+    u(arguments)
+  );
+};
+f2.prototype.checkIsRepo = function(t2, e) {
+  return this._runTask(
+    We(d(t2, m)),
+    u(arguments)
+  );
+};
+var Us = $("", "plugin:allowEnvironment");
+var $t = (0, import_promise_deferred.deferred)().promise;
+var we = $("", "plugin:binary");
+var nt = $("", "plugin:input");
 
 // node_modules/@actions/core/lib/command.js
-var os = __toESM(require("os"), 1);
+var os2 = __toESM(require("os"), 1);
 
 // node_modules/@actions/core/lib/utils.js
 function toCommandValue(input) {
@@ -46023,7 +44400,7 @@ __name(toCommandProperties, "toCommandProperties");
 // node_modules/@actions/core/lib/command.js
 function issueCommand(command, properties, message) {
   const cmd = new Command(command, properties, message);
-  process.stdout.write(cmd.toString() + os.EOL);
+  process.stdout.write(cmd.toString() + os2.EOL);
 }
 __name(issueCommand, "issueCommand");
 var CMD_STRING = "::";
@@ -46043,13 +44420,13 @@ var Command = class {
     let cmdStr = CMD_STRING + this.command;
     if (this.properties && Object.keys(this.properties).length > 0) {
       cmdStr += " ";
-      let first2 = true;
+      let first = true;
       for (const key in this.properties) {
         if (this.properties.hasOwnProperty(key)) {
           const val = this.properties[key];
           if (val) {
-            if (first2) {
-              first2 = false;
+            if (first) {
+              first = false;
             } else {
               cmdStr += ",";
             }
@@ -46073,7 +44450,7 @@ function escapeProperty(s) {
 __name(escapeProperty, "escapeProperty");
 
 // node_modules/@actions/core/lib/core.js
-var os3 = __toESM(require("os"), 1);
+var os4 = __toESM(require("os"), 1);
 
 // node_modules/@actions/http-client/lib/index.js
 var tunnel = __toESM(require_tunnel2(), 1);
@@ -46133,14 +44510,14 @@ var HttpResponseRetryCodes = [
 // node_modules/@actions/core/lib/summary.js
 var import_os = require("os");
 var import_fs = require("fs");
-var __awaiter = function(thisArg, _arguments, P, generator) {
+var __awaiter = function(thisArg, _arguments, P2, generator) {
   function adopt(value) {
-    return value instanceof P ? value : new P(function(resolve) {
+    return value instanceof P2 ? value : new P2(function(resolve) {
       resolve(value);
     });
   }
   __name(adopt, "adopt");
-  return new (P || (P = Promise))(function(resolve, reject) {
+  return new (P2 || (P2 = Promise))(function(resolve, reject) {
     function fulfilled(value) {
       try {
         step(generator.next(value));
@@ -46191,7 +44568,7 @@ supports job summaries.`);
       }
       try {
         yield access(pathFromEnv, import_fs.constants.R_OK | import_fs.constants.W_OK);
-      } catch (_a2) {
+      } catch (_a) {
         throw new Error(`Unable to access summary file: '${pathFromEnv}'. Check if the file has correct read/write permi\
 ssions.`);
       }
@@ -46427,10 +44804,10 @@ var _summary = new Summary();
 var import_os2 = __toESM(require("os"), 1);
 
 // node_modules/@actions/io/lib/io-util.js
-var fs = __toESM(require("fs"), 1);
-var { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs.promises;
+var fs2 = __toESM(require("fs"), 1);
+var { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs2.promises;
 var IS_WINDOWS = process.platform === "win32";
-var READONLY = fs.constants.O_RDONLY;
+var READONLY = fs2.constants.O_RDONLY;
 
 // node_modules/@actions/exec/lib/toolrunner.js
 var IS_WINDOWS2 = process.platform === "win32";
@@ -46470,7 +44847,7 @@ function warning(message, properties = {}) {
 }
 __name(warning, "warning");
 function info(message) {
-  process.stdout.write(message + os3.EOL);
+  process.stdout.write(message + os4.EOL);
 }
 __name(info, "info");
 
@@ -46497,7 +44874,6 @@ var import_promises = require("node:fs/promises");
 
 // node_modules/js-yaml/dist/js-yaml.mjs
 var NOT_RESOLVED = /* @__PURE__ */ Symbol("NOT_RESOLVED");
-var MERGE_KEY = /* @__PURE__ */ Symbol("MERGE_KEY");
 function defineScalarTag(tagName, options) {
   return {
     tagName,
@@ -46506,9 +44882,9 @@ function defineScalarTag(tagName, options) {
     matchByTagPrefix: options.matchByTagPrefix ?? false,
     implicitFirstChars: options.implicitFirstChars ?? null,
     resolve: options.resolve,
-    identify: options.identify ?? null,
+    identify: options.identify,
     represent: options.represent ?? ((data) => String(data)),
-    representTagName: options.representTagName ?? null
+    representTagName: options.representTagName ?? (() => tagName)
   };
 }
 __name(defineScalarTag, "defineScalarTag");
@@ -46523,9 +44899,9 @@ function defineSequenceTag(tagName, options) {
     addItem: options.addItem,
     finalize: options.finalize ?? ((carrier) => carrier),
     carrierIsResult,
-    identify: options.identify ?? null,
+    identify: options.identify,
     represent: options.represent ?? ((data) => data),
-    representTagName: options.representTagName ?? null
+    representTagName: options.representTagName ?? (() => tagName)
   };
 }
 __name(defineSequenceTag, "defineSequenceTag");
@@ -46543,9 +44919,9 @@ function defineMappingTag(tagName, options) {
     get: options.get,
     finalize: options.finalize ?? ((carrier) => carrier),
     carrierIsResult,
-    identify: options.identify ?? null,
+    identify: options.identify,
     represent: options.represent ?? ((data) => data),
-    representTagName: options.representTagName ?? null
+    representTagName: options.representTagName ?? (() => tagName)
   };
 }
 __name(defineMappingTag, "defineMappingTag");
@@ -46919,9 +45295,10 @@ var mergeTag = defineScalarTag("tag:yaml.org,2002:merge", {
   implicit: true,
   implicitFirstChars: ["<"],
   resolve: /* @__PURE__ */ __name((source, isExplicit) => {
-    if (source === "<<" || isExplicit && source === "") return MERGE_KEY;
+    if (source === "<<" || isExplicit && source === "") return "<<";
     return NOT_RESOLVED;
-  }, "resolve")
+  }, "resolve"),
+  identify: /* @__PURE__ */ __name(() => false, "identify")
 });
 var BASE64_PATTERN = /^[A-Za-z0-9+/]*={0,2}$/;
 function resolveYamlBinary(source) {
@@ -47008,12 +45385,12 @@ function isPlainObject(data) {
   return prototype === null || prototype === Object.prototype;
 }
 __name(isPlainObject, "isPlainObject");
-function pick2(object, keys) {
+function pick(object, keys) {
   const result = {};
   for (const key of keys) if (object[key] !== void 0) result[key] = object[key];
   return result;
 }
-__name(pick2, "pick");
+__name(pick, "pick");
 var omapTag = defineSequenceTag("tag:yaml.org,2002:omap", {
   create: /* @__PURE__ */ __name(() => ({
     list: [],
@@ -47034,7 +45411,8 @@ var omapTag = defineSequenceTag("tag:yaml.org,2002:omap", {
     carrier.list.push(item);
     return "";
   }, "addItem"),
-  finalize: /* @__PURE__ */ __name((carrier) => carrier.list, "finalize")
+  finalize: /* @__PURE__ */ __name((carrier) => carrier.list, "finalize"),
+  identify: /* @__PURE__ */ __name(() => false, "identify")
 });
 var pairsTag = defineSequenceTag("tag:yaml.org,2002:pairs", {
   create: /* @__PURE__ */ __name(() => [], "create"),
@@ -47050,7 +45428,8 @@ var pairsTag = defineSequenceTag("tag:yaml.org,2002:pairs", {
     if (keys.length !== 1) return "cannot resolve a pairs item";
     container.push([keys[0], object[keys[0]]]);
     return "";
-  }, "addItem")
+  }, "addItem"),
+  identify: /* @__PURE__ */ __name(() => false, "identify")
 });
 var mapTag = defineMappingTag("tag:yaml.org,2002:map", {
   create: /* @__PURE__ */ __name(() => ({}), "create"),
@@ -47137,11 +45516,35 @@ var Schema = class Schema2 {
     __name(this, "Schema");
   }
   tags;
+  /** @internal */
   implicitScalarTags;
+  /**
+  * Dispatch implicit scalar resolvers by `source.charAt(0)`. Each bucket holds
+  * the resolvers that may match that key, in schema order; a key absent from
+  * the map uses
+  * {@link Schema.implicitScalarAnyFirstChar}
+  * (resolvers that declared no first-char constraint, so they apply to any
+  * first character).
+  */
   implicitScalarByFirstChar;
   implicitScalarAnyFirstChar;
+  /**
+  * The default scalar tag (`!!str`), resolved once so the composer's fallback
+  * for unresolved plain scalars avoids a keyed lookup per scalar.
+  *
+  * @internal
+  */
   defaultScalarTag;
+  /**
+  * The default container tags (`!!seq` / `!!map`), used by the dumper: when a
+  * value is identified by its default tag, the tag is implicit and not
+  * printed. Undefined if the schema does not define them (then such values
+  * can't be dumped).
+  *
+  * @internal
+  */
   defaultSequenceTag;
+  /** @internal */
   defaultMappingTag;
   exact;
   prefix;
@@ -47189,6 +45592,52 @@ var Schema = class Schema2 {
     this.exact = exact;
     this.prefix = prefix;
   }
+  /** @internal */
+  lookupScalarTag(tagName) {
+    const exactTag = this.exact.scalar[tagName];
+    if (exactTag) return exactTag;
+    for (const tag of this.prefix.scalar) if (tagName.startsWith(tag.tagName)) return tag;
+  }
+  /** @internal */
+  lookupSequenceTag(tagName) {
+    const exactTag = this.exact.sequence[tagName];
+    if (exactTag) return exactTag;
+    for (const tag of this.prefix.sequence) if (tagName.startsWith(tag.tagName)) return tag;
+  }
+  /** @internal */
+  lookupMappingTag(tagName) {
+    const exactTag = this.exact.mapping[tagName];
+    if (exactTag) return exactTag;
+    for (const tag of this.prefix.mapping) if (tagName.startsWith(tag.tagName)) return tag;
+  }
+  /** @internal */
+  resolveImplicitScalarTag(source) {
+    const candidates = this.implicitScalarByFirstChar.get(source.charAt(0)) ?? this.implicitScalarAnyFirstChar;
+    for (const tag2 of candidates) {
+      const value = tag2.resolve(source, false, tag2.tagName);
+      if (value !== NOT_RESOLVED) return {
+        value,
+        tag: tag2
+      };
+    }
+    const tag = this.defaultScalarTag;
+    return {
+      value: tag.resolve(source, false, tag.tagName),
+      tag
+    };
+  }
+  /**
+  * Creates a new schema with the specified tags added. If a tag already
+  * exists, it is replaced by the specified tag.
+  *
+  * @example
+  *
+  * ```javascript
+  * import { CORE_SCHEMA, mergeTag, realMapTag } from 'js-yaml'
+  *
+  * const schema = CORE_SCHEMA.withTags(mergeTag, realMapTag)
+  * ```
+  */
   withTags(...tags) {
     let flatTags = [];
     for (const tag of tags) flatTags = flatTags.concat(tag);
@@ -47227,6 +45676,19 @@ var YAML11_SCHEMA = new Schema([
   pairsTag,
   setTag
 ]);
+var DUMP_SCHEMA = YAML11_SCHEMA.withTags({
+  ...intYaml11Tag,
+  resolve: /* @__PURE__ */ __name((source, isExplicit, tagName) => {
+    const result = intYaml11Tag.resolve(source, isExplicit, tagName);
+    return result === NOT_RESOLVED ? intCoreTag.resolve(source, isExplicit, tagName) : result;
+  }, "resolve")
+}, {
+  ...floatYaml11Tag,
+  resolve: /* @__PURE__ */ __name((source, isExplicit, tagName) => {
+    const result = floatYaml11Tag.resolve(source, isExplicit, tagName);
+    return result === NOT_RESOLVED ? floatCoreTag.resolve(source, isExplicit, tagName) : result;
+  }, "resolve")
+});
 var realMapTag = defineMappingTag("tag:yaml.org,2002:map", {
   create: /* @__PURE__ */ __name(() => /* @__PURE__ */ new Map(), "create"),
   addPair: /* @__PURE__ */ __name((container, key, value) => {
@@ -47324,12 +45786,12 @@ function makeSnippet(mark, options) {
     ...DEFAULT_SNIPPET_OPTIONS,
     ...options
   };
-  const re = /\r?\n|\r|\0/g;
+  const re2 = /\r?\n|\r|\0/g;
   const lineStarts = [0];
   const lineEnds = [];
   let match;
   let foundLineNo = -1;
-  while (match = re.exec(mark.buffer)) {
+  while (match = re2.exec(mark.buffer)) {
     lineEnds.push(match.index);
     lineStarts.push(match.index + match[0].length);
     if (mark.position <= match.index && foundLineNo < 0) foundLineNo = lineStarts.length - 2;
@@ -47338,11 +45800,11 @@ function makeSnippet(mark, options) {
   let result = "";
   const lineNoLength = Math.min(mark.line + opts.linesAfter, lineEnds.length).toString().length;
   const maxLineLength = opts.maxLength - (opts.indent + lineNoLength + 3);
-  for (let i2 = 1; i2 <= opts.linesBefore; i2++) {
-    if (foundLineNo - i2 < 0) break;
-    const line2 = getLine(mark.buffer, lineStarts[foundLineNo - i2], lineEnds[foundLineNo - i2], mark.position - (lineStarts[foundLineNo] -
-    lineStarts[foundLineNo - i2]), maxLineLength);
-    result = `${" ".repeat(opts.indent)}${padStart((mark.line - i2 + 1).toString(), lineNoLength)} | ${line2.str}
+  for (let i = 1; i <= opts.linesBefore; i++) {
+    if (foundLineNo - i < 0) break;
+    const line2 = getLine(mark.buffer, lineStarts[foundLineNo - i], lineEnds[foundLineNo - i], mark.position - (lineStarts[foundLineNo] -
+    lineStarts[foundLineNo - i]), maxLineLength);
+    result = `${" ".repeat(opts.indent)}${padStart((mark.line - i + 1).toString(), lineNoLength)} | ${line2.str}
 ${result}`;
   }
   const line = getLine(mark.buffer, lineStarts[foundLineNo], lineEnds[foundLineNo], mark.position, maxLineLength);
@@ -47350,11 +45812,11 @@ ${result}`;
 `;
   result += `${"-".repeat(opts.indent + lineNoLength + 3 + line.pos)}^
 `;
-  for (let i2 = 1; i2 <= opts.linesAfter; i2++) {
-    if (foundLineNo + i2 >= lineEnds.length) break;
-    const line2 = getLine(mark.buffer, lineStarts[foundLineNo + i2], lineEnds[foundLineNo + i2], mark.position - (lineStarts[foundLineNo] -
-    lineStarts[foundLineNo + i2]), maxLineLength);
-    result += `${" ".repeat(opts.indent)}${padStart((mark.line + i2 + 1).toString(), lineNoLength)} | ${line2.str}
+  for (let i = 1; i <= opts.linesAfter; i++) {
+    if (foundLineNo + i >= lineEnds.length) break;
+    const line2 = getLine(mark.buffer, lineStarts[foundLineNo + i], lineEnds[foundLineNo + i], mark.position - (lineStarts[foundLineNo] -
+    lineStarts[foundLineNo + i]), maxLineLength);
+    result += `${" ".repeat(opts.indent)}${padStart((mark.line + i + 1).toString(), lineNoLength)} | ${line2.str}
 `;
   }
   return result.replace(/\n$/, "");
@@ -47371,12 +45833,16 @@ ${exception.mark.snippet}`;
   return `${exception.reason} ${where}`;
 }
 __name(formatError, "formatError");
-var YAMLException = class extends Error {
+var YAMLException = class YAMLException2 extends Error {
   static {
     __name(this, "YAMLException");
   }
   reason;
   mark;
+  /**
+  * Optional `mark` contains source snippet data. Usually, use
+  * {@link YAMLException.throwAt} instead of passing it directly.
+  */
   constructor(reason, mark) {
     super();
     this.name = "YAMLException";
@@ -47385,35 +45851,65 @@ var YAMLException = class extends Error {
     this.message = formatError(this, false);
     if (Error.captureStackTrace) Error.captureStackTrace(this, this.constructor);
   }
+  /**
+  * Returns the formatted error, omitting the source snippet in compact mode.
+  */
   toString(compact) {
     return `${this.name}: ${formatError(this, compact)}`;
   }
-};
-function throwErrorAt(source, position, message, filename = "") {
-  let line = 0;
-  let lineStart = 0;
-  for (let index = 0; index < position; index++) {
-    const ch = source.charCodeAt(index);
-    if (ch === 10) {
-      line++;
-      lineStart = index + 1;
-    } else if (ch === 13) {
-      line++;
-      if (source.charCodeAt(index + 1) === 10) index++;
-      lineStart = index + 1;
+  /**
+  * Builds a YAMLException with a source snippet and throws it. `source` is
+  * the raw input text; `position` is an offset into it.
+  */
+  static throwAt(source, position, message, filename = "") {
+    let line = 0;
+    let lineStart = 0;
+    for (let index = 0; index < position; index++) {
+      const ch = source.charCodeAt(index);
+      if (ch === 10) {
+        line++;
+        lineStart = index + 1;
+      } else if (ch === 13) {
+        line++;
+        if (source.charCodeAt(index + 1) === 10) index++;
+        lineStart = index + 1;
+      }
     }
+    const mark = {
+      name: filename,
+      buffer: source,
+      position,
+      line,
+      column: position - lineStart
+    };
+    mark.snippet = makeSnippet(mark);
+    throw new YAMLException2(message, mark);
   }
-  const mark = {
-    name: filename,
-    buffer: source,
-    position,
-    line,
-    column: position - lineStart
-  };
-  mark.snippet = makeSnippet(mark);
-  throw new YAMLException(message, mark);
-}
-__name(throwErrorAt, "throwErrorAt");
+};
+var EVENT_ID = {
+  DOCUMENT: 1,
+  SEQUENCE: 2,
+  MAPPING: 3,
+  SCALAR: 4,
+  ALIAS: 5,
+  POP: 6
+};
+var SCALAR_STYLE = {
+  PLAIN: 1,
+  SINGLE_QUOTED: 2,
+  DOUBLE_QUOTED: 3,
+  LITERAL_BLOCK: 4,
+  FOLDED_BLOCK: 5
+};
+var COLLECTION_STYLE = {
+  BLOCK: 1,
+  FLOW: 2
+};
+var CHOMPING_MODE = {
+  CLIP: 1,
+  STRIP: 2,
+  KEEP: 3
+};
 var NO_RANGE$3 = -1;
 function simpleEscapeSequence(c3) {
   switch (c3) {
@@ -47460,9 +45956,9 @@ function simpleEscapeSequence(c3) {
 __name(simpleEscapeSequence, "simpleEscapeSequence");
 var simpleEscapeCheck = new Array(256);
 var simpleEscapeMap = new Array(256);
-for (let i2 = 0; i2 < 256; i2++) {
-  simpleEscapeCheck[i2] = simpleEscapeSequence(i2) ? 1 : 0;
-  simpleEscapeMap[i2] = simpleEscapeSequence(i2);
+for (let i = 0; i < 256; i++) {
+  simpleEscapeCheck[i] = simpleEscapeSequence(i) ? 1 : 0;
+  simpleEscapeMap[i] = simpleEscapeSequence(i);
 }
 function charFromCodepoint(c3) {
   if (c3 <= 65535) return String.fromCharCode(c3);
@@ -47605,8 +46101,8 @@ function getBlockValue(input, start, end, indent, chomping, folded) {
       continue;
     }
     const content = line.slice(textIndent);
-    const first2 = content.charCodeAt(0);
-    if (folded) if (first2 === 32 || first2 === 9) {
+    const first = content.charCodeAt(0);
+    if (folded) if (first === 32 || first === 9) {
       atMoreIndented = true;
       result += "\n".repeat(didReadContent ? 1 + emptyLines : emptyLines);
     } else if (atMoreIndented) {
@@ -47620,8 +46116,8 @@ function getBlockValue(input, start, end, indent, chomping, folded) {
     didReadContent = true;
     emptyLines = 0;
   }
-  if (chomping === 3) result += "\n".repeat(didReadContent ? 1 + emptyLines : emptyLines);
-  else if (chomping !== 2) {
+  if (chomping === CHOMPING_MODE.KEEP) result += "\n".repeat(didReadContent ? 1 + emptyLines : emptyLines);
+  else if (chomping !== CHOMPING_MODE.STRIP) {
     if (didReadContent) result += "\n";
   }
   return result;
@@ -47632,13 +46128,13 @@ function getScalarValue(input, scalar) {
   const { valueStart, valueEnd } = scalar;
   if (scalar.fast) return input.slice(valueStart, valueEnd);
   switch (scalar.style) {
-    case 2:
+    case SCALAR_STYLE.SINGLE_QUOTED:
       return getSingleQuotedValue(input, valueStart, valueEnd);
-    case 3:
+    case SCALAR_STYLE.DOUBLE_QUOTED:
       return getDoubleQuotedValue(input, valueStart, valueEnd);
-    case 4:
+    case SCALAR_STYLE.LITERAL_BLOCK:
       return getBlockValue(input, valueStart, valueEnd, scalar.indent, scalar.chomping, false);
-    case 5:
+    case SCALAR_STYLE.FOLDED_BLOCK:
       return getBlockValue(input, valueStart, valueEnd, scalar.indent, scalar.chomping, true);
     default:
       return getPlainValue(input, valueStart, valueEnd);
@@ -47658,6 +46154,7 @@ function tagNameFull(rawTag, tagHandlers) {
 }
 __name(tagNameFull, "tagNameFull");
 var NO_RANGE$2 = -1;
+var MERGE_TAG_NAME = "tag:yaml.org,2002:merge";
 var DEFAULT_CONSTRUCTOR_OPTIONS = {
   filename: "",
   schema: CORE_SCHEMA,
@@ -47674,7 +46171,7 @@ function eventPosition$1(event) {
 }
 __name(eventPosition$1, "eventPosition$1");
 function throwError$1(state, message) {
-  throwErrorAt(state.source, state.position, message, state.filename);
+  YAMLException.throwAt(state.source, state.position, message, state.filename);
 }
 __name(throwError$1, "throwError$1");
 function finalizeCollection(state, position, tag, carrier) {
@@ -47682,22 +46179,10 @@ function finalizeCollection(state, position, tag, carrier) {
     return tag.finalize(carrier);
   } catch (error2) {
     if (error2 instanceof YAMLException) throw error2;
-    throwErrorAt(state.source, position, error2 instanceof Error ? error2.message : String(error2), state.filename);
+    YAMLException.throwAt(state.source, position, error2 instanceof Error ? error2.message : String(error2), state.filename);
   }
 }
 __name(finalizeCollection, "finalizeCollection");
-function lookupTag(exact, prefix, tagName) {
-  const exactTag = exact[tagName];
-  if (exactTag) return exactTag;
-  for (const tag of prefix) if (tagName.startsWith(tag.tagName)) return tag;
-}
-__name(lookupTag, "lookupTag");
-function findExplicitTag(state, exact, prefix, tagName, nodeKind) {
-  const tag = lookupTag(exact, prefix, tagName);
-  if (tag) return tag;
-  throwError$1(state, `unknown ${nodeKind} tag !<${tagName}>`);
-}
-__name(findExplicitTag, "findExplicitTag");
 function constructScalar(state, event) {
   const source = getScalarValue(state.source, event);
   const rawTag = event.tagStart === NO_RANGE$2 ? "" : state.source.slice(event.tagStart, event.tagEnd);
@@ -47708,7 +46193,7 @@ function constructScalar(state, event) {
       tag: strTag2
     };
     const tagName = tagNameFull(rawTag, state.tagHandlers);
-    const scalarTag = lookupTag(state.schema.exact.scalar, state.schema.prefix.scalar, tagName);
+    const scalarTag = state.schema.lookupScalarTag(tagName);
     if (scalarTag) {
       const result = scalarTag.resolve(source, true, tagName);
       if (result === NOT_RESOLVED) throwError$1(state, `cannot resolve a node with !<${tagName}> explicit tag`);
@@ -47717,8 +46202,7 @@ function constructScalar(state, event) {
         tag: scalarTag
       };
     }
-    const collectionTagDef = lookupTag(state.schema.exact.mapping, state.schema.prefix.mapping, tagName) ?? lookupTag(state.
-    schema.exact.sequence, state.schema.prefix.sequence, tagName);
+    const collectionTagDef = state.schema.lookupMappingTag(tagName) ?? state.schema.lookupSequenceTag(tagName);
     if (collectionTagDef) {
       if (source !== "") throwError$1(state, `cannot resolve a node with !<${tagName}> explicit tag`);
       const carrier = collectionTagDef.create(tagName);
@@ -47729,57 +46213,56 @@ function constructScalar(state, event) {
     }
     throwError$1(state, `unknown scalar tag !<${tagName}>`);
   }
-  if (event.style === 1) {
-    const candidates = state.schema.implicitScalarByFirstChar.get(source.charAt(0)) ?? state.schema.implicitScalarAnyFirstChar;
-    for (const tag of candidates) {
-      const result = tag.resolve(source, false, tag.tagName);
-      if (result !== NOT_RESOLVED) return {
-        value: result,
-        tag
-      };
-    }
-  }
+  if (event.style === SCALAR_STYLE.PLAIN) return state.schema.resolveImplicitScalarTag(source);
   return {
     value: strTag2.resolve(source, false, strTag2.tagName),
     tag: strTag2
   };
 }
 __name(constructScalar, "constructScalar");
-function collectionTag(state, event, exact, prefix, defaultTagName, nodeKind) {
+function collectionTagName(state, event, defaultTagName) {
   const rawTag = event.tagStart === NO_RANGE$2 ? "" : state.source.slice(event.tagStart, event.tagEnd);
-  const tagName = rawTag === "" || rawTag === "!" ? defaultTagName : tagNameFull(rawTag, state.tagHandlers);
-  return {
-    tagName,
-    tag: findExplicitTag(state, exact, prefix, tagName, nodeKind)
-  };
+  return rawTag === "" || rawTag === "!" ? defaultTagName : tagNameFull(rawTag, state.tagHandlers);
 }
-__name(collectionTag, "collectionTag");
+__name(collectionTagName, "collectionTagName");
 function isMappingTag(tag) {
   return tag.nodeKind === "mapping";
 }
 __name(isMappingTag, "isMappingTag");
+function chargeMergeWork(state) {
+  state.totalMergeKeys++;
+  if (state.maxTotalMergeKeys !== -1 && state.totalMergeKeys > state.maxTotalMergeKeys) throwError$1(state, `merge keys \
+exceeded maxTotalMergeKeys (${state.maxTotalMergeKeys})`);
+}
+__name(chargeMergeWork, "chargeMergeWork");
 function mergeKeys(state, frame, source, sourceTag) {
+  chargeMergeWork(state);
   for (const sourceKey of sourceTag.keys(source)) {
-    if (state.maxTotalMergeKeys !== -1 && ++state.totalMergeKeys > state.maxTotalMergeKeys) throwError$1(state, `merge k\
-eys exceeded maxTotalMergeKeys (${state.maxTotalMergeKeys})`);
+    chargeMergeWork(state);
     if (frame.tag.has(frame.value, sourceKey)) continue;
     const err = frame.tag.addPair(frame.value, sourceKey, sourceTag.get(source, sourceKey));
     if (err) throwError$1(state, err);
-    (frame.overridable ??= /* @__PURE__ */ new Set()).add(sourceKey);
+    frame.overridable ??= /* @__PURE__ */ new Set();
+    frame.overridable.add(sourceKey);
   }
 }
 __name(mergeKeys, "mergeKeys");
 function mergeSource(state, frame, source, sourceTag) {
   state.position = frame.keyPosition;
   if (isMappingTag(sourceTag)) mergeKeys(state, frame, source, sourceTag);
-  else if (sourceTag.nodeKind === "sequence" && Array.isArray(source)) for (const element of source) mergeKeys(state, frame,
-  element, frame.tag);
-  else throwError$1(state, "cannot merge mappings; the provided source object is unacceptable");
+  else if (sourceTag.nodeKind === "sequence" && Array.isArray(source)) {
+    if (source.length > 100) throwError$1(state, "abnormal merge sequence size");
+    for (const element of source) {
+      const elementTag = state.nodeTags.get(element);
+      if (!elementTag) throwError$1(state, "cannot merge mappings; the provided source object is unacceptable");
+      mergeKeys(state, frame, element, elementTag);
+    }
+  } else throwError$1(state, "cannot merge mappings; the provided source object is unacceptable");
 }
 __name(mergeSource, "mergeSource");
 function addMappingValue(state, frame, key, value, tag) {
   state.position = frame.keyPosition;
-  if (key === MERGE_KEY) {
+  if (frame.keyIsMerge) {
     mergeSource(state, frame, value, tag);
     return;
   }
@@ -47796,9 +46279,7 @@ function addValue(state, value, tag) {
     frame.value = value;
     frame.hasValue = true;
   } else if (frame.kind === "sequence") {
-    if (frame.merge) {
-      if (!isMappingTag(tag)) throwError$1(state, "cannot merge mappings; the provided source object is unacceptable");
-    }
+    if (isMappingTag(tag)) state.nodeTags.set(value, tag);
     const err = frame.tag.addItem(frame.value, value, frame.index++);
     if (err) throwError$1(state, err);
   } else if (frame.hasKey) {
@@ -47810,6 +46291,7 @@ function addValue(state, value, tag) {
     frame.key = value;
     frame.keyPosition = state.position;
     frame.hasKey = true;
+    frame.keyIsMerge = tag.tagName === MERGE_TAG_NAME;
   }
 }
 __name(addValue, "addValue");
@@ -47836,6 +46318,7 @@ function constructFromEvents(events, options) {
     position: 0,
     frames: [],
     anchors: /* @__PURE__ */ new Map(),
+    nodeTags: /* @__PURE__ */ new Map(),
     tagHandlers: /* @__PURE__ */ Object.create(null),
     totalMergeKeys: 0,
     aliasCount: 0
@@ -47844,8 +46327,9 @@ function constructFromEvents(events, options) {
     const event = state.events[state.eventIndex++];
     state.position = eventPosition$1(event);
     switch (event.type) {
-      case 1:
+      case EVENT_ID.DOCUMENT:
         state.anchors = /* @__PURE__ */ new Map();
+        state.nodeTags = /* @__PURE__ */ new Map();
         state.aliasCount = 0;
         state.tagHandlers = /* @__PURE__ */ Object.create(null);
         for (const directive of event.directives) if (directive.kind === "tag") state.tagHandlers[directive.handle] = directive.
@@ -47857,49 +46341,49 @@ function constructFromEvents(events, options) {
           hasValue: false
         });
         break;
-      case 4: {
+      case EVENT_ID.SCALAR: {
         const { value, tag } = constructScalar(state, event);
         storeAnchor(state, event, value, tag, true);
         addValue(state, value, tag);
         break;
       }
-      case 2: {
-        const definition = collectionTag(state, event, state.schema.exact.sequence, state.schema.prefix.sequence, "tag:y\
-aml.org,2002:seq", "sequence");
-        const value = definition.tag.create(definition.tagName);
-        const anchor = storeAnchor(state, event, value, definition.tag, definition.tag.carrierIsResult);
-        const parent = state.frames[state.frames.length - 1];
-        const merge = parent !== void 0 && parent.kind === "mapping" && parent.hasKey && parent.key === MERGE_KEY;
+      case EVENT_ID.SEQUENCE: {
+        const tagName = collectionTagName(state, event, "tag:yaml.org,2002:seq");
+        const tag = state.schema.lookupSequenceTag(tagName);
+        if (!tag) throwError$1(state, `unknown sequence tag !<${tagName}>`);
+        const value = tag.create(tagName);
+        const anchor = storeAnchor(state, event, value, tag, tag.carrierIsResult);
         state.frames.push({
           kind: "sequence",
           position: state.position,
           value,
-          tag: definition.tag,
+          tag,
           anchor,
-          index: 0,
-          merge
+          index: 0
         });
         break;
       }
-      case 3: {
-        const definition = collectionTag(state, event, state.schema.exact.mapping, state.schema.prefix.mapping, "tag:yam\
-l.org,2002:map", "mapping");
-        const value = definition.tag.create(definition.tagName);
-        const anchor = storeAnchor(state, event, value, definition.tag, definition.tag.carrierIsResult);
+      case EVENT_ID.MAPPING: {
+        const tagName = collectionTagName(state, event, "tag:yaml.org,2002:map");
+        const tag = state.schema.lookupMappingTag(tagName);
+        if (!tag) throwError$1(state, `unknown mapping tag !<${tagName}>`);
+        const value = tag.create(tagName);
+        const anchor = storeAnchor(state, event, value, tag, tag.carrierIsResult);
         state.frames.push({
           kind: "mapping",
           position: state.position,
           value,
-          tag: definition.tag,
+          tag,
           anchor,
           key: void 0,
           keyPosition: state.position,
           hasKey: false,
+          keyIsMerge: false,
           overridable: null
         });
         break;
       }
-      case 5: {
+      case EVENT_ID.ALIAS: {
         if (state.maxAliases !== -1 && ++state.aliasCount > state.maxAliases) throwError$1(state, `aliases exceeded maxA\
 liases (${state.maxAliases})`);
         const name = state.source.slice(event.anchorStart, event.anchorEnd);
@@ -47910,7 +46394,7 @@ liases (${state.maxAliases})`);
         addValue(state, anchor.value, anchor.tag);
         break;
       }
-      case 6: {
+      case EVENT_ID.POP: {
         const frame = state.frames.pop();
         if (frame.kind === "mapping" && frame.hasKey) {
           state.position = frame.keyPosition;
@@ -47953,7 +46437,7 @@ var DEFAULT_PARSER_OPTIONS = {
 };
 function addDocumentEvent(state, explicitStart, explicitEnd) {
   state.events.push({
-    type: 1,
+    type: EVENT_ID.DOCUMENT,
     explicitStart,
     explicitEnd,
     directives: state.directives
@@ -47962,7 +46446,7 @@ function addDocumentEvent(state, explicitStart, explicitEnd) {
 __name(addDocumentEvent, "addDocumentEvent");
 function addSequenceEvent(state, start, anchorStart, anchorEnd, tagStart, tagEnd, style) {
   state.events.push({
-    type: 2,
+    type: EVENT_ID.SEQUENCE,
     start,
     anchorStart,
     anchorEnd,
@@ -47974,7 +46458,7 @@ function addSequenceEvent(state, start, anchorStart, anchorEnd, tagStart, tagEnd
 __name(addSequenceEvent, "addSequenceEvent");
 function addMappingEvent(state, start, anchorStart, anchorEnd, tagStart, tagEnd, style) {
   state.events.push({
-    type: 3,
+    type: EVENT_ID.MAPPING,
     start,
     anchorStart,
     anchorEnd,
@@ -47986,19 +46470,20 @@ function addMappingEvent(state, start, anchorStart, anchorEnd, tagStart, tagEnd,
 __name(addMappingEvent, "addMappingEvent");
 function insertFlowPairMappingEvent(state, snapshot) {
   state.events.splice(snapshot.eventsLength, 0, {
-    type: 3,
+    type: EVENT_ID.MAPPING,
     start: snapshot.position,
     anchorStart: NO_RANGE$1,
     anchorEnd: NO_RANGE$1,
     tagStart: NO_RANGE$1,
     tagEnd: NO_RANGE$1,
-    style: 2
+    style: COLLECTION_STYLE.FLOW
   });
 }
 __name(insertFlowPairMappingEvent, "insertFlowPairMappingEvent");
-function addScalarEvent(state, valueStart, valueEnd, anchorStart, anchorEnd, tagStart, tagEnd, style, chomping = 1, indent = -1, fast = false) {
+function addScalarEvent(state, valueStart, valueEnd, anchorStart, anchorEnd, tagStart, tagEnd, style, chomping = CHOMPING_MODE.
+CLIP, indent = -1, fast = false) {
   state.events.push({
-    type: 4,
+    type: EVENT_ID.SCALAR,
     valueStart,
     valueEnd,
     anchorStart,
@@ -48014,18 +46499,18 @@ function addScalarEvent(state, valueStart, valueEnd, anchorStart, anchorEnd, tag
 __name(addScalarEvent, "addScalarEvent");
 function addAliasEvent(state, anchorStart, anchorEnd) {
   state.events.push({
-    type: 5,
+    type: EVENT_ID.ALIAS,
     anchorStart,
     anchorEnd
   });
 }
 __name(addAliasEvent, "addAliasEvent");
 function addPopEvent(state) {
-  state.events.push({ type: 6 });
+  state.events.push({ type: EVENT_ID.POP });
 }
 __name(addPopEvent, "addPopEvent");
 function addEmptyScalarEvent(state) {
-  addScalarEvent(state, NO_RANGE$1, NO_RANGE$1, NO_RANGE$1, NO_RANGE$1, NO_RANGE$1, NO_RANGE$1, 1);
+  addScalarEvent(state, NO_RANGE$1, NO_RANGE$1, NO_RANGE$1, NO_RANGE$1, NO_RANGE$1, NO_RANGE$1, SCALAR_STYLE.PLAIN);
 }
 __name(addEmptyScalarEvent, "addEmptyScalarEvent");
 function emptyProperties() {
@@ -48058,7 +46543,7 @@ function restoreState(state, snapshot) {
 }
 __name(restoreState, "restoreState");
 function throwError(state, message) {
-  throwErrorAt(state.input.slice(0, state.length), state.position, message, state.filename);
+  YAMLException.throwAt(state.input.slice(0, state.length), state.position, message, state.filename);
 }
 __name(throwError, "throwError");
 function isEol(c3) {
@@ -48153,6 +46638,26 @@ function testDocumentSeparator(state, position = state.position) {
   return false;
 }
 __name(testDocumentSeparator, "testDocumentSeparator");
+function skipByteOrderMark(state) {
+  if (state.position === state.lineStart && state.input.charCodeAt(state.position) === 65279) {
+    state.position++;
+    state.lineStart = state.position;
+  }
+}
+__name(skipByteOrderMark, "skipByteOrderMark");
+function testDocumentBoundary(state) {
+  if (state.position !== state.lineStart) return false;
+  if (testDocumentSeparator(state)) return true;
+  if (state.input.charCodeAt(state.position) !== 65279) return false;
+  const snapshot = snapshotState(state);
+  skipByteOrderMark(state);
+  skipSeparationSpace(state, true);
+  const ch = state.input.charCodeAt(state.position);
+  const result = state.position === state.lineStart && (ch === 37 || ch === 45 && testDocumentSeparator(state));
+  restoreState(state, snapshot);
+  return result;
+}
+__name(testDocumentBoundary, "testDocumentBoundary");
 function skipUntilLineEnd(state) {
   let ch = state.input.charCodeAt(state.position);
   while (ch !== 0 && !isEol(ch)) ch = state.input.charCodeAt(++state.position);
@@ -48254,7 +46759,8 @@ function readSingleQuotedScalar(state, nodeIndent, props) {
       }
       const end = state.position;
       state.position++;
-      addScalarEvent(state, start, end, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, 2, 1, -1, simple);
+      addScalarEvent(state, start, end, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, SCALAR_STYLE.SINGLE_QUOTED,
+      CHOMPING_MODE.CLIP, -1, simple);
       return true;
     }
     if (isEol(ch)) {
@@ -48278,7 +46784,8 @@ function readDoubleQuotedScalar(state, nodeIndent, props) {
     if (ch === 34) {
       const end = state.position;
       state.position++;
-      addScalarEvent(state, start, end, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, 3, 1, -1, simple);
+      addScalarEvent(state, start, end, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, SCALAR_STYLE.DOUBLE_QUOTED,
+      CHOMPING_MODE.CLIP, -1, simple);
       return true;
     }
     if (ch === 92) {
@@ -48308,18 +46815,18 @@ the document within a double quoted scalar");
 __name(readDoubleQuotedScalar, "readDoubleQuotedScalar");
 function readBlockScalar(state, parentIndent, props) {
   const ch = state.input.charCodeAt(state.position);
-  let chomping = 1;
+  let chomping = CHOMPING_MODE.CLIP;
   let indent = -1;
   let detectedIndent = false;
   if (ch !== 124 && ch !== 62) return false;
-  const style = ch === 124 ? 4 : 5;
+  const style = ch === 124 ? SCALAR_STYLE.LITERAL_BLOCK : SCALAR_STYLE.FOLDED_BLOCK;
   state.position++;
   while (state.input.charCodeAt(state.position) !== 0) {
     const current = state.input.charCodeAt(state.position);
     const digit = fromDecimalCode(current);
     if (current === 43 || current === 45) {
-      if (chomping !== 1) throwError(state, "repeat of a chomping mode identifier");
-      chomping = current === 43 ? 3 : 2;
+      if (chomping !== CHOMPING_MODE.CLIP) throwError(state, "repeat of a chomping mode identifier");
+      chomping = current === 43 ? CHOMPING_MODE.KEEP : CHOMPING_MODE.STRIP;
       state.position++;
     } else if (digit >= 0) {
       if (digit === 0) throwError(state, "bad explicit indentation width of a block scalar; it cannot be less than one");
@@ -48345,17 +46852,17 @@ function readBlockScalar(state, parentIndent, props) {
     const linePosition = state.position;
     let column = 0;
     while (state.input.charCodeAt(linePosition + column) === 32) column++;
-    const first2 = state.input.charCodeAt(linePosition + column);
-    if (first2 === 0) {
+    const first = state.input.charCodeAt(linePosition + column);
+    if (first === 0) {
       if (contentIndent >= 0) {
         if (column > contentIndent) valueEnd = linePosition + column;
       } else if (column > 0) valueEnd = linePosition + column;
       break;
     }
-    if (linePosition === state.lineStart && testDocumentSeparator(state, linePosition)) break;
-    if (!detectedIndent && contentIndent === -1 && isEol(first2)) maxLeadingIndent = Math.max(maxLeadingIndent, column);
-    if (!detectedIndent && contentIndent === -1 && !isEol(first2)) {
-      if (first2 === 9 && column < parentIndent) {
+    if (testDocumentBoundary(state)) break;
+    if (!detectedIndent && contentIndent === -1 && isEol(first)) maxLeadingIndent = Math.max(maxLeadingIndent, column);
+    if (!detectedIndent && contentIndent === -1 && !isEol(first)) {
+      if (first === 9 && column < parentIndent) {
         state.position = linePosition + column;
         throwError(state, "tab characters must not be used in indentation");
       }
@@ -48364,14 +46871,14 @@ function readBlockScalar(state, parentIndent, props) {
         throwError(state, "bad indentation of a mapping entry");
       }
     }
-    if (contentIndent === -1 && first2 !== 0 && !isEol(first2) && column < parentIndent) {
+    if (contentIndent === -1 && first !== 0 && !isEol(first) && column < parentIndent) {
       state.lineIndent = column;
       state.position = linePosition + column;
       break;
     }
-    if (!detectedIndent && first2 !== 0 && !isEol(first2) && contentIndent === -1) contentIndent = column;
+    if (!detectedIndent && first !== 0 && !isEol(first) && contentIndent === -1) contentIndent = column;
     const requiredIndent = contentIndent === -1 ? parentIndent + 1 : contentIndent;
-    if (first2 !== 0 && !isEol(first2) && column < requiredIndent) {
+    if (first !== 0 && !isEol(first) && column < requiredIndent) {
       state.lineIndent = column;
       state.position = linePosition + column;
       break;
@@ -48409,7 +46916,7 @@ function readPlainScalar(state, nodeIndent, nodeContext, props) {
   const inFlow = nodeContext === CONTEXT_FLOW_IN;
   let multiline = false;
   while (ch !== 0) {
-    if (state.position === state.lineStart && testDocumentSeparator(state)) break;
+    if (testDocumentBoundary(state)) break;
     if (ch === 58) {
       const following = state.input.charCodeAt(state.position + 1);
       if (isWsOrEolOrEnd(following) || inFlow && isFlowIndicator(following)) break;
@@ -48438,7 +46945,8 @@ function readPlainScalar(state, nodeIndent, nodeContext, props) {
   }
   if (end === start) return false;
   checkPrintable(state, start, end);
-  addScalarEvent(state, start, end, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, 1, 1, -1, !multiline);
+  addScalarEvent(state, start, end, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, SCALAR_STYLE.PLAIN,
+  CHOMPING_MODE.CLIP, -1, !multiline);
   return true;
 }
 __name(readPlainScalar, "readPlainScalar");
@@ -48456,8 +46964,10 @@ function readFlowCollection(state, nodeIndent, props) {
   let readNext = true;
   if (ch !== 91 && ch !== 123) return false;
   const terminator = isMapping ? 125 : 93;
-  if (isMapping) addMappingEvent(state, start, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, 2);
-  else addSequenceEvent(state, start, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, 2);
+  if (isMapping) addMappingEvent(state, start, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, COLLECTION_STYLE.
+  FLOW);
+  else addSequenceEvent(state, start, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, COLLECTION_STYLE.
+  FLOW);
   state.position++;
   while (state.input.charCodeAt(state.position) !== 0) {
     skipFlowSeparationSpace(state, nodeIndent);
@@ -48513,7 +47023,8 @@ __name(readFlowCollection, "readFlowCollection");
 function readBlockSequence(state, nodeIndent, props) {
   if (state.firstTabInLine !== -1 || state.input.charCodeAt(state.position) !== 45 || !isWsOrEolOrEnd(state.input.charCodeAt(
   state.position + 1))) return false;
-  addSequenceEvent(state, state.position, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, 1);
+  addSequenceEvent(state, state.position, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, COLLECTION_STYLE.
+  BLOCK);
   while (state.input.charCodeAt(state.position) === 45 && isWsOrEolOrEnd(state.input.charCodeAt(state.position + 1))) {
     if (state.firstTabInLine !== -1) {
       state.position = state.firstTabInLine;
@@ -48552,7 +47063,8 @@ function readBlockMapping(state, nodeIndent, flowIndent, props) {
     const entryLine = state.line;
     if ((ch === 63 || ch === 58) && isWsOrEolOrEnd(following)) {
       if (!mappingOpened) {
-        addMappingEvent(state, state.position, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, 1);
+        addMappingEvent(state, state.position, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, COLLECTION_STYLE.
+        BLOCK);
         mappingOpened = true;
       }
       if (ch === 63) {
@@ -48584,7 +47096,7 @@ ithin a block mapping");
           if (!mappingOpened) {
             restoreState(state, beforeKey);
             addMappingEvent(state, beforeKey.position, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd,
-            1);
+            COLLECTION_STYLE.BLOCK);
             mappingOpened = true;
             parseNode(state, flowIndent, CONTEXT_FLOW_OUT, false, true);
             ch = state.input.charCodeAt(state.position);
@@ -48657,7 +47169,7 @@ function parseNode(state, parentIndent, nodeContext, allowToSeek, allowCompact, 
       const fallbackState = snapshotState(state);
       const flowIndent = parentIndent + 1;
       if (readBlockMapping(state, state.position - state.lineStart, flowIndent, props) && state.events[fallbackState.eventsLength]?.
-      type === 3) {
+      type === EVENT_ID.MAPPING) {
         state.depth--;
         return true;
       }
@@ -48689,7 +47201,7 @@ function parseNode(state, parentIndent, nodeContext, allowToSeek, allowCompact, 
         const propertyIndent = propertyStart.position - propertyStart.lineStart;
         restoreState(state, propertyStart);
         if (readBlockMapping(state, propertyIndent, flowIndent, emptyProperties()) && state.events[fallbackState.eventsLength]?.
-        type === 3) hasContent = true;
+        type === EVENT_ID.MAPPING) hasContent = true;
         else restoreState(state, fallbackState);
       }
       if (!hasContent && (allowBlockScalars && readBlockScalar(state, flowIndent, props) || readSingleQuotedScalar(state,
@@ -48700,7 +47212,8 @@ function parseNode(state, parentIndent, nodeContext, allowToSeek, allowCompact, 
   }
   allowBlockScalars = allowBlockScalars && !hasContent;
   if (!hasContent && (props.anchorStart !== NO_RANGE$1 || props.tagStart !== NO_RANGE$1 || allowBlockScalars)) {
-    addScalarEvent(state, NO_RANGE$1, NO_RANGE$1, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, 1);
+    addScalarEvent(state, NO_RANGE$1, NO_RANGE$1, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, SCALAR_STYLE.
+    PLAIN);
     hasContent = true;
   }
   state.depth--;
@@ -48796,10 +47309,10 @@ function readDocument(state) {
     }
   }
   const documentEvent = state.events[documentEventIndex];
-  if (documentEvent?.type === 1) documentEvent.explicitEnd = explicitEnd;
+  if (documentEvent?.type === EVENT_ID.DOCUMENT) documentEvent.explicitEnd = explicitEnd;
   addPopEvent(state);
-  if (!explicitEnd && state.position < state.length && !(state.position === state.lineStart && testDocumentSeparator(state)))
-   throwError(state, "end of the stream or a document separator is expected");
+  if (!explicitEnd && state.position < state.length && !testDocumentBoundary(state)) throwError(state, "end of the strea\
+m or a document separator is expected");
 }
 __name(readDocument, "readDocument");
 function parseEvents(input, options) {
@@ -48820,9 +47333,9 @@ function parseEvents(input, options) {
     events: []
   };
   const nullpos = input.indexOf("\0");
-  if (nullpos !== -1) throwErrorAt(input, nullpos, "null byte is not allowed in input", state.filename);
-  if (state.input.charCodeAt(state.position) === 65279) state.position++;
+  if (nullpos !== -1) YAMLException.throwAt(input, nullpos, "null byte is not allowed in input", state.filename);
   while (state.position < state.length) {
+    skipByteOrderMark(state);
     skipSeparationSpace(state, true);
     if (state.position >= state.length) break;
     const documentStart = state.position;
@@ -48845,8 +47358,8 @@ function loadDocuments(input, options = {}) {
   const source = String(input);
   const PARSER_OPT_KEYS = Object.keys(DEFAULT_PARSER_OPTIONS);
   const CONSTRUCTOR_OPT_KEYS = Object.keys(DEFAULT_CONSTRUCTOR_OPTIONS);
-  return constructFromEvents(parseEvents(source, pick2(opts, PARSER_OPT_KEYS)), {
-    ...pick2(opts, CONSTRUCTOR_OPT_KEYS),
+  return constructFromEvents(parseEvents(source, pick(opts, PARSER_OPT_KEYS)), {
+    ...pick(opts, CONSTRUCTOR_OPT_KEYS),
     source
   });
 }
@@ -48858,27 +47371,121 @@ function load(input, options) {
   throw new YAMLException("expected a single document in the stream, but found more");
 }
 __name(load, "load");
-var ESCAPE_SEQUENCES = {};
-ESCAPE_SEQUENCES[0] = "\\0";
-ESCAPE_SEQUENCES[7] = "\\a";
-ESCAPE_SEQUENCES[8] = "\\b";
-ESCAPE_SEQUENCES[9] = "\\t";
-ESCAPE_SEQUENCES[10] = "\\n";
-ESCAPE_SEQUENCES[11] = "\\v";
-ESCAPE_SEQUENCES[12] = "\\f";
-ESCAPE_SEQUENCES[13] = "\\r";
-ESCAPE_SEQUENCES[27] = "\\e";
-ESCAPE_SEQUENCES[34] = '\\"';
-ESCAPE_SEQUENCES[92] = "\\\\";
-ESCAPE_SEQUENCES[133] = "\\N";
-ESCAPE_SEQUENCES[160] = "\\_";
-ESCAPE_SEQUENCES[8232] = "\\L";
-ESCAPE_SEQUENCES[8233] = "\\P";
+function hasBit(mask, bit) {
+  return (mask & 1 << bit) !== 0;
+}
+__name(hasBit, "hasBit");
+var DEFAULT_SCALAR_STYLE_RULES = {
+  applyQuoteFlowKeysOption,
+  doubleQuoteForInvisibles,
+  doubleQuoteWhitespaceOnly,
+  applyForceQuotesOption,
+  tryLongOrMultilineAsBlock,
+  quoteInvalidPlain,
+  fallbackToDoubleQuoted
+};
+function _preferredQuotedStyle(layout) {
+  if (layout.presenterOptions.quoteStyle === "single" && hasBit(layout.allowedStylesMask, SCALAR_STYLE.SINGLE_QUOTED)) return SCALAR_STYLE.
+  SINGLE_QUOTED;
+  return SCALAR_STYLE.DOUBLE_QUOTED;
+}
+__name(_preferredQuotedStyle, "_preferredQuotedStyle");
+function applyQuoteFlowKeysOption(layout) {
+  if (!layout.presenterOptions.quoteFlowKeys) return;
+  if (!layout.isKey || !layout.flowOnly || layout.style !== SCALAR_STYLE.PLAIN) return;
+  layout.style = SCALAR_STYLE.DOUBLE_QUOTED;
+}
+__name(applyQuoteFlowKeysOption, "applyQuoteFlowKeysOption");
+function doubleQuoteForInvisibles(layout) {
+  if (layout.style === SCALAR_STYLE.PLAIN && /[\t\x7F-\xA0\u2028\u2029\uFEFF\uFFFE\uFFFF]/.test(layout.node.value)) layout.
+  style = SCALAR_STYLE.DOUBLE_QUOTED;
+}
+__name(doubleQuoteForInvisibles, "doubleQuoteForInvisibles");
+function doubleQuoteWhitespaceOnly(layout) {
+  if (layout.style === SCALAR_STYLE.PLAIN && /^\s+$/.test(layout.node.value)) layout.style = SCALAR_STYLE.DOUBLE_QUOTED;
+}
+__name(doubleQuoteWhitespaceOnly, "doubleQuoteWhitespaceOnly");
+function applyForceQuotesOption(layout) {
+  if (!layout.presenterOptions.forceQuotes) return;
+  if (layout.isKey || layout.style !== SCALAR_STYLE.PLAIN) return;
+  if (layout.node.tag !== layout.presenterOptions.schema.defaultScalarTag.tagName) return;
+  layout.style = layout.node.value.includes("\n") ? SCALAR_STYLE.DOUBLE_QUOTED : _preferredQuotedStyle(layout);
+}
+__name(applyForceQuotesOption, "applyForceQuotesOption");
+function tryLongOrMultilineAsBlock(layout) {
+  if (layout.style !== SCALAR_STYLE.PLAIN || layout.isKey) return;
+  const value = layout.node.value;
+  const multiline = value.indexOf("\n") !== -1;
+  if (!hasBit(layout.allowedStylesMask, SCALAR_STYLE.LITERAL_BLOCK)) {
+    if (multiline) layout.style = SCALAR_STYLE.DOUBLE_QUOTED;
+    return;
+  }
+  const w = layout.presenterOptions.lineWidth;
+  if (w === -1) {
+    if (multiline) layout.style = SCALAR_STYLE.LITERAL_BLOCK;
+    return;
+  }
+  const availableWidth = Math.max(Math.min(w, 40), w - layout.shiftOfContent);
+  let position = 0;
+  let shouldFold = false;
+  while (position <= value.length) {
+    let lineEnd = value.length;
+    const nextLineBreak = value.indexOf("\n", position);
+    if (nextLineBreak !== -1) lineEnd = nextLineBreak;
+    const line = value.slice(position, lineEnd);
+    if (line.length > availableWidth && line[0] !== " " && / [^ \t]/.test(line)) shouldFold = true;
+    if (nextLineBreak === -1) break;
+    position = nextLineBreak + 1;
+  }
+  if (shouldFold) layout.style = SCALAR_STYLE.FOLDED_BLOCK;
+  else if (multiline) layout.style = SCALAR_STYLE.LITERAL_BLOCK;
+}
+__name(tryLongOrMultilineAsBlock, "tryLongOrMultilineAsBlock");
+function quoteInvalidPlain(layout) {
+  if (layout.style === SCALAR_STYLE.PLAIN && !hasBit(layout.allowedStylesMask, SCALAR_STYLE.PLAIN)) layout.style = _preferredQuotedStyle(
+  layout);
+}
+__name(quoteInvalidPlain, "quoteInvalidPlain");
+function fallbackToDoubleQuoted(layout) {
+  if (!hasBit(layout.allowedStylesMask, layout.style)) layout.style = SCALAR_STYLE.DOUBLE_QUOTED;
+}
+__name(fallbackToDoubleQuoted, "fallbackToDoubleQuoted");
+var SRC_C_PRINTABLE = "[\\x09\\x0A\\x0D\\x20-\\x7E\\x85\\xA0-\\uD7FF\\uE000-\\uFFFD\\u{10000}-\\u{10FFFF}]";
+var SRC_B_CHAR = "[\\n\\r]";
+var SRC_C_BYTE_ORDER_MARK = "\\uFEFF";
+var SRC_S_WHITE = "[ \\t]";
+var SRC_NB_CHAR = `(?:(?!(?:${SRC_B_CHAR}|${SRC_C_BYTE_ORDER_MARK}))${SRC_C_PRINTABLE})`;
+var SRC_NS_CHAR = `(?:(?!${SRC_S_WHITE})${SRC_NB_CHAR})`;
+var SRC_NB_JSON = "[\\x09\\x20-\\uD7FF\\uE000-\\uFFFF\\u{10000}-\\u{10FFFF}]";
+var SRC_C_INDICATOR = "[-?:,\\[\\]{}#&*!|>'\"%@`]";
+var SRC_C_FLOW_INDICATOR = "[,\\[\\]{}]";
+var SRC_NS_PLAIN_SAFE_FLOW_OUT = SRC_NS_CHAR;
+var SRC_NS_PLAIN_SAFE_FLOW_IN = `(?:(?!${SRC_C_FLOW_INDICATOR})${SRC_NS_CHAR})`;
+var SRC_NS_PLAIN_FIRST_FLOW_OUT = `(?:(?:(?!${SRC_C_INDICATOR})${SRC_NS_CHAR})|[?:-](?=${SRC_NS_PLAIN_SAFE_FLOW_OUT}))`;
+var SRC_NS_PLAIN_FIRST_FLOW_IN = `(?:(?:(?!${SRC_C_INDICATOR})${SRC_NS_CHAR})|[?:-](?=${SRC_NS_PLAIN_SAFE_FLOW_IN}))`;
+var SRC_NS_PLAIN_CHAR_FLOW_OUT = `(?:(?:(?![:#])${SRC_NS_PLAIN_SAFE_FLOW_OUT})|:(?=${SRC_NS_PLAIN_SAFE_FLOW_OUT}))#*`;
+var SRC_NS_PLAIN_CHAR_FLOW_IN = `(?:(?:(?![:#])${SRC_NS_PLAIN_SAFE_FLOW_IN})|:(?=${SRC_NS_PLAIN_SAFE_FLOW_IN}))#*`;
+var SRC_NB_NS_PLAIN_IN_LINE_FLOW_OUT = `(?:${SRC_S_WHITE}*${SRC_NS_PLAIN_CHAR_FLOW_OUT})*`;
+var SRC_NB_NS_PLAIN_IN_LINE_FLOW_IN = `(?:${SRC_S_WHITE}*${SRC_NS_PLAIN_CHAR_FLOW_IN})*`;
+var SRC_NS_PLAIN_ONE_LINE_FLOW_OUT = `${SRC_NS_PLAIN_FIRST_FLOW_OUT}#*${SRC_NB_NS_PLAIN_IN_LINE_FLOW_OUT}`;
+var SRC_NS_PLAIN_ONE_LINE_FLOW_IN = `${SRC_NS_PLAIN_FIRST_FLOW_IN}#*${SRC_NB_NS_PLAIN_IN_LINE_FLOW_IN}`;
+var SRC_NS_PLAIN_ONE_LINE_BLOCK_KEY = SRC_NS_PLAIN_ONE_LINE_FLOW_OUT;
+var SRC_NS_PLAIN_ONE_LINE_FLOW_KEY = SRC_NS_PLAIN_ONE_LINE_FLOW_IN;
+var SRC_S_NS_PLAIN_NEXT_LINE_FLOW_OUT = `\\n+${SRC_NS_PLAIN_CHAR_FLOW_OUT}${SRC_NB_NS_PLAIN_IN_LINE_FLOW_OUT}`;
+var SRC_S_NS_PLAIN_NEXT_LINE_FLOW_IN = `\\n+${SRC_NS_PLAIN_CHAR_FLOW_IN}${SRC_NB_NS_PLAIN_IN_LINE_FLOW_IN}`;
+var SRC_NS_PLAIN_MULTI_LINE_FLOW_OUT = `${SRC_NS_PLAIN_ONE_LINE_FLOW_OUT}(?:${SRC_S_NS_PLAIN_NEXT_LINE_FLOW_OUT})*`;
+var SRC_NS_PLAIN_MULTI_LINE_FLOW_IN = `${SRC_NS_PLAIN_ONE_LINE_FLOW_IN}(?:${SRC_S_NS_PLAIN_NEXT_LINE_FLOW_IN})*`;
+var NS_PLAIN_FLOW_OUT = new RegExp(`^(?:${SRC_NS_PLAIN_MULTI_LINE_FLOW_OUT})$`, "u");
+var NS_PLAIN_FLOW_IN = new RegExp(`^(?:${SRC_NS_PLAIN_MULTI_LINE_FLOW_IN})$`, "u");
+var NS_PLAIN_BLOCK_KEY = new RegExp(`^(?:${SRC_NS_PLAIN_ONE_LINE_BLOCK_KEY})$`, "u");
+var NS_PLAIN_FLOW_KEY = new RegExp(`^(?:${SRC_NS_PLAIN_ONE_LINE_FLOW_KEY})$`, "u");
+var NB_SINGLE_ONE_LINE = new RegExp(`^(?:${SRC_NB_JSON})*$`, "u");
+var NB_SINGLE_MULTI_LINE = new RegExp(`^(?:${SRC_NB_JSON}|\\n)*$`, "u");
+var BLOCK_SCALAR_CONTENT = new RegExp(`^(?:${SRC_NB_CHAR}|\\n)*$`, "u");
 var DEFAULT_PRESENTER_OPTIONS = {
   indent: 2,
   seqNoIndent: false,
   seqInlineFirst: true,
-  sortKeys: false,
   lineWidth: 80,
   flowBracketPadding: false,
   flowSkipCommaSpace: false,
@@ -48886,30 +47493,35 @@ var DEFAULT_PRESENTER_OPTIONS = {
   quoteFlowKeys: false,
   quoteStyle: "single",
   forceQuotes: false,
+  scalarStyleRules: Object.keys(DEFAULT_SCALAR_STYLE_RULES).map((name) => Reflect.get(DEFAULT_SCALAR_STYLE_RULES, name)),
   tagBeforeAnchor: false
 };
-var DEFAULT_DUMP_SCHEMA = YAML11_SCHEMA.withTags({
-  ...intYaml11Tag,
-  resolve: /* @__PURE__ */ __name((source, isExplicit, tagName) => {
-    const result = intYaml11Tag.resolve(source, isExplicit, tagName);
-    return result === NOT_RESOLVED ? intCoreTag.resolve(source, isExplicit, tagName) : result;
-  }, "resolve")
-}, {
-  ...floatYaml11Tag,
-  resolve: /* @__PURE__ */ __name((source, isExplicit, tagName) => {
-    const result = floatYaml11Tag.resolve(source, isExplicit, tagName);
-    return result === NOT_RESOLVED ? floatCoreTag.resolve(source, isExplicit, tagName) : result;
-  }, "resolve")
-});
 var DEFAULT_DUMP_OPTIONS = {
   ...DEFAULT_PRESENTER_OPTIONS,
-  schema: DEFAULT_DUMP_SCHEMA,
+  schema: DUMP_SCHEMA,
   skipInvalid: false,
   noRefs: false,
   flowLevel: -1,
+  sortKeys: false,
   transform: /* @__PURE__ */ __name(() => {
   }, "transform")
 };
+var EVENT_DOCUMENT = EVENT_ID.DOCUMENT;
+var EVENT_SEQUENCE = EVENT_ID.SEQUENCE;
+var EVENT_MAPPING = EVENT_ID.MAPPING;
+var EVENT_SCALAR = EVENT_ID.SCALAR;
+var EVENT_ALIAS = EVENT_ID.ALIAS;
+var EVENT_POP = EVENT_ID.POP;
+var SCALAR_STYLE_PLAIN = SCALAR_STYLE.PLAIN;
+var SCALAR_STYLE_SINGLE_QUOTED = SCALAR_STYLE.SINGLE_QUOTED;
+var SCALAR_STYLE_DOUBLE_QUOTED = SCALAR_STYLE.DOUBLE_QUOTED;
+var SCALAR_STYLE_LITERAL_BLOCK = SCALAR_STYLE.LITERAL_BLOCK;
+var SCALAR_STYLE_FOLDED_BLOCK = SCALAR_STYLE.FOLDED_BLOCK;
+var COLLECTION_STYLE_BLOCK = COLLECTION_STYLE.BLOCK;
+var COLLECTION_STYLE_FLOW = COLLECTION_STYLE.FLOW;
+var CHOMPING_CLIP = CHOMPING_MODE.CLIP;
+var CHOMPING_STRIP = CHOMPING_MODE.STRIP;
+var CHOMPING_KEEP = CHOMPING_MODE.KEEP;
 
 // component-tests/src/create-api-test.js
 var import_supertest = __toESM(require_supertest(), 1);
@@ -49004,5 +47616,5 @@ methods/index.js:
   (*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
 
 js-yaml/dist/js-yaml.mjs:
-  (*! js-yaml 5.2.3 https://github.com/nodeca/js-yaml @license MIT *)
+  (*! js-yaml 5.4.2 https://github.com/nodeca/js-yaml @license MIT *)
 */
