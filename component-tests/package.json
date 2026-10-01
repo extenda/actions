@@ -5,7 +5,7 @@
   "private": true,
   "main": "dist/index.cjs",
   "dependencies": {
-    "supertest": "^7.2.2"
+    "supertest": "^7.3.0"
   },
   "type": "module",
   "scripts": {
