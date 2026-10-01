@@ -144892,7 +144892,7 @@ var action5 = /* @__PURE__ */ __name(async () => {
   const nexusPasswordSecretName = getInput("nexus-password-secret-name") || "";
   const workingDir = getInput("working-directory");
   const hasPom = pomExists(args, workingDir);
-  let usesArtifactRegistry = false;
+  let usesArtifactRegistry = process.env.MAVEN_USES_ARTIFACT_REGISTRY === "true";
   if (!process.env.MAVEN_INIT) {
     usesArtifactRegistry = await copySettings(
       serviceAccountKey && extensionsExists(workingDir)
@@ -144908,6 +144908,10 @@ var action5 = /* @__PURE__ */ __name(async () => {
       );
     }
     exportVariable("MAVEN_INIT", "true");
+    exportVariable(
+      "MAVEN_USES_ARTIFACT_REGISTRY",
+      String(usesArtifactRegistry)
+    );
     if (!version3 && hasPom) {
       const snapshotVersion = /* @__PURE__ */ __name(async () => getBuildVersion("-SNAPSHOT").then((v) => setVersion2(v,
       workingDir)), "snapshotVersion");
