@@ -43,6 +43,7 @@ function mockExeSyncCall(id, response, dryRun = false) {
     },
   );
   const exeNock = nock('https://exe-management.retailsvc.com')
+    .matchHeader('authorization', 'Bearer mockIdToken')
     .post('/api/v1/internal/event-sources:sync', payload)
     .query({ dryRun })
     .reply(200, response);
