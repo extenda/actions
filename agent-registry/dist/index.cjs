@@ -60421,10 +60421,50 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary: binary2, version: v
 }, "loadTool");
 
 // agent-registry/src/index.js
-var import_fast_glob2 = __toESM(require_out4(), 1);
-var import_node_path7 = __toESM(require("node:path"), 1);
-var import_node_fs8 = require("node:fs");
 var import_node_child_process = require("node:child_process");
+var import_node_fs8 = require("node:fs");
+var import_node_path7 = __toESM(require("node:path"), 1);
+var import_fast_glob3 = __toESM(require_out4(), 1);
+
+// cloud-run/src/project-info.js
+var projectInfo = /* @__PURE__ */ __name((projectId) => {
+  const parsed = projectId.split(/^(.+)-(prod|staging)(-.*)?$/).filter(Boolean);
+  return {
+    project: parsed[0],
+    env: parsed[1],
+    suffix: parsed[2]
+  };
+}, "projectInfo");
+var project_info_default = projectInfo;
+
+// setup-gcloud/src/exec-gcloud.js
+var import_node_os = __toESM(require("node:os"), 1);
+var findExecutable = /* @__PURE__ */ __name((executable) => {
+  if (executable === "gcloud" || !executable) {
+    return import_node_os.default.platform() === "win32" ? "gcloud.cmd" : "gcloud";
+  }
+  return executable;
+}, "findExecutable");
+var execGcloud = /* @__PURE__ */ __name(async (args, executable = "gcloud", silent = false) => {
+  const command = findExecutable(executable);
+  const gcloudEnv = process.env;
+  delete gcloudEnv.CLOUDSDK_AUTH_ACCESS_TOKEN;
+  const result = await getExecOutput(command, args, {
+    silent,
+    ignoreReturnCode: true,
+    env: gcloudEnv
+  });
+  if (result.exitCode !== 0) {
+    let message = `The process '${command}' failed with exit code ${result.exitCode}`;
+    if (result.stderr) {
+      message = `${message}
+
+${result.stderr}`;
+    }
+    throw new Error(message);
+  }
+  return result.stdout.trim();
+}, "execGcloud");
 
 // setup-gcloud/src/auth-stack.js
 var import_node_fs2 = __toESM(require("node:fs"), 1);
@@ -60491,35 +60531,6 @@ function createJobScopedCredential(credentialData, { encoding = "base64", suffix
   return credentialFilePath;
 }
 __name(createJobScopedCredential, "createJobScopedCredential");
-
-// setup-gcloud/src/exec-gcloud.js
-var import_node_os = __toESM(require("node:os"), 1);
-var findExecutable = /* @__PURE__ */ __name((executable) => {
-  if (executable === "gcloud" || !executable) {
-    return import_node_os.default.platform() === "win32" ? "gcloud.cmd" : "gcloud";
-  }
-  return executable;
-}, "findExecutable");
-var execGcloud = /* @__PURE__ */ __name(async (args, executable = "gcloud", silent = false) => {
-  const command = findExecutable(executable);
-  const gcloudEnv = process.env;
-  delete gcloudEnv.CLOUDSDK_AUTH_ACCESS_TOKEN;
-  const result = await getExecOutput(command, args, {
-    silent,
-    ignoreReturnCode: true,
-    env: gcloudEnv
-  });
-  if (result.exitCode !== 0) {
-    let message = `The process '${command}' failed with exit code ${result.exitCode}`;
-    if (result.stderr) {
-      message = `${message}
-
-${result.stderr}`;
-    }
-    throw new Error(message);
-  }
-  return result.stdout.trim();
-}, "execGcloud");
 
 // setup-gcloud/src/auth-wid-federation.js
 async function refreshIdToken({
@@ -97095,25 +97106,6 @@ var setupGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, version3 = "l
 }, "setupGcloud");
 var setup_gcloud_default = setupGcloud;
 
-// agent-registry/src/upload-gcs.js
-var GCS_BUCKET = "extenda-agent-artifacts";
-var upload = /* @__PURE__ */ __name(async (localPath, gcsPath) => {
-  const dest = `gs://${GCS_BUCKET}/${gcsPath}`;
-  await execGcloud(["storage", "cp", localPath, dest], "gcloud", true);
-  return dest;
-}, "upload");
-
-// cloud-run/src/project-info.js
-var projectInfo = /* @__PURE__ */ __name((projectId) => {
-  const parsed = projectId.split(/^(.+)-(prod|staging)(-.*)?$/).filter(Boolean);
-  return {
-    project: parsed[0],
-    env: parsed[1],
-    suffix: parsed[2]
-  };
-}, "projectInfo");
-var project_info_default = projectInfo;
-
 // agent-registry/node_modules/js-yaml/dist/js-yaml.mjs
 function getDefaultExportFromCjs(x3) {
   return x3 && x3.__esModule && Object.prototype.hasOwnProperty.call(x3, "default") ? x3["default"] : x3;
@@ -100513,6 +100505,7 @@ var registerMcp = /* @__PURE__ */ __name(async (mcpId, mcpYaml, dryRun) => {
 var import_node_fs7 = require("node:fs");
 var import_node_os4 = require("node:os");
 var import_node_path6 = __toESM(require("node:path"), 1);
+var import_fast_glob2 = __toESM(require_out4(), 1);
 
 // node_modules/fflate/esm/index.mjs
 var import_module = require("module");
@@ -101237,6 +101230,23 @@ function zipSync(data, opts) {
 }
 __name(zipSync, "zipSync");
 
+// agent-registry/src/upload-gcs.js
+var GCS_BUCKET = "extenda-agent-artifacts";
+var upload = /* @__PURE__ */ __name(async (localPath, gcsPath) => {
+  const dest = `gs://${GCS_BUCKET}/${gcsPath}`;
+  await execGcloud(["storage", "cp", localPath, dest], "gcloud", true);
+  return dest;
+}, "upload");
+var uploadDir = /* @__PURE__ */ __name(async (localDir, gcsPrefix) => {
+  const dest = `gs://${GCS_BUCKET}/${gcsPrefix}/`;
+  await execGcloud(
+    ["storage", "rsync", localDir, dest, "--recursive"],
+    "gcloud",
+    true
+  );
+  return dest;
+}, "uploadDir");
+
 // agent-registry/src/register-skill.js
 var PROJECT3 = "extenda";
 var LOCATION3 = "eu";
@@ -101250,9 +101260,16 @@ var parseSkillMeta = /* @__PURE__ */ __name((content) => {
   }
   return { name: meta["name"] ?? "", description: meta["description"] ?? "" };
 }, "parseSkillMeta");
-var makeZipFile = /* @__PURE__ */ __name((skillFilePath) => {
-  const content = (0, import_node_fs7.readFileSync)(skillFilePath);
-  const zipped = zipSync({ "SKILL.md": [strToU8(content.toString()), { level: 6 }] });
+var listSkillFiles = /* @__PURE__ */ __name((skillDir) => import_fast_glob2.default.sync("**/*", { cwd: skillDir, onlyFiles: true,
+dot: true }).sort((a, b) => a.localeCompare(b)), "listSkillFiles");
+var makeZipFile = /* @__PURE__ */ __name((skillDir, files) => {
+  const entries = Object.fromEntries(
+    files.map((file) => [
+      file,
+      [(0, import_node_fs7.readFileSync)(import_node_path6.default.join(skillDir, file)), { level: 6 }]
+    ])
+  );
+  const zipped = zipSync(entries);
   const tmpPath = import_node_path6.default.join((0, import_node_os4.tmpdir)(), `skill-${process.pid}.zip`);
   (0, import_node_fs7.writeFileSync)(tmpPath, Buffer.from(zipped));
   return tmpPath;
@@ -101284,18 +101301,22 @@ var skillExists = /* @__PURE__ */ __name(async (skillId) => {
 var getLatestRevision = /* @__PURE__ */ __name(async (registryId) => {
   try {
     info(`[skill] fetching latest revision for: ${registryId}`);
-    const output = await execGcloud([
-      "alpha",
-      "agent-registry",
-      "skills",
-      "revisions",
-      "list",
-      `--skill=${registryId}`,
-      `--location=${LOCATION3}`,
-      `--project=${PROJECT3}`,
-      "--format=value(name.basename())",
-      "--quiet"
-    ], "gcloud", true);
+    const output = await execGcloud(
+      [
+        "alpha",
+        "agent-registry",
+        "skills",
+        "revisions",
+        "list",
+        `--skill=${registryId}`,
+        `--location=${LOCATION3}`,
+        `--project=${PROJECT3}`,
+        "--format=value(name.basename())",
+        "--quiet"
+      ],
+      "gcloud",
+      true
+    );
     const versions = output.split("\n").filter(Boolean).filter((v) => /^v\d+-\d+$/.test(v));
     if (!versions.length) return null;
     return versions.sort((a, b) => {
@@ -101317,28 +101338,47 @@ var bumpVersion2 = /* @__PURE__ */ __name((version3) => {
 }, "bumpVersion");
 var activate = /* @__PURE__ */ __name(async (registryId, revisionId) => {
   const revisionName = `projects/${PROJECT3}/locations/${LOCATION3}/skills/${registryId}/revisions/${revisionId}`;
-  await execGcloud([
-    "alpha",
-    "agent-registry",
-    "skills",
-    "update",
-    registryId,
-    `--location=${LOCATION3}`,
-    `--project=${PROJECT3}`,
-    `--default-revision=${revisionName}`,
-    "--target-state=active",
-    "--quiet"
-  ], "gcloud", true);
+  await execGcloud(
+    [
+      "alpha",
+      "agent-registry",
+      "skills",
+      "update",
+      registryId,
+      `--location=${LOCATION3}`,
+      `--project=${PROJECT3}`,
+      `--default-revision=${revisionName}`,
+      "--target-state=active",
+      "--quiet"
+    ],
+    "gcloud",
+    true
+  );
 }, "activate");
-var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun, clan) => {
-  const skillContent = (0, import_node_fs7.readFileSync)(skillFilePath, "utf8");
+var registerSkill = /* @__PURE__ */ __name(async (skillId, skillDir, dryRun, clan) => {
+  const files = listSkillFiles(skillDir);
+  if (!files.includes("SKILL.md"))
+    throw new Error(
+      `Skill directory '${skillId}' is missing required file: SKILL.md`
+    );
+  const skillContent = (0, import_node_fs7.readFileSync)(import_node_path6.default.join(skillDir, "SKILL.md"), "utf8");
   const { name: displayName, description } = parseSkillMeta(skillContent);
-  if (!displayName) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: name`);
-  if (!description) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: description`);
+  if (!displayName)
+    throw new Error(
+      `SKILL.md for '${skillId}' is missing required frontmatter field: name`
+    );
+  if (!description)
+    throw new Error(
+      `SKILL.md for '${skillId}' is missing required frontmatter field: description`
+    );
   const body2 = skillContent.replace(/^---\n[\s\S]*?\n---\n?/, "").trim();
-  if (!body2) throw new Error(`SKILL.md for '${skillId}' must have instructions after the frontmatter`);
+  if (!body2)
+    throw new Error(
+      `SKILL.md for '${skillId}' must have instructions after the frontmatter`
+    );
   const namespacedId = clan ? `${clan}-${skillId}` : skillId;
   const registryId = `private-${namespacedId}`;
+  info(`[skill] files (${files.length}): ${files.join(", ")}`);
   if (dryRun) {
     info(`[dry-run] Would register skill: ${registryId}`);
     return;
@@ -101349,41 +101389,54 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
   const revisionId = version3;
   if (!exists3) {
     info(`Creating skill: ${registryId}@${version3}`);
-    await execGcloud([
-      "alpha",
-      "agent-registry",
-      "skills",
-      "create",
-      namespacedId,
-      `--location=${LOCATION3}`,
-      `--project=${PROJECT3}`,
-      `--display-name=${displayName}`,
-      `--description=${description}`,
-      "--type=simple",
-      "--quiet"
-    ], "gcloud", true);
+    await execGcloud(
+      [
+        "alpha",
+        "agent-registry",
+        "skills",
+        "create",
+        namespacedId,
+        `--location=${LOCATION3}`,
+        `--project=${PROJECT3}`,
+        `--display-name=${displayName}`,
+        `--description=${description}`,
+        "--type=simple",
+        "--quiet"
+      ],
+      "gcloud",
+      true
+    );
   }
-  const zipPath = makeZipFile(skillFilePath);
+  const zipPath = makeZipFile(skillDir, files);
   try {
-    info(`${exists3 ? "Adding" : "Uploading"} revision ${version3} to skill: ${registryId}`);
-    await execGcloud([
-      "alpha",
-      "agent-registry",
-      "skills",
-      "revisions",
-      "create",
-      revisionId,
-      `--skill=${registryId}`,
-      `--location=${LOCATION3}`,
-      `--project=${PROJECT3}`,
-      `--payload=${zipPath}`,
-      "--quiet"
-    ], "gcloud", true);
+    info(
+      `${exists3 ? "Adding" : "Uploading"} revision ${version3} to skill: ${registryId}`
+    );
+    await execGcloud(
+      [
+        "alpha",
+        "agent-registry",
+        "skills",
+        "revisions",
+        "create",
+        revisionId,
+        `--skill=${registryId}`,
+        `--location=${LOCATION3}`,
+        `--project=${PROJECT3}`,
+        `--payload=${zipPath}`,
+        "--quiet"
+      ],
+      "gcloud",
+      true
+    );
   } finally {
     (0, import_node_fs7.unlinkSync)(zipPath);
   }
   await activate(registryId, revisionId);
-  const gcsPath = await upload(skillFilePath, `skills/${namespacedId}/${revisionId}/SKILL.md`);
+  const gcsPath = await uploadDir(
+    skillDir,
+    `skills/${namespacedId}/${revisionId}`
+  );
   info(`Skill registered: ${registryId}@${version3} \u2192 ${gcsPath}`);
 }, "registerSkill");
 
@@ -101401,20 +101454,28 @@ var getChangedPaths = /* @__PURE__ */ __name(() => {
   }
 }, "getChangedPaths");
 var isAffected = /* @__PURE__ */ __name((registryRelativePath, changedPaths) => !changedPaths.length || changedPaths.some(
-(p) => p.startsWith(`${AGENT_REGISTRY_PATH}/${registryRelativePath}`)), "isAffected");
+  (p) => p.startsWith(`${AGENT_REGISTRY_PATH}/${registryRelativePath}`)
+), "isAffected");
 var uploadInstructions = /* @__PURE__ */ __name(async (instructionsPath, agentId, gitSha, dryRun) => {
   const versionedPath = `agents/${agentId}/${gitSha}/instructions.md`;
   const latestPath = `agents/${agentId}/instructions.md`;
   if (dryRun) {
-    info(`[dry-run] Would upload instructions to gs://extenda-agent-artifacts/${latestPath}`);
+    info(
+      `[dry-run] Would upload instructions to gs://extenda-agent-artifacts/${latestPath}`
+    );
   } else {
     await upload(instructionsPath, versionedPath);
     await upload(instructionsPath, latestPath);
-    info(`Instructions uploaded: gs://extenda-agent-artifacts/${latestPath}`);
+    info(
+      `Instructions uploaded: gs://extenda-agent-artifacts/${latestPath}`
+    );
   }
 }, "uploadInstructions");
 var processAgents = /* @__PURE__ */ __name(async (registryRoot, changedPaths, gitSha, dryRun) => {
-  const agentFiles = import_fast_glob2.default.sync("agents/*/agent.yaml", { cwd: registryRoot, onlyFiles: true });
+  const agentFiles = import_fast_glob3.default.sync("agents/*/agent.yaml", {
+    cwd: registryRoot,
+    onlyFiles: true
+  });
   for (const agentFile of agentFiles) {
     const agentId = import_node_path7.default.basename(import_node_path7.default.dirname(agentFile));
     if (agentId.startsWith("example-")) continue;
@@ -101422,7 +101483,12 @@ var processAgents = /* @__PURE__ */ __name(async (registryRoot, changedPaths, gi
     const agentYaml = (0, import_node_fs8.readFileSync)(import_node_path7.default.join(registryRoot, agentFile), "utf8");
     startGroup(`Agent: ${agentId}`);
     await registerAgent(agentId, agentYaml, dryRun);
-    const instructionsPath = import_node_path7.default.join(registryRoot, "agents", agentId, "instructions.md");
+    const instructionsPath = import_node_path7.default.join(
+      registryRoot,
+      "agents",
+      agentId,
+      "instructions.md"
+    );
     if ((0, import_node_fs8.existsSync)(instructionsPath)) {
       await uploadInstructions(instructionsPath, agentId, gitSha, dryRun);
     }
@@ -101430,7 +101496,10 @@ var processAgents = /* @__PURE__ */ __name(async (registryRoot, changedPaths, gi
   }
 }, "processAgents");
 var processMcps = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun) => {
-  const mcpFiles = import_fast_glob2.default.sync("mcp/*/mcp.yaml", { cwd: registryRoot, onlyFiles: true });
+  const mcpFiles = import_fast_glob3.default.sync("mcp/*/mcp.yaml", {
+    cwd: registryRoot,
+    onlyFiles: true
+  });
   for (const mcpFile of mcpFiles) {
     const mcpId = import_node_path7.default.dirname(mcpFile).replace(/^mcp\//, "");
     if (mcpId.startsWith("example-")) continue;
@@ -101442,23 +101511,39 @@ var processMcps = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryR
   }
 }, "processMcps");
 var processSkills = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun, clan) => {
-  const skillFiles = import_fast_glob2.default.sync("skills/*/SKILL.md", { cwd: registryRoot, onlyFiles: true });
-  for (const skillFile of skillFiles) {
-    const skillId = import_node_path7.default.basename(import_node_path7.default.dirname(skillFile));
+  const skillDirs = import_fast_glob3.default.sync("skills/*", {
+    cwd: registryRoot,
+    onlyDirectories: true
+  });
+  for (const skillDir of skillDirs) {
+    const skillId = import_node_path7.default.basename(skillDir);
     if (skillId.startsWith("example-")) continue;
     if (!isAffected(`skills/${skillId}/`, changedPaths)) continue;
     startGroup(`Skill: ${skillId}`);
-    await registerSkill(skillId, import_node_path7.default.join(registryRoot, skillFile), dryRun, clan);
+    await registerSkill(
+      skillId,
+      import_node_path7.default.join(registryRoot, skillDir),
+      dryRun,
+      clan
+    );
     endGroup();
   }
 }, "processSkills");
 var action5 = /* @__PURE__ */ __name(async () => {
-  const serviceAccountKey = getInput("service-account-key", { required: true });
+  const serviceAccountKey = getInput("service-account-key", {
+    required: true
+  });
   const dryRun = getInput("dry-run") === "true";
   const projectId = await setup_gcloud_default(serviceAccountKey);
   const { project: clan } = project_info_default(projectId);
   info(`Clan namespace: ${clan}`);
-  await execGcloud(["components", "install", "alpha", "--quiet", "--no-user-output-enabled"]);
+  await execGcloud([
+    "components",
+    "install",
+    "alpha",
+    "--quiet",
+    "--no-user-output-enabled"
+  ]);
   const gitSha = getGitSha();
   const changedPaths = getChangedPaths();
   if (changedPaths.length) {
