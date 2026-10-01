@@ -13,15 +13,18 @@ const SECRETS_PROJECT = 'extenda';
 // See https://docs.cloud.google.com/run/docs/configuring/services/secrets
 const SECRETS_PROJECT_NUMBER = '377710398576';
 
+// Default OCMS credentials point at the shared extenda Secret Manager
+// project. Callers whose evaluation sidecar needs its own OCMS client
+// (e.g. so the sidecar's calls into Customer Registry carry the tenant's
+// identity rather than the shared ecs-api one) can override these in
+// `sidecars.evaluation.env`, using the same `sm://<project>/<name>`
+// convention (including `sm://*/<name>` for "this service's own project")
+// as any other env var.
 const DEFAULT_ENV = {
   OCMS_CLIENT_ID: `sm://${SECRETS_PROJECT}/ecs-api-ocms-client-id`,
   OCMS_CLIENT_SECRET: `sm://${SECRETS_PROJECT}/ecs-api-ocms-client-secret`,
   REQUEST_ALL_BUNDLE: 'false',
 };
-
-// The OCMS credentials are always sourced from the shared extenda Secret
-// Manager project and can't be redirected to a different secret.
-const RESERVED_ENV = ['OCMS_CLIENT_ID', 'OCMS_CLIENT_SECRET'];
 
 const imageTag = (version = null) =>
   process.env.EVALUATION_IMAGE_TAG || version || STABLE_TAG;
@@ -73,12 +76,6 @@ const resolveEnvVar = (name, rawValue, platformGKE, projectId) => {
 
 const evaluationSpec = async (projectId, platformGKE, config = {}) => {
   const { version = null, env = {} } = config;
-  const overriddenReserved = RESERVED_ENV.filter((key) => key in env);
-  if (overriddenReserved.length > 0) {
-    throw new Error(
-      `${overriddenReserved.join(', ')} cannot be overridden in sidecars.evaluation.env - the evaluation sidecar always reads OCMS credentials from the '${SECRETS_PROJECT}' Secret Manager project.`,
-    );
-  }
   const envConfig = { ...DEFAULT_ENV, ...env };
   const image = await resolveImage(version);
 

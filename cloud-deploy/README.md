@@ -1156,15 +1156,14 @@ environments:
 - `enabled`: Set to `true` to add the sidecar (required)
 - `version`: Use a specific image tag of the sidecar (e.g. a build's git commit SHA). The image is
   not semantically versioned; if not set, the `stable` tag is used
-- `env`: Override the sidecar's default environment variables, except `OCMS_CLIENT_ID` and
-  `OCMS_CLIENT_SECRET` (see below)
+- `env`: Override the sidecar's default environment variables (see below)
 
 **Default environment variables:**
-- `OCMS_CLIENT_ID` and `OCMS_CLIENT_SECRET` always read from the `ecs-api-ocms-client-id` and
-  `ecs-api-ocms-client-secret` secrets in the shared `extenda` Secret Manager project and cannot be
-  overridden. Cloud Run resolves these natively as cross-project secret references; GKE relies on
-  Berglas to resolve them at container startup. Either way, the deploying service's runtime service
-  account needs `roles/secretmanager.secretAccessor` on both secrets in the `extenda` project
+- `OCMS_CLIENT_ID` and `OCMS_CLIENT_SECRET` default to the `ecs-api-ocms-client-id` and
+  `ecs-api-ocms-client-secret` secrets in the shared `extenda` Secret Manager project. Cloud Run
+  resolves these natively as cross-project secret references; GKE relies on Berglas to resolve them
+  at container startup. Either way, the deploying service's runtime service account needs
+  `roles/secretmanager.secretAccessor` on both secrets in the `extenda` project
 - `REQUEST_ALL_BUNDLE` defaults to `false`
 
 Use `env` to override the defaults, for example to request the full bundle:
@@ -1177,6 +1176,23 @@ sidecars:
     env:
       REQUEST_ALL_BUNDLE: 'true'
 ```
+
+If the sidecar needs to call into Customer Registry with the tenant's own identity rather than the
+shared `ecs-api` one, override `OCMS_CLIENT_ID`/`OCMS_CLIENT_SECRET` with an `sm://` reference, same
+as any other secret-backed env var. Use `sm://*/<name>` to read from the deploying service's own
+project:
+
+```yaml
+sidecars:
+  evaluation:
+    enabled: true
+    env:
+      OCMS_CLIENT_ID: sm://*/ocms-client-id
+      OCMS_CLIENT_SECRET: sm://*/ocms-client-secret
+```
+
+As with any other `sidecars.evaluation.env` secret reference, this only supports the deploying
+project or the shared `extenda` project - an `sm://` reference to a third project is rejected.
 
 ## Best Practices and Tips
 

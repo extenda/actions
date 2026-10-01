@@ -675,7 +675,7 @@ environments:
     expect(() => loadServiceDefinition('cloud-deploy.yaml')).toThrow();
   });
 
-  test('It rejects an evaluation sidecar env override of OCMS_CLIENT_ID', async () => {
+  test('It can parse an evaluation sidecar env override of OCMS_CLIENT_ID', async () => {
     mockFs({
       'cloud-deploy.yaml': `
 cloud-run:
@@ -708,7 +708,17 @@ environments:
       `,
     });
 
-    expect(() => loadServiceDefinition('cloud-deploy.yaml')).toThrow();
+    const spec = loadServiceDefinition('cloud-deploy.yaml');
+    expect(spec).toMatchObject({
+      sidecars: {
+        evaluation: {
+          enabled: true,
+          env: {
+            OCMS_CLIENT_ID: 'sm://*/some-other-secret',
+          },
+        },
+      },
+    });
   });
 
   test('It can parse additional CORS configuration', async () => {

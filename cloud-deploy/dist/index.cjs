@@ -109830,7 +109830,6 @@ var DEFAULT_ENV = {
   OCMS_CLIENT_SECRET: `sm://${SECRETS_PROJECT}/ecs-api-ocms-client-secret`,
   REQUEST_ALL_BUNDLE: "false"
 };
-var RESERVED_ENV = ["OCMS_CLIENT_ID", "OCMS_CLIENT_SECRET"];
 var imageTag2 = /* @__PURE__ */ __name((version3 = null) => process.env.EVALUATION_IMAGE_TAG || version3 || STABLE_TAG2,
 "imageTag");
 var resolveImage = /* @__PURE__ */ __name(async (version3 = null) => image_sha256_default(`${IMAGE_NAME}:${imageTag2(version3)}`),
@@ -109868,13 +109867,6 @@ ploying project or the shared '${SECRETS_PROJECT}' project.`
 }, "resolveEnvVar");
 var evaluationSpec = /* @__PURE__ */ __name(async (projectId, platformGKE, config = {}) => {
   const { version: version3 = null, env: env2 = {} } = config;
-  const overriddenReserved = RESERVED_ENV.filter((key) => key in env2);
-  if (overriddenReserved.length > 0) {
-    throw new Error(
-      `${overriddenReserved.join(", ")} cannot be overridden in sidecars.evaluation.env - the evaluation sidecar always \
-reads OCMS credentials from the '${SECRETS_PROJECT}' Secret Manager project.`
-    );
-  }
   const envConfig = { ...DEFAULT_ENV, ...env2 };
   const image = await resolveImage(version3);
   const resolved = Object.entries(envConfig).map(
@@ -112356,11 +112348,9 @@ the generally available `stable` tag is used.",
         env: {
           title: "EvaluationSidecarEnvVars",
           description: "Environment variables for the evaluation sidecar, e.g. REQUEST_ALL_BUNDLE. OCMS_CLIENT_ID and OC\
-MS_CLIENT_SECRET always read from the extenda Secret Manager project and cannot be overridden here.",
+MS_CLIENT_SECRET default to the extenda Secret Manager project's ecs-api secrets, but can be overridden here with an sm:\
+// reference, e.g. to the deploying project's own OCMS client (sm://*/<name>).",
           type: "object",
-          propertyNames: {
-            pattern: "^(?!OCMS_CLIENT_ID$|OCMS_CLIENT_SECRET$)[A-Z0-9_]+$"
-          },
           patternProperties: {
             "^[A-Z0-9_]+$": {
               title: "EnvVar",
