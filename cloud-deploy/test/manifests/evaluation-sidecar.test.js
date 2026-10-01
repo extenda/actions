@@ -172,19 +172,54 @@ describe('manifests/evaluation-sidecar', () => {
     ).rejects.toThrow(/not supported/);
   });
 
-  test('It rejects overriding OCMS_CLIENT_ID or OCMS_CLIENT_SECRET', async () => {
+  test('It allows overriding OCMS_CLIENT_ID and OCMS_CLIENT_SECRET to the deploying project', async () => {
+    const { container, secretAliases } = await evaluationSpec(
+      projectId,
+      false,
+      {
+        enabled: true,
+        env: {
+          OCMS_CLIENT_ID: 'sm://*/my-ocms-client-id',
+          OCMS_CLIENT_SECRET: 'sm://*/my-ocms-client-secret',
+        },
+      },
+    );
+    expect(container).toMatchObject({
+      name: 'evaluation',
+      env: expect.arrayContaining([
+        {
+          name: 'OCMS_CLIENT_ID',
+          valueFrom: {
+            secretKeyRef: { key: 'latest', name: 'my-ocms-client-id' },
+          },
+        },
+        {
+          name: 'OCMS_CLIENT_SECRET',
+          valueFrom: {
+            secretKeyRef: { key: 'latest', name: 'my-ocms-client-secret' },
+          },
+        },
+      ]),
+    });
+    // Same-project secrets resolve to a bare secretKeyRef, so no alias is needed.
+    expect(secretAliases).toEqual([]);
+  });
+
+  test('It rejects overriding OCMS_CLIENT_ID or OCMS_CLIENT_SECRET to an unsupported project', async () => {
     await expect(
       evaluationSpec(projectId, false, {
         enabled: true,
-        env: { OCMS_CLIENT_ID: 'sm://*/some-other-secret' },
+        env: { OCMS_CLIENT_ID: 'sm://some-other-project/some-other-secret' },
       }),
-    ).rejects.toThrow(/cannot be overridden/);
+    ).rejects.toThrow(/not supported/);
 
     await expect(
       evaluationSpec(projectId, false, {
         enabled: true,
-        env: { OCMS_CLIENT_SECRET: 'sm://*/some-other-secret' },
+        env: {
+          OCMS_CLIENT_SECRET: 'sm://some-other-project/some-other-secret',
+        },
       }),
-    ).rejects.toThrow(/cannot be overridden/);
+    ).rejects.toThrow(/not supported/);
   });
 });

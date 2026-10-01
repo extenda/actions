@@ -1799,7 +1799,7 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-**Description:** Environment variables for the evaluation sidecar, e.g. REQUEST_ALL_BUNDLE. OCMS_CLIENT_ID and OCMS_CLIENT_SECRET always read from the extenda Secret Manager project and cannot be overridden here.
+**Description:** Environment variables for the evaluation sidecar, e.g. REQUEST_ALL_BUNDLE. OCMS_CLIENT_ID and OCMS_CLIENT_SECRET default to the extenda Secret Manager project's ecs-api secrets, but can be overridden here with an sm:// reference, e.g. to the deploying project's own OCMS client (sm://*/<name>).
 
 | Property                                             | Pattern | Type   | Deprecated | Definition | Title/Description |
 | ---------------------------------------------------- | ------- | ------ | ---------- | ---------- | ----------------- |
