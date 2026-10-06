@@ -177,8 +177,6 @@ permissions:
   allow:
     - "Bash(git status*)"
 hooks:
-  SessionStart:
-    - script: hooks/session-init.sh
   PreToolUse:
     - matcher: "Bash"
       script: hooks/tool-guardian.sh

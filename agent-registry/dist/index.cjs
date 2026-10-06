@@ -101610,11 +101610,6 @@ var global_settings_schema_default = {
       type: "object",
       additionalProperties: false,
       properties: {
-        SessionStart: {
-          description: "Global session-start hook scripts. Downloaded to .claude/hooks/ on every session.",
-          type: "array",
-          items: { $ref: "#/definitions/HookEntry" }
-        },
         PreToolUse: {
           description: "Global pre-tool-use hook scripts.",
           type: "array",
@@ -101628,18 +101623,6 @@ var global_settings_schema_default = {
       items: {
         type: "string",
         pattern: "^commands/.+\\.md$"
-      }
-    },
-    HookEntry: {
-      type: "object",
-      required: ["script"],
-      additionalProperties: false,
-      properties: {
-        script: {
-          description: "Path to hook script relative to agent-registry/global/. Must end in .sh",
-          type: "string",
-          pattern: "^hooks/.+\\.sh$"
-        }
       }
     },
     MatchedHookEntry: {
@@ -101790,9 +101773,9 @@ var buildSessionStartHooks = /* @__PURE__ */ __name((baseline, clanConfig, clanN
     ));
   } else {
     cmds.push(hookCmd(
-      `CLAN=$(grep -oP '(?<=\\*\\*Clan:\\*\\* )[a-z0-9-]+' "${CD}/.agent/discovered.md" 2>/dev/null); [ -n "$CLAN" ] && \
-gcloud storage cp ${GCS}/config/$CLAN/settings.json "${CD}/.claude/settings.json" 2>/dev/null || gcloud storage cp ${GCS}\
-/config/settings.json "${CD}/.claude/settings.json" 2>/dev/null || true`
+      `CLAN=$(sed -n 's/.*\\*\\*Clan:\\*\\* \\([a-z0-9-]*\\).*/\\1/p' "${CD}/.agent/discovered.md" 2>/dev/null); [ -n "$\
+CLAN" ] && gcloud storage cp ${GCS}/config/$CLAN/settings.json "${CD}/.claude/settings.json" 2>/dev/null || gcloud stora\
+ge cp ${GCS}/config/settings.json "${CD}/.claude/settings.json" 2>/dev/null || true`
     ));
   }
   for (const entry of baseline?.hooks?.PreToolUse ?? []) {

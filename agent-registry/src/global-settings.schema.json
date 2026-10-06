@@ -27,11 +27,6 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "SessionStart": {
-          "description": "Global session-start hook scripts. Downloaded to .claude/hooks/ on every session.",
-          "type": "array",
-          "items": { "$ref": "#/definitions/HookEntry" }
-        },
         "PreToolUse": {
           "description": "Global pre-tool-use hook scripts.",
           "type": "array",
@@ -45,18 +40,6 @@
       "items": {
         "type": "string",
         "pattern": "^commands/.+\\.md$"
-      }
-    },
-    "HookEntry": {
-      "type": "object",
-      "required": ["script"],
-      "additionalProperties": false,
-      "properties": {
-        "script": {
-          "description": "Path to hook script relative to agent-registry/global/. Must end in .sh",
-          "type": "string",
-          "pattern": "^hooks/.+\\.sh$"
-        }
       }
     },
     "MatchedHookEntry": {

@@ -8,8 +8,8 @@ import fg from 'fast-glob';
 import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 import { upload } from './upload-gcs.js';
 
-import globalSchema from './global-settings.schema.json' with { type: 'json' };
-import clanSchema from './clan-settings.schema.json' with { type: 'json' };
+import globalSchema from './global-settings.schema.json';
+import clanSchema from './clan-settings.schema.json';
 
 const validateSettings = (filePath, data, schema) => {
   const result = validate(data, schema, { nestedErrors: true });
@@ -58,7 +58,7 @@ const buildSessionStartHooks = (baseline, clanConfig, clanName) => {
     ));
   } else {
     cmds.push(hookCmd(
-      `CLAN=$(grep -oP '(?<=\\*\\*Clan:\\*\\* )[a-z0-9-]+' "${CD}/.agent/discovered.md" 2>/dev/null);` +
+      `CLAN=$(sed -n 's/.*\\*\\*Clan:\\*\\* \\([a-z0-9-]*\\).*/\\1/p' "${CD}/.agent/discovered.md" 2>/dev/null);` +
       ` [ -n "$CLAN" ] && gcloud storage cp ${GCS}/config/$CLAN/settings.json "${CD}/.claude/settings.json" 2>/dev/null` +
       ` || gcloud storage cp ${GCS}/config/settings.json "${CD}/.claude/settings.json" 2>/dev/null || true`,
     ));
