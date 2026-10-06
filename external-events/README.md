@@ -52,6 +52,7 @@ event-sources: # (required) list of event sources for your system
         # entity-ids: $.data.items[*].id # use this instead for batched entities
         business-unit-id: $.attributes['Business-Unit-Id']
         business-unit-group-id: $.data.nested.bu.id
+        http-method: $.data.httpMethod # method of the original message, e.g. DELETE
         # jsonpath syntax https://github.com/JSONPath-Plus/JSONPath#syntax-through-examples
         # playground https://jsonpath.com/
       # (optional) per-entity extra fields for DFO; see DFO section below
@@ -105,7 +106,8 @@ When present, set `entity-type` to the DFO entity type for events from this sour
 `field-paths` with JSONPath expressions against the Pub/Sub message (payload under `$.data`,
 attributes under `$.attributes`). Use `entity-id` for single-entity events, or `entity-ids` when the
 payload carries a batch. Add `business-unit-id` and/or `business-unit-group-id` when those values
-appear in the message.
+appear in the message. Add `http-method` when the message carries the method it represents (for
+example `$.data.httpMethod` or `$.attributes['Http-Method']`); it is exposed as DFO `httpMethod`.
 
 Optional `additional-properties` extracts extra fields per entity into the DFO payload as a map
 keyed by entity id. Set `scope` to the JSONPath that selects each entity node (for example
