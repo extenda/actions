@@ -10,6 +10,7 @@ vi.mock('../src/upload-gcs.js');
 vi.mock('../src/register-agent.js');
 vi.mock('../src/register-mcp.js');
 vi.mock('../src/register-skill.js');
+vi.mock('../src/sync-clan-settings.js');
 
 import { execSync } from 'child_process';
 import { existsSync } from 'fs';

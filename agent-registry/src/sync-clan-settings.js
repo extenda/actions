@@ -26,7 +26,7 @@ const fetchGlobalBaseline = async () => {
   const tmpPath = path.join(tmpdir(), `global-settings-${process.pid}.yaml`);
   try {
     await execGcloud(
-      ['storage', 'cp', `${GCS}/claude-code/settings.yaml`, tmpPath],
+      ['storage', 'cp', `${GCS}/config/settings.yaml`, tmpPath],
       'gcloud',
       true,
     );
@@ -49,30 +49,41 @@ const buildSessionStartHooks = (baseline, clanConfig, clanName) => {
   // Setup
   cmds.push(hookCmd(`mkdir -p "${CD}/.claude/hooks" "${CD}/.claude/commands"`));
 
-  // Fetch clan settings, fall back to global
-  cmds.push(hookCmd(
-    `gcloud storage cp ${GCS}/clans/${clanName}/settings.json "${CD}/.claude/settings.json" 2>/dev/null` +
-    ` || gcloud storage cp ${GCS}/claude-code/settings.json "${CD}/.claude/settings.json" 2>/dev/null`,
-  ));
+  // Fetch clan-specific settings.json (self-updates this file on next session).
+  // Template mode (clanName=null): derive clan at runtime from discovered.md.
+  // Clan mode: hardcoded path — no fallback needed, bootstrap gap handled gracefully.
+  if (clanName) {
+    cmds.push(hookCmd(
+      `gcloud storage cp ${GCS}/config/${clanName}/settings.json "${CD}/.claude/settings.json" 2>/dev/null || true`,
+    ));
+  } else {
+    cmds.push(hookCmd(
+      `CLAN=$(grep -oP '(?<=\\*\\*Clan:\\*\\* )[a-z0-9-]+' "${CD}/.agent/discovered.md" 2>/dev/null);` +
+      ` [ -n "$CLAN" ] && gcloud storage cp ${GCS}/config/$CLAN/settings.json "${CD}/.claude/settings.json" 2>/dev/null` +
+      ` || gcloud storage cp ${GCS}/config/settings.json "${CD}/.claude/settings.json" 2>/dev/null || true`,
+    ));
+  }
 
   // Download global hook scripts (PreToolUse only — SessionStart IS this hook)
   for (const entry of (baseline?.hooks?.PreToolUse ?? [])) {
     const s = filename(entry.script);
-    cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null`));
+    cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
   }
 
   // Download clan hook scripts (SessionStart + PreToolUse)
-  const clanHookEntries = [
-    ...(clanConfig?.hooks?.SessionStart ?? []),
-    ...(clanConfig?.hooks?.PreToolUse ?? []),
-  ];
-  for (const entry of clanHookEntries) {
-    const s = filename(entry.script);
-    cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${clanName}/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null`));
+  if (clanName) {
+    const clanHookEntries = [
+      ...(clanConfig?.hooks?.SessionStart ?? []),
+      ...(clanConfig?.hooks?.PreToolUse ?? []),
+    ];
+    for (const entry of clanHookEntries) {
+      const s = filename(entry.script);
+      cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${clanName}/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
+    }
   }
 
   // chmod all hooks at once
-  cmds.push(hookCmd(`chmod +x "${CD}/.claude/hooks/"*.sh 2>/dev/null`));
+  cmds.push(hookCmd(`chmod +x "${CD}/.claude/hooks/"*.sh 2>/dev/null || true`));
 
   // Fetch orchestrator CLAUDE.md (strip frontmatter, preserve existing on failure)
   cmds.push(hookCmd(
@@ -84,19 +95,28 @@ const buildSessionStartHooks = (baseline, clanConfig, clanName) => {
   // Download global commands
   for (const c of (baseline?.commands ?? [])) {
     const f = filename(c);
-    cmds.push(hookCmd(`gcloud storage cp ${GCS}/commands/${f} "${CD}/.claude/commands/${f}" 2>/dev/null`));
+    cmds.push(hookCmd(`gcloud storage cp ${GCS}/commands/${f} "${CD}/.claude/commands/${f}" 2>/dev/null || true`));
   }
 
   // Download clan commands
-  for (const c of (clanConfig?.commands ?? [])) {
-    const f = filename(c);
-    cmds.push(hookCmd(`gcloud storage cp ${GCS}/commands/${clanName}/${f} "${CD}/.claude/commands/${f}" 2>/dev/null`));
+  if (clanName) {
+    for (const c of (clanConfig?.commands ?? [])) {
+      const f = filename(c);
+      cmds.push(hookCmd(`gcloud storage cp ${GCS}/commands/${clanName}/${f} "${CD}/.claude/commands/${f}" 2>/dev/null || true`));
+    }
+  }
+
+  // Download clan conventions (clan-specific settings.json only)
+  if (clanName) {
+    cmds.push(hookCmd(`gcloud storage cp ${GCS}/config/${clanName}/conventions.md "${CD}/.agent/conventions.md" 2>/dev/null || true`));
   }
 
   // Run clan SessionStart scripts after everything is downloaded
-  for (const entry of (clanConfig?.hooks?.SessionStart ?? [])) {
-    const s = filename(entry.script);
-    cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}"`));
+  if (clanName) {
+    for (const entry of (clanConfig?.hooks?.SessionStart ?? [])) {
+      const s = filename(entry.script);
+      cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}" || true`));
+    }
   }
 
   return cmds;
@@ -155,7 +175,7 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
   const hasGlobal = existsSync(globalYamlPath);
   const hasClan = existsSync(clanYamlPath);
 
-  if (!hasGlobal && !hasClan) return;
+  if (!hasGlobal && !hasClan && !clan) return;
 
   const affected = (prefix) =>
     !changedPaths.length || changedPaths.some((p) => p.startsWith(`agent-registry/${prefix}`));
@@ -163,30 +183,101 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
   // --- Global baseline (platform repo only) ---
   if (hasGlobal && affected('global/')) {
     core.startGroup('Global baseline');
-    validateSettings('global/settings.yaml', load(readFileSync(globalYamlPath, 'utf8')), globalSchema);
-
-    if (dryRun) {
-      core.info(`[dry-run] Would upload global/settings.yaml → gs://${GCS_BUCKET}/claude-code/settings.yaml`);
-    } else {
-      await upload(globalYamlPath, 'claude-code/settings.yaml');
-      core.info(`Global baseline uploaded: gs://${GCS_BUCKET}/claude-code/settings.yaml`);
-    }
+    const globalConfig = load(readFileSync(globalYamlPath, 'utf8'));
+    validateSettings('global/settings.yaml', globalConfig, globalSchema);
 
     await uploadFiles(path.join(registryRoot, 'global', 'hooks'), 'hooks', dryRun);
     await uploadFiles(path.join(registryRoot, 'global', 'commands'), 'commands', dryRun);
+
+    // Upload raw global YAML for clan repos that need to fetch the baseline
+    if (dryRun) {
+      core.info(`[dry-run] Would upload global/settings.yaml → gs://${GCS_BUCKET}/config/settings.yaml`);
+    } else {
+      await upload(globalYamlPath, 'config/settings.yaml');
+      core.info(`Global baseline uploaded: gs://${GCS_BUCKET}/config/settings.yaml`);
+    }
+
+    // Build and upload the global settings.json (clan-agnostic; derives clan at runtime)
+    const globalJson = buildSettingsJson(globalConfig, {}, null);
+    const globalJsonStr = JSON.stringify(globalJson, null, 2);
+    if (dryRun) {
+      core.info(`[dry-run] Would upload config/settings.json`);
+    } else {
+      const tmpPath = writeTempFile(globalJsonStr, 'settings.json');
+      try {
+        await upload(tmpPath, 'config/settings.json');
+        core.info(`Global settings.json uploaded: gs://${GCS_BUCKET}/config/settings.json`);
+      } finally {
+        unlinkSync(tmpPath);
+      }
+    }
+
+    // Rebuild settings.json for all clans that have already pushed config/<clan>/settings.yaml
+    try {
+      const lsOutput = await execGcloud(
+        ['storage', 'ls', `${GCS}/config/`],
+        'gcloud',
+        true,
+      );
+      const clanNames = (lsOutput || '')
+        .split('\n')
+        .map((l) => l.trim())
+        .filter((l) => l.endsWith('/') && l.includes('/config/'))
+        .map((l) => l.replace(/.*\/config\/([^/]+)\/$/, '$1'))
+        .filter(Boolean);
+
+      for (const clanName of clanNames) {
+        const tmpYamlPath = path.join(tmpdir(), `clan-yaml-${clanName}-${process.pid}`);
+        try {
+          await execGcloud(
+            ['storage', 'cp', `${GCS}/config/${clanName}/settings.yaml`, tmpYamlPath],
+            'gcloud',
+            true,
+          );
+          const clanConfig = load(readFileSync(tmpYamlPath, 'utf8'));
+          const merged = buildSettingsJson(globalConfig, clanConfig, clanName);
+          if (dryRun) {
+            core.info(`[dry-run] Would rebuild config/${clanName}/settings.json`);
+          } else {
+            const tmpJsonPath = writeTempFile(JSON.stringify(merged, null, 2), `settings-${clanName}.json`);
+            try {
+              await upload(tmpJsonPath, `config/${clanName}/settings.json`);
+              core.info(`Rebuilt: gs://${GCS_BUCKET}/config/${clanName}/settings.json`);
+            } finally {
+              unlinkSync(tmpJsonPath);
+            }
+          }
+        } catch (e) {
+          core.warning(`Skipped rebuilding ${clanName}: ${e.message}`);
+        } finally {
+          try { unlinkSync(tmpYamlPath); } catch { /* ignore */ }
+        }
+      }
+    } catch (e) {
+      core.warning(`Could not list GCS clans for rebuild: ${e.message}`);
+    }
 
     core.endGroup();
   }
 
   // --- Clan settings ---
-  if (!hasClan || !affected('config/')) return;
+  // Run when there is a local config/settings.yaml (custom hooks/commands) OR
+  // when the caller provides a clan name (no yaml = global-only merge).
+  if (!hasClan && !clan) return;
+  if (hasClan && !affected('config/')) return;
 
-  const clanYamlContent = readFileSync(clanYamlPath, 'utf8');
-  const clanConfig = load(clanYamlContent);
-  validateSettings('config/settings.yaml', clanConfig, clanSchema);
-  const clanName = clanConfig?.clan ?? clan;
+  let clanYamlContent, clanConfig, clanName;
+  if (hasClan) {
+    clanYamlContent = readFileSync(clanYamlPath, 'utf8');
+    clanConfig = load(clanYamlContent);
+    validateSettings('config/settings.yaml', clanConfig, clanSchema);
+    clanName = clanConfig?.clan ?? clan;
+  } else {
+    clanConfig = {};
+    clanName = clan;
+  }
 
-  if (!clanName) throw new Error('config/settings.yaml is missing required field: clan');
+  if (!clanName) throw new Error('config/settings.yaml is not valid: missing clan field');
 
   core.startGroup(`Clan settings: ${clanName}`);
 
@@ -212,16 +303,18 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
   } else {
     const jsonTmp = writeTempFile(JSON.stringify(merged, null, 2), 'settings.json');
     try {
-      await upload(jsonTmp, `clans/${clanName}/settings.json`);
-      core.info(`Clan settings.json uploaded: gs://${GCS_BUCKET}/clans/${clanName}/settings.json`);
+      await upload(jsonTmp, `config/${clanName}/settings.json`);
+      core.info(`Clan settings.json uploaded: gs://${GCS_BUCKET}/config/${clanName}/settings.json`);
     } finally {
       unlinkSync(jsonTmp);
     }
 
-    const yamlTmp = writeTempFile(clanYamlContent, 'settings.yaml');
+    // Always upload settings.yaml (empty when no local clan yaml) so global-change rebuild can find this clan
+    const yamlContent = hasClan ? clanYamlContent : '';
+    const yamlTmp = writeTempFile(yamlContent, 'settings.yaml');
     try {
-      await upload(yamlTmp, `clans/${clanName}/settings.yaml`);
-      core.info(`Clan settings.yaml stored: gs://${GCS_BUCKET}/clans/${clanName}/settings.yaml`);
+      await upload(yamlTmp, `config/${clanName}/settings.yaml`);
+      core.info(`Clan settings.yaml stored: gs://${GCS_BUCKET}/config/${clanName}/settings.yaml`);
     } finally {
       unlinkSync(yamlTmp);
     }
@@ -229,6 +322,16 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
 
   await uploadFiles(path.join(registryRoot, 'config', 'hooks'), `hooks/${clanName}`, dryRun);
   await uploadFiles(path.join(registryRoot, 'config', 'commands'), `commands/${clanName}`, dryRun);
+
+  const conventionsPath = path.join(registryRoot, 'config', 'conventions.md');
+  if (existsSync(conventionsPath)) {
+    if (dryRun) {
+      core.info(`[dry-run] Would upload config/conventions.md → config/${clanName}/conventions.md`);
+    } else {
+      await upload(conventionsPath, `config/${clanName}/conventions.md`);
+      core.info(`Conventions uploaded: gs://${GCS_BUCKET}/config/${clanName}/conventions.md`);
+    }
+  }
 
   core.endGroup();
 };
