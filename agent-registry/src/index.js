@@ -12,6 +12,7 @@ import projectInfo from '../../cloud-run/src/project-info.js';
 import { registerAgent } from './register-agent.js';
 import { registerMcp } from './register-mcp.js';
 import { registerSkill } from './register-skill.js';
+import { syncClanSettings } from './sync-clan-settings.js';
 
 const AGENT_REGISTRY_PATH = 'agent-registry';
 
@@ -112,6 +113,7 @@ const action = async () => {
   await processAgents(registryRoot, changedPaths, gitSha, dryRun);
   await processMcps(registryRoot, changedPaths, dryRun);
   await processSkills(registryRoot, changedPaths, dryRun, clan);
+  await syncClanSettings(registryRoot, changedPaths, dryRun, clan);
 };
 
 export { getChangedPaths, isAffected };

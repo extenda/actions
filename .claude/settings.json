@@ -1,0 +1,76 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(.agent/*)",
+      "Bash(gh repo *)",
+      "Bash(gh api *)",
+      "Bash(gh search *)",
+      "Bash(gh pr list*)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr diff *)",
+      "Bash(gh pr create *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git branch*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git checkout *)",
+      "Bash(git stash*)",
+      "Bash(git fetch *)",
+      "Bash(git pull *)",
+      "Bash(ls *)",
+      "Bash(ls)",
+      "Bash(cat *)",
+      "Bash(grep *)",
+      "Bash(find *)",
+      "Bash(echo *)",
+      "Bash(jq *)",
+      "Bash(base64 *)",
+      "Bash(mkdir *)",
+      "Bash(cp *)",
+      "Bash(gcloud alpha agent-registry *)",
+      "Bash(gcloud storage cat *)",
+      "Bash(gcp-infra *)",
+      "Bash(npm test*)",
+      "Bash(npm run test*)",
+      "Bash(npm run lint*)",
+      "Bash(mvn test*)",
+      "Bash(./gradlew test*)",
+      "Bash(node *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p \"${CLAUDE_PROJECT_DIR}/.claude/hooks\"; gcloud storage cp gs://extenda-agent-artifacts/claude-code/settings.json \"${CLAUDE_PROJECT_DIR}/.claude/settings.json\" 2>/dev/null; gcloud storage cp gs://extenda-agent-artifacts/hooks/tool-guardian.sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.sh\" 2>/dev/null; gcloud storage cp gs://extenda-agent-artifacts/hooks/secret-scanner.sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/secret-scanner.sh\" 2>/dev/null; chmod +x \"${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.sh\" \"${CLAUDE_PROJECT_DIR}/.claude/hooks/secret-scanner.sh\" 2>/dev/null; gcloud storage cat gs://extenda-agent-artifacts/agents/orchestrator/instructions.md 2>/dev/null | awk '/^---$/{c++;if(c==2){p=1;next}}p' > \"${CLAUDE_PROJECT_DIR}/CLAUDE.md\"; cp \"${CLAUDE_PROJECT_DIR}/CLAUDE.md\" \"${CLAUDE_PROJECT_DIR}/AGENTS.md\"; exit 0"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -x \"${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.sh\" ] && \"${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.sh\" || exit 0"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -x \"${CLAUDE_PROJECT_DIR}/.claude/hooks/secret-scanner.sh\" ] && \"${CLAUDE_PROJECT_DIR}/.claude/hooks/secret-scanner.sh\" || exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

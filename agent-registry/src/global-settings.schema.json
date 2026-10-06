@@ -1,0 +1,80 @@
+{
+  "$id": "global-settings.schema.json",
+  "title": "GlobalSettings",
+  "description": "Platform baseline applied to all clans. Managed by the platform team.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "permissions": { "$ref": "#/definitions/Permissions" },
+    "hooks": { "$ref": "#/definitions/GlobalHooks" },
+    "commands": { "$ref": "#/definitions/Commands" }
+  },
+  "definitions": {
+    "Permissions": {
+      "title": "Permissions",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "description": "Allowed tool invocations for all clans.",
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "GlobalHooks": {
+      "title": "GlobalHooks",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "SessionStart": {
+          "description": "Global session-start hook scripts. Downloaded to .claude/hooks/ on every session.",
+          "type": "array",
+          "items": { "$ref": "#/definitions/HookEntry" }
+        },
+        "PreToolUse": {
+          "description": "Global pre-tool-use hook scripts.",
+          "type": "array",
+          "items": { "$ref": "#/definitions/MatchedHookEntry" }
+        }
+      }
+    },
+    "Commands": {
+      "description": "Global slash command files. Must exist under agent-registry/global/commands/",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^commands/.+\\.md$"
+      }
+    },
+    "HookEntry": {
+      "type": "object",
+      "required": ["script"],
+      "additionalProperties": false,
+      "properties": {
+        "script": {
+          "description": "Path to hook script relative to agent-registry/global/. Must end in .sh",
+          "type": "string",
+          "pattern": "^hooks/.+\\.sh$"
+        }
+      }
+    },
+    "MatchedHookEntry": {
+      "type": "object",
+      "required": ["matcher", "script"],
+      "additionalProperties": false,
+      "properties": {
+        "matcher": {
+          "description": "Claude Code tool name pattern (e.g. Bash, Write|Edit).",
+          "type": "string",
+          "minLength": 1
+        },
+        "script": {
+          "description": "Path to hook script relative to agent-registry/global/. Must end in .sh",
+          "type": "string",
+          "pattern": "^hooks/.+\\.sh$"
+        }
+      }
+    }
+  }
+}

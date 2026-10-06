@@ -1,0 +1,86 @@
+{
+  "$id": "clan-settings.schema.json",
+  "title": "ClanSettings",
+  "description": "Clan-specific Claude Code settings. Merged on top of the global baseline by the agent-registry action.",
+  "type": "object",
+  "required": ["clan"],
+  "additionalProperties": false,
+  "properties": {
+    "clan": {
+      "description": "Clan identifier — must match the clan's GCP project name.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "permissions": { "$ref": "#/definitions/Permissions" },
+    "hooks": { "$ref": "#/definitions/ClanHooks" },
+    "commands": { "$ref": "#/definitions/Commands" }
+  },
+  "definitions": {
+    "Permissions": {
+      "title": "Permissions",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "description": "Additional permissions added on top of the global baseline. Cannot remove global permissions.",
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "ClanHooks": {
+      "title": "ClanHooks",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "SessionStart": {
+          "description": "Clan scripts run after session sync completes. Must exist under agent-registry/config/hooks/",
+          "type": "array",
+          "items": { "$ref": "#/definitions/HookEntry" }
+        },
+        "PreToolUse": {
+          "description": "Clan pre-tool-use scripts. Must exist under agent-registry/config/hooks/",
+          "type": "array",
+          "items": { "$ref": "#/definitions/MatchedHookEntry" }
+        }
+      }
+    },
+    "Commands": {
+      "description": "Clan slash command files. Must exist under agent-registry/config/commands/",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^commands/.+\\.md$"
+      }
+    },
+    "HookEntry": {
+      "type": "object",
+      "required": ["script"],
+      "additionalProperties": false,
+      "properties": {
+        "script": {
+          "description": "Path to hook script relative to agent-registry/config/. Must end in .sh",
+          "type": "string",
+          "pattern": "^hooks/.+\\.sh$"
+        }
+      }
+    },
+    "MatchedHookEntry": {
+      "type": "object",
+      "required": ["matcher", "script"],
+      "additionalProperties": false,
+      "properties": {
+        "matcher": {
+          "description": "Claude Code tool name pattern (e.g. Bash, Write|Edit).",
+          "type": "string",
+          "minLength": 1
+        },
+        "script": {
+          "description": "Path to hook script relative to agent-registry/config/. Must end in .sh",
+          "type": "string",
+          "pattern": "^hooks/.+\\.sh$"
+        }
+      }
+    }
+  }
+}
