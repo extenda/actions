@@ -101,8 +101,11 @@ const action = async () => {
   const gitSha = getGitSha();
   const changedPaths = getChangedPaths();
 
-  if (changedPaths.length) {
-    core.info(`Changed paths: ${changedPaths.join(', ')}`);
+  const registryPaths = changedPaths.filter((p) => p.startsWith(AGENT_REGISTRY_PATH));
+  if (registryPaths.length) {
+    core.info(`Changed agent-registry paths: ${registryPaths.join(', ')}`);
+  } else if (changedPaths.length) {
+    core.info('No agent-registry changes detected — skipping');
   } else {
     core.info('No changed paths detected — processing all items');
   }

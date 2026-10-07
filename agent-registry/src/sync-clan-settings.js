@@ -299,7 +299,6 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
 
   if (dryRun) {
     core.info(`[dry-run] Would upload merged settings.json for clan: ${clanName}`);
-    core.info(JSON.stringify(merged, null, 2));
   } else {
     const jsonTmp = writeTempFile(JSON.stringify(merged, null, 2), 'settings.json');
     try {

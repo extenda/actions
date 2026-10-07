@@ -101969,7 +101969,6 @@ agent-registry/${prefix2}`)), "affected");
   const merged = buildSettingsJson(baseline, clanConfig, clanName);
   if (dryRun) {
     info(`[dry-run] Would upload merged settings.json for clan: ${clanName}`);
-    info(JSON.stringify(merged, null, 2));
   } else {
     const jsonTmp = writeTempFile(JSON.stringify(merged, null, 2), "settings.json");
     try {
@@ -102075,8 +102074,11 @@ var action5 = /* @__PURE__ */ __name(async () => {
   await execGcloud(["components", "install", "alpha", "--quiet", "--no-user-output-enabled"]);
   const gitSha = getGitSha();
   const changedPaths = getChangedPaths();
-  if (changedPaths.length) {
-    info(`Changed paths: ${changedPaths.join(", ")}`);
+  const registryPaths = changedPaths.filter((p2) => p2.startsWith(AGENT_REGISTRY_PATH));
+  if (registryPaths.length) {
+    info(`Changed agent-registry paths: ${registryPaths.join(", ")}`);
+  } else if (changedPaths.length) {
+    info("No agent-registry changes detected \u2014 skipping");
   } else {
     info("No changed paths detected \u2014 processing all items");
   }
