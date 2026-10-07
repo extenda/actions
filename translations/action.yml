@@ -6,7 +6,9 @@ inputs:
     description: |
       The service account key or workload identity federation
       configuration used to authenticate against the Translation Service.
-    required: true
+      Leave it out to publish with the workflow's own GitHub OIDC token instead,
+      which needs `permissions: id-token: write` and no secret.
+    required: false
   module-id:
     description: |
       The module ID to publish translations for.

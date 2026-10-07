@@ -15,9 +15,7 @@ const DEFAULT_PATH = 'translations/';
 const DEFAULT_ENVIRONMENT = 'prod';
 
 async function action() {
-  const serviceAccountKey = core.getInput('service-account-key', {
-    required: true,
-  });
+  const serviceAccountKey = core.getInput('service-account-key');
   const moduleId = core.getInput('module-id', { required: true });
   const environment = core.getInput('environment') || DEFAULT_ENVIRONMENT;
   const dir = core.getInput('path') || DEFAULT_PATH;
@@ -48,9 +46,7 @@ async function action() {
     return;
   }
 
-  await setupGcloud(serviceAccountKey);
-
-  const token = await getIdToken(AUDIENCE);
+  const token = await publishToken(serviceAccountKey, baseUrl);
   const { created } = await publishDefaultLayer(
     baseUrl,
     moduleId,
@@ -61,6 +57,29 @@ async function action() {
   core.info(
     `${created ? 'Created' : 'Replaced'} the default layer for ${moduleId} on ${baseUrl}.`,
   );
+}
+
+/*
+ * With a service account key, a Google ID token for the allow-listed pipeline account. Without
+ * one, the workflow's own GitHub OIDC token: the service verifies it against GitHub and lets the
+ * repository publish the modules it owns, with no service account and no secret. Its audience is
+ * the service's own origin, which is how a staging token is kept off production.
+ */
+async function publishToken(serviceAccountKey, baseUrl) {
+  if (serviceAccountKey) {
+    await setupGcloud(serviceAccountKey);
+
+    return getIdToken(AUDIENCE);
+  }
+
+  try {
+    return await core.getIDToken(new URL(baseUrl).origin);
+  } catch (error) {
+    throw new Error(
+      `Could not get a GitHub OIDC token (${error.message}). Either give the job 'permissions: id-token: write' or pass a service-account-key.`,
+      { cause: error },
+    );
+  }
 }
 
 function dryRunReport(unchanged, moduleId, baseUrl) {

@@ -20,13 +20,22 @@ See [action.yml](action.yml)
 
 | Input                 | Required | Default         | Description                                                                |
 | --------------------- | -------- | --------------- | -------------------------------------------------------------------------- |
-| `service-account-key` | Yes      |                 | Service account key or WIF configuration used to authenticate against TRS. |
+| `service-account-key` | No       |                 | Service account key or WIF configuration used to authenticate against TRS. Leave it out to use GitHub OIDC. |
 | `module-id`           | Yes      |                 | The module ID to publish translations for.                                 |
 | `path`                | No       | `translations/` | Directory containing the `en-US.json` translation file.                    |
 | `dry-run`             | No       | `false`         | If `true`, report whether a real run would publish or skip, without a PUT. |
 
-When authenticating with workload identity federation, the calling workflow
-must grant:
+## Authentication
+
+Without `service-account-key`, the action publishes with the workflow's own
+GitHub OIDC token: no service account, no secret and no allow-list entry. This
+works for any repository in the Extenda organisation, from `master` or `main`.
+The first publish of a new module claims it for the repository; after that only
+that repository can publish it. A module first published by a service account
+has to be assigned to its repository by Cloud Core before it can switch.
+
+GitHub OIDC and workload identity federation both need the calling workflow to
+grant:
 
 ```yaml
 permissions:
@@ -79,7 +88,6 @@ jobs:
       - name: Publish translations
         uses: extenda/actions/translations@v0
         with:
-          service-account-key: ${{ secrets.SECRET_AUTH }}
           module-id: pos
           path: translations/ # default is `translations/`
 ```

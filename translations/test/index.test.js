@@ -96,6 +96,54 @@ describe('action', () => {
     );
   });
 
+  describe('without a service account key', () => {
+    beforeEach(() => {
+      setInputs({ 'service-account-key': '' });
+      core.getIDToken.mockResolvedValue('mock-id-token');
+    });
+
+    it('publishes with a GitHub OIDC token for the service origin', async () => {
+      mockResolvedGet(404, { message: 'Not Found' });
+      const put = mockPut(201);
+
+      await action();
+
+      expect(put.isDone()).toEqual(true);
+      expect(core.getIDToken).toHaveBeenCalledWith(STAGING_URL);
+      expect(setupGcloud).not.toHaveBeenCalled();
+      expect(getIdToken).not.toHaveBeenCalled();
+    });
+
+    it('asks for the production audience when publishing to prod', async () => {
+      setInputs({ 'service-account-key': '', environment: 'prod' });
+      mockResolvedGet(404, { message: 'Not Found' }, PROD_URL);
+      const put = mockPut(201, undefined, PROD_URL);
+
+      await action();
+
+      expect(put.isDone()).toEqual(true);
+      expect(core.getIDToken).toHaveBeenCalledWith(PROD_URL);
+    });
+
+    it('explains the missing id-token permission', async () => {
+      core.getIDToken.mockRejectedValue(
+        new Error('Unable to get ACTIONS_ID_TOKEN_REQUEST_URL env variable'),
+      );
+      mockResolvedGet(404, { message: 'Not Found' });
+
+      await expect(action()).rejects.toThrow('id-token: write');
+    });
+
+    it('needs no token for a dry run', async () => {
+      setInputs({ 'service-account-key': '', 'dry-run': 'true' });
+      mockResolvedGet(404, { message: 'Not Found' });
+
+      await action();
+
+      expect(core.getIDToken).not.toHaveBeenCalled();
+    });
+  });
+
   it('unwraps a file already wrapped in an entries object', async () => {
     mockFs({ 'translations/en-US.json': JSON.stringify({ entries }) });
     mockResolvedGet(404, { message: 'Not Found' });

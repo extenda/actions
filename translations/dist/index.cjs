@@ -96674,9 +96674,7 @@ var AUDIENCE = "trs.translation-api";
 var DEFAULT_PATH = "translations/";
 var DEFAULT_ENVIRONMENT = "prod";
 async function action5() {
-  const serviceAccountKey = getInput("service-account-key", {
-    required: true
-  });
+  const serviceAccountKey = getInput("service-account-key");
   const moduleId = getInput("module-id", { required: true });
   const environment = getInput("environment") || DEFAULT_ENVIRONMENT;
   const dir = getInput("path") || DEFAULT_PATH;
@@ -96697,8 +96695,7 @@ async function action5() {
     );
     return;
   }
-  await setup_gcloud_default(serviceAccountKey);
-  const token = await getIdToken(AUDIENCE);
+  const token = await publishToken(serviceAccountKey, baseUrl);
   const { created } = await publishDefaultLayer(
     baseUrl,
     moduleId,
@@ -96710,6 +96707,22 @@ async function action5() {
   );
 }
 __name(action5, "action");
+async function publishToken(serviceAccountKey, baseUrl) {
+  if (serviceAccountKey) {
+    await setup_gcloud_default(serviceAccountKey);
+    return getIdToken(AUDIENCE);
+  }
+  try {
+    return await getIDToken(new URL(baseUrl).origin);
+  } catch (error2) {
+    throw new Error(
+      `Could not get a GitHub OIDC token (${error2.message}). Either give the job 'permissions: id-token: write' or pass\
+ a service-account-key.`,
+      { cause: error2 }
+    );
+  }
+}
+__name(publishToken, "publishToken");
 function dryRunReport(unchanged, moduleId, baseUrl) {
   return unchanged ? `Dry run: translations for ${moduleId} are unchanged on ${baseUrl}. A real run would skip the publi\
 sh.` : `Dry run: would publish the default layer for ${moduleId} to ${baseUrl}.`;
