@@ -200,8 +200,6 @@ The action manages Claude Code `settings.json` for developers in a clan. It merg
 `agent-registry/config/settings.yaml` defines clan-specific additions on top of the global baseline. Only the clan's common repo should have this file.
 
 ```yaml
-clan: platform           # required — must match the GCP project clan name
-
 permissions:
   allow:
     - "Bash(./gradlew *)"   # any additional permissions beyond the global set
@@ -219,7 +217,6 @@ commands:
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `clan` | yes | Clan name — used as the GCS path prefix for clan artifacts. |
 | `permissions.allow` | no | Additional permission strings merged with the global set. |
 | `hooks.SessionStart` | no | Scripts that run once per session start, after all files are downloaded. |
 | `hooks.PreToolUse` | no | Additional PreToolUse hooks merged with the global set. |

@@ -3,14 +3,8 @@
   "title": "ClanSettings",
   "description": "Clan-specific Claude Code settings. Merged on top of the global baseline by the agent-registry action.",
   "type": "object",
-  "required": ["clan"],
   "additionalProperties": false,
   "properties": {
-    "clan": {
-      "description": "Clan identifier — must match the clan's GCP project name.",
-      "type": "string",
-      "pattern": "^[a-z][a-z0-9-]*$"
-    },
     "permissions": { "$ref": "#/definitions/Permissions" },
     "hooks": { "$ref": "#/definitions/ClanHooks" },
     "commands": { "$ref": "#/definitions/Commands" }

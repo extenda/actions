@@ -234,7 +234,6 @@ hooks:
 `;
 
 const CLAN_YAML = `
-clan: retail
 permissions:
   allow:
     - "Bash(./gradlew *)"
@@ -290,7 +289,7 @@ describe('syncClanSettings', () => {
     test('uploads merged settings.json to config/<clan>/', async () => {
       await syncClanSettings('/root/agent-registry', [], false, 'platform');
       const calls = upload.mock.calls.map((c) => c[1]);
-      expect(calls.some((p) => p === 'config/retail/settings.json')).toBe(true);
+      expect(calls.some((p) => p === 'config/platform/settings.json')).toBe(true);
     });
 
     test('uploads conventions.md to config/<clan>/conventions.md when it exists', async () => {
@@ -299,7 +298,7 @@ describe('syncClanSettings', () => {
       );
       await syncClanSettings('/root/agent-registry', [], false, 'platform');
       const calls = upload.mock.calls.map((c) => c[1]);
-      expect(calls).toContain('config/retail/conventions.md');
+      expect(calls).toContain('config/platform/conventions.md');
     });
 
     test('skips conventions upload when conventions.md does not exist', async () => {
@@ -311,7 +310,7 @@ describe('syncClanSettings', () => {
     test('stores raw clan yaml at config/<clan>/settings.yaml', async () => {
       await syncClanSettings('/root/agent-registry', [], false, 'platform');
       const calls = upload.mock.calls.map((c) => c[1]);
-      expect(calls).toContain('config/retail/settings.yaml');
+      expect(calls).toContain('config/platform/settings.yaml');
     });
 
     test('rebuilds clan settings.json for all clans listed in GCS', async () => {
@@ -430,7 +429,7 @@ describe('syncClanSettings', () => {
     test('skips clan upload when config/ is not in changed paths', async () => {
       await syncClanSettings('/root/agent-registry', ['agent-registry/global/settings.yaml'], false, 'platform');
       const calls = upload.mock.calls.map((c) => c[1]);
-      expect(calls.every((p) => !p.startsWith('config/retail/'))).toBe(true);
+      expect(calls.every((p) => !p.startsWith('config/platform/'))).toBe(true);
     });
 
     test('processes all when changed paths is empty', async () => {
@@ -438,7 +437,7 @@ describe('syncClanSettings', () => {
       const calls = upload.mock.calls.map((c) => c[1]);
       expect(calls).toContain('config/settings.yaml');
       expect(calls).toContain('config/settings.json');
-      expect(calls.some((p) => p.startsWith('config/retail/'))).toBe(true);
+      expect(calls.some((p) => p.startsWith('config/platform/'))).toBe(true);
     });
   });
 
@@ -464,7 +463,7 @@ describe('syncClanSettings', () => {
   });
 
   describe('validation', () => {
-    test('throws when clan field is missing and clan param is falsy', async () => {
+    test('throws when clan param is falsy', async () => {
       existsSync.mockImplementation((p) => p.includes('config/settings.yaml'));
       readFileSync.mockImplementation((p) => {
         if (p.includes('/tmp/')) return GLOBAL_YAML;
@@ -472,7 +471,7 @@ describe('syncClanSettings', () => {
       });
       execGcloud.mockResolvedValue('');
       await expect(syncClanSettings('/root/agent-registry', [], false, '')).rejects.toThrow(
-        'config/settings.yaml is not valid',
+        'Clan name could not be determined',
       );
     });
   });

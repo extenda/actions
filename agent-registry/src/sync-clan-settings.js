@@ -317,13 +317,13 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
     clanYamlContent = readFileSync(clanYamlPath, 'utf8');
     clanConfig = load(clanYamlContent);
     validateSettings('config/settings.yaml', clanConfig, clanSchema);
-    clanName = clanConfig?.clan ?? clan;
+    clanName = clan;
   } else {
     clanConfig = {};
     clanName = clan;
   }
 
-  if (!clanName) throw new Error('config/settings.yaml is not valid: missing clan field');
+  if (!clanName) throw new Error('Clan name could not be determined from the service account project ID');
 
   core.startGroup(`Clan settings: ${clanName}`);
 

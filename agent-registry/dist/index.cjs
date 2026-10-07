@@ -101668,14 +101668,8 @@ var clan_settings_schema_default = {
   title: "ClanSettings",
   description: "Clan-specific Claude Code settings. Merged on top of the global baseline by the agent-registry action.",
   type: "object",
-  required: ["clan"],
   additionalProperties: false,
   properties: {
-    clan: {
-      description: "Clan identifier \u2014 must match the clan's GCP project name.",
-      type: "string",
-      pattern: "^[a-z][a-z0-9-]*$"
-    },
     permissions: { $ref: "#/definitions/Permissions" },
     hooks: { $ref: "#/definitions/ClanHooks" },
     commands: { $ref: "#/definitions/Commands" }
@@ -101999,12 +101993,12 @@ agent-registry/${prefix2}`)), "affected");
     clanYamlContent = (0, import_node_fs8.readFileSync)(clanYamlPath, "utf8");
     clanConfig = load(clanYamlContent);
     validateSettings("config/settings.yaml", clanConfig, clan_settings_schema_default);
-    clanName = clanConfig?.clan ?? clan;
+    clanName = clan;
   } else {
     clanConfig = {};
     clanName = clan;
   }
-  if (!clanName) throw new Error("config/settings.yaml is not valid: missing clan field");
+  if (!clanName) throw new Error("Clan name could not be determined from the service account project ID");
   startGroup(`Clan settings: ${clanName}`);
   let baseline;
   if (hasGlobal) {
