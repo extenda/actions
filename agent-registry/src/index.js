@@ -91,7 +91,7 @@ const processSkills = async (registryRoot, changedPaths, dryRun, clan) => {
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
-  const dryRun = core.getInput('dry-run') === 'true' && core.getInput('skip-dry-run') !== 'true';
+  const dryRun = core.getInput('dry-run') === 'true';
 
   const projectId = await setupGcloud(serviceAccountKey);
   const { project: clan } = projectInfo(projectId);

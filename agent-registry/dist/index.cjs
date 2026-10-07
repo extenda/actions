@@ -102067,7 +102067,7 @@ var processSkills = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dr
 }, "processSkills");
 var action5 = /* @__PURE__ */ __name(async () => {
   const serviceAccountKey = getInput("service-account-key", { required: true });
-  const dryRun = getInput("dry-run") === "true" && getInput("skip-dry-run") !== "true";
+  const dryRun = getInput("dry-run") === "true";
   const projectId = await setup_gcloud_default(serviceAccountKey);
   const { project: clan } = project_info_default(projectId);
   info(`Clan namespace: ${clan}`);
