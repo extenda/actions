@@ -10,6 +10,7 @@ vi.mock('../src/upload-gcs.js');
 vi.mock('../src/register-agent.js');
 vi.mock('../src/register-mcp.js');
 vi.mock('../src/register-skill.js');
+vi.mock('../src/sync-clan-settings.js');
 
 import { execSync } from 'child_process';
 import { existsSync } from 'fs';
@@ -50,11 +51,12 @@ describe('getChangedPaths', () => {
     expect(paths).toEqual(['agent-registry/agents/my-agent/agent.yaml']);
   });
 
-  test('uses origin/{base} when GITHUB_BASE_REF is set', () => {
-    process.env.GITHUB_BASE_REF = 'main';
+  test('uses GITHUB_BASE_SHA when set', () => {
+    process.env.GITHUB_BASE_SHA = 'abc1234';
     execSync.mockReturnValue('agent-registry/skills/my-skill/SKILL.md\n');
     getChangedPaths();
-    expect(execSync).toHaveBeenCalledWith(expect.stringContaining('origin/main...HEAD'));
+    expect(execSync).toHaveBeenCalledWith(expect.stringContaining('abc1234...HEAD'));
+    delete process.env.GITHUB_BASE_SHA;
   });
 
   test('returns empty array when git fails', () => {

@@ -12,6 +12,7 @@ import projectInfo from '../../cloud-run/src/project-info.js';
 import { registerAgent } from './register-agent.js';
 import { registerMcp } from './register-mcp.js';
 import { registerSkill } from './register-skill.js';
+import { syncClanSettings } from './sync-clan-settings.js';
 
 const AGENT_REGISTRY_PATH = 'agent-registry';
 
@@ -19,9 +20,7 @@ const getGitSha = () => execSync('git rev-parse HEAD').toString().trim(); // NOS
 
 const getChangedPaths = () => {
   try {
-    const base = process.env.GITHUB_BASE_REF
-      ? `origin/${process.env.GITHUB_BASE_REF}`
-      : 'HEAD~1';
+    const base = process.env.GITHUB_BASE_SHA || 'HEAD~1';
     return execSync(`git diff --name-only ${base}...HEAD`).toString().trim().split('\n').filter(Boolean);
   } catch {
     return [];
@@ -102,9 +101,10 @@ const action = async () => {
   const gitSha = getGitSha();
   const changedPaths = getChangedPaths();
 
-  if (changedPaths.length) {
-    core.info(`Changed paths: ${changedPaths.join(', ')}`);
-  } else {
+  const registryPaths = changedPaths.filter((p) => p.startsWith(AGENT_REGISTRY_PATH));
+  if (changedPaths.length && !registryPaths.length) {
+    core.info('No agent-registry changes detected — skipping');
+  } else if (!changedPaths.length) {
     core.info('No changed paths detected — processing all items');
   }
 
@@ -112,6 +112,7 @@ const action = async () => {
   await processAgents(registryRoot, changedPaths, gitSha, dryRun);
   await processMcps(registryRoot, changedPaths, dryRun);
   await processSkills(registryRoot, changedPaths, dryRun, clan);
+  await syncClanSettings(registryRoot, changedPaths, dryRun, clan);
 };
 
 export { getChangedPaths, isAffected };
