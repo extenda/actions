@@ -102076,7 +102076,25 @@ var action5 = /* @__PURE__ */ __name(async () => {
   const changedPaths = getChangedPaths();
   const registryPaths = changedPaths.filter((p2) => p2.startsWith(AGENT_REGISTRY_PATH));
   if (registryPaths.length) {
-    info(`Changed agent-registry paths: ${registryPaths.join(", ")}`);
+    const bucket = /* @__PURE__ */ __name((prefix2) => registryPaths.filter((p2) => p2.startsWith(`${AGENT_REGISTRY_PATH}\
+/${prefix2}`)).map((p2) => p2.replace(`${AGENT_REGISTRY_PATH}/${prefix2}`, "").split("/")[0]).filter((v2, i2, a) => v2 &&
+    a.indexOf(v2) === i2), "bucket");
+    startGroup("Changed resources");
+    for (const [label, prefix2] of [
+      ["agents", "agents/"],
+      ["skills", "skills/"],
+      ["mcps", "mcp/"],
+      ["hooks", "global/hooks/"],
+      ["commands", "global/commands/"],
+      ["settings", "global/"],
+      ["clan-hooks", "config/hooks/"],
+      ["clan-commands", "config/commands/"],
+      ["clan-settings", "config/"]
+    ]) {
+      const items = bucket(prefix2);
+      if (items.length) info(`  ${label}: ${items.join(", ")}`);
+    }
+    endGroup();
   } else if (changedPaths.length) {
     info("No agent-registry changes detected \u2014 skipping");
   } else {

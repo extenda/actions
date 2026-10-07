@@ -103,7 +103,26 @@ const action = async () => {
 
   const registryPaths = changedPaths.filter((p) => p.startsWith(AGENT_REGISTRY_PATH));
   if (registryPaths.length) {
-    core.info(`Changed agent-registry paths: ${registryPaths.join(', ')}`);
+    const bucket = (prefix) => registryPaths
+      .filter((p) => p.startsWith(`${AGENT_REGISTRY_PATH}/${prefix}`))
+      .map((p) => p.replace(`${AGENT_REGISTRY_PATH}/${prefix}`, '').split('/')[0])
+      .filter((v, i, a) => v && a.indexOf(v) === i);
+    core.startGroup('Changed resources');
+    for (const [label, prefix] of [
+      ['agents', 'agents/'],
+      ['skills', 'skills/'],
+      ['mcps', 'mcp/'],
+      ['hooks', 'global/hooks/'],
+      ['commands', 'global/commands/'],
+      ['settings', 'global/'],
+      ['clan-hooks', 'config/hooks/'],
+      ['clan-commands', 'config/commands/'],
+      ['clan-settings', 'config/'],
+    ]) {
+      const items = bucket(prefix);
+      if (items.length) core.info(`  ${label}: ${items.join(', ')}`);
+    }
+    core.endGroup();
   } else if (changedPaths.length) {
     core.info('No agent-registry changes detected — skipping');
   } else {
