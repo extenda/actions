@@ -102007,7 +102007,7 @@ var getGitSha = /* @__PURE__ */ __name(() => (0, import_node_child_process2.exec
 "getGitSha");
 var getChangedPaths = /* @__PURE__ */ __name(() => {
   try {
-    const base = process.env.GITHUB_BASE_REF ? `origin/${process.env.GITHUB_BASE_REF}` : "HEAD~1";
+    const base = process.env.GITHUB_BASE_SHA || "HEAD~1";
     return (0, import_node_child_process2.execSync)(`git diff --name-only ${base}...HEAD`).toString().trim().split("\n").
     filter(Boolean);
   } catch {

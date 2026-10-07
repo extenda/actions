@@ -20,9 +20,7 @@ const getGitSha = () => execSync('git rev-parse HEAD').toString().trim(); // NOS
 
 const getChangedPaths = () => {
   try {
-    const base = process.env.GITHUB_BASE_REF
-      ? `origin/${process.env.GITHUB_BASE_REF}`
-      : 'HEAD~1';
+    const base = process.env.GITHUB_BASE_SHA || 'HEAD~1';
     return execSync(`git diff --name-only ${base}...HEAD`).toString().trim().split('\n').filter(Boolean);
   } catch {
     return [];
