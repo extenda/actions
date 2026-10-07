@@ -9,6 +9,10 @@ inputs:
     description: If 'true', validate and print actions without making changes.
     required: false
     default: 'false'
+  skip-dry-run:
+    description: If 'true', overrides dry-run and runs for real. Useful for testing on PRs.
+    required: false
+    default: 'false'
 runs:
   using: node24
   main: dist/index.cjs

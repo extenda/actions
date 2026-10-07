@@ -201,7 +201,7 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
     const globalJson = buildSettingsJson(globalConfig, {}, null);
     const globalJsonStr = JSON.stringify(globalJson, null, 2);
     if (dryRun) {
-      core.info(`[dry-run] Would upload config/settings.json`);
+      core.info(`[dry-run] Would upload settings.json → gs://${GCS_BUCKET}/config/settings.json`);
     } else {
       const tmpPath = writeTempFile(globalJsonStr, 'settings.json');
       try {
@@ -298,7 +298,7 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
   const merged = buildSettingsJson(baseline, clanConfig, clanName);
 
   if (dryRun) {
-    core.info(`[dry-run] Would upload merged settings.json for clan: ${clanName}`);
+    core.info(`[dry-run] Would upload settings.json → gs://${GCS_BUCKET}/config/${clanName}/settings.json`);
   } else {
     const jsonTmp = writeTempFile(JSON.stringify(merged, null, 2), 'settings.json');
     try {
@@ -325,7 +325,7 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
   const conventionsPath = path.join(registryRoot, 'config', 'conventions.md');
   if (existsSync(conventionsPath)) {
     if (dryRun) {
-      core.info(`[dry-run] Would upload config/conventions.md → config/${clanName}/conventions.md`);
+      core.info(`[dry-run] Would upload conventions.md → gs://${GCS_BUCKET}/config/${clanName}/conventions.md`);
     } else {
       await upload(conventionsPath, `config/${clanName}/conventions.md`);
       core.info(`Conventions uploaded: gs://${GCS_BUCKET}/config/${clanName}/conventions.md`);

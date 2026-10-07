@@ -91,7 +91,7 @@ const processSkills = async (registryRoot, changedPaths, dryRun, clan) => {
 
 const action = async () => {
   const serviceAccountKey = core.getInput('service-account-key', { required: true });
-  const dryRun = core.getInput('dry-run') === 'true';
+  const dryRun = core.getInput('dry-run') === 'true' && core.getInput('skip-dry-run') !== 'true';
 
   const projectId = await setupGcloud(serviceAccountKey);
   const { project: clan } = projectInfo(projectId);
@@ -102,30 +102,9 @@ const action = async () => {
   const changedPaths = getChangedPaths();
 
   const registryPaths = changedPaths.filter((p) => p.startsWith(AGENT_REGISTRY_PATH));
-  if (registryPaths.length) {
-    const bucket = (prefix) => registryPaths
-      .filter((p) => p.startsWith(`${AGENT_REGISTRY_PATH}/${prefix}`))
-      .map((p) => p.replace(`${AGENT_REGISTRY_PATH}/${prefix}`, '').split('/')[0])
-      .filter((v, i, a) => v && a.indexOf(v) === i);
-    core.startGroup('Changed resources');
-    for (const [label, prefix] of [
-      ['agents', 'agents/'],
-      ['skills', 'skills/'],
-      ['mcps', 'mcp/'],
-      ['hooks', 'global/hooks/'],
-      ['commands', 'global/commands/'],
-      ['settings', 'global/'],
-      ['clan-hooks', 'config/hooks/'],
-      ['clan-commands', 'config/commands/'],
-      ['clan-settings', 'config/'],
-    ]) {
-      const items = bucket(prefix);
-      if (items.length) core.info(`  ${label}: ${items.join(', ')}`);
-    }
-    core.endGroup();
-  } else if (changedPaths.length) {
+  if (changedPaths.length && !registryPaths.length) {
     core.info('No agent-registry changes detected — skipping');
-  } else {
+  } else if (!changedPaths.length) {
     core.info('No changed paths detected — processing all items');
   }
 

@@ -101885,7 +101885,7 @@ agent-registry/${prefix2}`)), "affected");
     const globalJson = buildSettingsJson(globalConfig, {}, null);
     const globalJsonStr = JSON.stringify(globalJson, null, 2);
     if (dryRun) {
-      info(`[dry-run] Would upload config/settings.json`);
+      info(`[dry-run] Would upload settings.json \u2192 gs://${GCS_BUCKET2}/config/settings.json`);
     } else {
       const tmpPath = writeTempFile(globalJsonStr, "settings.json");
       try {
@@ -101968,7 +101968,7 @@ agent-registry/${prefix2}`)), "affected");
   }
   const merged = buildSettingsJson(baseline, clanConfig, clanName);
   if (dryRun) {
-    info(`[dry-run] Would upload merged settings.json for clan: ${clanName}`);
+    info(`[dry-run] Would upload settings.json \u2192 gs://${GCS_BUCKET2}/config/${clanName}/settings.json`);
   } else {
     const jsonTmp = writeTempFile(JSON.stringify(merged, null, 2), "settings.json");
     try {
@@ -101991,7 +101991,7 @@ agent-registry/${prefix2}`)), "affected");
   const conventionsPath = import_node_path7.default.join(registryRoot, "config", "conventions.md");
   if ((0, import_node_fs8.existsSync)(conventionsPath)) {
     if (dryRun) {
-      info(`[dry-run] Would upload config/conventions.md \u2192 config/${clanName}/conventions.md`);
+      info(`[dry-run] Would upload conventions.md \u2192 gs://${GCS_BUCKET2}/config/${clanName}/conventions.md`);
     } else {
       await upload(conventionsPath, `config/${clanName}/conventions.md`);
       info(`Conventions uploaded: gs://${GCS_BUCKET2}/config/${clanName}/conventions.md`);
@@ -102067,7 +102067,7 @@ var processSkills = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dr
 }, "processSkills");
 var action5 = /* @__PURE__ */ __name(async () => {
   const serviceAccountKey = getInput("service-account-key", { required: true });
-  const dryRun = getInput("dry-run") === "true";
+  const dryRun = getInput("dry-run") === "true" && getInput("skip-dry-run") !== "true";
   const projectId = await setup_gcloud_default(serviceAccountKey);
   const { project: clan } = project_info_default(projectId);
   info(`Clan namespace: ${clan}`);
@@ -102075,29 +102075,9 @@ var action5 = /* @__PURE__ */ __name(async () => {
   const gitSha = getGitSha();
   const changedPaths = getChangedPaths();
   const registryPaths = changedPaths.filter((p2) => p2.startsWith(AGENT_REGISTRY_PATH));
-  if (registryPaths.length) {
-    const bucket = /* @__PURE__ */ __name((prefix2) => registryPaths.filter((p2) => p2.startsWith(`${AGENT_REGISTRY_PATH}\
-/${prefix2}`)).map((p2) => p2.replace(`${AGENT_REGISTRY_PATH}/${prefix2}`, "").split("/")[0]).filter((v2, i2, a) => v2 &&
-    a.indexOf(v2) === i2), "bucket");
-    startGroup("Changed resources");
-    for (const [label, prefix2] of [
-      ["agents", "agents/"],
-      ["skills", "skills/"],
-      ["mcps", "mcp/"],
-      ["hooks", "global/hooks/"],
-      ["commands", "global/commands/"],
-      ["settings", "global/"],
-      ["clan-hooks", "config/hooks/"],
-      ["clan-commands", "config/commands/"],
-      ["clan-settings", "config/"]
-    ]) {
-      const items = bucket(prefix2);
-      if (items.length) info(`  ${label}: ${items.join(", ")}`);
-    }
-    endGroup();
-  } else if (changedPaths.length) {
+  if (changedPaths.length && !registryPaths.length) {
     info("No agent-registry changes detected \u2014 skipping");
-  } else {
+  } else if (!changedPaths.length) {
     info("No changed paths detected \u2014 processing all items");
   }
   const registryRoot = import_node_path8.default.join(process.cwd(), AGENT_REGISTRY_PATH);

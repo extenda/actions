@@ -257,4 +257,22 @@ describe('action — change filtering', () => {
     expect(setupGcloud).toHaveBeenCalledWith('fake-key');
   });
 
+  test('skip-dry-run overrides dry-run=true', async () => {
+    core.getInput.mockImplementation((name) => {
+      if (name === 'service-account-key') return 'fake-key';
+      if (name === 'dry-run') return 'true';
+      if (name === 'skip-dry-run') return 'true';
+      return '';
+    });
+    setupDiff([]);
+    fg.sync.mockImplementation((pattern) => {
+      if (pattern === 'agents/*/agent.yaml') return ['agents/my-agent/agent.yaml'];
+      return [];
+    });
+
+    await action();
+
+    expect(registerAgent).toHaveBeenCalledWith('my-agent', expect.any(String), false);
+  });
+
 });

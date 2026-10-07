@@ -30,6 +30,8 @@ jobs:
           fetch-depth: 2  # required for changed-file detection
 
       - uses: extenda/actions/agent-registry@v0
+        env:
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         with:
           service-account-key: ${{ secrets.SECRET_AUTH }}
           dry-run: ${{ github.event_name == 'pull_request' }}
