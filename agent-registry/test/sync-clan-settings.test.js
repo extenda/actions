@@ -95,6 +95,29 @@ describe('buildSettingsJson', () => {
     expect(cmds.some((c) => c.includes('hooks/secret-scanner.sh'))).toBe(true);
   });
 
+  test('downloads global SessionStart hook scripts from hooks/', () => {
+    const base = { ...baseline, hooks: { ...baseline.hooks, SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] } };
+    const cmds = sessionCommands(buildSettingsJson(base, {}, 'retail'));
+    // Must download from global hooks/ path (no clan prefix)
+    expect(cmds.some((c) => c.includes('gcloud storage cp') && c.match(/hooks\/ensure-pre-commit\.sh/) && !c.includes('retail/'))).toBe(true);
+  });
+
+  test('runs global SessionStart scripts before clan SessionStart scripts', () => {
+    const base = { ...baseline, hooks: { ...baseline.hooks, SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] } };
+    const clan = { hooks: { SessionStart: [{ script: 'hooks/clan-setup.sh' }] } };
+    const cmds = sessionCommands(buildSettingsJson(base, clan, 'retail'));
+    const globalRunIdx = cmds.findIndex((c) => c.includes('[ -x') && c.includes('ensure-pre-commit.sh'));
+    const clanRunIdx = cmds.findIndex((c) => c.includes('[ -x') && c.includes('clan-setup.sh'));
+    expect(globalRunIdx).toBeGreaterThan(-1);
+    expect(clanRunIdx).toBeGreaterThan(globalRunIdx);
+  });
+
+  test('runs global SessionStart scripts in global template mode (clanName=null)', () => {
+    const base = { ...baseline, hooks: { ...baseline.hooks, SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] } };
+    const cmds = sessionCommands(buildSettingsJson(base, {}, null));
+    expect(cmds.some((c) => c.includes('[ -x') && c.includes('ensure-pre-commit.sh'))).toBe(true);
+  });
+
   test('downloads clan conventions to .agent/conventions.md', () => {
     const cmds = sessionCommands(buildSettingsJson(baseline, {}, 'retail'));
     expect(cmds.some((c) => c.includes('config/retail/conventions.md') && c.includes('.agent/conventions.md'))).toBe(true);
@@ -177,6 +200,8 @@ permissions:
   allow:
     - "Bash(git status*)"
 hooks:
+  SessionStart:
+    - script: hooks/ensure-pre-commit.sh
   PreToolUse:
     - matcher: "Bash"
       script: hooks/tool-guardian.sh
@@ -290,6 +315,33 @@ describe('syncClanSettings', () => {
       execGcloud.mockRejectedValue(new Error('permission denied'));
       await syncClanSettings('/root/agent-registry', [], false, 'platform');
       expect(core.warning).toHaveBeenCalledWith(expect.stringContaining('Could not list GCS clans'));
+    });
+
+    test('deletes stale GCS hook when removed locally', async () => {
+      execGcloud.mockImplementation((args) => {
+        if (args[1] === 'ls' && args[2]?.includes('hooks/')) {
+          return Promise.resolve('gs://extenda-agent-artifacts/hooks/stale-hook.sh\n');
+        }
+        return Promise.resolve('');
+      });
+      await syncClanSettings('/root/agent-registry', [], false, 'platform');
+      expect(execGcloud).toHaveBeenCalledWith(
+        expect.arrayContaining(['storage', 'rm', 'gs://extenda-agent-artifacts/hooks/stale-hook.sh']),
+        'gcloud',
+        true,
+      );
+    });
+
+    test('dry-run logs deletion instead of deleting', async () => {
+      execGcloud.mockImplementation((args) => {
+        if (args[1] === 'ls' && args[2]?.includes('hooks/')) {
+          return Promise.resolve('gs://extenda-agent-artifacts/hooks/stale-hook.sh\n');
+        }
+        return Promise.resolve('');
+      });
+      await syncClanSettings('/root/agent-registry', [], true, 'platform');
+      expect(execGcloud).not.toHaveBeenCalledWith(expect.arrayContaining(['storage', 'rm']), expect.anything(), expect.anything());
+      expect(core.info).toHaveBeenCalledWith(expect.stringContaining('[dry-run] Would delete'));
     });
 
     test('cleans up temp files after upload', async () => {

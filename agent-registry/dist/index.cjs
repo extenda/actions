@@ -101610,10 +101610,27 @@ var global_settings_schema_default = {
       type: "object",
       additionalProperties: false,
       properties: {
+        SessionStart: {
+          description: "Global session-start hook scripts run once per session for all clans.",
+          type: "array",
+          items: { $ref: "#/definitions/HookEntry" }
+        },
         PreToolUse: {
           description: "Global pre-tool-use hook scripts.",
           type: "array",
           items: { $ref: "#/definitions/MatchedHookEntry" }
+        }
+      }
+    },
+    HookEntry: {
+      type: "object",
+      required: ["script"],
+      additionalProperties: false,
+      properties: {
+        script: {
+          description: "Path to hook script relative to agent-registry/global/. Must end in .sh",
+          type: "string",
+          pattern: "^hooks/.+\\.sh$"
         }
       }
     },
@@ -101778,7 +101795,10 @@ CLAN" ] && gcloud storage cp ${GCS}/config/$CLAN/settings.json "${CD}/.claude/se
 ge cp ${GCS}/config/settings.json "${CD}/.claude/settings.json" 2>/dev/null || true`
     ));
   }
-  for (const entry of baseline?.hooks?.PreToolUse ?? []) {
+  for (const entry of [
+    ...baseline?.hooks?.SessionStart ?? [],
+    ...baseline?.hooks?.PreToolUse ?? []
+  ]) {
     const s = filename(entry.script);
     cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
   }
@@ -101813,6 +101833,10 @@ e rm -f "$tmp"; fi`
     cmds.push(hookCmd(`gcloud storage cp ${GCS}/config/${clanName}/conventions.md "${CD}/.agent/conventions.md" 2>/dev/n\
 ull || true`));
   }
+  for (const entry of baseline?.hooks?.SessionStart ?? []) {
+    const s = filename(entry.script);
+    cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}" || true`));
+  }
   if (clanName) {
     for (const entry of clanConfig?.hooks?.SessionStart ?? []) {
       const s = filename(entry.script);
@@ -101843,10 +101867,10 @@ var buildSettingsJson = /* @__PURE__ */ __name((baseline, clanConfig, clanName) 
     }
   };
 }, "buildSettingsJson");
-var uploadFiles = /* @__PURE__ */ __name(async (localDir, gcsPrefix, dryRun) => {
-  if (!(0, import_node_fs8.existsSync)(localDir)) return;
-  const files = import_fast_glob2.default.sync("**/*", { cwd: localDir, onlyFiles: true });
-  for (const file of files) {
+var syncFiles = /* @__PURE__ */ __name(async (localDir, gcsPrefix, dryRun) => {
+  const localFiles = (0, import_node_fs8.existsSync)(localDir) ? import_fast_glob2.default.sync("**/*", { cwd: localDir,
+  onlyFiles: true }) : [];
+  for (const file of localFiles) {
     const localPath = import_node_path7.default.join(localDir, file);
     const gcsPath = `${gcsPrefix}/${file}`;
     if (dryRun) {
@@ -101856,7 +101880,27 @@ var uploadFiles = /* @__PURE__ */ __name(async (localDir, gcsPrefix, dryRun) => 
       info(`Uploaded: gs://${GCS_BUCKET2}/${gcsPath}`);
     }
   }
-}, "uploadFiles");
+  let gcsFiles;
+  try {
+    const lsOut = await execGcloud(["storage", "ls", `${GCS}/${gcsPrefix}/`], "gcloud", true);
+    gcsFiles = (lsOut || "").split("\n").map((l3) => l3.trim()).filter((l3) => l3.startsWith("gs://") && !l3.endsWith("/")).
+    map((l3) => l3.replace(`gs://${GCS_BUCKET2}/${gcsPrefix}/`, "")).filter(Boolean);
+  } catch {
+    return;
+  }
+  const localSet = new Set(localFiles);
+  for (const f3 of gcsFiles) {
+    if (!localSet.has(f3)) {
+      const gcsPath = `${gcsPrefix}/${f3}`;
+      if (dryRun) {
+        info(`[dry-run] Would delete gs://${GCS_BUCKET2}/${gcsPath}`);
+      } else {
+        await execGcloud(["storage", "rm", `${GCS}/${gcsPath}`], "gcloud", true);
+        info(`Deleted: gs://${GCS_BUCKET2}/${gcsPath}`);
+      }
+    }
+  }
+}, "syncFiles");
 var writeTempFile = /* @__PURE__ */ __name((content, suffix) => {
   const tmpPath = import_node_path7.default.join((0, import_node_os5.tmpdir)(), `${suffix}-${process.pid}`);
   (0, import_node_fs8.writeFileSync)(tmpPath, content, "utf8");
@@ -101874,8 +101918,8 @@ agent-registry/${prefix2}`)), "affected");
     startGroup("Global baseline");
     const globalConfig = load((0, import_node_fs8.readFileSync)(globalYamlPath, "utf8"));
     validateSettings("global/settings.yaml", globalConfig, global_settings_schema_default);
-    await uploadFiles(import_node_path7.default.join(registryRoot, "global", "hooks"), "hooks", dryRun);
-    await uploadFiles(import_node_path7.default.join(registryRoot, "global", "commands"), "commands", dryRun);
+    await syncFiles(import_node_path7.default.join(registryRoot, "global", "hooks"), "hooks", dryRun);
+    await syncFiles(import_node_path7.default.join(registryRoot, "global", "commands"), "commands", dryRun);
     if (dryRun) {
       info(`[dry-run] Would upload global/settings.yaml \u2192 gs://${GCS_BUCKET2}/config/settings.yaml`);
     } else {
@@ -101986,8 +102030,8 @@ agent-registry/${prefix2}`)), "affected");
       (0, import_node_fs8.unlinkSync)(yamlTmp);
     }
   }
-  await uploadFiles(import_node_path7.default.join(registryRoot, "config", "hooks"), `hooks/${clanName}`, dryRun);
-  await uploadFiles(import_node_path7.default.join(registryRoot, "config", "commands"), `commands/${clanName}`, dryRun);
+  await syncFiles(import_node_path7.default.join(registryRoot, "config", "hooks"), `hooks/${clanName}`, dryRun);
+  await syncFiles(import_node_path7.default.join(registryRoot, "config", "commands"), `commands/${clanName}`, dryRun);
   const conventionsPath = import_node_path7.default.join(registryRoot, "config", "conventions.md");
   if ((0, import_node_fs8.existsSync)(conventionsPath)) {
     if (dryRun) {

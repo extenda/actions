@@ -64,8 +64,11 @@ const buildSessionStartHooks = (baseline, clanConfig, clanName) => {
     ));
   }
 
-  // Download global hook scripts (PreToolUse only — SessionStart IS this hook)
-  for (const entry of (baseline?.hooks?.PreToolUse ?? [])) {
+  // Download global hook scripts (SessionStart + PreToolUse)
+  for (const entry of [
+    ...(baseline?.hooks?.SessionStart ?? []),
+    ...(baseline?.hooks?.PreToolUse ?? []),
+  ]) {
     const s = filename(entry.script);
     cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
   }
@@ -111,7 +114,11 @@ const buildSessionStartHooks = (baseline, clanConfig, clanName) => {
     cmds.push(hookCmd(`gcloud storage cp ${GCS}/config/${clanName}/conventions.md "${CD}/.agent/conventions.md" 2>/dev/null || true`));
   }
 
-  // Run clan SessionStart scripts after everything is downloaded
+  // Run global SessionStart scripts, then clan SessionStart scripts
+  for (const entry of (baseline?.hooks?.SessionStart ?? [])) {
+    const s = filename(entry.script);
+    cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}" || true`));
+  }
   if (clanName) {
     for (const entry of (clanConfig?.hooks?.SessionStart ?? [])) {
       const s = filename(entry.script);
@@ -147,10 +154,12 @@ export const buildSettingsJson = (baseline, clanConfig, clanName) => {
   };
 };
 
-const uploadFiles = async (localDir, gcsPrefix, dryRun) => {
-  if (!existsSync(localDir)) return;
-  const files = fg.sync('**/*', { cwd: localDir, onlyFiles: true });
-  for (const file of files) {
+const syncFiles = async (localDir, gcsPrefix, dryRun) => {
+  const localFiles = existsSync(localDir)
+    ? fg.sync('**/*', { cwd: localDir, onlyFiles: true })
+    : [];
+
+  for (const file of localFiles) {
     const localPath = path.join(localDir, file);
     const gcsPath = `${gcsPrefix}/${file}`;
     if (dryRun) {
@@ -158,6 +167,33 @@ const uploadFiles = async (localDir, gcsPrefix, dryRun) => {
     } else {
       await upload(localPath, gcsPath);
       core.info(`Uploaded: gs://${GCS_BUCKET}/${gcsPath}`);
+    }
+  }
+
+  // Delete GCS objects no longer present locally (non-recursive — subdirs owned by other clans are untouched)
+  let gcsFiles;
+  try {
+    const lsOut = await execGcloud(['storage', 'ls', `${GCS}/${gcsPrefix}/`], 'gcloud', true);
+    gcsFiles = (lsOut || '')
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.startsWith('gs://') && !l.endsWith('/'))
+      .map((l) => l.replace(`gs://${GCS_BUCKET}/${gcsPrefix}/`, ''))
+      .filter(Boolean);
+  } catch {
+    return; // prefix not in GCS yet — nothing to delete
+  }
+
+  const localSet = new Set(localFiles);
+  for (const f of gcsFiles) {
+    if (!localSet.has(f)) {
+      const gcsPath = `${gcsPrefix}/${f}`;
+      if (dryRun) {
+        core.info(`[dry-run] Would delete gs://${GCS_BUCKET}/${gcsPath}`);
+      } else {
+        await execGcloud(['storage', 'rm', `${GCS}/${gcsPath}`], 'gcloud', true);
+        core.info(`Deleted: gs://${GCS_BUCKET}/${gcsPath}`);
+      }
     }
   }
 };
@@ -186,8 +222,8 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
     const globalConfig = load(readFileSync(globalYamlPath, 'utf8'));
     validateSettings('global/settings.yaml', globalConfig, globalSchema);
 
-    await uploadFiles(path.join(registryRoot, 'global', 'hooks'), 'hooks', dryRun);
-    await uploadFiles(path.join(registryRoot, 'global', 'commands'), 'commands', dryRun);
+    await syncFiles(path.join(registryRoot, 'global', 'hooks'), 'hooks', dryRun);
+    await syncFiles(path.join(registryRoot, 'global', 'commands'), 'commands', dryRun);
 
     // Upload raw global YAML for clan repos that need to fetch the baseline
     if (dryRun) {
@@ -319,8 +355,8 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
     }
   }
 
-  await uploadFiles(path.join(registryRoot, 'config', 'hooks'), `hooks/${clanName}`, dryRun);
-  await uploadFiles(path.join(registryRoot, 'config', 'commands'), `commands/${clanName}`, dryRun);
+  await syncFiles(path.join(registryRoot, 'config', 'hooks'), `hooks/${clanName}`, dryRun);
+  await syncFiles(path.join(registryRoot, 'config', 'commands'), `commands/${clanName}`, dryRun);
 
   const conventionsPath = path.join(registryRoot, 'config', 'conventions.md');
   if (existsSync(conventionsPath)) {
