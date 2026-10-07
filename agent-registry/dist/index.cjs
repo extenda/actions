@@ -101803,12 +101803,17 @@ ge cp ${GCS}/config/settings.json "${CD}/.claude/settings.json" 2>/dev/null || t
     cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
   }
   if (clanName) {
+    const globalHookNames = new Set([
+      ...baseline?.hooks?.SessionStart ?? [],
+      ...baseline?.hooks?.PreToolUse ?? []
+    ].map((e) => filename(e.script)));
     const clanHookEntries = [
       ...clanConfig?.hooks?.SessionStart ?? [],
       ...clanConfig?.hooks?.PreToolUse ?? []
     ];
     for (const entry of clanHookEntries) {
       const s = filename(entry.script);
+      if (globalHookNames.has(s)) continue;
       cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${clanName}/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
     }
   }
@@ -101823,8 +101828,10 @@ e rm -f "$tmp"; fi`
     cmds.push(hookCmd(`gcloud storage cp ${GCS}/commands/${f3} "${CD}/.claude/commands/${f3}" 2>/dev/null || true`));
   }
   if (clanName) {
+    const globalCommandNames = new Set((baseline?.commands ?? []).map((c3) => filename(c3)));
     for (const c3 of clanConfig?.commands ?? []) {
       const f3 = filename(c3);
+      if (globalCommandNames.has(f3)) continue;
       cmds.push(hookCmd(`gcloud storage cp ${GCS}/commands/${clanName}/${f3} "${CD}/.claude/commands/${f3}" 2>/dev/null \
 || true`));
     }
@@ -101838,8 +101845,10 @@ ull || true`));
     cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}" || true`));
   }
   if (clanName) {
+    const globalSessionNames = new Set((baseline?.hooks?.SessionStart ?? []).map((e) => filename(e.script)));
     for (const entry of clanConfig?.hooks?.SessionStart ?? []) {
       const s = filename(entry.script);
+      if (globalSessionNames.has(s)) continue;
       cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}" || true`));
     }
   }

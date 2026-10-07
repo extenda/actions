@@ -73,14 +73,20 @@ const buildSessionStartHooks = (baseline, clanConfig, clanName) => {
     cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
   }
 
-  // Download clan hook scripts (SessionStart + PreToolUse)
+  // Download clan hook scripts (SessionStart + PreToolUse) — global filenames take precedence
   if (clanName) {
+    const globalHookNames = new Set([
+      ...(baseline?.hooks?.SessionStart ?? []),
+      ...(baseline?.hooks?.PreToolUse ?? []),
+    ].map((e) => filename(e.script)));
+
     const clanHookEntries = [
       ...(clanConfig?.hooks?.SessionStart ?? []),
       ...(clanConfig?.hooks?.PreToolUse ?? []),
     ];
     for (const entry of clanHookEntries) {
       const s = filename(entry.script);
+      if (globalHookNames.has(s)) continue;
       cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${clanName}/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
     }
   }
@@ -101,10 +107,12 @@ const buildSessionStartHooks = (baseline, clanConfig, clanName) => {
     cmds.push(hookCmd(`gcloud storage cp ${GCS}/commands/${f} "${CD}/.claude/commands/${f}" 2>/dev/null || true`));
   }
 
-  // Download clan commands
+  // Download clan commands — global filenames take precedence
   if (clanName) {
+    const globalCommandNames = new Set((baseline?.commands ?? []).map((c) => filename(c)));
     for (const c of (clanConfig?.commands ?? [])) {
       const f = filename(c);
+      if (globalCommandNames.has(f)) continue;
       cmds.push(hookCmd(`gcloud storage cp ${GCS}/commands/${clanName}/${f} "${CD}/.claude/commands/${f}" 2>/dev/null || true`));
     }
   }
@@ -120,8 +128,10 @@ const buildSessionStartHooks = (baseline, clanConfig, clanName) => {
     cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}" || true`));
   }
   if (clanName) {
+    const globalSessionNames = new Set((baseline?.hooks?.SessionStart ?? []).map((e) => filename(e.script)));
     for (const entry of (clanConfig?.hooks?.SessionStart ?? [])) {
       const s = filename(entry.script);
+      if (globalSessionNames.has(s)) continue;
       cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}" || true`));
     }
   }

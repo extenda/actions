@@ -167,6 +167,32 @@ describe('buildSettingsJson', () => {
     expect(result.hooks.PreToolUse[0].hooks[0].command).toMatch(/\[ -x .* \] && .* \|\| exit 0/);
   });
 
+  test('clan hook with same filename as global SessionStart hook is not downloaded or run again', () => {
+    const base = { ...baseline, hooks: { ...baseline.hooks, SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] } };
+    const clan = {
+      hooks: {
+        SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }], // same filename as global
+        PreToolUse: [{ matcher: 'Bash', script: 'hooks/clan-lint.sh' }],
+      },
+    };
+    const cmds = sessionCommands(buildSettingsJson(base, clan, 'retail'));
+    // ensure-pre-commit.sh must be downloaded exactly once (from global hooks/, not retail/)
+    const downloads = cmds.filter((c) => c.includes('gcloud storage cp') && c.includes('ensure-pre-commit.sh'));
+    expect(downloads).toHaveLength(1);
+    expect(downloads[0]).not.toContain('retail/');
+    // And run exactly once (global SessionStart, clan entry skipped)
+    const runs = cmds.filter((c) => c.includes('[ -x') && c.includes('ensure-pre-commit.sh'));
+    expect(runs).toHaveLength(1);
+  });
+
+  test('clan command with same filename as global command is not downloaded', () => {
+    const clan = { commands: ['commands/init.md'] }; // same filename as global
+    const cmds = sessionCommands(buildSettingsJson(baseline, clan, 'retail'));
+    const initDownloads = cmds.filter((c) => c.includes('init.md'));
+    expect(initDownloads).toHaveLength(1);
+    expect(initDownloads[0]).not.toContain('retail/');
+  });
+
   test('PreToolUse entries include matcher field', () => {
     const result = buildSettingsJson(baseline, {}, 'retail');
     expect(result.hooks.PreToolUse[0].matcher).toBe('Bash');
