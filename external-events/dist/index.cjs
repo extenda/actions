@@ -120220,7 +120220,8 @@ var schema = import_joi.default.object({
           "entity-id": import_joi.default.string(),
           "entity-ids": import_joi.default.string(),
           "business-unit-id": import_joi.default.string(),
-          "business-unit-group-id": import_joi.default.string()
+          "business-unit-group-id": import_joi.default.string(),
+          "http-method": import_joi.default.string()
         }).required(),
         "additional-properties": import_joi.default.object({
           scope: import_joi.default.string().required(),

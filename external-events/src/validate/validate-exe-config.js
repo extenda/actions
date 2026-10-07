@@ -49,6 +49,7 @@ const schema = joi.object({
               'entity-ids': joi.string(),
               'business-unit-id': joi.string(),
               'business-unit-group-id': joi.string(),
+              'http-method': joi.string(),
             })
             .required(),
           'additional-properties': joi.object({
