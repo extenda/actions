@@ -236,6 +236,18 @@ describe('registerSkill', () => {
         .rejects.toThrow("SKILL.md for 'my-skill' has invalid YAML frontmatter");
     });
 
+    test('counts emoji as one char each against the limit', async () => {
+      readFileSync.mockReturnValue(`---\nname: My Skill\ndescription: ${'😀'.repeat(1024)}\n---\n\nBody\n`);
+      await registerSkill('my-skill', '/SKILL.md', true);
+      expect(core.info).toHaveBeenCalledWith('[dry-run] Would register skill: private-my-skill');
+    });
+
+    test('throws when emoji description exceeds 1024 chars', async () => {
+      readFileSync.mockReturnValue(`---\nname: My Skill\ndescription: ${'😀'.repeat(1025)}\n---\n\nBody\n`);
+      await expect(registerSkill('my-skill', '/SKILL.md', true))
+        .rejects.toThrow('description is 1025 chars, max is 1024');
+    });
+
     test('counts the full multi-line description against the limit', async () => {
       const lines = Array.from({ length: 11 }, () => `  ${'a'.repeat(99)}`).join('\n');
       readFileSync.mockReturnValue(`---\nname: My Skill\ndescription: >\n${lines}\n---\n\nBody\n`);

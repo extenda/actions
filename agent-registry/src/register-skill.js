@@ -101,8 +101,10 @@ const registerSkill = async (skillId, skillFilePath, dryRun, clan) => {
   const { name: displayName, description } = meta;
   if (!displayName) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: name`);
   if (!description) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: description`);
-  if (description.length > MAX_DESCRIPTION_LENGTH) {
-    throw new Error(`SKILL.md for '${skillId}': description is ${description.length} chars, max is ${MAX_DESCRIPTION_LENGTH}`);
+  // Count code points, not UTF-16 units, so emoji and other astral characters count as one.
+  const descriptionLength = [...description].length;
+  if (descriptionLength > MAX_DESCRIPTION_LENGTH) {
+    throw new Error(`SKILL.md for '${skillId}': description is ${descriptionLength} chars, max is ${MAX_DESCRIPTION_LENGTH}`);
   }
   const body = skillContent.replace(/^---\n[\s\S]*?\n---\n?/, '').trim();
   if (!body) throw new Error(`SKILL.md for '${skillId}' must have instructions after the frontmatter`);

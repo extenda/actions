@@ -101525,8 +101525,9 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
   const { name: displayName, description } = meta;
   if (!displayName) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: name`);
   if (!description) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: description`);
-  if (description.length > MAX_DESCRIPTION_LENGTH) {
-    throw new Error(`SKILL.md for '${skillId}': description is ${description.length} chars, max is ${MAX_DESCRIPTION_LENGTH}`);
+  const descriptionLength = [...description].length;
+  if (descriptionLength > MAX_DESCRIPTION_LENGTH) {
+    throw new Error(`SKILL.md for '${skillId}': description is ${descriptionLength} chars, max is ${MAX_DESCRIPTION_LENGTH}`);
   }
   const body2 = skillContent.replace(/^---\n[\s\S]*?\n---\n?/, "").trim();
   if (!body2) throw new Error(`SKILL.md for '${skillId}' must have instructions after the frontmatter`);
