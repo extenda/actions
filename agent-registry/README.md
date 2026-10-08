@@ -148,7 +148,7 @@ You are a dependency upgrade specialist...
 | Frontmatter field | Required | Description |
 |-------------------|----------|-------------|
 | `name` | yes | Display name shown in the registry. |
-| `description` | yes | Short description of what the skill does. |
+| `description` | yes | Short description of what the skill does. Max 1024 characters (checked in dry-run too). Frontmatter is parsed as YAML, so quote values containing `: ` or use `>` for multi-line text. |
 | `metadata` | no | Arbitrary key/value pairs (e.g. `category`). |
 
 The skill is registered as `private-<skill-id>` in the `eu` location. The entire `SKILL.md` file is zipped and uploaded as the skill payload.
