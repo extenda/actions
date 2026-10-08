@@ -52456,7 +52456,7 @@ var ToolRunner = class extends events.EventEmitter {
     });
   }
 };
-function argStringToArray(argString) {
+function argStringToArray(argString2) {
   const args = [];
   let inQuotes = false;
   let escaped = false;
@@ -52469,8 +52469,8 @@ function argStringToArray(argString) {
     escaped = false;
   }
   __name(append2, "append");
-  for (let i2 = 0; i2 < argString.length; i2++) {
-    const c3 = argString.charAt(i2);
+  for (let i2 = 0; i2 < argString2.length; i2++) {
+    const c3 = argString2.charAt(i2);
     if (c3 === '"') {
       if (!escaped) {
         inQuotes = !inQuotes;
@@ -101619,6 +101619,11 @@ var global_settings_schema_default = {
           description: "Global pre-tool-use hook scripts.",
           type: "array",
           items: { $ref: "#/definitions/MatchedHookEntry" }
+        },
+        Stop: {
+          description: "Global stop scripts, run when Claude finishes a turn. Exit code 2 blocks the stop.",
+          type: "array",
+          items: { $ref: "#/definitions/HookEntry" }
         }
       }
     },
@@ -101627,10 +101632,21 @@ var global_settings_schema_default = {
       required: ["script"],
       additionalProperties: false,
       properties: {
+        args: {
+          description: "Optional arguments passed to the script. Shell-quoted in the generated command.",
+          type: "array",
+          items: { type: "string" }
+        },
+        timeout: {
+          description: "Optional hook timeout in seconds.",
+          type: "integer",
+          minimum: 1
+        },
         script: {
-          description: "Path to hook script relative to agent-registry/global/. Must end in .sh",
+          description: "Path to hook script relative to agent-registry/global/. Must be a direct child of hooks/ (no sub\
+directories) and end in .sh",
           type: "string",
-          pattern: "^hooks/.+\\.sh$"
+          pattern: "^hooks/[^/]+\\.sh$"
         }
       }
     },
@@ -101652,10 +101668,21 @@ var global_settings_schema_default = {
           type: "string",
           minLength: 1
         },
+        args: {
+          description: "Optional arguments passed to the script. Shell-quoted in the generated command.",
+          type: "array",
+          items: { type: "string" }
+        },
+        timeout: {
+          description: "Optional hook timeout in seconds.",
+          type: "integer",
+          minimum: 1
+        },
         script: {
-          description: "Path to hook script relative to agent-registry/global/. Must end in .sh",
+          description: "Path to hook script relative to agent-registry/global/. Must be a direct child of hooks/ (no sub\
+directories) and end in .sh",
           type: "string",
-          pattern: "^hooks/.+\\.sh$"
+          pattern: "^hooks/[^/]+\\.sh$"
         }
       }
     }
@@ -101701,6 +101728,11 @@ var clan_settings_schema_default = {
           description: "Clan pre-tool-use scripts. Must exist under agent-registry/config/hooks/",
           type: "array",
           items: { $ref: "#/definitions/MatchedHookEntry" }
+        },
+        Stop: {
+          description: "Clan stop scripts, run when Claude finishes a turn. Exit code 2 blocks the stop.",
+          type: "array",
+          items: { $ref: "#/definitions/HookEntry" }
         }
       }
     },
@@ -101717,10 +101749,21 @@ var clan_settings_schema_default = {
       required: ["script"],
       additionalProperties: false,
       properties: {
+        args: {
+          description: "Optional arguments passed to the script. Shell-quoted in the generated command.",
+          type: "array",
+          items: { type: "string" }
+        },
+        timeout: {
+          description: "Optional hook timeout in seconds.",
+          type: "integer",
+          minimum: 1
+        },
         script: {
-          description: "Path to hook script relative to agent-registry/config/. Must end in .sh",
+          description: "Path to hook script relative to agent-registry/config/. Must be a direct child of hooks/ (no sub\
+directories) and end in .sh",
           type: "string",
-          pattern: "^hooks/.+\\.sh$"
+          pattern: "^hooks/[^/]+\\.sh$"
         }
       }
     },
@@ -101734,10 +101777,21 @@ var clan_settings_schema_default = {
           type: "string",
           minLength: 1
         },
+        args: {
+          description: "Optional arguments passed to the script. Shell-quoted in the generated command.",
+          type: "array",
+          items: { type: "string" }
+        },
+        timeout: {
+          description: "Optional hook timeout in seconds.",
+          type: "integer",
+          minimum: 1
+        },
         script: {
-          description: "Path to hook script relative to agent-registry/config/. Must end in .sh",
+          description: "Path to hook script relative to agent-registry/config/. Must be a direct child of hooks/ (no sub\
+directories) and end in .sh",
           type: "string",
-          pattern: "^hooks/.+\\.sh$"
+          pattern: "^hooks/[^/]+\\.sh$"
         }
       }
     }
@@ -101772,9 +101826,30 @@ var fetchGlobalBaseline = /* @__PURE__ */ __name(async () => {
   }
 }, "fetchGlobalBaseline");
 var filename = /* @__PURE__ */ __name((scriptPath) => import_node_path7.default.basename(scriptPath), "filename");
-var gcpHook = /* @__PURE__ */ __name((script) => `[ -x "${CD}/.claude/hooks/${script}" ] && "${CD}/.claude/hooks/${script}\
-" || exit 0`, "gcpHook");
-var hookCmd = /* @__PURE__ */ __name((command) => ({ type: "command", command }), "hookCmd");
+var SHELL_SAFE_ARG = /^[A-Za-z0-9_@%+=:,./-]+$/;
+var shellQuote = /* @__PURE__ */ __name((arg) => {
+  const str = String(arg);
+  if (SHELL_SAFE_ARG.test(str)) return str;
+  const escaped = str.replaceAll("'", String.raw`'\''`);
+  return `'${escaped}'`;
+}, "shellQuote");
+var argString = /* @__PURE__ */ __name((entry) => (entry.args ?? []).map(shellQuote).map((a) => ` ${a}`).join(""), "argS\
+tring");
+var gcpHook = /* @__PURE__ */ __name((entry) => {
+  const script = `"${CD}/.claude/hooks/${filename(entry.script)}"`;
+  return `[ -x ${script} ] || exit 0; ${script}${argString(entry)}`;
+}, "gcpHook");
+var hookCmd = /* @__PURE__ */ __name((command, timeout) => ({
+  type: "command",
+  command,
+  ...timeout ? { timeout } : {}
+}), "hookCmd");
+var hookEntryCmd = /* @__PURE__ */ __name((entry) => hookCmd(gcpHook(entry), entry.timeout), "hookEntryCmd");
+var allHookEntries = /* @__PURE__ */ __name((config) => [
+  ...config?.hooks?.SessionStart ?? [],
+  ...config?.hooks?.PreToolUse ?? [],
+  ...config?.hooks?.Stop ?? []
+], "allHookEntries");
 var buildSessionStartHooks = /* @__PURE__ */ __name((baseline, clanConfig, clanName) => {
   const cmds = [];
   cmds.push(hookCmd(`mkdir -p "${CD}/.claude/hooks" "${CD}/.claude/commands"`));
@@ -101789,25 +101864,20 @@ CLAN" ] && gcloud storage cp ${GCS}/config/$CLAN/settings.json "${CD}/.claude/se
 ge cp ${GCS}/config/settings.json "${CD}/.claude/settings.json" 2>/dev/null || true`
     ));
   }
-  for (const entry of [
-    ...baseline?.hooks?.SessionStart ?? [],
-    ...baseline?.hooks?.PreToolUse ?? []
-  ]) {
+  const downloadedGlobal = /* @__PURE__ */ new Set();
+  for (const entry of allHookEntries(baseline)) {
     const s = filename(entry.script);
+    if (downloadedGlobal.has(s)) continue;
+    downloadedGlobal.add(s);
     cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
   }
   if (clanName) {
-    const globalHookNames = new Set([
-      ...baseline?.hooks?.SessionStart ?? [],
-      ...baseline?.hooks?.PreToolUse ?? []
-    ].map((e) => filename(e.script)));
-    const clanHookEntries = [
-      ...clanConfig?.hooks?.SessionStart ?? [],
-      ...clanConfig?.hooks?.PreToolUse ?? []
-    ];
-    for (const entry of clanHookEntries) {
+    const globalHookNames = new Set(allHookEntries(baseline).map((e) => filename(e.script)));
+    const downloadedClan = /* @__PURE__ */ new Set();
+    for (const entry of allHookEntries(clanConfig)) {
       const s = filename(entry.script);
-      if (globalHookNames.has(s)) continue;
+      if (globalHookNames.has(s) || downloadedClan.has(s)) continue;
+      downloadedClan.add(s);
       cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${clanName}/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
     }
   }
@@ -101836,14 +101906,16 @@ ull || true`));
   }
   for (const entry of baseline?.hooks?.SessionStart ?? []) {
     const s = filename(entry.script);
-    cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}" || true`));
+    cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}"${argString(entry)} || true`, entry.
+    timeout));
   }
   if (clanName) {
     const globalSessionNames = new Set((baseline?.hooks?.SessionStart ?? []).map((e) => filename(e.script)));
     for (const entry of clanConfig?.hooks?.SessionStart ?? []) {
       const s = filename(entry.script);
       if (globalSessionNames.has(s)) continue;
-      cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}" || true`));
+      cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}"${argString(entry)} || true`, entry.
+      timeout));
     }
   }
   return cmds;
@@ -101855,18 +101927,23 @@ var buildSettingsJson = /* @__PURE__ */ __name((baseline, clanConfig, clanName) 
   const preToolUse = [
     ...(baseline?.hooks?.PreToolUse ?? []).map((e) => ({
       matcher: e.matcher,
-      hooks: [{ type: "command", command: gcpHook(filename(e.script)) }]
+      hooks: [hookEntryCmd(e)]
     })),
     ...(clanConfig?.hooks?.PreToolUse ?? []).map((e) => ({
       matcher: e.matcher,
-      hooks: [{ type: "command", command: gcpHook(filename(e.script)) }]
+      hooks: [hookEntryCmd(e)]
     }))
   ];
+  const stop = [
+    ...baseline?.hooks?.Stop ?? [],
+    ...clanConfig?.hooks?.Stop ?? []
+  ].map((e) => ({ hooks: [hookEntryCmd(e)] }));
   return {
     permissions: { allow: allPerms },
     hooks: {
       SessionStart: [{ hooks: buildSessionStartHooks(baseline, clanConfig, clanName) }],
-      ...preToolUse.length ? { PreToolUse: preToolUse } : {}
+      ...preToolUse.length ? { PreToolUse: preToolUse } : {},
+      ...stop.length ? { Stop: stop } : {}
     }
   };
 }, "buildSettingsJson");

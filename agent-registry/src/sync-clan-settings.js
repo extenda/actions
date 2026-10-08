@@ -38,10 +38,40 @@ const fetchGlobalBaseline = async () => {
 
 const filename = (scriptPath) => path.basename(scriptPath);
 
-const gcpHook = (script) =>
-  `[ -x "${CD}/.claude/hooks/${script}" ] && "${CD}/.claude/hooks/${script}" || exit 0`;
+// Quote an argument for POSIX sh. Plain tokens such as `--baseline` stay bare.
+const SHELL_SAFE_ARG = /^[A-Za-z0-9_@%+=:,./-]+$/;
 
-const hookCmd = (command) => ({ type: 'command', command });
+const shellQuote = (arg) => {
+  const str = String(arg);
+  if (SHELL_SAFE_ARG.test(str)) return str;
+  const escaped = str.replaceAll("'", String.raw`'\''`);
+  return `'${escaped}'`;
+};
+
+const argString = (entry) => (entry.args ?? []).map(shellQuote).map((a) => ` ${a}`).join('');
+
+// Runs the hook script if it is executable. The script is the last command so
+// its exit code propagates; exit 2 blocks the tool call. A missing or
+// non-executable script is a no-op.
+const gcpHook = (entry) => {
+  const script = `"${CD}/.claude/hooks/${filename(entry.script)}"`;
+  return `[ -x ${script} ] || exit 0; ${script}${argString(entry)}`;
+};
+
+const hookCmd = (command, timeout) => ({
+  type: 'command',
+  command,
+  ...(timeout ? { timeout } : {}),
+});
+
+const hookEntryCmd = (entry) => hookCmd(gcpHook(entry), entry.timeout);
+
+// Every hook entry across all events, used to decide which scripts to download.
+const allHookEntries = (config) => [
+  ...(config?.hooks?.SessionStart ?? []),
+  ...(config?.hooks?.PreToolUse ?? []),
+  ...(config?.hooks?.Stop ?? []),
+];
 
 const buildSessionStartHooks = (baseline, clanConfig, clanName) => {
   const cmds = [];
@@ -64,29 +94,25 @@ const buildSessionStartHooks = (baseline, clanConfig, clanName) => {
     ));
   }
 
-  // Download global hook scripts (SessionStart + PreToolUse)
-  for (const entry of [
-    ...(baseline?.hooks?.SessionStart ?? []),
-    ...(baseline?.hooks?.PreToolUse ?? []),
-  ]) {
+  // Download global hook scripts (SessionStart + PreToolUse + Stop). A script
+  // used by several events is downloaded once.
+  const downloadedGlobal = new Set();
+  for (const entry of allHookEntries(baseline)) {
     const s = filename(entry.script);
+    if (downloadedGlobal.has(s)) continue;
+    downloadedGlobal.add(s);
     cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
   }
 
-  // Download clan hook scripts (SessionStart + PreToolUse) — global filenames take precedence
+  // Download clan hook scripts (SessionStart + PreToolUse + Stop) — global filenames take precedence
   if (clanName) {
-    const globalHookNames = new Set([
-      ...(baseline?.hooks?.SessionStart ?? []),
-      ...(baseline?.hooks?.PreToolUse ?? []),
-    ].map((e) => filename(e.script)));
+    const globalHookNames = new Set(allHookEntries(baseline).map((e) => filename(e.script)));
 
-    const clanHookEntries = [
-      ...(clanConfig?.hooks?.SessionStart ?? []),
-      ...(clanConfig?.hooks?.PreToolUse ?? []),
-    ];
-    for (const entry of clanHookEntries) {
+    const downloadedClan = new Set();
+    for (const entry of allHookEntries(clanConfig)) {
       const s = filename(entry.script);
-      if (globalHookNames.has(s)) continue;
+      if (globalHookNames.has(s) || downloadedClan.has(s)) continue;
+      downloadedClan.add(s);
       cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${clanName}/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
     }
   }
@@ -125,14 +151,14 @@ const buildSessionStartHooks = (baseline, clanConfig, clanName) => {
   // Run global SessionStart scripts, then clan SessionStart scripts
   for (const entry of (baseline?.hooks?.SessionStart ?? [])) {
     const s = filename(entry.script);
-    cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}" || true`));
+    cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}"${argString(entry)} || true`, entry.timeout));
   }
   if (clanName) {
     const globalSessionNames = new Set((baseline?.hooks?.SessionStart ?? []).map((e) => filename(e.script)));
     for (const entry of (clanConfig?.hooks?.SessionStart ?? [])) {
       const s = filename(entry.script);
       if (globalSessionNames.has(s)) continue;
-      cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}" || true`));
+      cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}"${argString(entry)} || true`, entry.timeout));
     }
   }
 
@@ -147,19 +173,25 @@ export const buildSettingsJson = (baseline, clanConfig, clanName) => {
   const preToolUse = [
     ...(baseline?.hooks?.PreToolUse ?? []).map((e) => ({
       matcher: e.matcher,
-      hooks: [{ type: 'command', command: gcpHook(filename(e.script)) }],
+      hooks: [hookEntryCmd(e)],
     })),
     ...(clanConfig?.hooks?.PreToolUse ?? []).map((e) => ({
       matcher: e.matcher,
-      hooks: [{ type: 'command', command: gcpHook(filename(e.script)) }],
+      hooks: [hookEntryCmd(e)],
     })),
   ];
+
+  const stop = [
+    ...(baseline?.hooks?.Stop ?? []),
+    ...(clanConfig?.hooks?.Stop ?? []),
+  ].map((e) => ({ hooks: [hookEntryCmd(e)] }));
 
   return {
     permissions: { allow: allPerms },
     hooks: {
       SessionStart: [{ hooks: buildSessionStartHooks(baseline, clanConfig, clanName) }],
       ...(preToolUse.length ? { PreToolUse: preToolUse } : {}),
+      ...(stop.length ? { Stop: stop } : {}),
     },
   };
 };

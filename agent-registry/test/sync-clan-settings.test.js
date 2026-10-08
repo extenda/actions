@@ -17,6 +17,9 @@ import { readFileSync, existsSync, writeFileSync, unlinkSync } from 'node:fs';
 import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 import { upload } from '../src/upload-gcs.js';
 
+import { validate } from 'jsonschema';
+import globalSchema from '../src/global-settings.schema.json';
+import clanSchema from '../src/clan-settings.schema.json';
 import { buildSettingsJson, syncClanSettings } from '../src/sync-clan-settings.js';
 
 // ── buildSettingsJson ────────────────────────────────────────────────────────
@@ -162,9 +165,80 @@ describe('buildSettingsJson', () => {
     expect(cmds.some((c) => c.includes('commands/retail/review-pr.md'))).toBe(true);
   });
 
-  test('PreToolUse hooks use [ -x ] guard pattern', () => {
+  test('PreToolUse hooks use [ -x ] guard pattern that propagates the exit code', () => {
     const result = buildSettingsJson(baseline, {}, 'retail');
-    expect(result.hooks.PreToolUse[0].hooks[0].command).toMatch(/\[ -x .* \] && .* \|\| exit 0/);
+    const command = result.hooks.PreToolUse[0].hooks[0].command;
+    expect(command).toBe(
+      '[ -x "${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.sh" ] || exit 0;' +
+        ' "${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.sh"',
+    );
+    expect(command).not.toMatch(/\|\| exit 0$/);
+  });
+
+  test('hooks without args or timeout emit neither field', () => {
+    const hook = buildSettingsJson(baseline, {}, 'retail').hooks.PreToolUse[0].hooks[0];
+    expect(hook).toEqual({ type: 'command', command: expect.any(String) });
+  });
+
+  test('omits Stop when no Stop hooks are defined', () => {
+    expect(buildSettingsJson(baseline, {}, 'retail').hooks.Stop).toBeUndefined();
+  });
+
+  describe('Stop, args and timeout', () => {
+    const withStop = {
+      ...baseline,
+      hooks: {
+        SessionStart: [{ script: 'hooks/verify-on-stop.sh', args: ['--baseline'] }],
+        PreToolUse: [
+          { matcher: 'Write|Edit|MultiEdit|NotebookEdit|Bash', script: 'hooks/test-guard.sh' },
+        ],
+        Stop: [{ script: 'hooks/verify-on-stop.sh', timeout: 900 }],
+      },
+    };
+
+    test('emits Stop entries with timeout and no matcher', () => {
+      const result = buildSettingsJson(withStop, {}, 'retail');
+      expect(result.hooks.Stop).toEqual([
+        {
+          hooks: [
+            {
+              type: 'command',
+              command:
+                '[ -x "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh" ] || exit 0;' +
+                ' "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh"',
+              timeout: 900,
+            },
+          ],
+        },
+      ]);
+    });
+
+    test('accepts a compound matcher for PreToolUse', () => {
+      const result = buildSettingsJson(withStop, {}, 'retail');
+      expect(result.hooks.PreToolUse[0].matcher).toBe('Write|Edit|MultiEdit|NotebookEdit|Bash');
+    });
+
+    test('passes args to SessionStart scripts and downloads a shared script once', () => {
+      const cmds = sessionCommands(buildSettingsJson(withStop, {}, 'retail'));
+      expect(cmds.filter((c) => c.includes('gcloud storage cp') && c.includes('hooks/verify-on-stop.sh'))).toHaveLength(1);
+      expect(cmds).toContain(
+        '[ -x "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh" ] && "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh" --baseline || true',
+      );
+    });
+
+    test('shell-quotes arguments with unsafe characters', () => {
+      const cfg = { hooks: { Stop: [{ script: 'hooks/x.sh', args: ['a b', "it's", '$(rm -rf /)', 'plain-1.2'] }] } };
+      const command = buildSettingsJson(cfg, {}, 'retail').hooks.Stop[0].hooks[0].command;
+      expect(command).toContain(`x.sh" 'a b' 'it'\\''s' '$(rm -rf /)' plain-1.2`);
+    });
+
+    test('clan Stop hooks append after global and are downloaded', () => {
+      const clan = { hooks: { Stop: [{ script: 'hooks/clan-stop.sh' }] } };
+      const result = buildSettingsJson(withStop, clan, 'retail');
+      expect(result.hooks.Stop).toHaveLength(2);
+      expect(result.hooks.Stop[1].hooks[0].command).toContain('clan-stop.sh');
+      expect(sessionCommands(result).some((c) => c.includes('hooks/retail/clan-stop.sh'))).toBe(true);
+    });
   });
 
   test('clan hook with same filename as global SessionStart hook is not downloaded or run again', () => {
@@ -509,5 +583,60 @@ describe('syncClanSettings', () => {
       await syncClanSettings('/root/agent-registry', [], false, '');
       expect(upload).not.toHaveBeenCalled();
     });
+  });
+});
+
+// ── hook script paths ────────────────────────────────────────────────────────
+
+describe('hook script paths', () => {
+  // Scripts are uploaded to hooks/<name> and downloaded by file name only, so a
+  // nested path such as hooks/sub/foo.sh would be uploaded to one location and
+  // downloaded from another. The schemas therefore only accept flat paths.
+  const withHooks = (hooks) => ({ hooks });
+
+  test.each([
+    ['global', globalSchema],
+    ['clan', clanSchema],
+  ])(
+    '%s schema rejects nested script paths in every event',
+    (_name, schema) => {
+      const nested = 'hooks/sub/foo.sh';
+      for (const hooks of [
+        { SessionStart: [{ script: nested }] },
+        { PreToolUse: [{ matcher: 'Bash', script: nested }] },
+        { Stop: [{ script: nested }] },
+      ]) {
+        expect(validate(withHooks(hooks), schema).valid).toBe(false);
+      }
+    },
+  );
+
+  test.each([
+    ['global', globalSchema],
+    ['clan', clanSchema],
+  ])('%s schema accepts flat script paths', (_name, schema) => {
+    const hooks = {
+      SessionStart: [{ script: 'hooks/a.sh', args: ['--x'] }],
+      PreToolUse: [{ matcher: 'Bash', script: 'hooks/b.sh' }],
+      Stop: [{ script: 'hooks/c.sh', timeout: 10 }],
+    };
+    expect(validate(withHooks(hooks), schema).valid).toBe(true);
+  });
+
+  test('a clan script with the same file name as a global one is not downloaded', () => {
+    const baseline = { hooks: { Stop: [{ script: 'hooks/same.sh' }] } };
+    const clan = { hooks: { Stop: [{ script: 'hooks/same.sh' }] } };
+    const cmds = buildSettingsJson(
+      baseline,
+      clan,
+      'retail',
+    ).hooks.SessionStart[0].hooks.map((h) => h.command);
+    expect(
+      cmds.filter(
+        (c) => c.includes('same.sh') && c.includes('gcloud storage cp'),
+      ),
+    ).toEqual([
+      'gcloud storage cp gs://extenda-agent-artifacts/hooks/same.sh "${CLAUDE_PROJECT_DIR}/.claude/hooks/same.sh" 2>/dev/null || true',
+    ]);
   });
 });

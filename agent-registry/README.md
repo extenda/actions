@@ -210,6 +210,10 @@ hooks:
   PreToolUse:
     - matcher: "Bash"
       script: hooks/my-guard.sh           # additional PreToolUse hooks
+  Stop:
+    - script: hooks/my-verify.sh          # runs when Claude finishes a turn; exit 2 blocks the stop
+      args: ["--strict"]                  # optional, shell-quoted into the command
+      timeout: 600                        # optional, seconds
 
 commands:
   - commands/platform.md    # clan-specific slash commands
@@ -220,9 +224,14 @@ commands:
 | `permissions.allow` | no | Additional permission strings merged with the global set. |
 | `hooks.SessionStart` | no | Scripts that run once per session start, after all files are downloaded. |
 | `hooks.PreToolUse` | no | Additional PreToolUse hooks merged with the global set. |
+| `hooks.Stop` | no | Hooks that run when Claude finishes a turn. Exit code 2 blocks the stop. |
 | `commands` | no | Additional slash-command files added alongside global commands. |
 
 Hook scripts go in `agent-registry/config/hooks/` and slash-command files in `agent-registry/config/commands/`.
+
+Every hook entry (in any event, global or clan) accepts two optional fields: `args` (list of strings, shell-quoted into the generated command) and `timeout` (seconds). A hook runs as `[ -x script ] || exit 0; script args`, so a missing script is a no-op and the script's own exit code is propagated: exit 2 blocks the tool call (PreToolUse) or the stop (Stop). SessionStart scripts are run as `script args || true` and never block session start, whatever their exit code.
+
+Hook `script` paths must be direct children of `hooks/` (for example `hooks/my-guard.sh`). Subdirectories are rejected, because scripts are stored and downloaded by file name. A clan script with the same file name as a global script is ignored; the global script wins.
 
 ### Clan conventions
 

@@ -36,6 +36,11 @@
           "description": "Clan pre-tool-use scripts. Must exist under agent-registry/config/hooks/",
           "type": "array",
           "items": { "$ref": "#/definitions/MatchedHookEntry" }
+        },
+        "Stop": {
+          "description": "Clan stop scripts, run when Claude finishes a turn. Exit code 2 blocks the stop.",
+          "type": "array",
+          "items": { "$ref": "#/definitions/HookEntry" }
         }
       }
     },
@@ -52,10 +57,20 @@
       "required": ["script"],
       "additionalProperties": false,
       "properties": {
+        "args": {
+          "description": "Optional arguments passed to the script. Shell-quoted in the generated command.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "timeout": {
+          "description": "Optional hook timeout in seconds.",
+          "type": "integer",
+          "minimum": 1
+        },
         "script": {
-          "description": "Path to hook script relative to agent-registry/config/. Must end in .sh",
+          "description": "Path to hook script relative to agent-registry/config/. Must be a direct child of hooks/ (no subdirectories) and end in .sh",
           "type": "string",
-          "pattern": "^hooks/.+\\.sh$"
+          "pattern": "^hooks/[^/]+\\.sh$"
         }
       }
     },
@@ -69,10 +84,20 @@
           "type": "string",
           "minLength": 1
         },
+        "args": {
+          "description": "Optional arguments passed to the script. Shell-quoted in the generated command.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "timeout": {
+          "description": "Optional hook timeout in seconds.",
+          "type": "integer",
+          "minimum": 1
+        },
         "script": {
-          "description": "Path to hook script relative to agent-registry/config/. Must end in .sh",
+          "description": "Path to hook script relative to agent-registry/config/. Must be a direct child of hooks/ (no subdirectories) and end in .sh",
           "type": "string",
-          "pattern": "^hooks/.+\\.sh$"
+          "pattern": "^hooks/[^/]+\\.sh$"
         }
       }
     }
