@@ -1,6 +1,6 @@
 # agent-registry
 
-Registers A2A agents, MCP servers, and skills into the [GCP Agent Registry](https://cloud.google.com/agent-registry) on every push to main. Only items whose files changed in the commit are processed — unchanged items are skipped.
+Registers A2A agents, MCP servers, and skills into the [GCP Agent Registry](https://cloud.google.com/agent-registry), and syncs Claude Code settings, hooks, commands, and conventions to GCS — all on every push to main. Only items whose files changed in the commit are processed; unchanged items are skipped.
 
 ## Workflow setup
 
@@ -30,12 +30,16 @@ jobs:
           fetch-depth: 2  # required for changed-file detection
 
       - uses: extenda/actions/agent-registry@v0
+        env:
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         with:
           service-account-key: ${{ secrets.SECRET_AUTH }}
           dry-run: ${{ github.event_name == 'pull_request' }}
 ```
 
-On a **pull request** the action runs in dry-run mode — it prints what would happen without touching the registry. On **merge to main** it registers for real.
+`GITHUB_BASE_SHA` is needed for accurate changed-file detection on pull requests. On push events it is empty, and the action falls back to `HEAD~1`.
+
+On a **pull request** the action runs in dry-run mode — it prints what would happen without touching the registry or GCS. On **merge to main** it registers and uploads for real.
 
 ## Directory layout
 
@@ -51,6 +55,13 @@ agent-registry/
   skills/
     <skill-id>/
       SKILL.md            # required
+  config/                 # clan-specific Claude Code settings
+    settings.yaml         # clan name, additional permissions, hooks, and commands
+    hooks/
+      *.sh                # clan SessionStart and PreToolUse hook scripts
+    commands/
+      *.md                # slash commands available to clan developers
+    conventions.md        # clan coding conventions — downloaded to .agent/conventions.md
 ```
 
 Any directory prefixed with `example-` is ignored.
@@ -109,6 +120,7 @@ If `agent-registry/agents/<agent-id>/instructions.md` exists it is uploaded to G
 
 ```
 gs://extenda-agent-artifacts/agents/<agent-id>/<git-sha>/instructions.md
+gs://extenda-agent-artifacts/agents/<agent-id>/instructions.md   (latest alias)
 ```
 
 The GCS bucket (`extenda-agent-artifacts`) is fixed. How the agent uses this file is up to the agent implementation.
@@ -177,9 +189,76 @@ interfaces:
 | `spec` | no | The MCP server spec content (tools, resources, etc.). |
 | `interfaces` | no | Protocol bindings. Defaults `protocolBinding` to `JSONRPC`. |
 
+---
+
+## Claude Code settings
+
+The action manages Claude Code `settings.json` for developers in a clan. It merges the global baseline (managed by the platform team) with clan-specific additions defined in `config/settings.yaml`, then uploads the merged result to GCS. On every session start, Claude Code downloads the merged `settings.json` for its clan automatically.
+
+### Clan settings
+
+`agent-registry/config/settings.yaml` defines clan-specific additions on top of the global baseline. Only the clan's common repo should have this file.
+
+```yaml
+permissions:
+  allow:
+    - "Bash(./gradlew *)"   # any additional permissions beyond the global set
+
+hooks:
+  SessionStart:
+    - script: hooks/ensure-pre-commit.sh  # runs once on session start, after hook scripts are downloaded
+  PreToolUse:
+    - matcher: "Bash"
+      script: hooks/my-guard.sh           # additional PreToolUse hooks
+
+commands:
+  - commands/platform.md    # clan-specific slash commands
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `permissions.allow` | no | Additional permission strings merged with the global set. |
+| `hooks.SessionStart` | no | Scripts that run once per session start, after all files are downloaded. |
+| `hooks.PreToolUse` | no | Additional PreToolUse hooks merged with the global set. |
+| `commands` | no | Additional slash-command files added alongside global commands. |
+
+Hook scripts go in `agent-registry/config/hooks/` and slash-command files in `agent-registry/config/commands/`.
+
+### Clan conventions
+
+`agent-registry/config/conventions.md` contains clan-specific coding conventions. It is uploaded to GCS and downloaded to `.agent/conventions.md` on every session start, making it available to the Orchestrator as context.
+
+### GCS layout
+
+All artifacts land in `gs://extenda-agent-artifacts/`. The clan's portion of the bucket looks like:
+
+```
+config/
+  <clan>/
+    settings.json                # merged settings.json downloaded by developers on session start
+    conventions.md               # clan conventions
+hooks/
+  <clan>/
+    <clan-hook>.sh               # clan hook scripts
+commands/
+  <clan>/
+    <clan-command>.md            # clan slash commands
+agents/
+  <agent-id>/
+    instructions.md              # latest agent instructions
+    <git-sha>/instructions.md    # versioned snapshot
+skills/
+  <skill-id>/
+    <revision>/SKILL.md
+```
+
+Global hooks, commands, and the baseline `settings.json` are managed by the platform team and merged in automatically — clan repos do not need to define or upload them.
+
+---
+
 ## Inputs
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
 | `service-account-key` | yes | — | GCP service account key for authentication. |
-| `dry-run` | no | `false` | If `true`, print planned changes without modifying the registry. |
+| `dry-run` | no | `false` | If `true`, print planned changes without modifying the registry or GCS. Set to `false` to run for real even on a PR. |

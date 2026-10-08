@@ -728,10 +728,10 @@ var require_src2 = __commonJS({
     var fs_1 = require("fs");
     var debug_1 = __importDefault(require_src());
     var log2 = debug_1.default("@kwsites/file-exists");
-    function check(path20, isFile2, isDirectory2) {
-      log2(`checking %s`, path20);
+    function check(path21, isFile2, isDirectory2) {
+      log2(`checking %s`, path21);
       try {
-        const stat2 = fs_1.statSync(path20);
+        const stat2 = fs_1.statSync(path21);
         if (stat2.isFile() && isFile2) {
           log2(`[OK] path represents a file`);
           return true;
@@ -752,8 +752,8 @@ var require_src2 = __commonJS({
       }
     }
     __name(check, "check");
-    function exists2(path20, type = exports2.READABLE) {
-      return check(path20, (type & exports2.FILE) > 0, (type & exports2.FOLDER) > 0);
+    function exists2(path21, type = exports2.READABLE) {
+      return check(path21, (type & exports2.FILE) > 0, (type & exports2.FOLDER) > 0);
     }
     __name(exists2, "exists");
     exports2.exists = exists2;
@@ -1965,14 +1965,14 @@ eger.");
         }
         const port = url3.port != null ? url3.port : url3.protocol === "https:" ? 443 : 80;
         let origin2 = url3.origin != null ? url3.origin : `${url3.protocol || ""}//${url3.hostname || ""}:${port}`;
-        let path20 = url3.path != null ? url3.path : `${url3.pathname || ""}${url3.search || ""}`;
+        let path21 = url3.path != null ? url3.path : `${url3.pathname || ""}${url3.search || ""}`;
         if (origin2[origin2.length - 1] === "/") {
           origin2 = origin2.slice(0, origin2.length - 1);
         }
-        if (path20 && path20[0] !== "/") {
-          path20 = `/${path20}`;
+        if (path21 && path21[0] !== "/") {
+          path21 = `/${path21}`;
         }
-        return new URL(`${origin2}${path20}`);
+        return new URL(`${origin2}${path21}`);
       }
       if (!isHttpOrHttpsPrefixed(url3.origin || url3.protocol)) {
         throw new InvalidArgumentError("Invalid URL protocol: the URL must start with `http:` or `https:`.");
@@ -2463,39 +2463,39 @@ var require_diagnostics = __commonJS({
       });
       diagnosticsChannel.channel("undici:client:sendHeaders").subscribe((evt) => {
         const {
-          request: { method, path: path20, origin: origin2 }
+          request: { method, path: path21, origin: origin2 }
         } = evt;
-        debuglog("sending request to %s %s/%s", method, origin2, path20);
+        debuglog("sending request to %s %s/%s", method, origin2, path21);
       });
       diagnosticsChannel.channel("undici:request:headers").subscribe((evt) => {
         const {
-          request: { method, path: path20, origin: origin2 },
+          request: { method, path: path21, origin: origin2 },
           response: { statusCode }
         } = evt;
         debuglog(
           "received response to %s %s/%s - HTTP %d",
           method,
           origin2,
-          path20,
+          path21,
           statusCode
         );
       });
       diagnosticsChannel.channel("undici:request:trailers").subscribe((evt) => {
         const {
-          request: { method, path: path20, origin: origin2 }
+          request: { method, path: path21, origin: origin2 }
         } = evt;
-        debuglog("trailers received from %s %s/%s", method, origin2, path20);
+        debuglog("trailers received from %s %s/%s", method, origin2, path21);
       });
       diagnosticsChannel.channel("undici:request:error").subscribe((evt) => {
         const {
-          request: { method, path: path20, origin: origin2 },
+          request: { method, path: path21, origin: origin2 },
           error: error2
         } = evt;
         debuglog(
           "request to %s %s/%s errored - %s",
           method,
           origin2,
-          path20,
+          path21,
           error2.message
         );
       });
@@ -2544,9 +2544,9 @@ var require_diagnostics = __commonJS({
         });
         diagnosticsChannel.channel("undici:client:sendHeaders").subscribe((evt) => {
           const {
-            request: { method, path: path20, origin: origin2 }
+            request: { method, path: path21, origin: origin2 }
           } = evt;
-          debuglog("sending request to %s %s/%s", method, origin2, path20);
+          debuglog("sending request to %s %s/%s", method, origin2, path21);
         });
       }
       diagnosticsChannel.channel("undici:websocket:open").subscribe((evt) => {
@@ -2612,7 +2612,7 @@ var require_request = __commonJS({
         __name(this, "Request");
       }
       constructor(origin2, {
-        path: path20,
+        path: path21,
         method,
         body: body2,
         headers,
@@ -2627,12 +2627,12 @@ var require_request = __commonJS({
         expectContinue,
         servername
       }, handler) {
-        if (typeof path20 !== "string") {
+        if (typeof path21 !== "string") {
           throw new InvalidArgumentError("path must be a string");
-        } else if (path20[0] !== "/" && !(path20.startsWith("http://") || path20.startsWith("https://")) && method !== "\
+        } else if (path21[0] !== "/" && !(path21.startsWith("http://") || path21.startsWith("https://")) && method !== "\
 CONNECT") {
           throw new InvalidArgumentError("path must be an absolute URL or start with a slash");
-        } else if (invalidPathRegex.test(path20)) {
+        } else if (invalidPathRegex.test(path21)) {
           throw new InvalidArgumentError("invalid request path");
         }
         if (typeof method !== "string") {
@@ -2699,7 +2699,7 @@ terable");
         this.completed = false;
         this.aborted = false;
         this.upgrade = upgrade || null;
-        this.path = query ? buildURL2(path20, query) : path20;
+        this.path = query ? buildURL2(path21, query) : path21;
         this.origin = origin2;
         this.idempotent = idempotent == null ? method === "HEAD" || method === "GET" : idempotent;
         this.blocking = blocking == null ? false : blocking;
@@ -7188,7 +7188,7 @@ var require_formdata = __commonJS({
         }
         this[kState] = [];
       }
-      append(name, value, filename = void 0) {
+      append(name, value, filename2 = void 0) {
         webidl.brandCheck(this, _FormData);
         const prefix2 = "FormData.append";
         webidl.argumentLengthCheck(arguments, 2, prefix2);
@@ -7200,8 +7200,8 @@ var require_formdata = __commonJS({
         name = webidl.converters.USVString(name, prefix2, "name");
         value = isBlobLike(value) ? webidl.converters.Blob(value, prefix2, "value", { strict: false }) : webidl.converters.
         USVString(value, prefix2, "value");
-        filename = arguments.length === 3 ? webidl.converters.USVString(filename, prefix2, "filename") : void 0;
-        const entry = makeEntry(name, value, filename);
+        filename2 = arguments.length === 3 ? webidl.converters.USVString(filename2, prefix2, "filename") : void 0;
+        const entry = makeEntry(name, value, filename2);
         this[kState].push(entry);
       }
       delete(name) {
@@ -7236,7 +7236,7 @@ var require_formdata = __commonJS({
         name = webidl.converters.USVString(name, prefix2, "name");
         return this[kState].findIndex((entry) => entry.name === name) !== -1;
       }
-      set(name, value, filename = void 0) {
+      set(name, value, filename2 = void 0) {
         webidl.brandCheck(this, _FormData);
         const prefix2 = "FormData.set";
         webidl.argumentLengthCheck(arguments, 2, prefix2);
@@ -7248,8 +7248,8 @@ var require_formdata = __commonJS({
         name = webidl.converters.USVString(name, prefix2, "name");
         value = isBlobLike(value) ? webidl.converters.Blob(value, prefix2, "name", { strict: false }) : webidl.converters.
         USVString(value, prefix2, "name");
-        filename = arguments.length === 3 ? webidl.converters.USVString(filename, prefix2, "name") : void 0;
-        const entry = makeEntry(name, value, filename);
+        filename2 = arguments.length === 3 ? webidl.converters.USVString(filename2, prefix2, "name") : void 0;
+        const entry = makeEntry(name, value, filename2);
         const idx = this[kState].findIndex((entry2) => entry2.name === name);
         if (idx !== -1) {
           this[kState] = [
@@ -7293,19 +7293,19 @@ var require_formdata = __commonJS({
         configurable: true
       }
     });
-    function makeEntry(name, value, filename) {
+    function makeEntry(name, value, filename2) {
       if (typeof value === "string") {
       } else {
         if (!isFileLike(value)) {
           value = value instanceof Blob ? new File2([value], "blob", { type: value.type }) : new FileLike(value, "blob",
           { type: value.type });
         }
-        if (filename !== void 0) {
+        if (filename2 !== void 0) {
           const options = {
             type: value.type,
             lastModified: value.lastModified
           };
-          value = value instanceof NativeFile ? new File2([value], filename, options) : new FileLike(value, filename, options);
+          value = value instanceof NativeFile ? new File2([value], filename2, options) : new FileLike(value, filename2, options);
         }
       }
       return { name, value };
@@ -7392,7 +7392,7 @@ var require_formdata_parser = __commonJS({
         if (result === "failure") {
           return "failure";
         }
-        let { name, filename, contentType: contentType2, encoding } = result;
+        let { name, filename: filename2, contentType: contentType2, encoding } = result;
         position.position += 2;
         let body2;
         {
@@ -7412,24 +7412,24 @@ var require_formdata_parser = __commonJS({
           position.position += 2;
         }
         let value;
-        if (filename !== null) {
+        if (filename2 !== null) {
           contentType2 ??= "text/plain";
           if (!isAsciiString(contentType2)) {
             contentType2 = "";
           }
-          value = new File2([body2], filename, { type: contentType2 });
+          value = new File2([body2], filename2, { type: contentType2 });
         } else {
           value = utf8DecodeBytes(Buffer.from(body2));
         }
         assert4(isUSVString(name));
         assert4(typeof value === "string" && isUSVString(value) || isFileLike(value));
-        entryList.push(makeEntry(name, value, filename));
+        entryList.push(makeEntry(name, value, filename2));
       }
     }
     __name(multipartFormDataParser, "multipartFormDataParser");
     function parseMultipartFormDataHeaders(input, position) {
       let name = null;
-      let filename = null;
+      let filename2 = null;
       let contentType2 = null;
       let encoding = null;
       while (true) {
@@ -7437,7 +7437,7 @@ var require_formdata_parser = __commonJS({
           if (name === null) {
             return "failure";
           }
-          return { name, filename, contentType: contentType2, encoding };
+          return { name, filename: filename2, contentType: contentType2, encoding };
         }
         let headerName = collectASequenceOfBytes(
           (char) => char !== 10 && char !== 13 && char !== 58,
@@ -7459,7 +7459,7 @@ var require_formdata_parser = __commonJS({
         );
         switch (bufferToLowerCasedHeaderName(headerName)) {
           case "content-disposition": {
-            name = filename = null;
+            name = filename2 = null;
             if (!bufferStartsWith(input, formDataNameBuffer, position)) {
               return "failure";
             }
@@ -7478,8 +7478,8 @@ var require_formdata_parser = __commonJS({
                 return "failure";
               }
               position.position += 12;
-              filename = parseMultipartFormDataName(input, position);
-              if (filename === null) {
+              filename2 = parseMultipartFormDataName(input, position);
+              if (filename2 === null) {
                 return "failure";
               }
             }
@@ -8642,7 +8642,7 @@ var require_client_h1 = __commonJS({
     }
     __name(shouldSendContentLength, "shouldSendContentLength");
     function writeH1(client, request) {
-      const { method, path: path20, host, upgrade, blocking, reset } = request;
+      const { method, path: path21, host, upgrade, blocking, reset } = request;
       let { body: body2, headers, contentLength: contentLength2 } = request;
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH" || method === "QUERY" || method ===
       "PROPFIND" || method === "PROPPATCH";
@@ -8725,7 +8725,7 @@ var require_client_h1 = __commonJS({
       if (blocking) {
         socket[kBlocking] = true;
       }
-      let header = `${method} ${path20} HTTP/1.1\r
+      let header = `${method} ${path21} HTTP/1.1\r
 `;
       if (typeof host === "string") {
         header += `host: ${host}\r
@@ -9275,7 +9275,7 @@ var require_client_h2 = __commonJS({
     __name(shouldSendContentLength, "shouldSendContentLength");
     function writeH2(client, request) {
       const session = client[kHTTP2Session];
-      const { method, path: path20, host, upgrade, expectContinue, signal, headers: reqHeaders } = request;
+      const { method, path: path21, host, upgrade, expectContinue, signal, headers: reqHeaders } = request;
       let { body: body2 } = request;
       if (upgrade) {
         util9.errorRequest(client, request, new Error("Upgrade not supported for H2"));
@@ -9372,7 +9372,7 @@ var require_client_h2 = __commonJS({
         });
         return true;
       }
-      headers[HTTP2_HEADER_PATH] = path20;
+      headers[HTTP2_HEADER_PATH] = path21;
       headers[HTTP2_HEADER_SCHEME] = "https";
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH";
       if (body2 && typeof body2.read === "function") {
@@ -9743,9 +9743,9 @@ var require_redirect_handler = __commonJS({
         }
         const { origin: origin2, pathname, search } = util9.parseURL(new URL(this.location, this.opts.origin && new URL(
         this.opts.path, this.opts.origin)));
-        const path20 = search ? `${pathname}${search}` : pathname;
+        const path21 = search ? `${pathname}${search}` : pathname;
         this.opts.headers = cleanRequestHeaders(this.opts.headers, statusCode === 303, this.opts.origin !== origin2);
-        this.opts.path = path20;
+        this.opts.path = path21;
         this.opts.origin = origin2;
         this.opts.maxRedirections = 0;
         this.opts.query = null;
@@ -11036,10 +11036,10 @@ var require_proxy_agent = __commonJS({
         };
         const {
           origin: origin2,
-          path: path20 = "/",
+          path: path21 = "/",
           headers = {}
         } = opts;
-        opts.path = origin2 + path20;
+        opts.path = origin2 + path21;
         if (!("host" in headers) && !("Host" in headers)) {
           const { host } = new URL3(origin2);
           headers.host = host;
@@ -13088,21 +13088,21 @@ var require_mock_utils = __commonJS({
       return true;
     }
     __name(matchHeaders, "matchHeaders");
-    function safeUrl(path20) {
-      if (typeof path20 !== "string") {
-        return path20;
+    function safeUrl(path21) {
+      if (typeof path21 !== "string") {
+        return path21;
       }
-      const pathSegments = path20.split("?");
+      const pathSegments = path21.split("?");
       if (pathSegments.length !== 2) {
-        return path20;
+        return path21;
       }
       const qp = new URLSearchParams(pathSegments.pop());
       qp.sort();
       return [...pathSegments, qp.toString()].join("?");
     }
     __name(safeUrl, "safeUrl");
-    function matchKey(mockDispatch2, { path: path20, method, body: body2, headers }) {
-      const pathMatch = matchValue(mockDispatch2.path, path20);
+    function matchKey(mockDispatch2, { path: path21, method, body: body2, headers }) {
+      const pathMatch = matchValue(mockDispatch2.path, path21);
       const methodMatch = matchValue(mockDispatch2.method, method);
       const bodyMatch = typeof mockDispatch2.body !== "undefined" ? matchValue(mockDispatch2.body, body2) : true;
       const headersMatch = matchHeaders(mockDispatch2, headers);
@@ -13126,8 +13126,8 @@ var require_mock_utils = __commonJS({
     function getMockDispatch(mockDispatches, key) {
       const basePath = key.query ? buildURL2(key.path, key.query) : key.path;
       const resolvedPath = typeof basePath === "string" ? safeUrl(basePath) : basePath;
-      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path20 }) => matchValue(
-      safeUrl(path20), resolvedPath));
+      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path21 }) => matchValue(
+      safeUrl(path21), resolvedPath));
       if (matchedMockDispatches.length === 0) {
         throw new MockNotMatchedError(`Mock dispatch not matched for path '${resolvedPath}'`);
       }
@@ -13169,9 +13169,9 @@ var require_mock_utils = __commonJS({
     }
     __name(deleteMockDispatch, "deleteMockDispatch");
     function buildKey(opts) {
-      const { path: path20, method, body: body2, headers, query } = opts;
+      const { path: path21, method, body: body2, headers, query } = opts;
       return {
-        path: path20,
+        path: path21,
         method,
         body: body2,
         headers,
@@ -13664,10 +13664,10 @@ var require_pending_interceptors_formatter = __commonJS({
       }
       format(pendingInterceptors) {
         const withPrettyHeaders = pendingInterceptors.map(
-          ({ method, path: path20, data: { statusCode }, persist, times, timesInvoked, origin: origin2 }) => ({
+          ({ method, path: path21, data: { statusCode }, persist, times, timesInvoked, origin: origin2 }) => ({
             Method: method,
             Origin: origin2,
-            Path: path20,
+            Path: path21,
             "Status code": statusCode,
             Persistent: persist ? PERSISTENT : NOT_PERSISTENT,
             Invocations: timesInvoked,
@@ -18663,9 +18663,9 @@ var require_util6 = __commonJS({
       }
     }
     __name(validateCookieValue, "validateCookieValue");
-    function validateCookiePath(path20) {
-      for (let i2 = 0; i2 < path20.length; ++i2) {
-        const code = path20.charCodeAt(i2);
+    function validateCookiePath(path21) {
+      for (let i2 = 0; i2 < path21.length; ++i2) {
+        const code = path21.charCodeAt(i2);
         if (code < 32 || // exclude CTLs (0-31)
         code > 126 || // exclude DEL and non-ascii
         code === 59) {
@@ -21588,11 +21588,11 @@ var require_undici = __commonJS({
           if (typeof opts.path !== "string") {
             throw new InvalidArgumentError("invalid opts.path");
           }
-          let path20 = opts.path;
+          let path21 = opts.path;
           if (!opts.path.startsWith("/")) {
-            path20 = `/${path20}`;
+            path21 = `/${path21}`;
           }
-          url3 = new URL(util9.parseOrigin(url3).origin + path20);
+          url3 = new URL(util9.parseOrigin(url3).origin + path21);
         } else {
           if (!opts) {
             opts = typeof url3 === "object" ? url3 : {};
@@ -32541,11 +32541,11 @@ var require_mime_types = __commonJS({
       return exts[0];
     }
     __name(extension, "extension");
-    function lookup(path20) {
-      if (!path20 || typeof path20 !== "string") {
+    function lookup(path21) {
+      if (!path21 || typeof path21 !== "string") {
         return false;
       }
-      var extension2 = extname2("x." + path20).toLowerCase().substr(1);
+      var extension2 = extname2("x." + path21).toLowerCase().substr(1);
       if (!extension2) {
         return false;
       }
@@ -33673,7 +33673,7 @@ var require_form_data = __commonJS({
     "use strict";
     var CombinedStream = require_combined_stream();
     var util9 = require("util");
-    var path20 = require("path");
+    var path21 = require("path");
     var http5 = require("http");
     var https4 = require("https");
     var parseUrl2 = require("url").parse;
@@ -33804,16 +33804,16 @@ var require_form_data = __commonJS({
       return "--" + this.getBoundary() + FormData3.LINE_BREAK + contents + FormData3.LINE_BREAK;
     };
     FormData3.prototype._getContentDisposition = function(value, options) {
-      var filename;
+      var filename2;
       if (typeof options.filepath === "string") {
-        filename = path20.normalize(options.filepath).replace(/\\/g, "/");
+        filename2 = path21.normalize(options.filepath).replace(/\\/g, "/");
       } else if (options.filename || value && (value.name || value.path)) {
-        filename = path20.basename(options.filename || value && (value.name || value.path));
+        filename2 = path21.basename(options.filename || value && (value.name || value.path));
       } else if (value && value.readable && hasOwn(value, "httpVersion")) {
-        filename = path20.basename(value.client._httpMessage.path || "");
+        filename2 = path21.basename(value.client._httpMessage.path || "");
       }
-      if (filename) {
-        return 'filename="' + escapeHeaderParam(filename) + '"';
+      if (filename2) {
+        return 'filename="' + escapeHeaderParam(filename2) + '"';
       }
     };
     FormData3.prototype._getContentType = function(value, options) {
@@ -35105,7 +35105,7 @@ var require_path = __commonJS({
     escapePosixPath = exports2.escapeWindowsPath = exports2.escape = exports2.removeLeadingDotSegment = exports2.makeAbsolute =
     exports2.unixify = void 0;
     var os13 = require("os");
-    var path20 = require("path");
+    var path21 = require("path");
     var IS_WINDOWS_PLATFORM = os13.platform() === "win32";
     var LEADING_DOT_SEGMENT_CHARACTERS_COUNT = 2;
     var POSIX_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()*?[\]{|}]|^!|[!+@](?=\()|\\(?![!()*+?@[\]{|}]))/g;
@@ -35118,7 +35118,7 @@ var require_path = __commonJS({
     __name(unixify, "unixify");
     exports2.unixify = unixify;
     function makeAbsolute(cwd, filepath) {
-      return path20.resolve(cwd, filepath);
+      return path21.resolve(cwd, filepath);
     }
     __name(makeAbsolute, "makeAbsolute");
     exports2.makeAbsolute = makeAbsolute;
@@ -36438,7 +36438,7 @@ var require_braces = __commonJS({
 var require_constants8 = __commonJS({
   "node_modules/picomatch/lib/constants.js"(exports2, module2) {
     "use strict";
-    var path20 = require("path");
+    var path21 = require("path");
     var WIN_SLASH = "\\\\/";
     var WIN_NO_SLASH = `[^${WIN_SLASH}]`;
     var DEFAULT_MAX_EXTGLOB_RECURSION = 0;
@@ -36612,7 +36612,7 @@ var require_constants8 = __commonJS({
       /* | */
       CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279,
       /* \uFEFF */
-      SEP: path20.sep,
+      SEP: path21.sep,
       /**
        * Create EXTGLOB_CHARS
        */
@@ -36639,7 +36639,7 @@ var require_constants8 = __commonJS({
 var require_utils3 = __commonJS({
   "node_modules/picomatch/lib/utils.js"(exports2) {
     "use strict";
-    var path20 = require("path");
+    var path21 = require("path");
     var win32 = process.platform === "win32";
     var {
       REGEX_BACKSLASH,
@@ -36668,7 +36668,7 @@ var require_utils3 = __commonJS({
       if (options && typeof options.windows === "boolean") {
         return options.windows;
       }
-      return win32 === true || path20.sep === "\\";
+      return win32 === true || path21.sep === "\\";
     };
     exports2.escapeLast = (input, char, lastIdx) => {
       const idx = input.lastIndexOf(char, lastIdx);
@@ -38036,7 +38036,7 @@ var require_parse4 = __commonJS({
 var require_picomatch = __commonJS({
   "node_modules/picomatch/lib/picomatch.js"(exports2, module2) {
     "use strict";
-    var path20 = require("path");
+    var path21 = require("path");
     var scan = require_scan();
     var parse2 = require_parse4();
     var utils = require_utils3();
@@ -38121,7 +38121,7 @@ var require_picomatch = __commonJS({
     };
     picomatch.matchBase = (input, glob2, options, posix = utils.isWindows(options)) => {
       const regex = glob2 instanceof RegExp ? glob2 : picomatch.makeRe(glob2, options);
-      return regex.test(path20.basename(input));
+      return regex.test(path21.basename(input));
     };
     picomatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
     picomatch.parse = (pattern, options) => {
@@ -38354,7 +38354,7 @@ var require_pattern = __commonJS({
     exports2.getPositivePatterns = exports2.getNegativePatterns = exports2.isPositivePattern = exports2.isNegativePattern =
     exports2.convertToNegativePattern = exports2.convertToPositivePattern = exports2.isDynamicPattern = exports2.isStaticPattern =
     void 0;
-    var path20 = require("path");
+    var path21 = require("path");
     var globParent = require_glob_parent();
     var micromatch = require_micromatch();
     var GLOBSTAR2 = "**";
@@ -38465,7 +38465,7 @@ var require_pattern = __commonJS({
     __name(endsWithSlashGlobStar, "endsWithSlashGlobStar");
     exports2.endsWithSlashGlobStar = endsWithSlashGlobStar;
     function isAffectDepthOfReadingPattern(pattern) {
-      const basename5 = path20.basename(pattern);
+      const basename5 = path21.basename(pattern);
       return endsWithSlashGlobStar(pattern) || isStaticPattern(basename5);
     }
     __name(isAffectDepthOfReadingPattern, "isAffectDepthOfReadingPattern");
@@ -38532,7 +38532,7 @@ var require_pattern = __commonJS({
     __name(partitionAbsoluteAndRelative, "partitionAbsoluteAndRelative");
     exports2.partitionAbsoluteAndRelative = partitionAbsoluteAndRelative;
     function isAbsolute(pattern) {
-      return path20.isAbsolute(pattern);
+      return path21.isAbsolute(pattern);
     }
     __name(isAbsolute, "isAbsolute");
     exports2.isAbsolute = isAbsolute;
@@ -38724,8 +38724,8 @@ var require_utils4 = __commonJS({
     exports2.errno = errno;
     var fs15 = require_fs();
     exports2.fs = fs15;
-    var path20 = require_path();
-    exports2.path = path20;
+    var path21 = require_path();
+    exports2.path = path21;
     var pattern = require_pattern();
     exports2.pattern = pattern;
     var stream6 = require_stream();
@@ -38847,8 +38847,8 @@ var require_async2 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.read = void 0;
-    function read(path20, settings, callback) {
-      settings.fs.lstat(path20, (lstatError, lstat2) => {
+    function read(path21, settings, callback) {
+      settings.fs.lstat(path21, (lstatError, lstat2) => {
         if (lstatError !== null) {
           callFailureCallback(callback, lstatError);
           return;
@@ -38857,7 +38857,7 @@ var require_async2 = __commonJS({
           callSuccessCallback(callback, lstat2);
           return;
         }
-        settings.fs.stat(path20, (statError, stat2) => {
+        settings.fs.stat(path21, (statError, stat2) => {
           if (statError !== null) {
             if (settings.throwErrorOnBrokenSymbolicLink) {
               callFailureCallback(callback, statError);
@@ -38892,13 +38892,13 @@ var require_sync = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.read = void 0;
-    function read(path20, settings) {
-      const lstat2 = settings.fs.lstatSync(path20);
+    function read(path21, settings) {
+      const lstat2 = settings.fs.lstatSync(path21);
       if (!lstat2.isSymbolicLink() || !settings.followSymbolicLink) {
         return lstat2;
       }
       try {
-        const stat2 = settings.fs.statSync(path20);
+        const stat2 = settings.fs.statSync(path21);
         if (settings.markSymbolicLink) {
           stat2.isSymbolicLink = () => true;
         }
@@ -38974,18 +38974,18 @@ var require_out = __commonJS({
     var sync = require_sync();
     var settings_1 = require_settings();
     exports2.Settings = settings_1.default;
-    function stat2(path20, optionsOrSettingsOrCallback, callback) {
+    function stat2(path21, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === "function") {
-        async.read(path20, getSettings(), optionsOrSettingsOrCallback);
+        async.read(path21, getSettings(), optionsOrSettingsOrCallback);
         return;
       }
-      async.read(path20, getSettings(optionsOrSettingsOrCallback), callback);
+      async.read(path21, getSettings(optionsOrSettingsOrCallback), callback);
     }
     __name(stat2, "stat");
     exports2.stat = stat2;
-    function statSync3(path20, optionsOrSettings) {
+    function statSync3(path21, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings);
-      return sync.read(path20, settings);
+      return sync.read(path21, settings);
     }
     __name(statSync3, "statSync");
     exports2.statSync = statSync3;
@@ -39216,16 +39216,16 @@ var require_async3 = __commonJS({
           return;
         }
         const tasks = names.map((name) => {
-          const path20 = common.joinPathSegments(directory, name, settings.pathSegmentSeparator);
+          const path21 = common.joinPathSegments(directory, name, settings.pathSegmentSeparator);
           return (done) => {
-            fsStat2.stat(path20, settings.fsStatSettings, (error2, stats) => {
+            fsStat2.stat(path21, settings.fsStatSettings, (error2, stats) => {
               if (error2 !== null) {
                 done(error2);
                 return;
               }
               const entry = {
                 name,
-                path: path20,
+                path: path21,
                 dirent: utils.fs.createDirentFromStats(name, stats)
               };
               if (settings.stats) {
@@ -39350,7 +39350,7 @@ var require_settings2 = __commonJS({
   "node_modules/@nodelib/fs.scandir/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path20 = require("path");
+    var path21 = require("path");
     var fsStat2 = require_out();
     var fs15 = require_fs4();
     var Settings = class {
@@ -39361,7 +39361,7 @@ var require_settings2 = __commonJS({
         this._options = _options;
         this.followSymbolicLinks = this._getValue(this._options.followSymbolicLinks, false);
         this.fs = fs15.createFileSystemAdapter(this._options.fs);
-        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path20.sep);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path21.sep);
         this.stats = this._getValue(this._options.stats, false);
         this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
         this.fsStatSettings = new fsStat2.Settings({
@@ -39388,18 +39388,18 @@ var require_out2 = __commonJS({
     var sync = require_sync2();
     var settings_1 = require_settings2();
     exports2.Settings = settings_1.default;
-    function scandir(path20, optionsOrSettingsOrCallback, callback) {
+    function scandir(path21, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === "function") {
-        async.read(path20, getSettings(), optionsOrSettingsOrCallback);
+        async.read(path21, getSettings(), optionsOrSettingsOrCallback);
         return;
       }
-      async.read(path20, getSettings(optionsOrSettingsOrCallback), callback);
+      async.read(path21, getSettings(optionsOrSettingsOrCallback), callback);
     }
     __name(scandir, "scandir");
     exports2.scandir = scandir;
-    function scandirSync(path20, optionsOrSettings) {
+    function scandirSync(path21, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings);
-      return sync.read(path20, settings);
+      return sync.read(path21, settings);
     }
     __name(scandirSync, "scandirSync");
     exports2.scandirSync = scandirSync;
@@ -40097,7 +40097,7 @@ var require_settings3 = __commonJS({
   "node_modules/@nodelib/fs.walk/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path20 = require("path");
+    var path21 = require("path");
     var fsScandir = require_out2();
     var Settings = class {
       static {
@@ -40110,7 +40110,7 @@ var require_settings3 = __commonJS({
         this.deepFilter = this._getValue(this._options.deepFilter, null);
         this.entryFilter = this._getValue(this._options.entryFilter, null);
         this.errorFilter = this._getValue(this._options.errorFilter, null);
-        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path20.sep);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path21.sep);
         this.fsScandirSettings = new fsScandir.Settings({
           followSymbolicLinks: this._options.followSymbolicLinks,
           fs: this._options.fs,
@@ -40176,7 +40176,7 @@ var require_reader2 = __commonJS({
   "node_modules/fast-glob/out/readers/reader.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path20 = require("path");
+    var path21 = require("path");
     var fsStat2 = require_out();
     var utils = require_utils4();
     var Reader = class {
@@ -40192,7 +40192,7 @@ var require_reader2 = __commonJS({
         });
       }
       _getFullEntryPath(filepath) {
-        return path20.resolve(this._settings.cwd, filepath);
+        return path21.resolve(this._settings.cwd, filepath);
       }
       _makeEntry(stats, pattern) {
         const entry = {
@@ -40634,7 +40634,7 @@ var require_provider = __commonJS({
   "node_modules/fast-glob/out/providers/provider.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path20 = require("path");
+    var path21 = require("path");
     var deep_1 = require_deep();
     var entry_1 = require_entry();
     var error_1 = require_error();
@@ -40651,7 +40651,7 @@ var require_provider = __commonJS({
         this.entryTransformer = new entry_2.default(this._settings);
       }
       _getRootDirectory(task) {
-        return path20.resolve(this._settings.cwd, task.base);
+        return path21.resolve(this._settings.cwd, task.base);
       }
       _getReaderOptions(task) {
         const basePath = task.base === "." ? "" : task.base;
@@ -46181,6 +46181,1333 @@ var require_commonjs2 = __commonJS({
     Object.defineProperty(exports2, "ServerCallContextController", { enumerable: true, get: /* @__PURE__ */ __name(function() {
       return server_call_context_1.ServerCallContextController;
     }, "get") });
+  }
+});
+
+// node_modules/jsonschema/lib/helpers.js
+var require_helpers2 = __commonJS({
+  "node_modules/jsonschema/lib/helpers.js"(exports2, module2) {
+    "use strict";
+    var ValidationError2 = exports2.ValidationError = /* @__PURE__ */ __name(function ValidationError3(message, instance, schema, path21, name, argument) {
+      if (Array.isArray(path21)) {
+        this.path = path21;
+        this.property = path21.reduce(function(sum, item) {
+          return sum + makeSuffix(item);
+        }, "instance");
+      } else if (path21 !== void 0) {
+        this.property = path21;
+      }
+      if (message) {
+        this.message = message;
+      }
+      if (schema) {
+        var id = schema.$id || schema.id;
+        this.schema = id || schema;
+      }
+      if (instance !== void 0) {
+        this.instance = instance;
+      }
+      this.name = name;
+      this.argument = argument;
+      this.stack = this.toString();
+    }, "ValidationError");
+    ValidationError2.prototype.toString = /* @__PURE__ */ __name(function toString5() {
+      return this.property + " " + this.message;
+    }, "toString");
+    var ValidatorResult = exports2.ValidatorResult = /* @__PURE__ */ __name(function ValidatorResult2(instance, schema, options, ctx) {
+      this.instance = instance;
+      this.schema = schema;
+      this.options = options;
+      this.path = ctx.path;
+      this.propertyPath = ctx.propertyPath;
+      this.errors = [];
+      this.throwError = options && options.throwError;
+      this.throwFirst = options && options.throwFirst;
+      this.throwAll = options && options.throwAll;
+      this.disableFormat = options && options.disableFormat === true;
+    }, "ValidatorResult");
+    ValidatorResult.prototype.addError = /* @__PURE__ */ __name(function addError(detail) {
+      var err2;
+      if (typeof detail == "string") {
+        err2 = new ValidationError2(detail, this.instance, this.schema, this.path);
+      } else {
+        if (!detail) throw new Error("Missing error detail");
+        if (!detail.message) throw new Error("Missing error message");
+        if (!detail.name) throw new Error("Missing validator type");
+        err2 = new ValidationError2(detail.message, this.instance, this.schema, this.path, detail.name, detail.argument);
+      }
+      this.errors.push(err2);
+      if (this.throwFirst) {
+        throw new ValidatorResultError(this);
+      } else if (this.throwError) {
+        throw err2;
+      }
+      return err2;
+    }, "addError");
+    ValidatorResult.prototype.importErrors = /* @__PURE__ */ __name(function importErrors(res) {
+      if (typeof res == "string" || res && res.validatorType) {
+        this.addError(res);
+      } else if (res && res.errors) {
+        this.errors = this.errors.concat(res.errors);
+      }
+    }, "importErrors");
+    function stringizer(v2, i2) {
+      return i2 + ": " + v2.toString() + "\n";
+    }
+    __name(stringizer, "stringizer");
+    ValidatorResult.prototype.toString = /* @__PURE__ */ __name(function toString5(res) {
+      return this.errors.map(stringizer).join("");
+    }, "toString");
+    Object.defineProperty(ValidatorResult.prototype, "valid", { get: /* @__PURE__ */ __name(function() {
+      return !this.errors.length;
+    }, "get") });
+    module2.exports.ValidatorResultError = ValidatorResultError;
+    function ValidatorResultError(result) {
+      if (typeof Error.captureStackTrace === "function") {
+        Error.captureStackTrace(this, ValidatorResultError);
+      }
+      this.instance = result.instance;
+      this.schema = result.schema;
+      this.options = result.options;
+      this.errors = result.errors;
+    }
+    __name(ValidatorResultError, "ValidatorResultError");
+    ValidatorResultError.prototype = new Error();
+    ValidatorResultError.prototype.constructor = ValidatorResultError;
+    ValidatorResultError.prototype.name = "Validation Error";
+    var SchemaError = exports2.SchemaError = /* @__PURE__ */ __name(function SchemaError2(msg, schema) {
+      this.message = msg;
+      this.schema = schema;
+      Error.call(this, msg);
+      if (typeof Error.captureStackTrace === "function") {
+        Error.captureStackTrace(this, SchemaError2);
+      }
+    }, "SchemaError");
+    SchemaError.prototype = Object.create(
+      Error.prototype,
+      {
+        constructor: { value: SchemaError, enumerable: false },
+        name: { value: "SchemaError", enumerable: false }
+      }
+    );
+    var SchemaContext = exports2.SchemaContext = /* @__PURE__ */ __name(function SchemaContext2(schema, options, path21, base, schemas) {
+      this.schema = schema;
+      this.options = options;
+      if (Array.isArray(path21)) {
+        this.path = path21;
+        this.propertyPath = path21.reduce(function(sum, item) {
+          return sum + makeSuffix(item);
+        }, "instance");
+      } else {
+        this.propertyPath = path21;
+      }
+      this.base = base;
+      this.schemas = schemas;
+    }, "SchemaContext");
+    SchemaContext.prototype.resolve = /* @__PURE__ */ __name(function resolve3(target) {
+      return (() => resolveUrl(this.base, target))();
+    }, "resolve");
+    SchemaContext.prototype.makeChild = /* @__PURE__ */ __name(function makeChild(schema, propertyName) {
+      var path21 = propertyName === void 0 ? this.path : this.path.concat([propertyName]);
+      var id = schema.$id || schema.id;
+      let base = (() => resolveUrl(this.base, id || ""))();
+      var ctx = new SchemaContext(schema, this.options, path21, base, Object.create(this.schemas));
+      if (id && !ctx.schemas[base]) {
+        ctx.schemas[base] = schema;
+      }
+      return ctx;
+    }, "makeChild");
+    var FORMAT_REGEXPS = exports2.FORMAT_REGEXPS = {
+      // 7.3.1. Dates, Times, and Duration
+      "date-time": /^\d{4}-(?:0[0-9]{1}|1[0-2]{1})-(3[01]|0[1-9]|[12][0-9])[tT ](2[0-4]|[01][0-9]):([0-5][0-9]):(60|[0-5][0-9])(\.\d+)?([zZ]|[+-]([0-5][0-9]):(60|[0-5][0-9]))$/,
+      "date": /^\d{4}-(?:0[0-9]{1}|1[0-2]{1})-(3[01]|0[1-9]|[12][0-9])$/,
+      "time": /^(2[0-4]|[01][0-9]):([0-5][0-9]):(60|[0-5][0-9])$/,
+      "duration": /P(T\d+(H(\d+M(\d+S)?)?|M(\d+S)?|S)|\d+(D|M(\d+D)?|Y(\d+M(\d+D)?)?)(T\d+(H(\d+M(\d+S)?)?|M(\d+S)?|S))?|\d+W)/i,
+      // 7.3.2. Email Addresses
+      // TODO: fix the email production
+      "email": /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/,
+      "idn-email": /^("(?:[!#-\[\]-\u{10FFFF}]|\\[\t -\u{10FFFF}])*"|[!#-'*+\-/-9=?A-Z\^-\u{10FFFF}](?:\.?[!#-'*+\-/-9=?A-Z\^-\u{10FFFF}])*)@([!#-'*+\-/-9=?A-Z\^-\u{10FFFF}](?:\.?[!#-'*+\-/-9=?A-Z\^-\u{10FFFF}])*|\[[!-Z\^-\u{10FFFF}]*\])$/u,
+      // 7.3.3. Hostnames
+      // 7.3.4. IP Addresses
+      "ip-address": /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
+      // FIXME whitespace is invalid
+      "ipv6": /^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$/,
+      // 7.3.5. Resource Identifiers
+      // TODO: A more accurate regular expression for "uri" goes:
+      // [A-Za-z][+\-.0-9A-Za-z]*:((/(/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?)?)?#(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|(/(/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?[/?]|[!$&-.0-;=?-Z_a-z~])|/?%[0-9A-Fa-f]{2}|[!$&-.0-;=?-Z_a-z~])(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*(#(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*)?|/(/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+(:\d*)?|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?:\d*|\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)?)?
+      "uri": /^[a-zA-Z][a-zA-Z0-9+.-]*:[^\s]*$/,
+      "uri-reference": /^(((([A-Za-z][+\-.0-9A-Za-z]*(:%[0-9A-Fa-f]{2}|:[!$&-.0-;=?-Z_a-z~]|[/?])|\?)(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|([A-Za-z][+\-.0-9A-Za-z]*:?)?)|([A-Za-z][+\-.0-9A-Za-z]*:)?\/((%[0-9A-Fa-f]{2}|\/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?[/?]|[!$&-.0-;=?-Z_a-z~])(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|(\/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?)?))#(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|(([A-Za-z][+\-.0-9A-Za-z]*)?%[0-9A-Fa-f]{2}|[!$&-.0-9;=@_~]|[A-Za-z][+\-.0-9A-Za-z]*[!$&-*,;=@_~])(%[0-9A-Fa-f]{2}|[!$&-.0-9;=@-Z_a-z~])*((([/?](%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*)?#|[/?])(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*)?|([A-Za-z][+\-.0-9A-Za-z]*(:%[0-9A-Fa-f]{2}|:[!$&-.0-;=?-Z_a-z~]|[/?])|\?)(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|([A-Za-z][+\-.0-9A-Za-z]*:)?\/((%[0-9A-Fa-f]{2}|\/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?[/?]|[!$&-.0-;=?-Z_a-z~])(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|\/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+(:\d*)?|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?:\d*|\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)?|[A-Za-z][+\-.0-9A-Za-z]*:?)?$/,
+      "iri": /^[a-zA-Z][a-zA-Z0-9+.-]*:[^\s]*$/,
+      "iri-reference": /^(((([A-Za-z][+\-.0-9A-Za-z]*(:%[0-9A-Fa-f]{2}|:[!$&-.0-;=?-Z_a-z~-\u{10FFFF}]|[/?])|\?)(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~-\u{10FFFF}])*|([A-Za-z][+\-.0-9A-Za-z]*:?)?)|([A-Za-z][+\-.0-9A-Za-z]*:)?\/((%[0-9A-Fa-f]{2}|\/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~-\u{10FFFF}])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~-\u{10FFFF}]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?[/?]|[!$&-.0-;=?-Z_a-z~-\u{10FFFF}])(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~-\u{10FFFF}])*|(\/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~-\u{10FFFF}])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~-\u{10FFFF}]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?)?))#(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~-\u{10FFFF}])*|(([A-Za-z][+\-.0-9A-Za-z]*)?%[0-9A-Fa-f]{2}|[!$&-.0-9;=@_~-\u{10FFFF}]|[A-Za-z][+\-.0-9A-Za-z]*[!$&-*,;=@_~-\u{10FFFF}])(%[0-9A-Fa-f]{2}|[!$&-.0-9;=@-Z_a-z~-\u{10FFFF}])*((([/?](%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~-\u{10FFFF}])*)?#|[/?])(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~-\u{10FFFF}])*)?|([A-Za-z][+\-.0-9A-Za-z]*(:%[0-9A-Fa-f]{2}|:[!$&-.0-;=?-Z_a-z~-\u{10FFFF}]|[/?])|\?)(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~-\u{10FFFF}])*|([A-Za-z][+\-.0-9A-Za-z]*:)?\/((%[0-9A-Fa-f]{2}|\/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~-\u{10FFFF}])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~-\u{10FFFF}]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?[/?]|[!$&-.0-;=?-Z_a-z~-\u{10FFFF}])(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~-\u{10FFFF}])*|\/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~-\u{10FFFF}])+(:\d*)?|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~-\u{10FFFF}]+)?|[.0-:A-Fa-f]+)\])?:\d*|\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~-\u{10FFFF}]+)?|[.0-:A-Fa-f]+)\])?)?|[A-Za-z][+\-.0-9A-Za-z]*:?)?$/u,
+      "uuid": /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i,
+      // 7.3.6. uri-template
+      "uri-template": /(%[0-9a-f]{2}|[!#$&(-;=?@\[\]_a-z~]|\{[!#&+,./;=?@|]?(%[0-9a-f]{2}|[0-9_a-z])(\.?(%[0-9a-f]{2}|[0-9_a-z]))*(:[1-9]\d{0,3}|\*)?(,(%[0-9a-f]{2}|[0-9_a-z])(\.?(%[0-9a-f]{2}|[0-9_a-z]))*(:[1-9]\d{0,3}|\*)?)*\})*/iu,
+      // 7.3.7. JSON Pointers
+      "json-pointer": /^(\/([\x00-\x2e0-@\[-}\x7f]|~[01])*)*$/iu,
+      "relative-json-pointer": /^\d+(#|(\/([\x00-\x2e0-@\[-}\x7f]|~[01])*)*)$/iu,
+      // hostname regex from: http://stackoverflow.com/a/1420225/5628
+      "hostname": /^(?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\.?$/,
+      "host-name": /^(?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\.?$/,
+      "utc-millisec": /* @__PURE__ */ __name(function(input) {
+        return typeof input === "string" && parseFloat(input) === parseInt(input, 10) && !isNaN(input);
+      }, "utc-millisec"),
+      // 7.3.8. regex
+      "regex": /* @__PURE__ */ __name(function(input) {
+        var result = true;
+        try {
+          new RegExp(input);
+        } catch (e) {
+          result = false;
+        }
+        return result;
+      }, "regex"),
+      // Other definitions
+      // "style" was removed from JSON Schema in draft-4 and is deprecated
+      "style": /[\r\n\t ]*[^\r\n\t ][^:]*:[\r\n\t ]*[^\r\n\t ;]*[\r\n\t ]*;?/,
+      // "color" was removed from JSON Schema in draft-4 and is deprecated
+      "color": /^(#?([0-9A-Fa-f]{3}){1,2}\b|aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|orange|purple|red|silver|teal|white|yellow|(rgb\(\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*,\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*,\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*\))|(rgb\(\s*(\d?\d%|100%)+\s*,\s*(\d?\d%|100%)+\s*,\s*(\d?\d%|100%)+\s*\)))$/,
+      "phone": /^\+(?:[0-9] ?){6,14}[0-9]$/,
+      "alpha": /^[a-zA-Z]+$/,
+      "alphanumeric": /^[a-zA-Z0-9]+$/
+    };
+    FORMAT_REGEXPS.regexp = FORMAT_REGEXPS.regex;
+    FORMAT_REGEXPS.pattern = FORMAT_REGEXPS.regex;
+    FORMAT_REGEXPS.ipv4 = FORMAT_REGEXPS["ip-address"];
+    exports2.isFormat = /* @__PURE__ */ __name(function isFormat(input, format, validator) {
+      if (typeof input === "string" && FORMAT_REGEXPS[format] !== void 0) {
+        if (FORMAT_REGEXPS[format] instanceof RegExp) {
+          return FORMAT_REGEXPS[format].test(input);
+        }
+        if (typeof FORMAT_REGEXPS[format] === "function") {
+          return FORMAT_REGEXPS[format](input);
+        }
+      } else if (validator && validator.customFormats && typeof validator.customFormats[format] === "function") {
+        return validator.customFormats[format](input);
+      }
+      return true;
+    }, "isFormat");
+    var makeSuffix = exports2.makeSuffix = /* @__PURE__ */ __name(function makeSuffix2(key) {
+      key = key.toString();
+      if (!key.match(/[.\s\[\]]/) && !key.match(/^[\d]/)) {
+        return "." + key;
+      }
+      if (key.match(/^\d+$/)) {
+        return "[" + key + "]";
+      }
+      return "[" + JSON.stringify(key) + "]";
+    }, "makeSuffix");
+    exports2.deepCompareStrict = /* @__PURE__ */ __name(function deepCompareStrict(a, b2) {
+      if (typeof a !== typeof b2) {
+        return false;
+      }
+      if (Array.isArray(a)) {
+        if (!Array.isArray(b2)) {
+          return false;
+        }
+        if (a.length !== b2.length) {
+          return false;
+        }
+        return a.every(function(v2, i2) {
+          return deepCompareStrict(a[i2], b2[i2]);
+        });
+      }
+      if (typeof a === "object") {
+        if (!a || !b2) {
+          return a === b2;
+        }
+        var aKeys = Object.keys(a);
+        var bKeys = Object.keys(b2);
+        if (aKeys.length !== bKeys.length) {
+          return false;
+        }
+        return aKeys.every(function(v2) {
+          return deepCompareStrict(a[v2], b2[v2]);
+        });
+      }
+      return a === b2;
+    }, "deepCompareStrict");
+    function deepMerger(target, dst, e, i2) {
+      if (typeof e === "object") {
+        dst[i2] = deepMerge(target[i2], e);
+      } else {
+        if (target.indexOf(e) === -1) {
+          dst.push(e);
+        }
+      }
+    }
+    __name(deepMerger, "deepMerger");
+    function copyist(src, dst, key) {
+      dst[key] = src[key];
+    }
+    __name(copyist, "copyist");
+    function copyistWithDeepMerge(target, src, dst, key) {
+      if (typeof src[key] !== "object" || !src[key]) {
+        dst[key] = src[key];
+      } else {
+        if (!target[key]) {
+          dst[key] = src[key];
+        } else {
+          dst[key] = deepMerge(target[key], src[key]);
+        }
+      }
+    }
+    __name(copyistWithDeepMerge, "copyistWithDeepMerge");
+    function deepMerge(target, src) {
+      var array = Array.isArray(src);
+      var dst = array && [] || {};
+      if (array) {
+        target = target || [];
+        dst = dst.concat(target);
+        src.forEach(deepMerger.bind(null, target, dst));
+      } else {
+        if (target && typeof target === "object") {
+          Object.keys(target).forEach(copyist.bind(null, target, dst));
+        }
+        Object.keys(src).forEach(copyistWithDeepMerge.bind(null, target, src, dst));
+      }
+      return dst;
+    }
+    __name(deepMerge, "deepMerge");
+    module2.exports.deepMerge = deepMerge;
+    exports2.objectGetPath = /* @__PURE__ */ __name(function objectGetPath(o2, s) {
+      var parts = s.split("/").slice(1);
+      var k;
+      while (typeof (k = parts.shift()) == "string") {
+        var n = decodeURIComponent(k.replace(/~0/, "~").replace(/~1/g, "/"));
+        if (!(n in o2)) return;
+        o2 = o2[n];
+      }
+      return o2;
+    }, "objectGetPath");
+    function pathEncoder(v2) {
+      return "/" + encodeURIComponent(v2).replace(/~/g, "%7E");
+    }
+    __name(pathEncoder, "pathEncoder");
+    exports2.encodePath = /* @__PURE__ */ __name(function encodePointer(a) {
+      return a.map(pathEncoder).join("");
+    }, "encodePointer");
+    exports2.getDecimalPlaces = /* @__PURE__ */ __name(function getDecimalPlaces(number) {
+      var decimalPlaces = 0;
+      if (isNaN(number)) return decimalPlaces;
+      if (typeof number !== "number") {
+        number = Number(number);
+      }
+      var parts = number.toString().split("e");
+      if (parts.length === 2) {
+        if (parts[1][0] !== "-") {
+          return decimalPlaces;
+        } else {
+          decimalPlaces = Number(parts[1].slice(1));
+        }
+      }
+      var decimalParts = parts[0].split(".");
+      if (decimalParts.length === 2) {
+        decimalPlaces += decimalParts[1].length;
+      }
+      return decimalPlaces;
+    }, "getDecimalPlaces");
+    exports2.isSchema = /* @__PURE__ */ __name(function isSchema(val) {
+      return typeof val === "object" && val || typeof val === "boolean";
+    }, "isSchema");
+    var resolveUrl = exports2.resolveUrl = /* @__PURE__ */ __name(function resolveUrl2(from, to) {
+      const resolvedUrl = new URL(to, new URL(from, "resolve://"));
+      if (resolvedUrl.protocol === "resolve:") {
+        const { pathname, search, hash } = resolvedUrl;
+        return pathname + search + hash;
+      }
+      return resolvedUrl.toString();
+    }, "resolveUrl");
+  }
+});
+
+// node_modules/jsonschema/lib/attribute.js
+var require_attribute = __commonJS({
+  "node_modules/jsonschema/lib/attribute.js"(exports2, module2) {
+    "use strict";
+    var helpers = require_helpers2();
+    var ValidatorResult = helpers.ValidatorResult;
+    var SchemaError = helpers.SchemaError;
+    var attribute = {};
+    attribute.ignoreProperties = {
+      // informative properties
+      "id": true,
+      "default": true,
+      "description": true,
+      "title": true,
+      // arguments to other properties
+      "additionalItems": true,
+      "then": true,
+      "else": true,
+      // special-handled properties
+      "$schema": true,
+      "$ref": true,
+      "extends": true
+    };
+    var validators3 = attribute.validators = {};
+    validators3.type = /* @__PURE__ */ __name(function validateType(instance, schema, options, ctx) {
+      if (instance === void 0) {
+        return null;
+      }
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var types2 = Array.isArray(schema.type) ? schema.type : [schema.type];
+      if (!types2.some(this.testType.bind(this, instance, schema, options, ctx))) {
+        var list = types2.map(function(v2) {
+          if (!v2) return;
+          var id = v2.$id || v2.id;
+          return id ? "<" + id + ">" : v2 + "";
+        });
+        result.addError({
+          name: "type",
+          argument: list,
+          message: "is not of a type(s) " + list
+        });
+      }
+      return result;
+    }, "validateType");
+    function testSchemaNoThrow(instance, options, ctx, callback, schema) {
+      var throwError2 = options.throwError;
+      var throwAll = options.throwAll;
+      options.throwError = false;
+      options.throwAll = false;
+      var res = this.validateSchema(instance, schema, options, ctx);
+      options.throwError = throwError2;
+      options.throwAll = throwAll;
+      if (!res.valid && callback instanceof Function) {
+        callback(res);
+      }
+      return res.valid;
+    }
+    __name(testSchemaNoThrow, "testSchemaNoThrow");
+    validators3.anyOf = /* @__PURE__ */ __name(function validateAnyOf(instance, schema, options, ctx) {
+      if (instance === void 0) {
+        return null;
+      }
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var inner = new ValidatorResult(instance, schema, options, ctx);
+      if (!Array.isArray(schema.anyOf)) {
+        throw new SchemaError("anyOf must be an array");
+      }
+      if (!schema.anyOf.some(
+        testSchemaNoThrow.bind(
+          this,
+          instance,
+          options,
+          ctx,
+          function(res) {
+            inner.importErrors(res);
+          }
+        )
+      )) {
+        var list = schema.anyOf.map(function(v2, i2) {
+          var id = v2.$id || v2.id;
+          if (id) return "<" + id + ">";
+          return v2.title && JSON.stringify(v2.title) || v2["$ref"] && "<" + v2["$ref"] + ">" || "[subschema " + i2 + "]";
+        });
+        if (options.nestedErrors) {
+          result.importErrors(inner);
+        }
+        result.addError({
+          name: "anyOf",
+          argument: list,
+          message: "is not any of " + list.join(",")
+        });
+      }
+      return result;
+    }, "validateAnyOf");
+    validators3.allOf = /* @__PURE__ */ __name(function validateAllOf(instance, schema, options, ctx) {
+      if (instance === void 0) {
+        return null;
+      }
+      if (!Array.isArray(schema.allOf)) {
+        throw new SchemaError("allOf must be an array");
+      }
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var self2 = this;
+      schema.allOf.forEach(function(v2, i2) {
+        var valid2 = self2.validateSchema(instance, v2, options, ctx);
+        if (!valid2.valid) {
+          var id = v2.$id || v2.id;
+          var msg = id || v2.title && JSON.stringify(v2.title) || v2["$ref"] && "<" + v2["$ref"] + ">" || "[subschema " +
+          i2 + "]";
+          result.addError({
+            name: "allOf",
+            argument: { id: msg, length: valid2.errors.length, valid: valid2 },
+            message: "does not match allOf schema " + msg + " with " + valid2.errors.length + " error[s]:"
+          });
+          result.importErrors(valid2);
+        }
+      });
+      return result;
+    }, "validateAllOf");
+    validators3.oneOf = /* @__PURE__ */ __name(function validateOneOf(instance, schema, options, ctx) {
+      if (instance === void 0) {
+        return null;
+      }
+      if (!Array.isArray(schema.oneOf)) {
+        throw new SchemaError("oneOf must be an array");
+      }
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var inner = new ValidatorResult(instance, schema, options, ctx);
+      var count = schema.oneOf.filter(
+        testSchemaNoThrow.bind(
+          this,
+          instance,
+          options,
+          ctx,
+          function(res) {
+            inner.importErrors(res);
+          }
+        )
+      ).length;
+      var list = schema.oneOf.map(function(v2, i2) {
+        var id = v2.$id || v2.id;
+        return id || v2.title && JSON.stringify(v2.title) || v2["$ref"] && "<" + v2["$ref"] + ">" || "[subschema " + i2 +
+        "]";
+      });
+      if (count !== 1) {
+        if (options.nestedErrors) {
+          result.importErrors(inner);
+        }
+        result.addError({
+          name: "oneOf",
+          argument: list,
+          message: "is not exactly one from " + list.join(",")
+        });
+      }
+      return result;
+    }, "validateOneOf");
+    validators3.if = /* @__PURE__ */ __name(function validateIf(instance, schema, options, ctx) {
+      if (instance === void 0) return null;
+      if (!helpers.isSchema(schema.if)) throw new Error('Expected "if" keyword to be a schema');
+      var ifValid = testSchemaNoThrow.call(this, instance, options, ctx, null, schema.if);
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var res;
+      if (ifValid) {
+        if (schema.then === void 0) return;
+        if (!helpers.isSchema(schema.then)) throw new Error('Expected "then" keyword to be a schema');
+        res = this.validateSchema(instance, schema.then, options, ctx.makeChild(schema.then));
+        result.importErrors(res);
+      } else {
+        if (schema.else === void 0) return;
+        if (!helpers.isSchema(schema.else)) throw new Error('Expected "else" keyword to be a schema');
+        res = this.validateSchema(instance, schema.else, options, ctx.makeChild(schema.else));
+        result.importErrors(res);
+      }
+      return result;
+    }, "validateIf");
+    function getEnumerableProperty(object, key) {
+      if (Object.hasOwnProperty.call(object, key)) return object[key];
+      if (!(key in object)) return;
+      while (object = Object.getPrototypeOf(object)) {
+        if (Object.propertyIsEnumerable.call(object, key)) return object[key];
+      }
+    }
+    __name(getEnumerableProperty, "getEnumerableProperty");
+    validators3.propertyNames = /* @__PURE__ */ __name(function validatePropertyNames(instance, schema, options, ctx) {
+      if (!this.types.object(instance)) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var subschema = schema.propertyNames !== void 0 ? schema.propertyNames : {};
+      if (!helpers.isSchema(subschema)) throw new SchemaError('Expected "propertyNames" to be a schema (object or boolea\
+n)');
+      for (var property in instance) {
+        if (getEnumerableProperty(instance, property) !== void 0) {
+          var res = this.validateSchema(property, subschema, options, ctx.makeChild(subschema));
+          result.importErrors(res);
+        }
+      }
+      return result;
+    }, "validatePropertyNames");
+    validators3.properties = /* @__PURE__ */ __name(function validateProperties(instance, schema, options, ctx) {
+      if (!this.types.object(instance)) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var properties = schema.properties || {};
+      for (var property in properties) {
+        var subschema = properties[property];
+        if (subschema === void 0) {
+          continue;
+        } else if (subschema === null) {
+          throw new SchemaError('Unexpected null, expected schema in "properties"');
+        }
+        if (typeof options.preValidateProperty == "function") {
+          options.preValidateProperty(instance, property, subschema, options, ctx);
+        }
+        var prop = getEnumerableProperty(instance, property);
+        var res = this.validateSchema(prop, subschema, options, ctx.makeChild(subschema, property));
+        if (res.instance !== result.instance[property]) result.instance[property] = res.instance;
+        result.importErrors(res);
+      }
+      return result;
+    }, "validateProperties");
+    function testAdditionalProperty(instance, schema, options, ctx, property, result) {
+      if (!this.types.object(instance)) return;
+      if (schema.properties && schema.properties[property] !== void 0) {
+        return;
+      }
+      if (schema.additionalProperties === false) {
+        result.addError({
+          name: "additionalProperties",
+          argument: property,
+          message: "is not allowed to have the additional property " + JSON.stringify(property)
+        });
+      } else {
+        var additionalProperties = schema.additionalProperties || {};
+        if (typeof options.preValidateProperty == "function") {
+          options.preValidateProperty(instance, property, additionalProperties, options, ctx);
+        }
+        var res = this.validateSchema(instance[property], additionalProperties, options, ctx.makeChild(additionalProperties,
+        property));
+        if (res.instance !== result.instance[property]) result.instance[property] = res.instance;
+        result.importErrors(res);
+      }
+    }
+    __name(testAdditionalProperty, "testAdditionalProperty");
+    validators3.patternProperties = /* @__PURE__ */ __name(function validatePatternProperties(instance, schema, options, ctx) {
+      if (!this.types.object(instance)) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var patternProperties = schema.patternProperties || {};
+      for (var property in instance) {
+        var test2 = true;
+        for (var pattern in patternProperties) {
+          var subschema = patternProperties[pattern];
+          if (subschema === void 0) {
+            continue;
+          } else if (subschema === null) {
+            throw new SchemaError('Unexpected null, expected schema in "patternProperties"');
+          }
+          try {
+            var regexp = new RegExp(pattern, "u");
+          } catch (_e2) {
+            regexp = new RegExp(pattern);
+          }
+          if (!regexp.test(property)) {
+            continue;
+          }
+          test2 = false;
+          if (typeof options.preValidateProperty == "function") {
+            options.preValidateProperty(instance, property, subschema, options, ctx);
+          }
+          var res = this.validateSchema(instance[property], subschema, options, ctx.makeChild(subschema, property));
+          if (res.instance !== result.instance[property]) result.instance[property] = res.instance;
+          result.importErrors(res);
+        }
+        if (test2) {
+          testAdditionalProperty.call(this, instance, schema, options, ctx, property, result);
+        }
+      }
+      return result;
+    }, "validatePatternProperties");
+    validators3.additionalProperties = /* @__PURE__ */ __name(function validateAdditionalProperties(instance, schema, options, ctx) {
+      if (!this.types.object(instance)) return;
+      if (schema.patternProperties) {
+        return null;
+      }
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      for (var property in instance) {
+        testAdditionalProperty.call(this, instance, schema, options, ctx, property, result);
+      }
+      return result;
+    }, "validateAdditionalProperties");
+    validators3.minProperties = /* @__PURE__ */ __name(function validateMinProperties(instance, schema, options, ctx) {
+      if (!this.types.object(instance)) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var keys = Object.keys(instance);
+      if (!(keys.length >= schema.minProperties)) {
+        result.addError({
+          name: "minProperties",
+          argument: schema.minProperties,
+          message: "does not meet minimum property length of " + schema.minProperties
+        });
+      }
+      return result;
+    }, "validateMinProperties");
+    validators3.maxProperties = /* @__PURE__ */ __name(function validateMaxProperties(instance, schema, options, ctx) {
+      if (!this.types.object(instance)) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var keys = Object.keys(instance);
+      if (!(keys.length <= schema.maxProperties)) {
+        result.addError({
+          name: "maxProperties",
+          argument: schema.maxProperties,
+          message: "does not meet maximum property length of " + schema.maxProperties
+        });
+      }
+      return result;
+    }, "validateMaxProperties");
+    validators3.items = /* @__PURE__ */ __name(function validateItems(instance, schema, options, ctx) {
+      var self2 = this;
+      if (!this.types.array(instance)) return;
+      if (schema.items === void 0) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      instance.every(function(value, i2) {
+        if (Array.isArray(schema.items)) {
+          var items = schema.items[i2] === void 0 ? schema.additionalItems : schema.items[i2];
+        } else {
+          var items = schema.items;
+        }
+        if (items === void 0) {
+          return true;
+        }
+        if (items === false) {
+          result.addError({
+            name: "items",
+            message: "additionalItems not permitted"
+          });
+          return false;
+        }
+        var res = self2.validateSchema(value, items, options, ctx.makeChild(items, i2));
+        if (res.instance !== result.instance[i2]) result.instance[i2] = res.instance;
+        result.importErrors(res);
+        return true;
+      });
+      return result;
+    }, "validateItems");
+    validators3.contains = /* @__PURE__ */ __name(function validateContains(instance, schema, options, ctx) {
+      var self2 = this;
+      if (!this.types.array(instance)) return;
+      if (schema.contains === void 0) return;
+      if (!helpers.isSchema(schema.contains)) throw new Error('Expected "contains" keyword to be a schema');
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var count = instance.some(function(value, i2) {
+        var res = self2.validateSchema(value, schema.contains, options, ctx.makeChild(schema.contains, i2));
+        return res.errors.length === 0;
+      });
+      if (count === false) {
+        result.addError({
+          name: "contains",
+          argument: schema.contains,
+          message: "must contain an item matching given schema"
+        });
+      }
+      return result;
+    }, "validateContains");
+    validators3.minimum = /* @__PURE__ */ __name(function validateMinimum(instance, schema, options, ctx) {
+      if (!this.types.number(instance)) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      if (schema.exclusiveMinimum && schema.exclusiveMinimum === true) {
+        if (!(instance > schema.minimum)) {
+          result.addError({
+            name: "minimum",
+            argument: schema.minimum,
+            message: "must be greater than " + schema.minimum
+          });
+        }
+      } else {
+        if (!(instance >= schema.minimum)) {
+          result.addError({
+            name: "minimum",
+            argument: schema.minimum,
+            message: "must be greater than or equal to " + schema.minimum
+          });
+        }
+      }
+      return result;
+    }, "validateMinimum");
+    validators3.maximum = /* @__PURE__ */ __name(function validateMaximum(instance, schema, options, ctx) {
+      if (!this.types.number(instance)) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      if (schema.exclusiveMaximum && schema.exclusiveMaximum === true) {
+        if (!(instance < schema.maximum)) {
+          result.addError({
+            name: "maximum",
+            argument: schema.maximum,
+            message: "must be less than " + schema.maximum
+          });
+        }
+      } else {
+        if (!(instance <= schema.maximum)) {
+          result.addError({
+            name: "maximum",
+            argument: schema.maximum,
+            message: "must be less than or equal to " + schema.maximum
+          });
+        }
+      }
+      return result;
+    }, "validateMaximum");
+    validators3.exclusiveMinimum = /* @__PURE__ */ __name(function validateExclusiveMinimum(instance, schema, options, ctx) {
+      if (typeof schema.exclusiveMinimum === "boolean") return;
+      if (!this.types.number(instance)) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var valid2 = instance > schema.exclusiveMinimum;
+      if (!valid2) {
+        result.addError({
+          name: "exclusiveMinimum",
+          argument: schema.exclusiveMinimum,
+          message: "must be strictly greater than " + schema.exclusiveMinimum
+        });
+      }
+      return result;
+    }, "validateExclusiveMinimum");
+    validators3.exclusiveMaximum = /* @__PURE__ */ __name(function validateExclusiveMaximum(instance, schema, options, ctx) {
+      if (typeof schema.exclusiveMaximum === "boolean") return;
+      if (!this.types.number(instance)) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var valid2 = instance < schema.exclusiveMaximum;
+      if (!valid2) {
+        result.addError({
+          name: "exclusiveMaximum",
+          argument: schema.exclusiveMaximum,
+          message: "must be strictly less than " + schema.exclusiveMaximum
+        });
+      }
+      return result;
+    }, "validateExclusiveMaximum");
+    var validateMultipleOfOrDivisbleBy = /* @__PURE__ */ __name(function validateMultipleOfOrDivisbleBy2(instance, schema, options, ctx, validationType, errorMessage) {
+      if (!this.types.number(instance)) return;
+      var validationArgument = schema[validationType];
+      if (validationArgument == 0) {
+        throw new SchemaError(validationType + " cannot be zero");
+      }
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var instanceDecimals = helpers.getDecimalPlaces(instance);
+      var divisorDecimals = helpers.getDecimalPlaces(validationArgument);
+      var maxDecimals = Math.max(instanceDecimals, divisorDecimals);
+      var multiplier = Math.pow(10, maxDecimals);
+      if (Math.round(instance * multiplier) % Math.round(validationArgument * multiplier) !== 0) {
+        result.addError({
+          name: validationType,
+          argument: validationArgument,
+          message: errorMessage + JSON.stringify(validationArgument)
+        });
+      }
+      return result;
+    }, "validateMultipleOfOrDivisbleBy");
+    validators3.multipleOf = /* @__PURE__ */ __name(function validateMultipleOf(instance, schema, options, ctx) {
+      return validateMultipleOfOrDivisbleBy.call(this, instance, schema, options, ctx, "multipleOf", "is not a multiple \
+of (divisible by) ");
+    }, "validateMultipleOf");
+    validators3.divisibleBy = /* @__PURE__ */ __name(function validateDivisibleBy(instance, schema, options, ctx) {
+      return validateMultipleOfOrDivisbleBy.call(this, instance, schema, options, ctx, "divisibleBy", "is not divisible \
+by (multiple of) ");
+    }, "validateDivisibleBy");
+    validators3.required = /* @__PURE__ */ __name(function validateRequired(instance, schema, options, ctx) {
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      if (instance === void 0 && schema.required === true) {
+        result.addError({
+          name: "required",
+          message: "is required"
+        });
+      } else if (this.types.object(instance) && Array.isArray(schema.required)) {
+        schema.required.forEach(function(n) {
+          if (getEnumerableProperty(instance, n) === void 0) {
+            result.addError({
+              name: "required",
+              argument: n,
+              message: "requires property " + JSON.stringify(n)
+            });
+          }
+        });
+      }
+      return result;
+    }, "validateRequired");
+    validators3.pattern = /* @__PURE__ */ __name(function validatePattern(instance, schema, options, ctx) {
+      if (!this.types.string(instance)) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var pattern = schema.pattern;
+      try {
+        var regexp = new RegExp(pattern, "u");
+      } catch (_e2) {
+        regexp = new RegExp(pattern);
+      }
+      if (!instance.match(regexp)) {
+        result.addError({
+          name: "pattern",
+          argument: schema.pattern,
+          message: "does not match pattern " + JSON.stringify(schema.pattern.toString())
+        });
+      }
+      return result;
+    }, "validatePattern");
+    validators3.format = /* @__PURE__ */ __name(function validateFormat(instance, schema, options, ctx) {
+      if (instance === void 0) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      if (!result.disableFormat && !helpers.isFormat(instance, schema.format, this)) {
+        result.addError({
+          name: "format",
+          argument: schema.format,
+          message: "does not conform to the " + JSON.stringify(schema.format) + " format"
+        });
+      }
+      return result;
+    }, "validateFormat");
+    validators3.minLength = /* @__PURE__ */ __name(function validateMinLength(instance, schema, options, ctx) {
+      if (!this.types.string(instance)) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var hsp = instance.match(/[\uDC00-\uDFFF]/g);
+      var length = instance.length - (hsp ? hsp.length : 0);
+      if (!(length >= schema.minLength)) {
+        result.addError({
+          name: "minLength",
+          argument: schema.minLength,
+          message: "does not meet minimum length of " + schema.minLength
+        });
+      }
+      return result;
+    }, "validateMinLength");
+    validators3.maxLength = /* @__PURE__ */ __name(function validateMaxLength(instance, schema, options, ctx) {
+      if (!this.types.string(instance)) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var hsp = instance.match(/[\uDC00-\uDFFF]/g);
+      var length = instance.length - (hsp ? hsp.length : 0);
+      if (!(length <= schema.maxLength)) {
+        result.addError({
+          name: "maxLength",
+          argument: schema.maxLength,
+          message: "does not meet maximum length of " + schema.maxLength
+        });
+      }
+      return result;
+    }, "validateMaxLength");
+    validators3.minItems = /* @__PURE__ */ __name(function validateMinItems(instance, schema, options, ctx) {
+      if (!this.types.array(instance)) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      if (!(instance.length >= schema.minItems)) {
+        result.addError({
+          name: "minItems",
+          argument: schema.minItems,
+          message: "does not meet minimum length of " + schema.minItems
+        });
+      }
+      return result;
+    }, "validateMinItems");
+    validators3.maxItems = /* @__PURE__ */ __name(function validateMaxItems(instance, schema, options, ctx) {
+      if (!this.types.array(instance)) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      if (!(instance.length <= schema.maxItems)) {
+        result.addError({
+          name: "maxItems",
+          argument: schema.maxItems,
+          message: "does not meet maximum length of " + schema.maxItems
+        });
+      }
+      return result;
+    }, "validateMaxItems");
+    function testArrays(v2, i2, a) {
+      var j2, len = a.length;
+      for (j2 = i2 + 1, len; j2 < len; j2++) {
+        if (helpers.deepCompareStrict(v2, a[j2])) {
+          return false;
+        }
+      }
+      return true;
+    }
+    __name(testArrays, "testArrays");
+    validators3.uniqueItems = /* @__PURE__ */ __name(function validateUniqueItems(instance, schema, options, ctx) {
+      if (schema.uniqueItems !== true) return;
+      if (!this.types.array(instance)) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      if (!instance.every(testArrays)) {
+        result.addError({
+          name: "uniqueItems",
+          message: "contains duplicate item"
+        });
+      }
+      return result;
+    }, "validateUniqueItems");
+    validators3.dependencies = /* @__PURE__ */ __name(function validateDependencies(instance, schema, options, ctx) {
+      if (!this.types.object(instance)) return;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      for (var property in schema.dependencies) {
+        if (instance[property] === void 0) {
+          continue;
+        }
+        var dep = schema.dependencies[property];
+        var childContext = ctx.makeChild(dep, property);
+        if (typeof dep == "string") {
+          dep = [dep];
+        }
+        if (Array.isArray(dep)) {
+          dep.forEach(function(prop) {
+            if (instance[prop] === void 0) {
+              result.addError({
+                // FIXME there's two different "dependencies" errors here with slightly different outputs
+                // Can we make these the same? Or should we create different error types?
+                name: "dependencies",
+                argument: childContext.propertyPath,
+                message: "property " + prop + " not found, required by " + childContext.propertyPath
+              });
+            }
+          });
+        } else {
+          var res = this.validateSchema(instance, dep, options, childContext);
+          if (result.instance !== res.instance) result.instance = res.instance;
+          if (res && res.errors.length) {
+            result.addError({
+              name: "dependencies",
+              argument: childContext.propertyPath,
+              message: "does not meet dependency required by " + childContext.propertyPath
+            });
+            result.importErrors(res);
+          }
+        }
+      }
+      return result;
+    }, "validateDependencies");
+    validators3["enum"] = /* @__PURE__ */ __name(function validateEnum(instance, schema, options, ctx) {
+      if (instance === void 0) {
+        return null;
+      }
+      if (!Array.isArray(schema["enum"])) {
+        throw new SchemaError("enum expects an array", schema);
+      }
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      if (!schema["enum"].some(helpers.deepCompareStrict.bind(null, instance))) {
+        result.addError({
+          name: "enum",
+          argument: schema["enum"],
+          message: "is not one of enum values: " + schema["enum"].map(String).join(",")
+        });
+      }
+      return result;
+    }, "validateEnum");
+    validators3["const"] = /* @__PURE__ */ __name(function validateEnum(instance, schema, options, ctx) {
+      if (instance === void 0) {
+        return null;
+      }
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      if (!helpers.deepCompareStrict(schema["const"], instance)) {
+        result.addError({
+          name: "const",
+          argument: schema["const"],
+          message: "does not exactly match expected constant: " + schema["const"]
+        });
+      }
+      return result;
+    }, "validateEnum");
+    validators3.not = validators3.disallow = /* @__PURE__ */ __name(function validateNot(instance, schema, options, ctx) {
+      var self2 = this;
+      if (instance === void 0) return null;
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      var notTypes = schema.not || schema.disallow;
+      if (!notTypes) return null;
+      if (!Array.isArray(notTypes)) notTypes = [notTypes];
+      notTypes.forEach(function(type) {
+        if (self2.testType(instance, schema, options, ctx, type)) {
+          var id = type && (type.$id || type.id);
+          var schemaId = id || type;
+          result.addError({
+            name: "not",
+            argument: schemaId,
+            message: "is of prohibited type " + schemaId
+          });
+        }
+      });
+      return result;
+    }, "validateNot");
+    module2.exports = attribute;
+  }
+});
+
+// node_modules/jsonschema/lib/scan.js
+var require_scan2 = __commonJS({
+  "node_modules/jsonschema/lib/scan.js"(exports2, module2) {
+    "use strict";
+    var helpers = require_helpers2();
+    module2.exports.SchemaScanResult = SchemaScanResult;
+    function SchemaScanResult(found, ref) {
+      this.id = found;
+      this.ref = ref;
+    }
+    __name(SchemaScanResult, "SchemaScanResult");
+    module2.exports.scan = /* @__PURE__ */ __name(function scan(base, schema) {
+      function scanSchema(baseuri, schema2) {
+        if (!schema2 || typeof schema2 != "object") return;
+        if (schema2.$ref) {
+          let resolvedUri = helpers.resolveUrl(baseuri, schema2.$ref);
+          ref[resolvedUri] = ref[resolvedUri] ? ref[resolvedUri] + 1 : 0;
+          return;
+        }
+        var id = schema2.$id || schema2.id;
+        let resolvedBase = helpers.resolveUrl(baseuri, id);
+        var ourBase = id ? resolvedBase : baseuri;
+        if (ourBase) {
+          if (ourBase.indexOf("#") < 0) ourBase += "#";
+          if (found[ourBase]) {
+            if (!helpers.deepCompareStrict(found[ourBase], schema2)) {
+              throw new Error("Schema <" + ourBase + "> already exists with different definition");
+            }
+            return found[ourBase];
+          }
+          found[ourBase] = schema2;
+          if (ourBase[ourBase.length - 1] == "#") {
+            found[ourBase.substring(0, ourBase.length - 1)] = schema2;
+          }
+        }
+        scanArray(ourBase + "/items", Array.isArray(schema2.items) ? schema2.items : [schema2.items]);
+        scanArray(ourBase + "/extends", Array.isArray(schema2.extends) ? schema2.extends : [schema2.extends]);
+        scanSchema(ourBase + "/additionalItems", schema2.additionalItems);
+        scanObject(ourBase + "/properties", schema2.properties);
+        scanSchema(ourBase + "/additionalProperties", schema2.additionalProperties);
+        scanObject(ourBase + "/definitions", schema2.definitions);
+        scanObject(ourBase + "/patternProperties", schema2.patternProperties);
+        scanObject(ourBase + "/dependencies", schema2.dependencies);
+        scanArray(ourBase + "/disallow", schema2.disallow);
+        scanArray(ourBase + "/allOf", schema2.allOf);
+        scanArray(ourBase + "/anyOf", schema2.anyOf);
+        scanArray(ourBase + "/oneOf", schema2.oneOf);
+        scanSchema(ourBase + "/not", schema2.not);
+      }
+      __name(scanSchema, "scanSchema");
+      function scanArray(baseuri, schemas) {
+        if (!Array.isArray(schemas)) return;
+        for (var i2 = 0; i2 < schemas.length; i2++) {
+          scanSchema(baseuri + "/" + i2, schemas[i2]);
+        }
+      }
+      __name(scanArray, "scanArray");
+      function scanObject(baseuri, schemas) {
+        if (!schemas || typeof schemas != "object") return;
+        for (var p2 in schemas) {
+          scanSchema(baseuri + "/" + p2, schemas[p2]);
+        }
+      }
+      __name(scanObject, "scanObject");
+      var found = {};
+      var ref = {};
+      scanSchema(base, schema);
+      return new SchemaScanResult(found, ref);
+    }, "scan");
+  }
+});
+
+// node_modules/jsonschema/lib/validator.js
+var require_validator = __commonJS({
+  "node_modules/jsonschema/lib/validator.js"(exports2, module2) {
+    "use strict";
+    var attribute = require_attribute();
+    var helpers = require_helpers2();
+    var scanSchema = require_scan2().scan;
+    var ValidatorResult = helpers.ValidatorResult;
+    var ValidatorResultError = helpers.ValidatorResultError;
+    var SchemaError = helpers.SchemaError;
+    var SchemaContext = helpers.SchemaContext;
+    var anonymousBase = "/";
+    var Validator = /* @__PURE__ */ __name(function Validator2() {
+      this.customFormats = Object.create(Validator2.prototype.customFormats);
+      this.schemas = {};
+      this.unresolvedRefs = [];
+      this.types = Object.create(types2);
+      this.attributes = Object.create(attribute.validators);
+    }, "Validator");
+    Validator.prototype.customFormats = {};
+    Validator.prototype.schemas = null;
+    Validator.prototype.types = null;
+    Validator.prototype.attributes = null;
+    Validator.prototype.unresolvedRefs = null;
+    Validator.prototype.addSchema = /* @__PURE__ */ __name(function addSchema(schema, base) {
+      var self2 = this;
+      if (!schema) {
+        return null;
+      }
+      var scan = scanSchema(base || anonymousBase, schema);
+      var ourUri = base || schema.$id || schema.id;
+      for (var uri in scan.id) {
+        this.schemas[uri] = scan.id[uri];
+      }
+      for (var uri in scan.ref) {
+        this.unresolvedRefs.push(uri);
+      }
+      this.unresolvedRefs = this.unresolvedRefs.filter(function(uri2) {
+        return typeof self2.schemas[uri2] === "undefined";
+      });
+      return this.schemas[ourUri];
+    }, "addSchema");
+    Validator.prototype.addSubSchemaArray = /* @__PURE__ */ __name(function addSubSchemaArray(baseuri, schemas) {
+      if (!Array.isArray(schemas)) return;
+      for (var i2 = 0; i2 < schemas.length; i2++) {
+        this.addSubSchema(baseuri, schemas[i2]);
+      }
+    }, "addSubSchemaArray");
+    Validator.prototype.addSubSchemaObject = /* @__PURE__ */ __name(function addSubSchemaArray(baseuri, schemas) {
+      if (!schemas || typeof schemas != "object") return;
+      for (var p2 in schemas) {
+        this.addSubSchema(baseuri, schemas[p2]);
+      }
+    }, "addSubSchemaArray");
+    Validator.prototype.setSchemas = /* @__PURE__ */ __name(function setSchemas(schemas) {
+      this.schemas = schemas;
+    }, "setSchemas");
+    Validator.prototype.getSchema = /* @__PURE__ */ __name(function getSchema(urn) {
+      return this.schemas[urn];
+    }, "getSchema");
+    Validator.prototype.validate = /* @__PURE__ */ __name(function validate3(instance, schema, options, ctx) {
+      if (typeof schema !== "boolean" && typeof schema !== "object" || schema === null) {
+        throw new SchemaError("Expected `schema` to be an object or boolean");
+      }
+      if (!options) {
+        options = {};
+      }
+      var id = schema.$id || schema.id;
+      let base = helpers.resolveUrl(options.base, id || "");
+      if (!ctx) {
+        ctx = new SchemaContext(schema, options, [], base, Object.create(this.schemas));
+        if (!ctx.schemas[base]) {
+          ctx.schemas[base] = schema;
+        }
+        var found = scanSchema(base, schema);
+        for (var n in found.id) {
+          var sch = found.id[n];
+          ctx.schemas[n] = sch;
+        }
+      }
+      if (options.required && instance === void 0) {
+        var result = new ValidatorResult(instance, schema, options, ctx);
+        result.addError("is required, but is undefined");
+        return result;
+      }
+      var result = this.validateSchema(instance, schema, options, ctx);
+      if (!result) {
+        throw new Error("Result undefined");
+      } else if (options.throwAll && result.errors.length) {
+        throw new ValidatorResultError(result);
+      }
+      return result;
+    }, "validate");
+    function shouldResolve(schema) {
+      var ref = typeof schema === "string" ? schema : schema.$ref;
+      if (typeof ref == "string") return ref;
+      return false;
+    }
+    __name(shouldResolve, "shouldResolve");
+    Validator.prototype.validateSchema = /* @__PURE__ */ __name(function validateSchema(instance, schema, options, ctx) {
+      var result = new ValidatorResult(instance, schema, options, ctx);
+      if (typeof schema === "boolean") {
+        if (schema === true) {
+          schema = {};
+        } else if (schema === false) {
+          schema = { type: [] };
+        }
+      } else if (!schema) {
+        throw new Error("schema is undefined");
+      }
+      if (schema["extends"]) {
+        if (Array.isArray(schema["extends"])) {
+          var schemaobj = { schema, ctx };
+          schema["extends"].forEach(this.schemaTraverser.bind(this, schemaobj));
+          schema = schemaobj.schema;
+          schemaobj.schema = null;
+          schemaobj.ctx = null;
+          schemaobj = null;
+        } else {
+          schema = helpers.deepMerge(schema, this.superResolve(schema["extends"], ctx));
+        }
+      }
+      var switchSchema = shouldResolve(schema);
+      if (switchSchema) {
+        var resolved = this.resolve(schema, switchSchema, ctx);
+        var subctx = new SchemaContext(resolved.subschema, options, ctx.path, resolved.switchSchema, ctx.schemas);
+        return this.validateSchema(instance, resolved.subschema, options, subctx);
+      }
+      var skipAttributes = options && options.skipAttributes || [];
+      for (var key in schema) {
+        if (!attribute.ignoreProperties[key] && skipAttributes.indexOf(key) < 0) {
+          var validatorErr = null;
+          var validator = this.attributes[key];
+          if (validator) {
+            validatorErr = validator.call(this, instance, schema, options, ctx);
+          } else if (options.allowUnknownAttributes === false) {
+            throw new SchemaError("Unsupported attribute: " + key, schema);
+          }
+          if (validatorErr) {
+            result.importErrors(validatorErr);
+          }
+        }
+      }
+      if (typeof options.rewrite == "function") {
+        var value = options.rewrite.call(this, instance, schema, options, ctx);
+        result.instance = value;
+      }
+      return result;
+    }, "validateSchema");
+    Validator.prototype.schemaTraverser = /* @__PURE__ */ __name(function schemaTraverser(schemaobj, s) {
+      schemaobj.schema = helpers.deepMerge(schemaobj.schema, this.superResolve(s, schemaobj.ctx));
+    }, "schemaTraverser");
+    Validator.prototype.superResolve = /* @__PURE__ */ __name(function superResolve(schema, ctx) {
+      var ref = shouldResolve(schema);
+      if (ref) {
+        return this.resolve(schema, ref, ctx).subschema;
+      }
+      return schema;
+    }, "superResolve");
+    Validator.prototype.resolve = /* @__PURE__ */ __name(function resolve3(schema, switchSchema, ctx) {
+      switchSchema = ctx.resolve(switchSchema);
+      if (ctx.schemas[switchSchema]) {
+        return { subschema: ctx.schemas[switchSchema], switchSchema };
+      }
+      let parsed = new URL(switchSchema, "thismessage::/");
+      let fragment = parsed.hash;
+      var document2 = fragment && fragment.length && switchSchema.substr(0, switchSchema.length - fragment.length);
+      if (!document2 || !ctx.schemas[document2]) {
+        throw new SchemaError("no such schema <" + switchSchema + ">", schema);
+      }
+      var subschema = helpers.objectGetPath(ctx.schemas[document2], fragment.substr(1));
+      if (subschema === void 0) {
+        throw new SchemaError("no such schema " + fragment + " located in <" + document2 + ">", schema);
+      }
+      return { subschema, switchSchema };
+    }, "resolve");
+    Validator.prototype.testType = /* @__PURE__ */ __name(function validateType(instance, schema, options, ctx, type) {
+      if (type === void 0) {
+        return;
+      } else if (type === null) {
+        throw new SchemaError('Unexpected null in "type" keyword');
+      }
+      if (typeof this.types[type] == "function") {
+        return this.types[type].call(this, instance);
+      }
+      if (type && typeof type == "object") {
+        var res = this.validateSchema(instance, type, options, ctx);
+        return res === void 0 || !(res && res.errors.length);
+      }
+      return true;
+    }, "validateType");
+    var types2 = Validator.prototype.types = {};
+    types2.string = /* @__PURE__ */ __name(function testString(instance) {
+      return typeof instance == "string";
+    }, "testString");
+    types2.number = /* @__PURE__ */ __name(function testNumber(instance) {
+      return typeof instance == "number" && isFinite(instance);
+    }, "testNumber");
+    types2.integer = /* @__PURE__ */ __name(function testInteger(instance) {
+      return typeof instance == "number" && instance % 1 === 0;
+    }, "testInteger");
+    types2.boolean = /* @__PURE__ */ __name(function testBoolean(instance) {
+      return typeof instance == "boolean";
+    }, "testBoolean");
+    types2.array = /* @__PURE__ */ __name(function testArray(instance) {
+      return Array.isArray(instance);
+    }, "testArray");
+    types2["null"] = /* @__PURE__ */ __name(function testNull(instance) {
+      return instance === null;
+    }, "testNull");
+    types2.date = /* @__PURE__ */ __name(function testDate(instance) {
+      return instance instanceof Date;
+    }, "testDate");
+    types2.any = /* @__PURE__ */ __name(function testAny(instance) {
+      return true;
+    }, "testAny");
+    types2.object = /* @__PURE__ */ __name(function testObject(instance) {
+      return instance && typeof instance === "object" && !Array.isArray(instance) && !(instance instanceof Date);
+    }, "testObject");
+    module2.exports = Validator;
+  }
+});
+
+// node_modules/jsonschema/lib/index.js
+var require_lib = __commonJS({
+  "node_modules/jsonschema/lib/index.js"(exports2, module2) {
+    "use strict";
+    var Validator = module2.exports.Validator = require_validator();
+    module2.exports.ValidatorResult = require_helpers2().ValidatorResult;
+    module2.exports.ValidatorResultError = require_helpers2().ValidatorResultError;
+    module2.exports.ValidationError = require_helpers2().ValidationError;
+    module2.exports.SchemaError = require_helpers2().SchemaError;
+    module2.exports.SchemaScanResult = require_scan2().SchemaScanResult;
+    module2.exports.scan = require_scan2().scan;
+    module2.exports.validate = function(instance, schema, options) {
+      var v2 = new Validator();
+      return v2.validate(instance, schema, options);
+    };
   }
 });
 
@@ -53207,9 +54534,9 @@ function removeBrackets(key) {
   return utils_default.endsWith(key, "[]") ? key.slice(0, -2) : key;
 }
 __name(removeBrackets, "removeBrackets");
-function renderKey(path20, key, dots) {
-  if (!path20) return key;
-  return path20.concat(key).map(/* @__PURE__ */ __name(function each(token, i2) {
+function renderKey(path21, key, dots) {
+  if (!path21) return key;
+  return path21.concat(key).map(/* @__PURE__ */ __name(function each(token, i2) {
     token = removeBrackets(token);
     return !dots && i2 ? "[" + token + "]" : token;
   }, "each")).join(dots ? "." : "");
@@ -53295,13 +54622,13 @@ function toFormData(obj, formData, options) {
     }, "limitDepth"));
   }
   __name(stringifyWithDepthLimit, "stringifyWithDepthLimit");
-  function defaultVisitor(value, key, path20) {
+  function defaultVisitor(value, key, path21) {
     let arr = value;
     if (utils_default.isReactNative(formData) && utils_default.isReactNativeBlob(value)) {
-      formData.append(renderKey(path20, key, dots), convertValue(value));
+      formData.append(renderKey(path21, key, dots), convertValue(value));
       return false;
     }
-    if (value && !path20 && typeof value === "object") {
+    if (value && !path21 && typeof value === "object") {
       if (utils_default.endsWith(key, "{}")) {
         key = metaTokens ? key : key.slice(0, -2);
         value = stringifyWithDepthLimit(value, 1);
@@ -53321,7 +54648,7 @@ function toFormData(obj, formData, options) {
     if (isVisitable(value)) {
       return true;
     }
-    formData.append(renderKey(path20, key, dots), convertValue(value));
+    formData.append(renderKey(path21, key, dots), convertValue(value));
     return false;
   }
   __name(defaultVisitor, "defaultVisitor");
@@ -53330,18 +54657,18 @@ function toFormData(obj, formData, options) {
     convertValue,
     isVisitable
   });
-  function build(value, path20, depth = 0) {
+  function build(value, path21, depth = 0) {
     if (utils_default.isUndefined(value)) return;
     throwIfMaxDepthExceeded(depth);
     if (stack.indexOf(value) !== -1) {
-      throw new Error("Circular reference detected in " + path20.join("."));
+      throw new Error("Circular reference detected in " + path21.join("."));
     }
     stack.push(value);
     utils_default.forEach(value, /* @__PURE__ */ __name(function each(el, key) {
       const result = !(utils_default.isUndefined(el) || el === null) && visitor.call(formData, el, utils_default.isString(
-      key) ? key.trim() : key, path20, exposedHelpers);
+      key) ? key.trim() : key, path21, exposedHelpers);
       if (result === true) {
-        build(el, path20 ? path20.concat(key) : [key], depth + 1);
+        build(el, path21 ? path21.concat(key) : [key], depth + 1);
       }
     }, "each"));
     stack.pop();
@@ -53640,7 +54967,7 @@ var platform_default = {
 // node_modules/axios/lib/helpers/toURLEncodedForm.js
 function toURLEncodedForm(data, options) {
   return toFormData_default(data, new platform_default.classes.URLSearchParams(), {
-    visitor: /* @__PURE__ */ __name(function(value, key, path20, helpers) {
+    visitor: /* @__PURE__ */ __name(function(value, key, path21, helpers) {
       if (platform_default.isNode && utils_default.isBuffer(value)) {
         this.append(key, value.toString("base64"));
         return false;
@@ -53664,14 +54991,14 @@ function throwIfDepthExceeded(index) {
 }
 __name(throwIfDepthExceeded, "throwIfDepthExceeded");
 function parsePropPath(name) {
-  const path20 = [];
+  const path21 = [];
   const pattern = /[^.[\]]+|\[([^.[\]]*)]/g;
   let match3;
   while ((match3 = pattern.exec(name)) !== null) {
-    throwIfDepthExceeded(path20.length);
-    path20.push(match3[0] === "[]" ? "" : match3[1] || match3[0]);
+    throwIfDepthExceeded(path21.length);
+    path21.push(match3[0] === "[]" ? "" : match3[1] || match3[0]);
   }
-  return path20;
+  return path21;
 }
 __name(parsePropPath, "parsePropPath");
 function arrayToObject(arr) {
@@ -53688,12 +55015,12 @@ function arrayToObject(arr) {
 }
 __name(arrayToObject, "arrayToObject");
 function formDataToJSON(formData) {
-  function buildPath(path20, value, target, index) {
+  function buildPath(path21, value, target, index) {
     throwIfDepthExceeded(index);
-    let name = path20[index++];
+    let name = path21[index++];
     if (name === "__proto__") return true;
     const isNumericKey = Number.isFinite(+name);
-    const isLast = index >= path20.length;
+    const isLast = index >= path21.length;
     name = !name && utils_default.isArray(target) ? target.length : name;
     if (isLast) {
       if (utils_default.hasOwnProp(target, name)) {
@@ -53706,7 +55033,7 @@ function formDataToJSON(formData) {
     if (!utils_default.hasOwnProp(target, name) || !utils_default.isObject(target[name])) {
       target[name] = [];
     }
-    const result = buildPath(path20, value, target[name], index);
+    const result = buildPath(path21, value, target[name], index);
     if (result && utils_default.isArray(target[name])) {
       target[name] = arrayToObject(target[name]);
     }
@@ -55681,9 +57008,9 @@ var http_default = isHttpAdapterSupported && /* @__PURE__ */ __name(function htt
       auth = urlUsername + ":" + urlPassword;
     }
     auth && headers.delete("authorization");
-    let path20;
+    let path21;
     try {
-      path20 = buildURL(
+      path21 = buildURL(
         parsed.pathname + parsed.search,
         own2("params"),
         own2("paramsSerializer")
@@ -55706,7 +57033,7 @@ var http_default = isHttpAdapterSupported && /* @__PURE__ */ __name(function htt
       http2Options = Object.assign(/* @__PURE__ */ Object.create(null), http2Options, { lookup });
     }
     const options = Object.assign(/* @__PURE__ */ Object.create(null), {
-      path: path20,
+      path: path21,
       method,
       headers: toByteStringHeaderObject(headers),
       agents: { http: httpAgent, https: httpsAgent },
@@ -56123,14 +57450,14 @@ var isURLSameOrigin_default = platform_default.hasStandardBrowserEnv ? /* @__PUR
 var cookies_default = platform_default.hasStandardBrowserEnv ? (
   // Standard browser envs support document.cookie
   {
-    write(name, value, expires, path20, domain, secure, sameSite) {
+    write(name, value, expires, path21, domain, secure, sameSite) {
       if (typeof document === "undefined") return;
       const cookie = [`${name}=${encodeURIComponent(value)}`];
       if (utils_default.isNumber(expires)) {
         cookie.push(`expires=${new Date(expires).toUTCString()}`);
       }
-      if (utils_default.isString(path20)) {
-        cookie.push(`path=${path20}`);
+      if (utils_default.isString(path21)) {
+        cookie.push(`path=${path21}`);
       }
       if (utils_default.isString(domain)) {
         cookie.push(`domain=${domain}`);
@@ -57935,9 +59262,9 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary, version: version3, 
 }, "loadTool");
 
 // agent-registry/src/index.js
-var import_fast_glob2 = __toESM(require_out4(), 1);
-var import_node_path7 = __toESM(require("node:path"), 1);
-var import_node_fs8 = require("node:fs");
+var import_fast_glob3 = __toESM(require_out4(), 1);
+var import_node_path8 = __toESM(require("node:path"), 1);
+var import_node_fs9 = require("node:fs");
 var import_node_child_process2 = require("node:child_process");
 
 // setup-gcloud/src/auth-stack.js
@@ -60340,16 +61667,16 @@ var Minimatch = class {
     this.debug(this.pattern, "split", ff);
     const set = this.set;
     this.debug(this.pattern, "set", set);
-    let filename = ff[ff.length - 1];
-    if (!filename) {
-      for (let i2 = ff.length - 2; !filename && i2 >= 0; i2--) {
-        filename = ff[i2];
+    let filename2 = ff[ff.length - 1];
+    if (!filename2) {
+      for (let i2 = ff.length - 2; !filename2 && i2 >= 0; i2--) {
+        filename2 = ff[i2];
       }
     }
     for (const pattern of set) {
       let file = ff;
       if (options.matchBase && pattern.length === 1) {
-        file = [filename];
+        file = [filename2];
       }
       const hit = this.matchOne(file, pattern, partial);
       if (hit) {
@@ -60613,8 +61940,8 @@ var SearchState = class {
   static {
     __name(this, "SearchState");
   }
-  constructor(path20, level) {
-    this.path = path20;
+  constructor(path21, level) {
+    this.path = path21;
     this.level = level;
   }
 };
@@ -65465,15 +66792,15 @@ function getRequestUrl(baseUri, operationSpec, operationArguments, fallbackObjec
   let isAbsolutePath = false;
   let requestUrl = replaceAll(baseUri, urlReplacements);
   if (operationSpec.path) {
-    let path20 = replaceAll(operationSpec.path, urlReplacements);
-    if (operationSpec.path === "/{nextLink}" && path20.startsWith("/")) {
-      path20 = path20.substring(1);
+    let path21 = replaceAll(operationSpec.path, urlReplacements);
+    if (operationSpec.path === "/{nextLink}" && path21.startsWith("/")) {
+      path21 = path21.substring(1);
     }
-    if (isAbsoluteUrl(path20)) {
-      requestUrl = path20;
+    if (isAbsoluteUrl(path21)) {
+      requestUrl = path21;
       isAbsolutePath = true;
     } else {
-      requestUrl = appendPath(requestUrl, path20);
+      requestUrl = appendPath(requestUrl, path21);
     }
   }
   const { queryParams, sequenceParams } = calculateQueryParameters(operationSpec, operationArguments, fallbackObject);
@@ -65523,9 +66850,9 @@ function appendPath(url3, pathToAppend) {
   }
   const searchStart = pathToAppend.indexOf("?");
   if (searchStart !== -1) {
-    const path20 = pathToAppend.substring(0, searchStart);
+    const path21 = pathToAppend.substring(0, searchStart);
     const search = pathToAppend.substring(searchStart + 1);
-    newPath = newPath + path20;
+    newPath = newPath + path21;
     if (search) {
       parsedUrl.search = parsedUrl.search ? `${parsedUrl.search}&${search}` : search;
     }
@@ -69111,16 +70438,16 @@ var MatcherView = class {
    * @returns {string|undefined}
    */
   getCurrentTag() {
-    const path20 = this._matcher.path;
-    return path20.length > 0 ? path20[path20.length - 1].tag : void 0;
+    const path21 = this._matcher.path;
+    return path21.length > 0 ? path21[path21.length - 1].tag : void 0;
   }
   /**
    * Get current namespace.
    * @returns {string|undefined}
    */
   getCurrentNamespace() {
-    const path20 = this._matcher.path;
-    return path20.length > 0 ? path20[path20.length - 1].namespace : void 0;
+    const path21 = this._matcher.path;
+    return path21.length > 0 ? path21[path21.length - 1].namespace : void 0;
   }
   /**
    * Get current node's attribute value.
@@ -69128,9 +70455,9 @@ var MatcherView = class {
    * @returns {*}
    */
   getAttrValue(attrName) {
-    const path20 = this._matcher.path;
-    if (path20.length === 0) return void 0;
-    return path20[path20.length - 1].values?.[attrName];
+    const path21 = this._matcher.path;
+    if (path21.length === 0) return void 0;
+    return path21[path21.length - 1].values?.[attrName];
   }
   /**
    * Check if current node has an attribute.
@@ -69138,9 +70465,9 @@ var MatcherView = class {
    * @returns {boolean}
    */
   hasAttr(attrName) {
-    const path20 = this._matcher.path;
-    if (path20.length === 0) return false;
-    const current = path20[path20.length - 1];
+    const path21 = this._matcher.path;
+    if (path21.length === 0) return false;
+    const current = path21[path21.length - 1];
     return current.values !== void 0 && attrName in current.values;
   }
   /**
@@ -69148,18 +70475,18 @@ var MatcherView = class {
    * @returns {number}
    */
   getPosition() {
-    const path20 = this._matcher.path;
-    if (path20.length === 0) return -1;
-    return path20[path20.length - 1].position ?? 0;
+    const path21 = this._matcher.path;
+    if (path21.length === 0) return -1;
+    return path21[path21.length - 1].position ?? 0;
   }
   /**
    * Get current node's repeat counter (occurrence count of this tag name).
    * @returns {number}
    */
   getCounter() {
-    const path20 = this._matcher.path;
-    if (path20.length === 0) return -1;
-    return path20[path20.length - 1].counter ?? 0;
+    const path21 = this._matcher.path;
+    if (path21.length === 0) return -1;
+    return path21[path21.length - 1].counter ?? 0;
   }
   /**
    * Get current node's sibling index (alias for getPosition).
@@ -72329,9 +73656,9 @@ var StorageSharedKeyCredentialPolicy = class extends CredentialPolicy {
    * @param request -
    */
   getCanonicalizedResourceString(request) {
-    const path20 = getURLPath(request.url) || "/";
+    const path21 = getURLPath(request.url) || "/";
     let canonicalizedResourceString = "";
-    canonicalizedResourceString += `/${this.factory.accountName}${path20}`;
+    canonicalizedResourceString += `/${this.factory.accountName}${path21}`;
     const queries = getURLQueries(request.url);
     const lowercaseQueries = {};
     if (queries) {
@@ -72852,9 +74179,9 @@ function storageSharedKeyCredentialPolicy(options) {
   }
   __name(getCanonicalizedHeadersString, "getCanonicalizedHeadersString");
   function getCanonicalizedResourceString(request) {
-    const path20 = getURLPath(request.url) || "/";
+    const path21 = getURLPath(request.url) || "/";
     let canonicalizedResourceString = "";
-    canonicalizedResourceString += `/${options.accountName}${path20}`;
+    canonicalizedResourceString += `/${options.accountName}${path21}`;
     const queries = getURLQueries(request.url);
     const lowercaseQueries = {};
     if (queries) {
@@ -86854,10 +88181,10 @@ var StorageContextClient = class extends StorageClient {
 // node_modules/@azure/storage-blob/dist/esm/utils/utils.common.js
 function escapeURLPath(url3) {
   const urlParsed = new URL(url3);
-  let path20 = urlParsed.pathname;
-  path20 = path20 || "/";
-  path20 = escape2(path20);
-  urlParsed.pathname = path20;
+  let path21 = urlParsed.pathname;
+  path21 = path21 || "/";
+  path21 = escape2(path21);
+  urlParsed.pathname = path21;
   return urlParsed.toString();
 }
 __name(escapeURLPath, "escapeURLPath");
@@ -86947,9 +88274,9 @@ function escape2(text) {
 __name(escape2, "escape");
 function appendToURLPath(url3, name) {
   const urlParsed = new URL(url3);
-  let path20 = urlParsed.pathname;
-  path20 = path20 ? path20.endsWith("/") ? `${path20}${name}` : `${path20}/${name}` : name;
-  urlParsed.pathname = path20;
+  let path21 = urlParsed.pathname;
+  path21 = path21 ? path21.endsWith("/") ? `${path21}${name}` : `${path21}/${name}` : name;
+  urlParsed.pathname = path21;
   return urlParsed.toString();
 }
 __name(appendToURLPath, "appendToURLPath");
@@ -97554,7 +98881,7 @@ var YAMLException = class YAMLException2 extends Error {
   * Builds a YAMLException with a source snippet and throws it. `source` is
   * the raw input text; `position` is an offset into it.
   */
-  static throwAt(source, position, message, filename = "") {
+  static throwAt(source, position, message, filename2 = "") {
     let line = 0;
     let lineStart = 0;
     for (let index = 0; index < position; index++) {
@@ -97569,7 +98896,7 @@ var YAMLException = class YAMLException2 extends Error {
       }
     }
     const mark = {
-      name: filename,
+      name: filename2,
       buffer: source,
       position,
       line,
@@ -100246,13 +101573,487 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
   info(`Skill registered: ${registryId}@${version3} \u2192 ${gcsPath}`);
 }, "registerSkill");
 
+// agent-registry/src/sync-clan-settings.js
+var import_node_fs8 = require("node:fs");
+var import_node_os5 = require("node:os");
+var import_node_path7 = __toESM(require("node:path"), 1);
+var import_jsonschema = __toESM(require_lib(), 1);
+var import_fast_glob2 = __toESM(require_out4(), 1);
+
+// agent-registry/src/global-settings.schema.json
+var global_settings_schema_default = {
+  $id: "global-settings.schema.json",
+  title: "GlobalSettings",
+  description: "Platform baseline applied to all clans. Managed by the platform team.",
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    permissions: { $ref: "#/definitions/Permissions" },
+    hooks: { $ref: "#/definitions/GlobalHooks" },
+    commands: { $ref: "#/definitions/Commands" }
+  },
+  definitions: {
+    Permissions: {
+      title: "Permissions",
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        allow: {
+          description: "Allowed tool invocations for all clans.",
+          type: "array",
+          items: { type: "string" }
+        }
+      }
+    },
+    GlobalHooks: {
+      title: "GlobalHooks",
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        SessionStart: {
+          description: "Global session-start hook scripts run once per session for all clans.",
+          type: "array",
+          items: { $ref: "#/definitions/HookEntry" }
+        },
+        PreToolUse: {
+          description: "Global pre-tool-use hook scripts.",
+          type: "array",
+          items: { $ref: "#/definitions/MatchedHookEntry" }
+        }
+      }
+    },
+    HookEntry: {
+      type: "object",
+      required: ["script"],
+      additionalProperties: false,
+      properties: {
+        script: {
+          description: "Path to hook script relative to agent-registry/global/. Must end in .sh",
+          type: "string",
+          pattern: "^hooks/.+\\.sh$"
+        }
+      }
+    },
+    Commands: {
+      description: "Global slash command files. Must exist under agent-registry/global/commands/",
+      type: "array",
+      items: {
+        type: "string",
+        pattern: "^commands/.+\\.md$"
+      }
+    },
+    MatchedHookEntry: {
+      type: "object",
+      required: ["matcher", "script"],
+      additionalProperties: false,
+      properties: {
+        matcher: {
+          description: "Claude Code tool name pattern (e.g. Bash, Write|Edit).",
+          type: "string",
+          minLength: 1
+        },
+        script: {
+          description: "Path to hook script relative to agent-registry/global/. Must end in .sh",
+          type: "string",
+          pattern: "^hooks/.+\\.sh$"
+        }
+      }
+    }
+  }
+};
+
+// agent-registry/src/clan-settings.schema.json
+var clan_settings_schema_default = {
+  $id: "clan-settings.schema.json",
+  title: "ClanSettings",
+  description: "Clan-specific Claude Code settings. Merged on top of the global baseline by the agent-registry action.",
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    permissions: { $ref: "#/definitions/Permissions" },
+    hooks: { $ref: "#/definitions/ClanHooks" },
+    commands: { $ref: "#/definitions/Commands" }
+  },
+  definitions: {
+    Permissions: {
+      title: "Permissions",
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        allow: {
+          description: "Additional permissions added on top of the global baseline. Cannot remove global permissions.",
+          type: "array",
+          items: { type: "string" }
+        }
+      }
+    },
+    ClanHooks: {
+      title: "ClanHooks",
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        SessionStart: {
+          description: "Clan scripts run after session sync completes. Must exist under agent-registry/config/hooks/",
+          type: "array",
+          items: { $ref: "#/definitions/HookEntry" }
+        },
+        PreToolUse: {
+          description: "Clan pre-tool-use scripts. Must exist under agent-registry/config/hooks/",
+          type: "array",
+          items: { $ref: "#/definitions/MatchedHookEntry" }
+        }
+      }
+    },
+    Commands: {
+      description: "Clan slash command files. Must exist under agent-registry/config/commands/",
+      type: "array",
+      items: {
+        type: "string",
+        pattern: "^commands/.+\\.md$"
+      }
+    },
+    HookEntry: {
+      type: "object",
+      required: ["script"],
+      additionalProperties: false,
+      properties: {
+        script: {
+          description: "Path to hook script relative to agent-registry/config/. Must end in .sh",
+          type: "string",
+          pattern: "^hooks/.+\\.sh$"
+        }
+      }
+    },
+    MatchedHookEntry: {
+      type: "object",
+      required: ["matcher", "script"],
+      additionalProperties: false,
+      properties: {
+        matcher: {
+          description: "Claude Code tool name pattern (e.g. Bash, Write|Edit).",
+          type: "string",
+          minLength: 1
+        },
+        script: {
+          description: "Path to hook script relative to agent-registry/config/. Must end in .sh",
+          type: "string",
+          pattern: "^hooks/.+\\.sh$"
+        }
+      }
+    }
+  }
+};
+
+// agent-registry/src/sync-clan-settings.js
+var validateSettings = /* @__PURE__ */ __name((filePath, data, schema) => {
+  const result = (0, import_jsonschema.validate)(data, schema, { nestedErrors: true });
+  if (!result.valid) {
+    throw new Error(`${filePath} is not valid.
+${result.toString()}`);
+  }
+}, "validateSettings");
+var GCS_BUCKET2 = "extenda-agent-artifacts";
+var GCS = `gs://${GCS_BUCKET2}`;
+var CD = "${CLAUDE_PROJECT_DIR}";
+var fetchGlobalBaseline = /* @__PURE__ */ __name(async () => {
+  const tmpPath = import_node_path7.default.join((0, import_node_os5.tmpdir)(), `global-settings-${process.pid}.yaml`);
+  try {
+    await execGcloud(
+      ["storage", "cp", `${GCS}/config/settings.yaml`, tmpPath],
+      "gcloud",
+      true
+    );
+    return load((0, import_node_fs8.readFileSync)(tmpPath, "utf8"));
+  } finally {
+    try {
+      (0, import_node_fs8.unlinkSync)(tmpPath);
+    } catch {
+    }
+  }
+}, "fetchGlobalBaseline");
+var filename = /* @__PURE__ */ __name((scriptPath) => import_node_path7.default.basename(scriptPath), "filename");
+var gcpHook = /* @__PURE__ */ __name((script) => `[ -x "${CD}/.claude/hooks/${script}" ] && "${CD}/.claude/hooks/${script}\
+" || exit 0`, "gcpHook");
+var hookCmd = /* @__PURE__ */ __name((command) => ({ type: "command", command }), "hookCmd");
+var buildSessionStartHooks = /* @__PURE__ */ __name((baseline, clanConfig, clanName) => {
+  const cmds = [];
+  cmds.push(hookCmd(`mkdir -p "${CD}/.claude/hooks" "${CD}/.claude/commands"`));
+  if (clanName) {
+    cmds.push(hookCmd(
+      `gcloud storage cp ${GCS}/config/${clanName}/settings.json "${CD}/.claude/settings.json" 2>/dev/null || true`
+    ));
+  } else {
+    cmds.push(hookCmd(
+      `CLAN=$(sed -n 's/.*\\*\\*Clan:\\*\\* \\([a-z0-9-]*\\).*/\\1/p' "${CD}/.agent/discovered.md" 2>/dev/null); [ -n "$\
+CLAN" ] && gcloud storage cp ${GCS}/config/$CLAN/settings.json "${CD}/.claude/settings.json" 2>/dev/null || gcloud stora\
+ge cp ${GCS}/config/settings.json "${CD}/.claude/settings.json" 2>/dev/null || true`
+    ));
+  }
+  for (const entry of [
+    ...baseline?.hooks?.SessionStart ?? [],
+    ...baseline?.hooks?.PreToolUse ?? []
+  ]) {
+    const s = filename(entry.script);
+    cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
+  }
+  if (clanName) {
+    const globalHookNames = new Set([
+      ...baseline?.hooks?.SessionStart ?? [],
+      ...baseline?.hooks?.PreToolUse ?? []
+    ].map((e) => filename(e.script)));
+    const clanHookEntries = [
+      ...clanConfig?.hooks?.SessionStart ?? [],
+      ...clanConfig?.hooks?.PreToolUse ?? []
+    ];
+    for (const entry of clanHookEntries) {
+      const s = filename(entry.script);
+      if (globalHookNames.has(s)) continue;
+      cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${clanName}/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
+    }
+  }
+  cmds.push(hookCmd(`chmod +x "${CD}/.claude/hooks/"*.sh 2>/dev/null || true`));
+  cmds.push(hookCmd(
+    `tmp=$(mktemp); gcloud storage cat ${GCS}/agents/orchestrator/instructions.md 2>/dev/null | awk '/^---$/{c++;if(c==2\
+){p=1;next}}p' > "$tmp"; if [ -s "$tmp" ]; then mv "$tmp" "${CD}/CLAUDE.md"; cp "${CD}/CLAUDE.md" "${CD}/AGENTS.md"; els\
+e rm -f "$tmp"; fi`
+  ));
+  for (const c3 of baseline?.commands ?? []) {
+    const f3 = filename(c3);
+    cmds.push(hookCmd(`gcloud storage cp ${GCS}/commands/${f3} "${CD}/.claude/commands/${f3}" 2>/dev/null || true`));
+  }
+  if (clanName) {
+    const globalCommandNames = new Set((baseline?.commands ?? []).map((c3) => filename(c3)));
+    for (const c3 of clanConfig?.commands ?? []) {
+      const f3 = filename(c3);
+      if (globalCommandNames.has(f3)) continue;
+      cmds.push(hookCmd(`gcloud storage cp ${GCS}/commands/${clanName}/${f3} "${CD}/.claude/commands/${f3}" 2>/dev/null \
+|| true`));
+    }
+  }
+  if (clanName) {
+    cmds.push(hookCmd(`gcloud storage cp ${GCS}/config/${clanName}/conventions.md "${CD}/.agent/conventions.md" 2>/dev/n\
+ull || true`));
+  }
+  for (const entry of baseline?.hooks?.SessionStart ?? []) {
+    const s = filename(entry.script);
+    cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}" || true`));
+  }
+  if (clanName) {
+    const globalSessionNames = new Set((baseline?.hooks?.SessionStart ?? []).map((e) => filename(e.script)));
+    for (const entry of clanConfig?.hooks?.SessionStart ?? []) {
+      const s = filename(entry.script);
+      if (globalSessionNames.has(s)) continue;
+      cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}" || true`));
+    }
+  }
+  return cmds;
+}, "buildSessionStartHooks");
+var buildSettingsJson = /* @__PURE__ */ __name((baseline, clanConfig, clanName) => {
+  const basePerms = baseline?.permissions?.allow ?? [];
+  const clanPerms = clanConfig?.permissions?.allow ?? [];
+  const allPerms = [.../* @__PURE__ */ new Set([...basePerms, ...clanPerms])];
+  const preToolUse = [
+    ...(baseline?.hooks?.PreToolUse ?? []).map((e) => ({
+      matcher: e.matcher,
+      hooks: [{ type: "command", command: gcpHook(filename(e.script)) }]
+    })),
+    ...(clanConfig?.hooks?.PreToolUse ?? []).map((e) => ({
+      matcher: e.matcher,
+      hooks: [{ type: "command", command: gcpHook(filename(e.script)) }]
+    }))
+  ];
+  return {
+    permissions: { allow: allPerms },
+    hooks: {
+      SessionStart: [{ hooks: buildSessionStartHooks(baseline, clanConfig, clanName) }],
+      ...preToolUse.length ? { PreToolUse: preToolUse } : {}
+    }
+  };
+}, "buildSettingsJson");
+var syncFiles = /* @__PURE__ */ __name(async (localDir, gcsPrefix, dryRun) => {
+  const localFiles = (0, import_node_fs8.existsSync)(localDir) ? import_fast_glob2.default.sync("**/*", { cwd: localDir,
+  onlyFiles: true }) : [];
+  for (const file of localFiles) {
+    const localPath = import_node_path7.default.join(localDir, file);
+    const gcsPath = `${gcsPrefix}/${file}`;
+    if (dryRun) {
+      info(`[dry-run] Would upload ${file} \u2192 gs://${GCS_BUCKET2}/${gcsPath}`);
+    } else {
+      await upload(localPath, gcsPath);
+      info(`Uploaded: gs://${GCS_BUCKET2}/${gcsPath}`);
+    }
+  }
+  let gcsFiles;
+  try {
+    const lsOut = await execGcloud(["storage", "ls", `${GCS}/${gcsPrefix}/`], "gcloud", true);
+    gcsFiles = (lsOut || "").split("\n").map((l3) => l3.trim()).filter((l3) => l3.startsWith("gs://") && !l3.endsWith("/")).
+    map((l3) => l3.replace(`gs://${GCS_BUCKET2}/${gcsPrefix}/`, "")).filter(Boolean);
+  } catch {
+    return;
+  }
+  const localSet = new Set(localFiles);
+  for (const f3 of gcsFiles) {
+    if (!localSet.has(f3)) {
+      const gcsPath = `${gcsPrefix}/${f3}`;
+      if (dryRun) {
+        info(`[dry-run] Would delete gs://${GCS_BUCKET2}/${gcsPath}`);
+      } else {
+        await execGcloud(["storage", "rm", `${GCS}/${gcsPath}`], "gcloud", true);
+        info(`Deleted: gs://${GCS_BUCKET2}/${gcsPath}`);
+      }
+    }
+  }
+}, "syncFiles");
+var writeTempFile = /* @__PURE__ */ __name((content, suffix) => {
+  const tmpPath = import_node_path7.default.join((0, import_node_os5.tmpdir)(), `${suffix}-${process.pid}`);
+  (0, import_node_fs8.writeFileSync)(tmpPath, content, "utf8");
+  return tmpPath;
+}, "writeTempFile");
+var syncClanSettings = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun, clan) => {
+  const globalYamlPath = import_node_path7.default.join(registryRoot, "global", "settings.yaml");
+  const clanYamlPath = import_node_path7.default.join(registryRoot, "config", "settings.yaml");
+  const hasGlobal = (0, import_node_fs8.existsSync)(globalYamlPath);
+  const hasClan = (0, import_node_fs8.existsSync)(clanYamlPath);
+  if (!hasGlobal && !hasClan && !clan) return;
+  const affected = /* @__PURE__ */ __name((prefix2) => !changedPaths.length || changedPaths.some((p2) => p2.startsWith(`\
+agent-registry/${prefix2}`)), "affected");
+  if (hasGlobal && affected("global/")) {
+    startGroup("Global baseline");
+    const globalConfig = load((0, import_node_fs8.readFileSync)(globalYamlPath, "utf8"));
+    validateSettings("global/settings.yaml", globalConfig, global_settings_schema_default);
+    await syncFiles(import_node_path7.default.join(registryRoot, "global", "hooks"), "hooks", dryRun);
+    await syncFiles(import_node_path7.default.join(registryRoot, "global", "commands"), "commands", dryRun);
+    if (dryRun) {
+      info(`[dry-run] Would upload global/settings.yaml \u2192 gs://${GCS_BUCKET2}/config/settings.yaml`);
+    } else {
+      await upload(globalYamlPath, "config/settings.yaml");
+      info(`Global baseline uploaded: gs://${GCS_BUCKET2}/config/settings.yaml`);
+    }
+    const globalJson = buildSettingsJson(globalConfig, {}, null);
+    const globalJsonStr = JSON.stringify(globalJson, null, 2);
+    if (dryRun) {
+      info(`[dry-run] Would upload settings.json \u2192 gs://${GCS_BUCKET2}/config/settings.json`);
+    } else {
+      const tmpPath = writeTempFile(globalJsonStr, "settings.json");
+      try {
+        await upload(tmpPath, "config/settings.json");
+        info(`Global settings.json uploaded: gs://${GCS_BUCKET2}/config/settings.json`);
+      } finally {
+        (0, import_node_fs8.unlinkSync)(tmpPath);
+      }
+    }
+    try {
+      const lsOutput = await execGcloud(
+        ["storage", "ls", `${GCS}/config/`],
+        "gcloud",
+        true
+      );
+      const clanNames = (lsOutput || "").split("\n").map((l3) => l3.trim()).filter((l3) => l3.endsWith("/") && l3.includes(
+      "/config/")).map((l3) => l3.replace(/.*\/config\/([^/]+)\/$/, "$1")).filter(Boolean);
+      for (const clanName2 of clanNames) {
+        const tmpYamlPath = import_node_path7.default.join((0, import_node_os5.tmpdir)(), `clan-yaml-${clanName2}-${process.
+        pid}`);
+        try {
+          await execGcloud(
+            ["storage", "cp", `${GCS}/config/${clanName2}/settings.yaml`, tmpYamlPath],
+            "gcloud",
+            true
+          );
+          const clanConfig2 = load((0, import_node_fs8.readFileSync)(tmpYamlPath, "utf8"));
+          const merged2 = buildSettingsJson(globalConfig, clanConfig2, clanName2);
+          if (dryRun) {
+            info(`[dry-run] Would rebuild config/${clanName2}/settings.json`);
+          } else {
+            const tmpJsonPath = writeTempFile(JSON.stringify(merged2, null, 2), `settings-${clanName2}.json`);
+            try {
+              await upload(tmpJsonPath, `config/${clanName2}/settings.json`);
+              info(`Rebuilt: gs://${GCS_BUCKET2}/config/${clanName2}/settings.json`);
+            } finally {
+              (0, import_node_fs8.unlinkSync)(tmpJsonPath);
+            }
+          }
+        } catch (e) {
+          warning(`Skipped rebuilding ${clanName2}: ${e.message}`);
+        } finally {
+          try {
+            (0, import_node_fs8.unlinkSync)(tmpYamlPath);
+          } catch {
+          }
+        }
+      }
+    } catch (e) {
+      warning(`Could not list GCS clans for rebuild: ${e.message}`);
+    }
+    endGroup();
+  }
+  if (!hasClan && !clan) return;
+  if (hasClan && !affected("config/")) return;
+  let clanYamlContent, clanConfig, clanName;
+  if (hasClan) {
+    clanYamlContent = (0, import_node_fs8.readFileSync)(clanYamlPath, "utf8");
+    clanConfig = load(clanYamlContent);
+    validateSettings("config/settings.yaml", clanConfig, clan_settings_schema_default);
+    clanName = clan;
+  } else {
+    clanConfig = {};
+    clanName = clan;
+  }
+  if (!clanName) throw new Error("Clan name could not be determined from the service account project ID");
+  startGroup(`Clan settings: ${clanName}`);
+  let baseline;
+  if (hasGlobal) {
+    baseline = load((0, import_node_fs8.readFileSync)(globalYamlPath, "utf8"));
+    info("Using local global/settings.yaml as baseline");
+  } else {
+    try {
+      baseline = await fetchGlobalBaseline();
+      info("Fetched global baseline from GCS");
+    } catch (e) {
+      warning(`Could not fetch global baseline from GCS: ${e.message}. Using empty baseline.`);
+      baseline = { permissions: { allow: [] }, hooks: {} };
+    }
+  }
+  const merged = buildSettingsJson(baseline, clanConfig, clanName);
+  if (dryRun) {
+    info(`[dry-run] Would upload settings.json \u2192 gs://${GCS_BUCKET2}/config/${clanName}/settings.json`);
+  } else {
+    const jsonTmp = writeTempFile(JSON.stringify(merged, null, 2), "settings.json");
+    try {
+      await upload(jsonTmp, `config/${clanName}/settings.json`);
+      info(`Clan settings.json uploaded: gs://${GCS_BUCKET2}/config/${clanName}/settings.json`);
+    } finally {
+      (0, import_node_fs8.unlinkSync)(jsonTmp);
+    }
+    const yamlContent = hasClan ? clanYamlContent : "";
+    const yamlTmp = writeTempFile(yamlContent, "settings.yaml");
+    try {
+      await upload(yamlTmp, `config/${clanName}/settings.yaml`);
+      info(`Clan settings.yaml stored: gs://${GCS_BUCKET2}/config/${clanName}/settings.yaml`);
+    } finally {
+      (0, import_node_fs8.unlinkSync)(yamlTmp);
+    }
+  }
+  await syncFiles(import_node_path7.default.join(registryRoot, "config", "hooks"), `hooks/${clanName}`, dryRun);
+  await syncFiles(import_node_path7.default.join(registryRoot, "config", "commands"), `commands/${clanName}`, dryRun);
+  const conventionsPath = import_node_path7.default.join(registryRoot, "config", "conventions.md");
+  if ((0, import_node_fs8.existsSync)(conventionsPath)) {
+    if (dryRun) {
+      info(`[dry-run] Would upload conventions.md \u2192 gs://${GCS_BUCKET2}/config/${clanName}/conventions.md`);
+    } else {
+      await upload(conventionsPath, `config/${clanName}/conventions.md`);
+      info(`Conventions uploaded: gs://${GCS_BUCKET2}/config/${clanName}/conventions.md`);
+    }
+  }
+  endGroup();
+}, "syncClanSettings");
+
 // agent-registry/src/index.js
 var AGENT_REGISTRY_PATH = "agent-registry";
 var getGitSha = /* @__PURE__ */ __name(() => (0, import_node_child_process2.execSync)("git rev-parse HEAD").toString().trim(),
 "getGitSha");
 var getChangedPaths = /* @__PURE__ */ __name(() => {
   try {
-    const base = process.env.GITHUB_BASE_REF ? `origin/${process.env.GITHUB_BASE_REF}` : "HEAD~1";
+    const base = process.env.GITHUB_BASE_SHA || "HEAD~1";
     return (0, import_node_child_process2.execSync)(`git diff --name-only ${base}...HEAD`).toString().trim().split("\n").
     filter(Boolean);
   } catch {
@@ -100273,41 +102074,41 @@ var uploadInstructions = /* @__PURE__ */ __name(async (instructionsPath, agentId
   }
 }, "uploadInstructions");
 var processAgents = /* @__PURE__ */ __name(async (registryRoot, changedPaths, gitSha, dryRun) => {
-  const agentFiles = import_fast_glob2.default.sync("agents/*/agent.yaml", { cwd: registryRoot, onlyFiles: true });
+  const agentFiles = import_fast_glob3.default.sync("agents/*/agent.yaml", { cwd: registryRoot, onlyFiles: true });
   for (const agentFile of agentFiles) {
-    const agentId = import_node_path7.default.basename(import_node_path7.default.dirname(agentFile));
+    const agentId = import_node_path8.default.basename(import_node_path8.default.dirname(agentFile));
     if (agentId.startsWith("example-")) continue;
     if (!isAffected(`agents/${agentId}/`, changedPaths)) continue;
-    const agentYaml = (0, import_node_fs8.readFileSync)(import_node_path7.default.join(registryRoot, agentFile), "utf8");
+    const agentYaml = (0, import_node_fs9.readFileSync)(import_node_path8.default.join(registryRoot, agentFile), "utf8");
     startGroup(`Agent: ${agentId}`);
     await registerAgent(agentId, agentYaml, dryRun);
-    const instructionsPath = import_node_path7.default.join(registryRoot, "agents", agentId, "instructions.md");
-    if ((0, import_node_fs8.existsSync)(instructionsPath)) {
+    const instructionsPath = import_node_path8.default.join(registryRoot, "agents", agentId, "instructions.md");
+    if ((0, import_node_fs9.existsSync)(instructionsPath)) {
       await uploadInstructions(instructionsPath, agentId, gitSha, dryRun);
     }
     endGroup();
   }
 }, "processAgents");
 var processMcps = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun) => {
-  const mcpFiles = import_fast_glob2.default.sync("mcp/*/mcp.yaml", { cwd: registryRoot, onlyFiles: true });
+  const mcpFiles = import_fast_glob3.default.sync("mcp/*/mcp.yaml", { cwd: registryRoot, onlyFiles: true });
   for (const mcpFile of mcpFiles) {
-    const mcpId = import_node_path7.default.dirname(mcpFile).replace(/^mcp\//, "");
+    const mcpId = import_node_path8.default.dirname(mcpFile).replace(/^mcp\//, "");
     if (mcpId.startsWith("example-")) continue;
     if (!isAffected(`mcp/${mcpId}/`, changedPaths)) continue;
-    const mcpYaml = (0, import_node_fs8.readFileSync)(import_node_path7.default.join(registryRoot, mcpFile), "utf8");
+    const mcpYaml = (0, import_node_fs9.readFileSync)(import_node_path8.default.join(registryRoot, mcpFile), "utf8");
     startGroup(`MCP: ${mcpId}`);
     await registerMcp(mcpId, mcpYaml, dryRun);
     endGroup();
   }
 }, "processMcps");
 var processSkills = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun, clan) => {
-  const skillFiles = import_fast_glob2.default.sync("skills/*/SKILL.md", { cwd: registryRoot, onlyFiles: true });
+  const skillFiles = import_fast_glob3.default.sync("skills/*/SKILL.md", { cwd: registryRoot, onlyFiles: true });
   for (const skillFile of skillFiles) {
-    const skillId = import_node_path7.default.basename(import_node_path7.default.dirname(skillFile));
+    const skillId = import_node_path8.default.basename(import_node_path8.default.dirname(skillFile));
     if (skillId.startsWith("example-")) continue;
     if (!isAffected(`skills/${skillId}/`, changedPaths)) continue;
     startGroup(`Skill: ${skillId}`);
-    await registerSkill(skillId, import_node_path7.default.join(registryRoot, skillFile), dryRun, clan);
+    await registerSkill(skillId, import_node_path8.default.join(registryRoot, skillFile), dryRun, clan);
     endGroup();
   }
 }, "processSkills");
@@ -100320,15 +102121,17 @@ var action5 = /* @__PURE__ */ __name(async () => {
   await execGcloud(["components", "install", "alpha", "--quiet", "--no-user-output-enabled"]);
   const gitSha = getGitSha();
   const changedPaths = getChangedPaths();
-  if (changedPaths.length) {
-    info(`Changed paths: ${changedPaths.join(", ")}`);
-  } else {
+  const registryPaths = changedPaths.filter((p2) => p2.startsWith(AGENT_REGISTRY_PATH));
+  if (changedPaths.length && !registryPaths.length) {
+    info("No agent-registry changes detected \u2014 skipping");
+  } else if (!changedPaths.length) {
     info("No changed paths detected \u2014 processing all items");
   }
-  const registryRoot = import_node_path7.default.join(process.cwd(), AGENT_REGISTRY_PATH);
+  const registryRoot = import_node_path8.default.join(process.cwd(), AGENT_REGISTRY_PATH);
   await processAgents(registryRoot, changedPaths, gitSha, dryRun);
   await processMcps(registryRoot, changedPaths, dryRun);
   await processSkills(registryRoot, changedPaths, dryRun, clan);
+  await syncClanSettings(registryRoot, changedPaths, dryRun, clan);
 }, "action");
 var src_default = action5;
 
