@@ -36,6 +36,11 @@
           "description": "Global pre-tool-use hook scripts.",
           "type": "array",
           "items": { "$ref": "#/definitions/MatchedHookEntry" }
+        },
+        "Stop": {
+          "description": "Global stop scripts, run when Claude finishes a turn. Exit code 2 blocks the stop.",
+          "type": "array",
+          "items": { "$ref": "#/definitions/HookEntry" }
         }
       }
     },
@@ -44,6 +49,16 @@
       "required": ["script"],
       "additionalProperties": false,
       "properties": {
+        "args": {
+          "description": "Optional arguments passed to the script. Shell-quoted in the generated command.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "timeout": {
+          "description": "Optional hook timeout in seconds.",
+          "type": "integer",
+          "minimum": 1
+        },
         "script": {
           "description": "Path to hook script relative to agent-registry/global/. Must end in .sh",
           "type": "string",
@@ -68,6 +83,16 @@
           "description": "Claude Code tool name pattern (e.g. Bash, Write|Edit).",
           "type": "string",
           "minLength": 1
+        },
+        "args": {
+          "description": "Optional arguments passed to the script. Shell-quoted in the generated command.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "timeout": {
+          "description": "Optional hook timeout in seconds.",
+          "type": "integer",
+          "minimum": 1
         },
         "script": {
           "description": "Path to hook script relative to agent-registry/global/. Must end in .sh",

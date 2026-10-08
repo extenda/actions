@@ -162,9 +162,80 @@ describe('buildSettingsJson', () => {
     expect(cmds.some((c) => c.includes('commands/retail/review-pr.md'))).toBe(true);
   });
 
-  test('PreToolUse hooks use [ -x ] guard pattern', () => {
+  test('PreToolUse hooks use [ -x ] guard pattern that propagates the exit code', () => {
     const result = buildSettingsJson(baseline, {}, 'retail');
-    expect(result.hooks.PreToolUse[0].hooks[0].command).toMatch(/\[ -x .* \] && .* \|\| exit 0/);
+    const command = result.hooks.PreToolUse[0].hooks[0].command;
+    expect(command).toBe(
+      '[ -x "${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.sh" ] || exit 0;' +
+        ' "${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.sh"',
+    );
+    expect(command).not.toMatch(/\|\| exit 0$/);
+  });
+
+  test('hooks without args or timeout emit neither field', () => {
+    const hook = buildSettingsJson(baseline, {}, 'retail').hooks.PreToolUse[0].hooks[0];
+    expect(hook).toEqual({ type: 'command', command: expect.any(String) });
+  });
+
+  test('omits Stop when no Stop hooks are defined', () => {
+    expect(buildSettingsJson(baseline, {}, 'retail').hooks.Stop).toBeUndefined();
+  });
+
+  describe('Stop, args and timeout', () => {
+    const withStop = {
+      ...baseline,
+      hooks: {
+        SessionStart: [{ script: 'hooks/verify-on-stop.sh', args: ['--baseline'] }],
+        PreToolUse: [
+          { matcher: 'Write|Edit|MultiEdit|NotebookEdit|Bash', script: 'hooks/test-guard.sh' },
+        ],
+        Stop: [{ script: 'hooks/verify-on-stop.sh', timeout: 900 }],
+      },
+    };
+
+    test('emits Stop entries with timeout and no matcher', () => {
+      const result = buildSettingsJson(withStop, {}, 'retail');
+      expect(result.hooks.Stop).toEqual([
+        {
+          hooks: [
+            {
+              type: 'command',
+              command:
+                '[ -x "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh" ] || exit 0;' +
+                ' "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh"',
+              timeout: 900,
+            },
+          ],
+        },
+      ]);
+    });
+
+    test('accepts a compound matcher for PreToolUse', () => {
+      const result = buildSettingsJson(withStop, {}, 'retail');
+      expect(result.hooks.PreToolUse[0].matcher).toBe('Write|Edit|MultiEdit|NotebookEdit|Bash');
+    });
+
+    test('passes args to SessionStart scripts and downloads a shared script once', () => {
+      const cmds = sessionCommands(buildSettingsJson(withStop, {}, 'retail'));
+      expect(cmds.filter((c) => c.includes('gcloud storage cp') && c.includes('hooks/verify-on-stop.sh'))).toHaveLength(1);
+      expect(cmds).toContain(
+        '[ -x "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh" ] && "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh" --baseline || true',
+      );
+    });
+
+    test('shell-quotes arguments with unsafe characters', () => {
+      const cfg = { hooks: { Stop: [{ script: 'hooks/x.sh', args: ['a b', "it's", '$(rm -rf /)', 'plain-1.2'] }] } };
+      const command = buildSettingsJson(cfg, {}, 'retail').hooks.Stop[0].hooks[0].command;
+      expect(command).toContain(`x.sh" 'a b' 'it'\\''s' '$(rm -rf /)' plain-1.2`);
+    });
+
+    test('clan Stop hooks append after global and are downloaded', () => {
+      const clan = { hooks: { Stop: [{ script: 'hooks/clan-stop.sh' }] } };
+      const result = buildSettingsJson(withStop, clan, 'retail');
+      expect(result.hooks.Stop).toHaveLength(2);
+      expect(result.hooks.Stop[1].hooks[0].command).toContain('clan-stop.sh');
+      expect(sessionCommands(result).some((c) => c.includes('hooks/retail/clan-stop.sh'))).toBe(true);
+    });
   });
 
   test('clan hook with same filename as global SessionStart hook is not downloaded or run again', () => {
