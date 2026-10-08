@@ -101426,15 +101426,13 @@ __name(zipSync, "zipSync");
 // agent-registry/src/register-skill.js
 var PROJECT3 = "extenda";
 var LOCATION3 = "eu";
+var MAX_DESCRIPTION_LENGTH = 1024;
+var asTrimmedString = /* @__PURE__ */ __name((value) => value == null ? "" : String(value).trim(), "asTrimmedString");
 var parseSkillMeta = /* @__PURE__ */ __name((content) => {
   const match3 = content.match(/^---\n([\s\S]*?)\n---/);
   if (!match3) return { name: "", description: "" };
-  const meta = {};
-  for (const line of match3[1].split("\n")) {
-    const [key, ...rest] = line.split(":");
-    if (key && rest.length) meta[key.trim()] = rest.join(":").trim();
-  }
-  return { name: meta["name"] ?? "", description: meta["description"] ?? "" };
+  const meta = load(match3[1]) ?? {};
+  return { name: asTrimmedString(meta.name), description: asTrimmedString(meta.description) };
 }, "parseSkillMeta");
 var makeZipFile = /* @__PURE__ */ __name((skillFilePath) => {
   const content = (0, import_node_fs7.readFileSync)(skillFilePath);
@@ -101518,9 +101516,18 @@ var activate = /* @__PURE__ */ __name(async (registryId, revisionId) => {
 }, "activate");
 var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun, clan) => {
   const skillContent = (0, import_node_fs7.readFileSync)(skillFilePath, "utf8");
-  const { name: displayName, description } = parseSkillMeta(skillContent);
+  let meta;
+  try {
+    meta = parseSkillMeta(skillContent);
+  } catch (e) {
+    throw new Error(`SKILL.md for '${skillId}' has invalid YAML frontmatter: ${e.message.split("\n")[0]}`);
+  }
+  const { name: displayName, description } = meta;
   if (!displayName) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: name`);
   if (!description) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: description`);
+  if (description.length > MAX_DESCRIPTION_LENGTH) {
+    throw new Error(`SKILL.md for '${skillId}': description is ${description.length} chars, max is ${MAX_DESCRIPTION_LENGTH}`);
+  }
   const body2 = skillContent.replace(/^---\n[\s\S]*?\n---\n?/, "").trim();
   if (!body2) throw new Error(`SKILL.md for '${skillId}' must have instructions after the frontmatter`);
   const namespacedId = clan ? `${clan}-${skillId}` : skillId;

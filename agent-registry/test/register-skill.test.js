@@ -44,9 +44,29 @@ describe('parseSkillMeta', () => {
     expect(parseSkillMeta('# No frontmatter')).toEqual({ name: '', description: '' });
   });
 
-  test('handles description with colons', () => {
-    const content = `---\nname: S\ndescription: Does A: and B\n---\n`;
+  test('handles quoted description with colons', () => {
+    const content = `---\nname: S\ndescription: "Does A: and B"\n---\n`;
     expect(parseSkillMeta(content).description).toBe('Does A: and B');
+  });
+
+  test('handles folded multi-line description', () => {
+    const content = `---\nname: S\ndescription: >\n  Does A\n  and B\n---\n`;
+    expect(parseSkillMeta(content).description).toBe('Does A and B');
+  });
+
+  test('handles literal multi-line description', () => {
+    const content = `---\nname: S\ndescription: |\n  Does A\n  and B\n---\n`;
+    expect(parseSkillMeta(content).description).toBe('Does A\nand B');
+  });
+
+  test('ignores other frontmatter fields', () => {
+    const content = `---\nname: S\ndescription: D\nmetadata:\n  category: ops\n---\n`;
+    expect(parseSkillMeta(content)).toEqual({ name: 'S', description: 'D' });
+  });
+
+  test('throws on invalid YAML', () => {
+    const content = `---\nname: S\ndescription: Does A: and B\n---\n`;
+    expect(() => parseSkillMeta(content)).toThrow();
   });
 });
 
@@ -208,6 +228,31 @@ describe('registerSkill', () => {
       readFileSync.mockReturnValue('---\nname: My Skill\ndescription: A description\n---\n');
       await expect(registerSkill('my-skill', '/SKILL.md', true))
         .rejects.toThrow("must have instructions after the frontmatter");
+    });
+
+    test('throws on invalid YAML frontmatter even in dry-run', async () => {
+      readFileSync.mockReturnValue('---\nname: My Skill\ndescription: Does A: and B\n---\n\nBody\n');
+      await expect(registerSkill('my-skill', '/SKILL.md', true))
+        .rejects.toThrow("SKILL.md for 'my-skill' has invalid YAML frontmatter");
+    });
+
+    test('counts the full multi-line description against the limit', async () => {
+      const lines = Array.from({ length: 11 }, () => `  ${'a'.repeat(99)}`).join('\n');
+      readFileSync.mockReturnValue(`---\nname: My Skill\ndescription: >\n${lines}\n---\n\nBody\n`);
+      await expect(registerSkill('my-skill', '/SKILL.md', true))
+        .rejects.toThrow('description is 1099 chars, max is 1024');
+    });
+
+    test('throws when description exceeds 1024 chars even in dry-run', async () => {
+      readFileSync.mockReturnValue(`---\nname: My Skill\ndescription: ${'a'.repeat(1025)}\n---\n\nBody\n`);
+      await expect(registerSkill('my-skill', '/SKILL.md', true))
+        .rejects.toThrow("description is 1025 chars, max is 1024");
+    });
+
+    test('accepts description of exactly 1024 chars', async () => {
+      readFileSync.mockReturnValue(`---\nname: My Skill\ndescription: ${'a'.repeat(1024)}\n---\n\nBody\n`);
+      await registerSkill('my-skill', '/SKILL.md', true);
+      expect(core.info).toHaveBeenCalledWith('[dry-run] Would register skill: private-my-skill');
     });
   });
 
