@@ -68,9 +68,9 @@
           "minimum": 1
         },
         "script": {
-          "description": "Path to hook script relative to agent-registry/config/. Must end in .sh",
+          "description": "Path to hook script relative to agent-registry/config/. Must be a direct child of hooks/ (no subdirectories) and end in .sh",
           "type": "string",
-          "pattern": "^hooks/.+\\.sh$"
+          "pattern": "^hooks/[^/]+\\.sh$"
         }
       }
     },
@@ -95,9 +95,9 @@
           "minimum": 1
         },
         "script": {
-          "description": "Path to hook script relative to agent-registry/config/. Must end in .sh",
+          "description": "Path to hook script relative to agent-registry/config/. Must be a direct child of hooks/ (no subdirectories) and end in .sh",
           "type": "string",
-          "pattern": "^hooks/.+\\.sh$"
+          "pattern": "^hooks/[^/]+\\.sh$"
         }
       }
     }

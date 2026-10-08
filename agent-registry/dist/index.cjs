@@ -101643,9 +101643,10 @@ var global_settings_schema_default = {
           minimum: 1
         },
         script: {
-          description: "Path to hook script relative to agent-registry/global/. Must end in .sh",
+          description: "Path to hook script relative to agent-registry/global/. Must be a direct child of hooks/ (no sub\
+directories) and end in .sh",
           type: "string",
-          pattern: "^hooks/.+\\.sh$"
+          pattern: "^hooks/[^/]+\\.sh$"
         }
       }
     },
@@ -101678,9 +101679,10 @@ var global_settings_schema_default = {
           minimum: 1
         },
         script: {
-          description: "Path to hook script relative to agent-registry/global/. Must end in .sh",
+          description: "Path to hook script relative to agent-registry/global/. Must be a direct child of hooks/ (no sub\
+directories) and end in .sh",
           type: "string",
-          pattern: "^hooks/.+\\.sh$"
+          pattern: "^hooks/[^/]+\\.sh$"
         }
       }
     }
@@ -101758,9 +101760,10 @@ var clan_settings_schema_default = {
           minimum: 1
         },
         script: {
-          description: "Path to hook script relative to agent-registry/config/. Must end in .sh",
+          description: "Path to hook script relative to agent-registry/config/. Must be a direct child of hooks/ (no sub\
+directories) and end in .sh",
           type: "string",
-          pattern: "^hooks/.+\\.sh$"
+          pattern: "^hooks/[^/]+\\.sh$"
         }
       }
     },
@@ -101785,9 +101788,10 @@ var clan_settings_schema_default = {
           minimum: 1
         },
         script: {
-          description: "Path to hook script relative to agent-registry/config/. Must end in .sh",
+          description: "Path to hook script relative to agent-registry/config/. Must be a direct child of hooks/ (no sub\
+directories) and end in .sh",
           type: "string",
-          pattern: "^hooks/.+\\.sh$"
+          pattern: "^hooks/[^/]+\\.sh$"
         }
       }
     }
@@ -101822,9 +101826,12 @@ var fetchGlobalBaseline = /* @__PURE__ */ __name(async () => {
   }
 }, "fetchGlobalBaseline");
 var filename = /* @__PURE__ */ __name((scriptPath) => import_node_path7.default.basename(scriptPath), "filename");
+var SHELL_SAFE_ARG = /^[A-Za-z0-9_@%+=:,./-]+$/;
 var shellQuote = /* @__PURE__ */ __name((arg) => {
   const str = String(arg);
-  return /^[A-Za-z0-9_@%+=:,./-]+$/.test(str) ? str : `'${str.replace(/'/g, `'\\''`)}'`;
+  if (SHELL_SAFE_ARG.test(str)) return str;
+  const escaped = str.replaceAll("'", String.raw`'\''`);
+  return `'${escaped}'`;
 }, "shellQuote");
 var argString = /* @__PURE__ */ __name((entry) => (entry.args ?? []).map(shellQuote).map((a) => ` ${a}`).join(""), "argS\
 tring");

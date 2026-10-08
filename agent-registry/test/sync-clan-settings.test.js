@@ -17,6 +17,9 @@ import { readFileSync, existsSync, writeFileSync, unlinkSync } from 'node:fs';
 import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 import { upload } from '../src/upload-gcs.js';
 
+import { validate } from 'jsonschema';
+import globalSchema from '../src/global-settings.schema.json';
+import clanSchema from '../src/clan-settings.schema.json';
 import { buildSettingsJson, syncClanSettings } from '../src/sync-clan-settings.js';
 
 // ── buildSettingsJson ────────────────────────────────────────────────────────
@@ -580,5 +583,60 @@ describe('syncClanSettings', () => {
       await syncClanSettings('/root/agent-registry', [], false, '');
       expect(upload).not.toHaveBeenCalled();
     });
+  });
+});
+
+// ── hook script paths ────────────────────────────────────────────────────────
+
+describe('hook script paths', () => {
+  // Scripts are uploaded to hooks/<name> and downloaded by file name only, so a
+  // nested path such as hooks/sub/foo.sh would be uploaded to one location and
+  // downloaded from another. The schemas therefore only accept flat paths.
+  const withHooks = (hooks) => ({ hooks });
+
+  test.each([
+    ['global', globalSchema],
+    ['clan', clanSchema],
+  ])(
+    '%s schema rejects nested script paths in every event',
+    (_name, schema) => {
+      const nested = 'hooks/sub/foo.sh';
+      for (const hooks of [
+        { SessionStart: [{ script: nested }] },
+        { PreToolUse: [{ matcher: 'Bash', script: nested }] },
+        { Stop: [{ script: nested }] },
+      ]) {
+        expect(validate(withHooks(hooks), schema).valid).toBe(false);
+      }
+    },
+  );
+
+  test.each([
+    ['global', globalSchema],
+    ['clan', clanSchema],
+  ])('%s schema accepts flat script paths', (_name, schema) => {
+    const hooks = {
+      SessionStart: [{ script: 'hooks/a.sh', args: ['--x'] }],
+      PreToolUse: [{ matcher: 'Bash', script: 'hooks/b.sh' }],
+      Stop: [{ script: 'hooks/c.sh', timeout: 10 }],
+    };
+    expect(validate(withHooks(hooks), schema).valid).toBe(true);
+  });
+
+  test('a clan script with the same file name as a global one is not downloaded', () => {
+    const baseline = { hooks: { Stop: [{ script: 'hooks/same.sh' }] } };
+    const clan = { hooks: { Stop: [{ script: 'hooks/same.sh' }] } };
+    const cmds = buildSettingsJson(
+      baseline,
+      clan,
+      'retail',
+    ).hooks.SessionStart[0].hooks.map((h) => h.command);
+    expect(
+      cmds.filter(
+        (c) => c.includes('same.sh') && c.includes('gcloud storage cp'),
+      ),
+    ).toEqual([
+      'gcloud storage cp gs://extenda-agent-artifacts/hooks/same.sh "${CLAUDE_PROJECT_DIR}/.claude/hooks/same.sh" 2>/dev/null || true',
+    ]);
   });
 });

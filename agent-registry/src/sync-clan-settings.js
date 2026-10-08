@@ -39,9 +39,13 @@ const fetchGlobalBaseline = async () => {
 const filename = (scriptPath) => path.basename(scriptPath);
 
 // Quote an argument for POSIX sh. Plain tokens such as `--baseline` stay bare.
+const SHELL_SAFE_ARG = /^[A-Za-z0-9_@%+=:,./-]+$/;
+
 const shellQuote = (arg) => {
   const str = String(arg);
-  return /^[A-Za-z0-9_@%+=:,./-]+$/.test(str) ? str : `'${str.replace(/'/g, `'\\''`)}'`;
+  if (SHELL_SAFE_ARG.test(str)) return str;
+  const escaped = str.replaceAll("'", String.raw`'\''`);
+  return `'${escaped}'`;
 };
 
 const argString = (entry) => (entry.args ?? []).map(shellQuote).map((a) => ` ${a}`).join('');
