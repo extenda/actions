@@ -81,7 +81,6 @@ const registerAgent = async (agentId, agentYaml, dryRun) => {
     `--project=${PROJECT}`,
     `--display-name=${displayName}`,
     `--description=${description}`,
-    '--agent-spec-type=a2a-agent-card',
     `--agent-spec-content=${specContent}`,
   ];
 
@@ -94,7 +93,12 @@ const registerAgent = async (agentId, agentYaml, dryRun) => {
     await execGcloud(['agent-registry', 'services', 'update', agentId, ...flags, ...interfaces], 'gcloud', true);
   } else {
     core.info(`Creating agent: ${agentId}@${version}`);
-    await execGcloud(['agent-registry', 'services', 'create', agentId, ...flags, ...interfaces], 'gcloud', true);
+    // The spec type is fixed at creation; `services update` (gcloud 588+) rejects --agent-spec-type.
+    await execGcloud(
+      ['agent-registry', 'services', 'create', agentId, '--agent-spec-type=a2a-agent-card', ...flags, ...interfaces],
+      'gcloud',
+      true,
+    );
   }
   core.info(`Agent registered: ${agentId}@${version}`);
 };
