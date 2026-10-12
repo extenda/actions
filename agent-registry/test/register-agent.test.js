@@ -224,6 +224,17 @@ describe('register-agent', () => {
       expect(args).toContain('--agent-spec-type=a2a-agent-card');
     });
 
+    test('omits spec-type on update, which gcloud rejects', async () => {
+      mockExisting('0.1');
+      execGcloud.mockResolvedValueOnce('');
+
+      await registerAgent('my-agent', AGENT_YAML, false);
+
+      expect(call(2)[2]).toBe('update');
+      expect(call(2).some((a) => a.startsWith('--agent-spec-type'))).toBe(false);
+      expect(call(2).some((a) => a.startsWith('--agent-spec-content='))).toBe(true);
+    });
+
     test('uses agentId as displayName when omitted from YAML', async () => {
       mockNew();
       execGcloud.mockResolvedValueOnce('');

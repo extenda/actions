@@ -100630,7 +100630,6 @@ var registerAgent = /* @__PURE__ */ __name(async (agentId, agentYaml, dryRun) =>
     `--project=${PROJECT}`,
     `--display-name=${displayName}`,
     `--description=${description}`,
-    "--agent-spec-type=a2a-agent-card",
     `--agent-spec-content=${specContent}`
   ];
   const interfaces = (card.interfaces ?? []).flatMap((iface) => [
@@ -100641,7 +100640,11 @@ var registerAgent = /* @__PURE__ */ __name(async (agentId, agentYaml, dryRun) =>
     await execGcloud(["agent-registry", "services", "update", agentId, ...flags, ...interfaces], "gcloud", true);
   } else {
     info(`Creating agent: ${agentId}@${version3}`);
-    await execGcloud(["agent-registry", "services", "create", agentId, ...flags, ...interfaces], "gcloud", true);
+    await execGcloud(
+      ["agent-registry", "services", "create", agentId, "--agent-spec-type=a2a-agent-card", ...flags, ...interfaces],
+      "gcloud",
+      true
+    );
   }
   info(`Agent registered: ${agentId}@${version3}`);
 }, "registerAgent");
