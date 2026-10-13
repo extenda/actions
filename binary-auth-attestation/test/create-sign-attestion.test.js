@@ -52,6 +52,26 @@ describe('Create attestation', () => {
     ]);
   });
 
+  test('Skips an attestation that already exists', async () => {
+    execGcloud.mockRejectedValueOnce(
+      new Error(
+        'Resource in projects [p] is the subject of a conflict: Could not create occurrence',
+      ),
+    );
+
+    await expect(
+      createAttestation('eu.gcr.io/img@sha', 'a', 'p', 'k', 'l', 'r', 'k', '1'),
+    ).resolves.toEqual('');
+  });
+
+  test('Throws other gcloud errors', async () => {
+    execGcloud.mockRejectedValueOnce(new Error('permission denied'));
+
+    await expect(
+      createAttestation('eu.gcr.io/img@sha', 'a', 'p', 'k', 'l', 'r', 'k', '1'),
+    ).rejects.toThrow('permission denied');
+  });
+
   test('Get artifact URL with default tag', async () => {
     getImageWithSha256.mockResolvedValueOnce('eu.gcr.io/my-image@djdq1787');
 

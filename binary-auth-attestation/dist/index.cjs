@@ -104233,7 +104233,15 @@ var createAttestation = /* @__PURE__ */ __name(async (artifactUrl, attestor, att
     `--keyversion-key=${keyversionKey}`,
     `--keyversion=${keyversion}`
   ];
-  return execGcloud(args);
+  try {
+    return await execGcloud(args);
+  } catch (error2) {
+    if (!error2.message.includes("is the subject of a conflict")) {
+      throw error2;
+    }
+    info(`Attestation already exists for ${artifactUrl}`);
+    return "";
+  }
 }, "createAttestation");
 var getArtifactUrl = /* @__PURE__ */ __name(async (tag, imagePath) => {
   const imageName = imagePath.split(":")[0] || imagePath;

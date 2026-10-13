@@ -1,3 +1,5 @@
+import * as core from '@actions/core';
+
 import getImageWithSha256 from '../../cloud-deploy/src/manifests/image-sha256.js';
 import { execGcloud } from '../../setup-gcloud/src/index.js';
 
@@ -28,7 +30,15 @@ const createAttestation = async (
     `--keyversion-key=${keyversionKey}`,
     `--keyversion=${keyversion}`,
   ];
-  return execGcloud(args);
+  try {
+    return await execGcloud(args);
+  } catch (error) {
+    if (!error.message.includes('is the subject of a conflict')) {
+      throw error;
+    }
+    core.info(`Attestation already exists for ${artifactUrl}`);
+    return '';
+  }
 };
 
 const getArtifactUrl = async (tag, imagePath) => {
