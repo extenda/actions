@@ -80,9 +80,17 @@ const allHookEntries = (config) => [
 // Claude Code starts the hooks of one SessionStart group in parallel. The steps
 // below depend on each other (a script must be downloaded before it is run), so
 // they are emitted as ONE hook whose command runs them in order, one per line.
+//
+// The hook timeout covers the whole joined command, so it is the SUM of the
+// scripts' own timeouts plus an allowance for the untimed setup and download
+// steps. Steps without a timeout add nothing; if no step has one, the Claude
+// Code default applies.
+const SETUP_TIMEOUT_ALLOWANCE = 60;
+
 const sequential = (steps) => {
-  const timeout = Math.max(0, ...steps.map((step) => step.timeout ?? 0));
-  return hookCmd(steps.map((step) => step.command).join('\n'), timeout || undefined);
+  const scriptTimeouts = steps.reduce((sum, step) => sum + (step.timeout ?? 0), 0);
+  const timeout = scriptTimeouts > 0 ? scriptTimeouts + SETUP_TIMEOUT_ALLOWANCE : undefined;
+  return hookCmd(steps.map((step) => step.command).join('\n'), timeout);
 };
 
 const buildSessionStartHooks = (baseline, clanConfig, clanName) => {

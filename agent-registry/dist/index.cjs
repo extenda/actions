@@ -101861,9 +101861,11 @@ var allHookEntries = /* @__PURE__ */ __name((config) => [
   ...config?.hooks?.PreToolUse ?? [],
   ...config?.hooks?.Stop ?? []
 ], "allHookEntries");
+var SETUP_TIMEOUT_ALLOWANCE = 60;
 var sequential = /* @__PURE__ */ __name((steps) => {
-  const timeout = Math.max(0, ...steps.map((step) => step.timeout ?? 0));
-  return hookCmd(steps.map((step) => step.command).join("\n"), timeout || void 0);
+  const scriptTimeouts = steps.reduce((sum, step) => sum + (step.timeout ?? 0), 0);
+  const timeout = scriptTimeouts > 0 ? scriptTimeouts + SETUP_TIMEOUT_ALLOWANCE : void 0;
+  return hookCmd(steps.map((step) => step.command).join("\n"), timeout);
 }, "sequential");
 var buildSessionStartHooks = /* @__PURE__ */ __name((baseline, clanConfig, clanName) => {
   const cmds = [];

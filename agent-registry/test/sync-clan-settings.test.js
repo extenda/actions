@@ -71,12 +71,12 @@ describe('buildSettingsJson', () => {
     expect(firstRun).toBeGreaterThan(chmod);
   });
 
-  test('SessionStart takes the longest timeout of the scripts it runs', () => {
+  test('SessionStart timeout is the sum of script timeouts plus the setup allowance', () => {
     const base = {
       ...baseline,
       hooks: { SessionStart: [{ script: 'hooks/a.sh', timeout: 30 }, { script: 'hooks/b.sh', timeout: 120 }] },
     };
-    expect(sessionHooks(buildSettingsJson(base, {}, 'retail'))[0].timeout).toBe(120);
+    expect(sessionHooks(buildSettingsJson(base, {}, 'retail'))[0].timeout).toBe(210);
   });
 
   test('hooks are started with bash and tested with -f, never -x', () => {
