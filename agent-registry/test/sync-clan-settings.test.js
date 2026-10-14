@@ -50,12 +50,43 @@ describe('buildSettingsJson', () => {
   });
 
   const sessionHooks = (result) => result.hooks.SessionStart[0].hooks;
-  const sessionCommands = (result) => sessionHooks(result).map((h) => h.command);
+  // The steps of the one SessionStart hook, in the order they run.
+  const sessionCommands = (result) => sessionHooks(result).flatMap((h) => h.command.split('\n'));
 
-  test('SessionStart is a single entry with a hooks array', () => {
+  test('SessionStart is a single entry with a single hook that runs its steps in order', () => {
     const result = buildSettingsJson(baseline, {}, 'retail');
     expect(result.hooks.SessionStart).toHaveLength(1);
-    expect(Array.isArray(result.hooks.SessionStart[0].hooks)).toBe(true);
+    // Hooks of one group run in parallel, so downloads, chmod and runs must share one command.
+    expect(sessionHooks(result)).toHaveLength(1);
+    expect(sessionCommands(result).length).toBeGreaterThan(1);
+  });
+
+  test('SessionStart downloads every script before it runs one', () => {
+    const base = { ...baseline, hooks: { ...baseline.hooks, SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] } };
+    const cmds = sessionCommands(buildSettingsJson(base, {}, 'retail'));
+    const lastDownload = cmds.findLastIndex((c) => c.includes('gcloud storage cp') && c.includes('/hooks/'));
+    const chmod = cmds.findIndex((c) => c.startsWith('chmod'));
+    const firstRun = cmds.findIndex((c) => c.includes('bash "'));
+    expect(chmod).toBeGreaterThan(lastDownload);
+    expect(firstRun).toBeGreaterThan(chmod);
+  });
+
+  test('SessionStart takes the longest timeout of the scripts it runs', () => {
+    const base = {
+      ...baseline,
+      hooks: { SessionStart: [{ script: 'hooks/a.sh', timeout: 30 }, { script: 'hooks/b.sh', timeout: 120 }] },
+    };
+    expect(sessionHooks(buildSettingsJson(base, {}, 'retail'))[0].timeout).toBe(120);
+  });
+
+  test('hooks are started with bash and tested with -f, never -x', () => {
+    const result = buildSettingsJson(baseline, {}, 'retail');
+    const commands = [
+      ...sessionCommands(result),
+      ...result.hooks.PreToolUse.flatMap((e) => e.hooks.map((h) => h.command)),
+    ];
+    expect(commands.some((c) => c.includes('bash "'))).toBe(true);
+    expect(commands.every((c) => !c.includes('[ -x'))).toBe(true);
   });
 
   test('SessionStart hooks include setup, fetch, chmod, CLAUDE.md sync', () => {
@@ -109,8 +140,8 @@ describe('buildSettingsJson', () => {
     const base = { ...baseline, hooks: { ...baseline.hooks, SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] } };
     const clan = { hooks: { SessionStart: [{ script: 'hooks/clan-setup.sh' }] } };
     const cmds = sessionCommands(buildSettingsJson(base, clan, 'retail'));
-    const globalRunIdx = cmds.findIndex((c) => c.includes('[ -x') && c.includes('ensure-pre-commit.sh'));
-    const clanRunIdx = cmds.findIndex((c) => c.includes('[ -x') && c.includes('clan-setup.sh'));
+    const globalRunIdx = cmds.findIndex((c) => c.includes('[ -f') && c.includes('ensure-pre-commit.sh'));
+    const clanRunIdx = cmds.findIndex((c) => c.includes('[ -f') && c.includes('clan-setup.sh'));
     expect(globalRunIdx).toBeGreaterThan(-1);
     expect(clanRunIdx).toBeGreaterThan(globalRunIdx);
   });
@@ -118,7 +149,7 @@ describe('buildSettingsJson', () => {
   test('runs global SessionStart scripts in global template mode (clanName=null)', () => {
     const base = { ...baseline, hooks: { ...baseline.hooks, SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] } };
     const cmds = sessionCommands(buildSettingsJson(base, {}, null));
-    expect(cmds.some((c) => c.includes('[ -x') && c.includes('ensure-pre-commit.sh'))).toBe(true);
+    expect(cmds.some((c) => c.includes('[ -f') && c.includes('ensure-pre-commit.sh'))).toBe(true);
   });
 
   test('downloads clan conventions to .agent/conventions.md', () => {
@@ -146,7 +177,7 @@ describe('buildSettingsJson', () => {
   test('runs clan SessionStart scripts after download', () => {
     const clan = { hooks: { SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] } };
     const cmds = sessionCommands(buildSettingsJson(baseline, clan, 'platform'));
-    const runCmd = cmds.find((c) => c.includes('[ -x') && c.includes('ensure-pre-commit.sh'));
+    const runCmd = cmds.find((c) => c.includes('[ -f') && c.includes('ensure-pre-commit.sh'));
     expect(runCmd).toBeDefined();
     // Run cmd should come after the download cmd
     const downloadIdx = cmds.findIndex((c) => c.includes('hooks/platform/ensure-pre-commit.sh'));
@@ -165,12 +196,12 @@ describe('buildSettingsJson', () => {
     expect(cmds.some((c) => c.includes('commands/retail/review-pr.md'))).toBe(true);
   });
 
-  test('PreToolUse hooks use [ -x ] guard pattern that propagates the exit code', () => {
+  test('PreToolUse hooks use [ -f ] and bash, and the guard pattern that propagates the exit code', () => {
     const result = buildSettingsJson(baseline, {}, 'retail');
     const command = result.hooks.PreToolUse[0].hooks[0].command;
     expect(command).toBe(
-      '[ -x "${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.sh" ] || exit 0;' +
-        ' "${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.sh"',
+      '[ -f "${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.sh" ] || exit 0;' +
+        ' bash "${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.sh"',
     );
     expect(command).not.toMatch(/\|\| exit 0$/);
   });
@@ -204,8 +235,8 @@ describe('buildSettingsJson', () => {
             {
               type: 'command',
               command:
-                '[ -x "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh" ] || exit 0;' +
-                ' "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh"',
+                '[ -f "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh" ] || exit 0;' +
+                ' bash "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh"',
               timeout: 900,
             },
           ],
@@ -222,7 +253,7 @@ describe('buildSettingsJson', () => {
       const cmds = sessionCommands(buildSettingsJson(withStop, {}, 'retail'));
       expect(cmds.filter((c) => c.includes('gcloud storage cp') && c.includes('hooks/verify-on-stop.sh'))).toHaveLength(1);
       expect(cmds).toContain(
-        '[ -x "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh" ] && "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh" --baseline || true',
+        '[ -f "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh" ] && bash "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh" --baseline || true',
       );
     });
 
@@ -255,7 +286,7 @@ describe('buildSettingsJson', () => {
     expect(downloads).toHaveLength(1);
     expect(downloads[0]).not.toContain('retail/');
     // And run exactly once (global SessionStart, clan entry skipped)
-    const runs = cmds.filter((c) => c.includes('[ -x') && c.includes('ensure-pre-commit.sh'));
+    const runs = cmds.filter((c) => c.includes('[ -f') && c.includes('ensure-pre-commit.sh'));
     expect(runs).toHaveLength(1);
   });
 
@@ -630,7 +661,7 @@ describe('hook script paths', () => {
       baseline,
       clan,
       'retail',
-    ).hooks.SessionStart[0].hooks.map((h) => h.command);
+    ).hooks.SessionStart[0].hooks.flatMap((h) => h.command.split('\n'));
     expect(
       cmds.filter(
         (c) => c.includes('same.sh') && c.includes('gcloud storage cp'),
