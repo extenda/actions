@@ -335,11 +335,9 @@ spec:
             requests:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
             limits:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
           env:
             - name: POD_IP
               valueFrom:
@@ -611,11 +609,9 @@ spec:
             requests:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
             limits:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
           env:
             - name: POD_IP
               valueFrom:
@@ -849,11 +845,9 @@ spec:
             requests:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
             limits:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
           env:
             - name: POD_IP
               valueFrom:
@@ -1075,11 +1069,9 @@ spec:
             requests:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
             limits:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
           env:
             - name: POD_IP
               valueFrom:
@@ -1515,11 +1507,9 @@ spec:
             requests:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
             limits:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
           env:
             - name: POD_IP
               valueFrom:
@@ -1649,11 +1639,9 @@ spec:
             requests:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
             limits:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
           env:
             - name: POD_IP
               valueFrom:
@@ -1856,11 +1844,9 @@ spec:
             requests:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
             limits:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
           env:
             - name: POD_IP
               valueFrom:
@@ -2011,11 +1997,9 @@ spec:
             requests:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
             limits:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
           env:
             - name: POD_IP
               valueFrom:
@@ -2304,11 +2288,9 @@ spec:
             requests:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
             limits:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
           env:
             - name: POD_IP
               valueFrom:
@@ -2438,11 +2420,9 @@ spec:
             requests:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
             limits:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
           env:
             - name: POD_IP
               valueFrom:
@@ -2572,11 +2552,9 @@ spec:
             requests:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
             limits:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
           env:
             - name: POD_IP
               valueFrom:
@@ -2706,11 +2684,9 @@ spec:
             requests:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
             limits:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
           env:
             - name: POD_IP
               valueFrom:
@@ -2834,11 +2810,9 @@ spec:
             requests:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
             limits:
               cpu: 1
               memory: 512Mi
-              ephemeral-storage: 8Gi
           env:
             - name: POD_IP
               valueFrom:

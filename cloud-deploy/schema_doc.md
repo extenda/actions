@@ -52,6 +52,9 @@
     - [2.1.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > service`](#oneOf_i1_kubernetes_service)
     - [2.1.2. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > type`](#oneOf_i1_kubernetes_type)
     - [2.1.3. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > resources`](#oneOf_i1_kubernetes_resources)
+      - [2.1.3.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > resources > allOf > Resources`](#oneOf_i1_kubernetes_resources_allOf_i0)
+      - [2.1.3.2. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > resources > allOf > item 1`](#oneOf_i1_kubernetes_resources_allOf_i1)
+        - [2.1.3.2.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > resources > allOf > item 1 > ephemeral-storage`](#oneOf_i1_kubernetes_resources_allOf_i1_ephemeral-storage)
     - [2.1.4. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > protocol`](#oneOf_i1_kubernetes_protocol)
     - [2.1.5. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > timeout`](#oneOf_i1_kubernetes_timeout)
     - [2.1.6. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > availability`](#oneOf_i1_kubernetes_availability)
@@ -832,7 +835,7 @@ Must be one of:
 | ---------------------------------------------------------------------------- | ------- | ---------------- | ---------- | ----------------------------------------------------- | --------------------------------------------- |
 | + [service](#oneOf_i1_kubernetes_service )                                   | No      | string           | No         | Same as [service](#oneOf_i0_cloud-run_service )       | ServiceName                                   |
 | + [type](#oneOf_i1_kubernetes_type )                                         | No      | enum (of string) | No         | -                                                     | The type of service                           |
-| + [resources](#oneOf_i1_kubernetes_resources )                               | No      | object           | No         | Same as [resources](#security_oneOf_i1_resources )    | Resources                                     |
+| + [resources](#oneOf_i1_kubernetes_resources )                               | No      | Combination      | No         | -                                                     | -                                             |
 | + [protocol](#oneOf_i1_kubernetes_protocol )                                 | No      | enum (of string) | No         | Same as [protocol](#oneOf_i0_cloud-run_protocol )     | Protocol                                      |
 | - [timeout](#oneOf_i1_kubernetes_timeout )                                   | No      | integer          | No         | Same as [timeout](#oneOf_i0_cloud-run_timeout )       | RequestTimeout                                |
 | - [availability](#oneOf_i1_kubernetes_availability )                         | No      | enum (of string) | No         | In #/definitions/Availability                         | Availability                                  |
@@ -869,16 +872,54 @@ Must be one of:
 
 #### <a name="oneOf_i1_kubernetes_resources"></a>2.1.3. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > resources`
 
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `combining`      |
+| **Required**              | Yes              |
+| **Additional properties** | Any type allowed |
+
+| All of(Requirement)                                  |
+| ---------------------------------------------------- |
+| [Resources](#oneOf_i1_kubernetes_resources_allOf_i0) |
+| [item 1](#oneOf_i1_kubernetes_resources_allOf_i1)    |
+
+##### <a name="oneOf_i1_kubernetes_resources_allOf_i0"></a>2.1.3.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > resources > allOf > Resources`
+
 **Title:** Resources
 
 |                           |                                           |
 | ------------------------- | ----------------------------------------- |
 | **Type**                  | `object`                                  |
-| **Required**              | Yes                                       |
+| **Required**              | No                                        |
 | **Additional properties** | Any type allowed                          |
 | **Same definition as**    | [resources](#security_oneOf_i1_resources) |
 
 **Description:** The requested resources
+
+##### <a name="oneOf_i1_kubernetes_resources_allOf_i1"></a>2.1.3.2. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > resources > allOf > item 1`
+
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `object`         |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
+
+| Property                                                                          | Pattern | Type   | Deprecated | Definition | Title/Description                                                                                                                                           |
+| --------------------------------------------------------------------------------- | ------- | ------ | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| - [ephemeral-storage](#oneOf_i1_kubernetes_resources_allOf_i1_ephemeral-storage ) | No      | string | No         | -          | Opt-in ephemeral storage for the user container. When omitted, the GKE default (1Gi) applies. Max 8Gi to leave room for sidecars within the 10Gi pod limit. |
+
+###### <a name="oneOf_i1_kubernetes_resources_allOf_i1_ephemeral-storage"></a>2.1.3.2.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > resources > allOf > item 1 > ephemeral-storage`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** Opt-in ephemeral storage for the user container. When omitted, the GKE default (1Gi) applies. Max 8Gi to leave room for sidecars within the 10Gi pod limit.
+
+| Restrictions                      |                                                                               |
+| --------------------------------- | ----------------------------------------------------------------------------- |
+| **Must match regular expression** | ```^([1-8])Gi$``` [Test](https://regex101.com/?regex=%5E%28%5B1-8%5D%29Gi%24) |
 
 #### <a name="oneOf_i1_kubernetes_protocol"></a>2.1.4. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > protocol`
 
@@ -2120,4 +2161,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-09-14 at 20:13:45 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-10-14 at 12:22:28 +0200
