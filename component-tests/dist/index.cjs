@@ -40932,13 +40932,30 @@ var require_test = __commonJS({
             }, "onError");
             app.once("listening", onListening);
             app.once("error", onError);
-            app.listen(0);
+            app.listen(0, "127.0.0.1");
           }
           addr = app.address();
         }
         if (state) {
           this._server = app;
         }
+        if (!addr) {
+          this._serverPath = path;
+          const protocol = app instanceof Server ? "https" : "http";
+          return protocol + "://127.0.0.1" + path;
+        }
+        return this.formatServerUrl(app, addr, path);
+      }
+      /**
+       * Builds a request URL from a listening server address.
+       *
+       * @param {Server} app
+       * @param {Object} addr
+       * @param {String} path
+       * @returns {String} URL address
+       * @api private
+       */
+      formatServerUrl(app, addr, path) {
         let host = addr.address;
         if (host === "::") host = "127.0.0.1";
         else if (host === "0.0.0.0") host = "127.0.0.1";
@@ -41031,6 +41048,10 @@ var require_test = __commonJS({
         dispatch = /* @__PURE__ */ __name(() => {
           removeStartListeners();
           try {
+            if (this._serverPath !== void 0) {
+              this.url = this.formatServerUrl(server, server.address(), this._serverPath);
+              this._serverPath = void 0;
+            }
             super.end(finish);
           } catch (err) {
             finish(err);
@@ -47102,7 +47123,7 @@ function readBlockScalar(state, parentIndent, props) {
         state.position = linePosition + column;
         throwError(state, "tab characters must not be used in indentation");
       }
-      if (column < maxLeadingIndent) {
+      if (column >= parentIndent && column < maxLeadingIndent) {
         state.position = linePosition + column;
         throwError(state, "bad indentation of a mapping entry");
       }
@@ -47330,14 +47351,16 @@ function readBlockMapping(state, nodeIndent, flowIndent, props) {
           if (!isWsOrEolOrEnd(ch)) throwError(state, "a whitespace character is expected after the key-value separator w\
 ithin a block mapping");
           if (!mappingOpened) {
-            restoreState(state, beforeKey);
-            addMappingEvent(state, beforeKey.position, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd,
-            COLLECTION_STYLE.BLOCK);
+            state.events.splice(beforeKey.eventsLength, 0, {
+              type: EVENT_ID.MAPPING,
+              start: beforeKey.position,
+              anchorStart: props.anchorStart,
+              anchorEnd: props.anchorEnd,
+              tagStart: props.tagStart,
+              tagEnd: props.tagEnd,
+              style: COLLECTION_STYLE.BLOCK
+            });
             mappingOpened = true;
-            parseNode(state, flowIndent, CONTEXT_FLOW_OUT, false, true);
-            ch = state.input.charCodeAt(state.position);
-            while (isWhiteSpace(ch)) ch = state.input.charCodeAt(++state.position);
-            state.position++;
           }
           detected = true;
           atExplicitKey = false;
@@ -47852,5 +47875,5 @@ methods/index.js:
   (*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
 
 js-yaml/dist/js-yaml.mjs:
-  (*! js-yaml 5.4.2 https://github.com/nodeca/js-yaml @license MIT *)
+  (*! js-yaml 5.4.3 https://github.com/nodeca/js-yaml @license MIT *)
 */
