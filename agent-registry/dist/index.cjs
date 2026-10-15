@@ -101848,7 +101848,7 @@ var argString = /* @__PURE__ */ __name((entry) => (entry.args ?? []).map(shellQu
 tring");
 var gcpHook = /* @__PURE__ */ __name((entry) => {
   const script = `"${CD}/.claude/hooks/${filename(entry.script)}"`;
-  return `[ -x ${script} ] || exit 0; ${script}${argString(entry)}`;
+  return `[ -f ${script} ] || exit 0; bash ${script}${argString(entry)}`;
 }, "gcpHook");
 var hookCmd = /* @__PURE__ */ __name((command, timeout) => ({
   type: "command",
@@ -101861,6 +101861,12 @@ var allHookEntries = /* @__PURE__ */ __name((config) => [
   ...config?.hooks?.PreToolUse ?? [],
   ...config?.hooks?.Stop ?? []
 ], "allHookEntries");
+var SETUP_TIMEOUT_ALLOWANCE = 60;
+var sequential = /* @__PURE__ */ __name((steps) => {
+  const scriptTimeouts = steps.reduce((sum, step) => sum + (step.timeout ?? 0), 0);
+  const timeout = scriptTimeouts > 0 ? scriptTimeouts + SETUP_TIMEOUT_ALLOWANCE : void 0;
+  return hookCmd(steps.map((step) => step.command).join("\n"), timeout);
+}, "sequential");
 var buildSessionStartHooks = /* @__PURE__ */ __name((baseline, clanConfig, clanName) => {
   const cmds = [];
   cmds.push(hookCmd(`mkdir -p "${CD}/.claude/hooks" "${CD}/.claude/commands"`));
@@ -101917,19 +101923,19 @@ ull || true`));
   }
   for (const entry of baseline?.hooks?.SessionStart ?? []) {
     const s = filename(entry.script);
-    cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}"${argString(entry)} || true`, entry.
-    timeout));
+    cmds.push(hookCmd(`[ -f "${CD}/.claude/hooks/${s}" ] && bash "${CD}/.claude/hooks/${s}"${argString(entry)} || true`,
+    entry.timeout));
   }
   if (clanName) {
     const globalSessionNames = new Set((baseline?.hooks?.SessionStart ?? []).map((e) => filename(e.script)));
     for (const entry of clanConfig?.hooks?.SessionStart ?? []) {
       const s = filename(entry.script);
       if (globalSessionNames.has(s)) continue;
-      cmds.push(hookCmd(`[ -x "${CD}/.claude/hooks/${s}" ] && "${CD}/.claude/hooks/${s}"${argString(entry)} || true`, entry.
-      timeout));
+      cmds.push(hookCmd(`[ -f "${CD}/.claude/hooks/${s}" ] && bash "${CD}/.claude/hooks/${s}"${argString(entry)} || true`,
+      entry.timeout));
     }
   }
-  return cmds;
+  return [sequential(cmds)];
 }, "buildSessionStartHooks");
 var buildSettingsJson = /* @__PURE__ */ __name((baseline, clanConfig, clanName) => {
   const basePerms = baseline?.permissions?.allow ?? [];
