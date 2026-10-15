@@ -24,7 +24,37 @@ const DEFAULT_ENV = {
   OCMS_CLIENT_ID: `sm://${SECRETS_PROJECT}/ecs-api-ocms-client-id`,
   OCMS_CLIENT_SECRET: `sm://${SECRETS_PROJECT}/ecs-api-ocms-client-secret`,
   REQUEST_ALL_BUNDLE: 'false',
+  RULES_CHANNEL: 'stable',
 };
+
+const bundlesHealthProbe = (timings) => ({
+  httpGet: {
+    path: '/health?bundles=true',
+    port: 8282,
+  },
+  ...timings,
+});
+
+// OPA reports the bundles healthy once each has activated and never turns red
+// again, so the probe gates startup only.
+const probeFor = (platformGKE) =>
+  platformGKE
+    ? {
+        readinessProbe: bundlesHealthProbe({
+          initialDelaySeconds: 5,
+          periodSeconds: 5,
+          timeoutSeconds: 5,
+          failureThreshold: 60,
+        }),
+      }
+    : {
+        startupProbe: bundlesHealthProbe({
+          initialDelaySeconds: 0,
+          periodSeconds: 2,
+          timeoutSeconds: 2,
+          failureThreshold: 150,
+        }),
+      };
 
 const imageTag = (version = null) =>
   process.env.EVALUATION_IMAGE_TAG || version || STABLE_TAG;
@@ -88,6 +118,7 @@ const evaluationSpec = async (projectId, platformGKE, config = {}) => {
       name: 'evaluation',
       image,
       env: resolved.map(({ env: envVar }) => envVar),
+      ...probeFor(platformGKE),
     },
     // Cross-project secret aliases to merge into the `run.googleapis.com/secrets`
     // annotation. Always empty on GKE.

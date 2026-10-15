@@ -21,6 +21,22 @@ const configureNetworking = async (
   }
 };
 
+// Dependencies start before and shut down after the user-container, so the
+// OTEL endpoints and the loaded evaluation bundles are available to it.
+const USER_CONTAINER_DEPENDENCIES = ['collector', 'evaluation'];
+
+const setContainerDependencies = (annotations, containers) => {
+  const names = containers.map(({ name }) => name);
+  const dependencies = USER_CONTAINER_DEPENDENCIES.filter((name) =>
+    names.includes(name),
+  );
+  if (dependencies.length > 0) {
+    annotations['run.googleapis.com/container-dependencies'] = JSON.stringify({
+      'user-container': dependencies,
+    });
+  }
+};
+
 const cloudrunManifestTemplate = async (
   name,
   image,
@@ -163,11 +179,6 @@ const cloudrunManifestTemplate = async (
 
   if (collectorContainer) {
     containers.push(collectorContainer);
-    // The collector should start before and shutdown after the user-container
-    // to ensure the OTEL endpoints are available for the user-container.
-    annotations['run.googleapis.com/container-dependencies'] = JSON.stringify({
-      'user-container': ['collector'],
-    });
   }
 
   if (evaluationSidecar) {
@@ -189,6 +200,8 @@ const cloudrunManifestTemplate = async (
         .join(',');
     }
   }
+
+  setContainerDependencies(annotations, containers);
 
   return {
     apiVersion: 'serving.knative.dev/v1',

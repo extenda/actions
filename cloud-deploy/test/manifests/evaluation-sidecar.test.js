@@ -85,6 +85,7 @@ describe('manifests/evaluation-sidecar', () => {
           },
         },
         { name: 'REQUEST_ALL_BUNDLE', value: 'false' },
+        { name: 'RULES_CHANNEL', value: 'stable' },
       ],
     });
     expect(secretAliases).toEqual([
@@ -109,6 +110,7 @@ describe('manifests/evaluation-sidecar', () => {
           value: 'sm://extenda/ecs-api-ocms-client-secret',
         },
         { name: 'REQUEST_ALL_BUNDLE', value: 'false' },
+        { name: 'RULES_CHANNEL', value: 'stable' },
       ],
     });
     expect(secretAliases).toEqual([]);
@@ -133,6 +135,17 @@ describe('manifests/evaluation-sidecar', () => {
         },
       ]),
     );
+  });
+
+  test('It lets a configured RULES_CHANNEL replace the stable default', async () => {
+    const { container } = await evaluationSpec(projectId, false, {
+      enabled: true,
+      env: { RULES_CHANNEL: 'v1' },
+    });
+    const rulesChannels = container.env.filter(
+      ({ name }) => name === 'RULES_CHANNEL',
+    );
+    expect(rulesChannels).toEqual([{ name: 'RULES_CHANNEL', value: 'v1' }]);
   });
 
   test('It resolves same-project custom secrets to a bare secretKeyRef with no alias needed', async () => {
