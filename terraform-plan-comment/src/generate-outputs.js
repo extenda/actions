@@ -6,19 +6,39 @@ import * as exec from '@actions/exec';
 import fg from 'fast-glob';
 import pLimit from 'p-limit';
 
-const terraformShow = async (plan) => {
-  let stdout = '';
-  let stderr = '';
-
-  let cwd = path.dirname(plan);
-
+const planWorkingDir = (plan) => {
   const terragruntCache = fg.sync(
     `${path.dirname(plan)}/**/.terragrunt-cache/*/*`,
     { dot: true, onlyDirectories: true },
   );
-  if (terragruntCache.length > 0) {
-    [cwd] = terragruntCache;
-  }
+  return terragruntCache.length > 0 ? terragruntCache[0] : path.dirname(plan);
+};
+
+/**
+ * Show a plan as JSON.
+ * @param plan {string} the plan file
+ * @returns {Promise<object>} the parsed plan
+ */
+export const terraformShowJson = async (plan) => {
+  const cwd = planWorkingDir(plan);
+  let stdout = '';
+  await exec.exec('terraform', ['show', '-json', path.relative(cwd, plan)], {
+    cwd,
+    silent: true,
+    listeners: {
+      stdout: (data) => {
+        stdout += data.toString('utf8');
+      },
+    },
+  });
+  return JSON.parse(stdout);
+};
+
+const terraformShow = async (plan) => {
+  let stdout = '';
+  let stderr = '';
+
+  const cwd = planWorkingDir(plan);
 
   const status = await exec
     .exec('terraform', ['show', '-no-color', path.relative(cwd, plan)], {
