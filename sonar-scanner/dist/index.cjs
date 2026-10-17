@@ -55610,6 +55610,17 @@ var require_utils6 = __commonJS({
     var setMaxIndex = /* @__PURE__ */ __name(function setMaxIndex2(obj, maxIndex) {
       overflowChannel.set(obj, maxIndex);
     }, "setMaxIndex");
+    var conflictChannel = getSideChannel();
+    var markConflict = /* @__PURE__ */ __name(function markConflict2(obj, maxIndex) {
+      conflictChannel.set(obj, maxIndex);
+      return obj;
+    }, "markConflict");
+    var isConflict = /* @__PURE__ */ __name(function isConflict2(obj) {
+      return conflictChannel.has(obj);
+    }, "isConflict");
+    var getConflictIndex = /* @__PURE__ */ __name(function getConflictIndex2(obj) {
+      return conflictChannel.get(obj);
+    }, "getConflictIndex");
     var hexTable = (function() {
       var array = [];
       for (var i = 0; i < 256; ++i) {
@@ -55653,6 +55664,28 @@ var require_utils6 = __commonJS({
         obj[key] = value;
       }
     }, "setProperty");
+    var maxNumericIndex = /* @__PURE__ */ __name(function maxNumericIndex2(obj, min) {
+      var max = min;
+      var keys = Object.keys(obj);
+      for (var i = 0; i < keys.length; ++i) {
+        var num = parseInt(keys[i], 10);
+        if (String(num) === keys[i] && num > max) {
+          max = num;
+        }
+      }
+      return max;
+    }, "maxNumericIndex");
+    var limitedPair = /* @__PURE__ */ __name(function limitedPair2(first, second, options) {
+      var pair = [first, second];
+      if (options && typeof options.arrayLimit === "number" && pair.length > options.arrayLimit) {
+        if (options.throwOnLimitExceeded) {
+          throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit ===
+          1 ? "" : "s") + " allowed in an array.");
+        }
+        return markOverflow(arrayToObject2(pair, options), 1);
+      }
+      return pair;
+    }, "limitedPair");
     var merge3 = /* @__PURE__ */ __name(function merge4(target, source, options) {
       if (!source) {
         return target;
@@ -55673,13 +55706,22 @@ var require_utils6 = __commonJS({
             var newIndex = getMaxIndex(target) + 1;
             target[newIndex] = source;
             setMaxIndex(target, newIndex);
+          } else if (options && options.strictMerge && isConflict(target)) {
+            var nextConflict = getConflictIndex(target) + 1;
+            if (options.throwOnLimitExceeded && typeof options.arrayLimit === "number" && nextConflict >= options.arrayLimit) {
+              throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit ===
+              1 ? "" : "s") + " allowed in an array.");
+            }
+            target[nextConflict] = source;
+            markConflict(target, nextConflict);
           } else if (options && options.strictMerge) {
-            return [target, source];
+            var conflict = limitedPair(target, source, options);
+            return isArray2(conflict) ? markConflict(conflict, 1) : conflict;
           } else if (options && (options.plainObjects || options.allowPrototypes) || !has.call(Object.prototype, source)) {
             target[source] = true;
           }
         } else {
-          return [target, source];
+          return limitedPair(target, source, options);
         }
         return target;
       }
@@ -55706,6 +55748,9 @@ var require_utils6 = __commonJS({
       var mergeTarget = target;
       if (isArray2(target) && !isArray2(source)) {
         mergeTarget = arrayToObject2(target, options);
+        if (isConflict(target)) {
+          markConflict(mergeTarget, target.length - 1);
+        }
       }
       if (isArray2(target) && isArray2(source)) {
         source.forEach(function(item, i) {
@@ -55737,12 +55782,18 @@ var require_utils6 = __commonJS({
           setProperty(acc, key, value);
         }
         if (isOverflow(source) && !isOverflow(acc)) {
-          markOverflow(acc, getMaxIndex(source));
+          markOverflow(acc, maxNumericIndex(acc, getMaxIndex(source)));
         }
         if (isOverflow(acc)) {
           var keyNum = parseInt(key, 10);
           if (String(keyNum) === key && keyNum >= 0 && keyNum > getMaxIndex(acc)) {
             setMaxIndex(acc, keyNum);
+          }
+        }
+        if (isConflict(acc)) {
+          var conflictKey = parseInt(key, 10);
+          if (String(conflictKey) === key && conflictKey > getConflictIndex(acc)) {
+            markConflict(acc, conflictKey);
           }
         }
         return acc;
@@ -55755,6 +55806,9 @@ var require_utils6 = __commonJS({
       }, target);
     }, "assignSingleSource");
     var decode = /* @__PURE__ */ __name(function(str, defaultDecoder, charset) {
+      if (typeof str === "string" && str.indexOf("%") === -1) {
+        return str.indexOf("+") === -1 ? str : str.replace(/\+/g, " ");
+      }
       var strWithoutPlus = str.replace(/\+/g, " ");
       if (charset === "iso-8859-1") {
         return strWithoutPlus.replace(/%[0-9a-f]{2}/gi, unescape);
@@ -55765,6 +55819,52 @@ var require_utils6 = __commonJS({
         return strWithoutPlus;
       }
     }, "decode");
+    var hasToPrimitive = typeof Symbol === "function" && typeof Symbol.toPrimitive === "symbol";
+    var arrayJoin = Array.prototype.join;
+    var arrayToString = Array.prototype.toString;
+    var objectToString = Object.prototype.toString;
+    var toCoercible = /* @__PURE__ */ __name(function toCoercible2(value, joining) {
+      if (!value || typeof value !== "object" && typeof value !== "function") {
+        return value;
+      }
+      if (hasToPrimitive && value[Symbol.toPrimitive] != null) {
+        return value;
+      }
+      if (isArray2(value) && value.toString === arrayToString && value.join === arrayJoin) {
+        var ancestors = joining || getSideChannel();
+        if (ancestors.has(value)) {
+          return "";
+        }
+        ancestors.set(value, true);
+        var copy;
+        for (var i = 0; i < value.length; i += 1) {
+          var item = value[i];
+          var coerced = toCoercible2(item, ancestors);
+          if (!copy && coerced !== item) {
+            copy = [];
+            for (var j3 = 0; j3 < i; j3 += 1) {
+              copy[j3] = value[j3];
+            }
+          }
+          if (copy) {
+            copy[i] = coerced;
+          }
+        }
+        ancestors["delete"](value);
+        return copy || value;
+      }
+      if (typeof value.toString === "function") {
+        return value;
+      }
+      var valueOf = value.valueOf;
+      if (typeof valueOf === "function") {
+        var primitive = valueOf.call(value);
+        if (!primitive || typeof primitive !== "object" && typeof primitive !== "function") {
+          return String(primitive);
+        }
+      }
+      return objectToString.call(value);
+    }, "toCoercible");
     var limit = 1024;
     var encode3 = /* @__PURE__ */ __name(function encode4(str, defaultEncoder, charset, kind, format) {
       if (str.length === 0) {
@@ -55774,12 +55874,12 @@ var require_utils6 = __commonJS({
       if (typeof str === "symbol") {
         string = Symbol.prototype.toString.call(str);
       } else if (typeof str !== "string") {
-        string = String(str);
+        string = String(toCoercible(str));
       }
       if (charset === "iso-8859-1") {
         return escape(string).replace(/%u[0-9a-f]{4}/gi, function($0) {
           return "%26%23" + parseInt($0.slice(2), 16) + "%3B";
-        });
+        }).replace(/\+/g, "%2B");
       }
       var out = "";
       for (var j3 = 0; j3 < string.length; j3 += limit) {
@@ -55895,7 +55995,8 @@ var require_utils6 = __commonJS({
       isRegExp: isRegExp2,
       markOverflow,
       maybeMap,
-      merge: merge3
+      merge: merge3,
+      toCoercible
     };
   }
 });
@@ -56011,17 +56112,17 @@ var require_stringify3 = __commonJS({
       if (generateArrayPrefix === "comma" && isArray2(obj)) {
         if (encodeValuesOnly && encoder) {
           obj = utils.maybeMap(obj, function(v2) {
-            return v2 == null ? v2 : encoder(v2);
+            return v2 == null ? v2 : encoder(v2, defaults4.encoder, charset, "value", format);
           });
         }
-        objKeys = [{ value: obj.length > 0 ? obj.join(",") || null : void 0 }];
+        objKeys = [{ value: obj.length > 0 ? utils.toCoercible(obj).join(",") || null : void 0 }];
       } else if (isArray2(filter3)) {
         objKeys = filter3;
       } else {
         var keys = Object.keys(obj);
         objKeys = sort ? keys.sort(sort) : keys;
       }
-      var encodedPrefix = encodeDotInKeys ? String(prefix2).replace(/\./g, "%2E") : String(prefix2);
+      var encodedPrefix = String(prefix2);
       var adjustedPrefix = commaRoundTrip && isArray2(obj) && obj.length === 1 ? encodedPrefix + "[]" : encodedPrefix;
       if (allowEmptyArrays && isArray2(obj) && obj.length === 0 && Object.keys(obj).length === 0) {
         return adjustedPrefix + "[]";
@@ -56093,7 +56194,7 @@ var require_stringify3 = __commonJS({
         filter3 = opts.filter;
       }
       var arrayFormat;
-      if (opts.arrayFormat in arrayPrefixGenerators) {
+      if (has.call(arrayPrefixGenerators, opts.arrayFormat)) {
         arrayFormat = opts.arrayFormat;
       } else if ("indices" in opts) {
         arrayFormat = opts.indices ? "indices" : "repeat";
@@ -56204,9 +56305,53 @@ var require_stringify3 = __commonJS({
 var require_parse5 = __commonJS({
   "node_modules/qs/lib/parse.js"(exports2, module2) {
     "use strict";
+    var getSideChannel = require_side_channel();
     var utils = require_utils6();
     var has = Object.prototype.hasOwnProperty;
     var isArray2 = Array.isArray;
+    var getPrototypeOf2 = Object.getPrototypeOf;
+    var isPlainContainer = /* @__PURE__ */ __name(function isPlainContainer2(value) {
+      if (!value || typeof value !== "object") {
+        return false;
+      }
+      if (isArray2(value)) {
+        return true;
+      }
+      var proto = getPrototypeOf2(value);
+      return proto === Object.prototype || proto === null;
+    }, "isPlainContainer");
+    var emptyCopyOf = /* @__PURE__ */ __name(function emptyCopyOf2(value) {
+      if (isArray2(value)) {
+        var arr = [];
+        arr.length = value.length;
+        return arr;
+      }
+      return getPrototypeOf2(value) === null ? { __proto__: null } : {};
+    }, "emptyCopyOf");
+    var copyInput = /* @__PURE__ */ __name(function copyInput2(input) {
+      var copies = getSideChannel();
+      var result2 = {};
+      var queue = [{ source: input, target: result2 }];
+      for (var i = 0; i < queue.length; ++i) {
+        var source = queue[i].source;
+        var target = queue[i].target;
+        var keys = Object.keys(source);
+        for (var j3 = 0; j3 < keys.length; ++j3) {
+          var value = source[keys[j3]];
+          if (isPlainContainer(value)) {
+            if (!copies.has(value)) {
+              var copy = emptyCopyOf(value);
+              copies.set(value, copy);
+              queue[queue.length] = { source: value, target: copy };
+            }
+            target[keys[j3]] = copies.get(value);
+          } else {
+            target[keys[j3]] = value;
+          }
+        }
+      }
+      return result2;
+    }, "copyInput");
     var defaults4 = {
       allowDots: false,
       allowEmptyArrays: false,
@@ -56296,6 +56441,7 @@ owed.");
         var part = parts[i];
         var bracketEqualsPos = part.indexOf("]=");
         var pos = bracketEqualsPos === -1 ? part.indexOf("=") : bracketEqualsPos + 1;
+        var isEmptyBracketKey = pos > 1 && part.slice(pos - 2, pos) === "[]";
         var key;
         var val;
         if (pos === -1) {
@@ -56319,7 +56465,7 @@ owed.");
         if (val && options.interpretNumericEntities && charset === "iso-8859-1") {
           val = interpretNumericEntities(String(val));
         }
-        if (part.indexOf("[]=") > -1) {
+        if (isEmptyBracketKey) {
           val = isArray2(val) ? [val] : val;
         }
         if (options.comma && isArray2(val) && val.length > options.arrayLimit) {
@@ -56327,7 +56473,7 @@ owed.");
         }
         if (key !== null) {
           var existing = has.call(obj, key);
-          if (existing && (options.duplicates === "combine" || part.indexOf("[]=") > -1)) {
+          if (existing && (options.duplicates === "combine" || isEmptyBracketKey)) {
             obj[key] = utils.combine(
               obj[key],
               val,
@@ -56391,8 +56537,36 @@ owed.");
       }
       return leaf;
     }, "parseObject");
+    var topLevelDotsToBrackets = /* @__PURE__ */ __name(function topLevelDotsToBrackets2(key) {
+      var result2 = "";
+      var depth = 0;
+      for (var i = 0; i < key.length; i += 1) {
+        var cu = key.charCodeAt(i);
+        if (cu === 91) {
+          depth += 1;
+          result2 += "[";
+        } else if (cu === 93) {
+          if (depth > 0) {
+            depth -= 1;
+          }
+          result2 += "]";
+        } else if (cu === 46 && depth === 0 && i + 1 < key.length && key.charCodeAt(i + 1) !== 46 && key.charCodeAt(i + 1) !==
+        91) {
+          var start = i + 1;
+          var j3 = start;
+          while (j3 < key.length && key.charCodeAt(j3) !== 46 && key.charCodeAt(j3) !== 91) {
+            j3 += 1;
+          }
+          result2 += "[" + key.slice(start, j3) + "]";
+          i = j3 - 1;
+        } else {
+          result2 += key.charAt(i);
+        }
+      }
+      return result2;
+    }, "topLevelDotsToBrackets");
     var splitKeyIntoSegments = /* @__PURE__ */ __name(function splitKeyIntoSegments2(originalKey, options) {
-      var key = options.allowDots ? originalKey.replace(/\.([^.[]+)/g, "[$1]") : originalKey;
+      var key = options.allowDots ? topLevelDotsToBrackets(originalKey) : originalKey;
       if (options.depth <= 0) {
         if (!options.plainObjects && has.call(Object.prototype, key)) {
           if (!options.allowPrototypes) {
@@ -56520,7 +56694,7 @@ owed.");
       if (str === "" || str === null || typeof str === "undefined") {
         return options.plainObjects ? { __proto__: null } : {};
       }
-      var tempObj = typeof str === "string" ? parseValues(str, options) : str;
+      var tempObj = typeof str === "string" ? parseValues(str, options) : copyInput(str);
       var obj = options.plainObjects ? { __proto__: null } : {};
       var keys = Object.keys(tempObj);
       for (var i = 0; i < keys.length; ++i) {
