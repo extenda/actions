@@ -50194,7 +50194,7 @@ var require_utils2 = __commonJS({
     __name(indexOf, "indexOf");
     function escapeExpression(string) {
       if (typeof string !== "string") {
-        if (string && string.toHTML) {
+        if (string && typeof string.toHTML === "function") {
           return string.toHTML();
         } else if (string == null) {
           return "";
@@ -50245,11 +50245,13 @@ var require_exception = __commonJS({
     var errorProps = ["description", "fileName", "lineNumber", "endLineNumber", "message", "name", "number", "stack"];
     function Exception(message, node) {
       var loc = node && node.loc, line = void 0, endLineNumber = void 0, column = void 0, endColumn = void 0;
-      if (loc) {
+      if (loc && loc.start) {
         line = loc.start.line;
-        endLineNumber = loc.end.line;
         column = loc.start.column;
-        endColumn = loc.end.column;
+        if (loc.end) {
+          endLineNumber = loc.end.line;
+          endColumn = loc.end.column;
+        }
         message += " - " + line + ":" + column;
       }
       var tmp = Error.prototype.constructor.call(this, message);
@@ -50335,6 +50337,16 @@ var require_each = __commonJS({
     var _utils = require_utils2();
     var _exception = require_exception();
     var _exception2 = _interopRequireDefault(_exception);
+    function closeIterator(iterator2) {
+      try {
+        var _close = iterator2["return"];
+        if (_utils.isFunction(_close)) {
+          _close.call(iterator2);
+        }
+      } catch (closeError) {
+      }
+    }
+    __name(closeIterator, "closeIterator");
     exports2["default"] = function(instance) {
       instance.registerHelper("each", function(context3, options) {
         if (!options) {
@@ -50350,7 +50362,7 @@ var require_each = __commonJS({
         if (options.data) {
           data = _utils.createFrame(options.data);
         }
-        function execIteration(field, index, last) {
+        function execIteration(field, index, last, value) {
           if (data) {
             data.key = field;
             data.index = index;
@@ -50360,9 +50372,9 @@ var require_each = __commonJS({
               data.contextPath = contextPath + field;
             }
           }
-          ret = ret + fn2(context3[field], {
+          ret = ret + fn2(value, {
             data,
-            blockParams: _utils.blockParams([context3[field], field], [contextPath + field, null])
+            blockParams: _utils.blockParams([value, field], [contextPath + field, null])
           });
         }
         __name(execIteration, "execIteration");
@@ -50370,31 +50382,37 @@ var require_each = __commonJS({
           if (_utils.isArray(context3)) {
             for (var j3 = context3.length; i < j3; i++) {
               if (i in context3) {
-                execIteration(i, i, i === context3.length - 1);
+                execIteration(i, i, i === context3.length - 1, context3[i]);
               }
             }
           } else if (typeof Symbol === "function" && context3[Symbol.iterator]) {
-            var newContext = [];
             var iterator2 = context3[Symbol.iterator]();
-            for (var it2 = iterator2.next(); !it2.done; it2 = iterator2.next()) {
-              newContext.push(it2.value);
-            }
-            context3 = newContext;
-            for (var j3 = context3.length; i < j3; i++) {
-              execIteration(i, i, i === context3.length - 1);
+            var current = iterator2.next();
+            while (!current.done) {
+              var next = iterator2.next();
+              try {
+                execIteration(i, i, next.done, current.value);
+              } catch (e) {
+                if (!next.done) {
+                  closeIterator(iterator2);
+                }
+                throw e;
+              }
+              current = next;
+              i++;
             }
           } else {
             (function() {
               var priorKey = void 0;
               Object.keys(context3).forEach(function(key) {
                 if (priorKey !== void 0) {
-                  execIteration(priorKey, i - 1);
+                  execIteration(priorKey, i - 1, false, context3[priorKey]);
                 }
                 priorKey = key;
                 i++;
               });
               if (priorKey !== void 0) {
-                execIteration(priorKey, i - 1, true);
+                execIteration(priorKey, i - 1, true, context3[priorKey]);
               }
             })();
           }
@@ -50697,6 +50715,7 @@ var require_proto_access = __commonJS({
     exports2.__esModule = true;
     exports2.createProtoAccessControl = createProtoAccessControl;
     exports2.resultIsAllowed = resultIsAllowed;
+    exports2.isPrototypeConstructor = isPrototypeConstructor;
     exports2.resetLoggedProperties = resetLoggedProperties;
     function _interopRequireDefault(obj) {
       return obj && obj.__esModule ? obj : { "default": obj };
@@ -50737,6 +50756,10 @@ var require_proto_access = __commonJS({
       }
     }
     __name(resultIsAllowed, "resultIsAllowed");
+    function isPrototypeConstructor(parent, propertyName, result) {
+      return propertyName === "constructor" && typeof result === "function" && parent === result.prototype;
+    }
+    __name(isPrototypeConstructor, "isPrototypeConstructor");
     function checkWhiteList(protoAccessControlForType, propertyName) {
       if (protoAccessControlForType.whitelist[propertyName] !== void 0) {
         return protoAccessControlForType.whitelist[propertyName] === true;
@@ -50784,7 +50807,7 @@ var require_base = __commonJS({
     var _logger = require_logger();
     var _logger2 = _interopRequireDefault(_logger);
     var _internalProtoAccess = require_proto_access();
-    var VERSION3 = "4.7.9";
+    var VERSION3 = "4.7.10";
     exports2.VERSION = VERSION3;
     var COMPILER_REVISION = 8;
     exports2.COMPILER_REVISION = COMPILER_REVISION;
@@ -50982,7 +51005,15 @@ untime. Please update your runtime to a newer version (" + compilerInfo[1] + ").
         options.hooks = this.hooks;
         options.protoAccessControl = this.protoAccessControl;
         var result = env2.VM.invokePartial.call(this, partial, context3, options);
+        if (result == null && Utils.isFunction(partial)) {
+          throw new _exception2["default"]("The partial " + options.name + " returned no output: partials must return a \
+string");
+        }
         if (result == null && env2.compile) {
+          if (typeof partial !== "string") {
+            throw new _exception2["default"]("The partial " + options.name + " could not be compiled: partials must be s\
+trings or functions returning strings");
+          }
           options.partials[options.name] = env2.compile(partial, templateSpec.compilerOptions, env2);
           result = options.partials[options.name](context3, options);
         }
@@ -51018,7 +51049,8 @@ me-only mode");
           if (result == null) {
             return result;
           }
-          if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
+          if (Object.prototype.hasOwnProperty.call(parent, propertyName) && !_internalProtoAccess.isPrototypeConstructor(
+          parent, propertyName, result)) {
             return result;
           }
           if (_internalProtoAccess.resultIsAllowed(result, container.protoAccessControl, propertyName)) {
@@ -51159,7 +51191,7 @@ me-only mode");
         } else {
           partial = lookupOwnProperty(options.partials, options.name);
         }
-      } else if (!partial.call && !options.name) {
+      } else if (typeof partial !== "function" && !options.name) {
         options.name = partial;
         partial = lookupOwnProperty(options.partials, partial);
       }
@@ -52259,6 +52291,18 @@ es": [2], "inclusive": false }, "com": { "rules": [6], "inclusive": false }, "ra
   }
 });
 
+// node_modules/handlebars/dist/cjs/handlebars/compiler/node-types.js
+var require_node_types = __commonJS({
+  "node_modules/handlebars/dist/cjs/handlebars/compiler/node-types.js"(exports2) {
+    "use strict";
+    exports2.__esModule = true;
+    var NODE_TYPES = ["Program", "BlockStatement", "DecoratorBlock", "PartialStatement", "PartialBlockStatement", "Decor\
+ator", "MustacheStatement", "ContentStatement", "CommentStatement", "SubExpression", "PathExpression", "StringLiteral", "\
+NumberLiteral", "BooleanLiteral", "UndefinedLiteral", "NullLiteral", "Hash", "HashPair"];
+    exports2.NODE_TYPES = NODE_TYPES;
+  }
+});
+
 // node_modules/handlebars/dist/cjs/handlebars/compiler/visitor.js
 var require_visitor = __commonJS({
   "node_modules/handlebars/dist/cjs/handlebars/compiler/visitor.js"(exports2, module2) {
@@ -52270,10 +52314,17 @@ var require_visitor = __commonJS({
     __name(_interopRequireDefault, "_interopRequireDefault");
     var _exception = require_exception();
     var _exception2 = _interopRequireDefault(_exception);
+    var _utils = require_utils2();
+    var _nodeTypes = require_node_types();
     function Visitor() {
       this.parents = [];
     }
     __name(Visitor, "Visitor");
+    function isDispatchable(visitor, type) {
+      return _utils.indexOf(_nodeTypes.NODE_TYPES, type) !== -1 || !(type in Visitor.prototype) && typeof visitor[type] ===
+      "function";
+    }
+    __name(isDispatchable, "isDispatchable");
     Visitor.prototype = {
       constructor: Visitor,
       mutating: false,
@@ -52281,7 +52332,7 @@ var require_visitor = __commonJS({
       acceptKey: /* @__PURE__ */ __name(function acceptKey(node, name) {
         var value = this.accept(node[name]);
         if (this.mutating) {
-          if (value && !Visitor.prototype[value.type]) {
+          if (value && !isDispatchable(this, value.type)) {
             throw new _exception2["default"]('Unexpected node type "' + value.type + '" found when accepting ' + name + "\
  on " + node.type);
           }
@@ -52312,7 +52363,7 @@ var require_visitor = __commonJS({
         if (!object) {
           return;
         }
-        if (!this[object.type]) {
+        if (!isDispatchable(this, object.type) || !this[object.type]) {
           throw new _exception2["default"]("Unknown type: " + object.type, object);
         }
         if (this.current) {
@@ -52426,7 +52477,7 @@ var require_whitespace_control = __commonJS({
           omitRight(body2, i);
           if (omitLeft(body2, i)) {
             if (current.type === "PartialStatement") {
-              current.indent = /([ \t]+$)/.exec(body2[i - 1].original)[1];
+              current.indent = /(?:^|[^ \t])([ \t]+)$/.exec(body2[i - 1].original)[1];
             }
           }
         }
@@ -52503,7 +52554,7 @@ var require_whitespace_control = __commonJS({
         return isRoot;
       }
       if (prev.type === "ContentStatement") {
-        return (sibling || !isRoot ? /\r?\n\s*?$/ : /(^|\r?\n)\s*?$/).test(prev.original);
+        return (sibling || !isRoot ? /(?:^|\S)[^\S\n]*\n\s*$/ : /^\s*$|(?:^|\S)[^\S\n]*\n\s*$/).test(prev.original);
       }
     }
     __name(isPrevWhitespace, "isPrevWhitespace");
@@ -52536,7 +52587,7 @@ var require_whitespace_control = __commonJS({
         return;
       }
       var original = current.value;
-      current.value = current.value.replace(multiple ? /\s+$/ : /[ \t]+$/, "");
+      current.value = current.value.replace(multiple ? /(^|\S)\s+$/ : /(^|[^ \t])[ \t]+$/, "$1");
       current.leftStripped = current.value !== original;
       return current.leftStripped;
     }
@@ -52778,15 +52829,12 @@ var require_base2 = __commonJS({
     var _whitespaceControl2 = _interopRequireDefault(_whitespaceControl);
     var _helpers = require_helpers2();
     var Helpers = _interopRequireWildcard(_helpers);
-    var _exception = require_exception();
-    var _exception2 = _interopRequireDefault(_exception);
     var _utils = require_utils2();
     exports2.parser = _parser2["default"];
     var yy = {};
     _utils.extend(yy, Helpers);
     function parseWithoutProcessing(input, options) {
       if (input.type === "Program") {
-        validateInputAst(input);
         return input;
       }
       _parser2["default"].yy = yy;
@@ -52803,54 +52851,6 @@ var require_base2 = __commonJS({
       return strip.accept(ast);
     }
     __name(parse2, "parse");
-    function validateInputAst(ast) {
-      validateAstNode(ast);
-    }
-    __name(validateInputAst, "validateInputAst");
-    function validateAstNode(node) {
-      if (node == null) {
-        return;
-      }
-      if (Array.isArray(node)) {
-        node.forEach(validateAstNode);
-        return;
-      }
-      if (typeof node !== "object") {
-        return;
-      }
-      if (node.type === "PathExpression") {
-        if (!isValidDepth(node.depth)) {
-          throw new _exception2["default"]("Invalid AST: PathExpression.depth must be an integer");
-        }
-        if (!Array.isArray(node.parts)) {
-          throw new _exception2["default"]("Invalid AST: PathExpression.parts must be an array");
-        }
-        for (var i = 0; i < node.parts.length; i++) {
-          if (typeof node.parts[i] !== "string") {
-            throw new _exception2["default"]("Invalid AST: PathExpression.parts must only contain strings");
-          }
-        }
-      } else if (node.type === "NumberLiteral") {
-        if (typeof node.value !== "number" || !isFinite(node.value)) {
-          throw new _exception2["default"]("Invalid AST: NumberLiteral.value must be a number");
-        }
-      } else if (node.type === "BooleanLiteral") {
-        if (typeof node.value !== "boolean") {
-          throw new _exception2["default"]("Invalid AST: BooleanLiteral.value must be a boolean");
-        }
-      }
-      Object.keys(node).forEach(function(propertyName) {
-        if (propertyName === "loc") {
-          return;
-        }
-        validateAstNode(node[propertyName]);
-      });
-    }
-    __name(validateAstNode, "validateAstNode");
-    function isValidDepth(depth) {
-      return typeof depth === "number" && isFinite(depth) && Math.floor(depth) === depth && depth >= 0;
-    }
-    __name(isValidDepth, "isValidDepth");
   }
 });
 
@@ -52871,6 +52871,7 @@ var require_compiler = __commonJS({
     var _utils = require_utils2();
     var _ast = require_ast();
     var _ast2 = _interopRequireDefault(_ast);
+    var _nodeTypes = require_node_types();
     var slice = [].slice;
     function Compiler() {
     }
@@ -52925,7 +52926,7 @@ var require_compiler = __commonJS({
         return guid;
       }, "compileProgram"),
       accept: /* @__PURE__ */ __name(function accept3(node) {
-        if (!this[node.type]) {
+        if (_utils.indexOf(_nodeTypes.NODE_TYPES, node.type) === -1 || !this[node.type]) {
           throw new _exception2["default"]("Unknown type: " + node.type, node);
         }
         this.sourceNode.unshift(node);
@@ -52934,6 +52935,7 @@ var require_compiler = __commonJS({
         return ret;
       }, "accept"),
       Program: /* @__PURE__ */ __name(function Program(program) {
+        validateBlockParams(program);
         this.options.blockParams.unshift(program.blockParams);
         var body2 = program.body, bodyLength = body2.length;
         for (var i = 0; i < bodyLength; i++) {
@@ -53017,6 +53019,9 @@ var require_compiler = __commonJS({
         this.DecoratorBlock(decorator);
       }, "Decorator"),
       ContentStatement: /* @__PURE__ */ __name(function ContentStatement(content) {
+        if (content.value != null && typeof content.value !== "string") {
+          throw invalidAst(content, "value must be a string");
+        }
         if (content.value) {
           this.opcode("appendContent", content.value);
         }
@@ -53036,7 +53041,7 @@ var require_compiler = __commonJS({
       }, "SubExpression"),
       ambiguousSexpr: /* @__PURE__ */ __name(function ambiguousSexpr(sexpr, program, inverse) {
         var path20 = sexpr.path, name = path20.parts[0], isBlock = program != null || inverse != null;
-        this.opcode("getContext", path20.depth);
+        this.opcode("getContext", validateDepth(path20));
         this.opcode("pushProgram", program);
         this.opcode("pushProgram", inverse);
         path20.strict = true;
@@ -53063,28 +53068,33 @@ var require_compiler = __commonJS({
         }
       }, "helperSexpr"),
       PathExpression: /* @__PURE__ */ __name(function PathExpression(path20) {
-        this.addDepth(path20.depth);
-        this.opcode("getContext", path20.depth);
-        var name = path20.parts[0], scoped = _ast2["default"].helpers.scopedId(path20), blockParamId = !path20.depth && !scoped &&
-        this.blockParamIndex(name);
+        var depth = validateDepth(path20);
+        var parts = validateParts(path20);
+        this.addDepth(depth);
+        this.opcode("getContext", depth);
+        var name = parts[0], scoped = _ast2["default"].helpers.scopedId(path20), blockParamId = !depth && !scoped && this.
+        blockParamIndex(name);
         if (blockParamId) {
-          this.opcode("lookupBlockParam", blockParamId, path20.parts);
+          this.opcode("lookupBlockParam", blockParamId, parts);
         } else if (!name) {
           this.opcode("pushContext");
         } else if (path20.data) {
           this.options.data = true;
-          this.opcode("lookupData", path20.depth, path20.parts, path20.strict);
+          this.opcode("lookupData", depth, parts, path20.strict);
         } else {
-          this.opcode("lookupOnContext", path20.parts, path20.falsy, path20.strict, scoped);
+          this.opcode("lookupOnContext", parts, path20.falsy, path20.strict, scoped);
         }
       }, "PathExpression"),
       StringLiteral: /* @__PURE__ */ __name(function StringLiteral(string) {
+        validateLiteral(string);
         this.opcode("pushString", string.value);
       }, "StringLiteral"),
       NumberLiteral: /* @__PURE__ */ __name(function NumberLiteral(number) {
+        validateLiteral(number);
         this.opcode("pushLiteral", number.value);
       }, "NumberLiteral"),
       BooleanLiteral: /* @__PURE__ */ __name(function BooleanLiteral(bool) {
+        validateLiteral(bool);
         this.opcode("pushLiteral", bool.value);
       }, "BooleanLiteral"),
       UndefinedLiteral: /* @__PURE__ */ __name(function UndefinedLiteral() {
@@ -53094,7 +53104,16 @@ var require_compiler = __commonJS({
         this.opcode("pushLiteral", "null");
       }, "NullLiteral"),
       Hash: /* @__PURE__ */ __name(function Hash(hash) {
-        var pairs = hash.pairs, i = 0, l3 = pairs.length;
+        var pairs = hash.pairs, i = 0, l3 = void 0;
+        if (!_utils.isArray(pairs)) {
+          throw invalidAst(hash, "pairs must be an array");
+        }
+        l3 = pairs.length;
+        for (var j3 = 0; j3 < l3; j3++) {
+          if (!pairs[j3] || typeof pairs[j3].key !== "string") {
+            throw invalidAst(hash, "pair keys must be strings");
+          }
+        }
         this.opcode("pushHash");
         for (; i < l3; i++) {
           this.pushParam(pairs[i].value);
@@ -53119,6 +53138,7 @@ var require_compiler = __commonJS({
         this.useDepths = true;
       }, "addDepth"),
       classifySexpr: /* @__PURE__ */ __name(function classifySexpr(sexpr) {
+        validateParts(sexpr.path);
         var isSimple = _ast2["default"].helpers.simpleId(sexpr.path);
         var isBlockParam = isSimple && !!this.blockParamIndex(sexpr.path.parts[0]);
         var isHelper = !isBlockParam && _ast2["default"].helpers.helperExpression(sexpr);
@@ -53145,15 +53165,20 @@ var require_compiler = __commonJS({
         }
       }, "pushParams"),
       pushParam: /* @__PURE__ */ __name(function pushParam(val) {
+        validateLiteral(val);
         var value = val.value != null ? val.value : val.original || "";
+        var depth = validateDepth(val);
         if (this.stringParams) {
+          if (typeof value !== "number" && typeof value !== "boolean") {
+            value = String(value);
+          }
           if (value.replace) {
             value = value.replace(/^(\.?\.\/)*/g, "").replace(/\//g, ".");
           }
-          if (val.depth) {
-            this.addDepth(val.depth);
+          if (depth) {
+            this.addDepth(depth);
           }
-          this.opcode("getContext", val.depth || 0);
+          this.opcode("getContext", depth);
           this.opcode("pushStringParam", value, val.type);
           if (val.type === "SubExpression") {
             this.accept(val);
@@ -53161,8 +53186,8 @@ var require_compiler = __commonJS({
         } else {
           if (this.trackIds) {
             var blockParamIndex = void 0;
-            if (val.parts && !_ast2["default"].helpers.scopedId(val) && !val.depth) {
-              blockParamIndex = this.blockParamIndex(val.parts[0]);
+            if (val.parts && !_ast2["default"].helpers.scopedId(val) && !depth) {
+              blockParamIndex = this.blockParamIndex(validateParts(val)[0]);
             }
             if (blockParamIndex) {
               var blockParamChild = val.parts.slice(1).join(".");
@@ -53257,6 +53282,54 @@ var require_compiler = __commonJS({
       return ret;
     }
     __name(compile, "compile");
+    function invalidAst(node, message) {
+      return new _exception2["default"]("Invalid AST: " + node.type + " " + message, node);
+    }
+    __name(invalidAst, "invalidAst");
+    function validateDepth(node) {
+      var depth = node.depth;
+      if (depth == null) {
+        return 0;
+      }
+      if (typeof depth !== "number" || !isFinite(depth) || Math.floor(depth) !== depth || depth < 0) {
+        throw invalidAst(node, "depth must be a non-negative integer");
+      }
+      return depth;
+    }
+    __name(validateDepth, "validateDepth");
+    function validateLiteral(node) {
+      var value = node.value;
+      if (node.type === "StringLiteral" && typeof value !== "string") {
+        throw invalidAst(node, "value must be a string");
+      } else if (node.type === "NumberLiteral" && typeof value !== "number") {
+        throw invalidAst(node, "value must be a number");
+      } else if (node.type === "BooleanLiteral" && typeof value !== "boolean") {
+        throw invalidAst(node, "value must be a boolean");
+      }
+    }
+    __name(validateLiteral, "validateLiteral");
+    function validateStringArray(node, value, name) {
+      if (!_utils.isArray(value)) {
+        throw invalidAst(node, name + " must be an array");
+      }
+      for (var i = 0; i < value.length; i++) {
+        if (typeof value[i] !== "string") {
+          throw invalidAst(node, name + " must only contain strings");
+        }
+      }
+      return value;
+    }
+    __name(validateStringArray, "validateStringArray");
+    function validateParts(path20) {
+      return validateStringArray(path20, path20.parts, "parts");
+    }
+    __name(validateParts, "validateParts");
+    function validateBlockParams(program) {
+      if (program.blockParams != null) {
+        validateStringArray(program, program.blockParams, "blockParams");
+      }
+    }
+    __name(validateBlockParams, "validateBlockParams");
     function argEquals(a, b3) {
       if (a === b3) {
         return true;
@@ -55084,10 +55157,26 @@ var require_source_map = __commonJS({
 
 // node_modules/handlebars/dist/cjs/handlebars/compiler/code-gen.js
 var require_code_gen = __commonJS({
-  "node_modules/handlebars/dist/cjs/handlebars/compiler/code-gen.js"(exports2, module2) {
+  "node_modules/handlebars/dist/cjs/handlebars/compiler/code-gen.js"(exports2) {
     "use strict";
     exports2.__esModule = true;
+    exports2.safeJsonLiteral = safeJsonLiteral;
     var _utils = require_utils2();
+    var NEEDS_ESCAPING = /[\x00-\x1f\\"\u2028\u2029<\ud800-\udfff]/;
+    var SCRIPT_DELIMITERS = /<(?=!--|\/?script)/gi;
+    function escapeScriptDelimiters(code) {
+      return code.replace(SCRIPT_DELIMITERS, "\\u003C");
+    }
+    __name(escapeScriptDelimiters, "escapeScriptDelimiters");
+    function escapeSurrogate(surrogate) {
+      return "\\u" + surrogate.charCodeAt(0).toString(16);
+    }
+    __name(escapeSurrogate, "escapeSurrogate");
+    function safeJsonLiteral(value) {
+      return escapeScriptDelimiters(JSON.stringify(value).replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029").replace(
+      /[\ud800-\udfff]/g, escapeSurrogate));
+    }
+    __name(safeJsonLiteral, "safeJsonLiteral");
     var SourceNode = void 0;
     try {
       if (typeof define !== "function" || !define.amd) {
@@ -55182,8 +55271,11 @@ var require_code_gen = __commonJS({
         return this.wrap([fn2, type ? "." + type + "(" : "(", params, ")"]);
       }, "functionCall"),
       quotedString: /* @__PURE__ */ __name(function quotedString(str) {
-        return '"' + (str + "").replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r").
-        replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029") + '"';
+        str = str + "";
+        if (!NEEDS_ESCAPING.test(str)) {
+          return '"' + str + '"';
+        }
+        return safeJsonLiteral(str);
       }, "quotedString"),
       objectLiteral: /* @__PURE__ */ __name(function objectLiteral(obj) {
         var _this = this;
@@ -55217,7 +55309,6 @@ var require_code_gen = __commonJS({
       }, "generateArray")
     };
     exports2["default"] = CodeGen;
-    module2.exports = exports2["default"];
   }
 });
 
@@ -55250,7 +55341,7 @@ var require_javascript_compiler = __commonJS({
         return this.internalNameLookup(parent, name);
       }, "nameLookup"),
       depthedLookup: /* @__PURE__ */ __name(function depthedLookup(name) {
-        return [this.aliasable("container.lookup"), "(depths, ", JSON.stringify(name), ")"];
+        return [this.aliasable("container.lookup"), "(depths, ", this.quotedString(name), ")"];
       }, "depthedLookup"),
       compilerInfo: /* @__PURE__ */ __name(function compilerInfo() {
         var revision = _base.COMPILER_REVISION, versions = _base.REVISION_CHANGES[revision];
@@ -55276,7 +55367,7 @@ var require_javascript_compiler = __commonJS({
       // END PUBLIC API
       internalNameLookup: /* @__PURE__ */ __name(function internalNameLookup(parent, name) {
         this.lookupPropertyFunctionIsUsed = true;
-        return ["lookupProperty(", parent, ",", JSON.stringify(name), ")"];
+        return ["lookupProperty(", parent, ",", this.quotedString(name), ")"];
       }, "internalNameLookup"),
       lookupPropertyFunctionIsUsed: false,
       compile: /* @__PURE__ */ __name(function compile(environment, options, context3, asObject) {
@@ -55824,7 +55915,7 @@ rator: "' + name + '"'), "); }"]);
           delete options.name;
         }
         if (indent) {
-          options.indent = JSON.stringify(indent);
+          options.indent = this.quotedString(indent);
         }
         options.helpers = "helpers";
         options.partials = "partials";
@@ -55870,7 +55961,7 @@ rator: "' + name + '"'), "); }"]);
       }, "assignToHash"),
       pushId: /* @__PURE__ */ __name(function pushId(type, name, child2) {
         if (type === "BlockParam") {
-          this.pushStackLiteral("blockParams[" + name[0] + "].path[" + name[1] + "]" + (child2 ? " + " + JSON.stringify(
+          this.pushStackLiteral("blockParams[" + name[0] + "].path[" + name[1] + "]" + (child2 ? " + " + this.quotedString(
           "." + child2) : ""));
         } else if (type === "PathExpression") {
           this.pushString(name);
@@ -56110,7 +56201,7 @@ rator: "' + name + '"'), "); }"]);
       }, "setupParams"),
       setupHelperArgs: /* @__PURE__ */ __name(function setupHelperArgs(helper, paramSize, params, useRegister) {
         var options = this.setupParams(helper, paramSize, params);
-        options.loc = JSON.stringify(this.source.currentLocation);
+        options.loc = locationLiteral(this);
         options = this.objectLiteral(options);
         if (useRegister) {
           this.useRegister("options");
@@ -56137,6 +56228,11 @@ ds long super char final native synchronized class float package throws const go
     JavaScriptCompiler.isValidJavaScriptVariableName = function(name) {
       return !JavaScriptCompiler.RESERVED_WORDS[name] && /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(name);
     };
+    function locationLiteral(compiler) {
+      var loc = compiler.source.currentLocation;
+      return loc ? _codeGen.safeJsonLiteral(loc) : "undefined";
+    }
+    __name(locationLiteral, "locationLiteral");
     function strictLookup(requireTerminal, compiler, parts, startPartIndex, type) {
       var stack = compiler.popStack(), len = parts.length;
       if (requireTerminal) {
@@ -56146,8 +56242,8 @@ ds long super char final native synchronized class float package throws const go
         stack = compiler.nameLookup(stack, parts[i], type);
       }
       if (requireTerminal) {
-        return [compiler.aliasable("container.strict"), "(", stack, ", ", compiler.quotedString(parts[len]), ", ", JSON.
-        stringify(compiler.source.currentLocation), " )"];
+        return [compiler.aliasable("container.strict"), "(", stack, ", ", compiler.quotedString(parts[len]), ", ", locationLiteral(
+        compiler), " )"];
       } else {
         return stack;
       }
