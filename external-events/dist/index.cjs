@@ -119467,7 +119467,7 @@ function readBlockScalar(state3, parentIndent, props) {
         state3.position = linePosition + column;
         throwError(state3, "tab characters must not be used in indentation");
       }
-      if (column < maxLeadingIndent) {
+      if (column >= parentIndent && column < maxLeadingIndent) {
         state3.position = linePosition + column;
         throwError(state3, "bad indentation of a mapping entry");
       }
@@ -119695,14 +119695,16 @@ function readBlockMapping(state3, nodeIndent, flowIndent, props) {
           if (!isWsOrEolOrEnd(ch)) throwError(state3, "a whitespace character is expected after the key-value separator \
 within a block mapping");
           if (!mappingOpened) {
-            restoreState(state3, beforeKey);
-            addMappingEvent(state3, beforeKey.position, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd,
-            COLLECTION_STYLE.BLOCK);
+            state3.events.splice(beforeKey.eventsLength, 0, {
+              type: EVENT_ID.MAPPING,
+              start: beforeKey.position,
+              anchorStart: props.anchorStart,
+              anchorEnd: props.anchorEnd,
+              tagStart: props.tagStart,
+              tagEnd: props.tagEnd,
+              style: COLLECTION_STYLE.BLOCK
+            });
             mappingOpened = true;
-            parseNode(state3, flowIndent, CONTEXT_FLOW_OUT, false, true);
-            ch = state3.input.charCodeAt(state3.position);
-            while (isWhiteSpace2(ch)) ch = state3.input.charCodeAt(++state3.position);
-            state3.position++;
           }
           detected = true;
           atExplicitKey = false;
@@ -120364,5 +120366,5 @@ run-parallel/index.js:
   (*! run-parallel. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> *)
 
 js-yaml/dist/js-yaml.mjs:
-  (*! js-yaml 5.4.2 https://github.com/nodeca/js-yaml @license MIT *)
+  (*! js-yaml 5.4.3 https://github.com/nodeca/js-yaml @license MIT *)
 */
