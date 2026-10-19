@@ -1579,4 +1579,48 @@ environments:
       });
     });
   });
+
+  describe('ephemeral-storage', () => {
+    const common = `
+labels:
+  component: jest
+  product: my-product
+
+security:
+  permission-prefix: mye
+
+environments:
+  production:
+    min-instances: 1
+  staging: none
+`;
+    const kubernetes = (size) => `
+kubernetes:
+  type: Deployment
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+    ephemeral-storage: ${size}
+  protocol: http
+  scaling:
+    cpu: 50
+${common}`;
+
+    test('It accepts 7Gi on kubernetes', () => {
+      mockFs({ 'cloud-deploy.yaml': kubernetes('7Gi') });
+      const spec = loadServiceDefinition('cloud-deploy.yaml');
+      expect(spec.kubernetes.resources['ephemeral-storage']).toEqual('7Gi');
+    });
+
+    test.each(['8Gi', '10Gi', '512Mi'])(
+      'It rejects %s on kubernetes',
+      (size) => {
+        mockFs({ 'cloud-deploy.yaml': kubernetes(size) });
+        expect(() => loadServiceDefinition('cloud-deploy.yaml')).toThrow(
+          'instance.kubernetes.resources.ephemeral-storage does not match pattern "^[1-7]Gi$"',
+        );
+      },
+    );
+  });
 });

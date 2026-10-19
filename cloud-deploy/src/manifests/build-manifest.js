@@ -282,6 +282,7 @@ const buildManifest = async (
       securityPreviewTag,
       evaluationSidecar,
       projectId,
+      resources['ephemeral-storage'],
     );
 
     await connectToCluster(clanName, deployEnv, projectId);

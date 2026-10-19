@@ -110337,7 +110337,7 @@ var getStorageClassName = /* @__PURE__ */ __name((diskType) => {
   if (diskType === "hdd") return "standard";
   return "premium-rwo";
 }, "getStorageClassName");
-var gkeManifestTemplate = /* @__PURE__ */ __name(async (name, type, image, minInstances, maxInstances, cpuThreshold, cpuRequest, memoryRequest, environment, labels, opa, protocol, volumes, opaCpu, opaMemory, monitoring, deployEnv, availability, baseAnnotations, cors, terminationGracePeriod, securityPreviewTag, evaluationSidecar, projectId) => {
+var gkeManifestTemplate = /* @__PURE__ */ __name(async (name, type, image, minInstances, maxInstances, cpuThreshold, cpuRequest, memoryRequest, environment, labels, opa, protocol, volumes, opaCpu, opaMemory, monitoring, deployEnv, availability, baseAnnotations, cors, terminationGracePeriod, securityPreviewTag, evaluationSidecar, projectId, ephemeralStorage) => {
   let annotations = {};
   const deploymentVolumes = volumeSetup(opa, protocol);
   const userVolumeMounts = userContainerVolumeMountSetup(
@@ -110492,12 +110492,12 @@ var gkeManifestTemplate = /* @__PURE__ */ __name(async (name, type, image, minIn
                 requests: {
                   cpu: cpuRequest,
                   memory: memoryRequest,
-                  "ephemeral-storage": "8Gi"
+                  ...ephemeralStorage ? { "ephemeral-storage": ephemeralStorage } : {}
                 },
                 limits: {
                   cpu: cpuRequest,
                   memory: memoryRequest,
-                  "ephemeral-storage": "8Gi"
+                  ...ephemeralStorage ? { "ephemeral-storage": ephemeralStorage } : {}
                 }
               },
               env: [
@@ -111136,7 +111136,8 @@ var buildManifest = /* @__PURE__ */ __name(async (image, deployYaml, projectId, 
       terminationGracePeriod,
       securityPreviewTag,
       evaluationSidecar,
-      projectId
+      projectId,
+      resources["ephemeral-storage"]
     );
     await cluster_connection_default(clanName, deployEnv, projectId);
     if (scaling.vertical) {
@@ -112133,7 +112134,22 @@ disabled.",
           ]
         },
         resources: {
-          $ref: "#/definitions/Resources"
+          allOf: [
+            {
+              $ref: "#/definitions/Resources"
+            },
+            {
+              properties: {
+                "ephemeral-storage": {
+                  description: "Opt-in ephemeral storage for the user container. When omitted, the GKE default (1Gi) app\
+lies. Max 7Gi to leave room for up to 3 sidecars (security, collector, evaluation) at about 1Gi each within the 10Gi pod\
+ limit.",
+                  type: "string",
+                  pattern: "^[1-7]Gi$"
+                }
+              }
+            }
+          ]
         },
         protocol: {
           $ref: "#/definitions/Protocol"

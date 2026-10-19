@@ -63,6 +63,7 @@ const gkeManifestTemplate = async (
   securityPreviewTag,
   evaluationSidecar,
   projectId,
+  ephemeralStorage,
 ) => {
   // initialize manifest components
 
@@ -239,12 +240,16 @@ const gkeManifestTemplate = async (
                 requests: {
                   cpu: cpuRequest,
                   memory: memoryRequest,
-                  'ephemeral-storage': '8Gi',
+                  ...(ephemeralStorage
+                    ? { 'ephemeral-storage': ephemeralStorage }
+                    : {}),
                 },
                 limits: {
                   cpu: cpuRequest,
                   memory: memoryRequest,
-                  'ephemeral-storage': '8Gi',
+                  ...(ephemeralStorage
+                    ? { 'ephemeral-storage': ephemeralStorage }
+                    : {}),
                 },
               },
               env: [

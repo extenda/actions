@@ -939,6 +939,28 @@ environments:
 - `scale-up-interval`: Minimum minutes between scale-up events
 - `scale-up-threshold`: Number of consecutive checks before scaling up
 
+#### Kubernetes Deployment with increased ephemeral storage
+
+By default pods get the GKE default of 1Gi ephemeral storage.
+A service that needs more scratch space can opt in with `resources.ephemeral-storage`.
+It applies to the user container only.
+Allowed values are `1Gi` to `7Gi`.
+The maximum leaves room for up to 3 sidecars (security, collector and evaluation) at about 1Gi each,
+which keeps the pod within the 10Gi per-pod limit.
+
+```yaml
+kubernetes:
+  type: Deployment
+  service: my-service
+  resources:
+    cpu: 1
+    memory: 512Mi
+    ephemeral-storage: 7Gi
+  protocol: http
+  scaling:
+    cpu: 50
+```
+
 #### Kubernetes Deployment as internal service
 
 An internal Kubernetes gRPC service without IAM security. The request timeout has been increased from

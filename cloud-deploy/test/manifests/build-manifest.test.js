@@ -325,6 +325,60 @@ metadata:
     expect(k8sManifest).toMatchSnapshot();
   });
 
+  describe('ephemeral storage', () => {
+    const buildService = (resources) => ({
+      kubernetes: {
+        type: 'Deployment',
+        service: 'example-service',
+        resources,
+        protocol: 'http',
+        scaling: { cpu: 40 },
+        'termination-grace-period': 90,
+      },
+      security: 'none',
+      labels: { product: 'actions', component: 'jest' },
+      environments: {
+        production: { 'min-instances': 1, 'max-instances': 10 },
+        staging: 'none',
+      },
+    });
+
+    test('should not set ephemeral-storage by default', async () => {
+      await buildManifest(
+        'example-image:latest',
+        buildService({ cpu: 1, memory: '512Mi' }),
+        'example-project',
+        'example-clan',
+        'production',
+        '',
+        '',
+        '',
+        '',
+        '',
+      );
+      expect(readFileSync('k8s(deploy)-manifest.yaml')).not.toContain(
+        'ephemeral-storage',
+      );
+    });
+
+    test('should set ephemeral-storage when opted in', async () => {
+      await buildManifest(
+        'example-image:latest',
+        buildService({ cpu: 1, memory: '512Mi', 'ephemeral-storage': '7Gi' }),
+        'example-project',
+        'example-clan',
+        'production',
+        '',
+        '',
+        '',
+        '',
+        '',
+      );
+      const manifest = readFileSync('k8s(deploy)-manifest.yaml');
+      expect(manifest.match(/ephemeral-storage: 7Gi/g)).toHaveLength(2);
+    });
+  });
+
   test('should set OPA env vars', async () => {
     // const mockWriteFile = vi.spyOn(fs, 'writeFileSync').mockImplementation();
     checkSystem.mockResolvedValueOnce(true);
